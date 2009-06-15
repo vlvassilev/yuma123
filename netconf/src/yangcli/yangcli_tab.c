@@ -398,13 +398,7 @@ static status_t
 	}
 
 	btyp = obj_get_basetype(obj);
-	if (btyp == NCX_BT_EMPTY) {
-	    hasval = FALSE;
-	} else if (typ_is_simple(btyp)) {
-	    hasval = TRUE;
-	} else {
-	    hasval = FALSE;
-	}
+	hasval = (btyp == NCX_BT_EMPTY) ? FALSE : TRUE;
 
 	retval = 
 	    cpl_add_completion(cpl,
@@ -412,10 +406,8 @@ static status_t
 			       word_start,
 			       word_end,
 			       (const char *)&parmname[cmdlen],
-			       (const char *)"",
-			       (hasval) ?
-			       (const char *)"=" : 
-			       (const char *)" ");
+			       "",
+			       (hasval) ? "=" : " ");
 
 	if (retval != 0) {
 	    return ERR_NCX_OPERATION_FAILED;

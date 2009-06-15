@@ -21,8 +21,9 @@
     engine callbacks to process arbitrarily complex
     data structues with the same code.
 
-    There are 12 types of objects:
+    There are 13 types of objects:
 
+      OBJ_TYP_ANYXML
       OBJ_TYP_CONTAINER
       OBJ_TYP_LEAF
       OBJ_TYP_LEAF_LIST
@@ -37,7 +38,7 @@
       OBJ_TYP_NOTIF
 
    These objects are grouped as follows:
-      * concrete data node objects (container - list)
+      * concrete data node objects (anyxml, container - list)
       * meta grouping constructs (choice, case) 
         and (uses, refine, augment)
       * RPC method objects (rpc, input, output)
@@ -379,10 +380,13 @@ static status_t
 	if (testobj->mod != mod) {
 	    log_error("\nError: object '%s' already defined "
 		      "in submodule '%s' at line %u",
-		      name, mod->name, testobj->linenum);
+		      name, 
+                      mod->name, 
+                      testobj->linenum);
 	} else {
 	    log_error("\nError: object '%s' already defined at line %u",
-		      name, testobj->linenum);
+		      name, 
+                      testobj->linenum);
 	}
 	res = ERR_NCX_DUP_ENTRY;
 	ncx_print_errormsg(tkc, mod, res);
@@ -519,7 +523,7 @@ static status_t
     retres = NO_ERR;
 
     /* Get a new obj_template_t to fill in */
-    obj = obj_new_template(OBJ_TYP_LEAF);
+    obj = obj_new_template(OBJ_TYP_ANYXML);
     if (!obj) {
 	res = ERR_INTERNAL_MEM;
 	ncx_print_errormsg(tkc, mod, res);
@@ -590,13 +594,16 @@ static status_t
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
 	    res = yang_consume_when(tkc, mod, obj, &when);
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, mod, 
+	    res = yang_consume_iffeature(tkc, 
+                                         mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
-	    res = yang_consume_boolean(tkc, mod,
+	    res = yang_consume_boolean(tkc, 
+                                       mod,
 				       &flagset,
-				       &conf, &obj->appinfoQ);
+				       &conf, 
+                                       &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
@@ -604,22 +611,33 @@ static status_t
 		obj->flags &= ~OBJ_FL_CONFIG;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
-	    res = yang_consume_boolean(tkc, mod,
+	    res = yang_consume_boolean(tkc, 
+                                       mod,
 				       &flagset,
-				       &mand, &obj->appinfoQ);
+				       &mand, 
+                                       &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_MANDSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_MANDATORY;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, mod, &leaf->status,
-				      &stat, &obj->appinfoQ);
+	    res = yang_consume_status(tkc, 
+                                      mod, 
+                                      &leaf->status,
+				      &stat, 
+                                      &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &leaf->descr,
-				     &desc, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &leaf->descr,
+				     &desc, 
+                                     &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &leaf->ref,
-				     &ref, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &leaf->ref,
+				     &ref, 
+                                     &obj->appinfoQ);
 
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
@@ -758,26 +776,36 @@ static status_t
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
 	    res = yang_consume_when(tkc, mod, obj, &when);
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, mod, 
+	    res = yang_consume_iffeature(tkc, 
+                                         mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    res = yang_typ_consume_typedef(tkc, mod,
+	    res = yang_typ_consume_typedef(tkc, 
+                                           mod,
 					   con->typedefQ);
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(tkc, mod, 
-					    con->groupingQ, obj);
+	    res = yang_grp_consume_grouping(tkc, 
+                                            mod, 
+					    con->groupingQ, 
+                                            obj);
 	} else if (!xml_strcmp(val, YANG_K_MUST)) {
-	    res = yang_consume_must(tkc, mod, &con->mustQ,
+	    res = yang_consume_must(tkc, 
+                                    mod, 
+                                    &con->mustQ,
 				    &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_PRESENCE)) {
-	    res = yang_consume_strclause(tkc, mod, 
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
 					 &con->presence,
-					 &pres, &obj->appinfoQ);
+					 &pres, 
+                                         &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
-	    res = yang_consume_boolean(tkc, mod,
+	    res = yang_consume_boolean(tkc, 
+                                       mod,
 				       &flagset,
-				       &conf, &obj->appinfoQ);
+				       &conf, 
+                                       &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
@@ -785,17 +813,28 @@ static status_t
 		obj->flags &= ~OBJ_FL_CONFIG;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, mod, &con->status,
-				      &stat, &obj->appinfoQ);
+	    res = yang_consume_status(tkc, 
+                                      mod, 
+                                      &con->status,
+				      &stat, 
+                                      &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &con->descr,
-				     &desc, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &con->descr,
+				     &desc, 
+                                     &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &con->ref,
-				     &ref, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &con->ref,
+				     &ref, 
+                                     &obj->appinfoQ);
 	} else {
-	    res = yang_obj_consume_datadef(tkc, mod,
-					   con->datadefQ, obj);
+	    res = yang_obj_consume_datadef(tkc,
+                                           mod,
+					   con->datadefQ, 
+                                           obj);
 	}
 	CHK_OBJ_EXIT(obj, res, retres);
     }
@@ -936,7 +975,8 @@ static status_t
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
 	    res = yang_consume_when(tkc, mod, obj, &when);
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, mod, 
+	    res = yang_consume_iffeature(tkc, 
+                                         mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_TYPE)) {
@@ -959,19 +999,27 @@ static status_t
 		}
 	    }
 	} else if (!xml_strcmp(val, YANG_K_UNITS)) {
-	    res = yang_consume_strclause(tkc, mod, &leaf->units,
-					 &units, &obj->appinfoQ);
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
+                                         &leaf->units,
+					 &units, 
+                                         &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_MUST)) {
-	    res = yang_consume_must(tkc, mod, &leaf->mustQ,
+	    res = yang_consume_must(tkc, 
+                                    mod, 
+                                    &leaf->mustQ,
 				    &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
-	    res = yang_consume_strclause(tkc, mod, 
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
 					 &leaf->defval,
 					 &def, &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
-	    res = yang_consume_boolean(tkc, mod,
+	    res = yang_consume_boolean(tkc, 
+                                       mod,
 				       &flagset,
-				       &conf, &obj->appinfoQ);
+				       &conf, 
+                                       &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
@@ -979,22 +1027,33 @@ static status_t
 		obj->flags &= ~OBJ_FL_CONFIG;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
-	    res = yang_consume_boolean(tkc, mod,
+	    res = yang_consume_boolean(tkc, 
+                                       mod,
 				       &flagset,
-				       &mand, &obj->appinfoQ);
+				       &mand, 
+                                       &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_MANDSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_MANDATORY;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, mod, &leaf->status,
-				      &stat, &obj->appinfoQ);
+	    res = yang_consume_status(tkc, 
+                                      mod, 
+                                      &leaf->status,
+				      &stat, 
+                                      &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &leaf->descr,
-				     &desc, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &leaf->descr,
+				     &desc, 
+                                     &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &leaf->ref,
-				     &ref, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &leaf->ref,
+				     &ref, 
+                                     &obj->appinfoQ);
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
@@ -1147,7 +1206,8 @@ static status_t
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
 	    res = yang_consume_when(tkc, mod, obj, &when);
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, mod, 
+	    res = yang_consume_iffeature(tkc, 
+                                         mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_TYPE)) {
@@ -1165,16 +1225,23 @@ static status_t
 		}
 	    }
 	} else if (!xml_strcmp(val, YANG_K_UNITS)) {
-	    res = yang_consume_strclause(tkc, mod, &llist->units,
-					 &units, &obj->appinfoQ);
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
+                                         &llist->units,
+					 &units, 
+                                         &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_MUST)) {
-	    res = yang_consume_must(tkc, mod, &llist->mustQ,
+	    res = yang_consume_must(tkc, 
+                                    mod, 
+                                    &llist->mustQ,
 				    &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    flagset = FALSE;
-	    res = yang_consume_boolean(tkc, mod,
+	    res = yang_consume_boolean(tkc, 
+                                       mod,
 				       &flagset,
-				       &conf, &obj->appinfoQ);
+				       &conf, 
+                                       &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
@@ -1182,28 +1249,43 @@ static status_t
 		obj->flags &= ~OBJ_FL_CONFIG;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
-	    res = yang_consume_uint32(tkc, mod,
+	    res = yang_consume_uint32(tkc, 
+                                      mod,
 				      &llist->minelems,
-				      &minel, &obj->appinfoQ);
+				      &minel, 
+                                      &obj->appinfoQ);
 	    llist->minset = TRUE;
 	} else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
-	    res = yang_consume_max_elements(tkc, mod,
+	    res = yang_consume_max_elements(tkc, 
+                                            mod,
 					    &llist->maxelems,
-					    &maxel, &obj->appinfoQ);
+					    &maxel, 
+                                            &obj->appinfoQ);
 	    llist->maxset = TRUE;
 	} else if (!xml_strcmp(val, YANG_K_ORDERED_BY)) {
-	    res = yang_consume_ordered_by(tkc, mod, 
+	    res = yang_consume_ordered_by(tkc, 
+                                          mod, 
 					  &llist->ordersys,
-					  &ord, &obj->appinfoQ);
+					  &ord, 
+                                          &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, mod, &llist->status,
-				      &stat, &obj->appinfoQ);
+	    res = yang_consume_status(tkc, 
+                                      mod, 
+                                      &llist->status,
+				      &stat, 
+                                      &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &llist->descr,
-				     &desc, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &llist->descr,
+				     &desc, 
+                                     &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &llist->ref,
-				     &ref, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &llist->ref,
+				     &ref, 
+                                     &obj->appinfoQ);
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
@@ -1357,22 +1439,31 @@ static status_t
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
 	    res = yang_consume_when(tkc, mod, obj, &when);
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, mod, 
+	    res = yang_consume_iffeature(tkc, 
+                                         mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    res = yang_typ_consume_typedef(tkc, mod,
+	    res = yang_typ_consume_typedef(tkc, 
+                                           mod,
 					   list->typedefQ);
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(tkc, mod,
-					    list->groupingQ, obj);
+	    res = yang_grp_consume_grouping(tkc, 
+                                            mod,
+					    list->groupingQ, 
+                                            obj);
 	} else if (!xml_strcmp(val, YANG_K_MUST)) {
-	    res = yang_consume_must(tkc, mod, &list->mustQ,
+	    res = yang_consume_must(tkc, 
+                                    mod, 
+                                    &list->mustQ,
 				    &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_KEY)) {
 	    savetk = TK_CUR(tkc);
-	    res = yang_consume_strclause(tkc, mod, &list->keystr,
-					 &key, &obj->appinfoQ);
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
+                                         &list->keystr,
+					 &key, 
+                                         &obj->appinfoQ);
 	    if (res == NO_ERR) {
 		list->keytk = savetk;
 		list->keylinenum = savetk->linenum;
@@ -1388,9 +1479,11 @@ static status_t
 
 	    objuniq->tk = TK_CUR(tkc);
 
-	    res = yang_consume_strclause(tkc, mod,
+	    res = yang_consume_strclause(tkc, 
+                                         mod,
 					 &objuniq->xpath,
-					 NULL, &obj->appinfoQ);
+					 NULL, 
+                                         &obj->appinfoQ);
 	    if (res == NO_ERR) {
 		dlq_enque(objuniq, &list->uniqueQ);
 	    } else {
@@ -1398,9 +1491,11 @@ static status_t
 	    }
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    flagset = FALSE;
-	    res = yang_consume_boolean(tkc, mod,
+	    res = yang_consume_boolean(tkc, 
+                                       mod,
 				       &flagset,
-				       &conf, &obj->appinfoQ);
+				       &conf, 
+                                       &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
@@ -1408,31 +1503,48 @@ static status_t
 		obj->flags &= ~OBJ_FL_CONFIG;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
-	    res = yang_consume_uint32(tkc, mod,
+	    res = yang_consume_uint32(tkc, 
+                                      mod,
 				      &list->minelems,
-				      &minel, &obj->appinfoQ);
+				      &minel, 
+                                      &obj->appinfoQ);
 	    list->minset = TRUE;
 	} else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
-	    res = yang_consume_max_elements(tkc, mod,
+	    res = yang_consume_max_elements(tkc, 
+                                            mod,
 					    &list->maxelems,
-					    &maxel, &obj->appinfoQ);
+					    &maxel, 
+                                            &obj->appinfoQ);
 	    list->maxset = TRUE;
 	} else if (!xml_strcmp(val, YANG_K_ORDERED_BY)) {
-	    res = yang_consume_ordered_by(tkc, mod,
+	    res = yang_consume_ordered_by(tkc, 
+                                          mod,
 					  &list->ordersys,
-					  &ord, &obj->appinfoQ);
+					  &ord, 
+                                          &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, mod, &list->status,
-				      &stat, &obj->appinfoQ);
+	    res = yang_consume_status(tkc, 
+                                      mod, 
+                                      &list->status,
+				      &stat, 
+                                      &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &list->descr,
-				     &desc, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &list->descr,
+				     &desc, 
+                                     &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &list->ref,
-				     &ref, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &list->ref,
+				     &ref, 
+                                     &obj->appinfoQ);
 	} else {
-	    res = yang_obj_consume_datadef(tkc, mod,
-					   list->datadefQ, obj);
+	    res = yang_obj_consume_datadef(tkc, 
+                                           mod,
+					   list->datadefQ, 
+                                           obj);
 	}
 	CHK_OBJ_EXIT(obj, res, retres);
     }
@@ -1545,8 +1657,10 @@ static status_t
     } else {
 	/* shoarthand version, just 1 data-def-stmt per case */
 	anydone = TRUE;
-	res = consume_case_datadef(tkc, mod,
-				   cas->datadefQ, obj);
+	res = consume_case_datadef(tkc, 
+                                   mod,
+				   cas->datadefQ, 
+                                   obj);
 	CHK_OBJ_EXIT(obj, res, retres);
 	done = TRUE;
     }
@@ -1591,21 +1705,33 @@ static status_t
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
 	    res = yang_consume_when(tkc, mod, obj, &when);
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, mod, 
+	    res = yang_consume_iffeature(tkc, 
+                                         mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, mod, &cas->status,
-				      &stat, &obj->appinfoQ);
+	    res = yang_consume_status(tkc, 
+                                      mod, 
+                                      &cas->status,
+				      &stat, 
+                                      &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &cas->descr,
-				     &desc, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &cas->descr,
+				     &desc, 
+                                     &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &cas->ref,
-				     &ref, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &cas->ref,
+				     &ref, 
+                                     &obj->appinfoQ);
 	} else {
-	    res = consume_case_datadef(tkc, mod,
-				       cas->datadefQ, obj);
+	    res = consume_case_datadef(tkc, 
+                                       mod,
+				       cas->datadefQ, 
+                                       obj);
 	}
 	CHK_OBJ_EXIT(obj, res, retres);
     }
@@ -1650,7 +1776,8 @@ static status_t
 		/* case arm name already used  error */
 		res = retres = ERR_NCX_DUP_ENTRY;
 		log_error("\nError: case name '%s' already used"
-			  " on line %u", testcas->name,
+			  " on line %u", 
+                          testcas->name,
 			  casobj->linenum);
 		ncx_print_errormsg(tkc, mod, retres);
 	    } else {
@@ -1671,7 +1798,9 @@ static status_t
 			res = retres = ERR_NCX_DUP_ENTRY;
 			log_error("\nError: object name '%s' already used"
 				  " in case '%s', on line %u", 
-				  namestr, testcas->name, test2obj->linenum);
+				  namestr, 
+                                  testcas->name, 
+                                  test2obj->linenum);
 			ncx_print_errormsg(tkc, mod, retres);
 		    } 
 		}
@@ -1811,33 +1940,50 @@ static status_t
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
 	    res = yang_consume_when(tkc, mod, obj, &when);
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, mod, 
+	    res = yang_consume_iffeature(tkc, 
+                                         mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
-	    res = yang_consume_strclause(tkc, mod, &choic->defval,
-					 &def, &obj->appinfoQ);
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
+                                         &choic->defval,
+					 &def, 
+                                         &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
-	    res = yang_consume_boolean(tkc, mod,
+	    res = yang_consume_boolean(tkc,
+                                       mod,
 				       &flagset,
-				       &mand, &obj->appinfoQ);
+				       &mand,
+                                       &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_MANDSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_MANDATORY;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, mod, &choic->status,
-				      &stat, &obj->appinfoQ);
+	    res = yang_consume_status(tkc,
+                                      mod,
+                                      &choic->status,
+				      &stat,
+                                      &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &choic->descr,
-				     &desc, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc,
+                                     mod,
+                                     &choic->descr,
+				     &desc,
+                                     &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &choic->ref,
-				     &ref, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc,
+                                     mod,
+                                     &choic->ref,
+				     &ref,
+                                     &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
-	    res = yang_consume_boolean(tkc, mod,
+	    res = yang_consume_boolean(tkc,
+                                       mod,
 				       &flagset,
-				       &conf, &obj->appinfoQ);
+				       &conf,
+                                       &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
@@ -1845,18 +1991,22 @@ static status_t
 		obj->flags &= OBJ_FL_CONFIG;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_CASE)) {
-	    res = consume_case(tkc, mod,
-				    choic->caseQ,
-				    obj, TRUE);
+	    res = consume_case(tkc, 
+                               mod,
+                               choic->caseQ,
+                               obj, 
+                               TRUE);
 	} else if (!xml_strcmp(val, YANG_K_ANYXML) ||
 		   !xml_strcmp(val, YANG_K_CONTAINER) ||
 		   !xml_strcmp(val, YANG_K_LEAF) ||
 		   !xml_strcmp(val, YANG_K_LEAF_LIST) ||
 		   !xml_strcmp(val, YANG_K_LIST)) {
 	    /* create an inline 1-obj case statement */
-	    res = consume_case(tkc, mod,
-				    choic->caseQ,
-				    obj, FALSE);
+	    res = consume_case(tkc, 
+                               mod,
+                               choic->caseQ,
+                               obj, 
+                               FALSE);
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
@@ -1918,7 +2068,8 @@ static status_t
 		    res = retres = ERR_NCX_DUP_ENTRY;
 		    log_error("\nError: object name '%s' in case '%s'"
 			      " already used in sibling node, on line %u", 
-			      namestr, test2obj->linenum);
+			      namestr, 
+                              test2obj->linenum);
 		    ncx_print_errormsg(tkc, mod, retres);
 		} 
 	    }
@@ -2054,27 +2205,40 @@ static status_t
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    refine->descr_tk = TK_CUR(tkc);
-	    res = yang_consume_descr(tkc, mod, &refine->descr,
-				     &desc, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &refine->descr,
+				     &desc, 
+                                     &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    refine->ref_tk = TK_CUR(tkc);
-	    res = yang_consume_descr(tkc, mod, &refine->ref,
-				     &ref, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &refine->ref,
+				     &ref, 
+                                     &obj->appinfoQ);
 
 	} else if (!xml_strcmp(val, YANG_K_PRESENCE)) {
 	    refine->presence_tk = TK_CUR(tkc);
-	    res = yang_consume_strclause(tkc, mod, 
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
 					 &refine->presence,
-					 &pres, &obj->appinfoQ);
+					 &pres, 
+                                         &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
 	    refine->def_tk = TK_CUR(tkc);
-	    res = yang_consume_strclause(tkc, mod, 
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
 					 &refine->def,
-					 &def, &obj->appinfoQ);
+					 &def, 
+                                         &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    refine->config_tk = TK_CUR(tkc);
-	    res = yang_consume_boolean(tkc, mod, &flagset,
-				       &conf, &obj->appinfoQ);
+	    res = yang_consume_boolean(tkc, 
+                                       mod, 
+                                       &flagset,
+				       &conf, 
+                                       &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_CONFSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_CONFIG;
@@ -2083,25 +2247,33 @@ static status_t
 	    }
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
 	    refine->mandatory_tk = TK_CUR(tkc);
-	    res = yang_consume_boolean(tkc, mod,
+	    res = yang_consume_boolean(tkc, 
+                                       mod,
 				       &flagset,
-				       &mand, &obj->appinfoQ);
+				       &mand, 
+                                       &obj->appinfoQ);
 	    obj->flags |= OBJ_FL_MANDSET;
 	    if (flagset) {
 		obj->flags |= OBJ_FL_MANDATORY;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
 	    refine->minelems_tk = TK_CUR(tkc);
-	    res = yang_consume_uint32(tkc, mod,
+	    res = yang_consume_uint32(tkc, 
+                                      mod,
 				      &refine->minelems,
-				      &minel, &obj->appinfoQ);
+				      &minel, 
+                                      &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
 	    refine->maxelems_tk = TK_CUR(tkc);
-	    res = yang_consume_max_elements(tkc, mod,
+	    res = yang_consume_max_elements(tkc, 
+                                            mod,
 					    &refine->maxelems,
-					    &maxel, &obj->appinfoQ);
+					    &maxel, 
+                                            &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_MUST)) {
-	    res = yang_consume_must(tkc, mod, &refine->mustQ,
+	    res = yang_consume_must(tkc, 
+                                    mod, 
+                                    &refine->mustQ,
 				    &obj->appinfoQ);
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
@@ -2195,15 +2367,20 @@ static status_t
     uses = obj->def.uses;
 
     /* Get the mandatory uses target [prefix:]name */
-    res = yang_consume_pid_string(tkc, mod,
+    res = yang_consume_pid_string(tkc, 
+                                  mod,
 				  &uses->prefix,
 				  &uses->name);
     CHK_OBJ_EXIT(obj, res, retres);
 
     /* attempt to find grouping only if it is from another module */
     if (uses->prefix && xml_strcmp(uses->prefix, mod->prefix)) {
-	res = yang_find_imp_grouping(tkc, mod, uses->prefix,
-				     uses->name, obj->tk, &impgrp);
+	res = yang_find_imp_grouping(tkc, 
+                                     mod, 
+                                     uses->prefix,
+				     uses->name, 
+                                     obj->tk, 
+                                     &impgrp);
 	CHK_OBJ_EXIT(obj, res, retres);
 	uses->grp = impgrp;
     }
@@ -2253,21 +2430,34 @@ static status_t
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
 	    res = yang_consume_when(tkc, mod, obj, &when);
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, mod, 
+	    res = yang_consume_iffeature(tkc, 
+                                         mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, mod, &uses->status,
-				      &stat, &obj->appinfoQ);
+	    res = yang_consume_status(tkc, 
+                                      mod, 
+                                      &uses->status,
+				      &stat, 
+                                      &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &uses->descr,
-				     &desc, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &uses->descr,
+				     &desc, 
+                                     &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &uses->ref,
-				     &ref, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &uses->ref,
+				     &ref, 
+                                     &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_AUGMENT)) {
-	    res = consume_augment(tkc, mod, uses->datadefQ,
-				       obj, NULL);
+	    res = consume_augment(tkc, 
+                                  mod, 
+                                  uses->datadefQ,
+                                  obj, 
+                                  NULL);
 	} else if (!xml_strcmp(val, YANG_K_REFINE)) {
 	    res = consume_refine(tkc, mod, uses->datadefQ, obj);
 	} else {
@@ -2423,11 +2613,15 @@ static status_t
 	if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
 	    res = yang_typ_consume_typedef(tkc, mod, &rpcio->typedefQ);
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(tkc, mod, 
-					    &rpcio->groupingQ, obj);
+	    res = yang_grp_consume_grouping(tkc, 
+                                            mod, 
+					    &rpcio->groupingQ, 
+                                            obj);
 	} else {
-	    res = yang_obj_consume_datadef(tkc, mod,
-					   &rpcio->datadefQ, obj);
+	    res = yang_obj_consume_datadef(tkc, 
+                                           mod,
+					   &rpcio->datadefQ, 
+                                           obj);
 	}
 	CHK_OBJ_EXIT(obj, res, retres);
     }
@@ -2656,21 +2850,34 @@ static status_t
 	if (!xml_strcmp(val, YANG_K_WHEN)) {
 	    res = yang_consume_when(tkc, mod, obj, &when);
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, mod, 
+	    res = yang_consume_iffeature(tkc, 
+                                         mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, mod, &aug->status,
-				      &stat, &obj->appinfoQ);
+	    res = yang_consume_status(tkc, 
+                                      mod, 
+                                      &aug->status,
+				      &stat, 
+                                      &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &aug->descr,
-				     &desc, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &aug->descr,
+				     &desc, 
+                                     &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &aug->ref,
-				     &ref, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &aug->ref,
+				     &ref, 
+                                     &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_CASE)) {
-	    res = consume_case(tkc, mod, &aug->datadefQ,
-				    obj, TRUE);
+	    res = consume_case(tkc, 
+                               mod, 
+                               &aug->datadefQ,
+                               obj, 
+                               TRUE);
 	} else {
 	    res = consume_augdata(tkc, mod, &aug->datadefQ, obj);
 	}
@@ -2748,20 +2955,35 @@ static status_t
     } else {
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_ANYXML)) {
-	    res = consume_anyxml(tkc, mod, que,
-				      parent, NULL);
+	    res = consume_anyxml(tkc, 
+                                 mod, 
+                                 que,
+                                 parent, 
+                                 NULL);
 	} else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
-	    res = consume_container(tkc, mod, que,
-					 parent, NULL);
+	    res = consume_container(tkc, 
+                                    mod, 
+                                    que,
+                                    parent,
+                                    NULL);
 	} else if (!xml_strcmp(val, YANG_K_LEAF)) {
-	    res = consume_leaf(tkc, mod, que,
-				    parent, NULL);
+	    res = consume_leaf(tkc, 
+                               mod,
+                               que,
+                               parent,
+                               NULL);
 	} else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
-	    res = consume_leaflist(tkc, mod, que,
-					parent, NULL);
+	    res = consume_leaflist(tkc,
+                                   mod,
+                                   que,
+                                   parent,
+                                   NULL);
 	} else if (!xml_strcmp(val, YANG_K_LIST)) {
-	    res = consume_list(tkc, mod, que,
-				    parent, NULL);
+	    res = consume_list(tkc,
+                               mod,
+                               que,
+                               parent,
+                               NULL);
 	} else if (!xml_strcmp(val, YANG_K_USES)) {
 	    res = consume_uses(tkc, mod, que, parent, NULL);
 	} else {
@@ -2891,23 +3113,37 @@ static status_t
 
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, mod, 
+	    res = yang_consume_iffeature(tkc, 
+                                         mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    res = yang_typ_consume_typedef(tkc, mod, &rpc->typedefQ);
+	    res = yang_typ_consume_typedef(tkc, 
+                                           mod, 
+                                           &rpc->typedefQ);
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(tkc, mod, 
-					    &rpc->groupingQ, obj);
+	    res = yang_grp_consume_grouping(tkc, 
+                                            mod, 
+					    &rpc->groupingQ, 
+                                            obj);
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, mod, &rpc->status,
-				      &stat, &obj->appinfoQ);
+	    res = yang_consume_status(tkc, 
+                                      mod, 
+                                      &rpc->status,
+				      &stat, 
+                                      &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &rpc->descr,
-				     &desc, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &rpc->descr,
+				     &desc, 
+                                     &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &rpc->ref,
-				     &ref, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &rpc->ref,
+				     &ref, 
+                                     &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_INPUT) ||
 		   !xml_strcmp(val, YANG_K_OUTPUT)) {
 	    res = consume_rpcio(tkc, mod, &rpc->datadefQ, obj);
@@ -3102,24 +3338,39 @@ static status_t
 	if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
 	    res = yang_typ_consume_typedef(tkc, mod, &notif->typedefQ);
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(tkc, mod, 
-					    &notif->groupingQ, obj);
+	    res = yang_grp_consume_grouping(tkc, 
+                                            mod, 
+					    &notif->groupingQ, 
+                                            obj);
 	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, mod, 
+	    res = yang_consume_iffeature(tkc, 
+                                         mod, 
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, mod, &notif->status,
-				      &stat, &obj->appinfoQ);
+	    res = yang_consume_status(tkc, 
+                                      mod, 
+                                      &notif->status,
+				      &stat, 
+                                      &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &notif->descr,
-				     &desc, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc,
+                                     mod, 
+                                     &notif->descr,
+				     &desc,
+                                     &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &notif->ref,
-				     &ref, &obj->appinfoQ);
+	    res = yang_consume_descr(tkc,
+                                     mod,
+                                     &notif->ref,
+				     &ref,
+                                     &obj->appinfoQ);
 	} else {
-	    res = consume_datadef(tkc, mod, &notif->datadefQ,
-				  obj, NULL);
+	    res = consume_datadef(tkc,
+                                  mod,
+                                  &notif->datadefQ,
+				  obj,
+                                  NULL);
 	}
 	CHK_OBJ_EXIT(obj, res, retres);
     }
@@ -3225,6 +3476,7 @@ static status_t
 			       obj_get_name(targobj));
 		}
 		switch (targobj->objtype) {
+                case OBJ_TYP_ANYXML:
 		case OBJ_TYP_LEAF:
 		    typ_free_typdef(targobj->def.leaf->typdef);
 		    targobj->def.leaf->typdef = devi->typdef;
@@ -4037,8 +4289,11 @@ static status_t
 		retres = SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 
-	    res = yang_consume_strclause(tkc, mod, &devi->units,
-					 &units, &devi->appinfoQ);
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
+                                         &devi->units,
+					 &units, 
+                                         &devi->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
 	    devi->default_tk = TK_CUR(tkc);
 
@@ -4062,9 +4317,11 @@ static status_t
 		retres = SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 
-	    res = yang_consume_strclause(tkc, mod, 
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
 					 &devi->defval,
-					 &def, &devi->appinfoQ);
+					 &def, 
+                                         &devi->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
 	    devi->config_tk = TK_CUR(tkc);
 
@@ -4091,9 +4348,11 @@ static status_t
 		retres = SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 
-	    res = yang_consume_boolean(tkc, mod,
+	    res = yang_consume_boolean(tkc,
+                                       mod,
 				       &devi->config,
-				       &conf, &devi->appinfoQ);
+				       &conf,
+                                       &devi->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
 	    devi->mandatory_tk = TK_CUR(tkc);
 
@@ -4120,9 +4379,11 @@ static status_t
 		retres = SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 
-	    res = yang_consume_boolean(tkc, mod,
+	    res = yang_consume_boolean(tkc,
+                                       mod,
 				       &devi->mandatory,
-				       &mand, &devi->appinfoQ);
+				       &mand, 
+                                       &devi->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
 	    devi->minelems_tk = TK_CUR(tkc);
 
@@ -4149,9 +4410,11 @@ static status_t
 		retres = SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 
-	    res = yang_consume_uint32(tkc, mod,
+	    res = yang_consume_uint32(tkc, 
+                                      mod,
 				      &devi->minelems,
-				      &minel, &devi->appinfoQ);
+				      &minel, 
+                                      &devi->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
 	    devi->maxelems_tk = TK_CUR(tkc);
 
@@ -4178,9 +4441,11 @@ static status_t
 		retres = SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 
-	    res = yang_consume_max_elements(tkc, mod,
+	    res = yang_consume_max_elements(tkc, 
+                                            mod,
 					    &devi->maxelems,
-					    &maxel, &devi->appinfoQ);
+					    &maxel,
+                                            &devi->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_MUST)) {
 	    switch (devi->arg) {
 	    case OBJ_DARG_NONE:
@@ -4205,7 +4470,9 @@ static status_t
 		retres = SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 
-	    res = yang_consume_must(tkc, mod, &devi->mustQ,
+	    res = yang_consume_must(tkc, 
+                                    mod, 
+                                    &devi->mustQ,
 				    &devi->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_UNIQUE)) {
 	    uniq = obj_new_unique();
@@ -4241,9 +4508,11 @@ static status_t
 		retres = SET_ERROR(ERR_INTERNAL_VAL);
 	    }
 
-	    res = yang_consume_strclause(tkc, mod,
+	    res = yang_consume_strclause(tkc,
+                                         mod,
 					 &uniq->xpath,
-					 NULL, &devi->appinfoQ);
+					 NULL,
+                                         &devi->appinfoQ);
 	    CHK_DEVI_EXIT(devi, res, retres);
 	    if (res == NO_ERR) {
 		dlq_enque(uniq, &devi->uniqueQ);
@@ -4761,8 +5030,11 @@ static status_t
     }
 
     if (!obj_is_refine(obj) || !redo) {
-	res = yang_typ_resolve_type(tkc, mod, leaf->typdef,
-				    leaf->defval, obj);
+	res = yang_typ_resolve_type(tkc, 
+                                    mod, 
+                                    leaf->typdef,
+				    leaf->defval, 
+                                    obj);
 	CHK_EXIT(res, retres);
     } 
 
@@ -4819,8 +5091,11 @@ static status_t
     }
 
     if (!obj_is_refine(obj) && !redo) {
-	res = yang_typ_resolve_type(tkc, mod,
-				    llist->typdef, NULL, obj);
+	res = yang_typ_resolve_type(tkc, 
+                                    mod,
+				    llist->typdef, 
+                                    NULL, 
+                                    obj);
 	CHK_EXIT(res, retres);
     }
 
@@ -5194,9 +5469,14 @@ static status_t
 	*p = 0;
 
 	/* check for a valid descendant-schema-nodeid string */
-	res = xpath_find_schema_target_err(tkc, mod, obj,
+	res = xpath_find_schema_target_err(tkc, 
+                                           mod, 
+                                           obj,
 					   list->datadefQ,
-					   str, &uniobj, NULL, errtk);
+					   str, 
+                                           &uniobj,
+                                           NULL,
+                                           errtk);
 	CHK_EXIT(res, retres);
 	if (res == NO_ERR) {
 	    savestr = xml_strdup(str);
@@ -5942,14 +6222,18 @@ static status_t
 	/* find schema-nodeid target
 	 * the node being refined MUST exist in the grouping
 	 */
-	res = xpath_find_schema_target(tkc, mod, obj,
+	res = xpath_find_schema_target(tkc, 
+                                       mod, 
+                                       obj,
 				       &uses->grp->datadefQ,
 				       refine->target, 
-				       &targobj, NULL);
+				       &targobj, 
+                                       NULL);
 	if (res != NO_ERR || !targobj) {
 	    /* warning: refined obj not in the grouping */
 	    log_warn("\nWarning: refinement node '%s' not found"
-		      " in grouping '%s'", obj_get_name(chobj),
+		      " in grouping '%s'",
+                     obj_get_name(chobj),
 		      uses->grp->name);
 	    retres = ERR_NCX_MISSING_REFTARGET;
 	    tkc->cur = chobj->tk;
@@ -5961,8 +6245,10 @@ static status_t
 	    /* check any extra refinements not allowed for
 	     * the target object type
 	     */
-	    res = check_refine_allowed(tkc, mod,
-				       chobj, targobj);
+	    res = check_refine_allowed(tkc, 
+                                       mod,
+				       chobj,
+                                       targobj);
 	    CHK_EXIT(res, retres);
 
 	    /* check if any default statements are present,
@@ -6047,8 +6333,11 @@ static status_t
 	    if (testobj->def.refine->targobj == cobj) {
 		/* duplicate refine found, remove and combine */
 		dlq_remove(testobj);
-		res = combine_refine_objects(tkc, mod,
-					     chobj, testobj, cobj);
+		res = combine_refine_objects(tkc,
+                                             mod,
+					     chobj,
+                                             testobj,
+                                             cobj);
 		obj_free_template(testobj);
 		CHK_EXIT(res, retres);
 	    }
@@ -6118,7 +6407,8 @@ static status_t
 #ifdef YANG_OBJ_DEBUG
 	if (LOGDEBUG3) {
 	    log_debug3("\nexpand_uses: mod %s, object %s, on line %u",
-		       mod->name, obj_get_name(chobj),
+		       mod->name,
+                       obj_get_name(chobj),
 		       chobj->linenum);
 	}
 #endif
@@ -6133,12 +6423,14 @@ static status_t
 	    testobj = obj_find_template_test(datadefQ, NULL, name);
 	    if (testobj) {
 		log_error("\nError: object '%s' already defined at line %u",
-			  name, testobj->linenum);
+			  name,
+                          testobj->linenum);
 		retres = ERR_NCX_DUP_ENTRY;
 		tkc->cur = chobj->tk;
 		ncx_print_errormsg(tkc, mod, retres);
 	    } else {
-		newobj = obj_clone_template(mod, chobj,
+		newobj = obj_clone_template(mod,
+                                            chobj,
 					    uses->datadefQ);
 		if (!newobj) {
 		    retres = ERR_INTERNAL_MEM;
@@ -6327,8 +6619,13 @@ static status_t
     /* find schema-nodeid target
      * the node being augmented MUST exist to be valid
      */
-    res = xpath_find_schema_target(tkc, mod, obj, datadefQ,
-				   aug->target, &targobj, NULL);
+    res = xpath_find_schema_target(tkc, 
+                                   mod, 
+                                   obj, 
+                                   datadefQ,
+				   aug->target, 
+                                   &targobj,
+                                   NULL);
     if (res != NO_ERR) {
 	return res;
     }
@@ -6819,6 +7116,7 @@ static status_t
 	    switch (targobj->objtype) {
 	    case OBJ_TYP_CHOICE:
 	    case OBJ_TYP_LEAF:
+            case OBJ_TYP_ANYXML:
 		break;
 	    default:
 		res = retres = ERR_NCX_INVALID_DEV_STMT;
@@ -6866,6 +7164,7 @@ static status_t
 	if (!dlq_empty(&devi->mustQ)) {
 	    switch (targobj->objtype) {
 	    case OBJ_TYP_CONTAINER:
+            case OBJ_TYP_ANYXML:
 	    case OBJ_TYP_LEAF:
 	    case OBJ_TYP_LEAF_LIST:
 	    case OBJ_TYP_LIST:
@@ -7161,61 +7460,84 @@ static status_t
 
     switch (testobj->objtype) {
     case OBJ_TYP_CONTAINER:
-	res = resolve_container(tkc, mod,
+	res = resolve_container(tkc, 
+                                mod,
 				testobj->def.container, 
-				testobj, redo);
+				testobj, 
+                                redo);
 	break;
     case OBJ_TYP_LEAF:
-	res = resolve_leaf(tkc, mod,
+    case OBJ_TYP_ANYXML:
+	res = resolve_leaf(tkc, 
+                           mod,
 			   testobj->def.leaf, 
-			   testobj, redo);
+			   testobj, 
+                           redo);
 	break;
     case OBJ_TYP_LEAF_LIST:
-	res = resolve_leaflist(tkc, mod,
+	res = resolve_leaflist(tkc, 
+                               mod,
 			       testobj->def.leaflist, 
-			       testobj, redo);
+			       testobj, 
+                               redo);
 	break;
     case OBJ_TYP_LIST:
-	res = resolve_list(tkc, mod,
+	res = resolve_list(tkc, 
+                           mod,
 			   testobj->def.list, 
-			   testobj, redo);
+			   testobj, 
+                           redo);
 	break;
     case OBJ_TYP_CHOICE:
-	res = resolve_choice(tkc, mod,
+	res = resolve_choice(tkc, 
+                             mod,
 			     testobj->def.choic, 
-			     testobj, redo);
+			     testobj, 
+                             redo);
 	break;
     case OBJ_TYP_CASE:
-	res = resolve_case(tkc, mod,
+	res = resolve_case(tkc, 
+                           mod,
 			   testobj->def.cas, 
-			   testobj, redo);
+			   testobj, 
+                           redo);
 	break;
     case OBJ_TYP_USES:
 	if (!redo) {
-	    res = resolve_uses(tkc, mod,
-			       testobj->def.uses, testobj);
+	    res = resolve_uses(tkc, 
+                               mod,
+			       testobj->def.uses, 
+                               testobj);
 	}
 	break;
     case OBJ_TYP_AUGMENT:
 	if (!redo) {
-	    res = resolve_augment(tkc, mod,
-				  testobj->def.augment, testobj);
+	    res = resolve_augment(tkc, 
+                                  mod,
+				  testobj->def.augment, 
+                                  testobj);
 	}
 	break;
     case OBJ_TYP_RPC:
-	res = resolve_rpc(tkc, mod,
+	res = resolve_rpc(tkc, 
+                          mod,
 			  testobj->def.rpc, 
-			  testobj, redo);
+			  testobj, 
+                          redo);
 	break;
     case OBJ_TYP_RPCIO:
-	res = resolve_rpcio(tkc, mod,
+	res = resolve_rpcio(tkc, 
+                            mod,
 			    testobj->def.rpcio, 
-			    testobj, redo);
+			    testobj, 
+                            redo);
 	break;
     case OBJ_TYP_NOTIF:
-	res = resolve_notif(tkc, mod,
+	res = resolve_notif(tkc, 
+                            mod,
 			    testobj->def.notif, 
-			    testobj, redo);
+			    testobj, 
+                            redo);
 	break;
     case OBJ_TYP_REFINE:
 	res = NO_ERR;
@@ -7331,20 +7653,32 @@ static status_t
 	if (!xml_strcmp(val, YANG_K_ANYXML)) {
 	    res = consume_anyxml(tkc, mod, que, parent, grp);
 	} else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
-	    res = consume_container(tkc, mod, que,
-					 parent, grp);
+	    res = consume_container(tkc, 
+                                    mod, 
+                                    que,
+                                    parent,
+                                    grp);
 	} else if (!xml_strcmp(val, YANG_K_LEAF)) {
-	    res = consume_leaf(tkc, mod, que,
-				    parent, grp);
+	    res = consume_leaf(tkc, 
+                               mod,
+                               que,
+                               parent,
+                               grp);
 	} else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
-	    res = consume_leaflist(tkc, mod, que,
-					parent, grp);
+	    res = consume_leaflist(tkc,
+                                   mod,
+                                   que,
+                                   parent, grp);
 	} else if (!xml_strcmp(val, YANG_K_LIST)) {
-	    res = consume_list(tkc, mod, que,
-				    parent, grp);
+	    res = consume_list(tkc,
+                               mod,
+                               que,
+                               parent, grp);
 	} else if (!xml_strcmp(val, YANG_K_CHOICE)) {
-	    res = consume_choice(tkc, mod, que,
-				      parent, grp);
+	    res = consume_choice(tkc,
+                                 mod,
+                                 que,
+                                 parent, grp);
 	} else if (!xml_strcmp(val, YANG_K_USES)) {
 	    res = consume_uses(tkc, mod, que, parent, grp);
 	} else {
@@ -7407,8 +7741,11 @@ static status_t
 	if (iff->prefix &&
 	    xml_strcmp(iff->prefix, mod->prefix)) {
 	    /* find the feature in another module */
-	    res = yang_find_imp_feature(tkc, mod, iff->prefix,
-					iff->name, iff->tk,
+	    res = yang_find_imp_feature(tkc, 
+                                        mod, 
+                                        iff->prefix,
+					iff->name, 
+                                        iff->tk,
 					&testfeature);
 	    if (res != NO_ERR) {
 		retres = res;
@@ -7610,20 +7947,23 @@ static status_t
 	    /* check all possible when clauses in the testobj
 	     * against the ancestor node
 	     */
-	    res = check_one_when_mismatch(tkc, mod, 
+	    res = check_one_when_mismatch(tkc, 
+                                          mod, 
 					  testobj,
 					  ancestor);
 	    CHK_EXIT(res, retres);
 
 	    if (testobj->usesobj) {
-		res = check_one_when_mismatch(tkc, mod, 
+		res = check_one_when_mismatch(tkc, 
+                                              mod, 
 					      testobj->usesobj,
 					      ancestor);
 		CHK_EXIT(res, retres);
 	    }
 
 	    if (testobj->augobj) {
-		res = check_one_when_mismatch(tkc, mod, 
+		res = check_one_when_mismatch(tkc, 
+                                              mod, 
 					      testobj->augobj,
 					      ancestor);
 		CHK_EXIT(res, retres);
@@ -7638,8 +7978,11 @@ static status_t
 		 iff != NULL;
 		 iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
 
-		res = check_iffeature_mismatch(tkc, mod, ancestor,
-					       testobj, iff);
+		res = check_iffeature_mismatch(tkc, 
+                                               mod, 
+                                               ancestor,
+					       testobj, 
+                                               iff);
 		CHK_EXIT(res, retres);
 	    }
 
@@ -7656,8 +7999,11 @@ static status_t
 					    iff->name,
 					    mod->prefix)) {
 
-			res = check_iffeature_mismatch(tkc, mod, ancestor,
-						       testobj, iff);
+			res = check_iffeature_mismatch(tkc, 
+                                                       mod, 
+                                                       ancestor,
+						       testobj, 
+                                                       iff);
 			CHK_EXIT(res, retres);
 		    }
 		}
@@ -7675,8 +8021,11 @@ static status_t
 					    iff->name,
 					    mod->prefix)) {
 
-			res = check_iffeature_mismatch(tkc, mod, ancestor,
-						       testobj, iff);
+			res = check_iffeature_mismatch(tkc, 
+                                                       mod, 
+                                                       ancestor,
+						       testobj, 
+                                                       iff);
 			CHK_EXIT(res, retres);
 		    }
 		}
@@ -7793,15 +8142,19 @@ static status_t
 	switch (testobj->objtype) {
 	case OBJ_TYP_CONTAINER:
 	    /* check container children */
-	    res = resolve_xpath(tkc, mod, 
+	    res = resolve_xpath(tkc, 
+                                mod, 
 				testobj->def.container->datadefQ);
 	    break;
+        case OBJ_TYP_ANYXML:
+            break;
 	case OBJ_TYP_LEAF:
 	case OBJ_TYP_LEAF_LIST:
 	    if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
 #ifdef YANG_OBJ_DEBUG
 		if (LOGDEBUG3) {
-		    log_debug3("\nresolve_xpath: mod %s, object %s, on line %u",
+		    log_debug3("\nresolve_xpath: mod %s, "
+                               "object %s, on line %u",
 			       mod->name, obj_get_name(testobj), 
 			       testobj->linenum);
 		}
@@ -7852,7 +8205,8 @@ static status_t
 		 key = obj_next_key(key)) {
 
 		if (key->keyobj) {
-		    res = check_conditional_mismatch(tkc, mod,
+		    res = check_conditional_mismatch(tkc, 
+                                                     mod,
 						     testobj,
 						     key->keyobj);
 		    CHK_EXIT(res, retres);
@@ -7871,7 +8225,8 @@ static status_t
 		     uncomp = obj_next_unique_comp(uncomp)) {
 
 		    if (uncomp->unobj) {
-			res = check_conditional_mismatch(tkc, mod,
+			res = check_conditional_mismatch(tkc, 
+                                                         mod,
 							 testobj,
 							 uncomp->unobj);
 			CHK_EXIT(res, retres);
@@ -7880,28 +8235,34 @@ static status_t
 	    }
 
 	    /* check list children */
-	    res = resolve_xpath(tkc, mod, 
+	    res = resolve_xpath(tkc, 
+                                mod, 
 				testobj->def.list->datadefQ);
 	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_CHOICE:
-	    res = resolve_xpath(tkc, mod, 
+	    res = resolve_xpath(tkc, 
+                                mod, 
 				testobj->def.choic->caseQ);
 	    break;
 	case OBJ_TYP_CASE:
-	    res = resolve_xpath(tkc, mod, 
+	    res = resolve_xpath(tkc, 
+                                mod, 
 				testobj->def.cas->datadefQ);
 	    break;
 	case OBJ_TYP_RPC:
-	    res = resolve_xpath(tkc, mod, 
+	    res = resolve_xpath(tkc, 
+                                mod, 
 				&testobj->def.rpc->datadefQ);
 	    break;
 	case OBJ_TYP_RPCIO:
-	    res = resolve_xpath(tkc, mod, 
+	    res = resolve_xpath(tkc, 
+                                mod, 
 				&testobj->def.rpcio->datadefQ);
 	    break;
 	case OBJ_TYP_NOTIF:
-	    res = resolve_xpath(tkc, mod, 
+	    res = resolve_xpath(tkc, 
+                                mod, 
 				&testobj->def.notif->datadefQ);
 	    break;
 	case OBJ_TYP_NONE:
@@ -8253,11 +8614,17 @@ status_t
 
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &dev->descr,
-				     &desc, &dev->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &dev->descr,
+				     &desc, 
+                                     &dev->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &dev->ref,
-				     &ref, &dev->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &dev->ref,
+				     &ref, 
+                                     &dev->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DEVIATE)) {
 	    res = consume_deviate(tkc, mod, dev);
 	} else {
@@ -8377,25 +8744,31 @@ status_t
 
 	switch (testobj->objtype) {
 	case OBJ_TYP_CONTAINER:
-	    res = yang_grp_resolve_complete(tkc, mod,
-					    testobj->def.container->groupingQ,
-					    testobj);
+	    res = 
+                yang_grp_resolve_complete(tkc, 
+                                          mod,
+                                          testobj->def.container->groupingQ,
+                                          testobj);
 	    CHK_EXIT(res, retres);
 
-	    res = yang_obj_resolve_uses(tkc, mod,
+	    res = yang_obj_resolve_uses(tkc, 
+                                        mod,
 					testobj->def.container->datadefQ);
 	    CHK_EXIT(res, retres);
 	    break;
+        case OBJ_TYP_ANYXML:
 	case OBJ_TYP_LEAF:
 	case OBJ_TYP_LEAF_LIST:
 	    break;
 	case OBJ_TYP_LIST:
-	    res = yang_grp_resolve_complete(tkc, mod,
+	    res = yang_grp_resolve_complete(tkc, 
+                                            mod,
 					    testobj->def.list->groupingQ,
 					    testobj);
 	    CHK_EXIT(res, retres);
 
-	    res = yang_obj_resolve_uses(tkc, mod,
+	    res = yang_obj_resolve_uses(tkc, 
+                                        mod,
 					testobj->def.list->datadefQ);
 	    CHK_EXIT(res, retres);
 	    break;
@@ -8424,32 +8797,38 @@ status_t
 	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_RPC:
-	    res = yang_grp_resolve_complete(tkc, mod,
+	    res = yang_grp_resolve_complete(tkc, 
+                                            mod,
 					    &testobj->def.rpc->groupingQ,
 					    testobj);
 	    CHK_EXIT(res, retres);
 
-	    res = yang_obj_resolve_uses(tkc, mod,
+	    res = yang_obj_resolve_uses(tkc, 
+                                        mod,
 					&testobj->def.rpc->datadefQ);
 	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_RPCIO:
-	    res = yang_grp_resolve_complete(tkc, mod,
+	    res = yang_grp_resolve_complete(tkc, 
+                                            mod,
 					    &testobj->def.rpcio->groupingQ,
 					    testobj);
 	    CHK_EXIT(res, retres);
 
-	    res = yang_obj_resolve_uses(tkc, mod,
+	    res = yang_obj_resolve_uses(tkc, 
+                                        mod,
 					&testobj->def.rpcio->datadefQ);
 	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_NOTIF:
-	    res = yang_grp_resolve_complete(tkc, mod,
+	    res = yang_grp_resolve_complete(tkc,
+                                            mod,
 					    &testobj->def.notif->groupingQ,
 					    testobj);
 	    CHK_EXIT(res, retres);
 
-	    res = yang_obj_resolve_uses(tkc, mod,
+	    res = yang_obj_resolve_uses(tkc,
+                                        mod,
 					&testobj->def.notif->datadefQ);
 	    CHK_EXIT(res, retres);
 	    break;
@@ -8662,11 +9041,13 @@ status_t
 	    if (notclone) {
 		res = resolve_default_parm(tkc, mod, testobj);
 
-		yang_check_obj_used(tkc, mod,
+		yang_check_obj_used(tkc, 
+                                    mod,
 				    testobj->def.container->typedefQ,
 				    testobj->def.container->groupingQ);
 	    }
 	    break;
+        case OBJ_TYP_ANYXML:
 	case OBJ_TYP_LEAF:
 	case OBJ_TYP_LEAF_LIST:
 	    break;
@@ -8682,81 +9063,102 @@ status_t
 	    CHK_EXIT(res, retres);
 
 	    if (notclone) {
-		yang_check_obj_used(tkc, mod,
+		yang_check_obj_used(tkc, 
+                                    mod,
 				    testobj->def.list->typedefQ,
 				    testobj->def.list->groupingQ);
 	    }
 
-	    res = resolve_list_final(tkc, mod, 
+	    res = resolve_list_final(tkc, 
+                                     mod, 
 				     testobj->def.list, 
 				     testobj);
 	    break;
 	case OBJ_TYP_CHOICE:
-	    res = yang_obj_resolve_final(tkc, mod, 
+	    res = yang_obj_resolve_final(tkc, 
+                                         mod, 
 					 testobj->def.choic->caseQ);
 	    break;
 	case OBJ_TYP_CASE:
-	    res = yang_obj_resolve_final(tkc, mod, 
+	    res = yang_obj_resolve_final(tkc, 
+                                         mod, 
 					 testobj->def.cas->datadefQ);
 	    break;
 	case OBJ_TYP_USES:
 	    if (notclone) {
-		res = yang_obj_resolve_final
-		    (tkc, mod, testobj->def.uses->datadefQ);
+		res = 
+                    yang_obj_resolve_final(tkc, 
+                                           mod, 
+                                           testobj->def.uses->datadefQ);
 	    }
 	    break;
 	case OBJ_TYP_AUGMENT:
 	    if (notclone) {
-		res = yang_obj_resolve_final
-		    (tkc, mod, &testobj->def.augment->datadefQ);
+		res = 
+                    yang_obj_resolve_final(tkc, 
+                                           mod, 
+                                           &testobj->def.augment->datadefQ);
 	    }
 	    break;
 	case OBJ_TYP_RPC:
 	    if (notclone) {
-		res = yang_grp_resolve_final
-		    (tkc, mod, &testobj->def.rpc->groupingQ);
+		res = 
+                    yang_grp_resolve_final(tkc, 
+                                           mod, 
+                                           &testobj->def.rpc->groupingQ);
 		CHK_EXIT(res, retres);
 	    }
 
-	    res = yang_obj_resolve_final(tkc, mod, 
+	    res = yang_obj_resolve_final(tkc, 
+                                         mod, 
 					 &testobj->def.rpc->datadefQ);
 
 	    if (notclone) {
-		yang_check_obj_used(tkc, mod,
+		yang_check_obj_used(tkc, 
+                                    mod,
 				    &testobj->def.rpc->typedefQ,
 				    &testobj->def.rpc->groupingQ);
 	    }
 	    break;
 	case OBJ_TYP_RPCIO:
 	    if (notclone) {
-		res = yang_grp_resolve_final
-		    (tkc, mod, &testobj->def.rpcio->groupingQ);
+		res = 
+                    yang_grp_resolve_final(tkc, 
+                                           mod, 
+                                           &testobj->def.rpcio->groupingQ);
 		CHK_EXIT(res, retres);
 	    }
 
-	    res = yang_obj_resolve_final(tkc, mod, 
+	    res = yang_obj_resolve_final(tkc, 
+                                         mod, 
 					 &testobj->def.rpcio->datadefQ);
 	    CHK_EXIT(res, retres);
 
 	    if (notclone) {
 		res = resolve_default_parm(tkc, mod, testobj);
-		yang_check_obj_used(tkc, mod,
+		yang_check_obj_used(tkc, 
+                                    mod,
 				    &testobj->def.rpcio->typedefQ,
 				    &testobj->def.rpcio->groupingQ);
 	    }
 	    break;
 	case OBJ_TYP_NOTIF:
 	    if (notclone) {
-		res = yang_grp_resolve_final
-		    (tkc, mod,  &testobj->def.notif->groupingQ);
+		res = 
+                    yang_grp_resolve_final(tkc, 
+                                           mod, 
+                                           &testobj->def.notif->groupingQ);
 		CHK_EXIT(res, retres);
 	    }
 
-	    res = yang_obj_resolve_final
-		(tkc, mod, &testobj->def.notif->datadefQ);
+	    res = 
+                yang_obj_resolve_final(tkc, 
+                                       mod, 
+                                       &testobj->def.notif->datadefQ);
 
 	    if (notclone) {
-		yang_check_obj_used(tkc, mod,
+		yang_check_obj_used(tkc,
+                                    mod,
 				    &testobj->def.notif->typedefQ,
 				    &testobj->def.notif->groupingQ);
 	    }
@@ -8893,7 +9295,8 @@ status_t
 		if (LOGDEBUG3) {
 		    log_debug3("\ncheck_leafref_loop: mod %s, "
 			       "object %s, on line %u",
-			       mod->name, obj_get_name(testobj), 
+			       mod->name, 
+                               obj_get_name(testobj), 
 			       testobj->linenum);
 		}
 #endif

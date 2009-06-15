@@ -382,10 +382,22 @@ static xmlChar *
     }
 
     agent_cb->returncode = 0;
-    line = (xmlChar *)gl_get_line(agent_cb->cli_gl,
-				  (const char *)prompt,
-				  NULL, 
-				  -1);
+
+    if (agent_cb->history_line_active) {
+        line = (xmlChar *)
+            gl_get_line(agent_cb->cli_gl,
+                        (const char *)prompt,
+                        (const char *)agent_cb->history_line, 
+                        -1);
+        agent_cb->history_line_active = FALSE;
+    } else {
+        line = (xmlChar *)
+            gl_get_line(agent_cb->cli_gl,
+                        (const char *)prompt,
+                        NULL, 
+                        -1);
+    }
+
     if (!line) {
 	if (agent_cb->returncode == MGR_IO_RC_DROPPED ||
 	    agent_cb->returncode == MGR_IO_RC_DROPPED_NOW) {
@@ -663,16 +675,21 @@ static status_t
 	val_init_from_template(new_parm, parm);
 	(void)var_get_script_val(parm,
 				 new_parm,
-				 line, ISPARM, &res);
+				 line, 
+                                 ISPARM, 
+                                 &res);
 	if (res == NO_ERR) {
 	    /* add the parm to the parmset */
 	    val_add_child(new_parm, valset);
-	}
+	} else {
+            val_free_value(new_parm);
+        }
     }
 
     if (res != NO_ERR) {
 	log_stdout("\nyangcli: Error in %s (%s)",
-		   obj_get_name(parm), get_error_string(res));
+		   obj_get_name(parm), 
+                   get_error_string(res));
     }
 
     return res;
@@ -843,7 +860,9 @@ static status_t
 	if (*start == '?') {
 	    if (start[1] == '?') {
 		/* ?? == full help */
-		obj_dump_template(parm, HELP_MODE_FULL, 0,
+		obj_dump_template(parm, 
+                                  HELP_MODE_FULL, 
+                                  0,
 				  NCX_DEF_INDENT);
 	    } else if (start[1] == 'C' || start[1] == 'c') {
 		/* ?c or ?C == cancel the operation */
@@ -857,7 +876,9 @@ static status_t
 		return ERR_NCX_SKIPPED;
 	    } else {
 		/* ? == normal help mode */
-		obj_dump_template(parm, HELP_MODE_NORMAL, 4,
+		obj_dump_template(parm, 
+                                  HELP_MODE_NORMAL, 
+                                  4,
 				  NCX_DEF_INDENT);
 	    }
 	    log_stdout("\n");
@@ -1016,7 +1037,9 @@ static status_t
 			done = TRUE;
 		    } else {
 			/* ? == normal help mode */
-			obj_dump_template(parm, HELP_MODE_NORMAL, 4,
+			obj_dump_template(parm, 
+                                          HELP_MODE_NORMAL, 
+                                          4,
 					  NCX_DEF_INDENT);
 		    }
 		    log_stdout("\n");
@@ -1033,7 +1056,11 @@ static status_t
 		} else if (*start2 == 'N' || *start2 == 'n') {
 		    /* recurse: try again for a different input */
 		    m__free(saveline);
-		    res = get_parm(agent_cb, rpc, parm, valset, oldvalset);
+		    res = get_parm(agent_cb, 
+                                   rpc, 
+                                   parm, 
+                                   valset, 
+                                   oldvalset);
 		    done = TRUE;
 		} else {
 		    log_stdout("\nInvalid input.");
@@ -1085,6 +1112,8 @@ static status_t
 {
     const obj_template_t    *parm;
     val_value_t             *pval;
+    xmlChar                 *objbuff;
+    const xmlChar           *str;
     status_t                 res;
     boolean                  saveopt;
 
@@ -1097,6 +1126,27 @@ static status_t
     saveopt = agent_cb->get_optional;
     agent_cb->get_optional = TRUE;
     res = NO_ERR;
+
+    objbuff = NULL;
+    res = obj_gen_object_id(cas, &objbuff);
+    if (res != NO_ERR) {
+        log_error("\nError: generate object ID failed (%s)",
+                  get_error_string(res));
+        return res;
+    }
+
+    /* let the user know about the new nest level */
+    if (obj_is_mandatory(cas)) {
+        str = YANG_K_MANDATORY;
+    } else {
+        str = (const xmlChar *)"optional";
+    }
+
+    log_stdout("\nFilling %s case %s:", 
+               str,
+               objbuff);
+	    
+    m__free(objbuff);
 
     /* corner-case: user selected a case, and that case has
      * one empty leaf in it; 
@@ -1328,7 +1378,9 @@ static status_t
 	} else if (*str == '?') {
 	    redo = TRUE;
 	    if (str[1] == '?') {
-		obj_dump_template(choic, HELP_MODE_FULL, 0,
+		obj_dump_template(choic, 
+                                  HELP_MODE_FULL, 
+                                  0,
 				  NCX_DEF_INDENT);
 	    } else if (str[1] == 'C' || str[1] == 'c') {
 		log_stdout("\n%s command canceled\n",
@@ -1341,7 +1393,9 @@ static status_t
 		agent_cb->get_optional = saveopt;
 		return ERR_NCX_SKIPPED;
 	    } else {
-		obj_dump_template(choic, HELP_MODE_NORMAL, 4,
+		obj_dump_template(choic, 
+                                  HELP_MODE_NORMAL,
+                                  4,
 				  NCX_DEF_INDENT);
 	    }
 	    log_stdout("\n");
@@ -1359,7 +1413,8 @@ static status_t
 	    if (obj_get_default(choic)) {
 		done = TRUE;
 	    } else {
-		log_stdout("\nError: Choice does not have a default case\n");
+		log_stdout("\nError: Choice does not have "
+                           "a default case\n");
 		usedef = FALSE;
 	    }
 	} else if (casenum < 0 || casenum >= num) {
@@ -1461,6 +1516,7 @@ static val_value_t *
     boolean                saveopt;
 
     switch (parm->objtype) {
+    case OBJ_TYP_ANYXML:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
 	break;
@@ -1610,8 +1666,11 @@ static status_t
         switch (parm->objtype) {
         case OBJ_TYP_CHOICE:
 	    if (!val_choice_is_set(valset, parm)) {
-		res = get_choice(agent_cb, rpc, parm, 
-				 valset, oldvalset);
+		res = get_choice(agent_cb, 
+                                 rpc, 
+                                 parm, 
+				 valset, 
+                                 oldvalset);
 		switch (res) {
 		case NO_ERR:
 		    break;
@@ -1625,6 +1684,7 @@ static status_t
 		}
 	    }
             break;
+        case OBJ_TYP_ANYXML:
         case OBJ_TYP_LEAF:
 	    val = val_find_child(valset, 
 				 obj_get_mod_name(parm),
@@ -3004,7 +3064,10 @@ static status_t
 				  YANGCLI_MOD,
 				  YANGCLI_VAR);
 	    if (parm) {
-		res = do_show_var(VAL_STR(parm), VAR_TYP_NONE, TRUE, mode);
+		res = do_show_var(VAL_STR(parm), 
+                                  VAR_TYP_NONE, 
+                                  TRUE, 
+                                  mode);
 		done = TRUE;
 	    }
 	}
@@ -4297,6 +4360,7 @@ static status_t
 
     /* fill in the value based on all the parameters */
     switch (targobj->objtype) {
+    case OBJ_TYP_ANYXML:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
 	/* make a new leaf, toss the targval if any */
@@ -4456,6 +4520,7 @@ static status_t
 
     /* add content based on the current node type */
     switch (curobj->objtype) {
+    case OBJ_TYP_ANYXML:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
 	if (curobj != config_content->obj) {
@@ -5585,6 +5650,7 @@ static val_value_t *
 	}
 
 	switch (targobj->objtype) {
+        case OBJ_TYP_ANYXML:
 	case OBJ_TYP_LEAF:
 	    if (isdelete) {
 		dofill = FALSE;
@@ -6942,6 +7008,376 @@ static status_t
 
 
 /********************************************************************
+ * FUNCTION do_history_show (sub-mode of history RPC)
+ * 
+ * history show [25]
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ *    maxlines == max number of history entries to show
+ *    mode == requested help mode
+ * 
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    do_history_show (agent_cb_t *agent_cb,
+                     int maxlines,
+                     help_mode_t mode)
+{
+    FILE          *outputfile;
+    const char    *format;
+    int            glstatus;
+
+
+    outputfile = log_get_logfile();
+    if (!outputfile) {
+        /* use STDOUT instead */
+        outputfile = stdout;
+    }
+    
+    if (mode == HELP_MODE_FULL) {
+        format = "\n  [%N]\t%D %T %H";
+    } else {
+        format = "\n  [%N]\t%H";
+    }
+
+    glstatus = gl_show_history(agent_cb->cli_gl,
+                               outputfile,
+                               format,
+                               1,
+                               maxlines);
+
+    fputc('\n', outputfile);
+
+    return NO_ERR;
+
+} /* do_history_show */
+
+
+/********************************************************************
+ * FUNCTION do_history_clear (sub-mode of history RPC)
+ * 
+ * history clear 
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ * 
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    do_history_clear (agent_cb_t *agent_cb)
+{
+
+    gl_clear_history(agent_cb->cli_gl, 1);
+    return NO_ERR;
+
+} /* do_history_clear */
+
+
+/********************************************************************
+ * FUNCTION do_history_recall (sub-mode of history RPC)
+ * 
+ * history recall n 
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ *    num == entry number of history entry entry to recall
+ * 
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    do_history_recall (agent_cb_t *agent_cb,
+                       unsigned long num)
+{
+    GlHistoryLine   history_line;
+    int             glstatus;
+
+    agent_cb->history_line_active = FALSE;
+    memset(&history_line, 0x0, sizeof(GlHistoryLine));
+    glstatus = gl_lookup_history(agent_cb->cli_gl,
+                                 num,
+                                 &history_line);
+
+    if (glstatus == 0) {
+        log_error("\nError: lookup command line history failed");
+        return ERR_NCX_OPERATION_FAILED; 
+    }
+
+    if (agent_cb->history_line) {
+        m__free(agent_cb->history_line);
+    }
+
+    /* save the line in the agent_cb for next call
+     * to get_line
+     */
+
+    agent_cb->history_line = 
+        xml_strdup((const xmlChar *)history_line.line);
+    if (!agent_cb->history_line) {
+        return ERR_INTERNAL_MEM;
+    }
+    agent_cb->history_line_active = TRUE;
+
+    return NO_ERR;
+
+} /* do_history_recall */
+
+
+/********************************************************************
+ * FUNCTION do_history_load (sub-mode of history RPC)
+ * 
+ * history load
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ *    fname == filename parameter value
+ *    if missing then try the previous history file name
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    do_history_load (agent_cb_t *agent_cb,
+                     const xmlChar *fname)
+{
+    status_t   res;
+    int        glstatus;
+
+    res = NO_ERR;
+
+    if (fname && *fname) {
+        if (agent_cb->history_filename) {
+            m__free(agent_cb->history_filename);
+        }
+        agent_cb->history_filename = xml_strdup(fname);
+        if (!agent_cb->history_filename) {
+            res = ERR_INTERNAL_MEM;
+        }
+    } else if (agent_cb->history_filename) {
+        fname = agent_cb->history_filename;
+    } else {
+        res = ERR_NCX_INVALID_VALUE;
+    }
+
+    if (res == NO_ERR) {
+        glstatus = gl_load_history(agent_cb->cli_gl,
+                                   (const char *)fname,
+                                   "#");   /* comment prefix */
+        if (glstatus) {
+            res = ERR_NCX_OPERATION_FAILED;
+        }
+    }
+
+    return res;
+
+} /* do_history_load */
+
+
+/********************************************************************
+ * FUNCTION do_history_save (sub-mode of history RPC)
+ * 
+ * history save
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ *    fname == filename parameter value
+ *    if missing then try the previous history file name
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    do_history_save (agent_cb_t *agent_cb,
+                     const xmlChar *fname)
+{
+    status_t   res;
+    int        glstatus;
+
+    res = NO_ERR;
+
+    if (fname && *fname) {
+        if (agent_cb->history_filename) {
+            m__free(agent_cb->history_filename);
+        }
+        agent_cb->history_filename = xml_strdup(fname);
+        if (!agent_cb->history_filename) {
+            res = ERR_INTERNAL_MEM;
+        }
+    } else if (agent_cb->history_filename) {
+        fname = agent_cb->history_filename;
+    } else {
+        res = ERR_NCX_INVALID_VALUE;
+    }
+
+    if (res == NO_ERR) {
+        glstatus = gl_save_history(agent_cb->cli_gl,
+                                   (const char *)fname,
+                                   "#",   /* comment prefix */
+                                   -1);    /* save all entries */
+        if (glstatus) {
+            res = ERR_NCX_OPERATION_FAILED;
+        }
+    }
+
+    return res;
+
+} /* do_history_save */
+
+
+/********************************************************************
+ * FUNCTION do_history (local RPC)
+ * 
+ * Do Command line history support operations
+ *
+ * history 
+ *      show
+ *      clear
+ *      recall
+ *      load
+ *      save
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ *    rpc == RPC method for the history command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    do_history (agent_cb_t *agent_cb,
+                const obj_template_t *rpc,
+                const xmlChar *line,
+                uint32  len)
+{
+    val_value_t        *valset, *parm;
+    const ncx_module_t *mod;
+    status_t            res;
+    boolean             imode, done;
+    help_mode_t         mode;
+
+    mod = NULL;
+    done = FALSE;
+    res = NO_ERR;
+    imode = interactive_mode();
+
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
+    if (valset && res == NO_ERR) {
+	mode = HELP_MODE_NORMAL;
+
+	/* check if the 'brief' flag is set first */
+	parm = val_find_child(valset, 
+			      YANGCLI_MOD, 
+			      YANGCLI_BRIEF);
+	if (parm && parm->res == NO_ERR) {
+	    mode = HELP_MODE_BRIEF;
+	} else {
+            /* check if the 'full' flag is set first */
+	    parm = val_find_child(valset, 
+				  YANGCLI_MOD, 
+				  YANGCLI_FULL);
+	    if (parm && parm->res == NO_ERR) {
+		mode = HELP_MODE_FULL;
+	    }
+	}
+
+	/* find the 1 of N choice */
+	if (!done) {
+	    parm = val_find_child(valset, 
+				  YANGCLI_MOD, 
+				  YANGCLI_SHOW);
+	    if (parm) {
+		/* do show history */
+		res = do_history_show(agent_cb,
+                                      VAL_UINT(parm), 
+                                      mode);
+		done = TRUE;
+	    }
+	}
+
+	if (!done) {
+	    parm = val_find_child(valset, 
+				  YANGCLI_MOD, 
+				  YANGCLI_CLEAR);
+	    if (parm) {
+		/* do clear history */
+		res = do_history_clear(agent_cb);
+		done = TRUE;
+	    }
+	}
+
+	if (!done) {
+	    parm = val_find_child(valset, 
+				  YANGCLI_MOD, 
+				  YANGCLI_RECALL);
+	    if (parm) {
+		/* do recall history line */
+		res = do_history_recall(agent_cb, 
+                                        VAL_UINT(parm));
+		done = TRUE;
+	    }
+	}
+
+	if (!done) {
+	    parm = val_find_child(valset, 
+				  YANGCLI_MOD, 
+				  YANGCLI_LOAD);
+	    if (parm) {
+		/* do history load buffer */
+		res = do_history_load(agent_cb,
+                                      VAL_STR(parm));
+		done = TRUE;
+	    }
+	}
+
+	if (!done) {
+	    parm = val_find_child(valset, 
+				  YANGCLI_MOD, 
+				  YANGCLI_SAVE);
+	    if (parm) {
+		/* do history save buffer */
+		res = do_history_save(agent_cb,
+                                      VAL_STR(parm));
+		done = TRUE;
+	    }
+	}
+
+        if (!done) {
+            res = do_history_show(agent_cb, -1, mode);
+        }
+    }
+
+    if (valset) {
+	val_free_value(valset);
+    }
+
+    return res;
+
+}  /* do_history */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/********************************************************************
 * FUNCTION do_local_conn_command
 * 
 * Handle local connection mode RPC operations from yangcli.yang
@@ -7045,6 +7481,8 @@ static status_t
 	res = do_fill(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_HELP)) {
 	res = do_help(agent_cb, rpc, line, len);
+    } else if (!xml_strcmp(rpcname, YANGCLI_HISTORY)) {
+	res = do_history(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_LIST)) {
 	res = do_list(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_MGRLOAD)) {

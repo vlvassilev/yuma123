@@ -1251,6 +1251,7 @@ static void
     char                     buff[NCX_MAX_NUMLEN];
     boolean                  notrefined, isanyxml, isempty, rawmode;
 
+    isanyxml = FALSE;
     indent = startindent + ses_indent_count(scb);
     rawmode = strcmp(cp->objview, OBJVIEW_RAW) ? FALSE : TRUE;
 
@@ -1337,10 +1338,11 @@ static void
 	/* end container comment */
 	write_cyang_endsec_cmt(scb, YANG_K_CONTAINER, con->name);
 	break;
+    case OBJ_TYP_ANYXML:
+        isanyxml = TRUE;
+        /* fall through */
     case OBJ_TYP_LEAF:
 	leaf = obj->def.leaf;
-	isanyxml = (typ_get_basetype(leaf->typdef) == NCX_BT_ANY) ?
-	    TRUE : FALSE;
 	if (isanyxml) {
 	    write_cyang_id(scb, YANG_K_ANYXML, leaf->name, startindent, 
 			   isempty, !first);

@@ -20,6 +20,7 @@ date	     init     comment
 08-jan-06    abb      begun
 */
 
+#include <stdio.h>
 #include <xmlstring.h>
 
 #ifndef _H_status
@@ -137,5 +138,8 @@ extern void
 
 extern void
     log_stdout_indent (int32 indentcnt);
+
+extern FILE *
+    log_get_logfile (void);
 
 #endif	    /* _H_log */

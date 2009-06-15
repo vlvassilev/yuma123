@@ -177,6 +177,7 @@ date	     init     comment
  */
 typedef enum obj_type_t_ {
     OBJ_TYP_NONE,
+    OBJ_TYP_ANYXML,
     OBJ_TYP_CONTAINER,
     OBJ_TYP_LEAF,
     OBJ_TYP_LEAF_LIST,
@@ -188,8 +189,7 @@ typedef enum obj_type_t_ {
     OBJ_TYP_AUGMENT,
     OBJ_TYP_RPC,
     OBJ_TYP_RPCIO,
-    OBJ_TYP_NOTIF,
-    OBJ_TYP_ANYXML
+    OBJ_TYP_NOTIF
 } obj_type_t;
 
 
@@ -246,7 +246,7 @@ typedef struct obj_container_t_ {
 } obj_container_t;
 
 
-/* One YANG 'leaf' definition */
+/* One YANG 'leaf' or 'anyxml' definition */
 typedef struct obj_leaf_t_ {
     xmlChar       *name;
     xmlChar       *units;
@@ -571,7 +571,7 @@ extern void
     obj_free_template (obj_template_t *obj);
 
 extern obj_template_t *
-    obj_find_template (dlq_hdr_t  *que,
+    obj_find_template (const dlq_hdr_t  *que,
 		       const xmlChar *modname,
 		       const xmlChar *objname);
 
@@ -581,13 +581,13 @@ extern const obj_template_t *
 			   const xmlChar *objname);
 
 extern obj_template_t *
-    obj_find_template_str (dlq_hdr_t  *que,
+    obj_find_template_str (const dlq_hdr_t  *que,
 			   const xmlChar *modname,
 			   const xmlChar *objname,
 			   uint32 objnamelen);
 
 extern obj_template_t *
-    obj_find_template_test (dlq_hdr_t  *que,
+    obj_find_template_test (const dlq_hdr_t  *que,
 			    const xmlChar *modname,
 			    const xmlChar *objname);
 
@@ -1066,6 +1066,9 @@ extern boolean
 
 extern boolean
     obj_is_np_container (const obj_template_t *obj);
+
+extern const xmlChar *
+    obj_get_presence_string (const obj_template_t *obj);
 
 extern boolean
     obj_ok_for_cli (const obj_template_t *obj);

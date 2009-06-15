@@ -638,8 +638,6 @@ const xmlChar *
 }  /* log_get_debug_level_string */
 
 
-
-
 /********************************************************************
 * FUNCTION log_is_open
 * 
@@ -702,6 +700,24 @@ void
     }
 
 } /* log_stdout_indent */
+
+
+/********************************************************************
+* FUNCTION log_get_logfile
+* 
+* Get the open logfile for direct output
+* Needed by libtecla to write command line history
+*
+* RETURNS:
+*   pointer to open FILE if any
+*   NULL if no open logfile
+*********************************************************************/
+FILE *
+    log_get_logfile (void)
+{
+    return logfile;
+
+}  /* log_get_logfile */
 
 
 /* END file log.c */

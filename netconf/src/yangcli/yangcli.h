@@ -74,6 +74,8 @@ date	     init     comment
 
 #define YANGCLI_HISTLEN  4095
 
+#define YANGCLI_DEF_HISTORY_FILE  (const xmlChar *)"~/.yangcli_history"
+
 #define YANGCLI_DEF_TIMEOUT   30
 
 #define YANGCLI_MOD  (const xmlChar *)"yangcli"
@@ -114,6 +116,7 @@ date	     init     comment
 #define YANGCLI_BADDATA     (const xmlChar *)"baddata"
 #define YANGCLI_BATCHMODE   (const xmlChar *)"batch-mode"
 #define YANGCLI_BRIEF       (const xmlChar *)"brief"
+#define YANGCLI_CLEAR       (const xmlChar *)"clear"
 #define YANGCLI_COMMAND     (const xmlChar *)"command"
 #define YANGCLI_COMMANDS    (const xmlChar *)"commands"
 #define YANGCLI_CONFIG      (const xmlChar *)"config"
@@ -127,6 +130,7 @@ date	     init     comment
 #define YANGCLI_GLOBAL      (const xmlChar *)"global"
 #define YANGCLI_GLOBALS     (const xmlChar *)"globals"
 #define YANGCLI_OIDS        (const xmlChar *)"oids"
+#define YANGCLI_LOAD        (const xmlChar *)"load"
 #define YANGCLI_LOCAL       (const xmlChar *)"local"
 #define YANGCLI_LOCALS      (const xmlChar *)"locals"
 #define YANGCLI_MODULE      (const xmlChar *)"module"
@@ -138,6 +142,7 @@ date	     init     comment
 #define YANGCLI_ORDER       (const xmlChar *)"order"
 #define YANGCLI_PASSWORD    (const xmlChar *)"password"
 #define YANGCLI_PORT        (const xmlChar *)"port"
+#define YANGCLI_RECALL      (const xmlChar *)"recall"
 #define YANGCLI_RUN_SCRIPT  (const xmlChar *)"run-script"
 #define YANGCLI_TEST_OPTION (const xmlChar *)"test-option"
 #define YANGCLI_TIMEOUT     (const xmlChar *)"timeout"
@@ -157,6 +162,7 @@ date	     init     comment
 #define YANGCLI_DELETE  (const xmlChar *)"delete"
 #define YANGCLI_FILL    (const xmlChar *)"fill"
 #define YANGCLI_HELP    (const xmlChar *)"help"
+#define YANGCLI_HISTORY (const xmlChar *)"history"
 #define YANGCLI_INSERT  (const xmlChar *)"insert"
 #define YANGCLI_LIST    (const xmlChar *)"list"
 #define YANGCLI_MERGE   (const xmlChar *)"merge"
@@ -273,8 +279,12 @@ typedef struct agent_cb_t_ {
     /* per-session CLI support */
     const xmlChar       *cli_fn;
     GetLine             *cli_gl;
+    xmlChar             *history_filename;
+    xmlChar             *history_line;
+    boolean              history_line_active;
+    uint32               history_size;
+    completion_state_t   completion_state;
     boolean              climore;
-    completion_state_t completion_state;
     xmlChar              clibuff[YANGCLI_BUFFLEN];
 } agent_cb_t;
 

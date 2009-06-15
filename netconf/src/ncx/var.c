@@ -1534,6 +1534,12 @@ val_value_t *
 			      val_get_nsid(useval), 
 			      useval->name, 
 			      strval);
+    } else if (obj->objtype == OBJ_TYP_ANYXML) {
+	*res = val_set_simval(useval, 
+			      typ_get_basetype_typdef(NCX_BT_STRING), 
+			      val_get_nsid(useval), 
+			      useval->name, 
+			      strval);
     } else {
 	*res = ERR_NCX_WRONG_TYPE;
     }

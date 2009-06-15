@@ -945,11 +945,7 @@ static status_t
     const typ_def_t      *typdef;
     status_t              res;
 
-    if (obj->objtype == OBJ_TYP_LEAF) {
-	typdef = obj->def.leaf->typdef;
-    } else {
-	typdef = obj->def.leaflist->typdef;
-    }
+    typdef = obj_get_ctypdef(obj);
 
     annot = xsd_make_obj_annotation(obj, &res);
     if (res != NO_ERR) {
@@ -1038,11 +1034,8 @@ static status_t
     empty = FALSE;
     simtop = TRUE;
 
-    if (obj->objtype == OBJ_TYP_LEAF) {
-	typdef = obj->def.leaf->typdef;
-    } else if (obj->objtype == OBJ_TYP_LEAF_LIST) {
-	typdef = obj->def.leaflist->typdef;
-    } else {
+    typdef = obj_get_ctypdef(obj);
+    if (!typdef) {
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
@@ -1191,7 +1184,8 @@ static status_t
 			val_value_t *val)
 
 {
-    status_t   res;
+    const typ_def_t  *typdef;
+    status_t          res;
 
     /* augmented objects from a different module or submodule should
      * be skipped, and handled in the module that defined the node
@@ -1204,19 +1198,25 @@ static status_t
 	return NO_ERR;
     }
 
+    typdef = obj_get_ctypdef(obj);
+
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
 	res = do_yang_elem_container(mod, obj, augtargobj, val);
 	break;
+    case OBJ_TYP_ANYXML:
+        /**** NOT HANDLED YET *****/
+        res = NO_ERR;
+        break;
     case OBJ_TYP_LEAF:
-	if (typ_get_basetype(obj->def.leaf->typdef) == NCX_BT_UNION) {
+	if (typ_get_basetype(typdef) == NCX_BT_UNION) {
 	    res = do_yang_elem_union(mod, obj, augtargobj, iskey, val);
 	} else {
 	    res = do_yang_elem_simple(mod, obj, augtargobj, iskey, val);
 	}
 	break;
     case OBJ_TYP_LEAF_LIST:
-	if (typ_get_basetype(obj->def.leaflist->typdef) == NCX_BT_UNION) {
+	if (typ_get_basetype(typdef) == NCX_BT_UNION) {
 	    res = do_yang_elem_union(mod, obj, augtargobj, iskey, val);
 	} else {
 	    res = do_yang_elem_simple(mod, obj, augtargobj, iskey, val);
@@ -1231,7 +1231,8 @@ static status_t
 	 * augment for now!!!
 	 */
 	if (augtargobj) {
-	    log_debug("\nSkipping augment choice node '%s', not supported in XSD", 
+	    log_debug("\nSkipping augment choice node "
+                      "'%s', not supported in XSD", 
 		      obj_get_name(obj));
 	}
 	res = do_yang_elem_choice(mod, obj, val);
@@ -1520,6 +1521,7 @@ static status_t
     case OBJ_TYP_CONTAINER:
 	res = do_typedefs_container(mod, obj, typnameQ);
 	break;
+    case OBJ_TYP_ANYXML:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
 	res = NO_ERR;

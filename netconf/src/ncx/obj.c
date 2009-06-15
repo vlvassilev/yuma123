@@ -2075,12 +2075,12 @@ static boolean
 		     boolean *setflag)
 {
     switch (obj->objtype) {
+    case OBJ_TYP_ANYXML:
     case OBJ_TYP_CONTAINER:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
     case OBJ_TYP_LIST:
     case OBJ_TYP_CHOICE:
-    case OBJ_TYP_ANYXML:
 	if (obj_is_root(obj)) {
 	    *setflag = TRUE;
 	    return TRUE;
@@ -3150,7 +3150,7 @@ void
 *    pointer to obj_template_t or NULL if not found in 'que'
 *********************************************************************/
 obj_template_t *
-    obj_find_template (dlq_hdr_t  *que,
+    obj_find_template (const dlq_hdr_t  *que,
 		       const xmlChar *modname,
 		       const xmlChar *objname)
 {
@@ -3217,7 +3217,7 @@ const obj_template_t *
 *    pointer to obj_template_t or NULL if not found in 'que'
 *********************************************************************/
 obj_template_t *
-    obj_find_template_test (dlq_hdr_t  *que,
+    obj_find_template_test (const dlq_hdr_t  *que,
 			    const xmlChar *modname,
 			    const xmlChar *objname)
 {
@@ -6901,7 +6901,8 @@ boolean
 typ_def_t *
     obj_get_typdef (obj_template_t  *obj)
 {
-    if (obj->objtype == OBJ_TYP_LEAF) {
+    if (obj->objtype == OBJ_TYP_LEAF ||
+        obj->objtype == OBJ_TYP_ANYXML) {
 	return obj->def.leaf->typdef;
     } else if (obj->objtype == OBJ_TYP_LEAF_LIST) {
 	return obj->def.leaflist->typdef;
@@ -6911,8 +6912,6 @@ typ_def_t *
     /*NOTREACHED*/
 
 }  /* obj_get_typdef */
-
-
 
 
 /********************************************************************
@@ -6930,7 +6929,8 @@ typ_def_t *
 const typ_def_t *
     obj_get_ctypdef (const obj_template_t  *obj)
 {
-    if (obj->objtype == OBJ_TYP_LEAF) {
+    if (obj->objtype == OBJ_TYP_LEAF ||
+        obj->objtype == OBJ_TYP_ANYXML) {
 	return obj->def.leaf->typdef;
     } else if (obj->objtype == OBJ_TYP_LEAF_LIST) {
 	return obj->def.leaflist->typdef;
@@ -8434,6 +8434,38 @@ boolean
 
 
 /********************************************************************
+* FUNCTION obj_get_presence_string
+*
+* Get the present-stmt value, if any
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   pointer to string
+*   NULL if none
+*********************************************************************/
+const xmlChar *
+    obj_get_presence_string (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (obj->objtype != OBJ_TYP_CONTAINER) {
+	return NULL;
+    }
+
+    return obj->def.container->presence;
+
+}  /* obj_get_presence_string */
+
+
+/********************************************************************
 * FUNCTION obj_ok_for_cli
 *
 * Figure out if the obj is OK for current CLI implementation
@@ -8470,7 +8502,7 @@ boolean
 
 	switch (chobj->objtype) {
 	case OBJ_TYP_ANYXML:
-	    return FALSE;
+	    return TRUE;   /**** was FALSE ****/
 	case OBJ_TYP_LEAF:
 	case OBJ_TYP_LEAF_LIST:
 	    break;

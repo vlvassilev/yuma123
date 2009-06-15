@@ -365,10 +365,11 @@ static val_value_t *
 		      status_t  *res)
 {
     val_value_t          *newval, *appval, *mustval;
-    const dlq_hdr_t      *mustQ, *appinfoQ;
+    const dlq_hdr_t      *mustQ, *appinfoQ, *datadefQ;
     const xpath_pcb_t    *must;
     const ncx_errinfo_t  *errinfo;
     const obj_template_t *outputobj;
+    const xmlChar        *units, *presence;
     xmlChar              *buff;
     ncx_status_t          status;
     xmlns_id_t            ncx_id;
@@ -400,6 +401,7 @@ static val_value_t *
     }
 
     switch (obj->objtype) {
+    case OBJ_TYP_ANYXML:
     case OBJ_TYP_CONTAINER:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
@@ -415,8 +417,10 @@ static val_value_t *
 	needed = (obj->flags & OBJ_FL_TOP) ? TRUE : FALSE;
 	break;
     case OBJ_TYP_RPC:
-	outputobj = obj_find_template(&obj->def.rpc->datadefQ,
-				      NULL, YANG_K_OUTPUT);
+        datadefQ = obj_get_cdatadefQ(obj);
+	outputobj = obj_find_template(datadefQ,
+				      NULL, 
+                                      YANG_K_OUTPUT);
 	if (outputobj) {
 	    needed = TRUE;
 	}
@@ -449,8 +453,9 @@ static val_value_t *
     /* add choice or case name if needed */
     if (obj->objtype==OBJ_TYP_CHOICE) {
 	needed = TRUE;
-	newval = xml_val_new_cstring(NCX_EL_CHOICE_NAME, ncx_id, 
-				     obj->def.choic->name);
+	newval = xml_val_new_cstring(NCX_EL_CHOICE_NAME, 
+                                     ncx_id, 
+				     obj_get_name(obj));
 	if (!newval) {
 	    val_free_value(appval);
 	    return NULL;
@@ -459,8 +464,9 @@ static val_value_t *
 	}
     } else if (obj->objtype==OBJ_TYP_CASE) {
 	needed = TRUE;
-	newval = xml_val_new_cstring(NCX_EL_CASE_NAME, ncx_id, 
-				     obj->def.cas->name);
+	newval = xml_val_new_cstring(NCX_EL_CASE_NAME, 
+                                     ncx_id, 
+				     obj_get_name(obj));
 	if (!newval) {
 	    val_free_value(appval);
 	    return NULL;
@@ -472,7 +478,8 @@ static val_value_t *
     /* add status clause if needed */
     if (status != NCX_STATUS_NONE && status != NCX_STATUS_CURRENT) {
 	needed = TRUE;
-	newval = xml_val_new_cstring(YANG_K_STATUS, ncx_id, 
+	newval = xml_val_new_cstring(YANG_K_STATUS, 
+                                     ncx_id, 
 				     ncx_get_status_string(status));
 	if (!newval) {
 	    val_free_value(appval);
@@ -485,7 +492,8 @@ static val_value_t *
     /* add config clause if needed */
     if (config_needed) {
 	needed = TRUE;
-	newval = xml_val_new_cstring(YANG_K_CONFIG, ncx_id, 
+	newval = xml_val_new_cstring(YANG_K_CONFIG, 
+                                     ncx_id, 
 				     config ? NCX_EL_TRUE : NCX_EL_FALSE);
 	if (!newval) {
 	    val_free_value(appval);
@@ -498,7 +506,8 @@ static val_value_t *
     /* add when clause if needed */
     if (obj->when && obj->when->exprstr) {
 	needed = TRUE;
-	newval = xml_val_new_cstring(YANG_K_WHEN, ncx_id,
+	newval = xml_val_new_cstring(YANG_K_WHEN, 
+                                     ncx_id,
 				     obj->when->exprstr);
 	if (!newval) {
 	    val_free_value(appval);
@@ -526,7 +535,8 @@ static val_value_t *
 	    }
 
 	    if (must->exprstr) {
-		newval = xml_val_new_cstring(NCX_EL_XPATH, ncx_id,
+		newval = xml_val_new_cstring(NCX_EL_XPATH, 
+                                             ncx_id,
 					     must->exprstr);
 		if (!newval) {
 		    val_free_value(appval);
@@ -538,7 +548,8 @@ static val_value_t *
 
 	    if (errinfo->descr) {
 		newval = xml_val_new_cstring(YANG_K_DESCRIPTION,
-					     ncx_id, errinfo->descr);
+					     ncx_id, 
+                                             errinfo->descr);
 		if (!newval) {
 		    val_free_value(appval);
 		    return NULL;
@@ -549,7 +560,8 @@ static val_value_t *
 
 	    if (errinfo->ref) {
 		newval = xml_val_new_cstring(YANG_K_REFERENCE,
-					     ncx_id, errinfo->ref);
+					     ncx_id, 
+                                             errinfo->ref);
 		if (!newval) {
 		    val_free_value(appval);
 		    return NULL;
@@ -586,11 +598,12 @@ static val_value_t *
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	if (obj->def.container->presence) {
+        presence = obj_get_presence_string(obj);
+	if (presence) {
 	    needed = TRUE;
 	    newval = xml_val_new_cstring(YANG_K_PRESENCE,
 					 ncx_id,
-					 obj->def.container->presence);
+					 presence);
 	    if (!newval) {
 		val_free_value(appval);
 		return NULL;
@@ -600,11 +613,12 @@ static val_value_t *
 	}
 	break;
     case OBJ_TYP_LEAF:
-	if (obj->def.leaf->units) {
+        units = obj_get_units(obj);
+	if (units) {
 	    needed = TRUE;
-	    newval = xml_val_new_cstring(YANG_K_UNITS, 
+	    newval = xml_val_new_cstring(YANG_K_UNITS,
 					 ncx_id,
-					 obj->def.leaf->units);
+					 units);
 	    if (!newval) {
 		val_free_value(appval);
 		return NULL;
@@ -612,6 +626,8 @@ static val_value_t *
 		val_add_child(newval, appval);
 	    }
 	}
+        /* fall through */
+    case OBJ_TYP_ANYXML:
 	if (obj->flags & OBJ_FL_MANDSET) {
 	    needed = TRUE;
 	    newval = xml_val_new_cstring(YANG_K_MANDATORY,
@@ -628,11 +644,12 @@ static val_value_t *
 	}
 	break;
     case OBJ_TYP_LEAF_LIST:
-	if (obj->def.leaflist->units) {
+        units = obj_get_units(obj);
+	if (units) {
 	    needed = TRUE;
 	    newval = xml_val_new_cstring(YANG_K_UNITS, 
 					 ncx_id,
-					 obj->def.leaflist->units);
+					 units);
 	    if (!newval) {
 		val_free_value(appval);
 		return NULL;
@@ -642,7 +659,7 @@ static val_value_t *
 	}
 	newval = xml_val_new_cstring(YANG_K_ORDERED_BY, 
 				     ncx_id,
-				     obj->def.leaflist->ordersys ?
+				     obj_is_system_ordered(obj) ?
 				     YANG_K_SYSTEM : YANG_K_USER);
 	if (!newval) {
 	    val_free_value(appval);
@@ -656,7 +673,7 @@ static val_value_t *
 	needed = TRUE;
 	newval = xml_val_new_cstring(YANG_K_ORDERED_BY, 
 				     ncx_id,
-				     obj->def.list->ordersys ?
+				     obj_is_system_ordered(obj) ?
 				     YANG_K_SYSTEM : YANG_K_USER);
 	if (!newval) {
 	    val_free_value(appval);
@@ -940,7 +957,8 @@ static status_t
 	     * can be checked that way
 	     */
 	    typ_id = mod->nsid;
-	    name = ncx_find_typname(typdef->def.named.typ, &mod->typnameQ);
+	    name = ncx_find_typname(typdef->def.named.typ, 
+                                    &mod->typnameQ);
 	    if (!name) {
 		if (mod->ismod) {
 		    if (xml_strcmp(mod->name, NCXMOD_IETF_NETCONF)) {
@@ -1355,7 +1373,9 @@ static val_value_t *
 
     /* add default clause if needed */
     if (typ->defval) {
-	newval = xml_val_new_cstring(NCX_EL_DEFAULT, ncx_id, typ->defval);
+	newval = xml_val_new_cstring(NCX_EL_DEFAULT, 
+                                     ncx_id, 
+                                     typ->defval);
 	if (!newval) {
 	    val_free_value(appval);
 	    return NULL;
@@ -2489,8 +2509,10 @@ val_value_t *
     }
 
     /* add the name attribute */
-    res = xml_val_add_cattr(NCX_EL_NAME, 0,
-			    obj_get_name(obj), elem);
+    res = xml_val_add_cattr(NCX_EL_NAME,
+                            0,
+			    obj_get_name(obj), 
+                            elem);
     if (res != NO_ERR) {
 	val_free_value(elem);
 	return NULL;

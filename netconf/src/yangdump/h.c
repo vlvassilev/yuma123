@@ -494,7 +494,8 @@ static void
     isleaflist = FALSE;
 
     /* typedefs not needed for simple objects */
-    if (obj->objtype == OBJ_TYP_LEAF) {
+    if (obj->objtype == OBJ_TYP_LEAF ||
+        obj->objtype == OBJ_TYP_ANYXML) {
 	return;
     } else if (obj->objtype == OBJ_TYP_LEAF_LIST) {
 	isleaflist = TRUE;

@@ -460,6 +460,12 @@ static void
     if (agent_cb->result_filename) {
 	m__free(agent_cb->result_filename);
     }
+    if (agent_cb->history_filename) {
+	m__free(agent_cb->history_filename);
+    }
+    if (agent_cb->history_line) {
+	m__free(agent_cb->history_line);
+    }
 
     if (agent_cb->connect_valset) {
 	val_free_value(agent_cb->connect_valset);
@@ -497,10 +503,8 @@ static agent_cb_t *
     new_agent_cb (const xmlChar *name)
 {
     agent_cb_t  *agent_cb;
-    boolean      err;
     int          retval;
 
-    err = FALSE;
     agent_cb = m__getObj(agent_cb_t);
     if (agent_cb == NULL) {
 	return NULL;
@@ -509,6 +513,50 @@ static agent_cb_t *
     memset(agent_cb, 0x0, sizeof(agent_cb_t));
     dlq_createSQue(&agent_cb->varbindQ);
     dlq_createSQue(&agent_cb->modptrQ);
+
+    /* set the default CLI history file (may not get used) */
+    agent_cb->history_filename = xml_strdup(YANGCLI_DEF_HISTORY_FILE);
+    if (agent_cb->history_filename == NULL) {
+	free_agent_cb(agent_cb);
+        return NULL;
+    }
+
+    /* the name is not used yet; needed when multiple
+     * agent profiles are needed at once instead
+     * of 1 session at a time
+     */
+    agent_cb->name = xml_strdup(name);
+    if (agent_cb->name == NULL) {
+	free_agent_cb(agent_cb);
+        return NULL;
+    }
+
+    /* get a tecla CLI control block */
+    agent_cb->cli_gl = new_GetLine(YANGCLI_LINELEN, YANGCLI_HISTLEN);
+    if (agent_cb->cli_gl == NULL) {
+	free_agent_cb(agent_cb);
+        return NULL;
+    }
+
+    /* setup CLI tab line completion */
+    retval = gl_customize_completion(agent_cb->cli_gl,
+                                     &agent_cb->completion_state,
+                                     yangcli_tab_callback);
+    if (retval != 0) {
+	free_agent_cb(agent_cb);
+        return NULL;
+    }
+
+    /* setup the inactivity timeout callback function */
+    retval = gl_inactivity_timeout(agent_cb->cli_gl,
+                                   get_line_timeout,
+                                   agent_cb,
+                                   1,
+                                   0);
+    if (retval != 0) {
+	free_agent_cb(agent_cb);
+        return NULL;
+    }
 
     /* set default agent flags to current settings */
     agent_cb->state = MGR_IO_ST_INIT;
@@ -521,44 +569,7 @@ static agent_cb_t *
     agent_cb->erroption = erroption;
     agent_cb->timeout = default_timeout;
     agent_cb->withdefaults = withdefaults;
-
-    agent_cb->name = xml_strdup(name);
-    if (agent_cb->name == NULL) {
-	err = TRUE;
-    } else {
-
-	/* get a read line context with a history buffer 
-	 * change later to not get allocated if batch mode active
-	 */
-	agent_cb->cli_gl = new_GetLine(YANGCLI_LINELEN, 
-				       YANGCLI_HISTLEN);
-	if (agent_cb->cli_gl == NULL) {
-	    err = TRUE;
-	} else {
-	    /* setup the yangcli tab-completion function for libtecla */
-	    retval = gl_customize_completion(agent_cb->cli_gl,
-					     &agent_cb->completion_state,
-					     yangcli_tab_callback);
-	    if (retval != 0) {
-		err = TRUE;
-	    }
-
-	    /* setup the inactivity timeout callback function */
-	    retval = gl_inactivity_timeout(agent_cb->cli_gl,
-					   get_line_timeout,
-					   agent_cb,
-					   1,
-					   0);
-	    if (retval != 0) {
-		err = TRUE;
-	    }
-	}
-    }
-
-    if (err) {
-	free_agent_cb(agent_cb);
-	agent_cb = NULL;
-    }
+    agent_cb->history_size = YANGCLI_HISTLEN;
 
     return agent_cb;
 

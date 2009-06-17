@@ -154,7 +154,7 @@ typedef struct rpc_msg_t_ {
     rpc_data_t      rpc_data_type;          /* type of data reply */
     void           *rpc_datacb;              /* rpc_agt_data_cb_t */
     dlq_hdr_t       rpc_dataQ;                    /* data reply */
-    op_filter_t     rpc_filter;        /* filter for get* methods */
+    op_filter_t     rpc_filter;        /* backptrs for get* methods */
 
     /* incoming: rollback or commit phase support builtin
      * As an edit-config (or other RPC) is processed, a

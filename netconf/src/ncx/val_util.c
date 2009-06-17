@@ -276,6 +276,8 @@ static status_t
 	 chobj = obj_next_child(chobj)) {
 
 	switch (chobj->objtype) {
+        case OBJ_TYP_ANYXML:
+            break;
 	case OBJ_TYP_LEAF:
 	    /* If the child leaf is required then it is marked
 	     * as mandatory and no default exists
@@ -345,7 +347,8 @@ static status_t
 	    /* add defaults to the subtrees of existing
 	     * complex nodes, but do not add any new ones
 	     */
-	    chval = val_find_child(val, obj_get_mod_name(chobj),
+	    chval = val_find_child(val, 
+                                   obj_get_mod_name(chobj),
 				   obj_get_name(chobj));
 	    if (chval) {
 		res = add_defaults(chval, scriptmode, NULL);		

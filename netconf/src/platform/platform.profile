@@ -19,13 +19,14 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 
 
 # -Wunreachable-code removed due to -O3
+# -O3 changed to -O2 due to code bloat from inline functions
 
 CDEFS=-DDEBUG -DLINUX -DGCC -DHAS_FLOAT 
 CFLAGS=$(CDEFS) $(CWARN)
 
 # production (1) or debug (0) build
 ifdef BLD
-  CFLAGS += -Werror -O3
+  CFLAGS += -Werror -O2
 else
   CFLAGS += -ggdb3
 endif

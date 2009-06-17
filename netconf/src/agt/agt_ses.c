@@ -1323,7 +1323,7 @@ void
     cfg_release_locks(slot);
 
     agt_state_remove_session(slot);
-    agt_not_remove_subscriptions(slot);
+    agt_not_remove_subscription(slot);
 
     /* add this session to ses stats */
     agttotals->active_sessions--;

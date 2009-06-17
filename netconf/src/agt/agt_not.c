@@ -69,8 +69,16 @@ date         init     comment
 #include  "agt_state.h"
 #endif
 
+#ifndef _H_agt_tree
+#include  "agt_tree.h"
+#endif
+
 #ifndef _H_agt_util
 #include  "agt_util.h"
+#endif
+
+#ifndef _H_agt_xpath
+#include  "agt_xpath.h"
 #endif
 
 #ifndef _H_cfg
@@ -259,9 +267,10 @@ static void
     if (sub->stopTime) {
 	m__free(sub->stopTime);
     }
-    if (sub->filter) {
-	val_free_value(sub->filter);
+    if (sub->filterval) {
+	val_free_value(sub->filterval);
     }
+
     m__free(sub);
 
 }  /* free_subscription */
@@ -277,11 +286,16 @@ static void
 *     stream == requested stream ID
 *     curTime == current time for creation time
 *     startTime == replay start time (may be NULL)
+*           !!! THIS MALLOCED NODE IS FREED LATER !!!!
 *     stopTime == replayStopTime (may be NULL)
+*           !!! THIS MALLOCED NODE IS FREED LATER !!!!
 *     futurestop == TRUE if stopTime in the future
 *                   FALSE if not set or not in the future
-*     filter == filter value node passed from PDU
+*     filtertype == internal filter type
+*     filterval == filter value node passed from PDU
 *           !!! THIS MALLOCED NODE IS FREED LATER !!!!
+*     selectval == back-ptr into filterval->select value node
+*                  only used if filtertype == OP_FILTER_XPATH
 *
 * RETURNS:
 *    pointer to malloced struct or NULL if no memoryerror
@@ -290,10 +304,12 @@ static agt_not_subscription_t *
     new_subscription (ses_cb_t *scb,
 		      const xmlChar *stream,
 		      const xmlChar *curTime,
-		      const xmlChar *startTime,
-		      const xmlChar *stopTime,
+		      xmlChar *startTime,
+		      xmlChar *stopTime,
 		      boolean futurestop,
-		      val_value_t *filter)
+                      op_filtertyp_t  filtertype,
+		      val_value_t *filterval,
+		      val_value_t *selectval)
 {
     agt_not_subscription_t  *sub;
     agt_not_stream_t         streamid;
@@ -318,27 +334,15 @@ static agt_not_subscription_t *
 	return NULL;
     }
 
-    if (startTime) {
-	sub->startTime = xml_strdup(startTime);
-	if (!sub->startTime) {
-	    free_subscription(sub);
-	    return NULL;
-	}
-    }
-
-    if (stopTime) {
-	sub->stopTime = xml_strdup(stopTime);
-	if (!sub->stopTime) {
-	    free_subscription(sub);
-	    return NULL;
-	}
-    }
-
+    sub->startTime = startTime;
+    sub->stopTime = stopTime;
     sub->scb = scb;
     sub->sid = scb->sid;
     sub->streamid = streamid;
     xml_strcpy(sub->createTime, curTime);
-    sub->filter = filter;
+    sub->filtertyp = filtertype;
+    sub->filterval = filterval;
+    sub->selectval = selectval;
     if (futurestop) {
 	sub->flags = AGT_NOT_FL_FUTURESTOP;
     }
@@ -365,26 +369,34 @@ static status_t
 				  xml_node_t *methnode)
 {
     const xmlChar           *stream, *startTime, *stopTime;
-    val_value_t             *valstream, *valfilter;
+    xmlChar                 *starttime_utc, *stoptime_utc;
+    val_value_t             *valstream, *valfilter, *valselect;
     val_value_t             *valstartTime, *valstopTime;
-    agt_not_subscription_t  *sub;
+    agt_not_subscription_t  *sub, *testsub;
     xmlChar                  tstampbuff[TSTAMP_MIN_SIZE];
     int                      ret;
-    status_t                 res;
+    status_t                 res, res2, filterres;
     agt_not_stream_t         streamid;
-    boolean                  futurestop;
+    boolean                  futurestop, isnegative;
+    op_filtertyp_t           filtertyp;
 
     res = NO_ERR;
+    filterres = NO_ERR;
+    filtertyp = OP_FILTER_NONE;
     valstream = NULL;
     valfilter = NULL;
+    valselect = NULL;
     valstartTime = NULL;
     valstopTime = NULL;
     startTime = NULL;
     stopTime = NULL;
+    starttime_utc = NULL;
+    stoptime_utc = NULL;
     stream = NCX_DEF_STREAM_NAME;
     streamid = AGT_NOT_STREAM_NETCONF;
     tstamp_datetime(tstampbuff);
     futurestop = FALSE;
+    isnegative = FALSE;
 
     /* get the stream parameter */
     valstream = 
@@ -421,8 +433,13 @@ static status_t
     if (valfilter) {
 	if (valfilter->res == NO_ERR) {
 	    /* check if the optional filter parameter is ok */
-	    res = agt_validate_filter_ex(scb, msg, valfilter);
-	    /* error already recorded if not NO_ERR */
+	    filterres = agt_validate_filter_ex(scb, msg, valfilter);
+            if (filterres == NO_ERR) {
+                filtertyp = msg->rpc_filter.op_filtyp;
+                if (filtertyp == OP_FILTER_XPATH) {
+                    valselect = msg->rpc_filter.op_filter;
+                }
+            } /* else error already recorded if not NO_ERR */
 	}
     }
 
@@ -449,13 +466,56 @@ static status_t
     } 
 
     if (startTime || stopTime) {
-	/*** NEED TO NORMALIZE THE xsd:dateTime STRINGS SO
-	 *** ALL THE TIMEZONES ARE THE SAME  (TBD)
-	 ***/
+        res = NO_ERR;
+	/* Normalize the xsd:dateTime strings first */
+        if (startTime) {
+            isnegative = FALSE;
+            starttime_utc = 
+                tstamp_convert_to_utctime(startTime,
+                                          &isnegative,
+                                          &res);
+            if (!starttime_utc || isnegative) {
+                if (isnegative) {
+                    res = ERR_NCX_INVALID_VALUE;
+                }
+		agt_record_error(scb, 
+				 &msg->mhdr, 
+				 NCX_LAYER_OPERATION, 
+				 res, 
+				 methnode, 
+				 NCX_NT_STRING, 
+				 startTime,
+				 NCX_NT_VAL, 
+				 valstartTime);
+            }
+        }
 
+        if (res == NO_ERR && stopTime) {
+            isnegative = FALSE;
+            res = NO_ERR;
+            stoptime_utc = 
+                tstamp_convert_to_utctime(stopTime,
+                                          &isnegative,
+                                          &res);
+            if (!stoptime_utc || isnegative) {
+                if (isnegative) {
+                    res = ERR_NCX_INVALID_VALUE;
+                }
+		agt_record_error(scb, 
+				 &msg->mhdr, 
+				 NCX_LAYER_OPERATION, 
+				 res, 
+				 methnode, 
+				 NCX_NT_STRING, 
+				 stopTime,
+				 NCX_NT_VAL, 
+				 valstopTime);
+            }
+        }
 
-	if (startTime) {
-	    ret = xml_strcmp(startTime, tstampbuff);
+        /* check the start time against 'now' */
+	if (res == NO_ERR && starttime_utc) {
+	    ret = xml_strcmp(starttime_utc, tstampbuff);
 	    if (ret > 0) {
 		res = ERR_NCX_BAD_ELEMENT;
 		agt_record_error(scb, 
@@ -469,8 +529,9 @@ static status_t
 				 valstartTime);
 	    }  /* else startTime before now (OK) */
 
-	    if (stopTime) {
-		ret = xml_strcmp(startTime, stopTime);
+            /* check the start time after the stop time */
+	    if (res == NO_ERR && stoptime_utc) {
+		ret = xml_strcmp(starttime_utc, stoptime_utc);
 		if (ret > 0) {
 		    res = ERR_NCX_BAD_ELEMENT;
 		    agt_record_error(scb, 
@@ -486,8 +547,9 @@ static status_t
 	    }
 	}
 
-	if (stopTime) {
-	    if (!startTime) {
+        /* check stopTime but no startTime */
+	if (res == NO_ERR && stoptime_utc) {
+	    if (!starttime_utc) {
 		res = ERR_NCX_MISSING_ELEMENT;
 		agt_record_error(scb, 
 				 &msg->mhdr, 
@@ -501,22 +563,56 @@ static status_t
 	    }
 
 	    /* treat stopTime in the future as an error */
-	    ret = xml_strcmp(stopTime, tstampbuff);
+	    ret = xml_strcmp(stoptime_utc, tstampbuff);
 	    if (ret > 0) {
 		futurestop = TRUE;
 	    }
 	}
     }
 
-    if (res == NO_ERR) {
-	/* create a new subscription control block */
+    /* check if there is already a subscription 
+     * present for the specified session;
+     * this is an error since there is no way to
+     * identify multiple subscriptions per session,
+     * either on-the-wire or in the agt_state.c data model
+     */
+    res2 = NO_ERR;
+    for (testsub = (agt_not_subscription_t *)
+	     dlq_firstEntry(&subscriptionQ);
+	 testsub != NULL && res2 == NO_ERR;
+         testsub = (agt_not_subscription_t *)
+             dlq_nextEntry(testsub)) {
+
+	if (testsub->sid == scb->sid) {
+            res2 = ERR_NCX_IN_USE;
+            agt_record_error(scb, 
+                             &msg->mhdr, 
+                             NCX_LAYER_OPERATION, 
+                             res2, 
+                             methnode, 
+                             NCX_NT_NONE, 
+                             NULL,
+                             NCX_NT_NONE, 
+                             NULL);
+	}
+    }
+
+    /* create a new subscription control block if no errors */
+    if (res == NO_ERR && res2 == NO_ERR && filterres == NO_ERR) {
+        /* passing off malloced memory here
+         *    - starttime_utc
+         *    - stoptime_utc
+         *    - valfilter
+         */
 	sub = new_subscription(scb,
 			       stream,
 			       tstampbuff,
-			       startTime,
-			       stopTime,
+			       starttime_utc,
+			       stoptime_utc,
 			       futurestop,
-			       valfilter);
+                               filtertyp,
+			       valfilter,
+                               valselect);
 	if (!sub) {
 	    res = ERR_INTERNAL_MEM;
 	    agt_record_error(scb, 
@@ -530,14 +626,37 @@ static status_t
 			     NULL);
 	} else {
 	    if (valfilter) {
-		/* passing off this memory now !! */
+		/* passing off this memory now !! 
+                 * the new_subscription function 
+                 * saved a pointer to valfilter
+                 * need to remove it from the 
+                 * incoming PDU to prevent it 
+                 * from be deleted after the <rpc> is done
+                 */
 		val_remove_child(valfilter);
 	    }
 	    msg->rpc_user1 = sub;
 	}
+
+        /* these malloced strings have been
+         * stored in the new subscription, if used
+         */
+        starttime_utc = NULL;
+        stoptime_utc = NULL;
     }
 
-    return res;
+    if (starttime_utc) {
+        m__free(starttime_utc);
+    }
+    if (stoptime_utc) {
+        m__free(stoptime_utc);
+    }
+
+    if (res == NO_ERR) {
+        return res2;
+    } else {
+        return res;
+    }
 
 } /* create_subscription_validate */
 
@@ -679,7 +798,6 @@ static status_t
 } /* create_subscription_invoke */
 
 
-
 /********************************************************************
 * FUNCTION expire_subscription
 *
@@ -772,6 +890,7 @@ static status_t
     ses_total_stats_t  *totalstats;
     xml_msg_hdr_t       msghdr;
     status_t            res;
+    boolean             filterpassed;
     xmlChar             numbuff[NCX_MAX_NUMLEN];
 
     totalstats = ses_get_total_stats();
@@ -812,71 +931,144 @@ static status_t
 	val_add_child(eventType, topval);
 	notif->event = eventType;
 
+        /* move the payloadQ: transfer the memory here */
 	while (!dlq_empty(&notif->payloadQ)) {
 	    payloadval = (val_value_t *)
 		dlq_deque(&notif->payloadQ);
 	    val_add_child(payloadval, eventType);
 	}
 
-	sprintf((char *)numbuff, "%u", notif->msgid);
-	sequenceid = 
-	    val_make_simval_obj(sequenceidobj,
-				numbuff,
-				&res);
-	if (!sequenceid) {
-	    log_error("\nError: malloc failed: cannot add sequence-id");
-	} else {
-	    val_add_child(sequenceid, topval);
-	}
+        /* only use a msgid on a real event, not replay */
+        if (checkfilter) { 
+            sprintf((char *)numbuff, "%u", notif->msgid);
+            sequenceid = 
+                val_make_simval_obj(sequenceidobj,
+                                    numbuff,
+                                    &res);
+            if (!sequenceid) {
+                log_error("\nError: malloc failed: cannot "
+                          "add sequence-id");
+            } else {
+                val_add_child(sequenceid, topval);
+            }
+        }
 
 	notif->msg = topval;
-    }
-
-    /* check if any filtering is needed */
-    if (checkfilter && sub->filter) {
-
-
     }
 
     /* create an RPC message header struct */
     xml_msg_init_hdr(&msghdr);
 
-    res = ses_start_msg(sub->scb);
-    if (res != NO_ERR) {
-	log_error("\nError: cannot start notification");
-	sub->scb->stats.out_drop_bytes++;
-	totalstats->stats.out_drop_bytes++;
-	xml_msg_clean_hdr(&msghdr);
-	return res;
+    /* check if any filtering is needed */
+    if (checkfilter && sub->filterval) {
+        switch (sub->filtertyp) {
+        case OP_FILTER_SUBTREE:
+            filterpassed = 
+                agt_tree_test_filter(&msghdr,
+                                     sub->scb,
+                                     sub->filterval,
+                                     notif->event);
+            break;
+        case OP_FILTER_XPATH:
+            filterpassed = 
+                agt_xpath_test_filter(&msghdr,
+                                      sub->scb,
+                                      sub->selectval,
+                                      notif->event);
+            break;
+        case OP_FILTER_NONE:
+        default:
+            filterpassed = FALSE;
+            SET_ERROR(ERR_INTERNAL_VAL);
+        }
+
+        if (filterpassed) {
+            if (LOGDEBUG2) {
+                log_debug2("\nagt_not: filter passed");
+            }
+        } else {
+            if (LOGDEBUG) {
+                log_debug("\nagt_not: filter failed");
+            }
+        }
     }
 
-    xml_wr_full_val(sub->scb, &msghdr, notif->msg, 0);
-		    
-    ses_finish_msg(sub->scb);
+    if (filterpassed) {
+        /* send the notification */
+        res = ses_start_msg(sub->scb);
+        if (res != NO_ERR) {
+            log_error("\nError: cannot start notification");
+            sub->scb->stats.out_drop_bytes++;
+            totalstats->stats.out_drop_bytes++;
+            xml_msg_clean_hdr(&msghdr);
+            return res;
+        }
+        xml_wr_full_val(sub->scb, &msghdr, notif->msg, 0);
+        ses_finish_msg(sub->scb);
 
-    sub->scb->stats.outNotifications++;
-    totalstats->stats.outNotifications++;
+        sub->scb->stats.outNotifications++;
+        totalstats->stats.outNotifications++;
 
-    if (LOGDEBUG) {
-	log_debug("\nagt_not: Sent <%s> (%u) on '%s' stream "
-		  "for session '%u'",
-		  obj_get_name(notif->notobj),
-		  notif->msgid,
-		  sub->stream,
-		  sub->scb->sid);
-    }
-    if (LOGDEBUG2) {
-	log_debug2("\nNotification contents:");
-	if (notif->msg) {
-	    val_dump_value(notif->msg, NCX_DEF_INDENT);
-	}
-	log_debug2("\n");
+        if (LOGDEBUG) {
+            log_debug("\nagt_not: Sent <%s> (%u) on '%s' stream "
+                      "for session '%u'",
+                      obj_get_name(notif->notobj),
+                      notif->msgid,
+                      sub->stream,
+                      sub->scb->sid);
+        }
+        if (LOGDEBUG2) {
+            log_debug2("\nNotification contents:");
+            if (notif->msg) {
+                val_dump_value(notif->msg, NCX_DEF_INDENT);
+            }
+            log_debug2("\n");
+        }
     }
 
     xml_msg_clean_hdr(&msghdr);
     return NO_ERR;
 
 }  /* send_notification */
+
+
+/********************************************************************
+* FUNCTION new_notification
+* 
+* Malloc and initialize the fields in an agt_not_msg_t
+*
+* INPUTS:
+*   eventType == object template of the event type
+*   usemsgid == TRUE if this notification will have
+*               a sequence-id, FALSE if not
+*
+* RETURNS:
+*   pointer to the malloced and initialized struct or NULL if an error
+*********************************************************************/
+static agt_not_msg_t * 
+    new_notification (const obj_template_t *eventType,
+                      boolean usemsgid)
+{
+    agt_not_msg_t  *not;
+
+    not = m__getObj(agt_not_msg_t);
+    if (!not) {
+	return NULL;
+    }
+    (void)memset(not, 0x0, sizeof(agt_not_msg_t));
+    dlq_createSQue(&not->payloadQ);
+    if (usemsgid) {
+        not->msgid = ++msgid;
+        if (msgid == 0) {
+            /* msgid is wrapping!!! */
+            SET_ERROR(ERR_INTERNAL_VAL);
+        }
+    }
+    tstamp_datetime(not->eventTime);
+    not->notobj = eventType;
+    return not;
+
+}  /* new_notification */
 
 
 /********************************************************************
@@ -893,7 +1085,7 @@ static void
     agt_not_msg_t  *not;
     status_t        res;
 
-    not = agt_not_new_notification(replayCompleteobj);
+    not = new_notification(replayCompleteobj, FALSE);
     if (!not) {
 	log_error("\nError: malloc failed; cannot "
 		  "send <replayComplete>");
@@ -924,7 +1116,7 @@ static void
     agt_not_msg_t  *not;
     status_t        res;
 
-    not = agt_not_new_notification(notificationCompleteobj);
+    not = new_notification(notificationCompleteobj, FALSE);
     if (!not) {
 	log_error("\nError: malloc failed; cannot "
 		  "send <notificationComplete>");
@@ -961,6 +1153,7 @@ static void
     msgid = 0;
 
 } /* init_static_vars */
+
 
 
 /************* E X T E R N A L    F U N C T I O N S ***************/
@@ -1226,8 +1419,6 @@ status_t
 	return res;
     }
     val_add_child(childval, streamval);
-
-    /***** add coldstart or restart notification to notificationQ *****/
 
     return NO_ERR;
 
@@ -1514,20 +1705,19 @@ uint32
 
 
 /********************************************************************
-* FUNCTION agt_not_remove_subscriptions
+* FUNCTION agt_not_remove_subscription
 *
-* Remove any expire any subscriptions with
-* the specified session ID. The session is being removed
-* so just zap all subscriptions with the same session ID
+* Remove and expire a subscription with the specified session ID.
+* The session is being removed.
 *
 * INPUTS:
 *    sid == session ID to use
 *********************************************************************/
 void
-    agt_not_remove_subscriptions (ses_id_t sid)
+    agt_not_remove_subscription (ses_id_t sid)
 {
 
-    agt_not_subscription_t  *sub, *nextsub;
+    agt_not_subscription_t  *sub;
 
     if (!anySubscriptions) {
 	return;
@@ -1536,17 +1726,16 @@ void
     for (sub = (agt_not_subscription_t *)
 	     dlq_firstEntry(&subscriptionQ);
 	 sub != NULL;
-	 sub = nextsub) {
-	
-	nextsub = (agt_not_subscription_t *)dlq_nextEntry(sub);
+         sub = (agt_not_subscription_t *)dlq_nextEntry(sub)) {
 
 	if (sub->sid == sid) {
 	    dlq_remove(sub);
 	    expire_subscription(sub);
+            return;
 	}
     }
     
-}  /* agt_not_remove_subscriptions */
+}  /* agt_not_remove_subscription */
 
 
 /********************************************************************
@@ -1563,8 +1752,6 @@ void
 agt_not_msg_t * 
     agt_not_new_notification (const obj_template_t *eventType)
 {
-    agt_not_msg_t  *not;
-
 #ifdef DEBUG
     if (!eventType) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -1572,20 +1759,7 @@ agt_not_msg_t *
     }
 #endif
 
-    not = m__getObj(agt_not_msg_t);
-    if (!not) {
-	return NULL;
-    }
-    (void)memset(not, 0x0, sizeof(agt_not_msg_t));
-    dlq_createSQue(&not->payloadQ);
-    not->msgid = ++msgid;
-    if (msgid == 0) {
-	/* msgid is wrapping!!! */
-	SET_ERROR(ERR_INTERNAL_VAL);
-    }
-    tstamp_datetime(not->eventTime);
-    not->notobj = eventType;
-    return not;
+    return new_notification(eventType, TRUE);
 
 }  /* agt_not_new_notification */
 

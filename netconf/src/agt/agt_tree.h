@@ -41,18 +41,27 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+/* get and get-config step 1 */
 extern ncx_filptr_t *
     agt_tree_prune_filter (ses_cb_t *scb,
 			   rpc_msg_t *msg,
 			   const cfg_template_t *cfg,
 			   boolean getop);
 
+/* get and get-config step 2 */
 extern void
     agt_tree_output_filter (ses_cb_t *scb,
 			    rpc_msg_t *msg,
 			    ncx_filptr_t *top,
 			    int32 indent,
 			    boolean getop);
+
+/* notification */
+extern boolean
+    agt_tree_test_filter (xml_msg_hdr_t *msghdr,
+                          ses_cb_t *scb,
+                          val_value_t *filter,
+                          val_value_t *topval);
 
 
 #endif	    /* _H_agt_tree */

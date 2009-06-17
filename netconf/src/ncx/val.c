@@ -976,12 +976,19 @@ static void
 
     /* check if an index clause needs to be printed next */
     if (!dlq_empty(&val->indexQ)) {
-	res = val_get_index_string(NULL, NCX_IFMT_CLI, val, NULL, &len);
+	res = val_get_index_string(NULL, 
+                                   NCX_IFMT_CLI, 
+                                   val, 
+                                   NULL, 
+                                   &len);
 	if (res == NO_ERR) {
 	    buff = m__getMem(len+1);
 	    if (buff) {
-		res = val_get_index_string(NULL, NCX_IFMT_CLI, 
-					   val, buff, &len);
+		res = val_get_index_string(NULL, 
+                                           NCX_IFMT_CLI, 
+					   val, 
+                                           buff, 
+                                           &len);
 		if (res == NO_ERR) {
 		    (dumpfn)("%s ", buff);
 		} else {
@@ -991,11 +998,6 @@ static void
 	    } else {
 		(*errorfn)("\nval: malloc failed for %u bytes", len+1);
 	    }
-	}
-
-	/* check if there is no more to print for this node */
-	if (typ_is_simple(btyp)) {
-	    return;
 	}
     }
 
@@ -1067,7 +1069,7 @@ static void
 		(*dumpfn)("%c", VAL_QUOTE_CH);
 	    }
 	    if (obj_is_password(val->obj)) {
-		(*dumpfn)("%s", (const char *)"****");
+		(*dumpfn)("%s", VAL_PASSWORD_STRING);
 	    } else {
 		(*dumpfn)("%s", (const char *)VAL_STR(val));
 	    }
@@ -6747,7 +6749,11 @@ status_t
     case NCX_BT_STRING:	
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_LEAFREF:  /****/
-	s = VAL_STR(val);
+        if (obj_is_password(val->obj)) {
+            s = VAL_PASSWORD_STRING;
+        } else {
+            s = VAL_STR(val);
+        }
 	if (buff) {
 	    if (s) {
 		*len = xml_strcpy(buff, s);

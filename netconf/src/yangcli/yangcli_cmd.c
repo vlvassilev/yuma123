@@ -630,6 +630,7 @@ static status_t
 }  /* get_yesno */
 
 
+#if 0    /* in process of removal */
 /********************************************************************
 * FUNCTION get_complex_parm
 * 
@@ -695,6 +696,7 @@ static status_t
     return res;
     
 } /* get_complex_parm */
+#endif
 
 
 /********************************************************************
@@ -731,13 +733,16 @@ static status_t
     xmlChar          *line2, *start2, *saveline;
     status_t          res;
     ncx_btype_t       btyp;
-    boolean           done;
+    boolean           done, ispassword, iscomplex;
     uint32            len;
+    int               glstatus;
 
     if (!obj_is_mandatory(parm) && !agent_cb->get_optional) {
 	return NO_ERR;
     }
 
+    ispassword = FALSE;
+    iscomplex = FALSE;
     btyp = obj_get_basetype(parm);
     res = NO_ERR;
 
@@ -753,10 +758,13 @@ static status_t
 	/* let the user know about the new nest level */
 	if (obj_is_key(parm)) {
 	    str = YANG_K_KEY;
+	} else if (obj_is_password(parm)) {
+            str = YANGCLI_PASSWORD;
+            ispassword = TRUE;
 	} else if (obj_is_mandatory(parm)) {
 	    str = YANG_K_MANDATORY;
 	} else {
-	    str = (const xmlChar *)"optional";
+	    str = YANGCLI_OPTIONAL;
 	}
 
 	log_stdout("\nFilling %s %s %s:", 
@@ -770,7 +778,9 @@ static status_t
     switch (btyp) {
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
-	return get_complex_parm(agent_cb, parm, valset);
+        iscomplex = TRUE;
+        break;
+	/* return get_complex_parm(agent_cb, parm, valset); */
     default:
 	;
     }
@@ -780,14 +790,17 @@ static status_t
     btyp = obj_get_basetype(parm);
     res = NO_ERR;
     oldparm = NULL;
-    def = NULL;
   
     done = FALSE;
     while (!done) {
 	if (btyp==NCX_BT_EMPTY) {
 	    log_stdout("\nShould flag %s be set? [Y, N]", 
 		       parmname);
-	} else {
+	} else if (iscomplex) {
+	    log_stdout("\nEnter value for %s <%s>",
+		       obj_get_typestr(parm),
+		       parmname);
+        } else {
 	    log_stdout("\nEnter %s value for %s <%s>",
 		       (const xmlChar *)tk_get_btype_sym(btyp),
 		       obj_get_typestr(parm),
@@ -800,29 +813,13 @@ static status_t
 	}
 
 	/* pick a default value, either old value or default clause */
-	if (!oldparm) {
-	    /* try to get the defined default value */
-	    if (btyp != NCX_BT_EMPTY) {
-		def = obj_get_default(parm);
-		if (!def && (obj_get_nsid(rpc) == xmlns_nc_id() &&
-			     (!xml_strcmp(parmname, NCX_EL_TARGET) ||
-			      !xml_strcmp(parmname, NCX_EL_SOURCE)))) {
-		    /* offer the default target for the NETCONF
-		     * <source> and <target> parameters
-		     */
-		    def = agent_cb->default_target;
-		}
-	    }
-	    if (def) {
-		log_stdout(" [%s]\n", def);
-	    } else if (btyp==NCX_BT_EMPTY) {
-		log_stdout(" [N]\n");
-	    }
-	} else {
+	if (oldparm) {
 	    /* use the old value for the default */
-	    log_stdout(" [");
 	    if (btyp==NCX_BT_EMPTY) {
-		log_stdout("Y");
+		log_stdout(" [Y]");
+            } else if (iscomplex) {
+                log_stdout(" [%s contents not shown]",
+                           obj_get_typestr(parm));
 	    } else {
 		res = val_sprintf_simval_nc(NULL, oldparm, &len);
 		if (res != NO_ERR) {
@@ -834,18 +831,49 @@ static status_t
 		}
 		res = val_sprintf_simval_nc(buff, oldparm, &len);
 		if (res == NO_ERR) {
-		    log_stdout("%s", buff);
+		    log_stdout(" [%s]", buff);
 		}
 		m__free(buff);
 	    }
-	    log_stdout("]\n");
+        } else {
+            def = NULL;
+
+	    /* try to get the defined default value */
+	    if (btyp != NCX_BT_EMPTY && !iscomplex) {
+		def = obj_get_default(parm);
+		if (!def && (obj_get_nsid(rpc) == xmlns_nc_id() &&
+			     (!xml_strcmp(parmname, NCX_EL_TARGET) ||
+			      !xml_strcmp(parmname, NCX_EL_SOURCE)))) {
+		    /* offer the default target for the NETCONF
+		     * <source> and <target> parameters
+		     */
+		    def = agent_cb->default_target;
+		}
+	    }
+
+	    if (def) {
+		log_stdout(" [%s]\n", def);
+	    } else if (btyp==NCX_BT_EMPTY) {
+		log_stdout(" [N]\n");
+	    }
 	}
 
 	set_completion_state_curparm(&agent_cb->completion_state,
 				     parm);
 
-	/* get a line of input from the user */
+	/* get a line of input from the user
+         * but don't echo if this is a password parm
+         */
+        if (ispassword) {
+            glstatus = gl_echo_mode(agent_cb->cli_gl, 0);
+        }
+                                
 	line = get_cmd_line(agent_cb, &res);
+
+        if (ispassword) {
+            glstatus = gl_echo_mode(agent_cb->cli_gl, 1);
+        }
+
 	if (!line) {
 	    return res;
 	}
@@ -922,17 +950,18 @@ static status_t
 				    NULL,
 				    SCRIPTMODE, 
 				    get_baddata());
-	} else if (val_simval_ok(obj_get_ctypdef(parm), 
-				 EMPTY_STRING) == NO_ERR) {
-	    res = cli_parse_parm_ex(valset, 
-				    parm, 
-				    EMPTY_STRING,
-				    SCRIPTMODE, 
-				    get_baddata());
-	} else {
-	    /* data type requires some form of input */
-	    res = ERR_NCX_DATA_MISSING;
-	}  /* else flag should not be set */
+	} else if (!iscomplex && 
+                   (val_simval_ok(obj_get_ctypdef(parm), 
+                                  EMPTY_STRING) == NO_ERR)) {
+            res = cli_parse_parm_ex(valset, 
+                                    parm, 
+                                    EMPTY_STRING,
+                                    SCRIPTMODE, 
+                                    get_baddata());
+        } else {
+            /* data type requires some form of input */
+            res = ERR_NCX_DATA_MISSING;
+        }
     } else if (btyp==NCX_BT_EMPTY) {
 	/* empty data type handled special Y: set, N: leave out */
 	if (*start=='Y' || *start=='y') {
@@ -963,6 +992,12 @@ static status_t
 				get_baddata());
     }
 
+
+    /* got some value, now check if it is OK
+     * depending on the --bad-data CLI parameter,
+     * the value may be entered over again, accepted,
+     * or rejected with an invalid-value error
+     */
     if (res != NO_ERR) {
 	switch (get_baddata()) {
 	case NCX_BAD_DATA_IGNORE:

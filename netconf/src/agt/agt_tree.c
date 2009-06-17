@@ -453,7 +453,7 @@ static boolean
 * recursively as more container nodes are matched to the target
 *
 * INPUTS:
-*    msg == incoming message in progress
+*    msg == incoming or outgoing message header in progress
 *    scb == session control block
 *        == NULL if no read access control is desired
 *    getop  == TRUE if this is a <get> and not a <get-config>
@@ -462,6 +462,8 @@ static boolean
 *              filter output.
 *              FALSE if this is a <get-config> and only the 
 *              specified target in available for filter output
+*   isnotif == TRUE if this is for a notification
+*              FALSE if for <get> or <get-config>
 *    filval == filter node
 *    curval == current database node
 *    result == filptr tree result to fill in
@@ -470,14 +472,18 @@ static boolean
 * OUTPUTS:
 *    *result is filled in as needed
 *     only 'true' result filter nodes should be remaining 
-*    *keepempty is set to TRUE if 
+*    *keepempty is set to TRUE if a select node is tested
+*      and needs to be kept because all descendants are selected
+*      == FALSE if select node needs to be deleted (no match)
+*
 * RETURNS:
 *     status, NO_ERR or malloc error
 *********************************************************************/
 static status_t
-    process_val (rpc_msg_t *msg,
+    process_val (xml_msg_hdr_t *msg,
 		 ses_cb_t *scb,
 		 boolean getop,
+                 boolean isnotif,
 		 val_value_t *filval,
 		 val_value_t *curval,
 		 ncx_filptr_t *result,
@@ -520,10 +526,12 @@ static status_t
 	 filchild != NULL;
 	 filchild = val_get_next_child(filchild)) {
 
-	if (filchild->nsid == ncid) {
+	if (!isnotif && filchild->nsid == ncid) {
 	    /* no content in NETCONF namespace, so assume
 	     * that no namespace was used and the filter NSID
 	     * has been passed down to this point
+             *
+             * only use this for <get*>, not <notification>
 	     */
 	    filchild->nsid = 0;
 	}
@@ -570,10 +578,9 @@ static status_t
 					     filchild->name,
 					     curchild)) {
 
-#ifdef CHECK_BEFORE_THE_CHECK_IN_XML_WR
-	    /* check access control if scb is non-NULL */
-	    if (scb && 
-		!agt_acm_val_read_allowed(&msg->mhdr,
+	    /* check access control for notifications only */
+	    if (isnotif && scb &&
+		!agt_acm_val_read_allowed(msg,
 					  scb->username, 
 					  curchild)) {
 		/* treat an access-failed on a content match
@@ -581,7 +588,6 @@ static status_t
 		 */
 		return NO_ERR;
 	    }
-#endif
 
 	    test = content_match_test(scb, 
 				      VAL_STR(filchild), 
@@ -641,15 +647,13 @@ static status_t
 	    
 	    filptr = NULL;
 
-#ifdef CHECK_BEFORE_THE_CHECK_IN_XML_WR
 	    /* check access control if scb is non-NULL */
-	    if (scb && 
-		!agt_acm_val_read_allowed(&msg->mhdr,
+	    if (isnotif && scb && 
+		!agt_acm_val_read_allowed(msg,
 					  scb->username, 
 					  curchild)) {
 		continue;
 	    }
-#endif
 
 	    /* check any attr-match tests */
 	    if (!attr_test(filchild, curchild)) {
@@ -696,6 +700,7 @@ static status_t
 		res = process_val(msg,
 				  scb, 
 				  getop, 
+                                  isnotif,
 				  filchild,
 				  curchild, 
 				  filptr, 
@@ -982,10 +987,12 @@ ncx_filptr_t *
 	    return NULL;
 	}
 	top->node = cfg->root;
-	
-	res = process_val(msg,
+
+        keepempty = FALSE;
+	res = process_val((msg) ? &msg->mhdr : NULL,
 			  scb, 
 			  getop, 
+                          FALSE,
 			  filter, 
 			  cfg->root, 
 			  top, 
@@ -1044,6 +1051,96 @@ void
     output_node(scb, msg, top, indent, getop);
     
 } /* agt_tree_output_filter */
+
+
+/********************************************************************
+* FUNCTION agt_tree_test_filter
+*
+* Need to evaluate the entire subtree filter and return 'FALSE'
+* if any nodes in the filter are not in the result set
+* (this is probably a notification payload)
+*
+* INPUTS:
+*    msghdr == message in progress; needed for access control
+*    scb == session control block; needed for access control
+*    filter == subtree filter to use
+*    topval == value tree to check against
+*
+* RETURNS:
+*    TRUE if the filter matched; notification can be sent
+*    FALSE if the filter did not match; notification not sent
+*********************************************************************/
+boolean
+    agt_tree_test_filter (xml_msg_hdr_t *msghdr,
+                          ses_cb_t *scb,
+                          val_value_t *filter,
+                          val_value_t *topval)
+{
+    ncx_filptr_t      *top;
+    status_t           res;
+    boolean            keepempty, retval;
+
+#ifdef DEBUG
+    if (!msghdr || !scb || !filter || !topval) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    retval = FALSE;
+
+    /* start at the top with <filter> itself */
+    switch (filter->btyp) {
+    case NCX_BT_EMPTY:
+	/* This is an empty filter element; 
+	 * This is allowed, but the result is the empty set
+	 */
+        break;
+    case NCX_BT_STRING:
+	/* This is a mixed mode request, which is supposed to
+	 * be invalid; In this case it is simply interpreted
+	 * as 'not a match', because all NCX data is in XML.
+	 * This is not really allowed, and the result is the empty set
+	 */
+        break;
+    case NCX_BT_CONTAINER:
+	/* This is the normal case - a container node
+	 * Go through the child nodes.
+	 */
+	top = ncx_new_filptr();
+	if (!top) {
+            /* dropping ERR_INTERNAL_MEM error */
+	    return FALSE;
+	}
+	top->node = topval;
+
+        keepempty = FALSE;	
+	res = process_val(msghdr,
+			  scb, 
+			  TRUE, 
+                          TRUE,
+			  filter, 
+			  topval, 
+			  top, 
+			  &keepempty);
+	if (res != NO_ERR || dlq_empty(&top->childQ)) {
+	    /* ignore keepempty because the result will
+	     * be the same w/NULL return, just faster
+	     */
+            ;
+	} else {
+            retval = TRUE;
+	}
+
+        ncx_free_filptr(top);
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    return retval;
+
+} /* agt_tree_test_filter */
 
 
 /* END file agt_tree.c */

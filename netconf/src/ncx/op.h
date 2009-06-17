@@ -176,8 +176,8 @@ typedef struct op_target_t_ {
 
 /* NETCONF protocol operation filter spec */
 typedef struct op_filter_t_ {
-    op_filtertyp_t  op_filtyp;    
-    void           *op_filter;  /* val_value_t w/ the filter value */
+    op_filtertyp_t       op_filtyp;    
+    struct val_value_t_ *op_filter;  /* back-ptr to the filter value */
 } op_filter_t;
 
  

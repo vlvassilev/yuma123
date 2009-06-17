@@ -1,6 +1,6 @@
 /*  FILE: tstamp.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -57,16 +57,16 @@ date         init     comment
 *********************************************************************/
 static void 
     time_to_string (const struct tm *curtime,
-		       xmlChar *buff)
+                       xmlChar *buff)
 {
     (void)sprintf((char *)buff, 
-		  "%04u-%02u-%02uT%02u:%02u:%02uZ",
-		  (uint32)(curtime->tm_year+1900),
-		  (uint32)(curtime->tm_mon+1),
-		  (uint32)curtime->tm_mday,
-		  (uint32)curtime->tm_hour,
-		  (uint32)curtime->tm_min,
-		  (uint32)curtime->tm_sec);
+                  "%04u-%02u-%02uT%02u:%02u:%02uZ",
+                  (uint32)(curtime->tm_year+1900),
+                  (uint32)(curtime->tm_mon+1),
+                  (uint32)curtime->tm_mday,
+                  (uint32)curtime->tm_hour,
+                  (uint32)curtime->tm_min,
+                  (uint32)curtime->tm_sec);
 
 } /* time_to_string */
 
@@ -90,8 +90,8 @@ void
 
 #ifdef DEBUG
     if (!buff) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -121,18 +121,18 @@ void
 
 #ifdef DEBUG
     if (!buff) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     (void)time(&utime);
     curtime = localtime(&utime);
     (void)sprintf((char *)buff, 
-		  "%04u-%02u-%02u",
-		  (uint32)(curtime->tm_year+1900),
-		  (uint32)(curtime->tm_mon+1),
-		  (uint32)curtime->tm_mday);
+                  "%04u-%02u-%02u",
+                  (uint32)(curtime->tm_year+1900),
+                  (uint32)(curtime->tm_mon+1),
+                  (uint32)curtime->tm_mday);
 
 } /* tstamp_date */
 
@@ -156,8 +156,8 @@ void
 
 #ifdef DEBUG
     if (!buff) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -165,13 +165,13 @@ void
     curtime = localtime(&utime);
     /***  milliseconds not returned, hardwired to '00' ***/
     (void)sprintf((char *)buff, 
-		  "%04u-%02u-%02u %02u:%02u:%02u",
-		  (uint32)(curtime->tm_year+1900),
-		  (uint32)(curtime->tm_mon+1),
-		  (uint32)curtime->tm_mday,
-		  (uint32)curtime->tm_hour,
-		  (uint32)curtime->tm_min,
-		  (uint32)curtime->tm_sec);
+                  "%04u-%02u-%02u %02u:%02u:%02u",
+                  (uint32)(curtime->tm_year+1900),
+                  (uint32)(curtime->tm_mon+1),
+                  (uint32)curtime->tm_mday,
+                  (uint32)curtime->tm_hour,
+                  (uint32)curtime->tm_min,
+                  (uint32)curtime->tm_sec);
     
 } /* tstamp_datetime_sql */
 
@@ -199,8 +199,8 @@ void
 *********************************************************************/
 xmlChar *
     tstamp_convert_to_utctime (const xmlChar *timestr,
-			       boolean *isNegative,
-			       status_t *res)
+                               boolean *isNegative,
+                               status_t *res)
 {
     const char *retptr;
     xmlChar    *buffer;
@@ -210,8 +210,8 @@ xmlChar *
 
 #ifdef DEBUG
     if (!timestr || !isNegative || !res) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -220,81 +220,100 @@ xmlChar *
     memset(&convertedtime, 0x0, sizeof(struct tm));
 
     if (*timestr == '-') {
-	*isNegative = TRUE;
-	timestr++;
+        *isNegative = TRUE;
+        timestr++;
     } else {
-	*isNegative = FALSE;
+        *isNegative = FALSE;
     }
 
     len = xml_strlen(timestr);
 
     if (len == 20) {
-	/* could be in canonical form */
-	retptr = strptime((const char *)timestr,
-			  "%FT%TZ",
-			  &convertedtime);
-	if (retptr && *retptr == '\0') {
-	    buffer = xml_strdup(timestr);
-	    if (!buffer) {
-		*res = ERR_INTERNAL_MEM;
-		return NULL;
-	    } else {
-		return buffer;
-	    }
-	} else {
-	    *res = ERR_NCX_INVALID_VALUE;
-	    return NULL;
-	}
+        /* could be in canonical form */
+        retptr = strptime((const char *)timestr,
+                          "%FT%TZ",
+                          &convertedtime);
+        if (retptr && *retptr == '\0') {
+            buffer = xml_strdup(timestr);
+            if (!buffer) {
+                *res = ERR_INTERNAL_MEM;
+                return NULL;
+            } else {
+                return buffer;
+            }
+        } else {
+            *res = ERR_NCX_INVALID_VALUE;
+            return NULL;
+        }
     } else if (len > 20) {
-	retptr = strptime((const char *)timestr,
-			  "%FT%T",
-			  &convertedtime);
-	if (retptr == NULL || *retptr == '\0') {
-	    *res = ERR_NCX_INVALID_VALUE;
-	    return NULL;
-	}
+        retptr = strptime((const char *)timestr,
+                          "%FT%T",
+                          &convertedtime);
+        if (retptr == NULL || *retptr == '\0') {
+            *res = ERR_NCX_INVALID_VALUE;
+            return NULL;
+        }
 
-	/* check is frac-seconds entered, and skip it */
-	if (*retptr == '.') {
-	    retptr++;
-	    if (!isdigit(*retptr)) {
-		*res = ERR_NCX_INVALID_VALUE;
-		return NULL;
-	    }
+        /* check is frac-seconds entered, and skip it */
+        if (*retptr == '.') {
+            retptr++;
+            if (!isdigit(*retptr)) {
+                *res = ERR_NCX_INVALID_VALUE;
+                return NULL;
+            }
 
-	    retptr++;  /* got a start digit */
-	    while (isdigit((char)*retptr)) {
-		retptr++;
-	    }
-	}
+            retptr++;  /* got a start digit */
+            while (isdigit((char)*retptr)) {
+                retptr++;
+            }
+        }
 
-	/* check if a timezone offset is present */
-	retptr = strptime(retptr, "%z", &convertedtime);
-	if (retptr == NULL || *retptr != '\0') {
-	    *res = ERR_NCX_INVALID_VALUE;
-	    return NULL;
-	}
-	
-	buffer = m__getMem(TSTAMP_MIN_SIZE);
-	if (!buffer) {
-	    *res = ERR_INTERNAL_MEM;
-	    return NULL;
-	}
+        /* check if a timezone offset is present */
+        retptr = strptime(retptr, "%z", &convertedtime);
+        if (retptr == NULL) {
+            *res = ERR_NCX_INVALID_VALUE;
+            return NULL;
+        }
 
-	utime = mktime(&convertedtime);
-	if (utime == (utime)-1) {
-	    *res = ERR_INTERNAL_VAL;
-	    m__free(buffer);
-	    return NULL;
-	}
+        /* check where retptr ended up */
+        if (*retptr == '\0') {
+            /* OK read all the bytes */
+            ;
+        } else if (*retptr == ':') {
+            if (strcmp(retptr, ":00")) {
+                /* the linux strptime function does
+                 * not process the 'time-minute' field in the
+                 * time string; since this is so rare
+                 * just treat as a special error
+                 */
+                *res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+                return NULL;
+            } /* else time-minute field == '00' and no error */
+        } else {
+            *res = ERR_NCX_INVALID_VALUE;
+            return NULL;
+        }
 
-	curtime = gmtime(&utime);
-	time_to_string(curtime, buffer);
-	return buffer;
+        buffer = m__getMem(TSTAMP_MIN_SIZE);
+        if (!buffer) {
+            *res = ERR_INTERNAL_MEM;
+            return NULL;
+        }
+
+        utime = mktime(&convertedtime);
+        if (utime == (utime)-1) {
+            *res = ERR_INTERNAL_VAL;
+            m__free(buffer);
+            return NULL;
+        }
+
+        curtime = gmtime(&utime);
+        time_to_string(curtime, buffer);
+        return buffer;
     } else {
-	/* improper length */
-	*res = ERR_NCX_INVALID_VALUE;
-	return NULL;
+        /* improper length */
+        *res = ERR_NCX_INVALID_VALUE;
+        return NULL;
     }
     
 } /* tstamp_convert_to_utctime */

@@ -39,6 +39,14 @@ date	     init     comment
 #include "status.h"
 #endif
 
+#ifndef _H_xml_msg
+#include "xml_msg.h"
+#endif
+
+#ifndef _H_val
+#include "val.h"
+#endif
+
 /********************************************************************
 *								    *
 *			F U N C T I O N S			    *
@@ -51,5 +59,11 @@ extern status_t
 			     const cfg_template_t *cfg,
 			     boolean getop,
 			     int32 indent);
+
+extern boolean
+    agt_xpath_test_filter (xml_msg_hdr_t *msghdr,
+                           ses_cb_t *scb,
+                           const val_value_t *selectval,
+                           val_value_t *val);
 
 #endif	    /* _H_agt_xpath */

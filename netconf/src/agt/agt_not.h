@@ -135,10 +135,12 @@ typedef struct agt_not_subscription_t_ {
     ses_id_t              sid;              /* used when scb deleted */
     xmlChar              *stream;
     agt_not_stream_t      streamid;
-    val_value_t          *filter;
+    op_filtertyp_t        filtertyp;
+    val_value_t          *filterval;
+    val_value_t          *selectval;
     xmlChar               createTime[TSTAMP_MIN_SIZE];
-    xmlChar              *startTime;
-    xmlChar              *stopTime;
+    xmlChar              *startTime;       /* converted to UTC */
+    xmlChar              *stopTime;        /* converted to UTC */
     uint32                flags;
     agt_not_msg_t        *firstreplaymsg;   /* back-ptr; could be zapped */
     agt_not_msg_t        *lastreplaymsg;    /* back-ptr; could be zapped */
@@ -169,7 +171,7 @@ extern uint32
     agt_not_send_notifications (void);
 
 extern void
-    agt_not_remove_subscriptions (ses_id_t sid);
+    agt_not_remove_subscription (ses_id_t sid);
 
 extern agt_not_msg_t * 
     agt_not_new_notification (const obj_template_t *eventType);

@@ -487,7 +487,7 @@ static void
 
 
 /********************************************************************
-* FUNCTION agt_xpath_eval_filter
+* FUNCTION agt_xpath_output_filter
 *
 * Evaluate the XPath filter against the specified 
 * config root, and output the result of the
@@ -565,6 +565,86 @@ status_t
     return res;
 
 } /* agt_xpath_output_filter */
+
+
+/********************************************************************
+* FUNCTION agt_xpath_test_filter
+*
+* Evaluate the XPath filter against the specified 
+* config root, and just test if there would be any
+* <eventType> element generated at all
+*
+* Does not write any output based on the XPath evaluation
+*
+* INPUTS:
+*    msghdr == message header in progress (for access control)
+*    scb == session control block
+*    selectval == filter value struct to use
+*    val == top of value tree to compare the filter against
+*        !!! not written -- not const in XPath in case
+*        !!! a set-by-xpath function ever implemented
+*
+* RETURNS:
+*    status
+*********************************************************************/
+boolean
+    agt_xpath_test_filter (xml_msg_hdr_t *msghdr,
+                           ses_cb_t *scb,
+                           const val_value_t *selectval,
+                           val_value_t *val)
+
+{
+    xpath_result_t    *result;
+    status_t           res;
+    boolean            retval, getop, readallowed;
+
+#ifdef DEBUG
+    if (!msghdr || !scb || !selectval || !val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    /* make sure the <eventType> is allowed to be
+     * viewed by the specified session
+     */
+    readallowed = agt_acm_val_read_allowed(msghdr,
+                                           scb->username,
+                                           val);
+    
+    if (!readallowed) {
+        return FALSE;
+    }
+
+    res = NO_ERR;
+    getop = TRUE;   /* do not skip config=fale nodes */
+
+    /* evaluate the XPath expression
+     * any nodeset result that is non-empty
+     * will pass the filter test
+     */
+    result = xpath1_eval_xmlexpr(scb->reader,
+				 selectval->xpathpcb,
+				 val,
+				 val,
+				 FALSE,
+				 !getop,
+				 &res);
+
+    if (result && (res == NO_ERR) && 
+	(result->restype == XP_RT_NODESET)) {
+        retval = xpath_cvt_boolean(result);
+    } else {
+        retval = FALSE;
+    }
+
+    if (result) {
+	xpath_free_result(result);
+    }
+
+    return retval;
+
+} /* agt_xpath_test_filter */
 
 
 /* END file agt_xpath.c */

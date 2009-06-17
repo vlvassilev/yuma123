@@ -100,7 +100,7 @@ typedef struct agt_rpc_cbset_t_ {
  * function instead of generating a malloced val_value_t tree
  *
  * INPUTS:
- *   scb == ses_cb_t cast as void *, session control block
+ *   scb == session control block
  *   msg == RPC request in progress
  *   indent == start indent amount; ignored if the agent
  *             is configured not to use PDU indentation

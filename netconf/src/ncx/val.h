@@ -135,8 +135,11 @@ date	     init     comment
 #define VAL_EQUAL_CH      '='
 #define VAL_XPATH_SEPCH   '/'
 
-#define VAL_XPATH_INDEX_SEPSTR ((const xmlChar *)"][")
+#define VAL_XPATH_INDEX_SEPSTR (const xmlChar *)"]["
 #define VAL_XPATH_INDEX_SEPLEN 2
+
+/* display instead of readl password contents */
+#define VAL_PASSWORD_STRING  (const xmlChar *)"****"
 
 /* val_value_t flags field */
 
@@ -908,7 +911,7 @@ extern boolean
     val_is_virtual (const val_value_t *val);
 
 extern val_value_t *
-    val_get_virtual_value (void *session,
+    val_get_virtual_value (void *session,  /* really ses_cb_t *   */
 			   val_value_t *val,
 			   status_t *res);
 

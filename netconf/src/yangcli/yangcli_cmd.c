@@ -280,13 +280,11 @@ static void
 				  YANGCLI_USER);
 	}
 
-	/*
-	if (!parm && connect_valset) {
-	    parm = val_find_child(connect_valset, 
+	if (!parm && get_connect_valset()) {
+	    parm = val_find_child(get_connect_valset(), 
 				  YANGCLI_MOD, 
 				  YANGCLI_USER);
 	}
-	*/
 
 	if (parm) {
 	    len = xml_strncpy(p, VAL_STR(parm), bufflen);
@@ -309,13 +307,11 @@ static void
 				  YANGCLI_AGENT);
 	}
 
-	/*
-	if (!parm && connect_valset) {
-	    parm= val_find_child(connect_valset, 
+	if (!parm && get_connect_valset()) {
+	    parm= val_find_child(get_connect_valset(), 
 				 YANGCLI_MOD, 
 				 YANGCLI_AGENT);
 	}
-	*/
 
 	if (parm) {
 	    len = xml_strncpy(p, VAL_STR(parm), bufflen);
@@ -741,10 +737,10 @@ static status_t
 	return NO_ERR;
     }
 
-    ispassword = FALSE;
     iscomplex = FALSE;
     btyp = obj_get_basetype(parm);
     res = NO_ERR;
+    ispassword = obj_is_password(parm);
 
     if (obj_is_data_db(parm)) {
 	objbuff = NULL;
@@ -758,9 +754,8 @@ static status_t
 	/* let the user know about the new nest level */
 	if (obj_is_key(parm)) {
 	    str = YANG_K_KEY;
-	} else if (obj_is_password(parm)) {
+	} else if (ispassword) {
             str = YANGCLI_PASSWORD;
-            ispassword = TRUE;
 	} else if (obj_is_mandatory(parm)) {
 	    str = YANG_K_MANDATORY;
 	} else {
@@ -7548,7 +7543,7 @@ static status_t
     if (!xml_strcmp(rpcname, YANGCLI_CD)) {
 	res = do_cd(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
-	res = do_connect(agent_cb, rpc, line, len);
+	res = do_connect(agent_cb, rpc, line, len, FALSE);
     } else if (!xml_strcmp(rpcname, YANGCLI_FILL)) {
 	res = do_fill(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_HELP)) {
@@ -8018,6 +8013,9 @@ xmlChar *
  *   start == byte offset from 'line' where the parse RPC method
  *            left off.  This is eiother empty or contains some 
  *            parameters from the user
+ *   climode == TRUE if starting from CLI and should try
+ *              to connect right away if the mandatory parameters
+ *              are present
  *
  * OUTPUTS:
  *   connect_valset parms may be set 
@@ -8030,11 +8028,12 @@ status_t
     do_connect (agent_cb_t *agent_cb,
 		const obj_template_t *rpc,
 		const xmlChar *line,
-		uint32 start)
+		uint32 start,
+                boolean climode)
 {
     const obj_template_t  *obj;
-    val_value_t           *connect_valset, *connect_child;
-    val_value_t           *valset, *child;
+    val_value_t           *connect_valset;
+    val_value_t           *valset;
     status_t               res;
     boolean                s1, s2, s3;
 
@@ -8064,11 +8063,7 @@ status_t
 
     res = NO_ERR;
 
-    if (agent_cb->connect_valset) {
-        connect_valset = agent_cb->connect_valset;
-    } else {
-        connect_valset = get_connect_valset();
-    }
+    connect_valset = get_connect_valset();
 
     /* process any parameters entered on the command line */
     valset = NULL;
@@ -8091,36 +8086,37 @@ status_t
 	}
     }
 
-    /* transfer any of the parms set up in advance */
-    if (valset) {
-        for (connect_child = val_get_first_child(connect_valset);
-             connect_child != NULL;
-             connect_child = val_get_next_child(connect_child)) {
-
-            child = val_find_child(valset,
-                                   val_get_mod_name(connect_child),
-                                   connect_child->name);
-            if (!child) {
-                child = val_clone(connect_child);
-                if (!child) {
-                    agent_cb->state = MGR_IO_ST_IDLE;
-                    log_write("\nError: malloc failed");
-                    val_free_value(valset);
-                    return ERR_INTERNAL_MEM;
-                } else {
-                    val_add_child(child, valset);
-                }
+    if (!valset) {
+        if (climode) {
+            /* just clone the connect valset to start with */
+            valset = val_clone(connect_valset);
+            if (!valset) {
+                agent_cb->state = MGR_IO_ST_IDLE;
+                log_write("\nError: malloc failed");
+                return ERR_INTERNAL_MEM;
+            }
+        } else {
+            valset = val_new_value();
+            if (!valset) {
+                log_write("\nError: malloc failed");
+                agent_cb->state = MGR_IO_ST_IDLE;
+                return ERR_INTERNAL_MEM;
+            } else {
+                val_init_from_template(valset, obj);
             }
         }
-    } else {
-        /* just clone the connect valset to start with */
-        valset = val_clone(connect_valset);
-        if (!valset) {
-            agent_cb->state = MGR_IO_ST_IDLE;
-            log_write("\nError: malloc failed");
-            return ERR_INTERNAL_MEM;
-        }
     }
+
+    /* make sure the 3 required parms are set */
+    s1 = val_find_child(valset,
+                        YANGCLI_MOD, 
+                        YANGCLI_AGENT) ? TRUE : FALSE;
+    s2 = val_find_child(valset, 
+                        YANGCLI_MOD,
+                        YANGCLI_USER) ? TRUE : FALSE;
+    s3 = val_find_child(valset, 
+                        YANGCLI_MOD,
+                        YANGCLI_PASSWORD) ? TRUE : FALSE;
 
     /* complete the connect valset if needed
      * and transfer it to the agent_cb version
@@ -8128,12 +8124,18 @@ status_t
      * try to get any missing params in valset 
      */
     if (interactive_mode()) {
-        res = fill_valset(agent_cb, 
-                          rpc, 
-                          valset, 
-                          connect_valset);
-        if (res == ERR_NCX_SKIPPED) {
-            res = NO_ERR;
+        if (climode && s1 && s2 && s3) {
+            if (LOGDEBUG3) {
+                log_debug3("\nyangcli: CLI direct connect mode");
+            }
+        } else {
+            res = fill_valset(agent_cb, 
+                              rpc, 
+                              valset, 
+                              connect_valset);
+            if (res == ERR_NCX_SKIPPED) {
+                res = NO_ERR;
+            }
         }
     }
 

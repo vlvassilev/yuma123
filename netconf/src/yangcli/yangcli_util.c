@@ -278,6 +278,11 @@ void
     agent_cb->mysid = 0;
     agent_cb->state = MGR_IO_ST_IDLE;
 
+    if (agent_cb->connect_valset) {
+        val_free_value(agent_cb->connect_valset);
+        agent_cb->connect_valset = NULL;
+    }
+
 }  /* clear_agent_cb_session */
 
 

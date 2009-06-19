@@ -2761,7 +2761,7 @@ static status_t
                               YANGCLI_MOD, 
                               YANGCLI_AGENT);
 	if (parm && parm->res == NO_ERR) {
-	    do_connect(agent_cb, NULL, NULL, 0);
+	    do_connect(agent_cb, NULL, NULL, 0, TRUE);
 	}
     }
 

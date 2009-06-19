@@ -99,9 +99,6 @@ date         init     comment
  *                                                                   *
  *********************************************************************/
 
-/* how often to check for agent shutown (in seconds) */
-#define MGR_IO_TIMEOUT  1
-
 
 /********************************************************************
  *                                                                  *
@@ -468,8 +465,8 @@ status_t
 
 	    /* setup select parameters */
 	    read_fd_set = active_fd_set;
-	    timeout.tv_sec = MGR_IO_TIMEOUT;
-	    timeout.tv_usec = 0;
+	    timeout.tv_sec = 0;
+	    timeout.tv_usec = 100;
 
 	    /* check if there are no sessions active to wait for,
 	     * so just go back to the STDIN handler
@@ -586,7 +583,7 @@ boolean
 
     /* setup select parameters */
     timeout.tv_sec = 0;
-    timeout.tv_usec = 10000;
+    timeout.tv_usec = 100;
     read_fd_set = active_fd_set;
 
     if (!any_fd_set(&read_fd_set, maxrdnum)) {

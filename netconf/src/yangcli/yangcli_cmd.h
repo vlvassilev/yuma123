@@ -63,7 +63,8 @@ extern status_t
     do_connect (agent_cb_t *agent_cb,
 		const obj_template_t *rpc,
 		const xmlChar *line,
-		uint32 start);
+		uint32 start,
+                boolean climode);
 
 extern void *
     parse_def (agent_cb_t *agent_cb,

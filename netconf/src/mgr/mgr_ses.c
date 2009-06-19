@@ -773,13 +773,12 @@ boolean
     }
 
     /* free the message that was just processed */
-    msg = (ses_msg_t *)dlq_deque(&scb->msgQ);
-    if (msg) {
-	ses_msg_free_msg(scb, msg);
-    }
+    dlq_remove(msg);
+    ses_msg_free_msg(scb, msg);
 
     /* check if any messages left for this session */
-    if (!dlq_empty(&scb->msgQ)) {
+    msg = (ses_msg_t *)dlq_firstEntry(&scb->msgQ);
+    if (msg && msg->ready) {
 	ses_msg_make_inready(scb);
     }
 

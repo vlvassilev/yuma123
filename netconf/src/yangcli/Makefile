@@ -27,8 +27,11 @@ PROG=yangcli
 ## (LINUX
 LIBS = 	-lmgr \
 	-lncx \
-	-L/usr/lib -lxml2 -lcurses \
-	-L/usr/local/lib -lssh2 -ltecla
+	-L/usr/local/lib -lssh2d -ltecla \
+	-L/usr/lib -lxml2 -lcurses
+
+
+
 
 ## MACODS
 # LIBS = 	-lmgr \

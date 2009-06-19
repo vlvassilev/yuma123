@@ -63,13 +63,15 @@ extern status_t
     do_connect (agent_cb_t *agent_cb,
 		const obj_template_t *rpc,
 		const xmlChar *line,
-		uint32 start,
-		boolean  cli);
+		uint32 start);
 
 extern void *
     parse_def (agent_cb_t *agent_cb,
 	       ncx_node_t *dtyp,
 	       xmlChar *line,
 	       uint32 *len);
+
+extern status_t
+    send_keepalive_get (agent_cb_t *agent_cb);
 
 #endif	    /* _H_yangcli_cmd */

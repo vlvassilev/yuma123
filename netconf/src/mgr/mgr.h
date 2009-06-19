@@ -71,6 +71,7 @@ typedef struct mgr_scb_t_ {
     xmlChar         *target;
     LIBSSH2_SESSION *session;
     LIBSSH2_CHANNEL *channel;
+    int              returncode;
 
     /* RPC request info */
     uint32           next_id;

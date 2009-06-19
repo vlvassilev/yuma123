@@ -120,55 +120,55 @@ extern void
 extern status_t 
     agt_ses_get_inSessions (ses_cb_t *scb,
 			    getcb_mode_t cbmode,
-			    val_value_t *virval,
+			    const val_value_t *virval,
 			    val_value_t  *dstval);
 
 extern status_t 
     agt_ses_get_inXMLParseErrors (ses_cb_t *scb,
 				  getcb_mode_t cbmode,
-				  val_value_t *virval,
+				  const val_value_t *virval,
 				  val_value_t  *dstval);
 
 extern status_t 
     agt_ses_get_inBadHellos (ses_cb_t *scb,
 			     getcb_mode_t cbmode,
-			     val_value_t *virval,
+			     const val_value_t *virval,
 			     val_value_t  *dstval);
 
 extern status_t 
     agt_ses_get_inRpcs (ses_cb_t *scb,
 			getcb_mode_t cbmode,
-			val_value_t *virval,
+			const val_value_t *virval,
 			val_value_t  *dstval);
 
 extern status_t 
     agt_ses_get_inBadRpcs (ses_cb_t *scb,
 			   getcb_mode_t cbmode,
-			   val_value_t *virval,
+			   const val_value_t *virval,
 			   val_value_t  *dstval);
 
 extern status_t 
     agt_ses_get_inNotSupportedRpcs (ses_cb_t *scb,
 				    getcb_mode_t cbmode,
-				    val_value_t *virval,
+				    const val_value_t *virval,
 				    val_value_t  *dstval);
 
 extern status_t 
     agt_ses_get_outRpcReplies (ses_cb_t *scb,
 			       getcb_mode_t cbmode,
-			       val_value_t *virval,
+			       const val_value_t *virval,
 			       val_value_t  *dstval);
 
 extern status_t 
     agt_ses_get_outRpcErrors (ses_cb_t *scb,
 			      getcb_mode_t cbmode,
-			      val_value_t *virval,
+			      const val_value_t *virval,
 			      val_value_t  *dstval);
 
 extern status_t 
     agt_ses_get_outNotifications (ses_cb_t *scb,
 				  getcb_mode_t cbmode,
-				  val_value_t *virval,
+				  const val_value_t *virval,
 				  val_value_t  *dstval);
 
 #endif            /* _H_agt_ses */

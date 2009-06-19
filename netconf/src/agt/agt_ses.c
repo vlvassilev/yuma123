@@ -1530,6 +1530,13 @@ boolean
     if (!msg || !msg->ready) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	log_error("\nagt_ses ready Q message not correct");
+        if (msg) {
+            cnt = xml_strcpy(buff, 
+                             (const xmlChar *)"Incoming msg for session ");
+            sprintf((char *)(&buff[cnt]), "%u", scb->sid);
+            ses_msg_dump(msg, buff);
+        }
+            
 	return FALSE;
     } else if (LOGDEBUG2) {
 	cnt = xml_strcpy(buff, 
@@ -1702,7 +1709,7 @@ void
 status_t 
     agt_ses_get_inSessions (ses_cb_t *scb,
 			    getcb_mode_t cbmode,
-			    val_value_t *virval,
+			    const val_value_t *virval,
 			    val_value_t  *dstval)
 {
     (void)scb;
@@ -1732,7 +1739,7 @@ status_t
 status_t 
     agt_ses_get_inXMLParseErrors (ses_cb_t *scb,
 				  getcb_mode_t cbmode,
-				  val_value_t *virval,
+				  const val_value_t *virval,
 				  val_value_t  *dstval)
 {
     (void)scb;
@@ -1762,7 +1769,7 @@ status_t
 status_t 
     agt_ses_get_inBadHellos (ses_cb_t *scb,
 			     getcb_mode_t cbmode,
-			     val_value_t *virval,
+			     const val_value_t *virval,
 			     val_value_t  *dstval)
 {
     (void)scb;
@@ -1792,7 +1799,7 @@ status_t
 status_t 
     agt_ses_get_inRpcs (ses_cb_t *scb,
 			getcb_mode_t cbmode,
-			val_value_t *virval,
+			const val_value_t *virval,
 			val_value_t  *dstval)
 {
     (void)scb;
@@ -1822,7 +1829,7 @@ status_t
 status_t 
     agt_ses_get_inBadRpcs (ses_cb_t *scb,
 			   getcb_mode_t cbmode,
-			   val_value_t *virval,
+			   const val_value_t *virval,
 			   val_value_t  *dstval)
 {
     (void)scb;
@@ -1852,7 +1859,7 @@ status_t
 status_t 
     agt_ses_get_inNotSupportedRpcs (ses_cb_t *scb,
 				    getcb_mode_t cbmode,
-				    val_value_t *virval,
+				    const val_value_t *virval,
 				    val_value_t  *dstval)
 {
     (void)scb;
@@ -1882,7 +1889,7 @@ status_t
 status_t 
     agt_ses_get_outRpcReplies (ses_cb_t *scb,
 			       getcb_mode_t cbmode,
-			       val_value_t *virval,
+			       const val_value_t *virval,
 			       val_value_t  *dstval)
 {
     (void)scb;
@@ -1912,7 +1919,7 @@ status_t
 status_t 
     agt_ses_get_outRpcErrors (ses_cb_t *scb,
 			      getcb_mode_t cbmode,
-			      val_value_t *virval,
+			      const val_value_t *virval,
 			      val_value_t  *dstval)
 {
     (void)scb;
@@ -1942,7 +1949,7 @@ status_t
 status_t 
     agt_ses_get_outNotifications (ses_cb_t *scb,
 				  getcb_mode_t cbmode,
-				  val_value_t *virval,
+				  const val_value_t *virval,
 				  val_value_t  *dstval)
 {
     (void)scb;

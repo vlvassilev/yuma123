@@ -2027,11 +2027,12 @@ val_value_t *
 *   status
 *********************************************************************/
 status_t
-    xpath_yang_get_namespaces (xpath_pcb_t *pcb,
+    xpath_yang_get_namespaces (const xpath_pcb_t *pcb,
 			       xmlns_id_t *nsid_array,
 			       uint32 max_nsids,
 			       uint32 *num_nsids)
 {
+    const tk_token_t     *tk;
     boolean               done, found;
     uint32                i, next;
     xmlns_id_t            cur_nsid;
@@ -2057,24 +2058,16 @@ status_t
     next = 0;
     *num_nsids = 0;
 
-    tk_reset_chain(pcb->tkc);
-
     done = FALSE;
-    while (!done) {
-
-	/* get the next token */
-	res = TK_ADV(pcb->tkc);
-	if (res != NO_ERR) {
-	    res = NO_ERR;
-	    done = TRUE;
-	    continue;
-	}
+    for (tk = (const tk_token_t *)dlq_firstEntry(&pcb->tkc->tkQ);
+         tk != NULL && !done;
+         tk = (const tk_token_t *)dlq_nextEntry(tk)) {
 
 	/* only MSTRING and QVARBIND tokens have relevant NSID fields
 	 * as used in instance-identifier or schema-instance
 	 * path syntax
 	 */
-	switch (TK_CUR_TYP(pcb->tkc)) {
+	switch (tk->typ) {
 	case TK_TT_MSTRING:
 	case TK_TT_QVARBIND:
 	    break;
@@ -2082,7 +2075,7 @@ status_t
 	    continue;
 	}
 
-	cur_nsid = TK_CUR_NSID(pcb->tkc);
+	cur_nsid = tk->nsid;
 	if (cur_nsid == 0) {
 	    /* this token never had an NSID set */
 	    continue;

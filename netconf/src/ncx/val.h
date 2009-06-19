@@ -392,6 +392,15 @@ typedef boolean
 			void *cookie1,
 			void *cookie2);
 
+
+typedef enum val_dumpvalue_mode_t_ {
+    DUMP_VAL_NONE,
+    DUMP_VAL_STDOUT,
+    DUMP_VAL_LOG,
+    DUMP_VAL_ALT_LOG
+} val_dumpvalue_mode_t;
+
+
 /********************************************************************
 *								    *
 *			F U N C T I O N S			    *
@@ -575,6 +584,11 @@ extern void
     val_dump_value (const val_value_t *val,
 		    int32 startindent);
 
+extern void
+    val_dump_value_ex (const val_value_t *val,
+                       int32 startindent,
+                       ncx_display_mode_t display_mode);
+
 /* print a val_value_t struct contents to alternate logfile */
 extern void
     val_dump_alt_value (const val_value_t *val,
@@ -585,6 +599,19 @@ extern void
     val_stdout_value (const val_value_t *val,
 		      int32 startindent);
 
+extern void
+    val_stdout_value_ex (const val_value_t *val,
+                         int32 startindent,
+                         ncx_display_mode_t display_mode);
+
+
+extern void
+    val_dump_value_max (const val_value_t *val,
+                        int32 startindent,
+                        int32 indent_amount,
+                        val_dumpvalue_mode_t dumpmode,
+                        ncx_display_mode_t display_mode,
+                        boolean with_meta);
 
 /* use next 4 functions after calling
  * val_new_value().
@@ -912,7 +939,7 @@ extern boolean
 
 extern val_value_t *
     val_get_virtual_value (void *session,  /* really ses_cb_t *   */
-			   val_value_t *val,
+			   const val_value_t *val,
 			   status_t *res);
 
 extern boolean

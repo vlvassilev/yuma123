@@ -906,4 +906,10 @@ extern int64
 extern int64
     ncx_get_dec64_fraction (const ncx_num_t *num);
 
+extern ncx_display_mode_t
+    ncx_get_display_mode_enum (const xmlChar *dmstr);
+
+extern const xmlChar *
+    ncx_get_display_mode_str (ncx_display_mode_t dmode);
+
 #endif	    /* _H_ncx */

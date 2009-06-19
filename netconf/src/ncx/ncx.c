@@ -10123,10 +10123,7 @@ ncx_withdefaults_t
 	return NCX_WITHDEF_TRIM;
     } else if (!xml_strcmp(withdefstr, NCX_EL_EXPLICIT)) {
 	return NCX_WITHDEF_EXPLICIT;
-    } else if (!xml_strcmp(withdefstr, NCX_EL_NONE)) {
-	return NCX_WITHDEF_NONE;
     } else {
-	SET_ERROR(ERR_INTERNAL_VAL);
 	return NCX_WITHDEF_NONE;
     }
 
@@ -10253,6 +10250,72 @@ int64
     return temp1;
 
 }  /* ncx_get_dec64_fraction */
+
+
+/********************************************************************
+* FUNCTION ncx_get_display_mode_enum
+* 
+* Get the enum for the specified string value
+* 
+* INPUT:
+*   dmstr == string value to check
+*
+* RETURNS:
+*   enum value for the string
+*   NCX_DISPLAY_MODE_NONE if invalid value
+*********************************************************************/
+ncx_display_mode_t
+    ncx_get_display_mode_enum (const xmlChar *dmstr)
+{
+#ifdef DEBUG
+    if (!dmstr) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NCX_DISPLAY_MODE_NONE;
+    }
+#endif
+
+    if (!xml_strcmp(dmstr, NCX_EL_PLAIN)) {
+	return NCX_DISPLAY_MODE_PLAIN;
+    } else if (!xml_strcmp(dmstr, NCX_EL_PREFIXED)) {
+	return NCX_DISPLAY_MODE_PREFIXED;
+    } else if (!xml_strcmp(dmstr, NCX_EL_XML)) {
+	return NCX_DISPLAY_MODE_XML;
+    } else {
+	return NCX_DISPLAY_MODE_NONE;
+    }
+
+}  /* ncx_get_display_mode_enum */
+
+
+/********************************************************************
+* FUNCTION ncx_get_display_mode_str
+* 
+* Get the string for the specified enum value
+* 
+* INPUT:
+*   dmode == enum display mode value to check
+*
+* RETURNS:
+*   string value for the enum
+*   NULL if none found
+*********************************************************************/
+const xmlChar *
+    ncx_get_display_mode_str (ncx_display_mode_t dmode)
+{
+    switch (dmode) {
+    case NCX_DISPLAY_MODE_NONE:
+        return NULL;
+    case NCX_DISPLAY_MODE_PLAIN:
+        return NCX_EL_PLAIN;
+    case NCX_DISPLAY_MODE_PREFIXED:
+        return NCX_EL_PREFIXED;
+    case NCX_DISPLAY_MODE_XML:
+        return NCX_EL_XML;
+    default:
+        return NULL;
+    }
+
+}  /* ncx_get_display_mode_str */
 
 
 /* END file ncx.c */

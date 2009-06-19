@@ -272,6 +272,9 @@ static xmlChar        *default_module;
 /* 0 for no timeout; N for N seconds message timeout */
 static uint32          default_timeout;
 
+/* default value for val_dump_value display mode */
+static ncx_display_mode_t   display_mode;
+
 /* FALSE to send PDUs in manager-specified order
  * TRUE to always send in correct canonical order
  */
@@ -339,11 +342,11 @@ static GlAfterTimeout
 {
     agent_cb_t  *agent_cb;
     ses_cb_t    *scb;
-    boolean      retval;
+    boolean      retval, wantdata;
 
     (void)gl;
     agent_cb = (agent_cb_t *)data;
-    agent_cb->returncode = 0;
+    agent_cb->returncode = MGR_IO_RC_NONE;
 
     if (agent_cb->state != MGR_IO_ST_CONN_IDLE) {
 	agent_cb->returncode = MGR_IO_RC_IDLE;
@@ -358,12 +361,12 @@ static GlAfterTimeout
 	return GLTO_ABORT;
     }
 
-    retval = mgr_io_process_timeout(scb->sid);
-    agent_cb->errnocode = errno;
+    wantdata = FALSE;
+    retval = mgr_io_process_timeout(scb->sid, &wantdata);
     if (retval) {
-	/* this session is still alive */
-	if (agent_cb->errnocode == 11) {
-	    agent_cb->returncode = MGR_IO_RC_ERRNO11;
+	/* this session is probably still alive */
+	if (wantdata) {
+	    agent_cb->returncode = MGR_IO_RC_WANTDATA;
 	    return GLTO_CONTINUE;
 	} else {
 	    agent_cb->returncode = MGR_IO_RC_PROCESSED;
@@ -568,6 +571,7 @@ static agent_cb_t *
     agent_cb->testoption = testoption;
     agent_cb->erroption = erroption;
     agent_cb->timeout = default_timeout;
+    agent_cb->display_mode = display_mode;
     agent_cb->withdefaults = withdefaults;
     agent_cb->history_size = YANGCLI_HISTLEN;
 
@@ -607,6 +611,7 @@ static status_t
     op_testop_t            testop;
     op_errop_t             errop;
     ncx_num_t              testnum;
+    ncx_display_mode_t     dmode;
 
     res = NO_ERR;
     if (newval) {
@@ -692,6 +697,16 @@ static status_t
 		default_module = dupval;
 	    }
 	}
+    } else if (!xml_strcmp(configval->name, YANGCLI_DISPLAY_MODE)) {
+        dmode = ncx_get_display_mode_enum(usestr);
+        if (dmode != NCX_DISPLAY_MODE_NONE) {
+            display_mode = dmode;
+            agent_cb->display_mode = dmode;
+        } else {
+	    log_error("\nError: value must be 'plain', 'prefixed' "
+                      "or 'xml'");
+            res = ERR_NCX_INVALID_VALUE;
+        }
     } else if (!xml_strcmp(configval->name, YANGCLI_USER)) {
 	if (!ncx_valid_name2(usestr)) {
 	    log_error("\nError: must be a valid user name");
@@ -790,6 +805,7 @@ static status_t
 		      "warn, info, debug, debug2)\n");
 	    res = ERR_NCX_INVALID_VALUE;
 	} else {
+            log_level = testloglevel;
 	    agent_cb->log_level = testloglevel;
 	    log_set_debug_level(testloglevel);
 	}
@@ -1505,6 +1521,12 @@ static status_t
 	return res;
     }
 
+    res = create_config_var(YANGCLI_DISPLAY_MODE, 
+                            ncx_get_display_mode_str(display_mode));
+    if (res != NO_ERR) {
+	return res;
+    }
+
     strval = NULL;
     parm = val_find_child(mgr_cli_valset, NULL, YANGCLI_USER);
     if (parm) {
@@ -1541,7 +1563,8 @@ static status_t
 	return res;
     }
 
-
+    /* could have changed during CLI processing */
+    log_level = log_get_debug_level();
     res = create_config_var(NCX_EL_LOGLEVEL, 
 			    log_get_debug_level_string(log_level));
     if (res != NO_ERR) {
@@ -1562,7 +1585,6 @@ static status_t
     return NO_ERR;
 
 } /* init_config_vars */
-
 
 
 /********************************************************************
@@ -1589,6 +1611,7 @@ static status_t
     const obj_template_t  *obj;
     val_value_t           *parm;
     status_t               res;
+    ncx_display_mode_t     dmode;
 
     res = NO_ERR;
     mgr_cli_valset = NULL;
@@ -1611,9 +1634,13 @@ static status_t
 	    }
 	} else {
 	    /* parse the command line against the PSD */    
-	    mgr_cli_valset = cli_parse(argc, argv, obj,
-				       FULLTEST, PLAINMODE,
-				       autocomp, &res);
+	    mgr_cli_valset = cli_parse(argc, 
+                                       argv, 
+                                       obj,
+				       FULLTEST, 
+                                       PLAINMODE,
+				       autocomp, 
+                                       &res);
 	}
     }
 
@@ -1627,11 +1654,13 @@ static status_t
 
     /* next get any params from the conf file */
     confname = get_strparm(mgr_cli_valset, 
-			   YANGCLI_MOD, YANGCLI_CONFIG);
+			   YANGCLI_MOD, 
+                           YANGCLI_CONFIG);
     if (confname) {
 	res = conf_parse_val_from_filespec(confname, 
 					   mgr_cli_valset,
-					   TRUE, TRUE);
+					   TRUE, 
+                                           TRUE);
 	if (res != NO_ERR) {
 	    return res;
 	}
@@ -1692,12 +1721,27 @@ static status_t
 				 YANGCLI_MOD, 
 				 YANGCLI_DEF_MODULE);
 
+    /* get the display-mode parameter */
+    parm = val_find_child(mgr_cli_valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_DISPLAY_MODE);
+    if (parm && parm->res == NO_ERR) {
+	dmode = ncx_get_display_mode_enum(VAL_ENUM_NAME(parm));
+        if (dmode != NCX_DISPLAY_MODE_NONE) {
+            display_mode = dmode;
+        } else {
+            display_mode = YANGCLI_DEF_DISPLAY_MODE;
+        }
+    } else {
+        display_mode = YANGCLI_DEF_DISPLAY_MODE;
+    }
+
     /* get the fixorder parameter */
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_FIXORDER);
     if (parm && parm->res == NO_ERR) {
 	fixorder = VAL_BOOL(parm);
     } else {
-	fixorder = TRUE;
+	fixorder = YANGCLI_DEF_FIXORDER;
     }
 
     /* get the help flag */
@@ -1721,7 +1765,21 @@ static status_t
     }
 
     /* get the password parameter */
-    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_PASSWORD);
+    parm = val_find_child(mgr_cli_valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_PASSWORD);
+    if (parm && parm->res == NO_ERR) {
+	/* save to the connect_valset parmset */
+	res = add_clone_parm(parm, connect_valset);
+	if (res != NO_ERR) {
+	    return res;
+	}
+    }
+
+    /* get the port parameter */
+    parm = val_find_child(mgr_cli_valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_PORT);
     if (parm && parm->res == NO_ERR) {
 	/* save to the connect_valset parmset */
 	res = add_clone_parm(parm, connect_valset);
@@ -2242,7 +2300,15 @@ static mgr_io_state_t
      * at some point; currently 1 session supported in yangcli
      */
     agent_cb = cur_agent_cb;
-    
+
+    if (agent_cb->returncode == MGR_IO_RC_WANTDATA) {
+        if (LOGDEBUG2) {
+            log_debug2("\nyangcli: sending dummy <get> keepalive");
+        }
+        (void)send_keepalive_get(agent_cb);
+        agent_cb->returncode = MGR_IO_RC_NONE;        
+    }
+
     if (agent_cb->cli_fn == NULL && !agent_cb->climore) {
 	init_completion_state(&agent_cb->completion_state,
 			      agent_cb, 
@@ -2458,7 +2524,9 @@ static void
 	if (LOGDEBUG) {
 	    gl_normal_io(agent_cb->cli_gl);
 	    log_debug("\n\nIncoming notification:");
-	    val_dump_value(msg->notification, NCX_DEF_INDENT);
+	    val_dump_value_ex(msg->notification, 
+                              NCX_DEF_INDENT,
+                              agent_cb->display_mode);
 	    log_debug("\n\n");
 	}
     }
@@ -2689,9 +2757,11 @@ static status_t
      */
     agent_cb->state = MGR_IO_ST_IDLE;
     if (connect_valset) {
-	parm = val_find_child(connect_valset, YANGCLI_MOD, YANGCLI_AGENT);
+	parm = val_find_child(connect_valset, 
+                              YANGCLI_MOD, 
+                              YANGCLI_AGENT);
 	if (parm && parm->res == NO_ERR) {
-	    do_connect(agent_cb, NULL, NULL, 0, TRUE);
+	    do_connect(agent_cb, NULL, NULL, 0);
 	}
     }
 
@@ -3002,7 +3072,9 @@ void
 			   NCX_EL_RPC_ERROR)) {
 	    log_error("\nRPC Error Reply %s for session %u:\n",
 		      rpy->msg_id, usesid);
-	    val_dump_value(rpy->reply, 0);
+	    val_dump_value_ex(rpy->reply, 
+                              0,
+                              agent_cb->display_mode);
 	    log_error("\n");
 	    anyout = TRUE;
 	    anyerrors = TRUE;
@@ -3014,7 +3086,9 @@ void
 	    log_info("\nRPC Data Reply %s for session %u:\n",
 		     rpy->msg_id, usesid);
 	    if (LOGDEBUG) {
-		val_dump_value(rpy->reply, 0);
+		val_dump_value_ex(rpy->reply, 
+                                  0,
+                                  agent_cb->display_mode);
 		log_info("\n");
 	    }
 	    anyout = TRUE;

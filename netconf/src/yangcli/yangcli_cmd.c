@@ -2182,7 +2182,9 @@ static status_t
     if (res == NO_ERR) {
 	if (LOGDEBUG2) {
 	    log_debug2("\nabout to send RPC request with reqdata:");
-	    val_dump_value(reqdata, NCX_DEF_INDENT);
+	    val_dump_value_ex(reqdata, 
+                              NCX_DEF_INDENT,
+                              agent_cb->display_mode);
 	}
 
 	/* the request will be stored if this returns NO_ERR */
@@ -2400,6 +2402,7 @@ static status_t
  * generate the output for a global or local variable
  *
  * INPUTS:
+ *   agent_cb == agent control block to use
  *   varname == variable name to show
  *   vartype == type of user variable
  *   val == value associated with this variable
@@ -2409,7 +2412,8 @@ static status_t
  *   status
  *********************************************************************/
 static status_t
-    show_user_var (const xmlChar *varname,
+    show_user_var (agent_cb_t *agent_cb,
+                   const xmlChar *varname,
 		   var_type_t vartype,
 		   const val_value_t *val,
 		   help_mode_t mode)
@@ -2465,11 +2469,13 @@ static status_t
 	}
     } else {
 	if (imode) {
-	    val_stdout_value(val, 
-			     NCX_DEF_INDENT * doubleindent);
+	    val_stdout_value_ex(val, 
+                                NCX_DEF_INDENT * doubleindent,
+                                agent_cb->display_mode);
 	} else {
-	    val_dump_value(val, 
-			   NCX_DEF_INDENT * doubleindent);
+	    val_dump_value_ex(val, 
+                              NCX_DEF_INDENT * doubleindent,
+                              agent_cb->display_mode);
 	}
     }
 
@@ -2484,6 +2490,7 @@ static status_t
  * show brief info for all user variables
  *
  * INPUTS:
+ *  agent_cb == agent control block to use
  *  mode == help mode requested
  *  shortmode == TRUE if printing just global or local variables
  *               FALSE to print everything
@@ -2496,7 +2503,8 @@ static status_t
  *   status
  *********************************************************************/
 static status_t
-    do_show_vars (help_mode_t mode,
+    do_show_vars (agent_cb_t *agent_cb,
+                  help_mode_t mode,
 		  boolean shortmode,
 		  boolean isglobal,
 		  boolean isany)
@@ -2522,9 +2530,13 @@ static status_t
 	if (mgrset && val_child_cnt(mgrset)) {
 	    (*logfn)("\nCLI Variables\n");
 	    if (imode) {
-		val_stdout_value(mgrset, NCX_DEF_INDENT);
+		val_stdout_value_ex(mgrset, 
+                                    NCX_DEF_INDENT,
+                                    agent_cb->display_mode);
 	    } else {
-		val_dump_value(mgrset, NCX_DEF_INDENT);
+		val_dump_value_ex(mgrset, 
+                                  NCX_DEF_INDENT,
+                                  agent_cb->display_mode);
 	    }
 	    (*logfn)("\n");
 	} else {
@@ -2548,7 +2560,8 @@ static status_t
 		(*logfn)("\nRead-only system variables");
 		first = FALSE;
 	    }
-	    show_user_var(var->name, 
+	    show_user_var(agent_cb,
+                          var->name, 
 			  var->vartype,
 			  var->val,
 			  mode);
@@ -2575,7 +2588,8 @@ static status_t
 		(*logfn)("\nRead-write system variables");
 		first = FALSE;
 	    }
-	    show_user_var(var->name,
+	    show_user_var(agent_cb,
+                          var->name,
 			  var->vartype,
 			  var->val,
 			  mode);
@@ -2602,7 +2616,8 @@ static status_t
 		(*logfn)("\nGlobal variables");
 		first = FALSE;
 	    }
-	    show_user_var(var->name,
+	    show_user_var(agent_cb,
+                          var->name,
 			  var->vartype,
 			  var->val,
 			  mode);
@@ -2624,7 +2639,8 @@ static status_t
 		(*logfn)("\nLocal variables");
 		first = FALSE;
 	    }
-	    show_user_var(var->name, 
+	    show_user_var(agent_cb,
+                          var->name, 
 			  var->vartype,
 			  var->val,
 			  mode);
@@ -2646,6 +2662,7 @@ static status_t
  * show full info for one user var
  *
  * INPUTS:
+ *   agent_cb == agent control block to use
  *   name == variable name to find 
  *   isglobal == TRUE if global var, FALSE if local var
  *   isany == TRUE if don't care (global or local)
@@ -2656,7 +2673,8 @@ static status_t
  *   status
  *********************************************************************/
 static status_t
-    do_show_var (const xmlChar *name,
+    do_show_var (agent_cb_t *agent_cb,
+                 const xmlChar *name,
 		 var_type_t vartype,
 		 boolean isany,
 		 help_mode_t mode)
@@ -2698,7 +2716,7 @@ static status_t
     }
 
     if (val) {
-	show_user_var(name, vartype, val, mode);
+	show_user_var(agent_cb, name, vartype, val, mode);
 	(*logfn)("\n");
     } else {
 	(*logfn)("\nVariable '%s' not found", name);
@@ -3044,7 +3062,8 @@ static status_t
 			      YANGCLI_MOD,
 			      YANGCLI_LOCAL);
 	if (parm) {
-	    res = do_show_var(VAL_STR(parm), 
+	    res = do_show_var(agent_cb,
+                              VAL_STR(parm), 
 			      VAR_TYP_LOCAL, 
 			      FALSE, 
 			      mode);
@@ -3056,7 +3075,11 @@ static status_t
 				  YANGCLI_MOD,
 				  YANGCLI_LOCALS);
 	    if (parm) {
-		res = do_show_vars(mode, TRUE, FALSE, FALSE);
+		res = do_show_vars(agent_cb,
+                                   mode, 
+                                   TRUE, 
+                                   FALSE, 
+                                   FALSE);
 		done = TRUE;
 	    }
 	}
@@ -3076,10 +3099,11 @@ static status_t
 				  YANGCLI_MOD,
 				  YANGCLI_GLOBAL);
 	    if (parm) {
-		res = do_show_var(VAL_STR(parm), 
-			    VAR_TYP_GLOBAL, 
-			    FALSE, 
-			    mode);
+		res = do_show_var(agent_cb,
+                                  VAL_STR(parm), 
+                                  VAR_TYP_GLOBAL, 
+                                  FALSE, 
+                                  mode);
 		done = TRUE;
 	    }
 	}
@@ -3089,7 +3113,11 @@ static status_t
 				  YANGCLI_MOD,
 				  YANGCLI_GLOBALS);
 	    if (parm) {
-		res = do_show_vars(mode, TRUE, TRUE, FALSE);
+		res = do_show_vars(agent_cb,
+                                   mode, 
+                                   TRUE, 
+                                   TRUE, 
+                                   FALSE);
 		done = TRUE;
 	    }
 	}
@@ -3099,7 +3127,8 @@ static status_t
 				  YANGCLI_MOD,
 				  YANGCLI_VAR);
 	    if (parm) {
-		res = do_show_var(VAL_STR(parm), 
+		res = do_show_var(agent_cb,
+                                  VAL_STR(parm), 
                                   VAR_TYP_NONE, 
                                   TRUE, 
                                   mode);
@@ -3112,7 +3141,11 @@ static status_t
 				  YANGCLI_MOD,
 				  YANGCLI_VARS);
 	    if (parm) {
-		res = do_show_vars(mode, FALSE, FALSE, TRUE);
+		res = do_show_vars(agent_cb,
+                                   mode, 
+                                   FALSE, 
+                                   FALSE, 
+                                   TRUE);
 		done = TRUE;
 	    }
 	}
@@ -5195,7 +5228,9 @@ static status_t
     if (res == NO_ERR) {
 	if (LOGDEBUG2) {
 	    log_debug2("\nabout to send RPC request with reqdata:");
-	    val_dump_value(reqdata, NCX_DEF_INDENT);
+	    val_dump_value_ex(reqdata, 
+                              NCX_DEF_INDENT,
+                              agent_cb->display_mode);
 	}
 
 	/* the request will be stored if this returns NO_ERR */
@@ -5499,7 +5534,9 @@ static status_t
     if (res == NO_ERR) {
 	if (LOGDEBUG2) {
 	    log_debug2("\nabout to send RPC request with reqdata:");
-	    val_dump_value(reqdata, NCX_DEF_INDENT);
+	    val_dump_value_ex(reqdata, 
+                              NCX_DEF_INDENT,
+                              agent_cb->display_mode);
 	}
 
 	/* the request will be stored if this returns NO_ERR */
@@ -7511,7 +7548,7 @@ static status_t
     if (!xml_strcmp(rpcname, YANGCLI_CD)) {
 	res = do_cd(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
-	res = do_connect(agent_cb, rpc, line, len, FALSE);
+	res = do_connect(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_FILL)) {
 	res = do_fill(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_HELP)) {
@@ -7772,7 +7809,9 @@ status_t
 	if (res == NO_ERR) {
 	    if (LOGDEBUG2) {
 		log_debug2("\nabout to send RPC request with reqdata:");
-		val_dump_value(reqdata, NCX_DEF_INDENT);
+		val_dump_value_ex(reqdata, 
+                                  NCX_DEF_INDENT,
+                                  agent_cb->display_mode);
 	    }
 
 	    /* the request will be stored if this returns NO_ERR */
@@ -7979,8 +8018,6 @@ xmlChar *
  *   start == byte offset from 'line' where the parse RPC method
  *            left off.  This is eiother empty or contains some 
  *            parameters from the user
- *   cli == TRUE if this is a connect request from the CLI
- *       == FALSE if this is from top-level command input
  *
  * OUTPUTS:
  *   connect_valset parms may be set 
@@ -7993,11 +8030,11 @@ status_t
     do_connect (agent_cb_t *agent_cb,
 		const obj_template_t *rpc,
 		const xmlChar *line,
-		uint32 start,
-		boolean  cli)
+		uint32 start)
 {
     const obj_template_t  *obj;
-    val_value_t           *valset, *connect_valset;
+    val_value_t           *connect_valset, *connect_child;
+    val_value_t           *valset, *child;
     status_t               res;
     boolean                s1, s2, s3;
 
@@ -8007,13 +8044,12 @@ status_t
     }
 #endif
 
-    connect_valset = get_connect_valset();
-
     /* retrieve the 'connect' RPC template, if not done already */
     if (!rpc) {
 	rpc = ncx_find_object(get_yangcli_mod(), 
 			      YANGCLI_CONNECT);
 	if (!rpc) {
+            agent_cb->state = MGR_IO_ST_IDLE;
 	    log_write("\nError finding the 'connect' RPC method");
 	    return ERR_NCX_DEF_NOT_FOUND;
 	}
@@ -8021,8 +8057,17 @@ status_t
 
     obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
     if (!obj) {
+        agent_cb->state = MGR_IO_ST_IDLE;
 	log_write("\nError finding the connect RPC 'input' node");	
 	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    res = NO_ERR;
+
+    if (agent_cb->connect_valset) {
+        connect_valset = agent_cb->connect_valset;
+    } else {
+        connect_valset = get_connect_valset();
     }
 
     /* process any parameters entered on the command line */
@@ -8034,125 +8079,104 @@ status_t
 	if (line[start]) {
 	    valset = parse_rpc_cli(rpc, &line[start], &res);
 	    if (!valset || res != NO_ERR) {
+                if (valset) {
+                    val_free_value(valset);
+                }
 		log_write("\nError in the parameters for RPC %s (%s)",
-			  obj_get_name(rpc), get_error_string(res));
+			  obj_get_name(rpc), 
+                          get_error_string(res));
+                agent_cb->state = MGR_IO_ST_IDLE;
 		return res;
 	    }
 	}
     }
 
-    /* get an empty parmset and use the old set for defaults 
-     * unless this is a cli from the program startup and all
-     * of the parameters are entered
-     */
-    if (!valset) {
-	s1 = s2 = s3 = FALSE;
-	if (cli) {
-	    s1 = val_find_child(connect_valset, 
-				YANGCLI_MOD, 
-				YANGCLI_AGENT) ? TRUE : FALSE;
-	    s2 = val_find_child(connect_valset, 
-				YANGCLI_MOD,
-				YANGCLI_USER) ? TRUE : FALSE;
-	    s3 = val_find_child(connect_valset, 
-				YANGCLI_MOD,
-				YANGCLI_PASSWORD) ? TRUE : FALSE;
-	}
-	if (!(s1 && s2 && s3)) {
-	    valset = val_new_value();
-	    if (!valset) {
-		res = ERR_INTERNAL_MEM;
-		log_write("\nError: malloc failure");
-		return res;
-	    } else {
-		val_init_from_template(valset, obj);
-	    }
-	} /* else use all of connect_valset */
+    /* transfer any of the parms set up in advance */
+    if (valset) {
+        for (connect_child = val_get_first_child(connect_valset);
+             connect_child != NULL;
+             connect_child = val_get_next_child(connect_child)) {
+
+            child = val_find_child(valset,
+                                   val_get_mod_name(connect_child),
+                                   connect_child->name);
+            if (!child) {
+                child = val_clone(connect_child);
+                if (!child) {
+                    agent_cb->state = MGR_IO_ST_IDLE;
+                    log_write("\nError: malloc failed");
+                    val_free_value(valset);
+                    return ERR_INTERNAL_MEM;
+                } else {
+                    val_add_child(child, valset);
+                }
+            }
+        }
+    } else {
+        /* just clone the connect valset to start with */
+        valset = val_clone(connect_valset);
+        if (!valset) {
+            agent_cb->state = MGR_IO_ST_IDLE;
+            log_write("\nError: malloc failed");
+            return ERR_INTERNAL_MEM;
+        }
     }
 
     /* complete the connect valset if needed
      * and transfer it to the agent_cb version
+     *
+     * try to get any missing params in valset 
      */
-    res = NO_ERR;
-    if (valset) {
-	/* try to get any missing params in valset */
-	if (interactive_mode()) {
-	    res = fill_valset(agent_cb, 
-			      rpc, 
-			      valset, 
-			      (agent_cb->connect_valset) ?
-			      agent_cb->connect_valset :
-			      connect_valset);
-	    if (res == ERR_NCX_SKIPPED) {
-		res = NO_ERR;
-	    }
-	}
-
-	/* save the malloced valset */
-	if (res == NO_ERR) {
-	    if (agent_cb->connect_valset) {
-		val_free_value(agent_cb->connect_valset);
-	    }
-	    agent_cb->connect_valset = valset;
-	}
-    } else if (!cli) {
-	if (interactive_mode()) {
-	    if (!agent_cb->connect_valset) {
-		agent_cb->connect_valset = val_new_value();
-		if (!agent_cb->connect_valset) {
-		    log_write("\nError: malloc failure");
-		    return ERR_INTERNAL_MEM;
-		} else {
-		    val_init_from_template(agent_cb->connect_valset,
-					   obj);
-		}
-	    }
-	    res = fill_valset(agent_cb, 
-			      rpc,
-			      agent_cb->connect_valset, 
-			      (agent_cb->connect_valset) ?
-			      agent_cb->connect_valset :
-			      connect_valset);
-	}
-    } else {
-	if (agent_cb->connect_valset) {
-	    val_free_value(agent_cb->connect_valset);
-	}
-	agent_cb->connect_valset = val_clone(connect_valset);
-	if (!agent_cb->connect_valset) {
-	    res = ERR_INTERNAL_MEM;
-	}
+    if (interactive_mode()) {
+        res = fill_valset(agent_cb, 
+                          rpc, 
+                          valset, 
+                          connect_valset);
+        if (res == ERR_NCX_SKIPPED) {
+            res = NO_ERR;
+        }
     }
 
-    /* check result so far */
+    /* check error or operation canceled */
     if (res != NO_ERR) {
 	if (res != ERR_NCX_CANCELED) {
 	    log_write("\nError: Connect failed (%s)", 
 		      get_error_string(res));
 	}
 	agent_cb->state = MGR_IO_ST_IDLE;
-	if (valset) {
-	    val_free_value(valset);
-	}
-    } else {
-	/* make sure the 3 required parms are set */
-	s1 = val_find_child(agent_cb->connect_valset,
-			    YANGCLI_MOD, 
-			    YANGCLI_AGENT) ? TRUE : FALSE;
-	s2 = val_find_child(agent_cb->connect_valset, 
-			    YANGCLI_MOD,
-			    YANGCLI_USER) ? TRUE : FALSE;
-	s3 = val_find_child(agent_cb->connect_valset, 
-			    YANGCLI_MOD,
-			    YANGCLI_PASSWORD) ? TRUE : FALSE;
+        val_free_value(valset);
+        return res;
+    }
 
-	/* check if all params present yet */
-	if (s1 && s2 && s3) {
-	    create_session(agent_cb);
-	} else {
-	    log_write("\nError: Connect failed due to missing parameters");
-	    agent_cb->state = MGR_IO_ST_IDLE;
-	}
+
+    /* passing off valset memory here */
+    s1 = s2 = s3 = FALSE;
+    if (valset) {
+        /* save the malloced valset */
+        if (agent_cb->connect_valset) {
+            val_free_value(agent_cb->connect_valset);
+        }
+        agent_cb->connect_valset = valset;
+
+        /* make sure the 3 required parms are set */
+        s1 = val_find_child(agent_cb->connect_valset,
+                            YANGCLI_MOD, 
+                            YANGCLI_AGENT) ? TRUE : FALSE;
+        s2 = val_find_child(agent_cb->connect_valset, 
+                            YANGCLI_MOD,
+                            YANGCLI_USER) ? TRUE : FALSE;
+        s3 = val_find_child(agent_cb->connect_valset, 
+                            YANGCLI_MOD,
+                            YANGCLI_PASSWORD) ? TRUE : FALSE;
+    }
+
+    /* check if all params present yet */
+    if (s1 && s2 && s3) {
+        create_session(agent_cb);
+    } else {
+        res = ERR_NCX_MISSING_PARM;
+        log_write("\nError: Connect failed due to missing parameter(s)");
+        agent_cb->state = MGR_IO_ST_IDLE;
     }
 
     return res;
@@ -8371,6 +8395,235 @@ void *
     return def;
     
 } /* parse_def */
+
+
+/********************************************************************
+* FUNCTION send_keepalive_get
+* 
+* Send a <get> operation to the agent to keep the session
+* from getting timed out; agent sent a keepalive request
+* and SSH will drop the session unless data is sent
+* within a configured time
+*
+* INPUTS:
+*    agent_cb == agent control block to use
+*
+* OUTPUTS:
+*    state may be changed or other action taken
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    send_keepalive_get (agent_cb_t *agent_cb)
+{
+    (void)agent_cb;
+    return NO_ERR;
+
+#if 0
+    const obj_template_t  *rpc, *input, *withdefobj;
+    val_value_t           *reqdata, *filter;
+    val_value_t           *withdefval, *dummy_parm;
+    mgr_rpc_req_t         *req;
+    ses_cb_t              *scb;
+    mgr_scb_t             *mscb;
+    status_t               res;
+    boolean                freeroot;
+
+    req = NULL;
+    reqdata = NULL;
+    res = NO_ERR;
+    input = NULL;
+
+    /* either going to free valroot or config_content */
+    if (valroot == NULL || valroot == get_content) {
+	freeroot = FALSE;
+    } else {
+	freeroot = TRUE;
+    }
+
+    /* get the <get> or <get-config> input template */
+    rpc = ncx_find_object(get_netconf_mod(),
+			  (source) ? 
+			  NCX_EL_GET_CONFIG : NCX_EL_GET);
+    if (rpc) {
+	input = obj_find_child(rpc, NULL, YANG_K_INPUT);
+    }
+
+    if (!input) {
+	res = SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    } else {
+	/* construct a method + parameter tree */
+	reqdata = xml_val_new_struct(obj_get_name(rpc), 
+				     obj_get_nsid(rpc));
+	if (!reqdata) {
+	    log_error("\nError allocating a new RPC request");
+	    res = ERR_INTERNAL_MEM;
+	}
+    }
+
+    /* add /get-star/input/source */
+    if (res == NO_ERR) {
+	if (source) {
+	    val_add_child(source, reqdata);
+	}
+    }
+
+    /* add /get-star/input/filter */
+    if (res == NO_ERR) {
+	if (get_content) {
+	    /* set the get/input/filter node to the
+	     * get_content, but after filling in any
+	     * missing nodes from the root to the target
+	     */
+	    filter = xml_val_new_struct(NCX_EL_FILTER, xmlns_nc_id());
+	} else {
+	    filter = xml_val_new_flag(NCX_EL_FILTER, xmlns_nc_id());
+	}
+	if (!filter) {
+	    log_error("\nError: malloc failure");
+	    res = ERR_INTERNAL_MEM;
+	} else {
+	    val_add_child(filter, reqdata);
+	}
+    }
+
+    /* add the type and maybe select attributes */
+    if (res == NO_ERR) {
+	res = add_filter_attrs(filter, selectstr);
+    }
+
+    /* check any errors so far */
+    if (res != NO_ERR) {
+	if (freeroot) {
+	    val_free_value(valroot);
+	} else if (get_content) {
+	    val_free_value(get_content);
+	}
+	val_free_value(reqdata);
+	return res;
+    }
+
+    /* add the content to the filter element
+     * building the path from the content node
+     * to the root; fill if dofill is true
+     */
+    if (valroot) {
+	val_add_child(valroot, filter);
+	res = complete_path_content(agent_cb,
+				    rpc,
+				    valroot,
+				    get_content,
+				    dofill);
+	if (res != NO_ERR) {
+	    val_free_value(valroot);
+	    val_free_value(reqdata);
+	    return res;
+	}
+    } else if (get_content) {
+	dummy_parm = NULL;
+	res = add_filter_from_content_node(agent_cb,
+					   rpc, 
+					   get_content,
+					   get_content->obj,
+					   filter, 
+					   dofill,
+					   &dummy_parm);
+	if (res != NO_ERR && res != ERR_NCX_SKIPPED) {
+	    /*  val_free_value(get_content); already freed! */
+	    val_free_value(reqdata);
+	    return res;
+	}
+	res = NO_ERR;
+    }
+
+    /* get the session control block */
+    scb = mgr_ses_get_scb(agent_cb->mysid);
+    if (!scb) {
+	res = SET_ERROR(ERR_INTERNAL_PTR);
+    }
+
+    /* !!! get_content consumed at this point !!!
+     * check if the with-defaults parmaeter should be added
+     */
+    if (res == NO_ERR) {
+	mscb = mgr_ses_get_mscb(scb);
+	if (cap_std_set(&mscb->caplist, CAP_STDID_WITH_DEFAULTS)) {
+	    switch (withdef) {
+	    case NCX_WITHDEF_NONE:
+		break;
+	    case NCX_WITHDEF_TRIM:
+	    case NCX_WITHDEF_EXPLICIT:
+		/*** !!! NEED TO CHECK IF TRIM / EXPLICT 
+		 *** !!! REALLY SUPPORTED IN THE caplist
+		 ***/
+		/* fall through */
+	    case NCX_WITHDEF_REPORT_ALL:
+		/* it is OK to send a with-defaults to this agent */
+		withdefobj = obj_find_child(input, 
+					    NULL,
+					    NCX_EL_WITH_DEFAULTS);
+		if (!withdefobj) {
+		    SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+		} else {
+		    withdefval = val_make_simval_obj
+			(withdefobj,
+			 ncx_get_withdefaults_string(withdef),
+			 &res);
+		    if (withdefval) {
+			val_add_child(withdefval, reqdata);
+		    }
+		}
+		break;
+	    default:
+		SET_ERROR(ERR_INTERNAL_VAL);
+	    }
+	} else {
+	    log_warn("\nWarning: 'with-defaults' "
+		     "capability not-supported so parameter ignored");
+	}
+    }
+
+    if (res == NO_ERR) {
+	/* allocate an RPC request and send it */
+	req = mgr_rpc_new_request(scb);
+	if (!req) {
+	    res = ERR_INTERNAL_MEM;
+	    log_error("\nError allocating a new RPC request");
+	} else {
+	    req->data = reqdata;
+	    req->rpc = rpc;
+	    req->timeout = timeoutval;
+	}
+    }
+	
+    if (res == NO_ERR) {
+	if (LOGDEBUG2) {
+	    log_debug2("\nabout to send RPC request with reqdata:");
+	    val_dump_value_ex(reqdata, 
+                              NCX_DEF_INDENT,
+                              agent_cb->display_mode);
+	}
+
+	/* the request will be stored if this returns NO_ERR */
+	res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
+    }
+
+    if (res != NO_ERR) {
+	if (req) {
+	    mgr_rpc_free_request(req);
+	} else if (reqdata) {
+	    val_free_value(reqdata);
+	}
+    } else {
+	agent_cb->state = MGR_IO_ST_CONN_RPYWAIT;
+    }
+
+    return res;
+
+#endif
+
+} /* send_keepalive_get */
 
 
 /* END yangcli_cmd.c */

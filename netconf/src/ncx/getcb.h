@@ -100,7 +100,7 @@ typedef enum getcb_mode_t_ {
 typedef status_t 
     (*getcb_fn_t) (ses_cb_t *scb,
 		   getcb_mode_t cbmode,
-		   val_value_t *virval,
+		   const val_value_t *virval,
 		   val_value_t *dstval);
 
 #endif	    /* _H_getcb */

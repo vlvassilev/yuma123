@@ -179,6 +179,9 @@ extern ncx_iqual_t
 extern xpath_pcb_t *
     val_get_xpathpcb (val_value_t *val);
 
+extern const xpath_pcb_t *
+    val_get_const_xpathpcb (const val_value_t *val);
+
 extern val_value_t *
     val_make_simval_obj (const obj_template_t *obj,
 			 const xmlChar *valstr,

@@ -239,7 +239,7 @@ static const obj_template_t *sysSessionEndobj;
 static status_t 
     get_currentDateTime (ses_cb_t *scb,
 			 getcb_mode_t cbmode,
-			 val_value_t *virval,
+			 const val_value_t *virval,
 			 val_value_t  *dstval)
 {
     xmlChar      *buff;

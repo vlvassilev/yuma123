@@ -54,8 +54,9 @@ date         init     comment
 #include "xpath_wr.h"
 #endif
 
+
 /********************************************************************
-* FUNCTION xpath_wr_expr
+* FUNCTION wr_expr
 * 
 * Write the specified XPath expression to the current session
 * using the default prefixes
@@ -70,11 +71,10 @@ date         init     comment
 * RETURNS:
 *   status
 *********************************************************************/
-status_t
-    xpath_wr_expr (ses_cb_t *scb,
-		   val_value_t *xpathval)
+static status_t
+    wr_expr (ses_cb_t *scb,
+             xpath_pcb_t *pcb)
 {
-    xpath_pcb_t          *pcb;
     const xmlChar        *cur_val, *prefix;
     boolean               done, needspace, needprefix;
     xmlns_id_t            cur_nsid;
@@ -82,16 +82,6 @@ status_t
     status_t              res;
     uint32                quotes;
 
-#ifdef DEBUG
-    if (!scb || !xpathval) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    pcb = val_get_xpathpcb(xpathval);
-    if (pcb == NULL) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
     if (pcb->tkc == NULL || pcb->parseres != NO_ERR) {
 	return  pcb->parseres;
     }
@@ -222,7 +212,94 @@ status_t
 
     return NO_ERR;
 
+}  /* wr_expr */
+
+
+/************    E X P O R T E D   F U N C T I O N S    *************/
+
+
+/********************************************************************
+* FUNCTION xpath_wr_expr
+* 
+* Write the specified XPath expression to the current session
+* using the default prefixes
+*
+* The XPath pcb must be previously parsed and found valid
+*
+* INPUTS:
+*    scb == session control block to use
+*    msg == message header to use
+*    xpathval == the value containing the XPath expr to write
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xpath_wr_expr (ses_cb_t *scb,
+		   val_value_t *xpathval)
+{
+    xpath_pcb_t          *pcb;
+    status_t              res;
+
+#ifdef DEBUG
+    if (!scb || !xpathval) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    pcb = val_get_xpathpcb(xpathval);
+    if (pcb == NULL) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    res = wr_expr(scb, pcb);
+
+    return res;
+
 }  /* xpath_wr_expr */
+
+
+/********************************************************************
+* FUNCTION xpath_wr_const_expr
+* 
+* Write the specified XPath expression to the current session
+* using the default prefixes
+*
+* The XPath pcb must be previously parsed and found valid
+*
+* INPUTS:
+*    scb == session control block to use
+*    msg == message header to use
+*    xpathval == the value containing the XPath expr to write
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xpath_wr_const_expr (ses_cb_t *scb,
+                         const val_value_t *xpathval)
+{
+    xpath_pcb_t          *pcb;
+    status_t              res;
+
+#ifdef DEBUG
+    if (!scb || !xpathval) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    pcb = xpath_clone_pcb(val_get_const_xpathpcb(xpathval));
+    if (pcb == NULL) {
+	return ERR_INTERNAL_MEM;
+    }
+
+    res = wr_expr(scb, pcb);
+
+    xpath_free_pcb(pcb);
+
+    return res;
+
+}  /* xpath_wr_const_expr */
 
 
 /* END xpath_wr.c */

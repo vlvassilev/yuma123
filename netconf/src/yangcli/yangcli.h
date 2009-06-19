@@ -78,6 +78,12 @@ date	     init     comment
 
 #define YANGCLI_DEF_TIMEOUT   30
 
+#define YANGCLI_DEF_AGENT (const xmlChar *)"default"
+
+#define YANGCLI_DEF_DISPLAY_MODE   NCX_DISPLAY_MODE_PLAIN
+
+#define YANGCLI_DEF_FIXORDER   TRUE
+
 #define YANGCLI_MOD  (const xmlChar *)"yangcli"
 
 #ifdef MACOSX
@@ -122,6 +128,7 @@ date	     init     comment
 #define YANGCLI_CONFIG      (const xmlChar *)"config"
 #define YANGCLI_DEF_MODULE  (const xmlChar *)"default-module"
 #define YANGCLI_DIR         (const xmlChar *)"dir"
+#define YANGCLI_DISPLAY_MODE  (const xmlChar *)"display-mode"
 #define YANGCLI_EDIT_TARGET (const xmlChar *)"edit-target"
 #define YANGCLI_ERROR_OPTION (const xmlChar *)"error-option"
 #define YANGCLI_FIXORDER    (const xmlChar *)"fixorder"
@@ -184,8 +191,6 @@ date	     init     comment
 #define YANGCLI_PR_LLIST (const xmlChar *)"Add another leaf-list?"
 #define YANGCLI_PR_LIST (const xmlChar *)"Add another list?"
 
-
-#define YANGCLI_DEF_AGENT (const xmlChar *)"default"
 
 /********************************************************************
 *								    *
@@ -253,6 +258,7 @@ typedef struct agent_cb_t_ {
 
     /* per-agent shadows of global config vars */
     boolean              get_optional;
+    ncx_display_mode_t   display_mode;
     uint32               timeout;
     ncx_bad_data_t       baddata;
     log_debug_t          log_level;

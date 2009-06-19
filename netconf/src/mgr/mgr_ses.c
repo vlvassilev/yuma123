@@ -37,6 +37,10 @@ date         init     comment
 #include "procdefs.h"
 #endif
 
+#ifndef _H_def_reg
+#include "def_reg.h"
+#endif
+
 #ifndef _H_dlq
 #include "dlq.h"
 #endif
@@ -97,6 +101,7 @@ date         init     comment
 
 #ifdef DEBUG
 #define MGR_SES_DEBUG 1
+#define MGR_SES_SSH2_TRACE 1
 #endif
 
 /* maximum number of concurrent outbound sessions 
@@ -165,6 +170,9 @@ static status_t
 	}
     }
 
+    /* activate the socket in the select loop */
+    mgr_io_activate_session(scb->fd);
+
     /* set the NETCONF agent address */
     memset(&targ, 0x0, sizeof(targ));
     targ.sin_family = AF_INET;
@@ -198,6 +206,9 @@ static status_t
 	    return NO_ERR;
 	}
     }
+
+    /* de-activate the socket in the select loop */
+    mgr_io_deactivate_session(scb->fd);
 
     return ERR_NCX_CONNECT_FAILED;
 
@@ -251,6 +262,20 @@ static status_t
 	}
 	return ERR_NCX_SESSION_FAILED;
     }
+
+#ifdef MGR_SES_SSH2_TRACE
+    if (LOGDEBUG2) {
+        libssh2_trace(mscb->session,
+                      LIBSSH2_TRACE_TRANS |
+                      LIBSSH2_TRACE_KEX |
+                      LIBSSH2_TRACE_AUTH |
+                      LIBSSH2_TRACE_CONN |
+                      LIBSSH2_TRACE_SCP |
+                      LIBSSH2_TRACE_SFTP |
+                      LIBSSH2_TRACE_ERROR |
+                      LIBSSH2_TRACE_PUBLICKEY);
+    }
+#endif
 
     /* 
      * this does not work because the AUTH phase will not
@@ -589,6 +614,11 @@ status_t
     scb->inready.sid = slot;
     scb->outready.sid = slot;
 
+    /* add the FD to SCB mapping in the definition registry */
+    if (res == NO_ERR) {
+	res = def_reg_add_scb(scb->fd, scb);
+    }
+
     /* send the manager hello to the agent */
     if (res == NO_ERR) {
 	res = mgr_hello_send(scb);
@@ -649,6 +679,12 @@ void
     if (scb->mgrcb) {
 	mgr_free_scb(scb->mgrcb);
 	scb->mgrcb = NULL;
+    }
+
+    /* deactivate the session IO */
+    if (scb->fd) {
+	mgr_io_deactivate_session(scb->fd);
+	def_reg_del_scb(scb->fd);
     }
 
     ses_free_scb(scb);
@@ -932,12 +968,19 @@ ssize_t
     scb = (ses_cb_t *)s;
     mscb = mgr_ses_get_mscb(scb);
 
-    /* fix bug in libssh2 or my code -- cannot tell for sure !!! */
     ret = libssh2_channel_read(mscb->channel, buff, bufflen);
-
+    mscb->returncode = ret;
     if (ret < 0) {
         if (ret == LIBSSH2_ERROR_EAGAIN) {
             *erragain = TRUE;
+#if 0
+            if (LOGDEBUG3) {
+                log_debug3("\nmgr_ses: channel read EAGAIN "
+                           "on session %u (a:%u)",
+                           scb->sid,
+                           mscb->agtsid);
+            }
+#endif
         } else {
             log_ssh2_error(scb, mscb, "read");
         }

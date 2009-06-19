@@ -301,9 +301,11 @@ status_t
 		    if (!dlq_empty(&scb->outQ)) {
 			res = ses_msg_send_buffs(scb);
 			if (res != NO_ERR) {
-			    log_info("\nagt_ncxserver write failed; "
-				     "closing session %d ", 
-				     scb->sid);
+                            if (LOGINFO) {
+                                log_info("\nagt_ncxserver write failed; "
+                                         "closing session %d ", 
+                                         scb->sid);
+                            }
 			    agt_ses_kill_session(scb->sid, 
 						 scb->sid,
 						 SES_TR_OTHER);
@@ -335,21 +337,28 @@ status_t
 				 (struct sockaddr *)&clientname,
 				 &size);
 		    if (new < 0) {
-			log_info("\nagt_ncxserver accept "
-				 "connection failed (%d)",
-				 new);
+                        if (LOGINFO) {
+                            log_info("\nagt_ncxserver accept "
+                                     "connection failed (%d)",
+                                     new);
+                        }
 			continue;
 		    }
 
 		    /* get a new session control block */
 		    if (!agt_ses_new_session(SES_TRANSPORT_SSH, new)) {
 			close(new);
-			log_info("\nagt_ncxserver new "
-				 "session failed (%d)", new);
+                        if (LOGINFO) {
+                            log_info("\nagt_ncxserver new "
+                                     "session failed (%d)", 
+                                     new);
+                        }
 		    } else {
 			/* set non-blocking IO */
 			if (fcntl(new, F_SETFD, O_NONBLOCK)) {
-			    log_info("\nfnctl failed");
+                            if (LOGINFO) {
+                                log_info("\nfnctl failed");
+                            }
 			}
 			FD_SET(new, &active_fd_set);
 			if (new > maxrdnum) {
@@ -372,10 +381,12 @@ status_t
 				maxrdnum = i-1;
 			    }
 			    if (res != ERR_NCX_SESSION_CLOSED) {
-				log_info("\nagt_ncxssrv input failed"
-					 " for session %d (%s)",
-					 scb->sid, 
-					 get_error_string(res));
+                                if (LOGINFO) {
+                                    log_info("\nagt_ncxserver: input failed"
+                                             " for session %d (%s)",
+                                             scb->sid, 
+                                             get_error_string(res));
+                                }
 			    }
 			} 
 		    }

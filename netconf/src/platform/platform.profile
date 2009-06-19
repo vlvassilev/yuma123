@@ -80,7 +80,8 @@ COMPILE.c= $(CC) $(CFLAGS) $(CPPFLAGS) $(PLATFORM_CPP) $(CINC) $(SUBDIR_CPP) $(T
 
 
 $(TARGET)/%.o: %.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(PLATFORM_CPP) $(CINC) $(SUBDIR_CPP) $(TARGET_ARCH) -c -o $@ $< 
+	$(CC) $(CFLAGS) $(CPPFLAGS) $(PLATFORM_CPP) \
+        $(CINC) $(SUBDIR_CPP) $(TARGET_ARCH) -c -o $@ $< 
 
 
 

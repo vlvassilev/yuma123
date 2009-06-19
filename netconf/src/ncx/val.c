@@ -91,6 +91,10 @@ date         init     comment
 #include "xml_util.h"
 #endif
 
+#ifndef _H_xml_wr
+#include "xml_wr.h"
+#endif
+
 #ifndef _H_xpath
 #include "xpath.h"
 #endif
@@ -133,12 +137,6 @@ static uint32 editvars_malloc = 0;
 static uint32 editvars_free = 0;
 #endif
 
-typedef enum dumpvalue_mode_t_ {
-    DUMP_VAL_NONE,
-    DUMP_VAL_STDOUT,
-    DUMP_VAL_LOG,
-    DUMP_VAL_ALT_LOG
-} dumpvalue_mode_t;
 
 /********************************************************************
 * FUNCTION stdout_num
@@ -892,348 +890,6 @@ static status_t
 } /* check_rangeQ */
 
 
-/********************************************************************
-* FUNCTION dump_value
-* 
-* Printf the specified val_value_t struct to 
-* the logfile, or stdout if none set
-* Uses conf file format (see ncx/conf.h)
-*
-* INPUTS:
-*    val == value to dump
-*    startindent == start indent char count
-*    tofil == 
-*    dumpmode == logging mode to use
-*********************************************************************/
-static void
-    dump_value (const val_value_t *val,
-		int32 startindent,
-		dumpvalue_mode_t dumpmode)
-{
-    dumpfn_t            dumpfn, errorfn;
-    indentfn_t          indentfn;
-    const val_value_t  *chval;
-    const ncx_lmem_t   *listmem;
-    const val_idref_t  *idref;
-    xmlChar            *buff;
-    ncx_btype_t         btyp, lbtyp;
-    uint32              len;
-    status_t            res;
-    boolean             quotes;
-
-#ifdef VAL_INCLUDE_META
-    const dlq_hdr_t    *metaQ;
-    const val_value_t  *metaval;
-#endif
-
-#ifdef DEBUG
-    if (!val) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
-
-    switch (dumpmode) {
-    case DUMP_VAL_NONE:
-	return;
-    case DUMP_VAL_STDOUT:
-	dumpfn = log_stdout;
-	errorfn = log_stdout;
-	indentfn = log_stdout_indent;
-	break;
-    case DUMP_VAL_LOG:
-	dumpfn = log_write;
-	errorfn = log_error;
-	indentfn = log_indent;
-	break;
-    case DUMP_VAL_ALT_LOG:
-	dumpfn = log_alt_write;
-	errorfn = log_error;
-	indentfn = log_indent;
-	break;
-    default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
-    }
-
-    /* indent and print the val name */
-    (*indentfn)(startindent);
-    if (val->btyp == NCX_BT_EXTERN) {
-	(*dumpfn)("%s (extern=%s) ", 
-		  (val->name) ? (const char *)val->name : "--",
-		  (val->v.fname) ? (const char *)val->v.fname : "--");
-    } else if (val->btyp == NCX_BT_INTERN) {
-	(*dumpfn)("%s (intern) ",
-		  (val->name) ? (const char *)val->name : "--");
-    } else if (dumpmode == DUMP_VAL_ALT_LOG &&
-	       !xml_strcmp(val->name, NCX_EL_DATA)) {
-	;  /* skip the name */
-    } else {
-	(*dumpfn)("%s ", (val->name) ? (const char *)val->name : "--");
-    }
-
-    btyp = val->btyp;
-
-    /* check if an index clause needs to be printed next */
-    if (!dlq_empty(&val->indexQ)) {
-	res = val_get_index_string(NULL, 
-                                   NCX_IFMT_CLI, 
-                                   val, 
-                                   NULL, 
-                                   &len);
-	if (res == NO_ERR) {
-	    buff = m__getMem(len+1);
-	    if (buff) {
-		res = val_get_index_string(NULL, 
-                                           NCX_IFMT_CLI, 
-					   val, 
-                                           buff, 
-                                           &len);
-		if (res == NO_ERR) {
-		    (dumpfn)("%s ", buff);
-		} else {
-		    SET_ERROR(res);
-		}
-		m__free(buff);
-	    } else {
-		(*errorfn)("\nval: malloc failed for %u bytes", len+1);
-	    }
-	}
-    }
-
-    /* dump the value, depending on the base type */
-    switch (btyp) {
-    case NCX_BT_NONE:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	break;
-    case NCX_BT_ANY:
-	(*dumpfn)("(any)");
-	break;
-    case NCX_BT_ENUM:
-	if (val->v.enu.name) {
-	    (*dumpfn)("%s", (const char *)val->v.enu.name);
-	}
-	break;
-    case NCX_BT_EMPTY:
-	if (!val->v.bool) {
-	    (*dumpfn)("(not set)");   /* should not happen */
-	}
-	break;
-    case NCX_BT_BOOLEAN:
-	if (val->v.bool) {
-	    (*dumpfn)("true");
-	} else {
-	    (*dumpfn)("false");
-	}
-	break;
-    case NCX_BT_INT8:
-    case NCX_BT_INT16:
-    case NCX_BT_INT32:
-    case NCX_BT_INT64:
-    case NCX_BT_UINT8:
-    case NCX_BT_UINT16:
-    case NCX_BT_UINT32:
-    case NCX_BT_UINT64:
-    case NCX_BT_DECIMAL64:
-    case NCX_BT_FLOAT64:
-	switch (dumpmode) {
-	case DUMP_VAL_STDOUT:
-	    stdout_num(btyp, &val->v.num);
-	    break;
-	case DUMP_VAL_LOG:
-	    ncx_printf_num(&val->v.num, btyp);
-	    break;
-	case DUMP_VAL_ALT_LOG:
-	    ncx_alt_printf_num(&val->v.num, btyp);
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	}
-	break;
-    case NCX_BT_BINARY:
-	(*dumpfn)("binary string, length '%u'",
-		  val->v.binary.ustrlen);
-	break;
-    case NCX_BT_STRING:
-    case NCX_BT_INSTANCE_ID:
-    case NCX_BT_LEAFREF:   /*******/
-	if (VAL_STR(val)) {
-	    quotes = val_need_quotes(VAL_STR(val));
-
-	    if (dumpmode == DUMP_VAL_ALT_LOG &&
-		!xml_strcmp(val->name, NCX_EL_DATA)) {
-		quotes = FALSE;
-	    }
-
-	    if (quotes) {
-		(*dumpfn)("%c", VAL_QUOTE_CH);
-	    }
-	    if (obj_is_password(val->obj)) {
-		(*dumpfn)("%s", VAL_PASSWORD_STRING);
-	    } else {
-		(*dumpfn)("%s", (const char *)VAL_STR(val));
-	    }
-	    if (quotes) {
-		(*dumpfn)("%c", VAL_QUOTE_CH);
-	    }
-	}
-	break;
-    case NCX_BT_IDREF:
-	idref = VAL_IDREF(val);
-	(*dumpfn)("%s:%s",
-		  xmlns_get_ns_prefix(idref->nsid),
-		  idref->name);
-	break;
-    case NCX_BT_SLIST:
-    case NCX_BT_BITS:
-	if (dlq_empty(&val->v.list.memQ)) {
-	    (*dumpfn)("{ }");
-	} else {
-	    lbtyp = val->v.list.btyp;
-	    (*dumpfn)("{");
-	    for (listmem = (const ncx_lmem_t *)
-		     dlq_firstEntry(&val->v.list.memQ);
-		 listmem != NULL;
-		 listmem = (const ncx_lmem_t *)dlq_nextEntry(listmem)) {
-
-		if (startindent >= 0) {
-		    (*indentfn)(startindent+NCX_DEF_INDENT);
-		}
-
-		if (typ_is_string(lbtyp)) {
-		    if (listmem->val.str) {
-			quotes = val_need_quotes(listmem->val.str);
-			if (quotes) {
-			    (*dumpfn)("%c", VAL_QUOTE_CH);
-			}
-			(*dumpfn)("%s ", (const char *)listmem->val.str);
-			if (quotes) {
-			    (*dumpfn)("%c", VAL_QUOTE_CH);
-			}
-		    }
-		} else if (typ_is_number(lbtyp)) {
-		    switch (dumpmode) {
-		    case DUMP_VAL_STDOUT:
-			stdout_num(lbtyp, &listmem->val.num);
-			break;
-		    case DUMP_VAL_LOG:
-			ncx_printf_num(&listmem->val.num, lbtyp);
-			break;
-		    case DUMP_VAL_ALT_LOG:
-			ncx_alt_printf_num(&listmem->val.num, lbtyp);
-			break;
-		    default:
-			SET_ERROR(ERR_INTERNAL_VAL);
-		    }
-		    (*dumpfn)(" ");
-		} else {
-		    switch (lbtyp) {
-		    case NCX_BT_ENUM:
-			if (listmem->val.enu.name) {
-			    (*dumpfn)("%s ",
-				      (const char *)listmem->val.enu.name);
-			}
-			break;
-		    case NCX_BT_BITS:
-			(*dumpfn)("%s ", (const char *)listmem->val.str);
-			break;
-		    case NCX_BT_BOOLEAN:
-			(*dumpfn)("%s ",
-				  (listmem->val.bool) ? 
-				  NCX_EL_TRUE : NCX_EL_FALSE);
-			break;
-		    default:
-			SET_ERROR(ERR_INTERNAL_VAL);
-		    }
-		}
-	    }
-	    (*indentfn)(startindent);
-	    (*dumpfn)("}");
-	}
-	break;
-    case NCX_BT_LIST:
-    case NCX_BT_CONTAINER:
-    case NCX_BT_CHOICE:
-    case NCX_BT_CASE:
-	(*dumpfn)("{");
-	for (chval = (const val_value_t *)dlq_firstEntry(&val->v.childQ);
-	     chval != NULL;
-	     chval = (const val_value_t *)dlq_nextEntry(chval)) {
-	    dump_value(chval, (startindent >= 0) ?
-		       startindent+NCX_DEF_INDENT : startindent,
-		       dumpmode);
-	}
-	(*indentfn)(startindent);
-	(*dumpfn)("}");
-	break;
-    case NCX_BT_EXTERN:
-	(*dumpfn)("{");
-	(*indentfn)(startindent);
-
-	switch (dumpmode) {
-	case DUMP_VAL_STDOUT:
-	    stdout_extern(val->v.fname);
-	    break;
-	case DUMP_VAL_LOG:
-	    dump_extern(val->v.fname);
-	    break;
-	case DUMP_VAL_ALT_LOG:
-	    dump_alt_extern(val->v.fname);
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	}
-	
-	(*indentfn)(startindent);
-	(*dumpfn)("}");
-	break;
-    case NCX_BT_INTERN:
-	(*dumpfn)("{");
-	(*indentfn)(startindent);
-
-
-	switch (dumpmode) {
-	case DUMP_VAL_STDOUT:
-	    stdout_intern(val->v.intbuff);
-	    break;
-	case DUMP_VAL_LOG:
-	    dump_intern(val->v.intbuff);
-	    break;
-	case DUMP_VAL_ALT_LOG:
-	    dump_alt_intern(val->v.intbuff);
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	}
-
-	(*indentfn)(startindent);
-	(*dumpfn)("}");
-	break;
-    default:
-	(*errorfn)("\nval: illegal btype (%d)", btyp);
-    }    
-
-#ifdef VAL_INCLUDE_META
-    /* dump the metadata queue if non-empty */
-    metaQ = val_get_metaQ(val);
-    if (metaQ && !dlq_empty(metaQ)) {
-	if (startindent >= 0) {
-	    (*indentfn)(startindent+NCX_DEF_INDENT);
-	}
-	(*dumpfn)("%s.metaQ ", val->name);
-	for (metaval = val_get_first_meta(metaQ);
-	     metaval != NULL;
-	     metaval = val_get_next_meta(metaval)) {
-	    dump_value(metaval, 
-		       (startindent >= 0) ?
-		       startindent+(2*NCX_DEF_INDENT) : startindent,
-		       dumpmode);
-	}
-    }
-#endif
-
-}   /* dump_value */
-
 
 /********************************************************************
 * FUNCTION position_walker
@@ -1381,7 +1037,7 @@ static boolean
 *    *realval is setup for return if NO_ERR
 *********************************************************************/
 static void
-    setup_virtual_retval (val_value_t  *virval,
+    setup_virtual_retval (const val_value_t  *virval,
 			  val_value_t *realval)
 {
     const typ_template_t  *listtyp;
@@ -3408,9 +3064,48 @@ void
     }
 #endif
 
-    dump_value(val, startindent, DUMP_VAL_LOG);
+    val_dump_value_max(val, 
+                       startindent, 
+                       NCX_DEF_INDENT,
+                       DUMP_VAL_LOG, 
+                       NCX_DISPLAY_MODE_PLAIN,
+                       FALSE);
 
 } /* val_dump_value */
+
+
+/********************************************************************
+* FUNCTION val_dump_value_ex
+* 
+* Printf the specified val_value_t struct to 
+* the logfile, or stdout if none set
+* Uses conf file format (see ncx/conf.h)
+*
+* INPUTS:
+*    val == value to printf
+*    startindent == start indent char count
+*
+*********************************************************************/
+void
+    val_dump_value_ex (const val_value_t *val,
+                       int32 startindent,
+                       ncx_display_mode_t display_mode)
+{
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    val_dump_value_max(val, 
+                       startindent, 
+                       NCX_DEF_INDENT,
+                       DUMP_VAL_LOG,
+                       display_mode,
+                       FALSE);
+
+} /* val_dump_value_ex */
 
 
 /********************************************************************
@@ -3436,7 +3131,12 @@ void
     }
 #endif
 
-    dump_value(val, startindent, DUMP_VAL_ALT_LOG);
+    val_dump_value_max(val, 
+                       startindent, 
+                       NCX_DEF_INDENT,
+                       DUMP_VAL_ALT_LOG,
+                       NCX_DISPLAY_MODE_PLAIN,
+                       FALSE);
 
 } /* val_dump_alt_value */
 
@@ -3463,9 +3163,444 @@ void
     }
 #endif
 
-    dump_value(val, startindent, DUMP_VAL_STDOUT);
+    val_dump_value_max(val, 
+                       startindent, 
+                       NCX_DEF_INDENT,
+                       DUMP_VAL_STDOUT,
+                       NCX_DISPLAY_MODE_PLAIN,
+                       FALSE);
 
 } /* val_stdout_value */
+
+
+/********************************************************************
+* FUNCTION val_stdout_value_ex
+* 
+* Printf the specified val_value_t struct to stdout
+* Uses conf file format (see ncx/conf.h)
+*
+* INPUTS:
+*    val == value to printf
+*    startindent == start indent char count
+*
+*********************************************************************/
+void
+    val_stdout_value_ex (const val_value_t *val,
+                         int32 startindent,
+                         ncx_display_mode_t display_mode)
+{
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    val_dump_value_max(val, 
+                       startindent, 
+                       NCX_DEF_INDENT,
+                       DUMP_VAL_STDOUT,
+                       display_mode,
+                       FALSE);
+
+} /* val_stdout_value_ex */
+
+
+/********************************************************************
+* FUNCTION val_dump_value_max
+* 
+* Printf the specified val_value_t struct to 
+* the logfile, or stdout if none set
+* Uses conf file format (see ncx/conf.h)
+*
+* INPUTS:
+*    val == value to dump
+*    startindent == start indent char count
+*    indent_amount == number of spaces for each indent
+*    dumpmode == logging mode to use
+*    display_mode == formatting mode for display
+*    with_meta == TRUE if metaQ should be printed
+*                 FALSE to skip meta data
+*********************************************************************/
+void
+    val_dump_value_max (const val_value_t *val,
+                        int32 startindent,
+                        int32 indent_amount,
+                        val_dumpvalue_mode_t dumpmode,
+                        ncx_display_mode_t display_mode,
+                        boolean with_meta)
+{
+    dumpfn_t            dumpfn, errorfn;
+    indentfn_t          indentfn;
+    const val_value_t  *chval;
+    const ncx_lmem_t   *listmem;
+    const val_idref_t  *idref;
+    const xmlChar      *prefix;
+    xmlChar            *buff;
+    FILE               *outputfile;
+    const dlq_hdr_t    *metaQ;
+    const val_value_t  *metaval;
+    ncx_btype_t         btyp, lbtyp;
+    uint32              len;
+    status_t            res;
+    boolean             quotes;
+    int32               bump_amount;
+
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    bump_amount = max(0, indent_amount);
+
+    if (display_mode == NCX_DISPLAY_MODE_XML) {
+        outputfile = log_get_logfile();
+        if (!outputfile) {
+            outputfile = stdout;
+        }
+        res = xml_wr_check_open_file(outputfile,
+                                     val,
+                                     NULL,
+                                     FALSE,
+                                     FALSE,
+                                     indent_amount,
+                                     NULL);
+        return;
+    }
+
+    switch (dumpmode) {
+    case DUMP_VAL_NONE:
+	return;
+    case DUMP_VAL_STDOUT:
+	dumpfn = log_stdout;
+	errorfn = log_stdout;
+	indentfn = log_stdout_indent;
+	break;
+    case DUMP_VAL_LOG:
+	dumpfn = log_write;
+	errorfn = log_error;
+	indentfn = log_indent;
+	break;
+    case DUMP_VAL_ALT_LOG:
+	dumpfn = log_alt_write;
+	errorfn = log_error;
+	indentfn = log_indent;
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
+    }
+
+    /* indent and print the val name */
+    (*indentfn)(startindent);
+    if (display_mode == NCX_DISPLAY_MODE_PLAIN) {
+        if (val->btyp == NCX_BT_EXTERN) {
+            (*dumpfn)("%s (extern=%s) ", 
+                      (val->name) ? (const char *)val->name : "--",
+                      (val->v.fname) ? (const char *)val->v.fname : "--");
+        } else if (val->btyp == NCX_BT_INTERN) {
+            (*dumpfn)("%s (intern) ",
+                      (val->name) ? (const char *)val->name : "--");
+        } else if (dumpmode == DUMP_VAL_ALT_LOG &&
+                   !xml_strcmp(val->name, NCX_EL_DATA)) {
+            ;  /* skip the name */
+        } else {
+            (*dumpfn)("%s ", (val->name) ? (const char *)val->name : "--");
+        }
+    } else {
+        prefix = xmlns_get_ns_prefix(val_get_nsid(val));
+        if (!prefix) {
+            prefix = (const xmlChar *)"invalid";
+        }
+        if (val->btyp == NCX_BT_EXTERN) {
+            (*dumpfn)("%s:%s (extern=%s) ", 
+                      prefix,
+                      (val->name) ? (const char *)val->name : "--",
+                      (val->v.fname) ? (const char *)val->v.fname : "--");
+        } else if (val->btyp == NCX_BT_INTERN) {
+            (*dumpfn)("%s:%s (intern) ",
+                      prefix,
+                      (val->name) ? (const char *)val->name : "--");
+        } else if (dumpmode == DUMP_VAL_ALT_LOG &&
+                   !xml_strcmp(val->name, NCX_EL_DATA)) {
+            ;  /* skip the name */
+        } else {
+            (*dumpfn)("%s:%s ", 
+                      prefix,
+                      (val->name) ? (const char *)val->name : "--");
+        }
+    }
+
+    btyp = val->btyp;
+
+    /* check if an index clause needs to be printed next */
+    if (!dlq_empty(&val->indexQ)) {
+	res = val_get_index_string(NULL, 
+                                   NCX_IFMT_CLI, 
+                                   val, 
+                                   NULL, 
+                                   &len);
+	if (res == NO_ERR) {
+	    buff = m__getMem(len+1);
+	    if (buff) {
+		res = val_get_index_string(NULL, 
+                                           NCX_IFMT_CLI, 
+					   val, 
+                                           buff, 
+                                           &len);
+		if (res == NO_ERR) {
+		    (dumpfn)("%s ", buff);
+		} else {
+		    SET_ERROR(res);
+		}
+		m__free(buff);
+	    } else {
+		(*errorfn)("\nval: malloc failed for %u bytes", len+1);
+	    }
+	}
+    }
+
+    /* dump the value, depending on the base type */
+    switch (btyp) {
+    case NCX_BT_NONE:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	break;
+    case NCX_BT_ANY:
+	(*dumpfn)("(any)");
+	break;
+    case NCX_BT_ENUM:
+	if (val->v.enu.name) {
+	    (*dumpfn)("%s", (const char *)val->v.enu.name);
+	}
+	break;
+    case NCX_BT_EMPTY:
+	if (!val->v.bool) {
+	    (*dumpfn)("(not set)");   /* should not happen */
+	}
+	break;
+    case NCX_BT_BOOLEAN:
+	if (val->v.bool) {
+	    (*dumpfn)("true");
+	} else {
+	    (*dumpfn)("false");
+	}
+	break;
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+    case NCX_BT_INT64:
+    case NCX_BT_UINT8:
+    case NCX_BT_UINT16:
+    case NCX_BT_UINT32:
+    case NCX_BT_UINT64:
+    case NCX_BT_DECIMAL64:
+    case NCX_BT_FLOAT64:
+	switch (dumpmode) {
+	case DUMP_VAL_STDOUT:
+	    stdout_num(btyp, &val->v.num);
+	    break;
+	case DUMP_VAL_LOG:
+	    ncx_printf_num(&val->v.num, btyp);
+	    break;
+	case DUMP_VAL_ALT_LOG:
+	    ncx_alt_printf_num(&val->v.num, btyp);
+	    break;
+	default:
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	}
+	break;
+    case NCX_BT_BINARY:
+	(*dumpfn)("binary string, length '%u'",
+		  val->v.binary.ustrlen);
+	break;
+    case NCX_BT_STRING:
+    case NCX_BT_INSTANCE_ID:
+    case NCX_BT_LEAFREF:   /*******/
+	if (VAL_STR(val)) {
+	    quotes = val_need_quotes(VAL_STR(val));
+
+	    if (dumpmode == DUMP_VAL_ALT_LOG &&
+		!xml_strcmp(val->name, NCX_EL_DATA)) {
+		quotes = FALSE;
+	    }
+
+	    if (quotes) {
+		(*dumpfn)("%c", VAL_QUOTE_CH);
+	    }
+	    if (obj_is_password(val->obj)) {
+		(*dumpfn)("%s", VAL_PASSWORD_STRING);
+	    } else {
+		(*dumpfn)("%s", (const char *)VAL_STR(val));
+	    }
+	    if (quotes) {
+		(*dumpfn)("%c", VAL_QUOTE_CH);
+	    }
+	}
+	break;
+    case NCX_BT_IDREF:
+	idref = VAL_IDREF(val);
+	(*dumpfn)("%s:%s",
+		  xmlns_get_ns_prefix(idref->nsid),
+		  idref->name);
+	break;
+    case NCX_BT_SLIST:
+    case NCX_BT_BITS:
+	if (dlq_empty(&val->v.list.memQ)) {
+	    (*dumpfn)("{ }");
+	} else {
+	    lbtyp = val->v.list.btyp;
+	    (*dumpfn)("{");
+	    for (listmem = (const ncx_lmem_t *)
+		     dlq_firstEntry(&val->v.list.memQ);
+		 listmem != NULL;
+		 listmem = (const ncx_lmem_t *)dlq_nextEntry(listmem)) {
+
+		if (startindent >= 0) {
+		    (*indentfn)(startindent+bump_amount);
+		}
+
+		if (typ_is_string(lbtyp)) {
+		    if (listmem->val.str) {
+			quotes = val_need_quotes(listmem->val.str);
+			if (quotes) {
+			    (*dumpfn)("%c", VAL_QUOTE_CH);
+			}
+			(*dumpfn)("%s ", (const char *)listmem->val.str);
+			if (quotes) {
+			    (*dumpfn)("%c", VAL_QUOTE_CH);
+			}
+		    }
+		} else if (typ_is_number(lbtyp)) {
+		    switch (dumpmode) {
+		    case DUMP_VAL_STDOUT:
+			stdout_num(lbtyp, &listmem->val.num);
+			break;
+		    case DUMP_VAL_LOG:
+			ncx_printf_num(&listmem->val.num, lbtyp);
+			break;
+		    case DUMP_VAL_ALT_LOG:
+			ncx_alt_printf_num(&listmem->val.num, lbtyp);
+			break;
+		    default:
+			SET_ERROR(ERR_INTERNAL_VAL);
+		    }
+		    (*dumpfn)(" ");
+		} else {
+		    switch (lbtyp) {
+		    case NCX_BT_ENUM:
+			if (listmem->val.enu.name) {
+			    (*dumpfn)("%s ",
+				      (const char *)listmem->val.enu.name);
+			}
+			break;
+		    case NCX_BT_BITS:
+			(*dumpfn)("%s ", (const char *)listmem->val.str);
+			break;
+		    case NCX_BT_BOOLEAN:
+			(*dumpfn)("%s ",
+				  (listmem->val.bool) ? 
+				  NCX_EL_TRUE : NCX_EL_FALSE);
+			break;
+		    default:
+			SET_ERROR(ERR_INTERNAL_VAL);
+		    }
+		}
+	    }
+	    (*indentfn)(startindent);
+	    (*dumpfn)("}");
+	}
+	break;
+    case NCX_BT_LIST:
+    case NCX_BT_CONTAINER:
+    case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
+	(*dumpfn)("{");
+	for (chval = (const val_value_t *)dlq_firstEntry(&val->v.childQ);
+	     chval != NULL;
+	     chval = (const val_value_t *)dlq_nextEntry(chval)) {
+	    val_dump_value_max(chval, 
+                               startindent+bump_amount,
+                               indent_amount,
+                               dumpmode,
+                               display_mode,
+                               with_meta);
+	}
+	(*indentfn)(startindent);
+	(*dumpfn)("}");
+	break;
+    case NCX_BT_EXTERN:
+	(*dumpfn)("{");
+	(*indentfn)(startindent);
+
+	switch (dumpmode) {
+	case DUMP_VAL_STDOUT:
+	    stdout_extern(val->v.fname);
+	    break;
+	case DUMP_VAL_LOG:
+	    dump_extern(val->v.fname);
+	    break;
+	case DUMP_VAL_ALT_LOG:
+	    dump_alt_extern(val->v.fname);
+	    break;
+	default:
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	}
+	
+	(*indentfn)(startindent);
+	(*dumpfn)("}");
+	break;
+    case NCX_BT_INTERN:
+	(*dumpfn)("{");
+	(*indentfn)(startindent);
+
+
+	switch (dumpmode) {
+	case DUMP_VAL_STDOUT:
+	    stdout_intern(val->v.intbuff);
+	    break;
+	case DUMP_VAL_LOG:
+	    dump_intern(val->v.intbuff);
+	    break;
+	case DUMP_VAL_ALT_LOG:
+	    dump_alt_intern(val->v.intbuff);
+	    break;
+	default:
+	    SET_ERROR(ERR_INTERNAL_VAL);
+	}
+
+	(*indentfn)(startindent);
+	(*dumpfn)("}");
+	break;
+    default:
+	(*errorfn)("\nval: illegal btype (%d)", btyp);
+    }    
+
+    /* dump the metadata queue if non-empty */
+    if (with_meta) {
+        metaQ = val_get_metaQ(val);
+        if (metaQ && !dlq_empty(metaQ)) {
+            if (startindent >= 0) {
+                (*indentfn)(startindent+bump_amount);
+            }
+
+            (*dumpfn)("%s.metaQ ", val->name);
+            for (metaval = val_get_first_meta(metaQ);
+                 metaval != NULL;
+                 metaval = val_get_next_meta(metaval)) {
+
+                val_dump_value_max(metaval, 
+                                   startindent+(2*bump_amount),
+                                   indent_amount,
+                                   dumpmode,
+                                   display_mode,
+                                   with_meta);
+            }
+        }
+    }
+
+}   /* val_dump_value_max */
 
 
 /********************************************************************
@@ -7616,7 +7751,7 @@ boolean
 *********************************************************************/
 val_value_t *
     val_get_virtual_value (void *session,
-			   val_value_t *val,
+			   const val_value_t *val,
 			   status_t *res)
 {
     ses_cb_t    *scb;

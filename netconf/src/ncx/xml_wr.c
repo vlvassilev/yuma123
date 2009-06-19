@@ -116,7 +116,7 @@ date         init     comment
 *********************************************************************/
 static boolean
     fit_on_line (ses_cb_t *scb,
-		 val_value_t *val)
+		 const val_value_t *val)
 {
     uint32     len;
     status_t   res;
@@ -157,7 +157,7 @@ static boolean
 *********************************************************************/
 static void
     write_extern (ses_cb_t *scb,
-		  val_value_t *val)
+		  const val_value_t *val)
 {
     FILE               *fil;
     boolean             done;
@@ -196,7 +196,7 @@ static void
 *********************************************************************/
 static void
     write_intern (ses_cb_t *scb,
-		  val_value_t *val)
+		  const val_value_t *val)
 {
     if (val->v.intbuff) {
 	ses_putstr(scb, val->v.intbuff);
@@ -413,7 +413,7 @@ static void
 static status_t
     handle_xpath_start_tag (ses_cb_t *scb,
 			    xml_msg_hdr_t *msg,
-			    xpath_pcb_t *xpathpcb,
+			    const xpath_pcb_t *xpathpcb,
 			    int32 indent)
 {
     const xmlChar       *defpfix, *msgpfix;
@@ -487,12 +487,12 @@ static status_t
 static void
     begin_elem_val (ses_cb_t *scb,
 		    xml_msg_hdr_t *msg,
-		    val_value_t *val,
+		    const val_value_t *val,
 		    int32 indent)
 {
     const xmlChar       *pfix,  *elname;
     const dlq_hdr_t     *attrQ;
-    xpath_pcb_t         *xpathpcb;
+    const xpath_pcb_t   *xpathpcb;
     boolean              xneeded, empty, xmlcontent;
     xmlns_id_t           nsid, parent_nsid;
     status_t             res;
@@ -507,7 +507,7 @@ static void
 	parent_nsid = 0;
     }
     xmlcontent = obj_is_xpath_string(val->obj);
-    xpathpcb = (xmlcontent) ? val_get_xpathpcb(val) : NULL;
+    xpathpcb = (xmlcontent) ? val_get_const_xpathpcb(val) : NULL;
 
     ses_indent(scb, indent);
 
@@ -618,14 +618,15 @@ static void
 static void
     write_check_val (ses_cb_t *scb,
 		     xml_msg_hdr_t *msg,
-		     val_value_t *val,
+		     const val_value_t *val,
 		     int32  indent,
 		     val_nodetest_fn_t testfn,
 		     boolean acmcheck)
 {
     const ncx_lmem_t   *listmem;
     const xmlChar      *pfix;
-    val_value_t        *v_val, *chval, *useval;
+    val_value_t        *v_val, *chval;
+    const val_value_t  *useval;
     xmlChar            *binbuff;
     xml_msg_authfn_t    cbfn;
     uint32              len;
@@ -723,7 +724,7 @@ static void
 	break;
     case NCX_BT_INSTANCE_ID:
 	ses_indent(scb, indent);
-	res = xpath_wr_expr(scb, val);
+	res = xpath_wr_const_expr(scb, val);
 	if (res != NO_ERR) {
 	    SET_ERROR(res);
 	}
@@ -1338,7 +1339,7 @@ void
 void
     xml_wr_check_val (ses_cb_t *scb,
 		      xml_msg_hdr_t *msg,
-		      val_value_t *val,
+		      const val_value_t *val,
 		      int32  indent,
 		      val_nodetest_fn_t testfn)
 {
@@ -1373,7 +1374,7 @@ void
 void
     xml_wr_val (ses_cb_t *scb,
 		xml_msg_hdr_t *msg,
-		val_value_t *val,
+		const val_value_t *val,
 		int32  indent)
 {
     xml_wr_check_val(scb, 
@@ -1404,12 +1405,12 @@ void
 void
     xml_wr_full_check_val (ses_cb_t *scb,
 			   xml_msg_hdr_t *msg,
-			   val_value_t *val,
+			   const val_value_t *val,
 			   int32  indent,
 			   val_nodetest_fn_t testfn)
 {
     val_value_t       *vir;
-    val_value_t       *out;
+    const val_value_t *out;
     xml_msg_authfn_t   cbfn;
     status_t           res;
     boolean            acmtest;
@@ -1525,7 +1526,7 @@ void
 void
     xml_wr_full_val (ses_cb_t *scb,
 		     xml_msg_hdr_t *msg,
-		     val_value_t *val,
+		     const val_value_t *val,
 		     int32  indent)
 {
     xml_wr_full_check_val(scb, 
@@ -1538,12 +1539,12 @@ void
 
 
 /********************************************************************
-* FUNCTION xml_wr_check_file
+* FUNCTION xml_wr_check_open_file
 * 
-* Write the specified value to a FILE in XML format
+* Write the specified value to an open FILE in XML format
 *
 * INPUTS:
-*    filespec == exact path of filename to open
+*    fp == open FILE control block
 *    val == value for output
 *    attrs == top-level attributes to generate
 *    docmode == TRUE if XML_DOC output mode should be used
@@ -1557,34 +1558,33 @@ void
 *    status
 *********************************************************************/
 status_t
-    xml_wr_check_file (const xmlChar *filespec, 
-		       val_value_t *val,
-		       xml_attrs_t *attrs,
-		       boolean docmode,
-		       boolean xmlhdr,
-		       int32  indent,
-		       val_nodetest_fn_t testfn)
+    xml_wr_check_open_file (FILE *fp, 
+                            const val_value_t *val,
+                            xml_attrs_t *attrs,
+                            boolean docmode,
+                            boolean xmlhdr,
+                            int32  indent,
+                            val_nodetest_fn_t testfn)
 {
-    FILE       *fp;
     ses_cb_t   *scb;
     rpc_msg_t  *msg;
+    xml_attrs_t myattrs;
     status_t    res;
     ses_mode_t  sesmode;
     boolean     anyout;
 
+#ifdef DEBUG
+    if (!fp || !val) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     res = NO_ERR;
     msg = NULL;
     anyout = FALSE;
-    fp = NULL;
     indent = min(indent, 9);
     sesmode = SES_MODE_NONE;
-
-    if (filespec) {
-	fp = fopen((const char *)filespec, "w");
-	if (!fp) {
-	    return ERR_FIL_OPEN;
-	}
-    }
+    xml_init_attrs(&myattrs);
 
     /* get a dummy session control block */
     scb = ses_new_dummy_scb();
@@ -1604,7 +1604,7 @@ status_t
 	    /* hack -- need a queue because there is no top
 	     * element which this usually shadows
 	     */
-	    msg->rpc_in_attrs = attrs;
+	    msg->rpc_in_attrs = (attrs) ? attrs : &myattrs;
 	}
     }
 
@@ -1694,8 +1694,65 @@ status_t
 	rpc_free_msg(msg);
     }
     if (scb) {
+        scb->fp = NULL;   /* do not close the file */
 	ses_free_scb(scb);
     }
+    xml_clean_attrs(&myattrs);
+
+    return res;
+
+} /* xml_wr_check_open_file */
+
+
+/********************************************************************
+* FUNCTION xml_wr_check_file
+* 
+* Write the specified value to a FILE in XML format
+*
+* INPUTS:
+*    filespec == exact path of filename to open
+*    val == value for output
+*    attrs == top-level attributes to generate
+*    docmode == TRUE if XML_DOC output mode should be used
+*            == FALSE if XML output mode should be used
+*    xmlhdr == TRUE if <?xml?> directive should be output
+*            == FALSE if not
+*    indent == indent amount (0..9 spaces)
+*    testfn == callback test function to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    xml_wr_check_file (const xmlChar *filespec, 
+		       const val_value_t *val,
+		       xml_attrs_t *attrs,
+		       boolean docmode,
+		       boolean xmlhdr,
+		       int32  indent,
+		       val_nodetest_fn_t testfn)
+{
+    FILE       *fp;
+    status_t    res;
+
+#ifdef DEBUG
+    if (!filespec || !val || !attrs) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    fp = fopen((const char *)filespec, "w");
+    if (!fp) {
+        return ERR_FIL_OPEN;
+    }
+    res = xml_wr_check_open_file(fp,
+                                 val,
+                                 attrs,
+                                 docmode,
+                                 xmlhdr,
+                                 indent,
+                                 testfn);
+    fclose(fp);
 
     return res;
 
@@ -1722,12 +1779,18 @@ status_t
 *********************************************************************/
 status_t
     xml_wr_file (const xmlChar *filespec,
-		 val_value_t *val,
+		 const val_value_t *val,
 		 xml_attrs_t *attrs,
 		 boolean docmode,
 		 boolean xmlhdr,
 		 int32 indent)
 {
+#ifdef DEBUG
+    if (!filespec || !val || !attrs) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     return xml_wr_check_file(filespec, 
 			     val, 
 			     attrs, 

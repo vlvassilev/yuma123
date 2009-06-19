@@ -349,6 +349,15 @@ typedef enum ncx_bad_data_t_ {
 } ncx_bad_data_t;
 
 
+/* enumeration of val_dump_value display modes */
+typedef enum ncx_display_mode_t_ {
+    NCX_DISPLAY_MODE_NONE,
+    NCX_DISPLAY_MODE_PLAIN,
+    NCX_DISPLAY_MODE_PREFIXED,
+    NCX_DISPLAY_MODE_XML
+} ncx_display_mode_t;
+
+
 /* XPath expression axis types */
 typedef enum ncx_xpath_axis_t_ {
     XP_AX_NONE,

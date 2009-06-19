@@ -91,7 +91,7 @@ extern val_value_t *
 				    val_value_t **deepest);
 
 extern status_t
-    xpath_yang_get_namespaces (xpath_pcb_t *pcb,
+    xpath_yang_get_namespaces (const xpath_pcb_t *pcb,
 			       xmlns_id_t *nsid_array,
 			       uint32 max_nsids,
 			       uint32 *num_nsids);

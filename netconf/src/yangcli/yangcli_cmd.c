@@ -3750,7 +3750,7 @@ static status_t
 
 	    obj = ncx_get_first_object(modptr->mod);
 	    while (obj) {
-		if (obj_is_rpc(obj)) {
+		if (obj_is_rpc(obj) && !obj_is_hidden(obj)) {
 		    if (mode == HELP_MODE_BRIEF) {
 			obj_dump_template(obj, mode, 1, 0);
 		    } else {
@@ -3771,7 +3771,7 @@ static status_t
 
     obj = ncx_get_first_object(get_yangcli_mod());
     while (obj) {
-	if (obj_is_rpc(obj)) {
+	if (obj_is_rpc(obj) && !obj_is_hidden(obj)) {
 	    if (mode == HELP_MODE_BRIEF) {
 		obj_dump_template(obj, mode, 1, 0);
 	    } else {
@@ -3862,7 +3862,9 @@ static status_t
     if (parm && parm->res == NO_ERR) {
 	dtyp = NCX_NT_OBJ;
 	obj = parse_def(agent_cb, &dtyp, VAL_STR(parm), &dlen);
-	if (obj && obj->objtype == OBJ_TYP_RPC) {
+	if (obj && 
+            obj->objtype == OBJ_TYP_RPC && 
+            !obj_is_hidden(obj)) {
 	    help_object(obj, mode);
 	} else {
 	    res = ERR_NCX_DEF_NOT_FOUND;
@@ -3916,7 +3918,7 @@ static status_t
     if (parm && parm->res == NO_ERR) {
 	dtyp = NCX_NT_OBJ;
 	obj = parse_def(agent_cb, &dtyp, VAL_STR(parm), &dlen);
-	if (obj && obj_is_data(obj)) {
+	if (obj && obj_is_data(obj) && !obj_is_hidden(obj)) {
 	    help_object(obj, mode);
 	} else {
 	    res = ERR_NCX_DEF_NOT_FOUND;
@@ -3939,7 +3941,9 @@ static status_t
     if (parm && parm->res == NO_ERR) {
 	dtyp = NCX_NT_OBJ;
 	obj = parse_def(agent_cb, &dtyp, VAL_STR(parm), &dlen);
-	if (obj && obj->objtype == OBJ_TYP_NOTIF) {
+	if (obj && 
+            obj->objtype == OBJ_TYP_NOTIF &&
+            !obj_is_hidden(obj)) {
 	    help_object(obj, mode);
 	} else {
 	    res = ERR_NCX_DEF_NOT_FOUND;

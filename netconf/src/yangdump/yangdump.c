@@ -1713,7 +1713,12 @@ int
     }
 
     print_errors();
+
+    print_error_count();
+
     main_cleanup();
+
+    print_error_count();
 
     return (res == NO_ERR) ? 0 : 1;
 

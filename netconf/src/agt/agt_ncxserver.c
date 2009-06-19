@@ -1,6 +1,6 @@
 /*  FILE: agt_ncxserver.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -129,8 +129,8 @@ static status_t
     /* Create the socket. */
     *sock = socket(PF_LOCAL, SOCK_STREAM, 0);
     if (*sock < 0) {
-	perror ("socket");
-	return ERR_NCX_OPERATION_FAILED;
+        perror ("socket");
+        return ERR_NCX_OPERATION_FAILED;
     }
 
     /* Give the socket a name. */
@@ -139,8 +139,8 @@ static status_t
     size = SUN_LEN(&name);
     ret = bind(*sock, (struct sockaddr *)&name, size);
     if (ret != 0) {
-	perror ("bind");
-	return ERR_NCX_OPERATION_FAILED;
+        perror ("bind");
+        return ERR_NCX_OPERATION_FAILED;
     }
 
     return NO_ERR;
@@ -217,12 +217,12 @@ status_t
     /* Create the socket and set it up to accept connections. */
     res = make_named_socket(NCXSERVER_SOCKNAME, &ncxsock);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     if (listen(ncxsock, 1) < 0) {
-	perror ("listen");
-	return ERR_NCX_OPERATION_FAILED;
+        perror ("listen");
+        return ERR_NCX_OPERATION_FAILED;
     }
      
     /* Initialize the set of active sockets. */
@@ -234,179 +234,179 @@ status_t
     done = FALSE;
     while (!done) {
 
-	/* check exit program */
-	if (agt_shutdown_requested()) {
-	    done = TRUE;
-	    continue;
-	}
+        /* check exit program */
+        if (agt_shutdown_requested()) {
+            done = TRUE;
+            continue;
+        }
 
-	ret = 0;
-	done2 = FALSE;
-	while (!done2) {
-	    read_fd_set = active_fd_set;
-	    agt_ses_fill_writeset(&write_fd_set, &maxwrnum);
-	    timeout.tv_sec = AGT_NCXSERVER_TIMEOUT;
-	    timeout.tv_usec = 0;
+        ret = 0;
+        done2 = FALSE;
+        while (!done2) {
+            read_fd_set = active_fd_set;
+            agt_ses_fill_writeset(&write_fd_set, &maxwrnum);
+            timeout.tv_sec = AGT_NCXSERVER_TIMEOUT;
+            timeout.tv_usec = 0;
 
-	    /* Block until input arrives on one or more active sockets. 
-	     * or the timer expires
-	     */
-	    ret = select(max(maxrdnum+1, maxwrnum+1), &read_fd_set, 
-			 &write_fd_set, NULL, &timeout);
-	    if (ret > 0) {
-		done2 = TRUE;
-	    } else if (ret < 0) {
-		if (!(errno == EINTR || errno==EAGAIN)) {
-		    done2 = TRUE;
-		}
-	    } else if (ret == 0) {
-		/* should only happen if a timeout occurred */
-		if (agt_shutdown_requested()) {
-		    done2 = TRUE; 
-		} else {
-		    send_some_notifications();
-		}
-	    } else {
-		/* normal return with some bytes */
-		done2 = TRUE;
-	    }
-	}
+            /* Block until input arrives on one or more active sockets. 
+             * or the timer expires
+             */
+            ret = select(max(maxrdnum+1, maxwrnum+1), &read_fd_set, 
+                         &write_fd_set, NULL, &timeout);
+            if (ret > 0) {
+                done2 = TRUE;
+            } else if (ret < 0) {
+                if (!(errno == EINTR || errno==EAGAIN)) {
+                    done2 = TRUE;
+                }
+            } else if (ret == 0) {
+                /* should only happen if a timeout occurred */
+                if (agt_shutdown_requested()) {
+                    done2 = TRUE; 
+                } else {
+                    send_some_notifications();
+                }
+            } else {
+                /* normal return with some bytes */
+                done2 = TRUE;
+            }
+        }
 
-	/* check exit program */
-	if (agt_shutdown_requested()) {
-	    done = TRUE;
-	    continue;
-	}
+        /* check exit program */
+        if (agt_shutdown_requested()) {
+            done = TRUE;
+            continue;
+        }
 
-	/* check select return status for non-recoverable error */
-	if (ret < 0) {
-	    res = ERR_NCX_OPERATION_FAILED;
-	    log_error("\nncxserver select failed (%s)", 
-		      strerror(errno));
-	    agt_request_shutdown(NCX_SHUT_EXIT);
-	    done = TRUE;
-	    continue;
-	}
+        /* check select return status for non-recoverable error */
+        if (ret < 0) {
+            res = ERR_NCX_OPERATION_FAILED;
+            log_error("\nncxserver select failed (%s)", 
+                      strerror(errno));
+            agt_request_shutdown(NCX_SHUT_EXIT);
+            done = TRUE;
+            continue;
+        }
      
-	/* Service all the sockets with input and/or output pending */
-	done2 = FALSE;
-	for (i = 0; i < max(maxrdnum+1, maxwrnum+1) && !done2; i++) {
+        /* Service all the sockets with input and/or output pending */
+        done2 = FALSE;
+        for (i = 0; i < max(maxrdnum+1, maxwrnum+1) && !done2; i++) {
 
-	    /* check write output to client sessions */
-	    if (FD_ISSET(i, &write_fd_set)) {
-		/* try to send 1 packet worth of buffers for a session */
-		scb = def_reg_find_scb(i);
-		if (scb) {
-		    /* check if anything to write */
-		    if (!dlq_empty(&scb->outQ)) {
-			res = ses_msg_send_buffs(scb);
-			if (res != NO_ERR) {
+            /* check write output to client sessions */
+            if (FD_ISSET(i, &write_fd_set)) {
+                /* try to send 1 packet worth of buffers for a session */
+                scb = def_reg_find_scb(i);
+                if (scb) {
+                    /* check if anything to write */
+                    if (!dlq_empty(&scb->outQ)) {
+                        res = ses_msg_send_buffs(scb);
+                        if (res != NO_ERR) {
                             if (LOGINFO) {
                                 log_info("\nagt_ncxserver write failed; "
                                          "closing session %d ", 
                                          scb->sid);
                             }
-			    agt_ses_kill_session(scb->sid, 
-						 scb->sid,
-						 SES_TR_OTHER);
-			    scb = NULL;
-			    FD_CLR(i, &active_fd_set);
-			} else if (scb->state == SES_ST_SHUTDOWN_REQ) {
-			    /* close-session reply sent, now kill ses */
-			    agt_ses_kill_session(scb->sid, 
-						 scb->killedbysid,
-						 scb->termreason);
-			    scb = NULL;
-			    FD_CLR(i, &active_fd_set);
-			}
-		    }
+                            agt_ses_kill_session(scb->sid, 
+                                                 scb->sid,
+                                                 SES_TR_OTHER);
+                            scb = NULL;
+                            FD_CLR(i, &active_fd_set);
+                        } else if (scb->state == SES_ST_SHUTDOWN_REQ) {
+                            /* close-session reply sent, now kill ses */
+                            agt_ses_kill_session(scb->sid, 
+                                                 scb->killedbysid,
+                                                 scb->termreason);
+                            scb = NULL;
+                            FD_CLR(i, &active_fd_set);
+                        }
+                    }
 
-		    /* check if any buffers left over for next loop */
-		    if (scb && !dlq_empty(&scb->outQ)) {
-			ses_msg_make_outready(scb);
-		    }
-		}
-	    }
+                    /* check if any buffers left over for next loop */
+                    if (scb && !dlq_empty(&scb->outQ)) {
+                        ses_msg_make_outready(scb);
+                    }
+                }
+            }
 
-	    /* check read input from client sessions */
-	    if (FD_ISSET(i, &read_fd_set)) {
-		if (i == ncxsock) {
-		    /* Connection request on original socket. */
-		    size = (socklen_t)sizeof(clientname);
-		    new = accept(ncxsock,
-				 (struct sockaddr *)&clientname,
-				 &size);
-		    if (new < 0) {
+            /* check read input from client sessions */
+            if (FD_ISSET(i, &read_fd_set)) {
+                if (i == ncxsock) {
+                    /* Connection request on original socket. */
+                    size = (socklen_t)sizeof(clientname);
+                    new = accept(ncxsock,
+                                 (struct sockaddr *)&clientname,
+                                 &size);
+                    if (new < 0) {
                         if (LOGINFO) {
                             log_info("\nagt_ncxserver accept "
                                      "connection failed (%d)",
                                      new);
                         }
-			continue;
-		    }
+                        continue;
+                    }
 
-		    /* get a new session control block */
-		    if (!agt_ses_new_session(SES_TRANSPORT_SSH, new)) {
-			close(new);
+                    /* get a new session control block */
+                    if (!agt_ses_new_session(SES_TRANSPORT_SSH, new)) {
+                        close(new);
                         if (LOGINFO) {
                             log_info("\nagt_ncxserver new "
                                      "session failed (%d)", 
                                      new);
                         }
-		    } else {
-			/* set non-blocking IO */
-			if (fcntl(new, F_SETFD, O_NONBLOCK)) {
+                    } else {
+                        /* set non-blocking IO */
+                        if (fcntl(new, F_SETFD, O_NONBLOCK)) {
                             if (LOGINFO) {
                                 log_info("\nfnctl failed");
                             }
-			}
-			FD_SET(new, &active_fd_set);
-			if (new > maxrdnum) {
-			    maxrdnum = new;
-			}
-		    }
-		} else {
-		    /* Data arriving on an already-connected socket.
-		     * Need to have the xmlreader for this session
-		     */
-		    scb = def_reg_find_scb(i);
-		    if (scb) {
-			res = ses_accept_input(scb);
-			if (res != NO_ERR) {
-			    agt_ses_request_close(scb->sid,
-						  scb->sid,
-						  SES_TR_OTHER);
-			    FD_CLR(i, &active_fd_set);
-			    if (i >= maxrdnum) {
-				maxrdnum = i-1;
-			    }
-			    if (res != ERR_NCX_SESSION_CLOSED) {
+                        }
+                        FD_SET(new, &active_fd_set);
+                        if (new > maxrdnum) {
+                            maxrdnum = new;
+                        }
+                    }
+                } else {
+                    /* Data arriving on an already-connected socket.
+                     * Need to have the xmlreader for this session
+                     */
+                    scb = def_reg_find_scb(i);
+                    if (scb) {
+                        res = ses_accept_input(scb);
+                        if (res != NO_ERR) {
+                            agt_ses_request_close(scb->sid,
+                                                  scb->sid,
+                                                  SES_TR_OTHER);
+                            FD_CLR(i, &active_fd_set);
+                            if (i >= maxrdnum) {
+                                maxrdnum = i-1;
+                            }
+                            if (res != ERR_NCX_SESSION_CLOSED) {
                                 if (LOGINFO) {
                                     log_info("\nagt_ncxserver: input failed"
                                              " for session %d (%s)",
                                              scb->sid, 
                                              get_error_string(res));
                                 }
-			    }
-			} 
-		    }
-		}
-	    }
-	}
+                            }
+                        } 
+                    }
+                }
+            }
+        }
 
-	/* drain the ready queue before accepting new input */
-	if (!done) {
-	    done2 = FALSE;
-	    while (!done2) {
-		if (!agt_ses_process_first_ready()) {
-		    done2 = TRUE;
-		} else if (agt_shutdown_requested()) {
-		    done = done2 = TRUE;
-		} else {
-		    send_some_notifications();
-		}
-	    }
-	}
+        /* drain the ready queue before accepting new input */
+        if (!done) {
+            done2 = FALSE;
+            while (!done2) {
+                if (!agt_ses_process_first_ready()) {
+                    done2 = TRUE;
+                } else if (agt_shutdown_requested()) {
+                    done = done2 = TRUE;
+                } else {
+                    send_some_notifications();
+                }
+            }
+        }
     }  /* end select loop */
 
     /* all open client sockets will be closed as the sessions are

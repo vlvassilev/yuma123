@@ -235,7 +235,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                            *
 *                                                                   *
 *********************************************************************/
 
@@ -273,9 +273,9 @@ static boolean               any_subscriptions;
 *********************************************************************/
 static status_t 
     get_locks (ses_cb_t *scb,
-	       getcb_mode_t cbmode,
-	       val_value_t *virval,
-	       val_value_t  *dstval)
+               getcb_mode_t cbmode,
+               val_value_t *virval,
+               val_value_t  *dstval)
 {
     val_value_t           *nameval, *targval, *newval, *globallockval;
     const obj_template_t  *globallock;
@@ -290,68 +290,68 @@ static status_t
     res = NO_ERR;
 
     if (cbmode == GETCB_GET_VALUE) {
-	globallock = obj_find_child(virval->obj,
-				    AGT_STATE_MODULE,
-				    (const xmlChar *)"globalLock");
-	if (!globallock) {
-	    return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-	}
+        globallock = obj_find_child(virval->obj,
+                                    AGT_STATE_MODULE,
+                                    (const xmlChar *)"globalLock");
+        if (!globallock) {
+            return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        }
 
-	nameval = val_find_child(virval->parent,
-				 AGT_STATE_MODULE,
-				 (const xmlChar *)"name");
-	if (!nameval) {
-	    return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-	}
-	
-	targval = val_get_first_child(nameval);
-	if (!targval) {
-	    return SET_ERROR(ERR_NCX_DATA_MISSING);
-	}
-	cfg = cfg_get_config(targval->name);
-	if (!cfg) {
-	    return SET_ERROR(ERR_NCX_CFG_NOT_FOUND);	    
-	}
+        nameval = val_find_child(virval->parent,
+                                 AGT_STATE_MODULE,
+                                 (const xmlChar *)"name");
+        if (!nameval) {
+            return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        }
+        
+        targval = val_get_first_child(nameval);
+        if (!targval) {
+            return SET_ERROR(ERR_NCX_DATA_MISSING);
+        }
+        cfg = cfg_get_config(targval->name);
+        if (!cfg) {
+            return SET_ERROR(ERR_NCX_CFG_NOT_FOUND);            
+        }
 
-	globallocked = cfg_is_global_locked(cfg);
-	if (globallocked) {
-	    /* make the 2 return value leafs to put into
-	     * the retval container
-	     */
-	    res = cfg_get_global_lock_info(cfg, &sid, &locktime);
-	    if (res == NO_ERR) {
-		/* add locks/globalLock */
-		globallockval = val_new_value();
-		if (!globallockval) {
-		    return ERR_INTERNAL_MEM;
-		}
-		val_init_from_template(globallockval, globallock);
-		val_add_child(globallockval, dstval);
+        globallocked = cfg_is_global_locked(cfg);
+        if (globallocked) {
+            /* make the 2 return value leafs to put into
+             * the retval container
+             */
+            res = cfg_get_global_lock_info(cfg, &sid, &locktime);
+            if (res == NO_ERR) {
+                /* add locks/globalLock */
+                globallockval = val_new_value();
+                if (!globallockval) {
+                    return ERR_INTERNAL_MEM;
+                }
+                val_init_from_template(globallockval, globallock);
+                val_add_child(globallockval, dstval);
 
-		/* add locks/globalLock/lockedBySession */ 
-		sprintf((char *)numbuff, "%u", sid);
-		newval = agt_make_leaf(globallock,
-				       (const xmlChar *)"lockedBySession",
-				       numbuff, 
-				       &res);
-		if (newval) {
-		    val_add_child(newval, globallockval);
-		}
+                /* add locks/globalLock/lockedBySession */ 
+                sprintf((char *)numbuff, "%u", sid);
+                newval = agt_make_leaf(globallock,
+                                       (const xmlChar *)"lockedBySession",
+                                       numbuff, 
+                                       &res);
+                if (newval) {
+                    val_add_child(newval, globallockval);
+                }
 
-		/* add locks/globalLock/lockedTime */ 
-		newval = agt_make_leaf(globallock,
-				       (const xmlChar *)"lockedTime",
-				       locktime, 
-				       &res);
-		if (newval) {
-		    val_add_child(newval, globallockval);
-		}
-	    }
-	} else {
-	    res = ERR_NCX_SKIPPED;
-	}
+                /* add locks/globalLock/lockedTime */ 
+                newval = agt_make_leaf(globallock,
+                                       (const xmlChar *)"lockedTime",
+                                       locktime, 
+                                       &res);
+                if (newval) {
+                    val_add_child(newval, globallockval);
+                }
+            }
+        } else {
+            res = ERR_NCX_SKIPPED;
+        }
     } else {
-	res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+        res = ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
     return res;
 
@@ -376,69 +376,69 @@ INPUTS:
 *********************************************************************/
 static val_value_t *
     make_datastore_val (const xmlChar *confname,
-			const obj_template_t *confobj,
-			status_t *res)
+                        const obj_template_t *confobj,
+                        status_t *res)
 {
     const obj_template_t  *nameobj, *testobj;
     val_value_t           *confval, *nameval, *leafval;
 
     nameobj = obj_find_child(confobj, AGT_STATE_MODULE, 
-			     NCX_EL_NAME);
+                             NCX_EL_NAME);
     if (!nameobj) {
-	*res = SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 
     /* create datastore node */
     confval = val_new_value();
     if (!confval) {
-	*res = ERR_INTERNAL_MEM;
-	return NULL;
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
     }
     val_init_from_template(confval, confobj);
 
     /* create datastore/name */
     nameval = val_new_value();
     if (!nameval) {
-	val_free_value(confval);
-	*res = ERR_INTERNAL_MEM;
-	return NULL;
+        val_free_value(confval);
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
     }
     val_init_from_template(nameval, nameobj);
     val_add_child(nameval, confval);
     
     /* create datastore/name/<config-name> */
     testobj = obj_find_child(nameobj, 
-			     AGT_STATE_MODULE,
-			     confname);
+                             AGT_STATE_MODULE,
+                             confname);
     if (!testobj) {
-	val_free_value(confval);
-	*res = SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        val_free_value(confval);
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
     leafval = val_new_value();
     if (!leafval) {
-	val_free_value(confval);
-	*res = ERR_INTERNAL_MEM;
-	return NULL;
+        val_free_value(confval);
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
     } else {
-	val_init_from_template(leafval, testobj);
-	val_add_child(leafval, nameval);
+        val_init_from_template(leafval, testobj);
+        val_add_child(leafval, nameval);
     }
 
     /* create datastore/locks */
     testobj = obj_find_child(confobj, AGT_STATE_MODULE, 
-			     AGT_STATE_OBJ_LOCKS);
+                             AGT_STATE_OBJ_LOCKS);
     if (!testobj) {
-	val_free_value(confval);
-	*res = SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        val_free_value(confval);
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
     leafval = val_new_value();
     if (!leafval) {
-	val_free_value(confval);
-	*res = ERR_INTERNAL_MEM;
-	return NULL;
+        val_free_value(confval);
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
     }
     val_init_virtual(leafval, get_locks, testobj);
     val_add_child(leafval, confval);
@@ -467,8 +467,8 @@ INPUTS:
 *********************************************************************/
 static val_value_t *
     make_schema_val (ncx_module_t *mod,
-		     const obj_template_t *schemaobj,
-		     status_t *res)
+                     const obj_template_t *schemaobj,
+                     status_t *res)
 {
     val_value_t           *schemaval, *childval;
 
@@ -477,19 +477,19 @@ static val_value_t *
     /* create schema node */
     schemaval = val_new_value();
     if (!schemaval) {
-	*res = ERR_INTERNAL_MEM;
-	return NULL;
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
     }
     val_init_from_template(schemaval, schemaobj);
 
     /* create schema/identifier */
     childval = agt_make_leaf(schemaobj,
-			     AGT_STATE_OBJ_IDENTIFIER,
-			     ncx_get_modname(mod), 
-			     res);
+                             AGT_STATE_OBJ_IDENTIFIER,
+                             ncx_get_modname(mod), 
+                             res);
     if (!childval) {
-	val_free_value(schemaval);
-	return NULL;
+        val_free_value(schemaval);
+        return NULL;
     }
     val_add_child(childval, schemaval);
 
@@ -499,52 +499,52 @@ static val_value_t *
 
     /* create schema/version */
     childval = agt_make_leaf(schemaobj,
-			     AGT_STATE_OBJ_VERSION,
-			     ncx_get_modversion(mod), 
-			     res);
+                             AGT_STATE_OBJ_VERSION,
+                             ncx_get_modversion(mod), 
+                             res);
     if (!childval) {
-	val_free_value(schemaval);
-	return NULL;
+        val_free_value(schemaval);
+        return NULL;
     }
     val_add_child(childval, schemaval);
 
     /* create schema/format */
     childval = agt_make_leaf(schemaobj,
-			     AGT_STATE_OBJ_FORMAT,
-			     AGT_STATE_FORMAT_YANG, 
-			     res);
+                             AGT_STATE_OBJ_FORMAT,
+                             AGT_STATE_FORMAT_YANG, 
+                             res);
     if (!childval) {
-	val_free_value(schemaval);
-	return NULL;
+        val_free_value(schemaval);
+        return NULL;
     }
     val_add_child(childval, schemaval);
 
     /* create schema/namespace */
     childval = agt_make_leaf(schemaobj,
-			     AGT_STATE_OBJ_NAMESPACE,
-			     ncx_get_modnamespace(mod), 
-			     res);
+                             AGT_STATE_OBJ_NAMESPACE,
+                             ncx_get_modnamespace(mod), 
+                             res);
     if (!childval) {
-	val_free_value(schemaval);
-	return NULL;
+        val_free_value(schemaval);
+        return NULL;
     }
     val_add_child(childval, schemaval);
 
     /* create schema/location */
     childval = agt_make_leaf(schemaobj,
-			     AGT_STATE_OBJ_LOCATION,
-			     AGT_STATE_ENUM_NETCONF, 
-			     res);
+                             AGT_STATE_OBJ_LOCATION,
+                             AGT_STATE_ENUM_NETCONF, 
+                             res);
     if (!childval) {
-	val_free_value(schemaval);
-	return NULL;
+        val_free_value(schemaval);
+        return NULL;
     }
     val_add_child(childval, schemaval);
 
     *res = val_gen_index_chain(schemaobj, schemaval);
     if (*res != NO_ERR) {
-	val_free_value(schemaval);
-	return NULL;
+        val_free_value(schemaval);
+        return NULL;
     }
 
     return schemaval;
@@ -570,8 +570,8 @@ INPUTS:
 *********************************************************************/
 static val_value_t *
     make_session_val (ses_cb_t *scb,
-		      const obj_template_t *sessionobj,
-		      status_t *res)
+                      const obj_template_t *sessionobj,
+                      status_t *res)
 {
     val_value_t           *sessionval, *childval;
     xmlChar               numbuff[NCX_MAX_NUMLEN];
@@ -581,82 +581,82 @@ static val_value_t *
     /* create session node */
     sessionval = val_new_value();
     if (!sessionval) {
-	*res = ERR_INTERNAL_MEM;
-	return NULL;
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
     }
     val_init_from_template(sessionval, sessionobj);
 
     /* create session/sessionId */
     sprintf((char *)numbuff, "%u", scb->sid);
     childval = agt_make_leaf(sessionobj,
-			     AGT_STATE_OBJ_SESSIONID,
-			     numbuff, 
-			     res);
+                             AGT_STATE_OBJ_SESSIONID,
+                             numbuff, 
+                             res);
     if (!childval) {
-	val_free_value(sessionval);
-	return NULL;
+        val_free_value(sessionval);
+        return NULL;
     }
     val_add_child(childval, sessionval);
 
     /* create session/transport */
     childval = agt_make_leaf(sessionobj,
-			     AGT_STATE_OBJ_TRANSPORT,
-			     ses_get_transport_name(scb->transport),
-			     res);
+                             AGT_STATE_OBJ_TRANSPORT,
+                             ses_get_transport_name(scb->transport),
+                             res);
     if (!childval) {
-	val_free_value(sessionval);
-	return NULL;
+        val_free_value(sessionval);
+        return NULL;
     }
     val_add_child(childval, sessionval);
     
     /* create session/protocol */
     childval = agt_make_leaf(sessionobj,
-			     AGT_STATE_OBJ_PROTOCOL,
-			     AGT_STATE_ENUM_NETCONF,
-			     res);
+                             AGT_STATE_OBJ_PROTOCOL,
+                             AGT_STATE_ENUM_NETCONF,
+                             res);
     if (!childval) {
-	val_free_value(sessionval);
-	return NULL;
+        val_free_value(sessionval);
+        return NULL;
     }
     val_add_child(childval, sessionval);
 
     /* create session/username */
     childval = agt_make_leaf(sessionobj,
-			     AGT_STATE_OBJ_USERNAME,
-			     scb->username,
-			     res);
+                             AGT_STATE_OBJ_USERNAME,
+                             scb->username,
+                             res);
     if (!childval) {
-	val_free_value(sessionval);
-	return NULL;
+        val_free_value(sessionval);
+        return NULL;
     }
     val_add_child(childval, sessionval);
 
     /* create session/sourceHost */
     childval = agt_make_leaf(sessionobj,
-			     AGT_STATE_OBJ_SOURCEHOST,
-			     scb->peeraddr,
-			     res);
+                             AGT_STATE_OBJ_SOURCEHOST,
+                             scb->peeraddr,
+                             res);
     if (!childval) {
-	val_free_value(sessionval);
-	return NULL;
+        val_free_value(sessionval);
+        return NULL;
     }
     val_add_child(childval, sessionval);
 
     /* create session/loginTime */
     childval = agt_make_leaf(sessionobj,
-			     AGT_STATE_OBJ_LOGINTIME,
-			     scb->start_time,
-			     res);
+                             AGT_STATE_OBJ_LOGINTIME,
+                             scb->start_time,
+                             res);
     if (!childval) {
-	val_free_value(sessionval);
-	return NULL;
+        val_free_value(sessionval);
+        return NULL;
     }
     val_add_child(childval, sessionval);
 
     *res = val_gen_index_chain(sessionobj, sessionval);
     if (*res != NO_ERR) {
-	val_free_value(sessionval);
-	return NULL;
+        val_free_value(sessionval);
+        return NULL;
     }
 
     return sessionval;
@@ -681,7 +681,7 @@ INPUTS:
 *********************************************************************/
 static val_value_t *
     make_statistics_val (const obj_template_t *statisticsobj,
-			 status_t *res)
+                         status_t *res)
 {
     val_value_t            *statsval, *childval;
     xmlChar                tbuff[TSTAMP_MIN_SIZE+1];
@@ -689,122 +689,122 @@ static val_value_t *
     /* create statistics node */
     statsval = val_new_value();
     if (!statsval) {
-	*res = ERR_INTERNAL_MEM;
-	return NULL;
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
     }
     val_init_from_template(statsval, statisticsobj);
 
     /* add statistics/netconfStartTime static leaf */
     tstamp_datetime(tbuff);
     childval = agt_make_leaf(statisticsobj,
-			     (const xmlChar *)"netconfStartTime",
-			     tbuff,
-			     res);
+                             (const xmlChar *)"netconfStartTime",
+                             tbuff,
+                             res);
     if (!childval) {
-	val_free_value(statsval);
-	return NULL;
+        val_free_value(statsval);
+        return NULL;
     }
     val_add_child(childval, statsval);
 
 
     /* add statistics/inSessions virtual leaf */
     childval = agt_make_virtual_leaf(statisticsobj,
-				     (const xmlChar *)"inSessions",
-				     agt_ses_get_inSessions,
-				     res);
+                                     (const xmlChar *)"inSessions",
+                                     agt_ses_get_inSessions,
+                                     res);
     if (!childval) {
-	val_free_value(statsval);
-	return NULL;
+        val_free_value(statsval);
+        return NULL;
     }
     val_add_child(childval, statsval);
 
     /* add statistics/inXMLParseErrors virtual leaf */
     childval = agt_make_virtual_leaf(statisticsobj,
-				     (const xmlChar *)"inXMLParseErrors",
-				     agt_ses_get_inXMLParseErrors,
-				     res);
+                                     (const xmlChar *)"inXMLParseErrors",
+                                     agt_ses_get_inXMLParseErrors,
+                                     res);
     if (!childval) {
-	val_free_value(statsval);
-	return NULL;
+        val_free_value(statsval);
+        return NULL;
     }
     val_add_child(childval, statsval);
 
     /* add statistics/inBadHellos virtual leaf */
     childval = agt_make_virtual_leaf(statisticsobj,
-				     (const xmlChar *)"inBadHellos",
-				     agt_ses_get_inBadHellos,
-				     res);
+                                     (const xmlChar *)"inBadHellos",
+                                     agt_ses_get_inBadHellos,
+                                     res);
     if (!childval) {
-	val_free_value(statsval);
-	return NULL;
+        val_free_value(statsval);
+        return NULL;
     }
     val_add_child(childval, statsval);
 
 
     /* add statistics/inRpcs virtual leaf */
     childval = agt_make_virtual_leaf(statisticsobj,
-				     (const xmlChar *)"inRpcs",
-				     agt_ses_get_inRpcs,
-				     res);
+                                     (const xmlChar *)"inRpcs",
+                                     agt_ses_get_inRpcs,
+                                     res);
     if (!childval) {
-	val_free_value(statsval);
-	return NULL;
+        val_free_value(statsval);
+        return NULL;
     }
     val_add_child(childval, statsval);
 
     /* add statistics/inBadRpcs virtual leaf */
     childval = agt_make_virtual_leaf(statisticsobj,
-				     (const xmlChar *)"inBadRpcs",
-				     agt_ses_get_inBadRpcs,
-				     res);
+                                     (const xmlChar *)"inBadRpcs",
+                                     agt_ses_get_inBadRpcs,
+                                     res);
     if (!childval) {
-	val_free_value(statsval);
-	return NULL;
+        val_free_value(statsval);
+        return NULL;
     }
     val_add_child(childval, statsval);
 
 
     /* add statistics/inNotSupportedRpcs virtual leaf */
     childval = agt_make_virtual_leaf(statisticsobj,
-				     (const xmlChar *)"inNotSupportedRpcs",
-				     agt_ses_get_inNotSupportedRpcs,
-				     res);
+                                     (const xmlChar *)"inNotSupportedRpcs",
+                                     agt_ses_get_inNotSupportedRpcs,
+                                     res);
     if (!childval) {
-	val_free_value(statsval);
-	return NULL;
+        val_free_value(statsval);
+        return NULL;
     }
     val_add_child(childval, statsval);
 
     /* add statistics/outRpcReplies virtual leaf */
     childval = agt_make_virtual_leaf(statisticsobj,
-				     (const xmlChar *)"outRpcReplies",
-				     agt_ses_get_outRpcReplies,
-				     res);
+                                     (const xmlChar *)"outRpcReplies",
+                                     agt_ses_get_outRpcReplies,
+                                     res);
     if (!childval) {
-	val_free_value(statsval);
-	return NULL;
+        val_free_value(statsval);
+        return NULL;
     }
     val_add_child(childval, statsval);
 
     /* add statistics/outRpcErrors virtual leaf */
     childval = agt_make_virtual_leaf(statisticsobj,
-				     (const xmlChar *)"outRpcErrors",
-				     agt_ses_get_outRpcErrors,
-				     res);
+                                     (const xmlChar *)"outRpcErrors",
+                                     agt_ses_get_outRpcErrors,
+                                     res);
     if (!childval) {
-	val_free_value(statsval);
-	return NULL;
+        val_free_value(statsval);
+        return NULL;
     }
     val_add_child(childval, statsval);
 
     /* add statistics/outNotifications virtual leaf */
     childval = agt_make_virtual_leaf(statisticsobj,
-				     (const xmlChar *)"outNotifications",
-				     agt_ses_get_outNotifications,
-				     res);
+                                     (const xmlChar *)"outNotifications",
+                                     agt_ses_get_outNotifications,
+                                     res);
     if (!childval) {
-	val_free_value(statsval);
-	return NULL;
+        val_free_value(statsval);
+        return NULL;
     }
     val_add_child(childval, statsval);
 
@@ -825,8 +825,8 @@ static val_value_t *
 *********************************************************************/
 static status_t 
     get_schema_validate (ses_cb_t *scb,
-			 rpc_msg_t *msg,
-			 xml_node_t *methnode)
+                         rpc_msg_t *msg,
+                         xml_node_t *methnode)
 {
     ncx_module_t    *findmod;
     const xmlChar   *identifier, *version, *format;
@@ -841,95 +841,92 @@ static status_t
 
     /* get the identifier parameter */
     validentifier = val_find_child(msg->rpc_input, 
-				   AGT_STATE_MODULE,
-				   AGT_STATE_OBJ_IDENTIFIER);
+                                   AGT_STATE_MODULE,
+                                   AGT_STATE_OBJ_IDENTIFIER);
     if (validentifier && validentifier->res == NO_ERR) {
-	identifier = VAL_STR(validentifier);
+        identifier = VAL_STR(validentifier);
     }
 
     /* get the version parameter */
     valversion = val_find_child(msg->rpc_input, 
-				AGT_STATE_MODULE,
-				AGT_STATE_OBJ_VERSION);
+                                AGT_STATE_MODULE,
+                                AGT_STATE_OBJ_VERSION);
     if (valversion && valversion->res == NO_ERR) {
-	version = VAL_STR(valversion);
+        version = VAL_STR(valversion);
     }
 
     /* get the format parameter */
     valformat = val_find_child(msg->rpc_input, 
-			       AGT_STATE_MODULE,
-			       AGT_STATE_OBJ_FORMAT);
+                               AGT_STATE_MODULE,
+                               AGT_STATE_OBJ_FORMAT);
     if (valformat && valformat->res == NO_ERR) {
-	format = VAL_ENUM_NAME(valformat);
+        format = VAL_ENUM_NAME(valformat);
     }
 
     if (!identifier || !version || !format) {
-	/* should already be reported */
-	return ERR_NCX_MISSING_PARM;
+        /* should already be reported */
+        return ERR_NCX_MISSING_PARM;
     }
 
     /* check the identifier: must be valid module name */
     if (!ncx_valid_name2(identifier)) {
-	res = ERR_NCX_INVALID_NAME;
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, 
-			 res, methnode, 
-			 NCX_NT_STRING, identifier,
-			 NCX_NT_VAL, validentifier);
+        res = ERR_NCX_NO_MATCHES;
+        agt_record_error(scb, 
+                         &msg->mhdr, 
+                         NCX_LAYER_OPERATION, 
+                         res, 
+                         methnode, 
+                         NCX_NT_STRING, 
+                         identifier,
+                         NCX_NT_VAL, 
+                         validentifier);
     }
 
     /* do not check the revision now 
      * it must be an exact match if non-empty string
      */
     if (!*version) {
-	/* send NULL instead of empty string */
-	version = NULL;
+        /* send NULL instead of empty string */
+        version = NULL;
     }
 
     /* check format parameter: only YANG supported for now */
     if (xml_strcmp(format, AGT_STATE_FORMAT_YANG)) {
-	res = ERR_NCX_VALUE_NOT_SUPPORTED;
-	agt_record_error(scb, &msg->mhdr, 
-			 NCX_LAYER_OPERATION, 
-			 res, methnode, 
-			 NCX_NT_STRING, format,
-			 NCX_NT_VAL, valformat);
+        res = ERR_NCX_VALUE_NOT_SUPPORTED;
+        agt_record_error(scb, 
+                         &msg->mhdr, 
+                         NCX_LAYER_OPERATION, 
+                         res, 
+                         methnode, 
+                         NCX_NT_STRING, 
+                         format,
+                         NCX_NT_VAL, 
+                         valformat);
     }
 
     if (res == NO_ERR) {
-	findmod = ncx_find_module(identifier, version);
-	if (!findmod) {
-	    if (version) {
-		findmod = ncx_find_module(identifier, NULL);
-	    }
-	    if (findmod) {
-		/* version parameter is bad */
-		res = ERR_NCX_UNKNOWN_VERSION;
-		agt_record_error(scb, &msg->mhdr, 
-				 NCX_LAYER_OPERATION, 
-				 res, methnode, 
-				 NCX_NT_STRING, version,
-				 NCX_NT_VAL, valversion);
-
-	    } else {
-		/* identifier parameter is bad */
-		res = ERR_NCX_UNKNOWN_MODULE;
-		agt_record_error(scb, &msg->mhdr, 
-				 NCX_LAYER_OPERATION, 
-				 res, methnode, 
-				 NCX_NT_STRING, identifier,
-				 NCX_NT_VAL, validentifier);
-	    }
-	} else {
-	    /* save the found module and format
-	     * setup the automatic output using the callback
-	     * function in agt_util.c
-	     */
-	    msg->rpc_user1 = (void *)findmod;
-	    msg->rpc_user2 = (void *)NCX_MODFORMAT_YANG;
-	    msg->rpc_data_type = RPC_DATA_STD;
-	    msg->rpc_datacb = agt_output_schema;
-	}
+        findmod = ncx_find_module(identifier, version);
+        if (!findmod) {
+            res = ERR_NCX_NO_MATCHES;
+            agt_record_error(scb, 
+                             &msg->mhdr, 
+                             NCX_LAYER_OPERATION, 
+                             res, 
+                             methnode, 
+                             NCX_NT_STRING, 
+                             identifier,
+                             NCX_NT_VAL, 
+                             validentifier);
+        } else {
+            /* save the found module and format
+             * setup the automatic output using the callback
+             * function in agt_util.c
+             */
+            msg->rpc_user1 = (void *)findmod;
+            msg->rpc_user2 = (void *)NCX_MODFORMAT_YANG;
+            msg->rpc_data_type = RPC_DATA_STD;
+            msg->rpc_datacb = agt_output_schema;
+        }
     }
 
     return res;
@@ -955,7 +952,7 @@ INPUTS:
 *********************************************************************/
 static val_value_t *
     make_subscription_val (agt_not_subscription_t *sub,
-			   status_t *res)
+                           status_t *res)
 {
     const obj_template_t *subscriptionobj;
     val_value_t           *subval, *childval;
@@ -964,86 +961,86 @@ static val_value_t *
     *res = NO_ERR;
 
     subscriptionobj = 
-	obj_find_child(mysubscriptionsobj,
-		       AGT_STATE_MODULE,
-		       (const xmlChar *)"subscription");
+        obj_find_child(mysubscriptionsobj,
+                       AGT_STATE_MODULE,
+                       (const xmlChar *)"subscription");
     if (!subscriptionobj) {
-	*res = SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 
     /* create session node */
     subval = val_new_value();
     if (!subval) {
-	*res = ERR_INTERNAL_MEM;
-	return NULL;
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
     }
     val_init_from_template(subval, subscriptionobj);
 
     /* create subscription/sessionId */
     sprintf((char *)numbuff, "%u", sub->scb->sid);
     childval = agt_make_leaf(subscriptionobj,
-			     AGT_STATE_OBJ_SESSIONID,
-			     numbuff, 
-			     res);
+                             AGT_STATE_OBJ_SESSIONID,
+                             numbuff, 
+                             res);
     if (!childval) {
-	val_free_value(subval);
-	return NULL;
+        val_free_value(subval);
+        return NULL;
     }
     val_add_child(childval, subval);
 
     /* create subscription/stream */
     childval = agt_make_leaf(subscriptionobj,
-			     (const xmlChar *)"stream",
-			     sub->stream,
-			     res);
+                             (const xmlChar *)"stream",
+                             sub->stream,
+                             res);
     if (!childval) {
-	val_free_value(subval);
-	return NULL;
+        val_free_value(subval);
+        return NULL;
     }
     val_add_child(childval, subval);
     
     /* create subscription/startTime */
     if (sub->startTime) {
-	childval = agt_make_leaf(subscriptionobj,
-				 (const xmlChar *)"startTime",		 
-				 sub->startTime,
-				 res);
-	if (!childval) {
-	    val_free_value(subval);
-	    return NULL;
-	}
-	val_add_child(childval, subval);
+        childval = agt_make_leaf(subscriptionobj,
+                                 (const xmlChar *)"startTime",                 
+                                 sub->startTime,
+                                 res);
+        if (!childval) {
+            val_free_value(subval);
+            return NULL;
+        }
+        val_add_child(childval, subval);
     }
 
     /* create subscription/stopTime */
     if (sub->stopTime) {
-	childval = agt_make_leaf(subscriptionobj,
-				 (const xmlChar *)"stopTime",		 
-				 sub->stopTime,
-				 res);
-	if (!childval) {
-	    val_free_value(subval);
-	    return NULL;
-	}
-	val_add_child(childval, subval);
+        childval = agt_make_leaf(subscriptionobj,
+                                 (const xmlChar *)"stopTime",                 
+                                 sub->stopTime,
+                                 res);
+        if (!childval) {
+            val_free_value(subval);
+            return NULL;
+        }
+        val_add_child(childval, subval);
     }
 
     /* create subscription/outNotifications */
     childval = agt_make_virtual_leaf(subscriptionobj,
-				     (const xmlChar *)"outNotifications",
-				     agt_ses_get_outNotifications,
-				     res);
+                                     (const xmlChar *)"outNotifications",
+                                     agt_ses_get_outNotifications,
+                                     res);
     if (!childval) {
-	val_free_value(subval);
-	return NULL;
+        val_free_value(subval);
+        return NULL;
     }
     val_add_child(childval, subval);
 
     *res = val_gen_index_chain(subscriptionobj, subval);
     if (*res != NO_ERR) {
-	val_free_value(subval);
-	return NULL;
+        val_free_value(subval);
+        return NULL;
     }
 
     return subval;
@@ -1071,7 +1068,7 @@ status_t
     status_t   res;
 
     if (agt_state_init_done) {
-	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+        return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
 #ifdef AGT_STATE_DEBUG
@@ -1081,7 +1078,7 @@ status_t
     /* load the netconf-state module */
     res = ncxmod_load_module(AGT_STATE_MODULE, NULL, &statemod);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     mysessionsval = NULL;
@@ -1124,91 +1121,91 @@ status_t
     status_t  res;
 
     if (!agt_state_init_done) {
-	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+        return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
     /* set up get-schema RPC operation */
     res = agt_rpc_register_method(AGT_STATE_MODULE,
-				  AGT_STATE_GET_SCHEMA,
-				  AGT_RPC_PH_VALIDATE,
-				  get_schema_validate);
+                                  AGT_STATE_GET_SCHEMA,
+                                  AGT_RPC_PH_VALIDATE,
+                                  get_schema_validate);
     if (res != NO_ERR) {
-	return SET_ERROR(res);
+        return SET_ERROR(res);
     }
 
     runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
     if (!runningcfg || !runningcfg->root) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     /* get all the object nodes first */
     topobj = obj_find_template_top(statemod, 
-				   AGT_STATE_MODULE,
-				   AGT_STATE_TOP_CONTAINER);
+                                   AGT_STATE_MODULE,
+                                   AGT_STATE_TOP_CONTAINER);
     if (!topobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     confsobj = obj_find_child(topobj, 
-			      AGT_STATE_MODULE, 
-			      AGT_STATE_OBJ_DATASTORES);
+                              AGT_STATE_MODULE, 
+                              AGT_STATE_OBJ_DATASTORES);
     if (!confsobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     confobj = obj_find_child(confsobj,
-			     AGT_STATE_MODULE,
-			     AGT_STATE_OBJ_DATASTORE);
+                             AGT_STATE_MODULE,
+                             AGT_STATE_OBJ_DATASTORE);
     if (!confobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     schemasobj = obj_find_child(topobj,
-				AGT_STATE_MODULE,
-				AGT_STATE_OBJ_SCHEMAS);
+                                AGT_STATE_MODULE,
+                                AGT_STATE_OBJ_SCHEMAS);
     if (!schemasobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     myschemaobj = obj_find_child(schemasobj,
-				 AGT_STATE_MODULE,
-				 AGT_STATE_OBJ_SCHEMA);
+                                 AGT_STATE_MODULE,
+                                 AGT_STATE_OBJ_SCHEMA);
     if (!myschemaobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     sessionsobj = obj_find_child(topobj,
-				 AGT_STATE_MODULE,
-				 AGT_STATE_OBJ_SESSIONS);
+                                 AGT_STATE_MODULE,
+                                 AGT_STATE_OBJ_SESSIONS);
     if (!sessionsobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     mysessionobj = obj_find_child(sessionsobj,
-				  AGT_STATE_MODULE,
-				  AGT_STATE_OBJ_SESSION);
+                                  AGT_STATE_MODULE,
+                                  AGT_STATE_OBJ_SESSION);
     if (!mysessionobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     statisticsobj = obj_find_child(topobj,
-				   AGT_STATE_MODULE,
-				   AGT_STATE_OBJ_STATISTICS);
+                                   AGT_STATE_MODULE,
+                                   AGT_STATE_OBJ_STATISTICS);
     if (!statisticsobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     mysubscriptionsobj = obj_find_child(topobj,
-					AGT_STATE_MODULE,
-					AGT_STATE_OBJ_SUBSCRIPTIONS);
+                                        AGT_STATE_MODULE,
+                                        AGT_STATE_OBJ_SUBSCRIPTIONS);
     if (!mysubscriptionsobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     /* add /ietf-netconf-state */
     topval = val_new_value();
     if (!topval) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     val_init_from_template(topval, topobj);
 
@@ -1218,76 +1215,76 @@ status_t
     /* add /ietf-netconf-state/capabilities */
     capsval = val_clone(agt_cap_get_capsval());
     if (!capsval) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     } else {
-	/* change the namespace to this module, 
-	 * and get rid of the netconf NSID 
-	 */
-	val_change_nsid(capsval, statemod->nsid);
-	val_add_child(capsval, topval);
+        /* change the namespace to this module, 
+         * and get rid of the netconf NSID 
+         */
+        val_change_nsid(capsval, statemod->nsid);
+        val_add_child(capsval, topval);
     }
 
     /* add /ietf-netconf-state/datastores */
     confsval = val_new_value();
     if (!confsval) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     val_init_from_template(confsval, confsobj);
     val_add_child(confsval, topval);
 
     /* add /ietf-netconf-state/datastores/datastore[1] */
     if (agt_cap_std_set(CAP_STDID_CANDIDATE)) {
-	confval = make_datastore_val(NCX_EL_CANDIDATE,
-				     confobj,
-				     &res);
-	if (!confval) {
-	    return res;
-	}
-	val_add_child(confval, confsval);
+        confval = make_datastore_val(NCX_EL_CANDIDATE,
+                                     confobj,
+                                     &res);
+        if (!confval) {
+            return res;
+        }
+        val_add_child(confval, confsval);
     }
 
     /* add /ietf-netconf-state/datastores/datastore[2] */
     confval = make_datastore_val(NCX_EL_RUNNING,
-				 confobj,
-				 &res);
+                                 confobj,
+                                 &res);
     if (!confval) {
-	return res;
+        return res;
     }
     val_add_child(confval, confsval);
 
     /* add /ietf-netconf-state/datastores/datastore[3] */
     if (agt_cap_std_set(CAP_STDID_STARTUP)) {
-	confval = make_datastore_val(NCX_EL_STARTUP,
-				     confobj,
-				     &res);
-	if (!confval) {
-	    return res;
-	}
-	val_add_child(confval, confsval);
+        confval = make_datastore_val(NCX_EL_STARTUP,
+                                     confobj,
+                                     &res);
+        if (!confval) {
+            return res;
+        }
+        val_add_child(confval, confsval);
     }
 
     /* add /ietf-netconf-state/schemas */
     myschemasval = val_new_value();
     if (!myschemasval) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     val_init_from_template(myschemasval, schemasobj);
     val_add_child(myschemasval, topval);
 
     /* add all the /ietf-netconf-state/schemas/schema nodes */
     for (mod = ncx_get_first_module();
-	 mod != NULL;
-	 mod = ncx_get_next_module(mod)) {
-	res = agt_state_add_module_schema(mod);
-	if (res != NO_ERR) {
-	    return res;
-	}
+         mod != NULL;
+         mod = ncx_get_next_module(mod)) {
+        res = agt_state_add_module_schema(mod);
+        if (res != NO_ERR) {
+            return res;
+        }
     }
 
     /* add /ietf-netconf-state/sessions */
     sessionsval = val_new_value();
     if (!sessionsval) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     val_init_from_template(sessionsval, sessionsobj);
     val_add_child(sessionsval, topval);
@@ -1300,17 +1297,17 @@ status_t
      */
     subscriptionsval = val_new_value();
     if (!subscriptionsval) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     val_init_from_template(subscriptionsval, 
-			   mysubscriptionsobj);
+                           mysubscriptionsobj);
     mysubscriptionsval = subscriptionsval;
 
     /* add /ietf-netconf-state/statistics */
     statisticsval = make_statistics_val(statisticsobj,
-					&res);
+                                        &res);
     if (!statisticsval) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     val_add_child(statisticsval, topval);
 
@@ -1334,29 +1331,29 @@ void
 {
     if (agt_state_init_done) {
 
-	if (!any_subscriptions) {
-	    /* not going to get cleaned up when 
-	     * the running config is deleted,
-	     * so delete it now
-	     */
-	    if (mysubscriptionsval) {
-		val_free_value(mysubscriptionsval);
-	    }
-	}
+        if (!any_subscriptions) {
+            /* not going to get cleaned up when 
+             * the running config is deleted,
+             * so delete it now
+             */
+            if (mysubscriptionsval) {
+                val_free_value(mysubscriptionsval);
+            }
+        }
 
-	statemod = NULL;
-	mysessionsval = NULL;
-	myschemasval = NULL;
-	mysubscriptionsval = NULL;
-	mysessionobj = NULL;
-	myschemaobj = NULL;
-	mysubscriptionsobj = NULL;
-	any_subscriptions = FALSE;
+        statemod = NULL;
+        mysessionsval = NULL;
+        myschemasval = NULL;
+        mysubscriptionsval = NULL;
+        mysessionobj = NULL;
+        myschemaobj = NULL;
+        mysubscriptionsobj = NULL;
+        any_subscriptions = FALSE;
 
-	agt_rpc_unregister_method(AGT_STATE_MODULE, 
-				  AGT_STATE_GET_SCHEMA);
+        agt_rpc_unregister_method(AGT_STATE_MODULE, 
+                                  AGT_STATE_GET_SCHEMA);
 
-	agt_state_init_done = FALSE;
+        agt_state_init_done = FALSE;
     }
 }  /* agt_state_cleanup */
 
@@ -1381,7 +1378,7 @@ status_t
     res = NO_ERR;
     session = make_session_val(scb, mysessionobj, &res);
     if (!session) {
-	return res;
+        return res;
     }
 
     val_add_child(session, mysessionsval);
@@ -1405,24 +1402,24 @@ void
     val_value_t  *sessionval, *idval;
 
     if (mysessionsval == NULL) {
-	/* cleanup already done */
-	return;
+        /* cleanup already done */
+        return;
     }
 
     for (sessionval = val_get_first_child(mysessionsval);
-	 sessionval != NULL;
-	 sessionval = val_get_next_child(sessionval)) {
+         sessionval != NULL;
+         sessionval = val_get_next_child(sessionval)) {
 
-	idval = val_find_child(sessionval, 
-			       AGT_STATE_MODULE, 
-			       AGT_STATE_OBJ_SESSIONID);
-	if (!idval) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	} else if (VAL_UINT(idval) == sid) {
-	    dlq_remove(sessionval);
-	    val_free_value(sessionval);
-	    return;
-	}
+        idval = val_find_child(sessionval, 
+                               AGT_STATE_MODULE, 
+                               AGT_STATE_OBJ_SESSIONID);
+        if (!idval) {
+            SET_ERROR(ERR_INTERNAL_VAL);
+        } else if (VAL_UINT(idval) == sid) {
+            dlq_remove(sessionval);
+            val_free_value(sessionval);
+            return;
+        }
     }
     /* session already removed -- ignore the error */
 
@@ -1449,7 +1446,7 @@ status_t
     res = NO_ERR;
     schema = make_schema_val(mod, myschemaobj, &res);
     if (!schema) {
-	return res;
+        return res;
     }
 
     val_add_child(schema, myschemasval);
@@ -1478,20 +1475,20 @@ status_t
     res = NO_ERR;
     subscription = make_subscription_val(sub, &res);
     if (!subscription) {
-	return res;
+        return res;
     }
 
     val_add_child(subscription, mysubscriptionsval);
 
     if (!any_subscriptions) {
-	/* !!! special insert hack into the correct
-	 * !!! sibling position; OK because this is
-	 * !!! static read-only data and will not
-	 * !!! be removed by agt_val.c
-	 */
-	dlq_insertAfter(mysubscriptionsval, mysessionsval);
-	mysubscriptionsval->parent = mysessionsval->parent;
-	any_subscriptions = TRUE;
+        /* !!! special insert hack into the correct
+         * !!! sibling position; OK because this is
+         * !!! static read-only data and will not
+         * !!! be removed by agt_val.c
+         */
+        dlq_insertAfter(mysubscriptionsval, mysessionsval);
+        mysubscriptionsval->parent = mysessionsval->parent;
+        any_subscriptions = TRUE;
     }
 
     return NO_ERR;
@@ -1514,29 +1511,29 @@ void
     val_value_t  *subscriptionval, *sessionidval;
 
     for (subscriptionval = val_get_first_child(mysubscriptionsval);
-	 subscriptionval != NULL;
-	 subscriptionval = val_get_next_child(subscriptionval)) {
+         subscriptionval != NULL;
+         subscriptionval = val_get_next_child(subscriptionval)) {
 
-	sessionidval = val_find_child(subscriptionval, 
-				      AGT_STATE_MODULE, 
-				      AGT_STATE_OBJ_SESSIONID);
-	if (!sessionidval) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    continue;
-	}
+        sessionidval = val_find_child(subscriptionval, 
+                                      AGT_STATE_MODULE, 
+                                      AGT_STATE_OBJ_SESSIONID);
+        if (!sessionidval) {
+            SET_ERROR(ERR_INTERNAL_VAL);
+            continue;
+        }
 
-	if (VAL_UINT(sessionidval) != sid) {
-	    continue;
-	}
-	    
-	dlq_remove(subscriptionval);
-	val_free_value(subscriptionval);
+        if (VAL_UINT(sessionidval) != sid) {
+            continue;
+        }
+            
+        dlq_remove(subscriptionval);
+        val_free_value(subscriptionval);
 
-	if (!val_has_content(mysubscriptionsval)) {
-	    val_remove_child(mysubscriptionsval);
-	    any_subscriptions = FALSE;
-	}
-	return;
+        if (!val_has_content(mysubscriptionsval)) {
+            val_remove_child(mysubscriptionsval);
+            any_subscriptions = FALSE;
+        }
+        return;
     }
 
 }  /* agt_state_remove_subscription */

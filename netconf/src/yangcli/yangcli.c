@@ -3257,7 +3257,12 @@ int
     }
 
     print_errors();
+
+    print_error_count();
+
     yangcli_cleanup();
+
+    print_error_count();
 
     return 0;
 

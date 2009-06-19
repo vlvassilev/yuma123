@@ -1,6 +1,6 @@
 /*  FILE: agt.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -128,7 +128,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                            *
 *                                                                   *
 *********************************************************************/
 static boolean agt_init_done = FALSE;
@@ -199,57 +199,59 @@ static void
 
     cfg = cfg_get_config(NCX_CFG_RUNNING);
     if (!cfg) {
-	log_error("\nagt: No running config found!!");
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        log_error("\nagt: No running config found!!");
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
 
     /* use the user-set startup or default filename */
     if (startup) {
-	/* relative filespec, use search path */
-	fname = ncxmod_find_data_file(startup, FALSE, &res);
+        /* relative filespec, use search path */
+        fname = ncxmod_find_data_file(startup, FALSE, &res);
     } else {
-	/* search for the default startup-cfg.xml filename */
-	fname = ncxmod_find_data_file(NCX_DEF_STARTUP_FILE, FALSE, &res);
+        /* search for the default startup-cfg.xml filename */
+        fname = ncxmod_find_data_file(NCX_DEF_STARTUP_FILE, FALSE, &res);
     }
 
     /* check if error finding the filespec */
     if (startup && !fname) {
-	log_error("\nWarning: Startup config file (%s) not found."
-		 "\n   Booting with empty configuration!\n",
-		  startup);
+        log_error("\nWarning: Startup config file (%s) not found."
+                 "\n   Booting with empty configuration!\n",
+                  startup);
     }
 
     if (!fname) {
-	return;
+        return;
     }
     
     /* try to load the config file that was found or given */
     res = agt_ncx_cfg_load(cfg, CFG_LOC_FILE, fname);
     if (res != NO_ERR) {
-	if (!dlq_empty(&cfg->load_errQ)) {
-	    log_error("\nError: configuration errors occurred loading the "
-		     "<running> database from NV-storage"
-		     "\n     (%s)\n", fname);
-	} else if (res == ERR_XML_READER_START_FAILED) {
-	    log_error("\nagt: Error: Could not open startup config file"
-		      "\n     (%s)\n", fname);
-	}
+        if (!dlq_empty(&cfg->load_errQ)) {
+            log_error("\nError: configuration errors occurred loading the "
+                     "<running> database from NV-storage"
+                     "\n     (%s)\n", 
+                      fname);
+        } else if (res == ERR_XML_READER_START_FAILED) {
+            log_error("\nagt: Error: Could not open startup config file"
+                      "\n     (%s)\n", 
+                      fname);
+        }
     }
 
     if (res == NO_ERR) {
-	log_info("\nagt: Startup config loaded OK\n     Source: %s\n",
-		 fname);
+        log_info("\nagt: Startup config loaded OK\n     Source: %s\n",
+                 fname);
     }
 
     if (LOGDEBUG) {
-	log_debug("\nContents of %s configuration:", cfg->name);
-	val_dump_value(cfg->root, 0);
-	log_debug("\n");
+        log_debug("\nContents of %s configuration:", cfg->name);
+        val_dump_value(cfg->root, 0);
+        log_debug("\n");
     }
 
     if (fname) {
-	m__free(fname);
+        m__free(fname);
     }
 
 } /* load_running_config */
@@ -280,14 +282,14 @@ static void
 *********************************************************************/
 status_t 
     agt_init1 (int argc,
-	       const char *argv[],
-	       boolean *showver,
-	       help_mode_t *showhelpmode)
+               const char *argv[],
+               boolean *showver,
+               help_mode_t *showhelpmode)
 {
     status_t  res;
 
     if (agt_init_done) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
 #ifdef AGT_DEBUG
@@ -307,32 +309,35 @@ status_t
     init_agent_profile();
 
     /* get the command line params and also any config file params */
-    res = agt_cli_process_input(argc, argv, &agt_profile,
-				showver, showhelpmode);
+    res = agt_cli_process_input(argc, 
+                                argv, 
+                                &agt_profile,
+                                showver, 
+                                showhelpmode);
     if (res != NO_ERR) {
-	return res;
+        return res;
     } /* else the agt_profile is filled in */
 
     /* check if quick exit mode */
     if (*showver || *showhelpmode == HELP_MODE_NONE) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     /* loglevel and log file already set */
 
     /* set the module search path */
     if (agt_profile.agt_modpath) {
-	ncxmod_set_modpath(agt_profile.agt_modpath);
+        ncxmod_set_modpath(agt_profile.agt_modpath);
     }
 
     /* set the data file search path */
     if (agt_profile.agt_datapath) {
-	ncxmod_set_datapath(agt_profile.agt_datapath);
+        ncxmod_set_datapath(agt_profile.agt_datapath);
     }
 
     /* set the script file search path (NOT USED YET!) */
     if (agt_profile.agt_runpath) {
-	ncxmod_set_runpath(agt_profile.agt_runpath);
+        ncxmod_set_runpath(agt_profile.agt_runpath);
     }
 
     return res;
@@ -371,19 +376,19 @@ status_t
     /* initialize the RPC agent callback structures */
     res = agt_rpc_init();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* initialize the NCX connect handler */
     res = agt_connect_init();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* initialize the NCX hello handler */
     res = agt_hello_init();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
 
@@ -393,33 +398,33 @@ status_t
      */
     res = cfg_init_static_db(NCX_CFGID_RUNNING);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /*** All Agent profile parameters should be set by now ***/
 
     /* must set the agent capabilities after the profile is set */
     res = agt_cap_set_caps(agt_profile.agt_targ, 
-			   agt_profile.agt_start,
-			   agt_profile.agt_defaultStyle);
+                           agt_profile.agt_start,
+                           agt_profile.agt_defaultStyle);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* setup the candidate config if it is used (still TBD) */
     if (agt_profile.agt_targ==NCX_AGT_TARG_CANDIDATE) {
-	res = cfg_init_static_db(NCX_CFGID_CANDIDATE);
-	if (res != NO_ERR) {
-	    return res;
-	}
+        res = cfg_init_static_db(NCX_CFGID_CANDIDATE);
+        if (res != NO_ERR) {
+            return res;
+        }
     }
 
     /* setup the startup config if it is used */
     if (agt_profile.agt_start==NCX_AGT_START_DISTINCT) {
-	res = cfg_init_static_db(NCX_CFGID_STARTUP);
-	if (res != NO_ERR) {
-	    return res;
-	}
+        res = cfg_init_static_db(NCX_CFGID_STARTUP);
+        if (res != NO_ERR) {
+            return res;
+        }
     }
 
     /* initialize the NCX agent core callback functions
@@ -428,13 +433,13 @@ status_t
      * */
     res = agt_ncx_init();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* initialize the agent access control model */
     res = agt_acm_init();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* initialize the session handler data structures */
@@ -446,59 +451,59 @@ status_t
      */
     res = agtinst_init();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 #endif
 
     /* load the system module */
     res = agt_sys_init();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* load the NETCONF state monitoring data model module */
     res = agt_state_init();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* load the NETCONF Notifications data model module */
     res = agt_not_init();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
     
     /*** ALL INITIAL YANG MODULES SHOULD BE LOADED AT THIS POINT ***/
     if (ncx_any_mod_errors()) {
-	log_error("\nagt: fatal error - one or more YANG modules"
-		  " loaded with errors\n");
-	return ERR_NCX_DATA_MISSING;
+        log_error("\nagt: fatal error - one or more YANG modules"
+                  " loaded with errors\n");
+        return ERR_NCX_DATA_MISSING;
     }
 
     /* set the initial module capabilities in the agent <hello> message */
     res = agt_cap_set_modules();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* load the NV startup config into the running config if it exists */
     if (agt_profile.agt_usestartup) {
-	load_running_config(agt_profile.agt_startup);
+        load_running_config(agt_profile.agt_startup);
     } else {
-	log_info("\nagt: Startup configuration skipped due "
-		 "to no-startup CLI option\n");
+        log_info("\nagt: Startup configuration skipped due "
+                 "to no-startup CLI option\n");
     }
 
     /* load the nacm access control DM module */
     res = agt_acm_init2();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* load the system module callback functions and data */
     res = agt_sys_init2();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
     
     /* load the agent sessions callback functions and data */
@@ -507,13 +512,13 @@ status_t
     /* load the agent state monitoring callback functions and data */
     res = agt_state_init2();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* load the notifications callback functions and data */
     res = agt_not_init2();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* allow users to access the configuration databases now */
@@ -521,19 +526,19 @@ status_t
 
     /* set the correct configuration target */
     if (agt_profile.agt_targ==NCX_AGT_TARG_CANDIDATE) {
-	res = cfg_fill_candidate_from_running();
-	if (res != NO_ERR) {
-	    return res;
-	}
-	cfg_set_state(NCX_CFGID_CANDIDATE, CFG_ST_READY);
-	cfg_set_target(NCX_CFGID_CANDIDATE);
+        res = cfg_fill_candidate_from_running();
+        if (res != NO_ERR) {
+            return res;
+        }
+        cfg_set_state(NCX_CFGID_CANDIDATE, CFG_ST_READY);
+        cfg_set_target(NCX_CFGID_CANDIDATE);
     } else {
-	cfg_set_target(NCX_CFGID_RUNNING);
+        cfg_set_target(NCX_CFGID_RUNNING);
     }
 
     /* setup the startup config only if used */
     if (agt_profile.agt_start==NCX_AGT_START_DISTINCT) {
-	cfg_set_state(NCX_CFGID_STARTUP, CFG_ST_READY);
+        cfg_set_state(NCX_CFGID_STARTUP, CFG_ST_READY);
     }
 
     /* data modules can be accessed now, and still added
@@ -565,29 +570,29 @@ void
 #endif
 
 #if 0
-	agtinst_cleanup();
+        agtinst_cleanup();
 #endif
 
-	agt_acm_cleanup();
-	agt_ncx_cleanup();
-	agt_hello_cleanup();
-	agt_cli_cleanup();
-	agt_sys_cleanup();
-	agt_state_cleanup();
-	agt_not_cleanup();
-	agt_ses_cleanup();
-	agt_cap_cleanup();
-	agt_rpc_cleanup();
-	agt_signal_cleanup();
-	agt_timer_cleanup();
-	agt_connect_cleanup();
-	agt_cb_cleanup();
+        agt_acm_cleanup();
+        agt_ncx_cleanup();
+        agt_hello_cleanup();
+        agt_cli_cleanup();
+        agt_sys_cleanup();
+        agt_state_cleanup();
+        agt_not_cleanup();
+        agt_ses_cleanup();
+        agt_cap_cleanup();
+        agt_rpc_cleanup();
+        agt_signal_cleanup();
+        agt_timer_cleanup();
+        agt_connect_cleanup();
+        agt_cb_cleanup();
 
-	print_errors();
+        print_errors();
 
-	log_close();
+        log_close();
 
-	agt_init_done = FALSE;
+        agt_init_done = FALSE;
     }
 }   /* agt_cleanup */
 
@@ -624,14 +629,14 @@ void
 {
 #ifdef DEBUG
     if (mode <= NCX_SHUT_NONE || mode > NCX_SHUT_EXIT) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
 #endif
 
     /* don't allow the shutdown mode to change in mid-stream */
     if (agt_shutdown_started) {
-	return;
+        return;
     }
 
     agt_shutdown = TRUE;
@@ -691,22 +696,22 @@ const xmlChar *
 {
     switch (cbtyp) {
     case AGT_CB_LOAD_MOD:
-	return (const xmlChar *)"load-module";
+        return (const xmlChar *)"load-module";
     case AGT_CB_UNLOAD_MOD:
-	return (const xmlChar *)"unload-module";
+        return (const xmlChar *)"unload-module";
     case AGT_CB_VALIDATE:
-	return (const xmlChar *)"validate";
+        return (const xmlChar *)"validate";
     case AGT_CB_APPLY:
-	return (const xmlChar *)"apply";
+        return (const xmlChar *)"apply";
     case AGT_CB_COMMIT:
-	return (const xmlChar *)"commit";
+        return (const xmlChar *)"commit";
     case AGT_CB_ROLLBACK:
-	return (const xmlChar *)"rollback";
+        return (const xmlChar *)"rollback";
     case AGT_CB_TEST_APPLY:
-	return (const xmlChar *)"test-apply";
+        return (const xmlChar *)"test-apply";
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return (const xmlChar *)"invalid";
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return (const xmlChar *)"invalid";
     }
 }  /* agt_cbtyp_name */
 

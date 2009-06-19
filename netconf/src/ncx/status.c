@@ -67,8 +67,9 @@ typedef struct error_snapshot_t_ {
 *********************************************************************/
 
 /* used for error_stack, when debug_level == NONE */
-static int error_level = 0;
+static int error_level;
 static error_snapshot_t error_stack[MAX_ERR_LEVEL];
+static uint32 error_count;
 
 
 /********************************************************************
@@ -95,6 +96,8 @@ status_t set_error (const char *filename, int linenum,
 	error_stack[error_level].msg = get_error_string(status);
 	error_level++;
     }
+
+    error_count++;
 
     return status;
 
@@ -603,6 +606,8 @@ const char *
 	return "decimal64 fraction precision overflow";
     case ERR_NCX_RPC_WHEN_FAILED:
 	return "when-stmt tested false";
+    case ERR_NCX_NO_MATCHES:
+	return "no matches found";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:
@@ -733,6 +738,43 @@ status_t
     }
 
 } /* errno_to_status */
+
+
+/********************************************************************
+* FUNCTION status_init
+*
+* Init this module
+*
+*********************************************************************/
+void
+    status_init (void)
+{
+    error_level = 0;
+    memset(&error_stack, 0x0, sizeof(error_stack));
+    error_count = 0;
+
+} /* status_init */
+
+
+/********************************************************************
+* FUNCTION print_error_count
+*
+* Print the error_count field, if it is non-zero
+* to STDOUT or the logfile
+* Clears out the error_count afterwards so
+* the count will start over after printing!!!
+*
+*********************************************************************/
+void
+    print_error_count (void)
+{
+    if (error_count) {
+        log_error("\n\n*** Total Internal Errors: %u ***\n", 
+                  error_count);
+        error_count = 0;
+    }
+
+} /* print_error_count */
 
 
 /* END file status.c */

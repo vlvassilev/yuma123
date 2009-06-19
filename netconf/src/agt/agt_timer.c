@@ -1,7 +1,7 @@
 /*  FILE: agt_timer.c
 
     Handle timer services
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -55,7 +55,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                            *
 *                                                                   *
 *********************************************************************/
 
@@ -76,9 +76,9 @@ void
     agt_timer_init (void)
 {
     if (!agt_timer_init_done) {
-	/* setup agt_timer_handler */
+        /* setup agt_timer_handler */
 
-	agt_timer_init_done = TRUE;
+        agt_timer_init_done = TRUE;
     }
 
 } /* agt_timer_init */
@@ -94,9 +94,9 @@ void
     agt_timer_cleanup (void)
 {
     if (agt_timer_init_done) {
-	/* restore previous handlers */
+        /* restore previous handlers */
 
-	agt_timer_init_done = FALSE;
+        agt_timer_init_done = FALSE;
     }
 
 } /* agt_timer_cleanup */

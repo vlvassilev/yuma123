@@ -406,6 +406,8 @@ int
 
 	netconfd_cleanup();
 
+        print_error_count();
+
 	if (shutmode == NCX_SHUT_EXIT) {
 	    done = TRUE;
 	}
@@ -417,6 +419,8 @@ int
     }
 
     print_errors();
+
+    print_error_count();
 
     if (stdlog) {
 	printf("\n");

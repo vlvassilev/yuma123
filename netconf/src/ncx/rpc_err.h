@@ -221,6 +221,62 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
+/*** YANG standard error-app-tag values ***/
+/* 13.1 */
+#define RPC_ERR_APPTAG_UNIQUE_FAILED    (const xmlChar *)"data-not-unique"
+
+/* 13.2 */
+#define RPC_ERR_APPTAG_MAX_ELEMS       (const xmlChar *)"too-many-elements"
+
+/* 13.3 */
+#define RPC_ERR_APPTAG_MIN_ELEMS       (const xmlChar *)"too-few-elements"
+
+/* 13.4 */
+#define RPC_ERR_APPTAG_MUST            (const xmlChar *)"must-violation"
+
+/* 13.5 */
+#define RPC_ERR_APPTAG_INSTANCE_REQ    (const xmlChar *)"instance-required"
+
+/* 13.6 */
+#define RPC_ERR_APPTAG_CHOICE          (const xmlChar *)"missing-choice"
+
+/* 13.7 */
+#define RPC_ERR_APPTAG_INSERT          (const xmlChar *)"missing-instance"
+
+
+#define RPC_ERR_APPTAG_RANGE           (const xmlChar *)"not-in-range"
+
+#define RPC_ERR_APPTAG_VALUE_SET       (const xmlChar *)"not-in-value-set"
+
+#define RPC_ERR_APPTAG_PATTERN         (const xmlChar *)"pattern-test-failed"
+
+#define RPC_ERR_APPTAG_DATA_REST   \
+    (const xmlChar *)"data-restriction-violation"
+
+/* ietf-netconf-state:get-schema */
+#define RPC_ERR_APPTAG_NO_MATCHES     (const xmlChar *)"no-matches"
+
+
+/*** netconfcentral errror-app-tag values ***/
+#define RPC_ERR_APPTAG_GEN_WARNING      (const xmlChar *)"general-warning"
+#define RPC_ERR_APPTAG_GEN_ERROR        (const xmlChar *)"general-error"
+#define RPC_ERR_APPTAG_INT_ERROR        (const xmlChar *)"internal-error"
+#define RPC_ERR_APPTAG_IO_ERROR         (const xmlChar *)"io-error"
+#define RPC_ERR_APPTAG_MALLOC_ERROR     (const xmlChar *)"malloc-error"
+#define RPC_ERR_APPTAG_LIMIT_REACHED    (const xmlChar *)"limit-reached"
+#define RPC_ERR_APPTAG_LIBXML2_ERROR    (const xmlChar *)"libxml2-error"
+#define RPC_ERR_APPTAG_SQL_ERROR        (const xmlChar *)"sql-error"
+#define RPC_ERR_APPTAG_SSH_ERROR        (const xmlChar *)"ssh-error"
+#define RPC_ERR_APPTAG_BEEP_ERROR       (const xmlChar *)"beep-error"
+#define RPC_ERR_APPTAG_HTML_ERROR       (const xmlChar *)"html-error"
+#define RPC_ERR_APPTAG_DATA_INCOMPLETE  (const xmlChar *)"data-incomplete"
+#define RPC_ERR_APPTAG_DATA_INVALID     (const xmlChar *)"data-invalid"
+#define RPC_ERR_APPTAG_DUPLICATE_ERROR  (const xmlChar *)"duplicate-error"
+#define RPC_ERR_APPTAG_RESOURCE_IN_USE  (const xmlChar *)"resource-in-use"
+#define RPC_ERR_APPTAG_NO_ACCESS        (const xmlChar *)"no-access"
+#define RPC_ERR_APPTAG_RECOVER_FAILED   (const xmlChar *)"recover-failed"
+#define RPC_ERR_APPTAG_NO_SUPPORT       (const xmlChar *)"no-support"
+
 
 /********************************************************************
 *                                                                   *
@@ -259,6 +315,7 @@ typedef enum rpc_err_sev_t_ {
     RPC_ERR_SEV_WARNING,
     RPC_ERR_SEV_ERROR
 } rpc_err_sev_t;
+
 
 /* one error-info sub-element */
 typedef struct rpc_err_info_ {

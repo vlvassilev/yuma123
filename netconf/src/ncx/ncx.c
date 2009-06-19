@@ -1019,6 +1019,8 @@ status_t
         return NO_ERR;
     }
 
+    status_init();
+
     save_descr = savestr;
     mod_load_callback = NULL;
     log_set_debug_level(dlevel);

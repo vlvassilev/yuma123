@@ -216,7 +216,7 @@ typedef enum status_t_
     ERR_NCX_UNKNOWN_OBJECT,             /* 293 */
     ERR_NCX_EXTRA_PARMINST,             /* 294 */
     ERR_NCX_EXTRA_CHOICE,               /* 295 */
-    ERR_NCX_MISSING_CHOICE,             /* 296 */   /* 13.n */
+    ERR_NCX_MISSING_CHOICE,             /* 296 */   /* 13.6 */
     ERR_NCX_CFG_STATE,                  /* 297 */
     ERR_NCX_UNKNOWN_APP,                /* 298 */
     ERR_NCX_UNKNOWN_TYPE,               /* 299 */
@@ -260,8 +260,8 @@ typedef enum status_t_
     ERR_NCX_MAX_ELEMS_VIOLATION,        /* 337 */  /* 13.2 */
     ERR_NCX_MIN_ELEMS_VIOLATION,        /* 338 */  /* 13.3 */
     ERR_NCX_MUST_TEST_FAILED,           /* 339 */  /* 13.4 */
-    ERR_NCX_DATA_REST_VIOLATION,        /* 340 */  /* not used */
-    ERR_NCX_INSERT_MISSING_INSTANCE,    /* 341 */  /* 13.5 */
+    ERR_NCX_DATA_REST_VIOLATION,        /* 340 */  /* obsolete */
+    ERR_NCX_INSERT_MISSING_INSTANCE,    /* 341 */  /* 13.7 */
     ERR_NCX_NOT_CONFIG,                 /* 342 */
     ERR_NCX_INVALID_CONDITIONAL,        /* 343 */
     ERR_NCX_USING_OBSOLETE,             /* 344 */
@@ -285,7 +285,8 @@ typedef enum status_t_
     ERR_NCX_DEC64_BASEOVFL,             /* 362 */
     ERR_NCX_DEC64_FRACOVFL,             /* 363 */
     ERR_NCX_RPC_WHEN_FAILED,            /* 364 */
-    ERR_LAST_USR_ERR,                   /* 365 -- not really used */
+    ERR_NCX_NO_MATCHES,                 /* 365 */
+    ERR_LAST_USR_ERR,                   /* 366 -- not really used */
 
     /* user warnings start at 400 */
     ERR_MAKFILE_DUP_SRC=ERR_WARN_BASE,  /* 400 */
@@ -354,5 +355,11 @@ extern const char *
 
 extern status_t
     errno_to_status (void);
+
+extern void
+    status_init (void);
+
+extern void
+    print_error_count (void);
 
 #endif     /* _H_status */

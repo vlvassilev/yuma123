@@ -1,6 +1,6 @@
 /*  FILE: agt_cli.c
 
-	Set agent CLI parameters
+        Set agent CLI parameters
 
         This module is called before any other agent modules
         have been initialized.  Only core ncx library functions
@@ -75,7 +75,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                            *
 *                                                                   *
 *********************************************************************/
 static val_value_t *cli_val = NULL;
@@ -99,7 +99,7 @@ static val_value_t *cli_val = NULL;
 *********************************************************************/
 static void
     set_agent_profile (val_value_t *valset,
-		       agt_profile_t *agt_profile)
+                       agt_profile_t *agt_profile)
 {
     val_value_t  *val;
     uint32        i;
@@ -107,8 +107,8 @@ static void
 
     /* check if there is any CLI data to read */
     if (!valset) {
-	/* assumes agt_profile already has default values */
-	return;
+        /* assumes agt_profile already has default values */
+        return;
     }
 
     /* check all the netconfd CLI parameters;
@@ -120,50 +120,50 @@ static void
 
     /* get access-control param */
     val = val_find_child(valset, 
-			 AGT_CLI_MODULE, 
-			 NCX_EL_ACCESS_CONTROL);
+                         AGT_CLI_MODULE, 
+                         NCX_EL_ACCESS_CONTROL);
     if (val && val->res == NO_ERR) {
-	agt_profile->agt_accesscontrol = VAL_ENUM_NAME(val);
+        agt_profile->agt_accesscontrol = VAL_ENUM_NAME(val);
     }
     if (agt_profile->agt_accesscontrol) {
-	if (!xml_strcmp(agt_profile->agt_accesscontrol,
-			NCX_EL_ENFORCING)) {
-	    agt_profile->agt_accesscontrol_enum = 
-		AGT_ACMOD_ENFORCING;
-	} else if (!xml_strcmp(agt_profile->agt_accesscontrol,
-			       NCX_EL_PERMISSIVE)) {
-	    agt_profile->agt_accesscontrol_enum = 
-		AGT_ACMOD_PERMISSIVE;
-	} else if (!xml_strcmp(agt_profile->agt_accesscontrol,
-			       NCX_EL_DISABLED)) {
-	    agt_profile->agt_accesscontrol_enum = 
-		AGT_ACMOD_DISABLED;
-	} else if (!xml_strcmp(agt_profile->agt_accesscontrol,
-			       NCX_EL_OFF)) {
-	    agt_profile->agt_accesscontrol_enum = 
-		AGT_ACMOD_OFF;
-	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    agt_profile->agt_accesscontrol_enum = 
-		AGT_ACMOD_ENFORCING;
-	}
+        if (!xml_strcmp(agt_profile->agt_accesscontrol,
+                        NCX_EL_ENFORCING)) {
+            agt_profile->agt_accesscontrol_enum = 
+                AGT_ACMOD_ENFORCING;
+        } else if (!xml_strcmp(agt_profile->agt_accesscontrol,
+                               NCX_EL_PERMISSIVE)) {
+            agt_profile->agt_accesscontrol_enum = 
+                AGT_ACMOD_PERMISSIVE;
+        } else if (!xml_strcmp(agt_profile->agt_accesscontrol,
+                               NCX_EL_DISABLED)) {
+            agt_profile->agt_accesscontrol_enum = 
+                AGT_ACMOD_DISABLED;
+        } else if (!xml_strcmp(agt_profile->agt_accesscontrol,
+                               NCX_EL_OFF)) {
+            agt_profile->agt_accesscontrol_enum = 
+                AGT_ACMOD_OFF;
+        } else {
+            SET_ERROR(ERR_INTERNAL_VAL);
+            agt_profile->agt_accesscontrol_enum = 
+                AGT_ACMOD_ENFORCING;
+        }
     } else {
-	agt_profile->agt_accesscontrol_enum = 
-	    AGT_ACMOD_ENFORCING;
+        agt_profile->agt_accesscontrol_enum = 
+            AGT_ACMOD_ENFORCING;
     }
 
     /* get datapath param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_DATAPATH);
     if (val && val->res == NO_ERR) {
-	agt_profile->agt_datapath = VAL_STR(val);
+        agt_profile->agt_datapath = VAL_STR(val);
     }
 
     /* get default-style param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_DEFAULT_STYLE);
     if (val && val->res == NO_ERR) {
-	agt_profile->agt_defaultStyle = VAL_ENUM_NAME(val);
-	agt_profile->agt_defaultStyleEnum = 
-	    ncx_get_withdefaults_enum(VAL_ENUM_NAME(val));
+        agt_profile->agt_defaultStyle = VAL_ENUM_NAME(val);
+        agt_profile->agt_defaultStyleEnum = 
+            ncx_get_withdefaults_enum(VAL_ENUM_NAME(val));
     }
 
     /* help parameter checked externally */
@@ -177,87 +177,87 @@ static void
     /* get log param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_LOG);
     if (val && val->res == NO_ERR) {
-	agt_profile->agt_logfile = VAL_STR(val);
+        agt_profile->agt_logfile = VAL_STR(val);
     }
 
     /* get log-append param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_LOGAPPEND);
     if (val && val->res == NO_ERR) {
-	agt_profile->agt_logappend = TRUE;
+        agt_profile->agt_logappend = TRUE;
     }
 
     /* get log-level param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_LOGLEVEL);
     if (val && val->res == NO_ERR) {
-	agt_profile->agt_loglevel = 
-	    log_get_debug_level_enum((const char *)VAL_STR(val));
+        agt_profile->agt_loglevel = 
+            log_get_debug_level_enum((const char *)VAL_STR(val));
     }
 
     /* get modpath param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_MODPATH);
     if (val && val->res == NO_ERR) {
-	agt_profile->agt_modpath = VAL_STR(val);
+        agt_profile->agt_modpath = VAL_STR(val);
     }
 
     /* get leaf-list port parameter */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_PORT);
     if (val && val->res == NO_ERR) {
-	agt_profile->agt_ports[0] = VAL_UINT16(val);
+        agt_profile->agt_ports[0] = VAL_UINT16(val);
 
-	val = val_find_next_child(valset, AGT_CLI_MODULE,
-				  NCX_EL_PORT, val);
-	while (val) {
-	    done = FALSE;
-	    for (i = 0;	 i < AGT_MAX_PORTS && !done; i++) {
-		if (agt_profile->agt_ports[i] == VAL_UINT16(val)) {
-		    done = TRUE;
-		} else if (agt_profile->agt_ports[i] == 0) {
-		    agt_profile->agt_ports[i] = VAL_UINT16(val);
-		    done = TRUE;
-		}
-	    }
-	    val = val_find_next_child(valset, AGT_CLI_MODULE,
-				      NCX_EL_PORT, val);
-	}
+        val = val_find_next_child(valset, AGT_CLI_MODULE,
+                                  NCX_EL_PORT, val);
+        while (val) {
+            done = FALSE;
+            for (i = 0;         i < AGT_MAX_PORTS && !done; i++) {
+                if (agt_profile->agt_ports[i] == VAL_UINT16(val)) {
+                    done = TRUE;
+                } else if (agt_profile->agt_ports[i] == 0) {
+                    agt_profile->agt_ports[i] = VAL_UINT16(val);
+                    done = TRUE;
+                }
+            }
+            val = val_find_next_child(valset, AGT_CLI_MODULE,
+                                      NCX_EL_PORT, val);
+        }
     }
 
     /* get runpath param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_RUNPATH);
     if (val && val->res == NO_ERR) {
-	agt_profile->agt_runpath = VAL_STR(val);
+        agt_profile->agt_runpath = VAL_STR(val);
     }
 
     /* start choice: get no-startup startup param choice */
     val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_NOSTARTUP);
     if (val && val->res == NO_ERR) {
-	agt_profile->agt_usestartup = FALSE;
+        agt_profile->agt_usestartup = FALSE;
     }
 
     /* start choice: OR get startup param */
     val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_STARTUP);
     if (val && val->res == NO_ERR) {
-	agt_profile->agt_startup = VAL_STR(val);
+        agt_profile->agt_startup = VAL_STR(val);
     }
 
     /* superuser param */
     val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_SUPERUSER);
     if (val && val->res == NO_ERR) {
-	agt_profile->agt_superuser = VAL_STR(val);
+        agt_profile->agt_superuser = VAL_STR(val);
     }
 
     /* get target param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_TARGET);
     if (val && val->res == NO_ERR) {
-	if (!xml_strcmp(VAL_ENUM_NAME(val), NCX_EL_RUNNING)) {
-	    agt_profile->agt_targ = NCX_AGT_TARG_RUNNING;
-	    agt_profile->agt_start = NCX_AGT_START_DISTINCT;
-	    agt_profile->agt_del_startup = TRUE;
-	} else if (!xml_strcmp(VAL_ENUM_NAME(val), 
-			       NCX_EL_CANDIDATE)) {
-	    agt_profile->agt_targ = NCX_AGT_TARG_CANDIDATE;
-	    agt_profile->agt_start = NCX_AGT_START_MIRROR;
-	    agt_profile->agt_del_startup = FALSE;
-	}
+        if (!xml_strcmp(VAL_ENUM_NAME(val), NCX_EL_RUNNING)) {
+            agt_profile->agt_targ = NCX_AGT_TARG_RUNNING;
+            agt_profile->agt_start = NCX_AGT_START_DISTINCT;
+            agt_profile->agt_del_startup = TRUE;
+        } else if (!xml_strcmp(VAL_ENUM_NAME(val), 
+                               NCX_EL_CANDIDATE)) {
+            agt_profile->agt_targ = NCX_AGT_TARG_CANDIDATE;
+            agt_profile->agt_start = NCX_AGT_START_MIRROR;
+            agt_profile->agt_del_startup = FALSE;
+        }
     }
 
     /* version param handled externally */
@@ -265,7 +265,7 @@ static void
     /* get xmlorder param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_XMLORDER);
     if (val && val->res == NO_ERR) {
-	agt_profile->agt_xmlorder = TRUE;
+        agt_profile->agt_xmlorder = TRUE;
     }
 
 } /* set_agent_profile */
@@ -298,10 +298,10 @@ static void
 *********************************************************************/
 status_t
     agt_cli_process_input (int argc,
-			   const char *argv[],
-			   agt_profile_t *agt_profile,
-			   boolean *showver,
-			   help_mode_t *showhelpmode)
+                           const char *argv[],
+                           agt_profile_t *agt_profile,
+                           boolean *showver,
+                           help_mode_t *showhelpmode)
 {
     ncx_module_t          *mod;
     const obj_template_t  *obj;
@@ -310,7 +310,7 @@ status_t
 
 #ifdef DEBUG
     if (!argv || !agt_profile || !showver || !showhelpmode) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -321,71 +321,71 @@ status_t
     obj = NULL;
     mod = ncx_find_module(AGT_CLI_MODULE, NULL);
     if (mod) {
-	obj = ncx_find_object(mod, AGT_CLI_CONTAINER);
+        obj = ncx_find_object(mod, AGT_CLI_CONTAINER);
     }
     if (!obj) {
-	log_error("\nError: netconfd module with CLI definitions not loaded");
-	return ERR_NCX_NOT_FOUND;
+        log_error("\nError: netconfd module with CLI definitions not loaded");
+        return ERR_NCX_NOT_FOUND;
     }
 
     /* parse the command line against the object template */
     res = NO_ERR;
     valset = NULL;
     if (argc > 1) {
-	valset = cli_parse(argc, argv, obj,
-			   FULLTEST, PLAINMODE, TRUE, &res);
-	if (res != NO_ERR) {
-	    if (valset) {
-		val_free_value(valset);
-	    }
-	    return res;
-	}
+        valset = cli_parse(argc, argv, obj,
+                           FULLTEST, PLAINMODE, TRUE, &res);
+        if (res != NO_ERR) {
+            if (valset) {
+                val_free_value(valset);
+            }
+            return res;
+        }
     }
 
     if (valset) {
-	/* transfer the parmset values */
-	set_agent_profile(valset, agt_profile);
+        /* transfer the parmset values */
+        set_agent_profile(valset, agt_profile);
 
-	/* next get any params from the conf file */
-	val = val_find_child(valset, AGT_CLI_MODULE, 
-			     NCX_EL_CONFIG);
-	if (val) {
-	    if (val->res == NO_ERR) {
-		/* try the specified config location */
-		agt_profile->agt_conffile = VAL_STR(val);
-		res = conf_parse_val_from_filespec(VAL_STR(val), 
-						   valset, 
-						   TRUE, TRUE);
-		if (res != NO_ERR) {
-		    return res;
-		} else {
-		    /* transfer the parmset values again */
-		    set_agent_profile(valset, agt_profile);
-		}
-	    }
-	} /* else no default config location */
+        /* next get any params from the conf file */
+        val = val_find_child(valset, AGT_CLI_MODULE, 
+                             NCX_EL_CONFIG);
+        if (val) {
+            if (val->res == NO_ERR) {
+                /* try the specified config location */
+                agt_profile->agt_conffile = VAL_STR(val);
+                res = conf_parse_val_from_filespec(VAL_STR(val), 
+                                                   valset, 
+                                                   TRUE, TRUE);
+                if (res != NO_ERR) {
+                    return res;
+                } else {
+                    /* transfer the parmset values again */
+                    set_agent_profile(valset, agt_profile);
+                }
+            }
+        } /* else no default config location */
 
-	/* check if version mode requested */
-	val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_VERSION);
-	*showver = (val) ? TRUE : FALSE;
+        /* check if version mode requested */
+        val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_VERSION);
+        *showver = (val) ? TRUE : FALSE;
 
-	/* check if help mode requested */
-	val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_HELP);
-	if (val) {
-	    *showhelpmode = HELP_MODE_NORMAL;
+        /* check if help mode requested */
+        val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_HELP);
+        if (val) {
+            *showhelpmode = HELP_MODE_NORMAL;
 
-	    /* help submode parameter (brief/normal/full) */
-	    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_BRIEF);
-	    if (val) {
-		*showhelpmode = HELP_MODE_BRIEF;
-	    } else {
-		/* full parameter */
-		val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_FULL);
-		if (val) {
-		    *showhelpmode = HELP_MODE_FULL;
-		}
-	    }
-	}
+            /* help submode parameter (brief/normal/full) */
+            val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_BRIEF);
+            if (val) {
+                *showhelpmode = HELP_MODE_BRIEF;
+            } else {
+                /* full parameter */
+                val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_FULL);
+                if (val) {
+                    *showhelpmode = HELP_MODE_FULL;
+                }
+            }
+        }
     }
 
     /* cleanup and exit */
@@ -421,8 +421,8 @@ void
     agt_cli_cleanup (void)
 {
     if (cli_val) {
-	val_free_value(cli_val);
-	cli_val = NULL;
+        val_free_value(cli_val);
+        cli_val = NULL;
     }
 
 } /* agt_cli_cleanup */

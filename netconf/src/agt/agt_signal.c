@@ -1,7 +1,7 @@
 /*  FILE: agt_signal.c
 
     Handle interrupt signals for the agent
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -63,7 +63,7 @@ typedef void (*sighandler_t)(int signum);
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                            *
 *                                                                   *
 *********************************************************************/
 
@@ -84,13 +84,13 @@ void
     agt_signal_init (void)
 {
     if (!agt_signal_init_done) {
-	/* setup agt_signal_handler */
-	sh_int = signal(SIGINT, agt_signal_handler);
-	sh_hup = signal(SIGHUP, agt_signal_handler);
-	sh_term = signal(SIGTERM, agt_signal_handler);
-	sh_pipe = signal(SIGPIPE, agt_signal_handler);
-	sh_alarm = signal(SIGALRM, agt_signal_handler);
-	agt_signal_init_done = TRUE;
+        /* setup agt_signal_handler */
+        sh_int = signal(SIGINT, agt_signal_handler);
+        sh_hup = signal(SIGHUP, agt_signal_handler);
+        sh_term = signal(SIGTERM, agt_signal_handler);
+        sh_pipe = signal(SIGPIPE, agt_signal_handler);
+        sh_alarm = signal(SIGALRM, agt_signal_handler);
+        agt_signal_init_done = TRUE;
     }
 
 } /* agt_signal_init */
@@ -106,13 +106,13 @@ void
     agt_signal_cleanup (void)
 {
     if (agt_signal_init_done) {
-	/* restore previous handlers */
-	signal(SIGINT, sh_int);
-	signal(SIGHUP, sh_hup);
-	signal(SIGTERM, sh_term);
-	signal(SIGPIPE, sh_pipe);
-	signal(SIGALRM, sh_alarm);
-	agt_signal_init_done = FALSE;
+        /* restore previous handlers */
+        signal(SIGINT, sh_int);
+        signal(SIGHUP, sh_hup);
+        signal(SIGTERM, sh_term);
+        signal(SIGPIPE, sh_pipe);
+        signal(SIGALRM, sh_alarm);
+        agt_signal_init_done = FALSE;
     }
 
 } /* agt_signal_cleanup */
@@ -132,26 +132,26 @@ void
 {
     switch (intr) {
     case SIGINT:
-	/* control-C */
-	agt_request_shutdown(NCX_SHUT_EXIT);
-	break;
+        /* control-C */
+        agt_request_shutdown(NCX_SHUT_EXIT);
+        break;
     case SIGHUP:
-	/* hang up treated as reset */
-	agt_request_shutdown(NCX_SHUT_RESET);
-	break;
+        /* hang up treated as reset */
+        agt_request_shutdown(NCX_SHUT_RESET);
+        break;
     case SIGTERM:
-	/* kill -1 */
-	agt_request_shutdown(NCX_SHUT_EXIT);
-	break;
+        /* kill -1 */
+        agt_request_shutdown(NCX_SHUT_EXIT);
+        break;
     case SIGPIPE:
-	/* broken pipe ignored */
-	break;
+        /* broken pipe ignored */
+        break;
     case SIGALRM:
-	/* dispatch to the agent timer handler */
-	agt_timer_handler();
-	break;
+        /* dispatch to the agent timer handler */
+        agt_timer_handler();
+        break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
     }
 
 } /* agt_signal_handler */

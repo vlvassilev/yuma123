@@ -29,7 +29,7 @@ leaf /nacm/rules/dataRule/allowedRights
 leaf-list /nacm/rules/dataRule/allowedGroup
 leaf /nacm/rules/dataRule/comment
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -172,16 +172,16 @@ date         init     comment
 
 
 /********************************************************************
-*								    *
-*			     T Y P E S				    *
-*								    *
+*                                                                    *
+*                             T Y P E S                                    *
+*                                                                    *
 *********************************************************************/
 
 
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                            *
 *                                                                   *
 *********************************************************************/
 static boolean agt_acm_init_done = FALSE;
@@ -209,10 +209,10 @@ static boolean
     is_superuser (const xmlChar *username)
 {
     if (!superuser || !*superuser) {
-	return FALSE;
+        return FALSE;
     }
     if (!username || !*username) {
-	return FALSE;
+        return FALSE;
     }
     return (xml_strcmp(superuser, username)) ? FALSE : TRUE;
 
@@ -235,44 +235,44 @@ static boolean
 *********************************************************************/
 static boolean 
     check_mode (agt_acm_cache_t *cache,
-		const xmlChar *access,
-		const obj_template_t *obj)
+                const xmlChar *access,
+                const obj_template_t *obj)
 {
     boolean    isread;
 
     /* check if this is a read or a write */
     if (!xml_strcmp(access, nacm_E_allowedRights_write)) {
-	isread = FALSE;
+        isread = FALSE;
     } else if (!xml_strcmp(access, 
-			   nacm_E_allowedRights_exec)) {
-	isread = FALSE;
+                           nacm_E_allowedRights_exec)) {
+        isread = FALSE;
     } else {
-	isread = TRUE;
+        isread = TRUE;
     }
 
     switch (cache->mode) {
     case AGT_ACMOD_ENFORCING:
-	break;
+        break;
     case AGT_ACMOD_PERMISSIVE:
-	if (isread && !obj_is_very_secure(obj)) {
-	    return TRUE;
-	}
-	break;
+        if (isread && !obj_is_very_secure(obj)) {
+            return TRUE;
+        }
+        break;
     case AGT_ACMOD_DISABLED:
-	if (isread) {
-	    if (!obj_is_very_secure(obj)) {
-		return TRUE;
-	    }
-	} else {
-	    if (!obj_is_secure(obj)) {
-		return TRUE;
-	    }
-	}
-	break;
+        if (isread) {
+            if (!obj_is_very_secure(obj)) {
+                return TRUE;
+            }
+        } else {
+            if (!obj_is_secure(obj)) {
+                return TRUE;
+            }
+        }
+        break;
     case AGT_ACMOD_OFF:
-	return TRUE;
+        return TRUE;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
     }
     return FALSE;
 
@@ -293,13 +293,13 @@ static boolean
 *********************************************************************/
 static agt_acm_modrule_t *
     new_modrule (xmlns_id_t nsid,
-		 val_value_t *rule)
+                 val_value_t *rule)
 {
     agt_acm_modrule_t *modrule;
 
     modrule = m__getObj(agt_acm_modrule_t);
     if (!modrule) {
-	return NULL;
+        return NULL;
     }
     memset(modrule, 0x0, sizeof(agt_acm_modrule_t));
 
@@ -341,13 +341,13 @@ static void
 *********************************************************************/
 static agt_acm_datarule_t *
     new_datarule (xpath_result_t *result,
-		 val_value_t *rule)
+                 val_value_t *rule)
 {
     agt_acm_datarule_t *datarule;
 
     datarule = m__getObj(agt_acm_datarule_t);
     if (!datarule) {
-	return NULL;
+        return NULL;
     }
     memset(datarule, 0x0, sizeof(agt_acm_datarule_t));
 
@@ -372,7 +372,7 @@ static void
 {
 
     if (datarule->result) {
-	xpath_free_result(datarule->result);
+        xpath_free_result(datarule->result);
     }
     m__free(datarule);
 
@@ -393,13 +393,13 @@ static void
 *********************************************************************/
 static agt_acm_group_t *
     new_group_ptr (xmlns_id_t groupnsid,
-		   const xmlChar *groupname)
+                   const xmlChar *groupname)
 {
     agt_acm_group_t *grptr;
 
     grptr = m__getObj(agt_acm_group_t);
     if (!grptr) {
-	return NULL;
+        return NULL;
     }
     memset(grptr, 0x0, sizeof(agt_acm_group_t));
     grptr ->groupnsid = groupnsid;
@@ -444,20 +444,20 @@ static void
 *********************************************************************/
 static agt_acm_group_t *
     find_group_ptr (agt_acm_usergroups_t *usergroups,
-		    xmlns_id_t  groupnsid,
-		    const xmlChar *groupname)
+                    xmlns_id_t  groupnsid,
+                    const xmlChar *groupname)
 {
     agt_acm_group_t   *grptr;
 
     for (grptr = (agt_acm_group_t *)
-	     dlq_firstEntry(&usergroups->groupQ);
-	 grptr != NULL;
-	 grptr = (agt_acm_group_t *)dlq_nextEntry(grptr)) {
+             dlq_firstEntry(&usergroups->groupQ);
+         grptr != NULL;
+         grptr = (agt_acm_group_t *)dlq_nextEntry(grptr)) {
 
-	if (grptr->groupnsid == groupnsid &&
-	    !xml_strcmp(grptr->groupname, groupname)) {
-	    return grptr;
-	}
+        if (grptr->groupnsid == groupnsid &&
+            !xml_strcmp(grptr->groupname, groupname)) {
+            return grptr;
+        }
     }
     return NULL;
 
@@ -480,19 +480,19 @@ static agt_acm_group_t *
 *********************************************************************/
 static status_t
     add_group_ptr (agt_acm_usergroups_t *usergroups,
-		   xmlns_id_t  groupnsid,
-		   const xmlChar *groupname)
+                   xmlns_id_t  groupnsid,
+                   const xmlChar *groupname)
 {
     agt_acm_group_t   *grptr;
 
     grptr = find_group_ptr(usergroups, groupnsid, groupname);
     if (grptr) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     grptr = new_group_ptr(groupnsid, groupname);
     if (!grptr) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     dlq_enque(grptr, &usergroups->groupQ);
@@ -519,7 +519,7 @@ static agt_acm_usergroups_t *
 
     usergroups = m__getObj(agt_acm_usergroups_t);
     if (!usergroups) {
-	return NULL;
+        return NULL;
     }
 
     memset(usergroups, 0x0, sizeof(agt_acm_usergroups_t));
@@ -546,9 +546,9 @@ static void
     agt_acm_group_t *grptr;
 
     while (!dlq_empty(&usergroups->groupQ)) {
-	grptr = (agt_acm_group_t *)
-	    dlq_deque(&usergroups->groupQ);
-	free_group_ptr(grptr);
+        grptr = (agt_acm_group_t *)
+            dlq_deque(&usergroups->groupQ);
+        free_group_ptr(grptr);
     }
     m__free(usergroups);
 
@@ -577,8 +577,8 @@ static void
 *********************************************************************/
 static agt_acm_usergroups_t *
     get_usergroups_entry (val_value_t *nacmroot,
-			  const xmlChar *username,
-			  uint32 *groupcount)
+                          const xmlChar *username,
+                          uint32 *groupcount)
 {
     agt_acm_usergroups_t  *usergroups;
     val_value_t           *groupsval, *groupval, *groupid, *userval;
@@ -592,56 +592,56 @@ static agt_acm_usergroups_t *
 
     usergroups = new_usergroups(username);
     if (!usergroups) {
-	return NULL;
+        return NULL;
     }
 
     /* get /nacm/groups node */
     groupsval = val_find_child(nacmroot,
-			       AGT_ACM_MODULE,
-			       nacm_N_groups);
+                               AGT_ACM_MODULE,
+                               nacm_N_groups);
     if (!groupsval) {
-	return usergroups;
+        return usergroups;
     }
 
     /* check each /nacm/groups/group node */
     for (groupval = val_get_first_child(groupsval);
-	 groupval != NULL && res == NO_ERR;
-	 groupval = val_get_next_child(groupval)) {
+         groupval != NULL && res == NO_ERR;
+         groupval = val_get_next_child(groupval)) {
 
-	done = FALSE;
+        done = FALSE;
 
-	/* check each /nacm/groups/group/userName node */
-	for (userval = val_find_child(groupval,
-				      AGT_ACM_MODULE,
-				      nacm_N_userName);
-	     userval != NULL && !done;
-	     userval = val_find_next_child(groupval,
-					   AGT_ACM_MODULE,
-					   nacm_N_userName,
-					   userval)) {
+        /* check each /nacm/groups/group/userName node */
+        for (userval = val_find_child(groupval,
+                                      AGT_ACM_MODULE,
+                                      nacm_N_userName);
+             userval != NULL && !done;
+             userval = val_find_next_child(groupval,
+                                           AGT_ACM_MODULE,
+                                           nacm_N_userName,
+                                           userval)) {
 
-	    if (!xml_strcmp(username, VAL_STR(userval))) {
-		/* user is a member of this group
-		 * get the groupIdentity key leaf
-		 */
-		groupid = val_find_child(groupval,
-					 AGT_ACM_MODULE,
-					 nacm_N_groupIdentity);
-		done = TRUE;
-		if (!groupid) {
-		    res = SET_ERROR(ERR_INTERNAL_VAL);
-		} else {
-		    res = add_group_ptr(usergroups,
-					VAL_IDREF_NSID(groupid),
-					VAL_IDREF_NAME(groupid));
-		    (*groupcount)++;
-		}
-	    }
-	}
+            if (!xml_strcmp(username, VAL_STR(userval))) {
+                /* user is a member of this group
+                 * get the groupIdentity key leaf
+                 */
+                groupid = val_find_child(groupval,
+                                         AGT_ACM_MODULE,
+                                         nacm_N_groupIdentity);
+                done = TRUE;
+                if (!groupid) {
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                } else {
+                    res = add_group_ptr(usergroups,
+                                        VAL_IDREF_NSID(groupid),
+                                        VAL_IDREF_NAME(groupid));
+                    (*groupcount)++;
+                }
+            }
+        }
     }
 
     if (res != NO_ERR) {
-	log_error("\nError: agt_acm add user2group entry failed");
+        log_error("\nError: agt_acm add user2group entry failed");
     }
 
     return usergroups;
@@ -672,9 +672,9 @@ static agt_acm_usergroups_t *
 *********************************************************************/
 static boolean
     check_access_bit (val_value_t *ruleval,
-		      const xmlChar *access,
-		      agt_acm_usergroups_t *usergroups,
-		      boolean *done)
+                      const xmlChar *access,
+                      agt_acm_usergroups_t *usergroups,
+                      boolean *done)
 {
     val_value_t      *group, *rights;
     ncx_list_t       *bits;
@@ -684,34 +684,34 @@ static boolean
     granted = FALSE;
 
     for (group = val_find_child(ruleval, 
-				AGT_ACM_MODULE, 
-				nacm_N_allowedGroup);
-	 group != NULL && !*done;
-	 group = val_find_next_child(ruleval,
-				     AGT_ACM_MODULE,
-				     nacm_N_allowedGroup,
-				     group)) {
-	if (find_group_ptr(usergroups,
-			   VAL_IDREF_NSID(group),
-			   VAL_IDREF_NAME(group))) {
-	    /* this group is a match */
-	    *done = TRUE;
+                                AGT_ACM_MODULE, 
+                                nacm_N_allowedGroup);
+         group != NULL && !*done;
+         group = val_find_next_child(ruleval,
+                                     AGT_ACM_MODULE,
+                                     nacm_N_allowedGroup,
+                                     group)) {
+        if (find_group_ptr(usergroups,
+                           VAL_IDREF_NSID(group),
+                           VAL_IDREF_NAME(group))) {
+            /* this group is a match */
+            *done = TRUE;
 
-	    /* get the allowedRights leaf
-	     * and check if the exec bit is set
-	     */
-	    rights = val_find_child(ruleval,
-				    AGT_ACM_MODULE,
-				    nacm_N_allowedRights);
-	    if (!rights) {
-		SET_ERROR(ERR_INTERNAL_VAL);
-	    } else {
-		bits = &VAL_BITS(rights);
-		granted = ncx_string_in_list(access, bits);
-	    }
-	}
+            /* get the allowedRights leaf
+             * and check if the exec bit is set
+             */
+            rights = val_find_child(ruleval,
+                                    AGT_ACM_MODULE,
+                                    nacm_N_allowedRights);
+            if (!rights) {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            } else {
+                bits = &VAL_BITS(rights);
+                granted = ncx_string_in_list(access, bits);
+            }
+        }
     }
-				   
+                                   
     return granted;
 
 } /* check_accesse_bit */
@@ -734,12 +734,12 @@ static val_value_t *
     /* make sure the running config root is set */
     runningcfg = cfg_get_config(NCX_EL_RUNNING);
     if (!runningcfg || !runningcfg->root) {
-	return NULL;
+        return NULL;
     }
     
     nacmval = val_find_child(runningcfg->root,
-			     AGT_ACM_MODULE,
-			     nacm_N_nacm);
+                             AGT_ACM_MODULE,
+                             nacm_N_nacm);
 
     return nacmval;
 
@@ -763,8 +763,8 @@ static val_value_t *
 *********************************************************************/
 static boolean
     get_default_rpc_response (agt_acm_cache_t *cache,
-			      val_value_t *nacmroot,
-			      const obj_template_t *rpcobj)
+                              val_value_t *nacmroot,
+                              const obj_template_t *rpcobj)
 {
     val_value_t  *noRule;
     boolean       retval;
@@ -774,33 +774,33 @@ static boolean
      * deny access if so
      */
     if (obj_is_secure(rpcobj) ||
-	obj_is_very_secure(rpcobj)) {
-	return FALSE;
+        obj_is_very_secure(rpcobj)) {
+        return FALSE;
     }
 
     /* check the noDefaultRule setting on this agent */
     if (cache->flags & FL_ACM_DEFEXEC_SET) {
-	return (cache->flags & FL_ACM_DEFEXEC_OK) ? 
-	    TRUE : FALSE;
+        return (cache->flags & FL_ACM_DEFEXEC_OK) ? 
+            TRUE : FALSE;
     }
 
     noRule = val_find_child(nacmroot,
-			    AGT_ACM_MODULE,
-			    nacm_N_noRuleExecDefault);
+                            AGT_ACM_MODULE,
+                            nacm_N_noRuleExecDefault);
     if (!noRule) {
-	cache->flags |= (FL_ACM_DEFEXEC_SET | FL_ACM_DEFEXEC_OK);
-	return TRUE;  /* default is TRUE */
+        cache->flags |= (FL_ACM_DEFEXEC_SET | FL_ACM_DEFEXEC_OK);
+        return TRUE;  /* default is TRUE */
     } 
 
     if (!xml_strcmp(VAL_ENUM_NAME(noRule),
-		    nacm_E_noRuleDefault_permit)) {
-	retval = TRUE;
+                    nacm_E_noRuleDefault_permit)) {
+        retval = TRUE;
     } else {
-	retval = FALSE;
+        retval = FALSE;
     }
     cache->flags |= FL_ACM_DEFEXEC_SET;
     if (retval) {
-	cache->flags |= FL_ACM_DEFEXEC_OK;
+        cache->flags |= FL_ACM_DEFEXEC_OK;
     }
 
     return retval;
@@ -832,9 +832,9 @@ static boolean
 *********************************************************************/
 static boolean
     check_rpc_rules (val_value_t *rulesval,
-		     const obj_template_t *rpcobj,
-		     agt_acm_usergroups_t *usergroups,
-		     boolean *done)
+                     const obj_template_t *rpcobj,
+                     agt_acm_usergroups_t *usergroups,
+                     boolean *done)
 {
     val_value_t      *rpcrule, *modname, *rpcname;
     boolean           granted, done2;
@@ -846,64 +846,64 @@ static boolean
 
     /* check all the rpcRule entries */
     for (rpcrule = val_find_child(rulesval, 
-				  AGT_ACM_MODULE, 
-				  nacm_N_rpcRule);
-	 rpcrule != NULL && res == NO_ERR && !*done;
-	 rpcrule = val_find_next_child(rulesval,
-				       AGT_ACM_MODULE,
-				       nacm_N_rpcRule,
-				       rpcrule)) {
+                                  AGT_ACM_MODULE, 
+                                  nacm_N_rpcRule);
+         rpcrule != NULL && res == NO_ERR && !*done;
+         rpcrule = val_find_next_child(rulesval,
+                                       AGT_ACM_MODULE,
+                                       nacm_N_rpcRule,
+                                       rpcrule)) {
 
-	/* get the module name key */
-	modname = val_find_child(rpcrule,
-				 AGT_ACM_MODULE,
-				 nacm_N_rpcModuleName);
-	if (!modname) {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	    continue;
-	}
+        /* get the module name key */
+        modname = val_find_child(rpcrule,
+                                 AGT_ACM_MODULE,
+                                 nacm_N_rpcModuleName);
+        if (!modname) {
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+            continue;
+        }
 
-	/* get the rpc operation name key */
-	rpcname = val_find_child(rpcrule,
-				 AGT_ACM_MODULE,
-				 nacm_N_rpcModuleName);
-	if (!rpcname) {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	    continue;
-	}
+        /* get the rpc operation name key */
+        rpcname = val_find_child(rpcrule,
+                                 AGT_ACM_MODULE,
+                                 nacm_N_rpcModuleName);
+        if (!rpcname) {
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+            continue;
+        }
 
-	/* check if this is the right module */
-	if (xml_strcmp(obj_get_mod_name(rpcobj),
-		       VAL_STR(modname))) {
-	    continue;
-	}
+        /* check if this is the right module */
+        if (xml_strcmp(obj_get_mod_name(rpcobj),
+                       VAL_STR(modname))) {
+            continue;
+        }
 
-	/* check if this is the right RPC operation */
-	if (xml_strcmp(obj_get_name(rpcobj),
-		       VAL_STR(rpcname))) {
-	    continue;
-	}
+        /* check if this is the right RPC operation */
+        if (xml_strcmp(obj_get_name(rpcobj),
+                       VAL_STR(rpcname))) {
+            continue;
+        }
 
-	/* this rpcRule is for the specified RPC operation
-	 * check if any of the groups in the usergroups
-	 * list for this user match any of the groups in
-	 * the allowedGroup leaf-list
-	 */
-	done2 = FALSE;
-	granted = check_access_bit(rpcrule,
-				   nacm_E_allowedRights_exec,
-				   usergroups,
-				   &done2);
-	if (done2) {
-	    *done = TRUE;
-	} else {
-	    granted = FALSE;
-	}
+        /* this rpcRule is for the specified RPC operation
+         * check if any of the groups in the usergroups
+         * list for this user match any of the groups in
+         * the allowedGroup leaf-list
+         */
+        done2 = FALSE;
+        granted = check_access_bit(rpcrule,
+                                   nacm_E_allowedRights_exec,
+                                   usergroups,
+                                   &done2);
+        if (done2) {
+            *done = TRUE;
+        } else {
+            granted = FALSE;
+        }
     }
 
     if (res != NO_ERR) {
-	granted = FALSE;
-	*done = TRUE;
+        granted = FALSE;
+        *done = TRUE;
     }
 
     return granted;
@@ -938,11 +938,11 @@ static boolean
 *********************************************************************/
 static boolean
     check_module_rules (agt_acm_cache_t *cache,
-			val_value_t *rulesval,
-			const obj_template_t *obj,
-			const xmlChar *access,
-			agt_acm_usergroups_t *usergroups,
-			boolean *done)
+                        val_value_t *rulesval,
+                        const obj_template_t *obj,
+                        const xmlChar *access,
+                        agt_acm_usergroups_t *usergroups,
+                        boolean *done)
 {
     val_value_t        *modrule, *modname;
     agt_acm_modrule_t  *modrule_cache;
@@ -955,39 +955,39 @@ static boolean
     res = NO_ERR;
 
     if (!(cache->flags & FL_ACM_MODRULES_SET)) {
-	cache->flags |= FL_ACM_MODRULES_SET;
+        cache->flags |= FL_ACM_MODRULES_SET;
 
-	/* check all the moduleRule entries */
-	for (modrule = val_find_child(rulesval, 
-				      AGT_ACM_MODULE, 
-				      nacm_N_moduleRule);
-	     modrule != NULL && res == NO_ERR;
-	     modrule = val_find_next_child(rulesval,
-					   AGT_ACM_MODULE,
-					   nacm_N_moduleRule,
-					   modrule)) {
+        /* check all the moduleRule entries */
+        for (modrule = val_find_child(rulesval, 
+                                      AGT_ACM_MODULE, 
+                                      nacm_N_moduleRule);
+             modrule != NULL && res == NO_ERR;
+             modrule = val_find_next_child(rulesval,
+                                           AGT_ACM_MODULE,
+                                           nacm_N_moduleRule,
+                                           modrule)) {
 
-	    /* get the module name key */
-	    modname = val_find_child(modrule,
-				     AGT_ACM_MODULE,
-				     nacm_N_moduleName);
-	    if (!modname) {
-		res = SET_ERROR(ERR_INTERNAL_VAL);
-		continue;
-	    }
+            /* get the module name key */
+            modname = val_find_child(modrule,
+                                     AGT_ACM_MODULE,
+                                     nacm_N_moduleName);
+            if (!modname) {
+                res = SET_ERROR(ERR_INTERNAL_VAL);
+                continue;
+            }
 
-	    nsid = xmlns_find_ns_by_module(VAL_STR(modname));
-	    if (nsid) {
-		modrule_cache = new_modrule(nsid, modrule);
-		if (!modrule_cache) {
-		    res = ERR_INTERNAL_MEM;
-		} else {
-		    dlq_enque(modrule_cache, &cache->modruleQ);
-		}
-	    } else {
-		res = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	}
+            nsid = xmlns_find_ns_by_module(VAL_STR(modname));
+            if (nsid) {
+                modrule_cache = new_modrule(nsid, modrule);
+                if (!modrule_cache) {
+                    res = ERR_INTERNAL_MEM;
+                } else {
+                    dlq_enque(modrule_cache, &cache->modruleQ);
+                }
+            } else {
+                res = SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }
     }
 
     /* get the namespace ID to check against */
@@ -995,33 +995,33 @@ static boolean
 
     /* go through the cache and exit if any matches are found */
     for (modrule_cache = (agt_acm_modrule_t *)
-	     dlq_firstEntry(&cache->modruleQ);
-	 modrule_cache != NULL && res == NO_ERR && !*done;
-	 modrule_cache = (agt_acm_modrule_t *)
-	     dlq_nextEntry(modrule_cache)) {
+             dlq_firstEntry(&cache->modruleQ);
+         modrule_cache != NULL && res == NO_ERR && !*done;
+         modrule_cache = (agt_acm_modrule_t *)
+             dlq_nextEntry(modrule_cache)) {
 
-	    /* check if this is the right module */
-	if (nsid != modrule_cache->nsid) {
-	    continue;
-	}
+            /* check if this is the right module */
+        if (nsid != modrule_cache->nsid) {
+            continue;
+        }
 
-	/* this moduleRule is for the specified node
-	 * check if any of the groups in the usergroups
-	 * list for this user match any of the groups in
-	 * the allowedGroup leaf-list
-	 */
-	granted = check_access_bit(modrule_cache->modrule,
-				   access,
-				   usergroups,
-				   done);
-	if (!*done) {
-	    granted = FALSE;
-	}
+        /* this moduleRule is for the specified node
+         * check if any of the groups in the usergroups
+         * list for this user match any of the groups in
+         * the allowedGroup leaf-list
+         */
+        granted = check_access_bit(modrule_cache->modrule,
+                                   access,
+                                   usergroups,
+                                   done);
+        if (!*done) {
+            granted = FALSE;
+        }
     }
 
     if (res != NO_ERR) {
-	granted = FALSE;
-	*done = TRUE;
+        granted = FALSE;
+        *done = TRUE;
     }
 
     return granted;
@@ -1048,9 +1048,9 @@ static boolean
 *********************************************************************/
 static boolean
     get_default_data_response (agt_acm_cache_t *cache,
-			       val_value_t *nacmroot,
-			       const val_value_t *val,
-			       boolean iswrite)
+                               val_value_t *nacmroot,
+                               const val_value_t *val,
+                               boolean iswrite)
 {
     const obj_template_t  *testobj;
     val_value_t           *noRule;
@@ -1066,70 +1066,70 @@ static boolean
      * object tagged as ncx:secure or ncx:very-secure
      */
     while (testobj) {
-	if (iswrite) {
-	    /* reject any ncx:secure or ncx:very-secure object */
-	    if (obj_is_secure(testobj) ||
-		obj_is_very_secure(testobj)) {
-		return FALSE;
-	    }
-	} else {
-	    /* allow ncx:secure to be read; reject ncx:very-secure */
-	    if (obj_is_very_secure(testobj)) {
-		return FALSE;
-	    }
-	}	    
-	testobj = testobj->parent;
+        if (iswrite) {
+            /* reject any ncx:secure or ncx:very-secure object */
+            if (obj_is_secure(testobj) ||
+                obj_is_very_secure(testobj)) {
+                return FALSE;
+            }
+        } else {
+            /* allow ncx:secure to be read; reject ncx:very-secure */
+            if (obj_is_very_secure(testobj)) {
+                return FALSE;
+            }
+        }            
+        testobj = testobj->parent;
     }
 
     /* check the noDefaultRule setting on this agent */
     if (iswrite) {
-	if (cache->flags & FL_ACM_DEFWRITE_SET) {
-	    return (cache->flags & FL_ACM_DEFWRITE_OK) ?
-		TRUE : FALSE;
-	}
-	noRule = val_find_child(nacmroot,
-				AGT_ACM_MODULE,
-				nacm_N_noRuleWriteDefault);
-	if (!noRule) {
-	    cache->flags |= FL_ACM_DEFWRITE_SET;
-	    return FALSE;  /* default is FALSE */
-	}
+        if (cache->flags & FL_ACM_DEFWRITE_SET) {
+            return (cache->flags & FL_ACM_DEFWRITE_OK) ?
+                TRUE : FALSE;
+        }
+        noRule = val_find_child(nacmroot,
+                                AGT_ACM_MODULE,
+                                nacm_N_noRuleWriteDefault);
+        if (!noRule) {
+            cache->flags |= FL_ACM_DEFWRITE_SET;
+            return FALSE;  /* default is FALSE */
+        }
 
-	if (!xml_strcmp(VAL_ENUM_NAME(noRule),
-			nacm_E_noRuleDefault_permit)) {
-	    retval = TRUE;
-	} else {
-	    retval = FALSE;
-	}
+        if (!xml_strcmp(VAL_ENUM_NAME(noRule),
+                        nacm_E_noRuleDefault_permit)) {
+            retval = TRUE;
+        } else {
+            retval = FALSE;
+        }
 
-	cache->flags |= FL_ACM_DEFWRITE_SET;
-	if (retval) {
-	    cache->flags |= FL_ACM_DEFWRITE_OK;
-	}
+        cache->flags |= FL_ACM_DEFWRITE_SET;
+        if (retval) {
+            cache->flags |= FL_ACM_DEFWRITE_OK;
+        }
     } else {
-	if (cache->flags & FL_ACM_DEFREAD_SET) {
-	    return (cache->flags & FL_ACM_DEFREAD_OK) ?
-		TRUE : FALSE;
-	}
-	noRule = val_find_child(nacmroot,
-				AGT_ACM_MODULE,
-				nacm_N_noRuleReadDefault);
-	if (!noRule) {
-	    cache->flags |= (FL_ACM_DEFREAD_SET | FL_ACM_DEFREAD_OK);
-	    return TRUE;  /* default is TRUE */
-	}
+        if (cache->flags & FL_ACM_DEFREAD_SET) {
+            return (cache->flags & FL_ACM_DEFREAD_OK) ?
+                TRUE : FALSE;
+        }
+        noRule = val_find_child(nacmroot,
+                                AGT_ACM_MODULE,
+                                nacm_N_noRuleReadDefault);
+        if (!noRule) {
+            cache->flags |= (FL_ACM_DEFREAD_SET | FL_ACM_DEFREAD_OK);
+            return TRUE;  /* default is TRUE */
+        }
 
-	if (!xml_strcmp(VAL_ENUM_NAME(noRule),
-			nacm_E_noRuleDefault_permit)) {
-	    retval = TRUE;
-	} else {
-	    retval = FALSE;
-	}
+        if (!xml_strcmp(VAL_ENUM_NAME(noRule),
+                        nacm_E_noRuleDefault_permit)) {
+            retval = TRUE;
+        } else {
+            retval = FALSE;
+        }
 
-	cache->flags |= FL_ACM_DEFREAD_SET;
-	if (retval) {
-	    cache->flags |= FL_ACM_DEFREAD_OK;
-	}
+        cache->flags |= FL_ACM_DEFREAD_SET;
+        if (retval) {
+            cache->flags |= FL_ACM_DEFREAD_OK;
+        }
     }
 
     return retval;
@@ -1165,12 +1165,12 @@ static boolean
 *********************************************************************/
 static boolean
     check_data_rules (agt_acm_cache_t *cache,
-		      val_value_t *nacmroot,
-		      val_value_t *rulesval,
-		      const val_value_t *val,
-		      const xmlChar *access,
-		      agt_acm_usergroups_t *usergroups,
-		      boolean *done)
+                      val_value_t *nacmroot,
+                      val_value_t *rulesval,
+                      const val_value_t *val,
+                      const xmlChar *access,
+                      agt_acm_usergroups_t *usergroups,
+                      boolean *done)
 {
     xpath_pcb_t         *pcb;
     xpath_result_t      *result;
@@ -1188,102 +1188,102 @@ static boolean
     /* the /nacm node is supposed to be a child of <config> */
     valroot = nacmroot->parent;
     if (!valroot || !obj_is_root(valroot->obj)) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
     }
 
     /* fill the dataruleQ in the cache if needed */
     if (!(cache->flags & FL_ACM_DATARULES_SET)) {
-	cache->flags |= FL_ACM_DATARULES_SET;
+        cache->flags |= FL_ACM_DATARULES_SET;
 
-	/* check all the dataRule entries */
-	for (datarule = val_find_child(rulesval, 
-				       AGT_ACM_MODULE, 
-				       nacm_N_dataRule);
-	     datarule != NULL && res == NO_ERR;
-	     datarule = val_find_next_child(rulesval,
-					    AGT_ACM_MODULE,
-					    nacm_N_dataRule,
-					    datarule)) {
+        /* check all the dataRule entries */
+        for (datarule = val_find_child(rulesval, 
+                                       AGT_ACM_MODULE, 
+                                       nacm_N_dataRule);
+             datarule != NULL && res == NO_ERR;
+             datarule = val_find_next_child(rulesval,
+                                            AGT_ACM_MODULE,
+                                            nacm_N_dataRule,
+                                            datarule)) {
 
-	    /* get the XPath expression leaf */
-	    path = val_find_child(datarule,
-				  AGT_ACM_MODULE,
-				  nacm_N_path);
-	    if (!path || !path->xpathpcb) {
-		res = SET_ERROR(ERR_INTERNAL_VAL);
-		continue;
-	    }
+            /* get the XPath expression leaf */
+            path = val_find_child(datarule,
+                                  AGT_ACM_MODULE,
+                                  nacm_N_path);
+            if (!path || !path->xpathpcb) {
+                res = SET_ERROR(ERR_INTERNAL_VAL);
+                continue;
+            }
 
-	    pcb = xpath_clone_pcb(path->xpathpcb);
-	    if (!pcb) {
-		res = ERR_INTERNAL_MEM;
-		continue;
-	    }
+            pcb = xpath_clone_pcb(path->xpathpcb);
+            if (!pcb) {
+                res = ERR_INTERNAL_MEM;
+                continue;
+            }
 
-	    res = NO_ERR;
-	    result = xpath1_eval_expr(pcb,
-				      valroot,
-				      valroot,
-				      FALSE,
-				      TRUE,
-				      &res);
-	    if (!result) {
-		continue;
-	    }
+            res = NO_ERR;
+            result = xpath1_eval_expr(pcb,
+                                      valroot,
+                                      valroot,
+                                      FALSE,
+                                      TRUE,
+                                      &res);
+            if (!result) {
+                continue;
+            }
 
-	    if (res == NO_ERR) {
-		datarule_cache = new_datarule(result, datarule);
-		if (!datarule_cache) {
-		    res = ERR_INTERNAL_MEM;
-		    xpath_free_result(result);
-		    continue;
-		} else {
-		    dlq_enque(datarule_cache, &cache->dataruleQ);
-		}
-	    }
-	}
+            if (res == NO_ERR) {
+                datarule_cache = new_datarule(result, datarule);
+                if (!datarule_cache) {
+                    res = ERR_INTERNAL_MEM;
+                    xpath_free_result(result);
+                    continue;
+                } else {
+                    dlq_enque(datarule_cache, &cache->dataruleQ);
+                }
+            }
+        }
     }
 
     /* go through the cache and exit if any matches are found */
     for (datarule_cache = (agt_acm_datarule_t *)
-	     dlq_firstEntry(&cache->dataruleQ);
-	 datarule_cache != NULL && res == NO_ERR && !*done;
-	 datarule_cache = (agt_acm_datarule_t *)
-	     dlq_nextEntry(datarule_cache)) {
+             dlq_firstEntry(&cache->dataruleQ);
+         datarule_cache != NULL && res == NO_ERR && !*done;
+         datarule_cache = (agt_acm_datarule_t *)
+             dlq_nextEntry(datarule_cache)) {
 
-	resnodeQ = xpath_get_resnodeQ(datarule_cache->result);
-	if (!resnodeQ) {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	    continue;
-	}
+        resnodeQ = xpath_get_resnodeQ(datarule_cache->result);
+        if (!resnodeQ) {
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+            continue;
+        }
 
-	nodefound = xpath1_check_node_exists(pcb,
-					     resnodeQ,
-					     val);
-	if (nodefound) {
-	    /* this dataRule is for the specified node
-	     * check if any of the groups in the usergroups
-	     * list for this user match any of the groups in
-	     * the allowedGroup leaf-list
-	     */
-	    granted = check_access_bit(datarule_cache->datarule,
-				       access,
-				       usergroups,
-				       done);
-	    if (!*done) {
-		granted = FALSE;
-	    }
-	}
+        nodefound = xpath1_check_node_exists(pcb,
+                                             resnodeQ,
+                                             val);
+        if (nodefound) {
+            /* this dataRule is for the specified node
+             * check if any of the groups in the usergroups
+             * list for this user match any of the groups in
+             * the allowedGroup leaf-list
+             */
+            granted = check_access_bit(datarule_cache->datarule,
+                                       access,
+                                       usergroups,
+                                       done);
+            if (!*done) {
+                granted = FALSE;
+            }
+        }
     }
 
     if (pcb) {
-	xpath_free_pcb(pcb);
+        xpath_free_pcb(pcb);
     }
 
     if (res != NO_ERR) {
-	granted = FALSE;
-	*done = TRUE;
+        granted = FALSE;
+        *done = TRUE;
     }
 
     return granted;
@@ -1309,9 +1309,9 @@ static boolean
 *********************************************************************/
 static boolean 
     valnode_access_allowed (agt_acm_cache_t *cache,
-			    const xmlChar *user,
-			    const val_value_t *val,
-			    const xmlChar *access)
+                            const xmlChar *user,
+                            const val_value_t *val,
+                            const xmlChar *access)
 {
     val_value_t             *nacmroot, *rulesval;
     agt_acm_usergroups_t    *usergroups;
@@ -1320,107 +1320,107 @@ static boolean
 
     /* super user is allowed to access anything */
     if (is_superuser(user)) {
-	return TRUE;
+        return TRUE;
     }
 
     /* check if this is a read or a write */
     if (!xml_strcmp(access, nacm_E_allowedRights_write)) {
-	iswrite = TRUE;
+        iswrite = TRUE;
     } else {
-	iswrite = FALSE;
+        iswrite = FALSE;
     }
 
     /* check if access granted without any rules */
     if (check_mode(cache, access, val->obj)) {
-	return TRUE;
+        return TRUE;
     }
 
     /* get the NACM root to decide any more */
     if (cache->nacmroot) {
-	nacmroot = cache->nacmroot;
+        nacmroot = cache->nacmroot;
     } else {
-	nacmroot = get_nacm_root();
-	if (!nacmroot) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return FALSE;
-	} else {
-	    cache->nacmroot = nacmroot;
-	}
+        nacmroot = get_nacm_root();
+        if (!nacmroot) {
+            SET_ERROR(ERR_INTERNAL_VAL);
+            return FALSE;
+        } else {
+            cache->nacmroot = nacmroot;
+        }
     }
 
     groupcnt = 0;
     if (cache->usergroups) {
-	usergroups = cache->usergroups;
-	groupcnt = cache->groupcnt;
+        usergroups = cache->usergroups;
+        groupcnt = cache->groupcnt;
     } else {
-	usergroups = get_usergroups_entry(nacmroot, 
-					  user, 
-					  &groupcnt);
-	if (!usergroups) {
-	    /* out of memory! deny all access! */
-	    return FALSE;
-	} else {
-	    cache->usergroups = usergroups;
-	    cache->groupcnt = groupcnt;
-	}
+        usergroups = get_usergroups_entry(nacmroot, 
+                                          user, 
+                                          &groupcnt);
+        if (!usergroups) {
+            /* out of memory! deny all access! */
+            return FALSE;
+        } else {
+            cache->usergroups = usergroups;
+            cache->groupcnt = groupcnt;
+        }
     }
 
     /* usergroups malloced at this point */
     retval = FALSE;
 
     if (groupcnt == 0) {
-	/* just check the default for this RPC operation */
-	retval = get_default_data_response(cache,
-					   nacmroot, 
-					   val, 
-					   iswrite);
+        /* just check the default for this RPC operation */
+        retval = get_default_data_response(cache,
+                                           nacmroot, 
+                                           val, 
+                                           iswrite);
     } else {
-	/* get the /nacm/rules node to decide any more */
-	if (cache->rulesval) {
-	    rulesval = cache->rulesval;
-	} else {
-	    rulesval = val_find_child(nacmroot,
-				      AGT_ACM_MODULE,
-				      nacm_N_rules);
-	    if (rulesval) {
-		cache->rulesval = rulesval;
-	    } else {
-		/* no rules at all so use the default */
-		retval = get_default_data_response(cache,
-						   nacmroot, 
-						   val, 
-						   iswrite);
-		return retval;
-	    }
-	}
+        /* get the /nacm/rules node to decide any more */
+        if (cache->rulesval) {
+            rulesval = cache->rulesval;
+        } else {
+            rulesval = val_find_child(nacmroot,
+                                      AGT_ACM_MODULE,
+                                      nacm_N_rules);
+            if (rulesval) {
+                cache->rulesval = rulesval;
+            } else {
+                /* no rules at all so use the default */
+                retval = get_default_data_response(cache,
+                                                   nacmroot, 
+                                                   val, 
+                                                   iswrite);
+                return retval;
+            }
+        }
 
-	/* there is a rules node so check the dataRule list */
-	done = FALSE;
-	retval = check_data_rules(cache,
-				  nacmroot,
-				  rulesval,
-				  val,
-				  access,
-				  usergroups, 
-				  &done);
-	if (!done) {
-	    /* no data rule found;
-	     * try a module namespace rule
-	     */
-	    retval = check_module_rules(cache,
-					rulesval,
-					val->obj,
-					access,
-					usergroups, 
-					&done);
-	    if (!done) {
-		/* no module rule so use the default */
-		retval = get_default_data_response(cache,
-						   nacmroot,
-						   val,
-						   iswrite);
-	    }
-	}
+        /* there is a rules node so check the dataRule list */
+        done = FALSE;
+        retval = check_data_rules(cache,
+                                  nacmroot,
+                                  rulesval,
+                                  val,
+                                  access,
+                                  usergroups, 
+                                  &done);
+        if (!done) {
+            /* no data rule found;
+             * try a module namespace rule
+             */
+            retval = check_module_rules(cache,
+                                        rulesval,
+                                        val->obj,
+                                        access,
+                                        usergroups, 
+                                        &done);
+            if (!done) {
+                /* no module rule so use the default */
+                retval = get_default_data_response(cache,
+                                                   nacmroot,
+                                                   val,
+                                                   iswrite);
+            }
+        }
     }
 
     return retval;
@@ -1441,11 +1441,11 @@ static boolean
 *********************************************************************/
 static status_t 
     nacm_group_callback (ses_cb_t  *scb,
-			 rpc_msg_t  *msg,
-			 agt_cbtyp_t cbtyp,
-			 op_editop_t  editop,
-			 val_value_t  *newval,
-			 val_value_t  *curval)
+                         rpc_msg_t  *msg,
+                         agt_cbtyp_t cbtyp,
+                         op_editop_t  editop,
+                         val_value_t  *newval,
+                         val_value_t  *curval)
 {
 
     (void)scb;
@@ -1455,10 +1455,10 @@ static status_t
 
 #ifdef AGT_ACM_DEBUG
     if (LOGDEBUG) {
-	log_debug("\n\n**** agt_acm_cb: (G) op:%s, n:%s s:%s\n", 
-		  op_editop_name(editop),
-		  newval->name,
-		  agt_cbtype_name(cbtyp));
+        log_debug("\n\n**** agt_acm_cb: (G) op:%s, n:%s s:%s\n", 
+                  op_editop_name(editop),
+                  newval->name,
+                  agt_cbtype_name(cbtyp));
     }
 #endif
 
@@ -1467,13 +1467,13 @@ static status_t
     case AGT_CB_UNLOAD_MOD:
     case AGT_CB_VALIDATE:
     case AGT_CB_APPLY:
-	break;
+        break;
     case AGT_CB_COMMIT:
-	break;
+        break;
     case AGT_CB_ROLLBACK:
-	break;
+        break;
     default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
     
     return NO_ERR;
@@ -1494,11 +1494,11 @@ static status_t
 *********************************************************************/
 static status_t 
     nacm_rule_callback (ses_cb_t  *scb,
-			rpc_msg_t  *msg,
-			agt_cbtyp_t cbtyp,
-			op_editop_t  editop,
-			val_value_t  *newval,
-			val_value_t  *curval)
+                        rpc_msg_t  *msg,
+                        agt_cbtyp_t cbtyp,
+                        op_editop_t  editop,
+                        val_value_t  *newval,
+                        val_value_t  *curval)
 {
 
     (void)scb;
@@ -1508,10 +1508,10 @@ static status_t
 
 #ifdef AGT_ACM_DEBUG
     if (LOGDEBUG) {
-	log_debug("\n\n**** agt_acm_cb: (R) op:%s, n:%s s:%s\n", 
-		  op_editop_name(editop),
-		  newval->name,
-		  agt_cbtype_name(cbtyp));
+        log_debug("\n\n**** agt_acm_cb: (R) op:%s, n:%s s:%s\n", 
+                  op_editop_name(editop),
+                  newval->name,
+                  agt_cbtype_name(cbtyp));
     }
 #endif
 
@@ -1520,13 +1520,13 @@ static status_t
     case AGT_CB_UNLOAD_MOD:
     case AGT_CB_VALIDATE:
     case AGT_CB_APPLY:
-	break;
+        break;
     case AGT_CB_COMMIT:
-	break;
+        break;
     case AGT_CB_ROLLBACK:
-	break;
+        break;
     default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
     
     return NO_ERR;
@@ -1553,7 +1553,7 @@ status_t
     status_t  res;
 
     if (agt_acm_init_done) {
-	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+        return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
 #ifdef AGT_ACM_DEBUG
@@ -1564,10 +1564,10 @@ status_t
 
     /* load in the access control parameters */
     res = ncxmod_load_module(AGT_ACM_MODULE, 
-			     NULL, 
-			     &nacmmod);
+                             NULL, 
+                             &nacmmod);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     superuser = NULL;
@@ -1599,7 +1599,7 @@ status_t
     status_t               res;
 
     if (!agt_acm_init_done) {
-	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+        return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
     profile = agt_get_profile();
@@ -1607,51 +1607,51 @@ status_t
     superuser = profile->agt_superuser;
 
     if (profile->agt_accesscontrol_enum != AGT_ACMOD_NONE) {
-	acmode = profile->agt_accesscontrol_enum;
+        acmode = profile->agt_accesscontrol_enum;
     }
 
     res = agt_cb_register_callback(AGT_ACM_MODULE,
-				   nacm_OID_group,
-				   NULL,
-				   nacm_group_callback);
+                                   nacm_OID_group,
+                                   NULL,
+                                   nacm_group_callback);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     res = agt_cb_register_callback(AGT_ACM_MODULE,
-				   nacm_OID_moduleRule,
-				   NULL,
-				   nacm_rule_callback);
+                                   nacm_OID_moduleRule,
+                                   NULL,
+                                   nacm_rule_callback);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* make sure the running config root is set */
     runningcfg = cfg_get_config(NCX_EL_RUNNING);
     if (!runningcfg || !runningcfg->root) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     /* check to see if the /nacm branch already exists
      * if so, then skip all this init stuff
      */
     nacmval = val_find_child(runningcfg->root,
-			     AGT_ACM_MODULE,
-			     nacm_N_nacm);
+                             AGT_ACM_MODULE,
+                             nacm_N_nacm);
     if (nacmval) {
-	/* minimum init done OK, so just exit */
-	agt_acm_init_done = TRUE;
-	return NO_ERR;
+        /* minimum init done OK, so just exit */
+        agt_acm_init_done = TRUE;
+        return NO_ERR;
     }
-	
+        
     /* did not find the /nacm node so create one;
      * get all the static object nodes first 
      */
     nacmobj = obj_find_template_top(nacmmod, 
-				    AGT_ACM_MODULE,
-				    nacm_N_nacm);
+                                    AGT_ACM_MODULE,
+                                    nacm_N_nacm);
     if (!nacmobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     /* create the static structure for the /nacm data model
@@ -1659,15 +1659,15 @@ status_t
      */
     nacmval = val_new_value();
     if (!nacmval) {
-	res = ERR_INTERNAL_MEM;
+        res = ERR_INTERNAL_MEM;
     } else {
-	val_init_from_template(nacmval, nacmobj);
+        val_init_from_template(nacmval, nacmobj);
 
-	/* handing off the malloced memory here */
-	val_add_child(nacmval, runningcfg->root);
+        /* handing off the malloced memory here */
+        val_add_child(nacmval, runningcfg->root);
 
-	/* add /nacm/noRuleDefault */
-	res = val_add_defaults(nacmval, FALSE);
+        /* add /nacm/noRuleDefault */
+        res = val_add_defaults(nacmval, FALSE);
     }
 
     return res;
@@ -1685,13 +1685,13 @@ void
     agt_acm_cleanup (void)
 {
     if (!agt_acm_init_done) {
-	return;
+        return;
     }
 
-    agt_cb_unregister_callbacks(AGT_ACM_MODULE,	
-				nacm_OID_group);
-    agt_cb_unregister_callbacks(AGT_ACM_MODULE,	
-				nacm_OID_moduleRule);
+    agt_cb_unregister_callbacks(AGT_ACM_MODULE,        
+                                nacm_OID_group);
+    agt_cb_unregister_callbacks(AGT_ACM_MODULE,        
+                                nacm_OID_moduleRule);
     nacmmod = NULL;
     agt_acm_init_done = FALSE;
 
@@ -1713,8 +1713,8 @@ void
 *********************************************************************/
 boolean 
     agt_acm_rpc_allowed (xml_msg_hdr_t *msg,
-			 const xmlChar *user,
-			 const obj_template_t *rpcobj)
+                         const xmlChar *user,
+                         const obj_template_t *rpcobj)
 {
     val_value_t             *nacmroot, *rulesval;
     agt_acm_usergroups_t    *usergroups;
@@ -1724,106 +1724,106 @@ boolean
 
 #ifdef DEBUG
     if (!msg || !user || !rpcobj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     /* super user is allowed to access anything */
     if (is_superuser(user)) {
-	return TRUE;
+        return TRUE;
     }
 
     /* everybody is allowed to close their own session */
     if (obj_get_nsid(rpcobj) == xmlns_nc_id() &&
-	!xml_strcmp(obj_get_name(rpcobj),
-		    NCX_EL_CLOSE_SESSION)) {
-	return TRUE;
+        !xml_strcmp(obj_get_name(rpcobj),
+                    NCX_EL_CLOSE_SESSION)) {
+        return TRUE;
     }
 
     cache = msg->acm_cache;
 
     /* check if access granted without any rules */
     if (check_mode(cache, 
-		   nacm_E_allowedRights_exec, 
-		   rpcobj)) {
-	return TRUE;
+                   nacm_E_allowedRights_exec, 
+                   rpcobj)) {
+        return TRUE;
     }
 
     /* get the NACM root to decide any more */
     if (cache->nacmroot) {
-	nacmroot = cache->nacmroot;
+        nacmroot = cache->nacmroot;
     } else {
-	nacmroot = get_nacm_root();
-	if (!nacmroot) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return FALSE;
-	} else {
-	    cache->nacmroot = nacmroot;
-	}
+        nacmroot = get_nacm_root();
+        if (!nacmroot) {
+            SET_ERROR(ERR_INTERNAL_VAL);
+            return FALSE;
+        } else {
+            cache->nacmroot = nacmroot;
+        }
     }
 
     groupcnt = 0;
 
     if (cache->usergroups) {
-	usergroups = cache->usergroups;
-	groupcnt = cache->groupcnt;
+        usergroups = cache->usergroups;
+        groupcnt = cache->groupcnt;
     } else {
-	usergroups = get_usergroups_entry(nacmroot, 
-					  user, 
-					  &groupcnt);
-	if (!usergroups) {
-	    /* out of memory! deny all access! */
-	    return FALSE;
-	} else {
-	    cache->usergroups = usergroups;
-	    cache->groupcnt = groupcnt;
-	}
+        usergroups = get_usergroups_entry(nacmroot, 
+                                          user, 
+                                          &groupcnt);
+        if (!usergroups) {
+            /* out of memory! deny all access! */
+            return FALSE;
+        } else {
+            cache->usergroups = usergroups;
+            cache->groupcnt = groupcnt;
+        }
     }
 
     /* usergroups malloced at this point */
     retval = FALSE;
 
     if (groupcnt == 0) {
-	/* just check the default for this RPC operation */
-	retval = get_default_rpc_response(cache,
-					  nacmroot, 
-					  rpcobj);
+        /* just check the default for this RPC operation */
+        retval = get_default_rpc_response(cache,
+                                          nacmroot, 
+                                          rpcobj);
     } else {
-	/* get the /nacm/rules node to decide any more */
-	rulesval = val_find_child(nacmroot,
-				  AGT_ACM_MODULE,
-				  nacm_N_rules);
-	if (!rulesval) {
-	    /* no rules at all so use the default */
-	    retval = get_default_rpc_response(cache,
-					      nacmroot, 
-					      rpcobj);
-	} else {
-	    /* there is a rules node so check the rpcRules */
-	    done = FALSE;
-	    retval = check_rpc_rules(rulesval,
-				     rpcobj,
-				     usergroups, 
-				     &done);
-	    if (!done) {
-		/* no RPC rule found;
-		 * try a module namespace rule
-		 */
-		retval = check_module_rules(cache,
-					    rulesval,
-					    rpcobj,
-					    nacm_E_allowedRights_exec,
-					    usergroups, 
-					    &done);
-		if (!done) {
-		    /* no module rule so use the default */
-		    retval = get_default_rpc_response(cache,
-						      nacmroot, 
-						      rpcobj);
-		}
-	    }
-	}
+        /* get the /nacm/rules node to decide any more */
+        rulesval = val_find_child(nacmroot,
+                                  AGT_ACM_MODULE,
+                                  nacm_N_rules);
+        if (!rulesval) {
+            /* no rules at all so use the default */
+            retval = get_default_rpc_response(cache,
+                                              nacmroot, 
+                                              rpcobj);
+        } else {
+            /* there is a rules node so check the rpcRules */
+            done = FALSE;
+            retval = check_rpc_rules(rulesval,
+                                     rpcobj,
+                                     usergroups, 
+                                     &done);
+            if (!done) {
+                /* no RPC rule found;
+                 * try a module namespace rule
+                 */
+                retval = check_module_rules(cache,
+                                            rulesval,
+                                            rpcobj,
+                                            nacm_E_allowedRights_exec,
+                                            usergroups, 
+                                            &done);
+                if (!done) {
+                    /* no module rule so use the default */
+                    retval = get_default_rpc_response(cache,
+                                                      nacmroot, 
+                                                      rpcobj);
+                }
+            }
+        }
     }
 
     return retval;
@@ -1848,20 +1848,20 @@ boolean
 *********************************************************************/
 boolean 
     agt_acm_val_write_allowed (xml_msg_hdr_t *msg,
-			       const xmlChar *user,
-			       const val_value_t *val)
+                               const xmlChar *user,
+                               const val_value_t *val)
 {
 #ifdef DEBUG
     if (!msg || !msg->acm_cache || !user || !val) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     return valnode_access_allowed(msg->acm_cache,
-				  user,
-				  val,
-				  nacm_E_allowedRights_write);
+                                  user,
+                                  val,
+                                  nacm_E_allowedRights_write);
 
 }   /* agt_acm_val_write_allowed */
 
@@ -1881,20 +1881,20 @@ boolean
 *********************************************************************/
 boolean 
     agt_acm_val_read_allowed (xml_msg_hdr_t *msg,
-			      const xmlChar *user,
-			      const val_value_t *val)
+                              const xmlChar *user,
+                              const val_value_t *val)
 {
 #ifdef DEBUG
     if (!msg || !msg->acm_cache || !user || !val) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     return valnode_access_allowed(msg->acm_cache,
-				  user,
-				  val,
-				  nacm_E_allowedRights_read);
+                                  user,
+                                  val,
+                                  nacm_E_allowedRights_read);
 
 }   /* agt_acm_val_read_allowed */
 
@@ -1921,18 +1921,18 @@ status_t
 
 #ifdef DEBUG
     if (!msg) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     if (msg->acm_cache) {
-	SET_ERROR(ERR_INTERNAL_INIT_SEQ);
-	agt_acm_clear_msg_cache(msg);
+        SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+        agt_acm_clear_msg_cache(msg);
     }
 
     acm_cache = m__getObj(agt_acm_cache_t);
     if (!acm_cache) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     memset(acm_cache, 0x0, sizeof(agt_acm_cache_t));
     dlq_createSQue(&acm_cache->modruleQ);
@@ -1966,30 +1966,30 @@ void
 
 #ifdef DEBUG
     if (!msg) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     msg->acm_cbfn = NULL;
     if (!msg->acm_cache) {
-	return;
+        return;
     }
 
     while (!dlq_empty(&msg->acm_cache->modruleQ)) {
-	modrule = (agt_acm_modrule_t *)
-	    dlq_deque(&msg->acm_cache->modruleQ);
-	free_modrule(modrule);
+        modrule = (agt_acm_modrule_t *)
+            dlq_deque(&msg->acm_cache->modruleQ);
+        free_modrule(modrule);
     }
 
     while (!dlq_empty(&msg->acm_cache->dataruleQ)) {
-	datarule = (agt_acm_datarule_t *)
-	    dlq_deque(&msg->acm_cache->dataruleQ);
-	free_datarule(datarule);
+        datarule = (agt_acm_datarule_t *)
+            dlq_deque(&msg->acm_cache->dataruleQ);
+        free_datarule(datarule);
     }
 
     if (msg->acm_cache->usergroups) {
-	free_usergroups(msg->acm_cache->usergroups);
+        free_usergroups(msg->acm_cache->usergroups);
     }
 
     m__free(msg->acm_cache);

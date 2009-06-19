@@ -7,7 +7,7 @@
 
   Each top-level node is keyed by the owner name and 
   the element name.  
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -81,7 +81,9 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
+#ifdef DEBUG
 #define AGT_TOP_DEBUG 1
+#endif
 
 /********************************************************************
 *                                                                   *
@@ -91,7 +93,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                            *
 *                                                                   *
 *********************************************************************/
 
@@ -132,46 +134,52 @@ void
 
     /* get the first node */
     res = agt_xml_consume_node(scb, &top, 
-			       NCX_LAYER_TRANSPORT, NULL);
+                               NCX_LAYER_TRANSPORT, NULL);
     if (res != NO_ERR) {
-	scb->stats.inXMLParseErrors++;
-	myagttotals->stats.inXMLParseErrors++;
+        scb->stats.inXMLParseErrors++;
+        myagttotals->stats.inXMLParseErrors++;
 
-	log_info("\nagt_top: bad msg for session %d (%s)",
-		 scb->sid, get_error_string(res));
+        if (LOGINFO) {
+            log_info("\nagt_top: bad msg for session %d (%s)",
+                     scb->sid, 
+                     get_error_string(res));
+        }
 
-	xml_clean_node(&top);
-	/****  agt_ses_kill_session(scb->sid);  ****/
+        xml_clean_node(&top);
+        /****  agt_ses_kill_session(scb->sid);  ****/
         return;
     }
 
 #ifdef AGT_TOP_DEBUG
     log_debug3("\nagt_top: got node");
     if (LOGDEBUG3) {
-	xml_dump_node(&top);
+        xml_dump_node(&top);
     }
 #endif
 
     /* check node type and if handler exists, then call it */
     if (top.nodetyp==XML_NT_START || top.nodetyp==XML_NT_EMPTY) {
-	/* find the owner, elname tuple in the topQ */
-	handler = top_find_handler(top.module, top.elname);
-	if (handler) {
-	    /* call the handler */
-	    (*handler)(scb, &top);
-	} else {
-	    res = ERR_NCX_DEF_NOT_FOUND;
-	}
+        /* find the owner, elname tuple in the topQ */
+        handler = top_find_handler(top.module, top.elname);
+        if (handler) {
+            /* call the handler */
+            (*handler)(scb, &top);
+        } else {
+            res = ERR_NCX_DEF_NOT_FOUND;
+        }
     } else {
-	res = ERR_NCX_WRONG_NODETYP;
+        res = ERR_NCX_WRONG_NODETYP;
     }
 
     /* check any error trying to invoke the top handler */
     if (res != NO_ERR) {
-	scb->stats.inXMLParseErrors++;
-	myagttotals->stats.inXMLParseErrors++;
-	log_info("\nagt_top: bad msg for session %d (%s)",
-		 scb->sid, get_error_string(res));
+        scb->stats.inXMLParseErrors++;
+        myagttotals->stats.inXMLParseErrors++;
+        if (LOGINFO) {
+            log_info("\nagt_top: bad msg for session %d (%s)",
+                     scb->sid, 
+                     get_error_string(res));
+        }
     }
 
     xml_clean_node(&top);

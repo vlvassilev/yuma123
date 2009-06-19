@@ -143,6 +143,11 @@ extern void
     agt_rpc_unregister_method (const xmlChar *module,
 			       const xmlChar *method_name);
 
+/* mark an RPC in the definition file as a supported operation */
+extern void 
+    agt_rpc_support_method (const xmlChar *module,
+                            const xmlChar *method_name);
+
 /* mark an RPC in the definition file as an unsupported operation */
 extern void
     agt_rpc_unsupport_method (const xmlChar *module,

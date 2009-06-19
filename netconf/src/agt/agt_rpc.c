@@ -940,6 +940,39 @@ status_t
 
 
 /********************************************************************
+* FUNCTION agt_rpc_support_method
+*
+* mark an RPC method as supported within the agent
+* this is needed for operations dependent on capabilities
+*
+* INPUTS:
+*    module == module name of RPC method (really module name)
+*    method_name == RPC method name
+*********************************************************************/
+void 
+    agt_rpc_support_method (const xmlChar *module,
+                            const xmlChar *method_name)
+{
+    obj_template_t  *rpcobj;
+
+    if (!module || !method_name) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+
+    /* find the RPC template */
+    rpcobj = find_rpc(module, method_name);
+    if (!rpcobj) {
+	SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+	return;
+    }
+
+    rpcobj->def.rpc->supported = TRUE;
+
+} /* agt_rpc_support_method */
+
+
+/********************************************************************
 * FUNCTION agt_rpc_unsupport_method
 *
 * mark an RPC method as unsupported within the agent

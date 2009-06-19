@@ -1867,7 +1867,6 @@ static status_t
 	return SET_ERROR(res);
     }
 
-
     /* shutdown extension */
     res = agt_rpc_register_method(AGT_CLI_MODULE, 
 				  NCX_EL_SHUTDOWN,
@@ -1877,6 +1876,8 @@ static status_t
 	return SET_ERROR(res);
     }
 
+    /* no-op extension */
+    agt_rpc_support_method(AGT_CLI_MODULE, NCX_EL_NO_OP);
 
     return NO_ERR;
 
@@ -1951,6 +1952,9 @@ static void
 
     /* shutdown extension */
     agt_rpc_unregister_method(AGT_CLI_MODULE, NCX_EL_SHUTDOWN);
+
+    /* no-op extension */
+    agt_rpc_unsupport_method(AGT_CLI_MODULE, NCX_EL_NO_OP);
 
 } /* unregister_nc_callbacks */
 

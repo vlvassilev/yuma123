@@ -1574,22 +1574,20 @@ static val_value_t *
 
     /* just copy the useval if it is given */
     if (useval) {
-	/* make sure it is a simple value */
-	if (!typ_is_simple(useval->btyp)) {
-	    *res = ERR_NCX_WRONG_TYPE;
-	    log_error("\nError: var '%s' must be a simple type",
-		      useval->name);
+        newval = val_clone(useval);
+        if (!newval) {
+	    log_error("\nError: malloc failed");
 	    return NULL;
-	}
-
-	newval = val_make_simval(val_get_typdef(useval),
-				 obj_get_nsid(parm),
-				 obj_get_name(parm),
-				 VAL_STR(useval),
-				 res);
+        }
+        if (newval->obj != parm) {
+            /* force the new value to have the QName of 'parm' */
+            val_change_nsid(newval, obj_get_nsid(parm));
+            val_set_name(newval, 
+                         obj_get_name(parm),
+                         xml_strlen(obj_get_name(parm)));
+        }
 	return newval;
     }	
-
 
     /* since the CLI and original NCX language were never designed
      * to support top-level leafs, a dummy container must be
@@ -7345,9 +7343,15 @@ static status_t
 				  YANGCLI_MOD, 
 				  YANGCLI_LOAD);
 	    if (parm) {
-		/* do history load buffer */
-		res = do_history_load(agent_cb,
-                                      VAL_STR(parm));
+                if (!VAL_STR(parm) || !*VAL_STR(parm)) {
+                    /* do history load buffer: default filename */
+                    res = do_history_load(agent_cb,
+                                          YANGCLI_DEF_HISTORY_FILE);
+                } else {
+                    /* do history load buffer */
+                    res = do_history_load(agent_cb,
+                                          VAL_STR(parm));
+                }
 		done = TRUE;
 	    }
 	}
@@ -7357,9 +7361,15 @@ static status_t
 				  YANGCLI_MOD, 
 				  YANGCLI_SAVE);
 	    if (parm) {
-		/* do history save buffer */
-		res = do_history_save(agent_cb,
-                                      VAL_STR(parm));
+                if (!VAL_STR(parm) || !*VAL_STR(parm)) {
+                    /* do history save buffer: default filename */
+                    res = do_history_save(agent_cb,
+                                          YANGCLI_DEF_HISTORY_FILE);
+                } else {
+                    /* do history save buffer */
+                    res = do_history_save(agent_cb,
+                                          VAL_STR(parm));
+                }
 		done = TRUE;
 	    }
 	}

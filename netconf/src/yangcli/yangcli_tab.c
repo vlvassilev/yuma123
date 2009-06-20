@@ -278,6 +278,7 @@ static status_t
 			  int parmlen)
 {
     const xmlChar         *parmname;
+    const char            *defaultstr;
     const typ_enum_t      *typenum;
     const typ_def_t       *typdef, *basetypdef;
     ncx_btype_t            btyp;
@@ -304,7 +305,7 @@ static status_t
 					   word_end,
 					   parmlen);
 	}
-	break;
+        return res;
     case NCX_BT_BOOLEAN:
 	res = fill_one_parm_completion(cpl,
 				       comstate,
@@ -322,13 +323,27 @@ static status_t
 					   word_end,
 					   parmlen);
 	}
-	break;
+        return res;
     case NCX_BT_INSTANCE_ID:
 	break;
     case NCX_BT_IDREF:
 	break;
     default:
 	break;
+    }
+
+    /* no current values to show;
+     * just use the default if any
+     */
+    defaultstr = (const char *)obj_get_default(parmobj);
+    if (defaultstr) {
+        res = fill_one_parm_completion(cpl,
+                                       comstate,
+                                       line,
+                                       defaultstr,
+                                       word_start,
+                                       word_end,
+                                       parmlen);
     }
 
     return NO_ERR;

@@ -279,6 +279,7 @@ status_t
     xpath_wr_const_expr (ses_cb_t *scb,
                          const val_value_t *xpathval)
 {
+    const xpath_pcb_t    *constpcb;
     xpath_pcb_t          *pcb;
     status_t              res;
 
@@ -288,7 +289,18 @@ status_t
     }
 #endif
 
-    pcb = xpath_clone_pcb(val_get_const_xpathpcb(xpathval));
+    constpcb = val_get_const_xpathpcb(xpathval);
+    if (!constpcb) {
+        /********* not really an i-i **********/
+        if (typ_is_string(xpathval->btyp) && VAL_STR(xpathval)) {
+            ses_putstr(scb, VAL_STR(xpathval));
+            return NO_ERR;
+        } else {
+            return ERR_NCX_OPERATION_FAILED;
+        }
+    }
+
+    pcb = xpath_clone_pcb(constpcb);
     if (pcb == NULL) {
 	return ERR_INTERNAL_MEM;
     }

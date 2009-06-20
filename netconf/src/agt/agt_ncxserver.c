@@ -251,8 +251,11 @@ status_t
             /* Block until input arrives on one or more active sockets. 
              * or the timer expires
              */
-            ret = select(max(maxrdnum+1, maxwrnum+1), &read_fd_set, 
-                         &write_fd_set, NULL, &timeout);
+            ret = select(max(maxrdnum+1, maxwrnum+1), 
+                         &read_fd_set, 
+                         &write_fd_set, 
+                         NULL, 
+                         &timeout);
             if (ret > 0) {
                 done2 = TRUE;
             } else if (ret < 0) {

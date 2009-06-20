@@ -1707,20 +1707,11 @@ status_t
                                 NCX_EL_ERROR_APP_TAG,
                                 err->error_app_tag,
                                 &res);
-    } else if (err->error_res != NO_ERR) {
-        *buff = 0;
-        sprintf((char *)buff, "%u", err->error_res);
-        if (*buff) {
-            leafval = agt_make_leaf(rpcerror->obj,
-                                    NCX_EL_ERROR_APP_TAG,
-                                    buff,
-                                    &res);
+        if (leafval) {
+            val_add_child(leafval, rpcerror);
+        } else {
+            retres = res;
         }
-    }
-    if (leafval) {
-        val_add_child(leafval, rpcerror);
-    } else {
-        retres = res;
     }
 
     /* generate the <error-path> field */

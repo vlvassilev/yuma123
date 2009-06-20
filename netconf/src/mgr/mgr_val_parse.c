@@ -1048,6 +1048,9 @@ static status_t
 		    xpath_free_result(result);
 		}
 	    }
+            if (res != NO_ERR) {
+                res = ERR_NCX_INVALID_XPATH_EXPR;
+            }
 	}
 
 	/* record the value even if there are errors */

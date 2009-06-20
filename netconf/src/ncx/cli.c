@@ -1136,9 +1136,16 @@ val_value_t *
 		    }
 		}
 
-		/* make sure value entered if expected */
+		/* make sure value entered if expected
+                 * NCX_BT_EMPTY and NCX_BT_STRING 
+                 * (if zero-length strings allowed)
+                 */
 		if (res==NO_ERR && !parmval && btyp != NCX_BT_EMPTY) {
-		    res = ERR_NCX_EMPTY_VAL;
+                    if (!(typ_is_string(btyp) &&
+                        (val_simval_ok(obj_get_ctypdef(chobj),
+                                       EMPTY_STRING) == NO_ERR))) {
+                        res = ERR_NCX_EMPTY_VAL;
+                    }
 		}
 	    }
         }

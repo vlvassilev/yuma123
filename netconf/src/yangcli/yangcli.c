@@ -3190,6 +3190,9 @@ status_t
 					   configvar,
 					   resultvar,
 					   resultstr);
+                if (res == NO_ERR) {
+                    log_info("\nOK\n");
+                }                    
 	    }
 	} else if (resultvar) {
 	    /* save the filled in value

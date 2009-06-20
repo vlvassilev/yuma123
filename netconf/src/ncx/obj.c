@@ -1722,6 +1722,14 @@ static obj_rpc_t *
     dlq_createSQue(&rpc->groupingQ);
     dlq_createSQue(&rpc->datadefQ);
     rpc->status = NCX_STATUS_CURRENT;
+
+    /* by default: set supported to true for
+     * agent simulation mode; there will not be any
+     * callbacks to load, but RPC message
+     * processing based on the template will be done
+     */
+    rpc->supported = TRUE;
+
     return rpc;
 
 }  /* new_rpc */

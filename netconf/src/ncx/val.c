@@ -3265,6 +3265,7 @@ void
                                      NULL,
                                      FALSE,
                                      FALSE,
+                                     startindent,
                                      indent_amount,
                                      NULL);
         return;
@@ -6907,16 +6908,22 @@ status_t
 		 * !!! to send; assume call to this fn
 		 * !!! to retrieve the length was done OK
 		 */
-		res = b64_encode(s, val->v.binary.ustrlen,
-				 buff, NCX_MAX_UINT,
-				 NCX_DEF_LINELEN, len);
+		res = b64_encode(s, 
+                                 val->v.binary.ustrlen,
+				 buff, 
+                                 NCX_MAX_UINT,
+				 NCX_DEF_LINELEN, 
+                                 len);
 	    } else {
 		*len = 0;
 	    }
 	} else if (s) {
-	    res = b64_encode(s, val->v.binary.ustrlen,
-			     NULL, NCX_MAX_UINT,
-			     NCX_DEF_LINELEN, len);
+	    res = b64_encode(s, 
+                             val->v.binary.ustrlen,
+			     NULL, 
+                             NCX_MAX_UINT,
+			     NCX_DEF_LINELEN, 
+                             len);
 	} else {
 	    *len = 0;
 	}
@@ -6964,7 +6971,8 @@ status_t
 	    } else if (typ_is_number(val->v.list.btyp)) {
 		res = ncx_sprintf_num((xmlChar *)numbuff, 
 				      &lmem->val.num, 
-				      val->v.list.btyp, len);
+				      val->v.list.btyp, 
+                                      len);
 		if (res != NO_ERR) {
 		    return SET_ERROR(res);
 		}
@@ -7195,7 +7203,8 @@ boolean
 
     /* check for no-duplicates in the type appinfo */
     if (val->typdef) {
-	if (typ_find_appinfo(val->typdef, NCX_PREFIX, 
+	if (typ_find_appinfo(val->typdef, 
+                             NCX_PREFIX, 
 			     NCX_EL_NODUPLICATES)) {
 	    val->flags |= VAL_FL_DUPDONE;
 	    return FALSE;
@@ -7249,6 +7258,8 @@ boolean
     } else if ((btyp == NCX_BT_SLIST || btyp==NCX_BT_BITS)
 	       && ncx_list_empty(&val->v.list)) {
 	return FALSE;
+    } else if (typ_is_string(btyp)) {
+        return (VAL_STR(val) && *(VAL_STR(val))) ? TRUE : FALSE;
     } else {
 	return TRUE;
     }
@@ -7513,19 +7524,27 @@ void
 * Simple types should not use more than one line or introduce
 * any extra whitespace in any simple content element
 * 
+* !!!The calculation includes the XML start and end tags!!!
+*
+*  totalsize: <foo:node>value</foo:node>  == 26
+*
 * INPUTS:
 *   val == value to check
+*   linelen == length of line to check against
 *   
 * RETURNS:
 *   TRUE if the val is a type that should or must fit on one line
 *   FALSE otherwise
 *********************************************************************/
 boolean
-    val_fit_oneline (const val_value_t *val)
+    val_fit_oneline (const val_value_t *val,
+                     uint32 linesize)
 {
     ncx_btype_t       btyp;
     const xmlChar    *str;
-    uint32            cnt;
+    uint32            cnt, valsize, valnamesize, totalsize;
+    xmlns_id_t        nsid;
+
 #ifdef DEBUG
     if (!val) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -7535,10 +7554,19 @@ boolean
 
     btyp = val->btyp;
 
+    if (btyp == NCX_BT_EMPTY) {
+        return TRUE;
+    }
+
+    valsize = 0;
     switch (btyp) {
     case NCX_BT_ENUM:
-    case NCX_BT_EMPTY:
+        valsize = (VAL_ENUM_NAME(val)) ?
+            xml_strlen(VAL_ENUM_NAME(val)) : 0;
+        break;
     case NCX_BT_BOOLEAN:
+        valsize = (VAL_BOOL(val)) ? 4 : 5;
+        break;
     case NCX_BT_INT8:
     case NCX_BT_INT16:
     case NCX_BT_INT32:
@@ -7549,41 +7577,37 @@ boolean
     case NCX_BT_UINT64:
     case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
-	return TRUE;
+        /* guess worst case instead of sprintf to check */
+        valsize = NCX_MAX_NUMLEN;
+        break;
     case NCX_BT_BINARY:
-	return (val->v.binary.ustrlen < 20) ? TRUE : FALSE;
+	valsize = val->v.binary.ustrlen;
+        break;
     case NCX_BT_INSTANCE_ID:
-	return FALSE;
+        /*****/
+        return FALSE;
     case NCX_BT_STRING:
     case NCX_BT_LEAFREF:   /*****/
-	if (!VAL_STR(val)) {
-	    /* empty string */
-	    return TRUE;
-	}
+	if (VAL_STR(val)) {
+            valsize = xml_strlen(VAL_STR(val));
 
-	/* hack: assume some length more than a URI,
-	 * and less than enough to cause line wrap
-	 */
-	if (xml_strlen(VAL_STR(val)) > 20) {
-	    return FALSE;
-	}
-
-	/* check if multiple new-lines are entered, if not,
-	 * then treat it as if it will fit on one line
-	 * the session linesize and current linepos 
-	 * are not known here.
-	 */
-	str = VAL_STR(val);
-	cnt = 0;
-	while (*str && cnt < 2) {
-	    if (*str++ == '\n') {
-		cnt++;
-	    }
-	}
-	return (cnt < 2) ? TRUE : FALSE;
+            /* check if multiple new-lines are entered */
+            str = VAL_STR(val);
+            cnt = 0;
+            while (*str && cnt < 2) {
+                if (*str++ == '\n') {
+                    cnt++;
+                }
+            }
+            if (cnt >= 2) {
+                return FALSE;
+            }
+        }
+        break;
     case NCX_BT_SLIST:
     case NCX_BT_BITS:
-	return TRUE;  /***/
+        /* these are printed 1 per line right now */
+	return TRUE; 
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
     case NCX_BT_LIST:
@@ -7592,12 +7616,30 @@ boolean
 	return dlq_empty(&val->v.childQ);
     case NCX_BT_EXTERN:
     case NCX_BT_INTERN:
+        /* just put these on a new line; rare usage at this time */
 	return FALSE;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return TRUE;
     }
-    /*NOTREACHED*/
+
+    if (valsize >= linesize) {
+        return FALSE;
+    }
+
+    valnamesize = xml_strlen(val->name);
+
+    nsid = val_get_nsid(val);
+    if (val->nsid) {
+        /* account for 'foo:' */
+        valnamesize += 
+            (xml_strlen(xmlns_get_ns_prefix(nsid)) + 1);
+    }
+
+    /* <foo:valname>val</foo:valname> */
+    totalsize = valsize + 5 + (2 * valnamesize);
+
+    return (totalsize <= linesize) ? TRUE : FALSE;
 
 }  /* val_fit_oneline */
 

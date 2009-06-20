@@ -200,6 +200,7 @@ extern status_t
                             xml_attrs_t *attrs,
                             boolean docmode,
                             boolean xmlhdr,
+                            int32 startindent,
                             int32  indent,
                             val_nodetest_fn_t testfn);
 
@@ -209,6 +210,7 @@ extern status_t
 		       xml_attrs_t *attrs,
 		       boolean docmode,
 		       boolean xmlhdr,
+                       int32 startindent,
 		       int32 indent,
 		       val_nodetest_fn_t testfn);
 
@@ -219,6 +221,7 @@ extern status_t
 		 xml_attrs_t *attrs,
 		 boolean docmode,
 		 boolean xmlhdr,
+                 int32 startindent,
 		 int32 indent);
 
 

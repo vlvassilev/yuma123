@@ -1,6 +1,6 @@
 /*  FILE: yangdump.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -163,7 +163,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                            *
 *                                                                   *
 *********************************************************************/
 
@@ -201,7 +201,7 @@ static void
     pr_usage (void)
 {
     log_error("\nError: No parameters entered."
-	      "\nTry '%s --help' for usage details\n", PROGNAME);
+              "\nTry '%s --help' for usage details\n", PROGNAME);
 
 } /* pr_usage */
 
@@ -228,8 +228,8 @@ static void
 *********************************************************************/
 static status_t
     process_cli_input (int argc,
-		       const char *argv[],
-		       yangdump_cvtparms_t  *cp)
+                       const char *argv[],
+                       yangdump_cvtparms_t  *cp)
 {
     const obj_template_t  *obj;
     ncx_module_t          *mod;
@@ -241,7 +241,7 @@ static status_t
 
     cp->buff = m__getMem(YANGDUMP_BUFFSIZE);
     if (!cp->buff) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     cp->bufflen = YANGDUMP_BUFFSIZE;
 
@@ -249,50 +249,59 @@ static status_t
     obj = NULL;
     mod = ncx_find_module(YANGDUMP_MOD, NULL);
     if (mod) {
-	obj = ncx_find_object(mod, YANGDUMP_CONTAINER);
+        obj = ncx_find_object(mod, YANGDUMP_CONTAINER);
     }
 
     if (!obj) {
-	log_error("\nError: yangdump module with CLI definitions not loaded");
-	res = ERR_NCX_NOT_FOUND;
+        log_error("\nError: yangdump module with CLI definitions not loaded");
+        res = ERR_NCX_NOT_FOUND;
     }
 
     /* parse the command line against the object template */
     if (res == NO_ERR) {
-	valset = cli_parse(argc, argv, obj,
-			   FULLTEST, PLAINMODE, TRUE, &res);
+        valset = cli_parse(argc, 
+                           argv, 
+                           obj,
+                           FULLTEST, 
+                           PLAINMODE, 
+                           TRUE, 
+                           &res);
     }
     if (res != NO_ERR) {
-	if (valset) {
-	    val_free_value(valset);
-	}
-	return res;
+        if (valset) {
+            val_free_value(valset);
+        }
+        return res;
     } else if (!valset) {
-	pr_usage();
-	return ERR_NCX_SKIPPED;
+        pr_usage();
+        return ERR_NCX_SKIPPED;
     } else {
-	cli_val = valset;
+        cli_val = valset;
     }
 
     /* next get any params from the conf file */
     val = val_find_child(valset, YANGDUMP_MOD, YANGDUMP_PARM_CONFIG);
     if (val) {
-	if (val->res == NO_ERR) {
-	    /* try the specified config location */
-	    cp->config = VAL_STR(val);
-	    res = conf_parse_val_from_filespec(cp->config, valset, 
-					       TRUE, TRUE);
-	    if (res != NO_ERR) {
-		return res;
-	    }
-	}
+        if (val->res == NO_ERR) {
+            /* try the specified config location */
+            cp->config = VAL_STR(val);
+            res = conf_parse_val_from_filespec(cp->config, 
+                                               valset, 
+                                               TRUE, 
+                                               TRUE);
+            if (res != NO_ERR) {
+                return res;
+            }
+        }
     } else {
-	/* try default config location */
-	res = conf_parse_val_from_filespec(YANGDUMP_DEF_CONFIG,
-					   valset, TRUE, FALSE);
-	if (res != NO_ERR) {
-	    return res;
-	}
+        /* try default config location */
+        res = conf_parse_val_from_filespec(YANGDUMP_DEF_CONFIG,
+                                           valset, 
+                                           TRUE, 
+                                           FALSE);
+        if (res != NO_ERR) {
+            return res;
+        }
     }
 
     /* get the log-level parameter, but already set in
@@ -300,27 +309,27 @@ static status_t
      */
     val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_LOGLEVEL);
     if (val) {
-	cp->log_level = 
-	    log_get_debug_level_enum((const char *)VAL_STR(val));
-	if (cp->log_level == LOG_DEBUG_NONE) {
-	    log_error("\nError: invalid log-level value (%s)",
-		      (const char *)VAL_STR(val));
-	    return ERR_NCX_INVALID_VALUE;
-	}
+        cp->log_level = 
+            log_get_debug_level_enum((const char *)VAL_STR(val));
+        if (cp->log_level == LOG_DEBUG_NONE) {
+            log_error("\nError: invalid log-level value (%s)",
+                      (const char *)VAL_STR(val));
+            return ERR_NCX_INVALID_VALUE;
+        }
     }
 
     /* get the logging parameters */
     val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_LOG);
     if (val) {
-	cp->logfilename = VAL_STR(val);
-	cp->full_logfilename = ncx_get_source(VAL_STR(val));
-	if (!cp->full_logfilename) {
-	    return ERR_INTERNAL_MEM;
-	}
+        cp->logfilename = VAL_STR(val);
+        cp->full_logfilename = ncx_get_source(VAL_STR(val));
+        if (!cp->full_logfilename) {
+            return ERR_INTERNAL_MEM;
+        }
     }
     val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_LOGAPPEND);
     if (val) {
-	cp->logappend = TRUE;
+        cp->logappend = TRUE;
     }
 
     /*** ORDER DOES NOT MATTER FOR REST OF PARAMETERS ***/
@@ -328,190 +337,211 @@ static status_t
     /* defnames parameter */
     val = val_find_child(valset, YANGDUMP_MOD, YANGDUMP_PARM_DEFNAMES);
     if (val) {
-	cp->defnames = TRUE;
+        cp->defnames = TRUE;
     }
 
     /* dependencies parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 YANGDUMP_PARM_DEPENDENCIES);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_DEPENDENCIES);
     if (val) {
-	cp->dependencies = TRUE;
+        cp->dependencies = TRUE;
     }
 
     /* exports parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 YANGDUMP_PARM_EXPORTS);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_EXPORTS);
     if (val) {
-	cp->exports = TRUE;
+        cp->exports = TRUE;
     }
 
     /* format parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 YANGDUMP_PARM_FORMAT);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_FORMAT);
     if (val) {
-	/* format -- use string provided */
-	cp->format = 
-	    ncx_get_cvttyp_enum((const char *)VAL_ENUM_NAME(val));
+        /* format -- use string provided */
+        cp->format = 
+            ncx_get_cvttyp_enum((const char *)VAL_ENUM_NAME(val));
     } else {
-	cp->format = NCX_CVTTYP_NONE;
+        cp->format = NCX_CVTTYP_NONE;
     }
 
     /* identifiers parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 YANGDUMP_PARM_IDENTIFIERS);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_IDENTIFIERS);
     if (val) {
-	cp->identifiers = TRUE;
+        cp->identifiers = TRUE;
     }
 
     /* indent parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 YANGDUMP_PARM_INDENT);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_INDENT);
     if (val) {
-	cp->indent = (int32)VAL_UINT(val);
+        cp->indent = (int32)VAL_UINT(val);
     } else {
-	cp->indent = NCX_DEF_INDENT;
+        cp->indent = NCX_DEF_INDENT;
     }
 
     /* help parameter */
     val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_HELP);
     if (val) {
-	cp->helpmode = TRUE;
+        cp->helpmode = TRUE;
     }
 
     /* help submode parameter (brief/normal/full) */
     val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_BRIEF);
     if (val) {
-	cp->helpsubmode = HELP_MODE_BRIEF;
+        cp->helpsubmode = HELP_MODE_BRIEF;
     } else {
-	/* full parameter */
-	val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_FULL);
-	if (val) {
-	    cp->helpsubmode = HELP_MODE_FULL;
-	} else {
-	    cp->helpsubmode = HELP_MODE_NORMAL;
-	}
+        /* full parameter */
+        val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_FULL);
+        if (val) {
+            cp->helpsubmode = HELP_MODE_FULL;
+        } else {
+            cp->helpsubmode = HELP_MODE_NORMAL;
+        }
     }
 
     /* html-div parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 YANGDUMP_PARM_HTML_DIV);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_HTML_DIV);
     if (val) {
-	cp->html_div = TRUE;
+        cp->html_div = TRUE;
     }
 
     /* html-toc parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 YANGDUMP_PARM_HTML_TOC);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_HTML_TOC);
     if (val) {
-	cp->html_toc = VAL_STR(val);
+        cp->html_toc = VAL_STR(val);
     } else {
-	cp->html_toc = YANGDUMP_DEF_TOC;
+        cp->html_toc = YANGDUMP_DEF_TOC;
     }
 
     /* modpath parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 NCX_EL_MODPATH);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         NCX_EL_MODPATH);
     if (val) {
-	ncxmod_set_modpath(VAL_STR(val));
+        ncxmod_set_modpath(VAL_STR(val));
     }
 
     /* module parameter */
-    cp->modcount = val_instance_count(valset, NULL, 
-				      YANGDUMP_PARM_MODULE);
+    cp->modcount = val_instance_count(valset, 
+                                      NULL, 
+                                      YANGDUMP_PARM_MODULE);
     if (cp->modcount == 1) {
-	val = val_find_child(valset, YANGDUMP_MOD, 
-			     YANGDUMP_PARM_MODULE);
-	if (val) {
-	    cp->module = (char *)xml_strdup(VAL_STR(val));
-	    if (!cp->module) {
-		return ERR_INTERNAL_MEM;
-	    }
-	}
+        val = val_find_child(valset, 
+                             YANGDUMP_MOD, 
+                             YANGDUMP_PARM_MODULE);
+        if (val) {
+            cp->module = (char *)xml_strdup(VAL_STR(val));
+            if (!cp->module) {
+                return ERR_INTERNAL_MEM;
+            }
+        }
     }
 
     /* modversion parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 YANGDUMP_PARM_MODVERSION);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_MODVERSION);
     if (val) {
-	cp->modversion = TRUE;
+        cp->modversion = TRUE;
     }
 
     /* no-subdirs parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 YANGDUMP_PARM_NO_SUBDIRS);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_NO_SUBDIRS);
     if (val) {
-	cp->nosubdirs = TRUE;
+        cp->nosubdirs = TRUE;
     }
 
     /* no-versionnames */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 YANGDUMP_PARM_NO_VERSIONNAMES);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_NO_VERSIONNAMES);
     if (val) {
-	cp->noversionnames = TRUE;
+        cp->noversionnames = TRUE;
     }
 
     /* objview parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 YANGDUMP_PARM_OBJVIEW);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_OBJVIEW);
     if (val) {
-	cp->objview = (const char *)VAL_STR(val);
+        cp->objview = (const char *)VAL_STR(val);
     } else {
-	cp->objview = YANGDUMP_DEF_OBJVIEW;
+        cp->objview = YANGDUMP_DEF_OBJVIEW;
     }
 
     /* output parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 YANGDUMP_PARM_OUTPUT);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_OUTPUT);
     if (val) {
-	/* output -- use filename provided */
-	cp->output = (const char *)VAL_STR(val);
-	cp->full_output = ncx_get_source(VAL_STR(val));
-	if (!cp->full_output) {
-	    return ERR_INTERNAL_MEM;
-	}
-	cp->output_isdir = ncxmod_test_subdir(cp->full_output);
+        /* output -- use filename provided */
+        cp->output = (const char *)VAL_STR(val);
+        cp->full_output = ncx_get_source(VAL_STR(val));
+        if (!cp->full_output) {
+            return ERR_INTERNAL_MEM;
+        }
+        cp->output_isdir = ncxmod_test_subdir(cp->full_output);
     }
 
     /* simurls parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 YANGDUMP_PARM_SIMURLS);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_SIMURLS);
     if (val) {
-	cp->simurls = TRUE;
+        cp->simurls = TRUE;
     }
 
     /* subtree parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 YANGDUMP_PARM_SUBTREE);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_SUBTREE);
     if (val) {
-	cp->subtree = (const char *)VAL_STR(val);
+        cp->subtree = (const char *)VAL_STR(val);
     }
 
     /* unified parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 YANGDUMP_PARM_UNIFIED);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_UNIFIED);
     if (val) {
-	cp->unified = TRUE;
+        cp->unified = TRUE;
     }
 
     /* urlstart parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 YANGDUMP_PARM_URLSTART);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_URLSTART);
     if (val) {
-	cp->urlstart = VAL_STR(val);
+        cp->urlstart = VAL_STR(val);
     }
 
     /* version parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 NCX_EL_VERSION);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         NCX_EL_VERSION);
     if (val) {
-	cp->versionmode = TRUE;
+        cp->versionmode = TRUE;
     }
 
     /* xsd-schemaloc parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, 
-			 YANGDUMP_PARM_XSD_SCHEMALOC);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_XSD_SCHEMALOC);
     if (val) {
-	cp->schemaloc = VAL_STR(val);
+        cp->schemaloc = VAL_STR(val);
     }
 
     return NO_ERR;
@@ -527,7 +557,7 @@ static status_t
  *********************************************************************/
 static status_t 
     main_init (int argc,
-	       const char *argv[])
+               const char *argv[])
 {
     status_t       res;
     xmlns_id_t     nsid;
@@ -547,43 +577,43 @@ static status_t
      */
     res = ncx_init(TRUE,
 #ifdef DEBUG
-		   LOG_DEBUG_INFO,
+                   LOG_DEBUG_INFO,
 #else
-		   LOG_DEBUG_WARN,
+                   LOG_DEBUG_WARN,
 #endif
-		   FALSE,
-		   "yangdump started",
-		   argc, argv);
+                   FALSE,
+                   "yangdump started",
+                   argc, argv);
 
     if (res == NO_ERR) {
 
-	/* load in the YANGDUMP converter parmset definition file */
-	res = ncxmod_load_module(YANGDUMP_MOD, NULL, NULL);
+        /* load in the YANGDUMP converter parmset definition file */
+        res = ncxmod_load_module(YANGDUMP_MOD, NULL, NULL);
 
-	if (res == NO_ERR) {
-	    res = ncxmod_load_module(NCXMOD_NCX, NULL, NULL);
-	    if (res == NO_ERR) {
-		res = ncx_stage2_init();
-	    }
-	}
+        if (res == NO_ERR) {
+            res = ncxmod_load_module(NCXMOD_NCX, NULL, NULL);
+            if (res == NO_ERR) {
+                res = ncx_stage2_init();
+            }
+        }
 
-	/* Initialize the Notifications namespace */
-	res = xmlns_register_ns(NCN_URN, 
-				NCN_PREFIX, 
-				NCX_MODULE, 
-				NULL, 
-				&nsid);
-	if (res != NO_ERR) {
-	    return res;
-	}
+        /* Initialize the Notifications namespace */
+        res = xmlns_register_ns(NCN_URN, 
+                                NCN_PREFIX, 
+                                NCX_MODULE, 
+                                NULL, 
+                                &nsid);
+        if (res != NO_ERR) {
+            return res;
+        }
 
-	if (res == NO_ERR) {
-	    res = process_cli_input(argc, argv, &cvtparms);
-	}
+        if (res == NO_ERR) {
+            res = process_cli_input(argc, argv, &cvtparms);
+        }
     }
 
     if (res != NO_ERR && res != ERR_NCX_SKIPPED) {
-	pr_err(res);
+        pr_err(res);
     }
     return res;
 
@@ -609,8 +639,8 @@ static status_t
  *********************************************************************/
 static ses_cb_t *
     get_output_session (yang_pcb_t *pcb,
-			yangdump_cvtparms_t *cp,
-			status_t  *res)
+                        yangdump_cvtparms_t *cp,
+                        status_t  *res)
 {
     ncx_module_t    *mod;
     FILE            *fp;
@@ -624,50 +654,50 @@ static ses_cb_t *
 
     mod = pcb->top;
     if (!mod) {
-	*res = SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
+        *res = SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
     }
 
     /* open the output file if not STDOUT */
     if (*res == NO_ERR) {
-	if ((cp->defnames && cp->format != NCX_CVTTYP_NONE) || 
-	    (cp->output && cp->output_isdir)) {
-	    namebuff = xsd_make_output_filename(mod, cp);
-	    if (!namebuff) {
-		*res = ERR_INTERNAL_MEM;
-	    } else {
-		fp = fopen((const char *)namebuff, "w");
-		if (!fp) {
-		    *res = ERR_FIL_OPEN;
-		}
-	    }
-	} else if (cp->output) {
-	    if (!cp->firstdone) {
-		fp = fopen(cp->output, "w");
-		cp->firstdone = TRUE;
-	    } else if (cp->subtree) {
-		fp = fopen(cp->output, "a");
-	    } else {
-		fp = fopen(cp->output, "w");
-	    }
-	    if (!fp) {
-		*res = ERR_FIL_OPEN;
-	    }
-	}
+        if ((cp->defnames && cp->format != NCX_CVTTYP_NONE) || 
+            (cp->output && cp->output_isdir)) {
+            namebuff = xsd_make_output_filename(mod, cp);
+            if (!namebuff) {
+                *res = ERR_INTERNAL_MEM;
+            } else {
+                fp = fopen((const char *)namebuff, "w");
+                if (!fp) {
+                    *res = ERR_FIL_OPEN;
+                }
+            }
+        } else if (cp->output) {
+            if (!cp->firstdone) {
+                fp = fopen(cp->output, "w");
+                cp->firstdone = TRUE;
+            } else if (cp->subtree) {
+                fp = fopen(cp->output, "a");
+            } else {
+                fp = fopen(cp->output, "w");
+            }
+            if (!fp) {
+                *res = ERR_FIL_OPEN;
+            }
+        }
     }
 
     /* get a dummy session control block */
     if (*res == NO_ERR) {
-	scb = ses_new_dummy_scb();
-	if (!scb) {
-	    *res = ERR_INTERNAL_MEM;
-	} else {
-	    scb->fp = fp;
-	    ses_set_mode(scb, SES_MODE_TEXT);
-	}
+        scb = ses_new_dummy_scb();
+        if (!scb) {
+            *res = ERR_INTERNAL_MEM;
+        } else {
+            scb->fp = fp;
+            ses_set_mode(scb, SES_MODE_TEXT);
+        }
     } 
 
     if (namebuff) {
-	m__free(namebuff);
+        m__free(namebuff);
     }
 
     return scb;
@@ -687,8 +717,8 @@ static ses_cb_t *
  *********************************************************************/
 static void
     output_one_module_exports (ncx_module_t *mod,
-			       ses_cb_t *scb,
-			       char *buff)
+                               ses_cb_t *scb,
+                               char *buff)
 {
     typ_template_t    *typ;
     grp_template_t    *grp;
@@ -696,56 +726,56 @@ static void
     ext_template_t    *ext;
 
     if (mod->ismod) {
-	sprintf(buff, "\nnamespace %s", mod->ns);
-	ses_putstr(scb, (const xmlChar *)buff);
-	if (mod->prefix) {
-	    sprintf(buff, "\nprefix %s", mod->prefix);
-	    ses_putstr(scb, (const xmlChar *)buff);
-	} else {
-	    sprintf(buff, "\nprefix %s", mod->name);
-	    ses_putstr(scb, (const xmlChar *)buff);
-	}
+        sprintf(buff, "\nnamespace %s", mod->ns);
+        ses_putstr(scb, (const xmlChar *)buff);
+        if (mod->prefix) {
+            sprintf(buff, "\nprefix %s", mod->prefix);
+            ses_putstr(scb, (const xmlChar *)buff);
+        } else {
+            sprintf(buff, "\nprefix %s", mod->name);
+            ses_putstr(scb, (const xmlChar *)buff);
+        }
     } else {
-	sprintf(buff, "\nbelongs-to %s", mod->belongs);
-	ses_putstr(scb, (const xmlChar *)buff);
+        sprintf(buff, "\nbelongs-to %s", mod->belongs);
+        ses_putstr(scb, (const xmlChar *)buff);
     }
 
     for (typ = (typ_template_t *)dlq_firstEntry(&mod->typeQ);
-	 typ != NULL;
-	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
-	sprintf(buff, "\ntypedef %s", typ->name);
-	ses_putstr(scb, (const xmlChar *)buff);
+         typ != NULL;
+         typ = (typ_template_t *)dlq_nextEntry(typ)) {
+        sprintf(buff, "\ntypedef %s", typ->name);
+        ses_putstr(scb, (const xmlChar *)buff);
     }
 
     for (grp = (grp_template_t *)dlq_firstEntry(&mod->groupingQ);
-	 grp != NULL;
-	 grp = (grp_template_t *)dlq_nextEntry(grp)) {
-	sprintf(buff, "\ngrouping %s", grp->name);
-	ses_putstr(scb, (const xmlChar *)buff);
+         grp != NULL;
+         grp = (grp_template_t *)dlq_nextEntry(grp)) {
+        sprintf(buff, "\ngrouping %s", grp->name);
+        ses_putstr(scb, (const xmlChar *)buff);
     }
 
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
-	switch (obj->objtype) {
-	case OBJ_TYP_AUGMENT:
-	case OBJ_TYP_USES:
-	    break;
-	default:
-	    if (obj_is_cloned(obj) && !obj_is_augclone(obj)) {
-		break;
-	    }
-	    sprintf(buff, "\n%s %s", obj_get_typestr(obj),
-		    obj_get_name(obj));
-	    ses_putstr(scb, (const xmlChar *)buff);
-	}
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
+        switch (obj->objtype) {
+        case OBJ_TYP_AUGMENT:
+        case OBJ_TYP_USES:
+            break;
+        default:
+            if (obj_is_cloned(obj) && !obj_is_augclone(obj)) {
+                break;
+            }
+            sprintf(buff, "\n%s %s", obj_get_typestr(obj),
+                    obj_get_name(obj));
+            ses_putstr(scb, (const xmlChar *)buff);
+        }
     }
 
     for (ext = (ext_template_t *)dlq_firstEntry(&mod->extensionQ);
-	 ext != NULL;
-	 ext = (ext_template_t *)dlq_nextEntry(ext)) {
-	sprintf(buff, "\nextension %s", ext->name);
-	ses_putstr(scb, (const xmlChar *)buff);
+         ext != NULL;
+         ext = (ext_template_t *)dlq_nextEntry(ext)) {
+        sprintf(buff, "\nextension %s", ext->name);
+        ses_putstr(scb, (const xmlChar *)buff);
     }
 
     ses_putchar(scb, '\n');
@@ -765,8 +795,8 @@ static void
  *********************************************************************/
 static void
     output_module_exports (yang_pcb_t *pcb,
-			   yangdump_cvtparms_t *cp,
-			   ses_cb_t *scb)
+                           yangdump_cvtparms_t *cp,
+                           ses_cb_t *scb)
 {
     ncx_module_t      *mod;
     yang_node_t       *node;
@@ -774,36 +804,36 @@ static void
     /* the module should already be parsed and loaded */
     mod = pcb->top;
     if (!mod) {
-	SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
-	return;
+        SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
+        return;
     }
 
 
     ses_putstr(scb, (const xmlChar *)"\nexports:");
 
     if (pcb->subtree_mode) {
-	if (mod->ismod) {
-	    sprintf(cp->buff, "\nmodule %s", mod->name);
-	} else {
-	    sprintf(cp->buff, "\nsubmodule %s", mod->name);
-	}
-	ses_putstr(scb, (const xmlChar *)cp->buff);
-	if (mod->version) {
-	    ses_putchar(scb, ' ');
-	    ses_putstr(scb, mod->version);
-	}
+        if (mod->ismod) {
+            sprintf(cp->buff, "\nmodule %s", mod->name);
+        } else {
+            sprintf(cp->buff, "\nsubmodule %s", mod->name);
+        }
+        ses_putstr(scb, (const xmlChar *)cp->buff);
+        if (mod->version) {
+            ses_putchar(scb, ' ');
+            ses_putstr(scb, mod->version);
+        }
     }
 
     output_one_module_exports(mod, scb, cp->buff);
 
     if (cp->unified && mod->ismod) {
-	for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		output_one_module_exports(node->submod, scb, cp->buff);
-	    }
-	}
+        for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                output_one_module_exports(node->submod, scb, cp->buff);
+            }
+        }
     }
 
 }   /* output_module_exports */
@@ -821,38 +851,38 @@ static void
  *********************************************************************/
 static void
     output_one_module_dependencies (ncx_module_t *mod,
-				    ses_cb_t *scb,
-				    yangdump_cvtparms_t *cp)
+                                    ses_cb_t *scb,
+                                    yangdump_cvtparms_t *cp)
 {
     ncx_module_t      *testmod;
     yang_import_ptr_t *impptr;
     yang_node_t       *node; 
 
     for (impptr = (yang_import_ptr_t *)dlq_firstEntry(&mod->saveimpQ);
-	 impptr != NULL;
-	 impptr = (yang_import_ptr_t *)dlq_nextEntry(impptr)) {
+         impptr != NULL;
+         impptr = (yang_import_ptr_t *)dlq_nextEntry(impptr)) {
 
-	testmod = ncx_find_module(impptr->modname,
-				  impptr->revision);
-	sprintf(cp->buff, "\nimport %s", impptr->modname);
-	ses_putstr(scb,(const xmlChar *)cp->buff);
-	if (testmod && testmod->version) {
-	    sprintf(cp->buff, " %s", testmod->version);
-	    ses_putstr(scb,(const xmlChar *)cp->buff);		
-	}
+        testmod = ncx_find_module(impptr->modname,
+                                  impptr->revision);
+        sprintf(cp->buff, "\nimport %s", impptr->modname);
+        ses_putstr(scb,(const xmlChar *)cp->buff);
+        if (testmod && testmod->version) {
+            sprintf(cp->buff, " %s", testmod->version);
+            ses_putstr(scb,(const xmlChar *)cp->buff);                
+        }
     }
     if (!cp->unified) {
-	for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (yang_node_t *)dlq_nextEntry(node)) {
+        for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (yang_node_t *)dlq_nextEntry(node)) {
 
-	    sprintf(cp->buff, "\ninclude %s", node->name);
-	    ses_putstr(scb,(const xmlChar *)cp->buff);
-	    if (node->submod && node->submod->version) {
-		sprintf(cp->buff, " %s", node->submod->version);
-		ses_putstr(scb,(const xmlChar *)cp->buff);
-	    }
-	}
+            sprintf(cp->buff, "\ninclude %s", node->name);
+            ses_putstr(scb,(const xmlChar *)cp->buff);
+            if (node->submod && node->submod->version) {
+                sprintf(cp->buff, " %s", node->submod->version);
+                ses_putstr(scb,(const xmlChar *)cp->buff);
+            }
+        }
     }
 
     ses_putchar(scb, '\n');
@@ -872,8 +902,8 @@ static void
  *********************************************************************/
 static void
     output_module_dependencies (yang_pcb_t *pcb,
-				yangdump_cvtparms_t *cp,
-				ses_cb_t *scb)
+                                yangdump_cvtparms_t *cp,
+                                ses_cb_t *scb)
 {
     ncx_module_t      *mod;
     yang_node_t       *node; 
@@ -881,35 +911,35 @@ static void
     /* the module should already be parsed and loaded */
     mod = pcb->top;
     if (!mod) {
-	SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
-	return;
+        SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
+        return;
     }
 
     ses_putstr(scb, (const xmlChar *)"\ndependencies:");
 
     if (pcb->subtree_mode) {
-	if (mod->ismod) {
-	    sprintf(cp->buff, "\nmodule %s", mod->name);
-	} else {
-	    sprintf(cp->buff, "\nsubmodule %s", mod->name);
-	}
-	ses_putstr(scb,(const xmlChar *)cp->buff);
-	if (mod->version) {
-	    ses_putchar(scb, ' ');
-	    ses_putstr(scb, mod->version);
-	}
+        if (mod->ismod) {
+            sprintf(cp->buff, "\nmodule %s", mod->name);
+        } else {
+            sprintf(cp->buff, "\nsubmodule %s", mod->name);
+        }
+        ses_putstr(scb,(const xmlChar *)cp->buff);
+        if (mod->version) {
+            ses_putchar(scb, ' ');
+            ses_putstr(scb, mod->version);
+        }
     }
 
     output_one_module_dependencies(mod, scb, cp);
 
     if (cp->unified && mod->ismod) {
-	for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		output_one_module_dependencies(node->submod, scb, cp);
-	    }
-	}
+        for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                output_one_module_dependencies(node->submod, scb, cp);
+            }
+        }
     }
 
 }   /* output_module_dependencies */
@@ -932,9 +962,9 @@ static void
  *********************************************************************/
 static status_t
     output_identifiers (dlq_hdr_t *datadefQ,
-			ses_cb_t *scb,
-			xmlChar *buff,
-			uint32 bufflen)
+                        ses_cb_t *scb,
+                        xmlChar *buff,
+                        uint32 bufflen)
 {
     obj_template_t    *obj;
     dlq_hdr_t         *childQ;
@@ -942,32 +972,32 @@ static status_t
     status_t           res;
 
     for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_has_name(obj)) {
-	    continue;  /* skip uses and augment */
-	}
+        if (!obj_has_name(obj)) {
+            continue;  /* skip uses and augment */
+        }
 
-	res = obj_copy_object_id(obj, buff, bufflen, &reallen);
-	if (res != NO_ERR) {
-	    log_error("\nError: copy object ID failed (%s)",
-		      get_error_string(res));
-	    return res;
-	}
+        res = obj_copy_object_id(obj, buff, bufflen, &reallen);
+        if (res != NO_ERR) {
+            log_error("\nError: copy object ID failed (%s)",
+                      get_error_string(res));
+            return res;
+        }
 
-	ses_putchar(scb, '\n');
-	ses_putstr(scb, obj_get_typestr(obj));
-	ses_putchar(scb, ' ');
-	ses_putstr(scb, buff);
+        ses_putchar(scb, '\n');
+        ses_putstr(scb, obj_get_typestr(obj));
+        ses_putchar(scb, ' ');
+        ses_putstr(scb, buff);
 
-	childQ = obj_get_datadefQ(obj);
-	if (childQ) {
-	    res = output_identifiers(childQ, scb, buff, bufflen);
-	    if (res != NO_ERR) {
-		return res;
-	    }
-	}
+        childQ = obj_get_datadefQ(obj);
+        if (childQ) {
+            res = output_identifiers(childQ, scb, buff, bufflen);
+            if (res != NO_ERR) {
+                return res;
+            }
+        }
     }
 
     return NO_ERR;
@@ -989,9 +1019,9 @@ static status_t
  *********************************************************************/
 static void
     output_one_module_identifiers (ncx_module_t *mod,
-				   ses_cb_t *scb,
-				   xmlChar *buff,
-				   uint32 bufflen)
+                                   ses_cb_t *scb,
+                                   xmlChar *buff,
+                                   uint32 bufflen)
 {
     (void)output_identifiers(&mod->datadefQ, scb, buff, bufflen);
     ses_putchar(scb, '\n');
@@ -1013,8 +1043,8 @@ static void
  *********************************************************************/
 static void
     output_module_identifiers (yang_pcb_t *pcb,
-			       yangdump_cvtparms_t *cp,
-			       ses_cb_t *scb)
+                               yangdump_cvtparms_t *cp,
+                               ses_cb_t *scb)
 
 {
     ncx_module_t      *mod;
@@ -1023,40 +1053,41 @@ static void
     /* the module should already be parsed and loaded */
     mod = pcb->top;
     if (!mod) {
-	SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
-	return;
+        SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
+        return;
     }
 
     ses_putstr(scb, (const xmlChar *)"\nidentifiers:");
 
     if (pcb->subtree_mode) {
-	if (mod->ismod) {
-	    sprintf((char *)cp->buff, "\nmodule %s", mod->name);
-	} else {
-	    sprintf((char *)cp->buff, "\nsubmodule %s", mod->name);
-	}
-	ses_putstr(scb, (const xmlChar *)cp->buff);
+        if (mod->ismod) {
+            sprintf((char *)cp->buff, "\nmodule %s", mod->name);
+        } else {
+            sprintf((char *)cp->buff, "\nsubmodule %s", mod->name);
+        }
+        ses_putstr(scb, (const xmlChar *)cp->buff);
 
-	if (mod->version) {
-	    sprintf((char *)cp->buff, " %s", mod->version);
-	    ses_putstr(scb, (const xmlChar *)cp->buff);
-	}
+        if (mod->version) {
+            sprintf((char *)cp->buff, " %s", mod->version);
+            ses_putstr(scb, (const xmlChar *)cp->buff);
+        }
     }
 
     output_one_module_identifiers(mod, scb,
-				  (xmlChar *)cp->buff,
-				  cp->bufflen);
+                                  (xmlChar *)cp->buff,
+                                  cp->bufflen);
 
     if (cp->unified && mod->ismod) {
-	for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		output_one_module_identifiers(node->submod, scb, 
-					      (xmlChar *)cp->buff,
-					      cp->bufflen);
-	    }
-	}
+        for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                output_one_module_identifiers(node->submod, 
+                                              scb, 
+                                              (xmlChar *)cp->buff,
+                                              cp->bufflen);
+            }
+        }
     }
 
 }   /* output_module_identifiers */
@@ -1074,13 +1105,13 @@ static void
  *********************************************************************/
 static void
     output_one_module_version (ncx_module_t *mod,
-			       ses_cb_t *scb,
-			       char *buff)
+                               ses_cb_t *scb,
+                               char *buff)
 {
     if (mod->ismod) {
-	sprintf(buff, "\nmodule %s", mod->name);
+        sprintf(buff, "\nmodule %s", mod->name);
     } else {
-	sprintf(buff, "\nsubmodule %s", mod->name);
+        sprintf(buff, "\nsubmodule %s", mod->name);
     }
     ses_putstr(scb, (const xmlChar *)buff);
 
@@ -1088,8 +1119,8 @@ static void
     ses_putstr(scb, (const xmlChar *)buff);
 
     if (mod->source && LOGDEBUG2) {
-	ses_putchar(scb, ' ');
-	ses_putstr(scb, mod->source);
+        ses_putchar(scb, ' ');
+        ses_putstr(scb, mod->source);
     }
 
 }   /* output_one_module_version */
@@ -1108,8 +1139,8 @@ static void
  *********************************************************************/
 static void
     output_module_version (yang_pcb_t *pcb,
-			   yangdump_cvtparms_t *cp,
-			   ses_cb_t *scb)
+                           yangdump_cvtparms_t *cp,
+                           ses_cb_t *scb)
 {
     ncx_module_t      *mod;
     yang_node_t       *node; 
@@ -1117,21 +1148,21 @@ static void
     /* the module should already be parsed and loaded */
     mod = pcb->top;
     if (!mod) {
-	SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
-	return;
+        SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
+        return;
     }
 
     ses_putstr(scb, (const xmlChar *)"\nmodversion:");
     output_one_module_version(mod, scb, cp->buff);
 
     if (cp->unified && mod->ismod) {
-	for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		output_one_module_version(node->submod, scb, cp->buff);
-	    }
-	}
+        for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                output_one_module_version(node->submod, scb, cp->buff);
+            }
+        }
     }
     ses_putchar(scb, '\n');
 
@@ -1154,8 +1185,8 @@ static void
  *********************************************************************/
 static status_t
     copy_module (yang_pcb_t *pcb,
-		 yangdump_cvtparms_t *cp,
-		 ses_cb_t *scb)
+                 yangdump_cvtparms_t *cp,
+                 ses_cb_t *scb)
 {
     ncx_module_t      *mod;
     FILE              *srcfile;
@@ -1164,23 +1195,23 @@ static status_t
     /* the module should already be parsed and loaded */
     mod = pcb->top;
     if (!mod) {
-	return SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
     }
 
     /* open the YANG source file for reading */
     srcfile = fopen((const char *)mod->source, "r");
     if (!srcfile) {
-	return SET_ERROR(ERR_NCX_MISSING_FILE);
+        return SET_ERROR(ERR_NCX_MISSING_FILE);
     }
 
     done = FALSE;
     while (!done) {
-	if (!fgets((char *)cp->buff, (int)cp->bufflen, srcfile)) {
-	    /* read line failed, not an error */
-	    done = TRUE;
-	    continue;
-	}
-	ses_putstr(scb, (const xmlChar *)cp->buff);
+        if (!fgets((char *)cp->buff, (int)cp->bufflen, srcfile)) {
+            /* read line failed, not an error */
+            done = TRUE;
+            continue;
+        }
+        ses_putstr(scb, (const xmlChar *)cp->buff);
     }
 
     fclose(srcfile);
@@ -1208,10 +1239,10 @@ static void
     warnings = pcb->top->warnings;
     
     logsource = (LOGDEBUG) 
-	? pcb->top->source : pcb->top->sourcefn;
+        ? pcb->top->source : pcb->top->sourcefn;
 
     log_write("\n*** %s: %u Errors, %u Warnings\n", 
-	      logsource, errors, warnings);
+              logsource, errors, warnings);
 
 }   /* print_score_banner */
 
@@ -1245,49 +1276,49 @@ static status_t
     revision = NULL;   /*****/
 
     if (cp->modcount > 1) {
-	modname = (const xmlChar *)cp->curmodule;
+        modname = (const xmlChar *)cp->curmodule;
     } else {
-	modname = (const xmlChar *)cp->module;
+        modname = (const xmlChar *)cp->module;
     }
 
     /* load in the requested module to convert */
     pcb = ncxmod_load_module_xsd(modname,
-				 revision,
-				 cp->subtree ? TRUE : FALSE,
-				 cp->unified, 
-				 strcmp(cp->objview, OBJVIEW_COOKED) 
-				 ? FALSE : TRUE,
-				 &res);
+                                 revision,
+                                 cp->subtree ? TRUE : FALSE,
+                                 cp->unified, 
+                                 strcmp(cp->objview, OBJVIEW_COOKED) 
+                                 ? FALSE : TRUE,
+                                 &res);
     if (res == ERR_NCX_SKIPPED) {
-	if (pcb) {
-	    yang_free_pcb(pcb);
-	}
-	return NO_ERR;
+        if (pcb) {
+            yang_free_pcb(pcb);
+        }
+        return NO_ERR;
     } else if (res != NO_ERR) {
-	if (pcb && pcb->top) {
-	    print_score_banner(pcb);
-	} else {
-	    /* invalid module name and/or revision date */
-	    if (revision) {
-		log_error("\nError: module '%s' revision '%s' "
-			  "not found", modname, revision);
-	    } else {
-		log_error("\nError: module '%s' not found",
-			  modname);
-	    }
-	    ncx_print_errormsg(NULL, NULL, res);
-	}
-	if (!pcb || !pcb->top || pcb->top->errors) {
-	    if (pcb) {
-		yang_free_pcb(pcb);
-	    }
-	    return res;
-	} else {
-	    /* just warnings reported */
-	    res = NO_ERR;
-	}
+        if (pcb && pcb->top) {
+            print_score_banner(pcb);
+        } else {
+            /* invalid module name and/or revision date */
+            if (revision) {
+                log_error("\nError: module '%s' revision '%s' "
+                          "not found", modname, revision);
+            } else {
+                log_error("\nError: module '%s' not found",
+                          modname);
+            }
+            ncx_print_errormsg(NULL, NULL, res);
+        }
+        if (!pcb || !pcb->top || pcb->top->errors) {
+            if (pcb) {
+                yang_free_pcb(pcb);
+            }
+            return res;
+        } else {
+            /* just warnings reported */
+            res = NO_ERR;
+        }
     } else if (pcb && pcb->top) {
-	print_score_banner(pcb);
+        print_score_banner(pcb);
     }
 
     /* check if output session needed, any reports requestd or
@@ -1295,216 +1326,225 @@ static status_t
      * to write output.
      */
     if (cp->modversion || cp->exports || cp->dependencies || cp->identifiers
-	|| !(cp->format==NCX_CVTTYP_NONE || cp->format==NCX_CVTTYP_XSD)) {
+        || !(cp->format==NCX_CVTTYP_NONE || cp->format==NCX_CVTTYP_XSD)) {
 
-	scb = get_output_session(pcb, cp, &res);
-	if (!scb || res != NO_ERR) {
-	    log_error("\nError: open session failed (%s)\n",
-		      get_error_string(res));
-	    yang_free_pcb(pcb);
-	    return res;
-	}
+        scb = get_output_session(pcb, cp, &res);
+        if (!scb || res != NO_ERR) {
+            log_error("\nError: open session failed (%s)\n",
+                      get_error_string(res));
+            yang_free_pcb(pcb);
+            return res;
+        }
 
-	if (cp->indent != ses_indent_count(scb)) {
-	    ses_set_indent(scb, cp->indent);
-	}
+        if (cp->indent != ses_indent_count(scb)) {
+            ses_set_indent(scb, cp->indent);
+        }
     }
 
     /* check if modversion and other report modes */
     if (scb) {
-	if (cp->modversion) {
-	    output_module_version(pcb, cp, scb);
-	}
+        if (cp->modversion) {
+            output_module_version(pcb, cp, scb);
+        }
 
-	if (cp->exports) {
-	    output_module_exports(pcb, cp, scb);
-	}
+        if (cp->exports) {
+            output_module_exports(pcb, cp, scb);
+        }
 
-	if (cp->dependencies) {
-	    output_module_dependencies(pcb, cp, scb);
-	}
+        if (cp->dependencies) {
+            output_module_dependencies(pcb, cp, scb);
+        }
 
-	if (cp->identifiers) {
-	    output_module_identifiers(pcb, cp, scb);
-	}
+        if (cp->identifiers) {
+            output_module_identifiers(pcb, cp, scb);
+        }
     }
 
     /* get the namespace info for submodules */
     if (cp->format == NCX_CVTTYP_XSD ||
-	cp->format == NCX_CVTTYP_SQLDB ||
-	cp->format == NCX_CVTTYP_HTML) {
+        cp->format == NCX_CVTTYP_SQLDB ||
+        cp->format == NCX_CVTTYP_HTML) {
 
-	if (!pcb->top->ismod) {
-	    /* need to load the entire module now,
-	     * in order to get a namespace ID for
-	     * the main module, which is also used in the submodule
-	     * !!! DO NOT KNOW THE REVISION OF THE PARENT !!!
-	     */
-	    res = ncxmod_load_module(ncx_get_modname(pcb->top), 
-				     NULL, 
-				     &mainmod);
-	    if (res != NO_ERR) {
-		log_error("\nError: main module '%s' had errors."
-			  "\n       XSD conversion of '%s' terminated.",
-			  ncx_get_modname(pcb->top),
-			  pcb->top->sourcefn);
-		ncx_print_errormsg(NULL, pcb->top, res);
-		
-	    } else {
-			/* make a copy of the module namespace URI
-		 * so the XSD targetNamespace will be generated
-		 */
-		pcb->top->ns = mainmod->ns;
-		pcb->top->nsid = mainmod->nsid;
-	    }
-	}
+        if (!pcb->top->ismod) {
+            /* need to load the entire module now,
+             * in order to get a namespace ID for
+             * the main module, which is also used in the submodule
+             * !!! DO NOT KNOW THE REVISION OF THE PARENT !!!
+             */
+            res = ncxmod_load_module(ncx_get_modname(pcb->top), 
+                                     NULL, 
+                                     &mainmod);
+            if (res != NO_ERR) {
+                log_error("\nError: main module '%s' had errors."
+                          "\n       XSD conversion of '%s' terminated.",
+                          ncx_get_modname(pcb->top),
+                          pcb->top->sourcefn);
+                ncx_print_errormsg(NULL, pcb->top, res);
+                
+            } else {
+                        /* make a copy of the module namespace URI
+                 * so the XSD targetNamespace will be generated
+                 */
+                pcb->top->ns = mainmod->ns;
+                pcb->top->nsid = mainmod->nsid;
+            }
+        }
     }
 
     if (res == NO_ERR) {
-	/* check the type of translation requested */
-	switch (cp->format) {
-	case NCX_CVTTYP_NONE:
-	    if (ncx_any_dependency_errors(pcb->top)) {
-		log_warn("\nWarning: one or more modules imported into '%s' "
-			 "had errors", pcb->top->sourcefn);
-	    }
-	    log_debug2("\nFile '%s' compiled without errors",
-		       pcb->top->sourcefn);
-	    break;
-	case NCX_CVTTYP_XSD:
-	    if (ncx_any_dependency_errors(pcb->top)) {
-		log_error("\nError: one or more imported modules had errors."
-			  "\n       XSD conversion of '%s' terminated.",
-			  pcb->top->sourcefn);
-		res = ERR_NCX_IMPORT_ERRORS;
-		ncx_print_errormsg(NULL, pcb->top, res);
-	    } else {
-		val = NULL;
-		xml_init_attrs(&attrs);
-		res = xsd_convert_module(pcb->top, cp, &val, &attrs);
-		if (res == NO_ERR) {
-		    if (cp->defnames || (cp->output && cp->output_isdir)) {
-			namebuff = xsd_make_output_filename(pcb->top, cp);
-			if (!namebuff) {
-			    res = ERR_INTERNAL_MEM;
-			} else {
-			    /* output to the specified file or STDOUT */
-			    res = xml_wr_file(namebuff, val, &attrs, 
-					      DOCMODE, WITHHDR, cp->indent);
-			    m__free(namebuff);
-			}
-		    } else {
-			/* output to the specified file or STDOUT */
-			res = xml_wr_file((const xmlChar *)cp->output, 
-					  val, &attrs, DOCMODE, WITHHDR, 
-					  cp->indent);
-		    }
-		}
-		if (res != NO_ERR) {
-		    pr_err(res);
-		}
-		xml_clean_attrs(&attrs);
-		if (val) {
-		    val_free_value(val);
-		}
-	    }
-	    break;
-	case NCX_CVTTYP_SQL:
-	    res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-	    pr_err(res);
-	    break;
-	case NCX_CVTTYP_SQLDB:
-	    if (ncx_any_dependency_errors(pcb->top)) {
-		log_error("\nError: one or more imported modules had errors."
-			  "\n       SQL object database conversion of "
-			  "'%s' terminated.",
-			  pcb->top->sourcefn);
-		res = ERR_NCX_IMPORT_ERRORS;
-		ncx_print_errormsg(NULL, pcb->top, res);
-	    } else {
-		res = sql_convert_module(pcb, cp, scb);
-		if (res != NO_ERR) {
-		    pr_err(res);
-		}
-	    }
-	    break;
-	case NCX_CVTTYP_COPY:
-	    if (ncx_any_dependency_errors(pcb->top)) {
-		log_error("\nError: one or more imported modules had errors."
-			  "\n       Copy source for '%s' terminated.",
-			  pcb->top->sourcefn);
-		res = ERR_NCX_IMPORT_ERRORS;
-		ncx_print_errormsg(NULL, pcb->top, res);
-	    } else {
-		res = copy_module(pcb, cp, scb);
-		if (res != NO_ERR) {
-		    pr_err(res);
-		}
-	    }
-	    break;
-	case NCX_CVTTYP_HTML:
-	    if (ncx_any_dependency_errors(pcb->top)) {
-		log_error("\nError: one or more imported modules had errors."
-			  "\n       HTML conversion of '%s' terminated.",
-			  pcb->top->sourcefn);
-		res = ERR_NCX_IMPORT_ERRORS;
-		ncx_print_errormsg(NULL, pcb->top, res);
-	    } else {
-		res = html_convert_module(pcb, cp, scb);
-		if (res != NO_ERR) {
-		    pr_err(res);
-		}
-	    }
-	    break;
-	case NCX_CVTTYP_H:
-	    if (ncx_any_dependency_errors(pcb->top)) {
-		log_error("\nError: one or more imported modules had errors."
-			  "\n       H file conversion of '%s' terminated.",
-			  pcb->top->sourcefn);
-		res = ERR_NCX_IMPORT_ERRORS;
-		ncx_print_errormsg(NULL, pcb->top, res);
-	    } else {
-		res = h_convert_module(pcb, cp, scb);
-		if (res != NO_ERR) {
-		    pr_err(res);
-		}
-	    }
-	    break;
-	case NCX_CVTTYP_YANG:
-	    if (ncx_any_dependency_errors(pcb->top)) {
-		log_error("\nError: one or more imported modules had errors."
-			  "\n       YANG conversion of '%s' terminated.",
-			  pcb->top->sourcefn);
-		res = ERR_NCX_IMPORT_ERRORS;
-		ncx_print_errormsg(NULL, pcb->top, res);
-	    } else {
-		res = cyang_convert_module(pcb, cp, scb);
-		if (res != NO_ERR) {
-		    pr_err(res);
-		}
-	    }
-	    break;
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	    pr_err(res);
-	}
+        /* check the type of translation requested */
+        switch (cp->format) {
+        case NCX_CVTTYP_NONE:
+            if (ncx_any_dependency_errors(pcb->top)) {
+                log_warn("\nWarning: one or more modules imported into '%s' "
+                         "had errors", pcb->top->sourcefn);
+            }
+            log_debug2("\nFile '%s' compiled without errors",
+                       pcb->top->sourcefn);
+            break;
+        case NCX_CVTTYP_XSD:
+            if (ncx_any_dependency_errors(pcb->top)) {
+                log_error("\nError: one or more imported modules had errors."
+                          "\n       XSD conversion of '%s' terminated.",
+                          pcb->top->sourcefn);
+                res = ERR_NCX_IMPORT_ERRORS;
+                ncx_print_errormsg(NULL, pcb->top, res);
+            } else {
+                val = NULL;
+                xml_init_attrs(&attrs);
+                res = xsd_convert_module(pcb->top, cp, &val, &attrs);
+                if (res == NO_ERR) {
+                    if (cp->defnames || (cp->output && cp->output_isdir)) {
+                        namebuff = xsd_make_output_filename(pcb->top, cp);
+                        if (!namebuff) {
+                            res = ERR_INTERNAL_MEM;
+                        } else {
+                            /* output to the specified file or STDOUT */
+                            res = xml_wr_file(namebuff, 
+                                              val, 
+                                              &attrs, 
+                                              DOCMODE, 
+                                              WITHHDR, 
+                                              0,
+                                              cp->indent);
+                            m__free(namebuff);
+                        }
+                    } else {
+                        /* output to the specified file or STDOUT */
+                        res = xml_wr_file((const xmlChar *)cp->output, 
+                                          val, 
+                                          &attrs, 
+                                          DOCMODE, 
+                                          WITHHDR, 
+                                          0,
+                                          cp->indent);
+                    }
+                }
+                if (res != NO_ERR) {
+                    pr_err(res);
+                }
+                xml_clean_attrs(&attrs);
+                if (val) {
+                    val_free_value(val);
+                }
+            }
+            break;
+        case NCX_CVTTYP_SQL:
+            res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+            pr_err(res);
+            break;
+        case NCX_CVTTYP_SQLDB:
+            if (ncx_any_dependency_errors(pcb->top)) {
+                log_error("\nError: one or more imported modules had errors."
+                          "\n       SQL object database conversion of "
+                          "'%s' terminated.",
+                          pcb->top->sourcefn);
+                res = ERR_NCX_IMPORT_ERRORS;
+                ncx_print_errormsg(NULL, pcb->top, res);
+            } else {
+                res = sql_convert_module(pcb, cp, scb);
+                if (res != NO_ERR) {
+                    pr_err(res);
+                }
+            }
+            break;
+        case NCX_CVTTYP_COPY:
+            if (ncx_any_dependency_errors(pcb->top)) {
+                log_error("\nError: one or more imported modules had errors."
+                          "\n       Copy source for '%s' terminated.",
+                          pcb->top->sourcefn);
+                res = ERR_NCX_IMPORT_ERRORS;
+                ncx_print_errormsg(NULL, pcb->top, res);
+            } else {
+                res = copy_module(pcb, cp, scb);
+                if (res != NO_ERR) {
+                    pr_err(res);
+                }
+            }
+            break;
+        case NCX_CVTTYP_HTML:
+            if (ncx_any_dependency_errors(pcb->top)) {
+                log_error("\nError: one or more imported modules had errors."
+                          "\n       HTML conversion of '%s' terminated.",
+                          pcb->top->sourcefn);
+                res = ERR_NCX_IMPORT_ERRORS;
+                ncx_print_errormsg(NULL, pcb->top, res);
+            } else {
+                res = html_convert_module(pcb, cp, scb);
+                if (res != NO_ERR) {
+                    pr_err(res);
+                }
+            }
+            break;
+        case NCX_CVTTYP_H:
+            if (ncx_any_dependency_errors(pcb->top)) {
+                log_error("\nError: one or more imported modules had errors."
+                          "\n       H file conversion of '%s' terminated.",
+                          pcb->top->sourcefn);
+                res = ERR_NCX_IMPORT_ERRORS;
+                ncx_print_errormsg(NULL, pcb->top, res);
+            } else {
+                res = h_convert_module(pcb, cp, scb);
+                if (res != NO_ERR) {
+                    pr_err(res);
+                }
+            }
+            break;
+        case NCX_CVTTYP_YANG:
+            if (ncx_any_dependency_errors(pcb->top)) {
+                log_error("\nError: one or more imported modules had errors."
+                          "\n       YANG conversion of '%s' terminated.",
+                          pcb->top->sourcefn);
+                res = ERR_NCX_IMPORT_ERRORS;
+                ncx_print_errormsg(NULL, pcb->top, res);
+            } else {
+                res = cyang_convert_module(pcb, cp, scb);
+                if (res != NO_ERR) {
+                    pr_err(res);
+                }
+            }
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+            pr_err(res);
+        }
     }
     if (res != NO_ERR || LOGDEBUG2) {
-	if (pcb && pcb->top) {
-	    log_write("\n*** %s: %u Errors, %u Warnings\n", 
-		      pcb->top->sourcefn,
-		      pcb->top->errors, pcb->top->warnings);
-	} else if (res != NO_ERR) {
-	    log_write("\n");
-	}
+        if (pcb && pcb->top) {
+            log_write("\n*** %s: %u Errors, %u Warnings\n", 
+                      pcb->top->sourcefn,
+                      pcb->top->errors, pcb->top->warnings);
+        } else if (res != NO_ERR) {
+            log_write("\n");
+        }
     }
 
     if (pcb) {
-	yang_free_pcb(pcb);
+        yang_free_pcb(pcb);
     }
 
     if (scb) {
-	ses_free_scb(scb);
+        ses_free_scb(scb);
     }
 
     return res;
@@ -1535,7 +1575,7 @@ static status_t
  *********************************************************************/
 static status_t
     subtree_callback (const char *fullspec,
-		      void *cookie)
+                      void *cookie)
 {
     yangdump_cvtparms_t *cp;
     status_t    res;
@@ -1543,19 +1583,19 @@ static status_t
     cp = cookie;
 
     if (cp->module) {
-	m__free(cp->module);
+        m__free(cp->module);
     }
     cp->module = (char *)ncx_get_source((const xmlChar *)fullspec);
     if (!cp->module) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     log_debug2("\nStart subtree file:\n%s\n", fullspec);
     res = convert_one(cp);
     if (res != NO_ERR) {
-	if (!NEED_EXIT(res)) {
-	    res = NO_ERR;
-	}
+        if (!NEED_EXIT(res)) {
+            res = NO_ERR;
+        }
     }
 
     return res;
@@ -1573,35 +1613,35 @@ static void
     main_cleanup (void)
 {
     if (cli_val) {
-	val_free_value(cli_val);
+        val_free_value(cli_val);
     }
 
     /* free the input parameters */
     if (cvtparms.mod) {
-	ncx_free_module(cvtparms.mod);
+        ncx_free_module(cvtparms.mod);
     }
     if (cvtparms.srcfile) {
-	m__free(cvtparms.srcfile);
+        m__free(cvtparms.srcfile);
     }
     if (cvtparms.module) {
-	m__free(cvtparms.module);
+        m__free(cvtparms.module);
     }
     if (cvtparms.full_output) {
-	m__free(cvtparms.full_output);
+        m__free(cvtparms.full_output);
     }
     if (cvtparms.full_logfilename) {
-	m__free(cvtparms.full_logfilename);
+        m__free(cvtparms.full_logfilename);
     }
     if (cvtparms.buff) {
-	m__free(cvtparms.buff);
+        m__free(cvtparms.buff);
     }
 
     /* cleanup the NCX engine and registries */
     ncx_cleanup();
 
     if (malloc_cnt != free_cnt) {
-	log_error("\n*** Error: memory leak (m:%u f:%u)\n", 
-		  malloc_cnt, free_cnt);
+        log_error("\n*** Error: memory leak (m:%u f:%u)\n", 
+                  malloc_cnt, free_cnt);
     }
 
     log_close();
@@ -1624,7 +1664,7 @@ static void
     tstamp_datetime(buffer);
 
     log_write("\n\n*** Generated by yangdump %s at %s\n",
-	      YANGDUMP_PROGVER, buffer);
+              YANGDUMP_PROGVER, buffer);
 
 
 }   /* write_banner */
@@ -1632,12 +1672,12 @@ static void
 
 /********************************************************************
 *                                                                   *
-*			FUNCTION main				    *
+*                        FUNCTION main                                    *
 *                                                                   *
 *********************************************************************/
 int 
     main (int argc, 
-	  const char *argv[])
+          const char *argv[])
 {
     val_value_t  *val;
     status_t      res;
@@ -1649,67 +1689,67 @@ int
     res = main_init(argc, argv);
 
     if (res == NO_ERR) {
-	if (cvtparms.versionmode) {
-	    log_write("yangdump %s\n", YANGDUMP_PROGVER);
-	}
-	if (cvtparms.helpmode) {
-	    help_program_module(YANGDUMP_MOD, 
-				YANGDUMP_CONTAINER, 
-				cvtparms.helpsubmode);
-	}
-	if (!(cvtparms.helpmode || cvtparms.versionmode)) {
-	    /* check if subdir search suppression is requested */
-	    if (cvtparms.nosubdirs) {
-		ncxmod_set_subdirs(FALSE);
-	    }
+        if (cvtparms.versionmode) {
+            log_write("yangdump %s\n", YANGDUMP_PROGVER);
+        }
+        if (cvtparms.helpmode) {
+            help_program_module(YANGDUMP_MOD, 
+                                YANGDUMP_CONTAINER, 
+                                cvtparms.helpsubmode);
+        }
+        if (!(cvtparms.helpmode || cvtparms.versionmode)) {
+            /* check if subdir search suppression is requested */
+            if (cvtparms.nosubdirs) {
+                ncxmod_set_subdirs(FALSE);
+            }
 
-	    /* generate banner everytime yangdump runs */
-	    write_banner();
+            /* generate banner everytime yangdump runs */
+            write_banner();
 
-	    /* convert one file or N files or 1 subtree */
-	    if (cvtparms.modcount==1 && cvtparms.module) {
-		res = convert_one(&cvtparms);
-	    } else if (cvtparms.modcount > 1) {
-		res = NO_ERR;
-		val = val_find_child(cli_val, 
-				     YANGDUMP_MOD, 
-				     YANGDUMP_PARM_MODULE);
-		while (val) {
-		    cvtparms.curmodule = (const char *)VAL_STR(val);
-		    res = convert_one(&cvtparms);
-		    if (NEED_EXIT(res)) {
-			val = NULL;
-		    } else {
-			val = val_find_next_child(cli_val,
-						  YANGDUMP_MOD,
-						  YANGDUMP_PARM_MODULE,
-						  val);
-		    }
-		}
-	    } else if (cvtparms.subtree) {
-		if (cvtparms.format == NCX_CVTTYP_XSD ||
-		    cvtparms.format == NCX_CVTTYP_HTML ||
-		    cvtparms.format == NCX_CVTTYP_YANG ||
-		    cvtparms.format == NCX_CVTTYP_COPY) {
-		    /* force separate file names in subtree mode */
-		    cvtparms.defnames = TRUE;
-		}
-		res = ncxmod_process_subtree(cvtparms.subtree,
-					     subtree_callback,
-					     &cvtparms);
-	    } else {
-		res = ERR_NCX_MISSING_PARM;
-		log_error("\nyangdump: Error: missing parameter (%s or %s)\n",
-			  NCX_EL_MODULE, NCX_EL_SUBTREE);
-	    }
-	}
+            /* convert one file or N files or 1 subtree */
+            if (cvtparms.modcount==1 && cvtparms.module) {
+                res = convert_one(&cvtparms);
+            } else if (cvtparms.modcount > 1) {
+                res = NO_ERR;
+                val = val_find_child(cli_val, 
+                                     YANGDUMP_MOD, 
+                                     YANGDUMP_PARM_MODULE);
+                while (val) {
+                    cvtparms.curmodule = (const char *)VAL_STR(val);
+                    res = convert_one(&cvtparms);
+                    if (NEED_EXIT(res)) {
+                        val = NULL;
+                    } else {
+                        val = val_find_next_child(cli_val,
+                                                  YANGDUMP_MOD,
+                                                  YANGDUMP_PARM_MODULE,
+                                                  val);
+                    }
+                }
+            } else if (cvtparms.subtree) {
+                if (cvtparms.format == NCX_CVTTYP_XSD ||
+                    cvtparms.format == NCX_CVTTYP_HTML ||
+                    cvtparms.format == NCX_CVTTYP_YANG ||
+                    cvtparms.format == NCX_CVTTYP_COPY) {
+                    /* force separate file names in subtree mode */
+                    cvtparms.defnames = TRUE;
+                }
+                res = ncxmod_process_subtree(cvtparms.subtree,
+                                             subtree_callback,
+                                             &cvtparms);
+            } else {
+                res = ERR_NCX_MISSING_PARM;
+                log_error("\nyangdump: Error: missing parameter (%s or %s)\n",
+                          NCX_EL_MODULE, NCX_EL_SUBTREE);
+            }
+        }
     }
 
     /* if warnings+ are enabled, then res could be NO_ERR and still
      * have output to STDOUT
      */
     if (res == NO_ERR) {
-	log_warn("\n");   /*** producing extra blank lines ***/
+        log_warn("\n");   /*** producing extra blank lines ***/
     }
 
     print_errors();

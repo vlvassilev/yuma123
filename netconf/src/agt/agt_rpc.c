@@ -1655,7 +1655,6 @@ status_t
 {
     val_value_t         *leafval;
     status_t             res, retres;
-    xmlChar              buff[12];
 
 #ifdef DEBUG
     if (!rpcerror || !err) {

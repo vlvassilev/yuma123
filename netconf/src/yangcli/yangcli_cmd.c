@@ -2561,7 +2561,7 @@ static status_t
 	    }
 
 	    if (first) {
-		(*logfn)("\nRead-only system variables");
+		(*logfn)("\nRead-only system variables\n");
 		first = FALSE;
 	    }
 	    show_user_var(agent_cb,
@@ -2571,7 +2571,7 @@ static status_t
 			  mode);
 	}
 	if (first) {
-	    (*logfn)("\nNo read-only system variables");
+	    (*logfn)("\nNo read-only system variables\n");
 	}
 	(*logfn)("\n");
     }
@@ -2589,7 +2589,7 @@ static status_t
 	    }
 
 	    if (first) {
-		(*logfn)("\nRead-write system variables");
+		(*logfn)("\nRead-write system variables\n");
 		first = FALSE;
 	    }
 	    show_user_var(agent_cb,
@@ -2599,7 +2599,7 @@ static status_t
 			  mode);
 	}
 	if (first) {
-	    (*logfn)("\nNo system config variables");
+	    (*logfn)("\nNo system config variables\n");
 	}
 	(*logfn)("\n");
     }
@@ -2617,7 +2617,7 @@ static status_t
 	    }
 
 	    if (first) {
-		(*logfn)("\nGlobal variables");
+		(*logfn)("\nGlobal variables\n");
 		first = FALSE;
 	    }
 	    show_user_var(agent_cb,
@@ -2627,7 +2627,7 @@ static status_t
 			  mode);
 	}
 	if (first) {
-	    (*logfn)("\nNo global variables");
+	    (*logfn)("\nNo global variables\n");
 	}
 	(*logfn)("\n");
     }
@@ -2640,7 +2640,7 @@ static status_t
 	     var != NULL;
 	     var = (ncx_var_t *)dlq_nextEntry(var)) {
 	    if (first) {
-		(*logfn)("\nLocal variables");
+		(*logfn)("\nLocal variables\n");
 		first = FALSE;
 	    }
 	    show_user_var(agent_cb,
@@ -2650,7 +2650,7 @@ static status_t
 			  mode);
 	}
 	if (first) {
-	    (*logfn)("\nNo local variables");
+	    (*logfn)("\nNo local variables\n");
 	}
 	(*logfn)("\n");
     }
@@ -7314,18 +7314,16 @@ static status_t
 	}
 
 	/* find the 1 of N choice */
-	if (!done) {
-	    parm = val_find_child(valset, 
-				  YANGCLI_MOD, 
-				  YANGCLI_SHOW);
-	    if (parm) {
-		/* do show history */
-		res = do_history_show(agent_cb,
-                                      VAL_UINT(parm), 
-                                      mode);
-		done = TRUE;
-	    }
-	}
+        parm = val_find_child(valset, 
+                              YANGCLI_MOD, 
+                              YANGCLI_SHOW);
+        if (parm) {
+            /* do show history */
+            res = do_history_show(agent_cb,
+                                  VAL_UINT(parm), 
+                                  mode);
+            done = TRUE;
+        }
 
 	if (!done) {
 	    parm = val_find_child(valset, 
@@ -7335,6 +7333,11 @@ static status_t
 		/* do clear history */
 		res = do_history_clear(agent_cb);
 		done = TRUE;
+                if (res == NO_ERR) {
+                    log_info("\nOK\n");
+                } else {
+                    log_error("\nError: clear history failed\n");
+                }
 	    }
 	}
 
@@ -7353,6 +7356,11 @@ static status_t
                                           VAL_STR(parm));
                 }
 		done = TRUE;
+                if (res == NO_ERR) {
+                    log_info("\nOK\n");
+                } else {
+                    log_error("\nError: load history failed\n");
+                }
 	    }
 	}
 
@@ -7371,6 +7379,11 @@ static status_t
                                           VAL_STR(parm));
                 }
 		done = TRUE;
+                if (res == NO_ERR) {
+                    log_info("\nOK\n");
+                } else {
+                    log_error("\nError: save history failed\n");
+                }
 	    }
 	}
 

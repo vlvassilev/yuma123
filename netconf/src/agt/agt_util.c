@@ -502,7 +502,7 @@ void
 		break;
 	    case NCX_NT_VAL:
 		(void)val_gen_instance_id(msghdr, 
-					  (val_value_t *)error_path, 
+					  (const val_value_t *)error_path, 
 					  NCX_IFMT_XPATH1, 
 					  &pathbuff);
 		break;

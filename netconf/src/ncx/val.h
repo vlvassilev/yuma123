@@ -922,7 +922,8 @@ extern void
 		    xmlChar *intbuff);
 
 extern boolean
-    val_fit_oneline (const val_value_t *val);
+    val_fit_oneline (const val_value_t *val,
+                     uint32 linesize);
 
 
 extern boolean

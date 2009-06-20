@@ -979,13 +979,13 @@ static status_t
 	} else {
 	    /* output in XML format to the specified file */
 	    xml_init_attrs(&attrs);
-	    res = xml_wr_check_file(agent_cb->result_filename,
-				    resultval,
-				    &attrs, 
-				    XMLMODE, 
-				    WITHHDR, 
-				    NCX_DEF_INDENT,
-				    NULL);
+	    res = xml_wr_file(agent_cb->result_filename,
+                              resultval,
+                              &attrs, 
+                              XMLMODE, 
+                              WITHHDR, 
+                              0,
+                              NCX_DEF_INDENT);
 	    xml_clean_attrs(&attrs);
 	}
     } else {
@@ -2429,7 +2429,8 @@ static mgr_io_state_t
 				 &fileassign);
     if (res != NO_ERR) {
 	log_error("\nyangcli: Variable assignment failed (%s) (%s)",
-		  line, get_error_string(res));
+		  line, 
+                  get_error_string(res));
     } else if (getrpc) {
 	switch (agent_cb->state) {
 	case MGR_IO_ST_IDLE:
@@ -2470,10 +2471,6 @@ static mgr_io_state_t
 	default:
 	    ;
 	}
-
-
-
-
     } else {
 	log_info("\nOK\n");
     }

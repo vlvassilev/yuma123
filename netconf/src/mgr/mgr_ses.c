@@ -264,7 +264,7 @@ static status_t
     }
 
 #ifdef MGR_SES_SSH2_TRACE
-    if (LOGDEBUG2) {
+    if (LOGDEBUG3) {
         libssh2_trace(mscb->session,
                       LIBSSH2_TRACE_TRANS |
                       LIBSSH2_TRACE_KEX |

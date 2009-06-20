@@ -118,27 +118,38 @@ static boolean
     fit_on_line (ses_cb_t *scb,
 		 const val_value_t *val)
 {
-    uint32     len;
+    uint32     vallen, elemlen, prefixlen;
+    xmlns_id_t nsid;
     status_t   res;
 
-    if (!val_fit_oneline(val)) {
-	return FALSE;
-    }
-
-    if (!typ_is_simple(val->btyp)) {
-	return TRUE;
+    if (!val_fit_oneline(val, SES_LINESIZE(scb))) {
+        return FALSE;
     }
 
     if (ses_get_mode(scb) != SES_MODE_XMLDOC) {
 	return TRUE;
     }
 
-    res = val_sprintf_simval_nc(NULL, val, &len);
+    /* don't bother generating the actual size unless
+     * the session is requesting the XMLDOC mode
+     */
+    vallen = 0;
+    res = val_sprintf_simval_nc(NULL, val, &vallen);
     if (res != NO_ERR) {
 	return TRUE;
     }
 
-    return (len <= ses_line_left(scb)) ? TRUE : FALSE;
+    prefixlen = 0;
+    nsid = val_get_nsid(val);
+    if (nsid) {
+        prefixlen = 
+            (xml_strlen(xmlns_get_ns_prefix(nsid)) * 2) + 2;
+    }
+    
+    elemlen = xml_strlen(val->name) * 2;
+
+    return ((vallen + prefixlen + elemlen + 1) <= ses_line_left(scb)) 
+        ? TRUE : FALSE;
 
 }  /* fit_on_line */
 
@@ -1551,6 +1562,7 @@ void
 *            == FALSE if XML output mode should be used
 *    xmlhdr == TRUE if <?xml?> directive should be output
 *            == FALSE if not
+*    startindent == starting indent point
 *    indent == indent amount (0..9 spaces)
 *    testfn == callback test function to use
 *
@@ -1563,6 +1575,7 @@ status_t
                             xml_attrs_t *attrs,
                             boolean docmode,
                             boolean xmlhdr,
+                            int32 startindent,
                             int32  indent,
                             val_nodetest_fn_t testfn)
 {
@@ -1571,7 +1584,7 @@ status_t
     xml_attrs_t myattrs;
     status_t    res;
     ses_mode_t  sesmode;
-    boolean     anyout;
+    boolean     anyout, fitoneline, hascontent;
 
 #ifdef DEBUG
     if (!fp || !val) {
@@ -1582,6 +1595,7 @@ status_t
     res = NO_ERR;
     msg = NULL;
     anyout = FALSE;
+    hascontent = TRUE;
     indent = min(indent, 9);
     sesmode = SES_MODE_NONE;
     xml_init_attrs(&myattrs);
@@ -1613,6 +1627,8 @@ status_t
 	sesmode = ses_get_mode(scb);
 	ses_set_mode(scb, SES_MODE_XMLDOC);
     }
+
+    fitoneline = val_fit_oneline(val, SES_LINESIZE(scb));
     
     /* send the XML declaration */
     if (res == NO_ERR && xmlhdr) {
@@ -1634,10 +1650,23 @@ status_t
      * function assumes the attrQ is val_value_t
      * but it is really xml_attr_t
      *
-     * first, generate the <foo> start tag
+     * !!! not handling i-i and XPath strings yet !!!
      */
     if (res == NO_ERR) {
-	if (val->btyp == NCX_BT_IDREF) {
+        if (!val_has_content(val)) {
+            /* print empty element */
+	    xml_wr_begin_elem_ex(scb, 
+				 &msg->mhdr,
+				 0, 
+				 val->nsid, 
+				 val->name, 
+				 attrs, 
+				 TRUE, 
+				 startindent, 
+				 TRUE);
+            hascontent = FALSE;
+        } else if (val->btyp == NCX_BT_IDREF) {
+            /* print start QName element */
 	    xml_wr_qname_elem(scb, 
 			      &msg->mhdr,
 			      val->v.idref.nsid,
@@ -1647,8 +1676,9 @@ status_t
 			      val->name,
 			      attrs, 
 			      TRUE, 
-			      0);
+			      startindent);
 	} else {
+            /* print start normal string node element */
 	    xml_wr_begin_elem_ex(scb, 
 				 &msg->mhdr,
 				 0, 
@@ -1656,28 +1686,27 @@ status_t
 				 val->name, 
 				 attrs, 
 				 TRUE, 
-				 0, 
+				 startindent, 
 				 FALSE);
 	}
+
 	anyout = TRUE;
 
-	/* output the value */
-	if (res == NO_ERR) {
-	    xml_wr_check_val(scb, 
-			     &msg->mhdr, 
-			     val, 
-			     indent, 
-			     testfn);
-	}
+        if (hascontent) {
+            /* output the contents of the value */
+            xml_wr_check_val(scb, 
+                             &msg->mhdr, 
+                             val, 
+                             (fitoneline) ? -1 : indent, 
+                             testfn);
 
-	/* generate the <foo> end tag */
-	if (res == NO_ERR) {
-	    xml_wr_end_elem(scb, 
-			    &msg->mhdr, 
-			    val->nsid, 
-			    val->name,
-			    0);
-	}
+            /* generate the <foo> end tag */
+            xml_wr_end_elem(scb, 
+                            &msg->mhdr, 
+                            val->nsid, 
+                            val->name,
+                            (fitoneline) ? -1 : startindent);
+        }
     }
 
     /* finish the message, should be NO-OP  */
@@ -1717,6 +1746,7 @@ status_t
 *            == FALSE if XML output mode should be used
 *    xmlhdr == TRUE if <?xml?> directive should be output
 *            == FALSE if not
+*    startindent == starting indent point
 *    indent == indent amount (0..9 spaces)
 *    testfn == callback test function to use
 *
@@ -1729,6 +1759,7 @@ status_t
 		       xml_attrs_t *attrs,
 		       boolean docmode,
 		       boolean xmlhdr,
+                       int32 startindent,
 		       int32  indent,
 		       val_nodetest_fn_t testfn)
 {
@@ -1750,6 +1781,7 @@ status_t
                                  attrs,
                                  docmode,
                                  xmlhdr,
+                                 startindent,
                                  indent,
                                  testfn);
     fclose(fp);
@@ -1772,6 +1804,7 @@ status_t
 *            == FALSE if XML output mode should be used
 *    xmlhdr == TRUE if <?xml?> directive should be output
 *            == FALSE if not
+*    startindent == starting indent point
 *    indent == indent amount (0..9 spaces)
 *
 * RETURNS:
@@ -1783,6 +1816,7 @@ status_t
 		 xml_attrs_t *attrs,
 		 boolean docmode,
 		 boolean xmlhdr,
+                 int32 startindent,
 		 int32 indent)
 {
 #ifdef DEBUG
@@ -1796,6 +1830,7 @@ status_t
 			     attrs, 
 			     docmode, 
 			     xmlhdr, 
+                             startindent,
 			     indent, 
 			     NULL);
 

@@ -2129,8 +2129,13 @@ status_t
         xml_init_attrs(&attrs);
 
         /* output to the specified file or STDOUT */
-        res = xml_wr_check_file(cfg->src_url, cfg->root, &attrs, 
-                                XMLMODE, WITHHDR, NCX_DEF_INDENT,
+        res = xml_wr_check_file(cfg->src_url, 
+                                cfg->root, 
+                                &attrs, 
+                                XMLMODE, 
+                                WITHHDR, 
+                                0,
+                                NCX_DEF_INDENT,
                                 agt_check_save);
 
         xml_clean_attrs(&attrs);

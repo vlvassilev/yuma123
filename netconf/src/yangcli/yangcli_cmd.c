@@ -377,6 +377,7 @@ static xmlChar *
 	log_stdout("\n");
     }
 
+
     agent_cb->returncode = 0;
 
     if (agent_cb->history_line_active) {
@@ -402,34 +403,45 @@ static xmlChar *
 	}
 
 	returnstatus = gl_return_status(agent_cb->cli_gl);
-	
-	log_write("\nget_line error: ");
+
+        /* treat signal as control-C warning; about to exit */
+        if (returnstatus == GLR_SIGNAL) {
+	    log_warn("\nWarning: Control-C exit\n\n");            
+            return NULL;
+        }
+
+        /* skip ordinary line canceled code except if debug2 */
+        if (returnstatus == GLR_TIMEOUT && !LOGDEBUG2) {
+            return NULL;
+        }
+
+	log_error("\nError: GetLine returned ");
 	switch (returnstatus) {
 	case GLR_NEWLINE:
-	    log_write("NEWLINE");
+	    log_error("NEWLINE");
 	    break;
 	case GLR_BLOCKED:
-	    log_write("BLOCKED");
+	    log_error("BLOCKED");
 	    break;
 	case GLR_SIGNAL:
-	    log_write("SIGNAL");
+	    log_error("SIGNAL");
 	    break;
 	case GLR_TIMEOUT:
-	    log_write("TIMEOUT");
+	    log_error("TIMEOUT");
 	    break;
 	case GLR_FDABORT:
-	    log_write("FDABORT");
+	    log_error("FDABORT");
 	    break;
 	case GLR_EOF:
-	    log_write("EOF");
+	    log_error("EOF");
 	    break;
 	case GLR_ERROR:
-	    log_write("ERROR");
+	    log_error("ERROR");
 	    break;
 	default:
-	    log_write("<unknown>");
+	    log_error("<unknown>");
 	}
-	log_write(" rt:%u errno:%u", 
+	log_error(" (rt:%u errno:%u)", 
 		  agent_cb->returncode,
 		  agent_cb->errnocode);
     }
@@ -437,7 +449,6 @@ static xmlChar *
     return line;
 
 } /* get_line */
-
 
 
 /********************************************************************
@@ -7148,56 +7159,6 @@ static status_t
 
 
 /********************************************************************
- * FUNCTION do_history_recall (sub-mode of history RPC)
- * 
- * history recall n 
- *
- * INPUTS:
- *    agent_cb == agent control block to use
- *    num == entry number of history entry entry to recall
- * 
- * RETURNS:
- *   status
- *********************************************************************/
-static status_t
-    do_history_recall (agent_cb_t *agent_cb,
-                       unsigned long num)
-{
-    GlHistoryLine   history_line;
-    int             glstatus;
-
-    agent_cb->history_line_active = FALSE;
-    memset(&history_line, 0x0, sizeof(GlHistoryLine));
-    glstatus = gl_lookup_history(agent_cb->cli_gl,
-                                 num,
-                                 &history_line);
-
-    if (glstatus == 0) {
-        log_error("\nError: lookup command line history failed");
-        return ERR_NCX_OPERATION_FAILED; 
-    }
-
-    if (agent_cb->history_line) {
-        m__free(agent_cb->history_line);
-    }
-
-    /* save the line in the agent_cb for next call
-     * to get_line
-     */
-
-    agent_cb->history_line = 
-        xml_strdup((const xmlChar *)history_line.line);
-    if (!agent_cb->history_line) {
-        return ERR_INTERNAL_MEM;
-    }
-    agent_cb->history_line_active = TRUE;
-
-    return NO_ERR;
-
-} /* do_history_recall */
-
-
-/********************************************************************
  * FUNCTION do_history_load (sub-mode of history RPC)
  * 
  * history load
@@ -7326,12 +7287,10 @@ static status_t
                 uint32  len)
 {
     val_value_t        *valset, *parm;
-    const ncx_module_t *mod;
     status_t            res;
     boolean             imode, done;
     help_mode_t         mode;
 
-    mod = NULL;
     done = FALSE;
     res = NO_ERR;
     imode = interactive_mode();
@@ -7384,18 +7343,6 @@ static status_t
 	if (!done) {
 	    parm = val_find_child(valset, 
 				  YANGCLI_MOD, 
-				  YANGCLI_RECALL);
-	    if (parm) {
-		/* do recall history line */
-		res = do_history_recall(agent_cb, 
-                                        VAL_UINT(parm));
-		done = TRUE;
-	    }
-	}
-
-	if (!done) {
-	    parm = val_find_child(valset, 
-				  YANGCLI_MOD, 
 				  YANGCLI_LOAD);
 	    if (parm) {
 		/* do history load buffer */
@@ -7431,21 +7378,109 @@ static status_t
 }  /* do_history */
 
 
+/********************************************************************
+ * FUNCTION do_line_recall (execute the recall local RPC)
+ * 
+ * recall n 
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ *    num == entry number of history entry entry to recall
+ * 
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    do_line_recall (agent_cb_t *agent_cb,
+                    unsigned long num)
+{
+    GlHistoryLine   history_line;
+    int             glstatus;
+
+    agent_cb->history_line_active = FALSE;
+    memset(&history_line, 0x0, sizeof(GlHistoryLine));
+    glstatus = gl_lookup_history(agent_cb->cli_gl,
+                                 num,
+                                 &history_line);
+
+    if (glstatus == 0) {
+        log_error("\nError: lookup command line history failed");
+        return ERR_NCX_OPERATION_FAILED; 
+    }
+
+    if (agent_cb->history_line) {
+        m__free(agent_cb->history_line);
+    }
+
+    /* save the line in the agent_cb for next call
+     * to get_line
+     */
+
+    agent_cb->history_line = 
+        xml_strdup((const xmlChar *)history_line.line);
+    if (!agent_cb->history_line) {
+        return ERR_INTERNAL_MEM;
+    }
+    agent_cb->history_line_active = TRUE;
+
+    return NO_ERR;
+
+} /* do_line_recall */
 
 
+/********************************************************************
+ * FUNCTION do_recall (local RPC)
+ * 
+ * Do Command line history support operations
+ *
+ * recall index=n
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ *    rpc == RPC method for the history command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    do_recall (agent_cb_t *agent_cb,
+               const obj_template_t *rpc,
+               const xmlChar *line,
+               uint32  len)
+{
+    val_value_t        *valset, *parm;
+    status_t            res;
+    boolean             imode, done;
+    help_mode_t         mode;
 
+    done = FALSE;
+    res = NO_ERR;
+    imode = interactive_mode();
 
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
+    if (valset && res == NO_ERR) {
+	mode = HELP_MODE_NORMAL;
 
+	/* find the mandatory index */
+        parm = val_find_child(valset, YANGCLI_MOD, YANGCLI_INDEX);
+        if (parm) {
+            /* do show history */
+            res = do_line_recall(agent_cb, VAL_UINT(parm));
+	} else {
+            res = ERR_NCX_MISSING_PARM;
+            log_error("\nError: missing index parameter");
+        }
+    }
 
+    if (valset) {
+	val_free_value(valset);
+    }
 
+    return res;
 
-
-
-
-
-
-
-
+}  /* do_recall */
 
 
 /********************************************************************
@@ -7563,6 +7598,8 @@ static status_t
     } else if (!xml_strcmp(rpcname, YANGCLI_QUIT)) {
 	agent_cb->state = MGR_IO_ST_SHUT;
 	mgr_request_shutdown();
+    } else if (!xml_strcmp(rpcname, YANGCLI_RECALL)) {
+	res = do_recall(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_RUN)) {
 	res = do_run(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_SHOW)) {

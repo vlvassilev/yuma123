@@ -761,7 +761,8 @@ static status_t
     /* check sub-section for error-app-tag and error-message */
     if (TK_CUR_TYP(tkc)==TK_TT_LBRACE) {
 	errinfo = &range->range_errinfo;
-	res = yang_consume_error_stmts(tkc, mod, 
+	res = yang_consume_error_stmts(tkc, 
+                                       mod, 
 				       &errinfo,
 				       &typdef->appinfoQ);
 	CHK_EXIT(res, retres);
@@ -858,7 +859,8 @@ static status_t
     /* check sub-section for error-app-tag and error-message */
     if (TK_CUR_TYP(tkc)==TK_TT_LBRACE) {
 	errinfo = &pat->pat_errinfo;
-	res = yang_consume_error_stmts(tkc, mod,
+	res = yang_consume_error_stmts(tkc, 
+                                       mod,
 				       &errinfo,
 				       &typdef->appinfoQ);
 	if (res != NO_ERR) {
@@ -1477,17 +1479,28 @@ static status_t
 
 	/* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &enu->descr,
-				     &desc, &enu->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, &enu->descr,
+				     &desc, 
+                                     &enu->appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &enu->ref,
-				     &ref, &enu->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &enu->ref,
+				     &ref, 
+                                     &enu->appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, mod, &enu->status,
-				     &stat, &enu->appinfoQ);
+	    res = yang_consume_status(tkc, 
+                                      mod, 
+                                      &enu->status,
+                                      &stat, 
+                                      &enu->appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_POSITION)) {
-	    res = yang_consume_uint32(tkc, mod, &enu->pos,
-				      &pos, &enu->appinfoQ);
+	    res = yang_consume_uint32(tkc, 
+                                      mod, 
+                                      &enu->pos,
+				      &pos, 
+                                      &enu->appinfoQ);
 	    enu->flags |= TYP_FL_ESET;   /* mark explicit set val */
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
@@ -1504,8 +1517,12 @@ static status_t
 
     /* save the bit definition */
     if (retres == NO_ERR) {
-	res = insert_yang_enumbit(tkc, mod, enu, typdef,
-				  NCX_BT_BITS, pos);
+	res = insert_yang_enumbit(tkc, 
+                                  mod, 
+                                  enu, 
+                                  typdef,
+				  NCX_BT_BITS, 
+                                  pos);
 	if (res != NO_ERR) {
 	    typ_free_enum(enu);
 	}
@@ -1772,17 +1789,29 @@ static status_t
 
 	/* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod,  &enu->descr, 
-				     &desc,  &enu->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod,  
+                                     &enu->descr, 
+				     &desc,  
+                                     &enu->appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod,  &enu->ref, 
-				     &ref,  &enu->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod,  
+                                     &enu->ref, 
+				     &ref,  
+                                     &enu->appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, mod,  &enu->status, 
-				     &stat,  &enu->appinfoQ);
+	    res = yang_consume_status(tkc, 
+                                      mod,  
+                                      &enu->status, 
+                                      &stat,
+                                      &enu->appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_VALUE)) {
-	    res = yang_consume_int32(tkc, mod,  &enu->val, 
-				     &valdone,  &enu->appinfoQ);
+	    res = yang_consume_int32(tkc,
+                                     mod,
+                                     &enu->val, 
+				     &valdone,
+                                     &enu->appinfoQ);
 	    enu->flags |= TYP_FL_ESET;   /* mark explicit set val */
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
@@ -1799,8 +1828,12 @@ static status_t
 
     /* save the enum definition */
     if (retres == NO_ERR) {
-	res = insert_yang_enumbit(tkc, mod, enu, typdef,
-				  NCX_BT_ENUM, valdone);
+	res = insert_yang_enumbit(tkc,
+                                  mod,
+                                  enu,
+                                  typdef,
+				  NCX_BT_ENUM,
+                                  valdone);
 	if (res != NO_ERR) {
 	    typ_free_enum(enu);
 	}
@@ -2158,7 +2191,8 @@ static status_t
 		CHK_EXIT(res, retres);
 	    }
 	} else if (!xml_strcmp(val, YANG_K_REQUIRE_INSTANCE)) {
-	    res = yang_consume_boolean(tkc, mod, 
+	    res = yang_consume_boolean(tkc, 
+                                       mod, 
 				       &sim->constrained,
 				       &constrained,
 				       &typdef->appinfoQ);
@@ -2262,7 +2296,8 @@ static status_t
 
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_REQUIRE_INSTANCE)) {
-	    res = yang_consume_boolean(tkc, mod, 
+	    res = yang_consume_boolean(tkc, 
+                                       mod, 
 				       &sim->constrained,
 				       &constrained,
 				       &typdef->appinfoQ);
@@ -2361,7 +2396,8 @@ static status_t
 	/* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_BASE)) {
 	    sim->idref.modname = ncx_get_modname(mod);
-	    res = yang_consume_pid(tkc, mod,
+	    res = yang_consume_pid(tkc, 
+                                   mod,
 				   &sim->idref.baseprefix,
 				   &sim->idref.basename,
 				   &basedone,
@@ -3405,7 +3441,8 @@ static status_t
     intypdef->tk = TK_CUR(tkc);
 
     /* Get the mandatory base type */
-    res = yang_consume_pid_string(tkc, mod, 
+    res = yang_consume_pid_string(tkc, 
+                                  mod, 
 				  &intypdef->prefix,
 				  &intypdef->typename);
     CHK_EXIT(res, retres);
@@ -3414,7 +3451,8 @@ static status_t
     if (intypdef->prefix && intypdef->typename &&
 	xml_strcmp(intypdef->prefix, mod->prefix)) {
 	/* real import - not the same as this module's prefix */
-	res = yang_find_imp_typedef(tkc, mod,
+	res = yang_find_imp_typedef(tkc, 
+                                    mod,
 				    intypdef->prefix,
 				    intypdef->typename,
 				    TK_CUR(tkc),
@@ -3487,8 +3525,12 @@ static status_t
 	    break;
 	case NCX_BT_NONE:
 	    if (metamode && typ_get_basetype(intypdef) == NCX_BT_NONE) {
-		retres = obj_set_named_type(tkc, mod, NULL,
-					    intypdef, NULL, NULL);
+		retres = obj_set_named_type(tkc, 
+                                            mod, 
+                                            NULL,
+					    intypdef, 
+                                            NULL, 
+                                            NULL);
 	    }
 	    return retres;
 	default:
@@ -3614,7 +3656,8 @@ static status_t
     if (extonly) {
 	/* give back left brace and get the appinfo */
 	TK_BKUP(tkc);  
-	res = yang_consume_semiapp(tkc, mod,
+	res = yang_consume_semiapp(tkc, 
+                                   mod,
 				   &typdef->appinfoQ);
 	CHK_EXIT(res, retres);
     }
@@ -3830,8 +3873,11 @@ status_t
 		typeok = TRUE;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_UNITS)) {
-	    res = yang_consume_strclause(tkc, mod, &typ->units,
-					 &unit, &typ->typdef.appinfoQ);
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
+                                         &typ->units,
+					 &unit, 
+                                         &typ->typdef.appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
 		if (NEED_EXIT(res)) {
@@ -3840,8 +3886,11 @@ status_t
 		}
 	    }
 	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
-	    res = yang_consume_strclause(tkc, mod, &typ->defval,
-					 &def, &typ->typdef.appinfoQ);
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
+                                         &typ->defval,
+					 &def, 
+                                         &typ->typdef.appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
 		if (NEED_EXIT(res)) {
@@ -3850,8 +3899,11 @@ status_t
 		}
 	    }
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, mod, &typ->status,
-				      &stat, &typ->typdef.appinfoQ);
+	    res = yang_consume_status(tkc, 
+                                      mod, 
+                                      &typ->status,
+				      &stat, 
+                                      &typ->typdef.appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
 		if (NEED_EXIT(res)) {
@@ -3860,8 +3912,11 @@ status_t
 		}
 	    }
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &typ->descr,
-				     &desc, &typ->typdef.appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &typ->descr,
+				     &desc, 
+                                     &typ->typdef.appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
 		if (NEED_EXIT(res)) {
@@ -3870,8 +3925,11 @@ status_t
 		}
 	    }
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &typ->ref,
-				     &ref, &typ->typdef.appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &typ->ref,
+				     &ref, 
+                                     &typ->typdef.appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
 		if (NEED_EXIT(res)) {

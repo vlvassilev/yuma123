@@ -684,6 +684,10 @@ const char *
 	return "bad revision-stmt order";
     case ERR_NCX_DUP_PREFIX:
 	return "duplicate prefix";
+    case ERR_NCX_IDLEN_EXCEEDED:
+	return "identifier length exceeded";
+    case ERR_NCX_LINELEN_EXCEEDED:
+	return "display line length exceeded";
 
     /* system info codes start at 500 */
     case ERR_PARS_SECDONE:

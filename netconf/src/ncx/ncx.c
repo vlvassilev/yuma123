@@ -181,6 +181,10 @@ static boolean       stage2_init_done = FALSE;
 
 static boolean       save_descr = FALSE;
 
+static uint32        warn_idlen;
+
+static uint32        warn_linelen;
+
 
 /********************************************************************
 * FUNCTION gen_modns
@@ -1022,6 +1026,9 @@ status_t
     status_init();
 
     save_descr = savestr;
+    warn_idlen = 64;
+    warn_linelen = 72;
+
     mod_load_callback = NULL;
     log_set_debug_level(dlevel);
 
@@ -10318,6 +10325,180 @@ const xmlChar *
     }
 
 }  /* ncx_get_display_mode_str */
+
+
+/********************************************************************
+* FUNCTION ncx_set_warn_idlen
+* 
+* Set the warning length for identifiers
+* 
+* INPUT:
+*   warnlen == warning length to use
+*
+*********************************************************************/
+void
+    ncx_set_warn_idlen (uint32 warnlen)
+{
+    warn_idlen = warnlen;
+
+}  /* ncx_set_warn_idlen */
+
+
+/********************************************************************
+* FUNCTION ncx_get_warn_idlen
+* 
+* Get the warning length for identifiers
+* 
+* RETURNS:
+*   warning length to use
+*
+*********************************************************************/
+uint32
+    ncx_get_warn_idlen (void)
+{
+    return warn_idlen;
+
+}  /* ncx_get_warn_idlen */
+
+
+/********************************************************************
+* FUNCTION ncx_set_warn_linelen
+* 
+* Set the warning length for YANG file lines
+* 
+* INPUT:
+*   warnlen == warning length to use
+*
+*********************************************************************/
+void
+    ncx_set_warn_linelen (uint32 warnlen)
+{
+    warn_linelen = warnlen;
+
+}  /* ncx_set_warn_linelen */
+
+
+/********************************************************************
+* FUNCTION ncx_get_warn_linelen
+* 
+* Get the warning length for YANG file lines
+* 
+* RETURNS:
+*   warning length to use
+*
+*********************************************************************/
+uint32
+    ncx_get_warn_linelen (void)
+{
+    return warn_linelen;
+
+}  /* ncx_get_warn_linelen */
+
+
+/********************************************************************
+* FUNCTION ncx_check_warn_idlen
+* 
+* Check if the identifier length is greater than
+* the specified amount.
+*
+* INPUTS:
+*   tkc == token chain to use (for warning message only)
+*   mod == module (for warning message only)
+*   id == identifier string to check; must be Z terminated
+*
+* OUTPUTS:
+*    may generate log_warn ouput
+*********************************************************************/
+void
+    ncx_check_warn_idlen (tk_chain_t *tkc,
+                          ncx_module_t *mod,
+                          const xmlChar *id)
+{
+    uint32   idlen;
+
+#ifdef DEBUG
+    if (!id) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (!warn_idlen) {
+        return;
+    }
+
+    idlen = xml_strlen(id);
+    if (idlen > warn_idlen) {
+        log_warn("\nWarning: identifier '%s' length is %u chars, "
+                 "limit is %u chars",
+                 id,
+                 idlen,
+                 warn_idlen);
+        ncx_print_errormsg(tkc, mod, ERR_NCX_IDLEN_EXCEEDED);
+    }
+
+} /* ncx_check_warn_idlen */
+
+
+/********************************************************************
+* FUNCTION ncx_check_warn_linelen
+* 
+* Check if the line display length is greater than
+* the specified amount.
+*
+* INPUTS:
+*   tkc == token chain to use
+*   mod == module (used in warning message only
+*   linelen == line length to check
+*
+* OUTPUTS:
+*    may generate log_warn ouput
+*********************************************************************/
+void
+    ncx_check_warn_linelen (tk_chain_t *tkc,
+                            ncx_module_t *mod,
+                            const xmlChar *line)
+{
+    const xmlChar   *str;
+    uint32           len;
+
+#ifdef DEBUG
+    if (!line) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (!warn_linelen) {
+        return;
+    }
+
+    str = line;
+    len = 0;
+
+    /* check for line starting with newline */
+    if (*str == '\n') {
+        str++;
+    }
+
+    /* get the display length */
+    while (*str && *str != '\n') {
+        if (*str == '\t') {
+            len += 8;
+        } else {
+            len++;
+        }
+        str++;
+    }
+
+    if (len > warn_linelen) {
+        log_warn("\nWarning: line is %u chars, limit is %u chars",
+                 len,
+                 warn_linelen);
+        ncx_print_errormsg(tkc, mod, ERR_NCX_LINELEN_EXCEEDED);
+    }
+
+} /* ncx_check_warn_linelen */
 
 
 /* END file ncx.c */

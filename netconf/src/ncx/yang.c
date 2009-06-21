@@ -575,6 +575,10 @@ status_t
 
     if (res != NO_ERR) {
 	ncx_mod_exp_err(tkc, mod, res, "identifier string");
+    } else {
+        ncx_check_warn_idlen(tkc, 
+                             mod,
+                             TK_CUR_VAL(tkc));
     }
     return res;
     
@@ -658,7 +662,14 @@ status_t
 		    }
 		    if (res != NO_ERR) {
 			ncx_print_errormsg(tkc, mod, res);
-		    }
+		    } else {
+                        if (prefix && *prefix) {
+                            ncx_check_warn_idlen(tkc, mod, *prefix);
+                        }
+                        if (field && *field) {
+                            ncx_check_warn_idlen(tkc, mod, *field);
+                        }
+                    }
 		    return res;
 		}
 	    }
@@ -703,6 +714,15 @@ status_t
 	} else {
 	    res = ERR_NCX_INVALID_NAME;
 	}
+
+        if (res == NO_ERR) {
+            if (prefix && *prefix) {
+                ncx_check_warn_idlen(tkc, mod, *prefix);
+            }
+            if (field && *field) {
+                ncx_check_warn_idlen(tkc, mod, *field);
+            }
+        }
     } else {
 	res = ERR_NCX_WRONG_TKTYPE;
     }
@@ -825,22 +845,32 @@ status_t
 	/* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    /* Optional 'description' field is present */
-	    res = yang_consume_descr(tkc, mod, &err->descr,
-				     &desc, appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &err->descr,
+				     &desc, 
+                                     appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    /* Optional 'description' field is present */
-	    res = yang_consume_descr(tkc, mod, &err->ref,
-				     &ref, appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &err->ref,
+				     &ref, 
+                                     appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_ERROR_APP_TAG)) {
 	    /* Optional 'error-app-tag' field is present */
-	    res = yang_consume_strclause(tkc, mod,
+	    res = yang_consume_strclause(tkc, 
+                                         mod,
 					 &err->error_app_tag,
-					 &etag, appinfoQ);
+					 &etag, 
+                                         appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_ERROR_MESSAGE)) {
 	    /* Optional 'error-app-tag' field is present */
-	    res = yang_consume_strclause(tkc, mod,
+	    res = yang_consume_strclause(tkc, 
+                                         mod,
 					 &err->error_message,
-					 &emsg, appinfoQ);
+					 &emsg, 
+                                         appinfoQ);
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);	    
@@ -1300,8 +1330,11 @@ status_t
     } else if (TK_TYP_STR(nexttk)) {
 	str = NULL;
 	if (!xml_strcmp(nextval, YANG_K_UNBOUNDED)) {
-	    res = yang_consume_strclause(tkc, mod, &str,
-					 dupflag, appinfoQ);
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
+                                         &str,
+					 dupflag, 
+                                         appinfoQ);
 	    if (str) {
 		m__free(str);
 		str = NULL;
@@ -1311,8 +1344,11 @@ status_t
 	    }
 	} else {
 	    /* may be a quoted number or an error */
-	    res = yang_consume_uint32(tkc, mod, maxelems,
-				      dupflag, appinfoQ);
+	    res = yang_consume_uint32(tkc, 
+                                      mod, 
+                                      maxelems,
+				      dupflag, 
+                                      appinfoQ);
 	}
     }		    
 
@@ -1469,22 +1505,32 @@ status_t
 	/* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_ERROR_APP_TAG)) {
 	    /* Optional 'error-app-tag' field is present */
-	    res = yang_consume_strclause(tkc, mod,
+	    res = yang_consume_strclause(tkc, 
+                                         mod,
 					 &must->errinfo.error_app_tag,
-					 &etag, appinfoQ);
+					 &etag, 
+                                         appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_ERROR_MESSAGE)) {
 	    /* Optional 'error-message' field is present */
-	    res = yang_consume_strclause(tkc, mod,
+	    res = yang_consume_strclause(tkc, 
+                                         mod,
 					 &must->errinfo.error_message,
-					 &emsg, appinfoQ);
+					 &emsg, 
+                                         appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    /* Optional 'description' field is present */
-	    res = yang_consume_descr(tkc, mod, &must->errinfo.descr,
-				     &desc, appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &must->errinfo.descr,
+				     &desc, 
+                                     appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
 	    /* Optional 'reference' field is present */
-	    res = yang_consume_descr(tkc, mod, &must->errinfo.ref,
-				     &ref, appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &must->errinfo.ref,
+				     &ref, 
+                                     appinfoQ);
 	} else {
 	    expstr = "must sub-statement";
 	    res = ERR_NCX_WRONG_TKVAL;
@@ -1547,8 +1593,11 @@ status_t
 
     savetk = TK_CUR(tkc);
 
-    res = yang_consume_strclause(tkc, mod, &str,
-				 whenflag, &obj->appinfoQ);
+    res = yang_consume_strclause(tkc, 
+                                 mod, 
+                                 &str,
+				 whenflag, 
+                                 &obj->appinfoQ);
     if (res == NO_ERR) {
 	obj->when = xpath_new_pcb(NULL);
 	if (!obj->when) {

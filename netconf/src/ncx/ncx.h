@@ -912,4 +912,27 @@ extern ncx_display_mode_t
 extern const xmlChar *
     ncx_get_display_mode_str (ncx_display_mode_t dmode);
 
+extern void
+    ncx_set_warn_idlen (uint32 warnlen);
+
+extern uint32
+    ncx_get_warn_idlen (void);
+
+extern void
+    ncx_set_warn_linelen (uint32 warnlen);
+
+extern uint32
+    ncx_get_warn_linelen (void);
+
+extern void
+    ncx_check_warn_idlen (tk_chain_t *tkc,
+                          ncx_module_t *mod,
+                          const xmlChar *id);
+
+void
+    ncx_check_warn_linelen (tk_chain_t *tkc,
+                            ncx_module_t *mod,
+                            const xmlChar *line);
+
+
 #endif	    /* _H_ncx */

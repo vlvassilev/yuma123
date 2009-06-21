@@ -2228,6 +2228,7 @@ boolean
 * INPUTS:
 *   tkc == token chain 
 *   mod == module in progress (NULL if not used)
+*          !!! Just used for error messages !!!
 *
 * RETURNS:
 *   status of the operation
@@ -2273,7 +2274,7 @@ status_t
 	 */
         if (tkc->filename) {
             if (!fgets((char *)tkc->buff, TK_BUFF_SIZE, tkc->fp)) {
-                /* read line failed, not an error */
+                /* read line failed, treating as not an error */
                 res = NO_ERR;
 		done = TRUE;
 		continue;
@@ -2305,6 +2306,7 @@ status_t
                        xml_strlen(tkc->buff));
             }
 #endif
+            ncx_check_warn_linelen(tkc, mod, tkc->buff);
         }
 
         /* Have some sort of input in the buffer (tkc->buff) */

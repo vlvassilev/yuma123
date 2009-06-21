@@ -122,6 +122,11 @@ static boolean
     xmlns_id_t nsid;
     status_t   res;
 
+    /* metavals must be put on 1 line */
+    if (val_is_metaval(val)) {
+        return TRUE;
+    }
+
     if (!val_fit_oneline(val, SES_LINESIZE(scb))) {
         return FALSE;
     }
@@ -129,7 +134,7 @@ static boolean
     if (ses_get_mode(scb) != SES_MODE_XMLDOC) {
 	return TRUE;
     }
-
+    
     /* don't bother generating the actual size unless
      * the session is requesting the XMLDOC mode
      */

@@ -159,7 +159,8 @@ date         init     comment
 #define YANGDUMP_PARM_SUBTREE       (const xmlChar *)"subtree"
 #define YANGDUMP_PARM_URLSTART      (const xmlChar *)"urlstart"
 #define YANGDUMP_PARM_UNIFIED       (const xmlChar *)"unified"
-
+#define YANGDUMP_PARM_WARN_IDLEN    (const xmlChar *)"warn-idlen"
+#define YANGDUMP_PARM_WARN_LINELEN  (const xmlChar *)"warn-linelen"
 
 /********************************************************************
 *                                                                   *
@@ -536,6 +537,28 @@ static status_t
         cp->versionmode = TRUE;
     }
 
+    /* warn-idlen parameter */
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_WARN_IDLEN);
+    if (val) {
+        cp->warn_idlen = VAL_UINT(val);
+    } else {
+        cp->warn_idlen = YANGDUMP_DEF_WARN_IDLEN;
+    }
+    ncx_set_warn_idlen(cp->warn_idlen);
+
+    /* warn-linelen parameter */
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_WARN_LINELEN);
+    if (val) {
+        cp->warn_linelen = VAL_UINT(val);
+    } else {
+        cp->warn_linelen = YANGDUMP_DEF_WARN_LINELEN;
+    }
+    ncx_set_warn_linelen(cp->warn_linelen);
+
     /* xsd-schemaloc parameter */
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
@@ -583,7 +606,8 @@ static status_t
 #endif
                    FALSE,
                    "yangdump started",
-                   argc, argv);
+                   argc, 
+                   argv);
 
     if (res == NO_ERR) {
 

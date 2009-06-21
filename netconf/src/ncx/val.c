@@ -3430,7 +3430,7 @@ void
 	    if (quotes) {
 		(*dumpfn)("%c", VAL_QUOTE_CH);
 	    }
-	    if (obj_is_password(val->obj)) {
+	    if (val->obj && obj_is_password(val->obj)) {
 		(*dumpfn)("%s", VAL_PASSWORD_STRING);
 	    } else {
 		(*dumpfn)("%s", (const char *)VAL_STR(val));
@@ -3555,7 +3555,6 @@ void
     case NCX_BT_INTERN:
 	(*dumpfn)("{");
 	(*indentfn)(startindent);
-
 
 	switch (dumpmode) {
 	case DUMP_VAL_STDOUT:
@@ -6885,7 +6884,7 @@ status_t
     case NCX_BT_STRING:	
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_LEAFREF:  /****/
-        if (obj_is_password(val->obj)) {
+        if (val->obj && obj_is_password(val->obj)) {
             s = VAL_PASSWORD_STRING;
         } else {
             s = VAL_STR(val);
@@ -8796,6 +8795,33 @@ boolean
     return (val->flags & VAL_FL_DEFSET) ? TRUE : FALSE;
 
 }  /* val_set_by_default */
+
+
+/********************************************************************
+* FUNCTION val_is_metaval
+* 
+* Check if the value is a meta-val (XML attribute)
+*
+* INPUTS:
+*    val == val_value_t struct to check
+*
+* RETURNS:
+*   TRUE if val is a meta-val
+*   FALSE if val is not a meta-val
+*********************************************************************/
+boolean
+    val_is_metaval (const val_value_t *val)
+{
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    return (val->flags & VAL_FL_META) ? TRUE : FALSE;
+
+}  /* val_is_metaval */
 
 
 /* END file val.c */

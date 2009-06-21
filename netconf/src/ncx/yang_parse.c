@@ -291,17 +291,32 @@ static status_t
 		retres = res;
 	    }
         } else if (!xml_strcmp(val, YANG_K_NAMESPACE)) {
-	    res = yang_consume_strclause(tkc, mod, &mod->ns,
-					 &ns, &mod->appinfoQ);
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
+                                         &mod->ns,
+					 &ns, 
+                                         &mod->appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
-	    }
+	    } else {
+                /*** TBD: check valid URI ***/
+            }
 	} else if (!xml_strcmp(val, YANG_K_PREFIX)) {
-	    res = yang_consume_strclause(tkc, mod, &mod->prefix,
-					 &pfix, &mod->appinfoQ);
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
+                                         &mod->prefix,
+					 &pfix, 
+                                         &mod->appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
-	    }
+	    } else if (!ncx_valid_name2(mod->prefix)) {
+                retres = ERR_NCX_INVALID_NAME;
+                log_error("\nError: invalid prefix value '%s'",
+                          mod->prefix);
+                ncx_print_errormsg(tkc, mod, retres);
+            } else {
+                ncx_check_warn_idlen(tkc, mod, mod->prefix);
+            }
 	} else if (!yang_top_keyword(val)) {
 	    retres = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -374,8 +389,8 @@ static status_t
     res = yang_consume_id_string(tkc, mod, &mod->belongs);
     if (res != NO_ERR) {
 	return res;
-    }
-	
+    } 
+
     /* Get the starting left brace for the sub-clauses
      * or a semi-colon to end the belongs-to statement
      */
@@ -434,8 +449,20 @@ static status_t
 
 	/* Got a token string so check the value, should be 'prefix' */
 	if (!xml_strcmp(val, YANG_K_PREFIX)) {
-	    res = yang_consume_strclause(tkc, mod, &mod->prefix,
-					 &pfixdone, &mod->appinfoQ);
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
+                                         &mod->prefix,
+					 &pfixdone, 
+                                         &mod->appinfoQ);
+            if (res == NO_ERR &&
+                !ncx_valid_name2(mod->prefix)) {
+                res = ERR_NCX_INVALID_NAME;
+                log_error("\nError: invalid prefix value '%s'",
+                          mod->prefix);
+                ncx_print_errormsg(tkc, mod, res);
+            } else {
+                ncx_check_warn_idlen(tkc, mod, mod->prefix);
+            }
 	    CHK_EXIT(res, retres);
 	} else {
 	    retres = ERR_NCX_WRONG_TKVAL;
@@ -583,18 +610,28 @@ static status_t
 
 	/* Got a token string so check the value, should be 'prefix' */
 	if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, mod, 
+	    res = yang_consume_iffeature(tkc, 
+                                         mod, 
 					 &feature->iffeatureQ,
 					 &feature->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, mod, &feature->status,
-				      &stat, &feature->appinfoQ);
+	    res = yang_consume_status(tkc, 
+                                      mod, 
+                                      &feature->status,
+				      &stat, 
+                                      &feature->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &feature->descr,
-				     &desc, &feature->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &feature->descr,
+				     &desc, 
+                                     &feature->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &feature->ref,
-				     &ref, &feature->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &feature->ref,
+				     &ref, 
+                                     &feature->appinfoQ);
 	} else {
 	    retres = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -924,14 +961,23 @@ static status_t
 				   &identity->basename,
 				   &base, &identity->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, mod, &identity->status,
-				      &stat, &identity->appinfoQ);
+	    res = yang_consume_status(tkc, 
+                                      mod, 
+                                      &identity->status,
+				      &stat, 
+                                      &identity->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &identity->descr,
-				     &desc, &identity->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &identity->descr,
+				     &desc, 
+                                     &identity->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &identity->ref,
-				     &ref, &identity->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &identity->ref,
+				     &ref, 
+                                     &identity->appinfoQ);
 	} else {
 	    retres = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, retres, expstr);
@@ -1360,8 +1406,11 @@ static status_t
 
 	/* Got a token string so check the value, should be 'prefix' */
 	if (!xml_strcmp(val, YANG_K_PREFIX)) {
-	    res = yang_consume_strclause(tkc, mod, &imp->prefix,
-					 &pfixdone, &imp->appinfoQ);
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
+                                         &imp->prefix,
+					 &pfixdone, 
+                                         &imp->appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
 		if (NEED_EXIT(res)) {
@@ -2092,20 +2141,32 @@ static status_t
 	/* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_ORGANIZATION)) {
 	    /* 'organization' field is present */
-	    res = yang_consume_strclause(tkc, mod, &mod->organization,
-					 &org, &mod->appinfoQ);
+	    res = yang_consume_strclause(tkc, 
+                                         mod, 
+                                         &mod->organization,
+					 &org, 
+                                         &mod->appinfoQ);
 	    CHK_EXIT(res, retres);
         } else if (!xml_strcmp(val, YANG_K_CONTACT)) {
-	    res = yang_consume_descr(tkc, mod, &mod->contact_info,
-				     &contact, &mod->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &mod->contact_info,
+				     &contact, 
+                                     &mod->appinfoQ);
 	    CHK_EXIT(res, retres);
         } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &mod->descr,
-				     &descr, &mod->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &mod->descr,
+				     &descr, 
+                                     &mod->appinfoQ);
 	    CHK_EXIT(res, retres);
         } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &mod->ref,
-				     &ref, &mod->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &mod->ref,
+				     &ref, 
+                                     &mod->appinfoQ);
 	    CHK_EXIT(res, retres);
 	} else if (!yang_top_keyword(val)) {
 	    retres = ERR_NCX_WRONG_TKVAL;
@@ -2349,8 +2410,11 @@ static status_t
 	/* Got a token str so check the value, should be 'description' */
 	if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
 	    /* Mandatory 'description' field is present */
-	    res = yang_consume_descr(tkc, mod, &rev->descr,
-				     &descrdone, &mod->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &rev->descr,
+				     &descrdone, 
+                                     &mod->appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;
 		if (NEED_EXIT(res)) {

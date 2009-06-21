@@ -66,6 +66,9 @@ date	     init     comment
 #define OBJVIEW_RAW     "raw"
 #define OBJVIEW_COOKED  "cooked"
 
+#define YANGDUMP_DEF_WARN_IDLEN    64
+#define YANGDUMP_DEF_WARN_LINELEN  72
+
 /********************************************************************
 *								    *
 *			     T Y P E S				    *
@@ -105,6 +108,8 @@ typedef struct yangdump_cvtparms_t_ {
     boolean         simurls;
     boolean         unified;
     boolean         versionmode;
+    uint32          warn_idlen;
+    uint32          warn_linelen;
 
     /* internal vars */
     xmlChar        *full_output;

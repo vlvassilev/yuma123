@@ -1024,4 +1024,7 @@ extern const typ_def_t *
 extern boolean
     val_set_by_default (const val_value_t *val);
 
+extern boolean
+    val_is_metaval (const val_value_t *val);
+
 #endif	    /* _H_val */

@@ -143,6 +143,12 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
+/* warning suppression entry */
+typedef struct warnoff_t_ {
+    dlq_hdr_t    qhdr;
+    status_t     res;
+} warnoff_t;
+
 
 /********************************************************************
 *                                                                   *
@@ -150,27 +156,44 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
+/* Q of ncx_module_t
+ * list of active modules
+ */
 static dlq_hdr_t         ncx_modQ;
 
+/* pointer to the current Q of active modules */
 static dlq_hdr_t        *ncx_curQ;
 
+/* Q of ncx_filptr_t
+ * used as a cache of subtree filtering headers 
+ */
 static dlq_hdr_t         ncx_filptrQ;
 
+/* maximum number of filter cache entries */
 static uint32            ncx_max_filptrs;
 
+/* current number of filter cache entries */
 static uint32            ncx_cur_filptrs;
 
+/* generic anyxml object template */
 static obj_template_t   *gen_anyxml;
 
+/* generic container object template */
 static obj_template_t   *gen_container;
 
+/* generic string object template */
 static obj_template_t   *gen_string;
 
+/* generic empty object template */
 static obj_template_t   *gen_empty;
 
+/* generic root container object template */
 static obj_template_t   *gen_root;
 
-/* TBD: support multiple callbacks */
+/* module load callback function
+ * TBD: support multiple callbacks 
+ *  used when a ncxmod loads a module
+ */
 static ncx_load_cbfn_t  mod_load_callback;
 
 /* 1st stage init */
@@ -179,11 +202,22 @@ static boolean       ncx_init_done = FALSE;
 /* 2nd stage init */
 static boolean       stage2_init_done = FALSE;
 
+/* save descriptive clauses like description, reference */
 static boolean       save_descr = FALSE;
 
+/* system warning length for identifiers */
 static uint32        warn_idlen;
 
+/* system warning length for YANG file line length */
 static uint32        warn_linelen;
+
+/* Q of warnoff_t
+ * used to suppress warnings
+ * from being counted in the total
+ * only filters out the ncx_print_errormsg calls
+ * not the log_warn text messages
+ */
+static dlq_hdr_t     warnoffQ;
 
 
 /********************************************************************
@@ -1032,6 +1066,18 @@ status_t
     mod_load_callback = NULL;
     log_set_debug_level(dlevel);
 
+    /* create the module and appnode queues */
+    dlq_createSQue(&ncx_modQ);
+    ncx_curQ = &ncx_modQ;
+    dlq_createSQue(&ncx_filptrQ);
+    dlq_createSQue(&warnoffQ);
+    ncx_max_filptrs = NCX_DEF_FILPTR_CACHESIZE;
+    ncx_cur_filptrs = 0;
+
+    /* check that the correct version of libxml2 is installed */
+    LIBXML_TEST_VERSION;
+
+
     /* deal with bootstrap CLI parms */
     res = bootstrap_cli(argc, argv, dlevel, logtstamps);
     if (res != NO_ERR) {
@@ -1042,15 +1088,6 @@ status_t
 	log_debug2(startmsg);
     }
 
-    /* create the module and appnode queues */
-    dlq_createSQue(&ncx_modQ);
-    ncx_curQ = &ncx_modQ;
-    dlq_createSQue(&ncx_filptrQ);
-    ncx_max_filptrs = NCX_DEF_FILPTR_CACHESIZE;
-    ncx_cur_filptrs = 0;
-
-    /* check that the correct version of libxml2 is installed */
-    LIBXML_TEST_VERSION;
 
     /* init nmodule handler */
     ncxmod_init();
@@ -1221,6 +1258,7 @@ void
 {
     ncx_module_t   *mod;
     ncx_filptr_t   *filptr;
+    warnoff_t      *warnoff;
 
     if (!ncx_init_done) {
 	return;
@@ -1234,6 +1272,11 @@ void
     while (!dlq_empty(&ncx_filptrQ)) {
 	filptr = (ncx_filptr_t *)dlq_deque(&ncx_filptrQ);
 	m__free(filptr);
+    }
+
+    while (!dlq_empty(&warnoffQ)) {
+	warnoff = (warnoff_t *)dlq_deque(&warnoffQ);
+        m__free(warnoff);
     }
 
     if (stage2_init_done) {
@@ -8631,7 +8674,23 @@ void
 {
     boolean      iserr;
 
+    if (res == NO_ERR) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+
     iserr = (res <= ERR_LAST_USR_ERR) ? TRUE : FALSE;
+
+    if (!iserr && !ncx_warning_enabled(res)) {
+        if (LOGDEBUG3) {
+            log_debug3("\nSuppressed warning %d (%s.%u)",
+                       res, 
+                       get_error_string(res),
+                       mod->name,
+                       linenum);
+        }
+        return;
+    }
 
     if (mod) {
 	if (iserr) {
@@ -10499,6 +10558,85 @@ void
     }
 
 } /* ncx_check_warn_linelen */
+
+
+/********************************************************************
+* FUNCTION ncx_turn_off_warning
+* 
+* Add ar warning suppression entry
+*
+* INPUTS:
+*   res == internal status code to suppress
+*
+* RETURNS:
+*   status (duplicates are silently dropped)
+*********************************************************************/
+status_t
+    ncx_turn_off_warning (status_t res)
+{
+    warnoff_t         *warnoff;
+
+    if (res == NO_ERR) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if (res < ERR_WARN_BASE) {
+        return ERR_NCX_INVALID_VALUE;
+    }
+
+    /* check if 'res' already entered */
+    for (warnoff = (warnoff_t *)dlq_firstEntry(&warnoffQ);
+         warnoff != NULL;
+         warnoff = (warnoff_t *)dlq_nextEntry(warnoff)) {
+        if (warnoff->res == res) {
+            return NO_ERR;
+        }
+    }
+
+    warnoff = m__getObj(warnoff_t);
+    if (!warnoff) {
+        return ERR_INTERNAL_MEM;
+    }
+    memset(warnoff, 0x0, sizeof(warnoff_t));
+    warnoff->res = res;
+    dlq_enque(warnoff, &warnoffQ);
+    return NO_ERR;
+
+} /* ncx_turn_off_warning */
+
+
+/********************************************************************
+* FUNCTION ncx_warning_enabled
+* 
+* Check if a specific status_t code is enabled
+*
+* INPUTS:
+*   res == internal status code to check
+*
+* RETURNS:
+*   TRUE if warning is enabled
+*   FALSE if warning is suppressed
+*********************************************************************/
+boolean
+    ncx_warning_enabled (status_t res)
+{
+    const warnoff_t   *warnoff;
+
+    if (res < ERR_WARN_BASE) {
+        return TRUE;
+    }
+
+    /* check if 'res' already entered */
+    for (warnoff = (const warnoff_t *)dlq_firstEntry(&warnoffQ);
+         warnoff != NULL;
+         warnoff = (const warnoff_t *)dlq_nextEntry(warnoff)) {
+        if (warnoff->res == res) {
+            return FALSE;
+        }
+    }
+    return TRUE;
+
+} /* ncx_warning_enabled */
 
 
 /* END file ncx.c */

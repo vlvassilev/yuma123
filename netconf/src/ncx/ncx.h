@@ -929,10 +929,15 @@ extern void
                           ncx_module_t *mod,
                           const xmlChar *id);
 
-void
+extern void
     ncx_check_warn_linelen (tk_chain_t *tkc,
                             ncx_module_t *mod,
                             const xmlChar *line);
 
+extern status_t
+    ncx_turn_off_warning (status_t res);
+
+extern boolean
+    ncx_warning_enabled (status_t res);
 
 #endif	    /* _H_ncx */

@@ -7,7 +7,7 @@
       <t:foo></t:foo>
    </t:test2>
    <t:test2 xmlns:t="http://netconfcentral.com/ns/test">
-      <t:a2>bambi</t:a2>
+      <t:a2>bambi-error</t:a2>
       <t:a1>32</t:a1>
       <t:b2>2</t:b2>
       <t:foo>
@@ -95,4 +95,6 @@
       <t:data3>rrr</t:data3>
    </t:xpath.1>
    <t:string.1 xmlns:t="http://netconfcentral.com/ns/test">freddy</t:string.1>
+   <t:int32.1 xmlns:t="http://netconfcentral.com/ns/test">99</t:int32.1>
+   <t:uint32.1 xmlns:t="http://netconfcentral.com/ns/test">4095</t:uint32.1>
 </nd:config>

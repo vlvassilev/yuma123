@@ -1,5 +1,0 @@
-# connect to the ncxserver for testing
-
-connect user=test password=yangrocks agent=localhost
-
-

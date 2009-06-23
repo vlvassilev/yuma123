@@ -852,8 +852,7 @@ static status_t
     }
 
     /* else subdir searches not allowed
-     * first check for YANG file in the current path
-     * then check for NCX file in the current path
+     * check for YANG file in the current path
      */
     res = try_module(buff,
 		     bufflen, 

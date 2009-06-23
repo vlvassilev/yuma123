@@ -633,6 +633,9 @@ static rpc_err_t
     case ERR_NCX_NO_MATCHES:
         *apptag = RPC_ERR_APPTAG_NO_MATCHES;
 	return RPC_ERR_OPERATION_FAILED;
+    case ERR_NCX_MISSING_REFTARGET:
+        *apptag = RPC_ERR_APPTAG_DATA_INVALID;
+	return RPC_ERR_INVALID_VALUE;
 
     /* user warnings start at 400 and do not need to be listed here */
     default:

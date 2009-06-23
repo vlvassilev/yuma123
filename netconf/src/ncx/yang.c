@@ -1670,13 +1670,15 @@ status_t
 				 prefix, name,
 				 mod->prefix);
 	if (iff) {
-	    log_warn("\nWarning: if-feature '%s%s%s' "
-		     "already specified on line %u",
-		     (prefix) ? prefix : EMPTY_STRING,
-		     (prefix) ? ":" :  "", name,
-		     iff->tk->linenum);
-	    ncx_print_errormsg(tkc, mod, ERR_NCX_DUP_IF_FEATURE);
-
+            if (ncx_warning_enabled(ERR_NCX_DUP_IF_FEATURE)) {
+                log_warn("\nWarning: if-feature '%s%s%s' "
+                         "already specified on line %u",
+                         (prefix) ? prefix : EMPTY_STRING,
+                         (prefix) ? ":" :  "", 
+                         name,
+                         iff->tk->linenum);
+                ncx_print_errormsg(tkc, mod, ERR_NCX_DUP_IF_FEATURE);
+            }
 	    if (prefix) {
 		m__free(prefix);
 	    }
@@ -2436,21 +2438,25 @@ void
 	 testtyp != NULL;
 	 testtyp = (typ_template_t *)dlq_nextEntry(testtyp)) {
 	if (!testtyp->used) {
-	    log_warn("\nWarning: Local typedef '%s' not used",
-		     testtyp->name);
-	    tkc->cur = testtyp->tk;
-	    ncx_print_errormsg(tkc, mod, ERR_NCX_TYPDEF_NOT_USED);
+            if (ncx_warning_enabled(ERR_NCX_TYPDEF_NOT_USED)) {
+                log_warn("\nWarning: Local typedef '%s' not used",
+                         testtyp->name);
+                tkc->cur = testtyp->tk;
+                ncx_print_errormsg(tkc, mod, ERR_NCX_TYPDEF_NOT_USED);
+            }
 	}
     }
     for (testgrp = (grp_template_t *)dlq_firstEntry(grpQ);
 	 testgrp != NULL;
 	 testgrp = (grp_template_t *)dlq_nextEntry(testgrp)) {
 	if (!testgrp->used) {
-	    log_warn("\nWarning: Local grouping '%s' not used",
-		     testgrp->name);
-	    tkc->cur = testgrp->tk;
-	    ncx_print_errormsg(tkc, mod, ERR_NCX_GRPDEF_NOT_USED);
-	}
+            if (ncx_warning_enabled(ERR_NCX_GRPDEF_NOT_USED)) {
+                log_warn("\nWarning: Local grouping '%s' not used",
+                         testgrp->name);
+                tkc->cur = testgrp->tk;
+                ncx_print_errormsg(tkc, mod, ERR_NCX_GRPDEF_NOT_USED);
+            }
+        }
     }
 } /* yang_check_obj_used */
 
@@ -2490,10 +2496,13 @@ void
 	 testimp = (ncx_import_t *)dlq_nextEntry(testimp)) {
 
 	if (!testimp->used) {
-	    log_warn("\nWarning: Module '%s' not used", testimp->module);
-	    tkc->cur = testimp->tk;
-	    ncx_print_errormsg(tkc, mod, ERR_NCX_IMPORT_NOT_USED);
-	}
+            if (ncx_warning_enabled(ERR_NCX_IMPORT_NOT_USED)) {
+                log_warn("\nWarning: Module '%s' not used", 
+                         testimp->module);
+                tkc->cur = testimp->tk;
+                ncx_print_errormsg(tkc, mod, ERR_NCX_IMPORT_NOT_USED);
+            }
+        }
 
 	/* check if the import is newer than this file */
 	impmod = ncx_find_module(testimp->module,
@@ -3107,8 +3116,11 @@ status_t
 	    log_error("\nError: Invalid year string (%s)", numbuff);
 	    ncx_print_errormsg(tkc, mod, retres);
 	} else if (num.u < 1970) {
-	    log_warn("\nWarning: Invalid revision year (%s)", numbuff);
-	    ncx_print_errormsg(tkc, mod, ERR_NCX_DATE_PAST);
+            if (ncx_warning_enabled(ERR_NCX_DATE_PAST)) {
+                log_warn("\nWarning: Invalid revision year (%s)", 
+                         numbuff);
+                ncx_print_errormsg(tkc, mod, ERR_NCX_DATE_PAST);
+            }
 	} 
     }
 
@@ -3176,9 +3188,11 @@ status_t
     if (retres == NO_ERR) {
 	ret = xml_strcmp(curdate, datestr);
 	if (ret < 0) {
-	    log_warn("\nWarning: Revision date in the future (%s)",
-		     datestr);
-	    ncx_print_errormsg(tkc, mod, ERR_NCX_DATE_FUTURE);
+            if (ncx_warning_enabled(ERR_NCX_DATE_FUTURE)) {
+                log_warn("\nWarning: Revision date in the future (%s)",
+                         datestr);
+                ncx_print_errormsg(tkc, mod, ERR_NCX_DATE_FUTURE);
+            }
 	}
     }
 

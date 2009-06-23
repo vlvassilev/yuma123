@@ -356,7 +356,9 @@ static status_t
     infirst = obj_first_ckey(obj);
 
     /* first make value nodes for all the index values */
-    for (indef = infirst; indef != NULL; indef = obj_next_ckey(indef)) {
+    for (indef = infirst; 
+         indef != NULL; 
+         indef = obj_next_ckey(indef)) {
 
 	/* advance to the next non-NEWLINE token */
 	res = get_tk(tkc);
@@ -370,7 +372,8 @@ static status_t
 	    inval = val_make_simval(obj_get_typdef(indef->keyobj),
 				    nsid,
 				    obj_get_name(indef->keyobj),
-				    TK_CUR_VAL(tkc), &res);
+				    TK_CUR_VAL(tkc), 
+                                    &res);
 	    if (!inval) {
 		ncx_conf_exp_err(tkc, res, "index value");
 		return res;
@@ -462,7 +465,10 @@ static status_t
     if (typ_is_simple(btyp)) {
 	/* form for a leaf is: foo [value] NEWLINE  */
 	if (TK_CUR_TEXT(tkc)) {
-	    res = val_set_simval(val, typdef, nsid, valname,
+	    res = val_set_simval(val, 
+                                 typdef, 
+                                 nsid, 
+                                 valname,
 				 TK_CUR_VAL(tkc));
 	} else if (TK_CUR_TYP(tkc)==TK_TT_NEWLINE) {
 	    res = val_set_simval(val, typdef, nsid, valname, NULL);
@@ -525,7 +531,8 @@ static status_t
 		    /* parent 'typdef' must have a child with a name
 		     * that matches the current token vale
 		     */
-		    chobj = obj_find_child(obj, TK_CUR_MOD(tkc),
+		    chobj = obj_find_child(obj, 
+                                           TK_CUR_MOD(tkc),
 					   TK_CUR_VAL(tkc));
 		    if (chobj) {
 			chval = val_new_value();
@@ -598,7 +605,7 @@ static status_t
     val_value_t            *curparm, *newparm;
     status_t                res;
     ncx_iqual_t             iqual;
-    boolean                 match;
+    boolean                 match, usewarning;
 
     
     /* get the next token, which must be a TSTRING
@@ -611,6 +618,7 @@ static status_t
     }
 
     curparm = NULL;
+    usewarning = ncx_warning_enabled(ERR_NCX_CONF_PARM_EXISTS);
 
     /* check if this TSTRING is a parameter in this parmset
      * make sure to always check for prefix:identifier
@@ -620,18 +628,21 @@ static status_t
 	modname = xmlns_get_module
 	    (xmlns_find_ns_by_prefix(TK_CUR_MOD(tkc)));
 	if (modname) {
-	    curparm = val_find_child(val, modname,
+	    curparm = val_find_child(val, 
+                                     modname,
 				     TK_CUR_VAL(tkc));
 	}
     }  else {
-	curparm = val_find_child(val, val_get_mod_name(val),
+	curparm = val_find_child(val, 
+                                 val_get_mod_name(val),
 				 TK_CUR_VAL(tkc));
     }
 	
     if (curparm) {
 	obj = curparm->obj;
     } else {
-	obj = obj_find_child(val->obj, TK_CUR_MOD(tkc),
+	obj = obj_find_child(val->obj, 
+                             TK_CUR_MOD(tkc),
 			     TK_CUR_VAL(tkc));
     }
     if (!obj) {
@@ -675,15 +686,20 @@ static status_t
 	    if (!match) {
 		val_add_child(newparm, val);
 	    } else if (keepvals) {
-		/* keep current value and toss new value */
-		log_warn("\nconf: Parameter %s already exists. "
-			 "Not using new value", curparm->name);
+                if (usewarning) {
+                    /* keep current value and toss new value */
+                    log_warn("\nconf: Parameter %s already exists. "
+                             "Not using new value", 
+                             curparm->name);
+                }
 		val_free_value(newparm);
 	    } else {
-		/* replace current value and warn old value tossed */
-		log_warn("\nconf: Parameter %s already exists. "
-			 "Overwriting with new value",
-			 curparm->name);
+                if (usewarning) {
+                    /* replace current value and warn old value tossed */
+                    log_warn("\nconf: Parameter %s already exists. "
+                             "Overwriting with new value",
+                             curparm->name);
+                }
 		dlq_remove(curparm);
 		val_free_value(curparm);
 		val_add_child(newparm, val);
@@ -732,8 +748,11 @@ static status_t
     while (!done) {
 	res = match_name(tkc, obj_get_name(val->obj));
 	if (res == ERR_NCX_EOF) {
-	    log_debug("\nconf: object '%s' not found in file '%s'",
-		      obj_get_name(val->obj), tkc->filename);
+            if (LOGDEBUG) {
+                log_debug("\nconf: object '%s' not found in file '%s'",
+                          obj_get_name(val->obj), 
+                          tkc->filename);
+            }
 	    return NO_ERR;
 	} else if (res != NO_ERR) {
 	    res = skip_object(tkc);

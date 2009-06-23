@@ -1293,17 +1293,21 @@ static status_t
 	    if (btyp==NCX_BT_ENUM) {
 		if (en->val < enl->val) {
 		    res = ERR_NCX_ENUM_VAL_ORDER;
-		    log_warn("\nWarning: Out of order enum '%s' = %d",
-			     (char *)en->name, en->val);
-		    ncx_print_errormsg(tkc, mod, res);
+                    if (ncx_warning_enabled(res)) {
+                        log_warn("\nWarning: Out of order enum '%s' = %d",
+                                 (char *)en->name, en->val);
+                        ncx_print_errormsg(tkc, mod, res);
+                    }
 		    done = TRUE;
 		}
 	    } else {
 		if (en->pos < enl->pos) {
 		    res = ERR_NCX_BIT_POS_ORDER;
-		    log_warn("\nWarning: Out of order bit '%s' = %u",
-			     (char *)en->name, en->pos);
-		    ncx_print_errormsg(tkc, mod, res);
+                    if (ncx_warning_enabled(res)) {
+                        log_warn("\nWarning: Out of order bit '%s' = %u",
+                                 (char *)en->name, en->pos);
+                        ncx_print_errormsg(tkc, mod, res);
+                    }
 		    done = TRUE;
 		}
 	    }

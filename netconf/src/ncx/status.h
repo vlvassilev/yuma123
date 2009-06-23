@@ -36,12 +36,12 @@ date             init     comment
  */  
 
 /* group the error messages by severity */
-#define ERR_INT_BASE        0        /* really 2, hold 'NO_ERR' here */
+#define ERR_INT_BASE         0        /* really 2, hold 'NO_ERR' here */
 #define ERR_FIRST_INT        2
-#define ERR_SYS_BASE        100
-#define ERR_USR_BASE        200
+#define ERR_SYS_BASE         100
+#define ERR_USR_BASE         200
 #define ERR_WARN_BASE        400
-#define ERR_INFO_BASE   500
+#define ERR_INFO_BASE        900
 
 /* for backward compatability */
 #define statusT         status_t
@@ -286,6 +286,7 @@ typedef enum status_t_
     ERR_NCX_DEC64_FRACOVFL,             /* 363 */
     ERR_NCX_RPC_WHEN_FAILED,            /* 364 */
     ERR_NCX_NO_MATCHES,                 /* 365 */
+    ERR_NCX_MISSING_REFTARGET,          /* 366 */
     ERR_LAST_USR_ERR,                   /* 366 -- not really used */
 
     /* user warnings start at 400 */
@@ -317,7 +318,7 @@ typedef enum status_t_
     ERR_NCX_DUP_AUGNODE,                /* 425 */
     ERR_NCX_DUP_IF_FEATURE,             /* 426 */
     ERR_NCX_USING_DEPRECATED,           /* 427 */
-    ERR_NCX_MISSING_REFTARGET,          /* 428 */
+    ERR_NCX_MAX_KEY_CHECK,              /* 428 */
     ERR_NCX_EMPTY_XPATH_RESULT,         /* 429 */
     ERR_NCX_NO_XPATH_ANCESTOR,          /* 430 */
     ERR_NCX_NO_XPATH_PARENT,            /* 431 */
@@ -328,13 +329,22 @@ typedef enum status_t_
     ERR_NCX_DUP_PREFIX,                 /* 436 */
     ERR_NCX_IDLEN_EXCEEDED,             /* 437 */
     ERR_NCX_LINELEN_EXCEEDED,           /* 438 */
-    ERR_LAST_WARN,                      /* 439 -- not really used */
+    ERR_NCX_RCV_UNKNOWN_CAP,            /* 439 */
+    ERR_NCX_RCV_INVALID_MODCAP,         /* 440 */
+    ERR_NCX_USING_ANYXML,               /* 441 */
+    ERR_NCX_USING_BADDATA,              /* 442 */
+    ERR_NCX_USING_STRING,               /* 443 */
+    ERR_NCX_USING_RESERVED_NAME,        /* 444 */
+    ERR_NCX_CONF_PARM_EXISTS,           /* 445 */
+    ERR_NCX_NO_REVISION,                /* 446 */
+    ERR_NCX_DEPENDENCY_ERRORS,          /* 447 */
+    ERR_LAST_WARN,                      /* 447 -- not really used */
 
-    /* system info return codes start at 500 */
-    ERR_PARS_SECDONE=ERR_INFO_BASE,     /* 500 */
-    ERR_NCX_SKIPPED,                    /* 501 */
-    ERR_NCX_CANCELED,                   /* 502 */
-    ERR_LAST_INFO                       /* 503 -- not really used */
+    /* system info return codes start at 900 */
+    ERR_PARS_SECDONE=ERR_INFO_BASE,     /* 900 */
+    ERR_NCX_SKIPPED,                    /* 901 */
+    ERR_NCX_CANCELED,                   /* 902 */
+    ERR_LAST_INFO                       /* 903 -- not really used */
 
 } status_t;
 

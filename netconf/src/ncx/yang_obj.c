@@ -4585,17 +4585,19 @@ static status_t
 
 	    /* check invalid status warning */
 	    if (stat < parentstat) {
-		log_warn("\nWarning: Invalid status: "
-			 "child node '%s' = '%s' and"
-			 " parent node '%s' = '%s'",
-			 obj_get_name(obj),
-			 ncx_get_status_string(stat),
-			 obj_get_name(obj->parent),
-			 ncx_get_status_string(parentstat));
-		tkc->cur = obj->tk;
-		ncx_print_errormsg(tkc, mod, ERR_NCX_INVALID_STATUS);
-	    }
-	}
+                if (ncx_warning_enabled(ERR_NCX_INVALID_STATUS)) {
+                    log_warn("\nWarning: Invalid status: "
+                             "child node '%s' = '%s' and"
+                             " parent node '%s' = '%s'",
+                             obj_get_name(obj),
+                             ncx_get_status_string(stat),
+                             obj_get_name(obj->parent),
+                             ncx_get_status_string(parentstat));
+                    tkc->cur = obj->tk;
+                    ncx_print_errormsg(tkc, mod, ERR_NCX_INVALID_STATUS);
+                }
+            }
+        }
 
 	/* check invalid config flag error for real object only */
 	if (obj->objtype <= OBJ_TYP_CASE &&
@@ -4819,6 +4821,7 @@ static status_t
     tk_chain_t           *newchain;
     obj_metadata_t       *meta;
     status_t              res, retres;
+    boolean               usewarning;
 
     retres = NO_ERR;
     
@@ -4826,6 +4829,8 @@ static status_t
     if (!que) {
 	return NO_ERR;
     }
+
+    usewarning = ncx_warning_enabled(ERR_NCX_USING_RESERVED_NAME);
 
     for (appinfo = 
 	     ncx_find_appinfo(que, NCX_PREFIX, NCX_EL_METADATA);
@@ -4881,28 +4886,36 @@ static status_t
 			 */
 			if (!xml_strcmp(meta->name, 
 					NC_OPERATION_ATTR_NAME)) {
-			    log_warn("\nWarning: metadata using "
-				     "reserved name 'operation' "
-				     "for object %s",
-				     obj_get_name(obj));
+                            if (usewarning) {
+                                log_warn("\nWarning: metadata using "
+                                         "reserved name 'operation' "
+                                         "for object %s",
+                                         obj_get_name(obj));
+                            }
 			} else if (!xml_strcmp(meta->name, 
 					       YANG_K_KEY)) {
-			    log_warn("\nWarning: metadata using "
-				     "reserved name 'key' "
-				     "for object %s",
-				     obj_get_name(obj));
+                            if (usewarning) {
+                                log_warn("\nWarning: metadata using "
+                                         "reserved name 'key' "
+                                         "for object %s",
+                                         obj_get_name(obj));
+                            }
 			} else if (!xml_strcmp(meta->name, 
 					       YANG_K_INSERT)) {
-			    log_warn("\nWarning: metadata using "
-				     "reserved name 'insert' "
-				     "for object %s",
-				     obj_get_name(obj));
+                            if (usewarning) {
+                                log_warn("\nWarning: metadata using "
+                                         "reserved name 'insert' "
+                                         "for object %s",
+                                         obj_get_name(obj));
+                            }
 			} else if (!xml_strcmp(meta->name, 
 					       YANG_K_VALUE)) {
-			    log_warn("\nWarning: metadata using "
-				     "reserved name 'value' "
-				     "for object %s",
-				     obj_get_name(obj));
+                            if (usewarning) {
+                                log_warn("\nWarning: metadata using "
+                                         "reserved name 'value' "
+                                         "for object %s",
+                                         obj_get_name(obj));
+                            }
 			}
 
 			/* save the metadata even if the name clashes
@@ -5343,14 +5356,17 @@ static status_t
 	/* make sure madatory=false is not set for the key leaf */
 	if ((keyobj->flags & OBJ_FL_MANDSET) && 
 	    !(keyobj->flags & OBJ_FL_MANDATORY)) {
-	    log_warn("\nWarning: 'mandatory false;' ignored in leaf '%s' "
-		     "on line %u for list '%s'",
-		     obj_get_name(keyobj), 
-		     keyobj->linenum, 
-		     list->name);
-	    tkc->cur = errtk;
-	    ncx_print_errormsg(tkc, mod, ERR_NCX_STMT_IGNORED);
-	}
+            if (ncx_warning_enabled(ERR_NCX_STMT_IGNORED)) {
+                log_warn("\nWarning: 'mandatory false;' "
+                         "ignored in leaf '%s' "
+                         "on line %u for list '%s'",
+                         obj_get_name(keyobj), 
+                         keyobj->linenum, 
+                         list->name);
+                tkc->cur = errtk;
+                ncx_print_errormsg(tkc, mod, ERR_NCX_STMT_IGNORED);
+            }
+        }
 
 	/* make sure config has same setting as the list parent */
 	keyconfig = obj_get_config_flag_deep(keyobj);
@@ -5565,13 +5581,18 @@ static status_t
 	     testcomp != NULL && res==NO_ERR;
 	     testcomp = (obj_unique_comp_t *)dlq_nextEntry(testcomp)) {
 	    if (testcomp->unobj == uniobj) {
-		log_warn("\nWarning: duplicate unique node '%s' on line %u "
-			  "for list '%s'",
-			  obj_get_name(uniobj),
-			  uniobj->linenum, list->name);
-		tkc->cur = errtk;
-		ncx_print_errormsg(tkc, mod,
-				   ERR_NCX_DUP_UNIQUE_COMP);
+                if (ncx_warning_enabled(ERR_NCX_DUP_UNIQUE_COMP)) {
+                    log_warn("\nWarning: duplicate unique "
+                             "node '%s' on line %u "
+                             "for list '%s'",
+                             obj_get_name(uniobj),
+                             uniobj->linenum, 
+                             list->name);
+                    tkc->cur = errtk;
+                    ncx_print_errormsg(tkc, 
+                                       mod,
+                                       ERR_NCX_DUP_UNIQUE_COMP);
+                }
 	    }
 	}
 
@@ -6230,10 +6251,10 @@ static status_t
 				       &targobj, 
                                        NULL);
 	if (res != NO_ERR || !targobj) {
-	    /* warning: refined obj not in the grouping */
-	    log_warn("\nWarning: refinement node '%s' not found"
+	    /* error: refined obj not in the grouping */
+	    log_error("\nError: refinement node '%s' not found"
 		      " in grouping '%s'",
-                     obj_get_name(chobj),
+                      obj_get_name(chobj),
 		      uses->grp->name);
 	    retres = ERR_NCX_MISSING_REFTARGET;
 	    tkc->cur = chobj->tk;
@@ -6791,17 +6812,19 @@ static status_t
 	    testobj = obj_find_template_test(targQ, NULL, name);
 	    if (testobj && xml_strcmp(obj_get_mod_name(testobj),
 				      obj_get_mod_name(chobj))) {
-		log_warn("\nWarning: sibling object '%s' "
-			 "already defined "
-			 "in %smodule '%s' at line %u",
-			 name, 
-			 (testobj->mod->ismod) ? "" : "sub",
-			 testobj->mod->name,
-			 testobj->linenum);
-		res = ERR_NCX_DUP_AUGNODE;
-		tkc->cur = chobj->tk;
-		ncx_print_errormsg(tkc, mod, res);
-	    }
+                if (ncx_warning_enabled(ERR_NCX_DUP_AUGNODE)) {
+                    log_warn("\nWarning: sibling object '%s' "
+                             "already defined "
+                             "in %smodule '%s' at line %u",
+                             name, 
+                             (testobj->mod->ismod) ? "" : "sub",
+                             testobj->mod->name,
+                             testobj->linenum);
+                    res = ERR_NCX_DUP_AUGNODE;
+                    tkc->cur = chobj->tk;
+                    ncx_print_errormsg(tkc, mod, res);
+                }
+            }
 
 	    /* try to find the node in the target namespace (error) */
 	    testobj = obj_find_template_test(targQ, 

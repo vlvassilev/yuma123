@@ -770,7 +770,7 @@ status_t
     xmlChar       *liststr, *commastr;
     uint32         parmnamelen, parmvallen, baselen, i;
     uint32         modulelen, revisionlen, featureslen, deviationslen;
-    boolean        curmod, currev, curfeat, curdev, done;
+    boolean        curmod, currev, curfeat, curdev, done, usewarning;
     status_t       res;
     xmlns_id_t     foundnsid;
 
@@ -805,6 +805,7 @@ status_t
     curfeat = FALSE;
     curdev = FALSE;
     parmnamelen = 0;
+    usewarning = ncx_warning_enabled(ERR_NCX_RCV_INVALID_MODCAP);
 
     /* lookup this namespace to see if it is already loaded */
     foundnsid = xmlns_find_ns_by_name_str(uri, baselen);
@@ -824,11 +825,19 @@ status_t
 	    continue;
 	}
 
-	res = parse_uri_parm(parmname, &parmnamelen, 
-			     &parmval, &parmvallen, &nextparmname);
+	res = parse_uri_parm(parmname, 
+                             &parmnamelen, 
+			     &parmval, 
+                             &parmvallen, 
+                             &nextparmname);
 	if (res != NO_ERR) {
-	    log_warn("\nWarning: skipping invalid parameter syntax (%s) "
-		     "in capability URI '%s'", get_error_string(res), uri);
+            if (usewarning) {
+                log_warn("\nWarning: skipping invalid "
+                         "parameter syntax (%s) "
+                         "in capability URI '%s'", 
+                         get_error_string(res), 
+                         uri);
+            }
 	    if (NEED_EXIT(res)) {
 		done = TRUE;
 	    }
@@ -836,57 +845,78 @@ status_t
 	}
 
 	/* check that the parameter name matches one of the expected names */
-	if (!xml_strncmp(parmname, YANG_K_MODULE, xml_strlen(YANG_K_MODULE))) {
+	if (!xml_strncmp(parmname, 
+                         YANG_K_MODULE, 
+                         xml_strlen(YANG_K_MODULE))) {
 	    if (curmod) {
-		log_warn("\nWarning: skipping duplicate 'module' parameter "
-			 "in capability URI '%s'", uri);
+                if (usewarning) {
+                    log_warn("\nWarning: skipping duplicate "
+                             "'module' parameter "
+                             "in capability URI '%s'", 
+                             uri);
+                }
 	    } else {
 		curmod = TRUE;
 		module = parmval;
 		modulelen = parmvallen;
 	    }
-	} else if (!xml_strncmp(parmname, YANG_K_REVISION, 
+	} else if (!xml_strncmp(parmname, 
+                                YANG_K_REVISION, 
 				xml_strlen(YANG_K_REVISION))) {
 	    if (currev) {
-		log_warn("\nWarning: skipping duplicate 'revision' parameter "
-			 "in capability URI '%s'", uri);
+                if (usewarning) {
+                    log_warn("\nWarning: skipping duplicate "
+                             "'revision' parameter "
+                             "in capability URI '%s'", 
+                             uri);
+                }
 	    } else {
 		currev = TRUE;
 		revision = parmval;
 		revisionlen = parmvallen;
 	    }
-	} else if (!xml_strncmp(parmname, YANG_K_FEATURES, 
+	} else if (!xml_strncmp(parmname, 
+                                YANG_K_FEATURES, 
 				xml_strlen(YANG_K_FEATURES))) {
 	    if (curfeat) {
-		log_warn("\nWarning: skipping duplicate 'features' parameter "
-			 "in capability URI '%s'", uri);
+                if (usewarning) {
+                    log_warn("\nWarning: skipping duplicate "
+                             "'features' parameter "
+                             "in capability URI '%s'", 
+                             uri);
+                }
 	    } else {
 		curfeat = TRUE;
 		features = parmval;
 		featureslen = parmvallen;
 	    }
-	} else if (!xml_strncmp(parmname, YANG_K_DEVIATIONS, 
+	} else if (!xml_strncmp(parmname, 
+                                YANG_K_DEVIATIONS, 
 				xml_strlen(YANG_K_DEVIATIONS))) {
 	    if (curdev) {
-		log_warn("\nWarning: skipping duplicate 'deviations' parameter "
-			 "in capability URI '%s'", uri);
+                if (usewarning) {
+                    log_warn("\nWarning: skipping duplicate "
+                             "'deviations' parameter "
+                             "in capability URI '%s'", 
+                             uri);
+                }
 	    } else {
 		curdev = TRUE;
 		deviations = parmval;
 		deviationslen = parmvallen;
 	    }
-	} else if (LOGWARN) {
+        } else if (usewarning) {
 	    /* skip over this unknown parameter */
-	    log_warn("\nWarning: skipping unknown parameter '");
-	    for (i=0; i<parmnamelen; i++) {
-		log_warn("%c", parmname[i]);
-	    }
-	    log_warn("=");
-	    for (i=0; i<parmvallen; i++) {
-		log_warn("%c", parmval[i]);
-	    }
-	    log_warn("' in capability URI '%s'", uri);
-	}
+            log_warn("\nWarning: skipping unknown parameter '");
+            for (i=0; i<parmnamelen; i++) {
+                log_warn("%c", parmname[i]);
+            }
+            log_warn("=");
+            for (i=0; i<parmvallen; i++) {
+                log_warn("%c", parmval[i]);
+            }
+            log_warn("' in capability URI '%s'", uri);
+        }
     }
 
     if (NEED_EXIT(res)) {
@@ -895,8 +925,12 @@ status_t
 
     if (!module) {
 	if (revision || features || deviations) {
-	    log_warn("\nWarning: 'module' parameter missing from possible "
-		     "capability URI '%s'", uri);
+            if (usewarning) {
+                log_warn("\nWarning: 'module' parameter "
+                         "missing from possible "
+                         "capability URI '%s'", 
+                         uri);
+            }
 	}
 	return ERR_NCX_SKIPPED;
     }
@@ -924,9 +958,12 @@ status_t
     if (foundnsid) {
 	parmname = xmlns_get_module(foundnsid);
 	if (xml_strcmp(parmname, cap->cap_module)) {
-	    log_warn("\nWarning: capability base URI mismatch, "
-		     "got '%s' not '%s''", 
-		     cap->cap_module,  parmname);
+            if (usewarning) {
+                log_warn("\nWarning: capability base URI mismatch, "
+                         "got '%s' not '%s''", 
+                         cap->cap_module,  
+                         parmname);
+            }
 	}
     }
 
@@ -936,9 +973,10 @@ status_t
 	    free_cap(cap);
 	    return ERR_INTERNAL_MEM;
 	}
-    } else {
+    } else if (usewarning) {
 	log_warn("\nWarning: 'revision' parameter missing from "
-		 "capability URI '%s'", uri);
+		 "capability URI '%s'", 
+                 uri);
     }
 
     if (features) {
@@ -956,7 +994,8 @@ status_t
 	    commastr++;
 	}
 
-	res = ncx_set_list(NCX_BT_STRING, liststr, 
+	res = ncx_set_list(NCX_BT_STRING, 
+                           liststr, 
 			   &cap->cap_feature_list);
 	m__free(liststr);
 	if (res != NO_ERR) {
@@ -980,7 +1019,8 @@ status_t
 	    commastr++;
 	}
 
-	res = ncx_set_list(NCX_BT_STRING, liststr, 
+	res = ncx_set_list(NCX_BT_STRING, 
+                           liststr, 
 			   &cap->cap_deviation_list);
 	m__free(liststr);
 	if (res != NO_ERR) {
@@ -1074,8 +1114,7 @@ status_t
 		return ERR_INTERNAL_MEM;
 	    }
 	    caplist->cap_defstyle = 
-		xml_strndup(defstyle,
-			    basiclen);
+		xml_strndup(defstyle, basiclen);
 	    if (!caplist->cap_defstyle) {
 		return ERR_INTERNAL_MEM;
 	    }
@@ -1276,7 +1315,7 @@ status_t
 
     /* make the capability element */
     capval = xml_val_new_string(NCX_EL_CAPABILITY,
-				 xmlns_nc_id(), 
+                                xmlns_nc_id(), 
 				str);
     if (!capval) {
 	m__free(str);
@@ -1309,8 +1348,9 @@ boolean
         return FALSE;
     }
     if (capstd < CAP_STDID_LAST_MARKER) {
-	return (m__bitset(caplist->cap_std, stdcaps[capstd].cap_bitnum))
-		? TRUE : FALSE;
+	return (m__bitset(caplist->cap_std, 
+                          stdcaps[capstd].cap_bitnum))
+            ? TRUE : FALSE;
     } else {
 	return FALSE;
     }
@@ -1350,8 +1390,10 @@ boolean
 
     /* check if this is a NETCONF standard capability */
     len = xml_strlen(CAP_URN);
-    if ((xml_strlen(capuri) > len+1) && !xml_strncmp(capuri, 
-	     (const xmlChar *) CAP_URN, len)) {
+    if ((xml_strlen(capuri) > len+1) && 
+        !xml_strncmp(capuri, 
+                     (const xmlChar *)CAP_URN, 
+                     len)) {
 
 	/* set str to the 'capability-name:version-number' */
 	str = &capuri[len];    
@@ -1431,7 +1473,8 @@ void
     }
 
     for (capid = CAP_STDID_WRITE_RUNNING;
-	 capid < CAP_STDID_LAST_MARKER;	 capid++) {
+	 capid < CAP_STDID_LAST_MARKER;	 
+         capid++) {
 
 	if (cap_std_set(caplist, capid)) {
 	    log_write("\n   %s", stdcaps[capid].cap_name);

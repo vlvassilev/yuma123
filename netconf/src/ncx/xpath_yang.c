@@ -742,14 +742,16 @@ static status_t
     if (pcb->targobj && pcb->targobj->objtype == OBJ_TYP_LIST) {
 	keytotal = obj_key_count(pcb->targobj);
 	if (keytotal > MAX_KEYS) {
-	    if (pcb->logerrors) {
+	    if (pcb->logerrors && 
+                ncx_warning_enabled(ERR_NCX_MAX_KEY_CHECK)) {
 		log_warn("\nWarning: Only first %u keys in list '%s'"
 			 " can be checked in XPath expression", 
 			 MAX_KEYS,
 			 obj_get_name(pcb->obj));
 	    }
 	}
-    } else if ((pcb->flags & XP_FL_INSTANCEID) && pcb->targobj && 
+    } else if ((pcb->flags & XP_FL_INSTANCEID) && 
+               pcb->targobj && 
 	       pcb->targobj->objtype == OBJ_TYP_LEAF_LIST) {
 	keytotal = 1;
     }
@@ -832,8 +834,10 @@ static status_t
 		    keyflags |= keybit;
 		}
 	    } else {
-		if (pcb->logerrors) {
-		    log_warn("\nWarning: Key '%s' skipped in validation test",
+		if (pcb->logerrors &&
+                    ncx_warning_enabled(ERR_NCX_MAX_KEY_CHECK)) {
+		    log_warn("\nWarning: Key '%s' skipped "
+                             "in validation test",
 			     obj_get_name(pcb->varobj));
 		}
 	    }

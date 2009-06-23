@@ -1319,9 +1319,12 @@ status_t
 
     switch (bad_data) {
     case NCX_BAD_DATA_WARN:
-	log_warn("\nWarning: invalid value '%s' used for parm '%s'",
-		 (strval) ? strval : EMPTY_STRING,
-		 obj_get_name(obj));
+        if (ncx_warning_enabled(ERR_NCX_USING_BADDATA)) {
+            log_warn("\nWarning: invalid value "
+                     "'%s' used for parm '%s'",
+                     (strval) ? strval : EMPTY_STRING,
+                     obj_get_name(obj));
+        }
 	/* drop through */
     case NCX_BAD_DATA_IGNORE:
 	genstr = ncx_get_gen_string();

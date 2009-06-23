@@ -976,10 +976,6 @@ static status_t
 	} /* else use default modpath */
     }
 
-    if (logfilename) {
-	m__free(logfilename);
-    }
-
     cli_clean_rawparmQ(&parmQ);
     return res;
 
@@ -10660,6 +10656,10 @@ boolean
 
     if (res < ERR_WARN_BASE) {
         return TRUE;
+    }
+
+    if (!LOGWARN) {
+        return FALSE;
     }
 
     /* check if 'res' already entered */

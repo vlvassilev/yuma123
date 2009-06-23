@@ -1304,7 +1304,7 @@ static status_t
 	 * of an RPC function call 
 	 */
 	if (agent_cb->result_name) {
-	    log_warn("\nWarning: result already pending for %s",
+	    log_error("\nError: result already pending for %s",
 		     agent_cb->result_name);
 	    m__free(agent_cb->result_name);
 	    agent_cb->result_name = NULL;
@@ -2136,8 +2136,11 @@ static void
 			 &version);
 
 	if (module==NULL || !modlen || !version) {
-	    log_warn("\nWarning: skipping invalid module capability "
-		     "for URI '%s'", cap->cap_uri);
+            if (ncx_warning_enabled(ERR_NCX_RCV_INVALID_MODCAP)) {
+                log_warn("\nWarning: skipping invalid module capability "
+                         "for URI '%s'", 
+                         cap->cap_uri);
+            }
 	    cap = cap_next_modcap(cap);
 	    continue;
 	}
@@ -2189,9 +2192,10 @@ static void
 	    }
 
 	    if (yang_compare_revision_dates(mod->version, version)) {
-		log_warn("\nyangcli warning: Module %s "
+		log_error("\nError: Module %s "
 			 "has different version on agent!! (%s)",
-			 namebuff, mod->version);
+			 namebuff, 
+                         mod->version);
 	    }
 	}
 

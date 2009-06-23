@@ -1380,11 +1380,17 @@ static status_t
         switch (cp->format) {
         case NCX_CVTTYP_NONE:
             if (ncx_any_dependency_errors(pcb->top)) {
-                log_warn("\nWarning: one or more modules imported into '%s' "
-                         "had errors", pcb->top->sourcefn);
+                if (ncx_warning_enabled(ERR_NCX_DEPENDENCY_ERRORS)) {
+                    log_warn("\nWarning: one or more modules "
+                             "imported into '%s' "
+                             "had errors", 
+                             pcb->top->sourcefn);
+                }
             }
-            log_debug2("\nFile '%s' compiled without errors",
-                       pcb->top->sourcefn);
+            if (LOGDEBUG2) {
+                log_debug2("\nFile '%s' compiled without errors",
+                           pcb->top->sourcefn);
+            }
             break;
         case NCX_CVTTYP_XSD:
             if (ncx_any_dependency_errors(pcb->top)) {

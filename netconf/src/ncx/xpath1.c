@@ -336,7 +336,8 @@ static void
 static void
     no_parent_warning (xpath_pcb_t *pcb)
 {
-    if (pcb->logerrors) {
+    if (pcb->logerrors && 
+        ncx_warning_enabled(ERR_NCX_NO_XPATH_PARENT)) {
 	log_warn("\nWarning: no parent found "
 		  "in XPath expr '%s'", pcb->exprstr);
 	ncx_print_errormsg(pcb->tkc, 
@@ -5039,9 +5040,11 @@ static status_t
 			dlq_enque(resnode, &resnodeQ);
 		    }
 		} else {
-		    if (pcb->logerrors) {
+		    if (pcb->logerrors && 
+                        ncx_warning_enabled(ERR_NCX_NO_XPATH_NODES)) {
 			log_warn("\nWarning: no self node found "
-				 "in XPath expr '%s'", pcb->exprstr);
+				 "in XPath expr '%s'", 
+                                 pcb->exprstr);
 			ncx_print_errormsg(pcb->tkc, 
 					   pcb->objmod, 
 					   ERR_NCX_NO_XPATH_NODES);
@@ -5514,14 +5517,21 @@ static status_t
 	if (pcb->logerrors) {
 	    if (axis != XP_AX_CHILD) {
 		res = ERR_NCX_NO_XPATH_DESCENDANT;
-		log_warn("\nWarning: no descendant nodes found "
-			 "in XPath expr '%s'", pcb->exprstr);
+                if (ncx_warning_enabled(res)) {
+                    log_warn("\nWarning: no descendant nodes found "
+                             "in XPath expr '%s'", 
+                             pcb->exprstr);
+                    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+                }
 	    } else {
 		res = ERR_NCX_NO_XPATH_CHILD;
-		log_warn("\nWarning: no child nodes found "
-			 "in XPath expr '%s'", pcb->exprstr);
+                if (ncx_warning_enabled(res)) {
+                    log_warn("\nWarning: no child nodes found "
+                             "in XPath expr '%s'", 
+                             pcb->exprstr);
+                    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+                }
 	    }
-	    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
 	    res = NO_ERR;
 	}
     }
@@ -5691,7 +5701,7 @@ static status_t
 	dlq_block_enque(&resnodeQ, &result->r.nodeQ);
     } else if (!pcb->val && pcb->obj) {
 	res = ERR_NCX_NO_XPATH_NODES;
-	if (pcb->logerrors) {
+	if (pcb->logerrors && ncx_warning_enabled(res)) {
 	    log_warn("\nWarning: no axis nodes found "
 		     "in XPath expr '%s'", 
 		     pcb->exprstr);
@@ -5891,7 +5901,7 @@ static status_t
 	dlq_block_enque(&resnodeQ, &result->r.nodeQ);
     } else {
 	res = ERR_NCX_NO_XPATH_ANCESTOR;
-	if (pcb->logerrors) {
+	if (pcb->logerrors && ncx_warning_enabled(res)) {
 	    if (orself) {
 		log_warn("\nWarning: no ancestor-or-self nodes found "
 			 "in XPath expr '%s'", pcb->exprstr);
@@ -6056,10 +6066,14 @@ static status_t
 	case XP_EXNT_COMMENT:
 	    /* no comments to match */
 	    emptyresult = TRUE;
-	    if (pcb->obj && pcb->logerrors) {
+	    if (pcb->obj && 
+                pcb->logerrors && 
+                ncx_warning_enabled(ERR_NCX_EMPTY_XPATH_RESULT)) {
 		log_warn("\nWarning: no comment nodes available in "
-			 "XPath expr '%s'", pcb->exprstr);
-		ncx_print_errormsg(pcb->tkc, pcb->mod,
+			 "XPath expr '%s'", 
+                         pcb->exprstr);
+		ncx_print_errormsg(pcb->tkc, 
+                                   pcb->mod,
 				   ERR_NCX_EMPTY_XPATH_RESULT);
 	    }
 	    break;
@@ -6071,11 +6085,15 @@ static status_t
 	case XP_EXNT_PROC_INST:
 	    /* no processing instructions to match */
 	    emptyresult = TRUE;
-	    if (pcb->obj && pcb->logerrors) {
+	    if (pcb->obj && 
+                pcb->logerrors &&
+                ncx_warning_enabled(ERR_NCX_EMPTY_XPATH_RESULT)) {
 		log_warn("\nWarning: no processing instruction "
 			 "nodes available in "
-			 "XPath expr '%s'", pcb->exprstr);
-		ncx_print_errormsg(pcb->tkc, pcb->mod,
+			 "XPath expr '%s'", 
+                         pcb->exprstr);
+		ncx_print_errormsg(pcb->tkc, 
+                                   pcb->mod,
 				   ERR_NCX_EMPTY_XPATH_RESULT);
 	    }
 	    break;
@@ -6156,7 +6174,9 @@ static status_t
 	 *
 	 * just set the result to the empty nodeset
 	 */
-	if (pcb->obj && pcb->logerrors) {
+	if (pcb->obj && 
+            pcb->logerrors &&
+            ncx_warning_enabled(ERR_NCX_EMPTY_XPATH_RESULT)) {
 	    log_warn("\nWarning: attribute axis is empty in "
 		     "XPath expr '%s'", pcb->exprstr);
 	    ncx_print_errormsg(pcb->tkc, pcb->mod,
@@ -6236,10 +6256,14 @@ static status_t
 	 *
 	 * For now, just turn the result into the empty set
 	 */
-	if (pcb->obj && pcb->logerrors) {
+	if (pcb->obj && 
+            pcb->logerrors &&
+            ncx_warning_enabled(ERR_NCX_EMPTY_XPATH_RESULT)) {
 	    log_warn("Warning: namespace axis is empty in "
-		     "XPath expr '%s'", pcb->exprstr);
-	    ncx_print_errormsg(pcb->tkc, pcb->mod,
+		     "XPath expr '%s'", 
+                     pcb->exprstr);
+	    ncx_print_errormsg(pcb->tkc, 
+                               pcb->mod,
 			       ERR_NCX_EMPTY_XPATH_RESULT);
 	}
 	if (*result) {
@@ -6253,10 +6277,14 @@ static status_t
     case XP_AX_PARENT:
 	/* step is parent::*  -- same as .. for nodes  */
 	if (textmode) {
-	    if (pcb->obj && pcb->logerrors) {
+	    if (pcb->obj && 
+                pcb->logerrors &&
+                ncx_warning_enabled(ERR_NCX_EMPTY_XPATH_RESULT)) {
 		log_warn("Warning: parent axis contains no text nodes in "
-		     "XPath expr '%s'", pcb->exprstr);
-		ncx_print_errormsg(pcb->tkc, pcb->mod,
+		     "XPath expr '%s'", 
+                         pcb->exprstr);
+		ncx_print_errormsg(pcb->tkc, 
+                                   pcb->mod,
 				   ERR_NCX_EMPTY_XPATH_RESULT);
 	    }
 	    if (*result) {

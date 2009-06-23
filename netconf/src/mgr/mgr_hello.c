@@ -158,8 +158,10 @@ static status_t
     /* go through the capability nodes and construct a caplist */
     for (cap = val_find_child(caps, NC_MODULE, NCX_EL_CAPABILITY);
 	 cap != NULL;
-	 cap = val_find_next_child(caps, NC_MODULE, 
-				   NCX_EL_CAPABILITY, cap)) {
+	 cap = val_find_next_child(caps, 
+                                   NC_MODULE, 
+				   NCX_EL_CAPABILITY, 
+                                   cap)) {
 
 	if (cap->res != NO_ERR) {
 	    continue;
@@ -169,8 +171,10 @@ static status_t
 	if (res == ERR_NCX_SKIPPED) {
 	    res = cap_add_module_string(&mscb->caplist, VAL_STR(cap));
 	    if (res == ERR_NCX_SKIPPED) {
-		log_warn("\nWarning: received unknown capability '%s'",
-			 VAL_STR(cap));
+                if (ncx_warning_enabled(ERR_NCX_RCV_UNKNOWN_CAP)) {
+                    log_warn("\nWarning: received unknown capability '%s'",
+                             VAL_STR(cap));
+                }
 		res = cap_add_ent(&mscb->caplist, VAL_STR(cap));
 		if (res != NO_ERR) {
 		    return res;
@@ -196,10 +200,12 @@ static status_t
 	mscb->targtyp = NCX_AGT_TARG_CANDIDATE;
     } else {
 	mscb->targtyp = NCX_AGT_TARG_NONE;
-	log_info("\nmgr_hello: no writable target found for"
-		 " session %u (a:%u)", 
-		 scb->sid,
-		 mscb->agtsid);
+        if (LOGINFO) {
+            log_info("\nmgr_hello: no writable target found for"
+                     " session %u (a:%u)", 
+                     scb->sid,
+                     mscb->agtsid);
+        }
     }
 
     /* set the startup type in the mscb */
@@ -291,7 +297,9 @@ void
 #endif
 
 #ifdef MGR_HELLO_DEBUG
-    log_debug("\nmgr_hello got node");
+    if (LOGDEBUG) {
+        log_debug("\nmgr_hello got node");
+    }
     if (LOGDEBUG2) {
 	xml_dump_node(top);
     }
@@ -302,8 +310,10 @@ void
     /* only process this message in hello wait state */
     if (scb->state != SES_ST_HELLO_WAIT) {
 	/* TBD: stats update */
-	log_info("\nmgr_hello dropped, wrong state for session %d",
-		 scb->sid);
+        if (LOGINFO) {
+            log_info("\nmgr_hello dropped, wrong state for session %d",
+                     scb->sid);
+        }
 	return;
     }
 
@@ -346,14 +356,18 @@ void
 
     /* report first error and close session */
     if (res != NO_ERR) {
-	log_info("\nmgr_connect error (%s)\n  dropping session %u (a:%u)",
-		 get_error_string(res), 
-		 scb->sid, 
-		 mscb->agtsid,
-		 res);
+        if (LOGINFO) {
+            log_info("\nmgr_connect error (%s)\n  dropping session %u (a:%u)",
+                     get_error_string(res), 
+                     scb->sid, 
+                     mscb->agtsid,
+                     res);
+        }
     } else {
 	scb->state = SES_ST_IDLE;
-	log_debug("\nmgr_hello manager hello ok");
+        if (LOGDEBUG) {
+            log_debug("\nmgr_hello manager hello ok");
+        }
     }
     if (val) {
 	val_free_value(val);
@@ -391,7 +405,9 @@ status_t
 #endif
 
 #ifdef MGR_HELLO_DEBUG
-    log_debug2("\nmgr sending hello on session %d", scb->sid);
+    if (LOGDEBUG2) {
+        log_debug2("\nmgr sending hello on session %d", scb->sid);
+    }
 #endif
 
     res = NO_ERR;

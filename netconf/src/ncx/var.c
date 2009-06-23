@@ -1714,10 +1714,12 @@ val_value_t *
 	 * issue a warning that the old data type is
 	 * getting changed to generic string
 	 */
-	log_warn("\nWarning: changing object type from '%s' "
-		 "to 'string' for var '%s'",
-		 obj_get_typestr(useobj),
-		 newval->name);
+        if (ncx_warning_enabled(ERR_NCX_USING_STRING)) {
+            log_warn("\nWarning: changing object type from '%s' "
+                     "to 'string' for var '%s'",
+                     obj_get_typestr(useobj),
+                     newval->name);
+        }
 
 	useobj = ncx_get_gen_string();
 	*res = val_set_simval(newval,
@@ -1737,8 +1739,6 @@ val_value_t *
     return newval;
 
 }  /* var_check_script_val */
-
-
 
 
 /* END var.c */

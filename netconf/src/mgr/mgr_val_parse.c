@@ -1561,10 +1561,12 @@ static status_t
 
 
 	    if (!curchild || res != NO_ERR) {
-		log_warn("\nWarning: '%s' has no child node "
-                         "'%s'. Using anyxml",
-                         retval->name, 
-                         chnode.qname);
+                if (ncx_warning_enabled(ERR_NCX_USING_ANYXML)) {
+                    log_warn("\nWarning: '%s' has no child node "
+                             "'%s'. Using anyxml",
+                             retval->name, 
+                             chnode.qname);
+                }
 		curchild = ncx_get_gen_anyxml();
 		res = NO_ERR;
 		errmode = TRUE;

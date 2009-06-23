@@ -2331,8 +2331,8 @@ void
 	SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
-    if (parentval->btyp != NCX_BT_CONTAINER || 
-        parentval->btyp != NCX_BT_LIST) {
+    if (!(parentval->btyp == NCX_BT_CONTAINER || 
+          parentval->btyp == NCX_BT_LIST)) {
 	SET_ERROR(ERR_INTERNAL_VAL);
         return;
     }
@@ -2406,8 +2406,8 @@ void
 	SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
-    if (parentval->btyp != NCX_BT_CONTAINER || 
-        parentval->btyp != NCX_BT_LIST) {
+    if (!(parentval->btyp == NCX_BT_CONTAINER || 
+          parentval->btyp == NCX_BT_LIST)) {
 	SET_ERROR(ERR_INTERNAL_VAL);
         return;
     }

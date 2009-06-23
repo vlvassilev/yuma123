@@ -608,6 +608,8 @@ const char *
 	return "when-stmt tested false";
     case ERR_NCX_NO_MATCHES:
 	return "no matches found";
+    case ERR_NCX_MISSING_REFTARGET:
+	return "missing refine target";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:
@@ -666,8 +668,8 @@ const char *
 	return "duplicate if-feature statement";
     case ERR_NCX_USING_DEPRECATED:
 	return "using deprecated definition";
-    case ERR_NCX_MISSING_REFTARGET:
-	return "missing refine target";
+    case ERR_NCX_MAX_KEY_CHECK:
+        return "XPath object predicate check limit reached";
     case ERR_NCX_EMPTY_XPATH_RESULT:
 	return "empty XPath result in must or when expr";
     case ERR_NCX_NO_XPATH_ANCESTOR:
@@ -688,6 +690,24 @@ const char *
 	return "identifier length exceeded";
     case ERR_NCX_LINELEN_EXCEEDED:
 	return "display line length exceeded";
+    case ERR_NCX_RCV_UNKNOWN_CAP:
+        return "received unknown capability";
+    case ERR_NCX_RCV_INVALID_MODCAP:
+        return "invalid module capability URI";
+    case ERR_NCX_USING_ANYXML:
+        return "unknown child node, using anyxml";
+    case ERR_NCX_USING_BADDATA:
+        return "invalid value used for parm";
+    case ERR_NCX_USING_STRING:
+        return "changing object type to string";
+    case ERR_NCX_USING_RESERVED_NAME:
+        return "using a reserved name";
+    case ERR_NCX_CONF_PARM_EXISTS:
+        return "conf file parm already exists";
+    case ERR_NCX_NO_REVISION:
+        return "no valid revision statements found";
+    case ERR_NCX_DEPENDENCY_ERRORS:
+        return "dependency file has errors";
 
     /* system info codes start at 500 */
     case ERR_PARS_SECDONE:

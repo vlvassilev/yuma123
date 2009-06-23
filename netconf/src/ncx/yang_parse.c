@@ -1498,11 +1498,14 @@ static status_t
 		imp->usexsd = FALSE;
 		if (!xml_strcmp(testimp->prefix, imp->prefix)) {
 		    /* warning for exact duplicate import */
-		    log_warn("\nWarning: duplicate import found on line %u",
-			     testimp->tk->linenum);
-		    res = ERR_NCX_DUP_IMPORT;
-		    ncx_print_errormsg(tkc, mod, res);
-		} else {
+                    if (ncx_warning_enabled(ERR_NCX_DUP_IMPORT)) {
+                        log_warn("\nWarning: duplicate import "
+                                 "found on line %u",
+                                 testimp->tk->linenum);
+                        res = ERR_NCX_DUP_IMPORT;
+                        ncx_print_errormsg(tkc, mod, res);
+                    }
+		} else if (ncx_warning_enabled(ERR_NCX_PREFIX_DUP_IMPORT)) {
 		    /* warning for dup. import w/ different prefix */
 		    log_warn("\nWarning: same import with different prefix"
 			     " found on line %u", testimp->tk->linenum);
@@ -1864,10 +1867,12 @@ static status_t
 		 * include statements
 		 */
 		inc->usexsd = FALSE;
-		log_warn("\nWarning: duplicate include found on line %u",
-			 testinc->tk->linenum);
-		res = ERR_NCX_DUP_INCLUDE;
-		ncx_print_errormsg(tkc, mod, res);
+                if (ncx_warning_enabled(ERR_NCX_DUP_INCLUDE)) {
+                    log_warn("\nWarning: duplicate include found on line %u",
+                             testinc->tk->linenum);
+                    res = ERR_NCX_DUP_INCLUDE;
+                    ncx_print_errormsg(tkc, mod, res);
+                }
 	    }
 	} else {
 	    /* check simple submodule loop with itself */
@@ -2571,15 +2576,18 @@ static status_t
 	    } else {
 		ret = yang_compare_revision_dates(rev->version, val);
 		if (ret > 0) {
-		    log_warn("\nWarning: revision dates not in "
-			     "descending order");
-		    savetk = TK_CUR(tkc);
-		    TK_CUR(tkc) = rev->tk;
-		    ncx_print_errormsg(tkc, mod, 
-				       ERR_NCX_BAD_REV_ORDER);
-		    TK_CUR(tkc) = savetk;
-		    val = rev->version;
-		}
+                    if (ncx_warning_enabled(ERR_NCX_BAD_REV_ORDER)) {
+                        log_warn("\nWarning: revision dates not in "
+                                 "descending order");
+                        savetk = TK_CUR(tkc);
+                        TK_CUR(tkc) = rev->tk;
+                        ncx_print_errormsg(tkc, 
+                                           mod, 
+                                           ERR_NCX_BAD_REV_ORDER);
+                        TK_CUR(tkc) = savetk;
+                    }
+                    val = rev->version;
+                }
 	    }
 	}
     }
@@ -2590,42 +2598,14 @@ static status_t
 	mod->version = xml_strdup(val);
     }
 
-#if 0
-    /**** WAS USED TO SET REVISION TO CUR-DATE ****/
-    if (!mod->version) {
-	/* hard-wire the version to current date if no revision clauses */
-	str = m__getMem(TSTAMP_DATE_SIZE);
-	if (str) {
-	    tstamp_date(str);
-	    mod->version = str;
-	}
-    }
-    /* check if malloc worked */
-    if (!mod->version) {
-	retres = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, retres);
-    }
-
-    if (val) {
-	;
-    } else if (!dlq_empty(&mod->revhistQ)) {
-	log_warn("\nWarning: no valid revision statements, setting "
-		 "version to '%s' for %smodule '%s'",
-		 mod->version, (mod->ismod) ? "" : "sub", mod->name);
-	mod->warnings++;
-    } else {
-	log_warn("\nWarning: no revision statements, setting "
-		 "version to '%s' for %smodule '%s'",
-		 mod->version, (mod->ismod) ? "" : "sub", mod->name);
-	mod->warnings++;
-    }
-#else
     /* leave the version NULL if no good revision dates found */
     if (!val) {
-	log_warn("\nWarning: no revision statements "
-		 "for %smodule '%s'",
-		 (mod->ismod) ? "" : "sub", mod->name);
-	mod->warnings++;
+        if (ncx_warning_enabled(ERR_NCX_NO_REVISION)) {
+            log_warn("\nWarning: no revision statements "
+                     "for %smodule '%s'",
+                     (mod->ismod) ? "" : "sub", mod->name);
+            mod->warnings++;
+        }
     } else if (pcb->revision && 
 	       yang_compare_revision_dates(val, pcb->revision)) {
 
@@ -2636,7 +2616,6 @@ static status_t
 	retres = ERR_NCX_WRONG_VERSION;
 	ncx_print_errormsg(tkc, mod, retres);
     }
-#endif
 
     return retres;
 

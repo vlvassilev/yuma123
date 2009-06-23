@@ -64,6 +64,10 @@ date         init     comment
 #include "val.h"
 #endif
 
+#ifndef _H_val_util
+#include "val_util.h"
+#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -364,6 +368,12 @@ status_t
                 }
             }
         } /* else no default config location */
+
+        /* set the logging control parameters */
+        val_set_logging_parms(valset);
+
+        /* set the warning control parameters */
+        val_set_warning_parms(valset);
 
         /* check if version mode requested */
         val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_VERSION);

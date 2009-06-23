@@ -280,18 +280,6 @@ static ncx_display_mode_t   display_mode;
  */
 static boolean         fixorder;
 
-/* global log level for all logging except for direct STDOUT output */
-static log_debug_t     log_level;
-
-/* TRUE if append to existing log; FALSE to start a new log */
-static boolean         logappend;
-
-/* optional log filespec given at invocation to store output
- * user IO from the KBD will still be done, but errors and
- * warnings will be sent to the file, not STDOUT
- */
-static xmlChar        *logfilename;
-
 /* FALSE to skip optional nodes in do_fill
  * TRUE to check optional nodes in do_fill
  */
@@ -564,7 +552,7 @@ static agent_cb_t *
     /* set default agent flags to current settings */
     agent_cb->state = MGR_IO_ST_INIT;
     agent_cb->baddata = baddata;
-    agent_cb->log_level = log_level;
+    agent_cb->log_level = log_get_debug_level();
     agent_cb->autoload = autoload;
     agent_cb->fixorder = fixorder;
     agent_cb->get_optional = optional;
@@ -805,9 +793,8 @@ static status_t
 		      "warn, info, debug, debug2)\n");
 	    res = ERR_NCX_INVALID_VALUE;
 	} else {
-            log_level = testloglevel;
-	    agent_cb->log_level = testloglevel;
 	    log_set_debug_level(testloglevel);
+	    agent_cb->log_level = testloglevel;
 	}
     } else if (!xml_strcmp(configval->name, YANGCLI_FIXORDER)) {
 	if (ncx_is_true(usestr)) {
@@ -1564,9 +1551,9 @@ static status_t
     }
 
     /* could have changed during CLI processing */
-    log_level = log_get_debug_level();
     res = create_config_var(NCX_EL_LOGLEVEL, 
-			    log_get_debug_level_string(log_level));
+			    log_get_debug_level_string
+                            (log_get_debug_level()));
     if (res != NO_ERR) {
 	return res;
     }
@@ -1670,6 +1657,12 @@ static status_t
      * go through the yangcli params in order,
      * after setting up the logging parameters
      ****************************************************/
+
+    /* set the logging control parameters */
+    val_set_logging_parms(mgr_cli_valset);
+
+    /* set the warning control parameters */
+    val_set_warning_parms(mgr_cli_valset);
 
     /* get the agent parameter */
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_AGENT);
@@ -2554,6 +2547,7 @@ static status_t
     ncx_lmem_t           *lmem;
     val_value_t          *parm;
     status_t              res;
+    log_debug_t           log_level;
 
 #ifdef YANGCLI_DEBUG
     int   i;
@@ -2583,8 +2577,6 @@ static status_t
     fixorder = TRUE;
     optional = FALSE;
     autocomp = TRUE;
-    logappend = FALSE;
-    logfilename = NULL;
     runscript = NULL;
     runscriptdone = FALSE;
     malloc_cnt = 0;
@@ -2823,11 +2815,6 @@ static void
 	modules = NULL;
     }
 
-    if (logfilename) {
-	m__free(logfilename);
-	logfilename = NULL;
-    }
-
     if (confname) {
 	m__free(confname);
 	confname = NULL;
@@ -2846,9 +2833,6 @@ static void
     log_close();
 
 }  /* yangcli_cleanup */
-
-
-
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/

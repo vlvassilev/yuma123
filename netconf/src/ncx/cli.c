@@ -460,7 +460,8 @@ cli_rawparm_t *
     }
 #endif
 
-    return find_rawparm(parmQ, (const char *)name, 
+    return find_rawparm(parmQ, 
+                        (const char *)name, 
 			strlen((const char *)name));
 
 } /* cli_find_rawparm */

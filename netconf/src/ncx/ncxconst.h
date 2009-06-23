@@ -172,6 +172,10 @@ date	     init     comment
 
 #define NCX_MAX_LINELEN     4095
 
+#define NCX_DEF_WARN_IDLEN    64
+
+#define NCX_DEF_WARN_LINELEN  72
+
 #define NCX_SUFFIX          (const xmlChar *)"ncx"
 
 #define NCX_CONF_SUFFIX     (const xmlChar *)"conf"
@@ -588,6 +592,9 @@ date	     init     comment
 #define NCX_EL_VERSION         (const xmlChar *)"version"
 #define NCX_EL_VERY_SECURE     (const xmlChar *)"very-secure"
 #define NCX_EL_WARNING         (const xmlChar *)"warning"
+#define NCX_EL_WARN_IDLEN      (const xmlChar *)"warn-idlen"
+#define NCX_EL_WARN_LINELEN    (const xmlChar *)"warn-linelen"
+#define NCX_EL_WARN_OFF        (const xmlChar *)"warn-off"
 #define NCX_EL_WHEN            (const xmlChar *)"when"
 #define NCX_EL_WITH_DEFAULTS   (const xmlChar *)"with-defaults"
 #define NCX_EL_WITH_METADATA   (const xmlChar *)"with-metadata"
@@ -599,6 +606,7 @@ date	     init     comment
 #define NCX_EL_XSD             (const xmlChar *)"xsd"
 #define NCX_EL_XSDLIST         (const xmlChar *)"xsdlist"
 #define NCX_EL_YANG            (const xmlChar *)"yang"
+#define NCX_EL_YANG_HOME       (const xmlChar *)"yang-home"
 #define NCX_EL_YES             (const xmlChar *)"yes"
 
 

@@ -851,6 +851,22 @@ static status_t
 	}
     }
 
+    /* create bootstrap parm: yang-home */
+    if (res == NO_ERR) {
+	parm = cli_new_rawparm(NCX_EL_YANG_HOME);
+	if (parm) {
+	    dlq_enque(parm, &parmQ);
+	} else {
+	    log_error("\nError: malloc failed");
+	    res = ERR_INTERNAL_MEM;
+	}
+    }
+
+    /* check if any of these bootstrap parms are present
+     * and process them right away; this is different than
+     * normal CLI where all the parameters are gathered,
+     * validated, and then invoked
+     */
     if (res == NO_ERR) {
 	res = cli_parse_raw(argc, argv, &parmQ);
 	if (res != NO_ERR) {
@@ -864,6 +880,7 @@ static status_t
 	return res;
     }
 
+    /* --log-level=<debug_level> */
     parm = cli_find_rawparm(NCX_EL_LOGLEVEL, &parmQ);
     if (parm && parm->count) {
 	if (parm->count > 1) {
@@ -887,6 +904,7 @@ static status_t
 	log_set_debug_level(dlevel);
     }
 
+    /* --log-append=<boolean> */
     if (res == NO_ERR) {
 	parm = cli_find_rawparm(NCX_EL_LOGAPPEND, &parmQ);
 	logappend = (parm && parm->count) ? TRUE : FALSE;
@@ -896,6 +914,7 @@ static status_t
 	}
     }
 
+    /* --log=<logfilespec> */
     if (res == NO_ERR) {
 	parm = cli_find_rawparm(NCX_EL_LOG, &parmQ);
 	if (parm && parm->count) {
@@ -911,9 +930,11 @@ static status_t
 		} else {
 		    res = log_open(logfilename, logappend, logtstamps);
 		    if (res != NO_ERR) {
-			log_error("\nError: open logfile '%s' failed",
-				  logfilename);		    
+			log_error("\nError: open logfile '%s' failed (%s)",
+				  logfilename,
+                                  get_error_string(res));
 		    }
+                    m__free(logfilename);
 		}
 	    } else {
 		log_error("\nError: no value entered for "
@@ -923,6 +944,7 @@ static status_t
 	} /* else use default log (stdout) */
     }
 
+    /* --modpath=<pathspeclist> */
     if (res == NO_ERR) {
 	parm = cli_find_rawparm(NCX_EL_MODPATH, &parmQ);
 	if (parm && parm->count) {
@@ -936,6 +958,20 @@ static status_t
 		log_error("\nError: no value entered for "
 			  "'modpath' parameter");
 		res = ERR_NCX_INVALID_VALUE;
+	    }
+	} /* else use default modpath */
+    }
+
+    /* --yang-home=<$YANG_HOME> */
+    if (res == NO_ERR) {
+	parm = cli_find_rawparm(NCX_EL_YANG_HOME, &parmQ);
+	if (parm && parm->count) {
+	    if (parm->count > 1) {
+		log_error("\nError: Only one 'yang-home' parameter allowed");
+		res = ERR_NCX_DUP_ENTRY;
+            } else {
+		/*** VALIDATE YANG_HOME ***/
+		ncxmod_set_yang_home((const xmlChar *)parm->value);
 	    }
 	} /* else use default modpath */
     }
@@ -1060,8 +1096,8 @@ status_t
     status_init();
 
     save_descr = savestr;
-    warn_idlen = 64;
-    warn_linelen = 72;
+    warn_idlen = NCX_DEF_WARN_IDLEN;
+    warn_linelen = NCX_DEF_WARN_LINELEN;
 
     mod_load_callback = NULL;
     log_set_debug_level(dlevel);

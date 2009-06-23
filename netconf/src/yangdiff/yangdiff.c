@@ -82,6 +82,10 @@ date         init     comment
 #include  "val.h"
 #endif
 
+#ifndef _H_val_util
+#include  "val_util.h"
+#endif
+
 #ifndef _H_xml_util
 #include  "xml_util.h"
 #endif
@@ -1308,37 +1312,17 @@ static status_t
 	}
     }
 
-    /* get the log-level parameter */
-    val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_LOGLEVEL);
-    if (val) {
-	cp->log_level = 
-	    log_get_debug_level_enum((const char *)VAL_STR(val));
-	if (cp->log_level == LOG_DEBUG_NONE) {
-	    log_error("\nError: invalid log-level value (%s)",
-		      (const char *)VAL_STR(val));
-	    return ERR_NCX_INVALID_VALUE;
-	}
-    }
+    /* set the logging control parameters */
+    val_set_logging_parms(valset);
 
-    /* get the logging parameters */
-    val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_LOG);
-    if (val) {
-	cp->logfilename = VAL_STR(val);
-	cp->full_logfilename = ncx_get_source(VAL_STR(val));
-	if (!cp->full_logfilename) {
-	    return ERR_INTERNAL_MEM;
-	}
-    }
-    val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_LOGAPPEND);
-    if (val) {
-	cp->logappend = TRUE;
-    }
+    /* set the warning control parameters */
+    val_set_warning_parms(valset);
 
     /*** ORDER DOES NOT MATTER FOR REST OF PARAMETERS ***/
 
     /* difftype parameter */
     val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_DIFFTYPE);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	cp->difftype = VAL_STR(val);
 	if (!xml_strcmp(cp->difftype, YANGDIFF_DIFFTYPE_TERSE)) {
 	    cp->edifftype = YANGDIFF_DT_TERSE;
@@ -1356,7 +1340,7 @@ static status_t
 
     /* indent parameter */
     val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_INDENT);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	cp->indent = (int32)VAL_UINT(val);
     } else {
 	cp->indent = NCX_DEF_INDENT;
@@ -1364,13 +1348,13 @@ static status_t
 
     /* help parameter */
     val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_HELP);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	cp->helpmode = TRUE;
     }
 
     /* help submode parameter (brief/normal/full) */
     val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_BRIEF);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	cp->helpsubmode = HELP_MODE_BRIEF;
     } else {
 	/* full parameter */
@@ -1384,14 +1368,14 @@ static status_t
 
     /* modpath parameter */
     val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_MODPATH);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	cp->modpath = VAL_STR(val);
 	ncxmod_set_modpath(VAL_STR(val));
     }
 
     /* old parameter */
     val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_OLD);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	cp->old = VAL_STR(val);
 	cp->full_old = ncx_get_source(VAL_STR(val));
 	if (!cp->full_old) {
@@ -1403,7 +1387,7 @@ static status_t
 
     /* new parameter */
     val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_NEW);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	cp->new = VAL_STR(val);
 	cp->full_new = ncx_get_source(VAL_STR(val));
 	if (!cp->full_new) {
@@ -1417,31 +1401,31 @@ static status_t
 
     /* oldpath parameter */
     val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_OLDPATH);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	cp->oldpath = VAL_STR(val);
     }
 
     /* newpath parameter */
     val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_NEWPATH);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	cp->newpath = VAL_STR(val);
     }
 
     /* no-header parameter */
     val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_NO_HEADER);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	cp->noheader = TRUE;
     }
 
     /* no-subdirs parameter */
     val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_NO_SUBDIRS);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	cp->nosubdirs = TRUE;
     }
 
     /* output parameter */
     val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_OUTPUT);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	cp->output = VAL_STR(val);
 	cp->full_output = ncx_get_source(VAL_STR(val));
 	if (!cp->full_output) {
@@ -1453,7 +1437,7 @@ static status_t
 
     /* version parameter */
     val = val_find_child(valset, YANGDIFF_MOD, NCX_EL_VERSION);
-    if (val) {
+    if (val && val->res == NO_ERR) {
 	cp->versionmode = TRUE;
     }
 
@@ -1569,9 +1553,6 @@ static void
     }
     if (diffparms.full_output) {
 	m__free(diffparms.full_output);
-    }
-    if (diffparms.full_logfilename) {
-	m__free(diffparms.full_logfilename);
     }
 
     /* cleanup the NCX engine and registries */

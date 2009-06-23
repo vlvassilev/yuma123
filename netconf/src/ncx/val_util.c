@@ -2302,4 +2302,163 @@ status_t
 }  /* val_set_simval_obj */
 
 
+/********************************************************************
+* FUNCTION val_set_warning_parms
+* 
+* Check the parent value struct (expected to be a container or list)
+* for the common warning control parameters.
+* invoke the warning parms that are present
+*
+*   --warn-idlen
+*   --warn-linelen
+*   --warn-off
+*
+* INPUTS:
+*    parentval == parent value struct to check
+*
+* OUTPUTS:
+*  prints an error message if a warn-off record cannot be added
+*
+*********************************************************************/
+void
+    val_set_warning_parms (val_value_t *parentval)
+{
+    val_value_t        *parmval;
+    status_t            res;
+
+#ifdef DEBUG
+    if (!parentval) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+    if (parentval->btyp != NCX_BT_CONTAINER || 
+        parentval->btyp != NCX_BT_LIST) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+#endif
+
+    /* warn-idlen parameter */
+    parmval = val_find_child(parentval,
+                             val_get_mod_name(parentval),
+                             NCX_EL_WARN_IDLEN);
+    if (parmval && parmval->res == NO_ERR) {
+        ncx_set_warn_idlen(VAL_UINT(parmval));
+    }
+
+    /* warn-linelen parameter */
+    parmval = val_find_child(parentval,
+                             val_get_mod_name(parentval),
+                             NCX_EL_WARN_LINELEN);
+    if (parmval && parmval->res == NO_ERR) {
+        ncx_set_warn_linelen(VAL_UINT(parmval));
+    }
+
+    /* warn-off parameter */
+    for (parmval = val_find_child(parentval,
+                                  val_get_mod_name(parentval),
+                                  NCX_EL_WARN_OFF);
+         parmval != NULL;
+         parmval = val_find_next_child(parentval,
+                                       val_get_mod_name(parentval),
+                                       NCX_EL_WARN_OFF,
+                                       parmval)) {
+        if (parmval->res == NO_ERR) {
+            res = ncx_turn_off_warning(VAL_UINT(parmval));
+            if (res != NO_ERR) {
+                log_error("\nError: disable warning failed (%s)",
+                          get_error_string(res));
+            }
+        }
+    }
+
+}  /* val_set_warning_parms */
+
+
+/********************************************************************
+* FUNCTION val_set_logging_parms
+* 
+* Check the parent value struct (expected to be a container or list)
+* for the common warning control parameters.
+* invoke the warning parms that are present
+*
+*   --log=filename
+*   --log-level=<debug-enum>
+*   --log-append=<boolean>
+*
+* INPUTS:
+*    parentval == parent value struct to check
+*
+* OUTPUTS:
+*  prints an error message if any errors occur
+*
+*********************************************************************/
+void
+    val_set_logging_parms (val_value_t *parentval)
+{
+    val_value_t        *val;
+    char               *logfilename;
+    status_t            res;
+    boolean             logappend;
+
+#ifdef DEBUG
+    if (!parentval) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+    if (parentval->btyp != NCX_BT_CONTAINER || 
+        parentval->btyp != NCX_BT_LIST) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+#endif
+
+    logappend = FALSE;
+
+    /* get the log-level parameter */
+    val = val_find_child(parentval, 
+                         val_get_mod_name(parentval),
+                         NCX_EL_LOGLEVEL);
+    if (val && val->res == NO_ERR) {
+        log_set_debug_level
+            (log_get_debug_level_enum
+             ((const char *)VAL_ENUM_NAME(val)));
+        if (log_get_debug_level() == LOG_DEBUG_NONE) {
+            log_error("\nError: invalid log-level value (%s)",
+                      (const char *)VAL_ENUM_NAME(val));
+        }
+    }
+
+    val = val_find_child(parentval, 
+                         val_get_mod_name(parentval),
+                         NCX_EL_LOGAPPEND);
+    if (val && val->res == NO_ERR) {
+        logappend = TRUE;
+    }
+
+    /* get the log file name parameter */
+    val = val_find_child(parentval, 
+                         val_get_mod_name(parentval),
+                         NCX_EL_LOG);
+    if (val && val->res == NO_ERR && VAL_STR(val)) {
+        if (!log_is_open()) {
+            logfilename = (char *)ncx_get_source(VAL_STR(val));
+            if (!logfilename) {
+                log_error("\nError: malloc failed");
+                res = ERR_INTERNAL_MEM;
+            } else {
+                res = log_open(logfilename, logappend, TRUE);
+                if (res != NO_ERR) {
+                    log_error("\nError: open logfile '%s' failed (%s)",
+                              logfilename,
+                              get_error_string(res));
+                }
+                m__free(logfilename);
+            }
+        }
+    }
+
+}  /* val_set_logging_parms */
+
+
 /* END file val_util.c */

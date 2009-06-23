@@ -217,6 +217,9 @@ extern xmlChar *
 			     status_t *res);
 
 extern void
+    ncxmod_set_yang_home (const xmlChar *yanghome);
+
+extern void
     ncxmod_set_modpath (const xmlChar *modpath);
 
 extern void

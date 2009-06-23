@@ -85,6 +85,10 @@ date         init     comment
 #include  "val.h"
 #endif
 
+#ifndef _H_val_util
+#include  "val_util.h"
+#endif
+
 #ifndef _H_xmlns
 #include  "xmlns.h"
 #endif
@@ -159,8 +163,6 @@ date         init     comment
 #define YANGDUMP_PARM_SUBTREE       (const xmlChar *)"subtree"
 #define YANGDUMP_PARM_URLSTART      (const xmlChar *)"urlstart"
 #define YANGDUMP_PARM_UNIFIED       (const xmlChar *)"unified"
-#define YANGDUMP_PARM_WARN_IDLEN    (const xmlChar *)"warn-idlen"
-#define YANGDUMP_PARM_WARN_LINELEN  (const xmlChar *)"warn-linelen"
 
 /********************************************************************
 *                                                                   *
@@ -305,39 +307,17 @@ static status_t
         }
     }
 
-    /* get the log-level parameter, but already set in
-     * cli bootstrap, so do not activate
-     */
-    val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_LOGLEVEL);
-    if (val) {
-        cp->log_level = 
-            log_get_debug_level_enum((const char *)VAL_STR(val));
-        if (cp->log_level == LOG_DEBUG_NONE) {
-            log_error("\nError: invalid log-level value (%s)",
-                      (const char *)VAL_STR(val));
-            return ERR_NCX_INVALID_VALUE;
-        }
-    }
+    /* set the logging control parameters */
+    val_set_logging_parms(valset);
 
-    /* get the logging parameters */
-    val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_LOG);
-    if (val) {
-        cp->logfilename = VAL_STR(val);
-        cp->full_logfilename = ncx_get_source(VAL_STR(val));
-        if (!cp->full_logfilename) {
-            return ERR_INTERNAL_MEM;
-        }
-    }
-    val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_LOGAPPEND);
-    if (val) {
-        cp->logappend = TRUE;
-    }
+    /* set the warning control parameters */
+    val_set_warning_parms(valset);
 
     /*** ORDER DOES NOT MATTER FOR REST OF PARAMETERS ***/
 
     /* defnames parameter */
     val = val_find_child(valset, YANGDUMP_MOD, YANGDUMP_PARM_DEFNAMES);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->defnames = TRUE;
     }
 
@@ -345,7 +325,7 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_DEPENDENCIES);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->dependencies = TRUE;
     }
 
@@ -353,7 +333,7 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_EXPORTS);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->exports = TRUE;
     }
 
@@ -361,7 +341,7 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_FORMAT);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         /* format -- use string provided */
         cp->format = 
             ncx_get_cvttyp_enum((const char *)VAL_ENUM_NAME(val));
@@ -373,7 +353,7 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_IDENTIFIERS);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->identifiers = TRUE;
     }
 
@@ -381,7 +361,7 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_INDENT);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->indent = (int32)VAL_UINT(val);
     } else {
         cp->indent = NCX_DEF_INDENT;
@@ -389,18 +369,18 @@ static status_t
 
     /* help parameter */
     val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_HELP);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->helpmode = TRUE;
     }
 
     /* help submode parameter (brief/normal/full) */
     val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_BRIEF);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->helpsubmode = HELP_MODE_BRIEF;
     } else {
         /* full parameter */
         val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_FULL);
-        if (val) {
+        if (val && val->res == NO_ERR) {
             cp->helpsubmode = HELP_MODE_FULL;
         } else {
             cp->helpsubmode = HELP_MODE_NORMAL;
@@ -411,7 +391,7 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_HTML_DIV);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->html_div = TRUE;
     }
 
@@ -419,7 +399,7 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_HTML_TOC);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->html_toc = VAL_STR(val);
     } else {
         cp->html_toc = YANGDUMP_DEF_TOC;
@@ -429,7 +409,7 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          NCX_EL_MODPATH);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         ncxmod_set_modpath(VAL_STR(val));
     }
 
@@ -441,7 +421,7 @@ static status_t
         val = val_find_child(valset, 
                              YANGDUMP_MOD, 
                              YANGDUMP_PARM_MODULE);
-        if (val) {
+        if (val && val->res == NO_ERR) {
             cp->module = (char *)xml_strdup(VAL_STR(val));
             if (!cp->module) {
                 return ERR_INTERNAL_MEM;
@@ -453,7 +433,7 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_MODVERSION);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->modversion = TRUE;
     }
 
@@ -461,7 +441,7 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_NO_SUBDIRS);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->nosubdirs = TRUE;
     }
 
@@ -469,7 +449,7 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_NO_VERSIONNAMES);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->noversionnames = TRUE;
     }
 
@@ -477,7 +457,7 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_OBJVIEW);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->objview = (const char *)VAL_STR(val);
     } else {
         cp->objview = YANGDUMP_DEF_OBJVIEW;
@@ -487,7 +467,7 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_OUTPUT);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         /* output -- use filename provided */
         cp->output = (const char *)VAL_STR(val);
         cp->full_output = ncx_get_source(VAL_STR(val));
@@ -501,7 +481,7 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_SIMURLS);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->simurls = TRUE;
     }
 
@@ -509,7 +489,7 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_SUBTREE);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->subtree = (const char *)VAL_STR(val);
     }
 
@@ -517,7 +497,7 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_UNIFIED);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->unified = TRUE;
     }
 
@@ -525,7 +505,7 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_URLSTART);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->urlstart = VAL_STR(val);
     }
 
@@ -533,37 +513,15 @@ static status_t
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          NCX_EL_VERSION);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->versionmode = TRUE;
     }
-
-    /* warn-idlen parameter */
-    val = val_find_child(valset, 
-                         YANGDUMP_MOD, 
-                         YANGDUMP_PARM_WARN_IDLEN);
-    if (val) {
-        cp->warn_idlen = VAL_UINT(val);
-    } else {
-        cp->warn_idlen = YANGDUMP_DEF_WARN_IDLEN;
-    }
-    ncx_set_warn_idlen(cp->warn_idlen);
-
-    /* warn-linelen parameter */
-    val = val_find_child(valset, 
-                         YANGDUMP_MOD, 
-                         YANGDUMP_PARM_WARN_LINELEN);
-    if (val) {
-        cp->warn_linelen = VAL_UINT(val);
-    } else {
-        cp->warn_linelen = YANGDUMP_DEF_WARN_LINELEN;
-    }
-    ncx_set_warn_linelen(cp->warn_linelen);
 
     /* xsd-schemaloc parameter */
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_XSD_SCHEMALOC);
-    if (val) {
+    if (val && val->res == NO_ERR) {
         cp->schemaloc = VAL_STR(val);
     }
 
@@ -1262,11 +1220,13 @@ static void
     errors = pcb->top->errors;
     warnings = pcb->top->warnings;
     
-    logsource = (LOGDEBUG) 
+    logsource = (LOGINFO) 
         ? pcb->top->source : pcb->top->sourcefn;
 
     log_write("\n*** %s: %u Errors, %u Warnings\n", 
-              logsource, errors, warnings);
+              logsource, 
+              errors, 
+              warnings);
 
 }   /* print_score_banner */
 
@@ -1557,7 +1517,8 @@ static status_t
         if (pcb && pcb->top) {
             log_write("\n*** %s: %u Errors, %u Warnings\n", 
                       pcb->top->sourcefn,
-                      pcb->top->errors, pcb->top->warnings);
+                      pcb->top->errors, 
+                      pcb->top->warnings);
         } else if (res != NO_ERR) {
             log_write("\n");
         }
@@ -1652,9 +1613,6 @@ static void
     }
     if (cvtparms.full_output) {
         m__free(cvtparms.full_output);
-    }
-    if (cvtparms.full_logfilename) {
-        m__free(cvtparms.full_logfilename);
     }
     if (cvtparms.buff) {
         m__free(cvtparms.buff);

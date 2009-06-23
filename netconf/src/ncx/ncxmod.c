@@ -95,7 +95,9 @@ typedef enum ncxmod_mode_t_ {
 *********************************************************************/
 static boolean ncxmod_init_done = FALSE;
 
-static const xmlChar *ncxmod_env_home;
+static const xmlChar *ncxmod_yang_home;
+
+static xmlChar *ncxmod_yang_home_cli;
 
 static const xmlChar *ncxmod_env_install;
 
@@ -103,11 +105,17 @@ static const xmlChar *ncxmod_env_userhome;
 
 static const xmlChar *ncxmod_mod_path = NULL;
 
+static xmlChar *ncxmod_mod_path_cli;
+
 static const xmlChar *ncxmod_alt_path;
 
 static const xmlChar *ncxmod_data_path;
 
+static xmlChar *ncxmod_data_path_cli;
+
 static const xmlChar *ncxmod_run_path;
+
+static xmlChar *ncxmod_run_path_cli;
 
 static boolean ncxmod_subdirs;
 
@@ -1189,8 +1197,8 @@ static status_t
     }
 
     /* 6) YANG_HOME/modules directory */
-    if (!done && ncxmod_env_home) {
-	res = check_module_path(ncxmod_env_home,
+    if (!done && ncxmod_yang_home) {
+	res = check_module_path(ncxmod_yang_home,
 				buff,
 				bufflen,
 				modname, 
@@ -1507,7 +1515,9 @@ void
 #endif
 
     /* try to get the YANG_HOME environment variable */
-    ncxmod_env_home = (const xmlChar *)getenv(NCXMOD_HOME);
+    ncxmod_yang_home = (const xmlChar *)getenv(NCXMOD_HOME);
+
+    ncxmod_yang_home_cli = NULL;
 
     /* try to get the YANG_INSTALL environment variable */
     ncxmod_env_install = (const xmlChar *)getenv(NCXMOD_INSTALL);
@@ -1518,13 +1528,19 @@ void
     /* try to get the module search path variable */
     ncxmod_mod_path = (const xmlChar *)getenv(NCXMOD_MODPATH);
 
+    ncxmod_mod_path_cli = NULL;
+
     ncxmod_alt_path = NULL;
 
     /* try to get the data search path variable */
     ncxmod_data_path = (const xmlChar *)getenv(NCXMOD_DATAPATH);
 
+    ncxmod_data_path_cli = NULL;
+
     /* try to get the script search path variable */
     ncxmod_run_path = (const xmlChar *)getenv(NCXMOD_RUNPATH);
+
+    ncxmod_run_path_cli = NULL;
 
     ncxmod_subdirs = TRUE;
 
@@ -1549,12 +1565,28 @@ void
     }
 #endif
      
-    ncxmod_env_home = NULL;
+    ncxmod_yang_home = NULL;
     ncxmod_env_install = NULL;
     ncxmod_env_userhome = NULL;
     ncxmod_mod_path = NULL;
     ncxmod_data_path = NULL;
     ncxmod_run_path = NULL;
+
+    if (ncxmod_yang_home_cli) {
+        m__free(ncxmod_yang_home_cli);
+    }
+
+    if (ncxmod_mod_path_cli) {
+        m__free(ncxmod_mod_path_cli);
+    }
+
+    if (ncxmod_data_path_cli) {
+        m__free(ncxmod_data_path_cli);
+    }
+
+    if (ncxmod_run_path_cli) {
+        m__free(ncxmod_run_path_cli);
+    }
 
     ncxmod_init_done = FALSE;
     
@@ -1569,9 +1601,9 @@ void
 *
 * Module Search order:
 *
-* 1) NCX_MODPATH environment var (or set by modpath CLI var)
+* 1) YANG_MODPATH environment var (or set by modpath CLI var)
 * 2) current dir or absolute path
-* 3) NCXHOME/modules directory
+* 3) YANG_HOME/modules directory
 * 4) HOME/modules directory
 *
 * INPUTS:
@@ -1630,9 +1662,9 @@ status_t
 *
 * Module Search order:
 *
-* 1) NCX_MODPATH environment var (or set by modpath CLI var)
+* 1) YANG_MODPATH environment var (or set by modpath CLI var)
 * 2) current dir or absolute path
-* 3) NCXHOME/modules directory
+* 3) YANG_HOME/modules directory
 * 4) HOME/modules directory
 *
 * INPUTS:
@@ -1902,10 +1934,10 @@ xmlChar *
     }
 
     /* 4) YANG_HOME/data directory */
-    if (ncxmod_env_home) {
+    if (ncxmod_yang_home) {
         if (test_file(buff, 
 		      bufflen, 
-		      ncxmod_env_home,
+		      ncxmod_yang_home,
 		      NCXMOD_DATA_DIR, 
 		      fname)) {
             return buff;
@@ -2017,10 +2049,10 @@ xmlChar *
     }
 
     /* 4) try YANG_HOME/scripts/fname */
-    if (ncxmod_env_home) {
+    if (ncxmod_yang_home) {
         if (test_file(buff, 
 		      bufflen, 
-		      ncxmod_env_home, 
+		      ncxmod_yang_home, 
 		      NCXMOD_SCRIPT_DIR, 
 		      fname)) {
             return buff;
@@ -2059,29 +2091,59 @@ xmlChar *
 
 
 /********************************************************************
-* FUNCTION ncxmod_set_modpath
+* FUNCTION ncxmod_set_yang_home
 * 
-*   Override the NCX_MODPATH env var with the modpath CLI var
+*   Override the YANG_HOME env var with the yang-home CLI var
 *
 * THIS MAY GET SET DURING BOOTSTRAP SO SET_ERROR NOT CALLED !!!
+* MALLOC FAILED IGNORED!!!
 *
+* INPUTS:
+*   yanghome == new YANG_HOME value
+*            == NULL or empty string to disable
+*********************************************************************/
+void
+    ncxmod_set_yang_home (const xmlChar *yanghome)
+{
+    if (ncxmod_yang_home_cli) {
+        m__free(ncxmod_yang_home_cli);
+        ncxmod_yang_home_cli = NULL;        
+    }
+
+    if (yanghome && *yanghome) {
+        /* ignoring possible malloc failed!! */
+        ncxmod_yang_home_cli = xml_strdup(yanghome);
+    }
+    ncxmod_yang_home = ncxmod_yang_home_cli;
+    
+}  /* ncxmod_set_yang_home */
+
+
+/********************************************************************
+* FUNCTION ncxmod_set_modpath
+* 
+*   Override the YANG_MODPATH env var with the modpath CLI var
+*
+* THIS MAY GET SET DURING BOOTSTRAP SO SET_ERROR NOT CALLED !!!
+* MALLOC FAILED IGNORED!!!
+*
+* INPUTS:
+*   modpath == new YANG_MODPATH value
+*           == NULL or empty string to disable
 *********************************************************************/
 void
     ncxmod_set_modpath (const xmlChar *modpath)
 {
-#ifdef DEBUG
-    if (!modpath) {
-        return;
+    if (ncxmod_mod_path_cli) {
+        m__free(ncxmod_mod_path_cli);
+        ncxmod_mod_path_cli = NULL;
     }
-#endif
 
-    if (ncxmod_mod_path) {
-	if (xml_strcmp(ncxmod_mod_path, modpath)) {
-	    log_info("\nncxmod: Overriding NCX_MODPATH "
-		     "env-var with CLI modpath");
-	}
+    if (modpath && *modpath) {
+        /* ignoring possible malloc failed!! */
+        ncxmod_mod_path_cli = xml_strdup(modpath);
     }
-    ncxmod_mod_path = modpath;
+    ncxmod_mod_path = ncxmod_mod_path_cli;
     
 }  /* ncxmod_set_modpath */
 
@@ -2089,52 +2151,53 @@ void
 /********************************************************************
 * FUNCTION ncxmod_set_datapath
 * 
-*   Override the NCX_DATAPATH env var with the datapath CLI var
+*   Override the YANG_DATAPATH env var with the datapath CLI var
+*
+* INPUTS:
+*   datapath == new YANG_DATAPATH value
+*           == NULL or empty string to disable
 *
 *********************************************************************/
 void
     ncxmod_set_datapath (const xmlChar *datapath)
 {
-#ifdef DEBUG
-    if (!datapath) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
+    if (ncxmod_data_path_cli) {
+        m__free(ncxmod_data_path_cli);
+        ncxmod_data_path_cli = NULL;
     }
-#endif
 
-    if (ncxmod_data_path) {
-	if (xml_strcmp(ncxmod_data_path, datapath)) {
-	    log_info("\nncxmod: Overriding NCX_DATAPATH "
-		     "env-var with CLI datapath");
-	}
+    if (datapath && *datapath) {
+        /* ignoring possible malloc failed!! */
+        ncxmod_data_path_cli = xml_strdup(datapath);
     }
-    ncxmod_data_path = datapath;
-    
+    ncxmod_data_path = ncxmod_data_path_cli;
+
 }  /* ncxmod_set_datapath */
 
 
 /********************************************************************
 * FUNCTION ncxmod_set_runpath
 * 
-*   Override the NCX_RUNPATH env var with the runpath CLI var
+*   Override the YANG_RUNPATH env var with the runpath CLI var
+*
+* INPUTS:
+*   datapath == new YANG_RUNPATH value
+*           == NULL or empty string to disable
 *
 *********************************************************************/
 void
     ncxmod_set_runpath (const xmlChar *runpath)
 {
-#ifdef DEBUG
-    if (!runpath) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
+    if (ncxmod_run_path_cli) {
+        m__free(ncxmod_run_path_cli);
+        ncxmod_run_path_cli = NULL;
     }
-#endif
-    if (ncxmod_run_path) {
-	if (xml_strcmp(ncxmod_run_path, runpath)) {
-	    log_info("\nncxmod: Overriding NCX_RUNPATH "
-		     "env-var with CLI runpath");
-	}
+
+    if (runpath && *runpath) {
+        /* ignoring possible malloc failed!! */
+        ncxmod_run_path_cli = xml_strdup(runpath);
     }
-    ncxmod_run_path = runpath;
+    ncxmod_run_path = ncxmod_run_path_cli;
     
 }  /* ncxmod_set_runpath */
 

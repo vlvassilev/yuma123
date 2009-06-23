@@ -66,9 +66,6 @@ date	     init     comment
 #define OBJVIEW_RAW     "raw"
 #define OBJVIEW_COOKED  "cooked"
 
-#define YANGDUMP_DEF_WARN_IDLEN    64
-#define YANGDUMP_DEF_WARN_LINELEN  72
-
 /********************************************************************
 *								    *
 *			     T Y P E S				    *
@@ -85,7 +82,6 @@ typedef struct yangdump_cvtparms_t_ {
     const char     *objview;
     const xmlChar  *schemaloc;
     const xmlChar  *urlstart;
-    const xmlChar  *logfilename;
     const xmlChar  *modpath;
     const xmlChar  *config;
     const xmlChar  *html_toc;
@@ -99,8 +95,6 @@ typedef struct yangdump_cvtparms_t_ {
     help_mode_t     helpsubmode;
     boolean         identifiers;
     int32           indent;
-    boolean         logappend;
-    log_debug_t     log_level;
     boolean         modversion;
     boolean         nosubdirs;
     boolean         noversionnames;
@@ -108,12 +102,9 @@ typedef struct yangdump_cvtparms_t_ {
     boolean         simurls;
     boolean         unified;
     boolean         versionmode;
-    uint32          warn_idlen;
-    uint32          warn_linelen;
 
     /* internal vars */
     xmlChar        *full_output;
-    xmlChar        *full_logfilename;
     ncx_module_t   *mod;
     char           *srcfile;
     char           *buff;

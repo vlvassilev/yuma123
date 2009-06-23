@@ -193,4 +193,10 @@ extern status_t
 			const xmlChar *valstr);
 
 
+extern void
+    val_set_warning_parms (val_value_t *parentval);
+
+extern void
+    val_set_logging_parms (val_value_t *parentval);
+
 #endif	    /* _H_val_util */

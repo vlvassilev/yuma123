@@ -90,14 +90,6 @@ date         init     comment
 
 #define MAX_FILESPEC_LEN  1023
 
-/********************************************************************
-*                                                                   *
-*                       V A R I A B L E S			    *
-*                                                                   *
-*********************************************************************/
-/* program version string */
-static char progver[] = "0.9.5";
-
 
 /********************************************************************
  * FUNCTION load_base_schema 
@@ -365,6 +357,7 @@ int
     boolean            showver, stdlog, done;
     help_mode_t        showhelpmode;
     ncx_shutdowntyp_t  shutmode;
+    xmlChar            versionbuffer[NCX_VERSION_BUFFSIZE];
 
 #ifdef MEMORY_DEBUG
     mtrace();
@@ -387,7 +380,14 @@ int
 	    agt_request_shutdown(NCX_SHUT_EXIT);
 	} else {
 	    if (showver) {
-		log_write("\nnetconfd version %s\n", progver);
+                res = ncx_get_version(versionbuffer,
+                                      NCX_VERSION_BUFFSIZE);
+                if (res == NO_ERR) {
+                    log_write("\nnetconfd version %s\n", 
+                              versionbuffer);
+                } else {
+                    SET_ERROR(res);
+                }
 		agt_request_shutdown(NCX_SHUT_EXIT);
 	    } else if (showhelpmode != HELP_MODE_NONE) {
 		help_program_module(NETCONFD_MOD,

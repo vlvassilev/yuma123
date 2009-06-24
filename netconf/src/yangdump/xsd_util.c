@@ -2074,12 +2074,20 @@ status_t
     val_value_t      *doc, *appinfo, *appval;
     const xmlChar    *banner0, *banner1, *banner1b;
     xmlChar          *str, *str2;
-    uint32            len;
+    uint32            len, versionlen;
     xmlns_id_t        xsd_id, ncx_id;
     status_t          res;
+    xmlChar           versionbuffer[NCX_VERSION_BUFFSIZE];
 
     xsd_id = xmlns_xs_id();
     ncx_id = xmlns_ncx_id();
+
+    res = ncx_get_version(versionbuffer, NCX_VERSION_BUFFSIZE);
+    if (res != NO_ERR) {
+        SET_ERROR(res);
+        xml_strcpy(versionbuffer, (const xmlChar *)"unknown");
+    }
+    versionlen = xml_strlen(versionbuffer);
 
     /* create first <documentation> element */
     banner0 = XSD_BANNER_0Y;
@@ -2090,7 +2098,7 @@ status_t
     len = xml_strlen(banner0) +
 	xml_strlen(mod->sourcefn) +
 	xml_strlen(XSD_BANNER_0END) +
-	xml_strlen(YANGDUMP_PROGVER) +      
+        versionlen + 
 	xml_strlen(banner1) +           /* (Sub)Module */
 	xml_strlen(XSD_BANNER_3);            /* Version */
 
@@ -2125,7 +2133,7 @@ status_t
     str2 += xml_strcpy(str2, banner0);
     str2 += xml_strcpy(str2, mod->sourcefn);
     str2 += xml_strcpy(str2, XSD_BANNER_0END);
-    str2 += xml_strcpy(str2, YANGDUMP_PROGVER);
+    str2 += xml_strcpy(str2, versionbuffer);
     str2 += xml_strcpy(str2, banner1);
     str2 += xml_strcpy(str2, mod->name);
 

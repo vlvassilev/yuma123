@@ -381,6 +381,8 @@ static void
 {
     logfn_t             logfn;
     boolean             imode;
+    status_t            res;
+    xmlChar             versionbuffer[NCX_VERSION_BUFFSIZE];
 
     imode = interactive_mode();
     if (imode) {
@@ -389,7 +391,13 @@ static void
 	logfn = log_write;
     }
 
-    (*logfn)("\n  yangcli version %s",  YANGCLI_PROGVER);
+    res = ncx_get_version(versionbuffer, NCX_VERSION_BUFFSIZE);
+    if (res == NO_ERR) {
+        (*logfn)("\n  yangcli version %s",  versionbuffer);
+    } else {
+        SET_ERROR(res);
+    }
+
     (*logfn)("\n  Copyright 2009, Andy Bierman\n");
 
     if (!imode) {
@@ -2552,6 +2560,7 @@ static status_t
     val_value_t          *parm;
     status_t              res;
     log_debug_t           log_level;
+    xmlChar               versionbuffer[NCX_VERSION_BUFFSIZE];
 
 #ifdef YANGCLI_DEBUG
     int   i;
@@ -2665,13 +2674,17 @@ static status_t
     }
 
     /* check print version */
-    if (versionmode && !helpmode) {
-	log_stdout("\nyangcli version %s\n", YANGCLI_PROGVER);
+    if (versionmode || helpmode) {
+        res = ncx_get_version(versionbuffer, NCX_VERSION_BUFFSIZE);
+        if (res == NO_ERR) {
+            log_stdout("\nyangcli version %s\n", versionbuffer);
+        } else {
+            SET_ERROR(res);
+        }
     }
 
     /* check print help and exit */
     if (helpmode) {
-	log_stdout("\nyangcli version %s", YANGCLI_PROGVER);
 	help_program_module(YANGCLI_MOD, 
 			    YANGCLI_BOOT, 
 			    helpsubmode);

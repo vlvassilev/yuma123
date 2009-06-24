@@ -42,6 +42,7 @@ lint: treelint
 install: treeinstall
 
 treeall:
+	/bin/sh platform/setversion.sh
 	for dir in $(DIRS); do\
 	  cd $$dir && $(MAKE) $(JFLAG) all && cd ..;\
         done
@@ -52,11 +53,13 @@ treedepend:
         done
 
 treeclean:
+	/bin/sh platform/setversion.sh
 	for dir in $(DIRS); do\
 	  cd $$dir && $(MAKE) clean && cd ..;\
         done
 
 treesuperclean:
+	/bin/sh platform/setversion.sh
 	for dir in $(DIRS); do\
 	  cd $$dir && $(MAKE) superclean && cd ..;\
         done

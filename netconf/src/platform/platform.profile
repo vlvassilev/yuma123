@@ -107,4 +107,3 @@ lint:
 	-Wall -Wcomment $(CPPFLAGS) $(PLATFORM_CPP) $(CINC) \
 	$(SUBDIR_CPP) $(TARGET_ARCH) -c $< > $@
 
-

@@ -4127,6 +4127,7 @@ static void
 {
     xmlChar   *filespec;
     status_t   res;
+    xmlChar    buffer[NCX_VERSION_BUFFSIZE];
  
     ses_putstr_indent(scb, (const xmlChar *)
 		      "<!DOCTYPE html PUBLIC \"-//W3C//DTD "
@@ -4164,7 +4165,13 @@ static void
 		      "<meta name=\"generator\" "
 		      "content=\"yangdump ", 
                       indent);
-    ses_putstr(scb, YANGDUMP_PROGVER);
+
+    res = ncx_get_version(buffer, NCX_VERSION_BUFFSIZE);
+    if (res == NO_ERR) {
+        ses_putstr(scb, buffer);
+    } else {
+        SET_ERROR(res);
+    }
     ses_putstr(scb, (const xmlChar *)
 	       " (http://www.netconfcentral.com/)\"/>");
 

@@ -3037,6 +3037,7 @@ static status_t
     status_t            res;
     boolean             imode, done;
     help_mode_t         mode;
+    xmlChar             versionbuffer[NCX_VERSION_BUFFSIZE];
 
     res = NO_ERR;
     imode = interactive_mode();
@@ -3190,11 +3191,17 @@ static status_t
 				  YANGCLI_MOD,
 				  NCX_EL_VERSION);
 	    if (parm) {
-		if (imode) {
-		    log_stdout("\nyangcli version %s\n", YANGCLI_PROGVER);
-		} else {
-		    log_write("\nyangcli version %s\n", YANGCLI_PROGVER);
-		}
+                res = ncx_get_version(versionbuffer, 
+                                      NCX_VERSION_BUFFSIZE);
+                if (res == NO_ERR) {
+                    if (imode) {
+                        log_stdout("\nyangcli version %s\n", 
+                                   versionbuffer);
+                    } else {
+                        log_write("\nyangcli version %s\n", 
+                                  versionbuffer);
+                    }
+                }
 		done = TRUE;
 	    }
 	}

@@ -57,8 +57,6 @@ date	     init     comment
 *			 C O N S T A N T S			    *
 *								    *
 *********************************************************************/
-#define YANGCLI_PROGVER    (const xmlChar *)"0.9.5"
-
 #define PROGNAME            "yangcli"
 
 #define MAX_PROMPT_LEN 56

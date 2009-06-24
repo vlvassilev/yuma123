@@ -39,6 +39,8 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
+#include "curversion.h"
+
 #ifndef _H_cfg
 #include "cfg.h"
 #endif
@@ -109,6 +111,10 @@ date         init     comment
 
 #ifndef _H_val
 #include "val.h"
+#endif
+
+#ifndef _H_version
+#include "version.h"
 #endif
 
 #ifndef _H_xml_util
@@ -10673,6 +10679,41 @@ boolean
     return TRUE;
 
 } /* ncx_warning_enabled */
+
+
+/********************************************************************
+* FUNCTION ncx_get_version
+* 
+* Get the the YangTools version ID string
+*
+* INPUT:
+*    buffer == buffer to hold the version string
+*    buffsize == number of bytes in buffer
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    ncx_get_version (xmlChar *buffer,
+                     uint32 buffsize)
+{
+    xmlChar    *str;
+    uint32      versionlen;
+
+    versionlen = xml_strlen(YANGTOOLS_VERSION) +
+        xml_strlen((const xmlChar *)SVNVERSION) + 1;
+
+    if (versionlen >= buffsize) {
+        return ERR_BUFF_OVFL;
+    }
+
+    str = buffer;
+    str += xml_strcpy(str, YANGTOOLS_VERSION);
+    *str++ = '.';
+    xml_strcpy(str, (const xmlChar *)SVNVERSION);
+    return NO_ERR;
+
+}  /* ncx_get_version */
 
 
 /* END file ncx.c */

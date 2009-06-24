@@ -940,4 +940,8 @@ extern status_t
 extern boolean
     ncx_warning_enabled (status_t res);
 
+extern status_t
+    ncx_get_version (xmlChar *buffer,
+                     uint32 buffsize);
+
 #endif	    /* _H_ncx */

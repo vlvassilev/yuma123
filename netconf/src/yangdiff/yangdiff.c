@@ -1007,9 +1007,9 @@ static status_t
     if (cp->curnew) {
 	m__free(cp->curnew);
     }
-    cp->curnew = ncx_get_source((const xmlChar *)fullspec);
+    cp->curnew = ncx_get_source((const xmlChar *)fullspec, &res);
     if (!cp->curnew) {
-	return ERR_INTERNAL_MEM;
+	return res;
     }
 
     log_debug2("\nStart subtree file:\n%s\n", fullspec);
@@ -1390,9 +1390,10 @@ static status_t
     val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_OLD);
     if (val && val->res == NO_ERR) {
 	cp->old = VAL_STR(val);
-	cp->full_old = ncx_get_source(VAL_STR(val));
+        res = NO_ERR;
+	cp->full_old = ncx_get_source(VAL_STR(val), &res);
 	if (!cp->full_old) {
-	    return ERR_INTERNAL_MEM;
+	    return res;
 	} else {
 	    cp->old_isdir = ncxmod_test_subdir(cp->full_old); 
 	}
@@ -1402,9 +1403,10 @@ static status_t
     val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_NEW);
     if (val && val->res == NO_ERR) {
 	cp->new = VAL_STR(val);
-	cp->full_new = ncx_get_source(VAL_STR(val));
+        res = NO_ERR;
+	cp->full_new = ncx_get_source(VAL_STR(val), &res);
 	if (!cp->full_new) {
-	    return ERR_INTERNAL_MEM;
+	    return res;
 	} else {
 	    cp->new_isdir = ncxmod_test_subdir(cp->full_new);
 	}
@@ -1440,9 +1442,10 @@ static status_t
     val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_OUTPUT);
     if (val && val->res == NO_ERR) {
 	cp->output = VAL_STR(val);
-	cp->full_output = ncx_get_source(VAL_STR(val));
+        res = NO_ERR;
+	cp->full_output = ncx_get_source(VAL_STR(val), &res);
 	if (!cp->full_output) {
-	    return ERR_INTERNAL_MEM;
+	    return res;
 	} else {
 	    cp->output_isdir = ncxmod_test_subdir(cp->full_output);
 	}

@@ -866,7 +866,8 @@ extern status_t
 		      ncx_errinfo_t *dest);
 
 extern xmlChar *
-    ncx_get_source (const xmlChar *fspec);
+    ncx_get_source (const xmlChar *fspec,
+                    status_t *res);
 
 extern void
     ncx_set_cur_modQ (dlq_hdr_t *que);

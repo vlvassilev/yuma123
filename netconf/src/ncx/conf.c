@@ -429,7 +429,7 @@ static status_t
 {
     const obj_template_t  *chobj;
     val_value_t     *chval;
-    const xmlChar   *valname;
+    const xmlChar   *valname, *useval;
     const typ_def_t *typdef;
     status_t         res;
     ncx_btype_t      btyp;
@@ -464,19 +464,26 @@ static status_t
      */
     if (typ_is_simple(btyp)) {
 	/* form for a leaf is: foo [value] NEWLINE  */
-	if (TK_CUR_TEXT(tkc)) {
-	    res = val_set_simval(val, 
-                                 typdef, 
-                                 nsid, 
-                                 valname,
-				 TK_CUR_VAL(tkc));
-	} else if (TK_CUR_TYP(tkc)==TK_TT_NEWLINE) {
-	    res = val_set_simval(val, typdef, nsid, valname, NULL);
-	} else {
-	    res = ERR_NCX_WRONG_TKTYPE;
-	}
+	if (TK_CUR_TYP(tkc)==TK_TT_NEWLINE) {
+            useval = NULL;
+        } else {
+            useval = TK_CUR_VAL(tkc);
+        }
+        res = val_set_simval(val, 
+                             typdef, 
+                             nsid, 
+                             valname,
+                             useval);
+
 	if (res != NO_ERR) {
-	    ncx_conf_exp_err(tkc, res, "simple value string");
+            log_error("\nError: '%s' cannot be set to '%s'",
+                      valname,
+                      (TK_CUR_VAL(tkc)) ? TK_CUR_VAL(tkc) : EMPTY_STRING);
+            if (btyp == NCX_BT_EMPTY) {
+                ncx_conf_exp_err(tkc, res, "empty");
+            } else {
+                ncx_conf_exp_err(tkc, res, "simple value string");
+            }
 	    return res;
 	}
 
@@ -647,7 +654,15 @@ static status_t
     }
     if (!obj) {
 	res = ERR_NCX_UNKNOWN_PARM;
-	ncx_conf_exp_err(tkc, res, "object name");
+        if (TK_CUR_MOD(tkc)) {
+            log_error("\nError: parameter '%s:%s' not found",
+                      TK_CUR_MOD(tkc),
+                      TK_CUR_VAL(tkc));
+        } else {
+            log_error("\nError: parameter '%s' not found",
+                      TK_CUR_VAL(tkc));
+        }
+	ncx_conf_exp_err(tkc, res, "parameter name");
 	return res;
     }
 
@@ -667,6 +682,7 @@ static status_t
     /* parse the parameter value */
     res = parse_val(tkc, obj, newparm);
     if (res != NO_ERR) {
+        val_free_value(newparm);
 	return res;
     }
 
@@ -688,17 +704,25 @@ static status_t
 	    } else if (keepvals) {
                 if (usewarning) {
                     /* keep current value and toss new value */
-                    log_warn("\nconf: Parameter %s already exists. "
-                             "Not using new value", 
+                    log_warn("\nWarning: Parameter '%s' already exists. "
+                             "Not using new value\n", 
                              curparm->name);
+                    if (LOGDEBUG) {
+                        val_dump_value(newparm, NCX_DEF_INDENT);
+                        log_debug("\n");
+                    }
                 }
 		val_free_value(newparm);
 	    } else {
                 if (usewarning) {
                     /* replace current value and warn old value tossed */
-                    log_warn("\nconf: Parameter %s already exists. "
-                             "Overwriting with new value",
+                    log_warn("\nconf: Parameter '%s' already exists. "
+                             "Overwriting with new value\n",
                              curparm->name);
+                    if (LOGDEBUG) {
+                        val_dump_value(newparm, NCX_DEF_INDENT);
+                        log_debug("\n");
+                    }
                 }
 		dlq_remove(curparm);
 		val_free_value(curparm);
@@ -742,6 +766,8 @@ static status_t
 {
     status_t       res;
     boolean        done;
+
+    res = NO_ERR;
 
     /* get the container name */
     done = FALSE;
@@ -792,7 +818,7 @@ static status_t
 	}
     }
 
-    return NO_ERR;
+    return res;
 
 }  /* parse_top */
 
@@ -834,6 +860,7 @@ status_t
 {
     tk_chain_t    *tkc;
     FILE          *fp;
+    xmlChar       *sourcespec;
     status_t       res;
 
 #ifdef DEBUG
@@ -842,7 +869,16 @@ status_t
     } 
 #endif
 
-    fp = fopen((const char *)filespec, "r");
+    res = NO_ERR;
+    sourcespec = ncx_get_source(filespec, &res);
+    if (!sourcespec) {
+        return res;
+    }
+
+    fp = fopen((const char *)sourcespec, "r");
+
+    m__free(sourcespec);
+
     if (!fp) {
 	if (fileerr) {
 	    log_error("\nError: config file '%s' could not be opened",

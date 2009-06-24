@@ -470,9 +470,10 @@ static status_t
     if (val && val->res == NO_ERR) {
         /* output -- use filename provided */
         cp->output = (const char *)VAL_STR(val);
-        cp->full_output = ncx_get_source(VAL_STR(val));
+        res = NO_ERR;
+        cp->full_output = ncx_get_source(VAL_STR(val), &res);
         if (!cp->full_output) {
-            return ERR_INTERNAL_MEM;
+            return res;
         }
         cp->output_isdir = ncxmod_test_subdir(cp->full_output);
     }
@@ -1254,10 +1255,12 @@ static status_t
     const xmlChar     *modname, *revision;
     xml_attrs_t        attrs;
     status_t           res;
+    boolean            bannerdone;
 
     scb = NULL;
     res = NO_ERR;
     revision = NULL;   /*****/
+    bannerdone = FALSE;
 
     if (cp->modcount > 1) {
         modname = (const xmlChar *)cp->curmodule;
@@ -1303,6 +1306,7 @@ static status_t
         }
     } else if (pcb && pcb->top) {
         print_score_banner(pcb);
+        bannerdone = TRUE;
     }
 
     /* check if output session needed, any reports requestd or
@@ -1403,7 +1407,9 @@ static status_t
                 val = NULL;
                 xml_init_attrs(&attrs);
                 res = xsd_convert_module(pcb->top, cp, &val, &attrs);
-                if (res == NO_ERR) {
+                if (res != NO_ERR) {
+                    pr_err(res);
+                } else {
                     if (cp->defnames || (cp->output && cp->output_isdir)) {
                         namebuff = xsd_make_output_filename(pcb->top, cp);
                         if (!namebuff) {
@@ -1431,7 +1437,8 @@ static status_t
                     }
                 }
                 if (res != NO_ERR) {
-                    pr_err(res);
+                    log_error("\nError: cannot write output file '%s'",
+                              cp->output);
                 }
                 xml_clean_attrs(&attrs);
                 if (val) {
@@ -1519,12 +1526,10 @@ static status_t
             pr_err(res);
         }
     }
+
     if (res != NO_ERR || LOGDEBUG2) {
-        if (pcb && pcb->top) {
-            log_write("\n*** %s: %u Errors, %u Warnings\n", 
-                      pcb->top->sourcefn,
-                      pcb->top->errors, 
-                      pcb->top->warnings);
+        if (pcb && pcb->top && !bannerdone) {
+            print_score_banner(pcb);
         } else if (res != NO_ERR) {
             log_write("\n");
         }
@@ -1569,16 +1574,17 @@ static status_t
                       void *cookie)
 {
     yangdump_cvtparms_t *cp;
-    status_t    res;
+    status_t             res;
     
+    res = NO_ERR;
     cp = cookie;
 
     if (cp->module) {
         m__free(cp->module);
     }
-    cp->module = (char *)ncx_get_source((const xmlChar *)fullspec);
+    cp->module = (char *)ncx_get_source((const xmlChar *)fullspec, &res);
     if (!cp->module) {
-        return ERR_INTERNAL_MEM;
+        return res;
     }
 
     log_debug2("\nStart subtree file:\n%s\n", fullspec);

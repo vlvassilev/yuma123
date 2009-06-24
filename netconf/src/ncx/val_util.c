@@ -2442,11 +2442,9 @@ void
                          NCX_EL_LOG);
     if (val && val->res == NO_ERR && VAL_STR(val)) {
         if (!log_is_open()) {
-            logfilename = (char *)ncx_get_source(VAL_STR(val));
-            if (!logfilename) {
-                log_error("\nError: malloc failed");
-                res = ERR_INTERNAL_MEM;
-            } else {
+            res = NO_ERR;
+            logfilename = (char *)ncx_get_source(VAL_STR(val), &res);
+            if (logfilename) {
                 res = log_open(logfilename, logappend, TRUE);
                 if (res != NO_ERR) {
                     log_error("\nError: open logfile '%s' failed (%s)",

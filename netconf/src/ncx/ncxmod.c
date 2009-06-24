@@ -1339,7 +1339,8 @@ static status_t
     }
 
     /* make sure a min-length YANG file can be added (x.yang) */
-    if (pathlen+8 >= bufflen) {
+    if ((pathlen + 8) >= bufflen) {
+	log_error("\nError: pathspec too long '%s'", buff);
 	return ERR_BUFF_OVFL;
     } 
 
@@ -1352,6 +1353,7 @@ static status_t
     /* try to open the buffer spec as a directory */
     dp = opendir(buff);
     if (!dp) {
+	log_error("\nError: open directory '%s' failed", buff);
 	return ERR_OPEN_DIR_FAILED;
     }
 
@@ -2245,6 +2247,7 @@ status_t
 			    ncxmod_callback_fn_t callback,
 			    void *cookie)
 {
+    xmlChar       *sourcespec;
     char          *buff;
     DIR           *dp;
     uint32         bufflen;
@@ -2257,12 +2260,20 @@ status_t
 #endif
 
     if (strlen(startspec) >= NCXMOD_MAX_FSPEC_LEN) {
+	log_error("\nError: startspec too long '%s'", startspec);
 	return ERR_BUFF_OVFL;
     }
 
-    dp = opendir(startspec);
+    res = NO_ERR;
+    sourcespec = ncx_get_source((const xmlChar *)startspec, &res);
+    if (!sourcespec) {
+        return res;
+    }
+
+    dp = opendir((const char *)sourcespec);
     if (!dp) {
 	log_error("\nError: invalid pathspec '%s'", startspec);
+        m__free(sourcespec);
 	return ERR_NCX_INVALID_VALUE;
     } else {
 	(void)closedir(dp);
@@ -2274,9 +2285,10 @@ status_t
 	return ERR_INTERNAL_MEM;
     }
 
-    strcpy(buff, startspec);
+    strcpy(buff, (const char *)sourcespec);
     res = process_subtree(buff, bufflen, callback, cookie);
 
+    m__free(sourcespec);
     m__free(buff);
     return res;
 

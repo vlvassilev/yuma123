@@ -3199,9 +3199,16 @@ status_t
     keepmod = FALSE;
     wasadd = FALSE;
 
+    /* expand and copy the filespec */
+    str = ncx_get_source(filespec, &res);
+    if (!str) {
+        return res;
+    }
+
     /* open the YANG source file for reading */
-    fp = fopen((const char *)filespec, "r");
+    fp = fopen((const char *)str, "r");
     if (!fp) {
+        m__free(str);
 	return ERR_NCX_MISSING_FILE;
     }
 
@@ -3216,14 +3223,6 @@ status_t
 	if (!tkc) {
 	    res = ERR_INTERNAL_MEM;
 	    log_error("\nyang_parse malloc error");
-	}
-    }
-
-    /* copy the filespec */
-    if (res == NO_ERR) {
-	str = ncx_get_source(filespec);
-	if (!str) {
-	    res = ERR_INTERNAL_MEM;
 	}
     }
 

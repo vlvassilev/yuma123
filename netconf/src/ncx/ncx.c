@@ -928,12 +928,10 @@ static status_t
 		log_error("\nError: Only one 'log' filename allowed");
 		res = ERR_NCX_DUP_ENTRY;
 	    } else if (parm->value) {
+                res = NO_ERR;
 		logfilename = (char *)
-		    ncx_get_source((const xmlChar *)parm->value);
-		if (!logfilename) {
-		    log_error("\nError: malloc failed");
-		    res = ERR_INTERNAL_MEM;
-		} else {
+                    ncx_get_source((const xmlChar *)parm->value, &res);
+		if (logfilename) {
 		    res = log_open(logfilename, logappend, logtstamps);
 		    if (res != NO_ERR) {
 			log_error("\nError: open logfile '%s' failed (%s)",
@@ -9848,12 +9846,17 @@ status_t
 *
 * INPUTS:
 *    fspec == input filespec
+*    res == address of return status
+*
+* OUTPUTS:
+*   *res == return status, NO_ERR if return is non-NULL
 *
 * RETURNS:
 *   malloced buffer containing possibly expanded full filespec
 *********************************************************************/
 xmlChar *
-    ncx_get_source (const xmlChar *fspec)
+    ncx_get_source (const xmlChar *fspec,
+                    status_t *res)
 {
     const xmlChar  *p, *pp, *user;
     xmlChar        *buff, *bp;
@@ -9863,12 +9866,17 @@ xmlChar *
 #define DIRBUFF_SIZE 1500
 
 #ifdef DEBUG
-    if (!fspec || !*fspec) {
+    if (!fspec || !res) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+    if (!*fspec) {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
     }
 #endif
 
+    *res = NO_ERR;
     buff = NULL;
     user = NULL;
     userlen = 0;
@@ -9876,10 +9884,12 @@ xmlChar *
     pslen = 0;
     p = fspec;
 
-
     if (*p == NCXMOD_PSCHAR) {
 	/* absolute path */
 	buff = xml_strdup(fspec);
+        if (!buff) {
+            *res = ERR_INTERNAL_MEM;
+        }
     } else if (*p == NCXMOD_HMCHAR) {
 	/* starts with ~[username]/some/path */
 	if (p[1] && p[1] != NCXMOD_PSCHAR) {
@@ -9905,6 +9915,7 @@ xmlChar *
 	    log_error("\nError: invalid user name in path string (%s)",
 		      fspec);
 	    ncx_print_errormsg(NULL, NULL, ERR_NCX_INVALID_VALUE);
+            *res = ERR_NCX_INVALID_VALUE;
 	    return NULL;
 	}
 
@@ -9918,6 +9929,7 @@ xmlChar *
 
 	buff = m__getMem(len+pslen+1);
 	if (!buff) {
+            *res = ERR_INTERNAL_MEM;
 	    return NULL;
 	}
 
@@ -9941,6 +9953,7 @@ xmlChar *
 	    log_error("\nError: environment variable in path string (%s)",
 		      fspec);
 	    ncx_print_errormsg(NULL, NULL, ERR_NCX_INVALID_VALUE);
+            *res = ERR_NCX_INVALID_VALUE;
 	    return NULL;
 	}
 
@@ -9954,6 +9967,7 @@ xmlChar *
 
 	buff = m__getMem(len+pslen+1);
 	if (!buff) {
+            *res = ERR_INTERNAL_MEM;
 	    return NULL;
 	}
 
@@ -9975,6 +9989,7 @@ xmlChar *
 	/* prepend string with current directory */
 	buff = m__getMem(DIRBUFF_SIZE);
 	if (!buff) {
+            *res = ERR_INTERNAL_MEM;
 	    return NULL;
 	}
 
@@ -9987,7 +10002,7 @@ xmlChar *
 	bufflen = xml_strlen(buff);
 
 	if ((bufflen + xml_strlen(p) + 1) >= DIRBUFF_SIZE) {
-	    SET_ERROR(ERR_BUFF_OVFL);
+	    *res = ERR_BUFF_OVFL;
 	    m__free(buff);
 	    return NULL;
 	}

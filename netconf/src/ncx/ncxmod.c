@@ -2024,7 +2024,7 @@ xmlChar *
     }
 
     /* look for the script file  'fname'
-     * 2) check YANG_MODPATH env-var or modpath CLI param 
+     * 2) check YANG_RUNPATH env-var or runpath CLI param 
      */
     if (ncxmod_run_path) {
 	if (test_pathlist(ncxmod_run_path, 

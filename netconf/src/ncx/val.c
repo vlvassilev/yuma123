@@ -7572,24 +7572,41 @@ boolean
         valsize = (VAL_BOOL(val)) ? 4 : 5;
         break;
     case NCX_BT_INT8:
+        valsize = 4;
+        break;
     case NCX_BT_INT16:
+        valsize = 6;
+        break;
     case NCX_BT_INT32:
-    case NCX_BT_INT64:
+        valsize = 11;
+        break;
     case NCX_BT_UINT8:
+        valsize = 3;
+        break;
     case NCX_BT_UINT16:
+        valsize = 5;
+        break;
     case NCX_BT_UINT32:
+        valsize = 10;
+        break;
     case NCX_BT_UINT64:
+    case NCX_BT_INT64:
     case NCX_BT_DECIMAL64:
+        valsize = 21;
+        break;
     case NCX_BT_FLOAT64:
-        /* guess worst case instead of sprintf to check */
-        valsize = NCX_MAX_NUMLEN;
+        /* guess an average amount, since most numbers are 
+         * never going to be this many digits
+         */
+        valsize = 32;
         break;
     case NCX_BT_BINARY:
 	valsize = val->v.binary.ustrlen;
         break;
     case NCX_BT_INSTANCE_ID:
-        /*****/
-        return FALSE;
+        /*** TEMP !!! fall through !!!! ****/
+        /*** TBD: XPath check ***/
+        /* return FALSE; */
     case NCX_BT_STRING:
     case NCX_BT_LEAFREF:   /*****/
 	if (VAL_STR(val)) {

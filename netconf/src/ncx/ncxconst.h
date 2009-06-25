@@ -521,7 +521,7 @@ date	     init     comment
 #define NCX_EL_PORT            (const xmlChar *)"port"
 #define NCX_EL_POS             (const xmlChar *)"pos"
 #define NCX_EL_POSITION        (const xmlChar *)"position"
-#define NCX_EL_PREFIXED        (const xmlChar *)"prefixed"
+#define NCX_EL_PREFIX          (const xmlChar *)"prefix"
 #define NCX_EL_PROTOCOL        (const xmlChar *)"protocol"
 #define NCX_EL_QNAME           (const xmlChar *)"qname"
 #define NCX_EL_REPLACE         (const xmlChar *)"replace"

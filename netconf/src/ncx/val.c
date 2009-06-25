@@ -3311,7 +3311,12 @@ void
             (*dumpfn)("%s ", (val->name) ? (const char *)val->name : "--");
         }
     } else {
-        prefix = xmlns_get_ns_prefix(val_get_nsid(val));
+        if (display_mode == NCX_DISPLAY_MODE_PREFIX) {
+            prefix = xmlns_get_ns_prefix(val_get_nsid(val));
+        } else {
+            /* assume the mode is NCX_DISPLAY_MODE_MODULE */
+            prefix = val_get_mod_name(val);
+        }
         if (!prefix) {
             prefix = (const xmlChar *)"invalid";
         }

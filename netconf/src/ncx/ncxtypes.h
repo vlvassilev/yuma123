@@ -353,7 +353,8 @@ typedef enum ncx_bad_data_t_ {
 typedef enum ncx_display_mode_t_ {
     NCX_DISPLAY_MODE_NONE,
     NCX_DISPLAY_MODE_PLAIN,
-    NCX_DISPLAY_MODE_PREFIXED,
+    NCX_DISPLAY_MODE_PREFIX,
+    NCX_DISPLAY_MODE_MODULE,
     NCX_DISPLAY_MODE_XML
 } ncx_display_mode_t;
 

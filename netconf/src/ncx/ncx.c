@@ -10397,8 +10397,10 @@ ncx_display_mode_t
 
     if (!xml_strcmp(dmstr, NCX_EL_PLAIN)) {
 	return NCX_DISPLAY_MODE_PLAIN;
-    } else if (!xml_strcmp(dmstr, NCX_EL_PREFIXED)) {
-	return NCX_DISPLAY_MODE_PREFIXED;
+    } else if (!xml_strcmp(dmstr, NCX_EL_PREFIX)) {
+	return NCX_DISPLAY_MODE_PREFIX;
+    } else if (!xml_strcmp(dmstr, NCX_EL_MODULE)) {
+	return NCX_DISPLAY_MODE_MODULE;
     } else if (!xml_strcmp(dmstr, NCX_EL_XML)) {
 	return NCX_DISPLAY_MODE_XML;
     } else {
@@ -10428,8 +10430,10 @@ const xmlChar *
         return NULL;
     case NCX_DISPLAY_MODE_PLAIN:
         return NCX_EL_PLAIN;
-    case NCX_DISPLAY_MODE_PREFIXED:
-        return NCX_EL_PREFIXED;
+    case NCX_DISPLAY_MODE_PREFIX:
+        return NCX_EL_PREFIX;
+    case NCX_DISPLAY_MODE_MODULE:
+        return NCX_EL_MODULE;
     case NCX_DISPLAY_MODE_XML:
         return NCX_EL_XML;
     default:

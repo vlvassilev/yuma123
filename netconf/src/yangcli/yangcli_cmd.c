@@ -205,6 +205,7 @@ static val_value_t *
 			 VALONLY, 
 			 SCRIPTMODE,
 			 get_autocomp(), 
+                         CLI_MODE_COMMAND,
 			 res);
     } else {
 	*res = ERR_NCX_SKIPPED;
@@ -2084,7 +2085,6 @@ static void
     }
     
 } /* create_session */
-
 
 
 /********************************************************************
@@ -7770,7 +7770,9 @@ status_t
     /* get the RPC method template */
     dtyp = NCX_NT_OBJ;
     rpc = (const obj_template_t *)parse_def(agent_cb,
-					    &dtyp, line, &len);
+					    &dtyp, 
+                                            line, 
+                                            &len);
     if (!rpc) {
 	if (agent_cb->result_name || agent_cb->result_filename) {
 	    res = finish_result_assign(agent_cb, NULL, line);
@@ -7920,31 +7922,30 @@ status_t
  *
  * INPUTS:
  *   agent_cb == agent control block to use
+ *   runscript == name of the script to run (could have path)
  *
  * SIDE EFFECTS:
  *   runstack start with the runscript script if no errors
+ *
  * RETURNS:
  *   status
  *********************************************************************/
 status_t
-    do_startup_script (agent_cb_t *agent_cb)
+    do_startup_script (agent_cb_t *agent_cb,
+                       const xmlChar *runscript)
 {
     const obj_template_t *rpc;
-    const xmlChar        *runscript;
     xmlChar              *line, *p;
     status_t              res;
     uint32                linelen;
 
 #ifdef DEBUG
-    if (!agent_cb) {
+    if (!agent_cb || !runscript) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    runscript = get_runscript();
-
-    /* make sure there is a runscript string */
-    if (!runscript || !*runscript) {
+    if (!*runscript) {
 	return ERR_NCX_INVALID_VALUE;
     }
 
@@ -7964,12 +7965,82 @@ status_t
     p += xml_strcpy(p, NCX_EL_SCRIPT);
     *p++ = ' ';
     xml_strcpy(p, runscript);
-    
+
+    if (LOGDEBUG) {
+        log_debug("\nBegin startup script '%s'",  runscript);
+    }
+
     /* fill in the value set for the input parameters */
     res = do_run(agent_cb, rpc, line, 0);
+
+    m__free(line);
+
     return res;
 
 }  /* do_startup_script */
+
+
+/********************************************************************
+ * FUNCTION do_startup_command
+ * 
+ * Process run-command CLI parameter
+ *
+ * INPUTS:
+ *   agent_cb == agent control block to use
+ *   runcommand == command string to run
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+status_t
+    do_startup_command (agent_cb_t *agent_cb,
+                        const xmlChar *runcommand)
+{
+    xmlChar        *copystring;
+    status_t        res;
+
+#ifdef DEBUG
+    if (!agent_cb || !runcommand) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (!*runcommand) {
+	return ERR_NCX_INVALID_VALUE;
+    }
+
+    if (xml_strlen(runcommand) > YANGCLI_LINELEN) {
+        return ERR_NCX_RESOURCE_DENIED;
+    }
+
+    /* the top_command and conn_command functions
+     * expect this buffer to be wriable
+     */
+    copystring = xml_strdup(runcommand);
+    if (!copystring) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    if (LOGDEBUG) {
+        log_debug("\nBegin startup command '%s'",  copystring);
+    }
+
+    /* only invoke the command in idle or connection idle states */
+    switch (agent_cb->state) {
+    case MGR_IO_ST_IDLE:
+        res = top_command(agent_cb, copystring);
+        break;
+    case MGR_IO_ST_CONN_IDLE:
+        res = conn_command(agent_cb, copystring);
+        break;
+    default:
+        res = ERR_NCX_OPERATION_FAILED;
+    }
+
+    m__free(copystring);
+    return res;
+
+}  /* do_startup_command */
 
 
 /********************************************************************

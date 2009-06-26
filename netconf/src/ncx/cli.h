@@ -68,11 +68,21 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+/* CLI parsing modes */
+typedef enum cli_mode_t_ {
+    CLI_MODE_NONE,
+    CLI_MODE_PROGRAM,    /* real argc, argv */
+    CLI_MODE_COMMAND     /* called from yangcli command parser */
+} cli_mode_t;
+
+
+
 /* used for bootstrap CLI parms only, no validation */
 typedef struct cli_rawparm_t_ {
     dlq_hdr_t   qhdr;
     const char *name;
     char       *value;
+    boolean     hasvalue;
     int32       count;
 } cli_rawparm_t;
 
@@ -86,6 +96,9 @@ typedef struct cli_rawparm_t_ {
 /*** bootstrap CLI support ***/
 extern cli_rawparm_t *
     cli_new_rawparm (const xmlChar *name);
+
+extern cli_rawparm_t *
+    cli_new_empty_rawparm (const xmlChar *name);
 
 extern void
     cli_free_rawparm (cli_rawparm_t *parm);
@@ -111,6 +124,7 @@ extern val_value_t *
 	       boolean valonly,
 	       boolean script,
 	       boolean autocomp,
+               cli_mode_t  mode,
 	       status_t  *status);
 
 

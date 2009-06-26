@@ -2085,7 +2085,7 @@ xmlChar *
     log_info("\nError: script file (%s) not found.", fname);
 
     m__free(buff);
-    *res = ERR_NCX_MOD_NOT_FOUND;
+    *res = ERR_NCX_MISSING_FILE;
     return NULL;
 
 }  /* ncxmod_find_script_file */

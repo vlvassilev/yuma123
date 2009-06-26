@@ -196,10 +196,6 @@ static status_t
     status_t   res;
     log_debug_t  dlevel;
 
-#ifdef NETCONFD_DEBUG
-    int   i;
-#endif
-
     /* set the default debug output level */
 #ifdef DEBUG
 #ifdef NETCONFD_DEBUG
@@ -224,15 +220,6 @@ static status_t
     if (res != NO_ERR) {
 	return res;
     }
-
-#ifdef NETCONFD_DEBUG
-    if (argc>1 && LOGDEBUG2) {
-        log_debug2("\nCommand line parameters:");
-        for (i=0; i<argc; i++) {
-            log_debug2("\n   arg%d: %s", i, argv[i]);
-        }
-    }
-#endif
 
 #ifdef NETCONFD_DEBUG
     if (LOGDEBUG2) {

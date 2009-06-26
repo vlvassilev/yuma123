@@ -351,6 +351,236 @@ static cli_rawparm_t *
 } /* find_rawparm */
 
 
+/********************************************************************
+* FUNCTION copy_argv
+* 
+*  Check the argv string and copy it to the CLI buffer
+*  Add quotes as needed to restore command to original form
+*
+* INPUTS:
+*   buffer == buffer spot to copy string into
+*   parmstr == parameter string to use
+*
+* RETURNS:
+*   number of chars written to the buffer
+*********************************************************************/
+static int32
+    copy_argv (char *buffer,
+               const char *parmstr)
+{
+    const char   *str;
+    char         *str2;
+
+    str = NULL;
+    str2 = NULL;
+
+    /* look for any whitespace in the string at all */
+    str = parmstr;
+    while (*str && !isspace(*str)) {
+        str++;
+    }
+    if (*str == '\0') {
+        /* no whitespace, so nothing to worry about */
+        return (int32)xml_strcpy((xmlChar *)buffer, 
+                                 (const xmlChar *)parmstr);
+    } 
+
+    /* check leading whitespace */
+    str = parmstr;
+    while (*str && isspace(*str)) {
+        str++;
+    }
+    if (*str == '\0') {
+        /* the string is all whitespace, just copy it
+         * and it will be skipped later
+         */
+        return  (int32)xml_strcpy((xmlChar *)buffer, 
+                                  (const xmlChar *)parmstr);
+    } else if (str != parmstr) {
+        /* there was starting whitespace
+         * just guess that the whole string was
+         * quoted, since it is a rare case
+         */
+        str2 = buffer;
+        *str2++ = '"';
+        str2 += (int32)xml_strcpy((xmlChar *)str2,
+                                  (const xmlChar *)parmstr);
+        *str2++ = '"';
+        *str2 = '\0';
+        return (str2 - parmstr);
+    }
+
+    /* started with some non-whitespace; go until the
+     * equals sign is seen or the next whitespace
+     */
+    while (*str && !isspace(*str) && (*str != '=')) {
+        str++;
+    }
+
+    /* check where the search stopped */
+    if (*str == '=') {
+        str++;   /* str == first char to be inside dquotes */
+    } else if (isspace(*str)) {
+        /* see if the equals sign is still out there */
+        while (*str && isspace(*str)) {
+            str++;
+        }
+        if (*str == '=') {
+            str++;  /* str == first char to be inside dquotes */
+        } else {
+            /* hit end of string of the start of some new token */
+        }
+    } else {
+        /* should not have hit end of string */
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return 0;
+    }
+     
+    /* have some split point in the command string to
+     * guess where the original quotes were located
+     */
+    str2 = buffer;
+    str2 += (int32)xml_strncpy((xmlChar *)str2, 
+                               (const xmlChar *)parmstr,
+                               (uint32)(str - parmstr));
+    *str2++ = '"';
+    str2 += (int32)xml_strcpy((xmlChar *)str2, 
+                              (const xmlChar *)str);
+    *str2++ = '"';
+    *str2 = '\0';
+
+    return (str2 - buffer);
+
+} /* copy_argv */
+
+
+/********************************************************************
+* FUNCTION copy_argv_to_buffer
+* 
+*  Check the argv string and copy it to the CLI buffer
+*  Add quotes as needed to restore command to original form
+*
+* INPUTS:
+*   argc == number of strings passed in 'argv'
+*   argv == array of command line argument strings
+*   mode == CLI parsing mode in progress 
+*           (CLI_MODE_PROGRAM or CLI_MODE_COMMAND)
+*   bufflen == address of return buffer length
+*   res == address of return status
+*
+* OUTPUTS:
+*   *bufflen contains the number of chars to use in the 
+*       return buffer.
+*     Note that the malloced size of the return
+*     buffer may be slightly larger than this.
+*   *res == return status
+*
+* RETURNS:
+*   malloced buffer with the argv[] strings copied
+*   as if it were 1 long command line
+*********************************************************************/
+static char *
+    copy_argv_to_buffer (int argc,
+                         const char *argv[],
+                         cli_mode_t mode,
+                         int32 *bufflen,
+                         status_t *res)
+{
+    char     *buff;
+    int32     padamount;
+    int32     buffpos;
+    int       parmnum;
+
+    *bufflen = 0;
+    *res = NO_ERR;
+
+    /* gather all the argv strings into one buffer for easier parsing
+     * need to copy because the buffer is written during parsing
+     * and the argv parameter is always a 'const char **' data type
+     *
+     * Unfortunately, glibc will remove any 'outside' quotes
+     *  that were found while processing the input
+     *
+     *  program --foo --bar=1 2  --baz="1 2 3" "--goo='a b c'"
+     *
+     *  argc = 6
+     *  argv[0] = <absolute path to program>
+     *  argv[1] = '--foo'
+     *  argv[2] = '--bar=1'
+     *  argv[3] = '2'
+     *  argv[4] = '--baz=1 2 3'
+     *  argv[5] = "--goo='a b c'"
+     *
+     * Note:
+     *   argv[2] is an error anytime, no quotes will be added
+     *   argv[4] needs quotes put back into the string
+     *   argv[5] needs to be left alone and not get any new quotes
+     *
+     * first determine the buffer length
+     *
+     * mode == CLI_MODE_COMMAND:
+     *   padamount = 1 == for the space char added
+     *
+     * mode == CLI_MODE_PROGRAM:
+     *   padamount = 3 
+     *      1 for the space char added
+     *      2 for the 2 quote chars that may be needed
+     */
+    switch (mode) {
+    case CLI_MODE_PROGRAM:
+        padamount = 3;
+        break;
+    case CLI_MODE_COMMAND:
+        padamount = 1;
+        break;
+    default:
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+
+    for (parmnum=1; parmnum < argc; parmnum++) {
+	*bufflen += (strlen(argv[parmnum]) + padamount);
+    }
+
+    /* adjust extra spaces */
+    if (*bufflen) {
+	*bufflen -= padamount;
+    }
+
+    buff = m__getMem(*bufflen + 1);
+    if (!buff) {
+	/* non-recoverable error */
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+
+    /* copy the argv strings into the buffer */
+    buffpos = 0;
+
+    for (parmnum=1; parmnum < argc; parmnum++) {
+        if (mode == CLI_MODE_PROGRAM) {
+            buffpos += copy_argv(&buff[buffpos], argv[parmnum]);
+        } else {
+            buffpos += (int32)xml_strcpy((xmlChar *)&buff[buffpos], 
+                                         (const xmlChar *)argv[parmnum]);
+        }
+        if (parmnum+1 < argc) {
+            buff[buffpos++] = ' ';
+        }
+    }
+    buff[buffpos] = 0;
+
+    /* need to shorten the buffer because the malloc guessed
+     * 2 chars bigger than needed in most cases, on each
+     * separate command line
+     */
+    *bufflen = buffpos;
+
+    return buff;
+
+} /* copy_argv_to_buffer */
+
+
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
@@ -380,10 +610,43 @@ cli_rawparm_t *
     if (parm) {
 	memset(parm, 0x0, sizeof(cli_rawparm_t));
 	parm->name = (const char *)name;
+        parm->hasvalue = TRUE;
     }
     return parm;
 
 } /* cli_new_rawparm */
+
+
+/********************************************************************
+* FUNCTION cli_new_empty_rawparm
+* 
+* Malloc and init a raw parm entry that has no value (NCX_BT_EMPTY)
+*
+* INPUTS:
+*   name == name of parm (static const string)
+*
+* RETURNS:
+*   new parm entry, NULL if malloc failed
+*********************************************************************/
+cli_rawparm_t *
+    cli_new_empty_rawparm (const xmlChar *name)
+{
+    cli_rawparm_t  *parm;
+
+#ifdef DEBUG
+    if (!name) {
+	return NULL;
+    }
+#endif
+
+    parm = m__getObj(cli_rawparm_t);
+    if (parm) {
+	memset(parm, 0x0, sizeof(cli_rawparm_t));
+	parm->name = (const char *)name;
+    }
+    return parm;
+
+} /* cli_new_empty_rawparm */
 
 
 /********************************************************************
@@ -530,7 +793,7 @@ status_t
     cli_rawparm_t  *rawparm;
     char           *parmname, *parmval, *str, *buff;
     int32           parmnamelen, buffpos, bufflen;
-    int             parmnum;
+    int             i;
     status_t        res;
 
 #ifdef DEBUG
@@ -547,42 +810,26 @@ status_t
 	return NO_ERR;
     }
 
-    /* gather all the argv strings into one buffer for easier parsing
-     * need to copy because the buffer is written during parsing
-     * and the argv parameter is always a 'const char **' data type
-     *
-     * first determine the buffer length
-     */
+    if (LOGDEBUG2) {
+        log_debug("\nCLI bootstrap: input parameters:");
+        for (i=0; i<argc; i++) {
+            log_debug("\n   arg%d: '%s'", i, argv[i]);
+        }
+    }
+
+    res = NO_ERR;
     bufflen = 0;
-    for (parmnum=1; parmnum < argc; parmnum++) {
-	bufflen += (uint32)(strlen(argv[parmnum]) + 1);
-    }
-
-    /* adjust extra space */
-    if (bufflen) {
-	bufflen--;
-    }
-
-    buff = m__getMem(bufflen+1);
+    buff = copy_argv_to_buffer(argc,
+                               argv,
+                               CLI_MODE_PROGRAM,
+                               &bufflen,
+                               &res);
     if (!buff) {
-	/* non-recoverable error */
-	return ERR_INTERNAL_MEM;
+        return res;
     }
-
-    /* copy the argv strings into the buffer */
-    buffpos = 0;
-    for (parmnum=1; parmnum < argc; parmnum++) {
-	buffpos += xml_strcpy((xmlChar *)&buff[buffpos], 
-			      (const xmlChar *)argv[parmnum]);
-	if (parmnum+1 < argc) {
-	    buff[buffpos++] = ' ';
-	}
-    }
-    buff[buffpos] = 0;
 
     /* setup parm loop */
     buffpos = 0;
-
     res = NO_ERR;
 
     /* go through all the command line strings
@@ -773,11 +1020,6 @@ status_t
 * by this function.  This must be done after this function
 * has been called, and returns NO_ERR.
 * 
-* !!! TO-DO !!!
-*  - There are no 1-char aliases for CLI parameters.
-*  - unnamed parameters are not supported at this time.
-*    (ncx:cli-default extension)
-*
 * INPUTS:
 *   argc == number of strings passed in 'argv'
 *   argv == array of command line argument strings
@@ -791,6 +1033,12 @@ status_t
 *               tried if any specified parameters are not matches
 *               for the specified parmset
 *            == FALSE if exact match only is desired
+*   mode == CLI_MODE_PROGRAM if calling with real (argc, argv)
+*           parameters; these may need some prep work
+*        == CLI_MODE_COMMAND if calling from yangcli or
+*           some other internal command parser.
+*           These strings will not be preped at all
+*
 *   status == pointer to status_t to get the return value
 *
 * OUTPUTS:
@@ -809,6 +1057,7 @@ val_value_t *
 	       boolean valonly,
 	       boolean script,
 	       boolean autocomp,
+               cli_mode_t mode,
 	       status_t  *status)
 {
 #define ERRLEN  127
@@ -817,12 +1066,13 @@ val_value_t *
     const obj_template_t *chobj;
     const char     *msg;
     char           *parmname, *parmval, *str, *buff;
-    int32           parmnum;
-    uint32          parmnamelen, buffpos, bufflen, matchcount;
+    int32           buffpos, bufflen;
+    uint32          parmnamelen, copylen, matchcount;
     ncx_btype_t     btyp;
     status_t        res;
     xmlChar         errbuff[ERRLEN+1], savechar;
     boolean         gotdashes, gotmatch, gotdefaultparm, isdefaultparm;
+    int             i;
 
 #ifdef DEBUG
     if (!status) {
@@ -834,6 +1084,8 @@ val_value_t *
 	return NULL;
     }
 #endif
+
+    *status = NO_ERR;
 
     /* check if CLI parmset really OK to use
      * Must have only choices, leafs, and leaflists
@@ -852,6 +1104,12 @@ val_value_t *
 	return NULL;
     }
 
+    if (LOGDEBUG3) {
+        log_debug3("\nCLI: input parameters:");
+        for (i=0; i<argc; i++) {
+            log_debug3("\n   arg%d: '%s'", i, argv[i]);
+        }
+    }
 
     /* allocate a new container value to hold the output */
     val = val_new_value();
@@ -877,42 +1135,19 @@ val_value_t *
 	return NULL;
     }
 
-    /* gather all the argv strings into one buffer for easier parsing
-     * need to copy because the buffer is written during parsing
-     * and the argv parameter is always a 'const char **' data type
-     *
-     * first determine the buffer length
-     */
     bufflen = 0;
-    for (parmnum=1; parmnum < argc; parmnum++) {
-	bufflen += (uint32)(strlen(argv[parmnum]) + 1);
-    }
-
-    /* adjust extra space */
-    if (bufflen) {
-	bufflen--;
-    }
-
-    buff = m__getMem(bufflen+1);
+    buff = copy_argv_to_buffer(argc, 
+                               argv,
+                               mode,
+                               &bufflen,
+                               status);
     if (!buff) {
-	/* non-recoverable error */
-	*status = ERR_INTERNAL_MEM;
-	val_free_value(val);
-	return NULL;
+        val_free_value(val);
+        return NULL;
     }
-
-    /* copy the argv strings into the buffer */
-    buffpos = 0;
-    for (parmnum=1; parmnum < argc; parmnum++) {
-	buffpos += xml_strcpy((xmlChar *)&buff[buffpos], 
-			      (const xmlChar *)argv[parmnum]);
-	if (parmnum+1 < argc) {
-	    buff[buffpos++] = ' ';
-	}
-    }
-    buff[buffpos] = 0;
 
     /* setup parm loop */
+    res = NO_ERR;
     buffpos = 0;
     gotdefaultparm = FALSE;
 
@@ -921,7 +1156,6 @@ val_value_t *
      * and the PSD for these parameters
      * save each parm value in a ps_parm_t struct
      */
-    res = NO_ERR;
     while (buffpos < bufflen && res == NO_ERR) {
 
 	gotdashes = FALSE;
@@ -975,6 +1209,7 @@ val_value_t *
 		    str++;
 		}
 		parmnamelen = (uint32)(str - parmname);
+                copylen = parmnamelen;
 
 		/* check if this parameter name is in the parmset def */
 		chobj = obj_find_child_str(obj, 
@@ -997,12 +1232,12 @@ val_value_t *
 			    res = ERR_NCX_AMBIGUOUS_CMD;
 			}
 		    } else {
-			parmnamelen = 0;
+			copylen = 0;
 		    }
 		}
 
 		/* advance the buffer pointer */
-		buffpos += parmnamelen;
+		buffpos += copylen;
 
 	    }  /* else it could be a default-parm value */
 

@@ -222,12 +222,17 @@ static boolean         versionmode;
 /* contains list of modules entered from CLI --modules parm */
 static val_value_t    *modules;
 
-/* name of script pased at invocation to auto-run */
+/* name of script passed at invocation to auto-run */
 static xmlChar        *runscript;
 
 /* TRUE if runscript has been completed */
 static boolean         runscriptdone;
 
+/* command string passed at invocation to auto-run */
+static xmlChar        *runcommand;
+
+/* TRUE if runscript has been completed */
+static boolean         runcommanddone;
 
 /* Q of modtrs that have been loaded with 'mgrload' */
 static dlq_hdr_t       mgrloadQ;
@@ -1634,7 +1639,8 @@ static status_t
                                        obj,
 				       FULLTEST, 
                                        PLAINMODE,
-				       autocomp, 
+				       autocomp,
+                                       CLI_MODE_PROGRAM,
                                        &res);
 	}
     }
@@ -1790,7 +1796,9 @@ static status_t
     }
 
     /* get the modules parameter */
-    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, NCX_EL_MODULES);
+    parm = val_find_child(mgr_cli_valset, 
+                          YANGCLI_MOD, 
+                          NCX_EL_MODULES);
     if (parm && parm->res == NO_ERR) {
 	modules = val_clone(parm);
 	if (modules == NULL) {
@@ -1799,10 +1807,19 @@ static status_t
     }
 
     /* get the run-script parameter */
-    runscript = get_strparm(mgr_cli_valset, YANGCLI_MOD, YANGCLI_RUN_SCRIPT);
+    runscript = get_strparm(mgr_cli_valset, 
+                            YANGCLI_MOD, 
+                            YANGCLI_RUN_SCRIPT);
+
+    /* get the run-command parameter */
+    runcommand = get_strparm(mgr_cli_valset, 
+                             YANGCLI_MOD, 
+                             YANGCLI_RUN_COMMAND);
 
     /* get the timeout parameter */
-    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_TIMEOUT);
+    parm = val_find_child(mgr_cli_valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_TIMEOUT);
     if (parm && parm->res == NO_ERR) {
 	default_timeout = VAL_UINT(parm);
 
@@ -1816,7 +1833,9 @@ static status_t
     }
 
     /* get the user name */
-    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_USER);
+    parm = val_find_child(mgr_cli_valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_USER);
     if (parm && parm->res == NO_ERR) {
 	res = add_clone_parm(parm, connect_valset);
 	if (res != NO_ERR) {
@@ -1825,7 +1844,9 @@ static status_t
     }
 
     /* get the version parameter */
-    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, NCX_EL_VERSION);
+    parm = val_find_child(mgr_cli_valset, 
+                          YANGCLI_MOD, 
+                          NCX_EL_VERSION);
     if (parm && parm->res == NO_ERR) {
 	versionmode = TRUE;
     }
@@ -2336,6 +2357,10 @@ static mgr_io_state_t
 	if (scb == NULL) {
 	    /* session startup failed */
 	    agent_cb->state = MGR_IO_ST_IDLE;
+            if (batchmode) {
+                mgr_request_shutdown();
+                return agent_cb->state;
+            }
 	} else if (scb->state == SES_ST_IDLE 
 		   && dlq_empty(&scb->outQ)) {
 	    /* incoming hello OK and outgoing hello is sent */
@@ -2346,6 +2371,10 @@ static mgr_io_state_t
 	    /* check timeout */
 	    if (message_timed_out(scb)) {
 		agent_cb->state = MGR_IO_ST_IDLE;
+                if (batchmode) {
+                    mgr_request_shutdown();
+                    return agent_cb->state;
+                }
 		break;
 	    } /* else still setting up session */
 	    return agent_cb->state;
@@ -2393,19 +2422,30 @@ static mgr_io_state_t
     }
 
     /* check a batch-mode corner-case, nothing else to do */
-    if (batchmode && !runscript) {
+    if (batchmode && !(runscript || runcommand)) {
 	mgr_request_shutdown();
 	return agent_cb->state;
     }
 
     /* check the run-script parameters */
-    if (runscript && !runscriptdone) {
-	runscriptdone = TRUE;
-	res = do_startup_script(agent_cb);
-	if (res != NO_ERR) {
-	    mgr_request_shutdown();
-	    return agent_cb->state;
-	}
+    if (runscript) {
+        if (!runscriptdone) {
+            runscriptdone = TRUE;
+            res = do_startup_script(agent_cb, runscript);
+            if (res != NO_ERR) {
+                mgr_request_shutdown();
+                return agent_cb->state;
+            }
+        }
+    } else if (runcommand) {
+        if (!runcommanddone) {
+            runcommanddone = TRUE;
+            res = do_startup_command(agent_cb, runcommand);
+            if (res != NO_ERR) {
+                mgr_request_shutdown();
+                return agent_cb->state;
+            }
+        }
     }
 
     /* get a line of user input */
@@ -2592,6 +2632,9 @@ static status_t
     autocomp = TRUE;
     runscript = NULL;
     runscriptdone = FALSE;
+    runcommand = NULL;
+    runcommanddone = FALSE;
+
     malloc_cnt = 0;
     free_cnt = 0;
 
@@ -2767,11 +2810,16 @@ static status_t
                               YANGCLI_MOD, 
                               YANGCLI_AGENT);
 	if (parm && parm->res == NO_ERR) {
-	    do_connect(agent_cb, NULL, NULL, 0, TRUE);
+	    res = do_connect(agent_cb, NULL, NULL, 0, TRUE);
+            if (res != NO_ERR) {
+                if (!batchmode) {
+                    res = NO_ERR;
+                }
+            }
 	}
     }
 
-    return NO_ERR;
+    return res;
 
 }  /* yangcli_init */
 
@@ -2840,6 +2888,11 @@ static void
     if (runscript) {
 	m__free(runscript);
 	runscript = NULL;
+    }
+
+    if (runcommand) {
+	m__free(runcommand);
+	runcommand = NULL;
     }
 
     if (malloc_cnt != free_cnt) {
@@ -3292,7 +3345,9 @@ int
 	res = mgr_io_run();
 	if (res != NO_ERR) {
 	    log_error("\nmgr_io failed (%d)\n", res);
-	}
+	} else {
+            log_write("\n");
+        }
     }
 
     print_errors();

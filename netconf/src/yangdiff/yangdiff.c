@@ -334,7 +334,10 @@ static void
 				  oldrev->descr, newrev->descr,
 				  isrev, &cdb)) {
 		/* description was changed in the new module */
-		output_mstart_line(cp, YANG_K_REVISION, oldrev->version, FALSE);
+		output_mstart_line(cp, 
+                                   YANG_K_REVISION, 
+                                   oldrev->version, 
+                                   FALSE);
 		if (cp->edifftype != YANGDIFF_DT_TERSE) {
 		    indent_in(cp);
 		    output_cdb_line(cp, &cdb);
@@ -386,20 +389,30 @@ static void
     /* figure out what changed */
     changecnt = 0;
     changecnt += str_field_changed(YANG_K_DESCRIPTION,
-				   oldext->descr, newext->descr, 
-				   isrev, &extcdb[0]);
+				   oldext->descr, 
+                                   newext->descr, 
+				   isrev, 
+                                   &extcdb[0]);
     changecnt += str_field_changed(YANG_K_REFERENCE,
-				   oldext->ref, newext->ref, 
-				   isrev, &extcdb[1]);
+				   oldext->ref, 
+                                   newext->ref, 
+				   isrev, 
+                                   &extcdb[1]);
     changecnt += str_field_changed(YANG_K_ARGUMENT,
-				   oldext->arg, newext->arg, 
-				   isrev, &extcdb[2]);
+				   oldext->arg, 
+                                   newext->arg, 
+				   isrev, 
+                                   &extcdb[2]);
     changecnt += bool_field_changed(YANG_K_YIN_ELEMENT,
-				    oldext->argel, newext->argel, 
-				    isrev, &extcdb[3]);
+				    oldext->argel, 
+                                    newext->argel, 
+				    isrev, 
+                                    &extcdb[3]);
     changecnt += status_field_changed(YANG_K_STATUS,
-				      oldext->status, newext->status, 
-				      isrev, &extcdb[4]);
+				      oldext->status, 
+                                      newext->status, 
+				      isrev, 
+                                      &extcdb[4]);
     if (changecnt == 0) {
 	return;
     }
@@ -533,22 +546,32 @@ static void
     output_include_diff(cp, oldpcb, newpcb);
 
     /* organization */
-    output_diff(cp, YANG_K_ORGANIZATION,
+    output_diff(cp,
+                YANG_K_ORGANIZATION,
 		oldpcb->top->organization,
-		newpcb->top->organization, FALSE);
+		newpcb->top->organization, 
+                FALSE);
 
     /* contact */
-    output_diff(cp, YANG_K_CONTACT,
+    output_diff(cp,
+                YANG_K_CONTACT,
 		oldpcb->top->contact_info,
-		newpcb->top->contact_info, FALSE);
+		newpcb->top->contact_info,
+                FALSE);
 
     /* description */
-    output_diff(cp, YANG_K_DESCRIPTION,
-		oldpcb->top->descr, newpcb->top->descr, FALSE);
+    output_diff(cp,
+                YANG_K_DESCRIPTION,
+		oldpcb->top->descr,
+                newpcb->top->descr,
+                FALSE);
 
     /* reference */
-    output_diff(cp, YANG_K_REFERENCE,
-		oldpcb->top->ref, newpcb->top->ref, FALSE);
+    output_diff(cp,
+                YANG_K_REFERENCE,
+		oldpcb->top->ref,
+                newpcb->top->ref,
+                FALSE);
 
     /* revisions */
     output_revision_diff(cp, oldpcb, newpcb);
@@ -667,15 +690,18 @@ static status_t
     output_extension_diff(cp, oldpcb, newpcb);
 
     /* global typedefs */
-    output_typedefQ_diff(cp, &oldpcb->top->typeQ, 
+    output_typedefQ_diff(cp, 
+                         &oldpcb->top->typeQ, 
 			 &newpcb->top->typeQ);
 
     /* global groupings */
-    output_groupingQ_diff(cp, &oldpcb->top->groupingQ, 
+    output_groupingQ_diff(cp, 
+                          &oldpcb->top->groupingQ, 
 			  &newpcb->top->groupingQ);
 
     /* global data definitions */
-    output_datadefQ_diff(cp, &oldpcb->top->datadefQ, 
+    output_datadefQ_diff(cp, 
+                         &oldpcb->top->datadefQ, 
 			 &newpcb->top->datadefQ);
 
     /* finish off revision statement if that is the diff mode */
@@ -809,7 +835,9 @@ static status_t
     newpcb = ncxmod_load_module_diff((cp->curnew) ? cp->curnew : cp->new,
 				     revision,
 				     (cp->curnew) ? TRUE : FALSE,
-				     FALSE, modpath, &res);
+				     FALSE, 
+                                     modpath, 
+                                     &res);
     if (res == ERR_NCX_SKIPPED) {
 	if (newpcb) {
 	    yang_free_pcb(newpcb);
@@ -844,13 +872,15 @@ static status_t
 	}
     } else if (LOGDEBUG && newpcb && newpcb->top) {
 	log_debug("\n*** %s: %u Errors, %u Warnings\n", 
-		   newpcb->top->source,
-		   newpcb->top->errors, newpcb->top->warnings);
+                  newpcb->top->source,
+                  newpcb->top->errors,
+                  newpcb->top->warnings);
     }
 
     /* figure out where to get the requested 'old' file */
     cp->curold = make_curold_filename((cp->new_isdir) ? 
-				      cp->curnew : newpcb->top->sourcefn, cp);
+				      cp->curnew : newpcb->top->sourcefn, 
+                                      cp);
     if (!cp->curold) {
 	res = ERR_INTERNAL_MEM;
 	ncx_print_errormsg(NULL, NULL, res);
@@ -881,7 +911,9 @@ static status_t
     oldpcb = ncxmod_load_module_diff(cp->curold, 
 				     revision,
 				     (cp->new_isdir) ? TRUE : FALSE,
-				     FALSE, modpath, &res);
+				     FALSE, 
+                                     modpath, 
+                                     &res);
     if (res == ERR_NCX_SKIPPED) {
 	/* this is probably a submodule being skipped in subtree mode */
 	log_debug("\nyangdiff: New PCB OK but old PCB skipped (%s)",
@@ -898,11 +930,13 @@ static status_t
 
 	    if (oldpcb->top->errors) {
 		log_error("\n*** %s: %u Errors, %u Warnings\n", 
-			  logsource, oldpcb->top->errors, 
+			  logsource,
+                          oldpcb->top->errors, 
 			  oldpcb->top->warnings);
 	    } else if (oldpcb->top->warnings) {
 		log_warn("\n*** %s: %u Errors, %u Warnings\n", 
-			 logsource, oldpcb->top->errors, 
+			 logsource,
+                         oldpcb->top->errors, 
 			 oldpcb->top->warnings);
 	    }
 	} else {
@@ -926,7 +960,8 @@ static status_t
     } else if (LOGDEBUG && oldpcb && oldpcb->top) {
 	log_debug("\n*** %s: %u Errors, %u Warnings\n", 
 		  oldpcb->top->source,
-		  oldpcb->top->errors, oldpcb->top->warnings);
+		  oldpcb->top->errors,
+                  oldpcb->top->warnings);
     }
 
     /* allow new modules to be available for ncx_find_module */
@@ -946,7 +981,8 @@ static status_t
 
     if (ncx_any_dependency_errors(oldpcb->top)) {
 	log_error("\nError: one or more modules imported into old '%s' "
-		  "had errors", oldpcb->top->sourcefn);
+		  "had errors", 
+                  oldpcb->top->sourcefn);
 	skipreport = TRUE;
     } else {
 	cp->oldmod = oldpcb->top;
@@ -1208,12 +1244,14 @@ static status_t
 	ncx_print_errormsg(NULL, NULL, res);
     }
     if (diffparms.new_isdir && !diffparms.old_isdir) {
-	log_error("\nError: The 'old' parameter must identify a directory.");
+	log_error("\nError: The 'old' parameter "
+                  "must identify a directory.");
 	res = ERR_NCX_INVALID_VALUE;
 	ncx_print_errormsg(NULL, NULL, res);
     }
     if (!xml_strcmp(diffparms.old, diffparms.new)) {
-	log_error("\nError: The 'old' and 'new' parameters must be different.");
+	log_error("\nError: The 'old' and 'new' "
+                  "parameters must be different.");
 	res = ERR_NCX_INVALID_VALUE;
 	ncx_print_errormsg(NULL, NULL, res);
     }
@@ -1290,8 +1328,14 @@ static status_t
 
     /* parse the command line against the PSD */
     if (res == NO_ERR) {
-	valset = cli_parse(argc, argv, obj,
-			   FULLTEST, PLAINMODE, TRUE, &res);
+	valset = cli_parse(argc, 
+                           argv, 
+                           obj,
+			   FULLTEST, 
+                           PLAINMODE, 
+                           TRUE, 
+                           CLI_MODE_PROGRAM,
+                           &res);
     }
     if (res != NO_ERR) {
 	if (valset) {
@@ -1306,20 +1350,25 @@ static status_t
     }
 
     /* next get any params from the conf file */
-    val = val_find_child(valset, YANGDIFF_MOD, 
+    val = val_find_child(valset, 
+                         YANGDIFF_MOD, 
 			 YANGDIFF_PARM_CONFIG);
     if (val) {
 	/* try the specified config location */
 	cp->config = VAL_STR(val);
 	res = conf_parse_val_from_filespec(cp->config, 
-					   valset, TRUE, TRUE);
+					   valset, 
+                                           TRUE, 
+                                           TRUE);
 	if (res != NO_ERR) {
 	    return res;
 	}
     } else {
 	/* try default config location */
 	res = conf_parse_val_from_filespec(YANGDIFF_DEF_CONFIG,
-					   valset, TRUE, FALSE);
+					   valset, 
+                                           TRUE, 
+                                           FALSE);
 	if (res != NO_ERR) {
 	    return res;
 	}
@@ -1576,7 +1625,8 @@ static void
 
     if (malloc_cnt != free_cnt) {
 	log_error("\n*** Error: memory leak (m:%u f:%u)\n", 
-		  malloc_cnt, free_cnt);
+		  malloc_cnt, 
+                  free_cnt);
     }
 
     log_close();

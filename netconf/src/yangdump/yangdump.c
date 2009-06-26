@@ -267,7 +267,8 @@ static status_t
                            obj,
                            FULLTEST, 
                            PLAINMODE, 
-                           TRUE, 
+                           TRUE,
+                           CLI_MODE_PROGRAM,
                            &res);
     }
     if (res != NO_ERR) {

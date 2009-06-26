@@ -336,8 +336,14 @@ status_t
     res = NO_ERR;
     valset = NULL;
     if (argc > 1) {
-        valset = cli_parse(argc, argv, obj,
-                           FULLTEST, PLAINMODE, TRUE, &res);
+        valset = cli_parse(argc, 
+                           argv, 
+                           obj,
+                           FULLTEST, 
+                           PLAINMODE, 
+                           TRUE, 
+                           CLI_MODE_PROGRAM,
+                           &res);
         if (res != NO_ERR) {
             if (valset) {
                 val_free_value(valset);

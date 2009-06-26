@@ -53,7 +53,12 @@ extern status_t
 		  xmlChar *line);
 
 extern status_t
-    do_startup_script (agent_cb_t *agent_cb);
+    do_startup_script (agent_cb_t *agent_cb,
+                       const xmlChar *runscript);
+
+extern status_t
+    do_startup_command (agent_cb_t *agent_cb,
+                        const xmlChar *runcommand);
 
 extern xmlChar *
     get_cmd_line (agent_cb_t *agent_cb,

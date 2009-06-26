@@ -837,7 +837,7 @@ static status_t
 
     /* create bootstrap parm: log-append */
     if (res == NO_ERR) {
-	parm = cli_new_rawparm(NCX_EL_LOGAPPEND);
+	parm = cli_new_empty_rawparm(NCX_EL_LOGAPPEND);
 	if (parm) {
 	    dlq_enque(parm, &parmQ);
 	} else {

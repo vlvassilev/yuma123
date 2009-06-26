@@ -1992,6 +1992,12 @@ static void
     status_t       res;
     uint16         port;
 
+    if (LOGDEBUG) {
+        log_debug("\nConnect attempt with following parameters:");
+        val_dump_value(agent_cb->connect_valset, NCX_DEF_INDENT);
+        log_debug("\n");
+    }
+    
     /* make sure session not already running */
     if (agent_cb->mysid) {
 	if (mgr_ses_get_scb(agent_cb->mysid)) {
@@ -2050,7 +2056,8 @@ static void
     }
 
     log_info("\nyangcli: Starting NETCONF session for %s on %s",
-	     username, agent);
+	     username, 
+             agent);
 
     agent_cb->state = MGR_IO_ST_CONNECT;
 
@@ -8245,6 +8252,11 @@ status_t
 
     /* check if all params present yet */
     if (s1 && s2 && s3) {
+        res = replace_connect_valset(agent_cb->connect_valset);
+        if (res != NO_ERR) {
+            log_warn("\nWarning: connection parameters could not be saved");
+            res = NO_ERR;
+        }
         create_session(agent_cb);
     } else {
         res = ERR_NCX_MISSING_PARM;

@@ -3007,6 +3007,44 @@ val_value_t *
 
 
 /********************************************************************
+* FUNCTION replace_connect_valset
+* 
+*  Replace the current connect value set with a clone
+* of the specified connect valset
+* 
+* INPUTS:
+*    valset == value node to clone that matches the object type
+*              of the input section of the connect operation
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    replace_connect_valset (const val_value_t *valset)
+{
+    val_value_t   *replaceval;
+#ifdef DEBUG
+    if (!valset) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    replaceval = val_clone(valset);
+    if (!replaceval) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    if (connect_valset) {
+        val_free_value(connect_valset);
+    }
+
+    connect_valset = replaceval;
+    return NO_ERR;
+
+}  /* replace_connect_valset */
+
+
+/********************************************************************
 * FUNCTION get_mgrloadQ
 * 
 *  Get the mgrloadQ value pointer

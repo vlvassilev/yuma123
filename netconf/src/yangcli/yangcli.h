@@ -330,6 +330,9 @@ extern val_value_t *
 extern val_value_t *
     get_connect_valset (void);
 
+extern status_t
+    replace_connect_valset (const val_value_t *valset);
+
 extern dlq_hdr_t *
     get_mgrloadQ (void);
 

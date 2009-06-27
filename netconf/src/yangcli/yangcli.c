@@ -2421,31 +2421,23 @@ static mgr_io_state_t
 	return agent_cb->state;
     }
 
-    /* check a batch-mode corner-case, nothing else to do */
-    if (batchmode && !(runscript || runcommand)) {
-	mgr_request_shutdown();
-	return agent_cb->state;
-    }
-
     /* check the run-script parameters */
     if (runscript) {
         if (!runscriptdone) {
             runscriptdone = TRUE;
-            res = do_startup_script(agent_cb, runscript);
-            if (res != NO_ERR) {
-                mgr_request_shutdown();
-                return agent_cb->state;
-            }
+            (void)do_startup_script(agent_cb, runscript);
         }
     } else if (runcommand) {
         if (!runcommanddone) {
             runcommanddone = TRUE;
-            res = do_startup_command(agent_cb, runcommand);
-            if (res != NO_ERR) {
-                mgr_request_shutdown();
-                return agent_cb->state;
-            }
+            (void)do_startup_command(agent_cb, runcommand);
         }
+    }
+
+    /* check batch-mode corner-case, nothing else to do */
+    if (batchmode) {
+	mgr_request_shutdown();
+	return agent_cb->state;
     }
 
     /* get a line of user input */

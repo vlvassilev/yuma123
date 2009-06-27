@@ -199,7 +199,7 @@ date	     init     comment
 #define NCX_TABSIZE     8
 
 
-#define NCX_VERSION_BUFFSIZE  16
+#define NCX_VERSION_BUFFSIZE  24
 
 /* start of comment token in all NCX text */
 #define NCX_COMMENT_CH   '#'

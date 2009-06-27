@@ -874,7 +874,7 @@ status_t
 	/* check the parmname string for a terminating char */
 	parmname = &buff[buffpos];
 	str = &parmname[1];
-	while (*str && !isspace(*str) && *str != NCX_ASSIGN_CH) {
+	while (*str && !isspace(*str) && *str != '=') {
 	    str++;
 	}
 
@@ -887,12 +887,18 @@ status_t
 	rawparm = find_rawparm(rawparmQ, parmname, parmnamelen);
 	if (rawparm) {
 	    rawparm->count++;
+            if (!rawparm->hasvalue) {
+                /* start over, since no value is expected
+                 * for this known empty parm
+                 */
+                continue;
+            }
 	}
 
 	if ((buffpos < bufflen) &&
 	    ((buff[buffpos] == '=') || isspace(buff[buffpos]))) {
 
-	    /* assume that the unknown parm followed by a 
+	    /* assume that the parm followed by a 
 	     * space is the termination, try again on
 	     * the next keyword match
 	     */
@@ -900,14 +906,14 @@ status_t
 		continue;
 	    }
 
-	    buffpos++;
+	    buffpos++;  /* skip past '=' or whitespace */
 
 	    while (buff[buffpos] && isspace(buff[buffpos])) {
 		buffpos++;
 	    }
 
 	    /* if any chars left in buffer, get the parmval */
-	    if (buffpos < bufflen) {
+	    if (buffpos < bufflen)  {
 		if (buff[buffpos] == NCX_QUOTE_CH) {
 		    /* set the start after quote */
 		    parmval = &buff[++buffpos];
@@ -936,7 +942,7 @@ status_t
 	    }
         }
 
-	if (rawparm && parmval) {
+	if (rawparm) {
 	    if (rawparm->value) {
 		m__free(rawparm->value);
 	    }

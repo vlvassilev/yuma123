@@ -910,7 +910,7 @@ static status_t
 	log_set_debug_level(dlevel);
     }
 
-    /* --log-append=<boolean> */
+    /* --log-append */
     if (res == NO_ERR) {
 	parm = cli_find_rawparm(NCX_EL_LOGAPPEND, &parmQ);
 	logappend = (parm && parm->count) ? TRUE : FALSE;

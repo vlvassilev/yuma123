@@ -749,6 +749,7 @@ static status_t
 	return NO_ERR;
     }
 
+    def = NULL;
     iscomplex = FALSE;
     btyp = obj_get_basetype(parm);
     res = NO_ERR;

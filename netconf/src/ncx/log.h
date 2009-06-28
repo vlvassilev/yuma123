@@ -97,6 +97,9 @@ extern void
 extern void 
     log_alt_write (const char *fstr, ...);
 
+extern void
+    log_alt_indent (int32 indentcnt);
+
 extern void 
     log_fatal (const char *fstr, ...);
 

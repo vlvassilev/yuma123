@@ -3287,7 +3287,7 @@ void
     case DUMP_VAL_ALT_LOG:
 	dumpfn = log_alt_write;
 	errorfn = log_error;
-	indentfn = log_indent;
+	indentfn = log_alt_indent;
 	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);

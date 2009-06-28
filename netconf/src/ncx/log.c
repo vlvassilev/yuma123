@@ -307,6 +307,31 @@ void
 
 
 /********************************************************************
+* FUNCTION log_alt_indent
+* 
+* Printf a newline to the alternate logfile,
+* then the specified number of space chars
+*
+* INPUTS:
+*    indentcnt == number of indent chars, -1 == skip everything
+*
+*********************************************************************/
+void
+    log_alt_indent (int32 indentcnt)
+{
+    int32  i;
+
+    if (indentcnt >= 0) {
+	log_alt_write("\n");
+	for (i=0; i<indentcnt; i++) {
+	    log_alt_write(" ");
+	}
+    }
+
+} /* log_alt_indent */
+
+
+/********************************************************************
 * FUNCTION log_error
 *
 *   Generate a LOG_DEBUG_ERROR log entry

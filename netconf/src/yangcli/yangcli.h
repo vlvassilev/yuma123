@@ -117,7 +117,7 @@ date	     init     comment
 #define YANGCLI_AGENT       (const xmlChar *)"agent"
 #define YANGCLI_AUTOCOMP    (const xmlChar *)"autocomp"
 #define YANGCLI_AUTOLOAD    (const xmlChar *)"autoload"
-#define YANGCLI_BADDATA     (const xmlChar *)"baddata"
+#define YANGCLI_BADDATA     (const xmlChar *)"bad-data"
 #define YANGCLI_BATCHMODE   (const xmlChar *)"batch-mode"
 #define YANGCLI_BRIEF       (const xmlChar *)"brief"
 #define YANGCLI_CLEAR       (const xmlChar *)"clear"

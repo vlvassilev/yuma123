@@ -476,6 +476,7 @@ date	     init     comment
 #define NCX_EL_LONG            (const xmlChar *)"long"
 #define NCX_EL_MAGIC           (const xmlChar *)"magic"
 #define NCX_EL_MAX_ACCESS      (const xmlChar *)"max-access"
+#define NCX_EL_MAX_BURST       (const xmlChar *)"max-burst"
 #define NCX_EL_MERGE           (const xmlChar *)"merge"
 #define NCX_EL_MESSAGE_ID      (const xmlChar *)"message-id"
 #define NCX_EL_METADATA        (const xmlChar *)"metadata"

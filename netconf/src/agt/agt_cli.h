@@ -55,6 +55,8 @@ date	     init     comment
 
 #define AGT_CLI_SUPERUSER NCX_EL_SUPERUSER
 
+#define AGT_CLI_MAX_BURST NCX_EL_MAX_BURST
+
 /********************************************************************
 *								    *
 *			F U N C T I O N S			    *

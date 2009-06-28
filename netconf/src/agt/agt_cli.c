@@ -225,6 +225,12 @@ static void
         }
     }
 
+    /* max-burst param */
+    val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_MAX_BURST);
+    if (val && val->res == NO_ERR) {
+        agt_profile->agt_maxburst = VAL_UINT(val);
+    }
+
     /* get runpath param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_RUNPATH);
     if (val && val->res == NO_ERR) {

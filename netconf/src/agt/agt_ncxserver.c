@@ -165,20 +165,22 @@ static status_t
 static void
     send_some_notifications (void)
 {
-    uint32     sendcount, sendtotal, sendmax;
-    boolean    done;
+    const agt_profile_t  *agt_profile;
+    uint32                sendcount, sendtotal, sendmax;
+    boolean               done;
 
     sendtotal = 0;
 
     /* TBD: set to CLI param */
-    sendmax = MAX_NOTIFICATION_BURST;
+    agt_profile = agt_get_profile();
+    sendmax = agt_profile->agt_maxburst;
 
     done = FALSE;
     while (!done) {
         sendcount = agt_not_send_notifications();
         if (sendcount) {
             sendtotal += sendcount;
-            if (sendtotal >= sendmax) {
+            if (sendmax && (sendtotal >= sendmax)) {
                 done = TRUE;
             }
         } else {

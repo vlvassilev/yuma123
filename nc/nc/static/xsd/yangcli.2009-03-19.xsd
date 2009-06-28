@@ -1,0 +1,3478 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="http://netconfcentral.com/ns/yangcli"
+   targetNamespace="http://netconfcentral.com/ns/yangcli"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2009-03-19"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+   xmlns:ncxapp="http://netconfcentral.com/ns/ncx-app-common"
+   xmlns:nt="http://netconfcentral.com/ns/ncxtypes">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'yangcli.yang' by yangdump version 0.9.4
+         
+         Module: yangcli
+         Organization: Netconf Central
+         Version: 2009-03-19
+         Contact: Andy Bierman &lt;support@netconfcentral.com&gt;.
+      </xs:documentation>
+      <xs:documentation>
+         
+         Command Line Interface for the NETCONF protocol: Manager side
+         
+         Usage:
+            yangcli [parameters]
+         
+         Normal Mode:
+            An interactive CLI shell with command line history.
+         
+         Autostart-mode:
+            If the 'agent' parameter is present, then yangcli will
+             attempt to connect to that agent upon startup.  If the
+            'user' and 'password' parameters are also present, then
+            the user will not be prompted before the connection 
+            is attempted.
+         
+          Script-mode:
+             If the 'run-script' parameter is present, then the
+             specified script will be run automatically upon startup.
+         
+          
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/netconfcentral/yangcli.yang
+         </ncx:source>
+         <ncx:organization>Netconf Central</ncx:organization>
+         <ncx:contact>
+            Andy Bierman &lt;support@netconfcentral.com&gt;.
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2009-03-19</ncx:version>
+            <ncx:description>
+               Initial published version (TBD)
+            </ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:group name="FillParms">
+      <xs:sequence>
+         <xs:element name="target">
+            <xs:annotation>
+               <xs:documentation>
+                  XPath target object to fill.  If prefixes are missing
+                  then the first match in any namespace will be used.
+                  Any prefix used must be the default prefix
+                  assigned to the desired YANG module. Prefix usage is
+                  optional.
+               </xs:documentation>
+               <xs:appinfo>
+                  <ncx:mandatory>true</ncx:mandatory>
+                  <ncx:schema-instance/>
+               </xs:appinfo>
+            </xs:annotation>
+            <xs:simpleType>
+               <xs:restriction base="xs:string">
+                  <xs:minLength value="1"/>
+               </xs:restriction>
+            </xs:simpleType>
+         </xs:element>
+         <xs:element name="optional" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  If present, then prompt for leafs that are optional.
+                  If not, skip these objects.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+         <xs:element name="value" type="xs:anyType" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  Contains a string representing the content
+                  to use for the filled variable.
+                  
+                  If a string is entered, then the target value being
+                  filled must be a leaf or leaf-list.
+                  
+                  If a variable is referenced, then it will 
+                  be used as the content, if the target value being
+                  filled is a leaf or a leaf-list.
+                  
+                  If the target value is a complex object,
+                  then the referenced variable must also be
+                  a complex object of the same type. E.g.,
+                  
+                  The global variable 'foo' would be specified as:
+                  
+                      value=$$foo
+                  
+                  The local variable 'bar' would be specified as:
+                  
+                      value=$bar
+                  
+                  An error will be reported if the global or local
+                  variable does not reference the same object type
+                  as the target parameter.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:group name="CommonPduParms">
+      <xs:annotation>
+         <xs:documentation>
+            Common parms for some local commands that
+            generate NETCONF PDUs
+         </xs:documentation>
+      </xs:annotation>
+      <xs:sequence>
+         <xs:choice>
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:choice-name>from</ncx:choice-name>
+                  <ncx:mandatory>true</ncx:mandatory>
+               </xs:appinfo>
+            </xs:annotation>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>varref</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="varref" type="xs:string" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Use the contents of the specified variable 
+                        as the content
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="__.from.varref.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>from-cli</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="target">
+                  <xs:annotation>
+                     <xs:documentation>
+                        XPath target object to fill.  If prefixes are missing
+                        then the first match in any namespace will be used.
+                        Any prefix used must be the default prefix
+                        assigned to the desired YANG module. Prefix usage is
+                        optional.
+                     </xs:documentation>
+                     <xs:appinfo>
+                        <ncx:mandatory>true</ncx:mandatory>
+                        <ncx:schema-instance/>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:simpleType>
+                     <xs:restriction base="xs:string">
+                        <xs:minLength value="1"/>
+                     </xs:restriction>
+                  </xs:simpleType>
+               </xs:element>
+               <xs:element name="optional" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        If present, then prompt for leafs that are optional.
+                        If not, skip these objects.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="value" type="xs:anyType" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Contains a string representing the content
+                        to use for the filled variable.
+                        
+                        If a string is entered, then the target value being
+                        filled must be a leaf or leaf-list.
+                        
+                        If a variable is referenced, then it will 
+                        be used as the content, if the target value being
+                        filled is a leaf or a leaf-list.
+                        
+                        If the target value is a complex object,
+                        then the referenced variable must also be
+                        a complex object of the same type. E.g.,
+                        
+                        The global variable 'foo' would be specified as:
+                        
+                            value=$$foo
+                        
+                        The local variable 'bar' would be specified as:
+                        
+                            value=$bar
+                        
+                        An error will be reported if the global or local
+                        variable does not reference the same object type
+                        as the target parameter.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="__.from.from-cli.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:element name="__.from.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:choice>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:group name="EditParms">
+      <xs:annotation>
+         <xs:documentation>
+            Common parms for create, merge, replace commands
+         </xs:documentation>
+      </xs:annotation>
+      <xs:sequence>
+         <xs:choice>
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:choice-name>from</ncx:choice-name>
+                  <ncx:config>true</ncx:config>
+                  <ncx:mandatory>true</ncx:mandatory>
+               </xs:appinfo>
+            </xs:annotation>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>varref</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="varref" type="xs:string" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Use the contents of the specified variable 
+                        as the content
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="__.from.varref.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>from-cli</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="target">
+                  <xs:annotation>
+                     <xs:documentation>
+                        XPath target object to fill.  If prefixes are missing
+                        then the first match in any namespace will be used.
+                        Any prefix used must be the default prefix
+                        assigned to the desired YANG module. Prefix usage is
+                        optional.
+                     </xs:documentation>
+                     <xs:appinfo>
+                        <ncx:mandatory>true</ncx:mandatory>
+                        <ncx:schema-instance/>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:simpleType>
+                     <xs:restriction base="xs:string">
+                        <xs:minLength value="1"/>
+                     </xs:restriction>
+                  </xs:simpleType>
+               </xs:element>
+               <xs:element name="optional" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        If present, then prompt for leafs that are optional.
+                        If not, skip these objects.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="value" type="xs:anyType" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Contains a string representing the content
+                        to use for the filled variable.
+                        
+                        If a string is entered, then the target value being
+                        filled must be a leaf or leaf-list.
+                        
+                        If a variable is referenced, then it will 
+                        be used as the content, if the target value being
+                        filled is a leaf or a leaf-list.
+                        
+                        If the target value is a complex object,
+                        then the referenced variable must also be
+                        a complex object of the same type. E.g.,
+                        
+                        The global variable 'foo' would be specified as:
+                        
+                            value=$$foo
+                        
+                        The local variable 'bar' would be specified as:
+                        
+                            value=$bar
+                        
+                        An error will be reported if the global or local
+                        variable does not reference the same object type
+                        as the target parameter.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="__.from.from-cli.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:element name="__.from.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:choice>
+         <xs:element name="timeout" type="nt:Timeout" default="30"
+            minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>Timeout to use</xs:documentation>
+            </xs:annotation>
+         </xs:element>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:group name="SGetParms">
+      <xs:annotation>
+         <xs:documentation>
+            Common parms for sget and sget-config operations.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:sequence>
+         <xs:element name="nofill" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  If present, and the 'from-cli' option is used
+                  for input, then filling of mandatory nodes
+                  and key leafs will be skipped.  Instead, the target
+                  object will be treated as a terminating select node
+                  in the filter element.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+         <xs:element name="with-defaults"
+            type="ncxapp:CliWithDefaultsType" minOccurs="0">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:config>true</ncx:config>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:element>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:group name="XGetParms">
+      <xs:annotation>
+         <xs:documentation>
+            Common parms for xget and xget-config operations.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:sequence>
+         <xs:choice>
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:choice-name>from</ncx:choice-name>
+                  <ncx:mandatory>true</ncx:mandatory>
+               </xs:appinfo>
+            </xs:annotation>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>varref</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="varref" type="xs:string" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Use the contents of the specified variable 
+                        as the content
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="__.from.varref.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>select</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="select" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        The XPath expression to use in the retrieval
+                        operation.  The string may only contain
+                        single quotes, which are required for
+                        string literals.  The entire string
+                        will be inserted into a double-quoted
+                        string, within the get-config PDU.
+                        Character entities will be inserted as
+                        needed to maintain well-formed XML.
+                     </xs:documentation>
+                     <xs:appinfo>
+                        <ncx:xpath/>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:simpleType>
+                     <xs:restriction base="xs:string">
+                        <xs:minLength value="1"/>
+                     </xs:restriction>
+                  </xs:simpleType>
+               </xs:element>
+               <xs:element name="__.from.select.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:element name="__.from.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:choice>
+         <xs:element name="timeout" type="nt:Timeout" default="30"
+            minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>Timeout to use</xs:documentation>
+            </xs:annotation>
+         </xs:element>
+         <xs:element name="with-defaults"
+            type="ncxapp:CliWithDefaultsType" minOccurs="0">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:config>true</ncx:config>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:element>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:group name="ConnectParms">
+      <xs:annotation>
+         <xs:documentation>
+            Common parms for connecting to a NETCONF agent.
+            Used by the connect operation and if present at
+            the command line invocation, then the connect
+            operation will be invoked automatically.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:sequence>
+         <xs:element name="user" type="nt:NcxUserName" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  User name to use for NETCONF sessions.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+         <xs:element name="agent" type="xs:string" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  IP address or DNS name of the NETCONF agent target.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+         <xs:element name="password" type="xs:string" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  User password to use for NETCONF sessions.
+                  If none, then user will be prompted before connecting.
+               </xs:documentation>
+               <xs:appinfo>
+                  <ncx:password/>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:element>
+         <xs:element name="port" default="830" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  NETCONF port number to use.  If not present, then
+                  port 830, followed by port 22, will be tried.
+               </xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+               <xs:restriction base="xs:unsignedShort">
+                  <xs:minInclusive value="1"/>
+               </xs:restriction>
+            </xs:simpleType>
+         </xs:element>
+         <xs:element name="timeout" type="nt:Timeout" default="30"
+            minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  Number of seconds to wait for a response
+                  from the agent before declaring a timeout.
+                  Zero means no timeout at all.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:element name="yangcli">
+      <xs:annotation>
+         <xs:documentation>
+            CLI Parameter Set for the NETCONF Manager Application.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <ncx:cli/>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="config" type="xs:string" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The name of the configuration file to use.
+                     Any parameter except this one can be set in the config file.
+                     The default config file will be not be checked if this
+                     parameter is present.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="help" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Print yangdump help file and exit.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:choice>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:choice-name>brief-full</ncx:choice-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>brief</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="brief" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>Show brief help text
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.yangcli.brief-full.brief.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>full</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="full" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>Show full help text
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.yangcli.brief-full.full.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:element name="__.yangcli.brief-full.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:choice>
+            <xs:element name="indent" type="nt:IndentType" default="3"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Number of spaces to indent (0..9) in formatted output.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="log" type="xs:string" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Filespec for the log file to use instead of STDOUT.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="log-append" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     If present, the log will be appended not over-written.
+                     If not, the log will be over-written.
+                     Only meaningful if the 'log' parameter is
+                     also present.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="log-level" type="nt:NcDebugType"
+               default="info" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Sets the debug logging level for the program.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="modpath" type="nt:NcPathList"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Directory search path for YANG and NCX modules.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="version" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Print yangdump version string and exit.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="user" type="nt:NcxUserName" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     User name to use for NETCONF sessions.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="agent" type="xs:string" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     IP address or DNS name of the NETCONF agent target.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="password" type="xs:string" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     User password to use for NETCONF sessions.
+                     If none, then user will be prompted before connecting.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:password/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="port" default="830" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     NETCONF port number to use.  If not present, then
+                     port 830, followed by port 22, will be tried.
+                  </xs:documentation>
+               </xs:annotation>
+               <xs:simpleType>
+                  <xs:restriction base="xs:unsignedShort">
+                     <xs:minInclusive value="1"/>
+                  </xs:restriction>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="timeout" type="nt:Timeout" default="30"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Number of seconds to wait for a response
+                     from the agent before declaring a timeout.
+                     Zero means no timeout at all.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="autocomp" type="xs:boolean"
+               default="true" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Controls whether partial keywords will be 
+                     checked for interactive or script commands.
+                     By default, the first match for a partial keyword
+                     will be used if no definition is found for
+                     a command name or parameter name.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="autoload" type="xs:boolean"
+               default="true" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Controls whether any modules (except this one)
+                     will be automatically loaded upon startup or
+                     upon session startup with an agent. If false,
+                     the 'load-module' command must be used to
+                     explicitly load all the desired definition modules.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="baddata" default="check" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Specifies how invalid user input from the CLI
+                     will be handled when filling PDUs for remote
+                     operations.
+                  </xs:documentation>
+               </xs:annotation>
+               <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                     <xs:enumeration value="ignore">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Silently accept invalid PDU and data model 
+                              parameters.  Intended for advanced agent 
+                              testing mode only.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:value>0</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                     <xs:enumeration value="warn">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Warn, but accept invalid PDU and data model 
+                              parameters.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:value>1</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                     <xs:enumeration value="check">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Prompt the user to keep the invalid value
+                              or re-enter the value.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:value>2</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                     <xs:enumeration value="error">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Prompt the user to re-enter the invalid value.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:value>3</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                  </xs:restriction>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="batch-mode" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     If present, the interactive CLI will not be used.
+                     A script should be provided with the 'run-script'
+                     parameter, or else the program will simply exit.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="default-module" type="nt:NcxName"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Default module name string to use before 'netconf' 
+                     and 'ncx' are tried.  The module prefix must be
+                     used for other modules.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="fixorder" type="xs:boolean"
+               default="true" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Controls whether PDU parameters will be
+                     automatically sent to the agent in the
+                     correct order.  If false, the specified order
+                     will be used. If true, then canonical order will
+                     be used
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="modules" type="nt:NcModuleSpec"
+               minOccurs="0" maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     List of NCX module names to load at boot-time.
+                     Any imported modules required will be loaded automatically.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="run-script" type="xs:string"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The specified script will be invoked upon startup.
+                     If the auto-connect parameters are provided, then
+                     a session will be established before running the
+                     script.  If a quoted string is used, then any parameters
+                     after the script name will be passed to the script.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="__.yangcli.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="cd_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.cd.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="cd" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Change the current working directory.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>cd_output_type__</ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:default-parm>
+                  <ncx:parm>dir</ncx:parm>
+               </ncx:default-parm>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="dir" type="xs:string">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Directory path to use.
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.cd.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="connect_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.connect.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="connect" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Connect to a NETCONF agent.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>
+               connect_output_type__
+            </ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:default-parm>
+                  <ncx:parm>agent</ncx:parm>
+               </ncx:default-parm>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="user" type="nt:NcxUserName">
+                     <xs:annotation>
+                        <xs:documentation>
+                           User name to use for NETCONF sessions.
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="agent" type="xs:string">
+                     <xs:annotation>
+                        <xs:documentation>
+                           IP address or DNS name of the NETCONF agent target.
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="password" type="xs:string">
+                     <xs:annotation>
+                        <xs:documentation>
+                           User password to use for NETCONF sessions.
+                           If none, then user will be prompted before connecting.
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:mandatory>true</ncx:mandatory>
+                           <ncx:password/>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="port" default="830" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           NETCONF port number to use.  If not present, then
+                           port 830, followed by port 22, will be tried.
+                        </xs:documentation>
+                     </xs:annotation>
+                     <xs:simpleType>
+                        <xs:restriction base="xs:unsignedShort">
+                           <xs:minInclusive value="1"/>
+                        </xs:restriction>
+                     </xs:simpleType>
+                  </xs:element>
+                  <xs:element name="timeout" type="nt:Timeout"
+                     default="30" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Number of seconds to wait for a response
+                           from the agent before declaring a timeout.
+                           Zero means no timeout at all.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.connect.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="create_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.create.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="create" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Create some NETCONF config data with the edit-config operation
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>create_output_type__</ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:default-parm>
+                  <ncx:parm>target</ncx:parm>
+               </ncx:default-parm>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:choice>
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:choice-name>from</ncx:choice-name>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>varref</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="varref" type="xs:string"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Use the contents of the specified variable 
+                                 as the content
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.create.input.from.varref.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>from-cli</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="target">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 XPath target object to fill.  If prefixes are missing
+                                 then the first match in any namespace will be used.
+                                 Any prefix used must be the default prefix
+                                 assigned to the desired YANG module. Prefix usage is
+                                 optional.
+                              </xs:documentation>
+                              <xs:appinfo>
+                                 <ncx:mandatory>true</ncx:mandatory>
+                                 <ncx:schema-instance/>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:simpleType>
+                              <xs:restriction base="xs:string">
+                                 <xs:minLength value="1"/>
+                              </xs:restriction>
+                           </xs:simpleType>
+                        </xs:element>
+                        <xs:element name="optional" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 If present, then prompt for leafs that are optional.
+                                 If not, skip these objects.
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element name="value" type="xs:anyType"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Contains a string representing the content
+                                 to use for the filled variable.
+                                 
+                                 If a string is entered, then the target value being
+                                 filled must be a leaf or leaf-list.
+                                 
+                                 If a variable is referenced, then it will 
+                                 be used as the content, if the target value being
+                                 filled is a leaf or a leaf-list.
+                                 
+                                 If the target value is a complex object,
+                                 then the referenced variable must also be
+                                 a complex object of the same type. E.g.,
+                                 
+                                 The global variable 'foo' would be specified as:
+                                 
+                                     value=$$foo
+                                 
+                                 The local variable 'bar' would be specified as:
+                                 
+                                     value=$bar
+                                 
+                                 An error will be reported if the global or local
+                                 variable does not reference the same object type
+                                 as the target parameter.
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.create.input.from.from-cli.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:element name="__.create.input.from.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:choice>
+                  <xs:element name="timeout" type="nt:Timeout"
+                     default="30" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>Timeout to use</xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.create.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="delete_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.delete.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="delete" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Delete some NETCONF config data with the edit-config operation
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>delete_output_type__</ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:default-parm>
+                  <ncx:parm>target</ncx:parm>
+               </ncx:default-parm>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="target" type="xs:string">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Xpath expression indicating the node which is going
+                           to be deleted.
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.delete.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="fill_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="data" type="xs:anyType" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        The result of the fill operation.
+                        
+                        The name of the value node may not really 
+                        be 'data'. If the 'target' or 'current-value'
+                        input parameters are used, then the name
+                        of the result node will be copied instead.
+                        
+                        The data type will be inherited from the 'target'
+                        or 'current_value' parameters, and not really be 
+                        an 'anyxml' structure.  YANG does have a data 
+                        type that supports this feature.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="__.fill.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="fill" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Fill a value for reuse in a NETCONF PDU or other operation.
+            
+            Used in an assignment statement to create a variable
+            for later use:
+            
+                $foo = fill --target=/t:foo-con/bar-list \
+            		--optional \
+            		--current-value=$bar    
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>fill_output_type__</ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:default-parm>
+                  <ncx:parm>target</ncx:parm>
+               </ncx:default-parm>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="target">
+                     <xs:annotation>
+                        <xs:documentation>
+                           XPath target object to fill.  If prefixes are missing
+                           then the first match in any namespace will be used.
+                           Any prefix used must be the default prefix
+                           assigned to the desired YANG module. Prefix usage is
+                           optional.
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:mandatory>true</ncx:mandatory>
+                           <ncx:schema-instance/>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                           <xs:minLength value="1"/>
+                        </xs:restriction>
+                     </xs:simpleType>
+                  </xs:element>
+                  <xs:element name="optional" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           If present, then prompt for leafs that are optional.
+                           If not, skip these objects.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="value" type="xs:anyType"
+                     minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Contains a string representing the content
+                           to use for the filled variable.
+                           
+                           If a string is entered, then the target value being
+                           filled must be a leaf or leaf-list.
+                           
+                           If a variable is referenced, then it will 
+                           be used as the content, if the target value being
+                           filled is a leaf or a leaf-list.
+                           
+                           If the target value is a complex object,
+                           then the referenced variable must also be
+                           a complex object of the same type. E.g.,
+                           
+                           The global variable 'foo' would be specified as:
+                           
+                               value=$$foo
+                           
+                           The local variable 'bar' would be specified as:
+                           
+                               value=$bar
+                           
+                           An error will be reported if the global or local
+                           variable does not reference the same object type
+                           as the target parameter.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.fill.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="help_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.help.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="help" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Print the yangcli help text
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>help_output_type__</ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:default-parm>
+                  <ncx:parm>command</ncx:parm>
+               </ncx:default-parm>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:choice>
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:choice-name>helptype</ncx:choice-name>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>command</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="command"
+                           type="nt:NcxIdentifier" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Show help for the specified command,
+                                 also called an RPC method
+                              </xs:documentation>
+                           </xs:annotation>
+                           <xs:simpleType>
+                              <xs:union
+                                 memberTypes="nt:NcxName nt:NcxQName"/>
+                           </xs:simpleType>
+                        </xs:element>
+                        <xs:element
+                           name="__.help.input.helptype.command.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>commands</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="commands" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Show info for all local commands
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.help.input.helptype.commands.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>notification</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="notification"
+                           type="nt:NcxIdentifier" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Show help for the specified notification
+                              </xs:documentation>
+                           </xs:annotation>
+                           <xs:simpleType>
+                              <xs:union
+                                 memberTypes="nt:NcxName nt:NcxQName"/>
+                           </xs:simpleType>
+                        </xs:element>
+                        <xs:element
+                           name="__.help.input.helptype.notification.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>object</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="object"
+                           type="nt:NcxIdentifier" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Show help for the specified object
+                              </xs:documentation>
+                           </xs:annotation>
+                           <xs:simpleType>
+                              <xs:union
+                                 memberTypes="nt:NcxName nt:NcxQName"/>
+                           </xs:simpleType>
+                        </xs:element>
+                        <xs:element
+                           name="__.help.input.helptype.object.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>type</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="type" type="nt:NcxIdentifier"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Show help for the specified type
+                              </xs:documentation>
+                           </xs:annotation>
+                           <xs:simpleType>
+                              <xs:union
+                                 memberTypes="nt:NcxName nt:NcxQName"/>
+                           </xs:simpleType>
+                        </xs:element>
+                        <xs:element
+                           name="__.help.input.helptype.type.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:element name="__.help.input.helptype.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:choice>
+                  <xs:choice>
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:choice-name>brief-full</ncx:choice-name>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>brief</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="brief" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>Show brief help text
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.help.input.brief-full.brief.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>full</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="full" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>Show full help text
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.help.input.brief-full.full.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:element name="__.help.input.brief-full.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:choice>
+                  <xs:element name="__.help.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="insert_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.insert.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="insert" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Insert some NETCONF config data with the edit-config operation
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>insert_output_type__</ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:default-parm>
+                  <ncx:parm>target</ncx:parm>
+               </ncx:default-parm>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:choice>
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:choice-name>from</ncx:choice-name>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>varref</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="varref" type="xs:string"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Use the contents of the specified variable 
+                                 as the content
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.insert.input.from.varref.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>from-cli</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="target">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 XPath target object to fill.  If prefixes are missing
+                                 then the first match in any namespace will be used.
+                                 Any prefix used must be the default prefix
+                                 assigned to the desired YANG module. Prefix usage is
+                                 optional.
+                              </xs:documentation>
+                              <xs:appinfo>
+                                 <ncx:mandatory>true</ncx:mandatory>
+                                 <ncx:schema-instance/>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:simpleType>
+                              <xs:restriction base="xs:string">
+                                 <xs:minLength value="1"/>
+                              </xs:restriction>
+                           </xs:simpleType>
+                        </xs:element>
+                        <xs:element name="optional" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 If present, then prompt for leafs that are optional.
+                                 If not, skip these objects.
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element name="value" type="xs:anyType"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Contains a string representing the content
+                                 to use for the filled variable.
+                                 
+                                 If a string is entered, then the target value being
+                                 filled must be a leaf or leaf-list.
+                                 
+                                 If a variable is referenced, then it will 
+                                 be used as the content, if the target value being
+                                 filled is a leaf or a leaf-list.
+                                 
+                                 If the target value is a complex object,
+                                 then the referenced variable must also be
+                                 a complex object of the same type. E.g.,
+                                 
+                                 The global variable 'foo' would be specified as:
+                                 
+                                     value=$$foo
+                                 
+                                 The local variable 'bar' would be specified as:
+                                 
+                                     value=$bar
+                                 
+                                 An error will be reported if the global or local
+                                 variable does not reference the same object type
+                                 as the target parameter.
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.insert.input.from.from-cli.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:element name="__.insert.input.from.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:choice>
+                  <xs:element name="timeout" type="nt:Timeout"
+                     default="30" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>Timeout to use</xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="order" default="last" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           The insert order that should be used.
+                           If the values 'before' or 'after' are selected,
+                           then the edit-target parameter must also be present.
+                        </xs:documentation>
+                     </xs:annotation>
+                     <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                           <xs:enumeration value="first">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:value>0</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="last">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:value>1</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="before">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:value>2</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="after">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:value>3</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                        </xs:restriction>
+                     </xs:simpleType>
+                  </xs:element>
+                  <xs:element name="operation" default="merge"
+                     minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           The edit-config operation that should be used.
+                        </xs:documentation>
+                     </xs:annotation>
+                     <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                           <xs:enumeration value="create">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:value>0</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="merge">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:value>1</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="replace">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:value>2</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                        </xs:restriction>
+                     </xs:simpleType>
+                  </xs:element>
+                  <xs:element name="edit-target" type="xs:string"
+                     minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           The value or key clause that should be used.
+                           This parameter shoul only be present if the
+                           order selected is 'before' or 'after'.
+                           
+                           For a leaf-list, the edit-target contains the
+                           value of the target leaf-list node within the
+                           configuration being edited.  The new config
+                           will be inserted before or after this leaf-list
+                           node, depending on the order selected.
+                           E.g., edit-target='some leaf content'.
+                           
+                           For a list, the edit-target contains the
+                           key values of the target list node within the
+                           configuration being edited.  The new config
+                           will be inserted before or after this list
+                           node, depending on the order selected.
+                           E.g., edit-target=[name='fred'][zipcode=90210].
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.insert.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="list_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.list.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="list" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            List some NETCONF info.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>list_output_type__</ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:choice>
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:choice-name>listtype</ncx:choice-name>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>commands</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="commands" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 List all local and remote commands
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.list.input.listtype.commands.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>objects</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="objects" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 List all available top-level object names.
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.list.input.listtype.objects.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>oids</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="oids" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 List all available object identifiers.
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.list.input.listtype.oids.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:element name="__.list.input.listtype.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:choice>
+                  <xs:element name="module" type="nt:NcxIdentifier"
+                     minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           List only from this module, if specified.
+                        </xs:documentation>
+                     </xs:annotation>
+                     <xs:simpleType>
+                        <xs:union memberTypes="nt:NcxName nt:NcxQName"/>
+                     </xs:simpleType>
+                  </xs:element>
+                  <xs:choice>
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:choice-name>brief-full</ncx:choice-name>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>brief</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="brief" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>Show brief help text
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.list.input.brief-full.brief.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>full</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="full" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>Show full help text
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.list.input.brief-full.full.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:element name="__.list.input.brief-full.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:choice>
+                  <xs:element name="__.list.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="merge_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.merge.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="merge" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Merge some NETCONF config data with the edit-config operation
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>merge_output_type__</ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:default-parm>
+                  <ncx:parm>target</ncx:parm>
+               </ncx:default-parm>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:choice>
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:choice-name>from</ncx:choice-name>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>varref</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="varref" type="xs:string"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Use the contents of the specified variable 
+                                 as the content
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.merge.input.from.varref.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>from-cli</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="target">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 XPath target object to fill.  If prefixes are missing
+                                 then the first match in any namespace will be used.
+                                 Any prefix used must be the default prefix
+                                 assigned to the desired YANG module. Prefix usage is
+                                 optional.
+                              </xs:documentation>
+                              <xs:appinfo>
+                                 <ncx:mandatory>true</ncx:mandatory>
+                                 <ncx:schema-instance/>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:simpleType>
+                              <xs:restriction base="xs:string">
+                                 <xs:minLength value="1"/>
+                              </xs:restriction>
+                           </xs:simpleType>
+                        </xs:element>
+                        <xs:element name="optional" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 If present, then prompt for leafs that are optional.
+                                 If not, skip these objects.
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element name="value" type="xs:anyType"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Contains a string representing the content
+                                 to use for the filled variable.
+                                 
+                                 If a string is entered, then the target value being
+                                 filled must be a leaf or leaf-list.
+                                 
+                                 If a variable is referenced, then it will 
+                                 be used as the content, if the target value being
+                                 filled is a leaf or a leaf-list.
+                                 
+                                 If the target value is a complex object,
+                                 then the referenced variable must also be
+                                 a complex object of the same type. E.g.,
+                                 
+                                 The global variable 'foo' would be specified as:
+                                 
+                                     value=$$foo
+                                 
+                                 The local variable 'bar' would be specified as:
+                                 
+                                     value=$bar
+                                 
+                                 An error will be reported if the global or local
+                                 variable does not reference the same object type
+                                 as the target parameter.
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.merge.input.from.from-cli.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:element name="__.merge.input.from.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:choice>
+                  <xs:element name="timeout" type="nt:Timeout"
+                     default="30" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>Timeout to use</xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.merge.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="mgrload_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.mgrload.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="mgrload" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Load a module or other file into the manager.
+            Use the 'load' command to load a module into
+            the agent.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>
+               mgrload_output_type__
+            </ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:default-parm>
+                  <ncx:parm>module</ncx:parm>
+               </ncx:default-parm>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="module" type="nt:NcxName">
+                     <xs:annotation>
+                        <xs:documentation>Module name to load
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.mgrload.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="pwd_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.pwd.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="pwd" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Print the current working directory.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>pwd_output_type__</ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="__.pwd.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="replace_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.replace.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="replace" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Create some NETCONF config data with the edit-config operation
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>
+               replace_output_type__
+            </ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:default-parm>
+                  <ncx:parm>target</ncx:parm>
+               </ncx:default-parm>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:choice>
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:choice-name>from</ncx:choice-name>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>varref</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="varref" type="xs:string"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Use the contents of the specified variable 
+                                 as the content
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.replace.input.from.varref.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>from-cli</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="target">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 XPath target object to fill.  If prefixes are missing
+                                 then the first match in any namespace will be used.
+                                 Any prefix used must be the default prefix
+                                 assigned to the desired YANG module. Prefix usage is
+                                 optional.
+                              </xs:documentation>
+                              <xs:appinfo>
+                                 <ncx:mandatory>true</ncx:mandatory>
+                                 <ncx:schema-instance/>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:simpleType>
+                              <xs:restriction base="xs:string">
+                                 <xs:minLength value="1"/>
+                              </xs:restriction>
+                           </xs:simpleType>
+                        </xs:element>
+                        <xs:element name="optional" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 If present, then prompt for leafs that are optional.
+                                 If not, skip these objects.
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element name="value" type="xs:anyType"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Contains a string representing the content
+                                 to use for the filled variable.
+                                 
+                                 If a string is entered, then the target value being
+                                 filled must be a leaf or leaf-list.
+                                 
+                                 If a variable is referenced, then it will 
+                                 be used as the content, if the target value being
+                                 filled is a leaf or a leaf-list.
+                                 
+                                 If the target value is a complex object,
+                                 then the referenced variable must also be
+                                 a complex object of the same type. E.g.,
+                                 
+                                 The global variable 'foo' would be specified as:
+                                 
+                                     value=$$foo
+                                 
+                                 The local variable 'bar' would be specified as:
+                                 
+                                     value=$bar
+                                 
+                                 An error will be reported if the global or local
+                                 variable does not reference the same object type
+                                 as the target parameter.
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.replace.input.from.from-cli.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:element name="__.replace.input.from.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:choice>
+                  <xs:element name="timeout" type="nt:Timeout"
+                     default="30" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>Timeout to use</xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.replace.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="quit_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.quit.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="quit" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Quit the yangcli application
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>quit_output_type__</ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="__.quit.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="run_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.run.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="run" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Internal command to run a script.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>run_output_type__</ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:default-parm>
+                  <ncx:parm>script</ncx:parm>
+               </ncx:default-parm>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="script" type="xs:string">
+                     <xs:annotation>
+                        <xs:documentation>
+                           script filespec to run
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="P1" type="xs:string" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>script parameter $1
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="P2" type="xs:string" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>script parameter $2
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="P3" type="xs:string" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>script parameter $3
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="P4" type="xs:string" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>script parameter $4
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="P5" type="xs:string" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>script parameter $5
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="P6" type="xs:string" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>script parameter $6
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="P7" type="xs:string" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>script parameter $7
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="P8" type="xs:string" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>script parameter $8
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="P9" type="xs:string" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>script parameter $9
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.run.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="save_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.save.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="save" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Meta command to save configuration edits.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>save_output_type__</ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="__.save.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="sget_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="data" type="xs:anyType" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        The data resulting from the retrieval operation.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="__.sget.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="sget" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Get some NETCONF running config or state data with the get
+            operation, using an optional subtree filter.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>sget_output_type__</ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:default-parm>
+                  <ncx:parm>target</ncx:parm>
+               </ncx:default-parm>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:choice>
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:choice-name>from</ncx:choice-name>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>varref</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="varref" type="xs:string"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Use the contents of the specified variable 
+                                 as the content
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.sget.input.from.varref.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>from-cli</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="target">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 XPath target object to fill.  If prefixes are missing
+                                 then the first match in any namespace will be used.
+                                 Any prefix used must be the default prefix
+                                 assigned to the desired YANG module. Prefix usage is
+                                 optional.
+                              </xs:documentation>
+                              <xs:appinfo>
+                                 <ncx:mandatory>true</ncx:mandatory>
+                                 <ncx:schema-instance/>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:simpleType>
+                              <xs:restriction base="xs:string">
+                                 <xs:minLength value="1"/>
+                              </xs:restriction>
+                           </xs:simpleType>
+                        </xs:element>
+                        <xs:element name="optional" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 If present, then prompt for leafs that are optional.
+                                 If not, skip these objects.
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element name="value" type="xs:anyType"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Contains a string representing the content
+                                 to use for the filled variable.
+                                 
+                                 If a string is entered, then the target value being
+                                 filled must be a leaf or leaf-list.
+                                 
+                                 If a variable is referenced, then it will 
+                                 be used as the content, if the target value being
+                                 filled is a leaf or a leaf-list.
+                                 
+                                 If the target value is a complex object,
+                                 then the referenced variable must also be
+                                 a complex object of the same type. E.g.,
+                                 
+                                 The global variable 'foo' would be specified as:
+                                 
+                                     value=$$foo
+                                 
+                                 The local variable 'bar' would be specified as:
+                                 
+                                     value=$bar
+                                 
+                                 An error will be reported if the global or local
+                                 variable does not reference the same object type
+                                 as the target parameter.
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.sget.input.from.from-cli.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:element name="__.sget.input.from.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:choice>
+                  <xs:element name="nofill" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           If present, and the 'from-cli' option is used
+                           for input, then filling of mandatory nodes
+                           and key leafs will be skipped.  Instead, the target
+                           object will be treated as a terminating select node
+                           in the filter element.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="with-defaults"
+                     type="ncxapp:CliWithDefaultsType" minOccurs="0"/>
+                  <xs:element name="__.sget.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="sget-config_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="data" type="xs:anyType" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        The data resulting from the retrieval operation.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="__.sget-config.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="sget-config" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Get some NETCONF config data with the get-config
+            operation, using an optional subtree filter.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>
+               sget-config_output_type__
+            </ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:default-parm>
+                  <ncx:parm>target</ncx:parm>
+               </ncx:default-parm>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:choice>
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:choice-name>from</ncx:choice-name>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>varref</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="varref" type="xs:string"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Use the contents of the specified variable 
+                                 as the content
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.sget-config.input.from.varref.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>from-cli</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="target">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 XPath target object to fill.  If prefixes are missing
+                                 then the first match in any namespace will be used.
+                                 Any prefix used must be the default prefix
+                                 assigned to the desired YANG module. Prefix usage is
+                                 optional.
+                              </xs:documentation>
+                              <xs:appinfo>
+                                 <ncx:mandatory>true</ncx:mandatory>
+                                 <ncx:schema-instance/>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:simpleType>
+                              <xs:restriction base="xs:string">
+                                 <xs:minLength value="1"/>
+                              </xs:restriction>
+                           </xs:simpleType>
+                        </xs:element>
+                        <xs:element name="optional" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 If present, then prompt for leafs that are optional.
+                                 If not, skip these objects.
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element name="value" type="xs:anyType"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Contains a string representing the content
+                                 to use for the filled variable.
+                                 
+                                 If a string is entered, then the target value being
+                                 filled must be a leaf or leaf-list.
+                                 
+                                 If a variable is referenced, then it will 
+                                 be used as the content, if the target value being
+                                 filled is a leaf or a leaf-list.
+                                 
+                                 If the target value is a complex object,
+                                 then the referenced variable must also be
+                                 a complex object of the same type. E.g.,
+                                 
+                                 The global variable 'foo' would be specified as:
+                                 
+                                     value=$$foo
+                                 
+                                 The local variable 'bar' would be specified as:
+                                 
+                                     value=$bar
+                                 
+                                 An error will be reported if the global or local
+                                 variable does not reference the same object type
+                                 as the target parameter.
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.sget-config.input.from.from-cli.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:element name="__.sget-config.input.from.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:choice>
+                  <xs:element name="nofill" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           If present, and the 'from-cli' option is used
+                           for input, then filling of mandatory nodes
+                           and key leafs will be skipped.  Instead, the target
+                           object will be treated as a terminating select node
+                           in the filter element.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="with-defaults"
+                     type="ncxapp:CliWithDefaultsType" minOccurs="0"/>
+                  <xs:element name="source">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Particular configuration to retrieve.
+                        </xs:documentation>
+                     </xs:annotation>
+                     <xs:complexType>
+                        <xs:sequence>
+                           <xs:choice>
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:choice-name>config-source
+                                    </ncx:choice-name>
+                                    <ncx:mandatory>true</ncx:mandatory>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                              <xs:sequence>
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:case-name>candidate</ncx:case-name>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:element name="candidate"
+                                    minOccurs="0">
+                                    <xs:annotation>
+                                       <xs:documentation>
+                                          Only available if 'candidate' capability supported.
+                                       </xs:documentation>
+                                    </xs:annotation>
+                                 </xs:element>
+                                 <xs:element
+                                    name="__.sget-config.input.source.config-source.candidate.A__"
+                                    minOccurs="0" maxOccurs="unbounded"
+                                    abstract="true"/>
+                              </xs:sequence>
+                              <xs:sequence>
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:case-name>running</ncx:case-name>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:element name="running"
+                                    minOccurs="0"/>
+                                 <xs:element
+                                    name="__.sget-config.input.source.config-source.running.A__"
+                                    minOccurs="0" maxOccurs="unbounded"
+                                    abstract="true"/>
+                              </xs:sequence>
+                              <xs:sequence>
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:case-name>startup</ncx:case-name>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:element name="startup"
+                                    minOccurs="0">
+                                    <xs:annotation>
+                                       <xs:documentation>
+                                          Only available if 'startup' capability supported.
+                                       </xs:documentation>
+                                    </xs:annotation>
+                                 </xs:element>
+                                 <xs:element
+                                    name="__.sget-config.input.source.config-source.startup.A__"
+                                    minOccurs="0" maxOccurs="unbounded"
+                                    abstract="true"/>
+                              </xs:sequence>
+                              <xs:sequence>
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:case-name>url</ncx:case-name>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:element name="url"
+                                    type="nc:ConfigURIType"
+                                    minOccurs="0">
+                                    <xs:annotation>
+                                       <xs:documentation>
+                                          URL pointing to config data. Only available
+                                          if 'url' capability supported.
+                                       </xs:documentation>
+                                    </xs:annotation>
+                                 </xs:element>
+                                 <xs:element
+                                    name="__.sget-config.input.source.config-source.url.A__"
+                                    minOccurs="0" maxOccurs="unbounded"
+                                    abstract="true"/>
+                              </xs:sequence>
+                              <xs:element
+                                 name="__.sget-config.input.source.config-source.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:choice>
+                           <xs:element
+                              name="__.sget-config.input.source.A__"
+                              minOccurs="0" maxOccurs="unbounded"
+                              abstract="true"/>
+                        </xs:sequence>
+                     </xs:complexType>
+                  </xs:element>
+                  <xs:element name="__.sget-config.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="show_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.show.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="show" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Local show command for yangcli info.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>show_output_type__</ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:choice>
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:choice-name>showtype</ncx:choice-name>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>module</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="module"
+                           type="nt:NcxIdentifier" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Show full info for one module
+                              </xs:documentation>
+                           </xs:annotation>
+                           <xs:simpleType>
+                              <xs:union
+                                 memberTypes="nt:NcxName nt:NcxQName"/>
+                           </xs:simpleType>
+                        </xs:element>
+                        <xs:element
+                           name="__.show.input.showtype.module.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>modules</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="modules" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Show info for all modules
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.show.input.showtype.modules.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>local</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="local" type="nt:NcxName"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Show info for one local user variable
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.show.input.showtype.local.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>locals</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="locals" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Show info for all local user variables
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.show.input.showtype.locals.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>global</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="global" type="nt:NcxName"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Show full info for one global user variable
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.show.input.showtype.global.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>globals</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="globals" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Show info for all global user variables
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.show.input.showtype.globals.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>objects</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="objects" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Show config database objects available at this time
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.show.input.showtype.objects.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>var</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="var" type="nt:NcxName"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Show info for one local or global variable
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.show.input.showtype.var.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>vars</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="vars" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Show truncated info for all program variables
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.show.input.showtype.vars.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>version</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="version" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Show yangcli version info
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.show.input.showtype.version.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:element name="__.show.input.showtype.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:choice>
+                  <xs:choice>
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:choice-name>brief-full</ncx:choice-name>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>brief</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="brief" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>Show brief help text
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.show.input.brief-full.brief.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>full</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="full" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>Show full help text
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.show.input.brief-full.full.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:element name="__.show.input.brief-full.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:choice>
+                  <xs:element name="__.show.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="xget_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="data" type="xs:anyType" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        The data resulting from the retrieval operation.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="__.xget.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="xget" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Get some NETCONF running config or state data with the get
+            operation, using an optional XPath filter.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>xget_output_type__</ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:default-parm>
+                  <ncx:parm>select</ncx:parm>
+               </ncx:default-parm>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:choice>
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:choice-name>from</ncx:choice-name>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>varref</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="varref" type="xs:string"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Use the contents of the specified variable 
+                                 as the content
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.xget.input.from.varref.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>select</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="select" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 The XPath expression to use in the retrieval
+                                 operation.  The string may only contain
+                                 single quotes, which are required for
+                                 string literals.  The entire string
+                                 will be inserted into a double-quoted
+                                 string, within the get-config PDU.
+                                 Character entities will be inserted as
+                                 needed to maintain well-formed XML.
+                              </xs:documentation>
+                              <xs:appinfo>
+                                 <ncx:xpath/>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:simpleType>
+                              <xs:restriction base="xs:string">
+                                 <xs:minLength value="1"/>
+                              </xs:restriction>
+                           </xs:simpleType>
+                        </xs:element>
+                        <xs:element
+                           name="__.xget.input.from.select.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:element name="__.xget.input.from.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:choice>
+                  <xs:element name="timeout" type="nt:Timeout"
+                     default="30" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>Timeout to use</xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="with-defaults"
+                     type="ncxapp:CliWithDefaultsType" minOccurs="0"/>
+                  <xs:element name="__.xget.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="xget-config_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="data" type="xs:anyType" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        The data resulting from the retrieval operation.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="__.xget-config.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="xget-config" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Get some NETCONF config data with the get-config
+            operation, using an optional XPath filter.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>
+               xget-config_output_type__
+            </ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:default-parm>
+                  <ncx:parm>select</ncx:parm>
+               </ncx:default-parm>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:choice>
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:choice-name>from</ncx:choice-name>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>varref</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="varref" type="xs:string"
+                           minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 Use the contents of the specified variable 
+                                 as the content
+                              </xs:documentation>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.xget-config.input.from.varref.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:sequence>
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:case-name>select</ncx:case-name>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:element name="select" minOccurs="0">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 The XPath expression to use in the retrieval
+                                 operation.  The string may only contain
+                                 single quotes, which are required for
+                                 string literals.  The entire string
+                                 will be inserted into a double-quoted
+                                 string, within the get-config PDU.
+                                 Character entities will be inserted as
+                                 needed to maintain well-formed XML.
+                              </xs:documentation>
+                              <xs:appinfo>
+                                 <ncx:xpath/>
+                              </xs:appinfo>
+                           </xs:annotation>
+                           <xs:simpleType>
+                              <xs:restriction base="xs:string">
+                                 <xs:minLength value="1"/>
+                              </xs:restriction>
+                           </xs:simpleType>
+                        </xs:element>
+                        <xs:element
+                           name="__.xget-config.input.from.select.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                     <xs:element name="__.xget-config.input.from.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:choice>
+                  <xs:element name="timeout" type="nt:Timeout"
+                     default="30" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>Timeout to use</xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="with-defaults"
+                     type="ncxapp:CliWithDefaultsType" minOccurs="0"/>
+                  <xs:element name="source">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Particular configuration to retrieve.
+                        </xs:documentation>
+                     </xs:annotation>
+                     <xs:complexType>
+                        <xs:sequence>
+                           <xs:choice>
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:choice-name>config-source
+                                    </ncx:choice-name>
+                                    <ncx:mandatory>true</ncx:mandatory>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                              <xs:sequence>
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:case-name>candidate</ncx:case-name>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:element name="candidate"
+                                    minOccurs="0">
+                                    <xs:annotation>
+                                       <xs:documentation>
+                                          Only available if 'candidate' capability supported.
+                                       </xs:documentation>
+                                    </xs:annotation>
+                                 </xs:element>
+                                 <xs:element
+                                    name="__.xget-config.input.source.config-source.candidate.A__"
+                                    minOccurs="0" maxOccurs="unbounded"
+                                    abstract="true"/>
+                              </xs:sequence>
+                              <xs:sequence>
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:case-name>running</ncx:case-name>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:element name="running"
+                                    minOccurs="0"/>
+                                 <xs:element
+                                    name="__.xget-config.input.source.config-source.running.A__"
+                                    minOccurs="0" maxOccurs="unbounded"
+                                    abstract="true"/>
+                              </xs:sequence>
+                              <xs:sequence>
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:case-name>startup</ncx:case-name>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:element name="startup"
+                                    minOccurs="0">
+                                    <xs:annotation>
+                                       <xs:documentation>
+                                          Only available if 'startup' capability supported.
+                                       </xs:documentation>
+                                    </xs:annotation>
+                                 </xs:element>
+                                 <xs:element
+                                    name="__.xget-config.input.source.config-source.startup.A__"
+                                    minOccurs="0" maxOccurs="unbounded"
+                                    abstract="true"/>
+                              </xs:sequence>
+                              <xs:sequence>
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:case-name>url</ncx:case-name>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:element name="url"
+                                    type="nc:ConfigURIType"
+                                    minOccurs="0">
+                                    <xs:annotation>
+                                       <xs:documentation>
+                                          URL pointing to config data. Only available
+                                          if 'url' capability supported.
+                                       </xs:documentation>
+                                    </xs:annotation>
+                                 </xs:element>
+                                 <xs:element
+                                    name="__.xget-config.input.source.config-source.url.A__"
+                                    minOccurs="0" maxOccurs="unbounded"
+                                    abstract="true"/>
+                              </xs:sequence>
+                              <xs:element
+                                 name="__.xget-config.input.source.config-source.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:choice>
+                           <xs:element
+                              name="__.xget-config.input.source.A__"
+                              minOccurs="0" maxOccurs="unbounded"
+                              abstract="true"/>
+                        </xs:sequence>
+                     </xs:complexType>
+                  </xs:element>
+                  <xs:element name="__.xget-config.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

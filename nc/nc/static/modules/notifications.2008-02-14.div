@@ -1,0 +1,120 @@
+
+<div>
+   <h1 class="yang">notifications.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#streamNameType.25">streamNameType</a></li>
+         </ul>
+      </li>
+      <li><a href="#">RPC&nbsp;Methods</a>
+         <ul>
+            <li class="daddy"><a href="#create-subscription.31">create-subscription</a>
+               <ul>
+                  <li class="daddy"><a href="#input.41">input</a>
+                     <ul>
+                        <li><a href="#stream.42">stream</a></li>
+                        <li><a href="#filter.51">filter</a></li>
+                        <li><a href="#startTime.61">startTime</a></li>
+                        <li><a href="#stopTime.70">stopTime</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="#output.31">output</a></li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">notifications</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:netconf:notification:1.0"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"ncEvent"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/xsd">xsd</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"xsd"</span>;
+      }
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"IETF NETCONF WG"</span>;
+
+      <span class="yang_kw">contact</span> <span class="yang_str">"netconf@ops.ietf.org"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"Conversion of the 'ncEvent' XSD in the 
+         NETCONF Notifications draft."</span>;
+
+      <span class="yang_kw">reference</span>
+         <span class="yang_str">"draft-ietf-netconf-notifications-11.txt"</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2008-02-14"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Initial version, based on -11 draft."</span>;
+      }
+
+
+      <a name="streamNameType.25"></a><span class="yang_kw">typedef</span> <span class="yang_id">streamNameType</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"The name of an event stream."</span>;
+      }
+
+      <a name="create-subscription.31"></a><span class="yang_kw">rpc</span> <span class="yang_id">create-subscription</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"The command to create a notification subscription. It
+            takes as argument the name of the notification stream
+            and filter. Both of those options limit the content of
+            the subscription. In addition, there are two time-related
+            parameters, startTime and stopTime, which can be used to 
+            select the time interval of interest to the notification
+            replay feature."</span>;
+         <a name="input.41"></a><span class="yang_kw">input</span> {
+            <a name="stream.42"></a><span class="yang_kw">leaf</span> <span class="yang_id">stream</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#streamNameType.25">streamNameType</a></span>;
+               <span class="yang_kw">default</span> <span class="yang_str">"NETCONF"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An optional parameter that indicates which stream of events
+                  is of interest. If not present, then events in the default
+                  NETCONF stream will be sent."</span>;
+            }
+
+            <a name="filter.51"></a><span class="yang_kw">anyxml</span> <span class="yang_id">filter</span> {
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An optional parameter that indicates which subset of all
+                  possible events is of interest. The format of this
+                  parameter is the same as that of the filter parameter
+                  in the NETCONF protocol operations. If not present,
+                  all events not precluded by other parameters will 
+                  be sent."</span>;
+            }
+
+            <a name="startTime.61"></a><span class="yang_kw">leaf</span> <span class="yang_id">startTime</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/xsd/2007-12-06#dateTime.227">xsd:dateTime</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A parameter used to trigger the replay feature and
+                  indicates that the replay should start at the time
+                  specified. If start time is not present, this is not a
+                  replay subscription."</span>;
+            }
+
+            <a name="stopTime.70"></a><span class="yang_kw">leaf</span> <span class="yang_id">stopTime</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/xsd/2007-12-06#dateTime.227">xsd:dateTime</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An optional parameter used with the optional replay
+                  feature to indicate the newest notifications of
+                  interest. If stop time is not present, the notifications
+                  will continue until the subscription is terminated.
+                  Must be used with startTime."</span>;
+            }
+         }
+      }  <span class="yang_cmt">// rpc create-subscription</span>
+   }  <span class="yang_cmt">// module notifications</span>
+</pre>
+</div>
+</div>

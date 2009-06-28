@@ -1,0 +1,96 @@
+
+<div>
+   <h1 class="yang">testr2.2009-01-01.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#TestType.23">TestType</a></li>
+         </ul>
+      </li>
+      <li><a href="#">Groupings</a>
+         <ul>
+            <li class="daddy"><a href="#TestGroup.31">TestGroup</a>
+               <ul>
+                  <li><a href="#A.32">A</a></li>
+                  <li><a href="#B.33">B</a></li>
+                  <li><a href="#C.34">C</a></li>
+                  <li><a href="#D.35">D</a></li>
+                  <li><a href="#E.36">E</a></li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#bar-r2.39">bar-r2</a>
+               <ul>
+                  <li><a href="#uses.40">uses</a></li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">testr2</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span> <span class="yang_str">"http://netconfcentral.com/ns/testr2"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"r2"</span>;
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"Netconf Central"</span>;
+
+      <span class="yang_kw">contact</span> <span class="yang_str">"Andy Bierman"</span>;
+
+      <span class="yang_kw">description</span> <span class="yang_str">"YANG import-by-revision test module."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2009-01-01"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Add C and D to the test grouping"</span>;
+      }
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2008-01-01"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Initial version."</span>;
+      }
+
+
+      <a name="TestType.23"></a><span class="yang_kw">typedef</span> <span class="yang_id">TestType</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+            <span class="yang_kw">range</span> <span class="yang_str">"1..max"</span>;
+         }
+         <span class="yang_kw">units</span> <span class="yang_str">"seconds"</span>;
+         <span class="yang_kw">default</span> <span class="yang_str">"5"</span>;
+      }
+
+      <a name="TestGroup.31"></a><span class="yang_kw">grouping</span> <span class="yang_id">TestGroup</span> {
+         <a name="A.32"></a><span class="yang_kw">leaf</span> <span class="yang_id">A</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int64</span>;
+         }
+
+         <a name="B.33"></a><span class="yang_kw">leaf</span> <span class="yang_id">B</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">instance-identifier</span>;
+         }
+
+         <a name="C.34"></a><span class="yang_kw">leaf</span> <span class="yang_id">C</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         }
+
+         <a name="D.35"></a><span class="yang_kw">anyxml</span> <span class="yang_id">D</span>;
+
+         <a name="E.36"></a><span class="yang_kw">container</span> <span class="yang_id">E</span>;
+      }  <span class="yang_cmt">// grouping TestGroup</span>
+
+      <a name="bar-r2.39"></a><span class="yang_kw">container</span> <span class="yang_id">bar-r2</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+
+         <a name="uses.40"></a><span class="yang_kw">uses</span> <a href="#TestGroup.31">r2:TestGroup</a>;
+      }  <span class="yang_cmt">// container bar-r2</span>
+   }  <span class="yang_cmt">// module testr2</span>
+</pre>
+</div>
+</div>

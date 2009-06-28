@@ -1,0 +1,747 @@
+
+<div>
+   <h1 class="yang">test.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Groupings</a>
+         <ul>
+            <li class="daddy"><a href="#Leafs.1.232">Leafs.1</a>
+               <ul>
+                  <li><a href="#binary.1.234">binary.1</a></li>
+                  <li><a href="#bits.1.238">bits.1</a></li>
+                  <li><a href="#boolean.1.248">boolean.1</a></li>
+                  <li><a href="#empty.1.258">empty.1</a></li>
+                  <li><a href="#enumeration.1.262">enumeration.1</a></li>
+                  <li><a href="#identityref.1.271">identityref.1</a></li>
+                  <li><a href="#instance-identifier.1.275">instance-identifier.1</a></li>
+                  <li><a href="#instance-identifier.2.281">instance-identifier.2</a></li>
+                  <li><a href="#int8.1.287">int8.1</a></li>
+                  <li><a href="#int16.1.291">int16.1</a></li>
+                  <li><a href="#int32.1.295">int32.1</a></li>
+                  <li><a href="#int64.1.299">int64.1</a></li>
+                  <li><a href="#leafref.1.303">leafref.1</a></li>
+                  <li><a href="#leafref.2.310">leafref.2</a></li>
+                  <li><a href="#string.1.317">string.1</a></li>
+                  <li><a href="#uint8.1.321">uint8.1</a></li>
+                  <li><a href="#uint16.1.325">uint16.1</a></li>
+                  <li><a href="#uint32.1.329">uint32.1</a></li>
+                  <li><a href="#uint64.1.333">uint64.1</a></li>
+                  <li><a href="#dec64.1.337">dec64.1</a></li>
+                  <li><a href="#dec64.2.343">dec64.2</a></li>
+                  <li><a href="#dec64.3.350">dec64.3</a></li>
+                  <li><a href="#union.1.357">union.1</a></li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+      <li><a href="#">Objects</a>
+         <ul>
+            <li><a href="#instance1.24">instance1</a></li>
+            <li><a href="#instance2.28">instance2</a></li>
+            <li><a href="#leafref1.34">leafref1</a></li>
+            <li><a href="#leafref2.41">leafref2</a></li>
+            <li class="daddy"><a href="#test1.48">test1</a>
+               <ul>
+                  <li><a href="#a.49">a</a></li>
+                  <li><a href="#b.55">b</a></li>
+                  <li><a href="#c.60">c</a></li>
+                  <li><a href="#d.61">d</a></li>
+                  <li class="daddy"><a href="#e.69">e</a>
+                     <ul>
+                        <li><a href="#ee.70">ee</a></li>
+                        <li><a href="#eee.78">eee</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#f.83">f</a>
+                     <ul>
+                        <li class="daddy"><a href="#f1.86">f1</a>
+                           <ul>
+                              <li><a href="#f1.86">f1</a></li>
+                           </ul>
+                        </li>
+                        <li class="daddy"><a href="#f2.87">f2</a>
+                           <ul>
+                              <li><a href="#f2.87">f2</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#g.89">g</a>
+                     <ul>
+                        <li class="daddy"><a href="#g1.92">g1</a>
+                           <ul>
+                              <li><a href="#g1.92">g1</a></li>
+                           </ul>
+                        </li>
+                        <li class="daddy"><a href="#g2.96">g2</a>
+                           <ul>
+                              <li><a href="#g2.96">g2</a></li>
+                           </ul>
+                        </li>
+                        <li class="daddy"><a href="#g3.100">g3</a>
+                           <ul>
+                              <li><a href="#g3a.101">g3a</a></li>
+                              <li><a href="#g3b.102">g3b</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#test2.107">test2</a>
+               <ul>
+                  <li><a href="#a1.111">a1</a></li>
+                  <li><a href="#a2.115">a2</a></li>
+                  <li><a href="#b2.123">b2</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#augment.129">augment</a>
+               <ul>
+                  <li><a href="#xxx.130">xxx</a></li>
+                  <li><a href="#foo.131">foo</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#test3.138">test3</a>
+               <ul>
+                  <li class="daddy"><a href="#test3deep.141">test3deep</a>
+                     <ul>
+                        <li><a href="#b.144">b</a></li>
+                        <li><a href="#bb.150">bb</a></li>
+                        <li><a href="#bbb.156">bbb</a></li>
+                        <li><a href="#c.162">c</a></li>
+                        <li><a href="#y.169">y</a></li>
+                        <li class="daddy"><a href="#deepy.171">deepy</a>
+                           <ul>
+                              <li><a href="#yy1.174">yy1</a></li>
+                              <li><a href="#yy2.175">yy2</a></li>
+                              <li><a href="#yy3.176">yy3</a></li>
+                           </ul>
+                        </li>
+                        <li class="daddy"><a href="#deepz.179">deepz</a>
+                           <ul>
+                              <li><a href="#zz1.180">zz1</a></li>
+                              <li><a href="#zz2.181">zz2</a></li>
+                              <li><a href="#zz3.182">zz3</a></li>
+                           </ul>
+                        </li>
+                        <li><a href="#yy.185">yy</a></li>
+                        <li><a href="#yy64.186">yy64</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="#b2.189">b2</a></li>
+                  <li><a href="#c2.194">c2</a></li>
+                  <li><a href="#x.200">x</a></li>
+               </ul>
+            </li>
+            <li><a href="#idtest.211">idtest</a></li>
+            <li class="daddy"><a href="#musttest.215">musttest</a>
+               <ul>
+                  <li><a href="#A.217">A</a></li>
+                  <li class="daddy"><a href="#B.218">B</a>
+                     <ul>
+                        <li class="daddy"><a href="#B1.220">B1</a>
+                           <ul>
+                              <li><a href="#B1leaf.221">B1leaf</a></li>
+                              <li><a href="#B1num.222">B1num</a></li>
+                           </ul>
+                        </li>
+                        <li class="daddy"><a href="#B2.224">B2</a>
+                           <ul>
+                              <li><a href="#B2leaf.225">B2leaf</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li><a href="#uses.370">uses</a></li>
+            <li class="daddy"><a href="#container.1.372">container.1</a>
+               <ul>
+                  <li><a href="#uses.373">uses</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#container.2.376">container.2</a>
+               <ul>
+                  <li><a href="#uses.378">uses</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#list.1.381">list.1</a>
+               <ul>
+                  <li><a href="#uses.383">uses</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#choice.1.386">choice.1</a>
+               <ul>
+                  <li class="daddy"><a href="#case.1.1.387">case.1.1</a>
+                     <ul>
+                        <li><a href="#a.388">a</a></li>
+                        <li><a href="#b.389">b</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#c.391">c</a>
+                     <ul>
+                        <li><a href="#c.391">c</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#d.392">d</a>
+                     <ul>
+                        <li><a href="#d.392">d</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#xpath.1.395">xpath.1</a>
+               <ul>
+                  <li><a href="#name.399">name</a></li>
+                  <li><a href="#name2.404">name2</a></li>
+                  <li><a href="#data1.406">data1</a></li>
+                  <li><a href="#data2.410">data2</a></li>
+                  <li><a href="#data3.416">data3</a></li>
+                  <li><a href="#data4.421">data4</a></li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">test</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span> <span class="yang_str">"http://netconfcentral.com/ns/test"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"t"</span>;
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"Netconf Central"</span>;
+
+      <span class="yang_kw">contact</span> <span class="yang_str">"Andy Bierman"</span>;
+
+      <span class="yang_kw">description</span> <span class="yang_str">"YANG test module 1."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2009-06-10"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Test module in-progress."</span>;
+      }
+
+
+      <a name="feature1.19"></a><span class="yang_kw">feature</span> <span class="yang_id">feature1</span> {
+      }
+
+      <a name="feature2.20"></a><span class="yang_kw">feature</span> <span class="yang_id">feature2</span> {
+      }
+
+      <a name="feature3.21"></a><span class="yang_kw">feature</span> <span class="yang_id">feature3</span> {
+      }
+
+      <a name="feature4.22"></a><span class="yang_kw">feature</span> <span class="yang_id">feature4</span> {
+      }
+
+      <a name="instance1.24"></a><span class="yang_kw">leaf</span> <span class="yang_id">instance1</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">instance-identifier</span>;
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+      }
+
+      <a name="instance2.28"></a><span class="yang_kw">leaf</span> <span class="yang_id">instance2</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">instance-identifier</span>;
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+      }
+
+      <a name="leafref1.34"></a><span class="yang_kw">leaf</span> <span class="yang_id">leafref1</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+            <span class="yang_kw">path</span> <span class="yang_str">"../test2/a2"</span>;
+            <span class="yang_kw">require-instance</span> <span class="yang_str">"true"</span>;
+         }
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+      }
+
+      <a name="leafref2.41"></a><span class="yang_kw">leaf</span> <span class="yang_id">leafref2</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+            <span class="yang_kw">path</span> <span class="yang_str">"../test2/a2"</span>;
+            <span class="yang_kw">require-instance</span> <span class="yang_str">"false"</span>;
+         }
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+      }
+
+      <a name="test1.48"></a><span class="yang_kw">container</span> <span class="yang_id">test1</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <a name="a.49"></a><span class="yang_kw">leaf</span> <span class="yang_id">a</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">string</span> {
+               <span class="yang_kw">length</span> <span class="yang_str">"1..max"</span>;
+            }
+            <span class="yang_kw">default</span> <span class="yang_str">"1"</span>;
+         }
+
+         <a name="b.55"></a><span class="yang_kw">leaf</span> <span class="yang_id">b</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+               <span class="yang_kw">range</span> <span class="yang_str">"min..32"</span>;
+            }
+         }
+
+         <a name="c.60"></a><span class="yang_kw">leaf</span> <span class="yang_id">c</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+         }
+
+         <a name="d.61"></a><span class="yang_kw">leaf</span> <span class="yang_id">d</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+               <span class="yang_kw">enum</span> <span class="yang_str">"x"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">0</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"y"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"z"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+               }
+            }
+         }
+
+         <a name="e.69"></a><span class="yang_kw">container</span> <span class="yang_id">e</span> {
+            <a name="ee.70"></a><span class="yang_kw">leaf-list</span> <span class="yang_id">ee</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               <span class="yang_kw">max-elements</span> <span class="yang_str">"5"</span>;
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"user"</span>;
+            }
+
+            <a name="eee.78"></a><span class="yang_kw">leaf</span> <span class="yang_id">eee</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               <span class="yang_kw">default</span> <span class="yang_str">"test"</span>;
+            }
+         }  <span class="yang_cmt">// container e</span>
+
+         <a name="f.83"></a><span class="yang_kw">choice</span> <span class="yang_id">f</span> {
+            <a name="f1.86"></a><span class="yang_kw">case</span> <span class="yang_id">f1</span> {
+               <a name="f1.86"></a><span class="yang_kw">leaf</span> <span class="yang_id">f1</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+            }  <span class="yang_cmt">// case f1</span>
+
+            <a name="f2.87"></a><span class="yang_kw">case</span> <span class="yang_id">f2</span> {
+               <a name="f2.87"></a><span class="yang_kw">leaf</span> <span class="yang_id">f2</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+            }  <span class="yang_cmt">// case f2</span>
+         }  <span class="yang_cmt">// choice f</span>
+
+         <a name="g.89"></a><span class="yang_kw">choice</span> <span class="yang_id">g</span> {
+            <span class="yang_kw">mandatory</span> <span class="yang_str">"false"</span>;
+            <a name="g1.92"></a><span class="yang_kw">case</span> <span class="yang_id">g1</span> {
+               <a name="g1.92"></a><span class="yang_kw">leaf</span> <span class="yang_id">g1</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                  <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+               }
+            }  <span class="yang_cmt">// case g1</span>
+
+            <a name="g2.96"></a><span class="yang_kw">case</span> <span class="yang_id">g2</span> {
+               <a name="g2.96"></a><span class="yang_kw">leaf</span> <span class="yang_id">g2</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                  <span class="yang_kw">default</span> <span class="yang_str">"agent-set"</span>;
+               }
+            }  <span class="yang_cmt">// case g2</span>
+
+            <a name="g3.100"></a><span class="yang_kw">case</span> <span class="yang_id">g3</span> {
+               <a name="g3a.101"></a><span class="yang_kw">leaf</span> <span class="yang_id">g3a</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                  <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+               }
+
+               <a name="g3b.102"></a><span class="yang_kw">leaf</span> <span class="yang_id">g3b</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+            }  <span class="yang_cmt">// case g3</span>
+         }  <span class="yang_cmt">// choice g</span>
+      }  <span class="yang_cmt">// container test1</span>
+
+      <a name="test2.107"></a><span class="yang_kw">list</span> <span class="yang_id">test2</span> {
+         <span class="yang_kw">key</span> "<a href="#a2.115">a2</a>";
+         <span class="yang_kw">unique</span> "<a href="#b2.123">b2</a>";
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <span class="yang_kw">ordered-by</span> <span class="yang_str">"user"</span>;
+         <a name="a1.111"></a><span class="yang_kw">leaf</span> <span class="yang_id">a1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int8</span>;
+            <span class="yang_kw">default</span> <span class="yang_str">"4"</span>;
+         }
+
+         <a name="a2.115"></a><span class="yang_kw">leaf</span> <span class="yang_id">a2</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">string</span> {
+               <span class="yang_kw">length</span> <span class="yang_str">"1..5"</span> {
+                  <span class="yang_kw">error-message</span> <span class="yang_str">"some new message"</span>;
+               }
+            }
+         }
+
+         <a name="b2.123"></a><span class="yang_kw">leaf</span> <span class="yang_id">b2</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+            <span class="yang_kw">default</span> <span class="yang_str">"5"</span>;
+         }
+      }  <span class="yang_cmt">// list test2</span>
+
+      <a name="augment.129"></a><span class="yang_kw">augment</span> <a href="#test2.107">/test2</a> {
+         <a name="xxx.130"></a><span class="yang_kw">container</span> <span class="yang_id">xxx</span>;
+
+         <a name="foo.131"></a><span class="yang_kw">leaf</span> <span class="yang_id">foo</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+            <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+         }
+      }
+
+      <a name="test3.138"></a><span class="yang_kw">list</span> <span class="yang_id">test3</span> {
+         <span class="yang_kw">key</span> "<a href="#x.200">x</a>";
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+         <a name="test3deep.141"></a><span class="yang_kw">list</span> <span class="yang_id">test3deep</span> {
+            <span class="yang_kw">key</span> "<a href="#yy.185">yy</a> <a href="#y.169">y</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <a name="b.144"></a><span class="yang_kw">leaf</span> <span class="yang_id">b</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+                  <span class="yang_kw">path</span> <span class="yang_str">"../../x"</span>;
+                  <span class="yang_kw">require-instance</span> <span class="yang_str">"true"</span>;
+               }
+            }
+
+            <a name="bb.150"></a><span class="yang_kw">leaf</span> <span class="yang_id">bb</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+                  <span class="yang_kw">path</span> <span class="yang_str">"../yy"</span>;
+                  <span class="yang_kw">require-instance</span> <span class="yang_str">"true"</span>;
+               }
+            }
+
+            <a name="bbb.156"></a><span class="yang_kw">leaf</span> <span class="yang_id">bbb</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+                  <span class="yang_kw">path</span> <span class="yang_str">"../deepy/yy1"</span>;
+                  <span class="yang_kw">require-instance</span> <span class="yang_str">"true"</span>;
+               }
+            }
+
+            <a name="c.162"></a><span class="yang_kw">leaf</span> <span class="yang_id">c</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"../../../test3[x = current()/../b]/test3deep
+                     [yy=current()/../bb][y=current()/../bbb]/deepy/yy3"</span>;
+                  <span class="yang_kw">require-instance</span> <span class="yang_str">"true"</span>;
+               }
+            }
+
+            <a name="y.169"></a><span class="yang_kw">leaf</span> <span class="yang_id">y</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+            }
+
+            <a name="deepy.171"></a><span class="yang_kw">list</span> <span class="yang_id">deepy</span> {
+               <span class="yang_kw">key</span> "<a href="#yy3.176">yy3</a>";
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+               <a name="yy1.174"></a><span class="yang_kw">leaf</span> <span class="yang_id">yy1</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">instance-identifier</span>;
+               }
+
+               <a name="yy2.175"></a><span class="yang_kw">leaf</span> <span class="yang_id">yy2</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">int64</span>;
+               }
+
+               <a name="yy3.176"></a><span class="yang_kw">leaf</span> <span class="yang_id">yy3</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+            }  <span class="yang_cmt">// list deepy</span>
+
+            <a name="deepz.179"></a><span class="yang_kw">list</span> <span class="yang_id">deepz</span> {
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+               <a name="zz1.180"></a><span class="yang_kw">leaf</span> <span class="yang_id">zz1</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">instance-identifier</span>;
+               }
+
+               <a name="zz2.181"></a><span class="yang_kw">leaf</span> <span class="yang_id">zz2</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">int64</span>;
+               }
+
+               <a name="zz3.182"></a><span class="yang_kw">leaf</span> <span class="yang_id">zz3</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               }
+            }  <span class="yang_cmt">// list deepz</span>
+
+            <a name="yy.185"></a><span class="yang_kw">leaf</span> <span class="yang_id">yy</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+            }
+
+            <a name="yy64.186"></a><span class="yang_kw">leaf</span> <span class="yang_id">yy64</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int64</span>;
+            }
+         }  <span class="yang_cmt">// list test3deep</span>
+
+         <a name="b2.189"></a><span class="yang_kw">leaf</span> <span class="yang_id">b2</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+            <span class="yang_kw">default</span> <span class="yang_str">"5"</span>;
+         }
+
+         <a name="c2.194"></a><span class="yang_kw">leaf-list</span> <span class="yang_id">c2</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+            <span class="yang_kw">min-elements</span> <span class="yang_str">"4"</span>;
+            <span class="yang_kw">max-elements</span> <span class="yang_str">"4"</span>;
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+         }
+
+         <a name="x.200"></a><span class="yang_kw">leaf</span> <span class="yang_id">x</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         }
+      }  <span class="yang_cmt">// list test3</span>
+
+      <a name="id-A.205"></a><span class="yang_kw">identity</span> <span class="yang_id">id-A</span> {
+      }
+
+      <a name="id-B.206"></a><span class="yang_kw">identity</span> <span class="yang_id">id-B</span> {
+      }
+
+      <a name="id-C.207"></a><span class="yang_kw">identity</span> <span class="yang_id">id-C</span> {
+         <span class="yang_kw">base</span> <span class="yang_id"><a href="/modules/test/2009-06-10#id-A.205">id-A</a></span>;
+      }
+
+      <a name="id-D.208"></a><span class="yang_kw">identity</span> <span class="yang_id">id-D</span> {
+         <span class="yang_kw">base</span> <span class="yang_id"><a href="/modules/test/2009-06-10#id-C.207">id-C</a></span>;
+      }
+
+      <a name="id-E.209"></a><span class="yang_kw">identity</span> <span class="yang_id">id-E</span> {
+         <span class="yang_kw">base</span> <span class="yang_id"><a href="/modules/test/2009-06-10#id-D.208">id-D</a></span>;
+      }
+
+      <a name="idtest.211"></a><span class="yang_kw">leaf</span> <span class="yang_id">idtest</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">identityref</span> {
+            <span class="yang_kw">base</span> <span class="yang_id"><a href="/modules/test/2009-06-10#id-A.205">id-A</a></span>;
+         }
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+      }
+
+      <a name="musttest.215"></a><span class="yang_kw">container</span> <span class="yang_id">musttest</span> {
+         <span class="yang_kw">presence</span> <span class="yang_str">"testing one"</span>;
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <a name="A.217"></a><span class="yang_kw">leaf</span> <span class="yang_id">A</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         }
+
+         <a name="B.218"></a><span class="yang_kw">choice</span> <span class="yang_id">B</span> {
+            <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+            <a name="B1.220"></a><span class="yang_kw">case</span> <span class="yang_id">B1</span> {
+               <a name="B1leaf.221"></a><span class="yang_kw">leaf</span> <span class="yang_id">B1leaf</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+
+               <a name="B1num.222"></a><span class="yang_kw">leaf</span> <span class="yang_id">B1num</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               }
+            }  <span class="yang_cmt">// case B1</span>
+
+            <a name="B2.224"></a><span class="yang_kw">case</span> <span class="yang_id">B2</span> {
+               <a name="B2leaf.225"></a><span class="yang_kw">leaf</span> <span class="yang_id">B2leaf</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                  <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+               }
+            }  <span class="yang_cmt">// case B2</span>
+         }  <span class="yang_cmt">// choice B</span>
+      }  <span class="yang_cmt">// container musttest</span>
+
+      <a name="Leafs.1.232"></a><span class="yang_kw">grouping</span> <span class="yang_id">Leafs.1</span> {
+         <a name="binary.1.234"></a><span class="yang_kw">leaf</span> <span class="yang_id">binary.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+         }
+
+         <a name="bits.1.238"></a><span class="yang_kw">leaf</span> <span class="yang_id">bits.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">bits</span> {
+               <span class="yang_kw">bit</span> <span class="yang_str">"zero"</span> {
+                  <span class="yang_kw">position</span> <span class="yang_str">0</span>;
+               }
+               <span class="yang_kw">bit</span> <span class="yang_str">"one"</span> {
+                  <span class="yang_kw">position</span> <span class="yang_str">1</span>;
+               }
+               <span class="yang_kw">bit</span> <span class="yang_str">"two"</span> {
+                  <span class="yang_kw">position</span> <span class="yang_str">2</span>;
+               }
+               <span class="yang_kw">bit</span> <span class="yang_str">"ten"</span> {
+                  <span class="yang_kw">position</span> <span class="yang_str">10</span>;
+               }
+               <span class="yang_kw">bit</span> <span class="yang_str">"last"</span> {
+                  <span class="yang_kw">position</span> <span class="yang_str">3</span>;
+               }
+            }
+         }
+
+         <a name="boolean.1.248"></a><span class="yang_kw">leaf</span> <span class="yang_id">boolean.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">boolean</span>;
+         }
+
+         <a name="empty.1.258"></a><span class="yang_kw">leaf</span> <span class="yang_id">empty.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
+         }
+
+         <a name="enumeration.1.262"></a><span class="yang_kw">leaf</span> <span class="yang_id">enumeration.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+               <span class="yang_kw">enum</span> <span class="yang_str">"red"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"green"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">9</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"blue"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">11</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"deep purple"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">17</span>;
+               }
+            }
+         }
+
+         <a name="identityref.1.271"></a><span class="yang_kw">leaf</span> <span class="yang_id">identityref.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">identityref</span> {
+               <span class="yang_kw">base</span> <span class="yang_id"><a href="/modules/test/2009-06-10#id-A.205">id-A</a></span>;
+            }
+         }
+
+         <a name="instance-identifier.1.275"></a><span class="yang_kw">leaf</span> <span class="yang_id">instance-identifier.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">instance-identifier</span>;
+         }
+
+         <a name="instance-identifier.2.281"></a><span class="yang_kw">leaf</span> <span class="yang_id">instance-identifier.2</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">instance-identifier</span>;
+         }
+
+         <a name="int8.1.287"></a><span class="yang_kw">leaf</span> <span class="yang_id">int8.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int8</span>;
+         }
+
+         <a name="int16.1.291"></a><span class="yang_kw">leaf</span> <span class="yang_id">int16.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int16</span>;
+         }
+
+         <a name="int32.1.295"></a><span class="yang_kw">leaf</span> <span class="yang_id">int32.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+         }
+
+         <a name="int64.1.299"></a><span class="yang_kw">leaf</span> <span class="yang_id">int64.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int64</span>;
+         }
+
+         <a name="leafref.1.303"></a><span class="yang_kw">leaf</span> <span class="yang_id">leafref.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+               <span class="yang_kw">path</span> <span class="yang_str">"../instance-identifier.1"</span>;
+               <span class="yang_kw">require-instance</span> <span class="yang_str">"true"</span>;
+            }
+         }
+
+         <a name="leafref.2.310"></a><span class="yang_kw">leaf</span> <span class="yang_id">leafref.2</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+               <span class="yang_kw">path</span> <span class="yang_str">"../string.1"</span>;
+               <span class="yang_kw">require-instance</span> <span class="yang_str">"false"</span>;
+            }
+         }
+
+         <a name="string.1.317"></a><span class="yang_kw">leaf</span> <span class="yang_id">string.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         }
+
+         <a name="uint8.1.321"></a><span class="yang_kw">leaf</span> <span class="yang_id">uint8.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint8</span>;
+         }
+
+         <a name="uint16.1.325"></a><span class="yang_kw">leaf</span> <span class="yang_id">uint16.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint16</span>;
+         }
+
+         <a name="uint32.1.329"></a><span class="yang_kw">leaf</span> <span class="yang_id">uint32.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+         }
+
+         <a name="uint64.1.333"></a><span class="yang_kw">leaf</span> <span class="yang_id">uint64.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint64</span>;
+         }
+
+         <a name="dec64.1.337"></a><span class="yang_kw">leaf</span> <span class="yang_id">dec64.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">decimal64</span> {
+               <span class="yang_kw">fraction-digits</span> <span class="yang_str">4</span> {
+            }
+         }
+
+         <a name="dec64.2.343"></a><span class="yang_kw">leaf</span> <span class="yang_id">dec64.2</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">decimal64</span> {
+               <span class="yang_kw">fraction-digits</span> <span class="yang_str">2</span> {
+               <span class="yang_kw">range</span> <span class="yang_str">"0 .. 3 | 9 .. max"</span>;
+            }
+         }
+
+         <a name="dec64.3.350"></a><span class="yang_kw">leaf</span> <span class="yang_id">dec64.3</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">decimal64</span> {
+               <span class="yang_kw">fraction-digits</span> <span class="yang_str">18</span> {
+               <span class="yang_kw">range</span> <span class="yang_str">"3.1234567 .. max"</span>;
+            }
+         }
+
+         <a name="union.1.357"></a><span class="yang_kw">leaf</span> <span class="yang_id">union.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">union</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int8</span>;
+               <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+               <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               <span class="yang_kw">type</span> <span class="yang_id">union</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">boolean</span>;
+                  <span class="yang_kw">type</span> <span class="yang_id">uint64</span>;
+               }
+            }
+         }
+      }  <span class="yang_cmt">// grouping Leafs.1</span>
+
+      <a name="uses.370"></a><span class="yang_kw">uses</span> <a href="#Leafs.1.232">Leafs.1</a>;
+
+      <a name="container.1.372"></a><span class="yang_kw">container</span> <span class="yang_id">container.1</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+
+         <a name="uses.373"></a><span class="yang_kw">uses</span> <a href="#Leafs.1.232">Leafs.1</a>;
+      }  <span class="yang_cmt">// container container.1</span>
+
+      <a name="container.2.376"></a><span class="yang_kw">container</span> <span class="yang_id">container.2</span> {
+         <span class="yang_kw">presence</span> <span class="yang_str">"this is a presence container"</span>;
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+
+         <a name="uses.378"></a><span class="yang_kw">uses</span> <a href="#Leafs.1.232">Leafs.1</a>;
+      }  <span class="yang_cmt">// container container.2</span>
+
+      <a name="list.1.381"></a><span class="yang_kw">list</span> <span class="yang_id">list.1</span> {
+         <span class="yang_kw">key</span> "<a href="#string.1.317">string.1</a> <a href="#uint32.1.329">uint32.1</a>";
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+
+         <a name="uses.383"></a><span class="yang_kw">uses</span> <a href="#Leafs.1.232">Leafs.1</a>;
+      }  <span class="yang_cmt">// list list.1</span>
+
+      <a name="xpath.1.395"></a><span class="yang_kw">container</span> <span class="yang_id">xpath.1</span> {
+         <span class="yang_kw">must</span> <span class="yang_str">"name != 'fred' or data2"</span>;
+         <span class="yang_kw">must</span> <span class="yang_str">"name != name2 or data2"</span>;
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <a name="name.399"></a><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         }
+
+         <a name="name2.404"></a><span class="yang_kw">leaf</span> <span class="yang_id">name2</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         }
+
+         <a name="data1.406"></a><span class="yang_kw">leaf</span> <span class="yang_id">data1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+         }
+
+         <a name="data2.410"></a><span class="yang_kw">leaf</span> <span class="yang_id">data2</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+            <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+         }
+
+         <a name="data3.416"></a><span class="yang_kw">leaf</span> <span class="yang_id">data3</span> {
+            <span class="yang_kw">if-feature</span> <span class="yang_id"><a href="/modules/test/2009-06-10#feature1.19">t:feature1</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         }
+
+         <a name="data4.421"></a><span class="yang_kw">leaf</span> <span class="yang_id">data4</span> {
+            <span class="yang_kw">if-feature</span> <span class="yang_id"><a href="/modules/test/2009-06-10#feature2.20">t:feature2</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+            <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+         }
+      }  <span class="yang_cmt">// container xpath.1</span>
+   }  <span class="yang_cmt">// module test</span>
+</pre>
+</div>
+</div>

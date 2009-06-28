@@ -1,0 +1,73 @@
+
+<div>
+   <h1 class="yang">IANA-LANGUAGE-MIB.yang</h1>
+
+   <ul id="nav">
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">IANA-LANGUAGE-MIB</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:yang:smiv2:IANA-LANGUAGE-MIB"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"iana-language"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/yang-smi">yang-smi</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
+      }
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"IANA"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"Internet Assigned Numbers Authority (IANA)
+         
+         Postal: ICANN
+         	4676 Admiralty Way, Suite 330
+         	Marina del Rey, CA 90292
+         
+         Tel:    +1 310 823 9358 x20
+         E-Mail: iana@iana.org"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"The MIB module registers object identifier values for
+         well-known programming and scripting languages. Every
+         language registration MUST describe the format used
+         when transferring scripts written in this language.
+         
+         Any additions or changes to the contents of this MIB
+         module require Designated Expert Review as defined in
+         the Guidelines for Writing IANA Considerations Section
+         document. The Designated Expert will be selected by
+         the IESG Area Director of the OPS Area.
+         
+         Note, this module does not have to register all possible
+         languages since languages are identified by object
+         identifier values. It is therefore possible to registered 
+         languages in private OID trees. The references given below are not
+         normative with regard to the language version. Other
+         references might be better suited to describe some newer 
+         versions of this language. The references are only
+         provided as `a pointer into the right direction'."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2000-05-10"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Import mib-2 instead of experimental, so that
+            this module compiles"</span>;
+      }
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"1999-09-09"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Initial version as published at time of
+            publication of RFC 2591."</span>;
+      }
+
+   }  <span class="yang_cmt">// module IANA-LANGUAGE-MIB</span>
+</pre>
+</div>
+</div>

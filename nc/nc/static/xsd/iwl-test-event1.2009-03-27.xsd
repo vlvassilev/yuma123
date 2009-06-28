@@ -1,0 +1,973 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="http://www.iwl.com/netconf/ns/iwl-test-event1"
+   targetNamespace="http://www.iwl.com/netconf/ns/iwl-test-event1"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2009-03-27"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'iwl-test-event1.yang' by yangdump version 0.9.4
+         
+         Module: iwl-test-event1
+         Organization: Interworking Labs, Inc.
+         Version: 2009-03-27
+         Contact: Andy Bierman
+      </xs:documentation>
+      <xs:documentation>
+         YANG test module for IWL NETCONF Event 1
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/iwl-test-event1.yang
+         </ncx:source>
+         <ncx:organization>
+            Interworking Labs, Inc.
+         </ncx:organization>
+         <ncx:contact>Andy Bierman</ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2009-03-27</ncx:version>
+            <ncx:description>Initial version.</ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:group name="Leafs.1">
+      <xs:sequence>
+         <xs:element name="binary.1" type="xs:base64Binary"
+            minOccurs="0"/>
+         <xs:element name="bits.1" minOccurs="0">
+            <xs:simpleType>
+               <xs:list>
+                  <xs:simpleType>
+                     <xs:restriction base="xs:string">
+                        <xs:enumeration value="zero">
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:position>0</ncx:position>
+                              </xs:appinfo>
+                           </xs:annotation>
+                        </xs:enumeration>
+                        <xs:enumeration value="one">
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:position>1</ncx:position>
+                              </xs:appinfo>
+                           </xs:annotation>
+                        </xs:enumeration>
+                        <xs:enumeration value="two">
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:position>2</ncx:position>
+                              </xs:appinfo>
+                           </xs:annotation>
+                        </xs:enumeration>
+                        <xs:enumeration value="ten">
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:position>10</ncx:position>
+                              </xs:appinfo>
+                           </xs:annotation>
+                        </xs:enumeration>
+                        <xs:enumeration value="last">
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:position>3</ncx:position>
+                              </xs:appinfo>
+                           </xs:annotation>
+                        </xs:enumeration>
+                     </xs:restriction>
+                  </xs:simpleType>
+               </xs:list>
+            </xs:simpleType>
+         </xs:element>
+         <xs:element name="boolean.1" type="xs:boolean" minOccurs="0"/>
+         <xs:element name="empty.1" minOccurs="0"/>
+         <xs:element name="enumeration.1" minOccurs="0">
+            <xs:simpleType>
+               <xs:restriction base="xs:string">
+                  <xs:enumeration value="red">
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:value>5</ncx:value>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:enumeration>
+                  <xs:enumeration value="green">
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:value>9</ncx:value>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:enumeration>
+                  <xs:enumeration value="blue">
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:value>11</ncx:value>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:enumeration>
+                  <xs:enumeration value="deep purple">
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:value>17</ncx:value>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:enumeration>
+               </xs:restriction>
+            </xs:simpleType>
+         </xs:element>
+         <xs:element name="identityref.1" type="xs:QName" minOccurs="0"/>
+         <xs:element name="instance-identifier.1" type="xs:string"
+            minOccurs="0"/>
+         <xs:element name="instance-identifier.2" type="xs:string"
+            minOccurs="0"/>
+         <xs:element name="int8.1" type="xs:byte" minOccurs="0"/>
+         <xs:element name="int16.1" type="xs:short" minOccurs="0"/>
+         <xs:element name="int32.1" type="xs:int" minOccurs="0"/>
+         <xs:element name="int64.1" type="xs:long" minOccurs="0"/>
+         <xs:element name="leafref.1" type="xs:string" minOccurs="0"/>
+         <xs:element name="leafref.2" type="xs:string" minOccurs="0"/>
+         <xs:element name="string.1" type="xs:string" minOccurs="0"/>
+         <xs:element name="uint8.1" type="xs:unsignedByte"
+            minOccurs="0"/>
+         <xs:element name="uint16.1" type="xs:unsignedShort"
+            minOccurs="0"/>
+         <xs:element name="uint32.1" type="xs:unsignedInt"
+            minOccurs="0"/>
+         <xs:element name="uint64.1" type="xs:unsignedLong"
+            minOccurs="0"/>
+         <xs:element name="dec64.1" type="xs:long" minOccurs="0"/>
+         <xs:element name="dec64.2" minOccurs="0">
+            <xs:simpleType>
+               <xs:union>
+                  <xs:simpleType>
+                     <xs:restriction base="xs:long">
+                        <xs:minInclusive value="0.0"/>
+                        <xs:maxInclusive value="3.00"/>
+                     </xs:restriction>
+                  </xs:simpleType>
+                  <xs:simpleType>
+                     <xs:restriction base="xs:long">
+                        <xs:minInclusive value="9.00"/>
+                     </xs:restriction>
+                  </xs:simpleType>
+               </xs:union>
+            </xs:simpleType>
+         </xs:element>
+         <xs:element name="dec64.3" minOccurs="0">
+            <xs:simpleType>
+               <xs:restriction base="xs:long">
+                  <xs:minInclusive value="3.123456700000000000"/>
+               </xs:restriction>
+            </xs:simpleType>
+         </xs:element>
+         <xs:element name="union.1" minOccurs="0"/>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:element name="binary.1" type="xs:base64Binary" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="bits.1" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+         <xs:list>
+            <xs:simpleType>
+               <xs:restriction base="xs:string">
+                  <xs:enumeration value="zero">
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:position>0</ncx:position>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:enumeration>
+                  <xs:enumeration value="one">
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:position>1</ncx:position>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:enumeration>
+                  <xs:enumeration value="two">
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:position>2</ncx:position>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:enumeration>
+                  <xs:enumeration value="ten">
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:position>10</ncx:position>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:enumeration>
+                  <xs:enumeration value="last">
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:position>3</ncx:position>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:enumeration>
+               </xs:restriction>
+            </xs:simpleType>
+         </xs:list>
+      </xs:simpleType>
+   </xs:element>
+
+   <xs:element name="boolean.1" type="xs:boolean" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="empty.1" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="enumeration.1" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+         <xs:restriction base="xs:string">
+            <xs:enumeration value="red">
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:value>5</ncx:value>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="green">
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:value>9</ncx:value>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="blue">
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:value>11</ncx:value>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="deep purple">
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:value>17</ncx:value>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:enumeration>
+         </xs:restriction>
+      </xs:simpleType>
+   </xs:element>
+
+   <xs:element name="identityref.1" type="xs:QName" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="instance-identifier.1" type="xs:string"
+      minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="instance-identifier.2" type="xs:string"
+      minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="int8.1" type="xs:byte" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="int16.1" type="xs:short" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="int32.1" type="xs:int" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="int64.1" type="xs:long" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="leafref.1" type="xs:string" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="leafref.2" type="xs:string" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="string.1" type="xs:string" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="uint8.1" type="xs:unsignedByte" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="uint16.1" type="xs:unsignedShort" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="uint32.1" type="xs:unsignedInt" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="uint64.1" type="xs:unsignedLong" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="dec64.1" type="xs:long" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="dec64.2" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+         <xs:union>
+            <xs:simpleType>
+               <xs:restriction base="xs:long">
+                  <xs:minInclusive value="0.0"/>
+                  <xs:maxInclusive value="3.00"/>
+               </xs:restriction>
+            </xs:simpleType>
+            <xs:simpleType>
+               <xs:restriction base="xs:long">
+                  <xs:minInclusive value="9.00"/>
+               </xs:restriction>
+            </xs:simpleType>
+         </xs:union>
+      </xs:simpleType>
+   </xs:element>
+
+   <xs:element name="dec64.3" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+         <xs:restriction base="xs:long">
+            <xs:minInclusive value="3.123456700000000000"/>
+         </xs:restriction>
+      </xs:simpleType>
+   </xs:element>
+
+   <xs:element name="union.1" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+         <xs:union>
+            <xs:simpleType>
+               <xs:restriction base="xs:byte"/>
+            </xs:simpleType>
+            <xs:simpleType>
+               <xs:restriction base="xs:base64Binary"/>
+            </xs:simpleType>
+            <xs:simpleType>
+               <xs:restriction base="xs:string"/>
+            </xs:simpleType>
+            <xs:simpleType>
+               <xs:union>
+                  <xs:simpleType>
+                     <xs:restriction base="xs:boolean"/>
+                  </xs:simpleType>
+                  <xs:simpleType>
+                     <xs:restriction base="xs:unsignedLong"/>
+                  </xs:simpleType>
+               </xs:union>
+            </xs:simpleType>
+         </xs:union>
+      </xs:simpleType>
+   </xs:element>
+
+   <xs:element name="container.1">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="binary.1" type="xs:base64Binary"
+               minOccurs="0"/>
+            <xs:element name="bits.1" minOccurs="0">
+               <xs:simpleType>
+                  <xs:list>
+                     <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                           <xs:enumeration value="zero">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:position>0</ncx:position>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="one">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:position>1</ncx:position>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="two">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:position>2</ncx:position>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="ten">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:position>10</ncx:position>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="last">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:position>3</ncx:position>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                        </xs:restriction>
+                     </xs:simpleType>
+                  </xs:list>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="boolean.1" type="xs:boolean"
+               minOccurs="0"/>
+            <xs:element name="empty.1" minOccurs="0"/>
+            <xs:element name="enumeration.1" minOccurs="0">
+               <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                     <xs:enumeration value="red">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:value>5</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                     <xs:enumeration value="green">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:value>9</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                     <xs:enumeration value="blue">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:value>11</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                     <xs:enumeration value="deep purple">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:value>17</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                  </xs:restriction>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="identityref.1" type="xs:QName"
+               minOccurs="0"/>
+            <xs:element name="instance-identifier.1" type="xs:string"
+               minOccurs="0"/>
+            <xs:element name="instance-identifier.2" type="xs:string"
+               minOccurs="0"/>
+            <xs:element name="int8.1" type="xs:byte" minOccurs="0"/>
+            <xs:element name="int16.1" type="xs:short" minOccurs="0"/>
+            <xs:element name="int32.1" type="xs:int" minOccurs="0"/>
+            <xs:element name="int64.1" type="xs:long" minOccurs="0"/>
+            <xs:element name="leafref.1" type="xs:string" minOccurs="0"/>
+            <xs:element name="leafref.2" type="xs:string" minOccurs="0"/>
+            <xs:element name="string.1" type="xs:string" minOccurs="0"/>
+            <xs:element name="uint8.1" type="xs:unsignedByte"
+               minOccurs="0"/>
+            <xs:element name="uint16.1" type="xs:unsignedShort"
+               minOccurs="0"/>
+            <xs:element name="uint32.1" type="xs:unsignedInt"
+               minOccurs="0"/>
+            <xs:element name="uint64.1" type="xs:unsignedLong"
+               minOccurs="0"/>
+            <xs:element name="dec64.1" type="xs:long" minOccurs="0"/>
+            <xs:element name="dec64.2" minOccurs="0">
+               <xs:simpleType>
+                  <xs:union>
+                     <xs:simpleType>
+                        <xs:restriction base="xs:long">
+                           <xs:minInclusive value="0.0"/>
+                           <xs:maxInclusive value="3.00"/>
+                        </xs:restriction>
+                     </xs:simpleType>
+                     <xs:simpleType>
+                        <xs:restriction base="xs:long">
+                           <xs:minInclusive value="9.00"/>
+                        </xs:restriction>
+                     </xs:simpleType>
+                  </xs:union>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="dec64.3" minOccurs="0">
+               <xs:simpleType>
+                  <xs:restriction base="xs:long">
+                     <xs:minInclusive value="3.123456700000000000"/>
+                  </xs:restriction>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="union.1" minOccurs="0"/>
+            <xs:element name="__.container.1.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="container.2">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <ncx:presence>
+               this is a presence container
+            </ncx:presence>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="binary.1" type="xs:base64Binary"
+               minOccurs="0"/>
+            <xs:element name="bits.1" minOccurs="0">
+               <xs:simpleType>
+                  <xs:list>
+                     <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                           <xs:enumeration value="zero">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:position>0</ncx:position>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="one">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:position>1</ncx:position>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="two">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:position>2</ncx:position>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="ten">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:position>10</ncx:position>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="last">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:position>3</ncx:position>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                        </xs:restriction>
+                     </xs:simpleType>
+                  </xs:list>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="boolean.1" type="xs:boolean"
+               minOccurs="0"/>
+            <xs:element name="empty.1" minOccurs="0"/>
+            <xs:element name="enumeration.1" minOccurs="0">
+               <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                     <xs:enumeration value="red">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:value>5</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                     <xs:enumeration value="green">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:value>9</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                     <xs:enumeration value="blue">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:value>11</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                     <xs:enumeration value="deep purple">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:value>17</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                  </xs:restriction>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="identityref.1" type="xs:QName"
+               minOccurs="0"/>
+            <xs:element name="instance-identifier.1" type="xs:string"
+               minOccurs="0"/>
+            <xs:element name="instance-identifier.2" type="xs:string"
+               minOccurs="0"/>
+            <xs:element name="int8.1" type="xs:byte" minOccurs="0"/>
+            <xs:element name="int16.1" type="xs:short" minOccurs="0"/>
+            <xs:element name="int32.1" type="xs:int" minOccurs="0"/>
+            <xs:element name="int64.1" type="xs:long" minOccurs="0"/>
+            <xs:element name="leafref.1" type="xs:string" minOccurs="0"/>
+            <xs:element name="leafref.2" type="xs:string" minOccurs="0"/>
+            <xs:element name="string.1" type="xs:string" minOccurs="0"/>
+            <xs:element name="uint8.1" type="xs:unsignedByte"
+               minOccurs="0"/>
+            <xs:element name="uint16.1" type="xs:unsignedShort"
+               minOccurs="0"/>
+            <xs:element name="uint32.1" type="xs:unsignedInt"
+               minOccurs="0"/>
+            <xs:element name="uint64.1" type="xs:unsignedLong"
+               minOccurs="0"/>
+            <xs:element name="dec64.1" type="xs:long" minOccurs="0"/>
+            <xs:element name="dec64.2" minOccurs="0">
+               <xs:simpleType>
+                  <xs:union>
+                     <xs:simpleType>
+                        <xs:restriction base="xs:long">
+                           <xs:minInclusive value="0.0"/>
+                           <xs:maxInclusive value="3.00"/>
+                        </xs:restriction>
+                     </xs:simpleType>
+                     <xs:simpleType>
+                        <xs:restriction base="xs:long">
+                           <xs:minInclusive value="9.00"/>
+                        </xs:restriction>
+                     </xs:simpleType>
+                  </xs:union>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="dec64.3" minOccurs="0">
+               <xs:simpleType>
+                  <xs:restriction base="xs:long">
+                     <xs:minInclusive value="3.123456700000000000"/>
+                  </xs:restriction>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="union.1" minOccurs="0"/>
+            <xs:element name="__.container.2.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="list.1" minOccurs="0" maxOccurs="unbounded">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <ncx:ordered-by>system</ncx:ordered-by>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="string.1" type="xs:string"/>
+            <xs:element name="uint32.1" type="xs:unsignedInt"/>
+            <xs:element name="binary.1" type="xs:base64Binary"
+               minOccurs="0"/>
+            <xs:element name="bits.1" minOccurs="0">
+               <xs:simpleType>
+                  <xs:list>
+                     <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                           <xs:enumeration value="zero">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:position>0</ncx:position>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="one">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:position>1</ncx:position>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="two">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:position>2</ncx:position>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="ten">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:position>10</ncx:position>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="last">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:position>3</ncx:position>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                        </xs:restriction>
+                     </xs:simpleType>
+                  </xs:list>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="boolean.1" type="xs:boolean"
+               minOccurs="0"/>
+            <xs:element name="empty.1" minOccurs="0"/>
+            <xs:element name="enumeration.1" minOccurs="0">
+               <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                     <xs:enumeration value="red">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:value>5</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                     <xs:enumeration value="green">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:value>9</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                     <xs:enumeration value="blue">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:value>11</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                     <xs:enumeration value="deep purple">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:value>17</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                  </xs:restriction>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="identityref.1" type="xs:QName"
+               minOccurs="0"/>
+            <xs:element name="instance-identifier.1" type="xs:string"
+               minOccurs="0"/>
+            <xs:element name="instance-identifier.2" type="xs:string"
+               minOccurs="0"/>
+            <xs:element name="int8.1" type="xs:byte" minOccurs="0"/>
+            <xs:element name="int16.1" type="xs:short" minOccurs="0"/>
+            <xs:element name="int32.1" type="xs:int" minOccurs="0"/>
+            <xs:element name="int64.1" type="xs:long" minOccurs="0"/>
+            <xs:element name="leafref.1" type="xs:string" minOccurs="0"/>
+            <xs:element name="leafref.2" type="xs:string" minOccurs="0"/>
+            <xs:element name="uint8.1" type="xs:unsignedByte"
+               minOccurs="0"/>
+            <xs:element name="uint16.1" type="xs:unsignedShort"
+               minOccurs="0"/>
+            <xs:element name="uint64.1" type="xs:unsignedLong"
+               minOccurs="0"/>
+            <xs:element name="dec64.1" type="xs:long" minOccurs="0"/>
+            <xs:element name="dec64.2" minOccurs="0">
+               <xs:simpleType>
+                  <xs:union>
+                     <xs:simpleType>
+                        <xs:restriction base="xs:long">
+                           <xs:minInclusive value="0.0"/>
+                           <xs:maxInclusive value="3.00"/>
+                        </xs:restriction>
+                     </xs:simpleType>
+                     <xs:simpleType>
+                        <xs:restriction base="xs:long">
+                           <xs:minInclusive value="9.00"/>
+                        </xs:restriction>
+                     </xs:simpleType>
+                  </xs:union>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="dec64.3" minOccurs="0">
+               <xs:simpleType>
+                  <xs:restriction base="xs:long">
+                     <xs:minInclusive value="3.123456700000000000"/>
+                  </xs:restriction>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="union.1" minOccurs="0"/>
+            <xs:element name="__.list.1.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+      <xs:key name="list.1_Key">
+         <xs:selector xpath="."/>
+         <xs:field xpath="string.1"/>
+         <xs:field xpath="uint32.1"/>
+      </xs:key>
+   </xs:element>
+
+   <xs:choice>
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:choice-name>choice.1</ncx:choice-name>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:sequence>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:case-name>case.1.1</ncx:case-name>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:element name="a" type="xs:string" minOccurs="0"/>
+         <xs:element name="b" type="xs:string">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:mandatory>true</ncx:mandatory>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:element>
+         <xs:element name="__.choice.1.case.1.1.A__" minOccurs="0"
+            maxOccurs="unbounded" abstract="true"/>
+      </xs:sequence>
+      <xs:sequence>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:case-name>c</ncx:case-name>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:element name="c" type="xs:string">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:mandatory>true</ncx:mandatory>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:element>
+         <xs:element name="__.choice.1.c.A__" minOccurs="0"
+            maxOccurs="unbounded" abstract="true"/>
+      </xs:sequence>
+      <xs:sequence>
+         <xs:annotation>
+            <xs:appinfo>
+               <ncx:case-name>d</ncx:case-name>
+            </xs:appinfo>
+         </xs:annotation>
+         <xs:element name="d" type="xs:base64Binary" minOccurs="0"/>
+         <xs:element name="__.choice.1.d.A__" minOccurs="0"
+            maxOccurs="unbounded" abstract="true"/>
+      </xs:sequence>
+      <xs:element name="__.choice.1.A__" minOccurs="0"
+         maxOccurs="unbounded" abstract="true"/>
+   </xs:choice>
+
+</xs:schema>

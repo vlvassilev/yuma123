@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="urn:ietf:params:xml:ns:yang:test5"
+   targetNamespace="urn:ietf:params:xml:ns:yang:test5"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2008-11-20"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'test5.yang' by yangdump version 0.9.4
+         
+         Module: test5
+         Version: 2008-11-20
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/test/test5.yang
+         </ncx:source>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2008-11-20</ncx:version>
+            <ncx:description>Initial revision.</ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:element name="test5">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="a" minOccurs="0" maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="g1" type="xs:string"/>
+                     <xs:element name="g2" type="xs:string"
+                        minOccurs="0"/>
+                     <xs:element name="__.test5.a.A__" minOccurs="0"
+                        maxOccurs="unbounded" abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="a_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="g1"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="__.test5.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

@@ -1,0 +1,209 @@
+
+<div>
+   <h1 class="yang">ietf-netconf-partial-lock.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#lock-id-type.28">lock-id-type</a></li>
+         </ul>
+      </li>
+      <li><a href="#">RPC&nbsp;Methods</a>
+         <ul>
+            <li class="daddy"><a href="#partial-lock.36">partial-lock</a>
+               <ul>
+                  <li class="daddy"><a href="#input.39">input</a>
+                     <ul>
+                        <li class="daddy"><a href="#target.40">target</a>
+                           <ul>
+                              <li><a href="#datastore.45">datastore</a></li>
+                           </ul>
+                        </li>
+                        <li><a href="#select.51">select</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#output.63">output</a>
+                     <ul>
+                        <li><a href="#lock-id.64">lock-id</a></li>
+                        <li class="daddy"><a href="#running.70">running</a>
+                           <ul>
+                              <li><a href="#locked-node.71">locked-node</a></li>
+                           </ul>
+                        </li>
+                        <li class="daddy"><a href="#candidate.78">candidate</a>
+                           <ul>
+                              <li><a href="#locked-node.79">locked-node</a></li>
+                           </ul>
+                        </li>
+                        <li class="daddy"><a href="#startup.86">startup</a>
+                           <ul>
+                              <li><a href="#locked-node.87">locked-node</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#partial-unlock.97">partial-unlock</a>
+               <ul>
+                  <li class="daddy"><a href="#input.101">input</a>
+                     <ul>
+                        <li><a href="#lock-id.102">lock-id</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="#output.97">output</a></li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">ietf-netconf-partial-lock</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:netconf:partial-lock:1.0"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"pl"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/ncx">ncx</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"ncx"</span>;
+      }
+
+      <span class="yang_kw">organization</span>
+         <span class="yang_str">"IETF Network Configuration (netconf) Working Group"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"Netconf Working Group
+         Mailing list: netconf@ietf.org
+         Web: http://www.ietf.org/html.charters/netconf-charter.html
+         
+         Balazs Lengyel
+         Ericsson
+         balazs.lengyel@ericsson.com"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"This YANG module defines the &lt;partial-lock&gt; and
+         &lt;partial-unlock&gt; operations."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2009-02-19"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Initial version, published as RFC yyyy."</span>;
+      }
+
+
+      <a name="lock-id-type.28"></a><span class="yang_kw">typedef</span> <span class="yang_id">lock-id-type</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"A number identifying a specific partial-lock granted to a session.
+            It is allocated by the system, and SHOULD be used in the
+            partial-unlock operation."</span>;
+      }
+
+      <a name="partial-lock.36"></a><span class="yang_kw">rpc</span> <span class="yang_id">partial-lock</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"A NETCONF operation that locks part of one or more datastores."</span>;
+         <a name="input.39"></a><span class="yang_kw">input</span> {
+            <a name="target.40"></a><span class="yang_kw">list</span> <span class="yang_id">target</span> {
+               <span class="yang_kw">min-elements</span> <span class="yang_str">"1"</span>;
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A list of one or more datastore names.
+                  Each list entry must contain a different datastore name."</span>;
+               <a name="datastore.45"></a><span class="yang_kw">choice</span> <span class="yang_id">datastore</span> {
+                  <a name="running.46"></a><span class="yang_kw">case</span> <span class="yang_id">running</span> {
+                     <a name="running.46"></a><span class="yang_kw">leaf</span> <span class="yang_id">running</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
+                     }
+                  }  <span class="yang_cmt">// case running</span>
+
+                  <a name="candidate.47"></a><span class="yang_kw">case</span> <span class="yang_id">candidate</span> {
+                     <a name="candidate.47"></a><span class="yang_kw">leaf</span> <span class="yang_id">candidate</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
+                     }
+                  }  <span class="yang_cmt">// case candidate</span>
+
+                  <a name="startup.48"></a><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
+                     <a name="startup.48"></a><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
+                        <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
+                     }
+                  }  <span class="yang_cmt">// case startup</span>
+               }  <span class="yang_cmt">// choice datastore</span>
+            }  <span class="yang_cmt">// list target</span>
+
+            <a name="select.51"></a><span class="yang_kw">leaf-list</span> <span class="yang_id">select</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">string</span> {
+                  <a href="/modules/ncx/2009-04-10#xpath.448">ncx:xpath</a>;
+               }
+               <span class="yang_kw">min-elements</span> <span class="yang_str">"1"</span>;
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"XPath expression that specifies the scope of the lock.
+                  An Instance Identifier expression MUST be used unless the
+                  :xpath capability is supported, in which case any XPath 1.0
+                  expression is allowed."</span>;
+            }
+         }
+
+         <a name="output.63"></a><span class="yang_kw">output</span> {
+            <a name="lock-id.64"></a><span class="yang_kw">leaf</span> <span class="yang_id">lock-id</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#lock-id-type.28">lock-id-type</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Identifies the lock, if granted. The lock-id SHOULD be
+                  used in the partial-unlock rpc."</span>;
+            }
+
+            <a name="running.70"></a><span class="yang_kw">container</span> <span class="yang_id">running</span> {
+               <a name="locked-node.71"></a><span class="yang_kw">leaf-list</span> <span class="yang_id">locked-node</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">instance-identifier</span>;
+                  <span class="yang_kw">min-elements</span> <span class="yang_str">"1"</span>;
+                  <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"List of locked nodes in the running datastore"</span>;
+               }
+            }  <span class="yang_cmt">// container running</span>
+
+            <a name="candidate.78"></a><span class="yang_kw">container</span> <span class="yang_id">candidate</span> {
+               <a name="locked-node.79"></a><span class="yang_kw">leaf-list</span> <span class="yang_id">locked-node</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">instance-identifier</span>;
+                  <span class="yang_kw">min-elements</span> <span class="yang_str">"1"</span>;
+                  <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"List of locked nodes in the candidate datastore"</span>;
+               }
+            }  <span class="yang_cmt">// container candidate</span>
+
+            <a name="startup.86"></a><span class="yang_kw">container</span> <span class="yang_id">startup</span> {
+               <a name="locked-node.87"></a><span class="yang_kw">leaf-list</span> <span class="yang_id">locked-node</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">instance-identifier</span>;
+                  <span class="yang_kw">min-elements</span> <span class="yang_str">"1"</span>;
+                  <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"List of locked nodes in the startup datastore"</span>;
+               }
+            }  <span class="yang_cmt">// container startup</span>
+         }
+      }  <span class="yang_cmt">// rpc partial-lock</span>
+
+      <a name="partial-unlock.97"></a><span class="yang_kw">rpc</span> <span class="yang_id">partial-unlock</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"A NETCONF operation that releases a previously acquired
+            partial-lock."</span>;
+         <a name="input.101"></a><span class="yang_kw">input</span> {
+            <a name="lock-id.102"></a><span class="yang_kw">leaf</span> <span class="yang_id">lock-id</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#lock-id-type.28">lock-id-type</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Identifies the lock to be released. MUST be the value
+                  received in the response to the partial-lock operation."</span>;
+            }
+         }
+      }  <span class="yang_cmt">// rpc partial-unlock</span>
+   }  <span class="yang_cmt">// module ietf-netconf-partial-lock</span>
+</pre>
+</div>
+</div>

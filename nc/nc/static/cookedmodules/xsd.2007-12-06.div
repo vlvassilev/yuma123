@@ -1,0 +1,385 @@
+
+<div>
+   <h1 class="yang">xsd.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#normalizedString.25">normalizedString</a></li>
+            <li><a href="#token.34">token</a></li>
+            <li><a href="#base64Binary.43">base64Binary</a></li>
+            <li><a href="#hexBinary.52">hexBinary</a></li>
+            <li><a href="#integer.61">integer</a></li>
+            <li><a href="#positiveInteger.75">positiveInteger</a></li>
+            <li><a href="#negativeInteger.89">negativeInteger</a></li>
+            <li><a href="#nonNegativeInteger.103">nonNegativeInteger</a></li>
+            <li><a href="#nonPositiveInteger.117">nonPositiveInteger</a></li>
+            <li><a href="#long.131">long</a></li>
+            <li><a href="#unsignedLong.140">unsignedLong</a></li>
+            <li><a href="#int.149">int</a></li>
+            <li><a href="#unsignedInt.158">unsignedInt</a></li>
+            <li><a href="#short.167">short</a></li>
+            <li><a href="#unsignedShort.176">unsignedShort</a></li>
+            <li><a href="#byte.185">byte</a></li>
+            <li><a href="#unsignedByte.194">unsignedByte</a></li>
+            <li><a href="#decimal.203">decimal</a></li>
+            <li><a href="#duration.218">duration</a></li>
+            <li><a href="#dateTime.227">dateTime</a></li>
+            <li><a href="#date.240">date</a></li>
+            <li><a href="#time.249">time</a></li>
+            <li><a href="#gYear.258">gYear</a></li>
+            <li><a href="#gYearMonth.267">gYearMonth</a></li>
+            <li><a href="#gMonth.276">gMonth</a></li>
+            <li><a href="#gMonthDay.285">gMonthDay</a></li>
+            <li><a href="#gDay.294">gDay</a></li>
+            <li><a href="#Name.303">Name</a></li>
+            <li><a href="#QName.312">QName</a></li>
+            <li><a href="#NCName.321">NCName</a></li>
+            <li><a href="#anyURI.332">anyURI</a></li>
+            <li><a href="#language.341">language</a></li>
+            <li><a href="#ID.350">ID</a></li>
+            <li><a href="#IDREF.359">IDREF</a></li>
+            <li><a href="#IDREFS.368">IDREFS</a></li>
+            <li><a href="#ENTITY.377">ENTITY</a></li>
+            <li><a href="#ENTITIES.386">ENTITIES</a></li>
+            <li><a href="#NOTATION.395">NOTATION</a></li>
+            <li><a href="#NMTOKEN.404">NMTOKEN</a></li>
+            <li><a href="#NMTOKENS.413">NMTOKENS</a></li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">xsd</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span> <span class="yang_str">"http://www.w3.org/2001/XMLSchema"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"xsd"</span>;
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"YANG Language Design Team"</span>;
+
+      <span class="yang_kw">contact</span> <span class="yang_str">"yang@ietf.org"</span>;
+
+      <span class="yang_kw">description</span> <span class="yang_str">"XSD derived types for usage in YANG."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2007-12-06"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Initial revision.  There is more work to do
+            filling in patterns for some of the string types"</span>;
+      }
+
+
+      <a name="normalizedString.25"></a><span class="yang_kw">typedef</span> <span class="yang_id">normalizedString</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD normalized string"</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#normalizedString"</span>;
+      }
+
+      <a name="token.34"></a><span class="yang_kw">typedef</span> <span class="yang_id">token</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD token string"</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#token"</span>;
+      }
+
+      <a name="base64Binary.43"></a><span class="yang_kw">typedef</span> <span class="yang_id">base64Binary</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD base64 binary encoded string"</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#base64Binary"</span>;
+      }
+
+      <a name="hexBinary.52"></a><span class="yang_kw">typedef</span> <span class="yang_id">hexBinary</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD hex binary encoded string"</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#hexBinary"</span>;
+      }
+
+      <a name="integer.61"></a><span class="yang_kw">typedef</span> <span class="yang_id">integer</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"XSD unbounded integer type. 
+            This cannot be given a range like a number.
+            This pattern does not supoort string representations
+            of numbers, such as one two three"</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#integer"</span>;
+      }
+
+      <a name="positiveInteger.75"></a><span class="yang_kw">typedef</span> <span class="yang_id">positiveInteger</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"XSD unbounded positive integer.
+            This cannot be given a range like a number.
+            This pattern does not supoort string representations
+            of numbers, such as one two three"</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#positiveInteger"</span>;
+      }
+
+      <a name="negativeInteger.89"></a><span class="yang_kw">typedef</span> <span class="yang_id">negativeInteger</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"XSD unbounded negative integer.
+            This cannot be given a range like a number.
+            This pattern does not supoort string representations
+            of numbers, such as one two three"</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#negativeInteger"</span>;
+      }
+
+      <a name="nonNegativeInteger.103"></a><span class="yang_kw">typedef</span> <span class="yang_id">nonNegativeInteger</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"XSD unbounded non-negative integer.
+            This cannot be given a range like a number.
+            This pattern does not supoort string representations
+            of numbers, such as one two three"</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#nonNegativeInteger"</span>;
+      }
+
+      <a name="nonPositiveInteger.117"></a><span class="yang_kw">typedef</span> <span class="yang_id">nonPositiveInteger</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"XSD unbounded non-positive integer.
+            This cannot be given a range like a number.
+            This pattern does not supoort string representations
+            of numbers, such as one two three"</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#nonPositiveInteger"</span>;
+      }
+
+      <a name="long.131"></a><span class="yang_kw">typedef</span> <span class="yang_id">long</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">int64</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD 64 bit signed integer."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#long"</span>;
+      }
+
+      <a name="unsignedLong.140"></a><span class="yang_kw">typedef</span> <span class="yang_id">unsignedLong</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">uint64</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD 64 bit unsigned integer."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#unsignedLong"</span>;
+      }
+
+      <a name="int.149"></a><span class="yang_kw">typedef</span> <span class="yang_id">int</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD 32 bit signed integer."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#int"</span>;
+      }
+
+      <a name="unsignedInt.158"></a><span class="yang_kw">typedef</span> <span class="yang_id">unsignedInt</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD 32 bit unsigned integer."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#unsignedInt"</span>;
+      }
+
+      <a name="short.167"></a><span class="yang_kw">typedef</span> <span class="yang_id">short</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">int16</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD 16 bit signed integer."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#short"</span>;
+      }
+
+      <a name="unsignedShort.176"></a><span class="yang_kw">typedef</span> <span class="yang_id">unsignedShort</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">uint16</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD 16 bit unsigned integer."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#unsignedShort"</span>;
+      }
+
+      <a name="byte.185"></a><span class="yang_kw">typedef</span> <span class="yang_id">byte</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">int8</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD 8 bit signed integer."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#byte"</span>;
+      }
+
+      <a name="unsignedByte.194"></a><span class="yang_kw">typedef</span> <span class="yang_id">unsignedByte</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">uint8</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD 8 bit unsigned integer."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#unsignedByte"</span>;
+      }
+
+      <a name="decimal.203"></a><span class="yang_kw">typedef</span> <span class="yang_id">decimal</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"XSD decimal data type.
+            [To do: not sure if this is a bounded real number
+             or an unbounded real number.]."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#decimal"</span>;
+      }
+
+      <a name="duration.218"></a><span class="yang_kw">typedef</span> <span class="yang_id">duration</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD duration string type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#duration"</span>;
+      }
+
+      <a name="dateTime.227"></a><span class="yang_kw">typedef</span> <span class="yang_id">dateTime</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD date and time string type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#dateTime"</span>;
+      }
+
+      <a name="date.240"></a><span class="yang_kw">typedef</span> <span class="yang_id">date</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD date string type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#date"</span>;
+      }
+
+      <a name="time.249"></a><span class="yang_kw">typedef</span> <span class="yang_id">time</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD time string type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#time"</span>;
+      }
+
+      <a name="gYear.258"></a><span class="yang_kw">typedef</span> <span class="yang_id">gYear</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD year string type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#gYear"</span>;
+      }
+
+      <a name="gYearMonth.267"></a><span class="yang_kw">typedef</span> <span class="yang_id">gYearMonth</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD year and month string type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#gYearMonth"</span>;
+      }
+
+      <a name="gMonth.276"></a><span class="yang_kw">typedef</span> <span class="yang_id">gMonth</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD month string type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#gMonth"</span>;
+      }
+
+      <a name="gMonthDay.285"></a><span class="yang_kw">typedef</span> <span class="yang_id">gMonthDay</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD month and day string type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#gMonthDay"</span>;
+      }
+
+      <a name="gDay.294"></a><span class="yang_kw">typedef</span> <span class="yang_id">gDay</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD day string type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#gDay"</span>;
+      }
+
+      <a name="Name.303"></a><span class="yang_kw">typedef</span> <span class="yang_id">Name</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD name string type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#Name"</span>;
+      }
+
+      <a name="QName.312"></a><span class="yang_kw">typedef</span> <span class="yang_id">QName</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"XSD namespace-qualified name string type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#QName"</span>;
+      }
+
+      <a name="NCName.321"></a><span class="yang_kw">typedef</span> <span class="yang_id">NCName</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"XSD not-namespace-qualified name string type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#NCName"</span>;
+      }
+
+      <a name="anyURI.332"></a><span class="yang_kw">typedef</span> <span class="yang_id">anyURI</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"XSD universal resource identifier string type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#anyURI"</span>;
+      }
+
+      <a name="language.341"></a><span class="yang_kw">typedef</span> <span class="yang_id">language</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD language identifier string type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#language"</span>;
+      }
+
+      <a name="ID.350"></a><span class="yang_kw">typedef</span> <span class="yang_id">ID</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD ID attribute type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#ID"</span>;
+      }
+
+      <a name="IDREF.359"></a><span class="yang_kw">typedef</span> <span class="yang_id">IDREF</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD IDREF attribute type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#IDREF"</span>;
+      }
+
+      <a name="IDREFS.368"></a><span class="yang_kw">typedef</span> <span class="yang_id">IDREFS</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD IDREFS attribute type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#IDREFS"</span>;
+      }
+
+      <a name="ENTITY.377"></a><span class="yang_kw">typedef</span> <span class="yang_id">ENTITY</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD ENTITY attribute type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#ENTITY"</span>;
+      }
+
+      <a name="ENTITIES.386"></a><span class="yang_kw">typedef</span> <span class="yang_id">ENTITIES</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD ENTITIES attribute type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#ENTITIES"</span>;
+      }
+
+      <a name="NOTATION.395"></a><span class="yang_kw">typedef</span> <span class="yang_id">NOTATION</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD NOTATION attribute type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#NOTATION"</span>;
+      }
+
+      <a name="NMTOKEN.404"></a><span class="yang_kw">typedef</span> <span class="yang_id">NMTOKEN</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD NMTOKEN attribute type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#NMTOKEN"</span>;
+      }
+
+      <a name="NMTOKENS.413"></a><span class="yang_kw">typedef</span> <span class="yang_id">NMTOKENS</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"XSD NMTOKENS attribute type."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"http://www.w3.org/TR/2004/REC-xmlschema-2-20041028/datatypes.html#NMTOKENS"</span>;
+      }
+   }  <span class="yang_cmt">// module xsd</span>
+</pre>
+</div>
+</div>

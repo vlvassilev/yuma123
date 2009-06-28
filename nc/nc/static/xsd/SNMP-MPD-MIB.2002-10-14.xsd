@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="urn:ietf:params:xml:ns:yang:smiv2:SNMP-MPD-MIB"
+   targetNamespace="urn:ietf:params:xml:ns:yang:smiv2:SNMP-MPD-MIB"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2002-10-14"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+   xmlns:smi="urn:ietf:params:xml:ns:yang:yang-smi"
+   xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'SNMP-MPD-MIB.yang' by yangdump version 0.9.4
+         
+         Module: SNMP-MPD-MIB
+         Organization: SNMPv3 Working Group
+         Version: 2002-10-14
+         Contact: WG-EMail:   snmpv3@lists.tislabs.com
+         Subscribe:  snmpv3-request@lists.tislabs.com
+         
+         Co-Chair:   Russ Mundy
+         	    Network Associates Laboratories
+         postal:     15204 Omega Drive, Suite 300
+         	    Rockville, MD 20850-4601
+         	    USA
+         
+         EMail:      mundy@tislabs.com
+         phone:      +1 301-947-7107
+         
+         Co-Chair &amp;
+         Co-editor:  David Harrington
+         	    Enterasys Networks
+         postal:     35 Industrial Way
+         	    P. O. Box 5005
+         	    Rochester NH 03866-5005
+         	    USA
+         EMail:      dbh@enterasys.com
+         phone:      +1 603-337-2614
+         
+         Co-editor:  Jeffrey Case
+         	    SNMP Research, Inc.
+         postal:     3001 Kimberlin Heights Road
+         	    Knoxville, TN 37920-9716
+         	    USA
+         EMail:      case@snmp.com
+         phone:      +1 423-573-1434
+         
+         Co-editor:  Randy Presuhn
+         	    BMC Software, Inc.
+         postal:     2141 North First Street
+         	    San Jose, CA 95131
+         	    USA
+         EMail:      randy_presuhn@bmc.com
+         phone:      +1 408-546-1006
+         
+         Co-editor:  Bert Wijnen
+         	    Lucent Technologies
+         postal:     Schagen 33
+         	    3461 GL Linschoten
+         	    Netherlands
+         EMail:      bwijnen@lucent.com
+         phone:      +31 348-680-485
+      </xs:documentation>
+      <xs:documentation>
+         The MIB for Message Processing and Dispatching
+         
+         Copyright (C) The Internet Society (2002). This
+         version of this MIB module is part of RFC 3412;
+         see the RFC itself for full legal notices.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/ietf/SNMP-MPD-MIB.yang
+         </ncx:source>
+         <ncx:organization>SNMPv3 Working Group</ncx:organization>
+         <ncx:contact>
+            WG-EMail:   snmpv3@lists.tislabs.com
+            Subscribe:  snmpv3-request@lists.tislabs.com
+            
+            Co-Chair:   Russ Mundy
+            	    Network Associates Laboratories
+            postal:     15204 Omega Drive, Suite 300
+            	    Rockville, MD 20850-4601
+            	    USA
+            
+            EMail:      mundy@tislabs.com
+            phone:      +1 301-947-7107
+            
+            Co-Chair &amp;
+            Co-editor:  David Harrington
+            	    Enterasys Networks
+            postal:     35 Industrial Way
+            	    P. O. Box 5005
+            	    Rochester NH 03866-5005
+            	    USA
+            EMail:      dbh@enterasys.com
+            phone:      +1 603-337-2614
+            
+            Co-editor:  Jeffrey Case
+            	    SNMP Research, Inc.
+            postal:     3001 Kimberlin Heights Road
+            	    Knoxville, TN 37920-9716
+            	    USA
+            EMail:      case@snmp.com
+            phone:      +1 423-573-1434
+            
+            Co-editor:  Randy Presuhn
+            	    BMC Software, Inc.
+            postal:     2141 North First Street
+            	    San Jose, CA 95131
+            	    USA
+            EMail:      randy_presuhn@bmc.com
+            phone:      +1 408-546-1006
+            
+            Co-editor:  Bert Wijnen
+            	    Lucent Technologies
+            postal:     Schagen 33
+            	    3461 GL Linschoten
+            	    Netherlands
+            EMail:      bwijnen@lucent.com
+            phone:      +31 348-680-485
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2002-10-14</ncx:version>
+            <ncx:description>
+               Updated addresses, published as RFC 3412.
+            </ncx:description>
+         </ncx:revision>
+         <ncx:revision>
+            <ncx:version>1999-05-04</ncx:version>
+            <ncx:description>
+               Updated addresses, published as RFC 2572.
+            </ncx:description>
+         </ncx:revision>
+         <ncx:revision>
+            <ncx:version>1997-09-30</ncx:version>
+            <ncx:description>
+               Original version, published as RFC 2272.
+            </ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:element name="snmpMPDStats">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <smi:oid  smi:oid="1.3.6.1.6.3.11.2.1"/>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="snmpUnknownSecurityModels"
+               type="yang:counter32" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The total number of packets received by the SNMP
+                     engine which were dropped because they referenced a
+                     securityModel that was not known to or supported by
+                     the SNMP engine.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.6.3.11.2.1.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="snmpInvalidMsgs" type="yang:counter32"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The total number of packets received by the SNMP
+                     engine which were dropped because there were invalid
+                     or inconsistent components in the SNMP message.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.6.3.11.2.1.2"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="snmpUnknownPDUHandlers"
+               type="yang:counter32" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The total number of packets received by the SNMP
+                     engine which were dropped because the PDU contained
+                     in the packet could not be passed to an application
+                     responsible for handling the pduType, e.g. no SNMP
+                     application had registered for the proper
+                     combination of the contextEngineID and the pduType.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.6.3.11.2.1.3"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="__.snmpMPDStats.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

@@ -1,0 +1,64 @@
+module sessions {
+
+  namespace "http://netconfcentral.com/ns/sessions";
+
+  prefix "ses";
+
+  organization  "Netconf Central";
+
+  contact
+    "Andy Bierman <andy@netconfcentral.com>";
+
+  description
+    "This module contains objects for monitoring NETCONF
+     session statistics and state info.";
+
+  revision 2008-04-17 {
+    description 
+       "Remove NCX version and rename ysessions to sessions.";
+  }
+
+  revision 2007-11-20 {
+    description 
+       "Initial revision, converted from sessions.ncx.";
+  }
+
+  // Types
+
+  typedef UserName {
+    description "NETCONF Session User name string";
+    type string { 
+      length "1..63";
+      pattern '[a-z,A-Z][a-z,A-Z,0-9,\-,_]*';
+    }
+  }
+
+/*       
+  container sessionInfo {
+      description
+        "Read-only Session Statistics and Information";
+      config false;
+      status current;
+      
+      leaf activeSessions {
+        description
+          "Current number of open NETCONF sessions.";
+        type yang:zero-based-counter32;
+      }
+
+      leaf closedSessions {
+        description
+          "Total number of closed NETCONF sessions.";
+        type yang:zero-based-counter32;
+      }
+
+      leaf failedSessions {
+        description
+          "Total number of failed NETCONF sessions, which
+           failed to be established for any reason.";
+        type yang:zero-based-counter32;
+      }
+  }
+*/
+
+}

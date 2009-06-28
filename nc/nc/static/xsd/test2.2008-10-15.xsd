@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="urn:ietf:params:xml:ns:yang:test2"
+   targetNamespace="urn:ietf:params:xml:ns:yang:test2"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2008-10-15"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+   xmlns:t1="urn:ietf:params:xml:ns:yang:test1">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'test2.yang' by yangdump version 0.9.4
+         
+         Module: test2
+         Version: 2008-10-15
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/test/test2.yang
+         </ncx:source>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2008-10-15</ncx:version>
+            <ncx:description>Initial revision.</ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:simpleType name="XX">
+      <xs:restriction base="xs:string">
+         <xs:pattern value="a*"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="YY">
+      <xs:restriction>
+         <xs:simpleType>
+            <xs:restriction base="xs:string">
+               <xs:pattern value="b*"/>
+            </xs:restriction>
+         </xs:simpleType>
+         <xs:pattern value="b7*"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="ZZ">
+      <xs:restriction>
+         <xs:simpleType>
+            <xs:restriction base="YY">
+               <xs:pattern value="b7b*"/>
+            </xs:restriction>
+         </xs:simpleType>
+         <xs:pattern value="b7b7*"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="ZZZ">
+      <xs:restriction>
+         <xs:simpleType>
+            <xs:restriction base="t1:AA">
+               <xs:pattern value="b7b*"/>
+            </xs:restriction>
+         </xs:simpleType>
+         <xs:pattern value="b7b7*"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:element name="a" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+         <xs:restriction base="xs:int">
+            <xs:minInclusive value="2"/>
+            <xs:maxInclusive value="12"/>
+         </xs:restriction>
+      </xs:simpleType>
+   </xs:element>
+
+   <xs:element name="b" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+         <xs:restriction base="xs:string">
+            <xs:pattern value="1-9[0-9]*">
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:error-app-tag>error-test 2, leaf b
+                     </ncx:error-app-tag>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:pattern>
+            <xs:minLength value="1"/>
+            <xs:maxLength value="10"/>
+         </xs:restriction>
+      </xs:simpleType>
+   </xs:element>
+
+   <xs:element name="c" minOccurs="0">
+      <xs:annotation>
+         <xs:documentation>
+            Only 5151 should pass the AND pattern test
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+         <xs:restriction>
+            <xs:simpleType>
+               <xs:restriction>
+                  <xs:simpleType>
+                     <xs:restriction base="xs:string">
+                        <xs:pattern value="1-9[0-9]*">
+                           <xs:annotation>
+                              <xs:appinfo>
+                                 <ncx:error-message>error-test 2, leaf c
+                                 </ncx:error-message>
+                              </xs:appinfo>
+                           </xs:annotation>
+                        </xs:pattern>
+                     </xs:restriction>
+                  </xs:simpleType>
+                  <xs:pattern value="51*"/>
+               </xs:restriction>
+            </xs:simpleType>
+            <xs:pattern value="[1-9]{4}"/>
+            <xs:minLength value="1"/>
+            <xs:maxLength value="10"/>
+         </xs:restriction>
+      </xs:simpleType>
+   </xs:element>
+
+</xs:schema>

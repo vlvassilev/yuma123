@@ -1,0 +1,2 @@
+db_module=nc.model
+history_dir=$base/nc/sqlobject-history

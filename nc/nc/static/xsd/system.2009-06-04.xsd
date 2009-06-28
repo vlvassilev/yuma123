@@ -1,0 +1,593 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="http://netconfcentral.com/ns/system"
+   targetNamespace="http://netconfcentral.com/ns/system"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2009-06-04"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+   xmlns:ncn="urn:ietf:params:xml:ns:netconf:notification:1.0"
+   xmlns:inet="urn:ietf:params:xml:ns:yang:inet-types"
+   xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'system.yang' by yangdump version 0.9.4
+         
+         Module: system
+         Organization: Netconf Central
+         Version: 2009-06-04
+         Contact: Andy Bierman &lt;andy@netconfcentral.com&gt;.
+      </xs:documentation>
+      <xs:documentation>
+         NETCONF Basic System Group.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/netconfcentral/system.yang
+         </ncx:source>
+         <ncx:organization>Netconf Central</ncx:organization>
+         <ncx:contact>
+            Andy Bierman &lt;andy@netconfcentral.com&gt;.
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2009-06-04</ncx:version>
+            <ncx:description>Initial version.</ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:group name="SysCommonSessionParms">
+      <xs:sequence>
+         <xs:element name="userName" type="xs:string" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  Name of the user for the session.
+               </xs:documentation>
+            </xs:annotation>
+         </xs:element>
+         <xs:element name="sessionId" type="nc:SessionId">
+            <xs:annotation>
+               <xs:documentation>
+                  Identifier of the session.
+               </xs:documentation>
+               <xs:appinfo>
+                  <ncx:mandatory>true</ncx:mandatory>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:element>
+         <xs:element name="remoteHost" type="inet:ip-address"
+            minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>
+                  Address of the remote host for the session.
+               </xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+               <xs:union
+                  memberTypes="inet:ipv4-address inet:ipv6-address"/>
+            </xs:simpleType>
+         </xs:element>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:element name="system">
+      <xs:annotation>
+         <xs:documentation>
+            Basic objects for NETCONF system status.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:config>false</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="sysName" type="xs:string" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>The system name.</xs:documentation>
+                  <ncx:reference>
+                     <ncx:text>
+                        RFC 3418, sysName object
+                     </ncx:text>
+                     <ncx:url>
+                        http://www.ietf.org/rfc/rfc3418.txt
+                     </ncx:url>
+                  </ncx:reference>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="sysCurrentDateTime"
+               type="yang:date-and-time" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The current system date and time.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="sysBootDateTime"
+               type="yang:date-and-time" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The system date and time when the system 
+                     last restarted.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="__.system.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="sysStartup"
+      substitutionGroup="ncn:notificationContent">
+      <xs:annotation>
+         <xs:documentation>
+            Generated when the system restarts.
+            Used for logging purposes, since no
+            sessions are actually active when
+            the system restarts.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="ncn:NotificationContentType">
+               <xs:sequence>
+                  <xs:element name="startupSource" type="xs:string"
+                     minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           The filespec used to load the running configuration.
+                           This leaf will only be present if there was a startup
+                           configuration file used.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="bootError" minOccurs="0"
+                     maxOccurs="unbounded">
+                     <xs:annotation>
+                        <xs:documentation>
+                           There will be one entry for each &lt;rpc-error&gt;
+                           encountered during the load config operation.
+                           The &lt;rpc-error&gt; fields are used directly.
+                           There is no particular order, so no key is defined.
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:ordered-by>system</ncx:ordered-by>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:complexType>
+                        <xs:sequence>
+                           <xs:element name="error-type"
+                              type="nc:ErrorType">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    Defines the conceptual layer that the error occurred.
+                                 </xs:documentation>
+                                 <xs:appinfo>
+                                    <ncx:mandatory>true</ncx:mandatory>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:element>
+                           <xs:element name="error-tag"
+                              type="nc:ErrorTag">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    Contains a string identifying the error condition.
+                                 </xs:documentation>
+                                 <xs:appinfo>
+                                    <ncx:mandatory>true</ncx:mandatory>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:element>
+                           <xs:element name="error-severity"
+                              type="nc:ErrorSeverity">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    Contains a string identifying the error severity, as
+                                    determined by the device.
+                                 </xs:documentation>
+                                 <xs:appinfo>
+                                    <ncx:mandatory>true</ncx:mandatory>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:element>
+                           <xs:element name="error-app-tag"
+                              type="xs:string" minOccurs="0">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    Contains a string identifying the data-model-specific
+                                    or implementation-specific error condition, if one exists.
+                                    This element will not be present if no appropriate 
+                                    application error tag can be associated with a particular
+                                    error condition.
+                                 </xs:documentation>
+                              </xs:annotation>
+                           </xs:element>
+                           <xs:element name="error-path"
+                              type="xs:string" minOccurs="0">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    Contains the absolute XPath [2] expression identifying
+                                    the element path to the node that is associated with the error
+                                    being reported in a particular rpc-error element.  This element
+                                    will not be present if no appropriate payload element can be
+                                    associated with a particular error condition, or if the
+                                    'bad-element' QString returned in the 'error-info' container is
+                                    sufficient to identify the node associated with the error.  When
+                                    the XPath expression is interpreted, the set of namespace
+                                    declarations are those in scope on the rpc-error element,
+                                    including the default namespace.
+                                 </xs:documentation>
+                              </xs:annotation>
+                           </xs:element>
+                           <xs:element name="error-message"
+                              type="nc:LangString" minOccurs="0">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    Contains a string suitable for human display that
+                                    describes the error condition.  This element will not be present
+                                    if no appropriate message is provided for a particular error
+                                    condition.  This element SHOULD include an xml:lang attribute.
+                                 </xs:documentation>
+                              </xs:annotation>
+                           </xs:element>
+                           <xs:element name="error-info"
+                              type="xs:anyType" minOccurs="0">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    Contains protocol- or data-model-specific error content.
+                                    This element will not be present if no such error content is
+                                    provided for a particular error condition.  The list in 
+                                    RFC 4741, Appendix A, defines any mandatory error-info content 
+                                    for each error.  After any protocol-mandated content, a 
+                                    data model definition may mandate that certain application-layer
+                                    error information be included in the error-info container. 
+                                    An implementation may include additional elements to 
+                                    provide extended and/or implementation-specific debugging 
+                                    information.
+                                 </xs:documentation>
+                              </xs:annotation>
+                           </xs:element>
+                           <xs:element
+                              name="__.sysStartup.bootError.A__"
+                              minOccurs="0" maxOccurs="unbounded"
+                              abstract="true"/>
+                        </xs:sequence>
+                     </xs:complexType>
+                  </xs:element>
+                  <xs:element name="__.sysStartup.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="sysShutdown"
+      substitutionGroup="ncn:notificationContent">
+      <xs:annotation>
+         <xs:documentation>
+            Generated when the system is about to shutdown.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="ncn:NotificationContentType">
+               <xs:sequence>
+                  <xs:element name="timeLeft" type="xs:unsignedInt"
+                     minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Number of seconds left before the system is
+                           shutdown.
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:units>seconds</ncx:units>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="mode" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Indicates the type of shutdown mode and 
+                           restart (if any) requested.
+                        </xs:documentation>
+                     </xs:annotation>
+                     <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                           <xs:enumeration value="halt">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    System will power down and halt.
+                                 </xs:documentation>
+                                 <xs:appinfo>
+                                    <ncx:value>0</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="restart">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    System will restart, but the image
+                                    will not be reloaded.
+                                 </xs:documentation>
+                                 <xs:appinfo>
+                                    <ncx:value>1</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="reload">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    System will restart, and the image
+                                    will be reloaded.
+                                 </xs:documentation>
+                                 <xs:appinfo>
+                                    <ncx:value>2</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                        </xs:restriction>
+                     </xs:simpleType>
+                  </xs:element>
+                  <xs:element name="__.sysShutdown.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="sysConfigChange"
+      substitutionGroup="ncn:notificationContent">
+      <xs:annotation>
+         <xs:documentation>
+            Generated when the &lt;running&gt; configuration is changed.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="ncn:NotificationContentType">
+               <xs:sequence>
+                  <xs:element name="userName" type="xs:string"
+                     minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Name of the user for the session.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="sessionId" type="nc:SessionId">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Identifier of the session.
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="remoteHost" type="inet:ip-address"
+                     minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Address of the remote host for the session.
+                        </xs:documentation>
+                     </xs:annotation>
+                     <xs:simpleType>
+                        <xs:union
+                           memberTypes="inet:ipv4-address inet:ipv6-address"/>
+                     </xs:simpleType>
+                  </xs:element>
+                  <xs:element name="target" type="xs:string"
+                     minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Topmost node associated with the configuration change.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="operation"
+                     type="nc:EditOperationType" default="merge"
+                     minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Type of edit operation performed.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.sysConfigChange.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="sysSessionStart"
+      substitutionGroup="ncn:notificationContent">
+      <xs:annotation>
+         <xs:documentation>
+            Generated when a new management session is started.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="ncn:NotificationContentType">
+               <xs:sequence>
+                  <xs:element name="userName" type="xs:string"
+                     minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Name of the user for the session.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="sessionId" type="nc:SessionId">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Identifier of the session.
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="remoteHost" type="inet:ip-address"
+                     minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Address of the remote host for the session.
+                        </xs:documentation>
+                     </xs:annotation>
+                     <xs:simpleType>
+                        <xs:union
+                           memberTypes="inet:ipv4-address inet:ipv6-address"/>
+                     </xs:simpleType>
+                  </xs:element>
+                  <xs:element name="__.sysSessionStart.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="sysSessionEnd"
+      substitutionGroup="ncn:notificationContent">
+      <xs:annotation>
+         <xs:documentation>
+            Generated when a management session is terminated.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="ncn:NotificationContentType">
+               <xs:sequence>
+                  <xs:element name="userName" type="xs:string"
+                     minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Name of the user for the session.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="sessionId" type="nc:SessionId">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Identifier of the session.
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="remoteHost" type="inet:ip-address"
+                     minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Address of the remote host for the session.
+                        </xs:documentation>
+                     </xs:annotation>
+                     <xs:simpleType>
+                        <xs:union
+                           memberTypes="inet:ipv4-address inet:ipv6-address"/>
+                     </xs:simpleType>
+                  </xs:element>
+                  <xs:element name="killedBy" type="nc:SessionId"
+                     minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Session ID that issued the &lt;kill-session&gt;,
+                           if the session was terminated by this operation.
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:when>
+                              ../terminationReason = 'killed'
+                           </ncx:when>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="terminationReason">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Reason the session was terminated.
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                           <xs:enumeration value="closed">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    The session was terminated with 
+                                    the &lt;close-session&gt; operation.
+                                 </xs:documentation>
+                                 <xs:appinfo>
+                                    <ncx:value>0</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="killed">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    The session was terminated with 
+                                    the &lt;kill-session&gt; operation.
+                                 </xs:documentation>
+                                 <xs:appinfo>
+                                    <ncx:value>1</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="dropped">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    The session was terminated because
+                                    the SSH session or TCP connection was
+                                    unexpectedly closed.
+                                 </xs:documentation>
+                                 <xs:appinfo>
+                                    <ncx:value>2</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="timeout">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    The session was terminated because
+                                    of inactivity, either waiting for
+                                    the &lt;hello&gt; or &lt;rpc&gt; PDUs.
+                                 </xs:documentation>
+                                 <xs:appinfo>
+                                    <ncx:value>3</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="other">
+                              <xs:annotation>
+                                 <xs:documentation>
+                                    The session was terminated for
+                                    some other reason.
+                                 </xs:documentation>
+                                 <xs:appinfo>
+                                    <ncx:value>4</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                        </xs:restriction>
+                     </xs:simpleType>
+                  </xs:element>
+                  <xs:element name="__.sysSessionEnd.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

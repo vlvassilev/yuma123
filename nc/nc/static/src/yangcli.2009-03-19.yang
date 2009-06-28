@@ -1,0 +1,812 @@
+module yangcli {
+
+    namespace "http://netconfcentral.com/ns/yangcli";
+
+    prefix yc;
+
+    import ncx { prefix ncx; }
+
+    import ncx-app-common { prefix ncxapp; }
+
+    import ncxtypes { prefix nt; }
+
+    import netconf { prefix nc; }
+
+    organization  "Netconf Central";
+
+    contact "Andy Bierman <support@netconfcentral.com>.";
+
+    description 
+       "
+        Command Line Interface for the NETCONF protocol: Manager side
+
+        Usage:
+           yangcli [parameters]
+
+        Normal Mode:
+           An interactive CLI shell with command line history.
+
+        Autostart-mode:
+           If the 'agent' parameter is present, then yangcli will
+ 	   attempt to connect to that agent upon startup.  If the
+           'user' and 'password' parameters are also present, then
+           the user will not be prompted before the connection 
+           is attempted.
+
+         Script-mode:
+            If the 'run-script' parameter is present, then the
+            specified script will be run automatically upon startup.
+      
+         ";
+
+    revision 2009-03-19 {
+       description "Initial published version (TBD)";
+    }
+
+    /*************************************************************
+     *
+     *     Groupings for parameters used in multiple commands
+     *
+     *************************************************************/
+
+    grouping FillParms {
+       leaf target {
+         description 
+           "XPath target object to fill.  If prefixes are missing
+            then the first match in any namespace will be used.
+            Any prefix used must be the default prefix
+            assigned to the desired YANG module. Prefix usage is
+            optional.";
+
+         // type instance-identifier;  TBD
+
+         type string {
+           length "1..max";
+
+         }
+         mandatory true;
+         ncx:schema-instance;
+       }
+
+       leaf optional {
+         description 
+           "If present, then prompt for leafs that are optional.
+            If not, skip these objects.";
+         type empty;
+       }
+
+       anyxml value {
+         description
+           "Contains a string representing the content
+            to use for the filled variable.
+
+            If a string is entered, then the target value being
+            filled must be a leaf or leaf-list.
+
+            If a variable is referenced, then it will 
+            be used as the content, if the target value being
+            filled is a leaf or a leaf-list.
+
+            If the target value is a complex object,
+            then the referenced variable must also be
+            a complex object of the same type. E.g.,
+
+            The global variable 'foo' would be specified as:
+ 
+                value=$$foo
+
+            The local variable 'bar' would be specified as:
+ 
+                value=$bar
+
+            An error will be reported if the global or local
+            variable does not reference the same object type
+            as the target parameter.";
+       }
+    }
+
+    grouping CommonPduParms {
+        description
+            "Common parms for some local commands that
+             generate NETCONF PDUs";
+
+        choice from {
+            mandatory true;
+
+            leaf varref {
+                description 
+                   "Use the contents of the specified variable 
+                    as the content";
+                type string;
+            }
+
+            case from-cli {
+                uses FillParms;
+            }
+        }
+    }
+
+    grouping EditParms {
+        description
+            "Common parms for create, merge, replace commands";
+
+        uses CommonPduParms;
+
+	leaf timeout {
+	  description "Timeout to use";
+	  type nt:Timeout;
+        }
+    }
+
+    grouping SGetParms {
+        description
+            "Common parms for sget and sget-config operations.";
+
+        leaf nofill {
+           description
+            "If present, and the 'from-cli' option is used
+             for input, then filling of mandatory nodes
+             and key leafs will be skipped.  Instead, the target
+             object will be treated as a terminating select node
+             in the filter element.";
+           type empty;
+       }
+       uses ncxapp:CliWithDefaultsParm;
+    }
+
+    grouping XGetParms {
+        description
+            "Common parms for xget and xget-config operations.";
+
+	choice from {
+            mandatory true;
+
+            leaf varref {
+                description 
+                   "Use the contents of the specified variable 
+                    as the content";
+                type string;
+            }
+
+            leaf select {
+              description
+                "The XPath expression to use in the retrieval
+                 operation.  The string may only contain
+                 single quotes, which are required for
+                 string literals.  The entire string
+                 will be inserted into a double-quoted
+                 string, within the get-config PDU.
+                 Character entities will be inserted as
+                 needed to maintain well-formed XML.";
+              type string { length "1..max"; }
+              ncx:xpath;
+            }
+        }
+
+	leaf timeout {
+	  description "Timeout to use";
+	  type nt:Timeout;
+        }
+
+        uses ncxapp:CliWithDefaultsParm;
+    }
+
+    grouping ConnectParms {
+        description
+          "Common parms for connecting to a NETCONF agent.
+           Used by the connect operation and if present at
+           the command line invocation, then the connect
+           operation will be invoked automatically.";
+
+        leaf user {
+          description
+             "User name to use for NETCONF sessions.";
+          type nt:NcxUserName;
+        }
+
+        leaf agent {
+           description
+             "IP address or DNS name of the NETCONF agent target.";
+          type string;
+        }
+
+        leaf password {
+          description
+            "User password to use for NETCONF sessions.
+             If none, then user will be prompted before connecting.";
+          type string;
+          ncx:password;
+        }
+
+        leaf port {
+          description 
+            "NETCONF port number to use.  If not present, then
+             port 830, followed by port 22, will be tried.";
+          type uint16 {
+            range "1..max";
+          }
+          default 830;
+        }
+
+	leaf timeout {
+	  description
+	    "Number of seconds to wait for a response
+	     from the agent before declaring a timeout.
+             Zero means no timeout at all.";
+          type nt:Timeout;
+        }
+ 
+    }
+
+    /*************************************************************
+     *
+     *         CLI parameter set for yangcli program
+     *
+     *************************************************************/
+
+    container yangcli {
+      ncx:cli;
+
+      description
+        "CLI Parameter Set for the NETCONF Manager Application.";
+
+      uses ncxapp:NcxAppCommon;
+
+      uses ConnectParms;
+
+      leaf autocomp {
+        description
+          "Controls whether partial keywords will be 
+           checked for interactive or script commands.
+           By default, the first match for a partial keyword
+           will be used if no definition is found for
+           a command name or parameter name.";
+        type boolean;
+        default true;
+      }
+ 
+      leaf autoload {
+        description
+          "Controls whether any modules (except this one)
+           will be automatically loaded upon startup or
+           upon session startup with an agent. If false,
+           the 'load-module' command must be used to
+           explicitly load all the desired definition modules.";
+        type boolean;
+        default true;
+      }
+
+      leaf baddata {
+        description
+          "Specifies how invalid user input from the CLI
+           will be handled when filling PDUs for remote
+           operations.";
+
+        type enumeration {
+          enum ignore {
+            description 
+              "Silently accept invalid PDU and data model 
+               parameters.  Intended for advanced agent 
+               testing mode only.";
+          }
+          enum warn {
+            description 
+              "Warn, but accept invalid PDU and data model 
+               parameters.";
+          }
+          enum check {
+            description 
+              "Prompt the user to keep the invalid value
+               or re-enter the value.";
+          }
+          enum error {
+            description 
+              "Prompt the user to re-enter the invalid value.";
+          }
+        }
+        default "check";
+      }
+
+      leaf batch-mode {
+        description
+          "If present, the interactive CLI will not be used.
+           A script should be provided with the 'run-script'
+           parameter, or else the program will simply exit.";
+         type empty;
+      }
+
+      leaf default-module {
+        description
+           "Default module name string to use before 'netconf' 
+            and 'ncx' are tried.  The module prefix must be
+            used for other modules.";
+         type nt:NcxName;
+      }
+
+      leaf fixorder {
+        description
+          "Controls whether PDU parameters will be
+           automatically sent to the agent in the
+           correct order.  If false, the specified order
+           will be used. If true, then canonical order will
+	   be used";
+        type boolean;
+	default true;
+      }
+ 
+      leaf-list modules {
+        description
+           "List of NCX module names to load at boot-time.
+            Any imported modules required will be loaded automatically.";
+        type nt:NcModuleSpec;
+      }
+
+      leaf run-script {
+        description
+          "The specified script will be invoked upon startup.
+           If the auto-connect parameters are provided, then
+           a session will be established before running the
+           script.  If a quoted string is used, then any parameters
+           after the script name will be passed to the script.";
+         type string;
+      }
+
+    }
+
+    /*************************************************************
+     *
+     *        RPC methods for local commands within yangcli
+     *
+     *************************************************************/
+
+    rpc cd {
+      description "Change the current working directory.";
+      input {
+        ncx:default-parm dir;
+
+        leaf dir { 
+           description "Directory path to use.";
+           type string;
+           mandatory true;
+        }
+      }
+    }
+
+    rpc connect {
+      description "Connect to a NETCONF agent.";
+      input {
+        ncx:default-parm agent;
+
+        uses ConnectParms {
+          refine user {
+    	    mandatory true;
+          }
+
+          refine agent {
+  	    mandatory true;
+          }
+
+          refine password {
+            mandatory true;
+          }
+        }
+      }
+    }
+
+    rpc create {
+      description
+       "Create some NETCONF config data with the edit-config operation";
+      input {
+        ncx:default-parm  target;
+        uses EditParms;
+      }
+    }
+
+    rpc delete {
+      description
+       "Delete some NETCONF config data with the edit-config operation";
+      input {
+        ncx:default-parm  target;
+        leaf target {
+          description 
+           "Xpath expression indicating the node which is going
+            to be deleted.";
+          type string;
+          mandatory true;
+        }
+      }
+    }
+
+    rpc fill {
+      description 
+       "Fill a value for reuse in a NETCONF PDU or other operation.
+  
+        Used in an assignment statement to create a variable
+        for later use:
+
+            $foo = fill --target=/t:foo-con/bar-list \
+                        --optional \
+                        --current-value=$bar    ";
+       input {
+         ncx:default-parm  target;
+         uses FillParms;
+       }
+       output {
+         anyxml data {
+           description 
+             "The result of the fill operation.
+
+              The name of the value node may not really 
+              be 'data'. If the 'target' or 'current-value'
+              input parameters are used, then the name
+              of the result node will be copied instead.
+
+              The data type will be inherited from the 'target'
+              or 'current_value' parameters, and not really be 
+              an 'anyxml' structure.  YANG does have a data 
+              type that supports this feature.";
+         }
+       }
+    }
+
+    rpc help {
+      description "Print the yangcli help text";
+      input {
+        ncx:default-parm command;
+
+        choice helptype {
+          leaf command {
+            description "Show help for the specified command,
+                         also called an RPC method";
+            type nt:NcxIdentifier;
+          }
+          leaf commands {
+            description "Show info for all local commands";
+            type empty;
+          }
+          leaf notification {
+            description "Show help for the specified notification";
+            type nt:NcxIdentifier;
+          }
+          leaf object {
+            description "Show help for the specified object";
+            type nt:NcxIdentifier;
+          }
+          leaf type {
+            description "Show help for the specified type";
+            type nt:NcxIdentifier;
+          }
+        }
+        uses ncxapp:HelpMode;
+      }
+    }
+
+    rpc insert {
+      description
+       "Insert some NETCONF config data with the edit-config operation";
+      input {
+        ncx:default-parm  target;
+
+        uses EditParms;
+
+        leaf order {
+          description 
+            "The insert order that should be used.
+             If the values 'before' or 'after' are selected,
+             then the edit-target parameter must also be present.";
+          type enumeration {
+            enum first;
+            enum last;
+            enum before;
+            enum after;
+          }
+          default last;
+        }
+
+	leaf operation {
+          description "The edit-config operation that should be used.";
+          type enumeration {
+            enum create;
+            enum merge;
+            enum replace;
+          }
+          default merge;
+        }
+
+	leaf edit-target {
+          description 
+            "The value or key clause that should be used.
+             This parameter shoul only be present if the
+             order selected is 'before' or 'after'.
+
+             For a leaf-list, the edit-target contains the
+             value of the target leaf-list node within the
+             configuration being edited.  The new config
+             will be inserted before or after this leaf-list
+             node, depending on the order selected.
+             E.g., edit-target='some leaf content'.
+
+             For a list, the edit-target contains the
+             key values of the target list node within the
+             configuration being edited.  The new config
+             will be inserted before or after this list
+             node, depending on the order selected.
+             E.g., edit-target=[name='fred'][zipcode=90210].";
+
+          type string;
+        }
+      }
+    }
+
+    rpc list {
+      description "List some NETCONF info.";
+      input {
+        choice listtype {
+          mandatory true;
+
+          leaf commands {
+            description "List all local and remote commands";
+            type empty;
+          }
+
+          leaf objects {
+            description "List all available top-level object names.";
+            type empty;
+          }
+
+          leaf oids {
+            description "List all available object identifiers.";
+            type empty;
+          }
+
+        }
+
+        leaf module {
+          description "List only from this module, if specified.";
+          type nt:NcxIdentifier;
+        }
+
+        uses ncxapp:HelpMode;
+      }
+    }
+
+    rpc merge {
+      description
+       "Merge some NETCONF config data with the edit-config operation";
+      input {
+        ncx:default-parm target;
+        uses EditParms;
+      }
+    }
+
+    rpc mgrload {
+      description 
+        "Load a module or other file into the manager.
+         Use the 'load' command to load a module into
+         the agent.";
+      input {
+        ncx:default-parm module;
+        leaf module {
+          description
+             "Module name to load";
+          type nt:NcxName;
+          mandatory true;
+        }
+      }
+    }
+
+    rpc pwd {
+      description "Print the current working directory.";
+    }
+
+    rpc replace {
+      description
+       "Create some NETCONF config data with the edit-config operation";
+      input {
+        ncx:default-parm target;
+        uses EditParms;
+      }
+    }
+
+    rpc quit {
+      description "Quit the yangcli application";
+    }
+
+    rpc run {
+      description "Internal command to run a script.";
+      input {
+        ncx:default-parm script;
+
+        leaf script {
+           description "script filespec to run";
+           type string;
+           mandatory true;
+        }
+
+        // hardwired parameter names required at this time
+        // just allow 9 parameter/value pairs
+        // P0 is reserved for the name of the called script
+
+        leaf P1 {
+           description "script parameter $1";
+           type string;
+        }
+        leaf P2 {
+           description "script parameter $2";
+           type string;
+        }
+        leaf P3 {
+           description "script parameter $3";
+           type string;
+        }
+        leaf P4 {
+           description "script parameter $4";
+           type string;
+        }
+        leaf P5 {
+           description "script parameter $5";
+           type string;
+        }
+        leaf P6 {
+           description "script parameter $6";
+           type string;
+        }
+        leaf P7 {
+           description "script parameter $7";
+           type string;
+        }
+        leaf P8 {
+           description "script parameter $8";
+           type string;
+        }
+        leaf P9 {
+           description "script parameter $9";
+           type string;
+        }
+      }
+    }
+
+    rpc save {
+      description "Meta command to save configuration edits.";
+    }
+
+    rpc sget {
+      description
+       "Get some NETCONF running config or state data with the get
+        operation, using an optional subtree filter.";
+      input {
+        ncx:default-parm target;
+        uses CommonPduParms;
+        uses SGetParms;
+      }
+      output {
+        anyxml data {
+          description 
+            "The data resulting from the retrieval operation.";
+        }
+      }
+    }
+
+    rpc sget-config {
+      description
+       "Get some NETCONF config data with the get-config
+        operation, using an optional subtree filter.";
+      input {
+        ncx:default-parm target;
+        uses CommonPduParms;
+        uses SGetParms;
+        container source {
+          description "Particular configuration to retrieve.";
+          uses nc:GetConfigSourceType;
+        }
+      }
+      output {
+        anyxml data {
+          description 
+            "The data resulting from the retrieval operation.";
+        }
+      }
+    }
+
+    rpc show {
+      description "Local show command for yangcli info.";
+      input {
+        choice showtype {
+          mandatory true;
+
+          leaf module {
+            description "Show full info for one module";
+            type nt:NcxIdentifier;
+          }
+
+          leaf modules {
+            description "Show info for all modules";
+            type empty;
+          }
+
+          leaf local {
+            description "Show info for one local user variable";
+            type nt:NcxName;
+          }
+
+          leaf locals {
+            description "Show info for all local user variables";
+            type empty;
+          }
+
+          leaf global {
+            description "Show full info for one global user variable";
+            type nt:NcxName;
+          }
+
+          leaf globals {
+            description "Show info for all global user variables";
+            type empty;
+          }
+
+          leaf objects {
+            description 
+              "Show config database objects available at this time";
+            type empty;
+          }
+
+          leaf var {
+            description "Show info for one local or global variable";
+            type nt:NcxName;
+          }
+         
+          leaf vars {
+            description "Show truncated info for all program variables";
+            type empty;
+          }
+
+          leaf version {
+            description "Show yangcli version info";
+            type empty;
+          }
+        }
+        uses ncxapp:HelpMode;
+      }
+    }
+
+    rpc xget {
+      description
+       "Get some NETCONF running config or state data with the get
+        operation, using an optional XPath filter.";
+      input {
+        ncx:default-parm select;
+        uses XGetParms;
+      }
+      output {
+        anyxml data {
+          description 
+            "The data resulting from the retrieval operation.";
+        }
+      }
+    }
+
+    rpc xget-config {
+      description
+       "Get some NETCONF config data with the get-config
+        operation, using an optional XPath filter.";
+      input {
+        ncx:default-parm select;
+        uses XGetParms;
+
+        container source {
+          description "Particular configuration to retrieve.";
+          uses nc:GetConfigSourceType;
+        }
+      }
+      output {
+        anyxml data {
+          description 
+            "The data resulting from the retrieval operation.";
+        }
+      }
+    }
+
+
+}
+
+

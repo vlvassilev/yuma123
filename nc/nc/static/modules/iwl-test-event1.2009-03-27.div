@@ -1,0 +1,291 @@
+
+<div>
+   <h1 class="yang">iwl-test-event1.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Groupings</a>
+         <ul>
+            <li class="daddy"><a href="#Leafs.1.20">Leafs.1</a>
+               <ul>
+                  <li><a href="#binary.1.22">binary.1</a></li>
+                  <li><a href="#bits.1.26">bits.1</a></li>
+                  <li><a href="#boolean.1.36">boolean.1</a></li>
+                  <li><a href="#empty.1.46">empty.1</a></li>
+                  <li><a href="#enumeration.1.50">enumeration.1</a></li>
+                  <li><a href="#identityref.1.59">identityref.1</a></li>
+                  <li><a href="#instance-identifier.1.63">instance-identifier.1</a></li>
+                  <li><a href="#instance-identifier.2.69">instance-identifier.2</a></li>
+                  <li><a href="#int8.1.75">int8.1</a></li>
+                  <li><a href="#int16.1.79">int16.1</a></li>
+                  <li><a href="#int32.1.83">int32.1</a></li>
+                  <li><a href="#int64.1.87">int64.1</a></li>
+                  <li><a href="#leafref.1.91">leafref.1</a></li>
+                  <li><a href="#leafref.2.98">leafref.2</a></li>
+                  <li><a href="#string.1.105">string.1</a></li>
+                  <li><a href="#uint8.1.109">uint8.1</a></li>
+                  <li><a href="#uint16.1.113">uint16.1</a></li>
+                  <li><a href="#uint32.1.117">uint32.1</a></li>
+                  <li><a href="#uint64.1.121">uint64.1</a></li>
+                  <li><a href="#dec64.1.125">dec64.1</a></li>
+                  <li><a href="#dec64.2.131">dec64.2</a></li>
+                  <li><a href="#dec64.3.138">dec64.3</a></li>
+                  <li><a href="#union.1.145">union.1</a></li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+      <li><a href="#">Objects</a>
+         <ul>
+            <li><a href="#uses.163">uses</a></li>
+            <li class="daddy"><a href="#container.1.165">container.1</a>
+               <ul>
+                  <li><a href="#uses.166">uses</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#container.2.169">container.2</a>
+               <ul>
+                  <li><a href="#uses.171">uses</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#list.1.174">list.1</a>
+               <ul>
+                  <li><a href="#uses.176">uses</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#choice.1.179">choice.1</a>
+               <ul>
+                  <li class="daddy"><a href="#case.1.1.180">case.1.1</a>
+                     <ul>
+                        <li><a href="#a.181">a</a></li>
+                        <li><a href="#b.182">b</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#c.184">c</a>
+                     <ul>
+                        <li><a href="#c.184">c</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#d.185">d</a>
+                     <ul>
+                        <li><a href="#d.185">d</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">iwl-test-event1</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"http://www.iwl.com/netconf/ns/iwl-test-event1"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"iwl1"</span>;
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"Interworking Labs, Inc."</span>;
+
+      <span class="yang_kw">contact</span> <span class="yang_str">"Andy Bierman"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"YANG test module for IWL NETCONF Event 1"</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2009-03-27"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Initial version."</span>;
+      }
+
+
+      <a name="Leafs.1.20"></a><span class="yang_kw">grouping</span> <span class="yang_id">Leafs.1</span> {
+         <a name="binary.1.22"></a><span class="yang_kw">leaf</span> <span class="yang_id">binary.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+         }
+
+         <a name="bits.1.26"></a><span class="yang_kw">leaf</span> <span class="yang_id">bits.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">bits</span> {
+               <span class="yang_kw">bit</span> <span class="yang_str">"zero"</span> {
+                  <span class="yang_kw">position</span> <span class="yang_str">0</span>;
+               }
+               <span class="yang_kw">bit</span> <span class="yang_str">"one"</span> {
+                  <span class="yang_kw">position</span> <span class="yang_str">1</span>;
+               }
+               <span class="yang_kw">bit</span> <span class="yang_str">"two"</span> {
+                  <span class="yang_kw">position</span> <span class="yang_str">2</span>;
+               }
+               <span class="yang_kw">bit</span> <span class="yang_str">"ten"</span> {
+                  <span class="yang_kw">position</span> <span class="yang_str">10</span>;
+               }
+               <span class="yang_kw">bit</span> <span class="yang_str">"last"</span> {
+                  <span class="yang_kw">position</span> <span class="yang_str">3</span>;
+               }
+            }
+         }
+
+         <a name="boolean.1.36"></a><span class="yang_kw">leaf</span> <span class="yang_id">boolean.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">boolean</span>;
+         }
+
+         <a name="empty.1.46"></a><span class="yang_kw">leaf</span> <span class="yang_id">empty.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
+         }
+
+         <a name="enumeration.1.50"></a><span class="yang_kw">leaf</span> <span class="yang_id">enumeration.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+               <span class="yang_kw">enum</span> <span class="yang_str">"red"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"green"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">9</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"blue"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">11</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"deep purple"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">17</span>;
+               }
+            }
+         }
+
+         <a name="identityref.1.59"></a><span class="yang_kw">leaf</span> <span class="yang_id">identityref.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">identityref</span> {
+               <span class="yang_kw">base</span> <span class="yang_id"><a href="/modules/iwl-test-event1/2009-03-27#id-A.158">id-A</a></span>;
+            }
+         }
+
+         <a name="instance-identifier.1.63"></a><span class="yang_kw">leaf</span> <span class="yang_id">instance-identifier.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">instance-identifier</span>;
+         }
+
+         <a name="instance-identifier.2.69"></a><span class="yang_kw">leaf</span> <span class="yang_id">instance-identifier.2</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">instance-identifier</span>;
+         }
+
+         <a name="int8.1.75"></a><span class="yang_kw">leaf</span> <span class="yang_id">int8.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int8</span>;
+         }
+
+         <a name="int16.1.79"></a><span class="yang_kw">leaf</span> <span class="yang_id">int16.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int16</span>;
+         }
+
+         <a name="int32.1.83"></a><span class="yang_kw">leaf</span> <span class="yang_id">int32.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+         }
+
+         <a name="int64.1.87"></a><span class="yang_kw">leaf</span> <span class="yang_id">int64.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int64</span>;
+         }
+
+         <a name="leafref.1.91"></a><span class="yang_kw">leaf</span> <span class="yang_id">leafref.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+               <span class="yang_kw">path</span> <span class="yang_str">"../instance-identifier.1"</span>;
+               <span class="yang_kw">require-instance</span> <span class="yang_str">"true"</span>;
+            }
+         }
+
+         <a name="leafref.2.98"></a><span class="yang_kw">leaf</span> <span class="yang_id">leafref.2</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+               <span class="yang_kw">path</span> <span class="yang_str">"../string.1"</span>;
+               <span class="yang_kw">require-instance</span> <span class="yang_str">"false"</span>;
+            }
+         }
+
+         <a name="string.1.105"></a><span class="yang_kw">leaf</span> <span class="yang_id">string.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         }
+
+         <a name="uint8.1.109"></a><span class="yang_kw">leaf</span> <span class="yang_id">uint8.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint8</span>;
+         }
+
+         <a name="uint16.1.113"></a><span class="yang_kw">leaf</span> <span class="yang_id">uint16.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint16</span>;
+         }
+
+         <a name="uint32.1.117"></a><span class="yang_kw">leaf</span> <span class="yang_id">uint32.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+         }
+
+         <a name="uint64.1.121"></a><span class="yang_kw">leaf</span> <span class="yang_id">uint64.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">uint64</span>;
+         }
+
+         <a name="dec64.1.125"></a><span class="yang_kw">leaf</span> <span class="yang_id">dec64.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">decimal64</span> {
+               <span class="yang_kw">fraction-digits</span> <span class="yang_str">4</span> {
+            }
+         }
+
+         <a name="dec64.2.131"></a><span class="yang_kw">leaf</span> <span class="yang_id">dec64.2</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">decimal64</span> {
+               <span class="yang_kw">fraction-digits</span> <span class="yang_str">2</span> {
+               <span class="yang_kw">range</span> <span class="yang_str">"0 .. 3 | 9 .. max"</span>;
+            }
+         }
+
+         <a name="dec64.3.138"></a><span class="yang_kw">leaf</span> <span class="yang_id">dec64.3</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">decimal64</span> {
+               <span class="yang_kw">fraction-digits</span> <span class="yang_str">18</span> {
+               <span class="yang_kw">range</span> <span class="yang_str">"3.1234567 .. max"</span>;
+            }
+         }
+
+         <a name="union.1.145"></a><span class="yang_kw">leaf</span> <span class="yang_id">union.1</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">union</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int8</span>;
+               <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+               <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               <span class="yang_kw">type</span> <span class="yang_id">union</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">boolean</span>;
+                  <span class="yang_kw">type</span> <span class="yang_id">uint64</span>;
+               }
+            }
+         }
+      }  <span class="yang_cmt">// grouping Leafs.1</span>
+
+      <a name="id-A.158"></a><span class="yang_kw">identity</span> <span class="yang_id">id-A</span> {
+      }
+
+      <a name="id-B.159"></a><span class="yang_kw">identity</span> <span class="yang_id">id-B</span> {
+         <span class="yang_kw">base</span> <span class="yang_id"><a href="/modules/iwl-test-event1/2009-03-27#id-A.158">id-A</a></span>;
+      }
+
+      <a name="id-C.160"></a><span class="yang_kw">identity</span> <span class="yang_id">id-C</span> {
+         <span class="yang_kw">base</span> <span class="yang_id"><a href="/modules/iwl-test-event1/2009-03-27#id-B.159">id-B</a></span>;
+      }
+
+      <a name="id-D.161"></a><span class="yang_kw">identity</span> <span class="yang_id">id-D</span> {
+         <span class="yang_kw">base</span> <span class="yang_id"><a href="/modules/iwl-test-event1/2009-03-27#id-C.160">id-C</a></span>;
+      }
+
+      <a name="uses.163"></a><span class="yang_kw">uses</span> <a href="#Leafs.1.20">Leafs.1</a>;
+
+      <a name="container.1.165"></a><span class="yang_kw">container</span> <span class="yang_id">container.1</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+
+         <a name="uses.166"></a><span class="yang_kw">uses</span> <a href="#Leafs.1.20">Leafs.1</a>;
+      }  <span class="yang_cmt">// container container.1</span>
+
+      <a name="container.2.169"></a><span class="yang_kw">container</span> <span class="yang_id">container.2</span> {
+         <span class="yang_kw">presence</span> <span class="yang_str">"this is a presence container"</span>;
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+
+         <a name="uses.171"></a><span class="yang_kw">uses</span> <a href="#Leafs.1.20">Leafs.1</a>;
+      }  <span class="yang_cmt">// container container.2</span>
+
+      <a name="list.1.174"></a><span class="yang_kw">list</span> <span class="yang_id">list.1</span> {
+         <span class="yang_kw">key</span> "<a href="#string.1.105">string.1</a> <a href="#uint32.1.117">uint32.1</a>";
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+
+         <a name="uses.176"></a><span class="yang_kw">uses</span> <a href="#Leafs.1.20">Leafs.1</a>;
+      }  <span class="yang_cmt">// list list.1</span>
+   }  <span class="yang_cmt">// module iwl-test-event1</span>
+</pre>
+</div>
+</div>

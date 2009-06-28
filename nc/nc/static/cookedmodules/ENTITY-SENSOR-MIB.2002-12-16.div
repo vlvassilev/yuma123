@@ -1,0 +1,509 @@
+
+<div>
+   <h1 class="yang">ENTITY-SENSOR-MIB.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#EntitySensorDataType.73">EntitySensorDataType</a></li>
+            <li><a href="#EntitySensorDataScale.123">EntitySensorDataScale</a></li>
+            <li><a href="#EntitySensorPrecision.164">EntitySensorPrecision</a></li>
+            <li><a href="#EntitySensorValue.207">EntitySensorValue</a></li>
+            <li><a href="#EntitySensorStatus.253">EntitySensorStatus</a></li>
+         </ul>
+      </li>
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#entitySensorObjects.275">entitySensorObjects</a>
+               <ul>
+                  <li class="daddy"><a href="#entPhySensorEntry.280">entPhySensorEntry</a>
+                     <ul>
+                        <li><a href="#entPhysicalIndex.300">entPhysicalIndex</a></li>
+                        <li><a href="#entPhySensorType.309">entPhySensorType</a></li>
+                        <li><a href="#entPhySensorScale.321">entPhySensorScale</a></li>
+                        <li><a href="#entPhySensorPrecision.333">entPhySensorPrecision</a></li>
+                        <li><a href="#entPhySensorValue.350">entPhySensorValue</a></li>
+                        <li><a href="#entPhySensorOperStatus.363">entPhySensorOperStatus</a></li>
+                        <li><a href="#entPhySensorUnitsDisplay.371">entPhySensorUnitsDisplay</a></li>
+                        <li><a href="#entPhySensorValueTimeStamp.380">entPhySensorValueTimeStamp</a></li>
+                        <li><a href="#entPhySensorValueUpdateRate.389">entPhySensorValueUpdateRate</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">ENTITY-SENSOR-MIB</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:yang:smiv2:ENTITY-SENSOR-MIB"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"entity-sensor"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/ENTITY-MIB">ENTITY-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"entity-mib"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/SNMP-FRAMEWORK-MIB">SNMP-FRAMEWORK-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"snmp-framework"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-smi">yang-smi</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/ietf-yang-types">ietf-yang-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
+      }
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"IETF Entity MIB Working Group"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"        Andy Bierman
+         Cisco Systems, Inc.
+         Tel: +1 408-527-3711
+         E-mail: abierman@cisco.com
+         Postal: 170 West Tasman Drive
+         San Jose, CA USA 95134
+         
+         Dan Romascanu
+         Avaya Inc.
+         Tel: +972-3-645-8414
+         Email: dromasca@avaya.com
+         Postal: Atidim technology Park, Bldg. #3
+         Tel Aviv, Israel, 61131
+         
+         K.C. Norseth
+         L-3 Communications
+         Tel: +1 801-594-2809
+         Email: kenyon.c.norseth@L-3com.com
+         Postal: 640 N. 2200 West.
+         
+         
+         
+         Salt Lake City, Utah 84116-0850
+         
+         Send comments to &lt;entmib@ietf.org&gt;
+         Mailing list subscription info:
+         http://www.ietf.org/mailman/listinfo/entmib "</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"This module defines Entity MIB extensions for physical
+         sensors.
+         
+         Copyright (C) The Internet Society (2002). This version
+         of this MIB module is part of RFC 3433; see the RFC
+         itself for full legal notices."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2002-12-16"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Initial version of the Entity Sensor MIB module, published
+            as RFC 3433."</span>;
+      }
+
+
+      <a name="EntitySensorDataType.73"></a><span class="yang_kw">typedef</span> <span class="yang_id">EntitySensorDataType</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+            <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"unknown"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"voltsAC"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"voltsDC"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"amperes"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"watts"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"hertz"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">7</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"celsius"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">8</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"percentRH"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">9</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"rpm"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">10</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"cmm"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">11</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"truthvalue"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">12</span>;
+            }
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"An object using this data type represents the Entity Sensor
+            measurement data type associated with a physical sensor
+            value. The actual data units are determined by examining an
+            object of this type together with the associated
+            EntitySensorDataScale object.
+            
+            An object of this type SHOULD be defined together with
+            objects of type EntitySensorDataScale and
+            EntitySensorPrecision.  Together, associated objects of
+            these three types are used to identify the semantics of an
+            object of type EntitySensorValue.
+            
+            
+            
+            
+            
+            
+            Valid values are:
+            
+               other(1):        a measure other than those listed below
+               unknown(2):      unknown measurement, or arbitrary,
+            		    relative numbers
+               voltsAC(3):      electric potential
+               voltsDC(4):      electric potential
+               amperes(5):      electric current
+               watts(6):        power
+               hertz(7):        frequency
+               celsius(8):      temperature
+               percentRH(9):    percent relative humidity
+               rpm(10):         shaft revolutions per minute
+               cmm(11),:        cubic meters per minute (airflow)
+               truthvalue(12):  value takes { true(1), false(2) }"</span>;
+      }
+
+      <a name="EntitySensorDataScale.123"></a><span class="yang_kw">typedef</span> <span class="yang_id">EntitySensorDataScale</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+            <span class="yang_kw">enum</span> <span class="yang_str">"yocto"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"zepto"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"atto"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"femto"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"pico"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"nano"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"micro"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">7</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"milli"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">8</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"units"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">9</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"kilo"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">10</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"mega"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">11</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"giga"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">12</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"tera"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">13</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"exa"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">14</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"peta"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">15</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"zetta"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">16</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"yotta"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">17</span>;
+            }
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"An object using this data type represents a data scaling
+            factor, represented with an International System of Units
+            (SI) prefix.  The actual data units are determined by
+            examining an object of this type together with the
+            associated EntitySensorDataType object.
+            
+            An object of this type SHOULD be defined together with
+            objects of type EntitySensorDataType and
+            EntitySensorPrecision.  Together, associated objects of
+            these three types are used to identify the semantics of an
+            object of type EntitySensorValue."</span>;
+         <span class="yang_kw">reference</span>
+            <span class="yang_str">"The International System of Units (SI),
+            
+            
+            
+            National Institute of Standards and Technology,
+            Spec. Publ. 330, August 1991."</span>;
+      }
+
+      <a name="EntitySensorPrecision.164"></a><span class="yang_kw">typedef</span> <span class="yang_id">EntitySensorPrecision</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+            <span class="yang_kw">range</span> <span class="yang_str">"-8..9"</span>;
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"An object using this data type represents a sensor
+            precision range.
+            
+            An object of this type SHOULD be defined together with
+            objects of type EntitySensorDataType and
+            EntitySensorDataScale.  Together, associated objects of
+            these three types are used to identify the semantics of an
+            object of type EntitySensorValue.
+            
+            If an object of this type contains a value in the range 1 to
+            9, it represents the number of decimal places in the
+            fractional part of an associated EntitySensorValue fixed-
+            point number.
+            
+            If an object of this type contains a value in the range -8
+            to -1, it represents the number of accurate digits in the
+            associated EntitySensorValue fixed-point number.
+            
+            The value zero indicates the associated EntitySensorValue
+            object is not a fixed-point number.
+            
+            Agent implementors must choose a value for the associated
+            EntitySensorPrecision object so that the precision and
+            
+            
+            
+            accuracy of the associated EntitySensorValue object is
+            correctly indicated.
+            
+            For example, a physical entity representing a temperature
+            sensor that can measure 0 degrees to 100 degrees C in 0.1
+            degree increments, +/- 0.05 degrees, would have an
+            EntitySensorPrecision value of '1', an EntitySensorDataScale
+            value of 'units(9)', and an EntitySensorValue ranging from
+            '0' to '1000'.  The EntitySensorValue would be interpreted
+            as 'degrees C * 10'."</span>;
+      }
+
+      <a name="EntitySensorValue.207"></a><span class="yang_kw">typedef</span> <span class="yang_id">EntitySensorValue</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+            <span class="yang_kw">range</span> <span class="yang_str">"-1000000000..1000000000"</span>;
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"An object using this data type represents an Entity Sensor
+            value.
+            An object of this type SHOULD be defined together with
+            objects of type EntitySensorDataType, EntitySensorDataScale
+            and EntitySensorPrecision.  Together, associated objects of
+            those three types are used to identify the semantics of an
+            object of this data type.
+            
+            The semantics of an object using this data type are
+            determined by the value of the associated
+            EntitySensorDataType object.
+            
+            If the associated EntitySensorDataType object is equal to
+            'voltsAC(3)', 'voltsDC(4)', 'amperes(5)', 'watts(6),
+            'hertz(7)', 'celsius(8)', or 'cmm(11)', then an object of
+            this type MUST contain a fixed point number ranging from
+            -999,999,999 to +999,999,999.  The value -1000000000
+            indicates an underflow error. The value +1000000000
+            indicates an overflow error.  The EntitySensorPrecision
+            indicates how many fractional digits are represented in the
+            associated EntitySensorValue object.
+            
+            If the associated EntitySensorDataType object is equal to
+            'percentRH(9)', then an object of this type MUST contain a
+            number ranging from 0 to 100.
+            
+            If the associated EntitySensorDataType object is equal to
+            'rpm(10)', then an object of this type MUST contain a number
+            ranging from -999,999,999 to +999,999,999.
+            
+            If the associated EntitySensorDataType object is equal to
+            'truthvalue(12)', then an object of this type MUST contain
+            either the value 'true(1)' or the value 'false(2)'.
+            
+            
+            
+            If the associated EntitySensorDataType object is equal to
+            'other(1)' or unknown(2)', then an object of this type MUST
+            contain a number ranging from -1000000000 to 1000000000."</span>;
+      }
+
+      <a name="EntitySensorStatus.253"></a><span class="yang_kw">typedef</span> <span class="yang_id">EntitySensorStatus</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+            <span class="yang_kw">enum</span> <span class="yang_str">"ok"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"unavailable"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"nonoperational"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+            }
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"An object using this data type represents the operational
+            status of a physical sensor.
+            
+            The value 'ok(1)' indicates that the agent can obtain the
+            sensor value.
+            
+            The value 'unavailable(2)' indicates that the agent
+            presently cannot obtain the sensor value.
+            
+            The value 'nonoperational(3)' indicates that the agent
+            believes the sensor is broken.  The sensor could have a hard
+            failure (disconnected wire), or a soft failure such as out-
+            of-range, jittery, or wildly fluctuating readings."</span>;
+      }
+
+      <a name="entitySensorObjects.275"></a><span class="yang_kw">container</span> <span class="yang_id">entitySensorObjects</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <a name="entPhySensorEntry.280"></a><span class="yang_kw">list</span> <span class="yang_id">entPhySensorEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#entPhysicalIndex.300">entPhysicalIndex</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Information about a particular physical sensor.
+               
+               
+               
+               
+               
+               An entry in this table describes the present reading of a
+               sensor, the measurement units and scale, and sensor
+               operational status.
+               
+               Entries are created in this table by the agent.  An entry
+               for each physical sensor SHOULD be created at the same time
+               as the associated entPhysicalEntry.  An entry SHOULD be
+               destroyed if the associated entPhysicalEntry is destroyed."</span>;
+            <a name="entPhysicalIndex.300"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhysicalIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/entity-mib:entityPhysical/entity-mib:entPhysicalEntry/entity-mib:entPhysicalIndex"</span>;
+                  <span class="yang_kw">require-instance</span> <span class="yang_str">"true"</span>;
+               }
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated leafref leaf."</span>;
+            }
+
+            <a name="entPhySensorType.309"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#EntitySensorDataType.73">EntitySensorDataType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The type of data returned by the associated
+                  entPhySensorValue object.
+                  
+                  This object SHOULD be set by the agent during entry
+                  creation, and the value SHOULD NOT change during operation."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1.1"</span>;
+            }
+
+            <a name="entPhySensorScale.321"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorScale</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#EntitySensorDataScale.123">EntitySensorDataScale</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The exponent to apply to values returned by the associated
+                  entPhySensorValue object.
+                  
+                  This object SHOULD be set by the agent during entry
+                  creation, and the value SHOULD NOT change during operation."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1.2"</span>;
+            }
+
+            <a name="entPhySensorPrecision.333"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorPrecision</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#EntitySensorPrecision.164">EntitySensorPrecision</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of decimal places of precision in fixed-point
+                  sensor values returned by the associated entPhySensorValue
+                  object.
+                  
+                  This object SHOULD be set to '0' when the associated
+                  entPhySensorType value is not a fixed-point type: e.g.,
+                  'percentRH(9)', 'rpm(10)', 'cmm(11)', or 'truthvalue(12)'.
+                  
+                  This object SHOULD be set by the agent during entry
+                  creation, and the value SHOULD NOT change during operation."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1.3"</span>;
+            }
+
+            <a name="entPhySensorValue.350"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorValue</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#EntitySensorValue.207">EntitySensorValue</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The most recent measurement obtained by the agent for this
+                  sensor.
+                  
+                  To correctly interpret the value of this object, the
+                  associated entPhySensorType, entPhySensorScale, and
+                  entPhySensorPrecision objects must also be examined."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1.4"</span>;
+            }
+
+            <a name="entPhySensorOperStatus.363"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorOperStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#EntitySensorStatus.253">EntitySensorStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"The operational status of the sensor."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1.5"</span>;
+            }
+
+            <a name="entPhySensorUnitsDisplay.371"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorUnitsDisplay</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A textual description of the data units that should be used
+                  in the display of entPhySensorValue."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1.6"</span>;
+            }
+
+            <a name="entPhySensorValueTimeStamp.380"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorValueTimeStamp</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ietf-yang-types/2009-05-13#timestamp.352">yang:timestamp</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value of sysUpTime at the time the status and/or value
+                  of this sensor was last obtained by the agent."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1.7"</span>;
+            }
+
+            <a name="entPhySensorValueUpdateRate.389"></a><span class="yang_kw">leaf</span> <span class="yang_id">entPhySensorValueUpdateRate</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               <span class="yang_kw">units</span> <span class="yang_str">"milliseconds"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An indication of the frequency that the agent updates the
+                  associated entPhySensorValue object, representing in
+                  milliseconds.
+                  
+                  The value zero indicates:
+                  
+                      - the sensor value is updated on demand (e.g.,
+                        when polled by the agent for a get-request),
+                      - the sensor value is updated when the sensor
+                        value changes (event-driven),
+                      - the agent does not know the update rate."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1.8"</span>;
+            }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1.1.1"</span>;
+         }  <span class="yang_cmt">// list entPhySensorEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.99.1"</span>;
+      }  <span class="yang_cmt">// container entitySensorObjects</span>
+   }  <span class="yang_cmt">// module ENTITY-SENSOR-MIB</span>
+</pre>
+</div>
+</div>

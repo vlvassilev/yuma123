@@ -1,0 +1,109 @@
+module ncx-app-common {
+
+    yang-version 1;
+    namespace "http://netconfcentral.com/ns/ncx-app-common";
+    prefix "ncxapp";
+
+    import ncxtypes { prefix "nt"; }
+
+    organization "Netconf Central";
+
+    contact
+        "Andy Bierman <andy at netconfcentral.com>";
+
+    description 
+       "Common CLI parameters used in all NCX applications.";
+
+    revision 2009-04-10 {
+       description "Initial version.";
+    }
+
+    typedef CliWithDefaultsType {
+        description "Add 'none' to standard enumerations";
+        type enumeration {
+            enum none;
+            enum report-all;
+            enum trim;
+            enum explicit;
+        }
+    }
+
+    grouping CliWithDefaultsParm {
+        leaf with-defaults {
+            type CliWithDefaultsType;
+        }
+    }
+
+    grouping HelpMode {
+      choice brief-full {
+        leaf brief {
+          description "Show brief help text";
+          type empty;
+        }
+        leaf full {
+          description "Show full help text";
+          type empty;
+        }
+      }
+    }
+
+    grouping NcxAppCommon {
+
+        leaf config {
+          description
+            "The name of the configuration file to use.
+             Any parameter except this one can be set in the config file.
+             The default config file will be not be checked if this
+             parameter is present.";
+           type string;
+        }
+
+        leaf help {
+          description "Print yangdump help file and exit.";
+          type empty;
+        }
+
+        uses HelpMode;
+
+        leaf indent {
+          description 
+            "Number of spaces to indent (0..9) in formatted output.";
+          type nt:IndentType;
+        }
+
+	leaf log {
+          description
+             "Filespec for the log file to use instead of STDOUT.";
+          type string;
+        }
+
+	leaf log-append {
+          description
+             "If present, the log will be appended not over-written.
+              If not, the log will be over-written.
+              Only meaningful if the 'log' parameter is
+              also present.";
+          type empty;
+        }
+
+        leaf log-level {
+          description
+            "Sets the debug logging level for the program.";
+          type nt:NcDebugType;
+        }
+
+        leaf modpath {
+          description
+             "Directory search path for YANG and NCX modules.";
+          type nt:NcPathList;
+        }
+
+        leaf version {
+          description "Print yangdump version string and exit.";
+          type empty;
+        }
+
+    }
+}
+
+

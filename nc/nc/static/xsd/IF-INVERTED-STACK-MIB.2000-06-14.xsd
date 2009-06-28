@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="urn:ietf:params:xml:ns:yang:smiv2:IF-INVERTED-STACK-MIB"
+   targetNamespace="urn:ietf:params:xml:ns:yang:smiv2:IF-INVERTED-STACK-MIB"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2000-06-14"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+   xmlns:if-mib="urn:ietf:params:xml:ns:yang:smiv2:IF-MIB"
+   xmlns:smiv2="urn:ietf:params:xml:ns:yang:smiv2:SNMPv2-TC"
+   xmlns:smi="urn:ietf:params:xml:ns:yang:yang-smi">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'IF-INVERTED-STACK-MIB.yang' by yangdump version 0.9.4
+         
+         Module: IF-INVERTED-STACK-MIB
+         Organization: IETF Interfaces MIB Working Group
+         Version: 2000-06-14
+         Contact:    Keith McCloghrie
+         Cisco Systems, Inc.
+         170 West Tasman Drive
+         San Jose, CA  95134-1706
+         US
+         
+         408-526-5260
+         kzm@cisco.com
+      </xs:documentation>
+      <xs:documentation>
+         The MIB module which provides the Inverted Stack Table for
+         interface sub-layers.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/ietf/IF-INVERTED-STACK-MIB.yang
+         </ncx:source>
+         <ncx:organization>
+            IETF Interfaces MIB Working Group
+         </ncx:organization>
+         <ncx:contact>
+               Keith McCloghrie
+            Cisco Systems, Inc.
+            170 West Tasman Drive
+            San Jose, CA  95134-1706
+            US
+            
+            408-526-5260
+            kzm@cisco.com
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2000-06-14</ncx:version>
+            <ncx:description>
+               Initial revision, published as RFC 2864
+            </ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:element name="ifInvMIBObjects">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <smi:oid  smi:oid="1.3.6.1.2.1.77.1"/>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="ifInvStackEntry" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     Information on a particular relationship between two sub-
+                     layers, specifying that one sub-layer runs underneath the
+                     other sub-layer.  Each sub-layer corresponds to a conceptual
+                     row in the ifTable.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.77.1.1.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="ifStackLowerLayer"
+                        type="xs:string">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Automagically generated leafref leaf.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="ifStackHigherLayer"
+                        type="xs:string">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Automagically generated leafref leaf.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="ifInvStackStatus"
+                        type="smiv2:RowStatus" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The status of the relationship between two sub-layers.
+                              
+                              An instance of this object exists for each instance of the
+                              ifStackStatus object, and vice versa.  For example, if the
+                              variable ifStackStatus.H.L exists, then the variable
+                              ifInvStackStatus.L.H must also exist, and vice versa.  In
+                              addition, the two variables always have the same value.
+                              
+                              However, unlike ifStackStatus, the ifInvStackStatus object
+                              is NOT write-able.  A network management application wishing
+                              to change a relationship between sub-layers H and L cannot
+                              do so by modifying the value of ifInvStackStatus.L.H, but
+                              must instead modify the value of ifStackStatus.H.L.  After
+                              the ifStackTable is modified, the change will be reflected
+                              in this table.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.77.1.1.1.1"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element
+                        name="__.ifInvMIBObjects.ifInvStackEntry.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="ifInvStackEntry_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="ifStackLowerLayer"/>
+                  <xs:field xpath="ifStackHigherLayer"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="__.ifInvMIBObjects.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

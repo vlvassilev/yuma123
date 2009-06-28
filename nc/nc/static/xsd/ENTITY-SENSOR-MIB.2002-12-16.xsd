@@ -1,0 +1,712 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="urn:ietf:params:xml:ns:yang:smiv2:ENTITY-SENSOR-MIB"
+   targetNamespace="urn:ietf:params:xml:ns:yang:smiv2:ENTITY-SENSOR-MIB"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2002-12-16"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+   xmlns:entity-mib="urn:ietf:params:xml:ns:yang:smiv2:ENTITY-MIB"
+   xmlns:snmp-framework="urn:ietf:params:xml:ns:yang:smiv2:SNMP-FRAMEWORK-MIB"
+   xmlns:smi="urn:ietf:params:xml:ns:yang:yang-smi"
+   xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'ENTITY-SENSOR-MIB.yang' by yangdump version 0.9.4
+         
+         Module: ENTITY-SENSOR-MIB
+         Organization: IETF Entity MIB Working Group
+         Version: 2002-12-16
+         Contact:         Andy Bierman
+         Cisco Systems, Inc.
+         Tel: +1 408-527-3711
+         E-mail: abierman@cisco.com
+         Postal: 170 West Tasman Drive
+         San Jose, CA USA 95134
+         
+         Dan Romascanu
+         Avaya Inc.
+         Tel: +972-3-645-8414
+         Email: dromasca@avaya.com
+         Postal: Atidim technology Park, Bldg. #3
+         Tel Aviv, Israel, 61131
+         
+         K.C. Norseth
+         L-3 Communications
+         Tel: +1 801-594-2809
+         Email: kenyon.c.norseth@L-3com.com
+         Postal: 640 N. 2200 West.
+         
+         
+         
+         Salt Lake City, Utah 84116-0850
+         
+         Send comments to &lt;entmib@ietf.org&gt;
+         Mailing list subscription info:
+         http://www.ietf.org/mailman/listinfo/entmib 
+      </xs:documentation>
+      <xs:documentation>
+         This module defines Entity MIB extensions for physical
+         sensors.
+         
+         Copyright (C) The Internet Society (2002). This version
+         of this MIB module is part of RFC 3433; see the RFC
+         itself for full legal notices.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/ietf/ENTITY-SENSOR-MIB.yang
+         </ncx:source>
+         <ncx:organization>
+            IETF Entity MIB Working Group
+         </ncx:organization>
+         <ncx:contact>
+                    Andy Bierman
+            Cisco Systems, Inc.
+            Tel: +1 408-527-3711
+            E-mail: abierman@cisco.com
+            Postal: 170 West Tasman Drive
+            San Jose, CA USA 95134
+            
+            Dan Romascanu
+            Avaya Inc.
+            Tel: +972-3-645-8414
+            Email: dromasca@avaya.com
+            Postal: Atidim technology Park, Bldg. #3
+            Tel Aviv, Israel, 61131
+            
+            K.C. Norseth
+            L-3 Communications
+            Tel: +1 801-594-2809
+            Email: kenyon.c.norseth@L-3com.com
+            Postal: 640 N. 2200 West.
+            
+            
+            
+            Salt Lake City, Utah 84116-0850
+            
+            Send comments to &lt;entmib@ietf.org&gt;
+            Mailing list subscription info:
+            http://www.ietf.org/mailman/listinfo/entmib 
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2002-12-16</ncx:version>
+            <ncx:description>
+               Initial version of the Entity Sensor MIB module, published
+               as RFC 3433.
+            </ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:simpleType name="EntitySensorDataType">
+      <xs:annotation>
+         <xs:documentation>
+            An object using this data type represents the Entity Sensor
+            measurement data type associated with a physical sensor
+            value. The actual data units are determined by examining an
+            object of this type together with the associated
+            EntitySensorDataScale object.
+            
+            An object of this type SHOULD be defined together with
+            objects of type EntitySensorDataScale and
+            EntitySensorPrecision.  Together, associated objects of
+            these three types are used to identify the semantics of an
+            object of type EntitySensorValue.
+            
+            
+            
+            
+            
+            
+            Valid values are:
+            
+               other(1):        a measure other than those listed below
+               unknown(2):      unknown measurement, or arbitrary,
+            		    relative numbers
+               voltsAC(3):      electric potential
+               voltsDC(4):      electric potential
+               amperes(5):      electric current
+               watts(6):        power
+               hertz(7):        frequency
+               celsius(8):      temperature
+               percentRH(9):    percent relative humidity
+               rpm(10):         shaft revolutions per minute
+               cmm(11),:        cubic meters per minute (airflow)
+               truthvalue(12):  value takes { true(1), false(2) }
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="other">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>1</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="unknown">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>2</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="voltsAC">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>3</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="voltsDC">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>4</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="amperes">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>5</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="watts">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>6</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="hertz">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>7</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="celsius">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>8</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="percentRH">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>9</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="rpm">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>10</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="cmm">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>11</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="truthvalue">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>12</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="EntitySensorDataScale">
+      <xs:annotation>
+         <xs:documentation>
+            An object using this data type represents a data scaling
+            factor, represented with an International System of Units
+            (SI) prefix.  The actual data units are determined by
+            examining an object of this type together with the
+            associated EntitySensorDataType object.
+            
+            An object of this type SHOULD be defined together with
+            objects of type EntitySensorDataType and
+            EntitySensorPrecision.  Together, associated objects of
+            these three types are used to identify the semantics of an
+            object of type EntitySensorValue.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:reference>
+               <ncx:text>
+                  The International System of Units (SI),
+                  
+                  
+                  
+                  National Institute of Standards and Technology,
+                  Spec. Publ. 330, August 1991.
+               </ncx:text>
+            </ncx:reference>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="yocto">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>1</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="zepto">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>2</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="atto">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>3</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="femto">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>4</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="pico">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>5</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="nano">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>6</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="micro">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>7</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="milli">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>8</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="units">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>9</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="kilo">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>10</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="mega">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>11</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="giga">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>12</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="tera">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>13</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="exa">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>14</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="peta">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>15</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="zetta">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>16</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="yotta">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>17</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="EntitySensorPrecision">
+      <xs:annotation>
+         <xs:documentation>
+            An object using this data type represents a sensor
+            precision range.
+            
+            An object of this type SHOULD be defined together with
+            objects of type EntitySensorDataType and
+            EntitySensorDataScale.  Together, associated objects of
+            these three types are used to identify the semantics of an
+            object of type EntitySensorValue.
+            
+            If an object of this type contains a value in the range 1 to
+            9, it represents the number of decimal places in the
+            fractional part of an associated EntitySensorValue fixed-
+            point number.
+            
+            If an object of this type contains a value in the range -8
+            to -1, it represents the number of accurate digits in the
+            associated EntitySensorValue fixed-point number.
+            
+            The value zero indicates the associated EntitySensorValue
+            object is not a fixed-point number.
+            
+            Agent implementors must choose a value for the associated
+            EntitySensorPrecision object so that the precision and
+            
+            
+            
+            accuracy of the associated EntitySensorValue object is
+            correctly indicated.
+            
+            For example, a physical entity representing a temperature
+            sensor that can measure 0 degrees to 100 degrees C in 0.1
+            degree increments, +/- 0.05 degrees, would have an
+            EntitySensorPrecision value of '1', an EntitySensorDataScale
+            value of 'units(9)', and an EntitySensorValue ranging from
+            '0' to '1000'.  The EntitySensorValue would be interpreted
+            as 'degrees C * 10'.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:int">
+         <xs:minInclusive value="-8"/>
+         <xs:maxInclusive value="9"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="EntitySensorValue">
+      <xs:annotation>
+         <xs:documentation>
+            An object using this data type represents an Entity Sensor
+            value.
+            An object of this type SHOULD be defined together with
+            objects of type EntitySensorDataType, EntitySensorDataScale
+            and EntitySensorPrecision.  Together, associated objects of
+            those three types are used to identify the semantics of an
+            object of this data type.
+            
+            The semantics of an object using this data type are
+            determined by the value of the associated
+            EntitySensorDataType object.
+            
+            If the associated EntitySensorDataType object is equal to
+            'voltsAC(3)', 'voltsDC(4)', 'amperes(5)', 'watts(6),
+            'hertz(7)', 'celsius(8)', or 'cmm(11)', then an object of
+            this type MUST contain a fixed point number ranging from
+            -999,999,999 to +999,999,999.  The value -1000000000
+            indicates an underflow error. The value +1000000000
+            indicates an overflow error.  The EntitySensorPrecision
+            indicates how many fractional digits are represented in the
+            associated EntitySensorValue object.
+            
+            If the associated EntitySensorDataType object is equal to
+            'percentRH(9)', then an object of this type MUST contain a
+            number ranging from 0 to 100.
+            
+            If the associated EntitySensorDataType object is equal to
+            'rpm(10)', then an object of this type MUST contain a number
+            ranging from -999,999,999 to +999,999,999.
+            
+            If the associated EntitySensorDataType object is equal to
+            'truthvalue(12)', then an object of this type MUST contain
+            either the value 'true(1)' or the value 'false(2)'.
+            
+            
+            
+            If the associated EntitySensorDataType object is equal to
+            'other(1)' or unknown(2)', then an object of this type MUST
+            contain a number ranging from -1000000000 to 1000000000.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:int">
+         <xs:minInclusive value="-1000000000"/>
+         <xs:maxInclusive value="1000000000"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="EntitySensorStatus">
+      <xs:annotation>
+         <xs:documentation>
+            An object using this data type represents the operational
+            status of a physical sensor.
+            
+            The value 'ok(1)' indicates that the agent can obtain the
+            sensor value.
+            
+            The value 'unavailable(2)' indicates that the agent
+            presently cannot obtain the sensor value.
+            
+            The value 'nonoperational(3)' indicates that the agent
+            believes the sensor is broken.  The sensor could have a hard
+            failure (disconnected wire), or a soft failure such as out-
+            of-range, jittery, or wildly fluctuating readings.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="ok">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>1</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="unavailable">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>2</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="nonoperational">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>3</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:element name="entitySensorObjects">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <smi:oid  smi:oid="1.3.6.1.2.1.99.1"/>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="entPhySensorEntry" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     Information about a particular physical sensor.
+                     
+                     
+                     
+                     
+                     
+                     An entry in this table describes the present reading of a
+                     sensor, the measurement units and scale, and sensor
+                     operational status.
+                     
+                     Entries are created in this table by the agent.  An entry
+                     for each physical sensor SHOULD be created at the same time
+                     as the associated entPhysicalEntry.  An entry SHOULD be
+                     destroyed if the associated entPhysicalEntry is destroyed.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.99.1.1.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="entPhysicalIndex"
+                        type="xs:string">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Automagically generated leafref leaf.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="entPhySensorType"
+                        type="EntitySensorDataType" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The type of data returned by the associated
+                              entPhySensorValue object.
+                              
+                              This object SHOULD be set by the agent during entry
+                              creation, and the value SHOULD NOT change during operation.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.99.1.1.1.1"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="entPhySensorScale"
+                        type="EntitySensorDataScale" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The exponent to apply to values returned by the associated
+                              entPhySensorValue object.
+                              
+                              This object SHOULD be set by the agent during entry
+                              creation, and the value SHOULD NOT change during operation.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.99.1.1.1.2"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="entPhySensorPrecision"
+                        type="EntitySensorPrecision" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The number of decimal places of precision in fixed-point
+                              sensor values returned by the associated entPhySensorValue
+                              object.
+                              
+                              This object SHOULD be set to '0' when the associated
+                              entPhySensorType value is not a fixed-point type: e.g.,
+                              'percentRH(9)', 'rpm(10)', 'cmm(11)', or 'truthvalue(12)'.
+                              
+                              This object SHOULD be set by the agent during entry
+                              creation, and the value SHOULD NOT change during operation.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.99.1.1.1.3"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="entPhySensorValue"
+                        type="EntitySensorValue" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The most recent measurement obtained by the agent for this
+                              sensor.
+                              
+                              To correctly interpret the value of this object, the
+                              associated entPhySensorType, entPhySensorScale, and
+                              entPhySensorPrecision objects must also be examined.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.99.1.1.1.4"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="entPhySensorOperStatus"
+                        type="EntitySensorStatus" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The operational status of the sensor.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.99.1.1.1.5"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="entPhySensorUnitsDisplay"
+                        type="snmp-framework:SnmpAdminString"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              A textual description of the data units that should be used
+                              in the display of entPhySensorValue.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.99.1.1.1.6"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="entPhySensorValueTimeStamp"
+                        type="yang:timestamp" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The value of sysUpTime at the time the status and/or value
+                              of this sensor was last obtained by the agent.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.99.1.1.1.7"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="entPhySensorValueUpdateRate"
+                        type="xs:unsignedInt" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              An indication of the frequency that the agent updates the
+                              associated entPhySensorValue object, representing in
+                              milliseconds.
+                              
+                              The value zero indicates:
+                              
+                                  - the sensor value is updated on demand (e.g.,
+                                    when polled by the agent for a get-request),
+                                  - the sensor value is updated when the sensor
+                                    value changes (event-driven),
+                                  - the agent does not know the update rate.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <ncx:units>milliseconds</ncx:units>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.99.1.1.1.8"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element
+                        name="__.entitySensorObjects.entPhySensorEntry.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="entPhySensorEntry_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="entPhysicalIndex"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="__.entitySensorObjects.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

@@ -1,0 +1,2245 @@
+
+<div>
+   <h1 class="yang">DIFFSERV-MIB.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#IndexInteger.69">IndexInteger</a></li>
+            <li><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></li>
+            <li><a href="#IfDirection.112">IfDirection</a></li>
+         </ul>
+      </li>
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#diffServDataPath.124">diffServDataPath</a>
+               <ul>
+                  <li class="daddy"><a href="#diffServDataPathEntry.129">diffServDataPathEntry</a>
+                     <ul>
+                        <li><a href="#ifIndex.148">ifIndex</a></li>
+                        <li><a href="#diffServDataPathIfDirection.157">diffServDataPathIfDirection</a></li>
+                        <li><a href="#diffServDataPathStart.166">diffServDataPathStart</a></li>
+                        <li><a href="#diffServDataPathStorage.191">diffServDataPathStorage</a></li>
+                        <li><a href="#diffServDataPathStatus.202">diffServDataPathStatus</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#diffServClassifier.214">diffServClassifier</a>
+               <ul>
+                  <li><a href="#diffServClfrNextFree.216">diffServClfrNextFree</a></li>
+                  <li class="daddy"><a href="#diffServClfrEntry.228">diffServClfrEntry</a>
+                     <ul>
+                        <li><a href="#diffServClfrId.238">diffServClfrId</a></li>
+                        <li><a href="#diffServClfrStorage.248">diffServClfrStorage</a></li>
+                        <li><a href="#diffServClfrStatus.259">diffServClfrStatus</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="#diffServClfrElementNextFree.272">diffServClfrElementNextFree</a></li>
+                  <li class="daddy"><a href="#diffServClfrElementEntry.284">diffServClfrElementEntry</a>
+                     <ul>
+                        <li><a href="#diffServClfrId.292">diffServClfrId</a></li>
+                        <li><a href="#diffServClfrElementId.301">diffServClfrElementId</a></li>
+                        <li><a href="#diffServClfrElementPrecedence.311">diffServClfrElementPrecedence</a></li>
+                        <li><a href="#diffServClfrElementNext.336">diffServClfrElementNext</a></li>
+                        <li><a href="#diffServClfrElementSpecific.365">diffServClfrElementSpecific</a></li>
+                        <li><a href="#diffServClfrElementStorage.386">diffServClfrElementStorage</a></li>
+                        <li><a href="#diffServClfrElementStatus.397">diffServClfrElementStatus</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="#diffServMultiFieldClfrNextFree.410">diffServMultiFieldClfrNextFree</a></li>
+                  <li class="daddy"><a href="#diffServMultiFieldClfrEntry.422">diffServMultiFieldClfrEntry</a>
+                     <ul>
+                        <li><a href="#diffServMultiFieldClfrId.430">diffServMultiFieldClfrId</a></li>
+                        <li><a href="#diffServMultiFieldClfrAddrType.440">diffServMultiFieldClfrAddrType</a></li>
+                        <li><a href="#diffServMultiFieldClfrDstAddr.455">diffServMultiFieldClfrDstAddr</a></li>
+                        <li><a href="#diffServMultiFieldClfrDstPrefixLength.466">diffServMultiFieldClfrDstPrefixLength</a></li>
+                        <li><a href="#diffServMultiFieldClfrSrcAddr.481">diffServMultiFieldClfrSrcAddr</a></li>
+                        <li><a href="#diffServMultiFieldClfrSrcPrefixLength.492">diffServMultiFieldClfrSrcPrefixLength</a></li>
+                        <li><a href="#diffServMultiFieldClfrDscp.507">diffServMultiFieldClfrDscp</a></li>
+                        <li><a href="#diffServMultiFieldClfrFlowId.518">diffServMultiFieldClfrFlowId</a></li>
+                        <li><a href="#diffServMultiFieldClfrProtocol.528">diffServMultiFieldClfrProtocol</a></li>
+                        <li><a href="#diffServMultiFieldClfrDstL4PortMin.542">diffServMultiFieldClfrDstL4PortMin</a></li>
+                        <li><a href="#diffServMultiFieldClfrDstL4PortMax.552">diffServMultiFieldClfrDstL4PortMax</a></li>
+                        <li><a href="#diffServMultiFieldClfrSrcL4PortMin.564">diffServMultiFieldClfrSrcL4PortMin</a></li>
+                        <li><a href="#diffServMultiFieldClfrSrcL4PortMax.574">diffServMultiFieldClfrSrcL4PortMax</a></li>
+                        <li><a href="#diffServMultiFieldClfrStorage.586">diffServMultiFieldClfrStorage</a></li>
+                        <li><a href="#diffServMultiFieldClfrStatus.597">diffServMultiFieldClfrStatus</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#diffServMeter.612">diffServMeter</a>
+               <ul>
+                  <li><a href="#diffServMeterNextFree.614">diffServMeterNextFree</a></li>
+                  <li class="daddy"><a href="#diffServMeterEntry.626">diffServMeterEntry</a>
+                     <ul>
+                        <li><a href="#diffServMeterId.635">diffServMeterId</a></li>
+                        <li><a href="#diffServMeterSucceedNext.645">diffServMeterSucceedNext</a></li>
+                        <li><a href="#diffServMeterFailNext.672">diffServMeterFailNext</a></li>
+                        <li><a href="#diffServMeterSpecific.702">diffServMeterSpecific</a></li>
+                        <li><a href="#diffServMeterStorage.720">diffServMeterStorage</a></li>
+                        <li><a href="#diffServMeterStatus.731">diffServMeterStatus</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#diffServTBParam.746">diffServTBParam</a>
+               <ul>
+                  <li><a href="#diffServTBParamNextFree.748">diffServTBParamNextFree</a></li>
+                  <li class="daddy"><a href="#diffServTBParamEntry.760">diffServTBParamEntry</a>
+                     <ul>
+                        <li><a href="#diffServTBParamId.769">diffServTBParamId</a></li>
+                        <li><a href="#diffServTBParamType.779">diffServTBParamType</a></li>
+                        <li><a href="#diffServTBParamRate.796">diffServTBParamRate</a></li>
+                        <li><a href="#diffServTBParamBurstSize.812">diffServTBParamBurstSize</a></li>
+                        <li><a href="#diffServTBParamInterval.825">diffServTBParamInterval</a></li>
+                        <li><a href="#diffServTBParamStorage.843">diffServTBParamStorage</a></li>
+                        <li><a href="#diffServTBParamStatus.854">diffServTBParamStatus</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#diffServAction.869">diffServAction</a>
+               <ul>
+                  <li><a href="#diffServActionNextFree.871">diffServActionNextFree</a></li>
+                  <li class="daddy"><a href="#diffServActionEntry.883">diffServActionEntry</a>
+                     <ul>
+                        <li><a href="#diffServActionId.892">diffServActionId</a></li>
+                        <li><a href="#diffServActionInterface.902">diffServActionInterface</a></li>
+                        <li><a href="#diffServActionNext.927">diffServActionNext</a></li>
+                        <li><a href="#diffServActionSpecific.953">diffServActionSpecific</a></li>
+                        <li><a href="#diffServActionStorage.973">diffServActionStorage</a></li>
+                        <li><a href="#diffServActionStatus.984">diffServActionStatus</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#diffServDscpMarkActEntry.1000">diffServDscpMarkActEntry</a>
+                     <ul>
+                        <li><a href="#diffServDscpMarkActDscp.1009">diffServDscpMarkActDscp</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="#diffServCountActNextFree.1023">diffServCountActNextFree</a></li>
+                  <li class="daddy"><a href="#diffServCountActEntry.1035">diffServCountActEntry</a>
+                     <ul>
+                        <li><a href="#diffServCountActId.1044">diffServCountActId</a></li>
+                        <li><a href="#diffServCountActOctets.1057">diffServCountActOctets</a></li>
+                        <li><a href="#diffServCountActPkts.1070">diffServCountActPkts</a></li>
+                        <li><a href="#diffServCountActStorage.1083">diffServCountActStorage</a></li>
+                        <li><a href="#diffServCountActStatus.1094">diffServCountActStatus</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#diffServAlgDrop.1112">diffServAlgDrop</a>
+               <ul>
+                  <li><a href="#diffServAlgDropNextFree.1114">diffServAlgDropNextFree</a></li>
+                  <li class="daddy"><a href="#diffServAlgDropEntry.1126">diffServAlgDropEntry</a>
+                     <ul>
+                        <li><a href="#diffServAlgDropId.1137">diffServAlgDropId</a></li>
+                        <li><a href="#diffServAlgDropType.1147">diffServAlgDropType</a></li>
+                        <li><a href="#diffServAlgDropNext.1193">diffServAlgDropNext</a></li>
+                        <li><a href="#diffServAlgDropQMeasure.1220">diffServAlgDropQMeasure</a></li>
+                        <li><a href="#diffServAlgDropQThreshold.1238">diffServAlgDropQThreshold</a></li>
+                        <li><a href="#diffServAlgDropSpecific.1257">diffServAlgDropSpecific</a></li>
+                        <li><a href="#diffServAlgDropOctets.1284">diffServAlgDropOctets</a></li>
+                        <li><a href="#diffServAlgDropPkts.1298">diffServAlgDropPkts</a></li>
+                        <li><a href="#diffServAlgRandomDropOctets.1312">diffServAlgRandomDropOctets</a></li>
+                        <li><a href="#diffServAlgRandomDropPkts.1327">diffServAlgRandomDropPkts</a></li>
+                        <li><a href="#diffServAlgDropStorage.1342">diffServAlgDropStorage</a></li>
+                        <li><a href="#diffServAlgDropStatus.1353">diffServAlgDropStatus</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="#diffServRandomDropNextFree.1366">diffServRandomDropNextFree</a></li>
+                  <li class="daddy"><a href="#diffServRandomDropEntry.1378">diffServRandomDropEntry</a>
+                     <ul>
+                        <li><a href="#diffServRandomDropId.1387">diffServRandomDropId</a></li>
+                        <li><a href="#diffServRandomDropMinThreshBytes.1397">diffServRandomDropMinThreshBytes</a></li>
+                        <li><a href="#diffServRandomDropMinThreshPkts.1411">diffServRandomDropMinThreshPkts</a></li>
+                        <li><a href="#diffServRandomDropMaxThreshBytes.1425">diffServRandomDropMaxThreshBytes</a></li>
+                        <li><a href="#diffServRandomDropMaxThreshPkts.1441">diffServRandomDropMaxThreshPkts</a></li>
+                        <li><a href="#diffServRandomDropProbMax.1457">diffServRandomDropProbMax</a></li>
+                        <li><a href="#diffServRandomDropWeight.1473">diffServRandomDropWeight</a></li>
+                        <li><a href="#diffServRandomDropSamplingRate.1495">diffServRandomDropSamplingRate</a></li>
+                        <li><a href="#diffServRandomDropStorage.1508">diffServRandomDropStorage</a></li>
+                        <li><a href="#diffServRandomDropStatus.1519">diffServRandomDropStatus</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#diffServQueue.1534">diffServQueue</a>
+               <ul>
+                  <li><a href="#diffServQNextFree.1536">diffServQNextFree</a></li>
+                  <li class="daddy"><a href="#diffServQEntry.1548">diffServQEntry</a>
+                     <ul>
+                        <li><a href="#diffServQId.1557">diffServQId</a></li>
+                        <li><a href="#diffServQNext.1567">diffServQNext</a></li>
+                        <li><a href="#diffServQMinRate.1586">diffServQMinRate</a></li>
+                        <li><a href="#diffServQMaxRate.1604">diffServQMaxRate</a></li>
+                        <li><a href="#diffServQStorage.1625">diffServQStorage</a></li>
+                        <li><a href="#diffServQStatus.1636">diffServQStatus</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#diffServScheduler.1651">diffServScheduler</a>
+               <ul>
+                  <li><a href="#diffServSchedulerNextFree.1653">diffServSchedulerNextFree</a></li>
+                  <li class="daddy"><a href="#diffServSchedulerEntry.1665">diffServSchedulerEntry</a>
+                     <ul>
+                        <li><a href="#diffServSchedulerId.1674">diffServSchedulerId</a></li>
+                        <li><a href="#diffServSchedulerNext.1684">diffServSchedulerNext</a></li>
+                        <li><a href="#diffServSchedulerMethod.1717">diffServSchedulerMethod</a></li>
+                        <li><a href="#diffServSchedulerMinRate.1732">diffServSchedulerMinRate</a></li>
+                        <li><a href="#diffServSchedulerMaxRate.1752">diffServSchedulerMaxRate</a></li>
+                        <li><a href="#diffServSchedulerStorage.1774">diffServSchedulerStorage</a></li>
+                        <li><a href="#diffServSchedulerStatus.1785">diffServSchedulerStatus</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="#diffServMinRateNextFree.1798">diffServMinRateNextFree</a></li>
+                  <li class="daddy"><a href="#diffServMinRateEntry.1810">diffServMinRateEntry</a>
+                     <ul>
+                        <li><a href="#diffServMinRateId.1820">diffServMinRateId</a></li>
+                        <li><a href="#diffServMinRatePriority.1830">diffServMinRatePriority</a></li>
+                        <li><a href="#diffServMinRateAbsolute.1846">diffServMinRateAbsolute</a></li>
+                        <li><a href="#diffServMinRateRelative.1875">diffServMinRateRelative</a></li>
+                        <li><a href="#diffServMinRateStorage.1906">diffServMinRateStorage</a></li>
+                        <li><a href="#diffServMinRateStatus.1917">diffServMinRateStatus</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="#diffServMaxRateNextFree.1930">diffServMaxRateNextFree</a></li>
+                  <li class="daddy"><a href="#diffServMaxRateEntry.1942">diffServMaxRateEntry</a>
+                     <ul>
+                        <li><a href="#diffServMaxRateId.1952">diffServMaxRateId</a></li>
+                        <li><a href="#diffServMaxRateLevel.1962">diffServMaxRateLevel</a></li>
+                        <li><a href="#diffServMaxRateAbsolute.1980">diffServMaxRateAbsolute</a></li>
+                        <li><a href="#diffServMaxRateRelative.2013">diffServMaxRateRelative</a></li>
+                        <li><a href="#diffServMaxRateThreshold.2044">diffServMaxRateThreshold</a></li>
+                        <li><a href="#diffServMaxRateStorage.2061">diffServMaxRateStorage</a></li>
+                        <li><a href="#diffServMaxRateStatus.2072">diffServMaxRateStatus</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">DIFFSERV-MIB</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:yang:smiv2:DIFFSERV-MIB"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"diffserv-mib"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/DIFFSERV-DSCP-TC">DIFFSERV-DSCP-TC</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"diffserv-dscp"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/IF-MIB">IF-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"if-mib"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/INET-ADDRESS-MIB">INET-ADDRESS-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"inet-address"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/INTEGRATED-SERVICES-MIB">INTEGRATED-SERVICES-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"integrated-services"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/SNMPv2-TC">SNMPv2-TC</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smiv2"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-smi">yang-smi</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/ietf-yang-types">ietf-yang-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
+      }
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"IETF Differentiated Services WG"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"       Fred Baker
+         Cisco Systems
+         1121 Via Del Rey
+         Santa Barbara, CA 93117, USA
+         E-mail: fred@cisco.com
+         
+         Kwok Ho Chan
+         Nortel Networks
+         600 Technology Park Drive
+         Billerica, MA 01821, USA
+         E-mail: khchan@nortelnetworks.com
+         
+         Andrew Smith
+         Harbour Networks
+         Jiuling Building
+         
+         
+         21 North Xisanhuan Ave.
+         Beijing, 100089, PRC
+         E-mail: ah_smith@acm.org
+         
+         Differentiated Services Working Group:
+         diffserv@ietf.org"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"This MIB defines the objects necessary to manage a device that
+         uses the Differentiated Services Architecture described in RFC
+         2475. The Conceptual Model of a Differentiated Services Router
+         provides supporting information on how such a router is modeled."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2002-02-07"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Initial version, published as RFC 3289."</span>;
+      }
+
+
+      <a name="IndexInteger.69"></a><span class="yang_kw">typedef</span> <span class="yang_id">IndexInteger</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+            <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+            <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"d"</span>;
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"An integer which may be used as a table index."</span>;
+      }
+
+      <a name="IndexIntegerNextFree.78"></a><span class="yang_kw">typedef</span> <span class="yang_id">IndexIntegerNextFree</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+            <span class="yang_kw">range</span> <span class="yang_str">"0..4294967295"</span>;
+            <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"d"</span>;
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"An integer which may be used as a new Index in a table.
+            
+            The special value of 0 indicates that no more new entries can be
+            created in the relevant table.
+            
+            When a MIB is used for configuration, an object with this SYNTAX
+            always contains a legal value (if non-zero) for an index that is
+            not currently used in the relevant table. The Command Generator
+            (Network Management Application) reads this variable and uses the
+            (non-zero) value read when creating a new row with an SNMP SET.
+            When the SET is performed, the Command Responder (agent) must
+            determine whether the value is indeed still unused; Two Network
+            Management Applications may attempt to create a row
+            (configuration entry) simultaneously and use the same value. If
+            it is currently unused, the SET succeeds and the Command
+            Responder (agent) changes the value of this object, according to
+            an implementation-specific algorithm.  If the value is in use,
+            
+            
+            
+            however, the SET fails.  The Network Management Application must
+            then re-read this variable to obtain a new usable value.
+            
+            An OBJECT-TYPE definition using this SYNTAX MUST specify the
+            relevant table for which the object is providing this
+            functionality."</span>;
+      }
+
+      <a name="IfDirection.112"></a><span class="yang_kw">typedef</span> <span class="yang_id">IfDirection</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+            <span class="yang_kw">enum</span> <span class="yang_str">"inbound"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"outbound"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+            }
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"IfDirection specifies a direction of data travel on an
+            interface. 'inbound' traffic is operated on during reception from
+            the interface, while 'outbound' traffic is operated on prior to
+            transmission on the interface."</span>;
+      }
+
+      <a name="diffServDataPath.124"></a><span class="yang_kw">container</span> <span class="yang_id">diffServDataPath</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <a name="diffServDataPathEntry.129"></a><span class="yang_kw">list</span> <span class="yang_id">diffServDataPathEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#ifIndex.148">ifIndex</a> <a href="#diffServDataPathIfDirection.157">diffServDataPathIfDirection</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry in the data path table indicates the start of a single
+               Differentiated Services Functional Data Path in this device.
+               
+               These are associated with individual interfaces, logical or
+               physical, and therefore are instantiated by ifIndex. Therefore,
+               the interface index must have been assigned, according to the
+               procedures applicable to that, before it can be meaningfully
+               used. Generally, this means that the interface must exist.
+               
+               When diffServDataPathStorage is of type nonVolatile, however,
+               this may reflect the configuration for an interface whose ifIndex
+               has been assigned but for which the supporting implementation is
+               not currently present."</span>;
+            <a name="ifIndex.148"></a><span class="yang_kw">leaf</span> <span class="yang_id">ifIndex</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/if-mib:interfaces/if-mib:ifEntry/if-mib:ifIndex"</span>;
+                  <span class="yang_kw">require-instance</span> <span class="yang_str">"true"</span>;
+               }
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated leafref leaf."</span>;
+            }
+
+            <a name="diffServDataPathIfDirection.157"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServDataPathIfDirection</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#IfDirection.112">IfDirection</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"IfDirection specifies whether the reception or transmission path
+                  for this interface is in view."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.1.1.1.1"</span>;
+            }
+
+            <a name="diffServDataPathStart.166"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServDataPathStart</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This selects the first Differentiated Services Functional Data
+                  Path Element to handle traffic for this data path. This
+                  RowPointer should point to an instance of one of:
+                    diffServClfrEntry
+                    diffServMeterEntry
+                    diffServActionEntry
+                    diffServAlgDropEntry
+                    diffServQEntry
+                  
+                  A value of zeroDotZero in this attribute indicates that no
+                  Differentiated Services treatment is performed on traffic of this
+                  data path. A pointer with the value zeroDotZero normally
+                  terminates a functional data path.
+                  
+                  Setting this to point to a target that does not exist results in
+                  an inconsistentValue error.  If the row pointed to is removed or
+                  becomes inactive by other means, the treatment is as if this
+                  attribute contains a value of zeroDotZero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.1.1.1.2"</span>;
+            }
+
+            <a name="diffServDataPathStorage.191"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServDataPathStorage</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row.  Conceptual rows
+                  having the value 'permanent' need not allow write-access to any
+                  columnar objects in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nonVolatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.1.1.1.3"</span>;
+            }
+
+            <a name="diffServDataPathStatus.202"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServDataPathStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row. All writable objects in this
+                  row may be modified at any time."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.1.1.1.4"</span>;
+            }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.1.1.1"</span>;
+         }  <span class="yang_cmt">// list diffServDataPathEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.1"</span>;
+      }  <span class="yang_cmt">// container diffServDataPath</span>
+
+      <a name="diffServClassifier.214"></a><span class="yang_kw">container</span> <span class="yang_id">diffServClassifier</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <a name="diffServClfrNextFree.216"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrNextFree</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object contains an unused value for diffServClfrId, or a
+               zero to indicate that none exist."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.1"</span>;
+         }
+
+         <a name="diffServClfrEntry.228"></a><span class="yang_kw">list</span> <span class="yang_id">diffServClfrEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#diffServClfrId.238">diffServClfrId</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry in the classifier table describes a single classifier.
+               All classifier elements belonging to the same classifier use the
+               classifier's diffServClfrId as part of their index."</span>;
+            <a name="diffServClfrId.238"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An index that enumerates the classifier entries.  Managers
+                  should obtain new values for row creation in this table by
+                  reading diffServClfrNextFree."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.2.1.1"</span>;
+            }
+
+            <a name="diffServClfrStorage.248"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrStorage</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row.  Conceptual rows
+                  having the value 'permanent' need not allow write-access to any
+                  columnar objects in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nonVolatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.2.1.2"</span>;
+            }
+
+            <a name="diffServClfrStatus.259"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row. All writable objects in this
+                  row may be modified at any time. Setting this variable to
+                  'destroy' when the MIB contains one or more RowPointers pointing
+                  to it results in destruction being delayed until the row is no
+                  longer used."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.2.1.3"</span>;
+            }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.2.1"</span>;
+         }  <span class="yang_cmt">// list diffServClfrEntry</span>
+
+         <a name="diffServClfrElementNextFree.272"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementNextFree</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object contains an unused value for diffServClfrElementId,
+               or a zero to indicate that none exist."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.3"</span>;
+         }
+
+         <a name="diffServClfrElementEntry.284"></a><span class="yang_kw">list</span> <span class="yang_id">diffServClfrElementEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#diffServClfrId.292">diffServClfrId</a> <a href="#diffServClfrElementId.301">diffServClfrElementId</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry in the classifier element table describes a single
+               element of the classifier."</span>;
+            <a name="diffServClfrId.292"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/diffserv-mib:diffServClassifier/diffserv-mib:diffServClfrEntry/diffserv-mib:diffServClfrId"</span>;
+                  <span class="yang_kw">require-instance</span> <span class="yang_str">"true"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated leafref leaf."</span>;
+            }
+
+            <a name="diffServClfrElementId.301"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An index that enumerates the Classifier Element entries.
+                  Managers obtain new values for row creation in this table by
+                  reading diffServClfrElementNextFree."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.4.1.1"</span>;
+            }
+
+            <a name="diffServClfrElementPrecedence.311"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementPrecedence</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The relative order in which classifier elements are applied:
+                  higher numbers represent classifier element with higher
+                  precedence.  Classifier elements with the same order must be
+                  unambiguous i.e. they must define non-overlapping patterns, and
+                  are considered to be applied simultaneously to the traffic
+                  stream. Classifier elements with different order may overlap in
+                  their filters:  the classifier element with the highest order
+                  that matches is taken.
+                  
+                  On a given interface, there must be a complete classifier in
+                  place at all times in the ingress direction.  This means one or
+                  more filters must match any possible pattern. There is no such
+                  
+                  
+                  
+                  requirement in the egress direction."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.4.1.2"</span>;
+            }
+
+            <a name="diffServClfrElementNext.336"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementNext</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This attribute provides one branch of the fan-out functionality
+                  of a classifier described in the Informal Differentiated Services
+                  Model section 4.1.
+                  
+                  This selects the next Differentiated Services Functional Data
+                  Path Element to handle traffic for this data path. This
+                  RowPointer should point to an instance of one of:
+                    diffServClfrEntry
+                    diffServMeterEntry
+                    diffServActionEntry
+                    diffServAlgDropEntry
+                    diffServQEntry
+                  
+                  A value of zeroDotZero in this attribute indicates no further
+                  Differentiated Services treatment is performed on traffic of this
+                  data path. The use of zeroDotZero is the normal usage for the
+                  last functional data path element of the current data path.
+                  
+                  Setting this to point to a target that does not exist results in
+                  an inconsistentValue error.  If the row pointed to is removed or
+                  becomes inactive by other means, the treatment is as if this
+                  attribute contains a value of zeroDotZero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.4.1.3"</span>;
+            }
+
+            <a name="diffServClfrElementSpecific.365"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementSpecific</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A pointer to a valid entry in another table, filter table, that
+                  describes the applicable classification parameters, e.g. an entry
+                  in diffServMultiFieldClfrTable.
+                  
+                  The value zeroDotZero is interpreted to match anything not
+                  matched by another classifier element - only one such entry may
+                  exist for each classifier.
+                  
+                  Setting this to point to a target that does not exist results in
+                  an inconsistentValue error.  If the row pointed to is removed or
+                  
+                  
+                  
+                  becomes inactive by other means, the element is ignored."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.4.1.4"</span>;
+            }
+
+            <a name="diffServClfrElementStorage.386"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementStorage</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row.  Conceptual rows
+                  having the value 'permanent' need not allow write-access to any
+                  columnar objects in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nonVolatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.4.1.5"</span>;
+            }
+
+            <a name="diffServClfrElementStatus.397"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServClfrElementStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row. All writable objects in this
+                  row may be modified at any time. Setting this variable to
+                  'destroy' when the MIB contains one or more RowPointers pointing
+                  to it results in destruction being delayed until the row is no
+                  longer used."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.4.1.6"</span>;
+            }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.4.1"</span>;
+         }  <span class="yang_cmt">// list diffServClfrElementEntry</span>
+
+         <a name="diffServMultiFieldClfrNextFree.410"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrNextFree</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object contains an unused value for
+               diffServMultiFieldClfrId, or a zero to indicate that none exist."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.5"</span>;
+         }
+
+         <a name="diffServMultiFieldClfrEntry.422"></a><span class="yang_kw">list</span> <span class="yang_id">diffServMultiFieldClfrEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#diffServMultiFieldClfrId.430">diffServMultiFieldClfrId</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An IP Multi-field Classifier entry describes a single filter."</span>;
+            <a name="diffServMultiFieldClfrId.430"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An index that enumerates the MultiField Classifier filter
+                  entries.  Managers obtain new values for row creation in this
+                  table by reading diffServMultiFieldClfrNextFree."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.1"</span>;
+            }
+
+            <a name="diffServMultiFieldClfrAddrType.440"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrAddrType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressType.71">inet-address:InetAddressType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The type of IP address used by this classifier entry.  While
+                  other types of addresses are defined in the InetAddressType
+                  
+                  
+                  
+                  textual convention, and DNS names, a classifier can only look at
+                  packets on the wire. Therefore, this object is limited to IPv4
+                  and IPv6 addresses."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.2"</span>;
+            }
+
+            <a name="diffServMultiFieldClfrDstAddr.455"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrDstAddr</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddress.128">inet-address:InetAddress</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The IP address to match against the packet's destination IP
+                  address. This may not be a DNS name, but may be an IPv4 or IPv6
+                  prefix.  diffServMultiFieldClfrDstPrefixLength indicates the
+                  number of bits that are relevant."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.3"</span>;
+            }
+
+            <a name="diffServMultiFieldClfrDstPrefixLength.466"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrDstPrefixLength</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressPrefixLength.285">inet-address:InetAddressPrefixLength</a></span>;
+               <span class="yang_kw">units</span> <span class="yang_str">"bits"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The length of the CIDR Prefix carried in
+                  diffServMultiFieldClfrDstAddr. In IPv4 addresses, a length of 0
+                  indicates a match of any address; a length of 32 indicates a
+                  match of a single host address, and a length between 0 and 32
+                  indicates the use of a CIDR Prefix. IPv6 is similar, except that
+                  prefix lengths range from 0..128."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.4"</span>;
+            }
+
+            <a name="diffServMultiFieldClfrSrcAddr.481"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrSrcAddr</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddress.128">inet-address:InetAddress</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The IP address to match against the packet's source IP address.
+                  This may not be a DNS name, but may be an IPv4 or IPv6 prefix.
+                  diffServMultiFieldClfrSrcPrefixLength indicates the number of
+                  bits that are relevant."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.5"</span>;
+            }
+
+            <a name="diffServMultiFieldClfrSrcPrefixLength.492"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrSrcPrefixLength</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetAddressPrefixLength.285">inet-address:InetAddressPrefixLength</a></span>;
+               <span class="yang_kw">units</span> <span class="yang_str">"bits"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The length of the CIDR Prefix carried in
+                  diffServMultiFieldClfrSrcAddr. In IPv4 addresses, a length of 0
+                  indicates a match of any address; a length of 32 indicates a
+                  match of a single host address, and a length between 0 and 32
+                  indicates the use of a CIDR Prefix. IPv6 is similar, except that
+                  prefix lengths range from 0..128."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.6"</span>;
+            }
+
+            <a name="diffServMultiFieldClfrDscp.507"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrDscp</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/DIFFSERV-DSCP-TC/2002-05-09#DscpOrAny.71">diffserv-dscp:DscpOrAny</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value that the DSCP in the packet must have to match this
+                  entry. A value of -1 indicates that a specific DSCP value has not
+                  been defined and thus all DSCP values are considered a match."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"-1"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.7"</span>;
+            }
+
+            <a name="diffServMultiFieldClfrFlowId.518"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrFlowId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"0..1048575"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"The flow identifier in an IPv6 header."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.8"</span>;
+            }
+
+            <a name="diffServMultiFieldClfrProtocol.528"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrProtocol</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"0..255"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The IP protocol to match against the IPv4 protocol number or the
+                  IPv6 Next- Header number in the packet. A value of 255 means
+                  match all.  Note the protocol number of 255 is reserved by IANA,
+                  and Next-Header number of 0 is used in IPv6."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"255"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.9"</span>;
+            }
+
+            <a name="diffServMultiFieldClfrDstL4PortMin.542"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrDstL4PortMin</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetPortNumber.324">inet-address:InetPortNumber</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The minimum value that the layer-4 destination port number in
+                  the packet must have in order to match this classifier entry."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.10"</span>;
+            }
+
+            <a name="diffServMultiFieldClfrDstL4PortMax.552"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrDstL4PortMax</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetPortNumber.324">inet-address:InetPortNumber</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The maximum value that the layer-4 destination port number in
+                  the packet must have in order to match this classifier entry.
+                  This value must be equal to or greater than the value specified
+                  for this entry in diffServMultiFieldClfrDstL4PortMin."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"65535"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.11"</span>;
+            }
+
+            <a name="diffServMultiFieldClfrSrcL4PortMin.564"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrSrcL4PortMin</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetPortNumber.324">inet-address:InetPortNumber</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The minimum value that the layer-4 source port number in the
+                  packet must have in order to match this classifier entry."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.12"</span>;
+            }
+
+            <a name="diffServMultiFieldClfrSrcL4PortMax.574"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrSrcL4PortMax</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INET-ADDRESS-MIB/2005-02-04#InetPortNumber.324">inet-address:InetPortNumber</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The maximum value that the layer-4 source port number in the
+                  packet must have in order to match this classifier entry. This
+                  value must be equal to or greater than the value specified for
+                  this entry in diffServMultiFieldClfrSrcL4PortMin."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"65535"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.13"</span>;
+            }
+
+            <a name="diffServMultiFieldClfrStorage.586"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrStorage</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row.  Conceptual rows
+                  having the value 'permanent' need not allow write-access to any
+                  columnar objects in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nonVolatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.14"</span>;
+            }
+
+            <a name="diffServMultiFieldClfrStatus.597"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMultiFieldClfrStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row. All writable objects in this
+                  row may be modified at any time. Setting this variable to
+                  'destroy' when the MIB contains one or more RowPointers pointing
+                  to it results in destruction being delayed until the row is no
+                  longer used."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1.15"</span>;
+            }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2.6.1"</span>;
+         }  <span class="yang_cmt">// list diffServMultiFieldClfrEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.2"</span>;
+      }  <span class="yang_cmt">// container diffServClassifier</span>
+
+      <a name="diffServMeter.612"></a><span class="yang_kw">container</span> <span class="yang_id">diffServMeter</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <a name="diffServMeterNextFree.614"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterNextFree</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object contains an unused value for diffServMeterId, or a
+               zero to indicate that none exist."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.3.1"</span>;
+         }
+
+         <a name="diffServMeterEntry.626"></a><span class="yang_kw">list</span> <span class="yang_id">diffServMeterEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#diffServMeterId.635">diffServMeterId</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry in the meter table describes a single conformance level
+               of a meter."</span>;
+            <a name="diffServMeterId.635"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An index that enumerates the Meter entries.  Managers obtain new
+                  values for row creation in this table by reading
+                  diffServMeterNextFree."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.3.2.1.1"</span>;
+            }
+
+            <a name="diffServMeterSucceedNext.645"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterSucceedNext</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"If the traffic does conform, this selects the next
+                  Differentiated Services Functional Data Path element to handle
+                  traffic for this data path. This RowPointer should point to an
+                  instance of one of:
+                    diffServClfrEntry
+                    diffServMeterEntry
+                    diffServActionEntry
+                    diffServAlgDropEntry
+                    diffServQEntry
+                  
+                  A value of zeroDotZero in this attribute indicates that no
+                  further Differentiated Services treatment is performed on traffic
+                  of this data path. The use of zeroDotZero is the normal usage for
+                  the last functional data path element of the current data path.
+                  
+                  Setting this to point to a target that does not exist results in
+                  an inconsistentValue error.  If the row pointed to is removed or
+                  becomes inactive by other means, the treatment is as if this
+                  attribute contains a value of zeroDotZero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"zeroDotZero"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.3.2.1.2"</span>;
+            }
+
+            <a name="diffServMeterFailNext.672"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterFailNext</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"If the traffic does not conform, this selects the next
+                  Differentiated Services Functional Data Path element to handle
+                  traffic for this data path. This RowPointer should point to an
+                  instance of one of:
+                    diffServClfrEntry
+                    diffServMeterEntry
+                  
+                  
+                  
+                    diffServActionEntry
+                    diffServAlgDropEntry
+                    diffServQEntry
+                  
+                  A value of zeroDotZero in this attribute indicates no further
+                  Differentiated Services treatment is performed on traffic of this
+                  data path. The use of zeroDotZero is the normal usage for the
+                  last functional data path element of the current data path.
+                  
+                  Setting this to point to a target that does not exist results in
+                  an inconsistentValue error.  If the row pointed to is removed or
+                  becomes inactive by other means, the treatment is as if this
+                  attribute contains a value of zeroDotZero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"zeroDotZero"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.3.2.1.3"</span>;
+            }
+
+            <a name="diffServMeterSpecific.702"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterSpecific</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This indicates the behavior of the meter by pointing to an entry
+                  containing detailed parameters. Note that entries in that
+                  specific table must be managed explicitly.
+                  
+                  For example, diffServMeterSpecific may point to an entry in
+                  diffServTBParamTable, which contains an instance of a single set
+                  of Token Bucket parameters.
+                  
+                  Setting this to point to a target that does not exist results in
+                  an inconsistentValue error.  If the row pointed to is removed or
+                  becomes inactive by other means, the meter always succeeds."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.3.2.1.4"</span>;
+            }
+
+            <a name="diffServMeterStorage.720"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterStorage</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row.  Conceptual rows
+                  having the value 'permanent' need not allow write-access to any
+                  columnar objects in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nonVolatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.3.2.1.5"</span>;
+            }
+
+            <a name="diffServMeterStatus.731"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMeterStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row. All writable objects in this
+                  row may be modified at any time. Setting this variable to
+                  'destroy' when the MIB contains one or more RowPointers pointing
+                  to it results in destruction being delayed until the row is no
+                  longer used."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.3.2.1.6"</span>;
+            }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.3.2.1"</span>;
+         }  <span class="yang_cmt">// list diffServMeterEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.3"</span>;
+      }  <span class="yang_cmt">// container diffServMeter</span>
+
+      <a name="diffServTBParam.746"></a><span class="yang_kw">container</span> <span class="yang_id">diffServTBParam</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <a name="diffServTBParamNextFree.748"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamNextFree</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object contains an unused value for diffServTBParamId, or a
+               zero to indicate that none exist."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4.1"</span>;
+         }
+
+         <a name="diffServTBParamEntry.760"></a><span class="yang_kw">list</span> <span class="yang_id">diffServTBParamEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#diffServTBParamId.769">diffServTBParamId</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry that describes a single set of token bucket
+               parameters."</span>;
+            <a name="diffServTBParamId.769"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An index that enumerates the Token Bucket Parameter entries.
+                  Managers obtain new values for row creation in this table by
+                  reading diffServTBParamNextFree."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4.2.1.1"</span>;
+            }
+
+            <a name="diffServTBParamType.779"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#AutonomousType.141">smiv2:AutonomousType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The Metering algorithm associated with the Token Bucket
+                  parameters.  zeroDotZero indicates this is unknown.
+                  
+                  Standard values for generic algorithms:
+                  diffServTBParamSimpleTokenBucket, diffServTBParamAvgRate,
+                  diffServTBParamSrTCMBlind, diffServTBParamSrTCMAware,
+                  diffServTBParamTrTCMBlind, diffServTBParamTrTCMAware, and
+                  diffServTBParamTswTCM are specified in this MIB as OBJECT-
+                  IDENTITYs; additional values may be further specified in other
+                  MIBs."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4.2.1.2"</span>;
+            }
+
+            <a name="diffServTBParamRate.796"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamRate</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">units</span> <span class="yang_str">"kilobits per second"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The token-bucket rate, in kilobits per second (kbps). This
+                  attribute is used for:
+                  1. CIR in RFC 2697 for srTCM
+                  2. CIR and PIR in RFC 2698 for trTCM
+                  3. CTR and PTR in RFC 2859 for TSWTCM
+                  4. AverageRate in RFC 3290."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4.2.1.3"</span>;
+            }
+
+            <a name="diffServTBParamBurstSize.812"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamBurstSize</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INTEGRATED-SERVICES-MIB/1995-11-03#BurstSize.148">integrated-services:BurstSize</a></span>;
+               <span class="yang_kw">units</span> <span class="yang_str">"Bytes"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The maximum number of bytes in a single transmission burst. This
+                  attribute is used for:
+                  1. CBS and EBS in RFC 2697 for srTCM
+                  2. CBS and PBS in RFC 2698 for trTCM
+                  3. Burst Size in RFC 3290."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4.2.1.4"</span>;
+            }
+
+            <a name="diffServTBParamInterval.825"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamInterval</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">units</span> <span class="yang_str">"microseconds"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The time interval used with the token bucket.  For:
+                  1. Average Rate Meter, the Informal Differentiated Services Model
+                     section 5.2.1, - Delta.
+                  2. Simple Token Bucket Meter, the Informal Differentiated
+                     Services Model section 5.1, - time interval t.
+                  3. RFC 2859 TSWTCM, - AVG_INTERVAL.
+                  4. RFC 2697 srTCM, RFC 2698 trTCM, - token bucket update time
+                     interval."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4.2.1.5"</span>;
+            }
+
+            <a name="diffServTBParamStorage.843"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamStorage</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row.  Conceptual rows
+                  having the value 'permanent' need not allow write-access to any
+                  columnar objects in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nonVolatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4.2.1.6"</span>;
+            }
+
+            <a name="diffServTBParamStatus.854"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServTBParamStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row. All writable objects in this
+                  row may be modified at any time. Setting this variable to
+                  'destroy' when the MIB contains one or more RowPointers pointing
+                  to it results in destruction being delayed until the row is no
+                  longer used."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4.2.1.7"</span>;
+            }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4.2.1"</span>;
+         }  <span class="yang_cmt">// list diffServTBParamEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.4"</span>;
+      }  <span class="yang_cmt">// container diffServTBParam</span>
+
+      <a name="diffServAction.869"></a><span class="yang_kw">container</span> <span class="yang_id">diffServAction</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <a name="diffServActionNextFree.871"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionNextFree</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object contains an unused value for diffServActionId, or a
+               zero to indicate that none exist."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.1"</span>;
+         }
+
+         <a name="diffServActionEntry.883"></a><span class="yang_kw">list</span> <span class="yang_id">diffServActionEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#diffServActionId.892">diffServActionId</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Each entry in the action table allows description of one
+               specific action to be applied to traffic."</span>;
+            <a name="diffServActionId.892"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An index that enumerates the Action entries.  Managers obtain
+                  new values for row creation in this table by reading
+                  diffServActionNextFree."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.2.1.1"</span>;
+            }
+
+            <a name="diffServActionInterface.902"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionInterface</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/IF-MIB/2000-06-14#InterfaceIndexOrZero.95">if-mib:InterfaceIndexOrZero</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The interface index (value of ifIndex) that this action occurs
+                  on. This may be derived from the diffServDataPathStartEntry's
+                  index by extension through the various RowPointers. However, as
+                  this may be difficult for a network management station, it is
+                  placed here as well.  If this is indeterminate, the value is
+                  zero.
+                  
+                  This is of especial relevance when reporting the counters which
+                  may apply to traffic crossing an interface:
+                     diffServCountActOctets,
+                     diffServCountActPkts,
+                     diffServAlgDropOctets,
+                     diffServAlgDropPkts,
+                     diffServAlgRandomDropOctets, and
+                     diffServAlgRandomDropPkts.
+                  
+                  It is also especially relevant to the queue and scheduler which
+                  may be subsequently applied."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.2.1.2"</span>;
+            }
+
+            <a name="diffServActionNext.927"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionNext</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This selects the next Differentiated Services Functional Data
+                  Path Element to handle traffic for this data path. This
+                  RowPointer should point to an instance of one of:
+                    diffServClfrEntry
+                    diffServMeterEntry
+                    diffServActionEntry
+                    diffServAlgDropEntry
+                    diffServQEntry
+                  
+                  A value of zeroDotZero in this attribute indicates no further
+                  Differentiated Services treatment is performed on traffic of this
+                  data path. The use of zeroDotZero is the normal usage for the
+                  last functional data path element of the current data path.
+                  
+                  Setting this to point to a target that does not exist results in
+                  an inconsistentValue error.  If the row pointed to is removed or
+                  becomes inactive by other means, the treatment is as if this
+                  attribute contains a value of zeroDotZero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"zeroDotZero"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.2.1.3"</span>;
+            }
+
+            <a name="diffServActionSpecific.953"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionSpecific</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A pointer to an object instance providing additional information
+                  for the type of action indicated by this action table entry.
+                  
+                  For the standard actions defined by this MIB module, this should
+                  point to either a diffServDscpMarkActEntry or a
+                  diffServCountActEntry. For other actions, it may point to an
+                  object instance defined in some other MIB.
+                  
+                  Setting this to point to a target that does not exist results in
+                  an inconsistentValue error.  If the row pointed to is removed or
+                  becomes inactive by other means, the Meter should be treated as
+                  if it were not present.  This may lead to incorrect policy
+                  behavior."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.2.1.4"</span>;
+            }
+
+            <a name="diffServActionStorage.973"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionStorage</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row.  Conceptual rows
+                  having the value 'permanent' need not allow write-access to any
+                  columnar objects in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nonVolatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.2.1.5"</span>;
+            }
+
+            <a name="diffServActionStatus.984"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServActionStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row. All writable objects in this
+                  row may be modified at any time. Setting this variable to
+                  'destroy' when the MIB contains one or more RowPointers pointing
+                  to it results in destruction being delayed until the row is no
+                  longer used."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.2.1.6"</span>;
+            }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.2.1"</span>;
+         }  <span class="yang_cmt">// list diffServActionEntry</span>
+
+         <a name="diffServDscpMarkActEntry.1000"></a><span class="yang_kw">list</span> <span class="yang_id">diffServDscpMarkActEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#diffServDscpMarkActDscp.1009">diffServDscpMarkActDscp</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry in the DSCP mark action table that describes a single
+               DSCP used for marking."</span>;
+            <a name="diffServDscpMarkActDscp.1009"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServDscpMarkActDscp</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/DIFFSERV-DSCP-TC/2002-05-09#Dscp.59">diffserv-dscp:Dscp</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The DSCP that this Action will store into the DSCP field of the
+                  subject. It is quite possible that the only packets subject to
+                  this Action are already marked with this DSCP. Note also that
+                  Differentiated Services processing may result in packet being
+                  marked on both ingress to a network and on egress from it, and
+                  that ingress and egress can occur in the same router."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.3.1.1"</span>;
+            }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.3.1"</span>;
+         }  <span class="yang_cmt">// list diffServDscpMarkActEntry</span>
+
+         <a name="diffServCountActNextFree.1023"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActNextFree</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object contains an unused value for
+               diffServCountActId, or a zero to indicate that none exist."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.4"</span>;
+         }
+
+         <a name="diffServCountActEntry.1035"></a><span class="yang_kw">list</span> <span class="yang_id">diffServCountActEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#diffServCountActId.1044">diffServCountActId</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry in the count action table describes a single set of
+               traffic counters."</span>;
+            <a name="diffServCountActId.1044"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An index that enumerates the Count Action entries.  Managers
+                  obtain new values for row creation in this table by reading
+                  
+                  
+                  
+                  diffServCountActNextFree."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.5.1.1"</span>;
+            }
+
+            <a name="diffServCountActOctets.1057"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActOctets</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ietf-yang-types/2009-05-13#counter64.133">yang:counter64</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of octets at the Action data path element.
+                  
+                  Discontinuities in the value of this counter can occur at re-
+                  initialization of the management system and at other times as
+                  indicated by the value of ifCounterDiscontinuityTime on the
+                  relevant interface."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.5.1.2"</span>;
+            }
+
+            <a name="diffServCountActPkts.1070"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActPkts</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ietf-yang-types/2009-05-13#counter64.133">yang:counter64</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of packets at the Action data path element.
+                  
+                  Discontinuities in the value of this counter can occur at re-
+                  initialization of the management system and at other times as
+                  indicated by the value of ifCounterDiscontinuityTime on the
+                  relevant interface."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.5.1.3"</span>;
+            }
+
+            <a name="diffServCountActStorage.1083"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActStorage</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row.  Conceptual rows
+                  having the value 'permanent' need not allow write-access to any
+                  columnar objects in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nonVolatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.5.1.4"</span>;
+            }
+
+            <a name="diffServCountActStatus.1094"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServCountActStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row. All writable objects in this
+                  row may be modified at any time. Setting this variable to
+                  'destroy' when the MIB contains one or more RowPointers pointing
+                  
+                  
+                  
+                  to it results in destruction being delayed until the row is no
+                  longer used."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.5.1.5"</span>;
+            }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5.5.1"</span>;
+         }  <span class="yang_cmt">// list diffServCountActEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.5"</span>;
+      }  <span class="yang_cmt">// container diffServAction</span>
+
+      <a name="diffServAlgDrop.1112"></a><span class="yang_kw">container</span> <span class="yang_id">diffServAlgDrop</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <a name="diffServAlgDropNextFree.1114"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropNextFree</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object contains an unused value for diffServAlgDropId, or a
+               zero to indicate that none exist."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.1"</span>;
+         }
+
+         <a name="diffServAlgDropEntry.1126"></a><span class="yang_kw">list</span> <span class="yang_id">diffServAlgDropEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#diffServAlgDropId.1137">diffServAlgDropId</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry describes a process that drops packets according to
+               some algorithm. Further details of the algorithm type are to be
+               found in diffServAlgDropType and with more detail parameter entry
+               pointed to by diffServAlgDropSpecific when necessary."</span>;
+            <a name="diffServAlgDropId.1137"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An index that enumerates the Algorithmic Dropper entries.
+                  Managers obtain new values for row creation in this table by
+                  reading diffServAlgDropNextFree."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.1"</span>;
+            }
+
+            <a name="diffServAlgDropType.1147"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"tailDrop"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"headDrop"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"randomDrop"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"alwaysDrop"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The type of algorithm used by this dropper. The value other(1)
+                  requires further specification in some other MIB module.
+                  
+                  In the tailDrop(2) algorithm, diffServAlgDropQThreshold
+                  represents the maximum depth of the queue, pointed to by
+                  diffServAlgDropQMeasure, beyond which all newly arriving packets
+                  will be dropped.
+                  
+                  In the headDrop(3) algorithm, if a packet arrives when the
+                  current depth of the queue, pointed to by
+                  diffServAlgDropQMeasure, is at diffServAlgDropQThreshold, packets
+                  currently at the head of the queue are dropped to make room for
+                  the new packet to be enqueued at the tail of the queue.
+                  
+                  In the randomDrop(4) algorithm, on packet arrival, an Active
+                  Queue Management algorithm is executed which may randomly drop a
+                  packet. This algorithm may be proprietary, and it may drop either
+                  the arriving packet or another packet in the queue.
+                  diffServAlgDropSpecific points to a diffServRandomDropEntry that
+                  describes the algorithm. For this algorithm,
+                  
+                  
+                  
+                  diffServAlgDropQThreshold is understood to be the absolute
+                  maximum size of the queue and additional parameters are described
+                  in diffServRandomDropTable.
+                  
+                  The alwaysDrop(5) algorithm is as its name specifies; always
+                  drop. In this case, the other configuration values in this Entry
+                  are not meaningful; There is no useful 'next' processing step,
+                  there is no queue, and parameters describing the queue are not
+                  useful. Therefore, diffServAlgDropNext, diffServAlgDropMeasure,
+                  and diffServAlgDropSpecific are all zeroDotZero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.2"</span>;
+            }
+
+            <a name="diffServAlgDropNext.1193"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropNext</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This selects the next Differentiated Services Functional Data
+                  Path Element to handle traffic for this data path. This
+                  RowPointer should point to an instance of one of:
+                    diffServClfrEntry
+                    diffServMeterEntry
+                    diffServActionEntry
+                    diffServQEntry
+                  
+                  A value of zeroDotZero in this attribute indicates no further
+                  Differentiated Services treatment is performed on traffic of this
+                  data path. The use of zeroDotZero is the normal usage for the
+                  last functional data path element of the current data path.
+                  
+                  When diffServAlgDropType is alwaysDrop(5), this object is
+                  ignored.
+                  
+                  Setting this to point to a target that does not exist results in
+                  an inconsistentValue error.  If the row pointed to is removed or
+                  becomes inactive by other means, the treatment is as if this
+                  attribute contains a value of zeroDotZero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.3"</span>;
+            }
+
+            <a name="diffServAlgDropQMeasure.1220"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropQMeasure</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Points to an entry in the diffServQTable to indicate the queue
+                  that a drop algorithm is to monitor when deciding whether to drop
+                  a packet. If the row pointed to does not exist, the algorithmic
+                  dropper element is considered inactive.
+                  
+                  
+                  
+                  Setting this to point to a target that does not exist results in
+                  an inconsistentValue error.  If the row pointed to is removed or
+                  becomes inactive by other means, the treatment is as if this
+                  attribute contains a value of zeroDotZero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.4"</span>;
+            }
+
+            <a name="diffServAlgDropQThreshold.1238"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropQThreshold</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">units</span> <span class="yang_str">"Bytes"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"A threshold on the depth in bytes of the queue being measured at
+                  which a trigger is generated to the dropping algorithm, unless
+                  diffServAlgDropType is alwaysDrop(5) where this object is
+                  ignored.
+                  
+                  For the tailDrop(2) or headDrop(3) algorithms, this represents
+                  the depth of the queue, pointed to by diffServAlgDropQMeasure, at
+                  which the drop action will take place. Other algorithms will need
+                  to define their own semantics for this threshold."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.5"</span>;
+            }
+
+            <a name="diffServAlgDropSpecific.1257"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropSpecific</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Points to a table entry that provides further detail regarding a
+                  drop algorithm.
+                  
+                  Entries with diffServAlgDropType equal to other(1) may have this
+                  point to a table defined in another MIB module.
+                  
+                  Entries with diffServAlgDropType equal to randomDrop(4) must have
+                  this point to an entry in diffServRandomDropTable.
+                  
+                  For all other algorithms specified in this MIB, this should take
+                  the value zeroDotZero.
+                  
+                  The diffServAlgDropType is authoritative for the type of the drop
+                  algorithm and the specific parameters for the drop algorithm
+                  needs to be evaluated based on the diffServAlgDropType.
+                  
+                  Setting this to point to a target that does not exist results in
+                  an inconsistentValue error.  If the row pointed to is removed or
+                  becomes inactive by other means, the treatment is as if this
+                  attribute contains a value of zeroDotZero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.6"</span>;
+            }
+
+            <a name="diffServAlgDropOctets.1284"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropOctets</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ietf-yang-types/2009-05-13#counter64.133">yang:counter64</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of octets that have been deterministically dropped by
+                  this drop process.
+                  
+                  Discontinuities in the value of this counter can occur at re-
+                  initialization of the management system and at other times as
+                  indicated by the value of ifCounterDiscontinuityTime on the
+                  relevant interface."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.7"</span>;
+            }
+
+            <a name="diffServAlgDropPkts.1298"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropPkts</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ietf-yang-types/2009-05-13#counter64.133">yang:counter64</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of packets that have been deterministically dropped
+                  by this drop process.
+                  
+                  Discontinuities in the value of this counter can occur at re-
+                  initialization of the management system and at other times as
+                  indicated by the value of ifCounterDiscontinuityTime on the
+                  relevant interface."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.8"</span>;
+            }
+
+            <a name="diffServAlgRandomDropOctets.1312"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgRandomDropOctets</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ietf-yang-types/2009-05-13#counter64.133">yang:counter64</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of octets that have been randomly dropped by this
+                  drop process.  This counter applies, therefore, only to random
+                  droppers.
+                  
+                  Discontinuities in the value of this counter can occur at re-
+                  initialization of the management system and at other times as
+                  indicated by the value of ifCounterDiscontinuityTime on the
+                  relevant interface."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.9"</span>;
+            }
+
+            <a name="diffServAlgRandomDropPkts.1327"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgRandomDropPkts</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ietf-yang-types/2009-05-13#counter64.133">yang:counter64</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of packets that have been randomly dropped by this
+                  drop process. This counter applies, therefore, only to random
+                  droppers.
+                  
+                  Discontinuities in the value of this counter can occur at re-
+                  initialization of the management system and at other times as
+                  indicated by the value of ifCounterDiscontinuityTime on the
+                  relevant interface."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.10"</span>;
+            }
+
+            <a name="diffServAlgDropStorage.1342"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropStorage</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row.  Conceptual rows
+                  having the value 'permanent' need not allow write-access to any
+                  columnar objects in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nonVolatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.11"</span>;
+            }
+
+            <a name="diffServAlgDropStatus.1353"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServAlgDropStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row. All writable objects in this
+                  row may be modified at any time. Setting this variable to
+                  'destroy' when the MIB contains one or more RowPointers pointing
+                  to it results in destruction being delayed until the row is no
+                  longer used."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1.12"</span>;
+            }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.2.1"</span>;
+         }  <span class="yang_cmt">// list diffServAlgDropEntry</span>
+
+         <a name="diffServRandomDropNextFree.1366"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropNextFree</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object contains an unused value for diffServRandomDropId,
+               or a zero to indicate that none exist."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.3"</span>;
+         }
+
+         <a name="diffServRandomDropEntry.1378"></a><span class="yang_kw">list</span> <span class="yang_id">diffServRandomDropEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#diffServRandomDropId.1387">diffServRandomDropId</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry describes a process that drops packets according to a
+               random algorithm."</span>;
+            <a name="diffServRandomDropId.1387"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An index that enumerates the Random Drop entries.  Managers
+                  obtain new values for row creation in this table by reading
+                  diffServRandomDropNextFree."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.1"</span>;
+            }
+
+            <a name="diffServRandomDropMinThreshBytes.1397"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropMinThreshBytes</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">units</span> <span class="yang_str">"bytes"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The average queue depth in bytes, beyond which traffic has a
+                  non-zero probability of being dropped. Changes in this variable
+                  may or may not be reflected in the reported value of
+                  diffServRandomDropMinThreshPkts."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.2"</span>;
+            }
+
+            <a name="diffServRandomDropMinThreshPkts.1411"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropMinThreshPkts</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">units</span> <span class="yang_str">"packets"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The average queue depth in packets, beyond which traffic has a
+                  non-zero probability of being dropped. Changes in this variable
+                  may or may not be reflected in the reported value of
+                  diffServRandomDropMinThreshBytes."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.3"</span>;
+            }
+
+            <a name="diffServRandomDropMaxThreshBytes.1425"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropMaxThreshBytes</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">units</span> <span class="yang_str">"bytes"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The average queue depth beyond which traffic has a probability
+                  indicated by diffServRandomDropProbMax of being dropped or
+                  marked. Note that this differs from the physical queue limit,
+                  which is stored in diffServAlgDropQThreshold. Changes in this
+                  variable may or may not be reflected in the reported value of
+                  diffServRandomDropMaxThreshPkts."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.4"</span>;
+            }
+
+            <a name="diffServRandomDropMaxThreshPkts.1441"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropMaxThreshPkts</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">units</span> <span class="yang_str">"packets"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The average queue depth beyond which traffic has a probability
+                  indicated by diffServRandomDropProbMax of being dropped or
+                  marked. Note that this differs from the physical queue limit,
+                  which is stored in diffServAlgDropQThreshold. Changes in this
+                  variable may or may not be reflected in the reported value of
+                  diffServRandomDropMaxThreshBytes."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.5"</span>;
+            }
+
+            <a name="diffServRandomDropProbMax.1457"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropProbMax</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"0..1000"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The worst case random drop probability, expressed in drops per
+                  thousand packets.
+                  
+                  For example, if in the worst case every arriving packet may be
+                  dropped (100%) for a period, this has the value 1000.
+                  Alternatively, if in the worst case only one percent (1%) of
+                  traffic may be dropped, it has the value 10."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.6"</span>;
+            }
+
+            <a name="diffServRandomDropWeight.1473"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropWeight</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"0..65536"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The weighting of past history in affecting the Exponentially
+                  Weighted Moving Average function that calculates the current
+                  average queue depth.  The equation uses
+                  diffServRandomDropWeight/65536 as the coefficient for the new
+                  sample in the equation, and (65536 -
+                  diffServRandomDropWeight)/65536 as the coefficient of the old
+                  value.
+                  
+                  Implementations may limit the values of diffServRandomDropWeight
+                  to a subset of the possible range of values, such as powers of
+                  two. Doing this would facilitate implementation of the
+                  Exponentially Weighted Moving Average using shift instructions or
+                  registers."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.7"</span>;
+            }
+
+            <a name="diffServRandomDropSamplingRate.1495"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropSamplingRate</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"0..1000000"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of times per second the queue is sampled for queue
+                  average calculation.  A value of zero is used to mean that the
+                  queue is sampled approximately each time a packet is enqueued (or
+                  dequeued)."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.8"</span>;
+            }
+
+            <a name="diffServRandomDropStorage.1508"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropStorage</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row.  Conceptual rows
+                  having the value 'permanent' need not allow write-access to any
+                  columnar objects in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nonVolatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.9"</span>;
+            }
+
+            <a name="diffServRandomDropStatus.1519"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServRandomDropStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row. All writable objects in this
+                  row may be modified at any time. Setting this variable to
+                  'destroy' when the MIB contains one or more RowPointers pointing
+                  to it results in destruction being delayed until the row is no
+                  longer used."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1.10"</span>;
+            }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6.4.1"</span>;
+         }  <span class="yang_cmt">// list diffServRandomDropEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.6"</span>;
+      }  <span class="yang_cmt">// container diffServAlgDrop</span>
+
+      <a name="diffServQueue.1534"></a><span class="yang_kw">container</span> <span class="yang_id">diffServQueue</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <a name="diffServQNextFree.1536"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServQNextFree</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object contains an unused value for diffServQId, or a zero
+               to indicate that none exist."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.7.1"</span>;
+         }
+
+         <a name="diffServQEntry.1548"></a><span class="yang_kw">list</span> <span class="yang_id">diffServQEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#diffServQId.1557">diffServQId</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry in the Queue Table describes a single queue or class of
+               traffic."</span>;
+            <a name="diffServQId.1557"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServQId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An index that enumerates the Queue entries.  Managers obtain new
+                  values for row creation in this table by reading
+                  diffServQNextFree."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.7.2.1.1"</span>;
+            }
+
+            <a name="diffServQNext.1567"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServQNext</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This selects the next Differentiated Services Scheduler.  The
+                  RowPointer must point to a diffServSchedulerEntry.
+                  
+                  A value of zeroDotZero in this attribute indicates an incomplete
+                  diffServQEntry instance. In such a case, the entry has no
+                  operational effect, since it has no parameters to give it
+                  meaning.
+                  
+                  Setting this to point to a target that does not exist results in
+                  an inconsistentValue error.  If the row pointed to is removed or
+                  becomes inactive by other means, the treatment is as if this
+                  attribute contains a value of zeroDotZero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.7.2.1.2"</span>;
+            }
+
+            <a name="diffServQMinRate.1586"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServQMinRate</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This RowPointer indicates the diffServMinRateEntry that the
+                  scheduler, pointed to by diffServQNext, should use to service
+                  this queue.
+                  
+                  If the row pointed to is zeroDotZero, the minimum rate and
+                  priority is unspecified.
+                  
+                  Setting this to point to a target that does not exist results in
+                  an inconsistentValue error.  If the row pointed to is removed or
+                  becomes inactive by other means, the treatment is as if this
+                  attribute contains a value of zeroDotZero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.7.2.1.3"</span>;
+            }
+
+            <a name="diffServQMaxRate.1604"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServQMaxRate</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This RowPointer indicates the diffServMaxRateEntry that the
+                  scheduler, pointed to by diffServQNext, should use to service
+                  this queue.
+                  
+                  If the row pointed to is zeroDotZero, the maximum rate is the
+                  line speed of the interface.
+                  
+                  
+                  
+                  
+                  Setting this to point to a target that does not exist results in
+                  an inconsistentValue error.  If the row pointed to is removed or
+                  becomes inactive by other means, the treatment is as if this
+                  attribute contains a value of zeroDotZero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.7.2.1.4"</span>;
+            }
+
+            <a name="diffServQStorage.1625"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServQStorage</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row.  Conceptual rows
+                  having the value 'permanent' need not allow write-access to any
+                  columnar objects in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nonVolatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.7.2.1.5"</span>;
+            }
+
+            <a name="diffServQStatus.1636"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServQStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row. All writable objects in this
+                  row may be modified at any time. Setting this variable to
+                  'destroy' when the MIB contains one or more RowPointers pointing
+                  to it results in destruction being delayed until the row is no
+                  longer used."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.7.2.1.6"</span>;
+            }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.7.2.1"</span>;
+         }  <span class="yang_cmt">// list diffServQEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.7"</span>;
+      }  <span class="yang_cmt">// container diffServQueue</span>
+
+      <a name="diffServScheduler.1651"></a><span class="yang_kw">container</span> <span class="yang_id">diffServScheduler</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <a name="diffServSchedulerNextFree.1653"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerNextFree</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object contains an unused value for diffServSchedulerId, or
+               a zero to indicate that none exist."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.1"</span>;
+         }
+
+         <a name="diffServSchedulerEntry.1665"></a><span class="yang_kw">list</span> <span class="yang_id">diffServSchedulerEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#diffServSchedulerId.1674">diffServSchedulerId</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry in the Scheduler Table describing a single instance of
+               a scheduling algorithm."</span>;
+            <a name="diffServSchedulerId.1674"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An index that enumerates the Scheduler entries.  Managers obtain
+                  new values for row creation in this table by reading
+                  diffServSchedulerNextFree."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.2.1.1"</span>;
+            }
+
+            <a name="diffServSchedulerNext.1684"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerNext</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This selects the next Differentiated Services Functional Data
+                  Path Element to handle traffic for this data path. This normally
+                  is null (zeroDotZero), or points to a diffServSchedulerEntry or a
+                  diffServQEntry.
+                  
+                  However, this RowPointer may also point to an instance of:
+                    diffServClfrEntry,
+                    diffServMeterEntry,
+                    diffServActionEntry,
+                    diffServAlgDropEntry.
+                  
+                  It would point another diffServSchedulerEntry when implementing
+                  multiple scheduler methods for the same data path, such as having
+                  one set of queues scheduled by WRR and that group participating
+                  in a priority scheduling system in which other queues compete
+                  with it in that way.  It might also point to a second scheduler
+                  in a hierarchical scheduling system.
+                  
+                  If the row pointed to is zeroDotZero, no further Differentiated
+                  Services treatment is performed on traffic of this data path.
+                  
+                  Setting this to point to a target that does not exist results in
+                  an inconsistentValue error.  If the row pointed to is removed or
+                  becomes inactive by other means, the treatment is as if this
+                  attribute contains a value of zeroDotZero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"zeroDotZero"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.2.1.2"</span>;
+            }
+
+            <a name="diffServSchedulerMethod.1717"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerMethod</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#AutonomousType.141">smiv2:AutonomousType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The scheduling algorithm used by this Scheduler. zeroDotZero
+                  indicates that this is unknown.  Standard values for generic
+                  algorithms: diffServSchedulerPriority, diffServSchedulerWRR, and
+                  diffServSchedulerWFQ are specified in this MIB; additional values
+                  
+                  
+                  
+                  may be further specified in other MIBs."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.2.1.3"</span>;
+            }
+
+            <a name="diffServSchedulerMinRate.1732"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerMinRate</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This RowPointer indicates the entry in diffServMinRateTable
+                  which indicates the priority or minimum output rate from this
+                  scheduler. This attribute is used only when there is more than
+                  one level of scheduler.
+                  
+                  When it has the value zeroDotZero, it indicates that no minimum
+                  rate or priority is imposed.
+                  
+                  Setting this to point to a target that does not exist results in
+                  an inconsistentValue error.  If the row pointed to is removed or
+                  becomes inactive by other means, the treatment is as if this
+                  attribute contains a value of zeroDotZero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"zeroDotZero"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.2.1.4"</span>;
+            }
+
+            <a name="diffServSchedulerMaxRate.1752"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerMaxRate</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowPointer.171">smiv2:RowPointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This RowPointer indicates the entry in diffServMaxRateTable
+                  which indicates the maximum output rate from this scheduler.
+                  When more than one maximum rate applies (eg, when a multi-rate
+                  shaper is in view), it points to the first of those rate entries.
+                  This attribute is used only when there is more than one level of
+                  scheduler.
+                  
+                  When it has the value zeroDotZero, it indicates that no maximum
+                  rate is imposed.
+                  
+                  Setting this to point to a target that does not exist results in
+                  an inconsistentValue error.  If the row pointed to is removed or
+                  becomes inactive by other means, the treatment is as if this
+                  attribute contains a value of zeroDotZero."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"zeroDotZero"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.2.1.5"</span>;
+            }
+
+            <a name="diffServSchedulerStorage.1774"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerStorage</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row.  Conceptual rows
+                  having the value 'permanent' need not allow write-access to any
+                  columnar objects in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nonVolatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.2.1.6"</span>;
+            }
+
+            <a name="diffServSchedulerStatus.1785"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServSchedulerStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row. All writable objects in this
+                  row may be modified at any time. Setting this variable to
+                  'destroy' when the MIB contains one or more RowPointers pointing
+                  to it results in destruction being delayed until the row is no
+                  longer used."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.2.1.7"</span>;
+            }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.2.1"</span>;
+         }  <span class="yang_cmt">// list diffServSchedulerEntry</span>
+
+         <a name="diffServMinRateNextFree.1798"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateNextFree</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object contains an unused value for diffServMinRateId, or a
+               zero to indicate that none exist."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.3"</span>;
+         }
+
+         <a name="diffServMinRateEntry.1810"></a><span class="yang_kw">list</span> <span class="yang_id">diffServMinRateEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#diffServMinRateId.1820">diffServMinRateId</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry in the Minimum Rate Parameters Table describes a single
+               set of scheduling parameters for use by one or more queues or
+               schedulers."</span>;
+            <a name="diffServMinRateId.1820"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An index that enumerates the Scheduler Parameter entries.
+                  Managers obtain new values for row creation in this table by
+                  reading diffServMinRateNextFree."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.4.1.1"</span>;
+            }
+
+            <a name="diffServMinRatePriority.1830"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRatePriority</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The priority of this input to the associated scheduler, relative
+                  
+                  
+                  
+                  to the scheduler's other inputs. A queue or scheduler with a
+                  larger numeric value will be served before another with a smaller
+                  numeric value."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.4.1.2"</span>;
+            }
+
+            <a name="diffServMinRateAbsolute.1846"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateAbsolute</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">units</span> <span class="yang_str">"kilobits per second"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The minimum absolute rate, in kilobits/sec, that a downstream
+                  scheduler element should allocate to this queue. If the value is
+                  zero, then there is effectively no minimum rate guarantee. If the
+                  value is non-zero, the scheduler will assure the servicing of
+                  this queue to at least this rate.
+                  
+                  Note that this attribute value and that of
+                  diffServMinRateRelative are coupled: changes to one will affect
+                  the value of the other. They are linked by the following
+                  equation, in that setting one will change the other:
+                  
+                    diffServMinRateRelative =
+                  	  (diffServMinRateAbsolute*1000000)/ifSpeed
+                  
+                  or, if appropriate:
+                  
+                    diffServMinRateRelative = diffServMinRateAbsolute/ifHighSpeed"</span>;
+               <span class="yang_kw">reference</span>
+                  <span class="yang_str">"ifSpeed, ifHighSpeed, Interface MIB, RFC 2863"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.4.1.3"</span>;
+            }
+
+            <a name="diffServMinRateRelative.1875"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateRelative</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The minimum rate that a downstream scheduler element should
+                  allocate to this queue, relative to the maximum rate of the
+                  interface as reported by ifSpeed or ifHighSpeed, in units of
+                  1/1000 of 1. If the value is zero, then there is effectively no
+                  minimum rate guarantee. If the value is non-zero, the scheduler
+                  will assure the servicing of this queue to at least this rate.
+                  
+                  Note that this attribute value and that of
+                  diffServMinRateAbsolute are coupled: changes to one will affect
+                  the value of the other. They are linked by the following
+                  equation, in that setting one will change the other:
+                  
+                  
+                  
+                    diffServMinRateRelative =
+                  	  (diffServMinRateAbsolute*1000000)/ifSpeed
+                  
+                  or, if appropriate:
+                  
+                    diffServMinRateRelative = diffServMinRateAbsolute/ifHighSpeed"</span>;
+               <span class="yang_kw">reference</span>
+                  <span class="yang_str">"ifSpeed, ifHighSpeed, Interface MIB, RFC 2863"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.4.1.4"</span>;
+            }
+
+            <a name="diffServMinRateStorage.1906"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateStorage</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row.  Conceptual rows
+                  having the value 'permanent' need not allow write-access to any
+                  columnar objects in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nonVolatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.4.1.5"</span>;
+            }
+
+            <a name="diffServMinRateStatus.1917"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMinRateStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row. All writable objects in this
+                  row may be modified at any time. Setting this variable to
+                  'destroy' when the MIB contains one or more RowPointers pointing
+                  to it results in destruction being delayed until the row is no
+                  longer used."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.4.1.6"</span>;
+            }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.4.1"</span>;
+         }  <span class="yang_cmt">// list diffServMinRateEntry</span>
+
+         <a name="diffServMaxRateNextFree.1930"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateNextFree</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexIntegerNextFree.78">IndexIntegerNextFree</a></span>;
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"This object contains an unused value for diffServMaxRateId, or a
+               zero to indicate that none exist."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.5"</span>;
+         }
+
+         <a name="diffServMaxRateEntry.1942"></a><span class="yang_kw">list</span> <span class="yang_id">diffServMaxRateEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#diffServMaxRateId.1952">diffServMaxRateId</a> <a href="#diffServMaxRateLevel.1962">diffServMaxRateLevel</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry in the Maximum Rate Parameter Table describes a single
+               set of scheduling parameters for use by one or more queues or
+               schedulers."</span>;
+            <a name="diffServMaxRateId.1952"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateId</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#IndexInteger.69">IndexInteger</a></span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An index that enumerates the Maximum Rate Parameter entries.
+                  Managers obtain new values for row creation in this table by
+                  reading diffServMaxRateNextFree."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.6.1.1"</span>;
+            }
+
+            <a name="diffServMaxRateLevel.1962"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateLevel</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..32"</span>;
+               }
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An index that indicates which level of a multi-rate shaper is
+                  being given its parameters. A multi-rate shaper has some number
+                  of rate levels. Frame Relay's dual rate specification refers to a
+                  'committed' and an 'excess' rate; ATM's dual rate specification
+                  refers to a 'mean' and a 'peak' rate. This table is generalized
+                  to support an arbitrary number of rates. The committed or mean
+                  rate is level 1, the peak rate (if any) is the highest level rate
+                  configured, and if there are other rates they are distributed in
+                  monotonically increasing order between them."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.6.1.2"</span>;
+            }
+
+            <a name="diffServMaxRateAbsolute.1980"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateAbsolute</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">units</span> <span class="yang_str">"kilobits per second"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The maximum rate in kilobits/sec that a downstream scheduler
+                  element should allocate to this queue. If the value is zero, then
+                  there is effectively no maximum rate limit and that the scheduler
+                  should attempt to be work conserving for this queue. If the value
+                  is non-zero, the scheduler will limit the servicing of this queue
+                  to, at most, this rate in a non-work-conserving manner.
+                  
+                  Note that this attribute value and that of
+                  diffServMaxRateRelative are coupled: changes to one will affect
+                  the value of the other. They are linked by the following
+                  
+                  
+                  
+                  equation, in that setting one will change the other:
+                  
+                    diffServMaxRateRelative =
+                  	  (diffServMaxRateAbsolute*1000000)/ifSpeed
+                  
+                  or, if appropriate:
+                  
+                    diffServMaxRateRelative = diffServMaxRateAbsolute/ifHighSpeed"</span>;
+               <span class="yang_kw">reference</span>
+                  <span class="yang_str">"ifSpeed, ifHighSpeed, Interface MIB, RFC 2863"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.6.1.3"</span>;
+            }
+
+            <a name="diffServMaxRateRelative.2013"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateRelative</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+                  <span class="yang_kw">range</span> <span class="yang_str">"1..4294967295"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The maximum rate that a downstream scheduler element should
+                  allocate to this queue, relative to the maximum rate of the
+                  interface as reported by ifSpeed or ifHighSpeed, in units of
+                  1/1000 of 1. If the value is zero, then there is effectively no
+                  maximum rate limit and the scheduler should attempt to be work
+                  conserving for this queue. If the value is non-zero, the
+                  scheduler will limit the servicing of this queue to, at most,
+                  this rate in a non-work-conserving manner.
+                  
+                  Note that this attribute value and that of
+                  diffServMaxRateAbsolute are coupled: changes to one will affect
+                  the value of the other. They are linked by the following
+                  equation, in that setting one will change the other:
+                  
+                    diffServMaxRateRelative =
+                  	  (diffServMaxRateAbsolute*1000000)/ifSpeed
+                  
+                  or, if appropriate:
+                  
+                    diffServMaxRateRelative = diffServMaxRateAbsolute/ifHighSpeed"</span>;
+               <span class="yang_kw">reference</span>
+                  <span class="yang_str">"ifSpeed, ifHighSpeed, Interface MIB, RFC 2863"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.6.1.4"</span>;
+            }
+
+            <a name="diffServMaxRateThreshold.2044"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateThreshold</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/INTEGRATED-SERVICES-MIB/1995-11-03#BurstSize.148">integrated-services:BurstSize</a></span>;
+               <span class="yang_kw">units</span> <span class="yang_str">"Bytes"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of bytes of queue depth at which the rate of a
+                  
+                  
+                  
+                  multi-rate scheduler will increase to the next output rate. In
+                  the last conceptual row for such a shaper, this threshold is
+                  ignored and by convention is zero."</span>;
+               <span class="yang_kw">reference</span> <span class="yang_str">"Adaptive rate Shaper, RFC 2963"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.6.1.5"</span>;
+            }
+
+            <a name="diffServMaxRateStorage.2061"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateStorage</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The storage type for this conceptual row.  Conceptual rows
+                  having the value 'permanent' need not allow write-access to any
+                  columnar objects in the row."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"nonVolatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.6.1.6"</span>;
+            }
+
+            <a name="diffServMaxRateStatus.2072"></a><span class="yang_kw">leaf</span> <span class="yang_id">diffServMaxRateStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this conceptual row. All writable objects in this
+                  row may be modified at any time. Setting this variable to
+                  'destroy' when the MIB contains one or more RowPointers pointing
+                  to it results in destruction being delayed until the row is no
+                  longer used."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.6.1.7"</span>;
+            }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8.6.1"</span>;
+         }  <span class="yang_cmt">// list diffServMaxRateEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.97.1.8"</span>;
+      }  <span class="yang_cmt">// container diffServScheduler</span>
+   }  <span class="yang_cmt">// module DIFFSERV-MIB</span>
+</pre>
+</div>
+</div>

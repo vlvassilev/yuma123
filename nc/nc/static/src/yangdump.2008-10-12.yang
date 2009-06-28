@@ -1,0 +1,634 @@
+module yangdump {
+
+    yang-version 1;
+    namespace "http://netconfcentral.com/ns/yangdump";
+    prefix "yd";
+
+    import ncxtypes { prefix nt; }
+
+    import ncx { prefix ncx; }
+
+    import ncx-app-common { prefix ncxapp; }
+
+    organization "Netconf Central";
+
+    contact
+        "Andy Bierman <andy at netconfcentral.com>";
+
+    description 
+       "yangdump provides validation and translation of YANG data models.
+        Information about a module or submodule can be generated as well.
+
+        INPUT FILES
+
+           Operations can be performed on one or more files with 
+           the 'module' parameter, or an entire directory tree 
+           with the 'subtree' parameter.  Unless the 'help' or
+           'version' parameters is entered, one of these input
+           parameters must be present.
+
+        SEARCH PATH
+
+            When a module name is entered as input, or when a
+            module or submodule name is specified in an import or include
+            statement within the file, the following search algorithm
+            is used to find the file:
+
+            1) file is in the current directory
+            2) YANG_MODPATH environment var (or set by modpath parameter)
+            3) $HOME/modules directory
+            4) $YANG_HOME/modules directory
+            5) $YANG_INSTALL/modules directory OR
+               default install module location, '/usr/share/yang/modules'
+
+            By default, the entire directory tree for all locations
+            (except step 1) will be searched, not just the specified
+            directory.  The 'no-subdirs' parameter can be used to
+            prevent sub-directories from being searched.
+
+            Any directory name beginning with a dot character '.'
+            will be skipped.  Also, any directory named 'CVS' will
+            be skipped in directory searches.
+
+        TRANSLATION MODES
+
+            The 'format' parameter is used to select a translation output mode.
+            If it is missing, then no translation will be done.
+            This parameter can be used with the module reports parameters,
+            but the translation output should be directed to a file
+            instead of STDOUT to keep them separated.
+
+            For XSD 1.0 translation, use the 'format=xsd' parameter.
+
+            For XHTML 1.0 translation, use the 'format=html' parameter.
+
+        MODULE REPORTS
+
+            For a 1 line output of the module name and version,
+            use the 'modversion' parameter.
+
+            For a listing of all the symbols that the file exports
+            to other files, use the 'exports' parameter.
+
+            For a listing of all the files that the file depends on,
+            to compile, use the 'dependencies' parameter.
+
+            For a listing of all the accessible object identifiers that
+            the file contains, use the 'identifiers' parameter.
+
+        OUTPUT MODES
+
+            By default, any translation output will be sent to STDOUT.
+
+            The 'output' parameter can be used to specify the 
+            full filespec of the output file,  or a
+            partial directory specification to be combined
+            with a default filename.
+
+            The 'defnames' parameter can be used to generate a default
+            filename in the current directory for the output, or
+            in the 'output' directory, if one is specified.
+
+            By default, an output filename will have the form:
+
+                  <module-name>_<module-version>.<ext>
+
+            If the 'no-versionnames' parameter is used, then the
+            default filename will have the form:
+
+                  <module-name>.<ext>
+
+            This parameter will also affect URL generation during
+            HTML translation.
+
+            When the 'subtree' input parameter is used for XSD or HTML
+            translation, the 'defnames' parameter will be automatically
+            selected, to maintain well-formed XML documents when
+            multiple translations are possible.
+
+            If the 'unified' parameter is present, then all submodules will
+            be processed when the input is a main module that includes
+            any submodules.  For XSD and HTML translation, the
+            submodule content will be generated instead of an 'include'
+            statement.  Submodule files will be skipped in 'subtree' mode.
+
+
+        ERROR LOGGING
+
+            By default, warnings and errors are sent to STDOUT.
+
+            A log file can be specified instead with the 'log' parameter.
+            Existing log files can be reused with the 'logappend'
+            parameter, otherwise log files are overwritten.
+
+            The logging level can be controlled with the 'log-level'
+            parameter.  The default log level is 'info'.  The
+            log-levels are additive:
+
+               off:    suppress all errors (not recommended!)
+                       A program return code of '1' indicates some error.
+               error:  print errors
+               warn:   print warnings
+               info:   print generally interesting trace info
+               debug:  print general debugging trace info
+               debug2: print verbose debugging trace info
+    
+        ENVIRONMENT VARIABLES
+
+            The following optional environment variables can be used
+            to control module and data search behavior:
+
+            HOME:  the user's home directory  (e.g., /home/andy)
+
+            YANG_HOME:  The root of the user's YANG work directory
+                        (e.g., /home/andy/swdev/netconf)
+
+            YANG_INSTALL:  The root of the directory that yangdump
+                            is installed on this system
+                           (default is, /usr/share/yang)
+
+            YANG_MODPATH: Colon-separated list of directories to
+                          search for modules and submodules.
+                          (e.g.: './workdir/modules:/home/andy/test-modules')
+                          The 'modpath' parameter will override this
+                          environment variable, if both are present.
+
+       CONFIGURATION FILES
+
+              * config file
+                default: /etc/yang.conf                
+
+            An ASCII configuration file format is supported to 
+            store command line parameters.  The 'config' parameter
+            is used to specify a specific config file, otherwise
+            the default config file will be checked. 
+
+            - A hash mark until EOLN is treated as a comment
+            - All text is case-sensitive
+            - Whitespace within a line is not significant
+            - Whitespace to end a line is significant/
+              Unless the line starts a multi-line string,
+              an escaped EOLN (backslash EOLN) is needed
+              to enter a leaf on multiple lines.
+            - For parmsets that define lists, the key components
+              are listed just after the parameter name, without
+              any name,  e.g.,
+
+                interface eth0 {
+                  # name = eth0 is not listed inside the braces
+                  ifMtu 1500
+                  ifName mySystem
+                }
+ 
+            A config file can contain any number of parameter
+            sets for different programs.  Each program
+            must have its own section, identifies by its name:
+
+                # this is a comment
+                yangdump {
+                  log-level debug
+                  output \"~/swdev/testfiles\"
+                }
+ 
+                netconfd {
+                  ...
+                }
+
+        FILES            
+
+            The following data files must be present in the module
+            search path in order for this program to function:
+ 
+              * yangdump.ncx (this file)
+                default locations: 
+                   ~/modules/netconfcentral/yangdump.ncx
+                   /usr/share/yang/modules/netconfcentral/yangdump.ncx
+
+
+              * ncxtypes.ncx
+                default locations: 
+                   ~/modules/netconfcentral/ncxtypes.ncx
+                   /usr/share/yang/modules/netconfcentral/ncxtypes.ncx
+
+            This version of yangdump supports the version of YANG
+            defined in draft-ietf-netmod-yang-00.txt.
+
+        BUGS
+             Internal diagnostics may generate the following
+             type of message if any bugs are detected at runtime:
+
+             [E0]
+                 filename.c:linenum error-number (error-msg)
+ 
+             Please send a bug report to support@netconfcentral.com
+             if any messages of this type appear in the error log.
+        ";
+
+    revision 2008-10-12 {
+       description 
+          "Converted from yangdump.ncx.";
+    }
+
+    typedef FormatType {
+        description "Conversion Output Formats.";
+        type enumeration { 
+           enum xsd;
+           enum sql;
+           enum sqldb;
+           enum html;
+           enum yang;
+           enum copy;
+           enum h; 
+        }
+    }
+
+    typedef TocType {
+        description 
+           "Requested table of contents type.";
+        type enumeration {
+            enum none;
+            enum plain;
+            enum menu; 
+        }
+        default "menu";
+    }
+
+    typedef ObjViewType {
+        description 
+           "Requested view format for objects.";
+
+        type enumeration {
+            enum raw {
+              description 
+                 "output includes augment and uses clauses, not the
+                  expanded results of those clauses.";
+            }
+            enum cooked {
+               description 
+                  "output does not include augment or uses clauses,
+                   just the objects generated from those clauses (if any).";
+            }
+        }
+       default "raw";
+    }
+
+    container yangdump {
+      ncx:cli;
+      ncx:default-parm module;
+
+      description 
+         "CLI Parameter Set for the YANG Converter Application.";
+
+        uses ncxapp:NcxAppCommon;
+
+        choice m-or-s {
+          leaf-list module {
+            description 
+              "YANG or NCX source module name to convert.
+
+               If this string represents a filespec, 
+	       ending with the '.yang' or '.ncx' extension,
+	       then only that file location will be checked.
+
+               If this string represents a module name, then
+               the module search path will be checked for
+               a file with the module name and the '.yang' 
+               or '.ncx' extension.
+
+               If this string begins with a '~' character,
+               then a username is expected to follow or
+               a directory separator character.  If it begins
+               with a '$' character, then an environment variable
+               name is expected to follow.
+
+               ~/some/path ==> <my-home-dir>/some/path
+
+               ~fred/some/path ==> <fred-home-dir>/some/path
+
+               $workdir/some/path ==> <workdir-env-var>/some/path
+             ";
+            type nt:NcModuleSpec;
+          }
+
+          leaf subtree {
+            description 
+              "Path specification of the directory subtree to convert.
+               All of the YANG and NCX source modules contained in the
+               specified directory sub-tree will be processed.
+
+               If the 'output' parameter is present, and identifies
+               an existing directory, then any translation output
+               files will be generated in that directory.  If this
+               parameter identifies a file, then that one file will
+               be used for output.
+
+               If the 'format' parameter is present, then one file
+               with the default name will be generated for each
+               YANG or NCX file found in the sub-tree.
+
+               Note that symbolic links are not followed
+               during the directory traversal.  Only real directories
+               will be searched and regular files will be checked as
+               modules.  Processing will continue to the next file
+               if a module contains errors.
+
+               If this string begins with a '~' character,
+               then a username is expected to follow or
+               a directory separator character.  If it begins
+               with a '$' character, then an environment variable
+               name is expected to follow.
+
+               ~/some/path ==> <my-home-dir>/some/path
+
+               ~fred/some/path ==> <fred-home-dir>/some/path
+
+               $workdir/some/path ==> <workdir-env-var>/some/path";
+            type nt:NcModuleSpec;
+          }
+        }
+
+        leaf output {
+          description 
+            "Output directory or file name to use. 
+             Default is STDOUT if none specified and the
+             'defnames' parameter is also missing.
+
+             If this parameter represents an existing directory,
+             then the 'defnames' parameter will be assumed by
+             default, and the translation output file(s) will be
+             generated in the specified directory.
+
+             If this parameter represents a file name,
+             then the 'defnames' parameter will be ignored,
+             and all translation output will be directed
+             to the specified file.
+
+             If this string begins with a '~' character,
+             then a username is expected to follow or
+             a directory separator character.   If it begins
+             with a '$' character, then an environment variable
+             name is expected to follow.
+
+               ~/some/path ==> <my-home-dir>/some/path
+
+               ~fred/some/path ==> <fred-home-dir>/some/path
+
+               $workdir/some/path ==> <workdir-env-var>/some/path";
+          type string;
+        }
+
+        leaf defnames {
+          description 
+            "Output to a file with the default name for the format,
+             usually to the current directory.  
+             Not used if the format parameter is missing.
+
+             If the 'output' parameter is present and represents
+             an existing directory, then the default filename
+             will be created in that directory, instead of the
+             current directory.";
+          type empty;
+        }
+
+        leaf format {
+          description 
+            "Type of conversion desired, if any. If this
+             parameter is missing, then no translation
+             will be done, but the module will be validated,
+             and any requested reports will be generated.
+
+             The following values are supported:
+                xsd  == XSD 1.0 translation
+                html == XHTML 1.0 translation
+                yang == Canonical YANG translation
+                copy == Validate and copy with a new name.";
+          type FormatType;
+        }
+
+        leaf modversion {
+          description 
+             "Validate the file, write the [sub]module 
+              name, version and source filespec, then exit.";
+          type empty;
+        }
+
+        leaf exports {
+          description 
+             "Validate the file, write information for the symbols
+              that this [sub]module exports, then exit.  Report
+              includes the following info for the specific file,
+              not the entire module, if submodules are used:
+                  - [sub]module name
+                  - version
+                  - source filespec
+                  - namespace (module only)
+                  - prefix (module only)
+                  - belongs-to (submodule only)
+                  - typedefs
+                  - groupings
+                  - objects, rpcs, notifications
+                  - extensions.";
+          type empty;
+        }
+
+        leaf dependencies {
+          description 
+             "Validate the file, write the module name, version 
+              and module source for each file that this [sub]module
+              imports and includes, then exit.
+
+              Each dependency type, name, version, and source
+              is listed once. 
+ 
+              If the dependency version and source are missing,
+              then that import or include file was not found.";
+          type empty;
+        }
+
+        leaf identifiers {
+          description 
+             "Validate the file, write the list of object identifiers,
+              that this [sub]module contains, then exit.
+
+              Each accessible object node is listed once,
+              including all child nodes.  Notifications and
+              RPC methods are considered top-level objects,
+              and have object identifiers as well as configuration
+              and state data..";
+          type empty;
+        }
+
+        leaf html-div {
+          description 
+            "If HTML translation is requested, then this parameter will
+             cause the output to be a single <div> element, instead of
+             an entire HTML file.  This allows the HTML translation
+             to be easily integrated within more complex WEB pages,
+             but the proper CSS definitions need to be present for the 
+             HTML to render properly. 
+
+             The default filename extension will be '.div' instead of '.html'
+             if this parameter is present.  The contents will be well-formed
+             XHTML 1.0, but without any namespace declarations.";
+          type empty;
+        }
+
+        leaf html-toc {
+          description 
+            "The HTML Table of Contents output mode.
+             Ignored unless the 'format' parameter is
+             set to 'html'.  Default is 'menu'.
+             Values:
+               - none: no ToC generated
+               - plain: plain list ToC generated
+               - menu: drop-down menu ToC generated.";
+             
+          type TocType;
+        }
+
+        leaf objview {
+          description
+             "Determines how objects are generated in HTML and YANG outputs.
+              The default mode is the 'raw' view.
+              XSD output is always 'cooked', since refined groupings
+              and locally-scoped definitions are not supported in XSD.
+
+              raw -- output includes augment and uses clauses, not the
+                     expanded results of those clauses.
+  
+              cooked -- output does not include augment or uses clauses,
+                    just the objects generated from those clauses.";
+
+          type ObjViewType;
+        }
+
+	leaf no-subdirs {
+          description
+             "If present, the file search paths for modules, scripts, and data
+              files will not include sub-directories if they exist in the
+              specified path.
+
+              If missing, then these file search paths will include
+              sub-directories, if present.  Any directory name beginning
+              with a dot '.' character, or named 'CVS', will be ignored.";
+          type empty;
+        }
+
+	leaf no-versionnames {
+          description
+             "If present, the default filenames will not contain
+              the module version string.  Normally, the [sub]module
+              name and version string are both used to generate
+              a default file name, when the 'defnames' output parameter
+              is used.  This flag will cause filenames and links
+              to be generated which do not contain the version string.";
+          type empty;
+        }
+
+        leaf simurls {
+          description 
+            "If HTML translation is requested, then this parameter will
+             cause the format of URLs within links to be generated
+             in simplified form, for WEB development engines such
+             as CherryPy, which support this format.
+
+             Normal URL format:
+                example.html?parm1=foo&parm2=bar#frag
+
+             Simplified URL format:
+               example/foo/bar#frag
+            ";
+          type empty;
+        }
+
+        leaf unified {
+          description
+            "If present, then submodules will be processed within
+             the main module, in a unified report, 
+             instead of separately, one report for each file.
+
+             For translation purposes, this parameter will cause
+             any sub-modules to be treated as if they were defined in
+             the main module.  Actual definitions will be generated
+             instead of an 'include' directive, for each submodule.
+
+             Normally, a separate output file is generated for each
+             input file, so that XSD output and other reports
+             for a main module will not include information for
+             submodules.
+
+             If this mode is selected, then submodules entered
+             with the 'module' parameter will be ignored.";
+          type empty;
+        }
+
+        leaf urlstart {
+          description
+            "If present, then this string will be used to prepend
+             to HREF links and URLs generated for SQL and HTML
+             translation.  It is expected to be a URL ending
+             with a directory path.  The trailing separator '/'
+             will be added if it is missing.
+
+             If not present (the default), then relative URLs,
+             starting with the file name will be generated instead.
+
+             For example, if this parameter is set to
+ 
+                'http://acme.com/public'
+
+             then the URL generated for the 'bar' type on line 53,
+             in the module FOO (version 2008-01-01) would be:
+
+             if no-versionnames set:
+
+                'http://acme.com/public/FOO.html#bar.53'  
+
+             OR
+
+             if no-versionnames not set (default):
+
+                'http://acme.com/public/FOO_2008-01-01.html#bar.53' ";
+
+          type string;
+        }
+
+        leaf xsd-schemaloc {
+          description
+            "If present, then this string will be used to prepend
+             to output XSD filenames, when generating schemaLocation
+             clauses.  It is expected to be a URL ending
+             with a directory path.  The trailing separator '/'
+             will be added if it is missing.  This parameter
+             is also prepended to URLs generated fpr include and import
+             directives within the XSD. 
+
+             If not present (the default), then the schemaLocation
+             element is not generated during XSD translation.
+             Relative URLs for include and import directives will
+             be generated, starting with the file name.
+
+             For example, if this parameter is set to
+ 
+                'http://acme.com/public'
+
+             then the schemaLocation XSD for the module FOO 
+             (version 01-01-2008) would be:
+
+             if no-versionnames set:
+
+                'http://acme.com/public/FOO.xsd'  
+
+             OR
+
+             if no-versionnames not set (default):
+
+                'http://acme.com/public/FOO_2008-01-01.xsd' ";
+
+          type string;
+        }
+    }
+
+}
+
+

@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="urn:ietf:params:xml:ns:netconf:partial-lock:1.0"
+   targetNamespace="urn:ietf:params:xml:ns:netconf:partial-lock:1.0"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2009-02-19"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'ietf-netconf-partial-lock.yang' by yangdump version 0.9.4
+         
+         Module: ietf-netconf-partial-lock
+         Organization: IETF Network Configuration (netconf) Working Group
+         Version: 2009-02-19
+         Contact: Netconf Working Group
+         Mailing list: netconf@ietf.org
+         Web: http://www.ietf.org/html.charters/netconf-charter.html
+         
+         Balazs Lengyel
+         Ericsson
+         balazs.lengyel@ericsson.com
+      </xs:documentation>
+      <xs:documentation>
+         This YANG module defines the &lt;partial-lock&gt; and
+         &lt;partial-unlock&gt; operations.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/ietf/ietf-netconf-partial-lock.yang
+         </ncx:source>
+         <ncx:organization>
+            IETF Network Configuration (netconf) Working Group
+         </ncx:organization>
+         <ncx:contact>
+            Netconf Working Group
+            Mailing list: netconf@ietf.org
+            Web: http://www.ietf.org/html.charters/netconf-charter.html
+            
+            Balazs Lengyel
+            Ericsson
+            balazs.lengyel@ericsson.com
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2009-02-19</ncx:version>
+            <ncx:description>
+               Initial version, published as RFC yyyy.
+            </ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:simpleType name="lock-id-type">
+      <xs:annotation>
+         <xs:documentation>
+            A number identifying a specific partial-lock granted to a session.
+            It is allocated by the system, and SHOULD be used in the
+            partial-unlock operation.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:unsignedInt"/>
+   </xs:simpleType>
+
+   <xs:complexType name="partial-lock_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="lock-id" type="lock-id-type"
+                  minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Identifies the lock, if granted. The lock-id SHOULD be
+                        used in the partial-unlock rpc.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="running">
+                  <xs:complexType>
+                     <xs:sequence>
+                        <xs:element name="locked-node" type="xs:string"
+                           minOccurs="1" maxOccurs="unbounded">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 List of locked nodes in the running datastore
+                              </xs:documentation>
+                              <xs:appinfo>
+                                 <ncx:ordered-by>system</ncx:ordered-by>
+                              </xs:appinfo>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.partial-lock.output.running.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                  </xs:complexType>
+               </xs:element>
+               <xs:element name="candidate">
+                  <xs:complexType>
+                     <xs:sequence>
+                        <xs:element name="locked-node" type="xs:string"
+                           minOccurs="1" maxOccurs="unbounded">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 List of locked nodes in the candidate datastore
+                              </xs:documentation>
+                              <xs:appinfo>
+                                 <ncx:ordered-by>system</ncx:ordered-by>
+                              </xs:appinfo>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.partial-lock.output.candidate.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                  </xs:complexType>
+               </xs:element>
+               <xs:element name="startup">
+                  <xs:complexType>
+                     <xs:sequence>
+                        <xs:element name="locked-node" type="xs:string"
+                           minOccurs="1" maxOccurs="unbounded">
+                           <xs:annotation>
+                              <xs:documentation>
+                                 List of locked nodes in the startup datastore
+                              </xs:documentation>
+                              <xs:appinfo>
+                                 <ncx:ordered-by>system</ncx:ordered-by>
+                              </xs:appinfo>
+                           </xs:annotation>
+                        </xs:element>
+                        <xs:element
+                           name="__.partial-lock.output.startup.A__"
+                           minOccurs="0" maxOccurs="unbounded"
+                           abstract="true"/>
+                     </xs:sequence>
+                  </xs:complexType>
+               </xs:element>
+               <xs:element name="__.partial-lock.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="partial-lock" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            A NETCONF operation that locks part of one or more datastores.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>
+               partial-lock_output_type__
+            </ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="target" minOccurs="1"
+                     maxOccurs="unbounded">
+                     <xs:annotation>
+                        <xs:documentation>
+                           A list of one or more datastore names.
+                           Each list entry must contain a different datastore name.
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:ordered-by>system</ncx:ordered-by>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:complexType>
+                        <xs:sequence>
+                           <xs:choice>
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:choice-name>datastore</ncx:choice-name>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                              <xs:sequence>
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:case-name>running</ncx:case-name>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:element name="running"
+                                    minOccurs="0"/>
+                                 <xs:element
+                                    name="__.partial-lock.input.target.datastore.running.A__"
+                                    minOccurs="0" maxOccurs="unbounded"
+                                    abstract="true"/>
+                              </xs:sequence>
+                              <xs:sequence>
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:case-name>candidate</ncx:case-name>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:element name="candidate"
+                                    minOccurs="0"/>
+                                 <xs:element
+                                    name="__.partial-lock.input.target.datastore.candidate.A__"
+                                    minOccurs="0" maxOccurs="unbounded"
+                                    abstract="true"/>
+                              </xs:sequence>
+                              <xs:sequence>
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:case-name>startup</ncx:case-name>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:element name="startup"
+                                    minOccurs="0"/>
+                                 <xs:element
+                                    name="__.partial-lock.input.target.datastore.startup.A__"
+                                    minOccurs="0" maxOccurs="unbounded"
+                                    abstract="true"/>
+                              </xs:sequence>
+                              <xs:element
+                                 name="__.partial-lock.input.target.datastore.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:choice>
+                           <xs:element
+                              name="__.partial-lock.input.target.A__"
+                              minOccurs="0" maxOccurs="unbounded"
+                              abstract="true"/>
+                        </xs:sequence>
+                     </xs:complexType>
+                  </xs:element>
+                  <xs:element name="select" type="xs:string"
+                     minOccurs="1" maxOccurs="unbounded">
+                     <xs:annotation>
+                        <xs:documentation>
+                           XPath expression that specifies the scope of the lock.
+                           An Instance Identifier expression MUST be used unless the
+                           :xpath capability is supported, in which case any XPath 1.0
+                           expression is allowed.
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:ordered-by>system</ncx:ordered-by>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.partial-lock.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="partial-unlock_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.partial-unlock.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="partial-unlock"
+      substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            A NETCONF operation that releases a previously acquired
+            partial-lock.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>
+               partial-unlock_output_type__
+            </ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="lock-id" type="lock-id-type"
+                     minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Identifies the lock to be released. MUST be the value
+                           received in the response to the partial-lock operation.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.partial-unlock.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

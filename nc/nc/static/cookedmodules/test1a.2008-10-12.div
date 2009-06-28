@@ -1,0 +1,126 @@
+
+<div>
+   <h1 class="yang">test1a.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#X.9">X</a></li>
+            <li><a href="#XX.11">XX</a></li>
+         </ul>
+      </li>
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#test1-a.sub.13">test1-a.sub</a>
+               <ul>
+                  <li><a href="#a.16">a</a></li>
+                  <li><a href="#b.17">b</a></li>
+                  <li><a href="#c.18">c</a></li>
+                  <li class="daddy"><a href="#d.19">d</a>
+                     <ul>
+                        <li class="daddy"><a href="#e.20">e</a>
+                           <ul>
+                              <li><a href="#f.21">f</a></li>
+                              <li><a href="#g.22">g</a></li>
+                              <li><a href="#h.23">h</a></li>
+                           </ul>
+                        </li>
+                        <li class="daddy"><a href="#i.25">i</a>
+                           <ul>
+                              <li><a href="#i.25">i</a></li>
+                           </ul>
+                        </li>
+                        <li class="daddy"><a href="#j.26">j</a>
+                           <ul>
+                              <li><a href="#j.26">j</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">submodule</span> <span class="yang_id">test1a</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">belongs-to</span> <span class="yang_str">"test1"</span>;
+
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2008-10-12"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Initial revision."</span>;
+      }
+
+
+      <a name="X.9"></a><span class="yang_kw">typedef</span> <span class="yang_id">X</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+            <span class="yang_kw">range</span> <span class="yang_str">"1..10"</span>;
+         }
+      }
+
+      <a name="XX.11"></a><span class="yang_kw">typedef</span> <span class="yang_id">XX</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+            <span class="yang_kw">range</span> <span class="yang_str">"min..10"</span>;
+         }
+      }
+
+      <a name="test1-a.sub.13"></a><span class="yang_kw">list</span> <span class="yang_id">test1-a.sub</span> {
+         <span class="yang_kw">key</span> "<a href="#a.16">a</a> <a href="#b.17">b</a> <a href="#c.18">c</a>";
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+         <a name="a.16"></a><span class="yang_kw">leaf</span> <span class="yang_id">a</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+         }
+
+         <a name="b.17"></a><span class="yang_kw">leaf</span> <span class="yang_id">b</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int16</span>;
+         }
+
+         <a name="c.18"></a><span class="yang_kw">leaf</span> <span class="yang_id">c</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">int64</span>;
+         }
+
+         <a name="d.19"></a><span class="yang_kw">choice</span> <span class="yang_id">d</span> {
+            <a name="e.20"></a><span class="yang_kw">case</span> <span class="yang_id">e</span> {
+               <a name="f.21"></a><span class="yang_kw">leaf</span> <span class="yang_id">f</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
+               }
+
+               <a name="g.22"></a><span class="yang_kw">leaf</span> <span class="yang_id">g</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+                  <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+               }
+
+               <a name="h.23"></a><span class="yang_kw">leaf</span> <span class="yang_id">h</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+                  <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               }
+            }  <span class="yang_cmt">// case e</span>
+
+            <a name="i.25"></a><span class="yang_kw">case</span> <span class="yang_id">i</span> {
+               <a name="i.25"></a><span class="yang_kw">leaf</span> <span class="yang_id">i</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+                     <span class="yang_kw">path</span> <span class="yang_str">"../../../a"</span>;
+                     <span class="yang_kw">require-instance</span> <span class="yang_str">"true"</span>;
+                  }
+               }
+            }  <span class="yang_cmt">// case i</span>
+
+            <a name="j.26"></a><span class="yang_kw">case</span> <span class="yang_id">j</span> {
+               <a name="j.26"></a><span class="yang_kw">leaf</span> <span class="yang_id">j</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id"><a href="#X.9">X</a></span>;
+               }
+            }  <span class="yang_cmt">// case j</span>
+         }  <span class="yang_cmt">// choice d</span>
+      }  <span class="yang_cmt">// list test1-a.sub</span>
+   }  <span class="yang_cmt">// submodule test1a</span>
+</pre>
+</div>
+</div>

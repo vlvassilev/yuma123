@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="http://netconfcentral.com/ns/testr2"
+   targetNamespace="http://netconfcentral.com/ns/testr2"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2008-01-01"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'testr2.2008-01-01.yang' by yangdump version 0.9.4
+         
+         Module: testr2
+         Organization: Netconf Central
+         Version: 2008-01-01
+         Contact: Andy Bierman
+      </xs:documentation>
+      <xs:documentation>
+         YANG import-by-revision test module.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/test/testr2.2008-01-01.yang
+         </ncx:source>
+         <ncx:organization>Netconf Central</ncx:organization>
+         <ncx:contact>Andy Bierman</ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2008-01-01</ncx:version>
+            <ncx:description>Initial version.</ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:simpleType name="TestType">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:default>5</ncx:default>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:restriction base="xs:int">
+         <xs:minInclusive value="1"/>
+         <xs:maxInclusive value="9"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:group name="TestGroup">
+      <xs:sequence>
+         <xs:element name="A" type="xs:long" minOccurs="0"/>
+         <xs:element name="B" type="xs:string" minOccurs="0"/>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:element name="bar-r2">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="A" type="xs:long" minOccurs="0"/>
+            <xs:element name="B" type="xs:string" minOccurs="0"/>
+            <xs:element name="__.bar-r2.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

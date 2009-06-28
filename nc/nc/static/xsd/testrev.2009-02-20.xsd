@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="http://netconfcentral.com/ns/testrev"
+   targetNamespace="http://netconfcentral.com/ns/testrev"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2009-02-20"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+   xmlns:r1="http://netconfcentral.com/ns/testr1"
+   xmlns:r2="http://netconfcentral.com/ns/testr2">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'testrev.yang' by yangdump version 0.9.4
+         
+         Module: testrev
+         Organization: Netconf Central
+         Version: 2009-02-20
+         Contact: Andy Bierman
+      </xs:documentation>
+      <xs:documentation>
+         YANG import-by-revision test module.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/test/testrev.yang
+         </ncx:source>
+         <ncx:organization>Netconf Central</ncx:organization>
+         <ncx:contact>Andy Bierman</ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2009-02-20</ncx:version>
+            <ncx:description>Initial version.</ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:element name="foo">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="X" type="xs:string" minOccurs="0"/>
+            <xs:element name="Y" type="xs:string" minOccurs="0"/>
+            <xs:element name="A" type="xs:long" minOccurs="0"/>
+            <xs:element name="B" type="xs:string" minOccurs="0"/>
+            <xs:element name="__.foo.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="bar">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="A" type="xs:long" minOccurs="0"/>
+            <xs:element name="B" type="xs:string" minOccurs="0"/>
+            <xs:element name="C" type="xs:string" minOccurs="0"/>
+            <xs:element name="D" type="xs:anyType" minOccurs="0"/>
+            <xs:element name="E">
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="__.bar.E.A__" minOccurs="0"
+                        maxOccurs="unbounded" abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+            <xs:element name="__.bar.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="baz" default="5" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+         <xs:restriction base="r2:TestType">
+            <xs:minInclusive value="2"/>
+         </xs:restriction>
+      </xs:simpleType>
+   </xs:element>
+
+</xs:schema>

@@ -1,0 +1,444 @@
+
+<div>
+   <h1 class="yang">netconfd.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#netconfd.57">netconfd</a>
+               <ul>
+                  <li><a href="#config.52">config</a></li>
+                  <li><a href="#help.61">help</a></li>
+                  <li class="daddy"><a href="#brief-full.38">brief-full</a>
+                     <ul>
+                        <li class="daddy"><a href="#brief.39">brief</a>
+                           <ul>
+                              <li><a href="#brief.39">brief</a></li>
+                           </ul>
+                        </li>
+                        <li class="daddy"><a href="#full.43">full</a>
+                           <ul>
+                              <li><a href="#full.43">full</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+                  <li><a href="#indent.68">indent</a></li>
+                  <li><a href="#log.74">log</a></li>
+                  <li><a href="#log-append.80">log-append</a></li>
+                  <li><a href="#log-level.89">log-level</a></li>
+                  <li><a href="#modpath.95">modpath</a></li>
+                  <li><a href="#version.101">version</a></li>
+                  <li><a href="#access-control.67">access-control</a></li>
+                  <li><a href="#datapath.108">datapath</a></li>
+                  <li><a href="#default-style.114">default-style</a></li>
+                  <li><a href="#port.152">port</a></li>
+                  <li><a href="#runpath.172">runpath</a></li>
+                  <li class="daddy"><a href="#start.33">start</a>
+                     <ul>
+                        <li class="daddy"><a href="#no-startup.37">no-startup</a>
+                           <ul>
+                              <li><a href="#no-startup.37">no-startup</a></li>
+                           </ul>
+                        </li>
+                        <li class="daddy"><a href="#startup.43">startup</a>
+                           <ul>
+                              <li><a href="#startup.43">startup</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+                  <li><a href="#superuser.180">superuser</a></li>
+                  <li><a href="#target.196">target</a></li>
+                  <li><a href="#xmlorder.220">xmlorder</a></li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+      <li><a href="#">RPC&nbsp;Methods</a>
+         <ul>
+            <li class="daddy"><a href="#load-config.231">load-config</a>
+               <ul>
+                  <li class="daddy"><a href="#input.242">input</a>
+                     <ul>
+                        <li><a href="#config.243">config</a></li>
+                     </ul>
+                  </li>
+                  <li><a href="#output.231">output</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#load.250">load</a>
+               <ul>
+                  <li class="daddy"><a href="#input.259">input</a>
+                     <ul>
+                        <li><a href="#module.260">module</a></li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#output.267">output</a>
+                     <ul>
+                        <li><a href="#mod-revision.268">mod-revision</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#restart.280">restart</a>
+               <ul>
+                  <li><a href="#input.280">input</a></li>
+                  <li><a href="#output.280">output</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#shutdown.286">shutdown</a>
+               <ul>
+                  <li><a href="#input.286">input</a></li>
+                  <li><a href="#output.286">output</a></li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">netconfd</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span> <span class="yang_str">"http://netconfcentral.com/ns/netconfd"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"nd"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/ncx">ncx</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"ncx"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/ncxtypes">ncxtypes</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"nt"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/ncx-app-common">ncx-app-common</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"ncxapp"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/ietf-inet-types">ietf-inet-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"inet"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/ietf-with-defaults">ietf-with-defaults</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"wd"</span>;
+      }
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"Netconf Central"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"Andy Bierman &lt;support@netconfcentral.com&gt;."</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"NCX Agent Configuration Parameters and Statistics"</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2009-05-28"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"pre-beta1: work-in-progress version."</span>;
+      }
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2008-08-01"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Initial conversion from netconfd.ncx v 0.6"</span>;
+      }
+
+
+      <a name="netconfd.57"></a><span class="yang_kw">container</span> <span class="yang_id">netconfd</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Agent CLI for the NETCONF protocol.
+            Usage:
+              netconfd [parameters]"</span>;
+         <a name="config.52"></a><span class="yang_kw">leaf</span> <span class="yang_id">config</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The name of the configuration file to use.
+               Any parameter except this one can be set in the config file.
+               The default config file will be not be checked if this
+               parameter is present."</span>;
+         }
+
+         <a name="help.61"></a><span class="yang_kw">leaf</span> <span class="yang_id">help</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
+            <span class="yang_kw">description</span> <span class="yang_str">"Print yangdump help file and exit."</span>;
+         }
+
+         <a name="brief-full.38"></a><span class="yang_kw">choice</span> <span class="yang_id">brief-full</span> {
+            <a name="brief.39"></a><span class="yang_kw">case</span> <span class="yang_id">brief</span> {
+               <a name="brief.39"></a><span class="yang_kw">leaf</span> <span class="yang_id">brief</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
+                  <span class="yang_kw">description</span> <span class="yang_str">"Show brief help text"</span>;
+               }
+            }  <span class="yang_cmt">// case brief</span>
+
+            <a name="full.43"></a><span class="yang_kw">case</span> <span class="yang_id">full</span> {
+               <a name="full.43"></a><span class="yang_kw">leaf</span> <span class="yang_id">full</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
+                  <span class="yang_kw">description</span> <span class="yang_str">"Show full help text"</span>;
+               }
+            }  <span class="yang_cmt">// case full</span>
+         }  <span class="yang_cmt">// choice brief-full</span>
+
+         <a name="indent.68"></a><span class="yang_kw">leaf</span> <span class="yang_id">indent</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ncxtypes/2008-07-20#IndentType.252">nt:IndentType</a></span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Number of spaces to indent (0..9) in formatted output."</span>;
+         }
+
+         <a name="log.74"></a><span class="yang_kw">leaf</span> <span class="yang_id">log</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Filespec for the log file to use instead of STDOUT."</span>;
+         }
+
+         <a name="log-append.80"></a><span class="yang_kw">leaf</span> <span class="yang_id">log-append</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"If present, the log will be appended not over-written.
+               If not, the log will be over-written.
+               Only meaningful if the 'log' parameter is
+               also present."</span>;
+         }
+
+         <a name="log-level.89"></a><span class="yang_kw">leaf</span> <span class="yang_id">log-level</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ncxtypes/2008-07-20#NcDebugType.173">nt:NcDebugType</a></span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Sets the debug logging level for the program."</span>;
+         }
+
+         <a name="modpath.95"></a><span class="yang_kw">leaf</span> <span class="yang_id">modpath</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ncxtypes/2008-07-20#NcPathList.213">nt:NcPathList</a></span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Directory search path for YANG and NCX modules."</span>;
+         }
+
+         <a name="version.101"></a><span class="yang_kw">leaf</span> <span class="yang_id">version</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Print yangdump version string and exit."</span>;
+         }
+
+         <a name="access-control.67"></a><span class="yang_kw">leaf</span> <span class="yang_id">access-control</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+               <span class="yang_kw">enum</span> <span class="yang_str">"enforcing"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">0</span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"All configured access control rules will be
+                     enforced."</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"permissive"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"All configured access control rules will be
+                     enforced for write and execute requests.
+                     All read requests will be allowed, unless
+                     the requested object contains the
+                     'ncx:very-secure' extension.  In that case,
+                     all configured access control rules will
+                     be enforced."</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"disabled"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"All read, write, and execute requests will be
+                     allowed, unless the object contains the
+                     'ncx:secure' or 'ncx:very-secure' extension.
+                     If the 'ncx:secure' extension is in effect,
+                     then all configured access control rules
+                     will be enforced for write and execute requests.
+                     If the 'ncx:very-secure' extension is in effect,
+                     then all configured access control rules
+                     will be enforced for all requests.
+                     Use this mode with caution."</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"off"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"All access control enforcement is disabled.
+                     Use this mode with extreme caution."</span>;
+               }
+            }
+            <span class="yang_kw">default</span> <span class="yang_str">"enforcing"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Controls how access control is enforced by the agent."</span>;
+         }
+
+         <a name="datapath.108"></a><span class="yang_kw">leaf</span> <span class="yang_id">datapath</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ncxtypes/2008-07-20#NcPathList.213">nt:NcPathList</a></span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Internal file search path for config files."</span>;
+         }
+
+         <a name="default-style.114"></a><span class="yang_kw">leaf</span> <span class="yang_id">default-style</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ietf-with-defaults/2009-04-10#DefaultStyle.40">wd:DefaultStyle</a></span>;
+            <span class="yang_kw">default</span> <span class="yang_str">"report-all"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Selects the type of filtering behavior the agent will
+               advertise in the 'with-defaults' capability.  The agent
+               will use this default handling behavior if the 
+               'with-defaults' parameter is not explicitly set."</span>;
+         }
+
+         <a name="port.152"></a><span class="yang_kw">leaf-list</span> <span class="yang_id">port</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ietf-inet-types/2009-05-13#port-number.142">inet:port-number</a></span>;
+            <span class="yang_kw">max-elements</span> <span class="yang_str">"4"</span>;
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Specify the TCP ports that the agent will accept
+               connections from.  These ports must also be configured
+               in the /etc/ssh/sshd_config file for the SSH master
+               agent to accept the connection and invoke the netconf
+               subsystem.
+               
+               Up to 4 port numbers can be configured.
+               
+               If any ports are configured, then only those values
+               will be accepted by the agent.
+               
+               If no ports are configured, then the agent will accept
+               connections on the netconf-ssh port (tcp/830)."</span>;
+         }
+
+         <a name="runpath.172"></a><span class="yang_kw">leaf</span> <span class="yang_id">runpath</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ncxtypes/2008-07-20#NcPathList.213">nt:NcPathList</a></span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"Internal file search path for executable modules."</span>;
+         }
+
+         <a name="start.33"></a><span class="yang_kw">choice</span> <span class="yang_id">start</span> {
+            <span class="yang_kw">description</span> <span class="yang_str">"select startup config for boot load"</span>;
+            <a name="no-startup.37"></a><span class="yang_kw">case</span> <span class="yang_id">no-startup</span> {
+               <a name="no-startup.37"></a><span class="yang_kw">leaf</span> <span class="yang_id">no-startup</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"If present, do not load the startup config file."</span>;
+               }
+            }  <span class="yang_cmt">// case no-startup</span>
+
+            <a name="startup.43"></a><span class="yang_kw">case</span> <span class="yang_id">startup</span> {
+               <a name="startup.43"></a><span class="yang_kw">leaf</span> <span class="yang_id">startup</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"The full filespec of the startup config file to use.
+                     If present, overrides the default startup config
+                     file name 'startup-cfg.xml',  This will also
+                     override the NCX_DATAPATH environement variable
+                     and the datapath CLI parameter, if the first
+                     character is the forward slash '/', indicating
+                     an absolute file path."</span>;
+               }
+            }  <span class="yang_cmt">// case startup</span>
+         }  <span class="yang_cmt">// choice start</span>
+
+         <a name="superuser.180"></a><span class="yang_kw">leaf</span> <span class="yang_id">superuser</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">union</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ncxtypes/2008-07-20#NcxName.46">nt:NcxName</a></span>;
+               <span class="yang_kw">type</span> <span class="yang_id">string</span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"0"</span>;
+               }
+            }
+            <span class="yang_kw">default</span> <span class="yang_str">"superuser"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The user name to use as the superuser account.
+               Any session associated with this user name 
+               will bypass all access control enforcement.
+               See nacm.yang for more details.
+               
+               To disable the superuser account completely,
+               set this parameter to the empty string."</span>;
+         }
+
+         <a name="target.196"></a><span class="yang_kw">leaf</span> <span class="yang_id">target</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+               <span class="yang_kw">enum</span> <span class="yang_str">"running"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">0</span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"Write to the running config.
+                     Also use distinct startup capability.
+                     A copy-config operation must be used to 
+                     save the running config to the startup config file."</span>;
+               }
+               <span class="yang_kw">enum</span> <span class="yang_str">"candidate"</span> {
+                  <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"Write to the candidate config.
+                     Also automatically update the startup config
+                     file after each 'commit' operation is
+                     successfully completed."</span>;
+               }
+            }
+            <span class="yang_kw">default</span> <span class="yang_str">"candidate"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The database to use as the target of edit-config
+               operations."</span>;
+         }
+
+         <a name="xmlorder.220"></a><span class="yang_kw">leaf</span> <span class="yang_id">xmlorder</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">empty</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"If present, then XML element order will be enforced.
+               Otherwise, XML element order errors will not be
+               generated if possible. Default is no enforcement of
+               strict XML order."</span>;
+         }
+         <a href="/modules/ncx/2009-04-10#cli.348">ncx:cli</a>;
+      }  <span class="yang_cmt">// container netconfd</span>
+
+      <a name="load-config.231"></a><span class="yang_kw">rpc</span> <span class="yang_id">load-config</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"NCX internal load-config operation.
+            The config database can be loaded dynamically
+            only if the startup config phase was skipped
+            via the 'no-startup' option.
+            
+            An operation-failed error will be returned and
+            any startup config file was loaded (even partially)
+            successfully."</span>;
+         <a name="input.242"></a><span class="yang_kw">input</span> {
+            <a name="config.243"></a><span class="yang_kw">container</span> <span class="yang_id">config</span> {
+               <span class="yang_kw">description</span> <span class="yang_str">"XML Config contents."</span>;
+               <a href="/modules/ncx/2009-04-10#root.425">ncx:root</a>;
+            }  <span class="yang_cmt">// container config</span>
+         }
+      }  <span class="yang_cmt">// rpc load-config</span>
+
+      <a name="load.250"></a><span class="yang_kw">rpc</span> <span class="yang_id">load</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Load a module into the agent, if it is not already loaded.
+            Returns the module revision date (or today's date if none),
+            of the module that was loaded, or an error if not found
+            or the module found had errors and was not loaded
+            successfully.  If the module is already loaded, then the
+            revision date will simply be returned."</span>;
+         <a name="input.259"></a><span class="yang_kw">input</span> {
+            <a name="module.260"></a><span class="yang_kw">leaf</span> <span class="yang_id">module</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ncxtypes/2008-07-20#NcxName.46">nt:NcxName</a></span>;
+               <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Name of the module to load."</span>;
+            }
+         }
+
+         <a name="output.267"></a><span class="yang_kw">output</span> {
+            <a name="mod-revision.268"></a><span class="yang_kw">leaf</span> <span class="yang_id">mod-revision</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Revision date of the module in use by the agent.
+                  Will only be present if the module has a version"</span>;
+            }
+         }
+      }  <span class="yang_cmt">// rpc load</span>
+
+      <a name="restart.280"></a><span class="yang_kw">rpc</span> <span class="yang_id">restart</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Restart the agent. Does not reload the software image.."</span>;
+         <a href="/modules/ncx/2009-04-10#secure.476">ncx:secure</a>;
+      }  <span class="yang_cmt">// rpc restart</span>
+
+      <a name="shutdown.286"></a><span class="yang_kw">rpc</span> <span class="yang_id">shutdown</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Shutdown the agent."</span>;
+         <a href="/modules/ncx/2009-04-10#secure.476">ncx:secure</a>;
+      }  <span class="yang_cmt">// rpc shutdown</span>
+   }  <span class="yang_cmt">// module netconfd</span>
+</pre>
+</div>
+</div>

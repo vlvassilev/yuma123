@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="urn:ietf:params:xml:ns:yang:yang-smi"
+   targetNamespace="urn:ietf:params:xml:ns:yang:yang-smi"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2008-03-20"
+   xmlns:ncx="http://netconfcentral.com/ncx">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'yang-smi.yang' by yangdump version 0.9.4
+         
+         Module: yang-smi
+         Organization: YANG Language Design Team
+         Version: 2008-03-20
+         Contact: Martin Bjorklund (Editor) &lt;mbj@tail-f.com&gt;
+      </xs:documentation>
+      <xs:documentation>
+         This module contains extensions for dealing with SMIv2 modules.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/yang/yang-smi.yang
+         </ncx:source>
+         <ncx:organization>
+            YANG Language Design Team
+         </ncx:organization>
+         <ncx:contact>
+            Martin Bjorklund (Editor) &lt;mbj@tail-f.com&gt;
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2008-03-20</ncx:version>
+            <ncx:description>Initial revision.</ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+</xs:schema>

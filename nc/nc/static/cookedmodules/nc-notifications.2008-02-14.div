@@ -1,0 +1,140 @@
+
+<div>
+   <h1 class="yang">nc-notifications.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#netconf.26">netconf</a>
+               <ul>
+                  <li class="daddy"><a href="#streams.29">streams</a>
+                     <ul>
+                        <li class="daddy"><a href="#stream.36">stream</a>
+                           <ul>
+                              <li><a href="#name.42">name</a></li>
+                              <li><a href="#description.49">description</a></li>
+                              <li><a href="#replaySupport.58">replaySupport</a></li>
+                              <li><a href="#replayLogCreationTime.67">replayLogCreationTime</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+      <li><a href="#">Notifications</a>
+         <ul>
+            <li><a href="#replayComplete.81">replayComplete</a></li>
+            <li><a href="#notificationComplete.87">notificationComplete</a></li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">nc-notifications</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:netmod:notification"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"manageEvent"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/xsd">xsd</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"xsd"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/notifications">notifications</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"ncEvent"</span>;
+      }
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"IETF NETCONF WG"</span>;
+
+      <span class="yang_kw">contact</span> <span class="yang_str">"netconf@ops.ietf.org"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"Conversion of the 'manageEvent' XSD in the NETCONF
+         Notifications draft."</span>;
+
+      <span class="yang_kw">reference</span>
+         <span class="yang_str">"draft-ietf-netconf-notifications-11.txt"</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2008-02-14"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Initial version, based on -11 draft."</span>;
+      }
+
+
+      <a name="netconf.26"></a><span class="yang_kw">container</span> <span class="yang_id">netconf</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Top-level element in the notification namespace"</span>;
+         <a name="streams.29"></a><span class="yang_kw">container</span> <span class="yang_id">streams</span> {
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The list of event streams supported by the system. When
+               a query is issued, the returned set of streams is 
+               determined based on user privileges."</span>;
+            <a name="stream.36"></a><span class="yang_kw">list</span> <span class="yang_id">stream</span> {
+               <span class="yang_kw">key</span> "<a href="#name.42">name</a>";
+               <span class="yang_kw">min-elements</span> <span class="yang_str">"1"</span>;
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"Stream name, description and other information."</span>;
+               <a name="name.42"></a><span class="yang_kw">leaf</span> <span class="yang_id">name</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/notifications/2008-02-14#streamNameType.25">ncEvent:streamNameType</a></span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"The name of the event stream. If this is the default
+                     NETCONF stream, this must have the value 'NETCONF'."</span>;
+               }
+
+               <a name="description.49"></a><span class="yang_kw">leaf</span> <span class="yang_id">description</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                  <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"A description of the event stream, including such
+                     information as the type of events that are sent over
+                     this stream."</span>;
+               }
+
+               <a name="replaySupport.58"></a><span class="yang_kw">leaf</span> <span class="yang_id">replaySupport</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">boolean</span>;
+                  <span class="yang_kw">mandatory</span> <span class="yang_str">"true"</span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"A description of the event stream, including such
+                     information as the type of events that are sent over
+                     this stream."</span>;
+               }
+
+               <a name="replayLogCreationTime.67"></a><span class="yang_kw">leaf</span> <span class="yang_id">replayLogCreationTime</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/xsd/2007-12-06#dateTime.227">xsd:dateTime</a></span>;
+                  <span class="yang_kw">description</span>
+                     <span class="yang_str">"The timestamp of the creation of the log used to support
+                     the replay function on this stream. Note that this might
+                     be earlier then the earliest available notification in
+                     the log. This object is updated if the log resets for 
+                     some reason.  This object MUST be present if replay is
+                     supported."</span>;
+               }
+            }  <span class="yang_cmt">// list stream</span>
+         }  <span class="yang_cmt">// container streams</span>
+      }  <span class="yang_cmt">// container netconf</span>
+
+      <a name="replayComplete.81"></a><span class="yang_kw">notification</span> <span class="yang_id">replayComplete</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"This notification is sent to signal the end of a replay
+            portion of a subscription."</span>;
+      }  <span class="yang_cmt">// notification replayComplete</span>
+
+      <a name="notificationComplete.87"></a><span class="yang_kw">notification</span> <span class="yang_id">notificationComplete</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"This notification is sent to signal the end of a notification
+            subscription. It is sent in the case that stopTime was
+            specified during the creation of the subscription.."</span>;
+      }  <span class="yang_cmt">// notification notificationComplete</span>
+   }  <span class="yang_cmt">// module nc-notifications</span>
+</pre>
+</div>
+</div>

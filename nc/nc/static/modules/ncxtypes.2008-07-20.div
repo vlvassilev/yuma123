@@ -1,0 +1,298 @@
+
+<div>
+   <h1 class="yang">ncxtypes.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#int.21">int</a></li>
+            <li><a href="#uint.26">uint</a></li>
+            <li><a href="#long.31">long</a></li>
+            <li><a href="#ulong.36">ulong</a></li>
+            <li><a href="#ustring.41">ustring</a></li>
+            <li><a href="#NcxName.46">NcxName</a></li>
+            <li><a href="#NcxQName.54">NcxQName</a></li>
+            <li><a href="#NcxIdentifier.102">NcxIdentifier</a></li>
+            <li><a href="#NcxSessionId.110">NcxSessionId</a></li>
+            <li><a href="#NcxLineLength.117">NcxLineLength</a></li>
+            <li><a href="#NcxUserName.124">NcxUserName</a></li>
+            <li><a href="#NcxGroupName.129">NcxGroupName</a></li>
+            <li><a href="#NcAccessControlType.138">NcAccessControlType</a></li>
+            <li><a href="#NcxRpcType.160">NcxRpcType</a></li>
+            <li><a href="#NcDebugType.173">NcDebugType</a></li>
+            <li><a href="#NcPortNumber.199">NcPortNumber</a></li>
+            <li><a href="#NcIndex.206">NcIndex</a></li>
+            <li><a href="#NcPathList.213">NcPathList</a></li>
+            <li><a href="#NcModuleSpec.233">NcModuleSpec</a></li>
+            <li><a href="#IndentType.252">IndentType</a></li>
+            <li><a href="#Timeout.262">Timeout</a></li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">ncxtypes</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span> <span class="yang_str">"http://netconfcentral.com/ns/ncxtypes"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"nt"</span>;
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"Netconf Central"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"Andy Bierman &lt;andy at netconfcentral.com&gt;"</span>;
+
+      <span class="yang_kw">description</span> <span class="yang_str">"NCX Common Data Types"</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2008-07-20"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Converted from ncxtypes.ncx."</span>;
+      }
+
+
+      <a name="int.21"></a><span class="yang_kw">typedef</span> <span class="yang_id">int</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Changed int base type to int32 for YANG"</span>;
+      }
+
+      <a name="uint.26"></a><span class="yang_kw">typedef</span> <span class="yang_id">uint</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Changed uint base type to uint32 for YANG"</span>;
+      }
+
+      <a name="long.31"></a><span class="yang_kw">typedef</span> <span class="yang_id">long</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">int64</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Changed long base type to int64 for YANG"</span>;
+      }
+
+      <a name="ulong.36"></a><span class="yang_kw">typedef</span> <span class="yang_id">ulong</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">uint64</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Changed ulong base type to uint64 for YANG"</span>;
+      }
+
+      <a name="ustring.41"></a><span class="yang_kw">typedef</span> <span class="yang_id">ustring</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">binary</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Changed ustring base type to binary for YANG"</span>;
+      }
+
+      <a name="NcxName.46"></a><span class="yang_kw">typedef</span> <span class="yang_id">NcxName</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span> {
+            <span class="yang_kw">length</span> <span class="yang_str">"1..63"</span>;
+            <span class="yang_kw">pattern</span> <span class="yang_str">'[a-z,A-Z][a-z,A-Z,0-9,\-,_,\.]{0,62}'</span>;
+         }
+         <span class="yang_kw">description</span> <span class="yang_str">"General Purpose NCX Name string."</span>;
+      }
+
+      <a name="NcxQName.54"></a><span class="yang_kw">typedef</span> <span class="yang_id">NcxQName</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span> {
+            <span class="yang_kw">length</span> <span class="yang_str">"1..127"</span>;
+            <span class="yang_kw">pattern</span>
+               <span class="yang_str">'(([a-z,A-Z][a-z,A-Z,0-9,\-,_,\.]{0,62}):)?([a-z,A-Z][a-z,A-Z,0-9,\-,_,\.]{0,62})'</span>;
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Qualified Name:
+             module-name:NcxName OR owner-name:NcxName."</span>;
+      }
+
+      <a name="NcxIdentifier.102"></a><span class="yang_kw">typedef</span> <span class="yang_id">NcxIdentifier</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">union</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#NcxName.46">NcxName</a></span>;
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="#NcxQName.54">NcxQName</a></span>;
+         }
+         <span class="yang_kw">description</span> <span class="yang_str">"Union of all the Identifier types."</span>;
+      }
+
+      <a name="NcxSessionId.110"></a><span class="yang_kw">typedef</span> <span class="yang_id">NcxSessionId</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+            <span class="yang_kw">range</span> <span class="yang_str">"1..max"</span>;
+         }
+         <span class="yang_kw">description</span> <span class="yang_str">"NCX Session ID number"</span>;
+      }
+
+      <a name="NcxLineLength.117"></a><span class="yang_kw">typedef</span> <span class="yang_id">NcxLineLength</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+            <span class="yang_kw">range</span> <span class="yang_str">"32..65535"</span>;
+         }
+         <span class="yang_kw">description</span> <span class="yang_str">"Requested Maximum Line Length"</span>;
+      }
+
+      <a name="NcxUserName.124"></a><span class="yang_kw">typedef</span> <span class="yang_id">NcxUserName</span> {
+         <span class="yang_kw">type</span> <span class="yang_id"><a href="#NcxName.46">NcxName</a></span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"NCX User Name string."</span>;
+      }
+
+      <a name="NcxGroupName.129"></a><span class="yang_kw">typedef</span> <span class="yang_id">NcxGroupName</span> {
+         <span class="yang_kw">type</span> <span class="yang_id"><a href="#NcxName.46">NcxName</a></span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"NCX Group Name string."</span>;
+      }
+
+      <a name="NcAccessControlType.138"></a><span class="yang_kw">typedef</span> <span class="yang_id">NcAccessControlType</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+            <span class="yang_kw">enum</span> <span class="yang_str">"open"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">0</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"no access control checking enforced"</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"loose"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"any RPC method in the netconf namespace can
+                  be invoked;  read-only data allowed for all"</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"strict"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"RPC entry must be present to invoke
+                  an RPC method; ncxacl Data entry must be present
+                  to access any data. (Except for user == 'root'.)"</span>;
+            }
+         }
+         <span class="yang_kw">default</span> <span class="yang_str">"strict"</span>;
+         <span class="yang_kw">description</span> <span class="yang_str">"NCX System access control mode."</span>;
+      }
+
+      <a name="NcxRpcType.160"></a><span class="yang_kw">typedef</span> <span class="yang_id">NcxRpcType</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+            <span class="yang_kw">enum</span> <span class="yang_str">"other"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">0</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"config"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"exec"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"monitor"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"debug"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+            }
+         }
+         <span class="yang_kw">description</span> <span class="yang_str">"NCX RPC Type Classifications"</span>;
+      }
+
+      <a name="NcDebugType.173"></a><span class="yang_kw">typedef</span> <span class="yang_id">NcDebugType</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+            <span class="yang_kw">enum</span> <span class="yang_str">"off"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">0</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"error"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"warn"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"info"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"debug"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"debug2"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"debug3"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+            }
+         }
+         <span class="yang_kw">default</span> <span class="yang_str">"info"</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"NCX Session debug logging control enumeration.
+            Each successive value includes all the previous
+            messages from lower value enumeration values,
+            plus the messages for the specified value.
+            
+            off == no logging is done
+            error == log error messages
+            warn == log warning messages
+            info == log info messages 
+            debug == log debug level 1 messages
+            debug2 == log debug level 2 messages
+            debug3 == log debug level 3 messages"</span>;
+      }
+
+      <a name="NcPortNumber.199"></a><span class="yang_kw">typedef</span> <span class="yang_id">NcPortNumber</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+            <span class="yang_kw">range</span> <span class="yang_str">"1 .. 65535"</span>;
+         }
+         <span class="yang_kw">description</span> <span class="yang_str">"Transport layer port number."</span>;
+      }
+
+      <a name="NcIndex.206"></a><span class="yang_kw">typedef</span> <span class="yang_id">NcIndex</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+            <span class="yang_kw">range</span> <span class="yang_str">"1..max"</span>;
+         }
+         <span class="yang_kw">description</span> <span class="yang_str">"Non-negative index value"</span>;
+      }
+
+      <a name="NcPathList.213"></a><span class="yang_kw">typedef</span> <span class="yang_id">NcPathList</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"PATHSPEC formatted string indicating the machine-dependent
+            search path for the NCX programs to use.  Parameters
+            with this data type can be used to override the
+            default search order, and insert special work
+            directories in the search path.
+            
+            Each component in the string is an absolute or
+            relative directory path specification.
+            The colon char ':' is used to separate the path strings.
+            Whitespace is not allowed in the string at all.
+            
+            For example, the following string contains 3 paths
+            that would be used in the order given:
+            
+            /home/users/testbed1/yang:/home/users/yang:/usr/share/yang"</span>;
+      }
+
+      <a name="NcModuleSpec.233"></a><span class="yang_kw">typedef</span> <span class="yang_id">NcModuleSpec</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"A string which specifices a module name, or a filespec
+            which represents a module.
+            
+            If the string is a simple identifier string, then
+            it will be treated as a module name, and the search
+            path will be used to find the complete filespec.
+            
+            If the string:
+              -  ends in the sub-string '.yang' or '.ncx'
+              -  begins with the dot character '.'
+              -  contains any  or a path separator characters
+            then it is considered to be a filespec, not a module
+            name, and only that filespec will be used for input,
+            instead of using the module search path."</span>;
+      }
+
+      <a name="IndentType.252"></a><span class="yang_kw">typedef</span> <span class="yang_id">IndentType</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">uint32</span> {
+            <span class="yang_kw">range</span> <span class="yang_str">"0..9"</span>;
+         }
+         <span class="yang_kw">default</span> <span class="yang_str">"3"</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Requested indent amount.
+            Only a limited range of line indent values are allowed."</span>;
+      }
+
+      <a name="Timeout.262"></a><span class="yang_kw">typedef</span> <span class="yang_id">Timeout</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+         <span class="yang_kw">units</span> <span class="yang_str">"seconds"</span>;
+         <span class="yang_kw">default</span> <span class="yang_str">"30"</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Number of seconds to wait for a response
+            from the NETCONF peer before declaring a timeout.
+            Zero means no timeout at all."</span>;
+      }
+   }  <span class="yang_cmt">// module ncxtypes</span>
+</pre>
+</div>
+</div>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="urn:ietf:params:xml:ns:yang:test1"
+   targetNamespace="urn:ietf:params:xml:ns:yang:test1"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2008-10-12"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'test1.yang' by yangdump version 0.9.4
+         
+         Module: test1
+         Version: 2008-10-12
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/test/test1.yang
+         </ncx:source>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2008-10-12</ncx:version>
+            <ncx:description>Initial revision.</ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:include schemaLocation="test1a.xsd"/>
+
+   <xs:include schemaLocation="test1b.xsd"/>
+
+   <xs:simpleType name="AA">
+      <xs:restriction base="xs:string">
+         <xs:pattern value=".*"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:element name="t22" type="xs:boolean" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="t23" type="xs:string" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>false</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+</xs:schema>

@@ -1,0 +1,1175 @@
+
+<div>
+   <h1 class="yang">DISMAN-SCHEDULE-MIB.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#SnmpPduErrorStatus.80">SnmpPduErrorStatus</a></li>
+         </ul>
+      </li>
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#schedObjects.110">schedObjects</a>
+               <ul>
+                  <li><a href="#schedLocalTime.112">schedLocalTime</a></li>
+                  <li class="daddy"><a href="#schedEntry.129">schedEntry</a>
+                     <ul>
+                        <li><a href="#schedOwner.145">schedOwner</a></li>
+                        <li><a href="#schedName.158">schedName</a></li>
+                        <li><a href="#schedDescr.170">schedDescr</a></li>
+                        <li><a href="#schedInterval.180">schedInterval</a></li>
+                        <li><a href="#schedWeekDay.207">schedWeekDay</a></li>
+                        <li><a href="#schedMonth.232">schedMonth</a></li>
+                        <li><a href="#schedDay.263">schedDay</a></li>
+                        <li><a href="#schedHour.361">schedHour</a></li>
+                        <li><a href="#schedMinute.400">schedMinute</a></li>
+                        <li><a href="#schedContextName.475">schedContextName</a></li>
+                        <li><a href="#schedVariable.487">schedVariable</a></li>
+                        <li><a href="#schedValue.497">schedValue</a></li>
+                        <li><a href="#schedType.515">schedType</a></li>
+                        <li><a href="#schedAdminStatus.550">schedAdminStatus</a></li>
+                        <li><a href="#schedOperStatus.562">schedOperStatus</a></li>
+                        <li><a href="#schedFailures.585">schedFailures</a></li>
+                        <li><a href="#schedLastFailure.595">schedLastFailure</a></li>
+                        <li><a href="#schedLastFailed.606">schedLastFailed</a></li>
+                        <li><a href="#schedStorageType.618">schedStorageType</a></li>
+                        <li><a href="#schedRowStatus.637">schedRowStatus</a></li>
+                        <li><a href="#schedTriggers.657">schedTriggers</a></li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+      <li><a href="#">Notifications</a>
+         <ul>
+            <li><a href="#schedActionFailure.669">schedActionFailure</a></li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">DISMAN-SCHEDULE-MIB</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:yang:smiv2:DISMAN-SCHEDULE-MIB"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"disman-schedule"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/SNMP-FRAMEWORK-MIB">SNMP-FRAMEWORK-MIB</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"snmp-framework"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/SNMPv2-TC">SNMPv2-TC</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smiv2"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/yang-smi">yang-smi</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
+      }
+      <span class="yang_kw">import</span> <a href="/modules/ietf-yang-types">ietf-yang-types</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"yang"</span>;
+      }
+
+      <span class="yang_kw">organization</span>
+         <span class="yang_str">"IETF Distributed Management Working Group"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"WG EMail:  disman@dorothy.bmc.com
+         Subscribe: disman-request@dorothy.bmc.com
+         
+         Chair:     Randy Presuhn
+         	   BMC Software, Inc.
+         Postal:    Office 1-3141
+         	   2141 North First Street
+         	   San Jose,  California 95131
+         	   USA
+         EMail:     rpresuhn@bmc.com
+         Phone:     +1 408 546-1006
+         
+         Editor:    David B. Levi
+         	   Nortel Networks
+         Postal:    4401 Great America Parkway
+         	   Santa Clara, CA 95052-8185
+         	   USA
+         EMail:     dlevi@nortelnetworks.com
+         Phone:     +1 865 686 0432
+         
+         Editor:    Juergen Schoenwaelder
+         	   TU Braunschweig
+         Postal:    Bueltenweg 74/75
+         	   38106 Braunschweig
+         	   Germany
+         EMail:     schoenw@ibr.cs.tu-bs.de
+         Phone:     +49 531 391-3283"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"This MIB module defines a MIB which provides mechanisms to
+         schedule SNMP set operations periodically or at specific
+         points in time."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2002-01-07"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Revised version, published as RFC 3231.
+            
+            This revision introduces a new object type called
+            schedTriggers.  Created new conformance and compliance
+            statements that take care of the new schedTriggers object.
+            
+            Several clarifications have been added to remove ambiguities
+            that were discovered and reported by implementors."</span>;
+      }
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"1998-11-17"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Initial version, published as RFC 2591."</span>;
+      }
+
+
+      <a name="SnmpPduErrorStatus.80"></a><span class="yang_kw">typedef</span> <span class="yang_id">SnmpPduErrorStatus</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+            <span class="yang_kw">enum</span> <span class="yang_str">"noResponse"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">-1</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"noError"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">0</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"tooBig"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"noSuchName"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"badValue"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"readOnly"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">4</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"genErr"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">5</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"noAccess"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">6</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"wrongType"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">7</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"wrongLength"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">8</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"wrongEncoding"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">9</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"wrongValue"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">10</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"noCreation"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">11</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"inconsistentValue"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">12</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"resourceUnavailable"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">13</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"commitFailed"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">14</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"undoFailed"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">15</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"authorizationError"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">16</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"notWritable"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">17</span>;
+            }
+            <span class="yang_kw">enum</span> <span class="yang_str">"inconsistentName"</span> {
+               <span class="yang_kw">value</span> <span class="yang_str">18</span>;
+            }
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"This TC enumerates the SNMPv1 and SNMPv2 PDU error status
+            codes as defined in RFC 1157 and RFC 1905.  It also adds a
+            pseudo error status code `noResponse' which indicates a
+            timeout condition."</span>;
+      }
+
+      <a name="schedObjects.110"></a><span class="yang_kw">container</span> <span class="yang_id">schedObjects</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <a name="schedLocalTime.112"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedLocalTime</span> {
+            <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span> {
+               <span class="yang_kw">length</span> <span class="yang_str">"11"</span>;
+            }
+            <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"The local time used by the scheduler.  Schedules which
+               refer to calendar time will use the local time indicated
+               by this object.  An implementation MUST return all 11 bytes
+               of the DateAndTime textual-convention so that a manager
+               may retrieve the offset from GMT time."</span>;
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.1"</span>;
+         }
+
+         <a name="schedEntry.129"></a><span class="yang_kw">list</span> <span class="yang_id">schedEntry</span> {
+            <span class="yang_kw">key</span> "<a href="#schedOwner.145">schedOwner</a> <a href="#schedName.158">schedName</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"An entry describing a particular scheduled action.
+               
+               Unless noted otherwise, writable objects of this row
+               can be modified independent of the current value of
+               schedRowStatus, schedAdminStatus and schedOperStatus.
+               In particular, it is legal to modify schedInterval
+               and the objects in the schedCalendarGroup when
+               schedRowStatus is active and schedAdminStatus and
+               schedOperStatus are both enabled."</span>;
+            <a name="schedOwner.145"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedOwner</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
+               }
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The owner of this scheduling entry.  The exact semantics of
+                  this string are subject to the security policy defined by
+                  
+                  the security administrator."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.1"</span>;
+            }
+
+            <a name="schedName.158"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"1..32"</span>;
+               }
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The locally-unique, administratively assigned name for this
+                  scheduling entry.  This object allows a schedOwner to have
+                  multiple entries in the schedTable."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.2"</span>;
+            }
+
+            <a name="schedDescr.170"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedDescr</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The human readable description of the purpose of this
+                  scheduling entry."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.3"</span>;
+            }
+
+            <a name="schedInterval.180"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedInterval</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               <span class="yang_kw">units</span> <span class="yang_str">"seconds"</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The number of seconds between two action invocations of
+                  a periodic scheduler.  Implementations must guarantee
+                  that action invocations will not occur before at least
+                  schedInterval seconds have passed.
+                  
+                  The scheduler must ignore all periodic schedules that
+                  have a schedInterval value of 0.  A periodic schedule
+                  with a scheduling interval of 0 seconds will therefore
+                  never invoke an action.
+                  
+                  Implementations may be forced to delay invocations in the
+                  face of local constraints.  A scheduled management function
+                  should therefore not rely on the accuracy provided by the
+                  scheduler implementation.
+                  
+                  Note that implementations which maintain a list of pending
+                  activations must re-calculate them when this object is
+                  changed."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.4"</span>;
+            }
+
+            <a name="schedWeekDay.207"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedWeekDay</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">bits</span> {
+                  <span class="yang_kw">bit</span> <span class="yang_str">"sunday"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">0</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"monday"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"tuesday"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"wednesday"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"thursday"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">4</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"friday"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">5</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"saturday"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">6</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The set of weekdays on which the scheduled action should
+                  take place.  Setting multiple bits will include several
+                  weekdays in the set of possible weekdays for this schedule.
+                  Setting all bits will cause the scheduler to ignore the
+                  weekday.
+                  
+                  Note that implementations which maintain a list of pending
+                  activations must re-calculate them when this object is
+                  changed."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"()"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.5"</span>;
+            }
+
+            <a name="schedMonth.232"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedMonth</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">bits</span> {
+                  <span class="yang_kw">bit</span> <span class="yang_str">"january"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">0</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"february"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"march"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"april"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"may"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">4</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"june"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">5</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"july"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">6</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"august"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">7</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"september"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">8</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"october"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">9</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"november"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">10</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"december"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">11</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The set of months during which the scheduled action should
+                  take place.  Setting multiple bits will include several
+                  months in the set of possible months for this schedule.
+                  
+                  Setting all bits will cause the scheduler to ignore the
+                  month.
+                  
+                  Note that implementations which maintain a list of pending
+                  activations must re-calculate them when this object is
+                  changed."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"()"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.6"</span>;
+            }
+
+            <a name="schedDay.263"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedDay</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">bits</span> {
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d1"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">0</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d2"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d3"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d4"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d5"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">4</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d6"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">5</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d7"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">6</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d8"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">7</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d9"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">8</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d10"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">9</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d11"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">10</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d12"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">11</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d13"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">12</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d14"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">13</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d15"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">14</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d16"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">15</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d17"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">16</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d18"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">17</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d19"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">18</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d20"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">19</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d21"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">20</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d22"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">21</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d23"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">22</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d24"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">23</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d25"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">24</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d26"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">25</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d27"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">26</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d28"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">27</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d29"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">28</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d30"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">29</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"d31"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">30</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r1"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">31</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r2"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">32</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r3"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">33</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r4"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">34</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r5"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">35</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r6"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">36</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r7"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">37</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r8"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">38</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r9"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">39</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r10"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">40</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r11"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">41</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r12"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">42</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r13"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">43</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r14"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">44</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r15"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">45</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r16"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">46</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r17"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">47</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r18"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">48</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r19"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">49</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r20"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">50</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r21"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">51</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r22"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">52</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r23"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">53</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r24"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">54</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r25"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">55</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r26"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">56</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r27"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">57</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r28"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">58</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r29"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">59</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r30"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">60</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"r31"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">61</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The set of days in a month on which a scheduled action
+                  should take place.  There are two sets of bits one can
+                  use to define the day within a month:
+                  
+                  Enumerations starting with the letter 'd' indicate a
+                  day in a month relative to the first day of a month.
+                  The first day of the month can therefore be specified
+                  by setting the bit d1(0) and d31(30) means the last
+                  day of a month with 31 days.
+                  
+                  Enumerations starting with the letter 'r' indicate a
+                  day in a month in reverse order, relative to the last
+                  day of a month.  The last day in the month can therefore
+                  be specified by setting the bit r1(31) and r31(61) means
+                  the first day of a month with 31 days.
+                  
+                  Setting multiple bits will include several days in the set
+                  of possible days for this schedule.  Setting all bits will
+                  cause the scheduler to ignore the day within a month.
+                  
+                  Setting all bits starting with the letter 'd' or the
+                  letter 'r' will also cause the scheduler to ignore the
+                  day within a month.
+                  
+                  Note that implementations which maintain a list of pending
+                  activations must re-calculate them when this object is
+                  changed."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"()"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.7"</span>;
+            }
+
+            <a name="schedHour.361"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedHour</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">bits</span> {
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h0"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">0</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h1"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h2"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h3"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h4"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">4</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h5"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">5</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h6"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">6</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h7"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">7</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h8"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">8</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h9"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">9</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h10"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">10</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h11"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">11</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h12"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">12</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h13"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">13</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h14"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">14</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h15"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">15</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h16"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">16</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h17"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">17</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h18"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">18</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h19"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">19</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h20"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">20</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h21"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">21</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h22"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">22</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"h23"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">23</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The set of hours within a day during which the scheduled
+                  action should take place.
+                  
+                  Note that implementations which maintain a list of pending
+                  activations must re-calculate them when this object is
+                  changed."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"()"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.8"</span>;
+            }
+
+            <a name="schedMinute.400"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedMinute</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">bits</span> {
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m0"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">0</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m1"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m2"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m3"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">3</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m4"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">4</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m5"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">5</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m6"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">6</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m7"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">7</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m8"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">8</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m9"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">9</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m10"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">10</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m11"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">11</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m12"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">12</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m13"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">13</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m14"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">14</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m15"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">15</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m16"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">16</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m17"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">17</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m18"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">18</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m19"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">19</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m20"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">20</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m21"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">21</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m22"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">22</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m23"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">23</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m24"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">24</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m25"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">25</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m26"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">26</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m27"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">27</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m28"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">28</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m29"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">29</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m30"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">30</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m31"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">31</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m32"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">32</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m33"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">33</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m34"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">34</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m35"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">35</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m36"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">36</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m37"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">37</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m38"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">38</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m39"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">39</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m40"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">40</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m41"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">41</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m42"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">42</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m43"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">43</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m44"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">44</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m45"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">45</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m46"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">46</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m47"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">47</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m48"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">48</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m49"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">49</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m50"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">50</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m51"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">51</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m52"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">52</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m53"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">53</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m54"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">54</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m55"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">55</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m56"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">56</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m57"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">57</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m58"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">58</span>;
+                  }
+                  <span class="yang_kw">bit</span> <span class="yang_str">"m59"</span> {
+                     <span class="yang_kw">position</span> <span class="yang_str">59</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The set of minutes within an hour when the scheduled action
+                  should take place.
+                  
+                  Note that implementations which maintain a list of pending
+                  activations must re-calculate them when this object is
+                  changed."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"()"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.9"</span>;
+            }
+
+            <a name="schedContextName.475"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedContextName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMP-FRAMEWORK-MIB/2002-10-14#SnmpAdminString.377">snmp-framework:SnmpAdminString</a></span> {
+                  <span class="yang_kw">length</span> <span class="yang_str">"0..32"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The context which contains the local MIB variable pointed
+                  to by schedVariable."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">""</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.10"</span>;
+            }
+
+            <a name="schedVariable.487"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedVariable</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#VariablePointer.164">smiv2:VariablePointer</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"An object identifier pointing to a local MIB variable
+                  which resolves to an ASN.1 primitive type of INTEGER."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"zeroDotZero"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.11"</span>;
+            }
+
+            <a name="schedValue.497"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedValue</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The value which is written to the MIB object pointed to by
+                  schedVariable when the scheduler invokes an action.  The
+                  implementation shall enforce the use of access control
+                  rules when performing the set operation on schedVariable.
+                  This is accomplished by calling the isAccessAllowed abstract
+                  service interface as defined in RFC 2571.
+                  
+                  Note that an implementation may choose to issue an SNMP Set
+                  message to the SNMP engine and leave the access control
+                  decision to the normal message processing procedure."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.12"</span>;
+            }
+
+            <a name="schedType.515"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"periodic"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"calendar"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"oneshot"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The type of this schedule.  The value periodic(1) indicates
+                  that this entry specifies a periodic schedule.  A periodic
+                  schedule is defined by the value of schedInterval.  The
+                  values of schedWeekDay, schedMonth, schedDay, schedHour
+                  and schedMinute are ignored.
+                  
+                  The value calendar(2) indicates that this entry describes a
+                  calendar schedule.  A calendar schedule is defined by the
+                  values of schedWeekDay, schedMonth, schedDay, schedHour and
+                  schedMinute.  The value of schedInterval is ignored.  A
+                  calendar schedule will trigger on all local times that
+                  satisfy the bits set in schedWeekDay, schedMonth, schedDay,
+                  schedHour and schedMinute.
+                  
+                  The value oneshot(3) indicates that this entry describes a
+                  one-shot schedule.  A one-shot schedule is similar to a
+                  calendar schedule with the additional feature that it
+                  disables itself by changing in the `finished'
+                  schedOperStatus once the schedule triggers an action.
+                  
+                  Note that implementations which maintain a list of pending
+                  activations must re-calculate them when this object is
+                  changed."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"periodic"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.13"</span>;
+            }
+
+            <a name="schedAdminStatus.550"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedAdminStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"enabled"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"disabled"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"The desired state of the schedule."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"disabled"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.14"</span>;
+            }
+
+            <a name="schedOperStatus.562"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedOperStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">enumeration</span> {
+                  <span class="yang_kw">enum</span> <span class="yang_str">"enabled"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">1</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"disabled"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">2</span>;
+                  }
+                  <span class="yang_kw">enum</span> <span class="yang_str">"finished"</span> {
+                     <span class="yang_kw">value</span> <span class="yang_str">3</span>;
+                  }
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The current operational state of this schedule.  The state
+                  enabled(1) indicates this entry is active and that the
+                  scheduler will invoke actions at appropriate times.  The
+                  disabled(2) state indicates that this entry is currently
+                  inactive and ignored by the scheduler.  The finished(3)
+                  state indicates that the schedule has ended.  Schedules
+                  in the finished(3) state are ignored by the scheduler.
+                  A one-shot schedule enters the finished(3) state when it
+                  deactivates itself.
+                  
+                  Note that the operational state must not be enabled(1)
+                  when the schedRowStatus is not active."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.15"</span>;
+            }
+
+            <a name="schedFailures.585"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedFailures</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ietf-yang-types/2009-05-13#counter32.77">yang:counter32</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This variable counts the number of failures while invoking
+                  the scheduled action.  This counter at most increments once
+                  for a triggered action."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.16"</span>;
+            }
+
+            <a name="schedLastFailure.595"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedLastFailure</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#SnmpPduErrorStatus.80">SnmpPduErrorStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The most recent error that occurred during the invocation of
+                  a scheduled action.  The value noError(0) is returned
+                  if no errors have occurred yet."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"noError"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.17"</span>;
+            }
+
+            <a name="schedLastFailed.606"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedLastFailed</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The date and time when the most recent failure occurred.
+                  
+                  The value '0000000000000000'H is returned if no failure
+                  occurred since the last re-initialization of the scheduler."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0x0000000000000000"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.18"</span>;
+            }
+
+            <a name="schedStorageType.618"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedStorageType</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#StorageType.719">smiv2:StorageType</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This object defines whether this scheduled action is kept
+                  in volatile storage and lost upon reboot or if this row is
+                  backed up by non-volatile or permanent storage.
+                  
+                  Conceptual rows having the value `permanent' must allow
+                  write access to the columnar objects schedDescr,
+                  schedInterval, schedContextName, schedVariable, schedValue,
+                  and schedAdminStatus.  If an implementation supports the
+                  schedCalendarGroup, write access must be also allowed to
+                  the columnar objects schedWeekDay, schedMonth, schedDay,
+                  schedHour, schedMinute."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"volatile"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.19"</span>;
+            }
+
+            <a name="schedRowStatus.637"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedRowStatus</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#RowStatus.183">smiv2:RowStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The status of this scheduled action.  A control that allows
+                  entries to be added and removed from this table.
+                  
+                  Note that the operational state must change to enabled
+                  when the administrative state is enabled and the row
+                  status changes to active(1).
+                  
+                  Attempts to destroy(6) a row or to set a row
+                  notInService(2) while the operational state is enabled
+                  result in inconsistentValue errors.
+                  
+                  The value of this object has no effect on whether other
+                  objects in this conceptual row can be modified."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.20"</span>;
+            }
+
+            <a name="schedTriggers.657"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedTriggers</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/ietf-yang-types/2009-05-13#counter32.77">yang:counter32</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"This variable counts the number of attempts (either
+                  successful or failed) to invoke the scheduled action."</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.21"</span>;
+            }
+            <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1"</span>;
+         }  <span class="yang_cmt">// list schedEntry</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1"</span>;
+      }  <span class="yang_cmt">// container schedObjects</span>
+
+      <a name="schedActionFailure.669"></a><span class="yang_kw">notification</span> <span class="yang_id">schedActionFailure</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"This notification is generated whenever the invocation of a
+            scheduled action fails."</span>;
+         <a name="schedActionFailure-schedLastFailure.675"></a><span class="yang_kw">container</span> <span class="yang_id">schedActionFailure-schedLastFailure</span> {
+            <a name="schedOwner.676"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedOwner</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-schedule:schedObjects/disman-schedule:schedEntry/disman-schedule:schedOwner"</span>;
+                  <span class="yang_kw">require-instance</span> <span class="yang_str">"true"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated leafref leaf."</span>;
+            }
+
+            <a name="schedName.684"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-schedule:schedObjects/disman-schedule:schedEntry/disman-schedule:schedName"</span>;
+                  <span class="yang_kw">require-instance</span> <span class="yang_str">"true"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated leafref leaf."</span>;
+            }
+
+            <a name="schedLastFailure.692"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedLastFailure</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="#SnmpPduErrorStatus.80">SnmpPduErrorStatus</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The most recent error that occurred during the invocation of
+                  a scheduled action.  The value noError(0) is returned
+                  if no errors have occurred yet."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"noError"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.17"</span>;
+            }
+         }  <span class="yang_cmt">// container schedActionFailure-schedLastFailure</span>
+
+         <a name="schedActionFailure-schedLastFailed.704"></a><span class="yang_kw">container</span> <span class="yang_id">schedActionFailure-schedLastFailed</span> {
+            <a name="schedOwner.705"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedOwner</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-schedule:schedObjects/disman-schedule:schedEntry/disman-schedule:schedOwner"</span>;
+                  <span class="yang_kw">require-instance</span> <span class="yang_str">"true"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated leafref leaf."</span>;
+            }
+
+            <a name="schedName.713"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedName</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">leafref</span> {
+                  <span class="yang_kw">path</span>
+                     <span class="yang_str">"/disman-schedule:schedObjects/disman-schedule:schedEntry/disman-schedule:schedName"</span>;
+                  <span class="yang_kw">require-instance</span> <span class="yang_str">"true"</span>;
+               }
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span> <span class="yang_str">"Automagically generated leafref leaf."</span>;
+            }
+
+            <a name="schedLastFailed.721"></a><span class="yang_kw">leaf</span> <span class="yang_id">schedLastFailed</span> {
+               <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/SNMPv2-TC/1999-04-01#DateAndTime.683">smiv2:DateAndTime</a></span>;
+               <span class="yang_kw">config</span> <span class="yang_str">"false"</span>;
+               <span class="yang_kw">description</span>
+                  <span class="yang_str">"The date and time when the most recent failure occurred.
+                  
+                  The value '0000000000000000'H is returned if no failure
+                  occurred since the last re-initialization of the scheduler."</span>;
+               <a href="/modules/yang-smi/2008-03-20#default.33">smi:default</a> <span class="yang_str">"0x0000000000000000"</span>;
+               <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.1.2.1.18"</span>;
+            }
+         }  <span class="yang_cmt">// container schedActionFailure-schedLastFailed</span>
+         <a href="/modules/yang-smi/2008-03-20#oid.21">smi:oid</a> <span class="yang_str">"1.3.6.1.2.1.63.2.0.1"</span>;
+      }  <span class="yang_cmt">// notification schedActionFailure</span>
+   }  <span class="yang_cmt">// module DISMAN-SCHEDULE-MIB</span>
+</pre>
+</div>
+</div>

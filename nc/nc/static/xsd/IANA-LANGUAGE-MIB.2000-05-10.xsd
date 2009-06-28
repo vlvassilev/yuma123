@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="urn:ietf:params:xml:ns:yang:smiv2:IANA-LANGUAGE-MIB"
+   targetNamespace="urn:ietf:params:xml:ns:yang:smiv2:IANA-LANGUAGE-MIB"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2000-05-10"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:smi="urn:ietf:params:xml:ns:yang:yang-smi">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'IANA-LANGUAGE-MIB.yang' by yangdump version 0.9.4
+         
+         Module: IANA-LANGUAGE-MIB
+         Organization: IANA
+         Version: 2000-05-10
+         Contact: Internet Assigned Numbers Authority (IANA)
+         
+         Postal: ICANN
+         	4676 Admiralty Way, Suite 330
+         	Marina del Rey, CA 90292
+         
+         Tel:    +1 310 823 9358 x20
+         E-Mail: iana@iana.org
+      </xs:documentation>
+      <xs:documentation>
+         The MIB module registers object identifier values for
+         well-known programming and scripting languages. Every
+         language registration MUST describe the format used
+         when transferring scripts written in this language.
+         
+         Any additions or changes to the contents of this MIB
+         module require Designated Expert Review as defined in
+         the Guidelines for Writing IANA Considerations Section
+         document. The Designated Expert will be selected by
+         the IESG Area Director of the OPS Area.
+         
+         Note, this module does not have to register all possible
+         languages since languages are identified by object
+         identifier values. It is therefore possible to registered 
+         languages in private OID trees. The references given below are not
+         normative with regard to the language version. Other
+         references might be better suited to describe some newer 
+         versions of this language. The references are only
+         provided as `a pointer into the right direction'.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/ietf/IANA-LANGUAGE-MIB.yang
+         </ncx:source>
+         <ncx:organization>IANA</ncx:organization>
+         <ncx:contact>
+            Internet Assigned Numbers Authority (IANA)
+            
+            Postal: ICANN
+            	4676 Admiralty Way, Suite 330
+            	Marina del Rey, CA 90292
+            
+            Tel:    +1 310 823 9358 x20
+            E-Mail: iana@iana.org
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2000-05-10</ncx:version>
+            <ncx:description>
+               Import mib-2 instead of experimental, so that
+               this module compiles
+            </ncx:description>
+         </ncx:revision>
+         <ncx:revision>
+            <ncx:version>1999-09-09</ncx:version>
+            <ncx:description>
+               Initial version as published at time of
+               publication of RFC 2591.
+            </ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+</xs:schema>

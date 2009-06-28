@@ -1,0 +1,570 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="http://netconfcentral.com/ns/netconfd"
+   targetNamespace="http://netconfcentral.com/ns/netconfd"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2009-04-10"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+   xmlns:nt="http://netconfcentral.com/ns/ncxtypes"
+   xmlns:ncxapp="http://netconfcentral.com/ns/ncx-app-common"
+   xmlns:inet="urn:ietf:params:xml:ns:yang:inet-types"
+   xmlns:wd="file://draft-ietf-netconf-with-defaults-01.txt">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'netconfd.yang' by yangdump version 0.9.4
+         
+         Module: netconfd
+         Organization: Netconf Central
+         Version: 2009-04-10
+         Contact: Andy Bierman &lt;support@netconfcentral.com&gt;.
+      </xs:documentation>
+      <xs:documentation>
+         NCX Agent Configuration Parameters and Statistics
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/netconfcentral/netconfd.yang
+         </ncx:source>
+         <ncx:organization>Netconf Central</ncx:organization>
+         <ncx:contact>
+            Andy Bierman &lt;support@netconfcentral.com&gt;.
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2009-04-10</ncx:version>
+            <ncx:description>
+               work-in-progress version.
+            </ncx:description>
+         </ncx:revision>
+         <ncx:revision>
+            <ncx:version>2008-08-01</ncx:version>
+            <ncx:description>
+               Initial conversion from netconfd.ncx v 0.6
+            </ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:group name="StartupChoice">
+      <xs:sequence>
+         <xs:choice>
+            <xs:annotation>
+               <xs:documentation>
+                  select startup config for boot load
+               </xs:documentation>
+               <xs:appinfo>
+                  <ncx:choice-name>start</ncx:choice-name>
+               </xs:appinfo>
+            </xs:annotation>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>no-startup</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="no-startup" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        If present, do not load the startup config file.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="__.start.no-startup.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>startup</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="startup" type="xs:string"
+                  minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        The full filespec of the startup config file to use.
+                        If present, overrides the default startup config
+                        file name 'startup-cfg.xml',  This will also
+                        override the NCX_DATAPATH environement variable
+                        and the datapath CLI parameter, if the first
+                        character is the forward slash '/', indicating
+                        an absolute file path.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="__.start.startup.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:element name="__.start.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:choice>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:element name="netconfd">
+      <xs:annotation>
+         <xs:documentation>
+            Agent CLI for the NETCONF protocol.
+            Usage:
+              netconfd [parameters]
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <ncx:cli/>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="config" type="xs:string" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The name of the configuration file to use.
+                     Any parameter except this one can be set in the config file.
+                     The default config file will be not be checked if this
+                     parameter is present.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="help" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Print yangdump help file and exit.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:choice>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:choice-name>brief-full</ncx:choice-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>brief</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="brief" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>Show brief help text
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.netconfd.brief-full.brief.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>full</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="full" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>Show full help text
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.netconfd.brief-full.full.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:element name="__.netconfd.brief-full.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:choice>
+            <xs:element name="indent" type="nt:IndentType" default="3"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Number of spaces to indent (0..9) in formatted output.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="log" type="xs:string" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Filespec for the log file to use instead of STDOUT.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="log-append" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     If present, the log will be appended not over-written.
+                     If not, the log will be over-written.
+                     Only meaningful if the 'log' parameter is
+                     also present.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="log-level" type="nt:NcDebugType"
+               default="info" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Sets the debug logging level for the program.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="modpath" type="nt:NcPathList"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Directory search path for YANG and NCX modules.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="version" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Print yangdump version string and exit.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="datapath" type="nt:NcPathList"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Internal file search path for config files.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="default-style" type="wd:DefaultStyle"
+               default="report-all" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Selects the type of filtering behavior the agent will
+                     advertise in the 'with-defaults' capability.  The agent
+                     will use this default handling behavior if the 
+                     'with-defaults' parameter is not explicitly set.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="port" type="inet:port-number"
+               minOccurs="0" maxOccurs="4">
+               <xs:annotation>
+                  <xs:documentation>
+                     Specify the TCP ports that the agent will accept
+                     connections from.  These ports must also be configured
+                     in the /etc/ssh/sshd_config file for the SSH master
+                     agent to accept the connection and invoke the netconf
+                     subsystem.
+                     
+                     Up to 4 port numbers can be configured.
+                     
+                     If any ports are configured, then only those values
+                     will be accepted by the agent.
+                     
+                     If no ports are configured, then the agent will accept
+                     connections on the netconf-ssh port (tcp/830).
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="runpath" type="nt:NcPathList"
+               minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Internal file search path for executable modules.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:choice>
+               <xs:annotation>
+                  <xs:documentation>
+                     select startup config for boot load
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:choice-name>start</ncx:choice-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>no-startup</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="no-startup" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           If present, do not load the startup config file.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.netconfd.start.no-startup.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>startup</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="startup" type="xs:string"
+                     minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           The full filespec of the startup config file to use.
+                           If present, overrides the default startup config
+                           file name 'startup-cfg.xml',  This will also
+                           override the NCX_DATAPATH environement variable
+                           and the datapath CLI parameter, if the first
+                           character is the forward slash '/', indicating
+                           an absolute file path.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.netconfd.start.startup.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:element name="__.netconfd.start.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:choice>
+            <xs:element name="target" default="candidate" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The database to use as the target of edit-config
+                     operations.
+                  </xs:documentation>
+               </xs:annotation>
+               <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                     <xs:enumeration value="running">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Write to the running config.
+                              Also use distinct startup capability.
+                              A copy-config operation must be used to 
+                              save the running config to the startup config file.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:value>0</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                     <xs:enumeration value="candidate">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Write to the candidate config.
+                              Also automatically update the startup config
+                              file after each 'commit' operation is
+                              successfully completed.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:value>1</ncx:value>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:enumeration>
+                  </xs:restriction>
+               </xs:simpleType>
+            </xs:element>
+            <xs:element name="xmlorder" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     If present, then XML element order will be enforced.
+                     Otherwise, XML element order errors will not be
+                     generated if possible. Default is no enforcement of
+                     strict XML order.
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="__.netconfd.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="load-config_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.load-config.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="load-config" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            NCX internal load-config operation.
+            The config database can be loaded dynamically
+            only if the startup config phase was skipped
+            via the 'no-startup' option.
+            
+            An operation-failed error will be returned and
+            any startup config file was loaded (even partially)
+            successfully.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>
+               load-config_output_type__
+            </ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="config">
+                     <xs:annotation>
+                        <xs:documentation>XML Config contents.
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:config>true</ncx:config>
+                           <ncx:root/>
+                        </xs:appinfo>
+                     </xs:annotation>
+                     <xs:complexType>
+                        <xs:sequence>
+                           <xs:element
+                              name="__.load-config.input.config.A__"
+                              minOccurs="0" maxOccurs="unbounded"
+                              abstract="true"/>
+                        </xs:sequence>
+                     </xs:complexType>
+                  </xs:element>
+                  <xs:element name="__.load-config.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="load_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="mod-revision" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Revision date of the module in use by the agent.
+                        Will only be present if the module has a version
+                     </xs:documentation>
+                  </xs:annotation>
+                  <xs:simpleType>
+                     <xs:restriction base="xs:string">
+                        <xs:pattern value="\d{4}-\d{2}-\d{2}"/>
+                     </xs:restriction>
+                  </xs:simpleType>
+               </xs:element>
+               <xs:element name="__.load.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="load" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Load a module into the agent, if it is not already loaded.
+            Returns the module revision date (or today's date if none),
+            of the module that was loaded, or an error if not found
+            or the module found had errors and was not loaded
+            successfully.  If the module is already loaded, then the
+            revision date will simply be returned.
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>load_output_type__</ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="module" type="nt:NcxName">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Name of the module to load.
+                        </xs:documentation>
+                        <xs:appinfo>
+                           <ncx:mandatory>true</ncx:mandatory>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.load.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="restart_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.restart.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="restart" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>
+            Restart the agent. Does not reload the software image..
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>
+               restart_output_type__
+            </ncx:rpc-output>
+            <ncx:secure/>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="__.restart.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="shutdown_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.shutdown.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="shutdown" substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:documentation>Shutdown the agent.</xs:documentation>
+         <xs:appinfo>
+            <ncx:rpc-output>
+               shutdown_output_type__
+            </ncx:rpc-output>
+            <ncx:secure/>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="__.shutdown.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

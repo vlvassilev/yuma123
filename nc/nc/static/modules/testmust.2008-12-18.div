@@ -1,0 +1,569 @@
+
+<div>
+   <h1 class="yang">testmust.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Objects</a>
+         <ul>
+            <li class="daddy"><a href="#test1.19">test1</a>
+               <ul>
+                  <li class="daddy"><a href="#doc.194">doc</a>
+                     <ul>
+                        <li class="daddy"><a href="#chapter.195">chapter</a>
+                           <ul>
+                              <li><a href="#id.198">id</a></li>
+                              <li><a href="#title.200">title</a></li>
+                              <li><a href="#section.202">section</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#chapter.212">chapter</a>
+                     <ul>
+                        <li><a href="#id.215">id</a></li>
+                        <li><a href="#title.217">title</a></li>
+                        <li class="daddy"><a href="#section.219">section</a>
+                           <ul>
+                              <li><a href="#id.222">id</a></li>
+                              <li><a href="#para.224">para</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+                  <li><a href="#para.227">para</a></li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#test2.231">test2</a>
+               <ul>
+                  <li class="daddy"><a href="#doc.341">doc</a>
+                     <ul>
+                        <li class="daddy"><a href="#chapter.342">chapter</a>
+                           <ul>
+                              <li><a href="#id.345">id</a></li>
+                              <li><a href="#title.347">title</a></li>
+                              <li><a href="#section.349">section</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+                  <li class="daddy"><a href="#chapter.359">chapter</a>
+                     <ul>
+                        <li><a href="#id.362">id</a></li>
+                        <li><a href="#title.364">title</a></li>
+                        <li class="daddy"><a href="#section.366">section</a>
+                           <ul>
+                              <li><a href="#id.369">id</a></li>
+                              <li><a href="#para.371">para</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+                  <li><a href="#para.374">para</a></li>
+               </ul>
+            </li>
+            <li><a href="#A.413">A</a></li>
+            <li><a href="#B.415">B</a></li>
+            <li class="daddy"><a href="#test4.417">test4</a>
+               <ul>
+                  <li class="daddy"><a href="#C.438">C</a>
+                     <ul>
+                        <li class="daddy"><a href="#D.439">D</a>
+                           <ul>
+                              <li><a href="#AA.440">AA</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+            <li class="daddy"><a href="#doc.445">doc</a>
+               <ul>
+                  <li class="daddy"><a href="#chapter.446">chapter</a>
+                     <ul>
+                        <li><a href="#id.449">id</a></li>
+                        <li class="daddy"><a href="#section.451">section</a>
+                           <ul>
+                              <li><a href="#id.454">id</a></li>
+                              <li><a href="#para.456">para</a></li>
+                           </ul>
+                        </li>
+                     </ul>
+                  </li>
+               </ul>
+            </li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">testmust</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span> <span class="yang_str">"http://netconfcentral.com/ns/testmust"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"tm"</span>;
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"Netconf Central"</span>;
+
+      <span class="yang_kw">contact</span> <span class="yang_str">"Andy Bierman"</span>;
+
+      <span class="yang_kw">description</span> <span class="yang_str">"YANG must-stmt test module."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2008-12-18"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Initial version."</span>;
+      }
+
+
+      <a name="test1.19"></a><span class="yang_kw">container</span> <span class="yang_id">test1</span> {
+         <span class="yang_kw">must</span>
+            <span class="yang_str">"/child::doc/child::chapter[position()=5]/child::section[position()=2]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the second section of the fifth chapter
+               of the doc document element."</span>;
+         }
+         <span class="yang_kw">must</span>
+            <span class="yang_str">"child::doc/child::chapter[position()=1]/child::section[position()=2]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the second section of the fifth chapter
+               of the doc document element."</span>;
+         }
+         <span class="yang_kw">must</span>
+            <span class="yang_str">"boolean(42) + boolean(/test1) + boolean  (  'test'  )"</span>;
+         <span class="yang_kw">must</span> <span class="yang_str">"/descendant::para"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all the para elements in the same document 
+               as the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"//ancestor::*"</span>;
+         <span class="yang_kw">must</span> <span class="yang_str">"descendant::para"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the para element descendants of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"child::*"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all element children of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"child::para"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the para element children of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"child::text()"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all text node children of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"child::node()"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all the children of the context node, 
+               whatever their node type."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"attribute::name"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the name attribute of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"attribute::*"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all the attributes of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"ancestor::div"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all div ancestors of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"ancestor-or-self::div"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">" selects the div ancestors of the context node and,
+                if the context node is a div element,
+                the context node as well."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"descendant-or-self::para"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the para element descendants of the context 
+               node and, if the context node is a para element, 
+               the context node as well."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"self::para"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the context node if it is a para element,
+               and otherwise selects nothing."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"child::chapter/descendant::para"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the para element descendants of 
+               the chapter element children of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"child::*/child::para"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all para grandchildren of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"/"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the document root (which is always the 
+               parent of the document element)."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"/descendant::olist/child::item"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all the item elements that have an olist 
+               parent and that are in the same document as the 
+               context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"child::para[position()=1]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the first para child of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"child::para[position()=last()]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the last para child of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"child::para[position()=last()-1]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the last but one para child of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"child::para[position()&gt;1]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all the para children of the context node
+               other than the first para child of the context node."</span>;
+         }
+         <span class="yang_kw">must</span>
+            <span class="yang_str">"following-sibling::chapter[position()=1]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the next chapter sibling of the context node."</span>;
+         }
+         <span class="yang_kw">must</span>
+            <span class="yang_str">"preceding-sibling::chapter[position()=1]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the previous chapter sibling of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"/descendant::figure[position()=42]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the forty-second figure element in the document."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"child::para[attribute::type='warning']"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all para children of the context node 
+               that have a type attribute with value warning."</span>;
+         }
+         <span class="yang_kw">must</span>
+            <span class="yang_str">"child::para[attribute::type='warning'][position()=5]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the fifth para child of the context node
+               that has a type attribute with value warning."</span>;
+         }
+         <span class="yang_kw">must</span>
+            <span class="yang_str">"child::para[position()=5][attribute::type='warning']"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the fifth para child of the context node
+               if that child has a type attribute with value warning."</span>;
+         }
+         <span class="yang_kw">must</span>
+            <span class="yang_str">"child::chapter[child::title='Introduction']"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the chapter children of the context node that
+               have one or more title children with string-value
+               equal to Introduction."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"child::chapter[child::title]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the chapter children of the context node
+               that have one or more title children."</span>;
+         }
+         <span class="yang_kw">must</span>
+            <span class="yang_str">"child::*[self::chapter or self::appendix]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the chapter and appendix children 
+               of the context node."</span>;
+         }
+         <span class="yang_kw">must</span>
+            <span class="yang_str">"child::*[self::chapter or self::appendix][position()=last()]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the last chapter or appendix child 
+               of the context node."</span>;
+         }
+         <span class="yang_kw">must</span>
+            <span class="yang_str">"self::node()/descendant-or-self::node()/child::para"</span> {
+            <span class="yang_kw">description</span> <span class="yang_str">"longhand for .//para"</span>;
+         }
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Test XPath 1.0 location path expression parsing.
+            These must-stmts are not expected to evaluate to true.
+            Taken from XPath 1.0, section 2"</span>;
+         <a name="doc.194"></a><span class="yang_kw">container</span> <span class="yang_id">doc</span> {
+            <a name="chapter.195"></a><span class="yang_kw">list</span> <span class="yang_id">chapter</span> {
+               <span class="yang_kw">key</span> "<a href="#id.198">id</a>";
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+               <a name="id.198"></a><span class="yang_kw">leaf</span> <span class="yang_id">id</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               }
+
+               <a name="title.200"></a><span class="yang_kw">leaf</span> <span class="yang_id">title</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+
+               <a name="section.202"></a><span class="yang_kw">list</span> <span class="yang_id">section</span> {
+                  <span class="yang_kw">key</span> "<a href="#id.205">id</a>";
+                  <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+                  <a name="id.205"></a><span class="yang_kw">leaf</span> <span class="yang_id">id</span> {
+                     <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+                  }
+
+                  <a name="para.207"></a><span class="yang_kw">leaf</span> <span class="yang_id">para</span> {
+                     <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                  }
+               }  <span class="yang_cmt">// list section</span>
+            }  <span class="yang_cmt">// list chapter</span>
+         }  <span class="yang_cmt">// container doc</span>
+
+         <a name="chapter.212"></a><span class="yang_kw">list</span> <span class="yang_id">chapter</span> {
+            <span class="yang_kw">key</span> "<a href="#id.215">id</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <a name="id.215"></a><span class="yang_kw">leaf</span> <span class="yang_id">id</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+            }
+
+            <a name="title.217"></a><span class="yang_kw">leaf</span> <span class="yang_id">title</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+            }
+
+            <a name="section.219"></a><span class="yang_kw">list</span> <span class="yang_id">section</span> {
+               <span class="yang_kw">key</span> "<a href="#id.222">id</a>";
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+               <a name="id.222"></a><span class="yang_kw">leaf</span> <span class="yang_id">id</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               }
+
+               <a name="para.224"></a><span class="yang_kw">leaf</span> <span class="yang_id">para</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+            }  <span class="yang_cmt">// list section</span>
+         }  <span class="yang_cmt">// list chapter</span>
+
+         <a name="para.227"></a><span class="yang_kw">leaf-list</span> <span class="yang_id">para</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+         }
+      }  <span class="yang_cmt">// container test1</span>
+
+      <a name="test2.231"></a><span class="yang_kw">container</span> <span class="yang_id">test2</span> {
+         <span class="yang_kw">must</span> <span class="yang_str">"para"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the para element children of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"*"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all element children of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"text()"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all text node children of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"@name"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the name attribute of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"@*"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all the attributes of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"para[1]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the first para child of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"para[last()]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the last para child of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"*/para"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all para grandchildren of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"/doc/chapter[5]/section[2]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the second section of the fifth chapter of the doc."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"chapter//para"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the para element descendants 
+               of the chapter element children of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"//para"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all the para descendants of the document root
+                and thus selects all para elements in the same document
+                as the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"//olist/item"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all the item elements in the same document
+               as the context node that have an olist parent."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"."</span> {
+            <span class="yang_kw">description</span> <span class="yang_str">"selects the context node"</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">".//para"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the para element descendants of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">".."</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the parent of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"../@lang"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the lang attribute of the parent of the context node."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"para[@type='warning']"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all para children of the context node that have
+               a type attribute with value warning."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"para[@type='warning'][5]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the fifth para child of the context node
+               that has a type attribute with value warning."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"para[5][@type='warning']"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the fifth para child of the context node
+               if that child has a type attribute with value warning."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"chapter[title='Introduction']"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the chapter children of the context node that
+               have one or more title children with string-value 
+               equal to Introduction."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"chapter[title]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects the chapter children of the context node that 
+               have one or more title children."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">"employee[@secretary and @assistant]"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"selects all the employee children of the context node
+               that have both a secretary attribute and an assistant attribute."</span>;
+         }
+         <span class="yang_kw">must</span> <span class="yang_str">".//para"</span> {
+            <span class="yang_kw">description</span>
+               <span class="yang_str">"shorthand for self::node()/descendant-or-self::node()/child::para"</span>;
+         }
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Test XPath 1.0 abbreviated syntax location path expression parsing.
+            These must-stmts are not expected to evaluate to true.
+            Taken from XPath 1.0, section 2.5"</span>;
+         <a name="doc.341"></a><span class="yang_kw">container</span> <span class="yang_id">doc</span> {
+            <a name="chapter.342"></a><span class="yang_kw">list</span> <span class="yang_id">chapter</span> {
+               <span class="yang_kw">key</span> "<a href="#id.345">id</a>";
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+               <a name="id.345"></a><span class="yang_kw">leaf</span> <span class="yang_id">id</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               }
+
+               <a name="title.347"></a><span class="yang_kw">leaf</span> <span class="yang_id">title</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+
+               <a name="section.349"></a><span class="yang_kw">list</span> <span class="yang_id">section</span> {
+                  <span class="yang_kw">key</span> "<a href="#id.352">id</a>";
+                  <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+                  <a name="id.352"></a><span class="yang_kw">leaf</span> <span class="yang_id">id</span> {
+                     <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+                  }
+
+                  <a name="para.354"></a><span class="yang_kw">leaf</span> <span class="yang_id">para</span> {
+                     <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+                  }
+               }  <span class="yang_cmt">// list section</span>
+            }  <span class="yang_cmt">// list chapter</span>
+         }  <span class="yang_cmt">// container doc</span>
+
+         <a name="chapter.359"></a><span class="yang_kw">list</span> <span class="yang_id">chapter</span> {
+            <span class="yang_kw">key</span> "<a href="#id.362">id</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <a name="id.362"></a><span class="yang_kw">leaf</span> <span class="yang_id">id</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+            }
+
+            <a name="title.364"></a><span class="yang_kw">leaf</span> <span class="yang_id">title</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+            }
+
+            <a name="section.366"></a><span class="yang_kw">list</span> <span class="yang_id">section</span> {
+               <span class="yang_kw">key</span> "<a href="#id.369">id</a>";
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+               <a name="id.369"></a><span class="yang_kw">leaf</span> <span class="yang_id">id</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               }
+
+               <a name="para.371"></a><span class="yang_kw">leaf</span> <span class="yang_id">para</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+            }  <span class="yang_cmt">// list section</span>
+         }  <span class="yang_cmt">// list chapter</span>
+
+         <a name="para.374"></a><span class="yang_kw">leaf-list</span> <span class="yang_id">para</span> {
+            <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+         }
+      }  <span class="yang_cmt">// container test2</span>
+
+      <a name="A.413"></a><span class="yang_kw">leaf</span> <span class="yang_id">A</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">int64</span>;
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+      }
+
+      <a name="B.415"></a><span class="yang_kw">leaf</span> <span class="yang_id">B</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">int32</span>;
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+      }
+
+      <a name="test4.417"></a><span class="yang_kw">container</span> <span class="yang_id">test4</span> {
+         <span class="yang_kw">must</span> <span class="yang_str">"a/b/c + ../../A | /B"</span>;
+         <span class="yang_kw">must</span> <span class="yang_str">"//B = 4"</span>;
+         <span class="yang_kw">must</span> <span class="yang_str">".//AA"</span>;
+         <span class="yang_kw">must</span> <span class="yang_str">"//foo[@x = 1]"</span>;
+         <span class="yang_kw">must</span> <span class="yang_str">"//foo:*[@x = 1]"</span>;
+         <span class="yang_kw">must</span> <span class="yang_str">".//foo/bar[x='fred'] or .=10"</span>;
+         <span class="yang_kw">must</span> <span class="yang_str">"*[.=1 or . = 'fred']"</span>;
+         <span class="yang_kw">must</span> <span class="yang_str">"*[.=1 or . = 'fred'][1]"</span>;
+         <span class="yang_kw">must</span> <span class="yang_str">"*[.=1 or . = 'fred'][last()]"</span>;
+         <span class="yang_kw">must</span> <span class="yang_str">"/a/b | /c/d"</span>;
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <a name="C.438"></a><span class="yang_kw">container</span> <span class="yang_id">C</span> {
+            <a name="D.439"></a><span class="yang_kw">container</span> <span class="yang_id">D</span> {
+               <a name="AA.440"></a><span class="yang_kw">leaf</span> <span class="yang_id">AA</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+            }  <span class="yang_cmt">// container D</span>
+         }  <span class="yang_cmt">// container C</span>
+      }  <span class="yang_cmt">// container test4</span>
+
+      <a name="doc.445"></a><span class="yang_kw">container</span> <span class="yang_id">doc</span> {
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <a name="chapter.446"></a><span class="yang_kw">list</span> <span class="yang_id">chapter</span> {
+            <span class="yang_kw">key</span> "<a href="#id.449">id</a>";
+            <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+            <a name="id.449"></a><span class="yang_kw">leaf</span> <span class="yang_id">id</span> {
+               <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+            }
+
+            <a name="section.451"></a><span class="yang_kw">list</span> <span class="yang_id">section</span> {
+               <span class="yang_kw">key</span> "<a href="#id.454">id</a>";
+               <span class="yang_kw">ordered-by</span> <span class="yang_str">"system"</span>;
+               <a name="id.454"></a><span class="yang_kw">leaf</span> <span class="yang_id">id</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">uint32</span>;
+               }
+
+               <a name="para.456"></a><span class="yang_kw">leaf</span> <span class="yang_id">para</span> {
+                  <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+               }
+            }  <span class="yang_cmt">// list section</span>
+         }  <span class="yang_cmt">// list chapter</span>
+      }  <span class="yang_cmt">// container doc</span>
+   }  <span class="yang_cmt">// module testmust</span>
+</pre>
+</div>
+</div>

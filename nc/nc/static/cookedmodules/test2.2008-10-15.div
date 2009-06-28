@@ -1,0 +1,99 @@
+
+<div>
+   <h1 class="yang">test2.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#XX.12">XX</a></li>
+            <li><a href="#YY.18">YY</a></li>
+            <li><a href="#ZZ.25">ZZ</a></li>
+            <li><a href="#ZZZ.32">ZZZ</a></li>
+         </ul>
+      </li>
+      <li><a href="#">Objects</a>
+         <ul>
+            <li><a href="#a.39">a</a></li>
+            <li><a href="#b.45">b</a></li>
+            <li><a href="#c.54">c</a></li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">test2</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span> <span class="yang_str">"urn:ietf:params:xml:ns:yang:test2"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"t2"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/test1">test1</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"t1"</span>;
+      }
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2008-10-15"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Initial revision."</span>;
+      }
+
+
+      <a name="XX.12"></a><span class="yang_kw">typedef</span> <span class="yang_id">XX</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+      }
+
+      <a name="YY.18"></a><span class="yang_kw">typedef</span> <span class="yang_id">YY</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span>;
+      }
+
+      <a name="ZZ.25"></a><span class="yang_kw">typedef</span> <span class="yang_id">ZZ</span> {
+         <span class="yang_kw">type</span> <span class="yang_id"><a href="#YY.18">YY</a></span> {
+            <span class="yang_kw">pattern</span> <span class="yang_str">'b7b*'</span>;
+            <span class="yang_kw">pattern</span> <span class="yang_str">'b7b7*'</span>;
+         }
+      }
+
+      <a name="ZZZ.32"></a><span class="yang_kw">typedef</span> <span class="yang_id">ZZZ</span> {
+         <span class="yang_kw">type</span> <span class="yang_id"><a href="/modules/test1/2008-10-12#AA.13">t1:AA</a></span> {
+            <span class="yang_kw">pattern</span> <span class="yang_str">'b7b*'</span>;
+            <span class="yang_kw">pattern</span> <span class="yang_str">'b7b7*'</span>;
+         }
+      }
+
+      <a name="a.39"></a><span class="yang_kw">leaf</span> <span class="yang_id">a</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">int32</span> {
+            <span class="yang_kw">range</span> <span class="yang_str">"2 .. 12"</span>;
+         }
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+      }
+
+      <a name="b.45"></a><span class="yang_kw">leaf</span> <span class="yang_id">b</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span> {
+            <span class="yang_kw">length</span> <span class="yang_str">"1 .. 10"</span>;
+            <span class="yang_kw">pattern</span> <span class="yang_str">'1-9[0-9]*'</span> {
+               <span class="yang_kw">error-app-tag</span> <span class="yang_str">"error-test 2, leaf b"</span>;
+            }
+         }
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+      }
+
+      <a name="c.54"></a><span class="yang_kw">leaf</span> <span class="yang_id">c</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span> {
+            <span class="yang_kw">length</span> <span class="yang_str">"1 .. 10"</span>;
+            <span class="yang_kw">pattern</span> <span class="yang_str">'1-9[0-9]*'</span> {
+               <span class="yang_kw">error-message</span> <span class="yang_str">"error-test 2, leaf c"</span>;
+            }
+            <span class="yang_kw">pattern</span> <span class="yang_str">'51*'</span>;
+            <span class="yang_kw">pattern</span> <span class="yang_str">'[1-9]{4}'</span>;
+         }
+         <span class="yang_kw">config</span> <span class="yang_str">"true"</span>;
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Only 5151 should pass the AND pattern test"</span>;
+      }
+   }  <span class="yang_cmt">// module test2</span>
+</pre>
+</div>
+</div>

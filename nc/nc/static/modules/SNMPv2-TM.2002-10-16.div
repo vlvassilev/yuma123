@@ -1,0 +1,154 @@
+
+<div>
+   <h1 class="yang">SNMPv2-TM.yang</h1>
+
+   <ul id="nav">
+      <li><a href="#">Typedefs</a>
+         <ul>
+            <li><a href="#SnmpUDPAddress.76">SnmpUDPAddress</a></li>
+            <li><a href="#SnmpOSIAddress.90">SnmpOSIAddress</a></li>
+            <li><a href="#SnmpNBPAddress.106">SnmpNBPAddress</a></li>
+            <li><a href="#SnmpIPXAddress.126">SnmpIPXAddress</a></li>
+         </ul>
+      </li>
+   </ul>
+
+<br />
+<div class="yang">
+<pre>
+
+   <span class="yang_kw">module</span> <span class="yang_id">SNMPv2-TM</span> {
+
+      <span class="yang_kw">yang-version</span> <span class="yang_str">1</span>;
+
+      <span class="yang_kw">namespace</span>
+         <span class="yang_str">"urn:ietf:params:xml:ns:yang:smiv2:SNMPv2-TM"</span>;
+
+      <span class="yang_kw">prefix</span> <span class="yang_str">"snmpv2-tm"</span>;
+
+      <span class="yang_kw">import</span> <a href="/modules/yang-smi">yang-smi</a> {
+         <span class="yang_kw">prefix</span> <span class="yang_str">"smi"</span>;
+      }
+
+      <span class="yang_kw">organization</span> <span class="yang_str">"IETF SNMPv3 Working Group"</span>;
+
+      <span class="yang_kw">contact</span>
+         <span class="yang_str">"WG-EMail:   snmpv3@lists.tislabs.com
+         Subscribe:  snmpv3-request@lists.tislabs.com
+         
+         Co-Chair:   Russ Mundy
+         	    Network Associates Laboratories
+         postal:     15204 Omega Drive, Suite 300
+         	    Rockville, MD 20850-4601
+         	    USA
+         EMail:      mundy@tislabs.com
+         phone:      +1 301 947-7107
+         
+         Co-Chair:   David Harrington
+         	    Enterasys Networks
+         postal:     35 Industrial Way
+         	    P. O. Box 5005
+         	    Rochester, NH 03866-5005
+         	    USA
+         EMail:      dbh@enterasys.com
+         phone:      +1 603 337-2614
+         
+         Editor:     Randy Presuhn
+         	    BMC Software, Inc.
+         postal:     2141 North First Street
+         	    San Jose, CA 95131
+         	    USA
+         EMail:      randy_presuhn@bmc.com
+         phone:      +1 408 546-1006"</span>;
+
+      <span class="yang_kw">description</span>
+         <span class="yang_str">"The MIB module for SNMP transport mappings.
+         
+         Copyright (C) The Internet Society (2002). This
+         version of this MIB module is part of RFC 3417;
+         see the RFC itself for full legal notices."</span>;
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"2002-10-16"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Clarifications, published as RFC 3417."</span>;
+      }
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"1996-01-01"</span> {
+         <span class="yang_kw">description</span> <span class="yang_str">"Clarifications, published as RFC 1906."</span>;
+      }
+
+      <span class="yang_kw">revision</span> <span class="yang_str">"1993-04-01"</span> {
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"The initial version, published as RFC 1449."</span>;
+      }
+
+
+      <a name="SnmpUDPAddress.76"></a><span class="yang_kw">typedef</span> <span class="yang_id">SnmpUDPAddress</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span> {
+            <span class="yang_kw">length</span> <span class="yang_str">"6"</span>;
+            <span class="yang_kw">pattern</span>
+               <span class="yang_str">'((0|[1-9](([0-9]){0,2}))(0|[1-9](([0-9]){0,2}))(0|[1-9](([0-9]){0,2}))(0|[1-9](([0-9]){0,2}))((0|[1-9](([0-9]){0,4})){1,1})(0|[1-9](([0-9]){0,4})))'</span>;
+            <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"1d.1d.1d.1d/2d"</span>;
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Represents a UDP over IPv4 address:
+            
+            octets   contents        encoding
+             1-4     IP-address      network-byte order
+             5-6     UDP-port        network-byte order"</span>;
+      }
+
+      <a name="SnmpOSIAddress.90"></a><span class="yang_kw">typedef</span> <span class="yang_id">SnmpOSIAddress</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span> {
+            <span class="yang_kw">length</span> <span class="yang_str">"1 | 4..85"</span>;
+            <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"*1x:/1x:"</span>;
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Represents an OSI transport-address:
+            
+            octets   contents           encoding
+               1     length of NSAP     'n' as an unsigned-integer
+            			       (either 0 or from 3 to 20)
+            2..(n+1) NSAP                concrete binary representation
+            (n+2)..m TSEL                string of (up to 64) octets
+              "</span>;
+      }
+
+      <a name="SnmpNBPAddress.106"></a><span class="yang_kw">typedef</span> <span class="yang_id">SnmpNBPAddress</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">binary</span> {
+            <span class="yang_kw">length</span> <span class="yang_str">"3..99"</span>;
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Represents an NBP name:
+            
+            octets        contents          encoding
+               1          length of object  'n' as an unsigned integer
+             2..(n+1)     object            string of (up to 32) octets
+              n+2         length of type    'p' as an unsigned integer
+            (n+3)..(n+2+p)   type              string of (up to 32) octets
+             n+3+p        length of zone    'q' as an unsigned integer
+            (n+4+p)..(n+3+p+q) zone              string of (up to 32) octets
+            
+               For comparison purposes, strings are
+               case-insensitive. All strings may contain any octet
+               other than 255 (hex ff)."</span>;
+      }
+
+      <a name="SnmpIPXAddress.126"></a><span class="yang_kw">typedef</span> <span class="yang_id">SnmpIPXAddress</span> {
+         <span class="yang_kw">type</span> <span class="yang_id">string</span> {
+            <span class="yang_kw">length</span> <span class="yang_str">"12"</span>;
+            <span class="yang_kw">pattern</span>
+               <span class="yang_str">'((([0-9A-Fa-f]{2}){4})(([0-9A-Fa-f]{2}){1})(([0-9A-Fa-f]{2}){1})(([0-9A-Fa-f]{2}){1})(([0-9A-Fa-f]{2}){1})(([0-9A-Fa-f]{2}){1})(([0-9A-Fa-f]{2}){1})((0|[1-9](([0-9]){0,4})){1,1})(0|[1-9](([0-9]){0,4})))'</span>;
+            <a href="/modules/yang-smi/2008-03-20#display-hint.27">smi:display-hint</a> <span class="yang_str">"4x.1x:1x:1x:1x:1x:1x.2d"</span>;
+         }
+         <span class="yang_kw">description</span>
+            <span class="yang_str">"Represents an IPX address:
+            
+            octets   contents            encoding
+             1-4     network-number      network-byte order
+             5-10    physical-address    network-byte order
+            11-12    socket-number       network-byte order"</span>;
+      }
+   }  <span class="yang_cmt">// module SNMPv2-TM</span>
+</pre>
+</div>
+</div>

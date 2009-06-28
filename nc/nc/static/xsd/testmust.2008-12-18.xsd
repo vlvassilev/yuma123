@@ -1,0 +1,870 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="http://netconfcentral.com/ns/testmust"
+   targetNamespace="http://netconfcentral.com/ns/testmust"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2008-12-18"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'testmust.yang' by yangdump version 0.9.4
+         
+         Module: testmust
+         Organization: Netconf Central
+         Version: 2008-12-18
+         Contact: Andy Bierman
+      </xs:documentation>
+      <xs:documentation>
+         YANG must-stmt test module.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/test/testmust.yang
+         </ncx:source>
+         <ncx:organization>Netconf Central</ncx:organization>
+         <ncx:contact>Andy Bierman</ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2008-12-18</ncx:version>
+            <ncx:description>Initial version.</ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:element name="test1">
+      <xs:annotation>
+         <xs:documentation>
+            Test XPath 1.0 location path expression parsing.
+            These must-stmts are not expected to evaluate to true.
+            Taken from XPath 1.0, section 2
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <ncx:must>
+               <ncx:xpath>
+                  /child::doc/child::chapter[position()=5]/child::section[position()=2]
+               </ncx:xpath>
+               <ncx:description>
+                  selects the second section of the fifth chapter
+                  of the doc document element.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  child::doc/child::chapter[position()=1]/child::section[position()=2]
+               </ncx:xpath>
+               <ncx:description>
+                  selects the second section of the fifth chapter
+                  of the doc document element.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  boolean(42) + boolean(/test1) + boolean  (  'test'  )
+               </ncx:xpath>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>/descendant::para</ncx:xpath>
+               <ncx:description>
+                  selects all the para elements in the same document 
+                  as the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>//ancestor::*</ncx:xpath>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>descendant::para</ncx:xpath>
+               <ncx:description>
+                  selects the para element descendants of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>child::*</ncx:xpath>
+               <ncx:description>
+                  selects all element children of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>child::para</ncx:xpath>
+               <ncx:description>
+                  selects the para element children of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>child::text()</ncx:xpath>
+               <ncx:description>
+                  selects all text node children of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>child::node()</ncx:xpath>
+               <ncx:description>
+                  selects all the children of the context node, 
+                  whatever their node type.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>attribute::name</ncx:xpath>
+               <ncx:description>
+                  selects the name attribute of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>attribute::*</ncx:xpath>
+               <ncx:description>
+                  selects all the attributes of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>ancestor::div</ncx:xpath>
+               <ncx:description>
+                  selects all div ancestors of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  ancestor-or-self::div
+               </ncx:xpath>
+               <ncx:description>
+                   selects the div ancestors of the context node and,
+                   if the context node is a div element,
+                   the context node as well.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  descendant-or-self::para
+               </ncx:xpath>
+               <ncx:description>
+                  selects the para element descendants of the context 
+                  node and, if the context node is a para element, 
+                  the context node as well.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>self::para</ncx:xpath>
+               <ncx:description>
+                  selects the context node if it is a para element,
+                  and otherwise selects nothing.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  child::chapter/descendant::para
+               </ncx:xpath>
+               <ncx:description>
+                  selects the para element descendants of 
+                  the chapter element children of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>child::*/child::para</ncx:xpath>
+               <ncx:description>
+                  selects all para grandchildren of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>/</ncx:xpath>
+               <ncx:description>
+                  selects the document root (which is always the 
+                  parent of the document element).
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  /descendant::olist/child::item
+               </ncx:xpath>
+               <ncx:description>
+                  selects all the item elements that have an olist 
+                  parent and that are in the same document as the 
+                  context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  child::para[position()=1]
+               </ncx:xpath>
+               <ncx:description>
+                  selects the first para child of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  child::para[position()=last()]
+               </ncx:xpath>
+               <ncx:description>
+                  selects the last para child of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  child::para[position()=last()-1]
+               </ncx:xpath>
+               <ncx:description>
+                  selects the last but one para child of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  child::para[position()&gt;1]
+               </ncx:xpath>
+               <ncx:description>
+                  selects all the para children of the context node
+                  other than the first para child of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  following-sibling::chapter[position()=1]
+               </ncx:xpath>
+               <ncx:description>
+                  selects the next chapter sibling of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  preceding-sibling::chapter[position()=1]
+               </ncx:xpath>
+               <ncx:description>
+                  selects the previous chapter sibling of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  /descendant::figure[position()=42]
+               </ncx:xpath>
+               <ncx:description>
+                  selects the forty-second figure element in the document.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  child::para[attribute::type='warning']
+               </ncx:xpath>
+               <ncx:description>
+                  selects all para children of the context node 
+                  that have a type attribute with value warning.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  child::para[attribute::type='warning'][position()=5]
+               </ncx:xpath>
+               <ncx:description>
+                  selects the fifth para child of the context node
+                  that has a type attribute with value warning.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  child::para[position()=5][attribute::type='warning']
+               </ncx:xpath>
+               <ncx:description>
+                  selects the fifth para child of the context node
+                  if that child has a type attribute with value warning.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  child::chapter[child::title='Introduction']
+               </ncx:xpath>
+               <ncx:description>
+                  selects the chapter children of the context node that
+                  have one or more title children with string-value
+                  equal to Introduction.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  child::chapter[child::title]
+               </ncx:xpath>
+               <ncx:description>
+                  selects the chapter children of the context node
+                  that have one or more title children.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  child::*[self::chapter or self::appendix]
+               </ncx:xpath>
+               <ncx:description>
+                  selects the chapter and appendix children 
+                  of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  child::*[self::chapter or self::appendix][position()=last()]
+               </ncx:xpath>
+               <ncx:description>
+                  selects the last chapter or appendix child 
+                  of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  self::node()/descendant-or-self::node()/child::para
+               </ncx:xpath>
+               <ncx:description>longhand for .//para</ncx:description>
+            </ncx:must>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="doc">
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="chapter" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element name="id"
+                                 type="xs:unsignedInt"/>
+                              <xs:element name="title" type="xs:string"
+                                 minOccurs="0"/>
+                              <xs:element name="section" minOccurs="0"
+                                 maxOccurs="unbounded">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:ordered-by>system</ncx:ordered-by>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:complexType>
+                                    <xs:sequence>
+                                       <xs:element name="id"
+                                          type="xs:unsignedInt"/>
+                                       <xs:element name="para"
+                                          type="xs:string"
+                                          minOccurs="0"/>
+                                       <xs:element
+                                          name="__.test1.doc.chapter.section.A__"
+                                          minOccurs="0"
+                                          maxOccurs="unbounded"
+                                          abstract="true"/>
+                                    </xs:sequence>
+                                 </xs:complexType>
+                                 <xs:key name="section_Key">
+                                    <xs:selector xpath="."/>
+                                    <xs:field xpath="id"/>
+                                 </xs:key>
+                              </xs:element>
+                              <xs:element
+                                 name="__.test1.doc.chapter.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                        <xs:key name="chapter_Key">
+                           <xs:selector xpath="."/>
+                           <xs:field xpath="id"/>
+                        </xs:key>
+                     </xs:element>
+                     <xs:element name="__.test1.doc.A__" minOccurs="0"
+                        maxOccurs="unbounded" abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+            <xs:element name="chapter" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="id" type="xs:unsignedInt"/>
+                     <xs:element name="title" type="xs:string"
+                        minOccurs="0"/>
+                     <xs:element name="section" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element name="id"
+                                 type="xs:unsignedInt"/>
+                              <xs:element name="para" type="xs:string"
+                                 minOccurs="0"/>
+                              <xs:element
+                                 name="__.test1.chapter.section.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                        <xs:key name="section_Key">
+                           <xs:selector xpath="."/>
+                           <xs:field xpath="id"/>
+                        </xs:key>
+                     </xs:element>
+                     <xs:element name="__.test1.chapter.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="chapter_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="id"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="para" type="xs:string" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="__.test1.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="test2">
+      <xs:annotation>
+         <xs:documentation>
+            Test XPath 1.0 abbreviated syntax location path expression parsing.
+            These must-stmts are not expected to evaluate to true.
+            Taken from XPath 1.0, section 2.5
+         </xs:documentation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <ncx:must>
+               <ncx:xpath>para</ncx:xpath>
+               <ncx:description>
+                  selects the para element children of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>*</ncx:xpath>
+               <ncx:description>
+                  selects all element children of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>text()</ncx:xpath>
+               <ncx:description>
+                  selects all text node children of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>@name</ncx:xpath>
+               <ncx:description>
+                  selects the name attribute of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>@*</ncx:xpath>
+               <ncx:description>
+                  selects all the attributes of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>para[1]</ncx:xpath>
+               <ncx:description>
+                  selects the first para child of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>para[last()]</ncx:xpath>
+               <ncx:description>
+                  selects the last para child of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>*/para</ncx:xpath>
+               <ncx:description>
+                  selects all para grandchildren of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  /doc/chapter[5]/section[2]
+               </ncx:xpath>
+               <ncx:description>
+                  selects the second section of the fifth chapter of the doc.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>chapter//para</ncx:xpath>
+               <ncx:description>
+                  selects the para element descendants 
+                  of the chapter element children of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>//para</ncx:xpath>
+               <ncx:description>
+                  selects all the para descendants of the document root
+                   and thus selects all para elements in the same document
+                   as the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>//olist/item</ncx:xpath>
+               <ncx:description>
+                  selects all the item elements in the same document
+                  as the context node that have an olist parent.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>.</ncx:xpath>
+               <ncx:description>
+                  selects the context node
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>.//para</ncx:xpath>
+               <ncx:description>
+                  selects the para element descendants of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>..</ncx:xpath>
+               <ncx:description>
+                  selects the parent of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>../@lang</ncx:xpath>
+               <ncx:description>
+                  selects the lang attribute of the parent of the context node.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  para[@type='warning']
+               </ncx:xpath>
+               <ncx:description>
+                  selects all para children of the context node that have
+                  a type attribute with value warning.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  para[@type='warning'][5]
+               </ncx:xpath>
+               <ncx:description>
+                  selects the fifth para child of the context node
+                  that has a type attribute with value warning.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  para[5][@type='warning']
+               </ncx:xpath>
+               <ncx:description>
+                  selects the fifth para child of the context node
+                  if that child has a type attribute with value warning.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  chapter[title='Introduction']
+               </ncx:xpath>
+               <ncx:description>
+                  selects the chapter children of the context node that
+                  have one or more title children with string-value 
+                  equal to Introduction.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>chapter[title]</ncx:xpath>
+               <ncx:description>
+                  selects the chapter children of the context node that 
+                  have one or more title children.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  employee[@secretary and @assistant]
+               </ncx:xpath>
+               <ncx:description>
+                  selects all the employee children of the context node
+                  that have both a secretary attribute and an assistant attribute.
+               </ncx:description>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>.//para</ncx:xpath>
+               <ncx:description>
+                  shorthand for self::node()/descendant-or-self::node()/child::para
+               </ncx:description>
+            </ncx:must>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="doc">
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="chapter" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element name="id"
+                                 type="xs:unsignedInt"/>
+                              <xs:element name="title" type="xs:string"
+                                 minOccurs="0"/>
+                              <xs:element name="section" minOccurs="0"
+                                 maxOccurs="unbounded">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:ordered-by>system</ncx:ordered-by>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                                 <xs:complexType>
+                                    <xs:sequence>
+                                       <xs:element name="id"
+                                          type="xs:unsignedInt"/>
+                                       <xs:element name="para"
+                                          type="xs:string"
+                                          minOccurs="0"/>
+                                       <xs:element
+                                          name="__.test2.doc.chapter.section.A__"
+                                          minOccurs="0"
+                                          maxOccurs="unbounded"
+                                          abstract="true"/>
+                                    </xs:sequence>
+                                 </xs:complexType>
+                                 <xs:key name="section_Key">
+                                    <xs:selector xpath="."/>
+                                    <xs:field xpath="id"/>
+                                 </xs:key>
+                              </xs:element>
+                              <xs:element
+                                 name="__.test2.doc.chapter.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                        <xs:key name="chapter_Key">
+                           <xs:selector xpath="."/>
+                           <xs:field xpath="id"/>
+                        </xs:key>
+                     </xs:element>
+                     <xs:element name="__.test2.doc.A__" minOccurs="0"
+                        maxOccurs="unbounded" abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+            <xs:element name="chapter" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="id" type="xs:unsignedInt"/>
+                     <xs:element name="title" type="xs:string"
+                        minOccurs="0"/>
+                     <xs:element name="section" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element name="id"
+                                 type="xs:unsignedInt"/>
+                              <xs:element name="para" type="xs:string"
+                                 minOccurs="0"/>
+                              <xs:element
+                                 name="__.test2.chapter.section.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                        <xs:key name="section_Key">
+                           <xs:selector xpath="."/>
+                           <xs:field xpath="id"/>
+                        </xs:key>
+                     </xs:element>
+                     <xs:element name="__.test2.chapter.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="chapter_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="id"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="para" type="xs:string" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="__.test2.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="A" type="xs:long" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="B" type="xs:int" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="test4">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <ncx:must>
+               <ncx:xpath>a/b/c + ../../A | /B</ncx:xpath>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>//B = 4</ncx:xpath>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>.//AA</ncx:xpath>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>//foo[@x = 1]</ncx:xpath>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>//foo:*[@x = 1]</ncx:xpath>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  .//foo/bar[x='fred'] or .=10
+               </ncx:xpath>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>*[.=1 or . = 'fred']</ncx:xpath>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  *[.=1 or . = 'fred'][1]
+               </ncx:xpath>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>
+                  *[.=1 or . = 'fred'][last()]
+               </ncx:xpath>
+            </ncx:must>
+            <ncx:must>
+               <ncx:xpath>/a/b | /c/d</ncx:xpath>
+            </ncx:must>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="C">
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="D">
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element name="AA" type="xs:string"
+                                 minOccurs="0"/>
+                              <xs:element name="__.test4.C.D.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                     </xs:element>
+                     <xs:element name="__.test4.C.A__" minOccurs="0"
+                        maxOccurs="unbounded" abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+            <xs:element name="__.test4.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="doc">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="chapter" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="id" type="xs:unsignedInt"/>
+                     <xs:element name="section" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element name="id"
+                                 type="xs:unsignedInt"/>
+                              <xs:element name="para" type="xs:string"
+                                 minOccurs="0"/>
+                              <xs:element
+                                 name="__.doc.chapter.section.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                        <xs:key name="section_Key">
+                           <xs:selector xpath="."/>
+                           <xs:field xpath="id"/>
+                        </xs:key>
+                     </xs:element>
+                     <xs:element name="__.doc.chapter.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="chapter_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="id"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="__.doc.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

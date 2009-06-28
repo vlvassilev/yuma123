@@ -1,0 +1,814 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="http://netconfcentral.com/ns/examples"
+   targetNamespace="http://netconfcentral.com/ns/examples"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2008-11-09"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+   xmlns:ncn="urn:ietf:params:xml:ns:netconf:notification:1.0"
+   xmlns:inet="urn:ietf:params:xml:ns:yang:inet-types">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'examples.yang' by yangdump version 0.9.4
+         
+         Module: examples
+         Organization: Netconf Central
+         Version: 2008-11-09
+         Contact: Andy Bierman
+      </xs:documentation>
+      <xs:documentation>
+         Some YANG draft examples.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/test/examples.yang
+         </ncx:source>
+         <ncx:organization>Netconf Central</ncx:organization>
+         <ncx:contact>Andy Bierman</ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2008-11-09</ncx:version>
+            <ncx:description>Initial version.</ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:simpleType name="percent">
+      <xs:annotation>
+         <xs:documentation>Percentage</xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:unsignedShort">
+         <xs:maxInclusive value="100"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="ChannelNumber">
+      <xs:restriction base="xs:int">
+         <xs:minInclusive value="0"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:group name="target">
+      <xs:sequence>
+         <xs:element name="address" type="inet:ip-address"
+            minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>Target IP address</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+               <xs:union
+                  memberTypes="inet:ipv4-address inet:ipv6-address"/>
+            </xs:simpleType>
+         </xs:element>
+         <xs:element name="port" type="inet:port-number" minOccurs="0">
+            <xs:annotation>
+               <xs:documentation>Target port number</xs:documentation>
+            </xs:annotation>
+         </xs:element>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:group name="address">
+      <xs:annotation>
+         <xs:documentation>
+            A reusable address group.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:sequence>
+         <xs:element name="ip" type="inet:ip-address" minOccurs="0"/>
+         <xs:element name="port" type="inet:port-number" minOccurs="0"/>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:element name="system">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="host-name" type="xs:string" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     Hostname for this system
+                  </xs:documentation>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="domain-search" type="xs:string"
+               minOccurs="0" maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     List of domain names to search
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="login">
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="message" type="xs:string"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Message given at start of login session
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="user" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element name="name" type="xs:string"/>
+                              <xs:element name="full-name"
+                                 type="xs:string" minOccurs="0"/>
+                              <xs:element name="class" type="xs:string"
+                                 minOccurs="0"/>
+                              <xs:element name="uid" minOccurs="0">
+                                 <xs:simpleType>
+                                    <xs:restriction
+                                       base="xs:unsignedShort">
+                                       <xs:minInclusive value="1000"/>
+                                       <xs:maxInclusive value="30000"/>
+                                    </xs:restriction>
+                                 </xs:simpleType>
+                              </xs:element>
+                              <xs:element
+                                 name="__.system.login.user.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                        <xs:key name="user_Key">
+                           <xs:selector xpath="."/>
+                           <xs:field xpath="name"/>
+                        </xs:key>
+                     </xs:element>
+                     <xs:element name="__.system.login.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+            <xs:element name="services">
+               <xs:annotation>
+                  <xs:documentation>
+                     Configure externally available services
+                  </xs:documentation>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="ssh">
+                        <xs:annotation>
+                           <xs:documentation>
+                              SSH service specific configuration
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:presence>Enables SSH</ncx:presence>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element
+                                 name="__.system.services.ssh.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                     </xs:element>
+                     <xs:element name="__.system.services.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+            <xs:element name="server" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="name" type="xs:string"/>
+                     <xs:element name="ip" type="inet:ip-address"
+                        minOccurs="0"/>
+                     <xs:element name="port" type="inet:port-number"
+                        minOccurs="0"/>
+                     <xs:element name="__.system.server.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="server_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="name"/>
+               </xs:key>
+               <xs:unique name="server_Unique1">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="ip"/>
+                  <xs:field xpath="port"/>
+               </xs:unique>
+            </xs:element>
+            <xs:element name="__.system.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="mgmt-interface" type="xs:string" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="default-address">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="ifname" type="xs:string" minOccurs="0"/>
+            <xs:element name="address" type="xs:string" minOccurs="0"/>
+            <xs:element name="__.default-address.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="interfaces">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="interface" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:config>true</ncx:config>
+                     <ncx:must>
+                        <ncx:xpath>
+                           ifType != 'ethernet' or (ifType = 'ethernet' and ifMTU = 1500)
+                        </ncx:xpath>
+                        <ncx:error-message>
+                           An ethernet MTU must be 1500
+                        </ncx:error-message>
+                     </ncx:must>
+                     <ncx:must>
+                        <ncx:xpath>
+                           ifType != 'atm' or (ifType = 'atm' and ifMTU &lt;= 17966 and ifMTU &gt;= 64)
+                        </ncx:xpath>
+                        <ncx:error-message>
+                           An atm MTU must be  64 .. 17966
+                        </ncx:error-message>
+                     </ncx:must>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="name" type="xs:string"/>
+                     <xs:element name="type" type="xs:string"
+                        minOccurs="0"/>
+                     <xs:element name="speed" minOccurs="0">
+                        <xs:simpleType>
+                           <xs:restriction base="xs:string">
+                              <xs:enumeration value="10m">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>0</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="100m">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>1</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="auto">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>2</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="observed-speed"
+                        type="xs:unsignedInt" minOccurs="0">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="address" minOccurs="0"
+                        maxOccurs="unbounded">
+                        <xs:annotation>
+                           <xs:appinfo>
+                              <ncx:ordered-by>system</ncx:ordered-by>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:complexType>
+                           <xs:sequence>
+                              <xs:element name="ip"
+                                 type="inet:ip-address"/>
+                              <xs:element
+                                 name="__.interfaces.interface.address.A__"
+                                 minOccurs="0" maxOccurs="unbounded"
+                                 abstract="true"/>
+                           </xs:sequence>
+                        </xs:complexType>
+                        <xs:key name="address_Key">
+                           <xs:selector xpath="."/>
+                           <xs:field xpath="ip"/>
+                        </xs:key>
+                     </xs:element>
+                     <xs:element name="ifType" minOccurs="0">
+                        <xs:simpleType>
+                           <xs:restriction base="xs:string">
+                              <xs:enumeration value="ethernet">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>0</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="atm">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>1</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="ifMTU" type="xs:unsignedInt"
+                        minOccurs="0"/>
+                     <xs:element name="ds0ChannelNumber"
+                        type="ChannelNumber" minOccurs="0"/>
+                     <xs:element name="__.interfaces.interface.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="interface_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="name"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="__.interfaces.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="completed" type="percent" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="peer">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="destination">
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="address" type="inet:ip-address"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>Target IP address
+                           </xs:documentation>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:union
+                              memberTypes="inet:ipv4-address inet:ipv6-address"/>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="port" type="inet:port-number"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>Target port number
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="__.peer.destination.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+            </xs:element>
+            <xs:element name="__.peer.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="food">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:choice>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:choice-name>snack</ncx:choice-name>
+                     <ncx:mandatory>true</ncx:mandatory>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>sports-arena</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="pretzel" minOccurs="0"/>
+                  <xs:element name="beer" minOccurs="0"/>
+                  <xs:element name="__.food.snack.sports-arena.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>late-night</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="chocolate" minOccurs="0">
+                     <xs:simpleType>
+                        <xs:restriction base="xs:string">
+                           <xs:enumeration value="dark">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:value>0</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="milk">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:value>1</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                           <xs:enumeration value="first-available">
+                              <xs:annotation>
+                                 <xs:appinfo>
+                                    <ncx:value>2</ncx:value>
+                                 </xs:appinfo>
+                              </xs:annotation>
+                           </xs:enumeration>
+                        </xs:restriction>
+                     </xs:simpleType>
+                  </xs:element>
+                  <xs:element name="__.food.snack.late-night.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:element name="__.food.snack.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:choice>
+            <xs:element name="__.food.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:complexType name="activate-software-image_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="status" type="xs:string" minOccurs="0"/>
+               <xs:element name="__.activate-software-image.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="activate-software-image"
+      substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:rpc-output>
+               activate-software-image_output_type__
+            </ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="image-name" type="xs:string"
+                     minOccurs="0"/>
+                  <xs:element name="__.activate-software-image.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="link-failure"
+      substitutionGroup="ncn:notificationContent">
+      <xs:annotation>
+         <xs:documentation>
+            A link failure has been detected
+         </xs:documentation>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="ncn:NotificationContentType">
+               <xs:sequence>
+                  <xs:element name="if-name" type="xs:string"
+                     minOccurs="0"/>
+                  <xs:element name="if-admin-status" type="xs:string"
+                     minOccurs="0"/>
+                  <xs:element name="__.link-failure.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="transfer">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:choice>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:choice-name>how</ncx:choice-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>interval</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="interval" type="xs:unsignedShort"
+                     default="30" minOccurs="0">
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:units>minutes</ncx:units>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.transfer.how.interval.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>daily</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="daily" minOccurs="0"/>
+                  <xs:element name="time-of-day" type="xs:string"
+                     default="1am" minOccurs="0">
+                     <xs:annotation>
+                        <xs:appinfo>
+                           <ncx:units>24-hour-clock</ncx:units>
+                        </xs:appinfo>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.transfer.how.daily.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>manual</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="manual" minOccurs="0"/>
+                  <xs:element name="__.transfer.how.manual.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:element name="__.transfer.how.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:choice>
+            <xs:element name="__.transfer.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="protocol">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:choice>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:choice-name>name</ncx:choice-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>a</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="udp" minOccurs="0"/>
+                  <xs:element name="__.protocol.name.a.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>b</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="tcp" minOccurs="0"/>
+                  <xs:element name="__.protocol.name.b.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:element name="__.protocol.name.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:choice>
+            <xs:element name="__.protocol.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="http-server">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="name" type="xs:string" minOccurs="0"/>
+            <xs:element name="ip" type="inet:ip-address" minOccurs="0"/>
+            <xs:element name="port" type="inet:port-number"
+               default="80" minOccurs="0"/>
+            <xs:element name="__.http-server.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="server" minOccurs="0" maxOccurs="unbounded">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <ncx:ordered-by>system</ncx:ordered-by>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="ip" type="inet:ip-address"/>
+            <xs:element name="port" type="inet:port-number"/>
+            <xs:element name="name" type="xs:string" minOccurs="0"/>
+            <xs:element name="__.server.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+      <xs:key name="server_Key">
+         <xs:selector xpath="."/>
+         <xs:field xpath="ip"/>
+         <xs:field xpath="port"/>
+      </xs:key>
+   </xs:element>
+
+   <xs:complexType name="rock-the-house_output_type__">
+      <xs:complexContent>
+         <xs:extension base="nc:dataInlineType">
+            <xs:sequence>
+               <xs:element name="__.rock-the-house.A__" minOccurs="0"
+                  maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+         </xs:extension>
+      </xs:complexContent>
+   </xs:complexType>
+
+   <xs:element name="rock-the-house"
+      substitutionGroup="nc:rpcOperation">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:rpc-output>
+               rock-the-house_output_type__
+            </ncx:rpc-output>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="nc:rpcOperationType">
+               <xs:sequence>
+                  <xs:element name="zip-code" type="xs:string"
+                     minOccurs="0"/>
+                  <xs:element name="__.rock-the-house.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="event" substitutionGroup="ncn:notificationContent">
+      <xs:complexType>
+         <xs:complexContent>
+            <xs:extension base="ncn:NotificationContentType">
+               <xs:sequence>
+                  <xs:element name="event-class" type="xs:string"
+                     minOccurs="0"/>
+                  <xs:element name="reporting-entity" type="xs:anyType"
+                     minOccurs="0"/>
+                  <xs:element name="severity" type="xs:string"
+                     minOccurs="0"/>
+                  <xs:element name="__.event.A__" minOccurs="0"
+                     maxOccurs="unbounded" abstract="true"/>
+               </xs:sequence>
+            </xs:extension>
+         </xs:complexContent>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="crypto" type="xs:QName" minOccurs="0">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+   </xs:element>
+
+   <xs:element name="syslog">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="local-storage-limit"
+               type="xs:unsignedInt" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     The amount of local storage that can be
+                     used to hold syslog messages.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>false</ncx:config>
+                     <ncx:units>bytes</ncx:units>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="__.syslog.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

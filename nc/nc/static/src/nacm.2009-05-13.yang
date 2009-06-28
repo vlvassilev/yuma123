@@ -1,0 +1,454 @@
+module nacm {
+
+    namespace "http://netconfcentral.com/ns/nacm";
+
+    prefix "nacm";
+
+    // used just for ncx extensions
+    import ncx { prefix ncx; }
+
+    organization  "Netconf Central";
+
+    contact "Andy Bierman <andy@netconfcentral.com>.";
+
+    description 
+      "NETCONF Agent Access Control Model:
+
+       1) Administrative Groups
+          Group membership is configured by adding user names
+          to the 'groups' table.  A user may belong to
+          zero or more groups.  An extensible identityref
+          object is used to specify the group name.
+
+       2) Permissions
+          Specific NETCONF protocol permissions are granted
+          to particular administrative groups.  This is
+          limited to three standard values: read, write, 
+          and exec, using a bits leaf called 'allowedRights'.
+
+       3) YANG Module Access
+          Any RPC method or database node access
+          within a specific XML namespace
+          is controlled by the moduleRules list.
+          If no rpcRule is found for a particular
+          RPC operation, then the moduleRule list
+          will be checked for a matching entry.
+          If the requested XML namespace matches the
+          namespace-uri of a configured YANG module
+          then access to that module is limited
+          by the specific allowedRights leaf configured in
+          that entry.
+
+       4) RPC Method Invocation
+          In order to invoke a specific RPC method,
+          the 'rpcRules' list, then the 'moduleRule' list
+          is checked to see if the particular group has 
+          'exec' rights.  If not, the 'noRuleDefault' leaf
+          is checked for this requested RPC operation.
+          If denied, the RPC operation is rejected with 
+          an 'access-denied' error-tag, and no actions 
+          are performed.  The standard operation 
+          'close-session' is always allowed.
+          The special user 'superuser' is allowed to invoke any
+          RPC operation.
+
+       5) Database access
+          Once the RPC method access has been granted, the
+          agent will check any internal database access,
+          using the 'dataRules' table.  This is a user-ordered
+          list of instance-identifier rules.  If no dataRule
+          entries are found, then the the YANG module
+          associated with the accessed data node will
+          be checked in the moduleRules list, similar
+          to step 3.  If no moduleRule entry is found,
+          then step 6 is followed.
+
+       6) No Rule Default
+          If the object being accessed is tagged
+          as ncx:secure or ncx_very-secure, then
+          default access is 'denied',  Otherwise,
+          the noRuleDefault leaf is used to permit or deny
+          access when a specific rule is not found in
+          the rpcRules or dataRules tables.";
+
+
+    revision 2009-05-13 {
+        description  
+	  "Initial version of the rewrite.
+	   Preliminary!! Work-in-progress!!";
+    }
+
+    typedef NacmUserName {
+        description "General Purpose User Name string.";
+        type string {
+            length "1..63";
+            pattern '[a-z,A-Z][a-z,A-Z,0-9]{0,62}';
+        }
+    }
+
+    typedef NacmRights {
+      description 
+        "NETCONF Access Rights; 
+         These are individually assigned, not hierarchical.";
+
+      type bits {
+	bit read {
+           description
+              "Read access allowed to all specified data.
+               Any protocol operation or notification that
+               returns data to an application is a read 
+               operation.";
+        }
+	bit write {
+           description
+              "Write access allowed to all specified data.
+               Any protocol operation that alters a database
+               is a write operation.";
+
+        }
+	bit exec {
+           description
+              "Execution access to the specified RPC operation.
+               Any RPC method invocation is an exec operation.";
+        }
+      }
+    }
+
+    typedef NacmGroup {
+      description 
+        "Type of administrative group that can be
+         assigned to the user, and specified in
+         an access control rule.
+
+         The identityref data type is used to allow as 
+         many groups to be added as needed.  There are
+         three default groups defined here:
+
+           superuser == root account
+           admin == administrative account
+           guest == guest account";
+       
+      type identityref {
+         base nacmGroups;
+      }
+    }
+
+    typedef NacmAction {
+       description
+          "Action taken by the agent when a particular
+           rule matches.";
+       type enumeration {
+           enum permit {
+               description "Requested action is permitted.";
+           }
+           enum deny {
+               description "Requested action is denied.";
+           }
+       }
+    }
+
+    identity nacmGroups {
+       description 
+          "Root of all NETCONF Administrative Groups";
+    }
+
+    identity admin {
+       description 
+          "Administrator group.";
+       base nacmGroups;
+    }
+
+    identity monitor {
+       description 
+          "Monitoring group.";
+       base nacmGroups;
+    }
+
+    identity guest {
+       description 
+          "Guest user group.";
+       base nacmGroups;
+    }
+
+    container nacm {
+        ncx:very-secure;
+
+        presence 
+         "An empty nacm container indicates that the NACM service
+          is running, using all default parameters.";
+
+        description
+          "Parameters for NETCONF Access Control Model.";
+
+        leaf noRuleReadDefault {
+            description
+              "Controls whether read access is granted if
+               no appropriate rule is found for a
+               particular read request.";
+            type NacmAction;
+            default "permit";
+        }
+
+        leaf noRuleWriteDefault {
+            description
+              "Controls whether write access is granted if
+               no appropriate rule is found for a
+               particular write request.";
+            type NacmAction;
+            default "deny";
+        }
+
+        leaf noRuleExecDefault {
+            description
+              "Controls whether exec access is granted if
+               no appropriate rule is found for a
+               particular RPC operation request.";
+            type NacmAction;
+            default "permit";
+        }
+
+        container groups {
+            description 
+              "NETCONF Access Control Group Table";
+
+            list group {
+                description "One NETCONF ACM Group Entry";
+
+                key groupIdentity;
+
+                leaf groupIdentity {
+                    description 
+                      "Group identity associated with this entry.";
+                    type NacmGroup;
+                }
+
+                leaf-list userName {
+                    description 
+                      "Each entry identifies the user name of 
+                       a member of the group associated with 
+                       this entry.";
+                    type NacmUserName;
+                }
+            }
+        }
+
+        container rules {
+            description 
+              "NETCONF Access Control Rules Table.
+               Processing model for RPC method acme:reset
+               which touches database node /X/Y/Z:
+
+               Find an 'rpcRule' or 'moduleRule' for the 
+               specified RPC operation, and allow invocation
+               access if the 'allowedRights' leaf includes
+               the 'exec' bit.
+
+               If no rule is found, then the 'noRuleDefault'
+               parameter is usually used to allow or deny access.
+               (See note 3 and note 4.)
+
+               If RPC operation invocation permission is
+               granted, then the agent must also make sure
+               that any database data access (in the candidate
+               or running database) is also checked
+               in the 'dataRules' section.
+
+               The module rules are evaluated for data access
+               as the requested operation is being processed.
+               If a specific module is requested which matches
+               a rule in the moduleRules list, then it is
+               applied.  This is done before the dataRules list
+               is checked.
+
+               The data rules are evaluated in the order they
+               are entered by the user.  If the RPC operation
+               internal access is a read operation, and
+               a matching rule contains the 'read' bit
+               then database access permission is granted.
+               If the RPC operation internal access is a write
+               operation, and a matching rule contains the 
+               'write' bit, then database access permission 
+               is granted.
+
+               If no data rule is found, then the 'module rules'
+               are evaluated again, for access to the module
+               associated with the data node.
+
+               If no module rule is found, then the 'noRuleDefault'
+               parameter is usually used to allow or deny access.
+               (See note 3 and note 4.)
+              
+               Note 1: Access to the 'close-session'
+               RPC operation is always granted, even if
+               no rule exists controlling its access.
+
+               Note 2: Access is always granted to the
+               special user named 'superuser', even if not
+               yet configured in the 'groups' container.
+               This allows bootstrap and ACM repair
+               but as always, the 'superuser' account
+               needs to be used with extreme caution.
+
+               Note 3: Write or execution access to data
+               or RPC methods tagged as 'ncx:secure'
+               will only be granted to the 'superuser' user
+               if no rule is found.  The 'noRuleDefault'
+               leaf will be ignored in this case.
+
+               Note 4: Read, write or execution access to data
+               or RPC methods tagged as 'ncx:very-secure'
+               will only be granted to the 'superuser' user
+               if no rule is found.  The 'noRuleDefault'
+               leaf will be ignored in this case.
+
+               Note 5: A traditional 'deny' rule is created by
+               simply omitting bits from the allowedRights
+               for the specific data and administrative groups.";
+
+            grouping RulesCommon {
+                leaf allowedRights {
+                    description
+                      "List of access rights granted to
+                       specified administrative groups for the
+                       content specified by the associated path.";
+                    type NacmRights;
+                    mandatory true;
+                }
+
+                leaf-list allowedGroup {
+                    description
+                      "List of administrative groups which will be
+                       assigned the associated access rights
+                       for the content specified by the associated
+                       path.";
+                    type NacmGroup;
+                    min-elements 1;
+                }
+
+                leaf comment {
+                    description 
+                      "A textual description of the access rule.";
+                    type string {
+                      length "0..4095";
+                    }
+                }
+            }
+
+            list moduleRule {
+                description 
+                   "One Module Access Rule.
+                    A module rule is considered a match if
+                    the XML namespace for the specified module
+                    name matches the XML namespace used within
+                    a NETCONF PDU, and the administrative group
+                    associated with the requestor session is
+                    specified in the 'allowedGroups' ";
+
+                key "moduleName allowedRights";
+
+                ordered-by system;
+
+                leaf moduleName {
+                    description
+                      "Name of the YANG module associated with this rule.";
+                    type string {
+			length "1..max";
+                    }
+                }
+
+                uses RulesCommon;
+            }
+
+            list rpcRule {
+                description 
+                   "One RPC Method Access Rule.
+                    An RPC rule is considered a match if
+                    the module name of the requested RPC
+                    operation matches 'rpcModuleName',
+                    the requested RPC operation matches
+                    'rpcName', and the administrative group
+                    associated with the requesting session
+                    is listed in one of the 'allowedGroup'
+                    leaf-list objects.";
+
+                /* unique-stmt prevents the same
+                 * group from being used in multiple
+                 * entries for the same RPC operation
+                 * except that unique-stmt is not allowed
+                 * for leaf-lists so it cannot be used
+                 *
+                 * unique "rpcModuleName rpcName allowedGroup";
+                 */
+
+                key "rpcModuleName rpcName allowedRights";
+
+                ordered-by system;
+
+                leaf rpcModuleName {
+                    description
+                      "Name of the YANG module defining this RPC method.";
+                    type string {
+			length "1..max";
+                    }
+                }
+
+                leaf rpcName {
+                    description
+                      "Name of the RPC method.";
+                    type string {
+			length "1..max";
+                    }
+                }
+
+                uses RulesCommon;
+            }
+
+            list dataRule {
+                description 
+                  "One Data Access Control Rule
+                   A data rule is considered to match when
+                   the path expression identifies
+                   the same node that is being accessed
+                   in the NETCONF database, and the administrative
+                   group associated with the session is identified
+                   in one of the 'allowedGroup' leaf-list entries.";
+
+                key "name";
+
+                ordered-by user;
+
+                leaf name {
+                    description
+                      "Arbitrary name assigned to this data rule.";
+                    type string {
+                       length "1..1023";
+                    }
+                }
+
+		leaf path {
+                  description
+                    "Instance identifier associated with
+                     the configuration or state data
+                     controlled by this rule.
+
+                     Configuration data or state data
+                     instance identifiers start with
+                     a top-level data node.
+                     A complete instance identifier is 
+                     required for this type of path value.
+
+                     The special value '/' refers to all
+                     possible database contents.";
+
+		  type string {
+                      ncx:schema-instance;
+                  }
+                  mandatory true;
+                }
+
+                uses RulesCommon;
+            }
+        }
+    }      
+
+}

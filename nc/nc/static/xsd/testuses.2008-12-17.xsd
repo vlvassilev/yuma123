@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="http://netconfcentral.com/ns/testuses"
+   targetNamespace="http://netconfcentral.com/ns/testuses"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="2008-12-17"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'testuses.yang' by yangdump version 0.9.4
+         
+         Module: testuses
+         Organization: Netconf Central
+         Version: 2008-12-17
+         Contact: Andy Bierman
+      </xs:documentation>
+      <xs:documentation>
+         YANG uses-stmt test module.
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/test/testuses.yang
+         </ncx:source>
+         <ncx:organization>Netconf Central</ncx:organization>
+         <ncx:contact>Andy Bierman</ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>2008-12-17</ncx:version>
+            <ncx:description>Initial version.</ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:group name="top2-choice">
+      <xs:sequence>
+         <xs:choice>
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:choice-name>config-source</ncx:choice-name>
+                  <ncx:config>true</ncx:config>
+                  <ncx:mandatory>true</ncx:mandatory>
+               </xs:appinfo>
+            </xs:annotation>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>candidate</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="candidate" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Only available if 'candidate' capability supported.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="__.config-source.candidate.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>running</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="running" minOccurs="0"/>
+               <xs:element name="__.config-source.running.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>startup</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="startup" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Only available if 'startup' capability supported.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="__.config-source.startup.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>url</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="url" type="xs:string" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        URL pointing to config data. Only available
+                        if 'url' capability supported.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="__.config-source.url.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:element name="__.config-source.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:choice>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:group name="top-choice">
+      <xs:sequence>
+         <xs:choice>
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:choice-name>config-source</ncx:choice-name>
+                  <ncx:mandatory>true</ncx:mandatory>
+               </xs:appinfo>
+            </xs:annotation>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>candidate</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="candidate" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Only available if 'candidate' capability supported.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="__.config-source.candidate.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>running</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="running" minOccurs="0"/>
+               <xs:element name="__.config-source.running.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:sequence>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:case-name>startup</ncx:case-name>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:element name="startup" minOccurs="0">
+                  <xs:annotation>
+                     <xs:documentation>
+                        Only available if 'startup' capability supported.
+                     </xs:documentation>
+                  </xs:annotation>
+               </xs:element>
+               <xs:element name="__.config-source.startup.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:sequence>
+            <xs:element name="__.config-source.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:choice>
+      </xs:sequence>
+   </xs:group>
+
+   <xs:element name="foo">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:choice>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:choice-name>config-source</ncx:choice-name>
+                     <ncx:mandatory>true</ncx:mandatory>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>candidate</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="candidate" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Only available if 'candidate' capability supported.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.foo.config-source.candidate.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>running</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="running" minOccurs="0"/>
+                  <xs:element name="__.foo.config-source.running.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>startup</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="startup" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Only available if 'startup' capability supported.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.foo.config-source.startup.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:element name="__.foo.config-source.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:choice>
+            <xs:element name="__.foo.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="bar">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:choice>
+               <xs:annotation>
+                  <xs:appinfo>
+                     <ncx:choice-name>config-source</ncx:choice-name>
+                     <ncx:mandatory>true</ncx:mandatory>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>candidate</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="candidate" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Only available if 'candidate' capability supported.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.bar.config-source.candidate.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>running</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="running" minOccurs="0"/>
+                  <xs:element name="__.bar.config-source.running.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>startup</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="startup" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           Only available if 'startup' capability supported.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.bar.config-source.startup.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:sequence>
+                  <xs:annotation>
+                     <xs:appinfo>
+                        <ncx:case-name>url</ncx:case-name>
+                     </xs:appinfo>
+                  </xs:annotation>
+                  <xs:element name="url" type="xs:string" minOccurs="0">
+                     <xs:annotation>
+                        <xs:documentation>
+                           URL pointing to config data. Only available
+                           if 'url' capability supported.
+                        </xs:documentation>
+                     </xs:annotation>
+                  </xs:element>
+                  <xs:element name="__.bar.config-source.url.A__"
+                     minOccurs="0" maxOccurs="unbounded"
+                     abstract="true"/>
+               </xs:sequence>
+               <xs:element name="__.bar.config-source.A__"
+                  minOccurs="0" maxOccurs="unbounded" abstract="true"/>
+            </xs:choice>
+            <xs:element name="__.bar.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

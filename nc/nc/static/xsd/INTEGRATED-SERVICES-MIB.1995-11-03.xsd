@@ -1,0 +1,875 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+   xmlns="urn:ietf:params:xml:ns:yang:smiv2:INTEGRATED-SERVICES-MIB"
+   targetNamespace="urn:ietf:params:xml:ns:yang:smiv2:INTEGRATED-SERVICES-MIB"
+   elementFormDefault="qualified" attributeFormDefault="unqualified"
+   xml:lang="en" version="1995-11-03"
+   xmlns:ncx="http://netconfcentral.com/ncx"
+   xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"
+   xmlns:if-mib="urn:ietf:params:xml:ns:yang:smiv2:IF-MIB"
+   xmlns:smiv2="urn:ietf:params:xml:ns:yang:smiv2:SNMPv2-TC"
+   xmlns:smi="urn:ietf:params:xml:ns:yang:yang-smi"
+   xmlns:yang="urn:ietf:params:xml:ns:yang:yang-types">
+   <xs:annotation>
+      <xs:documentation>
+         Converted from YANG file 'INTEGRATED-SERVICES-MIB.yang' by yangdump version 0.9.4
+         
+         Module: INTEGRATED-SERVICES-MIB
+         Organization: IETF Integrated Services Working Group
+         Version: 1995-11-03
+         Contact:        Fred Baker
+         Postal: Cisco Systems
+         	519 Lado Drive
+         	Santa Barbara, California 93111
+         Tel:    +1 805 681 0115
+         E-Mail: fred@cisco.com
+         
+         	John Krawczyk
+         Postal: ArrowPoint Communications
+         	235 Littleton Road
+         	Westford, Massachusetts 01886
+         Tel:    +1 508 692 5875
+         E-Mail: jjk@tiac.net
+      </xs:documentation>
+      <xs:documentation>
+         The MIB module to describe the Integrated Services
+         
+         
+         
+         Protocol
+      </xs:documentation>
+      <xs:appinfo>
+         <ncx:source>
+            /home/andy/modules/ietf/INTEGRATED-SERVICES-MIB.yang
+         </ncx:source>
+         <ncx:organization>
+            IETF Integrated Services Working Group
+         </ncx:organization>
+         <ncx:contact>
+                   Fred Baker
+            Postal: Cisco Systems
+            	519 Lado Drive
+            	Santa Barbara, California 93111
+            Tel:    +1 805 681 0115
+            E-Mail: fred@cisco.com
+            
+            	John Krawczyk
+            Postal: ArrowPoint Communications
+            	235 Littleton Road
+            	Westford, Massachusetts 01886
+            Tel:    +1 508 692 5875
+            E-Mail: jjk@tiac.net
+         </ncx:contact>
+      </xs:appinfo>
+      <xs:appinfo>
+         <ncx:revision>
+            <ncx:version>1995-11-03</ncx:version>
+            <ncx:description>
+               This version published as RFC 2213.
+            </ncx:description>
+         </ncx:revision>
+      </xs:appinfo>
+   </xs:annotation>
+
+   <xs:simpleType name="SessionNumber">
+      <xs:annotation>
+         <xs:documentation>
+            The Session  Number  convention  is  used  for
+            numbers  identifying  sessions or saved PATH or
+            RESV information. It is a number in  the  range
+            returned  by  a TestAndIncr variable, having no
+            protocol meaning whatsoever but serving instead
+            as simple identifier.
+            
+            The alternative was a very complex instance  or
+            instance object that became unwieldy.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:int">
+         <xs:minInclusive value="0"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="Protocol">
+      <xs:annotation>
+         <xs:documentation>
+            The value of the IP Protocol field  of  an  IP
+            Datagram  Header.  This identifies the protocol
+            layer above IP.  For example, the  value  6  is
+            used  for TCP and the value 17 is used for UDP.
+            The values of this field are defined in the As-
+            signed Numbers RFC.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:int">
+         <xs:minInclusive value="1"/>
+         <xs:maxInclusive value="255"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="SessionType">
+      <xs:annotation>
+         <xs:documentation>
+            The value of the C-Type field of a Session ob-
+            ject,  as  defined  in  the RSVP specification.
+            This value  determines  the  lengths  of  octet
+            strings  and use of certain objects such as the
+            'port' variables. If the C-Type  calls  for  an
+            IP6  address, one would expect all source, des-
+            
+            
+            
+            tination, and next/previous hop addresses to be
+            16  bytes long, and for the ports to be UDP/TCP
+            port numbers, for example.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:int">
+         <xs:minInclusive value="1"/>
+         <xs:maxInclusive value="255"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="Port">
+      <xs:annotation>
+         <xs:documentation>
+            The value of the UDP or TCP Source or Destina-
+            tion  Port field, a virtual destination port or
+            generalized port identifier used with the IPSEC
+            Authentication Header or Encapsulating Security
+            Payload, or other session discriminator.  If it
+            is  not  used, the value should be of length 0.
+            This pair, when coupled with the  IP  Addresses
+            of the source and destination system and the IP
+            protocol  field,  uniquely  identifies  a  data
+            stream.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:base64Binary">
+         <xs:minLength value="2"/>
+         <xs:maxLength value="4"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="MessageSize">
+      <xs:annotation>
+         <xs:documentation>
+            The size of a message in bytes. This  is  used
+            to  specify  the  minimum and maximum size of a
+            message along an integrated services route.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:int">
+         <xs:minInclusive value="0"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="BitRate">
+      <xs:annotation>
+         <xs:documentation>
+            The rate, in bits/second, that data  may  move
+            in  the context.  Applicable contexts minimally
+            include the speed of an  interface  or  virtual
+            circuit, the data rate of a (potentially aggre-
+            gated) data flow, or the data rate to be  allo-
+            cated for use by a flow.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:int">
+         <xs:minInclusive value="0"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="BurstSize">
+      <xs:annotation>
+         <xs:documentation>
+            The number of octets of IP Data, including  IP
+            Headers, that a stream may send without concern
+            for policing.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:int">
+         <xs:minInclusive value="0"/>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:simpleType name="QosService">
+      <xs:annotation>
+         <xs:documentation>
+            The class of service in use by a flow.
+         </xs:documentation>
+      </xs:annotation>
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="bestEffort">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>1</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="guaranteedDelay">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>2</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+         <xs:enumeration value="controlledLoad">
+            <xs:annotation>
+               <xs:appinfo>
+                  <ncx:value>5</ncx:value>
+               </xs:appinfo>
+            </xs:annotation>
+         </xs:enumeration>
+      </xs:restriction>
+   </xs:simpleType>
+
+   <xs:element name="intSrvObjects">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <smi:oid  smi:oid="1.3.6.1.2.1.52.1"/>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="intSrvIfAttribEntry" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     The reservable attributes of  a  given  inter-
+                     face.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.52.1.1.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="ifIndex" type="xs:string">
+                        <xs:annotation>
+                           <xs:documentation>
+                              Automagically generated leafref leaf.
+                           </xs:documentation>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvIfAttribAllocatedBits"
+                        type="BitRate" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The number of bits/second currently  allocated
+                              to reserved sessions on the interface.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <ncx:units>Bits per second</ncx:units>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.1.1.1"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvIfAttribMaxAllocatedBits"
+                        type="BitRate" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The maximum number of bits/second that may  be
+                              allocated  to  reserved  sessions on the inter-
+                              face.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <ncx:units>Bits per second</ncx:units>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.1.1.2"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvIfAttribAllocatedBuffer"
+                        type="BurstSize" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The amount of buffer space  required  to  hold
+                              the simultaneous burst of all reserved flows on
+                              the interface.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <ncx:units>Bytes</ncx:units>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.1.1.3"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvIfAttribFlows"
+                        type="yang:gauge32" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The number of reserved flows currently  active
+                              on  this  interface.  A flow can be created ei-
+                              ther from a reservation protocol (such as  RSVP
+                              or ST-II) or via configuration information.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.1.1.4"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvIfAttribPropagationDelay"
+                        type="xs:int" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The amount of propagation delay that this  in-
+                              terface  introduces  in addition to that intro-
+                              diced by bit propagation delays.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <ncx:units>microseconds</ncx:units>
+                              <smi:default  smi:default="0"/>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.1.1.5"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvIfAttribStatus"
+                        type="smiv2:RowStatus" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              'active' on interfaces that are configured for
+                              RSVP.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.1.1.6"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element
+                        name="__.intSrvObjects.intSrvIfAttribEntry.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="intSrvIfAttribEntry_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="ifIndex"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="intSrvFlowEntry" minOccurs="0"
+               maxOccurs="unbounded">
+               <xs:annotation>
+                  <xs:documentation>
+                     Information describing the use of a given  in-
+                     terface   by   a   given   flow.   The  counter
+                     intSrvFlowPoliced starts counting  at  the  in-
+                     stallation of the flow.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:ordered-by>system</ncx:ordered-by>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+               <xs:complexType>
+                  <xs:sequence>
+                     <xs:element name="intSrvFlowNumber"
+                        type="SessionNumber">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The number of this flow.  This is for SNMP In-
+                              dexing purposes only and has no relation to any
+                              protocol value.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.1"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvFlowType"
+                        type="SessionType" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The type of session (IP4, IP6, IP6  with  flow
+                              information, etc).
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.2"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvFlowOwner" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The process that installed this  flow  in  the
+                              queue policy database.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.3"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:string">
+                              <xs:enumeration value="other">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>1</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="rsvp">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>2</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                              <xs:enumeration value="management">
+                                 <xs:annotation>
+                                    <xs:appinfo>
+                                       <ncx:value>3</ncx:value>
+                                    </xs:appinfo>
+                                 </xs:annotation>
+                              </xs:enumeration>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="intSrvFlowDestAddr"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The destination address used by all senders in
+                              this  session.   This object may not be changed
+                              when the value of the RowStatus object is  'ac-
+                              tive'.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.4"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:base64Binary">
+                              <xs:minLength value="4"/>
+                              <xs:maxLength value="16"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="intSrvFlowSenderAddr"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The source address of the sender  selected  by
+                              this  reservation.  The value of all zeroes in-
+                              dicates 'all senders'.  This object may not  be
+                              changed  when the value of the RowStatus object
+                              is 'active'.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.5"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:base64Binary">
+                              <xs:minLength value="4"/>
+                              <xs:maxLength value="16"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="intSrvFlowDestAddrLength"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The length of the destination address in bits.
+                              This  is  the CIDR Prefix Length, which for IP4
+                              hosts and multicast addresses is 32 bits.  This
+                              object may not be changed when the value of the
+                              RowStatus object is 'active'.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.6"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:int">
+                              <xs:minInclusive value="0"/>
+                              <xs:maxInclusive value="128"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="intSrvFlowSenderAddrLength"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The length of the sender's  address  in  bits.
+                              This  is  the CIDR Prefix Length, which for IP4
+                              hosts and multicast addresses is 32 bits.  This
+                              object may not be changed when the value of the
+                              RowStatus object is 'active'.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.7"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:int">
+                              <xs:minInclusive value="0"/>
+                              <xs:maxInclusive value="128"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="intSrvFlowProtocol"
+                        type="Protocol" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The IP Protocol used by a session.   This  ob-
+                              ject  may  not be changed when the value of the
+                              RowStatus object is 'active'.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.8"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvFlowDestPort" type="Port"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The UDP or TCP port number used as a  destina-
+                              tion  port for all senders in this session.  If
+                              the  IP   protocol   in   use,   specified   by
+                              intSrvResvFwdProtocol,  is 50 (ESP) or 51 (AH),
+                              this  represents  a  virtual  destination  port
+                              number.   A value of zero indicates that the IP
+                              protocol in use does not have ports.  This  ob-
+                              ject  may  not be changed when the value of the
+                              
+                              
+                              
+                              RowStatus object is 'active'.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.9"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvFlowPort" type="Port"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The UDP or TCP port number used  as  a  source
+                              port  for  this sender in this session.  If the
+                              IP    protocol    in    use,    specified    by
+                              intSrvResvFwdProtocol  is  50 (ESP) or 51 (AH),
+                              this represents a generalized  port  identifier
+                              (GPI).   A  value of zero indicates that the IP
+                              protocol in use does not have ports.  This  ob-
+                              ject  may  not be changed when the value of the
+                              RowStatus object is 'active'.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.10"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvFlowFlowId" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The flow ID that  this  sender  is  using,  if
+                              this  is  an IPv6 session.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.11"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:int">
+                              <xs:minInclusive value="0"/>
+                              <xs:maxInclusive value="16777215"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="intSrvFlowInterface"
+                        type="if-mib:InterfaceIndex" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The ifIndex value of the  interface  on  which
+                              this reservation exists.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.12"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvFlowIfAddr" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The IP Address on the ifEntry  on  which  this
+                              reservation  exists.  This is present primarily
+                              
+                              
+                              
+                              to support those interfaces which layer  multi-
+                              ple IP Addresses on the interface.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.13"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:base64Binary">
+                              <xs:minLength value="4"/>
+                              <xs:maxLength value="16"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="intSrvFlowRate" type="BitRate"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The Reserved Rate of the sender's data stream.
+                              If this is a Controlled Load service flow, this
+                              rate is derived from the Tspec  rate  parameter
+                              (r).   If  this  is  a Guaranteed service flow,
+                              this rate is derived from  the  Rspec  clearing
+                              rate parameter (R).
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <ncx:units>bits per second</ncx:units>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.14"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvFlowBurst"
+                        type="BurstSize" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The size of the largest  burst  expected  from
+                              the sender at a time.
+                              
+                              If this is less than  the  sender's  advertised
+                              burst  size, the receiver is asking the network
+                              to provide flow pacing  beyond  what  would  be
+                              provided  under normal circumstances. Such pac-
+                              ing is at the network's option.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <ncx:units>bytes</ncx:units>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.15"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvFlowWeight" type="xs:int"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The weight used  to  prioritize  the  traffic.
+                              Note  that the interpretation of this object is
+                              implementation-specific,   as   implementations
+                              vary in their use of weighting procedures.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.16"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvFlowQueue" type="xs:int"
+                        minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The number of the queue used by this  traffic.
+                              Note  that the interpretation of this object is
+                              implementation-specific,   as   implementations
+                              vary in their use of queue identifiers.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.17"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvFlowMinTU"
+                        type="MessageSize" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The minimum message size for  this  flow.  The
+                              policing  algorithm will treat smaller messages
+                              as though they are this size.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.18"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvFlowMaxTU"
+                        type="MessageSize" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The maximum datagram size for this  flow  that
+                              will conform to the traffic specification. This
+                              value cannot exceed the MTU of the interface.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.19"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvFlowBestEffort"
+                        type="yang:counter32" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The number of packets that  were  remanded  to
+                              best effort service.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.20"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvFlowPoliced"
+                        type="yang:counter32" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The number of packets policed since the incep-
+                              tion of the flow's service.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.21"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvFlowDiscard"
+                        type="smiv2:TruthValue" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              If 'true', the flow  is  to  incur  loss  when
+                              traffic is policed.  If 'false', policed traff-
+                              ic is treated as best effort traffic.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:default  smi:default="false"/>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.22"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvFlowService"
+                        type="QosService" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              The QoS service being applied to this flow.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>false</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.23"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element name="intSrvFlowOrder" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              In the event of ambiguity, the order in  which
+                              the  classifier  should  make  its comparisons.
+                              The row with intSrvFlowOrder=0 is tried  first,
+                              and  comparisons  proceed  in  the order of in-
+                              creasing value.  Non-serial implementations  of
+                              the classifier should emulate this behavior.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.24"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                        <xs:simpleType>
+                           <xs:restriction base="xs:int">
+                              <xs:minInclusive value="0"/>
+                              <xs:maxInclusive value="65535"/>
+                           </xs:restriction>
+                        </xs:simpleType>
+                     </xs:element>
+                     <xs:element name="intSrvFlowStatus"
+                        type="smiv2:RowStatus" minOccurs="0">
+                        <xs:annotation>
+                           <xs:documentation>
+                              'active' for all active  flows.   This  object
+                              
+                              
+                              
+                              may be used to install static classifier infor-
+                              mation, delete classifier information,  or  au-
+                              thorize such.
+                           </xs:documentation>
+                           <xs:appinfo>
+                              <ncx:config>true</ncx:config>
+                              <smi:oid  smi:oid="1.3.6.1.2.1.52.1.2.1.25"/>
+                           </xs:appinfo>
+                        </xs:annotation>
+                     </xs:element>
+                     <xs:element
+                        name="__.intSrvObjects.intSrvFlowEntry.A__"
+                        minOccurs="0" maxOccurs="unbounded"
+                        abstract="true"/>
+                  </xs:sequence>
+               </xs:complexType>
+               <xs:key name="intSrvFlowEntry_Key">
+                  <xs:selector xpath="."/>
+                  <xs:field xpath="intSrvFlowNumber"/>
+               </xs:key>
+            </xs:element>
+            <xs:element name="__.intSrvObjects.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+   <xs:element name="intSrvGenObjects">
+      <xs:annotation>
+         <xs:appinfo>
+            <ncx:config>true</ncx:config>
+            <smi:oid  smi:oid="1.3.6.1.2.1.52.2"/>
+         </xs:appinfo>
+      </xs:annotation>
+      <xs:complexType>
+         <xs:sequence>
+            <xs:element name="intSrvFlowNewIndex"
+               type="smiv2:TestAndIncr" minOccurs="0">
+               <xs:annotation>
+                  <xs:documentation>
+                     This  object  is  used  to  assign  values  to
+                     intSrvFlowNumber  as described in 'Textual Con-
+                     ventions  for  SNMPv2'.   The  network  manager
+                     reads  the  object,  and  then writes the value
+                     back in the SET that creates a new instance  of
+                     intSrvFlowEntry.   If  the  SET  fails with the
+                     code 'inconsistentValue', then the process must
+                     be  repeated; If the SET succeeds, then the ob-
+                     ject is incremented, and the  new  instance  is
+                     created according to the manager's directions.
+                  </xs:documentation>
+                  <xs:appinfo>
+                     <ncx:config>true</ncx:config>
+                     <smi:oid  smi:oid="1.3.6.1.2.1.52.2.1"/>
+                  </xs:appinfo>
+               </xs:annotation>
+            </xs:element>
+            <xs:element name="__.intSrvGenObjects.A__" minOccurs="0"
+               maxOccurs="unbounded" abstract="true"/>
+         </xs:sequence>
+      </xs:complexType>
+   </xs:element>
+
+</xs:schema>

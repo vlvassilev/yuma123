@@ -1392,8 +1392,6 @@ static status_t
     val_value_t     *val;
     status_t         res;
 
-    (void)methnode;
-
     /* This special callback is used by internal NCX functions
      * to load the initial configuration.  The msg->rpc_user1 parameter 
      * has already been set to the address of the cfg_template_t
@@ -1401,7 +1399,23 @@ static status_t
      *
      * NOTE: HACK DEPENDS ON THE agt_rpc_load_config_file to setup
      * the rpc->rpc_user1 parameter
+     *
+     * make sure this is a DUMMY session, not a real session
      */
+    if (scb->type != SES_TYP_DUMMY) {
+        res = ERR_NCX_ACCESS_DENIED;
+        agt_record_error(scb, 
+                         &msg->mhdr, 
+                         NCX_LAYER_OPERATION, 
+                         res,
+                         methnode, 
+                         NCX_NT_NONE, 
+                         NULL, 
+                         NCX_NT_NONE, 
+                         NULL);
+        return res;
+    }
+
     target = (cfg_template_t *)msg->rpc_user1;
     if (!target) {
         return SET_ERROR(ERR_INTERNAL_PTR);
@@ -1453,7 +1467,19 @@ static status_t
     val_value_t     *val;
     status_t         res;
 
-    (void)methnode;
+    if (scb->type != SES_TYP_DUMMY) {
+        res = ERR_NCX_ACCESS_DENIED;
+        agt_record_error(scb, 
+                         &msg->mhdr, 
+                         NCX_LAYER_OPERATION, 
+                         res,
+                         methnode, 
+                         NCX_NT_NONE, 
+                         NULL, 
+                         NCX_NT_NONE, 
+                         NULL);
+        return res;
+    }
 
     /* This special callback is used by internal NCX functions
      * to load the initial configuration. 

@@ -1313,7 +1313,7 @@ static void
                                  2, 
                                  TRUE);
 	    }
-	    /* fall through */
+            break;
 	case NCX_BT_INSTANCE_ID:
 	    constrained_set = typ_get_constrained(typdef);
 	    write_simple_str(scb, 

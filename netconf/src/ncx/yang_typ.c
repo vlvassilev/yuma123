@@ -2194,6 +2194,8 @@ static status_t
 		res = yang_consume_semiapp(tkc, mod, &typdef->appinfoQ);
 		CHK_EXIT(res, retres);
 	    }
+
+#if 0 /*  require-instance removed in -06 */
 	} else if (!xml_strcmp(val, YANG_K_REQUIRE_INSTANCE)) {
 	    res = yang_consume_boolean(tkc, 
                                        mod, 
@@ -2201,6 +2203,10 @@ static status_t
 				       &constrained,
 				       &typdef->appinfoQ);
 	    CHK_EXIT(res, retres);
+#else
+            sim->constrained = TRUE;
+#endif
+
 	} else {
 	    retres = ERR_NCX_WRONG_TKTYPE;
 	    expstr = "path or require-instance statement";

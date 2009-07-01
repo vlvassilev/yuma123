@@ -1167,7 +1167,14 @@ static status_t
     }
 
     saveopt = agent_cb->get_optional;
+
+#if 0
+    /* think this is not needed; user must set $$optional to true
+     * in order to fill in the optional nodes 
+     */
     agent_cb->get_optional = TRUE;
+#endif
+
     res = NO_ERR;
 
     objbuff = NULL;
@@ -1292,9 +1299,15 @@ static status_t
 
     saveopt = agent_cb->get_optional;
     
+#if 0
+    /* now think this is not actually needed.
+     * It will not ensure that some selection is made
+     * for a mandatory choice
+     */
     if (obj_is_mandatory(choic)) {
 	agent_cb->get_optional = TRUE;
     }
+#endif
 
     /* first check the partial block corner case */
     pval = val_get_choice_first_set(valset, choic);

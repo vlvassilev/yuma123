@@ -167,6 +167,21 @@ static status_t
 		res = ERR_NCX_INVALID_VALUE;
 	    }
 	}
+    } else if (obj->objtype == OBJ_TYP_CHOICE) {
+        /* check if a child of any case is named 'strval' */
+        targobj = obj_find_child(obj,
+                                 obj_get_mod_name(obj),
+                                 strval);
+        if (targobj && 
+            obj_get_basetype(targobj) == NCX_BT_EMPTY) {
+            /* found a match so set the value node to type empty */
+            val_init_from_template(new_parm, targobj);
+            val_set_name(new_parm,
+                         obj_get_name(targobj),
+                         xml_strlen(obj_get_name(targobj)));
+        } else {
+            res = ERR_NCX_INVALID_VALUE;
+        }
     } else {
 	/* get the base type value */
 	btyp = obj_get_basetype(obj);

@@ -1953,11 +1953,16 @@ static obj_template_t *
 	    }
 	    if (ret == 0) {
 		if (match) {
-		    if (matchcount) {
-			(*matchcount)++;
-		    }
-		    matchobj = obj;
-		} else {
+                    if (obj->objtype == OBJ_TYP_CHOICE ||
+                        obj->objtype == OBJ_TYP_CASE) {
+                        ;
+                    } else {
+                        if (matchcount) {
+                            (*matchcount)++;
+                        }
+                        matchobj = obj;
+                    }
+                } else {
 		    return obj;
 		}
 	    }
@@ -1976,8 +1981,11 @@ static obj_template_t *
 		 casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
 		cas = casobj->def.cas;
 		chobj = find_template(cas->datadefQ,
-				      modname, objname,
-				      lookdeep, match, matchcount);
+				      modname, 
+                                      objname,
+				      lookdeep, 
+                                      match, 
+                                      matchcount);
 		if (chobj) {
 		    if (match) {
 			matchobj = chobj;
@@ -1990,12 +1998,14 @@ static obj_template_t *
 	    /* last try: the choice name itself */
 	    if (ret == 0) {
 		if (match) {
+#if 0    /* don't want to match choice names in yangcli */
 		    if (!matchobj) {
 			if (matchcount) {
 			    (*matchcount)++;
 			}
 			matchobj = obj;
 		    }
+#endif
 		} else {
 		    return obj;
 		}
@@ -2004,8 +2014,11 @@ static obj_template_t *
 	case OBJ_TYP_CASE:
 	    cas = obj->def.cas;
 	    chobj = find_template(cas->datadefQ,
-				  modname, objname,
-				  lookdeep, match, matchcount);
+				  modname, 
+                                  objname,
+				  lookdeep, 
+                                  match, 
+                                  matchcount);
 	    if (chobj) {
 		if (match) {
 		    matchobj = chobj;
@@ -2015,12 +2028,14 @@ static obj_template_t *
 	    } else if (ret == 0) {
 		/* try case name itself */
 		if (match) {
+#if 0  /* don't want to match case names in yangcli */
 		    if (!matchobj) {
 			if (matchcount) {
 			    (*matchcount)++;
 			}
 			matchobj = obj;
 		    }
+#endif
 		} else {
 		    return obj;
 		}
@@ -3277,8 +3292,12 @@ obj_template_t *
 #endif
 
     /* check the main module */
-    obj = find_template(&mod->datadefQ, modname, 
-			objname, FALSE, FALSE, NULL);
+    obj = find_template(&mod->datadefQ, 
+                        modname, 
+			objname, 
+                        FALSE, 
+                        FALSE, 
+                        NULL);
     if (obj) {
 	return obj;
     }
@@ -3311,8 +3330,11 @@ obj_template_t *
 
 	/* check the type Q in this submodule */
 	obj = find_template(&inc->submod->datadefQ,
-			    modname, objname,
-			    FALSE, FALSE, NULL);
+			    modname, 
+                            objname,
+			    FALSE, 
+                            FALSE, 
+                            NULL);
 	if (obj) {
 	    return obj;
 	}
@@ -3358,8 +3380,12 @@ const obj_template_t *
 
     que = obj_get_cdatadefQ(obj);
     if (que) {
-	return find_template(que, modname, 
-			     objname, TRUE, FALSE, NULL);
+	return find_template(que, 
+                             modname, 
+			     objname, 
+                             TRUE, 
+                             FALSE, 
+                             NULL);
     }
 
     return NULL;

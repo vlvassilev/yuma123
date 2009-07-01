@@ -4305,6 +4305,7 @@ static status_t
 	   uint32  len)
 {
     val_value_t      *valset, *parm;
+    xmlChar          *pathstr;
     status_t          res;
     int               ret;
     boolean           imode;
@@ -4324,10 +4325,20 @@ static status_t
 			  YANGCLI_DIR);
     if (!parm || parm->res != NO_ERR) {
 	val_free_value(valset);
+        log_error("\nError: 'dir' parameter is missing");
 	return ERR_NCX_MISSING_PARM;
     }
 
-    ret = chdir((const char *)VAL_STR(parm));
+    res = NO_ERR;
+    pathstr = ncx_get_source(VAL_STR(parm), &res);
+    if (!pathstr) {
+	val_free_value(valset);
+        log_error("\nError: get path string failed (%s)",
+                  get_error_string(res));
+        return res;
+    }
+
+    ret = chdir((const char *)pathstr);
     if (ret) {
 	res = ERR_NCX_INVALID_VALUE;
 	if (imode) {
@@ -4342,6 +4353,7 @@ static status_t
     }
 
     val_free_value(valset);
+    m__free(pathstr);
 
     return res;
 
@@ -8517,7 +8529,7 @@ void *
 	}
 
 	/* if not found, try a partial RPC command name */
-	if (!def && get_autoload()) {
+	if (!def && get_autocomp()) {
 	    switch (*dtyp) {
 	    case NCX_NT_NONE:
 	    case NCX_NT_OBJ:

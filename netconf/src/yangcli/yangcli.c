@@ -672,6 +672,17 @@ static status_t
 	    log_error("\nError: value must be 'true' or 'false'");
 	    res = ERR_NCX_INVALID_VALUE;
 	}
+    } else if (!xml_strcmp(configval->name, YANGCLI_AUTOLOAD)) {
+	if (ncx_is_true(usestr)) {
+            agent_cb->autoload = TRUE;
+	    autoload = TRUE;
+	} else if (ncx_is_false(usestr)) {
+            agent_cb->autoload = FALSE;
+	    autoload = FALSE;
+	} else {
+	    log_error("\nError: value must be 'true' or 'false'");
+	    res = ERR_NCX_INVALID_VALUE;
+	}
     } else if (!xml_strcmp(configval->name, YANGCLI_BADDATA)) {
 	testbaddata = ncx_get_baddata_enum(usestr);
 	if (testbaddata != NCX_BAD_DATA_NONE) {
@@ -1515,6 +1526,12 @@ static status_t
 	return res;
     }
 
+    res = create_config_var(YANGCLI_AUTOLOAD, 
+			    (autoload) ? NCX_EL_TRUE : NCX_EL_FALSE);
+    if (res != NO_ERR) {
+	return res;
+    }
+
     res = create_config_var(YANGCLI_BADDATA, 
 			    ncx_get_baddata_string(baddata));
     if (res != NO_ERR) {
@@ -2187,15 +2204,19 @@ static void
 
 	mod = ncx_find_module(namebuff, version);
 	if (mod == NULL) {
-	    if (autoload) {
+	    if (agent_cb->autoload) {
 		res = ncxmod_load_module(namebuff, version, &mod);
 		if (res != NO_ERR) {
 		    log_error("\nyangcli error: Module %s not loaded (%s)!!",
-			      namebuff, get_error_string(res));
+			      namebuff, 
+                              get_error_string(res));
 		}
 	    } else {
-		log_info("\nyangcli warning: Module %s not loaded!!",
-			 namebuff);
+                if (LOGINFO) {
+                    log_info("\nWarning: Module %s not loaded "
+                             "(--autoload=false)",
+                             namebuff);
+                }
 	    }
 	}
 

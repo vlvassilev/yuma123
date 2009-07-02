@@ -333,6 +333,7 @@ static void
 * create a data rule cache entry
 *
 * INPUTS:
+*   pcb == parser control block to cache
 *   result == XPath result to cache
 *   rule == back-ptr to dataRule entry
 *
@@ -340,8 +341,9 @@ static void
 *   filled in, malloced struct or NULL if malloc error
 *********************************************************************/
 static agt_acm_datarule_t *
-    new_datarule (xpath_result_t *result,
-                 val_value_t *rule)
+    new_datarule (xpath_pcb_t *pcb,
+                  xpath_result_t *result,
+                  val_value_t *rule)
 {
     agt_acm_datarule_t *datarule;
 
@@ -351,6 +353,7 @@ static agt_acm_datarule_t *
     }
     memset(datarule, 0x0, sizeof(agt_acm_datarule_t));
 
+    datarule->pcb = pcb;
     datarule->result = result;
     datarule->datarule = rule;
     return datarule;
@@ -373,6 +376,9 @@ static void
 
     if (datarule->result) {
         xpath_free_result(datarule->result);
+    }
+    if (datarule->pcb) {
+        xpath_free_pcb(datarule->pcb);
     }
     m__free(datarule);
 
@@ -1077,8 +1083,23 @@ static boolean
             if (obj_is_very_secure(testobj)) {
                 return FALSE;
             }
-        }            
-        testobj = testobj->parent;
+        }
+
+        /* stop at root */
+        if (obj_is_root(testobj)) {
+            testobj = NULL;
+        } else {
+            testobj = testobj->parent;
+        }
+
+        /* no need to check further if the parent was the root
+         * need to make sure not to go past the
+         * config parameter into the rpc input
+         * then the secret <load-config> rpc
+         */
+        if (testobj && obj_is_root(testobj)) {
+            testobj = NULL;
+        }
     }
 
     /* check the noDefaultRule setting on this agent */
@@ -1221,6 +1242,11 @@ static boolean
                 continue;
             }
 
+            /* make sure the source is not XML so the defunct reader
+             * does not get accessed; the clone should save the
+             * NSID bindings in all the tokens
+             */
+            pcb->source = XP_SRC_YANG;
             res = NO_ERR;
             result = xpath1_eval_expr(pcb,
                                       valroot,
@@ -1228,17 +1254,27 @@ static boolean
                                       FALSE,
                                       TRUE,
                                       &res);
+
+
             if (!result) {
+                xpath_free_pcb(pcb);
+                pcb = NULL;
                 continue;
             }
 
             if (res == NO_ERR) {
-                datarule_cache = new_datarule(result, datarule);
+                datarule_cache = new_datarule(pcb, result, datarule);
                 if (!datarule_cache) {
                     res = ERR_INTERNAL_MEM;
+                    xpath_free_pcb(pcb);
                     xpath_free_result(result);
+                    pcb = NULL;
+                    result = NULL;
                     continue;
                 } else {
+                    /* pass off 'pcb' and 'result' memory here */
+                    pcb = NULL;
+                    result = NULL;
                     dlq_enque(datarule_cache, &cache->dataruleQ);
                 }
             }
@@ -1258,7 +1294,7 @@ static boolean
             continue;
         }
 
-        nodefound = xpath1_check_node_exists(pcb,
+        nodefound = xpath1_check_node_exists(datarule_cache->pcb,
                                              resnodeQ,
                                              val);
         if (nodefound) {
@@ -1275,10 +1311,6 @@ static boolean
                 granted = FALSE;
             }
         }
-    }
-
-    if (pcb) {
-        xpath_free_pcb(pcb);
     }
 
     if (res != NO_ERR) {

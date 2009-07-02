@@ -104,6 +104,7 @@ typedef struct agt_acm_modrule_t_ {
 /* cache for 1 NACM dataRule entry */
 typedef struct agt_acm_datarule_t_ {
     dlq_hdr_t           qhdr;
+    xpath_pcb_t        *pcb;
     xpath_result_t     *result;
     val_value_t        *datarule;   /* back-ptr */
 } agt_acm_datarule_t;

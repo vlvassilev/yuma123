@@ -1550,6 +1550,13 @@ boolean
     const yang_import_ptr_t  *impptr;
     const dlq_hdr_t          *impQ;
 
+#ifdef DEBUG
+    if (!mod) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
     impQ = (mod->allimpQ) ? mod->allimpQ : &mod->saveimpQ;
 
     for (impptr = (yang_import_ptr_t *)dlq_firstEntry(impQ);
@@ -1969,6 +1976,13 @@ obj_template_t *
     ncx_find_object (ncx_module_t *mod,
 		     const xmlChar *objname)
 {
+#ifdef DEBUG
+    if (!mod || !objname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
     return obj_find_template_top(mod, mod->name, objname);
 
 }  /* ncx_find_object */
@@ -2191,6 +2205,11 @@ status_t
 status_t 
     ncx_add_to_modQ (ncx_module_t *mod)
 {
+#ifdef DEBUG
+    if (!mod) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
 
     add_to_modQ(mod, ncx_curQ);
     mod->added = TRUE;
@@ -2272,6 +2291,13 @@ ncx_module_t *
     ncx_get_next_module (const ncx_module_t *mod)
 {
     ncx_module_t *nextmod;
+
+#ifdef DEBUG
+    if (!mod) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
 
     nextmod = (mod) ? 
 	(ncx_module_t *)dlq_nextEntry(mod) : NULL;
@@ -2398,6 +2424,13 @@ const obj_template_t *
     const obj_template_t *obj;
     const yang_node_t    *node;
 
+#ifdef DEBUG
+    if (!mod) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
     for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
@@ -2456,6 +2489,13 @@ const obj_template_t *
     const obj_template_t *obj;
     const yang_node_t    *node;
     boolean               start;
+
+#ifdef DEBUG
+    if (!mod || !curobj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
 
     for (obj = (const obj_template_t *)dlq_nextEntry(curobj);
 	 obj != NULL;
@@ -2528,6 +2568,13 @@ const obj_template_t *
     const obj_template_t *obj;
     const yang_node_t    *node;
 
+#ifdef DEBUG
+    if (!mod) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
     for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
@@ -2589,6 +2636,13 @@ const obj_template_t *
     const obj_template_t *obj;
     const yang_node_t    *node;
     boolean               start;
+
+#ifdef DEBUG
+    if (!mod || !curobj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
 
     for (obj = (const obj_template_t *)dlq_nextEntry(curobj);
 	 obj != NULL;
@@ -5259,6 +5313,12 @@ status_t
 {
     const xmlChar *numstr;
 
+#ifdef DEBUG
+    if (!tkc || !val) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     switch (TK_CUR_TYP(tkc)) {
     case TK_TT_DNUM:
 	numstr = TK_CUR_VAL(tkc);
@@ -5613,11 +5673,18 @@ boolean
 	 lmem != NULL;
 	 lmem = (const ncx_lmem_t *)dlq_nextEntry(lmem)) {
 
-	if (list->btyp == NCX_BT_ENUM) {
+        switch (list->btyp) {
+        case NCX_BT_ENUM:
 	    if (!xml_strcmp(str, lmem->val.enu.name)) {
 		return TRUE;
 	    }
-	} else {
+            break;
+        case NCX_BT_BITS:
+	    if (!xml_strcmp(str, lmem->val.bit.name)) {
+		return TRUE;
+	    }
+            break;
+        default:
 	    if (!xml_strcmp(str, lmem->val.str)) {
 		return TRUE;
 	    }
@@ -5649,6 +5716,7 @@ int32
 		       const ncx_list_t *list2)
 {
     const ncx_lmem_t  *s1, *s2;
+    int                retval;
 
 #ifdef DEBUG
     if (!list1 || !list2) {
@@ -5674,37 +5742,43 @@ int32
 	} else if (!s2) {
 	    return 1;
 	}
-	switch (list1->btyp) {
-	case NCX_BT_STRING:
-	case NCX_BT_BITS:
-	    switch (ncx_compare_strs(&s1->val.str, 
-				     &s2->val.str, 
-				     NCX_BT_STRING)) {
-	    case -1:
-		return -1;
-	    case 0:
-		break;
-	    case 1:
-		return 1;
-	    default:
-		SET_ERROR(ERR_INTERNAL_VAL);
-		return 0;
-	    }
-	    break;
-	default:
-	    switch (ncx_compare_nums(&s1->val.num, &s2->val.num,
-				     list1->btyp)) {
-	    case -1:
-		return -1;
-	    case 0:
-		break;
-	    case 1:
-		return 1;
-	    default:
-		SET_ERROR(ERR_INTERNAL_VAL);
-		return 0;
-	    }
-	}
+
+        if (typ_is_string(list1->btyp)) {
+	    retval = ncx_compare_strs(&s1->val.str, 
+                                      &s2->val.str, 
+                                      NCX_BT_STRING);
+        } else if (typ_is_number(list1->btyp)) {
+	    retval = ncx_compare_nums(&s1->val.num, 
+                                      &s2->val.num,
+                                      list1->btyp);
+        } else {
+            switch (list1->btyp) {
+            case NCX_BT_BITS:
+                retval = ncx_compare_bits(&s1->val.bit, 
+                                          &s2->val.bit);
+                break;
+            case NCX_BT_ENUM:
+                retval = ncx_compare_enums(&s1->val.enu, 
+                                           &s2->val.enu);
+                break;
+            default:
+                SET_ERROR(ERR_INTERNAL_VAL);
+                return 0;
+            }
+        }
+
+        switch (retval) {
+        case -1:
+            return -1;
+        case 0:
+            break;
+        case 1:
+            return 1;
+        default:
+            SET_ERROR(ERR_INTERNAL_VAL);
+            return 0;
+        }
+
 	s1 = (const ncx_lmem_t *)dlq_nextEntry(s1);
 	s2 = (const ncx_lmem_t *)dlq_nextEntry(s2);
     }
@@ -5888,7 +5962,6 @@ void
 
 	/* merge lmem into the dest list */
 	ncx_insert_lmem(dest, lmem, mergetyp);
-
     }
 
 }  /* ncx_merge_list */
@@ -5958,11 +6031,21 @@ status_t
     status_t           res;
     boolean            done;
 
+#ifdef DEBUG
+    if (!strval || !list) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* probably already set but make sure */
+    list->btyp = btyp;
+
     if (!*strval) {
 	return NO_ERR;
     }
 
     str1 = strval;
+    str2 = NULL;
     done = FALSE;
 
     while (!done) {
@@ -6021,7 +6104,7 @@ status_t
 	}
 
 	if (res != NO_ERR) {
-	    ncx_free_lmem(lmem, btyp);
+	    ncx_free_lmem(lmem, NCX_BT_STRING);
 	    return res;
 	}
 
@@ -6065,6 +6148,12 @@ status_t
     ncx_btype_t      btyp;
     status_t         res, retres;
     dlq_hdr_t        tempQ;
+
+#ifdef DEBUG
+    if (!typdef || !list) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
 
     btyp = typ_get_basetype(typdef);
     res = NO_ERR;
@@ -6145,7 +6234,6 @@ ncx_lmem_t *
     ncx_new_lmem (void)
 {
     ncx_lmem_t  *lmem;
-    
 
     lmem = m__getObj(ncx_lmem_t);
     if (!lmem) {
@@ -6242,10 +6330,11 @@ ncx_lmem_t *
     ncx_find_lmem (ncx_list_t *list,
 		   const ncx_lmem_t *memval)
 {
-    ncx_lmem_t      *lmem;
-    const ncx_num_t *num;
-    const ncx_str_t *str;
-    const ncx_enum_t *enu;
+    ncx_lmem_t        *lmem;
+    const ncx_num_t   *num;
+    const ncx_str_t   *str;
+    const ncx_enum_t  *enu;
+    const ncx_bit_t   *bit;
     int32            cmpval;
     boolean          bool;
 
@@ -6267,6 +6356,8 @@ ncx_lmem_t *
 	str = &memval->val.str;
     } else if (list->btyp == NCX_BT_ENUM) {
 	enu = &memval->val.enu;
+    } else if (list->btyp == NCX_BT_BITS) {
+        bit = &memval->val.bit;
     } else if (list->btyp == NCX_BT_BOOLEAN) {
 	bool = memval->val.bool;
     } else {
@@ -6283,6 +6374,8 @@ ncx_lmem_t *
 	    cmpval = ncx_compare_strs(&lmem->val.str, str, list->btyp);
 	} else if (enu) {
 	    cmpval = ncx_compare_enums(&lmem->val.enu, enu);
+        } else if (bit) {
+		cmpval = ncx_compare_bits(&lmem->val.bit, bit);
 	} else {
 	    cmpval = (lmem->val.bool && bool) ? 0 : 1;
 	}
@@ -8247,6 +8340,13 @@ const xmlChar *
 {
     const ncx_typname_t  *tn;
 
+#ifdef DEBUG
+    if (!typ || !que) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
     for (tn = (const ncx_typname_t *)dlq_firstEntry(que);
 	 tn != NULL;
 	 tn = (const ncx_typname_t *)dlq_nextEntry(tn)) {
@@ -8278,6 +8378,13 @@ const typ_template_t *
 {
     const ncx_typname_t  *tn;
 
+#ifdef DEBUG
+    if (!que || !typname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
     for (tn = (const ncx_typname_t *)dlq_firstEntry(que);
 	 tn != NULL;
 	 tn = (const ncx_typname_t *)dlq_nextEntry(tn)) {
@@ -8303,6 +8410,13 @@ void
     ncx_clean_typnameQ (dlq_hdr_t *que)
 {
     ncx_typname_t  *tn;
+
+#ifdef DEBUG
+    if (!que) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
 
     while (!dlq_empty(que)) {
 	tn = (ncx_typname_t *)dlq_deque(que);
@@ -8813,7 +8927,11 @@ void
 		      status_t result,
 		      const char *expstr)
 {
-    ncx_print_errormsg_ex(tkc, NULL, result, NULL, 0,
+    ncx_print_errormsg_ex(tkc, 
+                          NULL, 
+                          result, 
+                          NULL, 
+                          0,
 			  (expstr) ? FALSE : TRUE);
     if (expstr) {
 	log_write("  Expected: %s\n", expstr);
@@ -8870,7 +8988,11 @@ void
 	} else if (expstr) {
 	    log_write("\nError:  Expected: %s", expstr);
 	}
-	ncx_print_errormsg_ex(tkc, mod, result, NULL, 0,
+	ncx_print_errormsg_ex(tkc, 
+                              mod, 
+                              result, 
+                              NULL, 
+                              0,
 			      (expstr) ? FALSE : TRUE);
 	log_error("\n");
     }
@@ -8918,6 +9040,13 @@ void
     ncx_free_node (ncx_node_t nodetyp,
 		   void *node)
 {
+#ifdef DEBUG
+    if (!node) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
     switch (nodetyp) {
     case NCX_NT_NONE:                          /* uninitialized */
 	m__free(node);
@@ -9668,6 +9797,12 @@ ncx_errinfo_t *
 void 
     ncx_init_errinfo (ncx_errinfo_t *err)
 {
+#ifdef DEBUG
+    if (!err) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
 
     memset(err, 0x0, sizeof(ncx_errinfo_t));
 
@@ -9686,6 +9821,12 @@ void
 void 
     ncx_clean_errinfo (ncx_errinfo_t *err)
 {
+#ifdef DEBUG
+    if (!err) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
 
     if (err->descr) {
 	m__free(err->descr);
@@ -9719,6 +9860,13 @@ void
 void 
     ncx_free_errinfo (ncx_errinfo_t *err)
 {
+#ifdef DEBUG
+    if (!err) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
     ncx_clean_errinfo(err);
     m__free(err);
 
@@ -10163,7 +10311,6 @@ ncx_bad_data_t
 const xmlChar *
     ncx_get_baddata_string (ncx_bad_data_t baddata)
 {
-
     switch (baddata) {
     case NCX_BAD_DATA_NONE:
 	return NCX_EL_NONE;
@@ -10198,7 +10345,6 @@ const xmlChar *
 const xmlChar *
     ncx_get_withdefaults_string (ncx_withdefaults_t withdef)
 {
-
     switch (withdef) {
     case NCX_WITHDEF_NONE:
 	return NCX_EL_NONE;
@@ -10718,6 +10864,12 @@ status_t
 {
     xmlChar    *str;
     uint32      versionlen;
+
+#ifdef DEBUG
+    if (!buffer) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
 
     versionlen = xml_strlen(YANGTOOLS_VERSION) +
         xml_strlen((const xmlChar *)SVNVERSION) + 1;

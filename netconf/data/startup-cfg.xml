@@ -1,5 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nd:config xmlns:nd="http://netconfcentral.com/ns/netconfd">
+   <nacm:nacm xmlns:nacm="http://netconfcentral.com/ns/nacm">
+      <nacm:rules>
+         <nacm:dataRule>
+            <nacm:name>nacm-tree</nacm:name>
+            <nacm:path>/nacm:nacm</nacm:path>
+            <nacm:allowedRights>read write</nacm:allowedRights>
+            <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
+            <nacm:comment>access to nacm config</nacm:comment>
+         </nacm:dataRule>
+         <nacm:moduleRule>
+            <nacm:moduleName>netconf</nacm:moduleName>
+            <nacm:allowedRights>read write exec</nacm:allowedRights>
+            <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
+         </nacm:moduleRule>
+         <nacm:moduleRule>
+            <nacm:moduleName>netconf</nacm:moduleName>
+            <nacm:allowedRights>read exec</nacm:allowedRights>
+            <nacm:allowedGroup>nacm:guest</nacm:allowedGroup>
+         </nacm:moduleRule>
+         <nacm:moduleRule>
+            <nacm:moduleName>netconfd</nacm:moduleName>
+            <nacm:allowedRights>read write exec</nacm:allowedRights>
+            <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
+            <nacm:comment>access to shutdown and restart rpcs</nacm:comment>
+         </nacm:moduleRule>
+      </nacm:rules>
+      <nacm:groups>
+         <nacm:group>
+            <nacm:groupIdentity>nacm:admin</nacm:groupIdentity>
+            <nacm:userName>andy</nacm:userName>
+            <nacm:userName>fred</nacm:userName>
+            <nacm:userName>barney</nacm:userName>
+         </nacm:group>
+         <nacm:group>
+            <nacm:groupIdentity>nacm:guest</nacm:groupIdentity>
+            <nacm:userName>guest</nacm:userName>
+         </nacm:group>
+      </nacm:groups>
+   </nacm:nacm>
    <t:test2 xmlns:t="http://netconfcentral.com/ns/test">
       <t:a2>fred</t:a2>
       <t:a1>-33</t:a1>
@@ -56,37 +95,6 @@
       <t:c2>-6</t:c2>
       <t:c2>-1</t:c2>
    </t:test3>
-   <nacm:nacm xmlns:nacm="http://netconfcentral.com/ns/nacm">
-      <nacm:groups>
-         <nacm:group>
-            <nacm:groupIdentity>nacm:admin</nacm:groupIdentity>
-            <nacm:userName>andy</nacm:userName>
-            <nacm:userName>fred</nacm:userName>
-            <nacm:userName>barney</nacm:userName>
-         </nacm:group>
-         <nacm:group>
-            <nacm:groupIdentity>nacm:guest</nacm:groupIdentity>
-            <nacm:userName>guest</nacm:userName>
-         </nacm:group>
-      </nacm:groups>
-      <nacm:rules>
-         <nacm:moduleRule>
-            <nacm:moduleName>netconf</nacm:moduleName>
-            <nacm:allowedRights>read write exec</nacm:allowedRights>
-            <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
-         </nacm:moduleRule>
-         <nacm:moduleRule>
-            <nacm:moduleName>netconf</nacm:moduleName>
-            <nacm:allowedRights>read exec</nacm:allowedRights>
-            <nacm:allowedGroup>nacm:guest</nacm:allowedGroup>
-         </nacm:moduleRule>
-         <nacm:moduleRule>
-            <nacm:moduleName>netconfd</nacm:moduleName>
-            <nacm:allowedRights>read write exec</nacm:allowedRights>
-            <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
-         </nacm:moduleRule>
-      </nacm:rules>
-   </nacm:nacm>
    <t:bits.1 xmlns:t="http://netconfcentral.com/ns/test">two ten</t:bits.1>
    <t:xpath.1 xmlns:t="http://netconfcentral.com/ns/test">
       <t:name>barney</t:name>

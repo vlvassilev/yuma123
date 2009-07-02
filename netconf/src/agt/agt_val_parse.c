@@ -2176,8 +2176,12 @@ static status_t
          * if no xmlorder, then check for any valid child
          */
         if (res==NO_ERR) {
-            res = obj_get_child_node(obj, chobj, &chnode, xmlorder,
-                                     &topchild, &curchild);
+            res = obj_get_child_node(obj, 
+                                     chobj, 
+                                     &chnode, 
+                                     xmlorder,
+                                     &topchild, 
+                                     &curchild);
             if (res != NO_ERR) {
                 /* have no expected child element to match to this XML node
                  * if xmlorder == TRUE, then this could indicate an extra

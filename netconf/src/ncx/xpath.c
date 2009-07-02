@@ -2156,7 +2156,7 @@ status_t
     status_t        res;
 
 #ifdef DEBUG
-    if (!mod || !targmod) {
+    if (!targmod) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -2230,7 +2230,7 @@ status_t
     status_t        res;
 
 #ifdef DEBUG
-    if (!mod || !targmod) {
+    if (!targmod) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif

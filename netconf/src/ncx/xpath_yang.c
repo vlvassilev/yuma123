@@ -263,13 +263,13 @@ static status_t
     } else if (pcb->flags & XP_FL_ABSPATH) {
 	/* setting object for the first time
 	 * get top-level object from object module 
-	 */
+         */
 	foundobj = 
 	    obj_find_template_top(targmod,
 				  ncx_get_modname(targmod),
 				  nodename);
     } else {
-	/* setting object for the first time
+        /* setting object for the first time
 	 * but the context node is a leaf, so there
 	 * is no possible child node of the the start object 
 	 */
@@ -977,6 +977,11 @@ static status_t
 * Parse the leafref path-arg string
 * It has already been tokenized
 *
+* The exact syntax below is not followed!!!
+* The first '/' to start the absolute path
+* is allowed to be omitted in XPath, so
+* allow that here as well
+*
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
 *
@@ -1004,15 +1009,25 @@ static status_t
 {
     tk_type_t    nexttyp;
     status_t     res;
-    boolean      done;
+    boolean      done, first;
 
     res = NO_ERR;
     done = FALSE;
+    first = TRUE;
 
     /* make one loop for each step */
     while (!done) {
-	/* get  the first token in the step, '/' */
-	res = xpath_parse_token(pcb, TK_TT_FSLASH);
+        /* get  the first token in the step, '/' */
+        if (first) {
+            /* allow the first '/' to be omitted */
+            if (tk_next_typ(pcb->tkc) == TK_TT_FSLASH) {
+                res = xpath_parse_token(pcb, TK_TT_FSLASH);
+            }
+            first = FALSE;
+        } else {
+            /* get  the first token in the step, '/' */
+            res = xpath_parse_token(pcb, TK_TT_FSLASH);
+        }
 	if (res != NO_ERR) {
 	    done = TRUE;
 	    continue;
@@ -1607,6 +1622,7 @@ status_t
     pcb->altobj = NULL;
     pcb->varobj = NULL;
     pcb->curmode = XP_CM_TARGET;
+    pcb->flags |= XP_FL_ABSPATH;
 
     /* validate the XPath expression against the 
      * full cooked object tree
@@ -1618,6 +1634,7 @@ status_t
 	*targobj = pcb->targobj;
     }
 
+    pcb->reader = NULL;
     return pcb->validateres;
 
 }  /* xpath_yang_validate_xmlpath */
@@ -1706,6 +1723,8 @@ status_t
      * full cooked object tree
      */
     pcb->validateres = parse_keyexpr(pcb);
+
+    pcb->reader = NULL;
 
     return pcb->validateres;
 

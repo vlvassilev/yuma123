@@ -69,7 +69,7 @@ date         init     comment
 #define RUNSTACK_DEBUG   1
 #endif
 
-#define RUNSTACK_MAX_NEST  16
+#define RUNSTACK_MAX_NEST  64
 
 #define RUNSTACK_BUFFLEN  32000
 

@@ -846,12 +846,12 @@ boolean
 *  Check if the program is in interactive mode
 * 
 * RETURNS:
-*   TRUE if insteractive mode, FALSE if script or batch mode
+*   TRUE if insteractive mode, FALSE if batch mode
 *********************************************************************/
 boolean
     interactive_mode (void)
 {
-    return (get_batchmode() || runstack_level()) ? FALSE : TRUE;
+    return get_batchmode() ? FALSE : TRUE;
 
 }  /* interactive_mode */
 

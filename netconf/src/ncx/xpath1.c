@@ -4584,7 +4584,8 @@ static xpath_result_t *
 *    pcb == parser control block to use
 *    resultQ == Q of xpath_resnode_t structs to check
 *               DOES NOT HAVE TO BE WITHIN A RESULT NODE Q
-*    ptr   == pointer value to find
+*    nsid == namespace ID of node to find; 0 to skip NS test
+*    name == local-name of node to find
 *
 * RETURNS:
 *    found resnode or NULL if not found
@@ -4592,7 +4593,8 @@ static xpath_result_t *
 static xpath_resnode_t *
     find_resnode (xpath_pcb_t *pcb,
 		  dlq_hdr_t *resultQ,
-		  const void *ptr)
+                  xmlns_id_t nsid,
+                  const xmlChar *name)
 {
     xpath_resnode_t  *resnode;
 
@@ -4601,13 +4603,20 @@ static xpath_resnode_t *
 	 resnode = (xpath_resnode_t *)dlq_nextEntry(resnode)) {
 
 	if (pcb->val) {
-	    if (resnode->node.valptr == ptr) {
-		return resnode;
-	    }
+            if (nsid && (nsid != val_get_nsid(resnode->node.valptr))) {
+                continue;
+            }
+            if (!xml_strcmp(name, resnode->node.valptr->name)) {
+                return resnode;
+            }
 	} else {
-	    if (resnode->node.objptr == ptr) {
-		return resnode;
-	    }
+            if (nsid && (nsid != obj_get_nsid(resnode->node.objptr))) {
+                continue;
+            }
+            if (!xml_strcmp(name,
+                            obj_get_name(resnode->node.objptr))) {
+                return resnode;
+            }
 	}
     }
     return NULL;
@@ -4653,11 +4662,13 @@ static void
 	if (pcb->val) {
 	    findnode = find_resnode(pcb, 
 				    &val2->r.nodeQ,
-				    resnode->node.valptr);
+				    val_get_nsid(resnode->node.valptr),
+                                    resnode->node.valptr->name);
 	} else {
 	    findnode = find_resnode(pcb, 
 				    &val2->r.nodeQ,
-				    resnode->node.objptr);
+				    obj_get_nsid(resnode->node.objptr),
+				    obj_get_name(resnode->node.objptr));
 	}
 	if (findnode) {
 	    if (resnode->dblslash) {
@@ -4746,7 +4757,10 @@ static boolean
     parms = (xpath_walkerparms_t *)cookie2;
 
     /* check if this node is already in the result */
-    if (find_resnode(pcb, parms->resnodeQ, val)) {
+    if (find_resnode(pcb, 
+                     parms->resnodeQ, 
+                     val_get_nsid(val),
+                     val->name)) {
 	return TRUE;
     }
 
@@ -4816,7 +4830,10 @@ static boolean
     parms = (xpath_walkerparms_t *)cookie2;
 
     /* check if this node is already in the result */
-    if (find_resnode(pcb, parms->resnodeQ, obj)) {
+    if (find_resnode(pcb, 
+                     parms->resnodeQ, 
+                     obj_get_nsid(obj),
+                     obj_get_name(obj))) {
 	return TRUE;
     }
 
@@ -4977,7 +4994,8 @@ static status_t
 		if (keep) {
 		    findnode = find_resnode(pcb, 
 					    &resnodeQ, 
-					    testval);
+					    val_get_nsid(testval),
+                                            testval->name);
 		    if (findnode) {
 			if (resnode->dblslash) {
 			    findnode->dblslash = TRUE;
@@ -5024,7 +5042,8 @@ static status_t
 		if (keep) {
 		    findnode = find_resnode(pcb, 
 					    &resnodeQ, 
-					    testobj);
+					    obj_get_nsid(testobj),
+                                            obj_get_name(testobj));
 		    if (findnode) {
 			if (resnode->dblslash) {
 			    findnode->dblslash = TRUE;
@@ -5216,7 +5235,8 @@ static status_t
 		    if (keep) {
 			findnode = find_resnode(pcb, 
 						&resnodeQ, 
-						testval);
+						val_get_nsid(testval),
+                                                testval->name);
 			if (findnode) {
 			    /* parent already in the Q
 			     * remove node from result 
@@ -5259,7 +5279,8 @@ static status_t
 			/* this is a databd node */
 			findnode = find_resnode(pcb, 
 						&resnodeQ, 
-						pcb->docroot);
+						0,
+                                                obj_get_name(pcb->docroot));
 			if (findnode) {
 			    if (resnode->dblslash) {
 				findnode->position = ++position;
@@ -5314,7 +5335,10 @@ static status_t
 
 		    if (keep) {
 			/* replace this node with the useobj */
-			findnode = find_resnode(pcb, &resnodeQ, useobj);
+			findnode = find_resnode(pcb, 
+                                                &resnodeQ, 
+                                                obj_get_nsid(useobj),
+                                                obj_get_name(useobj));
 			if (findnode) {
 			    if (resnode->dblslash) {
 				findnode->position = ++position;
@@ -5882,8 +5906,11 @@ static status_t
 
 		    if (find_resnode(pcb, &resnodeQ,
 				     (testnode) ?
-				     (const void *)testnode->node.valptr :
-				     (const void *)testnode->node.objptr)) {
+				     val_get_nsid(testnode->node.valptr) :
+				     obj_get_nsid(testnode->node.objptr),
+                                     (testnode) ?
+				     testnode->node.valptr->name :
+				     obj_get_name(testnode->node.objptr))) {
 			free_resnode(pcb, testnode);
 		    } else {
 			dlq_enque(testnode, &resnodeQ);
@@ -8913,7 +8940,10 @@ boolean
     /* quick test -- see if docroot is already in the Q
      * which means nothing else is needed
      */
-    if (find_resnode(pcb, resultQ, pcb->val_docroot)) {
+    if (find_resnode(pcb, 
+                     resultQ, 
+                     0,
+                     pcb->val_docroot->name)) {
 	return TRUE;
     }
 
@@ -8923,12 +8953,14 @@ boolean
     }
 	
     while (val) {
-	if (find_resnode(pcb, resultQ, val)) {
+	if (find_resnode(pcb, 
+                         resultQ, 
+                         val_get_nsid(val),
+                         val->name)) {
 	    return TRUE;
 	}
 
-	if (val->parent && 
-	    val->parent != pcb->val_docroot) {
+	if (val->parent && !obj_is_root(val->parent->obj)) {
 	    val = val->parent;
 	} else {
 	    return FALSE;

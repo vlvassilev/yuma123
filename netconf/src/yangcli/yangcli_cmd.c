@@ -1177,26 +1177,28 @@ static status_t
 
     res = NO_ERR;
 
-    objbuff = NULL;
-    res = obj_gen_object_id(cas, &objbuff);
-    if (res != NO_ERR) {
-        log_error("\nError: generate object ID failed (%s)",
-                  get_error_string(res));
-        return res;
-    }
+    if (obj_is_data_db(cas)) {
+        objbuff = NULL;
+        res = obj_gen_object_id(cas, &objbuff);
+        if (res != NO_ERR) {
+            log_error("\nError: generate object ID failed (%s)",
+                      get_error_string(res));
+            return res;
+        }
 
-    /* let the user know about the new nest level */
-    if (obj_is_mandatory(cas)) {
-        str = YANG_K_MANDATORY;
-    } else {
-        str = (const xmlChar *)"optional";
-    }
+        /* let the user know about the new nest level */
+        if (obj_is_mandatory(cas)) {
+            str = YANG_K_MANDATORY;
+        } else {
+            str = (const xmlChar *)"optional";
+        }
 
-    log_stdout("\nFilling %s case %s:", 
-               str,
-               objbuff);
+        log_stdout("\nFilling %s case %s:", 
+                   str,
+                   objbuff);
 	    
-    m__free(objbuff);
+        m__free(objbuff);
+    }
 
     /* corner-case: user selected a case, and that case has
      * one empty leaf in it; 
@@ -1685,20 +1687,19 @@ static status_t
     res = NO_ERR;
     agent_cb->cli_fn = obj_get_name(rpc);
 
-    if (obj_is_data_db(valset->obj)) {
-	objbuff = NULL;
-	res = obj_gen_object_id(valset->obj, &objbuff);
-	if (res != NO_ERR) {
-	    log_error("\nError: generate object ID failed (%s)",
-		      get_error_string(res));
-	    return res;
-	}
-
-	/* let the user know about the new nest level */
-	log_stdout("\nFilling %s %s:",
-		   obj_get_typestr(valset->obj), objbuff);
-	m__free(objbuff);
+    objbuff = NULL;
+    res = obj_gen_object_id(valset->obj, &objbuff);
+    if (res != NO_ERR) {
+        log_error("\nError: generate object ID failed (%s)",
+                  get_error_string(res));
+        return res;
     }
+
+    /* let the user know about the new nest level */
+    log_stdout("\nFilling %s %s:",
+               obj_get_typestr(valset->obj), 
+               objbuff);
+    m__free(objbuff);
 
     for (parm = obj_first_child(valset->obj);
          parm != NULL && res==NO_ERR;
@@ -1947,7 +1948,8 @@ static val_value_t *
 		       obj_get_name(rpc));
 	} else if (*res != NO_ERR) {
 	    log_stdout("\nError in the parameters for RPC %s (%s)",
-		       obj_get_name(rpc), get_error_string(*res));
+		       obj_get_name(rpc), 
+                       get_error_string(*res));
 	}
     }
 

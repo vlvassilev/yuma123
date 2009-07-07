@@ -6610,7 +6610,7 @@ const xmlChar *
     case OBJ_TYP_RPC:
 	return YANG_K_RPC;
     case OBJ_TYP_RPCIO:
-	return (const xmlChar *)"input or output";
+	return YANG_K_CONTAINER;
     case OBJ_TYP_NOTIF:
 	return YANG_K_NOTIFICATION;
     case OBJ_TYP_NONE:

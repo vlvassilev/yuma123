@@ -154,7 +154,7 @@ static status_t
 
     /* get the module from the NSID or the prefix */
     if (res == NO_ERR) {
-	if (pcb->source == XP_SRC_XML) {
+	if (pcb->source == XP_SRC_XML || pcb->mod==NULL) {
 	    if (nsid) {
 		modname = xmlns_get_module(nsid);
 		if (modname) {
@@ -174,7 +174,7 @@ static status_t
 			      pcb->exprstr);
 		}
 	    }
-	} else if (pcb->mod) {
+	} else {
 	    res = xpath_get_curmod_from_prefix(prefix,
 					       pcb->mod,
 					       &targmod);
@@ -186,7 +186,7 @@ static status_t
 			      (prefix) ? prefix : EMPTY_STRING);
 		}
 	    }
-	}
+        }
     }
 
     /* check if no NSID or prefix used: instead of rejecting
@@ -266,6 +266,15 @@ static status_t
 		obj_find_template_top(targmod,
 				      ncx_get_modname(targmod),
 				      nodename);
+        } else if (obj_get_nsid(*useobj) == xmlns_nc_id() &&
+                   !xml_strcmp(obj_get_name(*useobj), NCX_EL_RPC)) {
+	    foundobj = 
+		obj_find_template_top(targmod,
+				      ncx_get_modname(targmod),
+				      nodename);
+            if (foundobj && foundobj->objtype != OBJ_TYP_RPC) {
+                foundobj = NULL;
+            }
 	} else {
 	    /* get child node of this object */
 	    foundobj = 
@@ -413,6 +422,7 @@ static status_t
 {
     const xmlChar  *prefix, *nodename;
     ncx_import_t   *import;
+    ncx_module_t   *testmod;
     status_t        res;
     xmlns_id_t      nsid;
 
@@ -451,19 +461,29 @@ static status_t
 	prefix = TK_CUR_MOD(pcb->tkc);
 
 	if (pcb->source != XP_SRC_XML) {
-	    if (pcb->mod && xml_strcmp(pcb->mod->prefix, prefix)) {
-		import = ncx_find_pre_import(pcb->mod, prefix);
-		if (!import) {
-		    res = ERR_NCX_PREFIX_NOT_FOUND;
-		    if (pcb->logerrors) {
-			log_error("\nError: import for "
-				  "prefix '%s' not found",
-				  prefix);
-			ncx_print_errormsg(pcb->tkc, pcb->mod, res);
-		    }
-		    break;
-		}
-	    }
+	    if (pcb->mod) {
+                if (xml_strcmp(pcb->mod->prefix, prefix)) {
+                    import = ncx_find_pre_import(pcb->mod, prefix);
+                    if (!import) {
+                        res = ERR_NCX_PREFIX_NOT_FOUND;
+                        if (pcb->logerrors) {
+                            log_error("\nError: import for "
+                                      "prefix '%s' not found",
+                                      prefix);
+                            ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+                        }
+                        break;
+                    } else {
+                        testmod = ncx_find_module(import->module,
+                                                  import->revision);
+                        if (testmod) {
+                            nsid = testmod->nsid;
+                        }
+                    }
+                }
+            } else {
+                nsid = xmlns_find_ns_by_prefix(prefix);
+            }
 	} else {
 	    res = xml_get_namespace_id(pcb->reader,
 				       prefix,
@@ -477,6 +497,9 @@ static status_t
 		break;
 	    }
 	}
+
+        /* save the NSID in the token for printing later */
+        TK_CUR_NSID(pcb->tkc) = nsid;
 	/* fall through to check QName */
     case TK_TT_TSTRING:
 	nodename = TK_CUR_VAL(pcb->tkc);
@@ -486,7 +509,9 @@ static status_t
 	break;
     default:
 	res = ERR_NCX_WRONG_TKTYPE;
-	ncx_mod_exp_err(pcb->tkc, pcb->mod, res,
+	ncx_mod_exp_err(pcb->tkc, 
+                        pcb->mod, 
+                        res,
 			tk_get_token_name(TK_CUR_TYP(pcb->tkc)));
     }
 
@@ -915,7 +940,8 @@ static status_t
 			      obj_get_name(pcb->altobj));
 		    ncx_mod_exp_err(pcb->tkc, 
 				    pcb->objmod, 
-				    res, "leaf");
+				    res, 
+                                    "leaf");
 		}
 		done = TRUE;
 		continue;

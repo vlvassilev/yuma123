@@ -294,6 +294,10 @@ static void
 *   indent == number of chars to indent after a newline
 *           == -1 means no newline or indent
 *           == 0 means just newline
+*   retcount == address of return xmlns print count
+*
+* OUTPUTS:
+*   *retcount == number of xmlns directives written
 *
 * RETURNS:
 *   status
@@ -302,13 +306,16 @@ static status_t
     handle_xpath_start_tag (ses_cb_t *scb,
 			    xml_msg_hdr_t *msg,
 			    const xpath_pcb_t *xpathpcb,
-			    int32 indent)
+			    int32 indent,
+                            uint32 *retcount)
 {
     const xmlChar       *defpfix, *msgpfix;
     uint32               num_nsids, i;
     xmlns_id_t           cur_nsid;
     xmlns_id_t           nsid_array[XML_WR_MAX_NAMESPACES];
     status_t             res;
+
+    *retcount = 0;
 
     res = xpath_yang_get_namespaces(xpathpcb,
 				    nsid_array,
@@ -351,9 +358,8 @@ static status_t
 			     indent);
 	}
     }
-    if (num_nsids) {
-        ses_indent(scb, indent);
-    }
+
+    *retcount = num_nsids;
 
     return NO_ERR;
 
@@ -390,7 +396,7 @@ static void
     dlq_hdr_t         *hdr;
     const xmlChar     *pfix, *attr_name, *attr_qname;
     boolean            xneeded;
-    uint32             len;
+    uint32             len, retcount;
     xmlns_id_t         ns_id, attr_nsid;
     status_t           res;
 
@@ -478,15 +484,19 @@ static void
                 /* generate all the default xmlns directives needed
                  * for the content following this start tag to be valid
                  */
+                retcount = 0;
                 res = handle_xpath_start_tag(scb,
                                              msg,
                                              val->xpathpcb,
-                                             indent);
+                                             indent,
+                                             &retcount);
                 if (res != NO_ERR) {
                     /* not expecting anything except a buffer overflow
                      * from too many namespaces in the same XPath expr
                      */
                     SET_ERROR(res);
+                } else if (retcount) {
+                    ses_indent(scb, indent);
                 }
             } else if (val->btyp == NCX_BT_IDREF) {
                 xneeded = FALSE;
@@ -547,6 +557,7 @@ static void
     boolean              xneeded, empty, xmlcontent;
     xmlns_id_t           nsid, parent_nsid;
     status_t             res;
+    uint32               retcount;
 
     empty = !val_has_content(val);
     elname = val->name;
@@ -557,7 +568,8 @@ static void
     } else {
 	parent_nsid = 0;
     }
-    xmlcontent = obj_is_xpath_string(val->obj);
+    xmlcontent = (val->btyp == NCX_BT_INSTANCE_ID) ||
+        obj_is_xpath_string(val->obj);
     xpathpcb = (xmlcontent) ? val_get_const_xpathpcb(val) : NULL;
 
     ses_indent(scb, indent);
@@ -610,7 +622,11 @@ static void
 	    res = handle_xpath_start_tag(scb,
 					 msg,
 					 xpathpcb,
-					 indent);
+					 indent,
+                                         &retcount);
+            /* don't care about the retcount value 
+             * terminating the start tag here no matter what
+             */
 	    if (res != NO_ERR) {
 		/* not expecting anything except a buffer overflow
 		 * from too many namespaces in the same XPath expr
@@ -774,14 +790,13 @@ static void
 	}
 	break;
     case NCX_BT_INSTANCE_ID:
-	ses_indent(scb, indent);
-	res = xpath_wr_const_expr(scb, val);
-	if (res != NO_ERR) {
-	    SET_ERROR(res);
-	}
-	break;
     case NCX_BT_STRING:
     case NCX_BT_LEAFREF:        /****/
+        /* if the content has XPath or QName content, then
+         * the begin_elem_val function should have already
+         * printed all the required xmlns attributes
+         * so just print the string value with prefixes and all
+         */
 	if (VAL_STR(useval)) {
 	    if (!fit_on_line(scb, useval) && (indent>0)) {
 		ses_indent(scb, indent);

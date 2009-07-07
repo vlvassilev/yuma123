@@ -369,15 +369,14 @@ static status_t
 
 	/* check if a valid token is given for the index value */
 	if (TK_CUR_TEXT(tkc)) {
-	    inval = val_make_simval(obj_get_typdef(indef->keyobj),
-				    nsid,
-				    obj_get_name(indef->keyobj),
-				    TK_CUR_VAL(tkc), 
-                                    &res);
+	    inval = val_make_simval_obj(indef->keyobj,
+                                        TK_CUR_VAL(tkc), 
+                                        &res);
 	    if (!inval) {
 		ncx_conf_exp_err(tkc, res, "index value");
 		return res;
 	    } else {
+                val_change_nsid(inval, nsid);
 		val_add_child(inval, val);
 	    }
 	} else {

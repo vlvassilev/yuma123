@@ -742,11 +742,9 @@ static status_t
 					 NULL, 
 					 YANGCLI_USER);
 		if (testobj) {
-		    testval = val_make_simval(obj_get_ctypdef(testobj),
-					      obj_get_nsid(testobj),
-					      YANGCLI_USER,
-					      usestr,
-					      &res);
+		    testval = val_make_simval_obj(testobj,
+                                                  usestr,
+                                                  &res);
 		}
 		if (testval) {
 		    val_add_child(testval, connect_valset);

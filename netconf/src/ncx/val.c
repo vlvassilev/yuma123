@@ -568,6 +568,7 @@ static void
     if (full) {
 	if (val->dname) {
 	    m__free(val->dname);
+            val->dname = NULL;
 	}
     }
 
@@ -585,6 +586,7 @@ static void
 
     if (val->xpathpcb) {
 	xpath_free_pcb(val->xpathpcb);
+        val->xpathpcb = NULL;
     }
 
 }  /* clean_value */

@@ -2272,6 +2272,8 @@ val_value_t *
 			 const xmlChar *valstr,
 			 status_t  *res)
 {
+    val_value_t  *newval;
+
 #ifdef DEBUG
     if (!obj || !res) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -2279,11 +2281,26 @@ val_value_t *
     }
 #endif
 
-    return val_make_simval(obj_get_ctypdef(obj),
-			   obj_get_nsid(obj),
-			   obj_get_name(obj),
-			   valstr,
-			   res);
+    newval = val_new_value();
+    if (!newval) {
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+
+    val_init_from_template(newval, obj);
+
+    *res = val_set_simval(newval,
+                          obj_get_ctypdef(obj),
+                          obj_get_nsid(obj),
+                          obj_get_name(obj),
+                          valstr);
+
+    if (*res != NO_ERR) {
+        val_free_value(newval);
+        newval = NULL;
+    }
+
+    return newval;
 
 } /* val_make_simval_obj */
 

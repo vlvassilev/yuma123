@@ -643,11 +643,9 @@ static status_t
              * make a value node to compare in the
              * value space instead of the lexicographical space
              */
-            simval = val_make_simval(newval->typdef,
-                                     newval->nsid,
-                                     newval->name,
-                                     newval->editvars->insertstr,
-                                     &res);
+            simval = val_make_simval_obj(newval->obj,
+                                         newval->editvars->insertstr,
+                                         &res);
             if (res == NO_ERR && simval) {
                 testval = 
                     val_first_child_match(newval->editvars->curparent,

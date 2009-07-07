@@ -1374,33 +1374,27 @@ status_t
     val_add_child(streamval, streamsval);
 
     /* add /netconf/streams/stream/name */
-    childval = val_make_simval(obj_get_ctypdef(nameobj),
-			       obj_get_nsid(nameobj),
-			       obj_get_name(nameobj),
-			       NCX_DEF_STREAM_NAME,
-			       &res);
+    childval = val_make_simval_obj(nameobj,
+                                   NCX_DEF_STREAM_NAME,
+                                   &res);
     if (!childval) {
 	return res;
     }
     val_add_child(childval, streamval);
 
     /* add /netconf/streams/stream/description */
-    childval = val_make_simval(obj_get_ctypdef(descriptionobj),
-			       obj_get_nsid(descriptionobj),
-			       obj_get_name(descriptionobj),
-			       NCX_DEF_STREAM_DESCR,
-			       &res);
+    childval = val_make_simval_obj(descriptionobj,
+                                   NCX_DEF_STREAM_DESCR,
+                                   &res);
     if (!childval) {
 	return res;
     }
     val_add_child(childval, streamval);
 
     /* add /netconf/streams/stream/replaySupport */
-    childval = val_make_simval(obj_get_ctypdef(replaySupportobj),
-			       obj_get_nsid(replaySupportobj),
-			       obj_get_name(replaySupportobj),
-			       NCX_EL_TRUE,
-			       &res);
+    childval = val_make_simval_obj(replaySupportobj,
+                                   NCX_EL_TRUE,
+                                   &res);
     if (!childval) {
 	return res;
     }
@@ -1410,11 +1404,9 @@ status_t
     tstamp_datetime(tstampbuff);
 
     /* add /netconf/streams/stream/replayLogCreationTime */
-    childval = val_make_simval(obj_get_ctypdef(replayLogCreationTimeobj),
-			       obj_get_nsid(replayLogCreationTimeobj),
-			       obj_get_name(replayLogCreationTimeobj),
-			       tstampbuff,
-			       &res);
+    childval = val_make_simval_obj(replayLogCreationTimeobj,
+                                   tstampbuff,
+                                   &res);
     if (!childval) {
 	return res;
     }

@@ -985,7 +985,7 @@ ssize_t
         }
     } else if (ret > 0) {
 	if (LOGDEBUG2) {
-	    log_debug2("\nmgr_ses: channel read %d bytes OK"
+	    log_debug2("\nmgr_ses: channel read %d bytes OK "
 		       "on session %u (a:%u)",
 		       ret, 
 		       scb->sid,
@@ -1061,8 +1061,11 @@ status_t
             res = ERR_NCX_SESSION_CLOSED;
         } else if (ret > 0) {
 	    if (LOGDEBUG2) {
-		log_debug2("\nmgr_ses: channel write %u bytes OK",
-			   buff->bufflen);
+		log_debug2("\nmgr_ses: channel write %u bytes OK "
+                           "on session %u (a:%u)",
+			   buff->bufflen,
+                           scb->sid,
+                           mscb->agtsid);
 	    }
 	    if (LOGDEBUG3) {
 		for (i=0; i < buff->bufflen; i++) {

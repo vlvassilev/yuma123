@@ -1637,11 +1637,9 @@ val_value_t *
 	return NULL;
     }
 
-    leafval = val_make_simval(obj_get_ctypdef(leafobj),
-			      obj_get_nsid(leafobj),
-			      leafname,
-			      leafstrval,
-			      res);
+    leafval = val_make_simval_obj(leafobj,
+                                  leafstrval,
+                                  res);
     return leafval;
 
 }  /* agt_make_leaf */

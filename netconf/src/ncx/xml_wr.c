@@ -272,134 +272,6 @@ static void
 
 
 /********************************************************************
-* FUNCTION write_attrs
-*
-* Write all the required attributes for this element
-*
-* INPUTS:
-*   scb == session control block
-*   msg == header for the rpc_msg_t in progress
-*   attrQ == Q of xml_attr_t or val_value_t to write
-*   isattrq == TRUE for Q of xml_attr_t
-*           == FALSE for Q of val_value_t
-*    curelem == value node for current element, if available
-*   indent == actual indent amount; xml_wr_indent will not be checked
-*   elem_nsid == namespace ID of the parent element
-*
-*********************************************************************/
-static void
-    write_attrs (ses_cb_t *scb,
-		 xml_msg_hdr_t *msg,
-		 const dlq_hdr_t *attrQ,
-		 boolean isattrq,
-		 const val_value_t  *curelem,
-		 int32 indent,
-		 xmlns_id_t elem_nsid)
-{
-    const xml_attr_t  *attr;
-    val_value_t       *val;
-    dlq_hdr_t         *hdr;
-    const xmlChar     *pfix, *attr_name, *attr_qname;
-    boolean            xneeded;
-    uint32             len;
-    xmlns_id_t         ns_id, attr_nsid;
-
-    ns_id = xmlns_ns_id();
-    attr = NULL;
-    val = NULL;
-
-    for (hdr = dlq_firstEntry(attrQ); 
-	 hdr != NULL;
-	 hdr = dlq_nextEntry(hdr)) {
-
-	/* set up the data fields; len is not precise, ignores prefix */
-	if (isattrq) {
-	    attr = (const xml_attr_t *)hdr;
-	    attr_nsid = attr->attr_ns;
-	    attr_name = attr->attr_name;
-	    attr_qname = attr->attr_qname;
-	    len = xml_strlen(attr->attr_val) 
-		+ xml_strlen(attr->attr_name);
-	} else {
-	    val = (val_value_t *)hdr;
-	    attr_nsid = val->nsid;
-	    attr_name = val->name;
-	    attr_qname = NULL;
-	    len = xml_strlen(val->v.str) 
-		+ xml_strlen(val->name);
-	}
-
-	/* deal with initial indent */
-	if (indent < 0) {
-	    ses_putchar(scb, ' ');
-	} else if (len + 4 + SES_LINELEN(scb) 
-		   >= SES_LINESIZE(scb)) {
-	    ses_indent(scb, indent);
-	} else {
-	    ses_putchar(scb, ' ');
-	}
-
-	/* generate one attribute name value pair
-	 *
-	 * generate a prefix if this attribute has a namespace ID 
-	 * make sure to skip the XMLNS namespace; this is 
-	 * handled different than all other attributes 
-	 *
-	 */
-	/* check if this is an XMLNS directive */
-	if (XMLNS_EQ(attr_nsid, ns_id)) {
-	    /* xmlns:prefix format */
-	    if (attr_name != attr_qname) {
-		/* this is a namespace decl with a prefix */
-		ses_putstr(scb, XMLNS);
-		ses_putchar(scb, ':');	    
-	    }
-	} else if (attr_nsid) {
-	    /* prefix:attribute-name format */
-	    pfix = xml_msg_get_prefix(msg, 
-				      elem_nsid, 
-				      attr_nsid, 
-				      curelem,
-				      &xneeded);
-	    if (xneeded) {
-		write_xmlns_decl(scb, 
-				 pfix, 
-				 attr_nsid, 
-				 indent);
-	    }
-
-	    /* deal with indent again */
-	    if (indent < 0) {
-		ses_putchar(scb, ' ');
-	    } else if (len + 4 + SES_LINELEN(scb) 
-		       >= SES_LINESIZE(scb)) {
-		ses_indent(scb, indent);
-	    } else {
-		ses_putchar(scb, ' ');
-	    }
-
-	    if (pfix) {
-		ses_putstr(scb, pfix);
-		ses_putchar(scb, ':');
-	    }
-	}
-
-	ses_putstr(scb, attr_name);
-	ses_putchar(scb, '=');
-	ses_putchar(scb, '\"');
-	if (isattrq) {
-	    ses_putstr(scb, attr->attr_val);
-	} else {
-	    /* write the simple value meta var */
-	    xml_wr_val(scb, msg, val, -1);
-	}	    
-	ses_putchar(scb, '\"');
-    }
-
-}  /* write_attrs */
-
-
-/********************************************************************
 * FUNCTION handle_xpath_start_tag
 *
 * Write a the xmlns attributes needed for the
@@ -479,10 +351,173 @@ static status_t
 			     indent);
 	}
     }
+    if (num_nsids) {
+        ses_indent(scb, indent);
+    }
 
     return NO_ERR;
 
 }  /* handle_xpath_start_tag */
+
+
+/********************************************************************
+* FUNCTION write_attrs
+*
+* Write all the required attributes for this element
+*
+* INPUTS:
+*   scb == session control block
+*   msg == header for the rpc_msg_t in progress
+*   attrQ == Q of xml_attr_t or val_value_t to write
+*   isattrq == TRUE for Q of xml_attr_t
+*           == FALSE for Q of val_value_t
+*    curelem == value node for current element, if available
+*   indent == actual indent amount; xml_wr_indent will not be checked
+*   elem_nsid == namespace ID of the parent element
+*
+*********************************************************************/
+static void
+    write_attrs (ses_cb_t *scb,
+		 xml_msg_hdr_t *msg,
+		 const dlq_hdr_t *attrQ,
+		 boolean isattrq,
+		 const val_value_t  *curelem,
+		 int32 indent,
+		 xmlns_id_t elem_nsid)
+{
+    const xml_attr_t  *attr;
+    val_value_t       *val;
+    dlq_hdr_t         *hdr;
+    const xmlChar     *pfix, *attr_name, *attr_qname;
+    boolean            xneeded;
+    uint32             len;
+    xmlns_id_t         ns_id, attr_nsid;
+    status_t           res;
+
+    ns_id = xmlns_ns_id();
+    for (hdr = dlq_firstEntry(attrQ); 
+	 hdr != NULL;
+	 hdr = dlq_nextEntry(hdr)) {
+
+        attr = NULL;
+        val = NULL;
+
+	/* set up the data fields; len is not precise, ignores prefix */
+	if (isattrq) {
+	    attr = (const xml_attr_t *)hdr;
+	    attr_nsid = attr->attr_ns;
+	    attr_name = attr->attr_name;
+	    attr_qname = attr->attr_qname;
+	    len = xml_strlen(attr->attr_val) 
+		+ xml_strlen(attr->attr_name);
+	} else {
+	    val = (val_value_t *)hdr;
+	    attr_nsid = val->nsid;
+	    attr_name = val->name;
+	    attr_qname = NULL;
+	    len = xml_strlen(val->v.str) 
+		+ xml_strlen(val->name);
+	}
+
+	/* deal with initial indent */
+	if (indent < 0) {
+	    ses_putchar(scb, ' ');
+	} else if (len + 4 + SES_LINELEN(scb) 
+		   >= SES_LINESIZE(scb)) {
+	    ses_indent(scb, indent);
+	} else {
+	    ses_putchar(scb, ' ');
+	}
+
+	/* generate one attribute name value pair
+	 *
+	 * generate a prefix if this attribute has a namespace ID 
+	 * make sure to skip the XMLNS namespace; this is 
+	 * handled different than all other attributes 
+	 *
+	 */
+	/* check if this is an XMLNS directive */
+	if (XMLNS_EQ(attr_nsid, ns_id)) {
+	    /* xmlns:prefix format */
+	    if (attr_name != attr_qname) {
+		/* this is a namespace decl with a prefix */
+		ses_putstr(scb, XMLNS);
+		ses_putchar(scb, ':');	    
+	    }
+	} else if (attr_nsid) {
+	    /* prefix:attribute-name format */
+	    pfix = xml_msg_get_prefix(msg, 
+				      elem_nsid, 
+				      attr_nsid, 
+				      curelem,
+				      &xneeded);
+	    if (xneeded) {
+		write_xmlns_decl(scb, 
+				 pfix, 
+				 attr_nsid, 
+				 indent);
+	    }
+
+	    /* deal with indent again */
+	    if (indent < 0) {
+		ses_putchar(scb, ' ');
+	    } else if (len + 4 + SES_LINELEN(scb) 
+		       >= SES_LINESIZE(scb)) {
+		ses_indent(scb, indent);
+	    } else {
+		ses_putchar(scb, ' ');
+	    }
+
+	    if (pfix) {
+		ses_putstr(scb, pfix);
+		ses_putchar(scb, ':');
+	    }
+	} else if (val) {
+            /* check if XPath or identityref content */
+            if (val->xpathpcb) {
+                /* generate all the default xmlns directives needed
+                 * for the content following this start tag to be valid
+                 */
+                res = handle_xpath_start_tag(scb,
+                                             msg,
+                                             val->xpathpcb,
+                                             indent);
+                if (res != NO_ERR) {
+                    /* not expecting anything except a buffer overflow
+                     * from too many namespaces in the same XPath expr
+                     */
+                    SET_ERROR(res);
+                }
+            } else if (val->btyp == NCX_BT_IDREF) {
+                xneeded = FALSE;
+                pfix = xml_msg_get_prefix(msg, 
+                                          (val->parent) ?
+                                          val_get_nsid(val->parent) : 0,
+                                          VAL_IDREF_NSID(val), 
+                                          val, 
+                                          &xneeded);
+                if (xneeded) {
+                    write_xmlns_decl(scb, 
+                                     pfix, 
+                                     VAL_IDREF_NSID(val), 
+                                     indent);
+                }
+            }
+        }
+
+	ses_putstr(scb, attr_name);
+	ses_putchar(scb, '=');
+	ses_putchar(scb, '\"');
+	if (isattrq) {
+	    ses_putstr(scb, attr->attr_val);
+	} else {
+	    /* write the simple value meta var */
+	    xml_wr_val(scb, msg, val, -1);
+	}	    
+	ses_putchar(scb, '\"');
+    }
+
+}  /* write_attrs */
 
 
 /********************************************************************

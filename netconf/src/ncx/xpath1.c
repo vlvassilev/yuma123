@@ -4451,6 +4451,8 @@ static boolean
 *
 * INPUTS:
 *    pcb == parser control block in progress
+*    prefix == prefix string to use (may be NULL)
+*    prefixlen == length of prefix 
 *    nsid == address of return NS ID (may be NULL)
 *
 * OUTPUTS:
@@ -4462,17 +4464,14 @@ static boolean
 *********************************************************************/
 static status_t
     check_qname_prefix (xpath_pcb_t *pcb,
+                        const xmlChar *prefix,
+                        uint32 prefixlen,
 			xmlns_id_t *nsid)
 {
-    const xmlChar  *prefix;
     ncx_module_t   *targmod;
-    uint32          prefixlen;
     status_t        res;
 
     res = NO_ERR;
-
-    prefix = TK_CUR_MOD(pcb->tkc);
-    prefixlen = TK_CUR_MODLEN(pcb->tkc);
 
     if (pcb->reader) {
 	res = xml_get_namespace_id(pcb->reader,
@@ -4584,8 +4583,7 @@ static xpath_result_t *
 *    pcb == parser control block to use
 *    resultQ == Q of xpath_resnode_t structs to check
 *               DOES NOT HAVE TO BE WITHIN A RESULT NODE Q
-*    nsid == namespace ID of node to find; 0 to skip NS test
-*    name == local-name of node to find
+*    ptr   == pointer value to find
 *
 * RETURNS:
 *    found resnode or NULL if not found
@@ -4593,8 +4591,49 @@ static xpath_result_t *
 static xpath_resnode_t *
     find_resnode (xpath_pcb_t *pcb,
 		  dlq_hdr_t *resultQ,
-                  xmlns_id_t nsid,
-                  const xmlChar *name)
+		  const void *ptr)
+{
+    xpath_resnode_t  *resnode;
+
+    for (resnode = (xpath_resnode_t *)dlq_firstEntry(resultQ);
+	 resnode != NULL;
+	 resnode = (xpath_resnode_t *)dlq_nextEntry(resnode)) {
+
+	if (pcb->val) {
+	    if (resnode->node.valptr == ptr) {
+		return resnode;
+	    }
+	} else {
+	    if (resnode->node.objptr == ptr) {
+		return resnode;
+	    }
+	}
+    }
+    return NULL;
+
+}  /* find_resnode */
+
+
+/********************************************************************
+* FUNCTION find_resnode_slow
+* 
+* Check if the specified resnode ptr is already in the Q
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    resultQ == Q of xpath_resnode_t structs to check
+*               DOES NOT HAVE TO BE WITHIN A RESULT NODE Q
+*    nsid == namespace ID of node to find; 0 to skip NS test
+*    name == local-name of node to find
+*
+* RETURNS:
+*    found resnode or NULL if not found
+*********************************************************************/
+static xpath_resnode_t *
+    find_resnode_slow (xpath_pcb_t *pcb,
+                       dlq_hdr_t *resultQ,
+                       xmlns_id_t nsid,
+                       const xmlChar *name)
 {
     xpath_resnode_t  *resnode;
 
@@ -4621,7 +4660,7 @@ static xpath_resnode_t *
     }
     return NULL;
 
-}  /* find_resnode */
+}  /* find_resnode_slow */
 
 
 /********************************************************************
@@ -4662,13 +4701,11 @@ static void
 	if (pcb->val) {
 	    findnode = find_resnode(pcb, 
 				    &val2->r.nodeQ,
-				    val_get_nsid(resnode->node.valptr),
-                                    resnode->node.valptr->name);
+				    resnode->node.valptr);
 	} else {
 	    findnode = find_resnode(pcb, 
 				    &val2->r.nodeQ,
-				    obj_get_nsid(resnode->node.objptr),
-				    obj_get_name(resnode->node.objptr));
+				    resnode->node.objptr);
 	}
 	if (findnode) {
 	    if (resnode->dblslash) {
@@ -4757,10 +4794,7 @@ static boolean
     parms = (xpath_walkerparms_t *)cookie2;
 
     /* check if this node is already in the result */
-    if (find_resnode(pcb, 
-                     parms->resnodeQ, 
-                     val_get_nsid(val),
-                     val->name)) {
+    if (find_resnode(pcb, parms->resnodeQ, val)) {
 	return TRUE;
     }
 
@@ -4830,10 +4864,7 @@ static boolean
     parms = (xpath_walkerparms_t *)cookie2;
 
     /* check if this node is already in the result */
-    if (find_resnode(pcb, 
-                     parms->resnodeQ, 
-                     obj_get_nsid(obj),
-                     obj_get_name(obj))) {
+    if (find_resnode(pcb, parms->resnodeQ, obj)) {
 	return TRUE;
     }
 
@@ -4994,8 +5025,7 @@ static status_t
 		if (keep) {
 		    findnode = find_resnode(pcb, 
 					    &resnodeQ, 
-					    val_get_nsid(testval),
-                                            testval->name);
+					    testval);
 		    if (findnode) {
 			if (resnode->dblslash) {
 			    findnode->dblslash = TRUE;
@@ -5042,8 +5072,7 @@ static status_t
 		if (keep) {
 		    findnode = find_resnode(pcb, 
 					    &resnodeQ, 
-					    obj_get_nsid(testobj),
-                                            obj_get_name(testobj));
+					    testobj);
 		    if (findnode) {
 			if (resnode->dblslash) {
 			    findnode->dblslash = TRUE;
@@ -5235,8 +5264,7 @@ static status_t
 		    if (keep) {
 			findnode = find_resnode(pcb, 
 						&resnodeQ, 
-						val_get_nsid(testval),
-                                                testval->name);
+						testval);
 			if (findnode) {
 			    /* parent already in the Q
 			     * remove node from result 
@@ -5279,8 +5307,7 @@ static status_t
 			/* this is a databd node */
 			findnode = find_resnode(pcb, 
 						&resnodeQ, 
-						0,
-                                                obj_get_name(pcb->docroot));
+						pcb->docroot);
 			if (findnode) {
 			    if (resnode->dblslash) {
 				findnode->position = ++position;
@@ -5335,10 +5362,7 @@ static status_t
 
 		    if (keep) {
 			/* replace this node with the useobj */
-			findnode = find_resnode(pcb, 
-                                                &resnodeQ, 
-                                                obj_get_nsid(useobj),
-                                                obj_get_name(useobj));
+			findnode = find_resnode(pcb, &resnodeQ, useobj);
 			if (findnode) {
 			    if (resnode->dblslash) {
 				findnode->position = ++position;
@@ -5906,11 +5930,8 @@ static status_t
 
 		    if (find_resnode(pcb, &resnodeQ,
 				     (testnode) ?
-				     val_get_nsid(testnode->node.valptr) :
-				     obj_get_nsid(testnode->node.objptr),
-                                     (testnode) ?
-				     testnode->node.valptr->name :
-				     obj_get_name(testnode->node.objptr))) {
+				     (const void *)testnode->node.valptr :
+				     (const void *)testnode->node.objptr)) {
 			free_resnode(pcb, testnode);
 		    } else {
 			dlq_enque(testnode, &resnodeQ);
@@ -6031,7 +6052,10 @@ static status_t
 	}
 	/* match all nodes in the namespace w/ specified prefix */
 	if (!pcb->tkc->cur->nsid) {
-	    res = check_qname_prefix(pcb, &pcb->tkc->cur->nsid);
+	    res = check_qname_prefix(pcb,
+                                     TK_CUR_VAL(pcb->tkc),
+                                     xml_strlen(TK_CUR_VAL(pcb->tkc)),
+                                     &pcb->tkc->cur->nsid);
 	}
 	if (res == NO_ERR) {
 	    nsid = pcb->tkc->cur->nsid;
@@ -6040,7 +6064,10 @@ static status_t
     case TK_TT_MSTRING:
 	/* match all nodes in the namespace w/ specified prefix */
 	if (!pcb->tkc->cur->nsid) {
-	    res = check_qname_prefix(pcb, &pcb->tkc->cur->nsid);
+	    res = check_qname_prefix(pcb, 
+                                     TK_CUR_MOD(pcb->tkc),
+                                     TK_CUR_MODLEN(pcb->tkc),
+                                     &pcb->tkc->cur->nsid);
 	}
 	if (res == NO_ERR) {
 	    nsid = pcb->tkc->cur->nsid;
@@ -8365,9 +8392,10 @@ status_t
 {
     xpath_result_t  *result;
     status_t         res;
+    uint32           linenum, linepos;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !pcb) {
+    if (!pcb) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -8381,9 +8409,18 @@ status_t
 	pcb->tkc = NULL;
     }
 
-    pcb->tkc = tk_tokenize_xpath_string(mod, pcb->exprstr, 
-					TK_CUR_LNUM(tkc),
-					TK_CUR_LPOS(tkc),
+    if (tkc) {
+        linenum = TK_CUR_LNUM(tkc);
+        linepos = TK_CUR_LPOS(tkc);
+    } else {
+        linenum = 1;
+        linepos = 1;
+    }
+
+    pcb->tkc = tk_tokenize_xpath_string(mod, 
+                                        pcb->exprstr, 
+                                        linenum,
+                                        linepos,
 					&res);
     if (!pcb->tkc || res != NO_ERR) {
         log_error("\nError: Invalid XPath string '%s'",
@@ -8436,7 +8473,8 @@ status_t
 		    log_error("\nError: extra tokens in "
 			      "instance-identifier '%s'",
 			      pcb->exprstr);
-		    ncx_print_errormsg(pcb->tkc, pcb->mod, 
+		    ncx_print_errormsg(pcb->tkc, 
+                                       pcb->mod, 
 				       pcb->parseres);
 		}
 	    } else {
@@ -8445,7 +8483,8 @@ status_t
 		    log_error("\nError: extra tokens in "
 			      "XPath expression '%s'",
 			      pcb->exprstr);
-		    ncx_print_errormsg(pcb->tkc, pcb->mod, 
+		    ncx_print_errormsg(pcb->tkc, 
+                                       pcb->mod, 
 				       pcb->parseres);
 		}
 	    }
@@ -8940,10 +8979,10 @@ boolean
     /* quick test -- see if docroot is already in the Q
      * which means nothing else is needed
      */
-    if (find_resnode(pcb, 
-                     resultQ, 
-                     0,
-                     pcb->val_docroot->name)) {
+    if (find_resnode_slow(pcb, 
+                          resultQ,
+                          0,
+                          pcb->val_docroot->name)) {
 	return TRUE;
     }
 
@@ -8953,10 +8992,10 @@ boolean
     }
 	
     while (val) {
-	if (find_resnode(pcb, 
-                         resultQ, 
-                         val_get_nsid(val),
-                         val->name)) {
+	if (find_resnode_slow(pcb, 
+                              resultQ, 
+                              val_get_nsid(val),
+                              val->name)) {
 	    return TRUE;
 	}
 

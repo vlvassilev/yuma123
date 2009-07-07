@@ -2578,7 +2578,7 @@ const ncx_appinfo_t *
 boolean
     typ_is_xpath_string (const typ_def_t *typdef)
 {
-
+    const typ_template_t  *test_typ;
 #ifdef DEBUG
     if (!typdef) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -2591,18 +2591,29 @@ boolean
     }
 
     if (ncx_find_appinfo(&typdef->appinfoQ,
-			 NCX_PREFIX, NCX_EL_XPATH)) {
+			 NCX_PREFIX, 
+                         NCX_EL_XPATH)) {
 	return TRUE;
     }
 
     if (typdef->class == NCX_CL_NAMED) {
 	if (typdef->def.named.newtyp &&
 	    ncx_find_appinfo(&typdef->def.named.newtyp->appinfoQ,
-			     NCX_PREFIX, NCX_EL_XPATH)) {
+			     NCX_PREFIX, 
+                             NCX_EL_XPATH)) {
 	    return TRUE;
 	}
 	if (typdef->def.named.typ) {
-	    return typ_is_xpath_string(&typdef->def.named.typ->typdef);
+            test_typ = typdef->def.named.typ;
+
+            /* hardwire the YANG xpath1.0 type */
+            if (!xml_strcmp(test_typ->mod->name,
+                            (const xmlChar *)"ietf-yang-types") &&
+                !xml_strcmp(test_typ->name,
+                            (const xmlChar *)"xpath1.0")) {
+                return TRUE;
+            }
+	    return typ_is_xpath_string(&test_typ->typdef);
 	} else {
 	    return FALSE;
 	}

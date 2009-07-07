@@ -1913,7 +1913,8 @@ static obj_template_t *
     obj_template_t *obj, *chobj, *casobj, *matchobj;
     obj_case_t     *cas;
     const xmlChar  *name, *mname;
-    uint32          len, ret;
+    uint32          len;
+    int             ret;
 
     matchobj = NULL;
     len = 0;

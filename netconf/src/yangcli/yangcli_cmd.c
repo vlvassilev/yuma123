@@ -1975,6 +1975,9 @@ static val_value_t *
 	*res = fill_valset(agent_cb, rpc, valset, NULL);
     }
 
+    if (*res==NO_ERR) {
+        *res = val_instance_check(valset, valset->obj);
+    }
     return valset;
 
 }  /* get_valset */
@@ -5309,33 +5312,34 @@ static status_t
  *
  * INPUTS:
  *    val == value node to set
- *    selectstr == select value string to use, (type=xpath)
+ *    selectval == select node to use, (type=xpath)
  *               == NULL for type = subtree
+ *              !!! this memory is consumed here !!!
  *
  * RETURNS:
  *   status
  *********************************************************************/
 static status_t
     add_filter_attrs (val_value_t *val,
-		      const xmlChar *selectstr)
+		      val_value_t *selectval)
 {
     val_value_t          *metaval;
 
     /* create a value node for the meta-value */
     metaval = val_make_string(0, NCX_EL_TYPE,
-			      (selectstr) 
+			      (selectval) 
 			      ?  NCX_EL_XPATH : NCX_EL_SUBTREE);
     if (!metaval) {
 	return ERR_INTERNAL_MEM;
     }
     dlq_enque(metaval, &val->metaQ);
 
-    if (selectstr) {
-	metaval = val_make_string(0, NCX_EL_SELECT,  selectstr);
-	if (!metaval) {
-	    return ERR_INTERNAL_MEM;
-	}
-	dlq_enque(metaval, &val->metaQ);
+    if (selectval) {
+        val_set_qname(selectval,
+                      0,
+                      NCX_EL_SELECT,
+                      xml_strlen(NCX_EL_SELECT));
+	dlq_enque(selectval, &val->metaQ);
     }
 
     return NO_ERR;
@@ -5363,8 +5367,8 @@ static status_t
 *   get_content == the node associated with the target
 *             to be used as content nested within the 
 *             <filter> element
-*             == NULL to use selectstr instead
-*   selectstr == XPath select string
+*             == NULL to use selectval instead
+*   selectval == value with select string in it
 *             == NULL to use get_content instead
 *   source == optional database source 
 *             <candidate>, <running>
@@ -5397,7 +5401,7 @@ static status_t
     send_get_to_agent (agent_cb_t *agent_cb,
 		       val_value_t *valroot,
 		       val_value_t *get_content,
-		       const xmlChar *selectstr,
+		       val_value_t *selectval,
 		       val_value_t *source,
 		       uint32 timeoutval,
 		       boolean dofill,
@@ -5472,7 +5476,7 @@ static status_t
 
     /* add the type and maybe select attributes */
     if (res == NO_ERR) {
-	res = add_filter_attrs(filter, selectstr);
+	res = add_filter_attrs(filter, selectval);
     }
 
     /* check any errors so far */
@@ -5481,7 +5485,9 @@ static status_t
 	    val_free_value(valroot);
 	} else if (get_content) {
 	    val_free_value(get_content);
-	}
+	} else if (selectval) {
+            val_free_value(selectval);
+        }
 	val_free_value(reqdata);
 	return res;
     }
@@ -5920,11 +5926,20 @@ static val_value_t *
 	    return (newparm) ? newparm : targval;
 	}
     } else if (isselect) {
-	newparm = val_make_string(xmlns_nc_id(),
-				  NCX_EL_SELECT, 
-				  fromstr);
-	if (!newparm) {
-	    log_error("\nError: make string failed");
+        newparm = val_new_value();
+        if (!newparm) {
+	    log_error("\nError: malloc failed");
+        } else {
+            val_init_from_template(newparm, parm->obj);
+            res = val_set_simval_obj(newparm,
+                                     parm->obj,
+                                     fromstr);
+            if (res != NO_ERR) {
+                log_error("\nError: set 'select' failed (%s)",
+                          get_error_string(res));
+                val_free_value(newparm);
+                newparm = NULL;
+            }
 	}
 	/*  *valroot == NULL and not in use */
 	return newparm;
@@ -6911,15 +6926,17 @@ static status_t
 	    } else {
 		/* construct a get PDU with the content
 		 * as the filter 
+                 * !! passing off content memory even on error !!
 		 */
 		res = send_get_to_agent(agent_cb, 
 					valroot,
 					NULL, 
-					VAL_STR(content), 
+					content, 
 					NULL, 
 					timeoutval,
 					FALSE,
 					withdef);
+                content = NULL;
 		if (res != NO_ERR) {
 		    log_error("\nError: send get operation"
 			      " failed (%s)",
@@ -6932,7 +6949,8 @@ static status_t
 	if (valroot) {
 	    /* should not happen */
 	    val_free_value(valroot);
-	} else {
+	}
+        if (content) {
 	    val_free_value(content);
 	}
     }
@@ -7094,15 +7112,18 @@ static status_t
 		val_remove_child(source);
 		val_change_nsid(source, xmlns_nc_id());
 
-		/* construct a get PDU with the content as the filter */
+		/* construct a get PDU with the content as the filter
+                 * !! hand off content memory here, even on error !! 
+                 */
 		res = send_get_to_agent(agent_cb, 
 					valroot,
 					NULL, 
-					VAL_STR(content), 
+					content, 
 					source,
 					timeoutval,
 					FALSE,
 					withdef);
+                content = NULL;
 		if (res != NO_ERR) {
 		    log_error("\nError: send get-config "
 			      "operation failed (%s)",
@@ -7115,7 +7136,8 @@ static status_t
 	if (valroot) {
 	    /* should not happen */
 	    val_free_value(valroot);
-	} else {
+	}
+        if (content) {
 	    val_free_value(content);
 	}
     }
@@ -8601,210 +8623,6 @@ status_t
 {
     (void)agent_cb;
     return NO_ERR;
-
-#if 0
-    const obj_template_t  *rpc, *input, *withdefobj;
-    val_value_t           *reqdata, *filter;
-    val_value_t           *withdefval, *dummy_parm;
-    mgr_rpc_req_t         *req;
-    ses_cb_t              *scb;
-    mgr_scb_t             *mscb;
-    status_t               res;
-    boolean                freeroot;
-
-    req = NULL;
-    reqdata = NULL;
-    res = NO_ERR;
-    input = NULL;
-
-    /* either going to free valroot or config_content */
-    if (valroot == NULL || valroot == get_content) {
-	freeroot = FALSE;
-    } else {
-	freeroot = TRUE;
-    }
-
-    /* get the <get> or <get-config> input template */
-    rpc = ncx_find_object(get_netconf_mod(),
-			  (source) ? 
-			  NCX_EL_GET_CONFIG : NCX_EL_GET);
-    if (rpc) {
-	input = obj_find_child(rpc, NULL, YANG_K_INPUT);
-    }
-
-    if (!input) {
-	res = SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    } else {
-	/* construct a method + parameter tree */
-	reqdata = xml_val_new_struct(obj_get_name(rpc), 
-				     obj_get_nsid(rpc));
-	if (!reqdata) {
-	    log_error("\nError allocating a new RPC request");
-	    res = ERR_INTERNAL_MEM;
-	}
-    }
-
-    /* add /get-star/input/source */
-    if (res == NO_ERR) {
-	if (source) {
-	    val_add_child(source, reqdata);
-	}
-    }
-
-    /* add /get-star/input/filter */
-    if (res == NO_ERR) {
-	if (get_content) {
-	    /* set the get/input/filter node to the
-	     * get_content, but after filling in any
-	     * missing nodes from the root to the target
-	     */
-	    filter = xml_val_new_struct(NCX_EL_FILTER, xmlns_nc_id());
-	} else {
-	    filter = xml_val_new_flag(NCX_EL_FILTER, xmlns_nc_id());
-	}
-	if (!filter) {
-	    log_error("\nError: malloc failure");
-	    res = ERR_INTERNAL_MEM;
-	} else {
-	    val_add_child(filter, reqdata);
-	}
-    }
-
-    /* add the type and maybe select attributes */
-    if (res == NO_ERR) {
-	res = add_filter_attrs(filter, selectstr);
-    }
-
-    /* check any errors so far */
-    if (res != NO_ERR) {
-	if (freeroot) {
-	    val_free_value(valroot);
-	} else if (get_content) {
-	    val_free_value(get_content);
-	}
-	val_free_value(reqdata);
-	return res;
-    }
-
-    /* add the content to the filter element
-     * building the path from the content node
-     * to the root; fill if dofill is true
-     */
-    if (valroot) {
-	val_add_child(valroot, filter);
-	res = complete_path_content(agent_cb,
-				    rpc,
-				    valroot,
-				    get_content,
-				    dofill);
-	if (res != NO_ERR) {
-	    val_free_value(valroot);
-	    val_free_value(reqdata);
-	    return res;
-	}
-    } else if (get_content) {
-	dummy_parm = NULL;
-	res = add_filter_from_content_node(agent_cb,
-					   rpc, 
-					   get_content,
-					   get_content->obj,
-					   filter, 
-					   dofill,
-					   &dummy_parm);
-	if (res != NO_ERR && res != ERR_NCX_SKIPPED) {
-	    /*  val_free_value(get_content); already freed! */
-	    val_free_value(reqdata);
-	    return res;
-	}
-	res = NO_ERR;
-    }
-
-    /* get the session control block */
-    scb = mgr_ses_get_scb(agent_cb->mysid);
-    if (!scb) {
-	res = SET_ERROR(ERR_INTERNAL_PTR);
-    }
-
-    /* !!! get_content consumed at this point !!!
-     * check if the with-defaults parmaeter should be added
-     */
-    if (res == NO_ERR) {
-	mscb = mgr_ses_get_mscb(scb);
-	if (cap_std_set(&mscb->caplist, CAP_STDID_WITH_DEFAULTS)) {
-	    switch (withdef) {
-	    case NCX_WITHDEF_NONE:
-		break;
-	    case NCX_WITHDEF_TRIM:
-	    case NCX_WITHDEF_EXPLICIT:
-		/*** !!! NEED TO CHECK IF TRIM / EXPLICT 
-		 *** !!! REALLY SUPPORTED IN THE caplist
-		 ***/
-		/* fall through */
-	    case NCX_WITHDEF_REPORT_ALL:
-		/* it is OK to send a with-defaults to this agent */
-		withdefobj = obj_find_child(input, 
-					    NULL,
-					    NCX_EL_WITH_DEFAULTS);
-		if (!withdefobj) {
-		    SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-		} else {
-		    withdefval = val_make_simval_obj
-			(withdefobj,
-			 ncx_get_withdefaults_string(withdef),
-			 &res);
-		    if (withdefval) {
-			val_add_child(withdefval, reqdata);
-		    }
-		}
-		break;
-	    default:
-		SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	} else {
-	    log_warn("\nWarning: 'with-defaults' "
-		     "capability not-supported so parameter ignored");
-	}
-    }
-
-    if (res == NO_ERR) {
-	/* allocate an RPC request and send it */
-	req = mgr_rpc_new_request(scb);
-	if (!req) {
-	    res = ERR_INTERNAL_MEM;
-	    log_error("\nError allocating a new RPC request");
-	} else {
-	    req->data = reqdata;
-	    req->rpc = rpc;
-	    req->timeout = timeoutval;
-	}
-    }
-	
-    if (res == NO_ERR) {
-	if (LOGDEBUG2) {
-	    log_debug2("\nabout to send RPC request with reqdata:");
-	    val_dump_value_ex(reqdata, 
-                              NCX_DEF_INDENT,
-                              agent_cb->display_mode);
-	}
-
-	/* the request will be stored if this returns NO_ERR */
-	res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
-    }
-
-    if (res != NO_ERR) {
-	if (req) {
-	    mgr_rpc_free_request(req);
-	} else if (reqdata) {
-	    val_free_value(reqdata);
-	}
-    } else {
-	agent_cb->state = MGR_IO_ST_CONN_RPYWAIT;
-    }
-
-    return res;
-
-#endif
-
 } /* send_keepalive_get */
 
 

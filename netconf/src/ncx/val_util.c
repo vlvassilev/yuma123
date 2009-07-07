@@ -681,6 +681,29 @@ static status_t
     }
     cnt += xml_strlen(name);
 
+    /* check if the 'input' or 'output node needs to be printed */
+    if (root && val->obj->objtype == OBJ_TYP_RPCIO) {
+        if (buff) {
+	    *buff++ = (xmlChar)((format==NCX_IFMT_C) ? 
+				VAL_INST_SEPCH : VAL_XPATH_SEPCH);
+        }
+        cnt++;
+        if (buff) {
+            buff += xml_strcpy(buff, prefix);
+        }
+        cnt += xml_strlen(prefix);
+
+        if (buff) {
+            *buff++ = ':';
+        }
+        cnt++;
+
+        if (buff) {
+            buff += xml_strcpy(buff, val->name);
+        }
+        cnt += xml_strlen(val->name);
+    }
+
     total = cnt;
 
     /* check if this is a value node with an index clause */

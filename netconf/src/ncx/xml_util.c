@@ -2156,13 +2156,15 @@ status_t
 			  uint32 prefixlen,
 			  xmlns_id_t  *retnsid)
 {
-    xmlChar *str, *ns;
+    xmlChar    *str, *ns;
 
 #ifdef DEBUG
     if (!reader || !retnsid) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
+
+    *retnsid = 0;
 
     if (prefix && prefixlen) {
 	str = xml_strndup(prefix, prefixlen);
@@ -2185,10 +2187,16 @@ status_t
 	ns = xmlTextReaderLookupNamespace(reader, NULL);
 	if (ns) {
 	    *retnsid = xmlns_find_ns_by_name(ns);
+
 	    xmlFree(ns);
 	}
     }
-    return NO_ERR;
+
+    if (*retnsid) {
+        return NO_ERR;
+    } else {
+        return ERR_NCX_UNKNOWN_NAMESPACE;
+    }
 
 }  /* xml_get_namespace_id */
 

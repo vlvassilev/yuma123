@@ -207,6 +207,31 @@ static status_t
 		    obj_get_nsid(foundobj) != nsid) {
 		    foundobj = NULL;
 		}
+            } else if (obj_get_nsid(pcb->targobj) == xmlns_nc_id() &&
+                       (!xml_strcmp(obj_get_name(pcb->targobj),
+                                    NCX_EL_RPC))) {
+                foundobj = NULL;
+
+                /* find an RPC method with the nodename */
+                if (prefix && nsid == 0) {
+                    nsid = xmlns_find_ns_by_prefix(prefix);
+                }
+                if (nsid == 0) {
+                    foundobj = ncx_find_any_object(nodename);
+                } else {
+                    modname = xmlns_get_module(nsid);
+                    if (modname) {
+                        targmod = ncx_find_module(modname, NULL);
+                        if (targmod) {
+                            foundobj = ncx_find_object(targmod,
+                                                       nodename);
+                        }
+                    }
+                }
+
+                if (foundobj && foundobj->objtype != OBJ_TYP_RPC) {
+                    foundobj = NULL;
+                }
 	    } else {
 		foundobj = obj_find_child(pcb->targobj,
 					  obj_get_mod_name(pcb->targobj),
@@ -1390,7 +1415,7 @@ status_t
 *    obj == object using the leafref data type
 *    pcb == the leafref parser control block, possibly
 *           cloned from from the typdef
-*    schemainst == TRUE if ncx:scnea-instance string
+*    schemainst == TRUE if ncx:schema-instance string
 *               == FALSE to use the pcb->source field 
 *                  to determine the exact parse mode
 *    leafobj == address of the return target object
@@ -2093,6 +2118,7 @@ status_t
 	switch (tk->typ) {
 	case TK_TT_MSTRING:
 	case TK_TT_QVARBIND:
+        case TK_TT_NCNAME_STAR:
 	    break;
 	default:
 	    continue;
@@ -2126,9 +2152,7 @@ status_t
 	}
     }
 
-    if (next) {
-	*num_nsids = next - 1;
-    }
+    *num_nsids = next;
 
     return res;
 

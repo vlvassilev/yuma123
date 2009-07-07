@@ -99,6 +99,14 @@ date         init     comment
 #include "xpath.h"
 #endif
 
+#ifndef _H_xpath1
+#include "xpath1.h"
+#endif
+
+#ifndef _H_xpath_yang
+#include "xpath_yang.h"
+#endif
+
 #ifndef _H_yangconst
 #include "yangconst.h"
 #endif
@@ -2530,28 +2538,6 @@ status_t
 	}
 	break;
     case NCX_BT_LEAFREF:
-#if 0
-	/**** NOT SURE WHY THIS IS REMOVED STILL *****/
-	xpathpcb = xpath_new_pcb(simval);
-	if (!xpathpcb) {
-	    res = ERR_INTERNAL_MEM;
-	} else {
-	    tkc->cur = pcb->tk;
-	    res = xpath_yang_parse_path(tkc, 
-					mod, 
-					XP_SRC_LEAFREF,
-					pcbclone);
-	    if (res == NO_ERR) {
-		leafobj = NULL;
-		res = xpath_yang_validate_path(NULL, 
-					       NULL, 
-					       xpathpcb, 
-					       FALSE,
-					       &leafobj);
-	    }
-	}
-#endif
-
 	/*****/
 	res = val_string_ok_errinfo(typdef, btyp, simval, errinfo);
 	break;
@@ -3880,6 +3866,8 @@ status_t
 {
     const xmlChar        *localname;
     const ncx_identity_t *identity;
+    const obj_template_t *leafobj, *objroot;
+    xpath_pcb_t          *xpathpcb;
     status_t              res;
     uint32                ulen;
     xmlns_id_t            qname_nsid;
@@ -3976,9 +3964,15 @@ status_t
     case NCX_BT_ANY:
 	val->btyp = NCX_BT_STRING;
 	val->typdef = typ_get_basetype_typdef(NCX_BT_STRING);
-	/* fall through and set the string value */
-    case NCX_BT_STRING:
-    case NCX_BT_INSTANCE_ID:
+	if (valstr) {
+	    VAL_STR(val) = xml_strdup(valstr);
+	} else {
+	    VAL_STR(val) = xml_strdup(EMPTY_STRING);
+	}
+	if (!VAL_STR(val)) {
+	    res = ERR_INTERNAL_MEM;
+	}
+        break;
     case NCX_BT_LEAFREF:   /****/
 	if (valstr) {
 	    VAL_STR(val) = xml_strdup(valstr);
@@ -3988,7 +3982,78 @@ status_t
 	if (!VAL_STR(val)) {
 	    res = ERR_INTERNAL_MEM;
 	}
-	break;
+        break;
+    case NCX_BT_STRING:
+        if (val->obj && obj_is_schema_instance_string(val->obj)) {
+            ;
+        } else {
+            if (valstr) {
+                VAL_STR(val) = xml_strdup(valstr);
+            } else {
+                VAL_STR(val) = xml_strdup(EMPTY_STRING);
+            }
+            if (!VAL_STR(val)) {
+                res = ERR_INTERNAL_MEM;
+            } else if (typ_is_xpath_string(val->typdef) ||
+                       (val->obj && obj_is_xpath_string(val->obj))) {
+
+                xpathpcb = xpath_new_pcb(VAL_STR(val));
+                if (!xpathpcb) {
+                    res = ERR_INTERNAL_MEM;
+                } else {
+                    res = xpath1_parse_expr(NULL, 
+                                            NULL,
+                                            xpathpcb,
+                                            XP_SRC_YANG);
+                    if (res == NO_ERR) {
+                        objroot = ncx_get_gen_root();
+                        res = xpath1_validate_expr(objroot->mod, 
+                                                   objroot, 
+                                                   xpathpcb);
+                    }
+                    if (val->xpathpcb) {
+                        xpath_free_pcb(val->xpathpcb);
+                    }
+                    val->xpathpcb = xpathpcb;
+                }
+            }
+            break;
+        }
+        /* fall through if this is an ncx:schema-instance string */
+    case NCX_BT_INSTANCE_ID:
+	if (valstr) {
+	    VAL_STR(val) = xml_strdup(valstr);
+	} else {
+	    VAL_STR(val) = xml_strdup(EMPTY_STRING);
+	}
+	if (!VAL_STR(val)) {
+	    res = ERR_INTERNAL_MEM;
+	} else {
+            xpathpcb = xpath_new_pcb(VAL_STR(val));
+            if (!xpathpcb) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+                res = xpath_yang_parse_path(NULL, 
+                                            NULL,
+                                            XP_SRC_INSTANCEID,
+                                            xpathpcb);
+                if (res == NO_ERR) {
+                    leafobj = NULL;
+                    res = xpath_yang_validate_path
+                        (NULL, 
+                         ncx_get_gen_root(), 
+                         xpathpcb, 
+                         (val->btyp == NCX_BT_INSTANCE_ID) 
+                         ? FALSE : TRUE,
+                         &leafobj);
+                }
+                if (val->xpathpcb) {
+                    xpath_free_pcb(val->xpathpcb);
+                }
+                val->xpathpcb = xpathpcb;
+	    }
+        }
+        break;
     case NCX_BT_IDREF:
 	res = val_parse_idref(NULL, 
 			      valstr, 
@@ -8688,7 +8753,8 @@ val_value_t *
 	}
 
 	keyval = val_make_string(val_get_nsid(sourceval),
-				 keyname, keystring);
+				 keyname, 
+                                 keystring);
 	if (!keyval) {
 	    myres = ERR_INTERNAL_MEM;
 	    continue;

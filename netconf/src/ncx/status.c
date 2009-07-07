@@ -77,8 +77,10 @@ static uint32 error_count;
 *
 *
 *********************************************************************/
-status_t set_error (const char *filename, int linenum, 
-		status_t status, int sqlError)
+status_t set_error (const char *filename, 
+                    int linenum, 
+                    status_t status, 
+                    int sqlError)
 {
     
     if (log_get_debug_level() > LOG_DEBUG_NONE) {

@@ -29,7 +29,7 @@ LIBS = 	-lmgr \
 	-lncx \
 	-L/lib \
 	-L/usr/lib -lxml2 -lcurses -lssh2 \
-	-L/usr/local/lib -ltecla \
+	-L/usr/local/lib -ltecla
 
 
 

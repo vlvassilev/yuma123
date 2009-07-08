@@ -32,7 +32,9 @@ test:
 install:
 
 
-ncxlib: dependencies $(LBASE)/lib$(SUBDIR_NM).a
+#ncxlib: dependencies $(LBASE)/lib$(SUBDIR_NM).a
+
+ncxlib: dependencies $(LBASE)/lib$(SUBDIR_NM).so
 
 
 # this dummy rule keeps make from deleting the $(OBJS) as
@@ -40,10 +42,13 @@ ncxlib: dependencies $(LBASE)/lib$(SUBDIR_NM).a
 ncxdummy: dependencies $(OBJS)
 
 clean:
-	rm -f $(OBJS) $(LBASE)/lib$(SUBDIR_NM).a
+	rm -f $(OBJS) $(LBASE)/lib$(SUBDIR_NM).a \
+	$(LBASE)/lib$(SUBDIR_NM).so*
 
 superclean:
-	rm -f *~  $(DEPS) dependencies $(OBJS) $(LBASE)/lib$(SUBDIR_NM).a
+	rm -f *~  $(DEPS) dependencies $(OBJS) \
+	$(LBASE)/lib$(SUBDIR_NM).a \
+	$(LBASE)/lib$(SUBDIR_NM).so*
 
 
 # prevent the make program from choking on all the symbols

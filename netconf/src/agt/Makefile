@@ -30,7 +30,7 @@ test:
 install:
 
 
-agtlib: dependencies $(LBASE)/lib$(SUBDIR_NM).a
+agtlib: dependencies $(LBASE)/lib$(SUBDIR_NM).so
 
 
 # this dummy rule keeps make from deleting the $(OBJS) as
@@ -39,10 +39,10 @@ agtdummy: dependencies $(OBJS)
 
 
 clean:
-	rm -f $(OBJS) $(LBASE)/lib$(SUBDIR_NM).a
+	rm -f $(OBJS) $(LBASE)/lib$(SUBDIR_NM).so*
 
 superclean:
-	rm -f *~  $(DEPS) dependencies $(OBJS) $(LBASE)/lib$(SUBDIR_NM).a
+	rm -f *~  $(DEPS) dependencies $(OBJS) $(LBASE)/lib$(SUBDIR_NM).so*
 
 
 

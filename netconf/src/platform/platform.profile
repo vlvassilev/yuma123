@@ -22,7 +22,7 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 # -O3 changed to -O2 due to code bloat from inline functions
 
 CDEFS=-DDEBUG -DLINUX -DGCC -DHAS_FLOAT 
-CFLAGS=$(CDEFS) $(CWARN)
+CFLAGS=$(CDEFS) $(CWARN) -fPIC
 
 # production (1) or debug (0) build
 ifdef BLD
@@ -90,6 +90,10 @@ $(TARGET)/%.o: %.c
 $(LBASE)/lib%.a: $(OBJS)
 	$(LIBTOOL) cr $@ $(OBJS)
 	ranlib $@
+
+$(LBASE)/lib%.so: $(OBJS)
+	gcc -shared -Wl,-soname,$@ -o $@ $(OBJS) -lc
+
 
 #### common cleanup rules
 

@@ -12,10 +12,10 @@ APPS = subsys netconfd yangdump yangdiff yangcli
 # Put only the directories that build object files in the list
 
 # make all targets
-DIRS = agt agtinst mgr ncx $(APPS)
+DIRS = agt mgr ncx $(APPS)
 
 # make agent without other targets
-AGTDIRS = agt agtinst ncx netconfd
+AGTDIRS = agt ncx netconfd
 
 JFLAG = -j3
 

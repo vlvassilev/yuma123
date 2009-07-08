@@ -28,15 +28,9 @@ PROG=yangcli
 LIBS = 	-lmgr \
 	-lncx \
 	-L/lib \
-	-L/usr/lib -lxml2 -lcurses -lssh2 \
+	-L/usr/lib -lxml2 -lncurses -lssh2 \
 	-L/usr/local/lib -ltecla
 
-
-
-## MACODS
-# LIBS = 	-lmgr \
-#	-lncx \
-#	-L/sw/lib -lxml2 -lcurses -lssh2 -ltecla
 
 ifdef MAC
   GRP=

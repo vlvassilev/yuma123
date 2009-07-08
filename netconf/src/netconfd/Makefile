@@ -32,16 +32,14 @@ endif
 # The ncx library should be last 'internal' library
 
 LIBS = 	-lagt \
-	-lagtinst \
 	-lncx \
 	-L/usr/lib -lxml2
 
 # hardwire the project library targets for now
 # to match the project dirs in the LIBS directive
 
-LIBTARGS= $(LBASE)/libagt.a \
-	$(LBASE)/libagtinst.a \
-	$(LBASE)/libncx.a
+LIBTARGS= $(LBASE)/libagt.so \
+	$(LBASE)/libncx.so
 
 
 ############################# MAKE RULES ##################

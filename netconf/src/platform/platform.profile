@@ -36,7 +36,7 @@ ifdef MEMTRACE
   CFLAGS += -DMEMORY_DEBUG=1
 endif
 
-CINC=-I. -I../agt -I../agtinst -I../db -I../mgr \
+CINC=-I. -I../agt -I../mgr \
     -I../ncx -I../platform \
     -I/usr/include -I/usr/include/libxml2 \
     -I/usr/include/libxml2/libxml
@@ -93,6 +93,7 @@ $(LBASE)/lib%.a: $(OBJS)
 
 $(LBASE)/lib%.so: $(OBJS)
 	gcc -shared -Wl,-soname,$@ -o $@ $(OBJS) -lc
+	sudo ldconfig -n $(LBASE)
 
 
 #### common cleanup rules

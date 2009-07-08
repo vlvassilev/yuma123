@@ -24,7 +24,7 @@ PROG=yangcli
 # Then put the library that contains foo BEFORE the one
 # that contains bar. 
 
-## (LINUX
+## LINUX
 LIBS = 	-lmgr \
 	-lncx \
 	-L/lib \

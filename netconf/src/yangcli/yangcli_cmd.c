@@ -62,6 +62,10 @@ date         init     comment
 #include "mgr_io.h"
 #endif
 
+#ifndef _H_mgr_not
+#include "mgr_not.h"
+#endif
+
 #ifndef _H_mgr_rpc
 #include "mgr_rpc.h"
 #endif
@@ -7154,7 +7158,7 @@ static status_t
 /********************************************************************
  * FUNCTION do_history_show (sub-mode of history RPC)
  * 
- * history show [25]
+ * history show [-1]
  *
  * INPUTS:
  *    agent_cb == agent control block to use
@@ -7329,7 +7333,6 @@ static status_t
  * history 
  *      show
  *      clear
- *      recall
  *      load
  *      save
  *
@@ -7384,7 +7387,7 @@ static status_t
         if (parm) {
             /* do show history */
             res = do_history_show(agent_cb,
-                                  VAL_UINT(parm), 
+                                  VAL_INT(parm), 
                                   mode);
             done = TRUE;
         }
@@ -7571,6 +7574,263 @@ static status_t
 
 
 /********************************************************************
+ * FUNCTION do_eventlog_show (sub-mode of eventlog RPC)
+ * 
+ * eventlog show=-1 start=0 full
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ *    maxevents == max number of eventlog entries to show
+ *    startindex == start event index number to show
+ *    mode == requested help mode
+ * 
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    do_eventlog_show (agent_cb_t *agent_cb,
+                      int32 maxevents,
+                      uint32 startindex,
+                      help_mode_t mode)
+{
+    mgr_not_msg_t  *notif;
+    val_value_t    *sequence_id;
+    logfn_t         logfn;
+    boolean         done, imode;
+    uint32          eventindex, maxindex, eventsdone;
+
+    if (maxevents > 0) {
+        maxindex = (uint32)maxevents;
+    } else if (maxevents == -1) {
+        maxindex = 0;
+    } else {
+        return ERR_NCX_INVALID_VALUE;
+    }
+
+    imode = interactive_mode();
+    if (imode) {
+	logfn = log_stdout;
+    } else {
+	logfn = log_write;
+    }
+
+    done = FALSE;
+    eventindex = 0;
+    eventsdone = 0;
+
+    for (notif = (mgr_not_msg_t *)
+             dlq_firstEntry(&agent_cb->notificationQ);
+         notif != NULL && !done;
+         notif = (mgr_not_msg_t *)dlq_nextEntry(notif)) {
+
+        if (eventindex >= startindex) {
+            sequence_id = val_find_child(notif->notification,
+                                         NULL,
+                                         NCX_EL_SEQUENCE_ID);
+
+
+            (*logfn)("\n [%u]\t", eventindex);
+            if (mode != HELP_MODE_BRIEF) {
+                (*logfn)(" [%s] ", VAL_STR(notif->eventTime));
+            }
+
+            /* print the eventType in the desired format */
+            switch (agent_cb->display_mode) {
+            case NCX_DISPLAY_MODE_PLAIN:
+                (*logfn)("<%s>", notif->eventType->name);
+                break;
+            case NCX_DISPLAY_MODE_PREFIX:
+            case NCX_DISPLAY_MODE_XML:
+                (*logfn)("<%s:%s>", 
+                         val_get_mod_prefix(notif->eventType),
+                         notif->eventType->name);
+                break;
+            case NCX_DISPLAY_MODE_MODULE:
+                (*logfn)("<%s:%s>", 
+                         val_get_mod_name(notif->eventType),
+                         notif->eventType->name);
+                break;
+            default:
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
+
+            if (mode == HELP_MODE_NORMAL) {
+                if (sequence_id) {
+                    (*logfn)(" sequence-id: %u", 
+                             VAL_UINT(sequence_id));
+                }
+            } else if (mode == HELP_MODE_FULL) {
+                if (imode) {
+                    val_stdout_value_ex(notif->notification,
+                                        NCX_DEF_INDENT,
+                                        agent_cb->display_mode);
+                } else {
+                    val_dump_value_ex(notif->notification,
+                                      NCX_DEF_INDENT,
+                                      agent_cb->display_mode);
+                }
+                (*logfn)("\n");
+            }
+            eventsdone++;
+        }
+
+        if (maxindex && (eventsdone == maxindex)) {
+            done = TRUE;
+        }
+
+        eventindex++;
+    }
+
+    return NO_ERR;
+
+} /* do_eventlog_show */
+
+
+/********************************************************************
+ * FUNCTION do_eventlog_clear (sub-mode of eventlog RPC)
+ * 
+ * eventlog clear
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ *    maxevents == max number of events to clear
+ *                 zero means clear all
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    do_eventlog_clear (agent_cb_t *agent_cb,
+                       int32 maxevents)
+{
+    mgr_not_msg_t  *notif;
+    int32           eventcount;
+
+    if (maxevents > 0) {
+        eventcount = 0;
+        while (!dlq_empty(&agent_cb->notificationQ) &&
+               eventcount < maxevents) {
+            notif = (mgr_not_msg_t *)
+                dlq_deque(&agent_cb->notificationQ);
+            mgr_not_free_msg(notif);
+            eventcount++;
+        }
+    } else if (maxevents == -1) {
+        while (!dlq_empty(&agent_cb->notificationQ)) {
+            notif = (mgr_not_msg_t *)
+                dlq_deque(&agent_cb->notificationQ);
+            mgr_not_free_msg(notif);
+        }
+    } else {
+        return ERR_NCX_INVALID_VALUE;
+    }
+
+    return NO_ERR;
+
+} /* do_eventlog_clear */
+
+
+/********************************************************************
+ * FUNCTION do_eventlog (local RPC)
+ * 
+ * Do Notification Event Log support operations
+ *
+ * eventlog 
+ *      show
+ *      clear
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ *    rpc == RPC method for the history command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    do_eventlog (agent_cb_t *agent_cb,
+                 const obj_template_t *rpc,
+                 const xmlChar *line,
+                 uint32  len)
+{
+    val_value_t        *valset, *parm, *start;
+    status_t            res;
+    boolean             imode, done;
+    help_mode_t         mode;
+
+    done = FALSE;
+    res = NO_ERR;
+    imode = interactive_mode();
+
+    valset = get_valset(agent_cb, rpc, &line[len], &res);
+    if (valset && res == NO_ERR) {
+	mode = HELP_MODE_NORMAL;
+
+	/* check if the 'brief' flag is set first */
+	parm = val_find_child(valset, 
+			      YANGCLI_MOD, 
+			      YANGCLI_BRIEF);
+	if (parm && parm->res == NO_ERR) {
+	    mode = HELP_MODE_BRIEF;
+	} else {
+            /* check if the 'full' flag is set first */
+	    parm = val_find_child(valset, 
+				  YANGCLI_MOD, 
+				  YANGCLI_FULL);
+	    if (parm && parm->res == NO_ERR) {
+		mode = HELP_MODE_FULL;
+	    }
+	}
+
+	/* find the 1 of N choice */
+        parm = val_find_child(valset, 
+                              YANGCLI_MOD, 
+                              YANGCLI_SHOW);
+        if (parm) {
+            start = val_find_child(valset, 
+                                   YANGCLI_MOD, 
+                                   YANGCLI_START);
+            /* do show eventlog  */
+            res = do_eventlog_show(agent_cb,
+                                   VAL_INT(parm),
+                                   (start) ? VAL_UINT(start) : 0,
+                                   mode);
+            done = TRUE;
+        }
+
+	if (!done) {
+	    parm = val_find_child(valset, 
+				  YANGCLI_MOD, 
+				  YANGCLI_CLEAR);
+	    if (parm) {
+		/* do clear event log */
+		res = do_eventlog_clear(agent_cb,
+                                        VAL_INT(parm));
+		done = TRUE;
+                if (res == NO_ERR) {
+                    log_info("\nOK\n");
+                } else {
+                    log_error("\nError: clear event log failed\n");
+                }
+	    }
+	}
+
+        if (!done) {
+            res = do_eventlog_show(agent_cb, -1, 0, mode);
+        }
+    }
+
+    if (valset) {
+	val_free_value(valset);
+    }
+
+    return res;
+
+}  /* do_eventlog */
+
+
+/********************************************************************
 * FUNCTION do_local_conn_command
 * 
 * Handle local connection mode RPC operations from yangcli.yang
@@ -7670,6 +7930,8 @@ static status_t
 	res = do_cd(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
 	res = do_connect(agent_cb, rpc, line, len, FALSE);
+    } else if (!xml_strcmp(rpcname, YANGCLI_EVENTLOG)) {
+	res = do_eventlog(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_FILL)) {
 	res = do_fill(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_HELP)) {

@@ -30,7 +30,7 @@ test:
 install:
 
 
-agtlib: dependencies $(LBASE)/lib$(SUBDIR_NM).so
+agtlib: dependencies $(LBASE)/lib$(SUBDIR_NM).a
 
 
 # this dummy rule keeps make from deleting the $(OBJS) as
@@ -39,11 +39,11 @@ agtdummy: dependencies $(OBJS)
 
 
 clean:
-	rm -f $(OBJS) $(LBASE)/lib$(SUBDIR_NM).so*
+	rm -f $(OBJS) $(LBASE)/lib$(SUBDIR_NM).*
 
 superclean:
-	rm -f *~  $(DEPS) dependencies $(OBJS) $(LBASE)/lib$(SUBDIR_NM).so*
-
+	rm -f *~  $(DEPS) dependencies $(OBJS) \
+	$(LBASE)/lib$(SUBDIR_NM).*
 
 
 # prevent the make program from choking on all the symbols

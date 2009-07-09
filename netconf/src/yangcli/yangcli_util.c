@@ -158,6 +158,8 @@ boolean
 	;
     } else if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
 	;
+    } else if (!xml_strcmp(rpcname, YANGCLI_EVENTLOG)) {
+	;
     } else if (!xml_strcmp(rpcname, YANGCLI_FILL)) {
 	;
     } else if (!xml_strcmp(rpcname, YANGCLI_HELP)) {

@@ -311,6 +311,7 @@ void
     mgr_not_msg_t           *msg;
     ncx_module_t            *mod;
     status_t                 res;
+    boolean                  consumed;
 
 #ifdef DEBUG
     if (!scb || !top) {
@@ -374,11 +375,14 @@ void
     }
 
     /* invoke the notification handler */
+    consumed = FALSE;
     if (callbackfn) {
-	(*callbackfn)(scb, msg);
+	(*callbackfn)(scb, msg, &consumed);
     }
 
-    mgr_not_free_msg(msg);
+    if (!consumed) {
+        mgr_not_free_msg(msg);
+    }
 
 #ifdef MGR_NOT_DEBUG
     print_errors();

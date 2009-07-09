@@ -35,6 +35,8 @@ endif
 
 LIBS =	-lncx -L/usr/lib -lxml2
 
+LIBTARGS= $(LBASE)/libncx.so
+
 ############################# MAKE RULES ##################
 all: yangdump
 
@@ -53,12 +55,12 @@ test:
 
 # needs to be done by root
 install:
-	install --owner=root $(GRP) $(BIN_INST)/$(PROG) $(REAL_INST)
+	sudo install --owner=root $(GRP) $(BIN_INST)/$(PROG) $(REAL_INST)
 
 
 # this real test rule keeps make from deleting the $(OBJS) as
 # intermediate files
-yangdump: $(OBJS)
+yangdump: $(OBJS) $(LIBTARGS)
 	$(LINK) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(PROG) $(LPATH) $(LIBS)
 
 clean:

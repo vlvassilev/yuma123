@@ -38,7 +38,7 @@ LIBS = 	-lagt \
 # hardwire the project library targets for now
 # to match the project dirs in the LIBS directive
 
-LIBTARGS= $(LBASE)/libagt.so \
+LIBTARGS= $(LBASE)/libagt.a \
 	$(LBASE)/libncx.so
 
 
@@ -66,7 +66,7 @@ test:
 
 
 install:
-	install --owner=root $(GRP) $(BIN_INST)/$(PROG) $(REAL_INST)
+	sudo install --owner=root $(GRP) $(BIN_INST)/$(PROG) $(REAL_INST)
 
 # this real rule keeps make from deleting the $(OBJS) as
 # intermediate files

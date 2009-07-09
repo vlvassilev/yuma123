@@ -1001,6 +1001,9 @@ extern val_value_t *
 extern const xmlChar *
     val_get_mod_name (const val_value_t *val);
 
+extern const xmlChar *
+    val_get_mod_prefix (const val_value_t *val);
+
 extern xmlns_id_t
     val_get_nsid (const val_value_t *val);
 

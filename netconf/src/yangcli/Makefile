@@ -31,12 +31,9 @@ LIBS = 	-lmgr \
 	-L/usr/lib -lxml2 -lncurses -lssh2 \
 	-L/usr/local/lib -ltecla
 
+LIBTARGS= $(LBASE)/libmgr.a \
+	$(LBASE)/libncx.so
 
-ifdef MAC
-  GRP=
-else
-  GRP=--group=root
-endif
 
 ############################# MAKE RULES ##################
 all: yangcli
@@ -63,11 +60,11 @@ test:
 
 # needs to be done by root
 install:
-	install --owner=root $(GRP)  $(BIN_INST)/$(PROG) $(REAL_INST)
+	sudo install --owner=root $(GRP)  $(BIN_INST)/$(PROG) $(REAL_INST)
 
 # this real rule keeps make from deleting the $(OBJS) as
 # intermediate files
-yangcli: $(OBJS)
+yangcli: $(OBJS) $(LIBTARGS)
 	$(LINK) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(PROG) $(LPATH) $(LIBS)
 
 

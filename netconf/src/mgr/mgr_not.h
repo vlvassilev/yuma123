@@ -63,7 +63,6 @@ date             init     comment
 /* struct to save and process an incoming notification */
 typedef struct mgr_not_msg_t_ {
     dlq_hdr_t               qhdr;
-    /* xml_msg_hdr_t           mhdr; */
     val_value_t            *notification;  /* parsed message */
     val_value_t            *eventTime;   /* ptr into notification */
     val_value_t            *eventType;   /* ptr into notification */
@@ -76,9 +75,17 @@ typedef struct mgr_not_msg_t_ {
  *  INPUTS:
  *   scb == session control block for session that got the reply
  *   msg == incoming notification msg
+ *   consumed == address of return message consumed flag
+ *
+ *   OUTPUTS:
+ *     *consumed == TRUE if msg has been consumed so
+ *                  it will not be freed by mgr_not_dispatch
+ *               == FALSE if msg has been not consumed so
+ *                  it will be freed by mgr_not_dispatch
  */
 typedef void (*mgr_not_cbfn_t) (ses_cb_t *scb,
-				mgr_not_msg_t *msg);
+				mgr_not_msg_t *msg,
+                                boolean *consumed);
 
 
 /********************************************************************

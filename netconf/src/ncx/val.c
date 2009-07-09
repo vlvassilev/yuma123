@@ -8589,6 +8589,38 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION val_get_mod_prefix
+* 
+* Get the module prefix associated with this value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     const pointer to module name string
+*     NULL if not found
+*********************************************************************/
+const xmlChar *
+    val_get_mod_prefix (const val_value_t *val)
+{
+#ifdef DEBUG
+    if (!val) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return NULL;
+    }
+#endif
+
+    if (val->nsid) {
+	return xmlns_get_ns_prefix(val->nsid);
+    } else if (val->obj) {
+	return obj_get_mod_prefix(val->obj);
+    } else {
+	return NULL;
+    }
+}  /* val_get_mod_prefix */
+
+
+/********************************************************************
 * FUNCTION val_get_nsid
 * 
 * Get the namespace ID for the specified value node

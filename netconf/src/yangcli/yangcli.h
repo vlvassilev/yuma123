@@ -150,6 +150,7 @@ date	     init     comment
 #define YANGCLI_PORT        (const xmlChar *)"port"
 #define YANGCLI_RUN_COMMAND (const xmlChar *)"run-command"
 #define YANGCLI_RUN_SCRIPT  (const xmlChar *)"run-script"
+#define YANGCLI_START       (const xmlChar *)"start"
 #define YANGCLI_TEST_OPTION (const xmlChar *)"test-option"
 #define YANGCLI_TIMEOUT     (const xmlChar *)"timeout"
 #define YANGCLI_USER        (const xmlChar *)"user"
@@ -166,6 +167,7 @@ date	     init     comment
 #define YANGCLI_CONNECT (const xmlChar *)"connect"
 #define YANGCLI_CREATE  (const xmlChar *)"create"
 #define YANGCLI_DELETE  (const xmlChar *)"delete"
+#define YANGCLI_EVENTLOG (const xmlChar *)"eventlog"
 #define YANGCLI_FILL    (const xmlChar *)"fill"
 #define YANGCLI_HELP    (const xmlChar *)"help"
 #define YANGCLI_HISTORY (const xmlChar *)"history"
@@ -281,6 +283,9 @@ typedef struct agent_cb_t_ {
      * plus the 'netconf.yang' module
      */
     dlq_hdr_t            modptrQ;     /* Q of modptr_t */
+
+    /* contains received notifications */
+    dlq_hdr_t            notificationQ;   /* Q of mgr_not_msg_t */
 
     /* per-session CLI support */
     const xmlChar       *cli_fn;

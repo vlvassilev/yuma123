@@ -183,8 +183,6 @@ date         init     comment
 
 
 #define AGT_NOT_SEQID_MOD   (const xmlChar *)"system"
-#define AGT_NOT_SEQID_OBJ   (const xmlChar *)"sequence-id"
-
 
 /********************************************************************
 *                                                                   *
@@ -1234,7 +1232,7 @@ status_t
     sequenceidobj = 
 	obj_find_child(notificationobj,
                        AGT_NOT_SEQID_MOD,
-                       AGT_NOT_SEQID_OBJ);
+                       NCX_EL_SEQUENCE_ID);
     if (!sequenceidobj) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }

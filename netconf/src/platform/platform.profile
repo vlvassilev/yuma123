@@ -1,8 +1,6 @@
 #
 # platform.profile
 #
-# DEBUG VERSION
-#
 
 ### GCC + [LINUX or MACOSX]
 
@@ -50,7 +48,13 @@ else
 # LINUX version
   CINC += -I/usr/local/include
 endif
-        
+
+ifdef MAC
+   GRP=
+else
+   GRP=--group=root
+endif
+
 CC=gcc
 LINK=gcc
 LINT=splint
@@ -90,10 +94,6 @@ $(TARGET)/%.o: %.c
 $(LBASE)/lib%.a: $(OBJS)
 	$(LIBTOOL) cr $@ $(OBJS)
 	ranlib $@
-
-$(LBASE)/lib%.so: $(OBJS)
-	gcc -shared -Wl,-soname,$@ -o $@ $(OBJS) -lc
-	sudo ldconfig -n $(LBASE)
 
 
 #### common cleanup rules

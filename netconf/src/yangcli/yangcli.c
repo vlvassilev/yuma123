@@ -447,7 +447,8 @@ static void
     free_agent_cb (agent_cb_t *agent_cb)
 {
 
-    modptr_t  *modptr;
+    modptr_t      *modptr;
+    mgr_not_msg_t *notif;
 
     if (agent_cb->name) {
 	m__free(agent_cb->name);
@@ -487,6 +488,11 @@ static void
 	free_modptr(modptr);
     }
 
+    while (!dlq_empty(&agent_cb->notificationQ)) {
+	notif = (mgr_not_msg_t *)dlq_deque(&agent_cb->notificationQ);
+	mgr_not_free_msg(notif);
+    }
+
     m__free(agent_cb);
 
 }  /* free_agent_cb */
@@ -517,6 +523,7 @@ static agent_cb_t *
     memset(agent_cb, 0x0, sizeof(agent_cb_t));
     dlq_createSQue(&agent_cb->varbindQ);
     dlq_createSQue(&agent_cb->modptrQ);
+    dlq_createSQue(&agent_cb->notificationQ);
 
     /* set the default CLI history file (may not get used) */
     agent_cb->history_filename = xml_strdup(YANGCLI_DEF_HISTORY_FILE);
@@ -2544,29 +2551,36 @@ static mgr_io_state_t
 /********************************************************************
  * FUNCTION yangcli_notification_handler
  * 
- * 
+ * matches callback template mgr_not_cbfn_t
+ *
  * INPUTS:
  *   scb == session receiving RPC reply
  *   msg == notification msg that was parsed
+ *   consumed == address of return consumed message flag
  *
- * RETURNS:
- *   none
+ *  OUTPUTS:
+ *     *consumed == TRUE if msg has been consumed so
+ *                  it will not be freed by mgr_not_dispatch
+ *               == FALSE if msg has been not consumed so
+ *                  it will be freed by mgr_not_dispatch
  *********************************************************************/
 static void
     yangcli_notification_handler (ses_cb_t *scb,
-				  mgr_not_msg_t *msg)
+				  mgr_not_msg_t *msg,
+                                  boolean *consumed)
 {
     agent_cb_t   *agent_cb;
     mgr_scb_t    *mgrcb;
     uint32        usesid;
 
 #ifdef DEBUG
-    if (!scb || !msg) {
+    if (!scb || !msg || !consumed) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return;
     }
 #endif
 
+    *consumed = FALSE;
     mgrcb = scb->mgrcb;
     if (mgrcb) {
 	usesid = mgrcb->agtsid;
@@ -2579,18 +2593,28 @@ static void
 
     /* check the contents of the reply */
     if (msg && msg->notification) {
-	if (LOGDEBUG) {
+	if (LOGINFO) {
 	    gl_normal_io(agent_cb->cli_gl);
-	    log_debug("\n\nIncoming notification:");
-	    val_dump_value_ex(msg->notification, 
-                              NCX_DEF_INDENT,
-                              agent_cb->display_mode);
-	    log_debug("\n\n");
+	    log_info("\n\nIncoming notification:");
+            if (LOGDEBUG) {
+                val_dump_value_ex(msg->notification, 
+                                  NCX_DEF_INDENT,
+                                  agent_cb->display_mode);
+            } else {
+                if (msg->eventType) {
+                    log_info(" <%s>", msg->eventType->name);
+                }
+            }
+	    log_info("\n\n");
 	}
+
+        /* Log the notification by removing it from the message
+         * and storing it in the agent notification log
+         */
+        dlq_enque(msg, &agent_cb->notificationQ);
+        *consumed = TRUE;
     }
-
-    /*** LOG THE NOTIFICATION ***/
-
+    
 }  /* yangcli_notification_handler */
 
 

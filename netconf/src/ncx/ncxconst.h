@@ -542,6 +542,7 @@ date	     init     comment
 #define NCX_EL_SCRIPT          (const xmlChar *)"script"
 #define NCX_EL_SECURE          (const xmlChar *)"secure"
 #define NCX_EL_SELECT          (const xmlChar *)"select"
+#define NCX_EL_SEQUENCE_ID     (const xmlChar *)"sequence-id"
 #define NCX_EL_SESSION_ID      (const xmlChar *)"session-id"
 #define NCX_EL_SET             (const xmlChar *)"set"
 #define NCX_EL_SHORT           (const xmlChar *)"short"

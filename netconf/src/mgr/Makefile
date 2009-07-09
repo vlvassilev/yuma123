@@ -37,12 +37,10 @@ mgrdummy: dependencies $(OBJS)
 
 
 clean:
-	rm -f $(OBJS) $(LBASE)/lib$(SUBDIR_NM).a \
-	$(LBASE)/lib$(SUBDIR_NM).so*
+	rm -f $(OBJS) $(LBASE)/lib$(SUBDIR_NM).so*
 
 superclean:
 	rm -f *~  $(DEPS) dependencies $(OBJS) \
-	$(LBASE)/lib$(SUBDIR_NM).a \
 	$(LBASE)/lib$(SUBDIR_NM).so*
 
 # prevent the make program from choking on all the symbols

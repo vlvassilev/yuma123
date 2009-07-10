@@ -79,21 +79,21 @@ date             init     comment
 #define CAP_BIT_SCHEMA_RETRIEVAL bit14
 
 /* put the version numbers in the capability names for now */
-#define CAP_NAME_V1                 ""
-#define CAP_NAME_WR_RUN             "writable-running:1.0"
-#define CAP_NAME_CANDIDATE          "candidate:1.0"
-#define CAP_NAME_CONF_COMMIT        "confirmed-commit:1.0"
-#define CAP_NAME_ROLLBACK_ERR       "rollback-on-error:1.0"
-#define CAP_NAME_VALIDATE           "validate:1.0"
-#define CAP_NAME_STARTUP            "startup:1.0"
-#define CAP_NAME_URL                "url:1.0"
-#define CAP_NAME_XPATH              "xpath:1.0"
-#define CAP_NAME_NOTIFICATION       "notification:1.0"
-#define CAP_NAME_INTERLEAVE         "interleave:1.0"
-#define CAP_NAME_PARTIAL_LOCK       "partial-lock:1.0"
-#define CAP_NAME_WITH_DEFAULTS      "with-defaults:1.0"
-#define CAP_NAME_NETCONF_MONITORING "netconf-monitoring:1.0"
-#define CAP_NAME_SCHEMA_RETRIEVAL   "schema-retrieval:1.0"
+#define CAP_NAME_V1                 ((const xmlChar *)"")
+#define CAP_NAME_WR_RUN             ((const xmlChar *)"writable-running:1.0")
+#define CAP_NAME_CANDIDATE          ((const xmlChar *)"candidate:1.0")
+#define CAP_NAME_CONF_COMMIT        ((const xmlChar *)"confirmed-commit:1.0")
+#define CAP_NAME_ROLLBACK_ERR       ((const xmlChar *)"rollback-on-error:1.0")
+#define CAP_NAME_VALIDATE           ((const xmlChar *)"validate:1.0")
+#define CAP_NAME_STARTUP            ((const xmlChar *)"startup:1.0")
+#define CAP_NAME_URL                ((const xmlChar *)"url:1.0")
+#define CAP_NAME_XPATH              ((const xmlChar *)"xpath:1.0")
+#define CAP_NAME_NOTIFICATION       ((const xmlChar *)"notification:1.0")
+#define CAP_NAME_INTERLEAVE         ((const xmlChar *)"interleave:1.0")
+#define CAP_NAME_PARTIAL_LOCK       ((const xmlChar *)"partial-lock:1.0")
+#define CAP_NAME_WITH_DEFAULTS      ((const xmlChar *)"with-defaults:1.0")
+#define CAP_NAME_NETCONF_MONITORING ((const xmlChar *)"netconf-monitoring:1.0")
+#define CAP_NAME_SCHEMA_RETRIEVAL   ((const xmlChar *)"schema-retrieval:1.0")
 
 /* some YANG capability details */
 #define CAP_REVISION_EQ        (const xmlChar *)"revision="
@@ -153,7 +153,7 @@ typedef struct cap_list_t_ {
 typedef struct cap_stdrec_t_ {
     cap_stdid_t     cap_idnum;
     uint32          cap_bitnum;
-    xmlChar         cap_name[MAX_STD_CAP_NAME_LEN+1];
+    const xmlChar  *cap_name;
 } cap_stdrec_t;
 
 

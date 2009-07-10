@@ -3767,7 +3767,7 @@ status_t
         case NCX_NF_HEX:
             ul = strtoul((const char *)numstr, &err, 16);
 	    break;
-        case TK_TT_RNUM:
+        case NCX_NF_REAL:
             return ERR_NCX_WRONG_NUMTYP;
         default:
             return SET_ERROR(ERR_INTERNAL_VAL);
@@ -5030,6 +5030,7 @@ status_t
 	buff = dumbuff;    
     }
 
+    ilen = 0;
     *len = 0;
     switch (btyp) {
     case NCX_BT_INT8:
@@ -6348,6 +6349,7 @@ ncx_lmem_t *
     num = NULL;
     str = NULL;
     enu = NULL;
+    bit = NULL;
     bool = FALSE;
 
     if (typ_is_number(list->btyp)) {

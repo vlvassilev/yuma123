@@ -135,7 +135,8 @@ static cap_stdrec_t stdcaps[] =
     CAP_NAME_NETCONF_MONITORING },
   { CAP_STDID_SCHEMA_RETRIEVAL, CAP_BIT_SCHEMA_RETRIEVAL, 
     CAP_NAME_SCHEMA_RETRIEVAL },
-  { CAP_STDID_LAST_MARKER, 0x0, "" }    /* end-of-list marker */
+  { CAP_STDID_LAST_MARKER, 0x0, 
+    (const xmlChar *)"" } /* end-of-list marker */
 };
 
 

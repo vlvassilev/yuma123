@@ -41,13 +41,11 @@ lint: treelint
 
 install: treeinstall
 
-# 	  cd $$dir && $(MAKE) $(JFLAG) all && cd ..;\
-
 
 treeall:
 	/bin/sh platform/setversion.sh
 	for dir in $(DIRS); do\
-	  (cd $$dir; $(MAKE) $(JFLAG) all; cd ..;)\
+	  cd $$dir && $(MAKE) $(JFLAG) all && cd ..;\
         done
 
 treedepend:

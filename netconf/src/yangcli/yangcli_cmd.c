@@ -194,17 +194,17 @@ static val_value_t *
 		   status_t  *res)
 {
     const obj_template_t   *obj;
-    const xmlChar          *myargv[2];
+    const char             *myargv[2];
 
     /* construct an argv array, 
      * convert the CLI into a parmset 
      */
     obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
     if (obj && obj_get_child_count(obj)) {
-	myargv[0] = obj_get_name(rpc);
-	myargv[1] = args;
+	myargv[0] = (const char *)obj_get_name(rpc);
+	myargv[1] = (const char *)args;
 	return cli_parse(2, 
-			 (const char **)myargv, 
+			 myargv, 
 			 obj, 
 			 VALONLY, 
 			 SCRIPTMODE,

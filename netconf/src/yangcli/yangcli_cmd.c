@@ -759,7 +759,8 @@ static status_t
     res = NO_ERR;
     ispassword = obj_is_password(parm);
 
-    if (obj_is_data_db(parm)) {
+    if (obj_is_data_db(parm) && 
+        parm->objtype != OBJ_TYP_RPCIO) {
 	objbuff = NULL;
 	res = obj_gen_object_id(parm, &objbuff);
 	if (res != NO_ERR) {
@@ -1691,19 +1692,22 @@ static status_t
     res = NO_ERR;
     agent_cb->cli_fn = obj_get_name(rpc);
 
-    objbuff = NULL;
-    res = obj_gen_object_id(valset->obj, &objbuff);
-    if (res != NO_ERR) {
-        log_error("\nError: generate object ID failed (%s)",
-                  get_error_string(res));
-        return res;
-    }
+    if (!(valset->obj->objtype == OBJ_TYP_RPC ||
+          valset->obj->objtype == OBJ_TYP_RPCIO)) {
+        objbuff = NULL;
+        res = obj_gen_object_id(valset->obj, &objbuff);
+        if (res != NO_ERR) {
+            log_error("\nError: generate object ID failed (%s)",
+                      get_error_string(res));
+            return res;
+        }
 
-    /* let the user know about the new nest level */
-    log_stdout("\nFilling %s %s:",
-               obj_get_typestr(valset->obj), 
-               objbuff);
-    m__free(objbuff);
+        /* let the user know about the new nest level */
+        log_stdout("\nFilling %s %s:",
+                   obj_get_typestr(valset->obj), 
+                   objbuff);
+        m__free(objbuff);
+    }
 
     for (parm = obj_first_child(valset->obj);
          parm != NULL && res==NO_ERR;
@@ -7624,42 +7628,50 @@ static status_t
          notif = (mgr_not_msg_t *)dlq_nextEntry(notif)) {
 
         if (eventindex >= startindex) {
+
             sequence_id = val_find_child(notif->notification,
                                          NULL,
                                          NCX_EL_SEQUENCE_ID);
 
 
             (*logfn)("\n [%u]\t", eventindex);
-            if (mode != HELP_MODE_BRIEF) {
+            if (mode != HELP_MODE_BRIEF && notif->eventTime) {
                 (*logfn)(" [%s] ", VAL_STR(notif->eventTime));
             }
 
-            /* print the eventType in the desired format */
-            switch (agent_cb->display_mode) {
-            case NCX_DISPLAY_MODE_PLAIN:
-                (*logfn)("<%s>", notif->eventType->name);
-                break;
-            case NCX_DISPLAY_MODE_PREFIX:
-            case NCX_DISPLAY_MODE_XML:
-                (*logfn)("<%s:%s>", 
-                         val_get_mod_prefix(notif->eventType),
-                         notif->eventType->name);
-                break;
-            case NCX_DISPLAY_MODE_MODULE:
-                (*logfn)("<%s:%s>", 
-                         val_get_mod_name(notif->eventType),
-                         notif->eventType->name);
-                break;
-            default:
-                SET_ERROR(ERR_INTERNAL_VAL);
+            if (mode != HELP_MODE_BRIEF) {
+                if (sequence_id) {
+                    (*logfn)("(%u)\t", VAL_UINT(sequence_id));
+                } else {
+                    (*logfn)("(--)\t");
+                }
             }
 
-            if (mode == HELP_MODE_NORMAL) {
-                if (sequence_id) {
-                    (*logfn)(" sequence-id: %u", 
-                             VAL_UINT(sequence_id));
+            /* print the eventType in the desired format */
+            if (notif->eventType) {
+                switch (agent_cb->display_mode) {
+                case NCX_DISPLAY_MODE_PLAIN:
+                    (*logfn)("<%s>", notif->eventType->name);
+                    break;
+                case NCX_DISPLAY_MODE_PREFIX:
+                case NCX_DISPLAY_MODE_XML:
+                    (*logfn)("<%s:%s>", 
+                             val_get_mod_prefix(notif->eventType),
+                             notif->eventType->name);
+                    break;
+                case NCX_DISPLAY_MODE_MODULE:
+                    (*logfn)("<%s:%s>", 
+                             val_get_mod_name(notif->eventType),
+                             notif->eventType->name);
+                    break;
+                default:
+                    SET_ERROR(ERR_INTERNAL_VAL);
                 }
-            } else if (mode == HELP_MODE_FULL) {
+            } else {
+                (*logfn)("<>");
+            }
+
+            if (mode == HELP_MODE_FULL) {
                 if (imode) {
                     val_stdout_value_ex(notif->notification,
                                         NCX_DEF_INDENT,
@@ -7679,6 +7691,10 @@ static status_t
         }
 
         eventindex++;
+    }
+
+    if (eventsdone) {
+        (*logfn)("\n");
     }
 
     return NO_ERR;
@@ -7783,14 +7799,16 @@ static status_t
 	    }
 	}
 
+        /* optional start position for show */
+        start = val_find_child(valset, 
+                               YANGCLI_MOD, 
+                               YANGCLI_START);
+
 	/* find the 1 of N choice */
         parm = val_find_child(valset, 
                               YANGCLI_MOD, 
                               YANGCLI_SHOW);
         if (parm) {
-            start = val_find_child(valset, 
-                                   YANGCLI_MOD, 
-                                   YANGCLI_START);
             /* do show eventlog  */
             res = do_eventlog_show(agent_cb,
                                    VAL_INT(parm),
@@ -7817,7 +7835,10 @@ static status_t
 	}
 
         if (!done) {
-            res = do_eventlog_show(agent_cb, -1, 0, mode);
+            res = do_eventlog_show(agent_cb, 
+                                   -1, 
+                                   (start) ? VAL_UINT(start) : 0, 
+                                   mode);
         }
     }
 

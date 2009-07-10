@@ -310,6 +310,7 @@ void
     const obj_template_t    *notobj;
     mgr_not_msg_t           *msg;
     ncx_module_t            *mod;
+    val_value_t             *child;
     status_t                 res;
     boolean                  consumed;
 
@@ -365,7 +366,7 @@ void
 	log_info("\nmgr_not: got invalid notification on session %d (%s)",
 		 scb->sid, 
 		 get_error_string(msg->res));
-    }
+    } 
 
     /* check that there is nothing after the <rpc-reply> element */
     if (msg->res==NO_ERR && 
@@ -374,20 +375,39 @@ void
 		 scb->sid);
     }
 
-    /* invoke the notification handler */
     consumed = FALSE;
-    if (callbackfn) {
-	(*callbackfn)(scb, msg, &consumed);
+
+    if (msg->res == NO_ERR && msg->notification) {
+        child = val_get_first_child(msg->notification);
+        if (child) {
+            if (!xml_strcmp(child->name, 
+                            (const xmlChar *)"eventTime")) {
+                msg->eventTime = child;
+            } else {
+                log_error("\nError: expected 'eventTime' in "
+                          "notification, got '%s'",
+                          child->name);
+            }
+
+            child = val_get_next_child(child);
+            if (child) {
+                /* eventType is expected to be next!! */
+                msg->eventType = child;
+            }
+        } else {
+            log_error("\nError: expected 'eventTime' in "
+                      "notification, got nothing");
+        }
+        
+        /* invoke the notification handler */
+        if (callbackfn) {
+            (*callbackfn)(scb, msg, &consumed);
+        }
     }
 
     if (!consumed) {
         mgr_not_free_msg(msg);
     }
-
-#ifdef MGR_NOT_DEBUG
-    print_errors();
-    clear_errors();
-#endif
 
 } /* mgr_not_dispatch */
 

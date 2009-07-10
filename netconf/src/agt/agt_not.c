@@ -891,6 +891,8 @@ static status_t
     boolean             filterpassed;
     xmlChar             numbuff[NCX_MAX_NUMLEN];
 
+    filterpassed = TRUE;
+
     totalstats = ses_get_total_stats();
 
     if (!notif->msg) {

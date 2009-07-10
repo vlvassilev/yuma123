@@ -1386,6 +1386,7 @@ static status_t
 
     enu = NULL;
     str = NULL;
+    expstr = NULL;
     retres = NO_ERR;
     done = FALSE;
     desc = FALSE;

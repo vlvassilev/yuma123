@@ -52,12 +52,13 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
-#include  <string.h>
-#include  <memory.h>
-#include  <unistd.h>
-#include  <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <memory.h>
+#include <unistd.h>
+#include <errno.h>
+#include <sys/utsname.h>
 
 #ifndef _H_procdefs
 #include  "procdefs.h"
@@ -194,6 +195,13 @@ date         init     comment
 
 #define system_N_target (const xmlChar *)"target"
 #define system_N_operation (const xmlChar *)"operation"
+
+#define system_N_uname (const xmlChar *)"uname"
+#define system_N_sysname (const xmlChar *)"sysname"
+#define system_N_release (const xmlChar *)"release"
+#define system_N_version (const xmlChar *)"version"
+#define system_N_machine (const xmlChar *)"machine"
+#define system_N_nodename (const xmlChar *)"nodename"
 
 /********************************************************************
 *                                                                   *
@@ -533,11 +541,14 @@ status_t
 status_t
     agt_sys_init2 (void)
 {
-    val_value_t           *topval, *childval;
+    val_value_t           *topval, *unameval, *childval;
     cfg_template_t        *runningcfg;
     const xmlChar         *myhostname;
+    const obj_template_t  *unameobj;
     status_t               res;
     xmlChar                tstampbuff[TSTAMP_MIN_SIZE];
+    struct utsname         utsbuff;
+    int                    retval;
 
     if (!agt_sys_init_done) {
 	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
@@ -570,6 +581,8 @@ status_t
 			     &res);
     if (childval) {
 	val_add_child(childval, topval);
+    } else {
+        return res;
     }
 
     /* add /system/sysCurrentDateTime */
@@ -579,6 +592,8 @@ status_t
 				     &res);
     if (childval) {
 	val_add_child(childval, topval);
+    } else {
+        return res;
     }
 
     /* add /system/sysBootDateTime */
@@ -589,8 +604,86 @@ status_t
 			     &res);
     if (childval) {
 	val_add_child(childval, topval);
+    } else {
+        return res;
     }
 
+    /* get the system information */
+    memset(&utsbuff, 0x0, sizeof(utsbuff));
+    retval = uname(&utsbuff);
+    if (retval) {
+        log_warn("\nWarning: <uname> data not available");
+    } else {
+        unameobj = obj_find_child(systemobj,
+                                  AGT_SYS_MODULE,
+                                  system_N_uname);
+        if (!unameobj) {
+            return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        } 
+
+        /* add /system/uname */
+        unameval = val_new_value();
+        if (!unameval) {
+            return ERR_INTERNAL_MEM;
+        }
+        val_init_from_template(unameval, unameobj);
+        val_add_child(unameval, topval);
+
+        /* add /system/uname/sysname */
+        childval = agt_make_leaf(unameobj,
+                                 system_N_sysname,
+                                 utsbuff.sysname,
+                                 &res);
+        if (childval) {
+            val_add_child(childval, unameval);
+        } else {
+            return res;
+        }
+
+        /* add /system/uname/release */
+        childval = agt_make_leaf(unameobj,
+                                 system_N_release,
+                                 utsbuff.release,
+                                 &res);
+        if (childval) {
+            val_add_child(childval, unameval);
+        } else {
+            return res;
+        }
+
+        /* add /system/uname/version */
+        childval = agt_make_leaf(unameobj,
+                                 system_N_version,
+                                 utsbuff.version,
+                                 &res);
+        if (childval) {
+            val_add_child(childval, unameval);
+        } else {
+            return res;
+        }
+        
+        /* add /system/uname/machine */
+        childval = agt_make_leaf(unameobj,
+                                 system_N_machine,
+                                 utsbuff.machine,
+                                 &res);
+        if (childval) {
+            val_add_child(childval, unameval);
+        } else {
+            return res;
+        }
+
+        /* add /system/uname/nodename */
+        childval = agt_make_leaf(unameobj,
+                                 system_N_nodename,
+                                 utsbuff.nodename,
+                                 &res);
+        if (childval) {
+            val_add_child(childval, unameval);
+        } else {
+            return res;
+        }
+    }
 
     /* add sysStartup to notificationQ */
     send_sysStartup();

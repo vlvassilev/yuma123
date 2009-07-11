@@ -565,7 +565,7 @@ static status_t
                    LOG_DEBUG_WARN,
 #endif
                    FALSE,
-                   "yangdump started",
+                   NULL,
                    argc, 
                    argv);
 

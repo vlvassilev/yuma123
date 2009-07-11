@@ -403,7 +403,7 @@ static void
         SET_ERROR(res);
     }
 
-    (*logfn)("\n  Copyright 2009, Andy Bierman\n");
+    (*logfn)("\n  Copyright 2009, Andy Bierman, All Rights Reserved.\n");
 
     if (!imode) {
 	return;
@@ -2688,7 +2688,7 @@ static status_t
     res = ncx_init(NCX_SAVESTR, 
 		   log_level, 
 		   TRUE,
-		   "\nStarting yangcli",
+		   NULL,
 		   argc, 
 		   argv);
 

@@ -1545,8 +1545,9 @@ static status_t
 		   LOG_DEBUG_WARN,
 #endif
 		   FALSE,
-		   "\nStarting yangdiff",
-		   argc, argv);
+		   NULL,
+		   argc, 
+                   argv);
 
     if (res == NO_ERR) {
 	/* load in the YANG converter CLI definition file */

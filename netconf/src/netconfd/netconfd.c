@@ -214,8 +214,10 @@ static status_t
     res = ncx_init(FALSE, 
 		   dlevel, 
 		   TRUE,
-		   "\nStarting netconfd",
-		   argc, argv);
+		   "\nStarting netconfd"
+                   "\n  Copyright 2009, Andy Bierman, All Rights Reserved.\n",
+		   argc, 
+                   argv);
 		   
     if (res != NO_ERR) {
 	return res;

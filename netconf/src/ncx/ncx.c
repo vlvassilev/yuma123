@@ -1113,6 +1113,9 @@ status_t
     /* check that the correct version of libxml2 is installed */
     LIBXML_TEST_VERSION;
 
+    /* init nmodule handler */
+    ncxmod_init();
+
     /* deal with bootstrap CLI parms */
     res = bootstrap_cli(argc, argv, dlevel, logtstamps);
     if (res != NO_ERR) {
@@ -1122,9 +1125,6 @@ status_t
     if (startmsg) {
 	log_write(startmsg);
     }
-
-    /* init nmodule handler */
-    ncxmod_init();
 
     /* init runstack script support */
     runstack_init();

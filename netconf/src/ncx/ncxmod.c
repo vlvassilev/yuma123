@@ -1633,6 +1633,8 @@ status_t
     }
 #endif
 
+    res = NO_ERR;
+
     pcb = yang_new_pcb();
     if (!pcb) {
 	res = ERR_INTERNAL_MEM;
@@ -1644,6 +1646,20 @@ status_t
 			      revision, 
 			      retmod);
     }
+
+    if (LOGINFO && res != NO_ERR) {
+        if (revision) {
+            log_info("\nLoad module '%s', revision '%s' failed (%s)",
+                     modname,
+                     revision,
+                     get_error_string(res));
+        } else {
+            log_info("\nLoad module '%s' failed (%s)",
+                     modname,
+                     get_error_string(res));
+        }
+    }
+
     if (pcb) {
 	yang_free_pcb(pcb);
     }

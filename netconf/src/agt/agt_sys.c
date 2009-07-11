@@ -632,7 +632,7 @@ status_t
         /* add /system/uname/sysname */
         childval = agt_make_leaf(unameobj,
                                  system_N_sysname,
-                                 utsbuff.sysname,
+                                 (const xmlChar *)utsbuff.sysname,
                                  &res);
         if (childval) {
             val_add_child(childval, unameval);
@@ -643,7 +643,7 @@ status_t
         /* add /system/uname/release */
         childval = agt_make_leaf(unameobj,
                                  system_N_release,
-                                 utsbuff.release,
+                                 (const xmlChar *)utsbuff.release,
                                  &res);
         if (childval) {
             val_add_child(childval, unameval);
@@ -654,7 +654,7 @@ status_t
         /* add /system/uname/version */
         childval = agt_make_leaf(unameobj,
                                  system_N_version,
-                                 utsbuff.version,
+                                 (const xmlChar *)utsbuff.version,
                                  &res);
         if (childval) {
             val_add_child(childval, unameval);
@@ -665,7 +665,7 @@ status_t
         /* add /system/uname/machine */
         childval = agt_make_leaf(unameobj,
                                  system_N_machine,
-                                 utsbuff.machine,
+                                 (const xmlChar *)utsbuff.machine,
                                  &res);
         if (childval) {
             val_add_child(childval, unameval);
@@ -676,7 +676,7 @@ status_t
         /* add /system/uname/nodename */
         childval = agt_make_leaf(unameobj,
                                  system_N_nodename,
-                                 utsbuff.nodename,
+                                 (const xmlChar *)utsbuff.nodename,
                                  &res);
         if (childval) {
             val_add_child(childval, unameval);

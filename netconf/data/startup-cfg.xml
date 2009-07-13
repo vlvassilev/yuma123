@@ -13,6 +13,7 @@
             <nacm:moduleName>netconf</nacm:moduleName>
             <nacm:allowedRights>read write exec</nacm:allowedRights>
             <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
+            <nacm:allowedGroup>nacm:monitor</nacm:allowedGroup>
          </nacm:moduleRule>
          <nacm:moduleRule>
             <nacm:moduleName>netconf</nacm:moduleName>
@@ -30,12 +31,18 @@
          <nacm:group>
             <nacm:groupIdentity>nacm:admin</nacm:groupIdentity>
             <nacm:userName>andy</nacm:userName>
-            <nacm:userName>fred</nacm:userName>
-            <nacm:userName>barney</nacm:userName>
+            <nacm:userName>admin</nacm:userName>
+         </nacm:group>
+         <nacm:group>
+            <nacm:groupIdentity>nacm:monitor</nacm:groupIdentity>
+            <nacm:userName>ultima</nacm:userName>
+            <nacm:userName>reflash</nacm:userName>
+            <nacm:userName>setup</nacm:userName>
          </nacm:group>
          <nacm:group>
             <nacm:groupIdentity>nacm:guest</nacm:groupIdentity>
             <nacm:userName>guest</nacm:userName>
+            <nacm:userName>info</nacm:userName>
          </nacm:group>
       </nacm:groups>
    </nacm:nacm>
@@ -46,7 +53,7 @@
       <t:foo></t:foo>
    </t:test2>
    <t:test2 xmlns:t="http://netconfcentral.com/ns/test">
-      <t:a2>bambi-error</t:a2>
+      <t:a2>bambi</t:a2>
       <t:a1>32</t:a1>
       <t:b2>2</t:b2>
       <t:foo>

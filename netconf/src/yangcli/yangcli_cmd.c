@@ -2348,14 +2348,15 @@ static status_t
 		const xmlChar *line,
 		uint32  len)
 {
-    val_value_t     *valset, *val;
+    val_value_t     *valset, *modval, *revval;
     ncx_module_t    *mod;
     modptr_t        *modptr;
     dlq_hdr_t       *mgrloadQ;
     logfn_t          logfn;
     status_t         res;
 
-    val = NULL;
+    modval = NULL;
+    revval = NULL;
     res = NO_ERR;
 
     if (interactive_mode()) {
@@ -2371,19 +2372,27 @@ static status_t
 
     /* get the module name */
     if (res == NO_ERR) {
-	val = val_find_child(valset, 
-			     YANGCLI_MOD, 
-			     NCX_EL_MODULE);
-	if (!val) {
+	modval = val_find_child(valset, 
+                                YANGCLI_MOD, 
+                                NCX_EL_MODULE);
+	if (!modval) {
 	    res = ERR_NCX_DEF_NOT_FOUND;
-	} else if (val->res != NO_ERR) {
-	    res = val->res;
+	} else if (modval->res != NO_ERR) {
+	    res = modval->res;
 	}
     }
 
-    /* check if the module is loaded already */
+    /* get the module revision */
     if (res == NO_ERR) {
-	mod = ncx_find_module(VAL_STR(val), NULL);
+	revval = val_find_child(valset, 
+                                YANGCLI_MOD, 
+                                NCX_EL_REVISION);
+    }
+
+
+    /* check if any version of the module is loaded already */
+    if (res == NO_ERR) {
+	mod = ncx_find_module(VAL_STR(modval), NULL);
 	if (mod) {
 	    if (mod->version) {
 		(*logfn)("\nModule '%s' revision '%s' already loaded",
@@ -2403,7 +2412,9 @@ static status_t
     /* load the module */
     if (res == NO_ERR) {
 	mod = NULL;
-	res = ncxmod_load_module(VAL_STR(val), NULL, &mod);
+	res = ncxmod_load_module(VAL_STR(modval), 
+                                 (revval) ? VAL_STR(revval) : NULL, 
+                                 &mod);
 	if (res == NO_ERR) {
 	    /*** TBD: prompt user for features to enable/disable ***/
 	    modptr = new_modptr(mod, NULL, NULL);
@@ -2418,10 +2429,16 @@ static status_t
 
     /* print the result to stdout */
     if (res == NO_ERR) {
-	(*logfn)("\nLoad module %s OK", VAL_STR(val));
+        if (revval) {
+            (*logfn)("\nLoad module '%s' revision '%s' OK", 
+                     VAL_STR(modval),
+                     VAL_STR(revval));
+        } else {
+            (*logfn)("\nLoad module '%s' OK", VAL_STR(modval));
+        }
     } else {
-	(*logfn)("\nError: Load module failed (%s)",
-		 get_error_string(res));
+        (*logfn)("\nError: Load module failed (%s)",
+                 get_error_string(res));
     }
     (*logfn)("\n");
 

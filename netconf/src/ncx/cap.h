@@ -21,6 +21,10 @@ date             init     comment
 */
 #include <xmlstring.h>
 
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
+#endif
+
 #ifndef _H_status
 #include "status.h"
 #endif
@@ -294,5 +298,8 @@ extern void
 		      uint32 *modlen,
 		      const xmlChar **version);
 
+/* make the module URI string (for sysCapabilityChange event) */
+extern xmlChar *
+    cap_make_moduri (ncx_module_t *mod);
 
 #endif            /* _H_cap */

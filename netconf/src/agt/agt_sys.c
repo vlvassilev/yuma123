@@ -26,6 +26,17 @@ leaf /sysConfigChange/sessionId
 list /sysConfigChange/editList
 leaf /sysConfigChange/editList/target
 leaf /sysConfigChange/editList/operation
+notification /sysCapabilityChange
+container /sysCapabilityChange/changed-by
+choice /sysCapabilityChange/changed-by/agent-or-user
+case /sysCapabilityChange/changed-by/agent-or-user/agent
+leaf /sysCapabilityChange/changed-by/agent-or-user/agent/agent
+case /sysCapabilityChange/changed-by/agent-or-user/by-user
+leaf /sysCapabilityChange/changed-by/agent-or-user/by-user/userName
+leaf /sysCapabilityChange/changed-by/agent-or-user/by-user/sessionId
+leaf /sysCapabilityChange/changed-by/agent-or-user/by-user/remoteHost
+leaf-list /sysCapabilityChange/added-capability
+leaf-list /sysCapabilityChange/deleted-capability
 notification /sysSessionStart
 leaf /sysSessionStart/userName
 leaf /sysSessionStart/sessionId
@@ -183,8 +194,10 @@ date         init     comment
 #define system_N_sysStartup (const xmlChar *)"sysStartup"
 #define system_N_sysShutdown (const xmlChar *)"sysShutdown"
 #define system_N_sysConfigChange (const xmlChar *)"sysConfigChange"
+#define system_N_sysCapabilityChange (const xmlChar *)"sysCapabilityChange"
 #define system_N_sysSessionStart (const xmlChar *)"sysSessionStart"
 #define system_N_sysSessionEnd (const xmlChar *)"sysSessionEnd"
+
 
 #define system_N_userName (const xmlChar *)"userName"
 #define system_N_sessionId (const xmlChar *)"sessionId"
@@ -195,6 +208,10 @@ date         init     comment
 
 #define system_N_target (const xmlChar *)"target"
 #define system_N_operation (const xmlChar *)"operation"
+
+#define system_N_changed_by (const xmlChar *)"changed-by"
+#define system_N_added_capability (const xmlChar *)"added-capability"
+#define system_N_deleted_capability (const xmlChar *)"deleted-capability"
 
 #define system_N_uname (const xmlChar *)"uname"
 #define system_N_sysname (const xmlChar *)"sysname"
@@ -228,6 +245,7 @@ static const obj_template_t *systemobj;
 static const obj_template_t *sysStartupobj;
 static const obj_template_t *sysShutdownobj;
 static const obj_template_t *sysConfigChangeobj;
+static const obj_template_t *sysCapabilityChangeobj;
 static const obj_template_t *sysSessionStartobj;
 static const obj_template_t *sysSessionEndobj;
 
@@ -434,6 +452,7 @@ static void
     sysStartupobj = NULL;
     sysShutdownobj = NULL;
     sysConfigChangeobj = NULL;
+    sysCapabilityChangeobj = NULL;
     sysSessionStartobj = NULL;
     sysSessionEndobj = NULL;
 
@@ -504,6 +523,13 @@ status_t
 	ncx_find_object(sysmod,
 			system_N_sysConfigChange);
     if (!sysConfigChangeobj) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    sysCapabilityChangeobj = 
+	ncx_find_object(sysmod,
+			system_N_sysCapabilityChange);
+    if (!sysCapabilityChangeobj) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
@@ -932,6 +958,153 @@ void
     agt_not_queue_notification(not);
 
 } /* agt_sys_send_sysConfigChange */
+
+
+/********************************************************************
+* FUNCTION agt_sys_send_sysCapabilityChange
+*
+* Send a <sysCapabilityChange> event for a module
+* being added
+*
+* Queue the <sysCapabilityChange> notification
+*
+* INPUTS:
+*   changed_by == session control block that made the
+*                 change to add this module
+*             == NULL if the agent made the change
+*   is_add    == TRUE if the capability is being added
+*                FALSE if the capability is being deleted
+*   capstr == capability string that was added or deleted
+*
+* OUTPUTS:
+*   notification generated and added to notificationQ
+*
+*********************************************************************/
+void
+    agt_sys_send_sysCapabilityChange (ses_cb_t *changed_by,
+                                      boolean is_add,
+                                      const xmlChar *capstr)
+{
+    agt_not_msg_t         *not;
+    val_value_t           *changedbyval, *leafval;
+    const obj_template_t  *changedbyobj;
+    status_t               res;
+    xmlChar                numbuff[NCX_MAX_NUMLEN];
+
+#ifdef DEBUG
+    if (!capstr) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    if (LOGDEBUG) {
+	log_debug("\nagt_sys: generating <sysCapabilityChange> "
+		  "notification");
+    }
+
+    changedbyobj = obj_find_child(sysCapabilityChangeobj,
+                                  AGT_SYS_MODULE,
+                                  system_N_changed_by);
+    if (!changedbyobj) {
+	SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+	return;
+    }
+
+    not = agt_not_new_notification(sysCapabilityChangeobj);
+    if (!not) {
+	log_error("\nError: malloc failed; cannot "
+		  "send <sysCapabilityChange>");
+	return;
+    }
+
+    changedbyval = val_new_value();
+    if (!changedbyval) {
+	log_error("\nError: malloc failed; cannot "
+		  "send <sysCapabilityChange>");
+        agt_not_free_notification(not);
+	return;
+    }
+    val_init_from_template(changedbyval, changedbyobj);
+    agt_not_add_to_payload(not, changedbyval);
+
+    if (changed_by) {
+        /* add userName */
+        if (changed_by->username) {
+            leafval = agt_make_leaf(changedbyobj,
+                                    system_N_userName,
+                                    changed_by->username,
+                                    &res);
+            if (leafval) {
+                val_add_child(leafval, changedbyval);
+            } else {
+                log_error("\nError: cannot make payload leaf (%s)",
+                          get_error_string(res));
+            }
+        }
+
+        /* add sessionId */
+        sprintf((char *)numbuff, "%u", changed_by->sid);
+        leafval = agt_make_leaf(changedbyobj,
+                                system_N_sessionId,
+                                numbuff,
+                                &res);
+        if (leafval) {
+            val_add_child(leafval, changedbyval);
+        } else {
+            log_error("\nError: cannot make payload leaf (%s)",
+                      get_error_string(res));
+        }
+
+        /* add remoteHost */
+        if (changed_by->peeraddr) {
+            leafval = agt_make_leaf(changedbyobj,
+                                    system_N_remoteHost,
+                                    changed_by->peeraddr,
+                                    &res);
+            if (leafval) {
+                val_add_child(leafval, changedbyval);
+            } else {
+                log_error("\nError: cannot make payload leaf (%s)",
+                          get_error_string(res));
+            }
+        }
+    } else {
+        leafval = agt_make_leaf(changedbyobj,
+                                NCX_EL_AGENT,
+                                NULL,
+                                &res);
+        if (leafval) {
+            val_add_child(leafval, changedbyval);
+        } else {
+            log_error("\nError: cannot make payload leaf (%s)",
+                      get_error_string(res));
+        }
+    }
+
+    if (is_add) {
+        /* add sysCapoabilityChange/added-capability */
+        leafval = agt_make_leaf(sysCapabilityChangeobj,
+                                system_N_added_capability,
+                                capstr,
+                                &res);
+    } else {
+        /* add sysCapoabilityChange/deleted-capability */
+        leafval = agt_make_leaf(sysCapabilityChangeobj,
+                                system_N_deleted_capability,
+                                capstr,
+                                &res);
+    }
+    if (leafval) {
+	agt_not_add_to_payload(not, leafval);
+    } else {
+	log_error("\nError: cannot make payload leaf (%s)",
+		  get_error_string(res));
+    }
+
+    agt_not_queue_notification(not);
+
+} /* agt_sys_send_sysCapabilityChange */
 
 
 /* END file agt_sys.c */

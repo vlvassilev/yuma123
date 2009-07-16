@@ -2610,7 +2610,7 @@ static status_t
 	       yang_compare_revision_dates(val, pcb->revision)) {
 
 	log_error("\nError: found version '%s' instead of "
-		  "requested version '%s",
+		  "requested version '%s'",
 		  (val) ? val : EMPTY_STRING,
 		  pcb->revision);
 	retres = ERR_NCX_WRONG_VERSION;

@@ -91,4 +91,9 @@ extern void
 				  const xmlChar *target,
 				  const xmlChar *operation);
 
+extern void
+    agt_sys_send_sysCapabilityChange (ses_cb_t *changed_by,
+                                      boolean is_add,
+                                      const xmlChar *capstr);
+
 #endif            /* _H_agt_sys */

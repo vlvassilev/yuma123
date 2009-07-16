@@ -1711,6 +1711,31 @@ void
 } /* cap_split_modcap */
 
 
+/********************************************************************
+* FUNCTION cap_make_moduri
+*
+* Malloc and construct a module URI for the specified module
+*
+* INPUTS:
+*    mod ==  module to use
+*
+* RETURNS:
+*    malloced string containing the URI !!! must be freed later !!!
+*********************************************************************/
+xmlChar *
+    cap_make_moduri (ncx_module_t *mod)
+{
+
+#ifdef DEBUG
+    if (!mod) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return make_mod_urn(mod);
+
+} /* cap_make_moduri */
 
 
 /* END file cap.c */

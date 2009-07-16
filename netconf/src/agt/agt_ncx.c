@@ -55,6 +55,10 @@ date         init     comment
 #include "agt_ses.h"
 #endif
 
+#ifndef _H_agt_sys
+#include "agt_sys.h"
+#endif
+
 #ifndef _H_agt_state
 #include "agt_state.h"
 #endif
@@ -1524,24 +1528,34 @@ static status_t
                  rpc_msg_t *msg,
                  xml_node_t *methnode)
 {
-    val_value_t           *val, *newval;
+    val_value_t           *modval, *revval, *newval;
     ncx_module_t          *mod;
+    xmlChar               *moduri;
     status_t               res;
 
     res = NO_ERR;
     newval = NULL;
 
-    val = val_find_child(msg->rpc_input, 
-                         NCXMOD_NETCONFD,
-                         NCX_EL_MODULE);
-    if (!val || val->res != NO_ERR) {
+    modval = val_find_child(msg->rpc_input, 
+                            NCXMOD_NETCONFD,
+                            NCX_EL_MODULE);
+    if (!modval || modval->res != NO_ERR) {
         return ERR_NCX_OPERATION_FAILED;
     }
 
-    /**** TBD: revision parameter support ****/
-    mod = ncx_find_module(VAL_STR(val), NULL);
+    revval = val_find_child(msg->rpc_input, 
+                            NCXMOD_NETCONFD,
+                            NCX_EL_REVISION);
+    if (revval && revval->res != NO_ERR) {
+        return ERR_NCX_OPERATION_FAILED;
+    }
+
+    /* check for any version of this module already loaded */
+    mod = ncx_find_module(VAL_STR(modval), NULL);
     if (!mod) {
-        res = ncxmod_load_module(VAL_STR(val), NULL, NULL);
+        res = ncxmod_load_module(VAL_STR(modval), 
+                                 (revval) ? VAL_STR(revval) : NULL, 
+                                 NULL);
         if (res != NO_ERR) {
             agt_record_error(scb, 
                              &msg->mhdr, 
@@ -1551,10 +1565,11 @@ static status_t
                              NCX_NT_NONE, 
                              NULL, 
                              NCX_NT_VAL, 
-                             val);
+                             modval);
             return res;
         } else {
-            mod = ncx_find_module(VAL_STR(val), NULL);
+            mod = ncx_find_module(VAL_STR(modval),
+                                  (revval) ? VAL_STR(revval) : NULL);
             if (!mod) {
                 return SET_ERROR(ERR_INTERNAL_VAL);
             }
@@ -1562,8 +1577,8 @@ static status_t
     }
 
     /* generate the return value */
-    if (mod->version) {
-        newval = val_make_string(val->nsid,
+    if (res == NO_ERR && mod && mod->version) {
+        newval = val_make_string(val_get_nsid(modval),
                                  NCX_EL_MOD_REVISION,
                                  mod->version);                                 
         if (!newval) {
@@ -1573,6 +1588,22 @@ static status_t
 
     if (res == NO_ERR) {
         res = agt_state_add_module_schema(mod);
+    }
+
+    if (res == NO_ERR) {
+        res = agt_cap_add_module(mod);
+    }
+
+    if (res == NO_ERR) {
+        moduri = cap_make_moduri(mod);
+        if (!moduri) {
+            res = ERR_INTERNAL_MEM;
+        } else {
+            agt_sys_send_sysCapabilityChange(scb, 
+                                             TRUE,
+                                             moduri);
+            m__free(moduri);
+        }
     }
 
     if (res != NO_ERR) {
@@ -1587,8 +1618,9 @@ static status_t
                          NCX_NT_NONE,
                          NULL, 
                          NCX_NT_VAL,
-                         val);
+                         modval);
     } else {
+        /* pass off newval memory here */
         msg->rpc_data_type = RPC_DATA_YANG;
         dlq_enque(newval, &msg->rpc_dataQ);
     }

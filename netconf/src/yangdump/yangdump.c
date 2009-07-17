@@ -284,7 +284,9 @@ static status_t
     }
 
     /* next get any params from the conf file */
-    val = val_find_child(valset, YANGDUMP_MOD, YANGDUMP_PARM_CONFIG);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_CONFIG);
     if (val) {
         if (val->res == NO_ERR) {
             /* try the specified config location */
@@ -317,7 +319,9 @@ static status_t
     /*** ORDER DOES NOT MATTER FOR REST OF PARAMETERS ***/
 
     /* defnames parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, YANGDUMP_PARM_DEFNAMES);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_DEFNAMES);
     if (val && val->res == NO_ERR) {
         cp->defnames = TRUE;
     }
@@ -369,13 +373,17 @@ static status_t
     }
 
     /* help parameter */
-    val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_HELP);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         NCX_EL_HELP);
     if (val && val->res == NO_ERR) {
         cp->helpmode = TRUE;
     }
 
     /* help submode parameter (brief/normal/full) */
-    val = val_find_child(valset, YANGDUMP_MOD, NCX_EL_BRIEF);
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         NCX_EL_BRIEF);
     if (val && val->res == NO_ERR) {
         cp->helpsubmode = HELP_MODE_BRIEF;
     } else {
@@ -418,17 +426,6 @@ static status_t
     cp->modcount = val_instance_count(valset, 
                                       NULL, 
                                       YANGDUMP_PARM_MODULE);
-    if (cp->modcount == 1) {
-        val = val_find_child(valset, 
-                             YANGDUMP_MOD, 
-                             YANGDUMP_PARM_MODULE);
-        if (val && val->res == NO_ERR) {
-            cp->module = (char *)xml_strdup(VAL_STR(val));
-            if (!cp->module) {
-                return ERR_INTERNAL_MEM;
-            }
-        }
-    }
 
     /* modversion parameter */
     val = val_find_child(valset, 
@@ -488,12 +485,9 @@ static status_t
     }
 
     /* subtree parameter */
-    val = val_find_child(valset, 
-                         YANGDUMP_MOD, 
-                         YANGDUMP_PARM_SUBTREE);
-    if (val && val->res == NO_ERR) {
-        cp->subtree = (const char *)VAL_STR(val);
-    }
+    cp->subtreecount = val_instance_count(valset, 
+                                          NULL, 
+                                          YANGDUMP_PARM_SUBTREE);
 
     /* unified parameter */
     val = val_find_child(valset, 
@@ -1263,11 +1257,7 @@ static status_t
     revision = NULL;   /*****/
     bannerdone = FALSE;
 
-    if (cp->modcount > 1) {
-        modname = (const xmlChar *)cp->curmodule;
-    } else {
-        modname = (const xmlChar *)cp->module;
-    }
+    modname = (const xmlChar *)cp->curmodule;
 
     /* load in the requested module to convert */
     pcb = ncxmod_load_module_xsd(modname,
@@ -1587,8 +1577,9 @@ static status_t
     if (!cp->module) {
         return res;
     }
+    cp->curmodule = cp->module;
 
-    log_debug2("\nStart subtree file:\n%s\n", fullspec);
+    log_debug2("\nStart subtree file:\n%s\n", cp->module);
     res = convert_one(cp);
     if (res != NO_ERR) {
         if (!NEED_EXIT(res)) {
@@ -1683,12 +1674,14 @@ int
 {
     val_value_t  *val;
     status_t      res;
+    boolean       done;
     xmlChar       buffer[NCX_VERSION_BUFFSIZE];
 
 #ifdef MEMORY_DEBUG
     mtrace();
 #endif
 
+    done = FALSE;
     res = main_init(argc, argv);
 
     if (res == NO_ERR) {
@@ -1715,14 +1708,13 @@ int
             write_banner();
 
             /* convert one file or N files or 1 subtree */
-            if (cvtparms.modcount==1 && cvtparms.module) {
-                res = convert_one(&cvtparms);
-            } else if (cvtparms.modcount > 1) {
+            if (cvtparms.modcount >= 1) {
                 res = NO_ERR;
                 val = val_find_child(cli_val, 
                                      YANGDUMP_MOD, 
                                      YANGDUMP_PARM_MODULE);
                 while (val) {
+                    done = TRUE;
                     cvtparms.curmodule = (const char *)VAL_STR(val);
                     res = convert_one(&cvtparms);
                     if (NEED_EXIT(res)) {
@@ -1734,7 +1726,10 @@ int
                                                   val);
                     }
                 }
-            } else if (cvtparms.subtree) {
+            }
+
+            if (res == NO_ERR &&
+                cvtparms.subtreecount >= 1) {
                 if (cvtparms.format == NCX_CVTTYP_XSD ||
                     cvtparms.format == NCX_CVTTYP_HTML ||
                     cvtparms.format == NCX_CVTTYP_YANG ||
@@ -1742,13 +1737,32 @@ int
                     /* force separate file names in subtree mode */
                     cvtparms.defnames = TRUE;
                 }
-                res = ncxmod_process_subtree(cvtparms.subtree,
-                                             subtree_callback,
-                                             &cvtparms);
-            } else {
+                   
+                val = val_find_child(cli_val, 
+                                     YANGDUMP_MOD, 
+                                     YANGDUMP_PARM_SUBTREE);
+                while (val) {
+                    done = TRUE;
+                    cvtparms.subtree = (const char *)VAL_STR(val);
+                    res = ncxmod_process_subtree(cvtparms.subtree,
+                                                 subtree_callback,
+                                                 &cvtparms);
+                    if (NEED_EXIT(res)) {
+                        val = NULL;
+                    } else {
+                        val = val_find_next_child(cli_val,
+                                                  YANGDUMP_MOD,
+                                                  YANGDUMP_PARM_SUBTREE,
+                                                  val);
+                    }
+                }
+            }
+
+            if (res == NO_ERR && !done) {
                 res = ERR_NCX_MISSING_PARM;
                 log_error("\nyangdump: Error: missing parameter (%s or %s)\n",
-                          NCX_EL_MODULE, NCX_EL_SUBTREE);
+                          NCX_EL_MODULE, 
+                          NCX_EL_SUBTREE);
             }
         }
     }

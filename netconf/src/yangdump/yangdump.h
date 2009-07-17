@@ -85,6 +85,7 @@ typedef struct yangdump_cvtparms_t_ {
     const xmlChar  *html_toc;
     boolean         html_div;
     uint32          modcount;
+    uint32          subtreecount;
     ncx_cvttyp_t    format;
     boolean         defnames;
     boolean         dependencies;

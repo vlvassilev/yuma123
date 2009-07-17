@@ -38,8 +38,13 @@ LIBS = 	-lagt \
 # hardwire the project library targets for now
 # to match the project dirs in the LIBS directive
 
+ifdef STATIC
+LIBTARGS= $(LBASE)/libagt.a \
+	$(LBASE)/libncx.a
+else
 LIBTARGS= $(LBASE)/libagt.a \
 	$(LBASE)/libncx.so
+endif
 
 
 ############################# MAKE RULES ##################

@@ -29,6 +29,12 @@ PROG=yangdiff
 
 LIBS =	-lncx -L/usr/lib -lxml2
 
+ifdef STATIC
+LIBTARGS= $(LBASE)/libncx.a
+else
+LIBTARGS= $(LBASE)/libncx.a
+endif
+
 ############################# MAKE RULES ##################
 all: yangdiff
 
@@ -52,7 +58,7 @@ install:
 
 # this real test rule keeps make from deleting the $(OBJS) as
 # intermediate files
-yangdiff: $(OBJS)
+yangdiff: $(OBJS) $(LIBTARGS)
 	$(LINK) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(PROG) $(LPATH) $(LIBS)
 
 clean:

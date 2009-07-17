@@ -35,7 +35,11 @@ endif
 
 LIBS =	-lncx -L/usr/lib -lxml2
 
+ifdef STATIC
+LIBTARGS= $(LBASE)/libncx.a
+else
 LIBTARGS= $(LBASE)/libncx.so
+endif
 
 ############################# MAKE RULES ##################
 all: yangdump

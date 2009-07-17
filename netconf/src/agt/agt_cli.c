@@ -363,7 +363,8 @@ status_t
         set_agent_profile(valset, agt_profile);
 
         /* next get any params from the conf file */
-        val = val_find_child(valset, AGT_CLI_MODULE, 
+        val = val_find_child(valset, 
+                             AGT_CLI_MODULE, 
                              NCX_EL_CONFIG);
         if (val) {
             if (val->res == NO_ERR) {
@@ -371,7 +372,8 @@ status_t
                 agt_profile->agt_conffile = VAL_STR(val);
                 res = conf_parse_val_from_filespec(VAL_STR(val), 
                                                    valset, 
-                                                   TRUE, TRUE);
+                                                   TRUE, 
+                                                   TRUE);
                 if (res != NO_ERR) {
                     return res;
                 } else {

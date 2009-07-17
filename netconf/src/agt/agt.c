@@ -88,12 +88,6 @@ date         init     comment
 #include "agt_timer.h"
 #endif
 
-#if 0
-#ifndef _H_agtinst
-#include "agtinst.h"
-#endif
-#endif
-
 #ifndef _H_log
 #include "log.h"
 #endif
@@ -304,6 +298,9 @@ status_t
     agt_shutdown_started = FALSE;
     agt_shutmode = NCX_SHUT_NONE;
 
+    *showver = FALSE;
+    *showhelpmode = HELP_MODE_NONE;
+
     /* allow cleanup to run even if this fn does not complete */
     agt_init_done = TRUE;
 
@@ -320,7 +317,7 @@ status_t
     } /* else the agt_profile is filled in */
 
     /* check if quick exit mode */
-    if (*showver || *showhelpmode == HELP_MODE_NONE) {
+    if (*showver || (*showhelpmode != HELP_MODE_NONE)) {
         return NO_ERR;
     }
 
@@ -359,7 +356,9 @@ status_t
 status_t 
     agt_init2 (void)
 {
-    status_t  res;
+    const val_value_t  *clivalset;
+    val_value_t        *modval;
+    status_t            res;
 
 #ifdef AGT_DEBUG
     log_debug3("\nAgent Init-2 Starting...");
@@ -412,7 +411,7 @@ status_t
         return res;
     }
 
-    /* setup the candidate config if it is used (still TBD) */
+    /* setup the candidate config if it is used */
     if (agt_profile.agt_targ==NCX_AGT_TARG_CANDIDATE) {
         res = cfg_init_static_db(NCX_CFGID_CANDIDATE);
         if (res != NO_ERR) {
@@ -446,16 +445,6 @@ status_t
     /* initialize the session handler data structures */
     agt_ses_init();
 
-#if 0
-    /* initialize the agent parmset callback functions 
-     *  *** TBD: make this modular and callable at any time
-     */
-    res = agtinst_init();
-    if (res != NO_ERR) {
-        return res;
-    }
-#endif
-
     /* load the system module */
     res = agt_sys_init();
     if (res != NO_ERR) {
@@ -474,11 +463,44 @@ status_t
         return res;
     }
     
+    /* check the module parameter set from CLI or conf file
+     * for any modules to pre-load
+     */
+    res = NO_ERR;
+    clivalset = agt_cli_get_valset();
+    if (clivalset) {
+        modval = val_find_child(clivalset,
+                                NCXMOD_NETCONFD,
+                                NCX_EL_MODULE);
+
+        while (modval && res == NO_ERR) {
+            res = ncxmod_load_module(VAL_STR(modval),
+                                     NULL,   /* parse revision TBD */
+                                     NULL);
+            if (res == NO_ERR) {
+
+                /*** TBD: load lib<modname>.<rev-date>.so 
+                 *** into the agent code
+                 ***/
+
+                modval = val_find_next_child(clivalset,
+                                             NCXMOD_NETCONFD,
+                                             NCX_EL_MODULE,
+                                             modval);
+            }
+        }
+    }
+
     /*** ALL INITIAL YANG MODULES SHOULD BE LOADED AT THIS POINT ***/
+    if (res != NO_ERR) {
+        log_error("\nError: one or more modules could not be loaded");
+        return ERR_NCX_OPERATION_FAILED;
+    }
+
     if (ncx_any_mod_errors()) {
-        log_error("\nagt: fatal error - one or more YANG modules"
-                  " loaded with errors\n");
-        return ERR_NCX_DATA_MISSING;
+        log_error("\nError: one or more pre-loaded YANG modules"
+                  " has fatal errors\n");
+        return ERR_NCX_OPERATION_FAILED;
     }
 
     /* set the initial module capabilities in the agent <hello> message */
@@ -568,10 +590,6 @@ void
     if (agt_init_done) {
 #ifdef AGT_DEBUG
         log_debug3("\nAgent Cleanup Starting...\n");
-#endif
-
-#if 0
-        agtinst_cleanup();
 #endif
 
         agt_acm_cleanup();

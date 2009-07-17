@@ -40,10 +40,11 @@ install:
 	$(REAL_INST)
 	sudo ldconfig
 
-#ncxlib: dependencies $(LBASE)/lib$(SUBDIR_NM).a
-
-ncxlib: dependencies $(LBASE)/lib$(SUBDIR_NM).so
-
+ifdef STATIC
+ncxlib: $(LBASE)/lib$(SUBDIR_NM).a
+else
+ncxlib: $(LBASE)/lib$(SUBDIR_NM).so
+endif
 
 # this dummy rule keeps make from deleting the $(OBJS) as
 # intermediate files

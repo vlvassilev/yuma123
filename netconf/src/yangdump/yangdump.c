@@ -1708,23 +1708,21 @@ int
             write_banner();
 
             /* convert one file or N files or 1 subtree */
-            if (cvtparms.modcount >= 1) {
-                res = NO_ERR;
-                val = val_find_child(cli_val, 
-                                     YANGDUMP_MOD, 
-                                     YANGDUMP_PARM_MODULE);
-                while (val) {
-                    done = TRUE;
-                    cvtparms.curmodule = (const char *)VAL_STR(val);
-                    res = convert_one(&cvtparms);
-                    if (NEED_EXIT(res)) {
-                        val = NULL;
-                    } else {
-                        val = val_find_next_child(cli_val,
-                                                  YANGDUMP_MOD,
-                                                  YANGDUMP_PARM_MODULE,
-                                                  val);
-                    }
+            res = NO_ERR;
+            val = val_find_child(cli_val, 
+                                 YANGDUMP_MOD, 
+                                 YANGDUMP_PARM_MODULE);
+            while (val) {
+                done = TRUE;
+                cvtparms.curmodule = (const char *)VAL_STR(val);
+                res = convert_one(&cvtparms);
+                if (NEED_EXIT(res)) {
+                    val = NULL;
+                } else {
+                    val = val_find_next_child(cli_val,
+                                              YANGDUMP_MOD,
+                                              YANGDUMP_PARM_MODULE,
+                                              val);
                 }
             }
 

@@ -219,9 +219,6 @@ static help_mode_t     helpsubmode;
 /* true if printing program version and exiting */
 static boolean         versionmode;
 
-/* contains list of modules entered from CLI --modules parm */
-static val_value_t    *modules;
-
 /* name of script passed at invocation to auto-run */
 static xmlChar        *runscript;
 
@@ -1822,17 +1819,6 @@ static status_t
 	}
     }
 
-    /* get the modules parameter */
-    parm = val_find_child(mgr_cli_valset, 
-                          YANGCLI_MOD, 
-                          NCX_EL_MODULES);
-    if (parm && parm->res == NO_ERR) {
-	modules = val_clone(parm);
-	if (modules == NULL) {
-	    return ERR_INTERNAL_MEM;
-	}
-    }
-
     /* get the run-script parameter */
     runscript = get_strparm(mgr_cli_valset, 
                             YANGCLI_MOD, 
@@ -2636,8 +2622,7 @@ static status_t
 {
     const obj_template_t *obj;
     agent_cb_t           *agent_cb;
-    ncx_lmem_t           *lmem;
-    val_value_t          *parm;
+    val_value_t          *parm, *modval;
     status_t              res;
     log_debug_t           log_level;
     xmlChar               versionbuffer[NCX_VERSION_BUFFSIZE];
@@ -2665,7 +2650,6 @@ static status_t
     helpmode = FALSE;
     helpsubmode = HELP_MODE_NONE;
     versionmode = FALSE;
-    modules = NULL;
     autoload = TRUE;
     fixorder = TRUE;
     optional = FALSE;
@@ -2799,25 +2783,27 @@ static status_t
     }
 
     /* check if any explicitly listed modules should be loaded */
-    if (modules) {
-	lmem = ncx_first_lmem(&VAL_LIST(modules));
-	while (lmem) {
+    modval = val_find_child(mgr_cli_valset,
+                            YANGCLI_MOD,
+                            NCX_EL_MODULE);
+    while (modval) {
+        log_info("\nyangcli: Loading requested module %s", 
+                 VAL_STR(modval));
 
-	    log_info("\nyangcli: Loading requested module %s", 
-		     NCX_LMEM_STRVAL(lmem));
+        res = ncxmod_load_module(VAL_STR(modval),
+                                 NULL,   /*** need revision parameter ***/
+                                 NULL);
+        if (res != NO_ERR) {
+            log_info("\n load failed (%s)", get_error_string(res));
+        } else {
+            log_info("\n load OK");
+        }
 
-	    res = ncxmod_load_module
-		((const xmlChar *)NCX_LMEM_STRVAL(lmem),
-		 NULL,   /*** need revision parameter ***/
-		 NULL);
-	    if (res != NO_ERR) {
-		log_info("\n load failed (%s)", get_error_string(res));
-	    } else {
-		log_info("\n load OK");
-	    }
+        modval = val_find_next_child(mgr_cli_valset,
+                                     YANGCLI_MOD,
+                                     NCX_EL_MODULE,
+                                     modval);
 
-	    lmem = (ncx_lmem_t *)dlq_nextEntry(lmem);
-	}
     }
 
     /* load the system (read-only) variables */
@@ -2913,11 +2899,6 @@ static void
     if (default_module) {
 	m__free(default_module);
 	default_module = NULL;
-    }
-
-    if (modules) {
-	val_free_value(modules);
-	modules = NULL;
     }
 
     if (confname) {

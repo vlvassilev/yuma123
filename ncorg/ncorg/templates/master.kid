@@ -100,7 +100,9 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 	    <li><a href="/yang_auto">YANG-based&nbsp;automation</a></li>
 	  </ul>
 	</li>
+        <!--
 	<li><a href="/download">Free&nbsp;Downloads</a></li>
+        -->
       </ul>
     </div>
 

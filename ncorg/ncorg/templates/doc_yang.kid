@@ -26,12 +26,100 @@
 	    (NETMOD)
 	  </a>
 	  is developing a high-level data modeling language for the 
-	  NETCONF protocol, called <b>YANG</b>.  The current version
-	  of the language specification is dated
-	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-05.txt">
-	    April 2009.
-	  </a>
+	  NETCONF protocol, called <b>YANG</b>. 
 	</p>
+
+        <p>
+          The NETMOD <a href="https://trac.tools.ietf.org/wg/netmod/">Wiki</a> 
+          contains up-to-date information
+          about the Internet Drafts under development by this WG.
+        </p>
+        <div class="publication-list">
+	  <br/>
+	  <h2>Standards Work in Progress</h2>
+
+	  <h4>draft-ietf-netmod-yang</h4>
+	  <p>
+            YANG is a data modeling language used to model configuration and
+            state data manipulated by the Network Configuration Protocol
+            (NETCONF) protocol, NETCONF remote procedure calls, and NETCONF
+            notifications.
+	    <br/><br/>
+	    <b>Intended Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
+	    <a href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-07.txt">
+              YANG - A data modeling language for NETCONF
+	    </a>
+	  </p>
+
+	  <h4>draft-ietf-netmod-yang-types</h4>
+	  <p>
+            This document introduces a collection of common data types to be used
+            with the YANG data modeling language.
+	    <br/><br/>
+	    <b>Intended Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
+	    <a href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-types-03.txt">
+              Common YANG Data Types
+	    </a>
+	  </p>
+
+	  <h4>draft-ietf-netmod-dsdl-map</h4>
+	  <p>
+            This draft specifies the mapping rules for translating YANG data
+            models into Document Schema Definition Languages (DSDL), a
+            coordinated set of XML schema languages standardized as ISO 19757.
+            The following DSDL schema languages are used by the mapping: RELAX
+            NG, Schematron and DSRL.  The mapping takes one or more YANG modules
+            and produces a set of DSDL schemas for a selected target document
+            type - datastore content, NETCONF PDU etc.  Procedures for schema-
+            based validation of such documents are also discussed.
+	    <br/><br/>
+	    <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
+	    <a href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-dsdl-map-03.txt">
+              Mapping YANG to Document Schema Definition Languages and Validating
+              NETCONF Content
+	    </a>
+	  </p>
+
+	  <h4>draft-ietf-netmod-arch</h4>
+	  <p>
+            NETCONF gives access to native capabilities of the devices within a
+            network, defining methods for manipulating configuration databases,
+            retrieving operational data, and invoking specific operations.  YANG
+            provides the means to define the content carried via NETCONF, both
+            data and operations.  Using both technologies, standard modules can
+            be defined to give interoperability and commonality to devices, while
+            still allowing devices to express their unique capabilities.
+            <br/><br/>
+            This document describes how NETCONF and YANG help build network
+            management applications that meet the needs of network operators.
+	    <br/><br/>
+	    <b>Intended Status:</b> Informational RFC, nothing-to-implement
+            <br/><br/>
+	    <a href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-arch-02.txt">
+              An NETCONF- and NETMOD-based Architecture for Network Management
+	    </a>
+	  </p>
+
+	  <h4>draft-ietf-netmod-yang-usage</h4>
+	  <p>
+            This memo provides guidelines for authors and reviewers of standards
+            track specifications containing YANG data model modules.  Applicable
+            portions may be used as a basis for reviews of other YANG data model
+            documents.  Recommendations and procedures are defined, which are
+            intended to increase interoperability and usability of NETCONF
+            implementations which utilize YANG data model modules.
+	    <br/><br/>
+	    <b>Intended Status:</b> Informational RFC, nothing-to-implement
+            <br/><br/>
+	    <a href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-usage-00.txt">
+              Guidelines for Authors and Reviewers of YANG Data Model Documents
+	    </a>
+	  </p>
+
+        </div>
+
+        <p>&nbsp;</p>
+
 	<h2>YANG Central</h2>
 	<p>
           The WEB home for YANG information is

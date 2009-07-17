@@ -16,7 +16,7 @@
       <br />
       <p>
 	This version of yangdump fully supports YANG as defined
-	in 'draft-ietf-netmod-yang-04.txt'.<br/>
+	in 'draft-ietf-netmod-yang-07.txt'.<br/>
 	File names must be in one of these forms:
 	<ul>
 	  <li>modulename.yang  (foo.yang)</li>

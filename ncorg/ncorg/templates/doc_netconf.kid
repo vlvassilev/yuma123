@@ -1112,7 +1112,7 @@
 	  instance-identifier or XPath expressions) for the 
 	  NETCONF protocol.<br/><br/>
 	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-partial-lock-08.txt">
+	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-partial-lock-09.txt">
 	    Partial Lock RPC for NETCONF
 	  </a>
 	</p>
@@ -1122,7 +1122,7 @@
 	  Defines an agent monitoring data model and schema retrieval
 	  mechanism for the NETCONF protocol.<br/><br/>
 	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-monitoring-04.txt">
+	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-monitoring-07.txt">
 	    NETCONF Monitoring Schema
 	  </a>
 	</p>
@@ -1132,7 +1132,7 @@
 	  Defines a mechanism to control the filtering of leaf objects
           containing the 'default' value, during NETCONF retrieval operations.<br/><br/>
 	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-with-defaults-01.txt">
+	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-with-defaults-02.txt">
 	    With-defaults capability for NETCONF
 	  </a>
 	</p>
@@ -1141,7 +1141,7 @@
 	<p>
 	  Defines a minor update to the NETCONF protocol.<br/><br/>
 	  <b>Intended Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-4741bis-00.txt">
+	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-4741bis-01.txt">
 	    Network Configuration Protocol
 	  </a>
 	</p>

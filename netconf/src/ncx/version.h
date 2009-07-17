@@ -26,6 +26,6 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
-#define YANGTOOLS_VERSION  (const xmlChar *)"0.9.6"
+#define YANGTOOLS_VERSION  (const xmlChar *)"0.9.7"
 
 #endif            /* _H_version */

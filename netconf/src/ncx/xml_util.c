@@ -1603,7 +1603,8 @@ xmlChar *
     uint32  len, i;
 
 #ifdef DEBUG
-    if (!copyFrom || !maxlen) {
+    if (!copyFrom) {
+        SET_ERROR(ERR_INTERNAL_PTR);
 	return NULL;
     }
 #endif
@@ -1644,7 +1645,8 @@ char *
     uint32  len, i;
 
 #ifdef DEBUG
-    if (!copyFrom || !maxlen) {
+    if (!copyFrom) {
+        SET_ERROR(ERR_INTERNAL_PTR);
 	return NULL;
     }
 #endif

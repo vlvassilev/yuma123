@@ -60,6 +60,10 @@ date         init     comment
 #include "agt_not.h"
 #endif
 
+#ifndef _H_agt_proc
+#include "agt_proc.h"
+#endif
+
 #ifndef _H_agt_rpc
 #include "agt_rpc.h"
 #endif
@@ -462,6 +466,12 @@ status_t
     if (res != NO_ERR) {
         return res;
     }
+
+    /* load the NETCONF /proc monitoring data model module */
+    res = agt_proc_init();
+    if (res != NO_ERR) {
+        return res;
+    }
     
     /* check the module parameter set from CLI or conf file
      * for any modules to pre-load
@@ -544,6 +554,12 @@ status_t
         return res;
     }
 
+    /* load the /proc monitoring callback functions and data */
+    res = agt_proc_init2();
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* allow users to access the configuration databases now */
     cfg_set_state(NCX_CFGID_RUNNING, CFG_ST_READY);
 
@@ -599,6 +615,7 @@ void
         agt_sys_cleanup();
         agt_state_cleanup();
         agt_not_cleanup();
+        agt_proc_cleanup();
         agt_ses_cleanup();
         agt_cap_cleanup();
         agt_rpc_cleanup();

@@ -39,6 +39,10 @@ date         init     comment
 #include "agt_top.h"
 #endif
 
+#ifndef _H_agt_ses
+#include "agt_ses.h"
+#endif
+
 #ifndef _H_agt_xml
 #include "agt_xml.h"
 #endif
@@ -133,8 +137,10 @@ void
     xml_init_node(&top);
 
     /* get the first node */
-    res = agt_xml_consume_node(scb, &top, 
-                               NCX_LAYER_TRANSPORT, NULL);
+    res = agt_xml_consume_node(scb, 
+                               &top, 
+                               NCX_LAYER_TRANSPORT, 
+                               NULL);
     if (res != NO_ERR) {
         scb->stats.inXMLParseErrors++;
         myagttotals->stats.inXMLParseErrors++;
@@ -146,7 +152,7 @@ void
         }
 
         xml_clean_node(&top);
-        /****  agt_ses_kill_session(scb->sid);  ****/
+        agt_ses_free_session(scb);
         return;
     }
 
@@ -180,6 +186,7 @@ void
                      scb->sid, 
                      get_error_string(res));
         }
+        agt_ses_free_session(scb);
     }
 
     xml_clean_node(&top);

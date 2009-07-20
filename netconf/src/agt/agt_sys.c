@@ -865,6 +865,11 @@ void
 	termreasonstr = (const xmlChar *)"other";
 	break;
     case SES_TR_NOSTART:
+	termreasonstr = (const xmlChar *)"nostart";
+        break;
+    case SES_TR_BAD_HELLO:
+	termreasonstr = (const xmlChar *)"bad-hello";
+        break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
 	termreasonstr = (const xmlChar *)"other";

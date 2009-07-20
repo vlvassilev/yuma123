@@ -147,7 +147,8 @@ typedef enum ses_term_reason_t_ {
     SES_TR_DROPPED,
     SES_TR_TIMEOUT,
     SES_TR_OTHER,
-    SES_TR_NOSTART
+    SES_TR_NOSTART,
+    SES_TR_BAD_HELLO
 } ses_term_reason_t;
 
 

@@ -893,16 +893,23 @@ int
     ses_msg_t   *msg;
     ses_msg_buff_t  *buff, *buff2;
     int          retlen;
-    boolean      done;
+    boolean      done, firstbuff;
+
+    if (len == 0) {
+        return 0;
+    }
 
     scb = (ses_cb_t *)context;
     if (scb->state >= SES_ST_SHUTDOWN_REQ) {
 	return -1;
     }
+
     msg = (ses_msg_t *)dlq_firstEntry(&scb->msgQ);
     if (!msg) {
 	return 0;
     }
+
+    firstbuff = FALSE;
     buff = msg->curbuff;
 
     /* check if this is the first read */
@@ -913,7 +920,11 @@ int
 	} else {
 	    buff->buffpos = 0;
 	    msg->curbuff = buff;
+            firstbuff = TRUE;
 	}
+    } else {
+	firstbuff = (buff == (ses_msg_buff_t *)
+                     dlq_firstEntry(&msg->buffQ)) ? TRUE : FALSE;
     }
 
     /* check current buffer end has been reached */
@@ -927,8 +938,21 @@ int
 	}
     }
 
+    /* hack: xmlTextReaderRead wants to start off
+     * with a newline for some reason, so always
+     * start the first buffer with a newline, even if
+     * none was sent by the NETCONF peer.
+     * Only the first 0xa char seems to matter
+     * Trailing newlines do not seem to affect the problem
+     */
+    if (buff->buffpos == 0 && firstbuff && buff->buff[0] != '\n') {
+        buffer[0] = '\n';
+        retlen = 1;
+    } else {
+        retlen = 0;
+    }
+
     /* start transferring bytes to the return buffer */
-    retlen = 0;
     done = FALSE;
     while (!done) {
 
@@ -961,7 +985,8 @@ int
      * Resetting the buffer back to the start seems to
      * fix the problem
      */
-    if (len==4 && buff->buffpos==4) {
+    if (len == 4 && firstbuff &&
+        (buff->buffpos == 3 || buff->buffpos == 4)) {
 	buff->buffpos = 0;
     }
 

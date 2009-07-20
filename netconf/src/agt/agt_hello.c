@@ -216,12 +216,12 @@ void
     agt_hello_dispatch (ses_cb_t *scb,
                         xml_node_t *top)
 {
-    status_t         res;
-    xml_msg_hdr_t    msg;
-    val_value_t     *val;
-    ncx_module_t    *mod;
+    val_value_t           *val;
+    ncx_module_t          *mod;
     const obj_template_t  *obj;
-    ncx_node_t       dtyp;
+    xml_msg_hdr_t          msg;
+    ncx_node_t             dtyp;
+    status_t               res;
 
 #ifdef DEBUG
     if (!scb || !top) {
@@ -246,6 +246,10 @@ void
                      scb->state, 
                      scb->sid);
         }
+        mytotals->stats.inBadHellos++;
+        agt_ses_request_close(scb->sid,
+                              scb->sid,
+                              SES_TR_BAD_HELLO);
         return;
     }
 
@@ -295,6 +299,11 @@ void
                      scb->sid);
         }
         mytotals->stats.inBadHellos++;
+
+        agt_ses_request_close(scb->sid,
+                              scb->sid,
+                              SES_TR_BAD_HELLO);
+
     } else {
         scb->state = SES_ST_IDLE;
         scb->active = TRUE;

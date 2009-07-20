@@ -48,5 +48,7 @@ date	     init     comment
 extern status_t 
     agt_ncxserver_run (void);
 
+extern void
+    agt_ncxserver_clear_fd (int fd);
 
 #endif	    /* _H_agt_ncxserver */

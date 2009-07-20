@@ -89,7 +89,7 @@ date	     init     comment
 #define MAX_CHAR_ENT 8
 
 #define XML_START_MSG ((const xmlChar *)\
-		       "\n<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
+		       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
 
 #define XML_START_FILMSG ((const xmlChar *)\
 			  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>")

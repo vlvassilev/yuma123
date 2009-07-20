@@ -40,6 +40,10 @@ date         init     comment
 #include  "agt_connect.h"
 #endif
 
+#ifndef _H_agt_ncxserver
+#include  "agt_ncxserver.h"
+#endif
+
 #ifndef _H_agt_ses
 #include  "agt_ses.h"
 #endif
@@ -1274,7 +1278,7 @@ ses_cb_t *
 	agttotals->active_sessions++;
     } else {
 	if (scb) {
-	    ses_free_scb(scb);
+	    agt_ses_free_session(scb);
 	    scb = NULL;
 	}
 	if (LOGINFO) {
@@ -1332,6 +1336,11 @@ void
     } else {
 	agttotals->failed_sessions++;
     }
+
+    /* make sure the ncxserver loop does not try
+     * to read from this file desciptor again
+     */
+    agt_ncxserver_clear_fd(scb->fd);
 
     /* this will close the socket if it is still open */
     ses_free_scb(scb);
@@ -1501,6 +1510,16 @@ boolean
 
     /* get the session control block that rdy is embedded into */
     scb = agtses[rdy->sid];
+
+    if (scb == NULL) {
+#ifdef AGT_SES_DEBUG
+        if (LOGDEBUG) {
+            log_debug("\nagt_ses: session %d gone", rdy->sid);
+        }
+#endif
+        return FALSE;
+    }
+
     mysid = scb->sid;
 
 #ifdef AGT_SES_DEBUG
@@ -1582,12 +1601,13 @@ boolean
 	/* free the message that was just processed */
 	dlq_remove(msg);
         ses_msg_free_msg(scb, msg);
-    }
 
-    /* check if any messages left for this session */
-    msg = (ses_msg_t *)dlq_firstEntry(&scb->msgQ);
-    if (msg && msg->ready) {
-        ses_msg_make_inready(scb);
+
+        /* check if any messages left for this session */
+        msg = (ses_msg_t *)dlq_firstEntry(&scb->msgQ);
+        if (msg && msg->ready) {
+            ses_msg_make_inready(scb);
+        }
     }
 
     return TRUE;

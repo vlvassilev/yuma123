@@ -102,6 +102,11 @@ date         init     comment
 #define MAX_NOTIFICATION_BURST  10
 
 
+static fd_set active_fd_set;
+static fd_set read_fd_set;
+static fd_set write_fd_set;
+
+
 /********************************************************************
  * FUNCTION make_named_socket
  * 
@@ -208,7 +213,6 @@ status_t
 {
     ses_cb_t *scb;
     int ncxsock, maxwrnum, maxrdnum;
-    fd_set active_fd_set, read_fd_set, write_fd_set;
     int i, new, ret;
     struct sockaddr_un clientname;
     struct timeval timeout;
@@ -228,6 +232,7 @@ status_t
     }
      
     /* Initialize the set of active sockets. */
+    FD_ZERO(&read_fd_set);
     FD_ZERO(&write_fd_set);
     FD_ZERO(&active_fd_set);
     FD_SET(ncxsock, &active_fd_set);
@@ -315,14 +320,12 @@ status_t
                                                  scb->sid,
                                                  SES_TR_OTHER);
                             scb = NULL;
-                            FD_CLR(i, &active_fd_set);
                         } else if (scb->state == SES_ST_SHUTDOWN_REQ) {
                             /* close-session reply sent, now kill ses */
                             agt_ses_kill_session(scb->sid, 
                                                  scb->killedbysid,
                                                  scb->termreason);
                             scb = NULL;
-                            FD_CLR(i, &active_fd_set);
                         }
                     }
 
@@ -378,10 +381,6 @@ status_t
                     if (scb) {
                         res = ses_accept_input(scb);
                         if (res != NO_ERR) {
-                            agt_ses_request_close(scb->sid,
-                                                  scb->sid,
-                                                  SES_TR_OTHER);
-                            FD_CLR(i, &active_fd_set);
                             if (i >= maxrdnum) {
                                 maxrdnum = i-1;
                             }
@@ -393,6 +392,10 @@ status_t
                                              get_error_string(res));
                                 }
                             }
+                            agt_ses_kill_session(scb->sid,
+                                                 scb->sid,
+                                                 SES_TR_OTHER);
+
                         } 
                     }
                 }
@@ -423,6 +426,21 @@ status_t
 
 }  /* agt_ncxserver_run */
 
+
+/********************************************************************
+ * FUNCTION agt_ncxserver_clear_fd
+ * 
+ * Clear a dead session from the select loop
+ * 
+ * INPUTS:
+ *   fd == file descriptor number for the socket to clear
+ *********************************************************************/
+void
+    agt_ncxserver_clear_fd (int fd)
+{
+    FD_CLR(fd, &active_fd_set);
+
+} /* agt_ncxserver_clear_fd */
 
 
 /* END agt_ncxserver.c */

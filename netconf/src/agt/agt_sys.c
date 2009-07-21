@@ -864,8 +864,8 @@ void
     case SES_TR_OTHER:
 	termreasonstr = (const xmlChar *)"other";
 	break;
-    case SES_TR_NOSTART:
-	termreasonstr = (const xmlChar *)"nostart";
+    case SES_TR_BAD_START:
+	termreasonstr = (const xmlChar *)"bad-start";
         break;
     case SES_TR_BAD_HELLO:
 	termreasonstr = (const xmlChar *)"bad-hello";

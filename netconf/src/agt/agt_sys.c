@@ -808,13 +808,6 @@ void
     }
 #endif
 
-    if (termreason == SES_TR_NOSTART) {
-	/* session did not start; just being killed
-	 * in the <ncxconnect> message handler
-	 */
-	return;
-    }
-
     if (LOGDEBUG) {
 	log_debug("\nagt_sys: generating <sysSessionEnd> "
 		  "notification");
@@ -827,7 +820,14 @@ void
 	return;
     }
 
-    add_common_session_parms(scb, not);
+    if (termreason == SES_TR_BAD_START) {
+	/* session did not start; just being killed
+	 * in the <ncxconnect> message handler
+	 */
+        ;
+    } else {
+        add_common_session_parms(scb, not);
+    }
 
     /* add sysSessionEnd/killedBy */
     if (termreason == SES_TR_KILLED) {

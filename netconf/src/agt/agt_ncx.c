@@ -16,8 +16,8 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #ifndef _H_procdefs
 #include  "procdefs.h"
@@ -642,7 +642,10 @@ static status_t
 #endif
 
     /* get the config to delete */
-    res = agt_get_cfg_from_parm(NCX_EL_TARGET, msg, methnode, &target);
+    res = agt_get_cfg_from_parm(NCX_EL_TARGET, 
+                                msg, 
+                                methnode, 
+                                &target);
     if (res != NO_ERR) {
         return res;  /* error already recorded */
     } 
@@ -709,7 +712,7 @@ static status_t
                          errtyp, 
                          errval,
                          NCX_NT_STRING, 
-                         "/rpc/delete-config/target");
+                         "/nc:rpc/nc:delete-config/nc:target");
     }
     return res;
 
@@ -731,11 +734,51 @@ static status_t
                           rpc_msg_t *msg,
                           xml_node_t *methnode)
 {
-    (void)scb;
-    (void)msg;
-    (void)methnode;
+    const agt_profile_t  *profile;
+    xmlChar              *fname;
+    const xmlChar        *startspec;
+    status_t              res;
+    int                   retval;
 
-    /*** NEED TO ADD SUPPORT FOR DELETE startup ***/
+    res = NO_ERR;
+
+    (void)scb;
+
+    profile = agt_get_profile();
+
+    /* use the user-set startup or default filename */
+    if (profile->agt_startup) {
+        startspec = profile->agt_startup;
+    } else {
+        startspec = NCX_DEF_STARTUP_FILE;
+    }
+
+    fname = ncxmod_find_data_file(startspec,
+                                  FALSE, 
+                                  &res);
+    if (fname) {
+        retval = remove((const char *)fname);
+        if (retval != 0) {
+            res = errno_to_status();
+            agt_record_error(scb, 
+                             &msg->mhdr,
+                             NCX_LAYER_OPERATION, 
+                             res, 
+                             methnode, 
+                             NCX_NT_STRING, 
+                             fname,
+                             NCX_NT_STRING, 
+                             "/nc:rpc/nc:delete-config/nc:target");
+        }
+        m__free(fname);
+        return res;
+    } else {
+        if (LOGWARN) {
+            log_warn("\nWarning: cannot find config file '%s' to delete",
+                     startspec);
+        }
+    }
+
     return NO_ERR;
 
 } /* delete_config_invoke */

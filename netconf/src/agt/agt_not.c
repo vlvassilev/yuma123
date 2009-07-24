@@ -241,8 +241,10 @@ static const obj_template_t *sequenceidobj;
 static boolean               anySubscriptions;
 
 /* auto-increment message index */
-static uint64                msgid;
+static uint32                msgid;
 
+/* keep track of eventlog size */
+static uint32                notification_count;
 
 /********************************************************************
 * FUNCTION free_subscription
@@ -825,8 +827,6 @@ static void
 }  /* expire_subscription */
 
 
-
-
 /********************************************************************
 * FUNCTION get_entry_after
 *
@@ -1033,6 +1033,62 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION delete_oldest_notification
+*
+* Clean and free a subscription control block
+*
+* INPUTS:
+*    sub == subscription to delete
+*
+*********************************************************************/
+static void
+    delete_oldest_notification (void)
+{
+    agt_not_msg_t            *msg;
+    agt_not_subscription_t   *sub;
+
+    /* get the oldest message in the replay buffer */
+    msg = (agt_not_msg_t *)dlq_deque(&notificationQ);
+    if (msg == NULL) {
+        return;
+    }
+
+    /* make sure none of the subscriptions are pointing
+     * to this message in tracking the replay progress
+     */
+    for (sub = (agt_not_subscription_t *)
+             dlq_firstEntry(&subscriptionQ);
+         sub != NULL;
+         sub = (agt_not_subscription_t *)dlq_nextEntry(sub)) {
+
+        if (sub->firstreplaymsg == msg) {
+            sub->firstreplaymsg = NULL;
+        }
+        if (sub->lastreplaymsg == msg) {
+            sub->lastreplaymsg = NULL;
+        }
+        if (sub->lastmsg == msg) {
+            sub->lastmsg = NULL;
+        }
+    }
+
+    if (LOGDEBUG2) {
+        log_debug2("\nDeleting oldest notification (id: %u)",
+                   msg->msgid);
+    }
+
+    agt_not_free_notification(msg);
+
+    if (notification_count > 0) {
+        notification_count--;
+    } else {
+        SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+}  /* delete_oldest_notification */
+
+
+/********************************************************************
 * FUNCTION new_notification
 * 
 * Malloc and initialize the fields in an agt_not_msg_t
@@ -1151,9 +1207,9 @@ static void
     sequenceidobj = NULL;
     anySubscriptions = FALSE;
     msgid = 0;
+    notification_count = 0;
 
 } /* init_static_vars */
-
 
 
 /************* E X T E R N A L    F U N C T I O N S ***************/
@@ -1482,6 +1538,7 @@ uint32
 {
     agt_not_subscription_t  *sub, *nextsub;
     agt_not_msg_t           *not;
+    const agt_profile_t     *agt_profile;
     xmlChar                  nowbuff[TSTAMP_MIN_SIZE];
     status_t                 res;
     int                      ret;
@@ -1492,6 +1549,7 @@ uint32
 	return 0;
     }
 
+    agt_profile = agt_get_profile();
     notcount = 0;
     tstamp_datetime(nowbuff);
 
@@ -1697,6 +1755,75 @@ uint32
 
 
 /********************************************************************
+* FUNCTION agt_not_clean_eventlog
+*
+* Remove any delivered notifications when the replay buffer
+* size is set to zero
+*
+*********************************************************************/
+void
+    agt_not_clean_eventlog (void)
+{
+    const agt_profile_t     *agt_profile;
+    agt_not_subscription_t  *sub;
+    agt_not_msg_t           *msg, *nextmsg;
+
+    uint32                   lowestmsgid;
+
+
+    agt_profile = agt_get_profile();
+
+    if (agt_profile->agt_eventlog_size > 0) {
+        return;
+    }
+
+    if (!anySubscriptions) {
+        /* zap everything in the Q, since there
+         * are no subscriptions right now
+         */
+        while (!dlq_empty(&notificationQ)) {
+            msg = (agt_not_msg_t *)dlq_deque(&notificationQ);
+            agt_not_free_notification(msg);
+        }
+	return;
+    }
+
+    /* find the lowest msgid that has been delivered
+     * to all the sessions, and any messages in the Q
+     * that are lower than that can be deleted
+     */
+    lowestmsgid = NCX_MAX_UINT;
+    for (sub = (agt_not_subscription_t *)
+	     dlq_firstEntry(&subscriptionQ);
+	 sub != NULL;
+         sub = (agt_not_subscription_t *)dlq_nextEntry(sub)) {
+
+        if (sub->lastmsgid && sub->lastmsgid < lowestmsgid) {
+            lowestmsgid = sub->lastmsgid;
+        }
+    }
+
+    /* keep deleting the oldest entries until the
+     * lowest msg ID is passed yb in the buffer
+     */
+    for (msg = (agt_not_msg_t *)dlq_firstEntry(&notificationQ);
+         msg != NULL;
+         msg = nextmsg) {
+
+         nextmsg = (agt_not_msg_t *)dlq_nextEntry(msg);
+
+         if (msg->msgid < lowestmsgid) {
+             dlq_remove(msg);
+             agt_not_free_notification(msg);
+         } else {
+             return;
+         }
+    }
+    
+}  /* agt_not_clean_eventlog */
+
+
+/********************************************************************
 * FUNCTION agt_not_remove_subscription
 *
 * Remove and expire a subscription with the specified session ID.
@@ -1848,6 +1975,8 @@ void
 void
     agt_not_queue_notification (agt_not_msg_t *notif)
 {
+    const agt_profile_t    *agt_profile;
+
 #ifdef DEBUG
     if (!notif) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -1855,10 +1984,33 @@ void
     }
 #endif
 
-    if (agt_not_init_done) {
-	dlq_enque(notif, &notificationQ);
-    } else {
+    if (!agt_not_init_done) {
 	SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+        return;
+    }
+
+    if (LOGDEBUG3) {
+        log_debug3("\nQueing <%s> notification to send (id: %u)",
+                   (notif->notobj) ? 
+                   obj_get_name(notif->notobj) : (const xmlChar *)"??",
+                   notif->msgid);
+    }
+
+    agt_profile = agt_get_profile();
+
+    if (agt_profile->agt_eventlog_size) {
+        if (notification_count < agt_profile->agt_eventlog_size) {
+            notification_count++;
+        } else {
+            delete_oldest_notification();
+        }
+        dlq_enque(notif, &notificationQ);
+    } else {
+        /* not tracking the event log size 
+         * since the entries will get deleted once 
+         * they are sent to all active subscriptions
+         */
+        dlq_enque(notif, &notificationQ);
     }
 
 }  /* agt_not_queue_notification */

@@ -174,6 +174,7 @@ static void
     agt_profile.agt_defaultStyle = NCX_EL_REPORT_ALL;
     agt_profile.agt_defaultStyleEnum = NCX_WITHDEF_REPORT_ALL;
     agt_profile.agt_superuser = NCX_DEF_SUPERUSER;
+    agt_profile.agt_eventlog_size = 1000;
     agt_profile.agt_maxburst = 10;
     agt_profile.agt_usevalidate = TRUE;
 

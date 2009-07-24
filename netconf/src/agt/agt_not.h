@@ -171,6 +171,9 @@ extern uint32
     agt_not_send_notifications (void);
 
 extern void
+    agt_not_clean_eventlog (void);
+
+extern void
     agt_not_remove_subscription (ses_id_t sid);
 
 extern agt_not_msg_t * 

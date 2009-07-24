@@ -427,6 +427,7 @@ date	     init     comment
 #define NCX_EL_ERROR_SEVERITY  (const xmlChar *)"error-severity"
 #define NCX_EL_ERROR_TAG       (const xmlChar *)"error-tag"
 #define NCX_EL_ERROR_TYPE      (const xmlChar *)"error-type"
+#define NCX_EL_EVENTLOG_SIZE   (const xmlChar *)"eventlog-size"
 #define NCX_EL_EVENTTIME       (const xmlChar *)"eventTime"
 #define NCX_EL_EXEC            (const xmlChar *)"exec"
 #define NCX_EL_EXPLICIT        (const xmlChar *)"explicit"

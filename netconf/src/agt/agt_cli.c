@@ -225,6 +225,12 @@ static void
         }
     }
 
+    /* eventlog-size param */
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_EVENTLOG_SIZE);
+    if (val && val->res == NO_ERR) {
+        agt_profile->agt_eventlog_size = VAL_UINT(val);
+    }
+
     /* max-burst param */
     val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_MAX_BURST);
     if (val && val->res == NO_ERR) {

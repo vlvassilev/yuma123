@@ -174,6 +174,7 @@ static void
     uint32                sendcount, sendtotal, sendmax;
     boolean               done;
 
+    sendcount = 0;
     sendtotal = 0;
 
     /* TBD: set to CLI param */
@@ -191,6 +192,10 @@ static void
         } else {
             done = TRUE;
         }
+    }
+
+    if (agt_profile->agt_eventlog_size == 0) {
+        agt_not_clean_eventlog();
     }
 
 } /* send_some_notifications */

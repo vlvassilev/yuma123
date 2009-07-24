@@ -844,6 +844,19 @@ static status_t
         }
 #endif
 
+        /* check the user callbacks before altering
+         * the database
+         */
+        res = handle_user_callback(AGT_CB_APPLY, 
+                                   editop,
+                                   scb, 
+                                   msg, 
+                                   newval, 
+                                   curval);
+        if (res != NO_ERR) {
+            return res;
+        }
+
         if (msg->rpc_need_undo) {
             undo = add_undo_node(msg, 
                                  editop,
@@ -882,6 +895,7 @@ static status_t
         if (curval && val_is_virtual(curval)) {
             return NO_ERR;
         }
+
 
         switch (cur_editop) {
         case OP_EDITOP_MERGE:
@@ -975,6 +989,8 @@ static status_t
 * Execute the AGT_CB_TEST_APPLY phase
 *
 * INPUTS:
+*   scb == session control block
+*   msg == incoming rpc_msg_t in progress
 *   parent == parent value of curval and newval
 *   newval == new value to apply
 *   curval == current instance of value (may be NULL if none)
@@ -991,7 +1007,9 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    test_apply_write_val (val_value_t  *parent,
+    test_apply_write_val (ses_cb_t *scb,
+                          rpc_msg_t *msg,
+                          val_value_t  *parent,
                           val_value_t  *newval,
                           val_value_t  *curval,
                           boolean      *done)
@@ -1027,6 +1045,19 @@ static status_t
             log_debug3("\ntest_apply_write_val: %s start", newval->name);
         }
 #endif
+
+        /* check the user callbacks before altering
+         * the database
+         */
+        res = handle_user_callback(AGT_CB_TEST_APPLY, 
+                                   newval->editvars->editop,
+                                   scb, 
+                                   msg, 
+                                   newval, 
+                                   curval);
+        if (res != NO_ERR) {
+            return res;
+        }
 
         /* make sure the node is not a virtual value */
         if (curval && val_is_virtual(curval)) {
@@ -1190,6 +1221,20 @@ static status_t
                                        (curval != NULL));
         }
 
+        /* check the user callback only if there is some
+         * operation in affect already
+         */
+        if (res == NO_ERR && 
+            newval->editvars->editop != OP_EDITOP_NONE) {
+
+            res = handle_user_callback(AGT_CB_VALIDATE, 
+                                       newval->editvars->editop,
+                                       scb, 
+                                       msg, 
+                                       newval, 
+                                       curval);
+        }
+
         /* check the insert operation, if any */
         if (res == NO_ERR) {
             res = check_insert_attr(scb, msg, newval);
@@ -1215,7 +1260,9 @@ static status_t
         } else {
             curparent = NULL;
         }
-        res = test_apply_write_val(curparent, 
+        res = test_apply_write_val(scb,
+                                   msg,
+                                   curparent, 
                                    newval, 
                                    curval, 
                                    &done);
@@ -1251,6 +1298,7 @@ static status_t
         ;  
     }
 
+#if 0
     /* check if the typdef for this value has a callback */
     if (res == NO_ERR) {
         res = handle_user_callback(cbtyp, 
@@ -1260,6 +1308,7 @@ static status_t
                                    newval, 
                                    curval);
     }
+#endif
 
     return res;
 
@@ -1357,7 +1406,9 @@ static status_t
         }
         break;
     case AGT_CB_TEST_APPLY:
-        retres = test_apply_write_val(newval->editvars->curparent, 
+        retres = test_apply_write_val(scb,
+                                      msg,
+                                      newval->editvars->curparent, 
                                       newval, 
                                       curval, 
                                       &done);
@@ -1445,6 +1496,7 @@ static status_t
         }
     }
 
+#if 0
     /* check if the typdef for this value has a callback
      * only call if the operation was applied here
      */
@@ -1456,6 +1508,7 @@ static status_t
                                       newval, 
                                       curval);
     }
+#endif
         
     return retres;
 

@@ -278,6 +278,14 @@ static void
         agt_profile->agt_xmlorder = TRUE;
     }
 
+    /* get with-validate param */
+    val = val_find_child(valset, 
+                         AGT_CLI_MODULE, 
+                         NCX_EL_WITH_VALIDATE);
+    if (val && val->res == NO_ERR) {
+        agt_profile->agt_usevalidate = VAL_BOOL(val);
+    }
+
 } /* set_agent_profile */
 
 

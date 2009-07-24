@@ -1367,6 +1367,10 @@ static boolean
         return TRUE;
     }
 
+    if (cache->mode == AGT_ACMOD_DISABLED) {
+        return TRUE;
+    }
+
     /* get the NACM root to decide any more */
     if (cache->nacmroot) {
         nacmroot = cache->nacmroot;
@@ -1779,6 +1783,10 @@ boolean
     if (check_mode(cache, 
                    nacm_E_allowedRights_exec, 
                    rpcobj)) {
+        return TRUE;
+    }
+
+    if (cache->mode == AGT_ACMOD_DISABLED) {
         return TRUE;
     }
 

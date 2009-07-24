@@ -143,6 +143,7 @@ typedef struct rpc_msg_t_ {
      */
     void           *rpc_user1;
     void           *rpc_user2;
+    uint32          rpc_returncode;   /* for nested callbacks */
 
     /* incoming: get method reply handling builtin 
      * If the rpc_datacb is non-NULL then it will be used as a

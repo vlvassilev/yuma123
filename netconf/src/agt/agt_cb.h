@@ -98,7 +98,6 @@ typedef struct agt_cb_fnset_t_ {
 } agt_cb_fnset_t;
 
 
-
 /********************************************************************
 *								    *
 *			F U N C T I O N S			    *

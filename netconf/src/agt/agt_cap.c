@@ -23,6 +23,10 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
+#ifndef _H_agt
+#include "agt.h"
+#endif
+
 #ifndef _H_agt_cap
 #include "agt_cap.h"
 #endif
@@ -131,10 +135,11 @@ status_t
 		      ncx_agtstart_t agtstart,
 		      const xmlChar *defstyle)
 {
-    status_t  res;
-    val_value_t *oldcaps, *newcaps;
-    cap_list_t *oldmycaps,*newmycaps;
-    xmlns_id_t  nc_id, ncx_id;
+    const agt_profile_t   *agt_profile;
+    val_value_t           *oldcaps, *newcaps;
+    cap_list_t            *oldmycaps,*newmycaps;
+    xmlns_id_t             nc_id, ncx_id;
+    status_t               res;
 
     res = NO_ERR;
     newcaps = NULL;
@@ -143,6 +148,8 @@ status_t
     ncx_id = xmlns_ncx_id();
     oldcaps = agt_caps;
     oldmycaps = my_agt_caps;
+
+    agt_profile = agt_get_profile();
 
     /* get a new cap_list */
     newmycaps = cap_new_caplist();
@@ -203,11 +210,13 @@ status_t
     }
 
     if (res == NO_ERR) {
-	/* set the validate capability */
-	res = cap_add_std(newmycaps, CAP_STDID_VALIDATE);
-	if (res == NO_ERR) {
-	    res = cap_add_stdval(newcaps, CAP_STDID_VALIDATE);
-	}
+        if (agt_profile->agt_usevalidate) {
+            /* set the validate capability */
+            res = cap_add_std(newmycaps, CAP_STDID_VALIDATE);
+            if (res == NO_ERR) {
+                res = cap_add_stdval(newcaps, CAP_STDID_VALIDATE);
+            }
+        }
     }
 
     /* check the startup type for distinct-startup capability */

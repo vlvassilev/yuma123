@@ -188,6 +188,7 @@ typedef struct agt_profile_t_ {
     const xmlChar      *agt_defaultStyle;
     const xmlChar      *agt_superuser;
     uint32              agt_maxburst;
+    boolean             agt_usevalidate;
     ncx_withdefaults_t  agt_defaultStyleEnum;
     agt_acmode_t        agt_accesscontrol_enum;
     uint16              agt_ports[AGT_MAX_PORTS];

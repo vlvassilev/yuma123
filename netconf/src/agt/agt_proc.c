@@ -1,4 +1,4 @@
-/*  FILE: agt_state.c
+/*  FILE: agt_proc.c
 
    /proc file system monitoring module
 
@@ -603,7 +603,7 @@ status_t
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
-#ifdef AGT_STATE_DEBUG
+#ifdef AGT_PROC_DEBUG
     log_debug2("\nagt: Loading proc module");
 #endif
 

@@ -602,6 +602,7 @@ date	     init     comment
 #define NCX_EL_WHEN            (const xmlChar *)"when"
 #define NCX_EL_WITH_DEFAULTS   (const xmlChar *)"with-defaults"
 #define NCX_EL_WITH_METADATA   (const xmlChar *)"with-metadata"
+#define NCX_EL_WITH_VALIDATE   (const xmlChar *)"with-validate"
 #define NCX_EL_XCONTAINER      (const xmlChar *)"xcontainer"
 #define NCX_EL_XLIST           (const xmlChar *)"xlist"
 #define NCX_EL_XML             (const xmlChar *)"xml"

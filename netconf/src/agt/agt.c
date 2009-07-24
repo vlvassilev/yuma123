@@ -52,6 +52,10 @@ date         init     comment
 #include "agt_hello.h"
 #endif
 
+#ifndef _H_agt_if
+#include "agt_if.h"
+#endif
+
 #ifndef _H_agt_ncx
 #include "agt_ncx.h"
 #endif
@@ -171,6 +175,7 @@ static void
     agt_profile.agt_defaultStyleEnum = NCX_WITHDEF_REPORT_ALL;
     agt_profile.agt_superuser = NCX_DEF_SUPERUSER;
     agt_profile.agt_maxburst = 10;
+    agt_profile.agt_usevalidate = TRUE;
 
 } /* init_agent_profile */
 
@@ -472,6 +477,12 @@ status_t
     if (res != NO_ERR) {
         return res;
     }
+
+    /* load the NETCONF interface monitoring data model module */
+    res = agt_if_init();
+    if (res != NO_ERR) {
+        return res;
+    }
     
     /* check the module parameter set from CLI or conf file
      * for any modules to pre-load
@@ -560,6 +571,12 @@ status_t
         return res;
     }
 
+    /* load the interface monitoring callback functions and data */
+    res = agt_if_init2();
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* allow users to access the configuration databases now */
     cfg_set_state(NCX_CFGID_RUNNING, CFG_ST_READY);
 
@@ -616,6 +633,7 @@ void
         agt_state_cleanup();
         agt_not_cleanup();
         agt_proc_cleanup();
+        agt_if_cleanup();
         agt_ses_cleanup();
         agt_cap_cleanup();
         agt_rpc_cleanup();

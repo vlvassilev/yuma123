@@ -307,18 +307,23 @@ static status_t
                           rpc_msg_t *msg,
                           xml_node_t *methnode)
 {
-    cfg_template_t *target;
-    val_value_t    *val;
-    op_editop_t     defop;
-    op_errop_t      errop;
-    op_testop_t     testop;
-    status_t        res;
+    cfg_template_t       *target;
+    val_value_t          *val;
+    const agt_profile_t  *agt_profile;
+    op_editop_t           defop;
+    op_errop_t            errop;
+    op_testop_t           testop;
+    status_t              res;
+
+    testop = OP_TESTOP_NONE;
 
     /* check if the source config database exists */
     res = agt_get_cfg_from_parm(NCX_EL_TARGET, msg, methnode, &target);
     if (res != NO_ERR) {
         return res;  /* error already recorded */
     } 
+
+    agt_profile = agt_get_profile();
 
     /* get the default-operation parameter */
     val = val_find_child(msg->rpc_input, 
@@ -364,44 +369,61 @@ static status_t
                          NCX_EL_TEST_OPTION);
     if (!val || val->res != NO_ERR) {
         /* set to the default if any error */
-        testop = OP_TESTOP_SET;
+        if (agt_profile->agt_usevalidate) {
+            testop = OP_TESTOP_TESTTHENSET;
+        } else {
+            testop = OP_TESTOP_SET;
+        }
+    } else if (!agt_profile->agt_usevalidate) {
+        res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+        agt_record_error(scb, 
+                         &msg->mhdr, 
+                         NCX_LAYER_OPERATION, 
+                         res,
+                         methnode, 
+                         NCX_NT_NONE, 
+                         NULL, 
+                         NCX_NT_VAL, 
+                         val);
     } else {
         testop = op_testop_enum(VAL_STR(val));
     }
 
-    /* get the config parameter */
-    val = val_find_child(msg->rpc_input, 
-                         NC_MODULE,
-                         NCX_EL_CONFIG);
-    if (val && val->res == NO_ERR) {
-        /* validate the <config> element (wrt/ embedded operation
-         * attributes) against the existing data model.
-         * <rpc-error> records will be added as needed 
-         */
-        res = agt_val_validate_write(scb, msg, target, val, defop);
+    if (res == NO_ERR) {
+        /* get the config parameter */
+        val = val_find_child(msg->rpc_input, 
+                             NC_MODULE,
+                             NCX_EL_CONFIG);
+        if (val && val->res == NO_ERR) {
+            /* validate the <config> element (wrt/ embedded operation
+             * attributes) against the existing data model.
+             * <rpc-error> records will be added as needed 
+             */
+            res = agt_val_validate_write(scb, msg, target, val, defop);
 
-        /* for continue-on-error, ignore the validate return value
-         * in case there are multiple parmsets and not all of them
-         * had errors.  Force a NO_ERR return.
-         */
-        if (!NEED_EXIT(res)) {
-            if (errop == OP_ERROP_CONTINUE) {
-                res = NO_ERR;
+            /* for continue-on-error, ignore the validate return value
+             * in case there are multiple parmsets and not all of them
+             * had errors.  Force a NO_ERR return.
+             */
+            if (!NEED_EXIT(res)) {
+                if (errop == OP_ERROP_CONTINUE) {
+                    res = NO_ERR;
+                }
             }
-        }
 
-        if (target->cfg_id == NCX_CFGID_RUNNING && res==NO_ERR) {
-            res = agt_val_split_root_check(scb, 
-                                           msg, 
-                                           val, 
-                                           target->root, 
-                                           defop);
+            if (target->cfg_id == NCX_CFGID_RUNNING && res==NO_ERR) {
+                res = agt_val_split_root_check(scb, 
+                                               msg, 
+                                               val, 
+                                               target->root, 
+                                               defop);
+            }
+        } else if (!val) {
+            /* this is reported in agt_val_parse phase */
+            res = ERR_NCX_DATA_MISSING;
+        } else {
+            res = val->res;
         }
-    } else if (!val) {
-        /* this is reported in agt_val_parse phase */
-        res = ERR_NCX_DATA_MISSING;
-    } else {
-        res = val->res;
     }
 
     /* save the default operation in 'user1' */
@@ -1096,17 +1118,25 @@ static status_t
     rootval = NULL;
     errstr = NULL;
     child = NULL;
+    profile = agt_get_profile();
 
-    /* get the source parameter */
-    val = val_find_child(msg->rpc_input, NC_MODULE,
-                         NCX_EL_SOURCE);
-    if (!val || val->res != NO_ERR) {
-        if (val) {
-            res = val->res;
-        } else {
-            res = ERR_NCX_OPERATION_FAILED;
+    if (!profile->agt_usevalidate) {
+        res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+    if (res == NO_ERR) {
+        /* get the source parameter */
+        val = val_find_child(msg->rpc_input, 
+                             NC_MODULE,
+                             NCX_EL_SOURCE);
+        if (!val || val->res != NO_ERR) {
+            if (val) {
+                res = val->res;
+            } else {
+                res = ERR_NCX_OPERATION_FAILED;
+            }
+            errstr = NCX_EL_SOURCE;
         }
-        errstr = NCX_EL_SOURCE;
     }
 
     /* determine which variant of the input parameter is present */

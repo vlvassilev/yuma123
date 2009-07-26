@@ -348,7 +348,7 @@ static val_value_t *
     m__free(parmvalstr);
 
     if (parmval == NULL) {
-        log_error("\nError: make /proc/cpuinfo/cpu/%s failed",
+        log_error("\nError: make /proc leaf <%s> failed",
                           obj_get_name(parmobj));
     }
 
@@ -434,7 +434,7 @@ static status_t
         if (cpuval == NULL) {
             cpuval = val_new_value();
             if (cpuval == NULL) {
-                res = ERR_INTERNAL_VAL;
+                res = ERR_INTERNAL_MEM;
                 done = TRUE;
                 continue;
             } else {
@@ -446,7 +446,14 @@ static status_t
 
         if (strlen(buffer) == 1 && *buffer == '\n') {
             /* force a new CPU entry; or last entry */
-            cpuval = NULL;
+            if (cpuval) {
+                res = val_gen_index_chain(cpuobj, cpuval);
+                if (res != NO_ERR) {
+                    log_error("\nError: could not add index");
+                    done = TRUE;
+                }
+                cpuval = NULL;
+            }
         } else {
             res = NO_ERR;
             parmval = make_proc_leaf(buffer, cpuobj, &res);
@@ -456,6 +463,15 @@ static status_t
         }
     }
 
+    if (res == NO_ERR && cpuval) {
+        if (val_get_first_index(cpuval) == NULL) {
+            res = val_gen_index_chain(cpuobj, cpuval);
+            if (res != NO_ERR) {
+                log_error("\nError: could not add index");
+            }
+        }
+    }
+            
     fclose(cpuinfofile);
     m__free(buffer);
 

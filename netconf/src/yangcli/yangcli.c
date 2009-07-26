@@ -1034,15 +1034,6 @@ static status_t
 	}
     }
 
-#if 0   
-    /* not sure if this is needed; it sometimes causes
-     * a double OK to be printed, like @foo = $$bar
-     */
-    if (res == NO_ERR) {
-	log_info("\nOK\n");
-    }
-#endif
-
     clear_result(agent_cb);
 
     return res;

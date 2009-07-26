@@ -1294,9 +1294,9 @@ static boolean
             continue;
         }
 
-        nodefound = xpath1_check_node_exists(datarule_cache->pcb,
-                                             resnodeQ,
-                                             val);
+        nodefound = xpath1_check_node_exists_slow(datarule_cache->pcb,
+                                                  resnodeQ,
+                                                  val);
         if (nodefound) {
             /* this dataRule is for the specified node
              * check if any of the groups in the usergroups

@@ -8979,6 +8979,68 @@ boolean
     /* quick test -- see if docroot is already in the Q
      * which means nothing else is needed
      */
+    if (find_resnode(pcb, 
+                     resultQ,
+                     pcb->val_docroot)) {
+	return TRUE;
+    }
+
+    /* no docroot in the Q so check the node itself */
+    if (val == pcb->val_docroot) {
+	return FALSE;
+    }
+	
+    while (val) {
+	if (find_resnode(pcb, resultQ, val)) {
+	    return TRUE;
+	}
+
+	if (val->parent && !obj_is_root(val->parent->obj)) {
+	    val = val->parent;
+	} else {
+	    return FALSE;
+	}
+    }
+    return FALSE;
+
+}  /* xpath1_check_node_exists */
+
+
+/********************************************************************
+* FUNCTION xpath1_check_node_exists_slow
+* 
+* Check if any ancestor-ot-self node is already in the specified Q
+* ONLY FOR VALUE NODES IN THE RESULT
+*
+* This is only done after all the nodes have been processed
+* and the nodeset is complete.  For NETCONF purposes,
+* the entire path to root is added for the context node,
+* and the entire context node contexts are always returned
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    resultQ == Q of xpath_resnode_t structs to check
+*               DOES NOT HAVE TO BE WITHIN A RESULT NODE Q
+*    val   == value node pointer value to find
+*
+* RETURNS:
+*    TRUE if found, FALSE otherwise
+*********************************************************************/
+boolean
+    xpath1_check_node_exists_slow (xpath_pcb_t *pcb,
+                                   dlq_hdr_t *resultQ,
+                                   const val_value_t *val)
+{
+#ifdef DEBUG
+    if (!pcb || !resultQ || !val) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    /* quick test -- see if docroot is already in the Q
+     * which means nothing else is needed
+     */
     if (find_resnode_slow(pcb, 
                           resultQ,
                           0,
@@ -9007,7 +9069,7 @@ boolean
     }
     return FALSE;
 
-}  /* xpath1_check_node_exists */
+}  /* xpath1_check_node_exists_slow */
 
 
 /********************************************************************

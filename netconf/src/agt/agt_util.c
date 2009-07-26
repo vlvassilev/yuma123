@@ -1074,8 +1074,15 @@ status_t
     } else {
 	source = (cfg_template_t *)msg->rpc_user1;
     }
-    if (!source || !source->root) {
+    if (!source) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+
+    if (source->root == NULL) {
+        /* if a database was deleted, it will
+         * have a NULL root until it gets replaced
+         */
+        return NO_ERR;
     }
 
     res = NO_ERR;

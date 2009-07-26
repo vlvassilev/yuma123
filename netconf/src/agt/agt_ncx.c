@@ -233,23 +233,6 @@ static status_t
         return res;  /* error already recorded */
     } 
 
-    /* check if this is the startup config
-     * filtered retrieval of this config is not supported
-     */
-    if (source->cfg_id == NCX_CFGID_STARTUP) {
-        res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-        agt_record_error(scb, 
-                         &msg->mhdr, 
-                         NCX_LAYER_OPERATION, 
-                         res,
-                         methnode, 
-                         NCX_NT_NONE, 
-                         NULL, 
-                         NCX_NT_NONE, 
-                         NULL);
-        return res;
-    }
-
     /* check if this config can be read right now */
     res = cfg_ok_to_read(source);
     if (res != NO_ERR) {
@@ -267,7 +250,8 @@ static status_t
 
     /* check the with-defaults parameter */
     parm = val_find_child(msg->rpc_input,
-                          NULL, NCX_EL_WITH_DEFAULTS);
+                          NULL, 
+                          NCX_EL_WITH_DEFAULTS);
     if (parm && parm->res == NO_ERR) {
         msg->mhdr.withdef = 
             ncx_get_withdefaults_enum(VAL_ENUM_NAME(parm));
@@ -318,7 +302,10 @@ static status_t
     testop = OP_TESTOP_NONE;
 
     /* check if the source config database exists */
-    res = agt_get_cfg_from_parm(NCX_EL_TARGET, msg, methnode, &target);
+    res = agt_get_cfg_from_parm(NCX_EL_TARGET, 
+                                msg, 
+                                methnode, 
+                                &target);
     if (res != NO_ERR) {
         return res;  /* error already recorded */
     } 
@@ -518,8 +505,9 @@ static status_t
     }
 
     /* check if neither distinct startup or url capability supported */
-    if (!cap_std_set(mycaps, CAP_STDID_STARTUP) &&
-        !cap_std_set(mycaps, CAP_STDID_URL)) {
+    if (!(cap_std_set(mycaps, CAP_STDID_STARTUP) ||
+          cap_std_set(mycaps, CAP_STDID_URL) ||
+          cap_std_set(mycaps, CAP_STDID_CANDIDATE))) {
         /* operation not supported 
          * *** update in the future if copy to <running> ever supported
          */
@@ -659,10 +647,6 @@ static status_t
     const void           *errval;
     ncx_node_t            errtyp;
 
-#ifdef NOT_YET
-    cap_list_t      *mycaps;
-#endif
-
     /* get the config to delete */
     res = agt_get_cfg_from_parm(NCX_EL_TARGET, 
                                 msg, 
@@ -683,10 +667,16 @@ static status_t
         /* check if the startup config is allowed to be deleted
          * and that is the config to be deleted
          */
-        if (!prof->agt_del_startup) {
-            res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-        } else if (xml_strcmp(target->name, NCX_EL_STARTUP)) {
-            res = ERR_NCX_WRONG_VAL;
+        if (target->cfg_id == NCX_CFGID_STARTUP) {
+            if (!prof->agt_del_startup) {
+                res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+            }
+        } else if (target->cfg_id == NCX_CFGID_CANDIDATE) {
+            if (prof->agt_targ != NCX_AGT_TARG_CANDIDATE) {
+                res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+            }
+        } else {
+            res = ERR_NCX_INVALID_VALUE;
         }
     }
 
@@ -694,29 +684,6 @@ static status_t
     if (res == NO_ERR) {
         res = cfg_ok_to_write(target, SES_MY_SID(scb));
     }
-
-#ifdef NOT_YET
-    if (res == NO_ERR) {
-        /* get the agent capabilities */    
-        mycaps = agt_cap_get_caps();
-        if (!mycaps) {
-            return SET_ERROR(ERR_INTERNAL_PTR);
-        }
-    }
-
-    /* check if the url capability is supported 
-     * it is not mandatory to support deletion of any config db 
-     */
-    if (res == NO_ERR) {
-        if (!cap_std_set(mycaps, CAP_STDID_URL)) {
-            /* none of the hardwired configs can be deleted */
-            res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-        } else {
-            /*** TBD: add URL check ***/
-            res = NCX_ERR_OPERATION_NOT_SUPPORTED;  
-        }
-    }
-#endif
 
     if (res != NO_ERR) {
         errval = agt_get_parmval(NCX_EL_TARGET, msg);
@@ -735,6 +702,8 @@ static status_t
                          errval,
                          NCX_NT_STRING, 
                          "/nc:rpc/nc:delete-config/nc:target");
+    } else {
+        msg->rpc_user1 = target;
     }
     return res;
 
@@ -757,6 +726,7 @@ static status_t
                           xml_node_t *methnode)
 {
     const agt_profile_t  *profile;
+    cfg_template_t       *startup, *target;
     xmlChar              *fname;
     const xmlChar        *startspec;
     status_t              res;
@@ -766,6 +736,17 @@ static status_t
 
     (void)scb;
 
+    target = (cfg_template_t *)msg->rpc_user1;
+
+    if (target->cfg_id == NCX_CFGID_CANDIDATE) {
+        /* do a discard-changes */
+        if (cfg_get_dirty_flag(target)) {
+            res = cfg_fill_candidate_from_running();
+        } 
+        return res;
+    } 
+
+    /* else this must be a request to delete the startup */
     profile = agt_get_profile();
 
     /* use the user-set startup or default filename */
@@ -791,6 +772,12 @@ static status_t
                              fname,
                              NCX_NT_STRING, 
                              "/nc:rpc/nc:delete-config/nc:target");
+        } else {
+            startup = target;
+            if (startup != NULL && startup->root != NULL) {
+                val_free_value(startup->root);
+                startup->root = NULL;
+            }
         }
         m__free(fname);
         return res;
@@ -1112,12 +1099,14 @@ static status_t
     const xmlChar        *errstr;
     const agt_profile_t  *profile;
     status_t              res;
+    boolean               needfullcheck;
 
     target = NULL;
     res = NO_ERR;
     rootval = NULL;
     errstr = NULL;
     child = NULL;
+    needfullcheck = FALSE;
     profile = agt_get_profile();
 
     if (!profile->agt_usevalidate) {
@@ -1155,34 +1144,36 @@ static status_t
 
     if (res == NO_ERR) {
         if (!xml_strcmp(child->name, NCX_EL_RUNNING)) {
-            res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-            errstr = child->name;
+            target = cfg_get_config_id(NCX_CFGID_RUNNING);
         } else if (!xml_strcmp(child->name, NCX_EL_CANDIDATE)) {
-            profile = agt_get_profile();
             if (profile->agt_targ != NCX_AGT_TARG_CANDIDATE) {
                 res = ERR_NCX_OPERATION_NOT_SUPPORTED;
                 errstr = child->name;
             } else {
                 target = cfg_get_config_id(NCX_CFGID_CANDIDATE);
-                if (target) {
-                    rootval = target->root;
-                    if (!rootval) {
-                        res = ERR_NCX_OPERATION_FAILED;
-                        errstr = child->name;
-                    }
-                } else {
-                    res = ERR_NCX_OPERATION_FAILED;
-                    errstr = child->name;
-                }
             }
         } else if (!xml_strcmp(child->name, NCX_EL_STARTUP)) {
-            res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-            errstr = child->name;
+            if (!profile->agt_del_startup) {
+                res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+                errstr = child->name;
+            } else {
+                target = cfg_get_config_id(NCX_CFGID_CANDIDATE);
+            }
         } else if (!xml_strcmp(child->name, NCX_EL_URL)) {
             res = ERR_NCX_OPERATION_NOT_SUPPORTED;
             errstr = child->name;
         } else if (!xml_strcmp(child->name, NCX_EL_CONFIG)) {
+            needfullcheck = TRUE;
             rootval = child;
+        }
+
+        if (res == NO_ERR && !needfullcheck) {
+            if (target == NULL || target->root == NULL) {
+                res = ERR_NCX_OPERATION_FAILED;
+                errstr = child->name;
+            } else {
+                rootval = target->root;
+            }
         }
     }
 
@@ -1199,19 +1190,16 @@ static status_t
         return res;
     }
 
-
     /* set the error parameter to gather the most errors */
     msg->rpc_err_option = OP_ERROP_CONTINUE;
 
-    /* validate the <config> element (wrt/ embedded operation
-     * attributes) against the existing data model.
-     * <rpc-error> records will be added as needed 
-     */
-    res = agt_val_validate_write(scb, 
-                                 msg, 
-                                 NULL, 
-                                 rootval, 
-                                 OP_EDITOP_MERGE);
+    if (needfullcheck) {
+        res = agt_val_validate_write(scb,
+                                     msg, 
+                                     NULL, 
+                                     rootval, 
+                                     OP_EDITOP_LOAD);
+    }
 
     if (res == NO_ERR) {
         res = agt_val_root_check(scb, &msg->mhdr, rootval);
@@ -2167,7 +2155,9 @@ status_t
                       cfg_location_t cfgloc,
                       const xmlChar *cfgparm)
 {
-    status_t  res;
+    cfg_template_t  *startup;
+    val_value_t     *copystartup;
+    status_t         res;
 
 #ifdef DEBUG
     if (!cfg) {
@@ -2177,6 +2167,9 @@ status_t
         return SET_ERROR(ERR_NCX_CFG_STATE);
     }
 #endif
+
+    startup = NULL;
+    copystartup = NULL;
 
     cfg->cfg_loc = cfgloc;
     if (cfgparm) {
@@ -2196,6 +2189,23 @@ status_t
         } else {
             /* the cfgparm should be a filespec of an XML config file */
             res = agt_rpc_load_config_file(cfgparm, cfg);
+            if (res == NO_ERR && 
+                cfg->root != NULL &&
+                cfg->cfg_id != NCX_CFGID_STARTUP) {
+                startup = cfg_get_config_id(NCX_CFGID_STARTUP);
+                if (startup != NULL) {
+                    copystartup = val_clone(cfg->root);
+                    if (copystartup == NULL) {
+                        log_error("\nError: create <startup> config failed");
+                    } else {
+                        if (startup->root != NULL) {
+                            val_free_value(startup->root);
+                        }
+                        startup->root = copystartup;
+                        copystartup = NULL;
+                    }
+                }
+            }
         }
         break;
     case CFG_LOC_NAMED:
@@ -2231,8 +2241,10 @@ status_t
     agt_ncx_cfg_save (cfg_template_t *cfg,
                       boolean bkup)
 {
-    status_t     res;
-    xml_attrs_t  attrs;
+    cfg_template_t    *startup;
+    val_value_t       *copystartup;
+    status_t           res;
+    xml_attrs_t        attrs;
 
 #ifdef DEBUG
     if (!cfg) {
@@ -2242,8 +2254,11 @@ status_t
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
-        
+
+    startup = NULL;
+    copystartup = NULL;
     res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+
     switch (cfg->cfg_loc) {
     case CFG_LOC_INTERNAL:
         break;
@@ -2256,32 +2271,56 @@ status_t
             /****/
         } 
 
-        /* write the new startup config */
-        xml_init_attrs(&attrs);
 
-        /* output to the specified file or STDOUT */
-        res = xml_wr_check_file(cfg->src_url, 
-                                cfg->root, 
-                                &attrs, 
-                                XMLMODE, 
-                                WITHHDR, 
-                                0,
-                                NCX_DEF_INDENT,
-                                agt_check_save);
+        /* save the new startup database, if there is one */
+        res = NO_ERR;
+        startup = cfg_get_config_id(NCX_CFGID_STARTUP);
+        if (startup != NULL) {
+            copystartup = val_clone_config_data(cfg->root, &res);
+            if (copystartup == NULL) {
+                return res;
+            }
+        }
 
-        xml_clean_attrs(&attrs);
+        if (res == NO_ERR) {
+            /* write the new startup config */
+            xml_init_attrs(&attrs);
+
+            /* output to the specified file or STDOUT */
+            res = xml_wr_check_file(cfg->src_url, 
+                                    cfg->root, 
+                                    &attrs, 
+                                    XMLMODE, 
+                                    WITHHDR, 
+                                    0,
+                                    NCX_DEF_INDENT,
+                                    agt_check_save);
+
+            xml_clean_attrs(&attrs);
+
+            if (res == NO_ERR && copystartup != NULL) {
+                /* toss the old startup and save the new one */
+                if (startup->root) {
+                    val_free_value(startup->root);
+                }
+                startup->root = copystartup;
+                copystartup = NULL;
+            }
+        }
         break;
     case CFG_LOC_NAMED:
-
         break;
     case CFG_LOC_LOCAL_URL:
-
         break;
     case CFG_LOC_REMOTE_URL:
-
         break;
     default:
         return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+
+    if (copystartup) {
+        val_free_value(copystartup);
     }
 
     return res;

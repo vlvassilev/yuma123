@@ -119,6 +119,11 @@ extern boolean
 			      dlq_hdr_t *resultQ,
 			      const val_value_t *val);
 
+extern boolean
+    xpath1_check_node_exists_slow (xpath_pcb_t *pcb,
+                                   dlq_hdr_t *resultQ,
+                                   const val_value_t *val);
+
 extern status_t
     xpath1_stringify_nodeset (xpath_pcb_t *pcb,
 			      const xpath_result_t *result,

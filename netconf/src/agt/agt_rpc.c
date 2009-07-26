@@ -1611,7 +1611,7 @@ status_t
         }
     }
 
-#ifdef DEBUG
+#ifdef AGT_RPC_DEBUG
     if (LOGDEBUG) {
         if (!dlq_empty(&msg->mhdr.errQ)) {
             rpc_err_dump_errors(msg);

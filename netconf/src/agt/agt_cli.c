@@ -266,11 +266,21 @@ static void
     if (val && val->res == NO_ERR) {
         if (!xml_strcmp(VAL_ENUM_NAME(val), NCX_EL_RUNNING)) {
             agt_profile->agt_targ = NCX_AGT_TARG_RUNNING;
-            agt_profile->agt_start = NCX_AGT_START_DISTINCT;
-            agt_profile->agt_del_startup = TRUE;
         } else if (!xml_strcmp(VAL_ENUM_NAME(val), 
                                NCX_EL_CANDIDATE)) {
             agt_profile->agt_targ = NCX_AGT_TARG_CANDIDATE;
+        }
+    }
+
+    /* get the :startup capability setting */
+    val = val_find_child(valset, 
+                         AGT_CLI_MODULE, 
+                         NCX_EL_WITH_STARTUP);
+    if (val && val->res == NO_ERR) {
+        if (VAL_BOOL(val)) {
+            agt_profile->agt_start = NCX_AGT_START_DISTINCT;
+            agt_profile->agt_del_startup = TRUE;
+        } else {
             agt_profile->agt_start = NCX_AGT_START_MIRROR;
             agt_profile->agt_del_startup = FALSE;
         }

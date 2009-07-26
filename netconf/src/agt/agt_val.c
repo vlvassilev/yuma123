@@ -4245,7 +4245,9 @@ status_t
     }
 
     /* check if any config nodes have been deleted in the target */
-    res = apply_commit_deletes(scb, msg, target,
+    res = apply_commit_deletes(scb, 
+                               msg, 
+                               target,
                                source->root,
                                target->root);
 

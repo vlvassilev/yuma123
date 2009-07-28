@@ -7826,13 +7826,19 @@ void
 	ncx_free_filptr(fp);
     }
 
-    /* check the cache first */
+    /* check if any malloced memory inside */
+    if (filptr->virtualnode) {
+        val_free_value(filptr->virtualnode);
+    }
+
+    /* check if this entry should be put in the cache */
     if (ncx_cur_filptrs < ncx_max_filptrs) {
 	memset(filptr, 0x0, sizeof(ncx_filptr_t));
 	dlq_createSQue(&filptr->childQ);
 	dlq_enque(filptr, &ncx_filptrQ);
 	ncx_cur_filptrs++;
     } else {
+        /* cache full, so just delete this entry */
 	m__free(filptr);
     }
     

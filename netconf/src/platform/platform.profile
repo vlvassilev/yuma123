@@ -13,7 +13,7 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 	-Waggregate-return -Wstrict-prototypes -Wold-style-definition \
 	-Wmissing-prototypes -Wmissing-declarations \
 	-Wpacked -Winvalid-pch \
-	-Wredundant-decls -Wnested-externs -Winline -std=gnu99
+	-Wredundant-decls -Wnested-externs -Winline -std=gnu99 -Werror
 
 
 # -Wunreachable-code removed due to -O3
@@ -24,7 +24,7 @@ CFLAGS=$(CDEFS) $(CWARN) -fPIC
 
 # production (1) or debug (0) build
 ifdef BLD
-  CFLAGS += -Werror -O2
+  CFLAGS += -O2
 else
   CFLAGS += -ggdb3
 endif

@@ -489,7 +489,7 @@ static status_t
                  ncx_filptr_t *result,
                  boolean *keepempty)
 {
-    val_value_t      *filchild, *curchild;
+    val_value_t      *filchild, *curchild, *useval, *virtualval;
     val_index_t      *valindex;
     ncx_filptr_t     *filptr;
     boolean           test, anycon, anycm, anysel, mykeepempty;
@@ -517,6 +517,23 @@ static status_t
     anycon = FALSE;
     anycm = FALSE;
     anysel = FALSE;
+
+    /* check if this is a real or a virtual value */
+    res = NO_ERR;
+    virtualval = NULL;
+    if (val_is_virtual(curval)) {
+        virtualval = val_get_virtual_value(scb,
+                                           curval,
+                                           &res);
+        if (virtualval == NULL) {
+            return res;
+        } else {
+            useval = virtualval;
+            result->virtualnode = virtualval;
+        }
+    } else {
+        useval = curval;
+    }
 
     /* check any content match nodes first
      * they must all be true or this entire sibling
@@ -551,7 +568,7 @@ static status_t
             SET_ERROR(ERR_INTERNAL_VAL);
         }
 
-        /* check corner case not caught by XML pares */
+        /* check corner case not caught by XML parser */
         if (val_all_whitespace(VAL_STR(filchild))) {
             /* should not happen! */
             SET_ERROR(ERR_INTERNAL_VAL);
@@ -569,11 +586,11 @@ static status_t
          */
         test = FALSE;
         for (curchild = 
-                 val_first_child_qname(curval, 
+                 val_first_child_qname(useval, 
                                        filchild->nsid,
                                        filchild->name);
              curchild != NULL && !test;
-             curchild = val_next_child_qname(curval,
+             curchild = val_next_child_qname(useval,
                                              filchild->nsid,
                                              filchild->name,
                                              curchild)) {
@@ -636,11 +653,11 @@ static status_t
         /* go through all the actual instances of 'filchild'
          * within the child nodes of 'curval'
          */
-        for (curchild = val_first_child_qname(curval, 
+        for (curchild = val_first_child_qname(useval, 
                                               filchild->nsid,
                                               filchild->name);
              curchild != NULL;
-             curchild = val_next_child_qname(curval,
+             curchild = val_next_child_qname(useval,
                                              filchild->nsid,
                                              filchild->name,
                                              curchild)) {

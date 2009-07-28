@@ -493,6 +493,12 @@ static void
     val_index_t   *in;
     ncx_btype_t    btyp;
 
+    if (full && val->virtualval) {
+        /* check if any cached entry of self needs to be cleared */
+        val_free_value(val->virtualval);
+        val->virtualval = NULL;
+    }
+
     btyp = val->btyp;
 
     if (full && val->editvars) {
@@ -5710,8 +5716,9 @@ boolean
 			   boolean configonly,
 			   boolean textmode)
 {
-    val_value_t *val;
+    val_value_t *val, *useval;
     boolean      fnresult, fncalled;
+    status_t     res;
 
 #ifdef DEBUG
     if (!startnode) {
@@ -5724,7 +5731,17 @@ boolean
 	return FALSE;
     }
 
-    for (val = (val_value_t *)dlq_firstEntry(&startnode->v.childQ);
+    if (val_is_virtual(startnode)) {
+        res = NO_ERR;
+        useval = val_cache_virtual_value(NULL, startnode, &res);
+        if (useval == NULL) {
+            return FALSE;
+        }
+    } else {
+        useval = startnode;
+    }
+
+    for (val = (val_value_t *)dlq_firstEntry(&useval->v.childQ);
 	 val != NULL;
 	 val = (val_value_t *)dlq_nextEntry(val)) {
 
@@ -5878,8 +5895,9 @@ boolean
 			      boolean orself,
 			      boolean forceall)
 {
-    val_value_t *val;
+    val_value_t *val, *useval;
     boolean      fncalled, fnresult;
+    status_t     res;
 
 #ifdef DEBUG
     if (!startnode) {
@@ -5888,11 +5906,21 @@ boolean
     }
 #endif
 
+    if (val_is_virtual(startnode)) {
+        res = NO_ERR;
+        useval = val_cache_virtual_value(NULL, startnode, &res);
+        if (useval == NULL) {
+            return res;
+        }
+    } else {
+        useval = startnode;
+    }
+
     if (orself) {
 	fnresult = process_one_valwalker(walkerfn,
 					 cookie1,
 					 cookie2,
-					 startnode,
+					 useval,
 					 modname, 
 					 name,
 					 configonly,
@@ -5907,7 +5935,7 @@ boolean
 	return TRUE;
     }
 
-    for (val = (val_value_t *)dlq_firstEntry(&startnode->v.childQ);
+    for (val = (val_value_t *)dlq_firstEntry(&useval->v.childQ);
 	 val != NULL;
 	 val = (val_value_t *)dlq_nextEntry(val)) {
 
@@ -6003,8 +6031,9 @@ boolean
 			 boolean textmode,
 			 ncx_xpath_axis_t axis)
 {
-    val_value_t      *val, *child;
-    boolean           fncalled, fnresult, forward;
+    val_value_t   *val, *child, *useval;
+    boolean        fncalled, fnresult, forward;
+    status_t       res;
 
 #ifdef DEBUG
     if (!startnode) {
@@ -6032,8 +6061,13 @@ boolean
 	return FALSE;
     }
 
+    /* for virtual nodes, it is assumed that the set of 
+     * siblings represents real values, but each 
+     * value node checked and expanded if a virtual node
+     */
     while (val) {
 	if (configonly && !name && !obj_is_config(val->obj)) {
+            /* skip this entry */
 	    if (forward) {
 		val = (val_value_t *)dlq_nextEntry(val);
 	    } else {
@@ -6042,10 +6076,21 @@ boolean
 	    continue;
 	}
 
+        if (val_is_virtual(val)) {
+            res = NO_ERR;
+            useval = val_cache_virtual_value(NULL, val, &res);
+            if (useval == NULL) {
+                return res;
+            }
+        } else {
+            useval = val;
+        }
+                
+
 	fnresult = process_one_valwalker(walkerfn,
 					 cookie1,
 					 cookie2,
-					 val, 
+					 useval, 
 					 modname,
 					 name,
 					 configonly,
@@ -6062,7 +6107,7 @@ boolean
 	     * one of them matches, because all
 	     * matches are needed with the '//' operator
 	     */
-	    for (child = val_get_first_child(val);
+	    for (child = val_get_first_child(useval);
 		 child != NULL;
 		 child = val_get_next_child(child)) {
 
@@ -6151,8 +6196,9 @@ boolean
 				 boolean textmode,
 				 ncx_xpath_axis_t axis)
 {
-    val_value_t *val, *child;
+    val_value_t *val, *useval, *child;
     boolean      fncalled, fnresult, forward;
+    status_t     res;
 
 #ifdef DEBUG
     if (!startnode) {
@@ -6192,10 +6238,21 @@ boolean
 	    continue;
 	}
 
+        if (val_is_virtual(val)) {
+            res = NO_ERR;
+            useval = val_cache_virtual_value(NULL, val, &res);
+            if (useval == NULL) {
+                return FALSE;
+            }
+        } else {
+            useval = val;
+        }
+
+
 	fnresult = process_one_valwalker(walkerfn,
 					 cookie1,
 					 cookie2,
-					 val, 
+					 useval, 
 					 modname,
 					 name,
 					 configonly,
@@ -6212,7 +6269,7 @@ boolean
 	     * one of them matches, because all
 	     * matches are needed with the '//' operator
 	     */
-	    for (child = val_get_first_child(val);
+	    for (child = val_get_first_child(useval);
 		 child != NULL;
 		 child = val_get_next_child(child)) {
 
@@ -7920,6 +7977,81 @@ val_value_t *
 
 }  /* val_get_virtual_value */
 
+
+/********************************************************************
+* FUNCTION val_cache_virtual_value
+* 
+* Get the value of a value node and store the malloced
+* pointer in the virtualval cache 
+* 
+* If the val->getcb is NULL, then an error will be returned
+*
+* Caller should check for *res == ERR_NCX_SKIPPED
+* This will be returned if virtual value has no
+* instance at this time.
+*
+* INPUTS:
+*   session == session CB ptr cast as void *
+*              that is getting the virtual value
+*   val == virtual value to get value for
+*   res == pointer to output function return status value
+*
+* OUTPUTS:
+*    val->virtualval set to the malloced val; will be cleared
+*        if already set
+*    *res == the function return status
+*
+* RETURNS:
+*   A malloced and filled in val_value_t struct
+*   The val_free_value function must be called if the
+*   return value is non-NULL
+*********************************************************************/
+val_value_t *
+    val_cache_virtual_value (void *session,
+                             val_value_t *val,
+                             status_t *res)
+{
+    ses_cb_t    *scb;
+    val_value_t *retval;
+    getcb_fn_t   getcb;
+
+#ifdef DEBUG
+    if (!val || !res) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    if (!val->getcb) {
+	*res = ERR_NCX_OPERATION_FAILED;
+	return NULL;
+    }
+
+    scb = (ses_cb_t *)session;
+    getcb = (getcb_fn_t)val->getcb;
+
+    retval = val_new_value();
+    if (!retval) {
+	*res = ERR_INTERNAL_MEM;
+	return NULL;
+    }
+    setup_virtual_retval(val, retval);
+
+    *res = (*getcb)(scb, GETCB_GET_VALUE, val, retval);
+    if (*res != NO_ERR) {
+	val_free_value(retval);
+	retval = NULL;
+    } else {
+        if (val->virtualval) {
+            val_free_value(val->virtualval);
+        }
+        val->virtualval = retval;
+        val->virtualval->parent = val->parent;
+    }
+
+    return retval;
+
+}  /* val_cache_virtual_value */
 
 
 /********************************************************************

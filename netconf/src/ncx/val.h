@@ -279,6 +279,14 @@ typedef struct val_value_t_ {
      */
     void *getcb;
 
+    /* if this field is non-NULL, then a malloced value struct
+     * representing the real value retrieved by 
+     * val_get_virtual_value, is cached here for XPath filtering
+     * TBD: add timestamp to reuse cached entries for some time
+     * period
+     */
+    struct val_value_t_ *virtualval;
+
     /* these fields are used for NCX_BT_LIST */
     struct val_index_t_ *index;   /* back-ptr/flag in use as index */
     dlq_hdr_t       indexQ;    /* Q of val_index_t or ncx_filptr_t */
@@ -938,10 +946,17 @@ extern boolean
 extern boolean
     val_is_virtual (const val_value_t *val);
 
+/* must free the return val; not cached */
 extern val_value_t *
     val_get_virtual_value (void *session,  /* really ses_cb_t *   */
 			   const val_value_t *val,
 			   status_t *res);
+
+/* get + cache as val->virtualval; DO NOT FREE the return val */
+extern val_value_t *
+    val_cache_virtual_value (void *session,  /* really ses_cb_t *   */
+                             val_value_t *val,
+                             status_t *res);
 
 extern boolean
     val_is_default (const val_value_t *val);

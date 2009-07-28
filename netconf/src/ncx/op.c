@@ -295,14 +295,16 @@ const xmlChar *
     op_defop_name (op_defop_t def_id) 
 {
     switch (def_id) {
+    case OP_DEFOP_NOT_SET:
+	return NCX_EL_NOT_SET;
     case OP_DEFOP_NONE:
 	return NCX_EL_NONE;
     case OP_DEFOP_MERGE:
 	return NCX_EL_MERGE;
     case OP_DEFOP_REPLACE:
 	return NCX_EL_REPLACE;
-    case OP_DEFOP_NODEF:
-	return NCX_EL_NODEFAULT;
+    case OP_DEFOP_NOT_USED:
+	return NCX_EL_NOT_USED;
     default:
 	return NCX_EL_ILLEGAL;
     }
@@ -431,7 +433,7 @@ const xmlChar *
 * Get the ID for the error-option from its keyword
 *
 * INPUTS:  
-*    errstr == string for the default operation
+*    errstr == string for the error option
 * RETURNS:
 *    the op_errop_t enumeration value for the string
 *********************************************************************/
@@ -457,6 +459,44 @@ op_errop_t
     return OP_ERROP_NONE;
 
 } /* op_errop_id */
+
+
+/********************************************************************
+* FUNCTION op_defop_id2
+*
+* Get the ID for the default-operation from its keyword
+* Return the op_defop_t, not the op_editop_t conversion
+*
+* INPUTS:  
+*    defstr == string for the default operation
+* RETURNS:
+*    the op_defop_t enumeration value for the string
+*********************************************************************/
+op_defop_t 
+    op_defop_id2 (const xmlChar *defstr)
+{
+#ifdef DEBUG
+    if (!defstr) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return OP_DEFOP_NOT_SET;
+    }
+#endif
+
+    if (!xml_strcmp(defstr, NCX_EL_NONE)) {
+	return OP_DEFOP_NONE;
+    }
+    if (!xml_strcmp(defstr, NCX_EL_MERGE)) {
+	return OP_DEFOP_MERGE;
+    }
+    if (!xml_strcmp(defstr, NCX_EL_REPLACE)) {
+	return OP_DEFOP_REPLACE;
+    }
+    if (!xml_strcmp(defstr, NCX_EL_NOT_USED)) {
+	return OP_DEFOP_NOT_USED;
+    }
+    return OP_DEFOP_NOT_SET;
+
+} /* op_defop_id2 */
 
 
 /* END file op.c */

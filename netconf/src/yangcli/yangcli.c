@@ -198,7 +198,7 @@ static dlq_hdr_t      agent_cbQ;
 /* hack for now instead of lookup functions to get correct
  * agent processing context; later search by session ID
  */
-static agent_cb_t    *cur_agent_cb = NULL;
+static agent_cb_t    *cur_agent_cb;
 
 /* yangcli.yang file used for quicker lookups */
 static ncx_module_t  *yangcli_mod;
@@ -292,6 +292,9 @@ static op_testop_t     testoption;
 
 /* default NETCONF error-option value */
 static op_errop_t      erroption;
+
+/* default NETCONF default-operation value */
+static op_defop_t      defop;
 
 /* default NETCONF with-defaults value */
 static ncx_withdefaults_t  withdefaults;
@@ -575,6 +578,7 @@ static agent_cb_t *
     agent_cb->get_optional = optional;
     agent_cb->testoption = testoption;
     agent_cb->erroption = erroption;
+    agent_cb->defop = defop;
     agent_cb->timeout = default_timeout;
     agent_cb->display_mode = display_mode;
     agent_cb->withdefaults = withdefaults;
@@ -615,6 +619,7 @@ static status_t
     ncx_bad_data_t         testbaddata;
     op_testop_t            testop;
     op_errop_t             errop;
+    op_defop_t             mydefop;
     ncx_num_t              testnum;
     ncx_display_mode_t     dmode;
 
@@ -786,6 +791,17 @@ static status_t
 			  "continue-on-error, rollback-on-error)\n");
 		res = ERR_NCX_INVALID_VALUE;
 	    }
+	}
+    } else if (!xml_strcmp(configval->name, NCX_EL_DEFAULT_OPERATION)) {
+        mydefop = op_defop_id2(usestr);
+        if (mydefop != OP_DEFOP_NOT_SET) {
+            agent_cb->defop = mydefop;
+            defop = mydefop;
+        } else {
+            log_error("\nError: must be a valid 'default-operation'");
+            log_error("\n       (none, merge, "
+                      "replace, not-used)\n");
+            res = ERR_NCX_INVALID_VALUE;
 	}
     } else if (!xml_strcmp(configval->name, YANGCLI_TIMEOUT)) {
 	ncx_init_num(&testnum);
@@ -1593,6 +1609,11 @@ static status_t
     }
 
     res = create_config_var(YANGCLI_WITH_DEFAULTS, NCX_EL_NONE); 
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    res = create_config_var(NCX_EL_DEFAULT_OPERATION, NCX_EL_NONE); 
     if (res != NO_ERR) {
 	return res;
     }
@@ -2631,25 +2652,35 @@ static status_t
 
     /* init the module static vars */
     dlq_createSQue(&agent_cbQ);
-    dlq_createSQue(&mgrloadQ);
-
-    /* state = MGR_IO_ST_INIT; */
+    cur_agent_cb = NULL;
+    yangcli_mod = NULL;
+    netconf_mod = NULL;
     mgr_cli_valset = NULL;
-    connect_valset = NULL;
     batchmode = FALSE;
-    default_module = NULL;
     helpmode = FALSE;
     helpsubmode = HELP_MODE_NONE;
     versionmode = FALSE;
-    autoload = TRUE;
-    fixorder = TRUE;
-    optional = FALSE;
-    autocomp = TRUE;
     runscript = NULL;
     runscriptdone = FALSE;
     runcommand = NULL;
     runcommanddone = FALSE;
+    dlq_createSQue(&mgrloadQ);
+    autoload = TRUE;
+    autocomp = TRUE;
+    baddata = NCX_BAD_DATA_NONE;
+    connect_valset = NULL;
+    confname = NULL;
+    default_module = NULL;
+    default_timeout = 30;
+    display_mode = NCX_DISPLAY_MODE_NONE;
+    fixorder = TRUE;
+    optional = FALSE;
+    testoption = OP_TESTOP_NONE;
+    erroption = OP_ERROP_NONE;
+    defop = OP_DEFOP_NOT_SET;
+    withdefaults = NCX_WITHDEF_NONE;
 
+    /* global vars */
     malloc_cnt = 0;
     free_cnt = 0;
 

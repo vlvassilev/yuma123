@@ -75,10 +75,11 @@ typedef enum op_targtyp_t_ {
 
 /* NETCONF protocol default edit-config operation types */
 typedef enum op_defop_t_ {
+    OP_DEFOP_NOT_SET,
     OP_DEFOP_NONE,
     OP_DEFOP_MERGE,
     OP_DEFOP_REPLACE,
-    OP_DEFOP_NODEF
+    OP_DEFOP_NOT_USED
 } op_defop_t;
 
 
@@ -223,5 +224,7 @@ extern const xmlChar *
 extern op_errop_t 
     op_errop_id (const xmlChar *errstr);
 
+extern op_defop_t 
+    op_defop_id2 (const xmlChar *defstr);
 
 #endif            /* _H_op */

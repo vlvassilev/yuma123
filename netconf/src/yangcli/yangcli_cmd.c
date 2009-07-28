@@ -5070,6 +5070,7 @@ static status_t
 			       uint32 timeoutval)
 {
     const obj_template_t  *rpc, *input, *child;
+    const xmlChar         *defopstr;
     mgr_rpc_req_t         *req;
     val_value_t           *reqdata, *parm, *target, *dummy_parm;
     ses_cb_t              *scb;
@@ -5166,22 +5167,25 @@ static status_t
 
     val_add_child(target, parm);
 
-    /* set the edit-config/input/default-operation node to 'none' */
-    child = obj_find_child(input, 
-			   NC_MODULE,
-			   NCX_EL_DEFAULT_OPERATION);
-    res = NO_ERR;
-    parm = val_make_simval_obj(child, NCX_EL_NONE, &res);
-    if (!parm) {
-	if (freeroot) {
-	    val_free_value(valroot);
-	} else {
-	    val_free_value(config_content);
-	}
-	val_free_value(reqdata);
-	return res;
+    /* set the edit-config/input/default-operation node */
+    if (agent_cb->defop != OP_DEFOP_NOT_USED) {
+        child = obj_find_child(input, 
+                               NC_MODULE,
+                               NCX_EL_DEFAULT_OPERATION);
+        res = NO_ERR;
+        defopstr = op_defop_name(agent_cb->defop);
+        parm = val_make_simval_obj(child, defopstr, &res);
+        if (!parm) {
+            if (freeroot) {
+                val_free_value(valroot);
+            } else {
+                val_free_value(config_content);
+            }
+            val_free_value(reqdata);
+            return res;
+        }
+        val_add_child(parm, reqdata);
     }
-    val_add_child(parm, reqdata);
 
     /* set the test-option to the user-configured or default value */
     if (agent_cb->testoption != OP_TESTOP_NONE) {

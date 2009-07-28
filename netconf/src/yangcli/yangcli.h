@@ -268,6 +268,7 @@ typedef struct agent_cb_t_ {
     boolean              fixorder;
     op_testop_t          testoption;
     op_errop_t           erroption;
+    op_defop_t           defop;
     ncx_withdefaults_t   withdefaults;
 
     /* session support */

@@ -6,6 +6,7 @@
             <nacm:groupIdentity>nacm:admin</nacm:groupIdentity>
             <nacm:userName>andy</nacm:userName>
             <nacm:userName>admin</nacm:userName>
+            <nacm:userName>barney</nacm:userName>
          </nacm:group>
          <nacm:group>
             <nacm:groupIdentity>nacm:monitor</nacm:groupIdentity>

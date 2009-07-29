@@ -2677,7 +2677,7 @@ static status_t
     optional = FALSE;
     testoption = OP_TESTOP_NONE;
     erroption = OP_ERROP_NONE;
-    defop = OP_DEFOP_NOT_SET;
+    defop = OP_DEFOP_NONE;   /* real enum 'none' */
     withdefaults = NCX_WITHDEF_NONE;
 
     /* global vars */

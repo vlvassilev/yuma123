@@ -1551,11 +1551,11 @@ status_t
 
 	/* check for a leaf, then if that is OK */
 	if (pcb->source == XP_SRC_LEAFREF) {
-	    if (!obj_get_ctypdef(pcb->targobj) ||  
-		pcb->targobj->objtype != OBJ_TYP_LEAF) {
+	    if (!obj_is_leafy(pcb->targobj)) {
 		res = ERR_NCX_INVALID_VALUE;
 		if (pcb->logerrors) {
-		    log_error("\nError: invalid path target anyxml '%s'",
+		    log_error("\nError: invalid path target %s '%s'",
+                              obj_get_typestr(pcb->targobj),
 			      obj_get_name(pcb->targobj));
 		    ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
 		}

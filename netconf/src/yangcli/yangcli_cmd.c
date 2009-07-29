@@ -5168,7 +5168,8 @@ static status_t
     val_add_child(target, parm);
 
     /* set the edit-config/input/default-operation node */
-    if (agent_cb->defop != OP_DEFOP_NOT_USED) {
+    if (!(agent_cb->defop == OP_DEFOP_NOT_USED ||
+          agent_cb->defop == OP_DEFOP_NOT_SET)) {          
         child = obj_find_child(input, 
                                NC_MODULE,
                                NCX_EL_DEFAULT_OPERATION);

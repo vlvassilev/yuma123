@@ -35,10 +35,13 @@ test:
 
 
 install:
+ifdef STATIC
+else
 	sudo install --owner=root $(GRP) \
 	$(LIB_INST)/lib$(SUBDIR_NM).so \
 	$(REAL_INST)
 	sudo ldconfig
+endif
 
 ifdef STATIC
 ncxlib: $(LBASE)/lib$(SUBDIR_NM).a

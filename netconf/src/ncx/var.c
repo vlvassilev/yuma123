@@ -420,7 +420,8 @@ static status_t
 	    var->val->nsid = tempval->nsid;
 
 	    /* make sure the name stays the same */
-	    val_set_name(var->val, tempval->name, 
+	    val_set_name(var->val, 
+                         tempval->name, 
 			 xml_strlen(tempval->name));
 	    val_free_value(tempval);
 	}
@@ -1145,8 +1146,11 @@ val_value_t *
     }
 #endif
 
-    var = find_var(varQ, name, xml_strlen(name), 
-		   nsid, VAR_TYP_QUEUE);
+    var = find_var(varQ, 
+                   name, 
+                   xml_strlen(name), 
+		   nsid, 
+                   VAR_TYP_QUEUE);
     if (var) {
 	return var->val;
     } else {
@@ -1182,8 +1186,11 @@ ncx_var_t *
     }
 #endif
 
-    return find_var(varQ, name, xml_strlen(name), 
-		    nsid, VAR_TYP_QUEUE);
+    return find_var(varQ, 
+                    name, 
+                    xml_strlen(name), 
+		    nsid, 
+                    VAR_TYP_QUEUE);
 
 }  /* var_get_que_raw */
 
@@ -1211,8 +1218,11 @@ val_value_t *
     }
 #endif
 
-    var = find_var(NULL, name, xml_strlen(name), 
-		   0, VAR_TYP_LOCAL);
+    var = find_var(NULL, 
+                   name, 
+                   xml_strlen(name), 
+		   0, 
+                   VAR_TYP_LOCAL);
     if (var) {
 	return var->val;
     }
@@ -1355,8 +1365,11 @@ status_t
     /* check the global var further */
     if (*vartype == VAR_TYP_GLOBAL) {
 	/* VAR_TYP_GLOBAL selects anything in the globalQ */
-	testvar = find_var(NULL, *name, *namelen, 
-			   0, VAR_TYP_GLOBAL);
+	testvar = find_var(NULL, 
+                           *name, 
+                           *namelen, 
+			   0, 
+                           VAR_TYP_GLOBAL);
 	if (testvar) {
 	    /* could be VAR_TYP_SYSTEM, VAR_TYP_CONFIG,
 	     * or VAR_TYP_GLOBAL
@@ -1467,8 +1480,12 @@ val_value_t *
 	 * get the value and clone it for the new value
 	 * flag an error if variable not found
 	 */
-	*res = var_check_ref(strval, ISRIGHT, &len, &vartype, 
-			     &name, &namelen);
+	*res = var_check_ref(strval, 
+                             ISRIGHT, 
+                             &len, 
+                             &vartype, 
+			     &name, 
+                             &namelen);
 	if (*res == NO_ERR) {
 	    varval = var_get_str(name, namelen, vartype);
 	    if (!varval) {
@@ -1614,8 +1631,12 @@ val_value_t *
 	 * get the value and clone it for the new value
 	 * flag an error if variable not found
 	 */
-	*res = var_check_ref(strval, ISRIGHT, &len, &vartype, 
-			     &name, &namelen);
+	*res = var_check_ref(strval, 
+                             ISRIGHT, 
+                             &len, 
+                             &vartype, 
+			     &name, 
+                             &namelen);
 	if (*res == NO_ERR) {
 	    varval = var_get_str(name, namelen, vartype);
 	    if (!varval) {
@@ -1661,7 +1682,7 @@ val_value_t *
 	    
 	} /* else res already set */
     } else if (strval && *strval == NCX_QUOTE_CH) {
-	/* this is a quoted string literal */
+	/* this is a double-quoted string literal */
 	/* set the start after quote */
 	str = ++strval;
 
@@ -1669,9 +1690,25 @@ val_value_t *
 	while (*str && *str != NCX_QUOTE_CH) {
 	    str++;
 	}
-	*res = val_set_string2(newval, NULL, 
+	*res = val_set_string2(newval, 
+                               NULL, 
 			       obj_get_ctypdef(useobj), 
-			       strval, (uint32)(str-strval)); 
+			       strval, 
+                               (uint32)(str-strval)); 
+    } else if (strval && *strval == NCX_SQUOTE_CH) {
+	/* this is a single-quoted string literal */
+	/* set the start after quote */
+	str = ++strval;
+
+	/* find the end of the quoted string */
+	while (*str && *str != NCX_SQUOTE_CH) {
+	    str++;
+	}
+	*res = val_set_string2(newval, 
+                               NULL, 
+			       obj_get_ctypdef(useobj), 
+			       strval, 
+                               (uint32)(str-strval)); 
     } else if (strval && (*strval == NCX_XML1a_CH) &&
 	       (strval[1] == NCX_XML1b_CH)) {
 

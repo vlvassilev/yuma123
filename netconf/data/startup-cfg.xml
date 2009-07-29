@@ -80,7 +80,7 @@
    <t:test2 xmlns:t="http://netconfcentral.com/ns/test">
       <t:a2>eee</t:a2>
       <t:a1>4</t:a1>
-      <t:b2>3</t:b2>
+      <t:b2>6</t:b2>
       <t:foo>sss</t:foo>
    </t:test2>
    <t:test3 xmlns:t="http://netconfcentral.com/ns/test">

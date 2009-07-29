@@ -813,16 +813,17 @@ static status_t
 static void
     expire_subscription (agt_not_subscription_t *sub)
 {
-    agt_state_remove_subscription(sub->scb->sid);
-    free_subscription(sub);
-    anySubscriptions = (dlq_empty(&subscriptionQ)) ? FALSE : TRUE;
-
     if (LOGDEBUG) {
 	log_debug("\nagt_not: Removed %s subscription "
 		  "for session '%u'",
 		  (sub->startTime) ? "replay" : "live",
 		  sub->scb->sid);
     }
+
+    agt_state_remove_subscription(sub->scb->sid);
+    free_subscription(sub);
+    anySubscriptions = (dlq_empty(&subscriptionQ)) ? FALSE : TRUE;
+
 
 }  /* expire_subscription */
 

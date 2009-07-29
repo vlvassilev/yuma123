@@ -17,9 +17,6 @@ leaf /sysStartup/bootError/error-app-tag
 leaf /sysStartup/bootError/error-path
 leaf /sysStartup/bootError/error-message
 leaf /sysStartup/bootError/error-info
-notification /sysShutdown
-leaf /sysShutdown/timeLeft
-leaf /sysShutdown/mode
 notification /sysConfigChange
 leaf /sysConfigChange/userName
 leaf /sysConfigChange/sessionId
@@ -192,7 +189,6 @@ date         init     comment
 #define system_N_sysBootDateTime (const xmlChar *)"sysBootDateTime"
 
 #define system_N_sysStartup (const xmlChar *)"sysStartup"
-#define system_N_sysShutdown (const xmlChar *)"sysShutdown"
 #define system_N_sysConfigChange (const xmlChar *)"sysConfigChange"
 #define system_N_sysCapabilityChange (const xmlChar *)"sysCapabilityChange"
 #define system_N_sysSessionStart (const xmlChar *)"sysSessionStart"
@@ -243,7 +239,6 @@ static const obj_template_t *systemobj;
 
 /* cached pointers to the eventType nodes for this module */
 static const obj_template_t *sysStartupobj;
-static const obj_template_t *sysShutdownobj;
 static const obj_template_t *sysConfigChangeobj;
 static const obj_template_t *sysCapabilityChangeobj;
 static const obj_template_t *sysSessionStartobj;
@@ -450,7 +445,6 @@ static void
     sysmod = NULL;
     systemobj = NULL;
     sysStartupobj = NULL;
-    sysShutdownobj = NULL;
     sysConfigChangeobj = NULL;
     sysCapabilityChangeobj = NULL;
     sysSessionStartobj = NULL;
@@ -509,13 +503,6 @@ status_t
 	ncx_find_object(sysmod,
 			system_N_sysStartup);
     if (!sysStartupobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    }
-
-    sysShutdownobj = 
-	ncx_find_object(sysmod,
-			system_N_sysShutdown);
-    if (!sysShutdownobj) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 

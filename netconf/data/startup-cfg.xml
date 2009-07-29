@@ -44,6 +44,14 @@
             <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
             <nacm:comment>access to nacm config</nacm:comment>
          </nacm:dataRule>
+         <nacm:dataRule>
+            <nacm:name>itf-1</nacm:name>
+            <nacm:path
+               xmlns:if="http://netconfcentral.com/ns/interfaces">/if:interfaces/if:interface</nacm:path>
+            <nacm:allowedRights>read write</nacm:allowedRights>
+            <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
+            <nacm:comment>let admin read and write all interfaces</nacm:comment>
+         </nacm:dataRule>
       </nacm:rules>
    </nacm:nacm>
    <t:test2 xmlns:t="http://netconfcentral.com/ns/test">

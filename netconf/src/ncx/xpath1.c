@@ -8409,7 +8409,7 @@ status_t
 	pcb->tkc = NULL;
     }
 
-    if (tkc) {
+    if (tkc && tkc->cur) {
         linenum = TK_CUR_LNUM(tkc);
         linepos = TK_CUR_LPOS(tkc);
     } else {

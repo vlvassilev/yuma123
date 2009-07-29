@@ -4737,7 +4737,12 @@ static status_t
 	     * is a bare-minimum copy; need to parse
 	     * the expression again,
 	     */
-	    tkc->cur = must->tk;
+
+            /* if the must is from a grouping in a different
+             * module, then the must->tk value will be
+             * garbage at this point  !!!!
+             */
+            tkc->cur = must->tk;
 	    res = xpath1_parse_expr(tkc, mod, must, XP_SRC_YANG);
 	}
 

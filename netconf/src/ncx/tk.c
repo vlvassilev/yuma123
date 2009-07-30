@@ -504,7 +504,8 @@ static status_t
     } else if (total == 0) {
 	/* zero length value strings are allowed */
 	tk = new_token((isdouble) ? TK_TT_QSTRING : TK_TT_SQSTRING,
-		       NULL, 0);
+		       NULL, 
+                       0);
     } else if (!isdouble) {
 	/* single quote string */
 	tk = new_token(TK_TT_SQSTRING, tkbuff, total);
@@ -920,8 +921,12 @@ static status_t
 	}
     }
 
-    res = add_new_qtoken(tkc, TRUE, tempbuff, 
-			 outstr, startline, startpos);
+    res = add_new_qtoken(tkc, 
+                         TRUE, 
+                         tempbuff, 
+			 outstr, 
+                         startline, 
+                         startpos);
     m__free(tempbuff);
     return res;
 
@@ -1040,8 +1045,12 @@ static status_t
     }
 
     /* get a token and save the SQSTRING */
-    res = add_new_qtoken(tkc, FALSE, tempbuff,
-			 outstr, startline, startpos);
+    res = add_new_qtoken(tkc, 
+                         FALSE, 
+                         tempbuff,
+			 outstr, 
+                         startline, 
+                         startpos);
     m__free(tempbuff);
     return res;
 
@@ -1428,8 +1437,10 @@ static status_t
     if (prefix) {
 	/* XPath $prefix:identifier */
 	tk = new_token_wmod(TK_TT_QVARBIND,
-			    prefix, prelen, 
-			    item, (uint32)(str - item));
+			    prefix, 
+                            prelen, 
+			    item, 
+                            (uint32)(str - item));
     } else {
 	/* XPath $identifier */
 	tk = new_token(TK_TT_VARBIND,  tkc->bptr+1, len);
@@ -1576,13 +1587,17 @@ static status_t
 		return ERR_NCX_LEN_EXCEEDED;
 	    }
 	    tk = new_token_wmod(scoped ? TK_TT_MSSTRING : TK_TT_MSTRING,
-				prefix, prelen, item, (uint32)(str - item));
+				prefix, 
+                                prelen, 
+                                item, 
+                                (uint32)(str - item));
 	} else {
 	    if ((str - tkc->bptr) > NCX_MAX_Q_STRLEN) {
 		return ERR_NCX_LEN_EXCEEDED;
 	    }
 	    tk = new_token(scoped ? TK_TT_SSTRING : TK_TT_TSTRING,
-			   tkc->bptr, (uint32)(str - tkc->bptr));
+			   tkc->bptr, 
+                           (uint32)(str - tkc->bptr));
 	}
     } else if (prefix) {
 	if (namestar) {
@@ -1591,12 +1606,15 @@ static status_t
 	} else {
 	    /* XPath prefix:identifier */
 	    tk = new_token_wmod(TK_TT_MSTRING,
-				prefix, prelen, 
-				item, (uint32)(str - item));
+				prefix, 
+                                prelen, 
+				item, 
+                                (uint32)(str - item));
 	}
     } else {
 	/* XPath identifier */
-	tk = new_token(TK_TT_TSTRING,  tkc->bptr, 
+	tk = new_token(TK_TT_TSTRING,  
+                       tkc->bptr, 
 		       (uint32)(str - tkc->bptr));
     }
 

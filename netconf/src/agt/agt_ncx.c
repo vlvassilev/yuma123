@@ -386,7 +386,11 @@ static status_t
              * attributes) against the existing data model.
              * <rpc-error> records will be added as needed 
              */
-            res = agt_val_validate_write(scb, msg, target, val, defop);
+            res = agt_val_validate_write(scb, 
+                                         msg, 
+                                         target, 
+                                         val, 
+                                         defop);
 
             /* for continue-on-error, ignore the validate return value
              * in case there are multiple parmsets and not all of them
@@ -398,7 +402,15 @@ static status_t
                 }
             }
 
-            if (target->cfg_id == NCX_CFGID_RUNNING && res==NO_ERR) {
+            /* if this is an edit-config on running
+             * or a test-then-set edit on candidate
+             * then make a copy of the root and do a
+             * complete non-destructive validation
+             */
+            if (res==NO_ERR &&
+                ((target->cfg_id == NCX_CFGID_RUNNING) ||
+                 (target->cfg_id == NCX_CFGID_CANDIDATE &&
+                  testop == OP_TESTOP_TESTTHENSET))) {
                 res = agt_val_split_root_check(scb, 
                                                msg, 
                                                val, 
@@ -1317,6 +1329,9 @@ static status_t
                          NCX_NT_NONE,
                          NULL);
     } else {
+        /*** TBD: may need to make a copy of candidate to make sure
+         *** that if this step fails, no changes to running will remain
+         ***/ 
         res = agt_val_apply_commit(scb, msg, candidate, running);
         if (res == NO_ERR) {
             res = cfg_fill_candidate_from_running();

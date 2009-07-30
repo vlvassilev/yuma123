@@ -1565,14 +1565,18 @@ status_t
 	}
 	break;
     case NCX_BT_INSTANCE_ID:
-	return NO_ERR;  /*** BUG: MISSING INSTANCE ID VALIDATION ***/
+        /* instance-identifier is handled with xpath.c xpath1.c
+         * functions; do not use for instance identifier validation
+         * since the source of the prefix mappings may be an XML reader
+         * or a YANG module
+         */
+	return SET_ERROR(ERR_INTERNAL_VAL);
     case NCX_BT_LEAFREF:
-	return NO_ERR;  /*** BUG: MISSING LEAFREF VALIDATION ***/
+        /*** BUG: MISSING LEAFREF VALIDATION ***/
+	return NO_ERR;
     default:
 	return ERR_NCX_WRONG_DATATYP;
     }
-
-    /* check the range against the string length */
 
     return res;
 

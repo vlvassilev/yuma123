@@ -656,7 +656,7 @@ extern status_t
 /* set any simple value with any typdef, and a counted string */
 extern status_t 
     val_set_simval_str (val_value_t  *val,
-			const typ_def_t    *typdef,
+			const typ_def_t *typdef,
 			xmlns_id_t    nsid,
 			const xmlChar *valname,
 			uint32 valnamelen,
@@ -664,7 +664,7 @@ extern status_t
 
 /* same as val_set_simval, but malloc the value first */
 extern val_value_t *
-    val_make_simval (const typ_def_t    *typdef,
+    val_make_simval (const typ_def_t *typdef,
 		     xmlns_id_t    nsid,
 		     const xmlChar *valname,
 		     const xmlChar *valstr,

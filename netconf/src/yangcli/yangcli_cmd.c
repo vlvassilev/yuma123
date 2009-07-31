@@ -5770,6 +5770,7 @@ static val_value_t *
 		val_free_value(*valroot);
 		*valroot = NULL;
 	    }
+	    agent_cb->get_optional = saveopt;
 	    return NULL;
 	}
 

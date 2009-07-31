@@ -3274,12 +3274,14 @@ static status_t
  *
  * INPUTS:
  *    obj == the object to use
+ *    help_mode == verbosity level to use
  *
  * RETURNS:
  *   status
  *********************************************************************/
 static status_t
-    do_list_one_oid (const obj_template_t *obj)
+    do_list_one_oid (const obj_template_t *obj,
+                     help_mode_t help_mode)
 {
     xmlChar      *buffer;
     boolean       imode;
@@ -3298,7 +3300,17 @@ static status_t
 	if (res != NO_ERR) {
 	    log_error("\nError: list OID failed (%s)",
 		      get_error_string(res));
-	} else {
+	} else if (help_mode == HELP_MODE_FULL) {
+	    if (imode) {
+		log_stdout("\n   %s %s", 
+                           obj_get_typestr(obj),
+                           buffer);
+	    } else {
+		log_write("\n   %s %s", 
+                          obj_get_typestr(obj),
+                          buffer);
+	    }
+        } else {
 	    if (imode) {
 		log_stdout("\n   %s", buffer);
 	    } else {
@@ -3323,13 +3335,16 @@ static status_t
  * INPUTS:
  *    obj == object to use
  *    nestlevel to stop at
+ *    help_mode == verbosity level to use
  *
  * RETURNS:
  *   status
  *********************************************************************/
 static status_t
     do_list_oid (const obj_template_t *obj,
-		 uint32 level)
+		 uint32 level,
+                 help_mode_t  help_mode)
+    
 {
     const obj_template_t  *chobj;
     status_t               res;
@@ -3337,11 +3352,11 @@ static status_t
     res = NO_ERR;
 
     if (obj_get_level(obj) <= level) {
-	res = do_list_one_oid(obj);
+	res = do_list_one_oid(obj, help_mode);
 	for (chobj = obj_first_child(obj);
-	     chobj != NULL && res != NO_ERR;
+	     chobj != NULL && res == NO_ERR;
 	     chobj = obj_next_child(chobj)) {
-	    res = do_list_oid(chobj, level);
+	    res = do_list_oid(chobj, level, help_mode);
 	}
     }
 
@@ -3381,10 +3396,10 @@ static status_t
     case HELP_MODE_NONE:
 	return res;
     case HELP_MODE_BRIEF:
-	level = 1;
+	level = 3;
 	break;
     case HELP_MODE_NORMAL:
-	level = 5;
+	level = 10;
 	break;
     case HELP_MODE_FULL:
 	level = 999;
@@ -3398,7 +3413,7 @@ static status_t
     if (mod) {
 	obj = ncx_get_first_object(mod);
 	while (obj && res == NO_ERR) {
-	    res = do_list_oid(obj, level);
+	    res = do_list_oid(obj, level, mode);
 	    obj = ncx_get_next_object(mod, obj);
 	}
     } else if (use_agentcb(agent_cb)) {
@@ -3409,7 +3424,7 @@ static status_t
 
 	    obj = ncx_get_first_object(modptr->mod);
 	    while (obj && res == NO_ERR) {
-		res = do_list_oid(obj, level);
+		res = do_list_oid(obj, level, mode);
 		obj = ncx_get_next_object(modptr->mod, obj);
 	    }
 	}

@@ -244,6 +244,7 @@ static status_t
 * Current token is the 'grouping' keyword
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   que == queue will get the grp_template_t 
@@ -253,7 +254,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_grp_consume_grouping (tk_chain_t *tkc,
+    yang_grp_consume_grouping (yang_pcb_t *pcb,
+                               tk_chain_t *tkc,
 			       ncx_module_t  *mod,
 			       dlq_hdr_t *que,
 			       obj_template_t *parent)
@@ -269,7 +271,7 @@ status_t
     status_t         res, retres;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !que) {
+    if (!pcb || !tkc || !mod || !que) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -364,24 +366,41 @@ status_t
 
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    res = yang_typ_consume_typedef(tkc, mod,
+	    res = yang_typ_consume_typedef(pcb,
+                                           tkc, 
+                                           mod,
 					   &grp->typedefQ);
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(tkc, mod,
-					    &grp->groupingQ, parent);
+	    res = yang_grp_consume_grouping(pcb,
+                                            tkc, 
+                                            mod,
+					    &grp->groupingQ, 
+                                            parent);
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, mod, &grp->status,
-				      &stat, &grp->appinfoQ);
+	    res = yang_consume_status(tkc, 
+                                      mod, 
+                                      &grp->status,
+				      &stat, 
+                                      &grp->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, mod, &grp->descr,
-				     &desc, &grp->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &grp->descr,
+				     &desc, 
+                                     &grp->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, mod, &grp->ref,
-				     &ref, &grp->appinfoQ);
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &grp->ref,
+				     &ref, 
+                                     &grp->appinfoQ);
 	} else {
-	    res = yang_obj_consume_datadef_grp(tkc, mod,
+	    res = yang_obj_consume_datadef_grp(pcb,
+                                               tkc, 
+                                               mod,
 					       &grp->datadefQ,
-					       parent, grp);
+					       parent, 
+                                               grp);
 	}
 	CHK_GRP_EXIT(res, retres);
     }
@@ -452,6 +471,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain from parsing (needed for error msgs)
 *   mod == module in progress
 *   groupingQ == Q of grp_template_t structs to check
@@ -462,7 +482,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_grp_resolve_groupings (tk_chain_t *tkc,
+    yang_grp_resolve_groupings (yang_pcb_t *pcb,
+                                tk_chain_t *tkc,
 				ncx_module_t  *mod,
 				dlq_hdr_t *groupingQ,
 				obj_template_t *parent)
@@ -472,7 +493,7 @@ status_t
     status_t         res, retres;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !groupingQ) {
+    if (!pcb || !tkc || !mod || !groupingQ) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -488,22 +509,34 @@ status_t
 	 grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
 	/* check the appinfoQ */
-	res = ncx_resolve_appinfoQ(tkc, mod, &grp->appinfoQ);
+	res = ncx_resolve_appinfoQ(pcb,
+                                   tkc, 
+                                   mod, 
+                                   &grp->appinfoQ);
 	CHK_EXIT(res, retres);
 
 	/* check any local typedefs */
-	res = yang_typ_resolve_typedefs_grp(tkc, mod,
+	res = yang_typ_resolve_typedefs_grp(pcb,
+                                            tkc, 
+                                            mod,
 					    &grp->typedefQ,
-					    parent, grp);
+					    parent, 
+                                            grp);
 	CHK_EXIT(res, retres);
 
 	/* check any local groupings */
-	res = yang_grp_resolve_groupings(tkc, mod,
-					 &grp->groupingQ, parent);
+	res = yang_grp_resolve_groupings(pcb,
+                                         tkc, 
+                                         mod,
+					 &grp->groupingQ, 
+                                         parent);
 	CHK_EXIT(res, retres);
 
 	/* check any local objects */
-	res = yang_obj_resolve_datadefs(tkc, mod, &grp->datadefQ);
+	res = yang_obj_resolve_datadefs(pcb,
+                                        tkc, 
+                                        mod, 
+                                        &grp->datadefQ);
 	CHK_EXIT(res, retres);
     }
 
@@ -606,6 +639,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain from parsing (needed for error msgs)
 *   mod == module in progress
 *   groupingQ == Q of grp_template_t structs to check
@@ -615,7 +649,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t
-    yang_grp_resolve_complete (tk_chain_t *tkc,
+    yang_grp_resolve_complete (yang_pcb_t *pcb,
+                               tk_chain_t *tkc,
 			       ncx_module_t  *mod,
 			       dlq_hdr_t *groupingQ,
 			       obj_template_t *parent)
@@ -624,7 +659,7 @@ status_t
     status_t         res, retres;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !groupingQ) {
+    if (!pcb || !tkc || !mod || !groupingQ) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -640,7 +675,10 @@ status_t
 	 grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
 	/* check any local groupings */
-	res = yang_grp_resolve_complete(tkc, mod, &grp->groupingQ, parent);
+	res = yang_grp_resolve_complete(pcb,
+                                        tkc, 
+                                        mod, 
+                                        &grp->groupingQ, parent);
 	CHK_EXIT(res, retres);
     }
 
@@ -650,14 +688,16 @@ status_t
 	 grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
 	/* check any local objects for uses clauses */
-	res = yang_obj_resolve_uses(tkc, mod, &grp->datadefQ);
+	res = yang_obj_resolve_uses(pcb,
+                                    tkc, 
+                                    mod, 
+                                    &grp->datadefQ);
 	CHK_EXIT(res, retres);
     }
 
     return retres;
 
 }  /* yang_grp_resolve_complete */
-
 
 
 /********************************************************************
@@ -671,6 +711,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain from parsing (needed for error msgs)
 *   mod == module in progress
 *   groupingQ == Q of grp_template_t structs to check
@@ -679,7 +720,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_grp_resolve_final (tk_chain_t *tkc,
+    yang_grp_resolve_final (yang_pcb_t *pcb,
+                            tk_chain_t *tkc,
 			    ncx_module_t  *mod,
 			    dlq_hdr_t *groupingQ)
 {
@@ -687,7 +729,7 @@ status_t
     status_t         res, retres;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !groupingQ) {
+    if (!pcb || !tkc || !mod || !groupingQ) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -703,14 +745,22 @@ status_t
 	 grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
 	/* check any local groupings */
-	res = yang_grp_resolve_final(tkc, mod, &grp->groupingQ);
+	res = yang_grp_resolve_final(pcb,
+                                     tkc, 
+                                     mod, 
+                                     &grp->groupingQ);
 	CHK_EXIT(res, retres);
 
 	/* final check on all objects within groupings */
-	res = yang_obj_resolve_final(tkc, mod, &grp->datadefQ);
+	res = yang_obj_resolve_final(pcb,
+                                     tkc, 
+                                     mod, 
+                                     &grp->datadefQ);
 	CHK_EXIT(res, retres);
 
-	yang_check_obj_used(tkc, mod, &grp->typedefQ,
+	yang_check_obj_used(tkc, 
+                            mod, 
+                            &grp->typedefQ,
 			    &grp->groupingQ);
 
     }

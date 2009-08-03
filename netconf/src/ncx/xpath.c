@@ -441,6 +441,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*    pcb == parswer control block to use
 *    tkc == token chain in progress
 *    mod == module in progress
 *    obj == object calling this fn (for error purposes)
@@ -459,7 +460,8 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    find_schema_node (tk_chain_t *tkc,
+    find_schema_node (yang_pcb_t *pcb,
+                      tk_chain_t *tkc,
 		      ncx_module_t *mod,
 		      obj_template_t *obj,
 		      dlq_hdr_t *datadefQ,
@@ -469,7 +471,6 @@ static status_t
 		      tk_token_t *errtk)
 {
     ncx_import_t   *imp;
-    ncx_module_t   *impmod;
     obj_template_t *curobj, *nextobj;
     dlq_hdr_t      *curQ;
     const xmlChar  *str;
@@ -480,7 +481,6 @@ static status_t
     xmlChar        *name;
 
     imp = NULL;
-    impmod = NULL;
     dtyp = NCX_NT_OBJ;
     curQ = NULL;
     prefix = NULL;
@@ -512,21 +512,10 @@ static status_t
 	imp = ncx_find_pre_import(mod, prefix);
 	if (!imp) {
 	    log_error("\nError: prefix '%s' not found in module imports"
-		      " in Xpath target %s", prefix, target);
+		      " in Xpath target %s", 
+                      prefix, 
+                      target);
 	    res = ERR_NCX_INVALID_NAME;
-	    do_errmsg(tkc, mod, errtk, res);
-	    m__free(prefix);
-	    if (name) {
-		m__free(name);
-	    }
-	    return res;
-	}
-	impmod = ncx_find_module(imp->module, imp->revision);
-	if (!impmod) {
-	    log_error("\nError: module '%s' not found for prefix %s"
-		      " in Xpath target %s",
-		      imp->module, prefix, target);
-	    res = ERR_NCX_MOD_NOT_FOUND;
 	    do_errmsg(tkc, mod, errtk, res);
 	    m__free(prefix);
 	    if (name) {
@@ -538,7 +527,10 @@ static status_t
 
     /* get the first object template */
     if (imp) {
-	curobj = ncx_locate_modqual_import(imp, name, &dtyp);
+	curobj = ncx_locate_modqual_import(pcb,
+                                           imp, 
+                                           name, 
+                                           &dtyp);
     } else if (*target == '/') {
 	curobj = obj_find_template_top(mod,
 				       ncx_get_modname(mod),
@@ -656,13 +648,17 @@ static status_t
 	if (name && curQ) {
 	    nextobj = obj_find_template(curQ,
 					(imp) ? imp->module : 
-					ncx_get_modname(mod), name);
+					ncx_get_modname(mod), 
+                                        name);
 	} else {
 	    res = ERR_NCX_DEFSEG_NOT_FOUND;
 	    log_error("\nError: '%s' in Xpath target '%s' invalid: "
 		      "%s on line %u is a %s",
-		      name, target, obj_get_name(curobj),
-		      curobj->tk->linenum, obj_get_typestr(curobj));
+		      name, 
+                      target, 
+                      obj_get_name(curobj),
+		      curobj->tk->linenum, 
+                      obj_get_typestr(curobj));
 	    do_errmsg(tkc, mod, errtk, res);
 	    if (prefix) {
 		m__free(prefix);
@@ -678,7 +674,8 @@ static status_t
 	} else {
 	    res = ERR_NCX_DEFSEG_NOT_FOUND;
 	    log_error("\nError: object '%s' not found in module %s",
-		      name, (imp) ? imp->module : mod->name);
+		      name, 
+                      (imp) ? imp->module : mod->name);
 	    do_errmsg(tkc, mod, errtk, res);
 	    if (prefix) {
 		m__free(prefix);
@@ -1439,6 +1436,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*    pcb == parser control block to use
 *    tkc == token chain in progress  (may be NULL: errmsg only)
 *    mod == module in progress
 *    obj == augment object initiating search, NULL to start at top
@@ -1456,7 +1454,8 @@ static status_t
 *   status
 *********************************************************************/
 status_t
-    xpath_find_schema_target (tk_chain_t *tkc,
+    xpath_find_schema_target (yang_pcb_t *pcb,
+                              tk_chain_t *tkc,
 			      ncx_module_t *mod,
 			      obj_template_t *obj,
 			      dlq_hdr_t  *datadefQ,
@@ -1464,8 +1463,14 @@ status_t
 			      obj_template_t **targobj,
 			      dlq_hdr_t **targQ)
 {
-    return xpath_find_schema_target_err(tkc, mod, obj, datadefQ, 
-					target, targobj, targQ, 
+    return xpath_find_schema_target_err(pcb,
+                                        tkc, 
+                                        mod, 
+                                        obj, 
+                                        datadefQ, 
+					target, 
+                                        targobj, 
+                                        targQ, 
 					NULL);
 
 }  /* xpath_find_schema_target */
@@ -1499,7 +1504,8 @@ status_t
 *   status
 *********************************************************************/
 status_t
-    xpath_find_schema_target_err (tk_chain_t *tkc,
+    xpath_find_schema_target_err (yang_pcb_t *pcb,
+                                  tk_chain_t *tkc,
 				  ncx_module_t *mod,
 				  obj_template_t *obj,
 				  dlq_hdr_t  *datadefQ,
@@ -1527,8 +1533,14 @@ status_t
 	}
     }
 
-    res = find_schema_node(tkc, mod, obj, datadefQ,
-			   target, targobj, targQ, 
+    res = find_schema_node(pcb,
+                           tkc, 
+                           mod, 
+                           obj, 
+                           datadefQ,
+			   target, 
+                           targobj,
+                           targQ, 
 			   errtk ? errtk : (obj ? obj->tk : NULL));
     return res;
 
@@ -1667,8 +1679,11 @@ status_t
     }
 #endif
 
-    return find_val_node_unique(startval, mod, 
-				target, logerrors, targval);
+    return find_val_node_unique(startval, 
+                                mod, 
+				target, 
+                                logerrors, 
+                                targval);
 
 }  /* xpath_find_val_unique */
 
@@ -2295,7 +2310,9 @@ status_t
     if (TK_CUR_TYP(pcb->tkc) != tktype) {
 	res = ERR_NCX_WRONG_TKTYPE;
 	if (pcb->logerrors) {
-	    ncx_mod_exp_err(pcb->tkc, pcb->mod, res,
+	    ncx_mod_exp_err(pcb->tkc, 
+                            pcb->mod, 
+                            res,
 			    tk_get_token_name(tktype));
 	}
 	return res;
@@ -2601,6 +2618,176 @@ dlq_hdr_t *
 
 }  /* xpath_get_resnodeQ */
 
+#if 0
+/********************************************************************
+* FUNCTION xpath_get_pfix_bindings
+* 
+* Follow the path expression
+* and create module/prefix bindings for each prefix
+* found in the XPath expression
+*
+* INPUTS:
+*    mod == module to check to imports
+*    target == Xpath expression string to evaluate
+*    bindingQ == address of Q to put new bindings
+*
+* OUTPUTS:
+*   if non-NULL inputs:
+*      0 or more entries added to bindingQ
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xpath_get_pfix_bindings (ncx_module_t *mod,
+                             const xmlChar *target,
+                             dlq_hdr_t *bindingQ)
+{
+    const xmlChar        *str;
+    const ncx_import_t   *import;
+    ncx_pfix_binding_t   *binding;
+    xmlChar              *prefix, *name, *modname;
+    uint32                len;
+    status_t              res, retres;
+
+    prefix = NULL;
+    lastprefix = NULL;
+    name = NULL;
+    res = NO_ERR;
+    retres = NO_ERR;
+
+    /* skip the first fwd slash, if any
+     * the target must be from the config root
+     * so if the first fwd-slash is missing then
+     * just keep going and assume the config root anyway
+     */
+    if (*target == '/') {
+	str = ++target;
+    } else {
+	str = target;
+    }
+
+    /* get the first QName (prefix, name) */
+    res = next_nodeid_noerr(str, &prefix, &name, &len);
+    if (res != NO_ERR) {
+	if (prefix) {
+	    m__free(prefix);
+	}
+	if (name) {
+	    m__free(name);
+	}
+	return res;
+    } else {
+	str += len;
+    }
+
+    if (prefix) {
+        import = ncx_find_pre_import(mod, prefix);
+        if (import == NULL) {
+            res = ERR_NCX_IMP_NOT_FOUND;
+            log_error("\nError: import for prefix '%s' "
+                      "not found in expr '%s'",
+                      prefix,
+                      target);
+            ncx_print_errormsg(NULL, mod, res);
+        } else {
+            modname = xml_strdup(import->module);
+            if (modname == NULL) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+                /* pass off prefix and modname memory here */
+                binding = ncx_new_pfix_binding(prefix, modname);
+                if (binding == NULL) {
+                    res = ERR_INTERNAL_MEM;
+                } else {
+                    /* pass off binding memory here */
+                    dlq_enque(binding, bindingQ);
+                    prefix = NULL;
+                }
+            }
+        }
+    }
+
+    if (prefix) {
+        m__free(prefix);
+        prefix = NULL;
+    }
+    if (name) {
+        m__free(name);
+        name = NULL;
+    }
+
+    if (res != NO_ERR) {
+        return res;;
+    }
+
+    /* got the first path step; keep parsing node IDs
+     * until the Xpath expression is done or an error occurs
+     */
+    while (*str == '/' && res == NO_ERR) {
+	str++;
+	/* get the next QName (prefix, name) */
+	res = next_nodeid_noerr(str, &prefix, &name, &len);
+	if (res != NO_ERR) {
+	    if (prefix) {
+		m__free(prefix);
+	    }
+	    if (name) {
+		m__free(name);
+	    }
+	    return res;
+	} else {
+	    str += len;
+	}
+
+        if (prefix) {
+            import = ncx_find_pre_import(mod, prefix);
+            if (import == NULL) {
+                res = ERR_NCX_IMP_NOT_FOUND;
+                log_error("\nError: import for prefix '%s' "
+                          "not found in expr '%s'",
+                          prefix,
+                          target);
+                ncx_print_errormsg(NULL, mod, res);
+            } else {
+                modname = xml_strdup(import->module);
+                if (modname == NULL) {
+                    res = ERR_INTERNAL_MEM;
+                } else {
+                    /* pass off prefix and modname memory here */
+                    binding = ncx_new_pfix_binding(prefix, modname);
+                    if (binding == NULL) {
+                        res = ERR_INTERNAL_MEM;
+                    } else {
+                        /* pass off binding memory here */
+                        dlq_enque(binding, bindingQ);
+                        prefix = NULL;
+                    }
+                }
+            }
+        }
+
+	if (prefix) {
+	    m__free(prefix);
+	    prefix = NULL;
+	}
+	if (name) {
+	    m__free(name);
+	    name = NULL;
+	}
+    }
+
+    if (prefix) {
+	m__free(prefix);
+    }
+    if (name) {
+	m__free(name);
+    }
+
+    return NO_ERR;
+
+}  /* xpath_get_pfix_bindings */
+#endif
 
 
 /* END xpath.c */

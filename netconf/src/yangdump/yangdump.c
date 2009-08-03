@@ -146,6 +146,7 @@ date         init     comment
 #define YANGDUMP_PARM_CONFIG        (const xmlChar *)"config"
 #define YANGDUMP_PARM_DEFNAMES      (const xmlChar *)"defnames"
 #define YANGDUMP_PARM_DEPENDENCIES  (const xmlChar *)"dependencies"
+#define YANGDUMP_PARM_DEVIATION     (const xmlChar *)"deviation"
 #define YANGDUMP_PARM_EXPORTS       (const xmlChar *)"exports"
 #define YANGDUMP_PARM_FORMAT        (const xmlChar *)"format"
 #define YANGDUMP_PARM_HTML_DIV      (const xmlChar *)"html-div"
@@ -172,7 +173,7 @@ date         init     comment
 
 static val_value_t          *cli_val;
 static yangdump_cvtparms_t   cvtparms;
-
+static dlq_hdr_t             savedevQ;
 
 /********************************************************************
 * FUNCTION pr_err
@@ -563,13 +564,21 @@ static status_t
                    argc, 
                    argv);
 
+    dlq_createSQue(&savedevQ);
+
     if (res == NO_ERR) {
 
         /* load in the YANGDUMP converter parmset definition file */
-        res = ncxmod_load_module(YANGDUMP_MOD, NULL, NULL);
+        res = ncxmod_load_module(YANGDUMP_MOD, 
+                                 NULL, 
+                                 NULL,
+                                 NULL);
 
         if (res == NO_ERR) {
-            res = ncxmod_load_module(NCXMOD_NCX, NULL, NULL);
+            res = ncxmod_load_module(NCXMOD_NCX, 
+                                     NULL, 
+                                     NULL,
+                                     NULL);
             if (res == NO_ERR) {
                 res = ncx_stage2_init();
             }
@@ -593,6 +602,7 @@ static status_t
     if (res != NO_ERR && res != ERR_NCX_SKIPPED) {
         pr_err(res);
     }
+
     return res;
 
 }  /* main_init */
@@ -1266,6 +1276,7 @@ static status_t
                                  cp->unified, 
                                  strcmp(cp->objview, OBJVIEW_COOKED) 
                                  ? FALSE : TRUE,
+                                 &savedevQ,
                                  &res);
     if (res == ERR_NCX_SKIPPED) {
         if (pcb) {
@@ -1352,6 +1363,7 @@ static status_t
              */
             res = ncxmod_load_module(ncx_get_modname(pcb->top), 
                                      NULL, 
+                                     &savedevQ,
                                      &mainmod);
             if (res != NO_ERR) {
                 log_error("\nError: main module '%s' had errors."
@@ -1397,7 +1409,11 @@ static status_t
             } else {
                 val = NULL;
                 xml_init_attrs(&attrs);
-                res = xsd_convert_module(pcb->top, cp, &val, &attrs);
+                res = xsd_convert_module(pcb,
+                                         pcb->top, 
+                                         cp, 
+                                         &val, 
+                                         &attrs);
                 if (res != NO_ERR) {
                     pr_err(res);
                 } else {
@@ -1622,18 +1638,20 @@ static void
         m__free(cvtparms.buff);
     }
 
+    ncx_clean_save_deviationsQ(&savedevQ);
+
     /* cleanup the NCX engine and registries */
     ncx_cleanup();
 
     if (malloc_cnt != free_cnt) {
         log_error("\n*** Error: memory leak (m:%u f:%u)\n", 
-                  malloc_cnt, free_cnt);
+                  malloc_cnt,
+                  free_cnt);
     }
 
     log_close();
 
 }  /* main_cleanup */
-
 
 
 /********************************************************************
@@ -1685,6 +1703,7 @@ int
     res = main_init(argc, argv);
 
     if (res == NO_ERR) {
+
         if (cvtparms.versionmode) {
             res = ncx_get_version(buffer, NCX_VERSION_BUFFSIZE);
             if (res == NO_ERR) {
@@ -1706,6 +1725,23 @@ int
 
             /* generate banner everytime yangdump runs */
             write_banner();
+
+            /* first check if there are any deviations to load */
+            res = NO_ERR;
+            val = val_find_child(cli_val, 
+                                 YANGDUMP_MOD, 
+                                 YANGDUMP_PARM_DEVIATION);
+            while (val) {
+                res = ncxmod_load_deviation(VAL_STR(val), &savedevQ);
+                if (NEED_EXIT(res)) {
+                    val = NULL;
+                } else {
+                    val = val_find_next_child(cli_val,
+                                              YANGDUMP_MOD,
+                                              YANGDUMP_PARM_DEVIATION,
+                                              val);
+                }
+            }
 
             /* convert one file or N files or 1 subtree */
             res = NO_ERR;

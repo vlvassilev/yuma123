@@ -128,11 +128,12 @@ date         init     comment
 
 
 /********************************************************************
-* FUNCTION add_one_import
+* FUNCTION add_one_prefix
 * 
-*   Add one import clause, after checking if it is needed first
+*   Add one prefix clause, after checking if it is needed first
 *
 * INPUTS:
+*   pcb == parser control block
 *   modname == import module name to check
 *   revision == module revision to find (may be NULL)
 *   top_attrs == pointer to receive the top element attributes
@@ -146,7 +147,8 @@ date         init     comment
 *   status
 *********************************************************************/
 static status_t
-    add_one_prefix (const xmlChar *modname,
+    add_one_prefix (yang_pcb_t *pcb,
+                    const xmlChar *modname,
 		    const xmlChar *revision,
 		    xml_attrs_t *top_attrs)
 {
@@ -168,7 +170,10 @@ static status_t
      */
     immod = ncx_find_module(modname, revision);
     if (!immod) {
-	res = ncxmod_load_module(modname, revision, &immod);
+	res = ncxmod_load_module(modname, 
+                                 revision, 
+                                 pcb->savedevQ,
+                                 &immod);
     }
     if (!immod) {
 	return SET_ERROR(ERR_INTERNAL_VAL);
@@ -281,7 +286,8 @@ static status_t
 *   status
 *********************************************************************/
 status_t
-    xsd_convert_module (ncx_module_t *mod,
+    xsd_convert_module (yang_pcb_t *pcb,
+                        ncx_module_t *mod,
 			yangdump_cvtparms_t *cp,
 			val_value_t **retval,
 			xml_attrs_t *top_attrs)
@@ -349,7 +355,9 @@ status_t
 	}
 
 	/* set the schema location */
-	str = xsd_make_schema_location(mod, cp->schemaloc, !cp->noversionnames);
+	str = xsd_make_schema_location(mod, 
+                                       cp->schemaloc, 
+                                       !cp->noversionnames);
 	if (str) {
 	    res = xml_add_attr(top_attrs, xsi_id, XSD_LOC, str);
 	    m__free(str);
@@ -386,7 +394,10 @@ status_t
 
     /* set the version attribute */
     if (mod->version) {
-	res = xml_add_attr(top_attrs, 0, NCX_EL_VERSION, mod->version);
+	res = xml_add_attr(top_attrs, 
+                           0, 
+                           NCX_EL_VERSION, 
+                           mod->version);
 	if (res != NO_ERR) {
 	    val_free_value(val);
 	    return res;
@@ -398,7 +409,8 @@ status_t
      */
     ncx_id = xmlns_ncx_id();
     if (ncx_id != mod->nsid) {
-	res = xml_add_xmlns_attr(top_attrs, ncx_id, 
+	res = xml_add_xmlns_attr(top_attrs, 
+                                 ncx_id, 
 				 xmlns_get_ns_prefix(ncx_id));
 	if (res != NO_ERR) {
 	    val_free_value(val);
@@ -409,7 +421,8 @@ status_t
     /* add the NETCONF NS if any RPC or OBJECT definitions */
     nc_id = xmlns_nc_id();
     if (mod->nsid != nc_id && !dlq_empty(&mod->datadefQ)) {
-	res = xml_add_xmlns_attr(top_attrs, nc_id, 
+	res = xml_add_xmlns_attr(top_attrs, 
+                                 nc_id, 
 				 xmlns_get_ns_prefix(nc_id));
 	if (res != NO_ERR) {
 	    val_free_value(val);
@@ -434,7 +447,8 @@ status_t
     if (needed) {
 	ncn_id = xmlns_ncn_id();
 	if (mod->nsid != ncn_id) {
-	    res = xml_add_xmlns_attr(top_attrs, ncn_id, 
+	    res = xml_add_xmlns_attr(top_attrs, 
+                                     ncn_id, 
 				     xmlns_get_ns_prefix(ncn_id));
 	    if (res != NO_ERR) {
 		val_free_value(val);
@@ -448,7 +462,10 @@ status_t
 	for (impptr = (yang_import_ptr_t *)dlq_firstEntry(&mod->saveimpQ);
 	     impptr != NULL;
 	     impptr = (yang_import_ptr_t *)dlq_nextEntry(impptr)) {
-	    res = add_one_prefix(impptr->modname, impptr->revision, top_attrs);
+	    res = add_one_prefix(pcb,
+                                 impptr->modname, 
+                                 impptr->revision, 
+                                 top_attrs);
 	    if (res != NO_ERR) {
 		return res;
 	    }
@@ -458,7 +475,10 @@ status_t
 	     import != NULL;
 	     import = (ncx_import_t *)dlq_nextEntry(import)) {
 
-	    res = add_one_prefix(import->module, import->revision, top_attrs);
+	    res = add_one_prefix(pcb,
+                                 import->module, 
+                                 import->revision, 
+                                 top_attrs);
 	    if (res != NO_ERR) {
 		return res;
 	    }
@@ -487,7 +507,7 @@ status_t
 
     /* convert NCX imports to XSD imports */
     if (cp->schemaloc) {
-	res = xsd_add_imports(mod, cp, val);
+	res = xsd_add_imports(pcb, mod, cp, val);
 	if (res != NO_ERR) {
 	    val_free_value(val);
 	    return res;

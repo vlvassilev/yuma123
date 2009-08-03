@@ -613,7 +613,8 @@ static status_t
 status_t
     agt_proc_init (void)
 {
-    status_t   res;
+    agt_profile_t   *agt_profile;
+    status_t         res;
 
     if (agt_proc_init_done) {
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
@@ -623,6 +624,7 @@ status_t
     log_debug2("\nagt: Loading proc module");
 #endif
 
+    agt_profile = agt_get_profile();
     procmod = NULL;
     myprocval = NULL;
     myprocobj = NULL;
@@ -631,6 +633,7 @@ status_t
     /* load the netconf-state module */
     res = ncxmod_load_module(proc_MOD,
                              proc_MOD_REV,
+                             &agt_profile->agt_savedevQ,
                              &procmod);
 
     return res;

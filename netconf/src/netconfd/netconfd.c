@@ -103,13 +103,19 @@ static status_t
     status_t res;
 
     /* load in the agent boot parameter definition file */
-    res = ncxmod_load_module(NCXMOD_NETCONFD, NULL, NULL);
+    res = ncxmod_load_module(NCXMOD_NETCONFD, 
+                             NULL, 
+                             NULL,
+                             NULL);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* load in the NETCONF data types and RPC methods */
-    res = ncxmod_load_module(NCXMOD_NETCONF, NULL, NULL);
+    res = ncxmod_load_module(NCXMOD_NETCONF, 
+                             NULL, 
+                             NULL,
+                             NULL);
     if (res != NO_ERR) {
 	return res;
     }
@@ -126,7 +132,7 @@ static status_t
  *     status
  *********************************************************************/
 static status_t
-    load_core_schema (void)
+    load_core_schema (agt_profile_t *profile)
 {
     status_t   res;
 
@@ -137,13 +143,19 @@ static status_t
 #endif
 
     /* load in the NCX extensions module */
-    res = ncxmod_load_module(NCXMOD_NCX, NULL, NULL);
+    res = ncxmod_load_module(NCXMOD_NCX,
+                             NULL,
+                             &profile->agt_savedevQ,
+                             NULL);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* load in the with-defaults extension module */
-    res = ncxmod_load_module(NCXMOD_WITH_DEFAULTS, NULL, NULL);
+    res = ncxmod_load_module(NCXMOD_WITH_DEFAULTS,
+                             NULL,
+                             &profile->agt_savedevQ,
+                             NULL);
     if (res != NO_ERR) {
 	return res;
     }
@@ -168,7 +180,10 @@ static status_t
 #define TESTFEATURE (const xmlChar *)"feature2"
 
     /* Load test module */
-    res = ncxmod_load_module(TESTMOD, NULL, NULL);
+    res = ncxmod_load_module(TESTMOD,
+                             NULL,
+                             &profile->agt_savedevQ,
+                             NULL);
     if (res != NO_ERR) {
 	return res;
     } else {
@@ -253,7 +268,7 @@ static status_t
     }
 
     /* Load the core modules (netconfd and netconf) */
-    res = load_core_schema();
+    res = load_core_schema(agt_get_profile());
     if (res != NO_ERR) {
 	return res;
     }

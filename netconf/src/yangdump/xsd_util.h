@@ -58,6 +58,10 @@ date	     init     comment
 #include "xml_util.h"
 #endif
 
+#ifndef _H_yang
+#include "yang.h"
+#endif
+
 #ifndef _H_yangdump
 #include "yangdump.h"
 #endif
@@ -215,7 +219,8 @@ extern status_t
 			       val_value_t *annot);
 
 extern status_t
-    xsd_add_imports (const ncx_module_t *mod,
+    xsd_add_imports (yang_pcb_t *pcb,
+                     const ncx_module_t *mod,
 		     const yangdump_cvtparms_t *cp,
 		     val_value_t *val);
 

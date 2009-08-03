@@ -1445,16 +1445,22 @@ static status_t
 
     testmod = NULL;
 
-    res = load_module(modname, revision, 
-		      pcb, ptyp, 
-		      FALSE, &testmod);
+    res = load_module(modname, 
+                      revision, 
+		      pcb, 
+                      ptyp, 
+		      FALSE, 
+                      &testmod);
     
     if (res == ERR_NCX_MOD_NOT_FOUND) {
 	if (revision && *revision) {
 	    /* try filenames without revision dates in them */
-	    res = load_module(modname, NULL, 
-			      pcb, ptyp, 
-			      FALSE, &testmod);
+	    res = load_module(modname, 
+                              NULL, 
+			      pcb, 
+                              ptyp, 
+			      FALSE, 
+                              &testmod);
 	    if (res == NO_ERR && testmod) {
 		if (!testmod->version) {
 		    /* asked for a spcific version; 
@@ -1610,6 +1616,7 @@ void
 * INPUTS:
 *   modname == module name with no path prefix or file extension
 *   revision == optional revision date of 'modname' to find
+*   savedevQ == Q of ncx_save_deviations_t to use, if any
 *   retmod == address of return module (may be NULL)
 *
 * OUTPUTS:
@@ -1622,6 +1629,7 @@ void
 status_t 
     ncxmod_load_module (const xmlChar *modname,
 			const xmlChar *revision,
+                        dlq_hdr_t *savedevQ,
 			ncx_module_t **retmod)
 {
     yang_pcb_t      *pcb;
@@ -1640,6 +1648,7 @@ status_t
 	res = ERR_INTERNAL_MEM;
     } else {
 	pcb->revision = revision;
+        pcb->savedevQ = savedevQ;
 	res = try_load_module(pcb, 
 			      YANG_PT_TOP,
 			      modname, 
@@ -1666,6 +1675,99 @@ status_t
     return res;
 
 }  /* ncxmod_load_module */
+
+
+/********************************************************************
+* FUNCTION ncxmod_load_deviation
+*
+* Determine the location of the specified module
+* and then parse it in the special deviation mode
+* and save any deviation statements in the Q that is provided
+*
+* Module Search order:
+*
+* 1) YANG_MODPATH environment var (or set by modpath CLI var)
+* 2) current dir or absolute path
+* 3) YANG_HOME/modules directory
+* 4) HOME/modules directory
+*
+* INPUTS:
+*   devname == deviation module name with 
+*                   no path prefix or file extension
+*   deviationQ == address of Q of ncx_save_deviations_t  structs
+*                 to add any new entries 
+*
+* OUTPUTS:
+*   if non-NULL:
+*    deviationQ has malloced ncx_save_deviations_t structs added
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t 
+    ncxmod_load_deviation (const xmlChar *devname,
+                           dlq_hdr_t *deviationQ)
+{
+    yang_pcb_t             *pcb;
+    ncx_module_t           *retmod;
+    ncx_save_deviations_t  *savedev;
+    status_t                res;
+
+#ifdef DEBUG
+    if (!devname || !deviationQ) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+    retmod = NULL;
+
+    /* first check that this deviation has not aleady
+     * been loaded and the user gave multiple leaf-list
+     * values with the same name (may not get checked)
+     */
+    for (savedev = (ncx_save_deviations_t *)
+             dlq_firstEntry(deviationQ);
+         savedev != NULL;
+         savedev = (ncx_save_deviations_t *)
+             dlq_nextEntry(savedev)) {
+
+        if (!xml_strcmp(devname, savedev->devmodule)) {
+            if (LOGDEBUG) {
+                log_debug("\nSkipping duplicate deviation module '%s'",
+                          devname);
+            }
+            return NO_ERR;
+        }
+    }
+
+    pcb = yang_new_pcb();
+    if (!pcb) {
+	res = ERR_INTERNAL_MEM;
+    } else {
+	pcb->deviationmode = TRUE;
+        pcb->savedevQ = deviationQ;
+	res = try_load_module(pcb, 
+			      YANG_PT_TOP,
+			      devname, 
+			      NULL, 
+			      &retmod);
+    }
+
+    if (res != NO_ERR) {
+        log_error("\nError: Load deviation module '%s' failed (%s)",
+                  devname,
+                  get_error_string(res));
+    } else if (LOGDEBUG) {
+        log_debug("\nLoad deviation module '%s' OK", devname);
+    }
+
+    if (pcb) {
+	yang_free_pcb(pcb);
+    }
+    return res;
+
+}  /* ncxmod_load_deviation */
 
 
 /********************************************************************
@@ -1746,6 +1848,7 @@ status_t
 *                == FALSE if top-level mode skip process sub-modules 
 *   cookedmode == TRUE if producing cooked output
 *                 FALSE if producing raw output
+*   savedevQ == Q of ncx_save_deviations_t to use
 *   res == address of return status
 *
 * OUTPUTS:
@@ -1760,6 +1863,7 @@ yang_pcb_t *
 			    boolean subtree_mode,
 			    boolean with_submods,
 			    boolean cookedmode,
+                            dlq_hdr_t *savedevQ,
 			    status_t *res)
 {
     yang_pcb_t     *pcb;
@@ -1775,6 +1879,7 @@ yang_pcb_t *
     if (!pcb) {
 	*res = ERR_INTERNAL_MEM;
     } else {
+        pcb->savedevQ = savedevQ;
 	pcb->revision = revision;
 	pcb->subtree_mode = subtree_mode;
 	pcb->with_submods = with_submods;
@@ -1808,6 +1913,7 @@ yang_pcb_t *
 *                == FALSE if top-level mode skip process sub-modules 
 *   modpath == module path to override the modpath CLI var or
 *              the YANG_MODPATH env var
+*   savedevQ == Q of ncx_save_deviations_t to use
 *   res == address of return status
 *
 * OUTPUTS:
@@ -1822,6 +1928,7 @@ yang_pcb_t *
 			     boolean subtree_mode,
 			     boolean with_submods,
 			     const xmlChar *modpath,
+                             dlq_hdr_t *savedevQ,
 			     status_t *res)
 {
     yang_pcb_t    *pcb;
@@ -1837,6 +1944,7 @@ yang_pcb_t *
     if (!pcb) {
 	*res = ERR_INTERNAL_MEM;
     } else {
+        pcb->savedevQ = savedevQ;
 	pcb->subtree_mode = subtree_mode;
 	pcb->with_submods = with_submods;
 	pcb->diffmode = TRUE;

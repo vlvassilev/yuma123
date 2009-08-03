@@ -138,7 +138,8 @@ date         init     comment
 
 
 static status_t 
-    resolve_type (tk_chain_t *tkc,
+    resolve_type (yang_pcb_t *pcb,
+                  tk_chain_t *tkc,
 		  ncx_module_t  *mod,
 		  typ_def_t *typdef,
 		  const xmlChar *name,
@@ -1960,6 +1961,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc    == token chain
 *   mod    == module in progress
 *   typdef == typ_def_t in progress
@@ -1968,7 +1970,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    finish_union_type (tk_chain_t  *tkc,
+    finish_union_type (yang_pcb_t *pcb,
+                       tk_chain_t  *tkc,
 		       ncx_module_t *mod,
 		       typ_def_t *typdef)
 {
@@ -2037,7 +2040,10 @@ static status_t
 		}
 	    }
 
-	    res = yang_typ_consume_type(tkc, mod, un->typdef);
+	    res = yang_typ_consume_type(pcb,
+                                        tkc, 
+                                        mod, 
+                                        un->typdef);
 	    if (res != NO_ERR) {
 		retres = res;
 		if (NEED_EXIT(res)) {
@@ -2975,6 +2981,7 @@ static status_t
 * Called during phase 2 of module parsing
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod == module in progress
 *   unionQ == Q of unfinished typ_unionnode_t structs
@@ -2987,7 +2994,8 @@ static status_t
 *   status
 *********************************************************************/
 static status_t 
-    resolve_union_type (tk_chain_t *tkc,
+    resolve_union_type (yang_pcb_t *pcb,
+                        tk_chain_t *tkc,
 			ncx_module_t *mod,
 			dlq_hdr_t  *unionQ,
 			obj_template_t *parent,
@@ -3005,7 +3013,8 @@ static status_t
 	 un != NULL;
 	 un = (typ_unionnode_t *)dlq_nextEntry(un)) {
 
-	res = resolve_type(tkc, 
+	res = resolve_type(pcb,
+                           tkc, 
 			   mod, 
 			   un->typdef,
 			   NULL, 
@@ -3056,6 +3065,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain from parsing (needed for error msgs)
 *   mod == module in progress
 *   typdef == typ_def_t struct to check
@@ -3069,7 +3079,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_type (tk_chain_t *tkc,
+    resolve_type (yang_pcb_t *pcb,
+                  tk_chain_t *tkc,
 		  ncx_module_t  *mod,
 		  typ_def_t *typdef,
 		  const xmlChar *name,
@@ -3107,7 +3118,10 @@ static status_t
 #endif
 
     /* check the appinfoQ */
-    res = ncx_resolve_appinfoQ(tkc, mod, &typdef->appinfoQ);
+    res = ncx_resolve_appinfoQ(pcb,
+                               tkc, 
+                               mod, 
+                               &typdef->appinfoQ);
     if (NEED_EXIT(res)) {
 	return res;
     } else {
@@ -3116,7 +3130,12 @@ static status_t
 
     /* first resolve all the local type names */
     if (res == NO_ERR) {
-	res = obj_set_named_type(tkc, mod, name, typdef, obj, grp);
+	res = obj_set_named_type(tkc, 
+                                 mod, 
+                                 name, 
+                                 typdef, 
+                                 obj, 
+                                 grp);
     }
 
     /* type name loop check */
@@ -3244,7 +3263,10 @@ static status_t
 		     enu != NO_ERR;
 		     enu = (typ_enum_t *)dlq_nextEntry(enu)) {
 
-		    res = ncx_resolve_appinfoQ(tkc, mod, &enu->appinfoQ);
+		    res = ncx_resolve_appinfoQ(pcb,
+                                               tkc, 
+                                               mod, 
+                                               &enu->appinfoQ);
 		    CHK_EXIT(res, retres);
 		}
 		res = NO_ERR;
@@ -3258,7 +3280,8 @@ static status_t
 		    xml_strcmp(idref->baseprefix, mod->prefix)) {
 
 		    /* find the identity in another module */
-		    res = yang_find_imp_identity(tkc, 
+		    res = yang_find_imp_identity(pcb,
+                                                 tkc, 
 						 mod, 
 						 idref->baseprefix,
 						 idref->basename, 
@@ -3296,7 +3319,8 @@ static status_t
 	if (typdef->class == NCX_CL_SIMPLE &&
 	    typ_get_basetype(typdef) == NCX_BT_UNION) {
 	    testdef = typ_get_base_typdef(typdef);
-	    res = resolve_union_type(tkc, 
+	    res = resolve_union_type(pcb,
+                                     tkc, 
 				     mod,
 				     &testdef->def.simple.unionQ,
 				     obj, 
@@ -3364,6 +3388,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain from parsing (needed for error msgs)
 *   mod == module in progress
 *   typ == typ_template struct to check
@@ -3374,7 +3399,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_typedef (tk_chain_t *tkc,
+    resolve_typedef (yang_pcb_t *pcb,
+                     tk_chain_t *tkc,
 		     ncx_module_t  *mod,
 		     typ_template_t *typ,
 		     obj_template_t *obj,
@@ -3385,12 +3411,14 @@ static status_t
     retres = NO_ERR;
 
     /* check the appinfoQ */
-    typ->res = res = ncx_resolve_appinfoQ(tkc, 
+    typ->res = res = ncx_resolve_appinfoQ(pcb,
+                                          tkc, 
 					  mod, 
 					  &typ->appinfoQ);
     CHK_EXIT(res, retres);
 
-    res = resolve_type(tkc, 
+    res = resolve_type(pcb,
+                       tkc, 
 		       mod, 
 		       &typ->typdef, 
 		       typ->name,
@@ -3420,6 +3448,7 @@ static status_t
 * Current token is the 'type' keyword
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod   == module in progress
 *   intypdef == struct that will get the type info
@@ -3428,7 +3457,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_type (tk_chain_t *tkc,
+    consume_type (yang_pcb_t *pcb,
+                  tk_chain_t *tkc,
 		  ncx_module_t  *mod,
 		  typ_def_t *intypdef,
 		  boolean metamode)
@@ -3462,7 +3492,8 @@ static status_t
     if (intypdef->prefix && intypdef->typename &&
 	xml_strcmp(intypdef->prefix, mod->prefix)) {
 	/* real import - not the same as this module's prefix */
-	res = yang_find_imp_typedef(tkc, 
+	res = yang_find_imp_typedef(pcb,
+                                    tkc, 
                                     mod,
 				    intypdef->prefix,
 				    intypdef->typename,
@@ -3628,7 +3659,10 @@ static status_t
 	if (derived) {
 	    extonly = TRUE;
 	} else {
-	    res = finish_union_type(tkc, mod, typdef);
+	    res = finish_union_type(pcb,
+                                    tkc, 
+                                    mod, 
+                                    typdef);
 	    CHK_EXIT(res, retres);
 	}
 	break;
@@ -3693,6 +3727,7 @@ static status_t
 * Current token is the 'type' keyword
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod   == module in progress
 *   intypdef == struct that will get the type info
@@ -3701,7 +3736,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_typ_consume_type (tk_chain_t *tkc,
+    yang_typ_consume_type (yang_pcb_t *pcb,
+                           tk_chain_t *tkc,
 			   ncx_module_t  *mod,
 			   typ_def_t *intypdef)
 {
@@ -3711,7 +3747,11 @@ status_t
     }
 #endif
 
-    return consume_type(tkc, mod, intypdef, FALSE);
+    return consume_type(pcb,
+                        tkc, 
+                        mod, 
+                        intypdef, 
+                        FALSE);
 
 }  /* yang_typ_consume_type */
 
@@ -3726,6 +3766,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod   == module in progress
 *   intypdef == struct that will get the type info
@@ -3734,17 +3775,22 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_typ_consume_metadata_type (tk_chain_t *tkc,
+    yang_typ_consume_metadata_type (yang_pcb_t *pcb,
+                                    tk_chain_t *tkc,
 				    ncx_module_t  *mod,
 				    typ_def_t *intypdef)
 {
 #ifdef DEBUG
-    if (!tkc || !mod || !intypdef) {
+    if (!pcb || !tkc || !mod || !intypdef) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    return consume_type(tkc, mod, intypdef, TRUE);
+    return consume_type(pcb,
+                        tkc, 
+                        mod, 
+                        intypdef, 
+                        TRUE);
 
 }  /* yang_typ_consume_metadata_type */
 
@@ -3761,6 +3807,7 @@ status_t
 * Current token is the 'typedef' keyword
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod == module in progress
 *   que == queue will get the typ_template_t 
@@ -3769,7 +3816,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_typ_consume_typedef (tk_chain_t *tkc,
+    yang_typ_consume_typedef (yang_pcb_t *pcb,
+                              tk_chain_t *tkc,
 			      ncx_module_t  *mod,
 			      dlq_hdr_t *que)
 {
@@ -3873,7 +3921,10 @@ status_t
 		typ_clean_typdef(&typ->typdef);
 	    }
 	    typdone = TRUE;
-	    res = yang_typ_consume_type(tkc, mod, &typ->typdef);
+	    res = yang_typ_consume_type(pcb,
+                                        tkc, 
+                                        mod, 
+                                        &typ->typdef);
 	    if (res != NO_ERR) {
 		retres = res;
 		if (NEED_EXIT(res)) {
@@ -4033,6 +4084,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain from parsing (needed for error msgs)
 *   mod == module in progress
 *   typeQ == Q of typ_template_t structs t0o check
@@ -4043,7 +4095,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_typ_resolve_typedefs (tk_chain_t *tkc,
+    yang_typ_resolve_typedefs (yang_pcb_t *pcb,
+                               tk_chain_t *tkc,
 			       ncx_module_t  *mod,
 			       dlq_hdr_t *typeQ,
 			       obj_template_t *parent)
@@ -4052,7 +4105,7 @@ status_t
     status_t         res, retres;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !typeQ) {
+    if (!pcb || !tkc || !mod || !typeQ) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -4064,7 +4117,12 @@ status_t
 	 typ != NULL;
 	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
 
-	res = resolve_typedef(tkc, mod, typ, parent, NULL);
+	res = resolve_typedef(pcb,
+                              tkc, 
+                              mod, 
+                              typ, 
+                              parent, 
+                              NULL);
 	CHK_EXIT(res, retres);
     }
 
@@ -4098,6 +4156,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain from parsing (needed for error msgs)
 *   mod == module in progress
 *   typeQ == Q of typ_template_t structs t0o check
@@ -4109,7 +4168,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_typ_resolve_typedefs_grp (tk_chain_t *tkc,
+    yang_typ_resolve_typedefs_grp (yang_pcb_t *pcb,
+                                   tk_chain_t *tkc,
 				   ncx_module_t  *mod,
 				   dlq_hdr_t *typeQ,
 				   obj_template_t *parent,
@@ -4119,7 +4179,7 @@ status_t
     status_t         res, retres;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !typeQ) {
+    if (!pcb || !tkc || !mod || !typeQ) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -4131,7 +4191,12 @@ status_t
 	 typ != NULL;
 	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
 
-	res = resolve_typedef(tkc, mod, typ, parent, grp);
+	res = resolve_typedef(pcb,
+                              tkc, 
+                              mod, 
+                              typ, 
+                              parent, 
+                              grp);
 	CHK_EXIT(res, retres);
     }
 
@@ -4161,6 +4226,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain from parsing (needed for error msgs)
 *   mod == module in progress
 *   typdef == typdef struct from leaf or leaf-list to check
@@ -4172,7 +4238,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_typ_resolve_type (tk_chain_t *tkc,
+    yang_typ_resolve_type (yang_pcb_t *pcb,
+                           tk_chain_t *tkc,
 			   ncx_module_t  *mod,
 			   typ_def_t *typdef,
 			   const xmlChar *defval,
@@ -4181,12 +4248,13 @@ status_t
     status_t         res;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !typdef) {
+    if (!pcb || !tkc || !mod || !typdef) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    res = resolve_type(tkc, 
+    res = resolve_type(pcb,
+                       tkc, 
 		       mod, 
 		       typdef, 
 		       NULL, 

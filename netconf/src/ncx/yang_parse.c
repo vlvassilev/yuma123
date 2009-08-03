@@ -141,6 +141,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc    == token chain
 *   mod    == module in progress
 *
@@ -148,7 +149,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_mod_appinfo (tk_chain_t  *tkc,
+    resolve_mod_appinfo (yang_pcb_t *pcb,
+                         tk_chain_t  *tkc,
 			 ncx_module_t *mod)
 {
     ncx_import_t    *imp;
@@ -162,7 +164,10 @@ static status_t
 	 imp != NULL;
 	 imp = (ncx_import_t *)dlq_nextEntry(imp)) {
 
-	res = ncx_resolve_appinfoQ(tkc, mod, &imp->appinfoQ);
+	res = ncx_resolve_appinfoQ(pcb,
+                                   tkc, 
+                                   mod, 
+                                   &imp->appinfoQ);
 	CHK_EXIT(res, retres);
     }
 
@@ -170,7 +175,10 @@ static status_t
 	 inc != NULL;
 	 inc = (ncx_include_t *)dlq_nextEntry(inc)) {
 
-	res = ncx_resolve_appinfoQ(tkc, mod, &inc->appinfoQ);
+	res = ncx_resolve_appinfoQ(pcb,
+                                   tkc, 
+                                   mod, 
+                                   &inc->appinfoQ);
 	CHK_EXIT(res, retres);
     }
 
@@ -178,7 +186,10 @@ static status_t
 	 feature != NULL;
 	 feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
 
-	res = ncx_resolve_appinfoQ(tkc, mod, &feature->appinfoQ);
+	res = ncx_resolve_appinfoQ(pcb, 
+                                   tkc, 
+                                   mod, 
+                                   &feature->appinfoQ);
 	CHK_EXIT(res, retres);
     }
 
@@ -688,6 +699,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == ncx_module_t in progress
 *   feature == ncx_feature_t to check
@@ -696,7 +708,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_feature (tk_chain_t *tkc,
+    resolve_feature (yang_pcb_t *pcb,
+                     tk_chain_t *tkc,
 		     ncx_module_t  *mod,
 		     ncx_feature_t *feature)
 {
@@ -722,8 +735,12 @@ static status_t
 	if (iff->prefix &&
 	    xml_strcmp(iff->prefix, mod->prefix)) {
 	    /* find the feature in another module */
-	    res = yang_find_imp_feature(tkc, mod, iff->prefix,
-					iff->name, iff->tk,
+	    res = yang_find_imp_feature(pcb,
+                                        tkc, 
+                                        mod, 
+                                        iff->prefix,
+					iff->name, 
+                                        iff->tk,
 					&testfeature);
 	    if (res != NO_ERR) {
 		retres = res;
@@ -956,10 +973,12 @@ static status_t
 	/* Got a token string so check the value, should be 'prefix' */
 	if (!xml_strcmp(val, YANG_K_BASE)) {
 	    identity->isroot = FALSE;
-	    res = yang_consume_pid(tkc, mod, 
+	    res = yang_consume_pid(tkc, 
+                                   mod, 
 				   &identity->baseprefix,
 				   &identity->basename,
-				   &base, &identity->appinfoQ);
+				   &base, 
+                                   &identity->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
 	    res = yang_consume_status(tkc, 
                                       mod, 
@@ -1032,6 +1051,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == ncx_module_t in progress
 *   identity == ncx_identity_t to check
@@ -1040,7 +1060,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_identity (tk_chain_t *tkc,
+    resolve_identity (yang_pcb_t *pcb,
+                      tk_chain_t *tkc,
 		      ncx_module_t  *mod,
 		      ncx_identity_t *identity)
 {
@@ -1060,7 +1081,9 @@ static status_t
 	xml_strcmp(identity->baseprefix, mod->prefix)) {
 
 	/* find the identity in another module */
-       	res = yang_find_imp_identity(tkc, mod, 
+       	res = yang_find_imp_identity(pcb,
+                                     tkc, 
+                                     mod, 
 				     identity->baseprefix,
 				     identity->basename, 
 				     identity->tk,
@@ -1468,6 +1491,18 @@ static status_t
 	}
     }
 
+    /* check special deviation mode processing mode */
+    if (pcb->deviationmode) {
+        /* save the import for prefix translation later
+         * do not need to actually import any of the symbols
+         * now; may be a waste of time unless there are
+         * any deviation statements found
+         * don't really care how valid it is right now
+         */
+        dlq_enque(imp, &mod->importQ);
+        return NO_ERR;
+    }
+
     savetk = tkc->cur;
     tkc->cur = imp->tk;
 
@@ -1477,7 +1512,6 @@ static status_t
 	expstr = "prefix string";
 	ncx_mod_exp_err(tkc, mod, retres, expstr);
     }
-
 
     /* check if the import is already present */
     if (imp->module && imp->prefix) {
@@ -1527,7 +1561,8 @@ static status_t
 	if (imp->usexsd && xml_strcmp(mod->name, pcb->top->name) &&
 	    !xml_strcmp(imp->module, pcb->top->name)) {
 	    log_error("\nError: import loop for top-level %smodule '%s'",
-		      (pcb->top->ismod) ? "" : "sub", imp->module);
+		      (pcb->top->ismod) ? "" : "sub", 
+                      imp->module);
 	    retres = ERR_NCX_IMPORT_LOOP;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
@@ -1536,7 +1571,9 @@ static status_t
 	if (imp->usexsd &&
 	    mod->belongs && !xml_strcmp(mod->belongs, imp->module)) {
 	    log_error("\nError: submodule '%s' cannot import its"
-		      " parent module '%s'", mod->name, imp->module);
+		      " parent module '%s'", 
+                      mod->name, 
+                      imp->module);
 	    retres = ERR_NCX_IMPORT_LOOP;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
@@ -1545,7 +1582,8 @@ static status_t
 	if (mod->ismod && !xml_strcmp(imp->prefix, mod->prefix)) {
 	    log_error("\nError: import '%s' using "
 		      "prefix for current module (%s)",
-		      imp->module, imp->prefix);
+		      imp->module, 
+                      imp->prefix);
 	    retres = ERR_NCX_IN_USE;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
@@ -1556,7 +1594,8 @@ static status_t
 	    if (xml_strcmp(testimp->module, imp->module)) {
 		retres = ERR_NCX_IN_USE;
 		log_error("\nImport %s on line %u already using prefix %s",
-			  testimp->module, testimp->tk->linenum,
+			  testimp->module, 
+                          testimp->tk->linenum,
 			  testimp->prefix);
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
@@ -1569,7 +1608,8 @@ static status_t
 	if (node) {
 	    log_error("\nError: loop created by import '%s'"
 		      " from module '%s', line %u",
-		      imp->module, node->mod->name,
+		      imp->module, 
+                      node->mod->name,
 		      node->tk->linenum);
 	    retres = ERR_NCX_IMPORT_LOOP;
 	    ncx_print_errormsg(tkc, mod, retres);
@@ -1602,7 +1642,7 @@ static status_t
 		/* save the import on the impchain stack */
 		dlq_enque(node, &pcb->impchainQ);
 
-		/* save the import for prefix translkation */
+		/* save the import for prefix translation */
 		dlq_enque(imp, &mod->importQ);
 
 		/* save the import marker to keep a list
@@ -1616,7 +1656,8 @@ static status_t
 		 */
 		res = ncxmod_load_imodule(imp->module, 
 					  imp->revision,
-					  pcb, YANG_PT_IMPORT);
+					  pcb, 
+                                          YANG_PT_IMPORT);
 		if (res != NO_ERR) {
 		    /* skip error if module has just warnings */
 		    if (get_errtyp(res) < ERR_TYP_WARN) {
@@ -1630,7 +1671,8 @@ static status_t
 			} else {
 			    log_error("\nError: '%s' import of "
 				      "module '%s' failed",
-				      mod->sourcefn, imp->module);
+				      mod->sourcefn, 
+                                      imp->module);
 			}
 			ncx_print_errormsg(tkc, mod, res);
 		    }
@@ -1946,7 +1988,8 @@ static status_t
 		/* load the module now instead of later for validation */
 		retres = ncxmod_load_imodule(inc->submodule, 
 					     inc->revision,
-					     pcb, YANG_PT_INCLUDE);
+					     pcb, 
+                                             YANG_PT_INCLUDE);
 
 		/* remove the node in the include chain that 
 		 * was added before the submodule was loaded
@@ -2631,6 +2674,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module struct in progress
 *
@@ -2638,7 +2682,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_body_stmts (tk_chain_t *tkc,
+    consume_body_stmts (yang_pcb_t *pcb,
+                        tk_chain_t *tkc,
 			ncx_module_t  *mod)
 {
     const xmlChar *val;
@@ -2700,21 +2745,38 @@ static status_t
 	} else if (!xml_strcmp(val, YANG_K_IDENTITY)) {
 	    res = consume_identity(tkc, mod);
 	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    res = yang_typ_consume_typedef(tkc, mod, &mod->typeQ);
+	    res = yang_typ_consume_typedef(pcb,
+                                           tkc, 
+                                           mod, 
+                                           &mod->typeQ);
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(tkc, mod,
-					    &mod->groupingQ, NULL);
+	    res = yang_grp_consume_grouping(pcb,
+                                            tkc, 
+                                            mod,
+					    &mod->groupingQ, 
+                                            NULL);
 	} else if (!xml_strcmp(val, YANG_K_RPC)) {
-	    res = yang_obj_consume_rpc(tkc, mod);
+	    res = yang_obj_consume_rpc(pcb,
+                                       tkc, 
+                                       mod);
 	} else if (!xml_strcmp(val, YANG_K_NOTIFICATION)) {
-	    res = yang_obj_consume_notification(tkc, mod);
+	    res = yang_obj_consume_notification(pcb,
+                                                tkc, 
+                                                mod);
 	} else if (!xml_strcmp(val, YANG_K_AUGMENT)) {
-	    res = yang_obj_consume_augment(tkc, mod);
+	    res = yang_obj_consume_augment(pcb,
+                                           tkc, 
+                                           mod);
 	} else if (!xml_strcmp(val, YANG_K_DEVIATION)) {
-	    res = yang_obj_consume_deviation(tkc, mod);
+	    res = yang_obj_consume_deviation(pcb,
+                                             tkc, 
+                                             mod);
 	} else {
-	    res = yang_obj_consume_datadef(tkc, mod,
-					   &mod->datadefQ, NULL);
+	    res = yang_obj_consume_datadef(pcb,
+                                           tkc, 
+                                           mod,
+					   &mod->datadefQ, 
+                                           NULL);
 	}
 	CHK_EXIT(res, retres);
     }
@@ -2794,13 +2856,21 @@ static status_t
 	if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_MODULE)) {
 	    ismain = TRUE;
 	    TK_BKUP(tkc);
-	    res = ncx_consume_name(tkc, mod, YANG_K_MODULE, 
-				   &mod->name, NCX_REQ, TK_TT_LBRACE);
+	    res = ncx_consume_name(tkc, 
+                                   mod, 
+                                   YANG_K_MODULE, 
+				   &mod->name, 
+                                   NCX_REQ, 
+                                   TK_TT_LBRACE);
 	} else if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_SUBMODULE)) {
 	    ismain = FALSE;
 	    TK_BKUP(tkc);
-	    res = ncx_consume_name(tkc, mod, YANG_K_SUBMODULE, 
-				   &mod->name, NCX_REQ, TK_TT_LBRACE);
+	    res = ncx_consume_name(tkc, 
+                                   mod, 
+                                   YANG_K_SUBMODULE, 
+				   &mod->name, 
+                                   NCX_REQ, 
+                                   TK_TT_LBRACE);
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_print_errormsg(tkc, mod, res);
@@ -2814,6 +2884,16 @@ static status_t
     /* exit on all errors, since this is probably not a YANG file */
     if (retres != NO_ERR) {
 	return res;
+    }
+
+    /* make sure the deviation parameter is pointing at
+     * a module and not a submodule, if this is deviation mode
+     */
+    if (pcb->deviationmode && !ismain) {
+        res = ERR_NCX_EXP_MODULE;
+        log_error("\nError: deviation cannot be a submodule");
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     /* got a start of [sub]module OK, check the parse type */
@@ -2907,7 +2987,7 @@ static status_t
     }
 
     /* Get the definition statements */
-    res = consume_body_stmts(tkc, mod);
+    res = consume_body_stmts(pcb, tkc, mod);
     if (res != ERR_NCX_EOF) {
 	CHK_EXIT(res, retres);
 
@@ -2929,14 +3009,26 @@ static status_t
 
     /**************** Module Validation *************************/
 
+    if (pcb->deviationmode) {
+        /* Check any deviations, record the module name
+         * and save the deviation in the global
+         * deviationQ within the parser control block
+         */
+        res = yang_obj_resolve_deviations(pcb, tkc, mod);
+        return res;
+    }
+
     /* check all the module level extension usage */
-    res = ncx_resolve_appinfoQ(tkc, mod, &mod->appinfoQ);
+    res = ncx_resolve_appinfoQ(pcb,
+                               tkc, 
+                               mod, 
+                               &mod->appinfoQ);
     CHK_EXIT(res, retres);
 
     /* check all the module level extension usage
      * within the include, import, and feature statements
      */
-    res = resolve_mod_appinfo(tkc, mod);
+    res = resolve_mod_appinfo(pcb, tkc, mod);
     CHK_EXIT(res, retres);
 
     /* resolve any if-feature statements within the featureQ */
@@ -2944,7 +3036,7 @@ static status_t
 	 feature != NULL;
 	 feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
 
-	res = resolve_feature(tkc, mod, feature);
+	res = resolve_feature(pcb, tkc, mod, feature);
 	CHK_EXIT(res, retres);
     }
 
@@ -2964,7 +3056,10 @@ static status_t
 	 identity != NULL;
 	 identity = (ncx_identity_t *)dlq_nextEntry(identity)) {
 
-	res = resolve_identity(tkc, mod, identity);
+	res = resolve_identity(pcb,
+                               tkc, 
+                               mod, 
+                               identity);
 	CHK_EXIT(res, retres);
     }
 
@@ -2978,42 +3073,79 @@ static status_t
     }
 
     /* Validate any module-level typedefs */
-    res = yang_typ_resolve_typedefs(tkc, mod, &mod->typeQ, NULL);
+    res = yang_typ_resolve_typedefs(pcb,
+                                    tkc,
+                                    mod, 
+                                    &mod->typeQ,
+                                    NULL);
     CHK_EXIT(res, retres);
 
     /* Validate any module-level groupings */
-    res = yang_grp_resolve_groupings(tkc, mod, &mod->groupingQ, NULL);
+    res = yang_grp_resolve_groupings(pcb,
+                                     tkc, 
+                                     mod, 
+                                     &mod->groupingQ, 
+                                     NULL);
     CHK_EXIT(res, retres);
 
     /* Validate any module-level data-def-stmts */
-    res = yang_obj_resolve_datadefs(tkc, mod, &mod->datadefQ);
+    res = yang_obj_resolve_datadefs(pcb,
+                                    tkc, 
+                                    mod, 
+                                    &mod->datadefQ);
     CHK_EXIT(res, retres);
 
     /* Expand and validate any uses-stmts within module-level groupings */
-    res = yang_grp_resolve_complete(tkc, mod, &mod->groupingQ, NULL);
+    res = yang_grp_resolve_complete(pcb,
+                                    tkc, 
+                                    mod, 
+                                    &mod->groupingQ, 
+                                    NULL);
     CHK_EXIT(res, retres);
 
     /* Expand and validate any uses-stmts within module-level datadefs */
-    res = yang_obj_resolve_uses(tkc, mod, &mod->datadefQ);
+    res = yang_obj_resolve_uses(pcb,
+                                tkc, 
+                                mod, 
+                                &mod->datadefQ);
     CHK_EXIT(res, retres);
 
     /* Expand and validate any augment-stmts within module-level datadefs */
-    res = yang_obj_resolve_augments(tkc, mod, &mod->datadefQ);
+    res = yang_obj_resolve_augments(pcb,
+                                    tkc, 
+                                    mod, 
+                                    &mod->datadefQ);
     CHK_EXIT(res, retres);
 
     /* Expand and validate any deviation-stmts within the module
-     * Only expand if source mode is XML
-     * Or if it is XMLDOC mode, but 'cooked-mode' output
+     * !!! This must be done before any object pointers such
+     * !!! as leafref paths and must/when XPath expressions
+     * !!! are cached.  The xpath_find_schema_target_int
+     * !!! fnction should be used instead of caching leafref
+     * !!! target object pointers
      */
-    res = yang_obj_resolve_deviations(pcb, tkc, mod);
+    res = yang_obj_resolve_deviations(pcb, 
+                                      tkc, 
+                                      mod);
     CHK_EXIT(res, retres);
 
+    res = yang_obj_remove_deleted_nodes(pcb,
+                                        tkc,
+                                        mod,
+                                        &mod->datadefQ);
+
     /* One final check for grouping integrity */
-    res = yang_grp_resolve_final(tkc, mod, &mod->groupingQ);
+    res = yang_grp_resolve_final(pcb,
+                                 tkc, 
+                                 mod, 
+                                 &mod->groupingQ);
     CHK_EXIT(res, retres);
 
     /* One final check for object integrity */
-    res = yang_obj_resolve_final(tkc, mod, &mod->datadefQ);
+    res = yang_obj_resolve_final(pcb,
+                                 tkc, 
+                                 mod, 
+                                 &mod->datadefQ);
     CHK_EXIT(res, retres);
 
     /* Validate all the XPath expressions within all cooked objects */
@@ -3290,6 +3422,11 @@ status_t
 		}
 		ncx_free_module(mod);
 	    }
+        } else if (pcb->deviationmode) {
+            if (pcb->top == mod) {
+                pcb->top = NULL;
+            }
+            ncx_free_module(mod);
 	} else if (!wasadd && !pcb->diffmode) {
 	    if (mod->ismod) {
 		if (pcb->top == mod) {

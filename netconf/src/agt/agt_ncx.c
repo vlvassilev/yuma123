@@ -1604,18 +1604,23 @@ static status_t
                  rpc_msg_t *msg,
                  xml_node_t *methnode)
 {
-    val_value_t           *modval, *revval, *newval;
-    ncx_module_t          *mod;
+    val_value_t           *modval, *revval, *devval, *newval;
+    ncx_module_t          *mod, *testmod;
     xmlChar               *moduri;
+    agt_profile_t         *agt_profile;
     status_t               res;
+    boolean                module_added;
 
     res = NO_ERR;
     newval = NULL;
+    module_added = FALSE;
+    agt_profile = agt_get_profile();
 
     modval = val_find_child(msg->rpc_input, 
                             NCXMOD_NETCONFD,
                             NCX_EL_MODULE);
     if (!modval || modval->res != NO_ERR) {
+        /* error already recorded */
         return ERR_NCX_OPERATION_FAILED;
     }
 
@@ -1623,16 +1628,65 @@ static status_t
                             NCXMOD_NETCONFD,
                             NCX_EL_REVISION);
     if (revval && revval->res != NO_ERR) {
+        /* error already recorded */
         return ERR_NCX_OPERATION_FAILED;
     }
 
     /* check for any version of this module already loaded */
     mod = ncx_find_module(VAL_STR(modval), NULL);
     if (!mod) {
-        res = ncxmod_load_module(VAL_STR(modval), 
-                                 (revval) ? VAL_STR(revval) : NULL, 
-                                 NULL);
-        if (res != NO_ERR) {
+        for (devval = val_find_child(msg->rpc_input, 
+                                     NCXMOD_NETCONFD,
+                                     NCX_EL_DEVIATION);
+             devval != NULL && res == NO_ERR;
+             devval = val_find_next_child(msg->rpc_input, 
+                                          NCXMOD_NETCONFD,
+                                          NCX_EL_DEVIATION,
+                                          devval)) {
+
+            res = ncxmod_load_deviation(VAL_STR(devval),
+                                        &agt_profile->agt_savedevQ);
+            if (res != NO_ERR) {
+                agt_record_error(scb, 
+                                 &msg->mhdr, 
+                                 NCX_LAYER_OPERATION, 
+                                 res,
+                                 methnode, 
+                                 NCX_NT_NONE, 
+                                 NULL, 
+                                 NCX_NT_VAL, 
+                                 devval);
+            }
+        }
+        if (res == NO_ERR) {
+            res = ncxmod_load_module(VAL_STR(modval), 
+                                     (revval) ? VAL_STR(revval) : NULL, 
+                                     &agt_profile->agt_savedevQ,
+                                     NULL);
+            if (res == NO_ERR) {
+                module_added = TRUE;
+            } else {
+                agt_record_error(scb, 
+                                 &msg->mhdr, 
+                                 NCX_LAYER_OPERATION, 
+                                 res,
+                                 methnode, 
+                                 NCX_NT_NONE, 
+                                 NULL, 
+                                 NCX_NT_VAL, 
+                                 modval);
+            }
+        }
+    } else if (revval) {
+        /* some version of the module is already loaded
+         * try again to get the exact version requested 
+         */
+        testmod = ncx_find_module(VAL_STR(modval),
+                                  VAL_STR(revval));
+        if (testmod) {
+            mod = testmod;
+        } else {
+            res = ERR_NCX_WRONG_VERSION;
             agt_record_error(scb, 
                              &msg->mhdr, 
                              NCX_LAYER_OPERATION, 
@@ -1641,14 +1695,8 @@ static status_t
                              NCX_NT_NONE, 
                              NULL, 
                              NCX_NT_VAL, 
-                             modval);
-            return res;
-        } else {
-            mod = ncx_find_module(VAL_STR(modval),
-                                  (revval) ? VAL_STR(revval) : NULL);
-            if (!mod) {
-                return SET_ERROR(ERR_INTERNAL_VAL);
-            }
+                             revval);
+
         }
     }
 
@@ -1662,15 +1710,15 @@ static status_t
         }
     }
 
-    if (res == NO_ERR) {
+    if (res == NO_ERR && module_added) {
         res = agt_state_add_module_schema(mod);
     }
 
-    if (res == NO_ERR) {
+    if (res == NO_ERR && module_added) {
         res = agt_cap_add_module(mod);
     }
 
-    if (res == NO_ERR) {
+    if (res == NO_ERR && module_added) {
         moduri = cap_make_moduri(mod);
         if (!moduri) {
             res = ERR_INTERNAL_MEM;
@@ -1683,18 +1731,18 @@ static status_t
     }
 
     if (res != NO_ERR) {
-        if (newval) {
+        agt_record_error(scb, 
+                         &msg->mhdr, 
+                         NCX_LAYER_OPERATION, 
+                         res,
+                         methnode, 
+                         NCX_NT_NONE, 
+                         NULL, 
+                         NCX_NT_VAL, 
+                         modval);
+        if (newval != NULL) {
             val_free_value(newval);
         }
-        agt_record_error(scb,
-                         &msg->mhdr, 
-                         NCX_LAYER_OPERATION,
-                         res,
-                         methnode,
-                         NCX_NT_NONE,
-                         NULL, 
-                         NCX_NT_VAL,
-                         modval);
     } else {
         /* pass off newval memory here */
         msg->rpc_data_type = RPC_DATA_YANG;

@@ -76,13 +76,15 @@ date	     init     comment
 
 
 extern status_t 
-    yang_obj_consume_datadef (tk_chain_t *tkc,
+    yang_obj_consume_datadef (yang_pcb_t *pcb,
+                              tk_chain_t *tkc,
 			      ncx_module_t  *mod,
 			      dlq_hdr_t *que,
 			      obj_template_t *parent);
 
 extern status_t 
-    yang_obj_consume_datadef_grp (tk_chain_t *tkc,
+    yang_obj_consume_datadef_grp (yang_pcb_t *pcb,
+                                  tk_chain_t *tkc,
 				  ncx_module_t  *mod,
 				  dlq_hdr_t *que,
 				  obj_template_t *parent,
@@ -90,33 +92,40 @@ extern status_t
 
 
 extern status_t 
-    yang_obj_consume_rpc (tk_chain_t *tkc,
+    yang_obj_consume_rpc (yang_pcb_t *pcb,
+                          tk_chain_t *tkc,
 			  ncx_module_t  *mod);
 
 extern status_t 
-    yang_obj_consume_notification (tk_chain_t *tkc,
+    yang_obj_consume_notification (yang_pcb_t *pcb,
+                                   tk_chain_t *tkc,
 				   ncx_module_t  *mod);
 extern status_t 
-    yang_obj_consume_augment (tk_chain_t *tkc,
+    yang_obj_consume_augment (yang_pcb_t *pcb,
+                              tk_chain_t *tkc,
 			      ncx_module_t  *mod);
 
 extern status_t 
-    yang_obj_consume_deviation (tk_chain_t *tkc,
+    yang_obj_consume_deviation (yang_pcb_t *pcb,
+                                tk_chain_t *tkc,
 				ncx_module_t  *mod);
 
 extern status_t 
-    yang_obj_resolve_datadefs (tk_chain_t *tkc,
+    yang_obj_resolve_datadefs (yang_pcb_t *pcb,
+                               tk_chain_t *tkc,
 			       ncx_module_t  *mod,
 			       dlq_hdr_t *datadefQ);
 
 
 extern status_t 
-    yang_obj_resolve_uses (tk_chain_t *tkc,
+    yang_obj_resolve_uses (yang_pcb_t *pcb,
+                           tk_chain_t *tkc,
 			   ncx_module_t  *mod,
 			   dlq_hdr_t *datadefQ);
 
 extern status_t 
-    yang_obj_resolve_augments (tk_chain_t *tkc,
+    yang_obj_resolve_augments (yang_pcb_t *pcb,
+                               tk_chain_t *tkc,
 			       ncx_module_t  *mod,
 			       dlq_hdr_t *datadefQ);
 
@@ -126,7 +135,8 @@ extern status_t
 				 ncx_module_t  *mod);
 
 extern status_t 
-    yang_obj_resolve_final (tk_chain_t *tkc,
+    yang_obj_resolve_final (yang_pcb_t *pcb,
+                            tk_chain_t *tkc,
 			    ncx_module_t  *mod,
 			    dlq_hdr_t *datadefQ);
 
@@ -139,5 +149,12 @@ extern status_t
     yang_obj_check_leafref_loops (tk_chain_t *tkc,
 				  ncx_module_t  *mod,
 				  const dlq_hdr_t *datadefQ);
+
+extern status_t
+    yang_obj_remove_deleted_nodes (yang_pcb_t *pcb,
+                                   tk_chain_t *tkc,
+                                   ncx_module_t *mod,
+                                   dlq_hdr_t *datadefQ);
+
 
 #endif	    /* _H_yang_obj */

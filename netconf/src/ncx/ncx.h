@@ -104,6 +104,10 @@ date	     init     comment
 #include "xmlns.h"
 #endif
 
+#ifndef _H_yang
+#include "yang.h"
+#endif
+
 /********************************************************************
 *								    *
 *			F U N C T I O N S			    *
@@ -252,6 +256,10 @@ extern ncx_import_t *
 		     const xmlChar *module);
 
 extern ncx_import_t * 
+    ncx_find_import_que (const dlq_hdr_t *importQ,
+                         const xmlChar *module);
+
+extern ncx_import_t * 
     ncx_find_import_test (const ncx_module_t *mod,
 			  const xmlChar *module);
 
@@ -260,16 +268,16 @@ extern ncx_import_t *
 			 const xmlChar *prefix);
 
 extern ncx_import_t * 
+    ncx_find_pre_import_que (const dlq_hdr_t *importQ,
+                             const xmlChar *prefix);
+
+extern ncx_import_t * 
     ncx_find_pre_import_test (const ncx_module_t *mod,
 			      const xmlChar *prefix);
 
 extern void *
-    ncx_locate_import (const ncx_module_t  *mod,
-		       const xmlChar *defname,
-		       ncx_node_t     *deftyp);
-
-extern void *
-    ncx_locate_modqual_import (ncx_import_t *imp,
+    ncx_locate_modqual_import (yang_pcb_t *pcb,
+                               ncx_import_t *imp,
 			       const xmlChar *defname,
 			       ncx_node_t *deftyp);
 
@@ -561,7 +569,8 @@ extern status_t
 			  dlq_hdr_t *appinfoQ);
 
 extern status_t 
-    ncx_resolve_appinfoQ (tk_chain_t *tkc,
+    ncx_resolve_appinfoQ (yang_pcb_t *pcb,
+                          tk_chain_t *tkc,
 			  ncx_module_t  *mod,
 			  dlq_hdr_t *appinfoQ);
 
@@ -944,5 +953,16 @@ extern boolean
 extern status_t
     ncx_get_version (xmlChar *buffer,
                      uint32 buffsize);
+
+extern ncx_save_deviations_t *
+    ncx_new_save_deviations (const xmlChar *devmodule,
+                             const xmlChar *devrevision,
+                             const xmlChar *devprefix);
+
+extern void
+    ncx_free_save_deviations (ncx_save_deviations_t *savedev);
+
+extern void
+    ncx_clean_save_deviationsQ (dlq_hdr_t *savedevQ);
 
 #endif	    /* _H_ncx */

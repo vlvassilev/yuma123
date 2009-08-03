@@ -1415,6 +1415,7 @@ static val_value_t *
 *   Add one import node
 *
 * INPUTS:
+*    pcb == parser control block
 *    modname == name of module
 *    revision == revision date of module
 *    cp == conversion parameters in use
@@ -1427,7 +1428,8 @@ static val_value_t *
 *   status
 *********************************************************************/
 static status_t
-    add_one_import (const xmlChar *modname,
+    add_one_import (yang_pcb_t *pcb,
+                    const xmlChar *modname,
 		    const xmlChar *revision,
 		    const yangdump_cvtparms_t *cp,
 		    val_value_t *val)
@@ -1442,7 +1444,10 @@ static status_t
 
     immod = ncx_find_module(modname, revision);
     if (!immod) {
-	res = ncxmod_load_module(modname, revision, &immod);
+	res = ncxmod_load_module(modname, 
+                                 revision, 
+                                 pcb->savedevQ,
+                                 &immod);
 	if (!immod) {
 	    return res;
 	}
@@ -1456,9 +1461,11 @@ static status_t
     }
 
     res = xml_val_add_cattr(NCX_EL_NAMESPACE, 0, 
-			    xmlns_get_ns_name(immod->nsid), imval);
+			    xmlns_get_ns_name(immod->nsid), 
+                            imval);
     if (res == NO_ERR) {
-	str = xsd_make_schema_location(immod, cp->schemaloc, 
+	str = xsd_make_schema_location(immod, 
+                                       cp->schemaloc, 
 				       !cp->noversionnames);
 	if (str) {
 	    res = xml_val_add_attr(XSD_LOC, 0, str, imval);
@@ -2270,6 +2277,7 @@ status_t
 *   Add the required imports nodes
 *
 * INPUTS:
+*    pcb == parser control block
 *    mod == module in progress
 *    cp == conversion parameters in use
 *    val == struct parent to contain child nodes for each import
@@ -2281,7 +2289,8 @@ status_t
 *   status
 *********************************************************************/
 status_t
-    xsd_add_imports (const ncx_module_t *mod,
+    xsd_add_imports (yang_pcb_t *pcb,
+                     const ncx_module_t *mod,
 		     const yangdump_cvtparms_t *cp,
 		     val_value_t *val)
 {
@@ -2347,7 +2356,8 @@ status_t
 	for (impptr = (const yang_import_ptr_t *)dlq_firstEntry(&mod->saveimpQ);
 	     impptr != NULL;
 	     impptr = (const yang_import_ptr_t *)dlq_nextEntry(impptr)) {
-	    res = add_one_import(impptr->modname, 
+	    res = add_one_import(pcb,
+                                 impptr->modname, 
 				 impptr->revision,
 				 cp, val);
 	    if (res != NO_ERR) {
@@ -2358,7 +2368,8 @@ status_t
 	for (import = (const ncx_import_t *)dlq_firstEntry(&mod->importQ);
 	     import != NULL;
 	     import = (const ncx_import_t *)dlq_nextEntry(import)) {
-	    res = add_one_import(import->module, 
+	    res = add_one_import(pcb,
+                                 import->module, 
 				 import->revision,
 				 cp, val);
 	    if (res != NO_ERR) {

@@ -1065,7 +1065,8 @@ static val_value_t *
 status_t
     agt_state_init (void)
 {
-    status_t   res;
+    agt_profile_t   *agt_profile;
+    status_t         res;
 
     if (agt_state_init_done) {
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
@@ -1075,8 +1076,13 @@ status_t
     log_debug2("\nagt: Loading netconf-state module");
 #endif
 
+    agt_profile = agt_get_profile();
+
     /* load the netconf-state module */
-    res = ncxmod_load_module(AGT_STATE_MODULE, NULL, &statemod);
+    res = ncxmod_load_module(AGT_STATE_MODULE, 
+                             NULL, 
+                             &agt_profile->agt_savedevQ,
+                             &statemod);
     if (res != NO_ERR) {
         return res;
     }

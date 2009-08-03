@@ -1898,19 +1898,28 @@ static status_t
     log_debug2("\nYangcli: Loading NCX yangcli-cli Parmset");
 
     /* load in the agent boot parameter definition file */
-    res = ncxmod_load_module(YANGCLI_MOD, NULL, &yangcli_mod);
+    res = ncxmod_load_module(YANGCLI_MOD, 
+                             NULL, 
+                             NULL,
+                             &yangcli_mod);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* load in the NETCONF data types and RPC methods */
-    res = ncxmod_load_module(NC_MODULE, NULL, &netconf_mod);
+    res = ncxmod_load_module(NC_MODULE, 
+                             NULL, 
+                             NULL,
+                             &netconf_mod);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* load in the NCX extensions */
-    res = ncxmod_load_module(NCXMOD_NCX, NULL, NULL);
+    res = ncxmod_load_module(NCXMOD_NCX, 
+                             NULL, 
+                             NULL,
+                             NULL);
     if (res != NO_ERR) {
 	return res;
     }
@@ -1948,13 +1957,19 @@ static status_t
     log_debug2("\nNcxmgr: Loading NETCONF Module");
 
     /* load in the XSD data types */
-    res = ncxmod_load_module(XSDMOD, NULL, NULL);
+    res = ncxmod_load_module(XSDMOD, 
+                             NULL, 
+                             NULL,
+                             NULL);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* load in the NCX data types */
-    res = ncxmod_load_module(NCXDTMOD, NULL, NULL);
+    res = ncxmod_load_module(NCXDTMOD, 
+                             NULL, 
+                             NULL,
+                             NULL);
     if (res != NO_ERR) {
 	return res;
     }
@@ -2137,6 +2152,70 @@ static boolean
 
 
 /********************************************************************
+* FUNCTION autoload_module
+* 
+* auto-load the specified module
+*
+* INPUTS:
+*   modname == module name
+*   revision == module revision
+*   devlist  == deviation list
+*   retmod == address of return module
+*
+* OUTPUTS:
+*   *retmod == loaded module (if NO_ERR)
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    autoload_module (const xmlChar *modname,
+                     const xmlChar *revision,
+                     ncx_list_t *devlist,
+                     ncx_module_t **retmod)
+{
+    dlq_hdr_t               savedevQ;
+    ncx_lmem_t             *listmember;
+    status_t                res;
+                                      
+    res = NO_ERR;
+    dlq_createSQue(&savedevQ);
+
+    /* first load any deviations */
+    for (listmember = ncx_first_lmem(devlist);
+         listmember != NULL && res == NO_ERR;
+         listmember = (ncx_lmem_t *)dlq_nextEntry(listmember)) {
+
+        res = ncxmod_load_deviation(listmember->val.str,
+                                    &savedevQ);
+        if (res != NO_ERR) {
+            log_error("\nError: Deviation module %s not loaded (%s)!!",
+                      listmember->val.str, 
+                      get_error_string(res));
+        }
+    }
+
+    /* load the requested module now */
+    if (res == NO_ERR) {
+        res = ncxmod_load_module(modname, 
+                                 revision, 
+                                 &savedevQ,
+                                 retmod);
+        if (res != NO_ERR) {
+            log_error("\nError: Auto-load for module '%s' failed (%s)",
+                      modname, 
+                      get_error_string(res));
+        }
+    }
+
+    ncx_clean_save_deviationsQ(&savedevQ);
+
+    return res;
+
+}  /* autoload_module */
+
+
+/********************************************************************
 * FUNCTION check_module_capabilities
 * 
 * Check the modules reported by the agent
@@ -2208,12 +2287,10 @@ static void
 	mod = ncx_find_module(namebuff, version);
 	if (mod == NULL) {
 	    if (agent_cb->autoload) {
-		res = ncxmod_load_module(namebuff, version, &mod);
-		if (res != NO_ERR) {
-		    log_error("\nyangcli error: Module %s not loaded (%s)!!",
-			      namebuff, 
-                              get_error_string(res));
-		}
+                res = autoload_module(namebuff,
+                                      version,
+                                      &cap->cap_deviation_list,
+                                      &mod);
 	    } else {
                 if (LOGINFO) {
                     log_info("\nWarning: Module %s not loaded "
@@ -2280,12 +2357,6 @@ static void
 				 FALSE);
 	}
     }
-
-    /*** TBD: handle external deviations; any deviations in
-     *** the specified module have already been applied to the
-     *** module, but not any external deviations modules
-     *** These are TBD in ncx/ncxmod.c and ncx/yang_parse.c
-     ***/
 
 } /* check_module_capabilities */
 
@@ -2637,6 +2708,7 @@ static status_t
     val_value_t          *parm, *modval;
     status_t              res;
     log_debug_t           log_level;
+    dlq_hdr_t             savedevQ;
     xmlChar               versionbuffer[NCX_VERSION_BUFFSIZE];
 
 #ifdef YANGCLI_DEBUG
@@ -2649,6 +2721,8 @@ static status_t
 #else
     log_level = LOG_DEBUG_INFO;
 #endif
+
+    dlq_createSQue(&savedevQ);
 
     /* init the module static vars */
     dlq_createSQue(&agent_cbQ);
@@ -2804,28 +2878,57 @@ static status_t
 	}
     }
 
-    /* check if any explicitly listed modules should be loaded */
-    modval = val_find_child(mgr_cli_valset,
-                            YANGCLI_MOD,
-                            NCX_EL_MODULE);
-    while (modval) {
-        log_info("\nyangcli: Loading requested module %s", 
-                 VAL_STR(modval));
+    /* check if there are any deviation parameters to load first */
+    for (modval = val_find_child(mgr_cli_valset,
+                                 YANGCLI_MOD,
+                                 NCX_EL_DEVIATION);
+         modval != NULL && res == NO_ERR;
+         modval = val_find_next_child(mgr_cli_valset,
+                                      YANGCLI_MOD,
+                                      NCX_EL_DEVIATION,
+                                      modval)) {
 
-        res = ncxmod_load_module(VAL_STR(modval),
-                                 NULL,   /*** need revision parameter ***/
-                                 NULL);
+        res = ncxmod_load_deviation(VAL_STR(modval),
+                                    &savedevQ);
         if (res != NO_ERR) {
-            log_info("\n load failed (%s)", get_error_string(res));
+            log_error("\n load deviation failed (%s)", 
+                      get_error_string(res));
         } else {
             log_info("\n load OK");
         }
+    }
 
-        modval = val_find_next_child(mgr_cli_valset,
-                                     YANGCLI_MOD,
-                                     NCX_EL_MODULE,
-                                     modval);
+    if (res == NO_ERR) {
+        /* check if any explicitly listed modules should be loaded */
+        modval = val_find_child(mgr_cli_valset,
+                                YANGCLI_MOD,
+                                NCX_EL_MODULE);
+        while (modval != NULL && res == NO_ERR) {
+            log_info("\nyangcli: Loading requested module %s", 
+                     VAL_STR(modval));
 
+            res = ncxmod_load_module(VAL_STR(modval),
+                                     NULL,   /*** need revision parameter ***/
+                                     &savedevQ,
+                                     NULL);
+            if (res != NO_ERR) {
+                log_error("\n load module failed (%s)", 
+                          get_error_string(res));
+            } else {
+                log_info("\n load OK");
+            }
+
+            modval = val_find_next_child(mgr_cli_valset,
+                                         YANGCLI_MOD,
+                                         NCX_EL_MODULE,
+                                         modval);
+        }
+    }
+
+    ncx_clean_save_deviationsQ(&savedevQ);
+
+    if (res != NO_ERR) {
+        return res;
     }
 
     /* load the system (read-only) variables */

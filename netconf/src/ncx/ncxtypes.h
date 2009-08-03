@@ -607,6 +607,7 @@ typedef struct ncx_module_t_ {
                                   /* saved from pcb->allincQ */
     dlq_hdr_t         stmtQ;             /* Q of yang_stmt_t */
                              /* saved for top, yang, docmode */
+    ncx_list_t        devmodlist;     /* for deviations list */
 } ncx_module_t;
 
 
@@ -740,6 +741,15 @@ typedef enum ncx_modformat_t_ {
     NCX_MODFORMAT_RNG
 } ncx_modformat_t;
 
+/* used with obj_deviation_t to defer object lookups */
+typedef struct ncx_save_deviations_t_ {
+    dlq_hdr_t    qhdr;
+    dlq_hdr_t    importQ;        /* Q of ncx_import_t */
+    dlq_hdr_t    deviationQ;  /* Q of obj_deviation_t */
+    xmlChar     *devmodule;
+    xmlChar     *devrevision;
+    xmlChar     *devprefix;
+} ncx_save_deviations_t;
 
 
 #endif	    /* _H_ncxtypes */

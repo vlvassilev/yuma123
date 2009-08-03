@@ -2352,12 +2352,14 @@ static status_t
     ncx_module_t    *mod;
     modptr_t        *modptr;
     dlq_hdr_t       *mgrloadQ;
+    dlq_hdr_t        savedevQ;
     logfn_t          logfn;
     status_t         res;
 
     modval = NULL;
     revval = NULL;
     res = NO_ERR;
+    dlq_createSQue(&savedevQ);
 
     if (interactive_mode()) {
 	logfn = log_stdout;
@@ -2409,11 +2411,30 @@ static status_t
 	}
     }
 
+    /* check if there are any deviation parameters to load first */
+    if (res == NO_ERR) {
+        for (modval = val_find_child(valset,
+                                     YANGCLI_MOD,
+                                     NCX_EL_DEVIATION);
+             modval != NULL && res == NO_ERR;
+             modval = val_find_next_child(valset,
+                                          YANGCLI_MOD,
+                                          NCX_EL_DEVIATION,
+                                          modval)) {
+
+
+            res = ncxmod_load_deviation(VAL_STR(modval),
+                                        &savedevQ);
+
+        }
+    }
+
     /* load the module */
     if (res == NO_ERR) {
 	mod = NULL;
 	res = ncxmod_load_module(VAL_STR(modval), 
                                  (revval) ? VAL_STR(revval) : NULL, 
+                                 &savedevQ,
                                  &mod);
 	if (res == NO_ERR) {
 	    /*** TBD: prompt user for features to enable/disable ***/
@@ -2445,6 +2466,7 @@ static status_t
     if (valset) {
 	val_free_value(valset);
     }
+    ncx_clean_save_deviationsQ(&savedevQ);
 
     return res;
 

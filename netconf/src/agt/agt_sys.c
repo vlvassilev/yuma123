@@ -470,7 +470,8 @@ static void
 status_t
     agt_sys_init (void)
 {
-    status_t   res;
+    agt_profile_t  *agt_profile;
+    status_t        res;
 
     if (agt_sys_init_done) {
 	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
@@ -482,11 +483,15 @@ status_t
     }
 #endif
 
+    agt_profile = agt_get_profile();
     init_static_sys_vars();
     agt_sys_init_done = TRUE;
 
     /* load the system module */
-    res = ncxmod_load_module(AGT_SYS_MODULE, NULL, &sysmod);
+    res = ncxmod_load_module(AGT_SYS_MODULE, 
+                             NULL, 
+                             &agt_profile->agt_savedevQ,
+                             &sysmod);
     if (res != NO_ERR) {
 	return res;
     }

@@ -157,7 +157,10 @@ typedef struct yang_pcb_t_ {
     boolean       stmtmode;      /* save top-level stmt order */
     boolean       diffmode;        /* TRUE = yangdiff old ver */
     boolean       cookedmode;  /* TRUE = OK to cook in deviations */
+    boolean       deviationmode;  /* TRUE if keeping deviations only */
     dlq_hdr_t     allimpQ;          /* Q of yang_import_ptr_t */
+
+    dlq_hdr_t    *savedevQ;  /* ptr to Q of ncx_save_deviations_t */
 
     /* 4 Qs of yang_node_t */
     dlq_hdr_t     impchainQ;      /* cur chain of import used */
@@ -317,7 +320,8 @@ extern status_t
 
 /* find an imported typedef */
 extern status_t 
-    yang_find_imp_typedef (tk_chain_t  *tkc,
+    yang_find_imp_typedef (yang_pcb_t *pcb,
+                           tk_chain_t  *tkc,
 			   ncx_module_t *mod,
 			   const xmlChar *prefix,
 			   const xmlChar *name,
@@ -326,7 +330,8 @@ extern status_t
 
 /* find an imported grouping */
 extern status_t 
-    yang_find_imp_grouping (tk_chain_t  *tkc,
+    yang_find_imp_grouping (yang_pcb_t *pcb,
+                            tk_chain_t  *tkc,
 			    ncx_module_t *mod,
 			    const xmlChar *prefix,
 			    const xmlChar *name,
@@ -334,7 +339,8 @@ extern status_t
 			    grp_template_t **grp);
 
 extern status_t 
-    yang_find_imp_extension (tk_chain_t  *tkc,
+    yang_find_imp_extension (yang_pcb_t *pcb,
+                             tk_chain_t  *tkc,
 			     ncx_module_t *mod,
 			     const xmlChar *prefix,
 			     const xmlChar *name,
@@ -343,7 +349,8 @@ extern status_t
 
 
 extern status_t 
-    yang_find_imp_feature (tk_chain_t  *tkc,
+    yang_find_imp_feature (yang_pcb_t *pcb,
+                           tk_chain_t  *tkc,
 			   ncx_module_t *mod,
 			   const xmlChar *prefix,
 			   const xmlChar *name,
@@ -351,7 +358,8 @@ extern status_t
 			   ncx_feature_t **feature);
 
 extern status_t 
-    yang_find_imp_identity (tk_chain_t  *tkc,
+    yang_find_imp_identity (yang_pcb_t *pcb,
+                            tk_chain_t  *tkc,
 			    ncx_module_t *mod,
 			    const xmlChar *prefix,
 			    const xmlChar *name,

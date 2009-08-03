@@ -1230,7 +1230,8 @@ static void
 status_t
     agt_not_init (void)
 {
-    status_t      res;
+    agt_profile_t  *agt_profile;
+    status_t        res;
 
     if (agt_not_init_done) {
 	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
@@ -1242,19 +1243,27 @@ status_t
     }
 #endif
 
+    agt_profile = agt_get_profile();
+
     dlq_createSQue(&subscriptionQ);
     dlq_createSQue(&notificationQ);
     init_static_vars();
     agt_not_init_done = TRUE;
 
     /* load the notifications module */
-    res = ncxmod_load_module(AGT_NOT_MODULE1, NULL, &notifmod);
+    res = ncxmod_load_module(AGT_NOT_MODULE1, 
+                             NULL, 
+                             &agt_profile->agt_savedevQ,
+                             &notifmod);
     if (res != NO_ERR) {
 	return res;
     }
 
     /* load the nc-notifications module */
-    res = ncxmod_load_module(AGT_NOT_MODULE2, NULL, &ncnotifmod);
+    res = ncxmod_load_module(AGT_NOT_MODULE2, 
+                             NULL, 
+                             &agt_profile->agt_savedevQ,
+                             &ncnotifmod);
     if (res != NO_ERR) {
 	return res;
     }

@@ -408,6 +408,7 @@ date	     init     comment
 #define NCX_EL_DELETE_CONFIG   (const xmlChar *)"delete-config"
 #define NCX_EL_DEPRECATED      (const xmlChar *)"deprecated"
 #define NCX_EL_DESCRIPTION     (const xmlChar *)"description"
+#define NCX_EL_DEVIATION       (const xmlChar *)"deviation"
 #define NCX_EL_DISABLED        (const xmlChar *)"disabled"
 #define NCX_EL_DISCARD_CHANGES (const xmlChar *)"discard-changes"
 #define NCX_EL_DOUBLE          (const xmlChar *)"double"

@@ -836,7 +836,8 @@ static status_t
 				     revision,
 				     (cp->curnew) ? TRUE : FALSE,
 				     FALSE, 
-                                     modpath, 
+                                     modpath,
+                                     NULL,
                                      &res);
     if (res == ERR_NCX_SKIPPED) {
 	if (newpcb) {
@@ -912,7 +913,8 @@ static status_t
 				     revision,
 				     (cp->new_isdir) ? TRUE : FALSE,
 				     FALSE, 
-                                     modpath, 
+                                     modpath,
+                                     NULL,
                                      &res);
     if (res == ERR_NCX_SKIPPED) {
 	/* this is probably a submodule being skipped in subtree mode */
@@ -1256,7 +1258,6 @@ static status_t
 	ncx_print_errormsg(NULL, NULL, res);
     }
 
-
     if (res == NO_ERR) {
 
 	/* compare one file to another or 1 subtree to another */
@@ -1551,10 +1552,16 @@ static status_t
 
     if (res == NO_ERR) {
 	/* load in the YANG converter CLI definition file */
-	res = ncxmod_load_module(YANGDIFF_MOD, NULL, NULL);
+	res = ncxmod_load_module(YANGDIFF_MOD, 
+                                 NULL, 
+                                 NULL,
+                                 NULL);
 
 	if (res == NO_ERR) {
-	    res = ncxmod_load_module(NCXMOD_NCX, NULL, NULL);
+	    res = ncxmod_load_module(NCXMOD_NCX, 
+                                     NULL, 
+                                     NULL,
+                                     NULL);
 	    if (res == NO_ERR) {
 		res = ncx_stage2_init();
 	    }

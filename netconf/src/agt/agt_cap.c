@@ -378,7 +378,7 @@ status_t
 *    status
 *********************************************************************/
 status_t 
-    agt_cap_add_module (const ncx_module_t *mod)
+    agt_cap_add_module (ncx_module_t *mod)
 {
 #ifdef DEBUG
     if (!mod) {

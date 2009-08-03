@@ -193,6 +193,9 @@ typedef struct agt_profile_t_ {
     ncx_withdefaults_t  agt_defaultStyleEnum;
     agt_acmode_t        agt_accesscontrol_enum;
     uint16              agt_ports[AGT_MAX_PORTS];
+
+    /* Q of malloced ncx_save_deviations_t */
+    dlq_hdr_t           agt_savedevQ;  
 } agt_profile_t;
 
 
@@ -214,7 +217,7 @@ extern status_t
 extern void 
     agt_cleanup (void);
 
-extern const agt_profile_t *
+extern agt_profile_t *
     agt_get_profile (void);
 
 extern void

@@ -61,7 +61,7 @@ extern status_t
     agt_cap_set_modules (void);
 
 extern status_t 
-    agt_cap_add_module (const ncx_module_t *mod);
+    agt_cap_add_module (ncx_module_t *mod);
 
 extern void
     agt_cap_set_modcaps_parmset (void);

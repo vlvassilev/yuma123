@@ -298,6 +298,7 @@ static xmlChar *
 * specified definition name.
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   imp == import struct to use
 *   defname == name of the app-specific definition to find
 *   dtyp == address of return definition type (for verification)
@@ -305,6 +306,7 @@ static xmlChar *
 *   dptr == addres of return definition pointer
 *
 * OUTPUTS:
+*   pcb == parser control block to use
 *   imp->mod may be set if not already
 *   *dtyp == node type found NCX_NT_OBJ or NCX_NT_TYPE, etc. 
 *   *dptr == pointer to data struct or NULL if not found
@@ -313,7 +315,8 @@ static xmlChar *
 *   status
 *********************************************************************/
 static status_t
-    check_moddef (ncx_import_t *imp,
+    check_moddef (yang_pcb_t *pcb,
+                  ncx_import_t *imp,
 		  const xmlChar *defname,
 		  ncx_node_t *dtyp,
 		  void **dptr)
@@ -328,7 +331,10 @@ static status_t
     }
 
     if (!imp->mod) {
-	res = ncxmod_load_module(imp->module, imp->revision, &imp->mod);
+	res = ncxmod_load_module(imp->module, 
+                                 imp->revision, 
+                                 pcb->savedevQ,
+                                 &imp->mod);
 	CHK_EXIT(res, retres);
 	if (!imp->mod) {
 	    return ERR_NCX_MOD_NOT_FOUND;
@@ -349,7 +355,8 @@ static status_t
 	break;
     case NCX_NT_OBJ:
 	*dptr = obj_find_template(&imp->mod->datadefQ, 
-				  imp->module, defname);
+				  imp->module, 
+                                  defname);
 	break;
     case NCX_NT_NONE:
 	*dptr = ncx_find_type(imp->mod, defname);
@@ -364,7 +371,8 @@ static status_t
 	}
 	if (!*dptr) {
 	    *dptr = obj_find_template(&imp->mod->datadefQ, 
-				      imp->module, defname);
+				      imp->module, 
+                                      defname);
 	    if (*dptr) {
 		*dtyp = NCX_NT_OBJ;
 	    }
@@ -723,6 +731,8 @@ static void
     if (mod->belongs) {
 	m__free(mod->belongs);
     }
+
+    ncx_clean_list(&mod->devmodlist);
 
     m__free(mod);
 
@@ -1371,6 +1381,7 @@ ncx_module_t *
     dlq_createSQue(&mod->stmtQ);
     dlq_createSQue(&mod->featureQ);
     dlq_createSQue(&mod->identityQ);
+    ncx_init_list(&mod->devmodlist, NCX_BT_STRING);
     return mod;
 
 }  /* ncx_new_module */
@@ -2780,8 +2791,6 @@ ncx_import_t *
     ncx_find_import (const ncx_module_t *mod,
 		     const xmlChar *module)
 {
-    ncx_import_t  *import;
-
 #ifdef DEBUG
     if (!mod || !module) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -2789,7 +2798,37 @@ ncx_import_t *
     }
 #endif
 
-    for (import = (ncx_import_t *)dlq_firstEntry(&mod->importQ);
+    return ncx_find_import_que(&mod->importQ, module);
+
+} /* ncx_find_import */
+
+
+/********************************************************************
+* FUNCTION ncx_find_import_que
+* 
+* Search the specified importQ for a specified module name
+* 
+* INPUTS:
+*   importQ == Q of ncx_import_t to search
+*   module == module name to find
+*
+* RETURNS:
+*   pointer to the node if found, NULL if not found
+*********************************************************************/
+ncx_import_t * 
+    ncx_find_import_que (const dlq_hdr_t *importQ,
+                         const xmlChar *module)
+{
+    ncx_import_t  *import;
+
+#ifdef DEBUG
+    if (!importQ || !module) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    for (import = (ncx_import_t *)dlq_firstEntry(importQ);
 	 import != NULL;
 	 import = (ncx_import_t *)dlq_nextEntry(import)) {
 	if (!xml_strcmp(import->module, module)) {
@@ -2799,7 +2838,7 @@ ncx_import_t *
     }
     return NULL;
 
-} /* ncx_find_import */
+} /* ncx_find_import_que */
 
 
 /********************************************************************
@@ -2856,8 +2895,6 @@ ncx_import_t *
     ncx_find_pre_import (const ncx_module_t *mod,
 			 const xmlChar *prefix)
 {
-    ncx_import_t  *import;
-
 #ifdef DEBUG
     if (!mod || !prefix) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -2865,7 +2902,37 @@ ncx_import_t *
     }
 #endif
 
-    for (import = (ncx_import_t *)dlq_firstEntry(&mod->importQ);
+    return ncx_find_pre_import_que(&mod->importQ, prefix);
+
+} /* ncx_find_pre_import */
+
+
+/********************************************************************
+* FUNCTION ncx_find_pre_import_que
+* 
+* Search the specified importQ for a specified prefix value
+* 
+* INPUTS:
+*   importQ == Q of ncx_import_t to search
+*   prefix == prefix string to find
+*
+* RETURNS:
+*   pointer to the node if found, NULL if not found
+*********************************************************************/
+ncx_import_t * 
+    ncx_find_pre_import_que (const dlq_hdr_t *importQ,
+                             const xmlChar *prefix)
+{
+    ncx_import_t  *import;
+
+#ifdef DEBUG
+    if (!importQ || !prefix) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    for (import = (ncx_import_t *)dlq_firstEntry(importQ);
 	 import != NULL;
 	 import = (ncx_import_t *)dlq_nextEntry(import)) {
 	if (import->prefix && !xml_strcmp(import->prefix, prefix)) {
@@ -2875,7 +2942,7 @@ ncx_import_t *
     }
     return NULL;
 
-} /* ncx_find_pre_import */
+} /* ncx_find_pre_import_que */
 
 
 /********************************************************************
@@ -2917,61 +2984,6 @@ ncx_import_t *
 
 
 /********************************************************************
-* FUNCTION ncx_locate_import
-* 
-* Search the module import path for the specified definition name.
-*
-* NCX only!!!
-* Do not use in YANG!!!
-*
-* INPUTS:
-*     mod == ncx_module_t for the construct using this def name
-*     defname == name of definition to find
-*     *deftyp == specified type or NCX_NT_NONE if any will do
-*
-* OUTPUTS:
-*    *deftyp == type retrieved if NO_ERR
-* RETURNS:
-*    pointer to the located definition or NULL if not found
-*********************************************************************/
-void *
-    ncx_locate_import (const ncx_module_t  *mod,
-		       const xmlChar *defname,
-		       ncx_node_t     *deftyp)
-{
-    ncx_import_t      *imp;
-    void              *dptr;
-    status_t           res;
-
-#ifdef DEBUG
-    if (!mod || !defname || !deftyp) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    for (imp = (ncx_import_t *)dlq_firstEntry(&mod->importQ);
-         imp != NULL;
-         imp = (ncx_import_t *)dlq_nextEntry(imp)) {
-
-        /* check only if there is no item list this time */
-	res = check_moddef(imp, defname, deftyp, &dptr);
-	if (res == NO_ERR) {
-	    return dptr;
-	} else if (res != ERR_NCX_DEF_NOT_FOUND) {
-	    return NULL;  /*  !! res is lost !! */
-	}
-    }
-
-    /* Either not a definition, definition is a forward reference,
-     * or the import for the definition is missing
-     */
-    return NULL;
-
-}  /* ncx_locate_import */
-
-
-/********************************************************************
 * FUNCTION ncx_locate_modqual_import
 * 
 * Search the specific module for the specified definition name.
@@ -2985,6 +2997,7 @@ void *
 *  - not_template_t (NCX_NT_NOTIF)
 *
 * INPUTS:
+*     pcb == parser control block to use
 *     imp == NCX import struct to use
 *     defname == name of definition to find
 *     *deftyp == specified type or NCX_NT_NONE if any will do
@@ -2997,7 +3010,8 @@ void *
 *    pointer to the located definition or NULL if not found
 *********************************************************************/
 void *
-    ncx_locate_modqual_import (ncx_import_t *imp,
+    ncx_locate_modqual_import (yang_pcb_t *pcb,
+                               ncx_import_t *imp,
 			       const xmlChar *defname,
 			       ncx_node_t *deftyp)
 {
@@ -3011,7 +3025,7 @@ void *
     }
 #endif
 
-    res = check_moddef(imp, defname, deftyp, &dptr);
+    res = check_moddef(pcb, imp, defname, deftyp, &dptr);
     return (res==NO_ERR) ? dptr : NULL;
     /*** error res is lost !!! ***/
 
@@ -3161,6 +3175,7 @@ void
 
     /* clean the num->union, depending on base type */
     switch (btyp) {
+    case NCX_BT_NONE:
     case NCX_BT_INT8:
     case NCX_BT_INT16:
     case NCX_BT_INT32:
@@ -6938,6 +6953,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == ncx_module_t in progress
 *   appinfoQ == queue to check
@@ -6946,7 +6962,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    ncx_resolve_appinfoQ (tk_chain_t *tkc,
+    ncx_resolve_appinfoQ (yang_pcb_t *pcb,
+                          tk_chain_t *tkc,
 			  ncx_module_t  *mod,
 			  dlq_hdr_t *appinfoQ)
 {
@@ -6979,8 +6996,12 @@ status_t
 	if (appinfo->prefix &&
 	    xml_strcmp(appinfo->prefix, mod->prefix)) {
 
-	    res = yang_find_imp_extension(tkc, mod, appinfo->prefix,
-					  appinfo->name, appinfo->tk,
+	    res = yang_find_imp_extension(pcb,
+                                          tkc, 
+                                          mod, 
+                                          appinfo->prefix,
+					  appinfo->name, 
+                                          appinfo->tk,
 					  &ext);
 	    CHK_EXIT(res, retres);
 	} else {
@@ -7009,14 +7030,16 @@ status_t
 		retres = ERR_NCX_EXTRA_PARM;
 		log_error("\nError: argument '%s' provided for"
 			  " extension '%s:%s' is not allowed",
-			  appinfo->value, appinfo->prefix, ext->name);
+			  appinfo->value, 
+                          appinfo->prefix, 
+                          ext->name);
 		tkc->cur = appinfo->tk;
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
 	}
 
 	/* recurse through any nested appinfo statements */
-	res = ncx_resolve_appinfoQ(tkc, mod, appinfo->appinfoQ);
+	res = ncx_resolve_appinfoQ(pcb, tkc, mod, appinfo->appinfoQ);
 	CHK_EXIT(res, retres);
     }
 
@@ -10891,6 +10914,141 @@ status_t
     return NO_ERR;
 
 }  /* ncx_get_version */
+
+
+/********************************************************************
+* FUNCTION ncx_new_save_deviations
+* 
+* create a deviation save structure
+*
+* INPUTS:
+*   devmodule == deviations module name
+*   devrevision == deviation module revision
+*   devprefix == local module prefix
+*
+* RETURNS:
+*   malloced and initialized save_deviations struct, 
+*   or NULL if malloc error
+*********************************************************************/
+ncx_save_deviations_t *
+    ncx_new_save_deviations (const xmlChar *devmodule,
+                             const xmlChar *devrevision,
+                             const xmlChar *devprefix)
+{
+    ncx_save_deviations_t  *savedev;
+
+#ifdef DEBUG
+    if (!devmodule) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    savedev = m__getObj(ncx_save_deviations_t);
+    if (savedev == NULL) {
+        return NULL;
+    }
+
+    memset(savedev, 0x0, sizeof(ncx_save_deviations_t));
+    dlq_createSQue(&savedev->importQ);
+    dlq_createSQue(&savedev->deviationQ);
+
+    savedev->devmodule = xml_strdup(devmodule);
+    if (savedev->devmodule == NULL) {
+        ncx_free_save_deviations(savedev);
+        return NULL;
+    }
+
+    if (devprefix) {
+        savedev->devprefix = xml_strdup(devprefix);
+        if (savedev->devprefix == NULL) {
+            ncx_free_save_deviations(savedev);
+            return NULL;
+        }
+    }
+
+    if (devrevision) {
+        savedev->devrevision = xml_strdup(devrevision);
+        if (savedev->devrevision == NULL) {
+            ncx_free_save_deviations(savedev);
+            return NULL;
+        }
+    }
+    
+    return savedev;
+
+}  /* ncx_new_save_deviations */
+
+
+/********************************************************************
+* FUNCTION ncx_free_save_deviations
+* 
+* free a deviation save struct
+*
+* INPUT:
+*    savedev == struct to clean and delete
+*********************************************************************/
+void
+    ncx_free_save_deviations (ncx_save_deviations_t *savedev)
+{
+    ncx_import_t      *import;
+    obj_deviation_t   *deviation;
+
+#ifdef DEBUG
+    if (!savedev) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    while (!dlq_empty(&savedev->importQ)) {
+        import = (ncx_import_t *)
+            dlq_deque(&savedev->importQ);
+        ncx_free_import(import);
+    }
+
+    while (!dlq_empty(&savedev->deviationQ)) {
+        deviation = (obj_deviation_t *)
+            dlq_deque(&savedev->deviationQ);
+        obj_free_deviation(deviation);
+    }
+
+    if (savedev->devmodule) {
+        m__free(savedev->devmodule);
+    }
+
+    if (savedev->devrevision) {
+        m__free(savedev->devrevision);
+    }
+
+    if (savedev->devprefix) {
+        m__free(savedev->devprefix);
+    }
+
+    m__free(savedev);
+
+}  /* ncx_free_save_deviations */
+
+
+
+/********************************************************************
+* FUNCTION ncx_free_save_deviations
+* 
+* clean a Q of deviation save structs
+*
+* INPUT:
+*    savedevQ == Q of ncx_save_deviations_t to clean
+*********************************************************************/
+void
+    ncx_clean_save_deviationsQ (dlq_hdr_t *savedevQ)
+{
+    ncx_save_deviations_t *savedev;
+
+    while (!dlq_empty(savedevQ)) {
+        savedev = (ncx_save_deviations_t *)dlq_deque(savedevQ);
+        ncx_free_save_deviations(savedev);
+    }
+} /* ncx_clean_save_deviationsQ */
 
 
 /* END file ncx.c */

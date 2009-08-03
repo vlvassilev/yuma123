@@ -177,7 +177,12 @@ extern void
 extern status_t 
     ncxmod_load_module (const xmlChar *modname,
 			const xmlChar *revision,
+                        dlq_hdr_t *savedevQ,
 			ncx_module_t **retmod);
+
+extern status_t 
+    ncxmod_load_deviation (const xmlChar *devname,
+                           dlq_hdr_t *deviationQ);
 
 extern status_t 
     ncxmod_load_imodule (const xmlChar *modname,
@@ -191,7 +196,9 @@ extern yang_pcb_t *
 			    boolean subtree_mode,
 			    boolean with_submods,
 			    boolean cookedmode,
+                            dlq_hdr_t *savedevQ,
 			    status_t  *res);
+
 
 extern yang_pcb_t *
     ncxmod_load_module_diff (const xmlChar *modname,
@@ -199,6 +206,7 @@ extern yang_pcb_t *
 			     boolean subtree_mode,
 			     boolean with_submods,
 			     const xmlChar *modpath,
+                             dlq_hdr_t  *savedevQ,
 			     status_t  *res);
 
 

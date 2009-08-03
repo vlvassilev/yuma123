@@ -164,6 +164,9 @@ date	     init     comment
 /* object is tagged ncx:very-secure */
 #define OBJ_FL_VERY_SECURE  bit25
 
+/* object is marked for deletion */
+#define OBJ_FL_DELETED      bit26
+
 
 /********************************************************************
 *								    *
@@ -439,8 +442,8 @@ typedef struct obj_template_t_ {
     dlq_hdr_t               metadataQ;       /* Q of obj_metadata_t */
     dlq_hdr_t               appinfoQ;         /* Q of ncx_appinfo_t */
     dlq_hdr_t               iffeatureQ;     /* Q of ncx_iffeature_t */
-    dlq_hdr_t               deviateQ;         /* Q of obj_deviate_t */
-      /* cbset is agt_rpc_cbset_t for RPC or agt_cb_fnset_t for OBJ */
+
+    /* cbset is agt_rpc_cbset_t for RPC or agt_cb_fnset_t for OBJ */
     void                   *cbset;   
 
     union def_ {
@@ -524,10 +527,12 @@ typedef struct obj_deviate_t_ {
 typedef struct obj_deviation_t_ {
     dlq_hdr_t             qhdr;
     xmlChar              *target;
+    xmlChar              *targmodname;
     obj_template_t       *targobj;
     xmlChar              *descr;
     xmlChar              *ref;
     tk_token_t           *tk;   /* back-ptr */
+    xmlChar              *devmodname;  /* set if not the targmod */
     uint32                linenum;
     boolean               empty;
     status_t              res;

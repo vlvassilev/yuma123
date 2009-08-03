@@ -54,7 +54,7 @@
     Syntax errors and any other static errors are reported
 
     In pass 3, the object definitions are validated for correctness,
-    via te yang_obj_resolve_datadefs function.  This is mixed with
+    via the yang_obj_resolve_datadefs function.  This is mixed with
     calls to yang_typ_resolve_typedefs and yang_grp_resolve_groupings.
 
     Uses and augments are not expanded in pass 3, so some details
@@ -253,14 +253,16 @@ date         init     comment
 
 /* local functions called recursively */
 static status_t 
-    consume_datadef (tk_chain_t *tkc,
+    consume_datadef (yang_pcb_t *pcb,
+                     tk_chain_t *tkc,
 		     ncx_module_t  *mod,
 		     dlq_hdr_t *que,
 		     obj_template_t *parent,
 		     grp_template_t *grp);
 
 static status_t 
-    consume_case_datadef (tk_chain_t *tkc,
+    consume_case_datadef (yang_pcb_t *pcb,
+                          tk_chain_t *tkc,
 			  ncx_module_t  *mod,
 			  dlq_hdr_t *que,
 			  obj_template_t *parent);
@@ -272,32 +274,37 @@ static status_t
 		    obj_template_t *parent);
 
 static status_t 
-    consume_augment (tk_chain_t *tkc,
+    consume_augment (yang_pcb_t *pcb,
+                     tk_chain_t *tkc,
 		     ncx_module_t  *mod,
 		     dlq_hdr_t *que,
 		     obj_template_t *parent,
 		     grp_template_t *grp);
 
 static status_t 
-    expand_augment (tk_chain_t *tkc,
+    expand_augment (yang_pcb_t *pcb,
+                    tk_chain_t *tkc,
 		    ncx_module_t  *mod,
 		    obj_template_t *obj,
 		    dlq_hdr_t *datadefQ);
 
 static status_t 
-    resolve_datadef (tk_chain_t *tkc,
+    resolve_datadef (yang_pcb_t *pcb,
+                     tk_chain_t *tkc,
 		     ncx_module_t  *mod,
 		     obj_template_t *testobj,
 		     boolean redo);
 
 static status_t 
-    resolve_datadefs (tk_chain_t *tkc,
+    resolve_datadefs (yang_pcb_t *pcb,
+                      tk_chain_t *tkc,
 		      ncx_module_t  *mod,
 		      dlq_hdr_t *datadefQ,
 		      boolean redo);
 
 static status_t 
-    resolve_iffeatureQ (tk_chain_t *tkc,
+    resolve_iffeatureQ (yang_pcb_t *pcb,
+                        tk_chain_t *tkc,
 			ncx_module_t  *mod,
 			obj_template_t *obj);
 
@@ -671,6 +678,7 @@ static status_t
 * Current token is the 'container' keyword
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
@@ -681,7 +689,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_container (tk_chain_t *tkc,
+    consume_container (yang_pcb_t *pcb,
+                       tk_chain_t *tkc,
 		       ncx_module_t  *mod,
 		       dlq_hdr_t  *que,
 		       obj_template_t *parent,
@@ -781,11 +790,13 @@ static status_t
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    res = yang_typ_consume_typedef(tkc, 
+	    res = yang_typ_consume_typedef(pcb,
+                                           tkc, 
                                            mod,
 					   con->typedefQ);
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(tkc, 
+	    res = yang_grp_consume_grouping(pcb,
+                                            tkc, 
                                             mod, 
 					    con->groupingQ, 
                                             obj);
@@ -831,7 +842,8 @@ static status_t
 				     &ref, 
                                      &obj->appinfoQ);
 	} else {
-	    res = yang_obj_consume_datadef(tkc,
+	    res = yang_obj_consume_datadef(pcb,
+                                           tkc,
                                            mod,
 					   con->datadefQ, 
                                            obj);
@@ -864,6 +876,7 @@ static status_t
 * Current token is the 'leaf' keyword
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
@@ -874,7 +887,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_leaf (tk_chain_t *tkc,
+    consume_leaf (yang_pcb_t *pcb,
+                  tk_chain_t *tkc,
 		  ncx_module_t  *mod,
 		  dlq_hdr_t  *que,
 		  obj_template_t *parent,
@@ -990,10 +1004,16 @@ static status_t
 		 * typedef; replace the old typedef!
 		 */
 		typ_clean_typdef(leaf->typdef);
-		res = yang_typ_consume_type(tkc, mod, leaf->typdef);
+		res = yang_typ_consume_type(pcb,
+                                            tkc, 
+                                            mod, 
+                                            leaf->typdef);
 	    } else {
 		typ = TRUE;
-		res = yang_typ_consume_type(tkc, mod, leaf->typdef);
+		res = yang_typ_consume_type(pcb,
+                                            tkc, 
+                                            mod, 
+                                            leaf->typdef);
 		if (res == NO_ERR) {
 		    typeok = TRUE;
 		}
@@ -1093,6 +1113,7 @@ static status_t
 * Current token is the 'leaf-list' keyword
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
@@ -1103,7 +1124,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_leaflist (tk_chain_t *tkc,
+    consume_leaflist (yang_pcb_t *pcb,
+                      tk_chain_t *tkc,
 		      ncx_module_t  *mod,
 		      dlq_hdr_t  *que,
 		      obj_template_t *parent,
@@ -1216,10 +1238,16 @@ static status_t
 		typeok = FALSE;
 		ncx_print_errormsg(tkc, mod, retres);
 		typ_clean_typdef(llist->typdef);
-		res = yang_typ_consume_type(tkc, mod, llist->typdef);
+		res = yang_typ_consume_type(pcb,
+                                            tkc, 
+                                            mod, 
+                                            llist->typdef);
 	    } else {
 		typ = TRUE;
-		res = yang_typ_consume_type(tkc, mod, llist->typdef);
+		res = yang_typ_consume_type(pcb,
+                                            tkc, 
+                                            mod, 
+                                            llist->typdef);
 		if (res == NO_ERR) {
 		    typeok = TRUE;
 		}
@@ -1325,6 +1353,7 @@ static status_t
 * Current token is the 'list' keyword
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
@@ -1335,7 +1364,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_list (tk_chain_t *tkc,
+    consume_list (yang_pcb_t *pcb,
+                  tk_chain_t *tkc,
 		  ncx_module_t  *mod,
 		  dlq_hdr_t  *que,
 		  obj_template_t *parent,
@@ -1444,11 +1474,13 @@ static status_t
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    res = yang_typ_consume_typedef(tkc, 
+	    res = yang_typ_consume_typedef(pcb,
+                                           tkc, 
                                            mod,
 					   list->typedefQ);
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(tkc, 
+	    res = yang_grp_consume_grouping(pcb,
+                                            tkc, 
                                             mod,
 					    list->groupingQ, 
                                             obj);
@@ -1541,7 +1573,8 @@ static status_t
 				     &ref, 
                                      &obj->appinfoQ);
 	} else {
-	    res = yang_obj_consume_datadef(tkc, 
+	    res = yang_obj_consume_datadef(pcb,
+                                           tkc, 
                                            mod,
 					   list->datadefQ, 
                                            obj);
@@ -1589,6 +1622,7 @@ static status_t
 * Current token is a data-def keyword (if withcase==FALSE)
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   choic == obj_choice_t in progress, add case arm to this caseQ
@@ -1606,7 +1640,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_case (tk_chain_t *tkc,
+    consume_case (yang_pcb_t *pcb,
+                  tk_chain_t *tkc,
 		  ncx_module_t  *mod,
 		  dlq_hdr_t *caseQ,
 		  obj_template_t *parent,
@@ -1657,7 +1692,8 @@ static status_t
     } else {
 	/* shoarthand version, just 1 data-def-stmt per case */
 	anydone = TRUE;
-	res = consume_case_datadef(tkc, 
+	res = consume_case_datadef(pcb,
+                                   tkc, 
                                    mod,
 				   cas->datadefQ, 
                                    obj);
@@ -1728,7 +1764,8 @@ static status_t
 				     &ref, 
                                      &obj->appinfoQ);
 	} else {
-	    res = consume_case_datadef(tkc, 
+	    res = consume_case_datadef(pcb,
+                                       tkc, 
                                        mod,
 				       cas->datadefQ, 
                                        obj);
@@ -1833,6 +1870,7 @@ static status_t
 * Current token is the 'choice' keyword
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
@@ -1843,7 +1881,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_choice (tk_chain_t *tkc,
+    consume_choice (yang_pcb_t *pcb,
+                    tk_chain_t *tkc,
 		    ncx_module_t  *mod,
 		    dlq_hdr_t  *que,
 		    obj_template_t *parent,
@@ -1991,7 +2030,8 @@ static status_t
 		obj->flags &= OBJ_FL_CONFIG;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_CASE)) {
-	    res = consume_case(tkc, 
+	    res = consume_case(pcb,
+                               tkc, 
                                mod,
                                choic->caseQ,
                                obj, 
@@ -2002,7 +2042,8 @@ static status_t
 		   !xml_strcmp(val, YANG_K_LEAF_LIST) ||
 		   !xml_strcmp(val, YANG_K_LIST)) {
 	    /* create an inline 1-obj case statement */
-	    res = consume_case(tkc, 
+	    res = consume_case(pcb,
+                               tkc, 
                                mod,
                                choic->caseQ,
                                obj, 
@@ -2032,11 +2073,13 @@ static status_t
 	    if (testobj->mod != mod) {
 		log_error("\nError: object '%s' already defined "
 			  "in submodule '%s' at line %u",
-			  choic->name, testobj->mod->name,
+			  choic->name, 
+                          testobj->mod->name,
 			  testobj->linenum);
 	    } else {
 		log_error("\nError: choice '%s' already defined at line %u",
-			  choic->name, testobj->linenum);
+			  choic->name, 
+                          testobj->linenum);
 	    }
 	    res = retres = ERR_NCX_DUP_ENTRY;
 	    ncx_print_errormsg(tkc, mod, retres);
@@ -2307,6 +2350,7 @@ static status_t
 * Current token is the 'uses' keyword
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
@@ -2317,7 +2361,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_uses (tk_chain_t *tkc,
+    consume_uses (yang_pcb_t *pcb,
+                  tk_chain_t *tkc,
 		  ncx_module_t  *mod,
 		  dlq_hdr_t  *que,
 		  obj_template_t *parent,
@@ -2375,7 +2420,8 @@ static status_t
 
     /* attempt to find grouping only if it is from another module */
     if (uses->prefix && xml_strcmp(uses->prefix, mod->prefix)) {
-	res = yang_find_imp_grouping(tkc, 
+	res = yang_find_imp_grouping(pcb,
+                                     tkc, 
                                      mod, 
                                      uses->prefix,
 				     uses->name, 
@@ -2453,7 +2499,8 @@ static status_t
 				     &ref, 
                                      &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_AUGMENT)) {
-	    res = consume_augment(tkc, 
+	    res = consume_augment(pcb,
+                                  tkc, 
                                   mod, 
                                   uses->datadefQ,
                                   obj, 
@@ -2514,6 +2561,7 @@ static status_t
 * Current token is the 'input' or 'output' keyword
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
@@ -2523,7 +2571,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_rpcio (tk_chain_t *tkc,
+    consume_rpcio (yang_pcb_t *pcb,
+                   tk_chain_t *tkc,
 		   ncx_module_t  *mod,
 		   dlq_hdr_t  *que,
 		   obj_template_t *parent)
@@ -2611,14 +2660,19 @@ static status_t
 
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    res = yang_typ_consume_typedef(tkc, mod, &rpcio->typedefQ);
+	    res = yang_typ_consume_typedef(pcb,
+                                           tkc, 
+                                           mod, 
+                                           &rpcio->typedefQ);
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(tkc, 
+	    res = yang_grp_consume_grouping(pcb,
+                                            tkc, 
                                             mod, 
 					    &rpcio->groupingQ, 
                                             obj);
 	} else {
-	    res = yang_obj_consume_datadef(tkc, 
+	    res = yang_obj_consume_datadef(pcb,
+                                           tkc, 
                                            mod,
 					   &rpcio->datadefQ, 
                                            obj);
@@ -2667,6 +2721,7 @@ static status_t
 *   uses
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   que == Q to hold the obj_template_t struct that get created
@@ -2676,7 +2731,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_augdata (tk_chain_t *tkc,
+    consume_augdata (yang_pcb_t *pcb,
+                     tk_chain_t *tkc,
 		     ncx_module_t  *mod,
 		     dlq_hdr_t *que,
 		     obj_template_t *parent)
@@ -2700,17 +2756,47 @@ static status_t
 	if (!xml_strcmp(val, YANG_K_ANYXML)) {
 	    res = consume_anyxml(tkc, mod, que, parent, NULL);
 	} else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
-	    res = consume_container(tkc, mod, que, parent, NULL);
+	    res = consume_container(pcb,
+                                    tkc, 
+                                    mod, 
+                                    que, 
+                                    parent, 
+                                    NULL);
 	} else if (!xml_strcmp(val, YANG_K_LEAF)) {
-	    res = consume_leaf(tkc, mod, que, parent, NULL);
+	    res = consume_leaf(pcb,
+                               tkc, 
+                               mod, 
+                               que, 
+                               parent, 
+                               NULL);
 	} else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
-	    res = consume_leaflist(tkc, mod, que, parent, NULL);
+	    res = consume_leaflist(pcb,
+                                   tkc, 
+                                   mod, 
+                                   que, 
+                                   parent, 
+                                   NULL);
 	} else if (!xml_strcmp(val, YANG_K_LIST)) {
-	    res = consume_list(tkc, mod, que, parent, NULL);
+	    res = consume_list(pcb,
+                               tkc, 
+                               mod, 
+                               que, 
+                               parent, 
+                               NULL);
 	} else if (!xml_strcmp(val, YANG_K_CHOICE)) {
-	    res = consume_choice(tkc, mod, que, parent, NULL);
+	    res = consume_choice(pcb,
+                                 tkc, 
+                                 mod, 
+                                 que, 
+                                 parent, 
+                                 NULL);
 	} else if (!xml_strcmp(val, YANG_K_USES)) {
-	    res = consume_uses(tkc, mod, que, parent, NULL);
+	    res = consume_uses(pcb,
+                               tkc, 
+                               mod, 
+                               que, 
+                               parent, 
+                               NULL);
 	} else {
 	    errdone = FALSE;
 	    res = ERR_NCX_WRONG_TKVAL;
@@ -2740,6 +2826,7 @@ static status_t
 * Current token is the 'augment' keyword
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   que == queue will get the obj_template_t 
@@ -2750,7 +2837,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_augment (tk_chain_t *tkc,
+    consume_augment (yang_pcb_t *pcb,
+                     tk_chain_t *tkc,
 		     ncx_module_t  *mod,
 		     dlq_hdr_t *que,
 		     obj_template_t *parent,
@@ -2873,13 +2961,18 @@ static status_t
 				     &ref, 
                                      &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_CASE)) {
-	    res = consume_case(tkc, 
+	    res = consume_case(pcb,
+                               tkc, 
                                mod, 
                                &aug->datadefQ,
                                obj, 
                                TRUE);
 	} else {
-	    res = consume_augdata(tkc, mod, &aug->datadefQ, obj);
+	    res = consume_augdata(pcb,
+                                  tkc, 
+                                  mod, 
+                                  &aug->datadefQ, 
+                                  obj);
 	}
 	CHK_OBJ_EXIT(obj, res, retres);
     }
@@ -2921,6 +3014,7 @@ static status_t
 * data definition
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   que == queue will get the obj_template_t 
@@ -2930,7 +3024,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_case_datadef (tk_chain_t *tkc,
+    consume_case_datadef (yang_pcb_t *pcb,
+                          tk_chain_t *tkc,
 			  ncx_module_t  *mod,
 			  dlq_hdr_t *que,
 			  obj_template_t *parent)
@@ -2961,31 +3056,47 @@ static status_t
                                  parent, 
                                  NULL);
 	} else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
-	    res = consume_container(tkc, 
+	    res = consume_container(pcb,
+                                    tkc, 
                                     mod, 
                                     que,
                                     parent,
                                     NULL);
 	} else if (!xml_strcmp(val, YANG_K_LEAF)) {
-	    res = consume_leaf(tkc, 
+	    res = consume_leaf(pcb,
+                               tkc, 
                                mod,
                                que,
                                parent,
                                NULL);
 	} else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
-	    res = consume_leaflist(tkc,
+	    res = consume_leaflist(pcb,
+                                   tkc,
                                    mod,
                                    que,
                                    parent,
                                    NULL);
 	} else if (!xml_strcmp(val, YANG_K_LIST)) {
-	    res = consume_list(tkc,
+	    res = consume_list(pcb,
+                               tkc,
                                mod,
                                que,
                                parent,
                                NULL);
+	} else if (!xml_strcmp(val, YANG_K_CHOICE)) {
+	    res = consume_choice(pcb,
+                                 tkc,
+                                 mod,
+                                 que,
+                                 parent,
+                                 NULL);
 	} else if (!xml_strcmp(val, YANG_K_USES)) {
-	    res = consume_uses(tkc, mod, que, parent, NULL);
+	    res = consume_uses(pcb,
+                               tkc, 
+                               mod, 
+                               que, 
+                               parent, 
+                               NULL);
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
 	    errdone = FALSE;
@@ -3013,6 +3124,7 @@ static status_t
 * Current token is the 'rpc' keyword
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
@@ -3023,7 +3135,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_rpc (tk_chain_t *tkc,
+    consume_rpc (yang_pcb_t *pcb,
+                 tk_chain_t *tkc,
 		 ncx_module_t  *mod,
 		 dlq_hdr_t  *que,
 		 obj_template_t *parent,
@@ -3118,11 +3231,13 @@ static status_t
 					 &obj->iffeatureQ,
 					 &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    res = yang_typ_consume_typedef(tkc, 
+	    res = yang_typ_consume_typedef(pcb,
+                                           tkc, 
                                            mod, 
                                            &rpc->typedefQ);
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(tkc, 
+	    res = yang_grp_consume_grouping(pcb,
+                                            tkc, 
                                             mod, 
 					    &rpc->groupingQ, 
                                             obj);
@@ -3146,7 +3261,11 @@ static status_t
                                      &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_INPUT) ||
 		   !xml_strcmp(val, YANG_K_OUTPUT)) {
-	    res = consume_rpcio(tkc, mod, &rpc->datadefQ, obj);
+	    res = consume_rpcio(pcb,
+                                tkc, 
+                                mod, 
+                                &rpc->datadefQ, 
+                                obj);
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
 	    ncx_mod_exp_err(tkc, mod, res, expstr);
@@ -3237,6 +3356,7 @@ static status_t
 * Current token is the 'notification' keyword
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   que == Q to hold the obj_template_t that gets created
@@ -3247,7 +3367,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_notif (tk_chain_t *tkc,
+    consume_notif (yang_pcb_t *pcb,
+                   tk_chain_t *tkc,
 		   ncx_module_t  *mod,
 		   dlq_hdr_t  *que,
 		   obj_template_t *parent,
@@ -3336,9 +3457,13 @@ static status_t
 
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    res = yang_typ_consume_typedef(tkc, mod, &notif->typedefQ);
+	    res = yang_typ_consume_typedef(pcb,
+                                           tkc, 
+                                           mod, 
+                                           &notif->typedefQ);
 	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(tkc, 
+	    res = yang_grp_consume_grouping(pcb,
+                                            tkc, 
                                             mod, 
 					    &notif->groupingQ, 
                                             obj);
@@ -3366,7 +3491,8 @@ static status_t
 				     &ref,
                                      &obj->appinfoQ);
 	} else {
-	    res = consume_datadef(tkc,
+	    res = consume_datadef(pcb,
+                                  tkc,
                                   mod,
                                   &notif->datadefQ,
 				  obj,
@@ -3388,8 +3514,6 @@ static status_t
 }  /* consume_notif */
 
 
-
-
 /********************************************************************
 * FUNCTION apply_object_deviations
 * 
@@ -3399,9 +3523,11 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   targobj == target object to check for deviations pending
+*   deviation == deviation to apply
 *   deleted == address of return deleted flag
 *
 * OUTPUTS:
@@ -3411,9 +3537,11 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    apply_object_deviations (tk_chain_t *tkc,
+    apply_object_deviations (yang_pcb_t *pcb,
+                             tk_chain_t *tkc,
 			     ncx_module_t  *mod,
 			     obj_template_t *targobj,
+                             obj_deviation_t *deviation,
 			     boolean *deleted)
 {
     obj_deviate_t      *devi;
@@ -3432,7 +3560,7 @@ static status_t
     dlq_createSQue(&datadefQ);
 
     for (devi = (obj_deviate_t *)
-	     dlq_firstEntry(&targobj->deviateQ);
+	     dlq_firstEntry(&deviation->deviateQ);
 	 devi != NULL && res == NO_ERR && !done;
 	 devi = (obj_deviate_t *)dlq_nextEntry(devi)) {
 
@@ -3450,13 +3578,12 @@ static status_t
 	    }
 
 	    /* remove the node and toss it out */
-	    if (LOGDEBUG3) {
-		log_debug3("\napply_dev: remove target obj %s:%s",
+	    if (LOGDEBUG2) {
+		log_debug2("\napply_dev: mark target obj %s:%s for removal",
 			   obj_get_mod_name(targobj),
 			   obj_get_name(targobj));
 	    }
-	    dlq_remove(targobj);
-	    obj_free_template(targobj);
+	    targobj->flags |= OBJ_FL_DELETED;
 	    *deleted = TRUE;
 	    done = TRUE;
 	    break;
@@ -3796,14 +3923,6 @@ static status_t
 	}
     }
 
-    /* clean the deviateQ */
-    if (!deleted) {
-	while (!dlq_empty(&targobj->deviateQ)) {
-	    devi = (obj_deviate_t *)dlq_deque(&targobj->deviateQ);
-	    obj_free_deviate(devi);
-	}
-    }
-
     if (res == NO_ERR && retest && !deleted) {
 	if (LOGDEBUG3) {
 	    log_debug3("\nRechecking %s:%s after "
@@ -3811,7 +3930,11 @@ static status_t
 		       obj_get_mod_name(targobj),
 		       obj_get_name(targobj));
 	}
-	res = resolve_datadef(tkc, mod, targobj, TRUE);
+	res = resolve_datadef(pcb,
+                              tkc, 
+                              mod, 
+                              targobj, 
+                              TRUE);
     }
 
     return res;
@@ -3828,80 +3951,64 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
-*   datadefQ == module in progress
 *
 * RETURNS:
 *   status of the operation
 *********************************************************************/
 static status_t 
-    apply_all_object_deviations (tk_chain_t *tkc,
-				 ncx_module_t *mod,
-				 dlq_hdr_t  *datadefQ)
+    apply_all_object_deviations (yang_pcb_t *pcb,
+                                 tk_chain_t *tkc,
+				 ncx_module_t *mod)
 {
     obj_deviation_t    *deviation;
-    obj_template_t     *childobj, *nextobj, *parentobj;
-    dlq_hdr_t          *childdatadefQ;
+    obj_template_t     *parentobj, *targobj;
     status_t            res, retres;
     boolean             deleted;
 
     res = NO_ERR;
     retres = NO_ERR;
+    targobj = NULL;
 
-    for (childobj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 childobj != NULL;
-	 childobj = nextobj) {
+    for (deviation = (obj_deviation_t *)
+             dlq_firstEntry(&mod->deviationQ);
+	 deviation != NULL && res == NO_ERR;
+	 deviation = (obj_deviation_t *)
+             dlq_nextEntry(deviation)) {
 
-	 nextobj = (obj_template_t *)dlq_nextEntry(childobj);
+        /* make sure deviation is for this module */
+        if (xml_strcmp(deviation->targmodname, mod->name)) {
+            continue;
+        }
 
-	 if (dlq_empty(&childobj->deviateQ)) {
-	     continue;
-	 }
+        if (deviation->targobj == NULL) {
+            continue;
+        }
 
-	 /* make sure not already processed
+        /* make sure not already processed
 	 * all the deviate structs from this deviation
 	 * have been moved to the object deviate Q
 	 */
 	 deleted = FALSE;
-	 parentobj = childobj->parent;
-	 res = apply_object_deviations(tkc, 
+	 parentobj = deviation->targobj->parent;
+	 res = apply_object_deviations(pcb,
+                                       tkc, 
 				       mod,
-				       childobj,
+				       deviation->targobj,
+                                       deviation,
 				       &deleted);
 	 CHK_EXIT(res, retres);
-
-	 if (deleted && parentobj) {
-	     /* need to retest the parent to see if it
-	      * is still OK; there should not be any other
-	      * deviations with the same target object
-	      */
-	     if (LOGDEBUG3) {
-		 log_debug3("\nRechecking %s:%s after "
-			    "applying deviation(s) to child",
-			    obj_get_mod_name(parentobj),
-			    obj_get_name(parentobj));
-	     }
-	     res = resolve_datadef(tkc, mod, parentobj, TRUE);
-	     CHK_EXIT(res, retres);
-	 } /* else this object was not deleted */
-
-	 if (!deleted) {
-	     childdatadefQ = obj_get_datadefQ(childobj);
-	     if (childdatadefQ) {
-		 res = apply_all_object_deviations(tkc, 
-						   mod,
-						   childdatadefQ);
-		 CHK_EXIT(res, retres);
-	     }
-	 }
     }
 
-    /* clean the Q of deviations */
-    while (!dlq_empty(&mod->deviationQ)) {
-	deviation = (obj_deviation_t *)
-	    dlq_deque(&mod->deviationQ);
-	obj_free_deviation(deviation);
+    if (!pcb->stmtmode) {
+        /* don't need these anymore for agent */
+        while (!dlq_empty(&mod->deviationQ)) {
+            deviation = (obj_deviation_t *)
+                dlq_deque(&mod->deviationQ);
+            obj_free_deviation(deviation);
+        }
     }
 
     return retres;
@@ -4047,6 +4154,87 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION normalize_deviationQ
+* 
+* Check for overlapping deviation statements
+* combine any deviation statements for the same target
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*        
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    normalize_deviationQ (tk_chain_t *tkc,
+                          ncx_module_t  *mod)
+{
+    obj_deviation_t  *curdev, *checkdev, *nextdev;
+    obj_deviate_t    *deviate;
+    status_t          res, retres;
+
+    if (dlq_count(&mod->deviationQ) < 2) {
+        return NO_ERR;
+    }
+
+    res = NO_ERR;
+    retres = NO_ERR;
+
+    /* there are at least 2 entries, so check the whole Q */
+    curdev = (obj_deviation_t *)dlq_firstEntry(&mod->deviationQ);
+    while (curdev != NULL) {
+
+        if (curdev->targobj == NULL || curdev->targobj->mod != mod) {
+            curdev = (obj_deviation_t *)dlq_nextEntry(curdev);
+            continue;
+        }
+
+        for (checkdev = (obj_deviation_t *)dlq_nextEntry(curdev);
+             checkdev != NULL;
+             checkdev = nextdev) {
+
+            nextdev = (obj_deviation_t *)dlq_nextEntry(checkdev);
+
+            if (checkdev->targobj == curdev->targobj) {
+                /* have a match; remove this entry
+                 * and combine it with the current deviation
+                 */
+                dlq_remove(checkdev);
+                dlq_block_enque(&checkdev->appinfoQ,
+                                &curdev->appinfoQ);
+                while (!dlq_empty(&checkdev->deviateQ)) {
+                    deviate = (obj_deviate_t *)
+                        dlq_deque(&checkdev->deviateQ);
+
+                    res = check_deviate_collision(tkc, 
+                                                  mod, 
+                                                  deviate,
+                                                  &curdev->deviateQ);
+                    if (res != NO_ERR) {
+                        retres = res;
+                        obj_free_deviate(deviate);
+                    } else {
+                        dlq_enque(deviate, &curdev->deviateQ);
+                    }
+                }
+                obj_free_deviation(checkdev);
+            }
+        }
+
+        /* move through the Q and keep checking for duplicates */
+        curdev = (obj_deviation_t *)dlq_nextEntry(curdev);
+    }
+
+    return retres;
+
+} /* normalize_deviationQ */
+
+
+/********************************************************************
 * FUNCTION consume_deviate
 * 
 * Parse the next N tokens as a deviate-stmt
@@ -4059,6 +4247,7 @@ static status_t
 * Current token is the 'deviate' keyword
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod == module in progress
 *   deviation == parent obj_deviation_t to hold the new obj_deviate_t
@@ -4071,7 +4260,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_deviate (tk_chain_t *tkc,
+    consume_deviate (yang_pcb_t *pcb,
+                     tk_chain_t *tkc,
 		     ncx_module_t  *mod,
 		     obj_deviation_t *deviation)
 {
@@ -4247,7 +4437,8 @@ static status_t
 		    obj_free_deviate(devi);
 		    return res;
 		} else {
-		    res = yang_typ_consume_type(tkc, 
+		    res = yang_typ_consume_type(pcb,
+                                                tkc, 
 						mod, 
 						dummy);
 		    typ_free_typdef(dummy);
@@ -4261,7 +4452,8 @@ static status_t
 		    obj_free_deviate(devi);
 		    return res;
 		} else {
-		    res = yang_typ_consume_type(tkc, 
+		    res = yang_typ_consume_type(pcb,
+                                                tkc, 
 						mod, 
 						devi->typdef);
 		}
@@ -4809,6 +5001,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod == module in progress
 *   obj == object to check for ncx:metadata clauses
@@ -4817,7 +5010,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_metadata (tk_chain_t *tkc,
+    resolve_metadata (yang_pcb_t *pcb,
+                      tk_chain_t *tkc,
 		      ncx_module_t  *mod,
 		      obj_template_t *obj)
 {
@@ -4863,7 +5057,9 @@ static status_t
 		 * a YANG QName for the datatype and a YANG
 		 * identifier for the XML attribute name
 		 */
-		res = yang_typ_consume_metadata_type(newchain, mod, 
+		res = yang_typ_consume_metadata_type(pcb,
+                                                     newchain, 
+                                                     mod, 
 						     meta->typdef);
 		if (res == NO_ERR) {
 		    /* make sure type OK for XML attribute */
@@ -4967,6 +5163,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   con == obj_container_t to check
@@ -4977,7 +5174,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_container (tk_chain_t *tkc,
+    resolve_container (yang_pcb_t *pcb,
+                       tk_chain_t *tkc,
 		       ncx_module_t  *mod,
 		       obj_container_t *con,
 		       obj_template_t *obj,
@@ -4988,21 +5186,36 @@ static status_t
     retres = NO_ERR;
 
     if (!redo) {
-	res = resolve_metadata(tkc, mod, obj);
+	res = resolve_metadata(pcb,
+                               tkc, 
+                               mod, 
+                               obj);
 	CHK_EXIT(res, retres);
     }
 
     if (!obj_is_refine(obj) && !redo) {
-	res = yang_typ_resolve_typedefs(tkc, mod, con->typedefQ, obj);
+	res = yang_typ_resolve_typedefs(pcb,
+                                        tkc, 
+                                        mod, 
+                                        con->typedefQ, 
+                                        obj);
 	CHK_EXIT(res, retres);
 
-	res = yang_grp_resolve_groupings(tkc, mod, con->groupingQ, obj);
+	res = yang_grp_resolve_groupings(pcb,
+                                         tkc, 
+                                         mod, 
+                                         con->groupingQ, 
+                                         obj);
 	CHK_EXIT(res, retres);
     }
 
     finish_config_flag(obj);
 
-    res = resolve_datadefs(tkc, mod, con->datadefQ, redo);
+    res = resolve_datadefs(pcb,
+                           tkc, 
+                           mod, 
+                           con->datadefQ, 
+                           redo);
     CHK_EXIT(res, retres);
 
     res = check_parent(tkc, mod, obj);
@@ -5022,6 +5235,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod == module in progress
 *   leaf == obj_leaf_t to check
@@ -5032,7 +5246,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_leaf (tk_chain_t *tkc,
+    resolve_leaf (yang_pcb_t *pcb,
+                  tk_chain_t *tkc,
 		  ncx_module_t  *mod,
 		  obj_leaf_t *leaf,
 		  obj_template_t *obj,
@@ -5043,12 +5258,16 @@ static status_t
     retres = NO_ERR;
 
     if (!redo) {
-	res = resolve_metadata(tkc, mod, obj);
+	res = resolve_metadata(pcb,
+                               tkc, 
+                               mod, 
+                               obj);
 	CHK_EXIT(res, retres);
     }
 
     if (!obj_is_refine(obj) || !redo) {
-	res = yang_typ_resolve_type(tkc, 
+	res = yang_typ_resolve_type(pcb,
+                                    tkc, 
                                     mod, 
                                     leaf->typdef,
 				    leaf->defval, 
@@ -5083,6 +5302,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod == module in progress
 *   llist == obj_leaflist_t to check
@@ -5093,7 +5313,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_leaflist (tk_chain_t *tkc,
+    resolve_leaflist (yang_pcb_t *pcb,
+                      tk_chain_t *tkc,
 		      ncx_module_t  *mod,
 		      obj_leaflist_t *llist,
 		      obj_template_t *obj,
@@ -5104,12 +5325,16 @@ static status_t
     retres = NO_ERR;
 
     if (!redo) {
-	res = resolve_metadata(tkc, mod, obj);
+	res = resolve_metadata(pcb,
+                               tkc, 
+                               mod, 
+                               obj);
 	CHK_EXIT(res, retres);
     }
 
     if (!obj_is_refine(obj) && !redo) {
-	res = yang_typ_resolve_type(tkc, 
+	res = yang_typ_resolve_type(pcb,
+                                    tkc, 
                                     mod,
 				    llist->typdef, 
                                     NULL, 
@@ -5153,6 +5378,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   list == obj_list_t to check
@@ -5163,7 +5389,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_list (tk_chain_t *tkc,
+    resolve_list (yang_pcb_t *pcb,
+                  tk_chain_t *tkc,
 		  ncx_module_t  *mod,
 		  obj_list_t *list,
 		  obj_template_t *obj,
@@ -5174,21 +5401,36 @@ static status_t
     retres = NO_ERR;
 
     if (!redo) {
-	res = resolve_metadata(tkc, mod, obj);
+	res = resolve_metadata(pcb,
+                               tkc, 
+                               mod, 
+                               obj);
 	CHK_EXIT(res, retres);
     }
 
     if (!obj_is_refine(obj) && !redo) {
-	res = yang_typ_resolve_typedefs(tkc, mod, list->typedefQ, obj);
+	res = yang_typ_resolve_typedefs(pcb,
+                                        tkc, 
+                                        mod, 
+                                        list->typedefQ, 
+                                        obj);
 	CHK_EXIT(res, retres);
 
-	res = yang_grp_resolve_groupings(tkc, mod, list->groupingQ, obj);
+	res = yang_grp_resolve_groupings(pcb,
+                                         tkc, 
+                                         mod, 
+                                         list->groupingQ, 
+                                         obj);
 	CHK_EXIT(res, retres);
     }
 
     finish_config_flag(obj);
 
-    res = resolve_datadefs(tkc, mod, list->datadefQ, redo);
+    res = resolve_datadefs(pcb, 
+                           tkc, 
+                           mod, 
+                           list->datadefQ, 
+                           redo);
     CHK_EXIT(res, retres);
 
     res = check_parent(tkc, mod, obj);
@@ -5219,6 +5461,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod == module in progress
 *   list == obj_list_t to check
@@ -5228,7 +5471,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    get_list_key (tk_chain_t *tkc,
+    get_list_key (yang_pcb_t *pcb,
+                  tk_chain_t *tkc,
 		  ncx_module_t  *mod,
 		  obj_list_t    *list,
 		  obj_template_t *obj)
@@ -5278,7 +5522,8 @@ static status_t
 	*p = 0;
 
 	/* check for a valid descendant-schema-nodeid string */
-	retres = xpath_find_schema_target_err(tkc, 
+	retres = xpath_find_schema_target_err(pcb,
+                                              tkc, 
 					      mod, 
 					      obj,
 					      list->datadefQ,
@@ -5434,6 +5679,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod == module in progress
 *   list == obj_list_t to check
@@ -5449,7 +5695,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    get_unique_comps (tk_chain_t *tkc,
+    get_unique_comps (yang_pcb_t *pcb,
+                      tk_chain_t *tkc,
 		      ncx_module_t  *mod,
 		      obj_list_t *list,
 		      obj_template_t *obj,
@@ -5490,7 +5737,8 @@ static status_t
 	*p = 0;
 
 	/* check for a valid descendant-schema-nodeid string */
-	res = xpath_find_schema_target_err(tkc, 
+	res = xpath_find_schema_target_err(pcb,
+                                           tkc, 
                                            mod, 
                                            obj,
 					   list->datadefQ,
@@ -5639,6 +5887,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod == module in progress
 *   list == obj_list_t to check
@@ -5648,7 +5897,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_list_final (tk_chain_t *tkc,
+    resolve_list_final (yang_pcb_t *pcb,
+                        tk_chain_t *tkc,
 			ncx_module_t  *mod,
 			obj_list_t *list,
 			obj_template_t *obj)
@@ -5660,7 +5910,11 @@ static status_t
 
     /* validate key clause */
     if (list->keystr) {
-	res = get_list_key(tkc, mod, list, obj);
+	res = get_list_key(pcb,
+                           tkc, 
+                           mod, 
+                           list, 
+                           obj);
 	CHK_EXIT(res, retres);
     }
 
@@ -5668,7 +5922,12 @@ static status_t
     for (uni = (obj_unique_t *)dlq_firstEntry(&list->uniqueQ);
 	 uni != NULL;
 	 uni = (obj_unique_t *)dlq_nextEntry(uni)) {
-	res = get_unique_comps(tkc, mod, list, obj, uni);
+	res = get_unique_comps(pcb,
+                               tkc, 
+                               mod, 
+                               list, 
+                               obj, 
+                               uni);
 	CHK_EXIT(res, retres);
     }
 
@@ -5686,6 +5945,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   cas == obj_case_t to check
@@ -5696,7 +5956,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_case (tk_chain_t *tkc,
+    resolve_case (yang_pcb_t *pcb,
+                  tk_chain_t *tkc,
 		  ncx_module_t  *mod,
 		  obj_case_t *cas,
 		  obj_template_t *obj,
@@ -5706,7 +5967,7 @@ static status_t
 
     retres = NO_ERR;
 
-    res = resolve_datadefs(tkc, mod, cas->datadefQ, redo);
+    res = resolve_datadefs(pcb, tkc, mod, cas->datadefQ, redo);
     CHK_EXIT(res, retres);
 
     res = check_parent(tkc, mod, obj);
@@ -5726,6 +5987,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   choic == obj_choice_t to check
@@ -5736,7 +5998,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_choice (tk_chain_t *tkc,
+    resolve_choice (yang_pcb_t *pcb,
+                    tk_chain_t *tkc,
 		    ncx_module_t  *mod,
 		    obj_choice_t *choic,
 		    obj_template_t *obj,
@@ -5763,7 +6026,7 @@ static status_t
     CHK_EXIT(res, retres);
 
     /* finish up the data-def-stmts in each case arm */
-    res = resolve_datadefs(tkc, mod, choic->caseQ, redo);
+    res = resolve_datadefs(pcb, tkc, mod, choic->caseQ, redo);
     CHK_EXIT(res, retres);
 
     /* check defval is valid case name */
@@ -6175,6 +6438,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   uses == obj_uses_t to check
@@ -6184,7 +6448,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_uses (tk_chain_t *tkc,
+    resolve_uses (yang_pcb_t *pcb,
+                  tk_chain_t *tkc,
 		  ncx_module_t  *mod,
 		  obj_uses_t *uses,
 		  obj_template_t *obj)
@@ -6225,7 +6490,10 @@ static status_t
 
 
     /* resolve all the grouping augments, skip the refines */
-    res = yang_obj_resolve_datadefs(tkc, mod, uses->datadefQ);
+    res = yang_obj_resolve_datadefs(pcb,
+                                    tkc, 
+                                    mod, 
+                                    uses->datadefQ);
     if (res != NO_ERR) {
 	retres = res;
     }
@@ -6248,7 +6516,8 @@ static status_t
 	/* find schema-nodeid target
 	 * the node being refined MUST exist in the grouping
 	 */
-	res = xpath_find_schema_target(tkc, 
+	res = xpath_find_schema_target(pcb,
+                                       tkc, 
                                        mod, 
                                        obj,
 				       &uses->grp->datadefQ,
@@ -6389,6 +6658,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod == module in progress
 *   obj == obj_template_t that contains the obj_uses_t to check
@@ -6398,7 +6668,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    expand_uses (tk_chain_t *tkc,
+    expand_uses (yang_pcb_t *pcb,
+                 tk_chain_t *tkc,
 		 ncx_module_t  *mod,
 		 obj_template_t *obj,
 		 dlq_hdr_t *datadefQ)
@@ -6520,7 +6791,11 @@ static status_t
 	}
 #endif
 
-	res = expand_augment(tkc, mod, chobj, datadefQ);
+	res = expand_augment(pcb,
+                             tkc, 
+                             mod, 
+                             chobj, 
+                             datadefQ);
 	CHK_EXIT(res, retres);
     }
 
@@ -6538,6 +6813,7 @@ static status_t
  Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod == module in progress
 *   aug == obj_augment_t to check
@@ -6547,7 +6823,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_augment (tk_chain_t *tkc,
+    resolve_augment (yang_pcb_t *pcb,
+                     tk_chain_t *tkc,
 		     ncx_module_t  *mod,
 		     obj_augment_t *aug,
 		     obj_template_t *obj)
@@ -6585,7 +6862,10 @@ static status_t
     }
 
     /* resolve augment contents */
-    res = yang_obj_resolve_datadefs(tkc, mod, &aug->datadefQ);
+    res = yang_obj_resolve_datadefs(pcb, 
+                                    tkc, 
+                                    mod, 
+                                    &aug->datadefQ);
     CHK_EXIT(res, retres);
 
     return retres;
@@ -6608,6 +6888,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod == module in progress
 *   obj == obj_template_t that contains the obj_augment_t to check
@@ -6617,7 +6898,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    expand_augment (tk_chain_t *tkc,
+    expand_augment (yang_pcb_t *pcb,
+                    tk_chain_t *tkc,
 		    ncx_module_t  *mod,
 		    obj_template_t *obj,
 		    dlq_hdr_t *datadefQ)
@@ -6645,7 +6927,8 @@ static status_t
     /* find schema-nodeid target
      * the node being augmented MUST exist to be valid
      */
-    res = xpath_find_schema_target(tkc, 
+    res = xpath_find_schema_target(pcb,
+                                   tkc, 
                                    mod, 
                                    obj, 
                                    datadefQ,
@@ -6807,7 +7090,11 @@ static status_t
 	case OBJ_TYP_USES:    /* expand should already be done */
 	    break;
 	case OBJ_TYP_AUGMENT:
-	    res = expand_augment(tkc, mod, chobj, &aug->datadefQ);
+	    res = expand_augment(pcb,
+                                 tkc, 
+                                 mod, 
+                                 chobj, 
+                                 &aug->datadefQ);
 	    CHK_EXIT(res, retres);
 	    break;
 	default:
@@ -6915,20 +7202,19 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod == module in progress
 *   deviation == obj_deviation_t to validate
-*   cookedmode == TRUE if expand deviation
-*                 FALSE to just validate the deviation
-*        
+*
 * RETURNS:
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_deviation (tk_chain_t *tkc,
+    resolve_deviation (yang_pcb_t *pcb,
+                       tk_chain_t *tkc,
 		       ncx_module_t  *mod,
-		       obj_deviation_t *deviation,
-		       boolean expandmode)
+		       obj_deviation_t *deviation)
 {
     obj_deviate_t     *devi, *nextdevi;
     obj_template_t    *targobj;
@@ -6943,23 +7229,33 @@ static status_t
     retres = NO_ERR;
     targobj = NULL;
     instancetest = FALSE;
+    curtk = NULL;
 
     /* find schema-nodeid target
      * the node being augmented MUST exist to be valid
      */
-    res = xpath_find_schema_target(tkc, 
-				   mod, 
-				   NULL, 
-				   &mod->datadefQ,
-				   deviation->target, 
-				   &targobj, 
-				   NULL);
+    res = xpath_find_schema_target(pcb,
+                                   tkc, 
+                                   mod, 
+                                   NULL, 
+                                   &mod->datadefQ,
+                                   deviation->target, 
+                                   &targobj, 
+                                   NULL);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 	
     deviation->targobj = targobj;
-    curtk = TK_CUR(tkc);
+
+    deviation->targmodname = xml_strdup(obj_get_mod_name(targobj));
+    if (deviation->targmodname == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    if (tkc) {
+        curtk = TK_CUR(tkc);
+    }
 
     /* make sure all the deviate statements are 
      * are OK for that object type
@@ -6969,7 +7265,9 @@ static status_t
 	 devi != NULL;
 	 devi = nextdevi) {
 
-	TK_CUR(tkc) = devi->tk;
+        if (tkc) {
+            TK_CUR(tkc) = devi->tk;
+        }
 
 	nextdevi = (obj_deviate_t *)dlq_nextEntry(devi);
 
@@ -7000,7 +7298,8 @@ static status_t
 			  obj_get_typestr(targobj));
 		ncx_print_errormsg(tkc, mod, retres);
 	    } else {
-		res = yang_typ_resolve_type(tkc,
+		res = yang_typ_resolve_type(pcb,
+                                            tkc,
 					    mod,
 					    devi->typdef,
 					    obj_get_default(targobj),
@@ -7280,12 +7579,14 @@ static status_t
 	    }
 	}
 
+#if 0
 	if (res == NO_ERR) {
 	    res = check_deviate_collision(tkc,
 					  mod,
 					  devi,
 					  &targobj->deviateQ);
 	}
+#endif
 
 	/* finally, if entire deviate-stmt is OK save it
 	 * or else toss it
@@ -7294,20 +7595,155 @@ static status_t
 	    /* toss this deviate-stmt; it is no good */
 	    dlq_remove(devi);
 	    obj_free_deviate(devi);
-	} else if (expandmode) {
-	    dlq_remove(devi);
-	    dlq_enque(devi, &targobj->deviateQ);
-	    /*** IF THIS MOD IS DIFFERENT THAN THE TARGET MOD
-	     *** THEN THE DEVIATION WILL BE IGNORED
-	     ***/
 	} /* else leave in this Q for HTML or YANG output */
     }
 
-    TK_CUR(tkc) = curtk;
+    if (tkc) {
+        TK_CUR(tkc) = curtk;
+    }
 
     return retres;
 				    
 }  /* resolve_deviation */
+
+
+/********************************************************************
+* FUNCTION transfer_my_deviations
+* 
+* Find any deviations for the specified module
+* Resolve them, and stored the resolved obj_deviation_t
+* in the module deviationQ
+*
+* INPUTS:
+*   pcb == parser control block to use
+*   tkc == token parse chain to use for errors
+*   savedev == save deviations struct to check
+*   mod == module in progress; transfer to this deviationQ
+*   runningtotal == address of return total deviation count
+*                    this will not be zeroed before using!!!
+* 
+* OUTPUTS:
+*   *runningtotal == running total of deviations added
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    transfer_my_deviations (yang_pcb_t *pcb,
+                            tk_chain_t *tkc,
+                            ncx_save_deviations_t *savedev,
+                            ncx_module_t *mod,
+                            uint32 *runningtotal)
+{
+    ncx_import_t      *myimport;
+    obj_deviation_t   *deviation, *nextdeviation;
+    ncx_module_t      *dummymod;
+    status_t           res;
+    boolean            anydone;
+
+    /* if 'mod->name' import does not show up, then this deviation
+     * module cannot possibly contain and deviations for 'mod'
+     */
+    myimport = ncx_find_import_que(&savedev->importQ,
+                                   mod->name);
+    if (myimport == NULL) {
+        return NO_ERR;
+    }
+
+    /* check the revision if it is present to make sure
+     * it is not for a different version of 'mod'
+     */
+    if (myimport->revision) {
+        if (mod->version == NULL ||
+            xml_strcmp(myimport->revision, mod->version)) {
+            return NO_ERR;
+        }
+    }
+
+    /* mock-up a dummy module for the deviations
+     * so the resolve_deviation function can be
+     * used directly
+     */
+    dummymod = ncx_new_module();
+    if (dummymod == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    /* borrow some pointers from the savedev */
+    dummymod->name = savedev->devmodule;
+    dummymod->ismod = TRUE;
+    dummymod->prefix = savedev->devprefix;
+    myimport->mod = mod;
+    anydone = FALSE;
+
+    /* temp move the imports from 1 Q to another */
+    dlq_block_enque(&savedev->importQ, 
+                    &dummymod->importQ);
+
+    /* the deviations file imported 'mod';
+     * check all the deviation targets to find
+     * any for 'mod'; remove and resolve if found
+     */
+    res = NO_ERR;
+    for (deviation = (obj_deviation_t *)
+             dlq_firstEntry(&savedev->deviationQ);
+         deviation != NULL && res == NO_ERR;
+         deviation = nextdeviation) {
+
+        nextdeviation = (obj_deviation_t *)
+            dlq_nextEntry(deviation);
+
+        if (deviation->targobj == NULL) {
+            /* deviation has not been resolved yet;
+             * or the target was never found
+             * and this fn call will fail
+             */
+            res = resolve_deviation(pcb,
+                                    tkc,
+                                    dummymod,
+                                    deviation);
+        }
+
+        if (res == NO_ERR) {
+            if (deviation->targobj->mod == mod) {
+                if (LOGDEBUG) {
+                    log_debug("\nAdding external deviation "
+                              "to '%s', from '%s' to '%s'",
+                              obj_get_name(deviation->targobj),
+                              savedev->devmodule,
+                              mod->name);
+                }
+
+                /* transfer the deviation to the target module */
+                dlq_remove(deviation);
+                dlq_enque(deviation, &mod->deviationQ);
+                anydone = TRUE;
+                (*runningtotal)++;
+            }
+        }
+    }
+
+    /* check if any devmodlist entry needed */
+    if (anydone) {
+        res = ncx_set_list(NCX_BT_STRING,
+                           savedev->devmodule,
+                           &mod->devmodlist);
+        if (res != NO_ERR) {
+            log_error("\nError: set list failed (%s), cannot add deviation",
+                      get_error_string(res));
+        }
+    }
+
+    /* restore the savedev structure */
+    myimport->mod = NULL;
+    dlq_block_enque(&dummymod->importQ, &savedev->importQ);
+    dummymod->name = NULL;
+    dummymod->prefix = NULL;
+    ncx_free_module(dummymod);
+
+    return res;
+
+} /* transfer_my_deviations */
 
 
 /********************************************************************
@@ -7319,6 +7755,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   rpc == obj_rpc_t to check
@@ -7329,7 +7766,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_rpc (tk_chain_t *tkc,
+    resolve_rpc (yang_pcb_t *pcb,
+                 tk_chain_t *tkc,
 		 ncx_module_t  *mod,
 		 obj_rpc_t *rpc,
 		 obj_template_t *obj,
@@ -7340,14 +7778,25 @@ static status_t
     retres = NO_ERR;
 
     if (!redo) {
-	res = yang_typ_resolve_typedefs(tkc, mod, &rpc->typedefQ, obj);
+	res = yang_typ_resolve_typedefs(pcb,
+                                        tkc, 
+                                        mod, 
+                                        &rpc->typedefQ, obj);
 	CHK_EXIT(res, retres);
 
-	res = yang_grp_resolve_groupings(tkc, mod, &rpc->groupingQ, obj);
+	res = yang_grp_resolve_groupings(pcb, 
+                                         tkc, 
+                                         mod, 
+                                         &rpc->groupingQ, 
+                                         obj);
 	CHK_EXIT(res, retres);
     }
 
-    res = resolve_datadefs(tkc, mod, &rpc->datadefQ, redo);
+    res = resolve_datadefs(pcb, 
+                           tkc, 
+                           mod, 
+                           &rpc->datadefQ, 
+                           redo);
     CHK_EXIT(res, retres);
 
     return retres;
@@ -7364,6 +7813,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   rpcio == obj_rpcio_t to check
@@ -7374,7 +7824,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_rpcio (tk_chain_t *tkc,
+    resolve_rpcio (yang_pcb_t *pcb,
+                   tk_chain_t *tkc,
 		   ncx_module_t  *mod,
 		   obj_rpcio_t *rpcio,
 		   obj_template_t *obj,
@@ -7385,14 +7836,26 @@ static status_t
     retres = NO_ERR;
 
     if (!redo) {
-	res = yang_typ_resolve_typedefs(tkc, mod, &rpcio->typedefQ, obj);
+	res = yang_typ_resolve_typedefs(pcb,
+                                        tkc, 
+                                        mod, 
+                                        &rpcio->typedefQ, 
+                                        obj);
 	CHK_EXIT(res, retres);
 
-	res = yang_grp_resolve_groupings(tkc, mod, &rpcio->groupingQ, obj);
+	res = yang_grp_resolve_groupings(pcb,
+                                         tkc, 
+                                         mod, 
+                                         &rpcio->groupingQ, 
+                                         obj);
 	CHK_EXIT(res, retres);
     }
 
-    res = resolve_datadefs(tkc, mod, &rpcio->datadefQ, redo);
+    res = resolve_datadefs(pcb, 
+                           tkc, 
+                           mod, 
+                           &rpcio->datadefQ, 
+                           redo);
     CHK_EXIT(res, retres);
 
     return retres;
@@ -7409,6 +7872,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   notif == obj_notif_t to check
@@ -7419,7 +7883,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_notif (tk_chain_t *tkc,
+    resolve_notif (yang_pcb_t *pcb,
+                   tk_chain_t *tkc,
 		   ncx_module_t  *mod,
 		   obj_notif_t *notif,
 		   obj_template_t *obj,
@@ -7430,15 +7895,27 @@ static status_t
     retres = NO_ERR;
 
     if (!redo) {
-	res = yang_typ_resolve_typedefs(tkc, mod, &notif->typedefQ, obj);
+	res = yang_typ_resolve_typedefs(pcb,
+                                        tkc, 
+                                        mod, 
+                                        &notif->typedefQ, 
+                                        obj);
 	CHK_EXIT(res, retres);
 
-	res = yang_grp_resolve_groupings(tkc, mod, &notif->groupingQ, obj);
+	res = yang_grp_resolve_groupings(pcb,
+                                         tkc, 
+                                         mod, 
+                                         &notif->groupingQ, 
+                                         obj);
 	CHK_EXIT(res, retres);
     }
 
     /* resolve notification contents */
-    res = resolve_datadefs(tkc, mod, &notif->datadefQ, redo);
+    res = resolve_datadefs(pcb, 
+                           tkc, 
+                           mod, 
+                           &notif->datadefQ, 
+                           redo);
     CHK_EXIT(res, retres);
 
     return retres;
@@ -7459,6 +7936,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain from parsing (needed for error msgs)
 *   mod == module in progress
 *   testobj == obj_template_t to check
@@ -7468,7 +7946,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_datadef (tk_chain_t *tkc,
+    resolve_datadef (yang_pcb_t *pcb,
+                     tk_chain_t *tkc,
 		     ncx_module_t  *mod,
 		     obj_template_t *testobj,
 		     boolean redo)
@@ -7479,16 +7958,23 @@ static status_t
     retres = NO_ERR;
 
     if (!redo) {
-	res = ncx_resolve_appinfoQ(tkc, mod, &testobj->appinfoQ);
+	res = ncx_resolve_appinfoQ(pcb,
+                                   tkc, 
+                                   mod, 
+                                   &testobj->appinfoQ);
 	CHK_EXIT(res, retres);
 
-	res = resolve_iffeatureQ(tkc, mod, testobj);
+	res = resolve_iffeatureQ(pcb,
+                                 tkc, 
+                                 mod, 
+                                 testobj);
 	CHK_EXIT(res, retres);
     }
 
     switch (testobj->objtype) {
     case OBJ_TYP_CONTAINER:
-	res = resolve_container(tkc, 
+	res = resolve_container(pcb,
+                                tkc, 
                                 mod,
 				testobj->def.container, 
 				testobj, 
@@ -7496,35 +7982,40 @@ static status_t
 	break;
     case OBJ_TYP_LEAF:
     case OBJ_TYP_ANYXML:
-	res = resolve_leaf(tkc, 
+	res = resolve_leaf(pcb,
+                           tkc, 
                            mod,
 			   testobj->def.leaf, 
 			   testobj, 
                            redo);
 	break;
     case OBJ_TYP_LEAF_LIST:
-	res = resolve_leaflist(tkc, 
+	res = resolve_leaflist(pcb,
+                               tkc, 
                                mod,
 			       testobj->def.leaflist, 
 			       testobj, 
                                redo);
 	break;
     case OBJ_TYP_LIST:
-	res = resolve_list(tkc, 
+	res = resolve_list(pcb,
+                           tkc, 
                            mod,
 			   testobj->def.list, 
 			   testobj, 
                            redo);
 	break;
     case OBJ_TYP_CHOICE:
-	res = resolve_choice(tkc, 
+	res = resolve_choice(pcb,
+                             tkc, 
                              mod,
 			     testobj->def.choic, 
 			     testobj, 
                              redo);
 	break;
     case OBJ_TYP_CASE:
-	res = resolve_case(tkc, 
+	res = resolve_case(pcb,
+                           tkc, 
                            mod,
 			   testobj->def.cas, 
 			   testobj, 
@@ -7532,7 +8023,8 @@ static status_t
 	break;
     case OBJ_TYP_USES:
 	if (!redo) {
-	    res = resolve_uses(tkc, 
+	    res = resolve_uses(pcb,
+                               tkc, 
                                mod,
 			       testobj->def.uses, 
                                testobj);
@@ -7540,28 +8032,32 @@ static status_t
 	break;
     case OBJ_TYP_AUGMENT:
 	if (!redo) {
-	    res = resolve_augment(tkc, 
+	    res = resolve_augment(pcb,
+                                  tkc, 
                                   mod,
 				  testobj->def.augment, 
                                   testobj);
 	}
 	break;
     case OBJ_TYP_RPC:
-	res = resolve_rpc(tkc, 
+	res = resolve_rpc(pcb,
+                          tkc, 
                           mod,
 			  testobj->def.rpc, 
 			  testobj, 
                           redo);
 	break;
     case OBJ_TYP_RPCIO:
-	res = resolve_rpcio(tkc, 
+	res = resolve_rpcio(pcb,
+                            tkc, 
                             mod,
 			    testobj->def.rpcio, 
 			    testobj, 
                             redo);
 	break;
     case OBJ_TYP_NOTIF:
-	res = resolve_notif(tkc, 
+	res = resolve_notif(pcb,
+                            tkc, 
                             mod,
 			    testobj->def.notif, 
 			    testobj, 
@@ -7594,6 +8090,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain from parsing (needed for error msgs)
 *   mod == module in progress
 *   datadefQ == Q of obj_template_t structs to check
@@ -7602,7 +8099,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_datadefs (tk_chain_t *tkc,
+    resolve_datadefs (yang_pcb_t *pcb,
+                      tk_chain_t *tkc,
 		      ncx_module_t  *mod,
 		      dlq_hdr_t *datadefQ,
 		      boolean redo)
@@ -7617,7 +8115,7 @@ static status_t
 	 testobj != NULL;
 	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
-	res = resolve_datadef(tkc, mod, testobj, redo);
+	res = resolve_datadef(pcb, tkc, mod, testobj, redo);
 	CHK_EXIT(res, retres);
     }
 
@@ -7643,6 +8141,7 @@ static status_t
 *   
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   que == queue will get the obj_template_t 
@@ -7653,7 +8152,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    consume_datadef (tk_chain_t *tkc,
+    consume_datadef (yang_pcb_t *pcb,
+                     tk_chain_t *tkc,
 		     ncx_module_t  *mod,
 		     dlq_hdr_t *que,
 		     obj_template_t *parent,
@@ -7679,36 +8179,50 @@ static status_t
     } else {
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_ANYXML)) {
-	    res = consume_anyxml(tkc, mod, que, parent, grp);
+	    res = consume_anyxml(tkc, 
+                                 mod, 
+                                 que, 
+                                 parent, 
+                                 grp);
 	} else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
-	    res = consume_container(tkc, 
+	    res = consume_container(pcb,
+                                    tkc, 
                                     mod, 
                                     que,
                                     parent,
                                     grp);
 	} else if (!xml_strcmp(val, YANG_K_LEAF)) {
-	    res = consume_leaf(tkc, 
+	    res = consume_leaf(pcb,
+                               tkc, 
                                mod,
                                que,
                                parent,
                                grp);
 	} else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
-	    res = consume_leaflist(tkc,
+	    res = consume_leaflist(pcb,
+                                   tkc,
                                    mod,
                                    que,
                                    parent, grp);
 	} else if (!xml_strcmp(val, YANG_K_LIST)) {
-	    res = consume_list(tkc,
+	    res = consume_list(pcb,
+                               tkc,
                                mod,
                                que,
                                parent, grp);
 	} else if (!xml_strcmp(val, YANG_K_CHOICE)) {
-	    res = consume_choice(tkc,
+	    res = consume_choice(pcb,
+                                 tkc,
                                  mod,
                                  que,
                                  parent, grp);
 	} else if (!xml_strcmp(val, YANG_K_USES)) {
-	    res = consume_uses(tkc, mod, que, parent, grp);
+	    res = consume_uses(pcb,
+                               tkc, 
+                               mod, 
+                               que, 
+                               parent, 
+                               grp);
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
 	    errdone = FALSE;
@@ -7735,6 +8249,7 @@ static status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod == module in progress
 *   obj == object to check
@@ -7743,7 +8258,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 static status_t 
-    resolve_iffeatureQ (tk_chain_t *tkc,
+    resolve_iffeatureQ (yang_pcb_t *pcb,
+                        tk_chain_t *tkc,
 			ncx_module_t  *mod,
 			obj_template_t *obj)
 {
@@ -7769,7 +8285,8 @@ static status_t
 	if (iff->prefix &&
 	    xml_strcmp(iff->prefix, mod->prefix)) {
 	    /* find the feature in another module */
-	    res = yang_find_imp_feature(tkc, 
+	    res = yang_find_imp_feature(pcb,
+                                        tkc, 
                                         mod, 
                                         iff->prefix,
 					iff->name, 
@@ -7786,7 +8303,8 @@ static status_t
 	if (!testfeature && !errdone) {
 	    log_error("\nError: Feature '%s' not found "
 		      "for if-feature statement in object '%s'",
-		      iff->name, obj_get_name(obj));
+		      iff->name, 
+                      obj_get_name(obj));
 	    res = retres = ERR_NCX_DEF_NOT_FOUND;
 	    tkc->cur = iff->tk;
 	    ncx_print_errormsg(tkc, mod, retres);
@@ -8325,6 +8843,7 @@ static status_t
 *   
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   que == queue will get the obj_template_t 
@@ -8334,7 +8853,8 @@ static status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_obj_consume_datadef (tk_chain_t *tkc,
+    yang_obj_consume_datadef (yang_pcb_t *pcb,
+                              tk_chain_t *tkc,
 			      ncx_module_t  *mod,
 			      dlq_hdr_t *que,
 			      obj_template_t *parent)
@@ -8342,12 +8862,17 @@ status_t
     status_t         res;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !que) {
+    if (!pcb || !tkc || !mod || !que) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    res = consume_datadef(tkc, mod, que, parent, NULL);
+    res = consume_datadef(pcb,
+                          tkc, 
+                          mod, 
+                          que, 
+                          parent, 
+                          NULL);
     return res;
 
 }  /* yang_obj_consume_datadef */
@@ -8368,6 +8893,7 @@ status_t
 * data definition
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *   que == queue will get the obj_template_t 
@@ -8378,7 +8904,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_obj_consume_datadef_grp (tk_chain_t *tkc,
+    yang_obj_consume_datadef_grp (yang_pcb_t *pcb,
+                                  tk_chain_t *tkc,
 				  ncx_module_t  *mod,
 				  dlq_hdr_t *que,
 				  obj_template_t *parent,
@@ -8387,12 +8914,12 @@ status_t
     status_t         res;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !que || !grp) {
+    if (!pcb || !tkc || !mod || !que || !grp) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    res = consume_datadef(tkc, mod, que, parent, grp);
+    res = consume_datadef(pcb, tkc, mod, que, parent, grp);
     return res;
 
 }  /* yang_obj_consume_datadef_grp */
@@ -8412,6 +8939,7 @@ status_t
 * Current token is the 'rpc' keyword
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *
@@ -8422,18 +8950,24 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_obj_consume_rpc (tk_chain_t *tkc,
+    yang_obj_consume_rpc (yang_pcb_t *pcb,
+                          tk_chain_t *tkc,
 			  ncx_module_t  *mod)
 {
     status_t         res;
 
 #ifdef DEBUG
-    if (!tkc || !mod) {
+    if (!pcb || !tkc || !mod) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    res = consume_rpc(tkc, mod, &mod->datadefQ, NULL, NULL);
+    res = consume_rpc(pcb,
+                      tkc, 
+                      mod, 
+                      &mod->datadefQ, 
+                      NULL, 
+                      NULL);
     return res;
 
 }  /* yang_obj_consume_rpc */
@@ -8451,6 +8985,7 @@ status_t
 * Current token is the 'notification' keyword
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *
@@ -8461,18 +8996,24 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_obj_consume_notification (tk_chain_t *tkc,
+    yang_obj_consume_notification (yang_pcb_t *pcb,
+                                   tk_chain_t *tkc,
 				   ncx_module_t  *mod)
 {
     status_t         res;
 
 #ifdef DEBUG
-    if (!tkc || !mod) {
+    if (!pcb || !tkc || !mod) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    res = consume_notif(tkc, mod, &mod->datadefQ, NULL, NULL);
+    res = consume_notif(pcb,
+                        tkc, 
+                        mod, 
+                        &mod->datadefQ, 
+                        NULL, 
+                        NULL);
     return res;
 
 }  /* yang_obj_consume_notification */
@@ -8490,6 +9031,7 @@ status_t
 * Current token is the 'augment' keyword
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain
 *   mod == module in progress
 *
@@ -8500,18 +9042,24 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_obj_consume_augment (tk_chain_t *tkc,
+    yang_obj_consume_augment (yang_pcb_t *pcb,
+                              tk_chain_t *tkc,
 			      ncx_module_t  *mod)
 {
     status_t         res;
 
 #ifdef DEBUG
-    if (!tkc || !mod) {
+    if (!pcb || !tkc || !mod) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    res = consume_augment(tkc, mod, &mod->datadefQ, NULL, NULL);
+    res = consume_augment(pcb,
+                          tkc, 
+                          mod, 
+                          &mod->datadefQ, 
+                          NULL, 
+                          NULL);
     return res;
 
 }  /* yang_obj_consume_augment */
@@ -8530,6 +9078,7 @@ status_t
 * Current token is the 'deviation' keyword
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain
 *   mod == module in progress
 *
@@ -8540,7 +9089,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_obj_consume_deviation (tk_chain_t *tkc,
+    yang_obj_consume_deviation (yang_pcb_t *pcb,
+                                tk_chain_t *tkc,
 				ncx_module_t  *mod)
 {
     obj_deviation_t  *dev;
@@ -8552,7 +9102,7 @@ status_t
     status_t          res, retres;
 
 #ifdef DEBUG
-    if (!tkc || !mod) {
+    if (!pcb || !tkc || !mod) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -8654,7 +9204,10 @@ status_t
 				     &ref, 
                                      &dev->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DEVIATE)) {
-	    res = consume_deviate(tkc, mod, dev);
+	    res = consume_deviate(pcb,
+                                  tkc, 
+                                  mod, 
+                                  dev);
 	} else {
 	    res = ERR_NCX_WRONG_TKVAL;
 	    expstr = "description, reference, or deviate";
@@ -8689,6 +9242,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc == token chain from parsing (needed for error msgs)
 *   mod == module in progress
 *   datadefQ == Q of obj_template_t structs to check
@@ -8697,19 +9251,20 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_obj_resolve_datadefs (tk_chain_t *tkc,
+    yang_obj_resolve_datadefs (yang_pcb_t *pcb,
+                               tk_chain_t *tkc,
 			       ncx_module_t  *mod,
 			       dlq_hdr_t *datadefQ)
 {
     status_t    retres;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !datadefQ) {
+    if (!pcb || !tkc || !mod || !datadefQ) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    retres = resolve_datadefs(tkc, mod, datadefQ, FALSE);
+    retres = resolve_datadefs(pcb, tkc, mod, datadefQ, FALSE);
     return retres;
 
 }  /* yang_obj_resolve_datadefs */
@@ -8730,6 +9285,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain from parsing (needed for error msgs)
 *   mod == module in progress
 *   datadefQ == Q of obj_template_t structs to check
@@ -8738,7 +9294,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_obj_resolve_uses (tk_chain_t *tkc,
+    yang_obj_resolve_uses (yang_pcb_t *pcb,
+                           tk_chain_t *tkc,
 			   ncx_module_t  *mod,
 			   dlq_hdr_t *datadefQ)
 {
@@ -8773,13 +9330,15 @@ status_t
 	switch (testobj->objtype) {
 	case OBJ_TYP_CONTAINER:
 	    res = 
-                yang_grp_resolve_complete(tkc, 
+                yang_grp_resolve_complete(pcb,
+                                          tkc, 
                                           mod,
                                           testobj->def.container->groupingQ,
                                           testobj);
 	    CHK_EXIT(res, retres);
 
-	    res = yang_obj_resolve_uses(tkc, 
+	    res = yang_obj_resolve_uses(pcb,
+                                        tkc, 
                                         mod,
 					testobj->def.container->datadefQ);
 	    CHK_EXIT(res, retres);
@@ -8789,13 +9348,15 @@ status_t
 	case OBJ_TYP_LEAF_LIST:
 	    break;
 	case OBJ_TYP_LIST:
-	    res = yang_grp_resolve_complete(tkc, 
+	    res = yang_grp_resolve_complete(pcb,
+                                            tkc, 
                                             mod,
 					    testobj->def.list->groupingQ,
 					    testobj);
 	    CHK_EXIT(res, retres);
 
-	    res = yang_obj_resolve_uses(tkc, 
+	    res = yang_obj_resolve_uses(pcb,
+                                        tkc, 
                                         mod,
 					testobj->def.list->datadefQ);
 	    CHK_EXIT(res, retres);
@@ -8806,56 +9367,75 @@ status_t
 		 casobj != NULL;
 		 casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
 		cas = casobj->def.cas;
-		res = yang_obj_resolve_uses(tkc, mod, cas->datadefQ);
+		res = yang_obj_resolve_uses(pcb,
+                                            tkc, 
+                                            mod, 
+                                            cas->datadefQ);
 		CHK_EXIT(res, retres);
 	    }
 	    break;
 	case OBJ_TYP_CASE:
 	    cas = testobj->def.cas;
-	    res = yang_obj_resolve_uses(tkc, mod, cas->datadefQ);
+	    res = yang_obj_resolve_uses(pcb,
+                                        tkc, 
+                                        mod, 
+                                        cas->datadefQ);
 	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_USES:
-	    res = expand_uses(tkc, mod, testobj, datadefQ);
+	    res = expand_uses(pcb,
+                              tkc, 
+                              mod, 
+                              testobj, 
+                              datadefQ);
 	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_AUGMENT:
 	    aug = testobj->def.augment;
-	    res = yang_obj_resolve_uses(tkc, mod, &aug->datadefQ);
+	    res = yang_obj_resolve_uses(pcb,
+                                        tkc, 
+                                        mod, 
+                                        &aug->datadefQ);
 	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_RPC:
-	    res = yang_grp_resolve_complete(tkc, 
+	    res = yang_grp_resolve_complete(pcb,
+                                            tkc, 
                                             mod,
 					    &testobj->def.rpc->groupingQ,
 					    testobj);
 	    CHK_EXIT(res, retres);
 
-	    res = yang_obj_resolve_uses(tkc, 
+	    res = yang_obj_resolve_uses(pcb,
+                                        tkc, 
                                         mod,
 					&testobj->def.rpc->datadefQ);
 	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_RPCIO:
-	    res = yang_grp_resolve_complete(tkc, 
+	    res = yang_grp_resolve_complete(pcb,
+                                            tkc, 
                                             mod,
 					    &testobj->def.rpcio->groupingQ,
 					    testobj);
 	    CHK_EXIT(res, retres);
 
-	    res = yang_obj_resolve_uses(tkc, 
+	    res = yang_obj_resolve_uses(pcb,
+                                        tkc, 
                                         mod,
 					&testobj->def.rpcio->datadefQ);
 	    CHK_EXIT(res, retres);
 	    break;
 	case OBJ_TYP_NOTIF:
-	    res = yang_grp_resolve_complete(tkc,
+	    res = yang_grp_resolve_complete(pcb,
+                                            tkc,
                                             mod,
 					    &testobj->def.notif->groupingQ,
 					    testobj);
 	    CHK_EXIT(res, retres);
 
-	    res = yang_obj_resolve_uses(tkc,
+	    res = yang_obj_resolve_uses(pcb,
+                                        tkc,
                                         mod,
 					&testobj->def.notif->datadefQ);
 	    CHK_EXIT(res, retres);
@@ -8885,6 +9465,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain from parsing (needed for error msgs)
 *   mod == module in progress
 *   datadefQ == Q of obj_template_t structs to check
@@ -8893,7 +9474,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_obj_resolve_augments (tk_chain_t *tkc,
+    yang_obj_resolve_augments (yang_pcb_t *pcb,
+                               tk_chain_t *tkc,
 			       ncx_module_t  *mod,
 			       dlq_hdr_t *datadefQ)
 {
@@ -8901,7 +9483,7 @@ status_t
     status_t         res, retres;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !datadefQ) {
+    if (!pcb || !tkc || !mod || !datadefQ) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -8915,7 +9497,11 @@ status_t
 	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
 	if (testobj->objtype == OBJ_TYP_AUGMENT) {
-	    res = expand_augment(tkc, mod, testobj, datadefQ);
+	    res = expand_augment(pcb,
+                                 tkc, 
+                                 mod, 
+                                 testobj, 
+                                 datadefQ);
 	    CHK_EXIT(res, retres);
 	}
     }
@@ -8947,9 +9533,11 @@ status_t
 				 tk_chain_t *tkc,
 				 ncx_module_t  *mod)
 {
-    obj_deviation_t   *deviation;
-    status_t           res, retres;
-    boolean            anydevs;
+    obj_deviation_t        *deviation;
+    ncx_save_deviations_t  *savedev, *nextdev;
+    status_t                res, retres;
+    boolean                 anydevs;
+    uint32                  extdevcount;
 
 #ifdef DEBUG
     if (!tkc || !mod) {
@@ -8957,15 +9545,46 @@ status_t
     }
 #endif
 
+    if (pcb->deviationmode) {
+        /* save any deviations until later 
+         * grab all the imports also to resolve
+         * the deviation statements later
+         */
+        if (!dlq_empty(&mod->deviationQ)) {
+            savedev = ncx_new_save_deviations(mod->name,
+                                              mod->version,
+                                              mod->prefix);
+            if (savedev == NULL) {
+                return ERR_INTERNAL_MEM;
+            }
+            if (LOGDEBUG) {
+                log_debug("\nSaving %u deviations from deviation module '%s'",
+                          dlq_count(&mod->deviationQ),
+                          mod->name);
+            }
+            dlq_block_enque(&mod->importQ, &savedev->importQ);
+            dlq_block_enque(&mod->deviationQ, &savedev->deviationQ);
+            dlq_enque(savedev, pcb->savedevQ);
+        } else if (LOGDEBUG) {
+            if (LOGDEBUG) {
+                log_debug("\nNo deviations found in deviation module '%s'",
+                          mod->name);
+            }
+        }
+        return NO_ERR;
+    }
+
     res = NO_ERR;
     retres = NO_ERR;
     anydevs = FALSE;
+    extdevcount = 0;
 
-    /* first resolve all the local type names */
+    /* first resolve all the local deviations */
     for (deviation = (obj_deviation_t *)
 	     dlq_firstEntry(&mod->deviationQ);
 	 deviation != NULL;
-	 deviation = (obj_deviation_t *)dlq_nextEntry(deviation)) {
+	 deviation = (obj_deviation_t *)
+             dlq_nextEntry(deviation)) {
 
 	if (deviation->res != NO_ERR) {
 	    continue;
@@ -8973,21 +9592,59 @@ status_t
 
 	anydevs = TRUE;
 
-	res = resolve_deviation(tkc, 
+	res = resolve_deviation(pcb,
+                                tkc, 
 				mod, 
-				deviation,
-				pcb->cookedmode);
+				deviation);
+
 	deviation->res = res;
 	CHK_EXIT(res, retres);
     }
 
-    if (anydevs && retres == NO_ERR && pcb->cookedmode) {
-	/*** THIS HAS NO AFFECT IF THE MOD WITH THE DEVIATIONS
-	 *** IS DIFFERENT THAN THE TARGOBJ MODULE
-	 ***/
-	retres = apply_all_object_deviations(tkc, 
-					     mod, 
-					     &mod->datadefQ);
+    /* next gather all the external deviations that apply
+     * to this module; they will be moved from the global
+     * pcb->savedevQ to the mod->deviationQ
+     * Only do this for main modules, not submodules
+     */
+    if (pcb->savedevQ) {
+        for (savedev = (ncx_save_deviations_t *)
+                 dlq_firstEntry(pcb->savedevQ);
+             savedev != NULL && mod->ismod;
+             savedev = nextdev) {
+
+            nextdev = (ncx_save_deviations_t *)dlq_nextEntry(savedev);
+
+            /* check if the deviation module is this module; skip */
+            if (!xml_strcmp(savedev->devmodule, mod->name)) {
+                continue;
+            }
+
+            /* check if there are any deviations for this module
+             * in the savedev->deviationQ; if so, resolve them
+             * and put them in the mod->deviationQ
+             */
+            res = transfer_my_deviations(pcb,
+                                         tkc,
+                                         savedev, 
+                                         mod, 
+                                         &extdevcount);
+            CHK_EXIT(res, retres);
+        }
+    }
+
+    /* normalize the deviationQ so there are no duplicate
+     * target objects; combine any deviations for the
+     * same targobj; check errors deferred from resolve_module
+     */
+    if (retres == NO_ERR && (anydevs || extdevcount)) {
+        retres = normalize_deviationQ(tkc, mod);
+    }
+
+    /* pick out any deviations for this module and 
+     * patch them into the object tree
+     */
+    if (retres == NO_ERR && (anydevs || extdevcount)) {
+	retres = apply_all_object_deviations(pcb, tkc, mod);
     }
 
     return retres;
@@ -9007,6 +9664,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block
 *   tkc == token chain from parsing (needed for error msgs)
 *   mod == module in progress
 *   datadefQ == Q of obj_template_t structs to check
@@ -9015,7 +9673,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_obj_resolve_final (tk_chain_t *tkc,
+    yang_obj_resolve_final (yang_pcb_t *pcb,
+                            tk_chain_t *tkc,
 			    ncx_module_t  *mod,
 			    dlq_hdr_t *datadefQ)
 {
@@ -9056,14 +9715,18 @@ status_t
 	switch (testobj->objtype) {
 	case OBJ_TYP_CONTAINER:
 	    if (notclone) {
-		res = yang_grp_resolve_final
-		    (tkc, mod,
-		     testobj->def.container->groupingQ);
+		res = 
+                    yang_grp_resolve_final(pcb,
+                                           tkc, 
+                                           mod,
+                                           testobj->def.container->groupingQ);
 		CHK_EXIT(res, retres);
 	    }
 
-	    res = yang_obj_resolve_final
-		(tkc, mod, testobj->def.container->datadefQ);
+	    res = yang_obj_resolve_final(pcb,
+                                         tkc, 
+                                         mod, 
+                                         testobj->def.container->datadefQ);
 	    CHK_EXIT(res, retres);
 
 	    if (notclone) {
@@ -9081,13 +9744,17 @@ status_t
 	    break;
 	case OBJ_TYP_LIST:
 	    if (notclone) {
-		res = yang_grp_resolve_final
-		    (tkc, mod, testobj->def.list->groupingQ);
+		res = yang_grp_resolve_final(pcb,
+                                             tkc, 
+                                             mod, 
+                                             testobj->def.list->groupingQ);
 		CHK_EXIT(res, retres);
 	    }
 
-	    res = yang_obj_resolve_final
-		(tkc, mod, testobj->def.list->datadefQ);
+	    res = yang_obj_resolve_final(pcb,
+                                         tkc, 
+                                         mod, 
+                                         testobj->def.list->datadefQ);
 	    CHK_EXIT(res, retres);
 
 	    if (notclone) {
@@ -9097,25 +9764,29 @@ status_t
 				    testobj->def.list->groupingQ);
 	    }
 
-	    res = resolve_list_final(tkc, 
+	    res = resolve_list_final(pcb,
+                                     tkc, 
                                      mod, 
 				     testobj->def.list, 
 				     testobj);
 	    break;
 	case OBJ_TYP_CHOICE:
-	    res = yang_obj_resolve_final(tkc, 
+	    res = yang_obj_resolve_final(pcb,
+                                         tkc, 
                                          mod, 
 					 testobj->def.choic->caseQ);
 	    break;
 	case OBJ_TYP_CASE:
-	    res = yang_obj_resolve_final(tkc, 
+	    res = yang_obj_resolve_final(pcb,
+                                         tkc, 
                                          mod, 
 					 testobj->def.cas->datadefQ);
 	    break;
 	case OBJ_TYP_USES:
 	    if (notclone) {
 		res = 
-                    yang_obj_resolve_final(tkc, 
+                    yang_obj_resolve_final(pcb,
+                                           tkc, 
                                            mod, 
                                            testobj->def.uses->datadefQ);
 	    }
@@ -9123,7 +9794,8 @@ status_t
 	case OBJ_TYP_AUGMENT:
 	    if (notclone) {
 		res = 
-                    yang_obj_resolve_final(tkc, 
+                    yang_obj_resolve_final(pcb,
+                                           tkc, 
                                            mod, 
                                            &testobj->def.augment->datadefQ);
 	    }
@@ -9131,13 +9803,15 @@ status_t
 	case OBJ_TYP_RPC:
 	    if (notclone) {
 		res = 
-                    yang_grp_resolve_final(tkc, 
+                    yang_grp_resolve_final(pcb,
+                                           tkc, 
                                            mod, 
                                            &testobj->def.rpc->groupingQ);
 		CHK_EXIT(res, retres);
 	    }
 
-	    res = yang_obj_resolve_final(tkc, 
+	    res = yang_obj_resolve_final(pcb,
+                                         tkc, 
                                          mod, 
 					 &testobj->def.rpc->datadefQ);
 
@@ -9151,13 +9825,15 @@ status_t
 	case OBJ_TYP_RPCIO:
 	    if (notclone) {
 		res = 
-                    yang_grp_resolve_final(tkc, 
+                    yang_grp_resolve_final(pcb,
+                                           tkc, 
                                            mod, 
                                            &testobj->def.rpcio->groupingQ);
 		CHK_EXIT(res, retres);
 	    }
 
-	    res = yang_obj_resolve_final(tkc, 
+	    res = yang_obj_resolve_final(pcb,
+                                         tkc, 
                                          mod, 
 					 &testobj->def.rpcio->datadefQ);
 	    CHK_EXIT(res, retres);
@@ -9173,14 +9849,16 @@ status_t
 	case OBJ_TYP_NOTIF:
 	    if (notclone) {
 		res = 
-                    yang_grp_resolve_final(tkc, 
+                    yang_grp_resolve_final(pcb,
+                                           tkc, 
                                            mod, 
                                            &testobj->def.notif->groupingQ);
 		CHK_EXIT(res, retres);
 	    }
 
 	    res = 
-                yang_obj_resolve_final(tkc, 
+                yang_obj_resolve_final(pcb,
+                                       tkc, 
                                        mod, 
                                        &testobj->def.notif->datadefQ);
 
@@ -9389,6 +10067,94 @@ status_t
     return retres;
 
 }  /* yang_obj_check_leafref_loops */
+
+
+/********************************************************************
+* FUNCTION yang_obj_remove_deleted_nodes
+* 
+* Find any nodes marked for deletion and remove them
+*
+* INPUTS:
+*   pcb == parser control block to use
+*   tkc == token parse chain to use for errors
+*   mod == module in progress; transfer to this deviationQ
+*   datadefQ == current object datadef Q to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t
+    yang_obj_remove_deleted_nodes (yang_pcb_t *pcb,
+                                   tk_chain_t *tkc,
+                                   ncx_module_t *mod,
+                                   dlq_hdr_t *datadefQ)
+{
+    obj_template_t   *testobj, *nextobj, *parentobj;
+    dlq_hdr_t        *child_datadefQ;
+    status_t          res, retres;
+
+#ifdef DEBUG
+    if (!pcb || !tkc || !mod || !datadefQ) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    retres = NO_ERR;
+
+    for (testobj = (obj_template_t *)
+             dlq_firstEntry(datadefQ);
+         testobj != NULL;
+         testobj = nextobj) {
+
+        nextobj = (obj_template_t *)dlq_nextEntry(testobj);
+        parentobj = NULL;
+
+        if (testobj->flags & OBJ_FL_DELETED) {
+            dlq_remove(testobj);
+            if (LOGDEBUG2) {
+                log_debug2("\nDeviation caused deletion of object %s:%s",
+                           obj_get_mod_name(testobj),
+                           obj_get_name(testobj));
+            }
+            parentobj = testobj->parent;
+            obj_free_template(testobj);
+
+            if (parentobj) {
+                /* need to retest the parent to see if it
+                 * is still OK; there should not be any other
+                 * deviations with the same target object
+                 */
+                if (LOGDEBUG2) {
+                    log_debug2("\nRechecking %s:%s after "
+                               "applying deviation(s) to child",
+                               obj_get_mod_name(parentobj),
+                               obj_get_name(parentobj));
+                }
+                res = resolve_datadef(pcb,
+                                      tkc, 
+                                      mod, 
+                                      parentobj,
+                                      TRUE);
+                CHK_EXIT(res, retres);
+            }
+        } else {
+            /* this object was not deleted */
+            child_datadefQ = obj_get_datadefQ(testobj);
+            if (child_datadefQ != NULL) {
+                res = yang_obj_remove_deleted_nodes(pcb,
+                                                    tkc,
+                                                    mod,
+                                                    child_datadefQ);
+                if (res != NO_ERR) {
+                    retres = res;
+                }
+            }
+        }
+    }
+
+    return retres;
+        
+}  /* yang_obj_remove_deleted_nodes */
 
 
 /* END file yang_obj.c */

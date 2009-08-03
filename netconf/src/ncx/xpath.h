@@ -54,6 +54,10 @@ date	     init     comment
 #include "var.h"
 #endif
 
+#ifndef _H_yang
+#include "yang.h"
+#endif
+
 
 /********************************************************************
 *								    *
@@ -434,7 +438,8 @@ typedef struct xpath_stringwalkerparms_t_ {
 
 /* find target, save in *targobj */
 extern status_t
-    xpath_find_schema_target (tk_chain_t *tkc,
+    xpath_find_schema_target (yang_pcb_t *pcb,
+                              tk_chain_t *tkc,
 			      ncx_module_t *mod,
 			      obj_template_t *obj,
 			      dlq_hdr_t  *datadefQ,
@@ -442,9 +447,17 @@ extern status_t
 			      obj_template_t **targobj,
 			      dlq_hdr_t **targQ);
 
+/* find target module name, return malloced module name string */
+extern xmlChar *
+    xpath_find_schema_target_modname (tk_chain_t *tkc,
+                                      ncx_module_t *mod,
+                                      const xmlChar *target,
+                                      status_t *res);
+
 /* find target, save in *targobj, use the errtk if error */
 extern status_t
-    xpath_find_schema_target_err (tk_chain_t *tkc,
+    xpath_find_schema_target_err (yang_pcb_t *pcb,
+                                  tk_chain_t *tkc,
 				  ncx_module_t *mod,
 				  obj_template_t *obj,
 				  dlq_hdr_t  *datadefQ,

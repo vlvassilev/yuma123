@@ -47,6 +47,10 @@ date	     init     comment
 #include "tk.h"
 #endif
 
+#ifndef _H_yang
+#include "yang.h"
+#endif
+
 
 /********************************************************************
 *								    *
@@ -63,27 +67,31 @@ date	     init     comment
 
 /* 2nd pass parsing */
 extern status_t 
-    yang_grp_consume_grouping (tk_chain_t *tkc,
+    yang_grp_consume_grouping (yang_pcb_t *pcb,
+                               tk_chain_t *tkc,
 			       ncx_module_t  *mod,
 			       dlq_hdr_t *que,
 			       obj_template_t *parent);
 
 /* 3rd pass parsing */
 extern status_t 
-    yang_grp_resolve_groupings (tk_chain_t *tkc,
+    yang_grp_resolve_groupings (yang_pcb_t *pcb,
+                                tk_chain_t *tkc,
 				ncx_module_t  *mod,
 				dlq_hdr_t *groupingQ,
 				obj_template_t *parent);
 
 /* 4th pass parsing */
 extern status_t 
-    yang_grp_resolve_complete (tk_chain_t *tkc,
+    yang_grp_resolve_complete (yang_pcb_t *pcb,
+                               tk_chain_t *tkc,
 			       ncx_module_t  *mod,
 			       dlq_hdr_t *groupingQ,
 			       obj_template_t *parent);
 
 extern status_t 
-    yang_grp_resolve_final (tk_chain_t *tkc,
+    yang_grp_resolve_final (yang_pcb_t *pcb,
+                            tk_chain_t *tkc,
 			    ncx_module_t  *mod,
 			    dlq_hdr_t *groupingQ);
 

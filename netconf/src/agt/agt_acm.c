@@ -1587,6 +1587,7 @@ status_t
     agt_acm_init (void)
 {
     status_t  res;
+    agt_profile_t  *agt_profile;
 
     if (agt_acm_init_done) {
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
@@ -1596,11 +1597,14 @@ status_t
     log_debug2("\nagt: Loading NCX Access Control module");
 #endif
 
+    agt_profile = agt_get_profile();
+
     nacmmod = NULL;
 
     /* load in the access control parameters */
     res = ncxmod_load_module(AGT_ACM_MODULE, 
                              NULL, 
+                             &agt_profile->agt_savedevQ,
                              &nacmmod);
     if (res != NO_ERR) {
         return res;

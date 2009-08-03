@@ -43,6 +43,10 @@ date	     init     comment
 #include "tk.h"
 #endif
 
+#ifndef _H_yang
+#include "yang.h"
+#endif
+
 
 /********************************************************************
 *								    *
@@ -58,37 +62,43 @@ date	     init     comment
 *********************************************************************/
 
 extern status_t 
-    yang_typ_consume_type (tk_chain_t *tkc,
+    yang_typ_consume_type (yang_pcb_t *pcb,
+                           tk_chain_t *tkc,
 			   ncx_module_t  *mod,
 			   typ_def_t *typdef);
 
 extern status_t 
-    yang_typ_consume_metadata_type (tk_chain_t *tkc,
+    yang_typ_consume_metadata_type (yang_pcb_t *pcb,
+                                    tk_chain_t *tkc,
 				    ncx_module_t  *mod,
 				    typ_def_t *intypdef);
 
 extern status_t 
-    yang_typ_consume_typedef (tk_chain_t *tkc,
+    yang_typ_consume_typedef (yang_pcb_t *pcb,
+                              tk_chain_t *tkc,
 			      ncx_module_t  *mod,
 			      dlq_hdr_t *que);
 
 
 extern status_t 
-    yang_typ_resolve_typedefs (tk_chain_t *tkc,
+    yang_typ_resolve_typedefs (yang_pcb_t *pcb,
+                               tk_chain_t *tkc,
 			       ncx_module_t  *mod,
 			       dlq_hdr_t *typeQ,
 			       obj_template_t *parent);
 
 
 extern status_t 
-    yang_typ_resolve_typedefs_grp (tk_chain_t *tkc,
+    yang_typ_resolve_typedefs_grp (yang_pcb_t *pcb,
+                                   tk_chain_t *tkc,
 				   ncx_module_t  *mod,
 				   dlq_hdr_t *typeQ,
 				   obj_template_t *parent,
 				   grp_template_t *grp);
 
 extern status_t 
-    yang_typ_resolve_type (tk_chain_t *tkc,
+    yang_typ_resolve_type (yang_pcb_t *pcb,
+                           tk_chain_t *tkc,
 			   ncx_module_t  *mod,
 			   typ_def_t *typdef,
 			   const xmlChar *defval,

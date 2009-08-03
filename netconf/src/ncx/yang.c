@@ -1979,6 +1979,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc    == token chain
 *   mod    == module in progress
 *   prefix  == prefix value to use
@@ -1993,7 +1994,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_find_imp_typedef (tk_chain_t  *tkc,
+    yang_find_imp_typedef (yang_pcb_t *pcb,
+                           tk_chain_t  *tkc,
 			   ncx_module_t *mod,
 			   const xmlChar *prefix,
 			   const xmlChar *name,
@@ -2006,7 +2008,7 @@ status_t
     status_t          res;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !prefix || !name || !typ) {
+    if (!pcb || !tkc || !mod || !prefix || !name || !typ) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -2020,12 +2022,14 @@ status_t
 	/* found import OK, look up imported type definition */
 	dtyp = NCX_NT_TYP;
 	*typ = (typ_template_t *)
-	    ncx_locate_modqual_import(imp, name, &dtyp);
+	    ncx_locate_modqual_import(pcb, imp, name, &dtyp);
 	if (!*typ) {
 	    res = ERR_NCX_DEF_NOT_FOUND;
 	    log_error("\nError: typedef definition for '%s:%s' not found"
 		      " in module %s", 
-		      prefix, name, imp->module);
+		      prefix, 
+                      name, 
+                      imp->module);
 
 	} else {
 	    return NO_ERR;
@@ -2055,6 +2059,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc    == token chain
 *   mod    == module in progress
 *   prefix  == prefix value to use
@@ -2069,7 +2074,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_find_imp_grouping (tk_chain_t  *tkc,
+    yang_find_imp_grouping (yang_pcb_t *pcb,
+                            tk_chain_t  *tkc,
 			    ncx_module_t *mod,
 			    const xmlChar *prefix,
 			    const xmlChar *name,
@@ -2082,7 +2088,7 @@ status_t
     status_t        res;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !prefix || !name || !grp) {
+    if (!pcb || !tkc || !mod || !prefix || !name || !grp) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -2098,12 +2104,14 @@ status_t
 	/* found import OK, look up imported type definition */
 	dtyp = NCX_NT_GRP;
 	*grp = (grp_template_t *)
-	    ncx_locate_modqual_import(imp, name, &dtyp);
+	    ncx_locate_modqual_import(pcb, imp, name, &dtyp);
 	if (!*grp) {
 	    res = ERR_NCX_DEF_NOT_FOUND;
 	    log_error("\nError: grouping definition for '%s:%s' not found"
 		      " in module %s", 
-		      prefix, name, imp->module);
+		      prefix, 
+                      name, 
+                      imp->module);
 	} else {
 	    return NO_ERR;
 	}
@@ -2132,6 +2140,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc    == token chain
 *   mod    == module in progress
 *   prefix  == prefix value to use
@@ -2146,7 +2155,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_find_imp_extension (tk_chain_t  *tkc,
+    yang_find_imp_extension (yang_pcb_t *pcb,
+                             tk_chain_t  *tkc,
 			     ncx_module_t *mod,
 			     const xmlChar *prefix,
 			     const xmlChar *name,
@@ -2159,7 +2169,7 @@ status_t
     status_t        res, retres;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !prefix || !name || !ext) {
+    if (!pcb || !tkc || !mod || !prefix || !name || !ext) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -2176,7 +2186,8 @@ status_t
 	imod = imp->mod;
     } else {
 	res = ncxmod_load_module(imp->module, 
-				 imp->revision, 
+				 imp->revision,
+                                 pcb->savedevQ,
 				 &imod);
 	CHK_EXIT(res, retres);
 
@@ -2196,7 +2207,9 @@ status_t
 	    res = ERR_NCX_DEF_NOT_FOUND;
 	    log_error("\nError: extension definition for '%s:%s' not found"
 		      " in module %s", 
-		      prefix, name, imp->module);
+		      prefix, 
+                      name, 
+                      imp->module);
 	} else {
 	    return NO_ERR;
 	}
@@ -2225,6 +2238,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc    == token chain
 *   mod    == module in progress
 *   prefix  == prefix value to use
@@ -2239,7 +2253,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_find_imp_feature (tk_chain_t  *tkc,
+    yang_find_imp_feature (yang_pcb_t *pcb,
+                           tk_chain_t  *tkc,
 			   ncx_module_t *mod,
 			   const xmlChar *prefix,
 			   const xmlChar *name,
@@ -2252,7 +2267,7 @@ status_t
     status_t        res, retres;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !prefix || !name || !feature) {
+    if (!pcb || !tkc || !mod || !prefix || !name || !feature) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -2270,6 +2285,7 @@ status_t
     } else {
 	res = ncxmod_load_module(imp->module,
 				 imp->revision,
+                                 pcb->savedevQ,
 				 &imp->mod);
 	CHK_EXIT(res, retres);
 
@@ -2289,7 +2305,9 @@ status_t
 	    res = ERR_NCX_DEF_NOT_FOUND;
 	    log_error("\nError: feature definition for '%s:%s' not found"
 		      " in module %s", 
-		      prefix, name, imp->module);
+		      prefix, 
+                      name, 
+                      imp->module);
 	} else {
 	    return NO_ERR;
 	}
@@ -2318,6 +2336,7 @@ status_t
 * Do not duplicate error messages upon error return
 *
 * INPUTS:
+*   pcb == parser control block to use
 *   tkc    == token chain
 *   mod    == module in progress
 *   prefix  == prefix value to use
@@ -2332,7 +2351,8 @@ status_t
 *   status of the operation
 *********************************************************************/
 status_t 
-    yang_find_imp_identity (tk_chain_t  *tkc,
+    yang_find_imp_identity (yang_pcb_t *pcb,
+                            tk_chain_t  *tkc,
 			    ncx_module_t *mod,
 			    const xmlChar *prefix,
 			    const xmlChar *name,
@@ -2345,7 +2365,7 @@ status_t
     status_t        res, retres;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !prefix || !name || !identity) {
+    if (!pcb || !tkc || !mod || !prefix || !name || !identity) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -2363,6 +2383,7 @@ status_t
     } else {
 	res = ncxmod_load_module(imp->module,
 				 imp->revision,
+                                 pcb->savedevQ,
 				 &imp->mod);
 	CHK_EXIT(res, retres);
 
@@ -2382,7 +2403,9 @@ status_t
 	    res = ERR_NCX_DEF_NOT_FOUND;
 	    log_error("\nError: identity definition for '%s:%s' not found"
 		      " in module %s", 
-		      prefix, name, imp->module);
+		      prefix, 
+                      name, 
+                      imp->module);
 	} else {
 	    return NO_ERR;
 	}

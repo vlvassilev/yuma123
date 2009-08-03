@@ -133,12 +133,11 @@ date         init     comment
 *                       V A R I A B L E S                            *
 *                                                                   *
 *********************************************************************/
-static boolean agt_init_done = FALSE;
-static agt_profile_t agt_profile;
-static boolean agt_shutdown;
-static boolean agt_shutdown_started;
-static ncx_shutdowntyp_t agt_shutmode;
-
+static boolean            agt_init_done = FALSE;
+static agt_profile_t      agt_profile;
+static boolean            agt_shutdown;
+static boolean            agt_shutdown_started;
+static ncx_shutdowntyp_t  agt_shutmode;
 
 /********************************************************************
 * FUNCTION init_agent_profile
@@ -153,6 +152,8 @@ static void
     init_agent_profile (void)
 {
     memset(&agt_profile, 0x0, sizeof(agt_profile_t));
+
+    dlq_createSQue(&agt_profile.agt_savedevQ);
 
     /* Set the default values for the user parameters
      * these may be overridden from the command line;
@@ -179,6 +180,23 @@ static void
     agt_profile.agt_usevalidate = TRUE;
 
 } /* init_agent_profile */
+
+
+/********************************************************************
+* FUNCTION clean_agent_profile
+* 
+* Clean the agent profile variables
+*
+* OUTPUTS:
+*  *agt_profile is filled in with params of defaults
+*
+*********************************************************************/
+static void
+    clean_agent_profile (void)
+{
+    ncx_clean_save_deviationsQ(&agt_profile.agt_savedevQ);
+
+} /* clean_agent_profile */
 
 
 /********************************************************************
@@ -367,7 +385,7 @@ status_t
     agt_init2 (void)
 {
     const val_value_t  *clivalset;
-    val_value_t        *modval;
+    val_value_t        *val;
     status_t            res;
 
 #ifdef AGT_DEBUG
@@ -491,24 +509,42 @@ status_t
     res = NO_ERR;
     clivalset = agt_cli_get_valset();
     if (clivalset) {
-        modval = val_find_child(clivalset,
-                                NCXMOD_NETCONFD,
-                                NCX_EL_MODULE);
 
-        while (modval && res == NO_ERR) {
-            res = ncxmod_load_module(VAL_STR(modval),
+        /* first check if there are any deviations to load */
+        val = val_find_child(clivalset, 
+                             NCXMOD_NETCONFD, 
+                             NCX_EL_DEVIATION);
+        while (val) {
+            res = ncxmod_load_deviation(VAL_STR(val), 
+                                        &agt_profile.agt_savedevQ);
+            if (res != NO_ERR) {
+                return res;
+            } else {
+                val = val_find_next_child(clivalset,
+                                          NCXMOD_NETCONFD,
+                                          NCX_EL_DEVIATION,
+                                          val);
+            }
+        }
+
+        val = val_find_child(clivalset,
+                             NCXMOD_NETCONFD,
+                             NCX_EL_MODULE);
+
+        while (val && res == NO_ERR) {
+            res = ncxmod_load_module(VAL_STR(val),
                                      NULL,   /* parse revision TBD */
+                                     &agt_profile.agt_savedevQ,
                                      NULL);
             if (res == NO_ERR) {
-
                 /*** TBD: load lib<modname>.<rev-date>.so 
                  *** into the agent code
                  ***/
 
-                modval = val_find_next_child(clivalset,
-                                             NCXMOD_NETCONFD,
-                                             NCX_EL_MODULE,
-                                             modval);
+                val = val_find_next_child(clivalset,
+                                          NCXMOD_NETCONFD,
+                                          NCX_EL_MODULE,
+                                          val);
             }
         }
     }
@@ -626,6 +662,7 @@ void
         log_debug3("\nAgent Cleanup Starting...\n");
 #endif
 
+        clean_agent_profile();
         agt_acm_cleanup();
         agt_ncx_cleanup();
         agt_hello_cleanup();
@@ -662,10 +699,10 @@ void
 * RETURNS:
 *   const pointer to the agent profile
 *********************************************************************/
-const agt_profile_t *
+agt_profile_t *
     agt_get_profile (void)
 {
-    return (const agt_profile_t *)&agt_profile;
+    return &agt_profile;
 
 } /* agt_get_profile */
 

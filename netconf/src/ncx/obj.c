@@ -155,7 +155,6 @@ static obj_template_t *
     dlq_createSQue(&obj->metadataQ);
     dlq_createSQue(&obj->appinfoQ);
     dlq_createSQue(&obj->iffeatureQ);
-    dlq_createSQue(&obj->deviateQ);
     return obj;
 
 }  /* new_blank_template */
@@ -2950,7 +2949,6 @@ obj_template_t *
     dlq_createSQue(&obj->metadataQ);
     dlq_createSQue(&obj->appinfoQ);
     dlq_createSQue(&obj->iffeatureQ);
-    dlq_createSQue(&obj->deviateQ);
     
     switch (objtype) {
     case OBJ_TYP_CONTAINER:
@@ -3063,20 +3061,12 @@ obj_template_t *
 void 
     obj_free_template (obj_template_t *obj)
 {
-    obj_deviate_t  *deviate;
-
 #ifdef DEBUG
     if (!obj) {
         SET_ERROR(ERR_INTERNAL_PTR);
 	return;
     }
 #endif
-
-    while (!dlq_empty(&obj->deviateQ)) {
-	deviate = (obj_deviate_t *)
-	    dlq_deque(&obj->deviateQ);
-	obj_free_deviate(deviate);
-    }
 
     clean_metadataQ(&obj->metadataQ);
     ncx_clean_appinfoQ(&obj->appinfoQ);
@@ -5871,12 +5861,17 @@ void
     if (deviation->target) {
 	m__free(deviation->target);
     }
-
+    if (deviation->targmodname) {
+	m__free(deviation->targmodname);
+    }
     if (deviation->descr) {
 	m__free(deviation->descr);
     }
     if (deviation->ref) {
 	m__free(deviation->ref);
+    }
+    if (deviation->devmodname) {
+	m__free(deviation->devmodname);
     }
 
     while (!dlq_empty(&deviation->deviateQ)) {

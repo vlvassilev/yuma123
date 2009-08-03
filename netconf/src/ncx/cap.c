@@ -294,10 +294,11 @@ static boolean
 *    status
 *********************************************************************/
 static xmlChar *
-    make_mod_urn (const ncx_module_t *mod)
+    make_mod_urn (ncx_module_t *mod)
 {
     xmlChar              *str, *p;
-    uint32                len, feature_count;
+    ncx_lmem_t           *listmember;
+    uint32                len, feature_count, deviation_count;
 
     /* get the length of the string needed by doing a dry run */
     len = xml_strlen(mod->ns);
@@ -313,7 +314,6 @@ static xmlChar *
     }
 
     feature_count = ncx_feature_count(mod, TRUE);
-
     if (feature_count > 0) {
 	len++;   /* & char */
 	len += xml_strlen(CAP_FEATURES_EQ);
@@ -323,7 +323,19 @@ static xmlChar *
 	ncx_for_all_features(mod, get_features_len, &len, TRUE);
     }
 
-    /*** TBD: Add deviations ***/
+    deviation_count = ncx_list_cnt(&mod->devmodlist);
+    if (deviation_count > 0) {
+	len++;   /* & char */
+	len += xml_strlen(CAP_DEVIATIONS_EQ);
+	len += (deviation_count-1);   /* all the commas */
+
+        for (listmember = ncx_first_lmem(&mod->devmodlist);
+             listmember != NULL;
+             listmember = (ncx_lmem_t *)dlq_nextEntry(listmember)) {
+
+            len += xml_strlen(listmember->val.str);
+        }
+    }
 
     /* get a string to hold the result */
     str = m__getMem(len+1);
@@ -358,7 +370,21 @@ static xmlChar *
 	*--p = 0;
     }
 
-    /*** TBD: Add deviations ***/
+    if (deviation_count > 0) {
+	*p++ = (xmlChar)'&';
+	p += xml_strcpy(p, CAP_DEVIATIONS_EQ);
+
+        for (listmember = ncx_first_lmem(&mod->devmodlist);
+             listmember != NULL;
+             listmember = (ncx_lmem_t *)dlq_nextEntry(listmember)) {
+
+            p += xml_strcpy(p, listmember->val.str);
+            *p++ = ',';
+        }
+
+	/* the last entry will have a comma that has to be removed */
+	*--p = 0;
+    }
 
     return str;
 
@@ -1294,7 +1320,7 @@ status_t
 *********************************************************************/
 status_t 
     cap_add_modval (val_value_t *caplist, 
-		    const ncx_module_t *mod)
+		    ncx_module_t *mod)
 {
     xmlChar      *str;
     val_value_t  *capval;

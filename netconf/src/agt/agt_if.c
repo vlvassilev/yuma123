@@ -708,7 +708,8 @@ static status_t
 status_t
     agt_if_init (void)
 {
-    status_t   res;
+    status_t       res;
+    agt_profile_t *agt_profile;
 
     if (agt_if_init_done) {
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
@@ -721,6 +722,7 @@ status_t
     ifmod = NULL;
     agt_if_not_supported = FALSE;
     agt_if_init_done = TRUE;
+    agt_profile = agt_get_profile();
 
     /* check if /interfaces file system supported */
     if (!is_interfaces_supported()) {
@@ -734,6 +736,7 @@ status_t
     /* load the netconf-state module */
     res = ncxmod_load_module(interfaces_MOD,
                              interfaces_MOD_REV,
+                             &agt_profile->agt_savedevQ,
                              &ifmod);
 
     return res;

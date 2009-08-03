@@ -247,7 +247,7 @@ extern status_t
 /* add a capability string for a data model module */
 extern status_t 
     cap_add_modval (val_value_t *caplist, 
-		    const ncx_module_t *mod);
+		    ncx_module_t *mod);
 
 
 /* fast search of standard protocol capability set */

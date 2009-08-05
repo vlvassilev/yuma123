@@ -36,6 +36,10 @@ date	     init     comment
 #include "obj.h"
 #endif
 
+#ifndef _H_ses
+#include "ses.h"
+#endif
+
 #ifndef _H_status
 #include "status.h"
 #endif
@@ -159,6 +163,7 @@ extern status_t
 extern void
     agt_acm_clear_msg_cache (xml_msg_hdr_t *msg);
 
-
+extern boolean
+    agt_acm_session_is_superuser (const ses_cb_t *scb);
 
 #endif	    /* _H_agt_acm */

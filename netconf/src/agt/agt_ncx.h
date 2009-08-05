@@ -30,6 +30,10 @@ date	     init     comment
 #include "status.h"
 #endif
 
+#ifndef _H_val
+#include "val.h"
+#endif
+
 /********************************************************************
 *								    *
 *			F U N C T I O N S			    *
@@ -51,5 +55,8 @@ extern status_t
     agt_ncx_cfg_save (cfg_template_t *cfg,
 		      boolean bkup);
 
+extern status_t
+    agt_ncx_cfg_save_inline (const xmlChar *source_url,
+                             val_value_t *newroot);
 
 #endif	    /* _H_agt_ncx */

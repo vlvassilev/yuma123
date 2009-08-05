@@ -78,6 +78,12 @@ extern status_t
 			   xml_node_t *methnode,
 			   cfg_template_t  **retcfg);
 
+extern status_t 
+    agt_get_inline_cfg_from_parm (const xmlChar *parmname,
+                                  rpc_msg_t *msg,
+                                  xml_node_t *methnode,
+                                  val_value_t  **retval);
+
 extern const val_value_t *
     agt_get_parmval (const xmlChar *parmname,
 		     rpc_msg_t *msg);

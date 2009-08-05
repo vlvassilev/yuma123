@@ -260,6 +260,12 @@ status_t
     const xmlChar     *cfgname;
     status_t           res;
 
+#ifdef DEBUG
+    if (!parmname || !msg || !methnode || !retcfg) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     val = val_find_child(msg->rpc_input, 
 			 val_get_mod_name(msg->rpc_input), 
 			 parmname);
@@ -295,31 +301,40 @@ status_t
 	cfgname = val->name;
 	break;
     case NCX_BT_CONTAINER:
-	val = val_get_first_child(val);
-	if (val) {
-	    switch (val->btyp) {
-	    case NCX_BT_STRING:
-		cfgname = VAL_STR(val);
-		break;
-	    case NCX_BT_EMPTY:
-		cfgname = val->name;
-		break;
-	    default:
-		SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-
-	}
+        val = val_get_first_child(val);
+        if (val) {
+            switch (val->btyp) {
+            case NCX_BT_STRING:
+                cfgname = VAL_STR(val);
+                break;
+            case NCX_BT_EMPTY:
+                cfgname = val->name;
+                break;
+            case NCX_BT_CONTAINER:
+                if (!xml_strcmp(parmname, NCX_EL_SOURCE) &&
+                    !xml_strcmp(val->name, NCX_EL_CONFIG)) {
+                    return ERR_NCX_SKIPPED;
+                } else {
+                    res = ERR_NCX_INVALID_VALUE;
+                }
+                break;
+            default:
+                res = SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }           
 	break;
     default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
+	res = ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
-    if (cfgname) {
+    if (cfgname != NULL && res == NO_ERR) {
 	/* get the config template from the config name */
 	cfg = cfg_get_config(cfgname);
 	if (!cfg) {
 	    res = ERR_NCX_CFG_NOT_FOUND;
-	}
+	} else {
+            *retcfg = cfg;
+        }
     }
 
     if (res != NO_ERR) {
@@ -332,13 +347,110 @@ status_t
 			 (const void *)cfgname, 
 			 NCX_NT_VAL, 
 			 errval);
+
+    }
+
+    return res;
+
+} /* agt_get_cfg_from_parm */
+
+
+/********************************************************************
+* FUNCTION agt_get_inline_cfg_from_parm
+*
+* Get the val_value_t node for the inline config element
+*
+* INPUTS:
+*    parmname == parameter to get from (e.g., source)
+*    msg == incoming rpc_msg_t in progress
+*    methnode == XML node for RPC method (for errors)
+*    retval == address of return value node pointer
+* 
+* OUTPUTS:
+*   *retval is set to the address of the val_value_t struct 
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_get_inline_cfg_from_parm (const xmlChar *parmname,
+                                  rpc_msg_t *msg,
+                                  xml_node_t *methnode,
+                                  val_value_t  **retval)
+{
+    val_value_t       *val, *childval;
+    const val_value_t *errval;
+    status_t           res;
+
+#ifdef DEBUG
+    if (!parmname || !msg || !methnode || !retval) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    val = val_find_child(msg->rpc_input, 
+			 val_get_mod_name(msg->rpc_input), 
+			 parmname);
+    if (!val || val->res != NO_ERR) {
+	if (!val) {
+	    res = ERR_NCX_DEF_NOT_FOUND;
+	} else {
+	    res = val->res;
+	}
+	agt_record_error(NULL, 
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION,
+			 res, 
+			 methnode, 
+			 NCX_NT_NONE, 
+			 NULL, 
+			 NCX_NT_VAL, 
+			 msg->rpc_input);
 	return res;
     }
 
-    *retcfg = cfg;
-    return NO_ERR;
+    errval = val;
+    res = NO_ERR;
+    
+    /* got some value in *val */
+    switch (val->btyp) {
+    case NCX_BT_STRING:
+    case NCX_BT_EMPTY:
+        res = ERR_NCX_INVALID_VALUE;
+	break;
+    case NCX_BT_CONTAINER:
+        childval = val_get_first_child(val);
+        if (childval) {
+            if (!xml_strcmp(val->name, NCX_EL_CONFIG)) {
+                *retval = childval;
+                return NO_ERR;
+            } else {
+                errval = childval;
+                res = ERR_NCX_INVALID_VALUE;
+            }
+        } else {
+            res = ERR_NCX_INVALID_VALUE;
+        }
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
 
-} /* agt_get_cfg_from_parm */
+    if (res != NO_ERR) {
+	agt_record_error(NULL, 
+			 &msg->mhdr, 
+			 NCX_LAYER_OPERATION,
+			 res, 
+			 methnode,
+			 NCX_NT_NONE,
+			 NULL,
+			 NCX_NT_VAL, 
+			 errval);
+    }
+
+    return res;
+
+} /* agt_get_inline_cfg_from_parm */
 
 
 /********************************************************************

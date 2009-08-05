@@ -173,7 +173,7 @@ typedef struct agt_profile_t_ {
     ncx_agttarg_t       agt_targ;
     ncx_agtstart_t      agt_start;
     log_debug_t         agt_loglevel;
-    boolean             agt_del_startup;
+    boolean             agt_has_startup;
     boolean             agt_usestartup;   /* --no-startup flag */
     boolean             agt_logappend;
     boolean             agt_xmlorder;

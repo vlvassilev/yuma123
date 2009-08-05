@@ -228,6 +228,12 @@ extern void
 extern status_t
     cfg_fill_candidate_from_running (void);
 
+extern status_t
+    cfg_fill_candidate_from_startup (void);
+
+extern status_t
+    cfg_fill_candidate_from_inline (val_value_t *newroot);
+
 extern void
     cfg_set_dirty_flag (cfg_template_t *cfg);
 

@@ -2042,6 +2042,31 @@ void
 } /* agt_acm_clear_msg_cache */
 
 
+/********************************************************************
+* FUNCTION agt_acm_session_is_superuser
+*
+* Check if the specified session is the superuser
+*
+* INPUTS:
+*   scb == session to check
+*
+* RETURNS:
+*   TRUE if session is for the superuser
+*   FALSE if session is not for the superuser
+*********************************************************************/
+boolean
+    agt_acm_session_is_superuser (const ses_cb_t *scb)
+{
+#ifdef DEBUG
+    if (!scb) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return is_superuser(scb->username);
+
+}  /* agt_acm_session_is_superuser */
 
 
 /* END file agt_acm.c */

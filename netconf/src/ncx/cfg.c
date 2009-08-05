@@ -677,6 +677,104 @@ status_t
 
 
 /********************************************************************
+* FUNCTION cfg_fill_candidate_from_startup
+*
+* Fill the <candidate> config with the config contents
+* of the <startup> config
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    cfg_fill_candidate_from_startup (void)
+{
+    cfg_template_t  *startup, *candidate;
+    status_t         res;
+
+#ifdef DEBUG
+    if (!cfg_arr[NCX_CFGID_CANDIDATE] ||
+        !cfg_arr[NCX_CFGID_STARTUP]) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+#endif
+
+    startup = cfg_arr[NCX_CFGID_STARTUP];
+    candidate = cfg_arr[NCX_CFGID_CANDIDATE];
+
+    if (!startup->root) {
+	return ERR_NCX_DATA_MISSING;
+    }
+
+    if (candidate->root) {
+	val_free_value(candidate->root);
+	candidate->root = NULL;
+    }
+
+    candidate->root = val_clone(startup->root);
+    if (candidate->root == NULL) {
+        res = ERR_INTERNAL_MEM;
+    } else {
+        res = NO_ERR;
+    }
+
+    /* clear the candidate dirty flag */
+    candidate->flags &= ~CFG_FL_DIRTY;
+
+    return res;
+
+} /* cfg_fill_candidate_from_startup */
+
+
+/********************************************************************
+* FUNCTION cfg_fill_candidate_from_inline
+*
+* Fill the <candidate> config with the config contents
+* of the <config> inline XML node
+*
+* INPUTS:
+*   newroot == new root for the candidate config
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    cfg_fill_candidate_from_inline (val_value_t *newroot)
+{
+    cfg_template_t  *candidate;
+    status_t         res;
+
+#ifdef DEBUG
+    if (newroot == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    if (!cfg_arr[NCX_CFGID_CANDIDATE]) {
+	return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+#endif
+
+    candidate = cfg_arr[NCX_CFGID_CANDIDATE];
+
+    if (candidate->root) {
+	val_free_value(candidate->root);
+	candidate->root = NULL;
+    }
+
+    candidate->root = val_clone(newroot);
+    if (candidate->root == NULL) {
+        res = ERR_INTERNAL_MEM;
+    } else {
+        res = NO_ERR;
+    }
+
+    /* clear the candidate dirty flag */
+    candidate->flags &= ~CFG_FL_DIRTY;
+
+    return res;
+
+} /* cfg_fill_candidate_from_inline */
+
+
+/********************************************************************
 * FUNCTION cfg_set_dirty_flag
 *
 * Mark the config as 'changed'
@@ -1101,6 +1199,13 @@ status_t
 	cfg->cfg_state = CFG_ST_READY;
 	cfg->locked_by = 0;
 	cfg->lock_src = CFG_SRC_NONE;
+
+        /* sec 8.3.5.2 requires a discard-changes
+         * when a lock is released on the candidate
+         */
+        if (cfg->cfg_id == NCX_CFGID_CANDIDATE) {
+            res = cfg_fill_candidate_from_running();
+        }
     }
 
     return res;
@@ -1122,6 +1227,7 @@ void
 {
     uint32  i;
     cfg_template_t *cfg;
+    status_t        res;
 
     if (!cfg_init_done) {
 	return;
@@ -1135,6 +1241,17 @@ void
 	    cfg->lock_src = CFG_SRC_NONE;
 	    log_info("\ncfg forced unlock on %s config, held by session %d",
 		     cfg->name, sesid);
+
+            /* sec 8.3.5.2 requires a discard-changes
+             * when a lock is released on the candidate
+             */
+            if (cfg->cfg_id == NCX_CFGID_CANDIDATE) {
+                res = cfg_fill_candidate_from_running();
+                if (res != NO_ERR) {
+                    log_error("\nError: discard-changes failed (%s)",
+                              get_error_string(res));
+                }
+            }
 	}
     }
 

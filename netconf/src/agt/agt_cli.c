@@ -279,10 +279,10 @@ static void
     if (val && val->res == NO_ERR) {
         if (VAL_BOOL(val)) {
             agt_profile->agt_start = NCX_AGT_START_DISTINCT;
-            agt_profile->agt_del_startup = TRUE;
+            agt_profile->agt_has_startup = TRUE;
         } else {
             agt_profile->agt_start = NCX_AGT_START_MIRROR;
-            agt_profile->agt_del_startup = FALSE;
+            agt_profile->agt_has_startup = FALSE;
         }
     }
 

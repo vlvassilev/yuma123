@@ -4229,6 +4229,7 @@ status_t
                           cfg_template_t *target)
 {
     val_value_t      *newval, *nextval, *matchval;
+    agt_profile_t    *profile;
     status_t          res;
 
 #ifdef DEBUG
@@ -4299,20 +4300,26 @@ status_t
     }  /* else there was no rollback, so APPLY is the final phase */
 
     if (res == NO_ERR) {
-        res = agt_ncx_cfg_save(target, FALSE);
-        if (res != NO_ERR) {
-            /* config save failed */
-            agt_record_error(scb,
-                             &msg->mhdr, 
-                             NCX_LAYER_OPERATION, 
-                             res, 
-                             NULL, 
-                             NCX_NT_CFG, 
-                             target,
-                             NCX_NT_NONE, 
-                             NULL);
-        } else {
-            val_clean_tree(target->root);
+        profile = agt_get_profile();
+        if (!profile->agt_has_startup) {
+            res = agt_ncx_cfg_save(target, FALSE);
+            if (res != NO_ERR) {
+                /* config save failed */
+                agt_record_error(scb,
+                                 &msg->mhdr, 
+                                 NCX_LAYER_OPERATION, 
+                                 res, 
+                                 NULL, 
+                                 NCX_NT_CFG, 
+                                 target,
+                                 NCX_NT_NONE, 
+                                 NULL);
+            } else {
+                /* don't clear the dirty flags in running
+                 * unless the save to file  worked
+                 */
+                val_clean_tree(target->root);
+            }
         }
     }
 

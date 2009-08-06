@@ -1679,8 +1679,10 @@ static status_t
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 
-    /* get the config parameter */
-    val = val_find_child(msg->rpc_input, NULL, NCX_EL_CONFIG);
+    /* get the <nc:config> parameter */
+    val = val_find_child(msg->rpc_input, 
+                         NC_MODULE, 
+                         NCX_EL_CONFIG);
     if (!val) {
         /* we shouldn't get here if the config param is missing */
         return SET_ERROR(ERR_NCX_OPERATION_FAILED);
@@ -2193,7 +2195,7 @@ static status_t
     }
 
     /* load-config extension */
-    res = agt_rpc_register_method(AGT_CLI_MODULE, 
+    res = agt_rpc_register_method(NC_MODULE, 
                                   NCX_EL_LOAD_CONFIG,
                                   AGT_RPC_PH_VALIDATE, 
                                   load_config_validate);
@@ -2201,7 +2203,7 @@ static status_t
         return SET_ERROR(res);
     }
 
-    res = agt_rpc_register_method(AGT_CLI_MODULE, 
+    res = agt_rpc_register_method(NC_MODULE, 
                                   NCX_EL_LOAD_CONFIG,
                                   AGT_RPC_PH_INVOKE,
                                   load_config_invoke);
@@ -2302,7 +2304,7 @@ static void
                               op_method_name(OP_DISCARD_CHANGES));
 
     /* load-config extension */
-    agt_rpc_unregister_method(AGT_CLI_MODULE, NCX_EL_LOAD_CONFIG);
+    agt_rpc_unregister_method(NC_MODULE, NCX_EL_LOAD_CONFIG);
 
     /* load module extension */
     agt_rpc_unregister_method(AGT_CLI_MODULE, NCX_EL_LOAD);
@@ -2482,7 +2484,7 @@ status_t
     agt_ncx_cfg_save (cfg_template_t *cfg,
                       boolean bkup)
 {
-    cfg_template_t    *startup;
+    cfg_template_t    *startup, *running;
     val_value_t       *copystartup;
     const xmlChar     *filename;
     status_t           res;
@@ -2517,6 +2519,10 @@ status_t
 
         /* save the new startup database, if there is one */
         res = NO_ERR;
+        running = cfg_get_config_id(NCX_CFGID_RUNNING);
+        if (running == NULL) {
+            SET_ERROR(ERR_INTERNAL_VAL);
+        }
         startup = cfg_get_config_id(NCX_CFGID_STARTUP);
         if (startup != NULL) {
             copystartup = val_clone_config_data(cfg->root, &res);
@@ -2530,6 +2536,8 @@ status_t
                 filename = cfg->src_url;
             } else if (startup && startup->src_url) {
                 filename = startup->src_url;
+            } else if (running && running->src_url) {
+                filename = running->src_url;
             } else {
                 filename = NCX_DEF_STARTUP_FILE;
             }

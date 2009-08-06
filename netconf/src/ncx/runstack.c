@@ -104,6 +104,7 @@ typedef struct stack_entry_t_ {
 
 /* nested run command support */
 static boolean         runstack_init_done = FALSE;
+static boolean         script_cancel;
 static uint32          script_level;
 static stack_entry_t   runstack[RUNSTACK_MAX_NEST];
 static dlq_hdr_t       globalQ;    /* Q of ncx_var_t */
@@ -256,7 +257,8 @@ status_t
     }
 
     log_info("\nrunstack: Starting level %u script %s",
-	      script_level, se->source);
+             script_level, 
+             se->source);
 
 
     return NO_ERR;
@@ -357,6 +359,16 @@ xmlChar *
     total = 0;
     done = FALSE;
 
+    if (script_cancel) {
+        if (LOGINFO) {
+            log_info("\nScript '%s' canceled", se->source);
+        }
+        done = TRUE;
+        if (script_level <= 1) {
+            script_cancel = FALSE;
+        }
+    }
+
     /* get a command line, handling comment and continuation lines */
     while (!done) {
 
@@ -439,12 +451,29 @@ xmlChar *
 	runstack_pop();
     } else {
 	log_info("\nrunstack: run line %u, %s\n cmd: %s",
-		 se->linenum, se->source, retstr);
+		 se->linenum, 
+                 se->source, 
+                 retstr);
     }
 
     return retstr;
 
 }  /* runstack_get_cmd */
+
+
+/********************************************************************
+* FUNCTION runstack_cancel
+* 
+*  Cancel all running scripts
+*
+*********************************************************************/
+void
+    runstack_cancel (void)
+{
+    if (script_level) {
+        script_cancel = TRUE;
+    }
+}  /* runstack_cencel */
 
 
 /********************************************************************
@@ -518,6 +547,7 @@ void
 {
     if (!runstack_init_done) {
 	script_level = 0;
+        script_cancel = FALSE;
 	dlq_createSQue(&globalQ);
 	dlq_createSQue(&zeroQ);
 	runstack_init_done = TRUE;

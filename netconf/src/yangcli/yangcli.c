@@ -3303,7 +3303,8 @@ void
 
     /* check the contents of the reply */
     if (rpy && rpy->reply) {
-	if (val_find_child(rpy->reply, NC_MODULE,
+	if (val_find_child(rpy->reply, 
+                           NC_MODULE,
 			   NCX_EL_RPC_ERROR)) {
 	    log_error("\nRPC Error Reply %s for session %u:\n",
 		      rpy->msg_id, usesid);
@@ -3369,6 +3370,11 @@ void
     } else if (agent_cb->state == MGR_IO_ST_CONN_RPYWAIT) {
 	agent_cb->state = MGR_IO_ST_CONN_IDLE;
     } /* else leave state at its current value */
+
+    /* check if a script is running */
+    if (anyerrors && runstack_level()) {
+        runstack_cancel();
+    }
 
     /* free the request and reply */
     mgr_rpc_free_request(req);
@@ -3465,7 +3471,6 @@ status_t
     return res;
 
 }  /* finish_result_assign */
-
 
 
 /********************************************************************

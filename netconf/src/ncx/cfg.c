@@ -851,7 +851,7 @@ status_t
 	     * to the candidate are already made
 	     */
 	    res = (cfg_get_dirty_flag(cfg)) ? 
-		ERR_NCX_LOCK_DENIED : NO_ERR;
+		ERR_NCX_CANDIDATE_DIRTY : NO_ERR;
 	} else {
 	    /* lock can be granted if state is ready */
 	    res = NO_ERR;
@@ -1309,7 +1309,6 @@ void
 } /* cfg_get_lock_list */
 
 
-
 /********************************************************************
 * FUNCTION cfg_find_datanode
 *
@@ -1422,17 +1421,15 @@ status_t
     cfg_apply_load_root (cfg_template_t *cfg,
 			 val_value_t *newroot)
 {
-    if (cfg->root) {
-	if (val_child_cnt(cfg->root)) {
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-	val_free_value(cfg->root);
-	cfg->root = NULL;
+    if (cfg->root && val_child_cnt(cfg->root)) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    } else if (cfg->root) {
+        val_free_value(cfg->root);
+        cfg->root = NULL;
+        cfg->root = newroot;
+    } else {
+        cfg->root = newroot;
     }
-
-    cfg->root = newroot;
-
-    /* set the load_time and last_ch_time timestamps */
 
     /* set the load_time and last_ch_time timestamps */
     cfg->load_time = new_cur_datetime();

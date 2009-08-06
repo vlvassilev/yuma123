@@ -1552,6 +1552,13 @@ val_value_t *
 			      useval->name, 
 			      strval);
     } else if (obj->objtype == OBJ_TYP_ANYXML) {
+        /* convert the NCX_BT_ANY value to an NCX_BT_STRING
+         * by reinitializing the template
+         */
+        if (useval->btyp == NCX_BT_ANY) {
+            memset(&useval->v.childQ, 0x0, sizeof(dlq_hdr_t));
+            useval->btyp = NCX_BT_STRING;
+        }
 	*res = val_set_simval(useval, 
 			      typ_get_basetype_typdef(NCX_BT_STRING), 
 			      val_get_nsid(useval), 

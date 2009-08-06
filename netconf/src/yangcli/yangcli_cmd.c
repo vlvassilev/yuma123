@@ -7912,6 +7912,64 @@ static status_t
 
 
 /********************************************************************
+ * FUNCTION do_get_locks (local RPC)
+ * 
+ * get all the locks on thew agent
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ *    rpc == RPC method for the history command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    do_get_locks (agent_cb_t *agent_cb,
+                  const obj_template_t *rpc,
+                  const xmlChar *line,
+                  uint32  len)
+{
+    (void)agent_cb;
+    (void)rpc;
+    (void)line;
+    (void)len;
+
+    return NO_ERR;
+}  /* do_get_locks */
+
+
+/********************************************************************
+ * FUNCTION do_release_locks (local RPC)
+ * 
+ * release all the locks on thew agent
+ *
+ * INPUTS:
+ *    agent_cb == agent control block to use
+ *    rpc == RPC method for the history command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+static status_t
+    do_release_locks (agent_cb_t *agent_cb,
+                  const obj_template_t *rpc,
+                  const xmlChar *line,
+                  uint32  len)
+{
+    (void)agent_cb;
+    (void)rpc;
+    (void)line;
+    (void)len;
+
+    return NO_ERR;
+}  /* do_release_locks */
+
+
+/********************************************************************
 * FUNCTION do_local_conn_command
 * 
 * Handle local connection mode RPC operations from yangcli.yang
@@ -7947,10 +8005,14 @@ static status_t
 	res = do_edit(agent_cb, rpc, line, len, OP_EDITOP_CREATE);
     } else if (!xml_strcmp(rpcname, YANGCLI_DELETE)) {
 	res = do_edit(agent_cb, rpc, line, len, OP_EDITOP_DELETE);
+    } else if (!xml_strcmp(rpcname, YANGCLI_GET_LOCKS)) {
+	res = do_get_locks(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_INSERT)) {
 	res = do_insert(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_MERGE)) {
 	res = do_edit(agent_cb, rpc, line, len, OP_EDITOP_MERGE);
+    } else if (!xml_strcmp(rpcname, YANGCLI_RELEASE_LOCKS)) {
+	res = do_release_locks(agent_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_REPLACE)) {
 	res = do_edit(agent_cb, rpc, line, len, OP_EDITOP_REPLACE);
     } else if (!xml_strcmp(rpcname, YANGCLI_SAVE)) {

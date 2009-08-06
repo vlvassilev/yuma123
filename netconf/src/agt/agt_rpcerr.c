@@ -636,6 +636,9 @@ static rpc_err_t
     case ERR_NCX_MISSING_REFTARGET:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
 	return RPC_ERR_INVALID_VALUE;
+    case ERR_NCX_CANDIDATE_DIRTY:
+        *apptag = RPC_ERR_APPTAG_NO_ACCESS;
+	return RPC_ERR_RESOURCE_DENIED;
 
     /* user warnings start at 400 and do not need to be listed here */
     default:
@@ -1011,7 +1014,7 @@ rpc_err_rec_t *
     status_t                  res;
     rpc_err_sev_t             errsev;
     xmlns_id_t                badnsid1, badnsid2;
-
+    boolean                   just_errnum;
 
     /* get a new error record */
     err = rpc_err_new_record();
@@ -1039,6 +1042,7 @@ rpc_err_rec_t *
     errsev = RPC_ERR_SEV_NONE;
     badnsid1 = 0;
     badnsid2 = 0;
+    just_errnum = FALSE;
 
     switch (interr) {
     case ERR_NCX_MISSING_PARM:
@@ -1194,31 +1198,33 @@ rpc_err_rec_t *
 	break;
     case RPC_ERR_DATA_MISSING:
 	if (interr != ERR_NCX_MISSING_CHOICE) {
-	    return err;
+            just_errnum = TRUE;
 	}
 	break;
     default:
 	if (error_parm && parmtyp==NCX_NT_STRING) {
 	    badval = (const xmlChar *)error_parm;
 	} else {
-	    return err;
+            just_errnum = TRUE;
 	}
     } 
 
-    /* add the required error-info, call even if err2 is NULL */
-    res = add_base_vars(err, 
-			rpcerr, 
-			errnode, 
-			badval, 
-			badns, 
-			badnsid1,
-			badnsid2,
-			err1, 
-			err2, 
-			err4);
-    if (res != NO_ERR) {
-	/*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
-	;    /* add error statistics (TBD) */
+    if (!just_errnum) {
+        /* add the required error-info, call even if err2 is NULL */
+        res = add_base_vars(err, 
+                            rpcerr, 
+                            errnode, 
+                            badval, 
+                            badns, 
+                            badnsid1,
+                            badnsid2,
+                            err1, 
+                            err2, 
+                            err4);
+        if (res != NO_ERR) {
+            /*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
+            ;    /* add error statistics (TBD) */
+        }
     }
 
     res = add_error_number(err, interr);

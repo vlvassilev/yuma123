@@ -3726,11 +3726,8 @@ status_t
 
             if (obj_is_root(chval->obj)) {
                 continue;
-            } else if (chval->obj->objtype != OBJ_TYP_LEAF) {
-                /* skipping leafs because if they already
-                 * exist, there is nothing to check;
-                 * there is already one of them as required
-                 */
+            } else if (!obj_is_leafy(chval->obj)) {
+                /* recurse for all object types except leaf and leaf-list */
                 res = agt_val_instance_check(scb, 
                                              msg, 
                                              chval, 

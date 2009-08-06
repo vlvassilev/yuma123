@@ -399,7 +399,7 @@ status_t
                             }
                             agt_ses_kill_session(scb->sid,
                                                  scb->sid,
-                                                 SES_TR_OTHER);
+                                                 SES_TR_DROPPED);
 
                         } 
                     }

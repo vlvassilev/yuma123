@@ -631,7 +631,7 @@ void
     /* make sure any real session has been properly established */
     if (scb->type != SES_TYP_DUMMY && scb->state != SES_ST_IDLE) {
 	scb->stats.in_drop_msgs++;
-	log_error("\nError: mgr_not: skipping incoming message '%s'",
+	log_error("\nError: mgr_rpc: skipping incoming message '%s'",
 		  top->qname);
 	mgr_xml_skip_subtree(scb->reader, top);
 	return;
@@ -698,7 +698,7 @@ void
     req = find_request(scb, rpy->msg_id);
     if (!req) {
 #ifdef MGR_RPC_DEBUG
-	log_debug("\nmgr_rpc: missing request for msg (%s) on session %d", 
+	log_debug("\nmgr_rpc: go request found for msg (%s) on session %d", 
 		  rpy->msg_id, 
 		  scb->sid);
 #endif

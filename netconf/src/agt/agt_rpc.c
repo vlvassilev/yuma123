@@ -1494,7 +1494,7 @@ status_t
     retres = NO_ERR;
 
     /* first make sure the load-config RPC is registered */
-    rpcobj = find_rpc(AGT_CLI_MODULE, NCX_EL_LOAD_CONFIG);
+    rpcobj = find_rpc(NC_MODULE, NCX_EL_LOAD_CONFIG);
     if (!rpcobj) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
@@ -1537,8 +1537,8 @@ status_t
     /* create a dummy method XML node */
     xml_init_node(&method);
     method.nodetyp = XML_NT_START;
-    method.nsid = 0;
-    method.module = AGT_CLI_MODULE;
+    method.nsid = xmlns_nc_id();
+    method.module = NC_MODULE;
     method.qname = NCX_EL_LOAD_CONFIG;
     method.elname = NCX_EL_LOAD_CONFIG;
     method.depth = 1;

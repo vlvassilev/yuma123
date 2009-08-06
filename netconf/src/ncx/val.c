@@ -1524,8 +1524,10 @@ status_t
 			   const xmlChar *strval,
 			   const ncx_errinfo_t **errinfo)
 {
-    status_t        res;
-    ncx_num_t       len;
+    xpath_pcb_t           *xpathpcb;
+    const obj_template_t  *leafobj, *objroot;
+    status_t               res;
+    ncx_num_t              len;
 
 #ifdef DEBUG
     if (!typdef || !strval) {
@@ -1541,36 +1543,74 @@ status_t
 
     /* make sure the data type is correct */
     switch (btyp) {
-    case NCX_BT_STRING:
-	len.u = xml_strlen(strval);
-	res = val_range_ok_errinfo(typdef, NCX_BT_UINT32, &len, errinfo);
-	if (res != NO_ERR) {
-	    return res;
-	}
-
-	/* the range-test, if any, has succeeded
-	 * check if there is a pattern test for a string only
-	 */
-	if (btyp == NCX_BT_STRING) {
-	    res = val_pattern_ok_errinfo(typdef, strval, errinfo);
-	}
-	break;
     case NCX_BT_BINARY:
 	/* just get the length of the decoded binary string */
-	res = b64_decode(strval, xml_strlen(strval),
-			 NULL, NCX_MAX_UINT, &len.u);
+	res = b64_decode(strval, 
+                         xml_strlen(strval),
+			 NULL, 
+                         NCX_MAX_UINT, 
+                         &len.u);
 	if (res == NO_ERR) {
-	    res = val_range_ok_errinfo(typdef, NCX_BT_UINT32, 
-				       &len, errinfo);
+	    res = val_range_ok_errinfo(typdef, 
+                                       NCX_BT_UINT32, 
+				       &len, 
+                                       errinfo);
 	}
 	break;
+    case NCX_BT_STRING:
+        if (!(typ_is_xpath_string(typdef) ||
+              typ_is_schema_instance_string(typdef))) {
+            len.u = xml_strlen(strval);
+            res = val_range_ok_errinfo(typdef, 
+                                       NCX_BT_UINT32, 
+                                       &len, 
+                                       errinfo);
+            if (res == NO_ERR) {
+                res = val_pattern_ok_errinfo(typdef, 
+                                             strval, 
+                                             errinfo);
+            }
+            break;
+        }
+        /* else fall through and treat XPath string */
     case NCX_BT_INSTANCE_ID:
-        /* instance-identifier is handled with xpath.c xpath1.c
-         * functions; do not use for instance identifier validation
-         * since the source of the prefix mappings may be an XML reader
-         * or a YANG module
-         */
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        /* instance-identifier is handled with xpath.c xpath1.c */
+        xpathpcb = xpath_new_pcb(strval);
+        if (xpathpcb) {
+            res = ERR_INTERNAL_MEM;
+        } else if (btyp == NCX_BT_INSTANCE_ID ||
+                   typ_is_schema_instance_string(typdef)) {
+            /* do a first pass parsing to resolve all
+             * the prefixes and check well-formed XPath
+             */
+            res = xpath_yang_parse_path(NULL, 
+                                        NULL,
+                                        XP_SRC_INSTANCEID,
+                                        xpathpcb);
+            if (res == NO_ERR) {
+                leafobj = NULL;
+                res = xpath_yang_validate_path(NULL, 
+                                               ncx_get_gen_root(), 
+                                               xpathpcb, 
+                                               (btyp == NCX_BT_INSTANCE_ID) 
+                                               ? FALSE : TRUE,
+                                               &leafobj);
+            }
+            xpath_free_pcb(xpathpcb);
+        } else {
+            res = xpath1_parse_expr(NULL, 
+                                    NULL,
+                                    xpathpcb,
+                                    XP_SRC_YANG);
+            if (res == NO_ERR) {
+                objroot = ncx_get_gen_root();
+                res = xpath1_validate_expr(objroot->mod, 
+                                           objroot, 
+                                           xpathpcb);
+            }
+            xpath_free_pcb(xpathpcb);
+        }
+        break;
     case NCX_BT_LEAFREF:
         /*** BUG: MISSING LEAFREF VALIDATION ***/
 	return NO_ERR;
@@ -3890,9 +3930,16 @@ status_t
     }
 #endif
 
-    res = val_simval_ok(typdef, valstr);
-    if (res != NO_ERR) {
-	return res;
+    val->btyp = typ_get_basetype(typdef);
+    
+    if (!(val->btyp == NCX_BT_INSTANCE_ID ||
+          typ_is_schema_instance_string(typdef) ||
+          typ_is_xpath_string(typdef))) {
+          
+        res = val_simval_ok(typdef, valstr);
+        if (res != NO_ERR) {
+            return res;
+        }
     }
 
     clean_value(val, FALSE);
@@ -3916,7 +3963,7 @@ status_t
      */
     val->nsid = nsid;
     val->typdef = typdef;
-    val->btyp = typ_get_basetype(typdef);
+
 
     /* convert the value string, if any */
     switch (val->btyp) {
@@ -4051,13 +4098,13 @@ status_t
                                             xpathpcb);
                 if (res == NO_ERR) {
                     leafobj = NULL;
-                    res = xpath_yang_validate_path
-                        (NULL, 
-                         ncx_get_gen_root(), 
-                         xpathpcb, 
-                         (val->btyp == NCX_BT_INSTANCE_ID) 
-                         ? FALSE : TRUE,
-                         &leafobj);
+                    res = xpath_yang_validate_path(NULL, 
+                                                   ncx_get_gen_root(), 
+                                                   xpathpcb, 
+                                                   (val->btyp 
+                                                    == NCX_BT_INSTANCE_ID) 
+                                                   ? FALSE : TRUE,
+                                                   &leafobj);
                 }
                 if (val->xpathpcb) {
                     xpath_free_pcb(val->xpathpcb);

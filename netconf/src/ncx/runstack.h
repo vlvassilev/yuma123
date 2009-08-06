@@ -66,6 +66,9 @@ extern void
 extern xmlChar *
     runstack_get_cmd (status_t *res);
 
+extern void
+    runstack_cancel (void);
+
 extern dlq_hdr_t *
     runstack_get_que (boolean isglobal);
 

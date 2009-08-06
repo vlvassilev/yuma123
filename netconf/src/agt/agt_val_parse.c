@@ -1609,7 +1609,7 @@ static status_t
     }
 
     /* check if any errors; record the first error */
-    if ((res != NO_ERR)        && !errdone) {
+    if ((res != NO_ERR) && !errdone) {
         /* add rpc-error to msg->errQ */
         (void)parse_error_subtree_errinfo(scb, 
                                           msg, 
@@ -2292,7 +2292,10 @@ static status_t
          * go through the loop once because the </load-config> tag
          * will not be present
          */
-        if ((startnode->nsid == xmlns_ncx_id() || startnode->nsid == 0) && 
+        if ((startnode->nsid == 0 ||
+             startnode->nsid == xmlns_nc_id() ||
+             startnode->nsid == xmlns_ncx_id() ||
+             startnode->nsid == xmlns_find_ns_by_name(NC_MODULE)) &&
             !xml_strcmp(startnode->elname, NCX_EL_LOAD_CONFIG)) {
             done = TRUE;
         }
@@ -2706,8 +2709,12 @@ static status_t
     nserr = (btyp != NCX_BT_ANY);
 
     /* parse the attributes, if any; do not quick exit on this error */
-    res2 = parse_metadata_nc(scb, msg, obj, startnode, 
-                             nserr, retval);
+    res2 = parse_metadata_nc(scb, 
+                             msg, 
+                             obj, 
+                             startnode, 
+                             nserr, 
+                             retval);
 
     /* continue to parse the startnode depending on the base type 
      * to record as many errors as possible

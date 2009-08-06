@@ -612,6 +612,8 @@ const char *
 	return "no matches found";
     case ERR_NCX_MISSING_REFTARGET:
 	return "missing refine target";
+    case ERR_NCX_CANDIDATE_DIRTY:
+	return "candidate cannot be locked, discard-changes needed";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

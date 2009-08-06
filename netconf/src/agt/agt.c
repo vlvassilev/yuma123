@@ -575,6 +575,8 @@ status_t
                  "to no-startup CLI option\n");
     }
 
+    /****   P H A S E   2   I N I T  ****  C O N F I G   D A T A  ***/
+
     /* load the nacm access control DM module */
     res = agt_acm_init2();
     if (res != NO_ERR) {

@@ -2179,12 +2179,6 @@ status_t
 	    xmlFree(ns);
 	}
 	m__free(str);
-    } else if (prefix) {
-	ns = xmlTextReaderLookupNamespace(reader, prefix);
-	if (ns) {
-	    *retnsid = xmlns_find_ns_by_name(ns);
-	    xmlFree(ns);
-	}
     } else {
 	ns = xmlTextReaderLookupNamespace(reader, NULL);
 	if (ns) {

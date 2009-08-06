@@ -565,9 +565,14 @@ static status_t
     /* process the specific node type 
      * Recurively find the top node and start there
      */
-    if (val->parent) {
-	res = get_instance_string(mhdr, format, val->parent, 
-				  buff, &cnt);
+    if (val->parent &&
+        val->parent->obj &&
+        !obj_is_root(val->parent->obj)) {
+	res = get_instance_string(mhdr, 
+                                  format, 
+                                  val->parent, 
+				  buff, 
+                                  &cnt);
     } else {
 	root = TRUE;
     }

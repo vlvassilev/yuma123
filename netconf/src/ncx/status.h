@@ -287,7 +287,8 @@ typedef enum status_t_
     ERR_NCX_RPC_WHEN_FAILED,            /* 364 */
     ERR_NCX_NO_MATCHES,                 /* 365 */
     ERR_NCX_MISSING_REFTARGET,          /* 366 */
-    ERR_LAST_USR_ERR,                   /* 366 -- not really used */
+    ERR_NCX_CANDIDATE_DIRTY,            /* 367 */
+    ERR_LAST_USR_ERR,                   /* 368 -- not really used */
 
     /* user warnings start at 400 */
     ERR_MAKFILE_DUP_SRC=ERR_WARN_BASE,  /* 400 */

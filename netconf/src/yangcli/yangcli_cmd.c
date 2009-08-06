@@ -5186,9 +5186,10 @@ static status_t
 	}
 	val_free_value(reqdata);
 	return ERR_INTERNAL_MEM;
+    } else {
+        val_init_from_template(parm, child);
+        val_add_child(parm, reqdata);
     }
-    val_init_from_template(parm, child);
-    val_add_child(parm, reqdata);
 
     target = xml_val_new_flag(agent_cb->default_target,
 			      obj_get_nsid(child));
@@ -5200,9 +5201,9 @@ static status_t
 	}
 	val_free_value(reqdata);
 	return ERR_INTERNAL_MEM;
+    } else {
+        val_add_child(target, parm);
     }
-
-    val_add_child(target, parm);
 
     /* set the edit-config/input/default-operation node */
     if (!(agent_cb->defop == OP_DEFOP_NOT_USED ||
@@ -5221,8 +5222,9 @@ static status_t
             }
             val_free_value(reqdata);
             return res;
+        } else {
+            val_add_child(parm, reqdata);
         }
-        val_add_child(parm, reqdata);
     }
 
     /* set the test-option to the user-configured or default value */
@@ -5245,7 +5247,9 @@ static status_t
 	    }
 	    val_free_value(reqdata);
 	    return res;
-	}
+	} else {
+            val_add_child(parm, reqdata);
+        }
     }
 
     /* set the error-option to the user-configured or default value */
@@ -5268,7 +5272,9 @@ static status_t
 	    }
 	    val_free_value(reqdata);
 	    return ERR_INTERNAL_MEM;
-	}
+	} else {
+            val_add_child(parm, reqdata);
+        }
     }
 
     /* create the <config> node */
@@ -5284,9 +5290,10 @@ static status_t
 	}
 	val_free_value(reqdata);
 	return ERR_INTERNAL_MEM;
+    } else {
+        val_init_from_template(parm, child);
+        val_add_child(parm, reqdata);
     }
-    val_init_from_template(parm, child);
-    val_add_child(parm, reqdata);
 
 
     /* set the edit-config/input/config node to the

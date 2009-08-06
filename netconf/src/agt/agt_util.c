@@ -626,24 +626,15 @@ void
 	    }
 	}
 
-	if (errinfo) {
-	    err = agt_rpcerr_gen_error_errinfo(layer, 
-					       res, 
-					       xmlnode, 
-					       parmtyp, 
-					       error_info, 
-					       pathbuff, 
-					       errinfo);
-	} else {
-	    err = agt_rpcerr_gen_error(layer, 
-				       res, 
-				       xmlnode, 
-				       parmtyp, 
-				       error_info, 
-				       pathbuff);
-	}
-
+        err = agt_rpcerr_gen_error_errinfo(layer, 
+                                           res, 
+                                           xmlnode, 
+                                           parmtyp, 
+                                           error_info, 
+                                           pathbuff, 
+                                           errinfo);
 	if (err) {
+            /* pass off pathbuff memory here */
 	    dlq_enque(err, errQ);
 	} else {
 	    if (pathbuff) {

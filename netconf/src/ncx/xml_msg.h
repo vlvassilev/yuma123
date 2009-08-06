@@ -153,6 +153,7 @@ extern status_t
 
 extern status_t
     xml_msg_gen_xmlns_attrs (xml_msg_hdr_t *msg, 
-			     xml_attrs_t *attrs);
+			     xml_attrs_t *attrs,
+                             boolean addncx);
 
 #endif            /* _H_xml_msg */

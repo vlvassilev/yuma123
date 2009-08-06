@@ -540,10 +540,11 @@ static void
     }
 
     agttotals = ses_get_total_stats();
-    errsend = FALSE;
+    errsend = !dlq_empty(&msg->mhdr.errQ);
 
     res = xml_msg_gen_xmlns_attrs(&msg->mhdr, 
-                                  msg->rpc_in_attrs);
+                                  msg->rpc_in_attrs,
+                                  errsend);
     if (res != NO_ERR) {
         ses_finish_msg(scb);
         scb->stats.out_drop_bytes++;
@@ -594,11 +595,10 @@ static void
          *
          * first send all the buffered errors
          */
-        for (err = (const rpc_err_rec_t *)dlq_firstEntry(&msg->mhdr.errQ);
+        for (err = (const rpc_err_rec_t *)
+                 dlq_firstEntry(&msg->mhdr.errQ);
              err != NULL;
              err = (const rpc_err_rec_t *)dlq_nextEntry(err)) {
-
-            errsend = TRUE;
 
             res = send_rpc_error(scb, msg, err, indent);
             if (res != NO_ERR) {
@@ -665,7 +665,11 @@ static void
     } 
 
     /* generate the <rpc-reply> end tag */
-    xml_wr_end_elem(scb, &msg->mhdr, ncid, NCX_EL_RPC_REPLY, 0);
+    xml_wr_end_elem(scb, 
+                    &msg->mhdr, 
+                    ncid, 
+                    NCX_EL_RPC_REPLY, 
+                    0);
 
     /* finish the message */
     ses_finish_msg(scb);

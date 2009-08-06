@@ -391,7 +391,7 @@ const xmlChar *
     *xneeded = FALSE;
 
     /* check if the default namespace is requested */
-    if (nsid == msg->defns || nsid==0) {
+    if (nsid == msg->defns || nsid == 0) {
 	return NULL;
     }
 
@@ -409,8 +409,10 @@ const xmlChar *
 
 	/* generate a prefix ID */
 	newpmap->nm_id = nsid;
-	res = xml_msg_gen_new_prefix(msg, nsid, 
-				     &newpmap->nm_pfix, 0);
+	res = xml_msg_gen_new_prefix(msg,
+                                     nsid, 
+				     &newpmap->nm_pfix, 
+                                     0);
 	if (res != NO_ERR) {
 	    SET_ERROR(res);
 	    xmlns_free_pmap(newpmap);
@@ -503,8 +505,10 @@ const xmlChar *
 
     /* generate a prefix ID */
     newpmap->nm_id = nsid;
-    res = xml_msg_gen_new_prefix(msg, nsid, 
-				 &newpmap->nm_pfix, 0);
+    res = xml_msg_gen_new_prefix(msg, 
+                                 nsid, 
+				 &newpmap->nm_pfix, 
+                                 0);
     if (res != NO_ERR) {
 	xmlns_free_pmap(newpmap);
 	return NULL;
@@ -568,7 +572,7 @@ const xmlChar *
 *    msg  == message to search and generate a prefix for
 *    nsid == namespace ID to generate prefix for
 *    retbuff == address of return buffer
-*
+*    buffsize == buffer size
 * OUTPUTS:
 *   if *retbuff is NULL it will be created
 *   else *retbuff is filled in with the new prefix if NO_ERR
@@ -935,6 +939,9 @@ status_t
 * INPUTS:
 *    msg == message in progress
 *    attrs == xmlns_attrs_t Q to process
+*    addncx == TRUE if an xmlns for the NCX prefix (for errors)
+*              should be added to the <rpc-reply> element
+*              FALSE if not
 *
 * OUTPUTS:
 *   *attrs will be populated as needed,
@@ -944,11 +951,14 @@ status_t
 *********************************************************************/
 status_t
     xml_msg_gen_xmlns_attrs (xml_msg_hdr_t *msg, 
-			     xml_attrs_t *attrs)
+			     xml_attrs_t *attrs,
+                             boolean addncx)
 {
-    xmlns_pmap_t *pmap;
+    xmlns_pmap_t *pmap, *newpmap;
     xmlChar      *buff;
     status_t      res, retres;
+    boolean       ncxfound;
+    xmlns_id_t    ncx_id;
 
 #ifdef DEBUG
     if (!msg || !attrs) {
@@ -956,11 +966,17 @@ status_t
     }
 #endif
 
+    ncxfound = FALSE;
     retres = NO_ERR;
+    ncx_id = xmlns_ncx_id();
 
     for (pmap = (xmlns_pmap_t *)dlq_firstEntry(&msg->prefixQ);
 	 pmap != NULL;
 	 pmap = (xmlns_pmap_t *)dlq_nextEntry(pmap)) {
+
+        if (pmap->nm_id == ncx_id) {
+            ncxfound = TRUE;
+        }
 
 	if (pmap->nm_topattr) {
 	    continue;
@@ -980,6 +996,37 @@ status_t
 	} else {
 	    pmap->nm_topattr = TRUE;
 	}
+    }
+
+    if (!ncxfound && addncx && retres == NO_ERR) {
+	/* need to create a new prefix map and save it */
+	newpmap = xmlns_new_pmap(0);
+	if (!newpmap) {
+            retres = ERR_INTERNAL_MEM;
+	} else {
+            /* generate a prefix ID */
+            newpmap->nm_id = ncx_id;
+            newpmap->nm_topattr = TRUE;
+            res = xml_msg_gen_new_prefix(msg,
+                                         ncx_id, 
+                                         &newpmap->nm_pfix, 
+                                         0);
+            if (res == NO_ERR) {
+                /* add the new prefix mapping to the prefixQ */
+                res = xml_add_xmlns_attr(attrs, 
+                                         newpmap->nm_id, 
+                                         newpmap->nm_pfix);
+                if (res == NO_ERR) {
+                    add_pmap(msg, newpmap);
+                } else {
+                    xmlns_free_pmap(newpmap);
+                    retres = res;
+                }
+            } else {
+                xmlns_free_pmap(newpmap);
+                retres = res;
+            }
+        }
     }
 
     return retres;

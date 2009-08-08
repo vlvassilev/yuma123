@@ -2708,7 +2708,14 @@ static status_t
     /* check namespace errors except if the type is ANY */
     nserr = (btyp != NCX_BT_ANY);
 
-    /* parse the attributes, if any; do not quick exit on this error */
+    if (retval->obj == NULL) {
+        /* in case the parse_metadata_nc function
+         * wants to record an error
+         */
+        retval->obj = ncx_get_gen_anyxml();
+    }
+
+    /* parse the attributes, if any */
     res2 = parse_metadata_nc(scb, 
                              msg, 
                              obj, 
@@ -2910,8 +2917,12 @@ status_t
 #endif
 
     /* get the element values */
-    res = parse_btype_nc(scb, msg, obj, startnode, 
-                         parentdc, retval);
+    res = parse_btype_nc(scb, 
+                         msg, 
+                         obj, 
+                         startnode, 
+                         parentdc, 
+                         retval);
     return res;
 
 }  /* agt_val_parse_nc */

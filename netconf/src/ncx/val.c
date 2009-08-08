@@ -1576,7 +1576,7 @@ status_t
     case NCX_BT_INSTANCE_ID:
         /* instance-identifier is handled with xpath.c xpath1.c */
         xpathpcb = xpath_new_pcb(strval);
-        if (xpathpcb) {
+        if (xpathpcb == NULL) {
             res = ERR_INTERNAL_MEM;
         } else if (btyp == NCX_BT_INSTANCE_ID ||
                    typ_is_schema_instance_string(typdef)) {

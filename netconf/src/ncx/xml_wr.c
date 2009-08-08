@@ -1052,8 +1052,13 @@ void
 	    indent += ses_indent_count(scb);
 	}
 	if (attrQ) {
-	    write_attrs(scb, msg, attrQ, isattrq, 
-			NULL, indent, nsid);
+	    write_attrs(scb, 
+                        msg, 
+                        attrQ, 
+                        isattrq, 
+			NULL, 
+                        indent, 
+                        nsid);
 	}
 	if (xneeded) {
 	    if (!attrQ || dlq_empty(attrQ)) {

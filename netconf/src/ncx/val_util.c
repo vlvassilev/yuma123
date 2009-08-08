@@ -589,18 +589,18 @@ static status_t
     }
 
     if (val->obj->objtype == OBJ_TYP_RPCIO) {
-	/* get the prefix and name of the RPC method 
-	 * instead of this node named 'input'
-	 */
-	rpcid = obj_get_nsid(val->obj->parent);
-	if (rpcid) {
-	    if (mhdr) {
-		prefix = xml_msg_get_prefix_xpath(mhdr, rpcid);
-	    } else {
-		prefix = xmlns_get_ns_prefix(rpcid);
-	    }
-	}
-	name = obj_get_name(val->obj->parent);
+        /* get the prefix and name of the RPC method 
+         * instead of this node named 'input'
+         */
+        rpcid = obj_get_nsid(val->obj->parent);
+        if (rpcid) {
+            if (mhdr) {
+                prefix = xml_msg_get_prefix_xpath(mhdr, rpcid);
+            } else {
+                prefix = xmlns_get_ns_prefix(rpcid);
+            }
+        }
+        name = obj_get_name(val->obj->parent);
     } else {
 	/* make sure the prefix is in the message header so
 	 * an xmlns directive will be generated for this prefix

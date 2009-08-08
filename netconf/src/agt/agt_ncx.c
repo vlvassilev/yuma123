@@ -1231,14 +1231,11 @@ static status_t
                          NULL, 
                          NCX_NT_NONE, 
                          NULL);
-    } else {
-        /* save the session control block */
-        msg->rpc_user1 = (void *)scb;
     }
 
     return res;
 
-} /* kill_session_validate */
+}  /* kill_session_validate */
 
 
 /********************************************************************
@@ -1256,12 +1253,34 @@ static status_t
                          rpc_msg_t *msg,
                          xml_node_t *methnode)
 {
-    ses_cb_t    *savedscb;
+    val_value_t *val;
+    status_t     res;
 
-    (void)methnode;
+    /* get the session-id parameter */
+    val = val_find_child(msg->rpc_input, 
+                         NC_MODULE,
+                         NCX_EL_SESSION_ID);
+    if (!val || val->res != NO_ERR) {
+        /* error already recorded in parse phase */
 
-    savedscb = (ses_cb_t *)msg->rpc_user1;
-    agt_ses_kill_session(savedscb->sid, 
+        if (val) {
+            res = val->res;
+        } else {
+            res = ERR_NCX_OPERATION_FAILED;
+        }
+
+        agt_record_error(scb, 
+                         &msg->mhdr, 
+                         NCX_LAYER_OPERATION, 
+                         res,
+                         methnode, 
+                         NCX_NT_NONE, 
+                         NULL, 
+                         NCX_NT_NONE, 
+                         NULL);
+    }
+
+    agt_ses_kill_session((ses_id_t)VAL_UINT(val), 
                          scb->sid,
                          SES_TR_KILLED);
     return NO_ERR;

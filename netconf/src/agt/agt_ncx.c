@@ -1808,13 +1808,16 @@ static status_t
     xmlChar               *moduri;
     agt_profile_t         *agt_profile;
     status_t               res;
-    boolean                module_added;
+    boolean                module_added, errdone;
 
     res = NO_ERR;
     newval = NULL;
+    mod = NULL;
+    errdone = FALSE;
     module_added = FALSE;
     agt_profile = agt_get_profile();
 
+    /* mandatory module name */
     modval = val_find_child(msg->rpc_input, 
                             NCXMOD_NETCONFD,
                             NCX_EL_MODULE);
@@ -1823,6 +1826,7 @@ static status_t
         return ERR_NCX_OPERATION_FAILED;
     }
 
+    /* optional revision data string */
     revval = val_find_child(msg->rpc_input, 
                             NCXMOD_NETCONFD,
                             NCX_EL_REVISION);
@@ -1855,13 +1859,14 @@ static status_t
                                  NULL, 
                                  NCX_NT_VAL, 
                                  devval);
+                errdone = TRUE;
             }
         }
         if (res == NO_ERR) {
             res = ncxmod_load_module(VAL_STR(modval), 
                                      (revval) ? VAL_STR(revval) : NULL, 
                                      &agt_profile->agt_savedevQ,
-                                     NULL);
+                                     &mod);
             if (res == NO_ERR) {
                 module_added = TRUE;
             } else {
@@ -1874,6 +1879,7 @@ static status_t
                                  NULL, 
                                  NCX_NT_VAL, 
                                  modval);
+                errdone = TRUE;
             }
         }
     } else if (revval) {
@@ -1895,7 +1901,7 @@ static status_t
                              NULL, 
                              NCX_NT_VAL, 
                              revval);
-
+            errdone = TRUE;
         }
     }
 
@@ -1904,20 +1910,20 @@ static status_t
         newval = val_make_string(val_get_nsid(modval),
                                  NCX_EL_MOD_REVISION,
                                  mod->version);                                 
-        if (!newval) {
+        if (newval == NULL) {
             res = ERR_INTERNAL_MEM;
         }
     }
 
-    if (res == NO_ERR && module_added) {
+    if (res == NO_ERR && mod && module_added) {
         res = agt_state_add_module_schema(mod);
     }
 
-    if (res == NO_ERR && module_added) {
+    if (res == NO_ERR && mod && module_added) {
         res = agt_cap_add_module(mod);
     }
 
-    if (res == NO_ERR && module_added) {
+    if (res == NO_ERR && mod && module_added) {
         moduri = cap_make_moduri(mod);
         if (!moduri) {
             res = ERR_INTERNAL_MEM;
@@ -1930,15 +1936,17 @@ static status_t
     }
 
     if (res != NO_ERR) {
-        agt_record_error(scb, 
-                         &msg->mhdr, 
-                         NCX_LAYER_OPERATION, 
-                         res,
-                         methnode, 
-                         NCX_NT_NONE, 
-                         NULL, 
-                         NCX_NT_VAL, 
-                         modval);
+        if (!errdone) {
+            agt_record_error(scb, 
+                             &msg->mhdr, 
+                             NCX_LAYER_OPERATION, 
+                             res,
+                             methnode, 
+                             NCX_NT_NONE, 
+                             NULL, 
+                             NCX_NT_VAL, 
+                             modval);
+        }
         if (newval != NULL) {
             val_free_value(newval);
         }

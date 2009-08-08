@@ -290,23 +290,23 @@ static status_t
 		if (!chval) {
 		    defval = obj_get_default(chobj);
 		    if (defval) {
-			res = cli_parse_parm(val, 
-					     chobj,
-					     defval, 
-					     scriptmode);
-			if (res==NO_ERR) {
-			    chval = val_find_child(val, 
-						   obj_get_mod_name(chobj),
-						   obj_get_name(chobj));
-			    if (!chval) {
-				SET_ERROR(ERR_INTERNAL_VAL);
-			    } else {
-				chval->flags |= VAL_FL_DEFSET;
-			    }
-			}
-		    }
-		}
-	    }
+                        res = cli_parse_parm(val, 
+                                             chobj,
+                                             defval, 
+                                             scriptmode);
+                        if (res==NO_ERR) {
+                            chval = val_find_child(val, 
+                                                   obj_get_mod_name(chobj),
+                                                   obj_get_name(chobj));
+                            if (!chval) {
+                                SET_ERROR(ERR_INTERNAL_VAL);
+                            } else {
+                                chval->flags |= VAL_FL_DEFSET;
+                            }
+                        }
+                    }
+                }
+            }
 	    break;
 	case OBJ_TYP_CHOICE:
 	    /* if the choice is not set, and it has a default

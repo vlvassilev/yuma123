@@ -353,6 +353,7 @@ void
 
     ncx_clean_appinfoQ(&typ->appinfoQ);
 
+
     m__free(typ);
 
 }  /* typ_free_template */

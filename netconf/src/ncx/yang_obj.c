@@ -5273,7 +5273,7 @@ static status_t
 				    leaf->defval, 
                                     obj);
 	CHK_EXIT(res, retres);
-    } 
+    }
 
     finish_config_flag(obj);
 
@@ -6031,14 +6031,16 @@ static status_t
 
     /* check defval is valid case name */
     if (choic->defval) {
-	cas = obj_find_case(choic, obj_get_mod_name(obj), 
+	cas = obj_find_case(choic, 
+                            obj_get_mod_name(obj), 
 			    choic->defval);
 	if (!cas) {
 	    /* default is not a valid case name */
 	    tkc->cur = obj->tk;
 	    retres = ERR_NCX_INVALID_VALUE;
 	    log_error("\nError: Choice default '%s' "
-		      "not a valid case name", choic->defval);
+		      "not a valid case name", 
+                      choic->defval);
 	    ncx_print_errormsg(tkc, mod, retres);
 	} else {
 	    /* valid case name, 

@@ -3075,6 +3075,7 @@ static status_t
 *   grp == grp_template containing this typdef, otherwise NULL
 *   fromdef == TRUE if this is a call for a typedef
 *           == FALSE if this is a call for a leaf or leaf-list
+*
 * RETURNS:
 *   status of the operation
 *********************************************************************/
@@ -3216,7 +3217,7 @@ static status_t
 		}
 		tkc->cur = typdef->tk;
 		ncx_print_errormsg(tkc, mod, res);
-	    }
+            }
 	} else if (typdef->class == NCX_CL_NAMED) {
 	    typdefval = typ_get_defval(typdef->def.named.typ);
 	    if (typdefval) {
@@ -3246,7 +3247,7 @@ static status_t
 		    }
 		    tkc->cur = typdef->tk;
 		    ncx_print_errormsg(tkc, mod, res);
-		}
+                }
 	    }
 	}
     }
@@ -3417,23 +3418,20 @@ static status_t
 					  &typ->appinfoQ);
     CHK_EXIT(res, retres);
 
-    res = resolve_type(pcb,
-                       tkc, 
-		       mod, 
-		       &typ->typdef, 
-		       typ->name,
-		       typ->defval, 
-		       obj, 
-		       grp, 
-		       TRUE);
-    if (typ->res == NO_ERR) {
-	typ->res = res;
-    }
+    typ->res = res = resolve_type(pcb,
+                                  tkc, 
+                                  mod, 
+                                  &typ->typdef, 
+                                  typ->name,
+                                  typ->defval, 
+                                  obj, 
+                                  grp, 
+                                  TRUE);
     CHK_EXIT(res, retres);
+
     return retres;
 
 }  /* resolve_typedef */
-
 
 
 /********************************************************************

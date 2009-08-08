@@ -33,6 +33,10 @@ date	     init     comment
 
 #include <xmlstring.h>
 
+#ifndef _H_help
+#include "help.h"
+#endif
+
 #ifndef _H_status
 #include "status.h"
 #endif
@@ -261,5 +265,17 @@ extern void
 
 extern void
     ncxmod_clear_altpath (void);
+
+extern status_t
+    ncxmod_list_data_files (help_mode_t helpmode,
+                            boolean logstdout);
+
+extern status_t
+    ncxmod_list_script_files (help_mode_t helpmode,
+                              boolean logstdout);
+
+extern status_t
+    ncxmod_list_yang_files (help_mode_t helpmode,
+                            boolean logstdout);
 
 #endif	    /* _H_ncxmod */

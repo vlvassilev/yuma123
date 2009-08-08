@@ -31,6 +31,10 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
+#ifndef _H_help
+#include "help.h"
+#endif
+
 #ifndef _H_log
 #include "log.h"
 #endif
@@ -88,6 +92,15 @@ typedef enum ncxmod_mode_t_ {
 } ncxmod_mode_t;
 
 
+/* Enumeration of the file directory list modes */
+typedef enum search_type_t_ {
+    SEARCH_TYPE_NONE,
+    SEARCH_TYPE_MODULE,
+    SEARCH_TYPE_DATA,
+    SEARCH_TYPE_SCRIPT
+} search_type_t;
+
+
 /********************************************************************
 *                                                                   *
 *                       V A R I A B L E S			    *
@@ -118,6 +131,38 @@ static const xmlChar *ncxmod_run_path;
 static xmlChar *ncxmod_run_path_cli;
 
 static boolean ncxmod_subdirs;
+
+
+/********************************************************************
+* FUNCTION is_yang_file
+*
+* Check the file suffix for .yang
+*
+* INPUTS:
+*    buff == buffer to check
+*
+* RETURNS:
+*   TRUE if .yang extension
+*   FALSE otherwise
+*********************************************************************/
+static boolean
+    is_yang_file (const xmlChar *buff)
+{
+    const xmlChar    *str;
+    uint32            count;
+
+    count = xml_strlen(buff);
+    if (count < 6) {
+        return FALSE;
+    }
+
+    str = &buff[count-5];
+
+    return (xml_strcmp(str, (const xmlChar *)".yang")) ? FALSE : TRUE;
+
+} /* is_yang_file */
+
+
 
 
 /********************************************************************
@@ -524,6 +569,7 @@ static boolean
 }  /* test_pathlist */
 
 
+
 /********************************************************************
 * FUNCTION search_subdirs
 *
@@ -697,6 +743,274 @@ static status_t
     return res;
 
 }  /* search_subdirs */
+
+
+/********************************************************************
+* FUNCTION list_subdirs
+*
+* List the relevant files in the subdir
+*
+* INPUTS:
+*    buff == buffer to use for filespec construction
+*            at the start it contains the path string to use;
+*            new directory names will be added to this buffer
+*            as the subdirs are traversed
+*    bufflen == size of buff in bytes
+*    searchtype == enum for the search type to use
+*    helpmode == help mode to use (BRIEF, NORMAL, FULL)
+*    logstdout == TRUE for log_stdout, FALSE for log_write
+*    dive == TRUE to list subdirs; FALSE to list just the
+*            specified directory
+*
+* RETURNS:
+*    NO_ERR if file found okay, full filespec in the 'buff' variable
+*    OR some error if not found or buffer overflow
+*********************************************************************/
+static status_t
+    list_subdirs (xmlChar *buff,
+                  uint32 bufflen,
+                  search_type_t searchtype,
+                  help_mode_t helpmode,
+                  boolean logstdout,
+                  boolean dive)
+{
+    DIR           *dp;
+    struct dirent *ep;
+    xmlChar       *str;
+    uint32         pathlen, dentlen;
+    boolean        dirdone, isyang;
+    status_t       res;
+
+    res = NO_ERR;
+    dentlen = 0;
+    pathlen = xml_strlen(buff);
+
+    /* try to open the buffer spec as a directory */
+    dp = opendir((const char *)buff);
+    if (!dp) {
+	return NO_ERR;  /* not done yet */
+    }
+
+    /* list top-down:
+     * first all the files first from this directory
+     * then files from any subdirs
+     */
+    dirdone = FALSE;
+    while (!dirdone) {
+
+	ep = readdir(dp);
+	if (!ep) {
+	    dirdone = TRUE;
+	    continue;
+	}
+
+	if (ep->d_type == DT_REG) {
+
+            /* skip files that start with a dot char */
+            if (*ep->d_name == '.') {
+                continue;
+            }
+
+            isyang = is_yang_file((const xmlChar *)ep->d_name);
+
+            /* check if this file needs to be listed */
+            switch (searchtype) {
+            case SEARCH_TYPE_MODULE:
+                if (!isyang) {
+                    continue;
+                }
+                break;
+            case SEARCH_TYPE_DATA:
+            case SEARCH_TYPE_SCRIPT:
+                if (isyang) {
+                    continue;
+                }
+                break;
+            case SEARCH_TYPE_NONE:
+            default:
+                dirdone = TRUE;
+                SET_ERROR(ERR_INTERNAL_VAL);
+                continue;
+
+            }
+
+            /* list the file */
+            if (logstdout) {
+                log_stdout_indent(NCX_DEF_INDENT);
+                if (helpmode == HELP_MODE_FULL) {
+                    log_stdout((const char *)buff);
+                }
+                log_stdout(ep->d_name);
+                if (helpmode != HELP_MODE_BRIEF) {
+                    ;
+                }
+            } else {
+                log_indent(NCX_DEF_INDENT);
+                if (helpmode == HELP_MODE_FULL) {
+                    log_write((const char *)buff);
+                }
+                log_write(ep->d_name);
+                if (helpmode != HELP_MODE_BRIEF) {
+                    ;
+                }
+            }
+	}
+    }
+
+    (void)closedir(dp);
+
+    if (!dive) {
+        return NO_ERR;
+    }
+
+    /* try to open the buffer spec as a directory */
+    dp = opendir((const char *)buff);
+    if (!dp) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* go through again but this time just dive into the subdirs */
+    dirdone = FALSE;
+    while (!dirdone) {
+
+	ep = readdir(dp);
+	if (!ep) {
+	    dirdone = TRUE;
+	    continue;
+	}
+
+	/* this field may not be present on all POSIX systems
+	 * according to the glibc 2.7 documentation!!
+	 * only using dir file which works on linux. 
+	 * !!!No support for symbolic links at this time!!!
+	 *
+	 * Always skip any directory or file that starts with
+	 * the dot-char or is named CVS
+	 */
+	dentlen = xml_strlen((const xmlChar *)ep->d_name); 
+
+	/* this dive-first behavior is not really what is desired
+	 * but do not have a 'stat' function for partial filenames
+	 * so just going through the directory block in order
+	 */
+	if (ep->d_type == DT_DIR) {
+	    if (*ep->d_name != '.' && strcmp(ep->d_name, "CVS")) {
+		if ((pathlen + dentlen + 2) >= bufflen) {
+		    res = ERR_BUFF_OVFL;
+		    dirdone = TRUE;
+		} else {
+                    /* make sure last dirspec ends witha path-sep-char */
+                    if (pathlen > 0 && buff[pathlen-1] != NCXMOD_PSCHAR) {
+                        buff[pathlen] = NCXMOD_PSCHAR;
+                        str = &buff[pathlen+1];
+                        str += xml_strcpy(str, (const xmlChar *)ep->d_name);
+                    } else {
+                        str = &buff[pathlen];
+                        str += xml_strcpy(str, (const xmlChar *)ep->d_name);
+                    }
+                    *str++ = NCXMOD_PSCHAR;
+                    *str = '\0';
+
+		    res = list_subdirs(buff, 
+                                       bufflen, 
+                                       searchtype,
+                                       helpmode,
+                                       logstdout,
+                                       TRUE);
+                    /* erase the filename and keep trying */
+                    buff[pathlen] = 0;
+                    if (res != NO_ERR) {
+                        dirdone = TRUE;
+                        continue;
+                    }
+		}
+	    }
+	}
+    }
+
+    return res;
+
+}  /* list_subdirs */
+
+
+/********************************************************************
+* FUNCTION list_pathlist
+*
+* Check the filespec path string and list files in each dir
+*
+* INPUTS:
+*    pathstr == pathstring list to check
+*    buff == scratch buffer to use
+*    bufflen == length of buff
+*    searchtype == search type to use
+*    helpmode == verbosity mode (BRIEF, NORMAL, FULL)
+*    logstdout == TRUE for log_stdout, FALSE for log_write
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    list_pathlist (const xmlChar *pathlist,
+                   xmlChar *buff,
+                   uint32 bufflen,
+                   search_type_t  searchtype,
+                   help_mode_t helpmode,
+                   boolean logstdout)
+{
+    const xmlChar *str, *p;
+    uint32         len;
+    status_t       res;
+
+    res = NO_ERR;
+    str = pathlist;
+
+    /* go through the path list and check each string */
+    while (*str) {
+	/* find end of path entry or EOS */
+	p = str+1;
+	while (*p && *p != ':') {
+	    p++;
+	}
+	len = (uint32)(p-str);
+	if (len >= bufflen) {
+	    return ERR_BUFF_OVFL;
+	}
+
+	/* copy the next string into buff */
+	xml_strncpy(buff, str, len);
+
+	/* make sure string ends with path sep char */
+	if (buff[len-1] != NCXMOD_PSCHAR) {
+	    if (len+1 >= bufflen) {
+		return ERR_BUFF_OVFL;
+	    } else {
+		buff[len++] = NCXMOD_PSCHAR;
+	    }
+	}
+
+        /* list all the requested files in this path */
+        res = list_subdirs(buff,
+                           bufflen,
+                           searchtype,
+                           helpmode,
+                           logstdout,
+                           FALSE);
+
+        if (res != NO_ERR) {
+            return res;
+        }
+    
+	/* setup the next path string to try */
+	if (*p) {
+	    str = p+1;   /* one past ':' char */
+	} else {
+	    str = p;        /* already at EOS */
+	}
+    }
+
+    return res;
+
+}  /* list_pathlist */
 
 
 /********************************************************************
@@ -2565,6 +2879,424 @@ void
     ncxmod_alt_path = NULL;
 
 }  /* ncxmod_clear_altpath */
+
+
+/********************************************************************
+* FUNCTION ncxmod_list_data_files
+*
+* List the available data files found in the data search parh
+*
+* Search order:
+*
+* 1) current directory or absolute path
+* 2) YANG_DATAPATH environment var (or set by datapath CLI var)
+* 3) HOME/data directory
+* 4) YANG_HOME/data directory
+*
+* INPUTS:
+*   helpmode == BRIEF, NORMAL or FULL 
+*   logstdout == TRUE to use log_stdout
+*                FALSE to use log_write
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t
+    ncxmod_list_data_files (help_mode_t helpmode,
+                            boolean logstdout)
+{
+    xmlChar     *buff, *p;
+    uint32       bufflen, pathlen;
+    status_t    res;
+
+
+    /* get a buffer to construct filespacs */
+    bufflen = NCXMOD_MAX_FSPEC_LEN+1;
+    buff = m__getMem(bufflen);
+    if (!buff) {
+	return ERR_INTERNAL_MEM;
+    }
+
+    /* 1) current directory */
+    xml_strcpy(buff, (const xmlChar *)"./");
+    res = list_subdirs(buff, 
+                       bufflen,
+                       SEARCH_TYPE_DATA,
+                       helpmode,
+                       logstdout,
+                       FALSE);
+    if (res != NO_ERR) {
+        m__free(buff);
+        return res;
+    }
+
+    /* 2) try the NCX_DATAPATH environment variable */
+    if (ncxmod_data_path) {
+	res = list_pathlist(ncxmod_data_path, 
+                            buff,
+                            bufflen,
+                            SEARCH_TYPE_DATA,
+                            helpmode,
+                            logstdout);
+        if (res != NO_ERR) {
+            m__free(buff);
+            return res;
+        }
+    }
+
+    /* 3) HOME/data directory */
+    if (ncxmod_env_userhome) {
+        pathlen = xml_strlen(ncxmod_env_userhome);
+        if (pathlen + 6 < bufflen) {
+            p = buff;
+            p += xml_strcpy(p, ncxmod_env_userhome);
+            *p++ = NCXMOD_PSCHAR;
+            p += xml_strcpy(p, (const xmlChar *)"data");
+            *p++ = NCXMOD_PSCHAR;
+            *p = '\0';
+
+            res = list_subdirs(buff, 
+                               bufflen, 
+                               SEARCH_TYPE_DATA,
+                               helpmode,
+                               logstdout,
+                               TRUE);
+            if (res != NO_ERR) {
+                m__free(buff);
+                return res;
+            }
+        }
+    }
+
+    /* 4) YANG_HOME/data directory */
+    if (ncxmod_yang_home) {
+        pathlen = xml_strlen(ncxmod_yang_home);;
+        if (pathlen + 6 < bufflen) {
+            p = buff;
+            p += xml_strcpy(p, ncxmod_yang_home);
+            *p++ = NCXMOD_PSCHAR;
+            p += xml_strcpy(p, (const xmlChar *)"data");
+            *p++ = NCXMOD_PSCHAR;
+            *p = '\0';
+
+            res = list_subdirs(buff, 
+                               bufflen, 
+                               SEARCH_TYPE_DATA,
+                               helpmode,
+                               logstdout,
+                               TRUE);
+            if (res != NO_ERR) {
+                m__free(buff);
+                return res;
+            }
+        }
+    }
+
+    if (logstdout) {
+        log_stdout("\n");
+    } else {
+        log_write("\n");
+    }
+
+    m__free(buff);
+    return NO_ERR;
+
+}  /* ncxmod_list_data_files */
+
+
+/********************************************************************
+* FUNCTION ncxmod_list_script_files
+*
+* List the available script files found in the 'run' search parh
+*
+* Search order:
+*
+* 1) current directory or absolute path
+* 2) YANG_RUNPATH environment var (or set by datapath CLI var)
+* 3) HOME/scripts directory
+* 4) YANG_HOME/scripts directory
+* 5) YANG_INSTALL/scripts directory
+*
+* INPUTS:
+*   helpmode == BRIEF, NORMAL or FULL 
+*   logstdout == TRUE to use log_stdout
+*                FALSE to use log_write
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t
+    ncxmod_list_script_files (help_mode_t helpmode,
+                              boolean logstdout)
+{
+    xmlChar     *buff, *p;
+    uint32       bufflen, pathlen;
+    status_t    res;
+
+
+    /* get a buffer to construct filespacs */
+    bufflen = NCXMOD_MAX_FSPEC_LEN+1;
+    buff = m__getMem(bufflen);
+    if (!buff) {
+	return ERR_INTERNAL_MEM;
+    }
+
+    /* 1) current directory */
+    xml_strcpy(buff, (const xmlChar *)"./");
+    res = list_subdirs(buff, 
+                       bufflen,
+                       SEARCH_TYPE_SCRIPT,
+                       helpmode,
+                       logstdout,
+                       FALSE);
+    if (res != NO_ERR) {
+        m__free(buff);
+        return res;
+    }
+
+    /* 2) try the NCX_RUNPATH environment variable */
+    if (ncxmod_run_path) {
+	res = list_pathlist(ncxmod_run_path, 
+                            buff,
+                            bufflen,
+                            SEARCH_TYPE_SCRIPT,
+                            helpmode,
+                            logstdout);
+        if (res != NO_ERR) {
+            m__free(buff);
+            return res;
+        }
+    }
+
+    /* 3) HOME/scripts directory */
+    if (ncxmod_env_userhome) {
+        pathlen = xml_strlen(ncxmod_env_userhome);
+        if (pathlen + 9 < bufflen) {
+            p = buff;
+            p += xml_strcpy(p, ncxmod_env_userhome);
+            *p++ = NCXMOD_PSCHAR;
+            p += xml_strcpy(p, (const xmlChar *)"scripts");
+            *p++ = NCXMOD_PSCHAR;
+            *p = '\0';
+
+            res = list_subdirs(buff, 
+                               bufflen, 
+                               SEARCH_TYPE_SCRIPT,
+                               helpmode,
+                               logstdout,
+                               TRUE);
+            if (res != NO_ERR) {
+                m__free(buff);
+                return res;
+            }
+        }
+    }
+
+    /* 4) YANG_HOME/scripts directory */
+    if (ncxmod_yang_home) {
+        pathlen = xml_strlen(ncxmod_yang_home);;
+        if (pathlen + 9 < bufflen) {
+            p = buff;
+            p += xml_strcpy(p, ncxmod_yang_home);
+            *p++ = NCXMOD_PSCHAR;
+            p += xml_strcpy(p, (const xmlChar *)"scripts");
+            *p++ = NCXMOD_PSCHAR;
+            *p = '\0';
+
+            res = list_subdirs(buff, 
+                               bufflen, 
+                               SEARCH_TYPE_SCRIPT,
+                               helpmode,
+                               logstdout,
+                               TRUE);
+            if (res != NO_ERR) {
+                m__free(buff);
+                return res;
+            }
+        }
+    }
+
+    /* 5) YANG_INSTALL/scripts directory */
+    if (ncxmod_env_install) {
+        pathlen = xml_strlen(ncxmod_env_install);;
+        if (pathlen + 9 < bufflen) {
+            p = buff;
+            p += xml_strcpy(p, ncxmod_env_install);
+            *p++ = NCXMOD_PSCHAR;
+            p += xml_strcpy(p, (const xmlChar *)"scripts");
+            *p++ = NCXMOD_PSCHAR;
+            *p = '\0';
+
+            res = list_subdirs(buff, 
+                               bufflen, 
+                               SEARCH_TYPE_SCRIPT,
+                               helpmode,
+                               logstdout,
+                               TRUE);
+            if (res != NO_ERR) {
+                m__free(buff);
+                return res;
+            }
+        }
+    }
+
+    if (logstdout) {
+        log_stdout("\n");
+    } else {
+        log_write("\n");
+    }
+
+    m__free(buff);
+    return NO_ERR;
+
+}  /* ncxmod_list_script_files */
+
+
+/********************************************************************
+* FUNCTION ncxmod_list_yang_files
+*
+* List the available YANG files found in the 'mod' search parh
+*
+* Search order:
+*
+* 1) current directory or absolute path
+* 2) YANG_MODPATH environment var (or set by datapath CLI var)
+* 3) HOME/modules directory
+* 4) YANG_HOME/modules directory
+* 5) YANG_INSTALL/modules directory
+*
+* INPUTS:
+*   helpmode == BRIEF, NORMAL or FULL 
+*   logstdout == TRUE to use log_stdout
+*                FALSE to use log_write
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t
+    ncxmod_list_yang_files (help_mode_t helpmode,
+                            boolean logstdout)
+{
+    xmlChar     *buff, *p;
+    uint32       bufflen, pathlen;
+    status_t    res;
+
+    /* get a buffer to construct filespacs */
+    bufflen = NCXMOD_MAX_FSPEC_LEN+1;
+    buff = m__getMem(bufflen);
+    if (!buff) {
+	return ERR_INTERNAL_MEM;
+    }
+
+    /* 1) current directory */
+    xml_strcpy(buff, (const xmlChar *)"./");
+    res = list_subdirs(buff, 
+                       bufflen,
+                       SEARCH_TYPE_MODULE,
+                       helpmode,
+                       logstdout,
+                       FALSE);
+    if (res != NO_ERR) {
+        m__free(buff);
+        return res;
+    }
+
+    /* 2) try the NCX_MODPATH environment variable */
+    if (ncxmod_mod_path) {
+	res = list_pathlist(ncxmod_mod_path, 
+                            buff,
+                            bufflen,
+                            SEARCH_TYPE_MODULE,
+                            helpmode,
+                            logstdout);
+        if (res != NO_ERR) {
+            m__free(buff);
+            return res;
+        }
+    }
+
+    /* 3) HOME/modules directory */
+    if (ncxmod_env_userhome) {
+        pathlen = xml_strlen(ncxmod_env_userhome);
+        if (pathlen + 9 < bufflen) {
+            p = buff;
+            p += xml_strcpy(p, ncxmod_env_userhome);
+            *p++ = NCXMOD_PSCHAR;
+            p += xml_strcpy(p, (const xmlChar *)"modules");
+            *p++ = NCXMOD_PSCHAR;
+            *p = '\0';
+
+            res = list_subdirs(buff, 
+                               bufflen, 
+                               SEARCH_TYPE_MODULE,
+                               helpmode,
+                               logstdout,
+                               TRUE);
+            if (res != NO_ERR) {
+                m__free(buff);
+                return res;
+            }
+        }
+    }
+
+    /* 4) YANG_HOME/modules directory */
+    if (ncxmod_yang_home) {
+        pathlen = xml_strlen(ncxmod_yang_home);;
+        if (pathlen + 9 < bufflen) {
+            p = buff;
+            p += xml_strcpy(p, ncxmod_yang_home);
+            *p++ = NCXMOD_PSCHAR;
+            p += xml_strcpy(p, (const xmlChar *)"modules");
+            *p++ = NCXMOD_PSCHAR;
+            *p = '\0';
+
+            res = list_subdirs(buff, 
+                               bufflen, 
+                               SEARCH_TYPE_MODULE,
+                               helpmode,
+                               logstdout,
+                               TRUE);
+            if (res != NO_ERR) {
+                m__free(buff);
+                return res;
+            }
+        }
+    }
+
+    /* 5) YANG_INSTALL/modules directory */
+    if (ncxmod_env_install) {
+        pathlen = xml_strlen(ncxmod_env_install);;
+        if (pathlen + 9 < bufflen) {
+            p = buff;
+            p += xml_strcpy(p, ncxmod_env_install);
+            *p++ = NCXMOD_PSCHAR;
+            p += xml_strcpy(p, (const xmlChar *)"modules");
+            *p++ = NCXMOD_PSCHAR;
+            *p = '\0';
+
+            res = list_subdirs(buff, 
+                               bufflen, 
+                               SEARCH_TYPE_MODULE,
+                               helpmode,
+                               logstdout,
+                               TRUE);
+            if (res != NO_ERR) {
+                m__free(buff);
+                return res;
+            }
+        }
+    }
+
+    if (logstdout) {
+        log_stdout("\n");
+    } else {
+        log_write("\n");
+    }
+
+    m__free(buff);
+    return NO_ERR;
+
+}  /* ncxmod_list_yang_files */
 
 
 /* END file ncxmod.c */

@@ -3788,6 +3788,17 @@ static status_t
 	if (!done) {
 	    parm = val_find_child(valset, 
 				  YANGCLI_MOD, 
+				  YANGCLI_FILES);
+	    if (parm) {
+		/* list the data files */
+		res = ncxmod_list_data_files(mode, imode);
+		done = TRUE;
+	    }
+	}
+
+	if (!done) {
+	    parm = val_find_child(valset, 
+				  YANGCLI_MOD, 
 				  YANGCLI_OBJECTS);
 	    if (parm) {
 		/* do list objects */
@@ -3806,6 +3817,29 @@ static status_t
 		done = TRUE;
 	    }
 	}
+
+	if (!done) {
+	    parm = val_find_child(valset, 
+				  YANGCLI_MOD, 
+				  YANGCLI_MODULES);
+	    if (parm) {
+		/* list the YANG files */
+		res = ncxmod_list_yang_files(mode, imode);
+		done = TRUE;
+	    }
+	}
+
+	if (!done) {
+	    parm = val_find_child(valset, 
+				  YANGCLI_MOD, 
+				  YANGCLI_SCRIPTS);
+	    if (parm) {
+		/* list the script files */
+		res = ncxmod_list_script_files(mode, imode);
+		done = TRUE;
+	    }
+	}
+
     }
 
     if (valset) {

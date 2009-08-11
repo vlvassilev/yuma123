@@ -639,6 +639,9 @@ static rpc_err_t
     case ERR_NCX_CANDIDATE_DIRTY:
         *apptag = RPC_ERR_APPTAG_NO_ACCESS;
 	return RPC_ERR_RESOURCE_DENIED;
+    case ERR_NCX_TIMEOUT:
+        *apptag = RPC_ERR_APPTAG_LIMIT_REACHED;
+	return RPC_ERR_OPERATION_FAILED;
 
     /* user warnings start at 400 and do not need to be listed here */
     default:
@@ -689,7 +692,7 @@ static status_t
 {
     rpc_err_info_t       *errinfo;
     const xmlChar        *badel;
-    const ses_cb_t       *badscb;
+    const cfg_template_t *badcfg;
     ses_id_t              sesid;
     boolean               attrerr;
     xmlns_id_t            ncid, ncxid, badid;
@@ -803,8 +806,8 @@ static status_t
 	break;
     case RPC_ERR_LOCK_DENIED:
 	/* generate session-id value */
-	badscb = (const ses_cb_t *)errparm1;
-	sesid = badscb->sid;
+        badcfg = (const cfg_template_t *)errparm1;
+	sesid = badcfg->locked_by;
 
 	errinfo = rpc_err_new_info();
 	if (!errinfo) {
@@ -1078,9 +1081,9 @@ rpc_err_rec_t *
     case ERR_NCX_LOCK_DENIED:
 	if (!error_parm || parmtyp != NCX_NT_CFG) {
 	    SET_ERROR(ERR_INTERNAL_VAL);
-	} else {
-	    err1 = error_parm;
-	}
+        } else {
+            err1 = error_parm;
+        }
 	break;
     case ERR_NCX_MISSING_INDEX:
 	if (!error_parm || parmtyp != NCX_NT_OBJ) {

@@ -29,6 +29,10 @@ date	     init     comment
 #include "obj.h"
 #endif
 
+#ifndef _H_rpc_err
+#include "rpc_err.h"
+#endif
+
 #ifndef _H_status
 #include "status.h"
 #endif
@@ -79,5 +83,25 @@ extern void *
 
 extern status_t
     send_keepalive_get (agent_cb_t *agent_cb);
+
+extern status_t
+    handle_get_locks_request_to_agent (agent_cb_t *agent_cb,
+                                       boolean first,
+                                       boolean *done);
+
+extern status_t
+    handle_release_locks_request_to_agent (agent_cb_t *agent_cb,
+                                           boolean first,
+                                           boolean *done);
+
+extern void
+    handle_locks_cleanup (agent_cb_t *agent_cb);
+
+
+extern boolean
+    check_locks_timeout (agent_cb_t *agent_cb);
+
+extern status_t
+    send_discard_changes_pdu_to_agent (agent_cb_t *agent_cb);
 
 #endif	    /* _H_yangcli_cmd */

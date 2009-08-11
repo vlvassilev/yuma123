@@ -614,6 +614,8 @@ const char *
 	return "missing refine target";
     case ERR_NCX_CANDIDATE_DIRTY:
 	return "candidate cannot be locked, discard-changes needed";
+    case ERR_NCX_TIMEOUT:
+        return "timeout occurred";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

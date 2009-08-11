@@ -569,6 +569,35 @@ static agent_cb_t *
         return NULL;
     }
 
+    /* set up lock control blocks for get-locks */
+    agent_cb->locks_active = FALSE;
+    agent_cb->locks_waiting = FALSE;
+    agent_cb->locks_cur_cfg = NCX_CFGID_RUNNING;
+    agent_cb->locks_timeout = 120;
+    agent_cb->locks_retry_interval = 1;
+    agent_cb->locks_cleanup = FALSE;
+    agent_cb->locks_start_time = (time_t)0;
+    agent_cb->lock_cb[NCX_CFGID_RUNNING].config_id = 
+        NCX_CFGID_RUNNING;
+    agent_cb->lock_cb[NCX_CFGID_RUNNING].config_name = 
+        NCX_CFG_RUNNING;
+    agent_cb->lock_cb[NCX_CFGID_RUNNING].lock_state = 
+        LOCK_STATE_IDLE;
+
+    agent_cb->lock_cb[NCX_CFGID_CANDIDATE].config_id = 
+        NCX_CFGID_CANDIDATE;
+    agent_cb->lock_cb[NCX_CFGID_CANDIDATE].config_name = 
+        NCX_CFG_CANDIDATE;
+    agent_cb->lock_cb[NCX_CFGID_CANDIDATE].lock_state = 
+        LOCK_STATE_IDLE;
+
+    agent_cb->lock_cb[NCX_CFGID_STARTUP].config_id = 
+        NCX_CFGID_STARTUP;
+    agent_cb->lock_cb[NCX_CFGID_STARTUP].config_name = 
+        NCX_CFG_STARTUP;
+    agent_cb->lock_cb[NCX_CFGID_STARTUP].lock_state = 
+        LOCK_STATE_IDLE;
+
     /* set default agent flags to current settings */
     agent_cb->state = MGR_IO_ST_INIT;
     agent_cb->baddata = baddata;
@@ -583,7 +612,7 @@ static agent_cb_t *
     agent_cb->display_mode = display_mode;
     agent_cb->withdefaults = withdefaults;
     agent_cb->history_size = YANGCLI_HISTLEN;
-
+    agent_cb->command_mode = CMD_MODE_NORMAL;
     return agent_cb;
 
 }  /* new_agent_cb */
@@ -2002,7 +2031,8 @@ static void
     mscb = (const mgr_scb_t *)scb->mgrcb;
 
     parm = val_find_child(agent_cb->connect_valset, 
-			  YANGCLI_MOD, YANGCLI_AGENT);
+			  YANGCLI_MOD, 
+                          YANGCLI_AGENT);
     if (parm && parm->res == NO_ERR) {
 	agent = VAL_STR(parm);
     } else {
@@ -2114,8 +2144,6 @@ static void
     log_write("\n");
     
 } /* report_capabilities */
-
-
 
 
 /********************************************************************
@@ -2400,6 +2428,36 @@ static boolean
 
 
 /********************************************************************
+* FUNCTION get_lock_worked
+* 
+* Check if the get-locks function ended up with
+* all its locks or not
+* 
+* INPUTS:
+*  agent_cb == agent control block to use
+*
+*********************************************************************/
+static boolean
+    get_lock_worked (agent_cb_t *agent_cb)
+{
+    ncx_cfg_t  cfgid;
+
+    for (cfgid = NCX_CFGID_RUNNING;
+         cfgid <= NCX_CFGID_STARTUP;
+         cfgid++) {
+        if (agent_cb->lock_cb[cfgid].lock_used &&
+            agent_cb->lock_cb[cfgid].lock_state !=
+            LOCK_STATE_ACTIVE) {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+
+}  /* get_lock_worked */
+
+
+/********************************************************************
 * yangcli_stdin_handler
 *
 * Temp: Calling readline which will block other IO while the user
@@ -2418,7 +2476,7 @@ static mgr_io_state_t
     xmlChar       *line;
     const xmlChar *resultstr;
     ses_cb_t       *scb;
-    boolean         getrpc, fileassign;
+    boolean         getrpc, fileassign, done;
     status_t        res;
     uint32          len;
 
@@ -2449,7 +2507,65 @@ static mgr_io_state_t
     case MGR_IO_ST_INIT:
 	return agent_cb->state;
     case MGR_IO_ST_IDLE:
+        break;
     case MGR_IO_ST_CONN_IDLE:
+	/* check if session was dropped by remote peer */
+	scb = mgr_ses_get_scb(agent_cb->mysid);
+	if (scb==NULL || scb->state == SES_ST_SHUTDOWN_REQ) {
+	    if (scb) {
+		(void)mgr_ses_free_session(agent_cb->mysid);
+	    }
+	    clear_agent_cb_session(agent_cb);
+	} else  {
+            res = NO_ERR;
+	    /* check timeout */
+            if (agent_cb->command_mode != CMD_MODE_NORMAL
+                && check_locks_timeout(agent_cb)) {
+                res = ERR_NCX_TIMEOUT;
+
+                if (runstack_level()) {
+                    runstack_cancel();
+                }
+                switch (agent_cb->command_mode) {
+                case CMD_MODE_NORMAL:
+                    break;
+                case CMD_MODE_AUTOLOAD:
+                    break;
+                case CMD_MODE_AUTODISCARD:
+                case CMD_MODE_AUTOLOCK:
+                    handle_locks_cleanup(agent_cb);
+                    if (agent_cb->command_mode != CMD_MODE_NORMAL) {
+                        return agent_cb->state;
+                    }
+                    break;
+                case CMD_MODE_AUTOUNLOCK:
+                    clear_lock_cbs(agent_cb);
+                    break;
+                default:
+                    SET_ERROR(ERR_INTERNAL_VAL);
+                }
+	    } else if (agent_cb->command_mode == CMD_MODE_AUTOLOCK) {
+                if (agent_cb->locks_waiting) {
+                    agent_cb->command_mode = CMD_MODE_AUTOLOCK;
+                    done = FALSE;
+                    res = handle_get_locks_request_to_agent(agent_cb,
+                                                            FALSE,
+                                                            &done);
+                    if (done) {
+                        /* check if the locks are all good */
+                        if (get_lock_worked(agent_cb)) {
+                            log_info("\nget-locks finished OK");
+                            agent_cb->command_mode = CMD_MODE_NORMAL;
+                            agent_cb->locks_waiting = FALSE;
+                        } else {
+                            log_error("\nError: get-locks failed, "
+                                      "starting cleanup");
+                            handle_locks_cleanup(agent_cb);
+                        }
+                    }
+                }
+            }
+	}
 	break;
     case MGR_IO_ST_CONN_START:
 	/* waiting until <hello> processing complete */
@@ -2489,13 +2605,43 @@ static mgr_io_state_t
 	    }
 	    clear_agent_cb_session(agent_cb);
 	} else  {
+            res = NO_ERR;
 	    /* check timeout */
 	    if (message_timed_out(scb)) {
+                res = ERR_NCX_TIMEOUT;
+            } else if (agent_cb->command_mode != CMD_MODE_NORMAL
+                       && check_locks_timeout(agent_cb)) {
+                res = ERR_NCX_TIMEOUT;
+            }
+            if (res != NO_ERR) {
+                if (runstack_level()) {
+                    runstack_cancel();
+                }
 		agent_cb->state = MGR_IO_ST_CONN_IDLE;
-		break;
-	    }
-	    /* keep waiting for reply */
-	    return agent_cb->state;
+                switch (agent_cb->command_mode) {
+                case CMD_MODE_NORMAL:
+                    break;
+                case CMD_MODE_AUTOLOAD:
+                    break;
+                case CMD_MODE_AUTODISCARD:
+                    agent_cb->command_mode = CMD_MODE_AUTOLOCK;
+                    /* fall through */
+                case CMD_MODE_AUTOLOCK:
+                    handle_locks_cleanup(agent_cb);
+                    if (agent_cb->command_mode != CMD_MODE_NORMAL) {
+                        return agent_cb->state;
+                    }
+                    break;
+                case CMD_MODE_AUTOUNLOCK:
+                    clear_lock_cbs(agent_cb);
+                    break;
+                default:
+                    SET_ERROR(ERR_INTERNAL_VAL);
+                }
+	    } else {
+                /* keep waiting for reply */
+                return agent_cb->state;
+            }
 	}
 	break;
     case MGR_IO_ST_CONNECT:
@@ -2519,6 +2665,10 @@ static mgr_io_state_t
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return agent_cb->state;
+    }
+
+    if (agent_cb->command_mode != CMD_MODE_NORMAL) {
+        return agent_cb->state;
     }
 
     /* check the run-script parameters */
@@ -3051,6 +3201,7 @@ static void
 }  /* yangcli_cleanup */
 
 
+
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
@@ -3259,6 +3410,45 @@ dlq_hdr_t *
 
 
 /********************************************************************
+ * FUNCTION get_rpc_error_tag
+ * 
+ *  Determine why the RPC operation failed
+ *
+ * INPUTS:
+ *   replyval == <rpc-reply> to use to look for <rpc-error>s
+ *
+ * RETURNS:
+ *   the RPC error code for the <rpc-error> that was found
+ *********************************************************************/
+static rpc_err_t
+    get_rpc_error_tag (val_value_t *replyval)
+{
+    val_value_t  *errval, *tagval;
+
+    errval = val_find_child(replyval, 
+                            NC_MODULE,
+                            NCX_EL_RPC_ERROR);
+    if (errval == NULL) {
+        log_error("\nError: No <rpc-error> elemenst found");
+        return RPC_ERR_NONE;
+    }
+
+    tagval = val_find_child(errval, 
+                            NC_MODULE,
+                            NCX_EL_ERROR_TAG);
+    if (tagval == NULL) {
+        log_error("\nError: <rpc-error> did not contain an <error-tag>");
+        return RPC_ERR_NONE;
+    }
+
+    return rpc_err_get_errtag_enum(VAL_ENUM_NAME(tagval));
+
+}  /* get_rpc_error_tag */
+
+
+
+
+/********************************************************************
  * FUNCTION yangcli_reply_handler
  * 
  * 
@@ -3278,8 +3468,10 @@ void
     agent_cb_t   *agent_cb;
     val_value_t  *val;
     mgr_scb_t    *mgrcb;
+    lock_cb_t    *lockcb;
+    rpc_err_t     rpcerrtyp;
     status_t      res;
-    boolean       anyout, anyerrors;
+    boolean       anyout, anyerrors, done;
     uint32        usesid;
 
 #ifdef DEBUG
@@ -3306,14 +3498,18 @@ void
 	if (val_find_child(rpy->reply, 
                            NC_MODULE,
 			   NCX_EL_RPC_ERROR)) {
-	    log_error("\nRPC Error Reply %s for session %u:\n",
-		      rpy->msg_id, usesid);
-	    val_dump_value_ex(rpy->reply, 
-                              0,
-                              agent_cb->display_mode);
-	    log_error("\n");
-	    anyout = TRUE;
-	    anyerrors = TRUE;
+            if (agent_cb->command_mode == CMD_MODE_NORMAL ||
+                LOGDEBUG2) {
+                log_error("\nRPC Error Reply %s for session %u:\n",
+                          rpy->msg_id, 
+                          usesid);
+                val_dump_value_ex(rpy->reply, 
+                                  0,
+                                  agent_cb->display_mode);
+                log_error("\n");
+                anyout = TRUE;
+            }
+            anyerrors = TRUE;
 	} else if (val_find_child(rpy->reply, NC_MODULE, NCX_EL_OK)) {
 	    log_info("\nRPC OK Reply %s for session %u:\n",
 		     rpy->msg_id, usesid);
@@ -3357,23 +3553,122 @@ void
 
 	    /* hand off the malloced 'val' node here */
 	    res = finish_result_assign(agent_cb, val, NULL);
-	}  else if (!anyout && interactive_mode()) {
+	}  else if (!anyout && !anyerrors && interactive_mode()) {
 	    log_stdout("\nOK\n");
 	}
     } else {
 	log_error("\nError: yangcli: no reply parsed\n");
     }
 
-    if (agent_cb->state == MGR_IO_ST_CONN_CLOSEWAIT) {
-	agent_cb->mysid = 0;
-	agent_cb->state = MGR_IO_ST_IDLE;
-    } else if (agent_cb->state == MGR_IO_ST_CONN_RPYWAIT) {
-	agent_cb->state = MGR_IO_ST_CONN_IDLE;
-    } /* else leave state at its current value */
-
     /* check if a script is running */
     if (anyerrors && runstack_level()) {
         runstack_cancel();
+    }
+
+    if (anyerrors && rpy->reply) {
+        rpcerrtyp = get_rpc_error_tag(rpy->reply);
+    } else {
+        rpcerrtyp = RPC_ERR_OPERATION_FAILED;
+    }
+
+    switch (agent_cb->state) {
+    case MGR_IO_ST_CONN_CLOSEWAIT:
+	agent_cb->mysid = 0;
+	agent_cb->state = MGR_IO_ST_IDLE;
+        break;
+    case MGR_IO_ST_CONN_RPYWAIT:
+        agent_cb->state = MGR_IO_ST_CONN_IDLE;
+        switch (agent_cb->command_mode) {
+        case CMD_MODE_NORMAL:
+            break;
+        case CMD_MODE_AUTOLOAD:
+            break;
+        case CMD_MODE_AUTOLOCK:
+            done = FALSE;
+            lockcb = &agent_cb->lock_cb[agent_cb->locks_cur_cfg];
+            if (anyerrors) {
+                if (rpcerrtyp == RPC_ERR_LOCK_DENIED) {
+                    lockcb->lock_state = LOCK_STATE_TEMP_ERROR;
+                } else if (lockcb->config_id == NCX_CFGID_CANDIDATE) {
+                    res = send_discard_changes_pdu_to_agent(agent_cb);
+                    if (res != NO_ERR) {
+                        handle_locks_cleanup(agent_cb);
+                    }
+                    done = TRUE;
+                } else {
+                    lockcb->lock_state = LOCK_STATE_FATAL_ERROR;
+                    done = TRUE;
+                }
+            } else {
+                lockcb->lock_state = LOCK_STATE_ACTIVE;
+            }
+
+            if (!done) {
+                res = handle_get_locks_request_to_agent(agent_cb,
+                                                        FALSE,
+                                                        &done);
+                if (done) {
+                    /* check if the locks are all good */
+                    if (get_lock_worked(agent_cb)) {
+                        log_info("\nget-locks finished OK");
+                        agent_cb->command_mode = CMD_MODE_NORMAL;
+                        agent_cb->locks_waiting = FALSE;
+                    } else {
+                        log_error("\nError: get-locks failed, "
+                                  "starting cleanup");
+                        handle_locks_cleanup(agent_cb);
+                    }
+                } else if (res != NO_ERR) {
+                    log_error("\nError: get-locks failed, no cleanup");
+                }
+            }
+            break;
+        case CMD_MODE_AUTOUNLOCK:
+            lockcb = &agent_cb->lock_cb[agent_cb->locks_cur_cfg];
+            if (anyerrors) {
+                lockcb->lock_state = LOCK_STATE_FATAL_ERROR;
+            } else {
+                lockcb->lock_state = LOCK_STATE_RELEASED;
+            }
+
+            res = handle_release_locks_request_to_agent(agent_cb,
+                                                        FALSE,
+                                                        &done);
+            if (done) {
+                clear_lock_cbs(agent_cb);
+            }
+            break;
+        case CMD_MODE_AUTODISCARD:
+            lockcb = &agent_cb->lock_cb[agent_cb->locks_cur_cfg];
+            agent_cb->command_mode = CMD_MODE_AUTOLOCK;
+            if (anyerrors) {
+                handle_locks_cleanup(agent_cb);
+            } else {
+                res = handle_get_locks_request_to_agent(agent_cb,
+                                                        FALSE,
+                                                        &done);
+                if (done) {
+                    /* check if the locks are all good */
+                    if (get_lock_worked(agent_cb)) {
+                        log_info("\nget-locks finished OK");
+                        agent_cb->command_mode = CMD_MODE_NORMAL;
+                        agent_cb->locks_waiting = FALSE;
+                    } else {
+                        log_error("\nError: get-locks failed, "
+                                  "starting cleanup");
+                        handle_locks_cleanup(agent_cb);
+                    }
+                } else if (res != NO_ERR) {
+                    log_error("\nError: get-locks failed, no cleanup");
+                }
+            }            
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        break;
+    default:
+        break;
     }
 
     /* free the request and reply */
@@ -3512,5 +3807,134 @@ int
     return 0;
 
 } /* main */
+
+
+/********************************************************************
+* FUNCTION setup_lock_cbs
+* 
+* Setup the lock state info in all the lock control blocks
+* in the specified agent_cb; call when a new sesion is started
+* 
+* INPUTS:
+*  agent_cb == agent control block to use
+*********************************************************************/
+void
+    setup_lock_cbs (agent_cb_t *agent_cb)
+{
+    ses_cb_t     *scb;
+    mgr_scb_t    *mscb;
+    ncx_cfg_t     cfg_id;
+
+    scb = mgr_ses_get_scb(agent_cb->mysid);
+    if (scb == NULL) {
+        log_error("\nError: active session dropped, cannot lock");
+        return;
+    }
+
+    mscb = (mgr_scb_t *)scb->mgrcb;
+    agent_cb->locks_active = TRUE;
+    agent_cb->locks_waiting = FALSE;
+    agent_cb->locks_cur_cfg = NCX_CFGID_RUNNING;
+
+    for (cfg_id = NCX_CFGID_RUNNING;
+         cfg_id <= NCX_CFGID_STARTUP;
+         cfg_id++) {
+
+        agent_cb->lock_cb[cfg_id].lock_state = LOCK_STATE_IDLE;
+        agent_cb->lock_cb[cfg_id].lock_used = FALSE;
+        agent_cb->lock_cb[cfg_id].start_time = (time_t)0;
+        agent_cb->lock_cb[cfg_id].last_msg_time = (time_t)0;
+    }
+
+    /* always request the lock on running */
+    agent_cb->lock_cb[NCX_CFGID_RUNNING].lock_used = TRUE;
+
+    agent_cb->lock_cb[NCX_CFGID_CANDIDATE].lock_used = 
+        (cap_std_set(&mscb->caplist, CAP_STDID_CANDIDATE))
+        ? TRUE : FALSE;
+
+    agent_cb->lock_cb[NCX_CFGID_STARTUP].lock_used =
+        (cap_std_set(&mscb->caplist, CAP_STDID_STARTUP))
+        ? TRUE : FALSE;
+
+}  /* setup_lock_cbs */
+
+
+/********************************************************************
+* FUNCTION clear_lock_cbs
+* 
+* Clear the lock state info in all the lock control blocks
+* in the specified agent_cb
+* 
+* INPUTS:
+*  agent_cb == agent control block to use
+*
+*********************************************************************/
+void
+    clear_lock_cbs (agent_cb_t *agent_cb)
+{
+    ncx_cfg_t  cfg_id;
+
+    /* set up lock control blocks for get-locks */
+    agent_cb->locks_active = FALSE;
+    agent_cb->locks_waiting = FALSE;
+    agent_cb->locks_cur_cfg = NCX_CFGID_RUNNING;
+    agent_cb->command_mode = CMD_MODE_NORMAL;
+
+    for (cfg_id = NCX_CFGID_RUNNING;
+         cfg_id <= NCX_CFGID_STARTUP;
+         cfg_id++) {
+
+        agent_cb->lock_cb[cfg_id].lock_state = LOCK_STATE_IDLE;
+        agent_cb->lock_cb[cfg_id].lock_used = FALSE;
+        agent_cb->lock_cb[cfg_id].start_time = (time_t)0;
+        agent_cb->lock_cb[cfg_id].last_msg_time = (time_t)0;
+    }
+
+}  /* clear_lock_cbs */
+
+
+/********************************************************************
+* FUNCTION setup_unlock_cbs
+* 
+* Setup the lock state info in all the lock control blocks
+* in the specified agent_cb; call when a new sesion is started
+* 
+* INPUTS:
+*     agent_cb == agent control block to use
+* RETURNS:
+*   TRUE if sending unlocks needed
+*   FALSE if sending unlocks not needed
+*********************************************************************/
+boolean
+    setup_unlock_cbs (agent_cb_t *agent_cb)
+{
+    boolean       needed;
+    ncx_cfg_t     cfg_id;
+
+    if (!agent_cb->locks_active) {
+        return FALSE;
+    }
+
+    needed = FALSE;
+
+    for (cfg_id = NCX_CFGID_RUNNING;
+         cfg_id <= NCX_CFGID_STARTUP;
+         cfg_id++) {
+
+        agent_cb->lock_cb[cfg_id].start_time = (time_t)0;
+        agent_cb->lock_cb[cfg_id].last_msg_time = (time_t)0;
+        if (agent_cb->lock_cb[cfg_id].lock_used && 
+            agent_cb->lock_cb[cfg_id].lock_state == 
+            LOCK_STATE_ACTIVE) {
+            needed = TRUE;
+        }
+    }
+
+    return needed;
+
+}  /* setup_unlock_cbs */
+
+
 
 /* END yangcli.c */

@@ -361,6 +361,9 @@ typedef struct rpc_err_rec_t_ {
 extern const xmlChar *
     rpc_err_get_errtag (rpc_err_t errid);
 
+extern rpc_err_t
+    rpc_err_get_errtag_enum (const xmlChar *errtag);
+
 extern rpc_err_rec_t *
     rpc_err_new_record (void);
 

@@ -239,6 +239,42 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION rpc_err_get_errtag_enum
+*
+* Get the RPC error-tag enum for an error-tag string
+*
+* INPUTS:
+*   errtag == error-tag string to check
+*
+* RETURNS:
+*   enum for this error-tag
+*********************************************************************/
+rpc_err_t
+    rpc_err_get_errtag_enum (const xmlChar *errtag)
+{
+    rpc_err_t   errcode;
+
+#ifdef DEBUG
+    if (!errtag) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return RPC_ERR_NONE;
+    }
+#endif
+
+    for (errcode = RPC_ERR_IN_USE;
+         errcode <= RPC_ERR_PARTIAL_OPERATION;
+         errcode++) {
+
+        if (!xml_strcmp(errtag, rpc_err_map[errcode].errtag)) {
+            return rpc_err_map[errcode].errid;
+        }
+    }
+    return RPC_ERR_NONE;
+
+} /* rpc_err_get_errtag_enum */
+
+
+/********************************************************************
 * FUNCTION rpc_err_new_record
 *
 * Malloc and init an rpc_err_rec_t struct

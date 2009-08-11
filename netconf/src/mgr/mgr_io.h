@@ -43,6 +43,7 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+/* SSH layer debugging return codes */
 typedef enum mgr_io_returncode_t_ {
     MGR_IO_RC_NONE,
     MGR_IO_RC_IDLE,
@@ -68,6 +69,7 @@ typedef enum mgr_io_state_t_ {
     MGR_IO_ST_SHUT                    /* application shutting down */
 } mgr_io_state_t;
 
+
 /* Callback function for STDIN input 
  *
  * Handle any input from the user keyboard
@@ -78,6 +80,7 @@ typedef enum mgr_io_state_t_ {
  *    new manager IO state (upon exit from the function
  */
 typedef mgr_io_state_t (*mgr_io_stdin_fn_t) (void);
+
 
 /********************************************************************
 *								    *

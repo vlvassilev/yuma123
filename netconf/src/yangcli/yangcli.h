@@ -22,10 +22,13 @@ date	     init     comment
 
 */
 
-
+#include <time.h>
 #include <xmlstring.h>
-
 #include "libtecla.h"
+
+#ifndef _H_ncxconst
+#include "ncxconst.h"
+#endif
 
 #ifndef _H_ncxtypes
 #include "ncxtypes.h"
@@ -120,6 +123,7 @@ date	     init     comment
 #define YANGCLI_BADDATA     (const xmlChar *)"bad-data"
 #define YANGCLI_BATCHMODE   (const xmlChar *)"batch-mode"
 #define YANGCLI_BRIEF       (const xmlChar *)"brief"
+#define YANGCLI_CLEANUP     (const xmlChar *)"cleanup"
 #define YANGCLI_CLEAR       (const xmlChar *)"clear"
 #define YANGCLI_COMMAND     (const xmlChar *)"command"
 #define YANGCLI_COMMANDS    (const xmlChar *)"commands"
@@ -137,6 +141,7 @@ date	     init     comment
 #define YANGCLI_GLOBALS     (const xmlChar *)"globals"
 #define YANGCLI_INDEX       (const xmlChar *)"index"
 #define YANGCLI_LOAD        (const xmlChar *)"load"
+#define YANGCLI_LOCK_TIMEOUT (const xmlChar *)"lock-timeout"
 #define YANGCLI_LOCAL       (const xmlChar *)"local"
 #define YANGCLI_LOCALS      (const xmlChar *)"locals"
 #define YANGCLI_MODULE      (const xmlChar *)"module"
@@ -149,6 +154,7 @@ date	     init     comment
 #define YANGCLI_ORDER       (const xmlChar *)"order"
 #define YANGCLI_PASSWORD    (const xmlChar *)"password"
 #define YANGCLI_PORT        (const xmlChar *)"port"
+#define YANGCLI_RETRY_INTERVAL (const xmlChar *)"retry-interval"
 #define YANGCLI_RUN_COMMAND (const xmlChar *)"run-command"
 #define YANGCLI_RUN_SCRIPT  (const xmlChar *)"run-script"
 #define YANGCLI_START       (const xmlChar *)"start"
@@ -197,6 +203,9 @@ date	     init     comment
 #define YANGCLI_PR_LLIST (const xmlChar *)"Add another leaf-list?"
 #define YANGCLI_PR_LIST (const xmlChar *)"Add another list?"
 
+/* retry for a lock request once per second */
+#define YANGCLI_RETRY_INTERNVAL   1
+
 
 /********************************************************************
 *								    *
@@ -235,6 +244,17 @@ typedef enum command_state_t {
 } command_state_t;
 
 
+/* command mode enumerations */
+typedef enum command_mode_t {
+    CMD_MODE_NONE,
+    CMD_MODE_NORMAL,
+    CMD_MODE_AUTOLOAD,
+    CMD_MODE_AUTOLOCK,
+    CMD_MODE_AUTOUNLOCK,
+    CMD_MODE_AUTODISCARD
+} command_mode_t;
+
+
 /* saved state for libtecla command line completion */
 typedef struct completion_state_t_ {
     const obj_template_t  *cmdobj;
@@ -245,6 +265,30 @@ typedef struct completion_state_t_ {
     command_state_t        cmdstate;
     boolean                assignstmt;
 } completion_state_t;
+
+
+/* save the agent lock state for get-locks and release-locks */
+typedef enum lock_state_t {
+    LOCK_STATE_NONE,
+    LOCK_STATE_IDLE,
+    LOCK_STATE_REQUEST_SENT,
+    LOCK_STATE_TEMP_ERROR,
+    LOCK_STATE_FATAL_ERROR,
+    LOCK_STATE_ACTIVE,
+    LOCK_STATE_RELEASE_SENT,
+    LOCK_STATE_RELEASED
+} lock_state_t;
+
+
+/* lock state record, used by get-locks, release-locks */
+typedef struct lock_cb_t_ {
+    ncx_cfg_t             config_id;
+    const xmlChar        *config_name;
+    lock_state_t          lock_state;
+    boolean               lock_used;
+    time_t                start_time;
+    time_t                last_msg_time;
+} lock_cb_t;
 
 
 /* NETCONF agent control block */
@@ -266,6 +310,7 @@ typedef struct agent_cb_t_ {
     boolean              get_optional;
     ncx_display_mode_t   display_mode;
     uint32               timeout;
+    uint32               lock_timeout;
     ncx_bad_data_t       baddata;
     log_debug_t          log_level;
     boolean              autoload;
@@ -280,6 +325,20 @@ typedef struct agent_cb_t_ {
     ses_id_t             mysid;
     mgr_io_returncode_t  returncode;
     int32                errnocode;
+    command_mode_t       command_mode;
+
+    /* get-locks and release-locks support
+     * there is one entry for each database
+     * indexed by the ncx_cfg_t enum
+     */
+    boolean              locks_active;
+    boolean              locks_waiting;
+    ncx_cfg_t            locks_cur_cfg;
+    uint32               locks_timeout;
+    uint32               locks_retry_interval;
+    boolean              locks_cleanup;
+    time_t               locks_start_time;
+    lock_cb_t            lock_cb[NCX_NUM_CFGS];
 
     /* TBD: session-specific user variables */
     dlq_hdr_t            varbindQ;   /* Q of ncx_var_t */
@@ -357,5 +416,14 @@ extern status_t
     finish_result_assign (agent_cb_t *agent_cb,
 			  val_value_t *resultvar,
 			  const xmlChar *resultstr);
+
+extern void
+    setup_lock_cbs (agent_cb_t *agent_cb);
+
+extern void
+    clear_lock_cbs (agent_cb_t *agent_cb);
+
+extern boolean
+    setup_unlock_cbs (agent_cb_t *agent_cb);
 
 #endif	    /* _H_yangcli */

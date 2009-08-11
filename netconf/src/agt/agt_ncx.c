@@ -1025,7 +1025,7 @@ static status_t
                          res,
                          methnode,
                          NCX_NT_CFG, 
-                         (const void *)cfg,
+                         cfg,
                          NCX_NT_NONE,
                          NULL);
     }

@@ -176,8 +176,6 @@ date	     init     comment
 
 #define NCX_DEF_WARN_LINELEN  72
 
-#define NCX_SUFFIX          (const xmlChar *)"ncx"
-
 #define NCX_CONF_SUFFIX     (const xmlChar *)"conf"
 
 #define NCX_CLI_START_CH   '-'
@@ -329,6 +327,8 @@ date	     init     comment
 #define NCX_CFG_RUNNING      (const xmlChar *)"running"
 #define NCX_CFG_CANDIDATE    (const xmlChar *)"candidate"
 #define NCX_CFG_STARTUP      (const xmlChar *)"startup"
+
+#define NCX_NUM_CFGS         3
 
 /* NCX Extension configuration names */
 #define NCX_CFG_ROLLBACK     (const xmlChar *)"rollback"

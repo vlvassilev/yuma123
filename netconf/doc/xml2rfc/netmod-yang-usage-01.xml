@@ -16,7 +16,7 @@
 ]>
 
 <rfc category="informational" 
-     docName="draft-ietf-netmod-yang-usage-00" 
+     docName="draft-ietf-netmod-yang-usage-01" 
      ipr="trust200811">
 
 <?xml-stylesheet type='text/xsl' href='rfc2629.xslt' ?>
@@ -119,10 +119,10 @@
   (2) |     RPC     |   | <rpc>, <rpc-reply> |  | <notification> |
       +-------------+   +--------------------+  +----------------+
              |                    |                   |
-      +-------------+       +-----------------------------+
-  (1) |  Transport  |       |   BEEP, SSH, SSL, console   |
-      |   Protocol  |       |                             |
-      +-------------+       +-----------------------------+
+      +-------------+       +--------------------------------+
+  (1) |  Transport  |       |  BEEP, SSH, SSL, TLS, console  |
+      |   Protocol  |       |                                |
+      +-------------+       +--------------------------------+
 
 ]]>
 	 </artwork>
@@ -204,7 +204,7 @@
        guidelines are available online at:
      </t>
      <t>
-       http://www.isi.edu/in-notes/rfc-editor/instructions2authors.txt
+       http://www.rfc-editor.org/rfc-editor/instructions2authors.txt
      </t>
 
      <t>
@@ -292,14 +292,15 @@
 	 <t>
 	   If an Internet-Draft defines a new name space that is to be
 	   administered by the IANA, then the document MUST include an IANA
-	   Considerations section, specifies how the name space is to be
+	   Considerations section, that specifies how the name space is to be
 	   administered.
 	 </t>
 	 <t>
 	   Specifically, if any YANG module namespace statement value contained
 	   in the document is not already registered with IANA, then a
 	   new YANG Namespace registry entry must be requested from the
-	   IANA [ed: procedure TBD].
+	   IANA.  The YANG specification includes the procedure
+           for this purpose in its IANA Considerations section.
 	 </t>
        </section>
 
@@ -315,9 +316,8 @@
 	   Specifically, if any YANG submodule belongs-to value contained
 	   in the document is associated with a module that contains
 	   a namespace statement value equal to a YANG Namespace 
-	   already administered by the IANA, then a new YANG Module registry
-	   entry and YANG Namespace Update Procedure must be requested from the
-	   IANA [ed: procedure TBD].
+	   already administered by the IANA, then the existing YANG Namespace
+           must be updated to include the new submodule.
 	 </t>
        </section>
      </section>
@@ -463,7 +463,9 @@
        <t>
 	 All 'must' and 'when' statements MUST contain valid XPath.
 	 If any name tests are present, they MUST contain
-	 valid module prefixes and/or data node names.
+	 valid module prefixes and data node names.
+         References to non-existent nodes are considered invalid
+         in YANG, even though they are permitted in XPath.
        </t>
        <t>
 	 The 'attribute' and 'namespace' axis SHOULD NOT be used
@@ -474,8 +476,7 @@
        <t>
 	 The 'position' and 'last' functions SHOULD NOT be used.
 	 Also, the 'preceding', 
-	 'preceding-sibling', 'following',
-	 and 'following-sibling' axis SHOULD NOT be used.
+	 and 'following' axes SHOULD NOT be used.
 	 These constructs rely on XML document order within a NETCONF agent
 	 configuration database, which may not be supported
 	 consistently or produce reliable results across implementations.
@@ -483,6 +484,11 @@
 	 properties (e.g., name, value, ancestors,
 	 descendants) SHOULD be used instead.
        </t>
+       <t>
+         The 'preceding-sibling' and 'following-sibling' axes
+         MAY be used, with causion.  An agent is not required to
+         maintain a persistent or deterministic XML document
+         order, which will affect use of these axes.
        <t>
 	 Implicit 'position' function calls within predicates
 	 SHOULD NOT be used. (e.g., //chapter[42]).
@@ -541,24 +547,26 @@
        <t>
 	 <list style="symbols">
 	   <t>
-	     The namespace MUST be a globally unique
+	     For published modules, the namespace MUST 
+             be a globally unique
 	     URI, as defined in <xref target="RFC3986"/>.
 	     This value is usually assigned by the IANA.
 	   </t>
 	   <t>
-	     Until a URI is assigned by the IANA, 
-	     a temporary namespace URI
-	     MAY be selected which is not likely to
-	     collide with other YANG namespaces, such as
-	     the filename of the Internet Draft containing
-	     the module. This value MUST be a
-	     valid URI (e.g., 'file:///draft-ietf-foo-bar-00').
-	   </t>
-	   <t>
 	     The organization statement MUST be present.
+             If the module is contained in a documented
+             intended for standards-track status, then
+             the organization SHOULD be the IETF.
 	   </t>
 	   <t>
 	     The contact statement MUST be present.
+             If the module is contained in a documented
+             intended for standards-track status, then
+             the working group WEB and mailing information
+             MUST be present, and the document author
+             contact information SHOULD be present.
+             In addition, the Area Director and other contact
+             information MAY be present.
 	   </t>
 	   <t>
 	     The description statement MUST be present.
@@ -584,6 +592,116 @@
 	     Internet Draft is re-published.
 	   </t>
 	 </list>
+       </t>
+     </section>
+
+     <section title="Temporary Namespace Assignments">
+       <t>
+         It is desirable to include only valid YANG modules
+         in documents, whether they are published yet or not.
+         <list style="bullets">
+           <t>
+             allows the module to compile correctly instead 
+             of generating disruptive fatal errors.
+           </t>
+           <t>
+             allows early implementors to use the modules
+             without picking a random value for this field.
+           </t>
+           <t>
+             allows early interoperability testing since
+             independent implementations will use the same
+             namespace value.
+           </t>
+         </list>
+       </t>
+       <t>
+         Until a URI is assigned by the IANA, a temporary namespace URI
+         MUST be provided for the namespace statement in a YANG module.
+         A value SHOULD be selected which is not likely to collide with 
+         other YANG namespaces.
+       </t>
+       <t>
+         An unpublished module namespace statement value SHOULD
+         include the field 'DRAFT-nn', where 'nn' is replaced
+         by the current Internet Draft number.
+       </t>
+       <t>
+         If the YANG module has been previously published, then
+         the RPC being updated needs to be identified.
+         In this case, an unpublished module namespace statement value SHOULD
+         include the field 'DRAFT-XXXXBIS-nn', where 'XXXX' is
+         replaced by the RFC number being updated, and 'nn' is replaced
+         by the current Internet Draft number.
+       </t>
+       <t>
+         A temporary namespace statement value SHOULD have the
+         following form:
+         <br/><br/>
+         &lt;URN prefix string&gt;:&lt;module-name&gt;:&lt;draft-field&gt;
+       </t>
+       <t>
+         The suggested URN prefix string that SHOULD be used is shown below.
+         This value will be defined by the IANA.<br/>
+         urn:ietf:params:xml:ns:yang:
+       </t>
+       <t>
+         The following example URNs would be valid temporary namespace
+         statement values:
+         <list style="bullets">
+           <t>
+             urn:ietf:params:xml:ns:yang:ietf-netconf-partial-lock:DRAFT-09
+           </t>
+           <t>
+             urn:ietf:params:xml:ns:yang:ietf-netconf-state:DRAFT-07
+           </t>
+           <t>
+             urn:ietf:params:xml:ns:yang:ietf-netconf:DRAFT-4741BIS-01
+           </t>
+         </list>
+       </t>
+     </section>
+
+     <section title="Top Level Database Objects">
+       <t>
+         There SHOULD only be one top-level data node defined
+         in each YANG module.  However, there MAY be more than one
+         if needed.
+       </t>
+       <t>
+         The top-level data organization SHOULD be considered carefully,
+         in advance.  Data model designers need to consider how
+         the functionality for a given protocol or protocol family
+         will grow over time.
+       </t>
+       <t>
+         The names and data organization SHOULD reflect persistent
+         information, such as the name of a protocol.  The name
+         of the working group SHOULD NOT be used because this
+         may change over time.
+       </t>
+       <t>
+         A mandatory database object is defined as 
+         a node that a manager must provide for the database
+         to be valid.  The agent will not provide a value
+         under any conditions.
+       </t>
+       <t>
+         Top-level database objects MUST NOT be mandatory.
+       </t>
+       <t>
+         If a mandatory node appears at the top-level, it will 
+         immediately cause the database to be invalid.
+         This can occue when the agent boots or when a module
+         is loaded dynamically at runtime.
+       </t>
+       <t>
+         Top level objects are declared in YANG as mandatory with
+         the mandatory statement or the min-elements statement.
+         All nested non-presence containers are transparent,
+         so a mandatory node nested within one or more non-presence
+         containers causes the top-level container to
+         be considered mandatory.
        </t>
      </section>
 
@@ -914,6 +1032,39 @@
 	 implementations to be created.
        </t>
      </list>
+   </appendix>
+
+   <appendix title="Change Log">
+     <section title="Changes from -00 to -01">
+       <list style="bullets">
+         <t>
+           Added TLS to figure 1.
+         </t>
+         <t>  
+           Corrected URL for RPC instructions.
+         </t>
+         <t>
+           Updated namespace procedures section.
+         </t>
+         <t>
+           Updated details on module contact and organization
+           statements.
+         </t>
+         <t>
+           Created separate note on use of preseding-sibling
+           and following-sibling axes in XPath expressions.
+         </t>
+         <t>
+           Added section on temporary namespace statement values.
+         </t>
+         <t>
+            Added section on top level database objects.
+         </t>
+         <t>  
+           Fixed typos.
+         </t>
+       </list>
+     </section>
    </appendix>
  </back>
 </rfc>

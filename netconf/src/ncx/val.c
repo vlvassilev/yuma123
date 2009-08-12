@@ -2575,7 +2575,6 @@ status_t
 	res = val_string_ok_errinfo(typdef, btyp, simval, errinfo);
 	break;
     case NCX_BT_INSTANCE_ID:
-	/*****/
 	res = val_string_ok_errinfo(typdef, btyp, simval, errinfo);
 	break;
     case NCX_BT_UNION:

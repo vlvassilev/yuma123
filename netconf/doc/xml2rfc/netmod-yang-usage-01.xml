@@ -571,11 +571,29 @@
 	   <t>
 	     The description statement MUST be present.
 	   </t>
-	   <t>
-	     If the module represents a model defined in one or more
-	     external documents, then a reference statement MUST
-	     be present.
-	   </t>
+           <t>
+             If the module relies on information contained
+             in other documents, which are not the same
+             documents implied by the import statements
+             present in the module, then these documents
+             MUST be identified in the reference
+             statement.
+           </t>
+           <t>
+             A normative reference MUST be present in
+             the references section of the document 
+             for every module identified in an import
+             statement.
+           </t>
+           <t>
+             The document which contains the module SHOULD
+             be identified in the reference statement,
+             whether it is published or unpublished.
+             Modules are often extracted from their original
+             documents and it is useful for developers
+             and operators to know how to find the
+             original source document in a consistent manner.
+           </t>
 	   <t>
 	     A revision statement MUST be present for each published
 	     version of the module.

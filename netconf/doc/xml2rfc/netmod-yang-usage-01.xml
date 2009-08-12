@@ -1052,6 +1052,20 @@
      </list>
    </appendix>
 
+   <appendix title="YANG Module Template">
+     <t>
+       <figure anchor="yang_template">
+	 <artwork>
+<![CDATA[
+
+
+
+]]>
+	 </artwork>
+       </figure>
+     </t>
+   </appendix>
+
    <appendix title="Change Log">
      <section title="Changes from -00 to -01">
        <list style="bullets">

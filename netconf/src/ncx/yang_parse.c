@@ -2826,7 +2826,7 @@ static status_t
     yang_node_t    *node;
     ncx_feature_t  *feature;
     ncx_identity_t *identity;
-    boolean         ismain, loaded, otherversion, done;
+    boolean         ismain, loaded, done;
     status_t        res, retres;
 
 #ifdef YANG_PARSE_DEBUG_TRACE
@@ -2845,7 +2845,6 @@ static status_t
     ismain = TRUE;
     retres = NO_ERR;
     *wasadded = FALSE;
-    otherversion = FALSE;
 
     /* could be module or submodule -- get the first keyword */
     res = TK_ADV(tkc);
@@ -2937,6 +2936,15 @@ static status_t
 	CHK_EXIT(res, retres);
     }
 
+    /* set the namespace and the XML prefix now,
+     * so all namespace assignments in XPath
+     * expressions will be valid when first parsed
+     */
+    if (!(pcb->deviationmode || pcb->diffmode)) {
+        res = ncx_add_namespace_to_registry(mod);
+        CHK_EXIT(res, retres);
+    }
+
     /* Get the linkage statements (imports, include) */
     res = consume_linkage_stmts(tkc, mod, pcb);
     CHK_EXIT(res, retres);
@@ -2974,10 +2982,6 @@ static status_t
 	switch (ptyp) {
 	case YANG_PT_TOP:
 	    loaded = TRUE;
-	    if (ncx_find_module(mod->name, NULL)) {
-		/* do not re-register the namespace */
-		otherversion = TRUE;
-	    }
 	    break;
 	case YANG_PT_IMPORT:
 	    return NO_ERR;
@@ -3226,7 +3230,7 @@ static status_t
 		if (pcb->diffmode) {
 		    res = ncx_add_to_modQ(mod);
 		} else {
-		    res = ncx_add_to_registry(mod, otherversion);
+		    res = ncx_add_to_registry(mod);
 		}
 		if (res != NO_ERR) {
 		    retres = res;

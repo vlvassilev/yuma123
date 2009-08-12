@@ -1611,7 +1611,9 @@ status_t
 	str = NULL;
 
 	if (res == NO_ERR) {
-	    res = xpath1_parse_expr(tkc, mod, obj->when,
+	    res = xpath1_parse_expr(tkc, 
+                                    mod, 
+                                    obj->when,
 				    XP_SRC_YANG);
 	}
     }

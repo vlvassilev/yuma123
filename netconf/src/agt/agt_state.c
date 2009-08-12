@@ -2,75 +2,69 @@
 
    NETCONF State Data Model implementation: Agent Side Support
 
+From draft-07:
 
 identifiers:
-container /ietf-netconf-state
-container /ietf-netconf-state/capabilities
-leaf-list /ietf-netconf-state/capabilities/capability
-container /ietf-netconf-state/datastores
-list /ietf-netconf-state/datastores/datastore
-container /ietf-netconf-state/datastores/datastore/name
-choice /ietf-netconf-state/datastores/datastore/name/datastore
-case /ietf-netconf-state/datastores/datastore/name/datastore/running
-leaf /ietf-netconf-state/datastores/datastore/name/datastore/running/running
-case /ietf-netconf-state/datastores/datastore/name/datastore/candidate
-leaf /ietf-netconf-state/datastores/datastore/name/datastore/candidate/candidate
-case /ietf-netconf-state/datastores/datastore/name/datastore/startup
-leaf /ietf-netconf-state/datastores/datastore/name/datastore/startup/startup
-container /ietf-netconf-state/datastores/datastore/locks
-choice /ietf-netconf-state/datastores/datastore/locks/lockType
-case /ietf-netconf-state/datastores/datastore/locks/lockType/globalLock
-container /ietf-netconf-state/datastores/datastore/locks/lockType/globalLock/globalLock
-leaf /ietf-netconf-state/datastores/datastore/locks/lockType/globalLock/globalLock/lockedBySession
-leaf /ietf-netconf-state/datastores/datastore/locks/lockType/globalLock/globalLock/lockedTime
-case /ietf-netconf-state/datastores/datastore/locks/lockType/partialLocks
-list /ietf-netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks
-leaf /ietf-netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/lockId
-leaf /ietf-netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/lockedBySession
-leaf /ietf-netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/lockedTime
-leaf-list /ietf-netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/select
-leaf-list /ietf-netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/lockedNodes
-container /ietf-netconf-state/schemas
-list /ietf-netconf-state/schemas/schema
-leaf /ietf-netconf-state/schemas/schema/identifier
-leaf /ietf-netconf-state/schemas/schema/version
-leaf /ietf-netconf-state/schemas/schema/format
-leaf /ietf-netconf-state/schemas/schema/namespace
-leaf /ietf-netconf-state/schemas/schema/location
-container /ietf-netconf-state/sessions
-list /ietf-netconf-state/sessions/session
-leaf /ietf-netconf-state/sessions/session/sessionId
-leaf /ietf-netconf-state/sessions/session/transport
-leaf /ietf-netconf-state/sessions/session/protocol
-leaf /ietf-netconf-state/sessions/session/username
-leaf /ietf-netconf-state/sessions/session/sourceHost
-leaf /ietf-netconf-state/sessions/session/loginTime
-container /ietf-netconf-state/subscriptions
-list /ietf-netconf-state/subscriptions/subscription
-leaf /ietf-netconf-state/subscriptions/subscription/sessionId
-leaf /ietf-netconf-state/subscriptions/subscription/stream
-*** out leaf /ietf-netconf-state/subscriptions/subscription/filter
-leaf /ietf-netconf-state/subscriptions/subscription/startTime
-leaf /ietf-netconf-state/subscriptions/subscription/stopTime
-leaf /ietf-netconf-state/subscriptions/subscription/outNotifications
-container /ietf-netconf-state/statistics
-leaf /ietf-netconf-state/statistics/netconfStartTime
-leaf /ietf-netconf-state/statistics/inSessions
-leaf /ietf-netconf-state/statistics/inXMLParseErrors
-leaf /ietf-netconf-state/statistics/inBadHellos
-leaf /ietf-netconf-state/statistics/inRpcs
-leaf /ietf-netconf-state/statistics/inBadRpcs
-leaf /ietf-netconf-state/statistics/inNotSupportedRpcs
-leaf /ietf-netconf-state/statistics/outRpcReplies
-leaf /ietf-netconf-state/statistics/outRpcErrors
-leaf /ietf-netconf-state/statistics/outNotifications
+container /netconf-state
+container /netconf-state/capabilities
+leaf-list /netconf-state/capabilities/capability
+container /netconf-state/datastores
+list /netconf-state/datastores/datastore
+container /netconf-state/datastores/datastore/name
+choice /netconf-state/datastores/datastore/name/datastore
+case /netconf-state/datastores/datastore/name/datastore/running
+leaf /netconf-state/datastores/datastore/name/datastore/running/running
+case /netconf-state/datastores/datastore/name/datastore/candidate
+leaf /netconf-state/datastores/datastore/name/datastore/candidate/candidate
+case /netconf-state/datastores/datastore/name/datastore/startup
+leaf /netconf-state/datastores/datastore/name/datastore/startup/startup
+container /netconf-state/datastores/datastore/locks
+choice /netconf-state/datastores/datastore/locks/lockType
+case /netconf-state/datastores/datastore/locks/lockType/globalLock
+container /netconf-state/datastores/datastore/locks/lockType/globalLock/globalLock
+leaf /netconf-state/datastores/datastore/locks/lockType/globalLock/globalLock/lockedBySession
+leaf /netconf-state/datastores/datastore/locks/lockType/globalLock/globalLock/lockedTime
+case /netconf-state/datastores/datastore/locks/lockType/partialLocks
+list /netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks
+leaf /netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/lockId
+leaf /netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/lockedBySession
+leaf /netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/lockedTime
+leaf-list /netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/select
+leaf-list /netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/lockedNodes
+container /netconf-state/schemas
+list /netconf-state/schemas/schema
+leaf /netconf-state/schemas/schema/identifier
+leaf /netconf-state/schemas/schema/version
+leaf /netconf-state/schemas/schema/format
+leaf /netconf-state/schemas/schema/namespace
+leaf-list /netconf-state/schemas/schema/location
+container /netconf-state/sessions
+list /netconf-state/sessions/session
+leaf /netconf-state/sessions/session/sessionId
+leaf /netconf-state/sessions/session/transport
+leaf /netconf-state/sessions/session/username
+leaf /netconf-state/sessions/session/sourceHost
+leaf /netconf-state/sessions/session/loginTime
+leaf /netconf-state/sessions/session/inRpcs
+leaf /netconf-state/sessions/session/inBadRpcs
+leaf /netconf-state/sessions/session/outRpcErrors
+leaf /netconf-state/sessions/session/outNotifications
+container /netconf-state/statistics
+leaf /netconf-state/statistics/netconfStartTime
+leaf /netconf-state/statistics/inBadHellos
+leaf /netconf-state/statistics/inSessions
+leaf /netconf-state/statistics/droppedSessions
+leaf /netconf-state/statistics/inRpcs
+leaf /netconf-state/statistics/inBadRpcs
+leaf /netconf-state/statistics/outRpcErrors
+leaf /netconf-state/statistics/outNotifications
 rpc /get-schema
-input or output /get-schema/input
+container /get-schema/input
 leaf /get-schema/input/identifier
 leaf /get-schema/input/version
 leaf /get-schema/input/format
-input or output /get-schema/output
-leaf /get-schema/output/data
+container /get-schema/output
+anyxml /get-schema/output/data
 
 *********************************************************************
 *                                                                   *
@@ -192,7 +186,7 @@ date         init     comment
 #define AGT_STATE_DEBUG 1
 #endif
 
-#define AGT_STATE_TOP_CONTAINER (const xmlChar *)"ietf-netconf-state"
+#define AGT_STATE_TOP_CONTAINER (const xmlChar *)"netconf-state"
 
 #define AGT_STATE_GET_SCHEMA    (const xmlChar *)"get-schema"
 
@@ -214,15 +208,20 @@ date         init     comment
 
 #define AGT_STATE_OBJ_SESSIONID       (const xmlChar *)"sessionId"
 #define AGT_STATE_OBJ_TRANSPORT       (const xmlChar *)"transport"
-#define AGT_STATE_OBJ_PROTOCOL        (const xmlChar *)"protocol"
 #define AGT_STATE_OBJ_USERNAME        (const xmlChar *)"username"
 #define AGT_STATE_OBJ_SOURCEHOST      (const xmlChar *)"sourceHost"
 #define AGT_STATE_OBJ_LOGINTIME       (const xmlChar *)"loginTime"
 
+#define AGT_STATE_OBJ_IN_RPCS         (const xmlChar *)"inRpcs"
+#define AGT_STATE_OBJ_IN_SESSIONS     (const xmlChar *)"inSessions"
+#define AGT_STATE_OBJ_IN_BAD_RPCS     (const xmlChar *)"inBadRpcs"
+#define AGT_STATE_OBJ_IN_BAD_HELLOS   (const xmlChar *)"inBadHellos"
+#define AGT_STATE_OBJ_OUT_RPC_ERRORS  (const xmlChar *)"outRpcErrors"
+#define AGT_STATE_OBJ_OUT_NOTIFICATIONS  (const xmlChar *)"outNotifications"
+#define AGT_STATE_OBJ_DROPPED_SESSIONS  (const xmlChar *)"droppedSessions"
 #define AGT_STATE_OBJ_STATISTICS      (const xmlChar *)"statistics"
-#define AGT_STATE_OBJ_SUBSCRIPTIONS   (const xmlChar *)"subscriptions"
 
-#define AGT_STATE_FORMAT_YANG         (const xmlChar *)"YANG"
+#define AGT_STATE_FORMAT_YANG         (const xmlChar *)"yang"
 
 #define AGT_STATE_ENUM_NETCONF        (const xmlChar *)"NETCONF"
 
@@ -247,18 +246,10 @@ static val_value_t          *mysessionsval;
 
 static val_value_t          *myschemasval;
 
-static val_value_t          *mysubscriptionsval;
-
 static const obj_template_t *mysessionobj;
 
 static const obj_template_t *myschemaobj;
 
-static const obj_template_t *mysubscriptionsobj;
-
-/* TRUE == mysubscriptionsval in the running config
- * FALSE ==mysubscriptionsval is not in the running config
- */
-static boolean               any_subscriptions;
 
 /********************************************************************
 * FUNCTION get_locks
@@ -382,7 +373,8 @@ static val_value_t *
     const obj_template_t  *nameobj, *testobj;
     val_value_t           *confval, *nameval, *leafval;
 
-    nameobj = obj_find_child(confobj, AGT_STATE_MODULE, 
+    nameobj = obj_find_child(confobj, 
+                             AGT_STATE_MODULE, 
                              NCX_EL_NAME);
     if (!nameobj) {
         *res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -427,7 +419,8 @@ static val_value_t *
     }
 
     /* create datastore/locks */
-    testobj = obj_find_child(confobj, AGT_STATE_MODULE, 
+    testobj = obj_find_child(confobj, 
+                             AGT_STATE_MODULE, 
                              AGT_STATE_OBJ_LOCKS);
     if (!testobj) {
         val_free_value(confval);
@@ -492,10 +485,6 @@ static val_value_t *
         return NULL;
     }
     val_add_child(childval, schemaval);
-
-    /**** DRAFT-03 HAS BUG IN KEY ORDER
-     **** THIS IS THE CORRECTED ORDER
-     ****/
 
     /* create schema/version */
     childval = agt_make_leaf(schemaobj,
@@ -609,17 +598,6 @@ static val_value_t *
     }
     val_add_child(childval, sessionval);
     
-    /* create session/protocol */
-    childval = agt_make_leaf(sessionobj,
-                             AGT_STATE_OBJ_PROTOCOL,
-                             AGT_STATE_ENUM_NETCONF,
-                             res);
-    if (!childval) {
-        val_free_value(sessionval);
-        return NULL;
-    }
-    val_add_child(childval, sessionval);
-
     /* create session/username */
     childval = agt_make_leaf(sessionobj,
                              AGT_STATE_OBJ_USERNAME,
@@ -647,6 +625,50 @@ static val_value_t *
                              AGT_STATE_OBJ_LOGINTIME,
                              scb->start_time,
                              res);
+    if (!childval) {
+        val_free_value(sessionval);
+        return NULL;
+    }
+    val_add_child(childval, sessionval);
+
+    /* create session/inRpcs */
+    childval = agt_make_virtual_leaf(sessionobj,
+                                     AGT_STATE_OBJ_IN_RPCS,
+                                     agt_ses_get_session_inRpcs,
+                             res);
+    if (!childval) {
+        val_free_value(sessionval);
+        return NULL;
+    }
+    val_add_child(childval, sessionval);
+
+    /* create session/inBadRpcs */
+    childval = agt_make_virtual_leaf(sessionobj,
+                                     AGT_STATE_OBJ_IN_BAD_RPCS,
+                                     agt_ses_get_session_inBadRpcs,
+                                     res);
+    if (!childval) {
+        val_free_value(sessionval);
+        return NULL;
+    }
+    val_add_child(childval, sessionval);
+
+    /* create session/outRpcErrors */
+    childval = agt_make_virtual_leaf(sessionobj,
+                                     AGT_STATE_OBJ_OUT_RPC_ERRORS,
+                                     agt_ses_get_session_outRpcErrors,
+                                     res);
+    if (!childval) {
+        val_free_value(sessionval);
+        return NULL;
+    }
+    val_add_child(childval, sessionval);
+
+    /* create session/outNotifications */
+    childval = agt_make_virtual_leaf(sessionobj,
+                                     AGT_STATE_OBJ_OUT_NOTIFICATIONS,
+                                     agt_ses_get_session_outNotifications,
+                                     res);
     if (!childval) {
         val_free_value(sessionval);
         return NULL;
@@ -706,32 +728,9 @@ static val_value_t *
     }
     val_add_child(childval, statsval);
 
-
-    /* add statistics/inSessions virtual leaf */
-    childval = agt_make_virtual_leaf(statisticsobj,
-                                     (const xmlChar *)"inSessions",
-                                     agt_ses_get_inSessions,
-                                     res);
-    if (!childval) {
-        val_free_value(statsval);
-        return NULL;
-    }
-    val_add_child(childval, statsval);
-
-    /* add statistics/inXMLParseErrors virtual leaf */
-    childval = agt_make_virtual_leaf(statisticsobj,
-                                     (const xmlChar *)"inXMLParseErrors",
-                                     agt_ses_get_inXMLParseErrors,
-                                     res);
-    if (!childval) {
-        val_free_value(statsval);
-        return NULL;
-    }
-    val_add_child(childval, statsval);
-
     /* add statistics/inBadHellos virtual leaf */
     childval = agt_make_virtual_leaf(statisticsobj,
-                                     (const xmlChar *)"inBadHellos",
+                                     AGT_STATE_OBJ_IN_BAD_HELLOS,
                                      agt_ses_get_inBadHellos,
                                      res);
     if (!childval) {
@@ -740,10 +739,31 @@ static val_value_t *
     }
     val_add_child(childval, statsval);
 
+    /* add statistics/inSessions virtual leaf */
+    childval = agt_make_virtual_leaf(statisticsobj,
+                                     AGT_STATE_OBJ_IN_SESSIONS,
+                                     agt_ses_get_inSessions,
+                                     res);
+    if (!childval) {
+        val_free_value(statsval);
+        return NULL;
+    }
+    val_add_child(childval, statsval);
+
+    /* add statistics/droppedSessions virtual leaf */
+    childval = agt_make_virtual_leaf(statisticsobj,
+                                     AGT_STATE_OBJ_DROPPED_SESSIONS,
+                                     agt_ses_get_droppedSessions,
+                                     res);
+    if (!childval) {
+        val_free_value(statsval);
+        return NULL;
+    }
+    val_add_child(childval, statsval);
 
     /* add statistics/inRpcs virtual leaf */
     childval = agt_make_virtual_leaf(statisticsobj,
-                                     (const xmlChar *)"inRpcs",
+                                     AGT_STATE_OBJ_IN_RPCS,
                                      agt_ses_get_inRpcs,
                                      res);
     if (!childval) {
@@ -754,31 +774,8 @@ static val_value_t *
 
     /* add statistics/inBadRpcs virtual leaf */
     childval = agt_make_virtual_leaf(statisticsobj,
-                                     (const xmlChar *)"inBadRpcs",
+                                     AGT_STATE_OBJ_IN_BAD_RPCS,
                                      agt_ses_get_inBadRpcs,
-                                     res);
-    if (!childval) {
-        val_free_value(statsval);
-        return NULL;
-    }
-    val_add_child(childval, statsval);
-
-
-    /* add statistics/inNotSupportedRpcs virtual leaf */
-    childval = agt_make_virtual_leaf(statisticsobj,
-                                     (const xmlChar *)"inNotSupportedRpcs",
-                                     agt_ses_get_inNotSupportedRpcs,
-                                     res);
-    if (!childval) {
-        val_free_value(statsval);
-        return NULL;
-    }
-    val_add_child(childval, statsval);
-
-    /* add statistics/outRpcReplies virtual leaf */
-    childval = agt_make_virtual_leaf(statisticsobj,
-                                     (const xmlChar *)"outRpcReplies",
-                                     agt_ses_get_outRpcReplies,
                                      res);
     if (!childval) {
         val_free_value(statsval);
@@ -788,7 +785,7 @@ static val_value_t *
 
     /* add statistics/outRpcErrors virtual leaf */
     childval = agt_make_virtual_leaf(statisticsobj,
-                                     (const xmlChar *)"outRpcErrors",
+                                     AGT_STATE_OBJ_OUT_RPC_ERRORS,
                                      agt_ses_get_outRpcErrors,
                                      res);
     if (!childval) {
@@ -799,7 +796,7 @@ static val_value_t *
 
     /* add statistics/outNotifications virtual leaf */
     childval = agt_make_virtual_leaf(statisticsobj,
-                                     (const xmlChar *)"outNotifications",
+                                     AGT_STATE_OBJ_OUT_NOTIFICATIONS,
                                      agt_ses_get_outNotifications,
                                      res);
     if (!childval) {
@@ -831,6 +828,7 @@ static status_t
     ncx_module_t    *findmod;
     const xmlChar   *identifier, *version, *format;
     val_value_t     *validentifier, *valversion, *valformat;
+    xmlns_id_t       nsid;
     status_t         res;
 
     res = NO_ERR;
@@ -860,7 +858,8 @@ static status_t
                                AGT_STATE_MODULE,
                                AGT_STATE_OBJ_FORMAT);
     if (valformat && valformat->res == NO_ERR) {
-        format = VAL_ENUM_NAME(valformat);
+        format = VAL_IDREF_NAME(valformat);
+        nsid = VAL_IDREF_NSID(valformat);
     }
 
     if (!identifier || !version || !format) {
@@ -891,7 +890,9 @@ static status_t
     }
 
     /* check format parameter: only YANG supported for now */
-    if (xml_strcmp(format, AGT_STATE_FORMAT_YANG)) {
+    if (xml_strcmp(format, AGT_STATE_FORMAT_YANG) ||
+        nsid != statemod->nsid) {
+
         res = ERR_NCX_VALUE_NOT_SUPPORTED;
         agt_record_error(scb, 
                          &msg->mhdr, 
@@ -902,6 +903,7 @@ static status_t
                          format,
                          NCX_NT_VAL, 
                          valformat);
+
     }
 
     if (res == NO_ERR) {
@@ -932,120 +934,6 @@ static status_t
     return res;
 
 } /* get_schema_validate */
-
-
-
-/********************************************************************
-* FUNCTION make_subscription_val
-*
-* make a val_value_t struct for a specified subscription
-*
-INPUTS:
-*   sub == subscription control block to use
-*   res == address of return status
-*
-* OUTPUTS:
-*   *res == return status
-*
-* RETURNS:
-*   malloced value struct or NULL if some error
-*********************************************************************/
-static val_value_t *
-    make_subscription_val (agt_not_subscription_t *sub,
-                           status_t *res)
-{
-    const obj_template_t *subscriptionobj;
-    val_value_t           *subval, *childval;
-    xmlChar               numbuff[NCX_MAX_NUMLEN];
-
-    *res = NO_ERR;
-
-    subscriptionobj = 
-        obj_find_child(mysubscriptionsobj,
-                       AGT_STATE_MODULE,
-                       (const xmlChar *)"subscription");
-    if (!subscriptionobj) {
-        *res = SET_ERROR(ERR_INTERNAL_VAL);
-        return NULL;
-    }
-
-    /* create session node */
-    subval = val_new_value();
-    if (!subval) {
-        *res = ERR_INTERNAL_MEM;
-        return NULL;
-    }
-    val_init_from_template(subval, subscriptionobj);
-
-    /* create subscription/sessionId */
-    sprintf((char *)numbuff, "%u", sub->scb->sid);
-    childval = agt_make_leaf(subscriptionobj,
-                             AGT_STATE_OBJ_SESSIONID,
-                             numbuff, 
-                             res);
-    if (!childval) {
-        val_free_value(subval);
-        return NULL;
-    }
-    val_add_child(childval, subval);
-
-    /* create subscription/stream */
-    childval = agt_make_leaf(subscriptionobj,
-                             (const xmlChar *)"stream",
-                             sub->stream,
-                             res);
-    if (!childval) {
-        val_free_value(subval);
-        return NULL;
-    }
-    val_add_child(childval, subval);
-    
-    /* create subscription/startTime */
-    if (sub->startTime) {
-        childval = agt_make_leaf(subscriptionobj,
-                                 (const xmlChar *)"startTime",                 
-                                 sub->startTime,
-                                 res);
-        if (!childval) {
-            val_free_value(subval);
-            return NULL;
-        }
-        val_add_child(childval, subval);
-    }
-
-    /* create subscription/stopTime */
-    if (sub->stopTime) {
-        childval = agt_make_leaf(subscriptionobj,
-                                 (const xmlChar *)"stopTime",                 
-                                 sub->stopTime,
-                                 res);
-        if (!childval) {
-            val_free_value(subval);
-            return NULL;
-        }
-        val_add_child(childval, subval);
-    }
-
-    /* create subscription/outNotifications */
-    childval = agt_make_virtual_leaf(subscriptionobj,
-                                     (const xmlChar *)"outNotifications",
-                                     agt_ses_get_outNotifications,
-                                     res);
-    if (!childval) {
-        val_free_value(subval);
-        return NULL;
-    }
-    val_add_child(childval, subval);
-
-    *res = val_gen_index_chain(subscriptionobj, subval);
-    if (*res != NO_ERR) {
-        val_free_value(subval);
-        return NULL;
-    }
-
-    return subval;
-
-    } /* make_subscription_val */
 
 
 /************* E X T E R N A L    F U N C T I O N S ***************/
@@ -1089,11 +977,8 @@ status_t
 
     mysessionsval = NULL;
     myschemasval = NULL;
-    mysubscriptionsval = NULL;
     mysessionobj = NULL;
     myschemaobj = NULL;
-    mysubscriptionsobj = NULL;
-    any_subscriptions = FALSE;
     agt_state_init_done = TRUE;
     return NO_ERR;
 
@@ -1121,7 +1006,6 @@ status_t
     val_value_t           *topval, *capsval;
     val_value_t           *confsval, *confval;
     val_value_t           *sessionsval, *statisticsval;
-    val_value_t           *subscriptionsval;
     cfg_template_t        *runningcfg;
     ncx_module_t          *mod;
     status_t  res;
@@ -1198,13 +1082,6 @@ status_t
                                    AGT_STATE_MODULE,
                                    AGT_STATE_OBJ_STATISTICS);
     if (!statisticsobj) {
-        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-    }
-
-    mysubscriptionsobj = obj_find_child(topobj,
-                                        AGT_STATE_MODULE,
-                                        AGT_STATE_OBJ_SUBSCRIPTIONS);
-    if (!mysubscriptionsobj) {
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
@@ -1296,19 +1173,6 @@ status_t
     val_add_child(sessionsval, topval);
     mysessionsval = sessionsval;
 
-    /* make cached /ietf-netconf-state/subscriptions 
-     * this is an NP-container so it is only added
-     * to the running config when there is at
-     * least one subscription active
-     */
-    subscriptionsval = val_new_value();
-    if (!subscriptionsval) {
-        return ERR_INTERNAL_MEM;
-    }
-    val_init_from_template(subscriptionsval, 
-                           mysubscriptionsobj);
-    mysubscriptionsval = subscriptionsval;
-
     /* add /ietf-netconf-state/statistics */
     statisticsval = make_statistics_val(statisticsobj,
                                         &res);
@@ -1337,24 +1201,11 @@ void
 {
     if (agt_state_init_done) {
 
-        if (!any_subscriptions) {
-            /* not going to get cleaned up when 
-             * the running config is deleted,
-             * so delete it now
-             */
-            if (mysubscriptionsval) {
-                val_free_value(mysubscriptionsval);
-            }
-        }
-
         statemod = NULL;
         mysessionsval = NULL;
         myschemasval = NULL;
-        mysubscriptionsval = NULL;
         mysessionobj = NULL;
         myschemaobj = NULL;
-        mysubscriptionsobj = NULL;
-        any_subscriptions = FALSE;
 
         agt_rpc_unregister_method(AGT_STATE_MODULE, 
                                   AGT_STATE_GET_SCHEMA);
@@ -1459,90 +1310,6 @@ status_t
     return res;
 
 }  /* agt_state_add_module_schema */
-
-
-/********************************************************************
-* FUNCTION agt_state_add_subscription
-*
-* Add a notification subscription entry to the netconf-state DM
-*
-* INPUTS:
-*   sub == subscription control block to use for the info
-*
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    agt_state_add_subscription (agt_not_subscription_t *sub)
-{
-    val_value_t *subscription;
-    status_t     res;
-
-    res = NO_ERR;
-    subscription = make_subscription_val(sub, &res);
-    if (!subscription) {
-        return res;
-    }
-
-    val_add_child(subscription, mysubscriptionsval);
-
-    if (!any_subscriptions) {
-        /* !!! special insert hack into the correct
-         * !!! sibling position; OK because this is
-         * !!! static read-only data and will not
-         * !!! be removed by agt_val.c
-         */
-        dlq_insertAfter(mysubscriptionsval, mysessionsval);
-        mysubscriptionsval->parent = mysessionsval->parent;
-        any_subscriptions = TRUE;
-    }
-
-    return NO_ERR;
-
-}  /* agt_state_add_subscription */
-
-
-/********************************************************************
-* FUNCTION agt_state_remove_subscription
-*
-* Remove a subscription entry from the netconf-state DM
-*
-* INPUTS:
-*   sid == session ID of the subscription entry to find and delete
-*
-*********************************************************************/
-void
-    agt_state_remove_subscription (ses_id_t sid)
-{
-    val_value_t  *subscriptionval, *sessionidval;
-
-    for (subscriptionval = val_get_first_child(mysubscriptionsval);
-         subscriptionval != NULL;
-         subscriptionval = val_get_next_child(subscriptionval)) {
-
-        sessionidval = val_find_child(subscriptionval, 
-                                      AGT_STATE_MODULE, 
-                                      AGT_STATE_OBJ_SESSIONID);
-        if (!sessionidval) {
-            SET_ERROR(ERR_INTERNAL_VAL);
-            continue;
-        }
-
-        if (VAL_UINT(sessionidval) != sid) {
-            continue;
-        }
-            
-        dlq_remove(subscriptionval);
-        val_free_value(subscriptionval);
-
-        if (!val_has_content(mysubscriptionsval)) {
-            val_remove_child(mysubscriptionsval);
-            any_subscriptions = FALSE;
-        }
-        return;
-    }
-
-}  /* agt_state_remove_subscription */
 
 
 /* END file agt_state.c */

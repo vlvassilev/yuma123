@@ -338,7 +338,6 @@ void
 	    notification_obj = notobj;
 	} else {
 	    SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-	    scb->stats.in_drop_msgs++;
 	    mgr_xml_skip_subtree(scb->reader, top);
 	    return;
 	}
@@ -349,7 +348,6 @@ void
      */
     msg = new_msg();
     if (!msg) {
-	scb->stats.in_drop_msgs++;
 	log_error("\nError: mgr_not: skipping incoming message");
 	mgr_xml_skip_subtree(scb->reader, top);
 	return;

@@ -831,8 +831,12 @@ static status_t
 
     if (*str == NCX_QSTRING_CH) {
         /* easy case, a quoted string on 1 line */
-	res = add_new_qtoken(tkc, TRUE, tkc->bptr, str, 
-				 startline, startpos);
+	res = add_new_qtoken(tkc, 
+                             TRUE, 
+                             tkc->bptr, 
+                             str, 
+                             startline, 
+                             startpos);
         tkc->bptr = str+1;
         return res;
     }
@@ -2407,8 +2411,10 @@ status_t
 		/* check for a 2 char token before 1 char token */
 		ttyp = get_token_id(tkc->bptr, 2, tkc->source);
 		if (ttyp != TK_TT_NONE) {
-		    res = add_new_token(tkc, ttyp, 
-					tkc->bptr+2, tkc->linepos);
+		    res = add_new_token(tkc, 
+                                        ttyp, 
+					tkc->bptr+2, 
+                                        tkc->linepos);
 		    tkc->bptr += 2;
 		    tkc->linepos += 2;
 		} else {
@@ -2416,8 +2422,10 @@ status_t
 		    ttyp = get_token_id(tkc->bptr, 1, tkc->source);
 		    if (ttyp != TK_TT_NONE) {
 			/* got a 1 char token */
-			res = add_new_token(tkc, ttyp, 
-					    tkc->bptr+1, tkc->linepos);
+			res = add_new_token(tkc, 
+                                            ttyp, 
+					    tkc->bptr+1, 
+                                            tkc->linepos);
 			tkc->bptr++;
 			tkc->linepos++;
 		    } else {
@@ -2675,6 +2683,71 @@ void
     tkc->cur = (tk_token_t *)&tkc->tkQ;
 
 }  /* tk_reset_chain */
+
+
+/********************************************************************
+* FUNCTION tk_clone_chain
+* 
+* Allocatate and a new token parse chain and fill
+* it with the specified token chain contents 
+*
+* INPUTS:
+*   oldtkc == token chain to clone
+*
+* RETURNS:
+*    new cloned parse chain or NULL if memory error
+*********************************************************************/
+tk_chain_t * 
+    tk_clone_chain (tk_chain_t *oldtkc)
+{
+    tk_chain_t  *tkc;
+    tk_token_t  *token, *oldtoken;
+    status_t     res;
+
+
+    tkc = tk_new_chain();
+    if (!tkc) {
+        return NULL;
+    }
+
+    tkc->filename = oldtkc->filename;
+    tkc->linenum = oldtkc->linenum;
+    tkc->flags = oldtkc->flags;
+    tkc->source = oldtkc->source;
+
+    res = NO_ERR;
+    for (oldtoken = (tk_token_t *)dlq_firstEntry(&oldtkc->tkQ);
+         oldtoken != NULL && res == NO_ERR;
+         oldtoken = (tk_token_t *)dlq_nextEntry(oldtoken)) {
+
+        token = new_token(oldtoken->typ,
+                          oldtoken->val,
+                          oldtoken->len);
+        if (!token) {
+            tk_free_chain(tkc);
+            return NULL;
+        }
+
+        if (oldtoken->mod) {
+            token->mod = xml_strndup(oldtoken->mod,
+                                     oldtoken->modlen);
+            if (!token->mod) {
+                free_token(token);
+                tk_free_chain(tkc);
+                return NULL;
+            }
+            token->modlen = oldtoken->modlen;
+        }
+                
+        token->linenum = oldtoken->linenum;
+        token->linepos = oldtoken->linepos;
+        token->nsid = oldtoken->nsid;
+        dlq_enque(token, &tkc->tkQ);
+    }
+
+    return tkc;
+           
+} /* tk_clone_chain */
 
 
 /* END file tk.c */

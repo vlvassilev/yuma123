@@ -578,6 +578,7 @@ void
     xmlChar            *pathbuff;
     ses_total_stats_t  *totals;
 
+    (void)scb;
     errQ = (msghdr) ? &msghdr->errQ : NULL;
     totals = ses_get_total_stats();
     pathbuff = NULL;
@@ -643,12 +644,6 @@ void
 	}
     }
 
-    if (scb) {
-	/*** need to change this counter ***/
-	scb->stats.out_drop_bytes++;
-	totals->stats.out_drop_bytes++;
-    }
-
 } /* agt_record_error_errinfo */
 
 
@@ -693,6 +688,7 @@ void
     dlq_hdr_t          *errQ;
     ses_total_stats_t  *totals;
 
+    (void)scb;
     errQ = (msghdr) ? &msghdr->errQ : NULL;
     totals = ses_get_total_stats();
 
@@ -722,13 +718,6 @@ void
 	    }
 	}
     }
-
-    /*** inc error-dropped counter for the session stats ***/
-    if (scb) {
-	scb->stats.out_drop_bytes++;
-	totals->stats.out_drop_bytes++;
-    }
-
 
 } /* agt_record_attr_error */
 
@@ -774,6 +763,7 @@ void
     }
 #endif
 
+    (void)scb;
     errQ = (msghdr) ? &msghdr->errQ : NULL;
     totals = ses_get_total_stats();
 
@@ -802,10 +792,6 @@ void
 	} else {
 	    if (pathbuff) {
 		m__free(pathbuff);
-	    }
-	    if (scb) {
-		scb->stats.out_drop_bytes++;
-		totals->stats.out_drop_bytes++;
 	    }
 	}
     }
@@ -855,6 +841,7 @@ void
     }
 #endif
 
+    (void)scb;
     interr = ERR_NCX_UNIQUE_TEST_FAILED;
     errQ = (msghdr) ? &msghdr->errQ : NULL;
     totals = ses_get_total_stats();
@@ -884,10 +871,6 @@ void
 	} else {
 	    if (pathbuff) {
 		m__free(pathbuff);
-	    }
-	    if (scb) {
-		scb->stats.out_drop_bytes++;
-		totals->stats.out_drop_bytes++;
 	    }
 	}
     }

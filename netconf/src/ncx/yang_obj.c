@@ -8703,7 +8703,8 @@ static status_t
 		if (LOGDEBUG3) {
 		    log_debug3("\nresolve_xpath: mod %s, "
                                "object %s, on line %u",
-			       mod->name, obj_get_name(testobj), 
+			       mod->name,
+                               obj_get_name(testobj), 
 			       testobj->linenum);
 		}
 #endif

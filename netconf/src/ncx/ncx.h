@@ -196,8 +196,10 @@ extern obj_template_t *
 		     const xmlChar *objname);
 
 extern status_t 
-    ncx_add_to_registry (ncx_module_t *mod,
-			 boolean alreadyreg);
+    ncx_add_namespace_to_registry (ncx_module_t *mod);
+
+extern status_t 
+    ncx_add_to_registry (ncx_module_t *mod);
 
 extern status_t 
     ncx_add_to_modQ (ncx_module_t *mod);

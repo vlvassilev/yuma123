@@ -1373,22 +1373,22 @@ status_t
     linenum = (tkc) ? TK_CUR_LNUM(tkc) : 1;
     linepos = (tkc) ? TK_CUR_LPOS(tkc) : 1;
 
-    /* before all objects are known, only simple validation
-     * is done, and the token chain is saved for reuse
-     * each time the expression is evaluated
-     */
-    pcb->tkc = tk_tokenize_xpath_string(mod, 
-					pcb->exprstr, 
-					linenum,
-					linepos,
-					&res);
-    if (!pcb->tkc || res != NO_ERR) {
-	if (pcb->logerrors) {
-	    log_error("\nError: Invalid path string '%s'",
-		      pcb->exprstr);
-	    ncx_print_errormsg(tkc, mod, res);
-	}
-	return res;
+    if (pcb->tkc) {
+        tk_reset_chain(pcb->tkc);
+    } else {
+        pcb->tkc = tk_tokenize_xpath_string(mod, 
+                                            pcb->exprstr, 
+                                            linenum,
+                                            linepos,
+                                            &res);
+        if (!pcb->tkc || res != NO_ERR) {
+            if (pcb->logerrors) {
+                log_error("\nError: Invalid path string '%s'",
+                          pcb->exprstr);
+                ncx_print_errormsg(tkc, mod, res);
+            }
+            return res;
+        }
     }
 
     /* the module that contains the leafref is the one

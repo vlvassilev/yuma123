@@ -879,9 +879,13 @@ static status_t
     }
 
     /* figure out where to get the requested 'old' file */
-    cp->curold = make_curold_filename((cp->new_isdir) ? 
-				      cp->curnew : newpcb->top->sourcefn, 
-                                      cp);
+    if (cp->old) {
+        cp->curold = xml_strdup(cp->old);
+    } else {
+        cp->curold = make_curold_filename((cp->new_isdir) ? 
+                                          cp->curnew : newpcb->top->sourcefn, 
+                                          cp);
+    }
     if (!cp->curold) {
 	res = ERR_INTERNAL_MEM;
 	ncx_print_errormsg(NULL, NULL, res);

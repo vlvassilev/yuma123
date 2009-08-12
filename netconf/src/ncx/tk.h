@@ -342,4 +342,8 @@ extern uint32
 extern void
     tk_reset_chain (tk_chain_t *tkc);
 
+extern tk_chain_t *
+    tk_clone_chain (tk_chain_t *oldtkc);
+
+
 #endif	    /* _H_tk */

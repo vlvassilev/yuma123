@@ -1998,6 +1998,137 @@ obj_template_t *
 
 
 /********************************************************************
+* FUNCTION ncx_add_namespace_to_registry
+*
+* Add the namespace and prefix to the registry
+* or retrieve it if already set
+* 
+* INPUTS:
+*   mod == module to add to registry
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    ncx_add_namespace_to_registry (ncx_module_t *mod)
+{
+    xmlns_t        *ns;
+    xmlChar        *buffer, *p;
+    const xmlChar  *modname;
+    status_t        res;
+    xmlns_id_t      nsid;
+    uint32          prefixlen, i;
+
+#ifdef DEBUG
+    if (!mod) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (!mod->ismod) {
+        return NO_ERR;
+    }
+
+    res = NO_ERR;
+
+    /* if this is the XSD module, then use the NS ID already registered */
+    if (!xml_strcmp(mod->name, NCX_EL_XSD)) {
+	mod->nsid = xmlns_xs_id();
+    } else {
+        mod->nsid = xmlns_find_ns_by_module(mod->name);
+    }
+
+    /* first add the application namespace
+     * Multiple NS URIs are allowed to map to the same app 
+     */
+    if (!mod->ns) {
+        /* construct a namespace value from the hdr info */
+        mod->ns = gen_modns(mod);
+        if (!mod->ns) {
+            return ERR_INTERNAL_MEM;
+        }
+    }
+    
+    /* check module prefix collision */
+    nsid = xmlns_find_ns_by_prefix(mod->prefix);
+    if (nsid) {
+        modname = xmlns_get_module(nsid);
+        if (xml_strcmp(mod->name, modname)) {
+            log_warn("\nWarning: prefix '%s' already in use "
+                     "by module '%s'",
+                     mod->prefix, 
+                     modname);
+            ncx_print_errormsg(NULL, mod, ERR_NCX_DUP_PREFIX);
+
+            /* redo the module xmlprefix */
+            prefixlen = xml_strlen(mod->prefix);
+            buffer = m__getMem(prefixlen + 6);
+            if (!buffer) {
+                return ERR_INTERNAL_MEM;
+            }
+            p = buffer;
+            p += xml_strcpy(p, mod->prefix);
+
+            /* keep adding numbers to end of prefix until
+             * 1 is unused or run out of numbers
+             */
+            for (i=1; i<10000 && nsid; i++) {
+                sprintf((char *)p, "%u", i);
+                nsid = xmlns_find_ns_by_prefix(buffer);
+            }
+            if (nsid) {
+                log_error("\nError: could not assign module prefix");
+                res = ERR_NCX_OPERATION_FAILED;
+                ncx_print_errormsg(NULL, mod, res);
+                m__free(buffer);
+                return res;
+            }
+
+            /* else the current buffer contains an unused prefix */
+            mod->xmlprefix = buffer;
+        }
+    }
+
+    ns = def_reg_find_ns(mod->ns);
+    if (ns) {
+        if (xml_strcmp(mod->name, ns->ns_module) &&
+            xml_strcmp(ns->ns_module, NCX_OWNER)) {
+            /* this NS string already registered to another module */
+            log_error("\nncx reg: Module '%s' registering "
+                      "duplicate namespace '%s'\n    "
+                      "registered by module '%s'",
+                      mod->name, 
+                      mod->ns, 
+                      ns->ns_module);
+            return ERR_DUP_NS;
+        } else {
+            /* same owner so okay */
+            mod->nsid = ns->ns_id;
+        }
+    } else {
+        res = xmlns_register_ns(mod->ns, 
+                                (mod->xmlprefix) 
+                                ? mod->xmlprefix : mod->prefix, 
+                                mod->name, 
+                                mod, 
+                                &mod->nsid);
+        if (res != NO_ERR) {
+            /* this NS registration failed */
+            log_error("\nncx reg: Module '%s' registering "
+                      "namespace '%s' failed (%s)",
+                      mod->name, 
+                      mod->ns,
+                      get_error_string(res));
+            return res;
+        }
+    }
+
+    return res;
+
+}  /* ncx_add_namespace_to_registry */
+
+
+/********************************************************************
 * FUNCTION ncx_add_to_registry
 *
 * Add all the definitions stored in an ncx_module_t to the registry
@@ -2006,26 +2137,15 @@ obj_template_t *
 * 
 * INPUTS:
 *   mod == module to add to registry
-*   alreadyreg == TRUE if another version has already 
-*                 registered the namespace
-*                 FALSE if this is the first revision
-*                 being added to the registry
 *
 * RETURNS:
 *   status of the operation
 *********************************************************************/
 status_t 
-    ncx_add_to_registry (ncx_module_t *mod,
-			 boolean alreadyreg)
+    ncx_add_to_registry (ncx_module_t *mod)
 {
     yang_node_t    *node;
-    xmlns_t        *ns;
-    xmlChar        *buffer, *p;
-    const xmlChar  *modname;
-    boolean         needns;
     status_t        res;
-    xmlns_id_t      nsid;
-    uint32          prefixlen, i;
 
 #ifdef DEBUG
     if (!mod) {
@@ -2041,117 +2161,19 @@ status_t
 	if (NEED_EXIT(res)) {
 	    /* should not happen */
 	    log_error("\nError: cannot add module '%s' to registry"
-		      " with fatal errors", mod->name);
+		      " with fatal errors", 
+                      mod->name);
 	    ncx_print_errormsg(NULL, mod, res);
 	    return SET_ERROR(ERR_INTERNAL_VAL);
 	} else {
 	    log_debug2("\nAdding module '%s' to registry"
-		       " with errors", mod->name);
+		       " with errors", 
+                       mod->name);
 	    res = NO_ERR;
 	}
     }
 
-    /* setup local vars */
-    needns = mod->ismod;
-
-    /* if this is the XSD module, then use the NS ID already registered */
-    if (!xml_strcmp(mod->name, NCX_EL_XSD)) {
-	mod->nsid = xmlns_xs_id();
-	needns = FALSE;
-    }
-
-    if (alreadyreg) {
-	needns = FALSE;
-    }
-
-    /* first add the application namespace
-     * Multiple NS URIs are allowed to map to the same app 
-     */
-    if (needns) {
-	if (!mod->ns) {
-	    /* construct a namespace value from the hdr info */
-	    mod->ns = gen_modns(mod);
-	    if (!mod->ns) {
-		return ERR_INTERNAL_MEM;
-	    }
-	}
-    
-	/* check module prefix collision */
-	nsid = xmlns_find_ns_by_prefix(mod->prefix);
-	if (nsid) {
-	    modname = xmlns_get_module(nsid);
-	    if (xml_strcmp(mod->name, modname)) {
-		log_warn("\nWarning: prefix '%s' already in use "
-			 "by module '%s'",
-			 mod->prefix, modname);
-		ncx_print_errormsg(NULL, mod, ERR_NCX_DUP_PREFIX);
-
-		/* redo the module xmlprefix */
-		prefixlen = xml_strlen(mod->prefix);
-		buffer = m__getMem(prefixlen + 6);
-		if (!buffer) {
-		    return ERR_INTERNAL_MEM;
-		}
-		p = buffer;
-		p += xml_strcpy(p, mod->prefix);
-
-		/* keep adding numbers to end of prefix until
-		 * 1 is unused or run out of numbers
-		 */
-		for (i=1; i<10000 && nsid; i++) {
-		    sprintf((char *)p, "%u", i);
-		    nsid = xmlns_find_ns_by_prefix(buffer);
-		}
-		if (nsid) {
-		    log_error("\nError: could not assign module prefix");
-		    res = ERR_NCX_OPERATION_FAILED;
-		    ncx_print_errormsg(NULL, mod, res);
-		    m__free(buffer);
-		    return res;
-		}
-
-		/* else the current buffer contains an unused prefix */
-		mod->xmlprefix = buffer;
-	    }
-	}
-
-	ns = def_reg_find_ns(mod->ns);
-	if (ns) {
-	    if (xml_strcmp(mod->name, ns->ns_module) &&
-		xml_strcmp(ns->ns_module, NCX_OWNER)) {
-		/* this NS string already registered to another module */
-		log_error("\nncx reg: Module '%s' registering "
-			  "duplicate namespace '%s'\n    "
-			  "registered by module '%s'",
-			  mod->name, mod->ns, ns->ns_module);
-		return ERR_DUP_NS;
-	    } else {
-		/* same owner so okay */
-		mod->nsid = ns->ns_id;
-	    }
-	} else {
-	    res = xmlns_register_ns(mod->ns, 
-				    (mod->xmlprefix) 
-				    ? mod->xmlprefix : mod->prefix, 
-				    mod->name, 
-				    mod, 
-				    &mod->nsid);
-	    if (res != NO_ERR) {
-		/* this NS registration failed */
-		log_error("\nncx reg: Module '%s' registering "
-			  "namespace '%s' failed (%s)",
-			  mod->name, 
-			  mod->ns,
-			  get_error_string(res));
-		return res;
-	    }
-	}
-    } else if (alreadyreg) {
-	mod->nsid = xmlns_find_ns_by_module(mod->name);
-    }
-
     res = set_toplevel_defs(mod, mod->nsid);
-
     if (res != NO_ERR) {
 	return res;
     }

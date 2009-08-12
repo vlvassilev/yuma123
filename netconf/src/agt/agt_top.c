@@ -142,8 +142,9 @@ void
                                NCX_LAYER_TRANSPORT, 
                                NULL);
     if (res != NO_ERR) {
-        scb->stats.inXMLParseErrors++;
-        myagttotals->stats.inXMLParseErrors++;
+        scb->stats.inBadRpcs++;
+        myagttotals->stats.inBadRpcs++;
+        myagttotals->droppedSessions++;
 
         if (LOGINFO) {
             log_info("\nagt_top: bad msg for session %d (%s)",
@@ -179,8 +180,10 @@ void
 
     /* check any error trying to invoke the top handler */
     if (res != NO_ERR) {
-        scb->stats.inXMLParseErrors++;
-        myagttotals->stats.inXMLParseErrors++;
+        scb->stats.inBadRpcs++;
+        myagttotals->stats.inBadRpcs++;
+        myagttotals->droppedSessions++;
+        
         if (LOGINFO) {
             log_info("\nagt_top: bad msg for session %d (%s)",
                      scb->sid, 

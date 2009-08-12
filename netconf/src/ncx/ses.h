@@ -104,7 +104,9 @@ typedef enum ses_transport_t_ {
     SES_TRANSPORT_NONE,
     SES_TRANSPORT_SSH,
     SES_TRANSPORT_BEEP,
-    SES_TRANSPORT_SOAP
+    SES_TRANSPORT_SOAP,
+    SES_TRANSPORT_SOAPBEEP,
+    SES_TRANSPORT_TLS
 } ses_transport_t;
 
 
@@ -160,20 +162,14 @@ typedef enum ses_term_reason_t_ {
 typedef struct ses_stats_t_ {
     /* extra original internal byte counters */
     uint32            in_bytes;
-    uint32            in_drop_msgs;
     uint32            out_bytes;
-    uint32            out_drop_bytes;
 
     /* hack: bytes since '\n', pretty-print */
     uint32            out_line;    
 
     /* netconf-state counters */
-    uint32            inXMLParseErrors;
-    uint32            inBadHellos;
     uint32            inRpcs;
     uint32            inBadRpcs;
-    uint32            inNotSupportedRpcs;
-    uint32            outRpcReplies;
     uint32            outRpcErrors;
     uint32            outNotifications;
 } ses_stats_t;
@@ -184,7 +180,9 @@ typedef struct ses_total_stats_t_ {
     uint32            active_sessions;
     uint32            closed_sessions;
     uint32            failed_sessions;
+    uint32            inBadHellos;
     uint32            inSessions;
+    uint32            droppedSessions;
     ses_stats_t       stats;
     xmlChar           startTime[TSTAMP_MIN_SIZE];
 } ses_total_stats_t;

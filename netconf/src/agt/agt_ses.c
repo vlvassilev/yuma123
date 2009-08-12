@@ -44,6 +44,10 @@ date         init     comment
 #include  "agt_ncxserver.h"
 #endif
 
+#ifndef _H_agt_rpc
+#include  "agt_rpc.h"
+#endif
+
 #ifndef _H_agt_ses
 #include  "agt_ses.h"
 #endif
@@ -130,17 +134,12 @@ date         init     comment
  */
 #define AGT_SES_MAX_SESSIONS     1024
 
-#define AGT_SES_APP         (const xmlChar *)"netconfd"
+#define AGT_SES_MODULE      (const xmlChar *)"mysession"
 
-#define AGT_SES_PARMSET     (const xmlChar *)"sessionInfo"
+#define AGT_SES_GET_MY_SESSION   (const xmlChar *)"get-my-session"
 
-#define AGT_SES_MY_SESSION  (const xmlChar *)"mySession"
+#define AGT_SES_SET_MY_SESSION   (const xmlChar *)"set-my-session"
 
-#define AGT_SES_LINESIZE    (const xmlChar *)"linesize"
-
-#define AGT_SES_WITHDEF_DEFAULT (const xmlChar *)"withDefDefault"
-
-#define AGT_SES_WITHMETA_DEFAULT (const xmlChar *)"withMetaDefault"
 
 /********************************************************************
 *                                                                   *
@@ -163,793 +162,132 @@ static ses_cb_t  *agtses[AGT_SES_MAX_SESSIONS];
 
 static ses_total_stats_t *agttotals;
 
-#if 0
+static ncx_module_t *mysesmod;
+
 /********************************************************************
-* FUNCTION make_stats_val
+* FUNCTION get_session_idval
 *
-*  Make a return value for a <get> operation out of the
-*  supplied session stats struct.  Add the child nodes
-*  to the supplied return value
+* Get the session ID number for the virtual
+* counter entry that was called from a <get> operation
 *
 * INPUTS:
-*   stats == session stats block to use
-*   typdef == the typdef from the virtual value node for the 
-*             session stats node which has the correct typdef 
-*             for each child node
-*   retval == output struct value to hold new child nodes
-*             for the counters
+*    virval == virtual value
+*    retsid == address of return session ID number
+*
 * OUTPUTS:
-*   retval->v.childQ has nodes added for each counter in the stats
-*
-*********************************************************************/
-static void
-    make_stats_val (const ses_stats_t *stats,
-		    const typ_def_t *typdef,
-		    val_value_t *retval)
-{
-    const typ_def_t   *realdef;
-    typ_child_t *typch;
-    val_value_t *chval;
+*   *retsid == session ID for this <session> entry
 
-    realdef = typ_get_cbase_typdef(typdef);
-    for (typch = typ_first_child(TYP_DEF_COMPLEX(realdef));
-	 typch != NULL;
-	 typch = typ_next_child(typch)) {
-
-	chval = val_new_virtual_chval(typch->name,
-				      retval->nsid,
-				      &typch->typdef, retval);
-	if (!chval) {
-	    SET_ERROR(ERR_INTERNAL_MEM);
-	    return;
-	}
-
-	/* brute force set the child value */
-	if (!xml_strcmp(typch->name, 
-			(const xmlChar *)"inBytes")) {
-	    VAL_UINT(chval) = stats->in_bytes;
-	} else if (!xml_strcmp(typch->name, 
-			       (const xmlChar *)"inDropMsgs")) {
-	    VAL_UINT(chval) = stats->in_drop_msgs;
-	} else if (!xml_strcmp(typch->name,
-			       (const xmlChar *)"inMsgs")) {
-	    VAL_UINT(chval) = stats->in_msgs;
-	} else if (!xml_strcmp(typch->name, 
-			       (const xmlChar *)"inErrMsgs")) {
-	    VAL_UINT(chval) = stats->in_err_msgs;
-	} else if (!xml_strcmp(typch->name, 
-			       (const xmlChar *)"outBytes")) {
-	    VAL_UINT(chval) = stats->out_bytes;
-	} else if (!xml_strcmp(typch->name, 
-			       (const xmlChar *)"outDropBytes")) {
-	    VAL_UINT(chval) = stats->out_drop_bytes;
-	} else if (!xml_strcmp(typch->name, 
-			       (const xmlChar *)"outMsgs")) {
-	    VAL_UINT(chval) = stats->out_msgs;
-	} else if (!xml_strcmp(typch->name,
-			       (const xmlChar *)"outErrMsgs")) {
-	    VAL_UINT(chval) = stats->out_err_msgs;
-	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	}
-    }
-
-}  /* make_stats_val */
-
-
-/********************************************************************
-* FUNCTION make_session_val
-*
-*  Make a return value for a <get> operation out of the
-*  supplied session struct.  Add the child nodes
-*  to the supplied return value
-*
-* INPUTS:
-*   ses_cb_t == session control block to use
-*   typdef == the typdef node for the sessionInfo struct
-*             which has the correct typdef for each child node
-*   retval == output struct value to hold new child nodes
-*             for the counters and other data
-* OUTPUTS:
-*   retval->v.childQ has nodes added for each counter in the stats
-*
-* RETURNS:
-*   status
-*********************************************************************/
-static status_t
-    make_session_val (const ses_cb_t *scb,
-		      typ_def_t *typdef,
-		      val_value_t *retval)
-{
-    typ_def_t   *realdef;
-    typ_child_t *typch;
-    val_value_t *chval;
-
-    realdef = typ_get_base_typdef(typdef);
-    for (typch = typ_first_child(TYP_DEF_COMPLEX(realdef));
-	 typch != NULL;
-	 typch = typ_next_child(typch)) {
-
-	chval = val_new_virtual_chval(typch->name,
-				      retval->nsid,
-				      &typch->typdef, retval);
-	if (!chval) {
-	    return SET_ERROR(ERR_INTERNAL_MEM);
-	}
-
-	/* brute force set the child value */
-	if (!xml_strcmp(typch->name, 
-			(const xmlChar *)"id")) {
-	    VAL_UINT(chval) = scb->sid;
-	} else if (!xml_strcmp(typch->name, 
-			       (const xmlChar *)"startTime")) {
-	    VAL_STR(chval) = xml_strdup(scb->start_time);
-	} else if (!xml_strcmp(typch->name,
-			       (const xmlChar *)"userName")) {
-	    VAL_STR(chval) = xml_strdup(scb->username);
-	} else if (!xml_strcmp(typch->name, 
-			       (const xmlChar *)"state")) {
-	    VAL_STR(chval) = xml_strdup(ses_state_name(scb->state));
-	} else if (!xml_strcmp(typch->name, 
-			       (const xmlChar *)"locks")) {
-	    cfg_get_lock_list(scb->sid, chval);
-	} else if (!xml_strcmp(typch->name, 
-			       (const xmlChar *)"stats")) {
-	    make_stats_val(&scb->stats, &typch->typdef, chval);
-	} else {
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-    }
-    return NO_ERR;
-
-}  /* make_session_val */
-
-
-/********************************************************************
-* FUNCTION get_activeSessions
-*
-* <get> operation handler for the activeSessions parm
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
 * RETURNS:
 *    status
 *********************************************************************/
 static status_t 
-    get_activeSessions (const ses_cb_t *scb,
-			getcb_mode_t cbmode,
-			ncx_filptr_t *fil,
-			val_value_t *virval,
-			val_value_t  *dstval)
+    get_session_key (const val_value_t *virval,
+                     ses_id_t *retsid)
 {
-    (void)scb;
+    const val_value_t  *parentval, *sidval;
 
-    if (cbmode == GETCB_GET_VALUE) {
-	VAL_ULONG(dstval) = totals.active_sessions;
+    parentval = virval->parent;
+    if (parentval == NULL) {
+        return ERR_NCX_DEF_NOT_FOUND;
+    }
+
+    sidval = val_find_child(parentval,
+                            obj_get_mod_name(parentval->obj),
+                            (const xmlChar *)"sessionId");
+
+    if (sidval == NULL) {
+        return ERR_NCX_DEF_NOT_FOUND;        
+    }
+
+    *retsid = VAL_UINT(sidval);
+    return NO_ERR;
+
+} /* get_session_key */
+
+
+/********************************************************************
+* FUNCTION get_my_session_invoke
+*
+* get-my-session : invoke params callback
+*
+* INPUTS:
+*    see rpc/agt_rpc.h
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    get_my_session_invoke (ses_cb_t *scb,
+                           rpc_msg_t *msg,
+                           xml_node_t *methnode)
+{
+    val_value_t     *linesizeval, *withdefval;
+    xmlChar          numbuff[NCX_MAX_NUMLEN];
+
+    (void)methnode;
+    sprintf((char *)numbuff, "%u", scb->linesize);
+    linesizeval = val_make_string(mysesmod->nsid,
+                                  NCX_EL_LINESIZE,
+                                  numbuff);
+    if (linesizeval == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    withdefval = 
+        val_make_string(mysesmod->nsid,
+                        NCX_EL_WITH_DEFAULTS,
+                        ncx_get_withdefaults_string(scb->withdef));
+    if (withdefval == NULL) {
+        val_free_value(linesizeval);
+        return ERR_INTERNAL_MEM;
+    }
+
+    dlq_enque(linesizeval, &msg->rpc_dataQ);
+    dlq_enque(withdefval, &msg->rpc_dataQ);
+    msg->rpc_data_type = RPC_DATA_YANG;
+    return NO_ERR;
+
+} /* get_my_session_invoke */
+
+
+/********************************************************************
+* FUNCTION set_my_session_invoke
+*
+* set-my-session : invoke params callback
+*
+* INPUTS:
+*    see rpc/agt_rpc.h
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    set_my_session_invoke (ses_cb_t *scb,
+                           rpc_msg_t *msg,
+                           xml_node_t *methnode)
+{
+    val_value_t     *linesizeval, *withdefval;
+
+    (void)methnode;
+
+    /* get the identifier parameter */
+    linesizeval = val_find_child(msg->rpc_input, 
+                                 AGT_SES_MODULE,
+                                 NCX_EL_LINESIZE);
+    if (linesizeval && linesizeval->res == NO_ERR) {
+        scb->linesize = VAL_UINT(linesizeval);
+    }
+
+    /* get the with-defaults parameter */
+    withdefval = val_find_child(msg->rpc_input, 
+                                AGT_SES_MODULE,
+                                NCX_EL_WITH_DEFAULTS);
+    if (withdefval && withdefval->res == NO_ERR) {
+        scb->withdef = 
+            ncx_get_withdefaults_enum(VAL_ENUM_NAME(withdefval));
     }
 
     return NO_ERR;
 
-} /* get_activeSessions */
-
-
-/********************************************************************
-* FUNCTION get_closedSessions
-*
-* <get> operation handler for the closedSessions parm
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    get_closedSessions (const ses_cb_t *scb,
-			getcb_mode_t cbmode,
-			ncx_filptr_t *fil,
-			val_value_t *virval,
-			val_value_t  *dstval)
-{
-    (void)scb;
-
-    if (cbmode == GETCB_GET_VALUE) {
-	VAL_ULONG(dstval) = totals.closed_sessions;
-    }
-
-    return NO_ERR;
-
-} /* get_closedSessions */
-
-
-/********************************************************************
-* FUNCTION get_failedSessions
-*
-* <get> operation handler for the failedSessions parm
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    get_failedSessions (const ses_cb_t *scb,
-			getcb_mode_t cbmode,
-			ncx_filptr_t *fil,
-			val_value_t *virval,
-			val_value_t  *dstval)
-{
-    (void)scb;
-
-    if (cbmode == GETCB_GET_VALUE) {
-	VAL_ULONG(dstval) = totals.failed_sessions;
-    }
-
-    return NO_ERR;
-
-} /* get_failedSessions */
-
-
-/********************************************************************
-* FUNCTION get_sessionTotals
-*
-* <get> operation handler for the sessionTotals parm
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    get_sessionTotals (const ses_cb_t *scb,
-		       getcb_mode_t cbmode,
-		       ncx_filptr_t *fil,
-		       val_value_t *virval,
-		       val_value_t  *dstval)
-{
-    ses_stats_t sum, *cur;
-
-    (void)scb;
-
-    /* check if this is a supported operation */
-    if (cbmode != GETCB_GET_VALUE) {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
-    }
-
-    /* setup the running totals with the deleted sessions totals */
-    memcpy(&sum, &totals.stats, sizeof(ses_stats_t));
-
-    /* check if a filter is supplied, and prune if so */
-    if (fil != NULL) {
-	;  /***/
-    } else {
-	/* create a complete instance of the sessionTotals 
-	 * the retval is already initialized as a struct
-	 */
-	make_stats_val(&sum, virval->typdef, dstval);
-    }
-
-    return NO_ERR;
-
-} /* get_sessionTotals */
-
-
-/********************************************************************
-* FUNCTION get_sessions
-*
-* <get> operation handler for the sessions parm
-*
-* INPUTS:
-*    scb == session control block
-*    cbmode == get callback mode
-*    fil == optional filter
-*    virval == virtual value node with the typedef struct 
-*       for the 'sessions' data structure
-*    dstval == initialized return val for the 'sessions' element
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    get_sessions (const ses_cb_t *scb,
-		  getcb_mode_t cbmode,
-		  ncx_filptr_t *fil,
-		  val_value_t  *virval,
-		  val_value_t  *dstval)
-{
-    const typ_def_t   *realdef;
-    typ_child_t *typch;
-    val_value_t *chval;
-    uint32       i;
-    status_t     res;
-
-    (void)scb;
-
-    /* check if this is a supported operation */
-    if (cbmode != GETCB_GET_VALUE) {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
-    }
-
-    /* get the 'session' typdef */
-    realdef = typ_get_cbase_typdef(virval->typdef);
-    typch = typ_find_child((const xmlChar *)"session",
-			   TYP_DEF_COMPLEX(realdef));
-    if (!typch) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    for (i = 1; i < AGT_SES_MAX_SESSIONS; i++) {
-	if (agtses[i]) {
-	    /* make a 'session' container */
-	    chval = val_new_virtual_chval(typch->name,
-					  dstval->nsid,
-					  &typch->typdef, 
-					  dstval);
-	    if (!chval) {
-		return SET_ERROR(ERR_INTERNAL_MEM);
-	    }
-
-	    /* fill in the contrainer */
-	    res = make_session_val(agtses[i], &typch->typdef, chval);
-	    if (res != NO_ERR) {
-		return res;
-	    }
-	}
-    }
-
-    return NO_ERR;
-
-} /* get_sessions */
-
-
-/********************************************************************
-* FUNCTION get_sessionInfo
-*
-* <get> operation handler for the sessionInfo parmset
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    get_sessionInfo (const ses_cb_t *scb,
-		     getcb_mode_t cbmode,
-		     ncx_filptr_t *fil,
-		     val_value_t *virval,
-		     val_value_t  *dstval)
-{
-
-    val_setup_virtual_retval(virval, dstval);
-
-    /* determine which callback mode is being used */
-    if (cbmode == GETCB_GET_METAQ) {
-	/* no session parameters have meta-vars, quick exit */
-	return NO_ERR;
-    }
-
-    /* determine which node is being requested */
-    if (!xml_strcmp(virval->name, 
-		    (const xmlChar *)"activeSessions")) {
-	return get_activeSessions(scb, cbmode, fil, virval, dstval);
-    } else if (!xml_strcmp(virval->name, 
-			   (const xmlChar *)"closedSessions")) {
-	return get_closedSessions(scb, cbmode, fil, virval, dstval);
-    } else if (!xml_strcmp(virval->name, 
-		    (const xmlChar *)"failedSessions")) {
-	return get_failedSessions(scb, cbmode, fil, virval, dstval);
-    } else if (!xml_strcmp(virval->name, 
-		    (const xmlChar *)"sessionTotals")) {
-	return get_sessionTotals(scb, cbmode, fil, virval, dstval);
-    } else if (!xml_strcmp(virval->name, 
-		    (const xmlChar *)"sessions")) {
-	return get_sessions(scb, cbmode, fil, virval, dstval);
-    } else {
-	return ERR_NCX_OPERATION_FAILED;
-    }
-
-}   /* get_sessionInfo */
-
-
-/********************************************************************
-* FUNCTION get_linesize
-*
-* <get> operation handler for the linesize parm
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    get_linesize (const ses_cb_t *scb,
-		  getcb_mode_t cbmode,
-		  ncx_filptr_t *fil,
-		  val_value_t *virval,
-		  val_value_t  *dstval)
-{
-    if (cbmode == GETCB_GET_VALUE) {
-	VAL_UINT(dstval) = scb->linesize;
-	return NO_ERR;
-    } else {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
-    }
-
-} /* get_linesize */
-
-
-/********************************************************************
-* FUNCTION set_linesize
-*
-* <edit-config> operation handler for the linesize parm
-*
-* INPUTS:
-*    see agt/agt_.h agt_cb_pcb_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    set_linesize (ses_cb_t  *scb,
-		  rpc_msg_t *msg,
-		  agt_cbtyp_t cbtyp,
-		  op_editop_t  editop,
-		  ps_parm_t *newp,
-		  ps_parm_t *curp)
-{
-    status_t  res;
-
-    (void)msg;
-    (void)curp;
-
-#ifdef AGT_SES_DEBUG
-    if (LOGDEBUG2) {
-	log_debug2("\nagt_ses: set linesize for session %d", 
-		   scb->sid);
-    }
-#endif
-
-    res = NO_ERR;
-
-    switch (cbtyp) {
-    case AGT_CB_VALIDATE:
-
-#ifdef REMOVED
-	switch (editop) {
-	case OP_EDITOP_NONE:
-	    /* treat as a no-op, not an error!! */
-	    break;
-	case OP_EDITOP_CREATE:
-	    /* should not happen ... */
-	    res = ERR_NCX_DATA_EXISTS;
-	    agt_record_error(scb, &msg->mhdr, 
-			     NCX_LAYER_CONTENT, res, NULL,
-			     NCX_NT_PARM, newp, NCX_NT_PARM, newp);
-	    break;
-	case OP_EDITOP_DELETE:
-	    /* should not happen since max-access exceeded */
-	    res = ERR_NCX_NO_ACCESS_MAX;
-	    agt_record_error(scb, &msg->mhdr, 
-			     NCX_LAYER_CONTENT, res, NULL,
-			     NCX_NT_PARM, newp, NCX_NT_PARM, newp);
-	    break;
-	case OP_EDITOP_MERGE:
-	case OP_EDITOP_REPLACE:
-	    break;
-	case OP_EDITOP_LOAD:
-	    break;
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-#endif
-
-	break;
-    case AGT_CB_APPLY:
-	if (editop != OP_EDITOP_NONE) {
-	    scb->linesize = VAL_UINT(newp->val);
-	}
-	break;
-    case AGT_CB_COMMIT:
-	/* nothing to do */
-	break;
-    case AGT_CB_ROLLBACK:
-	/***/
-	break;
-    default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    return res;
-
-}  /* set_linesize */
-
-
-/********************************************************************
-* FUNCTION get_withDefDefault
-*
-* <get> operation handler for the withDefDefault parm
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    get_withDefDefault (const ses_cb_t *scb,
-			getcb_mode_t cbmode,
-			ncx_filptr_t *fil,
-			val_value_t *virval,
-			val_value_t  *dstval)
-{
-    if (cbmode == GETCB_GET_VALUE) {
-	VAL_ENUM(dstval) = (scb->withdef) ? 1 : 0;
-	VAL_ENUM_NAME(dstval) = (scb->withdef) ? 
-	    NCX_EL_TRUE : NCX_EL_FALSE;
-	return NO_ERR;
-    } else {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
-    }
-
-} /* get_withDefDefault */
-
-
-/********************************************************************
-* FUNCTION set_withDefDefault
-*
-* <edit-config> operation handler for the withDefDefault parm
-*
-* INPUTS:
-*    see agt/agt_.h agt_cb_pcb_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    set_withDefDefault (ses_cb_t  *scb,
-			rpc_msg_t *msg,
-			agt_cbtyp_t cbtyp,
-			op_editop_t  editop,
-			ps_parm_t *newp,
-			ps_parm_t *curp)
-{
-    status_t  res;
-
-    (void)msg;
-    (void)curp;
-
-#ifdef AGT_SES_DEBUG
-    if (LOGDEBUG2) {
-	log_debug2("\nagt_ses: set withdef for session %d", scb->sid);
-    }
-#endif
-
-    res = NO_ERR;
-
-    switch (cbtyp) {
-    case AGT_CB_VALIDATE:
-
-#ifdef REMOVED
-
-	switch (editop) {
-	case OP_EDITOP_NONE:
-	    /* treat as a no-op, not an error!! */
-	    break;
-	case OP_EDITOP_CREATE:
-	    /* should not happen ... */
-	    res = ERR_NCX_DATA_EXISTS;
-	    agt_record_error(scb, &msg->mhdr, 
-			     NCX_LAYER_CONTENT, res, NULL,
-			     NCX_NT_PARM, newp, NCX_NT_PARM, newp);
-	    break;
-	case OP_EDITOP_DELETE:
-	    /* should not happen since max-access exceeded */
-	    res = ERR_NCX_NO_ACCESS_MAX;
-	    agt_record_error(scb, &msg->mhdr, 
-			     NCX_LAYER_CONTENT, res, NULL,
-			     NCX_NT_PARM, newp, NCX_NT_PARM, newp);
-	    break;
-	case OP_EDITOP_MERGE:
-	case OP_EDITOP_REPLACE:
-	    break;
-	case OP_EDITOP_LOAD:
-	    break;
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-#endif
-
-	break;
-    case AGT_CB_APPLY:
-	if (editop != OP_EDITOP_NONE) {
-	    if (VAL_ENUM(newp->val)) {
-		scb->withdef = TRUE;
-	    } else {
-		scb->withdef = FALSE;
-	    }
-	}
-	break;
-    case AGT_CB_COMMIT:
-	/* nothing to do */
-	break;
-    case AGT_CB_ROLLBACK:
-	/***/
-	break;
-    default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    return res;
-
-}  /* set_withDefDefault */
-
-
-/********************************************************************
-* FUNCTION get_withMetaDefault
-*
-* <get> operation handler for the withMetaDefault parm
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    get_withMetaDefault (const ses_cb_t *scb,
-			 getcb_mode_t cbmode,
-			 ncx_filptr_t *fil,
-			 val_value_t *virval,
-			 val_value_t  *dstval)
-{
-    if (cbmode == GETCB_GET_VALUE) {
-	VAL_ENUM(dstval) = (scb->withmeta) ? 1 : 0;
-	VAL_ENUM_NAME(dstval) = (scb->withmeta) ? 
-	    NCX_EL_TRUE : NCX_EL_FALSE;
-	return NO_ERR;
-    } else {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
-    }
-
-} /* get_withMetaDefault */
-
-
-/********************************************************************
-* FUNCTION set_withMetaDefault
-*
-* <edit-config> operation handler for the withMetaDefault parm
-*
-* INPUTS:
-*    see agt/agt_.h agt_cb_pcb_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    set_withMetaDefault (ses_cb_t  *scb,
-			 rpc_msg_t *msg,
-			 agt_cbtyp_t cbtyp,
-			 op_editop_t  editop,
-			 ps_parm_t *newp,
-			 ps_parm_t *curp)
-{
-    status_t  res;
-
-    (void)msg;
-    (void)curp;
-
-#ifdef AGT_SES_DEBUG
-    if (LOGDEBUG2) {
-	log_debug2("\nagt_ses: set withmeta for session %d", 
-		   scb->sid);
-    }
-#endif
-
-    res = NO_ERR;
-
-    switch (cbtyp) {
-    case AGT_CB_VALIDATE:
-
-#ifdef REMOVED
-	switch (editop) {
-	case OP_EDITOP_NONE:
-	    /* treat as a no-op, not an error!! */
-	    break;
-	case OP_EDITOP_CREATE:
-	    /* should not happen ... */
-	    res = ERR_NCX_DATA_EXISTS;
-	    agt_record_error(scb, &msg->mhdr, 
-			     NCX_LAYER_CONTENT, res, NULL,
-			     NCX_NT_PARM, newp, NCX_NT_PARM, newp);
-	    break;
-	case OP_EDITOP_DELETE:
-	    /* should not happen since max-access exceeded */
-	    res = ERR_NCX_NO_ACCESS_MAX;
-	    agt_record_error(scb, &msg->mhdr, 
-			     NCX_LAYER_CONTENT, res, NULL,
-			     NCX_NT_PARM, newp, NCX_NT_PARM, newp);
-	    break;
-	case OP_EDITOP_MERGE:
-	case OP_EDITOP_REPLACE:
-	    break;
-	case OP_EDITOP_LOAD:
-	    break;
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-#endif
-	break;
-    case AGT_CB_APPLY:
-	if (editop != OP_EDITOP_NONE) {
-	    if (VAL_ENUM(newp->val)) {
-		scb->withmeta = TRUE;
-	    } else {
-		scb->withmeta = FALSE;
-	    }
-	}
-	break;
-    case AGT_CB_COMMIT:
-	/* nothing to do */
-	break;
-    case AGT_CB_ROLLBACK:
-	/***/
-	break;
-    default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    return res;
-
-}  /* set_withMetaDefault */
-
-
-/********************************************************************
-* FUNCTION get_mySession
-*
-* <get> operation handler for the mySession parmset
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    get_mySession (const ses_cb_t *scb,
-		   getcb_mode_t cbmode,
-		   ncx_filptr_t *fil,
-		   val_value_t *virval,
-		   val_value_t  *dstval)
-{
-
-    val_setup_virtual_retval(virval, dstval);
-
-    /* determine which callback mode is being used */
-    if (cbmode == GETCB_GET_METAQ) {
-	/* no session parameters have meta-vars, quick exit */
-	return NO_ERR;
-    }
-
-    /* determine which node is being requested */
-    if (!xml_strcmp(virval->name, AGT_SES_LINESIZE)) {
-	return get_linesize(scb, cbmode, fil, virval, dstval);
-    } else if (!xml_strcmp(virval->name, AGT_SES_WITHDEF_DEFAULT)) {
-	return get_withDefDefault(scb, cbmode, fil, virval, dstval);
-    } else if (!xml_strcmp(virval->name, 
-		    (const xmlChar *)"withMetaDefault")) {
-	return get_withMetaDefault(scb, cbmode, fil, virval, dstval);
-    } else {
-	return ERR_NCX_OPERATION_FAILED;
-    }
-
-}   /* get_mySession */
-
-#endif  /* 0 */
+} /* set_my_session_invoke */
 
 
 /************* E X T E R N A L    F U N C T I O N S ***************/
@@ -969,23 +307,39 @@ static status_t
 status_t
     agt_ses_init (void)
 {
-    uint32             i;
+
+    agt_profile_t   *agt_profile;
+    status_t         res;
+    uint32           i;
 
     if (agt_ses_init_done) {
 	return ERR_INTERNAL_INIT_SEQ;
     }
 
+#ifdef AGT_STATE_DEBUG
+    log_debug2("\nagt: Loading netconf-state module");
+#endif
+
+    agt_profile = agt_get_profile();
+
     for (i=0; i<AGT_SES_MAX_SESSIONS; i++) {
 	agtses[i] = NULL;
     }
     next_sesid = 1;
+    mysesmod = NULL;
 
     agttotals = ses_get_total_stats();
     memset(agttotals, 0x0, sizeof(ses_total_stats_t));
     tstamp_datetime(agttotals->startTime);
 
     agt_ses_init_done = TRUE;
-    return NO_ERR;
+
+    /* load the netconf-state module */
+    res = ncxmod_load_module(AGT_SES_MODULE, 
+                             NULL, 
+                             &agt_profile->agt_savedevQ,
+                             &mysesmod);
+    return res;
 
 }  /* agt_ses_init */
 
@@ -1005,59 +359,30 @@ status_t
 status_t
     agt_ses_init2 (void)
 {
-#if 0
     status_t  res;
 
     if (!agt_ses_init_done) {
 	return ERR_INTERNAL_INIT_SEQ;
     }
 
-    /* create a virtual parmset for the sessionInfo node */
-    sesinfo = agt_ps_new_vparmset(AGT_SES_MODULE,
-				  AGT_SES_PARMSET,
-				  get_sessionInfo, FULL, &res);
-    if (!sesinfo || res != NO_ERR) {
-	return res;
-    }
-
-    /* create a transient parmset for the mySession node */
-    mySession = agt_ps_new_vparmset(AGT_SES_MODULE,
-				    AGT_SES_MY_SESSION, 
-				    get_mySession, FULL, &res);
-    if (!mySession || res != NO_ERR) {
-	return res;
-    }
-
-    /* register callback functions for the parameters */
-    res = agt_cb_register_parm_callback(AGT_SES_MODULE,
-					AGT_SES_MY_SESSION,
-					AGT_SES_LINESIZE,
-					FORALL,
-					AGT_CB_APPLY,
-					set_linesize);
+    /* set up get-my-session RPC operation */
+    res = agt_rpc_register_method(AGT_SES_MODULE,
+                                  AGT_SES_GET_MY_SESSION,
+                                  AGT_RPC_PH_INVOKE,
+                                  get_my_session_invoke);
     if (res != NO_ERR) {
-	return res;
+        return SET_ERROR(res);
     }
 
-    res = agt_cb_register_parm_callback(AGT_SES_MODULE,
-					AGT_SES_MY_SESSION,
-					AGT_SES_WITHDEF_DEFAULT,
-					FORALL,
-					AGT_CB_APPLY,
-					set_withDefDefault);
+    /* set up set-my-session RPC operation */
+    res = agt_rpc_register_method(AGT_SES_MODULE,
+                                  AGT_SES_SET_MY_SESSION,
+                                  AGT_RPC_PH_INVOKE,
+                                  set_my_session_invoke);
     if (res != NO_ERR) {
-	return res;
+        return SET_ERROR(res);
     }
 
-    res = agt_cb_register_parm_callback(AGT_SES_MODULE,
-					AGT_SES_MY_SESSION,
-					AGT_SES_WITHMETA_DEFAULT,
-					FORALL,
-					AGT_CB_APPLY,
-					set_withMetaDefault);
-
-    return res;
-#endif
     return NO_ERR;
 
 }  /* agt_ses_init2 */
@@ -1087,29 +412,11 @@ void
 
 	next_sesid = 0;
 
-#if 0
-	if (sesinfo) {
-	    /* ps_free_parmset(sesinfo); */
-	    sesinfo = NULL;
-	}
+        agt_rpc_unregister_method(AGT_SES_MODULE,
+                                  AGT_SES_GET_MY_SESSION);
 
-	if (mySession) {
-	    /* ps_free_parmset(mySession); */
-	    mySession = NULL;
-	}
-
-	/* unregister callback functions for the parameters */
-	agt_cb_unregister_parm_callback(AGT_SES_MODULE,
-					AGT_SES_MY_SESSION,
-					AGT_SES_LINESIZE);
-	agt_cb_unregister_parm_callback(AGT_SES_MODULE,
-					AGT_SES_MY_SESSION,
-					AGT_SES_WITHDEF_DEFAULT);
-	agt_cb_unregister_parm_callback(AGT_SES_MODULE,
-					AGT_SES_MY_SESSION,
-					AGT_SES_WITHMETA_DEFAULT);
-
-#endif
+        agt_rpc_unregister_method(AGT_SES_MODULE,
+                                  AGT_SES_SET_MY_SESSION);
 
 	agt_ses_init_done = FALSE;
     }
@@ -1744,36 +1051,6 @@ status_t
 
 
 /********************************************************************
-* FUNCTION agt_ses_get_inXMLParseErrors
-*
-* <get> operation handler for the inXMLParseErrors counter
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-status_t 
-    agt_ses_get_inXMLParseErrors (ses_cb_t *scb,
-				  getcb_mode_t cbmode,
-				  const val_value_t *virval,
-				  val_value_t  *dstval)
-{
-    (void)scb;
-    (void)virval;
-
-    if (cbmode == GETCB_GET_VALUE) {
-	VAL_UINT(dstval) = agttotals->stats.inXMLParseErrors;
-	return NO_ERR;
-    } else {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
-    }
-
-} /* agt_ses_get_inXMLParseErrors */
-
-
-/********************************************************************
 * FUNCTION agt_ses_get_inBadHellos
 *
 * <get> operation handler for the inBadHellos counter
@@ -1794,7 +1071,7 @@ status_t
     (void)virval;
 
     if (cbmode == GETCB_GET_VALUE) {
-	VAL_UINT(dstval) = agttotals->stats.inBadHellos;
+	VAL_UINT(dstval) = agttotals->inBadHellos;
 	return NO_ERR;
     } else {
 	return ERR_NCX_OPERATION_NOT_SUPPORTED;
@@ -1864,66 +1141,6 @@ status_t
 
 
 /********************************************************************
-* FUNCTION agt_ses_get_inNotSupportedRpcs
-*
-* <get> operation handler for the inNotSupportedRpcs counter
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-status_t 
-    agt_ses_get_inNotSupportedRpcs (ses_cb_t *scb,
-				    getcb_mode_t cbmode,
-				    const val_value_t *virval,
-				    val_value_t  *dstval)
-{
-    (void)scb;
-    (void)virval;
-
-    if (cbmode == GETCB_GET_VALUE) {
-	VAL_UINT(dstval) = agttotals->stats.inNotSupportedRpcs;
-	return NO_ERR;
-    } else {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
-    }
-
-} /* agt_ses_get_inNotSupportedRpcs */
-
-
-/********************************************************************
-* FUNCTION agt_ses_get_outRpcReplies
-*
-* <get> operation handler for the outRpcReplies counter
-*
-* INPUTS:
-*    see ncx/getcb.h getcb_fn_t for details
-*
-* RETURNS:
-*    status
-*********************************************************************/
-status_t 
-    agt_ses_get_outRpcReplies (ses_cb_t *scb,
-			       getcb_mode_t cbmode,
-			       const val_value_t *virval,
-			       val_value_t  *dstval)
-{
-    (void)scb;
-    (void)virval;
-
-    if (cbmode == GETCB_GET_VALUE) {
-	VAL_UINT(dstval) = agttotals->stats.outRpcReplies;
-	return NO_ERR;
-    } else {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
-    }
-
-} /* agt_ses_get_outRpcReplies */
-
-
-/********************************************************************
 * FUNCTION agt_ses_get_outRpcErrors
 *
 * <get> operation handler for the outRpcErrors counter
@@ -1981,6 +1198,196 @@ status_t
     }
 
 } /* agt_ses_get_outNotifications */
+
+
+/********************************************************************
+* FUNCTION agt_ses_get_droppedSessions
+*
+* <get> operation handler for the droppedSessions counter
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_ses_get_droppedSessions (ses_cb_t *scb,
+                                 getcb_mode_t cbmode,
+                                 const val_value_t *virval,
+                                 val_value_t  *dstval)
+{
+    (void)scb;
+    (void)virval;
+
+    if (cbmode == GETCB_GET_VALUE) {
+	VAL_UINT(dstval) = agttotals->droppedSessions;
+	return NO_ERR;
+    } else {
+	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+} /* agt_ses_get_droppedSessions */
+
+
+/********************************************************************
+* FUNCTION agt_ses_get_session_inRpcs
+*
+* <get> operation handler for the session/inRpcs counter
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_ses_get_session_inRpcs (ses_cb_t *scb,
+                                getcb_mode_t cbmode,
+                                const val_value_t *virval,
+                                val_value_t  *dstval)
+{
+    ses_cb_t    *testscb;
+    ses_id_t     sid;
+    status_t     res;
+
+    (void)scb;
+
+    if (cbmode != GETCB_GET_VALUE) {
+	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+    sid = 0;
+    res = get_session_key(virval, &sid);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    testscb = agtses[sid];
+    VAL_UINT(dstval) = testscb->stats.inRpcs;
+    return NO_ERR;
+
+} /* agt_ses_get_session_inRpcs */
+
+
+/********************************************************************
+* FUNCTION agt_ses_get_session_inBadRpcs
+*
+* <get> operation handler for the inBadRpcs counter
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_ses_get_session_inBadRpcs (ses_cb_t *scb,
+                                   getcb_mode_t cbmode,
+                                   const val_value_t *virval,
+                                   val_value_t  *dstval)
+{
+    ses_cb_t    *testscb;
+    ses_id_t     sid;
+    status_t     res;
+
+    (void)scb;
+
+    if (cbmode != GETCB_GET_VALUE) {
+	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+    sid = 0;
+    res = get_session_key(virval, &sid);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    testscb = agtses[sid];
+    VAL_UINT(dstval) = testscb->stats.inBadRpcs;
+    return NO_ERR;
+
+} /* agt_ses_get_session_inBadRpcs */
+
+
+/********************************************************************
+* FUNCTION agt_ses_get_session_outRpcErrors
+*
+* <get> operation handler for the outRpcErrors counter
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_ses_get_session_outRpcErrors (ses_cb_t *scb,
+                                      getcb_mode_t cbmode,
+                                      const val_value_t *virval,
+                                      val_value_t  *dstval)
+{
+    ses_cb_t    *testscb;
+    ses_id_t     sid;
+    status_t     res;
+
+    (void)scb;
+
+    if (cbmode != GETCB_GET_VALUE) {
+	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+    sid = 0;
+    res = get_session_key(virval, &sid);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    testscb = agtses[sid];
+    VAL_UINT(dstval) = testscb->stats.outRpcErrors;
+    return NO_ERR;
+
+} /* agt_ses_get_session_outRpcErrors */
+
+
+/********************************************************************
+* FUNCTION agt_ses_get_session_outNotifications
+*
+* <get> operation handler for the outNotifications counter
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_ses_get_session_outNotifications (ses_cb_t *scb,
+                                          getcb_mode_t cbmode,
+                                          const val_value_t *virval,
+                                          val_value_t  *dstval)
+{
+    ses_cb_t    *testscb;
+    ses_id_t     sid;
+    status_t     res;
+
+    (void)scb;
+
+    if (cbmode != GETCB_GET_VALUE) {
+	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+    sid = 0;
+    res = get_session_key(virval, &sid);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    testscb = agtses[sid];
+    VAL_UINT(dstval) = testscb->stats.outNotifications;
+    return NO_ERR;
+
+} /* agt_ses_get_session_outNotifications */
 
 
 /* END file agt_ses.c */

@@ -588,6 +588,78 @@ static uint32
 } /* leaf_changed */
 
 
+
+/********************************************************************
+ * FUNCTION anyxml_changed
+ * 
+ *  Check if an anyxml definition changed
+ *
+ * INPUTS:
+ *    oldobj == old obj_template_t to use
+ *    newobj == new obj_template_t to use
+ *
+ * RETURNS:
+ *    1 if field changed
+ *    0 if field not changed
+ *********************************************************************/
+static uint32
+    anyxml_changed (obj_template_t *oldobj,
+                    obj_template_t *newobj)
+{
+    obj_leaf_t *old, *new;
+
+    old = oldobj->def.leaf;
+    new = newobj->def.leaf;
+
+    if (mustQ_changed(&old->mustQ, &new->mustQ)) {
+	return 1;
+    }
+
+    if (bool_field_changed(YANG_K_CONFIG,
+			   (oldobj->flags & OBJ_FL_CONFIG),
+			   (newobj->flags & OBJ_FL_CONFIG), 
+			   FALSE, 
+			   NULL)) {
+	return 1;
+    }
+
+    if (bool_field_changed(YANG_K_MANDATORY,
+			   (oldobj->flags & OBJ_FL_MANDATORY),
+			   (newobj->flags & OBJ_FL_MANDATORY), 
+			   FALSE, 
+			   NULL)) {
+	return 1;
+    }
+
+    if (status_field_changed(YANG_K_STATUS,
+			     old->status, 
+			     new->status, 
+			     FALSE, 
+			     NULL)) {
+	return 1;
+    }
+
+    if (str_field_changed(YANG_K_DESCRIPTION,
+			  old->descr, 
+			  new->descr, 
+			  FALSE, 
+			  NULL)) {
+	return 1;
+    }
+
+    if (str_field_changed(YANG_K_REFERENCE,
+			  old->ref, 
+			  new->ref, 
+			  FALSE, 
+			  NULL)) {
+	return 1;
+    }
+
+    return 0;
+
+} /* anyxml_changed */
+
+
 /********************************************************************
  * FUNCTION output_leaf_diff
  * 
@@ -675,6 +747,75 @@ static void
     }
 
 } /* output_leaf_diff */
+
+
+/********************************************************************
+ * FUNCTION output_anyxml_diff
+ * 
+ *  Output the differences for an anyxml definition
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    oldobj == old obj_template_t to use
+ *    newobj == new obj_template_t to use
+ *
+ *********************************************************************/
+static void
+    output_anyxml_diff (yangdiff_diffparms_t *cp,
+                        obj_template_t *oldobj,
+                        obj_template_t *newobj)
+{
+    obj_leaf_t        *old, *new;
+    yangdiff_cdb_t    cdb;
+    boolean           isrev;
+
+    isrev = (cp->edifftype==YANGDIFF_DT_REVISION) ? TRUE : FALSE;
+    old = oldobj->def.leaf;
+    new = newobj->def.leaf;
+
+    output_mustQ_diff(cp, &old->mustQ, &new->mustQ);
+
+    if (bool_field_changed(YANG_K_CONFIG,
+			   (oldobj->flags & OBJ_FL_CONFIG),
+			   (newobj->flags & OBJ_FL_CONFIG), 
+			   isrev,
+			   &cdb)) {
+	output_cdb_line(cp, &cdb);
+    }
+
+    if (bool_field_changed(YANG_K_MANDATORY,
+			   (oldobj->flags & OBJ_FL_MANDATORY),
+			   (newobj->flags & OBJ_FL_MANDATORY), 
+			   isrev,
+			   &cdb)) {
+	output_cdb_line(cp, &cdb);
+    }
+
+    if (status_field_changed(YANG_K_STATUS,
+			     old->status,
+			     new->status, 
+			     isrev,
+			     &cdb)) {
+	output_cdb_line(cp, &cdb);
+    }
+
+    if (str_field_changed(YANG_K_DESCRIPTION, 
+			  old->descr,
+			  new->descr, 
+			  isrev, 
+			  &cdb)) {
+	output_cdb_line(cp, &cdb);
+    }
+
+    if (str_field_changed(YANG_K_REFERENCE,
+			  old->ref,
+			  new->ref,
+			  isrev,
+			  &cdb)) {
+	output_cdb_line(cp, &cdb);
+    }
+
+} /* output_anyxml_diff */
 
 
 /********************************************************************
@@ -1749,6 +1890,8 @@ static uint32
     switch (oldobj->objtype) {
     case OBJ_TYP_CONTAINER:
 	return container_changed(cp, oldobj, newobj);
+    case OBJ_TYP_ANYXML:
+	return anyxml_changed(oldobj, newobj);
     case OBJ_TYP_LEAF:
 	return leaf_changed(cp, oldobj, newobj);
     case OBJ_TYP_LEAF_LIST:
@@ -1814,6 +1957,9 @@ static void
 	    break;
 	case OBJ_TYP_LEAF:
 	    output_leaf_diff(cp, oldobj, newobj);
+	    break;
+	case OBJ_TYP_ANYXML:
+	    output_anyxml_diff(cp, oldobj, newobj);
 	    break;
 	case OBJ_TYP_LEAF_LIST:
 	    output_leaf_list_diff(cp, oldobj, newobj);

@@ -630,7 +630,6 @@ void
 
     /* make sure any real session has been properly established */
     if (scb->type != SES_TYP_DUMMY && scb->state != SES_ST_IDLE) {
-	scb->stats.in_drop_msgs++;
 	log_error("\nError: mgr_rpc: skipping incoming message '%s'",
 		  top->qname);
 	mgr_xml_skip_subtree(scb->reader, top);
@@ -651,7 +650,6 @@ void
 	    reply_obj = rpyobj;
 	} else {
 	    SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-	    scb->stats.in_drop_msgs++;
 	    mgr_xml_skip_subtree(scb->reader, top);
 	    return;
 	}
@@ -665,7 +663,6 @@ void
 	msg_id = xml_strdup(attr->attr_val);
     }
     if (!msg_id) {
-	scb->stats.in_drop_msgs++;
 	mgr_xml_skip_subtree(scb->reader, top);
 	log_error("\nError: mgr_rpc: skipping incoming message");
 	return;
@@ -677,7 +674,6 @@ void
     rpy = new_reply();
     if (!rpy) {
 	m__free(msg_id);
-	scb->stats.in_drop_msgs++;
 	log_error("\nError: mgr_rpc: skipping incoming message");
 	mgr_xml_skip_subtree(scb->reader, top);
 	return;

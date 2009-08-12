@@ -228,11 +228,14 @@ status_t
     /* Create the socket and set it up to accept connections. */
     res = make_named_socket(NCXSERVER_SOCKNAME, &ncxsock);
     if (res != NO_ERR) {
+        log_error("\n*** Cannot connect to ncxserver socket"
+                  "\n*** If no other instances of netconfd are running,"
+                  "\n*** try deleting /tmp/ncxserver.sock\n");
         return res;
     }
 
     if (listen(ncxsock, 1) < 0) {
-        perror ("listen");
+        log_error("\nError: listen failed");
         return ERR_NCX_OPERATION_FAILED;
     }
      

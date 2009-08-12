@@ -135,7 +135,6 @@ void
     /* get the first node */
     res = mgr_xml_consume_node(scb->reader, &top);
     if (res != NO_ERR) {
-	scb->stats.in_drop_msgs++;
 	log_info("\nmgr_top: get node failed (%s); session dropped", 
 		 get_error_string(res));
 	xml_clean_node(&top);
@@ -166,7 +165,6 @@ void
 
     /* check any error trying to invoke the top handler */
     if (res != NO_ERR) {
-	scb->stats.in_drop_msgs++;
 	log_error("\nError: agt_top skipped msg for session %d (%s)",
 		  scb->sid, get_error_string(res));
     }

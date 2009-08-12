@@ -250,8 +250,6 @@ static status_t
 					 scb->sid,
 					 get_error_string(res));
 			    }
-			    scb->stats.in_drop_msgs++;
-			    totals.stats.in_drop_msgs++;
 
 			    /* do not barf on input overflow error */
 			    res = NO_ERR;   
@@ -535,10 +533,7 @@ void
 	    res = ERR_NCX_OPERATION_FAILED;
 	}
 
-	if (res != NO_ERR) {
-	    scb->stats.out_drop_bytes++;
-	    totals.stats.out_drop_bytes++;
-	} else {
+	if (res == NO_ERR) {
 	    scb->stats.out_bytes++;
 	    totals.stats.out_bytes++;
 	}
@@ -1281,11 +1276,15 @@ const xmlChar *
     case SES_TRANSPORT_NONE:
 	return (const xmlChar *)"none";
     case SES_TRANSPORT_SSH:
-	return (const xmlChar *)"SSH";
+	return (const xmlChar *)"netconf-ssh";
     case SES_TRANSPORT_BEEP:
-	return (const xmlChar *)"SSL";
+	return (const xmlChar *)"netconf-beep";
     case SES_TRANSPORT_SOAP:
-	return (const xmlChar *)"HTTPS";
+	return (const xmlChar *)"netconf-soap-over-https";
+    case SES_TRANSPORT_SOAPBEEP:
+	return (const xmlChar *)"netconf-soap-over-beep";
+    case SES_TRANSPORT_TLS:
+	return (const xmlChar *)"netconf-tls";
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return (const xmlChar *)"none";

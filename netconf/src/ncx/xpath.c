@@ -1766,7 +1766,13 @@ xpath_pcb_t *
 	return NULL;
     }
 
-    /*** clone tkc ***/
+    if (srcpcb->tkc) {
+        newpcb->tkc = tk_clone_chain(srcpcb->tkc);
+        if (!newpcb->tkc) {
+            xpath_free_pcb(newpcb);
+            return NULL;
+        }
+    }
     newpcb->tk = srcpcb->tk;
     newpcb->reader = srcpcb->reader;
     newpcb->mod = srcpcb->mod;

@@ -547,8 +547,6 @@ static void
                                   errsend);
     if (res != NO_ERR) {
         ses_finish_msg(scb);
-        scb->stats.out_drop_bytes++;
-        agttotals->stats.out_drop_bytes++;
         return;
     }
 
@@ -674,11 +672,14 @@ static void
     /* finish the message */
     ses_finish_msg(scb);
 
-    scb->stats.outRpcReplies++;
-    agttotals->stats.outRpcReplies++;
     if (errsend) {
+        scb->stats.inBadRpcs++;
+        agttotals->stats.inBadRpcs++;
         scb->stats.outRpcErrors++;
         agttotals->stats.outRpcErrors++;
+    } else {
+        scb->stats.inRpcs++;
+        agttotals->stats.inRpcs++;
     }
 
 }  /* send_rpc_reply */
@@ -1085,8 +1086,6 @@ void
     rpcobj = NULL;
 
     agttotals = ses_get_total_stats();
-    scb->stats.inRpcs++;
-    agttotals->stats.inRpcs++;
 
     /* make sure any real session has been properly established */
     if (scb->type != SES_TYP_DUMMY && scb->state != SES_ST_IDLE) {
@@ -1097,8 +1096,12 @@ void
                      res, 
                      get_error_string(res));
         }
-        agt_ses_request_close(scb->sid, scb->sid, SES_TR_OTHER);
-        agttotals->stats.inBadRpcs++;
+         agttotals->stats.inBadRpcs++;
+        agttotals->droppedSessions++;
+        agt_ses_request_close(scb->sid, 
+                              scb->sid, 
+                              SES_TR_DROPPED);
+
         return;
     }
 
@@ -1108,8 +1111,25 @@ void
     msg = rpc_new_msg();
     if (!msg) {
         res = ERR_INTERNAL_MEM;
-        scb->stats.out_drop_bytes++;
-        agttotals->stats.out_drop_bytes++;
+        agttotals->droppedSessions++;
+        if (LOGINFO) {
+            log_info("\nError: malloc failed, dropping session %d (%d) %s",
+                     scb->sid, 
+                     res, 
+                     get_error_string(res));
+        }
+        agt_ses_request_close(scb->sid, 
+                              scb->sid, 
+                              SES_TR_DROPPED);
+        return;
+    }
+
+    /* make sure 'rpc' is the right kind of node */
+    if (top->nodetyp != XML_NT_START) {
+        res = ERR_NCX_WRONG_NODETYP;
+        scb->stats.inBadRpcs++;
+        agttotals->stats.inBadRpcs++;
+        agttotals->droppedSessions++;
         if (LOGINFO) {
             log_info("\nagt_rpc dropping session %d (%d) %s",
                      scb->sid, 
@@ -1117,16 +1137,6 @@ void
                      get_error_string(res));
         }
         agt_ses_request_close(scb->sid, scb->sid, SES_TR_OTHER);
-        return;
-    }
-
-    /* make sure 'rpc' is the right kind of node */
-    if (top->nodetyp != XML_NT_START) {
-        res = ERR_NCX_WRONG_NODETYP;
-        scb->stats.inXMLParseErrors++;
-        agttotals->stats.inXMLParseErrors++;
-
-        /* cleanup and exit */
         rpc_free_msg(msg);
         return;
     }
@@ -1220,11 +1230,8 @@ void
         send_rpc_reply(scb, msg);
         agt_acm_clear_msg_cache(&msg->mhdr);
         rpc_free_msg(msg);
-        scb->stats.inBadRpcs++;
-        agttotals->stats.inBadRpcs++;
         return;
     }
-
     
     /* get the next XML node, which is the RPC method name */
     xml_init_node(&method);
@@ -1307,25 +1314,6 @@ void
         agt_acm_clear_msg_cache(&msg->mhdr);
         rpc_free_msg(msg);
         xml_clean_node(&method);
-
-        switch (res) {
-        case ERR_NCX_WRONG_NODETYP:
-            scb->stats.inXMLParseErrors++;
-            agttotals->stats.inXMLParseErrors++;
-            break;
-        case ERR_NCX_DEF_NOT_FOUND:
-            scb->stats.inBadRpcs++;
-            agttotals->stats.inBadRpcs++;
-            break;
-        case ERR_NCX_OPERATION_NOT_SUPPORTED:
-        case ERR_NCX_ACCESS_DENIED:
-            scb->stats.inNotSupportedRpcs++;
-            agttotals->stats.inNotSupportedRpcs++;
-            break;
-        default:
-            scb->stats.inBadRpcs++;
-            agttotals->stats.inBadRpcs++;
-        }
         return;
     }
 
@@ -1413,11 +1401,6 @@ void
          */
         msg->rpc_agt_state = AGT_RPC_PH_VALIDATE;
         res = (*cbset->acb[AGT_RPC_PH_VALIDATE])(scb, msg, &method);
-    }
-
-    if (res != NO_ERR) {
-        scb->stats.inBadRpcs++;
-        agttotals->stats.inBadRpcs++;
     }
 
     /* there does not always have to be an invoke callback */

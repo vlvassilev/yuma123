@@ -246,7 +246,7 @@ void
                      scb->state, 
                      scb->sid);
         }
-        mytotals->stats.inBadHellos++;
+        mytotals->inBadHellos++;
         agt_ses_request_close(scb->sid,
                               scb->sid,
                               SES_TR_BAD_HELLO);
@@ -280,7 +280,12 @@ void
 
     /* parse a manager hello message */
     if (res == NO_ERR) {
-        res = agt_val_parse_nc(scb, &msg, obj, top, NCX_DC_STATE, val);
+        res = agt_val_parse_nc(scb, 
+                               &msg, 
+                               obj, 
+                               top, 
+                               NCX_DC_STATE, 
+                               val);
     }
     
     /* check that the NETCONF base capability is included
@@ -298,8 +303,7 @@ void
                      get_error_string(res), 
                      scb->sid);
         }
-        mytotals->stats.inBadHellos++;
-
+        mytotals->inBadHellos++;
         agt_ses_request_close(scb->sid,
                               scb->sid,
                               SES_TR_BAD_HELLO);
@@ -309,7 +313,8 @@ void
         scb->active = TRUE;
         if (LOGINFO) {
             log_info("\nSession %d for %s@%s now active", 
-                     scb->sid, scb->username, 
+                     scb->sid, 
+                     scb->username, 
                      scb->peeraddr);
         }
     }

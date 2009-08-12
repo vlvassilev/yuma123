@@ -465,6 +465,7 @@ date	     init     comment
 #define NCX_EL_KILL_SESSION    (const xmlChar *)"kill-session"
 #define NCX_EL_LANG            (const xmlChar *)"xml:lang"
 #define NCX_EL_LEAFREF         (const xmlChar *)"leafref"
+#define NCX_EL_LINESIZE        (const xmlChar *)"linesize"
 #define NCX_EL_LIST            (const xmlChar *)"list"
 #define NCX_EL_LOAD            (const xmlChar *)"load"
 #define NCX_EL_LOAD_CONFIG     (const xmlChar *)"load-config"

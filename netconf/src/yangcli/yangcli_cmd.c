@@ -2353,7 +2353,7 @@ static status_t
 		const xmlChar *line,
 		uint32  len)
 {
-    val_value_t     *valset, *modval, *revval;
+    val_value_t     *valset, *modval, *revval, *devval;
     ncx_module_t    *mod;
     modptr_t        *modptr;
     dlq_hdr_t       *mgrloadQ;
@@ -2418,17 +2418,17 @@ static status_t
 
     /* check if there are any deviation parameters to load first */
     if (res == NO_ERR) {
-        for (modval = val_find_child(valset,
+        for (devval = val_find_child(valset,
                                      YANGCLI_MOD,
                                      NCX_EL_DEVIATION);
-             modval != NULL && res == NO_ERR;
-             modval = val_find_next_child(valset,
+             devval != NULL && res == NO_ERR;
+             devval = val_find_next_child(valset,
                                           YANGCLI_MOD,
                                           NCX_EL_DEVIATION,
-                                          modval)) {
+                                          devval)) {
 
 
-            res = ncxmod_load_deviation(VAL_STR(modval),
+            res = ncxmod_load_deviation(VAL_STR(devval),
                                         &savedevQ);
 
         }

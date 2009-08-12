@@ -65,10 +65,6 @@ date         init     comment
 #include  "agt_ses.h"
 #endif
 
-#ifndef _H_agt_state
-#include  "agt_state.h"
-#endif
-
 #ifndef _H_agt_tree
 #include  "agt_tree.h"
 #endif
@@ -574,7 +570,6 @@ static status_t
      * present for the specified session;
      * this is an error since there is no way to
      * identify multiple subscriptions per session,
-     * either on-the-wire or in the agt_state.c data model
      */
     res2 = NO_ERR;
     for (testsub = (agt_not_subscription_t *)
@@ -684,8 +679,6 @@ static status_t
     (void)scb;
     (void)methnode;
     sub = (agt_not_subscription_t *)msg->rpc_user1;
-
-    agt_state_add_subscription(sub);
 
     if (sub->startTime) {
 	/* this subscription has requested replay
@@ -820,7 +813,6 @@ static void
 		  sub->scb->sid);
     }
 
-    agt_state_remove_subscription(sub->scb->sid);
     free_subscription(sub);
     anySubscriptions = (dlq_empty(&subscriptionQ)) ? FALSE : TRUE;
 
@@ -914,8 +906,6 @@ static status_t
 		      "send notification", 
 		      get_error_string(res));
 	    val_free_value(topval);
-	    sub->scb->stats.out_drop_bytes++;
-	    totalstats->stats.out_drop_bytes++;
 	    return res;
 	}
 	val_add_child(eventTime, topval);
@@ -924,8 +914,6 @@ static status_t
 	if (!eventType) {
 	    log_error("\nError: malloc failed: cannot send notification");
 	    val_free_value(topval);
-	    sub->scb->stats.out_drop_bytes++;
-	    totalstats->stats.out_drop_bytes++;
 	    return ERR_INTERNAL_MEM;
 	}
 	val_init_from_template(eventType, notif->notobj);
@@ -999,8 +987,6 @@ static status_t
         res = ses_start_msg(sub->scb);
         if (res != NO_ERR) {
             log_error("\nError: cannot start notification");
-            sub->scb->stats.out_drop_bytes++;
-            totalstats->stats.out_drop_bytes++;
             xml_msg_clean_hdr(&msghdr);
             return res;
         }

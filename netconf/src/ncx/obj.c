@@ -393,8 +393,11 @@ static obj_case_t *
 	}
     }
 
-    res = clone_datadefQ(mod, newcas->datadefQ, cas->datadefQ,
-			 mobjQ, obj);
+    res = clone_datadefQ(mod, 
+                         newcas->datadefQ, 
+                         cas->datadefQ,
+			 mobjQ, 
+                         obj);
     if (res != NO_ERR) {
 	free_case(newcas);
 	return NULL;
@@ -648,15 +651,19 @@ static obj_container_t *
 	}
     }
 
-    res = clone_mustQ(&newcon->mustQ, &con->mustQ,
+    res = clone_mustQ(&newcon->mustQ, 
+                      &con->mustQ,
 		      (mcon) ? &mcon->mustQ : NULL);
     if (res != NO_ERR) {
 	free_container(newcon, OBJ_FL_CLONE);
 	return NULL;
     }
 
-    res = clone_datadefQ(mod, newcon->datadefQ, 
-			 con->datadefQ, mobjQ, parent);
+    res = clone_datadefQ(mod, 
+                         newcon->datadefQ, 
+			 con->datadefQ, 
+                         mobjQ, 
+                         parent);
     if (res != NO_ERR) {
 	free_container(newcon, OBJ_FL_CLONE);
 	return NULL;
@@ -831,7 +838,8 @@ static obj_leaf_t *
 	}
     }
 
-    res = clone_mustQ(&newleaf->mustQ, &leaf->mustQ,
+    res = clone_mustQ(&newleaf->mustQ, 
+                      &leaf->mustQ,
 		      (mleaf) ? &mleaf->mustQ : NULL);
     if (res != NO_ERR) {
 	free_leaf(newleaf, OBJ_FL_CLONE);
@@ -1215,8 +1223,9 @@ static obj_list_t *
 	}
     }
 
-    res = clone_mustQ(&newlist->mustQ, &list->mustQ,
-		     (mlist) ? &mlist->mustQ : NULL);
+    res = clone_mustQ(&newlist->mustQ, 
+                      &list->mustQ,
+                      (mlist) ? &mlist->mustQ : NULL);
     if (res != NO_ERR) {
 	free_list(newlist, OBJ_FL_CLONE);
 	return NULL;
@@ -1238,8 +1247,11 @@ static obj_list_t *
 	newlist->maxset = list->maxset;
     }
 
-    res = clone_datadefQ(mod, newlist->datadefQ, list->datadefQ, 
-			 mobjQ, newparent);
+    res = clone_datadefQ(mod, 
+                         newlist->datadefQ, 
+                         list->datadefQ, 
+			 mobjQ, 
+                         newparent);
     if (res != NO_ERR) {
 	free_list(newlist, OBJ_FL_CLONE);
 	return NULL;
@@ -1484,8 +1496,11 @@ static obj_choice_t *
 	}
     }
 
-    res = clone_datadefQ(mod, newchoic->caseQ,
-			 choic->caseQ, mobjQ, obj);
+    res = clone_datadefQ(mod, 
+                         newchoic->caseQ,
+			 choic->caseQ, 
+                         mobjQ, 
+                         obj);
     if (res != NO_ERR) {
 	free_choice(newchoic, OBJ_FL_CLONE);
 	return NULL;
@@ -4892,6 +4907,14 @@ obj_template_t *
 	return NULL;
     }
 
+    if (srcobj->when) {
+        newobj->when = xpath_clone_pcb(srcobj->when);
+        if (newobj->when == NULL) {
+            obj_free_template(newobj);
+            return NULL;
+        }
+    }
+
     /* set most of the common fields but leave the mod and parent NULL
      * since the uses or augment calling this fn is going to
      * re-prent the cloned node under a different part of the tree
@@ -4961,7 +4984,9 @@ obj_template_t *
 	break;
     case OBJ_TYP_LIST:
 	newobj->def.list = 
-	    clone_list(mod, newobj, srcobj,
+	    clone_list(mod, 
+                       newobj, 
+                       srcobj,
 		       (mobj) ? mobj->def.refine : NULL, 
 		       mobjQ);
 	if (!newobj->def.list) {
@@ -4970,18 +4995,22 @@ obj_template_t *
 	break;
     case OBJ_TYP_CHOICE:
 	newobj->def.choic = 
-	    clone_choice(mod, srcobj->def.choic,
+	    clone_choice(mod, 
+                         srcobj->def.choic,
 			 (mobj) ? mobj->def.refine : NULL, 
-			 newobj, mobjQ);
+			 newobj, 
+                         mobjQ);
 	if (!newobj->def.choic) {
 	    res = ERR_INTERNAL_MEM;
 	}
 	break;
     case OBJ_TYP_CASE:
 	newobj->def.cas = 
-	    clone_case(mod, srcobj->def.cas,
+	    clone_case(mod, 
+                       srcobj->def.cas,
 		       (mobj) ? mobj->def.refine : NULL,
-		       newobj, mobjQ);
+		       newobj, 
+                       mobjQ);
 	if (!newobj->def.cas) {
 	    res = ERR_INTERNAL_MEM;
 	}

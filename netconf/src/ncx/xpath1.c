@@ -8400,15 +8400,6 @@ status_t
     }
 #endif
 
-    /* before all objects are known, only simple validation
-     * is done, and the token chain is saved for reuse
-     * each time the expression is evaluated
-     */
-    if (pcb->tkc) {
-	tk_free_chain(pcb->tkc);
-	pcb->tkc = NULL;
-    }
-
     if (tkc && tkc->cur) {
         linenum = TK_CUR_LNUM(tkc);
         linepos = TK_CUR_LPOS(tkc);
@@ -8417,16 +8408,20 @@ status_t
         linepos = 1;
     }
 
-    pcb->tkc = tk_tokenize_xpath_string(mod, 
-                                        pcb->exprstr, 
-                                        linenum,
-                                        linepos,
-					&res);
-    if (!pcb->tkc || res != NO_ERR) {
-        log_error("\nError: Invalid XPath string '%s'",
-                  pcb->exprstr);
-        ncx_print_errormsg(tkc, mod, res);
-        return res;
+    if (pcb->tkc) {
+        tk_reset_chain(pcb->tkc);
+    } else {
+        pcb->tkc = tk_tokenize_xpath_string(mod, 
+                                            pcb->exprstr, 
+                                            linenum,
+                                            linepos,
+                                            &res);
+        if (!pcb->tkc || res != NO_ERR) {
+            log_error("\nError: Invalid XPath string '%s'",
+                      pcb->exprstr);
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        }
     }
 
     /* the module that contains the XPath expr is the one
@@ -8794,8 +8789,11 @@ xpath_result_t *
     if (pcb->tkc) {
 	tk_reset_chain(pcb->tkc);
     } else {
-	pcb->tkc = tk_tokenize_xpath_string(NULL, pcb->exprstr, 
-					    0, 0, res);
+	pcb->tkc = tk_tokenize_xpath_string(NULL, 
+                                            pcb->exprstr, 
+					    0, 
+                                            0, 
+                                            res);
 	if (!pcb->tkc || *res != NO_ERR) {
 	    if (logerrors) {
 		log_error("\nError: Invalid XPath string '%s'",

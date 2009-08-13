@@ -109,6 +109,9 @@ extern status_t
 extern boolean
     agt_ses_process_first_ready (void);
 
+extern void
+    agt_ses_check_timeouts (void);
+
 extern boolean
     agt_ses_ssh_port_allowed (uint16 port);
 

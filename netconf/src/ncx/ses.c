@@ -368,9 +368,7 @@ ses_cb_t *
     dlq_createSQue(&scb->outQ);
     scb->linesize = SES_DEF_LINESIZE;
     scb->withdef = NCX_DEF_WITHDEF;
-    scb->withmeta = NCX_DEF_WITHMETA;
     scb->indent = NCX_DEF_INDENT;
-    scb->xmladvance = TRUE;
     return scb;
 
 }  /* ses_new_scb */
@@ -1158,25 +1156,6 @@ ncx_withdefaults_t
     return scb->withdef;
 
 } /* ses_withdef */
-
-
-/********************************************************************
-* FUNCTION ses_withmeta
-*
-* Get the with-metadata value for this session
-*
-* INPUTS:
-*   scb == session control block to check
-*
-* RETURNS:
-*   with-metadata value for the session
-*********************************************************************/
-boolean
-    ses_withmeta (const ses_cb_t *scb)
-{
-    return scb->withmeta;
-
-} /* ses_withmeta */
 
 
 /********************************************************************

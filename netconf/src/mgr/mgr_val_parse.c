@@ -171,12 +171,7 @@ static status_t
 {
     status_t   res;
 
-    if (scb->xmladvance) {
-	res = mgr_xml_consume_node(scb->reader, xmlnode);
-    } else {
-	res = mgr_xml_consume_node_noadv(scb->reader, xmlnode);
-    }
-    scb->xmladvance = TRUE;
+    res = mgr_xml_consume_node(scb->reader, xmlnode);
     return res;
 
 }   /* get_xml_node */

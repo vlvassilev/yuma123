@@ -17,10 +17,11 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
-#include  <string.h>
-#include  <memory.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <memory.h>
 
 #ifndef _H_procdefs
 #include  "procdefs.h"
@@ -1061,7 +1062,6 @@ void
                       xml_node_t *top)
 {
     rpc_msg_t             *msg;
-    xml_attr_t            *attr;
     obj_template_t        *rpcobj;
     obj_rpc_t             *rpc;
     const obj_template_t  *testobj;
@@ -1149,30 +1149,6 @@ void
      */
     msg->rpc_in_attrs = &top->attrs;
 
-    /* get the NCX RPC with-metadata attribute if present */
-    attr = xml_find_attr(top, xmlns_ncx_id(), NCX_EL_WITH_METADATA);
-    if (attr && attr->attr_val) {
-        if (ncx_is_true(attr->attr_val)) {
-            msg->mhdr.withmeta = TRUE;
-        } else if (ncx_is_false(attr->attr_val)) {
-            msg->mhdr.withmeta = FALSE;
-        } else {
-            /* else this is an invalid-attribute error !!! */
-            agt_record_attr_error(scb, 
-                                  &msg->mhdr, 
-                                  NCX_LAYER_RPC,
-                                  ERR_NCX_BAD_ATTRIBUTE, 
-                                  attr, 
-                                  top, 
-                                  NULL, 
-                                  NCX_NT_STRING, 
-                                  RPC_ROOT);
-        }
-    } else {
-        /* with-metadata not explicitly set, so get the default */
-        msg->mhdr.withmeta = ses_withmeta(scb);        
-    }
-
     /* set the default for the with-defaults parameter */
     msg->mhdr.withdef = ses_withdef(scb);
 
@@ -1243,6 +1219,9 @@ void
         errdone = TRUE;
     } else {
         errdone = FALSE;
+
+        /* reset idle timeout */
+        (void)time(&scb->last_rpc_time);
 
         if (LOGDEBUG) {
             tstamp_datetime(tstampbuff);

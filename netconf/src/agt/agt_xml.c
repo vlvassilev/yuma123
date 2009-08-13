@@ -698,24 +698,6 @@ status_t
 }  /* agt_xml_consume_node_noadv */
 
 
-status_t 
-    agt_xml_consume_node_nons_noadv (ses_cb_t *scb,
-				     xml_node_t *node,
-				     ncx_layer_t layer,
-				     xml_msg_hdr_t *msghdr)
-{
-    return consume_node(scb, 
-			FALSE, 
-			node, 
-			layer, 
-			msghdr, 
-			TRUE, 
-			FALSE, 
-			TRUE);
-
-}  /* agt_xml_consume_node_nons_noadv */
-
-
 /********************************************************************
 * FUNCTION agt_xml_skip_subtree
 * 

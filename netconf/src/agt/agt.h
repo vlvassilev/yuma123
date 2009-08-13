@@ -189,6 +189,8 @@ typedef struct agt_profile_t_ {
     const xmlChar      *agt_superuser;
     uint32              agt_eventlog_size;
     uint32              agt_maxburst;
+    uint32              agt_hello_timeout;
+    uint32              agt_idle_timeout;
     boolean             agt_usevalidate;
     ncx_withdefaults_t  agt_defaultStyleEnum;
     agt_acmode_t        agt_accesscontrol_enum;

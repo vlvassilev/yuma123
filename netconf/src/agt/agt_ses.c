@@ -140,6 +140,8 @@ date         init     comment
 
 #define AGT_SES_SET_MY_SESSION   (const xmlChar *)"set-my-session"
 
+/* number of seconds to wait between session timeout checks */
+#define AGT_SES_TIMEOUT_INTERVAL  5
 
 /********************************************************************
 *                                                                   *
@@ -163,6 +165,8 @@ static ses_cb_t  *agtses[AGT_SES_MAX_SESSIONS];
 static ses_total_stats_t *agttotals;
 
 static ncx_module_t *mysesmod;
+
+static time_t     last_timeout_check;
 
 /********************************************************************
 * FUNCTION get_session_idval
@@ -331,7 +335,7 @@ status_t
     agttotals = ses_get_total_stats();
     memset(agttotals, 0x0, sizeof(ses_total_stats_t));
     tstamp_datetime(agttotals->startTime);
-
+    (void)time(&last_timeout_check);
     agt_ses_init_done = TRUE;
 
     /* load the netconf-state module */
@@ -525,7 +529,7 @@ ses_cb_t *
     scb = NULL;
 
     /* check if any sessions are available */
-    if (!next_sesid) {
+    if (next_sesid == 0) {
 	/* end has already been reached, so now in brute force
 	 * session reclaim mode
 	 */
@@ -920,6 +924,94 @@ boolean
     return TRUE;
     
 }  /* agt_ses_process_first_ready */
+
+
+/********************************************************************
+* FUNCTION agt_ses_check_timeouts
+*
+* Check if any sessions need to be dropped because they
+* have been idle too long.
+*
+*********************************************************************/
+void
+    agt_ses_check_timeouts (void)
+{
+    ses_cb_t         *scb;
+    agt_profile_t    *agt_profile;
+    uint32            i, last;
+    time_t            timenow;
+    double            timediff;
+
+    agt_profile = agt_get_profile();
+
+    /* check if both timeouts are disabled; quick exit */
+    if (agt_profile->agt_idle_timeout == 0 &&
+        agt_profile->agt_hello_timeout == 0) {
+        return;
+    }
+
+    /* at least one timeout enabled, so check if enough
+     * time has elapsed since the last time through
+     * the process loop; the AGT_SES_TIMEOUT_INTERVAL
+     * is used for this purpose
+     */
+    (void)time(&timenow);
+    timediff = difftime(timenow, last_timeout_check);
+    if (timediff < (double)AGT_SES_TIMEOUT_INTERVAL) {
+        return;
+    }
+
+    /* reset the timeout interval for next time */
+    last_timeout_check = timenow;
+
+    /* check all the sessions */
+    if (next_sesid == 0) {
+        last = AGT_SES_MAX_SESSIONS;
+    } else {
+        last = next_sesid;
+    }
+
+    for (i=1; i < last; i++) {
+
+        scb = agtses[i];
+        if (scb == NULL) {
+            continue;
+        }
+
+        /* check if the the hello timer needs to be tested */
+        if (agt_profile->agt_hello_timeout > 0 &&
+            scb->state == SES_ST_HELLO_WAIT) {
+
+            timediff = difftime(timenow, scb->hello_time);
+            if (timediff >= (double)agt_profile->agt_hello_timeout) {
+                if (LOGDEBUG) {
+                    log_debug("\nHello timeout for session %u", i);
+                }
+                agt_ses_kill_session(i, 0, SES_TR_TIMEOUT);
+                continue;
+            }
+        }
+
+        /* check if the the idle timer needs to be tested 
+         * check only active sessions
+         * skip if notifications are active 
+         */
+        if (agt_profile->agt_idle_timeout > 0 &&
+            scb->active && 
+            !scb->notif_active) {
+
+            timediff = difftime(timenow, scb->last_rpc_time);
+            if (timediff >= (double)agt_profile->agt_idle_timeout) {
+                if (LOGDEBUG) {
+                    log_debug("\nIdle timeout for session %u", i);
+                }
+                agt_ses_kill_session(i, 0, SES_TR_TIMEOUT);
+                continue;
+            }
+        }
+    }
+
+}  /* agt_ses_check_timeouts */
 
 
 /********************************************************************

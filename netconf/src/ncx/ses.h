@@ -23,6 +23,9 @@ date             init     comment
 /* used by applications to generate FILE output */
 #include <stdio.h>
 
+/* used for timestamps and time deltas */
+#include <time.h>
+
 /* used by the agent for the xmlTextReader interface */
 #include <xmlreader.h>
 
@@ -232,11 +235,13 @@ typedef struct ses_cb_t_ {
     ses_id_t         sid;                         /* session ID */
     ses_id_t         killedbysid;       /* killed-by session ID */
     ses_term_reason_t termreason;
+    time_t           hello_time;     /* used for hello timeout */
+    time_t           last_rpc_time;   /* used for idle timeout */
     xmlChar         *start_time;         /* dateTime start time */
     xmlChar         *username;                       /* user ID */
     xmlChar         *peeraddr;           /* Inet address string */
     boolean          active;            /* <hello> completed ok */
-    boolean          xmladvance;    /* reader hack for leaflist */
+    boolean          notif_active;       /* subscription active */
     xmlTextReaderPtr reader;             /* input stream reader */
     FILE            *fp;             /* set if output to a file */
     int              fd;           /* set if output to a socket */
@@ -258,7 +263,6 @@ typedef struct ses_cb_t_ {
     int32            indent;          /* indent N spaces (0..9) */
     uint32           linesize;              /* TERM line length */
     ncx_withdefaults_t  withdef;       /* with-defaults default */
-    boolean          withmeta;         /* with-metadata default */
 } ses_cb_t;
 
 
@@ -332,9 +336,6 @@ extern const xmlChar *
 
 extern ncx_withdefaults_t
     ses_withdef (const ses_cb_t *scb);
-
-extern boolean
-    ses_withmeta (const ses_cb_t *scb);
 
 extern uint32
     ses_line_left (const ses_cb_t *scb);

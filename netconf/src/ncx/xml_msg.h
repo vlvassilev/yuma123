@@ -74,7 +74,6 @@ typedef struct xml_msg_hdr_t_ {
     xmlns_id_t      defns;       /* req. default namespace ID */
     xmlns_id_t      cur_defns;        /* minimize xmlns decls */
     ncx_withdefaults_t withdef;       /* with-defaults value */
-    boolean         withmeta;          /* with-metadata value */
     dlq_hdr_t       prefixQ;             /* Q of xmlns_pmap_t */
     dlq_hdr_t       errQ;               /* Q of rpc_err_rec_t */
 

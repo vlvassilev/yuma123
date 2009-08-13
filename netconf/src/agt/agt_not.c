@@ -266,6 +266,9 @@ static void
     if (sub->filterval) {
 	val_free_value(sub->filterval);
     }
+    if (sub->scb) {
+        sub->scb->notif_active = FALSE;
+    }
 
     m__free(sub);
 
@@ -343,6 +346,9 @@ static agt_not_subscription_t *
 	sub->flags = AGT_NOT_FL_FUTURESTOP;
     }
     sub->state = AGT_NOT_STATE_INIT;
+
+    /* prevent any idle timeout */
+    scb->notif_active = TRUE;
 
     return sub;
 

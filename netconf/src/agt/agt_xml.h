@@ -85,12 +85,6 @@ extern status_t
 				xml_msg_hdr_t *msghdr);
 
 extern status_t 
-    agt_xml_consume_node_nons_noadv (ses_cb_t *scb,
-				     xml_node_t *node,
-				     ncx_layer_t layer,
-				     xml_msg_hdr_t *msghdr);
-
-extern status_t 
     agt_xml_skip_subtree (ses_cb_t *scb,
 			  const xml_node_t *startnode);
 

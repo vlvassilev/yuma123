@@ -315,34 +315,18 @@ static status_t
 {
     status_t   res;
 
-    if (scb->xmladvance) {
-        /* get a new node */
-        if (usens) {
-            res = agt_xml_consume_node(scb, 
-                                       xmlnode,
-                                       NCX_LAYER_OPERATION, 
-                                       msg);
-        } else {
-            res = agt_xml_consume_node_nons(scb, 
-                                            xmlnode,
-                                            NCX_LAYER_OPERATION, 
-                                            msg);
-        }
+    /* get a new node */
+    if (usens) {
+        res = agt_xml_consume_node(scb, 
+                                   xmlnode,
+                                   NCX_LAYER_OPERATION, 
+                                   msg);
     } else {
-        /* get current node, not a new node */
-        if (usens) {
-            res = agt_xml_consume_node_noadv(scb, 
-                                             xmlnode,
-                                             NCX_LAYER_OPERATION, 
-                                             msg);
-        } else {
-            res = agt_xml_consume_node_nons_noadv(scb, 
-                                                  xmlnode,
-                                                  NCX_LAYER_OPERATION, 
-                                                  msg);
-        }
+        res = agt_xml_consume_node_nons(scb, 
+                                        xmlnode,
+                                        NCX_LAYER_OPERATION, 
+                                        msg);
     }
-    scb->xmladvance = TRUE;
     return res;
 
 }   /* get_xml_node */

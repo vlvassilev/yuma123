@@ -178,6 +178,8 @@ static void
     agt_profile.agt_eventlog_size = 1000;
     agt_profile.agt_maxburst = 10;
     agt_profile.agt_usevalidate = TRUE;
+    agt_profile.agt_hello_timeout = 300;
+    agt_profile.agt_idle_timeout = 3600;
 
 } /* init_agent_profile */
 

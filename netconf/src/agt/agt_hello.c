@@ -18,8 +18,9 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 #ifndef _H_procdefs
 #include  "procdefs.h"
@@ -311,13 +312,18 @@ void
     } else {
         scb->state = SES_ST_IDLE;
         scb->active = TRUE;
+        /* start the timer for the first rpc request */
+        (void)time(&scb->last_rpc_time);
+
         if (LOGINFO) {
             log_info("\nSession %d for %s@%s now active", 
                      scb->sid, 
                      scb->username, 
                      scb->peeraddr);
         }
+
     }
+
     if (val) {
         val_free_value(val);
     }
@@ -360,6 +366,9 @@ status_t
     xml_init_attrs(&attrs);
     nc_id = xmlns_nc_id();
     ncx_id = xmlns_ncx_id();
+
+    /* start the hello timeout */
+    (void)time(&scb->hello_time);
 
     /* get the agent caps */
     mycaps = agt_cap_get_capsval();

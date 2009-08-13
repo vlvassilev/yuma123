@@ -231,6 +231,22 @@ static void
         agt_profile->agt_eventlog_size = VAL_UINT(val);
     }
 
+    /* get hello-timeout param */
+    val = val_find_child(valset, 
+                         AGT_CLI_MODULE, 
+                         NCX_EL_HELLO_TIMEOUT);
+    if (val && val->res == NO_ERR) {
+        agt_profile->agt_hello_timeout = VAL_UINT(val);
+    }
+
+    /* get idle-timeout param */
+    val = val_find_child(valset, 
+                         AGT_CLI_MODULE, 
+                         NCX_EL_IDLE_TIMEOUT);
+    if (val && val->res == NO_ERR) {
+        agt_profile->agt_idle_timeout = VAL_UINT(val);
+    }
+
     /* max-burst param */
     val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_MAX_BURST);
     if (val && val->res == NO_ERR) {

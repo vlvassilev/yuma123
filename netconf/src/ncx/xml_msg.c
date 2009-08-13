@@ -344,7 +344,6 @@ void
     msg->defns = 0;
     msg->cur_defns = 0;
     msg->withdef = NCX_DEF_WITHDEF;
-    msg->withmeta = NCX_DEF_WITHMETA;
 
 } /* xml_msg_clean_hdr */
 

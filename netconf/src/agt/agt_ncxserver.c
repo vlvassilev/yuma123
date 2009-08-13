@@ -282,6 +282,7 @@ status_t
                 if (agt_shutdown_requested()) {
                     done2 = TRUE; 
                 } else {
+                    agt_ses_check_timeouts();
                     send_some_notifications();
                 }
             } else {

@@ -58,4 +58,7 @@ extern xmlChar *
 			       boolean *isNegative,
 			       status_t *res);
 
+extern void 
+    tstamp_datetime_dirname (xmlChar *buff);
+
 #endif	    /* _H_tstamp */

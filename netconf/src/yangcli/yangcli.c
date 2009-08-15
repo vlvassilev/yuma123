@@ -151,6 +151,14 @@ date         init     comment
 #include "yangcli_cmd.h"
 #endif
 
+#ifndef _H_yangcli_autoload
+#include "yangcli_autoload.h"
+#endif
+
+#ifndef _H_yangcli_autolock
+#include "yangcli_autolock.h"
+#endif
+
 #ifndef _H_yangcli_tab
 #include "yangcli_tab.h"
 #endif
@@ -233,6 +241,9 @@ static boolean         runcommanddone;
 
 /* Q of modtrs that have been loaded with 'mgrload' */
 static dlq_hdr_t       mgrloadQ;
+
+/* temporary file control block for the program instance */
+static ncxmod_temp_progcb_t  *temp_progcb;
 
 
 /*****************  C O N F I G   V A R S  ****************/
@@ -524,6 +535,8 @@ static agent_cb_t *
     dlq_createSQue(&agent_cb->varbindQ);
     dlq_createSQue(&agent_cb->modptrQ);
     dlq_createSQue(&agent_cb->notificationQ);
+    dlq_createSQue(&agent_cb->autoload_modcbQ);
+    dlq_createSQue(&agent_cb->autoload_devcbQ);
 
     /* set the default CLI history file (may not get used) */
     agent_cb->history_filename = xml_strdup(YANGCLI_DEF_HISTORY_FILE);
@@ -1924,7 +1937,7 @@ static status_t
 {
     status_t   res;
 
-    log_debug2("\nYangcli: Loading NCX yangcli-cli Parmset");
+    log_debug2("\nyangcli: Loading NCX yangcli-cli Parmset");
 
     /* load in the agent boot parameter definition file */
     res = ncxmod_load_module(YANGCLI_MOD, 
@@ -2177,70 +2190,6 @@ static boolean
     return TRUE;
 
 }  /* reset_feature */
-
-
-/********************************************************************
-* FUNCTION autoload_module
-* 
-* auto-load the specified module
-*
-* INPUTS:
-*   modname == module name
-*   revision == module revision
-*   devlist  == deviation list
-*   retmod == address of return module
-*
-* OUTPUTS:
-*   *retmod == loaded module (if NO_ERR)
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t
-    autoload_module (const xmlChar *modname,
-                     const xmlChar *revision,
-                     ncx_list_t *devlist,
-                     ncx_module_t **retmod)
-{
-    dlq_hdr_t               savedevQ;
-    ncx_lmem_t             *listmember;
-    status_t                res;
-                                      
-    res = NO_ERR;
-    dlq_createSQue(&savedevQ);
-
-    /* first load any deviations */
-    for (listmember = ncx_first_lmem(devlist);
-         listmember != NULL && res == NO_ERR;
-         listmember = (ncx_lmem_t *)dlq_nextEntry(listmember)) {
-
-        res = ncxmod_load_deviation(listmember->val.str,
-                                    &savedevQ);
-        if (res != NO_ERR) {
-            log_error("\nError: Deviation module %s not loaded (%s)!!",
-                      listmember->val.str, 
-                      get_error_string(res));
-        }
-    }
-
-    /* load the requested module now */
-    if (res == NO_ERR) {
-        res = ncxmod_load_module(modname, 
-                                 revision, 
-                                 &savedevQ,
-                                 retmod);
-        if (res != NO_ERR) {
-            log_error("\nError: Auto-load for module '%s' failed (%s)",
-                      modname, 
-                      get_error_string(res));
-        }
-    }
-
-    ncx_clean_save_deviationsQ(&savedevQ);
-
-    return res;
-
-}  /* autoload_module */
 
 
 /********************************************************************
@@ -2903,6 +2852,7 @@ static status_t
     erroption = OP_ERROP_NONE;
     defop = OP_DEFOP_NONE;   /* real enum 'none' */
     withdefaults = NCX_WITHDEF_NONE;
+    temp_progcb = NULL;
 
     /* global vars */
     malloc_cnt = 0;
@@ -2934,6 +2884,16 @@ static status_t
         }
     }
 #endif
+
+    /* make sure the yangtools temp directory
+     * exists for saving per session data
+     */
+    res = ncxmod_setup_tempdir();
+    if (res != NO_ERR) {
+        log_error("\nError: could not setup temp dir '%s'",
+                  NCXMOD_YANGTOOLS_TEMPDIR);
+        return res;
+    }
 
     /* at this point, modules that need to read config
      * params can be initialized
@@ -3093,6 +3053,12 @@ static status_t
 	return res;
     }
 
+    /* create the program instance temporary directory */
+    temp_progcb = ncxmod_new_program_tempdir(&res);
+    if (temp_progcb == NULL || res != NO_ERR) {
+        return res;
+    }
+
     /* make sure the startup screen is generated
      * before the auto-connect sequence starts
      */
@@ -3191,6 +3157,11 @@ static void
 	runcommand = NULL;
     }
 
+    if (temp_progcb) {
+        ncxmod_free_program_tempdir(temp_progcb);
+        temp_progcb = NULL;
+    }
+
     if (malloc_cnt != free_cnt) {
 	log_error("\n*** Error: memory leak (m:%u f:%u)\n", 
 		  malloc_cnt, free_cnt);
@@ -3199,7 +3170,6 @@ static void
     log_close();
 
 }  /* yangcli_cleanup */
-
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -3785,7 +3755,7 @@ int
 
     res = yangcli_init(argc, argv);
     if (res != NO_ERR) {
-	log_error("\nYangcli: init returned error (%s)\n", 
+	log_error("\nyangcli: init returned error (%s)\n", 
 		  get_error_string(res));
     } else if (!(helpmode || versionmode)) {
 	res = mgr_io_run();

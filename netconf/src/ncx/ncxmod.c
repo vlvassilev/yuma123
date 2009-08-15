@@ -59,6 +59,10 @@ date         init     comment
 #include  "status.h"
 #endif
 
+#ifndef _H_tstamp
+#include  "tstamp.h"
+#endif
+
 #ifndef _H_xml_util
 #include "xml_util.h"
 #endif
@@ -80,8 +84,6 @@ date         init     comment
 #ifdef DEBUG
 #define NCXMOD_DEBUG 1
 #endif
-
-
 
 
 /* Enumeration of the basic value type classifications */
@@ -161,8 +163,6 @@ static boolean
     return (xml_strcmp(str, (const xmlChar *)".yang")) ? FALSE : TRUE;
 
 } /* is_yang_file */
-
-
 
 
 /********************************************************************
@@ -1813,17 +1813,202 @@ static status_t
 }  /* try_load_module */
 
 
+/********************************************************************
+* FUNCTION new_temp_filcb
+* 
+* Malloc a new temporary file control block
+*
+* RETURNS:
+*  malloced and initialized struct
+*********************************************************************/
+static ncxmod_temp_filcb_t *
+    new_temp_filcb (void)
+
+{
+    ncxmod_temp_filcb_t *newcb;
+
+    newcb = m__getObj(ncxmod_temp_filcb_t);
+    if (newcb == NULL) {
+        return NULL;
+    }
+
+    memset(newcb, 0x0, sizeof(ncxmod_temp_filcb_t));
+    return newcb;
+
+}  /* new_temp_filcb */
+
+
+/********************************************************************
+* FUNCTION free_temp_filcb
+* 
+* Clean and free a temporary file control block
+*
+* INPUTS:
+*    filcb == temporary file control block to free
+*
+*********************************************************************/
+static void
+    free_temp_filcb (ncxmod_temp_filcb_t *filcb)
+{
+    int   retval;
+
+    if (filcb->fp) {
+        retval = fclose(filcb->fp);
+        if (retval < 0) {
+            log_error("\nError: could not close temp file '%s' (%s)",
+                      filcb->source,
+                      get_error_string(errno_to_status()));
+        }
+    }
+
+    if (filcb->source) {
+        retval = remove((const char *)filcb->source);
+        if (retval < 0) {
+            log_error("\nError: could not delete temp file '%s' (%s)",
+                      filcb->source,
+                      get_error_string(errno_to_status()));
+        }
+        m__free(filcb->source);
+    }
+    m__free(filcb);
+
+}  /* free_temp_filcb */
+
+
+/********************************************************************
+* FUNCTION new_temp_sescb
+* 
+* Malloc a new temporary session files control block
+*
+* RETURNS:
+*  malloced and initialized struct
+*********************************************************************/
+static ncxmod_temp_sescb_t *
+    new_temp_sescb (void)
+
+{
+    ncxmod_temp_sescb_t *newcb;
+
+    newcb = m__getObj(ncxmod_temp_sescb_t);
+    if (newcb == NULL) {
+        return NULL;
+    }
+
+    memset(newcb, 0x0, sizeof(ncxmod_temp_sescb_t));
+    dlq_createSQue(&newcb->temp_filcbQ);
+    return newcb;
+
+}  /* new_temp_sescb */
+
+
+/********************************************************************
+* FUNCTION free_temp_sescb
+* 
+* Clean and free a new temporary session files control block
+*
+* INPUTS:
+*    sescb == temp files session control block to free
+*
+*********************************************************************/
+static void
+    free_temp_sescb (ncxmod_temp_sescb_t *sescb)
+{
+    ncxmod_temp_filcb_t *filcb;
+    int                  retval;
+
+    while (!dlq_empty(&sescb->temp_filcbQ)) {
+        filcb = (ncxmod_temp_filcb_t *)
+            dlq_deque(&sescb->temp_filcbQ);
+        free_temp_filcb(filcb);
+    }
+
+    if (sescb->source) {
+        retval = rmdir((const char *)sescb->source);
+        if (retval < 0) {
+            log_error("\nError: could not delete temp directory '%s' (%s)",
+                      sescb->source,
+                      get_error_string(errno_to_status()));
+
+        }
+        m__free(sescb->source);
+    }
+
+    m__free(sescb);
+
+}  /* free_temp_sescb */
+
+
+/********************************************************************
+* FUNCTION new_temp_progcb
+* 
+* Malloc a new temporary program instance control block
+*
+* RETURNS:
+*  malloced and initialized struct
+*********************************************************************/
+static ncxmod_temp_progcb_t *
+    new_temp_progcb (void)
+
+{
+    ncxmod_temp_progcb_t *newcb;
+
+    newcb = m__getObj(ncxmod_temp_progcb_t);
+    if (newcb == NULL) {
+        return NULL;
+    }
+
+    memset(newcb, 0x0, sizeof(ncxmod_temp_progcb_t));
+    dlq_createSQue(&newcb->temp_sescbQ);
+    return newcb;
+
+}  /* new_temp_progcb */
+
+
+/********************************************************************
+* FUNCTION free_temp_progcb
+* 
+* Clean and free a new temporary program instance control block
+*
+* INPUTS:
+*    progcb == temp program instance control block to free
+*
+*********************************************************************/
+static void
+    free_temp_progcb (ncxmod_temp_progcb_t *progcb)
+{
+    ncxmod_temp_sescb_t *sescb;
+    int                  retval;
+
+    while (!dlq_empty(&progcb->temp_sescbQ)) {
+        sescb = (ncxmod_temp_sescb_t *)
+            dlq_deque(&progcb->temp_sescbQ);
+        free_temp_sescb(sescb);
+    }
+
+    if (progcb->source) {
+        retval = rmdir((const char *)progcb->source);
+        if (retval < 0) {
+            log_error("\nError: could not delete temp directory '%s' (%s)",
+                      progcb->source,
+                      get_error_string(errno_to_status()));
+
+        }
+        m__free(progcb->source);
+    }
+
+    m__free(progcb);
+
+}  /* free_temp_progcb */
+
+
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
 /********************************************************************
 * FUNCTION ncxmod_init
 * 
-
-* Determine the location of the specified module
+* Initialize the ncxmod module
 *
-* RETURNS:
-*   pointer to the malloced and initialized struct or NULL if an error
 *********************************************************************/
 void
     ncxmod_init (void)
@@ -1866,7 +2051,7 @@ void
     ncxmod_subdirs = TRUE;
 
     ncxmod_init_done = TRUE;
-    
+
 }  /* ncxmod_init */
 
 
@@ -3297,6 +3482,477 @@ status_t
     return NO_ERR;
 
 }  /* ncxmod_list_yang_files */
+
+
+/********************************************************************
+* FUNCTION ncxmod_setup_tempdir
+*
+* Setup the ~/.yangtools/tmp directory if it does not exist
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    ncxmod_setup_tempdir (void)
+{
+    xmlChar       *tempdir_path;
+    DIR           *dp;
+    status_t       res;
+    int            retcode;
+
+    /* get the full filespec for ~/.yangtools */
+    res = NO_ERR;
+    tempdir_path = ncx_get_source(NCXMOD_YANGTOOLS_DIR, &res);
+    if (tempdir_path == NULL) {
+        return res;
+    }
+
+    /* try to open ~/.yangtools directory */
+    dp = opendir((const char *)tempdir_path);
+    if (dp == NULL) {
+        /* create a ~/.yangtools directory with 700 permissions */
+        retcode = mkdir((const char *)tempdir_path, S_IRWXU);
+        if (retcode != 0) {
+            res = errno_to_status();
+        }
+    } else {
+        /* use the existing ~/.yangtools/tmp directory */
+	(void)closedir(dp);
+    }
+
+    m__free(tempdir_path);
+
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    tempdir_path = ncx_get_source(NCXMOD_YANGTOOLS_TEMPDIR, &res);
+    if (tempdir_path == NULL) {
+        return res;
+    }
+
+    /* try to open ~/.yangtools/tmp directory */
+    dp = opendir((const char *)tempdir_path);
+    if (dp == NULL) {
+        /* create a ~/.yangtools/tmp directory with 700 permissions */
+        retcode = mkdir((const char *)tempdir_path, S_IRWXU);
+        if (retcode != 0) {
+            res = errno_to_status();
+        }
+    } else {
+        /* use the existing ~/.yangtools/tmp directory */
+	(void)closedir(dp);
+    }
+
+    m__free(tempdir_path);
+
+    return res;
+
+}  /* ncxmod_setup_tempdir */
+
+
+/********************************************************************
+* FUNCTION ncxmod_new_program_tempdir
+*
+*   Setup a program instance temp files directory
+*
+* INPUTS:
+*   res == address of return status
+*
+* OUTPUTS:
+*  *res  == return status
+*
+* RETURNS:
+*   malloced tempdir_progcb_t record (if NO_ERR)
+*********************************************************************/
+ncxmod_temp_progcb_t *
+    ncxmod_new_program_tempdir (status_t *res)
+{
+    xmlChar              *buffer, *tempdir_path, *p;
+    DIR                  *dp;
+    ncxmod_temp_progcb_t *progcb;
+    xmlChar               datebuff[TSTAMP_MIN_SIZE];
+    xmlChar               numbuff[NCX_MAX_NUMLEN];
+    int                   randnum, retcode;
+    uint32                fixedlen, numlen;
+
+#ifdef DEBUG
+    if (res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    /* setup */
+    *res = NO_ERR;
+    progcb = NULL;
+    tstamp_datetime_dirname(datebuff);
+    fixedlen = xml_strlen(NCXMOD_YANGTOOLS_TEMPDIR);
+
+    /* get positive 5 digit random number (0 -- 64k) */
+    randnum = rand();
+    if (randnum < 0) {
+        randnum *= -1;
+    }
+    randnum &= 0xffff;
+    sprintf((char *)numbuff, "%d", randnum);
+    numlen = xml_strlen(numbuff);
+
+    /* get a buffer for the constructed directory name */
+    buffer = m__getMem(TSTAMP_MIN_SIZE+fixedlen+numlen+2);
+    if (buffer == NULL) {
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+
+    /* construct the entire dir name string
+     * generate the default directory name
+     * based on the current time + random number
+     */
+    p = buffer;
+    p += xml_strcpy(p, NCXMOD_YANGTOOLS_TEMPDIR);
+    *p++ = NCXMOD_PSCHAR;
+    p += xml_strcpy(p, datebuff);
+    xml_strcpy(p, numbuff);
+
+    /* covert this string to the expanded path name */
+    tempdir_path = ncx_get_source(buffer, res);
+    m__free(buffer);
+    if (tempdir_path == NULL) {
+        return NULL;
+    }
+
+    /* try to open ~/.yangtools/tmp/<progstr> directory */
+    dp = opendir((const char *)tempdir_path);
+    if (dp == NULL) {
+        /* create a directory with 700 permissions */
+        retcode = mkdir((const char *)tempdir_path, S_IRWXU);
+        if (retcode != 0) {
+            *res = errno_to_status();
+        }
+    } else {
+        /* error! this directory already exists, */
+        *res = ERR_NCX_ENTRY_EXISTS;
+    }
+
+    if (*res == NO_ERR) {
+        progcb = new_temp_progcb();
+        if (progcb == NULL) {
+            *res = ERR_INTERNAL_MEM;
+        } else {
+            /* transfer malloced tempdir_path here */
+            progcb->source = tempdir_path;
+            tempdir_path = NULL;
+        }
+    }
+
+    if (tempdir_path) {
+        /* error exit */
+        m__free(tempdir_path);
+    }
+
+    return progcb;
+
+}  /* ncxmod_new_program_tempdir */
+
+
+/********************************************************************
+* FUNCTION ncxmod_free_program_tempdir
+*
+*   Remove a program instance temp files directory
+*
+* INPUTS:
+*   progcb == tempoeray program instance control block to free
+*
+*********************************************************************/
+void
+    ncxmod_free_program_tempdir (ncxmod_temp_progcb_t *progcb)
+{
+#ifdef DEBUG
+    if (progcb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    free_temp_progcb(progcb);
+
+}  /* ncxmod_free_program_tempdir */
+
+
+/********************************************************************
+* FUNCTION ncxmod_new_session_tempdir
+*
+*   Setup a session instance temp files directory
+*
+* INPUTS:
+*    progcb == program instance control block to use
+*    sid == manager session ID of the new session instance control block
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*   malloced tempdir_sescb_t record
+*********************************************************************/
+ncxmod_temp_sescb_t *
+    ncxmod_new_session_tempdir (ncxmod_temp_progcb_t *progcb,
+                                uint32 sidnum,
+                                status_t *res)
+{
+    xmlChar              *buffer, *p;
+    DIR                  *dp;
+    ncxmod_temp_sescb_t  *sescb;
+    xmlChar               numbuff[NCX_MAX_NUMLEN];
+    uint32                fixedlen, numlen;
+    int                   retcode;
+
+
+#ifdef DEBUG
+    if (progcb == NULL || res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+    if (sidnum == 0 || progcb->source == NULL) {
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+#endif
+
+    /* setup */
+    *res = NO_ERR;
+    sescb = NULL;
+    fixedlen = xml_strlen(progcb->source);
+    sprintf((char *)numbuff, "%u", sidnum);
+    numlen = xml_strlen(numbuff);
+
+    /* get a buffer for the constructed directory name */
+    buffer = m__getMem(fixedlen+numlen+2);
+    if (buffer == NULL) {
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+
+    /* construct the entire dir name string
+     * generate the default directory name
+     * based on the session number
+     */
+    p = buffer;
+    p += xml_strcpy(p, progcb->source);
+    *p++ = NCXMOD_PSCHAR;
+    xml_strcpy(p, numbuff);
+
+    /* already in expanded path name format
+     * try to open ~/.yangtools/tmp/<progstr>/<sidnum> directory */
+    dp = opendir((const char *)buffer);
+    if (dp == NULL) {
+        /* create a directory with 700 permissions */
+        retcode = mkdir((const char *)buffer, S_IRWXU);
+        if (retcode != 0) {
+            *res = errno_to_status();
+        }
+    } else {
+        /* error! this directory already exists, */
+        *res = ERR_NCX_ENTRY_EXISTS;
+    }
+
+    if (*res == NO_ERR) {
+        sescb = new_temp_sescb();
+        if (sescb == NULL) {
+            *res = ERR_INTERNAL_MEM;
+        } else {
+            /* transfer malloced buffer here */
+            sescb->source = buffer;         
+            buffer = NULL;
+            sescb->sidnum = sidnum;
+
+            /* store pointer to the new session for cleanup */
+            dlq_enque(sescb, &progcb->temp_sescbQ);
+        }
+    }
+
+    if (buffer) {
+        /* error exit */
+        m__free(buffer);
+    }
+
+    return sescb;
+
+}  /* ncxmod_new_session_tempdir */
+
+
+/********************************************************************
+* FUNCTION ncxmod_free_session_tempdir
+*
+*   Clean and free a session instance temp files directory
+*
+* INPUTS:
+*    progcb == program instance control block to use
+*    sidnum == manager session number to delete
+*
+*********************************************************************/
+void
+    ncxmod_free_session_tempdir (ncxmod_temp_progcb_t *progcb,
+                                 uint32 sidnum)
+{
+    ncxmod_temp_sescb_t  *sescb;
+
+#ifdef DEBUG
+    if (progcb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+    if (sidnum == 0) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+#endif
+
+    for (sescb = (ncxmod_temp_sescb_t *)
+             dlq_firstEntry(&progcb->temp_sescbQ);
+         sescb != NULL;
+         sescb = (ncxmod_temp_sescb_t *)dlq_nextEntry(sescb)) {
+
+        if (sescb->sidnum == sidnum) {
+            dlq_remove(sescb);
+            free_temp_sescb(sescb);
+            return;
+        }
+    }
+
+    /* sid not found */
+    SET_ERROR(ERR_INTERNAL_VAL);    
+
+}  /* ncxmod_free_session_tempdir */
+
+
+/********************************************************************
+* FUNCTION ncxmod_new_session_tempfile
+*
+*   Setup a session instance temp file for writing
+*
+* INPUTS:
+*    sescb == session instance control block to use
+*    filename == filename to create in the temp directory
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*   malloced tempdir_sescb_t record
+*********************************************************************/
+ncxmod_temp_filcb_t *
+    ncxmod_new_session_tempfile (ncxmod_temp_sescb_t *sescb,
+                                 const xmlChar *filename,
+                                 status_t *res)
+{
+    xmlChar              *buffer, *p;
+    ncxmod_temp_filcb_t  *filcb;
+    uint32                fixedlen, filenamelen;
+
+#ifdef DEBUG
+    if (sescb == NULL || filename == NULL || res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+    if (sescb->source == NULL) {
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+#endif
+
+    /* first check if the filename is already used */
+    for (filcb = (ncxmod_temp_filcb_t *)
+             dlq_firstEntry(&sescb->temp_filcbQ);
+         filcb != NULL;
+         filcb = (ncxmod_temp_filcb_t *)dlq_nextEntry(filcb)) {
+
+        if (!xml_strcmp(filcb->filename, filename)) {
+            log_error("\nError: cannot create temp file '%s', "
+                      "duplicate entry");
+            *res = ERR_NCX_ENTRY_EXISTS;
+            return NULL;
+        }
+    }
+
+    /* setup */
+    *res = NO_ERR;
+    sescb = NULL;
+    fixedlen = xml_strlen(sescb->source);
+    filenamelen = xml_strlen(filename);
+
+    /* get a buffer for the constructed file name */
+    buffer = m__getMem(fixedlen+filenamelen+2);
+    if (buffer == NULL) {
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+    p = buffer;
+    p += xml_strcpy(p, sescb->source);
+    *p++ = NCXMOD_PSCHAR;
+    xml_strcpy(p, filename);
+
+    /* get a new file control block to return */
+    filcb = new_temp_filcb();
+    if (filcb == NULL) {
+        m__free(buffer);
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+
+    /* already in expanded path name format
+     * try to open ~/.yangtools/tmp/<progstr>/<sidnum>/filename 
+     * for writing; truncate to zero-length if already exists
+     */
+    filcb->fp = fopen((const char *)filcb->source, "w");
+    if (filcb->fp != NULL) {
+        /* transfer malloced buffer here */
+        filcb->source = buffer;
+        buffer = NULL;
+        filcb->filename = p;
+
+        /* store pointer to the new file for cleanup */
+        dlq_enque(filcb, &sescb->temp_filcbQ);
+    } else {
+        log_error("\nError: cannot open temp file '%s' for writing",
+                  filcb->source);
+        *res = errno_to_status();
+        free_temp_filcb(filcb);
+        m__free(buffer);
+        filcb = NULL;
+    }
+
+    return filcb;
+
+}  /* ncxmod_new_session_tempfile */
+
+
+/********************************************************************
+* FUNCTION ncxmod_free_session_tempfile
+*
+*   Clean and free a session instance temp files directory
+*
+* INPUTS:
+*    filcb == file control block to delete
+*
+*********************************************************************/
+void
+    ncxmod_free_session_tempfile (ncxmod_temp_filcb_t *filcb)
+{
+#ifdef DEBUG
+    if (filcb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    /* supposeds to be part of the sescb->temp_filcbQ !!! */
+    dlq_remove(filcb);
+    free_temp_filcb(filcb);
+
+}  /* ncxmod_free_session_tempfile */
 
 
 /* END file ncxmod.c */

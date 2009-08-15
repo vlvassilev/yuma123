@@ -72,6 +72,34 @@ static void
 
 
 /********************************************************************
+* FUNCTION time_to_dirname
+*
+* Convert the tm to a directory name for yangcli
+*
+* INPUTS:
+*   curtime == time struct to use
+*   buff == pointer to buffer to hold output
+*           MUST BE AT LEAST 21 CHARS
+* OUTPUTS:
+*   buff is filled in
+*********************************************************************/
+static void 
+    time_to_dirname (const struct tm *curtime,
+                     xmlChar *buff)
+{
+    (void)sprintf((char *)buff, 
+                  "%04u%02u%02u%02u%02u%02u",
+                  (uint32)(curtime->tm_year+1900),
+                  (uint32)(curtime->tm_mon+1),
+                  (uint32)curtime->tm_mday,
+                  (uint32)curtime->tm_hour,
+                  (uint32)curtime->tm_min,
+                  (uint32)curtime->tm_sec);
+
+} /* time_to_dirname */
+
+
+/********************************************************************
 * FUNCTION tstamp_datetime
 *
 * Set the current date and time in an XML dateTime string format
@@ -317,6 +345,37 @@ xmlChar *
     }
     
 } /* tstamp_convert_to_utctime */
+
+
+/********************************************************************
+* FUNCTION tstamp_datetime_dirname
+*
+* Set the current date and time in an XML dateTime string format
+*
+* INPUTS:
+*   buff == pointer to buffer to hold output
+*           MUST BE AT LEAST 21 CHARS
+* OUTPUTS:
+*   buff is filled in
+*********************************************************************/
+void 
+    tstamp_datetime_dirname (xmlChar *buff)
+{
+    time_t  utime;
+    struct tm  *curtime;
+
+#ifdef DEBUG
+    if (!buff) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    (void)time(&utime);
+    curtime = gmtime(&utime);
+    time_to_dirname(curtime, buff);
+
+} /* tstamp_datetime_dirname */
 
 
 /* END file tstamp.c */

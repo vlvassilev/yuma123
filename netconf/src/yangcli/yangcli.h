@@ -280,7 +280,7 @@ typedef enum lock_state_t {
 } lock_state_t;
 
 
-/* lock state record, used by get-locks, release-locks */
+/* autolock control block, used by get-locks, release-locks */
 typedef struct lock_cb_t_ {
     ncx_cfg_t             config_id;
     const xmlChar        *config_name;
@@ -289,6 +289,29 @@ typedef struct lock_cb_t_ {
     time_t                start_time;
     time_t                last_msg_time;
 } lock_cb_t;
+
+
+/* auto-get-schema control block for a module */
+typedef struct autoload_modcb_t_ {
+    dlq_hdr_t           qhdr;
+    xmlChar            *module;
+    xmlChar            *source;
+    xmlChar            *revision;
+    const ncx_list_t   *features;
+    const ncx_list_t   *deviations;
+    status_t            res;
+    boolean             retrieved;
+} autoload_modcb_t;
+
+
+/* auto-get-schema control block for a deviation */
+typedef struct autoload_devcb_t_ {
+    dlq_hdr_t           qhdr;
+    xmlChar            *module;
+    xmlChar            *source;
+    status_t            res;
+    boolean             retrieved;
+} autoload_devcb_t;
 
 
 /* NETCONF agent control block */
@@ -350,6 +373,12 @@ typedef struct agent_cb_t_ {
 
     /* contains received notifications */
     dlq_hdr_t            notificationQ;   /* Q of mgr_not_msg_t */
+
+    /* support fot auto-get-schema feature */
+    dlq_hdr_t            autoload_modcbQ;  /* Q of autoload_modcb_t */
+    dlq_hdr_t            autoload_devcbQ;  /* Q of autoload_devcb_t */
+    autoload_modcb_t    *autoload_curmod;
+    autoload_devcb_t    *autoload_curdev;
 
     /* per-session CLI support */
     const xmlChar       *cli_fn;

@@ -131,11 +131,44 @@ date	     init     comment
 /* NCX Environment Variable for SCRIPTS search path */
 #define NCXMOD_RUNPATH      "YANG_RUNPATH"
 
+/* per user yangcli internal data home */
+#define NCXMOD_YANGTOOLS_DIR (const xmlChar *)"~/.yangtools"
+
+/* directory yangcli uses to store local per-session workdirs */
+#define NCXMOD_YANGTOOLS_TEMPDIR (const xmlChar *)"~/.yangtools/tmp"
+
+
 /********************************************************************
 *								    *
 *			  T Y P E S                                 *
 *								    *
 *********************************************************************/
+
+/* program-level temp dir control block */
+typedef struct ncxmod_temp_progcb_t_ {
+    dlq_hdr_t    qhdr;
+    xmlChar     *source;
+    dlq_hdr_t    temp_sescbQ;  /* Q of ncxmod_temp_sescb_t */
+} ncxmod_temp_progcb_t;
+
+
+/* session-level temp-dir control block */
+typedef struct ncxmod_temp_sescb_t_ {
+    dlq_hdr_t    qhdr;
+    xmlChar     *source;
+    uint32       sidnum;
+    dlq_hdr_t    temp_filcbQ;  /* Q of ncxmod_temp_filcb_t */
+} ncxmod_temp_sescb_t;
+
+
+/* temporary file control block */
+typedef struct ncxmod_temp_filcb_t_ {
+    dlq_hdr_t       qhdr;
+    xmlChar        *source;
+    const xmlChar  *filename;  /* ptr into source */
+    FILE           *fp;
+} ncxmod_temp_filcb_t;
+
 
 
 /* user function callback template to process a module
@@ -277,5 +310,32 @@ extern status_t
 extern status_t
     ncxmod_list_yang_files (help_mode_t helpmode,
                             boolean logstdout);
+
+extern status_t
+    ncxmod_setup_tempdir (void);
+
+extern ncxmod_temp_progcb_t *
+    ncxmod_new_program_tempdir (status_t *res);
+
+extern void
+    ncxmod_free_program_tempdir (ncxmod_temp_progcb_t *progcb);
+
+extern ncxmod_temp_sescb_t *
+    ncxmod_new_session_tempdir (ncxmod_temp_progcb_t *progcb,
+                                uint32 sidnum,
+                                status_t *res);
+
+extern void
+    ncxmod_free_session_tempdir (ncxmod_temp_progcb_t *progcb,
+                                 uint32 sidnum);
+
+extern ncxmod_temp_filcb_t *
+    ncxmod_new_session_tempfile (ncxmod_temp_sescb_t *sescb,
+                                 const xmlChar *filename,
+                                 status_t *res);
+
+extern void
+    ncxmod_free_session_tempfile (ncxmod_temp_filcb_t *filcb);
+
 
 #endif	    /* _H_ncxmod */

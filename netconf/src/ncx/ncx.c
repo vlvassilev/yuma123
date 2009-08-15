@@ -1123,7 +1123,7 @@ status_t
     /* check that the correct version of libxml2 is installed */
     LIBXML_TEST_VERSION;
 
-    /* init nmodule handler */
+    /* init module library handler */
     ncxmod_init();
 
     /* deal with bootstrap CLI parms */
@@ -10057,10 +10057,9 @@ xmlChar *
     ncx_get_source (const xmlChar *fspec,
                     status_t *res)
 {
-    const xmlChar  *p, *pp, *user;
+    const xmlChar  *p, *start, *user;
     xmlChar        *buff, *bp;
-    uint32          bufflen;
-    uint32          len, pslen, userlen;
+    uint32          bufflen, userlen, len;
     
 #define DIRBUFF_SIZE 1500
 
@@ -10078,9 +10077,7 @@ xmlChar *
     *res = NO_ERR;
     buff = NULL;
     user = NULL;
-    userlen = 0;
     len = 0;
-    pslen = 0;
     p = fspec;
 
     if (*p == NCXMOD_PSCHAR) {
@@ -10093,123 +10090,101 @@ xmlChar *
 	/* starts with ~[username]/some/path */
 	if (p[1] && p[1] != NCXMOD_PSCHAR) {
 	    /* explicit user name */
-	    pp = &p[1];
+	    start = &p[1];   
 	    p = &p[2];
 	    while (*p && *p != NCXMOD_PSCHAR) {
 		p++;
 	    }
-	    userlen = (uint32)(p-pp);
-	    user = ncxmod_get_userhome(pp, userlen);
+	    userlen = (uint32)(p-start);
+	    user = ncxmod_get_userhome(start, userlen);
 	} else {
 	    /* implied current user */
 	    p++;   /* skip ~ char */
 	    /* get current user home dir */
 	    user = ncxmod_get_userhome(NULL, 0);
-	    if (user) {
-		userlen = xml_strlen(user);
-	    }
 	}
 
-	if (!user) {
+	if (user == NULL) {
 	    log_error("\nError: invalid user name in path string (%s)",
 		      fspec);
-	    ncx_print_errormsg(NULL, NULL, ERR_NCX_INVALID_VALUE);
             *res = ERR_NCX_INVALID_VALUE;
 	    return NULL;
 	}
 
-	len = xml_strlen(user);
-	if (len && user[len-1] != NCXMOD_PSCHAR) {
-	    pslen = 1;
-	}
-	if (*p) {
-	    len += xml_strlen(p);
-	}
-
-	buff = m__getMem(len+pslen+1);
-	if (!buff) {
+        /* string pointer 'p' stopped on the PSCHAR to start the
+         * rest of the path string
+         */
+        len = xml_strlen(user) + xml_strlen(p);
+	buff = m__getMem(len+1);
+	if (buff == NULL) {
             *res = ERR_INTERNAL_MEM;
 	    return NULL;
 	}
 
 	bp = buff;
 	bp += xml_strcpy(bp, user);
-	if (pslen) {
-	    *bp++ = NCXMOD_PSCHAR;
-	}
 	xml_strcpy(bp, p);
     } else if (*p == NCXMOD_ENVCHAR) {
 	/* should start with $ENVVAR/some/path */
-	pp = ++p;
-	while (*pp && *p != NCXMOD_PSCHAR) {
-		pp++;
+	start = ++p;  /* skip dollar sign */
+	while (*p && *p != NCXMOD_PSCHAR) {
+		p++;
 	}
-	userlen = (uint32)(p-pp);
+	userlen = (uint32)(p-start);
 	if (userlen) {
-	    user = ncxmod_get_envvar(p, userlen);
+	    user = ncxmod_get_envvar(start, userlen);
 	}
 	if (!user) {
 	    log_error("\nError: environment variable in path string (%s)",
 		      fspec);
-	    ncx_print_errormsg(NULL, NULL, ERR_NCX_INVALID_VALUE);
             *res = ERR_NCX_INVALID_VALUE;
 	    return NULL;
 	}
 
-	len = xml_strlen(user);
-	if (len && user[len-1] != NCXMOD_PSCHAR) {
-	    pslen = 1;
-	}
-	if (*p) {
-	    len += xml_strlen(p);
-	}
-
-	buff = m__getMem(len+pslen+1);
-	if (!buff) {
+        /* string pointer 'p' stopped on the PSCHAR to start the
+         * rest of the path string
+         */
+        len = xml_strlen(user) + xml_strlen(p);
+	buff = m__getMem(len+1);
+	if (buff == NULL) {
             *res = ERR_INTERNAL_MEM;
 	    return NULL;
 	}
 
 	bp = buff;
 	bp += xml_strcpy(bp, user);
-	if (pslen) {
-	    *bp++ = NCXMOD_PSCHAR;
-	}
 	xml_strcpy(bp, p);
-    } else {
-	if (*p == NCXMOD_DOTCHAR) {
-	    if (!p[1]) {
-		p++;
-	    } else if (p[1] == NCXMOD_PSCHAR) {
-		p += 2;
-	    }
-	}
+    } else if (*p == NCXMOD_DOTCHAR && p[1] == NCXMOD_PSCHAR) {
+        /* check for ./some/path */
+        p++;
 
-	/* prepend string with current directory */
-	buff = m__getMem(DIRBUFF_SIZE);
-	if (!buff) {
+        /* prepend string with current directory */
+        buff = m__getMem(DIRBUFF_SIZE);
+        if (buff == NULL) {
             *res = ERR_INTERNAL_MEM;
-	    return NULL;
-	}
+            return NULL;
+        }
 
-	if (!getcwd((char *)buff, DIRBUFF_SIZE)) {
-	    SET_ERROR(ERR_BUFF_OVFL);
-	    m__free(buff);
-	    return NULL;
-	}
+        if (!getcwd((char *)buff, DIRBUFF_SIZE)) {
+            SET_ERROR(ERR_BUFF_OVFL);
+            m__free(buff);
+            return NULL;
+        }
+            
+        bufflen = xml_strlen(buff);
 
-	bufflen = xml_strlen(buff);
+        if ((bufflen + xml_strlen(p) + 1) >= DIRBUFF_SIZE) {
+            *res = ERR_BUFF_OVFL;
+            m__free(buff);
+            return NULL;
+        }
 
-	if ((bufflen + xml_strlen(p) + 1) >= DIRBUFF_SIZE) {
-	    *res = ERR_BUFF_OVFL;
-	    m__free(buff);
-	    return NULL;
-	}
-
-	if (*p) {
-	    buff[bufflen] = NCXMOD_PSCHAR;
-	    xml_strcpy(&buff[bufflen+1], p);
-	}
+        xml_strcpy(&buff[bufflen+1], p);
+    } else {
+        buff = xml_strdup(fspec);
+        if (buff == NULL) {
+            *res = ERR_INTERNAL_MEM;
+        }
     }
 
     return buff;

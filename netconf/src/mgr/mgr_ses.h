@@ -26,6 +26,10 @@ date             init     comment
 #include "ncxconst.h"
 #endif
 
+#ifndef _H_ncxmod
+#include "ncxmod.h"
+#endif
+
 #ifndef _H_ses
 #include "ses.h"
 #endif
@@ -66,6 +70,7 @@ extern status_t
 			 const xmlChar *password,
 			 const xmlChar *target,
 			 uint16 port,
+                         ncxmod_temp_progcb_t *progcb,
 			 ses_id_t *retsid);
 
 extern void

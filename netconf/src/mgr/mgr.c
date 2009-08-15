@@ -33,6 +33,10 @@ date         init     comment
 #include "log.h"
 #endif
 
+#ifndef _H_ncxmod
+#include "ncxmod.h"
+#endif
+
 #ifndef _H_mgr
 #include "mgr.h"
 #endif
@@ -273,6 +277,13 @@ void
 	return;
     }
 #endif
+
+    if (mscb->temp_progcb && mscb->temp_sescb) {
+        ncxmod_free_session_tempdir(mscb->temp_progcb,
+                                    mscb->temp_sescb->sidnum);
+        mscb->temp_progcb = NULL;
+        mscb->temp_sescb = NULL;
+    }
 
     cap_clean_caplist(&mscb->caplist);
 

@@ -33,6 +33,10 @@ date	     init     comment
 #include "cfg.h"
 #endif
 
+#ifndef _H_ncxmod
+#include "ncxmod.h"
+#endif
+
 #ifndef _H_status
 #include "status.h"
 #endif
@@ -60,6 +64,11 @@ typedef struct mgr_scb_t_ {
     ncx_agtstart_t  starttyp;
     cap_list_t      caplist;
     uint32          agtsid;   /* agent assigned session ID */
+    boolean         closed;
+
+    /* temp directory for downloaded modules */
+    ncxmod_temp_progcb_t *temp_progcb;
+    ncxmod_temp_sescb_t  *temp_sescb;
 
     /* running config cached info */
     val_value_t    *root;

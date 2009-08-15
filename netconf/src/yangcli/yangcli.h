@@ -30,6 +30,10 @@ date	     init     comment
 #include "ncxconst.h"
 #endif
 
+#ifndef _H_ncxmod
+#include "ncxmod.h"
+#endif
+
 #ifndef _H_ncxtypes
 #include "ncxtypes.h"
 #endif
@@ -381,6 +385,10 @@ typedef struct agent_cb_t_ {
     dlq_hdr_t            autoload_devcbQ;  /* Q of autoload_devcb_t */
     autoload_modcb_t    *autoload_curmod;
     autoload_devcb_t    *autoload_curdev;
+
+    /* support for temp directory for downloaded modules */
+    ncxmod_temp_progcb_t *temp_progcb;
+    ncxmod_temp_sescb_t  *temp_sescb;
 
     /* per-session CLI support */
     const xmlChar       *cli_fn;

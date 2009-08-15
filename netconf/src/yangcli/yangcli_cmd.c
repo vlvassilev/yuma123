@@ -2030,6 +2030,7 @@ static void
 			      password, 
 			      agent, 
 			      port, 
+                              agent_cb->temp_progcb,
 			      &agent_cb->mysid);
     if (res == NO_ERR) {
 	agent_cb->state = MGR_IO_ST_CONN_START;
@@ -6903,14 +6904,14 @@ xmlChar *
 	}
 
 	/* copy the string to the clibuff */
-	if (total + len < maxlen) {
-	    xml_strcpy(start, str);
-	    start += len;
-	    total += len;
-	} else {
-	    *res = ERR_BUFF_OVFL;
-	    done = TRUE;
-	}
+        if (total + len < maxlen) {
+            xml_strcpy(start, str);
+            start += len;
+            total += len;
+        } else {
+            *res = ERR_BUFF_OVFL;
+            done = TRUE;
+        }
 	    
 	str = NULL;
     }

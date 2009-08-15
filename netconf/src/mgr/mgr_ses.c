@@ -496,6 +496,9 @@ void
 *   password == user password
 *   target == ASCII IP address or DNS hostname of target
 *   port == NETCONF port number to use, or 0 to use defaults
+*   progcb == temp program instance control block,
+*          == NULL if a session temp files control block is not
+*             needed
 *   retsid == address of session ID output
 *
 * OUTPUTS:
@@ -509,6 +512,7 @@ status_t
 			 const xmlChar *password,
 			 const xmlChar *target,
 			 uint16 port,
+                         ncxmod_temp_progcb_t *progcb,
 			 ses_id_t *retsid)
 {
     ses_cb_t  *scb;
@@ -579,6 +583,20 @@ status_t
     scb->instate = SES_INST_IDLE;
     scb->rdfn = mgr_ses_readfn;
     scb->wrfn = mgr_ses_writefn;
+
+    /* get a temp files directory for this session */
+    if (progcb != NULL) {
+        res = NO_ERR;
+        mscb->temp_progcb = progcb;
+        mscb->temp_sescb = 
+            ncxmod_new_session_tempdir(progcb, slot, &res);
+        if (mscb->temp_sescb == NULL) {
+            mgr_free_scb(scb->mgrcb);
+            scb->mgrcb = NULL;
+            ses_free_scb(scb);
+            return res;
+        }
+    }
 
     /* not important if the user name is missing on the manager */
     scb->username = xml_strdup((const xmlChar *)user);
@@ -997,6 +1015,7 @@ ssize_t
 		       scb->sid,
 		       mscb->agtsid);
 	}
+        mscb->closed = TRUE;
     }
 
     return (ssize_t)ret;

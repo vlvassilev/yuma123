@@ -564,6 +564,9 @@ static agent_cb_t *
     }
     agent_cb->history_auto = autohistory;
 
+    /* store per-session temp files */
+    agent_cb->temp_progcb = temp_progcb;
+
     /* the name is not used yet; needed when multiple
      * agent profiles are needed at once instead
      * of 1 session at a time
@@ -3013,6 +3016,12 @@ static status_t
 	return NO_ERR;
     }
 
+    /* create the program instance temporary directory */
+    temp_progcb = ncxmod_new_program_tempdir(&res);
+    if (temp_progcb == NULL || res != NO_ERR) {
+        return res;
+    }
+
     /* create a default agent control block */
     agent_cb = new_agent_cb(YANGCLI_DEF_AGENT);
     if (agent_cb==NULL) {
@@ -3096,12 +3105,6 @@ static status_t
     res = init_config_vars();
     if (res != NO_ERR) {
 	return res;
-    }
-
-    /* create the program instance temporary directory */
-    temp_progcb = ncxmod_new_program_tempdir(&res);
-    if (temp_progcb == NULL || res != NO_ERR) {
-        return res;
     }
 
     /* make sure the startup screen is generated
@@ -3588,8 +3591,11 @@ void
 
     switch (agent_cb->state) {
     case MGR_IO_ST_CONN_CLOSEWAIT:
-	agent_cb->mysid = 0;
-	agent_cb->state = MGR_IO_ST_IDLE;
+        if (mgrcb->closed) {
+            mgr_ses_free_session(agent_cb->mysid);
+            agent_cb->mysid = 0;
+            agent_cb->state = MGR_IO_ST_IDLE;
+        } /* else keep waiting */
         break;
     case MGR_IO_ST_CONN_RPYWAIT:
         agent_cb->state = MGR_IO_ST_CONN_IDLE;

@@ -394,6 +394,8 @@ status_t
     boolean        done, done2;
     mgr_io_state_t state;
 
+    state = MGR_IO_ST_INIT;
+
     /* first loop, handle user IO and get some data to read or write */
     done = FALSE;
     while (!done) {
@@ -404,7 +406,6 @@ status_t
 	    continue;
 	}
 
-	state = MGR_IO_ST_INIT;
 	done2 = FALSE;
 	ret = 0;
 
@@ -412,7 +413,7 @@ status_t
 	    /* will block in idle states waiting for user KBD input
 	     * while no command is active
 	     */
-	    if (stdin_handler) {
+	    if (stdin_handler != NULL) {
 		state = (*stdin_handler)();
 	    }
 
@@ -491,10 +492,10 @@ status_t
 		    done2 = TRUE;
 		}  /* else go again in the inner loop */
 	    } else {
-		/* should only happen if a timeout occurred */
-		if (mgr_shutdown_requested()) {
-		    done2 = TRUE; 
-		}
+                /* should only happen if a timeout occurred */
+                if (mgr_shutdown_requested()) {
+                    done2 = TRUE; 
+                }
 	    }
 	}  /* end inner loop */
 

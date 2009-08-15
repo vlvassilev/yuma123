@@ -75,7 +75,8 @@ date	     init     comment
 
 #define YANGCLI_HISTLEN  4095
 
-#define YANGCLI_DEF_HISTORY_FILE  (const xmlChar *)"~/.yangcli_history"
+#define YANGCLI_DEF_HISTORY_FILE  (const xmlChar *)\
+    "~/.yangtools/.yangcli_history"
 
 #define YANGCLI_DEF_TIMEOUT   30
 
@@ -119,6 +120,7 @@ date	     init     comment
 
 #define YANGCLI_AGENT       (const xmlChar *)"agent"
 #define YANGCLI_AUTOCOMP    (const xmlChar *)"autocomp"
+#define YANGCLI_AUTOHISTORY (const xmlChar *)"autohistory"
 #define YANGCLI_AUTOLOAD    (const xmlChar *)"autoload"
 #define YANGCLI_BADDATA     (const xmlChar *)"bad-data"
 #define YANGCLI_BATCHMODE   (const xmlChar *)"batch-mode"
@@ -386,6 +388,7 @@ typedef struct agent_cb_t_ {
     xmlChar             *history_filename;
     xmlChar             *history_line;
     boolean              history_line_active;
+    boolean              history_auto;
     uint32               history_size;
     completion_state_t   completion_state;
     boolean              climore;

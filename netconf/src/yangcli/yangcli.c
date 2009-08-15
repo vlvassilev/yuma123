@@ -239,6 +239,9 @@ static xmlChar        *runcommand;
 /* TRUE if runscript has been completed */
 static boolean         runcommanddone;
 
+/* controls automaic command line history buffer load/save */
+static boolean autohistory;
+
 /* Q of modtrs that have been loaded with 'mgrload' */
 static dlq_hdr_t       mgrloadQ;
 
@@ -460,6 +463,20 @@ static void
 
     modptr_t      *modptr;
     mgr_not_msg_t *notif;
+    int            retval;
+
+    /* save the history buffer if needed */
+    if (agent_cb->cli_gl != NULL && agent_cb->history_auto) {
+        retval = gl_save_history(agent_cb->cli_gl,
+                                 (const char *)agent_cb->history_filename,
+                                 "#",   /* comment prefix */
+                                 -1);    /* save all entries */
+        if (retval) {
+            log_error("\nError: could not save command line "
+                      "history file '%s'",
+                      agent_cb->history_filename);
+        }
+    }
 
     if (agent_cb->name) {
 	m__free(agent_cb->name);
@@ -486,6 +503,7 @@ static void
     if (agent_cb->connect_valset) {
 	val_free_value(agent_cb->connect_valset);
     }
+
 
     /* cleanup the user edit buffer */
     if (agent_cb->cli_gl) {
@@ -544,6 +562,7 @@ static agent_cb_t *
 	free_agent_cb(agent_cb);
         return NULL;
     }
+    agent_cb->history_auto = autohistory;
 
     /* the name is not used yet; needed when multiple
      * agent profiles are needed at once instead
@@ -558,6 +577,7 @@ static agent_cb_t *
     /* get a tecla CLI control block */
     agent_cb->cli_gl = new_GetLine(YANGCLI_LINELEN, YANGCLI_HISTLEN);
     if (agent_cb->cli_gl == NULL) {
+        log_error("\nError: cannot allocate a new GL");
 	free_agent_cb(agent_cb);
         return NULL;
     }
@@ -567,6 +587,7 @@ static agent_cb_t *
                                      &agent_cb->completion_state,
                                      yangcli_tab_callback);
     if (retval != 0) {
+        log_error("\nError: cannot set GL tab completion");
 	free_agent_cb(agent_cb);
         return NULL;
     }
@@ -578,8 +599,21 @@ static agent_cb_t *
                                    1,
                                    0);
     if (retval != 0) {
+        log_error("\nError: cannot set GL inactivity timeout");
 	free_agent_cb(agent_cb);
         return NULL;
+    }
+
+    /* setup the history buffer if needed */
+    if (agent_cb->history_auto) {
+        retval = gl_load_history(agent_cb->cli_gl,
+                                 (const char *)agent_cb->history_filename,
+                                 "#");   /* comment prefix */
+        if (retval) {
+            log_error("\nError: cannot load command line history buffer");
+            free_agent_cb(agent_cb);
+            return NULL;
+        }
     }
 
     /* set up lock control blocks for get-locks */
@@ -1774,6 +1808,16 @@ static status_t
 	autocomp = TRUE;
     }
 
+    /* get the autohistory parameter */
+    parm = val_find_child(mgr_cli_valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_AUTOHISTORY);
+    if (parm && parm->res == NO_ERR) {
+	autohistory = VAL_BOOL(parm);
+    } else {
+	autohistory = TRUE;
+    }
+
     /* get the autoload parameter */
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_AUTOLOAD);
     if (parm && parm->res == NO_ERR) {
@@ -2838,8 +2882,9 @@ static status_t
     runcommand = NULL;
     runcommanddone = FALSE;
     dlq_createSQue(&mgrloadQ);
-    autoload = TRUE;
     autocomp = TRUE;
+    autohistory = TRUE;
+    autoload = TRUE;
     baddata = NCX_BAD_DATA_NONE;
     connect_valset = NULL;
     confname = NULL;

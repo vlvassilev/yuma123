@@ -960,13 +960,10 @@ static status_t
 	    name = ncx_find_typname(typdef->def.named.typ, 
                                     &mod->typnameQ);
 	    if (!name) {
-		if (mod->ismod) {
-		    if (xml_strcmp(mod->name, NCXMOD_IETF_NETCONF)) {
-			SET_ERROR(ERR_INTERNAL_VAL);
-		    } /* else not sure why the typnameQ is
-		       * not getting filled in right now
-		       */
-		}
+                /* this must be a local type name in a grouping.
+                 * it could be a local type inside a node
+                 * inside a grouping from another module
+                 */
 		name = typdef->def.named.typ->name;
 	    }
 	}

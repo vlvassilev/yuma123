@@ -10179,7 +10179,7 @@ xmlChar *
             return NULL;
         }
 
-        xml_strcpy(&buff[bufflen+1], p);
+        xml_strcpy(&buff[bufflen], p);
     } else {
         buff = xml_strdup(fspec);
         if (buff == NULL) {

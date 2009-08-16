@@ -836,6 +836,7 @@ static status_t
     identifier = NULL;
     version = NULL;
     format = NULL;
+    nsid = 0;
 
     /* get the identifier parameter */
     validentifier = val_find_child(msg->rpc_input, 

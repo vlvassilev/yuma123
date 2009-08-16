@@ -1132,7 +1132,7 @@
 	  Defines a mechanism to control the filtering of leaf objects
           containing the 'default' value, during NETCONF retrieval operations.<br/><br/>
 	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-with-defaults-02.txt">
+	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-with-defaults-03.txt">
 	    With-defaults capability for NETCONF
 	  </a>
 	</p>
@@ -1154,7 +1154,7 @@
 	<h2>Additional NETCONF Resources</h2>
 	<ul>
 	  <li>
-	    <a href="http://www.ietf.org/html.charters/netconf-charter.html">
+	    <a href="http://www.ietf.org/dyn/wg/charter/netconf-charter.html">
 	      NETCONF WG Charter
 	    </a>
 	  </li>

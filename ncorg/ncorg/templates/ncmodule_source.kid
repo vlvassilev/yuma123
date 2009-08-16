@@ -18,7 +18,7 @@
        try:
            f = open(fname, 'r')
        except IOError:
-           err = "Could not open file %s" % (fname)
+           err = "Error: Could not find module '%s' or version '%s'" % (mod, version)
        except:
            err = "Unexpected error: %s" % (sys.exc_info()[0])
            raise
@@ -26,6 +26,8 @@
           opened = 1
     ?>
     <div py:if="opened==1">${XML(f.read())}</div>
-    <div py:if="opened==0" py:content="err"/>
+    <div py:if="opened==0" class="nchello_home">
+      <h2 py:content="err"/>
+    </div>
   </body>
 </html>

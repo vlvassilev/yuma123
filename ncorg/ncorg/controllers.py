@@ -880,7 +880,14 @@ class Root(controllers.RootController):
     # Show module source page
     # generated with yangdump -f html
     @expose(template="ncorg.templates.ncmodule_source")
-    def modules(self, mod, version, *args, **kw):
+    def modules(self, mod, version='latest', *args, **kw):
+        if version=="latest":
+            ncmodules = Ncmodule.select(AND(Ncmodule.q.modname==mod, 
+                                            Ncmodule.q.islatest=="1"),
+                                        orderBy=Ncmodule.q.modname)
+            for ncmodule in ncmodules:
+                version = ncmodule.version
+
         return dict(modmenu=moduleJumpMenu,
                     mod=mod,
                     version=version,

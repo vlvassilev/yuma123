@@ -120,7 +120,7 @@ extern status_t
 extern val_value_t *
     cli_parse (int argc, 
 	       const char *argv[],
-	       const obj_template_t *obj,
+	       obj_template_t *obj,
 	       boolean valonly,
 	       boolean script,
 	       boolean autocomp,
@@ -130,14 +130,14 @@ extern val_value_t *
 
 extern status_t
     cli_parse_parm (val_value_t *val,
-		    const obj_template_t *obj,
+		    obj_template_t *obj,
 		    const xmlChar *strval,
 		    boolean script);
 
 
 extern status_t
     cli_parse_parm_ex (val_value_t *val,
-		       const obj_template_t *obj,
+		       obj_template_t *obj,
 		       const xmlChar *strval,
 		       boolean script,
 		       ncx_bad_data_t  bad_data);

@@ -145,7 +145,7 @@ static void
     write_typedefs (ses_cb_t *scb,
 		    const ncx_module_t *mod,
 		    const yangdump_cvtparms_t *cp,
-		    const dlq_hdr_t *typedefQ,
+		    dlq_hdr_t *typedefQ,
 		    int32 startindent);
 
 
@@ -153,21 +153,21 @@ static void
     write_groupings (ses_cb_t *scb,
 		     const ncx_module_t *mod,
 		     const yangdump_cvtparms_t *cp,
-		     const dlq_hdr_t *groupingQ,
+		     dlq_hdr_t *groupingQ,
 		     int32 startindent);
 
 static void
     write_type_clause (ses_cb_t *scb,
 		       const ncx_module_t *mod,
 		       const yangdump_cvtparms_t *cp,
-		       const typ_def_t *typdef,
+		       typ_def_t *typdef,
 		       int32 startindent);
 
 static void
     write_objects (ses_cb_t *scb,
 		   const ncx_module_t *mod,
 		   const yangdump_cvtparms_t *cp,
-		   const dlq_hdr_t *datadefQ,
+		   dlq_hdr_t *datadefQ,
 		   int32 startindent);
 
 
@@ -663,9 +663,9 @@ static void
 
     /* get filename if identity-stmt found */
     if (idref->base) {
-	linenum = idref->base->linenum;
-	fname = idref->base->mod->name;
-	fversion = idref->base->mod->version;
+	linenum = idref->base->tkerr.linenum;
+	fname = idref->base->tkerr.mod->name;
+	fversion = idref->base->tkerr.mod->version;
     }
 
     ses_putstr(scb, (const xmlChar *)"<span class=\"yang_id\">");
@@ -715,9 +715,9 @@ static void
 
     /* get filename if identity-stmt found */
     if (identity->base) {
-	linenum = identity->base->linenum;
-	fname = identity->base->mod->name;
-	fversion = identity->base->mod->version;
+	linenum = identity->base->tkerr.linenum;
+	fname = identity->base->tkerr.mod->name;
+	fversion = identity->base->tkerr.mod->version;
     }
 
     ses_putstr(scb, (const xmlChar *)"<span class=\"yang_id\">");
@@ -887,9 +887,9 @@ static void
     if (typdef->prefix && 
 	xml_strcmp(typdef->prefix, mod->prefix)) {
 	if (typdef->class == NCX_CL_NAMED && typdef->def.named.typ
-	    && typdef->def.named.typ->mod) {
-	    fname = typdef->def.named.typ->mod->name;
-	    fversion = typdef->def.named.typ->mod->version;
+	    && typdef->def.named.typ->tkerr.mod) {
+	    fname = typdef->def.named.typ->tkerr.mod->name;
+	    fversion = typdef->def.named.typ->tkerr.mod->version;
 	} else {
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	}
@@ -907,7 +907,7 @@ static void
                 submod,
 		(fname) ? typdef->prefix : NULL,
 		typdef->typename, 
-                typdef->linenum);
+                typdef->tkerr.linenum);
 	ses_putstr(scb, (const xmlChar *)"</span>");
     } else {
 	write_id(scb, typdef->typename);
@@ -1049,19 +1049,28 @@ static void
 	if (appinfo->ext) {
 	    fname = NULL;
 	    fversion = NULL;
-	    if (appinfo->ext->mod && (appinfo->ext->mod != mod)) {
-		fname = appinfo->ext->mod->name;
-		fversion = appinfo->ext->mod->version;
+	    if (appinfo->ext->tkerr.mod && 
+                (appinfo->ext->tkerr.mod != mod)) {
+		fname = appinfo->ext->tkerr.mod->name;
+		fversion = appinfo->ext->tkerr.mod->version;
 	    }
-	    write_a(scb, cp, fname, fversion, submod, appinfo->prefix,
-		    appinfo->name, appinfo->ext->linenum);
+	    write_a(scb, 
+                    cp, 
+                    fname, 
+                    fversion, 
+                    submod, 
+                    appinfo->prefix,
+		    appinfo->name, 
+                    appinfo->ext->tkerr.linenum);
 	} else {
 	    write_extkw(scb, appinfo->prefix, appinfo->name);
 	}
 
 	if (appinfo->value) {
 	    ses_putchar(scb, ' ');
-	    write_str(scb, appinfo->value, 2,
+	    write_str(scb, 
+                      appinfo->value, 
+                      2,
 		      indent+ses_indent_count(scb));
 	}
 
@@ -1098,10 +1107,10 @@ static void
     write_type_contents (ses_cb_t *scb,
 			 const ncx_module_t *mod,
 			 const yangdump_cvtparms_t *cp,
-			 const typ_def_t *typdef,
+			 typ_def_t *typdef,
 			 int32 startindent)
 {
-    const typ_unionnode_t *un;
+    typ_unionnode_t       *un;
     const typ_enum_t      *bit, *enu;
     const xmlChar         *str;
     const typ_range_t     *range;
@@ -1370,13 +1379,16 @@ static void
     write_type_clause (ses_cb_t *scb,
 		       const ncx_module_t *mod,
 		       const yangdump_cvtparms_t *cp,
-		       const typ_def_t *typdef,
+		       typ_def_t *typdef,
 		       int32 startindent)
 {
     write_type(scb, mod, cp, typdef, startindent);
     if (typ_has_subclauses(typdef)) {
 	ses_putstr(scb, START_SEC);
-	write_type_contents(scb, mod, cp, typdef,
+	write_type_contents(scb, 
+                            mod, 
+                            cp, 
+                            typdef,
 			    startindent + ses_indent_count(scb));
 	ses_putstr_indent(scb, END_SEC, startindent);
     } else {
@@ -1403,7 +1415,7 @@ static void
     write_typedef (ses_cb_t *scb,
 		   const ncx_module_t *mod,
 		   const yangdump_cvtparms_t *cp,
-		   const typ_template_t *typ,
+		   typ_template_t *typ,
 		   int32 startindent,
 		   boolean first)
 {
@@ -1418,7 +1430,7 @@ static void
                   YANG_K_TYPEDEF, 
 		  typ->name, 
                   startindent, 
-                  typ->linenum,
+                  typ->tkerr.linenum,
 		  FALSE, 
                   !first);
 
@@ -1494,25 +1506,28 @@ static void
     write_typedefs (ses_cb_t *scb,
 		    const ncx_module_t *mod,
 		    const yangdump_cvtparms_t *cp,
-		    const dlq_hdr_t *typedefQ,
+		    dlq_hdr_t *typedefQ,
 		    int32 startindent)
 {
-    const typ_template_t    *typ;
-    boolean                  first;
+    typ_template_t    *typ;
+    boolean            first;
 
     if (dlq_empty(typedefQ)) {
 	return;
     }
 
     if (typedefQ == &mod->typeQ) {
-	write_banner_cmt(scb, mod, cp,
-			 (const xmlChar *)"typedefs", startindent);
+	write_banner_cmt(scb, 
+                         mod, 
+                         cp,
+			 (const xmlChar *)"typedefs", 
+                         startindent);
     }
 
     first = TRUE;
-    for (typ = (const typ_template_t *)dlq_firstEntry(typedefQ);
+    for (typ = (typ_template_t *)dlq_firstEntry(typedefQ);
 	 typ != NULL;
-	 typ = (const typ_template_t *)dlq_nextEntry(typ)) {
+	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
 
 	write_typedef(scb, mod, cp, typ, startindent, first);
 	first = FALSE;
@@ -1539,7 +1554,7 @@ static void
     write_grouping (ses_cb_t *scb,
 		    const ncx_module_t *mod,
 		    const yangdump_cvtparms_t *cp,
-		    const grp_template_t *grp,
+		    grp_template_t *grp,
 		    int32 startindent,
 		    boolean first)
 {
@@ -1561,7 +1576,7 @@ static void
                   YANG_K_GROUPING, 
 		  grp->name,
                   startindent,
-                  grp->linenum, 
+                  grp->tkerr.linenum, 
 		  FALSE,
                   !first);
 
@@ -1625,10 +1640,10 @@ static void
     write_groupings (ses_cb_t *scb,
 		     const ncx_module_t *mod,
 		     const yangdump_cvtparms_t *cp,
-		     const dlq_hdr_t *groupingQ,
+		     dlq_hdr_t *groupingQ,
 		     int32 startindent)
 {
-    const grp_template_t    *grp;
+    grp_template_t          *grp;
     const xmlChar           *submod;
     boolean                  needed, cooked, first;
 
@@ -1645,9 +1660,9 @@ static void
      */
     if (cooked) {
 	needed = FALSE;
-	for (grp = (const grp_template_t *)dlq_firstEntry(groupingQ);
+	for (grp = (grp_template_t *)dlq_firstEntry(groupingQ);
 	     grp != NULL && needed==FALSE;
-	     grp = (const grp_template_t *)dlq_nextEntry(grp)) {
+	     grp = (grp_template_t *)dlq_nextEntry(grp)) {
 	    needed = grp_has_typedefs(grp);
 	}
 	if (!needed) {
@@ -1657,14 +1672,17 @@ static void
 
     /* put comment for first grouping only */
     if (groupingQ == &mod->groupingQ) {
-	write_banner_cmt(scb, mod, cp,
-			 (const xmlChar *)"groupings", startindent);
+	write_banner_cmt(scb, 
+                         mod, 
+                         cp,
+			 (const xmlChar *)"groupings", 
+                         startindent);
     }
 
     first = TRUE;
-    for (grp = (const grp_template_t *)dlq_firstEntry(groupingQ);
+    for (grp = (grp_template_t *)dlq_firstEntry(groupingQ);
 	 grp != NULL;
-	 grp = (const grp_template_t *)dlq_nextEntry(grp)) {
+	 grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
 	write_grouping(scb, mod, cp, grp, startindent, first);
 	first = FALSE;
@@ -1707,13 +1725,14 @@ static void
 
     /* get filename if-feature-stmt filled in */
     if (iffeature->feature) {
-	linenum = iffeature->feature->linenum;
-	fname = iffeature->feature->mod->name;
-	fversion = iffeature->feature->mod->version;
+	linenum = iffeature->feature->tkerr.linenum;
+	fname = iffeature->feature->tkerr.mod->name;
+	fversion = iffeature->feature->tkerr.mod->version;
     }
 
     ses_putstr(scb, (const xmlChar *)"<span class=\"yang_id\">");
-    write_a(scb, cp, 
+    write_a(scb, 
+            cp, 
 	    fname, 
 	    fversion, 
 	    submod,
@@ -1778,28 +1797,28 @@ static void
     write_object (ses_cb_t *scb,
 		  const ncx_module_t *mod,
 		  const yangdump_cvtparms_t *cp,
-		  const obj_template_t *obj,
+		  obj_template_t *obj,
 		  int32 startindent,
 		  boolean first)
 {
-    const obj_container_t   *con;
-    const obj_leaf_t        *leaf;
-    const obj_leaflist_t    *leaflist;
-    const obj_list_t        *list;
-    const obj_choice_t      *choic;
-    const obj_case_t        *cas;
-    const obj_uses_t        *uses;
-    const obj_augment_t     *aug;
-    const obj_rpc_t         *rpc;
-    const obj_rpcio_t       *rpcio;
-    const obj_notif_t       *notif;
-    const obj_key_t         *key, *nextkey;
-    const obj_unique_t      *uni;
-    const obj_unique_comp_t *unicomp, *nextunicomp;
-    const xmlChar           *fname, *fversion, *submod;
-    int32                    indent;
-    char                     buff[NCX_MAX_NUMLEN];
-    boolean                  notrefined, isanyxml, isempty, rawmode;
+    obj_container_t   *con;
+    obj_leaf_t        *leaf;
+    obj_leaflist_t    *leaflist;
+    obj_list_t        *list;
+    obj_choice_t      *choic;
+    obj_case_t        *cas;
+    obj_uses_t        *uses;
+    obj_augment_t     *aug;
+    obj_rpc_t         *rpc;
+    obj_rpcio_t       *rpcio;
+    obj_notif_t       *notif;
+    obj_key_t         *key, *nextkey;
+    obj_unique_t      *uni;
+    obj_unique_comp_t *unicomp, *nextunicomp;
+    const xmlChar     *fname, *fversion, *submod;
+    int32              indent;
+    char               buff[NCX_MAX_NUMLEN];
+    boolean            notrefined, isanyxml, isempty, rawmode;
 
     submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
 
@@ -1824,7 +1843,7 @@ static void
                       YANG_K_CONTAINER, 
                       con->name,
 		      startindent, 
-                      obj->linenum, 
+                      obj->tkerr.linenum, 
                       isempty, 
                       !first);
 	if (isempty && rawmode) {
@@ -1908,7 +1927,7 @@ static void
                           YANG_K_ANYXML, 
                           leaf->name,
 			  startindent, 
-                          obj->linenum, 
+                          obj->tkerr.linenum, 
                           isempty, 
                           !first);
 	    if (isempty) {
@@ -1921,7 +1940,7 @@ static void
                           YANG_K_LEAF, 
                           leaf->name,
 			  startindent, 
-                          obj->linenum, 
+                          obj->tkerr.linenum, 
                           isempty, 
                           !first);
 	    if (isempty) {
@@ -2018,7 +2037,7 @@ static void
                       YANG_K_LEAF_LIST, 
                       leaflist->name,
 		      startindent, 
-                      obj->linenum, 
+                      obj->tkerr.linenum, 
                       isempty, 
                       !first);
 	if (isempty) {
@@ -2126,7 +2145,7 @@ static void
                       YANG_K_LIST,
                       list->name,
 		      startindent,
-                      obj->linenum,
+                      obj->tkerr.linenum,
                       isempty, 
                       !first);
 	if (isempty) {
@@ -2144,9 +2163,9 @@ static void
 	    write_kw(scb, YANG_K_KEY);
 	    ses_putstr(scb, (const xmlChar *)" \"");
 
-	    for (key = obj_first_ckey(obj);
+	    for (key = obj_first_key(obj);
 		 key != NULL; key = nextkey) {
-		nextkey = obj_next_ckey(key);
+		nextkey = obj_next_key(key);
 		write_a(scb,
                         cp,
                         NULL,
@@ -2154,7 +2173,7 @@ static void
                         submod,
                         NULL,
 			obj_get_name(key->keyobj),
-			key->keyobj->linenum);
+			key->keyobj->tkerr.linenum);
 		if (nextkey) {
 		    ses_putchar(scb, ' ');
 		}
@@ -2164,19 +2183,19 @@ static void
 
 	/* unique fields, manual generation to make links */
 	if (notrefined && !dlq_empty(&list->uniqueQ)) {
-	    for (uni = (const obj_unique_t *)
+	    for (uni = (obj_unique_t *)
 		     dlq_firstEntry(&list->uniqueQ);
 		 uni != NULL;
-		 uni = (const obj_unique_t *)dlq_nextEntry(uni)) {
+		 uni = (obj_unique_t *)dlq_nextEntry(uni)) {
 
 		ses_indent(scb, indent);
 		write_kw(scb, YANG_K_UNIQUE);
 		ses_putstr(scb, (const xmlChar *)" \"");
 
-		for (unicomp = (const obj_unique_comp_t *)
+		for (unicomp = (obj_unique_comp_t *)
 			 dlq_firstEntry(&uni->compQ);
 		     unicomp != NULL; unicomp = nextunicomp) {
-		    nextunicomp = (const obj_unique_comp_t *)
+		    nextunicomp = (obj_unique_comp_t *)
 			dlq_nextEntry(unicomp);
 		    write_a2(scb,
                              cp, 
@@ -2184,7 +2203,7 @@ static void
                              NULL,
                              submod,
 			     obj_get_name(unicomp->unobj),
-			     unicomp->unobj->linenum,
+			     unicomp->unobj->tkerr.linenum,
 			     unicomp->xpath);
 		    if (nextunicomp) {
 			ses_putstr(scb, (const xmlChar *)", ");
@@ -2285,7 +2304,7 @@ static void
                       YANG_K_CHOICE,
                       choic->name,
 		      startindent,
-                      obj->linenum,
+                      obj->tkerr.linenum,
                       isempty, 
                       !first);
 	if (isempty) {
@@ -2357,7 +2376,7 @@ static void
                       YANG_K_CASE, 
                       cas->name,
 		      startindent,
-                      obj->linenum,
+                      obj->tkerr.linenum,
                       isempty, 
                       !first);
 	if (isempty) {
@@ -2411,16 +2430,16 @@ static void
 	    ses_putchar(scb, '\n');
 	}
 	ses_indent(scb, startindent);
-	write_id_a(scb, submod, YANG_K_USES, obj->linenum);
+	write_id_a(scb, submod, YANG_K_USES, obj->tkerr.linenum);
 	write_kw(scb, YANG_K_USES);
 	ses_putchar(scb, ' ');
 	fname = NULL;
 	fversion = NULL;
 	if (uses->prefix && 
 	    xml_strcmp(uses->prefix, mod->prefix)) {
-	    if (uses->grp && uses->grp->mod) {
-		fname = uses->grp->mod->name;
-		fversion = uses->grp->mod->version;
+	    if (uses->grp && uses->grp->tkerr.mod) {
+		fname = uses->grp->tkerr.mod->name;
+		fversion = uses->grp->tkerr.mod->version;
 	    }
 	}
 	write_a(scb,
@@ -2430,7 +2449,7 @@ static void
                 submod,
 		uses->prefix,
                 uses->name,
-		uses->grp->linenum);
+		uses->grp->tkerr.linenum);
 	if (uses->descr || uses->ref || 
 	    uses->status != NCX_STATUS_CURRENT ||
 	    !dlq_empty(uses->datadefQ) ||
@@ -2483,15 +2502,15 @@ static void
 	    ses_putchar(scb, '\n');
 	}
 	ses_indent(scb, startindent);
-	write_id_a(scb, submod, YANG_K_AUGMENT, obj->linenum);
+	write_id_a(scb, submod, YANG_K_AUGMENT, obj->tkerr.linenum);
 	write_kw(scb, YANG_K_AUGMENT);
 	ses_putchar(scb, ' ');
 	fname = NULL;
 	fversion = NULL;
-	if (aug->targobj && aug->targobj->mod &&
-	    aug->targobj->mod != mod) {
-	    fname = aug->targobj->mod->name;
-	    fversion = aug->targobj->mod->version;
+	if (aug->targobj && aug->targobj->tkerr.mod &&
+	    aug->targobj->tkerr.mod != mod) {
+	    fname = aug->targobj->tkerr.mod->name;
+	    fversion = aug->targobj->tkerr.mod->version;
 	}
 	write_a2(scb,
                  cp, 
@@ -2499,7 +2518,7 @@ static void
                  fversion, 
                  submod,
 		 obj_get_name(aug->targobj), 
-		 aug->targobj->linenum, 
+		 aug->targobj->tkerr.linenum, 
                  aug->target);
 
 	if (isempty) {
@@ -2560,7 +2579,7 @@ static void
                       YANG_K_RPC, 
                       rpc->name,
 		      startindent, 
-                      obj->linenum, 
+                      obj->tkerr.linenum, 
                       isempty,
                       !first);
 	if (isempty) {
@@ -2619,7 +2638,7 @@ static void
                           obj_get_name(obj), 
                           NULL,
 			  startindent, 
-                          obj->linenum,
+                          obj->tkerr.linenum,
                           FALSE, 
                           !first);
 
@@ -2641,7 +2660,7 @@ static void
                       YANG_K_NOTIFICATION,
                       notif->name,
 		      startindent,
-                      obj->linenum, 
+                      obj->tkerr.linenum, 
                       isempty,
                       !first);
 	if (isempty) {
@@ -2713,25 +2732,28 @@ static void
     write_objects (ses_cb_t *scb,
 		   const ncx_module_t *mod,
 		   const yangdump_cvtparms_t *cp,
-		   const dlq_hdr_t *datadefQ,
+		   dlq_hdr_t *datadefQ,
 		   int32 startindent)
 {
-    const obj_template_t    *obj;
-    boolean                  first;
+    obj_template_t    *obj;
+    boolean            first;
 
     if (dlq_empty(datadefQ)) {
 	return;
     }
 
     if (datadefQ == &mod->datadefQ) {
-	write_banner_cmt(scb, mod, cp,
-			 (const xmlChar *)"objects", startindent);
+	write_banner_cmt(scb, 
+                         mod, 
+                         cp,
+			 (const xmlChar *)"objects", 
+                         startindent);
     }
 
     first = TRUE;
-    for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
+    for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
 	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
 	
 	if (obj_is_hidden(obj)) {
 	    continue;
@@ -2774,7 +2796,9 @@ static void
                   YANG_K_EXTENSION, 
 		  ext->name, 
                   startindent, 
-                  ext->linenum, FALSE, TRUE);
+                  ext->tkerr.linenum, 
+                  FALSE, 
+                  TRUE);
 
     /* argument sub-clause */
     if (ext->arg) {
@@ -2850,8 +2874,11 @@ static void
 	return;
     }
 
-    write_banner_cmt(scb, mod, cp,
-		     (const xmlChar *)"extensions", startindent);
+    write_banner_cmt(scb, 
+                     mod, 
+                     cp,
+		     (const xmlChar *)"extensions", 
+                     startindent);
 
     for (ext = (const ext_template_t *)dlq_firstEntry(extensionQ);
 	 ext != NULL;
@@ -2893,7 +2920,7 @@ static void
 		  YANG_K_IDENTITY, 
 		  identity->name, 
 		  startindent, 
-		  identity->linenum, 
+		  identity->tkerr.linenum, 
 		  FALSE, TRUE);
 
     /* optional base sub-clause */
@@ -3017,7 +3044,7 @@ static void
 		  YANG_K_FEATURE, 
 		  feature->name, 
 		  startindent, 
-		  feature->linenum, 
+		  feature->tkerr.linenum, 
 		  FALSE, 
                   TRUE);
 
@@ -3524,7 +3551,7 @@ static void
                     submod, 
                     NULL, 
                     obj_get_name(obj), 
-                    obj->linenum);
+                    obj->tkerr.linenum);
 	    end_elem(scb, EL_LI, -1);
 	} else {
 	    start_elem(scb, EL_LI, CL_DADDY, indent);
@@ -3535,7 +3562,7 @@ static void
                     submod, 
                     NULL, 
                     obj_get_name(obj), 
-                    obj->linenum);
+                    obj->tkerr.linenum);
 	    start_elem(scb, EL_UL, NULL, indent + ses_indent_count(scb));
 	    write_toc_menu_datadefQ(scb,
                                     mod,
@@ -3583,7 +3610,7 @@ static void
                     submod, 
                     NULL, 
                     grp->name, 
-                    grp->linenum);
+                    grp->tkerr.linenum);
 	    end_elem(scb, EL_LI, -1);
 	} else {
 	    start_elem(scb, EL_LI, CL_DADDY, indent);
@@ -3594,7 +3621,7 @@ static void
                     submod, 
                     NULL, 
                     grp->name, 
-                    grp->linenum);
+                    grp->tkerr.linenum);
 	    start_elem(scb, EL_UL, NULL, indent + ses_indent_count(scb));
 	    write_toc_menu_datadefQ(scb, 
                                     mod, 
@@ -3709,7 +3736,7 @@ static void
                     submod, 
                     NULL, 
 		    obj_get_name(obj), 
-                    obj->linenum);
+                    obj->tkerr.linenum);
 	    end_elem(scb, EL_LI, -1);
 	} else {
 	    start_elem(scb, EL_LI, CL_DADDY, indent);
@@ -3720,7 +3747,7 @@ static void
                     submod, 
                     NULL, 
 		    obj_get_name(obj), 
-                    obj->linenum);
+                    obj->tkerr.linenum);
 	    start_elem(scb, EL_UL, NULL, indent + ses_indent_count(scb));
 	    write_toc_menu_datadefQ(scb, 
                                     mod, 
@@ -3778,7 +3805,7 @@ static void
                     submod,
                     NULL, 
 		    obj_get_name(obj), 
-                    obj->linenum);
+                    obj->tkerr.linenum);
 	    end_elem(scb, EL_LI, -1);
 	} else {
 	    start_elem(scb, EL_LI, CL_DADDY, indent);
@@ -3789,7 +3816,7 @@ static void
                     submod,
                     NULL, 
 		    obj_get_name(obj),
-                    obj->linenum);
+                    obj->tkerr.linenum);
 	    start_elem(scb, EL_UL, NULL, indent + ses_indent_count(scb));
 	    write_toc_menu_datadefQ(scb, 
                                     mod,
@@ -3882,7 +3909,7 @@ static void
                     submod, 
                     NULL, 
                     typ->name, 
-                    typ->linenum);
+                    typ->tkerr.linenum);
 	    end_elem(scb, EL_LI, -1);
 	}
 	if (cp->unified && mod->ismod) {
@@ -3901,7 +3928,7 @@ static void
                             node->submod->name, 
 			    NULL,
                             typ->name,
-                            typ->linenum);
+                            typ->tkerr.linenum);
 		    end_elem(scb, EL_LI, -1);
 		}
 	    }
@@ -4073,7 +4100,7 @@ static void
                     submod, 
                     NULL, 
                     ext->name, 
-                    ext->linenum);
+                    ext->tkerr.linenum);
 	    end_elem(scb, EL_LI, -1);
 	}
 	if (cp->unified && mod->ismod) {
@@ -4092,7 +4119,7 @@ static void
                             submod,
                             NULL, 
 			    ext->name,
-                            ext->linenum);
+                            ext->tkerr.linenum);
 		    end_elem(scb, EL_LI, -1);
 		}
 	    }
@@ -4212,7 +4239,7 @@ static void
 *********************************************************************/
 static void
     write_html_body (ses_cb_t *scb,
-		     const ncx_module_t *mod,
+		     ncx_module_t *mod,
 		     const yangdump_cvtparms_t *cp)
 {
     const yang_node_t     *node;
@@ -4519,12 +4546,12 @@ static void
 *   status
 *********************************************************************/
 status_t
-    html_convert_module (const yang_pcb_t *pcb,
+    html_convert_module (yang_pcb_t *pcb,
 			 const yangdump_cvtparms_t *cp,
 			 ses_cb_t *scb)
 {
-    const ncx_module_t  *mod;
-    status_t            res;
+    ncx_module_t  *mod;
+    status_t       res;
 
     res = NO_ERR;
 

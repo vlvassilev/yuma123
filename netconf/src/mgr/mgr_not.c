@@ -139,7 +139,7 @@ date         init     comment
 *********************************************************************/
 static boolean               mgr_not_init_done = FALSE;
 
-static const obj_template_t *notification_obj;
+static obj_template_t       *notification_obj;
 
 mgr_not_cbfn_t               callbackfn;
 
@@ -307,7 +307,7 @@ void
     mgr_not_dispatch (ses_cb_t *scb,
 		      xml_node_t *top)
 {
-    const obj_template_t    *notobj;
+    obj_template_t          *notobj;
     mgr_not_msg_t           *msg;
     ncx_module_t            *mod;
     val_value_t             *child;

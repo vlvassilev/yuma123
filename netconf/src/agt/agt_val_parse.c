@@ -149,7 +149,7 @@ date         init     comment
 static status_t 
     parse_btype_nc (ses_cb_t  *scb,
                     xml_msg_hdr_t *msg,
-                    const obj_template_t *obj,
+                    obj_template_t *obj,
                     const xml_node_t *startnode,
                     ncx_data_class_t parentdc,
                     val_value_t  *retval);
@@ -190,7 +190,7 @@ static status_t
                          ncx_node_t errnodetyp,                            
                          const void *error_parm,
                          ncx_node_t intnodetyp,
-                         const void *intnode)
+                         void *intnode)
 {
     status_t        res;
 
@@ -252,8 +252,8 @@ static status_t
                                  ncx_node_t errnodetyp,            
                                  const void *error_parm,
                                  ncx_node_t intnodetyp,
-                                 const void *intnode,
-                                 const ncx_errinfo_t *errinfo)
+                                 void *intnode,
+                                 ncx_errinfo_t *errinfo)
 {
     status_t        res;
 
@@ -372,7 +372,7 @@ static op_editop_t
  *********************************************************************/
 static ncx_data_class_t
     pick_dataclass (ncx_data_class_t parentdc,
-                    const obj_template_t *obj)
+                    obj_template_t *obj)
 {
     boolean  ret, setflag;
 
@@ -651,7 +651,7 @@ static status_t
 static status_t 
     parse_enum_nc (ses_cb_t  *scb,
                    xml_msg_hdr_t *msg,
-                   const obj_template_t *obj,
+                   obj_template_t *obj,
                    const xml_node_t *startnode,
                    ncx_data_class_t parentdc,
                    val_value_t  *retval)
@@ -728,7 +728,7 @@ static status_t
                 res = NO_ERR;
             } else {
                 /* get the non-whitespace string here */
-                res = val_enum_ok(obj_get_ctypdef(obj), 
+                res = val_enum_ok(obj_get_typdef(obj), 
                                   valnode.simval, 
                                   &retval->v.enu.val, 
                                   &retval->v.enu.name);
@@ -833,7 +833,7 @@ static status_t
 static status_t 
     parse_empty_nc (ses_cb_t  *scb,
                     xml_msg_hdr_t *msg,
-                    const obj_template_t *obj,
+                    obj_template_t *obj,
                     const xml_node_t *startnode,
                     ncx_data_class_t parentdc,
                     val_value_t  *retval)
@@ -952,7 +952,7 @@ static status_t
 static status_t 
     parse_boolean_nc (ses_cb_t  *scb,
                       xml_msg_hdr_t *msg,
-                      const obj_template_t *obj,
+                      obj_template_t *obj,
                       const xml_node_t *startnode,
                       ncx_data_class_t parentdc,
                       val_value_t  *retval)
@@ -1116,7 +1116,7 @@ static status_t
 static status_t 
     parse_num_nc (ses_cb_t  *scb,
                   xml_msg_hdr_t *msg,
-                  const obj_template_t *obj,
+                  obj_template_t *obj,
                   ncx_btype_t  btyp,
                   const xml_node_t *startnode,
                   ncx_data_class_t parentdc,
@@ -1124,7 +1124,7 @@ static status_t
 {
     const xml_node_t    *errnode;
     const xmlChar       *badval;
-    const ncx_errinfo_t *errinfo;
+    ncx_errinfo_t       *errinfo;
     xml_node_t           valnode, endnode;
     status_t             res, res2, res3;
     boolean              errdone, empty, endtagdone;
@@ -1211,7 +1211,7 @@ static status_t
                 res = ERR_NCX_WRONG_NUMTYP;
             }
             if (res == NO_ERR) {
-                res = val_range_ok_errinfo(obj_get_ctypdef(obj), 
+                res = val_range_ok_errinfo(obj_get_typdef(obj), 
                                            btyp, 
                                            &retval->v.num, 
                                            &errinfo);
@@ -1324,7 +1324,7 @@ static status_t
 static status_t 
     parse_string_nc (ses_cb_t  *scb,
                      xml_msg_hdr_t *msg,
-                     const obj_template_t *obj,
+                     obj_template_t *obj,
                      ncx_btype_t  btyp,
                      const xml_node_t *startnode,
                      ncx_data_class_t parentdc,
@@ -1332,9 +1332,9 @@ static status_t
 {
     const xml_node_t     *errnode;
     const xmlChar        *badval;
-    const typ_template_t *listtyp;
-    const ncx_errinfo_t  *errinfo;
-    const obj_template_t *targobj;
+    typ_template_t       *listtyp;
+    ncx_errinfo_t        *errinfo;
+    obj_template_t       *targobj;
     xpath_result_t       *result; 
     xml_node_t            valnode, endnode;
     status_t              res, res2, res3;
@@ -1401,7 +1401,7 @@ static status_t
             /* no need to check the empty list */  ;
         } else {
             /* check the empty string */
-            res = val_string_ok_errinfo(obj_get_ctypdef(obj), 
+            res = val_string_ok_errinfo(obj_get_typdef(obj), 
                                         btyp, 
                                         EMPTY_STRING,
                                         &errinfo);
@@ -1453,7 +1453,7 @@ static status_t
         case NCX_BT_BITS:
             if (btyp==NCX_BT_SLIST) {
                 /* get the list of strings, then check them */
-                listtyp = typ_get_listtyp(obj_get_ctypdef(obj));
+                listtyp = typ_get_listtyp(obj_get_typdef(obj));
                 listbtyp = typ_get_basetype(&listtyp->typdef);
             } else if (btyp==NCX_BT_BITS) {
                 listbtyp = NCX_BT_BITS;
@@ -1467,13 +1467,13 @@ static status_t
                     res = ncx_finish_list(&listtyp->typdef, 
                                           &retval->v.list);
                 } else {
-                    res = ncx_finish_list(obj_get_ctypdef(obj),
+                    res = ncx_finish_list(obj_get_typdef(obj),
                                           &retval->v.list);
                 }
             }
 
             if (res == NO_ERR) {
-                res = val_list_ok_errinfo(obj_get_ctypdef(obj), 
+                res = val_list_ok_errinfo(obj_get_typdef(obj), 
                                           btyp, 
                                           &retval->v.list,
                                           &errinfo);
@@ -1482,7 +1482,7 @@ static status_t
         default:
             if (!obj_is_xpath_string(obj)) {
                 /* check the non-whitespace string */
-                res = val_string_ok_errinfo(obj_get_ctypdef(obj), 
+                res = val_string_ok_errinfo(obj_get_typdef(obj), 
                                             btyp, 
                                             valnode.simval, 
                                             &errinfo);
@@ -1630,7 +1630,7 @@ static status_t
 static status_t 
     parse_idref_nc (ses_cb_t  *scb,
                     xml_msg_hdr_t *msg,
-                    const obj_template_t *obj,
+                    obj_template_t *obj,
                     const xml_node_t *startnode,
                     ncx_data_class_t parentdc,
                     val_value_t  *retval)
@@ -1713,7 +1713,7 @@ static status_t
                  * for the identity base in the typdef
                  */
                 str = NULL;
-                res = val_idref_ok(obj_get_ctypdef(obj), 
+                res = val_idref_ok(obj_get_typdef(obj), 
                                    valnode.simval,
                                    retval->v.idref.nsid,
                                    &str, 
@@ -1821,14 +1821,14 @@ static status_t
 static status_t 
     parse_union_nc (ses_cb_t  *scb,
                     xml_msg_hdr_t *msg,
-                    const obj_template_t *obj,
+                    obj_template_t *obj,
                     const xml_node_t *startnode,
                     ncx_data_class_t parentdc,
                     val_value_t  *retval)
 {
     const xml_node_t    *errnode;
     const xmlChar       *badval;
-    const ncx_errinfo_t *errinfo;
+    ncx_errinfo_t       *errinfo;
     xml_node_t           valnode, endnode;
     status_t             res, res2, res3;
     boolean              errdone, stopnow, empty;
@@ -1892,7 +1892,7 @@ static status_t
             break;
         case XML_NT_STRING:
             /* get the non-whitespace string here */
-            res = val_union_ok_errinfo(obj_get_ctypdef(obj), 
+            res = val_union_ok_errinfo(obj_get_typdef(obj), 
                                        valnode.simval, 
                                        retval, 
                                        &errinfo);
@@ -1902,7 +1902,7 @@ static status_t
             break;
         case XML_NT_END:
             stopnow = TRUE;
-            res = val_union_ok_errinfo(obj_get_ctypdef(obj), 
+            res = val_union_ok_errinfo(obj_get_typdef(obj), 
                                        EMPTY_STRING, 
                                        retval, 
                                        &errinfo);
@@ -2019,13 +2019,13 @@ static status_t
 static status_t 
     parse_complex_nc (ses_cb_t  *scb,
                       xml_msg_hdr_t *msg,
-                      const obj_template_t *obj,
+                      obj_template_t *obj,
                       const xml_node_t *startnode,
                       ncx_data_class_t parentdc,
                       val_value_t  *retval)
 {
     const xml_node_t     *errnode;
-    const obj_template_t *chobj, *topchild, *curchild, *nextchobj;
+    obj_template_t *chobj, *topchild, *curchild, *nextchobj;
     const agt_profile_t  *profile;
     val_value_t          *chval;
     xml_node_t            chnode;
@@ -2320,17 +2320,17 @@ static status_t
 static status_t 
     parse_metadata_nc (ses_cb_t *scb,
                        xml_msg_hdr_t *msg,
-                       const obj_template_t *obj,
+                       obj_template_t *obj,
                        const xml_node_t *node,
                        boolean nserr,
                        val_value_t  *retval)
 {
-    const obj_metadata_t    *meta;
-    const typ_def_t         *metadef;
-    xml_attr_t              *attr;
-    val_value_t             *metaval;
-    xmlns_id_t               ncid, yangid;
-    status_t                 res, retres;
+    obj_metadata_t       *meta;
+    typ_def_t            *metadef;
+    xml_attr_t           *attr;
+    val_value_t          *metaval;
+    xmlns_id_t            ncid, yangid;
+    status_t              res, retres;
 
 
     retres = NO_ERR;
@@ -2481,7 +2481,7 @@ static status_t
                          xml_msg_hdr_t *msg,
                          val_value_t  *val)
 {
-    const obj_metadata_t *meta;
+    obj_metadata_t *meta;
     obj_type_t            objtype;
     uint32                insertcnt, cnt, checkcnt;
     status_t              res;
@@ -2674,7 +2674,7 @@ static status_t
 static status_t 
     parse_btype_nc (ses_cb_t  *scb,
                     xml_msg_hdr_t *msg,
-                    const obj_template_t *obj,
+                    obj_template_t *obj,
                     const xml_node_t *startnode,
                     ncx_data_class_t parentdc,
                     val_value_t  *retval)
@@ -2877,7 +2877,7 @@ static status_t
 status_t
     agt_val_parse_nc (ses_cb_t  *scb,
                       xml_msg_hdr_t *msg,
-                      const obj_template_t *obj,
+                      obj_template_t *obj,
                       const xml_node_t *startnode,
                       ncx_data_class_t  parentdc,
                       val_value_t  *retval)

@@ -235,7 +235,7 @@ static status_t
                        const char *argv[],
                        yangdump_cvtparms_t  *cp)
 {
-    const obj_template_t  *obj;
+    obj_template_t        *obj;
     ncx_module_t          *mod;
     val_value_t           *valset, *val;
     status_t               res;

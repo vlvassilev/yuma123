@@ -16,11 +16,6 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#if 0
-#include  <stdio.h>
-#include  <stdlib.h>
-#include  <memory.h>
-#endif
 
 #ifndef _H_procdefs
 #include  "procdefs.h"

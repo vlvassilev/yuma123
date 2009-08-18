@@ -65,23 +65,23 @@ extern status_t
 
 extern status_t
     xpath_yang_validate_path (ncx_module_t *mod,
-			      const obj_template_t *obj,
+			      obj_template_t *obj,
 			      xpath_pcb_t *pcb,
 			      boolean schemainst,
-			      const obj_template_t **leafobj);
+			      obj_template_t **leafobj);
 
 extern status_t
     xpath_yang_validate_xmlpath (xmlTextReaderPtr reader,
 				 xpath_pcb_t *pcb,
-				 const obj_template_t *pathobj,
+				 obj_template_t *pathobj,
 				 boolean logerrors,
-				 const obj_template_t **targobj);
+				 obj_template_t **targobj);
 
 
 extern status_t
     xpath_yang_validate_xmlkey (xmlTextReaderPtr reader,
 				xpath_pcb_t *pcb,
-				const obj_template_t *obj,
+				obj_template_t *obj,
 				boolean logerrors);
 
 

@@ -181,46 +181,6 @@ static void
 }  /* write_sessions */
 
 
-#if 0
-/********************************************************************
- * FUNCTION read_sessions
- * 
- * Go through any sessions and check any ready to read
- *
- *********************************************************************/
-static void
-    read_sessions (void)
-{
-    ses_cb_t      *scb, *nextscb;
-    mgr_scb_t     *mscb;
-    status_t       res;
-
-
-    /* check read input from agent */
-    scb = mgr_ses_get_first_session();
-    while (scb) {
-        nextscb = mgr_ses_get_next_session(scb);
-        res = ses_accept_input(scb);
-        if (res != NO_ERR) {
-            if (res != ERR_NCX_SESSION_CLOSED) {
-                if (LOGINFO) {
-                    mscb = mgr_ses_get_mscb(scb);
-                    log_info("\nmgr_io input failed"
-                             " for session %u (a:%u) (%s)",
-                             scb->sid, 
-                             mscb->agtsid,
-                             get_error_string(res));
-                }
-            }
-            mgr_ses_free_session(scb->sid);
-        }
-        scb = nextscb;
-    }
-
-}  /* read_sessions */
-#endif
-
-
 /********************************************************************
  * FUNCTION read_session
  * 
@@ -636,22 +596,6 @@ boolean
     write_sessions();
 
     return retval;
-
-#if 0
-    read_sessions();
-
-    done = FALSE;
-    while (!done) {
-	if (!mgr_ses_process_first_ready()) {
-	    done = TRUE;
-	} else if (mgr_shutdown_requested()) {
-	    done = TRUE;
-	}
-    }
-
-    scb = mgr_ses_get_scb(cursid);
-    return (scb) ? TRUE : FALSE;
-#endif
 
 }  /* mgr_io_process_timeout */
 

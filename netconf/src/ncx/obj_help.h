@@ -43,13 +43,13 @@ date	     init     comment
 *********************************************************************/
 
 extern void
-    obj_dump_template (const obj_template_t *obj,
+    obj_dump_template (obj_template_t *obj,
 		       help_mode_t mode,
 		       uint32 nestlevel,
 		       uint32 indent);
 
 extern void
-    obj_dump_datadefQ (const dlq_hdr_t *datadefQ,
+    obj_dump_datadefQ (dlq_hdr_t *datadefQ,
 		       help_mode_t mode,
 		       uint32 nestlevel,
 		       uint32 indent);

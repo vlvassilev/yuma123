@@ -345,20 +345,20 @@ static status_t
 *********************************************************************/
 static status_t 
     parse_index (tk_chain_t  *tkc,
-		 const obj_template_t *obj,
+		 obj_template_t *obj,
 		 val_value_t *val,
 		 xmlns_id_t  nsid)
 {
-    const obj_key_t     *indef, *infirst;
+    obj_key_t     *indef, *infirst;
     val_value_t   *inval;
     status_t       res;
 
-    infirst = obj_first_ckey(obj);
+    infirst = obj_first_key(obj);
 
     /* first make value nodes for all the index values */
     for (indef = infirst; 
          indef != NULL; 
-         indef = obj_next_ckey(indef)) {
+         indef = obj_next_key(indef)) {
 
 	/* advance to the next non-NEWLINE token */
 	res = get_tk(tkc);
@@ -423,13 +423,13 @@ static status_t
 *********************************************************************/
 static status_t 
     parse_val (tk_chain_t  *tkc,
-	       const obj_template_t *obj,
+	       obj_template_t *obj,
 	       val_value_t *val)
 {
-    const obj_template_t  *chobj;
+    obj_template_t  *chobj;
     val_value_t     *chval;
     const xmlChar   *valname, *useval;
-    const typ_def_t *typdef;
+    typ_def_t       *typdef;
     status_t         res;
     ncx_btype_t      btyp;
     boolean          done;
@@ -438,7 +438,7 @@ static status_t
     btyp = obj_get_basetype(obj);
     nsid = obj_get_nsid(obj);
     valname = obj_get_name(obj);
-    typdef = obj_get_ctypdef(obj);
+    typdef = obj_get_typdef(obj);
 
     /* check if there is an index clause expected */
     if (typ_has_index(btyp)) {
@@ -606,7 +606,7 @@ static status_t
 		val_value_t *val,
 		boolean keepvals)
 {
-    const obj_template_t   *obj;
+    obj_template_t         *obj;
     const xmlChar          *modname;
     val_value_t            *curparm, *newparm;
     status_t                res;

@@ -66,14 +66,12 @@ typedef struct ext_template_t_ {
     xmlChar         *descr;
     xmlChar         *ref;
     xmlChar         *arg;
-    ncx_module_t    *mod;        /* const back-ptr to this module */
-    tk_token_t      *tk;         /* const back-ptr to start token */
-    uint32           linenum;
     xmlns_id_t       nsid;
     ncx_status_t     status;
     boolean          argel;
     boolean          used;                  /* needed by yangdiff */
     dlq_hdr_t        appinfoQ;              /* Q of ncx_appinfo_t */
+    ncx_error_t      tkerr;
 } ext_template_t;
 
 

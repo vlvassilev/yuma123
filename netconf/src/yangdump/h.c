@@ -330,7 +330,7 @@ static void
 
 	ses_putstr(scb, POUND_IFDEF);
 	write_identifier(scb, 
-			 iffeature->feature->mod->name,
+			 iffeature->feature->tkerr.mod->name,
 			 BAR_FEAT,
 			 iffeature->feature->name);
     } else if (iffeaturecnt > 1) {
@@ -346,7 +346,7 @@ static void
 
 	    ses_putstr(scb, START_DEFINED);
 	    write_identifier(scb, 
-			     iffeature->feature->mod->name,
+			     iffeature->feature->tkerr.mod->name,
 			     BAR_FEAT,
 			     iffeature->feature->name);
 	    ses_putchar(scb, ')');
@@ -482,10 +482,10 @@ static void
 **********************************************************************/
 static void
     write_h_object (ses_cb_t *scb,
-		    const obj_template_t *obj)
+		    obj_template_t *obj)
 
 {
-    const obj_template_t    *childobj;
+    obj_template_t          *childobj;
     xmlChar                 *buffer;
     ncx_btype_t              btyp;
     status_t                 res;
@@ -603,24 +603,24 @@ static void
 *********************************************************************/
 static void
     write_h_objects (ses_cb_t *scb,
-		     const dlq_hdr_t *datadefQ)
+		     dlq_hdr_t *datadefQ)
 {
-    const obj_template_t    *obj;
-    const dlq_hdr_t         *childdatadefQ;
+    obj_template_t    *obj;
+    dlq_hdr_t         *childdatadefQ;
 
     if (dlq_empty(datadefQ)) {
 	return;
     }
 
-    for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
+    for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
 	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
 	if (!obj_has_name(obj) || !obj_is_data_db(obj)) {
 	    continue;
 	}
 
-	childdatadefQ = obj_get_cdatadefQ(obj);
+	childdatadefQ = obj_get_datadefQ(obj);
 	if (childdatadefQ) {
 	    write_h_objects(scb, childdatadefQ);
 	}
@@ -647,7 +647,7 @@ static void
     /* define the identity constant */
     ses_putstr(scb, POUND_DEFINE);
     write_identifier(scb, 
-		     identity->mod->name,
+		     identity->tkerr.mod->name,
 		     BAR_ID,
 		     identity->name);
     ses_putchar(scb, ' ');
@@ -785,7 +785,7 @@ static void
     /* define feature constant */
     ses_putstr(scb, POUND_DEFINE);
     write_identifier(scb, 
-		     feature->mod->name,
+		     feature->tkerr.mod->name,
 		     BAR_FEAT,
 		     feature->name);
     ses_putchar(scb, ' ');
@@ -954,10 +954,10 @@ static void
 *********************************************************************/
 static void
     write_h_file (ses_cb_t *scb,
-		  const ncx_module_t *mod,
+		  ncx_module_t *mod,
 		  const yangdump_cvtparms_t *cp)
 {
-    const yang_node_t *node;
+    yang_node_t *node;
 
     /* Write the start of the H file */
     ses_putstr(scb, POUND_IFNDEF);
@@ -974,10 +974,10 @@ static void
     write_h_features(scb, &mod->featureQ);
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)
+	for (node = (yang_node_t *)
 		 dlq_firstEntry(&mod->saveincQ);
 	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
+	     node = (yang_node_t *)dlq_nextEntry(node)) {
 	    if (node->submod) {
 		write_h_features(scb, &node->submod->featureQ);
 	    }
@@ -987,10 +987,10 @@ static void
     /* 2) identities */
     write_h_identities(scb, &mod->identityQ);
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)
+	for (node = (yang_node_t *)
 		 dlq_firstEntry(&mod->saveincQ);
 	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
+	     node = (yang_node_t *)dlq_nextEntry(node)) {
 	    if (node->submod) {
 		write_h_identities(scb, &node->submod->identityQ);
 	    }
@@ -1000,10 +1000,10 @@ static void
     /* 3) object node identifiers */
     write_h_oids(scb, &mod->datadefQ);
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)
+	for (node = (yang_node_t *)
 		 dlq_firstEntry(&mod->saveincQ);
 	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
+	     node = (yang_node_t *)dlq_nextEntry(node)) {
 	    if (node->submod) {
 		write_h_oids(scb, &node->submod->datadefQ);
 	    }
@@ -1014,10 +1014,10 @@ static void
     write_h_objects(scb, &mod->datadefQ);
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)
+	for (node = (yang_node_t *)
 		 dlq_firstEntry(&mod->saveincQ);
 	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
+	     node = (yang_node_t *)dlq_nextEntry(node)) {
 	    if (node->submod) {
 		write_h_objects(scb, &node->submod->datadefQ);
 	    }
@@ -1048,11 +1048,11 @@ static void
 *   status
 *********************************************************************/
 status_t
-    h_convert_module (const yang_pcb_t *pcb,
+    h_convert_module (yang_pcb_t *pcb,
 		      const yangdump_cvtparms_t *cp,
 		      ses_cb_t *scb)
 {
-    const ncx_module_t  *mod;
+    ncx_module_t  *mod;
 
     /* the module should already be parsed and loaded */
     mod = pcb->top;

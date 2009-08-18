@@ -243,11 +243,11 @@ static xmlns_id_t
 *   FALSE if not (already generated in this XML path to toor)
 *********************************************************************/
 static boolean
-    xmlns_needed (const val_value_t *curelem,
+    xmlns_needed (val_value_t *curelem,
 		  xmlns_id_t nsid)
 {
 
-    const val_value_t  *metaval;
+    val_value_t  *metaval;
 
     /* check if the XMLNS directive already present
      * in this node due to an attribute using the NS ID
@@ -372,7 +372,7 @@ const xmlChar *
     xml_msg_get_prefix (xml_msg_hdr_t *msg,
 			xmlns_id_t parent_nsid,
 			xmlns_id_t nsid,
-			const val_value_t *curelem,
+			val_value_t *curelem,
 			boolean  *xneeded)
 {
     xmlns_pmap_t   *pmap, *newpmap;

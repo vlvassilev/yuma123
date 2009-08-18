@@ -242,6 +242,7 @@ typedef struct tk_chain_t_ {
     dlq_hdr_t      qhdr;
     dlq_hdr_t      tkQ;
     tk_token_t    *cur;
+    ncx_error_t   *curerr;
     const xmlChar *filename;
     FILE          *fp;
     xmlChar       *buff;
@@ -344,6 +345,5 @@ extern void
 
 extern tk_chain_t *
     tk_clone_chain (tk_chain_t *oldtkc);
-
 
 #endif	    /* _H_tk */

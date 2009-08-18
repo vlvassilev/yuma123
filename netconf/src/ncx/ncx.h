@@ -231,19 +231,19 @@ extern ncx_module_t *
 
 
 /************* top obj_template_t in module **************/
-extern const obj_template_t *
-    ncx_get_first_object (const ncx_module_t *mod);
+extern obj_template_t *
+    ncx_get_first_object (ncx_module_t *mod);
 
-extern const obj_template_t *
-    ncx_get_next_object (const ncx_module_t *mod,
-			 const obj_template_t *curobj);
+extern obj_template_t *
+    ncx_get_next_object (ncx_module_t *mod,
+			 obj_template_t *curobj);
 
-extern const obj_template_t *
-    ncx_get_first_data_object (const ncx_module_t *mod);
+extern obj_template_t *
+    ncx_get_first_data_object (ncx_module_t *mod);
 
-extern const obj_template_t *
-    ncx_get_next_data_object (const ncx_module_t *mod,
-			      const obj_template_t *curobj);
+extern obj_template_t *
+    ncx_get_next_data_object (ncx_module_t *mod,
+			      obj_template_t *curobj);
 
 /******************** ncx_import_t ******************/
 
@@ -495,7 +495,7 @@ extern status_t
 
 /* 2nd pass of parsing a ncx_list_t */
 extern status_t
-    ncx_finish_list (const typ_def_t *typdef,
+    ncx_finish_list (typ_def_t *typdef,
 		     ncx_list_t *list);
 
 /********************** ncx_lmem_t *********************/
@@ -544,15 +544,25 @@ extern ncx_appinfo_t *
 extern void 
     ncx_free_appinfo (ncx_appinfo_t *appinfo);
 
-extern const ncx_appinfo_t *
-    ncx_find_appinfo (const dlq_hdr_t *appinfoQ,
+extern ncx_appinfo_t *
+    ncx_find_appinfo (dlq_hdr_t *appinfoQ,
 		      const xmlChar *prefix,
 		      const xmlChar *varname);
+
+extern const ncx_appinfo_t *
+    ncx_find_const_appinfo (const dlq_hdr_t *appinfoQ,
+                            const xmlChar *prefix,
+                            const xmlChar *varname);
 
 extern const ncx_appinfo_t *
     ncx_find_next_appinfo (const ncx_appinfo_t *current,
 			   const xmlChar *prefix,
 			   const xmlChar *varname);
+
+extern ncx_appinfo_t *
+    ncx_find_next_appinfo2 (ncx_appinfo_t *current,
+                            const xmlChar *prefix,
+                            const xmlChar *varname);
 
 extern ncx_appinfo_t *
     ncx_clone_appinfo (ncx_appinfo_t *appinfo);
@@ -966,5 +976,12 @@ extern void
 
 extern void
     ncx_clean_save_deviationsQ (dlq_hdr_t *savedevQ);
+
+extern void
+    ncx_set_error (ncx_error_t *tkerr,
+                   ncx_module_t *mod,
+                   uint32 linenum,
+                   uint32 linepos);
+
 
 #endif	    /* _H_ncx */

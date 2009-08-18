@@ -283,7 +283,7 @@ void
 {
     val_value_t           *val;
     ncx_module_t          *mod;
-    const obj_template_t  *obj;
+    obj_template_t        *obj;
     mgr_scb_t             *mscb;
     xml_msg_hdr_t          msg;
     status_t               res;

@@ -235,15 +235,14 @@ static boolean              agt_sys_init_done = FALSE;
 static ncx_module_t         *sysmod;
 
 /* cached pointer to the <system> element template */
-static const obj_template_t *systemobj;
+static obj_template_t *systemobj;
 
 /* cached pointers to the eventType nodes for this module */
-static const obj_template_t *sysStartupobj;
-static const obj_template_t *sysConfigChangeobj;
-static const obj_template_t *sysCapabilityChangeobj;
-static const obj_template_t *sysSessionStartobj;
-static const obj_template_t *sysSessionEndobj;
-
+static obj_template_t *sysStartupobj;
+static obj_template_t *sysConfigChangeobj;
+static obj_template_t *sysCapabilityChangeobj;
+static obj_template_t *sysSessionStartobj;
+static obj_template_t *sysSessionEndobj;
 
 
 /********************************************************************
@@ -296,7 +295,7 @@ static void
     cfg_template_t        *cfg;
     val_value_t           *leafval, *bootErrorval;
     rpc_err_rec_t         *rpcerror;
-    const obj_template_t  *bootErrorobj;
+    obj_template_t        *bootErrorobj;
     status_t               res;
 
     if (LOGDEBUG) {
@@ -562,7 +561,7 @@ status_t
     val_value_t           *topval, *unameval, *childval;
     cfg_template_t        *runningcfg;
     const xmlChar         *myhostname;
-    const obj_template_t  *unameobj;
+    obj_template_t        *unameobj;
     status_t               res;
     xmlChar                tstampbuff[TSTAMP_MIN_SIZE];
     struct utsname         utsbuff;
@@ -984,7 +983,7 @@ void
 {
     agt_not_msg_t         *not;
     val_value_t           *changedbyval, *leafval;
-    const obj_template_t  *changedbyobj;
+    obj_template_t        *changedbyobj;
     status_t               res;
     xmlChar                numbuff[NCX_MAX_NUMLEN];
 

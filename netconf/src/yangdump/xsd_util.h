@@ -271,17 +271,12 @@ extern status_t
 			    val_value_t *val);
 
 extern val_value_t *
-    xsd_make_obj_annotation (const obj_template_t *obj,
+    xsd_make_obj_annotation (obj_template_t *obj,
 			     status_t  *res);
 
 extern val_value_t *
     xsd_make_group_annotation (const grp_template_t *grp,
 			       status_t  *res);
-
-#if 0
-extern status_t
-    xsd_add_any (val_value_t *val);
-#endif
 
 extern status_t
     xsd_add_aughook (val_value_t *val,

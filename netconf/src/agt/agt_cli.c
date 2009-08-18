@@ -354,7 +354,7 @@ status_t
                            help_mode_t *showhelpmode)
 {
     ncx_module_t          *mod;
-    const obj_template_t  *obj;
+    obj_template_t        *obj;
     val_value_t           *valset, *val;
     status_t               res;
 

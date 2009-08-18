@@ -111,7 +111,7 @@ extern status_t
 
 extern status_t
     val_instance_check (val_value_t  *val,
-			const obj_template_t *obj);
+			obj_template_t *obj);
 
 extern val_value_t *
     val_get_choice_first_set (val_value_t *val,
@@ -124,7 +124,7 @@ extern val_value_t *
 
 extern boolean
     val_choice_is_set (val_value_t *val,
-		       const obj_template_t *obj);
+		       obj_template_t *obj);
 
 extern void
     val_purge_errors_from_root (val_value_t *val);
@@ -162,19 +162,19 @@ extern status_t
 extern status_t
     val_check_child_conditional (val_value_t *val,
 				 val_value_t *valroot,
-				 const obj_template_t *childobj,
+				 obj_template_t *childobj,
 				 boolean *condresult);
 
 extern boolean
     val_is_mandatory (val_value_t *val,
 		      val_value_t *valroot,
-		      const obj_template_t *childobj);
+		      obj_template_t *childobj);
 
 
 extern ncx_iqual_t 
     val_get_cond_iqualval (val_value_t *val,
 			   val_value_t *valroot,
-			   const obj_template_t *obj);
+			   obj_template_t *obj);
 
 extern xpath_pcb_t *
     val_get_xpathpcb (val_value_t *val);
@@ -183,13 +183,13 @@ extern const xpath_pcb_t *
     val_get_const_xpathpcb (const val_value_t *val);
 
 extern val_value_t *
-    val_make_simval_obj (const obj_template_t *obj,
+    val_make_simval_obj (obj_template_t *obj,
 			 const xmlChar *valstr,
 			 status_t  *res);
 
 extern status_t 
     val_set_simval_obj (val_value_t  *val,
-			const obj_template_t *obj,
+			obj_template_t *obj,
 			const xmlChar *valstr);
 
 

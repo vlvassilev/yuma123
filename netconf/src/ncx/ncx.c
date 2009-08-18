@@ -444,7 +444,8 @@ static status_t
      * if OK then malloc a new appinfo struct and make
      * a copy of the token value.
      */
-    res = yang_consume_pid_string(tkc, mod,
+    res = yang_consume_pid_string(tkc, 
+                                  mod,
 				  &appinfo->prefix,
 				  &appinfo->name);
     if (res != NO_ERR) {
@@ -455,7 +456,10 @@ static status_t
 	}
     }
 
-    appinfo->tk = TK_CUR(tkc);
+    ncx_set_error(&appinfo->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
 
     /* at this point, if appinfoQ non-NULL:
      *    appinfo is malloced initialized
@@ -2449,11 +2453,11 @@ ncx_module_t *
 * RETURNS:
 *   pointer to the first object or NULL if empty Q
 *********************************************************************/
-const obj_template_t *
-    ncx_get_first_object (const ncx_module_t *mod)
+obj_template_t *
+    ncx_get_first_object (ncx_module_t *mod)
 {
-    const obj_template_t *obj;
-    const yang_node_t    *node;
+    obj_template_t *obj;
+    yang_node_t    *node;
 
 #ifdef DEBUG
     if (!mod) {
@@ -2462,9 +2466,9 @@ const obj_template_t *
     }
 #endif
 
-    for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
+    for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
 	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
 	if (!obj_has_name(obj) ||
 	    !obj_is_enabled(obj) ||
 	    obj_is_cli(obj) || 
@@ -2474,19 +2478,19 @@ const obj_template_t *
 	return obj;
     }
 
-    for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+    for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
 	 node != NULL;
-	 node = (const yang_node_t *)dlq_nextEntry(node)) {
+	 node = (yang_node_t *)dlq_nextEntry(node)) {
 
 	if (!node->submod) {
 	    SET_ERROR(ERR_INTERNAL_PTR);
 	    continue;
 	}
 
-	for (obj = (const obj_template_t *)
+	for (obj = (obj_template_t *)
 		 dlq_firstEntry(&node->submod->datadefQ);
 	     obj != NULL;
-	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	     obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
 	    if (!obj_has_name(obj)  || 
 		!obj_is_enabled(obj) ||
@@ -2513,13 +2517,13 @@ const obj_template_t *
 * RETURNS:
 *   pointer to the next object or NULL if none
 *********************************************************************/
-const obj_template_t *
-    ncx_get_next_object (const ncx_module_t *mod,
-			 const obj_template_t *curobj)
+obj_template_t *
+    ncx_get_next_object (ncx_module_t *mod,
+			 obj_template_t *curobj)
 {
-    const obj_template_t *obj;
-    const yang_node_t    *node;
-    boolean               start;
+    obj_template_t *obj;
+    yang_node_t    *node;
+    boolean         start;
 
 #ifdef DEBUG
     if (!mod || !curobj) {
@@ -2528,9 +2532,9 @@ const obj_template_t *
     }
 #endif
 
-    for (obj = (const obj_template_t *)dlq_nextEntry(curobj);
+    for (obj = (obj_template_t *)dlq_nextEntry(curobj);
 	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
 	if (!obj_has_name(obj) || 
 	    !obj_is_enabled(obj) ||
@@ -2542,11 +2546,11 @@ const obj_template_t *
 	return obj;
     }
 
-    start = (curobj->mod == mod) ? TRUE : FALSE;
+    start = (curobj->tkerr.mod == mod) ? TRUE : FALSE;
 
-    for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+    for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
 	 node != NULL;
-	 node = (const yang_node_t *)dlq_nextEntry(node)) {
+	 node = (yang_node_t *)dlq_nextEntry(node)) {
 
 	if (!node->submod) {
 	    SET_ERROR(ERR_INTERNAL_PTR);
@@ -2554,16 +2558,16 @@ const obj_template_t *
 	}
 
 	if (!start) {
-	    if (node->submod == curobj->mod) {
+	    if (node->submod == curobj->tkerr.mod) {
 		start = TRUE;
 	    }
 	    continue;
 	}
 
-	for (obj = (const obj_template_t *)
+	for (obj = (obj_template_t *)
 		 dlq_firstEntry(&node->submod->datadefQ);
 	     obj != NULL;
-	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	     obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
 	    if (!obj_has_name(obj) || 
 		!obj_is_enabled(obj) ||
@@ -2593,11 +2597,11 @@ const obj_template_t *
 * RETURNS:
 *   pointer to the first object or NULL if empty Q
 *********************************************************************/
-const obj_template_t *
-    ncx_get_first_data_object (const ncx_module_t *mod)
+obj_template_t *
+    ncx_get_first_data_object (ncx_module_t *mod)
 {
-    const obj_template_t *obj;
-    const yang_node_t    *node;
+    obj_template_t *obj;
+    yang_node_t    *node;
 
 #ifdef DEBUG
     if (!mod) {
@@ -2606,9 +2610,9 @@ const obj_template_t *
     }
 #endif
 
-    for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
+    for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
 	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
 	if (!obj_has_name(obj) || 
 	    !obj_is_enabled(obj) ||
 	    obj_is_cli(obj) ||
@@ -2620,19 +2624,19 @@ const obj_template_t *
 	}
     }
 
-    for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+    for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
 	 node != NULL;
-	 node = (const yang_node_t *)dlq_nextEntry(node)) {
+	 node = (yang_node_t *)dlq_nextEntry(node)) {
 
 	if (!node->submod) {
 	    SET_ERROR(ERR_INTERNAL_PTR);
 	    continue;
 	}
 
-	for (obj = (const obj_template_t *)
+	for (obj = (obj_template_t *)
 		 dlq_firstEntry(&node->submod->datadefQ);
 	     obj != NULL;
-	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	     obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
 	    if (!obj_has_name(obj) || 
 		!obj_is_enabled(obj) ||
@@ -2660,13 +2664,13 @@ const obj_template_t *
 * RETURNS:
 *   pointer to the next object or NULL if none
 *********************************************************************/
-const obj_template_t *
-    ncx_get_next_data_object (const ncx_module_t *mod,
-			      const obj_template_t *curobj)
+obj_template_t *
+    ncx_get_next_data_object (ncx_module_t *mod,
+			      obj_template_t *curobj)
 {
-    const obj_template_t *obj;
-    const yang_node_t    *node;
-    boolean               start;
+    obj_template_t *obj;
+    yang_node_t    *node;
+    boolean         start;
 
 #ifdef DEBUG
     if (!mod || !curobj) {
@@ -2675,9 +2679,9 @@ const obj_template_t *
     }
 #endif
 
-    for (obj = (const obj_template_t *)dlq_nextEntry(curobj);
+    for (obj = (obj_template_t *)dlq_nextEntry(curobj);
 	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
 	if (!obj_has_name(obj) || 
 	    !obj_is_enabled(obj) ||
@@ -2691,11 +2695,11 @@ const obj_template_t *
 	}
     }
 
-    start = (curobj->mod == mod) ? TRUE : FALSE;
+    start = (curobj->tkerr.mod == mod) ? TRUE : FALSE;
 
-    for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+    for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
 	 node != NULL;
-	 node = (const yang_node_t *)dlq_nextEntry(node)) {
+	 node = (yang_node_t *)dlq_nextEntry(node)) {
 
 	if (!node->submod) {
 	    SET_ERROR(ERR_INTERNAL_PTR);
@@ -2703,16 +2707,16 @@ const obj_template_t *
 	}
 
 	if (!start) {
-	    if (node->submod == curobj->mod) {
+	    if (node->submod == curobj->tkerr.mod) {
 		start = TRUE;
 	    }
 	    continue;
 	}
 
-	for (obj = (const obj_template_t *)
+	for (obj = (obj_template_t *)
 		 dlq_firstEntry(&node->submod->datadefQ);
 	     obj != NULL;
-	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	     obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
 	    if (!obj_has_name(obj) || 
 		!obj_is_enabled(obj) ||
@@ -6176,7 +6180,7 @@ status_t
 *    status
 *********************************************************************/
 status_t
-    ncx_finish_list (const typ_def_t *typdef,
+    ncx_finish_list (typ_def_t *typdef,
 		     ncx_list_t *list)
 {
     ncx_lmem_t      *lmem;
@@ -6211,7 +6215,8 @@ status_t
 
 	str = lmem->val.str;
 	if (btyp == NCX_BT_ENUM) {
-	    res = val_enum_ok(typdef, str,
+	    res = val_enum_ok(typdef, 
+                              str,
 			      &lmem->val.enu.val,
 			      &lmem->val.enu.name);
 	} else if (btyp == NCX_BT_BITS) {
@@ -6746,8 +6751,8 @@ void
 *    pointer to the ncx_appinfo_t struct for the entry if found
 *    NULL if the entry is not found
 *********************************************************************/
-const ncx_appinfo_t *
-    ncx_find_appinfo (const dlq_hdr_t *appinfoQ,
+ncx_appinfo_t *
+    ncx_find_appinfo (dlq_hdr_t *appinfoQ,
 		      const xmlChar *prefix,
 		      const xmlChar *varname)
 {
@@ -6776,6 +6781,55 @@ const ncx_appinfo_t *
     return NULL;
 
 }  /* ncx_find_appinfo */
+
+
+/********************************************************************
+* FUNCTION ncx_find_const_appinfo
+* 
+* Find an appinfo entry by name (First match is returned)
+* The entry returned is not removed from the Q
+*
+* INPUTS:
+*    appinfoQ == pointer to Q of ncx_appinfo_t data structure to check
+*    prefix == module prefix that defines the extension 
+*            == NULL to pick the first match (not expecting
+*               appinfo name collisions)
+*    varname == name string of the appinfo variable to find
+*
+* RETURNS:
+*    pointer to the ncx_appinfo_t struct for the entry if found
+*    NULL if the entry is not found
+*********************************************************************/
+const ncx_appinfo_t *
+    ncx_find_const_appinfo (const dlq_hdr_t *appinfoQ,
+                            const xmlChar *prefix,
+                            const xmlChar *varname)
+{
+    const ncx_appinfo_t *appinfo;
+
+#ifdef DEBUG
+    if (!appinfoQ || !varname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    for (appinfo = (const ncx_appinfo_t *)dlq_firstEntry(appinfoQ);
+	 appinfo != NULL;
+	 appinfo = (const ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
+
+	if (prefix && appinfo->prefix &&
+	    xml_strcmp(prefix, appinfo->prefix)) {
+	    continue;
+	}
+
+	if (!xml_strcmp(varname, appinfo->name)) {
+	    return appinfo;
+	}
+    }
+    return NULL;
+
+}  /* ncx_find_const_appinfo */
 
 
 /********************************************************************
@@ -6826,6 +6880,56 @@ const ncx_appinfo_t *
     return NULL;
 
 }  /* ncx_find_next_appinfo */
+
+
+/********************************************************************
+* FUNCTION ncx_find_next_appinfo2
+* 
+* Find the next instance of an appinfo entry by name
+* (First match is returned)
+* The entry returned is not removed from the Q
+*
+* INPUTS:
+*    current == pointer to current ncx_appinfo_t data structure to check
+*    prefix == module prefix that defines the extension 
+*            == NULL to pick the first match (not expecting
+*               appinfo name collisions)
+*    varname == name string of the appinfo variable to find
+*
+* RETURNS:
+*    pointer to the ncx_appinfo_t struct for the entry if found
+*    NULL if the entry is not found
+*********************************************************************/
+ncx_appinfo_t *
+    ncx_find_next_appinfo2 (ncx_appinfo_t *current,
+			   const xmlChar *prefix,
+			   const xmlChar *varname)
+{
+    ncx_appinfo_t *appinfo;
+
+#ifdef DEBUG
+    if (!current || !varname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    for (appinfo = (ncx_appinfo_t *)dlq_nextEntry(current);
+	 appinfo != NULL;
+	 appinfo = (ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
+
+	if (prefix && appinfo->prefix &&
+	    xml_strcmp(prefix, appinfo->prefix)) {
+	    continue;
+	}
+
+	if (!xml_strcmp(varname, appinfo->name)) {
+	    return appinfo;
+	}
+    }
+    return NULL;
+
+}  /* ncx_find_next_appinfo2 */
 
 
 /********************************************************************
@@ -7023,7 +7127,7 @@ status_t
                                           mod, 
                                           appinfo->prefix,
 					  appinfo->name, 
-                                          appinfo->tk,
+                                          &appinfo->tkerr,
 					  &ext);
 	    CHK_EXIT(res, retres);
 	} else {
@@ -7033,7 +7137,7 @@ status_t
 		log_error("\nError: Local module extension '%s' not found",
 			  appinfo->name);
 		res = retres = ERR_NCX_DEF_NOT_FOUND;
-		tkc->cur = appinfo->tk;
+		tkc->curerr = &appinfo->tkerr;
 		ncx_print_errormsg(tkc, mod, retres);
 	    } else {
 		res = NO_ERR;
@@ -7046,7 +7150,7 @@ status_t
 		retres = ERR_NCX_MISSING_PARM;
 		log_error("\nError: argument missing for extension '%s:%s' ",
 			  appinfo->prefix, ext->name);
-		tkc->cur = appinfo->tk;
+		tkc->curerr = &appinfo->tkerr;
 		ncx_print_errormsg(tkc, mod, retres);
 	    } else if (!ext->arg && appinfo->value) {
 		retres = ERR_NCX_EXTRA_PARM;
@@ -7055,7 +7159,7 @@ status_t
 			  appinfo->value, 
                           appinfo->prefix, 
                           ext->name);
-		tkc->cur = appinfo->tk;
+		tkc->curerr = &appinfo->tkerr;
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
 	}
@@ -8911,7 +9015,10 @@ void
 	return;
     }
 
-    if (mod && mod->sourcefn) {
+    if (tkc && tkc->curerr) {
+	log_write("\n%s:", (tkc->curerr->mod->sourcefn) ? 
+		  (const char *)tkc->curerr->mod->sourcefn : "--");
+    } else if (mod && mod->sourcefn) {
 	log_write("\n%s:", (mod->sourcefn) ? 
 		  (const char *)mod->sourcefn : "--");
     } else if (tkc && tkc->filename) {
@@ -8925,8 +9032,17 @@ void
 	log_write("\n");
     }
 
-    if (tkc && tkc->cur && TK_CUR_VAL(tkc)) {
-	log_write("%u.%u:", TK_CUR_LNUM(tkc), TK_CUR_LPOS(tkc));
+    if (tkc) {
+        if (tkc->curerr) {
+            log_write("%u.%u:", 
+                      tkc->curerr->linenum, 
+                      tkc->curerr->linepos);
+            tkc->curerr = NULL;
+        } else if (tkc->cur && TK_CUR_VAL(tkc)) {
+            log_write("%u.%u:", 
+                      TK_CUR_LNUM(tkc), 
+                      TK_CUR_LPOS(tkc));
+        }
     }
 
     if (iserr) {
@@ -8934,26 +9050,6 @@ void
     } else {
 	log_write(" warning(%u): %s", res, get_error_string(res));
     }
-
-#ifdef TOO_VERBOSE_FOR_NOW
-    if (tkc && tkc->cur && TK_CUR_VAL(tkc)) {
-	if (TK_CUR_MOD(tkc)) {
-	    if (xml_strlen(TK_CUR_VAL(tkc)) < 20) {
-		log_write(": Cur: '%s:%s'",
-			  TK_CUR_MOD(tkc), TK_CUR_VAL(tkc));
-	    } else {
-		log_write(": Cur: '%s:%20s...'", 
-			  TK_CUR_MOD(tkc), TK_CUR_VAL(tkc));
-	    }
-	} else {
-	    if (xml_strlen(TK_CUR_VAL(tkc)) < 20) {
-		log_write(": Cur: '%s'", TK_CUR_VAL(tkc));
-	    } else {
-		log_write(": Cur: '%20s...'", TK_CUR_VAL(tkc));
-	    }
-	}
-    }
-#endif
 
     if (fineoln) {
 	log_write("\n");
@@ -11046,6 +11142,40 @@ void
         ncx_free_save_deviations(savedev);
     }
 } /* ncx_clean_save_deviationsQ */
+
+
+/********************************************************************
+* FUNCTION ncx_set_error
+* 
+* Set the fields in an ncx_error_t struct
+*
+* INPUTS:
+*   tkerr== address of ncx_error_t struct to set
+*   mod == [sub]module containing tkerr
+*   linenum == current linenum
+*   linepos == current column position on the current line
+*
+* OUTPUTS:
+*   *tkerr is filled in
+*********************************************************************/
+void
+    ncx_set_error (ncx_error_t *tkerr,
+                   ncx_module_t *mod,
+                   uint32 linenum,
+                   uint32 linepos)
+{
+#ifdef DEBUG
+    if (!tkerr || !mod) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }	
+#endif
+
+    tkerr->mod = mod;
+    tkerr->linenum = linenum;
+    tkerr->linepos = linepos;
+
+}  /* ncx_set_error */
 
 
 /* END file ncx.c */

@@ -119,7 +119,7 @@ typedef enum agt_not_stream_t_ {
  */
 typedef struct agt_not_msg_t_ {
     dlq_hdr_t                qhdr;
-    const obj_template_t    *notobj;
+    obj_template_t          *notobj;
     dlq_hdr_t                payloadQ;
     uint32                   msgid;
     xmlChar                  eventTime[TSTAMP_MIN_SIZE];
@@ -177,7 +177,7 @@ extern void
     agt_not_remove_subscription (ses_id_t sid);
 
 extern agt_not_msg_t * 
-    agt_not_new_notification (const obj_template_t *eventType);
+    agt_not_new_notification (obj_template_t *eventType);
 
 extern void 
     agt_not_free_notification (agt_not_msg_t *not);

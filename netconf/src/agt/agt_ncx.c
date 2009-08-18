@@ -18,6 +18,7 @@ date         init     comment
 *********************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifndef _H_procdefs
 #include  "procdefs.h"
@@ -835,6 +836,7 @@ static status_t
     cfg_template_t       *target;
     status_t              res;
     const void           *errval;
+    char                 *errstr;
     ncx_node_t            errtyp;
 
     /* get the config to delete */
@@ -883,6 +885,8 @@ static status_t
             errval = NCX_EL_TARGET;
             errtyp = NCX_NT_STRING;
         }
+
+        errstr = strdup("/nc:rpc/nc:delete-config/nc:target");
         agt_record_error(scb, 
                          &msg->mhdr,
                          NCX_LAYER_OPERATION, 
@@ -890,8 +894,11 @@ static status_t
                          methnode, 
                          errtyp, 
                          errval,
-                         NCX_NT_STRING, 
-                         "/nc:rpc/nc:delete-config/nc:target");
+                         (errstr) ? NCX_NT_STRING : NCX_NT_NONE,
+                         errstr);
+        if (errstr) {
+            m__free(errstr);
+        }
     } else {
         msg->rpc_user1 = target;
     }
@@ -919,6 +926,7 @@ static status_t
     cfg_template_t       *startup, *target;
     xmlChar              *fname;
     const xmlChar        *startspec;
+    char                 *errstr;
     status_t              res;
     int                   retval;
 
@@ -953,6 +961,9 @@ static status_t
         retval = remove((const char *)fname);
         if (retval != 0) {
             res = errno_to_status();
+            errstr = (char *)
+                xml_strdup((const xmlChar *)
+                           "/nc:rpc/nc:delete-config/nc:target");
             agt_record_error(scb, 
                              &msg->mhdr,
                              NCX_LAYER_OPERATION, 
@@ -960,8 +971,11 @@ static status_t
                              methnode, 
                              NCX_NT_STRING, 
                              fname,
-                             NCX_NT_STRING, 
-                             "/nc:rpc/nc:delete-config/nc:target");
+                             (errstr) ? NCX_NT_STRING : NCX_NT_NONE,
+                             errstr);
+            if (errstr) {
+                m__free(errstr);
+            }
         } else {
             startup = target;
             if (startup != NULL && startup->root != NULL) {

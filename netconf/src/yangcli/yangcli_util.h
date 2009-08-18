@@ -101,7 +101,7 @@ extern val_value_t *
     get_instanceid_parm (agent_cb_t *agent_cb,
 			 const xmlChar *target,
 			 boolean schemainst,
-			 const obj_template_t **targobj,
+			 obj_template_t **targobj,
 			 val_value_t **targval,
 			 status_t *retres);
 
@@ -120,12 +120,12 @@ extern void
 /* agent_cb field must already be set */
 extern void
     set_completion_state (completion_state_t *completion_state,
-			  const obj_template_t *rpc,
-			  const obj_template_t *parm,
+			  obj_template_t *rpc,
+			  obj_template_t *parm,
 			  command_state_t  cmdstate);
 
 extern void
     set_completion_state_curparm (completion_state_t *completion_state,
-				  const obj_template_t *parm);
+				  obj_template_t *parm);
 
 #endif	    /* _H_yangcli_util */

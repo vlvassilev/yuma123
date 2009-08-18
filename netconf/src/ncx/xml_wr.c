@@ -387,7 +387,7 @@ static void
 		 xml_msg_hdr_t *msg,
 		 const dlq_hdr_t *attrQ,
 		 boolean isattrq,
-		 const val_value_t  *curelem,
+		 val_value_t  *curelem,
 		 int32 indent,
 		 xmlns_id_t elem_nsid)
 {
@@ -548,7 +548,7 @@ static void
 static void
     begin_elem_val (ses_cb_t *scb,
 		    xml_msg_hdr_t *msg,
-		    const val_value_t *val,
+		    val_value_t *val,
 		    int32 indent)
 {
     const xmlChar       *pfix,  *elname;
@@ -685,7 +685,7 @@ static void
 static void
     write_check_val (ses_cb_t *scb,
 		     xml_msg_hdr_t *msg,
-		     const val_value_t *val,
+		     val_value_t *val,
 		     int32  indent,
 		     val_nodetest_fn_t testfn,
 		     boolean acmcheck)
@@ -693,7 +693,7 @@ static void
     const ncx_lmem_t   *listmem;
     const xmlChar      *pfix;
     val_value_t        *v_val, *chval;
-    const val_value_t  *useval;
+    val_value_t        *useval;
     xmlChar            *binbuff;
     xml_msg_authfn_t    cbfn;
     uint32              len;
@@ -1410,7 +1410,7 @@ void
 void
     xml_wr_check_val (ses_cb_t *scb,
 		      xml_msg_hdr_t *msg,
-		      const val_value_t *val,
+		      val_value_t *val,
 		      int32  indent,
 		      val_nodetest_fn_t testfn)
 {
@@ -1445,7 +1445,7 @@ void
 void
     xml_wr_val (ses_cb_t *scb,
 		xml_msg_hdr_t *msg,
-		const val_value_t *val,
+		val_value_t *val,
 		int32  indent)
 {
     xml_wr_check_val(scb, 
@@ -1476,12 +1476,12 @@ void
 void
     xml_wr_full_check_val (ses_cb_t *scb,
 			   xml_msg_hdr_t *msg,
-			   const val_value_t *val,
+			   val_value_t *val,
 			   int32  indent,
 			   val_nodetest_fn_t testfn)
 {
     val_value_t       *vir;
-    const val_value_t *out;
+    val_value_t       *out;
     xml_msg_authfn_t   cbfn;
     status_t           res;
     boolean            acmtest;
@@ -1597,7 +1597,7 @@ void
 void
     xml_wr_full_val (ses_cb_t *scb,
 		     xml_msg_hdr_t *msg,
-		     const val_value_t *val,
+		     val_value_t *val,
 		     int32  indent)
 {
     xml_wr_full_check_val(scb, 
@@ -1631,7 +1631,7 @@ void
 *********************************************************************/
 status_t
     xml_wr_check_open_file (FILE *fp, 
-                            const val_value_t *val,
+                            val_value_t *val,
                             xml_attrs_t *attrs,
                             boolean docmode,
                             boolean xmlhdr,
@@ -1815,7 +1815,7 @@ status_t
 *********************************************************************/
 status_t
     xml_wr_check_file (const xmlChar *filespec, 
-		       const val_value_t *val,
+		       val_value_t *val,
 		       xml_attrs_t *attrs,
 		       boolean docmode,
 		       boolean xmlhdr,
@@ -1872,7 +1872,7 @@ status_t
 *********************************************************************/
 status_t
     xml_wr_file (const xmlChar *filespec,
-		 const val_value_t *val,
+		 val_value_t *val,
 		 xml_attrs_t *attrs,
 		 boolean docmode,
 		 boolean xmlhdr,

@@ -102,7 +102,7 @@ static void
 	m__free(sim->range.rangestr);
 	sim->range.rangestr = NULL;
     }
-    sim->range.tk = NULL;
+    memset(&sim->range.tkerr, 0x0, sizeof(ncx_error_t));
 
     if (sim->idref.baseprefix) {
 	m__free(sim->idref.baseprefix);
@@ -576,7 +576,7 @@ void
 
     typdef->class = NCX_CL_NAMED;
     typdef->def.named.typ = imptyp;
-    typdef->linenum = imptyp->linenum;
+    typdef->linenum = imptyp->tkerr.linenum;
 
 }  /* typ_set_named_typdef */
 
@@ -2513,8 +2513,9 @@ const ncx_appinfo_t *
     while (!done) {
 	appdef = typ_get_cqual_typdef(typdef, NCX_SQUAL_APPINFO);
 	if (appdef) {
-	    appinfo = ncx_find_appinfo(&appdef->appinfoQ, 
-				       prefix, name);
+	    appinfo = ncx_find_const_appinfo(&appdef->appinfoQ, 
+                                             prefix, 
+                                             name);
 	    if (appinfo) {
 		done = TRUE;
 	    } else if (appdef->class == NCX_CL_NAMED) {
@@ -2558,8 +2559,9 @@ const ncx_appinfo_t *
     }
 #endif
 
-    return ncx_find_appinfo(&typdef->appinfoQ, 
-			    prefix, name);
+    return ncx_find_const_appinfo(&typdef->appinfoQ, 
+                                  prefix, 
+                                  name);
 
 }  /* typ_find_appinfo_con */
 
@@ -2591,24 +2593,24 @@ boolean
 	return TRUE;
     }
 
-    if (ncx_find_appinfo(&typdef->appinfoQ,
-			 NCX_PREFIX, 
-                         NCX_EL_XPATH)) {
+    if (ncx_find_const_appinfo(&typdef->appinfoQ,
+                               NCX_PREFIX, 
+                               NCX_EL_XPATH)) {
 	return TRUE;
     }
 
     if (typdef->class == NCX_CL_NAMED) {
 	if (typdef->def.named.newtyp &&
-	    ncx_find_appinfo(&typdef->def.named.newtyp->appinfoQ,
-			     NCX_PREFIX, 
-                             NCX_EL_XPATH)) {
+	    ncx_find_const_appinfo(&typdef->def.named.newtyp->appinfoQ,
+                                   NCX_PREFIX, 
+                                   NCX_EL_XPATH)) {
 	    return TRUE;
 	}
 	if (typdef->def.named.typ) {
             test_typ = typdef->def.named.typ;
 
             /* hardwire the YANG xpath1.0 type */
-            if (!xml_strcmp(test_typ->mod->name,
+            if (!xml_strcmp(test_typ->tkerr.mod->name,
                             (const xmlChar *)"ietf-yang-types") &&
                 !xml_strcmp(test_typ->name,
                             (const xmlChar *)"xpath1.0")) {
@@ -2648,15 +2650,17 @@ boolean
     }
 #endif
 
-    if (ncx_find_appinfo(&typdef->appinfoQ,
-			 NCX_PREFIX, NCX_EL_QNAME)) {
+    if (ncx_find_const_appinfo(&typdef->appinfoQ,
+                               NCX_PREFIX, 
+                               NCX_EL_QNAME)) {
 	return TRUE;
     }
 
     if (typdef->class == NCX_CL_NAMED) {
 	if (typdef->def.named.newtyp &&
-	    ncx_find_appinfo(&typdef->def.named.newtyp->appinfoQ,
-			     NCX_PREFIX, NCX_EL_QNAME)) {
+	    ncx_find_const_appinfo(&typdef->def.named.newtyp->appinfoQ,
+                                   NCX_PREFIX, 
+                                   NCX_EL_QNAME)) {
 	    return TRUE;
 	}
 	if (typdef->def.named.typ) {
@@ -2699,17 +2703,17 @@ boolean
 	return FALSE;
     }
 
-    if (ncx_find_appinfo(&typdef->appinfoQ,
-			 NCX_PREFIX, 
-			 NCX_EL_SCHEMA_INSTANCE)) {
+    if (ncx_find_const_appinfo(&typdef->appinfoQ,
+                               NCX_PREFIX, 
+                               NCX_EL_SCHEMA_INSTANCE)) {
 	return TRUE;
     }
 
     if (typdef->class == NCX_CL_NAMED) {
 	if (typdef->def.named.newtyp &&
-	    ncx_find_appinfo(&typdef->def.named.newtyp->appinfoQ,
-			     NCX_PREFIX, 
-			     NCX_EL_SCHEMA_INSTANCE)) {
+	    ncx_find_const_appinfo(&typdef->def.named.newtyp->appinfoQ,
+                                   NCX_PREFIX, 
+                                   NCX_EL_SCHEMA_INSTANCE)) {
 	    return TRUE;
 	}
 	if (typdef->def.named.typ) {
@@ -3122,8 +3126,8 @@ boolean
 * RETURNS:
 *   pointer to the first enum def of NULL if none
 *********************************************************************/
-const typ_enum_t *
-    typ_first_enumdef (const typ_def_t *typdef)
+typ_enum_t *
+    typ_first_enumdef (typ_def_t *typdef)
 {
 
 #ifdef DEBUG
@@ -3136,7 +3140,7 @@ const typ_enum_t *
 	return NULL;
     }
 
-    return (const typ_enum_t *)
+    return (typ_enum_t *)
 	dlq_firstEntry(&typdef->def.simple.valQ);
 
 }  /* typ_first_enumdef */
@@ -3153,8 +3157,8 @@ const typ_enum_t *
 * RETURNS:
 *   pointer to the first enum def of NULL if none
 *********************************************************************/
-const typ_enum_t *
-    typ_next_enumdef (const typ_enum_t *enumdef)
+typ_enum_t *
+    typ_next_enumdef (typ_enum_t *enumdef)
 {
 
 #ifdef DEBUG
@@ -3164,8 +3168,7 @@ const typ_enum_t *
     }
 #endif
 
-    return (const typ_enum_t *)
-	dlq_nextEntry(enumdef);
+    return (typ_enum_t *)dlq_nextEntry(enumdef);
 
 }  /* typ_next_enumdef */
 
@@ -3590,10 +3593,10 @@ xmlns_id_t
 * RETURNS:
 *   namespace ID of the type
 *********************************************************************/
-const typ_template_t *
-    typ_get_listtyp (const typ_def_t *typdef)
+typ_template_t *
+    typ_get_listtyp (typ_def_t *typdef)
 {
-    const typ_def_t *ltypdef;
+    typ_def_t *ltypdef;
     ncx_btype_t      btyp;
 
 #ifdef DEBUG
@@ -3773,8 +3776,8 @@ typ_def_t *
 * RETURNS:
 *   pointer to first typ_unionnode struct or NULL if none
 *********************************************************************/
-const typ_unionnode_t *
-    typ_first_unionnode (const typ_def_t *typdef)
+typ_unionnode_t *
+    typ_first_unionnode (typ_def_t *typdef)
 {
 
 #ifdef DEBUG
@@ -3790,7 +3793,7 @@ const typ_unionnode_t *
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	    return NULL;
 	} else {
-	    return (const typ_unionnode_t *)
+	    return (typ_unionnode_t *)
 		dlq_firstEntry(&typdef->def.simple.unionQ);
 	}
     case NCX_CL_NAMED:
@@ -4168,57 +4171,6 @@ uint32
 }  /* typ_get_pattern_count */
 
 
-#ifdef REMOVE_IN_PROGRESS
-/********************************************************************
-* FUNCTION typ_get_pattern_errinfo
-* 
-* Get the pattern errinfo for a typdef
-*
-* INPUTS:
-*   typdef == typ_def_t to check
-*   patstr == p[attern string to match 
-*
-* RETURNS:
-*   pointer to pattern string or NULL if none
-*********************************************************************/
-const ncx_errinfo_t *
-    typ_get_pattern_errinfo (const typ_def_t *typdef,
-			     const xmlChar *patstr)
-{
-    ncx_errinfo_t *errinfo;
-    const dlq_hdr_t     *que;
-
-#ifdef DEBUG
-    if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }
-#endif
-
-    if (typdef->class==NCX_CL_NAMED) {
-	if (typdef->def.named.newtyp) {
-	    que = &typdef->def.named.newtyp->pat_errinfoQ;
-	} else {
-	    return NULL;
-	}
-    } else {
-	que = &typdef->pat_errinfoQ;
-    }
-
-    for (errinfo = (ncx_errinfo_t *)dlq_firstEntry(que);
-	 errinfo != NULL;
-	 errinfo = (ncx_errinfo_t *)dlq_nextEntry(errinfo)) {
-	if (errinfo->pattern &&
-	    !xml_strcmp(errinfo->pattern, patstr)) {
-	    return errinfo;
-	}
-    } 
-    return NULL;
-
-}  /* typ_get_pattern_errinfo */
-#endif
-
-
 /********************************************************************
 * FUNCTION typ_get_range_errinfo
 * 
@@ -4230,8 +4182,8 @@ const ncx_errinfo_t *
 * RETURNS:
 *   pointer to pattern string or NULL if none
 *********************************************************************/
-const ncx_errinfo_t *
-    typ_get_range_errinfo (const typ_def_t *typdef)
+ncx_errinfo_t *
+    typ_get_range_errinfo (typ_def_t *typdef)
 {
 
 #ifdef DEBUG
@@ -4598,10 +4550,10 @@ const xmlChar *
 * RETURNS:
 *    pointer to the PCB struct or NULL if some error
 *********************************************************************/
-const struct xpath_pcb_t_ *
-    typ_get_leafref_pcb (const typ_def_t *typdef)
+struct xpath_pcb_t_ *
+    typ_get_leafref_pcb (typ_def_t *typdef)
 {
-    const typ_def_t        *tdef;
+    typ_def_t        *tdef;
 
 #ifdef DEBUG
     if (!typdef) {
@@ -4614,7 +4566,7 @@ const struct xpath_pcb_t_ *
 	return NULL;
     }
 
-    tdef = typ_get_cbase_typdef(typdef);
+    tdef = typ_get_base_typdef(typdef);
     if (tdef && tdef->def.simple.xleafref) {
 	return tdef->def.simple.xleafref;
     } else {
@@ -4671,7 +4623,7 @@ boolean
 *********************************************************************/
 void
     typ_set_xref_typdef (typ_def_t *typdef,
-			 const typ_def_t *target)
+			 typ_def_t *target)
 {
     typ_def_t        *tdef;
     ncx_btype_t       btyp;
@@ -4713,11 +4665,11 @@ void
 * RETURNS:
 *    pointer to the PCB struct or NULL if some error
 *********************************************************************/
-const typ_def_t *
-    typ_get_xref_typdef (const typ_def_t *typdef)
+typ_def_t *
+    typ_get_xref_typdef (typ_def_t *typdef)
 {
-    const typ_def_t        *tdef;
-    ncx_btype_t             btyp;
+    typ_def_t        *tdef;
+    ncx_btype_t       btyp;
 
 #ifdef DEBUG
     if (!typdef) {
@@ -4733,7 +4685,7 @@ const typ_def_t *
 	return NULL;
     }
 
-    tdef = typ_get_cbase_typdef(typdef);
+    tdef = typ_get_base_typdef(typdef);
     if (tdef && tdef->class == NCX_CL_SIMPLE) {
 	return tdef->def.simple.xrefdef;
     } else {

@@ -361,14 +361,14 @@ static status_t
 *    NULL if some error (*res != NO_ERR)
 *********************************************************************/
 static val_value_t *
-    make_obj_appinfo (const obj_template_t *obj,
+    make_obj_appinfo (obj_template_t *obj,
 		      status_t  *res)
 {
     val_value_t          *newval, *appval, *mustval;
-    const dlq_hdr_t      *mustQ, *appinfoQ, *datadefQ;
-    const xpath_pcb_t    *must;
-    const ncx_errinfo_t  *errinfo;
-    const obj_template_t *outputobj;
+    dlq_hdr_t            *mustQ, *appinfoQ, *datadefQ;
+    xpath_pcb_t          *must;
+    ncx_errinfo_t        *errinfo;
+    obj_template_t       *outputobj;
     const xmlChar        *units, *presence;
     xmlChar              *buff;
     ncx_status_t          status;
@@ -417,7 +417,7 @@ static val_value_t *
 	needed = (obj->flags & OBJ_FL_TOP) ? TRUE : FALSE;
 	break;
     case OBJ_TYP_RPC:
-        datadefQ = obj_get_cdatadefQ(obj);
+        datadefQ = obj_get_datadefQ(obj);
 	outputobj = obj_find_template(datadefQ,
 				      NULL, 
                                       YANG_K_OUTPUT);
@@ -519,9 +519,9 @@ static val_value_t *
 
     /* add must entries if needed */
     if (mustQ) {
-	for (must = (const xpath_pcb_t *)dlq_firstEntry(mustQ);
+	for (must = (xpath_pcb_t *)dlq_firstEntry(mustQ);
 	     must != NULL;
-	     must = (const xpath_pcb_t *)dlq_nextEntry(must)) {
+	     must = (xpath_pcb_t *)dlq_nextEntry(must)) {
 
 	    errinfo = &must->errinfo;
 	    needed = TRUE;
@@ -3003,7 +3003,7 @@ status_t
 *    NULL if some error (*res != NO_ERR)
 *********************************************************************/
 val_value_t *
-    xsd_make_obj_annotation (const obj_template_t *obj,
+    xsd_make_obj_annotation (obj_template_t *obj,
 			     status_t  *res)
 {
     val_value_t    *annot, *doc, *refval, *appinfo;

@@ -68,17 +68,17 @@ extern status_t
 
 extern status_t
     xsd_finish_simpleType (const ncx_module_t *mod,
-			   const typ_def_t *typdef,
+			   typ_def_t *typdef,
 			   val_value_t *val);
 
 extern status_t
     xsd_finish_namedType (const ncx_module_t *mod,
-			  const typ_def_t *typdef,
+			  typ_def_t *typdef,
 			  val_value_t *val);
 
 extern status_t
     xsd_finish_union (const ncx_module_t *mod,
-		      const typ_def_t *typdef,
+		      typ_def_t *typdef,
 		      val_value_t *val);
 
 #endif	    /* _H_xsd_typ */

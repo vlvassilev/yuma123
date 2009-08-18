@@ -241,8 +241,8 @@ typedef struct val_value_t_ {
     dlq_hdr_t      qhdr;
 
     /* common fields */
-    const struct obj_template_t_ *obj;        /* bptr to object def */
-    const typ_def_t *typdef;              /* bptr to typdef if leaf */
+    struct obj_template_t_ *obj;        /* bptr to object def */
+    typ_def_t *typdef;              /* bptr to typdef if leaf */
     const xmlChar   *name;                /* back pointer to elname */
     xmlChar         *dname;          /* AND malloced name if needed */
     struct val_value_t_ *parent;       /* back-ptr to parent if any */
@@ -297,7 +297,7 @@ typedef struct val_value_t_ {
      * the OBJ_TYP_CASE and OBJ_TYP_CHOICE nodes are skipped
      * inside an XML instance document
      */
-    const struct obj_template_t_   *casobj;
+    struct obj_template_t_   *casobj;
 
     /* these fields are for NCX_BT_LEAFREF
      * NCX_BT_INSTANCE_ID, or tagged ncx:xpath 
@@ -428,11 +428,11 @@ extern void
 extern void
     val_init_virtual (val_value_t *val,
 		      void *cbfn,
-		      const struct obj_template_t_ *obj);
+		      struct obj_template_t_ *obj);
 
 extern void
     val_init_from_template (val_value_t *val,
-			    const struct obj_template_t_ *obj);
+			    struct obj_template_t_ *obj);
 
 extern void 
     val_free_value (val_value_t *val);
@@ -455,16 +455,16 @@ extern void
 		   uint32 namelen);
 
 extern status_t
-    val_string_ok (const typ_def_t *typdef,
+    val_string_ok (typ_def_t *typdef,
 		   ncx_btype_t  btyp,
 		   const xmlChar *strval);
 
 /* retrieve the YANG custom error info if any */
 extern status_t
-    val_string_ok_errinfo (const typ_def_t *typdef,
+    val_string_ok_errinfo (typ_def_t *typdef,
 			   ncx_btype_t  btyp,
 			   const xmlChar *strval,
-			   const ncx_errinfo_t **errinfo);
+			   ncx_errinfo_t **errinfo);
 
 
 /* validate all the ncx_lmem_t entries in the list
@@ -473,29 +473,29 @@ extern status_t
  * in the list with an error
  */
 extern status_t
-    val_list_ok (const typ_def_t *typdef,
+    val_list_ok (typ_def_t *typdef,
 		 ncx_btype_t btyp,
 		 ncx_list_t *list);
 
 extern status_t
-    val_list_ok_errinfo (const typ_def_t *typdef,
+    val_list_ok_errinfo (typ_def_t *typdef,
 			 ncx_btype_t btyp,
 			 ncx_list_t *list,
-			 const ncx_errinfo_t **errinfo);
+			 ncx_errinfo_t **errinfo);
 
 extern status_t
-    val_enum_ok (const typ_def_t *typdef,
+    val_enum_ok (typ_def_t *typdef,
 		 const xmlChar *enumval,
 		 int32 *retval,
 		 const xmlChar **retstr);
 
 extern status_t
-    val_bit_ok (const typ_def_t *typdef,
+    val_bit_ok (typ_def_t *typdef,
 		const xmlChar *bitname,
 		uint32 *position);
 
 extern status_t
-    val_idref_ok (const typ_def_t *typdef,
+    val_idref_ok (typ_def_t *typdef,
 		  const xmlChar *qname,
 		  xmlns_id_t nsid,
 		  const xmlChar **name,
@@ -509,24 +509,24 @@ extern status_t
 		     const ncx_identity_t **id);
 
 extern status_t
-    val_range_ok (const typ_def_t *typdef,
+    val_range_ok (typ_def_t *typdef,
 		  ncx_btype_t  btyp,
 		  const ncx_num_t *num);
 
 extern status_t
-    val_pattern_ok (const typ_def_t *typdef,
+    val_pattern_ok (typ_def_t *typdef,
 		    const xmlChar *strval);
 
 extern status_t
-    val_pattern_ok_errinfo (const typ_def_t *typdef,
+    val_pattern_ok_errinfo (typ_def_t *typdef,
 			    const xmlChar *strval,
-			    const ncx_errinfo_t **errinfo);
+			    ncx_errinfo_t **errinfo);
 
 extern status_t
-    val_range_ok_errinfo (const typ_def_t *typdef,
+    val_range_ok_errinfo (typ_def_t *typdef,
 			  ncx_btype_t  btyp,
 			  const ncx_num_t *num,
-			  const ncx_errinfo_t **errinfo);
+			  ncx_errinfo_t **errinfo);
 
 
 
@@ -535,53 +535,53 @@ extern status_t
  * default parameter for example
  */
 extern status_t
-    val_simval_ok (const typ_def_t *typdef,
+    val_simval_ok (typ_def_t *typdef,
 		   const xmlChar *simval);
 		   
 extern status_t
-    val_simval_ok_errinfo (const typ_def_t *typdef,
+    val_simval_ok_errinfo (typ_def_t *typdef,
 			   const xmlChar *simval,
-			   const ncx_errinfo_t **errinfo);
+			   ncx_errinfo_t **errinfo);
 
 extern status_t
-    val_union_ok (const typ_def_t *typdef,
+    val_union_ok (typ_def_t *typdef,
 		  const xmlChar *strval,
 		  val_value_t *retval);
 
 extern status_t
-    val_union_ok_errinfo (const typ_def_t *typdef,
+    val_union_ok_errinfo (typ_def_t *typdef,
 			  const xmlChar *strval,
 			  val_value_t *retval,
-			  const ncx_errinfo_t **errinfo);
+			  ncx_errinfo_t **errinfo);
 
 
-extern const dlq_hdr_t *
-    val_get_metaQ (const val_value_t  *val);
-
-extern const val_value_t *
-    val_get_first_meta (const dlq_hdr_t *queue);
-
-extern const val_value_t *
-    val_get_first_meta_val (const val_value_t *val);
-
-extern const val_value_t *
-    val_get_next_meta (const val_value_t *curmeta);
-
-extern boolean
-    val_meta_empty (const val_value_t *val);
+extern dlq_hdr_t *
+    val_get_metaQ (val_value_t  *val);
 
 extern val_value_t *
-    val_find_meta (const val_value_t *val,
+    val_get_first_meta (dlq_hdr_t *queue);
+
+extern val_value_t *
+    val_get_first_meta_val (val_value_t *val);
+
+extern val_value_t *
+    val_get_next_meta (val_value_t *curmeta);
+
+extern boolean
+    val_meta_empty (val_value_t *val);
+
+extern val_value_t *
+    val_find_meta (val_value_t *val,
 		   xmlns_id_t   nsid,
 		   const xmlChar *name);
 
 extern boolean
-    val_meta_match (const val_value_t *val,
-		    const val_value_t *metaval);
+    val_meta_match (val_value_t *val,
+		    val_value_t *metaval);
 
 
 extern uint32
-    val_metadata_inst_count (const val_value_t  *val,
+    val_metadata_inst_count (val_value_t  *val,
 			     xmlns_id_t nsid,
 			     const xmlChar *name);
 
@@ -589,32 +589,31 @@ extern uint32
 
 /* print a val_value_t struct contents to logfile or stdout */
 extern void
-    val_dump_value (const val_value_t *val,
+    val_dump_value (val_value_t *val,
 		    int32 startindent);
 
 extern void
-    val_dump_value_ex (const val_value_t *val,
+    val_dump_value_ex (val_value_t *val,
                        int32 startindent,
                        ncx_display_mode_t display_mode);
 
 /* print a val_value_t struct contents to alternate logfile */
 extern void
-    val_dump_alt_value (const val_value_t *val,
+    val_dump_alt_value (val_value_t *val,
 			int32 startindent);
 
 /* print a val_value_t struct contents to stdout */
 extern void
-    val_stdout_value (const val_value_t *val,
+    val_stdout_value (val_value_t *val,
 		      int32 startindent);
 
 extern void
-    val_stdout_value_ex (const val_value_t *val,
+    val_stdout_value_ex (val_value_t *val,
                          int32 startindent,
                          ncx_display_mode_t display_mode);
 
-
 extern void
-    val_dump_value_max (const val_value_t *val,
+    val_dump_value_max (val_value_t *val,
                         int32 startindent,
                         int32 indent_amount,
                         val_dumpvalue_mode_t dumpmode,
@@ -635,7 +634,7 @@ extern status_t
 extern status_t 
     val_set_string2 (val_value_t  *val,
 		     const xmlChar *valname,
-		     const typ_def_t *typdef,
+		     typ_def_t *typdef,
 		     const xmlChar *valstr,
 		     uint32 valstrlen);
 
@@ -648,7 +647,7 @@ extern status_t
 /* set any simple value with any typdef */
 extern status_t 
     val_set_simval (val_value_t  *val,
-		    const typ_def_t *typdef,
+		    typ_def_t *typdef,
 		    xmlns_id_t    nsid,
 		    const xmlChar *valname,
 		    const xmlChar *valstr);
@@ -656,7 +655,7 @@ extern status_t
 /* set any simple value with any typdef, and a counted string */
 extern status_t 
     val_set_simval_str (val_value_t  *val,
-			const typ_def_t *typdef,
+			typ_def_t *typdef,
 			xmlns_id_t    nsid,
 			const xmlChar *valname,
 			uint32 valnamelen,
@@ -664,7 +663,7 @@ extern status_t
 
 /* same as val_set_simval, but malloc the value first */
 extern val_value_t *
-    val_make_simval (const typ_def_t *typdef,
+    val_make_simval (typ_def_t *typdef,
 		     xmlns_id_t    nsid,
 		     const xmlChar *valname,
 		     const xmlChar *valstr,
@@ -875,15 +874,15 @@ extern uint32
 
 
 extern boolean
-    val_index_match (const val_value_t *val1,
-		     const val_value_t *val2);
+    val_index_match (val_value_t *val1,
+		     val_value_t *val2);
 
 extern int32
-    val_compare (const val_value_t *val1,
-		 const val_value_t *val2);
+    val_compare (val_value_t *val1,
+		 val_value_t *val2);
 
 extern int32
-    val_compare_to_string (const val_value_t *val1,
+    val_compare_to_string (val_value_t *val1,
 			   const xmlChar *strval2,
 			   status_t *res);
 
@@ -917,7 +916,7 @@ extern val_index_t *
     val_get_next_index (const val_index_t *valindex);
 
 extern status_t
-    val_parse_meta (const typ_def_t *typdef,
+    val_parse_meta (typ_def_t *typdef,
 		    xml_attr_t *attr,
 		    val_value_t *retval);
 

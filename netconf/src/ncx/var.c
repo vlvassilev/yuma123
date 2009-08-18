@@ -772,7 +772,7 @@ status_t
 			 const xmlChar *valstr,
 			 var_type_t vartype)
 {
-    const obj_template_t  *genstr;
+    obj_template_t        *genstr;
     val_value_t           *val;
     status_t               res;
 
@@ -1412,7 +1412,7 @@ status_t
 *   If no error, then returns pointer to new val or filled in 'val'
 *********************************************************************/
 val_value_t *
-    var_get_script_val (const obj_template_t *obj,
+    var_get_script_val (obj_template_t *obj,
 			val_value_t *val,
 			const xmlChar *strval,
 			boolean istop,
@@ -1461,7 +1461,7 @@ val_value_t *
     /* check if strval is NULL */
     if (!strval) {
 	*res = val_set_simval(useval,
-			      obj_get_ctypdef(obj),
+			      obj_get_typdef(obj),
 			      obj_get_nsid(obj),
 			      obj_get_name(obj),
 			      NULL);
@@ -1513,8 +1513,9 @@ val_value_t *
 	}
 	*res = val_set_string2(useval, 
 			       obj_get_name(obj), 
-			       obj_get_ctypdef(obj), 
-			       strval, (uint32)(str-strval)); 
+			       obj_get_typdef(obj), 
+			       strval, 
+                               (uint32)(str-strval)); 
     } else if ((*strval == NCX_XML1a_CH) &&
 	       (strval[1] == NCX_XML1b_CH)) {
 
@@ -1547,7 +1548,7 @@ val_value_t *
 	 * so just treat as a string instead of potential RPC method
 	 */
 	*res = val_set_simval(useval, 
-			      obj_get_ctypdef(obj), 
+			      obj_get_typdef(obj), 
 			      val_get_nsid(useval), 
 			      useval->name, 
 			      strval);
@@ -1607,12 +1608,12 @@ val_value_t *
 *   If error, then returns NULL
 *********************************************************************/
 val_value_t *
-    var_check_script_val (const obj_template_t *obj,
+    var_check_script_val (obj_template_t *obj,
 			  const xmlChar *strval,
 			  boolean istop,
 			  status_t *res)
 {
-    const obj_template_t  *useobj;
+    obj_template_t        *useobj;
     const val_value_t     *varval;
     const xmlChar         *str, *name;
     val_value_t           *newval;
@@ -1699,7 +1700,7 @@ val_value_t *
 	}
 	*res = val_set_string2(newval, 
                                NULL, 
-			       obj_get_ctypdef(useobj), 
+			       obj_get_typdef(useobj), 
 			       strval, 
                                (uint32)(str-strval)); 
     } else if (strval && *strval == NCX_SQUOTE_CH) {
@@ -1713,7 +1714,7 @@ val_value_t *
 	}
 	*res = val_set_string2(newval, 
                                NULL, 
-			       obj_get_ctypdef(useobj), 
+			       obj_get_typdef(useobj), 
 			       strval, 
                                (uint32)(str-strval)); 
     } else if (strval && (*strval == NCX_XML1a_CH) &&
@@ -1747,7 +1748,7 @@ val_value_t *
 	 * when used within an RPC function  parameter
 	 */
 	*res = val_set_simval(newval,
-			      obj_get_ctypdef(useobj), 
+			      obj_get_typdef(useobj), 
 			      obj_get_nsid(useobj),
 			      obj_get_name(useobj), 
 			      strval);
@@ -1767,7 +1768,7 @@ val_value_t *
 
 	useobj = ncx_get_gen_string();
 	*res = val_set_simval(newval,
-			      obj_get_ctypdef(useobj), 
+			      obj_get_typdef(useobj), 
 			      val_get_nsid(newval),
 			      newval->name,
 			      strval);

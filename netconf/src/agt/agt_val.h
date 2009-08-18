@@ -101,7 +101,7 @@ extern status_t
     agt_val_rpc_xpath_check (ses_cb_t *scb,
 			     xml_msg_hdr_t *msg,
 			     val_value_t *rpcinput,
-			     const obj_template_t *rpcroot);
+			     obj_template_t *rpcroot);
 
 extern status_t 
     agt_val_instance_check (ses_cb_t *scb,

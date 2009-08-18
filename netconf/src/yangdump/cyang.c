@@ -145,7 +145,7 @@ static void
     write_cyang_type_clause (ses_cb_t *scb,
 			     const ncx_module_t *mod,
 			     const yangdump_cvtparms_t *cp,
-			     const typ_def_t *typdef,
+			     typ_def_t *typdef,
 			     int32 startindent);
 
 static void
@@ -599,10 +599,10 @@ static void
     write_cyang_type_contents (ses_cb_t *scb,
 			       const ncx_module_t *mod,
 			       const yangdump_cvtparms_t *cp,
-			       const typ_def_t *typdef,
+			       typ_def_t *typdef,
 			       int32 startindent)
 {
-    const typ_unionnode_t *un;
+    typ_unionnode_t       *un;
     const typ_enum_t      *bit, *enu;
     const xmlChar         *str;
     const typ_range_t     *range;
@@ -869,13 +869,16 @@ static void
     write_cyang_type_clause (ses_cb_t *scb,
 			     const ncx_module_t *mod,
 			     const yangdump_cvtparms_t *cp,
-			     const typ_def_t *typdef,
+			     typ_def_t *typdef,
 			     int32 startindent)
 {
     write_cyang_type(scb, mod, typdef, startindent);
     if (typ_has_subclauses(typdef)) {
 	ses_putstr(scb, START_SEC);
-	write_cyang_type_contents(scb, mod, cp, typdef,
+	write_cyang_type_contents(scb, 
+                                  mod, 
+                                  cp, 
+                                  typdef,
 				  startindent + ses_indent_count(scb));
 	ses_putstr_indent(scb, END_SEC, startindent);
     } else {
@@ -902,7 +905,7 @@ static void
     write_cyang_typedef (ses_cb_t *scb,
 			 const ncx_module_t *mod,
 			 const yangdump_cvtparms_t *cp,
-			 const typ_template_t *typ,
+			 typ_template_t *typ,
 			 int32 startindent,
 			 boolean first)
 {
@@ -989,8 +992,8 @@ static void
 			  const dlq_hdr_t *typedefQ,
 			  int32 startindent)
 {
-    const typ_template_t    *typ;
-    boolean                  first;
+    typ_template_t    *typ;
+    boolean            first;
 
     if (dlq_empty(typedefQ)) {
 	return;
@@ -1002,9 +1005,9 @@ static void
     }
 
     first = TRUE;
-    for (typ = (const typ_template_t *)dlq_firstEntry(typedefQ);
+    for (typ = (typ_template_t *)dlq_firstEntry(typedefQ);
 	 typ != NULL;
-	 typ = (const typ_template_t *)dlq_nextEntry(typ)) {
+	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
 
 	write_cyang_typedef(scb, mod, cp, typ, startindent, first);
 	first = FALSE;

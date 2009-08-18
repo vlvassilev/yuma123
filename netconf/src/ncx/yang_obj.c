@@ -384,16 +384,16 @@ static status_t
 					 name);
     }
     if (testobj) {
-	if (testobj->mod != mod) {
+	if (testobj->tkerr.mod != mod) {
 	    log_error("\nError: object '%s' already defined "
 		      "in submodule '%s' at line %u",
 		      name, 
                       mod->name, 
-                      testobj->linenum);
+                      testobj->tkerr.linenum);
 	} else {
 	    log_error("\nError: object '%s' already defined at line %u",
 		      name, 
-                      testobj->linenum);
+                      testobj->tkerr.linenum);
 	}
 	res = ERR_NCX_DUP_ENTRY;
 	ncx_print_errormsg(tkc, mod, res);
@@ -537,9 +537,11 @@ static status_t
 	return res;
     }
 
-    obj->mod = mod;
-    obj->tk = TK_CUR(tkc);
-    obj->linenum = obj->tk->linenum;
+    ncx_set_error(&obj->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
+
     obj->parent = parent;
     obj->grp = grp;
 
@@ -726,9 +728,11 @@ static status_t
 	return res;
     }
 
-    obj->mod = mod;
-    obj->tk = TK_CUR(tkc);
-    obj->linenum = obj->tk->linenum;
+    ncx_set_error(&obj->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
+
     obj->parent = parent;
     obj->grp = grp;
 
@@ -929,9 +933,11 @@ static status_t
 	return res;
     }
 
-    obj->mod = mod;
-    obj->tk = TK_CUR(tkc);
-    obj->linenum = obj->tk->linenum;
+    ncx_set_error(&obj->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
+
     obj->parent = parent;
     obj->grp = grp;
 
@@ -1169,9 +1175,11 @@ static status_t
 	return res;
     }
 
-    obj->mod = mod;
-    obj->tk = TK_CUR(tkc);
-    obj->linenum = obj->tk->linenum;
+    ncx_set_error(&obj->tkerr,
+                  mod,                  
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
+
     obj->parent = parent;
     obj->grp = grp;
 
@@ -1377,11 +1385,11 @@ static status_t
     const xmlChar   *val;
     const char      *expstr;
     xmlChar         *str;
-    tk_token_t      *savetk;
     tk_type_t        tktyp;
     boolean          done, when, key, conf;
     boolean          minel, maxel, ord, stat, desc, ref, flagset;
     status_t         res, retres;
+    ncx_error_t      savetkerr;
 
     obj = NULL;
     list = NULL;
@@ -1409,9 +1417,11 @@ static status_t
 	return res;
     }
 
-    obj->mod = mod;
-    obj->tk = TK_CUR(tkc);
-    obj->linenum = obj->tk->linenum;
+    ncx_set_error(&obj->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
+
     obj->parent = parent;
     obj->grp = grp;
 
@@ -1490,15 +1500,21 @@ static status_t
                                     &list->mustQ,
 				    &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_KEY)) {
-	    savetk = TK_CUR(tkc);
+	    ncx_set_error(&savetkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
+
 	    res = yang_consume_strclause(tkc, 
                                          mod, 
                                          &list->keystr,
 					 &key, 
                                          &obj->appinfoQ);
 	    if (res == NO_ERR) {
-		list->keytk = savetk;
-		list->keylinenum = savetk->linenum;
+		ncx_set_error(&list->keytkerr,
+                              savetkerr.mod,
+                              savetkerr.linenum,
+                              savetkerr.linepos);
 	    }
 	} else if (!xml_strcmp(val, YANG_K_UNIQUE)) {
 	    objuniq = obj_new_unique();
@@ -1509,7 +1525,10 @@ static status_t
 		return res;
 	    }
 
-	    objuniq->tk = TK_CUR(tkc);
+	    ncx_set_error(&objuniq->tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 
 	    res = yang_consume_strclause(tkc, 
                                          mod,
@@ -1584,7 +1603,8 @@ static status_t
 
     if (!list->keystr && (obj->flags & OBJ_FL_CONFIG)) {
 	log_error("\nError: No key entered for list '%s' on line %u",
-		  list->name, obj->linenum);
+		  list->name, 
+                  obj->tkerr.linenum);
 	retres = ERR_NCX_DATA_MISSING;
 	ncx_print_errormsg(tkc, mod, retres);
     }
@@ -1675,9 +1695,11 @@ static status_t
 	return res;
     }
 
-    obj->mod = mod;
-    obj->tk = TK_CUR(tkc);
-    obj->linenum = obj->tk->linenum;
+    ncx_set_error(&obj->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
+
     obj->parent = parent;
 
     cas = obj->def.cas;
@@ -1815,7 +1837,7 @@ static status_t
 		log_error("\nError: case name '%s' already used"
 			  " on line %u", 
                           testcas->name,
-			  casobj->linenum);
+			  casobj->tkerr.linenum);
 		ncx_print_errormsg(tkc, mod, retres);
 	    } else {
 		/* check object named within case arm already used */
@@ -1837,7 +1859,7 @@ static status_t
 				  " in case '%s', on line %u", 
 				  namestr, 
                                   testcas->name, 
-                                  test2obj->linenum);
+                                  test2obj->tkerr.linenum);
 			ncx_print_errormsg(tkc, mod, retres);
 		    } 
 		}
@@ -1920,9 +1942,11 @@ static status_t
 	return res;
     }
 
-    obj->mod = mod;
-    obj->tk = TK_CUR(tkc);
-    obj->linenum = obj->tk->linenum;
+    ncx_set_error(&obj->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
+
     obj->parent = parent;
     obj->grp = grp;
 
@@ -2070,16 +2094,16 @@ static status_t
 					     choic->name);
 	}
 	if (testobj) {
-	    if (testobj->mod != mod) {
+	    if (testobj->tkerr.mod != mod) {
 		log_error("\nError: object '%s' already defined "
 			  "in submodule '%s' at line %u",
 			  choic->name, 
-                          testobj->mod->name,
-			  testobj->linenum);
+                          testobj->tkerr.mod->name,
+			  testobj->tkerr.linenum);
 	    } else {
 		log_error("\nError: choice '%s' already defined at line %u",
 			  choic->name, 
-                          testobj->linenum);
+                          testobj->tkerr.linenum);
 	    }
 	    res = retres = ERR_NCX_DUP_ENTRY;
 	    ncx_print_errormsg(tkc, mod, retres);
@@ -2112,7 +2136,7 @@ static status_t
 		    log_error("\nError: object name '%s' in case '%s'"
 			      " already used in sibling node, on line %u", 
 			      namestr, 
-                              test2obj->linenum);
+                              test2obj->tkerr.linenum);
 		    ncx_print_errormsg(tkc, mod, retres);
 		} 
 	    }
@@ -2196,9 +2220,11 @@ static status_t
     }
     refine = obj->def.refine;
 
-    obj->mod = mod;
-    obj->tk = TK_CUR(tkc);
-    obj->linenum = obj->tk->linenum;
+    ncx_set_error(&obj->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
+
     obj->parent = parent;
 
     /* Get the mandatory refine target */
@@ -2247,14 +2273,20 @@ static status_t
 
 	/* Got a token string so check the value */
 	if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    refine->descr_tk = TK_CUR(tkc);
+	    ncx_set_error(&refine->descr_tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 	    res = yang_consume_descr(tkc, 
                                      mod, 
                                      &refine->descr,
 				     &desc, 
                                      &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    refine->ref_tk = TK_CUR(tkc);
+	    ncx_set_error(&refine->ref_tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 	    res = yang_consume_descr(tkc, 
                                      mod, 
                                      &refine->ref,
@@ -2262,21 +2294,30 @@ static status_t
                                      &obj->appinfoQ);
 
 	} else if (!xml_strcmp(val, YANG_K_PRESENCE)) {
-	    refine->presence_tk = TK_CUR(tkc);
+	    ncx_set_error(&refine->presence_tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 	    res = yang_consume_strclause(tkc, 
                                          mod, 
 					 &refine->presence,
 					 &pres, 
                                          &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
-	    refine->def_tk = TK_CUR(tkc);
+	    ncx_set_error(&refine->def_tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 	    res = yang_consume_strclause(tkc, 
                                          mod, 
 					 &refine->def,
 					 &def, 
                                          &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
-	    refine->config_tk = TK_CUR(tkc);
+	    ncx_set_error(&refine->config_tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 	    res = yang_consume_boolean(tkc, 
                                        mod, 
                                        &flagset,
@@ -2289,7 +2330,10 @@ static status_t
 		obj->flags &= ~OBJ_FL_CONFIG;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
-	    refine->mandatory_tk = TK_CUR(tkc);
+	    ncx_set_error(&refine->mandatory_tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 	    res = yang_consume_boolean(tkc, 
                                        mod,
 				       &flagset,
@@ -2300,14 +2344,20 @@ static status_t
 		obj->flags |= OBJ_FL_MANDATORY;
 	    }
 	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
-	    refine->minelems_tk = TK_CUR(tkc);
+	    ncx_set_error(&refine->minelems_tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 	    res = yang_consume_uint32(tkc, 
                                       mod,
 				      &refine->minelems,
 				      &minel, 
                                       &obj->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
-	    refine->maxelems_tk = TK_CUR(tkc);
+	    ncx_set_error(&refine->maxelems_tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 	    res = yang_consume_max_elements(tkc, 
                                             mod,
 					    &refine->maxelems,
@@ -2400,9 +2450,11 @@ static status_t
 	return res;
     }
 
-    obj->mod = mod;
-    obj->tk = TK_CUR(tkc);
-    obj->linenum = obj->tk->linenum;
+    ncx_set_error(&obj->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
+
     obj->parent = parent;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
@@ -2425,7 +2477,7 @@ static status_t
                                      mod, 
                                      uses->prefix,
 				     uses->name, 
-                                     obj->tk, 
+                                     &obj->tkerr, 
                                      &impgrp);
 	CHK_OBJ_EXIT(obj, res, retres);
 	uses->grp = impgrp;
@@ -2521,7 +2573,8 @@ static status_t
 					 uses->name);
 	if (testobj) {
 	    log_error("\nError: object '%s' already defined at line %u",
-		      uses->name, testobj->linenum);
+		      uses->name, 
+                      testobj->tkerr.linenum);
 	    retres = ERR_NCX_DUP_ENTRY;
 	    ncx_print_errormsg(tkc, mod, retres);
 	    obj_free_template(obj);
@@ -2602,9 +2655,11 @@ static status_t
 	return res;
     }
 
-    obj->mod = mod;
-    obj->tk = TK_CUR(tkc);
-    obj->linenum = obj->tk->linenum;
+    ncx_set_error(&obj->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
+
     obj->parent = parent;
 
     rpcio = obj->def.rpcio;
@@ -2686,7 +2741,8 @@ static status_t
 				     rpcio->name);
     if (testobj) {
 	log_error("\nError: '%s' statement already defined at line %u",
-		  rpcio->name, testobj->linenum);
+		  rpcio->name, 
+                  testobj->tkerr.linenum);
 	retres = ERR_NCX_DUP_ENTRY;
 	ncx_print_errormsg(tkc, mod, retres);
 	obj_free_template(obj);
@@ -2879,9 +2935,11 @@ static status_t
 	return res;
     }
 
-    obj->mod = mod;
-    obj->tk = TK_CUR(tkc);
-    obj->linenum = obj->tk->linenum;
+    ncx_set_error(&obj->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
+
     obj->parent = parent;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
@@ -3170,9 +3228,11 @@ static status_t
 	return res;
     }
 
-    obj->mod = mod;
-    obj->tk = TK_CUR(tkc);
-    obj->linenum = obj->tk->linenum;
+    ncx_set_error(&obj->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
+
     obj->parent = parent;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
@@ -3289,9 +3349,11 @@ static status_t
 		return res;
 	    }
 
-	    chobj->mod = mod;
-	    chobj->tk = obj->tk;
-	    chobj->linenum = obj->linenum;
+            ncx_set_error(&chobj->tkerr,
+                          mod,
+                          obj->tkerr.linenum,
+                          obj->tkerr.linepos);
+
 	    chobj->parent = obj;
 
 	    chobj->def.rpcio->name = xml_strdup(YANG_K_INPUT);
@@ -3316,9 +3378,11 @@ static status_t
 		return res;
 	    }
 
-	    chobj->mod = mod;
-	    chobj->tk = obj->tk;
-	    chobj->linenum = obj->linenum;
+            ncx_set_error(&chobj->tkerr,
+                          mod,
+                          obj->tkerr.linenum,
+                          obj->tkerr.linepos);
+
 	    chobj->parent = obj;
 
 	    chobj->def.rpcio->name = xml_strdup(YANG_K_OUTPUT);
@@ -3401,9 +3465,11 @@ static status_t
 	return res;
     }
 
-    obj->mod = mod;
-    obj->tk = TK_CUR(tkc);
-    obj->linenum = obj->tk->linenum;
+    ncx_set_error(&obj->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
+
     obj->parent = parent;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
@@ -3572,7 +3638,7 @@ static status_t
 		log_error("\nError: cannot remove key leaf %s:%s",
 			  obj_get_mod_name(targobj),
 			  obj_get_name(targobj));
-		tkc->cur = devi->tk;
+		tkc->curerr = &devi->tkerr;
 		ncx_print_errormsg(tkc, mod, res);
 		continue;
 	    }
@@ -3747,7 +3813,7 @@ static status_t
 	    }
 
 	    /* config-stmt */
-	    if (devi->config_tk) {
+	    if (devi->config_tkerr.mod) {
 		retest = TRUE;
 		if (LOGDEBUG3) {
 		    log_debug3("\napply_dev: replacing config-stmt in "
@@ -3765,7 +3831,7 @@ static status_t
 	    }
 
 	    /* mandatory-stmt */
-	    if (devi->mandatory_tk) {
+	    if (devi->mandatory_tkerr.mod) {
 		retest = TRUE;
 		if (LOGDEBUG3) {
 		    log_debug3("\napply_dev: replacing mandatory-stmt in "
@@ -3783,7 +3849,7 @@ static status_t
 	    }
 
 	    /* min-elements-stmt */
-	    if (devi->minelems_tk) {
+	    if (devi->minelems_tkerr.mod) {
 		retest = TRUE;
 		if (LOGDEBUG3) {
 		    log_debug3("\napply_dev: replacing min-elements in "
@@ -3805,7 +3871,7 @@ static status_t
 	    }
 
 	    /* max-elements-stmt */
-	    if (devi->maxelems_tk) {
+	    if (devi->maxelems_tkerr.mod) {
 		retest = TRUE;
 		if (LOGDEBUG3) {
 		    log_debug3("\napply_dev: replacing max-elements in "
@@ -4058,8 +4124,8 @@ static status_t
 		res = ERR_NCX_INVALID_DEV_STMT;
 		log_error("\nError: not-supported deviate-stmt "
 			  "already entered on line %u",
-			  testdevi->tk->linenum);
-		tkc->cur = devi->tk;
+			  testdevi->tkerr.linenum);
+		tkc->curerr = &devi->tkerr;
 		ncx_print_errormsg(tkc, mod, res);
 	    } else {
 		/* make sure none of the same sub-stmts are
@@ -4069,8 +4135,8 @@ static status_t
 		    res = ERR_NCX_INVALID_DEV_STMT;
 		    log_error("\nError: 'type' deviate-stmt "
 			      "already entered on line %u",
-			      testdevi->tk->linenum);
-		    tkc->cur = devi->tk;
+			      testdevi->tkerr.linenum);
+		    tkc->curerr = &devi->tkerr;
 		    ncx_print_errormsg(tkc, mod, res);
 		}
 
@@ -4078,8 +4144,8 @@ static status_t
 		    res = ERR_NCX_INVALID_DEV_STMT;
 		    log_error("\nError: 'units' deviate-stmt "
 			      "already entered on line %u",
-			      testdevi->tk->linenum);
-		    tkc->cur = devi->tk;
+			      testdevi->tkerr.linenum);
+		    tkc->curerr = &devi->tkerr;
 		    ncx_print_errormsg(tkc, mod, res);
 		}
 
@@ -4087,44 +4153,48 @@ static status_t
 		    res = ERR_NCX_INVALID_DEV_STMT;
 		    log_error("\nError: 'default' deviate-stmt "
 			      "already entered on line %u",
-			      testdevi->tk->linenum);
-		    tkc->cur = devi->tk;
+			      testdevi->tkerr.linenum);
+		    tkc->curerr = &devi->tkerr;
 		    ncx_print_errormsg(tkc, mod, res);
 		}
 
-		if (devi->config_tk && testdevi->config_tk) {
+		if (devi->config_tkerr.mod && 
+                    testdevi->config_tkerr.mod) {
 		    res = ERR_NCX_INVALID_DEV_STMT;
 		    log_error("\nError: 'config' deviate-stmt "
 			      "already entered on line %u",
-			      testdevi->tk->linenum);
-		    tkc->cur = devi->tk;
+			      testdevi->tkerr.linenum);
+		    tkc->curerr = &devi->tkerr;
 		    ncx_print_errormsg(tkc, mod, res);
 		}
 
-		if (devi->mandatory_tk && testdevi->mandatory_tk) {
+		if (devi->mandatory_tkerr.mod && 
+                    testdevi->mandatory_tkerr.mod) {
 		    res = ERR_NCX_INVALID_DEV_STMT;
 		    log_error("\nError: 'mandatory' deviate-stmt "
 			      "already entered on line %u",
-			      testdevi->tk->linenum);
-		    tkc->cur = devi->tk;
+			      testdevi->tkerr.linenum);
+		    tkc->curerr = &devi->tkerr;
 		    ncx_print_errormsg(tkc, mod, res);
 		}
 
-		if (devi->minelems_tk && testdevi->minelems_tk) {
+		if (devi->minelems_tkerr.mod && 
+                    testdevi->minelems_tkerr.mod) {
 		    res = ERR_NCX_INVALID_DEV_STMT;
 		    log_error("\nError: 'min-elements' deviate-stmt "
 			      "already entered on line %u",
-			      testdevi->tk->linenum);
-		    tkc->cur = devi->tk;
+			      testdevi->tkerr.linenum);
+		    tkc->curerr = &devi->tkerr;
 		    ncx_print_errormsg(tkc, mod, res);
 		}
 
-		if (devi->maxelems_tk && testdevi->maxelems_tk) {
+		if (devi->maxelems_tkerr.mod && 
+                    testdevi->maxelems_tkerr.mod) {
 		    res = ERR_NCX_INVALID_DEV_STMT;
 		    log_error("\nError: 'max-elements' deviate-stmt "
 			      "already entered on line %u",
-			      testdevi->tk->linenum);
-		    tkc->cur = devi->tk;
+			      testdevi->tkerr.linenum);
+		    tkc->curerr = &devi->tkerr;
 		    ncx_print_errormsg(tkc, mod, res);
 		}
 
@@ -4143,7 +4213,7 @@ static status_t
 	    res = ERR_NCX_INVALID_DEV_STMT;
 	    log_error("\nError: 'not-supported' deviate-stmt "
 		      "not allowed");
-	    tkc->cur = devi->tk;
+	    tkc->curerr = &devi->tkerr;
 	    ncx_print_errormsg(tkc, mod, res);
 	}
     }
@@ -4188,7 +4258,8 @@ static status_t
     curdev = (obj_deviation_t *)dlq_firstEntry(&mod->deviationQ);
     while (curdev != NULL) {
 
-        if (curdev->targobj == NULL || curdev->targobj->mod != mod) {
+        if (curdev->targobj == NULL || 
+            curdev->targobj->tkerr.mod != mod) {
             curdev = (obj_deviation_t *)dlq_nextEntry(curdev);
             continue;
         }
@@ -4297,8 +4368,10 @@ static status_t
     maxel = FALSE;
     retres = NO_ERR;
 
-    devi->tk = TK_CUR(tkc);
-    devi->linenum = devi->tk->linenum;
+    ncx_set_error(&devi->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
 
     /* Get the mandatory deviation argument */
     res = yang_consume_string(tkc, mod, &str);
@@ -4398,7 +4471,10 @@ static status_t
 
 	/* Got a keyword token string so check the value */
 	if (!xml_strcmp(val, YANG_K_TYPE)) {
-	    devi->type_tk = TK_CUR(tkc);
+	    ncx_set_error(&devi->type_tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 
 	    switch (devi->arg) {
 	    case OBJ_DARG_NONE:
@@ -4459,7 +4535,10 @@ static status_t
 		}
 	    }
 	} else if (!xml_strcmp(val, YANG_K_UNITS)) {
-	    devi->units_tk = TK_CUR(tkc);
+	    ncx_set_error(&devi->units_tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 
 	    switch (devi->arg) {
 	    case OBJ_DARG_NONE:
@@ -4487,7 +4566,10 @@ static status_t
 					 &units, 
                                          &devi->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
-	    devi->default_tk = TK_CUR(tkc);
+	    ncx_set_error(&devi->default_tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 
 	    switch (devi->arg) {
 	    case OBJ_DARG_NONE:
@@ -4515,7 +4597,10 @@ static status_t
 					 &def, 
                                          &devi->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
-	    devi->config_tk = TK_CUR(tkc);
+	    ncx_set_error(&devi->config_tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 
 	    switch (devi->arg) {
 	    case OBJ_DARG_NONE:
@@ -4546,7 +4631,10 @@ static status_t
 				       &conf,
                                        &devi->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
-	    devi->mandatory_tk = TK_CUR(tkc);
+	    ncx_set_error(&devi->mandatory_tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 
 	    switch (devi->arg) {
 	    case OBJ_DARG_NONE:
@@ -4577,7 +4665,10 @@ static status_t
 				       &mand, 
                                        &devi->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
-	    devi->minelems_tk = TK_CUR(tkc);
+	    ncx_set_error(&devi->minelems_tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 
 	    switch (devi->arg) {
 	    case OBJ_DARG_NONE:
@@ -4608,7 +4699,10 @@ static status_t
 				      &minel, 
                                       &devi->appinfoQ);
 	} else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
-	    devi->maxelems_tk = TK_CUR(tkc);
+	    ncx_set_error(&devi->maxelems_tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 
 	    switch (devi->arg) {
 	    case OBJ_DARG_NONE:
@@ -4675,7 +4769,10 @@ static status_t
 		return res;
 	    }
 
-	    uniq->tk = TK_CUR(tkc);
+            ncx_set_error(&uniq->tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 
 	    switch (devi->arg) {
 	    case OBJ_DARG_NONE:
@@ -4785,7 +4882,7 @@ static status_t
                              ncx_get_status_string(stat),
                              obj_get_name(obj->parent),
                              ncx_get_status_string(parentstat));
-                    tkc->cur = obj->tk;
+                    tkc->curerr = &obj->tkerr;
                     ncx_print_errormsg(tkc, mod, ERR_NCX_INVALID_STATUS);
                 }
             }
@@ -4802,14 +4899,14 @@ static status_t
 			      "but parent node '%s' is not",
 			      obj_get_name(obj),
 			      obj_get_name(obj->parent));
-		    tkc->cur = obj->tk;
+		    tkc->curerr = &obj->tkerr;
 		    res = ERR_NCX_INVALID_VALUE;
 		    ncx_print_errormsg(tkc, mod, res);
 		} else {
 		    log_info("\nInfo: Non-data node '%s' "
 			     "is marked as configuration : statement ignored",
 			     obj_get_name(obj));
-		    tkc->cur = obj->tk;
+		    tkc->curerr = &obj->tkerr;
 		    res = ERR_NCX_STMT_IGNORED;
 		    ncx_print_errormsg(tkc, mod, res);
 		}
@@ -4845,9 +4942,9 @@ static status_t
 		   ncx_module_t  *mod,
 		   obj_template_t *obj)
 {
-    const obj_template_t *targobj;
-    const ncx_appinfo_t  *appinfo;
-    status_t              res;
+    obj_template_t    *targobj;
+    ncx_appinfo_t     *appinfo;
+    status_t           res;
 
     res = NO_ERR;
 
@@ -4934,7 +5031,7 @@ static status_t
              * module, then the must->tk value will be
              * garbage at this point  !!!!
              */
-            tkc->cur = must->tk;
+            tkc->curerr = &must->tkerr;
 	    res = xpath1_parse_expr(tkc, mod, must, XP_SRC_YANG);
 	}
 
@@ -5015,8 +5112,8 @@ static status_t
 		      ncx_module_t  *mod,
 		      obj_template_t *obj)
 {
-    const dlq_hdr_t      *que;
-    const ncx_appinfo_t  *appinfo;
+    dlq_hdr_t            *que;
+    ncx_appinfo_t        *appinfo;
     tk_chain_t           *newchain;
     obj_metadata_t       *meta;
     status_t              res, retres;
@@ -5024,7 +5121,7 @@ static status_t
 
     retres = NO_ERR;
     
-    que = obj_get_appinfoQ(obj);
+    que = obj_get_appinfoQ2(obj);
     if (!que) {
 	return NO_ERR;
     }
@@ -5032,10 +5129,13 @@ static status_t
     usewarning = ncx_warning_enabled(ERR_NCX_USING_RESERVED_NAME);
 
     for (appinfo = 
-	     ncx_find_appinfo(que, NCX_PREFIX, NCX_EL_METADATA);
+	     ncx_find_appinfo(que, 
+                              NCX_PREFIX, 
+                              NCX_EL_METADATA);
 	 appinfo != NULL;
-	 appinfo = ncx_find_next_appinfo(appinfo, NCX_PREFIX,
-					 NCX_EL_METADATA)) {
+	 appinfo = ncx_find_next_appinfo2(appinfo, 
+                                          NCX_PREFIX,
+                                          NCX_EL_METADATA)) {
 
 	/* parse the value string into 2 or 3 fields */
 	newchain = NULL;
@@ -5134,7 +5234,7 @@ static status_t
 	if (res != NO_ERR) {
 	    log_error("\nError: Invalid ncx:metadata string");
 	    res = ERR_NCX_INVALID_VALUE;
-	    tkc->cur = appinfo->tk;
+	    tkc->curerr = &appinfo->tkerr;
 	    ncx_print_errormsg(tkc, mod, res);
 	    retres = res;
 	}
@@ -5281,7 +5381,7 @@ static status_t
 	log_error("\nError: both mandatory and default statements present"
 		  "'%s'", obj_get_name(obj));
 	retres = ERR_NCX_INVALID_VALUE;
-	tkc->cur = obj->tk;
+	tkc->curerr = &obj->tkerr;
 	ncx_print_errormsg(tkc, mod, retres);
     }
 
@@ -5359,7 +5459,7 @@ static status_t
 	    log_error("\nError: leaf-list '%s' min-elements > max-elements",
 		      obj_get_name(obj));
 	    retres = ERR_NCX_INVALID_VALUE;
-	    tkc->cur = obj->tk;
+	    tkc->curerr = &obj->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
     }
@@ -5442,7 +5542,7 @@ static status_t
 	    log_error("\nError: list '%s' min-elements > max-elements",
 		      obj_get_name(obj));
 	    retres = ERR_NCX_INVALID_VALUE;
-	    tkc->cur = obj->tk;
+	    tkc->curerr = &obj->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
     }
@@ -5479,14 +5579,14 @@ static status_t
 {
     obj_template_t    *keyobj;
     xmlChar           *str, *p, savech;
-    tk_token_t        *errtk;
+    ncx_error_t       *tkerr;
     obj_key_t         *objkey;
     status_t           retres;
     ncx_btype_t        btyp;
     boolean            keyconfig, listconfig;
 
     retres = NO_ERR;
-    errtk = (list->keytk) ? list->keytk : obj->tk;
+    tkerr = (list->keytkerr.mod) ? &list->keytkerr : &obj->tkerr;
 
     /* skip all leading whitespace */
     p = list->keystr;
@@ -5499,7 +5599,7 @@ static status_t
 	log_error("\nError: no identifiers entered in key '%s'",
 		  list->keystr);
 	retres = ERR_NCX_INVALID_VALUE;
-	tkc->cur = errtk;
+	tkc->curerr = tkerr;
 	ncx_print_errormsg(tkc, mod, retres);
 	return retres;
     }
@@ -5530,7 +5630,7 @@ static status_t
 					      str, 
 					      &keyobj, 
 					      NULL, 
-					      errtk);
+					      tkerr);
 
 
 	/* check identifier is bogus, nothing found */
@@ -5538,7 +5638,7 @@ static status_t
 	    log_error("\nError: invalid identifier in key"
 		      " for list '%s' (%s)", 
 		      list->name, str);
-	    tkc->cur = errtk;
+	    tkc->curerr = tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 
 	    /* waited to restore string so it could be used 
@@ -5569,24 +5669,25 @@ static status_t
 	    log_error("\nError: node '%s' on line %u not a leaf in key"
 		      " for list '%s' (%s)",
 		      obj_get_name(keyobj), 
-		      keyobj->linenum,
+		      keyobj->tkerr.linenum,
 		      list->name, 
 		      obj_get_typestr(keyobj));
 	    retres = ERR_NCX_TYPE_NOT_INDEX;
-	    tkc->cur = errtk;
+	    tkc->curerr = tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	    continue;
 	} 
 
 	/* make sure the leaf is a child of the list object */
-	if (keyobj->parent != obj || keyobj->mod != obj->mod) {
+	if (keyobj->parent != obj || 
+            keyobj->tkerr.mod != obj->tkerr.mod) {
 	    log_error("\nError: leaf node '%s' on line %u not child "
 		      "of list '%s'",
 		      obj_get_name(keyobj),
-		      keyobj->linenum,
+		      keyobj->tkerr.linenum,
 		      list->name);
 	    retres = ERR_NCX_WRONG_INDEX_TYPE;
-	    tkc->cur = errtk;
+	    tkc->curerr = tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
 
@@ -5595,11 +5696,11 @@ static status_t
 	    log_error("\nError: leaf node '%s' on line %u not valid type "
 		      "in key, for list '%s' (%s)",
 		      obj_get_name(keyobj),
-		      keyobj->linenum,
+		      keyobj->tkerr.linenum,
 		      list->name,
 		      tk_get_btype_sym(btyp));
 	    retres = ERR_NCX_TYPE_NOT_INDEX;
-	    tkc->cur = errtk;
+	    tkc->curerr = tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
 
@@ -5611,9 +5712,9 @@ static status_t
                          "ignored in leaf '%s' "
                          "on line %u for list '%s'",
                          obj_get_name(keyobj), 
-                         keyobj->linenum, 
+                         keyobj->tkerr.linenum, 
                          list->name);
-                tkc->cur = errtk;
+                tkc->curerr = tkerr;
                 ncx_print_errormsg(tkc, mod, ERR_NCX_STMT_IGNORED);
             }
         }
@@ -5627,9 +5728,9 @@ static status_t
 	    log_error("\nError: 'config-stmt for key leaf '%s' "
 		      "on line %u must match list '%s'",
 		      obj_get_name(keyobj), 
-		      keyobj->linenum, 
+		      keyobj->tkerr.linenum, 
 		      list->name);
-	    tkc->cur = errtk;
+	    tkc->curerr = tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
 
@@ -5639,10 +5740,10 @@ static status_t
 	    log_error("\nError: duplicate key node '%s' on line %u "
 		      "for list '%s'",
 		      obj_get_name(keyobj), 
-		      keyobj->linenum, 
+		      keyobj->tkerr.linenum, 
 		      list->name);
 	    retres = ERR_NCX_DUP_ENTRY;
-	    tkc->cur = errtk;
+	    tkc->curerr = tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	    continue;
 	}
@@ -5651,7 +5752,7 @@ static status_t
 	objkey = obj_new_key();
 	if (!objkey) {
 	    retres = ERR_INTERNAL_MEM;
-	    tkc->cur = errtk;
+	    tkc->curerr = tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	    return retres;
 	}
@@ -5704,13 +5805,13 @@ static status_t
 {
     obj_template_t    *uniobj, *testobj;
     xmlChar           *str, *p, *savestr, savech;
-    tk_token_t        *errtk;
+    ncx_error_t       *tkerr;
     obj_unique_comp_t *unicomp, *testcomp;
     status_t           res, retres;
 
     savestr = NULL;
     retres = NO_ERR;
-    errtk = (uni->tk) ? uni->tk : obj->tk;
+    tkerr = (uni->tkerr.mod) ? &uni->tkerr : &obj->tkerr;
 
     /* skip all leading whitespace */
     p = uni->xpath;
@@ -5721,7 +5822,7 @@ static status_t
 	log_error("\nError: no identifiers entered in unique statement '%s'",
 		  uni->xpath);
 	retres = ERR_NCX_INVALID_VALUE;
-	tkc->cur = errtk;
+	tkc->curerr = tkerr;
 	ncx_print_errormsg(tkc, mod, retres);
 	return retres;
     }
@@ -5745,13 +5846,13 @@ static status_t
 					   str, 
                                            &uniobj,
                                            NULL,
-                                           errtk);
+                                           tkerr);
 	CHK_EXIT(res, retres);
 	if (res == NO_ERR) {
 	    savestr = xml_strdup(str);
 	    if (!savestr) {
 		retres = ERR_INTERNAL_MEM;
-		tkc->cur = errtk;
+		tkc->curerr = tkerr;
 		ncx_print_errormsg(tkc, mod, retres);
 		return retres;
 	    }
@@ -5773,10 +5874,10 @@ static status_t
 	    log_error("\nError: node '%s' on line %u not leaf in "
 		      "list '%s' unique-stmt",
 		      obj_get_name(uniobj),
-		      uniobj->linenum,
+		      uniobj->tkerr.linenum,
 		      list->name);
 	    retres = ERR_NCX_INVALID_UNIQUE_NODE;
-	    tkc->cur = errtk;
+	    tkc->curerr = tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	    m__free(savestr);
 	    continue;
@@ -5787,10 +5888,10 @@ static status_t
 	    log_error("\nError: leaf '%s' on line %u not config in "
 		      "list '%s' unique-stmt",
 		      obj_get_name(uniobj),
-		      uniobj->linenum,
+		      uniobj->tkerr.linenum,
 		      list->name);
 	    retres = ERR_NCX_INVALID_UNIQUE_NODE;
-	    tkc->cur = errtk;
+	    tkc->curerr = tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	    m__free(savestr);
 	    continue;
@@ -5815,7 +5916,7 @@ static status_t
 			  "within unique stmt '%s'",
 			  obj_get_typestr(testobj),
 			  uni->xpath);
-		tkc->cur = errtk;
+		tkc->curerr = tkerr;
 		ncx_print_errormsg(tkc, mod, res);
 	    }
 
@@ -5839,9 +5940,9 @@ static status_t
                              "node '%s' on line %u "
                              "for list '%s'",
                              obj_get_name(uniobj),
-                             uniobj->linenum, 
+                             uniobj->tkerr.linenum, 
                              list->name);
-                    tkc->cur = errtk;
+                    tkc->curerr = tkerr;
                     ncx_print_errormsg(tkc, 
                                        mod,
                                        ERR_NCX_DUP_UNIQUE_COMP);
@@ -5855,7 +5956,7 @@ static status_t
 	    unicomp = obj_new_unique_comp();
 	    if (!unicomp) {
 		retres = ERR_INTERNAL_MEM;
-		tkc->cur = errtk;
+		tkc->curerr = tkerr;
 		ncx_print_errormsg(tkc, mod, retres);
 		m__free(savestr);
 		return retres;
@@ -6016,9 +6117,10 @@ static status_t
 
     if ((obj->flags & OBJ_FL_MANDATORY) && choic->defval) {
 	log_error("\nError: both mandatory and default statements present"
-		  "'%s'", obj_get_name(obj));
+		  "'%s'", 
+                  obj_get_name(obj));
 	retres = ERR_NCX_INVALID_VALUE;
-	tkc->cur = obj->tk;
+	tkc->curerr = &obj->tkerr;
 	ncx_print_errormsg(tkc, mod, retres);
     }
 
@@ -6036,7 +6138,7 @@ static status_t
 			    choic->defval);
 	if (!cas) {
 	    /* default is not a valid case name */
-	    tkc->cur = obj->tk;
+	    tkc->curerr = &obj->tkerr;
 	    retres = ERR_NCX_INVALID_VALUE;
 	    log_error("\nError: Choice default '%s' "
 		      "not a valid case name", 
@@ -6050,7 +6152,7 @@ static status_t
 		 cobj != NULL;
 		 cobj = (obj_template_t *)dlq_nextEntry(cobj)) {
 		if (obj_is_mandatory(cobj)) {
-		    tkc->cur = cobj->tk;		    
+		    tkc->curerr = &cobj->tkerr;
 		    retres = ERR_NCX_DEFCHOICE_NOT_OPTIONAL;
 		    ncx_print_errormsg(tkc, mod, retres);
 		}
@@ -6150,7 +6252,7 @@ static status_t
 	log_error("\nError: 'presence' refinement on %s '%s'",
 		  obj_get_typestr(targobj),
 		  obj_get_name(targobj));
-	tkc->cur = refine->presence_tk;
+	tkc->curerr = &refine->presence_tkerr;
 	ncx_print_errormsg(tkc, mod, res);
     }
 
@@ -6159,43 +6261,43 @@ static status_t
 	log_error("\nError: 'default' refinement on %s '%s'",
 		  obj_get_typestr(targobj),
 		  obj_get_name(targobj));
-	tkc->cur = refine->def_tk;
+	tkc->curerr = &refine->def_tkerr;
 	ncx_print_errormsg(tkc, mod, res);
     }
 
-    if (refine->config_tk && !conf) {
+    if (refine->config_tkerr.mod && !conf) {
 	res = ERR_NCX_REFINE_NOT_ALLOWED;
 	log_error("\nError: 'config' refinement on %s '%s'",
 		  obj_get_typestr(targobj),
 		  obj_get_name(targobj));
-	tkc->cur = refine->config_tk;
+	tkc->curerr = &refine->config_tkerr;
 	ncx_print_errormsg(tkc, mod, res);
     }
 
-    if (refine->mandatory_tk && !mand) {
+    if (refine->mandatory_tkerr.mod && !mand) {
 	res = ERR_NCX_REFINE_NOT_ALLOWED;
 	log_error("\nError: 'mandatory' refinement on %s '%s'",
 		  obj_get_typestr(targobj),
 		  obj_get_name(targobj));
-	tkc->cur = refine->config_tk;
+	tkc->curerr = &refine->config_tkerr;
 	ncx_print_errormsg(tkc, mod, res);
     }
 
-    if (refine->minelems_tk && !minel) {
+    if (refine->minelems_tkerr.mod && !minel) {
 	res = ERR_NCX_REFINE_NOT_ALLOWED;
 	log_error("\nError: 'min-elements' refinement on %s '%s'",
 		  obj_get_typestr(targobj),
 		  obj_get_name(targobj));
-	tkc->cur = refine->minelems_tk;
+	tkc->curerr = &refine->minelems_tkerr;
 	ncx_print_errormsg(tkc, mod, res);
     }
 
-    if (refine->maxelems_tk && !maxel) {
+    if (refine->maxelems_tkerr.mod && !maxel) {
 	res = ERR_NCX_REFINE_NOT_ALLOWED;
 	log_error("\nError: 'max-elements' refinement on %s '%s'",
 		  obj_get_typestr(targobj),
 		  obj_get_name(targobj));
-	tkc->cur = refine->maxelems_tk;
+	tkc->curerr = &refine->maxelems_tkerr;
 	ncx_print_errormsg(tkc, mod, res);
     }
 
@@ -6207,7 +6309,7 @@ static status_t
 	    log_error("\nError: 'must' refinement on %s '%s'",
 		      obj_get_typestr(targobj),
 		      obj_get_name(targobj));
-	    tkc->cur = must->tk;
+	    tkc->curerr = &must->tkerr;
 	    ncx_print_errormsg(tkc, mod, res);
 	}
     }
@@ -6306,12 +6408,15 @@ static status_t
 	if (krefine->descr) {
 	    res = ERR_NCX_DUP_REFINE_STMT;
 	    log_error("\nError: description-stmt set in refine on line %u",
-		      krefine->descr_tk->linenum);
-	    tkc->cur = mrefine->descr_tk;
+		      krefine->descr_tkerr.linenum);
+	    tkc->curerr = &mrefine->descr_tkerr;
 	    ncx_print_errormsg(tkc, mod, res);
 	} else {
 	    krefine->descr = mrefine->descr;
-	    krefine->descr_tk = mrefine->descr_tk;
+	    ncx_set_error(&krefine->descr_tkerr,
+                          mrefine->descr_tkerr.mod,
+                          mrefine->descr_tkerr.linenum,
+                          mrefine->descr_tkerr.linepos);
 	    mrefine->descr = NULL;
 	}
     }
@@ -6320,12 +6425,15 @@ static status_t
 	if (krefine->ref) {
 	    res = ERR_NCX_DUP_REFINE_STMT;
 	    log_error("\nError: reference-stmt set in refine on line %u",
-		      krefine->ref_tk->linenum);
-	    tkc->cur = mrefine->ref_tk;
+		      krefine->ref_tkerr.linenum);
+	    tkc->curerr = &mrefine->ref_tkerr;
 	    ncx_print_errormsg(tkc, mod, res);
 	} else {
 	    krefine->ref = mrefine->ref;
-	    krefine->ref_tk = mrefine->ref_tk;
+	    ncx_set_error(&krefine->ref_tkerr,
+                          mrefine->ref_tkerr.mod,
+                          mrefine->ref_tkerr.linenum,
+                          mrefine->ref_tkerr.linepos);
 	    mrefine->ref = NULL;
 	}
     }
@@ -6334,12 +6442,15 @@ static status_t
 	if (krefine->presence) {
 	    res = ERR_NCX_DUP_REFINE_STMT;
 	    log_error("\nError: presence-stmt set in refine on line %u",
-		      krefine->presence_tk->linenum);
-	    tkc->cur = mrefine->presence_tk;
+		      krefine->presence_tkerr.linenum);
+	    tkc->curerr = &mrefine->presence_tkerr;
 	    ncx_print_errormsg(tkc, mod, res);
 	} else {
 	    krefine->presence = mrefine->presence;
-	    krefine->presence_tk = mrefine->presence_tk;
+	    ncx_set_error(&krefine->presence_tkerr,
+                          mrefine->presence_tkerr.mod,
+                          mrefine->presence_tkerr.linenum,
+                          mrefine->presence_tkerr.linepos);
 	    mrefine->presence = NULL;
 	}
     }
@@ -6348,25 +6459,31 @@ static status_t
 	if (krefine->def) {
 	    res = ERR_NCX_DUP_REFINE_STMT;
 	    log_error("\nError: default-stmt set in refine on line %u",
-		      krefine->def_tk->linenum);
-	    tkc->cur = mrefine->def_tk;
+		      krefine->def_tkerr.linenum);
+	    tkc->curerr = &mrefine->def_tkerr;
 	    ncx_print_errormsg(tkc, mod, res);
 	} else {
 	    krefine->def = mrefine->def;
-	    krefine->def_tk = mrefine->def_tk;
+	    ncx_set_error(&krefine->def_tkerr,
+                          mrefine->def_tkerr.mod,
+                          mrefine->def_tkerr.linenum,
+                          mrefine->def_tkerr.linepos);
 	    mrefine->def = NULL;
 	}
     }
 
-    if (mrefine->config_tk && conf) {
-	if (krefine->config_tk) {
+    if (mrefine->config_tkerr.mod && conf) {
+	if (krefine->config_tkerr.mod) {
 	    res = ERR_NCX_DUP_REFINE_STMT;
 	    log_error("\nError: config-stmt set in refine on line %u",
-		      krefine->config_tk->linenum);
-	    tkc->cur = mrefine->config_tk;
+		      krefine->config_tkerr.linenum);
+	    tkc->curerr = &mrefine->config_tkerr;
 	    ncx_print_errormsg(tkc, mod, res);
 	} else {
-	    krefine->config_tk = mrefine->config_tk;
+	    ncx_set_error(&krefine->config_tkerr,
+                          mrefine->config_tkerr.mod,
+                          mrefine->config_tkerr.linenum,
+                          mrefine->config_tkerr.linepos);
 	    keepobj->flags |= OBJ_FL_CONFSET;
 	    if (mergeobj->flags & OBJ_FL_CONFIG) {
 		keepobj->flags |= OBJ_FL_CONFIG;
@@ -6376,15 +6493,18 @@ static status_t
 	}
     }
 
-    if (mrefine->mandatory_tk && mand) {
-	if (krefine->mandatory_tk) {
+    if (mrefine->mandatory_tkerr.mod && mand) {
+	if (krefine->mandatory_tkerr.mod) {
 	    res = ERR_NCX_DUP_REFINE_STMT;
 	    log_error("\nError: mandatory-stmt set in refine on line %u",
-		      krefine->mandatory_tk->linenum);
-	    tkc->cur = mrefine->mandatory_tk;
+		      krefine->mandatory_tkerr.linenum);
+	    tkc->curerr = &mrefine->mandatory_tkerr;
 	    ncx_print_errormsg(tkc, mod, res);
 	} else {
-	    krefine->mandatory_tk = mrefine->mandatory_tk;
+	    ncx_set_error(&krefine->mandatory_tkerr,
+                          mrefine->mandatory_tkerr.mod,
+                          mrefine->mandatory_tkerr.linenum,
+                          mrefine->mandatory_tkerr.linepos);
 	    keepobj->flags |= OBJ_FL_MANDSET;
 	    if (mergeobj->flags & OBJ_FL_MANDATORY) {
 		keepobj->flags |= OBJ_FL_MANDATORY;
@@ -6392,29 +6512,35 @@ static status_t
 	}
     }
 
-    if (mrefine->minelems_tk && minel) {
-	if (krefine->minelems_tk) {
+    if (mrefine->minelems_tkerr.mod && minel) {
+	if (krefine->minelems_tkerr.mod) {
 	    res = ERR_NCX_DUP_REFINE_STMT;
 	    log_error("\nError: min-elements-stmt set in refine on line %u",
-		      krefine->minelems_tk->linenum);
-	    tkc->cur = mrefine->minelems_tk;
+		      krefine->minelems_tkerr.linenum);
+	    tkc->curerr = &mrefine->minelems_tkerr;
 	    ncx_print_errormsg(tkc, mod, res);
 	} else {
 	    krefine->minelems = mrefine->minelems;
-	    krefine->minelems_tk = mrefine->minelems_tk;
+	    ncx_set_error(&krefine->minelems_tkerr,
+                          mrefine->minelems_tkerr.mod,
+                          mrefine->minelems_tkerr.linenum,
+                          mrefine->minelems_tkerr.linepos);
 	}
     }
 
-    if (mrefine->maxelems_tk && maxel) {
-	if (krefine->maxelems_tk) {
+    if (mrefine->maxelems_tkerr.mod && maxel) {
+	if (krefine->maxelems_tkerr.mod) {
 	    res = ERR_NCX_DUP_REFINE_STMT;
 	    log_error("\nError: max-elements-stmt set in refine on line %u",
-		      krefine->maxelems_tk->linenum);
-	    tkc->cur = mrefine->maxelems_tk;
+		      krefine->maxelems_tkerr.linenum);
+	    tkc->curerr = &mrefine->maxelems_tkerr;
 	    ncx_print_errormsg(tkc, mod, res);
 	} else {
 	    krefine->maxelems = mrefine->maxelems;
-	    krefine->minelems_tk = mrefine->minelems_tk;
+	    ncx_set_error(&krefine->maxelems_tkerr,
+                          mrefine->maxelems_tkerr.mod,
+                          mrefine->maxelems_tkerr.linenum,
+                          mrefine->maxelems_tkerr.linepos);
 	}
     }
 
@@ -6474,7 +6600,7 @@ static status_t
 		log_error("\nError: grouping '%s' not found",
 			  uses->name);
 		retres = ERR_NCX_DEF_NOT_FOUND;
-		tkc->cur = obj->tk;
+		tkc->curerr = &obj->tkerr;
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
 	}
@@ -6533,7 +6659,7 @@ static status_t
                       obj_get_name(chobj),
 		      uses->grp->name);
 	    retres = ERR_NCX_MISSING_REFTARGET;
-	    tkc->cur = chobj->tk;
+	    tkc->curerr = &chobj->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	} else {
 	    /* refine target is valid, so save it */
@@ -6561,7 +6687,7 @@ static status_t
 				  "invalid default value (%s)",
 				  obj_get_name(targobj),
 				  refine->def);
-			tkc->cur = refine->def_tk;
+			tkc->curerr = &refine->def_tkerr;
 			ncx_print_errormsg(tkc, mod, retres);
 		    }
 		}
@@ -6572,7 +6698,7 @@ static status_t
 					refine->def);
 		    if (!cas) {
 			/* default is not a valid case name */
-			tkc->cur = refine->def_tk;
+			tkc->curerr = &refine->def_tkerr;
 			retres = ERR_NCX_INVALID_VALUE;
 			log_error("\nError: Refined choice default '%s' "
 				  "is not a valid case name",
@@ -6588,7 +6714,7 @@ static status_t
 			     cobj = (obj_template_t *)dlq_nextEntry(cobj)) {
 			    if (obj_has_name(cobj) &&
 				obj_is_mandatory(cobj)) {
-				tkc->cur = cobj->tk;		    
+				tkc->curerr = &cobj->tkerr;
 				retres = ERR_NCX_DEFCHOICE_NOT_OPTIONAL;
 				ncx_print_errormsg(tkc, mod, retres);
 			    }
@@ -6708,7 +6834,7 @@ static status_t
 	    log_debug3("\nexpand_uses: mod %s, object %s, on line %u",
 		       mod->name,
                        obj_get_name(chobj),
-		       chobj->linenum);
+		       chobj->tkerr.linenum);
 	}
 #endif
 
@@ -6723,9 +6849,9 @@ static status_t
 	    if (testobj) {
 		log_error("\nError: object '%s' already defined at line %u",
 			  name,
-                          testobj->linenum);
+                          testobj->tkerr.linenum);
 		retres = ERR_NCX_DUP_ENTRY;
-		tkc->cur = chobj->tk;
+		tkc->curerr = &chobj->tkerr;
 		ncx_print_errormsg(tkc, mod, retres);
 	    } else {
 		newobj = obj_clone_template(mod,
@@ -6733,14 +6859,14 @@ static status_t
 					    uses->datadefQ);
 		if (!newobj) {
 		    retres = ERR_INTERNAL_MEM;
-		    tkc->cur = chobj->tk;
+		    tkc->curerr = &chobj->tkerr;
 		    ncx_print_errormsg(tkc, mod, retres);
 		    return retres;
 		} else {
 		    /* set the object module (and namespace)
 		     * to the target, not the module w/ grouping
 		     */
-		    newobj->mod = obj->mod;
+		    newobj->tkerr.mod = obj->tkerr.mod;  /****/
 		    newobj->parent = obj->parent;
 		    newobj->usesobj = obj;
 
@@ -6763,7 +6889,7 @@ static status_t
 				   (obj->grp) ? obj->grp->name :
 				   ((obj->parent) ? 
 				    obj_get_name(obj->parent) : NCX_EL_NONE),
-				   obj->linenum);
+				   obj->tkerr.linenum);
 		    }
 #endif
 		}
@@ -6789,7 +6915,7 @@ static status_t
 	if (LOGDEBUG3) {
 	    log_debug3("\nexpand_uses_augment: mod %s, augment on line %u",
 		       mod->name, 
-		       chobj->linenum);
+		       chobj->tkerr.linenum);
 	}
 #endif
 
@@ -6848,7 +6974,7 @@ static status_t
 	log_error("\nError: absolute schema-nodeid form"
 		  " not allowed in nested augment statement");
 	retres = ERR_NCX_INVALID_VALUE;
-	tkc->cur = obj->tk;
+	tkc->curerr = &obj->tkerr;
 	ncx_print_errormsg(tkc, mod, retres);
     }
 
@@ -6859,7 +6985,7 @@ static status_t
 	log_error("\nError: descendant schema-nodeid form"
 		  " not allowed in top-level augment statement");
 	retres = ERR_NCX_INVALID_AUGTARGET;
-	tkc->cur = obj->tk;
+	tkc->curerr = &obj->tkerr;
 	ncx_print_errormsg(tkc, mod, retres);
     }
 
@@ -6977,7 +7103,7 @@ static status_t
 		}
 		
 		retres = ERR_NCX_MANDATORY_NOT_ALLOWED;
-		tkc->cur = testobj->tk;
+		tkc->curerr = &testobj->tkerr;
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
 	}
@@ -6992,7 +7118,7 @@ static status_t
 	log_error("\nError: cannot augment rpc node '%s'; use 'input' "
 		  "or 'output' instead", 
 		  obj_get_name(targobj));
-	tkc->cur = obj->tk;
+	tkc->curerr = &obj->tkerr;
 	ncx_print_errormsg(tkc, mod, retres);
 	break;
     case OBJ_TYP_CHOICE:
@@ -7008,7 +7134,7 @@ static status_t
 		log_error("\nError: invalid %s '%s' augmenting choice node",
 			  obj_get_typestr(testobj),
 			  obj_get_name(testobj));
-		tkc->cur = obj->tk;
+		tkc->curerr = &obj->tkerr;
 		ncx_print_errormsg(tkc, mod, retres);
 		break;
 	    case OBJ_TYP_NONE:
@@ -7029,7 +7155,7 @@ static status_t
 	retres = ERR_NCX_INVALID_AUGTARGET;
 	log_error("\nError: cannot augment anyxml node '%s'",
 		  obj_get_name(targobj));
-	tkc->cur = obj->tk;
+	tkc->curerr = &obj->tkerr;
 	ncx_print_errormsg(tkc, mod, retres);
 	break;
     default:
@@ -7045,7 +7171,7 @@ static status_t
 		log_error("\nError: invalid %s '%s' augmenting data node",
 			  obj_get_typestr(testobj),
 			  obj_get_name(testobj));
-		tkc->cur = obj->tk;
+		tkc->curerr = &obj->tkerr;
 		ncx_print_errormsg(tkc, mod, retres);
 		break;
 	    case OBJ_TYP_NONE:
@@ -7066,7 +7192,7 @@ static status_t
 		  obj_get_typestr(targobj),
 		  obj_get_name(targobj));
 	retres = ERR_NCX_INVALID_AUGTARGET;
-	tkc->cur = targobj->tk;
+	tkc->curerr = &targobj->tkerr;
 	ncx_print_errormsg(tkc, mod, retres);
 	return retres;
     }
@@ -7084,7 +7210,7 @@ static status_t
 	if (LOGDEBUG3) {
 	    log_debug3("\nexpand_aug: mod %s, object %s, on line %u",
 		       mod->name, obj_get_name(chobj),
-		       chobj->linenum);
+		       chobj->tkerr.linenum);
 	}
 #endif
 
@@ -7111,11 +7237,11 @@ static status_t
                              "already defined "
                              "in %smodule '%s' at line %u",
                              name, 
-                             (testobj->mod->ismod) ? "" : "sub",
-                             testobj->mod->name,
-                             testobj->linenum);
+                             (testobj->tkerr.mod->ismod) ? "" : "sub",
+                             testobj->tkerr.mod->name,
+                             testobj->tkerr.linenum);
                     res = ERR_NCX_DUP_AUGNODE;
-                    tkc->cur = chobj->tk;
+                    tkc->curerr = &chobj->tkerr;
                     ncx_print_errormsg(tkc, mod, res);
                 }
             }
@@ -7128,11 +7254,11 @@ static status_t
 		log_error("\nError: object '%s' already defined "
 			  "in %smodule '%s' at line %u",
 			  name, 
-			  (testobj->mod->ismod) ? "" : "sub",
-			  testobj->mod->name,
-			  testobj->linenum);
+			  (testobj->tkerr.mod->ismod) ? "" : "sub",
+			  testobj->tkerr.mod->name,
+			  testobj->tkerr.linenum);
 		retres = ERR_NCX_DUP_ENTRY;
-		tkc->cur = chobj->tk;
+		tkc->curerr = &chobj->tkerr;
 		ncx_print_errormsg(tkc, mod, retres);
 	    } else {
 		/* OK to create the new name
@@ -7153,7 +7279,7 @@ static status_t
 		}
 		if (!newobj) {
 		    res = ERR_INTERNAL_MEM;
-		    tkc->cur = chobj->tk;
+		    tkc->curerr = &chobj->tkerr;
 		    ncx_print_errormsg(tkc, mod, res);
 		    return res;
 		} else {
@@ -7181,8 +7307,8 @@ static status_t
 				   "to target %s.%u, aug.%u",
 				   obj_get_name(newobj),
 				   obj_get_name(targobj),
-				   targobj->linenum,
-				   obj->linenum);
+				   targobj->tkerr.linenum,
+				   obj->tkerr.linenum);
 		    }
 #endif
 		}
@@ -7255,10 +7381,6 @@ static status_t
         return ERR_INTERNAL_MEM;
     }
 
-    if (tkc) {
-        curtk = TK_CUR(tkc);
-    }
-
     /* make sure all the deviate statements are 
      * are OK for that object type
      */
@@ -7266,10 +7388,6 @@ static status_t
 	     dlq_firstEntry(&deviation->deviateQ);
 	 devi != NULL;
 	 devi = nextdevi) {
-
-        if (tkc) {
-            TK_CUR(tkc) = devi->tk;
-        }
 
 	nextdevi = (obj_deviate_t *)dlq_nextEntry(devi);
 
@@ -7298,6 +7416,9 @@ static status_t
 			  "type-stmt not allowed",
 			  deviation->target,
 			  obj_get_typestr(targobj));
+                if (tkc) {
+                    tkc->curerr = &devi->tkerr;
+                }
 		ncx_print_errormsg(tkc, mod, retres);
 	    } else {
 		res = yang_typ_resolve_type(pcb,
@@ -7318,6 +7439,9 @@ static status_t
 			  "type-stmt not allowed",
 			  deviation->target,
 			  obj_get_typestr(targobj));
+                if (tkc) {
+                    tkc->curerr = &devi->tkerr;
+                }
 		ncx_print_errormsg(tkc, mod, retres);
 	    } else {
 		switch (targobj->objtype) {
@@ -7339,12 +7463,18 @@ static status_t
 		    log_error("\nError: 'units' must exist in "
 			      "deviate target '%s'",
 			      deviation->target);
+                    if (tkc) {
+                        tkc->curerr = &devi->tkerr;
+                    }
 		    ncx_print_errormsg(tkc, mod, retres);
 		} else if (!instancetest && curexists) {
 		    res = retres = ERR_NCX_INVALID_DEV_STMT;
 		    log_error("\nError: 'units' must not exist in "
 			      "deviate target '%s'",
 			      deviation->target);
+                    if (tkc) {
+                        tkc->curerr = &devi->tkerr;
+                    }
 		    ncx_print_errormsg(tkc, mod, retres);
 		} else if (devi->arg == OBJ_DARG_DELETE &&
 			   xml_strcmp(devi->units,
@@ -7354,6 +7484,9 @@ static status_t
 			      "deviate target '%s'",
 			      devi->units,
 			      deviation->target);
+                    if (tkc) {
+                        tkc->curerr = &devi->tkerr;
+                    }
 		    ncx_print_errormsg(tkc, mod, retres);
 		}
 	    }
@@ -7376,12 +7509,18 @@ static status_t
 		    log_error("\nError: 'default' must exist in "
 			      "deviate target '%s'",
 			      deviation->target);
+                    if (tkc) {
+                        tkc->curerr = &devi->tkerr;
+                    }
 		    ncx_print_errormsg(tkc, mod, retres);
 		} else if (!instancetest && curexists) {
 		    res = retres = ERR_NCX_INVALID_DEV_STMT;
 		    log_error("\nError: 'default' must not exist in "
 			      "deviate target '%s'",
 			      deviation->target);
+                    if (tkc) {
+                        tkc->curerr = &devi->tkerr;
+                    }
 		    ncx_print_errormsg(tkc, mod, retres);
 		} else if (devi->arg == OBJ_DARG_DELETE &&
 			   xml_strcmp(devi->defval, curval)) {
@@ -7390,6 +7529,9 @@ static status_t
 			      "deviate target '%s'",
 			      devi->defval,
 			      deviation->target);
+                    if (tkc) {
+                        tkc->curerr = &devi->tkerr;
+                    }
 		    ncx_print_errormsg(tkc, mod, retres);
 		}
 	    } else {
@@ -7398,12 +7540,15 @@ static status_t
 			  "default-stmt not allowed",
 			  deviation->target,
 			  obj_get_typestr(targobj));
+                if (tkc) {
+                    tkc->curerr = &devi->tkerr;
+                }
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
 	}
 
 	/* check if config-stmt entered */
-	if (devi->config_tk) {
+	if (devi->config_tkerr.mod) {
 	    switch (targobj->objtype) {
 	    case OBJ_TYP_LEAF:
 		if (!devi->config && obj_is_key(targobj) &&
@@ -7413,6 +7558,9 @@ static status_t
 			      "cannot change config to false",
 			      obj_get_mod_name(targobj),
 			      obj_get_name(targobj));
+                    if (tkc) {
+                        tkc->curerr = &devi->tkerr;
+                    }
 		    ncx_print_errormsg(tkc, mod, retres);		    
 		}
 		break;
@@ -7427,6 +7575,9 @@ static status_t
 			      "cannot change config to true",
 			      obj_get_mod_name(targobj),
 			      obj_get_name(targobj));
+                    if (tkc) {
+                        tkc->curerr = &devi->tkerr;
+                    }
 		    ncx_print_errormsg(tkc, mod, retres);		    
 		}
 		break;
@@ -7436,12 +7587,15 @@ static status_t
 			  "config-stmt not allowed",
 			  deviation->target,
 			  obj_get_typestr(targobj));
+                if (tkc) {
+                    tkc->curerr = &devi->tkerr;
+                }
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
 	}
 
 	/* check if mandatory-stmt entered */
-	if (devi->mandatory_tk) {
+	if (devi->mandatory_tkerr.mod) {
 	    switch (targobj->objtype) {
 	    case OBJ_TYP_CHOICE:
 	    case OBJ_TYP_LEAF:
@@ -7453,12 +7607,15 @@ static status_t
 			  "mandatory-stmt not allowed",
 			  deviation->target,
 			  obj_get_typestr(targobj));
+                if (tkc) {
+                    tkc->curerr = &devi->tkerr;
+                }
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
 	}
 
 	/* check if min-elements stmt entered */
-	if (devi->minelems_tk) {
+	if (devi->minelems_tkerr.mod) {
 	    switch (targobj->objtype) {
 	    case OBJ_TYP_LEAF_LIST:
 	    case OBJ_TYP_LIST:
@@ -7469,12 +7626,15 @@ static status_t
 			  "min-elements-stmt not allowed",
 			  deviation->target,
 			  obj_get_typestr(targobj));
+                if (tkc) {
+                    tkc->curerr = &devi->tkerr;
+                }
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
 	}
 
 	/* check if max-elements stmt entered */
-	if (devi->maxelems_tk) {
+	if (devi->maxelems_tkerr.mod) {
 	    switch (targobj->objtype) {
 	    case OBJ_TYP_LEAF_LIST:
 	    case OBJ_TYP_LIST:
@@ -7485,6 +7645,9 @@ static status_t
 			  "max-elements-stmt not allowed",
 			  deviation->target,
 			  obj_get_typestr(targobj));
+                if (tkc) {
+                    tkc->curerr = &devi->tkerr;
+                }
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
 	}
@@ -7516,6 +7679,9 @@ static status_t
 				  "deviate target '%s'",
 				  must->exprstr,
 				  deviation->target);
+                        if (tkc) {
+                            tkc->curerr = &devi->tkerr;
+                        }
 			ncx_print_errormsg(tkc, mod, retres);
 		    } else if (!instancetest && curexists) {
 			res = retres = ERR_NCX_INVALID_DEV_STMT;
@@ -7523,6 +7689,9 @@ static status_t
 				  "deviate target '%s'",
 				  must->exprstr,
 				  deviation->target);
+                        if (tkc) {
+                            tkc->curerr = &devi->tkerr;
+                        }
 			ncx_print_errormsg(tkc, mod, retres);
 		    }
 		}
@@ -7533,6 +7702,9 @@ static status_t
 			  "must-stmt not allowed",
 			  deviation->target,
 			  obj_get_typestr(targobj));
+                if (tkc) {
+                    tkc->curerr = &devi->tkerr;
+                }
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
 	}
@@ -7560,6 +7732,9 @@ static status_t
 				  "deviate target '%s'",
 				  unique->xpath,
 				  deviation->target);
+                        if (tkc) {
+                            tkc->curerr = &devi->tkerr;
+                        }
 			ncx_print_errormsg(tkc, mod, retres);
 		    } else if (!instancetest && curexists) {
 			res = retres = ERR_NCX_INVALID_DEV_STMT;
@@ -7567,6 +7742,9 @@ static status_t
 				  "deviate target '%s'",
 				  unique->xpath,
 				  deviation->target);
+                        if (tkc) {
+                            tkc->curerr = &devi->tkerr;
+                        }
 			ncx_print_errormsg(tkc, mod, retres);
 		    }
 		}
@@ -7577,18 +7755,12 @@ static status_t
 			  "unique-stmt not allowed",
 			  deviation->target,
 			  obj_get_typestr(targobj));
+                if (tkc) {
+                    tkc->curerr = &devi->tkerr;
+                }
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
 	}
-
-#if 0
-	if (res == NO_ERR) {
-	    res = check_deviate_collision(tkc,
-					  mod,
-					  devi,
-					  &targobj->deviateQ);
-	}
-#endif
 
 	/* finally, if entire deviate-stmt is OK save it
 	 * or else toss it
@@ -7598,10 +7770,6 @@ static status_t
 	    dlq_remove(devi);
 	    obj_free_deviate(devi);
 	} /* else leave in this Q for HTML or YANG output */
-    }
-
-    if (tkc) {
-        TK_CUR(tkc) = curtk;
     }
 
     return retres;
@@ -7707,7 +7875,7 @@ static status_t
         }
 
         if (res == NO_ERR) {
-            if (deviation->targobj->mod == mod) {
+            if (deviation->targobj->tkerr.mod == mod) {
                 if (LOGDEBUG) {
                     log_debug("\nAdding external deviation "
                               "to '%s', from '%s' to '%s'",
@@ -8292,7 +8460,7 @@ static status_t
                                         mod, 
                                         iff->prefix,
 					iff->name, 
-                                        iff->tk,
+                                        &iff->tkerr,
 					&testfeature);
 	    if (res != NO_ERR) {
 		retres = res;
@@ -8308,7 +8476,7 @@ static status_t
 		      iff->name, 
                       obj_get_name(obj));
 	    res = retres = ERR_NCX_DEF_NOT_FOUND;
-	    tkc->cur = iff->tk;
+	    tkc->curerr = &iff->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
 
@@ -8367,7 +8535,7 @@ static status_t
 		  obj_get_typestr(testobj),
 		  obj_get_name(testobj),
 		  obj_get_name(ancestor));
-	tkc->cur = iff->tk;
+	tkc->curerr = &iff->tkerr;
 	ncx_print_errormsg(tkc, mod, res);
     }
     return res;
@@ -8425,7 +8593,7 @@ static status_t
     log_error("\nError: when-stmt '%s' not in affect "
 	      "for list %s",
 	      test1->when, obj_get_name(test2));
-    tkc->cur = test1->when->tk;
+    tkc->curerr = &test1->when->tkerr;
     ncx_print_errormsg(tkc, mod, ERR_NCX_INVALID_CONDITIONAL);
 
     return ERR_NCX_INVALID_CONDITIONAL;
@@ -8624,12 +8792,12 @@ static status_t
 		   dlq_hdr_t *datadefQ)
 {
     obj_template_t        *testobj, *targobj;
-    const obj_template_t  *leafobj;
+    obj_template_t        *leafobj;
     obj_key_t             *key;
-    const obj_unique_t    *uniq;
+    obj_unique_t          *uniq;
     obj_unique_comp_t     *uncomp;
     typ_def_t             *typdef;
-    const xpath_pcb_t     *pcb;
+    xpath_pcb_t           *pcb;
     xpath_pcb_t           *pcbclone;
     status_t               res, retres;
 
@@ -8705,7 +8873,7 @@ static status_t
                                "object %s, on line %u",
 			       mod->name,
                                obj_get_name(testobj), 
-			       testobj->linenum);
+			       testobj->tkerr.linenum);
 		}
 #endif
 
@@ -8719,7 +8887,7 @@ static status_t
 		if (!pcbclone) {
 		    res = ERR_INTERNAL_MEM;
 		} else {
-		    tkc->cur = pcb->tk;
+		    tkc->curerr = &pcb->tkerr;
 		    res = xpath_yang_parse_path(tkc, 
 						mod, 
 						XP_SRC_LEAFREF,
@@ -8733,7 +8901,7 @@ static status_t
 						       &leafobj);
 			if (res == NO_ERR && leafobj) {
 			    typ_set_xref_typdef(typdef, 
-						obj_get_ctypdef(leafobj));
+						obj_get_typdef(leafobj));
 			    if (testobj->objtype == OBJ_TYP_LEAF) {
 				testobj->def.leaf->leafrefobj = leafobj;
 			    } else {
@@ -9126,8 +9294,10 @@ status_t
     ref = FALSE;
     retres = NO_ERR;
 
-    dev->tk = TK_CUR(tkc);
-    dev->linenum = dev->tk->linenum;
+    ncx_set_error(&dev->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
 
     /* Get the mandatory deviation target */
     res = yang_consume_string(tkc, mod, &dev->target);
@@ -9326,7 +9496,7 @@ status_t
 	    log_debug3("\nresolve_uses: mod %s, object %s, on line %u",
 		       mod->name, 
 		       obj_get_name(testobj),
-		       testobj->linenum);
+		       testobj->tkerr.linenum);
 	}
 #endif
 
@@ -9711,7 +9881,7 @@ status_t
 	    log_debug3("\nresolve_final: mod %s, object %s, on line %u",
 		       mod->name, 
 		       obj_get_name(testobj), 
-		       testobj->linenum);
+		       testobj->tkerr.linenum);
 	}
 #endif
 	
@@ -9972,12 +10142,12 @@ status_t
 status_t 
     yang_obj_check_leafref_loops (tk_chain_t *tkc,
 				  ncx_module_t *mod,
-				  const dlq_hdr_t *datadefQ)
+				  dlq_hdr_t *datadefQ)
 {
-    const obj_template_t  *testobj, *nextobj, *lastobj;
-    const dlq_hdr_t       *childdatadefQ;
-    status_t               res, retres;
-    boolean                isleaf;
+    obj_template_t  *testobj, *nextobj, *lastobj;
+    dlq_hdr_t       *childdatadefQ;
+    status_t         res, retres;
+    boolean          isleaf;
 
 #ifdef DEBUG
     if (!tkc || !mod || !datadefQ) {
@@ -10006,7 +10176,7 @@ status_t
 			       "object %s, on line %u",
 			       mod->name, 
                                obj_get_name(testobj), 
-			       testobj->linenum);
+			       testobj->tkerr.linenum);
 		}
 #endif
 		
@@ -10022,7 +10192,7 @@ status_t
 			      "%s %s loops with self",
 			      obj_get_typestr(testobj),
 			      obj_get_name(testobj));
-		    TK_CUR(tkc) = testobj->tk;
+		    tkc->curerr = &testobj->tkerr;
 		    ncx_print_errormsg(tkc, mod, res);
 		} else {
 		    while (nextobj) {
@@ -10044,7 +10214,7 @@ status_t
 					  obj_get_name(testobj),
 					  obj_get_typestr(lastobj),
 					  obj_get_name(lastobj));
-				TK_CUR(tkc) = testobj->tk;
+				tkc->curerr = &testobj->tkerr;
 				ncx_print_errormsg(tkc, mod, res);
 				nextobj = NULL;
 			    }
@@ -10057,7 +10227,7 @@ status_t
 	    }
 	    break;
 	default:
-	    childdatadefQ = obj_get_cdatadefQ(testobj);
+	    childdatadefQ = obj_get_datadefQ(testobj);
 	    if (childdatadefQ) {
 		res = yang_obj_check_leafref_loops(tkc,
 						   mod,

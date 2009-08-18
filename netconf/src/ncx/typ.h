@@ -148,9 +148,9 @@ typedef struct typ_rangedef_t_ {
     ncx_num_t   ub;              
     ncx_btype_t btyp;
     uint32      flags;
-    tk_token_t *tk;              /* saved in YANG only */
     xmlChar    *lbstr;           /* saved if range deferred */
     xmlChar    *ubstr;           /* saved if range deferred */
+    ncx_error_t tkerr;
 } typ_rangedef_t;
 
 
@@ -182,10 +182,10 @@ typedef struct typ_sval_t_ {
 /* one range description */
 typedef struct typ_range_t_ {
     xmlChar         *rangestr;
-    tk_token_t      *tk;
     dlq_hdr_t        rangeQ;            /* Q of typ_rangedef_t */
     ncx_errinfo_t    range_errinfo;
     ncx_status_t     res;
+    ncx_error_t      tkerr;
 } typ_range_t;
 
 /* YANG pattern struct : N per typedef and also
@@ -242,7 +242,7 @@ typedef struct typ_simple_t_ {
     struct xpath_pcb_t_   *xleafref;   /* saved for NCX_BT_LEAFREF only */
 
     /* pointer to resolved typedef for NCX_BT_LEAFREF/NCX_BT_INSTANCE_ID */
-    const struct typ_def_t_ *xrefdef;    
+    struct typ_def_t_ *xrefdef;    
 
     boolean          constrained;     /* set when require-instance=TRUE */
     typ_range_t      range;     /* for all num types and string length  */
@@ -308,10 +308,10 @@ typedef struct typ_def_t_ {
     ncx_merge_t      mergetype;
     xmlChar         *prefix;            /* pfix used in type field */
     xmlChar         *typename;      /* typename used in type field */
-    uint32           linenum;         /* linenum when NCX_CL_NAMED */
-    tk_token_t      *tk;            /* const back-ptr for errmsg */
     dlq_hdr_t        appinfoQ;             /* Q of ncx_appinfo_t */
+    ncx_error_t      tkerr;
     typ_def_u_t      def;
+    uint32           linenum;
 } typ_def_t;
 
 
@@ -323,16 +323,14 @@ typedef struct typ_template_t_ {
     xmlChar     *ref;
     xmlChar     *defval;
     xmlChar     *units;
-    ncx_module_t *mod;   /* const back-ptr to module defining type */
     xmlns_id_t   nsid;
     boolean      used;
     ncx_status_t status;
     typ_def_t    typdef;
     dlq_hdr_t    appinfoQ;
-    uint32       linenum;
-    tk_token_t  *tk;
     void        *grp;       /* const back-ptr to direct grp parent */
     status_t     res;
+    ncx_error_t  tkerr;
 } typ_template_t;
 
 
@@ -651,11 +649,11 @@ extern boolean
     typ_is_xsd_simple (ncx_btype_t btyp);
 
 /* looks past named typedefs to base typedef */
-extern const typ_enum_t *
-    typ_first_enumdef (const typ_def_t *typdef);
+extern typ_enum_t *
+    typ_first_enumdef (typ_def_t *typdef);
 
-extern const typ_enum_t *
-    typ_next_enumdef (const typ_enum_t *enumdef);
+extern typ_enum_t *
+    typ_next_enumdef (typ_enum_t *enumdef);
 
 extern typ_enum_t *
     typ_first_enumdef2 (typ_def_t *typdef);
@@ -689,8 +687,8 @@ extern ncx_merge_t
 extern xmlns_id_t 
     typ_get_nsid (const typ_template_t *typ);
 
-extern const typ_template_t *
-    typ_get_listtyp (const typ_def_t *typdef);
+extern typ_template_t *
+    typ_get_listtyp (typ_def_t *typdef);
 
 extern const typ_template_t *
     typ_get_clisttyp (const typ_def_t *typdef);
@@ -704,8 +702,8 @@ extern void
 extern typ_def_t *
     typ_get_unionnode_ptr (typ_unionnode_t *un);
 
-extern const typ_unionnode_t *
-    typ_first_unionnode (const typ_def_t *typdef);
+extern typ_unionnode_t *
+    typ_first_unionnode (typ_def_t *typdef);
 
 extern boolean
     typ_is_number (ncx_btype_t btyp);
@@ -737,8 +735,8 @@ extern const typ_pattern_t *
 extern uint32
     typ_get_pattern_count (const typ_def_t *typdef);
 
-extern const ncx_errinfo_t *
-    typ_get_range_errinfo (const typ_def_t *typdef);
+extern ncx_errinfo_t *
+    typ_get_range_errinfo (typ_def_t *typdef);
 
 /* clean Q of typ_template_t */
 extern void
@@ -772,8 +770,8 @@ extern const xmlChar *
     typ_get_leafref_path (const typ_def_t *typdef);
 
 /* returns xpath_pcb_t but cannot import due to H file loop */
-extern const struct xpath_pcb_t_ *
-    typ_get_leafref_pcb (const typ_def_t *typdef);
+extern struct xpath_pcb_t_ *
+    typ_get_leafref_pcb (typ_def_t *typdef);
 
 /* leafref or instance-identifier constrained flag */
 extern boolean
@@ -781,10 +779,10 @@ extern boolean
 
 extern void
     typ_set_xref_typdef (typ_def_t *typdef,
-			 const typ_def_t *target);
+			 typ_def_t *target);
 
-extern const typ_def_t *
-    typ_get_xref_typdef (const typ_def_t *typdef);
+extern typ_def_t *
+    typ_get_xref_typdef (typ_def_t *typdef);
 
 extern boolean
     typ_has_subclauses (const typ_def_t *typdef);

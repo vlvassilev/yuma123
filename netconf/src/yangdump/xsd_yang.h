@@ -61,21 +61,21 @@ date	     init     comment
 *********************************************************************/
 
 extern status_t
-    xsd_add_groupings (const ncx_module_t *mod,
+    xsd_add_groupings (ncx_module_t *mod,
 		       val_value_t *val);
 
 extern status_t
-    xsd_add_objects (const ncx_module_t *mod,
+    xsd_add_objects (ncx_module_t *mod,
 		     val_value_t *val);
 
 extern status_t
-    xsd_do_typedefs_groupingQ (const ncx_module_t *mod,
-			       const dlq_hdr_t *groupingQ,
+    xsd_do_typedefs_groupingQ (ncx_module_t *mod,
+			       dlq_hdr_t *groupingQ,
 			       dlq_hdr_t *typnameQ);
 
 extern status_t
-    xsd_do_typedefs_datadefQ (const ncx_module_t *mod,
-			      const dlq_hdr_t *datadefQ,
+    xsd_do_typedefs_datadefQ (ncx_module_t *mod,
+			      dlq_hdr_t *datadefQ,
 			      dlq_hdr_t *typnameQ);
 
 extern void

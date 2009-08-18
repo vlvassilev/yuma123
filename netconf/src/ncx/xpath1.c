@@ -318,7 +318,8 @@ static void
 	    log_error("\nError: malloc failed in "
 		      "Xpath expression");
 	}
-	ncx_print_errormsg(pcb->tkc, pcb->mod, 
+	ncx_print_errormsg(pcb->tkc, 
+                           pcb->tkerr.mod, 
 			   ERR_INTERNAL_MEM);
     }
 
@@ -369,7 +370,8 @@ static void
 	    log_error("\nError: End reached in "
 		      "XPath expression '%s'",  pcb->exprstr);
 	}
-	ncx_print_errormsg(pcb->tkc, pcb->mod, 
+	ncx_print_errormsg(pcb->tkc, 
+                           pcb->tkerr.mod, 
 			   ERR_NCX_WRONG_TKTYPE);
     }
 
@@ -396,7 +398,9 @@ static void
 		  "Xpath expression '%s'",
 		  parmcnt,
 		  pcb->exprstr);
-	ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	ncx_print_errormsg(pcb->tkc, 
+                           pcb->tkerr.mod, 
+                           res);
     }
 
 }  /* wrong_parmcnt_error */
@@ -416,7 +420,8 @@ static void
     if (pcb->logerrors) {
 	log_error("\nError: XPath found in instance-identifier '%s'",
 		  pcb->exprstr);
-	ncx_print_errormsg(pcb->tkc, pcb->mod, 
+	ncx_print_errormsg(pcb->tkc, 
+                           pcb->tkerr.mod, 
 			   ERR_NCX_INVALID_INSTANCEID);
     }
 
@@ -519,7 +524,9 @@ static status_t
 	if (pcb->logerrors) {
 	    log_error("\nError: %s in instance-identifier '%s'",
 		      msg, pcb->exprstr);
-	    ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	    ncx_print_errormsg(pcb->tkc, 
+                               pcb->tkerr.mod, 
+                               res);
 	}
 	return res;
     } else {
@@ -612,7 +619,9 @@ static status_t
 		log_error("\nError: %s in instance-identifier '%s'",
 			  msg, pcb->exprstr);
 	    }
-	    ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	    ncx_print_errormsg(pcb->tkc, 
+                               pcb->tkerr.mod, 
+                               res);
 	}
 	return res;
     } else {
@@ -719,7 +728,7 @@ static xpath_resnode_t *
     new_obj_resnode (xpath_pcb_t *pcb,
 		     int64 position,
 		     boolean dblslash,
-		     const obj_template_t *objptr)
+		     obj_template_t *objptr)
 {
     xpath_resnode_t  *resnode;
 
@@ -835,7 +844,7 @@ static void
 *********************************************************************/
 static xpath_result_t *
     new_nodeset (xpath_pcb_t *pcb,
-		 const obj_template_t *obj,
+		 obj_template_t *obj,
 		 val_value_t *val,
 		 int64 position,
 		 boolean dblslash)
@@ -1773,10 +1782,10 @@ static void
     if (banner) {
 	log_write("\n%s", banner);
     }
-    if (pcb->mod) {
+    if (pcb->tkerr.mod) {
 	log_write(" mod:%s, line:%u", 
-		  ncx_get_modname(pcb->mod),
-		  pcb->tk->linenum);
+		  ncx_get_modname(pcb->tkerr.mod),
+		  pcb->tkerr.linenum);
     }
     log_write("\nxpath result for '%s'", pcb->exprstr);
 
@@ -4335,7 +4344,7 @@ static const xpath_fncb_t *
 * INPUTS:
 *    pcb == parser control block in progress
 *    prefix == prefix string of module with the varbind
-*           == NULL for current module (pcb->mod)
+*           == NULL for current module (pcb->tkerr.mod)
 *    prefixlen == length of prefix string
 *    name == variable name string
 *     res == address of return status
@@ -4363,12 +4372,12 @@ static ncx_var_t *
     /* check if prefix set and specifies an import */
     if (pcb->source != XP_SRC_XML) {
 	if (prefix && prefixlen && 
-	    xml_strlen(pcb->mod->prefix) == prefixlen &&
-	    xml_strncmp(pcb->mod->prefix, prefix, prefixlen)) {
+	    xml_strlen(pcb->tkerr.mod->prefix) == prefixlen &&
+	    xml_strncmp(pcb->tkerr.mod->prefix, prefix, prefixlen)) {
 
 	    *res = xpath_get_curmod_from_prefix_str(prefix,
 						    prefixlen,
-						    pcb->mod,
+						    pcb->tkerr.mod,
 						    &targmod);
 	    if (*res == NO_ERR) {
 		nsid = targmod->nsid;
@@ -4481,7 +4490,7 @@ static status_t
     } else {
 	res = xpath_get_curmod_from_prefix_str(prefix, 
 					       prefixlen,
-					       pcb->mod, 
+					       pcb->tkerr.mod, 
 					       &targmod);
 	if (res == NO_ERR) {
 	    *nsid = targmod->nsid;
@@ -4492,7 +4501,7 @@ static status_t
 	if (pcb->logerrors) {
 	    log_error("\nError: Module for prefix '%s' not found",
 		      (prefix) ? prefix : EMPTY_STRING);
-	    ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	    ncx_print_errormsg(pcb->tkc, pcb->tkerr.mod, res);
 	}
     }
 
@@ -4852,7 +4861,7 @@ static boolean
 *    FALSE to terminate walk
 *********************************************************************/
 static boolean
-    object_walker_fn (const obj_template_t *obj,
+    object_walker_fn (obj_template_t *obj,
 		      void *cookie1,
 		      void *cookie2)
 {
@@ -4919,7 +4928,7 @@ static status_t
 		      boolean textmode)
 {
     xpath_resnode_t        *resnode, *findnode;
-    const obj_template_t   *testobj;
+    obj_template_t         *testobj;
     const xmlChar           *modname;
     val_value_t            *testval;
     boolean                 keep, cfgonly, fnresult, fncalled, useroot;
@@ -5145,7 +5154,7 @@ static status_t
 			const xmlChar *name)
 {
     xpath_resnode_t        *resnode, *findnode;
-    const obj_template_t   *testobj, *useobj;
+    obj_template_t         *testobj, *useobj;
     const xmlChar           *modname;
     val_value_t            *testval;
     boolean                 keep, cfgonly, fnresult, fncalled, useroot;
@@ -5438,7 +5447,7 @@ static status_t
 		       ncx_xpath_axis_t axis)
 {
     xpath_resnode_t      *resnode;
-    const obj_template_t *testobj;
+    obj_template_t       *testobj;
     val_value_t          *testval;
     const xmlChar        *modname;
     status_t              res;
@@ -5651,7 +5660,7 @@ static status_t
 			ncx_xpath_axis_t axis)
 {
     xpath_resnode_t      *resnode;
-    const obj_template_t *testobj;
+    obj_template_t       *testobj;
     val_value_t          *testval;
     const xmlChar        *modname;
     status_t              res;
@@ -5805,7 +5814,7 @@ static status_t
 			  ncx_xpath_axis_t axis)
 {
     xpath_resnode_t        *resnode, *testnode;
-    const obj_template_t   *testobj;
+    obj_template_t         *testobj;
     val_value_t            *testval;
     const xmlChar          *modname;
     xpath_result_t         *dummy;
@@ -6030,7 +6039,7 @@ static status_t
 	if (pcb->logerrors) {
 	    log_error("\nError: token expected in XPath "
 		      "expression '%s'", pcb->exprstr);
-	    ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	    ncx_print_errormsg(pcb->tkc, pcb->tkerr.mod, res);
 	} else {
 	    /*** handle agent error ***/
 	}
@@ -6127,7 +6136,7 @@ static status_t
 			 "XPath expr '%s'", 
                          pcb->exprstr);
 		ncx_print_errormsg(pcb->tkc, 
-                                   pcb->mod,
+                                   pcb->tkerr.mod,
 				   ERR_NCX_EMPTY_XPATH_RESULT);
 	    }
 	    break;
@@ -6147,7 +6156,7 @@ static status_t
 			 "XPath expr '%s'", 
                          pcb->exprstr);
 		ncx_print_errormsg(pcb->tkc, 
-                                   pcb->mod,
+                                   pcb->tkerr.mod,
 				   ERR_NCX_EMPTY_XPATH_RESULT);
 	    }
 	    break;
@@ -6233,7 +6242,8 @@ static status_t
             ncx_warning_enabled(ERR_NCX_EMPTY_XPATH_RESULT)) {
 	    log_warn("\nWarning: attribute axis is empty in "
 		     "XPath expr '%s'", pcb->exprstr);
-	    ncx_print_errormsg(pcb->tkc, pcb->mod,
+	    ncx_print_errormsg(pcb->tkc, 
+                               pcb->tkerr.mod,
 			       ERR_NCX_EMPTY_XPATH_RESULT);
 	}
 	if (*result) {
@@ -6317,7 +6327,7 @@ static status_t
 		     "XPath expr '%s'", 
                      pcb->exprstr);
 	    ncx_print_errormsg(pcb->tkc, 
-                               pcb->mod,
+                               pcb->tkerr.mod,
 			       ERR_NCX_EMPTY_XPATH_RESULT);
 	}
 	if (*result) {
@@ -6338,7 +6348,7 @@ static status_t
 		     "XPath expr '%s'", 
                          pcb->exprstr);
 		ncx_print_errormsg(pcb->tkc, 
-                                   pcb->mod,
+                                   pcb->tkerr.mod,
 				   ERR_NCX_EMPTY_XPATH_RESULT);
 	    }
 	    if (*result) {
@@ -6794,7 +6804,7 @@ static status_t
 			  "XPath expression '%s'",
 			  TK_CUR_VAL(pcb->tkc),
 			  pcb->exprstr);
-		ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+		ncx_print_errormsg(pcb->tkc, pcb->tkerr.mod, res);
 	    } else {
 		/*** log agent error ***/
 	    }
@@ -6987,7 +6997,7 @@ static xpath_result_t *
 			  " for function '%s'",
 			  parmcnt, fncb->parmcnt,
 			  fncb->name);
-		ncx_print_errormsg(pcb->tkc, pcb->mod, *res);
+		ncx_print_errormsg(pcb->tkc, pcb->tkerr.mod, *res);
 	    } else {
 		/*** log agent error ***/
 	    }
@@ -7009,7 +7019,7 @@ static xpath_result_t *
 	if (pcb->logerrors) {	
 	    log_error("\nError: Invalid XPath function name '%s'",
 		      TK_CUR_VAL(pcb->tkc));
-	    ncx_print_errormsg(pcb->tkc, pcb->mod, *res);
+	    ncx_print_errormsg(pcb->tkc, pcb->tkerr.mod, *res);
 	} else {
 	    /*** log agent error ***/
 	}
@@ -7094,11 +7104,11 @@ static xpath_result_t *
 		    if (*res == ERR_NCX_DEF_NOT_FOUND) {
 			log_error("\nError: unknown variable binding '%s'",
 				  errstr);
-			ncx_print_errormsg(pcb->tkc, pcb->mod, *res);
+			ncx_print_errormsg(pcb->tkc, pcb->tkerr.mod, *res);
 		    } else {
 			log_error("\nError: error in variable binding '%s'",
 				  errstr);
-			ncx_print_errormsg(pcb->tkc, pcb->mod, *res);
+			ncx_print_errormsg(pcb->tkc, pcb->tkerr.mod, *res);
 		    }
 		}
 	    } else {
@@ -7199,9 +7209,8 @@ static xpath_result_t *
 	    log_error("\nError: token expected in XPath expression '%s'",
 		      pcb->exprstr);
 	    /* hack to get correct error token to print */
-	    pcb->tkc->cur = pcb->tk;
-	    ncx_print_errormsg(pcb->tkc, pcb->mod, *res);
-	    pcb->tkc->cur = NULL;
+	    pcb->tkc->curerr = &pcb->tkerr;
+	    ncx_print_errormsg(pcb->tkc, pcb->tkerr.mod, *res);
 	} else {
 	    ;  /**** log agent error ****/
 	}
@@ -8427,7 +8436,7 @@ status_t
     /* the module that contains the XPath expr is the one
      * that will always be used to resolve prefixes
      */
-    pcb->mod = mod;
+    pcb->tkerr.mod = mod;
     pcb->source = source;
     pcb->logerrors = TRUE;
     pcb->obj = NULL;
@@ -8469,7 +8478,7 @@ status_t
 			      "instance-identifier '%s'",
 			      pcb->exprstr);
 		    ncx_print_errormsg(pcb->tkc, 
-                                       pcb->mod, 
+                                       pcb->tkerr.mod, 
 				       pcb->parseres);
 		}
 	    } else {
@@ -8479,7 +8488,7 @@ status_t
 			      "XPath expression '%s'",
 			      pcb->exprstr);
 		    ncx_print_errormsg(pcb->tkc, 
-                                       pcb->mod, 
+                                       pcb->tkerr.mod, 
 				       pcb->parseres);
 		}
 	    }
@@ -8532,11 +8541,11 @@ status_t
 *********************************************************************/
 status_t
     xpath1_validate_expr (ncx_module_t *mod,
-                          const obj_template_t *obj,
+                          obj_template_t *obj,
                           xpath_pcb_t *pcb)
 {
     xpath_result_t       *result;
-    const obj_template_t *rootobj;
+    obj_template_t       *rootobj;
     boolean               rootdone;
  
 #ifdef DEBUG
@@ -8804,7 +8813,7 @@ xpath_result_t *
     }
 
     pcb->obj = NULL;
-    pcb->mod = NULL;
+    pcb->tkerr.mod = NULL;
     pcb->val = val;
     pcb->val_docroot = docroot;
     pcb->logerrors = logerrors;
@@ -8832,7 +8841,7 @@ xpath_result_t *
 	    if (pcb->logerrors) {
 		log_error("\nError: extra tokens in XPath expression '%s'",
 			  pcb->exprstr);
-		ncx_print_errormsg(pcb->tkc, pcb->mod, pcb->valueres);
+		ncx_print_errormsg(pcb->tkc, pcb->tkerr.mod, pcb->valueres);
 	    }
 	}
     }

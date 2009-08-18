@@ -456,16 +456,27 @@ typedef struct ncx_binary_t_ {
 } ncx_binary_t;
 
 
+/* struct to remember error info 
+ * tkc->cur_err will be checked before tkc->cur
+ * for error information
+ */
+typedef struct ncx_error_t_ {
+    struct ncx_module_t_  *mod;
+    uint32                 linenum;
+    uint32                 linepos;
+} ncx_error_t;
+
+
 /* YANG extension usage entry */
 typedef struct ncx_appinfo_t_ {
     dlq_hdr_t               qhdr;
     xmlChar                *prefix;
     xmlChar                *name;
     xmlChar                *value;
-    struct tk_token_t_     *tk;
     struct ext_template_t_ *ext;
     dlq_hdr_t              *appinfoQ;
     boolean                 isclone;
+    ncx_error_t             tkerr;
 } ncx_appinfo_t;
 
 
@@ -474,8 +485,8 @@ typedef struct ncx_revhist_t_ {
     dlq_hdr_t           qhdr;
     xmlChar            *version;
     xmlChar            *descr;
-    struct tk_token_t_ *tk;
     status_t            res;
+    ncx_error_t         tkerr;
 } ncx_revhist_t;
 
 
@@ -485,8 +496,7 @@ typedef struct ncx_iffeature_t_ {
     xmlChar               *prefix;
     xmlChar               *name;
     struct ncx_feature_t_ *feature;
-    struct tk_token_t_    *tk;
-    uint32                 linenum;
+    ncx_error_t            tkerr;
 } ncx_iffeature_t;
 
 
@@ -496,14 +506,12 @@ typedef struct ncx_feature_t_ {
     xmlChar            *name;
     xmlChar            *descr;
     xmlChar            *ref;
-    struct ncx_module_t_   *mod;      /* back-ptr to module */
-    struct tk_token_t_ *tk;
-    uint32              linenum;
     ncx_status_t        status;
     dlq_hdr_t           iffeatureQ;   /* Q of ncx_iffeature_t */
     dlq_hdr_t           appinfoQ;       /* Q of ncx_appinfo_t */
     status_t            res;    /* may be stored with errors */
     boolean             enabled;
+    ncx_error_t         tkerr;
 } ncx_feature_t;
 
 /* struct for holding r/o pointer to generic internal node 
@@ -540,20 +548,18 @@ typedef struct ncx_idlink_t_ {
 typedef struct ncx_identity_t_ {
     dlq_hdr_t             qhdr;
     struct ncx_identity_t_ *base;      /* back-ptr to base id */
-    struct ncx_module_t_   *mod;      /* back-ptr to module */
     xmlChar              *name;
     xmlChar              *baseprefix;
     xmlChar              *basename;
     xmlChar              *descr;
     xmlChar              *ref;
-    struct tk_token_t_   *tk;
-    uint32                linenum;
     ncx_status_t          status;
     dlq_hdr_t             childQ;          /* Q of ncx_idlink_t */
     dlq_hdr_t             appinfoQ;       /* Q of ncx_appinfo_t */
     status_t              res;    /* may be stored with errors */
     boolean               isroot;    /* base==NULL not an error */
     ncx_idlink_t          idlink;
+    ncx_error_t           tkerr;
 } ncx_identity_t;
 
 
@@ -608,6 +614,7 @@ typedef struct ncx_module_t_ {
     dlq_hdr_t         stmtQ;             /* Q of yang_stmt_t */
                              /* saved for top, yang, docmode */
     ncx_list_t        devmodlist;     /* for deviations list */
+
 } ncx_module_t;
 
 
@@ -639,11 +646,11 @@ typedef struct ncx_import_t_ {
     xmlChar            *module;
     xmlChar            *prefix;
     xmlChar            *revision;
-    struct tk_token_t_ *tk;                    /* back-ptr */
     ncx_module_t       *mod;                   /* back-ptr */
     boolean             used;
     boolean             usexsd;        /* FALSE if duplicate */
     dlq_hdr_t           appinfoQ;
+    ncx_error_t         tkerr;
 } ncx_import_t;
 
 
@@ -652,10 +659,10 @@ typedef struct ncx_include_t_ {
     dlq_hdr_t             qhdr;
     xmlChar              *submodule;
     xmlChar              *revision;
-    struct tk_token_t_   *tk;                     /* back-ptr */
     struct ncx_module_t_ *submod;                 /* back-ptr */
     boolean               usexsd;       /* FALSE if duplicate */
     dlq_hdr_t             appinfoQ;
+    ncx_error_t           tkerr;
 } ncx_include_t;
 
 
@@ -689,7 +696,7 @@ typedef struct ncx_errinfo_t_ {
  */
 typedef struct ncx_typname_t_ {
     dlq_hdr_t                        qhdr;
-    const struct typ_template_t_    *typ;
+    struct typ_template_t_          *typ;
     const xmlChar                   *typname;
     xmlChar                         *typname_malloc;
 } ncx_typname_t;

@@ -990,14 +990,6 @@ ssize_t
     if (ret < 0) {
         if (ret == LIBSSH2_ERROR_EAGAIN) {
             *erragain = TRUE;
-#if 0
-            if (LOGDEBUG3) {
-                log_debug3("\nmgr_ses: channel read EAGAIN "
-                           "on session %u (a:%u)",
-                           scb->sid,
-                           mscb->agtsid);
-            }
-#endif
         } else {
             log_ssh2_error(scb, mscb, "read");
         }

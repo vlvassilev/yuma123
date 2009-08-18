@@ -231,14 +231,6 @@ extern status_t
     cap_add_withdefval (val_value_t *caplist,
 			const xmlChar *defstyle);
 
-
-#if 0  /* DO_NOT_NEED */
-extern status_t 
-    cap_add_mod (cap_list_t *caplist, 
-		 const xmlChar *modname,
-		 const xmlChar *modversion);
-#endif
-
 /* add a generic enterprise capability */
 extern status_t 
     cap_add_ent (cap_list_t *caplist, 

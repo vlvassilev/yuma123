@@ -178,7 +178,7 @@ static status_t
 		log_error("\nError: named type loops with "
 			  "type '%s' on line %u",
 			  testdef->typename,
-			  lastdef->tk->linenum);
+			  lastdef->tkerr.linenum);
 	    } else {
 		lastdef = testdef;    
 		testdef = typ_get_parent_typdef(testdef);
@@ -235,7 +235,7 @@ static status_t
 			  "allowed for the %s builtin type",
 		      tk_get_btype_sym(btyp));
 	    retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
-	    tkc->cur = newdef->tk;
+	    tkc->curerr = &newdef->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
     }
@@ -276,7 +276,7 @@ static status_t
 
     if (doerr) {
 	retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
-	tkc->cur = newdef->tk;
+	tkc->curerr = &newdef->tkerr;
 	ncx_print_errormsg(tkc, mod, retres);
     }
 
@@ -343,7 +343,7 @@ static status_t
 		      tk_get_btype_sym(testbtyp),
 		      tk_get_btype_sym(btyp));
 	    retres = ERR_NCX_WRONG_DATATYP;
-	    tkc->cur = typdef->tk;
+	    tkc->curerr = &typdef->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
 
@@ -674,7 +674,10 @@ static status_t
     range = typ_get_range_con(typdef);
 
     /* save the range token in case needed for error msg */
-    range->tk = TK_CUR(tkc);
+    ncx_set_error(&range->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
 
     btyp = typ_get_basetype(typdef);
     if (btyp == NCX_BT_NONE) {
@@ -2184,7 +2187,10 @@ static status_t
 			ncx_print_errormsg(tkc, mod, res);
 			return res;
 		    } else {
-			sim->xleafref->tk = TK_CUR(tkc);
+                        ncx_set_error(&sim->xleafref->tkerr,
+                                      mod,
+                                      TK_CUR_LNUM(tkc),
+                                      TK_CUR_LPOS(tkc));
 			res = xpath_yang_parse_path(tkc, 
 						    mod, 
 						    XP_SRC_LEAFREF,
@@ -2201,19 +2207,7 @@ static status_t
 		res = yang_consume_semiapp(tkc, mod, &typdef->appinfoQ);
 		CHK_EXIT(res, retres);
 	    }
-
-#if 0 /*  require-instance removed in -06 */
-	} else if (!xml_strcmp(val, YANG_K_REQUIRE_INSTANCE)) {
-	    res = yang_consume_boolean(tkc, 
-                                       mod, 
-				       &sim->constrained,
-				       &constrained,
-				       &typdef->appinfoQ);
-	    CHK_EXIT(res, retres);
-#else
             sim->constrained = TRUE;
-#endif
-
 	} else {
 	    retres = ERR_NCX_WRONG_TKTYPE;
 	    expstr = "path or require-instance statement";
@@ -2576,11 +2570,10 @@ static status_t
 
     if (res != NO_ERR) {
 	if (simple) {
-	    tkc->cur = typdef->def.simple.range.tk;
+	    tkc->curerr = &typdef->def.simple.range.tkerr;
 	} else {
-	    tkc->cur = typdef->tk;
+	    tkc->curerr = &typdef->tkerr;
 	}
-
 	ncx_print_errormsg(tkc, mod, res);
     } else {
 	/* set flags even if boundary set explicitly so
@@ -2878,7 +2871,7 @@ static status_t
 		typdef = typ_get_qual_typdef(typdef, NCX_SQUAL_RANGE);
 	    }
 	} else {
-	    tkc->cur = typdef->tk;
+	    tkc->curerr = &typdef->tkerr;
 	}
     }
 
@@ -2955,12 +2948,12 @@ static status_t
 	} else {
 	    /* set error token */
 	    range = typ_get_range_con(typdef);
-	    if (range && range->tk) {
-		tkc->cur = range->tk;
-	    } else if (typdef->tk) {
-		tkc->cur = typdef->tk;
+	    if (range) {
+		tkc->curerr = &range->tkerr;
+	    } else if (typdef) {
+		tkc->curerr = &typdef->tkerr;
 	    } else {
-		tkc->cur = intypdef->tk;
+		tkc->curerr = &intypdef->tkerr;
 	    }
 	}
     }
@@ -3028,8 +3021,9 @@ static status_t
 	if (btyp != NCX_BT_NONE && !typ_ok_for_union(btyp)) {
 	    retres = ERR_NCX_WRONG_TYPE;
 	    log_error("\nError: builtin type '%s' not allowed"
-		      " within a union", tk_get_btype_sym(btyp));
-	    tkc->cur = un->typdef->tk;
+		      " within a union", 
+                      tk_get_btype_sym(btyp));
+	    tkc->curerr = &un->typdef->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
 
@@ -3114,7 +3108,7 @@ static status_t
 	log_debug3("\nyang_typ: resolve type '%s' (name %s) on line %u",
 		   (typdef->typename) ? typdef->typename : NCX_EL_NONE,
 		   (name) ? name : NCX_EL_NONE,
-		   (typdef->tk) ? typdef->tk->linenum : 0);
+		   typdef->tkerr.linenum);
     }
 #endif
 
@@ -3157,7 +3151,7 @@ static status_t
      */
     if (res != NO_ERR) {
 	if (!errdone) {
-	    tkc->cur = typdef->tk;
+	    tkc->curerr = &typdef->tkerr;
 	    ncx_print_errormsg(tkc, mod, res);
 	}
 	return res;
@@ -3215,7 +3209,7 @@ static status_t
 			      (name) ? (const char *)name : "--", 
 			      defval);
 		}
-		tkc->cur = typdef->tk;
+		tkc->curerr = &typdef->tkerr;
 		ncx_print_errormsg(tkc, mod, res);
             }
 	} else if (typdef->class == NCX_CL_NAMED) {
@@ -3245,7 +3239,7 @@ static status_t
 				  (name) ? (const char *)name : "--", 
 				  typdefval);
 		    }
-		    tkc->cur = typdef->tk;
+		    tkc->curerr = &typdef->tkerr;
 		    ncx_print_errormsg(tkc, mod, res);
                 }
 	    }
@@ -3286,7 +3280,7 @@ static status_t
 						 mod, 
 						 idref->baseprefix,
 						 idref->basename, 
-						 typdef->tk,
+						 &typdef->tkerr,
 						 &testidentity);
 		} else {
 		    testidentity = ncx_find_identity
@@ -3303,7 +3297,7 @@ static status_t
 			      "base value (%s)",
 			      (name) ? (const char *)name : "--", 
 			      idref->basename);
-		    tkc->cur = typdef->tk;
+		    tkc->curerr = &typdef->tkerr;
 		    ncx_print_errormsg(tkc, mod, res);
 		}
 	    } else {
@@ -3368,9 +3362,10 @@ static status_t
 	if (errtyp) {
 	    res = ERR_NCX_DUP_ENTRY;
 	    log_error("\nError: local typedef %s shadows "
-		      "definition on line %u", name,
-		      errtyp->linenum);
-	    tkc->cur = typdef->tk;
+		      "definition on line %u", 
+                      name,
+		      errtyp->tkerr.linenum);
+	    tkc->curerr = &typdef->tkerr;
 	    ncx_print_errormsg(tkc, mod, res);
 	}
     }
@@ -3477,7 +3472,10 @@ static status_t
     retres = NO_ERR;
     btyp = NCX_BT_NONE;
 
-    intypdef->tk = TK_CUR(tkc);
+    ncx_set_error(&intypdef->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
 
     /* Get the mandatory base type */
     res = yang_consume_pid_string(tkc, 
@@ -3495,7 +3493,7 @@ static status_t
                                     mod,
 				    intypdef->prefix,
 				    intypdef->typename,
-				    TK_CUR(tkc),
+				    NULL,
 				    &imptyp);
 	if (res != NO_ERR) {
 	    CHK_EXIT(res, retres);
@@ -3823,7 +3821,6 @@ status_t
     const xmlChar   *val;
     const char      *expstr;
     xmlChar         *str;
-    tk_token_t      *savetk;
     yang_stmt_t     *stmt;
     tk_type_t        tktyp;
     boolean          done, typdone, typeok, unit, def, stat, desc, ref;
@@ -3853,9 +3850,10 @@ status_t
 	ncx_print_errormsg(tkc, mod, res);
 	return res;
     } else {
-	typ->tk = TK_CUR(tkc);
-	typ->linenum = typ->tk->linenum;
-	typ->mod = mod;
+        ncx_set_error(&typ->tkerr,
+                      mod,
+                      TK_CUR_LNUM(tkc),
+                      TK_CUR_LPOS(tkc));
     }
 
     /* Get the mandatory type name */
@@ -4018,11 +4016,10 @@ status_t
 	    /* fatal error for duplicate type w/ same name */
 	    retres = ERR_NCX_DUP_ENTRY;
 	    log_error("\nError: type '%s' is already defined on line %u",
-		      typ->name, testtyp->linenum);
-	    savetk = tkc->cur;
-	    tkc->cur = typ->tk;
+		      typ->name, 
+                      testtyp->tkerr.linenum);
+	    tkc->curerr = &typ->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
-	    tkc->cur = savetk;
 	    typ_free_template(typ);
 	} else if (typeok) {
 #ifdef YANG_TYP_DEBUG

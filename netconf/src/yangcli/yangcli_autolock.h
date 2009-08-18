@@ -65,14 +65,17 @@ extern status_t
 
 extern status_t
     do_get_locks (agent_cb_t *agent_cb,
-                  const obj_template_t *rpc,
+                  obj_template_t *rpc,
                   const xmlChar *line,
                   uint32  len);
 
 extern status_t
     do_release_locks (agent_cb_t *agent_cb,
-                  const obj_template_t *rpc,
-                  const xmlChar *line,
+                      obj_template_t *rpc,
+                      const xmlChar *line,
                       uint32  len);
+
+extern void
+    clear_lock_cbs (agent_cb_t *agent_cb);
 
 #endif	    /* _H_yangcli_autolock */

@@ -297,12 +297,12 @@ static val_value_t *
 *    pointer to the new entry or NULL if malloc failed
 *********************************************************************/
 static val_value_t *
-    make_interface_entry (const obj_template_t *interfaceobj,
+    make_interface_entry (obj_template_t *interfaceobj,
                           char *nameptr,
                           status_t *res)
 {
-    const obj_template_t *nameobj;
-    val_value_t          *interfaceval, *nameval;
+    obj_template_t     *nameobj;
+    val_value_t        *interfaceval, *nameval;
 
     *res = NO_ERR;
 
@@ -365,12 +365,12 @@ static val_value_t *
 *    some other error like ERR_INTERNAL_MEM
 *********************************************************************/
 static status_t 
-    fill_if_counters (const obj_template_t *countersobj,
+    fill_if_counters (obj_template_t *countersobj,
                       val_value_t *nameval,
                       char *buffer,
                       val_value_t  *dstval)
 {
-    const obj_template_t  *childobj;
+    obj_template_t       *childobj;
     val_value_t           *childval;
     char                  *str, *name, *endptr;
     status_t               res;
@@ -483,7 +483,7 @@ static status_t
                      val_value_t  *dstval)
 {
     FILE                  *countersfile;
-    const obj_template_t  *countersobj;
+    obj_template_t        *countersobj;
     val_value_t           *parentval, *nameval;
     char                  *buffer, *readtest;
     boolean                done;
@@ -585,7 +585,7 @@ static status_t
 {
 
     FILE                  *countersfile;
-    const obj_template_t  *interfaceobj, *countersobj;
+    obj_template_t        *interfaceobj, *countersobj;
     val_value_t           *interfaceval, *countersval;
     char                  *buffer, *readtest, *ifname;
     boolean                done;
@@ -760,7 +760,7 @@ status_t
     agt_if_init2 (void)
 {
     cfg_template_t        *runningcfg;
-    const obj_template_t  *interfacesobj;
+    obj_template_t       *interfacesobj;
     val_value_t           *interfacesval;
     status_t               res;
 

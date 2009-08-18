@@ -84,7 +84,7 @@ extern status_t
  */
 extern status_t
     xpath1_validate_expr (ncx_module_t *mod,
-			  const obj_template_t *obj,
+			  obj_template_t *obj,
 			  xpath_pcb_t *pcb);
 
 /* use if the prefixes are YANG: must/when */

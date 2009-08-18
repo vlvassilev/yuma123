@@ -267,8 +267,8 @@ typedef struct xpath_resnode_t_ {
     int64                 position;
     int64                 last;   /* only set in context node */
     union node_ {
-	const obj_template_t *objptr;
-	val_value_t          *valptr;
+	obj_template_t *objptr;
+	val_value_t    *valptr;
     } node;
 } xpath_resnode_t;
 
@@ -294,7 +294,6 @@ typedef struct xpath_result_t_ {
 typedef struct xpath_pcb_t_ {
     dlq_hdr_t            qhdr;           /* in case saved in a Q */
     tk_chain_t          *tkc;               /* chain for exprstr */
-    tk_token_t          *tk;              /* back-ptr for errors */
     xmlChar             *exprstr;           /* YANG XPath string */
     xmlTextReaderPtr     reader;            /* get NS inside XML */
 
@@ -308,7 +307,6 @@ typedef struct xpath_pcb_t_ {
      * the prefix is part of an extended name, representing
      * XML namespace for the module that defines that node
      */
-    ncx_module_t        *mod;         /* bptr to exprstr context */
     xpath_source_t       source;
     ncx_errinfo_t        errinfo;            /* must error extras */
     boolean              logerrors;     /* T: use log_error F: agt */
@@ -316,15 +314,15 @@ typedef struct xpath_pcb_t_ {
     /* these parms are used to parse leafref path-arg 
      * limited object tree syntax allowed only
      */
-    const obj_template_t  *targobj;       /* bptr to result object */
-    const obj_template_t  *altobj;     /* bptr to pred. RHS object */
-    const obj_template_t  *varobj;  /* bptr to key-expr LHS object */
+    obj_template_t  *targobj;       /* bptr to result object */
+    obj_template_t  *altobj;     /* bptr to pred. RHS object */
+    obj_template_t  *varobj;  /* bptr to key-expr LHS object */
     xpath_curmode_t        curmode;     /* select targ/alt/var obj */
 
     /* these parms are used by leafref and XPath1 parsing */
-    const obj_template_t  *obj;            /* bptr to start object */
+    obj_template_t  *obj;            /* bptr to start object */
     ncx_module_t          *objmod;        /* module containing obj */
-    const obj_template_t  *docroot;        /* bptr to <config> obj */
+    obj_template_t  *docroot;        /* bptr to <config> obj */
     xpath_document_t       doctype;
     val_value_t           *val;                  /* current() node */
     val_value_t           *val_docroot;        /* cfg->root for db */
@@ -377,9 +375,7 @@ typedef struct xpath_pcb_t_ {
     status_t             valueres;
 
     /* saved error info for the agent to process */
-    const tk_token_t    *errtoken;
-    uint32               errpos;
-
+    ncx_error_t          tkerr;
     boolean              seen;      /* yangdiff support */
 } xpath_pcb_t;
 
@@ -464,7 +460,7 @@ extern status_t
 				  const xmlChar *target,
 				  obj_template_t **targobj,
 				  dlq_hdr_t **targQ,
-				  tk_token_t *errtk);
+				  ncx_error_t *tkerr);
 
 
 /* internal find target, without any error reporting */

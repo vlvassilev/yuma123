@@ -45,7 +45,7 @@ date	     init     comment
 
 extern status_t
     do_list (agent_cb_t *agent_cb,
-	     const obj_template_t *rpc,
+	     obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len);
 

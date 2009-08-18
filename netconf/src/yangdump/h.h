@@ -59,7 +59,7 @@ date	     init     comment
 *********************************************************************/
 
 extern status_t 
-    h_convert_module (const yang_pcb_t *pcb,
+    h_convert_module (yang_pcb_t *pcb,
 		      const yangdump_cvtparms_t *cp,
 		      ses_cb_t *scb);
 

@@ -1406,7 +1406,11 @@ status_t
 	return res;
     }
 
-    must->tk = TK_CUR(tkc);
+    ncx_set_error(&must->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
+
     retres = NO_ERR;
     expstr = "Xpath expression string";
     done = FALSE;
@@ -1581,8 +1585,8 @@ status_t
 		       obj_template_t *obj,
 		       boolean        *whenflag)
 {
-    tk_token_t    *savetk;
     xmlChar       *str;
+    ncx_error_t    savetkerr;
     status_t       res;
 
 #ifdef DEBUG
@@ -1591,7 +1595,10 @@ status_t
     }
 #endif
 
-    savetk = TK_CUR(tkc);
+    ncx_set_error(&savetkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
 
     res = yang_consume_strclause(tkc, 
                                  mod, 
@@ -1605,8 +1612,11 @@ status_t
 	    res = ERR_INTERNAL_MEM;
 	    ncx_print_errormsg(tkc, mod, res);
 	} else {
+	    ncx_set_error(&obj->when->tkerr,
+                          savetkerr.mod,
+                          savetkerr.linenum,
+                          savetkerr.linepos);
 	    obj->when->exprstr = str;
-	    obj->when->tk = savetk;
 	}
 	str = NULL;
 
@@ -1678,7 +1688,7 @@ status_t
                          (prefix) ? prefix : EMPTY_STRING,
                          (prefix) ? ":" :  "", 
                          name,
-                         iff->tk->linenum);
+                         iff->tkerr.linenum);
                 ncx_print_errormsg(tkc, mod, ERR_NCX_DUP_IF_FEATURE);
             }
 	    if (prefix) {
@@ -1699,8 +1709,10 @@ status_t
 		/* transfer malloced fields */
 		iff->prefix = prefix;
 		iff->name = name;
-		iff->tk = TK_CUR(tkc);
-		iff->linenum = TK_CUR_LNUM(tkc);
+                ncx_set_error(&iff->tkerr,
+                              mod,
+                              TK_CUR_LNUM(tkc),
+                              TK_CUR_LPOS(tkc));
 		dlq_enque(iff, iffeatureQ);
 	    }
 	}
@@ -1986,7 +1998,7 @@ status_t
 *   mod    == module in progress
 *   prefix  == prefix value to use
 *   name == type name to use
-*   errtk == token to use in error messages (may be NULL)
+*   tkerr == error record to use in error messages (may be NULL)
 *   typ  == address of return typ_template_t pointer
 *
 * OUTPUTS:
@@ -2001,11 +2013,10 @@ status_t
 			   ncx_module_t *mod,
 			   const xmlChar *prefix,
 			   const xmlChar *name,
-			   tk_token_t *errtk,
+			   ncx_error_t *tkerr,
 			   typ_template_t **typ)
 {
     ncx_import_t     *imp;
-    tk_token_t       *savetk;
     ncx_node_t        dtyp;
     status_t          res;
 
@@ -2038,14 +2049,8 @@ status_t
 	}
     }
 
-    if (errtk) {
-	savetk = tkc->cur;
-	tkc->cur = errtk;
-	ncx_print_errormsg(tkc, mod, res);
-	tkc->cur = savetk;
-    } else {
-	ncx_print_errormsg(tkc, mod, res);
-    }
+    tkc->curerr = tkerr;
+    ncx_print_errormsg(tkc, mod, res);
 
     return res;
 
@@ -2066,7 +2071,7 @@ status_t
 *   mod    == module in progress
 *   prefix  == prefix value to use
 *   name == grouping name to use
-*   errtk == token to use in error messages (may be NULL)
+*   tkerr == error record to use in error messages (may be NULL)
 *   grp  == address of return grp_template_t pointer
 *
 * OUTPUTS:
@@ -2081,11 +2086,10 @@ status_t
 			    ncx_module_t *mod,
 			    const xmlChar *prefix,
 			    const xmlChar *name,
-			    tk_token_t *errtk,
+			    ncx_error_t *tkerr,
 			    grp_template_t **grp)
 {
     ncx_import_t   *imp;
-    tk_token_t     *savetk;
     ncx_node_t      dtyp;
     status_t        res;
 
@@ -2119,14 +2123,8 @@ status_t
 	}
     }
 
-    if (errtk) {
-	savetk = tkc->cur;
-	tkc->cur = errtk;
-	ncx_print_errormsg(tkc, mod, res);
-	tkc->cur = savetk;
-    } else {
-	ncx_print_errormsg(tkc, mod, res);
-    }
+    tkc->curerr = tkerr;
+    ncx_print_errormsg(tkc, mod, res);
 
     return res;
 
@@ -2147,7 +2145,7 @@ status_t
 *   mod    == module in progress
 *   prefix  == prefix value to use
 *   name == extension name to use
-*   errtk == token to use in error messages (may be NULL)
+*   tkerr == error struct to use in error messages (may be NULL)
 *   ext  == address of return ext_template_t pointer
 *
 * OUTPUTS:
@@ -2162,12 +2160,11 @@ status_t
 			     ncx_module_t *mod,
 			     const xmlChar *prefix,
 			     const xmlChar *name,
-			     tk_token_t *errtk,
+			     ncx_error_t *tkerr,
 			     ext_template_t **ext)
 {
     ncx_import_t   *imp;
     ncx_module_t   *imod;
-    tk_token_t     *savetk;
     status_t        res, retres;
 
 #ifdef DEBUG
@@ -2217,14 +2214,8 @@ status_t
 	}
     }
 
-    if (errtk) {
-	savetk = tkc->cur;
-	tkc->cur = errtk;
-	ncx_print_errormsg(tkc, mod, res);
-	tkc->cur = savetk;
-    } else {
-	ncx_print_errormsg(tkc, mod, res);
-    }
+    tkc->curerr = tkerr;
+    ncx_print_errormsg(tkc, mod, res);
 
     return res;
 
@@ -2245,7 +2236,7 @@ status_t
 *   mod    == module in progress
 *   prefix  == prefix value to use
 *   name == feature name to use
-*   errtk == token to use in error messages (may be NULL)
+*   tkerr == error struct to use in error messages (may be NULL)
 *   feature  == address of return ncx_feature_t pointer
 *
 * OUTPUTS:
@@ -2260,12 +2251,11 @@ status_t
 			   ncx_module_t *mod,
 			   const xmlChar *prefix,
 			   const xmlChar *name,
-			   tk_token_t *errtk,
+			   ncx_error_t *tkerr,
 			   ncx_feature_t **feature)
 {
     ncx_import_t   *imp;
     ncx_module_t   *imod;
-    tk_token_t     *savetk;
     status_t        res, retres;
 
 #ifdef DEBUG
@@ -2315,14 +2305,8 @@ status_t
 	}
     }
 
-    if (errtk) {
-	savetk = tkc->cur;
-	tkc->cur = errtk;
-	ncx_print_errormsg(tkc, mod, res);
-	tkc->cur = savetk;
-    } else {
-	ncx_print_errormsg(tkc, mod, res);
-    }
+    tkc->curerr = tkerr;
+    ncx_print_errormsg(tkc, mod, res);
 
     return res;
 
@@ -2343,7 +2327,7 @@ status_t
 *   mod    == module in progress
 *   prefix  == prefix value to use
 *   name == feature name to use
-*   errtk == token to use in error messages (may be NULL)
+*   tkerr == error struct to use in error messages (may be NULL)
 *   identity  == address of return ncx_identity_t pointer
 *
 * OUTPUTS:
@@ -2358,12 +2342,11 @@ status_t
 			    ncx_module_t *mod,
 			    const xmlChar *prefix,
 			    const xmlChar *name,
-			    tk_token_t *errtk,
+			    ncx_error_t *tkerr,
 			    ncx_identity_t **identity)
 {
     ncx_import_t   *imp;
     ncx_module_t   *imod;
-    tk_token_t     *savetk;
     status_t        res, retres;
 
 #ifdef DEBUG
@@ -2413,14 +2396,8 @@ status_t
 	}
     }
 
-    if (errtk) {
-	savetk = tkc->cur;
-	tkc->cur = errtk;
-	ncx_print_errormsg(tkc, mod, res);
-	tkc->cur = savetk;
-    } else {
-	ncx_print_errormsg(tkc, mod, res);
-    }
+    tkc->curerr = tkerr;
+    ncx_print_errormsg(tkc, mod, res);
 
     return res;
 
@@ -2466,7 +2443,7 @@ void
             if (ncx_warning_enabled(ERR_NCX_TYPDEF_NOT_USED)) {
                 log_warn("\nWarning: Local typedef '%s' not used",
                          testtyp->name);
-                tkc->cur = testtyp->tk;
+                tkc->curerr = &testtyp->tkerr;
                 ncx_print_errormsg(tkc, mod, ERR_NCX_TYPDEF_NOT_USED);
             }
 	}
@@ -2478,7 +2455,7 @@ void
             if (ncx_warning_enabled(ERR_NCX_GRPDEF_NOT_USED)) {
                 log_warn("\nWarning: Local grouping '%s' not used",
                          testgrp->name);
-                tkc->cur = testgrp->tk;
+                tkc->curerr = &testgrp->tkerr;
                 ncx_print_errormsg(tkc, mod, ERR_NCX_GRPDEF_NOT_USED);
             }
         }
@@ -2524,7 +2501,7 @@ void
             if (ncx_warning_enabled(ERR_NCX_IMPORT_NOT_USED)) {
                 log_warn("\nWarning: Module '%s' not used", 
                          testimp->module);
-                tkc->cur = testimp->tk;
+                tkc->curerr = &testimp->tkerr;
                 ncx_print_errormsg(tkc, mod, ERR_NCX_IMPORT_NOT_USED);
             }
         }
@@ -2600,9 +2577,6 @@ void
     }
     if (node->failedrev) {
 	m__free(node->failedrev);
-    }
-    if (node->tkc) {
-	tk_free_chain(node->tkc);
     }
     m__free(node);
 
@@ -3086,7 +3060,7 @@ void
 * INPUTS:
 *    tkc == token chain in progress
 *    mod == module in progress
-*    errtk == error token to use (may be NULL to use tkc->cur)
+*    tkerr == error struct to use (may be NULL to use tkc->cur)
 *    datestr == string to validate
 *
 * RETURNS:
@@ -3095,13 +3069,12 @@ void
 status_t
     yang_validate_date_string (tk_chain_t *tkc,
 			      ncx_module_t *mod,
-			      tk_token_t *errtk,
+			      ncx_error_t *tkerr,
 			      const xmlChar *datestr)
 {
 
 #define DATE_STR_LEN 10
 
-    tk_token_t     *useerr, *savetk;
     status_t        res, retres;
     uint32          len, i;
     int             ret;
@@ -3117,15 +3090,13 @@ status_t
 
     retres = NO_ERR;
     len = xml_strlen(datestr);
-    useerr = (errtk) ? errtk : tkc->cur;
-    savetk = tkc->cur;
-    tkc->cur = useerr;
     tstamp_date(curdate);
 
     /* validate the length */
     if (len != DATE_STR_LEN) {
 	retres = ERR_NCX_INVALID_VALUE;
 	log_error("\nError: Invalid date string length (%u)", len);
+        tkc->curerr = tkerr;
 	ncx_print_errormsg(tkc, mod, retres);
     }
 
@@ -3144,6 +3115,7 @@ status_t
             if (ncx_warning_enabled(ERR_NCX_DATE_PAST)) {
                 log_warn("\nWarning: Invalid revision year (%s)", 
                          numbuff);
+                tkc->curerr = tkerr;
                 ncx_print_errormsg(tkc, mod, ERR_NCX_DATE_PAST);
             }
 	} 
@@ -3155,6 +3127,7 @@ status_t
 	    retres = ERR_NCX_INVALID_VALUE;
 	    log_error("\nError: Invalid date string separator (%c)",
 		      datestr[4]);
+            tkc->curerr = tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	} 
     }
@@ -3175,6 +3148,7 @@ status_t
 	} else if (num.u < 1 || num.u > 12) {
 	    retres = ERR_NCX_INVALID_VALUE;
 	    log_error("\nError: Invalid month string (%s)", numbuff);
+            tkc->curerr = tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	} 
     }
@@ -3185,6 +3159,7 @@ status_t
 	    retres = ERR_NCX_INVALID_VALUE;
 	    log_error("\nError: Invalid date string separator (%c)",
 		      datestr[7]);
+            tkc->curerr = tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	} 
     }
@@ -3201,10 +3176,12 @@ status_t
 	if (res != NO_ERR) {
 	    retres = ERR_NCX_INVALID_VALUE;
 	    log_error("\nError: Invalid day string (%s)", numbuff);
+            tkc->curerr = tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	} else if (num.u < 1 || num.u > 31) {
 	    retres = ERR_NCX_INVALID_VALUE;
 	    log_error("\nError: Invalid day string (%s)", numbuff);
+            tkc->curerr = tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
     }
@@ -3216,12 +3193,12 @@ status_t
             if (ncx_warning_enabled(ERR_NCX_DATE_FUTURE)) {
                 log_warn("\nWarning: Revision date in the future (%s)",
                          datestr);
+                tkc->curerr = tkerr;
                 ncx_print_errormsg(tkc, mod, ERR_NCX_DATE_FUTURE);
             }
 	}
     }
 
-    tkc->cur = savetk;
     return retres;
 
 }  /* yang_validate_date_string */

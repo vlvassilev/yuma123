@@ -70,7 +70,7 @@ extern xmlChar *
 
 extern status_t
     do_connect (agent_cb_t *agent_cb,
-		const obj_template_t *rpc,
+		obj_template_t *rpc,
 		const xmlChar *line,
 		uint32 start,
                 boolean climode);
@@ -87,7 +87,7 @@ extern status_t
 
 extern val_value_t *
     get_valset (agent_cb_t *agent_cb,
-		const obj_template_t *rpc,
+		obj_template_t *rpc,
 		const xmlChar *line,
 		status_t  *res);
 

@@ -226,16 +226,16 @@ const xmlChar *
     grp_get_mod_name (const grp_template_t *grp)
 {
 #ifdef DEBUG
-    if (!grp || !grp->mod) {
+    if (!grp || !grp->tkerr.mod) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return NULL;
     }
 #endif
 
-    if (grp->mod->ismod) {
-	return grp->mod->name;
+    if (grp->tkerr.mod->ismod) {
+	return grp->tkerr.mod->name;
     } else {
-	return grp->mod->belongs;
+	return grp->tkerr.mod->belongs;
     }
     /*NOTREACHED*/
 

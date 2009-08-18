@@ -52,7 +52,7 @@ date	     init     comment
 extern status_t
     agt_val_parse_nc (ses_cb_t  *scb,
 		      xml_msg_hdr_t *msg,
-		      const obj_template_t *obj,
+		      obj_template_t *obj,
 		      const xml_node_t *startnode,
 		      ncx_data_class_t  parentdc,
 		      val_value_t *retval);

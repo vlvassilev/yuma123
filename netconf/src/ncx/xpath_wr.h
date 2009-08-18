@@ -46,8 +46,4 @@ extern status_t
     xpath_wr_expr (ses_cb_t *scb,
 		   val_value_t *xpathval);
 
-extern status_t
-    xpath_wr_const_expr (ses_cb_t *scb,
-                         const val_value_t *xpathval);
-
 #endif	    /* _H_xpath_wr */

@@ -141,7 +141,7 @@ date         init     comment
 static status_t
     send_copy_config_to_agent (agent_cb_t *agent_cb)
 {
-    const obj_template_t  *rpc, *input, *child;
+    obj_template_t        *rpc, *input, *child;
     mgr_rpc_req_t         *req;
     val_value_t           *reqdata, *parm, *target, *source;
     ses_cb_t              *scb;

@@ -146,7 +146,7 @@ static status_t
     show_user_var (agent_cb_t *agent_cb,
                    const xmlChar *varname,
 		   var_type_t vartype,
-		   const val_value_t *val,
+		   val_value_t *val,
 		   help_mode_t mode)
 {
     xmlChar      *objbuff;
@@ -410,7 +410,7 @@ static status_t
 		 boolean isany,
 		 help_mode_t mode)
 {
-    const val_value_t *val;
+    val_value_t       *val;
     logfn_t            logfn;
     boolean            imode;
 
@@ -624,7 +624,7 @@ static status_t
  *   status
  *********************************************************************/
 static status_t
-    do_show_one_object (const obj_template_t *obj,
+    do_show_one_object (obj_template_t *obj,
 			help_mode_t mode,
 			boolean *anyout)
 {
@@ -673,9 +673,9 @@ static status_t
     do_show_objects (agent_cb_t *agent_cb,
 		     help_mode_t mode)
 {
-    const ncx_module_t   *mod;
-    const obj_template_t *obj;
-    const modptr_t       *modptr;
+    ncx_module_t         *mod;
+    obj_template_t       *obj;
+    modptr_t             *modptr;
     boolean               anyout, imode;
     status_t              res;
 
@@ -684,10 +684,10 @@ static status_t
     res = NO_ERR;
 
     if (use_agentcb(agent_cb)) {
-	for (modptr = (const modptr_t *)
+	for (modptr = (modptr_t *)
 		 dlq_firstEntry(&agent_cb->modptrQ);
 	     modptr != NULL;
-	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+	     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
 	    for (obj = ncx_get_first_object(modptr->mod);
 		 obj != NULL && res == NO_ERR;
@@ -697,10 +697,10 @@ static status_t
 	    }
 	}
 
-	for (modptr = (const modptr_t *)
+	for (modptr = (modptr_t *)
 		 dlq_firstEntry(get_mgrloadQ());
 	     modptr != NULL;
-	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+	     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
 	    for (obj = ncx_get_first_object(modptr->mod);
 		 obj != NULL && res == NO_ERR;
@@ -718,7 +718,7 @@ static status_t
 
 		res = do_show_one_object(obj, mode, &anyout);
 	    }
-	    mod = (const ncx_module_t *)ncx_get_next_module(mod);
+	    mod = (ncx_module_t *)ncx_get_next_module(mod);
 	}
     }
     if (anyout) {
@@ -755,12 +755,12 @@ static status_t
  *********************************************************************/
 status_t
     do_show (agent_cb_t *agent_cb,
-	     const obj_template_t *rpc,
+	     obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len)
 {
     val_value_t        *valset, *parm;
-    const ncx_module_t *mod;
+    ncx_module_t       *mod;
     status_t            res;
     boolean             imode, done;
     help_mode_t         mode;

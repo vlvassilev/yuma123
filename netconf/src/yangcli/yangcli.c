@@ -692,7 +692,7 @@ static status_t
     const xmlChar         *usestr;
     xmlChar               *dupval;
     val_value_t           *testval;
-    const obj_template_t  *testobj;
+    obj_template_t        *testobj;
     status_t               res;
     log_debug_t            testloglevel;
     ncx_bad_data_t         testbaddata;
@@ -1136,7 +1136,6 @@ static status_t
 }  /* output_file_result */
 
 
-
 /********************************************************************
 * FUNCTION check_assign_statement
 * 
@@ -1187,7 +1186,7 @@ static status_t
 {
     const xmlChar         *str, *name, *filespec;
     val_value_t           *curval;
-    const obj_template_t  *obj;
+    obj_template_t        *obj;
     val_value_t           *val;
     xmlChar               *tempstr;
     uint32                 nlen, tlen;
@@ -1723,7 +1722,7 @@ static status_t
     process_cli_input (int argc,
 		       const char *argv[])
 {
-    const obj_template_t  *obj;
+    obj_template_t        *obj;
     val_value_t           *parm;
     status_t               res;
     ncx_display_mode_t     dmode;
@@ -2849,7 +2848,7 @@ static status_t
     yangcli_init (int argc,
 	      const char *argv[])
 {
-    const obj_template_t *obj;
+    obj_template_t       *obj;
     agent_cb_t           *agent_cb;
     val_value_t          *parm, *modval;
     status_t              res;
@@ -3464,8 +3463,6 @@ static rpc_err_t
 }  /* get_rpc_error_tag */
 
 
-
-
 /********************************************************************
  * FUNCTION yangcli_reply_handler
  * 
@@ -3828,134 +3825,5 @@ int
     return 0;
 
 } /* main */
-
-
-/********************************************************************
-* FUNCTION setup_lock_cbs
-* 
-* Setup the lock state info in all the lock control blocks
-* in the specified agent_cb; call when a new sesion is started
-* 
-* INPUTS:
-*  agent_cb == agent control block to use
-*********************************************************************/
-void
-    setup_lock_cbs (agent_cb_t *agent_cb)
-{
-    ses_cb_t     *scb;
-    mgr_scb_t    *mscb;
-    ncx_cfg_t     cfg_id;
-
-    scb = mgr_ses_get_scb(agent_cb->mysid);
-    if (scb == NULL) {
-        log_error("\nError: active session dropped, cannot lock");
-        return;
-    }
-
-    mscb = (mgr_scb_t *)scb->mgrcb;
-    agent_cb->locks_active = TRUE;
-    agent_cb->locks_waiting = FALSE;
-    agent_cb->locks_cur_cfg = NCX_CFGID_RUNNING;
-
-    for (cfg_id = NCX_CFGID_RUNNING;
-         cfg_id <= NCX_CFGID_STARTUP;
-         cfg_id++) {
-
-        agent_cb->lock_cb[cfg_id].lock_state = LOCK_STATE_IDLE;
-        agent_cb->lock_cb[cfg_id].lock_used = FALSE;
-        agent_cb->lock_cb[cfg_id].start_time = (time_t)0;
-        agent_cb->lock_cb[cfg_id].last_msg_time = (time_t)0;
-    }
-
-    /* always request the lock on running */
-    agent_cb->lock_cb[NCX_CFGID_RUNNING].lock_used = TRUE;
-
-    agent_cb->lock_cb[NCX_CFGID_CANDIDATE].lock_used = 
-        (cap_std_set(&mscb->caplist, CAP_STDID_CANDIDATE))
-        ? TRUE : FALSE;
-
-    agent_cb->lock_cb[NCX_CFGID_STARTUP].lock_used =
-        (cap_std_set(&mscb->caplist, CAP_STDID_STARTUP))
-        ? TRUE : FALSE;
-
-}  /* setup_lock_cbs */
-
-
-/********************************************************************
-* FUNCTION clear_lock_cbs
-* 
-* Clear the lock state info in all the lock control blocks
-* in the specified agent_cb
-* 
-* INPUTS:
-*  agent_cb == agent control block to use
-*
-*********************************************************************/
-void
-    clear_lock_cbs (agent_cb_t *agent_cb)
-{
-    ncx_cfg_t  cfg_id;
-
-    /* set up lock control blocks for get-locks */
-    agent_cb->locks_active = FALSE;
-    agent_cb->locks_waiting = FALSE;
-    agent_cb->locks_cur_cfg = NCX_CFGID_RUNNING;
-    agent_cb->command_mode = CMD_MODE_NORMAL;
-
-    for (cfg_id = NCX_CFGID_RUNNING;
-         cfg_id <= NCX_CFGID_STARTUP;
-         cfg_id++) {
-
-        agent_cb->lock_cb[cfg_id].lock_state = LOCK_STATE_IDLE;
-        agent_cb->lock_cb[cfg_id].lock_used = FALSE;
-        agent_cb->lock_cb[cfg_id].start_time = (time_t)0;
-        agent_cb->lock_cb[cfg_id].last_msg_time = (time_t)0;
-    }
-
-}  /* clear_lock_cbs */
-
-
-/********************************************************************
-* FUNCTION setup_unlock_cbs
-* 
-* Setup the lock state info in all the lock control blocks
-* in the specified agent_cb; call when a new sesion is started
-* 
-* INPUTS:
-*     agent_cb == agent control block to use
-* RETURNS:
-*   TRUE if sending unlocks needed
-*   FALSE if sending unlocks not needed
-*********************************************************************/
-boolean
-    setup_unlock_cbs (agent_cb_t *agent_cb)
-{
-    boolean       needed;
-    ncx_cfg_t     cfg_id;
-
-    if (!agent_cb->locks_active) {
-        return FALSE;
-    }
-
-    needed = FALSE;
-
-    for (cfg_id = NCX_CFGID_RUNNING;
-         cfg_id <= NCX_CFGID_STARTUP;
-         cfg_id++) {
-
-        agent_cb->lock_cb[cfg_id].start_time = (time_t)0;
-        agent_cb->lock_cb[cfg_id].last_msg_time = (time_t)0;
-        if (agent_cb->lock_cb[cfg_id].lock_used && 
-            agent_cb->lock_cb[cfg_id].lock_state == 
-            LOCK_STATE_ACTIVE) {
-            needed = TRUE;
-        }
-    }
-
-    return needed;
-
-}  /* setup_unlock_cbs */
-
-
 
 /* END yangcli.c */

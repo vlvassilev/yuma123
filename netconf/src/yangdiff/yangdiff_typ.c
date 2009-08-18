@@ -102,25 +102,28 @@ date         init     comment
 static void
     output_range_diff (yangdiff_diffparms_t *cp,
 		       const xmlChar *keyword,
-		       const typ_def_t *oldtypdef,
-		       const typ_def_t *newtypdef)
+		       typ_def_t *oldtypdef,
+		       typ_def_t *newtypdef)
 {
-    const typ_range_t   *oldrange, *newrange;
+    typ_range_t         *oldrange, *newrange;
     const xmlChar       *oldstr, *newstr;
-    const ncx_errinfo_t *olderr, *newerr;
+    ncx_errinfo_t       *olderr, *newerr;
     yangdiff_cdb_t       cdb;
     boolean              isrev;
 
     isrev = (cp->edifftype==YANGDIFF_DT_REVISION) ? TRUE : FALSE;
-    oldrange = typ_get_crange_con(oldtypdef);
+    oldrange = typ_get_range_con(oldtypdef);
     oldstr = oldrange ? oldrange->rangestr : NULL;
-    newrange = typ_get_crange_con(newtypdef);
+    newrange = typ_get_range_con(newtypdef);
     newstr = newrange ? newrange->rangestr : NULL;
     olderr = typ_get_range_errinfo(oldtypdef);
     newerr = typ_get_range_errinfo(newtypdef);
 
-    if (str_field_changed(keyword, oldstr, newstr,
-			  isrev, &cdb)) {
+    if (str_field_changed(keyword, 
+                          oldstr, 
+                          newstr,
+			  isrev, 
+                          &cdb)) {
 	output_cdb_line(cp, &cdb);
 	indent_in(cp);
 	output_errinfo_diff(cp, olderr, newerr);
@@ -885,16 +888,16 @@ static uint32
 *   0 if field not changed
 *********************************************************************/
 static uint32
-    range_changed (const typ_def_t *oldtypdef,
-		   const typ_def_t *newtypdef)
+    range_changed (typ_def_t *oldtypdef,
+		   typ_def_t *newtypdef)
 {
-    const typ_range_t     *oldr, *newr;
-    const xmlChar         *oldstr, *newstr;
-    const ncx_errinfo_t   *olderr, *newerr;
+    typ_range_t     *oldr, *newr;
+    const xmlChar   *oldstr, *newstr;
+    ncx_errinfo_t   *olderr, *newerr;
 
-    oldr = typ_get_crange_con(oldtypdef);
+    oldr = typ_get_range_con(oldtypdef);
     oldstr = (oldr) ? oldr->rangestr : NULL;
-    newr = typ_get_crange_con(newtypdef);
+    newr = typ_get_range_con(newtypdef);
     newstr = (newr) ? newr->rangestr : NULL;
 
     /* check range string is the same */

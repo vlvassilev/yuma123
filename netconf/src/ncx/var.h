@@ -211,7 +211,7 @@ extern status_t
 
 
 extern val_value_t *
-    var_get_script_val (const obj_template_t *obj,
+    var_get_script_val (obj_template_t *obj,
 			val_value_t *val,
 			const xmlChar *strval,
 			boolean istop,
@@ -219,7 +219,7 @@ extern val_value_t *
 
 
 extern val_value_t *
-    var_check_script_val (const obj_template_t *obj,
+    var_check_script_val (obj_template_t *obj,
 			  const xmlChar *strval,
 			  boolean istop,
 			  status_t *res);

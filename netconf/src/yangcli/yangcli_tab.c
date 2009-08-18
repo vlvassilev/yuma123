@@ -269,7 +269,7 @@ static status_t
  *   status
  *********************************************************************/
 static status_t
-    fill_parm_completion (const obj_template_t *parmobj,
+    fill_parm_completion (obj_template_t *parmobj,
 			  WordCompletion *cpl,
 			  completion_state_t *comstate,
 			  const char *line,
@@ -279,15 +279,15 @@ static status_t
 {
     const xmlChar         *parmname;
     const char            *defaultstr;
-    const typ_enum_t      *typenum;
-    const typ_def_t       *typdef, *basetypdef;
+    typ_enum_t            *typenum;
+    typ_def_t             *typdef, *basetypdef;
     ncx_btype_t            btyp;
     status_t               res;
 
     res = NO_ERR;
     parmname = obj_get_name(parmobj);
-    typdef = obj_get_ctypdef(parmobj);
-    basetypdef = typ_get_cbase_typdef(typdef);
+    typdef = obj_get_typdef(parmobj);
+    basetypdef = typ_get_base_typdef(typdef);
     btyp = obj_get_basetype(parmobj);
 
     switch (btyp) {
@@ -378,14 +378,14 @@ static status_t
  *   status
  *********************************************************************/
 static status_t
-    fill_one_rpc_completion_parms (const obj_template_t *rpc,
+    fill_one_rpc_completion_parms (obj_template_t *rpc,
 				   WordCompletion *cpl,
 				   const char *line,
 				   int word_start,
 				   int word_end,
 				   int cmdlen)
 {
-    const obj_template_t  *inputobj, *obj;
+    obj_template_t        *inputobj, *obj;
     const xmlChar         *parmname;
     int                    retval;
     ncx_btype_t            btyp;
@@ -462,7 +462,7 @@ static status_t
  *   status
  *********************************************************************/
 static status_t
-    fill_one_module_completion_commands (const ncx_module_t *mod,
+    fill_one_module_completion_commands (ncx_module_t *mod,
 					 WordCompletion *cpl,
 					 completion_state_t *comstate,
 					 const char *line,
@@ -470,7 +470,7 @@ static status_t
 					 int word_end,
 					 int cmdlen)
 {
-    const obj_template_t  *obj;
+    obj_template_t        *obj;
     const xmlChar         *cmdname;
     ncx_module_t          *yangcli_mod;
     int                    retval;
@@ -560,8 +560,8 @@ static status_t
 				  int word_end,
 				  int cmdlen)
 {
-    const modptr_t     *modptr;
-    status_t            res;
+    modptr_t     *modptr;
+    status_t      res;
 
     res = NO_ERR;
 
@@ -582,10 +582,10 @@ static status_t
     } else {
 	if (use_agentcb(comstate->agent_cb)) {
 	    /* list agent commands first */
-	    for (modptr = (const modptr_t *)
+	    for (modptr = (modptr_t *)
 		     dlq_firstEntry(&comstate->agent_cb->modptrQ);
 		 modptr != NULL && res == NO_ERR;
-		 modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+		 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
 		res = fill_one_module_completion_commands
 		    (modptr->mod,
@@ -598,10 +598,10 @@ static status_t
 	    }
 
 	    /* list manager loaded commands next */
-	    for (modptr = (const modptr_t *)
+	    for (modptr = (modptr_t *)
 		     dlq_firstEntry(get_mgrloadQ());
 		 modptr != NULL && res == NO_ERR;
-		 modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+		 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
 		res = fill_one_module_completion_commands
 		    (modptr->mod,
@@ -738,17 +738,17 @@ static boolean
  *   status
  *********************************************************************/
 static status_t
-    find_parm_start (const obj_template_t *inputobj,
+    find_parm_start (obj_template_t *inputobj,
 		     const char *line,
 		     int word_start,
 		     int word_end,
 		     boolean *expectparm,
 		     boolean *emptyexit,
-		     const obj_template_t **parmobj,
+		     obj_template_t **parmobj,
 		     int *tokenstart)
 
 {
-    const obj_template_t *childobj;
+    obj_template_t       *childobj;
     const char           *str, *seqstart, *equals;
     uint32                withequals, matchcount;
     boolean               inbetween, inbetween2, gotdashes;
@@ -1062,7 +1062,7 @@ static status_t
 			  int word_end)
 
 {
-    const obj_template_t  *rpc, *inputobj, *parmobj;
+    obj_template_t        *rpc, *inputobj, *parmobj;
     status_t               res;
     int                    tokenstart;
     boolean                expectparm, emptyexit;
@@ -1205,7 +1205,7 @@ static status_t
 			      int word_end)
 
 {
-    const obj_template_t  *inputobj;
+    obj_template_t        *inputobj;
     const char            *str, *cmdend, *cmdname, *match;
     xmlChar               *buffer;
     ncx_node_t             dtyp;
@@ -1371,7 +1371,7 @@ static status_t
     }
     retlen = 0;
     dtyp = NCX_NT_OBJ;
-    comstate->cmdobj = (const obj_template_t *)
+    comstate->cmdobj = (obj_template_t *)
 	parse_def(comstate->agent_cb,
 		  &dtyp,
 		  buffer,

@@ -161,11 +161,12 @@ static status_t
 	    log_error("\nError: grouping '%s'"
 		      " on line %u loops in uses, defined "
 		      "in module %s, line %u",
-		      testgrp->name, testgrp->linenum,
-		      testobj->mod->name,
-		      testobj->tk->linenum);
+		      testgrp->name, 
+                      testgrp->tkerr.linenum,
+		      testobj->tkerr.mod->name,
+		      testobj->tkerr.linenum);
 	    retres = ERR_NCX_DEF_LOOP;
-	    tkc->cur = testgrp->tk;
+	    tkc->curerr = &testgrp->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	} else if (testobj->def.uses->grp) {
 	    res = follow_loop(tkc, mod,
@@ -296,9 +297,11 @@ status_t
 	return res;
     }
 
-    grp->tk = TK_CUR(tkc);
-    grp->linenum = grp->tk->linenum;
-    grp->mod = mod;
+    ncx_set_error(&grp->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
+
     grp->parent = parent;
     grp->istop = (que == &mod->groupingQ) ? TRUE : FALSE;
 
@@ -410,7 +413,8 @@ status_t
 	testgrp = ncx_find_grouping_que(que, grp->name);
 	if (testgrp) {
 	    log_error("\nError: grouping '%s' already defined at line %u",
-		      grp->name, testgrp->linenum);
+		      grp->name, 
+                      testgrp->tkerr.linenum);
 	    retres = ERR_NCX_DUP_ENTRY;
 	    ncx_print_errormsg(tkc, mod, retres);
 	    grp_free_template(grp);
@@ -569,8 +573,8 @@ status_t
 	    log_error("\nError: local grouping '%s' shadows"
 		      " definition on line %u",
 		      grp->name,
-		      errgrp->linenum);
-	    tkc->cur = grp->tk;
+		      errgrp->tkerr.linenum);
+	    tkc->curerr = &grp->tkerr;
 	    ncx_print_errormsg(tkc, mod, res);
 	} else if (parent) {
 	    testobj = parent->parent;
@@ -580,8 +584,8 @@ status_t
 		    log_error("\nError: local grouping '%s' shadows"
 			      " definition on line %u",
 			      grp->name,
-			      nextgrp->linenum);
-		    tkc->cur = grp->tk;
+			      nextgrp->tkerr.linenum);
+		    tkc->curerr = &grp->tkerr;
 		    ncx_print_errormsg(tkc, mod, res);
 		}
 	    }
@@ -594,9 +598,9 @@ status_t
 		log_error("\nError: local grouping '%s' shadows"
 			  " module definition on line %u",
 			  grp->name,
-			  nextgrp->linenum);
+			  nextgrp->tkerr.linenum);
 		res = ERR_NCX_DUP_ENTRY;
-		tkc->cur = grp->tk;
+		tkc->curerr = &grp->tkerr;
 		ncx_print_errormsg(tkc, mod, res);
 	    }
 	    CHK_EXIT(res, retres);
@@ -823,9 +827,10 @@ status_t
 	    log_error("\nError: uses of '%s'"
 		      " is contained within that grouping, "
 		      "defined on line %u",
-		      grp->name, grp->linenum);
+		      grp->name, 
+                      grp->tkerr.linenum);
 	    retres = ERR_NCX_DEF_LOOP;
-	    tkc->cur = obj->tk;
+	    tkc->curerr = &obj->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	    return retres;
 	} else if (testobj->grp) {
@@ -835,9 +840,10 @@ status_t
 		    log_error("\nError: uses of '%s'"
 			      " is contained within "
 			      "that grouping, defined on line %u",
-			      grp->name, grp->linenum);
+			      grp->name, 
+                              grp->tkerr.linenum);
 		    retres = ERR_NCX_DEF_LOOP;
-		    tkc->cur = obj->tk;
+		    tkc->curerr = &obj->tkerr;
 		    ncx_print_errormsg(tkc, mod, retres);
 		    return retres;
 		} else {

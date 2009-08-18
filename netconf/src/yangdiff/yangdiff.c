@@ -1305,7 +1305,7 @@ static status_t
 		       const char *argv[],
 		       yangdiff_diffparms_t  *cp)
 {
-    const obj_template_t  *obj;
+    obj_template_t        *obj;
     val_value_t           *valset, *val;
     ncx_module_t          *mod;
     status_t               res;

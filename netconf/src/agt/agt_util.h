@@ -97,7 +97,7 @@ extern void
 		      ncx_node_t parmtyp,
 		      const void *error_info,
 		      ncx_node_t nodetyp,
-		      const void *error_path);
+		      void *error_path);
 
 extern void
     agt_record_error_errinfo (ses_cb_t *scb,
@@ -108,7 +108,7 @@ extern void
 			      ncx_node_t parmtyp,
 			      const void *error_parm,
 			      ncx_node_t nodetyp,
-			      const void *error_path,
+			      void *error_path,
 			      const ncx_errinfo_t *errinfo);
 
 extern void
@@ -127,7 +127,7 @@ extern void
     agt_record_insert_error (ses_cb_t *scb,
 			     xml_msg_hdr_t *msghdr,
 			     status_t  res,
-			     const val_value_t *errval);
+			     val_value_t *errval);
 
 extern void
     agt_record_unique_error (ses_cb_t *scb,
@@ -200,13 +200,13 @@ extern status_t
 
 
 extern val_value_t *
-    agt_make_leaf (const obj_template_t *parentobj,
+    agt_make_leaf (obj_template_t *parentobj,
 		   const xmlChar *leafname,
 		   const xmlChar *leafstrval,
 		   status_t *res);
 
 extern val_value_t *
-    agt_make_virtual_leaf (const obj_template_t *parentobj,
+    agt_make_virtual_leaf (obj_template_t *parentobj,
 			   const xmlChar *leafname,
 			   getcb_fn_t callbackfn,
 			   status_t *res);

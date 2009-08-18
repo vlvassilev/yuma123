@@ -136,7 +136,7 @@ date         init     comment
  *   status
  *********************************************************************/
 static status_t
-    do_list_one_oid (const obj_template_t *obj,
+    do_list_one_oid (obj_template_t *obj,
                      help_mode_t help_mode)
 {
     xmlChar      *buffer;
@@ -197,13 +197,13 @@ static status_t
  *   status
  *********************************************************************/
 static status_t
-    do_list_oid (const obj_template_t *obj,
+    do_list_oid (obj_template_t *obj,
 		 uint32 level,
                  help_mode_t  help_mode)
     
 {
-    const obj_template_t  *chobj;
-    status_t               res;
+    obj_template_t  *chobj;
+    status_t         res;
 
     res = NO_ERR;
 
@@ -237,14 +237,14 @@ static status_t
  *********************************************************************/
 static status_t
     do_list_oids (agent_cb_t *agent_cb,
-		  const ncx_module_t *mod,
+		  ncx_module_t *mod,
 		  help_mode_t mode)
 {
-    const modptr_t        *modptr;
-    const obj_template_t  *obj;
-    boolean                imode;
-    uint32                 level;
-    status_t               res;
+    modptr_t        *modptr;
+    obj_template_t  *obj;
+    boolean          imode;
+    uint32           level;
+    status_t         res;
 
     res = NO_ERR;
 
@@ -273,10 +273,10 @@ static status_t
 	    obj = ncx_get_next_object(mod, obj);
 	}
     } else if (use_agentcb(agent_cb)) {
-	for (modptr = (const modptr_t *)
+	for (modptr = (modptr_t *)
 		 dlq_firstEntry(&agent_cb->modptrQ);
 	     modptr != NULL;
-	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+	     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
 	    obj = ncx_get_first_object(modptr->mod);
 	    while (obj && res == NO_ERR) {
@@ -311,7 +311,7 @@ static status_t
  *    status
  *********************************************************************/
 static status_t
-    do_list_one_command (const obj_template_t *obj,
+    do_list_one_command (obj_template_t *obj,
 			 help_mode_t mode)
 {
     if (interactive_mode()) {
@@ -361,14 +361,14 @@ static status_t
  *********************************************************************/
 static status_t
     do_list_objects (agent_cb_t *agent_cb,
-		     const ncx_module_t *mod,
+		     ncx_module_t *mod,
 		     help_mode_t mode)
 {
-    const modptr_t        *modptr;
-    const obj_template_t  *obj;
-    logfn_t                logfn;
-    boolean                anyout;
-    status_t               res;
+    modptr_t             *modptr;
+    obj_template_t       *obj;
+    logfn_t               logfn;
+    boolean               anyout;
+    status_t              res;
 
     res = NO_ERR;
     anyout = FALSE;
@@ -393,10 +393,10 @@ static status_t
 	}
     } else {
 	if (use_agentcb(agent_cb)) {
-	    for (modptr = (const modptr_t *)
+	    for (modptr = (modptr_t *)
 		     dlq_firstEntry(&agent_cb->modptrQ);
 		 modptr != NULL;
-		 modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+		 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
 		obj = ncx_get_first_object(modptr->mod);
 		while (obj && res == NO_ERR) {
@@ -412,10 +412,10 @@ static status_t
 	    }
 	}
 
-	for (modptr = (const modptr_t *)
+	for (modptr = (modptr_t *)
 		 dlq_firstEntry(get_mgrloadQ());
 	     modptr != NULL && res == NO_ERR;
-	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+	     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
 	    obj = ncx_get_first_object(modptr->mod);
 	    while (obj && res == NO_ERR) {
@@ -458,11 +458,11 @@ static status_t
  *********************************************************************/
 static status_t
     do_list_commands (agent_cb_t *agent_cb,
-		      const ncx_module_t *mod,
+		      ncx_module_t *mod,
 		      help_mode_t mode)
 {
-    const modptr_t        *modptr;
-    const obj_template_t  *obj;
+    modptr_t              *modptr;
+    obj_template_t        *obj;
     logfn_t                logfn;
     boolean                imode, anyout;
     status_t               res;
@@ -493,10 +493,10 @@ static status_t
 	if (use_agentcb(agent_cb)) {
 	    (*logfn)("\nAgent Commands:");
 	
-	    for (modptr = (const modptr_t *)
+	    for (modptr = (modptr_t *)
 		     dlq_firstEntry(&agent_cb->modptrQ);
 		 modptr != NULL && res == NO_ERR;
-		 modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+		 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
 		obj = ncx_get_first_object(modptr->mod);
 		while (obj) {
@@ -556,12 +556,12 @@ static status_t
  *********************************************************************/
 status_t
     do_list (agent_cb_t *agent_cb,
-	     const obj_template_t *rpc,
+	     obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len)
 {
     val_value_t        *valset, *parm;
-    const ncx_module_t *mod;
+    ncx_module_t       *mod;
     status_t            res;
     boolean             imode, done;
     help_mode_t         mode;

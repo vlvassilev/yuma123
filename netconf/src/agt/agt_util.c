@@ -256,7 +256,7 @@ status_t
 {
     cfg_template_t    *cfg;
     val_value_t       *val;
-    const val_value_t *errval;
+    val_value_t       *errval;
     const xmlChar     *cfgname;
     status_t           res;
 
@@ -379,7 +379,7 @@ status_t
                                   val_value_t  **retval)
 {
     val_value_t       *val, *childval;
-    const val_value_t *errval;
+    val_value_t       *errval;
     status_t           res;
 
 #ifdef DEBUG
@@ -515,7 +515,7 @@ void
 		      ncx_node_t parmtyp,
 		      const void *error_info,
 		      ncx_node_t nodetyp,
-		      const void *error_path)
+		      void *error_path)
 {
     agt_record_error_errinfo(scb, 
 			     msghdr, 
@@ -570,7 +570,7 @@ void
 			      ncx_node_t parmtyp,
 			      const void *error_info,
 			      ncx_node_t nodetyp,
-			      const void *error_path,
+			      void *error_path,
 			      const ncx_errinfo_t *errinfo)
 {
     rpc_err_rec_t      *err;
@@ -599,8 +599,8 @@ void
 	}
 	if (nodetyp == NCX_NT_VAL && error_path) {
 	    log_debug3(" error-path: \n");
-	    val_dump_value((const val_value_t *)error_path, 
-			   NCX_DEF_INDENT);
+	    val_dump_value((val_value_t *)error_path, 
+                           NCX_DEF_INDENT);
 	    log_debug3("\n");
 	}
     }
@@ -615,7 +615,7 @@ void
 		break;
 	    case NCX_NT_VAL:
 		(void)val_gen_instance_id(msghdr, 
-					  (const val_value_t *)error_path, 
+					  (val_value_t *)error_path, 
 					  NCX_IFMT_XPATH1, 
 					  &pathbuff);
 		break;
@@ -749,7 +749,7 @@ void
     agt_record_insert_error (ses_cb_t *scb,
 			     xml_msg_hdr_t *msghdr,
 			     status_t  res,
-			     const val_value_t *errval)
+			     val_value_t *errval)
 {
     rpc_err_rec_t       *err;
     dlq_hdr_t           *errQ;
@@ -1709,13 +1709,13 @@ INPUTS:
 *   malloced value struct or NULL if some error
 *********************************************************************/
 val_value_t *
-    agt_make_leaf (const obj_template_t *parentobj,
+    agt_make_leaf (obj_template_t *parentobj,
 		   const xmlChar *leafname,
 		   const xmlChar *leafstrval,
 		   status_t *res)
 {
-    const obj_template_t  *leafobj;
-    val_value_t           *leafval;
+    obj_template_t  *leafobj;
+    val_value_t     *leafval;
     
     leafobj = obj_find_child(parentobj,
 			     obj_get_mod_name(parentobj),
@@ -1757,13 +1757,13 @@ INPUTS:
 *   malloced value struct or NULL if some error
 *********************************************************************/
 val_value_t *
-    agt_make_virtual_leaf (const obj_template_t *parentobj,
+    agt_make_virtual_leaf (obj_template_t *parentobj,
 			   const xmlChar *leafname,
 			   getcb_fn_t callbackfn,
 			   status_t *res)
 {
-    const obj_template_t  *leafobj;
-    val_value_t           *leafval;
+    obj_template_t  *leafobj;
+    val_value_t     *leafval;
     
     leafobj = obj_find_child(parentobj,
 			     obj_get_mod_name(parentobj),

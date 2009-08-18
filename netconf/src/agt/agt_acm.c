@@ -1237,7 +1237,7 @@ static boolean
             }
 
             pcb = xpath_clone_pcb(path->xpathpcb);
-            if (!pcb) {
+            if (pcb == NULL) {
                 res = ERR_INTERNAL_MEM;
                 continue;
             }
@@ -1254,8 +1254,6 @@ static boolean
                                       FALSE,
                                       TRUE,
                                       &res);
-
-
             if (!result) {
                 xpath_free_pcb(pcb);
                 pcb = NULL;
@@ -1273,7 +1271,6 @@ static boolean
                     continue;
                 } else {
                     /* pass off 'pcb' and 'result' memory here */
-                    pcb = NULL;
                     result = NULL;
                     dlq_enque(datarule_cache, &cache->dataruleQ);
                 }
@@ -1633,7 +1630,7 @@ status_t
     agt_acm_init2 (void)
 {
     const agt_profile_t   *profile;
-    const obj_template_t  *nacmobj;
+    obj_template_t        *nacmobj;
     cfg_template_t        *runningcfg;
     val_value_t           *nacmval;
     status_t               res;

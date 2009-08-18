@@ -144,7 +144,7 @@ static ncx_module_t         *procmod;
 
 static val_value_t          *myprocval;
 
-static const obj_template_t *myprocobj;
+static obj_template_t       *myprocobj;
 
 
 
@@ -280,10 +280,10 @@ static xmlChar *
 *********************************************************************/
 static val_value_t *
     make_proc_leaf (char *buffer,
-                    const obj_template_t *parentobj,
+                    obj_template_t *parentobj,
                     status_t *res)
 {
-    const obj_template_t  *parmobj;
+    obj_template_t        *parmobj;
     val_value_t           *parmval;
     xmlChar               *parmname, *parmvalstr;
     char                  *colonchar, *str;
@@ -373,7 +373,7 @@ static status_t
     add_cpuinfo (val_value_t *procval)
 {
     FILE                  *cpuinfofile;
-    const obj_template_t  *cpuinfoobj, *cpuobj;
+    obj_template_t        *cpuinfoobj, *cpuobj;
     val_value_t           *cpuinfoval, *cpuval, *parmval;
     char                  *buffer, *readtest;
     boolean                done;
@@ -498,7 +498,7 @@ static status_t
                  val_value_t  *dstval)
 {
     FILE                  *meminfofile;
-    const obj_template_t  *meminfoobj;
+    obj_template_t        *meminfoobj;
     val_value_t           *parmval;
     char                  *buffer, *readtest;
     boolean                done;
@@ -570,7 +570,7 @@ INPUTS:
 static status_t
     add_meminfo (val_value_t *procval)
 {
-    const obj_template_t  *meminfoobj;
+    obj_template_t        *meminfoobj;
     val_value_t           *meminfoval;
 
     /* find the meminfo object */

@@ -322,9 +322,10 @@ status_t
 	return res;
     }
 
-    ext->tk = TK_CUR(tkc);
-    ext->linenum = ext->tk->linenum;
-    ext->mod = mod;
+    ncx_set_error(&ext->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
 
     /* Get the mandatory extension name */
     res = yang_consume_id_string(tkc, mod, &ext->name);
@@ -412,7 +413,8 @@ status_t
 	testext = ext_find_extension(&mod->extensionQ, ext->name);
 	if (testext) {
 	    log_error("\nError: extension '%s' already defined at line %u",
-		      ext->name, testext->linenum);
+		      ext->name, 
+                      testext->tkerr.linenum);
 	    retres = ERR_NCX_DUP_ENTRY;
 	    ncx_print_errormsg(tkc, mod, retres);
 	    ext_free_template(ext);

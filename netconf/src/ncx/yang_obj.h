@@ -148,7 +148,7 @@ extern status_t
 extern status_t 
     yang_obj_check_leafref_loops (tk_chain_t *tkc,
 				  ncx_module_t  *mod,
-				  const dlq_hdr_t *datadefQ);
+				  dlq_hdr_t *datadefQ);
 
 extern status_t
     yang_obj_remove_deleted_nodes (yang_pcb_t *pcb,

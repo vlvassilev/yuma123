@@ -1,4 +1,3 @@
-
 /*  FILE: obj_help.c
 
 		
@@ -96,14 +95,14 @@ date         init     comment
 *   indent == start indent count
 *********************************************************************/
 static void
-    dump_typdef_data (const obj_template_t *obj,
-		       help_mode_t mode,
-		       uint32 indent)
+    dump_typdef_data (obj_template_t *obj,
+                      help_mode_t mode,
+                      uint32 indent)
 {
     const xmlChar    *datastr;
-    const typ_def_t  *typdef, *basetypdef, *testdef;
-    const typ_enum_t *tenum;
-    const typ_pattern_t *pattern;
+    typ_def_t  *typdef, *basetypdef, *testdef;
+    typ_enum_t *tenum;
+    typ_pattern_t *pattern;
     xmlChar           numbuff[NCX_MAX_NUMLEN];
     ncx_btype_t       btyp;
 
@@ -111,11 +110,11 @@ static void
 	return;
     }
 
-    typdef = obj_get_ctypdef(obj);
+    typdef = obj_get_typdef(obj);
     if (!typdef) {
 	return;
     }
-    basetypdef = typ_get_cbase_typdef(typdef);
+    basetypdef = typ_get_base_typdef(typdef);
 
     btyp = typ_get_basetype(typdef);
 
@@ -131,14 +130,14 @@ static void
 
     testdef = typdef;
     while (testdef) {
-	for (pattern = typ_get_first_cpattern(testdef);
+	for (pattern = typ_get_first_pattern(testdef);
 	     pattern != NULL;
-	     pattern = typ_get_next_cpattern(pattern)) {
+	     pattern = typ_get_next_pattern(pattern)) {
 
 	    help_write_lines((const xmlChar *)"pattern: ", indent, TRUE);
 	    help_write_lines(pattern->pat_str, 0, FALSE);
 	}
-	testdef = typ_get_cparent_typdef(testdef);
+	testdef = typ_get_parent_typdef(testdef);
     }
 
     switch (btyp) {
@@ -146,10 +145,12 @@ static void
     case NCX_BT_BITS:
 	if (btyp == NCX_BT_ENUM) {
 	    help_write_lines((const xmlChar *)"enum values:",
-			     indent, TRUE);
+			     indent, 
+                             TRUE);
 	} else {
 	    help_write_lines((const xmlChar *)"bit values:",
-			     indent, TRUE);
+			     indent, 
+                             TRUE);
 	}
 	
 	for (tenum = typ_first_enumdef(basetypdef);
@@ -215,13 +216,13 @@ static void
 *   indent == start indent count
 *********************************************************************/
 void
-    obj_dump_template (const obj_template_t *obj,
+    obj_dump_template (obj_template_t *obj,
 		       help_mode_t mode,
 		       uint32 nestlevel,
 		       uint32 indent)
 {
     const xmlChar        *val;
-    const obj_template_t *testobj;
+    obj_template_t *testobj;
     uint32                count, objnestlevel;
     char                  numbuff[NCX_MAX_NUMLEN];
     boolean               normalpass;
@@ -590,13 +591,13 @@ void
 *   indent == start indent count
 *********************************************************************/
 void
-    obj_dump_datadefQ (const dlq_hdr_t *datadefQ,
+    obj_dump_datadefQ (dlq_hdr_t *datadefQ,
 		       help_mode_t mode,
 		       uint32 nestlevel,
 		       uint32 indent)
 {
-    const obj_template_t  *obj;
-    uint32                 objnestlevel;
+    obj_template_t  *obj;
+    uint32           objnestlevel;
 
 #ifdef DEBUG
     if (!datadefQ) {
@@ -613,9 +614,9 @@ void
 	return;
     }
 
-    for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
+    for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
 	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
 	if (!obj_has_name(obj) ||
 	    !obj_is_enabled(obj)) {

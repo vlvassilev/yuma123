@@ -124,15 +124,15 @@ date         init     comment
 *********************************************************************/
 
 static status_t
-    do_yang_elem_btype (const ncx_module_t *mod,
-			const obj_template_t *obj,
-			const obj_template_t *augtargobj,
+    do_yang_elem_btype (ncx_module_t *mod,
+			obj_template_t *obj,
+			obj_template_t *augtargobj,
 			boolean iskey,
 			val_value_t *val);
 
 static status_t
-    do_local_typedefs (const ncx_module_t *mod,
-		       const obj_template_t *obj,
+    do_local_typedefs (ncx_module_t *mod,
+		       obj_template_t *obj,
 		       dlq_hdr_t *typnameQ);
 
 
@@ -150,7 +150,7 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    add_type_mapping (const typ_template_t *typ,
+    add_type_mapping (typ_template_t *typ,
 		      dlq_hdr_t *que)
 {
     ncx_typname_t   *tn;
@@ -227,7 +227,7 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    add_augtarget_subgrp (const obj_template_t *targobj,
+    add_augtarget_subgrp (obj_template_t *targobj,
 			  val_value_t *elem)
 {
     xmlChar    *qname, *buff;
@@ -238,7 +238,7 @@ static status_t
 	return res;
     }
 
-    qname = xml_val_make_qname(targobj->mod->nsid, buff);
+    qname = xml_val_make_qname(targobj->tkerr.mod->nsid, buff);
     m__free(buff);
     if (!qname) {
 	return res;
@@ -273,8 +273,8 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    do_typedefs_container (const ncx_module_t *mod,
-			   const obj_template_t *obj,
+    do_typedefs_container (ncx_module_t *mod,
+			   obj_template_t *obj,
 			   dlq_hdr_t *typnameQ)
 {
     obj_container_t  *con;
@@ -329,14 +329,14 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    do_yang_elem_container (const ncx_module_t *mod,
-			    const obj_template_t *obj,
-			    const obj_template_t *augtargobj,
+    do_yang_elem_container (ncx_module_t *mod,
+			    obj_template_t *obj,
+			    obj_template_t *augtargobj,
 			    val_value_t *val)
 {
     val_value_t      *elem, *cpx, *seq, *annot;
-    const obj_template_t   *child;
-    const obj_container_t  *con;
+    obj_template_t   *child;
+    obj_container_t  *con;
     status_t          res;
     xmlns_id_t        xsd_id;
 
@@ -391,9 +391,9 @@ static status_t
     }
 
     /* go through all the child nodes and generate elements for them */
-    for (child = (const obj_template_t *)dlq_firstEntry(con->datadefQ);
+    for (child = (obj_template_t *)dlq_firstEntry(con->datadefQ);
 	 child != NULL && res==NO_ERR;
-	 child = (const obj_template_t *)dlq_nextEntry(child)) {
+	 child = (obj_template_t *)dlq_nextEntry(child)) {
 	res = do_yang_elem_btype(mod, child, NULL, FALSE, seq);
     }
 
@@ -424,20 +424,20 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    do_typedefs_list (const ncx_module_t *mod,
-		      const obj_template_t *obj,
+    do_typedefs_list (ncx_module_t *mod,
+		      obj_template_t *obj,
 		      dlq_hdr_t *typnameQ)
 {
-    const obj_list_t       *list;
-    const typ_template_t   *typ;
-    status_t                res;
+    obj_list_t       *list;
+    typ_template_t   *typ;
+    status_t          res;
 
     list = obj->def.list;
 
     /* check any local typedefs in this list */
-    for (typ = (const typ_template_t *)dlq_firstEntry(list->typedefQ);
+    for (typ = (typ_template_t *)dlq_firstEntry(list->typedefQ);
 	 typ != NULL;
-	 typ = (const typ_template_t *)dlq_nextEntry(typ)) {
+	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
 	res = add_type_mapping(typ, typnameQ);
 	if (res != NO_ERR) {
 	    return res;
@@ -478,17 +478,17 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    do_yang_elem_list (const ncx_module_t *mod,
-		       const obj_template_t *obj,
-		       const obj_template_t *augtargobj,
+    do_yang_elem_list (ncx_module_t *mod,
+		       obj_template_t *obj,
+		       obj_template_t *augtargobj,
 		       val_value_t *val)
 {
     val_value_t            *elem, *cpx, *annot, *seq, *key, *chnode, *uniqval;
-    const obj_template_t    *child;
-    const obj_list_t        *list;
-    const obj_key_t         *idx;
-    const obj_unique_t      *uniq;
-    const obj_unique_comp_t *uniqcomp;
+    obj_template_t    *child;
+    obj_list_t        *list;
+    obj_key_t         *idx;
+    obj_unique_t      *uniq;
+    obj_unique_comp_t *uniqcomp;
     xmlChar           *buff, *str;
     status_t           res;
     xmlns_id_t         xsd_id;
@@ -566,9 +566,9 @@ static status_t
     }
 
     /* go through all the key nodes and generate elements for them */
-    for (idx = (const obj_key_t *)dlq_firstEntry(&list->keyQ);
+    for (idx = (obj_key_t *)dlq_firstEntry(&list->keyQ);
 	 idx != NULL;
-	 idx = (const obj_key_t *)dlq_nextEntry(idx)) {
+	 idx = (obj_key_t *)dlq_nextEntry(idx)) {
 
 	res = do_yang_elem_btype(mod, idx->keyobj, NULL, TRUE, seq);
 	if (res != NO_ERR) {
@@ -579,9 +579,9 @@ static status_t
     /* go through all the child nodes and generate elements for them,
      * skipping any key leafs already done
      */
-    for (child = (const obj_template_t *)dlq_firstEntry(list->datadefQ);
+    for (child = (obj_template_t *)dlq_firstEntry(list->datadefQ);
 	 child != NULL;
-	 child = (const obj_template_t *)dlq_nextEntry(child)) {
+	 child = (obj_template_t *)dlq_nextEntry(child)) {
 
 	if (child->objtype == OBJ_TYP_LEAF) {
 	    iskey = (obj_find_key(&list->keyQ, obj_get_name(child))) 
@@ -649,9 +649,9 @@ static status_t
 	/* add all the field child nodes
 	 * go through all the index nodes as field nodes
 	 */
-	for (idx = (const obj_key_t *)dlq_firstEntry(&list->keyQ);
+	for (idx = (obj_key_t *)dlq_firstEntry(&list->keyQ);
 	     idx != NULL;
-	     idx = (const obj_key_t *)dlq_nextEntry(idx)) {
+	     idx = (obj_key_t *)dlq_nextEntry(idx)) {
 
 	    /* add the selector child node */
 	    chnode = xml_val_new_flag(XSD_FIELD, xsd_id);
@@ -676,9 +676,9 @@ static status_t
     uniqcnt = 0;
     namelen = xml_strlen(list->name);
 
-    for (uniq = (const obj_unique_t *)dlq_firstEntry(&list->uniqueQ);
+    for (uniq = (obj_unique_t *)dlq_firstEntry(&list->uniqueQ);
 	 uniq != NULL;
-	 uniq = (const obj_unique_t *)dlq_nextEntry(uniq)) {
+	 uniq = (obj_unique_t *)dlq_nextEntry(uniq)) {
 
 	uniqval = xml_val_new_struct(XSD_UNIQUE, xsd_id);
 	if (!uniqval) {
@@ -728,9 +728,9 @@ static status_t
 	/* add all the field child nodes
 	 * go through all the unique comp nodes as field nodes
 	 */
-	for (uniqcomp = (const obj_unique_comp_t *)dlq_firstEntry(&uniq->compQ);
+	for (uniqcomp = (obj_unique_comp_t *)dlq_firstEntry(&uniq->compQ);
 	     uniqcomp != NULL;
-	     uniqcomp = (const obj_unique_comp_t *)dlq_nextEntry(uniqcomp)) {
+	     uniqcomp = (obj_unique_comp_t *)dlq_nextEntry(uniqcomp)) {
 
 	    /* add the selector child node */
 	    chnode = xml_val_new_flag(XSD_FIELD, xsd_id);
@@ -772,8 +772,8 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    do_typedefs_case (const ncx_module_t *mod,
-		      const obj_template_t *obj,
+    do_typedefs_case (ncx_module_t *mod,
+		      obj_template_t *obj,
 		      dlq_hdr_t *typnameQ)
 {
     const obj_case_t       *cas;
@@ -806,8 +806,8 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    do_typedefs_choice (const ncx_module_t *mod,
-			const obj_template_t *obj,
+    do_typedefs_choice (ncx_module_t *mod,
+			obj_template_t *obj,
 			dlq_hdr_t *typnameQ)
 {
     const obj_choice_t     *choic;
@@ -837,14 +837,14 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    do_yang_elem_choice (const ncx_module_t *mod,
-			 const obj_template_t *obj,
+    do_yang_elem_choice (ncx_module_t *mod,
+			 obj_template_t *obj,
 			 val_value_t *val)
 {
     val_value_t          *top, *seq, *annot;
-    const obj_choice_t   *choic;
-    const obj_template_t *casobj, *child;
-    const obj_case_t     *cas;
+    obj_choice_t   *choic;
+    obj_template_t *casobj, *child;
+    obj_case_t     *cas;
     xmlns_id_t            xsd_id;
     status_t              res;
 
@@ -870,9 +870,9 @@ static status_t
 	val_add_child(annot, top);
     }
 
-    for (casobj = (const obj_template_t *)dlq_firstEntry(choic->caseQ);
+    for (casobj = (obj_template_t *)dlq_firstEntry(choic->caseQ);
 	 casobj != NULL && res==NO_ERR;
-	 casobj = (const obj_template_t *)dlq_nextEntry(casobj)) {
+	 casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
 
 	
 	/* next level is sequence */
@@ -892,9 +892,9 @@ static status_t
 	}
 
 	cas = casobj->def.cas;
-	for (child = (const obj_template_t *)dlq_firstEntry(cas->datadefQ);
+	for (child = (obj_template_t *)dlq_firstEntry(cas->datadefQ);
 	     child != NULL && res==NO_ERR;
-	     child = (const obj_template_t *)dlq_nextEntry(child)) {
+	     child = (obj_template_t *)dlq_nextEntry(child)) {
 	    res = do_yang_elem_btype(mod, child, NULL, FALSE, seq);
 	}
 	if (res == NO_ERR) {
@@ -933,19 +933,19 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    do_yang_elem_union (const ncx_module_t *mod,
-			const obj_template_t *obj,
-			const obj_template_t *augtargobj,
+    do_yang_elem_union (ncx_module_t *mod,
+			obj_template_t *obj,
+			obj_template_t *augtargobj,
 			boolean iskey,
 			val_value_t *val)
 
 {
 
     val_value_t          *elem, *typnode, *annot;
-    const typ_def_t      *typdef;
+    typ_def_t            *typdef;
     status_t              res;
 
-    typdef = obj_get_ctypdef(obj);
+    typdef = obj_get_typdef(obj);
 
     annot = xsd_make_obj_annotation(obj, &res);
     if (res != NO_ERR) {
@@ -1017,16 +1017,16 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    do_yang_elem_simple (const ncx_module_t *mod,
-			 const obj_template_t *obj,
-			 const obj_template_t *augtargobj,
+    do_yang_elem_simple (ncx_module_t *mod,
+			 obj_template_t *obj,
+			 obj_template_t *augtargobj,
 			 boolean iskey,
 			 val_value_t *val)
 
 {
-    const typ_def_t     *typdef;
+    typ_def_t           *typdef;
     val_value_t         *elem, *toptyp, *annot;
-    const typ_simple_t  *simtyp;
+    typ_simple_t        *simtyp;
     boolean              empty, simtop;
     status_t             res;
 
@@ -1034,7 +1034,7 @@ static status_t
     empty = FALSE;
     simtop = TRUE;
 
-    typdef = obj_get_ctypdef(obj);
+    typdef = obj_get_typdef(obj);
     if (!typdef) {
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
@@ -1177,15 +1177,15 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    do_yang_elem_btype (const ncx_module_t *mod,
-			const obj_template_t *obj,
-			const obj_template_t *augtargobj,
+    do_yang_elem_btype (ncx_module_t *mod,
+			obj_template_t *obj,
+			obj_template_t *augtargobj,
 			boolean iskey,
 			val_value_t *val)
 
 {
-    const typ_def_t  *typdef;
-    status_t          res;
+    typ_def_t  *typdef;
+    status_t    res;
 
     /* augmented objects from a different module or submodule should
      * be skipped, and handled in the module that defined the node
@@ -1194,11 +1194,11 @@ static status_t
      * fully-augmented XSD for a given target, except there are other
      * details, like complete module tree mode instead of subtree mode
      */
-    if (obj->mod != mod) {
+    if (obj->tkerr.mod != mod) {
 	return NO_ERR;
     }
 
-    typdef = obj_get_ctypdef(obj);
+    typdef = obj_get_typdef(obj);
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
@@ -1289,12 +1289,12 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    do_typedefs_uses (const ncx_module_t *mod,
-		      const obj_template_t *obj,
+    do_typedefs_uses (ncx_module_t *mod,
+		      obj_template_t *obj,
 		      dlq_hdr_t *typnameQ)
 {
-    const obj_uses_t       *uses;
-    status_t                res;
+    obj_uses_t       *uses;
+    status_t          res;
 
     uses = obj->def.uses;
     res = xsd_do_typedefs_datadefQ(mod, uses->datadefQ, typnameQ);
@@ -1321,12 +1321,12 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    do_typedefs_augment (const ncx_module_t *mod,
-			 const obj_template_t *obj,
+    do_typedefs_augment (ncx_module_t *mod,
+			 obj_template_t *obj,
 			 dlq_hdr_t *typnameQ)
 {
-    const obj_augment_t    *aug;
-    status_t                res;
+    obj_augment_t    *aug;
+    status_t          res;
 
     aug = obj->def.augment;
     res = xsd_do_typedefs_datadefQ(mod, &aug->datadefQ, typnameQ);
@@ -1353,20 +1353,20 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    do_typedefs_rpc (const ncx_module_t *mod,
-		     const obj_template_t *obj,
+    do_typedefs_rpc (ncx_module_t *mod,
+		     obj_template_t *obj,
 		     dlq_hdr_t *typnameQ)
 {
-    const obj_rpc_t        *rpc;
-    const typ_template_t   *typ;
-    status_t                res;
+    obj_rpc_t        *rpc;
+    typ_template_t   *typ;
+    status_t          res;
 
     rpc = obj->def.rpc;
 
     /* check any local typedefs in this RPC */
-    for (typ = (const typ_template_t *)dlq_firstEntry(&rpc->typedefQ);
+    for (typ = (typ_template_t *)dlq_firstEntry(&rpc->typedefQ);
 	 typ != NULL;
-	 typ = (const typ_template_t *)dlq_nextEntry(typ)) {
+	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
 	res = add_type_mapping(typ, typnameQ);
 	if (res != NO_ERR) {
 	    return res;
@@ -1404,20 +1404,20 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    do_typedefs_rpcio (const ncx_module_t *mod,
-		       const obj_template_t *obj,
+    do_typedefs_rpcio (ncx_module_t *mod,
+		       obj_template_t *obj,
 		       dlq_hdr_t *typnameQ)
 {
-    const obj_rpcio_t      *rpcio;
-    const typ_template_t   *typ;
-    status_t                res;
+    obj_rpcio_t      *rpcio;
+    typ_template_t   *typ;
+    status_t          res;
 
     rpcio = obj->def.rpcio;
 
     /* check any local typedefs in this RPC input/output */
-    for (typ = (const typ_template_t *)dlq_firstEntry(&rpcio->typedefQ);
+    for (typ = (typ_template_t *)dlq_firstEntry(&rpcio->typedefQ);
 	 typ != NULL;
-	 typ = (const typ_template_t *)dlq_nextEntry(typ)) {
+	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
 	res = add_type_mapping(typ, typnameQ);
 	if (res != NO_ERR) {
 	    return res;
@@ -1455,20 +1455,20 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    do_typedefs_notif (const ncx_module_t *mod,
-		       const obj_template_t *obj,
+    do_typedefs_notif (ncx_module_t *mod,
+		       obj_template_t *obj,
 		       dlq_hdr_t *typnameQ)
 {
-    const obj_notif_t      *notif;
-    const typ_template_t   *typ;
-    status_t                res;
+    obj_notif_t      *notif;
+    typ_template_t   *typ;
+    status_t          res;
 
     notif = obj->def.notif;
 
     /* check any local typedefs in this notification */
-    for (typ = (const typ_template_t *)dlq_firstEntry(&notif->typedefQ);
+    for (typ = (typ_template_t *)dlq_firstEntry(&notif->typedefQ);
 	 typ != NULL;
-	 typ = (const typ_template_t *)dlq_nextEntry(typ)) {
+	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
 	res = add_type_mapping(typ, typnameQ);
 	if (res != NO_ERR) {
 	    return res;
@@ -1505,8 +1505,8 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    do_local_typedefs (const ncx_module_t *mod,
-		       const obj_template_t *obj,
+    do_local_typedefs (ncx_module_t *mod,
+		       obj_template_t *obj,
 		       dlq_hdr_t *typnameQ)
 {
     status_t   res;
@@ -1582,15 +1582,15 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    add_yang_rpcio (const ncx_module_t *mod,
-		    const obj_template_t *obj,
-		    const obj_template_t *iobj,
+    add_yang_rpcio (ncx_module_t *mod,
+		    obj_template_t *obj,
+		    obj_template_t *iobj,
 		    boolean addtypename,
 		    val_value_t *val)
 {
     val_value_t            *cpxtyp, *cpxcon, *ext, *seq, *annot;
-    const obj_template_t   *chobj;
-    const obj_rpcio_t      *rpcio;
+    obj_template_t         *chobj;
+    obj_rpcio_t            *rpcio;
     xmlChar                *typename, *qname;
     xmlns_id_t              xsd_id, nc_id;
     status_t                res;
@@ -1665,9 +1665,9 @@ static status_t
     }
 
     if (rpcio) {
-	for (chobj = (const obj_template_t *)dlq_firstEntry(&rpcio->datadefQ);
+	for (chobj = (obj_template_t *)dlq_firstEntry(&rpcio->datadefQ);
 	     chobj != NULL;
-	     chobj = (const obj_template_t *)dlq_nextEntry(chobj)) {
+	     chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 	    res = do_yang_elem_btype(mod, chobj, NULL, FALSE, seq);
 	    if (res != NO_ERR) {
 		return res;
@@ -1699,13 +1699,13 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    add_yang_rpc (const ncx_module_t *mod,
-		  const obj_template_t *obj,
+    add_yang_rpc (ncx_module_t *mod,
+		  obj_template_t *obj,
 		  val_value_t *val)
 {
     val_value_t          *elem, *annot;
-    const obj_template_t *inputobj, *outputobj;
-    const obj_rpc_t      *rpc;
+    obj_template_t       *inputobj, *outputobj;
+    obj_rpc_t            *rpc;
     xmlChar              *qname;
     xmlns_id_t            xsd_id, nc_id;
     status_t              res;
@@ -1714,8 +1714,8 @@ static status_t
     nc_id = xmlns_nc_id();
 
     rpc = obj->def.rpc;
-    inputobj = obj_find_template_con(&rpc->datadefQ, NULL, YANG_K_INPUT);
-    outputobj = obj_find_template_con(&rpc->datadefQ, NULL, YANG_K_OUTPUT);
+    inputobj = obj_find_template(&rpc->datadefQ, NULL, YANG_K_INPUT);
+    outputobj = obj_find_template(&rpc->datadefQ, NULL, YANG_K_OUTPUT);
 
     /* add a named typedef for the output if needed */
     if (outputobj) {
@@ -1788,13 +1788,13 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    add_yang_notif (const ncx_module_t *mod,
-		    const obj_template_t *obj,
+    add_yang_notif (ncx_module_t *mod,
+		    obj_template_t *obj,
 		    val_value_t *val)
 {
     val_value_t          *elem, *annot, *cpxtyp, *cpxcon, *ext, *seq;
-    const obj_notif_t    *notif;
-    const obj_template_t *chobj;
+    obj_notif_t          *notif;
+    obj_template_t       *chobj;
     xmlChar              *qname;
     xmlns_id_t            xsd_id, ncn_id;
     status_t              res;
@@ -1883,9 +1883,9 @@ static status_t
     }
 
     /* add any data defined for this notification */
-    for (chobj = (const obj_template_t *)dlq_firstEntry(&notif->datadefQ);
+    for (chobj = (obj_template_t *)dlq_firstEntry(&notif->datadefQ);
 	 chobj != NULL;
-	 chobj = (const obj_template_t *)dlq_nextEntry(chobj)) {
+	 chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 	res = do_yang_elem_btype(mod, chobj, NULL, FALSE, seq);
 	if (res != NO_ERR) {
 	    return res;
@@ -1919,19 +1919,19 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    add_yang_augment (const ncx_module_t *mod,
-		      const obj_template_t *obj,
+    add_yang_augment (ncx_module_t *mod,
+		      obj_template_t *obj,
 		      val_value_t *val)
 {
-    const obj_augment_t  *aug;
-    const obj_template_t *chobj;
-    status_t              res;
+    obj_augment_t     *aug;
+    obj_template_t    *chobj;
+    status_t           res;
 
     aug = obj->def.augment;
 
     /* check that the target is in another namespace */
-    if (!aug->targobj || !aug->targobj->mod ||
-	(aug->targobj->mod->nsid == mod->nsid)) {
+    if (!aug->targobj || !aug->targobj->tkerr.mod ||
+	(aug->targobj->tkerr.mod->nsid == mod->nsid)) {
 	return NO_ERR;
     }
 
@@ -1940,9 +1940,9 @@ static status_t
      * Each datadef node declared in the augment clause generates a top-level
      * element to replace the abstract element representing the target.
      */
-    for (chobj = (const obj_template_t *)dlq_firstEntry(&aug->datadefQ);
+    for (chobj = (obj_template_t *)dlq_firstEntry(&aug->datadefQ);
 	 chobj != NULL;
-	 chobj = (const obj_template_t *)dlq_nextEntry(chobj)) {
+	 chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 
 	res = do_yang_elem_btype(mod, chobj, aug->targobj, FALSE, val);
 	if (res != NO_ERR) {
@@ -1953,7 +1953,6 @@ static status_t
     return NO_ERR;
 
 } /* add_yang_augment */
-
 
 
 /************* E X T E R N A L   F U N C T I O N S *****************/
@@ -1975,11 +1974,11 @@ static status_t
 *   status
 *********************************************************************/
 status_t
-    xsd_add_groupings (const ncx_module_t *mod,
+    xsd_add_groupings (ncx_module_t *mod,
 		       val_value_t *val)
 {
-    const grp_template_t *grp;
-    const obj_template_t *obj;
+    grp_template_t *grp;
+    obj_template_t *obj;
     val_value_t    *grpval, *seqval, *annot;
     xmlns_id_t      xsd_id;
     status_t        res;
@@ -1987,9 +1986,9 @@ status_t
     xsd_id = xmlns_xs_id();
 
     /* generate top-level groupings only */
-    for (grp = (const grp_template_t *)dlq_firstEntry(&mod->groupingQ);
+    for (grp = (grp_template_t *)dlq_firstEntry(&mod->groupingQ);
 	 grp != NO_ERR;
-	 grp = (const grp_template_t *)dlq_nextEntry(grp)) {
+	 grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
 	/* check if an annotation node is needed */
 	annot = xsd_make_group_annotation(grp, &res);
@@ -2030,9 +2029,9 @@ status_t
 		val_add_child(seqval, grpval);
 	    }
 
-	    for (obj = (const obj_template_t *)dlq_firstEntry(&grp->datadefQ);
+	    for (obj = (obj_template_t *)dlq_firstEntry(&grp->datadefQ);
 		 obj != NULL;
-		 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+		 obj = (obj_template_t *)dlq_nextEntry(obj)) {
 		res = do_yang_elem_btype(mod, obj, NULL, FALSE, seqval);
 		if (res != NO_ERR) {
 		    return res;
@@ -2063,16 +2062,16 @@ status_t
 *   status
 *********************************************************************/
 status_t
-    xsd_add_objects (const ncx_module_t *mod,
+    xsd_add_objects (ncx_module_t *mod,
 		     val_value_t *val)
 {
-    const obj_template_t   *obj;
-    status_t                res;
+    obj_template_t   *obj;
+    status_t          res;
 
     /* go through all the objects and create complexType constructs */
-    for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
+    for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
 	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
 	if (obj_is_hidden(obj)) {
 	    continue;
@@ -2126,26 +2125,26 @@ status_t
 *   status
 *********************************************************************/
 status_t
-    xsd_do_typedefs_groupingQ (const ncx_module_t *mod,
-			       const dlq_hdr_t *groupingQ,
+    xsd_do_typedefs_groupingQ (ncx_module_t *mod,
+			       dlq_hdr_t *groupingQ,
 			       dlq_hdr_t *typnameQ)
 {
-    const grp_template_t  *grp;
-    const typ_template_t  *typ;
-    const obj_template_t  *obj;
-    status_t               res;
+    grp_template_t  *grp;
+    typ_template_t  *typ;
+    obj_template_t  *obj;
+    status_t         res;
 
     /* go through the groupingQ and check the local types/groupings
      * and data-def statements
      */
-    for (grp = (const grp_template_t *)dlq_firstEntry(groupingQ);
+    for (grp = (grp_template_t *)dlq_firstEntry(groupingQ);
 	 grp != NULL;
-	 grp = (const grp_template_t *)dlq_nextEntry(grp)) {
+	 grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
 	/* check any local typedefs in this grouping */
-	for (typ = (const typ_template_t *)dlq_firstEntry(&grp->typedefQ);
+	for (typ = (typ_template_t *)dlq_firstEntry(&grp->typedefQ);
 	     typ != NULL;
-	     typ = (const typ_template_t *)dlq_nextEntry(typ)) {
+	     typ = (typ_template_t *)dlq_nextEntry(typ)) {
 	    res = add_type_mapping(typ, typnameQ);
 	    if (res != NO_ERR) {
 		return res;
@@ -2153,9 +2152,9 @@ status_t
 	}
 
 	/* check any local typedefs in the objects in this grouping */
-	for (obj = (const obj_template_t *)dlq_firstEntry(&grp->datadefQ);
+	for (obj = (obj_template_t *)dlq_firstEntry(&grp->datadefQ);
 	     obj != NULL;
-	     obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	     obj = (obj_template_t *)dlq_nextEntry(obj)) {
 	    res = do_local_typedefs(mod, obj, typnameQ);
 	    if (res != NO_ERR) {
 		return res;
@@ -2192,16 +2191,16 @@ status_t
 *   status
 *********************************************************************/
 status_t
-    xsd_do_typedefs_datadefQ (const ncx_module_t *mod,
-			      const dlq_hdr_t *datadefQ,
+    xsd_do_typedefs_datadefQ (ncx_module_t *mod,
+			      dlq_hdr_t *datadefQ,
 			      dlq_hdr_t *typnameQ)
 {
-    const obj_template_t  *obj;
-    status_t               res;
+    obj_template_t  *obj;
+    status_t         res;
 
-    for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
+    for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
 	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
 	res = do_local_typedefs(mod, obj, typnameQ);
 	if (res != NO_ERR) {
 	    return res;

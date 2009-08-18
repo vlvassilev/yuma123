@@ -225,11 +225,10 @@ typedef struct obj_unique_comp_t_ {
 /* One component in a YANG list unique target */
 typedef struct obj_unique_t_ {
     dlq_hdr_t       qhdr;
-    tk_token_t     *tk;
     xmlChar        *xpath;       /* complete saved unique str */
-    uint32          linenum;
     dlq_hdr_t       compQ;          /* Q of obj_unique_comp_t */
     boolean         seen;               /* needed by yangdiff */
+    ncx_error_t     tkerr;
 } obj_unique_t;
 
 
@@ -245,7 +244,7 @@ typedef struct obj_container_t_ {
     boolean        datadefclone;
     ncx_status_t   status;
     dlq_hdr_t      mustQ;             /* Q of xpath_pcb_t */
-    const struct obj_template_t_ *defaultparm;
+    struct obj_template_t_ *defaultparm;
 } obj_container_t;
 
 
@@ -259,7 +258,7 @@ typedef struct obj_leaf_t_ {
     typ_def_t     *typdef;
     ncx_status_t   status;
     dlq_hdr_t      mustQ;              /* Q of xpath_pcb_t */
-    const struct obj_template_t_ *leafrefobj;
+    struct obj_template_t_ *leafrefobj;
 } obj_leaf_t;
 
 
@@ -277,7 +276,7 @@ typedef struct obj_leaflist_t_ {
     uint32         maxelems;
     ncx_status_t   status;
     dlq_hdr_t      mustQ;              /* Q of xpath_pcb_t */
-    const struct obj_template_t_ *leafrefobj;
+    struct obj_template_t_ *leafrefobj;
 } obj_leaflist_t;
 
 
@@ -285,7 +284,6 @@ typedef struct obj_leaflist_t_ {
 typedef struct obj_list_t_ {
     xmlChar       *name;
     xmlChar       *keystr;
-    tk_token_t    *keytk;
     xmlChar       *descr;
     xmlChar       *ref;
     dlq_hdr_t     *typedefQ;         /* Q of typ_template_t */
@@ -299,9 +297,9 @@ typedef struct obj_list_t_ {
     uint32         minelems;
     boolean        maxset;
     uint32         maxelems;
-    uint32         keylinenum;
     ncx_status_t   status;
     dlq_hdr_t      mustQ;              /* Q of xpath_pcb_t */
+    ncx_error_t    keytkerr;
 } obj_list_t;
 
 
@@ -353,21 +351,21 @@ typedef struct obj_refine_t_ {
      * needs to wait until the resolve phase
      */
     xmlChar          *descr;
-    tk_token_t       *descr_tk;
+    ncx_error_t       descr_tkerr;
     xmlChar          *ref;
-    tk_token_t       *ref_tk;
+    ncx_error_t       ref_tkerr;
     xmlChar          *presence;
-    tk_token_t       *presence_tk;
+    ncx_error_t       presence_tkerr;
     xmlChar          *def;
-    tk_token_t       *def_tk;
+    ncx_error_t       def_tkerr;
     /* config and confset are in the object flags */
-    tk_token_t       *config_tk;
+    ncx_error_t       config_tkerr;
     /* mandatory and mandset are in the object flags */
-    tk_token_t       *mandatory_tk;
+    ncx_error_t       mandatory_tkerr;
     uint32            minelems;
-    tk_token_t       *minelems_tk;   /* also minset */
+    ncx_error_t       minelems_tkerr;   /* also minset */
     uint32            maxelems;
-    tk_token_t       *maxelems_tk;   /* also maxset */
+    ncx_error_t       maxelems_tkerr;   /* also maxset */
     dlq_hdr_t         mustQ;
 } obj_refine_t;
 
@@ -378,7 +376,7 @@ typedef struct obj_rpcio_t_ {
     dlq_hdr_t          typedefQ;         /* Q of typ_template_t */
     dlq_hdr_t          groupingQ;        /* Q of gtp_template_t */
     dlq_hdr_t          datadefQ;         /* Q of obj_template_t */
-    const struct obj_template_t_ *defaultparm;
+    struct obj_template_t_ *defaultparm;
 } obj_rpcio_t;
 
 
@@ -429,9 +427,7 @@ typedef struct obj_template_t_ {
     dlq_hdr_t      qhdr;
     obj_type_t     objtype;
     uint32         flags;              /* see OBJ_FL_* definitions */
-    uint32         linenum;    /* saved from tk->linenum, persists */
-    ncx_module_t  *mod;            /* mod or submod containing obj */
-    tk_token_t    *tk;             /* tk valid only during parsing */
+    ncx_error_t    tkerr;
     grp_template_t *grp;          /* non-NULL == in a grp.datadefQ */
 
     /* 4 back pointers */
@@ -468,11 +464,10 @@ typedef struct obj_template_t_ {
 typedef struct obj_metadata_t_ {
     dlq_hdr_t      qhdr;
     struct obj_template_t_ *parent;     /* obj containing metadata */
-    ncx_module_t  *mod;                 /* mod or submod container */
     xmlChar       *name;
     typ_def_t     *typdef;
-    uint32         linenum;              /* saved from tk->linenum */
     xmlns_id_t     nsid;                 /* in case parent == NULL */
+    ncx_error_t    tkerr;
 } obj_metadata_t;
 
 
@@ -490,33 +485,31 @@ typedef enum obj_deviate_arg_t_ {
 typedef struct obj_deviate_t_ {
     dlq_hdr_t          qhdr;
 
-    /* the token for each sub-clause is saved because
+    /* the error info for each sub-clause is saved because
      * when the deviation-stmt is parsed, the target is not
      * known yet so picking the correct variant
      * such as type-stmt or refine-list-stmts
      * needs to wait until the resolve phase
      *
-     * all tk_token_t are back-pointers, not malloced
      */
-    tk_token_t       *tk;
-    uint32            linenum;
+    ncx_error_t       tkerr;
     boolean           empty;
     obj_deviate_arg_t arg;
-    tk_token_t       *arg_tk;
+    ncx_error_t       arg_tkerr;
     typ_def_t        *typdef;
-    tk_token_t       *type_tk;
+    ncx_error_t       type_tkerr;
     xmlChar          *units;
-    tk_token_t       *units_tk;
+    ncx_error_t       units_tkerr;
     xmlChar          *defval;
-    tk_token_t       *default_tk;
+    ncx_error_t       default_tkerr;
     boolean           config;
-    tk_token_t       *config_tk;
+    ncx_error_t       config_tkerr;
     boolean           mandatory;
-    tk_token_t       *mandatory_tk;
+    ncx_error_t       mandatory_tkerr;
     uint32            minelems;
-    tk_token_t       *minelems_tk;   /* also minset */
+    ncx_error_t       minelems_tkerr;   /* also minset */
     uint32            maxelems;
-    tk_token_t       *maxelems_tk;   /* also maxset */
+    ncx_error_t       maxelems_tkerr;   /* also maxset */
     dlq_hdr_t         mustQ;     /* Q of xpath_pcb_t */
     dlq_hdr_t         uniqueQ;  /* Q of obj_unique_t */
     dlq_hdr_t         appinfoQ;  /* Q of ncx_appinfo_t */
@@ -531,9 +524,8 @@ typedef struct obj_deviation_t_ {
     obj_template_t       *targobj;
     xmlChar              *descr;
     xmlChar              *ref;
-    tk_token_t           *tk;   /* back-ptr */
+    ncx_error_t           tkerr;
     xmlChar              *devmodname;  /* set if not the targmod */
-    uint32                linenum;
     boolean               empty;
     status_t              res;
     dlq_hdr_t             deviateQ;   /* Q of obj_deviate_t */
@@ -553,7 +545,7 @@ typedef struct obj_deviation_t_ {
  *   FALSE if walk should terminate 
  */
 typedef boolean
-    (*obj_walker_fn_t) (const obj_template_t *obj,
+    (*obj_walker_fn_t) (obj_template_t *obj,
 			void *cookie1,
 			void *cookie2);
 
@@ -576,23 +568,23 @@ extern void
     obj_free_template (obj_template_t *obj);
 
 extern obj_template_t *
-    obj_find_template (const dlq_hdr_t  *que,
+    obj_find_template (dlq_hdr_t  *que,
 		       const xmlChar *modname,
 		       const xmlChar *objname);
 
 extern const obj_template_t *
-    obj_find_template_con (const dlq_hdr_t  *que,
+    obj_find_template_con (dlq_hdr_t  *que,
 			   const xmlChar *modname,
 			   const xmlChar *objname);
 
 extern obj_template_t *
-    obj_find_template_str (const dlq_hdr_t  *que,
+    obj_find_template_str (dlq_hdr_t  *que,
 			   const xmlChar *modname,
 			   const xmlChar *objname,
 			   uint32 objnamelen);
 
 extern obj_template_t *
-    obj_find_template_test (const dlq_hdr_t  *que,
+    obj_find_template_test (dlq_hdr_t  *que,
 			    const xmlChar *modname,
 			    const xmlChar *objname);
 
@@ -601,55 +593,54 @@ extern obj_template_t *
 			   const xmlChar *modname,
 			   const xmlChar *objname);
 
-extern const obj_template_t *
-    obj_find_child (const obj_template_t  *obj,
+extern obj_template_t *
+    obj_find_child (obj_template_t  *obj,
 		    const xmlChar *modname,
 		    const xmlChar *objname);
 
-extern const obj_template_t *
-    obj_find_child_str (const obj_template_t  *obj,
+extern obj_template_t *
+    obj_find_child_str (obj_template_t  *obj,
 			const xmlChar *modname,
 			const xmlChar *objname,
 			uint32 objnamelen);
 
-extern const obj_template_t *
-    obj_match_child_str (const obj_template_t *obj,
+extern obj_template_t *
+    obj_match_child_str (obj_template_t *obj,
 			 const xmlChar *modname,
 			 const xmlChar *objname,
 			 uint32 objnamelen,
 			 uint32 *matchcount);
 
 /* skips augment and uses */
-extern const obj_template_t *
-    obj_first_child (const obj_template_t *obj);
+extern obj_template_t *
+    obj_first_child (obj_template_t *obj);
 
 /* skips augment and uses */
-extern const obj_template_t *
-    obj_last_child (const obj_template_t *obj);
+extern obj_template_t *
+    obj_last_child (obj_template_t *obj);
 
 /* skips augment and uses */
-extern const obj_template_t *
-    obj_next_child (const obj_template_t *obj);
+extern obj_template_t *
+    obj_next_child (obj_template_t *obj);
 
 /* skips augment and uses */
-extern const obj_template_t *
-    obj_previous_child (const obj_template_t *obj);
-
+extern obj_template_t *
+    obj_previous_child (obj_template_t *obj);
 
 /* skips augment and uses, dives into choice, case */
-extern const obj_template_t *
-    obj_first_child_deep (const obj_template_t *obj);
+extern obj_template_t *
+    obj_first_child_deep (obj_template_t *obj);
 
 /* skips augment and uses, dives into choice, case */
-extern const obj_template_t *
-    obj_next_child_deep (const obj_template_t *obj);
+extern obj_template_t *
+    obj_next_child_deep (obj_template_t *obj);
 
 extern boolean
     obj_find_all_children (ncx_module_t *exprmod,
 			   obj_walker_fn_t walkerfn,
 			   void *cookie1,
 			   void *cookie2,
-			   const obj_template_t *startnode,
+			   obj_template_t *startnode,
 			   const xmlChar *modname,
 			   const xmlChar *childname,
 			   boolean configonly, 
@@ -662,7 +653,7 @@ extern boolean
 			    obj_walker_fn_t walkerfn,
 			    void *cookie1,
 			    void *cookie2,
-			    const obj_template_t *startnode,
+			    obj_template_t *startnode,
 			    const xmlChar *modname,
 			    const xmlChar *name,
 			    boolean configonly,
@@ -676,7 +667,7 @@ extern boolean
 			      obj_walker_fn_t walkerfn,
 			      void *cookie1,
 			      void *cookie2,
-			      const obj_template_t *startnode,
+			      obj_template_t *startnode,
 			      const xmlChar *modname,
 			      const xmlChar *name,
 			      boolean configonly,
@@ -691,7 +682,7 @@ extern boolean
 			 obj_walker_fn_t walkerfn,
 			 void *cookie1,
 			 void *cookie2,
-			 const obj_template_t *startnode,
+			 obj_template_t *startnode,
 			 const xmlChar *modname,
 			 const xmlChar *name,
 			 boolean configonly,
@@ -707,12 +698,6 @@ extern obj_case_t *
 		   const xmlChar *modname,
 		   const xmlChar *casname);
 
-#ifdef NOT_NEEDED
-extern obj_template_t *
-    obj_find_uses (const dlq_hdr_t *que,
-		   const obj_template_t *uobj);
-#endif
-
 
 extern obj_template_t * 
     obj_new_rpcio (obj_template_t *rpcobj,
@@ -723,11 +708,11 @@ extern void
     obj_clean_datadefQ (dlq_hdr_t *que);
 
 extern typ_template_t *
-    obj_find_type (const obj_template_t *obj,
+    obj_find_type (obj_template_t *obj,
 		   const xmlChar *typname);
 
 extern grp_template_t *
-    obj_find_grouping (const obj_template_t *obj,
+    obj_find_grouping (obj_template_t *obj,
 		       const xmlChar *grpname);
 
 extern status_t 
@@ -778,14 +763,14 @@ extern obj_unique_t *
     obj_find_unique (dlq_hdr_t *que,
 		     const xmlChar *xpath);
 
-extern const obj_unique_t *
-    obj_first_unique (const obj_template_t *listobj);
+extern obj_unique_t *
+    obj_first_unique (obj_template_t *listobj);
 
-extern const obj_unique_t *
-    obj_next_unique (const obj_unique_t *un);
+extern obj_unique_t *
+    obj_next_unique (obj_unique_t *un);
 
 extern obj_unique_comp_t *
-    obj_first_unique_comp (const obj_unique_t *un);
+    obj_first_unique_comp (obj_unique_t *un);
 
 extern obj_unique_comp_t *
     obj_next_unique_comp (obj_unique_comp_t *uncomp);
@@ -798,15 +783,15 @@ extern void
     obj_free_key (obj_key_t *key);
 
 extern obj_key_t *
-    obj_find_key (const dlq_hdr_t *que,
+    obj_find_key (dlq_hdr_t *que,
 		  const xmlChar *keycompname);
 
 extern obj_key_t *
-    obj_find_key2 (const dlq_hdr_t *que,
-		   const obj_template_t *keyobj);
+    obj_find_key2 (dlq_hdr_t *que,
+		   obj_template_t *keyobj);
 
 extern obj_key_t *
-    obj_first_key (const obj_template_t *obj);
+    obj_first_key (obj_template_t *obj);
 
 extern const obj_key_t *
     obj_first_ckey (const obj_template_t *obj);
@@ -907,8 +892,11 @@ extern boolean
 extern ncx_access_t
     obj_get_max_access (const obj_template_t *obj);
 
-extern const dlq_hdr_t *
-    obj_get_appinfoQ (const obj_template_t *obj);
+extern dlq_hdr_t *
+    obj_get_appinfoQ (obj_template_t *obj);
+
+extern dlq_hdr_t *
+    obj_get_appinfoQ2 (obj_template_t *obj);
 
 extern dlq_hdr_t *
     obj_get_mustQ (const obj_template_t *obj);
@@ -925,8 +913,8 @@ extern const dlq_hdr_t *
 extern const xmlChar *
     obj_get_default (const obj_template_t *obj);
 
-extern const obj_template_t *
-    obj_get_default_case (const obj_template_t *obj);
+extern obj_template_t *
+    obj_get_default_case (obj_template_t *obj);
 
 extern uint32
     obj_get_level (const obj_template_t *obj);
@@ -959,25 +947,25 @@ extern xmlns_id_t
     obj_get_nsid (const obj_template_t *);
 
 extern ncx_iqual_t
-    obj_get_iqualval (const obj_template_t  *obj);
+    obj_get_iqualval (obj_template_t  *obj);
 
 extern ncx_iqual_t
-    obj_get_iqualval_ex (const obj_template_t  *obj,
+    obj_get_iqualval_ex (obj_template_t  *obj,
 			 boolean required);
 
 /* return TRUE if min is set */
 extern boolean
-    obj_get_min_elements (const obj_template_t  *obj,
+    obj_get_min_elements (obj_template_t  *obj,
 			  uint32 *minelems);
 
 /* return TRUE if max is set */
 extern boolean
-    obj_get_max_elements (const obj_template_t  *obj,
+    obj_get_max_elements (obj_template_t  *obj,
 			  uint32 *maxelems);
 
 
 extern const xmlChar *
-    obj_get_units (const obj_template_t  *obj);
+    obj_get_units (obj_template_t  *obj);
 
 extern obj_template_t *
     obj_get_parent (obj_template_t  *obj);
@@ -989,7 +977,7 @@ extern boolean
     obj_is_leafy (const obj_template_t  *obj);
 
 extern boolean
-    obj_is_mandatory (const obj_template_t *obj);
+    obj_is_mandatory (obj_template_t *obj);
 
 extern boolean
     obj_is_cloned (const obj_template_t *obj);
@@ -1034,11 +1022,6 @@ extern boolean
 extern boolean
     obj_is_root (const obj_template_t *obj);
 
-#if 0
-extern boolean
-    obj_is_toproot (const obj_template_t *obj);
-#endif
-
 extern boolean
     obj_is_password (const obj_template_t *obj);
 
@@ -1076,22 +1059,22 @@ extern const xmlChar *
     obj_get_presence_string (const obj_template_t *obj);
 
 extern boolean
-    obj_ok_for_cli (const obj_template_t *obj);
+    obj_ok_for_cli (obj_template_t *obj);
 
 extern status_t 
-    obj_get_child_node (const obj_template_t *obj,
-			const obj_template_t *chobj,
+    obj_get_child_node (obj_template_t *obj,
+			obj_template_t *chobj,
 			const xml_node_t *curnode,
 			boolean xmlorder,
-			const obj_template_t **rettop,
-			const obj_template_t **retobj);
+			obj_template_t **rettop,
+			obj_template_t **retobj);
 
 
 extern uint32
     obj_get_child_count (const obj_template_t *obj);
 
 extern boolean
-    obj_has_children (const obj_template_t *obj);
+    obj_has_children (obj_template_t *obj);
 
 extern obj_metadata_t * 
     obj_new_metadata (void);
@@ -1115,8 +1098,8 @@ extern obj_metadata_t *
     obj_next_metadata (const obj_metadata_t *meta);
 
 /* yangcli and ncx:cli support */
-extern const obj_template_t * 
-    obj_get_default_parm (const obj_template_t *obj);
+extern obj_template_t * 
+    obj_get_default_parm (obj_template_t *obj);
 
 /* get config flag during augment expand */
 extern boolean
@@ -1135,7 +1118,7 @@ extern boolean
     obj_is_enabled (const obj_template_t *obj);
 
 extern boolean
-    obj_is_single_instance (const obj_template_t *obj);
+    obj_is_single_instance (obj_template_t *obj);
 
 
 #endif	    /* _H_obj */

@@ -51,15 +51,15 @@ date	     init     comment
 /* parse a value for a YANG object from a NETCONF PDU XML stream */
 extern status_t 
     mgr_val_parse (ses_cb_t  *scb,
-		   const obj_template_t *obj,
+		   obj_template_t *obj,
 		   const xml_node_t *startnode,
 		   val_value_t  *retval);
 
 /* parse an <rpc-reply> element */
 extern status_t 
     mgr_val_parse_reply (ses_cb_t  *scb,
-			 const obj_template_t *obj,
-			 const obj_template_t *rpc,
+			 obj_template_t *obj,
+			 obj_template_t *rpc,
 			 const xml_node_t *startnode,
 			 val_value_t  *retval);
 
@@ -67,7 +67,7 @@ extern status_t
 /* parse a <notification> element */
 extern status_t 
     mgr_val_parse_notification (ses_cb_t  *scb,
-				const obj_template_t *notobj,
+				obj_template_t *notobj,
 				const xml_node_t *startnode,
 				val_value_t  *retval);
 

@@ -209,12 +209,12 @@ date         init     comment
 *    may have errors, check *res
 *********************************************************************/
 static val_value_t *
-    parse_rpc_cli (const obj_template_t *rpc,
+    parse_rpc_cli (obj_template_t *rpc,
 		   const xmlChar *args,
 		   status_t  *res)
 {
-    const obj_template_t   *obj;
-    const char             *myargv[2];
+    obj_template_t   *obj;
+    const char       *myargv[2];
 
     /* construct an argv array, 
      * convert the CLI into a parmset 
@@ -662,75 +662,6 @@ static status_t
 }  /* get_yesno */
 
 
-#if 0    /* in process of removal */
-/********************************************************************
-* FUNCTION get_complex_parm
-* 
-* Fill the specified parm, which is a complex type
-* This function will block on readline to get input from the user
-*
-* INPUTS:
-*   agent_cb == agent control block to use
-*   parm == parm to get from the CLI
-*   valset == value set being filled
-*
-* OUTPUTS:
-*    new val_value_t node will be added to valset if NO_ERR
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t
-    get_complex_parm (agent_cb_t *agent_cb,
-		      const obj_template_t *parm,
-		      val_value_t *valset)
-{
-    xmlChar          *line;
-    val_value_t      *new_parm;
-    status_t          res;
-
-    res = NO_ERR;
-
-    log_stdout("\nEnter parameter value %s (%s)", 
-	       obj_get_name(parm), 
-	       tk_get_btype_sym(obj_get_basetype(parm)));
-
-    /* get a line of input from the user */
-    line = get_cmd_line(agent_cb, &res);
-    if (!line) {
-	return res;
-    }
-
-    new_parm = val_new_value();
-    if (!new_parm) {
-	res = ERR_INTERNAL_MEM;
-    } else {
-	val_init_from_template(new_parm, parm);
-	(void)var_get_script_val(parm,
-				 new_parm,
-				 line, 
-                                 ISPARM, 
-                                 &res);
-	if (res == NO_ERR) {
-	    /* add the parm to the parmset */
-	    val_add_child(new_parm, valset);
-	} else {
-            val_free_value(new_parm);
-        }
-    }
-
-    if (res != NO_ERR) {
-	log_stdout("\nyangcli: Error in %s (%s)",
-		   obj_get_name(parm), 
-                   get_error_string(res));
-    }
-
-    return res;
-    
-} /* get_complex_parm */
-#endif
-
-
 /********************************************************************
 * FUNCTION get_parm
 * 
@@ -753,13 +684,13 @@ static status_t
 *********************************************************************/
 static status_t
     get_parm (agent_cb_t *agent_cb,
-	      const obj_template_t *rpc,
-	      const obj_template_t *parm,
+	      obj_template_t *rpc,
+	      obj_template_t *parm,
 	      val_value_t *valset,
 	      val_value_t *oldvalset)
 {
     const xmlChar    *def, *parmname, *str;
-    const typ_def_t  *typdef;
+    typ_def_t        *typdef;
     val_value_t      *oldparm, *newparm;
     xmlChar          *line, *start, *objbuff, *buff;
     xmlChar          *line2, *start2, *saveline;
@@ -819,7 +750,7 @@ static status_t
     }
 
     parmname = obj_get_name(parm);
-    typdef = obj_get_ctypdef(parm);
+    typdef = obj_get_typdef(parm);
     btyp = obj_get_basetype(parm);
     res = NO_ERR;
     oldparm = NULL;
@@ -984,7 +915,7 @@ static status_t
 				    SCRIPTMODE, 
 				    get_baddata());
 	} else if (!iscomplex && 
-                   (val_simval_ok(obj_get_ctypdef(parm), 
+                   (val_simval_ok(obj_get_typdef(parm), 
                                   EMPTY_STRING) == NO_ERR)) {
             res = cli_parse_parm_ex(valset, 
                                     parm, 
@@ -1173,12 +1104,12 @@ static status_t
 *********************************************************************/
 static status_t
     get_case (agent_cb_t *agent_cb,
-	      const obj_template_t *rpc,
-	      const obj_template_t *cas,
+	      obj_template_t *rpc,
+	      obj_template_t *cas,
 	      val_value_t *valset,
 	      val_value_t *oldvalset)
 {
-    const obj_template_t    *parm;
+    obj_template_t          *parm;
     val_value_t             *pval;
     xmlChar                 *objbuff;
     const xmlChar           *str;
@@ -1192,13 +1123,6 @@ static status_t
     }
 
     saveopt = agent_cb->get_optional;
-
-#if 0
-    /* think this is not needed; user must set $$optional to true
-     * in order to fill in the optional nodes 
-     */
-    agent_cb->get_optional = TRUE;
-#endif
 
     res = NO_ERR;
 
@@ -1289,12 +1213,12 @@ static status_t
 *********************************************************************/
 static status_t
     get_choice (agent_cb_t *agent_cb,
-		const obj_template_t *rpc,
-		const obj_template_t *choic,
+		obj_template_t *rpc,
+		obj_template_t *choic,
 		val_value_t *valset,
 		val_value_t *oldvalset)
 {
-    const obj_template_t    *parm, *cas, *usecase;
+    obj_template_t          *parm, *cas, *usecase;
     val_value_t             *pval;
     xmlChar                 *myline, *str, *objbuff;
     status_t                 res;
@@ -1326,16 +1250,6 @@ static status_t
 
     saveopt = agent_cb->get_optional;
     
-#if 0
-    /* now think this is not actually needed.
-     * It will not ensure that some selection is made
-     * for a mandatory choice
-     */
-    if (obj_is_mandatory(choic)) {
-	agent_cb->get_optional = TRUE;
-    }
-#endif
-
     /* first check the partial block corner case */
     pval = val_get_choice_first_set(valset, choic);
     if (pval) {
@@ -1589,12 +1503,12 @@ static status_t
 *********************************************************************/
 static val_value_t *
     fill_value (agent_cb_t *agent_cb,
-		const obj_template_t *rpc,
-		const obj_template_t *parm,
+		obj_template_t *rpc,
+		obj_template_t *parm,
 		val_value_t *useval,
 		status_t  *res)
 {
-    const obj_template_t  *parentobj;
+    obj_template_t        *parentobj;
     val_value_t           *dummy, *newval;
     boolean                saveopt;
 
@@ -1698,11 +1612,11 @@ static val_value_t *
 *********************************************************************/
 static status_t
     fill_valset (agent_cb_t *agent_cb,
-		 const obj_template_t *rpc,
+		 obj_template_t *rpc,
 		 val_value_t *valset,
 		 val_value_t *oldvalset)
 {
-    const obj_template_t  *parm;
+    obj_template_t        *parm;
     val_value_t           *val, *oldval;
     xmlChar               *objbuff;
     status_t               res;
@@ -2071,7 +1985,7 @@ static void
  *********************************************************************/
 static status_t
     do_mgrload (agent_cb_t *agent_cb,
-		const obj_template_t *rpc,
+		obj_template_t *rpc,
 		const xmlChar *line,
 		uint32  len)
 {
@@ -2217,9 +2131,9 @@ static status_t
     do_help_commands (agent_cb_t *agent_cb,
 		      help_mode_t mode)
 {
-    const modptr_t        *modptr;
-    const obj_template_t  *obj;
-    boolean                anyout, imode;
+    modptr_t            *modptr;
+    obj_template_t      *obj;
+    boolean              anyout, imode;
 
     imode = interactive_mode();
     anyout = FALSE;
@@ -2231,10 +2145,10 @@ static status_t
 	    log_write("\nAgent Commands:\n");
 	}
 
-	for (modptr = (const modptr_t *)
+	for (modptr = (modptr_t *)
 		 dlq_firstEntry(&agent_cb->modptrQ);
 	     modptr != NULL;
-	     modptr = (const modptr_t *)dlq_nextEntry(modptr)) {
+	     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
 	    obj = ncx_get_first_object(modptr->mod);
 	    while (obj) {
@@ -2302,12 +2216,12 @@ static status_t
  *********************************************************************/
 static status_t
     do_help (agent_cb_t *agent_cb,
-	     const obj_template_t *rpc,
+	     obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len)
 {
-    const typ_template_t *typ;
-    const obj_template_t *obj;
+    typ_template_t       *typ;
+    obj_template_t       *obj;
     val_value_t          *valset, *parm;
     status_t              res;
     help_mode_t           mode;
@@ -2597,7 +2511,7 @@ static status_t
  *********************************************************************/
 static status_t
     do_run (agent_cb_t *agent_cb,
-	    const obj_template_t *rpc,
+	    obj_template_t *rpc,
 	    const xmlChar *line,
 	    uint32  len)
 {
@@ -2710,7 +2624,7 @@ static void
  *********************************************************************/
 static status_t
     do_pwd (agent_cb_t *agent_cb,
-	    const obj_template_t *rpc,
+	    obj_template_t *rpc,
 	    const xmlChar *line,
 	    uint32  len)
 {
@@ -2751,7 +2665,7 @@ static status_t
  *********************************************************************/
 static status_t
     do_cd (agent_cb_t *agent_cb,
-	   const obj_template_t *rpc,
+	   obj_template_t *rpc,
 	   const xmlChar *line,
 	   uint32  len)
 {
@@ -2831,13 +2745,13 @@ static status_t
  *********************************************************************/
 static status_t
     do_fill (agent_cb_t *agent_cb,
-	     const obj_template_t *rpc,
+	     obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len)
 {
     val_value_t           *valset, *valroot, *parm, *newparm, *curparm;
     val_value_t           *targval;
-    const obj_template_t  *targobj;
+    obj_template_t        *targobj;
     const xmlChar         *target;
     status_t               res;
     boolean                imode, save_getopt;
@@ -3064,14 +2978,14 @@ static status_t
 *********************************************************************/
 static status_t
     add_content (agent_cb_t *agent_cb,
-		 const obj_template_t *rpc,
+		 obj_template_t *rpc,
 		 val_value_t *config_content,
-		 const obj_template_t *curobj,
+		 obj_template_t *curobj,
 		 boolean dofill,
 		 val_value_t **curtop)
 {
 
-    const obj_key_t       *curkey;
+    obj_key_t             *curkey;
     val_value_t           *newnode, *keyval, *lastkey;
     status_t               res;
     boolean                done, content_used;
@@ -3119,9 +3033,9 @@ static status_t
 	content_used = FALSE;
 
 	lastkey = NULL;
-	for (curkey = obj_first_ckey(curobj);
+	for (curkey = obj_first_key(curobj);
 	     curkey != NULL;
-	     curkey = obj_next_ckey(curkey)) {
+	     curkey = obj_next_key(curkey)) {
 
 	    keyval = val_find_child(*curtop,
 				    obj_get_mod_name(curkey->keyobj),
@@ -3249,17 +3163,17 @@ static status_t
 *********************************************************************/
 static status_t
     add_config_from_content_node (agent_cb_t *agent_cb,
-				  const obj_template_t *rpc,
+				  obj_template_t *rpc,
 				  val_value_t *config_content,
-				  const obj_template_t *curobj,
+				  obj_template_t *curobj,
 				  val_value_t *config,
 				  val_value_t **curtop)
 {
-    const obj_template_t  *parent;
-    status_t               res;
+    obj_template_t  *parent;
+    status_t         res;
 
     /* get to the root of the object chain */
-    parent = obj_get_cparent(curobj);
+    parent = obj_get_parent(curobj);
     if (parent && !obj_is_root(parent)) {
 	res = add_config_from_content_node(agent_cb,
 					   rpc,
@@ -3317,12 +3231,12 @@ static status_t
 *********************************************************************/
 static status_t
     complete_path_content (agent_cb_t *agent_cb,
-			   const obj_template_t *rpc,
+			   obj_template_t *rpc,
 			   val_value_t *valroot,
 			   val_value_t *config_content,
 			   boolean dofill)
 {
-    const obj_key_t   *curkey;
+    obj_key_t         *curkey;
     val_value_t       *curnode, *keyval, *lastkey;
     status_t           res;
     boolean            done;
@@ -3336,9 +3250,9 @@ static status_t
     while (!done) {
 	if (curnode->btyp == NCX_BT_LIST) {
 	    lastkey = NULL;
-	    for (curkey = obj_first_ckey(curnode->obj);
+	    for (curkey = obj_first_key(curnode->obj);
 		 curkey != NULL;
-		 curkey = obj_next_ckey(curkey)) {
+		 curkey = obj_next_key(curkey)) {
 
 		keyval = val_find_child(curnode,
 					obj_get_mod_name(curkey->keyobj),
@@ -3412,18 +3326,18 @@ static status_t
 *********************************************************************/
 static status_t
     add_filter_from_content_node (agent_cb_t *agent_cb,
-				  const obj_template_t *rpc,
+				  obj_template_t *rpc,
 				  val_value_t *get_content,
-				  const obj_template_t *curobj,
+				  obj_template_t *curobj,
 				  val_value_t *filter,
 				  boolean dofill,
 				  val_value_t **curtop)
 {
-    const obj_template_t  *parent;
-    status_t               res;
+    obj_template_t  *parent;
+    status_t         res;
 
     /* get to the root of the object chain */
-    parent = obj_get_cparent(curobj);
+    parent = obj_get_parent(curobj);
     if (parent && !obj_is_root(parent)) {
 	res = add_filter_from_content_node(agent_cb,
 					   rpc,
@@ -3490,7 +3404,7 @@ static status_t
 			       val_value_t *config_content,
 			       uint32 timeoutval)
 {
-    const obj_template_t  *rpc, *input, *child;
+    obj_template_t        *rpc, *input, *child;
     const xmlChar         *defopstr;
     mgr_rpc_req_t         *req;
     val_value_t           *reqdata, *parm, *target, *dummy_parm;
@@ -3867,7 +3781,7 @@ static status_t
 		       boolean dofill,
 		       ncx_withdefaults_t withdef)
 {
-    const obj_template_t  *rpc, *input, *withdefobj;
+    obj_template_t        *rpc, *input, *withdefobj;
     val_value_t           *reqdata, *filter;
     val_value_t           *withdefval, *dummy_parm;
     mgr_rpc_req_t         *req;
@@ -4119,7 +4033,7 @@ static status_t
  *********************************************************************/
 static val_value_t *
     get_content_from_choice (agent_cb_t *agent_cb,
-			     const obj_template_t *rpc,
+			     obj_template_t *rpc,
 			     val_value_t *valset,
 			     boolean getoptional,
 			     boolean isdelete,
@@ -4130,7 +4044,7 @@ static val_value_t *
     val_value_t           *parm, *curparm, *newparm;
     const val_value_t     *userval;
     val_value_t           *targval;
-    const obj_template_t  *targobj;
+    obj_template_t        *targobj;
     const xmlChar         *fromstr, *target;
     var_type_t             vartype;
     boolean                iscli, isselect, saveopt;
@@ -4458,7 +4372,7 @@ static status_t
     add_one_operation_attr (val_value_t *val,
 			    op_editop_t op)
 {
-    const obj_template_t *operobj;
+    obj_template_t       *operobj;
     const xmlChar        *editopstr;
     val_value_t          *metaval;
     status_t              res;
@@ -4486,7 +4400,7 @@ static status_t
 
     /* set the meta variable value and other fields */
     res = val_set_simval(metaval,
-			 obj_get_ctypdef(operobj),
+			 obj_get_typdef(operobj),
 			 obj_get_nsid(operobj),
 			 obj_get_name(operobj),
 			 editopstr);
@@ -4563,7 +4477,7 @@ static status_t
 			  op_insertop_t insop,
 			  const xmlChar *edit_target)
 {
-    const obj_template_t *operobj;
+    obj_template_t       *operobj;
     const xmlChar        *insopstr;
     val_value_t          *metaval;
     ncx_node_t            dtyp;
@@ -4708,7 +4622,7 @@ static status_t
  *********************************************************************/
 static status_t
     do_edit (agent_cb_t *agent_cb,
-	     const obj_template_t *rpc,
+	     obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len,
 	     op_editop_t editop)
@@ -4833,7 +4747,7 @@ static status_t
  *********************************************************************/
 static status_t
     do_insert (agent_cb_t *agent_cb,
-	       const obj_template_t *rpc,
+	       obj_template_t *rpc,
 	       const xmlChar *line,
 	       uint32  len)
 {
@@ -5023,7 +4937,7 @@ static status_t
  *********************************************************************/
 static status_t
     do_sget (agent_cb_t *agent_cb,
-	     const obj_template_t *rpc,
+	     obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len)
 {
@@ -5138,7 +5052,7 @@ static status_t
  *********************************************************************/
 static status_t
     do_sget_config (agent_cb_t *agent_cb,
-		    const obj_template_t *rpc,
+		    obj_template_t *rpc,
 		    const xmlChar *line,
 		    uint32  len)
 {
@@ -5268,7 +5182,7 @@ static status_t
  *********************************************************************/
 static status_t
     do_xget (agent_cb_t *agent_cb,
-	     const obj_template_t *rpc,
+	     obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len)
 {
@@ -5444,7 +5358,7 @@ static status_t
  *********************************************************************/
 static status_t
     do_xget_config (agent_cb_t *agent_cb,
-		    const obj_template_t *rpc,
+		    obj_template_t *rpc,
 		    const xmlChar *line,
 		    uint32  len)
 {
@@ -5802,7 +5716,7 @@ static status_t
  *********************************************************************/
 static status_t
     do_history (agent_cb_t *agent_cb,
-                const obj_template_t *rpc,
+                obj_template_t *rpc,
                 const xmlChar *line,
                 uint32  len)
 {
@@ -5991,7 +5905,7 @@ static status_t
  *********************************************************************/
 static status_t
     do_recall (agent_cb_t *agent_cb,
-               const obj_template_t *rpc,
+               obj_template_t *rpc,
                const xmlChar *line,
                uint32  len)
 {
@@ -6217,7 +6131,7 @@ static status_t
  *********************************************************************/
 static status_t
     do_eventlog (agent_cb_t *agent_cb,
-                 const obj_template_t *rpc,
+                 obj_template_t *rpc,
                  const xmlChar *line,
                  uint32  len)
 {
@@ -6323,7 +6237,7 @@ static status_t
 *********************************************************************/
 static status_t
     do_local_conn_command (agent_cb_t *agent_cb,
-			   const obj_template_t *rpc,
+			   obj_template_t *rpc,
 			   xmlChar *line,
 			   uint32  len)
 {
@@ -6391,7 +6305,7 @@ static status_t
 *********************************************************************/
 static status_t
     do_local_command (agent_cb_t *agent_cb,
-		      const obj_template_t *rpc,
+		      obj_template_t *rpc,
 		      xmlChar *line,
 		      uint32  len)
 {
@@ -6459,7 +6373,7 @@ status_t
     top_command (agent_cb_t *agent_cb,
 		 xmlChar *line)
 {
-    const obj_template_t  *rpc;
+    obj_template_t         *rpc;
     uint32                 len;
     ncx_node_t             dtyp;
     status_t               res;
@@ -6477,10 +6391,10 @@ status_t
     }
 
     dtyp = NCX_NT_OBJ;
-    rpc = (const obj_template_t *)parse_def(agent_cb,
-					    &dtyp, 
-					    line, 
-					    &len);
+    rpc = (obj_template_t *)parse_def(agent_cb,
+                                      &dtyp, 
+                                      line, 
+                                      &len);
     if (!rpc) {
 	if (agent_cb->result_name || agent_cb->result_filename) {
 	    res = finish_result_assign(agent_cb, NULL, line);
@@ -6526,7 +6440,7 @@ status_t
     conn_command (agent_cb_t *agent_cb,
 		  xmlChar *line)
 {
-    const obj_template_t  *rpc, *input;
+    obj_template_t        *rpc, *input;
     mgr_rpc_req_t         *req;
     val_value_t           *reqdata, *valset, *parm;
     ses_cb_t              *scb;
@@ -6556,10 +6470,10 @@ status_t
 
     /* get the RPC method template */
     dtyp = NCX_NT_OBJ;
-    rpc = (const obj_template_t *)parse_def(agent_cb,
-					    &dtyp, 
-                                            line, 
-                                            &len);
+    rpc = (obj_template_t *)parse_def(agent_cb,
+                                      &dtyp, 
+                                      line, 
+                                      &len);
     if (!rpc) {
 	if (agent_cb->result_name || agent_cb->result_filename) {
 	    res = finish_result_assign(agent_cb, NULL, line);
@@ -6721,7 +6635,7 @@ status_t
     do_startup_script (agent_cb_t *agent_cb,
                        const xmlChar *runscript)
 {
-    const obj_template_t *rpc;
+    obj_template_t       *rpc;
     xmlChar              *line, *p;
     status_t              res;
     uint32                linelen;
@@ -6962,12 +6876,12 @@ xmlChar *
  *********************************************************************/
 status_t
     do_connect (agent_cb_t *agent_cb,
-		const obj_template_t *rpc,
+		obj_template_t *rpc,
 		const xmlChar *line,
 		uint32 start,
                 boolean climode)
 {
-    const obj_template_t  *obj;
+    obj_template_t        *obj;
     val_value_t           *connect_valset;
     val_value_t           *valset;
     status_t               res;
@@ -7384,11 +7298,11 @@ status_t
  *********************************************************************/
 val_value_t *
     get_valset (agent_cb_t *agent_cb,
-		const obj_template_t *rpc,
+		obj_template_t *rpc,
 		const xmlChar *line,
 		status_t  *res)
 {
-    const obj_template_t  *obj;
+    obj_template_t        *obj;
     val_value_t           *valset;
     uint32                 len;
 

@@ -271,11 +271,11 @@ static ncx_filptr_t *
 *    FALSE if any tests fail (exits at first failure)
 *********************************************************************/
 static boolean
-    attr_test (const val_value_t *filval,
-               const val_value_t  *targval)
+    attr_test (val_value_t *filval,
+               val_value_t  *targval)
 {
-    const val_value_t  *m1;
-    const dlq_hdr_t    *metaQ;
+    val_value_t  *m1;
+    dlq_hdr_t    *metaQ;
     xmlns_id_t          invid;
     boolean             done, ret;
 

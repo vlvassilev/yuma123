@@ -436,7 +436,7 @@ static status_t
 		      boolean useint,
 		      const xmlChar *name,
 		      uint32  namelen,
-		      const dlq_hdr_t *checkQ,
+		      dlq_hdr_t *checkQ,
 		      typ_enum_t  **reten)
 {
     typ_enum_t  *en;
@@ -704,10 +704,10 @@ static void
 *   1 if val1 > val2 index
 *********************************************************************/
 static int32
-    index_match (const val_value_t *val1,
-		 const val_value_t *val2)
+    index_match (val_value_t *val1,
+		 val_value_t *val2)
 {
-    const val_index_t *c1, *c2;
+    val_index_t *c1, *c2;
     int32              cmp;
     status_t           res;
 
@@ -789,14 +789,14 @@ static int32
 *********************************************************************/
 static void
     init_from_template (val_value_t *val,
-			const obj_template_t *obj,
+			obj_template_t *obj,
 			ncx_btype_t  btyp)
 {
-    const typ_template_t  *listtyp;
+    typ_template_t  *listtyp;
     ncx_btype_t            listbtyp;
 
     val->obj = obj;
-    val->typdef = obj_get_ctypdef(obj);
+    val->typdef = obj_get_typdef(obj);
     val->btyp = btyp;
     val->nsid = obj_get_nsid(obj);
 
@@ -820,7 +820,7 @@ static void
     if (!typ_is_simple(val->btyp)) {
 	val_init_complex(val, btyp);
     } else if (val->btyp == NCX_BT_SLIST) {
-	listtyp = typ_get_clisttyp(val->typdef);
+	listtyp = typ_get_listtyp(val->typdef);
 	if (!listtyp) {
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	    listbtyp = NCX_BT_STRING;
@@ -854,15 +854,15 @@ static void
 static status_t
     check_rangeQ (ncx_btype_t  btyp,
 		  const ncx_num_t *num,
-		  const dlq_hdr_t *checkQ)
+		  dlq_hdr_t *checkQ)
 {
-    const typ_rangedef_t  *rv;
+    typ_rangedef_t  *rv;
     int32            cmp;
     boolean          lbok, ubok;
 
-    for (rv = (const typ_rangedef_t *)dlq_firstEntry(checkQ);
+    for (rv = (typ_rangedef_t *)dlq_firstEntry(checkQ);
 	 rv != NULL;
-	 rv = (const typ_rangedef_t *)dlq_nextEntry(rv)) {
+	 rv = (typ_rangedef_t *)dlq_nextEntry(rv)) {
 
 	lbok = FALSE;
 	ubok = FALSE;
@@ -1056,8 +1056,8 @@ static void
     setup_virtual_retval (const val_value_t  *virval,
 			  val_value_t *realval)
 {
-    const typ_template_t  *listtyp;
-    ncx_btype_t            btyp;
+    typ_template_t  *listtyp;
+    ncx_btype_t      btyp;
 
     realval->name = virval->name;
     realval->nsid = virval->nsid;
@@ -1215,7 +1215,7 @@ void
 void
     val_init_virtual (val_value_t *val,
 		      void  *cbfn,
-		      const obj_template_t *obj)
+		      obj_template_t *obj)
 {
 #ifdef DEBUG
     if (!val || !cbfn || !obj) {
@@ -1243,7 +1243,7 @@ void
 *********************************************************************/
 void
     val_init_from_template (val_value_t *val,
-			    const obj_template_t *obj)
+			    obj_template_t *obj)
 {
 #ifdef DEBUG
     if (!val || !obj) {
@@ -1483,7 +1483,7 @@ void
 *    status
 *********************************************************************/
 status_t
-    val_string_ok (const typ_def_t *typdef,
+    val_string_ok (typ_def_t *typdef,
 		   ncx_btype_t btyp,
 		   const xmlChar *strval)
 {
@@ -1519,13 +1519,13 @@ status_t
 *    status
 *********************************************************************/
 status_t
-    val_string_ok_errinfo (const typ_def_t *typdef,
+    val_string_ok_errinfo (typ_def_t *typdef,
 			   ncx_btype_t btyp,
 			   const xmlChar *strval,
-			   const ncx_errinfo_t **errinfo)
+			   ncx_errinfo_t **errinfo)
 {
     xpath_pcb_t           *xpathpcb;
-    const obj_template_t  *leafobj, *objroot;
+    obj_template_t       *leafobj, *objroot;
     status_t               res;
     ncx_num_t              len;
 
@@ -1604,7 +1604,7 @@ status_t
                                     XP_SRC_YANG);
             if (res == NO_ERR) {
                 objroot = ncx_get_gen_root();
-                res = xpath1_validate_expr(objroot->mod, 
+                res = xpath1_validate_expr(objroot->tkerr.mod, 
                                            objroot, 
                                            xpathpcb);
             }
@@ -1645,7 +1645,7 @@ status_t
 *    status
 *********************************************************************/
 status_t
-    val_list_ok (const typ_def_t *typdef,
+    val_list_ok (typ_def_t *typdef,
 		 ncx_btype_t  btyp,
 		 ncx_list_t *list)
 {
@@ -1685,14 +1685,14 @@ status_t
 *    status
 *********************************************************************/
 status_t
-    val_list_ok_errinfo (const typ_def_t *typdef,
+    val_list_ok_errinfo (typ_def_t *typdef,
 			 ncx_btype_t  btyp,
 			 ncx_list_t *list,
-			 const ncx_errinfo_t **errinfo)
+			 ncx_errinfo_t **errinfo)
 {
-    const typ_template_t *listtyp;
-    const typ_def_t      *listdef;
-    const ncx_lmem_t     *lmem;
+    typ_template_t *listtyp;
+    typ_def_t      *listdef;
+    ncx_lmem_t     *lmem;
     status_t              res;
 
 #ifdef DEBUG
@@ -1709,7 +1709,7 @@ status_t
 
     /* listtyp is for the list members, not the list itself */
     if (btyp == NCX_BT_SLIST) {
-	listtyp = typ_get_clisttyp(typdef);
+	listtyp = typ_get_listtyp(typdef);
 	listdef = &listtyp->typdef;
     }
 
@@ -1758,13 +1758,13 @@ status_t
 *    status
 *********************************************************************/
 status_t
-    val_enum_ok (const typ_def_t *typdef,
+    val_enum_ok (typ_def_t *typdef,
 		 const xmlChar *enumval,
 		 int32 *retval,
 		 const xmlChar **retstr)
 {
     ncx_btype_t    btyp;
-    const dlq_hdr_t  *checkQ;
+    dlq_hdr_t     *checkQ;
     status_t       res;
     int32          i;
     boolean        iset, last;
@@ -1878,11 +1878,11 @@ status_t
 *    status
 *********************************************************************/
 status_t
-    val_bit_ok (const typ_def_t *typdef,
+    val_bit_ok (typ_def_t *typdef,
 		const xmlChar *bitname,
 		uint32 *position)
 {
-    const dlq_hdr_t  *checkQ;
+    dlq_hdr_t  *checkQ;
     status_t       res;
     boolean        last;
     typ_enum_t    *en;
@@ -1990,7 +1990,7 @@ status_t
 *    status
 *********************************************************************/
 status_t
-    val_idref_ok (const typ_def_t *typdef,
+    val_idref_ok (typ_def_t *typdef,
 		  const xmlChar *qname,
 		  xmlns_id_t nsid,
 		  const xmlChar **name,
@@ -2065,7 +2065,7 @@ status_t
      * as the base specified in the typdef
      */
     while (identity && !found) {
-	if (!xml_strcmp(ncx_get_modname(identity->mod), 
+	if (!xml_strcmp(ncx_get_modname(identity->tkerr.mod), 
 			idref->modname) &&
 	    !xml_strcmp(identity->name, idref->basename)) {
 	    found = TRUE;
@@ -2261,7 +2261,7 @@ status_t
 *    status
 *********************************************************************/
 status_t
-    val_range_ok (const typ_def_t *typdef,
+    val_range_ok (typ_def_t *typdef,
 		  ncx_btype_t  btyp,
 		  const ncx_num_t *num)
 {
@@ -2296,14 +2296,14 @@ status_t
 *    status
 *********************************************************************/
 status_t
-    val_range_ok_errinfo (const typ_def_t *typdef,
+    val_range_ok_errinfo (typ_def_t *typdef,
 			  ncx_btype_t  btyp,
 			  const ncx_num_t *num,
-			  const ncx_errinfo_t **errinfo)
+			  ncx_errinfo_t **errinfo)
 {
-    const typ_def_t       *testdef;
-    const dlq_hdr_t       *checkQ;
-    const ncx_errinfo_t   *range_errinfo;
+    typ_def_t       *testdef;
+    dlq_hdr_t       *checkQ;
+    ncx_errinfo_t   *range_errinfo;
     status_t          res;
 
 #ifdef DEBUG
@@ -2317,7 +2317,7 @@ status_t
     }
 
     /* find the real typdef to check */
-    testdef = typ_get_cqual_typdef(typdef, NCX_SQUAL_RANGE);
+    testdef = typ_get_qual_typdef(typdef, NCX_SQUAL_RANGE);
     if (!testdef) {
 	/* assume this means no range specified and
 	 * not an internal PTR or VAL error
@@ -2329,7 +2329,7 @@ status_t
      * the most derived typdef that declares a range
      */
     range_errinfo = typ_get_range_errinfo(testdef);
-    checkQ = typ_get_crangeQ_con(testdef);
+    checkQ = typ_get_rangeQ_con(testdef);
 
     res = check_rangeQ(btyp, num, checkQ);
     if (res != NO_ERR && errinfo && range_errinfo &&
@@ -2354,7 +2354,7 @@ status_t
 *    NO_ERR if pattern OK or no patterns found to check; error otherwise
 *********************************************************************/
 status_t
-    val_pattern_ok (const typ_def_t *typdef,
+    val_pattern_ok (typ_def_t *typdef,
 		    const xmlChar *strval)
 {
 #ifdef DEBUG
@@ -2387,11 +2387,11 @@ status_t
 *    that failed has any errinfo defined in it
 *********************************************************************/
 status_t
-    val_pattern_ok_errinfo (const typ_def_t *typdef,
+    val_pattern_ok_errinfo (typ_def_t *typdef,
 			    const xmlChar *strval,
-			    const ncx_errinfo_t **errinfo)
+			    ncx_errinfo_t **errinfo)
 {
-    const typ_pattern_t   *pat;
+    typ_pattern_t   *pat;
 
 #ifdef DEBUG
     if (!typdef) {
@@ -2412,9 +2412,9 @@ status_t
     }
 
     while (typdef) {
-	for (pat = typ_get_first_cpattern(typdef);
+	for (pat = typ_get_first_pattern(typdef);
 	     pat != NULL;
-	     pat = typ_get_next_cpattern(pat)) {
+	     pat = typ_get_next_pattern(pat)) {
 
 	    if (!pattern_match(pat->pattern, strval)) {
 		if (errinfo && 
@@ -2425,7 +2425,7 @@ status_t
 	    } /* else matched -- keep trying more patterns */
 	}
 
-	typdef = typ_get_cparent_typdef(typdef);
+	typdef = typ_get_parent_typdef(typdef);
     }
 
     return NO_ERR;
@@ -2448,7 +2448,7 @@ status_t
 *    status
 *********************************************************************/
 status_t
-    val_simval_ok (const typ_def_t *typdef,
+    val_simval_ok (typ_def_t *typdef,
 		   const xmlChar *simval)
 {
 #ifdef DEBUG
@@ -2482,13 +2482,13 @@ status_t
 *    status
 *********************************************************************/
 status_t
-    val_simval_ok_errinfo (const typ_def_t *typdef,
+    val_simval_ok_errinfo (typ_def_t *typdef,
 			   const xmlChar *simval,
-			   const ncx_errinfo_t **errinfo)
+			   ncx_errinfo_t **errinfo)
 {
     const xmlChar          *retstr, *name;
     val_value_t            *unval;
-    const typ_template_t   *listtyp;
+    typ_template_t         *listtyp;
     const ncx_identity_t   *identity;
     ncx_num_t               num;
     ncx_list_t              list;
@@ -2557,7 +2557,10 @@ status_t
     case NCX_BT_FLOAT64:
 	res = ncx_decode_num(simval, btyp, &num);
 	if (res == NO_ERR) {
-	    res = val_range_ok_errinfo(typdef, btyp, &num, errinfo);
+	    res = val_range_ok_errinfo(typdef, 
+                                       btyp, 
+                                       &num, 
+                                       errinfo);
 	}
 	ncx_clean_num(btyp, &num);
 	break;
@@ -2572,10 +2575,16 @@ status_t
 	break;
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
-	res = val_string_ok_errinfo(typdef, btyp, simval, errinfo);
+	res = val_string_ok_errinfo(typdef, 
+                                    btyp, 
+                                    simval, 
+                                    errinfo);
 	break;
     case NCX_BT_INSTANCE_ID:
-	res = val_string_ok_errinfo(typdef, btyp, simval, errinfo);
+	res = val_string_ok_errinfo(typdef, 
+                                    btyp, 
+                                    simval, 
+                                    errinfo);
 	break;
     case NCX_BT_UNION:
 	unval = val_new_value();
@@ -2584,7 +2593,10 @@ status_t
 	} else {
 	    unval->btyp = NCX_BT_UNION;
 	    unval->typdef = typdef;
-	    res = val_union_ok_errinfo(typdef, simval, unval, errinfo);
+	    res = val_union_ok_errinfo(typdef, 
+                                       simval, 
+                                       unval, 
+                                       errinfo);
 	    val_free_value(unval);
 	}
 	break;
@@ -2604,22 +2616,26 @@ status_t
 	if (res == NO_ERR) {
 	    res = ncx_finish_list(typdef, &list);
 	    if (res == NO_ERR) {
-		res = val_list_ok_errinfo(typdef, btyp, 
-					  &list, errinfo);
+		res = val_list_ok_errinfo(typdef, 
+                                          btyp, 
+					  &list, 
+                                          errinfo);
 	    }
 	}
 	ncx_clean_list(&list);
 	break;
     case NCX_BT_SLIST:
-	listtyp = typ_get_clisttyp(typdef);
+	listtyp = typ_get_listtyp(typdef);
 	listbtyp = typ_get_basetype(&listtyp->typdef);
 	ncx_init_list(&list, listbtyp);
 	res = ncx_set_list(listbtyp, simval, &list);
 	if (res == NO_ERR) {
 	    res = ncx_finish_list(&listtyp->typdef, &list);
 	    if (res == NO_ERR) {
-		res = val_list_ok_errinfo(typdef, btyp, 
-					  &list, errinfo);
+		res = val_list_ok_errinfo(typdef, 
+                                          btyp, 
+					  &list, 
+                                          errinfo);
 	    }
 	}
 	ncx_clean_list(&list);
@@ -2660,7 +2676,7 @@ status_t
 *    status
 *********************************************************************/
 status_t
-    val_union_ok (const typ_def_t *typdef,
+    val_union_ok (typ_def_t *typdef,
 		  const xmlChar *strval,
 		  val_value_t *retval)
 {
@@ -2697,13 +2713,13 @@ status_t
 *    status
 *********************************************************************/
 status_t
-    val_union_ok_errinfo (const typ_def_t *typdef,
+    val_union_ok_errinfo (typ_def_t *typdef,
 			  const xmlChar *strval,
 			  val_value_t *retval,
-			  const ncx_errinfo_t **errinfo)
+			  ncx_errinfo_t **errinfo)
 {
-    const typ_def_t        *undef;
-    const typ_unionnode_t  *un;
+    typ_def_t        *undef;
+    typ_unionnode_t  *un;
     status_t                res;
     boolean                 done;
     ncx_btype_t             testbtyp;
@@ -2764,7 +2780,7 @@ status_t
 	    }
 	    done = TRUE;
 	} else if (res != ERR_INTERNAL_MEM) {
-	    un = (const typ_unionnode_t *)dlq_nextEntry(un);
+	    un = (typ_unionnode_t *)dlq_nextEntry(un);
 	    if (!un) {
 		res = ERR_NCX_WRONG_NODETYP;
 		done = TRUE;
@@ -2790,8 +2806,8 @@ status_t
 * RETURNS:
 *   pointer to the metaQ for this value
 *********************************************************************/
-const dlq_hdr_t *
-    val_get_metaQ (const val_value_t  *val)
+dlq_hdr_t *
+    val_get_metaQ (val_value_t  *val)
 {
 #ifdef DEBUG
     if (!val) {
@@ -2821,8 +2837,8 @@ const dlq_hdr_t *
 *   pointer to the first meta-var in the Queue if found, 
 *   or NULL if none
 *********************************************************************/
-const val_value_t *
-    val_get_first_meta (const dlq_hdr_t *queue)
+val_value_t *
+    val_get_first_meta (dlq_hdr_t *queue)
 {
 #ifdef DEBUG
     if (!queue) {
@@ -2831,7 +2847,7 @@ const val_value_t *
     }
 #endif
 
-    return (const val_value_t *)dlq_firstEntry(queue);
+    return (val_value_t *)dlq_firstEntry(queue);
 
 }  /* val_get_first_meta */
 
@@ -2848,8 +2864,8 @@ const val_value_t *
 *   pointer to the first meta-var in the Queue if found, 
 *   or NULL if none
 *********************************************************************/
-const val_value_t *
-    val_get_first_meta_val (const val_value_t *val)
+val_value_t *
+    val_get_first_meta_val (val_value_t *val)
 {
 #ifdef DEBUG
     if (!val) {
@@ -2858,7 +2874,7 @@ const val_value_t *
     }
 #endif
 
-    return (const val_value_t *)dlq_firstEntry(&val->metaQ);
+    return (val_value_t *)dlq_firstEntry(&val->metaQ);
 
 }  /* val_get_first_meta_val */
 
@@ -2875,8 +2891,8 @@ const val_value_t *
 *   pointer to the next meta-var in the Queue if found, 
 *   or NULL if none
 *********************************************************************/
-const val_value_t *
-    val_get_next_meta (const val_value_t *curnode)
+val_value_t *
+    val_get_next_meta (val_value_t *curnode)
 {
 #ifdef DEBUG
     if (!curnode) {
@@ -2885,7 +2901,7 @@ const val_value_t *
     }
 #endif
 
-    return (const val_value_t *)dlq_nextEntry(curnode);
+    return (val_value_t *)dlq_nextEntry(curnode);
 
 }  /* val_get_next_meta */
 
@@ -2903,7 +2919,7 @@ const val_value_t *
 *   FALSE otherwise
 *********************************************************************/
 boolean
-    val_meta_empty (const val_value_t *val)
+    val_meta_empty (val_value_t *val)
 {
 
 #ifdef DEBUG
@@ -2936,7 +2952,7 @@ boolean
 *   pointer to the child if found or NULL if not found
 *********************************************************************/
 val_value_t *
-    val_find_meta (const val_value_t  *val,
+    val_find_meta (val_value_t  *val,
 		   xmlns_id_t    nsid,
 		   const xmlChar *name)
 {
@@ -2983,11 +2999,11 @@ val_value_t *
 *   FALSE otherwise
 *********************************************************************/
 boolean
-    val_meta_match (const val_value_t *val,
-		    const val_value_t *metaval)
+    val_meta_match (val_value_t *val,
+		    val_value_t *metaval)
 {
-    const val_value_t *m1;
-    const dlq_hdr_t   *queue;
+    val_value_t *m1;
+    dlq_hdr_t   *queue;
     boolean            ret, done;
 
 #ifdef DEBUG
@@ -3043,12 +3059,12 @@ boolean
 *   number of instances found in val->metaQ
 *********************************************************************/
 uint32
-    val_metadata_inst_count (const val_value_t  *val,
+    val_metadata_inst_count (val_value_t  *val,
 			     xmlns_id_t nsid,
 			     const xmlChar *name)
 {
-    const val_value_t *metaval;
-    uint32             cnt;
+    val_value_t *metaval;
+    uint32       cnt;
 
 #ifdef DEBUG
     if (!val || !name) {
@@ -3059,9 +3075,9 @@ uint32
 
     cnt = 0;
 
-    for (metaval = (const val_value_t *)dlq_firstEntry(&val->metaQ);
+    for (metaval = (val_value_t *)dlq_firstEntry(&val->metaQ);
 	 metaval != NULL;
-	 metaval = (const val_value_t *)dlq_nextEntry(metaval)) {
+	 metaval = (val_value_t *)dlq_nextEntry(metaval)) {
 	if (xml_strcmp(metaval->name, name)) {
 	    continue;
 	}
@@ -3091,7 +3107,7 @@ uint32
 *
 *********************************************************************/
 void
-    val_dump_value (const val_value_t *val,
+    val_dump_value (val_value_t *val,
 		    int32 startindent)
 {
 #ifdef DEBUG
@@ -3124,7 +3140,7 @@ void
 *
 *********************************************************************/
 void
-    val_dump_value_ex (const val_value_t *val,
+    val_dump_value_ex (val_value_t *val,
                        int32 startindent,
                        ncx_display_mode_t display_mode)
 {
@@ -3158,7 +3174,7 @@ void
 *
 *********************************************************************/
 void
-    val_dump_alt_value (const val_value_t *val,
+    val_dump_alt_value (val_value_t *val,
 			int32 startindent)
 {
 #ifdef DEBUG
@@ -3190,7 +3206,7 @@ void
 *
 *********************************************************************/
 void
-    val_stdout_value (const val_value_t *val,
+    val_stdout_value (val_value_t *val,
 		      int32 startindent)
 {
 #ifdef DEBUG
@@ -3222,7 +3238,7 @@ void
 *
 *********************************************************************/
 void
-    val_stdout_value_ex (const val_value_t *val,
+    val_stdout_value_ex (val_value_t *val,
                          int32 startindent,
                          ncx_display_mode_t display_mode)
 {
@@ -3260,7 +3276,7 @@ void
 *                 FALSE to skip meta data
 *********************************************************************/
 void
-    val_dump_value_max (const val_value_t *val,
+    val_dump_value_max (val_value_t *val,
                         int32 startindent,
                         int32 indent_amount,
                         val_dumpvalue_mode_t dumpmode,
@@ -3269,14 +3285,14 @@ void
 {
     dumpfn_t            dumpfn, errorfn;
     indentfn_t          indentfn;
-    const val_value_t  *chval;
-    const ncx_lmem_t   *listmem;
-    const val_idref_t  *idref;
+    val_value_t        *chval;
+    ncx_lmem_t         *listmem;
+    val_idref_t        *idref;
     const xmlChar      *prefix;
     xmlChar            *buff;
     FILE               *outputfile;
-    const dlq_hdr_t    *metaQ;
-    const val_value_t  *metaval;
+    dlq_hdr_t          *metaQ;
+    val_value_t        *metaval;
     ncx_btype_t         btyp, lbtyp;
     uint32              len;
     status_t            res;
@@ -3495,10 +3511,10 @@ void
 	} else {
 	    lbtyp = val->v.list.btyp;
 	    (*dumpfn)("{");
-	    for (listmem = (const ncx_lmem_t *)
+	    for (listmem = (ncx_lmem_t *)
 		     dlq_firstEntry(&val->v.list.memQ);
 		 listmem != NULL;
-		 listmem = (const ncx_lmem_t *)dlq_nextEntry(listmem)) {
+		 listmem = (ncx_lmem_t *)dlq_nextEntry(listmem)) {
 
 		if (startindent >= 0) {
 		    (*indentfn)(startindent+bump_amount);
@@ -3560,9 +3576,9 @@ void
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
 	(*dumpfn)("{");
-	for (chval = (const val_value_t *)dlq_firstEntry(&val->v.childQ);
+	for (chval = (val_value_t *)dlq_firstEntry(&val->v.childQ);
 	     chval != NULL;
-	     chval = (const val_value_t *)dlq_nextEntry(chval)) {
+	     chval = (val_value_t *)dlq_nextEntry(chval)) {
 	    val_dump_value_max(chval, 
                                startindent+bump_amount,
                                indent_amount,
@@ -3714,7 +3730,7 @@ status_t
 status_t 
     val_set_string2 (val_value_t  *val,
 		     const xmlChar *valname,
-		     const typ_def_t *typdef,
+		     typ_def_t *typdef,
 		     const xmlChar *valstr,
 		     uint32 valstrlen)
 {
@@ -3832,7 +3848,7 @@ status_t
 *********************************************************************/
 status_t 
     val_set_simval (val_value_t  *val,
-		    const typ_def_t    *typdef,
+		    typ_def_t    *typdef,
 		    xmlns_id_t    nsid,
 		    const xmlChar *valname,
 		    const xmlChar *valstr)
@@ -3909,7 +3925,7 @@ status_t
 *********************************************************************/
 status_t 
     val_set_simval_str (val_value_t  *val,
-			const typ_def_t *typdef,
+			typ_def_t *typdef,
 			xmlns_id_t    nsid,
 			const xmlChar *valname,
 			uint32 valnamelen,
@@ -3917,7 +3933,7 @@ status_t
 {
     const xmlChar        *localname;
     const ncx_identity_t *identity;
-    const obj_template_t *leafobj, *objroot;
+    obj_template_t *leafobj, *objroot;
     xpath_pcb_t          *xpathpcb;
     status_t              res;
     uint32                ulen;
@@ -4065,7 +4081,7 @@ status_t
                                             XP_SRC_YANG);
                     if (res == NO_ERR) {
                         objroot = ncx_get_gen_root();
-                        res = xpath1_validate_expr(objroot->mod, 
+                        res = xpath1_validate_expr(objroot->tkerr.mod, 
                                                    objroot, 
                                                    xpathpcb);
                     }
@@ -4199,7 +4215,7 @@ status_t
 *    NULL if some error
 *********************************************************************/
 val_value_t *
-    val_make_simval (const typ_def_t    *typdef,
+    val_make_simval (typ_def_t    *typdef,
 		     xmlns_id_t    nsid,
 		     const xmlChar *valname,
 		     const xmlChar *valstr,
@@ -6658,8 +6674,8 @@ uint32
 *   TRUE if the index chains match
 *********************************************************************/
 boolean
-    val_index_match (const val_value_t *val1,
-		     const val_value_t *val2)
+    val_index_match (val_value_t *val1,
+		     val_value_t *val2)
 {
     int32 ret;
 
@@ -6700,8 +6716,8 @@ boolean
 *      1: val1 is greater than val2
 *********************************************************************/
 int32
-    val_compare (const val_value_t *val1,
-		 const val_value_t *val2)
+    val_compare (val_value_t *val1,
+		 val_value_t *val2)
 {
     ncx_btype_t  btyp;
     val_value_t *ch1, *ch2;
@@ -6868,7 +6884,7 @@ int32
 *      1: val1 is greater than val2
 *********************************************************************/
 int32
-    val_compare_to_string (const val_value_t *val1,
+    val_compare_to_string (val_value_t *val1,
 			   const xmlChar *strval2,
 			   status_t *res)
 {
@@ -7541,7 +7557,7 @@ val_index_t *
 *   status of the operation
 *********************************************************************/
 status_t
-    val_parse_meta (const typ_def_t *typdef,
+    val_parse_meta (typ_def_t *typdef,
 		    xml_attr_t *attr,
 		    val_value_t *retval)
 {

@@ -263,9 +263,9 @@ typedef enum command_mode_t {
 
 /* saved state for libtecla command line completion */
 typedef struct completion_state_t_ {
-    const obj_template_t  *cmdobj;
-    const obj_template_t  *cmdinput;
-    const obj_template_t  *cmdcurparm;
+    obj_template_t        *cmdobj;
+    obj_template_t        *cmdinput;
+    obj_template_t        *cmdcurparm;
     struct agent_cb_t_    *agent_cb;
     ncx_module_t          *cmdmodule;
     command_state_t        cmdstate;
@@ -456,14 +456,5 @@ extern status_t
     finish_result_assign (agent_cb_t *agent_cb,
 			  val_value_t *resultvar,
 			  const xmlChar *resultstr);
-
-extern void
-    setup_lock_cbs (agent_cb_t *agent_cb);
-
-extern void
-    clear_lock_cbs (agent_cb_t *agent_cb);
-
-extern boolean
-    setup_unlock_cbs (agent_cb_t *agent_cb);
 
 #endif	    /* _H_yangcli */

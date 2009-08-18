@@ -144,37 +144,6 @@ typedef enum op_errop_t_ {
 } op_errop_t;
 
 
-#if 0
-/* NETCONF protocol operation PDU sources union */
-typedef union op_source_u_t_ {
-    op_config_t     op_config;
-    xmlChar        *op_inline;
-    xmlChar        *op_url;
-} op_source_u_t;
-
-
-/* NETCONF protocol operation PDU source */
-typedef struct op_source_t_ {
-    op_srctyp_t    op_srctyp;
-    op_source_u_t  op_src;
-} op_source_t;
-
-
-/* NETCONF protocol operation PDU targets union */
-typedef union op_target_u_t_ {
-    op_config_t     op_config;
-    xmlChar        *op_url;
-} op_target_u_t;
-
-
-/* NETCONF protocol operation PDU target */
-typedef struct op_target_t_ {
-    op_targtyp_t    op_targtyp;
-    op_target_u_t   op_targ;
-} op_target_t;
-#endif
-
-
 /* NETCONF protocol operation filter spec */
 typedef struct op_filter_t_ {
     op_filtertyp_t       op_filtyp;    

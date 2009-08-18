@@ -831,10 +831,10 @@ static val_value_t *
 static status_t
     finish_list (const ncx_module_t *mod,
 		 ncx_btype_t  btyp,
-		 const typ_def_t *typdef,
+		 typ_def_t *typdef,
 		 val_value_t *val)
 {
-    const typ_template_t *listtyp;
+    typ_template_t       *listtyp;
     const typ_def_t      *rtypdef;
     const ncx_num_t      *lb, *ub;
     const xmlChar        *typname;
@@ -1178,8 +1178,8 @@ status_t
     xsd_add_types (const ncx_module_t *mod,
 		   val_value_t *val)
 {
-    const typ_template_t   *typ;
-    const typ_def_t        *typdef;
+    typ_template_t         *typ;
+    typ_def_t              *typdef;
     val_value_t            *tval;
     xmlChar                *basename;
     xmlns_id_t              xsd_id;
@@ -1190,9 +1190,9 @@ status_t
 
     xsd_id = xmlns_xs_id();
 
-    for (typ = (const typ_template_t *)dlq_firstEntry(&mod->typeQ);
+    for (typ = (typ_template_t *)dlq_firstEntry(&mod->typeQ);
 	 typ != NULL;
-	 typ = (const typ_template_t *)dlq_nextEntry(typ)) {
+	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
 
 	/* get type info */
 	typdef = &typ->typdef;
@@ -1325,9 +1325,9 @@ status_t
     xsd_add_local_types (const ncx_module_t *mod,
 			 val_value_t *val)
 {
-    const ncx_typname_t    *typnam;
-    const typ_template_t   *typ;
-    const typ_def_t        *typdef;
+    ncx_typname_t          *typnam;
+    typ_template_t         *typ;
+    typ_def_t              *typdef;
     val_value_t            *tval;
     xmlns_id_t              xsd_id;
     ncx_btype_t             btyp;
@@ -1338,9 +1338,9 @@ status_t
     res = NO_ERR;
     xsd_id = xmlns_xs_id();
 
-    for (typnam = (const ncx_typname_t *)dlq_firstEntry(&mod->typnameQ);
+    for (typnam = (ncx_typname_t *)dlq_firstEntry(&mod->typnameQ);
 	 typnam != NULL;
-	 typnam = (const ncx_typname_t *)dlq_nextEntry(typnam)) {
+	 typnam = (ncx_typname_t *)dlq_nextEntry(typnam)) {
 
 	/* get type info */
 	typ = typnam->typ;
@@ -1413,7 +1413,7 @@ status_t
 *********************************************************************/
 status_t
     xsd_finish_simpleType (const ncx_module_t *mod,
-			   const typ_def_t *typdef,
+			   typ_def_t *typdef,
 			   val_value_t *val)
 {
     val_value_t      *topcon, *simtyp, *chval;
@@ -1618,7 +1618,7 @@ status_t
 *********************************************************************/
 status_t
     xsd_finish_namedType (const ncx_module_t *mod,
-			  const typ_def_t *typdef,
+			  typ_def_t *typdef,
 			  val_value_t *val)
 {
     val_value_t          *topcon, *chval;
@@ -1836,13 +1836,13 @@ status_t
 *********************************************************************/
 status_t
     xsd_finish_union (const ncx_module_t *mod,
-		      const typ_def_t *typdef,
+		      typ_def_t *typdef,
 		      val_value_t *val)
 {
-    const typ_unionnode_t *un;
+    typ_unionnode_t      *un;
     const xmlChar        *typname;
     val_value_t          *top, *simtyp;
-    const typ_def_t      *untypdef;
+    typ_def_t            *untypdef;
     xmlChar              *str, *p;
     uint32                len, siz, perline;
     xmlns_id_t            union_id, xsd_id;

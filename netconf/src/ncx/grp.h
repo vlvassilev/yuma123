@@ -66,15 +66,13 @@ typedef struct grp_template_t_ {
     xmlChar         *name;
     xmlChar         *descr;
     xmlChar         *ref;
-    ncx_module_t    *mod;        /* const back-ptr to this module */
-    tk_token_t      *tk;         /* const back-ptr to start token */
+    ncx_error_t      tkerr; 
     void            *parent;      /* const back-ptr to parent obj */
     struct grp_template_t_ *parentgrp;    /* direct parent is grp */
     xmlns_id_t       nsid;
     boolean          used;
     boolean          istop;
     ncx_status_t     status;
-    uint32           linenum;                /* use after parsing */
     uint32           grpindex;         /* used for XSD generation */
     dlq_hdr_t        typedefQ;             /* Q of typ_template_t */
     dlq_hdr_t        groupingQ;            /* Q of grp_template_t */

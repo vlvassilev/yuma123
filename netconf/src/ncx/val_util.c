@@ -139,7 +139,7 @@ static val_index_t *
 *********************************************************************/
 static status_t 
     choice_check (val_value_t *val,
-		  const obj_template_t *choicobj)
+		  obj_template_t *choicobj)
 {
     val_value_t           *chval, *testval;
     status_t               res, retres;
@@ -235,9 +235,9 @@ static status_t
 static status_t 
     add_defaults (val_value_t *val,
 		  boolean scriptmode,
-		  const obj_template_t *addcas)
+		  obj_template_t *addcas)
 {
-    const obj_template_t *obj, *chobj, *casobj;
+    obj_template_t       *obj, *chobj, *casobj;
     const xmlChar        *defval;
     val_value_t          *chval, *testval;
     status_t              res;
@@ -841,7 +841,7 @@ static void
 void
     val_set_canonical_order (val_value_t *val)
 {
-    const obj_template_t  *chobj;
+    obj_template_t        *chobj;
     const obj_key_t       *key;
     val_value_t           *chval, *rootval, *nextrootval;
     dlq_hdr_t              tempQ;
@@ -1209,9 +1209,9 @@ status_t
 *********************************************************************/
 status_t
     val_instance_check (val_value_t  *val,
-			const obj_template_t *obj)
+			obj_template_t *obj)
 {
-    const obj_template_t  *chobj;
+    obj_template_t        *chobj;
     ncx_iqual_t            iqual;
     uint32                 cnt, minelems, maxelems;
     boolean                minset, maxset, minerr, maxerr;
@@ -1271,7 +1271,9 @@ status_t
 		retres = ERR_NCX_MISSING_VAL_INST;
 		log_error("\nError: Not enough instances of object '%s' "
 			  "Got '%u', needed '%u'",
-			  obj_get_name(chobj), cnt, minelems);
+			  obj_get_name(chobj), 
+                          cnt, 
+                          minelems);
 		ncx_print_errormsg(NULL, NULL, retres);
 	    }
 	}
@@ -1283,7 +1285,9 @@ status_t
 		retres = ERR_NCX_EXTRA_VAL_INST;
 		log_error("\nError: Too many instances of object '%s' entered "
 			  "Got '%u', allowed '%u'",
-			  obj_get_name(chobj), cnt, maxelems);
+			  obj_get_name(chobj), 
+                          cnt, 
+                          maxelems);
 		ncx_print_errormsg(NULL, NULL, retres);
 	    }
 	}
@@ -1436,9 +1440,9 @@ val_value_t *
 *********************************************************************/
 boolean
     val_choice_is_set (val_value_t *val,
-		       const obj_template_t *obj)
+		       obj_template_t *obj)
 {
-    const obj_template_t  *cas, *child;
+    obj_template_t        *cas, *child;
     val_value_t           *testval, *chval;
     boolean                done;
 
@@ -1888,7 +1892,7 @@ status_t
 status_t
     val_check_child_conditional (val_value_t *val,
 				 val_value_t *valroot,
-				 const obj_template_t *childobj,
+				 obj_template_t *childobj,
 				 boolean *condresult)
 {
     val_value_t             *dummychild;
@@ -2086,9 +2090,9 @@ status_t
 boolean
     val_is_mandatory (val_value_t *val,
 		      val_value_t *valroot,
-		      const obj_template_t *childobj)
+		      obj_template_t *childobj)
 {
-    const obj_template_t *chobj;
+    obj_template_t       *chobj;
     boolean               mand, condresult;
     status_t              res;
 
@@ -2179,7 +2183,7 @@ boolean
 ncx_iqual_t 
     val_get_cond_iqualval (val_value_t *val,
 			   val_value_t *valroot,
-			   const obj_template_t *obj)
+			   obj_template_t *obj)
 {
     ncx_iqual_t  ret;
     boolean      required;
@@ -2273,7 +2277,7 @@ const xpath_pcb_t *
 *    NULL if some error
 *********************************************************************/
 val_value_t *
-    val_make_simval_obj (const obj_template_t *obj,
+    val_make_simval_obj (obj_template_t *obj,
 			 const xmlChar *valstr,
 			 status_t  *res)
 {
@@ -2295,7 +2299,7 @@ val_value_t *
     val_init_from_template(newval, obj);
 
     *res = val_set_simval(newval,
-                          obj_get_ctypdef(obj),
+                          obj_get_typdef(obj),
                           obj_get_nsid(obj),
                           obj_get_name(obj),
                           valstr);
@@ -2329,7 +2333,7 @@ val_value_t *
 *********************************************************************/
 status_t 
     val_set_simval_obj (val_value_t  *val,
-			const obj_template_t *obj,
+			obj_template_t *obj,
 			const xmlChar *valstr)
 {
 #ifdef DEBUG
@@ -2339,7 +2343,7 @@ status_t
 #endif
 
     return val_set_simval(val,
-			  obj_get_ctypdef(obj),
+			  obj_get_typdef(obj),
 			  obj_get_nsid(obj),
 			  obj_get_name(obj),
 			  valstr);

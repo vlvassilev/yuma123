@@ -123,6 +123,101 @@ date         init     comment
 
 
 /********************************************************************
+* FUNCTION setup_lock_cbs
+* 
+* Setup the lock state info in all the lock control blocks
+* in the specified agent_cb; call when a new sesion is started
+* 
+* INPUTS:
+*  agent_cb == agent control block to use
+*********************************************************************/
+static void
+    setup_lock_cbs (agent_cb_t *agent_cb)
+{
+    ses_cb_t     *scb;
+    mgr_scb_t    *mscb;
+    ncx_cfg_t     cfg_id;
+
+    scb = mgr_ses_get_scb(agent_cb->mysid);
+    if (scb == NULL) {
+        log_error("\nError: active session dropped, cannot lock");
+        return;
+    }
+
+    mscb = (mgr_scb_t *)scb->mgrcb;
+    agent_cb->locks_active = TRUE;
+    agent_cb->locks_waiting = FALSE;
+    agent_cb->locks_cur_cfg = NCX_CFGID_RUNNING;
+
+    for (cfg_id = NCX_CFGID_RUNNING;
+         cfg_id <= NCX_CFGID_STARTUP;
+         cfg_id++) {
+
+        agent_cb->lock_cb[cfg_id].lock_state = LOCK_STATE_IDLE;
+        agent_cb->lock_cb[cfg_id].lock_used = FALSE;
+        agent_cb->lock_cb[cfg_id].start_time = (time_t)0;
+        agent_cb->lock_cb[cfg_id].last_msg_time = (time_t)0;
+    }
+
+    /* always request the lock on running */
+    agent_cb->lock_cb[NCX_CFGID_RUNNING].lock_used = TRUE;
+
+    agent_cb->lock_cb[NCX_CFGID_CANDIDATE].lock_used = 
+        (cap_std_set(&mscb->caplist, CAP_STDID_CANDIDATE))
+        ? TRUE : FALSE;
+
+    agent_cb->lock_cb[NCX_CFGID_STARTUP].lock_used =
+        (cap_std_set(&mscb->caplist, CAP_STDID_STARTUP))
+        ? TRUE : FALSE;
+
+}  /* setup_lock_cbs */
+
+
+/********************************************************************
+* FUNCTION setup_unlock_cbs
+* 
+* Setup the lock state info in all the lock control blocks
+* in the specified agent_cb; call when release-locks or cleanup
+* is releasing all the locks gained so far
+* 
+* INPUTS:
+*     agent_cb == agent control block to use
+*
+* RETURNS:
+*   TRUE if sending unlocks needed
+*   FALSE if sending unlocks not needed
+*********************************************************************/
+static boolean
+    setup_unlock_cbs (agent_cb_t *agent_cb)
+{
+    boolean       needed;
+    ncx_cfg_t     cfg_id;
+
+    if (!agent_cb->locks_active) {
+        return FALSE;
+    }
+
+    needed = FALSE;
+
+    for (cfg_id = NCX_CFGID_RUNNING;
+         cfg_id <= NCX_CFGID_STARTUP;
+         cfg_id++) {
+
+        agent_cb->lock_cb[cfg_id].start_time = (time_t)0;
+        agent_cb->lock_cb[cfg_id].last_msg_time = (time_t)0;
+        if (agent_cb->lock_cb[cfg_id].lock_used && 
+            agent_cb->lock_cb[cfg_id].lock_state == 
+            LOCK_STATE_ACTIVE) {
+            needed = TRUE;
+        }
+    }
+
+    return needed;
+
+}  /* setup_unlock_cbs */
+
+
+/********************************************************************
 * FUNCTION send_lock_pdu_to_agent
 * 
 * Send a <lock> or <unlock> operation to the agent
@@ -140,7 +235,7 @@ static status_t
                             lock_cb_t *lockcb,
                             boolean islock)
 {
-    const obj_template_t  *rpc, *input;
+    obj_template_t        *rpc, *input;
     mgr_rpc_req_t         *req;
     val_value_t           *reqdata, *targetval, *parmval;
     ses_cb_t              *scb;
@@ -267,7 +362,7 @@ static status_t
  *********************************************************************/
 status_t
     do_get_locks (agent_cb_t *agent_cb,
-                  const obj_template_t *rpc,
+                  obj_template_t *rpc,
                   const xmlChar *line,
                   uint32  len)
 {
@@ -368,9 +463,9 @@ status_t
  *********************************************************************/
 status_t
     do_release_locks (agent_cb_t *agent_cb,
-                  const obj_template_t *rpc,
-                  const xmlChar *line,
-                  uint32  len)
+                      obj_template_t *rpc,
+                      const xmlChar *line,
+                      uint32  len)
 {
     ses_cb_t      *scb;
     val_value_t   *valset;
@@ -735,7 +830,7 @@ boolean
 status_t
     send_discard_changes_pdu_to_agent (agent_cb_t *agent_cb)
 {
-    const obj_template_t  *rpc;
+    obj_template_t        *rpc;
     mgr_rpc_req_t         *req;
     val_value_t           *reqdata;
     ses_cb_t              *scb;
@@ -807,6 +902,41 @@ status_t
     return res;
 
 } /* send_discard_changes_pdu_to_agent */
+
+
+/********************************************************************
+* FUNCTION clear_lock_cbs
+* 
+* Clear the lock state info in all the lock control blocks
+* in the specified agent_cb
+* 
+* INPUTS:
+*  agent_cb == agent control block to use
+*
+*********************************************************************/
+void
+    clear_lock_cbs (agent_cb_t *agent_cb)
+{
+    ncx_cfg_t  cfg_id;
+
+    /* set up lock control blocks for get-locks */
+    agent_cb->locks_active = FALSE;
+    agent_cb->locks_waiting = FALSE;
+    agent_cb->locks_cur_cfg = NCX_CFGID_RUNNING;
+    agent_cb->command_mode = CMD_MODE_NORMAL;
+
+    for (cfg_id = NCX_CFGID_RUNNING;
+         cfg_id <= NCX_CFGID_STARTUP;
+         cfg_id++) {
+
+        agent_cb->lock_cb[cfg_id].lock_state = LOCK_STATE_IDLE;
+        agent_cb->lock_cb[cfg_id].lock_used = FALSE;
+        agent_cb->lock_cb[cfg_id].start_time = (time_t)0;
+        agent_cb->lock_cb[cfg_id].last_msg_time = (time_t)0;
+    }
+
+}  /* clear_lock_cbs */
+
 
 
 /* END yangcli_autolock.c */

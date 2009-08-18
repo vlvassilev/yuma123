@@ -540,9 +540,10 @@ static status_t
 	ncx_print_errormsg(tkc, mod, res);
 	return res;
     }
-    feature->tk = TK_CUR(tkc);
-    feature->linenum = TK_CUR_LNUM(tkc);
-    feature->mod = mod;
+    ncx_set_error(&feature->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
 
     /* Get the mandatory feature name */
     res = yang_consume_id_string(tkc, mod, &feature->name);
@@ -740,7 +741,7 @@ static status_t
                                         mod, 
                                         iff->prefix,
 					iff->name, 
-                                        iff->tk,
+                                        &iff->tkerr,
 					&testfeature);
 	    if (res != NO_ERR) {
 		retres = res;
@@ -751,7 +752,7 @@ static status_t
 	    res = retres = ERR_NCX_DEF_LOOP;
 	    log_error("\nError: 'if-feature %s' inside feature '%s'",
 		      iff->name, iff->name);
-	    tkc->cur = iff->tk;
+	    tkc->curerr = &iff->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	    errdone = TRUE;
 	} else {
@@ -763,7 +764,7 @@ static status_t
 		      "for if-feature statement",
 		      iff->name);
 	    res = retres = ERR_NCX_DEF_NOT_FOUND;
-	    tkc->cur = iff->tk;
+	    tkc->curerr = &iff->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
 
@@ -827,7 +828,7 @@ static status_t
 		      "in feature '%s'",
 		      startfeature->name,
 		      feature->name);
-	    tkc->cur = startfeature->tk;
+	    tkc->curerr = &startfeature->tkerr;
 	    ncx_print_errormsg(tkc, mod, res);
 	} else if (iff->feature->res != ERR_NCX_DEF_LOOP) {
 	    res = check_feature_loop(tkc, mod, iff->feature,
@@ -890,10 +891,11 @@ static status_t
 	ncx_print_errormsg(tkc, mod, res);
 	return res;
     }
-    identity->tk = TK_CUR(tkc);
-    identity->linenum = TK_CUR_LNUM(tkc);
+    ncx_set_error(&identity->tkerr,
+                  mod,
+                  TK_CUR_LNUM(tkc),
+                  TK_CUR_LPOS(tkc));
     identity->isroot = TRUE;
-    identity->mod = mod;
 
     /* Get the mandatory identity name */
     res = yang_consume_id_string(tkc, mod, &identity->name);
@@ -1086,7 +1088,7 @@ static status_t
                                      mod, 
 				     identity->baseprefix,
 				     identity->basename, 
-				     identity->tk,
+				     &identity->tkerr,
 				     &testidentity);
 	if (res != NO_ERR) {
 	    errdone = TRUE;
@@ -1096,7 +1098,7 @@ static status_t
 	res = ERR_NCX_DEF_LOOP;
 	log_error("\nError: 'base %s' inside identity '%s'",
 		  identity->basename, identity->name);
-	tkc->cur = identity->tk;
+	tkc->curerr = &identity->tkerr;
 	ncx_print_errormsg(tkc, mod, res);
 	errdone = TRUE;
     } else {
@@ -1114,7 +1116,7 @@ static status_t
 		  identity->basename,
 		  identity->name);
 	res = ERR_NCX_DEF_NOT_FOUND;
-	tkc->cur = identity->tk;
+	tkc->curerr = &identity->tkerr;
 	ncx_print_errormsg(tkc, mod, res);
     }
 
@@ -1167,7 +1169,7 @@ static status_t
 		  "in identity '%s'",
 		  startidentity->name,
 		  identity->name);
-	tkc->cur = startidentity->tk;
+	tkc->curerr = &startidentity->tkerr;
 	ncx_print_errormsg(tkc, mod, res);
     } else if (identity->base->res != ERR_NCX_DEF_LOOP) {
 	res = check_identity_loop(tkc, mod, 
@@ -1339,10 +1341,10 @@ static status_t
     yang_node_t        *node;
     yang_import_ptr_t  *impptr;
     xmlChar            *str;
-    tk_token_t         *savetk, *revtk;
     tk_type_t           tktyp;
     boolean             done, pfixdone, revdone;
     status_t            res, retres;
+    ncx_error_t         tkerr;
 
     val = NULL;
     str = NULL;
@@ -1351,7 +1353,7 @@ static status_t
     pfixdone = FALSE;
     revdone = FALSE;
     retres = NO_ERR;
-    revtk = NULL;
+    memset(&tkerr, 0x0, sizeof(tkerr));
 
     /* Get a new ncx_import_t to fill in */
     imp = ncx_new_import();
@@ -1360,7 +1362,10 @@ static status_t
 	ncx_print_errormsg(tkc, mod, retres);
 	return retres;
     } else {
-	imp->tk = TK_CUR(tkc);
+	ncx_set_error(&imp->tkerr,
+                      mod,
+                      TK_CUR_LNUM(tkc),
+                      TK_CUR_LPOS(tkc));
 	imp->usexsd = TRUE;
     }
 
@@ -1442,7 +1447,10 @@ static status_t
 		}
 	    }
 	} else if (!xml_strcmp(val, YANG_K_REVISION_DATE)) {
-	    revtk = TK_CUR(tkc);
+	    ncx_set_error(&tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
 	    if (revdone) {
 		res = retres = ERR_NCX_ENTRY_EXISTS;
 		ncx_print_errormsg(tkc, mod, retres);
@@ -1481,7 +1489,10 @@ static status_t
 
     if (imp->revision) {
 	/* validate the revision date */
-	res = yang_validate_date_string(tkc, mod, revtk, imp->revision);
+	res = yang_validate_date_string(tkc, 
+                                        mod, 
+                                        &tkerr, 
+                                        imp->revision);
 	if (res != NO_ERR) {
 	    retres = res;
 	    if (NEED_EXIT(res)) {
@@ -1503,13 +1514,13 @@ static status_t
         return NO_ERR;
     }
 
-    savetk = tkc->cur;
-    tkc->cur = imp->tk;
+
 
     /* check all the mandatory clauses are present */
     if (!imp->prefix) {
 	retres = ERR_NCX_DATA_MISSING;
 	expstr = "prefix string";
+        tkc->curerr = &imp->tkerr;
 	ncx_mod_exp_err(tkc, mod, retres, expstr);
     }
 
@@ -1525,8 +1536,9 @@ static status_t
 					    imp->revision)) {
 		
 		log_error("\nError: invalid duplicate import found on line %u",
-			  testimp->tk->linenum);
+			  testimp->tkerr.linenum);
 		retres = res = ERR_NCX_INVALID_DUP_IMPORT;
+                tkc->curerr = &imp->tkerr;
 		ncx_print_errormsg(tkc, mod, res);
 	    } else {
 		imp->usexsd = FALSE;
@@ -1535,15 +1547,17 @@ static status_t
                     if (ncx_warning_enabled(ERR_NCX_DUP_IMPORT)) {
                         log_warn("\nWarning: duplicate import "
                                  "found on line %u",
-                                 testimp->tk->linenum);
+                                 testimp->tkerr.linenum);
                         res = ERR_NCX_DUP_IMPORT;
+                        tkc->curerr = &imp->tkerr;
                         ncx_print_errormsg(tkc, mod, res);
                     }
 		} else if (ncx_warning_enabled(ERR_NCX_PREFIX_DUP_IMPORT)) {
 		    /* warning for dup. import w/ different prefix */
 		    log_warn("\nWarning: same import with different prefix"
-			     " found on line %u", testimp->tk->linenum);
+			     " found on line %u", testimp->tkerr.linenum);
 		    res = ERR_NCX_PREFIX_DUP_IMPORT;
+                    tkc->curerr = &imp->tkerr;
 		    ncx_print_errormsg(tkc, mod, res);
 		}
 	    }
@@ -1554,6 +1568,7 @@ static status_t
 	    log_error("\nError: import '%s' for current module",
 		      mod->name);
 	    retres = ERR_NCX_IMPORT_LOOP;
+            tkc->curerr = &imp->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
 
@@ -1564,6 +1579,7 @@ static status_t
 		      (pcb->top->ismod) ? "" : "sub", 
                       imp->module);
 	    retres = ERR_NCX_IMPORT_LOOP;
+            tkc->curerr = &imp->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
 
@@ -1575,6 +1591,7 @@ static status_t
                       mod->name, 
                       imp->module);
 	    retres = ERR_NCX_IMPORT_LOOP;
+            tkc->curerr = &imp->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
 
@@ -1585,6 +1602,7 @@ static status_t
 		      imp->module, 
                       imp->prefix);
 	    retres = ERR_NCX_IN_USE;
+            tkc->curerr = &imp->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
 	    
@@ -1595,8 +1613,9 @@ static status_t
 		retres = ERR_NCX_IN_USE;
 		log_error("\nImport %s on line %u already using prefix %s",
 			  testimp->module, 
-                          testimp->tk->linenum,
+                          testimp->tkerr.linenum,
 			  testimp->prefix);
+                tkc->curerr = &imp->tkerr;
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
 	}
@@ -1610,8 +1629,9 @@ static status_t
 		      " from module '%s', line %u",
 		      imp->module, 
                       node->mod->name,
-		      node->tk->linenum);
+		      node->tkerr.linenum);
 	    retres = ERR_NCX_IMPORT_LOOP;
+            tkc->curerr = &imp->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
     }
@@ -1629,6 +1649,7 @@ static status_t
 					 imp->revision);
 	    if (!impptr) {
 		retres = ERR_INTERNAL_MEM;
+                tkc->curerr = &imp->tkerr;
 		ncx_print_errormsg(tkc, mod, retres);
 		ncx_free_import(imp);
 		yang_free_node(node);
@@ -1636,8 +1657,10 @@ static status_t
 		/* save the import used record and the import */
 		node->name = imp->module;
 		node->revision = imp->revision;
-		node->mod = mod;
-		node->tk = imp->tk;
+                ncx_set_error(&node->tkerr,
+                              imp->tkerr.mod,
+                              imp->tkerr.linenum,
+                              imp->tkerr.linepos);
 
 		/* save the import on the impchain stack */
 		dlq_enque(node, &pcb->impchainQ);
@@ -1674,6 +1697,7 @@ static status_t
 				      mod->sourcefn, 
                                       imp->module);
 			}
+                        tkc->curerr = &imp->tkerr;
 			ncx_print_errormsg(tkc, mod, res);
 		    }
 		} /* else ignore the warnings */
@@ -1694,8 +1718,6 @@ static status_t
     } else {
 	ncx_free_import(imp);
     }
-
-    tkc->cur = savetk;
 
     return retres;
 
@@ -1730,16 +1752,16 @@ static status_t
     const char     *expstr;
     const xmlChar  *val;
     yang_node_t    *node, *testnode;
-    tk_token_t     *savetk, *revtk;
     tk_type_t       tktyp;
     status_t        res, retres;
     boolean         done, revdone;
+    ncx_error_t     tkerr;
 
     done = FALSE;
     expstr = "submodule name";
     retres = NO_ERR;
     revdone = FALSE;
-    revtk = NULL;
+    memset(&tkerr, 0x0, sizeof(tkerr));
 
     /* Get a new ncx_include_t to fill in */
     inc = ncx_new_include();
@@ -1748,7 +1770,10 @@ static status_t
 	ncx_print_errormsg(tkc, mod, retres);
 	return retres;
     } else {
-	inc->tk = TK_CUR(tkc);
+	ncx_set_error(&inc->tkerr,
+                      mod,
+                      TK_CUR_LNUM(tkc),
+                      TK_CUR_LPOS(tkc));
 	inc->usexsd = TRUE;
     }
 
@@ -1829,7 +1854,11 @@ static status_t
 
 	/* Got a token string so check the value, should be 'prefix' */
 	if (!xml_strcmp(val, YANG_K_REVISION_DATE)) {
-	    revtk = TK_CUR(tkc);
+	    ncx_set_error(&tkerr,
+                          mod,
+                          TK_CUR_LNUM(tkc),
+                          TK_CUR_LPOS(tkc));
+
 	    if (revdone) {
 		res = retres = ERR_NCX_ENTRY_EXISTS;
 		ncx_print_errormsg(tkc, mod, retres);
@@ -1868,7 +1897,10 @@ static status_t
 
     if (inc->revision) {
 	/* validate the revision date */
-	res = yang_validate_date_string(tkc, mod, revtk, inc->revision);
+	res = yang_validate_date_string(tkc, 
+                                        mod, 
+                                        &tkerr,
+                                        inc->revision);
 	if (res != NO_ERR) {
 	    retres = res;
 	    if (NEED_EXIT(res)) {
@@ -1878,18 +1910,16 @@ static status_t
 	}
     }
 
-    /* set up tkc for potential errors */
-    savetk = tkc->cur;
-    tkc->cur = inc->tk;
-
     /* check if the mandatory submodule name is valid
      * and if the include is already present 
      */
     if (!inc->submodule) {
 	retres = ERR_NCX_DATA_MISSING;
+        tkc->curerr = &inc->tkerr;
 	ncx_mod_exp_err(tkc, mod, retres, expstr);
     } else if (!ncx_valid_name2(inc->submodule)) {
 	retres = ERR_NCX_INVALID_NAME;
+        tkc->curerr = &inc->tkerr;
 	ncx_mod_exp_err(tkc, mod, retres, expstr);
     } else {
 	/* check if submodule already present */
@@ -1900,9 +1930,11 @@ static status_t
 		 (!testinc->revision && !inc->revision)) &&
 		yang_compare_revision_dates(testinc->revision, 
 					    inc->revision)) {
-		log_error("\nError: invalid duplicate include found on line %u",
-			  testinc->tk->linenum);
+		log_error("\nError: invalid duplicate "
+                          "include found on line %u",
+			  testinc->tkerr.linenum);
 		retres = res = ERR_NCX_INVALID_DUP_INCLUDE;
+                tkc->curerr = &inc->tkerr;
 		ncx_print_errormsg(tkc, mod, res);
 	    } else {
 		/* warning for same duplicate already in the
@@ -1910,9 +1942,11 @@ static status_t
 		 */
 		inc->usexsd = FALSE;
                 if (ncx_warning_enabled(ERR_NCX_DUP_INCLUDE)) {
-                    log_warn("\nWarning: duplicate include found on line %u",
-                             testinc->tk->linenum);
+                    log_warn("\nWarning: duplicate include found "
+                             "on line %u",
+                             testinc->tkerr.linenum);
                     res = ERR_NCX_DUP_INCLUDE;
+                    tkc->curerr = &inc->tkerr;
                     ncx_print_errormsg(tkc, mod, res);
                 }
 	    }
@@ -1922,6 +1956,7 @@ static status_t
 		log_error("\nError: include '%s' for current submodule",
 			  mod->name);
 		retres = ERR_NCX_INCLUDE_LOOP;
+                tkc->curerr = &inc->tkerr;
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
 
@@ -1932,6 +1967,7 @@ static status_t
 		log_error("\nError: include loop for top-level %smodule '%s'",
 			  (pcb->top->ismod) ? "" : "sub", inc->submodule);
 		retres = ERR_NCX_INCLUDE_LOOP;
+                tkc->curerr = &inc->tkerr;
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
 
@@ -1941,6 +1977,7 @@ static status_t
 		log_error("\nError: submodule '%s' cannot include its"
 			  " parent module '%s'", mod->name, inc->submodule);
 		retres = ERR_NCX_INCLUDE_LOOP;
+                tkc->curerr = &inc->tkerr;
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
 
@@ -1953,8 +1990,10 @@ static status_t
 		    log_error("\nError: loop created by include '%s'"
 			      " from %smodule '%s', line %u",
 			      inc->submodule, (node->mod->ismod) ? "" : "sub",
-			      node->mod->name, node->tk->linenum);
+			      node->mod->name, 
+                              node->tkerr.linenum);
 		    retres = ERR_NCX_INCLUDE_LOOP;
+                    tkc->curerr = &inc->tkerr;
 		    ncx_print_errormsg(tkc, mod, retres);
 		}
 	    }
@@ -1973,7 +2012,10 @@ static status_t
 	    node->name = inc->submodule;
 	    node->revision = inc->revision;
 	    node->mod = mod;
-	    node->tk = inc->tk;
+	    ncx_set_error(&node->tkerr,
+                          inc->tkerr.mod,
+                          inc->tkerr.linenum,
+                          inc->tkerr.linepos);
 
 	    /* hand off malloced 'inc' struct here */
 	    dlq_enque(inc, &mod->includeQ);
@@ -2008,8 +2050,6 @@ static status_t
     } else {
 	ncx_free_include(inc);
     }	
-
-    tkc->cur = savetk;
 
     return retres;
     
@@ -2389,7 +2429,10 @@ static status_t
 	ncx_print_errormsg(tkc, mod, res);
 	return res;
     } else {
-	rev->tk = TK_CUR(tkc);
+	ncx_set_error(&rev->tkerr,
+                      mod,
+                      TK_CUR_LNUM(tkc),
+                      TK_CUR_LPOS(tkc));
     }
 
     /* get the mandatory version identifier date string */
@@ -2487,7 +2530,10 @@ static status_t
 
     if (rev->version) {
 	/* check if the version string is valid */
-	res = yang_validate_date_string(tkc, mod, rev->tk, rev->version);
+	res = yang_validate_date_string(tkc, 
+                                        mod, 
+                                        &rev->tkerr, 
+                                        rev->version);
 	CHK_EXIT(res, retres);
 	    
 	/* check if the revision is already present */
@@ -2496,7 +2542,8 @@ static status_t
 	    /* error for dup. revision with same version */
 	    retres = ERR_NCX_DUP_ENTRY;
 	    log_error("\nError: revision with same date on line %u",
-		      testrev->tk->linenum);
+		      testrev->tkerr.linenum);
+            tkc->curerr = &rev->tkerr;
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
     }
@@ -2539,7 +2586,6 @@ static status_t
     const xmlChar *val;
     const char    *expstr;
     ncx_revhist_t *rev;
-    tk_token_t    *savetk;
     tk_type_t      tktyp;
     status_t       res, retres;
     boolean        done;
@@ -2622,12 +2668,10 @@ static status_t
                     if (ncx_warning_enabled(ERR_NCX_BAD_REV_ORDER)) {
                         log_warn("\nWarning: revision dates not in "
                                  "descending order");
-                        savetk = TK_CUR(tkc);
-                        TK_CUR(tkc) = rev->tk;
+                        tkc->curerr = &rev->tkerr;
                         ncx_print_errormsg(tkc, 
                                            mod, 
                                            ERR_NCX_BAD_REV_ORDER);
-                        TK_CUR(tkc) = savetk;
                     }
                     val = rev->version;
                 }
@@ -3258,8 +3302,6 @@ static status_t
 	    node->name = mod->name;
 	    node->revision = mod->version;
 	    node->mod = NULL;
-	    node->tk = NULL;
-	    node->tkc = tkc;
 	    node->submod = mod;
 	    mod->allimpQ = NULL;
 	    mod->allincQ = NULL;
@@ -3431,7 +3473,12 @@ status_t
                 pcb->top = NULL;
             }
             ncx_free_module(mod);
-	} else if (!wasadd && !pcb->diffmode) {
+	} else if (!wasadd && 
+                  !(pcb->diffmode || 
+                    pcb->searchmode ||
+                    pcb->deviationmode)) {
+
+            /* do not swap out diffmode, searchmode, or deviationmode */
 	    if (mod->ismod) {
 		if (pcb->top == mod) {
 		    /* hack: make sure netconf-ietf does not 
@@ -3466,7 +3513,9 @@ status_t
 	    if (!pcb->top && !pcb->with_submods) {
 		res = ERR_NCX_MOD_NOT_FOUND;
 	    }
-	}  /* else the module went into an alternate mod Q */
+	}  /* else the module went into an alternate mod Q 
+            * or the pcb->top pointer is live and will be freed later
+            */
     }
 
     fclose(fp);
@@ -3474,8 +3523,8 @@ status_t
 	tkc->fp = NULL;
     }
 
-    if (tkc && ptyp != YANG_PT_INCLUDE) {
-	tk_free_chain(tkc);
+    if (tkc) {
+        tk_free_chain(tkc);
     }
 
     return res;

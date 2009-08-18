@@ -308,7 +308,8 @@ static void
 	    (mod->ismod) ? mod->name : mod->belongs,
 	    mod->name, 
 	    (mod->version) ? mod->version : NCX_EL_NONE,
-	    name, linenum);
+	    name, 
+            linenum);
     ses_putstr(scb, (const xmlChar *)buff);
 
 } /* write_first_tuple */
@@ -679,13 +680,13 @@ static void
     ses_putstr(scb, (const xmlChar *)"\n\nINSERT INTO nctypedef VALUES (");
 
     /* columns: ID, modname, submodname, version, name, linenum */
-    write_first_tuple(scb, mod, typ->name, typ->linenum, buff);
+    write_first_tuple(scb, mod, typ->name, typ->tkerr.linenum, buff);
 
     /* columns: description, reference */
     write_descr_ref(scb, typ->descr, typ->ref);
 
     /* column: docurl */
-    write_docurl(scb, mod, cp, typ->name, typ->linenum);
+    write_docurl(scb, mod, cp, typ->name, typ->tkerr.linenum);
 
     /* column: basetypename */
     sprintf(buff, "'%s', ", (const char *)typ_get_basetype_name(typ));
@@ -699,7 +700,8 @@ static void
     parenttyp = typ_get_parent_type(typ);
     if (parenttyp) {
 	sprintf(buff, "\n    '%s', '%u', ", 
-		parenttyp->mod->name, parenttyp->linenum);
+		parenttyp->tkerr.mod->name, 
+                parenttyp->tkerr.linenum);
 	ses_putstr(scb, (const xmlChar *)buff);
     } else {
 	write_empty_col(scb);
@@ -742,13 +744,13 @@ static void
     ses_putstr(scb, (const xmlChar *)"\n\nINSERT INTO ncgrouping VALUES (");
 
     /* columns: ID, modname, submodname, version, name, linenum */
-    write_first_tuple(scb, mod, grp->name, grp->linenum, buff);
+    write_first_tuple(scb, mod, grp->name, grp->tkerr.linenum, buff);
 
     /* columns: description, reference */
     write_descr_ref(scb, grp->descr, grp->ref);
 
     /* column: docurl */
-    write_docurl(scb, mod, cp, grp->name, grp->linenum);
+    write_docurl(scb, mod, cp, grp->name, grp->tkerr.linenum);
 
     /* column: object list */
     write_object_list(scb, &grp->datadefQ);
@@ -781,13 +783,13 @@ static void
 *********************************************************************/
 static void
     write_object_entry (const ncx_module_t *mod,
-			const obj_template_t *obj,
+			obj_template_t *obj,
 			const yangdump_cvtparms_t *cp,
 			ses_cb_t *scb,
 			char *buff)
 {
-    const dlq_hdr_t        *datadefQ;
-    const obj_template_t   *chobj;
+    dlq_hdr_t              *datadefQ;
+    obj_template_t         *chobj;
     const xmlChar          *name, *defval;
 
     if (!obj_has_name(obj)) {
@@ -795,12 +797,12 @@ static void
     }
 
     name = obj_get_name(obj);
-    datadefQ = obj_get_cdatadefQ(obj);
+    datadefQ = obj_get_datadefQ(obj);
 
     ses_putstr(scb, (const xmlChar *)"\n\nINSERT INTO ncobject VALUES (");
 
     /* columns: ID, modname, submodname, version, name, linenum */
-    write_first_tuple(scb, mod, name, obj->linenum, buff);
+    write_first_tuple(scb, mod, name, obj->tkerr.linenum, buff);
 
     /* column: objectid */
     write_object_id(scb, obj, buff);
@@ -810,7 +812,7 @@ static void
 		    obj_get_reference(obj));
 
     /* column: docurl */
-    write_docurl(scb, mod, cp, name, obj->linenum);
+    write_docurl(scb, mod, cp, name, obj->tkerr.linenum);
 
     /* column: objtyp */
     sprintf(buff, "\n    '%s', ", (const char *)obj_get_typestr(obj));
@@ -950,13 +952,13 @@ static void
     ses_putstr(scb, (const xmlChar *)"\n\nINSERT INTO ncextension VALUES (");
 
     /* columns: ID, modname, submodname, version, myid, myname, linenum */
-    write_first_tuple(scb, mod, ext->name, ext->linenum, buff);
+    write_first_tuple(scb, mod, ext->name, ext->tkerr.linenum, buff);
 
     /* columns: description, reference */
     write_descr_ref(scb, ext->descr, ext->ref);
 
     /* column: docurl */
-    write_docurl(scb, mod, cp, ext->name, ext->linenum);
+    write_docurl(scb, mod, cp, ext->name, ext->tkerr.linenum);
 
     /* columns: argument, yinelement */
     if (ext->arg) {
@@ -999,7 +1001,7 @@ static void
 {
     const typ_template_t  *typ;
     const grp_template_t  *grp;
-    const obj_template_t  *obj;
+    obj_template_t        *obj;
     const ext_template_t  *ext;
 
 #ifdef DEBUG
@@ -1033,9 +1035,9 @@ static void
     }
 
     /* write the ncobject table entries */
-    for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
+    for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
 	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
 	if (obj_is_hidden(obj)) {
 	    continue;

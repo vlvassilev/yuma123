@@ -171,7 +171,7 @@ static void
 	ncx_printf_num(&errinfo->v.numval, errinfo->val_btype);
 	break;
     default:
-	val_dump_value((const val_value_t *)errinfo->v.cpxval,
+	val_dump_value((val_value_t *)errinfo->v.cpxval,
 		       NCX_DEF_INDENT*2);
     }
 

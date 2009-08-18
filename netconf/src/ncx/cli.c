@@ -124,13 +124,13 @@ date         init     comment
 *********************************************************************/
 static status_t
     parse_parm_cmn (val_value_t *new_parm,
-		    const obj_template_t *obj,
+		    obj_template_t *obj,
 		    const xmlChar *strval,
 		    boolean script)
 {
     val_value_t          *newchild;
-    const typ_def_t      *typdef;
-    const obj_template_t *choiceobj, *targobj;
+    typ_def_t      *typdef;
+    obj_template_t *choiceobj, *targobj;
     ncx_btype_t           btyp;
     status_t              res;
 
@@ -194,7 +194,7 @@ static status_t
 					 ISPARM, 
 					 &res);
 	    } else {
-		typdef = obj_get_ctypdef(obj);
+		typdef = obj_get_typdef(obj);
 		if (btyp != NCX_BT_ANY) {
 		    res = val_simval_ok(typdef, strval);
 		}
@@ -240,7 +240,7 @@ static status_t
 *********************************************************************/
 static status_t
     parse_parm (val_value_t *val,
-		const obj_template_t *obj,
+		obj_template_t *obj,
 		const xmlChar *strval,
 		boolean script)
 {
@@ -294,7 +294,7 @@ static status_t
 *********************************************************************/
 static status_t
     parse_parm_ex (val_value_t *val,
-		   const obj_template_t *obj,
+		   obj_template_t *obj,
 		   xmlns_id_t  nsid,
 		   const xmlChar *name,
 		   const xmlChar *strval,
@@ -1074,7 +1074,7 @@ status_t
 val_value_t *
     cli_parse (int argc, 
 	       const char *argv[],
-	       const obj_template_t *obj,
+	       obj_template_t *obj,
 	       boolean valonly,
 	       boolean script,
 	       boolean autocomp,
@@ -1084,7 +1084,7 @@ val_value_t *
 #define ERRLEN  127
 
     val_value_t    *val;
-    const obj_template_t *chobj;
+    obj_template_t *chobj;
     const char     *msg;
     char           *parmname, *parmval, *str, *buff;
     int32           buffpos, bufflen;
@@ -1399,7 +1399,7 @@ val_value_t *
                  */
 		if (res==NO_ERR && !parmval && btyp != NCX_BT_EMPTY) {
                     if (!(typ_is_string(btyp) &&
-                        (val_simval_ok(obj_get_ctypdef(chobj),
+                        (val_simval_ok(obj_get_typdef(chobj),
                                        EMPTY_STRING) == NO_ERR))) {
                         res = ERR_NCX_EMPTY_VAL;
                     }
@@ -1523,7 +1523,7 @@ val_value_t *
 *********************************************************************/
 status_t
     cli_parse_parm (val_value_t *val,
-		    const obj_template_t *obj,
+		    obj_template_t *obj,
 		    const xmlChar *strval,
 		    boolean script)
 {
@@ -1560,13 +1560,13 @@ status_t
 *********************************************************************/
 status_t
     cli_parse_parm_ex (val_value_t *val,
-		       const obj_template_t *obj,
+		       obj_template_t *obj,
 		       const xmlChar *strval,
 		       boolean script,
 		       ncx_bad_data_t  bad_data)
 {
-    const obj_template_t  *genstr;
-    status_t               res;
+    obj_template_t  *genstr;
+    status_t         res;
 
     res = parse_parm(val, obj, strval, script);
     if (res == NO_ERR || NEED_EXIT(res)) {

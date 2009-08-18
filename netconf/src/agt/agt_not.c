@@ -219,19 +219,19 @@ static dlq_hdr_t             subscriptionQ;
 static dlq_hdr_t             notificationQ;
 
 /* cached pointer to the <notification> element template */
-static const obj_template_t *notificationobj;
+static obj_template_t *notificationobj;
 
 /* cached pointer to the /notification/eventTime element template */
-static const obj_template_t *eventTimeobj;
+static obj_template_t *eventTimeobj;
 
 /* cached pointer to the /ncn:replayComplete element template */
-static const obj_template_t *replayCompleteobj;
+static obj_template_t *replayCompleteobj;
 
 /* cached pointer to the /ncn:notificationComplete element template */
-static const obj_template_t *notificationCompleteobj;
+static obj_template_t *notificationCompleteobj;
 
 /* cached pointer to the /ncx:sequence-id element template */
-static const obj_template_t *sequenceidobj;
+static obj_template_t *sequenceidobj;
 
 /* flag to signal quick exit */
 static boolean               anySubscriptions;
@@ -1095,7 +1095,7 @@ static void
 *   pointer to the malloced and initialized struct or NULL if an error
 *********************************************************************/
 static agt_not_msg_t * 
-    new_notification (const obj_template_t *eventType,
+    new_notification (obj_template_t *eventType,
                       boolean usemsgid)
 {
     agt_not_msg_t  *not;
@@ -1317,9 +1317,9 @@ status_t
 status_t
     agt_not_init2 (void)
 {
-    const obj_template_t  *topobj, *streamsobj, *streamobj;
-    const obj_template_t  *nameobj, *descriptionobj;
-    const obj_template_t  *replaySupportobj, *replayLogCreationTimeobj;
+    obj_template_t  *topobj, *streamsobj, *streamobj;
+    obj_template_t  *nameobj, *descriptionobj;
+    obj_template_t  *replaySupportobj, *replayLogCreationTimeobj;
     val_value_t           *topval, *streamsval, *streamval, *childval;
     cfg_template_t        *runningcfg;
     status_t               res;
@@ -1871,7 +1871,7 @@ void
 *   pointer to the malloced and initialized struct or NULL if an error
 *********************************************************************/
 agt_not_msg_t * 
-    agt_not_new_notification (const obj_template_t *eventType)
+    agt_not_new_notification (obj_template_t *eventType)
 {
 #ifdef DEBUG
     if (!eventType) {

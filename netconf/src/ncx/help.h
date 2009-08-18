@@ -77,7 +77,7 @@ extern void
 	       help_mode_t mode);
 
 extern void
-    help_object (const obj_template_t *obj,
+    help_object (obj_template_t *obj,
 		 help_mode_t mode);
 
 extern void

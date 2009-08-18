@@ -246,9 +246,9 @@ static val_value_t          *mysessionsval;
 
 static val_value_t          *myschemasval;
 
-static const obj_template_t *mysessionobj;
+static obj_template_t *mysessionobj;
 
-static const obj_template_t *myschemaobj;
+static obj_template_t *myschemaobj;
 
 
 /********************************************************************
@@ -269,7 +269,7 @@ static status_t
                val_value_t  *dstval)
 {
     val_value_t           *nameval, *targval, *newval, *globallockval;
-    const obj_template_t  *globallock;
+    obj_template_t  *globallock;
     cfg_template_t        *cfg;
     const xmlChar         *locktime;
     status_t          res;
@@ -367,10 +367,10 @@ INPUTS:
 *********************************************************************/
 static val_value_t *
     make_datastore_val (const xmlChar *confname,
-                        const obj_template_t *confobj,
+                        obj_template_t *confobj,
                         status_t *res)
 {
-    const obj_template_t  *nameobj, *testobj;
+    obj_template_t  *nameobj, *testobj;
     val_value_t           *confval, *nameval, *leafval;
 
     nameobj = obj_find_child(confobj, 
@@ -460,7 +460,7 @@ INPUTS:
 *********************************************************************/
 static val_value_t *
     make_schema_val (ncx_module_t *mod,
-                     const obj_template_t *schemaobj,
+                     obj_template_t *schemaobj,
                      status_t *res)
 {
     val_value_t           *schemaval, *childval;
@@ -559,7 +559,7 @@ INPUTS:
 *********************************************************************/
 static val_value_t *
     make_session_val (ses_cb_t *scb,
-                      const obj_template_t *sessionobj,
+                      obj_template_t *sessionobj,
                       status_t *res)
 {
     val_value_t           *sessionval, *childval;
@@ -702,7 +702,7 @@ INPUTS:
 *   malloced value struct or NULL if some error
 *********************************************************************/
 static val_value_t *
-    make_statistics_val (const obj_template_t *statisticsobj,
+    make_statistics_val (obj_template_t *statisticsobj,
                          status_t *res)
 {
     val_value_t            *statsval, *childval;
@@ -1001,9 +1001,9 @@ status_t
 status_t
     agt_state_init2 (void)
 {
-    const obj_template_t  *topobj, *confsobj, *confobj;
-    const obj_template_t  *sessionsobj, *statisticsobj;
-    const obj_template_t  *schemasobj;
+    obj_template_t  *topobj, *confsobj, *confobj;
+    obj_template_t  *sessionsobj, *statisticsobj;
+    obj_template_t  *schemasobj;
     val_value_t           *topval, *capsval;
     val_value_t           *confsval, *confval;
     val_value_t           *sessionsval, *statisticsval;

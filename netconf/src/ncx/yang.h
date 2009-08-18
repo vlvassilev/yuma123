@@ -107,12 +107,11 @@ typedef struct yang_node_t_ {
     const xmlChar *name;    /* module name in imp/inc/failed */
     const xmlChar *revision;   /* revision date in imp/inc/failed */
     ncx_module_t  *mod;     /* back-ptr to module w/ imp/inc */
-    tk_token_t    *tk;      /* back-ptr to token for imp/inc */
     ncx_module_t  *submod;             /* submod for allincQ */
     xmlChar       *failed;  /* saved name for failed entries */
     xmlChar       *failedrev;  /* saved revision for failed entries */
-    tk_chain_t    *tkc;      /* saved token chain for errors */
     status_t       res;         /* saved result for 'failed' */
+    ncx_error_t    tkerr;
 } yang_node_t;
 
 
@@ -158,6 +157,7 @@ typedef struct yang_pcb_t_ {
     boolean       diffmode;        /* TRUE = yangdiff old ver */
     boolean       cookedmode;  /* TRUE = OK to cook in deviations */
     boolean       deviationmode;  /* TRUE if keeping deviations only */
+    boolean       searchmode;  /* TRUE if just getting ns & version */
     dlq_hdr_t     allimpQ;          /* Q of yang_import_ptr_t */
 
     dlq_hdr_t    *savedevQ;  /* ptr to Q of ncx_save_deviations_t */
@@ -325,7 +325,7 @@ extern status_t
 			   ncx_module_t *mod,
 			   const xmlChar *prefix,
 			   const xmlChar *name,
-			   tk_token_t *errtk,
+			   ncx_error_t *tkerr,
 			   typ_template_t **typ);
 
 /* find an imported grouping */
@@ -335,7 +335,7 @@ extern status_t
 			    ncx_module_t *mod,
 			    const xmlChar *prefix,
 			    const xmlChar *name,
-			    tk_token_t *errtk,
+			    ncx_error_t *tkerr,
 			    grp_template_t **grp);
 
 extern status_t 
@@ -344,7 +344,7 @@ extern status_t
 			     ncx_module_t *mod,
 			     const xmlChar *prefix,
 			     const xmlChar *name,
-			     tk_token_t *errtk,
+			     ncx_error_t *tkerr,
 			     ext_template_t **ext);
 
 
@@ -354,7 +354,7 @@ extern status_t
 			   ncx_module_t *mod,
 			   const xmlChar *prefix,
 			   const xmlChar *name,
-			   tk_token_t *errtk,
+			   ncx_error_t *tkerr,
 			   ncx_feature_t **feature);
 
 extern status_t 
@@ -363,7 +363,7 @@ extern status_t
 			    ncx_module_t *mod,
 			    const xmlChar *prefix,
 			    const xmlChar *name,
-			    tk_token_t *errtk,
+			    ncx_error_t *tkerr,
 			    ncx_identity_t **identity);
 
 /* generate warnings if local typedefs/groupings not used */
@@ -430,7 +430,7 @@ extern void
 extern status_t
     yang_validate_date_string (tk_chain_t *tkc,
 			      ncx_module_t *mod,
-			      tk_token_t *errtk,
+			      ncx_error_t *tkerr,
 			      const xmlChar *datestr);
 
 extern void

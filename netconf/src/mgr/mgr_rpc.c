@@ -140,7 +140,7 @@ date         init     comment
 *********************************************************************/
 static boolean mgr_rpc_init_done = FALSE;
 
-static const obj_template_t *reply_obj;
+static obj_template_t *reply_obj;
 
 
 /********************************************************************
@@ -607,7 +607,7 @@ void
     mgr_rpc_dispatch (ses_cb_t *scb,
 		      xml_node_t *top)
 {
-    const obj_template_t    *rpyobj;
+    obj_template_t          *rpyobj;
     mgr_rpc_rpy_t           *rpy;
     mgr_rpc_req_t           *req;
     xml_attr_t              *attr;

@@ -170,15 +170,15 @@ static void
 	       uint32 indent)
 {
 
-    const obj_template_t *rpc;
+    obj_template_t       *rpc;
     boolean               anyout;
     uint32                nestlevel;
 
     nestlevel = get_nestlevel(mode);
     anyout = FALSE;
-    for (rpc = (const obj_template_t *)dlq_firstEntry(hdr);
+    for (rpc = (obj_template_t *)dlq_firstEntry(hdr);
 	 rpc != NULL;
-	 rpc = (const obj_template_t *)dlq_nextEntry(rpc)) {
+	 rpc = (obj_template_t *)dlq_nextEntry(rpc)) {
 
 	if (rpc->objtype == OBJ_TYP_RPC) {
 	    anyout = TRUE;
@@ -241,7 +241,7 @@ void
 			 help_mode_t mode)
 {
     ncx_module_t         *mod;
-    const obj_template_t *cli;
+    obj_template_t       *cli;
     uint32                nestlevel;
 
 #ifdef DEBUG
@@ -302,8 +302,10 @@ void
 	    log_stdout("\n          built-in YANG type is present for "
 		       "derived types only\n");
 
-	    obj_dump_datadefQ(obj_get_cdatadefQ(cli), mode, 
-			      nestlevel, 4);
+	    obj_dump_datadefQ(obj_get_datadefQ(cli), 
+                              mode, 
+			      nestlevel, 
+                              4);
 	}
     }
 
@@ -395,7 +397,7 @@ void
 *    mode == help mode requested
 *********************************************************************/
 void
-    help_object (const obj_template_t *obj,
+    help_object (obj_template_t *obj,
 		 help_mode_t mode)
 {
     obj_dump_template(obj, mode, get_nestlevel(mode), 0);

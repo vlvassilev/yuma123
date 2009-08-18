@@ -124,7 +124,7 @@ static status_t
 		      xmlns_id_t  nsid,
 		      const xmlChar *nodename)
 {
-    const obj_template_t  **useobj, *foundobj;
+    obj_template_t  **useobj, *foundobj;
     const xmlChar          *modname;
     ncx_module_t           *targmod;
     status_t                res;
@@ -154,7 +154,7 @@ static status_t
 
     /* get the module from the NSID or the prefix */
     if (res == NO_ERR) {
-	if (pcb->source == XP_SRC_XML || pcb->mod==NULL) {
+	if (pcb->source == XP_SRC_XML || pcb->tkerr.mod==NULL) {
 	    if (nsid) {
 		modname = xmlns_get_module(nsid);
 		if (modname) {
@@ -176,7 +176,7 @@ static status_t
 	    }
 	} else {
 	    res = xpath_get_curmod_from_prefix(prefix,
-					       pcb->mod,
+					       pcb->tkerr.mod,
 					       &targmod);
 	    if (res != NO_ERR) {
 		if (!prefix && laxnamespaces) {
@@ -252,7 +252,7 @@ static status_t
     /* finish off any error and exit */
     if (res != NO_ERR) {
 	if (pcb->logerrors) {
-	    ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	    ncx_print_errormsg(pcb->tkc, pcb->tkerr.mod, res);
 	}
 	return res;
     }
@@ -348,7 +348,7 @@ static status_t
 static status_t
     move_up_obj (xpath_pcb_t *pcb)
 {
-    const obj_template_t  **useobj, *foundobj;
+    obj_template_t  **useobj, *foundobj;
     status_t                res;
 
     foundobj = NULL;
@@ -435,7 +435,7 @@ static status_t
     /* get the next token in the step, node-identifier */
     res = TK_ADV(pcb->tkc);
     if (res != NO_ERR) {
-	ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+	ncx_print_errormsg(pcb->tkc, pcb->tkerr.mod, res);
 	return res;
     }
 
@@ -461,16 +461,18 @@ static status_t
 	prefix = TK_CUR_MOD(pcb->tkc);
 
 	if (pcb->source != XP_SRC_XML) {
-	    if (pcb->mod) {
-                if (xml_strcmp(pcb->mod->prefix, prefix)) {
-                    import = ncx_find_pre_import(pcb->mod, prefix);
+	    if (pcb->tkerr.mod) {
+                if (xml_strcmp(pcb->tkerr.mod->prefix, prefix)) {
+                    import = ncx_find_pre_import(pcb->tkerr.mod, prefix);
                     if (!import) {
                         res = ERR_NCX_PREFIX_NOT_FOUND;
                         if (pcb->logerrors) {
                             log_error("\nError: import for "
                                       "prefix '%s' not found",
                                       prefix);
-                            ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+                            ncx_print_errormsg(pcb->tkc, 
+                                               pcb->tkerr.mod, 
+                                               res);
                         }
                         break;
                     } else {
@@ -510,7 +512,7 @@ static status_t
     default:
 	res = ERR_NCX_WRONG_TKTYPE;
 	ncx_mod_exp_err(pcb->tkc, 
-                        pcb->mod, 
+                        pcb->tkerr.mod, 
                         res,
 			tk_get_token_name(TK_CUR_TYP(pcb->tkc)));
     }
@@ -550,7 +552,9 @@ static status_t
     if (xml_strcmp(TK_CUR_VAL(pcb->tkc),
 		   (const xmlChar *)"current")) {
 	res = ERR_NCX_WRONG_VAL;
-	ncx_mod_exp_err(pcb->tkc, pcb->mod, res,
+	ncx_mod_exp_err(pcb->tkc, 
+                        pcb->tkerr.mod, 
+                        res,
 			"current() function");
 	return res;
     }
@@ -714,22 +718,22 @@ static status_t
 *   int32   [0..N-1] key number or -1 if not a key in this obj
 *********************************************************************/
 static int32
-    get_key_number (const obj_template_t *obj,
-		    const obj_template_t *keyobj)
+    get_key_number (obj_template_t *obj,
+		    obj_template_t *keyobj)
 {
-    const obj_key_t       *key;
-    int32                  keynum;
+    obj_key_t       *key;
+    int32            keynum;
 
     keynum = 0;
 
-    key = obj_first_ckey(obj);
+    key = obj_first_key(obj);
     while (key) {
 	if (key->keyobj == keyobj) {
 	    return keynum;
 	}
 
 	keynum++;
-	key = obj_next_ckey(key);
+	key = obj_next_key(key);
     }
 
     return -1;
@@ -1120,7 +1124,9 @@ static status_t
 	    if (pcb->logerrors) {
 		log_error("\nError: wrong token at end of absolute-path '%s'",
 			  tk_get_token_name(nexttyp));
-		ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+		ncx_print_errormsg(pcb->tkc, 
+                                   pcb->tkerr.mod, 
+                                   res);
 	    }
 	}
     }
@@ -1307,7 +1313,7 @@ static status_t
 	    if (pcb->logerrors) {
 		log_error("\nError: wrong token in key-expr '%s'",
 			  pcb->exprstr);
-		ncx_print_errormsg(pcb->tkc, pcb->mod, res);
+		ncx_print_errormsg(pcb->tkc, pcb->tkerr.mod, res);
 	    }
 	}
     }
@@ -1370,8 +1376,13 @@ status_t
 #endif
 
     pcb->logerrors = TRUE;
-    linenum = (tkc) ? TK_CUR_LNUM(tkc) : 1;
-    linepos = (tkc) ? TK_CUR_LPOS(tkc) : 1;
+    if (tkc && tkc->cur) {
+        linenum = TK_CUR_LNUM(tkc);
+        linepos = TK_CUR_LPOS(tkc);
+    } else {
+        linenum = pcb->tkerr.linenum;
+        linepos = pcb->tkerr.linepos;
+    }
 
     if (pcb->tkc) {
         tk_reset_chain(pcb->tkc);
@@ -1395,7 +1406,7 @@ status_t
      * that will always be used to resolve prefixes
      * within the XPath expression
      */
-    pcb->mod = mod;
+    pcb->tkerr.mod = mod;
     pcb->source = source;
     if (source == XP_SRC_INSTANCEID) {
 	pcb->flags |= XP_FL_INSTANCEID;
@@ -1454,10 +1465,10 @@ status_t
 *********************************************************************/
 status_t
     xpath_yang_validate_path (ncx_module_t *mod,
-			      const obj_template_t *obj,
+			      obj_template_t *obj,
 			      xpath_pcb_t *pcb,
 			      boolean schemainst,
-			      const obj_template_t **leafobj)
+			      obj_template_t **leafobj)
 {
     status_t          res;
     boolean           doerror;
@@ -1616,9 +1627,9 @@ status_t
 status_t
     xpath_yang_validate_xmlpath (xmlTextReaderPtr reader,
 				 xpath_pcb_t *pcb,
-				 const obj_template_t *pathobj,
+				 obj_template_t *pathobj,
 				 boolean logerrors,
-				 const obj_template_t **targobj)
+				 obj_template_t **targobj)
 {
     status_t  res;
 
@@ -1721,7 +1732,7 @@ status_t
 status_t
     xpath_yang_validate_xmlkey (xmlTextReaderPtr reader,
 				xpath_pcb_t *pcb,
-				const obj_template_t *obj,
+				obj_template_t *obj,
 				boolean logerrors)
 {
     status_t  res;
@@ -1812,7 +1823,7 @@ val_value_t *
 				    val_value_t **deepest)
 {
     val_value_t          *childval, *top, *curtop;
-    const obj_template_t *curobj, *childobj;
+    obj_template_t *curobj, *childobj;
     const xmlChar        *objprefix, *objname, *modname;
     status_t              res;
     boolean               done, done2;
@@ -2006,7 +2017,7 @@ val_value_t *
 
 	    /* set the new leaf with the value */
 	    res = val_set_simval(childval,
-				 obj_get_ctypdef(childobj),
+				 obj_get_typdef(childobj),
 				 obj_get_nsid(childobj),
 				 obj_get_name(childobj),
 				 TK_CUR_VAL(pcb->tkc));

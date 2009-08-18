@@ -167,7 +167,7 @@ extern void
 extern void
     xml_wr_check_val (ses_cb_t *scb,
 		      xml_msg_hdr_t *msg,
-		      const val_value_t *val,
+		      val_value_t *val,
 		      int32  indent,
 		      val_nodetest_fn_t testfn);
 
@@ -176,14 +176,14 @@ extern void
 extern void
     xml_wr_val (ses_cb_t *scb,
 		xml_msg_hdr_t *msg,
-		const val_value_t *val,
+		val_value_t *val,
 		int32 indent);
 
 /* generate entire val_value_t *w/filter) */
 extern void
     xml_wr_full_check_val (ses_cb_t *scb,
 			   xml_msg_hdr_t *msg,
-			   const val_value_t *val,
+			   val_value_t *val,
 			   int32  indent,
 			   val_nodetest_fn_t testfn);
 
@@ -191,12 +191,12 @@ extern void
 extern void
     xml_wr_full_val (ses_cb_t *scb,
 		     xml_msg_hdr_t *msg,
-		     const val_value_t *val,
+		     val_value_t *val,
 		     int32  indent);
 
 extern status_t
     xml_wr_check_open_file (FILE *fp, 
-                            const val_value_t *val,
+                            val_value_t *val,
                             xml_attrs_t *attrs,
                             boolean docmode,
                             boolean xmlhdr,
@@ -206,7 +206,7 @@ extern status_t
 
 extern status_t
     xml_wr_check_file (const xmlChar *filespec, 
-		       const val_value_t *val,
+		       val_value_t *val,
 		       xml_attrs_t *attrs,
 		       boolean docmode,
 		       boolean xmlhdr,
@@ -217,7 +217,7 @@ extern status_t
 
 extern status_t
     xml_wr_file (const xmlChar *filespec, 
-		 const val_value_t *val,
+		 val_value_t *val,
 		 xml_attrs_t *attrs,
 		 boolean docmode,
 		 boolean xmlhdr,

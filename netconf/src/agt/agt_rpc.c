@@ -736,9 +736,9 @@ static status_t
                      obj_template_t *rpcobj,
                      xml_node_t  *method)
 {
-    const obj_template_t  *obj;
-    const obj_rpcio_t     *rpcio;
-    status_t               res;
+    obj_template_t  *obj;
+    obj_rpcio_t     *rpcio;
+    status_t         res;
 
     res = NO_ERR;
 
@@ -1064,10 +1064,11 @@ void
     rpc_msg_t             *msg;
     obj_template_t        *rpcobj;
     obj_rpc_t             *rpc;
-    const obj_template_t  *testobj;
+    obj_template_t       *testobj;
     agt_rpc_cbset_t       *cbset;
     ses_total_stats_t     *agttotals;
     xmlChar               *buff;
+    char                  *errstr;
     xml_node_t             method, testnode;
     status_t               res;
     boolean                errdone;
@@ -1344,6 +1345,7 @@ void
                    NCX_LAYER_NONE, NULL);
             if (res==NO_ERR) {
                 res = ERR_NCX_UNKNOWN_ELEMENT;
+                errstr = (char *)xml_strdup((const xmlChar *)RPC_ROOT);
                 agt_record_error(scb, 
                                  &msg->mhdr, 
                                  NCX_LAYER_RPC, 
@@ -1351,8 +1353,11 @@ void
                                  &method, 
                                  NCX_NT_NONE, 
                                  NULL, 
-                                 NCX_NT_STRING, 
-                                 RPC_ROOT);
+                                 (errstr) ? NCX_NT_STRING : NCX_NT_NONE,
+                                 errstr);
+                if (errstr) {
+                    m__free(errstr);
+                }
             }
         }
 

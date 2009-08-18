@@ -234,7 +234,7 @@ static cfg_template_t *
 {
     ncx_module_t          *mod;
     cfg_template_t        *cfg;
-    const obj_template_t  *cfgobj;
+    obj_template_t        *cfgobj;
 
     cfgobj = NULL;
     mod = ncx_find_module(NCX_EL_NETCONF, NULL);

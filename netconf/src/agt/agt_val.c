@@ -1298,18 +1298,6 @@ static status_t
         ;  
     }
 
-#if 0
-    /* check if the typdef for this value has a callback */
-    if (res == NO_ERR) {
-        res = handle_user_callback(cbtyp, 
-                                   editop, 
-                                   scb, 
-                                   msg, 
-                                   newval, 
-                                   curval);
-    }
-#endif
-
     return res;
 
 }  /* invoke_simval_cb */
@@ -1496,20 +1484,6 @@ static status_t
         }
     }
 
-#if 0
-    /* check if the typdef for this value has a callback
-     * only call if the operation was applied here
-     */
-    if (retres == NO_ERR && !initialdone && done) {
-        retres = handle_user_callback(cbtyp, 
-                                      cur_editop, 
-                                      scb, 
-                                      msg,
-                                      newval, 
-                                      curval);
-    }
-#endif
-        
     return retres;
 
 }  /* invoke_cpxval_cb */
@@ -1934,7 +1908,7 @@ static boolean
 *********************************************************************/
 static status_t 
     make_unique_testset (val_value_t *curval,
-                         const obj_unique_t *unidef,
+                         obj_unique_t *unidef,
                          dlq_hdr_t *resultQ,
                          dlq_hdr_t *freeQ)
 {
@@ -1953,11 +1927,7 @@ static status_t
     }
 
     /* need to get a non-const pointer to the module */
-    mod = ncx_find_module(curval->obj->mod->name,
-                          curval->obj->mod->version);
-    if (mod != curval->obj->mod) {
-        return SET_ERROR(ERR_INTERNAL_VAL);
-    }
+    mod = curval->obj->tkerr.mod;
 
     /* for each unique component, get the descendant
      * node that is specifies and save it in a val_unique_t
@@ -2023,7 +1993,7 @@ static status_t
     one_unique_stmt_check (ses_cb_t *scb,
                            xml_msg_hdr_t *msg,
                            val_value_t *curval,
-                           const obj_unique_t *unidef,
+                           obj_unique_t *unidef,
                            uint32 uninum)
 {
     dlq_hdr_t        uni1Q, uni2Q, freeQ;
@@ -2167,7 +2137,7 @@ static status_t
                        xml_msg_hdr_t *msg,
                        val_value_t *curval)
 {
-    const obj_unique_t    *unidef;
+    obj_unique_t         *unidef;
     val_value_t           *clearval, *chval;
     uint32                 uninum;
     status_t               res, retres;
@@ -2243,9 +2213,9 @@ static status_t
                           ncx_layer_t layer)
 {
     xpath_result_t      *result;
-    const xpath_pcb_t   *xpcb;
-    const ncx_errinfo_t *errinfo;
-    const typ_def_t     *typdef;
+    xpath_pcb_t         *xpcb;
+    ncx_errinfo_t       *errinfo;
+    typ_def_t           *typdef;
     boolean              constrained, fnresult;
     status_t             res, validateres;
 
@@ -2259,7 +2229,7 @@ static status_t
          * instance that matched, just checking the
          * require-instance flag
          */
-        typdef = obj_get_ctypdef(val->obj);
+        typdef = obj_get_typdef(val->obj);
         constrained = typ_get_constrained(typdef);
         xpcb = typ_get_leafref_pcb(typdef);
 
@@ -2400,7 +2370,7 @@ static status_t
 static status_t 
     instance_check (ses_cb_t *scb,
                     xml_msg_hdr_t *msg,
-                    const obj_template_t *obj,
+                    obj_template_t *obj,
                     val_value_t *val,
                     val_value_t *valroot,
                     ncx_layer_t layer)
@@ -2765,12 +2735,12 @@ static status_t
 static status_t 
     choice_check_agt (ses_cb_t  *scb,
                       xml_msg_hdr_t *msg,
-                      const obj_template_t *choicobj,
+                      obj_template_t *choicobj,
                       val_value_t *val,
                       val_value_t *valroot,
                       ncx_layer_t   layer)
 {
-    const obj_template_t  *testobj;
+    obj_template_t        *testobj;
     val_value_t           *chval, *testval;
     status_t               res, retres;
 
@@ -2890,8 +2860,8 @@ static status_t
                      val_value_t *root,
                      val_value_t *curval)
 {
-    const obj_template_t  *obj;
-    const dlq_hdr_t       *mustQ;
+    obj_template_t  *obj;
+    dlq_hdr_t       *mustQ;
     xpath_pcb_t           *must;
     xpath_result_t        *result;
     val_value_t           *chval;
@@ -3064,8 +3034,8 @@ static status_t
                      boolean *deleteme,
                      boolean rpcmode)
 {
-    const obj_template_t  *obj;
-    const xpath_pcb_t     *objwhen, *augwhen, *useswhen, *whendef;
+    obj_template_t  *obj;
+    xpath_pcb_t     *objwhen, *augwhen, *useswhen, *whendef;
     xpath_pcb_t           *whenclone;
     xpath_result_t        *result;
     val_value_t           *chval, *nextchild;
@@ -3262,7 +3232,7 @@ static void
                                dlq_hdr_t *deleteQ,
                                boolean *deleteme)
 {
-    const obj_template_t  *obj;
+    obj_template_t  *obj;
     val_value_t           *chval, *nextchild;
     boolean                deletechild;
 
@@ -3559,7 +3529,7 @@ status_t
     agt_val_rpc_xpath_check (ses_cb_t *scb,
                              xml_msg_hdr_t *msg,
                              val_value_t *rpcinput,
-                             const obj_template_t *rpcroot)
+                             obj_template_t *rpcroot)
 {
     val_value_t           *method, *deleteval;
     dlq_hdr_t              deleteQ;
@@ -3693,7 +3663,7 @@ status_t
                             val_value_t *root,
                             ncx_layer_t layer)
 {
-    const obj_template_t  *obj, *chobj;
+    obj_template_t  *obj, *chobj;
     val_value_t           *chval;
     status_t               res, retres;
 
@@ -3807,8 +3777,8 @@ status_t
                         xml_msg_hdr_t *msg,
                         val_value_t *root)
 {
-    const ncx_module_t    *mod;
-    const obj_template_t  *obj, *chobj;
+    ncx_module_t    *mod;
+    obj_template_t  *obj, *chobj;
     val_value_t           *chval;
     status_t               res, retres;
     xmlns_id_t             ncxid;

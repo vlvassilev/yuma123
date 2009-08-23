@@ -195,6 +195,8 @@ boolean
 * 
 * INPUTS:
 *    mod == module to cache in this struct
+*    malloced == TRUE if mod is malloced
+*                FALSE if mod is a back-ptr
 *    feature_list == feature list from capability
 *    deviation_list = deviations list from capability
 *
@@ -396,8 +398,6 @@ ncx_module_t *
     return mod;
 
 }  /* find_module */
-
-
 
 
 /********************************************************************

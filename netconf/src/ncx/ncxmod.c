@@ -569,7 +569,6 @@ static boolean
 }  /* test_pathlist */
 
 
-
 /********************************************************************
 * FUNCTION search_subdirs
 *
@@ -1035,6 +1034,13 @@ static status_t
 {
     yang_node_t *node;
 
+    /* do not save failed modules based on a failed search
+     * or if the module is not really being added to the registry
+     */
+    if (pcb->searchmode || pcb->parsemode) {
+        return NO_ERR;
+    }
+
     node = yang_new_node();
     if (!node) {
 	return ERR_INTERNAL_MEM;
@@ -1400,8 +1406,11 @@ static status_t
 	}
     }
 
-    /* check if the module is already loaded (in the current ncx_modQ) */
-    if (!isfile) {
+    /* check if the module is already loaded (in the current ncx_modQ) 
+     * skip if this is parsemode in yangcli, and a new copy of the
+     * module is desired
+     */
+    if (!isfile && (pcb->importmode || !pcb->parsemode)) {
 	testmod = ncx_find_module(modname, revision);
 	if (testmod) {
 #ifdef NCXMOD_DEBUG
@@ -1852,15 +1861,6 @@ static void
 {
     int   retval;
 
-    if (filcb->fp) {
-        retval = fclose(filcb->fp);
-        if (retval < 0) {
-            log_error("\nError: could not close temp file '%s' (%s)",
-                      filcb->source,
-                      get_error_string(errno_to_status()));
-        }
-    }
-
     if (filcb->source) {
         retval = remove((const char *)filcb->source);
         if (retval < 0) {
@@ -2177,6 +2177,230 @@ status_t
 
 
 /********************************************************************
+* FUNCTION ncxmod_parse_module
+*
+* Determine the location of the specified module
+* and then parse the file into an ncx_module_t,
+* but do not load it into the module registry
+*
+* Used by yangcli to build per-session view of each
+* module advertised by the NETCONF server
+*
+* Module Search order:
+*
+* 1) YANG_MODPATH environment var (or set by modpath CLI var)
+* 2) current dir or absolute path
+* 3) YANG_HOME/modules directory
+* 4) HOME/modules directory
+*
+* INPUTS:
+*   modname == module name with no path prefix or file extension
+*   revision == optional revision date of 'modname' to find
+*   savedevQ == Q of ncx_save_deviations_t to use, if any
+*   retmod == address of return module
+*
+* OUTPUTS:
+*    *retmod == pointer to requested module version
+*               THIS IS A LIVE MALLOCED STRUCT THAT NEEDS
+*               FREED LATER
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t 
+    ncxmod_parse_module (const xmlChar *modname,
+                         const xmlChar *revision,
+                         dlq_hdr_t *savedevQ,
+                         ncx_module_t **retmod)
+{
+    yang_pcb_t      *pcb;
+    status_t         res;
+
+#ifdef DEBUG
+    if (!modname) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+
+    pcb = yang_new_pcb();
+    if (!pcb) {
+	res = ERR_INTERNAL_MEM;
+    } else {
+	pcb->revision = revision;
+        pcb->savedevQ = savedevQ;
+        pcb->parsemode = TRUE;
+	res = try_load_module(pcb, 
+			      YANG_PT_TOP,
+			      modname, 
+			      revision, 
+			      retmod);
+    }
+
+    if (LOGINFO && res != NO_ERR) {
+        if (revision) {
+            log_info("\nLoad module '%s', revision '%s' failed (%s)",
+                     modname,
+                     revision,
+                     get_error_string(res));
+        } else {
+            log_info("\nLoad module '%s' failed (%s)",
+                     modname,
+                     get_error_string(res));
+        }
+    }
+
+    if (pcb) {
+	yang_free_pcb(pcb);
+    }
+    return res;
+
+}  /* ncxmod_parse_module */
+
+
+/********************************************************************
+* FUNCTION ncxmod_find_module
+*
+* Determine the location of the specified module
+* and then fill out a search result struct
+* DO NOT load it into the system
+*
+* Module Search order:
+*
+* 1) YANG_MODPATH environment var (or set by modpath CLI var)
+* 2) current dir or absolute path
+* 3) YANG_HOME/modules directory
+* 4) HOME/modules directory
+*
+* INPUTS:
+*   modname == module name with no path prefix or file extension
+*   revision == optional revision date of 'modname' to find
+*
+* RETURNS:
+*   == malloced and filled in search result struct
+*      MUST call ncxmod_free_search_result() if the
+*      return value is non-NULL
+*      CHECK result->res TO SEE IF MODULE WAS FOUND
+*      A SEARCH RESULT WILL BE RETURNED IF A SEARCH WAS
+*      ATTEMPTED, EVEN IF NOTHING FOUND
+*   == NULL if any error preventing a search
+*********************************************************************/
+ncxmod_search_result_t *
+    ncxmod_find_module (const xmlChar *modname,
+			const xmlChar *revision)
+{
+    yang_pcb_t               *pcb;
+    ncxmod_search_result_t   *searchresult;
+    ncx_module_t             *retmod;
+    status_t                  res;
+
+#ifdef DEBUG
+    if (!modname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    res = NO_ERR;
+
+    searchresult = ncxmod_new_search_result();
+    if (searchresult == NULL) {
+        return NULL;
+    }
+
+    pcb = yang_new_pcb();
+    if (pcb == NULL) {
+        ncxmod_free_search_result(searchresult);
+        return NULL;
+    } 
+
+    pcb->revision = revision;
+    pcb->searchmode = TRUE;
+    retmod = NULL;
+    res = try_load_module(pcb, 
+                          YANG_PT_TOP,
+                          modname, 
+                          revision, 
+                          &retmod);
+    if (res != NO_ERR) {
+        if (LOGINFO) {
+            if (revision) {
+                log_info("\nFind module '%s', revision '%s' failed (%s)",
+                         modname,
+                         revision,
+                         get_error_string(res));
+            } else {
+                log_info("\nFind module '%s' failed (%s)",
+                         modname,
+                         get_error_string(res));
+            }
+        }
+
+        retmod = NULL;
+        searchresult->res = res;
+        searchresult->module = xml_strdup(modname);
+        if (searchresult->module == NULL) {
+            searchresult->res = ERR_INTERNAL_MEM;
+        } else if (revision) {
+            searchresult->revision = xml_strdup(revision);
+            if (searchresult->revision == NULL) {
+                searchresult->res = ERR_INTERNAL_MEM;
+            }
+        }
+    }
+
+    if (res == NO_ERR && LOGDEBUG2) {
+        log_debug2("\nFound module"
+                   "\n   name:      '%s'"
+                   "\n   revision:  '%s':"
+                   "\n   namespace: '%s'"
+                   "\n   source:    '%s'",
+                   (retmod->name) ? retmod->name : EMPTY_STRING,
+                   (retmod->version) ? retmod->version : EMPTY_STRING,
+                   (retmod->ns) ? retmod->ns : EMPTY_STRING,
+                   (retmod->source) ? retmod->source : EMPTY_STRING);
+    }
+
+    if (retmod) {
+        searchresult->mod = NULL;
+
+        if (retmod->name) {
+            searchresult->module = xml_strdup(retmod->name);
+            if (searchresult->module == NULL) {
+                searchresult->res = ERR_INTERNAL_MEM;
+            }
+        }
+        if (retmod->version) {
+            searchresult->revision = xml_strdup(retmod->version);
+            if (searchresult->revision == NULL) {
+                searchresult->res = ERR_INTERNAL_MEM;
+            }
+        }
+        if (retmod->ns) {
+            searchresult->namespace = xml_strdup(retmod->ns);
+            if (searchresult->namespace == NULL) {
+                searchresult->res = ERR_INTERNAL_MEM;
+            }
+        }
+        if (retmod->source) {
+            searchresult->source = xml_strdup(retmod->source);
+            if (searchresult->source == NULL) {
+                searchresult->res = ERR_INTERNAL_MEM;
+            }
+        }
+    }
+
+    if (pcb) {
+	yang_free_pcb(pcb);
+    }
+
+    return searchresult;
+
+}  /* ncxmod_find_module */
+
+
+/********************************************************************
 * FUNCTION ncxmod_load_deviation
 *
 * Determine the location of the specified module
@@ -2303,6 +2527,7 @@ status_t
     yang_node_t     *node;
     const xmlChar   *savedrev;
     status_t         res;
+    boolean          savedparsemode, savedimportmode;
 
 #ifdef DEBUG
     if (!modname || !pcb) {
@@ -2319,6 +2544,12 @@ status_t
     savedrev = pcb->revision;
     pcb->revision = revision;
 
+    savedparsemode = pcb->parsemode;
+    pcb->parsemode = FALSE;
+
+    savedimportmode = pcb->importmode;
+    pcb->importmode = TRUE;
+
     res = try_load_module(pcb, 
 			  ptyp,
 			  modname,
@@ -2326,6 +2557,9 @@ status_t
 			  NULL);
 
     pcb->revision = savedrev;
+    pcb->parsemode = savedparsemode;
+    pcb->importmode = savedimportmode;
+
     return res;
 
 }  /* ncxmod_load_imodule */
@@ -2455,6 +2689,9 @@ yang_pcb_t *
 			       modname, 
 			       revision,
 			       NULL);
+        if (modpath) {
+            ncxmod_clear_altpath();
+        }
     }
 
     return pcb;
@@ -3879,7 +4116,6 @@ ncxmod_temp_filcb_t *
 
     /* setup */
     *res = NO_ERR;
-    sescb = NULL;
     fixedlen = xml_strlen(sescb->source);
     filenamelen = xml_strlen(filename);
 
@@ -3902,27 +4138,12 @@ ncxmod_temp_filcb_t *
         return NULL;
     }
 
-    /* already in expanded path name format
-     * try to open ~/.yangtools/tmp/<progstr>/<sidnum>/filename 
-     * for writing; truncate to zero-length if already exists
-     */
-    filcb->fp = fopen((const char *)filcb->source, "w");
-    if (filcb->fp != NULL) {
-        /* transfer malloced buffer here */
-        filcb->source = buffer;
-        buffer = NULL;
-        filcb->filename = p;
+    /* transfer malloced buffer here */
+    filcb->source = buffer;
+    filcb->filename = p;
 
-        /* store pointer to the new file for cleanup */
-        dlq_enque(filcb, &sescb->temp_filcbQ);
-    } else {
-        log_error("\nError: cannot open temp file '%s' for writing",
-                  filcb->source);
-        *res = errno_to_status();
-        free_temp_filcb(filcb);
-        m__free(buffer);
-        filcb = NULL;
-    }
+    /* store pointer to the new file for cleanup */
+    dlq_enque(filcb, &sescb->temp_filcbQ);
 
     return filcb;
 
@@ -3953,6 +4174,128 @@ void
     free_temp_filcb(filcb);
 
 }  /* ncxmod_free_session_tempfile */
+
+
+/********************************************************************
+* FUNCTION ncxmod_new_search_result
+*
+*  Malloc and initialize a search result struct
+*
+* RETURNS:
+*   malloced and initialized struct, NULL if ERR_INTERNAL_MEM
+*********************************************************************/
+ncxmod_search_result_t *
+    ncxmod_new_search_result (void)
+{
+    ncxmod_search_result_t *searchresult;
+
+    searchresult = m__getObj(ncxmod_search_result_t);
+    if (searchresult == NULL) {
+        return NULL;
+    }
+    memset(searchresult, 0x0, sizeof(ncxmod_search_result_t));
+    return searchresult;
+
+}  /* ncxmod_new_search_result */
+
+
+/********************************************************************
+* FUNCTION ncxmod_new_search_result_ex
+*
+*  Malloc and initialize a search result struct
+*
+* INPUTS:
+*    mod == module struct to use
+*
+* RETURNS:
+*   malloced and initialized struct, NULL if ERR_INTERNAL_MEM
+*********************************************************************/
+ncxmod_search_result_t *
+    ncxmod_new_search_result_ex (const ncx_module_t *mod)
+{
+    ncxmod_search_result_t *searchresult;
+
+#ifdef DEBUG
+    if (mod == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    searchresult = m__getObj(ncxmod_search_result_t);
+    if (searchresult == NULL) {
+        return NULL;
+    }
+    memset(searchresult, 0x0, sizeof(ncxmod_search_result_t));
+
+    searchresult->module = xml_strdup(mod->name);
+    if (searchresult->module == NULL) {
+        ncxmod_free_search_result(searchresult);
+        return NULL;
+    }
+
+    if (mod->version) {
+        searchresult->revision = xml_strdup(mod->version);
+        if (searchresult->revision == NULL) {
+            ncxmod_free_search_result(searchresult);
+            return NULL;
+        }
+    }
+
+    if (mod->ns) {
+        searchresult->namespace = xml_strdup(mod->ns);
+        if (searchresult->namespace == NULL) {
+            ncxmod_free_search_result(searchresult);
+            return NULL;
+        }
+    }
+
+    if (mod->source) {
+        searchresult->source = xml_strdup(mod->source);
+        if (searchresult->source == NULL) {
+            ncxmod_free_search_result(searchresult);
+            return NULL;
+        }
+    }
+
+    return searchresult;
+
+}  /* ncxmod_new_search_result_ex */
+
+
+/********************************************************************
+* FUNCTION ncxmod_free_search_result
+*
+*  Clean and free a search result struct
+*
+* INPUTS:
+*    searchresult == struct to clean and free
+*********************************************************************/
+void
+    ncxmod_free_search_result (ncxmod_search_result_t *searchresult)
+{
+#ifdef DEBUG
+    if (searchresult == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (searchresult->module) {
+        m__free(searchresult->module);
+    }
+    if (searchresult->revision) {
+        m__free(searchresult->revision);
+    }
+    if (searchresult->namespace) {
+        m__free(searchresult->namespace);
+    }
+    if (searchresult->source) {
+        m__free(searchresult->source);
+    }
+    m__free(searchresult);
+
+}  /* ncxmod_free_search_result */
 
 
 /* END file ncxmod.c */

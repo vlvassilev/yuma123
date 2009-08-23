@@ -184,6 +184,9 @@ static void
     if (cap->cap_uri) {
 	m__free(cap->cap_uri);
     }
+    if (cap->cap_namespace) {
+	m__free(cap->cap_namespace);
+    }
     if (cap->cap_module) {
 	m__free(cap->cap_module);
     }
@@ -975,6 +978,12 @@ status_t
         return ERR_INTERNAL_MEM;
     }
 
+    cap->cap_namespace = xml_strndup(uri, baselen);
+    if (!cap->cap_namespace) {
+	free_cap(cap);
+        return ERR_INTERNAL_MEM;
+    }
+
     cap->cap_module = xml_strndup(module, modulelen);
     if (!cap->cap_module) {
 	free_cap(cap);
@@ -1057,7 +1066,6 @@ status_t
     }
 
     cap->cap_subject = CAP_SUBJTYP_DM;
-    cap->cap_baselen = baselen;
     dlq_enque(cap, &caplist->capQ);
     return NO_ERR;
 
@@ -1705,13 +1713,13 @@ cap_rec_t *
 * INPUTS:
 *    cap ==  capability rec to parse
 *    module == address of return module name
-*    modlen == address of return module name length
-*    version == address of return module version string
+*    revision == address of return module revision date string
+*    namespace == address of return module namespace
 *
 * OUTPUTS:
 *    *module == return module name
-*    *modlen == return module name length
-*    *version == return module version string
+*    *revision == return module revision date string
+*    *namespace == return module namepsace
 *
 * RETURNS:
 *    status
@@ -1719,20 +1727,20 @@ cap_rec_t *
 void
     cap_split_modcap (cap_rec_t *cap,
 		      const xmlChar **module,
-		      uint32 *modlen,
-		      const xmlChar **version)
+		      const xmlChar **revision,
+		      const xmlChar **namespace)
 {
 
 #ifdef DEBUG
-    if (!cap || !module || !modlen || !version) {
+    if (!cap || !module || !revision || !namespace) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return;
     }
 #endif
 
     *module = cap->cap_module;
-    *modlen = xml_strlen(cap->cap_module);
-    *version = cap->cap_revision;
+    *revision = cap->cap_revision;
+    *namespace = cap->cap_namespace;
 
 } /* cap_split_modcap */
 

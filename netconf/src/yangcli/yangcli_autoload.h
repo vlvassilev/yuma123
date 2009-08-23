@@ -24,12 +24,8 @@ date	     init     comment
 
 #include <xmlstring.h>
 
-#ifndef _H_ncxtypes
-#include "ncxtypes.h"
-#endif
-
-#ifndef _H_obj
-#include "obj.h"
+#ifndef _H_ses
+#include "ses.h"
 #endif
 
 #ifndef _H_status
@@ -47,12 +43,27 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+extern status_t
+    autoload_setup_tempdir (agent_cb_t *agent_cb,
+                            ses_cb_t *scb);
 
 extern status_t
-    autoload_module (const xmlChar *modname,
-                     const xmlChar *revision,
-                     ncx_list_t *devlist,
-                     ncx_module_t **retmod);
+    autoload_start_get_modules (agent_cb_t *agent_cb,
+                                ses_cb_t *scb);
+
+extern status_t
+    autoload_handle_rpc_reply (agent_cb_t *agent_cb,
+                               ses_cb_t *scb,
+                               val_value_t *reply,
+                               boolean anyerrors);
+
+extern status_t
+    autoload_compile_modules (agent_cb_t *agent_cb,
+                              ses_cb_t *scb);
+
+extern void
+    autoload_handle_timeout_cleanup (agent_cb_t *agent_cb,
+                                     ses_cb_t *scb);
 
 
 #endif	    /* _H_yangcli_autoload */

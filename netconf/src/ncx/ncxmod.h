@@ -33,8 +33,16 @@ date	     init     comment
 
 #include <xmlstring.h>
 
+#ifndef _H_cap
+#include "cap.h"
+#endif
+
 #ifndef _H_help
 #include "help.h"
+#endif
+
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
 #endif
 
 #ifndef _H_status
@@ -90,6 +98,8 @@ date	     init     comment
 
 #define NCXMOD_IETF_NETCONF   (const xmlChar *)"ietf-netconf"
 
+#define NCXMOD_IETF_NETCONF_STATE (const xmlChar *)"ietf-netconf-state"
+
 /* name of the NCX modules directory appended when YANG_HOME or HOME
  * ENV vars used to construct NCX module filespec
  */
@@ -144,6 +154,10 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+/* following 3 structs used for providing temporary 
+ * work directories for yangcli sessions
+ */
+
 /* program-level temp dir control block */
 typedef struct ncxmod_temp_progcb_t_ {
     dlq_hdr_t    qhdr;
@@ -166,9 +180,25 @@ typedef struct ncxmod_temp_filcb_t_ {
     dlq_hdr_t       qhdr;
     xmlChar        *source;
     const xmlChar  *filename;  /* ptr into source */
-    FILE           *fp;
 } ncxmod_temp_filcb_t;
 
+
+/* struct for storing YANG file search results
+ * this is used by yangcli for schema auto-load
+ * also for finding newest version, or all versions
+ * within the module path
+ */
+typedef struct ncxmod_search_result_t_ {
+    dlq_hdr_t      qhdr;
+    xmlChar       *module;
+    xmlChar       *revision;
+    xmlChar       *namespace;
+    xmlChar       *source;
+    ncx_module_t  *mod;      /* back-ptr to found module if loaded */
+    cap_rec_t     *cap;      /* back-ptr to source capabuility URI */
+    status_t       res;
+    boolean        capmatch;     /* set by yangcli */
+} ncxmod_search_result_t;
 
 
 /* user function callback template to process a module
@@ -216,6 +246,16 @@ extern status_t
 			const xmlChar *revision,
                         dlq_hdr_t *savedevQ,
 			ncx_module_t **retmod);
+
+extern status_t 
+    ncxmod_parse_module (const xmlChar *modname,
+                         const xmlChar *revision,
+                         dlq_hdr_t *savedevQ,
+                         ncx_module_t **retmod);
+
+extern ncxmod_search_result_t *
+    ncxmod_find_module (const xmlChar *modname,
+			const xmlChar *revision);
 
 extern status_t 
     ncxmod_load_deviation (const xmlChar *devname,
@@ -337,5 +377,14 @@ extern ncxmod_temp_filcb_t *
 extern void
     ncxmod_free_session_tempfile (ncxmod_temp_filcb_t *filcb);
 
+
+extern ncxmod_search_result_t *
+    ncxmod_new_search_result (void);
+
+extern ncxmod_search_result_t *
+    ncxmod_new_search_result_ex (const ncx_module_t *mod);
+
+extern void
+    ncxmod_free_search_result (ncxmod_search_result_t *searchresult);
 
 #endif	    /* _H_ncxmod */

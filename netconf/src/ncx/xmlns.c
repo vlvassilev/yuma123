@@ -414,7 +414,6 @@ const xmlChar *
 } /* xmlns_get_ns_name */
 
 
-
 /********************************************************************
 * FUNCTION xmlns_find_ns_by_module
 *

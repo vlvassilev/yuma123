@@ -1183,13 +1183,13 @@ static status_t
     /* the module should already be parsed and loaded */
     mod = pcb->top;
     if (!mod) {
-        return SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
+        return ERR_NCX_MOD_NOT_FOUND;
     }
 
     /* open the YANG source file for reading */
     srcfile = fopen((const char *)mod->source, "r");
     if (!srcfile) {
-        return SET_ERROR(ERR_NCX_MISSING_FILE);
+        return ERR_NCX_MISSING_FILE;
     }
 
     done = FALSE;

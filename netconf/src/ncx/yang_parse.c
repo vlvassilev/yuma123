@@ -1514,8 +1514,6 @@ static status_t
         return NO_ERR;
     }
 
-
-
     /* check all the mandatory clauses are present */
     if (!imp->prefix) {
 	retres = ERR_NCX_DATA_MISSING;
@@ -1636,8 +1634,8 @@ static status_t
 	}
     }
 
-    /* save or delete the import struct */
-    if (retres == NO_ERR  && imp->usexsd) {
+    /* save or delete the import struct, except in search mode */
+    if (retres == NO_ERR && imp->usexsd && !pcb->searchmode) {
 	node = yang_new_node();
 	if (!node) {
 	    retres = ERR_INTERNAL_MEM;
@@ -2985,7 +2983,9 @@ static status_t
      * expressions will be valid when first parsed
      */
     if (!(pcb->deviationmode || pcb->diffmode)) {
-        res = ncx_add_namespace_to_registry(mod);
+        /* add real or temp module NS to the registry */
+        res = ncx_add_namespace_to_registry(mod, 
+                                            pcb->parsemode);
         CHK_EXIT(res, retres);
     }
 
@@ -3008,6 +3008,11 @@ static status_t
 	!mod->name || (mod->ismod && !mod->prefix) || 
 	!*mod->name || (mod->ismod && !*mod->prefix)) {
 	return retres;
+    }
+
+    /* check for early exit if just searching for modules */
+    if (pcb->searchmode) {
+        return retres;
     }
 
     /* special hack -- check if this is the ietf-netconf
@@ -3271,7 +3276,7 @@ static status_t
 	    
 	    /* add this regular module to the registry */
 	    if (!loaded) {
-		if (pcb->diffmode) {
+		if (pcb->diffmode || pcb->parsemode) {
 		    res = ncx_add_to_modQ(mod);
 		} else {
 		    res = ncx_add_to_registry(mod);
@@ -3476,6 +3481,7 @@ status_t
 	} else if (!wasadd && 
                   !(pcb->diffmode || 
                     pcb->searchmode ||
+                    pcb->parsemode ||
                     pcb->deviationmode)) {
 
             /* do not swap out diffmode, searchmode, or deviationmode */

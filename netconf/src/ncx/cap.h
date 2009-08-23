@@ -166,7 +166,7 @@ typedef struct cap_rec_t_ {
     dlq_hdr_t      cap_qhdr;
     cap_subjtyp_t  cap_subject;
     xmlChar       *cap_uri;
-    uint32         cap_baselen;
+    xmlChar       *cap_namespace;
     xmlChar       *cap_module;
     xmlChar       *cap_revision;
     ncx_list_t     cap_feature_list;
@@ -287,8 +287,9 @@ extern cap_rec_t *
 extern void
     cap_split_modcap (cap_rec_t *cap,
 		      const xmlChar **module,
-		      uint32 *modlen,
-		      const xmlChar **version);
+		      const xmlChar **revision,
+		      const xmlChar **namespace);
+
 
 /* make the module URI string (for sysCapabilityChange event) */
 extern xmlChar *

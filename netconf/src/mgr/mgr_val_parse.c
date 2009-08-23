@@ -51,6 +51,11 @@ date         init     comment
 #include "log.h"
 #endif
 
+
+#ifndef _H_mgr
+#include "mgr.h"
+#endif
+
 #ifndef _H_mgr_val_parse
 #include "mgr_val_parse.h"
 #endif
@@ -1416,9 +1421,11 @@ static status_t
 		   const xml_node_t *startnode,
 		   val_value_t  *retval)
 {
-    obj_template_t *chobj, *curchild, *curtop;
-    obj_template_t *nextchobj, *outchobj;
+    obj_template_t       *chobj, *curchild, *curtop;
+    obj_template_t       *nextchobj, *outchobj;
+    mgr_scb_t            *mscb;
     val_value_t          *chval;
+    dlq_hdr_t            *force_modQ;
     xml_node_t            chnode;
     status_t              res, res2, retres;
     boolean               done, empty, errmode;
@@ -1436,6 +1443,13 @@ static status_t
     done = FALSE;
     empty = FALSE;
     chbtyp = NCX_BT_NONE;
+    mscb = (mgr_scb_t *)scb->mgrcb;
+
+    if (dlq_empty(&mscb->temp_modQ)) {
+        force_modQ = NULL;
+    } else {
+        force_modQ = &mscb->temp_modQ;
+    }
 
     val_init_from_template(retval, obj);
 
@@ -1540,6 +1554,7 @@ static status_t
 					 chobj, 
 					 &chnode, 
 					 FALSE,
+                                         force_modQ,
 					 &curtop, 
 					 &curchild);
 	    }
@@ -1549,6 +1564,7 @@ static status_t
 					 outchobj, 
 					 &chnode, 
 					 FALSE,
+                                         force_modQ,
 					 &curtop, 
 					 &curchild);
 	    }
@@ -1579,9 +1595,11 @@ static status_t
 	     */
 	    chval = 
                 val_new_child_val((errmode) ?
-                                  xmlns_inv_id() : obj_get_nsid(curchild),
+                                  xmlns_inv_id() : 
+                                  obj_get_nsid(curchild),
                                   (errmode) ? 
-                                  chnode.elname : obj_get_name(curchild), 
+                                  chnode.elname : 
+                                  obj_get_name(curchild), 
                                   FALSE, 
                                   retval, 
                                   get_editop(&chnode));
@@ -1621,7 +1639,9 @@ static status_t
 	     * is a list
 	     */
 	    if (chbtyp != NCX_BT_LIST) {
-		/* setup next child if the cur child is 0 - 1 instance */
+		/* setup next child if the cur child 
+                 * is 0 - 1 instance 
+                 */
 		switch (obj_get_iqualval(curchild)) {
 		case NCX_IQUAL_ONE:
 		case NCX_IQUAL_OPT:
@@ -1646,17 +1666,19 @@ static status_t
 	}
 	xml_clean_node(&chnode);
 
-	/* check if this is the special internal load-config RPC method,
-	 * in which case there will not be an end tag for the <load-config>
-	 * start tag passed to this function.  Need to quick exit
-	 * to prevent reading past the end of the XML config file,
+	/* check if this is the internal load-config RPC method,
+	 * in which case there will not be an end tag for the 
+         * <load-config> start tag passed to this function.  
+         * Need to quick exit to prevent reading past the 
+         * end of the XML config file,
 	 * which just contains the <config> element
 	 *
 	 * know there is just one parameter named <config> so just
 	 * go through the loop once because the </load-config> tag
 	 * will not be present
 	 */
-	if ((startnode->nsid == xmlns_ncx_id() || startnode->nsid == 0) && 
+	if ((startnode->nsid == xmlns_ncx_id() || 
+             startnode->nsid == 0) && 
 	    !xml_strcmp(startnode->elname, NCX_EL_LOAD_CONFIG)) {
 	    done = TRUE;
 	}

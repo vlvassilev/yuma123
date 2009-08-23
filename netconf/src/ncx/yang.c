@@ -2776,13 +2776,15 @@ void
 
     if (pcb->top) {
 	if (pcb->top->ismod) {
-	    if (pcb->top->name &&
+	    if ((pcb->top->name &&
 		!xml_strcmp(pcb->top->name,
-			    NCXMOD_IETF_NETCONF)) {
+			    NCXMOD_IETF_NETCONF)) ||
+                pcb->searchmode) {
 		/* special hack; the ietf-netconf module
 		 * was used in yangdump, but it was not
 		 * added to the registry; needs to be
-		 * deleted here
+		 * deleted here. Also searchmode modules
+                 * must be deleted now.
 		 */
 		ncx_free_module(pcb->top);
 	    }

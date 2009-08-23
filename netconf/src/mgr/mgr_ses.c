@@ -559,11 +559,12 @@ status_t
     }
 
     /* get the memory for the manager SCB */
-    scb->mgrcb = mscb = mgr_new_scb();
+    mscb = mgr_new_scb();
     if (!mscb) {
 	ses_free_scb(scb);
 	return ERR_INTERNAL_MEM;
     }
+    scb->mgrcb = mscb;
 
     /* make sure at least 1 outbuff buffer is available */
     res = ses_msg_new_buff(scb, &scb->outbuff);

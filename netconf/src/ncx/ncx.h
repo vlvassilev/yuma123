@@ -137,11 +137,15 @@ extern ncx_module_t *
     ncx_find_module (const xmlChar *modname,
 		     const xmlChar *revision);
 
-#ifdef REMOVED_FROM_YANGDUMP_SO_LEAVE_OUT
 extern ncx_module_t *
-    ncx_find_submodule (const xmlChar *modname,
-			const xmlChar *submodname);
-#endif
+    ncx_find_module_que (dlq_hdr_t *modQ,
+                         const xmlChar *modname,
+                         const xmlChar *revision);
+
+
+extern ncx_module_t *
+    ncx_find_module_que_nsid (dlq_hdr_t *modQ,
+                              xmlns_id_t nsid);
 
 /* use if module was not added to registry */
 extern void 
@@ -192,11 +196,16 @@ extern obj_template_t *
     ncx_find_any_object (const xmlChar *objname);
 
 extern obj_template_t *
+    ncx_find_any_object_que (dlq_hdr_t *modQ,
+                             const xmlChar *objname);
+
+extern obj_template_t *
     ncx_find_object (ncx_module_t *mod,
 		     const xmlChar *objname);
 
 extern status_t 
-    ncx_add_namespace_to_registry (ncx_module_t *mod);
+    ncx_add_namespace_to_registry (ncx_module_t *mod,
+                                   boolean tempmod);
 
 extern status_t 
     ncx_add_to_registry (ncx_module_t *mod);

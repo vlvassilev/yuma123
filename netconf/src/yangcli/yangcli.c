@@ -461,16 +461,18 @@ static void
     free_agent_cb (agent_cb_t *agent_cb)
 {
 
-    modptr_t      *modptr;
-    mgr_not_msg_t *notif;
-    int            retval;
+    modptr_t                *modptr;
+    mgr_not_msg_t           *notif;
+    ncxmod_search_result_t  *searchresult;
+    int                      retval;
 
     /* save the history buffer if needed */
     if (agent_cb->cli_gl != NULL && agent_cb->history_auto) {
-        retval = gl_save_history(agent_cb->cli_gl,
-                                 (const char *)agent_cb->history_filename,
-                                 "#",   /* comment prefix */
-                                 -1);    /* save all entries */
+        retval = 
+            gl_save_history(agent_cb->cli_gl,
+                            (const char *)agent_cb->history_filename,
+                            "#",   /* comment prefix */
+                            -1);    /* save all entries */
         if (retval) {
             log_error("\nError: could not save command line "
                       "history file '%s'",
@@ -512,6 +514,12 @@ static void
 
     var_clean_varQ(&agent_cb->varbindQ);
 
+    while (!dlq_empty(&agent_cb->searchresultQ)) {
+        searchresult = (ncxmod_search_result_t *)
+            dlq_deque(&agent_cb->searchresultQ);
+	ncxmod_free_search_result(searchresult);
+    }
+
     while (!dlq_empty(&agent_cb->modptrQ)) {
 	modptr = (modptr_t *)dlq_deque(&agent_cb->modptrQ);
 	free_modptr(modptr);
@@ -551,6 +559,7 @@ static agent_cb_t *
 
     memset(agent_cb, 0x0, sizeof(agent_cb_t));
     dlq_createSQue(&agent_cb->varbindQ);
+    dlq_createSQue(&agent_cb->searchresultQ);
     dlq_createSQue(&agent_cb->modptrQ);
     dlq_createSQue(&agent_cb->notificationQ);
     dlq_createSQue(&agent_cb->autoload_modcbQ);
@@ -2012,6 +2021,17 @@ static status_t
 	return res;
     }
 
+    /* load the netconf-state module to use
+     * the <get-schema> operation 
+     */
+    res = ncxmod_load_module(NCXMOD_IETF_NETCONF_STATE, 
+                             NULL,
+                             NULL,
+                             NULL);
+    if (res != NO_ERR) {
+	return res;
+    }
+
     /* initialize the NETCONF operation attribute 
      * MUST be after the netconf.yang module is loaded
      */
@@ -2206,45 +2226,34 @@ static void
 
 
 /********************************************************************
-* FUNCTION reset_feature
-* 
-* Go through the feature list and see if the specified
-* feature should be enabled or not
-*
-* INPUTS:
-*    mod == module containing this feature
-*    feature == feature found
-*    cookie == cookie passed in (feature_list)
-*
-* RETURNS:
-*    TRUE if processing should continue, FALSE if done
-*********************************************************************/
-static boolean
-    reset_feature (const ncx_module_t *mod,
-		   ncx_feature_t *feature,
-		   void *cookie)
-{
-    const ncx_list_t *feature_list;
-
-    (void)mod;
-    feature_list = (const ncx_list_t *)cookie;
-
-    feature->enabled = 
-	(ncx_string_in_list(feature->name, feature_list)) ?
-	TRUE : FALSE;
-
-    return TRUE;
-
-}  /* reset_feature */
-
-
-/********************************************************************
 * FUNCTION check_module_capabilities
 * 
 * Check the modules reported by the agent
 * If autoload is TRUE then load any missing modules
 * otherwise just warn which modules are missing
 * Also check for wrong module module and version errors
+*
+* The agent_cb->searchresultQ is filled with
+* records for each module or deviation specified in
+* the module capability URIs.
+*
+* After determining all the files that the agent has,
+* the <get-schema> operation is used (if :schema-retrieval
+* advertised by the device and --autoload=true)
+*
+* All the files are copied into the session work directory
+* to make sure the correct versions are used when compiling
+* these files and applying features and deviations
+*
+* All files are compiled against the versions of the imports
+* advertised in the capabilities, to make sure that imports
+* without revision-date statements will still select the
+* same revision as the agent (INSTEAD OF ALWAYS SELECTING 
+* THE LATEST VERSION).
+*
+* If the device advertises an incomplete set of modules,
+* then searches for any missing imports will be done
+* using the normal search path, including YANG_MODPATH.
 *
 * INPUTS:
 *  agent_cb == agent control block to use
@@ -2253,24 +2262,32 @@ static boolean
 *********************************************************************/
 static void
     check_module_capabilities (agent_cb_t *agent_cb,
-			       const ses_cb_t *scb)
+			       ses_cb_t *scb)
 {
-    mgr_scb_t          *mscb;
-    ncx_module_t       *mod;
-    cap_rec_t          *cap;
-    const xmlChar      *module, *version;
-    modptr_t           *modptr;
-    xmlChar            *namebuff;
-    uint32              modlen;
-    status_t            res;
-
+    mgr_scb_t              *mscb;
+    ncx_module_t           *mod;
+    cap_rec_t              *cap;
+    const xmlChar          *module, *revision, *namespace;
+    modptr_t               *modptr;
+    ncxmod_search_result_t *searchresult;
+    status_t                res;
+    boolean                 retrieval_supported;
 
     mscb = (mgr_scb_t *)scb->mgrcb;
 
     log_info("\n\nChecking Agent Modules...\n");
 
-    /**** HARDWIRE ADD NETCONF V1 TO THE QUEUE
-     **** NEED TO GET THE STD CAP INSTEAD
+    if (!cap_std_set(&mscb->caplist, CAP_STDID_V1)) {
+        log_warn("\nWarning: NETCONF v1 capability not found");
+    }
+
+    retrieval_supported = cap_std_set(&mscb->caplist,
+                                      CAP_STDID_SCHEMA_RETRIEVAL);
+
+    /**** !!! HARDWIRE ADD NETCONF V1 TO THE QUEUE
+     **** !!! EVEN IF THE AGENT LEFT IT OUT
+     **** !!! NEED TO CHECK THE ietf-netconf.yang
+     **** !!! MODULE CAPABILITY
      ****/
     mod = ncx_find_module(NC_MODULE, NULL);
     if (mod) {
@@ -2283,15 +2300,24 @@ static void
 	}
     }
 
-    /* check all the YANG modules */
+    /* check all the YANG modules;
+     * build a list of modules that
+     * the agent needs to get somehow
+     * or proceed without them
+     * save the results in the agent_cb->searchresultQ
+     */
     cap = cap_first_modcap(&mscb->caplist);
     while (cap) {
+        module = NULL;
+        revision = NULL;
+        namespace = NULL;
+
 	cap_split_modcap(cap,
 			 &module,
-			 &modlen,
-			 &version);
+			 &revision,
+                         &namespace);
 
-	if (module==NULL || !modlen || !version) {
+	if (module==NULL || namespace==NULL) {
             if (ncx_warning_enabled(ERR_NCX_RCV_INVALID_MODCAP)) {
                 log_warn("\nWarning: skipping invalid module capability "
                          "for URI '%s'", 
@@ -2301,84 +2327,169 @@ static void
 	    continue;
 	}
 
-	namebuff = xml_strndup(module, modlen);
-	if (namebuff == NULL) {
-	    log_error("\nMalloc failure");
-	    return;
-	}
+	mod = ncx_find_module(module, revision);
+	if (mod != NULL) {
+            /* make sure that the namespace URIs match */
+            if (xml_strcmp(mod->ns, namespace)) {
+                /* !!! need a warning number for suppression */
+                log_warn("\nWarning: module namespace URI mismatch:"
+                          "\n   module:    '%s'"
+                          "\n   revision:  '%s'"
+                          "\n   server ns: '%s'"
+                          "\n   client ns: '%s'",
+                          module,
+                          (revision) ? revision : EMPTY_STRING,
+                          namespace,
+                          mod->ns);
+                mod = NULL;
+            }
+        } 
 
-	mod = ncx_find_module(namebuff, version);
-	if (mod == NULL) {
+        if (mod == NULL) {
+            /* module was not found already loaded into
+             * this instance of yangcli
+             * try to auto-load the module if enabled
+             */
 	    if (agent_cb->autoload) {
-                res = autoload_module(namebuff,
-                                      version,
-                                      &cap->cap_deviation_list,
-                                      &mod);
+                searchresult = ncxmod_find_module(module, revision);
+                if (searchresult) {
+                    searchresult->cap = cap;
+                    if (searchresult->res != NO_ERR) {
+                        log_error("\nError: module search failed (%s)",
+                                  get_error_string(searchresult->res));
+                        ncxmod_free_search_result(searchresult);
+                    } else if (searchresult->source) {
+                        /* module with matching name, revision
+                         * was found on the local system;
+                         * check if the namespace also matches
+                         */
+                        if (searchresult->namespace) {
+                            if (xml_strcmp(searchresult->namespace,
+                                           namespace)) {
+                                /* cannot use this local file because
+                                 * it has a different namespace
+                                 * !!! need a warning number for suppression 
+                                 */
+                                log_warn("\nWarning: module "
+                                         "namespace URI mismatch:"
+                                         "\n   module:    '%s'"
+                                         "\n   revision:  '%s'"
+                                         "\n   server ns: '%s'"
+                                         "\n   client ns: '%s'",
+                                         module,
+                                         (revision) ? revision : EMPTY_STRING,
+                                         namespace,
+                                         searchresult->namespace);
+                            } else {
+                                /* can use the local system file found */
+                                searchresult->capmatch = TRUE;
+                            }
+                        } else {
+                            /* this module found is invalid;
+                             * has no namespace statement
+                             */
+                            log_error("\nError: found module '%s' "
+                                      "revision '%s' "
+                                      "has no namespace-stmt",
+                                      module,
+                                      (revision) ? revision : EMPTY_STRING);
+                        }
+                    } else {
+                        /* the search result is valid;
+                         * specified module is not available
+                         * on the manager platform; see if the
+                         * get-schema operation is available
+                         */
+                        if (!retrieval_supported) {
+                            /* no <get-schema> so SOL, do without this module 
+                             * !!! need warning number 
+                             */
+                            log_warn("\nWarning: module '%s' "
+                                     "revision '%s' not "
+                                     "available and no <get-schema>",
+                                     module,
+                                     revision ? (revision) : EMPTY_STRING);
+                        }
+                    }
+
+                    /* save the search result no matter what */
+                    dlq_enque(searchresult, &agent_cb->searchresultQ);
+                } else {
+                    /* search result was NULL, so there was some
+                     * bad error, like malloc-failed
+                     */
+                    log_error("\nError: module search malloc failed");
+                }
 	    } else {
+                /* --autoload=false */
                 if (LOGINFO) {
-                    log_info("\nWarning: Module %s not loaded "
-                             "(--autoload=false)",
-                             namebuff);
+                    log_info("\nModule '%s' "
+                             "revision '%s' not "
+                             "loaded, autoload disabled",
+                             module,
+                             (revision) ? revision : EMPTY_STRING);
                 }
 	    }
-	}
+	} else {
+            /* since the module was already loaded, it is
+             * OK to use, even if --autoload=false
+             * just copy the info into a search result record
+             * so it will be copied and recompiled with the 
+             * correct features and deviations applied
+             */
+            searchresult = ncxmod_new_search_result_ex(mod);
+            if (searchresult == NULL) {
+                log_error("\nError: cannot load file, malloc failed");
+            } else {
+                searchresult->cap = cap;
+                searchresult->capmatch = TRUE;
+                dlq_enque(searchresult, &agent_cb->searchresultQ);
+            }
+        }
 
-	/* keep track of the exact modules the agent knows about
-	 * this is a hack that needs to be replaced!!!
-	 * need a complete copy of every module for each agent
-	 * instead of simply rewriting the feature enabled flags
-	 * in all the modules each time.
-	 *
-	 * This will not work when deviations are supported because
-	 * they are destructive patches to the object tree which
-	 * cannot be reversed after the module is done being
-	 * used for one agent session
-	 *
-	 * This approach does not support multiple concurrent agent_cb
-	 * structs in use at the same time.  Need a complete copy of
-	 * each module, not just a pointer into the NCX module list
-	 */
-	if (mod) {
-	    modptr = new_modptr(mod, 
-				&cap->cap_feature_list,
-				&cap->cap_deviation_list);
-	    if (modptr == NULL) {
-		log_error("\nMalloc failure");
-		return;
-	    } else {
-		dlq_enque(modptr, &agent_cb->modptrQ);
-	    }
-
-	    if (yang_compare_revision_dates(mod->version, version)) {
-		log_error("\nError: Module %s "
-			 "has different version on agent!! (%s)",
-			 namebuff, 
-                         mod->version);
-	    }
-	}
-
-	m__free(namebuff);
-	namebuff = NULL;
-
+        /* move on to the next module */
 	cap = cap_next_modcap(cap);
     }
 
-    /* need to wait until all the modules are loaded to
-     * go through the modptr list and enable/disable the features
-     * to match what the agent has reported
+    /* get all the advertised YANG data model modules into the
+     * session temp work directory that are local to the system
      */
+    res = autoload_setup_tempdir(agent_cb, scb);
+    if (res != NO_ERR) {
+        log_error("\nError: autoload setup temp files failed (%s)",
+                  get_error_string(res));
+    }
 
-    for (modptr = (modptr_t *)
-	     dlq_firstEntry(&agent_cb->modptrQ);
-	 modptr != NULL;
-	 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+    /* go through all the search results (if any)
+     * and see if <get-schema> is needed to pre-load
+     * the session work directory YANG files
+     */
+    if (res == NO_ERR &&
+        retrieval_supported && 
+        agent_cb->autoload) {
 
-	if (modptr->feature_list) {
-	    ncx_for_all_features(modptr->mod,
-				 reset_feature,
-				 modptr->feature_list,
-				 FALSE);
-	}
+        /* compile phase will be delayed until autoload
+         * get-schema operations are done
+         */
+        res = autoload_start_get_modules(agent_cb, scb);
+        if (res != NO_ERR) {
+            log_error("\nError: autoload get modules failed (%s)",
+                      get_error_string(res));
+        }
+    }
+
+    /* check autoload state did not start or was not requested */
+    if (res == NO_ERR && agent_cb->command_mode != CMD_MODE_AUTOLOAD) {
+        /* parse and hold the modules with the correct deviations,
+         * features and revisions.  The returned modules
+         * from yang_parse.c will not be stored in the local module
+         * directory -- just used for this one session then deleted
+         */
+        res = autoload_compile_modules(agent_cb, scb);
+        if (res != NO_ERR) {
+            log_error("\nError: autoload compile modules failed (%s)",
+                      get_error_string(res));
+        }
     }
 
 } /* check_module_capabilities */
@@ -2513,54 +2624,58 @@ static mgr_io_state_t
 	    clear_agent_cb_session(agent_cb);
 	} else  {
             res = NO_ERR;
-	    /* check timeout */
-            if (agent_cb->command_mode != CMD_MODE_NORMAL
-                && check_locks_timeout(agent_cb)) {
-                res = ERR_NCX_TIMEOUT;
 
-                if (runstack_level()) {
-                    runstack_cancel();
-                }
-                switch (agent_cb->command_mode) {
-                case CMD_MODE_NORMAL:
-                    break;
-                case CMD_MODE_AUTOLOAD:
-                    break;
-                case CMD_MODE_AUTODISCARD:
-                case CMD_MODE_AUTOLOCK:
-                    handle_locks_cleanup(agent_cb);
-                    if (agent_cb->command_mode != CMD_MODE_NORMAL) {
-                        return agent_cb->state;
+	    /* check locks timeout */
+            if (!(agent_cb->command_mode == CMD_MODE_NORMAL ||
+                  agent_cb->command_mode == CMD_MODE_AUTOLOAD)) {
+
+                if (check_locks_timeout(agent_cb)) {
+                    res = ERR_NCX_TIMEOUT;
+
+                    if (runstack_level()) {
+                        runstack_cancel();
                     }
+
+                    switch (agent_cb->command_mode) {
                     break;
-                case CMD_MODE_AUTOUNLOCK:
-                    clear_lock_cbs(agent_cb);
-                    break;
-                default:
-                    SET_ERROR(ERR_INTERNAL_VAL);
-                }
-	    } else if (agent_cb->command_mode == CMD_MODE_AUTOLOCK) {
-                if (agent_cb->locks_waiting) {
-                    agent_cb->command_mode = CMD_MODE_AUTOLOCK;
-                    done = FALSE;
-                    res = handle_get_locks_request_to_agent(agent_cb,
-                                                            FALSE,
-                                                            &done);
-                    if (done) {
-                        /* check if the locks are all good */
-                        if (get_lock_worked(agent_cb)) {
-                            log_info("\nget-locks finished OK");
-                            agent_cb->command_mode = CMD_MODE_NORMAL;
-                            agent_cb->locks_waiting = FALSE;
-                        } else {
-                            log_error("\nError: get-locks failed, "
-                                      "starting cleanup");
-                            handle_locks_cleanup(agent_cb);
+                    case CMD_MODE_AUTODISCARD:
+                    case CMD_MODE_AUTOLOCK:
+                        handle_locks_cleanup(agent_cb);
+                        if (agent_cb->command_mode != CMD_MODE_NORMAL) {
+                            return agent_cb->state;
+                        }
+                        break;
+                    case CMD_MODE_AUTOUNLOCK:
+                        clear_lock_cbs(agent_cb);
+                        break;
+                    case CMD_MODE_AUTOLOAD:
+                    case CMD_MODE_NORMAL:
+                    default:
+                        SET_ERROR(ERR_INTERNAL_VAL);
+                    }
+                } else if (agent_cb->command_mode == CMD_MODE_AUTOLOCK) {
+                    if (agent_cb->locks_waiting) {
+                        agent_cb->command_mode = CMD_MODE_AUTOLOCK;
+                        done = FALSE;
+                        res = handle_get_locks_request_to_agent(agent_cb,
+                                                                FALSE,
+                                                                &done);
+                        if (done) {
+                            /* check if the locks are all good */
+                            if (get_lock_worked(agent_cb)) {
+                                log_info("\nget-locks finished OK");
+                                agent_cb->command_mode = CMD_MODE_NORMAL;
+                                agent_cb->locks_waiting = FALSE;
+                            } else {
+                                log_error("\nError: get-locks failed, "
+                                          "starting cleanup");
+                                handle_locks_cleanup(agent_cb);
+                            }
                         }
                     }
                 }
             }
-	}
+        }
 	break;
     case MGR_IO_ST_CONN_START:
 	/* waiting until <hello> processing complete */
@@ -2604,19 +2719,28 @@ static mgr_io_state_t
 	    /* check timeout */
 	    if (message_timed_out(scb)) {
                 res = ERR_NCX_TIMEOUT;
-            } else if (agent_cb->command_mode != CMD_MODE_NORMAL
-                       && check_locks_timeout(agent_cb)) {
-                res = ERR_NCX_TIMEOUT;
+            } else if (!(agent_cb->command_mode == CMD_MODE_NORMAL ||
+                         agent_cb->command_mode == CMD_MODE_AUTOLOAD)) {
+                if (check_locks_timeout(agent_cb)) {
+                    res = ERR_NCX_TIMEOUT;
+                }
             }
+
             if (res != NO_ERR) {
                 if (runstack_level()) {
                     runstack_cancel();
                 }
 		agent_cb->state = MGR_IO_ST_CONN_IDLE;
+
                 switch (agent_cb->command_mode) {
                 case CMD_MODE_NORMAL:
                     break;
                 case CMD_MODE_AUTOLOAD:
+                    /* even though a timeout occurred
+                     * attempt to compile the modules
+                     * that are already present
+                     */
+                    autoload_compile_modules(agent_cb, scb);
                     break;
                 case CMD_MODE_AUTODISCARD:
                     agent_cb->command_mode = CMD_MODE_AUTOLOCK;
@@ -3211,7 +3335,8 @@ static void
 
     if (malloc_cnt != free_cnt) {
 	log_error("\n*** Error: memory leak (m:%u f:%u)\n", 
-		  malloc_cnt, free_cnt);
+		  malloc_cnt, 
+                  free_cnt);
     }
 
     log_close();
@@ -3510,11 +3635,10 @@ void
 
     /* check the contents of the reply */
     if (rpy && rpy->reply) {
-	if (val_find_child(rpy->reply, 
+        if (val_find_child(rpy->reply, 
                            NC_MODULE,
-			   NCX_EL_RPC_ERROR)) {
-            if (agent_cb->command_mode == CMD_MODE_NORMAL ||
-                LOGDEBUG2) {
+                           NCX_EL_RPC_ERROR)) {
+            if (agent_cb->command_mode == CMD_MODE_NORMAL || LOGDEBUG2) {
                 log_error("\nRPC Error Reply %s for session %u:\n",
                           rpy->msg_id, 
                           usesid);
@@ -3525,18 +3649,24 @@ void
                 anyout = TRUE;
             }
             anyerrors = TRUE;
-	} else if (val_find_child(rpy->reply, NC_MODULE, NCX_EL_OK)) {
-	    log_info("\nRPC OK Reply %s for session %u:\n",
-		     rpy->msg_id, usesid);
-	    anyout = TRUE;
-	} else if (LOGINFO) {
-	    log_info("\nRPC Data Reply %s for session %u:\n",
-		     rpy->msg_id, usesid);
-	    if (LOGDEBUG) {
-		val_dump_value_ex(rpy->reply, 
+        } else if (val_find_child(rpy->reply, NC_MODULE, NCX_EL_OK)) {
+            if (agent_cb->command_mode == CMD_MODE_NORMAL || LOGDEBUG2) {
+                log_info("\nRPC OK Reply %s for session %u:\n",
+                         rpy->msg_id, 
+                         usesid);
+                anyout = TRUE;
+            }
+        } else if ((agent_cb->command_mode == CMD_MODE_NORMAL && LOGINFO) ||
+                   (agent_cb->command_mode != CMD_MODE_NORMAL && LOGDEBUG2)) {
+
+            log_info("\nRPC Data Reply %s for session %u:\n",
+                     rpy->msg_id, 
+                     usesid);
+            if (LOGDEBUG) {
+                val_dump_value_ex(rpy->reply, 
                                   0,
                                   agent_cb->display_mode);
-		log_info("\n");
+                log_info("\n");
 	    }
 	    anyout = TRUE;
 	} else {
@@ -3568,7 +3698,10 @@ void
 
 	    /* hand off the malloced 'val' node here */
 	    res = finish_result_assign(agent_cb, val, NULL);
-	}  else if (!anyout && !anyerrors && interactive_mode()) {
+	}  else if (!anyout && 
+                    !anyerrors && 
+                    agent_cb->command_mode == CMD_MODE_NORMAL &&
+                    interactive_mode()) {
 	    log_stdout("\nOK\n");
 	}
     } else {
@@ -3583,6 +3716,7 @@ void
     if (anyerrors && rpy->reply) {
         rpcerrtyp = get_rpc_error_tag(rpy->reply);
     } else {
+        /* default error: may not get used */
         rpcerrtyp = RPC_ERR_OPERATION_FAILED;
     }
 
@@ -3600,6 +3734,10 @@ void
         case CMD_MODE_NORMAL:
             break;
         case CMD_MODE_AUTOLOAD:
+            res = autoload_handle_rpc_reply(agent_cb,
+                                            scb,
+                                            rpy->reply,
+                                            anyerrors);
             break;
         case CMD_MODE_AUTOLOCK:
             done = FALSE;

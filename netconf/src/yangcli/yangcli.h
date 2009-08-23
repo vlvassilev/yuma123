@@ -372,6 +372,13 @@ typedef struct agent_cb_t_ {
     /* TBD: session-specific user variables */
     dlq_hdr_t            varbindQ;   /* Q of ncx_var_t */
 
+    /* before any agent modules are loaded, all the
+     * modules are checked out, and the results are stored in
+     * this Q of ncxmod_search_result_t 
+     */
+    dlq_hdr_t            searchresultQ;
+    ncxmod_search_result_t  *cursearchresult;
+
     /* contains only the modules that the agent is using
      * plus the 'netconf.yang' module
      */

@@ -8623,6 +8623,9 @@ boolean
  *                 ignored; find child nodes out of order
  *                 and check too-many-instances later
  *    curnode == current XML start or empty node to check
+ *    force_modQ == Q of ncx_module_t to check, if set
+ *               == NULL and the xmlns registry of module pointers
+ *                  will be used instead (except netconf.yang)
  *    rettop == address of return topchild object
  *    retobj == address of return object to use
  *
@@ -8639,16 +8642,17 @@ status_t
 			obj_template_t *chobj,
 			const xml_node_t *curnode,
 			boolean xmlorder,
+                        dlq_hdr_t *force_modQ,
 			obj_template_t **rettop,
 			obj_template_t **retobj)
 {
-    obj_template_t  *foundobj, *nextchobj;
+    obj_template_t        *foundobj, *nextchobj;
     const xmlChar         *foundmodname;
     ncx_module_t          *foundmod;
     status_t               res;
     ncx_node_t             dtyp;
     boolean                topdone;
-    xmlns_id_t             ncnid;
+    xmlns_id_t             ncnid, ncid;
 
 #ifdef DEBUG
     if (!obj || !curnode || !rettop || !retobj) {
@@ -8662,13 +8666,19 @@ status_t
     dtyp = NCX_NT_OBJ;
     res = NO_ERR;
     topdone = FALSE;
+    ncid = xmlns_nc_id();
     ncnid = xmlns_ncn_id();
 
     if (curnode->nsid) {
-	foundmod = xmlns_get_modptr(curnode->nsid);
-	if (foundmod) {
-	    foundmodname = ncx_get_modname(foundmod);
-	}
+        if (curnode->nsid == ncid || force_modQ == NULL) {
+            foundmod = xmlns_get_modptr(curnode->nsid);
+        } else if (force_modQ) {
+            foundmod = ncx_find_module_que_nsid(force_modQ,
+                                                curnode->nsid);
+        }
+        if (foundmod) {
+            foundmodname = ncx_get_modname(foundmod);
+        }
     } 
 
     if (obj_is_root(obj)) {
@@ -8679,7 +8689,14 @@ status_t
 	    /* get the name from 1 module */
 	    foundobj =  ncx_find_object(foundmod,
 					curnode->elname);
-	} else {
+	} else if (force_modQ) {
+            /* check this Q of modules for a top-level match */
+	    foundobj = ncx_find_any_object_que(force_modQ,
+                                               curnode->elname);
+	    if (foundobj) {
+		foundmodname = obj_get_mod_name(foundobj);
+	    }
+        } else {
 	    /* NSID not set, get the name from any module */
 	    foundobj = ncx_find_any_object(curnode->elname);
 	    if (foundobj) {
@@ -8721,7 +8738,12 @@ status_t
 	    /* no namespace ID used
 	     * try to find any eventType object
 	     */
-	    foundobj = ncx_find_any_object(curnode->elname);
+            if (force_modQ) {
+                foundobj = ncx_find_any_object_que(force_modQ,
+                                                   curnode->elname);
+            } else {
+                foundobj = ncx_find_any_object(curnode->elname);
+            }
 	    if (foundobj) {
 		if (foundobj->objtype != OBJ_TYP_NOTIF) {
 		    foundobj = NULL;

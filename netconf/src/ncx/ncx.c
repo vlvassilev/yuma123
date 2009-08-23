@@ -227,68 +227,6 @@ static dlq_hdr_t     warnoffQ;
 
 
 /********************************************************************
-* FUNCTION gen_modns
-*
-* Generate a namespace ID that should be unique from
-* various fields in the module header
-*
-* INPUTS:
-*   modhdr == pointer to ncx_module_t containing info
-*
-* RETURNS:
-*    malloced string containing the constructed NS URI
-*    !!! This MUST be freed by the caller.!!!
-*    Returns NULL if out of memory
-*********************************************************************/
-static xmlChar *
-    gen_modns (const ncx_module_t *modhdr)
-{
-    xmlChar *str;
-    uint32   len;
-    int      ret;
-
-#ifdef DEBUG
-    if (!modhdr) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    /* Constructed URI format is not allowed to be
-     * 'urn' format unless it is IETF approved org-name,
-     *  so 'owner' is not allowed unless IETF-approved.
-     *
-     * This hack is used:
-     *
-     *    http://<LIB-LOC>/<modname>
-     *
-     * This NS is expecting in the application element
-     * under an 'root' type of node
-     */
-    len = xml_strlen(NCX_URNP1) + 
-	xml_strlen(NCX_HOSTNAME) + 1 +
-        xml_strlen(modhdr->name);
-
-    str = m__getMem(len+1);
-    if (!str) {
-        return NULL;
-    }
-
-    ret = sprintf((char *)str, "%s%s/%s",
-		  (const char *)NCX_URNP1,
-		  (const char *)NCX_HOSTNAME,
-		  (const char *)modhdr->name);
-    if (ret == -1) {
-        m__free(str);
-        return NULL;
-    }
-
-    return str;
-
-}   /* gen_modns */
-
-
-/********************************************************************
 * FUNCTION check_moddef
 * 
 * Check if a specified module is loaded
@@ -1408,9 +1346,6 @@ ncx_module_t *
     ncx_find_module (const xmlChar *modname,
 		     const xmlChar *revision)
 {
-    ncx_module_t  *mod;
-    int32          retval;
-
 #ifdef DEBUG
     if (!modname) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -1418,7 +1353,41 @@ ncx_module_t *
     }
 #endif
 
-    for (mod = (ncx_module_t *)dlq_firstEntry(ncx_curQ);
+    return ncx_find_module_que(ncx_curQ, modname, revision);
+
+}   /* ncx_find_module */
+
+
+/********************************************************************
+* FUNCTION ncx_find_module_que
+*
+* Find a ncx_module_t in the specified Q
+* Check the namespace ID
+*
+* INPUTS:
+*   modQ == module Q to search
+*   modname == module name
+*   revision == module revision date
+*
+* RETURNS:
+*  module pointer if found or NULL if not
+*********************************************************************/
+ncx_module_t *
+    ncx_find_module_que (dlq_hdr_t *modQ,
+                         const xmlChar *modname,
+                         const xmlChar *revision)
+{
+    ncx_module_t  *mod;
+    int32          retval;
+
+#ifdef DEBUG
+    if (!modQ || !modname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;    /* error */
+    }
+#endif
+
+    for (mod = (ncx_module_t *)dlq_firstEntry(modQ);
          mod != NULL;
          mod = (ncx_module_t *)dlq_nextEntry(mod)) {
 
@@ -1443,57 +1412,51 @@ ncx_module_t *
     }
     return NULL;
 
-}   /* ncx_find_module */
+}   /* ncx_find_module_que */
 
 
-#ifdef REMOVED_FROM_YANGDUMP_SO_LEAVE_OUT
 /********************************************************************
-* FUNCTION ncx_find_submodule
+* FUNCTION ncx_find_module_que_nsid
 *
-* Find a submodule of an ncx_module_t in the ncx_modQ
-* These are the modules that are already loaded
+* Find a ncx_module_t in the specified Q
+* Check the namespace ID
 *
 * INPUTS:
+*   modQ == module Q to search
 *   modname == module name
-*   modrevision == module revision date
-*   submodname == submodule name
-*   revision == submodule revision date
+*   revision == module revision date
 *
 * RETURNS:
 *  module pointer if found or NULL if not
 *********************************************************************/
 ncx_module_t *
-    ncx_find_submodule (const xmlChar *modname,
-			const xmlChar *modrevision,
-			const xmlChar *submodname,
-			const xmlChar *revision)
+    ncx_find_module_que_nsid (dlq_hdr_t *modQ,
+                              xmlns_id_t nsid)
 {
     ncx_module_t  *mod;
-    yang_node_t   *node;
-    dlq_hdr_t     *que;
 
 #ifdef DEBUG
-    if (!modname || !submodname) {
+    if (modQ == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;    /* error */
     }
+    if (nsid == 0) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
 #endif
 
-    mod = ncx_find_module(modname, modrevision);
-    if (!mod) {
-	return NULL;
-    }
+    for (mod = (ncx_module_t *)dlq_firstEntry(modQ);
+         mod != NULL;
+         mod = (ncx_module_t *)dlq_nextEntry(mod)) {
 
-    que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
-    node = yang_find_node(que, submodname, revision);
-    if (node) {
-	return node->submod;
+        if (mod->nsid == nsid) {
+            return mod;
+        }
     }
-
     return NULL;
 
-}   /* ncx_find_submodule */
-#endif
+}   /* ncx_find_module_que_nsid */
 
 
 /********************************************************************
@@ -1940,7 +1903,8 @@ obj_template_t *
 * matches the object name string
 *
 * INPUTS:
-*   rpcname == RPC name to match
+*   objname == object name to match
+*
 * RETURNS:
 *  pointer to struct if present, NULL otherwise
 *********************************************************************/
@@ -1972,6 +1936,50 @@ obj_template_t *
     return NULL;
 
 }   /* ncx_find_any_object */
+
+
+/********************************************************************
+* FUNCTION ncx_find_any_object_que
+*
+* Check if an obj_template_t in in any module that
+* matches the object name string
+*
+* INPUTS:
+*   modQ == Q of modules to check
+*   objname == object name to match
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
+obj_template_t *
+    ncx_find_any_object_que (dlq_hdr_t *modQ,
+                             const xmlChar *objname)
+{
+    obj_template_t *obj;
+    ncx_module_t   *mod;
+
+#ifdef DEBUG
+    if (!modQ || !objname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    obj = NULL;
+    for (mod = (ncx_module_t *)dlq_firstEntry(modQ);
+	 mod != NULL;
+	 mod = (ncx_module_t *)dlq_nextEntry(mod)) {
+
+	obj = obj_find_template_top(mod, 
+				    ncx_get_modname(mod), 
+				    objname);
+	if (obj) {
+	    return obj;
+	}
+    }
+    return NULL;
+
+}   /* ncx_find_any_object_que */
 
 
 /********************************************************************
@@ -2009,12 +2017,15 @@ obj_template_t *
 * 
 * INPUTS:
 *   mod == module to add to registry
+*   tempmod == TRUE if this is a temporary add mode
+*              FALSE if this is a real registry add
 *
 * RETURNS:
 *   status of the operation
 *********************************************************************/
 status_t 
-    ncx_add_namespace_to_registry (ncx_module_t *mod)
+    ncx_add_namespace_to_registry (ncx_module_t *mod,
+                                   boolean tempmod)
 {
     xmlns_t        *ns;
     xmlChar        *buffer, *p;
@@ -2033,6 +2044,10 @@ status_t
         return NO_ERR;
     }
 
+    if (mod->ns == NULL) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
     res = NO_ERR;
 
     /* if this is the XSD module, then use the NS ID already registered */
@@ -2042,60 +2057,53 @@ status_t
         mod->nsid = xmlns_find_ns_by_module(mod->name);
     }
 
-    /* first add the application namespace
-     * Multiple NS URIs are allowed to map to the same app 
-     */
-    if (!mod->ns) {
-        /* construct a namespace value from the hdr info */
-        mod->ns = gen_modns(mod);
-        if (!mod->ns) {
-            return ERR_INTERNAL_MEM;
-        }
-    }
-    
-    /* check module prefix collision */
-    nsid = xmlns_find_ns_by_prefix(mod->prefix);
-    if (nsid) {
-        modname = xmlns_get_module(nsid);
-        if (xml_strcmp(mod->name, modname)) {
-            log_warn("\nWarning: prefix '%s' already in use "
-                     "by module '%s'",
-                     mod->prefix, 
-                     modname);
-            ncx_print_errormsg(NULL, mod, ERR_NCX_DUP_PREFIX);
+    if (!tempmod) {
+        /* check module prefix collision */
+        nsid = xmlns_find_ns_by_prefix(mod->prefix);
+        if (nsid) {
+            modname = xmlns_get_module(nsid);
+            if (xml_strcmp(mod->name, modname)) {
+                log_warn("\nWarning: prefix '%s' already in use "
+                         "by module '%s'",
+                         mod->prefix, 
+                         modname);
+                ncx_print_errormsg(NULL, mod, ERR_NCX_DUP_PREFIX);
+                
+                /* redo the module xmlprefix */
+                prefixlen = xml_strlen(mod->prefix);
+                buffer = m__getMem(prefixlen + 6);
+                if (!buffer) {
+                    return ERR_INTERNAL_MEM;
+                }
+                p = buffer;
+                p += xml_strcpy(p, mod->prefix);
 
-            /* redo the module xmlprefix */
-            prefixlen = xml_strlen(mod->prefix);
-            buffer = m__getMem(prefixlen + 6);
-            if (!buffer) {
-                return ERR_INTERNAL_MEM;
-            }
-            p = buffer;
-            p += xml_strcpy(p, mod->prefix);
+                /* keep adding numbers to end of prefix until
+                 * 1 is unused or run out of numbers
+                 */
+                for (i=1; i<10000 && nsid; i++) {
+                    sprintf((char *)p, "%u", i);
+                    nsid = xmlns_find_ns_by_prefix(buffer);
+                }
+                if (nsid) {
+                    log_error("\nError: could not assign module prefix");
+                    res = ERR_NCX_OPERATION_FAILED;
+                    ncx_print_errormsg(NULL, mod, res);
+                    m__free(buffer);
+                    return res;
+                }
 
-            /* keep adding numbers to end of prefix until
-             * 1 is unused or run out of numbers
-             */
-            for (i=1; i<10000 && nsid; i++) {
-                sprintf((char *)p, "%u", i);
-                nsid = xmlns_find_ns_by_prefix(buffer);
+                /* else the current buffer contains an unused prefix */
+                mod->xmlprefix = buffer;
             }
-            if (nsid) {
-                log_error("\nError: could not assign module prefix");
-                res = ERR_NCX_OPERATION_FAILED;
-                ncx_print_errormsg(NULL, mod, res);
-                m__free(buffer);
-                return res;
-            }
-
-            /* else the current buffer contains an unused prefix */
-            mod->xmlprefix = buffer;
         }
     }
 
     ns = def_reg_find_ns(mod->ns);
     if (ns) {
-        if (xml_strcmp(mod->name, ns->ns_module) &&
+        if (tempmod) {
+            mod->nsid = ns->ns_id;
+        } else if (xml_strcmp(mod->name, ns->ns_module) &&
             xml_strcmp(ns->ns_module, NCX_OWNER)) {
             /* this NS string already registered to another module */
             log_error("\nncx reg: Module '%s' registering "
@@ -2114,7 +2122,7 @@ status_t
                                 (mod->xmlprefix) 
                                 ? mod->xmlprefix : mod->prefix, 
                                 mod->name, 
-                                mod, 
+                                (tempmod) ? NULL : mod, 
                                 &mod->nsid);
         if (res != NO_ERR) {
             /* this NS registration failed */
@@ -9015,7 +9023,7 @@ void
 	return;
     }
 
-    if (tkc && tkc->curerr) {
+    if (tkc && tkc->curerr && tkc->curerr->mod) {
 	log_write("\n%s:", (tkc->curerr->mod->sourcefn) ? 
 		  (const char *)tkc->curerr->mod->sourcefn : "--");
     } else if (mod && mod->sourcefn) {
@@ -9033,16 +9041,16 @@ void
     }
 
     if (tkc) {
-        if (tkc->curerr) {
+        if (tkc->curerr && tkc->curerr->mod) {
             log_write("%u.%u:", 
                       tkc->curerr->linenum, 
                       tkc->curerr->linepos);
-            tkc->curerr = NULL;
         } else if (tkc->cur && TK_CUR_VAL(tkc)) {
             log_write("%u.%u:", 
                       TK_CUR_LNUM(tkc), 
                       TK_CUR_LPOS(tkc));
         }
+        tkc->curerr = NULL;
     }
 
     if (iserr) {
@@ -11148,6 +11156,8 @@ void
 * FUNCTION ncx_set_error
 * 
 * Set the fields in an ncx_error_t struct
+* When called from NACM or <get> internally, there is no
+* module or line number info
 *
 * INPUTS:
 *   tkerr== address of ncx_error_t struct to set
@@ -11165,7 +11175,7 @@ void
                    uint32 linepos)
 {
 #ifdef DEBUG
-    if (!tkerr || !mod) {
+    if (!tkerr) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return;
     }	

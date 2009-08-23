@@ -231,6 +231,7 @@ void
     memset(mscb, 0x0, sizeof(mgr_scb_t));
     cap_init_caplist(&mscb->caplist);
     dlq_createSQue(&mscb->reqQ);
+    dlq_createSQue(&mscb->temp_modQ);
     mscb->next_id = 1;
 
 }  /* mgr_init_scb */
@@ -271,6 +272,8 @@ void
 void
     mgr_clean_scb (mgr_scb_t *mscb)
 {
+    ncx_module_t *mod;
+
 #ifdef DEBUG
     if (!mscb) {
 	SET_ERROR(ERR_INTERNAL_PTR);
@@ -321,6 +324,11 @@ void
 	libssh2_session_disconnect(mscb->session, "SSH2 session closed");
 	libssh2_session_free(mscb->session);
 	mscb->session = NULL;
+    }
+
+    while (!dlq_empty(&mscb->temp_modQ)) {
+        mod = (ncx_module_t *)dlq_deque(&mscb->temp_modQ);
+        ncx_free_module(mod);
     }
 
     mgr_rpc_clean_requestQ(&mscb->reqQ);

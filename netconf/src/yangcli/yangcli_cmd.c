@@ -1856,17 +1856,19 @@ static status_t
 *
 * OUTPUTS:
 *   'agent_cb->mysid' is set to the output session ID, if NO_ERR
-*   'agent_cb->state' is changed based on the success of the session setup
+*   'agent_cb->state' is changed based on the success of 
+*    the session setup
 *
 *********************************************************************/
 static void
     create_session (agent_cb_t *agent_cb)
 {
-    const xmlChar *agent, *username, *password;
-    modptr_t      *modptr;
-    val_value_t   *val;
-    status_t       res;
-    uint16         port;
+    const xmlChar          *agent, *username, *password;
+    modptr_t               *modptr;
+    ncxmod_search_result_t *searchresult;
+    val_value_t            *val;
+    status_t                res;
+    uint16                  port;
 
     if (LOGDEBUG) {
         log_debug("\nConnect attempt with following parameters:");
@@ -1884,6 +1886,13 @@ static void
 	    /* OK: reset session ID */
 	    agent_cb->mysid = 0;
 	}
+    }
+
+    /* make sure no stale search results in the control block */
+    while (!dlq_empty(&agent_cb->searchresultQ)) {
+        searchresult = (ncxmod_search_result_t *)
+            dlq_deque(&agent_cb->searchresultQ);
+        ncxmod_free_search_result(searchresult);
     }
 
     /* make sure no stale modules in the control block */
@@ -1961,7 +1970,6 @@ static void
     }
     
 } /* create_session */
-
 
 
 /********************************************************************

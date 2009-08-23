@@ -1061,11 +1061,15 @@ extern const xmlChar *
 extern boolean
     obj_ok_for_cli (obj_template_t *obj);
 
+/* complex logic for finding the right module namespace
+ * and child node, given the current context
+ */
 extern status_t 
     obj_get_child_node (obj_template_t *obj,
 			obj_template_t *chobj,
 			const xml_node_t *curnode,
 			boolean xmlorder,
+                        dlq_hdr_t *force_modQ,
 			obj_template_t **rettop,
 			obj_template_t **retobj);
 

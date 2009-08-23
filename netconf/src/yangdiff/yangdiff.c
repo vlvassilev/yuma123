@@ -214,15 +214,22 @@ static void
 		output_mstart_line(cp, YANG_K_IMPORT, oldimp->module, TRUE);
 		if (cp->edifftype != YANGDIFF_DT_TERSE) {
 		    indent_in(cp);
-		    output_diff(cp, YANG_K_PREFIX,
-				oldimp->prefix, newimp->prefix, TRUE);
+		    output_diff(cp, 
+                                YANG_K_PREFIX,
+				oldimp->prefix, 
+                                newimp->prefix, 
+                                TRUE);
 		    indent_out(cp);
 		}
 	    }
 	    newimp->used = TRUE;
 	} else {
 	    /* import was removed from the new module */
-	    output_diff(cp, YANG_K_IMPORT, oldimp->module, NULL, TRUE);
+	    output_diff(cp, 
+                        YANG_K_IMPORT, 
+                        oldimp->module, 
+                        NULL, 
+                        TRUE);
 	}
     }
 
@@ -232,7 +239,11 @@ static void
 
 	if (!newimp->used) {
 	    /* this import was added in the new revision */
-	    output_diff(cp, YANG_K_IMPORT, NULL, newimp->module, TRUE);
+	    output_diff(cp, 
+                        YANG_K_IMPORT, 
+                        NULL, 
+                        newimp->module, 
+                        TRUE);
 	}
     }
 
@@ -276,7 +287,11 @@ static void
 	    newinc->usexsd = TRUE;
 	} else {
 	    /* include was removed from the new module */
-	    output_diff(cp, YANG_K_INCLUDE, oldinc->submodule, NULL, TRUE);
+	    output_diff(cp, 
+                        YANG_K_INCLUDE, 
+                        oldinc->submodule, 
+                        NULL, 
+                        TRUE);
 	}
     }
 
@@ -286,7 +301,11 @@ static void
 
 	if (!newinc->usexsd) {
 	    /* this include was added in the new revision */
-	    output_diff(cp, YANG_K_INCLUDE, NULL, newinc->submodule, TRUE);
+	    output_diff(cp, 
+                        YANG_K_INCLUDE, 
+                        NULL, 
+                        newinc->submodule, 
+                        TRUE);
 	}
     }
 
@@ -347,7 +366,11 @@ static void
 	    newrev->res = NO_ERR;
 	} else {
 	    /* revision was removed from the new module */
-	    output_diff(cp, YANG_K_REVISION, oldrev->version, NULL, FALSE);
+	    output_diff(cp, 
+                        YANG_K_REVISION, 
+                        oldrev->version, 
+                        NULL, 
+                        FALSE);
 	}
     }
 
@@ -357,7 +380,11 @@ static void
 
 	if (newrev->res != NO_ERR) {
 	    /* this revision-stmt was added in the new version */
-	    output_diff(cp, YANG_K_REVISION, NULL, newrev->version, FALSE);
+	    output_diff(cp, 
+                        YANG_K_REVISION, 
+                        NULL, 
+                        newrev->version, 
+                        FALSE);
 	}
     }
 
@@ -477,7 +504,11 @@ static void
 	    newext->used = TRUE;
 	} else {
 	    /* extension was removed from the new module */
-	    output_diff(cp, YANG_K_EXTENSION, oldext->name, NULL, TRUE);
+	    output_diff(cp, 
+                        YANG_K_EXTENSION, 
+                        oldext->name, 
+                        NULL, 
+                        TRUE);
 	}
     }
 
@@ -486,7 +517,11 @@ static void
 	 newext = (ext_template_t *)dlq_nextEntry(newext)) {
 	if (!newext->used) {
 	    /* this extension-stmt was added in the new version */
-	    output_diff(cp, YANG_K_EXTENSION, NULL, newext->name, TRUE);
+	    output_diff(cp, 
+                        YANG_K_EXTENSION,
+                        NULL,
+                        newext->name,
+                        TRUE);
 	}
     }
 
@@ -517,27 +552,38 @@ static void
     /* module name, module/submodule mismatch */
     if (oldpcb->top->ismod != newpcb->top->ismod ||
 	xml_strcmp(oldpcb->top->name, newpcb->top->name)) {
-	output_diff(cp, oldpcb->top->ismod ? 
+	output_diff(cp, 
+                    oldpcb->top->ismod ? 
 		    YANG_K_MODULE : YANG_K_SUBMODULE, 
-		    oldpcb->top->name, newpcb->top->name, TRUE);
+		    oldpcb->top->name, 
+                    newpcb->top->name, 
+                    TRUE);
     }
 
     /* yang-version */
     if (oldpcb->top->langver != newpcb->top->langver) {
 	sprintf(oldnumbuff, "%u", oldpcb->top->langver);
 	sprintf(newnumbuff, "%u", newpcb->top->langver);
-	output_diff(cp, YANG_K_YANG_VERSION,
+	output_diff(cp, 
+                    YANG_K_YANG_VERSION,
 		    (const xmlChar *)oldnumbuff,
-		    (const xmlChar *)newnumbuff, TRUE);
+		    (const xmlChar *)newnumbuff, 
+                    TRUE);
     }
 
     /* namespace */
-    output_diff(cp, YANG_K_NAMESPACE,
-		oldpcb->top->ns, newpcb->top->ns, FALSE);
+    output_diff(cp, 
+                YANG_K_NAMESPACE,
+		oldpcb->top->ns, 
+                newpcb->top->ns, 
+                FALSE);
 
     /* prefix */
-    output_diff(cp, YANG_K_PREFIX,
-		oldpcb->top->prefix, newpcb->top->prefix, FALSE);
+    output_diff(cp, 
+                YANG_K_PREFIX,
+		oldpcb->top->prefix, 
+                newpcb->top->prefix, 
+                FALSE);
 
     /* imports */
     output_import_diff(cp, oldpcb, newpcb);
@@ -1009,6 +1055,9 @@ static status_t
     if (oldpcb) {
 	yang_free_pcb(oldpcb);
     }
+
+    /* cleanup the altered module Q */
+    ncx_reset_modQ();
 
     return res;
 

@@ -2164,12 +2164,14 @@ static status_t
                                      chobj, 
                                      &chnode, 
                                      xmlorder,
+                                     NULL,
                                      &topchild, 
                                      &curchild);
             if (res != NO_ERR) {
-                /* have no expected child element to match to this XML node
-                 * if xmlorder == TRUE, then this could indicate an extra
-                 * instance of the last child node
+                /* have no expected child element to match to 
+                 * this XML node
+                 * if xmlorder == TRUE, then this could indicate 
+                 * an extra instance of the last child node
                  */
                 res = ERR_NCX_UNKNOWN_OBJECT;
                 errnode = &chnode;

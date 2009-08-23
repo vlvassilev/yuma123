@@ -2428,7 +2428,7 @@ ncxmod_search_result_t *
 *   status
 *********************************************************************/
 status_t 
-    ncxmod_load_deviation (const xmlChar *devname,
+    ncxmod_load_deviation (const xmlChar *deviname,
                            dlq_hdr_t *deviationQ)
 {
     yang_pcb_t             *pcb;
@@ -2437,7 +2437,7 @@ status_t
     status_t                res;
 
 #ifdef DEBUG
-    if (!devname || !deviationQ) {
+    if (!deviname || !deviationQ) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -2455,10 +2455,10 @@ status_t
          savedev = (ncx_save_deviations_t *)
              dlq_nextEntry(savedev)) {
 
-        if (!xml_strcmp(devname, savedev->devmodule)) {
+        if (!xml_strcmp(deviname, savedev->devmodule)) {
             if (LOGDEBUG) {
                 log_debug("\nSkipping duplicate deviation module '%s'",
-                          devname);
+                          deviname);
             }
             return NO_ERR;
         }
@@ -2472,17 +2472,17 @@ status_t
         pcb->savedevQ = deviationQ;
 	res = try_load_module(pcb, 
 			      YANG_PT_TOP,
-			      devname, 
+			      deviname, 
 			      NULL, 
 			      &retmod);
     }
 
     if (res != NO_ERR) {
         log_error("\nError: Load deviation module '%s' failed (%s)",
-                  devname,
+                  deviname,
                   get_error_string(res));
     } else if (LOGDEBUG) {
-        log_debug("\nLoad deviation module '%s' OK", devname);
+        log_debug("\nLoad deviation module '%s' OK", deviname);
     }
 
     if (pcb) {

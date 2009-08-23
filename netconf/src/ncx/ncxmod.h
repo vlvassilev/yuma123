@@ -258,7 +258,7 @@ extern ncxmod_search_result_t *
 			const xmlChar *revision);
 
 extern status_t 
-    ncxmod_load_deviation (const xmlChar *devname,
+    ncxmod_load_deviation (const xmlChar *deviname,
                            dlq_hdr_t *deviationQ);
 
 extern status_t 

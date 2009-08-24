@@ -1921,7 +1921,6 @@ xpath_result_t *
     if (!result) {
 	return NULL;
     }
-    
     xpath_init_result(result, restype);
     return result;
 
@@ -2169,7 +2168,7 @@ status_t
 {
     ncx_import_t   *imp;
     status_t        res;
-
+    
 #ifdef DEBUG
     if (!targmod) {
 	return SET_ERROR(ERR_INTERNAL_PTR);

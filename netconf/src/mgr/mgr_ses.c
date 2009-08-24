@@ -649,6 +649,7 @@ status_t
 	ses_free_scb(scb);
 	scb = NULL;
     } else {
+        ncx_set_temp_modQ(&mscb->temp_modQ);
 	scb->state = SES_ST_HELLO_WAIT;
 	mgrses[slot] = scb;
 	if (++next_sesid==MGR_SES_MAX_SESSIONS) {
@@ -694,8 +695,10 @@ void
 	return;
     }
 
+
     /* close the session before deactivating the IO */
     if (scb->mgrcb) {
+        ncx_clear_temp_modQ();
 	mgr_free_scb(scb->mgrcb);
 	scb->mgrcb = NULL;
     }

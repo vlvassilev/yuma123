@@ -225,6 +225,14 @@ static uint32        warn_linelen;
  */
 static dlq_hdr_t     warnoffQ;
 
+/* pointer to the current Q of modules to use
+ * for yangcli sessions; will be 1 per thread
+ * later but now this works because access is
+ * serialized and the temp_modQ is set when each
+ * session needs to look for objects (CLI or XPath)
+ */
+static dlq_hdr_t   *temp_modQ;
+
 
 /********************************************************************
 * FUNCTION check_moddef
@@ -573,13 +581,6 @@ static void
     ncx_feature_t  *feature;
     ncx_identity_t *identity;
     yang_stmt_t    *stmt;
-
-#ifdef DEBUG
-    if (!mod) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }
-#endif
 
     /* clear the revision Q */
     while (!dlq_empty(&mod->revhistQ)) {
@@ -1059,6 +1060,7 @@ status_t
     ncx_curQ = &ncx_modQ;
     dlq_createSQue(&ncx_filptrQ);
     dlq_createSQue(&warnoffQ);
+    temp_modQ = NULL;
     ncx_max_filptrs = NCX_DEF_FILPTR_CACHESIZE;
     ncx_cur_filptrs = 0;
 
@@ -1477,6 +1479,13 @@ ncx_module_t *
 void 
     ncx_free_module (ncx_module_t *mod)
 {
+#ifdef DEBUG
+    if (mod == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
     free_module(mod);
 
 }  /* ncx_free_module */
@@ -11186,6 +11195,59 @@ void
     tkerr->linepos = linepos;
 
 }  /* ncx_set_error */
+
+
+/********************************************************************
+* FUNCTION ncx_set_temp_modQ
+* 
+* Set the temp_modQ for yangcli session-specific module list
+*
+* INPUTS:
+*   modQ == new Q pointer to use
+*
+*********************************************************************/
+void
+    ncx_set_temp_modQ (dlq_hdr_t *modQ)
+{
+#ifdef DEBUG
+    if (!modQ) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }	
+#endif
+
+    temp_modQ = modQ;
+
+}  /* ncx_set_temp_modQ */
+
+
+/********************************************************************
+* FUNCTION ncx_get_temp_modQ
+* 
+* Get the temp_modQ for yangcli session-specific module list
+*
+* RETURNS:
+*   pointer to the temp modQ, if set
+*********************************************************************/
+dlq_hdr_t *
+    ncx_get_temp_modQ (void)
+{
+    return temp_modQ;
+
+}  /* ncx_get_temp_modQ */
+
+/********************************************************************
+* FUNCTION ncx_clear_temp_modQ
+* 
+* Clear the temp_modQ for yangcli session-specific module list
+*
+*********************************************************************/
+void
+    ncx_clear_temp_modQ (void)
+{
+    temp_modQ = NULL;
+
+}  /* ncx_clear_temp_modQ */
 
 
 /* END file ncx.c */

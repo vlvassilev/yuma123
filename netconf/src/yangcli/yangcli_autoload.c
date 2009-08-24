@@ -556,11 +556,11 @@ static status_t
     ncx_lmem_t             *listmember;
     status_t                res;
 
-    if (LOGDEBUG) {
-        log_debug("\nStarting autoload for module '%s', "
-                  "revision '%s'",
-                  modname,
-                  (revision) ? revision : EMPTY_STRING);
+    if (LOGDEBUG2) {
+        log_debug2("\nStarting autoload for module '%s', "
+                   "revision '%s'",
+                   modname,
+                   (revision) ? revision : EMPTY_STRING);
     }
 
     res = NO_ERR;
@@ -980,7 +980,8 @@ status_t
                               &searchresult->cap->cap_deviation_list,
                               &mod);
 
-        if (res == NO_ERR) {
+        if (res == NO_ERR && mod != NULL) {
+            /* mod can be NULL if the module was already in the temp_modQ */
             modptr = new_modptr(mod, 
                                 &searchresult->cap->cap_feature_list,
                                 &searchresult->cap->cap_deviation_list);

@@ -16,35 +16,27 @@
                       Container of Definitions
                         +-----------------+ 
                         |   ncx_module_t  |
-                        |   ncxconst.h    |
+                        |   ncxtypes.h    |
                         +-----------------+
 
             Template/Schema 
           +-----------------+ 
           | obj_template_t  |
-    +-----|     obj.h       |
-    |     +-----------------+
-    |                   ^
-    V  Registry         |      Parameter Instances
-  +---------------+     |     +-----------------+
-  |  Definitions  |     +-----|   val_value_t   |
-  |    def_reg.h  |           |      val.h      |
-  +---------------+           +-----------------+
-      ^                               
-      |   Data Types and Objects
-      |   +--------------------+      
-      +---| Simple/Complex XSD |      
-          |   typ_template_t   |      
-          |   obj_template_t   |      
-          +--------------------+      
+          |     obj.h       |
+          +-----------------+
+             ^          |
+             |          |       Value Instances
+             |          |     +-----------------+
+             |          +---->|   val_value_t   |
+             |                |      val.h      |
+             |                +-----------------+
+             |                               
+             |       Data Types
+             |   +--------------------+      
+             +---|   typ_template_t   |      
+                 |       typ.h        |      
+                 +--------------------+      
 
-  This library processes:
-
-     - NCX modules
-
-        - Type definitions
- 
-        - utility functions for ncxtypes.h
  
 *********************************************************************
 *								    *
@@ -56,6 +48,7 @@ date	     init     comment
 ----------------------------------------------------------------------
 29-oct-05    abb      Begun
 20-jul-08    abb      Start YANG rewrite; remove PSD and PS
+23-aug-09    abb      Update diagram in header
 */
 
 #include <xmlstring.h>
@@ -991,6 +984,16 @@ extern void
                    ncx_module_t *mod,
                    uint32 linenum,
                    uint32 linepos);
+
+
+extern void
+    ncx_set_temp_modQ (dlq_hdr_t *modQ);
+
+extern dlq_hdr_t *
+    ncx_get_temp_modQ (void);
+
+extern void
+    ncx_clear_temp_modQ (void);
 
 
 #endif	    /* _H_ncx */

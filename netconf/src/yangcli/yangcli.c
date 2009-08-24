@@ -2578,10 +2578,11 @@ static boolean
 static mgr_io_state_t
     yangcli_stdin_handler (void)
 {
-    agent_cb_t    *agent_cb;
-    xmlChar       *line;
-    const xmlChar *resultstr;
+    agent_cb_t     *agent_cb;
+    xmlChar        *line;
+    const xmlChar  *resultstr;
     ses_cb_t       *scb;
+    mgr_scb_t      *mscb;
     boolean         getrpc, fileassign, done;
     status_t        res;
     uint32          len;
@@ -2624,6 +2625,8 @@ static mgr_io_state_t
 	    clear_agent_cb_session(agent_cb);
 	} else  {
             res = NO_ERR;
+            mscb = (mgr_scb_t *)scb->mgrcb;
+            ncx_set_temp_modQ(&mscb->temp_modQ);
 
 	    /* check locks timeout */
             if (!(agent_cb->command_mode == CMD_MODE_NORMAL ||
@@ -2693,6 +2696,8 @@ static mgr_io_state_t
 	    agent_cb->state = MGR_IO_ST_CONN_IDLE;
 	    report_capabilities(agent_cb, scb);
 	    check_module_capabilities(agent_cb, scb);
+            mscb = (mgr_scb_t *)scb->mgrcb;
+            ncx_set_temp_modQ(&mscb->temp_modQ);
 	} else {
 	    /* check timeout */
 	    if (message_timed_out(scb)) {
@@ -2716,6 +2721,9 @@ static mgr_io_state_t
 	    clear_agent_cb_session(agent_cb);
 	} else  {
             res = NO_ERR;
+            mscb = (mgr_scb_t *)scb->mgrcb;
+            ncx_set_temp_modQ(&mscb->temp_modQ);
+
 	    /* check timeout */
 	    if (message_timed_out(scb)) {
                 res = ERR_NCX_TIMEOUT;
@@ -2786,6 +2794,9 @@ static mgr_io_state_t
 	return agent_cb->state;
     }
 
+    /* check if some sort of auto-mode, and the
+     * CLI is skipped until that mode is done
+     */
     if (agent_cb->command_mode != CMD_MODE_NORMAL) {
         return agent_cb->state;
     }
@@ -2880,7 +2891,7 @@ static mgr_io_state_t
     } else {
 	log_info("\nOK\n");
     }
-
+    
     return agent_cb->state;
 
 } /* yangcli_stdin_handler */
@@ -2922,6 +2933,7 @@ static void
     mgrcb = scb->mgrcb;
     if (mgrcb) {
 	usesid = mgrcb->agtsid;
+        ncx_set_temp_modQ(&mgrcb->temp_modQ);
     } else {
 	usesid = 0;
     }
@@ -3624,6 +3636,7 @@ void
     mgrcb = scb->mgrcb;
     if (mgrcb) {
 	usesid = mgrcb->agtsid;
+        ncx_set_temp_modQ(&mgrcb->temp_modQ);
     } else {
 	usesid = 0;
     }

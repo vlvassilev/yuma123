@@ -2489,6 +2489,7 @@ status_t
     const xmlChar          *retstr, *name;
     val_value_t            *unval;
     typ_template_t         *listtyp;
+    typ_def_t              *realtypdef;
     const ncx_identity_t   *identity;
     ncx_num_t               num;
     ncx_list_t              list;
@@ -2601,8 +2602,18 @@ status_t
 	}
 	break;
     case NCX_BT_LEAFREF:
-	/*****/
-	res = val_string_ok_errinfo(typdef, btyp, simval, errinfo);
+	/* cannot check instances for default or
+         * manager-side set function, so just check
+         * if the pointed-at typedef validates correctly
+         */
+        realtypdef = typ_get_xref_typdef(typdef);
+        if (realtypdef) {
+            res = val_simval_ok_errinfo(realtypdef, 
+                                        simval, 
+                                        errinfo);
+        } else {
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
 	break;
     case NCX_BT_IDREF:
 	res = val_parse_idref(NULL, simval, &nsid, &name, &identity);
@@ -2817,7 +2828,11 @@ dlq_hdr_t *
 #endif
 
     if (val->getcb) {
-	/***/ return NULL;
+        /* the virtual value will not have any attributes
+         * present; only the PDU value nodes will have
+         * any XML attributes present
+         */
+	return NULL;
     } else {
 	return &val->metaQ;
     }
@@ -2930,7 +2945,10 @@ boolean
 #endif
 
     if (val->getcb) {
-	/***/ return TRUE;
+        /* only the real values (not virtual values) will
+         * have any XML attributes present
+         */
+	return TRUE;
     } else {
 	return dlq_empty(&val->metaQ);
     }
@@ -3476,7 +3494,8 @@ void
 	break;
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_LEAFREF:   /*******/
+    case NCX_BT_LEAFREF:
+        /* leafref is not dumped in canonical form */
 	if (VAL_STR(val)) {
 	    quotes = val_need_quotes(VAL_STR(val));
 
@@ -3714,6 +3733,8 @@ status_t
 * Set an initialized val_value_t as a simple type
 * namespace set to 0 !!!
 *
+* Will check if the string is OK for the typdef!
+*
 * INPUTS:
 *    val == value to set
 *    valname == name of simple value
@@ -3755,7 +3776,6 @@ status_t
     switch (val->btyp) {
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_LEAFREF:   /****/
 	if (valname && !val->name) {
 	    if (val->dname) {
 		SET_ERROR(ERR_INTERNAL_VAL);
@@ -3780,6 +3800,7 @@ status_t
 	    res = NO_ERR;
 	}
 	break;
+    case NCX_BT_LEAFREF:
     default:
 	if (valstr) {
 	    temp = xml_strndup(valstr, valstrlen);
@@ -3979,7 +4000,6 @@ status_t
     val->nsid = nsid;
     val->typdef = typdef;
 
-
     /* convert the value string, if any */
     switch (val->btyp) {
     case NCX_BT_INT8:
@@ -4047,7 +4067,7 @@ status_t
 	    res = ERR_INTERNAL_MEM;
 	}
         break;
-    case NCX_BT_LEAFREF:   /****/
+    case NCX_BT_LEAFREF:
 	if (valstr) {
 	    VAL_STR(val) = xml_strdup(valstr);
 	} else {
@@ -4396,7 +4416,7 @@ boolean
 	case NCX_BT_STRING:
 	case NCX_BT_BINARY:
 	case NCX_BT_INSTANCE_ID:
-	case NCX_BT_LEAFREF:   /*****/
+	case NCX_BT_LEAFREF:
 	    merge_simple(btyp, src, dest);
 	    break;
 	case NCX_BT_UNION:
@@ -4617,7 +4637,7 @@ val_value_t *
 	break;
     case NCX_BT_STRING:	
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_LEAFREF:   /*****/
+    case NCX_BT_LEAFREF:
 	*res = ncx_copy_str(&val->v.str, &copy->v.str, val->btyp);
 	break;
     case NCX_BT_IDREF:
@@ -6787,7 +6807,7 @@ int32
 	break;
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_LEAFREF:   /*****/
+    case NCX_BT_LEAFREF:
 	ret = ncx_compare_strs(&val1->v.str, &val2->v.str, btyp);
 	break;
     case NCX_BT_SLIST:
@@ -7078,7 +7098,7 @@ status_t
 	break;
     case NCX_BT_STRING:	
     case NCX_BT_INSTANCE_ID:
-    case NCX_BT_LEAFREF:  /****/
+    case NCX_BT_LEAFREF:
         if (val->obj && obj_is_password(val->obj)) {
             s = VAL_PASSWORD_STRING;
         } else {
@@ -7798,7 +7818,7 @@ boolean
         /*** TBD: XPath check ***/
         /* return FALSE; */
     case NCX_BT_STRING:
-    case NCX_BT_LEAFREF:   /*****/
+    case NCX_BT_LEAFREF:
 	if (VAL_STR(val)) {
             valsize = xml_strlen(VAL_STR(val));
 
@@ -8266,7 +8286,7 @@ boolean
     case NCX_BT_CASE:
     case NCX_BT_EXTERN:
     case NCX_BT_INTERN:
-	/*** not supported for default value ***/
+	/* not supported for default value */
 	break;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);

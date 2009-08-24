@@ -2527,7 +2527,7 @@ status_t
     yang_node_t     *node;
     const xmlChar   *savedrev;
     status_t         res;
-    boolean          savedparsemode, savedimportmode;
+    boolean          savedimportmode;
 
 #ifdef DEBUG
     if (!modname || !pcb) {
@@ -2544,9 +2544,6 @@ status_t
     savedrev = pcb->revision;
     pcb->revision = revision;
 
-    savedparsemode = pcb->parsemode;
-    pcb->parsemode = FALSE;
-
     savedimportmode = pcb->importmode;
     pcb->importmode = TRUE;
 
@@ -2557,7 +2554,6 @@ status_t
 			  NULL);
 
     pcb->revision = savedrev;
-    pcb->parsemode = savedparsemode;
     pcb->importmode = savedimportmode;
 
     return res;

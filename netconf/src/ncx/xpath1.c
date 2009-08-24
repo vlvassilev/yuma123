@@ -1670,8 +1670,11 @@ static boolean
      */
     if (val1->restype == XP_RT_NODESET ||
 	val2->restype == XP_RT_NODESET) {
-	return compare_nodeset_to_other(pcb, val1, val2, 
-					exop, res);
+	return compare_nodeset_to_other(pcb, 
+                                        val1, 
+                                        val2, 
+					exop, 
+                                        res);
     }
 
     /* no nodesets involved, so the specific exop matters */

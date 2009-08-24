@@ -127,8 +127,10 @@ static status_t
     obj_template_t  **useobj, *foundobj;
     const xmlChar          *modname;
     ncx_module_t           *targmod;
+    dlq_hdr_t              *temp_modQ;
     status_t                res;
     boolean                 laxnamespaces;
+    xmlns_id_t              ncid;
 
     /* TBD: change this to an agt_profile 'namespaces' */
     laxnamespaces = TRUE;
@@ -136,6 +138,8 @@ static status_t
     foundobj = NULL;
     res = NO_ERR;
     useobj = NULL;
+    ncid = xmlns_nc_id();
+    temp_modQ = ncx_get_temp_modQ();
 
     /* set the pcb target to get the result */
     switch (pcb->curmode) {
@@ -156,10 +160,15 @@ static status_t
     if (res == NO_ERR) {
 	if (pcb->source == XP_SRC_XML || pcb->tkerr.mod==NULL) {
 	    if (nsid) {
-		modname = xmlns_get_module(nsid);
-		if (modname) {
-		    targmod = ncx_find_module(modname, NULL);
-		}
+                if (nsid == ncid || temp_modQ == NULL) {
+                    modname = xmlns_get_module(nsid);
+                    if (modname) {
+                        targmod = ncx_find_module(modname, NULL);
+                    }
+                } else if (temp_modQ) {
+                    targmod = ncx_find_module_que_nsid(temp_modQ, 
+                                                       nsid);
+                }
 		if (!targmod) {
 		    res = ERR_NCX_DEF_NOT_FOUND;
 		    if (pcb->logerrors) {
@@ -202,9 +211,16 @@ static status_t
 
 	if (pcb->targobj) {
 	    if (obj_is_root(pcb->targobj)) {
-		foundobj = ncx_find_any_object(nodename);
+                if (temp_modQ) {
+                    foundobj = 
+                        ncx_find_any_object_que(temp_modQ,
+                                                nodename);
+                } else {
+                    foundobj = ncx_find_any_object(nodename);
+                }
 		if (foundobj && nsid && 
 		    obj_get_nsid(foundobj) != nsid) {
+                    /* did not match the specified namespace ID */
 		    foundobj = NULL;
 		}
             } else if (obj_get_nsid(pcb->targobj) == xmlns_nc_id() &&
@@ -217,15 +233,28 @@ static status_t
                     nsid = xmlns_find_ns_by_prefix(prefix);
                 }
                 if (nsid == 0) {
-                    foundobj = ncx_find_any_object(nodename);
+                    if (temp_modQ) {
+                        foundobj = 
+                            ncx_find_any_object_que(temp_modQ,
+                                                    nodename);
+                    } else {
+                        foundobj = ncx_find_any_object(nodename);
+                    }
                 } else {
-                    modname = xmlns_get_module(nsid);
-                    if (modname) {
-                        targmod = ncx_find_module(modname, NULL);
-                        if (targmod) {
+                    targmod = NULL;
+                    if (temp_modQ) {
+                        targmod = 
+                            ncx_find_module_que_nsid(temp_modQ,
+                                                     nsid);
+                    } else {
+                        modname = xmlns_get_module(nsid);
+                        if (modname) {
+                            targmod = ncx_find_module(modname, NULL);
+                        }
+                    }
+                    if (targmod) {
                             foundobj = ncx_find_object(targmod,
                                                        nodename);
-                        }
                     }
                 }
 

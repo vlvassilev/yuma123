@@ -563,14 +563,20 @@ static void
     elname = val->name;
     nsid = val->nsid;
     attrQ = &val->metaQ;
+    xpathpcb = NULL;
+
     if (val->parent) {
 	parent_nsid = val->parent->nsid;
     } else {
 	parent_nsid = 0;
     }
+
     xmlcontent = (val->btyp == NCX_BT_INSTANCE_ID) ||
         obj_is_xpath_string(val->obj);
-    xpathpcb = (xmlcontent) ? val_get_const_xpathpcb(val) : NULL;
+
+    if (xmlcontent) {
+        xpathpcb = val_get_const_xpathpcb(val);
+    }
 
     ses_indent(scb, indent);
 
@@ -692,6 +698,8 @@ static void
 {
     const ncx_lmem_t   *listmem;
     const xmlChar      *pfix;
+    typ_def_t          *realtypdef;
+    val_value_t        *realval;
     val_value_t        *v_val, *chval;
     val_value_t        *useval;
     xmlChar            *binbuff;
@@ -731,6 +739,7 @@ static void
     }
 
     v_val = NULL;
+    realval = NULL;
 
     if (val_is_virtual(val)) {
 	v_val = val_get_virtual_value(scb, val, &res);
@@ -745,6 +754,37 @@ static void
     useval = (v_val) ? v_val : val;
 
     btyp = useval->btyp;
+
+    if (btyp == NCX_BT_LEAFREF) {
+        realtypdef = typ_get_xref_typdef(val->typdef);
+        if (realtypdef) {
+            res = NO_ERR;
+            btyp = typ_get_basetype(realtypdef);
+
+            switch (btyp) {
+            case NCX_BT_STRING:
+            case NCX_BT_BINARY:
+            case NCX_BT_BOOLEAN:
+            case NCX_BT_ENUM:
+                break;
+            default:
+                realval = val_make_simval(realtypdef,
+                                          val_get_nsid(useval),
+                                          useval->name,
+                                          VAL_STR(useval),
+                                          &res);
+                if (realval) {
+                    useval = realval;
+                } else {
+                    log_error("\nError: write leafref '%s' failed (%s)",
+                              useval->name,
+                              get_error_string(res));
+                }
+            }
+        } else {
+            SET_ERROR(ERR_INTERNAL_VAL);
+        }
+    }
 
     switch (btyp) {
     case NCX_BT_ENUM:
@@ -791,7 +831,6 @@ static void
 	break;
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_STRING:
-    case NCX_BT_LEAFREF:        /****/
         /* if the content has XPath or QName content, then
          * the begin_elem_val function should have already
          * printed all the required xmlns attributes
@@ -936,12 +975,17 @@ static void
 				  testfn);
 	} 
 	break;
+    case NCX_BT_LEAFREF:
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     if (v_val) {
 	val_free_value(v_val);
+    }
+
+    if (realval) {
+        val_free_value(realval);
     }
 
 }  /* write_check_val */
@@ -1482,10 +1526,12 @@ void
 {
     val_value_t       *vir;
     val_value_t       *out;
+    val_value_t       *realval;
+    typ_def_t         *realtypdef;
     xml_msg_authfn_t   cbfn;
     status_t           res;
     boolean            acmtest;
-
+    ncx_btype_t        btyp;
 
 #ifdef DEBUG
     if (!scb || !msg || !val) {
@@ -1493,6 +1539,9 @@ void
 	return;
     }
 #endif
+
+    vir = NULL;
+    realval = NULL;
 
     if (val_is_virtual(val)) {
 	vir = val_get_virtual_value(scb, val, &res);
@@ -1504,7 +1553,6 @@ void
 	}
 	out = vir;
     } else {
-	vir = NULL;
 	out = val;
     }
 
@@ -1522,12 +1570,52 @@ void
 	cbfn = (xml_msg_authfn_t)msg->acm_cbfn;
 	acmtest = (*cbfn)(msg, scb->username, val);
 	if (!acmtest) {
+	    if (vir) {
+		val_free_value(vir);
+	    }
 	    return;  /* skip this entry: access-denied */
 	}
     }
 
+    if (out->btyp == NCX_BT_LEAFREF) {
+        realtypdef = typ_get_xref_typdef(out->typdef);
+        if (realtypdef) {
+            res = NO_ERR;
+            btyp = typ_get_basetype(realtypdef);
+
+            switch (btyp) {
+            case NCX_BT_STRING:
+            case NCX_BT_BINARY:
+            case NCX_BT_BOOLEAN:
+            case NCX_BT_ENUM:
+                break;
+            default:
+                realval = val_make_simval(realtypdef,
+                                          val_get_nsid(out),
+                                          out->name,
+                                          VAL_STR(out),
+                                          &res);
+                if (realval) {
+                    out = realval;
+                } else {
+                    log_error("\nError: write leafref '%s' failed (%s)",
+                              out->name,
+                              get_error_string(res));
+                }
+            }
+        } else {
+            SET_ERROR(ERR_INTERNAL_VAL);
+        }
+    }
+
     /* check if this is a false (not present) flag */
     if (out->btyp==NCX_BT_EMPTY && !VAL_BOOL(out)) {
+        if (vir) {
+            val_free_value(vir);
+        }
+        if (realval) {
+            val_free_value(realval);
+        }
 	return;
     }
 
@@ -1575,6 +1663,9 @@ void
 
     if (vir) {
 	val_free_value(vir);
+    }
+    if (realval) {
+	val_free_value(realval);
     }
 
 }  /* xml_wr_full_check_val */

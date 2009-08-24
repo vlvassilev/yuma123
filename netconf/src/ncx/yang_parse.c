@@ -3026,7 +3026,8 @@ static status_t
     }
 
     /* check if this module is already loaded, except in diff mode */
-    if (mod->ismod && !pcb->diffmode &&
+    if (mod->ismod && 
+        !pcb->diffmode &&
 	ncx_find_module(mod->name, mod->version)) {
 	switch (ptyp) {
 	case YANG_PT_TOP:
@@ -3478,50 +3479,55 @@ status_t
                 pcb->top = NULL;
             }
             ncx_free_module(mod);
-	} else if (!wasadd && 
-                  !(pcb->diffmode || 
-                    pcb->searchmode ||
-                    pcb->parsemode ||
-                    pcb->deviationmode)) {
+	} else if (!wasadd) {
+            if (pcb->parsemode) {
+                if (pcb->top == mod) {
+                    pcb->top = NULL;
+                }
+                ncx_free_module(mod);
+            } else if (!(pcb->diffmode || 
+                         pcb->searchmode ||
+                         pcb->deviationmode)) {
 
-            /* do not swap out diffmode, searchmode, or deviationmode */
-	    if (mod->ismod) {
-		if (pcb->top == mod) {
-		    /* hack: make sure netconf-ietf does not 
-		     * get swapped out for netconf.yang;
-		     * the internal version is used instead of
-		     * the standard one to fill in the
-		     * missing peices
-		     */
-		    if (xml_strcmp(mod->name, NCXMOD_IETF_NETCONF)) {
-			/* swap with the real module already done */
-			pcb->top = ncx_find_module(mod->name,
-						   mod->version);
-		    } else {
-			keepmod = TRUE;
-		    }
-		}
-	    } else if (!pcb->with_submods) {
-		/* subtree parsing mode can cause top-level to already
-		 * be loaded into the registry, swap out the new dummy
-		 * module with the real one
-		 */
-		if (pcb->top == mod) {
-		    pcb->top = ncx_find_module(mod->belongs,
-					       mod->version);
-		}
-	    } else if (pcb->top == mod) {
-		pcb->top = NULL;
-	    }
-	    if (!keepmod) {
-		ncx_free_module(mod);
-	    }
-	    if (!pcb->top && !pcb->with_submods) {
-		res = ERR_NCX_MOD_NOT_FOUND;
-	    }
-	}  /* else the module went into an alternate mod Q 
-            * or the pcb->top pointer is live and will be freed later
-            */
+                /* do not swap out diffmode, searchmode, or deviationmode */
+                if (mod->ismod) {
+                    if (pcb->top == mod) {
+                        /* hack: make sure netconf-ietf does not 
+                         * get swapped out for netconf.yang;
+                         * the internal version is used instead of
+                         * the standard one to fill in the
+                         * missing peices
+                         */
+                        if (xml_strcmp(mod->name, NCXMOD_IETF_NETCONF)) {
+                            /* swap with the real module already done */
+                            pcb->top = ncx_find_module(mod->name,
+                                                       mod->version);
+                        } else {
+                            keepmod = TRUE;
+                        }
+                    }
+                } else if (!pcb->with_submods) {
+                    /* subtree parsing mode can cause top-level to already
+                     * be loaded into the registry, swap out the new dummy
+                     * module with the real one
+                     */
+                    if (pcb->top == mod) {
+                        pcb->top = ncx_find_module(mod->belongs,
+                                                   mod->version);
+                    }
+                } else if (pcb->top == mod) {
+                    pcb->top = NULL;
+                }
+                if (!keepmod) {
+                    ncx_free_module(mod);
+                }
+                if (!pcb->top && !pcb->with_submods) {
+                    res = ERR_NCX_MOD_NOT_FOUND;
+                }
+            }  /* else the module went into an alternate mod Q 
+                * or the pcb->top pointer is live and will be freed later
+                */
+        }
     }
 
     fclose(fp);

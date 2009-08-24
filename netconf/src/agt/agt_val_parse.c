@@ -2768,9 +2768,6 @@ static status_t
     case NCX_BT_SLIST:
     case NCX_BT_BITS:
     case NCX_BT_INSTANCE_ID:
-        /* leafref and instance-identifier do not get
-         * fully validated until commit time
-         */
         res = parse_string_nc(scb, 
                               msg, 
                               obj, 

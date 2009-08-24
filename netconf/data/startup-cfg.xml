@@ -135,4 +135,6 @@
    </if:interfaces>
    <t:uint8.1 xmlns:t="http://netconfcentral.com/ns/test">44</t:uint8.1>
    <t:uint16.1 xmlns:t="http://netconfcentral.com/ns/test">7</t:uint16.1>
+   <t:int8.1 xmlns:t="http://netconfcentral.com/ns/test">2</t:int8.1>
+   <t:leafref.3 xmlns:t="http://netconfcentral.com/ns/test">tina</t:leafref.3>
 </nc:config>

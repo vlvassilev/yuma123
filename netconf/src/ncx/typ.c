@@ -4687,7 +4687,12 @@ typ_def_t *
 
     tdef = typ_get_base_typdef(typdef);
     if (tdef && tdef->class == NCX_CL_SIMPLE) {
-	return tdef->def.simple.xrefdef;
+        btyp = typ_get_basetype(tdef->def.simple.xrefdef);
+        if (btyp == NCX_BT_LEAFREF) {
+            return typ_get_xref_typdef(tdef->def.simple.xrefdef);
+        } else {
+            return tdef->def.simple.xrefdef;
+        }
     } else {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;

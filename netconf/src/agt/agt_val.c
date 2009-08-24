@@ -2221,6 +2221,7 @@ static status_t
 
     res = NO_ERR;
     errinfo = NULL;
+    typdef = obj_get_typdef(val->obj);
 
     switch (val->btyp) {
     case NCX_BT_LEAFREF:
@@ -2228,7 +2229,6 @@ static status_t
          * instance that matched, just checking the
          * require-instance flag
          */
-        typdef = obj_get_typdef(val->obj);
         xpcb = typ_get_leafref_pcb(typdef);
         constrained = TRUE;
 

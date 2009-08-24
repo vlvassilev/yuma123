@@ -3633,6 +3633,8 @@ void
     }
 #endif
 
+
+
     mgrcb = scb->mgrcb;
     if (mgrcb) {
 	usesid = mgrcb->agtsid;
@@ -3644,6 +3646,7 @@ void
     /***  TBD: multi-session support ***/
     agent_cb = cur_agent_cb;
 
+    anyout = FALSE;
     anyerrors = FALSE;
 
     /* check the contents of the reply */
@@ -3682,8 +3685,6 @@ void
                 log_info("\n");
 	    }
 	    anyout = TRUE;
-	} else {
-	    anyout = FALSE;
 	}
 
 	/* output data even if there were errors

@@ -95,7 +95,7 @@ date         init     comment
 #define MGR_HELLO_DEBUG 1
 #endif
 
-#define MGR_AGENT_HELLO_OBJ ((const xmlChar *)"agent-hello")
+#define MGR_SERVER_HELLO_OBJ ((const xmlChar *)"server-hello")
 
 
 /********************************************************************
@@ -334,7 +334,7 @@ void
     if (res == NO_ERR) {
 	mod = ncx_find_module(NC_MODULE, NULL);
 	if (mod) {
-	    obj = ncx_find_object(mod, MGR_AGENT_HELLO_OBJ);
+	    obj = ncx_find_object(mod, MGR_SERVER_HELLO_OBJ);
 	}
 	if (!obj) {
 	    /* netconf module should have loaded this definition */

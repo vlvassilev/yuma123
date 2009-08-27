@@ -101,7 +101,7 @@ date         init     comment
 #define AGT_HELLO_DEBUG 1
 #endif
 
-#define MGR_HELLO_CON ((const xmlChar *)"mgr-hello")
+#define CLIENT_HELLO_CON ((const xmlChar *)"client-hello")
 
 /********************************************************************
 *                                                                   *
@@ -271,7 +271,7 @@ void
         obj = NULL;
         mod = ncx_find_module(NC_MODULE, NULL);
         if (mod) {
-            obj = ncx_find_object(mod, MGR_HELLO_CON);
+            obj = ncx_find_object(mod, CLIENT_HELLO_CON);
         }
         if (!obj) {
             /* netconf module should have loaded this definition */

@@ -1,6 +1,6 @@
 /*  FILE: agt_sys.c
 
-   NETCONF System Data Model implementation: Agent Side Support
+   NETCONF System Data Model implementation: Server Side Support
 
 identifiers:
 container /system
@@ -25,13 +25,13 @@ leaf /sysConfigChange/editList/target
 leaf /sysConfigChange/editList/operation
 notification /sysCapabilityChange
 container /sysCapabilityChange/changed-by
-choice /sysCapabilityChange/changed-by/agent-or-user
-case /sysCapabilityChange/changed-by/agent-or-user/agent
-leaf /sysCapabilityChange/changed-by/agent-or-user/agent/agent
-case /sysCapabilityChange/changed-by/agent-or-user/by-user
-leaf /sysCapabilityChange/changed-by/agent-or-user/by-user/userName
-leaf /sysCapabilityChange/changed-by/agent-or-user/by-user/sessionId
-leaf /sysCapabilityChange/changed-by/agent-or-user/by-user/remoteHost
+choice /sysCapabilityChange/changed-by/server-or-user
+case /sysCapabilityChange/changed-by/server-or-user/server
+leaf /sysCapabilityChange/changed-by/server-or-user/server/server
+case /sysCapabilityChange/changed-by/server-or-user/by-user
+leaf /sysCapabilityChange/changed-by/server-or-user/by-user/userName
+leaf /sysCapabilityChange/changed-by/server-or-user/by-user/sessionId
+leaf /sysCapabilityChange/changed-by/server-or-user/by-user/remoteHost
 leaf-list /sysCapabilityChange/added-capability
 leaf-list /sysCapabilityChange/deleted-capability
 notification /sysSessionStart
@@ -459,7 +459,7 @@ static void
 * FUNCTION agt_sys_init
 *
 * INIT 1:
-*   Initialize the agent notification module data structures
+*   Initialize the server notification module data structures
 *
 * INPUTS:
 *   none
@@ -967,7 +967,7 @@ void
 * INPUTS:
 *   changed_by == session control block that made the
 *                 change to add this module
-*             == NULL if the agent made the change
+*             == NULL if the server made the change
 *   is_add    == TRUE if the capability is being added
 *                FALSE if the capability is being deleted
 *   capstr == capability string that was added or deleted
@@ -1067,7 +1067,7 @@ void
         }
     } else {
         leafval = agt_make_leaf(changedbyobj,
-                                NCX_EL_AGENT,
+                                NCX_EL_SERVER,
                                 NULL,
                                 &res);
         if (leafval) {

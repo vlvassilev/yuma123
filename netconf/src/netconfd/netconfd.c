@@ -230,7 +230,8 @@ static status_t
 		   dlevel, 
 		   TRUE,
 		   "\nStarting netconfd"
-                   "\n  Copyright 2009, Andy Bierman, All Rights Reserved.\n",
+                   "\n  Copyright 2009, Netconf Central, "
+                   "All Rights Reserved.\n",
 		   argc, 
                    argv);
 		   

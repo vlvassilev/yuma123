@@ -126,47 +126,47 @@ date         init     comment
 * FUNCTION setup_lock_cbs
 * 
 * Setup the lock state info in all the lock control blocks
-* in the specified agent_cb; call when a new sesion is started
+* in the specified server_cb; call when a new sesion is started
 * 
 * INPUTS:
-*  agent_cb == agent control block to use
+*  server_cb == server control block to use
 *********************************************************************/
 static void
-    setup_lock_cbs (agent_cb_t *agent_cb)
+    setup_lock_cbs (server_cb_t *server_cb)
 {
     ses_cb_t     *scb;
     mgr_scb_t    *mscb;
     ncx_cfg_t     cfg_id;
 
-    scb = mgr_ses_get_scb(agent_cb->mysid);
+    scb = mgr_ses_get_scb(server_cb->mysid);
     if (scb == NULL) {
         log_error("\nError: active session dropped, cannot lock");
         return;
     }
 
     mscb = (mgr_scb_t *)scb->mgrcb;
-    agent_cb->locks_active = TRUE;
-    agent_cb->locks_waiting = FALSE;
-    agent_cb->locks_cur_cfg = NCX_CFGID_RUNNING;
+    server_cb->locks_active = TRUE;
+    server_cb->locks_waiting = FALSE;
+    server_cb->locks_cur_cfg = NCX_CFGID_RUNNING;
 
     for (cfg_id = NCX_CFGID_RUNNING;
          cfg_id <= NCX_CFGID_STARTUP;
          cfg_id++) {
 
-        agent_cb->lock_cb[cfg_id].lock_state = LOCK_STATE_IDLE;
-        agent_cb->lock_cb[cfg_id].lock_used = FALSE;
-        agent_cb->lock_cb[cfg_id].start_time = (time_t)0;
-        agent_cb->lock_cb[cfg_id].last_msg_time = (time_t)0;
+        server_cb->lock_cb[cfg_id].lock_state = LOCK_STATE_IDLE;
+        server_cb->lock_cb[cfg_id].lock_used = FALSE;
+        server_cb->lock_cb[cfg_id].start_time = (time_t)0;
+        server_cb->lock_cb[cfg_id].last_msg_time = (time_t)0;
     }
 
     /* always request the lock on running */
-    agent_cb->lock_cb[NCX_CFGID_RUNNING].lock_used = TRUE;
+    server_cb->lock_cb[NCX_CFGID_RUNNING].lock_used = TRUE;
 
-    agent_cb->lock_cb[NCX_CFGID_CANDIDATE].lock_used = 
+    server_cb->lock_cb[NCX_CFGID_CANDIDATE].lock_used = 
         (cap_std_set(&mscb->caplist, CAP_STDID_CANDIDATE))
         ? TRUE : FALSE;
 
-    agent_cb->lock_cb[NCX_CFGID_STARTUP].lock_used =
+    server_cb->lock_cb[NCX_CFGID_STARTUP].lock_used =
         (cap_std_set(&mscb->caplist, CAP_STDID_STARTUP))
         ? TRUE : FALSE;
 
@@ -177,23 +177,23 @@ static void
 * FUNCTION setup_unlock_cbs
 * 
 * Setup the lock state info in all the lock control blocks
-* in the specified agent_cb; call when release-locks or cleanup
+* in the specified server_cb; call when release-locks or cleanup
 * is releasing all the locks gained so far
 * 
 * INPUTS:
-*     agent_cb == agent control block to use
+*     server_cb == server control block to use
 *
 * RETURNS:
 *   TRUE if sending unlocks needed
 *   FALSE if sending unlocks not needed
 *********************************************************************/
 static boolean
-    setup_unlock_cbs (agent_cb_t *agent_cb)
+    setup_unlock_cbs (server_cb_t *server_cb)
 {
     boolean       needed;
     ncx_cfg_t     cfg_id;
 
-    if (!agent_cb->locks_active) {
+    if (!server_cb->locks_active) {
         return FALSE;
     }
 
@@ -203,10 +203,10 @@ static boolean
          cfg_id <= NCX_CFGID_STARTUP;
          cfg_id++) {
 
-        agent_cb->lock_cb[cfg_id].start_time = (time_t)0;
-        agent_cb->lock_cb[cfg_id].last_msg_time = (time_t)0;
-        if (agent_cb->lock_cb[cfg_id].lock_used && 
-            agent_cb->lock_cb[cfg_id].lock_state == 
+        server_cb->lock_cb[cfg_id].start_time = (time_t)0;
+        server_cb->lock_cb[cfg_id].last_msg_time = (time_t)0;
+        if (server_cb->lock_cb[cfg_id].lock_used && 
+            server_cb->lock_cb[cfg_id].lock_state == 
             LOCK_STATE_ACTIVE) {
             needed = TRUE;
         }
@@ -218,20 +218,20 @@ static boolean
 
 
 /********************************************************************
-* FUNCTION send_lock_pdu_to_agent
+* FUNCTION send_lock_pdu_to_server
 * 
-* Send a <lock> or <unlock> operation to the agent
+* Send a <lock> or <unlock> operation to the server
 *
 * INPUTS:
-*   agent_cb == agent control block to use
-*   lockcb == lock control block to use within agent_cb
+*   server_cb == server control block to use
+*   lockcb == lock control block to use within server_cb
 *   islock == TRUE for lock; FALSE for unlock
 *
 * RETURNS:
 *    status
 *********************************************************************/
 static status_t
-    send_lock_pdu_to_agent (agent_cb_t *agent_cb,
+    send_lock_pdu_to_server (server_cb_t *server_cb,
                             lock_cb_t *lockcb,
                             boolean islock)
 {
@@ -293,7 +293,7 @@ static status_t
         val_add_child(parmval, targetval);
     }
 
-    scb = mgr_ses_get_scb(agent_cb->mysid);
+    scb = mgr_ses_get_scb(server_cb->mysid);
     if (!scb) {
 	res = SET_ERROR(ERR_INTERNAL_PTR);
     } else {
@@ -304,7 +304,7 @@ static status_t
 	} else {
 	    req->data = reqdata;
 	    req->rpc = rpc;
-	    req->timeout = agent_cb->timeout;
+	    req->timeout = server_cb->timeout;
 	}
     }
 	
@@ -314,7 +314,7 @@ static status_t
 	    log_debug2("\nabout to send RPC request with reqdata:");
 	    val_dump_value_ex(reqdata, 
                               NCX_DEF_INDENT,
-                              agent_cb->display_mode);
+                              server_cb->display_mode);
 	}
 
 	/* the request will be stored if this returns NO_ERR */
@@ -326,7 +326,7 @@ static status_t
                 lockcb->lock_state = LOCK_STATE_RELEASE_SENT;
             }
             (void)time(&lockcb->last_msg_time);
-            agent_cb->locks_cur_cfg = lockcb->config_id;
+            server_cb->locks_cur_cfg = lockcb->config_id;
         }
     }
 
@@ -338,21 +338,21 @@ static status_t
 	    val_free_value(reqdata);
 	}
     } else {
-	agent_cb->state = MGR_IO_ST_CONN_RPYWAIT;
+	server_cb->state = MGR_IO_ST_CONN_RPYWAIT;
     }
 
     return res;
 
-} /* send_lock_pdu_to_agent */
+} /* send_lock_pdu_to_server */
 
 
 /********************************************************************
  * FUNCTION do_get_locks (local RPC)
  * 
- * get all the locks on the agent
+ * get all the locks on the server
  *
  * INPUTS:
- *    agent_cb == agent control block to use
+ *    server_cb == server control block to use
  *    rpc == RPC method for the history command
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
@@ -361,7 +361,7 @@ static status_t
  *   status
  *********************************************************************/
 status_t
-    do_get_locks (agent_cb_t *agent_cb,
+    do_get_locks (server_cb_t *server_cb,
                   obj_template_t *rpc,
                   const xmlChar *line,
                   uint32  len)
@@ -372,28 +372,28 @@ status_t
     boolean        cleanup, done;
     status_t       res;
 
-    if (agent_cb->locks_active) {
+    if (server_cb->locks_active) {
         log_error("\nError: locks are already active");
         return ERR_NCX_OPERATION_FAILED;
     }
-    if (agent_cb->state != MGR_IO_ST_CONN_IDLE) {
+    if (server_cb->state != MGR_IO_ST_CONN_IDLE) {
         log_error("\nError: no active session to lock");
         return ERR_NCX_OPERATION_FAILED;
     }
 
-    scb = mgr_ses_get_scb(agent_cb->mysid);
+    scb = mgr_ses_get_scb(server_cb->mysid);
     if (scb == NULL) {
         log_error("\nError: active session dropped, cannot lock");
         return ERR_NCX_OPERATION_FAILED;
     }
 
-    locks_timeout = agent_cb->locks_timeout;
-    retry_interval = agent_cb->locks_retry_interval;
+    locks_timeout = server_cb->locks_timeout;
+    retry_interval = server_cb->locks_retry_interval;
     cleanup = TRUE;
 
     res = NO_ERR;
 
-    valset = get_valset(agent_cb, rpc, &line[len], &res);
+    valset = get_valset(server_cb, rpc, &line[len], &res);
     if (valset && res == NO_ERR) {
         /* get the overall lock timeout */
 	parm = val_find_child(valset, 
@@ -421,16 +421,16 @@ status_t
     }
 
     /* start the auto-lock procedure */
-    setup_lock_cbs(agent_cb);
-    agent_cb->locks_timeout = locks_timeout;
-    agent_cb->locks_retry_interval = retry_interval;
-    agent_cb->locks_cleanup = cleanup;
+    setup_lock_cbs(server_cb);
+    server_cb->locks_timeout = locks_timeout;
+    server_cb->locks_retry_interval = retry_interval;
+    server_cb->locks_cleanup = cleanup;
 
     done = FALSE;
     if (LOGINFO) {
         log_info("\nSending <lock> operations for get-locks...\n");
     }
-    res = handle_get_locks_request_to_agent(agent_cb,
+    res = handle_get_locks_request_to_server(server_cb,
                                             TRUE,
                                             &done);
     if (res != NO_ERR && done) {
@@ -450,10 +450,10 @@ status_t
 /********************************************************************
  * FUNCTION do_release_locks (local RPC)
  * 
- * release all the locks on the agent
+ * release all the locks on the server
  *
  * INPUTS:
- *    agent_cb == agent control block to use
+ *    server_cb == server control block to use
  *    rpc == RPC method for the history command
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
@@ -462,7 +462,7 @@ status_t
  *   status
  *********************************************************************/
 status_t
-    do_release_locks (agent_cb_t *agent_cb,
+    do_release_locks (server_cb_t *server_cb,
                       obj_template_t *rpc,
                       const xmlChar *line,
                       uint32  len)
@@ -473,29 +473,29 @@ status_t
     boolean        cleanup, done, needed;
     status_t       res;
 
-    if (!agent_cb->locks_active) {
+    if (!server_cb->locks_active) {
         log_error("\nError: locks are not active");
         return ERR_NCX_OPERATION_FAILED;
     }
-    scb = mgr_ses_get_scb(agent_cb->mysid);
+    scb = mgr_ses_get_scb(server_cb->mysid);
     if (scb == NULL) {
         log_error("\nError: active session dropped, cannot lock");
         return ERR_NCX_OPERATION_FAILED;
     }
 
-    locks_timeout = agent_cb->locks_timeout;
-    retry_interval = agent_cb->locks_retry_interval;
+    locks_timeout = server_cb->locks_timeout;
+    retry_interval = server_cb->locks_retry_interval;
     cleanup = TRUE;
 
     res = NO_ERR;
-    valset = get_valset(agent_cb, rpc, &line[len], &res);
+    valset = get_valset(server_cb, rpc, &line[len], &res);
     if (res == NO_ERR || res == ERR_NCX_SKIPPED) {
 
         /* start the auto-unlock procedure */
-        agent_cb->locks_timeout = locks_timeout;
-        agent_cb->locks_retry_interval = retry_interval;
-        agent_cb->locks_cleanup = cleanup;
-        needed = setup_unlock_cbs(agent_cb);
+        server_cb->locks_timeout = locks_timeout;
+        server_cb->locks_retry_interval = retry_interval;
+        server_cb->locks_cleanup = cleanup;
+        needed = setup_unlock_cbs(server_cb);
 
         if (LOGINFO && needed) {
             log_info("\nSending <unlock> operations for release-locks...\n");
@@ -503,12 +503,12 @@ status_t
 
         if (needed) {
             done = FALSE;
-            res = handle_release_locks_request_to_agent(agent_cb,
+            res = handle_release_locks_request_to_server(server_cb,
                                                         TRUE,
                                                         &done);
             if (done) {
                 /* need to close the session or report fatal error */
-                clear_lock_cbs(agent_cb);
+                clear_lock_cbs(server_cb);
             }
         }
     }
@@ -523,18 +523,18 @@ status_t
 
 
 /********************************************************************
-* FUNCTION handle_get_locks_request_to_agent
+* FUNCTION handle_get_locks_request_to_server
 * 
-* Send the first <lock> operation to the agent
+* Send the first <lock> operation to the server
 * in a get-locks command
 *
 * INPUTS:
-*   agent_cb == agent control block to use
+*   server_cb == server control block to use
 *   first == TRUE if this is the first call; FALSE otherwise
 *   done == address of return final done flag
 *
 * OUTPUTS:
-*    agent_cb->state may be changed or other action taken
+*    server_cb->state may be changed or other action taken
 *    *done == TRUE when the return code is NO_ERR and all
 *                 the locks are granted
 *             FALSE otherwise
@@ -543,7 +543,7 @@ status_t
 *            otherwise done is true on any error
 *********************************************************************/
 status_t
-    handle_get_locks_request_to_agent (agent_cb_t *agent_cb,
+    handle_get_locks_request_to_server (server_cb_t *server_cb,
                                        boolean first,
                                        boolean *done)
 {
@@ -555,7 +555,7 @@ status_t
     boolean         finddone, stillwaiting;
 
 #ifdef DEBUG
-    if (!agent_cb || !done) {
+    if (!server_cb || !done) {
         return  SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -569,10 +569,10 @@ status_t
 
     if (first) {
         /* this is the first try, start the overall timer */
-        (void)time(&agent_cb->locks_start_time);
-    } else if (check_locks_timeout(agent_cb)) {
+        (void)time(&server_cb->locks_start_time);
+    } else if (check_locks_timeout(server_cb)) {
         log_error("\nError: get-locks timeout");
-        handle_locks_cleanup(agent_cb);
+        handle_locks_cleanup(server_cb);
         return ERR_NCX_TIMEOUT;
     }
 
@@ -584,7 +584,7 @@ status_t
          cfg_id <= NCX_CFGID_STARTUP && !finddone;
          cfg_id++) {
 
-        lockcb = &agent_cb->lock_cb[cfg_id];
+        lockcb = &server_cb->lock_cb[cfg_id];
 
         if (lockcb->lock_used) {
             if (lockcb->lock_state == LOCK_STATE_IDLE) {
@@ -609,15 +609,15 @@ status_t
              cfg_id <= NCX_CFGID_STARTUP && !finddone;
              cfg_id++) {
 
-            lockcb = &agent_cb->lock_cb[cfg_id];
+            lockcb = &server_cb->lock_cb[cfg_id];
             if (lockcb->lock_used) {
                 if (lockcb->lock_state == LOCK_STATE_TEMP_ERROR) {
                     timediff = difftime(timenow, lockcb->last_msg_time);
                     if (timediff >= 
-                        (double)agent_cb->locks_retry_interval) {
+                        (double)server_cb->locks_retry_interval) {
                         finddone = TRUE;
                     } else {
-                        agent_cb->locks_waiting = TRUE;
+                        server_cb->locks_waiting = TRUE;
                         stillwaiting = TRUE;
                     }
                 }
@@ -634,31 +634,31 @@ status_t
 
     /* check if a <lock> request needs to be sent */
     if (finddone && lockcb) {
-        agent_cb->command_mode = CMD_MODE_AUTOLOCK;
-        res = send_lock_pdu_to_agent(agent_cb,
+        server_cb->command_mode = CMD_MODE_AUTOLOCK;
+        res = send_lock_pdu_to_server(server_cb,
                                      lockcb,
                                      TRUE);
     }
 
     return res;
     
-}  /* handle_get_locks_request_to_agent */
+}  /* handle_get_locks_request_to_server */
 
 
 /********************************************************************
-* FUNCTION handle_release_locks_request_to_agent
+* FUNCTION handle_release_locks_request_to_server
 * 
-* Send an <unlock> operation to the agent
+* Send an <unlock> operation to the server
 * in a get-locks command teardown or a release-locks
 * operation
 *
 * INPUTS:
-*   agent_cb == agent control block to use
+*   server_cb == server control block to use
 *   first == TRUE if this is the first call; FALSE otherwise
 *   done == address of return final done flag
 *
 * OUTPUTS:
-*    agent_cb->state may be changed or other action taken
+*    server_cb->state may be changed or other action taken
 *    *done == TRUE when the return code is NO_ERR and all
 *                 the locks are granted
 *             FALSE otherwise
@@ -667,7 +667,7 @@ status_t
 *            otherwise done is true on any error
 *********************************************************************/
 status_t
-    handle_release_locks_request_to_agent (agent_cb_t *agent_cb,
+    handle_release_locks_request_to_server (server_cb_t *server_cb,
                                            boolean first,
                                            boolean *done)
 {
@@ -677,7 +677,7 @@ status_t
     boolean         finddone;
 
 #ifdef DEBUG
-    if (!agent_cb || !done) {
+    if (!server_cb || !done) {
         return  SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -688,11 +688,11 @@ status_t
     *done = FALSE;
 
     if (first) {
-        agent_cb->command_mode = CMD_MODE_AUTOUNLOCK;
-        (void)time(&agent_cb->locks_start_time);
-    } else if (check_locks_timeout(agent_cb)) {
+        server_cb->command_mode = CMD_MODE_AUTOUNLOCK;
+        (void)time(&server_cb->locks_start_time);
+    } else if (check_locks_timeout(server_cb)) {
         log_error("\nError: release-locks timeout");
-        clear_lock_cbs(agent_cb);
+        clear_lock_cbs(server_cb);
         return ERR_NCX_TIMEOUT;
     }
 
@@ -703,7 +703,7 @@ status_t
          cfg_id <= NCX_CFGID_STARTUP && !finddone;
          cfg_id++) {
 
-        lockcb = &agent_cb->lock_cb[cfg_id];
+        lockcb = &server_cb->lock_cb[cfg_id];
         if (lockcb->lock_used &&
             lockcb->lock_state == LOCK_STATE_ACTIVE) {
             finddone = TRUE;
@@ -715,18 +715,18 @@ status_t
         if (first) {
             log_info("\nNo locks to release");
         }
-        agent_cb->state = MGR_IO_ST_CONN_IDLE;
-        clear_lock_cbs(agent_cb);
+        server_cb->state = MGR_IO_ST_CONN_IDLE;
+        clear_lock_cbs(server_cb);
         *done = TRUE;
     } else {
-        res = send_lock_pdu_to_agent(agent_cb,
+        res = send_lock_pdu_to_server(server_cb,
                                      lockcb,
                                      FALSE);
     }
 
     return res;
     
-}  /* handle_release_locks_request_to_agent */
+}  /* handle_release_locks_request_to_server */
 
 
 /********************************************************************
@@ -735,42 +735,42 @@ status_t
 * Deal with the cleanup for the get-locks or release-locks
 *
 * INPUTS:
-*   agent_cb == agent control block to use
+*   server_cb == server control block to use
 *
 * OUTPUTS:
-*    agent_cb->state may be changed or other action taken
+*    server_cb->state may be changed or other action taken
 *
 *********************************************************************/
 void
-    handle_locks_cleanup (agent_cb_t *agent_cb)
+    handle_locks_cleanup (server_cb_t *server_cb)
 {
     status_t        res;
     boolean         done;
 
 #ifdef DEBUG
-    if (!agent_cb) {
+    if (!server_cb) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
 #endif
 
-    if (!use_agentcb(agent_cb)) {
+    if (!use_servercb(server_cb)) {
         log_error("\nError: connection lost, canceling release-locks");
-        clear_lock_cbs(agent_cb);
+        clear_lock_cbs(server_cb);
         return;
     }
 
-    if (agent_cb->locks_cleanup) {
-        agent_cb->command_mode = CMD_MODE_AUTOUNLOCK;
+    if (server_cb->locks_cleanup) {
+        server_cb->command_mode = CMD_MODE_AUTOUNLOCK;
         done = FALSE;
-        res = handle_release_locks_request_to_agent(agent_cb,
+        res = handle_release_locks_request_to_server(server_cb,
                                                     TRUE,
                                                     &done);
         if (done) {
-            clear_lock_cbs(agent_cb);
+            clear_lock_cbs(server_cb);
         }
     } else {
-        clear_lock_cbs(agent_cb);
+        clear_lock_cbs(server_cb);
     }
 
 }  /* handle_locks_cleanup */
@@ -782,31 +782,31 @@ void
 * Check if the locks_timeout is active and if it expired yet
 *
 * INPUTS:
-*   agent_cb == agent control block to use
+*   server_cb == server control block to use
 *
 * RETURNS:
 *   TRUE if locks_timeout expired
 *   FALSE if no timeout has occurred
 *********************************************************************/
 boolean
-    check_locks_timeout (agent_cb_t *agent_cb)
+    check_locks_timeout (server_cb_t *server_cb)
 {
     time_t          timenow;
     double          timediff;
 
 #ifdef DEBUG
-    if (!agent_cb) {
+    if (!server_cb) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return FALSE;
     }
 #endif
 
-    if (agent_cb->locks_timeout) {
+    if (server_cb->locks_timeout) {
         /* check if there is an overall timeout yet */
         (void)time(&timenow);
         timediff = difftime(timenow,
-                            agent_cb->locks_start_time);
-        if (timediff >= (double)agent_cb->locks_timeout) {
+                            server_cb->locks_start_time);
+        if (timediff >= (double)server_cb->locks_timeout) {
             log_debug("\nlock timeout");
             return TRUE;
         }
@@ -817,18 +817,18 @@ boolean
 
 
 /********************************************************************
-* FUNCTION send_discard_changes_pdu_to_agent
+* FUNCTION send_discard_changes_pdu_to_server
 * 
-* Send a <discard-changes> operation to the agent
+* Send a <discard-changes> operation to the server
 *
 * INPUTS:
-*   agent_cb == agent control block to use
+*   server_cb == server control block to use
 *
 * RETURNS:
 *    status
 *********************************************************************/
 status_t
-    send_discard_changes_pdu_to_agent (agent_cb_t *agent_cb)
+    send_discard_changes_pdu_to_server (server_cb_t *server_cb)
 {
     obj_template_t        *rpc;
     mgr_rpc_req_t         *req;
@@ -857,7 +857,7 @@ status_t
 	return ERR_INTERNAL_MEM;
     }
 
-    scb = mgr_ses_get_scb(agent_cb->mysid);
+    scb = mgr_ses_get_scb(server_cb->mysid);
     if (!scb) {
 	res = SET_ERROR(ERR_INTERNAL_PTR);
     } else {
@@ -868,7 +868,7 @@ status_t
 	} else {
 	    req->data = reqdata;
 	    req->rpc = rpc;
-	    req->timeout = agent_cb->timeout;
+	    req->timeout = server_cb->timeout;
 	}
     }
 	
@@ -878,13 +878,13 @@ status_t
 	    log_debug2("\nabout to send RPC request with reqdata:");
 	    val_dump_value_ex(reqdata, 
                               NCX_DEF_INDENT,
-                              agent_cb->display_mode);
+                              server_cb->display_mode);
 	}
 
 	/* the request will be stored if this returns NO_ERR */
 	res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
         if (res == NO_ERR) {
-            agent_cb->command_mode = CMD_MODE_AUTODISCARD;
+            server_cb->command_mode = CMD_MODE_AUTODISCARD;
         }
     }
 
@@ -896,43 +896,43 @@ status_t
 	    val_free_value(reqdata);
 	}
     } else {
-	agent_cb->state = MGR_IO_ST_CONN_RPYWAIT;
+	server_cb->state = MGR_IO_ST_CONN_RPYWAIT;
     }
 
     return res;
 
-} /* send_discard_changes_pdu_to_agent */
+} /* send_discard_changes_pdu_to_server */
 
 
 /********************************************************************
 * FUNCTION clear_lock_cbs
 * 
 * Clear the lock state info in all the lock control blocks
-* in the specified agent_cb
+* in the specified server_cb
 * 
 * INPUTS:
-*  agent_cb == agent control block to use
+*  server_cb == server control block to use
 *
 *********************************************************************/
 void
-    clear_lock_cbs (agent_cb_t *agent_cb)
+    clear_lock_cbs (server_cb_t *server_cb)
 {
     ncx_cfg_t  cfg_id;
 
     /* set up lock control blocks for get-locks */
-    agent_cb->locks_active = FALSE;
-    agent_cb->locks_waiting = FALSE;
-    agent_cb->locks_cur_cfg = NCX_CFGID_RUNNING;
-    agent_cb->command_mode = CMD_MODE_NORMAL;
+    server_cb->locks_active = FALSE;
+    server_cb->locks_waiting = FALSE;
+    server_cb->locks_cur_cfg = NCX_CFGID_RUNNING;
+    server_cb->command_mode = CMD_MODE_NORMAL;
 
     for (cfg_id = NCX_CFGID_RUNNING;
          cfg_id <= NCX_CFGID_STARTUP;
          cfg_id++) {
 
-        agent_cb->lock_cb[cfg_id].lock_state = LOCK_STATE_IDLE;
-        agent_cb->lock_cb[cfg_id].lock_used = FALSE;
-        agent_cb->lock_cb[cfg_id].start_time = (time_t)0;
-        agent_cb->lock_cb[cfg_id].last_msg_time = (time_t)0;
+        server_cb->lock_cb[cfg_id].lock_state = LOCK_STATE_IDLE;
+        server_cb->lock_cb[cfg_id].lock_used = FALSE;
+        server_cb->lock_cb[cfg_id].start_time = (time_t)0;
+        server_cb->lock_cb[cfg_id].last_msg_time = (time_t)0;
     }
 
 }  /* clear_lock_cbs */

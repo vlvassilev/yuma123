@@ -123,27 +123,27 @@ date         init     comment
 
 
 /********************************************************************
-* FUNCTION send_get_schema_to_agent
+* FUNCTION send_get_schema_to_server
 * 
-* Send an <get-schema> operation to the specified agent
+* Send an <get-schema> operation to the specified server
 * in MGR_IO_ST_AUTOLOAD state
 *
 * format will be hard-wired to yang
 *
 * INPUTS:
-*   agent_cb == agent control block to use
+*   server_cb == server control block to use
 *   scb == session control block to use
 *   module == module to get
 *   revision == revision to get
 *
 * OUTPUTS:
-*    agent_cb->state may be changed or other action taken
+*    server_cb->state may be changed or other action taken
 *
 * RETURNS:
 *    status
 *********************************************************************/
 static status_t
-    send_get_schema_to_agent (agent_cb_t *agent_cb,
+    send_get_schema_to_server (server_cb_t *server_cb,
                               ses_cb_t *scb,
                               const xmlChar *module,
                               const xmlChar *revision)
@@ -241,7 +241,7 @@ static status_t
     } else {
         req->data = reqdata;
         req->rpc = rpc;
-        req->timeout = agent_cb->timeout;
+        req->timeout = server_cb->timeout;
     }
 	
     if (res == NO_ERR) {
@@ -249,7 +249,7 @@ static status_t
 	    log_debug2("\nabout to send RPC request with reqdata:");
 	    val_dump_value_ex(reqdata, 
                               NCX_DEF_INDENT,
-                              agent_cb->display_mode);
+                              server_cb->display_mode);
 	}
 
 	/* the request will be stored if this returns NO_ERR */
@@ -263,12 +263,12 @@ static status_t
 	    val_free_value(reqdata);
 	}
     } else {
-	agent_cb->state = MGR_IO_ST_CONN_RPYWAIT;
+	server_cb->state = MGR_IO_ST_CONN_RPYWAIT;
     }
 
     return res;
 
-} /* send_get_schema_to_agent */
+} /* send_get_schema_to_server */
 
 
 /********************************************************************
@@ -278,7 +278,7 @@ static status_t
 * specified YANG file in the session work directory
 *
 * INPUTS:
-*    agent_cb == agent control block to use
+*    server_cb == server control block to use
 *    module == module name
 *    revision == revision date
 *    targetfile == filespec of the output file
@@ -288,7 +288,7 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    save_schema_file (agent_cb_t *agent_cb,
+    save_schema_file (server_cb_t *server_cb,
                       const xmlChar *module,
                       const xmlChar *revision,
                       const xmlChar *targetfile,
@@ -330,8 +330,8 @@ static status_t
         log_alt_close();
 
         /* copy the target filename into the search result */
-        agent_cb->cursearchresult->source = xml_strdup(targetfile);
-        if (agent_cb->cursearchresult->source == NULL) {
+        server_cb->cursearchresult->source = xml_strdup(targetfile);
+        if (server_cb->cursearchresult->source == NULL) {
             log_error("\nError: malloc failed for temporary file '%s'",
                       targetfile);
             return ERR_INTERNAL_MEM;
@@ -612,7 +612,7 @@ static status_t
 * IN THE SEARCH RESULT (ONLY LOCAL FILES COPIED)
 *
 * INPUTS:
-*   agent_cb == agent session control block to use
+*   server_cb == server session control block to use
 *   scb == current session in progress
 *
 * OUTPUTS:
@@ -621,14 +621,14 @@ static status_t
 *   on this system.
 *   
 *   These search records will be removed from the 
-*   agent_cb->searchresultQ and modptr records 
-*   added to the agent_cb->modptrQ
+*   server_cb->searchresultQ and modptr records 
+*   added to the server_cb->modptrQ
 *
 * RETURNS:
 *    status
 *********************************************************************/
 status_t
-    autoload_setup_tempdir (agent_cb_t *agent_cb,
+    autoload_setup_tempdir (server_cb_t *server_cb,
                             ses_cb_t *scb)
 {
     mgr_scb_t               *mscb;
@@ -636,7 +636,7 @@ status_t
     status_t                 res, retres;
 
 #ifdef DEBUG
-    if (!agent_cb || !scb) {
+    if (!server_cb || !scb) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -647,7 +647,7 @@ status_t
 
     /* try to copy as many files as possible, even if some errors */
     for (searchresult = (ncxmod_search_result_t *)
-             dlq_firstEntry(&agent_cb->searchresultQ);
+             dlq_firstEntry(&server_cb->searchresultQ);
          searchresult != NULL;
          searchresult = (ncxmod_search_result_t *)
              dlq_nextEntry(searchresult)) {
@@ -697,7 +697,7 @@ status_t
 * <get-schema> operation to fill in any missing modules
 *
 * INPUTS:
-*   agent_cb == agent session control block to use
+*   server_cb == server session control block to use
 *   scb == session control block to use
 *
 * OUTPUTS:
@@ -709,7 +709,7 @@ status_t
 *    status
 *********************************************************************/
 status_t
-    autoload_start_get_modules (agent_cb_t *agent_cb,
+    autoload_start_get_modules (server_cb_t *server_cb,
                                 ses_cb_t *scb)
 {
     ncxmod_search_result_t  *searchresult;
@@ -717,7 +717,7 @@ status_t
     boolean                  done;
 
 #ifdef DEBUG
-    if (!agent_cb || !scb) {
+    if (!server_cb || !scb) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -727,7 +727,7 @@ status_t
 
     /* find first file that needs to be retrieved with get-schema */
     for (searchresult = (ncxmod_search_result_t *)
-             dlq_firstEntry(&agent_cb->searchresultQ);
+             dlq_firstEntry(&server_cb->searchresultQ);
          searchresult != NULL && !done;
          searchresult = (ncxmod_search_result_t *)
              dlq_nextEntry(searchresult)) {
@@ -740,11 +740,11 @@ status_t
         }
 
         /* found an entry that needs to be retrieved */
-        agent_cb->command_mode = CMD_MODE_AUTOLOAD;
-        agent_cb->cursearchresult = searchresult;
+        server_cb->command_mode = CMD_MODE_AUTOLOAD;
+        server_cb->cursearchresult = searchresult;
         done = TRUE;
 
-        res = send_get_schema_to_agent(agent_cb,
+        res = send_get_schema_to_server(server_cb,
                                        scb,
                                        searchresult->module,
                                        searchresult->revision);
@@ -761,7 +761,7 @@ status_t
 * Handle the current <get-schema> response
 *
 * INPUTS:
-*   agent_cb == agent session control block to use
+*   server_cb == server session control block to use
 *   scb == session control block to use
 *   reply == data node from the <rpc-reply> PDU
 *   anyerrors == TRUE if <rpc-error> detected instead
@@ -780,7 +780,7 @@ status_t
 *    status
 *********************************************************************/
 status_t
-    autoload_handle_rpc_reply (agent_cb_t *agent_cb,
+    autoload_handle_rpc_reply (server_cb_t *server_cb,
                                ses_cb_t *scb,
                                val_value_t *reply,
                                boolean anyerrors)
@@ -794,7 +794,7 @@ status_t
     boolean                  done;
 
 #ifdef DEBUG
-    if (!agent_cb || !scb || !reply) {
+    if (!server_cb || !scb || !reply) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -802,7 +802,7 @@ status_t
     done = FALSE;
     res = NO_ERR;
     mscb = (mgr_scb_t *)scb->mgrcb;
-    searchresult = agent_cb->cursearchresult;
+    searchresult = server_cb->cursearchresult;
     module = searchresult->module;
     revision = searchresult->revision;
 
@@ -840,7 +840,7 @@ status_t
                 /* copy the value node to the work directory
                  * as a YANG file
                  */
-                res = save_schema_file(agent_cb,
+                res = save_schema_file(server_cb,
                                        module,
                                        revision,
                                        temp_filcb->source,
@@ -854,13 +854,13 @@ status_t
                       module,
                       (revision) ? revision : EMPTY_STRING,
                       get_error_string(res));
-            agent_cb->cursearchresult->res = res;
+            server_cb->cursearchresult->res = res;
         }
     }
 
     /* find next file that needs to be retrieved with get-schema */
     for (searchresult = (ncxmod_search_result_t *)
-             dlq_nextEntry(agent_cb->cursearchresult);
+             dlq_nextEntry(server_cb->cursearchresult);
          searchresult != NULL && !done;
          searchresult = (ncxmod_search_result_t *)
              dlq_nextEntry(searchresult)) {
@@ -873,11 +873,11 @@ status_t
         }
 
         /* found an entry that needs to be retrieved */
-        agent_cb->command_mode = CMD_MODE_AUTOLOAD;
-        agent_cb->cursearchresult = searchresult;
+        server_cb->command_mode = CMD_MODE_AUTOLOAD;
+        server_cb->cursearchresult = searchresult;
         done = TRUE;
 
-        res = send_get_schema_to_agent(agent_cb,
+        res = send_get_schema_to_server(server_cb,
                                        scb,
                                        searchresult->module,
                                        searchresult->revision);
@@ -885,7 +885,7 @@ status_t
 
     if (!done) {
         /* no search results left to get */
-        return autoload_compile_modules(agent_cb, scb);
+        return autoload_compile_modules(server_cb, scb);
     }
 
     return res;
@@ -905,7 +905,7 @@ status_t
 * the search result cap back-ptr, to the module 
 *
 * INPUTS:
-*   agent_cb == agent session control block to use
+*   server_cb == server session control block to use
 *   scb == session control block to use
 *
 * OUTPUTS:
@@ -914,14 +914,14 @@ status_t
 *   on this system.
 *   
 *   These search records will be removed from the 
-*   agent_cb->searchresultQ and modptr records 
-*   added to the agent_cb->modptrQ
+*   server_cb->searchresultQ and modptr records 
+*   added to the server_cb->modptrQ
 *
 * RETURNS:
 *    status
 *********************************************************************/
 status_t
-    autoload_compile_modules (agent_cb_t *agent_cb,
+    autoload_compile_modules (server_cb_t *server_cb,
                               ses_cb_t *scb)
 {
     mgr_scb_t              *mscb;
@@ -931,15 +931,15 @@ status_t
     status_t                res;
 
 #ifdef DEBUG
-    if (!agent_cb || !scb) {
+    if (!server_cb || !scb) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     /* should not happen, but it is possible that the
-     * agent did not send any YANG module capabilities
+     * server did not send any YANG module capabilities
      */
-    if (dlq_empty(&agent_cb->searchresultQ)) {
+    if (dlq_empty(&server_cb->searchresultQ)) {
         return NO_ERR;
     }
 
@@ -963,10 +963,10 @@ status_t
      * the modules in order; all imports should already
      * be preloaded into the session work directory
      */
-    while (!dlq_empty(&agent_cb->searchresultQ)) {
+    while (!dlq_empty(&server_cb->searchresultQ)) {
 
         searchresult = (ncxmod_search_result_t *)
-            dlq_deque(&agent_cb->searchresultQ);
+            dlq_deque(&server_cb->searchresultQ);
 
         if (searchresult->res != NO_ERR ||
             searchresult->source == NULL) {
@@ -988,7 +988,7 @@ status_t
             if (modptr == NULL) {
                 log_error("\nMalloc failure");
             } else {
-                dlq_enque(modptr, &agent_cb->modptrQ);
+                dlq_enque(modptr, &server_cb->modptrQ);
             }
         }
 
@@ -999,17 +999,17 @@ status_t
     ncxmod_clear_altpath();
 
     /* undo the temporary module Q
-     * the agent_cb->modQ is full of the live modules
-     * that the agent_cb->modptrQ is refereincing
+     * the server_cb->modQ is full of the live modules
+     * that the server_cb->modptrQ is refereincing
      */
     ncx_reset_modQ();
 
     /* need to wait until all the modules are loaded to
      * go through the modptr list and enable/disable the features
-     * to match what the agent has reported
+     * to match what the server has reported
      */
     for (modptr = (modptr_t *)
-	     dlq_firstEntry(&agent_cb->modptrQ);
+	     dlq_firstEntry(&server_cb->modptrQ);
 	 modptr != NULL;
 	 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
@@ -1021,8 +1021,8 @@ status_t
 	}
     }
 
-    agent_cb->command_mode = CMD_MODE_NORMAL;
-    agent_cb->cursearchresult = NULL;
+    server_cb->command_mode = CMD_MODE_NORMAL;
+    server_cb->cursearchresult = NULL;
 
     return res;
 

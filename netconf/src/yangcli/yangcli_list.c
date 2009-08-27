@@ -227,7 +227,7 @@ static status_t
  * list oids
  *
  * INPUTS:
- *    agent_cb == agent control block to use
+ *    server_cb == server control block to use
  *    mod == the 1 module to use
  *           NULL to use all available modules instead
  *    mode == requested help mode
@@ -236,7 +236,7 @@ static status_t
  *   status
  *********************************************************************/
 static status_t
-    do_list_oids (agent_cb_t *agent_cb,
+    do_list_oids (server_cb_t *server_cb,
 		  ncx_module_t *mod,
 		  help_mode_t mode)
 {
@@ -272,9 +272,9 @@ static status_t
 	    res = do_list_oid(obj, level, mode);
 	    obj = ncx_get_next_object(mod, obj);
 	}
-    } else if (use_agentcb(agent_cb)) {
+    } else if (use_servercb(server_cb)) {
 	for (modptr = (modptr_t *)
-		 dlq_firstEntry(&agent_cb->modptrQ);
+		 dlq_firstEntry(&server_cb->modptrQ);
 	     modptr != NULL;
 	     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
@@ -351,7 +351,7 @@ static status_t
  * list objects
  *
  * INPUTS:
- *    agent_cb == agent control block to use
+ *    server_cb == server control block to use
  *    mod == the 1 module to use
  *           NULL to use all available modules instead
  *    mode == requested help mode
@@ -360,7 +360,7 @@ static status_t
  *   status
  *********************************************************************/
 static status_t
-    do_list_objects (agent_cb_t *agent_cb,
+    do_list_objects (server_cb_t *server_cb,
 		     ncx_module_t *mod,
 		     help_mode_t mode)
 {
@@ -392,9 +392,9 @@ static status_t
 	    obj = ncx_get_next_object(mod, obj);
 	}
     } else {
-	if (use_agentcb(agent_cb)) {
+	if (use_servercb(server_cb)) {
 	    for (modptr = (modptr_t *)
-		     dlq_firstEntry(&agent_cb->modptrQ);
+		     dlq_firstEntry(&server_cb->modptrQ);
 		 modptr != NULL;
 		 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
@@ -448,7 +448,7 @@ static status_t
  * list commands
  *
  * INPUTS:
- *    agent_cb == agent control block to use
+ *    server_cb == server control block to use
  *    mod == the 1 module to use
  *           NULL to use all available modules instead
  *    mode == requested help mode
@@ -457,7 +457,7 @@ static status_t
  *   status
  *********************************************************************/
 static status_t
-    do_list_commands (agent_cb_t *agent_cb,
+    do_list_commands (server_cb_t *server_cb,
 		      ncx_module_t *mod,
 		      help_mode_t mode)
 {
@@ -490,11 +490,11 @@ static status_t
 		     mod->name);
 	}
     } else {
-	if (use_agentcb(agent_cb)) {
-	    (*logfn)("\nAgent Commands:");
+	if (use_servercb(server_cb)) {
+	    (*logfn)("\nServer Commands:");
 	
 	    for (modptr = (modptr_t *)
-		     dlq_firstEntry(&agent_cb->modptrQ);
+		     dlq_firstEntry(&server_cb->modptrQ);
 		 modptr != NULL && res == NO_ERR;
 		 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
@@ -513,7 +513,7 @@ static status_t
 	obj = ncx_get_first_object(get_yangcli_mod());
 	while (obj && res == NO_ERR) {
 	    if (obj_is_rpc(obj)) {
-		if (use_agentcb(agent_cb)) {
+		if (use_servercb(server_cb)) {
 		    /* list a local command */
 		    res = do_list_one_command(obj, mode);
 		} else {
@@ -546,7 +546,7 @@ static status_t
  * List the specified information based on the parameters
  *
  * INPUTS:
- * agent_cb == agent control block to use
+ * server_cb == server control block to use
  *    rpc == RPC method for the show command
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
@@ -555,7 +555,7 @@ static status_t
  *   status
  *********************************************************************/
 status_t
-    do_list (agent_cb_t *agent_cb,
+    do_list (server_cb_t *server_cb,
 	     obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len)
@@ -571,7 +571,7 @@ status_t
     res = NO_ERR;
     imode = interactive_mode();
 
-    valset = get_valset(agent_cb, rpc, &line[len], &res);
+    valset = get_valset(server_cb, rpc, &line[len], &res);
     if (valset && res == NO_ERR) {
 	mode = HELP_MODE_NORMAL;
 
@@ -594,7 +594,7 @@ status_t
 			      YANGCLI_MOD, 
 			      YANGCLI_MODULE);
 	if (parm && parm->res == NO_ERR) {
-	    mod = find_module(agent_cb, VAL_STR(parm));
+	    mod = find_module(server_cb, VAL_STR(parm));
 	    if (!mod) {
 		if (imode) {
 		    log_stdout("\nError: no module found named '%s'",
@@ -614,7 +614,7 @@ status_t
 				  YANGCLI_COMMANDS);
 	    if (parm) {
 		/* do list commands */
-		res = do_list_commands(agent_cb, mod, mode);
+		res = do_list_commands(server_cb, mod, mode);
 		done = TRUE;
 	    }
 	}
@@ -636,7 +636,7 @@ status_t
 				  YANGCLI_OBJECTS);
 	    if (parm) {
 		/* do list objects */
-		res = do_list_objects(agent_cb, mod, mode);
+		res = do_list_objects(server_cb, mod, mode);
 		done = TRUE;
 	    }
 	}
@@ -647,7 +647,7 @@ status_t
 				  YANGCLI_OIDS);
 	    if (parm) {
 		/* do list oids */
-		res = do_list_oids(agent_cb, mod, mode);
+		res = do_list_oids(server_cb, mod, mode);
 		done = TRUE;
 	    }
 	}

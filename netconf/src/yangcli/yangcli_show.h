@@ -44,7 +44,7 @@ date	     init     comment
 *********************************************************************/
 
 extern status_t
-    do_show (agent_cb_t *agent_cb,
+    do_show (server_cb_t *server_cb,
 	     obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len);

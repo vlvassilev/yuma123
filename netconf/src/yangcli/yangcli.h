@@ -74,7 +74,7 @@ date	     init     comment
 
 #define YANGCLI_LINELEN   4095
 
-/* 8K CLI buffer per agent session */
+/* 8K CLI buffer per server session */
 #define YANGCLI_BUFFLEN  8192
 
 #define YANGCLI_HISTLEN  4095
@@ -84,7 +84,7 @@ date	     init     comment
 
 #define YANGCLI_DEF_TIMEOUT   30
 
-#define YANGCLI_DEF_AGENT (const xmlChar *)"default"
+#define YANGCLI_DEF_SERVER (const xmlChar *)"default"
 
 #define YANGCLI_DEF_DISPLAY_MODE   NCX_DISPLAY_MODE_PLAIN
 
@@ -122,7 +122,7 @@ date	     init     comment
  * matches parm clauses in yangcli container in yangcli.yang
  */
 
-#define YANGCLI_AGENT       (const xmlChar *)"agent"
+#define YANGCLI_SERVER       (const xmlChar *)"server"
 #define YANGCLI_AUTOCOMP    (const xmlChar *)"autocomp"
 #define YANGCLI_AUTOHISTORY (const xmlChar *)"autohistory"
 #define YANGCLI_AUTOLOAD    (const xmlChar *)"autoload"
@@ -219,7 +219,7 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
-/* cache the module pointers known by a particular agent,
+/* cache the module pointers known by a particular server,
  * as reported in the session <hello> message
  */
 typedef struct modptr_t_ {
@@ -266,14 +266,14 @@ typedef struct completion_state_t_ {
     obj_template_t        *cmdobj;
     obj_template_t        *cmdinput;
     obj_template_t        *cmdcurparm;
-    struct agent_cb_t_    *agent_cb;
+    struct server_cb_t_    *server_cb;
     ncx_module_t          *cmdmodule;
     command_state_t        cmdstate;
     boolean                assignstmt;
 } completion_state_t;
 
 
-/* save the agent lock state for get-locks and release-locks */
+/* save the server lock state for get-locks and release-locks */
 typedef enum lock_state_t {
     LOCK_STATE_NONE,
     LOCK_STATE_IDLE,
@@ -320,8 +320,8 @@ typedef struct autoload_devcb_t_ {
 } autoload_devcb_t;
 
 
-/* NETCONF agent control block */
-typedef struct agent_cb_t_ {
+/* NETCONF server control block */
+typedef struct server_cb_t_ {
     dlq_hdr_t            qhdr;
     xmlChar             *name;
     xmlChar             *address;
@@ -335,7 +335,7 @@ typedef struct agent_cb_t_ {
     xmlChar             *result_filename;
     result_format_t      result_format;
 
-    /* per-agent shadows of global config vars */
+    /* per-server shadows of global config vars */
     boolean              get_optional;
     ncx_display_mode_t   display_mode;
     uint32               timeout;
@@ -372,14 +372,14 @@ typedef struct agent_cb_t_ {
     /* TBD: session-specific user variables */
     dlq_hdr_t            varbindQ;   /* Q of ncx_var_t */
 
-    /* before any agent modules are loaded, all the
+    /* before any server modules are loaded, all the
      * modules are checked out, and the results are stored in
      * this Q of ncxmod_search_result_t 
      */
     dlq_hdr_t            searchresultQ;
     ncxmod_search_result_t  *cursearchresult;
 
-    /* contains only the modules that the agent is using
+    /* contains only the modules that the server is using
      * plus the 'netconf.yang' module
      */
     dlq_hdr_t            modptrQ;     /* Q of modptr_t */
@@ -408,7 +408,7 @@ typedef struct agent_cb_t_ {
     completion_state_t   completion_state;
     boolean              climore;
     xmlChar              clibuff[YANGCLI_BUFFLEN];
-} agent_cb_t;
+} server_cb_t;
 
 
 /* logging function template to switch between
@@ -453,14 +453,14 @@ extern status_t
 extern dlq_hdr_t *
     get_mgrloadQ (void);
 
-/* forward decl needed by send_copy_config_to_agent function */
+/* forward decl needed by send_copy_config_to_server function */
 extern void
     yangcli_reply_handler (ses_cb_t *scb,
 			   mgr_rpc_req_t *req,
 			   mgr_rpc_rpy_t *rpy);
 
 extern status_t
-    finish_result_assign (agent_cb_t *agent_cb,
+    finish_result_assign (server_cb_t *server_cb,
 			  val_value_t *resultvar,
 			  const xmlChar *resultstr);
 

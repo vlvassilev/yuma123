@@ -479,7 +479,7 @@ static status_t
     yangcli_mod = get_yangcli_mod();
     toponly = FALSE;
     if (mod == yangcli_mod &&
-	!use_agentcb(comstate->agent_cb)) {
+	!use_servercb(comstate->server_cb)) {
 	toponly = TRUE;
     }
 
@@ -580,10 +580,10 @@ static status_t
 	     word_end,
 	     cmdlen);
     } else {
-	if (use_agentcb(comstate->agent_cb)) {
-	    /* list agent commands first */
+	if (use_servercb(comstate->server_cb)) {
+	    /* list server commands first */
 	    for (modptr = (modptr_t *)
-		     dlq_firstEntry(&comstate->agent_cb->modptrQ);
+		     dlq_firstEntry(&comstate->server_cb->modptrQ);
 		 modptr != NULL && res == NO_ERR;
 		 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
@@ -1372,7 +1372,7 @@ static status_t
     retlen = 0;
     dtyp = NCX_NT_OBJ;
     comstate->cmdobj = (obj_template_t *)
-	parse_def(comstate->agent_cb,
+	parse_def(comstate->server_cb,
 		  &dtyp,
 		  buffer,
 		  &retlen);
@@ -1631,7 +1631,7 @@ int
 
     comstate = (completion_state_t *)data;
 
-    if (comstate->agent_cb && comstate->agent_cb->climore) {
+    if (comstate->server_cb && comstate->server_cb->climore) {
 	comstate->cmdstate = CMD_STATE_MORE;
     }
 

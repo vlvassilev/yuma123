@@ -44,25 +44,25 @@ date	     init     comment
 *********************************************************************/
 
 extern status_t
-    autoload_setup_tempdir (agent_cb_t *agent_cb,
+    autoload_setup_tempdir (server_cb_t *server_cb,
                             ses_cb_t *scb);
 
 extern status_t
-    autoload_start_get_modules (agent_cb_t *agent_cb,
+    autoload_start_get_modules (server_cb_t *server_cb,
                                 ses_cb_t *scb);
 
 extern status_t
-    autoload_handle_rpc_reply (agent_cb_t *agent_cb,
+    autoload_handle_rpc_reply (server_cb_t *server_cb,
                                ses_cb_t *scb,
                                val_value_t *reply,
                                boolean anyerrors);
 
 extern status_t
-    autoload_compile_modules (agent_cb_t *agent_cb,
+    autoload_compile_modules (server_cb_t *server_cb,
                               ses_cb_t *scb);
 
 extern void
-    autoload_handle_timeout_cleanup (agent_cb_t *agent_cb,
+    autoload_handle_timeout_cleanup (server_cb_t *server_cb,
                                      ses_cb_t *scb);
 
 

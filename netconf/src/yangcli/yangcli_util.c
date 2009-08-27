@@ -257,39 +257,39 @@ void
 
 
 /********************************************************************
-* FUNCTION clear_agent_cb_session
+* FUNCTION clear_server_cb_session
 * 
-*  Clean the current session data from an agent control block
+*  Clean the current session data from an server control block
 * 
 * INPUTS:
-*    agent_cb == control block to use for clearing
+*    server_cb == control block to use for clearing
 *                the session data
 *********************************************************************/
 void
-    clear_agent_cb_session (agent_cb_t *agent_cb)
+    clear_server_cb_session (server_cb_t *server_cb)
 {
     modptr_t  *modptr;
 
 #ifdef DEBUG
-    if (!agent_cb) {
+    if (!server_cb) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return;
     }
 #endif
 
-    while (!dlq_empty(&agent_cb->modptrQ)) {
-	modptr = (modptr_t *)dlq_deque(&agent_cb->modptrQ);
+    while (!dlq_empty(&server_cb->modptrQ)) {
+	modptr = (modptr_t *)dlq_deque(&server_cb->modptrQ);
 	free_modptr(modptr);
     }
-    agent_cb->mysid = 0;
-    agent_cb->state = MGR_IO_ST_IDLE;
+    server_cb->mysid = 0;
+    server_cb->state = MGR_IO_ST_IDLE;
 
-    if (agent_cb->connect_valset) {
-        val_free_value(agent_cb->connect_valset);
-        agent_cb->connect_valset = NULL;
+    if (server_cb->connect_valset) {
+        val_free_value(server_cb->connect_valset);
+        server_cb->connect_valset = NULL;
     }
 
-}  /* clear_agent_cb_session */
+}  /* clear_server_cb_session */
 
 
 /********************************************************************
@@ -299,7 +299,7 @@ void
 * mode is active
 * 
 * INPUTS:
-*   agent state to use
+*   server state to use
 *
 * RETURNS:
 *  TRUE if this is TOP mode
@@ -330,37 +330,37 @@ boolean
 
 
 /********************************************************************
-* FUNCTION use_agentcb
+* FUNCTION use_servercb
 * 
-* Check if the agent_cb should be used for modules right now
+* Check if the server_cb should be used for modules right now
 *
 * INPUTS:
-*   agent_cb == agent control block to check
+*   server_cb == server control block to check
 *
 * RETURNS:
-*   TRUE to use agent_cb
+*   TRUE to use server_cb
 *   FALSE if not
 *********************************************************************/
 boolean
-    use_agentcb (agent_cb_t *agent_cb)
+    use_servercb (server_cb_t *server_cb)
 {
-    if (!agent_cb || is_top(agent_cb->state)) {
+    if (!server_cb || is_top(server_cb->state)) {
 	return FALSE;
-    } else if (dlq_empty(&agent_cb->modptrQ)) {
+    } else if (dlq_empty(&server_cb->modptrQ)) {
 	return FALSE;
     }
     return TRUE;
-}  /* use_agentcb */
+}  /* use_servercb */
 
 
 /********************************************************************
 * FUNCTION find_module
 * 
-*  Check the agent_cb for the specified module; if not found
+*  Check the server_cb for the specified module; if not found
 *  then try ncx_find_module
 * 
 * INPUTS:
-*    agent_cb == control block to free
+*    server_cb == control block to free
 *    modname == module name
 *
 * RETURNS:
@@ -369,7 +369,7 @@ boolean
 *   NULL if not found
 *********************************************************************/
 ncx_module_t *
-    find_module (agent_cb_t *agent_cb,
+    find_module (server_cb_t *server_cb,
 		 const xmlChar *modname)
 {
     modptr_t      *modptr;
@@ -382,8 +382,8 @@ ncx_module_t *
     }
 #endif
 
-    if (use_agentcb(agent_cb)) {
-	for (modptr = (modptr_t *)dlq_firstEntry(&agent_cb->modptrQ);
+    if (use_servercb(server_cb)) {
+	for (modptr = (modptr_t *)dlq_firstEntry(&server_cb->modptrQ);
 	     modptr != NULL;
 	     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
@@ -551,27 +551,27 @@ boolean
  * clear out the pending result info
  *
  * INPUTS:
- *   agent_cb == agent control block to use
+ *   server_cb == server control block to use
  *
  *********************************************************************/
 void
-    clear_result (agent_cb_t *agent_cb)
+    clear_result (server_cb_t *server_cb)
 
 {
 #ifdef DEBUG
-    if (!agent_cb) {
+    if (!server_cb) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return;
     }
 #endif
 
-    if (agent_cb->result_name) {
-	m__free(agent_cb->result_name);
-	agent_cb->result_name = NULL;
+    if (server_cb->result_name) {
+	m__free(server_cb->result_name);
+	server_cb->result_name = NULL;
     }
-    if (agent_cb->result_filename) {
-	m__free(agent_cb->result_filename);
-	agent_cb->result_filename = NULL;
+    if (server_cb->result_filename) {
+	m__free(server_cb->result_filename);
+	server_cb->result_filename = NULL;
     }
 
 }  /* clear_result */
@@ -584,26 +584,26 @@ void
 * Save it if it si good
 *
 * INPUTS:
-*    agent_cb == agent control block to use
+*    server_cb == server control block to use
 *    filespec == string to check
 *    varname == variable name to use in log_error
 *              if this is complex form
 *
 * OUTPUTS:
-*    agent_cb->result_filename will get set if NO_ERR
+*    server_cb->result_filename will get set if NO_ERR
 *
 * RETURNS:
 *   status
 *********************************************************************/
 status_t
-    check_filespec (agent_cb_t *agent_cb,
+    check_filespec (server_cb_t *server_cb,
 		    const xmlChar *filespec,
 		    const xmlChar *varname)
 {
     const xmlChar *teststr;
 
 #ifdef DEBUG
-    if (!agent_cb || !filespec) {
+    if (!server_cb || !filespec) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
@@ -660,13 +660,13 @@ status_t
     }
 
     /* toss out the old value, if any */
-    if (agent_cb->result_filename) {
-	m__free(agent_cb->result_filename);
+    if (server_cb->result_filename) {
+	m__free(server_cb->result_filename);
     }
 
     /* save the filename, may still be an invalid fspec  */
-    agent_cb->result_filename = xml_strdup(filespec);
-    if (!agent_cb->result_filename) {
+    server_cb->result_filename = xml_strdup(filespec);
+    if (!server_cb->result_filename) {
 	return ERR_INTERNAL_MEM;
     }
     return NO_ERR;
@@ -683,7 +683,7 @@ status_t
  * all the predicate assignments in the stance identifier
  *
  * INPUTS:
- *    agent_cb == agent control block to use (NULL if none)
+ *    server_cb == server control block to use (NULL if none)
  *    target == XPath expression for the instance-identifier
  *    schemainst == TRUE if ncx:schema-instance string
  *                  FALSE if instance-identifier
@@ -706,7 +706,7 @@ status_t
  *    NULL, check *retres
  *********************************************************************/
 val_value_t *
-    get_instanceid_parm (agent_cb_t *agent_cb,
+    get_instanceid_parm (server_cb_t *server_cb,
 			 const xmlChar *target,
 			 boolean schemainst,
 			 obj_template_t **targobj,
@@ -718,7 +718,7 @@ val_value_t *
     status_t               res;
 
 #ifdef DEBUG
-    if (!agent_cb || !target || !targobj || !targval || !retres) {
+    if (!server_cb || !target || !targobj || !targval || !retres) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return NULL;
     }
@@ -865,12 +865,12 @@ boolean
  *
  * INPUTS:
  *    completion_state == record to initialize
- *    agent_cb == agent control block to use
+ *    server_cb == server control block to use
  *    cmdstate ==initial  calling state
  *********************************************************************/
 void
     init_completion_state (completion_state_t *completion_state,
-			   agent_cb_t *agent_cb,
+			   server_cb_t *server_cb,
 			   command_state_t  cmdstate)
 {
 #ifdef DEBUG
@@ -883,7 +883,7 @@ void
     memset(completion_state, 
 	   0x0, 
 	   sizeof(completion_state_t));
-    completion_state->agent_cb = agent_cb;
+    completion_state->server_cb = server_cb;
     completion_state->cmdstate = cmdstate;
 
 }  /* init_completion_state */

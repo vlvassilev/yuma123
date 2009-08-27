@@ -38,7 +38,7 @@ date	     init     comment
 *********************************************************************/
 
 extern status_t
-    do_save (agent_cb_t *agent_cb);
+    do_save (server_cb_t *server_cb);
 
 
 #endif	    /* _H_yangcli_save */

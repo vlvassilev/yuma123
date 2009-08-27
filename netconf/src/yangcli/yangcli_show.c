@@ -133,7 +133,7 @@ date         init     comment
  * generate the output for a global or local variable
  *
  * INPUTS:
- *   agent_cb == agent control block to use
+ *   server_cb == server control block to use
  *   varname == variable name to show
  *   vartype == type of user variable
  *   val == value associated with this variable
@@ -143,7 +143,7 @@ date         init     comment
  *   status
  *********************************************************************/
 static status_t
-    show_user_var (agent_cb_t *agent_cb,
+    show_user_var (server_cb_t *server_cb,
                    const xmlChar *varname,
 		   var_type_t vartype,
 		   val_value_t *val,
@@ -202,11 +202,11 @@ static status_t
 	if (imode) {
 	    val_stdout_value_ex(val, 
                                 NCX_DEF_INDENT * doubleindent,
-                                agent_cb->display_mode);
+                                server_cb->display_mode);
 	} else {
 	    val_dump_value_ex(val, 
                               NCX_DEF_INDENT * doubleindent,
-                              agent_cb->display_mode);
+                              server_cb->display_mode);
 	}
     }
 
@@ -221,7 +221,7 @@ static status_t
  * show brief info for all user variables
  *
  * INPUTS:
- *  agent_cb == agent control block to use
+ *  server_cb == server control block to use
  *  mode == help mode requested
  *  shortmode == TRUE if printing just global or local variables
  *               FALSE to print everything
@@ -234,7 +234,7 @@ static status_t
  *   status
  *********************************************************************/
 static status_t
-    do_show_vars (agent_cb_t *agent_cb,
+    do_show_vars (server_cb_t *server_cb,
                   help_mode_t mode,
 		  boolean shortmode,
 		  boolean isglobal,
@@ -263,11 +263,11 @@ static status_t
 	    if (imode) {
 		val_stdout_value_ex(mgrset, 
                                     NCX_DEF_INDENT,
-                                    agent_cb->display_mode);
+                                    server_cb->display_mode);
 	    } else {
 		val_dump_value_ex(mgrset, 
                                   NCX_DEF_INDENT,
-                                  agent_cb->display_mode);
+                                  server_cb->display_mode);
 	    }
 	    (*logfn)("\n");
 	} else {
@@ -291,7 +291,7 @@ static status_t
 		(*logfn)("\nRead-only system variables\n");
 		first = FALSE;
 	    }
-	    show_user_var(agent_cb,
+	    show_user_var(server_cb,
                           var->name, 
 			  var->vartype,
 			  var->val,
@@ -319,7 +319,7 @@ static status_t
 		(*logfn)("\nRead-write system variables\n");
 		first = FALSE;
 	    }
-	    show_user_var(agent_cb,
+	    show_user_var(server_cb,
                           var->name,
 			  var->vartype,
 			  var->val,
@@ -347,7 +347,7 @@ static status_t
 		(*logfn)("\nGlobal variables\n");
 		first = FALSE;
 	    }
-	    show_user_var(agent_cb,
+	    show_user_var(server_cb,
                           var->name,
 			  var->vartype,
 			  var->val,
@@ -370,7 +370,7 @@ static status_t
 		(*logfn)("\nLocal variables\n");
 		first = FALSE;
 	    }
-	    show_user_var(agent_cb,
+	    show_user_var(server_cb,
                           var->name, 
 			  var->vartype,
 			  var->val,
@@ -393,7 +393,7 @@ static status_t
  * show full info for one user var
  *
  * INPUTS:
- *   agent_cb == agent control block to use
+ *   server_cb == server control block to use
  *   name == variable name to find 
  *   isglobal == TRUE if global var, FALSE if local var
  *   isany == TRUE if don't care (global or local)
@@ -404,7 +404,7 @@ static status_t
  *   status
  *********************************************************************/
 static status_t
-    do_show_var (agent_cb_t *agent_cb,
+    do_show_var (server_cb_t *server_cb,
                  const xmlChar *name,
 		 var_type_t vartype,
 		 boolean isany,
@@ -447,7 +447,7 @@ static status_t
     }
 
     if (val) {
-	show_user_var(agent_cb, name, vartype, val, mode);
+	show_user_var(server_cb, name, vartype, val, mode);
 	(*logfn)("\n");
     } else {
 	(*logfn)("\nVariable '%s' not found", name);
@@ -545,14 +545,14 @@ static status_t
  * show modules
  *
  * INPUTS:
- *    agent_cb == agent control block to use
+ *    server_cb == server control block to use
  *    mode == requested help mode
  *
  * RETURNS:
  *   status
  *********************************************************************/
 static status_t
-    do_show_modules (agent_cb_t *agent_cb,
+    do_show_modules (server_cb_t *server_cb,
 		     help_mode_t mode)
 {
     ncx_module_t  *mod;
@@ -564,8 +564,8 @@ static status_t
     anyout = FALSE;
     res = NO_ERR;
 
-    if (use_agentcb(agent_cb)) {
-	for (modptr = (modptr_t *)dlq_firstEntry(&agent_cb->modptrQ);
+    if (use_servercb(server_cb)) {
+	for (modptr = (modptr_t *)dlq_firstEntry(&server_cb->modptrQ);
 	     modptr != NULL && res == NO_ERR;
 	     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
@@ -663,14 +663,14 @@ static status_t
  * show objects
  *
  * INPUTS:
- *    agent_cb == agent control block to use
+ *    server_cb == server control block to use
  *    mode == requested help mode
  *
  * RETURNS:
  *    status
  *********************************************************************/
 static status_t
-    do_show_objects (agent_cb_t *agent_cb,
+    do_show_objects (server_cb_t *server_cb,
 		     help_mode_t mode)
 {
     ncx_module_t         *mod;
@@ -683,9 +683,9 @@ static status_t
     anyout = FALSE;
     res = NO_ERR;
 
-    if (use_agentcb(agent_cb)) {
+    if (use_servercb(server_cb)) {
 	for (modptr = (modptr_t *)
-		 dlq_firstEntry(&agent_cb->modptrQ);
+		 dlq_firstEntry(&server_cb->modptrQ);
 	     modptr != NULL;
 	     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
@@ -745,7 +745,7 @@ static status_t
  * based on the parameter
  *
  * INPUTS:
- * agent_cb == agent control block to use
+ * server_cb == server control block to use
  *    rpc == RPC method for the show command
  *    line == CLI input in progress
  *    len == offset into line buffer to start parsing
@@ -754,7 +754,7 @@ static status_t
  *   status
  *********************************************************************/
 status_t
-    do_show (agent_cb_t *agent_cb,
+    do_show (server_cb_t *server_cb,
 	     obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len)
@@ -768,7 +768,7 @@ status_t
 
     res = NO_ERR;
     imode = interactive_mode();
-    valset = get_valset(agent_cb, rpc, &line[len], &res);
+    valset = get_valset(server_cb, rpc, &line[len], &res);
 
     if (valset && res == NO_ERR) {
 	mode = HELP_MODE_NORMAL;
@@ -794,7 +794,7 @@ status_t
 			      YANGCLI_MOD,
 			      YANGCLI_LOCAL);
 	if (parm) {
-	    res = do_show_var(agent_cb,
+	    res = do_show_var(server_cb,
                               VAL_STR(parm), 
 			      VAR_TYP_LOCAL, 
 			      FALSE, 
@@ -807,7 +807,7 @@ status_t
 				  YANGCLI_MOD,
 				  YANGCLI_LOCALS);
 	    if (parm) {
-		res = do_show_vars(agent_cb,
+		res = do_show_vars(server_cb,
                                    mode, 
                                    TRUE, 
                                    FALSE, 
@@ -821,7 +821,7 @@ status_t
 				  YANGCLI_MOD,
 				  YANGCLI_OBJECTS);
 	    if (parm) {
-		res = do_show_objects(agent_cb, mode);
+		res = do_show_objects(server_cb, mode);
 		done = TRUE;
 	    }
 	}
@@ -831,7 +831,7 @@ status_t
 				  YANGCLI_MOD,
 				  YANGCLI_GLOBAL);
 	    if (parm) {
-		res = do_show_var(agent_cb,
+		res = do_show_var(server_cb,
                                   VAL_STR(parm), 
                                   VAR_TYP_GLOBAL, 
                                   FALSE, 
@@ -845,7 +845,7 @@ status_t
 				  YANGCLI_MOD,
 				  YANGCLI_GLOBALS);
 	    if (parm) {
-		res = do_show_vars(agent_cb,
+		res = do_show_vars(server_cb,
                                    mode, 
                                    TRUE, 
                                    TRUE, 
@@ -859,7 +859,7 @@ status_t
 				  YANGCLI_MOD,
 				  YANGCLI_VAR);
 	    if (parm) {
-		res = do_show_var(agent_cb,
+		res = do_show_var(server_cb,
                                   VAL_STR(parm), 
                                   VAR_TYP_NONE, 
                                   TRUE, 
@@ -873,7 +873,7 @@ status_t
 				  YANGCLI_MOD,
 				  YANGCLI_VARS);
 	    if (parm) {
-		res = do_show_vars(agent_cb,
+		res = do_show_vars(server_cb,
                                    mode, 
                                    FALSE, 
                                    FALSE, 
@@ -887,7 +887,7 @@ status_t
 				  YANGCLI_MOD,
 				  YANGCLI_MODULE);
 	    if (parm) {
-		mod = find_module(agent_cb, VAL_STR(parm));
+		mod = find_module(server_cb, VAL_STR(parm));
 		if (mod) {
 		    res = do_show_module(mod, mode);
 		} else {
@@ -908,7 +908,7 @@ status_t
 				  YANGCLI_MOD,
 				  YANGCLI_MODULES);
 	    if (parm) {
-		res = do_show_modules(agent_cb, mode);
+		res = do_show_modules(server_cb, mode);
 		done = TRUE;
 	    }
 	}

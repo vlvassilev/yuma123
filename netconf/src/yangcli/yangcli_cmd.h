@@ -49,44 +49,44 @@ date	     init     comment
 *********************************************************************/
 
 extern status_t
-    top_command (agent_cb_t *agent_cb,
+    top_command (server_cb_t *server_cb,
 		 xmlChar *line);
 
 extern status_t
-    conn_command (agent_cb_t *agent_cb,
+    conn_command (server_cb_t *server_cb,
 		  xmlChar *line);
 
 extern status_t
-    do_startup_script (agent_cb_t *agent_cb,
+    do_startup_script (server_cb_t *server_cb,
                        const xmlChar *runscript);
 
 extern status_t
-    do_startup_command (agent_cb_t *agent_cb,
+    do_startup_command (server_cb_t *server_cb,
                         const xmlChar *runcommand);
 
 extern xmlChar *
-    get_cmd_line (agent_cb_t *agent_cb,
+    get_cmd_line (server_cb_t *server_cb,
 		  status_t *res);
 
 extern status_t
-    do_connect (agent_cb_t *agent_cb,
+    do_connect (server_cb_t *server_cb,
 		obj_template_t *rpc,
 		const xmlChar *line,
 		uint32 start,
                 boolean climode);
 
 extern void *
-    parse_def (agent_cb_t *agent_cb,
+    parse_def (server_cb_t *server_cb,
 	       ncx_node_t *dtyp,
 	       xmlChar *line,
 	       uint32 *len);
 
 extern status_t
-    send_keepalive_get (agent_cb_t *agent_cb);
+    send_keepalive_get (server_cb_t *server_cb);
 
 
 extern val_value_t *
-    get_valset (agent_cb_t *agent_cb,
+    get_valset (server_cb_t *server_cb,
 		obj_template_t *rpc,
 		const xmlChar *line,
 		status_t  *res);

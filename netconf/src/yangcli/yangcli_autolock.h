@@ -43,39 +43,39 @@ date	     init     comment
 *								    *
 *********************************************************************/
 extern status_t
-    handle_get_locks_request_to_agent (agent_cb_t *agent_cb,
-                                       boolean first,
-                                       boolean *done);
+    handle_get_locks_request_to_server (server_cb_t *server_cb,
+                                        boolean first,
+                                        boolean *done);
 
 extern status_t
-    handle_release_locks_request_to_agent (agent_cb_t *agent_cb,
-                                           boolean first,
-                                           boolean *done);
+    handle_release_locks_request_to_server (server_cb_t *server_cb,
+                                            boolean first,
+                                            boolean *done);
 
 extern void
-    handle_locks_cleanup (agent_cb_t *agent_cb);
+    handle_locks_cleanup (server_cb_t *server_cb);
 
 
 extern boolean
-    check_locks_timeout (agent_cb_t *agent_cb);
+    check_locks_timeout (server_cb_t *server_cb);
 
 extern status_t
-    send_discard_changes_pdu_to_agent (agent_cb_t *agent_cb);
+    send_discard_changes_pdu_to_server (server_cb_t *server_cb);
 
 
 extern status_t
-    do_get_locks (agent_cb_t *agent_cb,
+    do_get_locks (server_cb_t *server_cb,
                   obj_template_t *rpc,
                   const xmlChar *line,
                   uint32  len);
 
 extern status_t
-    do_release_locks (agent_cb_t *agent_cb,
+    do_release_locks (server_cb_t *server_cb,
                       obj_template_t *rpc,
                       const xmlChar *line,
                       uint32  len);
 
 extern void
-    clear_lock_cbs (agent_cb_t *agent_cb);
+    clear_lock_cbs (server_cb_t *server_cb);
 
 #endif	    /* _H_yangcli_autolock */

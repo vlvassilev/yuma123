@@ -60,16 +60,16 @@ extern void
     free_modptr (modptr_t *modptr);
 
 extern void
-    clear_agent_cb_session (agent_cb_t *agent_cb);
+    clear_server_cb_session (server_cb_t *server_cb);
 
 extern boolean
     is_top (mgr_io_state_t state);
 
 extern boolean
-    use_agentcb (agent_cb_t *agent_cb);
+    use_servercb (server_cb_t *server_cb);
 
 extern ncx_module_t *
-    find_module (agent_cb_t *agent_cb,
+    find_module (server_cb_t *server_cb,
 		 const xmlChar *modname);
 
 extern xmlChar *
@@ -90,15 +90,15 @@ extern boolean
     is_yangcli_ns (xmlns_id_t ns);
 
 extern void
-    clear_result (agent_cb_t *agent_cb);
+    clear_result (server_cb_t *server_cb);
 
 extern status_t
-    check_filespec (agent_cb_t *agent_cb,
+    check_filespec (server_cb_t *server_cb,
 		    const xmlChar *filespec,
 		    const xmlChar *varname);
 
 extern val_value_t *
-    get_instanceid_parm (agent_cb_t *agent_cb,
+    get_instanceid_parm (server_cb_t *server_cb,
 			 const xmlChar *target,
 			 boolean schemainst,
 			 obj_template_t **targobj,
@@ -113,11 +113,11 @@ extern boolean
 
 extern void
     init_completion_state (completion_state_t *completion_state,
-			   agent_cb_t *agent_cb,
+			   server_cb_t *server_cb,
 			   command_state_t  cmdstate);
 
 
-/* agent_cb field must already be set */
+/* server_cb field must already be set */
 extern void
     set_completion_state (completion_state_t *completion_state,
 			  obj_template_t *rpc,

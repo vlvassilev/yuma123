@@ -200,13 +200,13 @@ date         init     comment
 
 /*****************  I N T E R N A L   V A R S  ****************/
 
-/* TBD: use multiple agent control blocks, stored in this Q */
-static dlq_hdr_t      agent_cbQ;
+/* TBD: use multiple server control blocks, stored in this Q */
+static dlq_hdr_t      server_cbQ;
 
 /* hack for now instead of lookup functions to get correct
- * agent processing context; later search by session ID
+ * server processing context; later search by session ID
  */
-static agent_cb_t    *cur_agent_cb;
+static server_cb_t    *cur_server_cb;
 
 /* yangcli.yang file used for quicker lookups */
 static ncx_module_t  *yangcli_mod;
@@ -253,7 +253,7 @@ static ncxmod_temp_progcb_t  *temp_progcb;
 
 /* TRUE if OK to load modules automatically
  * FALSE if --no-autoload set by user
- * when agent connection is made, and module discovery is done
+ * when server connection is made, and module discovery is done
  * then this var controls whether the matching modules
  * will be loaded into this application automatically
  */
@@ -273,7 +273,7 @@ static boolean         autocomp;
  */
 static ncx_bad_data_t  baddata;
 
-/* global connect param set, copied to agent connect parmsets */
+/* global connect param set, copied to server connect parmsets */
 static val_value_t   *connect_valset;
 
 /* name of external CLI config file used on invocation */
@@ -328,7 +328,7 @@ static ncx_withdefaults_t  withdefaults;
 *
 * INPUTS:
 *    gl == line in progress
-*    data == agent control block passed as cookie
+*    data == server control block passed as cookie
 * 
 * OUTPUTS:
 *    prints/logs notifications pending
@@ -347,24 +347,24 @@ static GlAfterTimeout
     get_line_timeout (GetLine *gl, 
 		      void *data)
 {
-    agent_cb_t  *agent_cb;
+    server_cb_t  *server_cb;
     ses_cb_t    *scb;
     boolean      retval, wantdata;
 
     (void)gl;
-    agent_cb = (agent_cb_t *)data;
-    agent_cb->returncode = MGR_IO_RC_NONE;
+    server_cb = (server_cb_t *)data;
+    server_cb->returncode = MGR_IO_RC_NONE;
 
-    if (agent_cb->state != MGR_IO_ST_CONN_IDLE) {
-	agent_cb->returncode = MGR_IO_RC_IDLE;
+    if (server_cb->state != MGR_IO_ST_CONN_IDLE) {
+	server_cb->returncode = MGR_IO_RC_IDLE;
 	return GLTO_CONTINUE;
     }
 
-    scb = mgr_ses_get_scb(agent_cb->mysid);
+    scb = mgr_ses_get_scb(server_cb->mysid);
     if (scb == NULL) {
 	/* session was dropped */
-	agent_cb->returncode = MGR_IO_RC_DROPPED;
-	agent_cb->state = MGR_IO_ST_IDLE;
+	server_cb->returncode = MGR_IO_RC_DROPPED;
+	server_cb->state = MGR_IO_ST_IDLE;
 	return GLTO_ABORT;
     }
 
@@ -373,16 +373,16 @@ static GlAfterTimeout
     if (retval) {
 	/* this session is probably still alive */
 	if (wantdata) {
-	    agent_cb->returncode = MGR_IO_RC_WANTDATA;
+	    server_cb->returncode = MGR_IO_RC_WANTDATA;
 	    return GLTO_CONTINUE;
 	} else {
-	    agent_cb->returncode = MGR_IO_RC_PROCESSED;
+	    server_cb->returncode = MGR_IO_RC_PROCESSED;
 	    return GLTO_REFRESH;
 	}
     } else {
 	/* this session was dropped just now */
-	agent_cb->returncode = MGR_IO_RC_DROPPED_NOW;
-	agent_cb->state = MGR_IO_ST_IDLE;
+	server_cb->returncode = MGR_IO_RC_DROPPED_NOW;
+	server_cb->state = MGR_IO_ST_IDLE;
 	return GLTO_ABORT;
     }
 
@@ -417,7 +417,7 @@ static void
         SET_ERROR(res);
     }
 
-    (*logfn)("\n  Copyright 2009, Andy Bierman, All Rights Reserved.\n");
+    (*logfn)("\n  Copyright 2009, Netconf Central, All Rights Reserved.\n");
 
     if (!imode) {
 	return;
@@ -448,17 +448,17 @@ static void
 
 
 /********************************************************************
-* FUNCTION free_agent_cb
+* FUNCTION free_server_cb
 * 
-*  Clean and free an agent control block
+*  Clean and free an server control block
 * 
 * INPUTS:
-*    agent_cb == control block to free
+*    server_cb == control block to free
 *                MUST BE REMOVED FROM ANY Q FIRST
 *
 *********************************************************************/
 static void
-    free_agent_cb (agent_cb_t *agent_cb)
+    free_server_cb (server_cb_t *server_cb)
 {
 
     modptr_t                *modptr;
@@ -467,214 +467,214 @@ static void
     int                      retval;
 
     /* save the history buffer if needed */
-    if (agent_cb->cli_gl != NULL && agent_cb->history_auto) {
+    if (server_cb->cli_gl != NULL && server_cb->history_auto) {
         retval = 
-            gl_save_history(agent_cb->cli_gl,
-                            (const char *)agent_cb->history_filename,
+            gl_save_history(server_cb->cli_gl,
+                            (const char *)server_cb->history_filename,
                             "#",   /* comment prefix */
                             -1);    /* save all entries */
         if (retval) {
             log_error("\nError: could not save command line "
                       "history file '%s'",
-                      agent_cb->history_filename);
+                      server_cb->history_filename);
         }
     }
 
-    if (agent_cb->name) {
-	m__free(agent_cb->name);
+    if (server_cb->name) {
+	m__free(server_cb->name);
     }
-    if (agent_cb->address) {
-	m__free(agent_cb->address);
+    if (server_cb->address) {
+	m__free(server_cb->address);
     }
-    if (agent_cb->password) {
-	m__free(agent_cb->password);
+    if (server_cb->password) {
+	m__free(server_cb->password);
     }
-    if (agent_cb->result_name) {
-	m__free(agent_cb->result_name);
+    if (server_cb->result_name) {
+	m__free(server_cb->result_name);
     }
-    if (agent_cb->result_filename) {
-	m__free(agent_cb->result_filename);
+    if (server_cb->result_filename) {
+	m__free(server_cb->result_filename);
     }
-    if (agent_cb->history_filename) {
-	m__free(agent_cb->history_filename);
+    if (server_cb->history_filename) {
+	m__free(server_cb->history_filename);
     }
-    if (agent_cb->history_line) {
-	m__free(agent_cb->history_line);
+    if (server_cb->history_line) {
+	m__free(server_cb->history_line);
     }
 
-    if (agent_cb->connect_valset) {
-	val_free_value(agent_cb->connect_valset);
+    if (server_cb->connect_valset) {
+	val_free_value(server_cb->connect_valset);
     }
 
 
     /* cleanup the user edit buffer */
-    if (agent_cb->cli_gl) {
-	(void)del_GetLine(agent_cb->cli_gl);
+    if (server_cb->cli_gl) {
+	(void)del_GetLine(server_cb->cli_gl);
     }
 
-    var_clean_varQ(&agent_cb->varbindQ);
+    var_clean_varQ(&server_cb->varbindQ);
 
-    while (!dlq_empty(&agent_cb->searchresultQ)) {
+    while (!dlq_empty(&server_cb->searchresultQ)) {
         searchresult = (ncxmod_search_result_t *)
-            dlq_deque(&agent_cb->searchresultQ);
+            dlq_deque(&server_cb->searchresultQ);
 	ncxmod_free_search_result(searchresult);
     }
 
-    while (!dlq_empty(&agent_cb->modptrQ)) {
-	modptr = (modptr_t *)dlq_deque(&agent_cb->modptrQ);
+    while (!dlq_empty(&server_cb->modptrQ)) {
+	modptr = (modptr_t *)dlq_deque(&server_cb->modptrQ);
 	free_modptr(modptr);
     }
 
-    while (!dlq_empty(&agent_cb->notificationQ)) {
-	notif = (mgr_not_msg_t *)dlq_deque(&agent_cb->notificationQ);
+    while (!dlq_empty(&server_cb->notificationQ)) {
+	notif = (mgr_not_msg_t *)dlq_deque(&server_cb->notificationQ);
 	mgr_not_free_msg(notif);
     }
 
-    m__free(agent_cb);
+    m__free(server_cb);
 
-}  /* free_agent_cb */
+}  /* free_server_cb */
 
 
 /********************************************************************
-* FUNCTION new_agent_cb
+* FUNCTION new_server_cb
 * 
-*  Malloc and init a new agent control block
+*  Malloc and init a new server control block
 * 
 * INPUTS:
-*    name == name of agent record
+*    name == name of server record
 *
 * RETURNS:
-*   malloced agent_cb struct or NULL of malloc failed
+*   malloced server_cb struct or NULL of malloc failed
 *********************************************************************/
-static agent_cb_t *
-    new_agent_cb (const xmlChar *name)
+static server_cb_t *
+    new_server_cb (const xmlChar *name)
 {
-    agent_cb_t  *agent_cb;
+    server_cb_t  *server_cb;
     int          retval;
 
-    agent_cb = m__getObj(agent_cb_t);
-    if (agent_cb == NULL) {
+    server_cb = m__getObj(server_cb_t);
+    if (server_cb == NULL) {
 	return NULL;
     }
 
-    memset(agent_cb, 0x0, sizeof(agent_cb_t));
-    dlq_createSQue(&agent_cb->varbindQ);
-    dlq_createSQue(&agent_cb->searchresultQ);
-    dlq_createSQue(&agent_cb->modptrQ);
-    dlq_createSQue(&agent_cb->notificationQ);
-    dlq_createSQue(&agent_cb->autoload_modcbQ);
-    dlq_createSQue(&agent_cb->autoload_devcbQ);
+    memset(server_cb, 0x0, sizeof(server_cb_t));
+    dlq_createSQue(&server_cb->varbindQ);
+    dlq_createSQue(&server_cb->searchresultQ);
+    dlq_createSQue(&server_cb->modptrQ);
+    dlq_createSQue(&server_cb->notificationQ);
+    dlq_createSQue(&server_cb->autoload_modcbQ);
+    dlq_createSQue(&server_cb->autoload_devcbQ);
 
     /* set the default CLI history file (may not get used) */
-    agent_cb->history_filename = xml_strdup(YANGCLI_DEF_HISTORY_FILE);
-    if (agent_cb->history_filename == NULL) {
-	free_agent_cb(agent_cb);
+    server_cb->history_filename = xml_strdup(YANGCLI_DEF_HISTORY_FILE);
+    if (server_cb->history_filename == NULL) {
+	free_server_cb(server_cb);
         return NULL;
     }
-    agent_cb->history_auto = autohistory;
+    server_cb->history_auto = autohistory;
 
     /* store per-session temp files */
-    agent_cb->temp_progcb = temp_progcb;
+    server_cb->temp_progcb = temp_progcb;
 
     /* the name is not used yet; needed when multiple
-     * agent profiles are needed at once instead
+     * server profiles are needed at once instead
      * of 1 session at a time
      */
-    agent_cb->name = xml_strdup(name);
-    if (agent_cb->name == NULL) {
-	free_agent_cb(agent_cb);
+    server_cb->name = xml_strdup(name);
+    if (server_cb->name == NULL) {
+	free_server_cb(server_cb);
         return NULL;
     }
 
     /* get a tecla CLI control block */
-    agent_cb->cli_gl = new_GetLine(YANGCLI_LINELEN, YANGCLI_HISTLEN);
-    if (agent_cb->cli_gl == NULL) {
+    server_cb->cli_gl = new_GetLine(YANGCLI_LINELEN, YANGCLI_HISTLEN);
+    if (server_cb->cli_gl == NULL) {
         log_error("\nError: cannot allocate a new GL");
-	free_agent_cb(agent_cb);
+	free_server_cb(server_cb);
         return NULL;
     }
 
     /* setup CLI tab line completion */
-    retval = gl_customize_completion(agent_cb->cli_gl,
-                                     &agent_cb->completion_state,
+    retval = gl_customize_completion(server_cb->cli_gl,
+                                     &server_cb->completion_state,
                                      yangcli_tab_callback);
     if (retval != 0) {
         log_error("\nError: cannot set GL tab completion");
-	free_agent_cb(agent_cb);
+	free_server_cb(server_cb);
         return NULL;
     }
 
     /* setup the inactivity timeout callback function */
-    retval = gl_inactivity_timeout(agent_cb->cli_gl,
+    retval = gl_inactivity_timeout(server_cb->cli_gl,
                                    get_line_timeout,
-                                   agent_cb,
+                                   server_cb,
                                    1,
                                    0);
     if (retval != 0) {
         log_error("\nError: cannot set GL inactivity timeout");
-	free_agent_cb(agent_cb);
+	free_server_cb(server_cb);
         return NULL;
     }
 
     /* setup the history buffer if needed */
-    if (agent_cb->history_auto) {
-        retval = gl_load_history(agent_cb->cli_gl,
-                                 (const char *)agent_cb->history_filename,
+    if (server_cb->history_auto) {
+        retval = gl_load_history(server_cb->cli_gl,
+                                 (const char *)server_cb->history_filename,
                                  "#");   /* comment prefix */
         if (retval) {
             log_error("\nError: cannot load command line history buffer");
-            free_agent_cb(agent_cb);
+            free_server_cb(server_cb);
             return NULL;
         }
     }
 
     /* set up lock control blocks for get-locks */
-    agent_cb->locks_active = FALSE;
-    agent_cb->locks_waiting = FALSE;
-    agent_cb->locks_cur_cfg = NCX_CFGID_RUNNING;
-    agent_cb->locks_timeout = 120;
-    agent_cb->locks_retry_interval = 1;
-    agent_cb->locks_cleanup = FALSE;
-    agent_cb->locks_start_time = (time_t)0;
-    agent_cb->lock_cb[NCX_CFGID_RUNNING].config_id = 
+    server_cb->locks_active = FALSE;
+    server_cb->locks_waiting = FALSE;
+    server_cb->locks_cur_cfg = NCX_CFGID_RUNNING;
+    server_cb->locks_timeout = 120;
+    server_cb->locks_retry_interval = 1;
+    server_cb->locks_cleanup = FALSE;
+    server_cb->locks_start_time = (time_t)0;
+    server_cb->lock_cb[NCX_CFGID_RUNNING].config_id = 
         NCX_CFGID_RUNNING;
-    agent_cb->lock_cb[NCX_CFGID_RUNNING].config_name = 
+    server_cb->lock_cb[NCX_CFGID_RUNNING].config_name = 
         NCX_CFG_RUNNING;
-    agent_cb->lock_cb[NCX_CFGID_RUNNING].lock_state = 
+    server_cb->lock_cb[NCX_CFGID_RUNNING].lock_state = 
         LOCK_STATE_IDLE;
 
-    agent_cb->lock_cb[NCX_CFGID_CANDIDATE].config_id = 
+    server_cb->lock_cb[NCX_CFGID_CANDIDATE].config_id = 
         NCX_CFGID_CANDIDATE;
-    agent_cb->lock_cb[NCX_CFGID_CANDIDATE].config_name = 
+    server_cb->lock_cb[NCX_CFGID_CANDIDATE].config_name = 
         NCX_CFG_CANDIDATE;
-    agent_cb->lock_cb[NCX_CFGID_CANDIDATE].lock_state = 
+    server_cb->lock_cb[NCX_CFGID_CANDIDATE].lock_state = 
         LOCK_STATE_IDLE;
 
-    agent_cb->lock_cb[NCX_CFGID_STARTUP].config_id = 
+    server_cb->lock_cb[NCX_CFGID_STARTUP].config_id = 
         NCX_CFGID_STARTUP;
-    agent_cb->lock_cb[NCX_CFGID_STARTUP].config_name = 
+    server_cb->lock_cb[NCX_CFGID_STARTUP].config_name = 
         NCX_CFG_STARTUP;
-    agent_cb->lock_cb[NCX_CFGID_STARTUP].lock_state = 
+    server_cb->lock_cb[NCX_CFGID_STARTUP].lock_state = 
         LOCK_STATE_IDLE;
 
-    /* set default agent flags to current settings */
-    agent_cb->state = MGR_IO_ST_INIT;
-    agent_cb->baddata = baddata;
-    agent_cb->log_level = log_get_debug_level();
-    agent_cb->autoload = autoload;
-    agent_cb->fixorder = fixorder;
-    agent_cb->get_optional = optional;
-    agent_cb->testoption = testoption;
-    agent_cb->erroption = erroption;
-    agent_cb->defop = defop;
-    agent_cb->timeout = default_timeout;
-    agent_cb->display_mode = display_mode;
-    agent_cb->withdefaults = withdefaults;
-    agent_cb->history_size = YANGCLI_HISTLEN;
-    agent_cb->command_mode = CMD_MODE_NORMAL;
-    return agent_cb;
+    /* set default server flags to current settings */
+    server_cb->state = MGR_IO_ST_INIT;
+    server_cb->baddata = baddata;
+    server_cb->log_level = log_get_debug_level();
+    server_cb->autoload = autoload;
+    server_cb->fixorder = fixorder;
+    server_cb->get_optional = optional;
+    server_cb->testoption = testoption;
+    server_cb->erroption = erroption;
+    server_cb->defop = defop;
+    server_cb->timeout = default_timeout;
+    server_cb->display_mode = display_mode;
+    server_cb->withdefaults = withdefaults;
+    server_cb->history_size = YANGCLI_HISTLEN;
+    server_cb->command_mode = CMD_MODE_NORMAL;
+    return server_cb;
 
-}  /* new_agent_cb */
+}  /* new_server_cb */
 
 
 /********************************************************************
@@ -683,7 +683,7 @@ static agent_cb_t *
  * handle a user assignment of a config variable
  *
  * INPUTS:
- *   agent_cb == agent control block to use
+ *   server_cb == server control block to use
  *   configval == value to set
  *  use 1 of:
  *   newval == value to use for changing 'configval' 
@@ -693,7 +693,7 @@ static agent_cb_t *
  *   status
  *********************************************************************/
 static status_t
-    handle_config_assign (agent_cb_t *agent_cb,
+    handle_config_assign (server_cb_t *server_cb,
 			  val_value_t *configval,
 			  val_value_t *newval,
 			  const xmlChar *newvalstr)
@@ -727,7 +727,7 @@ static status_t
 	return ERR_NCX_INVALID_VALUE;
     }
 
-    if (!xml_strcmp(configval->name, YANGCLI_AGENT)) {
+    if (!xml_strcmp(configval->name, YANGCLI_SERVER)) {
 	/* should check for valid IP address!!! */
 	if (val_need_quotes(usestr)) {
 	    /* using this dumb test as a placeholder */
@@ -736,7 +736,7 @@ static status_t
 	    /* save or update the connnect_valset */
 	    testval = val_find_child(connect_valset,
 				     NULL, 
-				     YANGCLI_AGENT);
+				     YANGCLI_SERVER);
 	    if (testval) {
 		res = val_set_simval(testval,
 				     testval->typdef,
@@ -744,12 +744,12 @@ static status_t
 				     testval->name,
 				     usestr);
 		if (res != NO_ERR) {
-		    log_error("\nError: changing 'agent' failed");
+		    log_error("\nError: changing 'server' failed");
 		}
 	    } else {
 		testobj = obj_find_child(connect_valset->obj,
 					 NULL, 
-					 YANGCLI_AGENT);
+					 YANGCLI_SERVER);
 		if (testobj) {
 		    testval = val_make_simval_obj(testobj,
 						  usestr,
@@ -771,10 +771,10 @@ static status_t
 	}
     } else if (!xml_strcmp(configval->name, YANGCLI_AUTOLOAD)) {
 	if (ncx_is_true(usestr)) {
-            agent_cb->autoload = TRUE;
+            server_cb->autoload = TRUE;
 	    autoload = TRUE;
 	} else if (ncx_is_false(usestr)) {
-            agent_cb->autoload = FALSE;
+            server_cb->autoload = FALSE;
 	    autoload = FALSE;
 	} else {
 	    log_error("\nError: value must be 'true' or 'false'");
@@ -783,7 +783,7 @@ static status_t
     } else if (!xml_strcmp(configval->name, YANGCLI_BADDATA)) {
 	testbaddata = ncx_get_baddata_enum(usestr);
 	if (testbaddata != NCX_BAD_DATA_NONE) {
-	    agent_cb->baddata = testbaddata;
+	    server_cb->baddata = testbaddata;
 	    baddata = testbaddata;
 	} else {
 	    log_error("\nError: value must be 'true' or 'false'");
@@ -810,7 +810,7 @@ static status_t
         dmode = ncx_get_display_mode_enum(usestr);
         if (dmode != NCX_DISPLAY_MODE_NONE) {
             display_mode = dmode;
-            agent_cb->display_mode = dmode;
+            server_cb->display_mode = dmode;
         } else {
 	    log_error("\nError: value must be 'plain', 'prefixed' "
                       "or 'xml'");
@@ -850,12 +850,12 @@ static status_t
 	}
     } else if (!xml_strcmp(configval->name, YANGCLI_TEST_OPTION)) {
 	if (!xml_strcmp(usestr, NCX_EL_NONE)) {
-	    agent_cb->testoption = OP_TESTOP_NONE;
+	    server_cb->testoption = OP_TESTOP_NONE;
 	    testop = OP_TESTOP_NONE;
 	} else {	    
 	    testop = op_testop_enum(usestr);
 	    if (testop != OP_TESTOP_NONE) {
-		agent_cb->testoption = testop;
+		server_cb->testoption = testop;
 		testoption = testop;
 	    } else {
 		log_error("\nError: must be a valid 'test-option'");
@@ -866,12 +866,12 @@ static status_t
 	}
     } else if (!xml_strcmp(configval->name, YANGCLI_ERROR_OPTION)) {
 	if (!xml_strcmp(usestr, NCX_EL_NONE)) {
-	    agent_cb->erroption = OP_ERROP_NONE;
+	    server_cb->erroption = OP_ERROP_NONE;
 	    erroption = OP_ERROP_NONE;
 	} else {	    
 	    errop = op_errop_id(usestr);
 	    if (errop != OP_ERROP_NONE) {
-		agent_cb->erroption = errop;
+		server_cb->erroption = errop;
 		erroption = errop;
 	    } else {
 		log_error("\nError: must be a valid 'error-option'");
@@ -883,7 +883,7 @@ static status_t
     } else if (!xml_strcmp(configval->name, NCX_EL_DEFAULT_OPERATION)) {
         mydefop = op_defop_id2(usestr);
         if (mydefop != OP_DEFOP_NOT_SET) {
-            agent_cb->defop = mydefop;
+            server_cb->defop = mydefop;
             defop = mydefop;
         } else {
             log_error("\nError: must be a valid 'default-operation'");
@@ -897,7 +897,7 @@ static status_t
 			     NCX_BT_UINT32,
 			     &testnum);
 	if (res == NO_ERR) {
-	    agent_cb->timeout = testnum.u;
+	    server_cb->timeout = testnum.u;
 	    default_timeout = testnum.u;
 	} else {
 	    log_error("\nError: must be valid uint32 value");
@@ -906,10 +906,10 @@ static status_t
     } else if (!xml_strcmp(configval->name, YANGCLI_OPTIONAL)) {
 	if (ncx_is_true(usestr)) {
 	    optional = TRUE;
-	    agent_cb->get_optional = TRUE;
+	    server_cb->get_optional = TRUE;
 	} else if (ncx_is_false(usestr)) {
 	    optional = FALSE;
-	    agent_cb->get_optional = FALSE;
+	    server_cb->get_optional = FALSE;
 	} else {
 	    log_error("\nError: value must be 'true' or 'false'");
 	    res = ERR_NCX_INVALID_VALUE;
@@ -924,15 +924,15 @@ static status_t
 	    res = ERR_NCX_INVALID_VALUE;
 	} else {
 	    log_set_debug_level(testloglevel);
-	    agent_cb->log_level = testloglevel;
+	    server_cb->log_level = testloglevel;
 	}
     } else if (!xml_strcmp(configval->name, YANGCLI_FIXORDER)) {
 	if (ncx_is_true(usestr)) {
 	    fixorder = TRUE;
-	    agent_cb->fixorder = TRUE;
+	    server_cb->fixorder = TRUE;
 	} else if (ncx_is_false(usestr)) {
 	    fixorder = FALSE;
-	    agent_cb->fixorder = FALSE;
+	    server_cb->fixorder = FALSE;
 	} else {
 	    log_error("\nError: value must be 'true' or 'false'");
 	    res = ERR_NCX_INVALID_VALUE;
@@ -947,7 +947,7 @@ static status_t
 		res = ERR_NCX_INVALID_VALUE;
 	    } else {
 		withdefaults = ncx_get_withdefaults_enum(usestr);
-		agent_cb->withdefaults = withdefaults;
+		server_cb->withdefaults = withdefaults;
 	    }
 	}
     } else {
@@ -968,7 +968,7 @@ static status_t
 	}
 	if (res != NO_ERR) {
 	    log_error("\nError: set result for '%s' failed (%s)",
-			  agent_cb->result_name, 
+			  server_cb->result_name, 
 			  get_error_string(res));
 	}
     }
@@ -984,16 +984,16 @@ static status_t
 * Delete the specified file, if it is ASCII and a regular file
 *
 * INPUTS:
-*    agent_cb == agent control block to use
+*    server_cb == server control block to use
 *
 * OUTPUTS:
-*    agent_cb->result_filename will get deleted if NO_ERR
+*    server_cb->result_filename will get deleted if NO_ERR
 *
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t
-    handle_delete_result (agent_cb_t *agent_cb)
+    handle_delete_result (server_cb_t *server_cb)
 {
     status_t     res;
     struct stat  statbuf;
@@ -1003,30 +1003,30 @@ static status_t
 
     if (LOGDEBUG2) {
 	log_debug2("\n*** delete file result '%s'",
-		   agent_cb->result_filename);
+		   server_cb->result_filename);
     }
 
     /* see if file already exists */
-    statresult = stat((const char *)agent_cb->result_filename,
+    statresult = stat((const char *)server_cb->result_filename,
 		      &statbuf);
     if (statresult != 0) {
 	log_error("\nError: assignment file '%s' could not be opened",
-		  agent_cb->result_filename);
+		  server_cb->result_filename);
 	res = errno_to_status();
     } else if (!S_ISREG(statbuf.st_mode)) {
 	log_error("\nError: assignment file '%s' is not a regular file",
-		  agent_cb->result_filename);
+		  server_cb->result_filename);
 	res = ERR_NCX_OPERATION_FAILED;
     } else {
-	statresult = remove((const char *)agent_cb->result_filename);
+	statresult = remove((const char *)server_cb->result_filename);
 	if (statresult == -1) {
 	    log_error("\nError: assignment file '%s' could not be deleted",
-		      agent_cb->result_filename);
+		      server_cb->result_filename);
 	    res = errno_to_status();
 	}
     }
 
-    clear_result(agent_cb);
+    clear_result(server_cb);
 
     return res;
 
@@ -1040,19 +1040,19 @@ static status_t
 * Save it if it si good
 *
 * INPUTS:
-*    agent_cb == agent control block to use
+*    server_cb == server control block to use
 * use 1 of these 2 parms:
 *    resultval == result to output to file
 *    resultstr == result to output as string
 *
 * OUTPUTS:
-*    agent_cb->result_filename will get set if NO_ERR
+*    server_cb->result_filename will get set if NO_ERR
 *
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t
-    output_file_result (agent_cb_t *agent_cb,
+    output_file_result (server_cb_t *server_cb,
 			val_value_t *resultval,
 			const xmlChar *resultstr)
 {
@@ -1066,28 +1066,28 @@ static status_t
 
     if (LOGDEBUG2) {
 	log_debug2("\n*** output file result to '%s'",
-		   agent_cb->result_filename);
+		   server_cb->result_filename);
     }
 
     /* see if file already exists */
-    statresult = stat((const char *)agent_cb->result_filename,
+    statresult = stat((const char *)server_cb->result_filename,
 		      &statbuf);
     if (statresult == 0) {
 	log_error("\nError: assignment file '%s' already exists",
-		  agent_cb->result_filename);
-	clear_result(agent_cb);
+		  server_cb->result_filename);
+	clear_result(server_cb);
 	return ERR_NCX_DATA_EXISTS;
     }
     
     if (resultval) {
-	if (file_is_text(agent_cb->result_filename)) {
+	if (file_is_text(server_cb->result_filename)) {
 	    /* output in text format to the specified file */
 	    res = log_alt_open((const char *)
-			       agent_cb->result_filename);
+			       server_cb->result_filename);
 	    if (res != NO_ERR) {
 		log_error("\nError: assignment file '%s' could "
 			  "not be opened (%s)",
-			  agent_cb->result_filename,
+			  server_cb->result_filename,
 			  get_error_string(res));
 	    } else {
 		val_dump_alt_value(resultval, 0);
@@ -1096,7 +1096,7 @@ static status_t
 	} else {
 	    /* output in XML format to the specified file */
 	    xml_init_attrs(&attrs);
-	    res = xml_wr_file(agent_cb->result_filename,
+	    res = xml_wr_file(server_cb->result_filename,
                               resultval,
                               &attrs, 
                               XMLMODE, 
@@ -1106,25 +1106,25 @@ static status_t
 	    xml_clean_attrs(&attrs);
 	}
     } else {
-	fil = fopen((const char *)agent_cb->result_filename, "w");
+	fil = fopen((const char *)server_cb->result_filename, "w");
 	if (fil == NULL) {
 	    log_error("\nError: assignment file '%s' could "
 		      "not be opened",
-		      agent_cb->result_filename);
+		      server_cb->result_filename);
 	    res = errno_to_status();
 	} else {
 	    statresult = fputs((const char *)resultstr, fil);
 	    if (statresult == EOF) {
 		log_error("\nError: assignment file '%s' could "
 			  "not be written",
-			  agent_cb->result_filename);
+			  server_cb->result_filename);
 		res = errno_to_status();
 	    } else {
 		statresult = fputc('\n', fil);	
 		if (statresult == EOF) {
 		    log_error("\nError: assignment file '%s' could "
 			      "not be written",
-			      agent_cb->result_filename);
+			      server_cb->result_filename);
 		    res = errno_to_status();
 		}
 	    }
@@ -1133,12 +1133,12 @@ static status_t
 	if (statresult == EOF) {
 	    log_error("\nError: assignment file '%s' could "
 		      "not be closed",
-		      agent_cb->result_filename);
+		      server_cb->result_filename);
 	    res = errno_to_status();
 	}
     }
 
-    clear_result(agent_cb);
+    clear_result(server_cb);
 
     return res;
 
@@ -1159,7 +1159,7 @@ static status_t
 *   $foo = @datafile.xml
 *
 * INPUTS:
-*   agent_cb == agent control block to use
+*   server_cb == server control block to use
 *   line == command line string to expand
 *   len  == address of number chars parsed so far in line
 *   getrpc == address of return flag to parse and execute an
@@ -1187,7 +1187,7 @@ static status_t
 *    status
 *********************************************************************/
 static status_t
-    check_assign_statement (agent_cb_t *agent_cb,
+    check_assign_statement (server_cb_t *server_cb,
 			    const xmlChar *line,
 			    uint32 *len,
 			    boolean *getrpc,
@@ -1257,7 +1257,7 @@ static status_t
 		return ERR_NCX_VAR_NOT_FOUND;
 	    }
 	    filespec = VAL_STR(curval);
-	    res = check_filespec(agent_cb, filespec, curval->name);
+	    res = check_filespec(server_cb, filespec, curval->name);
 	    if (res != NO_ERR) {
 		return res;
 	    }
@@ -1308,7 +1308,7 @@ static status_t
 	}
 
 	/* check filespec and save filename for real */
-	res = check_filespec(agent_cb, tempstr, NULL);
+	res = check_filespec(server_cb, tempstr, NULL);
 
 	m__free(tempstr);
 
@@ -1329,7 +1329,7 @@ static status_t
     /* check end of string */
     if (!*str) {
 	log_error("\nError: truncated assignment statement");
-	clear_result(agent_cb);
+	clear_result(server_cb);
 	return ERR_NCX_DATA_MISSING;
     }
 
@@ -1339,7 +1339,7 @@ static status_t
 	str++;
     } else {
 	log_error("\nError: equals sign '=' expected");
-	clear_result(agent_cb);
+	clear_result(server_cb);
 	return ERR_NCX_WRONG_TKTYPE;
     }
 
@@ -1354,7 +1354,7 @@ static status_t
 	    /* got file assignment (@foo) =  EOLN
 	     * treat this as a request to delete the file
 	     */
-	    res = handle_delete_result(agent_cb);
+	    res = handle_delete_result(server_cb);
 	} else {
 	    /* got $foo =  EOLN
 	     * treat this as a request to unset the variable
@@ -1362,7 +1362,7 @@ static status_t
 	    if (vartype == VAR_TYP_SYSTEM ||
 		vartype == VAR_TYP_CONFIG) {
 		log_error("\nError: cannot remove system variables");
-		clear_result(agent_cb);
+		clear_result(server_cb);
 		return ERR_NCX_OPERATION_FAILED;
 	    }
 
@@ -1399,7 +1399,7 @@ static status_t
 	    /* file assignment of a variable value 
 	     *   @foo.txt=$bar  or @$foo=$bar
 	     */
-	    res = output_file_result(agent_cb, val, NULL);
+	    res = output_file_result(server_cb, val, NULL);
 	    val_free_value(val);
 	} else {
 	    /* this is a plain assignment statement
@@ -1409,7 +1409,7 @@ static status_t
 		if (curval==NULL) {
 		    res = SET_ERROR(ERR_INTERNAL_VAL);
 		} else {
-		    res = handle_config_assign(agent_cb,
+		    res = handle_config_assign(server_cb,
 					       curval, 
 					       val,
 					       NULL);
@@ -1428,21 +1428,21 @@ static status_t
 	/* this is as assignment to the results
 	 * of an RPC function call 
 	 */
-	if (agent_cb->result_name) {
+	if (server_cb->result_name) {
 	    log_error("\nError: result already pending for %s",
-		     agent_cb->result_name);
-	    m__free(agent_cb->result_name);
-	    agent_cb->result_name = NULL;
+		     server_cb->result_name);
+	    m__free(server_cb->result_name);
+	    server_cb->result_name = NULL;
 	}
 
 	if (!*fileassign) {
 	    /* save the variable result name */
-	    agent_cb->result_name = xml_strndup(name, nlen);
-	    if (agent_cb->result_name == NULL) {
+	    server_cb->result_name = xml_strndup(name, nlen);
+	    if (server_cb->result_name == NULL) {
 		*len = 0;
 		res = ERR_INTERNAL_MEM;
 	    } else {
-		agent_cb->result_vartype = vartype;
+		server_cb->result_vartype = vartype;
 	    }
 	}
 
@@ -1453,7 +1453,7 @@ static status_t
     } else {
 	/* there was some error in the statement processing */
 	*len = 0;
-	clear_result(agent_cb);
+	clear_result(server_cb);
     }
 
     return res;
@@ -1607,11 +1607,11 @@ static status_t
     xmlChar         numbuff[NCX_MAX_NUMLEN];
 
     strval = NULL;
-    parm = val_find_child(mgr_cli_valset, NULL, YANGCLI_AGENT);
+    parm = val_find_child(mgr_cli_valset, NULL, YANGCLI_SERVER);
     if (parm) {
 	strval = VAL_STR(parm);
     }
-    res = create_config_var(YANGCLI_AGENT, strval);
+    res = create_config_var(YANGCLI_SERVER, strval);
     if (res != NO_ERR) {
 	return res;
     }
@@ -1675,7 +1675,7 @@ static status_t
     }
 
     res = create_config_var(YANGCLI_OPTIONAL, 
-			    (cur_agent_cb->get_optional) 
+			    (cur_server_cb->get_optional) 
 			    ? NCX_EL_TRUE : NCX_EL_FALSE);
     if (res != NO_ERR) {
 	return res;
@@ -1801,8 +1801,8 @@ static status_t
     /* set the warning control parameters */
     val_set_warning_parms(mgr_cli_valset);
 
-    /* get the agent parameter */
-    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_AGENT);
+    /* get the server parameter */
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_SERVER);
     if (parm && parm->res == NO_ERR) {
 	/* save to the connect_valset parmset */
 	res = add_clone_parm(parm, connect_valset);
@@ -1994,7 +1994,7 @@ static status_t
 
     log_debug2("\nyangcli: Loading NCX yangcli-cli Parmset");
 
-    /* load in the agent boot parameter definition file */
+    /* load in the server boot parameter definition file */
     res = ncxmod_load_module(YANGCLI_MOD, 
                              NULL, 
                              NULL,
@@ -2091,82 +2091,82 @@ static status_t
 * FUNCTION report_capabilities
 * 
 * Generate a start session report, listing the capabilities
-* of the NETCONF agent
+* of the NETCONF server
 * 
 * INPUTS:
-*  agent_cb == agent control block to use
+*  server_cb == server control block to use
 *  scb == session control block
 *
 *********************************************************************/
 static void
-    report_capabilities (agent_cb_t *agent_cb,
+    report_capabilities (server_cb_t *server_cb,
 			 const ses_cb_t *scb)
 {
     const mgr_scb_t    *mscb;
-    const xmlChar      *agent;
+    const xmlChar      *server;
     const val_value_t  *parm;
 
 
     mscb = (const mgr_scb_t *)scb->mgrcb;
 
-    parm = val_find_child(agent_cb->connect_valset, 
+    parm = val_find_child(server_cb->connect_valset, 
 			  YANGCLI_MOD, 
-                          YANGCLI_AGENT);
+                          YANGCLI_SERVER);
     if (parm && parm->res == NO_ERR) {
-	agent = VAL_STR(parm);
+	server = VAL_STR(parm);
     } else {
-	agent = (const xmlChar *)"--";
+	server = (const xmlChar *)"--";
     }
 
     log_write("\n\nNETCONF session established for %s on %s",
 	      scb->username, 
-	      mscb->target ? mscb->target : agent);
+	      mscb->target ? mscb->target : server);
 
     if (!LOGINFO) {
 	/* skip the rest unless log level is INFO or higher */
 	return;
     }
 
-    log_write("\n\nManager Session Id: %u", scb->sid);
-    log_write("\nAgent Session Id: %u", mscb->agtsid);
+    log_write("\n\nClient Session Id: %u", scb->sid);
+    log_write("\nServer Session Id: %u", mscb->agtsid);
 
-    log_write("\n\nAgent Protocol Capabilities");
+    log_write("\n\nServer Protocol Capabilities");
     cap_dump_stdcaps(&mscb->caplist);
 
-    log_write("\n\nAgent Module Capabilities");
+    log_write("\n\nServer Module Capabilities");
     cap_dump_modcaps(&mscb->caplist);
 
-    log_write("\n\nAgent Enterprise Capabilities");
+    log_write("\n\nServer Enterprise Capabilities");
     cap_dump_entcaps(&mscb->caplist);
     log_write("\n");
 
     log_write("\nDefault target set to: ");
     switch (mscb->targtyp) {
     case NCX_AGT_TARG_NONE:
-	agent_cb->default_target = NULL;
+	server_cb->default_target = NULL;
 	log_write("none");
 	break;
     case NCX_AGT_TARG_CANDIDATE:
-	agent_cb->default_target = NCX_EL_CANDIDATE;
+	server_cb->default_target = NCX_EL_CANDIDATE;
 	log_write("<candidate>");
 	break;
     case NCX_AGT_TARG_RUNNING:
-	agent_cb->default_target = NCX_EL_RUNNING;	
+	server_cb->default_target = NCX_EL_RUNNING;	
 	log_write("<running>");
 	break;
     case NCX_AGT_TARG_CAND_RUNNING:
 	log_write("<candidate> (<running> also supported)");
 	break;
     case NCX_AGT_TARG_LOCAL:
-	agent_cb->default_target = NULL;
+	server_cb->default_target = NULL;
 	log_write("none -- local file");	
 	break;
     case NCX_AGT_TARG_REMOTE:
-	agent_cb->default_target = NULL;
+	server_cb->default_target = NULL;
 	log_write("none -- remote file");	
 	break;
     default:
-	agent_cb->default_target = NULL;
+	server_cb->default_target = NULL;
 	SET_ERROR(ERR_INTERNAL_VAL);
 	log_write("none -- unknown (%d)", mscb->targtyp);
 	break;
@@ -2228,16 +2228,16 @@ static void
 /********************************************************************
 * FUNCTION check_module_capabilities
 * 
-* Check the modules reported by the agent
+* Check the modules reported by the server
 * If autoload is TRUE then load any missing modules
 * otherwise just warn which modules are missing
 * Also check for wrong module module and version errors
 *
-* The agent_cb->searchresultQ is filled with
+* The server_cb->searchresultQ is filled with
 * records for each module or deviation specified in
 * the module capability URIs.
 *
-* After determining all the files that the agent has,
+* After determining all the files that the server has,
 * the <get-schema> operation is used (if :schema-retrieval
 * advertised by the device and --autoload=true)
 *
@@ -2248,7 +2248,7 @@ static void
 * All files are compiled against the versions of the imports
 * advertised in the capabilities, to make sure that imports
 * without revision-date statements will still select the
-* same revision as the agent (INSTEAD OF ALWAYS SELECTING 
+* same revision as the server (INSTEAD OF ALWAYS SELECTING 
 * THE LATEST VERSION).
 *
 * If the device advertises an incomplete set of modules,
@@ -2256,12 +2256,12 @@ static void
 * using the normal search path, including YANG_MODPATH.
 *
 * INPUTS:
-*  agent_cb == agent control block to use
+*  server_cb == server control block to use
 *  scb == session control block
 *
 *********************************************************************/
 static void
-    check_module_capabilities (agent_cb_t *agent_cb,
+    check_module_capabilities (server_cb_t *server_cb,
 			       ses_cb_t *scb)
 {
     mgr_scb_t              *mscb;
@@ -2275,7 +2275,7 @@ static void
 
     mscb = (mgr_scb_t *)scb->mgrcb;
 
-    log_info("\n\nChecking Agent Modules...\n");
+    log_info("\n\nChecking Server Modules...\n");
 
     if (!cap_std_set(&mscb->caplist, CAP_STDID_V1)) {
         log_warn("\nWarning: NETCONF v1 capability not found");
@@ -2285,7 +2285,7 @@ static void
                                       CAP_STDID_SCHEMA_RETRIEVAL);
 
     /**** !!! HARDWIRE ADD NETCONF V1 TO THE QUEUE
-     **** !!! EVEN IF THE AGENT LEFT IT OUT
+     **** !!! EVEN IF THE SERVER LEFT IT OUT
      **** !!! NEED TO CHECK THE ietf-netconf.yang
      **** !!! MODULE CAPABILITY
      ****/
@@ -2296,15 +2296,15 @@ static void
 	    log_error("\nMalloc failure");
 	    return;
 	} else {
-	    dlq_enque(modptr, &agent_cb->modptrQ);
+	    dlq_enque(modptr, &server_cb->modptrQ);
 	}
     }
 
     /* check all the YANG modules;
      * build a list of modules that
-     * the agent needs to get somehow
+     * the server needs to get somehow
      * or proceed without them
-     * save the results in the agent_cb->searchresultQ
+     * save the results in the server_cb->searchresultQ
      */
     cap = cap_first_modcap(&mscb->caplist);
     while (cap) {
@@ -2350,7 +2350,7 @@ static void
              * this instance of yangcli
              * try to auto-load the module if enabled
              */
-	    if (agent_cb->autoload) {
+	    if (server_cb->autoload) {
                 searchresult = ncxmod_find_module(module, revision);
                 if (searchresult) {
                     searchresult->cap = cap;
@@ -2413,7 +2413,7 @@ static void
                     }
 
                     /* save the search result no matter what */
-                    dlq_enque(searchresult, &agent_cb->searchresultQ);
+                    dlq_enque(searchresult, &server_cb->searchresultQ);
                 } else {
                     /* search result was NULL, so there was some
                      * bad error, like malloc-failed
@@ -2443,7 +2443,7 @@ static void
             } else {
                 searchresult->cap = cap;
                 searchresult->capmatch = TRUE;
-                dlq_enque(searchresult, &agent_cb->searchresultQ);
+                dlq_enque(searchresult, &server_cb->searchresultQ);
             }
         }
 
@@ -2454,7 +2454,7 @@ static void
     /* get all the advertised YANG data model modules into the
      * session temp work directory that are local to the system
      */
-    res = autoload_setup_tempdir(agent_cb, scb);
+    res = autoload_setup_tempdir(server_cb, scb);
     if (res != NO_ERR) {
         log_error("\nError: autoload setup temp files failed (%s)",
                   get_error_string(res));
@@ -2466,12 +2466,12 @@ static void
      */
     if (res == NO_ERR &&
         retrieval_supported && 
-        agent_cb->autoload) {
+        server_cb->autoload) {
 
         /* compile phase will be delayed until autoload
          * get-schema operations are done
          */
-        res = autoload_start_get_modules(agent_cb, scb);
+        res = autoload_start_get_modules(server_cb, scb);
         if (res != NO_ERR) {
             log_error("\nError: autoload get modules failed (%s)",
                       get_error_string(res));
@@ -2479,13 +2479,13 @@ static void
     }
 
     /* check autoload state did not start or was not requested */
-    if (res == NO_ERR && agent_cb->command_mode != CMD_MODE_AUTOLOAD) {
+    if (res == NO_ERR && server_cb->command_mode != CMD_MODE_AUTOLOAD) {
         /* parse and hold the modules with the correct deviations,
          * features and revisions.  The returned modules
          * from yang_parse.c will not be stored in the local module
          * directory -- just used for this one session then deleted
          */
-        res = autoload_compile_modules(agent_cb, scb);
+        res = autoload_compile_modules(server_cb, scb);
         if (res != NO_ERR) {
             log_error("\nError: autoload compile modules failed (%s)",
                       get_error_string(res));
@@ -2520,7 +2520,7 @@ static boolean
     if (mscb) {
 	deletecount = mgr_rpc_timeout_requestQ(&mscb->reqQ);
 	if (deletecount) {
-	    log_error("\nError: request to agent timed out");
+	    log_error("\nError: request to server timed out");
 	}
 	return (deletecount) ? TRUE : FALSE;
     }
@@ -2540,19 +2540,19 @@ static boolean
 * all its locks or not
 * 
 * INPUTS:
-*  agent_cb == agent control block to use
+*  server_cb == server control block to use
 *
 *********************************************************************/
 static boolean
-    get_lock_worked (agent_cb_t *agent_cb)
+    get_lock_worked (server_cb_t *server_cb)
 {
     ncx_cfg_t  cfgid;
 
     for (cfgid = NCX_CFGID_RUNNING;
          cfgid <= NCX_CFGID_STARTUP;
          cfgid++) {
-        if (agent_cb->lock_cb[cfgid].lock_used &&
-            agent_cb->lock_cb[cfgid].lock_state !=
+        if (server_cb->lock_cb[cfgid].lock_used &&
+            server_cb->lock_cb[cfgid].lock_state !=
             LOCK_STATE_ACTIVE) {
             return FALSE;
         }
@@ -2578,7 +2578,7 @@ static boolean
 static mgr_io_state_t
     yangcli_stdin_handler (void)
 {
-    agent_cb_t     *agent_cb;
+    server_cb_t     *server_cb;
     xmlChar        *line;
     const xmlChar  *resultstr;
     ses_cb_t       *scb;
@@ -2587,92 +2587,92 @@ static mgr_io_state_t
     status_t        res;
     uint32          len;
 
-    /* assuming cur_agent_cb will be set dynamically
+    /* assuming cur_server_cb will be set dynamically
      * at some point; currently 1 session supported in yangcli
      */
-    agent_cb = cur_agent_cb;
+    server_cb = cur_server_cb;
 
-    if (agent_cb->returncode == MGR_IO_RC_WANTDATA) {
+    if (server_cb->returncode == MGR_IO_RC_WANTDATA) {
         if (LOGDEBUG2) {
             log_debug2("\nyangcli: sending dummy <get> keepalive");
         }
-        (void)send_keepalive_get(agent_cb);
-        agent_cb->returncode = MGR_IO_RC_NONE;        
+        (void)send_keepalive_get(server_cb);
+        server_cb->returncode = MGR_IO_RC_NONE;        
     }
 
-    if (agent_cb->cli_fn == NULL && !agent_cb->climore) {
-	init_completion_state(&agent_cb->completion_state,
-			      agent_cb, 
+    if (server_cb->cli_fn == NULL && !server_cb->climore) {
+	init_completion_state(&server_cb->completion_state,
+			      server_cb, 
 			      CMD_STATE_FULL);
     }
 
     if (mgr_shutdown_requested()) {
-	agent_cb->state = MGR_IO_ST_SHUT;
+	server_cb->state = MGR_IO_ST_SHUT;
     }
 
-    switch (agent_cb->state) {
+    switch (server_cb->state) {
     case MGR_IO_ST_INIT:
-	return agent_cb->state;
+	return server_cb->state;
     case MGR_IO_ST_IDLE:
         break;
     case MGR_IO_ST_CONN_IDLE:
 	/* check if session was dropped by remote peer */
-	scb = mgr_ses_get_scb(agent_cb->mysid);
+	scb = mgr_ses_get_scb(server_cb->mysid);
 	if (scb==NULL || scb->state == SES_ST_SHUTDOWN_REQ) {
 	    if (scb) {
-		(void)mgr_ses_free_session(agent_cb->mysid);
+		(void)mgr_ses_free_session(server_cb->mysid);
 	    }
-	    clear_agent_cb_session(agent_cb);
+	    clear_server_cb_session(server_cb);
 	} else  {
             res = NO_ERR;
             mscb = (mgr_scb_t *)scb->mgrcb;
             ncx_set_temp_modQ(&mscb->temp_modQ);
 
 	    /* check locks timeout */
-            if (!(agent_cb->command_mode == CMD_MODE_NORMAL ||
-                  agent_cb->command_mode == CMD_MODE_AUTOLOAD)) {
+            if (!(server_cb->command_mode == CMD_MODE_NORMAL ||
+                  server_cb->command_mode == CMD_MODE_AUTOLOAD)) {
 
-                if (check_locks_timeout(agent_cb)) {
+                if (check_locks_timeout(server_cb)) {
                     res = ERR_NCX_TIMEOUT;
 
                     if (runstack_level()) {
                         runstack_cancel();
                     }
 
-                    switch (agent_cb->command_mode) {
+                    switch (server_cb->command_mode) {
                     break;
                     case CMD_MODE_AUTODISCARD:
                     case CMD_MODE_AUTOLOCK:
-                        handle_locks_cleanup(agent_cb);
-                        if (agent_cb->command_mode != CMD_MODE_NORMAL) {
-                            return agent_cb->state;
+                        handle_locks_cleanup(server_cb);
+                        if (server_cb->command_mode != CMD_MODE_NORMAL) {
+                            return server_cb->state;
                         }
                         break;
                     case CMD_MODE_AUTOUNLOCK:
-                        clear_lock_cbs(agent_cb);
+                        clear_lock_cbs(server_cb);
                         break;
                     case CMD_MODE_AUTOLOAD:
                     case CMD_MODE_NORMAL:
                     default:
                         SET_ERROR(ERR_INTERNAL_VAL);
                     }
-                } else if (agent_cb->command_mode == CMD_MODE_AUTOLOCK) {
-                    if (agent_cb->locks_waiting) {
-                        agent_cb->command_mode = CMD_MODE_AUTOLOCK;
+                } else if (server_cb->command_mode == CMD_MODE_AUTOLOCK) {
+                    if (server_cb->locks_waiting) {
+                        server_cb->command_mode = CMD_MODE_AUTOLOCK;
                         done = FALSE;
-                        res = handle_get_locks_request_to_agent(agent_cb,
+                        res = handle_get_locks_request_to_server(server_cb,
                                                                 FALSE,
                                                                 &done);
                         if (done) {
                             /* check if the locks are all good */
-                            if (get_lock_worked(agent_cb)) {
+                            if (get_lock_worked(server_cb)) {
                                 log_info("\nget-locks finished OK");
-                                agent_cb->command_mode = CMD_MODE_NORMAL;
-                                agent_cb->locks_waiting = FALSE;
+                                server_cb->command_mode = CMD_MODE_NORMAL;
+                                server_cb->locks_waiting = FALSE;
                             } else {
                                 log_error("\nError: get-locks failed, "
                                           "starting cleanup");
-                                handle_locks_cleanup(agent_cb);
+                                handle_locks_cleanup(server_cb);
                             }
                         }
                     }
@@ -2682,43 +2682,43 @@ static mgr_io_state_t
 	break;
     case MGR_IO_ST_CONN_START:
 	/* waiting until <hello> processing complete */
-	scb = mgr_ses_get_scb(agent_cb->mysid);
+	scb = mgr_ses_get_scb(server_cb->mysid);
 	if (scb == NULL) {
 	    /* session startup failed */
-	    agent_cb->state = MGR_IO_ST_IDLE;
+	    server_cb->state = MGR_IO_ST_IDLE;
             if (batchmode) {
                 mgr_request_shutdown();
-                return agent_cb->state;
+                return server_cb->state;
             }
 	} else if (scb->state == SES_ST_IDLE 
 		   && dlq_empty(&scb->outQ)) {
 	    /* incoming hello OK and outgoing hello is sent */
-	    agent_cb->state = MGR_IO_ST_CONN_IDLE;
-	    report_capabilities(agent_cb, scb);
-	    check_module_capabilities(agent_cb, scb);
+	    server_cb->state = MGR_IO_ST_CONN_IDLE;
+	    report_capabilities(server_cb, scb);
+	    check_module_capabilities(server_cb, scb);
             mscb = (mgr_scb_t *)scb->mgrcb;
             ncx_set_temp_modQ(&mscb->temp_modQ);
 	} else {
 	    /* check timeout */
 	    if (message_timed_out(scb)) {
-		agent_cb->state = MGR_IO_ST_IDLE;
+		server_cb->state = MGR_IO_ST_IDLE;
                 if (batchmode) {
                     mgr_request_shutdown();
-                    return agent_cb->state;
+                    return server_cb->state;
                 }
 		break;
 	    } /* else still setting up session */
-	    return agent_cb->state;
+	    return server_cb->state;
 	}
 	break;
     case MGR_IO_ST_CONN_RPYWAIT:
 	/* check if session was dropped by remote peer */
-	scb = mgr_ses_get_scb(agent_cb->mysid);
+	scb = mgr_ses_get_scb(server_cb->mysid);
 	if (scb==NULL || scb->state == SES_ST_SHUTDOWN_REQ) {
 	    if (scb) {
-		(void)mgr_ses_free_session(agent_cb->mysid);
+		(void)mgr_ses_free_session(server_cb->mysid);
 	    }
-	    clear_agent_cb_session(agent_cb);
+	    clear_server_cb_session(server_cb);
 	} else  {
             res = NO_ERR;
             mscb = (mgr_scb_t *)scb->mgrcb;
@@ -2727,9 +2727,9 @@ static mgr_io_state_t
 	    /* check timeout */
 	    if (message_timed_out(scb)) {
                 res = ERR_NCX_TIMEOUT;
-            } else if (!(agent_cb->command_mode == CMD_MODE_NORMAL ||
-                         agent_cb->command_mode == CMD_MODE_AUTOLOAD)) {
-                if (check_locks_timeout(agent_cb)) {
+            } else if (!(server_cb->command_mode == CMD_MODE_NORMAL ||
+                         server_cb->command_mode == CMD_MODE_AUTOLOAD)) {
+                if (check_locks_timeout(server_cb)) {
                     res = ERR_NCX_TIMEOUT;
                 }
             }
@@ -2738,9 +2738,9 @@ static mgr_io_state_t
                 if (runstack_level()) {
                     runstack_cancel();
                 }
-		agent_cb->state = MGR_IO_ST_CONN_IDLE;
+		server_cb->state = MGR_IO_ST_CONN_IDLE;
 
-                switch (agent_cb->command_mode) {
+                switch (server_cb->command_mode) {
                 case CMD_MODE_NORMAL:
                     break;
                 case CMD_MODE_AUTOLOAD:
@@ -2748,26 +2748,26 @@ static mgr_io_state_t
                      * attempt to compile the modules
                      * that are already present
                      */
-                    autoload_compile_modules(agent_cb, scb);
+                    autoload_compile_modules(server_cb, scb);
                     break;
                 case CMD_MODE_AUTODISCARD:
-                    agent_cb->command_mode = CMD_MODE_AUTOLOCK;
+                    server_cb->command_mode = CMD_MODE_AUTOLOCK;
                     /* fall through */
                 case CMD_MODE_AUTOLOCK:
-                    handle_locks_cleanup(agent_cb);
-                    if (agent_cb->command_mode != CMD_MODE_NORMAL) {
-                        return agent_cb->state;
+                    handle_locks_cleanup(server_cb);
+                    if (server_cb->command_mode != CMD_MODE_NORMAL) {
+                        return server_cb->state;
                     }
                     break;
                 case CMD_MODE_AUTOUNLOCK:
-                    clear_lock_cbs(agent_cb);
+                    clear_lock_cbs(server_cb);
                     break;
                 default:
                     SET_ERROR(ERR_INTERNAL_VAL);
                 }
 	    } else {
                 /* keep waiting for reply */
-                return agent_cb->state;
+                return server_cb->state;
             }
 	}
 	break;
@@ -2777,47 +2777,47 @@ static mgr_io_state_t
     case MGR_IO_ST_CONN_SHUT:
     case MGR_IO_ST_CONN_CLOSEWAIT:
 	/* check timeout */
-	scb = mgr_ses_get_scb(agent_cb->mysid);
+	scb = mgr_ses_get_scb(server_cb->mysid);
 	if (scb==NULL || scb->state == SES_ST_SHUTDOWN_REQ) {
 	    if (scb) {
-		(void)mgr_ses_free_session(agent_cb->mysid);
+		(void)mgr_ses_free_session(server_cb->mysid);
 	    }
-	    clear_agent_cb_session(agent_cb);
+	    clear_server_cb_session(server_cb);
 	} else if (message_timed_out(scb)) {
-	    clear_agent_cb_session(agent_cb);
+	    clear_server_cb_session(server_cb);
 	}
 
 	/* do not accept chars in these states */
-	return agent_cb->state;
+	return server_cb->state;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
-	return agent_cb->state;
+	return server_cb->state;
     }
 
     /* check if some sort of auto-mode, and the
      * CLI is skipped until that mode is done
      */
-    if (agent_cb->command_mode != CMD_MODE_NORMAL) {
-        return agent_cb->state;
+    if (server_cb->command_mode != CMD_MODE_NORMAL) {
+        return server_cb->state;
     }
 
     /* check the run-script parameters */
     if (runscript) {
         if (!runscriptdone) {
             runscriptdone = TRUE;
-            (void)do_startup_script(agent_cb, runscript);
+            (void)do_startup_script(server_cb, runscript);
         }
     } else if (runcommand) {
         if (!runcommanddone) {
             runcommanddone = TRUE;
-            (void)do_startup_command(agent_cb, runcommand);
+            (void)do_startup_command(server_cb, runcommand);
         }
     }
 
     /* check batch-mode corner-case, nothing else to do */
     if (batchmode) {
 	mgr_request_shutdown();
-	return agent_cb->state;
+	return server_cb->state;
     }
 
     /* get a line of user input */
@@ -2828,18 +2828,18 @@ static mgr_io_state_t
 	    if (batchmode) {
 		mgr_request_shutdown();
 	    }
-	    return agent_cb->state;
+	    return server_cb->state;
 	}
     } else {
 	/* block until user enters some input */
-	line = get_cmd_line(agent_cb, &res);
+	line = get_cmd_line(server_cb, &res);
 	if (line==NULL) {
-	    return agent_cb->state;
+	    return server_cb->state;
 	}
     }
 
     /* check if this is an assignment statement */
-    res = check_assign_statement(agent_cb, 
+    res = check_assign_statement(server_cb, 
 				 line, 
 				 &len, 
 				 &getrpc,
@@ -2849,14 +2849,14 @@ static mgr_io_state_t
 		  line, 
                   get_error_string(res));
     } else if (getrpc) {
-	switch (agent_cb->state) {
+	switch (server_cb->state) {
 	case MGR_IO_ST_IDLE:
 	    /* waiting for top-level commands */
-	    res = top_command(agent_cb, &line[len]);
+	    res = top_command(server_cb, &line[len]);
 	    break;
 	case MGR_IO_ST_CONN_IDLE:
 	    /* waiting for session commands */
-	    res = conn_command(agent_cb, &line[len]);
+	    res = conn_command(server_cb, &line[len]);
 	    break;
 	case MGR_IO_ST_CONN_RPYWAIT:
 	    /* waiting for RPC reply while more input typed */
@@ -2867,22 +2867,22 @@ static mgr_io_state_t
 	    break;
 	}
 
-	switch (agent_cb->state) {
+	switch (server_cb->state) {
 	case MGR_IO_ST_IDLE:
 	case MGR_IO_ST_CONN_IDLE:
 	    /* check assignment statement active */
-	    if (agent_cb->result_name || 
-		agent_cb->result_filename) {
+	    if (server_cb->result_name || 
+		server_cb->result_filename) {
 		/* save the filled in value */
 		resultstr = (res == NO_ERR) ? 
 		    (const xmlChar *)"ok" :
 		    (const xmlChar *)get_error_string(res);
 
-		res = finish_result_assign(agent_cb, 
+		res = finish_result_assign(server_cb, 
 					   NULL,
 					   resultstr);
 	    } else {
-		clear_result(agent_cb);
+		clear_result(server_cb);
 	    }
 	    break;
 	default:
@@ -2892,7 +2892,7 @@ static mgr_io_state_t
 	log_info("\nOK\n");
     }
     
-    return agent_cb->state;
+    return server_cb->state;
 
 } /* yangcli_stdin_handler */
 
@@ -2918,7 +2918,7 @@ static void
 				  mgr_not_msg_t *msg,
                                   boolean *consumed)
 {
-    agent_cb_t   *agent_cb;
+    server_cb_t   *server_cb;
     mgr_scb_t    *mgrcb;
     uint32        usesid;
 
@@ -2939,17 +2939,17 @@ static void
     }
 
     /***  TBD: multi-session support ***/
-    agent_cb = cur_agent_cb;
+    server_cb = cur_server_cb;
 
     /* check the contents of the reply */
     if (msg && msg->notification) {
 	if (LOGINFO) {
-	    gl_normal_io(agent_cb->cli_gl);
+	    gl_normal_io(server_cb->cli_gl);
 	    log_info("\n\nIncoming notification:");
             if (LOGDEBUG) {
                 val_dump_value_ex(msg->notification, 
                                   NCX_DEF_INDENT,
-                                  agent_cb->display_mode);
+                                  server_cb->display_mode);
             } else {
                 if (msg->eventType) {
                     log_info(" <%s>", msg->eventType->name);
@@ -2959,9 +2959,9 @@ static void
 	}
 
         /* Log the notification by removing it from the message
-         * and storing it in the agent notification log
+         * and storing it in the server notification log
          */
-        dlq_enque(msg, &agent_cb->notificationQ);
+        dlq_enque(msg, &server_cb->notificationQ);
         *consumed = TRUE;
     }
     
@@ -2985,7 +2985,7 @@ static status_t
 	      const char *argv[])
 {
     obj_template_t       *obj;
-    agent_cb_t           *agent_cb;
+    server_cb_t           *server_cb;
     val_value_t          *parm, *modval;
     status_t              res;
     log_debug_t           log_level;
@@ -3006,8 +3006,8 @@ static status_t
     dlq_createSQue(&savedevQ);
 
     /* init the module static vars */
-    dlq_createSQue(&agent_cbQ);
-    cur_agent_cb = NULL;
+    dlq_createSQue(&server_cbQ);
+    cur_server_cb = NULL;
     yangcli_mod = NULL;
     netconf_mod = NULL;
     mgr_cli_valset = NULL;
@@ -3112,7 +3112,7 @@ static status_t
 	return ERR_NCX_DEF_NOT_FOUND;
     }
 
-    /* treat the connect-to-agent parmset special
+    /* treat the connect-to-server parmset special
      * it is saved for auto-start plus restart parameters
      * Setup an empty parmset to hold the connect parameters
      */
@@ -3157,14 +3157,14 @@ static status_t
         return res;
     }
 
-    /* create a default agent control block */
-    agent_cb = new_agent_cb(YANGCLI_DEF_AGENT);
-    if (agent_cb==NULL) {
+    /* create a default server control block */
+    server_cb = new_server_cb(YANGCLI_DEF_SERVER);
+    if (server_cb==NULL) {
 	return ERR_INTERNAL_MEM;
     }
-    dlq_enque(agent_cb, &agent_cbQ);
+    dlq_enque(server_cb, &server_cbQ);
 
-    cur_agent_cb = agent_cb;
+    cur_server_cb = server_cb;
 
     /* set the CLI handler */
     mgr_io_set_stdin_handler(yangcli_stdin_handler);
@@ -3248,19 +3248,19 @@ static status_t
     do_startup_screen();    
 
     /* check to see if a session should be auto-started
-     * --> if the agent parameter is set a connect will
+     * --> if the server parameter is set a connect will
      * --> be attempted
      *
      * The yangcli_stdin_handler will call the finish_start_session
      * function when the user enters a line of keyboard text
      */
-    agent_cb->state = MGR_IO_ST_IDLE;
+    server_cb->state = MGR_IO_ST_IDLE;
     if (connect_valset) {
 	parm = val_find_child(connect_valset, 
                               YANGCLI_MOD, 
-                              YANGCLI_AGENT);
+                              YANGCLI_SERVER);
 	if (parm && parm->res == NO_ERR) {
-	    res = do_connect(agent_cb, NULL, NULL, 0, TRUE);
+	    res = do_connect(server_cb, NULL, NULL, 0, TRUE);
             if (res != NO_ERR) {
                 if (!batchmode) {
                     res = NO_ERR;
@@ -3283,7 +3283,7 @@ static status_t
 static void
     yangcli_cleanup (void)
 {
-    agent_cb_t  *agent_cb;
+    server_cb_t  *server_cb;
     modptr_t    *modptr;
 
     log_debug2("\nShutting down yangcli\n");
@@ -3293,21 +3293,21 @@ static void
 	free_modptr(modptr);
     }
 
-    /* Cleanup the Netconf Agent Library */
+    /* Cleanup the Netconf Server Library */
     mgr_cleanup();
 
     /* cleanup the NCX engine and registries */
     ncx_cleanup();
 
     /* clean and reset all module static vars */
-    if (cur_agent_cb) {
-	cur_agent_cb->state = MGR_IO_ST_NONE;
-	cur_agent_cb->mysid = 0;
+    if (cur_server_cb) {
+	cur_server_cb->state = MGR_IO_ST_NONE;
+	cur_server_cb->mysid = 0;
     }
 
-    while (!dlq_empty(&agent_cbQ)) {
-	agent_cb = (agent_cb_t *)dlq_deque(&agent_cbQ);
-	free_agent_cb(agent_cb);
+    while (!dlq_empty(&server_cbQ)) {
+	server_cb = (server_cb_t *)dlq_deque(&server_cbQ);
+	free_server_cb(server_cb);
     }
 
     if (mgr_cli_valset) {
@@ -3607,7 +3607,7 @@ static rpc_err_t
  * INPUTS:
  *   scb == session receiving RPC reply
  *   req == original request returned for freeing or reusing
- *   rpy == reply received from the agent (for checking then freeing)
+ *   rpy == reply received from the server (for checking then freeing)
  *
  * RETURNS:
  *   none
@@ -3617,7 +3617,7 @@ void
 			   mgr_rpc_req_t *req,
 			   mgr_rpc_rpy_t *rpy)
 {
-    agent_cb_t   *agent_cb;
+    server_cb_t   *server_cb;
     val_value_t  *val;
     mgr_scb_t    *mgrcb;
     lock_cb_t    *lockcb;
@@ -3644,7 +3644,7 @@ void
     }
 
     /***  TBD: multi-session support ***/
-    agent_cb = cur_agent_cb;
+    server_cb = cur_server_cb;
 
     anyout = FALSE;
     anyerrors = FALSE;
@@ -3654,26 +3654,26 @@ void
         if (val_find_child(rpy->reply, 
                            NC_MODULE,
                            NCX_EL_RPC_ERROR)) {
-            if (agent_cb->command_mode == CMD_MODE_NORMAL || LOGDEBUG2) {
+            if (server_cb->command_mode == CMD_MODE_NORMAL || LOGDEBUG2) {
                 log_error("\nRPC Error Reply %s for session %u:\n",
                           rpy->msg_id, 
                           usesid);
                 val_dump_value_ex(rpy->reply, 
                                   0,
-                                  agent_cb->display_mode);
+                                  server_cb->display_mode);
                 log_error("\n");
                 anyout = TRUE;
             }
             anyerrors = TRUE;
         } else if (val_find_child(rpy->reply, NC_MODULE, NCX_EL_OK)) {
-            if (agent_cb->command_mode == CMD_MODE_NORMAL || LOGDEBUG2) {
+            if (server_cb->command_mode == CMD_MODE_NORMAL || LOGDEBUG2) {
                 log_info("\nRPC OK Reply %s for session %u:\n",
                          rpy->msg_id, 
                          usesid);
                 anyout = TRUE;
             }
-        } else if ((agent_cb->command_mode == CMD_MODE_NORMAL && LOGINFO) ||
-                   (agent_cb->command_mode != CMD_MODE_NORMAL && LOGDEBUG2)) {
+        } else if ((server_cb->command_mode == CMD_MODE_NORMAL && LOGINFO) ||
+                   (server_cb->command_mode != CMD_MODE_NORMAL && LOGDEBUG2)) {
 
             log_info("\nRPC Data Reply %s for session %u:\n",
                      rpy->msg_id, 
@@ -3681,7 +3681,7 @@ void
             if (LOGDEBUG) {
                 val_dump_value_ex(rpy->reply, 
                                   0,
-                                  agent_cb->display_mode);
+                                  server_cb->display_mode);
                 log_info("\n");
 	    }
 	    anyout = TRUE;
@@ -3691,7 +3691,7 @@ void
 	 * TBD: use a CLI switch to control whether
 	 * to save if <rpc-errors> received
 	 */
-	if (agent_cb->result_name || agent_cb->result_filename) {
+	if (server_cb->result_name || server_cb->result_filename) {
 	    /* save the data element if it exists */
 	    val = val_first_child_name(rpy->reply, NCX_EL_DATA);
 	    if (val) {
@@ -3711,10 +3711,10 @@ void
 	    }
 
 	    /* hand off the malloced 'val' node here */
-	    res = finish_result_assign(agent_cb, val, NULL);
+	    res = finish_result_assign(server_cb, val, NULL);
 	}  else if (!anyout && 
                     !anyerrors && 
-                    agent_cb->command_mode == CMD_MODE_NORMAL &&
+                    server_cb->command_mode == CMD_MODE_NORMAL &&
                     interactive_mode()) {
 	    log_stdout("\nOK\n");
 	}
@@ -3734,35 +3734,35 @@ void
         rpcerrtyp = RPC_ERR_OPERATION_FAILED;
     }
 
-    switch (agent_cb->state) {
+    switch (server_cb->state) {
     case MGR_IO_ST_CONN_CLOSEWAIT:
         if (mgrcb->closed) {
-            mgr_ses_free_session(agent_cb->mysid);
-            agent_cb->mysid = 0;
-            agent_cb->state = MGR_IO_ST_IDLE;
+            mgr_ses_free_session(server_cb->mysid);
+            server_cb->mysid = 0;
+            server_cb->state = MGR_IO_ST_IDLE;
         } /* else keep waiting */
         break;
     case MGR_IO_ST_CONN_RPYWAIT:
-        agent_cb->state = MGR_IO_ST_CONN_IDLE;
-        switch (agent_cb->command_mode) {
+        server_cb->state = MGR_IO_ST_CONN_IDLE;
+        switch (server_cb->command_mode) {
         case CMD_MODE_NORMAL:
             break;
         case CMD_MODE_AUTOLOAD:
-            res = autoload_handle_rpc_reply(agent_cb,
+            res = autoload_handle_rpc_reply(server_cb,
                                             scb,
                                             rpy->reply,
                                             anyerrors);
             break;
         case CMD_MODE_AUTOLOCK:
             done = FALSE;
-            lockcb = &agent_cb->lock_cb[agent_cb->locks_cur_cfg];
+            lockcb = &server_cb->lock_cb[server_cb->locks_cur_cfg];
             if (anyerrors) {
                 if (rpcerrtyp == RPC_ERR_LOCK_DENIED) {
                     lockcb->lock_state = LOCK_STATE_TEMP_ERROR;
                 } else if (lockcb->config_id == NCX_CFGID_CANDIDATE) {
-                    res = send_discard_changes_pdu_to_agent(agent_cb);
+                    res = send_discard_changes_pdu_to_server(server_cb);
                     if (res != NO_ERR) {
-                        handle_locks_cleanup(agent_cb);
+                        handle_locks_cleanup(server_cb);
                     }
                     done = TRUE;
                 } else {
@@ -3774,19 +3774,19 @@ void
             }
 
             if (!done) {
-                res = handle_get_locks_request_to_agent(agent_cb,
+                res = handle_get_locks_request_to_server(server_cb,
                                                         FALSE,
                                                         &done);
                 if (done) {
                     /* check if the locks are all good */
-                    if (get_lock_worked(agent_cb)) {
+                    if (get_lock_worked(server_cb)) {
                         log_info("\nget-locks finished OK");
-                        agent_cb->command_mode = CMD_MODE_NORMAL;
-                        agent_cb->locks_waiting = FALSE;
+                        server_cb->command_mode = CMD_MODE_NORMAL;
+                        server_cb->locks_waiting = FALSE;
                     } else {
                         log_error("\nError: get-locks failed, "
                                   "starting cleanup");
-                        handle_locks_cleanup(agent_cb);
+                        handle_locks_cleanup(server_cb);
                     }
                 } else if (res != NO_ERR) {
                     log_error("\nError: get-locks failed, no cleanup");
@@ -3794,39 +3794,39 @@ void
             }
             break;
         case CMD_MODE_AUTOUNLOCK:
-            lockcb = &agent_cb->lock_cb[agent_cb->locks_cur_cfg];
+            lockcb = &server_cb->lock_cb[server_cb->locks_cur_cfg];
             if (anyerrors) {
                 lockcb->lock_state = LOCK_STATE_FATAL_ERROR;
             } else {
                 lockcb->lock_state = LOCK_STATE_RELEASED;
             }
 
-            res = handle_release_locks_request_to_agent(agent_cb,
+            res = handle_release_locks_request_to_server(server_cb,
                                                         FALSE,
                                                         &done);
             if (done) {
-                clear_lock_cbs(agent_cb);
+                clear_lock_cbs(server_cb);
             }
             break;
         case CMD_MODE_AUTODISCARD:
-            lockcb = &agent_cb->lock_cb[agent_cb->locks_cur_cfg];
-            agent_cb->command_mode = CMD_MODE_AUTOLOCK;
+            lockcb = &server_cb->lock_cb[server_cb->locks_cur_cfg];
+            server_cb->command_mode = CMD_MODE_AUTOLOCK;
             if (anyerrors) {
-                handle_locks_cleanup(agent_cb);
+                handle_locks_cleanup(server_cb);
             } else {
-                res = handle_get_locks_request_to_agent(agent_cb,
+                res = handle_get_locks_request_to_server(server_cb,
                                                         FALSE,
                                                         &done);
                 if (done) {
                     /* check if the locks are all good */
-                    if (get_lock_worked(agent_cb)) {
+                    if (get_lock_worked(server_cb)) {
                         log_info("\nget-locks finished OK");
-                        agent_cb->command_mode = CMD_MODE_NORMAL;
-                        agent_cb->locks_waiting = FALSE;
+                        server_cb->command_mode = CMD_MODE_NORMAL;
+                        server_cb->locks_waiting = FALSE;
                     } else {
                         log_error("\nError: get-locks failed, "
                                   "starting cleanup");
-                        handle_locks_cleanup(agent_cb);
+                        handle_locks_cleanup(server_cb);
                     }
                 } else if (res != NO_ERR) {
                     log_error("\nError: get-locks failed, no cleanup");
@@ -3859,13 +3859,13 @@ void
  *    resultstr == result to output as string
  *
  * INPUTS:
- *   agent_cb == agent control block to use
+ *   server_cb == server control block to use
  *
  * RETURNS:
  *   status
  *********************************************************************/
 status_t
-    finish_result_assign (agent_cb_t *agent_cb,
+    finish_result_assign (server_cb_t *server_cb,
 			  val_value_t *resultvar,
 			  const xmlChar *resultstr)
 {
@@ -3873,26 +3873,26 @@ status_t
     status_t       res;
 
 #ifdef DEBUG
-    if (!agent_cb) {
+    if (!server_cb) {
 	return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     res = NO_ERR;
 
-    if (agent_cb->result_filename) {
-	res = output_file_result(agent_cb, resultvar, resultstr);
+    if (server_cb->result_filename) {
+	res = output_file_result(server_cb, resultvar, resultstr);
 	if (resultvar) {
 	    val_free_value(resultvar);
 	}
-    } else if (agent_cb->result_name) {
-	if (agent_cb->result_vartype == VAR_TYP_CONFIG) {
-	    configvar = var_get(agent_cb->result_name,
+    } else if (server_cb->result_name) {
+	if (server_cb->result_vartype == VAR_TYP_CONFIG) {
+	    configvar = var_get(server_cb->result_name,
 				VAR_TYP_CONFIG);
 	    if (configvar==NULL) {
 		res = SET_ERROR(ERR_INTERNAL_VAL);
 	    } else {
-		res = handle_config_assign(agent_cb,
+		res = handle_config_assign(server_cb,
 					   configvar,
 					   resultvar,
 					   resultstr);
@@ -3904,26 +3904,26 @@ status_t
 	    /* save the filled in value
 	     * hand off the malloced 'resultvar' here
 	     */
-	    res = var_set_move(agent_cb->result_name, 
-			       xml_strlen(agent_cb->result_name),
-			       agent_cb->result_vartype,
+	    res = var_set_move(server_cb->result_name, 
+			       xml_strlen(server_cb->result_name),
+			       server_cb->result_vartype,
 			       resultvar);
 	    if (res != NO_ERR) {
 		val_free_value(resultvar);
 		log_error("\nError: set result for '%s' failed (%s)",
-			  agent_cb->result_name, 
+			  server_cb->result_name, 
 			  get_error_string(res));
 	    } else {
 		log_info("\nOK\n");
 	    }
 	} else {
 	    /* this is just a string assignment */
-	    res = var_set_from_string(agent_cb->result_name,
+	    res = var_set_from_string(server_cb->result_name,
 				      resultstr, 
-				      agent_cb->result_vartype);
+				      server_cb->result_vartype);
 	    if (res != NO_ERR) {
 		log_error("\nyangcli: Error setting variable %s (%s)",
-			  agent_cb->result_name, 
+			  server_cb->result_name, 
 			  get_error_string(res));
 	    } else {
 		log_info("\nOK\n");
@@ -3931,7 +3931,7 @@ status_t
 	}
     }
 
-    clear_result(agent_cb);
+    clear_result(server_cb);
 
     return res;
 

@@ -123,13 +123,13 @@ date         init     comment
 
 
 /********************************************************************
-* FUNCTION send_copy_config_to_agent
+* FUNCTION send_copy_config_to_server
 * 
-* Send a <copy-config> operation to the agent to support
+* Send a <copy-config> operation to the server to support
 * the save operation
 *
 * INPUTS:
-*    agent_cb == agent control block to use
+*    server_cb == server control block to use
 *
 * OUTPUTS:
 *    state may be changed or other action taken
@@ -139,7 +139,7 @@ date         init     comment
 *    status
 *********************************************************************/
 static status_t
-    send_copy_config_to_agent (agent_cb_t *agent_cb)
+    send_copy_config_to_server (server_cb_t *server_cb)
 {
     obj_template_t        *rpc, *input, *child;
     mgr_rpc_req_t         *req;
@@ -210,7 +210,7 @@ static status_t
     val_add_child(source, parm);
 
     /* allocate an RPC request and send it */
-    scb = mgr_ses_get_scb(agent_cb->mysid);
+    scb = mgr_ses_get_scb(server_cb->mysid);
     if (!scb) {
 	res = SET_ERROR(ERR_INTERNAL_PTR);
     } else {
@@ -221,7 +221,7 @@ static status_t
 	} else {
 	    req->data = reqdata;
 	    req->rpc = rpc;
-	    req->timeout = agent_cb->timeout;
+	    req->timeout = server_cb->timeout;
 	}
     }
 	
@@ -230,7 +230,7 @@ static status_t
 	    log_debug2("\nabout to send RPC request with reqdata:");
 	    val_dump_value_ex(reqdata, 
                               NCX_DEF_INDENT,
-                              agent_cb->display_mode);
+                              server_cb->display_mode);
 	}
 
 	/* the request will be stored if this returns NO_ERR */
@@ -244,28 +244,28 @@ static status_t
 	    val_free_value(reqdata);
 	}
     } else {
-	agent_cb->state = MGR_IO_ST_CONN_RPYWAIT;
+	server_cb->state = MGR_IO_ST_CONN_RPYWAIT;
     }
 
     return res;
 
-} /* send_copy_config_to_agent */
+} /* send_copy_config_to_server */
 
 
 /********************************************************************
  * FUNCTION do_save
  * 
  * INPUTS:
- *    agent_cb == agent control block to use
+ *    server_cb == server control block to use
  *
  * OUTPUTS:
- *   copy-config and/or commit operation will be sent to agent
+ *   copy-config and/or commit operation will be sent to server
  *
  * RETURNS:
  *   status
  *********************************************************************/
 status_t
-    do_save (agent_cb_t *agent_cb)
+    do_save (server_cb_t *server_cb)
 {
     const ses_cb_t   *scb;
     const mgr_scb_t  *mscb;
@@ -275,7 +275,7 @@ status_t
     res = NO_ERR;
 
     /* get the session info */
-    scb = mgr_ses_get_scb(agent_cb->mysid);
+    scb = mgr_ses_get_scb(server_cb->mysid);
     if (!scb) {
 	return SET_ERROR(ERR_INTERNAL_VAL);
     }
@@ -286,13 +286,13 @@ status_t
     /* determine which commands to send */
     switch (mscb->targtyp) {
     case NCX_AGT_TARG_NONE:
-	log_stdout("\nWarning: No writable targets supported on this agent");
+	log_stdout("\nWarning: No writable targets supported on this server");
 	break;
     case NCX_AGT_TARG_CANDIDATE:
     case NCX_AGT_TARG_CAND_RUNNING:
 	line = xml_strdup(NCX_EL_COMMIT);
 	if (line) {
-	    res = conn_command(agent_cb, line);
+	    res = conn_command(server_cb, line);
 #ifdef NOT_YET
 	    if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
 		log_stdout(" + copy-config <running> <startup>");
@@ -305,14 +305,14 @@ status_t
 	break;
     case NCX_AGT_TARG_RUNNING:
 	if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
-	    res = send_copy_config_to_agent(agent_cb);
+	    res = send_copy_config_to_server(server_cb);
 	    if (res != NO_ERR) {
 		log_stdout("\nError: send copy-config failed (%s)",
 			   get_error_string(res));
 	    }
 	} else {
 	    log_stdout("\nWarning: No distinct save operation needed "
-		       "for this agent");
+		       "for this server");
 	}
 	break;
     case NCX_AGT_TARG_LOCAL:

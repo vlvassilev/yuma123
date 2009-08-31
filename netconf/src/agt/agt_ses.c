@@ -224,15 +224,25 @@ static status_t
                            rpc_msg_t *msg,
                            xml_node_t *methnode)
 {
-    val_value_t     *linesizeval, *withdefval;
+    val_value_t     *indentval, *linesizeval, *withdefval;
     xmlChar          numbuff[NCX_MAX_NUMLEN];
 
     (void)methnode;
+
+    sprintf((char *)numbuff, "%u", scb->indent);
+    indentval = val_make_string(mysesmod->nsid,
+                                NCX_EL_INDENT,
+                                numbuff);
+    if (indentval == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+
     sprintf((char *)numbuff, "%u", scb->linesize);
     linesizeval = val_make_string(mysesmod->nsid,
                                   NCX_EL_LINESIZE,
                                   numbuff);
     if (linesizeval == NULL) {
+        val_free_value(indentval);
         return ERR_INTERNAL_MEM;
     }
 
@@ -241,10 +251,12 @@ static status_t
                         NCX_EL_WITH_DEFAULTS,
                         ncx_get_withdefaults_string(scb->withdef));
     if (withdefval == NULL) {
+        val_free_value(indentval);
         val_free_value(linesizeval);
         return ERR_INTERNAL_MEM;
     }
 
+    dlq_enque(indentval, &msg->rpc_dataQ);
     dlq_enque(linesizeval, &msg->rpc_dataQ);
     dlq_enque(withdefval, &msg->rpc_dataQ);
     msg->rpc_data_type = RPC_DATA_YANG;
@@ -268,11 +280,19 @@ static status_t
                            rpc_msg_t *msg,
                            xml_node_t *methnode)
 {
-    val_value_t     *linesizeval, *withdefval;
+    val_value_t     *indentval, *linesizeval, *withdefval;
 
     (void)methnode;
 
-    /* get the identifier parameter */
+    /* get the indent amount parameter */
+    indentval = val_find_child(msg->rpc_input, 
+                               AGT_SES_MODULE,
+                               NCX_EL_INDENT);
+    if (indentval && indentval->res == NO_ERR) {
+        scb->indent = VAL_UINT(indentval);
+    }
+
+    /* get the line sizer parameter */
     linesizeval = val_find_child(msg->rpc_input, 
                                  AGT_SES_MODULE,
                                  NCX_EL_LINESIZE);

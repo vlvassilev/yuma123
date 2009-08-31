@@ -97,7 +97,6 @@
       <t:test3deep>
          <t:yy>139</t:yy>
          <t:y>this is a string</t:y>
-         <t:bb>139</t:bb>
          <t:deepy>
             <t:yy3>fred</t:yy3>
             <t:yy2>1123400005</t:yy2>
@@ -109,32 +108,4 @@
       <t:c2>-6</t:c2>
       <t:c2>-1</t:c2>
    </t:test3>
-   <t:bits.1 xmlns:t="http://netconfcentral.com/ns/test">two ten</t:bits.1>
-   <t:xpath.1 xmlns:t="http://netconfcentral.com/ns/test">
-      <t:name>barney</t:name>
-      <t:name2>freddy</t:name2>
-      <t:data1>44</t:data1>
-      <t:data3>rrr</t:data3>
-   </t:xpath.1>
-   <t:string.1 xmlns:t="http://netconfcentral.com/ns/test">freddy</t:string.1>
-   <t:int32.1 xmlns:t="http://netconfcentral.com/ns/test">-42</t:int32.1>
-   <t:uint32.1 xmlns:t="http://netconfcentral.com/ns/test">4095</t:uint32.1>
-   <if:interfaces xmlns:if="http://netconfcentral.com/ns/interfaces">
-      <if:interface>
-         <if:name>lo</if:name>
-      </if:interface>
-      <if:interface>
-         <if:name>eth0</if:name>
-      </if:interface>
-      <if:interface>
-         <if:name>virbr0</if:name>
-      </if:interface>
-      <if:interface>
-         <if:name>pan0</if:name>
-      </if:interface>
-   </if:interfaces>
-   <t:uint8.1 xmlns:t="http://netconfcentral.com/ns/test">44</t:uint8.1>
-   <t:uint16.1 xmlns:t="http://netconfcentral.com/ns/test">7</t:uint16.1>
-   <t:int8.1 xmlns:t="http://netconfcentral.com/ns/test">2</t:int8.1>
-   <t:leafref.3 xmlns:t="http://netconfcentral.com/ns/test">tina</t:leafref.3>
-</nc:config>
+   <t:bits.1 xmlns:t="http://

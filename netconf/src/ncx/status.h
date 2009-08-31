@@ -340,7 +340,8 @@ typedef enum status_t_
     ERR_NCX_CONF_PARM_EXISTS,           /* 445 */
     ERR_NCX_NO_REVISION,                /* 446 */
     ERR_NCX_DEPENDENCY_ERRORS,          /* 447 */
-    ERR_LAST_WARN,                      /* 447 -- not really used */
+    ERR_NCX_TOP_LEVEL_MANDATORY,        /* 448 */
+    ERR_LAST_WARN,                      /* 448 -- not really used */
 
     /* system info return codes start at 900 */
     ERR_PARS_SECDONE=ERR_INFO_BASE,     /* 900 */

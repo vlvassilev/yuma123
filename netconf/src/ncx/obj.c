@@ -4911,6 +4911,8 @@ obj_template_t *
                   srcobj->tkerr.linepos);
     newobj->flags = (srcobj->flags | OBJ_FL_CLONE);
 
+    /* newobj->grp = srcobj->grp; */
+
     mobj = NULL;
     if (mobjQ) {
 	for (testobj = (obj_template_t *)dlq_firstEntry(mobjQ);
@@ -5272,7 +5274,6 @@ void
     m__free(unc);
 
 }  /* obj_free_unique_comp */
-
 
 
 /********************************************************************

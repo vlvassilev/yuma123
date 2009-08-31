@@ -714,6 +714,8 @@ const char *
         return "no valid revision statements found";
     case ERR_NCX_DEPENDENCY_ERRORS:
         return "dependency file has errors";
+    case ERR_NCX_TOP_LEVEL_MANDATORY:
+        return "top-level object is mandatory";
 
     /* system info codes start at 500 */
     case ERR_PARS_SECDONE:

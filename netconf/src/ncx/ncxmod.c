@@ -3116,7 +3116,7 @@ status_t
 #endif
 
     if (strlen(startspec) >= NCXMOD_MAX_FSPEC_LEN) {
-	log_error("\nError: startspec too long '%s'", startspec);
+	log_error("\nError: startspec too long '%s'\n", startspec);
 	return ERR_BUFF_OVFL;
     }
 
@@ -3128,7 +3128,7 @@ status_t
 
     dp = opendir((const char *)sourcespec);
     if (!dp) {
-	log_error("\nError: invalid pathspec '%s'", startspec);
+	log_error("\nError: invalid pathspec '%s'\n", startspec);
         m__free(sourcespec);
 	return ERR_NCX_INVALID_VALUE;
     } else {

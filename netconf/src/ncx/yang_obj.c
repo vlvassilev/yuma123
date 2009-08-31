@@ -212,36 +212,44 @@ date         init     comment
  * continues in order to validate as much of the input
  * module as possible
  */
-#define CHK_OBJ_EXIT(obj, res, retres)			  \
-    if (res != NO_ERR) {				  \
-	if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) { \
-	    obj_free_template(obj);			  \
-	    return res;					  \
-	} else {					  \
-	    retres = res;				  \
-	}						  \
+#define CHK_OBJ_EXIT(obj, res, retres)\
+    if (res != NO_ERR) {\
+	if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) {\
+	    obj_free_template(obj);\
+	    return res;\
+	} else {\
+	    retres = res;\
+	}\
     }
 
 
-#define CHK_DEV_EXIT(dev, res, retres)			  \
-    if (res != NO_ERR) {				  \
-	if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) { \
-	    obj_free_deviation(dev);			  \
-	    return res;					  \
-	} else {					  \
-	    retres = res;				  \
-	}						  \
+#define CHK_DEV_EXIT(dev, res, retres)\
+    if (res != NO_ERR) {\
+	if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) {\
+	    obj_free_deviation(dev);\
+	    return res;\
+	} else {\
+	    retres = res;\
+	}\
     }
 
 
-#define CHK_DEVI_EXIT(devi, res, retres)		  \
-    if (res != NO_ERR) {				  \
-	if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) { \
-	    obj_free_deviate(devi);			  \
-	    return res;					  \
-	} else {					  \
-	    retres = res;				  \
-	}						  \
+#define CHK_DEVI_EXIT(devi, res, retres)\
+    if (res != NO_ERR) {\
+	if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) {\
+	    obj_free_deviate(devi);\
+	    return res;\
+	} else {\
+	    retres = res;\
+	}\
+    }
+
+
+#define SET_OBJ_CURERR(tkc, obj)                 \
+    if (obj->usesobj) {\
+         tkc->curerr = &obj->usesobj->tkerr;\
+    } else {\
+        tkc->curerr = &obj->tkerr;\
     }
 
 
@@ -2114,7 +2122,7 @@ static status_t
 	 * with any sibling nodes of the choice itself
 	 */
 	for (casobj = (obj_template_t *)dlq_firstEntry(choic->caseQ);
-	     casobj != NULL && res==NO_ERR;
+	     casobj != NULL;
 	     casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
 
 	    testcas = casobj->def.cas;
@@ -2136,6 +2144,7 @@ static status_t
 		    log_error("\nError: object name '%s' in case '%s'"
 			      " already used in sibling node, on line %u", 
 			      namestr, 
+                              obj_get_name(casobj),
                               test2obj->tkerr.linenum);
 		    ncx_print_errormsg(tkc, mod, retres);
 		} 
@@ -4882,7 +4891,7 @@ static status_t
                              ncx_get_status_string(stat),
                              obj_get_name(obj->parent),
                              ncx_get_status_string(parentstat));
-                    tkc->curerr = &obj->tkerr;
+                    SET_OBJ_CURERR(tkc, obj);
                     ncx_print_errormsg(tkc, mod, ERR_NCX_INVALID_STATUS);
                 }
             }
@@ -4899,14 +4908,14 @@ static status_t
 			      "but parent node '%s' is not",
 			      obj_get_name(obj),
 			      obj_get_name(obj->parent));
-		    tkc->curerr = &obj->tkerr;
+                    SET_OBJ_CURERR(tkc, obj);
 		    res = ERR_NCX_INVALID_VALUE;
 		    ncx_print_errormsg(tkc, mod, res);
 		} else {
 		    log_info("\nInfo: Non-data node '%s' "
 			     "is marked as configuration : statement ignored",
 			     obj_get_name(obj));
-		    tkc->curerr = &obj->tkerr;
+                    SET_OBJ_CURERR(tkc, obj);
 		    res = ERR_NCX_STMT_IGNORED;
 		    ncx_print_errormsg(tkc, mod, res);
 		}
@@ -5327,6 +5336,55 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION resolve_container_final
+* 
+* Check the final container placement for any mandatory
+* top-level NP containers
+
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   obj == container object to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_container_final (tk_chain_t *tkc,
+                             ncx_module_t  *mod,
+                             obj_template_t *obj)
+{
+
+    status_t res;
+
+    res = NO_ERR;
+
+    if ((obj->def.container->presence == NULL) &&
+        obj_get_config_flag(obj) &&
+        ((obj->parent != NULL && obj_is_root(obj->parent)) ||
+         (obj->parent == NULL && obj->grp == NULL)) &&
+        obj_is_mandatory(obj)) {
+        
+        if (ncx_warning_enabled(ERR_NCX_TOP_LEVEL_MANDATORY)) {
+            log_warn("\nWarning: top-level NP container "
+                     "'%s' is mandatory",
+                     obj_get_name(obj));
+            res = ERR_NCX_TOP_LEVEL_MANDATORY;
+            SET_OBJ_CURERR(tkc, obj);
+            ncx_print_errormsg(tkc, mod, res);
+            res = NO_ERR;
+        }
+    }
+
+    return res;
+				    
+}  /* resolve_container_final */
+
+
+/********************************************************************
 * FUNCTION resolve_leaf
 * 
 * Check the leaf object type
@@ -5377,12 +5435,15 @@ static status_t
 
     finish_config_flag(obj);
 
-    if ((obj->flags & OBJ_FL_MANDATORY) && leaf->defval) {
-	log_error("\nError: both mandatory and default statements present"
-		  "'%s'", obj_get_name(obj));
-	retres = ERR_NCX_INVALID_VALUE;
-	tkc->curerr = &obj->tkerr;
-	ncx_print_errormsg(tkc, mod, retres);
+    if (obj->flags & OBJ_FL_MANDATORY) {
+        if (leaf->defval) {
+            log_error("\nError: both mandatory and default "
+                      "statements present"
+                      "'%s'", obj_get_name(obj));
+            retres = ERR_NCX_INVALID_VALUE;
+            SET_OBJ_CURERR(tkc, obj);
+            ncx_print_errormsg(tkc, mod, retres);
+        }
     }
 
     res = check_parent(tkc, mod, obj);
@@ -5391,6 +5452,52 @@ static status_t
     return retres;
 				    
 }  /* resolve_leaf */
+
+
+/********************************************************************
+* FUNCTION resolve_leaf_final
+* 
+* Check the final leaf placements for any mandatory
+* top-level leafs
+
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   obj == leaf object to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_leaf_final (tk_chain_t *tkc,
+                        ncx_module_t  *mod,
+                        obj_template_t *obj)
+{
+    status_t res;
+
+    res = NO_ERR;
+
+    if ((obj->flags & OBJ_FL_MANDATORY) &&
+        obj_get_config_flag(obj) &&
+        ((obj->parent && obj_is_root(obj->parent)) || 
+         (obj->parent == NULL && obj->grp == NULL))) {
+
+        if (ncx_warning_enabled(ERR_NCX_TOP_LEVEL_MANDATORY)) {
+            log_warn("\nWarning: top-level leaf '%s' is mandatory",
+                     obj_get_name(obj));
+            res = ERR_NCX_TOP_LEVEL_MANDATORY;
+            SET_OBJ_CURERR(tkc, obj);
+            ncx_print_errormsg(tkc, mod, res);
+            res = NO_ERR;
+        }
+    }
+
+    return res;
+				    
+}  /* resolve_leaf_final */
 
 
 /********************************************************************
@@ -5459,7 +5566,7 @@ static status_t
 	    log_error("\nError: leaf-list '%s' min-elements > max-elements",
 		      obj_get_name(obj));
 	    retres = ERR_NCX_INVALID_VALUE;
-	    tkc->curerr = &obj->tkerr;
+            SET_OBJ_CURERR(tkc, obj);
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
     }
@@ -5542,7 +5649,7 @@ static status_t
 	    log_error("\nError: list '%s' min-elements > max-elements",
 		      obj_get_name(obj));
 	    retres = ERR_NCX_INVALID_VALUE;
-	    tkc->curerr = &obj->tkerr;
+            SET_OBJ_CURERR(tkc, obj);
 	    ncx_print_errormsg(tkc, mod, retres);
 	}
     }
@@ -6120,7 +6227,7 @@ static status_t
 		  "'%s'", 
                   obj_get_name(obj));
 	retres = ERR_NCX_INVALID_VALUE;
-	tkc->curerr = &obj->tkerr;
+        SET_OBJ_CURERR(tkc, obj);
 	ncx_print_errormsg(tkc, mod, retres);
     }
 
@@ -6138,7 +6245,7 @@ static status_t
 			    choic->defval);
 	if (!cas) {
 	    /* default is not a valid case name */
-	    tkc->curerr = &obj->tkerr;
+            SET_OBJ_CURERR(tkc, obj);
 	    retres = ERR_NCX_INVALID_VALUE;
 	    log_error("\nError: Choice default '%s' "
 		      "not a valid case name", 
@@ -6163,6 +6270,52 @@ static status_t
     return retres;
 				    
 }  /* resolve_choice */
+
+
+/********************************************************************
+* FUNCTION resolve_choice_final
+* 
+* Check the final choice placement for any mandatory
+* top-level choices
+
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   obj == choice object to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_choice_final (tk_chain_t *tkc,
+                          ncx_module_t  *mod,
+                          obj_template_t *obj)
+{
+    status_t res;
+
+    res = NO_ERR;
+
+    if ((obj->flags & OBJ_FL_MANDATORY) &&
+        obj_get_config_flag(obj) &&
+        ((obj->parent && obj_is_root(obj->parent)) ||
+         (obj->parent == NULL && obj->grp == NULL))) {
+
+        if (ncx_warning_enabled(ERR_NCX_TOP_LEVEL_MANDATORY)) {
+            log_warn("\nWarning: top-level choice '%s' is mandatory",
+                     obj_get_name(obj));
+            res = ERR_NCX_TOP_LEVEL_MANDATORY;
+            SET_OBJ_CURERR(tkc, obj);
+            ncx_print_errormsg(tkc, mod, res);
+            res = NO_ERR;
+        }
+    }
+
+    return res;
+				    
+}  /* resolve_choice_final */
 
 
 /********************************************************************
@@ -6600,7 +6753,7 @@ static status_t
 		log_error("\nError: grouping '%s' not found",
 			  uses->name);
 		retres = ERR_NCX_DEF_NOT_FOUND;
-		tkc->curerr = &obj->tkerr;
+                SET_OBJ_CURERR(tkc, obj);
 		ncx_print_errormsg(tkc, mod, retres);
 	    }
 	}
@@ -6974,7 +7127,7 @@ static status_t
 	log_error("\nError: absolute schema-nodeid form"
 		  " not allowed in nested augment statement");
 	retres = ERR_NCX_INVALID_VALUE;
-	tkc->curerr = &obj->tkerr;
+        SET_OBJ_CURERR(tkc, obj);
 	ncx_print_errormsg(tkc, mod, retres);
     }
 
@@ -6985,7 +7138,7 @@ static status_t
 	log_error("\nError: descendant schema-nodeid form"
 		  " not allowed in top-level augment statement");
 	retres = ERR_NCX_INVALID_AUGTARGET;
-	tkc->curerr = &obj->tkerr;
+        SET_OBJ_CURERR(tkc, obj);
 	ncx_print_errormsg(tkc, mod, retres);
     }
 
@@ -8373,19 +8526,22 @@ static status_t
                                    tkc,
                                    mod,
                                    que,
-                                   parent, grp);
+                                   parent, 
+                                   grp);
 	} else if (!xml_strcmp(val, YANG_K_LIST)) {
 	    res = consume_list(pcb,
                                tkc,
                                mod,
                                que,
-                               parent, grp);
+                               parent, 
+                               grp);
 	} else if (!xml_strcmp(val, YANG_K_CHOICE)) {
 	    res = consume_choice(pcb,
                                  tkc,
                                  mod,
                                  que,
-                                 parent, grp);
+                                 parent, 
+                                 grp);
 	} else if (!xml_strcmp(val, YANG_K_USES)) {
 	    res = consume_uses(pcb,
                                tkc, 
@@ -9887,6 +10043,9 @@ status_t
 	
 	switch (testobj->objtype) {
 	case OBJ_TYP_CONTAINER:
+            res = resolve_container_final(tkc, mod, testobj);
+            CHK_EXIT(res, retres);
+
 	    if (notclone) {
 		res = 
                     yang_grp_resolve_final(pcb,
@@ -9911,8 +10070,10 @@ status_t
 				    testobj->def.container->groupingQ);
 	    }
 	    break;
-        case OBJ_TYP_ANYXML:
 	case OBJ_TYP_LEAF:
+            res = resolve_leaf_final(tkc, mod, testobj);
+            break;
+        case OBJ_TYP_ANYXML:
 	case OBJ_TYP_LEAF_LIST:
 	    break;
 	case OBJ_TYP_LIST:
@@ -9944,6 +10105,9 @@ status_t
 				     testobj);
 	    break;
 	case OBJ_TYP_CHOICE:
+            res = resolve_choice_final(tkc, mod, testobj);
+            CHK_EXIT(res, retres);
+
 	    res = yang_obj_resolve_final(pcb,
                                          tkc, 
                                          mod, 

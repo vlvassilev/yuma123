@@ -3175,7 +3175,7 @@ static status_t
      * !!! This must be done before any object pointers such
      * !!! as leafref paths and must/when XPath expressions
      * !!! are cached.  The xpath_find_schema_target_int
-     * !!! fnction should be used instead of caching leafref
+     * !!! function should be used instead of caching leafref
      * !!! target object pointers
      */
     res = yang_obj_resolve_deviations(pcb, 

@@ -4203,6 +4203,7 @@ status_t
     val_value_t      *newval, *nextval, *matchval;
     agt_profile_t    *profile;
     status_t          res;
+    boolean           no_startup_errors;
 
 #ifdef DEBUG
     if (!scb || !msg || !source || !target) {
@@ -4211,10 +4212,52 @@ status_t
 #endif
 
     res = NO_ERR;
+    no_startup_errors = dlq_empty(&target->load_errQ);
+    profile = agt_get_profile();
 
-    /* only save if the source config was touched */
+    /* usually only save if the source config was touched */
     if (!cfg_get_dirty_flag(source)) {
-        return NO_ERR;
+        /* no need to merge the candidate into the running
+         * config because there are no changes in the candidate
+         */
+        if (profile->agt_has_startup) {
+            /* separate copy-config required to rewrite
+             * the startup config file
+             */
+            if (LOGDEBUG) {
+                log_debug("\nSkipping commit, candidate not dirty");
+            }
+        } else {
+            /* there is no distinct startup; need to mirror now;
+             * check if the running config had load errors
+             * so overwriting it even if the candidate is
+             * clean makes sense
+             */
+            if (no_startup_errors) {
+                if (LOGDEBUG) {
+                    log_debug("\nSkipping commit, candidate not dirty");
+                }
+            } else {
+                if (LOGINFO) {
+                    log_debug("\nSkipping commit, but saving running "
+                              "to NV-storage due to load errors");
+                }
+                res = agt_ncx_cfg_save(target, FALSE);
+                if (res != NO_ERR) {
+                    /* write to NV-store failed */
+                    agt_record_error(scb,
+                                     &msg->mhdr, 
+                                     NCX_LAYER_OPERATION, 
+                                     res, 
+                                     NULL, 
+                                     NCX_NT_CFG, 
+                                     target,
+                                     NCX_NT_NONE, 
+                                     NULL);
+                }
+            }
+        }
+        return res;
     }
 
     /* check if any config nodes have been deleted in the target */
@@ -4272,11 +4315,10 @@ status_t
     }  /* else there was no rollback, so APPLY is the final phase */
 
     if (res == NO_ERR) {
-        profile = agt_get_profile();
         if (!profile->agt_has_startup) {
             res = agt_ncx_cfg_save(target, FALSE);
             if (res != NO_ERR) {
-                /* config save failed */
+                /* write to NV-store failed */
                 agt_record_error(scb,
                                  &msg->mhdr, 
                                  NCX_LAYER_OPERATION, 

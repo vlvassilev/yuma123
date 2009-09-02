@@ -7568,7 +7568,7 @@ boolean
     case OBJ_TYP_LEAF:
 	if (obj_is_key(obj)) {
 	    return TRUE;
-	}
+	} 
 	/* else fall through */
     case OBJ_TYP_ANYXML:
     case OBJ_TYP_CHOICE:
@@ -7590,6 +7590,83 @@ boolean
     }
 
 }   /* obj_is_mandatory */
+
+
+/********************************************************************
+* FUNCTION obj_is_mandatory_when
+*
+* Figure out if the obj is YANG mandatory or not
+* Check the when-stmts, not just mandatory-stmt
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is mandatory
+*   FALSE if object is not mandatory
+*********************************************************************/
+boolean
+    obj_is_mandatory_when (obj_template_t *obj)
+{
+    obj_template_t *chobj;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+	if (obj->def.container->presence) {
+	    return FALSE;
+	}
+	/* else drop through and check children */
+    case OBJ_TYP_CASE:
+    case OBJ_TYP_RPCIO:
+	for (chobj = obj_first_child(obj);
+	     chobj != NULL;
+	     chobj = obj_next_child(chobj)) {
+	    if (obj_is_mandatory_when(chobj)) {
+		return TRUE;
+	    }
+	}
+	return FALSE;
+    case OBJ_TYP_LEAF:
+	if (obj_is_key(obj)) {
+	    return TRUE;
+	} 
+	/* else fall through */
+    case OBJ_TYP_ANYXML:
+    case OBJ_TYP_CHOICE:
+        if (obj_has_when_stmts(obj)) {
+            return FALSE;
+        }
+	return (obj->flags & OBJ_FL_MANDATORY) ? TRUE : FALSE;
+    case OBJ_TYP_LEAF_LIST:
+        if (obj_has_when_stmts(obj)) {
+            return FALSE;
+        }
+	return (obj->def.leaflist->minelems) ? TRUE : FALSE;
+    case OBJ_TYP_LIST:
+        if (obj_has_when_stmts(obj)) {
+            return FALSE;
+        }
+	return (obj->def.list->minelems) ? TRUE : FALSE;
+    case OBJ_TYP_USES:
+    case OBJ_TYP_AUGMENT:
+    case OBJ_TYP_REFINE:
+    case OBJ_TYP_RPC:
+    case OBJ_TYP_NOTIF:
+	return FALSE;
+    case OBJ_TYP_NONE:
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return FALSE;
+    }
+
+}   /* obj_is_mandatory_when */
 
 
 /********************************************************************
@@ -9428,6 +9505,39 @@ boolean
     return TRUE;
 
 }  /* obj_is_single_instance */
+
+
+/********************************************************************
+ * FUNCTION obj_has_when_stmts
+ * 
+ * Check if any when-stmts apply to this object
+ * Does not check if they are true, just any when-stmts present
+ *
+ * INPUTS:
+ *    obj == object template to check
+ *********************************************************************/
+boolean
+    obj_has_when_stmts (obj_template_t *obj)
+{
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    if (obj->when) {
+        return TRUE;;
+    }
+    if (obj->augobj && obj->augobj->when) {
+        return TRUE;
+    }
+    if (obj->usesobj && obj->usesobj->when) {
+        return TRUE;
+    }
+    return FALSE;
+
+}  /* obj_has_when_stmts */
 
 
 /* END obj.c */

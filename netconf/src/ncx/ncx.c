@@ -11033,8 +11033,9 @@ status_t
 *
 * INPUTS:
 *   devmodule == deviations module name
-*   devrevision == deviation module revision
-*   devprefix == local module prefix
+*   devrevision == deviation module revision (optional)
+*   devnamespace == deviation module namespace URI value
+*   devprefix == local module prefix (optional)
 *
 * RETURNS:
 *   malloced and initialized save_deviations struct, 
@@ -11043,12 +11044,13 @@ status_t
 ncx_save_deviations_t *
     ncx_new_save_deviations (const xmlChar *devmodule,
                              const xmlChar *devrevision,
+                             const xmlChar *devnamespace,
                              const xmlChar *devprefix)
 {
     ncx_save_deviations_t  *savedev;
 
 #ifdef DEBUG
-    if (!devmodule) {
+    if (!devmodule || !devnamespace) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
@@ -11083,6 +11085,12 @@ ncx_save_deviations_t *
             ncx_free_save_deviations(savedev);
             return NULL;
         }
+    }
+
+    savedev->devnamespace = xml_strdup(devnamespace);
+    if (savedev->devnamespace == NULL) {
+        ncx_free_save_deviations(savedev);
+        return NULL;
     }
     
     return savedev;
@@ -11131,6 +11139,10 @@ void
         m__free(savedev->devrevision);
     }
 
+    if (savedev->devnamespace) {
+        m__free(savedev->devnamespace);
+    }
+
     if (savedev->devprefix) {
         m__free(savedev->devprefix);
     }
@@ -11140,9 +11152,8 @@ void
 }  /* ncx_free_save_deviations */
 
 
-
 /********************************************************************
-* FUNCTION ncx_free_save_deviations
+* FUNCTION ncx_clean_save_deviationsQ
 * 
 * clean a Q of deviation save structs
 *

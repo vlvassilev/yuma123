@@ -564,7 +564,7 @@ status_t
     }
 
     /* set the initial module capabilities in the agent <hello> message */
-    res = agt_cap_set_modules();
+    res = agt_cap_set_modules(&agt_profile);
     if (res != NO_ERR) {
         return res;
     }

@@ -55,4 +55,19 @@
          </nacm:dataRule>
       </nacm:rules>
    </nacm:nacm>
+   <if:interfaces xmlns:if="http://netconfcentral.com/ns/interfaces">
+      <if:interface>
+         <if:name>lo</if:name>
+      </if:interface>
+      <if:interface>
+         <if:name>eth0</if:name>
+      </if:interface>
+      <if:interface>
+         <if:name>virbr0</if:name>
+      </if:interface>
+      <if:interface>
+         <if:name>pan0</if:name>
+      </if:interface>
+   </if:interfaces>
+   <t:int8.1 xmlns:t="http://netconfcentral.com/ns/test">7</t:int8.1>
 </nc:config>

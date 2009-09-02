@@ -5357,8 +5357,8 @@ static status_t
                              ncx_module_t  *mod,
                              obj_template_t *obj)
 {
-
-    status_t res;
+    const xmlChar *errstr;
+    status_t       res;
 
     res = NO_ERR;
 
@@ -5366,11 +5366,16 @@ static status_t
         obj_get_config_flag(obj) &&
         ((obj->parent != NULL && obj_is_root(obj->parent)) ||
          (obj->parent == NULL && obj->grp == NULL)) &&
-        obj_is_mandatory(obj)) {
+        obj_is_mandatory_when(obj)) {
         
         if (ncx_warning_enabled(ERR_NCX_TOP_LEVEL_MANDATORY)) {
-            log_warn("\nWarning: top-level NP container "
+
+            errstr = (obj_has_when_stmts(obj)) ? 
+                (const xmlChar *)"conditional " : EMPTY_STRING;
+
+            log_warn("\nWarning: top-level %sNP container "
                      "'%s' is mandatory",
+                     errstr,
                      obj_get_name(obj));
             res = ERR_NCX_TOP_LEVEL_MANDATORY;
             SET_OBJ_CURERR(tkc, obj);
@@ -5476,17 +5481,23 @@ static status_t
                         ncx_module_t  *mod,
                         obj_template_t *obj)
 {
-    status_t res;
+    const xmlChar *errstr;
+    status_t       res;
 
     res = NO_ERR;
 
-    if ((obj->flags & OBJ_FL_MANDATORY) &&
+    if (obj_is_mandatory_when(obj) &&
         obj_get_config_flag(obj) &&
         ((obj->parent && obj_is_root(obj->parent)) || 
          (obj->parent == NULL && obj->grp == NULL))) {
 
         if (ncx_warning_enabled(ERR_NCX_TOP_LEVEL_MANDATORY)) {
-            log_warn("\nWarning: top-level leaf '%s' is mandatory",
+
+            errstr = (obj_has_when_stmts(obj)) ? 
+                (const xmlChar *)"conditional " : EMPTY_STRING;
+            
+            log_warn("\nWarning: top-level %sleaf '%s' is mandatory",
+                     errstr,
                      obj_get_name(obj));
             res = ERR_NCX_TOP_LEVEL_MANDATORY;
             SET_OBJ_CURERR(tkc, obj);
@@ -6294,17 +6305,23 @@ static status_t
                           ncx_module_t  *mod,
                           obj_template_t *obj)
 {
-    status_t res;
+    const xmlChar *errstr;
+    status_t       res;
 
     res = NO_ERR;
 
-    if ((obj->flags & OBJ_FL_MANDATORY) &&
+    if (obj_is_mandatory_when(obj) &&
         obj_get_config_flag(obj) &&
         ((obj->parent && obj_is_root(obj->parent)) ||
          (obj->parent == NULL && obj->grp == NULL))) {
 
         if (ncx_warning_enabled(ERR_NCX_TOP_LEVEL_MANDATORY)) {
-            log_warn("\nWarning: top-level choice '%s' is mandatory",
+
+            errstr = (obj_has_when_stmts(obj)) ? 
+                (const xmlChar *)"conditional " : EMPTY_STRING;
+
+            log_warn("\nWarning: top-level %schoice '%s' is mandatory",
+                     errstr,
                      obj_get_name(obj));
             res = ERR_NCX_TOP_LEVEL_MANDATORY;
             SET_OBJ_CURERR(tkc, obj);
@@ -9882,6 +9899,7 @@ status_t
         if (!dlq_empty(&mod->deviationQ)) {
             savedev = ncx_new_save_deviations(mod->name,
                                               mod->version,
+                                              mod->ns,
                                               mod->prefix);
             if (savedev == NULL) {
                 return ERR_INTERNAL_MEM;

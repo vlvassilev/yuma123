@@ -22,6 +22,10 @@ date	     init     comment
 
 */
 
+#ifndef _H_agt
+#include "agt.h"
+#endif
+
 #ifndef _H_cap
 #include "cap.h"
 #endif
@@ -58,7 +62,7 @@ extern status_t
 		      const xmlChar *defstyle);
 
 extern status_t 
-    agt_cap_set_modules (void);
+    agt_cap_set_modules (agt_profile_t *profile);
 
 extern status_t 
     agt_cap_add_module (ncx_module_t *mod);

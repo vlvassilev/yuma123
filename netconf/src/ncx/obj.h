@@ -980,6 +980,9 @@ extern boolean
     obj_is_mandatory (obj_template_t *obj);
 
 extern boolean
+    obj_is_mandatory_when (obj_template_t *obj);
+
+extern boolean
     obj_is_cloned (const obj_template_t *obj);
 
 extern boolean
@@ -1123,6 +1126,9 @@ extern boolean
 
 extern boolean
     obj_is_single_instance (obj_template_t *obj);
+
+extern boolean
+    obj_has_when_stmts (obj_template_t *obj);
 
 
 #endif	    /* _H_obj */

@@ -971,6 +971,7 @@ extern status_t
 extern ncx_save_deviations_t *
     ncx_new_save_deviations (const xmlChar *devmodule,
                              const xmlChar *devrevision,
+                             const xmlChar *devnamespace,
                              const xmlChar *devprefix);
 
 extern void

@@ -755,6 +755,7 @@ typedef struct ncx_save_deviations_t_ {
     dlq_hdr_t    deviationQ;  /* Q of obj_deviation_t */
     xmlChar     *devmodule;
     xmlChar     *devrevision;
+    xmlChar     *devnamespace;
     xmlChar     *devprefix;
 } ncx_save_deviations_t;
 

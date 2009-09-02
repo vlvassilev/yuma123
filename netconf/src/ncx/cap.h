@@ -241,6 +241,9 @@ extern status_t
     cap_add_modval (val_value_t *caplist, 
 		    ncx_module_t *mod);
 
+extern status_t 
+    cap_add_devmodval (val_value_t *caplist, 
+                       ncx_save_deviations_t *savedev);
 
 /* fast search of standard protocol capability set */
 extern boolean 

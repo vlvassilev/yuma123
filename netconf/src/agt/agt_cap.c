@@ -332,25 +332,26 @@ status_t
 * Initialize the NETCONF agent capabilities modules list
 * MUST call after agt_cap_set_caps
 *
+* INPUTS:
+*   profile == agent profile control block to use
+*
 * RETURNS:
 *    status
 *********************************************************************/
 status_t 
-    agt_cap_set_modules (void)
+    agt_cap_set_modules (agt_profile_t *profile)
 {
-    ncx_module_t  *mod;
-    status_t       res;
+    ncx_module_t          *mod;
+    ncx_save_deviations_t *savedev;
+    status_t               res;
 
     if (!agt_caps || !my_agt_caps) {
 	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
-    mod = ncx_get_first_module();
-    if (!mod) {
-	return NO_ERR;
-    }
-
     res = NO_ERR;
+
+    mod = ncx_get_first_module();
 
     /* add capability for each module loaded in ncxmod */
     while (mod && res == NO_ERR) {
@@ -363,6 +364,28 @@ status_t
 	mod = (ncx_module_t *)dlq_nextEntry(mod);
     }
 
+    /* add capability for each deviation module, not already
+     * listed in the module capabilities so far
+     */
+    for (savedev = (ncx_save_deviations_t *)
+             dlq_firstEntry(&profile->agt_savedevQ);
+         savedev != NULL && res == NO_ERR;
+         savedev = (ncx_save_deviations_t *)
+             dlq_nextEntry(savedev)) {
+
+	if (xml_strcmp(savedev->devmodule, NCX_EL_NETCONF) &&
+	    xml_strcmp(savedev->devmodule, NCX_EL_XSD)) {
+
+            /* not a hard-wired internal module */
+            mod = ncx_find_module(savedev->devmodule,
+                                  savedev->devrevision);
+            if (mod == NULL) {
+                /* not already announced in the capabilities */
+                res = cap_add_devmodval(agt_caps, savedev);
+            }
+        }
+    }
+         
     return res;
 
 } /* agt_cap_set_modules */

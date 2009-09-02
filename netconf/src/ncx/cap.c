@@ -261,11 +261,11 @@ static boolean
 
 
 /********************************************************************
-* FUNCTION make_mod_urn
+* FUNCTION make_mod_urn_ex
 *
 * Construct and malloc a module capability URN string
 *
-* From yang-02: section 5.4:
+* From yang-07: section 5.6.4:
 
    The namespace URI is advertised as a capability in the NETCONF
    <hello> message to indicate support for the YANG module by a NETCONF
@@ -277,18 +277,21 @@ static boolean
                            module-parameter /
                            feature-parameter /
                            deviation-parameter
-     revision-parameter  = "revision=" revision-number
+     revision-parameter  = "revision=" revision-date
      module-parameter    = "module=" module-name
      feature-parameter   = "features=" feature *( "," feature )
      deviation-parameter = "deviations=" deviation *( "," deviation )
 
-   Where "revision-number" is the revision of the module (see
-   Section 7.1.9) that the server implements, "module-name" is the name
-   of module as it appears in the "module" statement (see Section 7.1),
-   "namespace-uri" is the namespace for the module as it appears in the
-   "namespace" statement, "feature" is the name of an optional feature
-   implemented by the device (see Section 7.18.1), and "deviation" is
-   the name of a module defining device deviations (see Section 7.18.3).
+   Where "revision-date" is the revision of the module (see
+   Section 7.1.9) that the NETCONF server implements, "module-name" is
+   the name of module as it appears in the "module" statement (see
+   Section 7.1), "namespace-uri" is the namespace for the module as it
+   appears in the "namespace" statement, "feature" is the name of an
+   optional feature implemented by the device (see Section 7.18.1), and
+   "deviation" is the name of a module defining device deviations (see
+   Section 7.18.3).
+
+   In the parameter list, each named parameter MUST occur at most once.
 
 * INPUTS:
 *    mod == module to use
@@ -297,46 +300,54 @@ static boolean
 *    status
 *********************************************************************/
 static xmlChar *
-    make_mod_urn (ncx_module_t *mod)
+    make_mod_urn_ex (const xmlChar *modname,
+                     const xmlChar *revision,
+                     const xmlChar *namespace,
+                     ncx_module_t *mod)
 {
     xmlChar              *str, *p;
     ncx_lmem_t           *listmember;
     uint32                len, feature_count, deviation_count;
 
+    feature_count = 0;
+    deviation_count = 0;
+
     /* get the length of the string needed by doing a dry run */
-    len = xml_strlen(mod->ns);
+    len = xml_strlen(namespace);
     len++;   /* '?' char */
 
     len += xml_strlen(CAP_MODULE_EQ);
-    len += xml_strlen(mod->name);
+    len += xml_strlen(modname);
 
-    if (mod->version) {
+    if (revision) {
 	len++;   /* & char */
 	len += xml_strlen(CAP_REVISION_EQ);
-	len += xml_strlen(mod->version);
+	len += xml_strlen(revision);
     }
 
-    feature_count = ncx_feature_count(mod, TRUE);
-    if (feature_count > 0) {
-	len++;   /* & char */
-	len += xml_strlen(CAP_FEATURES_EQ);
-	len += (feature_count-1);   /* all the commas */
+    if (mod) {
+        feature_count = ncx_feature_count(mod, TRUE);
+        if (feature_count > 0) {
+            len++;   /* & char */
+            len += xml_strlen(CAP_FEATURES_EQ);
+            len += (feature_count-1);   /* all the commas */
 
-	/* add in all the enabled features length */
-	ncx_for_all_features(mod, get_features_len, &len, TRUE);
-    }
+            /* add in all the enabled features length */
+            ncx_for_all_features(mod, get_features_len, &len, TRUE);
+        }
 
-    deviation_count = ncx_list_cnt(&mod->devmodlist);
-    if (deviation_count > 0) {
-	len++;   /* & char */
-	len += xml_strlen(CAP_DEVIATIONS_EQ);
-	len += (deviation_count-1);   /* all the commas */
+        deviation_count = ncx_list_cnt(&mod->devmodlist);
+        if (deviation_count > 0) {
+            len++;   /* & char */
+            len += xml_strlen(CAP_DEVIATIONS_EQ);
+            len += (deviation_count-1);   /* all the commas */
+            
+            for (listmember = ncx_first_lmem(&mod->devmodlist);
+                 listmember != NULL;
+                 listmember = (ncx_lmem_t *)dlq_nextEntry(listmember)) {
 
-        for (listmember = ncx_first_lmem(&mod->devmodlist);
-             listmember != NULL;
-             listmember = (ncx_lmem_t *)dlq_nextEntry(listmember)) {
-
-            len += xml_strlen(listmember->val.str);
+                len += xml_strlen(listmember->val.str);
+            }
         }
     }
 
@@ -348,50 +359,106 @@ static xmlChar *
 
     /* repeat the previous steps for real */
     p = str;
-    p += xml_strcpy(p, mod->ns);
+    p += xml_strcpy(p, namespace);
     *p++ = (xmlChar)'?';
 
     p += xml_strcpy(p, CAP_MODULE_EQ);
-    p += xml_strcpy(p, mod->name);
+    p += xml_strcpy(p, modname);
 
-    if (mod->version) {
+    if (revision) {
 	*p++ = (xmlChar)'&';
 	p += xml_strcpy(p, CAP_REVISION_EQ);
-	p += xml_strcpy(p, mod->version);
+	p += xml_strcpy(p, revision);
     }
 
-    feature_count = ncx_feature_count(mod, TRUE);
+    if (mod) {
+        if (feature_count > 0) {
+            *p++ = (xmlChar)'&';
+            p += xml_strcpy(p, CAP_FEATURES_EQ);
 
-    if (feature_count > 0) {
-	*p++ = (xmlChar)'&';
-	p += xml_strcpy(p, CAP_FEATURES_EQ);
+            /* add in all the enabled 'feature-name,' strings */
+            ncx_for_all_features(mod, add_features, &p, TRUE);
 
-	/* add in all the enabled 'feature-name,' strings */
-	ncx_for_all_features(mod, add_features, &p, TRUE);
-
-	/* the last entry will have a comma that has to be removed */
-	*--p = 0;
-    }
-
-    if (deviation_count > 0) {
-	*p++ = (xmlChar)'&';
-	p += xml_strcpy(p, CAP_DEVIATIONS_EQ);
-
-        for (listmember = ncx_first_lmem(&mod->devmodlist);
-             listmember != NULL;
-             listmember = (ncx_lmem_t *)dlq_nextEntry(listmember)) {
-
-            p += xml_strcpy(p, listmember->val.str);
-            *p++ = ',';
+            /* the last entry will have a comma that has to be removed */
+            *--p = 0;
         }
 
-	/* the last entry will have a comma that has to be removed */
-	*--p = 0;
+        if (deviation_count > 0) {
+            *p++ = (xmlChar)'&';
+            p += xml_strcpy(p, CAP_DEVIATIONS_EQ);
+
+            for (listmember = ncx_first_lmem(&mod->devmodlist);
+                 listmember != NULL;
+                 listmember = (ncx_lmem_t *)dlq_nextEntry(listmember)) {
+
+                p += xml_strcpy(p, listmember->val.str);
+                *p++ = ',';
+            }
+
+            /* the last entry will have a comma that has to be removed */
+            *--p = 0;
+        }
     }
 
     return str;
 
+}  /* make_mod_urn_ex */ 
+
+
+/********************************************************************
+* FUNCTION make_mod_urn
+*
+* Construct and malloc a module capability URN string
+*
+* INPUTS:
+*    mod == module to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static xmlChar *
+    make_mod_urn (ncx_module_t *mod)
+{
+
+    return make_mod_urn_ex(mod->name,
+                           mod->version,
+                           mod->ns,
+                           mod);
+
 }  /* make_mod_urn */ 
+
+
+/********************************************************************
+* FUNCTION make_devmod_urn
+*
+* Construct and malloc a module capability URN string
+* for a deviations module, from a save deviations struct
+* These are the same as regular modules externally,
+* but internally, they are not fully parsed.
+*
+* If the deviations module contains any YANG statements
+* other than deviation-stmts, then it MUST be loaded
+* into the system with ncxmod_load_module.
+* If so, then a regular module capability URI MUST already
+* be generated for that module INSTEAD of this function
+*
+* INPUTS:
+*    savedev == save deviations struct to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static xmlChar *
+    make_devmod_urn (ncx_save_deviations_t *savedev)
+{
+
+    return make_mod_urn_ex(savedev->devmodule,
+                           savedev->devrevision,
+                           savedev->devnamespace,
+                           NULL);
+
+
+}  /* make_devmod_urn */ 
 
 
 /********************************************************************
@@ -1362,6 +1429,56 @@ status_t
     return NO_ERR;
 
 }  /* cap_add_modval */ 
+
+
+/********************************************************************
+* FUNCTION cap_add_devmodval
+*
+* Add a deviation module capability to the list (val_value_t version)
+*
+* INPUTS:
+*    caplist == capability list that will contain the enterprise cap 
+*    savedev == save_deviations struct to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    cap_add_devmodval (val_value_t *caplist, 
+                       ncx_save_deviations_t *savedev)
+{
+    xmlChar      *str;
+    val_value_t  *capval;
+
+#ifdef DEBUG
+    if (!caplist || !savedev) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    if (!savedev->devmodule || !savedev->devnamespace) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }	
+#endif
+
+    /* construct the module URN string */
+    str = make_devmod_urn(savedev);
+    if (!str) {
+	return ERR_INTERNAL_MEM;
+    }
+
+    /* make the capability element */
+    capval = xml_val_new_string(NCX_EL_CAPABILITY,
+                                xmlns_nc_id(), 
+				str);
+    if (!capval) {
+	m__free(str);
+	return ERR_INTERNAL_MEM;
+    }
+
+    val_add_child(capval, caplist);
+
+    return NO_ERR;
+
+}  /* cap_add_devmodval */ 
 
 
 /********************************************************************

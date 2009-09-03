@@ -759,7 +759,8 @@ status_t
 	res = yang_obj_resolve_final(pcb,
                                      tkc, 
                                      mod, 
-                                     &grp->datadefQ);
+                                     &grp->datadefQ,
+                                     TRUE);
 	CHK_EXIT(res, retres);
 
 	yang_check_obj_used(tkc, 

@@ -5357,6 +5357,9 @@ static status_t
 *   tkc == token chain
 *   mod == module in progress
 *   obj == container object to check
+*   ingrouping == TRUE if this object being resolved
+*                 from yang_grp_resolve_final
+*              == FALSE otherwise
 *
 * RETURNS:
 *   status of the operation
@@ -5364,14 +5367,16 @@ static status_t
 static status_t 
     resolve_container_final (tk_chain_t *tkc,
                              ncx_module_t  *mod,
-                             obj_template_t *obj)
+                             obj_template_t *obj,
+                             boolean ingrouping)
 {
     const xmlChar *errstr;
     status_t       res;
 
     res = NO_ERR;
 
-    if ((obj->def.container->presence == NULL) &&
+    if (!ingrouping &&
+        (obj->def.container->presence == NULL) &&
         obj_get_config_flag(obj) &&
         ((obj->parent != NULL && obj_is_root(obj->parent)) ||
          (obj->parent == NULL && obj->grp == NULL)) &&
@@ -5485,6 +5490,9 @@ static status_t
 *   tkc == token chain
 *   mod == module in progress
 *   obj == leaf object to check
+*   ingrouping == TRUE if this object being resolved
+*                 from yang_grp_resolve_final
+*              == FALSE otherwise
 *
 * RETURNS:
 *   status of the operation
@@ -5492,14 +5500,16 @@ static status_t
 static status_t 
     resolve_leaf_final (tk_chain_t *tkc,
                         ncx_module_t  *mod,
-                        obj_template_t *obj)
+                        obj_template_t *obj,
+                        boolean ingrouping)
 {
     const xmlChar *errstr;
     status_t       res;
 
     res = NO_ERR;
 
-    if (obj_is_mandatory_when(obj) &&
+    if (!ingrouping &&
+        obj_is_mandatory_when(obj) &&
         obj_get_config_flag(obj) &&
         ((obj->parent && obj_is_root(obj->parent)) || 
          (obj->parent == NULL && obj->grp == NULL))) {
@@ -6309,6 +6319,9 @@ static status_t
 *   tkc == token chain
 *   mod == module in progress
 *   obj == choice object to check
+*   ingrouping == TRUE if this object being resolved
+*                 from yang_grp_resolve_final
+*              == FALSE otherwise
 *
 * RETURNS:
 *   status of the operation
@@ -6316,14 +6329,16 @@ static status_t
 static status_t 
     resolve_choice_final (tk_chain_t *tkc,
                           ncx_module_t  *mod,
-                          obj_template_t *obj)
+                          obj_template_t *obj,
+                          boolean ingrouping)
 {
     const xmlChar *errstr;
     status_t       res;
 
     res = NO_ERR;
 
-    if (obj_is_mandatory_when(obj) &&
+    if (!ingrouping &&
+        obj_is_mandatory_when(obj) &&
         obj_get_config_flag(obj) &&
         ((obj->parent && obj_is_root(obj->parent)) ||
          (obj->parent == NULL && obj->grp == NULL))) {
@@ -10028,6 +10043,9 @@ status_t
 *   tkc == token chain from parsing (needed for error msgs)
 *   mod == module in progress
 *   datadefQ == Q of obj_template_t structs to check
+*   ingrouping == TRUE if this object being resolved
+*                 from yang_grp_resolve_final
+*              == FALSE otherwise
 *
 * RETURNS:
 *   status of the operation
@@ -10036,7 +10054,8 @@ status_t
     yang_obj_resolve_final (yang_pcb_t *pcb,
                             tk_chain_t *tkc,
 			    ncx_module_t  *mod,
-			    dlq_hdr_t *datadefQ)
+			    dlq_hdr_t *datadefQ,
+                            boolean ingrouping)
 {
     obj_template_t  *testobj;
     status_t         res, retres;
@@ -10074,7 +10093,10 @@ status_t
 	
 	switch (testobj->objtype) {
 	case OBJ_TYP_CONTAINER:
-            res = resolve_container_final(tkc, mod, testobj);
+            res = resolve_container_final(tkc, 
+                                          mod, 
+                                          testobj,
+                                          ingrouping);
             CHK_EXIT(res, retres);
 
 	    if (notclone) {
@@ -10089,7 +10111,8 @@ status_t
 	    res = yang_obj_resolve_final(pcb,
                                          tkc, 
                                          mod, 
-                                         testobj->def.container->datadefQ);
+                                         testobj->def.container->datadefQ,
+                                         ingrouping);
 	    CHK_EXIT(res, retres);
 
 	    if (notclone) {
@@ -10102,7 +10125,7 @@ status_t
 	    }
 	    break;
 	case OBJ_TYP_LEAF:
-            res = resolve_leaf_final(tkc, mod, testobj);
+            res = resolve_leaf_final(tkc, mod, testobj, ingrouping);
             break;
         case OBJ_TYP_ANYXML:
 	case OBJ_TYP_LEAF_LIST:
@@ -10119,7 +10142,8 @@ status_t
 	    res = yang_obj_resolve_final(pcb,
                                          tkc, 
                                          mod, 
-                                         testobj->def.list->datadefQ);
+                                         testobj->def.list->datadefQ,
+                                         ingrouping);
 	    CHK_EXIT(res, retres);
 
 	    if (notclone) {
@@ -10136,19 +10160,21 @@ status_t
 				     testobj);
 	    break;
 	case OBJ_TYP_CHOICE:
-            res = resolve_choice_final(tkc, mod, testobj);
+            res = resolve_choice_final(tkc, mod, testobj, ingrouping);
             CHK_EXIT(res, retres);
 
 	    res = yang_obj_resolve_final(pcb,
                                          tkc, 
                                          mod, 
-					 testobj->def.choic->caseQ);
+					 testobj->def.choic->caseQ,
+                                         ingrouping);
 	    break;
 	case OBJ_TYP_CASE:
 	    res = yang_obj_resolve_final(pcb,
                                          tkc, 
                                          mod, 
-					 testobj->def.cas->datadefQ);
+					 testobj->def.cas->datadefQ,
+                                         ingrouping);
 	    break;
 	case OBJ_TYP_USES:
 	    if (notclone) {
@@ -10156,7 +10182,8 @@ status_t
                     yang_obj_resolve_final(pcb,
                                            tkc, 
                                            mod, 
-                                           testobj->def.uses->datadefQ);
+                                           testobj->def.uses->datadefQ,
+                                           ingrouping);
 	    }
 	    break;
 	case OBJ_TYP_AUGMENT:
@@ -10165,7 +10192,8 @@ status_t
                     yang_obj_resolve_final(pcb,
                                            tkc, 
                                            mod, 
-                                           &testobj->def.augment->datadefQ);
+                                           &testobj->def.augment->datadefQ,
+                                           ingrouping);
 	    }
 	    break;
 	case OBJ_TYP_RPC:
@@ -10181,7 +10209,8 @@ status_t
 	    res = yang_obj_resolve_final(pcb,
                                          tkc, 
                                          mod, 
-					 &testobj->def.rpc->datadefQ);
+					 &testobj->def.rpc->datadefQ,
+                                         ingrouping);
 
 	    if (notclone) {
 		yang_check_obj_used(tkc, 
@@ -10203,7 +10232,8 @@ status_t
 	    res = yang_obj_resolve_final(pcb,
                                          tkc, 
                                          mod, 
-					 &testobj->def.rpcio->datadefQ);
+					 &testobj->def.rpcio->datadefQ,
+                                         ingrouping);
 	    CHK_EXIT(res, retres);
 
 	    if (notclone) {
@@ -10228,7 +10258,8 @@ status_t
                 yang_obj_resolve_final(pcb,
                                        tkc, 
                                        mod, 
-                                       &testobj->def.notif->datadefQ);
+                                       &testobj->def.notif->datadefQ,
+                                       ingrouping);
 
 	    if (notclone) {
 		yang_check_obj_used(tkc,

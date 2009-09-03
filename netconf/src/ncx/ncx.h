@@ -996,5 +996,4 @@ extern dlq_hdr_t *
 extern void
     ncx_clear_temp_modQ (void);
 
-
 #endif	    /* _H_ncx */

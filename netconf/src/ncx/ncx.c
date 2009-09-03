@@ -10389,7 +10389,7 @@ boolean
     if (prefix1 == prefix2) {
 	return FALSE;
     }
-    if (!prefix1 || !prefix2) {
+    if (prefix1 == NULL || prefix2 == NULL) {
 	return TRUE;
     }
     return (xml_strcmp(prefix1, prefix2)) ? TRUE : FALSE;

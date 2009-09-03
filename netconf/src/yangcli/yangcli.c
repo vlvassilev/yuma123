@@ -417,7 +417,8 @@ static void
         SET_ERROR(res);
     }
 
-    (*logfn)("\n  Copyright 2009, Netconf Central, All Rights Reserved.\n");
+    (*logfn)("\n  ");
+    (*logfn)(COPYRIGHT_STRING);
 
     if (!imode) {
 	return;

@@ -208,8 +208,10 @@ static status_t
 	      boolean *showver,
 	      help_mode_t *showhelpmode)
 {
-    status_t   res;
+    status_t     res;
     log_debug_t  dlevel;
+    int          len;
+    char        *buff;
 
     /* set the default debug output level */
 #ifdef DEBUG
@@ -222,19 +224,31 @@ static status_t
     dlevel = LOG_DEBUG_WARN;
 #endif
 
+#define START_MSG "Starting netconfd...\n"
+
     /* initialize the NCX Library first to allow NCX modules
      * to be processed.  No module can get its internal config
      * until the NCX module parser and definition registry is up
      */
+    len = strlen(START_MSG) + strlen(COPYRIGHT_STRING) + 2;
+
+    buff = m__getMem(len);
+    if (buff == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    strcpy(buff, START_MSG);
+    strcat(buff, COPYRIGHT_STRING);
+
     res = ncx_init(FALSE, 
 		   dlevel, 
 		   TRUE,
-		   "\nStarting netconfd"
-                   "\n  Copyright 2009, Netconf Central, "
-                   "All Rights Reserved.\n",
+		   buff,
 		   argc, 
                    argv);
-		   
+
+    m__free(buff);
+
     if (res != NO_ERR) {
 	return res;
     }

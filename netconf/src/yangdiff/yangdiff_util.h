@@ -102,4 +102,23 @@ extern uint32
     errinfo_changed (const ncx_errinfo_t *olderr,
 		     const ncx_errinfo_t *newerr);
 
+
+extern uint32
+    iffeature_changed (const xmlChar *modprefix,
+                       const ncx_iffeature_t *oldif,
+                       const ncx_iffeature_t *newif);
+
+extern uint32
+    iffeatureQ_changed (const xmlChar *modprefix,
+                        dlq_hdr_t *oldQ,
+                        dlq_hdr_t *newQ);
+
+
+extern void
+    output_iffeatureQ_diff (yangdiff_diffparms_t *cp,
+                            const xmlChar *modprefix,
+                            dlq_hdr_t *oldQ,
+                            dlq_hdr_t *newQ);
+
+
 #endif	    /* _H_yangdiff_util */

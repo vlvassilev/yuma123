@@ -505,7 +505,7 @@ status_t
 	return res;
     }
 
-    /* convert NCX imports to XSD imports */
+    /* convert YANG imports to XSD imports */
     if (cp->schemaloc) {
 	res = xsd_add_imports(pcb, mod, cp, val);
 	if (res != NO_ERR) {

@@ -138,7 +138,8 @@ extern status_t
     yang_obj_resolve_final (yang_pcb_t *pcb,
                             tk_chain_t *tkc,
 			    ncx_module_t  *mod,
-			    dlq_hdr_t *datadefQ);
+			    dlq_hdr_t *datadefQ,
+                            boolean ingrouping);
 
 extern status_t 
     yang_obj_resolve_xpath (tk_chain_t *tkc,

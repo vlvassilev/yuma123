@@ -610,25 +610,31 @@ uint32
 	return 1;
     } else if (olderr && newerr) {
 	if (str_field_changed(YANG_K_DESCRIPTION,
-			      olderr->descr, newerr->descr,
-			      FALSE, NULL)) {
+			      olderr->descr, 
+                              newerr->descr,
+			      FALSE, 
+                              NULL)) {
 	    return 1;
 	}
 	if (str_field_changed(YANG_K_REFERENCE,
-			      olderr->ref, newerr->ref,
-			      FALSE, NULL)) {
+			      olderr->ref, 
+                              newerr->ref,
+			      FALSE, 
+                              NULL)) {
 	    return 1;
 	}
 	if (str_field_changed(YANG_K_ERROR_APP_TAG,
 			      olderr->error_app_tag,
 			      newerr->error_app_tag,
-			      FALSE, NULL)) {
+			      FALSE, 
+                              NULL)) {
 	    return 1;
 	}
 	if (str_field_changed(YANG_K_ERROR_MESSAGE,
 			      olderr->error_message,
 			      newerr->error_message,
-			      FALSE, NULL)) {
+			      FALSE, 
+                              NULL)) {
 	    return 1;
 	}
 	return 0;
@@ -638,5 +644,215 @@ uint32
     /*NOTREACHED*/
     
 }  /* errinfo_changed */
+
+
+
+/********************************************************************
+* FUNCTION iffeature_changed
+*
+* Check if the ncx_iffeature_t struct changed at all
+*
+* INPUTS:
+*   modprefix == module prefix value to use as default
+*   oldif == old if-feature struct to check
+*   newif == new if-feature struct to check
+*
+* RETURNS:
+*   1 if field changed
+*   0 if field not changed
+*********************************************************************/
+uint32
+    iffeature_changed (const xmlChar *modprefix,
+                       const ncx_iffeature_t *oldif,
+                       const ncx_iffeature_t *newif)
+{
+    if ((!oldif && newif) || (oldif && !newif)) {
+	return 1;
+    } else if (oldif && newif) {
+	if (ncx_prefix_different(oldif->prefix, 
+                                 newif->prefix,
+                                 modprefix)) {
+	    return 1;
+	}
+	if (str_field_changed(YANG_K_IF_FEATURE,
+			      oldif->name, 
+                              newif->name,
+			      FALSE,
+                              NULL)) {
+	    return 1;
+	}
+    }
+
+    return 0;    
+
+}  /* iffeature_changed */
+
+
+/********************************************************************
+ * FUNCTION iffeatureQ_changed
+ * 
+ *  Check if a Q of must-stmt definitions changed
+ *
+ * INPUTS:
+ *    modprefix == module prefix in use
+ *    oldQ == Q of old ncx_iffeature_t to use
+ *    newQ == Q of new ncx_iffeature_t to use
+ *
+ * RETURNS:
+ *    1 if field changed
+ *    0 if field not changed
+ *********************************************************************/
+uint32
+    iffeatureQ_changed (const xmlChar *modprefix,
+                        dlq_hdr_t *oldQ,
+                        dlq_hdr_t *newQ)
+{
+    ncx_iffeature_t *oldif, *newif;
+    uint32           oldcnt, newcnt;
+
+#ifdef DEBUG
+    if (oldQ == NULL || newQ == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    oldcnt = dlq_count(oldQ);
+    newcnt = dlq_count(newQ);
+
+    if (oldcnt != newcnt) {
+	return 1;
+    }
+
+    if (oldcnt == 0) {
+	return 0;
+    }
+
+    for (newif = (ncx_iffeature_t *)dlq_firstEntry(newQ);
+	 newif != NULL;
+	 newif = (ncx_iffeature_t *)dlq_nextEntry(newif)) {
+	newif->seen = FALSE;
+    }
+
+    /* look through the old Q for matching entries in the new Q */
+    for (oldif = (ncx_iffeature_t *)dlq_firstEntry(oldQ);
+	 oldif != NULL;
+	 oldif = (ncx_iffeature_t *)dlq_nextEntry(oldif)) {
+
+	newif = ncx_find_iffeature(newQ, 
+                                   oldif->prefix,
+                                   oldif->name,
+                                   modprefix);
+	if (newif) {
+	    if (iffeature_changed(modprefix, oldif, newif)) {
+		return 1;
+	    } else {
+		newif->seen = TRUE;
+	    }
+	} else {
+	    return 1;
+	}
+    }
+
+    /* look for iffeature-stmts that were added in the new module */
+    for (newif = (ncx_iffeature_t *)dlq_firstEntry(newQ);
+	 newif != NULL;
+	 newif = (ncx_iffeature_t *)dlq_nextEntry(newif)) {
+	if (!newif->seen) {
+	    return 1;
+	}
+    }
+
+    return 0;
+
+}  /* iffeatureQ_changed */
+
+
+/********************************************************************
+ * FUNCTION output_iffeatureQ_diff
+ * 
+ *  Output any changes in a Q of if-feature-stmt definitions
+ *
+ * INPUTS:
+ *    cp == comparison paraeters to use
+ *    modprefix == module prefix in use
+ *    oldQ == Q of old ncx_iffeature_t to use
+ *    newQ == Q of new ncx_iffeature_t to use
+ *
+ *********************************************************************/
+void
+    output_iffeatureQ_diff (yangdiff_diffparms_t *cp,
+                            const xmlChar *modprefix,
+                            dlq_hdr_t *oldQ,
+                            dlq_hdr_t *newQ)
+{
+    ncx_iffeature_t *oldif, *newif;
+
+#ifdef DEBUG
+    if (cp == NULL || oldQ == NULL || newQ == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    for (newif = (ncx_iffeature_t *)dlq_firstEntry(newQ);
+	 newif != NULL;
+	 newif = (ncx_iffeature_t *)dlq_nextEntry(newif)) {
+	newif->seen = FALSE;
+    }
+
+    /* look through the old Q for matching entries in the new Q */
+    for (oldif = (ncx_iffeature_t *)dlq_firstEntry(oldQ);
+	 oldif != NULL;
+	 oldif = (ncx_iffeature_t *)dlq_nextEntry(oldif)) {
+
+	newif = ncx_find_iffeature(newQ, 
+                                   oldif->prefix,
+                                   oldif->name,
+                                   modprefix);
+	if (newif) {
+	    newif->seen = TRUE;
+	    if (iffeature_changed(modprefix, oldif, newif)) {
+		output_mstart_line(cp, 
+				   YANG_K_IF_FEATURE, 
+				   oldif->name, 
+				   FALSE);
+		if (cp->edifftype != YANGDIFF_DT_TERSE) {
+		    indent_in(cp);
+		    output_diff(cp, 
+                                YANG_K_IF_FEATURE,
+				oldif->name, 
+                                newif->name, 
+                                TRUE);
+		    indent_out(cp);
+		}
+	    }
+	} else {
+	    /* if-feature-stmt was removed from the new module */
+	    output_diff(cp, 
+			YANG_K_IF_FEATURE,  
+			oldif->name, 
+			NULL, 
+			FALSE);
+	}
+    }
+
+    /* look for must-stmts that were added in the new module */
+    for (newif = (ncx_iffeature_t *)dlq_firstEntry(newQ);
+	 newif != NULL;
+	 newif = (ncx_iffeature_t *)dlq_nextEntry(newif)) {
+
+	if (!newif->seen) {
+	    /* must-stmt was added in the new module */
+	    output_diff(cp, 
+			YANG_K_IF_FEATURE,  
+			NULL, 
+			newif->name,
+			FALSE);
+	}
+    }
+
+}  /* output_iffeatureQ_diff */
+
 
 /* END yangdiff_util.c */

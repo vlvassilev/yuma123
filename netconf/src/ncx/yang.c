@@ -1679,7 +1679,8 @@ status_t
     if (res == NO_ERR) {
 	/* check if this if if-feature already entered warning */
 	iff = ncx_find_iffeature(iffeatureQ,
-				 prefix, name,
+				 prefix, 
+                                 name,
 				 mod->prefix);
 	if (iff) {
             if (ncx_warning_enabled(ERR_NCX_DUP_IF_FEATURE)) {

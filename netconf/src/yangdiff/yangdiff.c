@@ -468,7 +468,7 @@ static void
 
 
 /********************************************************************
- * FUNCTION output_extension_diff
+ * FUNCTION output_extensions_diff
  * 
  *  Output the differences report for the extensions portion
  *  of two 2 parsed modules
@@ -480,25 +480,28 @@ static void
  *
  *********************************************************************/
 static void
-    output_extension_diff (yangdiff_diffparms_t *cp,
-			   yang_pcb_t *oldpcb,
-			   yang_pcb_t *newpcb)
+    output_extensions_diff (yangdiff_diffparms_t *cp,
+                            yang_pcb_t *oldpcb,
+                            yang_pcb_t *newpcb)
 {
     ext_template_t *oldext, *newext;
 
     /* make sure the new 'used' flags are cleared */
-    for (newext = (ext_template_t *)dlq_firstEntry(&newpcb->top->extensionQ);
+    for (newext = (ext_template_t *)
+             dlq_firstEntry(&newpcb->top->extensionQ);
 	 newext != NULL;
 	 newext = (ext_template_t *)dlq_nextEntry(newext)) {
 	newext->used = FALSE;
     }
 
-    for (oldext = (ext_template_t *)dlq_firstEntry(&oldpcb->top->extensionQ);
+    for (oldext = (ext_template_t *)
+             dlq_firstEntry(&oldpcb->top->extensionQ);
 	 oldext != NULL;
 	 oldext = (ext_template_t *)dlq_nextEntry(oldext)) {
 
 	/* find this extension in the new module */
-	newext = ext_find_extension(&newpcb->top->extensionQ, oldext->name);
+	newext = ext_find_extension(&newpcb->top->extensionQ, 
+                                    oldext->name);
 	if (newext) {
 	    output_one_extension_diff(cp, oldext, newext);
 	    newext->used = TRUE;
@@ -512,7 +515,8 @@ static void
 	}
     }
 
-    for (newext = (ext_template_t *)dlq_firstEntry(&newpcb->top->extensionQ);
+    for (newext = (ext_template_t *)
+             dlq_firstEntry(&newpcb->top->extensionQ);
 	 newext != NULL;
 	 newext = (ext_template_t *)dlq_nextEntry(newext)) {
 	if (!newext->used) {
@@ -526,6 +530,152 @@ static void
     }
 
 } /* output_extension_diff */
+
+
+/********************************************************************
+ * FUNCTION output_one_feature_diff
+ * 
+ *  Output the differences report for a YANG feature
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    oldfeat == old feature
+ *    newfeat == new feature
+ *
+ *********************************************************************/
+static void
+    output_one_feature_diff (yangdiff_diffparms_t *cp,
+                             const xmlChar *modprefix,
+                             ncx_feature_t *oldfeat,
+                             ncx_feature_t *newfeat)
+{
+    yangdiff_cdb_t  featcdb[5];
+    uint32          changecnt, i;
+    boolean         isrev;
+
+    isrev = (cp->edifftype==YANGDIFF_DT_REVISION) ? TRUE : FALSE;
+
+    /* figure out what changed */
+    changecnt = 0;
+    changecnt += status_field_changed(YANG_K_STATUS,
+				      oldfeat->status, 
+                                      newfeat->status, 
+				      isrev, 
+                                      &featcdb[0]);
+    changecnt += str_field_changed(YANG_K_DESCRIPTION,
+				   oldfeat->descr, 
+                                   newfeat->descr, 
+				   isrev, 
+                                   &featcdb[1]);
+    changecnt += str_field_changed(YANG_K_REFERENCE,
+				   oldfeat->ref, 
+                                   newfeat->ref, 
+				   isrev, 
+                                   &featcdb[2]);
+
+    changecnt += iffeatureQ_changed(modprefix,
+                                    &oldfeat->iffeatureQ,
+                                    &newfeat->iffeatureQ);
+
+    if (changecnt == 0) {
+	return;
+    }
+
+    /* generate the diff output, based on the requested format */
+    switch (cp->edifftype) {
+    case YANGDIFF_DT_TERSE:
+    case YANGDIFF_DT_NORMAL:
+    case YANGDIFF_DT_REVISION:
+	output_mstart_line(cp, 
+                           YANG_K_FEATURE, 
+                           oldfeat->name, 
+                           TRUE);
+	if (cp->edifftype != YANGDIFF_DT_TERSE) {
+	    indent_in(cp);
+	    for (i=0; i<2; i++) {
+		if (featcdb[i].changed) {
+		    output_cdb_line(cp, &featcdb[i]);
+		}
+	    }
+            output_iffeatureQ_diff(cp,
+                                   modprefix,
+                                   &oldfeat->iffeatureQ,
+                                   &newfeat->iffeatureQ);
+	    indent_out(cp);
+	}
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+} /* output_one_feature_diff */
+
+
+/********************************************************************
+ * FUNCTION output_features_diff
+ * 
+ *  Output the differences report for the features portion
+ *  of two 2 parsed modules
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    oldpcb == old module
+ *    newpcb == new module
+ *
+ *********************************************************************/
+static void
+    output_features_diff (yangdiff_diffparms_t *cp,
+                         yang_pcb_t *oldpcb,
+                         yang_pcb_t *newpcb)
+{
+    ncx_feature_t *oldfeat, *newfeat;
+
+    /* make sure the new 'used' flags are cleared */
+    for (newfeat = (ncx_feature_t *)
+             dlq_firstEntry(&newpcb->top->featureQ);
+	 newfeat != NULL;
+	 newfeat = (ncx_feature_t *)dlq_nextEntry(newfeat)) {
+	newfeat->seen = FALSE;
+    }
+
+    for (oldfeat = (ncx_feature_t *)
+             dlq_firstEntry(&oldpcb->top->featureQ);
+	 oldfeat != NULL;
+	 oldfeat = (ncx_feature_t *)dlq_nextEntry(oldfeat)) {
+
+	/* find this feature in the new module */
+	newfeat = ncx_find_feature(newpcb->top, oldfeat->name);
+	if (newfeat) {
+	    output_one_feature_diff(cp, 
+                                    oldpcb->top->prefix,
+                                    oldfeat, 
+                                    newfeat);
+	    newfeat->seen = TRUE;
+	} else {
+	    /* feature was removed from the new module */
+	    output_diff(cp, 
+                        YANG_K_FEATURE, 
+                        oldfeat->name, 
+                        NULL, 
+                        TRUE);
+	}
+    }
+
+    for (newfeat = (ncx_feature_t *)
+             dlq_firstEntry(&newpcb->top->featureQ);
+	 newfeat != NULL;
+	 newfeat = (ncx_feature_t *)dlq_nextEntry(newfeat)) {
+	if (!newfeat->seen) {
+	    /* this feature-stmt was added in the new version */
+	    output_diff(cp, 
+                        YANG_K_FEATURE,
+                        NULL,
+                        newfeat->name,
+                        TRUE);
+	}
+    }
+
+} /* output_features_diff */
 
 
 /********************************************************************
@@ -651,6 +801,8 @@ static void
         res = ncx_get_version(versionbuffer, NCX_VERSION_BUFFSIZE);
         if (res == NO_ERR) {
             ses_putstr(cp->scb, versionbuffer);
+            ses_putstr(cp->scb, (const xmlChar *)"\n// ");
+            ses_putstr(cp->scb, (const xmlChar *)COPYRIGHT_STRING);
         } else {
             SET_ERROR(res);
         }
@@ -733,7 +885,10 @@ static status_t
     }
 
     /* all extensions */
-    output_extension_diff(cp, oldpcb, newpcb);
+    output_extensions_diff(cp, oldpcb, newpcb);
+
+    /* all features */
+    output_features_diff(cp, oldpcb, newpcb);
 
     /* global typedefs */
     output_typedefQ_diff(cp, 

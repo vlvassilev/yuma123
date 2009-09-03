@@ -102,11 +102,18 @@ static uint32
     mustQ_changed (dlq_hdr_t *oldQ,
 		   dlq_hdr_t *newQ)
 {
-
     xpath_pcb_t *oldm, *newm;
+    uint32       oldcnt, newcnt;
 
-    if (dlq_count(oldQ) != dlq_count(newQ)) {
+    oldcnt = dlq_count(oldQ);
+    newcnt = dlq_count(newQ);
+
+    if (oldcnt != newcnt) {
 	return 1;
+    }
+
+    if (oldcnt == 0) {
+	return 0;
     }
 
     for (newm = (xpath_pcb_t *)dlq_firstEntry(newQ);
@@ -1887,6 +1894,12 @@ static uint32
 	return 1;
     }
 
+    if (iffeatureQ_changed(obj_get_mod_prefix(oldobj),
+                           &oldobj->iffeatureQ,
+                           &newobj->iffeatureQ)) {
+        return 1;
+    }
+
     switch (oldobj->objtype) {
     case OBJ_TYP_CONTAINER:
 	return container_changed(cp, oldobj, newobj);
@@ -1951,6 +1964,11 @@ static void
 		    obj_get_typestr(newobj), 
 		    TRUE);
     } else {
+        output_iffeatureQ_diff(cp,
+                               obj_get_mod_prefix(oldobj),
+                               &oldobj->iffeatureQ,
+                               &newobj->iffeatureQ);
+
 	switch (oldobj->objtype) {
 	case OBJ_TYP_CONTAINER:
 	    output_container_diff(cp, oldobj, newobj);

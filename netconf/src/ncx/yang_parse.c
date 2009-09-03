@@ -3199,7 +3199,8 @@ static status_t
     res = yang_obj_resolve_final(pcb,
                                  tkc, 
                                  mod, 
-                                 &mod->datadefQ);
+                                 &mod->datadefQ,
+                                 FALSE);
     CHK_EXIT(res, retres);
 
     /* Validate all the XPath expressions within all cooked objects */

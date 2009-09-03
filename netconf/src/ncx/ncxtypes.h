@@ -497,6 +497,7 @@ typedef struct ncx_iffeature_t_ {
     xmlChar               *name;
     struct ncx_feature_t_ *feature;
     ncx_error_t            tkerr;
+    boolean                seen;          /* for yangdiff */
 } ncx_iffeature_t;
 
 
@@ -512,6 +513,7 @@ typedef struct ncx_feature_t_ {
     status_t            res;    /* may be stored with errors */
     boolean             enabled;
     ncx_error_t         tkerr;
+    boolean             seen;          /* for yangdiff */
 } ncx_feature_t;
 
 /* struct for holding r/o pointer to generic internal node 

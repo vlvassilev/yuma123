@@ -166,19 +166,31 @@ static boolean
     is_default (ncx_withdefaults_t withdef,
 		const val_value_t *val)
 {
+    boolean retval;
+
+    retval = FALSE;
+
     switch (withdef) {
-    case NCX_WITHDEF_NONE:
-	return FALSE;
-    case NCX_WITHDEF_TRIM:
-	return val_is_default(val);
-    case NCX_WITHDEF_EXPLICIT:
-	return val_set_by_default(val);
     case NCX_WITHDEF_REPORT_ALL:
-	return FALSE;
+	break;
+    case NCX_WITHDEF_TRIM:
+	retval = val_is_default(val);
+        break;
+    case NCX_WITHDEF_EXPLICIT:
+        if (!val_set_by_default(val)) {
+            /* set by operator, never a default */
+            retval = FALSE;
+        } else {
+            /* set by server, could be a default */
+            retval = val_is_default(val);
+        }
+        break;
+    case NCX_WITHDEF_NONE:
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
     }
+
+    return retval;
 
 } /* is_default */
 

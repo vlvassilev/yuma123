@@ -948,6 +948,7 @@ static status_t
 
     obj->parent = parent;
     obj->grp = grp;
+    obj->nsid = mod->nsid;
 
     leaf = obj->def.leaf;
     if (que == &mod->datadefQ) {
@@ -1190,6 +1191,7 @@ static status_t
 
     obj->parent = parent;
     obj->grp = grp;
+    obj->nsid = mod->nsid;
 
     llist = obj->def.leaflist;
     if (que == &mod->datadefQ) {
@@ -1432,6 +1434,7 @@ static status_t
 
     obj->parent = parent;
     obj->grp = grp;
+    obj->nsid = mod->nsid;
 
     list = obj->def.list;
     if (que == &mod->datadefQ) {
@@ -1709,7 +1712,7 @@ static status_t
                   TK_CUR_LPOS(tkc));
 
     obj->parent = parent;
-
+    obj->nsid = mod->nsid;
     cas = obj->def.cas;
 
     /* Get the mandatory case name */
@@ -1957,6 +1960,7 @@ static status_t
 
     obj->parent = parent;
     obj->grp = grp;
+    obj->nsid = mod->nsid;
 
     choic = obj->def.choic;
     if (que == &mod->datadefQ) {
@@ -2235,6 +2239,7 @@ static status_t
                   TK_CUR_LPOS(tkc));
 
     obj->parent = parent;
+    obj->nsid = mod->nsid;
 
     /* Get the mandatory refine target */
     res = yang_consume_string(tkc, mod, &refine->target);
@@ -2465,6 +2470,7 @@ static status_t
                   TK_CUR_LPOS(tkc));
 
     obj->parent = parent;
+    obj->nsid = mod->nsid;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
 	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
@@ -2670,7 +2676,7 @@ static status_t
                   TK_CUR_LPOS(tkc));
 
     obj->parent = parent;
-
+    obj->nsid = mod->nsid;
     rpcio = obj->def.rpcio;
 	
     /* Get the mandatory RPC method name */
@@ -2950,6 +2956,7 @@ static status_t
                   TK_CUR_LPOS(tkc));
 
     obj->parent = parent;
+    obj->nsid = mod->nsid;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
 	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
@@ -3243,6 +3250,7 @@ static status_t
                   TK_CUR_LPOS(tkc));
 
     obj->parent = parent;
+    obj->nsid = mod->nsid;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
 	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
@@ -3481,6 +3489,7 @@ static status_t
 
     obj->parent = parent;
     obj->grp = grp;
+    obj->nsid = mod->nsid;
     if (que == &mod->datadefQ) {
 	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
@@ -5382,6 +5391,10 @@ static status_t
             ncx_print_errormsg(tkc, mod, res);
             res = NO_ERR;
         }
+    }
+
+    if (obj_is_cli(obj)) {
+        obj_sort_children(obj);
     }
 
     return res;

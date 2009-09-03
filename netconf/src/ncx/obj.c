@@ -4910,7 +4910,9 @@ obj_template_t *
                   srcobj->tkerr.linenum,
                   srcobj->tkerr.linepos);
     newobj->flags = (srcobj->flags | OBJ_FL_CLONE);
+    newobj->nsid = mod->nsid;
 
+    /* do not set the group in a clone */
     /* newobj->grp = srcobj->grp; */
 
     mobj = NULL;
@@ -7191,7 +7193,7 @@ xmlns_id_t
     }
 #endif
 
-    return obj->tkerr.mod->nsid;
+    return obj->nsid;
 
 }  /* obj_get_nsid */
 
@@ -9538,6 +9540,86 @@ boolean
     return FALSE;
 
 }  /* obj_has_when_stmts */
+
+
+/********************************************************************
+ * FUNCTION obj_sort_children
+ * 
+ * Check all the child nodes of the specified object
+ * and rearrange them into alphabetical order,
+ * based on the element local-name.
+ *
+ * ONLY SAFE TO USE FOR ncx:cli CONTAINERS
+ * YANG DATA CONTENT ORDER NEEDS TO BE PRESERVED
+ *
+ * INPUTS:
+ *    obj == object template to reorder
+ *********************************************************************/
+void
+    obj_sort_children (obj_template_t *obj)
+{
+    obj_template_t    *newchild, *curchild;
+    dlq_hdr_t         *datadefQ, sortQ;
+    boolean            done;
+    int                retval;
+
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    datadefQ = obj_get_datadefQ(obj);
+    if (datadefQ == NULL) {
+        return;
+    } 
+
+    dlq_createSQue(&sortQ);
+    newchild = (obj_template_t *)dlq_deque(datadefQ);
+    while (newchild != NULL) {
+        if (!obj_has_name(newchild)) {
+            dlq_enque(newchild, &sortQ);
+        } else {
+            obj_sort_children(newchild);
+
+            done = FALSE;
+            for (curchild = (obj_template_t *)
+                     dlq_firstEntry(&sortQ);
+                 curchild != NULL && !done;
+                 curchild = (obj_template_t *)
+                     dlq_nextEntry(curchild)) {
+            
+                if (!obj_has_name(curchild)) {
+                    continue;
+                }
+
+                retval = xml_strcmp(obj_get_name(newchild),
+                                    obj_get_name(curchild));
+                if (retval == 0) {        
+                   if (obj_get_nsid(newchild) 
+                        < obj_get_nsid(curchild)) {
+                        dlq_insertAhead(newchild, curchild);
+                    } else {
+                        dlq_insertAfter(newchild, curchild);                    
+                    }
+                   done = TRUE;
+                } else if (retval < 0) {
+                    dlq_insertAhead(newchild, curchild);
+                    done = TRUE;
+                }
+            }
+            
+            if (!done) {
+                dlq_enque(newchild, &sortQ);
+            }
+        }
+        newchild = (obj_template_t *)dlq_deque(datadefQ);
+    }
+
+    dlq_block_enque(&sortQ, datadefQ);
+
+}  /* obj_sort_children */
 
 
 /* END obj.c */

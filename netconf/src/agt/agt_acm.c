@@ -1676,9 +1676,13 @@ status_t
                              AGT_ACM_MODULE,
                              nacm_N_nacm);
     if (nacmval) {
+        /* add /nacm/noRule*Default if they
+         * are not already set
+         */
+        res = val_add_defaults(nacmval, FALSE);
+        
         /* minimum init done OK, so just exit */
-        agt_acm_init_done = TRUE;
-        return NO_ERR;
+        return res;
     }
         
     /* did not find the /nacm node so create one;

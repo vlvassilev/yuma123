@@ -712,6 +712,7 @@ static void
     grp_template_t    *grp;
     obj_template_t    *obj;
     ext_template_t    *ext;
+    ncx_feature_t     *feature;
 
     if (mod->ismod) {
         sprintf(buff, "\nnamespace %s", mod->ns);
@@ -763,6 +764,13 @@ static void
          ext != NULL;
          ext = (ext_template_t *)dlq_nextEntry(ext)) {
         sprintf(buff, "\nextension %s", ext->name);
+        ses_putstr(scb, (const xmlChar *)buff);
+    }
+
+    for (feature = (ncx_feature_t *)dlq_firstEntry(&mod->featureQ);
+         feature != NULL;
+         feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
+        sprintf(buff, "\nfeature %s", feature->name);
         ses_putstr(scb, (const xmlChar *)buff);
     }
 

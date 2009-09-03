@@ -309,7 +309,7 @@ void
 	}
     }
 
-    if (obj_any_rpcs(&mod->datadefQ)) {
+    if (obj_any_rpcs(&mod->datadefQ) && mode != HELP_MODE_BRIEF) {
 	log_stdout("\n\n  Local Commands\n");
 	dump_rpcQ(&mod->datadefQ, mode, 4);
     }

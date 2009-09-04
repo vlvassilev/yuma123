@@ -2042,6 +2042,7 @@ status_t
     status_t        res;
     xmlns_id_t      nsid;
     uint32          prefixlen, i;
+    boolean         isnetconf;
 
 #ifdef DEBUG
     if (!mod) {
@@ -2058,10 +2059,15 @@ status_t
     }
 
     res = NO_ERR;
+    isnetconf = FALSE;
 
     /* if this is the XSD module, then use the NS ID already registered */
     if (!xml_strcmp(mod->name, NCX_EL_XSD)) {
 	mod->nsid = xmlns_xs_id();
+    } else if (!xml_strcmp(mod->name,
+                           (const xmlChar *)"ietf-netconf")) {
+        mod->nsid = xmlns_nc_id();
+        isnetconf = TRUE;
     } else {
         mod->nsid = xmlns_find_ns_by_module(mod->name);
     }
@@ -2071,12 +2077,14 @@ status_t
         nsid = xmlns_find_ns_by_prefix(mod->prefix);
         if (nsid) {
             modname = xmlns_get_module(nsid);
-            if (xml_strcmp(mod->name, modname)) {
-                log_warn("\nWarning: prefix '%s' already in use "
-                         "by module '%s'",
-                         mod->prefix, 
-                         modname);
-                ncx_print_errormsg(NULL, mod, ERR_NCX_DUP_PREFIX);
+            if (xml_strcmp(mod->name, modname) && !isnetconf) {
+                if (ncx_warning_enabled(ERR_NCX_DUP_PREFIX)) {
+                    log_warn("\nWarning: prefix '%s' already in use "
+                             "by module '%s'",
+                             mod->prefix, 
+                             modname);
+                    ncx_print_errormsg(NULL, mod, ERR_NCX_DUP_PREFIX);
+                }
                 
                 /* redo the module xmlprefix */
                 prefixlen = xml_strlen(mod->prefix);
@@ -2112,6 +2120,8 @@ status_t
     if (ns) {
         if (tempmod) {
             mod->nsid = ns->ns_id;
+        } else if (isnetconf) {
+            ;
         } else if (xml_strcmp(mod->name, ns->ns_module) &&
             xml_strcmp(ns->ns_module, NCX_OWNER)) {
             /* this NS string already registered to another module */
@@ -2126,7 +2136,7 @@ status_t
             /* same owner so okay */
             mod->nsid = ns->ns_id;
         }
-    } else {
+    } else if (!isnetconf) {
         res = xmlns_register_ns(mod->ns, 
                                 (mod->xmlprefix) 
                                 ? mod->xmlprefix : mod->prefix, 

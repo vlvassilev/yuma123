@@ -477,6 +477,14 @@ static status_t
         cp->output_isdir = ncxmod_test_subdir(cp->full_output);
     }
 
+    /* show-errors parameter */
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         NCX_EL_SHOW_ERRORS);
+    if (val && val->res == NO_ERR) {
+        cp->showerrorsmode = TRUE;
+    }
+
     /* simurls parameter */
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
@@ -1722,7 +1730,7 @@ int
 {
     val_value_t  *val;
     status_t      res;
-    boolean       done;
+    boolean       done, quickexit;
     xmlChar       buffer[NCX_VERSION_BUFFSIZE];
 
 #ifdef MEMORY_DEBUG
@@ -1734,10 +1742,17 @@ int
 
     if (res == NO_ERR) {
 
-        if (cvtparms.versionmode) {
+        quickexit = cvtparms.helpmode ||
+            cvtparms.versionmode ||
+            cvtparms.showerrorsmode;
+
+        if (cvtparms.versionmode || cvtparms.showerrorsmode) {
             res = ncx_get_version(buffer, NCX_VERSION_BUFFSIZE);
             if (res == NO_ERR) {
-                log_write("yangdump %s\n", buffer);
+                log_write("\nyangdump %s", buffer);
+                if (cvtparms.versionmode) {
+                    log_write("\n");
+                }
             } else {
                 SET_ERROR(res);
             }
@@ -1747,7 +1762,12 @@ int
                                 YANGDUMP_CONTAINER, 
                                 cvtparms.helpsubmode);
         }
-        if (!(cvtparms.helpmode || cvtparms.versionmode)) {
+        if (cvtparms.showerrorsmode) {
+            log_write(" errors and warnings\n");
+            print_error_messages();
+        }
+
+        if (!quickexit) {
             /* check if subdir search suppression is requested */
             if (cvtparms.nosubdirs) {
                 ncxmod_set_subdirs(FALSE);

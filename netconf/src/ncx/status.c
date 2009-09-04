@@ -208,9 +208,9 @@ const char *
     case ERR_INTERNAL_VAL:
 	return "invalid internal value";
     case ERR_INTERNAL_BUFF:
-	return "internal buffer";
+	return "internal buffering failed";
     case ERR_INTERNAL_QDEL:
-	return "queue delete";	
+	return "invalid queue deletion";
     case ERR_INTERNAL_INIT_SEQ:
 	return "wrong init sequence";
     case ERR_QNODE_NOT_HDR:
@@ -224,7 +224,7 @@ const char *
     case ERR_TOO_MANY_ENTRIES:
 	return "too many entries";
     case ERR_XML2_FAILED:
-	return "libxml2";
+	return "libxml2 operation failed";
     case ERR_FIL_OPEN:
 	return "cannot open file";
     case ERR_FIL_READ:
@@ -295,13 +295,13 @@ const char *
     case ERR_MISSING_FORM_PARAMS:
 	return "missing form params";
     case ERR_FORM_STATE:
-	return "form state";
+	return "invalid form state";
     case ERR_DUP_NS:
 	return "duplicate namespace";
     case ERR_XML_READER_START_FAILED:
 	return "xml reader start failed";
     case ERR_XML_READER_READ:
-	return "xml reader";
+	return "xml reader read failed";
     case ERR_XML_READER_NODETYP:
 	return "wrong XML node type";
     case ERR_XML_READER_NULLNAME:
@@ -385,7 +385,7 @@ const char *
     case ERR_NCX_TYPE_NOT_MDATA:
 	return "type not mdata";
     case ERR_NCX_MDATA_NOT_ALLOWED:
-	return "mdata not allowed";
+	return "meta-data not allowed";
     case ERR_NCX_TOP_NOT_FOUND:
 	return "top not found";
 
@@ -807,6 +807,53 @@ void
     }
 
 } /* print_error_count */
+
+
+/********************************************************************
+* FUNCTION print_error_messages
+*
+* Print the error number and error message for each error
+* to STDOUT or the logfile
+*
+*********************************************************************/
+void
+    print_error_messages (void)
+{
+    status_t   res;
+
+    /* internal errors */
+    for (res = NO_ERR; res < ERR_LAST_INT_ERR; res++) {
+        log_write("\n%3d\t%s",
+                  res,
+                  get_error_string(res));
+    }
+
+    /* system errors */
+    for (res = ERR_SYS_BASE; res < ERR_LAST_SYS_ERR; res++) {
+        log_write("\n%3d\t%s",
+                  res,
+                  get_error_string(res));
+    }
+
+    /* user errors */
+    for (res = ERR_USR_BASE; res < ERR_LAST_USR_ERR; res++) {
+        log_write("\n%3d\t%s",
+                  res,
+                  get_error_string(res));
+    }
+
+    /* warnings */
+    for (res = ERR_WARN_BASE; res < ERR_LAST_WARN; res++) {
+        log_write("\n%3d\t%s",
+                  res,
+                  get_error_string(res));
+    }
+
+    log_write("\n");
+
+
+} /* print_error_messages */
+
 
 
 /* END file status.c */

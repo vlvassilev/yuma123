@@ -961,8 +961,7 @@ static status_t
                                     &mod->typnameQ);
 	    if (!name) {
                 /* this must be a local type name in a grouping.
-                 * it could be a local type inside a node
-                 * inside a grouping from another module
+                 * it could also be a local type inside a node
                  */
 		name = typdef->def.named.typ->name;
 	    }
@@ -3443,6 +3442,80 @@ status_t
     return add_basetype_attr(TRUE, mod, typdef, val);
 
 }   /* xsd_add_type_attr */
+
+
+/********************************************************************
+* FUNCTION test_basetype_attr
+* 
+*   Test for the OK generate a type or base attribute
+*
+* INPUTS:
+*    mod == module in progress
+*    typdef == typ_def for the typ_template struct to use for 
+*              the attribute list source
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    test_basetype_attr (const ncx_module_t *mod,
+                        const typ_def_t *typdef)
+{
+    status_t       res;
+    xmlns_id_t     typ_id;
+    ncx_btype_t    btyp;
+    const xmlChar *test;
+
+#ifdef DEBUG
+    if (mod == NULL || typdef == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+
+    /* figure out the correct namespace and name for the typename */
+    switch (typdef->class) {
+    case NCX_CL_BASE:
+    case NCX_CL_SIMPLE:
+	break;
+    case NCX_CL_COMPLEX:
+	btyp = typ_get_basetype(typdef);
+	switch (btyp) {
+	case NCX_BT_ANY:
+	    break;
+	default:
+	    res = SET_ERROR(ERR_INTERNAL_VAL);
+	}
+	break;
+    case NCX_CL_NAMED:
+	typ_id = typdef->def.named.typ->nsid;
+	if (typ_id == 0) {
+	    /* inside a grouping, include submod, etc.
+	     * this has to be a type in the current [sub]module
+	     * or it would have a NSID assigned already
+	     *
+	     * The design of the local typename to 
+	     * global XSD typename translation does not
+	     * put top-level typedefs in the typenameQ.
+	     * They are already in the registry, so name collision
+	     * can be checked that way
+	     */
+	    test = ncx_find_typname(typdef->def.named.typ, 
+                                    &mod->typnameQ);
+            if (test == NULL) {
+                res = ERR_NCX_SKIPPED;
+	    }
+	}
+	break;
+    case NCX_CL_REF:
+    default:
+	res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    return res;
+
+}   /* test_basetype_attr */
 
 
 /* END file xsd_util.c */

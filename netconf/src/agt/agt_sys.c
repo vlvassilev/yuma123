@@ -7,6 +7,7 @@ container /system
 leaf /system/sysName
 leaf /system/sysCurrentDateTime
 leaf /system/sysBootDateTime
+leaf /system/sysLogLevel
 notification /sysStartup
 leaf /sysStartup/startupSource
 list /sysStartup/bootError
@@ -43,7 +44,8 @@ leaf /sysSessionEnd/userName
 leaf /sysSessionEnd/sessionId
 leaf /sysSessionEnd/remoteHost
 leaf /sysSessionEnd/terminationReason
-
+rpc /set-log-level
+leaf rpc/input/log-level
 
 *********************************************************************
 *                                                                   *
@@ -187,6 +189,7 @@ date         init     comment
 #define system_N_sysName (const xmlChar *)"sysName"
 #define system_N_sysCurrentDateTime (const xmlChar *)"sysCurrentDateTime"
 #define system_N_sysBootDateTime (const xmlChar *)"sysBootDateTime"
+#define system_N_sysLogLevel (const xmlChar *)"sysLogLevel"
 
 #define system_N_sysStartup (const xmlChar *)"sysStartup"
 #define system_N_sysConfigChange (const xmlChar *)"sysConfigChange"
@@ -215,6 +218,10 @@ date         init     comment
 #define system_N_version (const xmlChar *)"version"
 #define system_N_machine (const xmlChar *)"machine"
 #define system_N_nodename (const xmlChar *)"nodename"
+
+#define system_N_set_log_level (const xmlChar *)"set-log-level"
+#define system_N_log_level (const xmlChar *)"log-level"
+
 
 /********************************************************************
 *                                                                   *
@@ -280,6 +287,98 @@ static status_t
     }
 
 } /* get_currentDateTime */
+
+
+/********************************************************************
+* FUNCTION get_currentLogLevel
+*
+* <get> operation handler for the sysCurrentDateTime leaf
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    get_currentLogLevel (ses_cb_t *scb,
+			 getcb_mode_t cbmode,
+			 const val_value_t *virval,
+			 val_value_t  *dstval)
+{
+    const xmlChar  *loglevelstr;
+    log_debug_t     loglevel;
+    int32           dummyval;
+    status_t        res;
+
+    (void)scb;
+    (void)virval;
+    dummyval = 0;
+    res = NO_ERR;
+
+    if (cbmode == GETCB_GET_VALUE) {
+        loglevel = log_get_debug_level();
+        loglevelstr = log_get_debug_level_string(loglevel);
+        if (loglevelstr == NULL) {
+            res = ERR_NCX_OPERATION_FAILED;
+        } else {
+            res = ncx_set_enum(loglevelstr, VAL_ENU(dstval));
+        }
+    } else {
+	res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+    return res;
+
+} /* get_currentLogLevel */
+
+
+/********************************************************************
+* FUNCTION set_log_level_invoke
+*
+* set-log-level : invoke params callback
+*
+* INPUTS:
+*    see rpc/agt_rpc.h
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    set_log_level_invoke (ses_cb_t *scb,
+                          rpc_msg_t *msg,
+                          xml_node_t *methnode)
+{
+    val_value_t     *levelval;
+    log_debug_t      levelenum;
+    status_t         res;
+
+    (void)scb;
+    (void)methnode;
+
+    res = NO_ERR;
+
+    /* get the level parameter */
+    levelval = val_find_child(msg->rpc_input, 
+                              AGT_SYS_MODULE,
+                              NCX_EL_LOGLEVEL);
+    if (levelval) {
+        if (levelval->res == NO_ERR) {
+            levelenum = 
+                log_get_debug_level_enum((const char *)
+                                         VAL_ENUM_NAME(levelval));
+            if (levelenum != LOG_DEBUG_NONE) {
+                log_set_debug_level(levelenum);
+            } else {
+                res = ERR_NCX_OPERATION_FAILED;
+            }
+        } else {
+            res = levelval->res;
+        }
+    }
+
+    return res;
+
+} /* set_log_level_invoke */
 
 
 /********************************************************************
@@ -571,6 +670,15 @@ status_t
 	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
+    /* set up set-log-level RPC operation */
+    res = agt_rpc_register_method(AGT_SYS_MODULE,
+                                  system_N_set_log_level,
+                                  AGT_RPC_PH_INVOKE,
+                                  set_log_level_invoke);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
     /* get the running config to add some static data into */
     runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
     if (!runningcfg || !runningcfg->root) {
@@ -619,6 +727,17 @@ status_t
 			     system_N_sysBootDateTime,
 			     tstampbuff,
 			     &res);
+    if (childval) {
+	val_add_child(childval, topval);
+    } else {
+        return res;
+    }
+
+    /* add /system/sysLogLevel */
+    childval = agt_make_virtual_leaf(systemobj,
+				     system_N_sysLogLevel,
+				     get_currentLogLevel,
+				     &res);
     if (childval) {
 	val_add_child(childval, topval);
     } else {
@@ -726,6 +845,8 @@ void
     if (agt_sys_init_done) {
 	init_static_sys_vars();
 	agt_sys_init_done = FALSE;
+        agt_rpc_unregister_method(AGT_SYS_MODULE,
+                                  system_N_set_log_level);
     }
 }  /* agt_sys_cleanup */
 

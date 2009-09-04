@@ -558,10 +558,11 @@ typedef struct ncx_identity_t_ {
     ncx_status_t          status;
     dlq_hdr_t             childQ;          /* Q of ncx_idlink_t */
     dlq_hdr_t             appinfoQ;       /* Q of ncx_appinfo_t */
-    status_t              res;    /* may be stored with errors */
+    status_t              res;     /* may be stored with errors */
     boolean               isroot;    /* base==NULL not an error */
     ncx_idlink_t          idlink;
     ncx_error_t           tkerr;
+    boolean               seen;                  /* for yangcli */
 } ncx_identity_t;
 
 

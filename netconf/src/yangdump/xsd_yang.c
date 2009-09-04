@@ -1045,6 +1045,8 @@ static status_t
 	return res;
     }
 
+    res = test_basetype_attr(mod, typdef);
+
     switch (typdef->class) {
     case NCX_CL_BASE:
 	empty = TRUE;

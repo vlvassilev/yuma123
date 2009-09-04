@@ -556,6 +556,7 @@ date	     init     comment
 #define NCX_EL_SESSION_ID      (const xmlChar *)"session-id"
 #define NCX_EL_SET             (const xmlChar *)"set"
 #define NCX_EL_SHORT           (const xmlChar *)"short"
+#define NCX_EL_SHOW_ERRORS     (const xmlChar *)"show-errors"
 #define NCX_EL_SHUTDOWN        (const xmlChar *)"shutdown"
 #define NCX_EL_SLIST           (const xmlChar *)"slist"
 #define NCX_EL_SOURCE          (const xmlChar *)"source"

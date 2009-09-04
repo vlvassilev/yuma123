@@ -549,7 +549,7 @@ static void
                              ncx_feature_t *oldfeat,
                              ncx_feature_t *newfeat)
 {
-    yangdiff_cdb_t  featcdb[5];
+    yangdiff_cdb_t  featcdb[3];
     uint32          changecnt, i;
     boolean         isrev;
 
@@ -592,7 +592,7 @@ static void
                            TRUE);
 	if (cp->edifftype != YANGDIFF_DT_TERSE) {
 	    indent_in(cp);
-	    for (i=0; i<2; i++) {
+	    for (i=0; i<3; i++) {
 		if (featcdb[i].changed) {
 		    output_cdb_line(cp, &featcdb[i]);
 		}
@@ -676,6 +676,154 @@ static void
     }
 
 } /* output_features_diff */
+
+
+/********************************************************************
+ * FUNCTION output_one_identity_diff
+ * 
+ *  Output the differences report for a YANG identity
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    oldident == old identity
+ *    newident == new identity
+ *
+ *********************************************************************/
+static void
+    output_one_identity_diff (yangdiff_diffparms_t *cp,
+                              ncx_identity_t *oldident,
+                              ncx_identity_t *newident)
+{
+    yangdiff_cdb_t  identcdb[5];
+    uint32          changecnt, i;
+    boolean         isrev;
+
+    isrev = (cp->edifftype==YANGDIFF_DT_REVISION) ? TRUE : FALSE;
+
+    /* figure out what changed */
+    changecnt = 0;
+    changecnt += status_field_changed(YANG_K_STATUS,
+				      oldident->status, 
+                                      newident->status, 
+				      isrev, 
+                                      &identcdb[0]);
+    changecnt += str_field_changed(YANG_K_DESCRIPTION,
+				   oldident->descr, 
+                                   newident->descr, 
+				   isrev, 
+                                   &identcdb[1]);
+    changecnt += str_field_changed(YANG_K_REFERENCE,
+				   oldident->ref, 
+                                   newident->ref, 
+				   isrev, 
+                                   &identcdb[2]);
+    changecnt += str_field_changed((const xmlChar *)"base prefix",
+				   oldident->baseprefix, 
+                                   newident->baseprefix, 
+				   isrev, 
+                                   &identcdb[3]);
+
+    changecnt += str_field_changed(YANG_K_BASE,
+				   oldident->basename, 
+                                   newident->basename, 
+				   isrev, 
+                                   &identcdb[4]);
+
+    if (changecnt == 0) {
+	return;
+    }
+
+    /* generate the diff output, based on the requested format */
+    switch (cp->edifftype) {
+    case YANGDIFF_DT_TERSE:
+    case YANGDIFF_DT_NORMAL:
+    case YANGDIFF_DT_REVISION:
+	output_mstart_line(cp, 
+                           YANG_K_IDENTITY, 
+                           oldident->name, 
+                           TRUE);
+	if (cp->edifftype != YANGDIFF_DT_TERSE) {
+	    indent_in(cp);
+	    for (i=0; i<5; i++) {
+		if (identcdb[i].changed) {
+		    output_cdb_line(cp, &identcdb[i]);
+		}
+	    }
+	    indent_out(cp);
+	}
+	break;
+    default:
+	SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+} /* output_one_identity_diff */
+
+
+/********************************************************************
+ * FUNCTION output_identities_diff
+ * 
+ *  Output the differences report for the identities portion
+ *  of two 2 parsed modules
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    oldpcb == old module
+ *    newpcb == new module
+ *
+ *********************************************************************/
+static void
+    output_identities_diff (yangdiff_diffparms_t *cp,
+                            yang_pcb_t *oldpcb,
+                            yang_pcb_t *newpcb)
+{
+    ncx_identity_t *oldident, *newident;
+
+    /* make sure the new 'used' flags are cleared */
+    for (newident = (ncx_identity_t *)
+             dlq_firstEntry(&newpcb->top->identityQ);
+	 newident != NULL;
+	 newident = (ncx_identity_t *)dlq_nextEntry(newident)) {
+	newident->seen = FALSE;
+    }
+
+    for (oldident = (ncx_identity_t *)
+             dlq_firstEntry(&oldpcb->top->identityQ);
+	 oldident != NULL;
+	 oldident = (ncx_identity_t *)dlq_nextEntry(oldident)) {
+
+	/* find this identure in the new module */
+	newident = ncx_find_identity(newpcb->top, 
+                                     oldident->name);
+	if (newident) {
+	    output_one_identity_diff(cp, 
+                                     oldident, 
+                                     newident);
+	    newident->seen = TRUE;
+	} else {
+	    /* identure was removed from the new module */
+	    output_diff(cp, 
+                        YANG_K_IDENTITY, 
+                        oldident->name, 
+                        NULL, 
+                        TRUE);
+	}
+    }
+
+    for (newident = (ncx_identity_t *)
+             dlq_firstEntry(&newpcb->top->identityQ);
+	 newident != NULL;
+	 newident = (ncx_identity_t *)dlq_nextEntry(newident)) {
+	if (!newident->seen) {
+	    /* this identure-stmt was added in the new version */
+	    output_diff(cp, 
+                        YANG_K_IDENTITY,
+                        NULL,
+                        newident->name,
+                        TRUE);
+	}
+    }
+
+} /* output_identities_diff */
 
 
 /********************************************************************
@@ -889,6 +1037,9 @@ static status_t
 
     /* all features */
     output_features_diff(cp, oldpcb, newpcb);
+
+    /* all identities */
+    output_identities_diff(cp, oldpcb, newpcb);
 
     /* global typedefs */
     output_typedefQ_diff(cp, 

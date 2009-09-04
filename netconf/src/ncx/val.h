@@ -166,6 +166,8 @@ date	     init     comment
 
 #define VAL_DOUBLE(V)  ((V)->v.num.d)
 
+#define VAL_ENU(V)     (&(V)->v.enu)
+
 #define VAL_ENUM(V)    ((V)->v.enu.val)
 
 #define VAL_ENUM_NAME(V)    ((V)->v.enu.name)

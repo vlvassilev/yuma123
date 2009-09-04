@@ -291,7 +291,9 @@ extern status_t
 		       const typ_def_t *typdef,
 		       val_value_t *val);
 
-extern xmlChar *
-    xsd_make_default_filename (const ncx_module_t *mod);
+extern status_t
+    test_basetype_attr (const ncx_module_t *mod,
+                        const typ_def_t *typdef);
+
 
 #endif	    /* _H_xsd_util */

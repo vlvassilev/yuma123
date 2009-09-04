@@ -92,6 +92,7 @@ typedef struct yangdump_cvtparms_t_ {
     boolean         exports;
     boolean         helpmode;
     help_mode_t     helpsubmode;
+    boolean         showerrorsmode;
     boolean         identifiers;
     int32           indent;
     boolean         modversion;

@@ -377,4 +377,7 @@ extern void
 extern void
     print_error_count (void);
 
+extern void
+    print_error_messages (void);
+
 #endif     /* _H_status */

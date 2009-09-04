@@ -140,6 +140,7 @@ date         init     comment
 
 #define AGT_SES_SET_MY_SESSION   (const xmlChar *)"set-my-session"
 
+
 /* number of seconds to wait between session timeout checks */
 #define AGT_SES_TIMEOUT_INTERVAL  5
 

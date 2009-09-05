@@ -72,7 +72,9 @@ date	     init     comment
  *
  * INPUTS:
  *   withdef == with-defaults value in affect
- *   nodetyp == node type enumeration
+ *   realtest == FALSE to just check object properties
+ *               in the val->obj template
+ *            == TRUE if OK to check the other fields
  *   mode == void pointer to the node to check
  *
  * RETURNS:
@@ -81,6 +83,7 @@ date	     init     comment
  */
 typedef boolean 
     (*val_nodetest_fn_t) (ncx_withdefaults_t withdef,
+                          boolean realtest,
 			  const val_value_t *node);
 
 

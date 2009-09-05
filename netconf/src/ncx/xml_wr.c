@@ -713,7 +713,7 @@ static void
 
     /* check the user filter callback function */
     if (testfn) {
-	if (!(*testfn)(msg->withdef, val)) {
+	if (!(*testfn)(msg->withdef, TRUE, val)) {
 	    return;   /* skip this entry */
 	}
     }
@@ -1130,7 +1130,6 @@ void
 }  /* xml_wr_begin_elem_ex */
 
 
-
 /********************************************************************
 * FUNCTION xml_wr_begin_elem
 *
@@ -1544,6 +1543,12 @@ void
     realval = NULL;
 
     if (val_is_virtual(val)) {
+        if (testfn) {
+            if (!(*testfn)(msg->withdef, FALSE, val)) {
+                return;
+            }
+        }
+
 	vir = val_get_virtual_value(scb, val, &res);
 	if (!vir) {
 	    if (res != ERR_NCX_SKIPPED) {
@@ -1558,7 +1563,7 @@ void
 
     /* check the user filter callback function */
     if (testfn) {
-	if (!(*testfn)(msg->withdef, out)) {
+	if (!(*testfn)(msg->withdef, TRUE, out)) {
 	    if (vir) {
 		val_free_value(vir);
 	    }

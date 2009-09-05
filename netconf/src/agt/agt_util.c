@@ -1059,17 +1059,24 @@ status_t
 *********************************************************************/
 boolean
     agt_check_config (ncx_withdefaults_t withdef,
+                      boolean realtest,
 		      const val_value_t *node)
 {
     boolean           ret;
 
-    if (node->dataclass == NCX_DC_CONFIG) {
-	ret = check_withdef(withdef, node);
+    if (realtest) {
+        if (node->dataclass == NCX_DC_CONFIG) {
+            ret = check_withdef(withdef, node);
+        } else {
+            /* not a node that should be saved with a copy-config 
+             * to NVRAM
+             */
+            ret = FALSE;
+        }
+    } else if (node->obj) {
+        ret = obj_is_config(node->obj);
     } else {
-	/* not a node that should be saved with a copy-config 
-	 * to NVRAM
-	 */
-	ret = FALSE;
+        ret = TRUE;
     }
 
     return ret;
@@ -1093,6 +1100,7 @@ boolean
 *********************************************************************/
 boolean
     agt_check_default (ncx_withdefaults_t withdef,
+                       boolean realtest,
 		       const val_value_t *node)
 {
     boolean ret;
@@ -1100,8 +1108,10 @@ boolean
     ret = TRUE;
 
     /* check if defaults are suppressed */
-    if (is_default(withdef, node)) {
-	ret = FALSE;
+    if (realtest) {
+        if (is_default(withdef, node)) {
+            ret = FALSE;
+        }
     }
 
     return ret;
@@ -1125,21 +1135,28 @@ boolean
 *********************************************************************/
 boolean
     agt_check_save (ncx_withdefaults_t withdef,
+                    boolean realtest,
 		    const val_value_t *node)
 {
     boolean ret;
 
     ret = TRUE;
-    if (node->dataclass==NCX_DC_CONFIG) {
-	if (is_default(withdef, node)) {
-	    ret = FALSE;
-	}
-    } else {
-	/* not a node that should be saved with a copy-config 
-	 * to NVRAM
-	 */
-	ret = FALSE;
+
+    if (realtest) {
+        if (node->dataclass==NCX_DC_CONFIG) {
+            if (is_default(withdef, node)) {
+                ret = FALSE;
+            }
+        } else {
+            /* not a node that should be saved with a copy-config 
+             * to NVRAM
+             */
+            ret = FALSE;
+        }
+    } else if (node->obj != NULL) {
+        ret = obj_is_config(node->obj);
     }
+
     return ret;
 
 } /* agt_check_save */

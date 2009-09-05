@@ -145,16 +145,18 @@ extern status_t
 			    rpc_msg_t *msg,
 			    val_value_t *filter);
 
-/* filter: returns TRUE for NCX_DC_CONFIG or NCX_DC_TCONFIG 
- *  and with-defaults test passes as well
- */
+
+/* next 3: val_nodetest_fn_t template */
 extern boolean
     agt_check_config (ncx_withdefaults_t withdef,
+                      boolean realtest,
 		      const val_value_t *node);
+
 
 /* default handler when no filter is present */
 extern boolean
     agt_check_default (ncx_withdefaults_t withdef,
+                       boolean realtest,
 		       const val_value_t *node);
 
 
@@ -163,6 +165,7 @@ extern boolean
  */
 extern boolean
     agt_check_save (ncx_withdefaults_t withdef,
+                    boolean realtest,
 		    const val_value_t *node);
 
 /* generate the data that matched the subtree or XPath filter */

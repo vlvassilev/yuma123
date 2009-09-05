@@ -646,6 +646,7 @@ static status_t
          * and if so, if the test node fails the config test 
          */
         if (!getop && !agt_check_config(ses_withdef(scb), 
+                                        TRUE,
                                         filchild)) {
             continue;
         }

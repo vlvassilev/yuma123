@@ -161,6 +161,7 @@ date	     init     comment
 /* if set, value is a list which has unique-stmt already failed */
 #define VAL_FL_UNIDONE   bit5
 
+
 /* macros to access simple value types */
 #define VAL_BOOL(V)    ((V)->v.bool)
 
@@ -235,6 +236,7 @@ typedef struct val_editvars_t_ {
     struct xpath_pcb_t_ *insertxpcb;       /* key attr for insert */
     struct val_value_t_ *insertval;                   /* back-ptr */
     boolean        iskey;                     /* T: key, F: value */
+    boolean        operset;                  /* nc:operation here */
 } val_editvars_t;
 
 
@@ -880,8 +882,18 @@ extern boolean
 		     val_value_t *val2);
 
 extern int32
+    val_compare_ex (val_value_t *val1,
+                    val_value_t *val2,
+                    boolean configonly);
+
+extern int32
     val_compare (val_value_t *val1,
 		 val_value_t *val2);
+
+extern int32
+    val_compare_for_replace (val_value_t *val1,
+                             val_value_t *val2);
+
 
 extern int32
     val_compare_to_string (val_value_t *val1,
@@ -1045,5 +1057,9 @@ extern boolean
 
 extern boolean
     val_is_metaval (const val_value_t *val);
+
+extern void
+    val_move_children (val_value_t *srcval,
+                       val_value_t *destval);
 
 #endif	    /* _H_val */

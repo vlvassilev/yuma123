@@ -998,11 +998,14 @@ status_t
     /* undo the temporary MODPATH setting */
     ncxmod_clear_altpath();
 
-    /* undo the temporary module Q
-     * the server_cb->modQ is full of the live modules
-     * that the server_cb->modptrQ is refereincing
-     */
+    /* undo the temporary module Q */
     ncx_reset_modQ();
+
+    /* set the session module Q so the val.c
+     * functions will find the server modules
+     * instead of the pre-loaded versions
+     */
+    ncx_set_session_modQ(&mscb->temp_modQ);
 
     /* need to wait until all the modules are loaded to
      * go through the modptr list and enable/disable the features

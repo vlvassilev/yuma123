@@ -1111,6 +1111,8 @@ static status_t
 	copy->editvars->curparent = val->editvars->curparent;
 	copy->editvars->editop = val->editvars->editop;
 	copy->editvars->insertop = val->editvars->insertop;
+	copy->editvars->iskey = val->editvars->iskey;
+	copy->editvars->operset = val->editvars->operset;
 
 	if (val->editvars->insertstr) {
 	    copy->editvars->insertstr = 
@@ -3139,7 +3141,7 @@ void
                        startindent, 
                        NCX_DEF_INDENT,
                        DUMP_VAL_LOG, 
-                       NCX_DISPLAY_MODE_PLAIN,
+                       ncx_get_display_mode(),
                        FALSE);
 
 } /* val_dump_value */
@@ -3206,7 +3208,7 @@ void
                        startindent, 
                        NCX_DEF_INDENT,
                        DUMP_VAL_ALT_LOG,
-                       NCX_DISPLAY_MODE_PLAIN,
+                       ncx_get_display_mode(),
                        FALSE);
 
 } /* val_dump_alt_value */
@@ -3238,7 +3240,7 @@ void
                        startindent, 
                        NCX_DEF_INDENT,
                        DUMP_VAL_STDOUT,
-                       NCX_DISPLAY_MODE_PLAIN,
+                       ncx_get_display_mode(),
                        FALSE);
 
 } /* val_stdout_value */
@@ -4589,6 +4591,16 @@ val_value_t *
 
     copy->res = val->res;
     copy->getcb = val->getcb;
+
+    /* clone the XPath control block if there is one */
+    if (val->xpathpcb) {
+        copy->xpathpcb = xpath_clone_pcb(val->xpathpcb);
+        if (copy->xpathpcb == NULL) {
+            *res = ERR_INTERNAL_MEM;
+            val_free_value(copy);
+            return NULL;
+        }
+    }
 
     /* DO NOT COPY copy->index = val->index; */
     /* set copy->indexQ after cloning child nodes is done */
@@ -6713,9 +6725,10 @@ boolean
 
 
 /********************************************************************
-* FUNCTION val_compare
+* FUNCTION val_compare_ex
 * 
 * Compare 2 val_value_t struct value contents
+* Check all or config only
 *
 * Handles NCX_CL_BASE and NCX_CL_SIMPLE data classes
 * by comparing the simple value.
@@ -6728,6 +6741,8 @@ boolean
 * INPUTS:
 *    val1 == first value to check
 *    val2 == second value to check
+*    configonly == TRUE to compare config=true nodes only
+*                  FALSE to compare all nodes
 *
 * RETURNS:
 *   compare result
@@ -6736,23 +6751,43 @@ boolean
 *      1: val1 is greater than val2
 *********************************************************************/
 int32
-    val_compare (val_value_t *val1,
-		 val_value_t *val2)
+    val_compare_ex (val_value_t *val1,
+                    val_value_t *val2,
+                    boolean configonly)
 {
     ncx_btype_t  btyp;
     val_value_t *ch1, *ch2;
     int32        ret;
+    xmlns_id_t   nsid1, nsid2;
 
 #ifdef DEBUG
     if (!val1 || !val2) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return -1;
     }
+#endif
+
     if (val1->btyp != val2->btyp) {
-	SET_ERROR(ERR_INTERNAL_VAL);
+        /* this might happen if a new config tree
+         * has a delete node with no value
+         */
 	return -1;
     }
-#endif
+
+    /* normally ignore all meta-data, except when checking
+     * for nested operations
+     */
+    if (configonly) {
+        /* if there was an nc:operation or YANG attribute in the
+         * node, then do not treat the nodes as equal
+         */
+        if (val1->editvars && val1->editvars->operset) {
+            return -1;
+        }
+        if (val2->editvars && val2->editvars->operset) {
+            return 1;
+        }
+    }
 
     btyp = val1->btyp;
 
@@ -6836,6 +6871,15 @@ int32
 	ch1 = (val_value_t *)dlq_firstEntry(&val1->v.childQ);
 	ch2 = (val_value_t *)dlq_firstEntry(&val2->v.childQ);
 	for (;;) {
+            if (configonly) {
+                while (ch1 && !obj_get_config_flag(ch1->obj)) {
+                    ch1 = (val_value_t *)dlq_nextEntry(ch1);
+                }
+                while (ch2 && !obj_get_config_flag(ch2->obj)) {
+                    ch2 = (val_value_t *)dlq_nextEntry(ch2);
+                }
+            }
+
 	    /* check if both child nodes exist */
 	    if (!ch1 && !ch2) {
 		return 0;
@@ -6844,18 +6888,28 @@ int32
 	    } else if (!ch2) {
 		return 1;
 	    }
-	    
-	    /* check if both child nodes have the same name */
-	    ret = xml_strcmp(ch1->name, ch2->name);
-	    if (ret) {
-		return ret;
-	    } else {
-		/* check if they have same value */
-		ret = val_compare(ch1, ch2);
-		if (ret) {
-		    return ret;
-		}
-	    }
+
+            /* check if the namespaces are the same */
+            nsid1 = val_get_nsid(ch1);
+            nsid2 = val_get_nsid(ch1);
+
+            if (nsid1 < nsid2) {
+                return -1;
+            } else if (nsid1 > nsid2) {
+                return 1;
+            }
+
+            /* check if both child nodes have the same name */
+            ret = xml_strcmp(ch1->name, ch2->name);
+            if (ret) {
+                return ret;
+            }
+
+            /* check if they have same value */
+            ret = val_compare_ex(ch1, ch2, configonly);
+            if (ret) {
+                return ret;
+            }
 
 	    /* get the next pair of child nodes to check */
 	    ch1 = (val_value_t *)dlq_nextEntry(ch1);
@@ -6876,6 +6930,37 @@ int32
     }
     return ret;
 
+}  /* val_compare_ex */
+
+
+/********************************************************************
+* FUNCTION val_compare
+* 
+* Compare 2 val_value_t struct value contents
+*
+* Handles NCX_CL_BASE and NCX_CL_SIMPLE data classes
+* by comparing the simple value.
+*
+* Handle NCX_CL_COMPLEX by checking the index if needed
+* and then checking all the child nodes recursively
+*
+* !!!! Meta-value contents are ignored for this test !!!!
+* 
+* INPUTS:
+*    val1 == first value to check
+*    val2 == second value to check
+*
+* RETURNS:
+*   compare result
+*     -1: val1 is less than val2 (if complex just different or error)
+*      0: val1 is the same as val2 
+*      1: val1 is greater than val2
+*********************************************************************/
+int32
+    val_compare (val_value_t *val1,
+		 val_value_t *val2)
+{
+    return val_compare_ex(val1, val2, FALSE);
 }  /* val_compare */
 
 
@@ -6966,6 +7051,118 @@ int32
     return retval;
 
 }  /* val_compare_to_string */
+
+
+/********************************************************************
+* FUNCTION val_compare_for_replace
+* 
+* Compare 2 val_value_t struct value contents
+* for the nc:operation=replace procedures
+* Only check the child nodes to see if the
+* config nodes are the same
+*
+* !!!! Meta-value contents are ignored for this test !!!!
+* 
+* INPUTS:
+*    val1 == new value to check
+*    val2 == current value to check
+*
+* RETURNS:
+*   compare result
+*     -1: val1 is less than val2 (if complex just different or error)
+*      0: val1 is the same as val2 
+*      1: val1 is greater than val2
+*********************************************************************/
+int32
+    val_compare_for_replace (val_value_t *val1,
+                             val_value_t *val2)
+{
+    val_value_t *ch1, *ch2;
+    int32        ret;
+    xmlns_id_t   nsid1, nsid2;
+
+#ifdef DEBUG
+    if (!val1 || !val2) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return -1;
+    }
+#endif
+
+    ret = 0;
+
+    switch (val1->btyp) {
+    case NCX_BT_LIST:
+	ret = index_match(val1, val2);
+	if (ret) {
+	    break;
+	} /* else drop though and check values */
+    case NCX_BT_ANY:
+    case NCX_BT_CONTAINER:
+    case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
+	ch1 = (val_value_t *)dlq_firstEntry(&val1->v.childQ);
+	ch2 = (val_value_t *)dlq_firstEntry(&val2->v.childQ);
+	for (;;) {
+            while (ch1 && !obj_get_config_flag(ch1->obj)) {
+                ch1 = (val_value_t *)dlq_nextEntry(ch1);
+            }
+            while (ch2 && !obj_get_config_flag(ch2->obj)) {
+                ch2 = (val_value_t *)dlq_nextEntry(ch2);
+            }
+
+	    /* check if both child nodes exist */
+	    if (!ch1 && !ch2) {
+		return 0;
+	    } else if (!ch1) {
+		return -1;
+	    } else if (!ch2) {
+		return 1;
+	    }
+
+            /* check if the namespaces are the same */
+            nsid1 = val_get_nsid(ch1);
+            nsid2 = val_get_nsid(ch1);
+
+            if (nsid1 < nsid2) {
+                return -1;
+            } else if (nsid1 > nsid2) {
+                return 1;
+            }
+
+            /* check if both child nodes have the same name */
+            ret = xml_strcmp(ch1->name, ch2->name);
+            if (ret) {
+                return ret;
+            }
+
+            /* check if they have same value */
+            if (ch1->typdef && ch2->typdef) {
+                /* these are both leafs */
+                ret = val_compare_ex(ch1, ch2, TRUE);
+            } else {
+                /* assume they are the same complex object type
+                 * do not start the replace operation at this node
+                 * keep trying child nodes until one is different
+                 */
+                ret = 0;
+            }
+
+            if (ret) {
+                return ret;
+            }
+
+	    /* get the next pair of child nodes to check */
+	    ch1 = (val_value_t *)dlq_nextEntry(ch1);
+	    ch2 = (val_value_t *)dlq_nextEntry(ch2);
+	}
+        break;
+    default:
+        ret = val_compare_ex(val1, val2, TRUE);
+    }
+
+    return ret;
+
+}  /* val_compare_for_replace */
 
 
 /********************************************************************
@@ -9162,6 +9359,51 @@ boolean
     return (val->flags & VAL_FL_META) ? TRUE : FALSE;
 
 }  /* val_is_metaval */
+
+
+
+/********************************************************************
+* FUNCTION val_move_chidren
+* 
+* Move all the child nodes from src to dest
+* Source and dest must both be containers!
+*
+* INPUTS:
+*    srcval == source val_value_t struct to mode
+*    destval == destination value struct ot use
+*
+*********************************************************************/
+void
+    val_move_children (val_value_t *srcval,
+                       val_value_t *destval)
+{
+    val_value_t   *childval;
+
+#ifdef DEBUG
+    if (!srcval || !destval) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+    if (!(srcval->btyp == NCX_BT_CONTAINER &&
+          destval->btyp == NCX_BT_CONTAINER)) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+
+#endif
+
+    /* set new parent */
+    for (childval = (val_value_t *)
+             dlq_firstEntry(&srcval->v.childQ);
+         childval != NULL;
+         childval = (val_value_t *)dlq_nextEntry(childval)) {
+        childval->parent = destval;
+    }
+
+    /* move all the entries at once */
+    dlq_block_enque(&srcval->v.childQ, &destval->v.childQ);
+
+}  /* val_move_children */
 
 
 /* END file val.c */

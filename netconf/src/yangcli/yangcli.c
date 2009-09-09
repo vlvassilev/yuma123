@@ -1224,8 +1224,12 @@ static status_t
 
     if (*str == '$') {
 	/* check if a valid variable assignment is being made */
-	res = var_check_ref(str, ISLEFT, &tlen, 
-			    &vartype, &name, &nlen);
+	res = var_check_ref(str, 
+                            ISLEFT, 
+                            &tlen, 
+			    &vartype, 
+                            &name, 
+                            &nlen);
 	if (res != NO_ERR) {
 	    /* error in the varref */
 	    return res;
@@ -1486,6 +1490,7 @@ static status_t
     return res;
 
 } /* create_system_var */
+
 
 /********************************************************************
  * FUNCTION create_config_var

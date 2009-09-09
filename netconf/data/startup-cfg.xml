@@ -1,51 +1,54 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<config>
-   <nacm>
-      <groups>
-         <nacm:group xmlns:nacm="http://netconfcentral.com/ns/nacm">
+<nc:config xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+   <nacm:nacm xmlns:nacm="http://netconfcentral.com/ns/nacm">
+      <nacm:noRuleReadDefault>permit</nacm:noRuleReadDefault>
+      <nacm:noRuleWriteDefault>deny</nacm:noRuleWriteDefault>
+      <nacm:noRuleExecDefault>permit</nacm:noRuleExecDefault>
+      <nacm:groups>
+         <nacm:group>
             <nacm:groupIdentity>nacm:admin</nacm:groupIdentity>
             <nacm:userName>andy</nacm:userName>
             <nacm:userName>admin</nacm:userName>
             <nacm:userName>barney</nacm:userName>
          </nacm:group>
-         <nacm:group xmlns:nacm="http://netconfcentral.com/ns/nacm">
+         <nacm:group>
             <nacm:groupIdentity>nacm:monitor</nacm:groupIdentity>
             <nacm:userName>ultima</nacm:userName>
             <nacm:userName>reflash</nacm:userName>
             <nacm:userName>setup</nacm:userName>
          </nacm:group>
-         <nacm:group xmlns:nacm="http://netconfcentral.com/ns/nacm">
+         <nacm:group>
             <nacm:groupIdentity>nacm:guest</nacm:groupIdentity>
             <nacm:userName>guest</nacm:userName>
             <nacm:userName>info</nacm:userName>
          </nacm:group>
-      </groups>
-      <rules>
-         <nacm:moduleRule xmlns:nacm="http://netconfcentral.com/ns/nacm">
+      </nacm:groups>
+      <nacm:rules>
+         <nacm:moduleRule>
             <nacm:moduleName>netconf</nacm:moduleName>
             <nacm:allowedRights>read write exec</nacm:allowedRights>
             <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
             <nacm:allowedGroup>nacm:monitor</nacm:allowedGroup>
          </nacm:moduleRule>
-         <nacm:moduleRule xmlns:nacm="http://netconfcentral.com/ns/nacm">
+         <nacm:moduleRule>
             <nacm:moduleName>netconf</nacm:moduleName>
             <nacm:allowedRights>read exec</nacm:allowedRights>
             <nacm:allowedGroup>nacm:guest</nacm:allowedGroup>
          </nacm:moduleRule>
-         <nacm:moduleRule xmlns:nacm="http://netconfcentral.com/ns/nacm">
+         <nacm:moduleRule>
             <nacm:moduleName>netconfd</nacm:moduleName>
             <nacm:allowedRights>read write exec</nacm:allowedRights>
             <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
             <nacm:comment>access to shutdown and restart rpcs</nacm:comment>
          </nacm:moduleRule>
-         <nacm:dataRule xmlns:nacm="http://netconfcentral.com/ns/nacm">
+         <nacm:dataRule>
             <nacm:name>nacm-tree</nacm:name>
             <nacm:path>/nacm:nacm</nacm:path>
             <nacm:allowedRights>read write</nacm:allowedRights>
             <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
             <nacm:comment>access to nacm config</nacm:comment>
          </nacm:dataRule>
-         <nacm:dataRule xmlns:nacm="http://netconfcentral.com/ns/nacm">
+         <nacm:dataRule>
             <nacm:name>itf-1</nacm:name>
             <nacm:path
                xmlns:if="http://netconfcentral.com/ns/interfaces">/if:interfaces/if:interface</nacm:path>
@@ -53,24 +56,21 @@
             <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
             <nacm:comment>let admin read and write all interfaces</nacm:comment>
          </nacm:dataRule>
-      </rules>
-      <nacm:noRuleReadDefault xmlns:nacm="http://netconfcentral.com/ns/nacm">permit</nacm:noRuleReadDefault>
-      <nacm:noRuleWriteDefault xmlns:nacm="http://netconfcentral.com/ns/nacm">deny</nacm:noRuleWriteDefault>
-      <nacm:noRuleExecDefault xmlns:nacm="http://netconfcentral.com/ns/nacm">permit</nacm:noRuleExecDefault>
-   </nacm>
-   <interfaces>
-      <if:interface xmlns:if="http://netconfcentral.com/ns/interfaces">
+      </nacm:rules>
+   </nacm:nacm>
+   <if:interfaces xmlns:if="http://netconfcentral.com/ns/interfaces">
+      <if:interface>
          <if:name>lo</if:name>
       </if:interface>
-      <if:interface xmlns:if="http://netconfcentral.com/ns/interfaces">
+      <if:interface>
          <if:name>eth0</if:name>
       </if:interface>
-      <if:interface xmlns:if="http://netconfcentral.com/ns/interfaces">
+      <if:interface>
          <if:name>virbr0</if:name>
       </if:interface>
-      <if:interface xmlns:if="http://netconfcentral.com/ns/interfaces">
+      <if:interface>
          <if:name>pan0</if:name>
       </if:interface>
-   </interfaces>
-   <t:int8.1 xmlns:t="http://netconfcentral.com/ns/test">9</t:int8.1>
-</config>
+   </if:interfaces>
+   <t:uint16.1 xmlns:t="http://netconfcentral.com/ns/test">4</t:uint16.1>
+</nc:config>

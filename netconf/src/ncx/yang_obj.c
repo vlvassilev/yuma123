@@ -552,6 +552,7 @@ static status_t
 
     obj->parent = parent;
     obj->grp = grp;
+    obj->nsid = mod->nsid;
 
     leaf = obj->def.leaf;
     if (que == &mod->datadefQ) {
@@ -743,6 +744,7 @@ static status_t
 
     obj->parent = parent;
     obj->grp = grp;
+    obj->nsid = mod->nsid;
 
     con = obj->def.container;
     if (que == &mod->datadefQ) {

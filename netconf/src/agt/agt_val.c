@@ -400,9 +400,9 @@ static boolean
             }
         }
         break;
+    case OP_EDITOP_REPLACE:
     case OP_EDITOP_COMMIT:
     case OP_EDITOP_CREATE:
-    case OP_EDITOP_REPLACE:
     case OP_EDITOP_LOAD:
     case OP_EDITOP_DELETE:
         retval = TRUE;
@@ -796,13 +796,13 @@ static status_t
     rpc_undo_rec_t   *undo;
     status_t          res;
     op_editop_t       cur_editop;
-    boolean           applyhere, mergehere, freenew;
-    
+    boolean           applyhere, freenew;
+    int               retval;
 
     res = NO_ERR;
-    mergehere = FALSE;
     freenew = FALSE;
     undo = NULL;
+    name = NULL;
 
     if (newval) {
         cur_editop = newval->editvars->editop;
@@ -833,6 +833,47 @@ static status_t
     } else {
         applyhere = apply_this_node(cur_editop, curval);
         *done = applyhere;
+
+        /* try to make sure subtree has changed in a replace */
+        if (applyhere && (cur_editop == OP_EDITOP_REPLACE)) {
+            if (newval && curval) {
+                /* for replace, it is safe to add the default
+                 * nodes because any missing node in new
+                 * is supposed to be deleted in the current node,
+                 * and a default will get added right back again
+                 */
+                res = val_add_defaults(newval, FALSE);
+                if (res != NO_ERR) {
+                    *done = TRUE;
+                    return res;
+                }
+                val_set_canonical_order(newval);
+                retval = val_compare_ex(newval, curval, TRUE);
+                if (retval == 0) {
+                    /* apply here but nothing to do,
+                     * so skip this entire subtree
+                     */
+                    if (LOGDEBUG) {
+                        log_debug("\napply_write_val: "
+                                  "Skipping replace node "
+                                  "'%s', no changes",
+                                  (name) ? name : (const xmlChar *)"--");
+                    }
+                    applyhere = FALSE;
+                } else {
+                    retval = val_compare_for_replace(newval, curval);
+                    if (retval == 0) {
+                        if (LOGDEBUG2) {
+                            log_debug2("\napply_write_val: "
+                                       "Skip replace level '%s'",
+                                       (name) ? name : (const xmlChar *)"--");
+                        }
+                        *done = FALSE;
+                        applyhere = FALSE;
+                    }
+                }
+            }
+        }
     }
 
     /* apply the requested edit operation */
@@ -1016,10 +1057,9 @@ static status_t
 {
     val_value_t     *testval;
     status_t         res;
-    boolean          applyhere, mergehere, freenew;
+    boolean          applyhere, freenew;
     
     res = NO_ERR;
-    mergehere = FALSE;
     freenew = FALSE;
     testval = NULL;
 
@@ -1524,7 +1564,7 @@ static status_t
     val_value_t   *v_val;
     status_t       res;
     obj_type_t     objtype;
-    
+
     res = NO_ERR;
     v_val = NULL;
 

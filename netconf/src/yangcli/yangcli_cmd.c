@@ -1249,7 +1249,15 @@ static status_t
     }
 
     saveopt = server_cb->get_optional;
-    
+
+    /* only force optional=true if this is a mandatory choice
+     * otherwise, a mandatory choice of all optional cases
+     * will just get skipped over
+     */
+    if (obj_is_mandatory(choic)) {
+        server_cb->get_optional = TRUE;
+    }
+
     /* first check the partial block corner case */
     pval = val_get_choice_first_set(valset, choic);
     if (pval) {
@@ -3619,16 +3627,27 @@ static status_t
 	    return res;
 	}
     } else {
-	dummy_parm = NULL;
-	res = add_config_from_content_node(server_cb,
-					   rpc, 
-					   config_content,
-					   config_content->obj,
-					   parm, 
-					   &dummy_parm);
-	if (res != NO_ERR) {
-	    val_free_value(config_content);
-	    val_free_value(reqdata);
+        /* need a hack here to adjust for variables that
+         * start with a data node because they are
+         * from a variable reference
+         */
+        if (config_content->btyp == NCX_BT_CONTAINER) {
+            val_move_children(config_content, parm);
+            val_free_value(config_content);
+            config_content = NULL;
+            res = NO_ERR;
+        } else {
+            dummy_parm = NULL;
+            res = add_config_from_content_node(server_cb,
+                                               rpc, 
+                                               config_content,
+                                               config_content->obj,
+                                               parm, 
+                                               &dummy_parm);
+        }
+        if (res != NO_ERR) {
+            val_free_value(config_content);
+            val_free_value(reqdata);
 	    return res;
 	}
     }
@@ -4353,7 +4372,7 @@ static val_value_t *
 	    } else {
 		newparm = val_clone(userval);
 		if (!newparm) {
-		    log_error("\nError: valloc failed");
+                    log_error("\nError: malloc failed");
 		}
 		return newparm;
 	    }

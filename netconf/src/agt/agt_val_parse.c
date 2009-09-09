@@ -2366,6 +2366,7 @@ static status_t
             if (retval->editvars->editop == OP_EDITOP_NONE) {
                 res = ERR_NCX_INVALID_VALUE;
             } else {
+                retval->editvars->operset = TRUE;
                 continue;
             }
         } else if (val_match_metaval(attr, yangid, YANG_K_INSERT)) {
@@ -2373,6 +2374,7 @@ static status_t
             if (retval->editvars->insertop == OP_INSOP_NONE) {
                 res = ERR_NCX_INVALID_VALUE;
             } else {
+                retval->editvars->operset = TRUE;
                 continue;
             }
         } else if (val_match_metaval(attr, yangid, YANG_K_KEY)) {
@@ -2388,6 +2390,7 @@ static status_t
                      */
                     retval->editvars->insertxpcb = attr->attr_xpcb;
                     attr->attr_xpcb = NULL;
+                    retval->editvars->operset = TRUE;
                     continue;
                 }
             } else {
@@ -2401,6 +2404,7 @@ static status_t
                 if (!retval->editvars->insertstr) {
                     res = ERR_INTERNAL_MEM;
                 } else {
+                    retval->editvars->operset = TRUE;
                     continue;
                 }
             } else {

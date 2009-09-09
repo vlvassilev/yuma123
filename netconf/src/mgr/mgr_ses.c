@@ -709,6 +709,10 @@ void
 	def_reg_del_scb(scb->fd);
     }
 
+    ncxmod_clear_altpath();
+    ncx_reset_modQ();
+    ncx_clear_session_modQ();
+
     ses_free_scb(scb);
     mgrses[sid] = NULL;
 

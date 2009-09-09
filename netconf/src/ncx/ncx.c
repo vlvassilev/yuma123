@@ -170,6 +170,12 @@ static dlq_hdr_t         ncx_modQ;
 /* pointer to the current Q of active modules */
 static dlq_hdr_t        *ncx_curQ;
 
+/* pointer to the current session Q of active modules
+ * this is for yangcli to serialize access to the
+ * database of modules
+ */
+static dlq_hdr_t        *ncx_sesmodQ;
+
 /* Q of ncx_filptr_t
  * used as a cache of subtree filtering headers 
  */
@@ -232,6 +238,11 @@ static dlq_hdr_t     warnoffQ;
  * session needs to look for objects (CLI or XPath)
  */
 static dlq_hdr_t   *temp_modQ;
+
+/* default diplay mode in all programs except yangcli,
+ * which uses a more complex schem for diplay-mode
+ */
+static ncx_display_mode_t  display_mode;
 
 
 /********************************************************************
@@ -1058,9 +1069,13 @@ status_t
     /* create the module and appnode queues */
     dlq_createSQue(&ncx_modQ);
     ncx_curQ = &ncx_modQ;
+    ncx_sesmodQ = NULL;
     dlq_createSQue(&ncx_filptrQ);
     dlq_createSQue(&warnoffQ);
     temp_modQ = NULL;
+
+    display_mode = NCX_DISPLAY_MODE_PREFIX;
+
     ncx_max_filptrs = NCX_DEF_FILPTR_CACHESIZE;
     ncx_cur_filptrs = 0;
 
@@ -1348,6 +1363,8 @@ ncx_module_t *
     ncx_find_module (const xmlChar *modname,
 		     const xmlChar *revision)
 {
+    ncx_module_t *mod;
+
 #ifdef DEBUG
     if (!modname) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -1355,7 +1372,17 @@ ncx_module_t *
     }
 #endif
 
-    return ncx_find_module_que(ncx_curQ, modname, revision);
+    /* check the yangcli session module Q
+     * and then the current module Q
+     */
+    mod = NULL;
+    if (ncx_sesmodQ) {
+        mod = ncx_find_module_que(ncx_sesmodQ, modname, revision);
+    }
+    if (mod == NULL) {
+        mod = ncx_find_module_que(ncx_curQ, modname, revision);
+    }
+    return mod;
 
 }   /* ncx_find_module */
 
@@ -10354,6 +10381,57 @@ void
 
 
 /********************************************************************
+* FUNCTION ncx_set_session_modQ
+* 
+* !!! THIS HACK IS NEEDED BECAUSE val.c
+* !!! USES ncx_find_module sometimes, and
+* !!! yangcli sessions are not loaded into the
+* !!! main database of modules.
+* !!! THIS DOES NOT WORK FOR MULTIPLE CONCURRENT PROCESSES
+*
+* Set the current session module Q to an alternate (for yangdiff)
+* This will be used for module searches usually in ncx_modQ
+*
+* INPUTS:
+*    que == Q of ncx_module_t to use
+*********************************************************************/
+void
+    ncx_set_session_modQ (dlq_hdr_t *que)
+{
+#ifdef DEBUG
+    if (!que) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return;
+    }
+#endif
+
+    ncx_sesmodQ = que;
+
+}  /* ncx_set_sesion_modQ */
+
+
+/********************************************************************
+* FUNCTION ncx_clear_session_modQ
+* 
+* !!! THIS HACK IS NEEDED BECAUSE val.c
+* !!! USES ncx_find_module sometimes, and
+* !!! yangcli sessions are not loaded into the
+* !!! main database of modules.
+* !!! THIS DOES NOT WORK FOR MULTIPLE CONCURRENT PROCESSES
+*
+* Clear the current session module Q
+*
+*********************************************************************/
+void
+    ncx_clear_session_modQ (void)
+{
+
+    ncx_sesmodQ = NULL;
+
+}  /* ncx_clear_sesion_modQ */
+
+
+/********************************************************************
 * FUNCTION ncx_set_load_callback
 * 
 * Set the callback function for a load-module event
@@ -11257,6 +11335,7 @@ dlq_hdr_t *
 
 }  /* ncx_get_temp_modQ */
 
+
 /********************************************************************
 * FUNCTION ncx_clear_temp_modQ
 * 
@@ -11269,6 +11348,20 @@ void
     temp_modQ = NULL;
 
 }  /* ncx_clear_temp_modQ */
+
+
+/********************************************************************
+* FUNCTION ncx_get_display_mode
+* 
+* Get the current default display mode
+*
+*********************************************************************/
+ncx_display_mode_t
+    ncx_get_display_mode (void)
+{
+    return display_mode;
+
+}  /* ncx_get_display_mode */
 
 
 /* END file ncx.c */

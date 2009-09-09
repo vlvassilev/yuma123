@@ -947,6 +947,8 @@ static status_t
     if (empty) {
 	if (btyp==NCX_BT_SLIST || btyp==NCX_BT_BITS) {
 	    /* no need to check the empty list */ ;
+        } else if (btyp == NCX_BT_INSTANCE_ID) {
+            res = ERR_NCX_INVALID_VALUE;
 	} else {
 	    /* check the empty string */
 	    res = val_string_ok_errinfo(obj_get_typdef(obj), 
@@ -993,7 +995,8 @@ static status_t
 		listbtyp = NCX_BT_BITS;
 	    }
 
-	    res = ncx_set_list(listbtyp, valnode.simval, 
+	    res = ncx_set_list(listbtyp, 
+                               valnode.simval, 
 			       &retval->v.list);
 	    if (res == NO_ERR) {
 		if (btyp == NCX_BT_SLIST) {
@@ -1729,11 +1732,11 @@ static status_t
 {
     obj_metadata_t    *meta;
     typ_def_t         *metadef;
-    xml_attr_t              *attr;
-    val_value_t             *metaval;
-    xmlns_id_t               ncid, yangid, xmlid;
-    status_t                 res, retres;
-    boolean                  iskey, isvalue, islang;
+    xml_attr_t        *attr;
+    val_value_t       *metaval;
+    xmlns_id_t         ncid, yangid, xmlid;
+    status_t           res, retres;
+    boolean            iskey, isvalue, islang;
 
     retres = NO_ERR;
     ncid =  xmlns_nc_id();

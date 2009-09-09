@@ -899,7 +899,13 @@ extern void
     ncx_reset_modQ (void);
 
 extern void
+    ncx_set_session_modQ (dlq_hdr_t *que);
+
+extern void
     ncx_set_load_callback (ncx_load_cbfn_t cbfn);
+
+extern void
+    ncx_clear_session_modQ (void);
 
 extern boolean
     ncx_prefix_different (const xmlChar *prefix1,
@@ -995,5 +1001,8 @@ extern dlq_hdr_t *
 
 extern void
     ncx_clear_temp_modQ (void);
+
+extern ncx_display_mode_t
+    ncx_get_display_mode (void);
 
 #endif	    /* _H_ncx */

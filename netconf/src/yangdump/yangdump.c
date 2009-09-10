@@ -155,8 +155,8 @@ date         init     comment
 #define YANGDUMP_PARM_INDENT        (const xmlChar *)"indent"
 #define YANGDUMP_PARM_MODULE        (const xmlChar *)"module"
 #define YANGDUMP_PARM_MODVERSION    (const xmlChar *)"modversion"
-#define YANGDUMP_PARM_NO_SUBDIRS    (const xmlChar *)"no-subdirs"
-#define YANGDUMP_PARM_NO_VERSIONNAMES (const xmlChar *)"no-versionnames"
+#define YANGDUMP_PARM_SUBDIRS       (const xmlChar *)"subdirs"
+#define YANGDUMP_PARM_VERSIONNAMES  (const xmlChar *)"versionnames"
 #define YANGDUMP_PARM_OUTPUT        (const xmlChar *)"output"
 #define YANGDUMP_PARM_OBJVIEW       (const xmlChar *)"objview"
 #define YANGDUMP_PARM_XSD_SCHEMALOC (const xmlChar *)"xsd-schemaloc"
@@ -436,20 +436,24 @@ static status_t
         cp->modversion = TRUE;
     }
 
-    /* no-subdirs parameter */
+    /* subdirs parameter */
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
-                         YANGDUMP_PARM_NO_SUBDIRS);
+                         YANGDUMP_PARM_SUBDIRS);
     if (val && val->res == NO_ERR) {
-        cp->nosubdirs = TRUE;
+        cp->subdirs = VAL_BOOL(val);
+    } else {
+        cp->subdirs = TRUE;
     }
 
-    /* no-versionnames */
+    /* versionnames */
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
-                         YANGDUMP_PARM_NO_VERSIONNAMES);
+                         YANGDUMP_PARM_VERSIONNAMES);
     if (val && val->res == NO_ERR) {
-        cp->noversionnames = TRUE;
+        cp->versionnames = VAL_BOOL(val);
+    } else {
+        cp->versionnames = TRUE;
     }
 
     /* objview parameter */
@@ -1769,7 +1773,7 @@ int
 
         if (!quickexit) {
             /* check if subdir search suppression is requested */
-            if (cvtparms.nosubdirs) {
+            if (!cvtparms.subdirs) {
                 ncxmod_set_subdirs(FALSE);
             }
 

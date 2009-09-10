@@ -251,7 +251,7 @@ static void
     } else {
 	ses_putstr(scb, mod->name);
     }
-    if (!cp->noversionnames && mod->version) {
+    if (cp->versionnames && mod->version) {
 	if (cp->simurls) {
 	    ses_putchar(scb, NCXMOD_PSCHAR);
 	} else {	    
@@ -602,7 +602,7 @@ static void
     } else {
 	ses_putstr(scb, mod->name);
     }
-    if (!cp->noversionnames && mod->version) {
+    if (cp->versionnames && mod->version) {
 	ses_putchar(scb, '.');
 	ses_putstr(scb, mod->version);
     }
@@ -623,7 +623,7 @@ static void
     } else {
 	ses_putstr(scb, mod->name);
     }
-    if (!cp->noversionnames && mod->version) {
+    if (cp->versionnames && mod->version) {
 	ses_putchar(scb, '.');
 	ses_putstr(scb, mod->version);
     }

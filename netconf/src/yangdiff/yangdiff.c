@@ -1570,7 +1570,7 @@ static status_t
     }
 
     /* check if subdir search suppression is requested */
-    if (diffparms.nosubdirs) {
+    if (!diffparms.subdirs) {
 	ncxmod_set_subdirs(FALSE);
     }
 
@@ -1841,10 +1841,14 @@ static status_t
 	cp->noheader = TRUE;
     }
 
-    /* no-subdirs parameter */
-    val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_NO_SUBDIRS);
+    /* subdirs parameter */
+    val = val_find_child(valset, 
+                         YANGDIFF_MOD, 
+                         YANGDIFF_PARM_SUBDIRS);
     if (val && val->res == NO_ERR) {
-	cp->nosubdirs = TRUE;
+	cp->subdirs = VAL_BOOL(val);
+    } else {
+        cp->subdirs = TRUE;
     }
 
     /* output parameter */

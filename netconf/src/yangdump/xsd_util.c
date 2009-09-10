@@ -1462,7 +1462,7 @@ static status_t
     if (res == NO_ERR) {
 	str = xsd_make_schema_location(immod, 
                                        cp->schemaloc, 
-				       !cp->noversionnames);
+				       cp->versionnames);
 	if (str) {
 	    res = xml_val_add_attr(XSD_LOC, 0, str, imval);
 	    if (res != NO_ERR) {
@@ -1923,7 +1923,7 @@ xmlChar *
 	    if (cp->full_output[len-1] != NCXMOD_PSCHAR) {
 		len++;
 	    }
-	    if (cp->noversionnames) {
+	    if (!cp->versionnames) {
 		len += xml_strlen(mod->name) + xml_strlen(ext); 
 	    } else if (mod->version) {
 		len += xml_strlen(mod->name) + xml_strlen(mod->version) + 1 +
@@ -1934,7 +1934,7 @@ xmlChar *
 	    }
 	}
     } else {
-	if (cp->noversionnames) {
+	if (!cp->versionnames) {
 	    len = xml_strlen(mod->name) + xml_strlen(ext); 
 	} else if (mod->version) {
 	    len = xml_strlen(mod->name) + xml_strlen(mod->version) + 1 +
@@ -1958,7 +1958,7 @@ xmlChar *
 		*p++ = NCXMOD_PSCHAR;
 	    }
 	    p += xml_strcpy(p, mod->name);
-	    if (!cp->noversionnames && mod->version) {
+	    if (cp->versionnames && mod->version) {
 		*p++ = '.';
 		p += xml_strcpy(p, mod->version);
 	    }
@@ -1968,7 +1968,7 @@ xmlChar *
 	}
     } else {
 	p += xml_strcpy(p, mod->name);
-	if (!cp->noversionnames && mod->version) {
+	if (cp->versionnames && mod->version) {
 	    *p++ = '.';
 	    p += xml_strcpy(p, mod->version);
 	}
@@ -2334,9 +2334,9 @@ status_t
     }
     str = make_schema_loc(cp->schemaloc, 
 			  NCX_MOD, 
-			  (cp->noversionnames) ? NULL : mod->version,
+			  (cp->versionnames) ? mod->version : NULL,
 			  NCX_URN,
-			  !cp->noversionnames);
+			  cp->versionnames);
     if (str) {
 	res = xml_val_add_attr(XSD_LOC, 0, str, imval);
 	if (res != NO_ERR) {

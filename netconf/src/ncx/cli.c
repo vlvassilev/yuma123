@@ -1473,12 +1473,10 @@ val_value_t *
     m__free(buff);
     buff = NULL;
 
-#ifdef PUT_BACK_ADDING_DEFAULTS_TO_CLI
-    /* 2) add any defaults for mandatory parms that are not set */
+    /* 2) add any defaults for optional parms that are not set */
     if (res == NO_ERR && !valonly) {
 	res = val_add_defaults(val, script);
     }
-#endif
 
     /* 3) CLI Instance Check
      * Go through all the parameters in the object and check

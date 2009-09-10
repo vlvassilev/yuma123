@@ -357,7 +357,7 @@ status_t
 	/* set the schema location */
 	str = xsd_make_schema_location(mod, 
                                        cp->schemaloc, 
-                                       !cp->noversionnames);
+                                       cp->versionnames);
 	if (str) {
 	    res = xml_add_attr(top_attrs, xsi_id, XSD_LOC, str);
 	    m__free(str);

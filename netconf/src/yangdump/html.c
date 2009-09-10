@@ -521,7 +521,7 @@ static void
 	    }
 	}
 	ses_putstr(scb, fname);
-	if (fversion && !cp->noversionnames) {
+	if (fversion && cp->versionnames) {
 	    if (cp->simurls) {
 		ses_putchar(scb, NCXMOD_PSCHAR);
 	    } else {
@@ -598,7 +598,7 @@ static void
 	    }
 	}
 	ses_putstr(scb, fname);
-	if (fversion && !cp->noversionnames) {
+	if (fversion && cp->versionnames) {
 	    if (cp->simurls) {
 		ses_putchar(scb, NCXMOD_PSCHAR);
 	    } else {
@@ -4145,12 +4145,13 @@ static void
 *   scb == session control block to use for writing
 *   mod == module in progress
 *   indent == the indent amount per line, starting at 0
-*
+*   css_file == optional CSS inline file name
 *********************************************************************/
 static void
     write_html_header (ses_cb_t *scb,
 		       const ncx_module_t *mod,
-		       int32 indent)
+		       int32 indent,
+                       const xmlChar *css_file)
 {
     xmlChar   *filespec;
     status_t   res;
@@ -4200,22 +4201,29 @@ static void
         SET_ERROR(res);
     }
     ses_putstr(scb, (const xmlChar *)
-	       " (http://www.netconfcentral.com/)\"/>");
+	       " (http://www.netconfcentral.org/)\"/>");
 
-    filespec = ncxmod_find_data_file(CSS_CONTENT_FILE, FALSE, &res);
-    if (!filespec || res != NO_ERR) {
-	ses_putstr_indent(scb, (const xmlChar *)
-			  "<link rel=\"stylesheet\" "
-			  "href=\"http://netconfcentral.com"
-                          "/static/css/yangdump.css\""
+    filespec = NULL;
+    if (css_file) {
+        filespec = ncxmod_find_data_file(css_file, FALSE, &res);
+        if (filespec) {
+            ses_putstr_indent(scb, (const xmlChar *)
+                              "<style type='text/css'><!--", indent);
+            ses_put_extern(scb, filespec);
+            ses_putstr_indent(scb, (const xmlChar *)"  -->\n</style>", 
+                              indent);
+        }
+    }
+
+    if (filespec == NULL) {
+        ses_putstr_indent(scb, (const xmlChar *)
+                          "<link rel=\"stylesheet\" "
+			  "href=\"http://netconfcentral.org"
+                          "/static/css/style.css\""
 			  " type=\"text/css\"/>", 
                           indent);
-    } else {
-	ses_putstr_indent(scb, (const xmlChar *)
-			  "<style type='text/css'><!--", indent);
-	ses_put_extern(scb, filespec);
-	ses_putstr_indent(scb, (const xmlChar *)"  -->\n</style>", indent);
     }
+
     ses_putstr_indent(scb, (const xmlChar *)"</head>", 0);
 
     if (filespec) {
@@ -4562,7 +4570,7 @@ status_t
     }
 
     if (!cp->html_div) {
-	write_html_header(scb, mod, cp->indent);
+	write_html_header(scb, mod, cp->indent, cp->css_file);
     }
 
     write_html_body(scb, mod, cp);

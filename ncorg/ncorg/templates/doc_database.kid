@@ -78,9 +78,9 @@
 	</p>
 	<pre>
 
-    modules> yangdump --format=html --subtree=. --defnames \
-      --output=$(HTML_TARGET) --log-level=info --html-div \
-      --html-toc=menu --urlstart=/modules --simurls
+    modules> yangdump --format=html --subtree=. --defnames=true \
+      --output=$(HTML_TARGET) --log-level=info --html-div=true \
+      --html-toc=menu --urlstart=/modules --simurls=true
 
 	</pre>
 	<p>
@@ -90,9 +90,10 @@
 	</p>
 	<pre>
 
-    modules> yangdump --format=html --subtree=. --defnames \
-	--output=$(COOKEDHTML_TARGET) --log-level=info --html-div \
-	--html-toc=menu --urlstart=/modules --simurls --objview=cooked
+    modules> yangdump --format=html --subtree=. --defnames=true \
+	--output=$(COOKEDHTML_TARGET) --log-level=info \
+        --html-div=true --html-toc=menu --urlstart=/modules \
+        --simurls=true --objview=cooked
 
 	</pre>
 	<p>
@@ -102,7 +103,7 @@
 	</p>
 	<pre>
 
-    modules> yangdump --format=xsd --subtree=. --defnames \
+    modules> yangdump --format=xsd --subtree=. --defnames=true \
 	--output=$(XSD_TARGET) --urlstart=/xsd --log-level=info
 
 	</pre>
@@ -113,7 +114,7 @@
 	</p>
 	<pre>
 
-    modules> yangdump --format=copy --subtree=. --defnames \
+    modules> yangdump --format=copy --subtree=. --defnames=true \
 	--output=$(COPY_TARGET) --log-level=info 
 
 	</pre>
@@ -128,7 +129,7 @@
 
     modules> yangdump --format=sqldb --subtree=. \
 	--output=$(SQLDB_TARGET) --log-level=info \
-	--urlstart=/modules --simurls
+	--urlstart=/modules --simurls=true
 
 	</pre>
 	<p>

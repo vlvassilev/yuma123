@@ -131,17 +131,18 @@ void
     agt_signal_handler (int intr)
 {
     switch (intr) {
-    case SIGINT:
-        /* control-C */
+    case SIGINT:          /* control-C */
+    case SIGKILL:           /* kill -9 */
+    case SIGQUIT:         /* core dump */
+    case SIGABRT:         /* core dump */
+    case SIGILL:          /* core dump */
+    case SIGTRAP:         /* core dump */
+    case SIGTERM:             /* kill  */
         agt_request_shutdown(NCX_SHUT_EXIT);
         break;
     case SIGHUP:
-        /* hang up treated as reset */
+        /* hang up treated as reset; kill -1 */
         agt_request_shutdown(NCX_SHUT_RESET);
-        break;
-    case SIGTERM:
-        /* kill -1 */
-        agt_request_shutdown(NCX_SHUT_EXIT);
         break;
     case SIGPIPE:
         /* broken pipe ignored */
@@ -151,7 +152,7 @@ void
         agt_timer_handler();
         break;
     default:
-        SET_ERROR(ERR_INTERNAL_VAL);
+        /* ignore */;
     }
 
 } /* agt_signal_handler */

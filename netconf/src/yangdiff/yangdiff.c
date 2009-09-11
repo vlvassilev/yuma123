@@ -1028,7 +1028,7 @@ static status_t
     output_diff_banner(cp, oldpcb, newpcb);
 
     /* header fields */
-    if (!cp->noheader) {
+    if (cp->header) {
 	output_hdr_diff(cp, oldpcb, newpcb);
     }
 
@@ -1835,10 +1835,14 @@ static status_t
 	cp->newpath = VAL_STR(val);
     }
 
-    /* no-header parameter */
-    val = val_find_child(valset, YANGDIFF_MOD, YANGDIFF_PARM_NO_HEADER);
+    /* header parameter */
+    val = val_find_child(valset, 
+                         YANGDIFF_MOD, 
+                         YANGDIFF_PARM_HEADER);
     if (val && val->res == NO_ERR) {
-	cp->noheader = TRUE;
+	cp->header = VAL_BOOL(val);
+    } else {
+        cp->header = TRUE;
     }
 
     /* subdirs parameter */

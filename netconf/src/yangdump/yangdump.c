@@ -324,7 +324,9 @@ static status_t
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_DEFNAMES);
     if (val && val->res == NO_ERR) {
-        cp->defnames = TRUE;
+        cp->defnames = VAL_BOOL(val);
+    } else {
+        cp->defnames = FALSE;
     }
 
     /* dependencies parameter */
@@ -402,7 +404,9 @@ static status_t
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_HTML_DIV);
     if (val && val->res == NO_ERR) {
-        cp->html_div = TRUE;
+        cp->html_div = VAL_BOOL(val);
+    } else {
+        cp->html_div = FALSE;
     }
 
     /* html-toc parameter */
@@ -507,7 +511,9 @@ static status_t
                          YANGDUMP_MOD, 
                          YANGDUMP_PARM_UNIFIED);
     if (val && val->res == NO_ERR) {
-        cp->unified = TRUE;
+        cp->unified = VAL_BOOL(val);
+    } else {
+        cp->unified = FALSE;
     }
 
     /* urlstart parameter */

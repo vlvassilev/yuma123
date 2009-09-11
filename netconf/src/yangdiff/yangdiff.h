@@ -73,7 +73,7 @@ date	     init     comment
 #define YANGDIFF_PARM_OUTPUT        (const xmlChar *)"output"
 #define YANGDIFF_PARM_INDENT        (const xmlChar *)"indent"
 #define YANGDIFF_PARM_SUBDIRS       (const xmlChar *)"subdirs"
-#define YANGDIFF_PARM_NO_HEADER     (const xmlChar *)"no-header"
+#define YANGDIFF_PARM_HEADER        (const xmlChar *)"header"
 #define YANGDIFF_LINE (const xmlChar *)\
 "\n==================================================================="
 
@@ -117,7 +117,7 @@ typedef struct yangdiff_diffparms_t_ {
     int32           indent;
     boolean         logappend;
     log_debug_t     log_level;
-    boolean         noheader;
+    boolean         header;
     boolean         subdirs;
     boolean         versionmode;
     uint32          maxlen;

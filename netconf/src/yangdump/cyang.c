@@ -630,11 +630,17 @@ static void
 		 un != NULL;
 		 un = (typ_unionnode_t *)dlq_nextEntry(un)) {
 		if (un->typdef) {
-		    write_cyang_type_clause(scb, mod, cp,
-					    un->typdef, startindent);
+		    write_cyang_type_clause(scb, 
+                                            mod, 
+                                            cp,
+					    un->typdef, 
+                                            startindent);
 		} else if (un->typ) {
-		    write_cyang_type_clause(scb, mod, cp, 
-					    &un->typ->typdef, startindent);
+		    write_cyang_type_clause(scb, 
+                                            mod, 
+                                            cp, 
+					    &un->typ->typdef, 
+                                            startindent);
 		} else {
 		    SET_ERROR(ERR_INTERNAL_VAL);
 		}
@@ -913,8 +919,12 @@ static void
 
     indent = startindent + ses_indent_count(scb);
 
-    write_cyang_id(scb, YANG_K_TYPEDEF, typ->name, startindent, 
-		   FALSE, !first);
+    write_cyang_id(scb, 
+                   YANG_K_TYPEDEF, 
+                   typ->name, 
+                   startindent, 
+		   FALSE, 
+                   !first);
 
     /* type field */
     write_cyang_type_clause(scb, mod, cp, &typ->typdef, indent);
@@ -1041,15 +1051,19 @@ static void
     int32                    indent;
     boolean                  cooked;
 
-    cooked = (strcmp(cp->objview, OBJVIEW_COOKED)) ? FALSE : TRUE;
+    cooked = !cp->rawmode;
     indent = startindent + ses_indent_count(scb);
 
     if (cooked && !grp_has_typedefs(grp)) {
 	return;
     }
 	
-    write_cyang_id(scb, YANG_K_GROUPING, grp->name, startindent,
-		   FALSE, !first);
+    write_cyang_id(scb, 
+                   YANG_K_GROUPING, 
+                   grp->name, 
+                   startindent,
+		   FALSE, 
+                   !first);
 
     /* status field */
     write_cyang_status(scb, grp->status, indent);
@@ -1121,7 +1135,7 @@ static void
 	return;
     }
 
-    cooked = (strcmp(cp->objview, OBJVIEW_COOKED)) ? FALSE : TRUE;
+    cooked = !cp->rawmode;
 
     /* groupings are only generated in cooked mode if they have
      * typedefs, and then just the typedefs are generated
@@ -1214,6 +1228,298 @@ static void
 }  /* write_cyang_iffeatureQ */
 
 
+
+/********************************************************************
+* FUNCTION write_cyang_whenif
+* 
+* Check then when-stmt and if-featureQ for an object
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object to check
+*   indent = indent amount
+*********************************************************************/
+static void
+    write_cyang_whenif (ses_cb_t *scb,
+                        const obj_template_t *obj,
+                        int32 indent)
+{
+    /* when-stmt? */
+    if (obj->when && obj->when->exprstr) {
+        write_cyang_simple_str(scb, 
+                               YANG_K_WHEN, 
+                               obj->when->exprstr,
+                               indent, 
+                               2, 
+                               TRUE);
+    }
+
+    /* if-feature-stmt* */ 
+    write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
+
+}  /* write_cyang_whenif */
+
+
+/********************************************************************
+* FUNCTION write_cyang_sdr
+* 
+* Write the status-stmt, description-stmt, and reference-stmt
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object to check
+*   indent = indent amount
+*********************************************************************/
+static void
+    write_cyang_sdr (ses_cb_t *scb,
+                     const obj_template_t *obj,
+                     int32 indent)
+{
+    const xmlChar *str;
+
+    /* status-stmt? (only written if not 'current' */
+    write_cyang_status(scb, obj_get_status(obj), indent);
+
+    /* description-stmt? */
+    str = obj_get_description(obj);
+    if (str) {
+        write_cyang_simple_str(scb, 
+                               YANG_K_DESCRIPTION, 
+                               str,
+                               indent, 
+                               2, 
+                               TRUE);
+    }
+	    
+    /* reference-stmt? */
+    str = obj_get_reference(obj);
+    if (str) {
+        write_cyang_simple_str(scb, 
+                               YANG_K_REFERENCE, 
+                               str, 
+                               indent, 
+                               2,
+                               TRUE);
+    }
+
+}  /* write_cyang_sdr */
+
+
+/********************************************************************
+* FUNCTION write_cyang_config_stmt
+* 
+* Write the config-stmt
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object to check
+*   indent = indent amount
+*********************************************************************/
+static void
+    write_cyang_config_stmt (ses_cb_t *scb,
+                             const obj_template_t *obj,
+                             int32 indent)
+{
+    /* config-stmt, only if actually set to false */
+    if (obj->flags & OBJ_FL_CONFSET) {
+        if (!(obj->flags & OBJ_FL_CONFIG)) {
+            write_cyang_simple_str(scb, 
+                                   YANG_K_CONFIG, 
+                                   NCX_EL_FALSE,
+                                   indent, 
+                                   2, 
+                                   TRUE);
+        }
+    }
+
+}  /* write_cyang_config_stmt */
+
+
+/********************************************************************
+* FUNCTION write_cyang_mandatory_stmt
+* 
+* Write the mandatory-stmt
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object to check
+*   indent = indent amount
+*********************************************************************/
+static void
+    write_cyang_mandatory_stmt (ses_cb_t *scb,
+                                const obj_template_t *obj,
+                                int32 indent)
+{
+
+    /* mandatory field, only if actually set to true */
+    if (obj->flags & OBJ_FL_MANDSET) {
+        if (obj->flags & OBJ_FL_MANDATORY) {
+            write_cyang_simple_str(scb, 
+                                   YANG_K_MANDATORY,
+                                   NCX_EL_TRUE,
+                                   indent,
+                                   2,
+                                   TRUE);
+        }
+    }
+
+}  /* write_cyang_mandatory_stmt */
+
+
+/********************************************************************
+* FUNCTION write_cyang_presence_stmt
+* 
+* Write the presence-stmt
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   presence == presence string (may be NULL to skip)
+*   indent = indent amount
+*********************************************************************/
+static void
+    write_cyang_presence_stmt (ses_cb_t *scb,
+                               const xmlChar *presence,
+                               int32 indent)
+{
+    if (presence) {
+        write_cyang_simple_str(scb, 
+                               YANG_K_PRESENCE, 
+                               presence, 
+                               indent, 
+                               2, 
+                               TRUE);
+    }
+
+}  /* write_cyang_presence_stmt */
+
+
+/********************************************************************
+* FUNCTION write_cyang_default_stmt
+* 
+* Write the default-stmt
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   defval == default string (may be NULL to skip)
+*   indent = indent amount
+*********************************************************************/
+static void
+    write_cyang_default_stmt (ses_cb_t *scb,
+                              const xmlChar *defval,
+                              int32 indent)
+{
+    if (defval) {
+        write_cyang_simple_str(scb, 
+                               YANG_K_DEFAULT, 
+                               defval, 
+                               indent, 
+                               2, 
+                               TRUE);
+    }
+
+}  /* write_cyang_default_stmt */
+
+
+/********************************************************************
+* FUNCTION write_cyang_minmax
+* 
+* Write the min-elements and/or max-elements stmts if needed
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   minset == TRUE if min-elements set
+*   minval == min-elements value
+*   maxset == TRUE if max-elements set
+*   maxval == min-elements value
+*   indent == indent amount
+*********************************************************************/
+static void
+    write_cyang_minmax (ses_cb_t *scb,
+                        boolean minset,
+                        uint32 minval,
+                        boolean maxset,
+                        uint32 maxval,
+                        int32 indent)
+{
+    char    buff[NCX_MAX_NUMLEN];
+
+    if (minset) {
+        sprintf(buff, "%u", minval);
+        write_cyang_simple_str(scb, 
+                               YANG_K_MIN_ELEMENTS, 
+                               (const xmlChar *)buff,
+                               indent, 
+                               2, 
+                               TRUE);
+    }
+
+    if (maxset) {
+        if (maxval == 0) {
+	    write_cyang_simple_str(scb, 
+				   YANG_K_MAX_ELEMENTS, 
+                                   YANG_K_UNBOUNDED,
+				   indent, 
+				   2, 
+				   TRUE);
+
+        } else {
+	    sprintf(buff, "%u", maxval);
+	    write_cyang_simple_str(scb, 
+				   YANG_K_MAX_ELEMENTS, 
+				   (const xmlChar *)buff,
+				   indent, 
+				   2, 
+				   TRUE);
+	}
+    }
+
+}  /* write_cyang_minmax */
+
+
+/********************************************************************
+* FUNCTION write_cyang_unique_stmts
+* 
+* Write the unique-stmts if needed
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   uniqueQ == Q of obj_unique_t to use
+*   indent == indent amount
+*********************************************************************/
+static void
+    write_cyang_unique_stmts (ses_cb_t *scb,
+                              const dlq_hdr_t *uniqueQ,
+                              int32 indent)
+{
+    const obj_unique_t      *uni;
+    const obj_unique_comp_t *unicomp, *nextunicomp;
+
+
+    for (uni = (const obj_unique_t *)dlq_firstEntry(uniqueQ);
+         uni != NULL;
+         uni = (const obj_unique_t *)dlq_nextEntry(uni)) {
+
+        ses_indent(scb, indent);
+        ses_putstr(scb, YANG_K_UNIQUE);
+        ses_putstr(scb, (const xmlChar *)" \"");
+
+        for (unicomp = (const obj_unique_comp_t *)
+                 dlq_firstEntry(&uni->compQ);
+             unicomp != NULL; 
+             unicomp = nextunicomp) {
+            nextunicomp = (const obj_unique_comp_t *)
+                dlq_nextEntry(unicomp);
+            ses_putstr(scb, unicomp->xpath);
+            if (nextunicomp) {
+                ses_putstr(scb, (const xmlChar *)", ");
+            }
+        }
+        ses_putstr(scb, (const xmlChar *)"\";");
+    }
+
+}  /* write_cyang_unique_stmts */
+
+
 /********************************************************************
 * FUNCTION write_cyang_object
 * 
@@ -1227,238 +1533,116 @@ static void
 *   startindent == start indent count
 *   first == TRUE if this is the first object at this indent level
 *            FALSE if not the first object at this indent level
+*  RETURNS:
+*    status (usually NO_ERR or ERR_NCX_SKIPPED)
 **********************************************************************/
-static void
+static status_t
     write_cyang_object (ses_cb_t *scb,
 			const ncx_module_t *mod,
 			const yangdump_cvtparms_t *cp,
-			const obj_template_t *obj,
+			obj_template_t *obj,
 			int32 startindent,
 			boolean first)
 {
-    const obj_container_t   *con;
-    const obj_leaf_t        *leaf;
-    const obj_leaflist_t    *leaflist;
-    const obj_list_t        *list;
-    const obj_choice_t      *choic;
-    const obj_case_t        *cas;
-    const obj_uses_t        *uses;
-    const obj_augment_t     *aug;
-    const obj_rpc_t         *rpc;
-    const obj_rpcio_t       *rpcio;
-    const obj_notif_t       *notif;
-    const obj_key_t         *key, *nextkey;
-    const obj_unique_t      *uni;
-    const obj_unique_comp_t *unicomp, *nextunicomp;
-    int32                    indent;
-    char                     buff[NCX_MAX_NUMLEN];
-    boolean                  notrefined, isanyxml, isempty, rawmode;
+    obj_container_t   *con;
+    obj_leaf_t        *leaf;
+    obj_leaflist_t    *leaflist;
+    obj_list_t        *list;
+    obj_choice_t      *choic;
+    obj_case_t        *cas;
+    obj_uses_t        *uses;
+    obj_augment_t     *aug;
+    obj_rpc_t         *rpc;
+    obj_rpcio_t       *rpcio;
+    obj_notif_t       *notif;
+    obj_refine_t      *refine;
+    obj_key_t         *key, *nextkey;
+    const xmlChar     *str;
+    int32              indent;
+    boolean            isempty, fullcase;
 
-    isanyxml = FALSE;
-    indent = startindent + ses_indent_count(scb);
-    rawmode = strcmp(cp->objview, OBJVIEW_RAW) ? FALSE : TRUE;
-
-    if (obj_is_cloned(obj) && rawmode) {
+    if (obj_is_cloned(obj) && cp->rawmode) {
 	/* skip cloned objects in 'raw' object view mode */
-	return;
+	return ERR_NCX_SKIPPED;
     }
 
-    notrefined = !obj_is_refine(obj);
-    isempty = obj_is_empty(obj);
+    if (cp->rawmode) {
+        isempty = obj_is_empty(obj);
+    } else {
+        isempty = FALSE;
+    }
+
+    indent = startindent + ses_indent_count(scb);
+    fullcase = !obj_is_short_case(obj);
+
+    /* generate start of statement with the object type
+     * except a short-form case-stmt
+     */
+    if (fullcase && 
+        obj_has_name(obj) && 
+        obj->objtype != OBJ_TYP_RPCIO) {
+
+        write_cyang_id(scb, 
+                       obj_get_typestr(obj),
+                       obj_get_name(obj), 
+                       startindent,
+                       isempty, 
+                       !first);
+        if (isempty) {
+            return NO_ERR;
+        }
+    }
 
     switch (obj->objtype) {
-    case OBJ_TYP_CONTAINER:
-	con = obj->def.container;
-	write_cyang_id(scb, YANG_K_CONTAINER, con->name, startindent, 
-		       isempty, !first);
-	if (isempty && rawmode) {
-	    return;
-	}
-
-	write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
-
-	/* 0 or more must-stmts */
-	write_cyang_musts(scb, &con->mustQ, indent);
-
-	/* presence field */
-	if (con->presence) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_PRESENCE, 
-				   con->presence, 
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-
-	/* config field, only if actually set (no default) */
-	if (obj->flags & OBJ_FL_CONFSET) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_CONFIG, 
-				   (obj->flags & OBJ_FL_CONFIG) 
-				   ? NCX_EL_TRUE : NCX_EL_FALSE,
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-	    
-	/* status field */
-	if (notrefined) {
-	    write_cyang_status(scb, con->status, indent);
-	}
-
-	/* description field */
-	if (con->descr) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_DESCRIPTION, 
-				   con->descr, 
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-	    
-	/* reference field */
-	if (con->ref) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_REFERENCE, 
-				   con->ref, 
-				   indent, 
-				   2,
-				   TRUE);
-	}
-
-	if (notrefined) {
-	    write_cyang_typedefs(scb, mod, cp, con->typedefQ, indent);
-	    write_cyang_groupings(scb, mod, cp, con->groupingQ, indent);
-	}
-
-	write_cyang_objects(scb, mod, cp, con->datadefQ, indent);
-
+    case OBJ_TYP_ANYXML:
+        write_cyang_whenif(scb, obj, indent);
+	write_cyang_musts(scb, obj_get_mustQ(obj), indent);
+        write_cyang_config_stmt(scb, obj, indent);
+        write_cyang_mandatory_stmt(scb, obj, indent);
+        write_cyang_sdr(scb, obj, indent);
 	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
-
-	/* end container comment */
+        break;
+    case OBJ_TYP_CONTAINER:
+        con = obj->def.container;
+        write_cyang_whenif(scb, obj, indent);
+	write_cyang_musts(scb, obj_get_mustQ(obj), indent);
+        str = obj_get_presence_string(obj);
+        write_cyang_presence_stmt(scb, str, indent);
+        write_cyang_config_stmt(scb, obj, indent);
+        write_cyang_sdr(scb, obj, indent);
+        write_cyang_typedefs(scb, mod, cp, con->typedefQ, indent);
+        write_cyang_groupings(scb, mod, cp, con->groupingQ, indent);
+	write_cyang_objects(scb, mod, cp, con->datadefQ, indent);
+	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+	ses_putstr_indent(scb, END_SEC, startindent);
 	write_cyang_endsec_cmt(scb, YANG_K_CONTAINER, con->name);
 	break;
-    case OBJ_TYP_ANYXML:
-        isanyxml = TRUE;
-        /* fall through */
     case OBJ_TYP_LEAF:
-	leaf = obj->def.leaf;
-	if (isanyxml) {
-	    write_cyang_id(scb, YANG_K_ANYXML, leaf->name, startindent, 
-			   isempty, !first);
-	    if (isempty) {
-		return;
-	    }
-	} else {
-	    write_cyang_id(scb, YANG_K_LEAF, leaf->name, startindent, 
-			   isempty, !first);
-	    if (isempty) {
-		return;
-	    }
-
-	    write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
-
-	    /* type field */
-	    if (notrefined) {
-		write_cyang_type_clause(scb, mod, cp, leaf->typdef, indent);
-	    }
-
-	    /* units clause */
-	    if (notrefined && leaf->units) {
-		write_cyang_simple_str(scb,
-				       YANG_K_UNITS,
-				       leaf->units,
-				       indent, 
-				       2, 
-				       TRUE);
-	    }
-
-	    /* 0 or more must-stmts */
-	    write_cyang_musts(scb, &leaf->mustQ, indent);
-
-	    /* default field */
-	    if (leaf->defval) {
-		write_cyang_simple_str(scb, 
-				       YANG_K_DEFAULT, 
-				       leaf->defval, 
-				       indent, 
-				       2, 
-				       TRUE);
-	    }
-	}
-
-	/* config field, only if actually set (no default) */
-	if (obj->flags & OBJ_FL_CONFSET) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_CONFIG, 
-				   (obj->flags & OBJ_FL_CONFIG) ? 
-				   NCX_EL_TRUE : NCX_EL_FALSE,
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-
-	/* mandatory field, only if actually set (no default) */
-	if (obj->flags & OBJ_FL_MANDSET) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_MANDATORY, 
-				   (obj->flags & OBJ_FL_MANDATORY) ? 
-				   NCX_EL_TRUE : NCX_EL_FALSE,
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-
-	/* status field */
-	if (notrefined) {
-	    write_cyang_status(scb, leaf->status, indent);
-	}
-
-	/* description field */
-	if (leaf->descr) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_DESCRIPTION, 
-				   leaf->descr, 
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-
-	/* reference field */
-	if (leaf->ref) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_REFERENCE, 
-				   leaf->ref, 
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-
+        leaf = obj->def.leaf;
+        write_cyang_whenif(scb, obj, indent);
+        write_cyang_type_clause(scb, mod, cp, leaf->typdef, indent);
+        if (leaf->units) {
+            write_cyang_simple_str(scb,
+                                   YANG_K_UNITS,
+                                   leaf->units,
+                                   indent, 
+                                   2, 
+                                   TRUE);
+        }
+        write_cyang_musts(scb, obj_get_mustQ(obj), indent);
+        write_cyang_default_stmt(scb, leaf->defval, indent);
+        write_cyang_config_stmt(scb, obj, indent);
+        write_cyang_mandatory_stmt(scb, obj, indent);
+        write_cyang_sdr(scb, obj, indent);
 	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
 	break;
     case OBJ_TYP_LEAF_LIST:
 	leaflist = obj->def.leaflist;
-	write_cyang_id(scb, YANG_K_LEAF_LIST, leaflist->name, startindent, 
-		       isempty, !first);
-	if (isempty) {
-	    return;
-	}
-
-	write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
-
-	/* type field */
-	if (notrefined) {
-	    write_cyang_type_clause(scb, mod, cp, leaflist->typdef, indent);
-	}
-
-	/* units clause */
-	if (notrefined && leaflist->units) {
+        write_cyang_whenif(scb, obj, indent);
+        write_cyang_type_clause(scb, mod, cp, leaflist->typdef, indent);
+	if (leaflist->units) {
 	    write_cyang_simple_str(scb, 
 				   YANG_K_UNITS, 
 				   leaflist->units,
@@ -1466,107 +1650,43 @@ static void
 				   2, 
 				   TRUE);
 	}
+	write_cyang_musts(scb, obj_get_mustQ(obj), indent);
+        write_cyang_config_stmt(scb, obj, indent);
 
-	/* 0 or more must-stmts */
-	write_cyang_musts(scb, &leaflist->mustQ, indent);
+        write_cyang_minmax(scb, 
+                           leaflist->minset,
+                           leaflist->minelems,
+                           leaflist->maxset,
+                           leaflist->maxelems,
+                           indent);
 
-	/* config field, only if actually set (no default) */
-	if (obj->flags & OBJ_FL_CONFSET) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_CONFIG, 
-				   (obj->flags & OBJ_FL_CONFIG) ? 
-				   NCX_EL_TRUE : NCX_EL_FALSE,
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-
-	/*  min-elements */
-	if (leaflist->minset && leaflist->minelems) {
-	    sprintf(buff, "%u", leaflist->minelems);
-	    write_cyang_simple_str(scb, 
-				   YANG_K_MIN_ELEMENTS, 
-				   (const xmlChar *)buff,
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-
-	/*  max-elements */
-	if (leaflist->maxset && leaflist->maxelems) {
-	    sprintf(buff, "%u", leaflist->maxelems);
-	    write_cyang_simple_str(scb, 
-				   YANG_K_MAX_ELEMENTS, 
-				   (const xmlChar *)buff,
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-
-	/* ordered-by field */
-	if (notrefined) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_ORDERED_BY, 
-				   (leaflist->ordersys) ? 
-				   YANG_K_SYSTEM : YANG_K_USER,
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-
-	/* status field */
-	if (notrefined) {
-	    write_cyang_status(scb, leaflist->status, indent);
-	}
-
-	/* description field */
-	if (leaflist->descr) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_DESCRIPTION, 
-				   leaflist->descr, 
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-
-	/* reference field */
-	if (leaflist->ref) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_REFERENCE, 
-				   leaflist->ref, 
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-
+        if (!leaflist->ordersys) {
+            write_cyang_simple_str(scb, 
+                                   YANG_K_ORDERED_BY, 
+                                   YANG_K_USER,
+                                   indent, 
+                                   2, 
+                                   TRUE);
+        }
+        write_cyang_sdr(scb, obj, indent);
 	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
 	break;
     case OBJ_TYP_LIST:
 	list = obj->def.list;
-	write_cyang_id(scb, YANG_K_LIST, list->name, startindent, 
-		       isempty, !first);
-	if (isempty) {
-	    return;
-	}
-
-	write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
-
-	/* 0 or more must-stmts */
-	write_cyang_musts(scb, &list->mustQ, indent);
+        write_cyang_whenif(scb, obj, indent);
+	write_cyang_musts(scb, obj_get_mustQ(obj), indent);
 
 	/* key field, manual generation to make links */
-	if (notrefined && !dlq_empty(&list->keyQ)) {
+	if (!dlq_empty(&list->keyQ)) {
 	    ses_indent(scb, indent);
 	    ses_putstr(scb, YANG_K_KEY);
 	    ses_putstr(scb, (const xmlChar *)" \"");
 
-	    for (key = obj_first_ckey(obj);
+	    for (key = obj_first_key(obj);
 		 key != NULL; 
 		 key = nextkey) {
-		nextkey = obj_next_ckey(key);
+		nextkey = obj_next_key(key);
 		ses_putstr(scb, obj_get_name(key->keyobj));
 		if (nextkey) {
 		    ses_putchar(scb, ' ');
@@ -1575,126 +1695,39 @@ static void
 	    ses_putstr(scb, (const xmlChar *)"\";");
 	}
 
-	/* unique fields, manual generation to make links */
-	if (notrefined && !dlq_empty(&list->uniqueQ)) {
-	    for (uni = (const obj_unique_t *)
-		     dlq_firstEntry(&list->uniqueQ);
-		 uni != NULL;
-		 uni = (const obj_unique_t *)dlq_nextEntry(uni)) {
+        write_cyang_unique_stmts(scb, &list->uniqueQ, indent);
 
-		ses_indent(scb, indent);
-		ses_putstr(scb, YANG_K_UNIQUE);
-		ses_putstr(scb, (const xmlChar *)" \"");
-
-		for (unicomp = (const obj_unique_comp_t *)
-			 dlq_firstEntry(&uni->compQ);
-		     unicomp != NULL; unicomp = nextunicomp) {
-		    nextunicomp = (const obj_unique_comp_t *)
-			dlq_nextEntry(unicomp);
-		    ses_putstr(scb, unicomp->xpath);
-		    if (nextunicomp) {
-			ses_putstr(scb, (const xmlChar *)", ");
-		    }
-		}
-		ses_putstr(scb, (const xmlChar *)"\";");
-	    }
-	}
-
-	/* config field, only if actually set (no default) */
-	if (obj->flags & OBJ_FL_CONFSET) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_CONFIG, 
-				   (obj->flags & OBJ_FL_CONFIG) ? 
-				   NCX_EL_TRUE : NCX_EL_FALSE,
-				   indent, 
-				   2, 
-				   TRUE);
-	}
+        write_cyang_config_stmt(scb, obj, indent);
 
 	/*  min-elements */
-	if (list->minset && list->minelems) {
-	    sprintf(buff, "%u", list->minelems);
-	    write_cyang_simple_str(scb, 
-				   YANG_K_MIN_ELEMENTS, 
-				   (const xmlChar *)buff,
-				   indent,
-				   2,
-				   TRUE);
-	}
+        write_cyang_minmax(scb,
+                           list->minset,
+                           list->minelems,
+                           list->maxset,
+                           list->maxelems,
+                           indent);
 
-	/*  max-elements */
-	if (list->maxset && list->maxelems) {
-	    sprintf(buff, "%u", list->maxelems);
-	    write_cyang_simple_str(scb,
-				   YANG_K_MAX_ELEMENTS, 
-				   (const xmlChar *)buff,
-				   indent,
-				   2,
-				   TRUE);
-	}
-
-	/* ordered-by field */
-	if (notrefined) {
-	    write_cyang_simple_str(scb,
-				   YANG_K_ORDERED_BY, 
-				   (list->ordersys) ? 
-				   YANG_K_SYSTEM : YANG_K_USER,
-				   indent,
-				   2,
-				   TRUE);
-	}
-
-	/* status field */
-	if (notrefined) {
-	    write_cyang_status(scb, list->status, indent);
-	}
-
-	/* description field */
-	if (list->descr) {
-	    write_cyang_simple_str(scb,
-				   YANG_K_DESCRIPTION, 
-				   list->descr,
-				   indent,
-				   2,
-				   TRUE);
-	}
-
-	/* reference field */
-	if (list->ref) {
-	    write_cyang_simple_str(scb,
-				   YANG_K_REFERENCE, 
-				   list->ref,
-				   indent,
-				   2,
-				   TRUE);
-	}
-
-
-
-	if (notrefined) {
-	    write_cyang_typedefs(scb, mod, cp, list->typedefQ, indent);
-	    write_cyang_groupings(scb, mod, cp, list->groupingQ, indent);
-	}
-
+	/* ordered-by field, only if non-default (user) */
+        if (!list->ordersys) {
+            write_cyang_simple_str(scb,
+                                   YANG_K_ORDERED_BY, 
+                                   YANG_K_USER,
+                                   indent,
+                                   2,
+                                   TRUE);
+        }
+        write_cyang_sdr(scb, obj, indent);
+        write_cyang_typedefs(scb, mod, cp, list->typedefQ, indent);
+        write_cyang_groupings(scb, mod, cp, list->groupingQ, indent);
 	write_cyang_objects(scb, mod, cp, list->datadefQ, indent);
-
 	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
-
-	/* end list section comment */
 	write_cyang_endsec_cmt(scb, YANG_K_LIST, list->name);
 	break;
     case OBJ_TYP_CHOICE:
 	choic = obj->def.choic;
-	write_cyang_id(scb, YANG_K_CHOICE, choic->name, startindent, 
-		       isempty, !first);
-	if (isempty) {
-	    return;
-	}
 
-	write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
+        write_cyang_whenif(scb, obj, indent);
 
 	/* default case field */
 	if (choic->defval) {
@@ -1706,102 +1739,34 @@ static void
 				   TRUE);
 	}
 
-	/* mandatory field, only if actually set (no default) */
-	if (obj->flags & OBJ_FL_MANDSET) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_MANDATORY, 
-				   (obj->flags & OBJ_FL_MANDATORY) ? 
-				   NCX_EL_TRUE : NCX_EL_FALSE,
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-
-	/* status field */
-	if (notrefined) {
-	    write_cyang_status(scb, choic->status, indent);
-	}
-
-	/* description field */
-	if (choic->descr) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_DESCRIPTION, 
-				   choic->descr, 
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-
-	/* reference field */
-	if (choic->ref) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_REFERENCE, 
-				   choic->ref, 
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-
+        write_cyang_mandatory_stmt(scb, obj, indent);
+        write_cyang_sdr(scb, obj, indent);
 	write_cyang_objects(scb, mod, cp, choic->caseQ, indent);
-
 	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
-
-	/* end choice comment */
 	write_cyang_endsec_cmt(scb, YANG_K_CHOICE, choic->name);
 	break;
     case OBJ_TYP_CASE:
-	cas = obj->def.cas;
-	write_cyang_id(scb, YANG_K_CASE, cas->name, startindent, 
-		       isempty, !first);
-	if (isempty) {
-	    return;
-	}
-
-	write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
-
-	/* status field */
-	if (notrefined) {
-	    write_cyang_status(scb, cas->status, indent);
-	}
-
-	/* description field */
-	if (cas->descr) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_DESCRIPTION, 
-				   cas->descr, 
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-
-	/* reference field */
-	if (cas->ref) {
-	    write_cyang_simple_str(scb,
-				   YANG_K_REFERENCE, 
-				   cas->ref, 
-				   indent, 
-				   2,
-				   TRUE);
-	}
-
-	write_cyang_objects(scb, mod, cp, cas->datadefQ, indent);
-
-	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
-	ses_putstr_indent(scb, END_SEC, startindent);
-
-	/* end case comment */
-	write_cyang_endsec_cmt(scb, YANG_K_CASE, cas->name);
+        cas = obj->def.cas;
+        if (fullcase) {
+            write_cyang_whenif(scb, obj, indent);
+            write_cyang_sdr(scb, obj, indent);
+        }
+        write_cyang_objects(scb, 
+                            mod, 
+                            cp, 
+                            cas->datadefQ, 
+                            (fullcase) ? indent : startindent);
+        if (fullcase) {
+            write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+            ses_putstr_indent(scb, END_SEC, startindent);
+            write_cyang_endsec_cmt(scb, YANG_K_CASE, cas->name);
+        }
 	break;
     case OBJ_TYP_USES:
-	if (strcmp(cp->objview, OBJVIEW_RAW)) {
-	    return;
+	if (!cp->rawmode) {
+	    return ERR_NCX_SKIPPED;
 	}
-
 	uses = obj->def.uses;
 	if (!first) {
 	    ses_putchar(scb, '\n');
@@ -1815,7 +1780,9 @@ static void
 	    ses_putstr(scb, uses->name);
 	}
 
-	if (uses->descr || uses->ref || 
+	if (uses->descr || 
+            uses->ref || 
+            (obj->when && obj->when->exprstr) ||
 	    uses->status != NCX_STATUS_CURRENT ||
 	    !dlq_empty(&obj->iffeatureQ) ||
 	    !dlq_empty(uses->datadefQ) ||
@@ -1823,47 +1790,19 @@ static void
 
 	    ses_putstr(scb, START_SEC);
 
-	    write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
-
-
-	    /* status field */
-	    write_cyang_status(scb, uses->status, indent);
-
-	    /* description field */
-	    if (uses->descr) {
-		write_cyang_simple_str(scb,
-				       YANG_K_DESCRIPTION, 
-				       uses->descr,
-				       indent, 
-				       2, 
-				       TRUE);
-	    }
-
-	    /* reference field */
-	    if (uses->ref) {
-		write_cyang_simple_str(scb, 
-				       YANG_K_REFERENCE, 
-				       uses->ref, 
-				       indent, 
-				       2, 
-				       TRUE);
-	    }
-
+	    write_cyang_whenif(scb, obj, indent);
+	    write_cyang_sdr(scb, obj, indent);
 	    write_cyang_objects(scb, mod, cp, uses->datadefQ, indent);
-
 	    write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	    /* end object definition clause */
 	    ses_putstr_indent(scb, END_SEC, startindent);
 	} else {
 	    ses_putchar(scb, ';');
 	}
 	break;
     case OBJ_TYP_AUGMENT:
-	if (strcmp(cp->objview, OBJVIEW_RAW)) {
-	    return;
+	if (!cp->rawmode) {
+	    return ERR_NCX_SKIPPED;
 	}
-
 	aug = obj->def.augment;
 	if (!first) {
 	    ses_putchar(scb, '\n');
@@ -1872,180 +1811,131 @@ static void
 	ses_putstr(scb, YANG_K_AUGMENT);
 	ses_putchar(scb, ' ');
 	ses_putstr(scb, aug->target);
-
 	if (isempty) {
 	    ses_putchar(scb, ';');
-	    return;
+	    return NO_ERR;
 	}
-
 	ses_putstr(scb, START_SEC);
-
-	write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
-
-	/* when field */
-	if (obj->when && obj->when->exprstr) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_WHEN, 
-				   obj->when->exprstr,
-				   indent, 
-				   2, 
-				   TRUE);
-	}		
-
-	/* status field */
-	write_cyang_status(scb, aug->status, indent);
-
-	/* description field */
-	if (aug->descr) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_DESCRIPTION, 
-				   aug->descr, 
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-
-	/* reference field */
-	if (aug->ref) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_REFERENCE, 
-				   aug->ref, 
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-
-	if (!dlq_empty(&aug->datadefQ)) {
-	    write_cyang_objects(scb, mod, cp, &aug->datadefQ, indent);
-	}
-
+	write_cyang_whenif(scb, obj, indent);
+	write_cyang_sdr(scb, obj, indent);
+        write_cyang_objects(scb, mod, cp, &aug->datadefQ, indent);
 	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
 	break;
     case OBJ_TYP_RPC:
 	rpc = obj->def.rpc;
-	write_cyang_id(scb, YANG_K_RPC, rpc->name, startindent, 
-		       isempty, !first);
-	if (isempty) {
-	    return;
-	}
-
-	write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
-
-
-	/* status field */
-	write_cyang_status(scb, rpc->status, indent);
-
-	/* description field */
-	if (rpc->descr) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_DESCRIPTION, 
-				   rpc->descr,
-				   indent,
-				   2,
-				   TRUE);
-	}
-
-	/* reference field */
-	if (rpc->ref) {
-	    write_cyang_simple_str(scb,
-				   YANG_K_REFERENCE, 
-				   rpc->ref,
-				   indent,
-				   2,
-				   TRUE);
-	}
-
+	write_cyang_whenif(scb, obj, indent);      /* when-stmt NULL */
+	write_cyang_sdr(scb, obj, indent);
 	write_cyang_typedefs(scb, mod, cp, &rpc->typedefQ, indent);
-
 	write_cyang_groupings(scb, mod, cp, &rpc->groupingQ, indent);
-
 	write_cyang_objects(scb, mod, cp, &rpc->datadefQ, indent);
-
 	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
-
-	/* end RPC section comment */
 	write_cyang_endsec_cmt(scb, YANG_K_RPC, rpc->name);
 	break;
     case OBJ_TYP_RPCIO:
 	rpcio = obj->def.rpcio;
-
 	if (!dlq_empty(&rpcio->typedefQ) ||
 	    !dlq_empty(&rpcio->groupingQ) ||
 	    !dlq_empty(&rpcio->datadefQ) ||
 	    !dlq_empty(&obj->appinfoQ)) {
 
-	    write_cyang_id(scb, obj_get_name(obj), NULL, startindent, 
-			   FALSE, !first);
+	    write_cyang_id(scb, 
+                           obj_get_name(obj), 
+                           NULL, 
+                           startindent, 
+			   FALSE, 
+                           !first);
 
 	    write_cyang_typedefs(scb, mod, cp, &rpcio->typedefQ, indent);
-
 	    write_cyang_groupings(scb, mod, cp, &rpcio->groupingQ, indent);
-
 	    write_cyang_objects(scb, mod, cp, &rpcio->datadefQ, indent);
-
 	    write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
 	    ses_putstr_indent(scb, END_SEC, startindent);
 	}
 	break;
     case OBJ_TYP_NOTIF:
 	notif = obj->def.notif;
-	write_cyang_id(scb, YANG_K_NOTIFICATION, notif->name, startindent, 
-		       isempty, !first);
-	if (isempty) {
-	    return;
-	}
-
-	write_cyang_iffeatureQ(scb, &obj->iffeatureQ, indent);
-
-	/* status field */
-	write_cyang_status(scb, notif->status, indent);
-
-	/* description field */
-	if (notif->descr) {
-	    write_cyang_simple_str(scb,
-				   YANG_K_DESCRIPTION, 
-				   notif->descr,
-				   indent,
-				   2,
-				   TRUE);
-	}
-
-	/* reference field */
-	if (notif->ref) {
-	    write_cyang_simple_str(scb,
-				   YANG_K_REFERENCE, 
-				   notif->ref,
-				   indent,
-				   2,
-				   TRUE);
-	}
-
+	write_cyang_whenif(scb, obj, indent);      /* when-stmt NULL */
+	write_cyang_sdr(scb, obj, indent);
 	write_cyang_typedefs(scb, mod, cp, &notif->typedefQ, indent);
-
 	write_cyang_groupings(scb, mod, cp, &notif->groupingQ, indent);
-
 	write_cyang_objects(scb, mod, cp, &notif->datadefQ, indent);
-
 	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
-
-	/* end notification section comment */
 	write_cyang_endsec_cmt(scb, YANG_K_NOTIFICATION, notif->name);
 	break;
     case OBJ_TYP_REFINE:
-	break;   /*****/
+	if (!cp->rawmode) {
+	    return ERR_NCX_SKIPPED;
+	}
+	refine = obj->def.refine;
+	if (!first) {
+	    ses_putchar(scb, '\n');
+	}
+	ses_indent(scb, startindent);
+	ses_putstr(scb, YANG_K_REFINE);
+	ses_putchar(scb, ' ');
+	ses_putstr(scb, refine->target);
+	if (isempty || refine->targobj == NULL) {
+	    ses_putchar(scb, ';');
+	    return NO_ERR;
+	}
+	ses_putstr(scb, START_SEC);
+
+        switch (refine->targobj->objtype) {
+        case OBJ_TYP_ANYXML:
+            /* must-stmt refine not in -07*/
+            write_cyang_musts(scb, obj_get_mustQ(obj), indent); 
+            write_cyang_config_stmt(scb, obj, indent);
+            write_cyang_mandatory_stmt(scb, obj, indent);
+            write_cyang_sdr(scb, obj, indent);
+            break;
+        case OBJ_TYP_CONTAINER:
+            write_cyang_musts(scb, obj_get_mustQ(obj), indent); 
+            write_cyang_presence_stmt(scb, refine->presence, indent);
+            write_cyang_config_stmt(scb, obj, indent);
+            write_cyang_sdr(scb, obj, indent);
+            break;
+        case OBJ_TYP_LEAF:
+            write_cyang_musts(scb, obj_get_mustQ(obj), indent); 
+            write_cyang_default_stmt(scb, refine->def, indent);
+            write_cyang_config_stmt(scb, obj, indent);
+            write_cyang_mandatory_stmt(scb, obj, indent);
+            write_cyang_sdr(scb, obj, indent);
+            break;
+        case OBJ_TYP_LEAF_LIST:
+        case OBJ_TYP_LIST:
+            write_cyang_musts(scb, obj_get_mustQ(obj), indent); 
+            write_cyang_config_stmt(scb, obj, indent);
+            write_cyang_minmax(scb,
+                               refine->minelems_tkerr.linenum != 0,
+                               refine->minelems,
+                               refine->maxelems_tkerr.linenum != 0,
+                               refine->maxelems,
+                               indent);
+            write_cyang_sdr(scb, obj, indent);
+            break;
+        case OBJ_TYP_CHOICE:
+            write_cyang_default_stmt(scb, refine->def, indent);
+            write_cyang_config_stmt(scb, obj, indent);
+            write_cyang_mandatory_stmt(scb, obj, indent);
+            write_cyang_sdr(scb, obj, indent);
+            break;
+        case OBJ_TYP_CASE:
+            write_cyang_sdr(scb, obj, indent);
+            break;
+        default:
+            ;
+        }
+
+	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+	ses_putstr_indent(scb, END_SEC, startindent);
+	break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+	return SET_ERROR(ERR_INTERNAL_VAL);
     }
+    return NO_ERR;
     
 }  /* write_cyang_object */
 
@@ -2070,8 +1960,9 @@ static void
 			 const dlq_hdr_t *datadefQ,
 			 int32 startindent)
 {
-    const obj_template_t    *obj;
-    boolean                  first;
+    obj_template_t    *obj;
+    status_t           res;
+    boolean            first;
 
     if (dlq_empty(datadefQ)) {
 	return;
@@ -2084,16 +1975,23 @@ static void
     }
 
     first = TRUE;
-    for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
+    for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
 	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
 	if (obj_is_hidden(obj)) {
 	    continue;
 	}
 
-	write_cyang_object(scb, mod, cp, obj, startindent, first);
-	first = FALSE;
+	res = write_cyang_object(scb, 
+                                 mod, 
+                                 cp, 
+                                 obj, 
+                                 startindent, 
+                                 first);
+        if (first && res == NO_ERR) {
+            first = FALSE;
+        }
     }
 
 }  /* write_cyang_objects */
@@ -2123,9 +2021,12 @@ static void
 
     indent = startindent + ses_indent_count(scb);
 
-    write_cyang_id(scb, YANG_K_EXTENSION, 
-		   ext->name, startindent, 
-		   FALSE, FALSE);
+    write_cyang_id(scb, 
+                   YANG_K_EXTENSION, 
+		   ext->name, 
+                   startindent, 
+		   FALSE, 
+                   FALSE);
 
     /* argument sub-clause */
     if (ext->arg) {
@@ -2242,10 +2143,12 @@ static void
 
     indent = startindent + ses_indent_count(scb);
 
-    write_cyang_id(scb, YANG_K_IDENTITY, 
+    write_cyang_id(scb, 
+                   YANG_K_IDENTITY, 
 		   identity->name, 
 		   startindent, 
-		   FALSE, FALSE);
+		   FALSE, 
+                   FALSE);
 
     /* base sub-clause */
     if (identity->base) {
@@ -2335,8 +2238,11 @@ static void
 	 identity = (const ncx_identity_t *)
 	     dlq_nextEntry(identity)) {
 
-	write_cyang_identity(scb, mod, cp, 
-			     identity, startindent);
+	write_cyang_identity(scb, 
+                             mod, 
+                             cp, 
+			     identity, 
+                             startindent);
     }
 
 }  /* write_cyang_identities */
@@ -2366,10 +2272,12 @@ static void
 
     indent = startindent + ses_indent_count(scb);
 
-    write_cyang_id(scb, YANG_K_FEATURE, 
+    write_cyang_id(scb, 
+                   YANG_K_FEATURE, 
 		   feature->name, 
 		   startindent, 
-		   FALSE, FALSE);
+		   FALSE, 
+                   FALSE);
 
     /* optional Q of if-feature statements */
     write_cyang_iffeatureQ(scb, &feature->iffeatureQ, indent);
@@ -2435,7 +2343,9 @@ static void
 	return;
     }
 
-    write_cyang_banner_cmt(scb, mod, cp,
+    write_cyang_banner_cmt(scb, 
+                           mod, 
+                           cp,
 			   (const xmlChar *)"features", 
 			   startindent);
 
@@ -2445,11 +2355,252 @@ static void
 	 feature = (const ncx_feature_t *)
 	     dlq_nextEntry(feature)) {
 
-	write_cyang_feature(scb, mod, cp, 
-			    feature, startindent);
+	write_cyang_feature(scb, 
+                            mod, 
+                            cp, 
+			    feature, 
+                            startindent);
     }
 
 }  /* write_cyang_features */
+
+
+/********************************************************************
+* FUNCTION write_cyang_deviate
+* 
+* Generate the YANG for 1 deviate statement
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   deviate == obj_deviate_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_cyang_deviate (ses_cb_t *scb,
+                         const ncx_module_t *mod,
+                         const yangdump_cvtparms_t *cp,
+                         const obj_deviate_t *deviate,
+                         int32 startindent)
+{
+    int32                 indent;
+
+    indent = startindent + ses_indent_count(scb);
+
+    ses_indent(scb, startindent);
+    ses_putstr(scb, YANG_K_DEVIATE);
+    ses_putchar(scb, ' ');
+    ses_putstr(scb, obj_get_deviate_arg(deviate->arg));
+
+    if (deviate->empty || deviate->arg == OBJ_DARG_NOT_SUPPORTED) {
+        ses_putchar(scb, ';');
+        return;
+    }
+
+    /* go through the deviate record and generate all
+     * sub-statements that are present
+     */
+    ses_putstr(scb, START_SEC);
+
+    /* type-stmt */
+    if (deviate->typdef) {
+	write_cyang_type_clause(scb, 
+                                mod,
+                                cp,
+                                deviate->typdef,
+                                indent);
+    }
+
+    /* units-stmt */
+    if (deviate->units) {
+	write_cyang_simple_str(scb, 
+			       YANG_K_UNITS, 
+			       deviate->units, 
+			       indent, 
+			       2, 
+			       TRUE);
+    }
+
+    /* default-stmt */
+    if (deviate->defval) {
+	write_cyang_simple_str(scb, 
+			       YANG_K_DEFAULT, 
+			       deviate->defval, 
+			       indent, 
+			       2, 
+			       TRUE);
+    }
+
+    /* config-stmt, only if actually set */
+    if (deviate->config_tkerr.linenum != 0) {
+        write_cyang_simple_str(scb, 
+                               YANG_K_CONFIG, 
+                               (deviate->config) ?
+                               NCX_EL_TRUE : NCX_EL_FALSE,
+                               indent, 
+                               2, 
+                               TRUE);
+    }
+
+    /* mandatory-stmt, only if actually set */
+    if (deviate->mandatory_tkerr.linenum != 0) {
+        write_cyang_simple_str(scb, 
+                               YANG_K_MANDATORY, 
+                               (deviate->mandatory) ?
+                               NCX_EL_TRUE : NCX_EL_FALSE,
+                               indent, 
+                               2, 
+                               TRUE);
+    }
+
+    write_cyang_minmax(scb,
+                       deviate->minelems_tkerr.linenum != 0,
+                       deviate->minelems,
+                       deviate->maxelems_tkerr.linenum != 0,
+                       deviate->maxelems,
+                       indent);
+
+    write_cyang_musts(scb, &deviate->mustQ, indent);
+
+    write_cyang_unique_stmts(scb, &deviate->uniqueQ, indent);
+
+    write_cyang_appinfoQ(scb, 
+			 mod, 
+			 cp, 
+			 &deviate->appinfoQ, 
+			 indent);
+
+    ses_putstr_indent(scb, END_SEC, startindent);
+
+}  /* write_cyang_deviate */
+
+
+/********************************************************************
+* FUNCTION write_cyang_deviation
+* 
+* Generate the YANG for 1 deviation statement
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   deviation == obj_deviation_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_cyang_deviation (ses_cb_t *scb,
+                           const ncx_module_t *mod,
+                           const yangdump_cvtparms_t *cp,
+                           const obj_deviation_t *deviation,
+                           int32 startindent)
+{
+    const obj_deviate_t  *deviate;
+    int32                 indent;
+
+    indent = startindent + ses_indent_count(scb);
+
+    ses_indent(scb, startindent);
+    ses_putstr(scb, YANG_K_DEVIATION);
+    ses_putchar(scb, ' ');
+    ses_putstr(scb, deviation->target);
+
+    if (deviation->empty) {
+        ses_putchar(scb, ';');
+        return;
+    }
+
+    ses_putstr(scb, START_SEC);
+
+    /* description field */
+    if (deviation->descr) {
+	write_cyang_simple_str(scb, 
+			       YANG_K_DESCRIPTION, 
+			       deviation->descr, 
+			       indent, 
+			       2, 
+			       TRUE);
+    }
+
+    /* reference field */
+    if (deviation->ref) {
+	write_cyang_simple_str(scb, 
+			       YANG_K_REFERENCE, 
+			       deviation->ref, 
+			       indent, 
+			       2, 
+			       TRUE);
+    }
+
+    /* 0 or more deviate-stmts */
+    for (deviate = (const obj_deviate_t *)
+             dlq_firstEntry(&deviation->deviateQ);
+         deviate != NULL;
+         deviate = (const obj_deviate_t *)
+             dlq_nextEntry(deviate)) {
+        write_cyang_deviate(scb, mod, cp, deviate, indent);
+    }
+
+    write_cyang_appinfoQ(scb, 
+			 mod, 
+			 cp, 
+			 &deviation->appinfoQ, 
+			 indent);
+
+
+    ses_putstr_indent(scb, END_SEC, startindent);
+
+}  /* write_cyang_deviation */
+
+
+/********************************************************************
+* FUNCTION write_cyang_deviations
+* 
+* Generate the YANG for the specified deviationQ
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   deviationQ == que of obj_deviation_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_cyang_deviations (ses_cb_t *scb,
+                            const ncx_module_t *mod,
+                            const yangdump_cvtparms_t *cp,
+                            const dlq_hdr_t *deviationQ,
+                            int32 startindent)
+{
+    const obj_deviation_t *deviation;
+
+    if (dlq_empty(deviationQ)) {
+	return;
+    }
+
+    write_cyang_banner_cmt(scb, 
+                           mod, 
+                           cp,
+			   (const xmlChar *)"deviations", 
+			   startindent);
+
+    for (deviation = (const obj_deviation_t *)
+	     dlq_firstEntry(deviationQ);
+	 deviation != NULL;
+	 deviation = (const obj_deviation_t *)
+	     dlq_nextEntry(deviation)) {
+
+	write_cyang_deviation(scb, 
+                              mod, 
+                              cp, 
+                              deviation, 
+                              startindent);
+    }
+
+}  /* write_cyang_deviations */
 
 
 /********************************************************************
@@ -2766,11 +2917,17 @@ static void
     /* if the top-level statement order was saved, it was only for
      * the YANG_PT_TOP module, and none of the sub-modules
      */
-    stmtmode = dlq_empty(&mod->stmtQ) ? FALSE : TRUE;
+    if (cp->unified) {
+        stmtmode = FALSE;
+    } else {
+        stmtmode = dlq_empty(&mod->stmtQ) ? FALSE : TRUE;
+    }
 
     /* 1) features */
     if (!stmtmode) {
-	write_cyang_features(scb, mod, cp, 
+	write_cyang_features(scb, 
+                             mod, 
+                             cp, 
 			     &mod->featureQ, 
 			     2*cp->indent);
     }
@@ -2909,6 +3066,31 @@ static void
 	}
     }
 
+    /* 7) deviations */
+    if (!stmtmode) {
+	write_cyang_deviations(scb, 
+                               mod, 
+                               cp, 
+                               &mod->deviationQ, 
+                               cp->indent);
+    }
+
+    if (cp->unified && mod->ismod) {
+	for (node = (const yang_node_t *)
+		 dlq_firstEntry(&mod->saveincQ);
+	     node != NULL;
+	     node = (const yang_node_t *)dlq_nextEntry(node)) {
+	    if (node->submod) {
+		write_cyang_deviations(scb, 
+                                       node->submod,
+                                       cp, 
+                                       &node->submod->deviationQ, 
+                                       cp->indent);
+	    }
+	}
+    }
+
+
     /* check statement mode on top-level module only */
     if (stmtmode) {
 	for (stmt = (const yang_stmt_t *)
@@ -2963,6 +3145,13 @@ static void
 				    cp, 
 				    stmt->s.feature, 
 				    cp->indent);
+		break;
+	    case YANG_ST_DEVIATION:
+		write_cyang_deviation(scb, 
+                                      mod,
+                                      cp, 
+                                      stmt->s.deviation, 
+                                      cp->indent);
 		break;
 	    default:
 		SET_ERROR(ERR_INTERNAL_VAL);

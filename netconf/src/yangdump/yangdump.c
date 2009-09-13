@@ -470,6 +470,9 @@ static status_t
         cp->objview = YANGDUMP_DEF_OBJVIEW;
     }
 
+    /* rawmode derived parameter */
+    cp->rawmode = strcmp(cp->objview, OBJVIEW_RAW) ? FALSE : TRUE;
+
     /* output parameter */
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
@@ -1300,8 +1303,7 @@ static status_t
                                  revision,
                                  cp->subtree ? TRUE : FALSE,
                                  cp->unified, 
-                                 strcmp(cp->objview, OBJVIEW_COOKED) 
-                                 ? FALSE : TRUE,
+                                 !cp->rawmode,
                                  &savedevQ,
                                  &res);
     if (res == ERR_NCX_SKIPPED) {

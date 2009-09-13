@@ -93,8 +93,8 @@ date	     init     comment
  */
 #define OBJ_FL_AUGCLONE     bit2
 
-/* object is a refinement within a uses, not a real object */
-#define OBJ_FL_REFINE       bit3
+/* object is marked for deletion */
+#define OBJ_FL_DELETED      bit3
 
 /* object is conditional, via a when-stmt expression */
 #define OBJ_FL_CONDITIONAL  bit4
@@ -164,8 +164,6 @@ date	     init     comment
 /* object is tagged ncx:very-secure */
 #define OBJ_FL_VERY_SECURE  bit25
 
-/* object is marked for deletion */
-#define OBJ_FL_DELETED      bit26
 
 
 /********************************************************************
@@ -828,6 +826,8 @@ extern obj_deviate_t *
 extern void
     obj_free_deviate (obj_deviate_t *deviate);
 
+extern const xmlChar *
+    obj_get_deviate_arg (obj_deviate_arg_t devarg);
 
 
 /********************    obj_deviation_t   *****************/
@@ -1134,6 +1134,9 @@ extern boolean
 
 extern boolean
     obj_is_single_instance (obj_template_t *obj);
+
+extern boolean
+    obj_is_short_case (obj_template_t *obj);
 
 extern boolean
     obj_has_when_stmts (obj_template_t *obj);

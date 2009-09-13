@@ -84,18 +84,18 @@ typedef struct yangdump_cvtparms_t_ {
     const xmlChar  *config;
     const xmlChar  *html_toc;
     const xmlChar  *css_file;
-    boolean         html_div;
+    int32           indent;
     uint32          modcount;
     uint32          subtreecount;
     ncx_cvttyp_t    format;
+    boolean         helpmode;
+    help_mode_t     helpsubmode;
     boolean         defnames;
     boolean         dependencies;
     boolean         exports;
-    boolean         helpmode;
-    help_mode_t     helpsubmode;
     boolean         showerrorsmode;
     boolean         identifiers;
-    int32           indent;
+    boolean         html_div;
     boolean         modversion;
     boolean         subdirs;
     boolean         versionnames;
@@ -103,6 +103,7 @@ typedef struct yangdump_cvtparms_t_ {
     boolean         simurls;
     boolean         unified;
     boolean         versionmode;
+    boolean         rawmode;
 
     /* internal vars */
     xmlChar        *full_output;

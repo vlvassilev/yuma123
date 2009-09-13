@@ -1780,6 +1780,280 @@ static void
 
 
 /********************************************************************
+* FUNCTION write_when
+* 
+* Check then when-stmt for an object
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object to check
+*   indent = indent amount
+*********************************************************************/
+static void
+    write_when (ses_cb_t *scb,
+                const obj_template_t *obj,
+                int32 indent)
+{
+    /* when-stmt? */
+    if (obj->when && obj->when->exprstr) {
+        write_simple_str(scb, 
+                         YANG_K_WHEN, 
+                         obj->when->exprstr,
+                         indent, 
+                         2, 
+                         TRUE);
+    }
+
+}  /* write_when */
+
+
+/********************************************************************
+* FUNCTION write_cyang_presence_stmt
+* 
+* Write the presence-stmt
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   presence == presence string (may be NULL to skip)
+*   indent = indent amount
+*********************************************************************/
+static void
+    write_presence_stmt (ses_cb_t *scb,
+                         const xmlChar *presence,
+                         int32 indent)
+{
+    if (presence) {
+        write_simple_str(scb, 
+                         YANG_K_PRESENCE, 
+                         presence, 
+                         indent, 
+                         2, 
+                         TRUE);
+    }
+
+}  /* write_presence_stmt */
+
+
+/********************************************************************
+* FUNCTION write_sdr
+* 
+* Write the status-stmt, description-stmt, and reference-stmt
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object to check
+*   indent = indent amount
+*********************************************************************/
+static void
+    write_sdr (ses_cb_t *scb,
+               const obj_template_t *obj,
+               int32 indent)
+{
+    const xmlChar *str;
+
+    /* status-stmt? (only written if not 'current' */
+    write_status(scb, obj_get_status(obj), indent);
+
+    /* description-stmt? */
+    str = obj_get_description(obj);
+    if (str) {
+        write_simple_str(scb, 
+                         YANG_K_DESCRIPTION, 
+                         str,
+                         indent, 
+                         2, 
+                         TRUE);
+    }
+	    
+    /* reference-stmt? */
+    str = obj_get_reference(obj);
+    if (str) {
+        write_simple_str(scb, 
+                         YANG_K_REFERENCE, 
+                         str, 
+                         indent, 
+                         2,
+                         TRUE);
+    }
+
+}  /* write_sdr */
+
+
+/********************************************************************
+* FUNCTION write_config_stmt
+* 
+* Write the config-stmt
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object to check
+*   indent = indent amount
+*********************************************************************/
+static void
+    write_config_stmt (ses_cb_t *scb,
+                       const obj_template_t *obj,
+                       int32 indent)
+{
+    /* config-stmt, only if actually set to false */
+    if (obj->flags & OBJ_FL_CONFSET) {
+        if (!(obj->flags & OBJ_FL_CONFIG)) {
+            write_simple_str(scb, 
+                             YANG_K_CONFIG, 
+                             NCX_EL_FALSE,
+                             indent, 
+                             2, 
+                             TRUE);
+        }
+    }
+
+}  /* write_config_stmt */
+
+
+/********************************************************************
+* FUNCTION write_mandatory_stmt
+* 
+* Write the mandatory-stmt
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object to check
+*   indent = indent amount
+*********************************************************************/
+static void
+    write_mandatory_stmt (ses_cb_t *scb,
+                          const obj_template_t *obj,
+                          int32 indent)
+{
+
+    /* mandatory field, only if actually set to true */
+    if (obj->flags & OBJ_FL_MANDSET) {
+        if (obj->flags & OBJ_FL_MANDATORY) {
+            write_simple_str(scb, 
+                             YANG_K_MANDATORY,
+                             NCX_EL_TRUE,
+                             indent,
+                             2,
+                             TRUE);
+        }
+    }
+
+}  /* write__mandatory_stmt */
+
+
+/********************************************************************
+* FUNCTION write_minmax
+* 
+* Write the min-elements and/or max-elements stmts if needed
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   minset == TRUE if min-elements set
+*   minval == min-elements value
+*   maxset == TRUE if max-elements set
+*   maxval == min-elements value
+*   indent == indent amount
+*********************************************************************/
+static void
+    write_minmax (ses_cb_t *scb,
+                  boolean minset,
+                  uint32 minval,
+                  boolean maxset,
+                  uint32 maxval,
+                  int32 indent)
+{
+    char    buff[NCX_MAX_NUMLEN];
+
+    if (minset) {
+        sprintf(buff, "%u", minval);
+        write_simple_str(scb, 
+                         YANG_K_MIN_ELEMENTS, 
+                         (const xmlChar *)buff,
+                         indent, 
+                         2, 
+                         TRUE);
+    }
+
+    if (maxset) {
+        if (maxval == 0) {
+	    write_simple_str(scb, 
+                             YANG_K_MAX_ELEMENTS, 
+                             YANG_K_UNBOUNDED,
+                             indent, 
+                             2, 
+                             TRUE);
+        } else {
+	    sprintf(buff, "%u", maxval);
+	    write_simple_str(scb, 
+                             YANG_K_MAX_ELEMENTS, 
+                             (const xmlChar *)buff,
+                             indent, 
+                             2, 
+                             TRUE);
+	}
+    }
+
+}  /* write_minmax */
+
+
+/********************************************************************
+* FUNCTION write_unique_stmts
+* 
+* Generate the HTML for the specified uniqueQ
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   uniqueQ == que of obj_unique_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_unique_stmts (ses_cb_t *scb,
+                        const ncx_module_t *mod,
+                        const yangdump_cvtparms_t *cp,
+                        const dlq_hdr_t *uniqueQ,
+                        int32 startindent)
+{
+    const obj_unique_t      *uni;
+    const obj_unique_comp_t *unicomp, *nextunicomp;
+    const xmlChar           *submod;
+
+    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
+
+    for (uni = (const obj_unique_t *)dlq_firstEntry(uniqueQ);
+         uni != NULL;
+         uni = (const obj_unique_t *)dlq_nextEntry(uni)) {
+
+        ses_indent(scb, startindent);
+        write_kw(scb, YANG_K_UNIQUE);
+        ses_putstr(scb, (const xmlChar *)" \"");
+
+        for (unicomp = (obj_unique_comp_t *)
+                 dlq_firstEntry(&uni->compQ);
+             unicomp != NULL; 
+             unicomp = nextunicomp) {
+            nextunicomp = (obj_unique_comp_t *)
+                dlq_nextEntry(unicomp);
+            write_a2(scb,
+                     cp, 
+                     NULL,
+                     NULL,
+                     submod,
+                     obj_get_name(unicomp->unobj),
+                     unicomp->unobj->tkerr.linenum,
+                     unicomp->xpath);
+            if (nextunicomp) {
+                ses_putstr(scb, (const xmlChar *)", ");
+            }
+        }
+        ses_putstr(scb, (const xmlChar *)"\";");
+    }
+
+}  /* write_unique_stmts */
+
+
+/********************************************************************
 * FUNCTION write_object
 * 
 * Generate the HTML for the 1 datadef
@@ -1792,8 +2066,10 @@ static void
 *   startindent == start indent count
 *   first == TRUE if this is the first object at this indent level
 *            FALSE if not the first object at this indent level
+* RETURNS:
+*   status (usually NO_ERR or ERR_NCX_SKIPPED)
 *********************************************************************/
-static void
+static status_t
     write_object (ses_cb_t *scb,
 		  const ncx_module_t *mod,
 		  const yangdump_cvtparms_t *cp,
@@ -1812,247 +2088,111 @@ static void
     obj_rpc_t         *rpc;
     obj_rpcio_t       *rpcio;
     obj_notif_t       *notif;
+    obj_refine_t      *refine;
     obj_key_t         *key, *nextkey;
-    obj_unique_t      *uni;
-    obj_unique_comp_t *unicomp, *nextunicomp;
-    const xmlChar     *fname, *fversion, *submod;
+    const xmlChar     *fname, *fversion, *submod, *str;
     int32              indent;
-    char               buff[NCX_MAX_NUMLEN];
-    boolean            notrefined, isanyxml, isempty, rawmode;
+    boolean            isempty, fullcase;
 
-    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
-
-    indent = startindent + ses_indent_count(scb);
-
-    rawmode = strcmp(cp->objview, OBJVIEW_RAW) ? FALSE : TRUE;
-
-    if (obj_is_cloned(obj) && rawmode) {
+    if (obj_is_cloned(obj) && cp->rawmode) {
 	/* skip cloned objects in 'raw' object view mode */
-	return;
+	return ERR_NCX_SKIPPED;
     }
 
-    notrefined = !obj_is_refine(obj);
-    isempty = obj_is_empty(obj);
-    isanyxml = FALSE;
+    if (cp->rawmode) {
+        isempty = obj_is_empty(obj);
+    } else {
+        isempty = FALSE;
+    }
+    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
+    indent = startindent + ses_indent_count(scb);
+    fullcase = !obj_is_short_case(obj);
 
-    switch (obj->objtype) {
-    case OBJ_TYP_CONTAINER:
-	con = obj->def.container;
+    /* generate start of statement with the object type
+     * except a short-form case-stmt
+     */
+    if (fullcase && 
+        obj_has_name(obj) && 
+        obj->objtype != OBJ_TYP_RPCIO) {
+
 	write_href_id(scb, 
                       submod, 
-                      YANG_K_CONTAINER, 
-                      con->name,
-		      startindent, 
-                      obj->tkerr.linenum, 
-                      isempty, 
-                      !first);
-	if (isempty && rawmode) {
-	    return;
-	}
-
-	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
-
-	/* 0 or more must-stmts */
-	write_musts(scb, &con->mustQ, indent);
-
-	/* presence field */
-	if (con->presence) {
-	    write_simple_str(scb, 
-                             YANG_K_PRESENCE, 
-			     con->presence, 
-                             indent,
-                             2,
-                             TRUE);
-	}
-
-	/* config field, only if actually set (no default) */
-	if (obj->flags & OBJ_FL_CONFSET) {
-	    write_simple_str(scb,
-                             YANG_K_CONFIG, 
-			     (obj->flags & OBJ_FL_CONFIG) 
-			     ? NCX_EL_TRUE : NCX_EL_FALSE,
-			     indent,
-                             2,
-                             TRUE);
-	}
-	    
-	/* status field */
-	if (notrefined) {
-	    write_status(scb, con->status, indent);
-	}
-
-	/* description field */
-	if (con->descr) {
-	    write_simple_str(scb,
-                             YANG_K_DESCRIPTION, 
-			     con->descr,
-                             indent,
-                             2,
-                             TRUE);
-	}
-	    
-	/* reference field */
-	if (con->ref) {
-	    write_simple_str(scb,
-                             YANG_K_REFERENCE, 
-			     con->ref,
-                             indent, 
-                             2, 
-                             TRUE);
-	}
-
-	if (notrefined) {
-	    write_typedefs(scb, mod, cp, con->typedefQ, indent);
-	    write_groupings(scb, mod, cp, con->groupingQ, indent);
-	}
-
-	write_objects(scb, mod, cp, con->datadefQ, indent);
-
-	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
-	ses_putstr_indent(scb, END_SEC, startindent);
-
-	/* end container comment */
-	write_endsec_cmt(scb, YANG_K_CONTAINER, con->name);
-	break;
-    case OBJ_TYP_ANYXML:
-        isanyxml = TRUE;
-        /* fall through */
-    case OBJ_TYP_LEAF:
-	leaf = obj->def.leaf;
-	if (isanyxml) {
-	    write_href_id(scb, 
-                          submod, 
-                          YANG_K_ANYXML, 
-                          leaf->name,
-			  startindent, 
-                          obj->tkerr.linenum, 
-                          isempty, 
-                          !first);
-	    if (isempty) {
-		return;
-	    }
-	    write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
-	} else {
-	    write_href_id(scb, 
-                          submod, 
-                          YANG_K_LEAF, 
-                          leaf->name,
-			  startindent, 
-                          obj->tkerr.linenum, 
-                          isempty, 
-                          !first);
-	    if (isempty) {
-		return;
-	    }
-
-	    write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
-
-	    /* type field */
-	    if (notrefined) {
-		write_type_clause(scb, mod, cp, leaf->typdef, indent);
-	    }
-
-	    /* units clause */
-	    if (notrefined && leaf->units) {
-		write_simple_str(scb, 
-                                 YANG_K_UNITS, 
-                                 leaf->units,
-				 indent, 
-                                 2, 
-                                 TRUE);
-	    }
-
-	    /* 0 or more must-stmts */
-	    write_musts(scb, &leaf->mustQ, indent);
-
-	    /* default field */
-	    if (leaf->defval) {
-		write_simple_str(scb, 
-                                 YANG_K_DEFAULT, 
-				 leaf->defval, 
-                                 indent, 
-                                 2, 
-                                 TRUE);
-	    }
-	}
-
-	/* config field, only if actually set (no default) */
-	if (obj->flags & OBJ_FL_CONFSET) {
-	    write_simple_str(scb, 
-                             YANG_K_CONFIG, 
-			     (obj->flags & OBJ_FL_CONFIG) ? 
-			     NCX_EL_TRUE : NCX_EL_FALSE,
-			     indent, 
-                             2, 
-                             TRUE);
-	}
-
-	/* mandatory field, only if actually set (no default) */
-	if (obj->flags & OBJ_FL_MANDSET) {
-	    write_simple_str(scb, 
-                             YANG_K_MANDATORY, 
-			     (obj->flags & OBJ_FL_MANDATORY) ? 
-			     NCX_EL_TRUE : NCX_EL_FALSE,
-			     indent, 
-                             2, 
-                             TRUE);
-	}
-
-	/* status field */
-	if (notrefined) {
-	    write_status(scb, leaf->status, indent);
-	}
-
-	/* description field */
-	if (leaf->descr) {
-	    write_simple_str(scb, 
-                             YANG_K_DESCRIPTION, 
-			     leaf->descr,
-                             indent,
-                             2, 
-                             TRUE);
-	}
-
-	/* reference field */
-	if (leaf->ref) {
-	    write_simple_str(scb,
-                             YANG_K_REFERENCE, 
-			     leaf->ref,
-                             indent,
-                             2,
-                             TRUE);
-	}
-
-	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
-	ses_putstr_indent(scb, END_SEC, startindent);
-	break;
-    case OBJ_TYP_LEAF_LIST:
-	leaflist = obj->def.leaflist;
-	write_href_id(scb, 
-                      submod, 
-                      YANG_K_LEAF_LIST, 
-                      leaflist->name,
+                      obj_get_typestr(obj), 
+                      obj_get_name(obj),
 		      startindent, 
                       obj->tkerr.linenum, 
                       isempty, 
                       !first);
 	if (isempty) {
-	    return;
+	    return NO_ERR;
 	}
+    }
 
+    switch (obj->objtype) {
+    case OBJ_TYP_ANYXML:
+        write_when(scb, obj, indent);
 	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+	write_musts(scb, obj_get_mustQ(obj), indent);
+        write_config_stmt(scb, obj, indent);
+        write_mandatory_stmt(scb, obj, indent);
+        write_sdr(scb, obj, indent);
+	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+	ses_putstr_indent(scb, END_SEC, startindent);
+        break;
+    case OBJ_TYP_CONTAINER:
+	con = obj->def.container;
+        write_when(scb, obj, indent);
+	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+	write_musts(scb, obj_get_mustQ(obj), indent);
+        str = obj_get_presence_string(obj);
+        write_presence_stmt(scb, str, indent);
+        write_config_stmt(scb, obj, indent);
+        write_sdr(scb, obj, indent);
+        write_typedefs(scb, mod, cp, con->typedefQ, indent);
+        write_groupings(scb, mod, cp, con->groupingQ, indent);
+	write_objects(scb, mod, cp, con->datadefQ, indent);
+	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+	ses_putstr_indent(scb, END_SEC, startindent);
+	write_endsec_cmt(scb, YANG_K_CONTAINER, con->name);
+	break;
+    case OBJ_TYP_LEAF:
+	leaf = obj->def.leaf;
+        write_when(scb, obj, indent);
+        write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+        write_type_clause(scb, mod, cp, leaf->typdef, indent);
 
-	/* type field */
-	if (notrefined) {
-	    write_type_clause(scb, mod, cp, leaflist->typdef, indent);
-	}
+        /* units clause */
+        if (leaf->units) {
+            write_simple_str(scb, 
+                             YANG_K_UNITS, 
+                             leaf->units,
+                             indent, 
+                             2, 
+                             TRUE);
+        }
+        write_musts(scb, obj_get_mustQ(obj), indent);
 
-	/* units clause */
-	if (notrefined && leaflist->units) {
+        if (leaf->defval) {
+            write_simple_str(scb, 
+                             YANG_K_DEFAULT, 
+                             leaf->defval, 
+                             indent, 
+                             2, 
+                             TRUE);
+        }
+
+        write_config_stmt(scb, obj, indent);
+        write_mandatory_stmt(scb, obj, indent);
+        write_sdr(scb, obj, indent);
+	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+	ses_putstr_indent(scb, END_SEC, startindent);
+	break;
+    case OBJ_TYP_LEAF_LIST:
+	leaflist = obj->def.leaflist;
+        write_when(scb, obj, indent);
+	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+        write_type_clause(scb, mod, cp, leaflist->typdef, indent);
+	if (leaflist->units) {
 	    write_simple_str(scb,
                              YANG_K_UNITS,
                              leaflist->units,
@@ -2060,105 +2200,34 @@ static void
                              2,
                              TRUE);
 	}
-
-	/* 0 or more must-stmts */
-	write_musts(scb, &leaflist->mustQ, indent);
-
-	/* config field, only if actually set (no default) */
-	if (obj->flags & OBJ_FL_CONFSET) {
-	    write_simple_str(scb,
-                             YANG_K_CONFIG, 
-			     (obj->flags & OBJ_FL_CONFIG) ? 
-			     NCX_EL_TRUE : NCX_EL_FALSE,
-			     indent, 
-                             2, 
-                             TRUE);
-	}
-
-	/*  min-elements */
-	if (leaflist->minset && leaflist->minelems) {
-	    sprintf(buff, "%u", leaflist->minelems);
-	    write_simple_str(scb,
-                             YANG_K_MIN_ELEMENTS, 
-			     (const xmlChar *)buff,
-			     indent, 
-                             2, 
-                             TRUE);
-	}
-
-	/*  max-elements */
-	if (leaflist->maxset && leaflist->maxelems) {
-	    sprintf(buff, "%u", leaflist->maxelems);
-	    write_simple_str(scb, 
-                             YANG_K_MAX_ELEMENTS, 
-			     (const xmlChar *)buff,
-			     indent, 
-                             2, 
-                             TRUE);
-	}
-
-	/* ordered-by field */
-	if (notrefined) {
+	write_musts(scb, obj_get_mustQ(obj), indent);
+        write_config_stmt(scb, obj, indent);
+	write_minmax(scb,
+                     leaflist->minset,
+                     leaflist->minelems,
+                     leaflist->maxset,
+                     leaflist->maxelems,
+                     indent);
+	if (!leaflist->ordersys) {
 	    write_simple_str(scb, 
                              YANG_K_ORDERED_BY, 
-			     (leaflist->ordersys) ? 
-			     YANG_K_SYSTEM : YANG_K_USER,
+			     YANG_K_USER,
 			     indent, 
                              2, 
                              TRUE);
 	}
-
-	/* status field */
-	if (notrefined) {
-	    write_status(scb, leaflist->status, indent);
-	}
-
-	/* description field */
-	if (leaflist->descr) {
-	    write_simple_str(scb, 
-                             YANG_K_DESCRIPTION, 
-			     leaflist->descr, 
-                             indent, 
-                             2, 
-                             TRUE);
-	}
-
-	/* reference field */
-	if (leaflist->ref) {
-	    write_simple_str(scb, 
-                             YANG_K_REFERENCE, 
-			     leaflist->ref, 
-                             indent, 
-                             2, 
-                             TRUE);
-	}
-
+        write_sdr(scb, obj, indent);
 	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
 	break;
     case OBJ_TYP_LIST:
 	list = obj->def.list;
-	write_href_id(scb, 
-                      submod,
-                      YANG_K_LIST,
-                      list->name,
-		      startindent,
-                      obj->tkerr.linenum,
-                      isempty, 
-                      !first);
-	if (isempty) {
-	    return;
-	}
-
+        write_when(scb, obj, indent);
 	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
-
-	/* 0 or more must-stmts */
-	write_musts(scb, &list->mustQ, indent);
+	write_musts(scb, obj_get_mustQ(obj), indent);
 
 	/* key field, manual generation to make links */
-	if (notrefined && !dlq_empty(&list->keyQ)) {
+	if (!dlq_empty(&list->keyQ)) {
 	    ses_indent(scb, indent);
 	    write_kw(scb, YANG_K_KEY);
 	    ses_putstr(scb, (const xmlChar *)" \"");
@@ -2181,139 +2250,37 @@ static void
 	    ses_putstr(scb, (const xmlChar *)"\";");
 	}
 
-	/* unique fields, manual generation to make links */
-	if (notrefined && !dlq_empty(&list->uniqueQ)) {
-	    for (uni = (obj_unique_t *)
-		     dlq_firstEntry(&list->uniqueQ);
-		 uni != NULL;
-		 uni = (obj_unique_t *)dlq_nextEntry(uni)) {
-
-		ses_indent(scb, indent);
-		write_kw(scb, YANG_K_UNIQUE);
-		ses_putstr(scb, (const xmlChar *)" \"");
-
-		for (unicomp = (obj_unique_comp_t *)
-			 dlq_firstEntry(&uni->compQ);
-		     unicomp != NULL; unicomp = nextunicomp) {
-		    nextunicomp = (obj_unique_comp_t *)
-			dlq_nextEntry(unicomp);
-		    write_a2(scb,
-                             cp, 
-                             NULL,
-                             NULL,
-                             submod,
-			     obj_get_name(unicomp->unobj),
-			     unicomp->unobj->tkerr.linenum,
-			     unicomp->xpath);
-		    if (nextunicomp) {
-			ses_putstr(scb, (const xmlChar *)", ");
-		    }
-		}
-		ses_putstr(scb, (const xmlChar *)"\";");
-	    }
-	}
-
-	/* config field, only if actually set (no default) */
-	if (obj->flags & OBJ_FL_CONFSET) {
-	    write_simple_str(scb, 
-                             YANG_K_CONFIG, 
-			     (obj->flags & OBJ_FL_CONFIG) ? 
-			     NCX_EL_TRUE : NCX_EL_FALSE,
-			     indent, 
-                             2, 
-                             TRUE);
-	}
-
-	/*  min-elements */
-	if (list->minset && list->minelems) {
-	    sprintf(buff, "%u", list->minelems);
-	    write_simple_str(scb, 
-                             YANG_K_MIN_ELEMENTS, 
-			     (const xmlChar *)buff,
-			     indent, 
-                             2, 
-                             TRUE);
-	}
-
-	/*  max-elements */
-	if (list->maxset && list->maxelems) {
-	    sprintf(buff, "%u", list->maxelems);
-	    write_simple_str(scb, 
-                             YANG_K_MAX_ELEMENTS, 
-			     (const xmlChar *)buff,
-			     indent, 
-                             2, 
-                             TRUE);
-	}
+        write_unique_stmts(scb, mod, cp, &list->uniqueQ, indent);
+        write_config_stmt(scb, obj, indent);
+        write_minmax(scb,
+                     list->minset,
+                     list->minelems,
+                     list->maxset,
+                     list->maxelems,
+                     indent);
 
 	/* ordered-by field */
-	if (notrefined) {
+	if (!list->ordersys) {
 	    write_simple_str(scb, 
                              YANG_K_ORDERED_BY, 
-			     (list->ordersys) ? 
-			     YANG_K_SYSTEM : YANG_K_USER,
+			     YANG_K_USER,
 			     indent, 
                              2, 
                              TRUE);
 	}
 
-	/* status field */
-	if (notrefined) {
-	    write_status(scb, list->status, indent);
-	}
-
-	/* description field */
-	if (list->descr) {
-	    write_simple_str(scb, 
-                             YANG_K_DESCRIPTION, 
-			     list->descr, 
-                             indent, 
-                             2, 
-                             TRUE);
-	}
-
-	/* reference field */
-	if (list->ref) {
-	    write_simple_str(scb, 
-                             YANG_K_REFERENCE, 
-			     list->ref,
-                             indent,
-                             2, 
-                             TRUE);
-	}
-
-	if (notrefined) {
-	    write_typedefs(scb, mod, cp, list->typedefQ, indent);
-	    write_groupings(scb, mod, cp, list->groupingQ, indent);
-	}
-
+        write_sdr(scb, obj, indent);
+        write_typedefs(scb, mod, cp, list->typedefQ, indent);
+        write_groupings(scb, mod, cp, list->groupingQ, indent);
 	write_objects(scb, mod, cp, list->datadefQ, indent);
-
 	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
-
-	/* end list section comment */
 	write_endsec_cmt(scb, YANG_K_LIST, list->name);
 	break;
     case OBJ_TYP_CHOICE:
 	choic = obj->def.choic;
-	write_href_id(scb, 
-                      submod, 
-                      YANG_K_CHOICE,
-                      choic->name,
-		      startindent,
-                      obj->tkerr.linenum,
-                      isempty, 
-                      !first);
-	if (isempty) {
-	    return;
-	}
-
+        write_when(scb, obj, indent);
 	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
-
-	/* default case field */
 	if (choic->defval) {
 	    write_simple_str(scb,
                              YANG_K_DEFAULT, 
@@ -2322,113 +2289,44 @@ static void
                              2,
                              TRUE);
 	}
-
-	/* mandatory field, only if actually set (no default) */
-	if (obj->flags & OBJ_FL_MANDSET) {
-	    write_simple_str(scb,
-                             YANG_K_MANDATORY, 
-			     (obj->flags & OBJ_FL_MANDATORY) ? 
-			     NCX_EL_TRUE : NCX_EL_FALSE,
-			     indent,
-                             2,
-                             TRUE);
-	}
-
-	/* status field */
-	if (notrefined) {
-	    write_status(scb, choic->status, indent);
-	}
-
-	/* description field */
-	if (choic->descr) {
-	    write_simple_str(scb,
-                             YANG_K_DESCRIPTION, 
-			     choic->descr, 
-                             indent,
-                             2,
-                             TRUE);
-	}
-
-	/* reference field */
-	if (choic->ref) {
-	    write_simple_str(scb,
-                             YANG_K_REFERENCE, 
-			     choic->ref, 
-                             indent, 
-                             2, 
-                             TRUE);
-	}
-
+        write_mandatory_stmt(scb, obj, indent);
+        write_sdr(scb, obj, indent);
 	write_objects(scb, mod, cp, choic->caseQ, indent);
-
-	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
-
 	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end choice comment */
 	write_endsec_cmt(scb, YANG_K_CHOICE, choic->name);
 	break;
     case OBJ_TYP_CASE:
 	cas = obj->def.cas;
-	write_href_id(scb, 
-                      submod, 
-                      YANG_K_CASE, 
-                      cas->name,
-		      startindent,
-                      obj->tkerr.linenum,
-                      isempty, 
-                      !first);
-	if (isempty) {
-	    return;
+        if (fullcase) {
+            write_when(scb, obj, indent);
+            write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+            write_sdr(scb, obj, indent);
 	}
 
-	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+	write_objects(scb, 
+                      mod, 
+                      cp, 
+                      cas->datadefQ, 
+                      (fullcase) ? indent : startindent);
 
-	/* status field */
-	if (notrefined) {
-	    write_status(scb, cas->status, indent);
-	}
-
-	/* description field */
-	if (cas->descr) {
-	    write_simple_str(scb, 
-                             YANG_K_DESCRIPTION, 
-			     cas->descr, 
-                             indent, 
-                             2, 
-                             TRUE);
-	}
-
-	/* reference field */
-	if (cas->ref) {
-	    write_simple_str(scb, 
-                             YANG_K_REFERENCE, 
-			     cas->ref, 
-                             indent, 
-                             2, 
-                             TRUE);
-	}
-
-	write_objects(scb, mod, cp, cas->datadefQ, indent);
-
-	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
-	ses_putstr_indent(scb, END_SEC, startindent);
-
-	/* end case comment */
-	write_endsec_cmt(scb, YANG_K_CASE, cas->name);
+        if (fullcase) {
+            write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+            ses_putstr_indent(scb, END_SEC, startindent);
+            write_endsec_cmt(scb, YANG_K_CASE, cas->name);
+        }
 	break;
     case OBJ_TYP_USES:
-	if (strcmp(cp->objview, OBJVIEW_RAW)) {
-	    return;
+	if (!cp->rawmode) {
+	    return ERR_NCX_SKIPPED;
 	}
-
 	uses = obj->def.uses;
+
+
 	if (!first) {
 	    ses_putchar(scb, '\n');
 	}
+
 	ses_indent(scb, startindent);
 	write_id_a(scb, submod, YANG_K_USES, obj->tkerr.linenum);
 	write_kw(scb, YANG_K_USES);
@@ -2450,57 +2348,35 @@ static void
 		uses->prefix,
                 uses->name,
 		uses->grp->tkerr.linenum);
-	if (uses->descr || uses->ref || 
+	if (uses->descr || 
+            uses->ref || 
+            (obj->when && obj->when->exprstr) ||
 	    uses->status != NCX_STATUS_CURRENT ||
 	    !dlq_empty(uses->datadefQ) ||
 	    !dlq_empty(&obj->appinfoQ)) {
 
 	    ses_putstr(scb, START_SEC);
-
+            write_when(scb, obj, indent);
 	    write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
-
-	    /* status field */
-	    write_status(scb, uses->status, indent);
-
-	    /* description field */
-	    if (uses->descr) {
-		write_simple_str(scb, 
-                                 YANG_K_DESCRIPTION, 
-				 uses->descr, 
-                                 indent, 
-                                 2, 
-                                 TRUE);
-	    }
-
-	    /* reference field */
-	    if (uses->ref) {
-		write_simple_str(scb, 
-                                 YANG_K_REFERENCE, 
-				 uses->ref, 
-                                 indent, 
-                                 2, 
-                                 TRUE);
-	    }
-
+            write_sdr(scb, obj, indent);
 	    write_objects(scb, mod, cp, uses->datadefQ, indent);
-
 	    write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	    /* end object definition clause */
 	    ses_putstr_indent(scb, END_SEC, startindent);
 	} else {
 	    ses_putchar(scb, ';');
 	}
 	break;
     case OBJ_TYP_AUGMENT:
-	if (strcmp(cp->objview, OBJVIEW_RAW)) {
-	    return;
+	if (!cp->rawmode) {
+	    return ERR_NCX_SKIPPED;
 	}
 
 	aug = obj->def.augment;
+
 	if (!first) {
 	    ses_putchar(scb, '\n');
 	}
+
 	ses_indent(scb, startindent);
 	write_id_a(scb, submod, YANG_K_AUGMENT, obj->tkerr.linenum);
 	write_kw(scb, YANG_K_AUGMENT);
@@ -2523,106 +2399,26 @@ static void
 
 	if (isempty) {
 	    ses_putchar(scb, ';');
-	    return;
+	    return NO_ERR;
 	}
 
 	ses_putstr(scb, START_SEC);
-
+        write_when(scb, obj, indent);
 	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
-
-	/* when field */
-	if (obj->when && obj->when->exprstr) {
-	    write_simple_str(scb, 
-                             YANG_K_WHEN, 
-			     obj->when->exprstr,
-			     indent, 
-                             2, 
-                             TRUE);
-	}		
-
-	/* status field */
-	write_status(scb, aug->status, indent);
-
-	/* description field */
-	if (aug->descr) {
-	    write_simple_str(scb, 
-                             YANG_K_DESCRIPTION, 
-			     aug->descr, 
-                             indent, 
-                             2, 
-                             TRUE);
-	}
-
-	/* reference field */
-	if (aug->ref) {
-	    write_simple_str(scb, 
-                             YANG_K_REFERENCE, 
-			     aug->ref, 
-                             indent, 
-                             2, 
-                             TRUE);
-	}
-
-	if (!dlq_empty(&aug->datadefQ)) {
-	    write_objects(scb, mod, cp, &aug->datadefQ, indent);
-	}
-
+        write_sdr(scb, obj, indent);
+        write_objects(scb, mod, cp, &aug->datadefQ, indent);
 	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
 	break;
     case OBJ_TYP_RPC:
 	rpc = obj->def.rpc;
-	write_href_id(scb, 
-                      submod, 
-                      YANG_K_RPC, 
-                      rpc->name,
-		      startindent, 
-                      obj->tkerr.linenum, 
-                      isempty,
-                      !first);
-	if (isempty) {
-	    return;
-	}
-
 	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
-
-	/* status field */
-	write_status(scb, rpc->status, indent);
-
-	/* description field */
-	if (rpc->descr) {
-	    write_simple_str(scb,
-                             YANG_K_DESCRIPTION, 
-			     rpc->descr, 
-                             indent, 
-                             2, 
-                             TRUE);
-	}
-
-	/* reference field */
-	if (rpc->ref) {
-	    write_simple_str(scb, 
-                             YANG_K_REFERENCE, 
-			     rpc->ref, 
-                             indent,
-                             2, 
-                             TRUE);
-	}
-
+        write_sdr(scb, obj, indent);
 	write_typedefs(scb, mod, cp, &rpc->typedefQ, indent);
-
 	write_groupings(scb, mod, cp, &rpc->groupingQ, indent);
-
 	write_objects(scb, mod, cp, &rpc->datadefQ, indent);
-
 	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
-
-	/* end RPC section comment */
 	write_endsec_cmt(scb, YANG_K_RPC, rpc->name);
 	break;
     case OBJ_TYP_RPCIO:
@@ -2643,74 +2439,129 @@ static void
                           !first);
 
 	    write_typedefs(scb, mod, cp, &rpcio->typedefQ, indent);
-
 	    write_groupings(scb, mod, cp, &rpcio->groupingQ, indent);
-
 	    write_objects(scb, mod, cp, &rpcio->datadefQ, indent);
-
 	    write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
 	    ses_putstr_indent(scb, END_SEC, startindent);
 	}
 	break;
     case OBJ_TYP_NOTIF:
 	notif = obj->def.notif;
-	write_href_id(scb,
-                      submod,
-                      YANG_K_NOTIFICATION,
-                      notif->name,
-		      startindent,
-                      obj->tkerr.linenum, 
-                      isempty,
-                      !first);
-	if (isempty) {
-	    return;
-	}
-
 	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
-
-	/* status field */
-	write_status(scb, notif->status, indent);
-
-	/* description field */
-	if (notif->descr) {
-	    write_simple_str(scb,
-                             YANG_K_DESCRIPTION, 
-			     notif->descr,
-                             indent, 
-                             2, 
-                             TRUE);
-	}
-
-	/* reference field */
-	if (notif->ref) {
-	    write_simple_str(scb, 
-                             YANG_K_REFERENCE, 
-			     notif->ref, 
-                             indent, 
-                             2, 
-                             TRUE);
-	}
-
+        write_sdr(scb, obj, indent);
 	write_typedefs(scb, mod, cp, &notif->typedefQ, indent);
-
 	write_groupings(scb, mod, cp, &notif->groupingQ, indent);
-
 	write_objects(scb, mod, cp, &notif->datadefQ, indent);
-
 	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-
-	/* end object definition clause */
 	ses_putstr_indent(scb, END_SEC, startindent);
-
-	/* end notification section comment */
 	write_endsec_cmt(scb, YANG_K_NOTIFICATION, notif->name);
 	break;
     case OBJ_TYP_REFINE:
-	break;   /****/
+	if (!cp->rawmode) {
+	    return ERR_NCX_SKIPPED;
+	}
+	refine = obj->def.refine;
+	if (!first) {
+	    ses_putchar(scb, '\n');
+	}
+	ses_indent(scb, startindent);
+	write_id_a(scb, 
+                   submod, 
+                   YANG_K_REFINE, 
+                   obj->tkerr.linenum);
+	write_kw(scb, YANG_K_REFINE);
+	ses_putchar(scb, ' ');
+	fname = NULL;
+	fversion = NULL;
+	if (refine->targobj && refine->targobj->tkerr.mod &&
+	    refine->targobj->tkerr.mod != mod) {
+	    fname = refine->targobj->tkerr.mod->name;
+	    fversion = refine->targobj->tkerr.mod->version;
+	}
+	write_a2(scb,
+                 cp, 
+                 fname, 
+                 fversion, 
+                 submod,
+		 obj_get_name(refine->targobj), 
+		 refine->targobj->tkerr.linenum, 
+                 refine->target);
+
+	if (isempty) {
+	    ses_putchar(scb, ';');
+	    return NO_ERR;
+	}
+
+	ses_putstr(scb, START_SEC);
+
+        switch (refine->targobj->objtype) {
+        case OBJ_TYP_ANYXML:
+            /* must-stmt refine not in -07*/
+            write_musts(scb, obj_get_mustQ(obj), indent); 
+            write_config_stmt(scb, obj, indent);
+            write_mandatory_stmt(scb, obj, indent);
+            write_sdr(scb, obj, indent);
+            break;
+        case OBJ_TYP_CONTAINER:
+            write_musts(scb, obj_get_mustQ(obj), indent); 
+            write_presence_stmt(scb, refine->presence, indent);
+            write_config_stmt(scb, obj, indent);
+            write_sdr(scb, obj, indent);
+            break;
+        case OBJ_TYP_LEAF:
+            write_musts(scb, obj_get_mustQ(obj), indent); 
+            if (refine->def) {
+                write_simple_str(scb, 
+                                 YANG_K_DEFAULT, 
+                                 refine->def, 
+                                 indent, 
+                                 2, 
+                                 TRUE);
+            }
+            write_config_stmt(scb, obj, indent);
+            write_mandatory_stmt(scb, obj, indent);
+            write_sdr(scb, obj, indent);
+            break;
+        case OBJ_TYP_LEAF_LIST:
+        case OBJ_TYP_LIST:
+            write_musts(scb, obj_get_mustQ(obj), indent); 
+            write_config_stmt(scb, obj, indent);
+            write_minmax(scb,
+                         refine->minelems_tkerr.linenum != 0,
+                         refine->minelems,
+                         refine->maxelems_tkerr.linenum != 0,
+                         refine->maxelems,
+                         indent);
+            write_sdr(scb, obj, indent);
+            break;
+        case OBJ_TYP_CHOICE:
+            if (refine->def) {
+                write_simple_str(scb, 
+                                 YANG_K_DEFAULT, 
+                                 refine->def, 
+                                 indent, 
+                                 2, 
+                                 TRUE);
+            }
+            write_config_stmt(scb, obj, indent);
+            write_mandatory_stmt(scb, obj, indent);
+            write_sdr(scb, obj, indent);
+            break;
+        case OBJ_TYP_CASE:
+            write_sdr(scb, obj, indent);
+            break;
+        default:
+            ;
+        }
+
+	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+	ses_putstr_indent(scb, END_SEC, startindent);
+	break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+	return SET_ERROR(ERR_INTERNAL_VAL);
     }
+
+    return NO_ERR;
     
 }  /* write_object */
 
@@ -2736,6 +2587,7 @@ static void
 		   int32 startindent)
 {
     obj_template_t    *obj;
+    status_t           res;
     boolean            first;
 
     if (dlq_empty(datadefQ)) {
@@ -2758,8 +2610,15 @@ static void
 	if (obj_is_hidden(obj)) {
 	    continue;
 	}
-	write_object(scb, mod, cp, obj, startindent, first);
-	first = FALSE;
+	res = write_object(scb, 
+                           mod, 
+                           cp, 
+                           obj, 
+                           startindent, 
+                           first);
+        if (first && res == NO_ERR) {
+            first = FALSE;
+        }
     }
 
 }  /* write_objects */
@@ -2916,12 +2775,14 @@ static void
     submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
     indent = startindent + ses_indent_count(scb);
 
-    write_href_id(scb, submod, 
+    write_href_id(scb, 
+                  submod, 
 		  YANG_K_IDENTITY, 
 		  identity->name, 
 		  startindent, 
 		  identity->tkerr.linenum, 
-		  FALSE, TRUE);
+		  FALSE, 
+                  TRUE);
 
     /* optional base sub-clause */
     if (identity->base) {
@@ -3130,6 +2991,273 @@ static void
     }
 
 }  /* write_features */
+
+
+
+/********************************************************************
+* FUNCTION write_deviate
+* 
+* Generate the HTML for 1 deviate statement
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   deviate== obj_deviate_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_deviate (ses_cb_t *scb,
+                   const ncx_module_t *mod,
+                   const yangdump_cvtparms_t *cp,
+                   const obj_deviate_t *deviate,
+                   int32 startindent)
+{
+    const xmlChar        *submod;
+    int32                 indent;
+
+    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
+    indent = startindent + ses_indent_count(scb);
+
+
+    ses_indent(scb, startindent);
+    write_id_a(scb, submod, YANG_K_DEVIATE, deviate->tkerr.linenum);
+    write_kw(scb, YANG_K_DEVIATE);
+    ses_putchar(scb, ' ');
+    ses_putstr(scb, obj_get_deviate_arg(deviate->arg));
+    if (deviate->empty) {
+        ses_putchar(scb, ';');
+        return;
+    }
+
+    ses_putstr(scb, START_SEC);
+
+    /* type-stmt */
+    if (deviate->typdef) {
+	write_type_clause(scb, 
+                          mod,
+                          cp,
+                          deviate->typdef,
+                          indent);
+    }
+
+    /* units-stmt */
+    if (deviate->units) {
+	write_simple_str(scb, 
+                         YANG_K_UNITS, 
+                         deviate->units, 
+                         indent, 
+                         2, 
+                         TRUE);
+    }
+
+    /* default-stmt */
+    if (deviate->defval) {
+	write_simple_str(scb, 
+                         YANG_K_DEFAULT, 
+                         deviate->defval, 
+                         indent, 
+                         2, 
+                         TRUE);
+    }
+
+    /* config-stmt, only if actually set */
+    if (deviate->config_tkerr.linenum != 0) {
+        write_simple_str(scb, 
+                         YANG_K_CONFIG, 
+                         (deviate->config) ?
+                         NCX_EL_TRUE : NCX_EL_FALSE,
+                         indent, 
+                         2, 
+                         TRUE);
+    }
+
+    /* mandatory-stmt, only if actually set */
+    if (deviate->mandatory_tkerr.linenum != 0) {
+        write_simple_str(scb, 
+                         YANG_K_MANDATORY, 
+                         (deviate->mandatory) ?
+                         NCX_EL_TRUE : NCX_EL_FALSE,
+                         indent, 
+                         2, 
+                         TRUE);
+    }
+
+    /* min-elements, max-elements */
+    write_minmax(scb,
+                 deviate->minelems_tkerr.linenum != 0,
+                 deviate->minelems,
+                 deviate->maxelems_tkerr.linenum != 0,
+                 deviate->maxelems,
+                 indent);
+
+    /* must-stmts */
+    write_musts(scb, &deviate->mustQ, indent);
+
+    /* unique-stmts */
+    write_unique_stmts(scb, 
+                       mod,
+                       cp,
+                       &deviate->uniqueQ, 
+                       indent);
+
+    /* extension usage */
+    write_appinfoQ(scb, 
+                   mod, 
+                   cp, 
+		   &deviate->appinfoQ, 
+		   indent);
+
+    ses_putstr_indent(scb, END_SEC, startindent);
+
+}  /* write_deviate */
+
+
+/********************************************************************
+* FUNCTION write_deviation
+* 
+* Generate the HTML for 1 deviation statement
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   deviation == obj_deviation_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_deviation (ses_cb_t *scb,
+                     const ncx_module_t *mod,
+                     const yangdump_cvtparms_t *cp,
+                     const obj_deviation_t *deviation,
+                     int32 startindent)
+{
+    const obj_deviate_t  *deviate;
+    const xmlChar        *submod, *fname, *fversion;
+    int32                 indent;
+
+    submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
+    indent = startindent + ses_indent_count(scb);
+
+
+    ses_indent(scb, startindent);
+    write_id_a(scb, submod, YANG_K_DEVIATION, deviation->tkerr.linenum);
+    write_kw(scb, YANG_K_DEVIATION);
+    ses_putchar(scb, ' ');
+    fname = NULL;
+    fversion = NULL;
+    if (deviation->targobj && 
+        deviation->targobj->tkerr.mod &&
+        deviation->targobj->tkerr.mod != mod) {
+
+        fname = deviation->targobj->tkerr.mod->name;
+        fversion = deviation->targobj->tkerr.mod->version;
+    }
+    write_a2(scb,
+             cp, 
+             fname, 
+             fversion, 
+             submod,
+             obj_get_name(deviation->targobj), 
+             deviation->targobj->tkerr.linenum, 
+             deviation->target);
+
+    if (deviation->empty) {
+        ses_putchar(scb, ';');
+        return;
+    }
+
+    ses_putstr(scb, START_SEC);
+
+    /* description field */
+    if (deviation->descr) {
+	write_simple_str(scb,
+                         YANG_K_DESCRIPTION, 
+			 deviation->descr, 
+			 indent, 
+                         2, 
+                         TRUE);
+    }
+
+    /* reference field */
+    if (deviation->ref) {
+	write_simple_str(scb, 
+                         YANG_K_REFERENCE, 
+			 deviation->ref, 
+			 indent, 
+                         2, 
+                         TRUE);
+    }
+
+    /* 0 or more deviate-stmts */
+    for (deviate = (const obj_deviate_t *)
+             dlq_firstEntry(&deviation->deviateQ);
+         deviate != NULL;
+         deviate = (const obj_deviate_t *)
+             dlq_nextEntry(deviate)) {
+        write_deviate(scb, mod, cp, deviate, indent);
+    }
+
+    write_appinfoQ(scb, 
+                   mod, 
+                   cp, 
+		   &deviation->appinfoQ, 
+		   indent);
+
+    /* end deviation statement */
+    ses_putstr_indent(scb, END_SEC, startindent);
+
+}  /* write_deviation */
+
+
+/********************************************************************
+* FUNCTION write_deviations
+* 
+* Generate the HTML for the specified deviationQ
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == ncx_module_t struct in progress
+*   cp == conversion parameters in use
+*   deviationQ == que of obj_deviation_t to use
+*   startindent == start indent count
+*
+*********************************************************************/
+static void
+    write_deviations (ses_cb_t *scb,
+                      const ncx_module_t *mod,
+                      const yangdump_cvtparms_t *cp,
+                      const dlq_hdr_t *deviationQ,
+                      int32 startindent)
+{
+    const obj_deviation_t *deviation;
+
+    if (dlq_empty(deviationQ)) {
+	return;
+    }
+
+    write_banner_cmt(scb, 
+                     mod, 
+                     cp,
+		     (const xmlChar *)"deviations", 
+		     startindent);
+
+    for (deviation = (const obj_deviation_t *)
+	     dlq_firstEntry(deviationQ);
+	 deviation != NULL;
+	 deviation = (const obj_deviation_t *)
+	     dlq_nextEntry(deviation)) {
+
+	write_deviation(scb, 
+                        mod, 
+                        cp, 
+                        deviation, 
+                        startindent);
+    }
+
+}  /* write_deviations */
 
 
 /********************************************************************
@@ -4432,6 +4560,25 @@ static void
 	}
     }
 
+    /* 6) deviations */
+    if (!stmtmode) {
+	write_deviations(scb, mod, cp, &mod->deviationQ, 2*cp->indent);
+    }
+
+    if (cp->unified && mod->ismod) {
+	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+	     node != NULL;
+	     node = (const yang_node_t *)dlq_nextEntry(node)) {
+	    if (node->submod) {
+		write_deviations(scb,
+                                 node->submod, 
+                                 cp, 
+                                 &node->submod->deviationQ, 
+                                 2*cp->indent);
+	    }
+	}
+    }
+
     /* check statement mode on top-level module only */
     if (stmtmode) {
 	for (stmt = (const yang_stmt_t *)dlq_firstEntry(&mod->stmtQ);
@@ -4485,6 +4632,13 @@ static void
                               cp, 
 			      stmt->s.feature,
 			      2*cp->indent);
+		break;
+	    case YANG_ST_DEVIATION:
+		write_deviation(scb,
+                                mod,
+                                cp, 
+                                stmt->s.deviation,
+                                2*cp->indent);
 		break;
 	    default:
 		SET_ERROR(ERR_INTERNAL_VAL);

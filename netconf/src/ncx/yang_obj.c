@@ -9471,6 +9471,7 @@ status_t
     const xmlChar    *val;
     const char       *expstr;
     xmlChar          *str;
+    yang_stmt_t      *stmt;
     tk_type_t         tktyp;
     boolean           done, desc, ref;
     status_t          res, retres;
@@ -9596,6 +9597,17 @@ status_t
     if (dev->target) {
 	dev->res = retres;
 	dlq_enque(dev, &mod->deviationQ);
+	if (mod->stmtmode) {
+	    /* save top-level deviation order */
+	    stmt = yang_new_deviation_stmt(dev);
+	    if (stmt) {
+		dlq_enque(stmt, &mod->stmtQ);
+	    } else {
+		log_error("\nError: malloc failure for obj_stmt");
+		res = ERR_INTERNAL_MEM;
+		ncx_print_errormsg(tkc, mod, res);
+	    }
+	}
     } else {
 	obj_free_deviation(dev);
     }

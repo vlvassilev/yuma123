@@ -2998,6 +2998,38 @@ yang_stmt_t *
 
 
 /********************************************************************
+* FUNCTION yang_new_deviation_stmt
+* 
+* Create a new YANG stmt node for a deviation definition
+*
+* RETURNS:
+*   pointer to new and initialized struct, NULL if memory error
+*********************************************************************/
+yang_stmt_t *
+    yang_new_deviation_stmt (obj_deviation_t *deviation)
+{
+    yang_stmt_t *stmt;
+
+#ifdef DEBUG
+    if (!deviation) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    stmt = m__getObj(yang_stmt_t);
+    if (!stmt) {
+	return NULL;
+    }
+    memset(stmt, 0x0, sizeof(yang_stmt_t));
+    stmt->stmttype = YANG_ST_DEVIATION;
+    stmt->s.deviation = deviation;
+    return stmt;
+
+} /* yang_new_deviation_stmt */
+
+
+/********************************************************************
 * FUNCTION yang_free_stmt
 * 
 * Delete a YANG statement node

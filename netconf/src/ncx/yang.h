@@ -81,7 +81,8 @@ typedef enum yang_stmttype_t_ {
     YANG_ST_EXTENSION,          /* node is ext_template_t */
     YANG_ST_OBJECT,             /* node is obj_template_t */
     YANG_ST_IDENTITY,           /* node is ncx_identity_t */
-    YANG_ST_FEATURE             /* node is ncx_feature_t */
+    YANG_ST_FEATURE,             /* node is ncx_feature_t */
+    YANG_ST_DEVIATION          /* node is ncx_deviation_t */
 } yang_stmttype_t;
 
 
@@ -91,12 +92,13 @@ typedef struct yang_stmt_t_ {
     yang_stmttype_t  stmttype;
     /* these node pointers are back-pointers and not malloced here */
     union s_ {
-	typ_template_t *typ;
-	grp_template_t *grp;
-	ext_template_t *ext;
-	obj_template_t *obj;
-	ncx_identity_t *identity;
-	ncx_feature_t  *feature;
+        typ_template_t  *typ;
+        grp_template_t  *grp;
+        ext_template_t  *ext;
+        obj_template_t  *obj;
+        ncx_identity_t  *identity;
+        ncx_feature_t   *feature;
+        obj_deviation_t *deviation;
     } s;
 } yang_stmt_t;
 
@@ -418,6 +420,9 @@ extern yang_stmt_t *
 
 extern yang_stmt_t *
     yang_new_feature_stmt (ncx_feature_t *feature);
+
+extern yang_stmt_t *
+    yang_new_deviation_stmt (obj_deviation_t *deviation);
 
 extern void
     yang_free_stmt (yang_stmt_t *stmt);

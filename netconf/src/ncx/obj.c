@@ -4932,7 +4932,7 @@ obj_template_t *
     }
 
     if (mobj) {
-	newobj->flags |= (mobj->flags & ~OBJ_FL_REFINE);
+	newobj->flags |= mobj->flags;
     }
 
     res = clone_appinfoQ(&newobj->appinfoQ,
@@ -5827,6 +5827,38 @@ void
     m__free(deviate);
 
 } /* obj_free_deviate */
+
+
+/********************************************************************
+* FUNCTION obj_get_deviate_arg
+* 
+* Get the deviate-arg string from its enumeration
+*
+* INPUTS:
+*   devarg == enumeration to convert
+* RETURNS:
+*   const string version of the enum
+*********************************************************************/
+const xmlChar *
+    obj_get_deviate_arg (obj_deviate_arg_t devarg)
+{
+    switch (devarg) {
+    case OBJ_DARG_NONE:
+        return NCX_EL_NONE;
+    case OBJ_DARG_ADD:
+        return YANG_K_ADD;
+    case OBJ_DARG_DELETE:
+        return YANG_K_DELETE;
+    case OBJ_DARG_REPLACE:
+        return YANG_K_REPLACE;
+    case OBJ_DARG_NOT_SUPPORTED:
+        return YANG_K_NOT_SUPPORTED;
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return (const xmlChar *)"--";
+    }
+
+} /* obj_get_deviate_arg */
 
 
 /********************************************************************
@@ -7752,7 +7784,7 @@ boolean
     }
 #endif
 
-    return (obj->flags & OBJ_FL_REFINE) ? TRUE : FALSE;
+    return (obj->objtype == OBJ_TYP_REFINE) ? TRUE : FALSE;
 
 }   /* obj_is_refine */
 
@@ -9507,6 +9539,66 @@ boolean
     return TRUE;
 
 }  /* obj_is_single_instance */
+
+
+/********************************************************************
+ * FUNCTION obj_is_short_case
+ * 
+ * Check if the object is a short case statement
+ *
+ * INPUTS:
+ *    obj == object template to check
+ *********************************************************************/
+boolean
+    obj_is_short_case (obj_template_t *obj)
+{
+    const obj_case_t   *cas;
+
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return TRUE;
+    }
+#endif
+
+    if (obj->objtype != OBJ_TYP_CASE) {
+        return FALSE;
+    }
+
+    cas = obj->def.cas;
+
+    if (dlq_count(cas->datadefQ) != 1) {
+        return FALSE;
+    }
+
+    if (obj->when && obj->when->exprstr) {
+        return FALSE;
+    }
+
+    if (obj_get_first_iffeature(obj) != NULL) {
+        return FALSE;
+    }
+
+    if (obj_get_status(obj) != NCX_STATUS_CURRENT) {
+        return FALSE;
+    }
+
+    if (obj_get_description(obj) != NULL) {
+        return FALSE;
+    }
+
+    if (obj_get_reference(obj) != NULL) {
+        return FALSE;
+    }
+
+    if (dlq_count(obj_get_appinfoQ(obj)) > 0) {
+        return FALSE;
+    }
+
+    return TRUE;
+
+
+}  /* obj_is_short_case */
 
 
 /********************************************************************

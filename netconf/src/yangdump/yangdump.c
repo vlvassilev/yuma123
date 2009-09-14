@@ -1584,7 +1584,7 @@ static status_t
                 res = ERR_NCX_IMPORT_ERRORS;
                 ncx_print_errormsg(NULL, pcb->top, res);
             } else {
-                res = ERR_NCX_NOT_SUPPORTED;
+                res = ERR_NCX_OPERATION_NOT_SUPPORTED;
                 /*** res = c_convert_module(pcb, cp, scb); ***/
                 if (res != NO_ERR) {
                     pr_err(res);

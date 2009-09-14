@@ -9093,10 +9093,17 @@ void
             log_write("%u.%u:", 
                       tkc->curerr->linenum, 
                       tkc->curerr->linepos);
-        } else if (tkc->cur && TK_CUR_VAL(tkc)) {
+        } else if (tkc->cur && 
+                   (tkc->cur != (tk_token_t *)&tkc->tkQ) &&
+                   TK_CUR_VAL(tkc)) {
             log_write("%u.%u:", 
                       TK_CUR_LNUM(tkc), 
                       TK_CUR_LPOS(tkc));
+        } else {
+            log_write("%u.%u:", 
+                      tkc->linenum, 
+                      tkc->linepos);
+
         }
         tkc->curerr = NULL;
     }

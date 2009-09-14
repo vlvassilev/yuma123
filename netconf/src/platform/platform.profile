@@ -34,6 +34,12 @@ ifdef MEMTRACE
   CFLAGS += -DMEMORY_DEBUG=1
 endif
 
+# free or SDK version
+ifdef FREE
+  CFLAGS += -DFREE_VERSION
+endif
+
+
 CINC=-I. -I../agt -I../mgr \
     -I../ncx -I../platform \
     -I/usr/include -I/usr/include/libxml2 \
@@ -80,7 +86,8 @@ PLATFORM_CPP=
 .PHONY: all superclean clean test install depend lint
 
 ######################### MAKE DEPENDENCIES ###############
-COMPILE.c= $(CC) $(CFLAGS) $(CPPFLAGS) $(PLATFORM_CPP) $(CINC) $(SUBDIR_CPP) $(TARGET_ARCH) -c
+COMPILE.c= $(CC) $(CFLAGS) $(CPPFLAGS) $(PLATFORM_CPP) \
+           $(CINC) $(SUBDIR_CPP) $(TARGET_ARCH) -c
 
 
 $(TARGET)/%.o: %.c

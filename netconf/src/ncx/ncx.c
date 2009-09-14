@@ -8832,6 +8832,8 @@ ncx_cvttyp_t
         return NCX_CVTTYP_HTML;
     } else if (!xml_strcmp(NCX_EL_H, (const xmlChar *)str)) {
         return NCX_CVTTYP_H;
+    } else if (!xml_strcmp(NCX_EL_C, (const xmlChar *)str)) {
+        return NCX_CVTTYP_C;
     } else if (!xml_strcmp(NCX_EL_YANG, (const xmlChar *)str)) {
         return NCX_CVTTYP_YANG;
     } else if (!xml_strcmp(NCX_EL_COPY, (const xmlChar *)str)) {

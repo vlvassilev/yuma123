@@ -125,12 +125,12 @@ date	     init     comment
 #define NCXMOD_HOME         "YANG_HOME"
 
 /* NCX Environment Variable for tools install directory
- * The default is /usr/share/yang
+ * The default is /usr/share/yangtools
  */
 #define NCXMOD_INSTALL   "YANG_INSTALL"
 
 /* !! should import this from make !! */
-#define NCXMOD_DEFAULT_INSTALL ((const xmlChar *)"/usr/share/yang")
+#define NCXMOD_DEFAULT_INSTALL (const xmlChar *)"/usr/share/yangtools"
 
 /* NCX Environment Variable for MODULE search path */
 #define NCXMOD_MODPATH      "YANG_MODPATH"

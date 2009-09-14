@@ -367,7 +367,7 @@ date	     init     comment
 #define NCX_EL_BOOLEAN         (const xmlChar *)"boolean"
 #define NCX_EL_BRIEF           (const xmlChar *)"brief"
 #define NCX_EL_BYTE            (const xmlChar *)"byte"
-#define NCX_EL_C               (const xmlChar *)"C"
+#define NCX_EL_C               (const xmlChar *)"c"
 #define NCX_EL_CANDIDATE       (const xmlChar *)"candidate"
 #define NCX_EL_CAPABILITIES    (const xmlChar *)"capabilities"
 #define NCX_EL_CAPABILITY      (const xmlChar *)"capability"

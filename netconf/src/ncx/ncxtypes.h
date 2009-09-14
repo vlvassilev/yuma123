@@ -628,9 +628,10 @@ typedef enum ncx_cvttyp_t_ {
     NCX_CVTTYP_SQL,
     NCX_CVTTYP_SQLDB,
     NCX_CVTTYP_HTML,
-    NCX_CVTTYP_H,
     NCX_CVTTYP_YANG,
-    NCX_CVTTYP_COPY
+    NCX_CVTTYP_COPY,
+    NCX_CVTTYP_H,
+    NCX_CVTTYP_C
 } ncx_cvttyp_t;
 
 

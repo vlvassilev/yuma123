@@ -12,7 +12,6 @@
 # to define a different 'depend' rule.
 depend: dependencies
 
-
 dependencies: $(DEPS)
 	@if [ ! -f Makefile ]; then \
 	    echo "Error: Makefile missing!"; \

@@ -1786,4 +1786,41 @@ val_value_t *
 }  /* var_check_script_val */
 
 
+/********************************************************************
+* FUNCTION var_queue_cvt_generic
+* 
+* Cleanup after a yangcli session has ended
+*
+* INPUTS:
+*   varQ == Q of ncx_var_t to cleanup and change to generic
+*           object pointers
+*
+*********************************************************************/
+void
+    var_cvt_generic (dlq_hdr_t *varQ)
+{
+    ncx_var_t  *cur;
+    status_t    res;
+
+#ifdef DEBUG
+    if (varQ == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    for (cur = (ncx_var_t *)dlq_firstEntry(varQ);
+	 cur != NULL;
+	 cur = (ncx_var_t *)dlq_nextEntry(cur)) {
+
+        if (cur->val) {
+            res = val_cvt_generic(cur->val);
+            if (res != NO_ERR) {
+                SET_ERROR(res);
+            }
+        }
+    }
+
+} /* var_cvt_generic */
+
 /* END var.c */

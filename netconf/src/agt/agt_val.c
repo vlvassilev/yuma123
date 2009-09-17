@@ -524,7 +524,8 @@ static void
 * to be moved
 *
 * INPUTS:
-*   newchild == new child value to add
+*   newchild == new child value with the editvars
+*               to use to move curchild
 *   curchild == existing child value to move
 *   parent == parent value to move child within
 *   undo == undo record in progress (may be NULL)
@@ -546,7 +547,8 @@ static void
 #ifdef AGT_VAL_DEBUG
     if (LOGDEBUG3) {
         log_debug3("\nMove list '%s' in parent '%s'",
-                   newchild->name, parent->name);
+                   newchild->name, 
+                   parent->name);
     }
 #endif
 
@@ -1055,13 +1057,34 @@ static status_t
                           val_value_t  *curval,
                           boolean      *done)
 {
+    const xmlChar   *name;
     val_value_t     *testval;
     status_t         res;
-    boolean          applyhere, freenew;
-    
+    boolean          applyhere, freetest;
+    op_editop_t      cur_editop;
+    int              retval;
+
     res = NO_ERR;
-    freenew = FALSE;
+    freetest = FALSE;
     testval = NULL;
+    name = NULL;
+
+    if (newval) {
+        cur_editop = newval->editvars->editop;
+        name = newval->name;
+    } else if (curval) {
+        cur_editop = OP_EDITOP_DELETE;
+        name = curval->name;
+    } else {
+        *done = TRUE;
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+#ifdef AGT_VAL_DEBUG
+    if (LOGDEBUG3) {
+        log_debug3("\ntest_apply_write_val: %s start", name);
+    }
+#endif
 
     /* check if this node needs the edit operation applied */
     if (*done) {
@@ -1075,6 +1098,56 @@ static status_t
     } else {
         applyhere = apply_this_node(newval->editvars->editop, curval);
         *done = applyhere;
+
+        /* try to make sure subtree has changed in a replace */
+        if (applyhere && (cur_editop == OP_EDITOP_REPLACE)) {
+            if (newval && curval) {
+                testval = val_clone(newval);
+                if (testval == NULL) {
+                    res = ERR_INTERNAL_MEM;
+                } else {
+                    freetest = TRUE;
+
+                    /* for replace, it is safe to add the default
+                     * nodes because any missing node in new
+                     * is supposed to be deleted in the current node,
+                     * and a default will get added right back again
+                     */
+                    res = val_add_defaults(testval, FALSE);
+                    if (res != NO_ERR) {
+                        *done = TRUE;
+                        val_free_value(testval);
+                        return res;
+                    }
+                    val_set_canonical_order(testval);
+                    retval = val_compare_ex(testval, curval, TRUE);
+                    if (retval == 0) {
+                        /* apply here but nothing to do,
+                         * so skip this entire subtree
+                         */
+                        if (LOGDEBUG) {
+                            log_debug("\ntest_apply_write_val: "
+                                      "Skipping replace node "
+                                      "'%s', no changes",
+                                      (name) ? name : (const xmlChar *)"--");
+                        }
+                        applyhere = FALSE;
+                    } else {
+                        retval = val_compare_for_replace(testval, curval);
+                        if (retval == 0) {
+                            if (LOGDEBUG2) {
+                                log_debug2("\napply_write_val: "
+                                           "Skip replace level '%s'",
+                                           (name) ? name : 
+                                           (const xmlChar *)"--");
+                            }
+                            *done = FALSE;
+                            applyhere = FALSE;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /* apply the requested edit operation */
@@ -1096,70 +1169,91 @@ static status_t
                                    newval, 
                                    curval);
         if (res != NO_ERR) {
+            if (testval) {
+                val_free_value(testval);
+            }
             return res;
         }
 
         /* make sure the node is not a virtual value */
         if (curval && val_is_virtual(curval)) {
-            return NO_ERR;   /*** freenew?? ***/
+            if (testval) {
+                val_free_value(testval);
+            }
+            return NO_ERR;
         }
 
         switch (newval->editvars->editop) {
         case OP_EDITOP_MERGE:
-            testval = val_clone(newval);
+            if (testval == NULL) {
+                testval = val_clone(newval);
+            }
             if (!testval) {
                 res = ERR_INTERNAL_MEM;
             } else {
+                freetest = TRUE;
                 if (curval) {
                     if (newval->editvars->insertstr) {
-                        freenew = FALSE;
                         move_child_node(testval, 
                                         curval, 
                                         parent, 
                                         NULL);
+                        freetest = FALSE;
                     } else {
-                        freenew = val_merge(testval, curval);
+                        freetest = val_merge(testval, curval);
                     }
                 } else {
                     add_child_node(testval, parent, NULL);
+                    freetest = FALSE;
                 }
             }
 
-            if (!freenew) {
+            if (!freetest) {
                 ; /* val_set_canonical_order(parent); */
             }
             break;
         case OP_EDITOP_REPLACE:
         case OP_EDITOP_COMMIT:
-            testval = val_clone(newval);
+            if (testval == NULL) {
+                testval = val_clone(newval);
+            }
             if (!testval) {
                 res = ERR_INTERNAL_MEM;
             } else {
+                freetest = TRUE;
                 if (curval) {
                     if (newval->editvars->insertstr) {
-                        freenew = FALSE;
                         move_child_node(testval, 
                                         curval, 
                                         parent, 
                                         NULL);
+                        freetest = FALSE;
                     } else {
                         /* val_set_canonical_order(testval); */
-                        val_swap_child(testval, curval);
+                        testval->parent = curval->parent;
+                        testval->getcb = curval->getcb;
+                        dlq_insertAhead(testval, curval);
+                        dlq_remove(curval);
                         val_free_value(curval);
+                        freetest = FALSE;
                     }
                 } else {
                     add_child_node(testval, parent, NULL);
                     /* val_set_canonical_order(parent); */
+                    freetest = FALSE;
                 }
             }
             break;
         case OP_EDITOP_CREATE:
-            testval = val_clone(newval);
+            if (testval == NULL) {
+                testval = val_clone(newval);
+            }
             if (!testval) {
                 res = ERR_INTERNAL_MEM;
             } else {
                 add_child_node(testval, parent, NULL);
                 /* val_set_canonical_order(parent); */
+                freetest = FALSE;
             }
             break;
         case OP_EDITOP_LOAD:
@@ -1181,11 +1275,14 @@ static status_t
         && newval->editvars->insertstr 
         && newval->editvars->editop == OP_EDITOP_MERGE) {
 
-        /* move the list entry after the merge is done */
+        /* move the list entry after the merge is done
+         * only the editvars are used from the newval
+         * it is not a bug; do not use testval instead
+         */
         move_mergedlist_node(newval, curval, parent, NULL);
     }
 
-    if (freenew) {
+    if (freetest && testval) {
         val_free_value(testval);
     }
 

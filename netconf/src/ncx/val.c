@@ -3956,7 +3956,7 @@ status_t
 {
     const xmlChar        *localname;
     const ncx_identity_t *identity;
-    obj_template_t *leafobj, *objroot;
+    obj_template_t       *leafobj, *objroot;
     xpath_pcb_t          *xpathpcb;
     status_t              res;
     uint32                ulen;
@@ -9361,7 +9361,6 @@ boolean
 }  /* val_is_metaval */
 
 
-
 /********************************************************************
 * FUNCTION val_move_chidren
 * 
@@ -9369,7 +9368,7 @@ boolean
 * Source and dest must both be containers!
 *
 * INPUTS:
-*    srcval == source val_value_t struct to mode
+*    srcval == source val_value_t struct to move
 *    destval == destination value struct ot use
 *
 *********************************************************************/
@@ -9389,7 +9388,6 @@ void
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return;
     }
-
 #endif
 
     /* set new parent */
@@ -9404,6 +9402,125 @@ void
     dlq_block_enque(&srcval->v.childQ, &destval->v.childQ);
 
 }  /* val_move_children */
+
+
+/********************************************************************
+* FUNCTION val_cvt_generic
+* 
+* Convert all the database object pointers to
+* generic object pointers to decouple a user
+* variable in yangcli from the server-specific
+* object definition (which goes away when the
+* session is terminated)
+*
+* INPUTS:
+*    val == val_value_t struct to convert to generic
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    val_cvt_generic (val_value_t *val)
+{
+    val_value_t   *childval;
+    val_index_t   *in;
+    xmlChar       *buffer;
+    status_t       res;
+    uint32         len;
+    boolean        haschildren;
+
+#ifdef DEBUG
+    if (!val) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (val->obj == NULL) {
+        /* leave this object-less value alone */
+        return NO_ERR;
+    }
+
+    if (obj_is_abstract(val->obj) || obj_is_cli(val->obj)) {
+        /* ignore values for abstract and CLI objects */
+        return NO_ERR;
+    }
+
+    res = NO_ERR;
+    haschildren = typ_has_children(val->btyp);
+
+    if (val->dname == NULL) {
+        val->dname = xml_strdup(val->name);
+        if (val->dname == NULL) {
+            return ERR_INTERNAL_MEM;
+        }
+        val->name = val->dname;
+    }
+
+    if (typ_is_string(val->btyp)) {
+        val->obj = ncx_get_gen_string();
+        if (val->xpathpcb) {
+            xpath_free_pcb(val->xpathpcb);
+            val->xpathpcb = NULL;
+        }
+    } else if (val->obj->objtype == OBJ_TYP_ANYXML) {
+        val->obj = ncx_get_gen_anyxml();
+    } else {
+        switch (val->btyp) {
+        case NCX_BT_BINARY:
+            val->obj = ncx_get_gen_binary();
+            break;
+        case NCX_BT_EMPTY:
+            val->obj = ncx_get_gen_empty();
+            break;
+        case NCX_BT_CONTAINER:
+            val->obj = ncx_get_gen_container();
+            break;
+        case NCX_BT_LIST:
+            while (!dlq_empty(&val->indexQ)) {
+                in = (val_index_t *)dlq_deque(&val->indexQ);
+                m__free(in);
+            }
+            val->obj = ncx_get_gen_container();
+            break;
+        default:
+            len = 0;
+            res = val_sprintf_simval_nc(NULL, val, &len);
+            if (res != NO_ERR) {
+                return res;
+            }
+
+            buffer = m__getMem(len+1);
+            if (!buffer) {
+                return ERR_INTERNAL_MEM;
+            }
+
+            res = val_sprintf_simval_nc(buffer, val, &len);
+            if (res == NO_ERR) {
+                clean_value(val, FALSE);
+                val->v.str = buffer;
+                val->btyp = NCX_BT_STRING;
+                val->obj = ncx_get_gen_string();
+            } else {
+                m__free(buffer);
+                return res;
+            }
+        }
+    }
+
+    /* dive down into all the child nodest */
+    if (haschildren) {
+        for (childval = (val_value_t *)
+                 dlq_firstEntry(&val->v.childQ);
+             childval != NULL;
+             childval = (val_value_t *)dlq_nextEntry(childval)) {
+
+            res = val_cvt_generic(childval);
+        }
+    }
+
+    return res;
+
+}  /* val_cvt_generic */
 
 
 /* END file val.c */

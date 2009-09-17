@@ -81,4 +81,7 @@ extern void
 extern void
     runstack_cleanup (void);
 
+extern void
+    runstack_session_cleanup (void);
+
 #endif	    /* _H_runstack */

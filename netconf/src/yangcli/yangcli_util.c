@@ -277,6 +277,12 @@ void
     }
 #endif
 
+    /* get rid of the val->obj pointers that reference
+     * server-specific object trees that have been freed
+     * already by mgr_ses_free_session
+     */
+    runstack_session_cleanup();
+
     while (!dlq_empty(&server_cb->modptrQ)) {
 	modptr = (modptr_t *)dlq_deque(&server_cb->modptrQ);
 	free_modptr(modptr);

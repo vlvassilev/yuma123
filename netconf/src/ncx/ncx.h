@@ -214,6 +214,12 @@ extern ncx_module_t *
     ncx_get_first_module (void);
 
 extern ncx_module_t *
+    ncx_get_first_session_module (void);
+
+extern ncx_module_t *
+    ncx_get_next_session_module (const ncx_module_t *mod);
+
+extern ncx_module_t *
     ncx_get_next_module (const ncx_module_t *mod);
 
 /* returns mod->name for main mod, mod->belongs for submod */
@@ -751,6 +757,9 @@ extern obj_template_t *
 
 extern obj_template_t *
     ncx_get_gen_root (void);
+
+extern obj_template_t *
+    ncx_get_gen_binary (void);
 
 /* translate ncx_layer_t enum to a string */
 extern const xmlChar *

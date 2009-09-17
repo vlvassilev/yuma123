@@ -1062,4 +1062,7 @@ extern void
     val_move_children (val_value_t *srcval,
                        val_value_t *destval);
 
+extern status_t
+    val_cvt_generic (val_value_t *val);
+
 #endif	    /* _H_val */

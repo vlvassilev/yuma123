@@ -587,4 +587,25 @@ void
 } /* runstack_cleanup */		      
 
 
-/* END nunstack.c */
+/********************************************************************
+* FUNCTION runstack_session_cleanup
+* 
+* Cleanup after a yangcli session has ended
+*
+*********************************************************************/
+void
+    runstack_session_cleanup (void)
+{
+    uint32      level;
+
+    var_cvt_generic(&globalQ);
+    var_cvt_generic(&zeroQ);
+
+    for (level = 0; level < script_level; level++) {
+        var_cvt_generic(&runstack[level].varQ);
+    }
+
+} /* runstack_session_cleanup */
+
+
+/* END runstack.c */

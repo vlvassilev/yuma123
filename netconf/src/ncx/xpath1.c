@@ -8584,7 +8584,7 @@ status_t
     pcb->context.node.objptr = obj;
 
     rootdone = FALSE;
-    if (obj_is_data_db(obj)) {
+    if (obj_is_root(obj) || obj_is_data_db(obj)) {
 	rootdone = TRUE;
 	pcb->doctype = XP_DOC_DATABASE;
 	pcb->docroot = ncx_get_gen_root();

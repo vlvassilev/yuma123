@@ -1267,7 +1267,7 @@ static status_t
 		return res;
 	    }
 	} else {
-	    /* variable regerence:
+	    /* variable reference:
 	     *
 	     *     $foo or $$foo
 	     *
@@ -1510,7 +1510,8 @@ static status_t
 {
     status_t  res;
 
-    res = var_set_from_string(varname, varval,
+    res = var_set_from_string(varname, 
+                              varval,
 			      VAR_TYP_CONFIG);
     return res;
 
@@ -3910,10 +3911,12 @@ status_t
 	    /* save the filled in value
 	     * hand off the malloced 'resultvar' here
 	     */
-	    res = var_set_move(server_cb->result_name, 
-			       xml_strlen(server_cb->result_name),
-			       server_cb->result_vartype,
-			       resultvar);
+            if (res == NO_ERR) {
+                res = var_set_move(server_cb->result_name, 
+                                   xml_strlen(server_cb->result_name),
+                                   server_cb->result_vartype,
+                                   resultvar);
+            }
 	    if (res != NO_ERR) {
 		val_free_value(resultvar);
 		log_error("\nError: set result for '%s' failed (%s)",

@@ -3943,6 +3943,29 @@ boolean
 		}
 	    }
 	}
+
+	for (mod = ncx_get_first_session_module();
+	     mod != NULL;
+	     mod = ncx_get_next_session_module(mod)) {
+
+	    for (obj = ncx_get_first_data_object(mod);
+		 obj != NULL;
+		 obj = ncx_get_next_data_object(mod, obj)) {
+
+		fnresult = test_one_child(exprmod,
+					  walkerfn,
+					  cookie1,
+					  cookie2,
+					  obj,
+					  modname,
+					  childname,
+					  configonly,
+					  textmode);
+		if (!fnresult) {
+		    return FALSE;
+		}
+	    }
+	}
     } else {
 
 	datadefQ = obj_get_datadefQ(startnode);
@@ -4098,6 +4121,31 @@ boolean
 		}
 	    }
 	}
+
+	for (mod = ncx_get_first_session_module();
+	     mod != NULL;
+	     mod = ncx_get_next_session_module(mod)) {
+
+	    for (obj = ncx_get_first_data_object(mod);
+		 obj != NULL;
+		 obj = ncx_get_next_data_object(mod, obj)) {
+
+		fnresult = test_one_ancestor(exprmod,
+					     walkerfn,
+					     cookie1,
+					     cookie2,
+					     obj,
+					     modname,
+					     name,
+					     configonly,
+					     textmode,
+					     orself,
+					     fncalled);
+		if (!fnresult) {
+		    return FALSE;
+		}
+	    }
+	}
     } else {
 	while (obj) {
 	    if (obj->objtype == OBJ_TYP_CHOICE ||
@@ -4223,6 +4271,31 @@ boolean
 	for (mod = ncx_get_first_module();
 	     mod != NULL;
 	     mod = ncx_get_next_module(mod)) {
+
+	    for (obj = ncx_get_first_data_object(mod);
+		 obj != NULL;
+		 obj = ncx_get_next_data_object(mod, obj)) {
+
+		fnresult = test_one_descendant(exprmod,
+					       walkerfn,
+					       cookie1,
+					       cookie2,
+					       obj,
+					       modname,
+					       name,
+					       configonly,
+					       textmode,
+					       orself,
+					       fncalled);
+		if (!fnresult) {
+		    return FALSE;
+		}
+	    }
+	}
+
+	for (mod = ncx_get_first_session_module();
+	     mod != NULL;
+	     mod = ncx_get_next_session_module(mod)) {
 
 	    for (obj = ncx_get_first_data_object(mod);
 		 obj != NULL;
@@ -4397,6 +4470,33 @@ boolean
 	for (mod = ncx_get_first_module();
 	     mod != NULL;
 	     mod = ncx_get_next_module(mod)) {
+
+	    for (obj = ncx_get_first_data_object(mod);
+		 obj != NULL;
+		 obj = ncx_get_next_data_object(mod, obj)) {
+
+		fnresult = test_one_pfnode(exprmod,
+					   walkerfn,
+					   cookie1,
+					   cookie2,
+					   obj,
+					   modname,
+					   name,
+					   configonly,
+					   dblslash,
+					   textmode,
+					   forward,
+					   axis,
+					   fncalled);
+		if (!fnresult) {
+		    return FALSE;
+		}
+	    }
+	}
+
+	for (mod = ncx_get_first_session_module();
+	     mod != NULL;
+	     mod = ncx_get_next_session_module(mod)) {
 
 	    for (obj = ncx_get_first_data_object(mod);
 		 obj != NULL;
@@ -7855,6 +7955,10 @@ boolean
 	return FALSE;
     }
 #endif
+
+    if (obj_is_abstract(obj) || obj_is_cli(obj)) {
+        return FALSE;
+    }
 
     switch (obj->objtype) {
     case OBJ_TYP_RPC:

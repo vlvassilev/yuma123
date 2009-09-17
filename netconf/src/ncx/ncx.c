@@ -202,6 +202,9 @@ static obj_template_t   *gen_empty;
 /* generic root container object template */
 static obj_template_t   *gen_root;
 
+/* generic binary leaf object template */
+static obj_template_t   *gen_binary;
+
 /* module load callback function
  * TBD: support multiple callbacks 
  *  used when a ncxmod loads a module
@@ -1245,6 +1248,11 @@ status_t
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
+    gen_binary = ncx_find_object(mod, NCX_EL_BINARY);
+    if (!gen_binary) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
     stage2_init_done = TRUE;
     return NO_ERR;
 
@@ -1288,6 +1296,7 @@ void
 	gen_string = NULL;
 	gen_empty = NULL;
 	gen_root = NULL;
+        gen_binary = NULL;
     }
 
     typ_unload_basetypes();
@@ -2342,7 +2351,6 @@ boolean
 }  /* ncx_is_duplicate */
 
 
-
 /********************************************************************
 * FUNCTION ncx_get_first_module
 * 
@@ -2388,8 +2396,7 @@ ncx_module_t *
     }
 #endif
 
-    nextmod = (mod) ? 
-	(ncx_module_t *)dlq_nextEntry(mod) : NULL;
+    nextmod = (ncx_module_t *)dlq_nextEntry(mod);
     while (nextmod) {
 	if (nextmod->defaultrev) {
 	    return nextmod;
@@ -2399,6 +2406,58 @@ ncx_module_t *
     return nextmod;
 
 }  /* ncx_get_next_module */
+
+
+/********************************************************************
+* FUNCTION ncx_get_first_session_module
+* 
+* Get the first module in the ncx_sesmodQ
+* 
+* RETURNS:
+*   pointer to the first entry or NULL if empty Q
+*********************************************************************/
+ncx_module_t *
+    ncx_get_first_session_module (void)
+{
+    ncx_module_t *mod;
+
+    if (ncx_sesmodQ == NULL) {
+        return NULL;
+    }
+
+    mod = (ncx_module_t *)dlq_firstEntry(ncx_sesmodQ);
+    return mod;
+
+}  /* ncx_get_first_session_module */
+
+
+/********************************************************************
+* FUNCTION ncx_get_next_session_module
+* 
+* Get the next module in the ncx_sesmodQ
+* 
+* RETURNS:
+*   pointer to the first entry or NULL if empty Q
+*********************************************************************/
+ncx_module_t *
+    ncx_get_next_session_module (const ncx_module_t *mod)
+{
+    ncx_module_t *nextmod;
+
+#ifdef DEBUG
+    if (!mod) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    nextmod = (ncx_module_t *)dlq_nextEntry(mod);
+    return nextmod;
+
+}  /* ncx_get_next_session_module */
+
+
+
 
 
 /********************************************************************
@@ -8718,6 +8777,23 @@ obj_template_t *
     return gen_root;
 
 } /* ncx_get_gen_root */
+
+
+/********************************************************************
+* FUNCTION ncx_get_gen_binary
+* 
+* Get the object template for the NCX generic binary leaf
+*
+*********************************************************************/
+obj_template_t *
+    ncx_get_gen_binary (void)
+{
+    if (!stage2_init_done) {
+	return NULL;
+    }
+    return gen_binary;
+
+} /* ncx_get_gen_binary */
 
 
 /********************************************************************

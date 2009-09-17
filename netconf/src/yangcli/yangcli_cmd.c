@@ -3403,6 +3403,7 @@ static status_t
 *             to be used as content nested within the 
 *             <config> element
 *   timeoutval == timeout value to use
+*   def_editop == default-operation to use (or NOT_SET)
 *
 * OUTPUTS:
 *    server_cb->state may be changed or other action taken
@@ -3416,9 +3417,10 @@ static status_t
 *********************************************************************/
 static status_t
     send_edit_config_to_server (server_cb_t *server_cb,
-			       val_value_t *valroot,
-			       val_value_t *config_content,
-			       uint32 timeoutval)
+                                val_value_t *valroot,
+                                val_value_t *config_content,
+                                uint32 timeoutval,
+                                op_defop_t def_editop)
 {
     obj_template_t        *rpc, *input, *child;
     const xmlChar         *defopstr;
@@ -3520,13 +3522,13 @@ static status_t
     }
 
     /* set the edit-config/input/default-operation node */
-    if (!(server_cb->defop == OP_DEFOP_NOT_USED ||
-          server_cb->defop == OP_DEFOP_NOT_SET)) {          
+    if (!(def_editop == OP_DEFOP_NOT_USED ||
+          def_editop == OP_DEFOP_NOT_SET)) {          
         child = obj_find_child(input, 
                                NC_MODULE,
                                NCX_EL_DEFAULT_OPERATION);
         res = NO_ERR;
-        defopstr = op_defop_name(server_cb->defop);
+        defopstr = op_defop_name(def_editop);
         parm = val_make_simval_obj(child, defopstr, &res);
         if (!parm) {
             if (freeroot) {
@@ -4451,13 +4453,17 @@ static status_t
  * INPUTS:
  *    val == value node to set
  *    op == edit operation to use
+ *    topcontainer == TRUE if a top-level container
+ *                    is passed in 'val'
+ *                 == FALSE otherwise
  *
  * RETURNS:
  *   status
  *********************************************************************/
 static status_t
     add_operation_attr (val_value_t *val,
-			op_editop_t op)
+			op_editop_t op,
+                        boolean topcontainer)
 {
     val_value_t          *childval;
     status_t              res;
@@ -4465,6 +4471,11 @@ static status_t
     res = NO_ERR;
 
     switch (val->obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+        if (!topcontainer) {
+            res = add_one_operation_attr(val, op);
+            break;
+        } /* else fall through */
     case OBJ_TYP_CHOICE:
     case OBJ_TYP_CASE:
 	for (childval = val_get_first_child(val);
@@ -4657,13 +4668,18 @@ static status_t
     val_value_t           *valset, *content, *parm, *valroot;
     status_t               res;
     uint32                 timeoutval;
-    boolean                getoptional, dofill, isdelete;
+    boolean                getoptional, dofill;
+    boolean                isdelete, topcontainer, doattr;
+    op_defop_t             def_editop;
 
     /* init locals */
     res = NO_ERR;
     content = NULL;
     valroot = NULL;
     dofill = TRUE;
+    doattr = TRUE;
+    topcontainer = FALSE;
+    def_editop = server_cb->defop;
 
     if (editop == OP_EDITOP_DELETE) {
 	isdelete = TRUE;
@@ -4722,25 +4738,45 @@ static status_t
 	return ERR_NCX_MISSING_PARM;
     }
 
-    /* add nc:operation attribute to the value node */
-    res = add_operation_attr(content, editop);
-    if (res != NO_ERR) {
-	log_error("\nError: Creation of nc:operation"
-		  " attribute failed");
-	val_free_value(valset);
-	if (valroot) {
-	    val_free_value(valroot);
-	} else {
-	    val_free_value(content);
-	}
-	return res;
+    if (valroot == NULL && content->btyp == NCX_BT_CONTAINER) {
+        switch (editop) {
+        case OP_EDITOP_CREATE:
+        case OP_EDITOP_DELETE:
+            topcontainer = TRUE;
+            break;
+        case OP_EDITOP_MERGE:
+            def_editop = OP_DEFOP_MERGE;
+            break;
+        case OP_EDITOP_REPLACE:
+            def_editop = OP_DEFOP_REPLACE;
+            break;
+        default:
+            SET_ERROR(ERR_INTERNAL_VAL);
+        }
+    }
+
+    if (doattr) {
+        /* add nc:operation attribute to the value node */
+        res = add_operation_attr(content, editop, topcontainer);
+        if (res != NO_ERR) {
+            log_error("\nError: Creation of nc:operation"
+                      " attribute failed");
+            val_free_value(valset);
+            if (valroot) {
+                val_free_value(valroot);
+            } else {
+                val_free_value(content);
+            }
+            return res;
+        }
     }
 
     /* construct an edit-config PDU with default parameters */
     res = send_edit_config_to_server(server_cb, 
-				    valroot,
-				    content, 
-				    timeoutval);
+                                     valroot,
+                                     content, 
+                                     timeoutval,
+                                     def_editop);
     if (res != NO_ERR) {
 	log_error("\nError: send %s operation failed (%s)",
 		  op_editop_name(editop),
@@ -4895,7 +4931,7 @@ static status_t
     }
 
     /* add nc:operation attribute to the value node */
-    res = add_operation_attr(content, editop);
+    res = add_operation_attr(content, editop, FALSE);
     if (res != NO_ERR) {
 	log_error("\nError: Creation of nc:operation"
 		  " attribute failed");
@@ -4918,9 +4954,10 @@ static status_t
     if (res == NO_ERR) {
 	/* construct an edit-config PDU with default parameters */
 	res = send_edit_config_to_server(server_cb, 
-					valroot,
-					content, 
-					timeoutval);
+                                         valroot,
+                                         content, 
+                                         timeoutval,
+                                         server_cb->defop);
 	if (res != NO_ERR) {
 	    log_error("\nError: send create operation failed (%s)",
 		      get_error_string(res));

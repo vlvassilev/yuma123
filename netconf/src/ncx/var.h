@@ -225,4 +225,8 @@ extern val_value_t *
 			  status_t *res);
 
 
+/* yangcli session cleanup */
+extern void
+    var_cvt_generic (dlq_hdr_t *varQ);
+
 #endif	    /* _H_var */

@@ -6648,7 +6648,8 @@ status_t
 	
 	if (res == NO_ERR) {
 	    if (LOGDEBUG2) {
-		log_debug2("\nabout to send RPC request with reqdata:");
+		log_debug2("\nabout to send <%s> RPC request with reqdata:",
+                           obj_get_name(rpc));
 		val_dump_value_ex(reqdata, 
                                   NCX_DEF_INDENT,
                                   server_cb->display_mode);
@@ -6657,6 +6658,12 @@ status_t
 	    /* the request will be stored if this returns NO_ERR */
 	    res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
 	}
+    }
+
+    if (res != NO_ERR) {
+        log_error("\nError: send <%s> RPC failed (%s)",
+                  obj_get_name(rpc),
+                  get_error_string(res));
     }
 
     if (valset) {

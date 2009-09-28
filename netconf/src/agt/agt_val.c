@@ -401,6 +401,10 @@ static boolean
         }
         break;
     case OP_EDITOP_REPLACE:
+        if (curnode == NULL || !obj_is_root(curnode->obj)) {
+            retval = TRUE;
+        }
+        break;
     case OP_EDITOP_COMMIT:
     case OP_EDITOP_CREATE:
     case OP_EDITOP_LOAD:
@@ -886,6 +890,11 @@ static status_t
             log_debug2("\napply_write_val: %s applyhere", name);
         }
 #endif
+
+        /* check corner case applying to the config root */
+        if (newval && obj_is_root(newval->obj)) {
+
+        }
 
         /* check the user callbacks before altering
          * the database
@@ -4323,6 +4332,11 @@ status_t
 *   source == cfg_template_t for the source (candidate)
 *   target == cfg_template_t for the config database to 
 *             write (running)
+*   save_nvstore == TRUE if the mirrored NV-store
+*                   should be updated after the commit is done
+*                   FALSE if this is the start of a confirmed-commit
+*                   so the NV-store update is deferred
+*                   Never save to NV-store if :startup is supported
 *
 * OUTPUTS:
 *   rpc_err_rec_t structs may be malloced and added 
@@ -4335,7 +4349,9 @@ status_t
     agt_val_apply_commit (ses_cb_t  *scb,
                           rpc_msg_t  *msg,
                           cfg_template_t *source,
-                          cfg_template_t *target)
+                          cfg_template_t *target,
+                          boolean save_nvstore)
+    
 {
     val_value_t      *newval, *nextval, *matchval;
     agt_profile_t    *profile;
@@ -4451,8 +4467,8 @@ status_t
         }
     }  /* else there was no rollback, so APPLY is the final phase */
 
-    if (res == NO_ERR) {
-        if (!profile->agt_has_startup) {
+    if (res == NO_ERR && !profile->agt_has_startup) {
+        if (save_nvstore) {
             res = agt_ncx_cfg_save(target, FALSE);
             if (res != NO_ERR) {
                 /* write to NV-store failed */
@@ -4471,6 +4487,9 @@ status_t
                  */
                 val_clean_tree(target->root);
             }
+        } else if (LOGDEBUG2) {
+            log_debug2("\nagt_val: defer NV-save after commit "
+                       "until confirmed");
         }
     }
 

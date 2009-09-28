@@ -75,6 +75,10 @@ extern void
 extern ses_cb_t *
     agt_ses_new_dummy_session (void);
 
+extern status_t
+    agt_ses_set_dummy_session_acm (ses_cb_t *dummy_session,
+                                   ses_id_t  use_sid);
+
 extern void
     agt_ses_free_dummy_session (ses_cb_t *scb);
 

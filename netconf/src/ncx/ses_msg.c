@@ -436,20 +436,33 @@ status_t
 
     dologmsg = LOGDEBUG2;
 
+    if (LOGDEBUG) {
+	log_debug("\nses got send request on session %d", 
+                  scb->sid);
+    }
+
     if (dologmsg) {
-	log_debug2("\nses got send request on session %d", 
-		   scb->sid);
+	buff = (ses_msg_buff_t *)dlq_firstEntry(&scb->outQ);
+	if (buff) {
+            if (LOGDEBUG3) {
+                log_debug3("\nses_msg_send full reply:\n%s",
+                           &buff->buff[buff->buffpos]);
+                buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
+                while (buff != NULL) {
+                    log_debug3("%s",
+                               &buff->buff[buff->buffpos]);
+                    buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
+                }
+            } else {
+                log_debug2("\nses_msg_send first buffer:\n%s",
+                           &buff->buff[buff->buffpos]);
+
+            }
+        }
     }
 
     /* check if an external write function is used */
     if (scb->wrfn) {
-	buff = (ses_msg_buff_t *)dlq_firstEntry(&scb->outQ);
-	if (buff) {
-	    if (dologmsg) {
-		log_debug2("\nses_msg_send_wrfn: first buff %s",
-			   &buff->buff[buff->buffpos]);
-	    }
-	}
 	return (*scb->wrfn)(scb);
     }
 
@@ -495,21 +508,14 @@ status_t
     } else {
 	if (dologmsg) {
 	    log_debug2("\nses wrote %d of %d bytes on session %d\n", 
-		       retcnt, total, scb->sid);
+		       retcnt, 
+                       total, 
+                       scb->sid);
 	}
     }
 
     /* clean up the buffers that were written */
     buff = (ses_msg_buff_t *)dlq_firstEntry(&scb->outQ);
-
-    if (buff) {
-	if (LOGDEBUG3) {
-	    ; /* buffers already printed */
-	} else if (dologmsg) {
-	    log_debug2("\nses_msg_send: first buff %s",
-		       &buff->buff[buff->buffpos]);
-	}
-    }
 
     while (retcnt && buff) {
 	/* get the number of bytes written from this buffer */

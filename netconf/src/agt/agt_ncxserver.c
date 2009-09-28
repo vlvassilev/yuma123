@@ -177,7 +177,7 @@ static void
     sendcount = 0;
     sendtotal = 0;
 
-    /* TBD: set to CLI param */
+    /* get --maxburst CLI param value */
     agt_profile = agt_get_profile();
     sendmax = agt_profile->agt_maxburst;
 
@@ -282,6 +282,7 @@ status_t
                 if (agt_shutdown_requested()) {
                     done2 = TRUE; 
                 } else {
+                    /* !! put all polling callbacks here for now !! */
                     agt_ses_check_timeouts();
                     send_some_notifications();
                 }

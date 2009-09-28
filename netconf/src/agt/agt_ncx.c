@@ -136,12 +136,33 @@ date         init     comment
 
 #define AGT_NCX_DEBUG 1
 
+
+/********************************************************************
+*								    *
+*			     T Y P E S				    *
+*								    *
+*********************************************************************/
+
+
+/* candidate commit control block struct */
+typedef struct commit_cb_t_ {
+    xmlChar     *cc_backup_source;
+    time_t       cc_start_time;
+    uint32       cc_cancel_timeout;
+    ses_id_t     cc_ses_id;
+    boolean      cc_active;
+} commit_cb_t;
+
+
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S                            *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
-static boolean agt_ncx_init_done = FALSE;
+
+static boolean          agt_ncx_init_done = FALSE;
+
+static commit_cb_t      commit_cb;
 
 
 /********************************************************************
@@ -185,7 +206,8 @@ static status_t
 
     /* check the with-defaults parameter */
     parm = val_find_child(msg->rpc_input,
-                          NULL, NCX_EL_WITH_DEFAULTS);
+                          NULL, 
+                          NCX_EL_WITH_DEFAULTS);
     if (parm && parm->res == NO_ERR) {
         msg->mhdr.withdef = 
             ncx_get_withdefaults_enum(VAL_ENUM_NAME(parm));
@@ -512,14 +534,11 @@ static status_t
     const cap_list_t   *mycaps;
     val_value_t        *parm, *srcval;
     status_t            res, retres;
-    boolean             isroot;
-
 
     srccfg = NULL;
     srcval = NULL;
     destcfg = NULL;
     retres = NO_ERR;
-    isroot = agt_acm_session_is_superuser(scb);
 
     /* get the agent capabilities */
     mycaps = agt_cap_get_caps();
@@ -539,21 +558,6 @@ static status_t
                                            &srcval);
         /* errors already recorded */
         if (res != NO_ERR) {
-            retres = res;
-        } else if (!isroot) {
-            /* only root is allowed to blow away
-             * configs with inline data
-             */
-            res = ERR_NCX_ACCESS_DENIED;
-            agt_record_error(scb, 
-                             &msg->mhdr, 
-                             NCX_LAYER_OPERATION, 
-                             res,
-                             methnode, 
-                             NCX_NT_NONE,
-                             NULL,
-                             NCX_NT_NONE, 
-                             NULL);
             retres = res;
         }
     } /* else errors already recorded */
@@ -1468,6 +1472,7 @@ static status_t
         if (!candidate || !running) {
             res = SET_ERROR(ERR_INTERNAL_VAL);
         } else {
+
             /* check if this session is allowed to clear the
              * candidate config now
              */
@@ -1507,6 +1512,49 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION write_config
+*
+* Write the specified cfg->root to the the default backup source
+*
+* INPUTS:
+*    filespec == complete path for the output file
+*    cfg == config template to write to XML file
+* 
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    write_config (const xmlChar *filespec,
+                  cfg_template_t *cfg)
+{
+    status_t           res;
+    xml_attrs_t        attrs;
+
+    if (cfg->root == NULL) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* write the new startup config */
+    xml_init_attrs(&attrs);
+
+    /* output to the specified file or STDOUT */
+    res = xml_wr_check_file(filespec, 
+                            cfg->root, 
+                            &attrs, 
+                            XMLMODE, 
+                            WITHHDR, 
+                            0,
+                            NCX_DEF_INDENT,
+                            agt_check_save);
+
+    xml_clean_attrs(&attrs);
+
+    return res;
+
+} /* write_config */
+
+
+/********************************************************************
 * FUNCTION commit_invoke
 *
 * commit : invoke callback
@@ -1521,10 +1569,14 @@ static status_t
                    rpc_msg_t *msg,
                    xml_node_t *methnode)
 {
+    val_value_t    *confirmedval, *timeoutval;
     cfg_template_t *candidate, *running;
+    xmlChar        *fname;
     status_t        res;
+    boolean         save_nvstore, errdone;
 
     res = NO_ERR;
+    errdone = FALSE;
 
     candidate = cfg_get_config_id(NCX_CFGID_CANDIDATE);
     running = cfg_get_config_id(NCX_CFGID_RUNNING);
@@ -1539,25 +1591,173 @@ static status_t
                          NULL, 
                          NCX_NT_NONE,
                          NULL);
-    } else {
-        /*** TBD: may need to make a copy of candidate to make sure
-         *** that if this step fails, no changes to running will remain
-         ***/ 
-        res = agt_val_apply_commit(scb, msg, candidate, running);
-        if (res == NO_ERR) {
-            res = cfg_fill_candidate_from_running();
-            if (res != NO_ERR) {
-                agt_record_error(scb,
-                                 &msg->mhdr, 
-                                 NCX_LAYER_OPERATION,
-                                 res,
-                                 methnode,
-                                 NCX_NT_NONE, 
-                                 NULL, 
-                                 NCX_NT_VAL,
-                                 candidate->root);
+        return res;
+    }
+
+    save_nvstore = TRUE;
+
+    /* get the confirmed parameter */
+    confirmedval = val_find_child(msg->rpc_input,
+                                  val_get_mod_name(msg->rpc_input),
+                                  NCX_EL_CONFIRMED);
+
+    /* get the confirm-timeout parameter */
+    timeoutval = val_find_child(msg->rpc_input,
+                                val_get_mod_name(msg->rpc_input),
+                                NCX_EL_CONFIRM_TIMEOUT);
+
+    /* figure out what to do wrt/ confirmed-commit */
+    if (commit_cb.cc_active) {
+        /* confirmed-commit already active
+         * see if this commit is finishing the
+         * confirmed commit or extending the timer
+         * and perhaps adding more data to running
+         */
+        if (confirmedval) {
+            /* check same session that started cc */
+            if (commit_cb.cc_ses_id != SES_MY_SID(scb)) {
+                log_warn("\nWarning: session %u extending "
+                         "confirmed-commit started by session %u",
+                         SES_MY_SID(scb),
+                         commit_cb.cc_ses_id);
             }
-        }  /* else errors already recorded */
+            
+            /* extend the timer */
+            (void)time(&commit_cb.cc_start_time);
+            if (timeoutval) {
+                commit_cb.cc_cancel_timeout = 
+                    VAL_UINT(timeoutval);
+            } else {
+                commit_cb.cc_cancel_timeout = 
+                    NCX_DEF_CONFIRM_TIMEOUT;
+            }
+            if (LOGDEBUG2) {
+                log_debug2("\nConfirmed commit timer extended "
+                           "by %u seconds",
+                           commit_cb.cc_cancel_timeout);
+            }
+            save_nvstore = FALSE;
+            /* send_cc_extend_timer = TRUE; */
+        } else {
+            /* check same session that started cc */
+            if (commit_cb.cc_ses_id != SES_MY_SID(scb)) {
+                log_warn("\nWarning: session %u completing "
+                         "confirmed-commit started by session %u",
+                         SES_MY_SID(scb),
+                         commit_cb.cc_ses_id);
+            } else if (LOGDEBUG2) {
+                log_debug2("\nConfirmed commit completed");
+            }
+
+            /* finish the confirmed-commit */
+            res = agt_ncx_cfg_save(running, FALSE);
+            if (res != NO_ERR) {
+                errdone = FALSE;
+            }
+            commit_cb.cc_active = FALSE;
+            commit_cb.cc_ses_id = 0;
+
+            /* send_cc_completed = TRUE; */
+        }
+    } else {
+        /* check if a new confirmed commit is starting */
+        if (confirmedval) {
+            /* save the session ID that started this conf-commit */
+            commit_cb.cc_ses_id = SES_MY_SID(scb);
+
+            /* set the timer */
+            (void)time(&commit_cb.cc_start_time);
+            if (timeoutval) {
+                commit_cb.cc_cancel_timeout = 
+                    VAL_UINT(timeoutval);
+            } else {
+                commit_cb.cc_cancel_timeout = 
+                    NCX_DEF_CONFIRM_TIMEOUT;
+            }
+            commit_cb.cc_active = TRUE;
+            save_nvstore = FALSE;
+
+            if (LOGDEBUG2) {
+                log_debug2("\nConfirmed commit started, timeout in "
+                           "%u seconds",
+                           commit_cb.cc_cancel_timeout);
+            }
+            /* send_cc_started = TRUE; */
+        } else {
+            /* no confirmed commit is starting */
+            save_nvstore = TRUE;
+        }
+    }
+
+    /* make a backup of running to make sure
+     * that if this step fails, the MUST not change
+     * requirement for running can be always honored
+     */ 
+    if (commit_cb.cc_backup_source) {
+        /* rewrite the existing backup file */
+        ;
+    } else {
+        /* search for the default startup-cfg.xml filename */
+        fname = ncxmod_find_data_file(NCX_DEF_BACKUP_FILE, 
+                                      FALSE, 
+                                      &res);
+        if (fname) {
+            /* rewrite the existing backup file
+             * hand off fname malloced memory here 
+             */
+            commit_cb.cc_backup_source = fname;
+        } else {
+            /* create a new backup file name
+             * should really check the res code
+             * to make sure the error is some sort
+             * of not-found error, but if it was a fatal
+             * malloc error, etc. then the following
+             * attempt to create a backup will probably 
+             * fail as well
+             */
+            res = NO_ERR;
+            commit_cb.cc_backup_source = 
+                ncxmod_make_data_filespec(NCX_DEF_BACKUP_FILE,
+                                          &res);
+        }
+    }
+
+    /* attempt to save the backup, if a file name is available */
+    if (res == NO_ERR) {
+        res = write_config(commit_cb.cc_backup_source, running);
+    }
+
+    if (res == NO_ERR) {
+        res = agt_val_apply_commit(scb,
+                                   msg, 
+                                   candidate, 
+                                   running,
+                                   save_nvstore);
+        if (res != NO_ERR) {
+            errdone = TRUE;
+
+            /* restore the config if needed */
+            res = agt_ncx_load_backup(commit_cb.cc_backup_source,
+                                      running,
+                                      commit_cb.cc_ses_id);
+            if (res != NO_ERR) {
+                errdone = FALSE;
+            }
+        } else {
+            res = cfg_fill_candidate_from_running();
+        }
+    }
+
+    if (res != NO_ERR && !errdone) {
+        agt_record_error(scb,
+                         &msg->mhdr, 
+                         NCX_LAYER_OPERATION,
+                         res,
+                         methnode,
+                         NCX_NT_NONE, 
+                         NULL, 
+                         NCX_NT_VAL,
+                         candidate->root);
     }
 
     return res;
@@ -1721,15 +1921,12 @@ static status_t
         return SET_ERROR(ERR_NCX_OPERATION_FAILED);
     }
 
-    /* Startup config load mode is always continue-on-error */
-    msg->rpc_err_option = OP_ERROP_CONTINUE;
-
     /* errors will be added as needed */
     res = agt_val_validate_write(scb, 
                                  msg, 
                                  target, 
                                  val, 
-                                 OP_EDITOP_LOAD);
+                                 msg->rpc_top_editop);
 
     if (res == NO_ERR) {
         res = agt_val_root_check(scb, &msg->mhdr, val);
@@ -2386,8 +2583,9 @@ status_t
             return res;
         }
 
-        agt_ncx_init_done = TRUE;
+        memset(&commit_cb, 0x0, sizeof(commit_cb_t));
 
+        agt_ncx_init_done = TRUE;
     }
     return NO_ERR;
 
@@ -2408,6 +2606,12 @@ void
     if (agt_ncx_init_done) {
 
         unregister_nc_callbacks();
+
+        if (commit_cb.cc_backup_source) {
+            m__free(commit_cb.cc_backup_source);
+        }
+        memset(&commit_cb, 0x0, sizeof(commit_cb_t));
+
         agt_ncx_init_done = FALSE;
     }
 }   /* agt_ncx_cleanup */
@@ -2417,6 +2621,7 @@ void
 * FUNCTION agt_ncx_cfg_load
 *
 * Load the specifed config from the indicated source
+* Called just once from agt.c at boot or reload time!
 *
 * This function should only be used to load an empty config
 * in CFG_ST_INIT state
@@ -2472,7 +2677,7 @@ status_t
             res = ERR_INTERNAL_MEM;
         } else {
             /* the cfgparm should be a filespec of an XML config file */
-            res = agt_rpc_load_config_file(cfgparm, cfg);
+            res = agt_rpc_load_config_file(cfgparm, cfg, TRUE, 0);
             if (res == NO_ERR && 
                 cfg->root != NULL &&
                 cfg->cfg_id != NCX_CFGID_STARTUP) {
@@ -2706,6 +2911,142 @@ status_t
     return res;
 
 } /* agt_ncx_cfg_save_inline */
+
+
+/********************************************************************
+* FUNCTION agt_ncx_load_backup
+*
+* Load a backup config into the specified config template
+*
+* INPUTS:
+*    filespec == complete path for the input file
+*    cfg == config template to load
+*    use_sid == session ID of user to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    agt_ncx_load_backup (const xmlChar *filespec,
+                         cfg_template_t *cfg,
+                         ses_id_t  use_sid)
+{
+    status_t           res;
+
+    res = agt_rpc_load_config_file(filespec, 
+                                   cfg, 
+                                   FALSE, 
+                                   use_sid);
+    return res;
+
+} /* agt_ncx_load_backup */
+
+
+/********************************************************************
+* FUNCTION agt_ncx_cc_active
+*
+* Check if a confirmed-commit is active, and the timeout
+* may need to be processed
+*
+* RETURNS:
+*    TRUE if confirmed-commit is active
+*    FALSE otherwise
+*********************************************************************/
+boolean
+    agt_ncx_cc_active (void)
+{
+
+    return commit_cb.cc_active;
+
+} /* agt_ncx_cc_active */
+
+
+/********************************************************************
+* FUNCTION agt_ncx_cc_ses_id
+*
+* Check if a confirmed-commit is active, and the timeout
+* may need to be processed
+*
+* RETURNS:
+*    TRUE if confirmed-commit is active
+*    FALSE otherwise
+*********************************************************************/
+ses_id_t
+    agt_ncx_cc_ses_id (void)
+{
+
+    return commit_cb.cc_ses_id;
+
+} /* agt_ncx_cc_ses_id */
+
+
+/********************************************************************
+* FUNCTION agt_ncx_check_cc_timeout
+*
+* Check if a confirmed-commit has timed out, and needs to be canceled
+*
+*********************************************************************/
+void
+    agt_ncx_check_cc_timeout (void)
+{
+
+    time_t            timenow;
+    double            timediff;
+
+    if (!commit_cb.cc_active) {
+        return;
+    }
+
+    (void)time(&timenow);
+    timediff = difftime(timenow, commit_cb.cc_start_time);
+
+    if (timediff >= (double)commit_cb.cc_cancel_timeout) {
+        if (LOGDEBUG) {
+            log_debug("\nConfirmed-commit timeout");
+        }
+        agt_ncx_cancel_confirmed_commit();
+    }
+
+} /* agt_ncx_check_cc_timeout */
+
+
+/********************************************************************
+* FUNCTION agt_ncx_cancel_confirmed_commit
+*
+* Cancel the confirmed-commit in progress and rollback
+* to the backup-cfg.xml file
+*
+*********************************************************************/
+void
+    agt_ncx_cancel_confirmed_commit (void)
+{
+    cfg_template_t  *running;
+    status_t         res;
+
+    if (!commit_cb.cc_active) {
+        return;
+    }
+
+    running = cfg_get_config_id(NCX_CFGID_RUNNING);
+
+    if (LOGDEBUG) {
+        log_debug("\nConfirmed-commit canceled");
+    }
+
+    /* restore the config if needed */
+    res = agt_ncx_load_backup(commit_cb.cc_backup_source,
+                              running,
+                              commit_cb.cc_ses_id);
+    if (res != NO_ERR) {
+        log_error("\nError: restore running config failed (%s)",
+                  get_error_string(res));
+
+    }
+    commit_cb.cc_active = FALSE;
+    commit_cb.cc_ses_id = 0;
+
+} /* agt_ncx_cancel_confirmed_commit */
+
 
 
 /* END file agt_ncx.c */

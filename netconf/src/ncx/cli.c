@@ -141,7 +141,17 @@ static status_t
      * common NETCONF mechanism, try to match the
      * strval to a child name
      */
-    if (obj->objtype == OBJ_TYP_CONTAINER) {
+    if (obj_is_root(obj)) {
+        if (script) {
+            (void)var_get_script_val(obj, 
+                                     new_parm,
+                                     strval, 
+                                     ISPARM, 
+                                     &res);
+        } else {
+	    res = ERR_NCX_INVALID_VALUE;
+        }
+    } else if (obj->objtype == OBJ_TYP_CONTAINER) {
 
 	/* check if the only child is an OBJ_TYP_CHOICE */
 	choiceobj = obj_first_child(obj);
@@ -1007,15 +1017,14 @@ status_t
 * The format "--foo=bar" must be processed within one argv segment.
 * If the separator is a whitespace char, then the next string
 * in the argv array must contain the expected value.
-* 
+* Whitespace can be preserved using single or double quotes
 *
 * DESIGN NOTES:
 *
 *   1) parse the (argc, argv) input against the specified object
 *   2) add any missing mandatory and condition-met parameters
-*      to the container. Defaults within a choice group are not
-*      checked during this phase (unless valonly is TRUE)
-*   3) Set the instance sequence IDs to distinguish duplicates
+*      to the container.
+*   3) Add defaults if valonly is false
 *   4) Validate any 'choice' constructs within the parmset
 *   5) Validate the proper number of instances (missing or extra)
 *      (unless valonly is TRUE)
@@ -1048,7 +1057,7 @@ status_t
 *          that should be used to validate the input
 *          against the child nodes of this container
 *   valonly == TRUE if only the values presented should
-*             be checked, no defaults, missing parms (Step 1&3 only)
+*             be checked, no defaults, missing parms (Step 1 & 2 only)
 *           == FALSE if all the tests and procedures should be done
 *   autocomp == TRUE if parameter auto-completion should be
 *               tried if any specified parameters are not matches
@@ -1120,7 +1129,7 @@ val_value_t *
     }
 
     /* check if there are any parameters at all to parse */
-    if (argc < 2) {
+    if (argc < 2 && valonly) {
 	*status = NO_ERR;
 	return NULL;
     }
@@ -1157,6 +1166,34 @@ val_value_t *
     }
 
     bufflen = 0;
+    buff = NULL;
+
+    /* handle special case -- may just need default CLI params
+     * and validation
+     */
+    if (argc < 2) {
+        /* 2) add any defaults for optional parms that are not set */
+        if (!valonly) {
+            res = val_add_defaults(val, script);
+        }
+
+        /* 3) CLI Instance Check
+         * Go through all the parameters in the object and check
+         * to see if each child node is present with the 
+         * correct number of instances
+         * The CLI object node can be a choice or a simple parameter 
+         * The choice test is also performed by this function call
+         */
+        if (res == NO_ERR && !valonly) {
+            res = val_instance_check(val, val->obj);
+        }
+        *status = res;
+        return val;
+    }
+
+    /* need to parse some CLI parms
+     * get 1 normalized buffer
+     */
     buff = copy_argv_to_buffer(argc, 
                                argv,
                                mode,

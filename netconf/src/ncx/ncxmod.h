@@ -298,6 +298,10 @@ extern xmlChar *
 			   status_t *res);
 
 extern xmlChar *
+    ncxmod_make_data_filespec (const xmlChar *fname,
+                               status_t *res);
+
+extern xmlChar *
     ncxmod_find_script_file (const xmlChar *fname,
 			     status_t *res);
 

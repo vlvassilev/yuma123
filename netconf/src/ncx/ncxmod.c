@@ -443,6 +443,57 @@ static boolean
 
     res = prep_dirpath(buff, bufflen, path, path2, &total);
     if (res != NO_ERR) {
+	return FALSE;
+    }
+
+    flen = xml_strlen(filename);
+    if (flen+total >= bufflen) {
+	log_error("\nError: Filename too long error. Max: %d Got %u",
+		  NCXMOD_MAX_FSPEC_LEN, 
+		  flen+total);
+	return FALSE;
+    }
+
+    p = &buff[total];
+    p += xml_strcpy(p, filename);
+
+    ret = stat((const char *)buff, &statbuf);
+    return (ret == 0 && S_ISREG(statbuf.st_mode)) ? TRUE : FALSE;
+
+}  /* test_file */
+
+
+/********************************************************************
+* FUNCTION test_file_make
+*
+* Construct a filespec out of a path name and a file name
+* if the constructed directory is valid
+*
+* INPUTS:
+*    buff == buffer to use for filespec construction
+*    bufflen == length of buffer
+*    path == first piece of path string
+*    path2 == optional 2nd piece of path string
+*    filename == complete filename with or without suffix
+* 
+* RETURNS:
+*    status:
+*    NO_ERR if directory found OK and buffer constructed OK
+*********************************************************************/
+static status_t
+    test_file_make (xmlChar *buff, 
+                    uint32 bufflen,
+                    const xmlChar *path, 
+                    const xmlChar *path2,
+                    const xmlChar *filename)
+{
+    uint32      flen, total;
+    int         ret;
+    status_t    res;
+    struct stat statbuf;
+
+    res = prep_dirpath(buff, bufflen, path, path2, &total);
+    if (res != NO_ERR) {
 	return res;
     }
 
@@ -454,13 +505,21 @@ static boolean
 	return ERR_BUFF_OVFL;
     }
 
-    p = &buff[total];
-    p += xml_strcpy(p, filename);
+    if (path) {
+        ret = stat((const char *)buff, &statbuf);
 
-    ret = stat((const char *)buff, &statbuf);
-    return (ret == 0 && S_ISREG(statbuf.st_mode)) ? TRUE : FALSE;
+        if (ret == 0 && S_ISDIR(statbuf.st_mode)) {
+            xml_strcpy(&buff[total], filename);
+            return NO_ERR;
+        } else {
+            return ERR_NCX_DEF_NOT_FOUND;
+        }
+    } else {
+        xml_strcpy(buff, filename);
+        return NO_ERR;
+    }
 
-}  /* test_file */
+}  /* test_file_make */
 
 
 /********************************************************************
@@ -567,6 +626,87 @@ static boolean
     return FALSE;
 
 }  /* test_pathlist */
+
+
+/********************************************************************
+* FUNCTION test_pathlist_make
+*
+* Check the filespec path string to find the first
+* entry that actually exists.  It does not check
+* if the specified user has permission to write
+* to this directory.  That must be true or the
+* backup will fail
+*
+* INPUTS:
+*    pathstr == pathstring list to check
+*    buff == buffer to use for pathspec construction
+*    bufflen == length of buffer
+*
+* OUTPUTS:
+*    buff contains the complete path to the found directory if
+*    the return value is TRUE.  Ignore buff contents otherwise
+*
+* RETURNS:
+*    TRUE if valid directory found 
+*    FALSE otherwise
+*********************************************************************/
+static boolean
+    test_pathlist_make (const xmlChar *pathlist,
+                        xmlChar *buff,
+                        uint32 bufflen)
+{
+    const xmlChar *str, *p;
+    uint32         len;
+    int            ret;
+    struct stat    statbuf;
+
+    /* go through the path list and check each string */
+    str = pathlist;
+    while (*str) {
+	/* find end of path entry or EOS */
+	p = str+1;
+	while (*p && *p != ':') {
+	    p++;
+	}
+	len = (uint32)(p-str);
+	if (len >= bufflen) {
+	    SET_ERROR(ERR_BUFF_OVFL);
+	    return FALSE;
+	}
+
+	/* copy the next string into buff */
+	xml_strncpy(buff, str, len);
+
+        /* check if this is a directory */
+	ret = stat((const char *)buff, &statbuf);
+	if (ret == 0) {
+	    /* match in buff, make sure it is a directory */
+	    if (S_ISDIR(statbuf.st_mode)) {
+                /* make sure string ends with path sep char */
+                if (buff[len-1] != NCXMOD_PSCHAR) {
+                    if (len+1 >= bufflen) {
+                        SET_ERROR(ERR_BUFF_OVFL);
+                        return FALSE;
+                    } else {
+                        buff[len++] = NCXMOD_PSCHAR;
+                        buff[len] = 0;
+                    }
+                }
+		return TRUE;
+	    }
+	}
+    
+	/* setup the next path string to try */
+	if (*p) {
+	    str = p+1;   /* one past ':' char */
+	} else {
+	    str = p;        /* already at EOS */
+	}
+    }
+
+    return FALSE;
+
+}  /* test_pathlist_make */
 
 
 /********************************************************************
@@ -2810,6 +2950,137 @@ xmlChar *
     return NULL;
 
 }  /* ncxmod_find_data_file */
+
+
+/********************************************************************
+* FUNCTION ncxmod_make_data_filespec
+*
+* Determine a suitable path location for the specified data file name
+*
+* Search order:
+*
+* 1) YANG_DATAPATH environment var (or set by datapath CLI var)
+* 2) HOME/data directory
+* 3) YANG_HOME/data directory
+* 4) YANG_INSTALL/data directory
+* 5) current directory
+
+* INPUTS:
+*   fname == file name with extension
+*            if the first char is '.' or '/', then an absolute
+*            path is assumed, and the search path will not be tries
+*   res == address of status result
+*
+* OUTPUTS:
+*   *res == status 
+*
+* RETURNS:
+*   pointer to the malloced and initialized string containing
+*   the complete filespec or NULL if no suitable location
+*   for the datafile is found
+*   It must be freed after use!!!
+*********************************************************************/
+xmlChar *
+    ncxmod_make_data_filespec (const xmlChar *fname,
+                               status_t *res)
+{
+    xmlChar  *buff;
+    uint32    flen, pathlen, bufflen;
+
+#ifdef DEBUG
+    if (!fname || !res) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    *res = NO_ERR;
+
+    flen = xml_strlen(fname);
+    if (!flen || flen > NCX_MAX_NLEN) {
+        *res = ERR_NCX_WRONG_LEN;
+	return NULL;
+    }
+
+    /* get a buffer to construct filespacs */
+    bufflen = NCXMOD_MAX_FSPEC_LEN+1;
+    buff = m__getMem(bufflen);
+    if (!buff) {
+	*res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+
+    /* 1) try the NCX_DATAPATH environment variable */
+    if (ncxmod_data_path) {
+	if (test_pathlist_make(ncxmod_data_path, 
+                               buff, 
+                               bufflen)) {
+            pathlen = xml_strlen(buff);
+            if ((pathlen + flen) < bufflen) {
+                xml_strcat(buff, fname);
+            } else {
+                *res = ERR_BUFF_OVFL;
+                m__free(buff);
+                return NULL;
+            }
+	}
+    }
+
+    /* 2) HOME/data directory */
+    if (ncxmod_env_userhome) {
+        if (test_file_make(buff, 
+                           bufflen, 
+                           ncxmod_env_userhome, 
+                           NCXMOD_DATA_DIR, 
+                           fname) == NO_ERR) {
+            return buff;
+        }
+    }
+
+    /* 3) YANG_HOME/data directory */
+    if (ncxmod_yang_home) {
+        if (test_file_make(buff, 
+                           bufflen, 
+                           ncxmod_yang_home,
+                           NCXMOD_DATA_DIR, 
+                           fname) == NO_ERR) {
+            return buff;
+        }
+    }
+
+    /* 4) YANG_INSTALL/data directory */
+    if (ncxmod_env_install) {
+        if (test_file_make(buff, 
+                           bufflen, 
+                           ncxmod_env_install,
+                           NCXMOD_DATA_DIR, 
+                           fname) == NO_ERR) {
+            return buff;
+        }
+    } else {
+        if (test_file_make(buff, 
+                           bufflen, 
+                           NCXMOD_DEFAULT_INSTALL,
+                           NCXMOD_DATA_DIR, 
+                           fname) == NO_ERR) {
+            return buff;
+        }
+    }
+
+    /* 5) current directory */
+    if (test_file_make(buff, 
+                       bufflen, 
+                       NULL,
+                       NULL, 
+                       fname) == NO_ERR) {
+        return buff;
+    }
+
+    m__free(buff);
+    *res = ERR_NCX_MOD_NOT_FOUND;
+    return NULL;
+
+}  /* ncxmod_make_data_filespec */
 
 
 /********************************************************************

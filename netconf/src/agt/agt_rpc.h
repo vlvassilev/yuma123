@@ -163,9 +163,14 @@ extern void
 		      xml_node_t *top);
 
 
+/* used for OP_EDITOP_LOAD to load the running from startup
+ * and OP_EDITOP_REPLACE to restore running from backup
+ */
 extern status_t
     agt_rpc_load_config_file (const xmlChar *filespec,
-			      cfg_template_t  *cfg);
+			      cfg_template_t  *cfg,
+                              boolean isload,
+                              ses_id_t  use_sid);
 
 
 /* used to make the sysStartup notification */

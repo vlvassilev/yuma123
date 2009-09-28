@@ -381,7 +381,7 @@ status_t
     /* parse the command line against the object template */
     res = NO_ERR;
     valset = NULL;
-    if (argc > 1) {
+    if (argc > 0) {
         valset = cli_parse(argc, 
                            argv, 
                            obj,

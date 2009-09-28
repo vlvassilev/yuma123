@@ -110,6 +110,8 @@ rpc_msg_t *
 	return NULL;
     }
 
+    msg->rpc_top_editop = OP_EDITOP_MERGE;
+
     return msg;
 
 } /* rpc_new_msg */

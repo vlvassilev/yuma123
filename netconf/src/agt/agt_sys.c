@@ -486,6 +486,7 @@ static void
     val_value_t     *leafval;
     xmlChar          numbuff[NCX_MAX_NUMLEN];
     status_t         res;
+    ses_id_t         use_sid;
 
     /* add userName */
     if (scb->username) {
@@ -502,15 +503,29 @@ static void
     }
 
     /* add sessionId */
-    sprintf((char *)numbuff, "%u", scb->sid);
-    leafval = agt_make_leaf(not->notobj,
-			    system_N_sessionId,
-			    numbuff,
-			    &res);
+    if (scb->sid) {
+        use_sid = scb->sid;
+    } else if (scb->rollback_sid) {
+        use_sid = scb->rollback_sid;
+    } else {
+        res = ERR_NCX_NOT_IN_RANGE;
+        use_sid = 0;
+    }
+
+    leafval = NULL;
+    if (use_sid) {
+        sprintf((char *)numbuff, "%u", use_sid);
+        leafval = agt_make_leaf(not->notobj,
+                                system_N_sessionId,
+                                numbuff,
+                                &res);
+    }
     if (leafval) {
 	agt_not_add_to_payload(not, leafval);
     } else {
-	log_error("\nError: cannot make payload leaf (%s)",
+	log_error("\nError: cannot make payload leaf "
+                  "for session %u (%s)",
+                  use_sid,
 		  get_error_string(res));
     }
 

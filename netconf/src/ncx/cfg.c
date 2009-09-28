@@ -1344,14 +1344,15 @@ val_value_t *
 	return NULL;
     }
 
-    res = xpath_find_val_target(cfg->root, NULL,
-				target, &retval);
+    res = xpath_find_val_target(cfg->root, 
+                                NULL,
+				target, 
+                                &retval);
     if (res == NO_ERR) {
 	return retval;
     } else {
 	return NULL;
     }
-    
 
 } /* cfg_find_datanode */
 
@@ -1394,8 +1395,10 @@ val_value_t *
 	return NULL;
     }
 
-    res = xpath_find_val_target(cfg->root, mod,
-				target, &retval);
+    res = xpath_find_val_target(cfg->root, 
+                                mod,
+				target, 
+                                &retval);
     if (res == NO_ERR) {
 	return retval;
     } else {

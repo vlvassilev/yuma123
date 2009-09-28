@@ -252,6 +252,12 @@ date	     init     comment
 /* Default startup config data file name */
 #define NCX_DEF_STARTUP_FILE  (const xmlChar *)"startup-cfg.xml"
 
+/* Default backup config data file name */
+#define NCX_DEF_BACKUP_FILE  (const xmlChar *)"backup-cfg.xml"
+
+/* default conrm-tmieout value in seconds */
+#define NCX_DEF_CONFIRM_TIMEOUT  600
+
 /* default value for the with-defaults option */
 #define NCX_DEF_WITHDEF   NCX_WITHDEF_REPORT_ALL
 

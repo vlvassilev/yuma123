@@ -40,6 +40,10 @@ date         init     comment
 #include  "agt_connect.h"
 #endif
 
+#ifndef _H_agt_ncx
+#include  "agt_ncx.h"
+#endif
+
 #ifndef _H_agt_ncxserver
 #include  "agt_ncxserver.h"
 #endif
@@ -488,6 +492,75 @@ ses_cb_t *
 
 
 /********************************************************************
+* FUNCTION agt_ses_set_dummy_session_acm
+*
+* Set the session ID and username of the user that
+* will be responsible for the rollback if needed
+*
+* INPUTS:
+*   dummy_session == session control block to change
+*   use_sid == Session ID to use for the rollback
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    agt_ses_set_dummy_session_acm (ses_cb_t *dummy_session,
+                                   ses_id_t  use_sid)
+{
+    ses_cb_t  *scb;
+
+#ifdef DEBUG
+    if (dummy_session == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (!agt_ses_init_done) {
+	agt_ses_init();
+    }
+
+    scb = agtses[use_sid];
+    if (scb == NULL) {
+        return ERR_NCX_INVALID_VALUE;
+    }
+
+    dummy_session->rollback_sid = use_sid;
+
+    if (scb == dummy_session) {
+        return NO_ERR;  /* skip -- nothing to do */
+    }
+
+    if (dummy_session->username && scb->username) {
+        m__free(dummy_session->username);
+        dummy_session->username = NULL;
+    }
+
+    if (scb->username) {
+        dummy_session->username = xml_strdup(scb->username);
+        if (dummy_session->username == NULL) {
+            return ERR_INTERNAL_MEM;
+        }
+    }
+
+    if (dummy_session->peeraddr && scb->peeraddr) {
+        m__free(dummy_session->peeraddr);
+        dummy_session->peeraddr = NULL;
+    }
+
+    if (scb->peeraddr) {
+        dummy_session->peeraddr = xml_strdup(scb->peeraddr);
+        if (dummy_session->peeraddr == NULL) {
+            return ERR_INTERNAL_MEM;
+        }
+    }
+    
+    return NO_ERR;
+
+}  /* agt_ses_set_dummy_session_acm */
+
+
+/********************************************************************
 * FUNCTION agt_ses_free_dummy_session
 *
 * Free a dummy session control block
@@ -802,6 +875,10 @@ void
 	return;
     }
 
+    if (agt_ncx_cc_active() && agt_ncx_cc_ses_id() == sid) {
+        agt_ncx_cancel_confirmed_commit();
+    }
+
     agt_sys_send_sysSessionEnd(scb,
 			       termreason,
 			       killedby);
@@ -965,9 +1042,12 @@ void
 
     agt_profile = agt_get_profile();
 
-    /* check if both timeouts are disabled; quick exit */
+    /* check if both timeouts are disabled and the
+     * confirmed-commit is not active -- quick exit 
+     */
     if (agt_profile->agt_idle_timeout == 0 &&
-        agt_profile->agt_hello_timeout == 0) {
+        agt_profile->agt_hello_timeout == 0 &&
+        !agt_ncx_cc_active()) {
         return;
     }
 
@@ -985,8 +1065,13 @@ void
     /* reset the timeout interval for next time */
     last_timeout_check = timenow;
 
-    /* check all the sessions */
-    if (next_sesid == 0) {
+    /* check all the sessions only if idle or hello
+     * timeout checking is enabled
+     */
+    if (agt_profile->agt_idle_timeout == 0 &&
+        agt_profile->agt_hello_timeout == 0) {
+        last = 0;
+    } else if (next_sesid == 0) {
         last = AGT_SES_MAX_SESSIONS;
     } else {
         last = next_sesid;
@@ -1031,6 +1116,9 @@ void
             }
         }
     }
+
+    /* check the confirmed-commit timeout */
+    agt_ncx_check_cc_timeout();
 
 }  /* agt_ses_check_timeouts */
 

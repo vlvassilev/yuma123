@@ -2133,7 +2133,7 @@ static status_t
                 break;
             case XML_NT_STRING:
                 res = ERR_NCX_WRONG_NODETYP_SIM;
-                errnode = &chnode;
+                errnode = startnode;
                 break;
             case XML_NT_END:
                 res = xml_endnode_match(startnode, &chnode);

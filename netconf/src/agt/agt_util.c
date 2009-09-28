@@ -433,7 +433,7 @@ status_t
     case NCX_BT_CONTAINER:
         childval = val_get_first_child(val);
         if (childval) {
-            if (!xml_strcmp(val->name, NCX_EL_CONFIG)) {
+            if (!xml_strcmp(childval->name, NCX_EL_CONFIG)) {
                 *retval = childval;
                 return NO_ERR;
             } else {

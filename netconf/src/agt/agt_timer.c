@@ -34,6 +34,10 @@ date         init     comment
 #include "agt_timer.h"
 #endif
 
+#ifndef _H_log
+#include "log.h"
+#endif
+
 #ifndef _H_ncx
 #include "ncx.h"
 #endif
@@ -107,15 +111,15 @@ void
 *
 * Handle an incoming interrupt timer
 *
-* INPUTS:
-*   intr == interrupt numer
-*
 *********************************************************************/
 void 
     agt_timer_handler (void)
 {
-
+    if (LOGDEBUG3) {
+        log_debug3("\nagt_timer: got event");
+    }
 } /* agt_timer_handler */
+
 
 /* END file agt_timer.c */
 

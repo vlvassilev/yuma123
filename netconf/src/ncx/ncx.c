@@ -2457,9 +2457,6 @@ ncx_module_t *
 }  /* ncx_get_next_session_module */
 
 
-
-
-
 /********************************************************************
 * FUNCTION ncx_get_modname
 * 

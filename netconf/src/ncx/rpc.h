@@ -135,7 +135,8 @@ typedef struct rpc_msg_t_ {
 
     /* incoming: AGENT RPC processing state */
     int              rpc_agt_state;        /* rpc_agt_phase_t */
-    op_errop_t       rpc_err_option;       
+    op_errop_t       rpc_err_option;
+    op_editop_t      rpc_top_editop;
     val_value_t     *rpc_input;
 
     /* incoming:

@@ -54,6 +54,10 @@ date         init     comment
 #include "val.h"
 #endif
 
+#ifndef _H_val_util
+#include "val_util.h"
+#endif
+
 #ifndef _H_var
 #include "var.h"
 #endif
@@ -1487,21 +1491,40 @@ val_value_t *
 			     &name, 
                              &namelen);
 	if (*res == NO_ERR) {
+            /* this is a var-reference, so get the variable */
 	    varval = var_get_str(name, namelen, vartype);
 	    if (!varval) {
 		*res = ERR_NCX_VAR_NOT_FOUND;
-	    } else if (typ_is_simple(varval->btyp)) {
-		cloneval = val_clone(varval);
-		if (!cloneval) {
-		    *res = ERR_INTERNAL_MEM;
-		} else {
-		    *res = val_replace(cloneval, useval);
-		    val_free_value(cloneval);
-		}
 	    } else {
-		*res = ERR_NCX_WRONG_DATATYP;
-	    }
-	}
+                /* check that the var and the useval have
+                 * the same basic type
+                 */
+                if (typ_is_simple(varval->btyp) && 
+                    typ_is_simple(useval->btyp)) {
+                    cloneval = val_clone(varval);
+                    if (!cloneval) {
+                        *res = ERR_INTERNAL_MEM;
+                    } else {
+                        *res = val_replace(cloneval, useval);
+                        val_free_value(cloneval);
+                    }
+                } else if (varval->btyp == useval->btyp) {
+                    cloneval = val_clone(varval);
+                    if (!cloneval) {
+                        *res = ERR_INTERNAL_MEM;
+                    } else {
+                        val_move_children(cloneval, useval);
+                        val_free_value(cloneval);
+                        if (useval->btyp == NCX_BT_LIST) {
+                            *res = val_gen_index_chain(useval->obj,
+                                                       useval);
+                        }                            
+                    }
+                } else {
+                    *res = ERR_NCX_WRONG_DATATYP;
+                }
+            }
+        }
     } else if (*strval == NCX_QUOTE_CH) {
 	/* this is a quoted string literal */
 	/* set the start after quote */

@@ -26,6 +26,10 @@ date	     init     comment
 #include "cfg.h"
 #endif
 
+#ifndef _H_ses
+#include "ses.h"
+#endif
+
 #ifndef _H_status
 #include "status.h"
 #endif
@@ -58,5 +62,22 @@ extern status_t
 extern status_t
     agt_ncx_cfg_save_inline (const xmlChar *source_url,
                              val_value_t *newroot);
+
+extern status_t
+    agt_ncx_load_backup (const xmlChar *filespec,
+                         cfg_template_t *cfg,
+                         ses_id_t  use_sid);
+
+extern boolean
+    agt_ncx_cc_active (void);
+
+extern ses_id_t
+    agt_ncx_cc_ses_id (void);
+
+extern void
+    agt_ncx_check_cc_timeout (void);
+
+extern void
+    agt_ncx_cancel_confirmed_commit (void);
 
 #endif	    /* _H_agt_ncx */

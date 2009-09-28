@@ -234,6 +234,7 @@ typedef struct ses_cb_t_ {
     ses_mode_t       mode;                      /* session mode */
     ses_id_t         sid;                         /* session ID */
     ses_id_t         killedbysid;       /* killed-by session ID */
+    ses_id_t         rollback_sid;   /* session ID for rollback */
     ses_term_reason_t termreason;
     time_t           hello_time;     /* used for hello timeout */
     time_t           last_rpc_time;   /* used for idle timeout */

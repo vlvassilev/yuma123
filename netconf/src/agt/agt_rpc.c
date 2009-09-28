@@ -1439,13 +1439,18 @@ void
 * INPUTS:
 *   filespec == XML config filespec to load
 *   cfg == cfg_template_t to fill in
+*   isload == TRUE for normal load-config
+*             FALSE for restore backup load-config
+*   use_sid == session ID to use for the access control
 *
 * RETURNS:
 *     status
 *********************************************************************/
 status_t
     agt_rpc_load_config_file (const xmlChar *filespec,
-                              cfg_template_t  *cfg)
+                              cfg_template_t  *cfg,
+                              boolean isload,
+                              ses_id_t  use_sid)
 {
     ses_cb_t        *scb;
     rpc_msg_t       *msg;
@@ -1476,15 +1481,17 @@ status_t
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    /* make sure the config is in the init state */
-    if (cfg->cfg_state != CFG_ST_INIT) {
-        return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
     /* create a dummy session control block */
     scb = agt_ses_new_dummy_session();
     if (!scb) {
         return ERR_INTERNAL_MEM;
+    }
+
+    /* set the ACM profile to use for rollback */
+    res = agt_ses_set_dummy_session_acm(scb, use_sid);
+    if (res != NO_ERR) {
+        agt_ses_free_dummy_session(scb);        
+        return res;
     }
 
     /* create a dummy RPC msg */
@@ -1517,6 +1524,11 @@ status_t
     msg->rpc_method = rpcobj;
     msg->rpc_user1 = cfg;
     msg->rpc_err_option = OP_ERROP_CONTINUE;
+    if (isload) {
+        msg->rpc_top_editop = OP_EDITOP_LOAD;
+    } else {
+        msg->rpc_top_editop = OP_EDITOP_REPLACE;
+    }
 
     res = NO_ERR;
     valdone = FALSE;

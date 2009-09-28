@@ -140,8 +140,6 @@ date         init     comment
 *********************************************************************/
 static boolean mgr_rpc_init_done = FALSE;
 
-static obj_template_t *reply_obj;
-
 
 /********************************************************************
 * FUNCTION new_reply
@@ -267,7 +265,6 @@ status_t
 	if (res != NO_ERR) {
 	    return res;
 	}
-	reply_obj = NULL;
 	mgr_rpc_init_done = TRUE;
     }
     return NO_ERR;
@@ -287,7 +284,6 @@ void
 {
     if (mgr_rpc_init_done) {
 	top_unregister_node(NC_MODULE, NCX_EL_RPC_REPLY);
-	reply_obj = NULL;
 	mgr_rpc_init_done = FALSE;
     }
 
@@ -637,22 +633,15 @@ void
     }
 
     /* check if the reply template is already cached */
-    if (reply_obj) {
-	rpyobj = reply_obj;
-    } else {
-	/* get the rpcReply template */
-	rpyobj = NULL;
-	mod = ncx_find_module(NC_MODULE, NULL);
-	if (mod) {
-	    rpyobj = ncx_find_object(mod, NC_RPC_REPLY_TYPE);
-	}
-	if (rpyobj) {
-	    reply_obj = rpyobj;
-	} else {
-	    SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-	    mgr_xml_skip_subtree(scb->reader, top);
-	    return;
-	}
+    rpyobj = NULL;
+    mod = ncx_find_module(NC_MODULE, NULL);
+    if (mod) {
+        rpyobj = ncx_find_object(mod, NC_RPC_REPLY_TYPE);
+    }
+    if (rpyobj == NULL) {
+        SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        mgr_xml_skip_subtree(scb->reader, top);
+        return;
     }
 
     /* get the NC RPC message-id attribute; should be present

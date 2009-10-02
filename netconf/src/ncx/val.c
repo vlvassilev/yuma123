@@ -3968,8 +3968,9 @@ status_t
     }
 #endif
 
+    res = NO_ERR;
     val->btyp = typ_get_basetype(typdef);
-    
+
     if (!(val->btyp == NCX_BT_INSTANCE_ID ||
           typ_is_schema_instance_string(typdef) ||
           typ_is_xpath_string(typdef))) {

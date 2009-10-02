@@ -1115,6 +1115,7 @@ val_value_t *
     }
 #endif
 
+    res = NO_ERR;
     *status = NO_ERR;
 
     /* check if CLI parmset really OK to use

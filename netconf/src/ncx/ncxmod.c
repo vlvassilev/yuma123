@@ -3002,7 +3002,7 @@ xmlChar *
 	return NULL;
     }
 
-    /* get a buffer to construct filespacs */
+    /* get a buffer to construct filespecs */
     bufflen = NCXMOD_MAX_FSPEC_LEN+1;
     buff = m__getMem(bufflen);
     if (!buff) {
@@ -3081,6 +3081,88 @@ xmlChar *
     return NULL;
 
 }  /* ncxmod_make_data_filespec */
+
+
+/********************************************************************
+* FUNCTION ncxmod_make_data_filespec_from_src
+*
+* Determine the directory path portion of the specified
+* source_url and change the filename to the specified filename
+* in a new copy of the complete filespec
+*
+* INPUTS:
+*   srcspec == source filespec to use
+*   fname == file name with extension
+*            if the first char is '.' or '/', then an absolute
+*            path is assumed, and the search path will not be tries
+*   res == address of status result
+*
+* OUTPUTS:
+*   *res == status 
+*
+* RETURNS:
+*   pointer to the malloced and initialized string containing
+*   the complete filespec or NULL if some error occurred
+*********************************************************************/
+xmlChar *
+    ncxmod_make_data_filespec_from_src (const xmlChar *srcspec,
+                                        const xmlChar *fname,
+                                        status_t *res)
+{
+    const xmlChar  *str;
+    xmlChar        *buff, *p;
+    uint32          flen, pathlen, copylen, bufflen;
+
+#ifdef DEBUG
+    if (!srcspec || !fname || !res) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    *res = NO_ERR;
+
+    pathlen = xml_strlen(srcspec);
+    if (pathlen == 0) {
+        *res = ERR_NCX_WRONG_LEN;
+        return NULL;
+    }
+
+    flen = xml_strlen(fname);
+    if (!flen || flen > NCX_MAX_NLEN) {
+        *res = ERR_NCX_WRONG_LEN;
+	return NULL;
+    }
+
+    bufflen = flen+1;
+    copylen = 0;
+
+    /* find the end of the path portion of the srcspec */
+    str = &srcspec[pathlen-1];
+    while (str >= srcspec && *str != NCXMOD_PSCHAR) {
+        str--;
+    }
+    if (*str == NCXMOD_PSCHAR) {
+        copylen = (uint32)(str - srcspec) + 1;
+        bufflen += copylen;
+    }
+
+    /* get a buffer to construct the filespec */
+    buff = m__getMem(bufflen);
+    if (!buff) {
+	*res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+
+    p = buff;
+    if (copylen) {
+        p += xml_strncpy(p, srcspec, copylen);
+    }
+    xml_strcpy(p, fname);
+
+    return buff;
+
+}  /* ncxmod_make_data_filespec_from_src */
 
 
 /********************************************************************

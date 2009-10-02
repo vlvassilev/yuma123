@@ -26,6 +26,10 @@ date	     init     comment
 #include "cfg.h"
 #endif
 
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
+#endif
+
 #ifndef _H_ses
 #include "ses.h"
 #endif
@@ -78,6 +82,8 @@ extern void
     agt_ncx_check_cc_timeout (void);
 
 extern void
-    agt_ncx_cancel_confirmed_commit (void);
+    agt_ncx_cancel_confirmed_commit (ses_cb_t *scb,
+                                     ncx_confirm_event_t event);
+
 
 #endif	    /* _H_agt_ncx */

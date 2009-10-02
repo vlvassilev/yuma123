@@ -445,7 +445,8 @@ static void
 #ifdef AGT_VAL_DEBUG
     if (LOGDEBUG3) {
         log_debug3("\nAdd child '%s' to parent '%s'",
-                   child->name, parent->name);
+                   child->name, 
+                   parent->name);
     }
 #endif
 
@@ -491,7 +492,8 @@ static void
 #ifdef AGT_VAL_DEBUG
     if (LOGDEBUG3) {
         log_debug3("\nMove child '%s' in parent '%s'",
-                   newchild->name, parent->name);
+                   newchild->name, 
+                   parent->name);
     }
 #endif
 

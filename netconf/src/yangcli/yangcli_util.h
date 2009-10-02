@@ -56,6 +56,11 @@ extern modptr_t *
 		ncx_list_t *feature_list,
 		ncx_list_t *deviation_list);
 
+extern modptr_t *
+    find_modptr (dlq_hdr_t *modptrQ,
+                 const xmlChar *modname,
+                 const xmlChar *revision);
+
 extern void
     free_modptr (modptr_t *modptr);
 

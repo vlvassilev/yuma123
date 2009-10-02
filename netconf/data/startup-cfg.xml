@@ -72,6 +72,7 @@
          <if:name>pan0</if:name>
       </if:interface>
    </if:interfaces>
-   <t:uint16.1 xmlns:t="http://netconfcentral.com/ns/test">4</t:uint16.1>
+   <t:uint16.1 xmlns:t="http://netconfcentral.com/ns/test">997</t:uint16.1>
    <t:int8.1 xmlns:t="http://netconfcentral.com/ns/test">0</t:int8.1>
+   <t:int16.1 xmlns:t="http://netconfcentral.com/ns/test">991</t:int16.1>
 </nc:config>

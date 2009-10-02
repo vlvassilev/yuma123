@@ -7083,7 +7083,8 @@ static status_t
 
 #ifdef YANG_OBJ_DEBUG
 		    if (LOGDEBUG3) {
-			log_debug3("\nexpand_uses: add new obj %s to parent %s,"
+			log_debug3("\nexpand_uses: add new "
+                                   "obj %s to parent %s,"
 				   " uses.%u",
 				   obj_get_name(newobj),
 				   (obj->grp) ? obj->grp->name :
@@ -7113,7 +7114,8 @@ static status_t
 
 #ifdef YANG_OBJ_DEBUG
 	if (LOGDEBUG3) {
-	    log_debug3("\nexpand_uses_augment: mod %s, augment on line %u",
+	    log_debug3("\nexpand_uses_augment: "
+                       "mod %s, augment on line %u",
 		       mod->name, 
 		       chobj->tkerr.linenum);
 	}
@@ -9955,10 +9957,8 @@ status_t
             dlq_block_enque(&mod->deviationQ, &savedev->deviationQ);
             dlq_enque(savedev, pcb->savedevQ);
         } else if (LOGDEBUG) {
-            if (LOGDEBUG) {
-                log_debug("\nNo deviations found in deviation module '%s'",
-                          mod->name);
-            }
+            log_debug("\nNo deviations found in deviation module '%s'",
+                      mod->name);
         }
         return NO_ERR;
     }

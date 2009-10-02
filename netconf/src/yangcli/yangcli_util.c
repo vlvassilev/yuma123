@@ -257,6 +257,56 @@ void
 
 
 /********************************************************************
+* FUNCTION find_modptr
+* 
+*  Find a specified module name
+* 
+* INPUTS:
+*    modptrQ == Q of modptr_t to check
+*    modname == module name to find
+*    revision == module revision (may be NULL)
+*
+* RETURNS:
+*   pointer to found entry or NULL if not found
+*
+*********************************************************************/
+modptr_t *
+    find_modptr (dlq_hdr_t *modptrQ,
+                 const xmlChar *modname,
+                 const xmlChar *revision)
+{
+    modptr_t  *modptr;
+
+#ifdef DEBUG
+    if (!modptrQ || !modname) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    for (modptr = (modptr_t *)dlq_firstEntry(modptrQ);
+	 modptr != NULL;
+	 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+
+	if (xml_strcmp(modptr->mod->name, modname)) {
+            continue;
+        }
+
+        if (revision && 
+            modptr->mod->version &&
+            !xml_strcmp(modptr->mod->version, revision)) {
+            return modptr;
+	}
+        if (revision == NULL) {
+            return modptr;
+        }
+    }
+    return NULL;
+    
+}  /* find_modptr */
+
+
+/********************************************************************
 * FUNCTION clear_server_cb_session
 * 
 *  Clean the current session data from an server control block

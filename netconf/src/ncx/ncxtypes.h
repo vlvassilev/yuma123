@@ -764,4 +764,15 @@ typedef struct ncx_save_deviations_t_ {
 } ncx_save_deviations_t;
 
 
+/* type of confirmEvent in the sysConfirmedCommit notification */
+typedef enum ncx_confirm_event_t_ {
+    NCX_CC_EVENT_NONE,
+    NCX_CC_EVENT_START,
+    NCX_CC_EVENT_CANCEL,
+    NCX_CC_EVENT_TIMEOUT,
+    NCX_CC_EVENT_EXTEND,
+    NCX_CC_EVENT_COMPLETE
+} ncx_confirm_event_t;
+
+
 #endif	    /* _H_ncxtypes */

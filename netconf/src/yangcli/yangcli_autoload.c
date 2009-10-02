@@ -980,15 +980,36 @@ status_t
                               &searchresult->cap->cap_deviation_list,
                               &mod);
 
-        if (res == NO_ERR && mod != NULL) {
-            /* mod can be NULL if the module was already in the temp_modQ */
-            modptr = new_modptr(mod, 
-                                &searchresult->cap->cap_feature_list,
-                                &searchresult->cap->cap_deviation_list);
-            if (modptr == NULL) {
-                log_error("\nMalloc failure");
-            } else {
-                dlq_enque(modptr, &server_cb->modptrQ);
+        if (res == NO_ERR) {
+            if (mod == NULL) {
+                mod = ncx_find_module(searchresult->module,
+                                      searchresult->revision);
+                if (mod == NULL) {
+                    log_warn("\nWarning: no module parsed "
+                             "for module %s, rev %s",
+                             searchresult->module,
+                             (searchresult->revision) ?
+                             searchresult->revision : NCX_EL_NONE);
+                }
+            }
+
+            /* make sure this module is not stored more than once */
+            modptr = find_modptr(&server_cb->modptrQ,
+                                 searchresult->module,
+                                 searchresult->revision);
+
+            if (mod != NULL && modptr == NULL) {
+                /* mod can be NULL if the module was already 
+                 * in the temp_modQ 
+                 */
+                modptr = new_modptr(mod, 
+                                    &searchresult->cap->cap_feature_list,
+                                    &searchresult->cap->cap_deviation_list);
+                if (modptr == NULL) {
+                    log_error("\nMalloc failure");
+                } else {
+                    dlq_enque(modptr, &server_cb->modptrQ);
+                }
             }
         }
 

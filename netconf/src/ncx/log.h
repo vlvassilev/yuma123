@@ -40,6 +40,7 @@ date	     init     comment
 #define LOGDEBUG   (log_get_debug_level() >= LOG_DEBUG_DEBUG)
 #define LOGDEBUG2  (log_get_debug_level() >= LOG_DEBUG_DEBUG2)
 #define LOGDEBUG3  (log_get_debug_level() >= LOG_DEBUG_DEBUG3)
+#define LOGDEBUG4  (log_get_debug_level() >= LOG_DEBUG_DEBUG4)
 
 
 #define LOG_DEBUG_STR_OFF     (const xmlChar *)"off"
@@ -49,6 +50,7 @@ date	     init     comment
 #define LOG_DEBUG_STR_DEBUG   (const xmlChar *)"debug"
 #define LOG_DEBUG_STR_DEBUG2  (const xmlChar *)"debug2"
 #define LOG_DEBUG_STR_DEBUG3  (const xmlChar *)"debug3"
+#define LOG_DEBUG_STR_DEBUG4  (const xmlChar *)"debug4"
 
 /********************************************************************
 *                                                                   *
@@ -65,7 +67,8 @@ typedef enum log_debug_t_ {
     LOG_DEBUG_INFO,         /* all previous + user info trace */
     LOG_DEBUG_DEBUG,                        /* debug level 1 */
     LOG_DEBUG_DEBUG2,                       /* debug level 2 */
-    LOG_DEBUG_DEBUG3                        /* debug level 3 */
+    LOG_DEBUG_DEBUG3,                       /* debug level 3 */
+    LOG_DEBUG_DEBUG4                        /* debug level 3 */
 }  log_debug_t;
 
 /********************************************************************
@@ -120,6 +123,9 @@ extern void
 
 extern void 
     log_debug3 (const char *fstr, ...);
+
+extern void 
+    log_debug4 (const char *fstr, ...);
 
 extern void
     log_set_debug_level (log_debug_t dlevel);

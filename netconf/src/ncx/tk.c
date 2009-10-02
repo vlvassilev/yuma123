@@ -261,13 +261,13 @@ static tk_token_t *
     }
 
 #ifdef TK_DEBUG
-    log_debug3("\ntk: new token (%s) ", tk_get_token_name(ttyp));
-    if (LOGDEBUG3 && tval) {
+    log_debug4("\ntk: new token (%s) ", tk_get_token_name(ttyp));
+    if (LOGDEBUG4 && tval) {
         while (tlen--) {
-            log_debug3("%c", *tval++);
+            log_debug4("%c", *tval++);
         }
     } else {
-        log_debug3("%s", tk_get_token_sym(ttyp));
+        log_debug4("%s", tk_get_token_sym(ttyp));
     }
 #endif
             
@@ -307,13 +307,13 @@ static tk_token_t *
     }
 
 #ifdef TK_DEBUG
-    log_debug3("\ntk: new mtoken (%s) ", tk_get_token_name(ttyp));
-    if (LOGDEBUG3 && tval) {
+    log_debug4("\ntk: new mtoken (%s) ", tk_get_token_name(ttyp));
+    if (LOGDEBUG4 && tval) {
         while (tlen--) {
-            log_debug3("%c", *tval++);
+            log_debug4("%c", *tval++);
         }
     } else {
-        log_debug3("%s", tk_get_token_sym(ttyp));
+        log_debug4("%s", tk_get_token_sym(ttyp));
     }
 #endif
             
@@ -334,9 +334,9 @@ static void
     free_token (tk_token_t *tk)
 {
 #ifdef TK_DEBUG
-    log_debug3("\ntk: free_token: (%s)", tk_get_token_name(tk->typ));
+    log_debug4("\ntk: free_token: (%s)", tk_get_token_name(tk->typ));
     if (tk->val) {
-        log_debug3(" val=(%s) ", tk->val);
+        log_debug4(" val=(%s) ", tk->val);
     }
 #endif
 
@@ -388,9 +388,11 @@ static tk_token_t *
     }
 
 #ifdef TK_DEBUG
-    log_debug("  mod: ");
-    while (modlen--) {
-        log_debug("%c", *mod++);
+    if (LOGDEBUG3) {
+        log_debug3("  mod: ");
+        while (modlen--) {
+            log_debug3("%c", *mod++);
+        }
     }
 #endif
 

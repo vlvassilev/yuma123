@@ -179,11 +179,13 @@ extern obj_template_t *
 
 extern obj_template_t * 
     ncx_match_rpc (const ncx_module_t *mod,
-		   const xmlChar *rpcname);
+		   const xmlChar *rpcname,
+                   uint32 *retcount);
 
 extern obj_template_t * 
     ncx_match_any_rpc (const xmlChar *module,
-		       const xmlChar *rpcname);
+		       const xmlChar *rpcname,
+                       uint32 *retcount);
 
 extern obj_template_t *
     ncx_find_any_object (const xmlChar *objname);
@@ -1013,5 +1015,8 @@ extern void
 
 extern ncx_display_mode_t
     ncx_get_display_mode (void);
+
+extern const xmlChar *
+    ncx_get_confirm_event_str (ncx_confirm_event_t event);
 
 #endif	    /* _H_ncx */

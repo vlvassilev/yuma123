@@ -1637,7 +1637,8 @@ static status_t
                            commit_cb.cc_cancel_timeout);
             }
             save_nvstore = FALSE;
-            /* send_cc_extend_timer = TRUE; */
+            agt_sys_send_sysConfirmedCommit(scb,
+                                            NCX_CC_EVENT_EXTEND);
         } else {
             /* check same session that started cc */
             if (commit_cb.cc_ses_id != SES_MY_SID(scb)) {
@@ -1654,10 +1655,10 @@ static status_t
             if (res != NO_ERR) {
                 errdone = FALSE;
             }
+            agt_sys_send_sysConfirmedCommit(scb,
+                                            NCX_CC_EVENT_COMPLETE);
             commit_cb.cc_active = FALSE;
             commit_cb.cc_ses_id = 0;
-
-            /* send_cc_completed = TRUE; */
         }
     } else {
         /* check if a new confirmed commit is starting */
@@ -1682,7 +1683,8 @@ static status_t
                            "%u seconds",
                            commit_cb.cc_cancel_timeout);
             }
-            /* send_cc_started = TRUE; */
+            agt_sys_send_sysConfirmedCommit(scb,
+                                            NCX_CC_EVENT_START);
         } else {
             /* no confirmed commit is starting */
             save_nvstore = TRUE;
@@ -1690,8 +1692,7 @@ static status_t
     }
 
     /* make a backup of running to make sure
-     * that if this step fails, the MUST not change
-     * requirement for running can be always honored
+     * that if this step fails, running config MUST not change
      */ 
     if (commit_cb.cc_backup_source) {
         /* rewrite the existing backup file */
@@ -1706,6 +1707,16 @@ static status_t
              * hand off fname malloced memory here 
              */
             commit_cb.cc_backup_source = fname;
+        } else if (running->src_url) {
+            /* use the same path as the startup config file
+             * if it has already been set; it may be different
+             * each boot via the --startup CLI parameter
+             */
+            res = NO_ERR;
+            commit_cb.cc_backup_source = 
+                ncxmod_make_data_filespec_from_src(running->src_url,
+                                                   NCX_DEF_BACKUP_FILE,
+                                                   &res);
         } else {
             /* create a new backup file name
              * should really check the res code
@@ -3004,7 +3015,7 @@ void
         if (LOGDEBUG) {
             log_debug("\nConfirmed-commit timeout");
         }
-        agt_ncx_cancel_confirmed_commit();
+        agt_ncx_cancel_confirmed_commit(NULL, NCX_CC_EVENT_TIMEOUT);
     }
 
 } /* agt_ncx_check_cc_timeout */
@@ -3016,9 +3027,14 @@ void
 * Cancel the confirmed-commit in progress and rollback
 * to the backup-cfg.xml file
 *
+* INPUTS:
+*   scb == session control block making this change, may be NULL
+*   event == confirmEvent enumeration value to use
+*
 *********************************************************************/
 void
-    agt_ncx_cancel_confirmed_commit (void)
+    agt_ncx_cancel_confirmed_commit (ses_cb_t  *scb,
+                                     ncx_confirm_event_t event)
 {
     cfg_template_t  *running;
     status_t         res;
@@ -3042,6 +3058,9 @@ void
                   get_error_string(res));
 
     }
+
+    agt_sys_send_sysConfirmedCommit(scb, event);
+
     commit_cb.cc_active = FALSE;
     commit_cb.cc_ses_id = 0;
 

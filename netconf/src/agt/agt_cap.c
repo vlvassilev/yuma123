@@ -188,12 +188,12 @@ status_t
 		res = cap_add_stdval(newcaps, CAP_STDID_CANDIDATE);
 	    }
 
-#ifdef NOT_YET 
-	    res = cap_add_std(newmycaps, CAP_STDID_CONF_COMMIT);
-	    if (res == NO_ERR) {
-		res = cap_add_stdval(newcaps, CAP_STDID_CONF_COMMIT);
-	    }
-#endif
+            if (res == NO_ERR) {
+                res = cap_add_std(newmycaps, CAP_STDID_CONF_COMMIT);
+                if (res == NO_ERR) {
+                    res = cap_add_stdval(newcaps, CAP_STDID_CONF_COMMIT);
+                }
+            }
 	    break;
 	default:
 	    res = SET_ERROR(ERR_INTERNAL_VAL);

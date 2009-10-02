@@ -536,6 +536,40 @@ void
 
 
 /********************************************************************
+* FUNCTION log_debug4
+*
+*   Generate LOG_DEBUG_DEBUG4 log trace output
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   ... == any additional arguments for printf
+*
+*********************************************************************/
+void 
+    log_debug4 (const char *fstr, ...)
+{
+    va_list args;
+
+    if (log_get_debug_level() < LOG_DEBUG_DEBUG4) {
+	return;
+    }
+
+    va_start(args, fstr);
+
+    if (logfile) {
+	vfprintf(logfile, fstr, args);
+	fflush(logfile);
+    } else {
+	vprintf(fstr, args);
+	fflush(stdout);
+    }
+
+    va_end(args);
+
+}  /* log_debug4 */
+
+
+/********************************************************************
 * FUNCTION log_set_debug_level
 * 
 * Set the global debug filter threshold level
@@ -548,9 +582,9 @@ void
     log_set_debug_level (log_debug_t dlevel)
 {
 #ifdef DEBUG
-    if (dlevel > LOG_DEBUG_DEBUG3) {
+    if (dlevel > LOG_DEBUG_DEBUG4) {
 	SET_ERROR(ERR_INTERNAL_VAL);
-	dlevel = LOG_DEBUG_DEBUG3;
+	dlevel = LOG_DEBUG_DEBUG4;
     }
 #endif
 
@@ -617,6 +651,9 @@ log_debug_t
     } else if (!xml_strcmp((const xmlChar *)str,
 			   LOG_DEBUG_STR_DEBUG3)) {
 	return LOG_DEBUG_DEBUG3;
+    } else if (!xml_strcmp((const xmlChar *)str,
+			   LOG_DEBUG_STR_DEBUG4)) {
+	return LOG_DEBUG_DEBUG4;
     } else {
 	return LOG_DEBUG_NONE;
     }
@@ -654,6 +691,8 @@ const xmlChar *
 	return LOG_DEBUG_STR_DEBUG2;
     case LOG_DEBUG_DEBUG3:
 	return LOG_DEBUG_STR_DEBUG3;
+    case LOG_DEBUG_DEBUG4:
+	return LOG_DEBUG_STR_DEBUG4;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return LOG_DEBUG_STR_OFF;

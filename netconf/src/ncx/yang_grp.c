@@ -432,8 +432,8 @@ status_t
 		testtyp->grp = grp;
 	    }
 #ifdef YANG_GRP_DEBUG
-	    if (LOGDEBUG3) {
-		log_debug3("\nyang_grp: adding grouping (%s) to mod (%s)", 
+	    if (LOGDEBUG4) {
+		log_debug4("\nyang_grp: adding grouping (%s) to mod (%s)", 
 			   grp->name, 
 			   mod->name);
 	    }

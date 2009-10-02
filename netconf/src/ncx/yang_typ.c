@@ -3104,8 +3104,8 @@ static status_t
     }
 
 #ifdef YANG_TYP_DEBUG
-    if (LOGDEBUG3) {
-	log_debug3("\nyang_typ: resolve type '%s' (name %s) on line %u",
+    if (LOGDEBUG4) {
+	log_debug4("\nyang_typ: resolve type '%s' (name %s) on line %u",
 		   (typdef->typename) ? typdef->typename : NCX_EL_NONE,
 		   (name) ? name : NCX_EL_NONE,
 		   typdef->tkerr.linenum);
@@ -4023,8 +4023,8 @@ status_t
 	    typ_free_template(typ);
 	} else if (typeok) {
 #ifdef YANG_TYP_DEBUG
-	    if (LOGDEBUG3) {
-		log_debug3("\nyang_typ: adding type (%s) to mod (%s)", 
+	    if (LOGDEBUG4) {
+		log_debug4("\nyang_typ: adding type (%s) to mod (%s)", 
 			   typ->name, 
 			   mod->name);
 	    }

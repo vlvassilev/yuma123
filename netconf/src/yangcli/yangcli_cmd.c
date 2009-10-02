@@ -7143,13 +7143,13 @@ void *
 	       xmlChar *line,
 	       uint32 *len)
 {
-    void           *def;
+    void           *def, *firstmatch;
     xmlChar        *start, *p, *q, oldp, oldq;
     const xmlChar  *prefix, *defname, *modname;
     ncx_module_t   *mod;
     obj_template_t *obj;
     modptr_t       *modptr;
-    uint32          prelen;
+    uint32          prelen, tempcount, matchcount;
     xmlns_id_t      nsid;
     
     def = NULL;
@@ -7275,26 +7275,38 @@ void *
 	}
 
 	/* if not found, try a partial RPC command name */
-	if (!def && get_autocomp()) {
+	if (def == NULL && get_autocomp()) {
 	    switch (*dtyp) {
 	    case NCX_NT_NONE:
 	    case NCX_NT_OBJ:
+                matchcount = 0;
+                firstmatch = NULL;
+
 		if (use_servercb(server_cb)) {
 		    for (modptr = (modptr_t *)
 			     dlq_firstEntry(&server_cb->modptrQ);
-			 modptr != NULL && !def;
+			 modptr != NULL;
 			 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
+                        tempcount = 0;
 			def = ncx_match_any_rpc(modptr->mod->name, 
-						defname);
+						defname,
+                                                &tempcount);
 			if (def) {
-			    *dtyp = NCX_NT_OBJ;
+                            if (firstmatch == NULL) {
+                                firstmatch = def;
+                            }
+                            matchcount += tempcount;
 			}
 		    }
 		}
-		if (!def) {
-		    def = ncx_match_any_rpc(NULL, defname);
+
+		if (firstmatch == NULL) {
+                    tempcount = 0;
+		    def = ncx_match_any_rpc(NULL, defname, &tempcount);
 		    if (def) {
+                        matchcount += tempcount;
+
 			obj = (obj_template_t *)def;
 			if (obj_get_nsid(obj) == xmlns_nc_id()) {
 			    /* matched a NETCONF RPC and not connected;
@@ -7303,10 +7315,18 @@ void *
 			     */
 			    def = NULL;
 			} else {
-			    *dtyp = NCX_NT_OBJ;
+                            firstmatch = def;
 			}
 		    }
 		}
+
+                if (matchcount > 1) {
+                    log_error("\nError: Ambiguous partial command");
+                    def = NULL;
+                } else {
+                    def = firstmatch;
+                    *dtyp = NCX_NT_OBJ;
+                }
 		break;
 	    default:
 		;

@@ -455,8 +455,8 @@ static status_t
     if (res == NO_ERR) {
 
 #ifdef AGT_VAL_PARSE_DEBUG
-        if (LOGDEBUG3) {
-            log_debug3("\nparse_any: expecting any node type");
+        if (LOGDEBUG4) {
+            log_debug4("\nparse_any: expecting any node type");
             xml_dump_node(&nextnode);
         }
 #endif
@@ -506,8 +506,8 @@ static status_t
         res2 = get_xml_node(scb, msg, &nextnode, FALSE);
         if (res2 == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
-            if (LOGDEBUG3) {
-                log_debug3("\nparse_any: expecting end node for %s", 
+            if (LOGDEBUG4) {
+                log_debug4("\nparse_any: expecting end node for %s", 
                            startnode->qname);
                 xml_dump_node(&nextnode);
             }
@@ -609,8 +609,8 @@ static status_t
         res = get_xml_node(scb, msg, &nextnode, FALSE);
         if (res == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
-            if (LOGDEBUG3) {
-                log_debug3("\nparse_any: expecting start, empty, "
+            if (LOGDEBUG4) {
+                log_debug4("\nparse_any: expecting start, empty, "
                            "or end node");
                 xml_dump_node(&nextnode);
             }
@@ -705,8 +705,8 @@ static status_t
 
     if (res == NO_ERR && !empty) {
 #ifdef AGT_VAL_PARSE_DEBUG
-        if (LOGDEBUG3) {
-            log_debug3("\nparse_enum: expecting string node");
+        if (LOGDEBUG4) {
+            log_debug4("\nparse_enum: expecting string node");
             xml_dump_node(&valnode);
         }
 #endif
@@ -761,8 +761,8 @@ static status_t
             res2 = get_xml_node(scb, msg, &endnode, TRUE);
             if (res2 == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
-                if (LOGDEBUG3) {
-                    log_debug3("\nparse_enum: expecting end for %s", 
+                if (LOGDEBUG4) {
+                    log_debug4("\nparse_enum: expecting end for %s", 
                                startnode->qname);
                     xml_dump_node(&endnode);
                 }
@@ -870,8 +870,8 @@ static status_t
                 errdone = TRUE;
             } else {
 #ifdef AGT_VAL_PARSE_DEBUG
-                if (LOGDEBUG3) {
-                    log_debug3("\nparse_empty: expecting end for %s", 
+                if (LOGDEBUG4) {
+                    log_debug4("\nparse_empty: expecting end for %s", 
                                startnode->qname);
                     xml_dump_node(&endnode);
                 }
@@ -888,8 +888,8 @@ static status_t
                         res = get_xml_node(scb, msg, &endnode, TRUE);
                         if (res == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
-                            if (LOGDEBUG3) {
-                                log_debug3("\nparse_empty: expecting "
+                            if (LOGDEBUG4) {
+                                log_debug4("\nparse_empty: expecting "
                                            "end for %s", 
                                            startnode->qname);
                                 xml_dump_node(&endnode);
@@ -1005,8 +1005,8 @@ static status_t
 
     if (res == NO_ERR && !empty) {
 #ifdef AGT_VAL_PARSE_DEBUG
-        if (LOGDEBUG3) {
-            log_debug3("\nparse_boolean: expecting string node.");
+        if (LOGDEBUG4) {
+            log_debug4("\nparse_boolean: expecting string node.");
             xml_dump_node(&valnode);
         }
 #endif
@@ -1037,8 +1037,8 @@ static status_t
         res2 = get_xml_node(scb, msg, &endnode, TRUE);
         if (res2 == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
-            if (LOGDEBUG3) {
-                log_debug3("\nparse_boolean: expecting end for %s", 
+            if (LOGDEBUG4) {
+                log_debug4("\nparse_boolean: expecting end for %s", 
                            startnode->qname);
                 xml_dump_node(&endnode);
             }
@@ -1173,8 +1173,8 @@ static status_t
     }
 
 #ifdef AGT_VAL_PARSE_DEBUG
-    if (LOGDEBUG3) {
-        log_debug3("\nparse_num: expecting string node.");
+    if (LOGDEBUG4) {
+        log_debug4("\nparse_num: expecting string node.");
         xml_dump_node(&valnode);
     }
 #endif
@@ -1244,8 +1244,8 @@ static status_t
             res2 = get_xml_node(scb, msg, &endnode, TRUE);
             if (res2 == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
-                if (LOGDEBUG3) {
-                    log_debug3("\nparse_num: expecting end for %s", 
+                if (LOGDEBUG4) {
+                    log_debug4("\nparse_num: expecting end for %s", 
                                startnode->qname);
                     xml_dump_node(&endnode);
                 }
@@ -1435,8 +1435,8 @@ static status_t
     }
 
 #ifdef AGT_VAL_PARSE_DEBUG
-    if (LOGDEBUG3) {
-        log_debug3("\nparse_string: expecting string node.");
+    if (LOGDEBUG4) {
+        log_debug4("\nparse_string: expecting string node.");
         xml_dump_node(&valnode);
     }
 #endif
@@ -1565,8 +1565,8 @@ static status_t
     res2 = get_xml_node(scb, msg, &endnode, TRUE);
     if (res2 == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
-        if (LOGDEBUG3) {
-            log_debug3("\nparse_string: expecting end for %s", 
+        if (LOGDEBUG4) {
+            log_debug4("\nparse_string: expecting end for %s", 
                        startnode->qname);
             xml_dump_node(&endnode);
         }
@@ -1685,8 +1685,8 @@ static status_t
 
     if (res == NO_ERR && !empty) {
 #ifdef AGT_VAL_PARSE_DEBUG
-        if (LOGDEBUG3) {
-            log_debug3("\nparse_idref: expecting string node");
+        if (LOGDEBUG4) {
+            log_debug4("\nparse_idref: expecting string node");
             xml_dump_node(&valnode);
         }
 #endif
@@ -1752,8 +1752,8 @@ static status_t
             res2 = get_xml_node(scb, msg, &endnode, TRUE);
             if (res2 == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
-                if (LOGDEBUG3) {
-                    log_debug3("\nparse_idref: expecting end for %s", 
+                if (LOGDEBUG4) {
+                    log_debug4("\nparse_idref: expecting end for %s", 
                                startnode->qname);
                     xml_dump_node(&endnode);
                 }
@@ -1877,8 +1877,8 @@ static status_t
 
     if (res == NO_ERR && !empty) {
 #ifdef AGT_VAL_PARSE_DEBUG
-        if (LOGDEBUG3) {
-            log_debug3("\nparse_union: expecting string or number node.");
+        if (LOGDEBUG4) {
+            log_debug4("\nparse_union: expecting string or number node.");
             xml_dump_node(&valnode);
         }
 #endif
@@ -1937,8 +1937,8 @@ static status_t
             res2 = get_xml_node(scb, msg, &endnode, TRUE);
             if (res2 == NO_ERR) {
 #ifdef AGT_VAL_PARSE_DEBUG
-                if (LOGDEBUG3) {
-                    log_debug3("\nparse_union: expecting end for %s", 
+                if (LOGDEBUG4) {
+                    log_debug4("\nparse_union: expecting end for %s", 
                                startnode->qname);
                     xml_dump_node(&endnode);
                 }
@@ -2119,8 +2119,8 @@ static status_t
             done = TRUE;
         } else {
 #ifdef AGT_VAL_PARSE_DEBUG
-            if (LOGDEBUG3) {
-                log_debug3("\nparse_complex: expecting start-child "
+            if (LOGDEBUG4) {
+                log_debug4("\nparse_complex: expecting start-child "
                            "or end node.");
                 xml_dump_node(&chnode);
             }

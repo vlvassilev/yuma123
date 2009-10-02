@@ -1861,34 +1861,49 @@ obj_template_t *
 * INPUTS:
 *   mod == ncx_module to check
 *   rpcname == RPC name to match
+*   retcount == address of return match count
+*
+* OUTPUTS:
+*   *retcount == number of matches found
+*
 * RETURNS:
 *  pointer to struct if present, NULL otherwise
 *********************************************************************/
 obj_template_t *
     ncx_match_rpc (const ncx_module_t *mod,
-		   const xmlChar *rpcname)
+		   const xmlChar *rpcname,
+                   uint32 *retcount)
 {
-    obj_template_t *rpc;
-    uint32          len;
+    obj_template_t *rpc, *firstfound;
+    uint32          len, cnt;
 
 #ifdef DEBUG
-    if (!mod || !rpcname) {
+    if (!mod || !rpcname || !retcount) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
 #endif
 
+    *retcount = 0;
+    cnt = 0;
+    firstfound = NULL;
     len = xml_strlen(rpcname);
+
     for (rpc = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
          rpc != NULL;
          rpc = (obj_template_t *)dlq_nextEntry(rpc)) {
 	if (rpc->objtype == OBJ_TYP_RPC) {
 	    if (!xml_strncmp(obj_get_name(rpc), rpcname, len)) {
-		return rpc;
+                if (firstfound == NULL) {
+                    firstfound = rpc;
+                }
+                cnt++;
 	    }
         }
     }
-    return NULL;
+
+    *retcount = cnt;
+    return firstfound;
 
 }   /* ncx_match_rpc */
 
@@ -1902,41 +1917,57 @@ obj_template_t *
 * INPUTS:
 *   module == module name to check (NULL == check all)
 *   rpcname == RPC name to match
+*   retcount == address of return count of matches
+*
+* OUTPUTS:
+*   *retcount == number of matches found
+*
 * RETURNS:
 *  pointer to struct if present, NULL otherwise
 *********************************************************************/
 obj_template_t *
     ncx_match_any_rpc (const xmlChar *module,
-		       const xmlChar *rpcname)
+		       const xmlChar *rpcname,
+                       uint32 *retcount)
 {
-    obj_template_t *rpc;
+    obj_template_t *rpc, *firstfound;
     ncx_module_t   *mod;
+    uint32          cnt, tempcnt;
 
 #ifdef DEBUG
-    if (!rpcname) {
+    if (!rpcname || !retcount) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
 #endif
 
-    rpc = NULL;
+    firstfound = NULL;
+    *retcount = 0;
+
     if (module) {
 	mod = ncx_find_module(module, NULL);
 	if (mod) {
-	    rpc = ncx_match_rpc(mod, rpcname);
+	    firstfound = ncx_match_rpc(mod, rpcname, retcount);
 	}
     } else {
+        cnt = 0;
 	for (mod = ncx_get_first_module();
 	     mod != NULL;
 	     mod =  ncx_get_next_module(mod)) {
 
-	    rpc = ncx_match_rpc(mod, rpcname);
+            tempcnt = 0;
+	    rpc = ncx_match_rpc(mod, rpcname, &tempcnt);
 	    if (rpc) {
-		return rpc;
+                if (firstfound == NULL) {
+                    firstfound = rpc;
+                }
+                cnt += tempcnt;
 	    }
 	}
+        *retcount = cnt;
     }
-    return rpc;
+
+    return firstfound;
 
 }   /* ncx_match_any_rpc */
 
@@ -11444,6 +11475,41 @@ ncx_display_mode_t
     return display_mode;
 
 }  /* ncx_get_display_mode */
+
+
+/********************************************************************
+* FUNCTION ncx_get_confirm_event_str
+* 
+* Get the string for the specified enum value
+* 
+* INPUT:
+*   event == enum confirm event value to convert
+*
+* RETURNS:
+*   string value for the enum
+*   NULL if none found
+*********************************************************************/
+const xmlChar *
+    ncx_get_confirm_event_str (ncx_confirm_event_t event)
+{
+    switch (event) {
+    case NCX_CC_EVENT_NONE:
+        return NULL;
+    case NCX_CC_EVENT_START:
+        return NCX_EL_START;
+    case NCX_CC_EVENT_CANCEL:
+        return NCX_EL_CANCEL;
+    case NCX_CC_EVENT_TIMEOUT:
+        return NCX_EL_TIMEOUT;
+    case NCX_CC_EVENT_EXTEND:
+        return NCX_EL_EXTEND;
+    case NCX_CC_EVENT_COMPLETE:
+        return NCX_EL_COMPLETE;
+    default:
+        return NULL;
+    }
+
+}  /* ncx_get_confirm_event_str */
 
 
 /* END file ncx.c */

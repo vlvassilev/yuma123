@@ -876,7 +876,7 @@ void
     }
 
     if (agt_ncx_cc_active() && agt_ncx_cc_ses_id() == sid) {
-        agt_ncx_cancel_confirmed_commit();
+        agt_ncx_cancel_confirmed_commit(scb, NCX_CC_EVENT_CANCEL);
     }
 
     agt_sys_send_sysSessionEnd(scb,

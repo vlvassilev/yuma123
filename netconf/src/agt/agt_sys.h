@@ -96,4 +96,8 @@ extern void
                                       boolean is_add,
                                       const xmlChar *capstr);
 
+extern void
+    agt_sys_send_sysConfirmedCommit (const ses_cb_t *scb,
+                                     ncx_confirm_event_t event);
+
 #endif            /* _H_agt_sys */

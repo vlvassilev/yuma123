@@ -44,6 +44,11 @@ leaf /sysSessionEnd/userName
 leaf /sysSessionEnd/sessionId
 leaf /sysSessionEnd/remoteHost
 leaf /sysSessionEnd/terminationReason
+notification /sysConfirmedCommit
+leaf /sysConfirmedCommit/userName
+leaf /sysConfirmedCommit/sessionId
+leaf /sysConfirmedCommit/remoteHost
+leaf /sysConfirmedCommit/confirmEvent
 rpc /set-log-level
 leaf rpc/input/log-level
 
@@ -196,6 +201,7 @@ date         init     comment
 #define system_N_sysCapabilityChange (const xmlChar *)"sysCapabilityChange"
 #define system_N_sysSessionStart (const xmlChar *)"sysSessionStart"
 #define system_N_sysSessionEnd (const xmlChar *)"sysSessionEnd"
+#define system_N_sysConfirmedCommit (const xmlChar *)"sysConfirmedCommit"
 
 
 #define system_N_userName (const xmlChar *)"userName"
@@ -204,6 +210,8 @@ date         init     comment
 #define system_N_killedBy (const xmlChar *)"killedBy"
 #define system_N_terminationReason (const xmlChar *)\
     "terminationReason"
+
+#define system_N_confirmEvent (const xmlChar *)"confirmEvent"
 
 #define system_N_target (const xmlChar *)"target"
 #define system_N_operation (const xmlChar *)"operation"
@@ -250,6 +258,7 @@ static obj_template_t *sysConfigChangeobj;
 static obj_template_t *sysCapabilityChangeobj;
 static obj_template_t *sysSessionStartobj;
 static obj_template_t *sysSessionEndobj;
+static obj_template_t *sysConfirmedCommitobj;
 
 
 /********************************************************************
@@ -562,6 +571,7 @@ static void
     sysCapabilityChangeobj = NULL;
     sysSessionStartobj = NULL;
     sysSessionEndobj = NULL;
+    sysConfirmedCommitobj = NULL;
 
 } /* init_static_sys_vars */
 
@@ -649,6 +659,13 @@ status_t
 	ncx_find_object(sysmod,
 			system_N_sysSessionEnd);
     if (!sysSessionEndobj) {
+	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    sysConfirmedCommitobj = 
+	ncx_find_object(sysmod,
+			system_N_sysConfirmedCommit);
+    if (!sysConfirmedCommitobj) {
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
@@ -1019,6 +1036,7 @@ void
 } /* agt_sys_send_sysSessionEnd */
 
 
+
 /********************************************************************
 * FUNCTION agt_sys_send_sysConfigChange
 *
@@ -1237,6 +1255,72 @@ void
     agt_not_queue_notification(not);
 
 } /* agt_sys_send_sysCapabilityChange */
+
+
+/********************************************************************
+* FUNCTION agt_sys_send_sysConfirmedCommit
+*
+* Queue the <sysConfirmedCommit> notification
+*
+* INPUTS:
+*   scb == session control block to use for payload values
+*   event == enum for the confirmEvent leaf
+*
+* OUTPUTS:
+*   notification generated and added to notificationQ
+*
+*********************************************************************/
+void
+    agt_sys_send_sysConfirmedCommit (const ses_cb_t *scb,
+                                     ncx_confirm_event_t event)
+{
+    agt_not_msg_t         *not;
+    val_value_t           *leafval;
+    const xmlChar         *eventstr;
+    status_t               res;
+
+    res = NO_ERR;
+
+    eventstr = ncx_get_confirm_event_str(event);
+
+    if (!eventstr) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+	return;
+    }
+
+    if (LOGDEBUG) {
+	log_debug("\nagt_sys: generating <sysConfirmedCommit> "
+		  "notification (%s)",
+                  eventstr);
+    }
+
+    not = agt_not_new_notification(sysConfirmedCommitobj);
+    if (!not) {
+	log_error("\nError: malloc failed; cannot "
+		  "send <sysConfirmedCommit>");
+	return;
+    }
+
+    if (scb) {
+        add_common_session_parms(scb, not);
+    }
+
+    /* add sysConfirmedCommit/confirmEvent */
+    leafval = agt_make_leaf(sysConfirmedCommitobj,
+			    system_N_confirmEvent,
+			    eventstr,
+			    &res);
+    if (leafval) {
+	agt_not_add_to_payload(not, leafval);
+    } else {
+	log_error("\nError: cannot make payload leaf (%s)",
+		  get_error_string(res));
+    }
+
+    agt_not_queue_notification(not);
+
+} /* agt_sys_send_sysConfirmedCommit */
+
 
 
 /* END file agt_sys.c */

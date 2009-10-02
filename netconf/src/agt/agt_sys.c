@@ -8,6 +8,7 @@ leaf /system/sysName
 leaf /system/sysCurrentDateTime
 leaf /system/sysBootDateTime
 leaf /system/sysLogLevel
+leaf /system/sysNetconfServerId
 notification /sysStartup
 leaf /sysStartup/startupSource
 list /sysStartup/bootError
@@ -195,6 +196,7 @@ date         init     comment
 #define system_N_sysCurrentDateTime (const xmlChar *)"sysCurrentDateTime"
 #define system_N_sysBootDateTime (const xmlChar *)"sysBootDateTime"
 #define system_N_sysLogLevel (const xmlChar *)"sysLogLevel"
+#define system_N_sysNetconfServerId (const xmlChar *)"sysNetconfServerId"
 
 #define system_N_sysStartup (const xmlChar *)"sysStartup"
 #define system_N_sysConfigChange (const xmlChar *)"sysConfigChange"
@@ -506,7 +508,8 @@ static void
 	if (leafval) {
 	    agt_not_add_to_payload(not, leafval);
 	} else {
-	    log_error("\nError: cannot make payload leaf (%s)",
+	    log_error("\nError: cannot make payload leaf <%s> (%s)",
+                      system_N_userName,
 		      get_error_string(res));
 	}
     }
@@ -532,8 +535,9 @@ static void
     if (leafval) {
 	agt_not_add_to_payload(not, leafval);
     } else {
-	log_error("\nError: cannot make payload leaf "
+	log_error("\nError: cannot make payload leaf <%s> "
                   "for session %u (%s)",
+                  system_N_sessionId,
                   use_sid,
 		  get_error_string(res));
     }
@@ -547,7 +551,8 @@ static void
 	if (leafval) {
 	    agt_not_add_to_payload(not, leafval);
 	} else {
-	    log_error("\nError: cannot make payload leaf (%s)",
+	    log_error("\nError: cannot make payload leaf <%s> (%s)",
+                      system_N_remoteHost,
 		      get_error_string(res));
 	}
     }
@@ -694,7 +699,7 @@ status_t
     const xmlChar         *myhostname;
     obj_template_t        *unameobj;
     status_t               res;
-    xmlChar                tstampbuff[TSTAMP_MIN_SIZE];
+    xmlChar               *buffer, *p, tstampbuff[TSTAMP_MIN_SIZE];
     struct utsname         utsbuff;
     int                    retval;
 
@@ -775,6 +780,33 @@ status_t
     } else {
         return res;
     }
+
+
+    /* add /system/sysNetconfServerId */
+    buffer = m__getMem(256);
+    if (buffer == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+    p = buffer;
+    p += xml_strcpy(p, (const xmlChar *)"netconfd ");
+
+    res = ncx_get_version(p, 247);
+    if (res == NO_ERR) {
+        childval = agt_make_leaf(systemobj,
+                                 system_N_sysNetconfServerId,
+                                 buffer,
+                                 &res);
+        m__free(buffer);
+        if (childval) {
+            val_add_child(childval, topval);
+        } else {
+            return res;
+        }
+    } else {
+        m__free(buffer);
+        log_error("\nError: could not get netconfd version");
+    }
+    buffer = NULL;
 
     /* get the system information */
     memset(&utsbuff, 0x0, sizeof(utsbuff));

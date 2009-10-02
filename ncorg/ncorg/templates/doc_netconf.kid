@@ -1122,7 +1122,7 @@
 	  Defines an agent monitoring data model and schema retrieval
 	  mechanism for the NETCONF protocol.<br/><br/>
 	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-monitoring-07.txt">
+	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-monitoring-08.txt">
 	    NETCONF Monitoring Schema
 	  </a>
 	</p>

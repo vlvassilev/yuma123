@@ -115,13 +115,13 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
     <div id="footer">
       <hr />
       <p>
-	YangTools 0.9.7, Copyright &#169; 2008, 2009, Andy Bierman
+	YangTools 0.9.7, Copyright &#169; 2008, 2009, Netconf Central, Inc.
       </p>
       <p py:if="copyright">
 	TurboGears is Copyright &#169; 2007, Kevin Dangoor
       </p>
       <p py:if="copyright">
-	Last updated: 2009-08-16
+	Last updated: 2009-10-02
       </p>
 
     </div>

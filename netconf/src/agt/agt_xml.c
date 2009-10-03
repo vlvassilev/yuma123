@@ -85,10 +85,6 @@ date         init     comment
 #define AGT_XML_DEBUG  1
 #endif
 
-#define XML_READER_OPTIONS    XML_PARSE_RECOVER+XML_PARSE_NOERROR+\
-	XML_PARSE_NOWARNING+XML_PARSE_NOBLANKS+XML_PARSE_NONET
-
-#define XML_SES_URL "netconf://pdu"
 
 /********************************************************************
 *								    *

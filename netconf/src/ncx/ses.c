@@ -882,11 +882,11 @@ int
 		 char *buffer,
 		 int len)
 {
-    ses_cb_t    *scb;
-    ses_msg_t   *msg;
-    ses_msg_buff_t  *buff, *buff2;
-    int          retlen;
-    boolean      done, firstbuff;
+    ses_cb_t         *scb;
+    ses_msg_t        *msg;
+    ses_msg_buff_t   *buff, *buff2;
+    int               retlen;
+    boolean           done, firstbuff;
 
     if (len == 0) {
         return 0;
@@ -904,6 +904,7 @@ int
 
     firstbuff = FALSE;
     buff = msg->curbuff;
+    retlen = 0;
 
     /* check if this is the first read */
     if (!buff) {
@@ -937,12 +938,22 @@ int
      * none was sent by the NETCONF peer.
      * Only the first 0xa char seems to matter
      * Trailing newlines do not seem to affect the problem
+     *
+     * Also, the first line needs to be the <?xml ... ?>
+     * directive, or the parser refuses to use the buffer
+     *
+     * 
      */
-    if (buff->buffpos == 0 && firstbuff && buff->buff[0] != '\n') {
-        buffer[0] = '\n';
-        retlen = 1;
-    } else {
-        retlen = 0;
+    if (buff->buffpos == 0 && firstbuff) {
+        if (len == 4) {
+            strcpy(buffer, "\n<?x");
+            return 4;
+        }
+
+        if (buff->buff[0] != '\n') {
+            buffer[0] = '\n';
+            retlen = 1;
+        }
     }
 
     /* start transferring bytes to the return buffer */
@@ -971,6 +982,7 @@ int
 	}
     }
 
+#if 0
     /* this hack is needed to reset the read buffer
      * after the newReaderForIO function is called
      * which reads 4 bytes and corruptsthe input stream
@@ -982,6 +994,7 @@ int
         (buff->buffpos == 3 || buff->buffpos == 4)) {
 	buff->buffpos = 0;
     }
+#endif
 
     return retlen;
 

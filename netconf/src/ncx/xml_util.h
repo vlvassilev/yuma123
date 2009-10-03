@@ -94,6 +94,13 @@ date	     init     comment
 #define XML_START_FILMSG ((const xmlChar *)\
 			  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
 
+
+#define XML_READER_OPTIONS    XML_PARSE_RECOVER+XML_PARSE_NOERROR+\
+    XML_PARSE_NOWARNING+XML_PARSE_NOBLANKS+XML_PARSE_NONET+       \
+    XML_PARSE_XINCLUDE
+
+#define XML_SES_URL "netconf://pdu"
+
 /********************************************************************
 *								    *
 *			     T Y P E S				    *

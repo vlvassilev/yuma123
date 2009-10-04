@@ -91,6 +91,8 @@ date	     init     comment
 #define XML_START_MSG ((const xmlChar *)\
 		       "<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
 
+#define XML_START_MSG_SIZE   38
+
 #define XML_START_FILMSG ((const xmlChar *)\
 			  "<?xml version=\"1.0\" encoding=\"UTF-8\"?>")
 

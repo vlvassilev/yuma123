@@ -886,7 +886,7 @@ int
     ses_msg_t        *msg;
     ses_msg_buff_t   *buff, *buff2;
     int               retlen;
-    boolean           done, firstbuff;
+    boolean           done, firstbuff, neednewline, needprolog;
 
     if (len == 0) {
         return 0;
@@ -905,6 +905,8 @@ int
     firstbuff = FALSE;
     buff = msg->curbuff;
     retlen = 0;
+    neednewline = FALSE;
+    needprolog = FALSE;
 
     /* check if this is the first read */
     if (!buff) {
@@ -940,9 +942,14 @@ int
      * Trailing newlines do not seem to affect the problem
      *
      * Also, the first line needs to be the <?xml ... ?>
-     * directive, or the parser refuses to use the buffer
+     * prolog directive, or the libxml2 parser refuses
+     * to use the incoming message.  
+     * It quits and returns EOF instead.
      *
-     * 
+     * the xmlTextReader parser will request 4 bytes
+     * to test the message and a buffer size of 4096
+     * if the request is for real.  These constants
+     * are not hard-wired into this code, though.
      */
     if (buff->buffpos == 0 && firstbuff) {
         if (len == 4) {
@@ -950,9 +957,48 @@ int
             return 4;
         }
 
-        if (buff->buff[0] != '\n') {
+        if (buff->bufflen <  7) {
+            /* just deliver what's here 
+             * it will probably be an error
+             */
+            ;
+        } else if (!strncmp((const char *)buff->buff, "\n<?xml", 6)) {
+            /* expected string is present */
+            ;
+        } else if (!strncmp((const char *)buff->buff, "<?xml", 5)) {
+            /* expected string except a newline needs
+             * to be inserted first to make libxml2 happy
+             */
+            neednewline = TRUE;
+        } else if (buff->buff[0] != '\n') {
+            neednewline = TRUE;
+            needprolog = TRUE;
+        } else {
+            needprolog = TRUE;
+        }
+
+        if (neednewline || needprolog) {
             buffer[0] = '\n';
-            retlen = 1;
+            retlen++;
+        }
+
+        if (needprolog) {
+            /* expected string sequence is not present */
+            if (len < XML_START_MSG_SIZE+3) {
+                /* just copy what is there 
+                 * it will be an error
+                 */
+                ;
+            } else {
+                /* copy the prolog string inline
+                 * to make libxml2 happy
+                 */
+                strcpy(&buffer[retlen], (const char *)XML_START_MSG);
+                retlen += XML_START_MSG_SIZE;
+                if (neednewline) {
+                    buffer[retlen++] = '\n';
+                }
+            }
         }
     }
 
@@ -981,20 +1027,6 @@ int
 	    }
 	}
     }
-
-#if 0
-    /* this hack is needed to reset the read buffer
-     * after the newReaderForIO function is called
-     * which reads 4 bytes and corruptsthe input stream
-     * for the normal parse mode read functions.
-     * Resetting the buffer back to the start seems to
-     * fix the problem
-     */
-    if (len == 4 && firstbuff &&
-        (buff->buffpos == 3 || buff->buffpos == 4)) {
-	buff->buffpos = 0;
-    }
-#endif
 
     return retlen;
 

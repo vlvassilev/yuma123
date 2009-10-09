@@ -616,7 +616,7 @@ static status_t
 *   scb == current session in progress
 *
 * OUTPUTS:
-*   $HOME/.yangtools/tmp/<progdir>/<sesdir>/ filled with
+*   $HOME/.yuma/tmp/<progdir>/<sesdir>/ filled with
 *   the the specified YANG files that are already available
 *   on this system.
 *   
@@ -701,7 +701,7 @@ status_t
 *   scb == session control block to use
 *
 * OUTPUTS:
-*   $HOME/.yangtools/tmp/<progdir>/<sesdir>/ filled with
+*   $HOME/.yuma/tmp/<progdir>/<sesdir>/ filled with
 *   the the specified YANG files that are ertrieved from
 *   the device with <get-schema>
 *   
@@ -769,7 +769,7 @@ status_t
 *             == FALSE if no <rpc-error> elements detected
 *
 * OUTPUTS:
-*   $HOME/.yangtools/tmp/<progdir>/<sesdir>/ filled with
+*   $HOME/.yuma/tmp/<progdir>/<sesdir>/ filled with
 *   the the specified YANG files that was retrieved from
 *   the device with <get-schema>
 *
@@ -909,7 +909,7 @@ status_t
 *   scb == session control block to use
 *
 * OUTPUTS:
-*   $HOME/.yangtools/tmp/<progdir>/<sesdir>/ filled with
+*   $HOME/.yuma/tmp/<progdir>/<sesdir>/ filled with
 *   the the specified YANG files that are already available
 *   on this system.
 *   

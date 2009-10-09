@@ -2260,7 +2260,7 @@ static void
 *
 * If the device advertises an incomplete set of modules,
 * then searches for any missing imports will be done
-* using the normal search path, including YANG_MODPATH.
+* using the normal search path, including YUMA_MODPATH.
 *
 * INPUTS:
 *  server_cb == server control block to use
@@ -3075,13 +3075,13 @@ static status_t
     }
 #endif
 
-    /* make sure the yangtools temp directory
+    /* make sure the Yuma temp directory
      * exists for saving per session data
      */
     res = ncxmod_setup_tempdir();
     if (res != NO_ERR) {
         log_error("\nError: could not setup temp dir '%s'",
-                  NCXMOD_YANGTOOLS_TEMPDIR);
+                  NCXMOD_YUMA_TEMPDIR);
         return res;
     }
 

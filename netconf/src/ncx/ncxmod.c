@@ -110,9 +110,9 @@ typedef enum search_type_t_ {
 *********************************************************************/
 static boolean ncxmod_init_done = FALSE;
 
-static const xmlChar *ncxmod_yang_home;
+static const xmlChar *ncxmod_yuma_home;
 
-static xmlChar *ncxmod_yang_home_cli;
+static xmlChar *ncxmod_yuma_home_cli;
 
 static const xmlChar *ncxmod_env_install;
 
@@ -1444,11 +1444,11 @@ static status_t
 * Module Search order:
 *   1) filespec == try that only and exit
 *   2) current directory
-*   3) YANG_MODPATH environment var (or set by modpath CLI var)
+*   3) YUMA_MODPATH environment var (or set by modpath CLI var)
 *   4) HOME/modules directory
-*   5) YANG_HOME/modules directory
-*   6) YANG_INSTALL/modules directory OR
-*   7) default install module location, which is '/usr/share/yang/modules'
+*   5) YUMA_HOME/modules directory
+*   6) YUMA_INSTALL/modules directory OR
+*   7) default install module location, which is '/usr/share/yuma/modules'
 *
 * INPUTS:
 *   modname == module name with no path prefix or file extension
@@ -1631,7 +1631,7 @@ static status_t
 			 ptyp);
     }
 
-    /* 4) try YANG_MODPATH environment variable if set */
+    /* 4) try YUMA_MODPATH environment variable if set */
     if (!done && ncxmod_mod_path) {
 	res = check_module_pathlist(ncxmod_mod_path,
 				    buff,
@@ -1658,9 +1658,9 @@ static status_t
 				&done);
     }
 
-    /* 6) YANG_HOME/modules directory */
-    if (!done && ncxmod_yang_home) {
-	res = check_module_path(ncxmod_yang_home,
+    /* 6) YUMA_HOME/modules directory */
+    if (!done && ncxmod_yuma_home) {
+	res = check_module_path(ncxmod_yuma_home,
 				buff,
 				bufflen,
 				modname, 
@@ -1672,7 +1672,7 @@ static status_t
 				&done);
     }
 
-    /* 7) YANG_INSTALL/modules directory or default install path
+    /* 7) YUMA_INSTALL/modules directory or default install path
      *    If this envvar is set then the default install path will not
      *    be tried
      */
@@ -2160,12 +2160,12 @@ void
     }
 #endif
 
-    /* try to get the YANG_HOME environment variable */
-    ncxmod_yang_home = (const xmlChar *)getenv(NCXMOD_HOME);
+    /* try to get the YUMA_HOME environment variable */
+    ncxmod_yuma_home = (const xmlChar *)getenv(NCXMOD_HOME);
 
-    ncxmod_yang_home_cli = NULL;
+    ncxmod_yuma_home_cli = NULL;
 
-    /* try to get the YANG_INSTALL environment variable */
+    /* try to get the YUMA_INSTALL environment variable */
     ncxmod_env_install = (const xmlChar *)getenv(NCXMOD_INSTALL);
 
     /* try to get the user HOME environment variable */
@@ -2211,15 +2211,15 @@ void
     }
 #endif
      
-    ncxmod_yang_home = NULL;
+    ncxmod_yuma_home = NULL;
     ncxmod_env_install = NULL;
     ncxmod_env_userhome = NULL;
     ncxmod_mod_path = NULL;
     ncxmod_data_path = NULL;
     ncxmod_run_path = NULL;
 
-    if (ncxmod_yang_home_cli) {
-        m__free(ncxmod_yang_home_cli);
+    if (ncxmod_yuma_home_cli) {
+        m__free(ncxmod_yuma_home_cli);
     }
 
     if (ncxmod_mod_path_cli) {
@@ -2247,9 +2247,9 @@ void
 *
 * Module Search order:
 *
-* 1) YANG_MODPATH environment var (or set by modpath CLI var)
+* 1) YUMA_MODPATH environment var (or set by modpath CLI var)
 * 2) current dir or absolute path
-* 3) YANG_HOME/modules directory
+* 3) YUMA_HOME/modules directory
 * 4) HOME/modules directory
 *
 * INPUTS:
@@ -2328,9 +2328,9 @@ status_t
 *
 * Module Search order:
 *
-* 1) YANG_MODPATH environment var (or set by modpath CLI var)
+* 1) YUMA_MODPATH environment var (or set by modpath CLI var)
 * 2) current dir or absolute path
-* 3) YANG_HOME/modules directory
+* 3) YUMA_HOME/modules directory
 * 4) HOME/modules directory
 *
 * INPUTS:
@@ -2408,9 +2408,9 @@ status_t
 *
 * Module Search order:
 *
-* 1) YANG_MODPATH environment var (or set by modpath CLI var)
+* 1) YUMA_MODPATH environment var (or set by modpath CLI var)
 * 2) current dir or absolute path
-* 3) YANG_HOME/modules directory
+* 3) YUMA_HOME/modules directory
 * 4) HOME/modules directory
 *
 * INPUTS:
@@ -2549,9 +2549,9 @@ ncxmod_search_result_t *
 *
 * Module Search order:
 *
-* 1) YANG_MODPATH environment var (or set by modpath CLI var)
+* 1) YUMA_MODPATH environment var (or set by modpath CLI var)
 * 2) current dir or absolute path
-* 3) YANG_HOME/modules directory
+* 3) YUMA_HOME/modules directory
 * 4) HOME/modules directory
 *
 * INPUTS:
@@ -2644,9 +2644,9 @@ status_t
 *
 * Module Search order:
 *
-* 1) YANG_MODPATH environment var (or set by modpath CLI var)
+* 1) YUMA_MODPATH environment var (or set by modpath CLI var)
 * 2) current dir or absolute path
-* 3) YANG_HOME/modules directory
+* 3) YUMA_HOME/modules directory
 * 4) HOME/modules directory
 *
 * INPUTS:
@@ -2781,7 +2781,7 @@ yang_pcb_t *
 *   with_submods == TRUE if YANG_PT_TOP mode should skip submodules
 *                == FALSE if top-level mode skip process sub-modules 
 *   modpath == module path to override the modpath CLI var or
-*              the YANG_MODPATH env var
+*              the YUMA_MODPATH env var
 *   savedevQ == Q of ncx_save_deviations_t to use
 *   res == address of return status
 *
@@ -2843,9 +2843,9 @@ yang_pcb_t *
 * Search order:
 *
 * 1) current directory or absolute path
-* 2) YANG_DATAPATH environment var (or set by datapath CLI var)
+* 2) YUMA_DATAPATH environment var (or set by datapath CLI var)
 * 3) HOME/data directory
-* 4) YANG_HOME/data directory
+* 4) YUMA_HOME/data directory
 *
 * INPUTS:
 *   fname == file name with extension
@@ -2930,11 +2930,11 @@ xmlChar *
         }
     }
 
-    /* 4) YANG_HOME/data directory */
-    if (ncxmod_yang_home) {
+    /* 4) YUMA_HOME/data directory */
+    if (ncxmod_yuma_home) {
         if (test_file(buff, 
 		      bufflen, 
-		      ncxmod_yang_home,
+		      ncxmod_yuma_home,
 		      NCXMOD_DATA_DIR, 
 		      fname)) {
             return buff;
@@ -2959,10 +2959,10 @@ xmlChar *
 *
 * Search order:
 *
-* 1) YANG_DATAPATH environment var (or set by datapath CLI var)
+* 1) YUMA_DATAPATH environment var (or set by datapath CLI var)
 * 2) HOME/data directory
-* 3) YANG_HOME/data directory
-* 4) YANG_INSTALL/data directory
+* 3) YUMA_HOME/data directory
+* 4) YUMA_INSTALL/data directory
 * 5) current directory
 
 * INPUTS:
@@ -3037,18 +3037,18 @@ xmlChar *
         }
     }
 
-    /* 3) YANG_HOME/data directory */
-    if (ncxmod_yang_home) {
+    /* 3) YUMA_HOME/data directory */
+    if (ncxmod_yuma_home) {
         if (test_file_make(buff, 
                            bufflen, 
-                           ncxmod_yang_home,
+                           ncxmod_yuma_home,
                            NCXMOD_DATA_DIR, 
                            fname) == NO_ERR) {
             return buff;
         }
     }
 
-    /* 4) YANG_INSTALL/data directory */
+    /* 4) YUMA_INSTALL/data directory */
     if (ncxmod_env_install) {
         if (test_file_make(buff, 
                            bufflen, 
@@ -3173,10 +3173,10 @@ xmlChar *
 * Search order:
 *
 * 1) current directory or absolute path
-* 2) YANG_RUNPATH environment var (or set by runpath CLI var)
+* 2) YUMA_RUNPATH environment var (or set by runpath CLI var)
 * 3) HOME/scripts directory
-* 4) YANG_HOME/scripts directory
-* 5) YANG_INSTALL/scripts directory
+* 4) YUMA_HOME/scripts directory
+* 5) YUMA_INSTALL/scripts directory
 *
 * INPUTS:
 *   fname == file name with extension
@@ -3235,7 +3235,7 @@ xmlChar *
     }
 
     /* look for the script file  'fname'
-     * 2) check YANG_RUNPATH env-var or runpath CLI param 
+     * 2) check YUMA_RUNPATH env-var or runpath CLI param 
      */
     if (ncxmod_run_path) {
 	if (test_pathlist(ncxmod_run_path, 
@@ -3258,18 +3258,18 @@ xmlChar *
         }
     }
 
-    /* 4) try YANG_HOME/scripts/fname */
-    if (ncxmod_yang_home) {
+    /* 4) try YUMA_HOME/scripts/fname */
+    if (ncxmod_yuma_home) {
         if (test_file(buff, 
 		      bufflen, 
-		      ncxmod_yang_home, 
+		      ncxmod_yuma_home, 
 		      NCXMOD_SCRIPT_DIR, 
 		      fname)) {
             return buff;
         }
     }
 
-    /* 5) YANG_INSTALL/scripts directory or default install path
+    /* 5) YUMA_INSTALL/scripts directory or default install path
      *    If this envvar is set then the default install path will not
      *    be tried
      */
@@ -3301,44 +3301,44 @@ xmlChar *
 
 
 /********************************************************************
-* FUNCTION ncxmod_set_yang_home
+* FUNCTION ncxmod_set_yuma_home
 * 
-*   Override the YANG_HOME env var with the yang-home CLI var
+*   Override the YUMA_HOME env var with the yuma-home CLI var
 *
 * THIS MAY GET SET DURING BOOTSTRAP SO SET_ERROR NOT CALLED !!!
 * MALLOC FAILED IGNORED!!!
 *
 * INPUTS:
-*   yanghome == new YANG_HOME value
+*   yumahome == new YUMA_HOME value
 *            == NULL or empty string to disable
 *********************************************************************/
 void
-    ncxmod_set_yang_home (const xmlChar *yanghome)
+    ncxmod_set_yuma_home (const xmlChar *yumahome)
 {
-    if (ncxmod_yang_home_cli) {
-        m__free(ncxmod_yang_home_cli);
-        ncxmod_yang_home_cli = NULL;        
+    if (ncxmod_yuma_home_cli) {
+        m__free(ncxmod_yuma_home_cli);
+        ncxmod_yuma_home_cli = NULL;        
     }
 
-    if (yanghome && *yanghome) {
+    if (yumahome && *yumahome) {
         /* ignoring possible malloc failed!! */
-        ncxmod_yang_home_cli = xml_strdup(yanghome);
+        ncxmod_yuma_home_cli = xml_strdup(yumahome);
     }
-    ncxmod_yang_home = ncxmod_yang_home_cli;
+    ncxmod_yuma_home = ncxmod_yuma_home_cli;
     
-}  /* ncxmod_set_yang_home */
+}  /* ncxmod_set_yuma_home */
 
 
 /********************************************************************
 * FUNCTION ncxmod_set_modpath
 * 
-*   Override the YANG_MODPATH env var with the modpath CLI var
+*   Override the YUMA_MODPATH env var with the modpath CLI var
 *
 * THIS MAY GET SET DURING BOOTSTRAP SO SET_ERROR NOT CALLED !!!
 * MALLOC FAILED IGNORED!!!
 *
 * INPUTS:
-*   modpath == new YANG_MODPATH value
+*   modpath == new YUMA_MODPATH value
 *           == NULL or empty string to disable
 *********************************************************************/
 void
@@ -3361,10 +3361,10 @@ void
 /********************************************************************
 * FUNCTION ncxmod_set_datapath
 * 
-*   Override the YANG_DATAPATH env var with the datapath CLI var
+*   Override the YUMA_DATAPATH env var with the datapath CLI var
 *
 * INPUTS:
-*   datapath == new YANG_DATAPATH value
+*   datapath == new YUMA_DATAPATH value
 *           == NULL or empty string to disable
 *
 *********************************************************************/
@@ -3388,10 +3388,10 @@ void
 /********************************************************************
 * FUNCTION ncxmod_set_runpath
 * 
-*   Override the YANG_RUNPATH env var with the runpath CLI var
+*   Override the YUMA_RUNPATH env var with the runpath CLI var
 *
 * INPUTS:
-*   datapath == new YANG_RUNPATH value
+*   datapath == new YUMA_RUNPATH value
 *           == NULL or empty string to disable
 *
 *********************************************************************/
@@ -3660,9 +3660,9 @@ void
 * Search order:
 *
 * 1) current directory or absolute path
-* 2) YANG_DATAPATH environment var (or set by datapath CLI var)
+* 2) YUMA_DATAPATH environment var (or set by datapath CLI var)
 * 3) HOME/data directory
-* 4) YANG_HOME/data directory
+* 4) YUMA_HOME/data directory
 *
 * INPUTS:
 *   helpmode == BRIEF, NORMAL or FULL 
@@ -3739,12 +3739,12 @@ status_t
         }
     }
 
-    /* 4) YANG_HOME/data directory */
-    if (ncxmod_yang_home) {
-        pathlen = xml_strlen(ncxmod_yang_home);;
+    /* 4) YUMA_HOME/data directory */
+    if (ncxmod_yuma_home) {
+        pathlen = xml_strlen(ncxmod_yuma_home);;
         if (pathlen + 6 < bufflen) {
             p = buff;
-            p += xml_strcpy(p, ncxmod_yang_home);
+            p += xml_strcpy(p, ncxmod_yuma_home);
             *p++ = NCXMOD_PSCHAR;
             p += xml_strcpy(p, (const xmlChar *)"data");
             *p++ = NCXMOD_PSCHAR;
@@ -3783,10 +3783,10 @@ status_t
 * Search order:
 *
 * 1) current directory or absolute path
-* 2) YANG_RUNPATH environment var (or set by datapath CLI var)
+* 2) YUMA_RUNPATH environment var (or set by datapath CLI var)
 * 3) HOME/scripts directory
-* 4) YANG_HOME/scripts directory
-* 5) YANG_INSTALL/scripts directory
+* 4) YUMA_HOME/scripts directory
+* 5) YUMA_INSTALL/scripts directory
 *
 * INPUTS:
 *   helpmode == BRIEF, NORMAL or FULL 
@@ -3863,12 +3863,12 @@ status_t
         }
     }
 
-    /* 4) YANG_HOME/scripts directory */
-    if (ncxmod_yang_home) {
-        pathlen = xml_strlen(ncxmod_yang_home);;
+    /* 4) YUMA_HOME/scripts directory */
+    if (ncxmod_yuma_home) {
+        pathlen = xml_strlen(ncxmod_yuma_home);;
         if (pathlen + 9 < bufflen) {
             p = buff;
-            p += xml_strcpy(p, ncxmod_yang_home);
+            p += xml_strcpy(p, ncxmod_yuma_home);
             *p++ = NCXMOD_PSCHAR;
             p += xml_strcpy(p, (const xmlChar *)"scripts");
             *p++ = NCXMOD_PSCHAR;
@@ -3887,7 +3887,7 @@ status_t
         }
     }
 
-    /* 5) YANG_INSTALL/scripts directory */
+    /* 5) YUMA_INSTALL/scripts directory */
     if (ncxmod_env_install) {
         pathlen = xml_strlen(ncxmod_env_install);;
         if (pathlen + 9 < bufflen) {
@@ -3931,10 +3931,10 @@ status_t
 * Search order:
 *
 * 1) current directory or absolute path
-* 2) YANG_MODPATH environment var (or set by datapath CLI var)
+* 2) YUMA_MODPATH environment var (or set by datapath CLI var)
 * 3) HOME/modules directory
-* 4) YANG_HOME/modules directory
-* 5) YANG_INSTALL/modules directory
+* 4) YUMA_HOME/modules directory
+* 5) YUMA_INSTALL/modules directory
 *
 * INPUTS:
 *   helpmode == BRIEF, NORMAL or FULL 
@@ -4010,12 +4010,12 @@ status_t
         }
     }
 
-    /* 4) YANG_HOME/modules directory */
-    if (ncxmod_yang_home) {
-        pathlen = xml_strlen(ncxmod_yang_home);;
+    /* 4) YUMA_HOME/modules directory */
+    if (ncxmod_yuma_home) {
+        pathlen = xml_strlen(ncxmod_yuma_home);;
         if (pathlen + 9 < bufflen) {
             p = buff;
-            p += xml_strcpy(p, ncxmod_yang_home);
+            p += xml_strcpy(p, ncxmod_yuma_home);
             *p++ = NCXMOD_PSCHAR;
             p += xml_strcpy(p, (const xmlChar *)"modules");
             *p++ = NCXMOD_PSCHAR;
@@ -4034,7 +4034,7 @@ status_t
         }
     }
 
-    /* 5) YANG_INSTALL/modules directory */
+    /* 5) YUMA_INSTALL/modules directory */
     if (ncxmod_env_install) {
         pathlen = xml_strlen(ncxmod_env_install);;
         if (pathlen + 9 < bufflen) {
@@ -4073,7 +4073,7 @@ status_t
 /********************************************************************
 * FUNCTION ncxmod_setup_tempdir
 *
-* Setup the ~/.yangtools/tmp directory if it does not exist
+* Setup the ~/.yuma/tmp directory if it does not exist
 *
 * RETURNS:
 *   status
@@ -4086,23 +4086,23 @@ status_t
     status_t       res;
     int            retcode;
 
-    /* get the full filespec for ~/.yangtools */
+    /* get the full filespec for ~/.yuma */
     res = NO_ERR;
-    tempdir_path = ncx_get_source(NCXMOD_YANGTOOLS_DIR, &res);
+    tempdir_path = ncx_get_source(NCXMOD_YUMA_DIR, &res);
     if (tempdir_path == NULL) {
         return res;
     }
 
-    /* try to open ~/.yangtools directory */
+    /* try to open ~/.yuma directory */
     dp = opendir((const char *)tempdir_path);
     if (dp == NULL) {
-        /* create a ~/.yangtools directory with 700 permissions */
+        /* create a ~/.yuma directory with 700 permissions */
         retcode = mkdir((const char *)tempdir_path, S_IRWXU);
         if (retcode != 0) {
             res = errno_to_status();
         }
     } else {
-        /* use the existing ~/.yangtools/tmp directory */
+        /* use the existing ~/.yuma/tmp directory */
 	(void)closedir(dp);
     }
 
@@ -4112,21 +4112,21 @@ status_t
         return res;
     }
 
-    tempdir_path = ncx_get_source(NCXMOD_YANGTOOLS_TEMPDIR, &res);
+    tempdir_path = ncx_get_source(NCXMOD_YUMA_TEMPDIR, &res);
     if (tempdir_path == NULL) {
         return res;
     }
 
-    /* try to open ~/.yangtools/tmp directory */
+    /* try to open ~/.yuma/tmp directory */
     dp = opendir((const char *)tempdir_path);
     if (dp == NULL) {
-        /* create a ~/.yangtools/tmp directory with 700 permissions */
+        /* create a ~/.yuma/tmp directory with 700 permissions */
         retcode = mkdir((const char *)tempdir_path, S_IRWXU);
         if (retcode != 0) {
             res = errno_to_status();
         }
     } else {
-        /* use the existing ~/.yangtools/tmp directory */
+        /* use the existing ~/.yuma/tmp directory */
 	(void)closedir(dp);
     }
 
@@ -4173,7 +4173,7 @@ ncxmod_temp_progcb_t *
     *res = NO_ERR;
     progcb = NULL;
     tstamp_datetime_dirname(datebuff);
-    fixedlen = xml_strlen(NCXMOD_YANGTOOLS_TEMPDIR);
+    fixedlen = xml_strlen(NCXMOD_YUMA_TEMPDIR);
 
     /* get positive 5 digit random number (0 -- 64k) */
     randnum = rand();
@@ -4196,7 +4196,7 @@ ncxmod_temp_progcb_t *
      * based on the current time + random number
      */
     p = buffer;
-    p += xml_strcpy(p, NCXMOD_YANGTOOLS_TEMPDIR);
+    p += xml_strcpy(p, NCXMOD_YUMA_TEMPDIR);
     *p++ = NCXMOD_PSCHAR;
     p += xml_strcpy(p, datebuff);
     xml_strcpy(p, numbuff);
@@ -4208,7 +4208,7 @@ ncxmod_temp_progcb_t *
         return NULL;
     }
 
-    /* try to open ~/.yangtools/tmp/<progstr> directory */
+    /* try to open ~/.yuma/tmp/<progstr> directory */
     dp = opendir((const char *)tempdir_path);
     if (dp == NULL) {
         /* create a directory with 700 permissions */
@@ -4330,7 +4330,7 @@ ncxmod_temp_sescb_t *
     xml_strcpy(p, numbuff);
 
     /* already in expanded path name format
-     * try to open ~/.yangtools/tmp/<progstr>/<sidnum> directory */
+     * try to open ~/.yuma/tmp/<progstr>/<sidnum> directory */
     dp = opendir((const char *)buffer);
     if (dp == NULL) {
         /* create a directory with 700 permissions */

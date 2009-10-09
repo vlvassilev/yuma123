@@ -933,16 +933,16 @@ static status_t
 	} /* else use default modpath */
     }
 
-    /* --yang-home=<$YANG_HOME> */
+    /* --yuma-home=<$YUMA_HOME> */
     if (res == NO_ERR) {
-	parm = cli_find_rawparm(NCX_EL_YANG_HOME, &parmQ);
+	parm = cli_find_rawparm(NCX_EL_YUMA_HOME, &parmQ);
 	if (parm && parm->count) {
 	    if (parm->count > 1) {
 		log_error("\nError: Only one 'yang-home' parameter allowed");
 		res = ERR_NCX_DUP_ENTRY;
             } else {
-		/*** VALIDATE YANG_HOME ***/
-		ncxmod_set_yang_home((const xmlChar *)parm->value);
+		/*** VALIDATE YUMA_HOME ***/
+		ncxmod_set_yuma_home((const xmlChar *)parm->value);
 	    }
 	} /* else use default modpath */
     }
@@ -11189,7 +11189,7 @@ boolean
 /********************************************************************
 * FUNCTION ncx_get_version
 * 
-* Get the the YangTools version ID string
+* Get the the Yuma version ID string
 *
 * INPUT:
 *    buffer == buffer to hold the version string
@@ -11211,7 +11211,7 @@ status_t
     }
 #endif
 
-    versionlen = xml_strlen(YANGTOOLS_VERSION) +
+    versionlen = xml_strlen(YUMA_VERSION) +
         xml_strlen((const xmlChar *)SVNVERSION) + 1;
 
     if (versionlen >= buffsize) {
@@ -11219,7 +11219,7 @@ status_t
     }
 
     str = buffer;
-    str += xml_strcpy(str, YANGTOOLS_VERSION);
+    str += xml_strcpy(str, YUMA_VERSION);
     *str++ = '.';
     xml_strcpy(str, (const xmlChar *)SVNVERSION);
     return NO_ERR;

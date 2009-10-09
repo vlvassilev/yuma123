@@ -7,7 +7,7 @@
 *                                                                   *
 *********************************************************************
 
-    Contains the current YangTools version ID
+    Contains the current Yuma version ID
 
 *********************************************************************
 *                                                                   *
@@ -26,6 +26,6 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
-#define YANGTOOLS_VERSION  (const xmlChar *)"0.9.7"
+#define YUMA_VERSION  (const xmlChar *)"0.9.7"
 
 #endif            /* _H_version */

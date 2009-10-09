@@ -29,6 +29,7 @@ date	     init     comment
 16-feb-08   abb       Changed environment variables from NCX to YANG
                       Added YANG_INSTALL envvar as well.
 22-jul-08   abb       Remove NCX support -- YANG only from now on
+06-oct-09   abb       Change YANG_ env vars to YUMA_ 
 */
 
 #include <xmlstring.h>
@@ -100,17 +101,17 @@ date	     init     comment
 
 #define NCXMOD_IETF_NETCONF_STATE (const xmlChar *)"ietf-netconf-state"
 
-/* name of the NCX modules directory appended when YANG_HOME or HOME
+/* name of the NCX modules directory appended when YUMA_HOME or HOME
  * ENV vars used to construct NCX module filespec
  */
 #define NCXMOD_DIR            (const xmlChar *)"modules"
 
-/* name of the data direectory when YANG_HOME or HOME
- * ENV vars used to construct a NCX filespec
+/* name of the data direectory when YUMA_HOME or HOME
+ * ENV vars used to construct an NCX filespec
  */
 #define NCXMOD_DATA_DIR        (const xmlChar *)"data"
 
-/* name of the scripts direectory when YANG_HOME or HOME
+/* name of the scripts direectory when YUMA_HOME or HOME
  * ENV vars used to construct a NCX filespec
  */
 #define NCXMOD_SCRIPT_DIR       (const xmlChar *)"scripts"
@@ -122,30 +123,30 @@ date	     init     comment
 #define USER_HOME           "HOME"
 
 /* NCX Environment Variable for YANG/NCX user work home directory */
-#define NCXMOD_HOME         "YANG_HOME"
+#define NCXMOD_HOME         "YUMA_HOME"
 
 /* NCX Environment Variable for tools install directory
- * The default is /usr/share/yangtools
+ * The default is /usr/share/yuma
  */
-#define NCXMOD_INSTALL   "YANG_INSTALL"
+#define NCXMOD_INSTALL   "YUMA_INSTALL"
 
 /* !! should import this from make !! */
-#define NCXMOD_DEFAULT_INSTALL (const xmlChar *)"/usr/share/yangtools"
+#define NCXMOD_DEFAULT_INSTALL (const xmlChar *)"/usr/share/yuma"
 
 /* NCX Environment Variable for MODULE search path */
-#define NCXMOD_MODPATH      "YANG_MODPATH"
+#define NCXMOD_MODPATH      "YUMA_MODPATH"
 
 /* NCX Environment Variable for DATA search path */
-#define NCXMOD_DATAPATH      "YANG_DATAPATH"
+#define NCXMOD_DATAPATH      "YUMA_DATAPATH"
 
 /* NCX Environment Variable for SCRIPTS search path */
-#define NCXMOD_RUNPATH      "YANG_RUNPATH"
+#define NCXMOD_RUNPATH      "YUMA_RUNPATH"
 
 /* per user yangcli internal data home */
-#define NCXMOD_YANGTOOLS_DIR (const xmlChar *)"~/.yangtools"
+#define NCXMOD_YUMA_DIR (const xmlChar *)"~/.yuma"
 
 /* directory yangcli uses to store local per-session workdirs */
-#define NCXMOD_YANGTOOLS_TEMPDIR (const xmlChar *)"~/.yangtools/tmp"
+#define NCXMOD_YUMA_TEMPDIR (const xmlChar *)"~/.yuma/tmp"
 
 
 /********************************************************************
@@ -311,7 +312,7 @@ extern xmlChar *
 			     status_t *res);
 
 extern void
-    ncxmod_set_yang_home (const xmlChar *yanghome);
+    ncxmod_set_yuma_home (const xmlChar *yumahome);
 
 extern void
     ncxmod_set_modpath (const xmlChar *modpath);

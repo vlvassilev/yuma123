@@ -80,7 +80,7 @@ date	     init     comment
 #define YANGCLI_HISTLEN  4095
 
 #define YANGCLI_DEF_HISTORY_FILE  (const xmlChar *)\
-    "~/.yangtools/.yangcli_history"
+    "~/.yuma/.yangcli_history"
 
 #define YANGCLI_DEF_TIMEOUT   30
 

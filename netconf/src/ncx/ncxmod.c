@@ -271,10 +271,10 @@ static status_t
 /********************************************************************
 * FUNCTION try_module
 *
-* For NCX and YANG Modules Only!!!
+* For YANG Modules Only!!!
 *
 * Construct a filespec out of a path name and a module name
-* and try to load the filespec as an NCX module
+* and try to load the filespec as a YANG module
 *
 * INPUTS:
 *    buff == buffer to use for filespec construction
@@ -284,7 +284,6 @@ static status_t
 *    modname == module name without file suffix (may be NULL)
 *    mode == suffix mode
 *           == NCXMOD_MODE_YANG if YANG module and suffix is .yang
-*           == NCXMOD_MODE_FILENCX if NCX filespec
 *           == NCXMOD_MODE_FILEYANG if YANG filespec
 *    usebuff == use buffer as-is, unless modname is present
 *    done == address of return done flag
@@ -1212,7 +1211,7 @@ static status_t
 /********************************************************************
 * FUNCTION check_module_path
 *
-*  Check the specified path for a YANG or NCX module file
+*  Check the specified path for a YANG module file
 *
 * INPUTS:
 *   path == starting path to check
@@ -1341,7 +1340,7 @@ static status_t
 * FUNCTION check_module_pathlist
 *
 *  Check a list of pathnames for the specified path of 
-*  a YANG or NCX module file
+*  a YANG module file
 *
 *  Example:   path1:path2:path3
 *
@@ -1734,7 +1733,7 @@ static status_t
 *    filespec == file spec string to check
 *
 * RETURNS:
-*    TRUE if YANG or NCX file extension found
+*    TRUE if YANG file extension found
 *       and non-zero filename\
 *    FALSE otherwise
 *********************************************************************/
@@ -1765,8 +1764,8 @@ static boolean
 /********************************************************************
 * FUNCTION process_subtree
 *
-* Search the entire specified subtree, looking for YANG and
-* NCX modules.  Invoke the callback function for each module
+* Search the entire specified subtree, looking for YANG
+* modules.  Invoke the callback function for each module
 * file found
 *
 * INPUTS:
@@ -2908,7 +2907,7 @@ xmlChar *
 	return buff;
     }
 
-    /* 2) try the NCX_DATAPATH environment variable */
+    /* 2) try the YUMA_DATAPATH environment variable */
     if (ncxmod_data_path) {
 	if (test_pathlist(ncxmod_data_path, 
 			  buff, 
@@ -3010,7 +3009,7 @@ xmlChar *
         return NULL;
     }
 
-    /* 1) try the NCX_DATAPATH environment variable */
+    /* 1) try the YUMA_DATAPATH environment variable */
     if (ncxmod_data_path) {
 	if (test_pathlist_make(ncxmod_data_path, 
                                buff, 
@@ -3432,8 +3431,8 @@ void
 /********************************************************************
 * FUNCTION ncxmod_process_subtree
 *
-* Search the entire specified subtree, looking for YANG and
-* NCX modules.  Invoke the callback function for each module
+* Search the entire specified subtree, looking for YANG
+* modules.  Invoke the callback function for each module
 * file found
 *
 * INPUTS:
@@ -3701,7 +3700,7 @@ status_t
         return res;
     }
 
-    /* 2) try the NCX_DATAPATH environment variable */
+    /* 2) try the YUMA_DATAPATH environment variable */
     if (ncxmod_data_path) {
 	res = list_pathlist(ncxmod_data_path, 
                             buff,

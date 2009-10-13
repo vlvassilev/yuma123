@@ -225,7 +225,7 @@ void
     obj_template_t *testobj;
     uint32                count, objnestlevel;
     char                  numbuff[NCX_MAX_NUMLEN];
-    boolean               normalpass;
+    boolean               normalpass, neednewline;
 
 #ifdef DEBUG
     if (!obj) {
@@ -272,6 +272,8 @@ void
 	help_write_lines(obj_get_name(obj), 0, FALSE);
     }
 
+    neednewline = FALSE;
+
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
     case OBJ_TYP_LIST:
@@ -286,7 +288,8 @@ void
 	    help_write_lines((const xmlChar *)" [", 0, FALSE); 
 	    help_write_lines((const xmlChar *)
 			     obj_get_type_name(obj),
-			     0, FALSE);
+			     0, 
+                             FALSE);
 	    help_write_lines((const xmlChar *)"]", 0, FALSE); 
 	}
 
@@ -307,15 +310,19 @@ void
 	    case HELP_MODE_BRIEF:
 		if (obj->objtype == OBJ_TYP_RPC || 
 		    obj->objtype == OBJ_TYP_NOTIF) {
-		    help_write_lines_max(val, indent+NCX_DEF_INDENT,
-					 TRUE, HELP_MODE_BRIEF_MAX); 
+		    help_write_lines_max(val, 
+                                         indent+NCX_DEF_INDENT,
+					 TRUE, 
+                                         HELP_MODE_BRIEF_MAX); 
 		}
 		break;
 	    case HELP_MODE_NORMAL:
 		if (obj->objtype == OBJ_TYP_RPC || 
 		    obj->objtype == OBJ_TYP_NOTIF) {
-		    help_write_lines_max(val, indent+NCX_DEF_INDENT,
-					 TRUE, HELP_MODE_NORMAL_MAX); 
+		    help_write_lines_max(val, 
+                                         indent+NCX_DEF_INDENT,
+					 TRUE, 
+                                         HELP_MODE_NORMAL_MAX); 
 		}
 		break;
 	    case HELP_MODE_FULL:
@@ -332,6 +339,7 @@ void
     case OBJ_TYP_CONTAINER:
 	switch (mode) {
 	case HELP_MODE_BRIEF:
+            neednewline = TRUE;
 	    break;
 	case HELP_MODE_NORMAL:
 	    if (obj->def.container->presence) {
@@ -380,6 +388,7 @@ void
 	break;
     case OBJ_TYP_ANYXML:
         /* nothing interesting in the typdef to report */
+        neednewline = TRUE;
         break;
     case OBJ_TYP_LEAF:
 	switch (mode) {
@@ -457,6 +466,7 @@ void
 	break;
     case OBJ_TYP_CHOICE:
 	if (mode == HELP_MODE_BRIEF) {
+            neednewline = TRUE;
 	    break;
 	}
 	count = dlq_count(obj->def.choic->caseQ);
@@ -469,6 +479,7 @@ void
 	break;
     case OBJ_TYP_CASE:
 	if (mode == HELP_MODE_BRIEF) {
+            neednewline = TRUE;
 	    break;
 	}
 	count = dlq_count(obj->def.cas->datadefQ);
@@ -573,6 +584,9 @@ void
 	SET_ERROR(ERR_INTERNAL_VAL);
     }
 
+    if (neednewline) {
+        help_write_lines(NULL, 0, TRUE);
+    }
 
 }   /* obj_dump_template */
 

@@ -156,12 +156,6 @@ static void
             AGT_ACMOD_ENFORCING;
     }
 
-    /* get datapath param */
-    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_DATAPATH);
-    if (val && val->res == NO_ERR) {
-        agt_profile->agt_datapath = VAL_STR(val);
-    }
-
     /* get default-style param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_DEFAULT_STYLE);
     if (val && val->res == NO_ERR) {
@@ -195,12 +189,6 @@ static void
     if (val && val->res == NO_ERR) {
         agt_profile->agt_loglevel = 
             log_get_debug_level_enum((const char *)VAL_STR(val));
-    }
-
-    /* get modpath param */
-    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_MODPATH);
-    if (val && val->res == NO_ERR) {
-        agt_profile->agt_modpath = VAL_STR(val);
     }
 
     /* get leaf-list port parameter */
@@ -251,12 +239,6 @@ static void
     val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_MAX_BURST);
     if (val && val->res == NO_ERR) {
         agt_profile->agt_maxburst = VAL_UINT(val);
-    }
-
-    /* get runpath param */
-    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_RUNPATH);
-    if (val && val->res == NO_ERR) {
-        agt_profile->agt_runpath = VAL_STR(val);
     }
 
     /* start choice: get no-startup startup param choice */
@@ -425,6 +407,9 @@ status_t
 
         /* set the logging control parameters */
         val_set_logging_parms(valset);
+
+        /* set the file search path parms */
+        val_set_path_parms(valset);
 
         /* set the warning control parameters */
         val_set_warning_parms(valset);

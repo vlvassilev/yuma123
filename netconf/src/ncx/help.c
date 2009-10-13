@@ -330,6 +330,12 @@ void
     help_data_module (const ncx_module_t *mod,
 		      help_mode_t mode)
 {
+#ifdef DEBUG
+    if (mod == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
 
     dump_mod_hdr(mod);
 
@@ -363,6 +369,13 @@ void
     help_type (const typ_template_t *typ,
 	       help_mode_t mode)
 {
+#ifdef DEBUG
+    if (typ == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
     log_stdout("\n  Type: %s", typ->name);
     log_stdout(" (%s)",
 	       tk_get_btype_sym(typ_get_basetype
@@ -400,6 +413,13 @@ void
     help_object (obj_template_t *obj,
 		 help_mode_t mode)
 {
+#ifdef DEBUG
+    if (obj == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
     obj_dump_template(obj, mode, get_nestlevel(mode), 0);
 
 }  /* help_object */
@@ -430,13 +450,15 @@ void
 	}
     }
 
-    while (*str) {
-	log_stdout("%c", *str);
-	if (*str++ == '\n') {
-	    for (i=0; i<indent; i++) {
-		log_stdout(" ");
-	    }
-	}
+    if (str) {
+        while (*str) {
+            log_stdout("%c", *str);
+            if (*str++ == '\n') {
+                for (i=0; i<indent; i++) {
+                    log_stdout(" ");
+                }
+            }
+        }
     }
 
 } /* help_write_lines */
@@ -483,22 +505,24 @@ void
 	}
     }
 
-    while (*str) {
-	log_stdout("%c", *str);
-	if (++cnt > maxlen) {
-	    log_stdout("..."); 
-	    return;
-	}
-
-	if (*str++ == '\n') {
-	    for (i=0; i<indent; i++) {
-		log_stdout(" ");
-		if (++cnt > maxlen) {
-		    log_stdout("..."); 
-		    return;
-		}
-	    }
-	}
+    if (str) {
+        while (*str) {
+            log_stdout("%c", *str);
+            if (++cnt > maxlen) {
+                log_stdout("..."); 
+                return;
+            }
+            
+            if (*str++ == '\n') {
+                for (i=0; i<indent; i++) {
+                    log_stdout(" ");
+                    if (++cnt > maxlen) {
+                        log_stdout("..."); 
+                        return;
+                    }
+                }
+            }
+        }
     }
 
 } /* help_write_lines_max */

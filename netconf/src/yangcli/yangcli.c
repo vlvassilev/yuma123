@@ -1805,6 +1805,9 @@ static status_t
     /* set the logging control parameters */
     val_set_logging_parms(mgr_cli_valset);
 
+    /* set the file search path parms */
+    val_set_path_parms(mgr_cli_valset);
+
     /* set the warning control parameters */
     val_set_warning_parms(mgr_cli_valset);
 

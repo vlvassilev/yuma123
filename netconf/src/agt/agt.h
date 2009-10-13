@@ -182,9 +182,6 @@ typedef struct agt_profile_t_ {
     const xmlChar      *agt_conffile;
     const xmlChar      *agt_logfile;
     const xmlChar      *agt_startup;
-    const xmlChar      *agt_modpath;
-    const xmlChar      *agt_datapath;
-    const xmlChar      *agt_runpath;
     const xmlChar      *agt_defaultStyle;
     const xmlChar      *agt_superuser;
     uint32              agt_eventlog_size;

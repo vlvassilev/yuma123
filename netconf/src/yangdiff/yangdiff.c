@@ -1737,6 +1737,9 @@ static status_t
     /* set the logging control parameters */
     val_set_logging_parms(valset);
 
+    /* set the file search path parameters */
+    val_set_path_parms(valset);
+
     /* set the warning control parameters */
     val_set_warning_parms(valset);
 

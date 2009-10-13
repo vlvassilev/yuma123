@@ -50,6 +50,10 @@ date         init     comment
 #include "ncxconst.h"
 #endif
 
+#ifndef _H_ncxmod
+#include "ncxmod.h"
+#endif
+
 #ifndef _H_obj
 #include "obj.h"
 #endif
@@ -2506,6 +2510,64 @@ void
     }
 
 }  /* val_set_logging_parms */
+
+
+/********************************************************************
+* FUNCTION val_set_path_parms
+*   --datapath
+*   --modpath
+*   --runpath
+*
+* Check the specified value set for the 3 path CLI parms
+* and override the environment variable setting, if any.
+
+* INPUTS:
+*   parentval == CLI container to check for the runpath,
+*                 modpath, and datapath variables
+*
+*********************************************************************/
+void
+    val_set_path_parms (val_value_t *parentval)
+{
+    val_value_t        *val;
+
+#ifdef DEBUG
+    if (!parentval) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+    if (!(parentval->btyp == NCX_BT_CONTAINER || 
+          parentval->btyp == NCX_BT_LIST)) {
+	SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+#endif
+
+    /* get the modnpath parameter */
+    val = val_find_child(parentval, 
+                         val_get_mod_name(parentval),
+                         NCX_EL_MODPATH);
+    if (val && val->res == NO_ERR) {
+        ncxmod_set_modpath(VAL_STR(val));
+    }
+
+    /* get the datapath parameter */
+    val = val_find_child(parentval, 
+                         val_get_mod_name(parentval),
+                         NCX_EL_DATAPATH);
+    if (val && val->res == NO_ERR) {
+        ncxmod_set_datapath(VAL_STR(val));
+    }
+
+    /* get the runpath parameter */
+    val = val_find_child(parentval, 
+                         val_get_mod_name(parentval),
+                         NCX_EL_RUNPATH);
+    if (val && val->res == NO_ERR) {
+        ncxmod_set_runpath(VAL_STR(val));
+    }
+    
+}  /* val_set_path_parms */
 
 
 /* END file val_util.c */

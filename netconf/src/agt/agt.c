@@ -169,9 +169,6 @@ static void
     agt_profile.agt_conffile = NULL;
     agt_profile.agt_logfile = NULL;
     agt_profile.agt_startup = NULL;
-    agt_profile.agt_modpath = NULL;
-    agt_profile.agt_datapath = NULL;
-    agt_profile.agt_runpath = NULL;
     agt_profile.agt_defaultStyle = NCX_EL_REPORT_ALL;
     agt_profile.agt_defaultStyleEnum = NCX_WITHDEF_REPORT_ALL;
     agt_profile.agt_superuser = NCX_DEF_SUPERUSER;
@@ -352,21 +349,6 @@ status_t
     }
 
     /* loglevel and log file already set */
-
-    /* set the module search path */
-    if (agt_profile.agt_modpath) {
-        ncxmod_set_modpath(agt_profile.agt_modpath);
-    }
-
-    /* set the data file search path */
-    if (agt_profile.agt_datapath) {
-        ncxmod_set_datapath(agt_profile.agt_datapath);
-    }
-
-    /* set the script file search path (NOT USED YET!) */
-    if (agt_profile.agt_runpath) {
-        ncxmod_set_runpath(agt_profile.agt_runpath);
-    }
 
     return res;
 

@@ -314,6 +314,9 @@ static status_t
     /* set the logging control parameters */
     val_set_logging_parms(valset);
 
+    /* set the file search path parms */
+    val_set_path_parms(valset);
+
     /* set the warning control parameters */
     val_set_warning_parms(valset);
 
@@ -417,14 +420,6 @@ static status_t
         cp->html_toc = VAL_STR(val);
     } else {
         cp->html_toc = YANGDUMP_DEF_TOC;
-    }
-
-    /* modpath parameter */
-    val = val_find_child(valset, 
-                         YANGDUMP_MOD, 
-                         NCX_EL_MODPATH);
-    if (val && val->res == NO_ERR) {
-        ncxmod_set_modpath(VAL_STR(val));
     }
 
     /* module parameter */

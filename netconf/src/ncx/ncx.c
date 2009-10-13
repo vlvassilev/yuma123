@@ -824,9 +824,9 @@ static status_t
 	}
     }
 
-    /* create bootstrap parm: yang-home */
+    /* create bootstrap parm: yuma-home */
     if (res == NO_ERR) {
-	parm = cli_new_rawparm(NCX_EL_YANG_HOME);
+	parm = cli_new_rawparm(NCX_EL_YUMA_HOME);
 	if (parm) {
 	    dlq_enque(parm, &parmQ);
 	} else {

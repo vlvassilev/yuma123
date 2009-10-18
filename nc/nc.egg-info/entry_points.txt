@@ -1,3 +1,0 @@
-[console_scripts]
-start-nc = nc.commands:start
-

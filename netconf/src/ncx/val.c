@@ -2459,7 +2459,7 @@ status_t
     }
 #endif
 
-    return val_simval_ok_errinfo(typdef, simval, NULL);
+    return val_simval_ok_ex(typdef, simval, NULL, NULL);
 
 } /* val_simval_ok */
 
@@ -2487,6 +2487,37 @@ status_t
     val_simval_ok_errinfo (typ_def_t *typdef,
 			   const xmlChar *simval,
 			   ncx_errinfo_t **errinfo)
+{
+    return val_simval_ok_ex(typdef, simval, errinfo, NULL);
+
+} /* val_simval_ok_errinfo */
+
+
+/********************************************************************
+* FUNCTION val_simval_ok_ex
+* 
+* check any simple type to see if it is valid,
+* but do not retrieve the value; used to check the
+* default parameter for example
+*
+* INPUTS:
+*    typdef == typ_def_t for the simple type to check
+*    simval == value string to check (NULL means empty string)
+*    errinfo == address of return error struct
+*    mod == module in progress to use for idref and other
+*           strings with prefixes in them
+* OUTPUTS:
+*   if non-NULL:
+*      *errinfo == error struct on error exit
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    val_simval_ok_ex (typ_def_t *typdef,
+                      const xmlChar *simval,
+                      ncx_errinfo_t **errinfo,
+                      ncx_module_t *mod)
 {
     const xmlChar          *retstr, *name;
     val_value_t            *unval;
@@ -2596,10 +2627,11 @@ status_t
 	} else {
 	    unval->btyp = NCX_BT_UNION;
 	    unval->typdef = typdef;
-	    res = val_union_ok_errinfo(typdef, 
-                                       simval, 
-                                       unval, 
-                                       errinfo);
+	    res = val_union_ok_ex(typdef, 
+                                  simval, 
+                                  unval, 
+                                  errinfo,
+                                  mod);
 	    val_free_value(unval);
 	}
 	break;
@@ -2610,17 +2642,29 @@ status_t
          */
         realtypdef = typ_get_xref_typdef(typdef);
         if (realtypdef) {
-            res = val_simval_ok_errinfo(realtypdef, 
-                                        simval, 
-                                        errinfo);
+            res = val_simval_ok_ex(realtypdef, 
+                                   simval, 
+                                   errinfo,
+                                   mod);
         } else {
             res = SET_ERROR(ERR_INTERNAL_VAL);
         }
 	break;
     case NCX_BT_IDREF:
-	res = val_parse_idref(NULL, simval, &nsid, &name, &identity);
+        identity = NULL;
+	res = val_parse_idref(mod, 
+                              simval, 
+                              &nsid, 
+                              &name, 
+                              &identity);
 	if (res == NO_ERR) {
-	    res = val_idref_ok(typdef, simval, nsid, &name, &identity);
+            if (identity == NULL) {
+                res = val_idref_ok(typdef, 
+                                   simval, 
+                                   nsid, 
+                                   &name, 
+                                   &identity);
+            }
 	}
 	break;
     case NCX_BT_BITS:
@@ -2666,7 +2710,7 @@ status_t
 
     return res;
 
-} /* val_simval_ok_errinfo */
+} /* val_simval_ok_ex */
 
 
 /********************************************************************
@@ -2699,7 +2743,7 @@ status_t
     }
 #endif
 
-    return val_union_ok_errinfo(typdef, strval, retval, NULL);
+    return val_union_ok_ex(typdef, strval, retval, NULL, NULL);
 
 } /* val_union_ok */
 
@@ -2730,6 +2774,44 @@ status_t
 			  const xmlChar *strval,
 			  val_value_t *retval,
 			  ncx_errinfo_t **errinfo)
+{
+    return val_union_ok_ex(typdef, 
+                           strval, 
+                           retval, 
+                           errinfo, 
+                           NULL);
+
+} /* val_union_ok_errinfo */
+
+
+/********************************************************************
+* FUNCTION val_union_ok_ex
+* 
+* Check a union to make sure the string is valid based
+* on the specified typdef, and convert the string to
+* an NCX internal format
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated union type
+*    strval == the value to check against the member typ defs
+*    retval == pointer to output struct for converted value
+*    errinfo == address of error struct
+*    mod == module in progress, if any
+*
+* OUTPUTS:
+*   If return NO_ERR:
+*   retval->str or retval->num will be set with the converted value
+*   *errinfo == error struct on error exit
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    val_union_ok_ex (typ_def_t *typdef,
+                     const xmlChar *strval,
+                     val_value_t *retval,
+                     ncx_errinfo_t **errinfo,
+                     ncx_module_t *mod)
 {
     typ_def_t        *undef;
     typ_unionnode_t  *un;
@@ -2778,9 +2860,13 @@ status_t
 
 	testbtyp = typ_get_basetype(undef);
 	if (testbtyp == NCX_BT_UNION) {
-	    res = val_union_ok_errinfo(undef, strval, retval, errinfo);
+	    res = val_union_ok_ex(undef, 
+                                  strval, 
+                                  retval, 
+                                  errinfo, 
+                                  mod);
 	} else {
-	    res = val_simval_ok_errinfo(undef, strval, errinfo);
+	    res = val_simval_ok_ex(undef, strval, errinfo, mod);
 	}
 	if (res == NO_ERR) {
 	    /* the un->typ field may be NULL for YANG unions in progress
@@ -2805,7 +2891,7 @@ status_t
 
     return res;
 
-} /* val_union_ok_errinfo */
+} /* val_union_ok_ex */
 
 
 /********************************************************************

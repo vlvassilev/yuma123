@@ -329,9 +329,10 @@ static void
 			 yang_pcb_t *oldpcb,
 			 yang_pcb_t *newpcb)
 {
-    ncx_revhist_t *oldrev, *newrev;
-    yangdiff_cdb_t  cdb;
-    boolean isrev;
+    yangdiff_cdb_t  revcdb[2];
+    ncx_revhist_t  *oldrev, *newrev;
+    boolean         isrev;
+    uint32          changecnt, i;
 
     isrev = (cp->edifftype == YANGDIFF_DT_REVISION) ? TRUE : FALSE;
 
@@ -349,19 +350,41 @@ static void
 	/* find this revision in the new module */
 	newrev = ncx_find_revhist(newpcb->top, oldrev->version);
 	if (newrev) {
-	    if (str_field_changed(YANG_K_DESCRIPTION,
-				  oldrev->descr, newrev->descr,
-				  isrev, &cdb)) {
-		/* description was changed in the new module */
-		output_mstart_line(cp, 
-                                   YANG_K_REVISION, 
-                                   oldrev->version, 
-                                   FALSE);
-		if (cp->edifftype != YANGDIFF_DT_TERSE) {
-		    indent_in(cp);
-		    output_cdb_line(cp, &cdb);
-		    indent_out(cp);
-		}
+            changecnt = 0;
+	    changecnt += str_field_changed(YANG_K_DESCRIPTION,
+                                           oldrev->descr, 
+                                           newrev->descr,
+                                           isrev, 
+                                           &revcdb[0]);
+
+	    changecnt += str_field_changed(YANG_K_REFERENCE,
+                                           oldrev->ref, 
+                                           newrev->ref,
+                                           isrev, 
+                                           &revcdb[1]);
+
+            if (changecnt > 0) {
+                switch (cp->edifftype) {
+                case YANGDIFF_DT_TERSE:
+                case YANGDIFF_DT_NORMAL:
+                case YANGDIFF_DT_REVISION:
+                    output_mstart_line(cp, 
+                                       YANG_K_REVISION, 
+                                       oldrev->version, 
+                                       FALSE);
+                    if (cp->edifftype != YANGDIFF_DT_TERSE) {
+                        indent_in(cp);
+                        for (i=0; i<2; i++) {
+                            if (revcdb[i].changed) {
+                                output_cdb_line(cp, &revcdb[i]);
+                            }
+                        }
+                        indent_out(cp);
+                    }
+                    break;
+                default:
+                    SET_ERROR(ERR_INTERNAL_VAL);
+                }
 	    }
 	    newrev->res = NO_ERR;
 	} else {

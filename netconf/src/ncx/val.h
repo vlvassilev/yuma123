@@ -548,6 +548,12 @@ extern status_t
 			   ncx_errinfo_t **errinfo);
 
 extern status_t
+    val_simval_ok_ex (typ_def_t *typdef,
+                      const xmlChar *simval,
+                      ncx_errinfo_t **errinfo,
+                      ncx_module_t *mod);
+
+extern status_t
     val_union_ok (typ_def_t *typdef,
 		  const xmlChar *strval,
 		  val_value_t *retval);
@@ -558,6 +564,12 @@ extern status_t
 			  val_value_t *retval,
 			  ncx_errinfo_t **errinfo);
 
+extern status_t
+    val_union_ok_ex (typ_def_t *typdef,
+                     const xmlChar *strval,
+                     val_value_t *retval,
+                     ncx_errinfo_t **errinfo,
+                     ncx_module_t *mod);
 
 extern dlq_hdr_t *
     val_get_metaQ (val_value_t  *val);

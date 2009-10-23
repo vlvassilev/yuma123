@@ -365,8 +365,8 @@ static status_t
 *   tkc == token chain
 *   mod    == ncx_module_t in progress
 *   appinfoQ == address of Queue to hold this entry (may be NULL)
-*   nobrace == TRUE if not looking for a right brace
-*              FALSE if right brace should be checked
+*   bkup == TRUE if not looking for a right brace
+*           FALSE if right brace should be checked
 *
 * RETURNS:
 *   status of the operation
@@ -375,13 +375,13 @@ static status_t
     consume_appinfo_entry (tk_chain_t *tkc,
 			   ncx_module_t  *mod,
 			   dlq_hdr_t     *appinfoQ,
-			   boolean nobrace)
+			   boolean bkup)
 {
     ncx_appinfo_t   *appinfo;
     status_t         res, retres;
 
     /* right brace means appinfo is done */
-    if (tkc->source == TK_SOURCE_YANG && !nobrace) {
+    if (tkc->source == TK_SOURCE_YANG && !bkup) {
 	if (tk_next_typ(tkc)==TK_TT_RBRACE) {
 	    return ERR_NCX_SKIPPED;
 	}
@@ -420,6 +420,17 @@ static status_t
                   mod,
                   TK_CUR_LNUM(tkc),
                   TK_CUR_LPOS(tkc));
+
+    if (!bkup && appinfo->prefix == NULL) {
+        /* skip the entire YANG statement */
+        if (LOGDEBUG) {
+            log_debug("\nSkipping YANG statement inside "
+                      "an unknown-stmt");
+        }
+        yang_skip_statement(tkc, mod);
+        ncx_free_appinfo(appinfo);
+        return NO_ERR;
+    }
 
     /* at this point, if appinfoQ non-NULL:
      *    appinfo is malloced initialized
@@ -506,7 +517,10 @@ static status_t
     res = NO_ERR;
     done = FALSE;
     while (!done) {
-	res = consume_appinfo_entry(tkc, mod, appinfoQ, bkup);
+	res = consume_appinfo_entry(tkc, 
+                                    mod, 
+                                    appinfoQ, 
+                                    bkup);
 	if (res != NO_ERR || tkc->source == TK_SOURCE_YANG) {
 	    done = TRUE;
 	}
@@ -8181,6 +8195,9 @@ void
     }
     if (revhist->descr) {
 	m__free(revhist->descr);
+    }
+    if (revhist->ref) {
+	m__free(revhist->ref);
     }
     m__free(revhist);
 

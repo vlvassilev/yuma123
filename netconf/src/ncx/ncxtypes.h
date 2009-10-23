@@ -485,6 +485,7 @@ typedef struct ncx_revhist_t_ {
     dlq_hdr_t           qhdr;
     xmlChar            *version;
     xmlChar            *descr;
+    xmlChar            *ref;
     status_t            res;
     ncx_error_t         tkerr;
 } ncx_revhist_t;

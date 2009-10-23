@@ -6879,8 +6879,10 @@ static status_t
 	     */
 	    if (targobj->objtype == OBJ_TYP_LEAF) {
 		if (refine->def) {
-		    res = val_simval_ok(targobj->def.leaf->typdef,
-					refine->def);
+		    res = val_simval_ok_ex(targobj->def.leaf->typdef,
+                                           refine->def,
+                                           NULL,
+                                           mod);
 		    if (res != NO_ERR) {
 			retres = res;
 			log_error("\nError: Leaf refinement '%s' has "

@@ -177,6 +177,86 @@ date         init     comment
 
 
 /********************************************************************
+* FUNCTION need_rpc_includes
+* 
+* Check if the include-stmts for RPC methods are needed
+*
+* INPUTS:
+*   mod == module in progress
+*   cp == conversion parameters to use
+*
+* RETURNS:
+*  TRUE if RPCs found
+*  FALSE if no RPCs found
+*********************************************************************/
+static boolean
+    need_rpc_includes (const ncx_module_t *mod,
+                       const yangdump_cvtparms_t *cp)
+{
+    const ncx_include_t *inc;
+
+    if (obj_any_rpcs(&mod->datadefQ)) {
+        return TRUE;
+    }
+
+    if (cp->unified) {
+	for (inc = (const ncx_include_t *)
+		 dlq_firstEntry(&mod->includeQ);
+	     inc != NULL;
+	     inc = (const ncx_include_t *)dlq_nextEntry(inc)) {
+
+            if (inc->submod && obj_any_rpcs(&inc->submod->datadefQ)) {
+                return TRUE;
+            }
+	}
+    }
+
+    return FALSE;
+
+} /* need_rpc_includes */
+
+
+/********************************************************************
+* FUNCTION need_notif_includes
+* 
+* Check if the include-stmts for notifications are needed
+*
+* INPUTS:
+*   mod == module in progress
+*   cp == conversion parameters to use
+*
+* RETURNS:
+*   TRUE if notifcations found
+*   FALSE if no notifications found
+*********************************************************************/
+static boolean
+    need_notif_includes (const ncx_module_t *mod,
+                         const yangdump_cvtparms_t *cp)
+{
+    const ncx_include_t *inc;
+
+    if (obj_any_notifs(&mod->datadefQ)) {
+        return TRUE;
+    }
+
+    if (cp->unified) {
+	for (inc = (const ncx_include_t *)
+		 dlq_firstEntry(&mod->includeQ);
+	     inc != NULL;
+	     inc = (const ncx_include_t *)dlq_nextEntry(inc)) {
+
+            if (inc->submod && obj_any_notifs(&inc->submod->datadefQ)) {
+                return TRUE;
+            }
+	}
+    }
+
+    return FALSE;
+
+} /* need_notif_includes */
+
+
+/********************************************************************
 * FUNCTION write_h_safe_str
 * 
 * Generate a string token at the current line location
@@ -275,7 +355,7 @@ static void
 
 
 /********************************************************************
- *
+*
 * FUNCTION write_identifier
 * 
 * Generate an identifier
@@ -285,7 +365,7 @@ static void
 * INPUTS:
 *   scb == session control block to use for writing
 *   modname == module name start-string to use
-*   defpart == string for deftype part
+*   defpart == internal string for deftype part
 *   idname == identifier name
 *
 *********************************************************************/
@@ -295,13 +375,66 @@ static void
 		      const xmlChar *defpart,
 		      const xmlChar *idname)
 {
+    ses_putstr(scb, (const xmlChar *)"y_");
     write_h_safe_str(scb, modname);
     ses_putchar(scb, '_');
-    ses_putstr(scb, defpart);
-    ses_putchar(scb, '_');
+    if (defpart != NULL) {
+        ses_putstr(scb, defpart);
+        ses_putchar(scb, '_');
+    }
     write_h_safe_str(scb, idname);
 
 }  /* write_identifier */
+
+
+/********************************************************************
+* FUNCTION write_ext_include
+* 
+* Generate an include statement for an external file
+*
+*  #include <foo,h>
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   hfile == H file name == file name to include (foo.h)
+*
+*********************************************************************/
+static void
+    write_ext_include (ses_cb_t *scb,
+                       const xmlChar *hfile)
+{
+    ses_putstr(scb, (const xmlChar *)"\n#include <");
+    ses_putstr(scb, hfile);
+    ses_putstr(scb, (const xmlChar *)">\n");
+
+}  /* write_ext_include */
+
+
+/********************************************************************
+* FUNCTION write_ncx_include
+* 
+* Generate an include statement for an NCX file
+*
+*  #ifndef _H_foo
+*  #include "foo,h"
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   modname == module name to include (foo)
+*
+*********************************************************************/
+static void
+    write_ncx_include (ses_cb_t *scb,
+                       const xmlChar *modname)
+{
+    ses_putstr(scb, (const xmlChar *)"\n#ifndef _H_");
+    ses_putstr(scb, modname);
+    ses_putstr(scb, (const xmlChar *)"\n#include \"");
+    ses_putstr(scb, modname);
+    ses_putstr(scb, (const xmlChar *)".h\"");
+    ses_putstr(scb, (const xmlChar *)"\n#endif\n");
+
+}  /* write_ncx_include */
 
 
 /********************************************************************
@@ -630,6 +763,98 @@ static void
 }  /* write_h_objects */
 
 
+
+/********************************************************************
+* FUNCTION write_h_rpcs
+* 
+* Generate the YANG for the RPC methods in the specified datadefQ
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   datadefQ == que of obj_template_t to use
+*
+*********************************************************************/
+static void
+    write_h_rpcs (ses_cb_t *scb,
+                  dlq_hdr_t *datadefQ)
+{
+    obj_template_t    *obj;
+    /* dlq_hdr_t         *childdatadefQ; */
+
+
+
+    (void)scb;
+
+
+    if (dlq_empty(datadefQ)) {
+	return;
+    }
+
+    for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
+	 obj != NULL;
+	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+
+	if (!obj_is_rpc(obj)) {
+	    continue;
+	}
+
+        /*
+	childdatadefQ = obj_get_datadefQ(obj);
+	if (childdatadefQ) {
+	    write_h_objects(scb, childdatadefQ);
+	}
+	write_h_rpc(scb, obj);
+        */
+    }
+
+}  /* write_h_rpcs */
+
+
+/********************************************************************
+* FUNCTION write_h_notifs
+* 
+* Generate the YANG for the notifications in the specified datadefQ
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   datadefQ == que of obj_template_t to use
+*
+*********************************************************************/
+static void
+    write_h_notifs (ses_cb_t *scb,
+                    dlq_hdr_t *datadefQ)
+{
+    obj_template_t    *obj;
+    /* dlq_hdr_t         *childdatadefQ; */
+
+
+    (void)scb;
+
+
+    if (dlq_empty(datadefQ)) {
+	return;
+    }
+
+    for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
+	 obj != NULL;
+	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+
+	if (!obj_is_notif(obj)) {
+	    continue;
+	}
+
+        /*
+	childdatadefQ = obj_get_datadefQ(obj);
+	if (childdatadefQ) {
+	    write_h_objects(scb, childdatadefQ);
+	}
+	write_h_notif(scb, obj);
+        */
+    }
+
+}  /* write_h_notifs */
+
+
 /********************************************************************
 * FUNCTION write_h_identity
 * 
@@ -847,10 +1072,11 @@ static void
 			const ncx_module_t *mod,
 			const yangdump_cvtparms_t *cp)
 {
-    const ncx_include_t      *inc;
     status_t                  res;
+    int32                     indent;
     xmlChar                   buffer[NCX_VERSION_BUFFSIZE];
 
+    indent = cp->indent;
 
     /* banner comments */
     ses_putstr(scb, START_COMMENT);    
@@ -873,9 +1099,9 @@ static void
 
     /* module name */
     if (mod->ismod) {
-	ses_putstr_indent(scb, YANG_K_MODULE, NCX_DEF_INDENT);
+	ses_putstr_indent(scb, YANG_K_MODULE, indent);
     } else {
-	ses_putstr_indent(scb, YANG_K_SUBMODULE, NCX_DEF_INDENT);
+	ses_putstr_indent(scb, YANG_K_SUBMODULE, indent);
     }
     ses_putchar(scb, ' ');
     ses_putstr(scb, mod->name);
@@ -885,7 +1111,8 @@ static void
 	write_h_simple_str(scb, 
 			   YANG_K_REVISION,
 			   mod->version, 
-			   NCX_DEF_INDENT, 0);
+                           indent,
+                           0);
 	ses_putchar(scb, '\n');
     }
 
@@ -894,12 +1121,14 @@ static void
 	write_h_simple_str(scb, 
 			   YANG_K_NAMESPACE, 
 			   mod->ns,
-			   NCX_DEF_INDENT, 0);
+                           indent,
+                           0);
     } else {
 	write_h_simple_str(scb, 
 			   YANG_K_BELONGS_TO, 
 			   mod->belongs,
-			   NCX_DEF_INDENT, 0);
+                           indent,
+                           0);
     }
 
     /* organization */
@@ -907,7 +1136,8 @@ static void
 	write_h_simple_str(scb, 
 			   YANG_K_ORGANIZATION,
 			   mod->organization, 
-			   NCX_DEF_INDENT, 0);
+                           indent,
+                           0);
     }
 
     ses_putchar(scb, '\n');
@@ -915,29 +1145,85 @@ static void
     ses_putstr(scb, END_COMMENT);
     ses_putchar(scb, '\n');
 
-    /* includes section	*/
+} /* write_h_header */
+
+
+/********************************************************************
+* FUNCTION write_h_includes
+* 
+* Write the H file #include statements
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == module in progress
+*   cp == conversion parameters to use
+*
+* OUTPUTS:
+*  current indent count will be ses_indent_count(scb) upon exit
+*********************************************************************/
+static void
+    write_h_includes (ses_cb_t *scb,
+                      const ncx_module_t *mod,
+                      const yangdump_cvtparms_t *cp)
+{
+    const ncx_include_t      *inc;
+    boolean                   needrpc, neednotif;
+
+
+    needrpc = need_rpc_includes(mod, cp);
+    neednotif = need_notif_includes(mod, cp);
+
+    /* add xmlChar include */
+    write_ext_include(scb, (const xmlChar *)"xmlstring.h");
+
+    /* add includes even if they may not get used
+     * TBD: prune all unused include files
+     */
+    write_ncx_include(scb, (const xmlChar *)"agt");
+
+    if (needrpc) {
+        write_ncx_include(scb, (const xmlChar *)"agt_cb");
+    }
+
+    if (neednotif) {
+        write_ncx_include(scb, (const xmlChar *)"agt_not");
+    }
+        
+    if (needrpc) {
+        write_ncx_include(scb, (const xmlChar *)"agt_rpc");
+    }
+
+    write_ncx_include(scb, (const xmlChar *)"agt_util");
+    write_ncx_include(scb, (const xmlChar *)"dlq");
+    write_ncx_include(scb, (const xmlChar *)"ncxtypes");
+
+    if (needrpc) {
+        write_ncx_include(scb, (const xmlChar *)"rpc");
+    }
+
+    if (needrpc || neednotif) {
+        write_ncx_include(scb, (const xmlChar *)"ses");
+    }
+
+    write_ncx_include(scb, (const xmlChar *)"status");
+
+    if (needrpc || neednotif) {
+        write_ncx_include(scb, (const xmlChar *)"val");
+        write_ncx_include(scb, (const xmlChar *)"val_util");
+    }
+
+    /* includes for submodules */
     if (!cp->unified) {
 	for (inc = (const ncx_include_t *)
 		 dlq_firstEntry(&mod->includeQ);
 	     inc != NULL;
 	     inc = (const ncx_include_t *)dlq_nextEntry(inc)) {
 
-	    ses_putstr(scb, POUND_IFNDEF);
-	    ses_putstr(scb, BAR_H);
-	    write_h_safe_str(scb, inc->submodule);
-
-	    ses_putstr(scb, POUND_INCLUDE);
-	    ses_putchar(scb, ' ');
-	    ses_putchar(scb, '"');
-	    write_h_safe_str(scb, inc->submodule);
-	    ses_putstr(scb, DOT_H);
-	    ses_putchar(scb, '"');
-	    ses_putstr(scb, POUND_ENDIF);
-	    ses_putchar(scb, '\n');
+            write_ncx_include(scb, inc->submodule);
 	}
     }
 
-} /* write_h_header */
+} /* write_h_includes */
 
 
 /********************************************************************
@@ -958,6 +1244,9 @@ static void
 		  const yangdump_cvtparms_t *cp)
 {
     yang_node_t *node;
+    int32        indent;
+
+    indent = cp->indent;
 
     /* Write the start of the H file */
     ses_putstr(scb, POUND_IFNDEF);
@@ -969,6 +1258,7 @@ static void
 
     write_h_header(scb, mod, cp);
 
+    write_h_includes(scb, mod, cp);
 
     /* 1) features */
     write_h_features(scb, &mod->featureQ);
@@ -1022,6 +1312,67 @@ static void
 		write_h_objects(scb, &node->submod->datadefQ);
 	    }
 	}
+    }
+
+    /* 5) typedefs and function prototypes for RPCs */
+    write_h_rpcs(scb, &mod->datadefQ);
+
+    if (cp->unified && mod->ismod) {
+	for (node = (yang_node_t *)
+		 dlq_firstEntry(&mod->saveincQ);
+	     node != NULL;
+	     node = (yang_node_t *)dlq_nextEntry(node)) {
+	    if (node->submod) {
+		write_h_rpcs(scb, &node->submod->datadefQ);
+	    }
+	}
+    }
+
+    /* 6) typedefs and function prototypes for notifications */
+    write_h_notifs(scb, &mod->datadefQ);
+
+    if (cp->unified && mod->ismod) {
+	for (node = (yang_node_t *)
+		 dlq_firstEntry(&mod->saveincQ);
+	     node != NULL;
+	     node = (yang_node_t *)dlq_nextEntry(node)) {
+	    if (node->submod) {
+		write_h_notifs(scb, &node->submod->datadefQ);
+	    }
+	}
+    }
+
+    /* 5) init and cleanup functions */
+    if (mod->ismod) {
+        /* extern status_t y_<module>_init (void); */
+        ses_putstr(scb, START_COMMENT);
+        ses_putstr(scb, mod->name);
+        ses_putstr(scb, (const xmlChar *)" module init 1");
+        ses_putstr(scb, END_COMMENT);
+        ses_putstr(scb, (const xmlChar *)"\nextern status_t");
+        ses_putstr_indent(scb, (const xmlChar *)"y_", indent);
+        ses_putstr(scb, mod->name);
+        ses_putstr(scb, (const xmlChar *)"_init (void);");
+
+        /* extern status_t y_<module>_init2 (void); */
+        ses_putstr(scb, START_COMMENT);
+        ses_putstr(scb, mod->name);
+        ses_putstr(scb, (const xmlChar *)" module init 2");
+        ses_putstr(scb, END_COMMENT);
+        ses_putstr(scb, (const xmlChar *)"\nextern status_t");
+        ses_putstr_indent(scb, (const xmlChar *)"y_", indent);
+        ses_putstr(scb, mod->name);
+        ses_putstr(scb, (const xmlChar *)"_init2 (void);");
+
+        /* extern void y_<module>_cleanup (void); */
+        ses_putstr(scb, START_COMMENT);
+        ses_putstr(scb, mod->name);
+        ses_putstr(scb, (const xmlChar *)" module cleanup");
+        ses_putstr(scb, END_COMMENT);
+        ses_putstr(scb, (const xmlChar *)"\nextern void");
+        ses_putstr_indent(scb, (const xmlChar *)"y_", indent);
+        ses_putstr(scb, mod->name);
+        ses_putstr(scb, (const xmlChar *)"_cleanup (void);");
     }
 
     /* Write the end of the H file */

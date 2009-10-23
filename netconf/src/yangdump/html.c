@@ -3561,6 +3561,15 @@ static void
                          2, 
                          TRUE);
 
+        if (rev->ref) {
+            write_simple_str(scb, 
+                             YANG_K_REFERENCE,
+                             rev->ref,
+                             indent + ses_indent_count(scb),
+                             2, 
+                             TRUE);
+        }
+
 	ses_putstr_indent(scb, END_SEC, indent);
 	ses_putchar(scb, '\n');
     }

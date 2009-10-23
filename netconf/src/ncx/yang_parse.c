@@ -2411,13 +2411,14 @@ static status_t
     const xmlChar *val;
     const char    *expstr;
     tk_type_t      tktyp;
-    boolean        done, descrdone;
+    boolean        done, descrdone, refdone;
     status_t       res, retres;
 
     val = NULL;
     expstr = "module name";
     done = FALSE;
     descrdone = FALSE;
+    refdone = FALSE;
     res = NO_ERR;
     retres = NO_ERR;
 
@@ -2503,6 +2504,20 @@ static status_t
                                      mod, 
                                      &rev->descr,
 				     &descrdone, 
+                                     &mod->appinfoQ);
+	    if (res != NO_ERR) {
+		retres = res;
+		if (NEED_EXIT(res)) {
+		    ncx_free_revhist(rev);
+		    return res;
+		}
+	    }
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+	    /* Optional 'reference' field is present */
+	    res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &rev->ref,
+				     &refdone, 
                                      &mod->appinfoQ);
 	    if (res != NO_ERR) {
 		retres = res;

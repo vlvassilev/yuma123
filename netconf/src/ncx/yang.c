@@ -178,8 +178,8 @@ static const xmlChar *top_keywords[] =
 *********************************************************************/
 status_t 
     yang_consume_semiapp (tk_chain_t *tkc,
-			  ncx_module_t *mod,
-			  dlq_hdr_t *appinfoQ)
+                          ncx_module_t *mod,
+                          dlq_hdr_t *appinfoQ)
 {
     const char   *expstr;
     status_t      res, retres;
@@ -223,8 +223,8 @@ status_t
 	return res;
     }
 
-    /* got the start of a vendor extension section
-     * got left brace okay
+    /* got a left brace '{' 
+     * the start of a vendor extension section
      */
     done = FALSE;
     while (!done) {
@@ -598,7 +598,7 @@ status_t
 * INPUTS:
 *   tkc == token chain
 *   mod == module in progress
-*   prefix == address of prefix string if any is used (may be BULL)
+*   prefix == address of prefix string if any is used (may be NULL)
 *   field == address of field to get the string (may be NULL)
 *
 * OUTPUTS:

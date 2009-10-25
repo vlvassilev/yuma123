@@ -665,6 +665,6 @@ date	     init     comment
 #define E_BAD_DATA_ERROR  (const xmlChar *)"error"
 
 #define COPYRIGHT_STRING \
-    "Copyright (c) 2009, Netconf Central, All Rights Reserved.\n"
+    "Copyright (c) 2009, Netconf Central, Inc., All Rights Reserved.\n"
 
 #endif	    /* _H_ncxconst */

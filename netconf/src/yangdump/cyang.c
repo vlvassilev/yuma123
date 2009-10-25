@@ -130,30 +130,30 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
 static void
     write_cyang_groupings (ses_cb_t *scb,
-			   const ncx_module_t *mod,
-			   const yangdump_cvtparms_t *cp,
-			   const dlq_hdr_t *groupingQ,
-			   int32 startindent);
+                           const ncx_module_t *mod,
+                           const yangdump_cvtparms_t *cp,
+                           const dlq_hdr_t *groupingQ,
+                           int32 startindent);
 
 static void
     write_cyang_type_clause (ses_cb_t *scb,
-			     const ncx_module_t *mod,
-			     const yangdump_cvtparms_t *cp,
-			     typ_def_t *typdef,
-			     int32 startindent);
+                             const ncx_module_t *mod,
+                             const yangdump_cvtparms_t *cp,
+                             typ_def_t *typdef,
+                             int32 startindent);
 
 static void
     write_cyang_objects (ses_cb_t *scb,
-			 const ncx_module_t *mod,
-			 const yangdump_cvtparms_t *cp,
-			 const dlq_hdr_t *datadefQ,
-			 int32 startindent);
+                         const ncx_module_t *mod,
+                         const yangdump_cvtparms_t *cp,
+                         const dlq_hdr_t *datadefQ,
+                         int32 startindent);
 
 
 /********************************************************************
@@ -169,8 +169,8 @@ static void
 *********************************************************************/
 static void
     write_cyang_extkw (ses_cb_t *scb,
-		       const xmlChar *kwpfix,
-		       const xmlChar *kwname)
+                       const xmlChar *kwpfix,
+                       const xmlChar *kwname)
 {
     ses_putstr(scb, kwpfix);
     ses_putchar(scb, ':');
@@ -194,27 +194,27 @@ static void
 *********************************************************************/
 static void
     write_cyang_banner_cmt (ses_cb_t *scb,
-			    const ncx_module_t *mod,
-			    const yangdump_cvtparms_t *cp,
-			    const xmlChar *cmval,
-			    int32 indent)
+                            const ncx_module_t *mod,
+                            const yangdump_cvtparms_t *cp,
+                            const xmlChar *cmval,
+                            int32 indent)
 {
     boolean needed;
 
     needed = FALSE;
 
     if (cp->unified) {
-	if (mod->ismod) {
-	    needed = TRUE;
-	}
+        if (mod->ismod) {
+            needed = TRUE;
+        }
     } else {
-	needed = TRUE;
+        needed = TRUE;
     }
     if (needed) {
-	ses_putchar(scb, '\n');
-	ses_indent(scb, indent);
-	ses_putstr(scb, (const xmlChar *)"// ");
-	ses_putstr(scb, cmval);
+        ses_putchar(scb, '\n');
+        ses_indent(scb, indent);
+        ses_putstr(scb, (const xmlChar *)"// ");
+        ses_putstr(scb, cmval);
     }
 
 }  /* write_cyang_banner_cmt */
@@ -234,16 +234,16 @@ static void
 *********************************************************************/
 static void
     write_cyang_endsec_cmt (ses_cb_t *scb,
-			    const xmlChar *cmtype,
-			    const xmlChar *cmname)
+                            const xmlChar *cmtype,
+                            const xmlChar *cmname)
 {
     ses_putstr(scb, (const xmlChar *)" // ");
     if (cmtype) {
-	ses_putstr(scb, cmtype);
-	ses_putchar(scb, ' ');
+        ses_putstr(scb, cmtype);
+        ses_putchar(scb, ' ');
     }
     if (cmname) {
-	ses_putstr(scb, cmname);
+        ses_putstr(scb, cmname);
     }
 
 }  /* write_cyang_endsec_cmt */
@@ -262,32 +262,32 @@ static void
 *********************************************************************/
 static void
     write_cyang_str (ses_cb_t *scb,
-		     const xmlChar *strval,
-		     uint32 quotes,
-		     int32 indent)
+                     const xmlChar *strval,
+                     uint32 quotes,
+                     int32 indent)
 {
     switch (quotes) {
     case 1:
-	ses_putchar(scb, '\'');
-	break;
+        ses_putchar(scb, '\'');
+        break;
     case 2:
-	ses_putchar(scb, '"');
-	break;
+        ses_putchar(scb, '"');
+        break;
     default:
-	;
+        ;
     }
 
     ses_putcstr(scb, strval, indent);
 
     switch (quotes) {
     case 1:
-	ses_putchar(scb, '\'');
-	break;
+        ses_putchar(scb, '\'');
+        break;
     case 2:
-	ses_putchar(scb, '"');
-	break;
+        ses_putchar(scb, '"');
+        break;
     default:
-	;
+        ;
     }
 
 }  /* write_cyang_str */
@@ -309,24 +309,24 @@ static void
 *********************************************************************/
 static void
     write_cyang_id (ses_cb_t *scb,
-		    const xmlChar *kwname,
-		    const xmlChar *idname,
-		    int32 indent,
-		    boolean finsemi,
-		    boolean newln)
+                    const xmlChar *kwname,
+                    const xmlChar *idname,
+                    int32 indent,
+                    boolean finsemi,
+                    boolean newln)
 {
     if (newln) {
-	ses_putchar(scb, '\n');
+        ses_putchar(scb, '\n');
     }
     ses_putstr_indent(scb, kwname, indent);
     if (idname) {
-	ses_putchar(scb, ' ');
-	ses_putstr(scb, idname);
+        ses_putchar(scb, ' ');
+        ses_putstr(scb, idname);
     }
     if (finsemi) {
-	ses_putchar(scb, ';');
+        ses_putchar(scb, ';');
     } else {
-	ses_putstr(scb, START_SEC);
+        ses_putstr(scb, START_SEC);
     }
 
 }  /* write_cyang_id */
@@ -347,26 +347,26 @@ static void
 *********************************************************************/
 static void
     write_cyang_simple_str (ses_cb_t *scb,
-			    const xmlChar *kwname,
-			    const xmlChar *strval,
-			    int32 indent,
-			    uint32 quotes,
-			    boolean finsemi)
+                            const xmlChar *kwname,
+                            const xmlChar *strval,
+                            int32 indent,
+                            uint32 quotes,
+                            boolean finsemi)
 {
     ses_putstr_indent(scb, kwname, indent);
     if (strval) {
-	if (xml_strlen(strval) < 39) {
-	    ses_putchar(scb, ' ');
-	} else {
-	    indent += ses_indent_count(scb);
-	    ses_indent(scb, indent);
-	}
-	write_cyang_str(scb, strval, quotes, indent);
+        if (xml_strlen(strval) < 39) {
+            ses_putchar(scb, ' ');
+        } else {
+            indent += ses_indent_count(scb);
+            ses_indent(scb, indent);
+        }
+        write_cyang_str(scb, strval, quotes, indent);
     }
     if (finsemi) {
-	ses_putchar(scb, ';');
+        ses_putchar(scb, ';');
     } else {
-	ses_putstr(scb, START_SEC);
+        ses_putstr(scb, START_SEC);
     }
 
 }  /* write_cyang_simple_str */
@@ -386,16 +386,16 @@ static void
 *********************************************************************/
 static void
     write_cyang_status (ses_cb_t *scb,
-		  ncx_status_t status,
-		  int32 indent)
+                  ncx_status_t status,
+                  int32 indent)
 {
     if (status != NCX_STATUS_CURRENT && status != NCX_STATUS_NONE) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_STATUS,
-			       ncx_get_status_string(status),
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_STATUS,
+                               ncx_get_status_string(status),
+                               indent, 
+                               2, 
+                               TRUE);
     }
 }  /* write_cyang_status */
 
@@ -416,17 +416,17 @@ static void
 *********************************************************************/
 static void
     write_cyang_type (ses_cb_t *scb,
-		      const ncx_module_t *mod,
-		      const typ_def_t *typdef,
-		      int32 indent)
+                      const ncx_module_t *mod,
+                      const typ_def_t *typdef,
+                      int32 indent)
 {
     ses_putstr_indent(scb, YANG_K_TYPE, indent);
     ses_putchar(scb, ' ');
 
     if (typdef->prefix && xml_strcmp(typdef->prefix, mod->prefix)) {
-	write_cyang_extkw(scb, typdef->prefix, typdef->typename);
+        write_cyang_extkw(scb, typdef->prefix, typdef->typename);
     } else {
-	ses_putstr(scb, typdef->typename);
+        ses_putstr(scb, typdef->typename);
     }
 
 }  /* write_cyang_type */
@@ -445,40 +445,40 @@ static void
 *********************************************************************/
 static void
     write_cyang_errinfo (ses_cb_t *scb,
-			 const ncx_errinfo_t *errinfo,
-			 int32 indent)
+                         const ncx_errinfo_t *errinfo,
+                         int32 indent)
 {
     if (errinfo->error_message) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_ERROR_MESSAGE,
-			       errinfo->error_message, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_ERROR_MESSAGE,
+                               errinfo->error_message, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
     if (errinfo->error_app_tag) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_ERROR_APP_TAG,
-			       errinfo->error_app_tag, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_ERROR_APP_TAG,
+                               errinfo->error_app_tag, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
     if (errinfo->descr) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_DESCRIPTION,
-			       errinfo->descr, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_DESCRIPTION,
+                               errinfo->descr, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
     if (errinfo->ref) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_REFERENCE,
-			       errinfo->ref, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_REFERENCE,
+                               errinfo->ref, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
 }  /* write_cyang_errinfo */
 
@@ -497,37 +497,37 @@ static void
 *********************************************************************/
 static void
     write_cyang_musts (ses_cb_t *scb,
-		       const dlq_hdr_t *mustQ,
-		       int32 indent)
+                       const dlq_hdr_t *mustQ,
+                       int32 indent)
 {
     const xpath_pcb_t    *must;
     const ncx_errinfo_t  *errinfo;
 
     for (must = (const xpath_pcb_t *)dlq_firstEntry(mustQ);
-	 must != NULL;
-	 must = (const xpath_pcb_t *)dlq_nextEntry(must)) {
+         must != NULL;
+         must = (const xpath_pcb_t *)dlq_nextEntry(must)) {
 
-	errinfo = &must->errinfo;
-	if (errinfo->descr || errinfo->ref ||
-	    errinfo->error_app_tag || errinfo->error_message) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_MUST,
-				   must->exprstr, 
-				   indent, 
-				   2, 
-				   FALSE);
-	    write_cyang_errinfo(scb, 
-				errinfo, 
-				indent + ses_indent_count(scb));
-	    ses_putstr_indent(scb, END_SEC, indent);
-	} else {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_MUST,
-				   must->exprstr, 
-				   indent, 
-				   2, 
-				   TRUE);
-	}
+        errinfo = &must->errinfo;
+        if (errinfo->descr || errinfo->ref ||
+            errinfo->error_app_tag || errinfo->error_message) {
+            write_cyang_simple_str(scb, 
+                                   YANG_K_MUST,
+                                   must->exprstr, 
+                                   indent, 
+                                   2, 
+                                   FALSE);
+            write_cyang_errinfo(scb, 
+                                errinfo, 
+                                indent + ses_indent_count(scb));
+            ses_putstr_indent(scb, END_SEC, indent);
+        } else {
+            write_cyang_simple_str(scb, 
+                                   YANG_K_MUST,
+                                   must->exprstr, 
+                                   indent, 
+                                   2, 
+                                   TRUE);
+        }
     }
 
 }  /* write_cyang_musts */
@@ -549,34 +549,34 @@ static void
 *********************************************************************/
 static void
     write_cyang_appinfoQ (ses_cb_t *scb,
-			  const ncx_module_t *mod,
-			  const yangdump_cvtparms_t *cp,
-			  const dlq_hdr_t *appinfoQ,
-			  int32 indent)
+                          const ncx_module_t *mod,
+                          const yangdump_cvtparms_t *cp,
+                          const dlq_hdr_t *appinfoQ,
+                          int32 indent)
 {
     const ncx_appinfo_t *appinfo;
 
     for (appinfo = (const ncx_appinfo_t *)dlq_firstEntry(appinfoQ);
-	 appinfo != NULL;
-	 appinfo = (const ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
+         appinfo != NULL;
+         appinfo = (const ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
 
-	ses_indent(scb, indent);
-	write_cyang_extkw(scb, appinfo->prefix, appinfo->name);
+        ses_indent(scb, indent);
+        write_cyang_extkw(scb, appinfo->prefix, appinfo->name);
 
-	if (appinfo->value) {
-	    ses_putchar(scb, ' ');
-	    write_cyang_str(scb, appinfo->value, 2,
-			    indent+ses_indent_count(scb));
-	}
+        if (appinfo->value) {
+            ses_putchar(scb, ' ');
+            write_cyang_str(scb, appinfo->value, 2,
+                            indent+ses_indent_count(scb));
+        }
 
-	if (!dlq_empty(appinfo->appinfoQ)) {
-	    ses_putstr(scb, START_SEC);
-	    write_cyang_appinfoQ(scb, mod, cp, appinfo->appinfoQ,
-				 indent+ses_indent_count(scb));
-	    ses_putstr_indent(scb, END_SEC, indent);
-	} else {
-	    ses_putchar(scb, ';');
-	}
+        if (!dlq_empty(appinfo->appinfoQ)) {
+            ses_putstr(scb, START_SEC);
+            write_cyang_appinfoQ(scb, mod, cp, appinfo->appinfoQ,
+                                 indent+ses_indent_count(scb));
+            ses_putstr_indent(scb, END_SEC, indent);
+        } else {
+            ses_putchar(scb, ';');
+        }
     }
 
 }  /* write_cyang_appinfoQ */
@@ -597,10 +597,10 @@ static void
 *********************************************************************/
 static void
     write_cyang_type_contents (ses_cb_t *scb,
-			       const ncx_module_t *mod,
-			       const yangdump_cvtparms_t *cp,
-			       typ_def_t *typdef,
-			       int32 startindent)
+                               const ncx_module_t *mod,
+                               const yangdump_cvtparms_t *cp,
+                               typ_def_t *typdef,
+                               int32 startindent)
 {
     typ_unionnode_t       *un;
     const typ_enum_t      *bit, *enu;
@@ -615,242 +615,242 @@ static void
 
     switch (typdef->class) {
     case NCX_CL_BASE:
-	break;
+        break;
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp) {
-	    typdef = typdef->def.named.newtyp;
-	} else {
-	    break;
-	}
-	/* fall through if typdef set */
+        if (typdef->def.named.newtyp) {
+            typdef = typdef->def.named.newtyp;
+        } else {
+            break;
+        }
+        /* fall through if typdef set */
     case NCX_CL_SIMPLE:
-	switch (typdef->def.simple.btyp) {
-	case NCX_BT_UNION:
-	    for (un = typ_first_unionnode(typdef);
-		 un != NULL;
-		 un = (typ_unionnode_t *)dlq_nextEntry(un)) {
-		if (un->typdef) {
-		    write_cyang_type_clause(scb, 
+        switch (typdef->def.simple.btyp) {
+        case NCX_BT_UNION:
+            for (un = typ_first_unionnode(typdef);
+                 un != NULL;
+                 un = (typ_unionnode_t *)dlq_nextEntry(un)) {
+                if (un->typdef) {
+                    write_cyang_type_clause(scb, 
                                             mod, 
                                             cp,
-					    un->typdef, 
+                                            un->typdef, 
                                             startindent);
-		} else if (un->typ) {
-		    write_cyang_type_clause(scb, 
+                } else if (un->typ) {
+                    write_cyang_type_clause(scb, 
                                             mod, 
                                             cp, 
-					    &un->typ->typdef, 
+                                            &un->typ->typdef, 
                                             startindent);
-		} else {
-		    SET_ERROR(ERR_INTERNAL_VAL);
-		}
-	    }
-	    break;
-	case NCX_BT_BITS:
-	    for (bit = typ_first_con_enumdef(typdef);
-		 bit != NULL;
-		 bit = (const typ_enum_t *)dlq_nextEntry(bit)) {
-
-		write_cyang_simple_str(scb, 
-				       YANG_K_BIT, 
-				       bit->name,
-				       startindent, 
-				       2, 
-				       FALSE);
-
-		sprintf(buff, "%u", bit->pos);
-		write_cyang_simple_str(scb, 
-				       YANG_K_POSITION,
-				       (const xmlChar *)buff,
-				       indent, 
-				       0, 
-				       TRUE);
-
-		write_cyang_status(scb, bit->status, indent);
-
-		if (bit->descr) {
-		    write_cyang_simple_str(scb, 
-					   YANG_K_DESCRIPTION,
-					   bit->descr, 
-					   indent, 
-					   2, 
-					   TRUE);
-		}
-
-		if (bit->ref) {
-		    write_cyang_simple_str(scb, 
-					   YANG_K_REFERENCE,
-					   bit->ref, 
-					   indent, 
-					   2, 
-					   TRUE);
-		}
-
-		write_cyang_appinfoQ(scb, 
-				     mod, 
-				     cp, 
-				     &bit->appinfoQ, 
-				     indent);
-
-		ses_putstr_indent(scb, END_SEC, startindent);
-	    }
-	    break;
-	case NCX_BT_ENUM:
-	    for (enu = typ_first_con_enumdef(typdef);
-		 enu != NULL;
-		 enu = (const typ_enum_t *)dlq_nextEntry(enu)) {
-
-		write_cyang_simple_str(scb, 
-				       YANG_K_ENUM, 
-				       enu->name,
-				       startindent, 
-				       2, 
-				       FALSE);
-
-		sprintf(buff, "%d", enu->val);
-		write_cyang_simple_str(scb, 
-				       YANG_K_VALUE,
-				       (const xmlChar *)buff,
-				       indent, 
-				       0, 
-				       TRUE);
-
-		write_cyang_status(scb, enu->status, indent);
-
-		if (enu->descr) {
-		    write_cyang_simple_str(scb, 
-					   YANG_K_DESCRIPTION,
-					   enu->descr, 
-					   indent, 
-					   2, 
-					   TRUE);
-		}
-
-		if (enu->ref) {
-		    write_cyang_simple_str(scb, 
-					   YANG_K_REFERENCE,
-					   enu->ref, 
-					   indent, 
-					   2, 
-					   TRUE);
-		}
-
-		write_cyang_appinfoQ(scb, 
-				     mod, 
-				     cp, 
-				     &enu->appinfoQ, 
-				     indent);
-
-		ses_putstr_indent(scb, END_SEC,  startindent);
-	    }
-	    break;
-	case NCX_BT_EMPTY:
-	case NCX_BT_BOOLEAN:
-	    /* appinfo only */
-	    break;
-	case NCX_BT_DECIMAL64:
-	    sprintf(buff, "%d", typ_get_fraction_digits(typdef));
-	    write_cyang_simple_str(scb,
-				   YANG_K_FRACTION_DIGITS,
-				   (const xmlChar *)buff,
-				   startindent,
-				   0,
-				   FALSE);
-	    /* fall through to check range */
-	case NCX_BT_INT8:
-	case NCX_BT_INT16:
-	case NCX_BT_INT32:
-	case NCX_BT_INT64:
-	case NCX_BT_UINT8:
-	case NCX_BT_UINT16:
-	case NCX_BT_UINT32:
-	case NCX_BT_UINT64:
-	case NCX_BT_FLOAT64:
-	    range = typ_get_crange_con(typdef);
-	    if (range && range->rangestr) {
-		errinfo_set = ncx_errinfo_set(&range->range_errinfo);
-		write_cyang_simple_str(scb, 
-				       YANG_K_RANGE,
-				       range->rangestr,
-				       startindent, 
-				       2, 
-				       !errinfo_set);
-		if (errinfo_set) {
-		    write_cyang_errinfo(scb, &range->range_errinfo, indent);
-		    ses_putstr_indent(scb, END_SEC, startindent);
-		}
-	    }
-	    break;
-	case NCX_BT_STRING:
-	case NCX_BT_BINARY:
-	    range = typ_get_crange_con(typdef);
-	    if (range && range->rangestr) {
-		errinfo_set = ncx_errinfo_set(&range->range_errinfo);
-		write_cyang_simple_str(scb, 
-				       YANG_K_LENGTH,
-				       range->rangestr,
-				       startindent, 
-				       2, 
-				       !errinfo_set);
-		if (errinfo_set) {
-		    write_cyang_errinfo(scb, &range->range_errinfo, indent);
-		    ses_putstr_indent(scb, END_SEC, startindent);
-		}
-	    }
-	    for (pat = typ_get_first_cpattern(typdef);
-		 pat != NULL;
-		 pat = typ_get_next_cpattern(pat)) {
-
-		errinfo_set = ncx_errinfo_set(&pat->pat_errinfo);
-		write_cyang_simple_str(scb, 
-				       YANG_K_PATTERN, 
-				       pat->pat_str,
-				       startindent, 
-				       1, 
-				       !errinfo_set);
-		if (errinfo_set) {		
-		    write_cyang_errinfo(scb, 
-					&pat->pat_errinfo, 
-					indent);
-		    ses_putstr_indent(scb, END_SEC, startindent);
-		}
-	    }
-	    break;
-	case NCX_BT_SLIST:
-	    break;
-	case NCX_BT_LEAFREF:
-	    str = typ_get_leafref_path(typdef);
-	    if (str) {
-		write_cyang_simple_str(scb, 
-				       YANG_K_PATH, 
-				       str,
-				       startindent, 
-				       2, 
-				       TRUE);
-	    }
+                } else {
+                    SET_ERROR(ERR_INTERNAL_VAL);
+                }
+            }
             break;
-	case NCX_BT_INSTANCE_ID:
-	    constrained_set = typ_get_constrained(typdef);
-	    write_cyang_simple_str(scb, 
-				   YANG_K_REQUIRE_INSTANCE,
-				   (constrained_set) 
-				   ? NCX_EL_TRUE : NCX_EL_FALSE,
-				   startindent, 
-				   2, 
-				   TRUE);
-	    break;
-	default:
-	    break;
-	}
-	break;
+        case NCX_BT_BITS:
+            for (bit = typ_first_con_enumdef(typdef);
+                 bit != NULL;
+                 bit = (const typ_enum_t *)dlq_nextEntry(bit)) {
+
+                write_cyang_simple_str(scb, 
+                                       YANG_K_BIT, 
+                                       bit->name,
+                                       startindent, 
+                                       2, 
+                                       FALSE);
+
+                sprintf(buff, "%u", bit->pos);
+                write_cyang_simple_str(scb, 
+                                       YANG_K_POSITION,
+                                       (const xmlChar *)buff,
+                                       indent, 
+                                       0, 
+                                       TRUE);
+
+                write_cyang_status(scb, bit->status, indent);
+
+                if (bit->descr) {
+                    write_cyang_simple_str(scb, 
+                                           YANG_K_DESCRIPTION,
+                                           bit->descr, 
+                                           indent, 
+                                           2, 
+                                           TRUE);
+                }
+
+                if (bit->ref) {
+                    write_cyang_simple_str(scb, 
+                                           YANG_K_REFERENCE,
+                                           bit->ref, 
+                                           indent, 
+                                           2, 
+                                           TRUE);
+                }
+
+                write_cyang_appinfoQ(scb, 
+                                     mod, 
+                                     cp, 
+                                     &bit->appinfoQ, 
+                                     indent);
+
+                ses_putstr_indent(scb, END_SEC, startindent);
+            }
+            break;
+        case NCX_BT_ENUM:
+            for (enu = typ_first_con_enumdef(typdef);
+                 enu != NULL;
+                 enu = (const typ_enum_t *)dlq_nextEntry(enu)) {
+
+                write_cyang_simple_str(scb, 
+                                       YANG_K_ENUM, 
+                                       enu->name,
+                                       startindent, 
+                                       2, 
+                                       FALSE);
+
+                sprintf(buff, "%d", enu->val);
+                write_cyang_simple_str(scb, 
+                                       YANG_K_VALUE,
+                                       (const xmlChar *)buff,
+                                       indent, 
+                                       0, 
+                                       TRUE);
+
+                write_cyang_status(scb, enu->status, indent);
+
+                if (enu->descr) {
+                    write_cyang_simple_str(scb, 
+                                           YANG_K_DESCRIPTION,
+                                           enu->descr, 
+                                           indent, 
+                                           2, 
+                                           TRUE);
+                }
+
+                if (enu->ref) {
+                    write_cyang_simple_str(scb, 
+                                           YANG_K_REFERENCE,
+                                           enu->ref, 
+                                           indent, 
+                                           2, 
+                                           TRUE);
+                }
+
+                write_cyang_appinfoQ(scb, 
+                                     mod, 
+                                     cp, 
+                                     &enu->appinfoQ, 
+                                     indent);
+
+                ses_putstr_indent(scb, END_SEC,  startindent);
+            }
+            break;
+        case NCX_BT_EMPTY:
+        case NCX_BT_BOOLEAN:
+            /* appinfo only */
+            break;
+        case NCX_BT_DECIMAL64:
+            sprintf(buff, "%d", typ_get_fraction_digits(typdef));
+            write_cyang_simple_str(scb,
+                                   YANG_K_FRACTION_DIGITS,
+                                   (const xmlChar *)buff,
+                                   startindent,
+                                   0,
+                                   FALSE);
+            /* fall through to check range */
+        case NCX_BT_INT8:
+        case NCX_BT_INT16:
+        case NCX_BT_INT32:
+        case NCX_BT_INT64:
+        case NCX_BT_UINT8:
+        case NCX_BT_UINT16:
+        case NCX_BT_UINT32:
+        case NCX_BT_UINT64:
+        case NCX_BT_FLOAT64:
+            range = typ_get_crange_con(typdef);
+            if (range && range->rangestr) {
+                errinfo_set = ncx_errinfo_set(&range->range_errinfo);
+                write_cyang_simple_str(scb, 
+                                       YANG_K_RANGE,
+                                       range->rangestr,
+                                       startindent, 
+                                       2, 
+                                       !errinfo_set);
+                if (errinfo_set) {
+                    write_cyang_errinfo(scb, &range->range_errinfo, indent);
+                    ses_putstr_indent(scb, END_SEC, startindent);
+                }
+            }
+            break;
+        case NCX_BT_STRING:
+        case NCX_BT_BINARY:
+            range = typ_get_crange_con(typdef);
+            if (range && range->rangestr) {
+                errinfo_set = ncx_errinfo_set(&range->range_errinfo);
+                write_cyang_simple_str(scb, 
+                                       YANG_K_LENGTH,
+                                       range->rangestr,
+                                       startindent, 
+                                       2, 
+                                       !errinfo_set);
+                if (errinfo_set) {
+                    write_cyang_errinfo(scb, &range->range_errinfo, indent);
+                    ses_putstr_indent(scb, END_SEC, startindent);
+                }
+            }
+            for (pat = typ_get_first_cpattern(typdef);
+                 pat != NULL;
+                 pat = typ_get_next_cpattern(pat)) {
+
+                errinfo_set = ncx_errinfo_set(&pat->pat_errinfo);
+                write_cyang_simple_str(scb, 
+                                       YANG_K_PATTERN, 
+                                       pat->pat_str,
+                                       startindent, 
+                                       1, 
+                                       !errinfo_set);
+                if (errinfo_set) {                
+                    write_cyang_errinfo(scb, 
+                                        &pat->pat_errinfo, 
+                                        indent);
+                    ses_putstr_indent(scb, END_SEC, startindent);
+                }
+            }
+            break;
+        case NCX_BT_SLIST:
+            break;
+        case NCX_BT_LEAFREF:
+            str = typ_get_leafref_path(typdef);
+            if (str) {
+                write_cyang_simple_str(scb, 
+                                       YANG_K_PATH, 
+                                       str,
+                                       startindent, 
+                                       2, 
+                                       TRUE);
+            }
+            break;
+        case NCX_BT_INSTANCE_ID:
+            constrained_set = typ_get_constrained(typdef);
+            write_cyang_simple_str(scb, 
+                                   YANG_K_REQUIRE_INSTANCE,
+                                   (constrained_set) 
+                                   ? NCX_EL_TRUE : NCX_EL_FALSE,
+                                   startindent, 
+                                   2, 
+                                   TRUE);
+            break;
+        default:
+            break;
+        }
+        break;
     case NCX_CL_COMPLEX:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	break;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        break;
     case NCX_CL_REF:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	break;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     write_cyang_appinfoQ(scb, mod, cp, &typdef->appinfoQ, startindent);
@@ -873,22 +873,22 @@ static void
 *********************************************************************/
 static void
     write_cyang_type_clause (ses_cb_t *scb,
-			     const ncx_module_t *mod,
-			     const yangdump_cvtparms_t *cp,
-			     typ_def_t *typdef,
-			     int32 startindent)
+                             const ncx_module_t *mod,
+                             const yangdump_cvtparms_t *cp,
+                             typ_def_t *typdef,
+                             int32 startindent)
 {
     write_cyang_type(scb, mod, typdef, startindent);
     if (typ_has_subclauses(typdef)) {
-	ses_putstr(scb, START_SEC);
-	write_cyang_type_contents(scb, 
+        ses_putstr(scb, START_SEC);
+        write_cyang_type_contents(scb, 
                                   mod, 
                                   cp, 
                                   typdef,
-				  startindent + ses_indent_count(scb));
-	ses_putstr_indent(scb, END_SEC, startindent);
+                                  startindent + ses_indent_count(scb));
+        ses_putstr_indent(scb, END_SEC, startindent);
     } else {
-	ses_putchar(scb, ';');
+        ses_putchar(scb, ';');
     }
 }  /* write_cyang_type_clause */
 
@@ -909,11 +909,11 @@ static void
 **********************************************************************/
 static void
     write_cyang_typedef (ses_cb_t *scb,
-			 const ncx_module_t *mod,
-			 const yangdump_cvtparms_t *cp,
-			 typ_template_t *typ,
-			 int32 startindent,
-			 boolean first)
+                         const ncx_module_t *mod,
+                         const yangdump_cvtparms_t *cp,
+                         typ_template_t *typ,
+                         int32 startindent,
+                         boolean first)
 {
     int32                    indent;
 
@@ -923,7 +923,7 @@ static void
                    YANG_K_TYPEDEF, 
                    typ->name, 
                    startindent, 
-		   FALSE, 
+                   FALSE, 
                    !first);
 
     /* type field */
@@ -931,22 +931,22 @@ static void
 
     /* units field */
     if (typ->units) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_UNITS, 
-			       typ->units, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_UNITS, 
+                               typ->units, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
 
     /* default field */
     if (typ->defval) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_DEFAULT, 
-			       typ->defval, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_DEFAULT, 
+                               typ->defval, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
 
     /* status field */
@@ -954,22 +954,22 @@ static void
 
     /* description field */
     if (typ->descr) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_DESCRIPTION, 
-			       typ->descr, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_DESCRIPTION, 
+                               typ->descr, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
 
     /* reference field */
     if (typ->ref) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_REFERENCE, 
-			       typ->ref, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_REFERENCE, 
+                               typ->ref, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
 
     /* appinfoQ */
@@ -997,30 +997,30 @@ static void
 *********************************************************************/
 static void
     write_cyang_typedefs (ses_cb_t *scb,
-			  const ncx_module_t *mod,
-			  const yangdump_cvtparms_t *cp,
-			  const dlq_hdr_t *typedefQ,
-			  int32 startindent)
+                          const ncx_module_t *mod,
+                          const yangdump_cvtparms_t *cp,
+                          const dlq_hdr_t *typedefQ,
+                          int32 startindent)
 {
     typ_template_t    *typ;
     boolean            first;
 
     if (dlq_empty(typedefQ)) {
-	return;
+        return;
     }
 
     if (typedefQ == &mod->typeQ) {
-	write_cyang_banner_cmt(scb, mod, cp,
-			       (const xmlChar *)"typedefs", startindent);
+        write_cyang_banner_cmt(scb, mod, cp,
+                               (const xmlChar *)"typedefs", startindent);
     }
 
     first = TRUE;
     for (typ = (typ_template_t *)dlq_firstEntry(typedefQ);
-	 typ != NULL;
-	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
+         typ != NULL;
+         typ = (typ_template_t *)dlq_nextEntry(typ)) {
 
-	write_cyang_typedef(scb, mod, cp, typ, startindent, first);
-	first = FALSE;
+        write_cyang_typedef(scb, mod, cp, typ, startindent, first);
+        first = FALSE;
     }
 
 }  /* write_cyang_typedefs */
@@ -1042,11 +1042,11 @@ static void
 **********************************************************************/
 static void
     write_cyang_grouping (ses_cb_t *scb,
-			  const ncx_module_t *mod,
-			  const yangdump_cvtparms_t *cp,
-			  const grp_template_t *grp,
-			  int32 startindent,
-			  boolean first)
+                          const ncx_module_t *mod,
+                          const yangdump_cvtparms_t *cp,
+                          const grp_template_t *grp,
+                          int32 startindent,
+                          boolean first)
 {
     int32                    indent;
     boolean                  cooked;
@@ -1055,14 +1055,14 @@ static void
     indent = startindent + ses_indent_count(scb);
 
     if (cooked && !grp_has_typedefs(grp)) {
-	return;
+        return;
     }
-	
+        
     write_cyang_id(scb, 
                    YANG_K_GROUPING, 
                    grp->name, 
                    startindent,
-		   FALSE, 
+                   FALSE, 
                    !first);
 
     /* status field */
@@ -1070,22 +1070,22 @@ static void
 
     /* description field */
     if (grp->descr) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_DESCRIPTION, 
-			       grp->descr, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_DESCRIPTION, 
+                               grp->descr, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
 
     /* reference field */
     if (grp->ref) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_REFERENCE, 
-			       grp->ref, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_REFERENCE, 
+                               grp->ref, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
 
     write_cyang_typedefs(scb, mod, cp, &grp->typedefQ, indent);
@@ -1093,7 +1093,7 @@ static void
     write_cyang_groupings(scb, mod, cp, &grp->groupingQ, indent);
 
     if (!cooked) {
-	write_cyang_objects(scb, mod, cp, &grp->datadefQ, indent);
+        write_cyang_objects(scb, mod, cp, &grp->datadefQ, indent);
     }
 
     /* appinfoQ */
@@ -1123,16 +1123,16 @@ static void
 *********************************************************************/
 static void
     write_cyang_groupings (ses_cb_t *scb,
-			   const ncx_module_t *mod,
-			   const yangdump_cvtparms_t *cp,
-			   const dlq_hdr_t *groupingQ,
-			   int32 startindent)
+                           const ncx_module_t *mod,
+                           const yangdump_cvtparms_t *cp,
+                           const dlq_hdr_t *groupingQ,
+                           int32 startindent)
 {
     const grp_template_t    *grp;
     boolean                  needed, cooked, first;
 
     if (dlq_empty(groupingQ)) {
-	return;
+        return;
     }
 
     cooked = !cp->rawmode;
@@ -1141,30 +1141,30 @@ static void
      * typedefs, and then just the typedefs are generated
      */
     if (cooked) {
-	needed = FALSE;
-	for (grp = (const grp_template_t *)dlq_firstEntry(groupingQ);
-	     grp != NULL && needed==FALSE;
-	     grp = (const grp_template_t *)dlq_nextEntry(grp)) {
-	    needed = grp_has_typedefs(grp);
-	}
-	if (!needed) {
-	    return;
-	}
+        needed = FALSE;
+        for (grp = (const grp_template_t *)dlq_firstEntry(groupingQ);
+             grp != NULL && needed==FALSE;
+             grp = (const grp_template_t *)dlq_nextEntry(grp)) {
+            needed = grp_has_typedefs(grp);
+        }
+        if (!needed) {
+            return;
+        }
     }
 
     /* put comment for first grouping only */
     if (groupingQ == &mod->groupingQ) {
-	write_cyang_banner_cmt(scb, mod, cp,
-			       (const xmlChar *)"groupings", startindent);
+        write_cyang_banner_cmt(scb, mod, cp,
+                               (const xmlChar *)"groupings", startindent);
     }
 
     first = TRUE;
     for (grp = (const grp_template_t *)dlq_firstEntry(groupingQ);
-	 grp != NULL;
-	 grp = (const grp_template_t *)dlq_nextEntry(grp)) {
+         grp != NULL;
+         grp = (const grp_template_t *)dlq_nextEntry(grp)) {
 
-	write_cyang_grouping(scb, mod, cp, grp, startindent, first);
-	first = FALSE;
+        write_cyang_grouping(scb, mod, cp, grp, startindent, first);
+        first = FALSE;
     }
 
 }  /* write_cyang_groupings */
@@ -1183,14 +1183,14 @@ static void
 *********************************************************************/
 static void
     write_cyang_iffeature (ses_cb_t *scb,
-			   const ncx_iffeature_t *iffeature,
-			   int32 startindent)
+                           const ncx_iffeature_t *iffeature,
+                           int32 startindent)
 {
     ses_putstr_indent(scb, YANG_K_IF_FEATURE, startindent);
     ses_putchar(scb, ' ');
     if (iffeature->prefix) {
-	ses_putstr(scb, iffeature->prefix);
-	ses_putchar(scb, ':');
+        ses_putstr(scb, iffeature->prefix);
+        ses_putchar(scb, ':');
     }
     ses_putstr(scb, iffeature->name);
     ses_putchar(scb, ';');
@@ -1211,18 +1211,18 @@ static void
 *********************************************************************/
 static void
     write_cyang_iffeatureQ (ses_cb_t *scb,
-			    const dlq_hdr_t *iffeatureQ,
-			    int32 startindent)
+                            const dlq_hdr_t *iffeatureQ,
+                            int32 startindent)
 {
     const ncx_iffeature_t   *iffeature;
 
     for (iffeature = (const ncx_iffeature_t *)
-	     dlq_firstEntry(iffeatureQ);
-	 iffeature != NULL;
-	 iffeature = (const ncx_iffeature_t *)
-	     dlq_nextEntry(iffeature)) {
+             dlq_firstEntry(iffeatureQ);
+         iffeature != NULL;
+         iffeature = (const ncx_iffeature_t *)
+             dlq_nextEntry(iffeature)) {
 
-	write_cyang_iffeature(scb, iffeature, startindent);
+        write_cyang_iffeature(scb, iffeature, startindent);
     }
 
 }  /* write_cyang_iffeatureQ */
@@ -1290,7 +1290,7 @@ static void
                                2, 
                                TRUE);
     }
-	    
+            
     /* reference-stmt? */
     str = obj_get_reference(obj);
     if (str) {
@@ -1455,22 +1455,22 @@ static void
 
     if (maxset) {
         if (maxval == 0) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_MAX_ELEMENTS, 
+            write_cyang_simple_str(scb, 
+                                   YANG_K_MAX_ELEMENTS, 
                                    YANG_K_UNBOUNDED,
-				   indent, 
-				   2, 
-				   TRUE);
+                                   indent, 
+                                   2, 
+                                   TRUE);
 
         } else {
-	    sprintf(buff, "%u", maxval);
-	    write_cyang_simple_str(scb, 
-				   YANG_K_MAX_ELEMENTS, 
-				   (const xmlChar *)buff,
-				   indent, 
-				   2, 
-				   TRUE);
-	}
+            sprintf(buff, "%u", maxval);
+            write_cyang_simple_str(scb, 
+                                   YANG_K_MAX_ELEMENTS, 
+                                   (const xmlChar *)buff,
+                                   indent, 
+                                   2, 
+                                   TRUE);
+        }
     }
 
 }  /* write_cyang_minmax */
@@ -1538,11 +1538,11 @@ static void
 **********************************************************************/
 static status_t
     write_cyang_object (ses_cb_t *scb,
-			const ncx_module_t *mod,
-			const yangdump_cvtparms_t *cp,
-			obj_template_t *obj,
-			int32 startindent,
-			boolean first)
+                        const ncx_module_t *mod,
+                        const yangdump_cvtparms_t *cp,
+                        obj_template_t *obj,
+                        int32 startindent,
+                        boolean first)
 {
     obj_container_t   *con;
     obj_leaf_t        *leaf;
@@ -1562,8 +1562,8 @@ static status_t
     boolean            isempty, fullcase;
 
     if (obj_is_cloned(obj) && cp->rawmode) {
-	/* skip cloned objects in 'raw' object view mode */
-	return ERR_NCX_SKIPPED;
+        /* skip cloned objects in 'raw' object view mode */
+        return ERR_NCX_SKIPPED;
     }
 
     if (cp->rawmode) {
@@ -1596,28 +1596,28 @@ static status_t
     switch (obj->objtype) {
     case OBJ_TYP_ANYXML:
         write_cyang_whenif(scb, obj, indent);
-	write_cyang_musts(scb, obj_get_mustQ(obj), indent);
+        write_cyang_musts(scb, obj_get_mustQ(obj), indent);
         write_cyang_config_stmt(scb, obj, indent);
         write_cyang_mandatory_stmt(scb, obj, indent);
         write_cyang_sdr(scb, obj, indent);
-	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
         break;
     case OBJ_TYP_CONTAINER:
         con = obj->def.container;
         write_cyang_whenif(scb, obj, indent);
-	write_cyang_musts(scb, obj_get_mustQ(obj), indent);
+        write_cyang_musts(scb, obj_get_mustQ(obj), indent);
         str = obj_get_presence_string(obj);
         write_cyang_presence_stmt(scb, str, indent);
         write_cyang_config_stmt(scb, obj, indent);
         write_cyang_sdr(scb, obj, indent);
         write_cyang_typedefs(scb, mod, cp, con->typedefQ, indent);
         write_cyang_groupings(scb, mod, cp, con->groupingQ, indent);
-	write_cyang_objects(scb, mod, cp, con->datadefQ, indent);
-	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	write_cyang_endsec_cmt(scb, YANG_K_CONTAINER, con->name);
-	break;
+        write_cyang_objects(scb, mod, cp, con->datadefQ, indent);
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        write_cyang_endsec_cmt(scb, YANG_K_CONTAINER, con->name);
+        break;
     case OBJ_TYP_LEAF:
         leaf = obj->def.leaf;
         write_cyang_whenif(scb, obj, indent);
@@ -1635,22 +1635,22 @@ static status_t
         write_cyang_config_stmt(scb, obj, indent);
         write_cyang_mandatory_stmt(scb, obj, indent);
         write_cyang_sdr(scb, obj, indent);
-	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	break;
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        break;
     case OBJ_TYP_LEAF_LIST:
-	leaflist = obj->def.leaflist;
+        leaflist = obj->def.leaflist;
         write_cyang_whenif(scb, obj, indent);
         write_cyang_type_clause(scb, mod, cp, leaflist->typdef, indent);
-	if (leaflist->units) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_UNITS, 
-				   leaflist->units,
-				   indent, 
-				   2, 
-				   TRUE);
-	}
-	write_cyang_musts(scb, obj_get_mustQ(obj), indent);
+        if (leaflist->units) {
+            write_cyang_simple_str(scb, 
+                                   YANG_K_UNITS, 
+                                   leaflist->units,
+                                   indent, 
+                                   2, 
+                                   TRUE);
+        }
+        write_cyang_musts(scb, obj_get_mustQ(obj), indent);
         write_cyang_config_stmt(scb, obj, indent);
 
         write_cyang_minmax(scb, 
@@ -1669,37 +1669,37 @@ static status_t
                                    TRUE);
         }
         write_cyang_sdr(scb, obj, indent);
-	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	break;
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        break;
     case OBJ_TYP_LIST:
-	list = obj->def.list;
+        list = obj->def.list;
         write_cyang_whenif(scb, obj, indent);
-	write_cyang_musts(scb, obj_get_mustQ(obj), indent);
+        write_cyang_musts(scb, obj_get_mustQ(obj), indent);
 
-	/* key field, manual generation to make links */
-	if (!dlq_empty(&list->keyQ)) {
-	    ses_indent(scb, indent);
-	    ses_putstr(scb, YANG_K_KEY);
-	    ses_putstr(scb, (const xmlChar *)" \"");
+        /* key field, manual generation to make links */
+        if (!dlq_empty(&list->keyQ)) {
+            ses_indent(scb, indent);
+            ses_putstr(scb, YANG_K_KEY);
+            ses_putstr(scb, (const xmlChar *)" \"");
 
-	    for (key = obj_first_key(obj);
-		 key != NULL; 
-		 key = nextkey) {
-		nextkey = obj_next_key(key);
-		ses_putstr(scb, obj_get_name(key->keyobj));
-		if (nextkey) {
-		    ses_putchar(scb, ' ');
-		}
-	    }
-	    ses_putstr(scb, (const xmlChar *)"\";");
-	}
+            for (key = obj_first_key(obj);
+                 key != NULL; 
+                 key = nextkey) {
+                nextkey = obj_next_key(key);
+                ses_putstr(scb, obj_get_name(key->keyobj));
+                if (nextkey) {
+                    ses_putchar(scb, ' ');
+                }
+            }
+            ses_putstr(scb, (const xmlChar *)"\";");
+        }
 
         write_cyang_unique_stmts(scb, &list->uniqueQ, indent);
 
         write_cyang_config_stmt(scb, obj, indent);
 
-	/*  min-elements */
+        /*  min-elements */
         write_cyang_minmax(scb,
                            list->minset,
                            list->minelems,
@@ -1707,7 +1707,7 @@ static status_t
                            list->maxelems,
                            indent);
 
-	/* ordered-by field, only if non-default (user) */
+        /* ordered-by field, only if non-default (user) */
         if (!list->ordersys) {
             write_cyang_simple_str(scb,
                                    YANG_K_ORDERED_BY, 
@@ -1719,33 +1719,33 @@ static status_t
         write_cyang_sdr(scb, obj, indent);
         write_cyang_typedefs(scb, mod, cp, list->typedefQ, indent);
         write_cyang_groupings(scb, mod, cp, list->groupingQ, indent);
-	write_cyang_objects(scb, mod, cp, list->datadefQ, indent);
-	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	write_cyang_endsec_cmt(scb, YANG_K_LIST, list->name);
-	break;
+        write_cyang_objects(scb, mod, cp, list->datadefQ, indent);
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        write_cyang_endsec_cmt(scb, YANG_K_LIST, list->name);
+        break;
     case OBJ_TYP_CHOICE:
-	choic = obj->def.choic;
+        choic = obj->def.choic;
 
         write_cyang_whenif(scb, obj, indent);
 
-	/* default case field */
-	if (choic->defval) {
-	    write_cyang_simple_str(scb, 
-				   YANG_K_DEFAULT, 
-				   choic->defval, 
-				   indent, 
-				   2, 
-				   TRUE);
-	}
+        /* default case field */
+        if (choic->defval) {
+            write_cyang_simple_str(scb, 
+                                   YANG_K_DEFAULT, 
+                                   choic->defval, 
+                                   indent, 
+                                   2, 
+                                   TRUE);
+        }
 
         write_cyang_mandatory_stmt(scb, obj, indent);
         write_cyang_sdr(scb, obj, indent);
-	write_cyang_objects(scb, mod, cp, choic->caseQ, indent);
-	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	write_cyang_endsec_cmt(scb, YANG_K_CHOICE, choic->name);
-	break;
+        write_cyang_objects(scb, mod, cp, choic->caseQ, indent);
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        write_cyang_endsec_cmt(scb, YANG_K_CHOICE, choic->name);
+        break;
     case OBJ_TYP_CASE:
         cas = obj->def.cas;
         if (fullcase) {
@@ -1762,126 +1762,126 @@ static status_t
             ses_putstr_indent(scb, END_SEC, startindent);
             write_cyang_endsec_cmt(scb, YANG_K_CASE, cas->name);
         }
-	break;
+        break;
     case OBJ_TYP_USES:
-	if (!cp->rawmode) {
-	    return ERR_NCX_SKIPPED;
-	}
-	uses = obj->def.uses;
-	if (!first) {
-	    ses_putchar(scb, '\n');
-	}
-	ses_indent(scb, startindent);
-	ses_putstr(scb, YANG_K_USES);
-	ses_putchar(scb, ' ');
-	if (uses->prefix && xml_strcmp(uses->prefix, mod->prefix)) {
-	    write_cyang_extkw(scb, uses->prefix, uses->name);
-	} else {
-	    ses_putstr(scb, uses->name);
-	}
+        if (!cp->rawmode) {
+            return ERR_NCX_SKIPPED;
+        }
+        uses = obj->def.uses;
+        if (!first) {
+            ses_putchar(scb, '\n');
+        }
+        ses_indent(scb, startindent);
+        ses_putstr(scb, YANG_K_USES);
+        ses_putchar(scb, ' ');
+        if (uses->prefix && xml_strcmp(uses->prefix, mod->prefix)) {
+            write_cyang_extkw(scb, uses->prefix, uses->name);
+        } else {
+            ses_putstr(scb, uses->name);
+        }
 
-	if (uses->descr || 
+        if (uses->descr || 
             uses->ref || 
             (obj->when && obj->when->exprstr) ||
-	    uses->status != NCX_STATUS_CURRENT ||
-	    !dlq_empty(&obj->iffeatureQ) ||
-	    !dlq_empty(uses->datadefQ) ||
-	    !dlq_empty(&obj->appinfoQ)) {
+            uses->status != NCX_STATUS_CURRENT ||
+            !dlq_empty(&obj->iffeatureQ) ||
+            !dlq_empty(uses->datadefQ) ||
+            !dlq_empty(&obj->appinfoQ)) {
 
-	    ses_putstr(scb, START_SEC);
+            ses_putstr(scb, START_SEC);
 
-	    write_cyang_whenif(scb, obj, indent);
-	    write_cyang_sdr(scb, obj, indent);
-	    write_cyang_objects(scb, mod, cp, uses->datadefQ, indent);
-	    write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	    ses_putstr_indent(scb, END_SEC, startindent);
-	} else {
-	    ses_putchar(scb, ';');
-	}
-	break;
+            write_cyang_whenif(scb, obj, indent);
+            write_cyang_sdr(scb, obj, indent);
+            write_cyang_objects(scb, mod, cp, uses->datadefQ, indent);
+            write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+            ses_putstr_indent(scb, END_SEC, startindent);
+        } else {
+            ses_putchar(scb, ';');
+        }
+        break;
     case OBJ_TYP_AUGMENT:
-	if (!cp->rawmode) {
-	    return ERR_NCX_SKIPPED;
-	}
-	aug = obj->def.augment;
-	if (!first) {
-	    ses_putchar(scb, '\n');
-	}
-	ses_indent(scb, startindent);
-	ses_putstr(scb, YANG_K_AUGMENT);
-	ses_putchar(scb, ' ');
-	ses_putstr(scb, aug->target);
-	if (isempty) {
-	    ses_putchar(scb, ';');
-	    return NO_ERR;
-	}
-	ses_putstr(scb, START_SEC);
-	write_cyang_whenif(scb, obj, indent);
-	write_cyang_sdr(scb, obj, indent);
+        if (!cp->rawmode) {
+            return ERR_NCX_SKIPPED;
+        }
+        aug = obj->def.augment;
+        if (!first) {
+            ses_putchar(scb, '\n');
+        }
+        ses_indent(scb, startindent);
+        ses_putstr(scb, YANG_K_AUGMENT);
+        ses_putchar(scb, ' ');
+        ses_putstr(scb, aug->target);
+        if (isempty) {
+            ses_putchar(scb, ';');
+            return NO_ERR;
+        }
+        ses_putstr(scb, START_SEC);
+        write_cyang_whenif(scb, obj, indent);
+        write_cyang_sdr(scb, obj, indent);
         write_cyang_objects(scb, mod, cp, &aug->datadefQ, indent);
-	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	break;
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        break;
     case OBJ_TYP_RPC:
-	rpc = obj->def.rpc;
-	write_cyang_whenif(scb, obj, indent);      /* when-stmt NULL */
-	write_cyang_sdr(scb, obj, indent);
-	write_cyang_typedefs(scb, mod, cp, &rpc->typedefQ, indent);
-	write_cyang_groupings(scb, mod, cp, &rpc->groupingQ, indent);
-	write_cyang_objects(scb, mod, cp, &rpc->datadefQ, indent);
-	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	write_cyang_endsec_cmt(scb, YANG_K_RPC, rpc->name);
-	break;
+        rpc = obj->def.rpc;
+        write_cyang_whenif(scb, obj, indent);      /* when-stmt NULL */
+        write_cyang_sdr(scb, obj, indent);
+        write_cyang_typedefs(scb, mod, cp, &rpc->typedefQ, indent);
+        write_cyang_groupings(scb, mod, cp, &rpc->groupingQ, indent);
+        write_cyang_objects(scb, mod, cp, &rpc->datadefQ, indent);
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        write_cyang_endsec_cmt(scb, YANG_K_RPC, rpc->name);
+        break;
     case OBJ_TYP_RPCIO:
-	rpcio = obj->def.rpcio;
-	if (!dlq_empty(&rpcio->typedefQ) ||
-	    !dlq_empty(&rpcio->groupingQ) ||
-	    !dlq_empty(&rpcio->datadefQ) ||
-	    !dlq_empty(&obj->appinfoQ)) {
+        rpcio = obj->def.rpcio;
+        if (!dlq_empty(&rpcio->typedefQ) ||
+            !dlq_empty(&rpcio->groupingQ) ||
+            !dlq_empty(&rpcio->datadefQ) ||
+            !dlq_empty(&obj->appinfoQ)) {
 
-	    write_cyang_id(scb, 
+            write_cyang_id(scb, 
                            obj_get_name(obj), 
                            NULL, 
                            startindent, 
-			   FALSE, 
+                           FALSE, 
                            !first);
 
-	    write_cyang_typedefs(scb, mod, cp, &rpcio->typedefQ, indent);
-	    write_cyang_groupings(scb, mod, cp, &rpcio->groupingQ, indent);
-	    write_cyang_objects(scb, mod, cp, &rpcio->datadefQ, indent);
-	    write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	    ses_putstr_indent(scb, END_SEC, startindent);
-	}
-	break;
+            write_cyang_typedefs(scb, mod, cp, &rpcio->typedefQ, indent);
+            write_cyang_groupings(scb, mod, cp, &rpcio->groupingQ, indent);
+            write_cyang_objects(scb, mod, cp, &rpcio->datadefQ, indent);
+            write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+            ses_putstr_indent(scb, END_SEC, startindent);
+        }
+        break;
     case OBJ_TYP_NOTIF:
-	notif = obj->def.notif;
-	write_cyang_whenif(scb, obj, indent);      /* when-stmt NULL */
-	write_cyang_sdr(scb, obj, indent);
-	write_cyang_typedefs(scb, mod, cp, &notif->typedefQ, indent);
-	write_cyang_groupings(scb, mod, cp, &notif->groupingQ, indent);
-	write_cyang_objects(scb, mod, cp, &notif->datadefQ, indent);
-	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	write_cyang_endsec_cmt(scb, YANG_K_NOTIFICATION, notif->name);
-	break;
+        notif = obj->def.notif;
+        write_cyang_whenif(scb, obj, indent);      /* when-stmt NULL */
+        write_cyang_sdr(scb, obj, indent);
+        write_cyang_typedefs(scb, mod, cp, &notif->typedefQ, indent);
+        write_cyang_groupings(scb, mod, cp, &notif->groupingQ, indent);
+        write_cyang_objects(scb, mod, cp, &notif->datadefQ, indent);
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        write_cyang_endsec_cmt(scb, YANG_K_NOTIFICATION, notif->name);
+        break;
     case OBJ_TYP_REFINE:
-	if (!cp->rawmode) {
-	    return ERR_NCX_SKIPPED;
-	}
-	refine = obj->def.refine;
-	if (!first) {
-	    ses_putchar(scb, '\n');
-	}
-	ses_indent(scb, startindent);
-	ses_putstr(scb, YANG_K_REFINE);
-	ses_putchar(scb, ' ');
-	ses_putstr(scb, refine->target);
-	if (isempty || refine->targobj == NULL) {
-	    ses_putchar(scb, ';');
-	    return NO_ERR;
-	}
-	ses_putstr(scb, START_SEC);
+        if (!cp->rawmode) {
+            return ERR_NCX_SKIPPED;
+        }
+        refine = obj->def.refine;
+        if (!first) {
+            ses_putchar(scb, '\n');
+        }
+        ses_indent(scb, startindent);
+        ses_putstr(scb, YANG_K_REFINE);
+        ses_putchar(scb, ' ');
+        ses_putstr(scb, refine->target);
+        if (isempty || refine->targobj == NULL) {
+            ses_putchar(scb, ';');
+            return NO_ERR;
+        }
+        ses_putstr(scb, START_SEC);
 
         switch (refine->targobj->objtype) {
         case OBJ_TYP_ANYXML:
@@ -1929,11 +1929,11 @@ static status_t
             ;
         }
 
-	write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	break;
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        break;
     default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
     return NO_ERR;
     
@@ -1955,35 +1955,35 @@ static status_t
 *********************************************************************/
 static void
     write_cyang_objects (ses_cb_t *scb,
-			 const ncx_module_t *mod,
-			 const yangdump_cvtparms_t *cp,
-			 const dlq_hdr_t *datadefQ,
-			 int32 startindent)
+                         const ncx_module_t *mod,
+                         const yangdump_cvtparms_t *cp,
+                         const dlq_hdr_t *datadefQ,
+                         int32 startindent)
 {
     obj_template_t    *obj;
     status_t           res;
     boolean            first;
 
     if (dlq_empty(datadefQ)) {
-	return;
+        return;
     }
 
     if (datadefQ == &mod->datadefQ) {
-	write_cyang_banner_cmt(scb, mod, cp,
-			       (const xmlChar *)"objects", 
-			       startindent);
+        write_cyang_banner_cmt(scb, mod, cp,
+                               (const xmlChar *)"objects", 
+                               startindent);
     }
 
     first = TRUE;
     for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (obj_is_hidden(obj)) {
-	    continue;
-	}
+        if (obj_is_hidden(obj)) {
+            continue;
+        }
 
-	res = write_cyang_object(scb, 
+        res = write_cyang_object(scb, 
                                  mod, 
                                  cp, 
                                  obj, 
@@ -2012,10 +2012,10 @@ static void
 *********************************************************************/
 static void
     write_cyang_extension (ses_cb_t *scb,
-			   const ncx_module_t *mod,
-			   const yangdump_cvtparms_t *cp,
-			   const ext_template_t *ext,
-			   int32 startindent)
+                           const ncx_module_t *mod,
+                           const yangdump_cvtparms_t *cp,
+                           const ext_template_t *ext,
+                           int32 startindent)
 {
     int32              indent;
 
@@ -2023,26 +2023,26 @@ static void
 
     write_cyang_id(scb, 
                    YANG_K_EXTENSION, 
-		   ext->name, 
+                   ext->name, 
                    startindent, 
-		   FALSE, 
+                   FALSE, 
                    FALSE);
 
     /* argument sub-clause */
     if (ext->arg) {
-	write_cyang_simple_str(scb,
-			       YANG_K_ARGUMENT, 
-			       ext->arg, 
-			       indent, 
-			       2, 
-			       FALSE);
-	write_cyang_simple_str(scb, 
-			       YANG_K_YIN_ELEMENT, 
-			       ext->argel ? NCX_EL_TRUE : NCX_EL_FALSE,
-			       indent + ses_indent_count(scb), 
-			       2, 
-			       FALSE);
-	ses_putstr_indent(scb, END_SEC, indent);
+        write_cyang_simple_str(scb,
+                               YANG_K_ARGUMENT, 
+                               ext->arg, 
+                               indent, 
+                               2, 
+                               FALSE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_YIN_ELEMENT, 
+                               ext->argel ? NCX_EL_TRUE : NCX_EL_FALSE,
+                               indent + ses_indent_count(scb), 
+                               2, 
+                               FALSE);
+        ses_putstr_indent(scb, END_SEC, indent);
     }
 
     /* status field */
@@ -2050,22 +2050,22 @@ static void
 
     /* description field */
     if (ext->descr) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_DESCRIPTION, 
-			       ext->descr, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_DESCRIPTION, 
+                               ext->descr, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
 
     /* reference field */
     if (ext->ref) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_REFERENCE, 
-			       ext->ref, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_REFERENCE, 
+                               ext->ref, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
 
     write_cyang_appinfoQ(scb, mod, cp, &ext->appinfoQ, indent);
@@ -2091,29 +2091,29 @@ static void
 *********************************************************************/
 static void
     write_cyang_extensions (ses_cb_t *scb,
-			    const ncx_module_t *mod,
-			    const yangdump_cvtparms_t *cp,
-			    const dlq_hdr_t *extensionQ,
-			    int32 startindent)
+                            const ncx_module_t *mod,
+                            const yangdump_cvtparms_t *cp,
+                            const dlq_hdr_t *extensionQ,
+                            int32 startindent)
 {
     const ext_template_t *ext;
     int32              indent;
 
     if (dlq_empty(extensionQ)) {
-	return;
+        return;
     }
 
     write_cyang_banner_cmt(scb, mod, cp,
-			   (const xmlChar *)"extensions", 
-			   startindent);
+                           (const xmlChar *)"extensions", 
+                           startindent);
 
     indent = startindent + ses_indent_count(scb);
 
     for (ext = (const ext_template_t *)dlq_firstEntry(extensionQ);
-	 ext != NULL;
-	 ext = (const ext_template_t *)dlq_nextEntry(ext)) {
+         ext != NULL;
+         ext = (const ext_template_t *)dlq_nextEntry(ext)) {
 
-	write_cyang_extension(scb, mod, cp, ext, startindent);
+        write_cyang_extension(scb, mod, cp, ext, startindent);
     }
 
 }  /* write_cyang_extensions */
@@ -2134,10 +2134,10 @@ static void
 *********************************************************************/
 static void
     write_cyang_identity (ses_cb_t *scb,
-			  const ncx_module_t *mod,
-			  const yangdump_cvtparms_t *cp,
-			  const ncx_identity_t *identity,
-			  int32 startindent)
+                          const ncx_module_t *mod,
+                          const yangdump_cvtparms_t *cp,
+                          const ncx_identity_t *identity,
+                          int32 startindent)
 {
     int32              indent;
 
@@ -2145,23 +2145,23 @@ static void
 
     write_cyang_id(scb, 
                    YANG_K_IDENTITY, 
-		   identity->name, 
-		   startindent, 
-		   FALSE, 
+                   identity->name, 
+                   startindent, 
+                   FALSE, 
                    FALSE);
 
     /* base sub-clause */
     if (identity->base) {
-	ses_putstr_indent(scb, YANG_K_BASE, indent);
-	ses_putchar(scb, ' ');
-	if (identity->baseprefix) {
-	    write_cyang_extkw(scb, 
-			      identity->baseprefix, 
-			      identity->basename);
-	} else {
-	    ses_putstr(scb, identity->basename);
-	}
-	ses_putchar(scb, ';');
+        ses_putstr_indent(scb, YANG_K_BASE, indent);
+        ses_putchar(scb, ' ');
+        if (identity->baseprefix) {
+            write_cyang_extkw(scb, 
+                              identity->baseprefix, 
+                              identity->basename);
+        } else {
+            ses_putstr(scb, identity->basename);
+        }
+        ses_putchar(scb, ';');
     }
 
     /* status field */
@@ -2169,29 +2169,29 @@ static void
 
     /* description field */
     if (identity->descr) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_DESCRIPTION, 
-			       identity->descr, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_DESCRIPTION, 
+                               identity->descr, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
 
     /* reference field */
     if (identity->ref) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_REFERENCE, 
-			       identity->ref, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_REFERENCE, 
+                               identity->ref, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
 
     write_cyang_appinfoQ(scb, 
-			 mod, 
-			 cp, 
-			 &identity->appinfoQ, 
-			 indent);
+                         mod, 
+                         cp, 
+                         &identity->appinfoQ, 
+                         indent);
 
     /* end identity clause */
     ses_putstr_indent(scb, END_SEC, startindent);
@@ -2214,34 +2214,34 @@ static void
 *********************************************************************/
 static void
     write_cyang_identities (ses_cb_t *scb,
-			    const ncx_module_t *mod,
-			    const yangdump_cvtparms_t *cp,
-			    const dlq_hdr_t *identityQ,
-			    int32 startindent)
+                            const ncx_module_t *mod,
+                            const yangdump_cvtparms_t *cp,
+                            const dlq_hdr_t *identityQ,
+                            int32 startindent)
 {
     const ncx_identity_t *identity;
     int32                 indent;
 
     if (dlq_empty(identityQ)) {
-	return;
+        return;
     }
 
     write_cyang_banner_cmt(scb, mod, cp,
-			   (const xmlChar *)"identities", 
-			   startindent);
+                           (const xmlChar *)"identities", 
+                           startindent);
 
     indent = startindent + ses_indent_count(scb);
 
     for (identity = (const ncx_identity_t *)
-	     dlq_firstEntry(identityQ);
-	 identity != NULL;
-	 identity = (const ncx_identity_t *)
-	     dlq_nextEntry(identity)) {
+             dlq_firstEntry(identityQ);
+         identity != NULL;
+         identity = (const ncx_identity_t *)
+             dlq_nextEntry(identity)) {
 
-	write_cyang_identity(scb, 
+        write_cyang_identity(scb, 
                              mod, 
                              cp, 
-			     identity, 
+                             identity, 
                              startindent);
     }
 
@@ -2263,10 +2263,10 @@ static void
 *********************************************************************/
 static void
     write_cyang_feature (ses_cb_t *scb,
-			 const ncx_module_t *mod,
-			 const yangdump_cvtparms_t *cp,
-			 const ncx_feature_t *feature,
-			 int32 startindent)
+                         const ncx_module_t *mod,
+                         const yangdump_cvtparms_t *cp,
+                         const ncx_feature_t *feature,
+                         int32 startindent)
 {
     int32              indent;
 
@@ -2274,9 +2274,9 @@ static void
 
     write_cyang_id(scb, 
                    YANG_K_FEATURE, 
-		   feature->name, 
-		   startindent, 
-		   FALSE, 
+                   feature->name, 
+                   startindent, 
+                   FALSE, 
                    FALSE);
 
     /* optional Q of if-feature statements */
@@ -2287,29 +2287,29 @@ static void
 
     /* description field */
     if (feature->descr) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_DESCRIPTION, 
-			       feature->descr, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_DESCRIPTION, 
+                               feature->descr, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
 
     /* reference field */
     if (feature->ref) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_REFERENCE, 
-			       feature->ref, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_REFERENCE, 
+                               feature->ref, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
 
     write_cyang_appinfoQ(scb, 
-			 mod, 
-			 cp, 
-			 &feature->appinfoQ, 
-			 indent);
+                         mod, 
+                         cp, 
+                         &feature->appinfoQ, 
+                         indent);
 
     /* end feature clause */
     ses_putstr_indent(scb, END_SEC, startindent);
@@ -2332,33 +2332,33 @@ static void
 *********************************************************************/
 static void
     write_cyang_features (ses_cb_t *scb,
-			  const ncx_module_t *mod,
-			  const yangdump_cvtparms_t *cp,
-			  const dlq_hdr_t *featureQ,
-			  int32 startindent)
+                          const ncx_module_t *mod,
+                          const yangdump_cvtparms_t *cp,
+                          const dlq_hdr_t *featureQ,
+                          int32 startindent)
 {
     const ncx_feature_t *feature;
 
     if (dlq_empty(featureQ)) {
-	return;
+        return;
     }
 
     write_cyang_banner_cmt(scb, 
                            mod, 
                            cp,
-			   (const xmlChar *)"features", 
-			   startindent);
+                           (const xmlChar *)"features", 
+                           startindent);
 
     for (feature = (const ncx_feature_t *)
-	     dlq_firstEntry(featureQ);
-	 feature != NULL;
-	 feature = (const ncx_feature_t *)
-	     dlq_nextEntry(feature)) {
+             dlq_firstEntry(featureQ);
+         feature != NULL;
+         feature = (const ncx_feature_t *)
+             dlq_nextEntry(feature)) {
 
-	write_cyang_feature(scb, 
+        write_cyang_feature(scb, 
                             mod, 
                             cp, 
-			    feature, 
+                            feature, 
                             startindent);
     }
 
@@ -2406,7 +2406,7 @@ static void
 
     /* type-stmt */
     if (deviate->typdef) {
-	write_cyang_type_clause(scb, 
+        write_cyang_type_clause(scb, 
                                 mod,
                                 cp,
                                 deviate->typdef,
@@ -2415,22 +2415,22 @@ static void
 
     /* units-stmt */
     if (deviate->units) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_UNITS, 
-			       deviate->units, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_UNITS, 
+                               deviate->units, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
 
     /* default-stmt */
     if (deviate->defval) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_DEFAULT, 
-			       deviate->defval, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_DEFAULT, 
+                               deviate->defval, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
 
     /* config-stmt, only if actually set */
@@ -2467,10 +2467,10 @@ static void
     write_cyang_unique_stmts(scb, &deviate->uniqueQ, indent);
 
     write_cyang_appinfoQ(scb, 
-			 mod, 
-			 cp, 
-			 &deviate->appinfoQ, 
-			 indent);
+                         mod, 
+                         cp, 
+                         &deviate->appinfoQ, 
+                         indent);
 
     ses_putstr_indent(scb, END_SEC, startindent);
 
@@ -2516,22 +2516,22 @@ static void
 
     /* description field */
     if (deviation->descr) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_DESCRIPTION, 
-			       deviation->descr, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_DESCRIPTION, 
+                               deviation->descr, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
 
     /* reference field */
     if (deviation->ref) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_REFERENCE, 
-			       deviation->ref, 
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_REFERENCE, 
+                               deviation->ref, 
+                               indent, 
+                               2, 
+                               TRUE);
     }
 
     /* 0 or more deviate-stmts */
@@ -2544,10 +2544,10 @@ static void
     }
 
     write_cyang_appinfoQ(scb, 
-			 mod, 
-			 cp, 
-			 &deviation->appinfoQ, 
-			 indent);
+                         mod, 
+                         cp, 
+                         &deviation->appinfoQ, 
+                         indent);
 
 
     ses_putstr_indent(scb, END_SEC, startindent);
@@ -2578,22 +2578,22 @@ static void
     const obj_deviation_t *deviation;
 
     if (dlq_empty(deviationQ)) {
-	return;
+        return;
     }
 
     write_cyang_banner_cmt(scb, 
                            mod, 
                            cp,
-			   (const xmlChar *)"deviations", 
-			   startindent);
+                           (const xmlChar *)"deviations", 
+                           startindent);
 
     for (deviation = (const obj_deviation_t *)
-	     dlq_firstEntry(deviationQ);
-	 deviation != NULL;
-	 deviation = (const obj_deviation_t *)
-	     dlq_nextEntry(deviation)) {
+             dlq_firstEntry(deviationQ);
+         deviation != NULL;
+         deviation = (const obj_deviation_t *)
+             dlq_nextEntry(deviation)) {
 
-	write_cyang_deviation(scb, 
+        write_cyang_deviation(scb, 
                               mod, 
                               cp, 
                               deviation, 
@@ -2621,13 +2621,13 @@ static void
 *********************************************************************/
 static void
     write_cyang_import (ses_cb_t *scb,
-			const ncx_module_t *mod,
-			const yangdump_cvtparms_t *cp,
-			const xmlChar *modprefix,
-			const xmlChar *modname,
-			const xmlChar *modrevision,
-			const dlq_hdr_t *appinfoQ,
-			int32 indent)
+                        const ncx_module_t *mod,
+                        const yangdump_cvtparms_t *cp,
+                        const xmlChar *modprefix,
+                        const xmlChar *modname,
+                        const xmlChar *modrevision,
+                        const dlq_hdr_t *appinfoQ,
+                        int32 indent)
 {
     ses_indent(scb, indent);
     ses_putstr(scb, YANG_K_IMPORT);
@@ -2635,26 +2635,26 @@ static void
     ses_putstr(scb, modname);
     ses_putstr(scb, START_SEC);
     write_cyang_simple_str(scb, 
-			   YANG_K_PREFIX,
-			   modprefix,
-			   indent + ses_indent_count(scb), 
-			   2, 
-			   TRUE);
+                           YANG_K_PREFIX,
+                           modprefix,
+                           indent + ses_indent_count(scb), 
+                           2, 
+                           TRUE);
     if (modrevision) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_REVISION, 
-			       modrevision,
-			       indent + ses_indent_count(scb), 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_REVISION, 
+                               modrevision,
+                               indent + ses_indent_count(scb), 
+                               2, 
+                               TRUE);
 
     }
     if (appinfoQ) {
-	write_cyang_appinfoQ(scb, 
-			     mod, 
-			     cp, 
-			     appinfoQ,
-			     indent + ses_indent_count(scb));
+        write_cyang_appinfoQ(scb, 
+                             mod, 
+                             cp, 
+                             appinfoQ,
+                             indent + ses_indent_count(scb));
     }
     ses_putstr_indent(scb, END_SEC, indent);
 
@@ -2676,8 +2676,8 @@ static void
 *********************************************************************/
 static void
     write_cyang_header (ses_cb_t *scb,
-			const ncx_module_t *mod,
-			const yangdump_cvtparms_t *cp)
+                        const ncx_module_t *mod,
+                        const yangdump_cvtparms_t *cp)
 {
     const ncx_import_t       *imp;
     const yang_import_ptr_t  *impptr;
@@ -2688,9 +2688,9 @@ static void
 
     /* [sub]module name { */
     if (mod->ismod) {
-	ses_putstr(scb, YANG_K_MODULE);
+        ses_putstr(scb, YANG_K_MODULE);
     } else {
-	ses_putstr(scb, YANG_K_SUBMODULE);
+        ses_putstr(scb, YANG_K_SUBMODULE);
     }
     ses_putchar(scb, ' ');
     ses_putstr(scb, mod->name);
@@ -2703,39 +2703,39 @@ static void
     /* yang-version */
     sprintf(buff, "%u", mod->langver);
     write_cyang_simple_str(scb, 
-			   YANG_K_YANG_VERSION, 
-			   (const xmlChar *)buff, 
-			   indent, 
-			   0, 
-			   TRUE);
+                           YANG_K_YANG_VERSION, 
+                           (const xmlChar *)buff, 
+                           indent, 
+                           0, 
+                           TRUE);
     ses_putchar(scb, '\n');
 
     /* namespace or belongs-to */
     if (mod->ismod) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_NAMESPACE, 
-			       mod->ns,
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_NAMESPACE, 
+                               mod->ns,
+                               indent, 
+                               2, 
+                               TRUE);
     } else {
-	write_cyang_simple_str(scb, 
-			       YANG_K_BELONGS_TO, 
-			       mod->belongs,
-			       indent, 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_BELONGS_TO, 
+                               mod->belongs,
+                               indent, 
+                               2, 
+                               TRUE);
     }
     ses_putchar(scb, '\n');
 
     /* prefix for module only */ 
     if (mod->ismod) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_PREFIX,
-			       mod->prefix,
-			       indent,
-			       2,
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_PREFIX,
+                               mod->prefix,
+                               indent,
+                               2,
+                               TRUE);
     }
 
     /* blank line */
@@ -2743,144 +2743,144 @@ static void
 
     /* imports section */
     if (cp->unified) {
-	for (impptr = (const yang_import_ptr_t *)
-		 dlq_firstEntry(&mod->saveimpQ);
-	     impptr != NULL;
-	     impptr = (const yang_import_ptr_t *)
-		 dlq_nextEntry(impptr)) {
+        for (impptr = (const yang_import_ptr_t *)
+                 dlq_firstEntry(&mod->saveimpQ);
+             impptr != NULL;
+             impptr = (const yang_import_ptr_t *)
+                 dlq_nextEntry(impptr)) {
 
-	    /* the appinfoQ info is not saved in unified mode ouput!! */
-	    write_cyang_import(scb, 
-			       mod, 
-			       cp, 
-			       impptr->modprefix,
-			       impptr->modname, 
-			       impptr->revision, 
-			       NULL, 
-			       indent);
-	}
-	if (!dlq_empty(&mod->saveimpQ)) {
-	    ses_putchar(scb, '\n');
-	}
+            /* the appinfoQ info is not saved in unified mode ouput!! */
+            write_cyang_import(scb, 
+                               mod, 
+                               cp, 
+                               impptr->modprefix,
+                               impptr->modname, 
+                               impptr->revision, 
+                               NULL, 
+                               indent);
+        }
+        if (!dlq_empty(&mod->saveimpQ)) {
+            ses_putchar(scb, '\n');
+        }
     } else {
-	for (imp = (const ncx_import_t *)
-		 dlq_firstEntry(&mod->importQ);
-	     imp != NULL;
-	     imp = (const ncx_import_t *)
-		 dlq_nextEntry(imp)) {
+        for (imp = (const ncx_import_t *)
+                 dlq_firstEntry(&mod->importQ);
+             imp != NULL;
+             imp = (const ncx_import_t *)
+                 dlq_nextEntry(imp)) {
 
-	    write_cyang_import(scb, 
-			       mod, 
-			       cp, 
-			       imp->prefix,
-			       imp->module, 
-			       imp->revision,
-			       &imp->appinfoQ, 
-			       indent);
+            write_cyang_import(scb, 
+                               mod, 
+                               cp, 
+                               imp->prefix,
+                               imp->module, 
+                               imp->revision,
+                               &imp->appinfoQ, 
+                               indent);
 
-	}
-	if (!dlq_empty(&mod->importQ)) {
-	    ses_putchar(scb, '\n');
-	}
+        }
+        if (!dlq_empty(&mod->importQ)) {
+            ses_putchar(scb, '\n');
+        }
     }
 
-    /* includes section	*/
+    /* includes section        */
     if (!cp->unified) {
-	for (inc = (const ncx_include_t *)
-		 dlq_firstEntry(&mod->includeQ);
-	     inc != NULL;
-	     inc = (const ncx_include_t *)dlq_nextEntry(inc)) {
-	    ses_putstr_indent(scb, YANG_K_INCLUDE, indent);
-	    ses_putchar(scb, ' ');
-	    ses_putstr(scb, inc->submodule);
-	    if (inc->revision || !dlq_empty(&inc->appinfoQ)) {
-		ses_putstr(scb, START_SEC);
-		if (inc->revision) {
-		    write_cyang_simple_str(scb, 
-					   YANG_K_REVISION, 
-					   inc->revision,
-					   indent + ses_indent_count(scb), 
-					   2, 
-					   TRUE);
-		}
-		write_cyang_appinfoQ(scb, 
-				     mod, 
-				     cp, 
-				     &inc->appinfoQ,
-				     indent + ses_indent_count(scb));
-		ses_putstr_indent(scb, END_SEC, indent);
-	    } else {
-		ses_putchar(scb, ';');
-	    }
-	}
-	if (!dlq_empty(&mod->includeQ)) {
-	    ses_putchar(scb, '\n');
-	}
+        for (inc = (const ncx_include_t *)
+                 dlq_firstEntry(&mod->includeQ);
+             inc != NULL;
+             inc = (const ncx_include_t *)dlq_nextEntry(inc)) {
+            ses_putstr_indent(scb, YANG_K_INCLUDE, indent);
+            ses_putchar(scb, ' ');
+            ses_putstr(scb, inc->submodule);
+            if (inc->revision || !dlq_empty(&inc->appinfoQ)) {
+                ses_putstr(scb, START_SEC);
+                if (inc->revision) {
+                    write_cyang_simple_str(scb, 
+                                           YANG_K_REVISION, 
+                                           inc->revision,
+                                           indent + ses_indent_count(scb), 
+                                           2, 
+                                           TRUE);
+                }
+                write_cyang_appinfoQ(scb, 
+                                     mod, 
+                                     cp, 
+                                     &inc->appinfoQ,
+                                     indent + ses_indent_count(scb));
+                ses_putstr_indent(scb, END_SEC, indent);
+            } else {
+                ses_putchar(scb, ';');
+            }
+        }
+        if (!dlq_empty(&mod->includeQ)) {
+            ses_putchar(scb, '\n');
+        }
     }
 
     /* organization */
     if (mod->organization) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_ORGANIZATION,
-			       mod->organization, 
-			       indent, 
-			       2, 
-			       TRUE);
-	ses_putchar(scb, '\n');	
+        write_cyang_simple_str(scb, 
+                               YANG_K_ORGANIZATION,
+                               mod->organization, 
+                               indent, 
+                               2, 
+                               TRUE);
+        ses_putchar(scb, '\n');        
     }
 
     /* contact */
     if (mod->contact_info) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_CONTACT,
-			       mod->contact_info, 
-			       indent, 
-			       2, 
-			       TRUE);
-	ses_putchar(scb, '\n');
+        write_cyang_simple_str(scb, 
+                               YANG_K_CONTACT,
+                               mod->contact_info, 
+                               indent, 
+                               2, 
+                               TRUE);
+        ses_putchar(scb, '\n');
     }
 
     /* description */
     if (mod->descr) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_DESCRIPTION,
-			       mod->descr, 
-			       indent, 
-			       2, 
-			       TRUE);
-	ses_putchar(scb, '\n');
+        write_cyang_simple_str(scb, 
+                               YANG_K_DESCRIPTION,
+                               mod->descr, 
+                               indent, 
+                               2, 
+                               TRUE);
+        ses_putchar(scb, '\n');
     }
 
     /* reference */
     if (mod->ref) {
-	write_cyang_simple_str(scb, 
-			       YANG_K_REFERENCE,
-			       mod->ref,
-			       indent,
-			       2,
-			       TRUE);
-	ses_putchar(scb, '\n');
+        write_cyang_simple_str(scb, 
+                               YANG_K_REFERENCE,
+                               mod->ref,
+                               indent,
+                               2,
+                               TRUE);
+        ses_putchar(scb, '\n');
     }
 
-    /* revision history section	*/
+    /* revision history section        */
     for (rev = (const ncx_revhist_t *)
-	     dlq_firstEntry(&mod->revhistQ);
-	 rev != NULL;
-	 rev = (const ncx_revhist_t *)dlq_nextEntry(rev)) {
+             dlq_firstEntry(&mod->revhistQ);
+         rev != NULL;
+         rev = (const ncx_revhist_t *)dlq_nextEntry(rev)) {
 
-	write_cyang_simple_str(scb, 
-			       YANG_K_REVISION,
-			       rev->version,
-			       indent, 
-			       2, 
-			       FALSE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_REVISION,
+                               rev->version,
+                               indent, 
+                               2, 
+                               FALSE);
 
-	write_cyang_simple_str(scb, 
-			       YANG_K_DESCRIPTION,
-			       (rev->descr) ? rev->descr : EMPTY_STRING,
-			       indent + ses_indent_count(scb), 
-			       2, 
-			       TRUE);
+        write_cyang_simple_str(scb, 
+                               YANG_K_DESCRIPTION,
+                               (rev->descr) ? rev->descr : EMPTY_STRING,
+                               indent + ses_indent_count(scb), 
+                               2, 
+                               TRUE);
 
         if (rev->ref) {
             write_cyang_simple_str(scb, 
@@ -2891,10 +2891,10 @@ static void
                                    TRUE);
         }
 
-	ses_putstr_indent(scb, END_SEC, indent);
+        ses_putstr_indent(scb, END_SEC, indent);
     }
     if (!dlq_empty(&mod->revhistQ)) {
-	ses_putchar(scb, '\n');
+        ses_putchar(scb, '\n');
     }
 
 } /* write_cyang_header */
@@ -2914,8 +2914,8 @@ static void
 *********************************************************************/
 static void
     write_cyang_module (ses_cb_t *scb,
-			const ncx_module_t *mod,
-			const yangdump_cvtparms_t *cp)
+                        const ncx_module_t *mod,
+                        const yangdump_cvtparms_t *cp)
 {
     const yang_node_t     *node;
     const yang_stmt_t     *stmt;
@@ -2934,150 +2934,150 @@ static void
 
     /* 1) features */
     if (!stmtmode) {
-	write_cyang_features(scb, 
+        write_cyang_features(scb, 
                              mod, 
                              cp, 
-			     &mod->featureQ, 
-			     2*cp->indent);
+                             &mod->featureQ, 
+                             2*cp->indent);
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_cyang_features(scb, 
-				     node->submod, 
-				     cp, 
-				     &node->submod->featureQ, 
-				     2*cp->indent);
-	    }
-	}
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_cyang_features(scb, 
+                                     node->submod, 
+                                     cp, 
+                                     &node->submod->featureQ, 
+                                     2*cp->indent);
+            }
+        }
     }
 
     /* 2) identities */
     if (!stmtmode) {
-	write_cyang_identities(scb, 
-			       mod, 
-			       cp, 
-			       &mod->identityQ, 
-			       cp->indent);
+        write_cyang_identities(scb, 
+                               mod, 
+                               cp, 
+                               &mod->identityQ, 
+                               cp->indent);
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)
-		 dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_cyang_identities(scb, 
-				       node->submod, 
-				       cp, 
-				       &node->submod->identityQ, 
-				       cp->indent);
-	    }
-	}
+        for (node = (const yang_node_t *)
+                 dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_cyang_identities(scb, 
+                                       node->submod, 
+                                       cp, 
+                                       &node->submod->identityQ, 
+                                       cp->indent);
+            }
+        }
     }
 
     /* 3) typedefs */
     if (!stmtmode) {
-	write_cyang_typedefs(scb, 
-			     mod, 
-			     cp, 
-			     &mod->typeQ, 
-			     cp->indent);
+        write_cyang_typedefs(scb, 
+                             mod, 
+                             cp, 
+                             &mod->typeQ, 
+                             cp->indent);
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)
-		 dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_cyang_typedefs(scb, 
-				     node->submod, 
-				     cp, 
-				     &node->submod->typeQ, 
-				     cp->indent);
-	    }
-	}
+        for (node = (const yang_node_t *)
+                 dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_cyang_typedefs(scb, 
+                                     node->submod, 
+                                     cp, 
+                                     &node->submod->typeQ, 
+                                     cp->indent);
+            }
+        }
     }
 
     /* 4) groupings */
     if (!stmtmode) {
-	write_cyang_groupings(scb, 
-			      mod, 
-			      cp, 
-			      &mod->groupingQ, 
-			      cp->indent);
+        write_cyang_groupings(scb, 
+                              mod, 
+                              cp, 
+                              &mod->groupingQ, 
+                              cp->indent);
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)
-		 dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_cyang_groupings(scb, 
-				      node->submod, 
-				      cp, 
-				      &node->submod->groupingQ, 
-				      cp->indent);
-	    }
-	}
+        for (node = (const yang_node_t *)
+                 dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_cyang_groupings(scb, 
+                                      node->submod, 
+                                      cp, 
+                                      &node->submod->groupingQ, 
+                                      cp->indent);
+            }
+        }
     }
 
     /* 5) extensions */
     if (!stmtmode) {
-	write_cyang_extensions(scb, 
-			       mod, 
-			       cp, 
-			       &mod->extensionQ, 
-			       cp->indent);
+        write_cyang_extensions(scb, 
+                               mod, 
+                               cp, 
+                               &mod->extensionQ, 
+                               cp->indent);
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)
-		 dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_cyang_extensions(scb, 
-				       node->submod, 
-				       cp, 
-				       &node->submod->extensionQ, 
-				       cp->indent);
-	    }
-	}
+        for (node = (const yang_node_t *)
+                 dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_cyang_extensions(scb, 
+                                       node->submod, 
+                                       cp, 
+                                       &node->submod->extensionQ, 
+                                       cp->indent);
+            }
+        }
     }
 
     /* 6) objects */
     if (!stmtmode) {
-	write_cyang_objects(scb, 
-			    mod, 
-			    cp, 
-			    &mod->datadefQ, 
-			    cp->indent);
+        write_cyang_objects(scb, 
+                            mod, 
+                            cp, 
+                            &mod->datadefQ, 
+                            cp->indent);
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)
-		 dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_cyang_objects(scb, 
-				    node->submod,
-				    cp, 
-				    &node->submod->datadefQ, 
-				    cp->indent);
-	    }
-	}
+        for (node = (const yang_node_t *)
+                 dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_cyang_objects(scb, 
+                                    node->submod,
+                                    cp, 
+                                    &node->submod->datadefQ, 
+                                    cp->indent);
+            }
+        }
     }
 
     /* 7) deviations */
     if (!stmtmode) {
-	write_cyang_deviations(scb, 
+        write_cyang_deviations(scb, 
                                mod, 
                                cp, 
                                &mod->deviationQ, 
@@ -3085,87 +3085,87 @@ static void
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)
-		 dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_cyang_deviations(scb, 
+        for (node = (const yang_node_t *)
+                 dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_cyang_deviations(scb, 
                                        node->submod,
                                        cp, 
                                        &node->submod->deviationQ, 
                                        cp->indent);
-	    }
-	}
+            }
+        }
     }
 
 
     /* check statement mode on top-level module only */
     if (stmtmode) {
-	for (stmt = (const yang_stmt_t *)
-		 dlq_firstEntry(&mod->stmtQ);
-	     stmt != NULL;
-	     stmt = (const yang_stmt_t *)dlq_nextEntry(stmt)) {
-	    switch (stmt->stmttype) {
-	    case YANG_ST_NONE:
-		SET_ERROR(ERR_INTERNAL_VAL);
-		break;
-	    case YANG_ST_TYPEDEF:
-		write_cyang_typedef(scb,
-				    mod,
-				    cp, 
-				    stmt->s.typ,
-				    cp->indent, 
-				    FALSE);
-		break;
-	    case YANG_ST_GROUPING:
-		write_cyang_grouping(scb,
-				     mod,
-				     cp, 
-				     stmt->s.grp, 
-				     cp->indent, 
-				     FALSE);
-		break;
-	    case YANG_ST_EXTENSION:
-		write_cyang_extension(scb,
-				      mod,
-				      cp, 
-				      stmt->s.ext,
-				      cp->indent);
-		break;
-	    case YANG_ST_OBJECT:
-		write_cyang_object(scb,
-				   mod,
-				   cp, 
-				   stmt->s.obj, 
-				   cp->indent,
-				   FALSE);
-		break;
-	    case YANG_ST_IDENTITY:
-		write_cyang_identity(scb,
-				     mod,
-				     cp, 
-				     stmt->s.identity, 
-				     cp->indent);
-		break;
-	    case YANG_ST_FEATURE:
-		write_cyang_feature(scb, 
-				    mod,
-				    cp, 
-				    stmt->s.feature, 
-				    cp->indent);
-		break;
-	    case YANG_ST_DEVIATION:
-		write_cyang_deviation(scb, 
+        for (stmt = (const yang_stmt_t *)
+                 dlq_firstEntry(&mod->stmtQ);
+             stmt != NULL;
+             stmt = (const yang_stmt_t *)dlq_nextEntry(stmt)) {
+            switch (stmt->stmttype) {
+            case YANG_ST_NONE:
+                SET_ERROR(ERR_INTERNAL_VAL);
+                break;
+            case YANG_ST_TYPEDEF:
+                write_cyang_typedef(scb,
+                                    mod,
+                                    cp, 
+                                    stmt->s.typ,
+                                    cp->indent, 
+                                    FALSE);
+                break;
+            case YANG_ST_GROUPING:
+                write_cyang_grouping(scb,
+                                     mod,
+                                     cp, 
+                                     stmt->s.grp, 
+                                     cp->indent, 
+                                     FALSE);
+                break;
+            case YANG_ST_EXTENSION:
+                write_cyang_extension(scb,
+                                      mod,
+                                      cp, 
+                                      stmt->s.ext,
+                                      cp->indent);
+                break;
+            case YANG_ST_OBJECT:
+                write_cyang_object(scb,
+                                   mod,
+                                   cp, 
+                                   stmt->s.obj, 
+                                   cp->indent,
+                                   FALSE);
+                break;
+            case YANG_ST_IDENTITY:
+                write_cyang_identity(scb,
+                                     mod,
+                                     cp, 
+                                     stmt->s.identity, 
+                                     cp->indent);
+                break;
+            case YANG_ST_FEATURE:
+                write_cyang_feature(scb, 
+                                    mod,
+                                    cp, 
+                                    stmt->s.feature, 
+                                    cp->indent);
+                break;
+            case YANG_ST_DEVIATION:
+                write_cyang_deviation(scb, 
                                       mod,
                                       cp, 
                                       stmt->s.deviation, 
                                       cp->indent);
-		break;
-	    default:
-		SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	}
+                break;
+            default:
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }
     }
     
     /* TBD: need a better way to generate all the top-level
@@ -3179,17 +3179,17 @@ static void
     write_cyang_appinfoQ(scb, mod, cp, &mod->appinfoQ, cp->indent);
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_cyang_appinfoQ(scb, 
-				     node->submod,
-				     cp, 
-				     &node->submod->appinfoQ,
-				     cp->indent);
-	    }
-	}
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_cyang_appinfoQ(scb, 
+                                     node->submod,
+                                     cp, 
+                                     &node->submod->appinfoQ,
+                                     cp->indent);
+            }
+        }
     }
 
     /* end module */
@@ -3216,15 +3216,15 @@ static void
 *********************************************************************/
 status_t
     cyang_convert_module (const yang_pcb_t *pcb,
-			  const yangdump_cvtparms_t *cp,
-			  ses_cb_t *scb)
+                          const yangdump_cvtparms_t *cp,
+                          ses_cb_t *scb)
 {
     const ncx_module_t  *mod;
 
     /* the module should already be parsed and loaded */
     mod = pcb->top;
     if (!mod) {
-	return SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
     }
 
     write_cyang_module(scb, mod, cp);

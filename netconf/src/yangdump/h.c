@@ -49,6 +49,10 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
+#ifndef _H_c_util
+#include "c_util.h"
+#endif
+
 #ifndef _H_dlq
 #include "dlq.h"
 #endif
@@ -105,62 +109,16 @@ date         init     comment
 #include "yangdump.h"
 #endif
 
+#ifndef _H_yangdump_util
+#include "yangdump_util.h"
+#endif
+
 
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-#define START_COMMENT (const xmlChar *)"\n\n/* "
-#define END_COMMENT   (const xmlChar *)" */"
-
-#define START_BLOCK  (const xmlChar *)" {"
-#define END_BLOCK    (const xmlChar *)"\n}"
-
-#define BAR_H         (const xmlChar *)"_H_"
-#define DOT_H         (const xmlChar *)".h"
-#define BAR_FEAT      (const xmlChar *)"F"
-#define BAR_ID        (const xmlChar *)"I"
-#define BAR_NODE      (const xmlChar *)"N"
-#define DEF_TYPE      (const xmlChar *)"T"
-
-#define BAR_CONST     (const xmlChar *)"(const xmlChar *)"
-
-#define POUND_DEFINE  (const xmlChar *)"\n#define "
-#define POUND_ENDIF   (const xmlChar *)"\n#endif"
-#define POUND_IF      (const xmlChar *)"\n#if "
-#define POUND_IFDEF   (const xmlChar *)"\n#ifdef "
-#define POUND_IFNDEF  (const xmlChar *)"\n#ifndef "
-#define POUND_INCLUDE (const xmlChar *)"\n#include "
-
-#define START_DEFINED (const xmlChar *)"defined("
-#define START_TYPEDEF (const xmlChar *)"\ntypedef "
-
-
-#define INT8          (const xmlChar *)"int8"
-#define INT16         (const xmlChar *)"int16"
-#define INT32         (const xmlChar *)"int32"
-#define INT64         (const xmlChar *)"int64"
-
-#define UINT8         (const xmlChar *)"uint8"
-#define UINT16        (const xmlChar *)"uint16"
-#define UINT32        (const xmlChar *)"uint32"
-#define UINT64        (const xmlChar *)"uint64"
-
-#define STRING        (const xmlChar *)"xmlChar *"
-
-#define BOOLEAN       (const xmlChar *)"boolean"
-#define FLOAT         (const xmlChar *)"float"
-#define DOUBLE        (const xmlChar *)"double"
-
-#define STRUCT        (const xmlChar *)"struct"
-#define UNION         (const xmlChar *)"union"
-
-#define QHEADER       (const xmlChar *)"\n    dlq_hdr_t qhdr;"
-
-#define QUEUE         (const xmlChar *)"dlq_hdr_t"
-
-#define START_LINE    (const xmlChar *)"\n    "
 
 /********************************************************************
 *                                                                   *
@@ -171,270 +129,10 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                            *
 *                                                                   *
 *********************************************************************/
 
-
-/********************************************************************
-* FUNCTION need_rpc_includes
-* 
-* Check if the include-stmts for RPC methods are needed
-*
-* INPUTS:
-*   mod == module in progress
-*   cp == conversion parameters to use
-*
-* RETURNS:
-*  TRUE if RPCs found
-*  FALSE if no RPCs found
-*********************************************************************/
-static boolean
-    need_rpc_includes (const ncx_module_t *mod,
-                       const yangdump_cvtparms_t *cp)
-{
-    const ncx_include_t *inc;
-
-    if (obj_any_rpcs(&mod->datadefQ)) {
-        return TRUE;
-    }
-
-    if (cp->unified) {
-	for (inc = (const ncx_include_t *)
-		 dlq_firstEntry(&mod->includeQ);
-	     inc != NULL;
-	     inc = (const ncx_include_t *)dlq_nextEntry(inc)) {
-
-            if (inc->submod && obj_any_rpcs(&inc->submod->datadefQ)) {
-                return TRUE;
-            }
-	}
-    }
-
-    return FALSE;
-
-} /* need_rpc_includes */
-
-
-/********************************************************************
-* FUNCTION need_notif_includes
-* 
-* Check if the include-stmts for notifications are needed
-*
-* INPUTS:
-*   mod == module in progress
-*   cp == conversion parameters to use
-*
-* RETURNS:
-*   TRUE if notifcations found
-*   FALSE if no notifications found
-*********************************************************************/
-static boolean
-    need_notif_includes (const ncx_module_t *mod,
-                         const yangdump_cvtparms_t *cp)
-{
-    const ncx_include_t *inc;
-
-    if (obj_any_notifs(&mod->datadefQ)) {
-        return TRUE;
-    }
-
-    if (cp->unified) {
-	for (inc = (const ncx_include_t *)
-		 dlq_firstEntry(&mod->includeQ);
-	     inc != NULL;
-	     inc = (const ncx_include_t *)dlq_nextEntry(inc)) {
-
-            if (inc->submod && obj_any_notifs(&inc->submod->datadefQ)) {
-                return TRUE;
-            }
-	}
-    }
-
-    return FALSE;
-
-} /* need_notif_includes */
-
-
-/********************************************************************
-* FUNCTION write_h_safe_str
-* 
-* Generate a string token at the current line location
-*
-* INPUTS:
-*   scb == session control block to use for writing
-*   strval == string value
-*********************************************************************/
-static void
-    write_h_safe_str (ses_cb_t *scb,
-		      const xmlChar *strval)
-{
-    const xmlChar *s;
-
-    s = strval;
-    while (*s) {
-	if (*s == '.' || *s == '-') {
-	    ses_putchar(scb, '_');
-	} else {
-	    ses_putchar(scb, *s);
-	}
-	s++;
-    }
-
-}  /* write_h_safe_str */
-
-
-/********************************************************************
-* FUNCTION write_h_str
-* 
-* Generate a string token at the current line location
-*
-* INPUTS:
-*   scb == session control block to use for writing
-*   strval == string value
-*   quotes == quotes style (0, 1, 2)
-*********************************************************************/
-static void
-    write_h_str (ses_cb_t *scb,
-		 const xmlChar *strval,
-		 uint32 quotes)
-{
-    switch (quotes) {
-    case 1:
-	ses_putchar(scb, '\'');
-	break;
-    case 2:
-	ses_putchar(scb, '"');
-	break;
-    default:
-	;
-    }
-
-    ses_putstr(scb, strval);
-
-    switch (quotes) {
-    case 1:
-	ses_putchar(scb, '\'');
-	break;
-    case 2:
-	ses_putchar(scb, '"');
-	break;
-    default:
-	;
-    }
-
-}  /* write_h_str */
-
-
-/********************************************************************
-* FUNCTION write_h_simple_str
-* 
-* Generate a simple clause on 1 line
-*
-* INPUTS:
-*   scb == session control block to use for writing
-*   kwname == keyword name
-*   strval == string value
-*   indent == indent count to use
-*   quotes == quotes style (0, 1, 2)
-*********************************************************************/
-static void
-    write_h_simple_str (ses_cb_t *scb,
-			const xmlChar *kwname,
-			const xmlChar *strval,
-			int32 indent,
-			uint32 quotes)
-{
-    ses_putstr_indent(scb, kwname, indent);
-    if (strval) {
-	ses_putchar(scb, ' ');
-	write_h_str(scb, strval, quotes);
-    }
-
-}  /* write_h_simple_str */
-
-
-/********************************************************************
-*
-* FUNCTION write_identifier
-* 
-* Generate an identifier
-*
-*  #module_DEFTYPE_idname
-*
-* INPUTS:
-*   scb == session control block to use for writing
-*   modname == module name start-string to use
-*   defpart == internal string for deftype part
-*   idname == identifier name
-*
-*********************************************************************/
-static void
-    write_identifier (ses_cb_t *scb,
-		      const xmlChar *modname,
-		      const xmlChar *defpart,
-		      const xmlChar *idname)
-{
-    ses_putstr(scb, (const xmlChar *)"y_");
-    write_h_safe_str(scb, modname);
-    ses_putchar(scb, '_');
-    if (defpart != NULL) {
-        ses_putstr(scb, defpart);
-        ses_putchar(scb, '_');
-    }
-    write_h_safe_str(scb, idname);
-
-}  /* write_identifier */
-
-
-/********************************************************************
-* FUNCTION write_ext_include
-* 
-* Generate an include statement for an external file
-*
-*  #include <foo,h>
-*
-* INPUTS:
-*   scb == session control block to use for writing
-*   hfile == H file name == file name to include (foo.h)
-*
-*********************************************************************/
-static void
-    write_ext_include (ses_cb_t *scb,
-                       const xmlChar *hfile)
-{
-    ses_putstr(scb, (const xmlChar *)"\n#include <");
-    ses_putstr(scb, hfile);
-    ses_putstr(scb, (const xmlChar *)">\n");
-
-}  /* write_ext_include */
-
-
-/********************************************************************
-* FUNCTION write_ncx_include
-* 
-* Generate an include statement for an NCX file
-*
-*  #ifndef _H_foo
-*  #include "foo,h"
-*
-* INPUTS:
-*   scb == session control block to use for writing
-*   modname == module name to include (foo)
-*
-*********************************************************************/
-static void
-    write_ncx_include (ses_cb_t *scb,
-                       const xmlChar *modname)
-{
-    ses_putstr(scb, (const xmlChar *)"\n#ifndef _H_");
-    ses_putstr(scb, modname);
-    ses_putstr(scb, (const xmlChar *)"\n#include \"");
-    ses_putstr(scb, modname);
-    ses_putstr(scb, (const xmlChar *)".h\"");
-    ses_putstr(scb, (const xmlChar *)"\n#endif\n");
-
-}  /* write_ncx_include */
 
 
 /********************************************************************
@@ -449,7 +147,7 @@ static void
 *********************************************************************/
 static void
     write_h_iffeature_start (ses_cb_t *scb,
-			     const dlq_hdr_t *iffeatureQ)
+                             const dlq_hdr_t *iffeatureQ)
 {
     ncx_iffeature_t   *iffeature, *nextif;
     uint32             iffeaturecnt;
@@ -458,37 +156,37 @@ static void
 
     /* check if conditional wrapper needed */
     if (iffeaturecnt == 1) {
-	iffeature = (ncx_iffeature_t *)
-	    dlq_firstEntry(iffeatureQ);
+        iffeature = (ncx_iffeature_t *)
+            dlq_firstEntry(iffeatureQ);
 
-	ses_putstr(scb, POUND_IFDEF);
-	write_identifier(scb, 
-			 iffeature->feature->tkerr.mod->name,
-			 BAR_FEAT,
-			 iffeature->feature->name);
+        ses_putstr(scb, POUND_IFDEF);
+        write_identifier(scb, 
+                         iffeature->feature->tkerr.mod->name,
+                         BAR_FEAT,
+                         iffeature->feature->name);
     } else if (iffeaturecnt > 1) {
-	ses_putstr(scb, POUND_IF);
-	ses_putchar(scb, '(');
+        ses_putstr(scb, POUND_IF);
+        ses_putchar(scb, '(');
 
-	for (iffeature = (ncx_iffeature_t *)
-		 dlq_firstEntry(iffeatureQ);
-	     iffeature != NULL;
-	     iffeature = nextif) {
+        for (iffeature = (ncx_iffeature_t *)
+                 dlq_firstEntry(iffeatureQ);
+             iffeature != NULL;
+             iffeature = nextif) {
 
-	    nextif = (ncx_iffeature_t *)dlq_nextEntry(iffeature);
+            nextif = (ncx_iffeature_t *)dlq_nextEntry(iffeature);
 
-	    ses_putstr(scb, START_DEFINED);
-	    write_identifier(scb, 
-			     iffeature->feature->tkerr.mod->name,
-			     BAR_FEAT,
-			     iffeature->feature->name);
-	    ses_putchar(scb, ')');
+            ses_putstr(scb, START_DEFINED);
+            write_identifier(scb, 
+                             iffeature->feature->tkerr.mod->name,
+                             BAR_FEAT,
+                             iffeature->feature->name);
+            ses_putchar(scb, ')');
 
-	    if (nextif) {
-		ses_putstr(scb, (const xmlChar *)" && ");
-	    }
-	}
-	ses_putchar(scb, ')');
+            if (nextif) {
+                ses_putstr(scb, (const xmlChar *)" && ");
+            }
+        }
+        ses_putchar(scb, ')');
     }
 
 }  /* write_h_iffeature_start */
@@ -506,10 +204,10 @@ static void
 *********************************************************************/
 static void
     write_h_iffeature_end (ses_cb_t *scb,
-			   const dlq_hdr_t *iffeatureQ)
+                           const dlq_hdr_t *iffeatureQ)
 {
     if (!dlq_empty(iffeatureQ)) {
-	ses_putstr(scb, POUND_ENDIF);
+        ses_putstr(scb, POUND_ENDIF);
     }
 
 }  /* write_h_iffeature_end */
@@ -527,7 +225,7 @@ static void
 **********************************************************************/
 static void
     write_h_objtype (ses_cb_t *scb,
-		     const obj_template_t *obj)
+                     const obj_template_t *obj)
 
 {
     ncx_btype_t    btyp;
@@ -540,38 +238,38 @@ static void
 
     switch (btyp) {
     case NCX_BT_BOOLEAN:
-	ses_putstr(scb, BOOLEAN);
-	break;
+        ses_putstr(scb, BOOLEAN);
+        break;
     case NCX_BT_INT8:
-	ses_putstr(scb, INT8);
-	break;
+        ses_putstr(scb, INT8);
+        break;
     case NCX_BT_INT16:
-	ses_putstr(scb, INT16);
-	break;
+        ses_putstr(scb, INT16);
+        break;
     case NCX_BT_INT32:
-	ses_putstr(scb, INT32);
-	break;
+        ses_putstr(scb, INT32);
+        break;
     case NCX_BT_INT64:
-	ses_putstr(scb, INT64);
-	break;
+        ses_putstr(scb, INT64);
+        break;
     case NCX_BT_UINT8:
-	ses_putstr(scb, UINT8);
-	break;
+        ses_putstr(scb, UINT8);
+        break;
     case NCX_BT_UINT16:
-	ses_putstr(scb, UINT16);
-	break;
+        ses_putstr(scb, UINT16);
+        break;
     case NCX_BT_UINT32:
-	ses_putstr(scb, UINT32);
-	break;
+        ses_putstr(scb, UINT32);
+        break;
     case NCX_BT_UINT64:
-	ses_putstr(scb, UINT64);
-	break;
+        ses_putstr(scb, UINT64);
+        break;
     case NCX_BT_DECIMAL64:
-	ses_putstr(scb, INT64);
-	break;
+        ses_putstr(scb, INT64);
+        break;
     case NCX_BT_FLOAT64:
-	ses_putstr(scb, DOUBLE);
-	break;
+        ses_putstr(scb, DOUBLE);
+        break;
     case NCX_BT_ENUM:
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
@@ -579,45 +277,46 @@ static void
     case NCX_BT_LEAFREF:
     case NCX_BT_IDREF:
     case NCX_BT_SLIST:
-	ses_putstr(scb, STRING);
-	needspace = FALSE;
-	break;
+        ses_putstr(scb, STRING);
+        needspace = FALSE;
+        break;
     case NCX_BT_LIST:
-	ses_putstr(scb, QUEUE);
-	break;
+        ses_putstr(scb, QUEUE);
+        break;
     default:
-	/* assume complex type */
-	write_identifier(scb,
-			 obj_get_mod_name(obj),
-			 DEF_TYPE,
-			 obj_get_name(obj));
+        /* assume complex type */
+        write_identifier(scb,
+                         obj_get_mod_name(obj),
+                         DEF_TYPE,
+                         obj_get_name(obj));
     }
 
     if (needspace) {
-	ses_putchar(scb, ' ');
+        ses_putchar(scb, ' ');
     }
 
-    write_h_safe_str(scb, obj_get_name(obj));
+    write_c_safe_str(scb, obj_get_name(obj));
     ses_putchar(scb, ';');
 
 }  /* write_h_objtype */
 
 
 /********************************************************************
-* FUNCTION write_h_object
+* FUNCTION write_h_object_typdef
 * 
-* Generate the C definitions for 1 datadef
+* Generate the H file typdefs definitions for 1 data node
 *
 * INPUTS:
 *   scb == session control block to use for writing
 *   obj == obj_template_t to use
-*
+*   cdefQ == Q of c_define_t structs to check for identity binding
 **********************************************************************/
 static void
-    write_h_object (ses_cb_t *scb,
-		    obj_template_t *obj)
-
+    write_h_object_typdef (ses_cb_t *scb,
+                           obj_template_t *obj,
+                           dlq_hdr_t *cdefQ)
 {
+    c_define_t              *cdef;
     obj_template_t          *childobj;
     xmlChar                 *buffer;
     ncx_btype_t              btyp;
@@ -629,18 +328,30 @@ static void
     /* typedefs not needed for simple objects */
     if (obj->objtype == OBJ_TYP_LEAF ||
         obj->objtype == OBJ_TYP_ANYXML) {
-	return;
+        return;
     } else if (obj->objtype == OBJ_TYP_LEAF_LIST) {
-	isleaflist = TRUE;
+        isleaflist = TRUE;
+    }
+
+    cdef = find_path_cdefine(cdefQ, obj);
+    if (cdef == NULL) {
+        SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return;
     }
 
     btyp = obj_get_basetype(obj);
 
+    if (obj->objtype == OBJ_TYP_CONTAINER &&
+        !obj_has_children(obj)) {
+        /* skip empty containers */
+        return;
+    }
+
     /* generate the YOID as a comment */
     res = obj_gen_object_id(obj, &buffer);
     if (res != NO_ERR) {
-	SET_ERROR(res);
-	return;
+        SET_ERROR(res);
+        return;
     }
     ses_putstr(scb, START_COMMENT);
     ses_putstr(scb, obj_get_typestr(obj));
@@ -653,30 +364,27 @@ static void
     ses_putstr(scb, START_TYPEDEF);
 
     if (isleaflist) {
-	ses_putstr(scb, STRUCT);
+        ses_putstr(scb, STRUCT);
     } else {
-	/* print the C top-level data type */
-	switch (btyp) {
-	case NCX_BT_CONTAINER:
-	case NCX_BT_CASE:
-	case NCX_BT_LIST:
-	    ses_putstr(scb, STRUCT);
-	    break;
-	case NCX_BT_CHOICE:
-	    ses_putstr(scb, UNION);
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return;
-	}
+        /* print the C top-level data type */
+        switch (btyp) {
+        case NCX_BT_CONTAINER:
+        case NCX_BT_CASE:
+        case NCX_BT_LIST:
+            ses_putstr(scb, STRUCT);
+            break;
+        case NCX_BT_CHOICE:
+            ses_putstr(scb, UNION);
+            break;
+        default:
+            SET_ERROR(ERR_INTERNAL_VAL);
+            return;
+        }
     }
     ses_putchar(scb, ' ');
 
     /* the first 'real' name has an underscore on the end */
-    write_identifier(scb,
-		     obj_get_mod_name(obj),
-		     DEF_TYPE,
-		     obj_get_name(obj));
+    ses_putstr(scb, cdef->idstr);
     ses_putchar(scb, '_');
 
     /* start the guts of the typedef */
@@ -684,44 +392,41 @@ static void
 
     /* generate a line for a Q header or a Queue */
     if (obj->objtype == OBJ_TYP_LIST || 
-	obj->objtype == OBJ_TYP_LEAF_LIST) {
-	ses_putstr(scb, QHEADER);
+        obj->objtype == OBJ_TYP_LEAF_LIST) {
+        ses_putstr(scb, QHEADER);
     }
 
     if (isleaflist) { 
-	/* generate a line for the leaf-list data type */
-	write_h_objtype(scb, obj);
+        /* generate a line for the leaf-list data type */
+        write_h_objtype(scb, obj);
     } else {
-	/* generate a line for each child node */
-	for (childobj = obj_first_child(obj);
-	     childobj != NULL;
-	     childobj = obj_next_child(childobj)) {
+        /* generate a line for each child node */
+        for (childobj = obj_first_child(obj);
+             childobj != NULL;
+             childobj = obj_next_child(childobj)) {
 
-	    if (!obj_has_name(childobj) ||
-		!obj_is_data_db(childobj)) {
-		continue;
-	    }
-	    if (childobj->objtype == OBJ_TYP_LEAF_LIST) {
-		ses_putstr(scb, START_LINE);
-		ses_putstr(scb, QUEUE);
-		ses_putchar(scb, ' ');
-		write_h_safe_str(scb, obj_get_name(childobj));
-		ses_putchar(scb, ';');
-	    } else {
-		write_h_objtype(scb, childobj);
-	    }
-	}
+            if (!obj_has_name(childobj) ||
+                !obj_is_data_db(childobj)) {
+                continue;
+            }
+            if (childobj->objtype == OBJ_TYP_LEAF_LIST) {
+                ses_putstr(scb, START_LINE);
+                ses_putstr(scb, QUEUE);
+                ses_putchar(scb, ' ');
+                ses_putstr(scb, cdef->valstr);
+                ses_putchar(scb, ';');
+            } else {
+                write_h_objtype(scb, childobj);
+            }
+        }
     }
 
     ses_putstr(scb, END_BLOCK);
     ses_putchar(scb, ' ');
-    write_identifier(scb,
-		     obj_get_mod_name(obj),
-		     DEF_TYPE,
-		     obj_get_name(obj));
+    ses_putstr(scb, cdef->idstr);
     ses_putchar(scb, ';');
 
-}  /* write_h_object */
+}  /* write_h_object_typdef */
 
 
 /********************************************************************
@@ -731,37 +436,97 @@ static void
 *
 * INPUTS:
 *   scb == session control block to use for writing
-*   datadefQ == que of obj_template_t to use
-*
+*   datadefQ == Q of obj_template_t to use
+*   typcdefQ == Q of typename binding c_define_t structs
 *********************************************************************/
 static void
     write_h_objects (ses_cb_t *scb,
-		     dlq_hdr_t *datadefQ)
+                     dlq_hdr_t *datadefQ,
+                     dlq_hdr_t *typcdefQ)
 {
     obj_template_t    *obj;
     dlq_hdr_t         *childdatadefQ;
 
     if (dlq_empty(datadefQ)) {
-	return;
+        return;
     }
 
     for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_has_name(obj) || !obj_is_data_db(obj)) {
-	    continue;
-	}
+        if (!obj_has_name(obj) || !obj_is_data_db(obj)) {
+            continue;
+        }
 
-	childdatadefQ = obj_get_datadefQ(obj);
-	if (childdatadefQ) {
-	    write_h_objects(scb, childdatadefQ);
-	}
-	write_h_object(scb, obj);
+        childdatadefQ = obj_get_datadefQ(obj);
+        if (childdatadefQ) {
+            write_h_objects(scb, childdatadefQ, typcdefQ);
+        }
+        write_h_object_typdef(scb, obj, typcdefQ);
     }
 
 }  /* write_h_objects */
 
+
+/********************************************************************
+* FUNCTION save_h_objects
+* 
+* save the path name bindings for C typdefs
+*
+* INPUTS:
+*   mod == module in progress
+*   datadefQ == que of obj_template_t to use
+*   savecdefQ == Q of c_define_t structs to use
+*
+* OUTPUTS:
+*   savecdefQ may get new structs added
+*
+* RETURNS:
+*  status
+*********************************************************************/
+static status_t
+    save_h_objects (ncx_module_t *mod,
+                    dlq_hdr_t *datadefQ,
+                    dlq_hdr_t *savecdefQ)
+{
+    obj_template_t    *obj;
+    dlq_hdr_t         *childdatadefQ;
+    status_t           res;
+
+    if (dlq_empty(datadefQ)) {
+        return NO_ERR;
+    }
+
+    for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
+
+        if (!obj_has_name(obj) || !obj_is_data_db(obj)) {
+            continue;
+        }
+
+        res = save_path_cdefine(savecdefQ,
+                                ncx_get_modname(mod), 
+                                obj);
+        if (res != NO_ERR) {
+            return res;
+        }
+
+        childdatadefQ = obj_get_datadefQ(obj);
+        if (childdatadefQ) {
+            res = save_h_objects(mod,
+                                 childdatadefQ,
+                                 savecdefQ);
+            if (res != NO_ERR) {
+                return res;
+            }
+        }
+    }
+
+    return NO_ERR;
+
+}  /* save_h_objects */
 
 
 /********************************************************************
@@ -787,23 +552,23 @@ static void
 
 
     if (dlq_empty(datadefQ)) {
-	return;
+        return;
     }
 
     for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_is_rpc(obj)) {
-	    continue;
-	}
+        if (!obj_is_rpc(obj)) {
+            continue;
+        }
 
         /*
-	childdatadefQ = obj_get_datadefQ(obj);
-	if (childdatadefQ) {
-	    write_h_objects(scb, childdatadefQ);
-	}
-	write_h_rpc(scb, obj);
+        childdatadefQ = obj_get_datadefQ(obj);
+        if (childdatadefQ) {
+            write_h_objects(scb, childdatadefQ);
+        }
+        write_h_rpc(scb, obj);
         */
     }
 
@@ -832,23 +597,23 @@ static void
 
 
     if (dlq_empty(datadefQ)) {
-	return;
+        return;
     }
 
     for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_is_notif(obj)) {
-	    continue;
-	}
+        if (!obj_is_notif(obj)) {
+            continue;
+        }
 
         /*
-	childdatadefQ = obj_get_datadefQ(obj);
-	if (childdatadefQ) {
-	    write_h_objects(scb, childdatadefQ);
-	}
-	write_h_notif(scb, obj);
+        childdatadefQ = obj_get_datadefQ(obj);
+        if (childdatadefQ) {
+            write_h_objects(scb, childdatadefQ);
+        }
+        write_h_notif(scb, obj);
         */
     }
 
@@ -867,14 +632,14 @@ static void
 *********************************************************************/
 static void
     write_h_identity (ses_cb_t *scb,
-		      const ncx_identity_t *identity)
+                      const ncx_identity_t *identity)
 {
     /* define the identity constant */
     ses_putstr(scb, POUND_DEFINE);
     write_identifier(scb, 
-		     identity->tkerr.mod->name,
-		     BAR_ID,
-		     identity->name);
+                     identity->tkerr.mod->name,
+                     BAR_ID,
+                     identity->name);
     ses_putchar(scb, ' ');
     ses_putstr(scb, BAR_CONST);
     ses_putchar(scb, '"');
@@ -896,22 +661,22 @@ static void
 *********************************************************************/
 static void
     write_h_identities (ses_cb_t *scb,
-			const dlq_hdr_t *identityQ)
+                        const dlq_hdr_t *identityQ)
 {
 
     const ncx_identity_t *identity;
 
     if (dlq_empty(identityQ)) {
-	return;
+        return;
     }
 
     for (identity = (const ncx_identity_t *)
-	     dlq_firstEntry(identityQ);
-	 identity != NULL;
-	 identity = (const ncx_identity_t *)
-	     dlq_nextEntry(identity)) {
+             dlq_firstEntry(identityQ);
+         identity != NULL;
+         identity = (const ncx_identity_t *)
+             dlq_nextEntry(identity)) {
 
-	write_h_identity(scb, identity);
+        write_h_identity(scb, identity);
     }
     ses_putchar(scb, '\n');
 
@@ -925,22 +690,19 @@ static void
 *
 * INPUTS:
 *   scb == session control block to use for writing
-*   obj == object template to use
+*   cdef == c_define_t struct to use
 *
 *********************************************************************/
 static void
     write_h_oid (ses_cb_t *scb,
-		 const obj_template_t *obj)
+                 const c_define_t *cdef)
 {
     /* define the identity constant */
     ses_putstr(scb, POUND_DEFINE);
-    write_identifier(scb, 
-		     obj_get_mod_name(obj),
-		     BAR_NODE,
-		     obj_get_name(obj));
+    ses_putstr(scb, cdef->idstr);
     ses_putchar(scb, ' ');
     ses_putstr(scb, BAR_CONST);
-    write_h_str(scb, obj_get_name(obj), 2);
+    write_c_str(scb, cdef->valstr, 2);
 
 }  /* write_h_oid */
 
@@ -948,22 +710,53 @@ static void
 /********************************************************************
 * FUNCTION write_h_oids
 * 
-* Generate the YANG for the specified identityQ
+* Generate the C for the specified #define statements
+* for name identifier strings
 *
 * INPUTS:
 *   scb == session control block to use for writing
-*   identityQ == que of ncx_identity_t to use
+*   cdefineQ == que of c_define_t structs to use
 *
 *********************************************************************/
 static void
     write_h_oids (ses_cb_t *scb,
-		  const dlq_hdr_t *datadefQ)
+                  const dlq_hdr_t *cdefineQ)
+{
+    const c_define_t     *cdef;
+
+    for (cdef = (const c_define_t *)dlq_firstEntry(cdefineQ);
+         cdef != NULL;
+         cdef = (const c_define_t *)dlq_nextEntry(cdef)) {
+
+        write_h_oid(scb, cdef);
+    }
+
+}  /* write_h_oids */
+
+
+/********************************************************************
+* FUNCTION save_h_oids
+* 
+* Save the identity to name bindings for the object names
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   cdefineQ == que of c_define_t structs to use
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    save_h_oids (ses_cb_t *scb,
+                 const dlq_hdr_t *datadefQ,
+                 dlq_hdr_t *cdefineQ)
 {
     const dlq_hdr_t      *childQ;
     const obj_template_t *obj;
+    status_t              res;
 
     if (dlq_empty(datadefQ)) {
-	return;
+	return NO_ERR;
     }
 
     for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
@@ -971,17 +764,25 @@ static void
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
 	if (obj_has_name(obj) && obj_is_data_db(obj)) {
-	    write_h_oid(scb, obj);
-
+	    res = save_oid_cdefine(cdefineQ,
+                                   obj_get_mod_name(obj),
+                                   obj_get_name(obj));
+            if (res != NO_ERR) {
+                return res;
+            }
 	    childQ = obj_get_cdatadefQ(obj);
 	    if (childQ) {
-		write_h_oids(scb, childQ);
+		res = save_h_oids(scb, childQ, cdefineQ);
+                if (res != NO_ERR) {
+                    return res;
+                }
 	    }
 	}
     }
 
-}  /* write_h_oids */
+    return NO_ERR;
 
+}  /* save_h_oids */
 
 
 /********************************************************************
@@ -996,12 +797,12 @@ static void
 *********************************************************************/
 static void
     write_h_feature (ses_cb_t *scb,
-		     const ncx_feature_t *feature)
+                     const ncx_feature_t *feature)
 {
 
 #ifdef NOT_IMPLEMENTED_YET
     if (!feature->enabled) {
-	return;
+        return;
     }
 #endif
 
@@ -1010,9 +811,9 @@ static void
     /* define feature constant */
     ses_putstr(scb, POUND_DEFINE);
     write_identifier(scb, 
-		     feature->tkerr.mod->name,
-		     BAR_FEAT,
-		     feature->name);
+                     feature->tkerr.mod->name,
+                     BAR_FEAT,
+                     feature->name);
     ses_putchar(scb, ' ');
     ses_putchar(scb, '1');
 
@@ -1033,21 +834,21 @@ static void
 *********************************************************************/
 static void
     write_h_features (ses_cb_t *scb,
-		      const dlq_hdr_t *featureQ)
+                      const dlq_hdr_t *featureQ)
 {
     const ncx_feature_t *feature;
 
     if (dlq_empty(featureQ)) {
-	return;
+        return;
     }
 
     for (feature = (const ncx_feature_t *)
-	     dlq_firstEntry(featureQ);
-	 feature != NULL;
-	 feature = (const ncx_feature_t *)
-	     dlq_nextEntry(feature)) {
+             dlq_firstEntry(featureQ);
+         feature != NULL;
+         feature = (const ncx_feature_t *)
+             dlq_nextEntry(feature)) {
 
-	write_h_feature(scb, feature);
+        write_h_feature(scb, feature);
     }
     ses_putchar(scb, '\n');
 
@@ -1069,12 +870,10 @@ static void
 *********************************************************************/
 static void
     write_h_header (ses_cb_t *scb,
-			const ncx_module_t *mod,
-			const yangdump_cvtparms_t *cp)
+                        const ncx_module_t *mod,
+                        const yangdump_cvtparms_t *cp)
 {
-    status_t                  res;
     int32                     indent;
-    xmlChar                   buffer[NCX_VERSION_BUFFSIZE];
 
     indent = cp->indent;
 
@@ -1083,59 +882,51 @@ static void
     ses_putchar(scb, '\n');
 
     /* generater tag */
-    ses_putstr(scb, (const xmlChar *)
-	       "\n  Generated by yangdump version ");
-    res = ncx_get_version(buffer, NCX_VERSION_BUFFSIZE);
-    if (res == NO_ERR) {
-        ses_putstr(scb, buffer);
-    } else {
-        SET_ERROR(res);
-    }
-    ses_putchar(scb, '\n');
+    write_banner();
 
     /* copyright section */
     ses_putstr(scb, (const xmlChar *)
-	       "\n  *** Put copyright info here ***\n");
+               "\n  *** Put copyright info here ***\n");
 
     /* module name */
     if (mod->ismod) {
-	ses_putstr_indent(scb, YANG_K_MODULE, indent);
+        ses_putstr_indent(scb, YANG_K_MODULE, indent);
     } else {
-	ses_putstr_indent(scb, YANG_K_SUBMODULE, indent);
+        ses_putstr_indent(scb, YANG_K_SUBMODULE, indent);
     }
     ses_putchar(scb, ' ');
     ses_putstr(scb, mod->name);
 
     /* version */
     if (mod->version) {
-	write_h_simple_str(scb, 
-			   YANG_K_REVISION,
-			   mod->version, 
+        write_c_simple_str(scb, 
+                           YANG_K_REVISION,
+                           mod->version, 
                            indent,
                            0);
-	ses_putchar(scb, '\n');
+        ses_putchar(scb, '\n');
     }
 
     /* namespace or belongs-to */
     if (mod->ismod) {
-	write_h_simple_str(scb, 
-			   YANG_K_NAMESPACE, 
-			   mod->ns,
+        write_c_simple_str(scb, 
+                           YANG_K_NAMESPACE, 
+                           mod->ns,
                            indent,
                            0);
     } else {
-	write_h_simple_str(scb, 
-			   YANG_K_BELONGS_TO, 
-			   mod->belongs,
+        write_c_simple_str(scb, 
+                           YANG_K_BELONGS_TO, 
+                           mod->belongs,
                            indent,
                            0);
     }
 
     /* organization */
     if (mod->organization) {
-	write_h_simple_str(scb, 
-			   YANG_K_ORGANIZATION,
-			   mod->organization, 
+        write_c_simple_str(scb, 
+                           YANG_K_ORGANIZATION,
+                           mod->organization, 
                            indent,
                            0);
     }
@@ -1214,13 +1005,13 @@ static void
 
     /* includes for submodules */
     if (!cp->unified) {
-	for (inc = (const ncx_include_t *)
-		 dlq_firstEntry(&mod->includeQ);
-	     inc != NULL;
-	     inc = (const ncx_include_t *)dlq_nextEntry(inc)) {
+        for (inc = (const ncx_include_t *)
+                 dlq_firstEntry(&mod->includeQ);
+             inc != NULL;
+             inc = (const ncx_include_t *)dlq_nextEntry(inc)) {
 
             write_ncx_include(scb, inc->submodule);
-	}
+        }
     }
 
 } /* write_h_includes */
@@ -1235,26 +1026,32 @@ static void
 *   scb == session control block to use for writing
 *   mod == module in progress
 *   cp == conversion parameters to use
-
 *
+* RETURNS:
+*   status
 *********************************************************************/
-static void
+static status_t
     write_h_file (ses_cb_t *scb,
-		  ncx_module_t *mod,
-		  const yangdump_cvtparms_t *cp)
+                  ncx_module_t *mod,
+                  const yangdump_cvtparms_t *cp)
 {
     yang_node_t *node;
     int32        indent;
+    dlq_hdr_t    cdefineQ, typenameQ;
+    status_t     res;
 
+    res = NO_ERR;
     indent = cp->indent;
+    dlq_createSQue(&cdefineQ);
+    dlq_createSQue(&typenameQ);
 
     /* Write the start of the H file */
     ses_putstr(scb, POUND_IFNDEF);
     ses_putstr(scb, BAR_H);
-    write_h_safe_str(scb, mod->name);
+    write_c_safe_str(scb, mod->name);
     ses_putstr(scb, POUND_DEFINE);
     ses_putstr(scb, BAR_H);
-    write_h_safe_str(scb, mod->name);
+    write_c_safe_str(scb, mod->name);
 
     write_h_header(scb, mod, cp);
 
@@ -1264,93 +1061,123 @@ static void
     write_h_features(scb, &mod->featureQ);
 
     if (cp->unified && mod->ismod) {
-	for (node = (yang_node_t *)
-		 dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_h_features(scb, &node->submod->featureQ);
-	    }
-	}
+        for (node = (yang_node_t *)
+                 dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_h_features(scb, &node->submod->featureQ);
+            }
+        }
     }
 
     /* 2) identities */
     write_h_identities(scb, &mod->identityQ);
     if (cp->unified && mod->ismod) {
-	for (node = (yang_node_t *)
-		 dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_h_identities(scb, &node->submod->identityQ);
-	    }
-	}
+        for (node = (yang_node_t *)
+                 dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_h_identities(scb, &node->submod->identityQ);
+            }
+        }
     }
 
     /* 3) object node identifiers */
-    write_h_oids(scb, &mod->datadefQ);
-    if (cp->unified && mod->ismod) {
-	for (node = (yang_node_t *)
-		 dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_h_oids(scb, &node->submod->datadefQ);
-	    }
-	}
+    res = save_h_oids(scb, &mod->datadefQ, &cdefineQ);
+    if (res == NO_ERR) {
+        if (cp->unified && mod->ismod) {
+            for (node = (yang_node_t *)
+                     dlq_firstEntry(&mod->saveincQ);
+                 node != NULL && res == NO_ERR;
+                 node = (yang_node_t *)dlq_nextEntry(node)) {
+                if (node->submod) {
+                    res = save_h_oids(scb, 
+                                      &node->submod->datadefQ, 
+                                      &cdefineQ);
+                }
+            }
+        }
+    }
+
+    if (res == NO_ERR) {
+        write_h_oids(scb, &cdefineQ);
     }
 
     /* 4) typedefs for objects */
-    write_h_objects(scb, &mod->datadefQ);
 
-    if (cp->unified && mod->ismod) {
-	for (node = (yang_node_t *)
-		 dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_h_objects(scb, &node->submod->datadefQ);
-	    }
-	}
+    if (res == NO_ERR) {
+        res = save_h_objects(mod, &mod->datadefQ, &typenameQ);
+        if (res == NO_ERR) {
+            if (cp->unified && mod->ismod) {
+                for (node = (yang_node_t *)
+                         dlq_firstEntry(&mod->saveincQ);
+                     node != NULL && res == NO_ERR;
+                     node = (yang_node_t *)dlq_nextEntry(node)) {
+                    if (node->submod) {
+                        res = save_h_objects(node->submod,
+                                             &node->submod->datadefQ, 
+                                             &typenameQ);
+                    }
+                }
+            }
+        }
+    }
+
+    if (res == NO_ERR) {
+        write_h_objects(scb, &mod->datadefQ, &typenameQ);
+        if (cp->unified && mod->ismod) {
+            for (node = (yang_node_t *)
+                     dlq_firstEntry(&mod->saveincQ);
+                 node != NULL;
+                 node = (yang_node_t *)dlq_nextEntry(node)) {
+                if (node->submod) {
+                    write_h_objects(scb, &node->submod->datadefQ, &typenameQ);
+                }
+            }
+        }
     }
 
     /* 5) typedefs and function prototypes for RPCs */
-    write_h_rpcs(scb, &mod->datadefQ);
-
-    if (cp->unified && mod->ismod) {
-	for (node = (yang_node_t *)
-		 dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_h_rpcs(scb, &node->submod->datadefQ);
-	    }
-	}
+    if (res == NO_ERR) {
+        write_h_rpcs(scb, &mod->datadefQ);
+        if (cp->unified && mod->ismod) {
+            for (node = (yang_node_t *)
+                     dlq_firstEntry(&mod->saveincQ);
+                 node != NULL;
+                 node = (yang_node_t *)dlq_nextEntry(node)) {
+                if (node->submod) {
+                    write_h_rpcs(scb, &node->submod->datadefQ);
+                }
+            }
+        }
     }
 
     /* 6) typedefs and function prototypes for notifications */
-    write_h_notifs(scb, &mod->datadefQ);
-
-    if (cp->unified && mod->ismod) {
-	for (node = (yang_node_t *)
-		 dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_h_notifs(scb, &node->submod->datadefQ);
-	    }
-	}
+    if (res == NO_ERR) {
+        write_h_notifs(scb, &mod->datadefQ);
+        if (cp->unified && mod->ismod) {
+            for (node = (yang_node_t *)
+                     dlq_firstEntry(&mod->saveincQ);
+                 node != NULL;
+                 node = (yang_node_t *)dlq_nextEntry(node)) {
+                if (node->submod) {
+                    write_h_notifs(scb, &node->submod->datadefQ);
+                }
+            }
+        }
     }
 
     /* 5) init and cleanup functions */
-    if (mod->ismod) {
+    if (mod->ismod && res == NO_ERR) {
         /* extern status_t y_<module>_init (void); */
         ses_putstr(scb, START_COMMENT);
         ses_putstr(scb, mod->name);
         ses_putstr(scb, (const xmlChar *)" module init 1");
         ses_putstr(scb, END_COMMENT);
         ses_putstr(scb, (const xmlChar *)"\nextern status_t");
-        ses_putstr_indent(scb, (const xmlChar *)"y_", indent);
+        ses_putstr_indent(scb, Y_PREFIX, indent);
         ses_putstr(scb, mod->name);
         ses_putstr(scb, (const xmlChar *)"_init (void);");
 
@@ -1360,7 +1187,7 @@ static void
         ses_putstr(scb, (const xmlChar *)" module init 2");
         ses_putstr(scb, END_COMMENT);
         ses_putstr(scb, (const xmlChar *)"\nextern status_t");
-        ses_putstr_indent(scb, (const xmlChar *)"y_", indent);
+        ses_putstr_indent(scb, Y_PREFIX, indent);
         ses_putstr(scb, mod->name);
         ses_putstr(scb, (const xmlChar *)"_init2 (void);");
 
@@ -1370,7 +1197,7 @@ static void
         ses_putstr(scb, (const xmlChar *)" module cleanup");
         ses_putstr(scb, END_COMMENT);
         ses_putstr(scb, (const xmlChar *)"\nextern void");
-        ses_putstr_indent(scb, (const xmlChar *)"y_", indent);
+        ses_putstr_indent(scb, Y_PREFIX, indent);
         ses_putstr(scb, mod->name);
         ses_putstr(scb, (const xmlChar *)"_cleanup (void);");
     }
@@ -1378,6 +1205,11 @@ static void
     /* Write the end of the H file */
     ses_putchar(scb, '\n');
     ses_putstr(scb, POUND_ENDIF);
+
+    clean_cdefineQ(&cdefineQ);
+    clean_cdefineQ(&typenameQ);
+
+    return res;
 
 } /* write_h_file */
 
@@ -1400,20 +1232,21 @@ static void
 *********************************************************************/
 status_t
     h_convert_module (yang_pcb_t *pcb,
-		      const yangdump_cvtparms_t *cp,
-		      ses_cb_t *scb)
+                      const yangdump_cvtparms_t *cp,
+                      ses_cb_t *scb)
 {
     ncx_module_t  *mod;
+    status_t       res;
 
     /* the module should already be parsed and loaded */
     mod = pcb->top;
     if (!mod) {
-	return SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
     }
 
-    write_h_file(scb, mod, cp);
+    res = write_h_file(scb, mod, cp);
 
-    return NO_ERR;
+    return res;
 
 }   /* h_convert_module */
 

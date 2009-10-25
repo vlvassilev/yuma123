@@ -2168,6 +2168,8 @@ static boolean
 *   normalmode == TRUE for a real Xpath OID
 *              == FALSE to generate a big element name to use
 *                 for augment substitutionGroup name generation
+*   mod == module in progress for C code generation
+*       == NULL for other purposes
 *   retlen == address of return length
 *
 * OUTPUTS
@@ -2183,17 +2185,25 @@ static status_t
 		       xmlChar  *buff,
 		       uint32 bufflen,
 		       boolean normalmode,
+                       ncx_module_t *mod,
 		       uint32 *retlen)
 {
-    const xmlChar *name;
-    uint32         namelen;
+    const xmlChar *name, *modname;
+    uint32         namelen, modnamelen;
     status_t       res;
+    boolean        addmodname;
 
     *retlen = 0;
 
+    addmodname = FALSE;
+
     if (obj->parent && !obj_is_root(obj->parent)) {
-	res = get_object_string(obj->parent, buff, 
-				bufflen, normalmode, retlen);
+	res = get_object_string(obj->parent, 
+                                buff, 
+				bufflen, 
+                                normalmode,
+                                mod,
+                                retlen);
 	if (res != NO_ERR) {
 	    return res;
 	}
@@ -2204,12 +2214,27 @@ static status_t
 	return NO_ERR;
     }
 
+    modname = obj_get_mod_name(obj);
+    modnamelen = xml_strlen(modname);
+
+    if (mod != NULL &&
+        (xml_strcmp(modname, ncx_get_modname(mod)))) {
+        addmodname = TRUE;
+    }
+
     /* get the name and check the added length */
     name = obj_get_name(obj);
     namelen = xml_strlen(name);
 
-    if (bufflen && ((*retlen + namelen + 1) >= bufflen)) {
-	return ERR_BUFF_OVFL;
+    if (addmodname) {
+        if (bufflen &&
+            ((*retlen + namelen + modnamelen + 2) >= bufflen)) {
+            return ERR_BUFF_OVFL;
+        }
+    } else {
+        if (bufflen && ((*retlen + namelen + 1) >= bufflen)) {
+            return ERR_BUFF_OVFL;
+        }
     }
 
     /* copy the name string recusively, letting the stack
@@ -2221,10 +2246,20 @@ static status_t
 	    buff[*retlen] = '/';
 	} else {
 	    buff[*retlen] = '.';
-	}  
-	xml_strcpy(&buff[*retlen+1], name);
+	}
+        if (addmodname) {
+            xml_strcpy(&buff[*retlen + 1], modname);
+            buff[*retlen + modnamelen + 2] = '_';
+            xml_strcpy(&buff[*retlen + modnamelen + 3], name);
+        } else {
+            xml_strcpy(&buff[*retlen + 1], name);
+        }
     }
-    *retlen += (namelen+1);
+    if (addmodname) {
+        *retlen += (namelen + modnamelen + 2);
+    } else {
+        *retlen += (namelen + 1);
+    }
     return NO_ERR;
 
 }  /* get_object_string */
@@ -6097,7 +6132,7 @@ status_t
     *buff = NULL;
 
     /* figure out the length of the object ID */
-    res = get_object_string(obj, NULL, 0, TRUE, &len);
+    res = get_object_string(obj, NULL, 0, TRUE, NULL, &len);
     if (res != NO_ERR) {
 	return res;
     }
@@ -6109,7 +6144,7 @@ status_t
     }
 
     /* get the object ID for real this time */
-    res = get_object_string(obj, *buff, len+1, TRUE, &len);
+    res = get_object_string(obj, *buff, len+1, TRUE, NULL, &len);
     if (res != NO_ERR) {
 	m__free(*buff);
 	*buff = NULL;
@@ -6119,6 +6154,64 @@ status_t
     return NO_ERR;
 
 }  /* obj_gen_object_id */
+
+
+/********************************************************************
+* FUNCTION obj_gen_object_id_code
+* 
+* Malloc and Generate the object ID for an object node
+* for C code usage
+*
+* INPUTS:
+*   mod == current module in progress
+*   obj == node to generate the instance ID for
+*   buff == pointer to address of buffer to use
+*
+* OUTPUTS
+*   *buff == malloced buffer with the instance ID
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    obj_gen_object_id_code (ncx_module_t *mod,
+                            const obj_template_t *obj,
+                            xmlChar  **buff)
+{
+    uint32    len;
+    status_t  res;
+
+#ifdef DEBUG 
+    if (!mod || !obj || !buff) {
+	return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    *buff = NULL;
+
+    /* figure out the length of the object ID */
+    res = get_object_string(obj, NULL, 0, TRUE, mod, &len);
+    if (res != NO_ERR) {
+	return res;
+    }
+
+    /* get a buffer to fit the instance ID string */
+    *buff = (xmlChar *)m__getMem(len+1);
+    if (!*buff) {
+	return ERR_INTERNAL_MEM;
+    }
+
+    /* get the object ID for real this time */
+    res = get_object_string(obj, *buff, len+1, TRUE, mod, &len);
+    if (res != NO_ERR) {
+	m__free(*buff);
+	*buff = NULL;
+	return SET_ERROR(res);
+    }
+
+    return NO_ERR;
+
+}  /* obj_gen_object_id_code */
 
 
 /********************************************************************
@@ -6153,7 +6246,12 @@ status_t
     }
 #endif
 
-    return get_object_string(obj, buff, bufflen, TRUE, reallen);
+    return get_object_string(obj, 
+                             buff, 
+                             bufflen, 
+                             TRUE, 
+                             NULL, 
+                             reallen);
 
 }  /* obj_copy_object_id */
 
@@ -6192,7 +6290,7 @@ status_t
     *buff = NULL;
 
     /* figure out the length of the aughook ID */
-    res = get_object_string(obj, NULL, 0, FALSE, &len);
+    res = get_object_string(obj, NULL, 0, FALSE, NULL, &len);
     if (res != NO_ERR) {
 	return res;
     }
@@ -6211,7 +6309,7 @@ status_t
     p += xml_strcpy(p, NCX_AUGHOOK_START);
     
     /* add the aughook ID to the buffer */
-    res = get_object_string(obj, p, len+1, FALSE, &len);
+    res = get_object_string(obj, p, len+1, FALSE, NULL, &len);
     if (res != NO_ERR) {
 	m__free(*buff);
 	*buff = NULL;

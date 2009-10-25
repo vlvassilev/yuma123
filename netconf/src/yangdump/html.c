@@ -1,6 +1,6 @@
 /*  FILE: html.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -137,38 +137,38 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
 static void
     write_typedefs (ses_cb_t *scb,
-		    const ncx_module_t *mod,
-		    const yangdump_cvtparms_t *cp,
-		    dlq_hdr_t *typedefQ,
-		    int32 startindent);
+                    const ncx_module_t *mod,
+                    const yangdump_cvtparms_t *cp,
+                    dlq_hdr_t *typedefQ,
+                    int32 startindent);
 
 
 static void
     write_groupings (ses_cb_t *scb,
-		     const ncx_module_t *mod,
-		     const yangdump_cvtparms_t *cp,
-		     dlq_hdr_t *groupingQ,
-		     int32 startindent);
+                     const ncx_module_t *mod,
+                     const yangdump_cvtparms_t *cp,
+                     dlq_hdr_t *groupingQ,
+                     int32 startindent);
 
 static void
     write_type_clause (ses_cb_t *scb,
-		       const ncx_module_t *mod,
-		       const yangdump_cvtparms_t *cp,
-		       typ_def_t *typdef,
-		       int32 startindent);
+                       const ncx_module_t *mod,
+                       const yangdump_cvtparms_t *cp,
+                       typ_def_t *typdef,
+                       int32 startindent);
 
 static void
     write_objects (ses_cb_t *scb,
-		   const ncx_module_t *mod,
-		   const yangdump_cvtparms_t *cp,
-		   dlq_hdr_t *datadefQ,
-		   int32 startindent);
+                   const ncx_module_t *mod,
+                   const yangdump_cvtparms_t *cp,
+                   dlq_hdr_t *datadefQ,
+                   int32 startindent);
 
 
 /********************************************************************
@@ -185,19 +185,19 @@ static void
 *********************************************************************/
 static void
     start_elem (ses_cb_t *scb,
-		const xmlChar *name,
-		const xmlChar *class,
-		int32 indent)
+                const xmlChar *name,
+                const xmlChar *class,
+                int32 indent)
 
 {
     ses_putstr_indent(scb, (const xmlChar *)"<", indent);
     ses_putstr(scb, name);
     if (class) {
-	ses_putstr(scb, (const xmlChar *)" class=\"");
-	ses_putstr(scb, class);
-	ses_putstr(scb, (const xmlChar *)"\">");
+        ses_putstr(scb, (const xmlChar *)" class=\"");
+        ses_putstr(scb, class);
+        ses_putstr(scb, (const xmlChar *)"\">");
     } else {
-	ses_putchar(scb, '>');
+        ses_putchar(scb, '>');
     }
 
 }  /* start_elem */
@@ -217,19 +217,19 @@ static void
 *********************************************************************/
 static void
     start_id_elem (ses_cb_t *scb,
-		   const xmlChar *name,
-		   const xmlChar *id,
-		   int32 indent)
+                   const xmlChar *name,
+                   const xmlChar *id,
+                   int32 indent)
 
 {
     ses_putstr_indent(scb, (const xmlChar *)"<", indent);
     ses_putstr(scb, name);
     if (id) {
-	ses_putstr(scb, (const xmlChar *)" id=\"");
-	ses_putstr(scb, id);
-	ses_putstr(scb, (const xmlChar *)"\">");
+        ses_putstr(scb, (const xmlChar *)" id=\"");
+        ses_putstr(scb, id);
+        ses_putstr(scb, (const xmlChar *)"\">");
     } else {
-	ses_putchar(scb, '>');
+        ses_putchar(scb, '>');
     }
 
 }  /* start_id_elem */
@@ -248,8 +248,8 @@ static void
 *********************************************************************/
 static void
     end_elem (ses_cb_t *scb,
-	      const xmlChar *name,
-	      int32 indent)
+              const xmlChar *name,
+              int32 indent)
 {
     ses_putstr_indent(scb, (const xmlChar *)"</", indent);
     ses_putstr(scb, name);
@@ -270,7 +270,7 @@ static void
 *********************************************************************/
 static void
     write_kw (ses_cb_t *scb,
-	      const xmlChar *kwname)
+              const xmlChar *kwname)
 {
     ses_putstr(scb, (const xmlChar *)"<span class=\"yang_kw\">");
     ses_putstr(scb, kwname);
@@ -292,8 +292,8 @@ static void
 *********************************************************************/
 static void
     write_extkw (ses_cb_t *scb,
-		 const xmlChar *kwpfix,
-		 const xmlChar *kwname)
+                 const xmlChar *kwpfix,
+                 const xmlChar *kwname)
 {
     ses_putstr(scb, (const xmlChar *)"<span class=\"yang_kw\">");
     ses_putstr(scb, kwpfix);
@@ -319,29 +319,29 @@ static void
 *********************************************************************/
 static void
     write_banner_cmt (ses_cb_t *scb,
-		      const ncx_module_t *mod,
-		      const yangdump_cvtparms_t *cp,
-		      const xmlChar *cmval,
-		      int32 indent)
+                      const ncx_module_t *mod,
+                      const yangdump_cvtparms_t *cp,
+                      const xmlChar *cmval,
+                      int32 indent)
 {
     boolean needed;
 
     needed = FALSE;
 
     if (cp->unified) {
-	if (mod->ismod) {
-	    needed = TRUE;
-	}
+        if (mod->ismod) {
+            needed = TRUE;
+        }
     } else {
-	needed = TRUE;
+        needed = TRUE;
     }
     if (needed) {
-	ses_putchar(scb, '\n');
-	ses_indent(scb, indent);
-	ses_putstr(scb, (const xmlChar *)"<span class=\"yang_cmt\">");
-	ses_putstr(scb, (const xmlChar *)"// ");
-	ses_putstr(scb, cmval);
-	ses_putstr(scb, (const xmlChar *)"</span>");
+        ses_putchar(scb, '\n');
+        ses_indent(scb, indent);
+        ses_putstr(scb, (const xmlChar *)"<span class=\"yang_cmt\">");
+        ses_putstr(scb, (const xmlChar *)"// ");
+        ses_putstr(scb, cmval);
+        ses_putstr(scb, (const xmlChar *)"</span>");
     }
 
 }  /* write_banner_cmt */
@@ -361,17 +361,17 @@ static void
 *********************************************************************/
 static void
     write_endsec_cmt (ses_cb_t *scb,
-		   const xmlChar *cmtype,
-		   const xmlChar *cmname)
+                   const xmlChar *cmtype,
+                   const xmlChar *cmname)
 {
     ses_putstr(scb, (const xmlChar *)"  <span class=\"yang_cmt\">");
     ses_putstr(scb, (const xmlChar *)"// ");
     if (cmtype) {
-	ses_putstr(scb, cmtype);
-	ses_putchar(scb, ' ');
+        ses_putstr(scb, cmtype);
+        ses_putchar(scb, ' ');
     }
     if (cmname) {
-	ses_putstr(scb, cmname);
+        ses_putstr(scb, cmname);
     }
     ses_putstr(scb, (const xmlChar *)"</span>");
 
@@ -390,7 +390,7 @@ static void
 *********************************************************************/
 static void
     write_id (ses_cb_t *scb,
-	      const xmlChar *idname)
+              const xmlChar *idname)
 {
     ses_putstr(scb, (const xmlChar *)"<span class=\"yang_id\">");
     ses_putstr(scb, idname);
@@ -414,22 +414,22 @@ static void
 *********************************************************************/
 static void
     write_id_a (ses_cb_t *scb,
-		const xmlChar *submod,
-		const xmlChar *idname,
-		uint32 linenum)
+                const xmlChar *submod,
+                const xmlChar *idname,
+                uint32 linenum)
 {
     char  buff[NCX_MAX_NUMLEN];
 
     ses_putstr(scb, (const xmlChar *)"<a name=\"");
     if (submod) {
-	ses_putstr(scb, submod);
-	ses_putchar(scb, '.');
+        ses_putstr(scb, submod);
+        ses_putchar(scb, '.');
     }
     ses_putstr(scb, idname);
     if (linenum) {
-	ses_putchar(scb, '.');
-	sprintf(buff, "%u", linenum);
-	ses_putstr(scb, (const xmlChar *)buff);
+        ses_putchar(scb, '.');
+        sprintf(buff, "%u", linenum);
+        ses_putstr(scb, (const xmlChar *)buff);
     }
     ses_putstr(scb, (const xmlChar *)"\"></a>");
 
@@ -449,34 +449,34 @@ static void
 *********************************************************************/
 static void
     write_str (ses_cb_t *scb,
-	       const xmlChar *strval,
-	       uint32 quotes,
-	       int32 indent)
+               const xmlChar *strval,
+               uint32 quotes,
+               int32 indent)
 {
     ses_putstr(scb, (const xmlChar *)"<span class=\"yang_str\">");
 
     switch (quotes) {
     case 1:
-	ses_putchar(scb, '\'');
-	break;
+        ses_putchar(scb, '\'');
+        break;
     case 2:
-	ses_putchar(scb, '"');
-	break;
+        ses_putchar(scb, '"');
+        break;
     default:
-	;
+        ;
     }
 
     ses_putcstr(scb, strval, indent);
 
     switch (quotes) {
     case 1:
-	ses_putchar(scb, '\'');
-	break;
+        ses_putchar(scb, '\'');
+        break;
     case 2:
-	ses_putchar(scb, '"');
-	break;
+        ses_putchar(scb, '"');
+        break;
     default:
-	;
+        ;
     }
     ses_putstr(scb, (const xmlChar *)"</span>");
 
@@ -502,59 +502,59 @@ static void
 *********************************************************************/
 static void
     write_a (ses_cb_t *scb,
-	     const yangdump_cvtparms_t *cp,
-	     const xmlChar *fname,
-	     const xmlChar *fversion,
-	     const xmlChar *submod,
-	     const xmlChar *idpfix,
-	     const xmlChar *idname,
-	     uint32 linenum)
+             const yangdump_cvtparms_t *cp,
+             const xmlChar *fname,
+             const xmlChar *fversion,
+             const xmlChar *submod,
+             const xmlChar *idpfix,
+             const xmlChar *idname,
+             uint32 linenum)
 {
     char buff[NCX_MAX_NUMLEN];
 
     ses_putstr(scb, (const xmlChar *)"<a href=\"");
     if (fname) {
-	if (cp->urlstart && *cp->urlstart) {
-	    ses_putstr(scb, cp->urlstart);
-	    if (cp->urlstart[xml_strlen(cp->urlstart)-1] != NCXMOD_PSCHAR) {
-		ses_putchar(scb, NCXMOD_PSCHAR);
-	    }
-	}
-	ses_putstr(scb, fname);
-	if (fversion && cp->versionnames) {
-	    if (cp->simurls) {
-		ses_putchar(scb, NCXMOD_PSCHAR);
-	    } else {
-		ses_putchar(scb, '.');
-	    }
-	    ses_putstr(scb, fversion);
-	}
-	if (!cp->simurls) {
-	    ses_putstr(scb, (const xmlChar *)".html");
-	}
+        if (cp->urlstart && *cp->urlstart) {
+            ses_putstr(scb, cp->urlstart);
+            if (cp->urlstart[xml_strlen(cp->urlstart)-1] != NCXMOD_PSCHAR) {
+                ses_putchar(scb, NCXMOD_PSCHAR);
+            }
+        }
+        ses_putstr(scb, fname);
+        if (fversion && cp->versionnames) {
+            if (cp->simurls) {
+                ses_putchar(scb, NCXMOD_PSCHAR);
+            } else {
+                ses_putchar(scb, '.');
+            }
+            ses_putstr(scb, fversion);
+        }
+        if (!cp->simurls) {
+            ses_putstr(scb, (const xmlChar *)".html");
+        }
     }
 
     if (idname) {
-	ses_putchar(scb, '#');
-	if (submod) {
-	    ses_putstr(scb, submod);
-	    ses_putchar(scb, '.');
-	}
-	ses_putstr(scb, idname);
-	if (linenum) {
-	    sprintf(buff, ".%u", linenum);
-	    ses_putstr(scb, (const xmlChar *)buff);
-	}
+        ses_putchar(scb, '#');
+        if (submod) {
+            ses_putstr(scb, submod);
+            ses_putchar(scb, '.');
+        }
+        ses_putstr(scb, idname);
+        if (linenum) {
+            sprintf(buff, ".%u", linenum);
+            ses_putstr(scb, (const xmlChar *)buff);
+        }
     }
     ses_putstr(scb, (const xmlChar *)"\">");
     if (idpfix && idname) {
-	ses_putstr(scb, idpfix);
-	ses_putchar(scb, ':');
-	ses_putstr(scb, idname);
+        ses_putstr(scb, idpfix);
+        ses_putchar(scb, ':');
+        ses_putstr(scb, idname);
     } else if (idname) {
-	ses_putstr(scb, idname);
+        ses_putstr(scb, idname);
     } else if (fname) {
-	ses_putstr(scb, fname);
+        ses_putstr(scb, fname);
     }
     ses_putstr(scb, (const xmlChar *)"</a>");
 
@@ -579,49 +579,49 @@ static void
 *********************************************************************/
 static void
     write_a2 (ses_cb_t *scb,
-	      const yangdump_cvtparms_t *cp,
-	      const xmlChar *fname,
-	      const xmlChar *fversion,
-	      const xmlChar *submod,
-	      const xmlChar *idname,
-	      uint32 linenum,
-	      const xmlChar *idshow)
+              const yangdump_cvtparms_t *cp,
+              const xmlChar *fname,
+              const xmlChar *fversion,
+              const xmlChar *submod,
+              const xmlChar *idname,
+              uint32 linenum,
+              const xmlChar *idshow)
 {
     char buff[NCX_MAX_NUMLEN];
 
     ses_putstr(scb, (const xmlChar *)"<a href=\"");
     if (fname) {
-	if (cp->urlstart && *cp->urlstart) {
-	    ses_putstr(scb, cp->urlstart);
-	    if (cp->urlstart[xml_strlen(cp->urlstart)-1] != NCXMOD_PSCHAR) {
-		ses_putchar(scb, NCXMOD_PSCHAR);
-	    }
-	}
-	ses_putstr(scb, fname);
-	if (fversion && cp->versionnames) {
-	    if (cp->simurls) {
-		ses_putchar(scb, NCXMOD_PSCHAR);
-	    } else {
-		ses_putchar(scb, '.');
-	    }
-	    ses_putstr(scb, fversion);
-	}
-	if (!cp->simurls) {
-	    ses_putstr(scb, (const xmlChar *)".html");
-	}
+        if (cp->urlstart && *cp->urlstart) {
+            ses_putstr(scb, cp->urlstart);
+            if (cp->urlstart[xml_strlen(cp->urlstart)-1] != NCXMOD_PSCHAR) {
+                ses_putchar(scb, NCXMOD_PSCHAR);
+            }
+        }
+        ses_putstr(scb, fname);
+        if (fversion && cp->versionnames) {
+            if (cp->simurls) {
+                ses_putchar(scb, NCXMOD_PSCHAR);
+            } else {
+                ses_putchar(scb, '.');
+            }
+            ses_putstr(scb, fversion);
+        }
+        if (!cp->simurls) {
+            ses_putstr(scb, (const xmlChar *)".html");
+        }
     }
 
     if (idname) {
-	ses_putchar(scb, '#');
-	if (submod) {
-	    ses_putstr(scb, submod);
-	    ses_putchar(scb, '.');
-	}
-	ses_putstr(scb, idname);
-	if (linenum) {
-	    sprintf(buff, ".%u", linenum);
-	    ses_putstr(scb, (const xmlChar *)buff);
-	}
+        ses_putchar(scb, '#');
+        if (submod) {
+            ses_putstr(scb, submod);
+            ses_putchar(scb, '.');
+        }
+        ses_putstr(scb, idname);
+        if (linenum) {
+            sprintf(buff, ".%u", linenum);
+            ses_putstr(scb, (const xmlChar *)buff);
+        }
     }
     ses_putstr(scb, (const xmlChar *)"\">");
     ses_putstr(scb, idshow);
@@ -644,10 +644,10 @@ static void
 *********************************************************************/
 static void
     write_idref_base (ses_cb_t *scb,
-		      const ncx_module_t *mod,
-		      const yangdump_cvtparms_t *cp,
-		      const typ_idref_t *idref,
-		      int32 startindent)
+                      const ncx_module_t *mod,
+                      const yangdump_cvtparms_t *cp,
+                      const typ_idref_t *idref,
+                      int32 startindent)
 {
     const xmlChar       *fname, *fversion, *submod;
     uint32               linenum;
@@ -663,19 +663,19 @@ static void
 
     /* get filename if identity-stmt found */
     if (idref->base) {
-	linenum = idref->base->tkerr.linenum;
-	fname = idref->base->tkerr.mod->name;
-	fversion = idref->base->tkerr.mod->version;
+        linenum = idref->base->tkerr.linenum;
+        fname = idref->base->tkerr.mod->name;
+        fversion = idref->base->tkerr.mod->version;
     }
 
     ses_putstr(scb, (const xmlChar *)"<span class=\"yang_id\">");
     write_a(scb, cp, 
-	    fname, 
-	    fversion, 
-	    submod,
-	    idref->baseprefix,
-	    idref->basename, 
-	    linenum);
+            fname, 
+            fversion, 
+            submod,
+            idref->baseprefix,
+            idref->basename, 
+            linenum);
     ses_putstr(scb, (const xmlChar *)"</span>");
     ses_putchar(scb, ';');
 
@@ -696,10 +696,10 @@ static void
 *********************************************************************/
 static void
     write_identity_base (ses_cb_t *scb,
-			 const ncx_module_t *mod,
-			 const yangdump_cvtparms_t *cp,
-			 const ncx_identity_t *identity,
-			 int32 startindent)
+                         const ncx_module_t *mod,
+                         const yangdump_cvtparms_t *cp,
+                         const ncx_identity_t *identity,
+                         int32 startindent)
 {
     const xmlChar       *fname, *fversion, *submod;
     uint32               linenum;
@@ -715,19 +715,19 @@ static void
 
     /* get filename if identity-stmt found */
     if (identity->base) {
-	linenum = identity->base->tkerr.linenum;
-	fname = identity->base->tkerr.mod->name;
-	fversion = identity->base->tkerr.mod->version;
+        linenum = identity->base->tkerr.linenum;
+        fname = identity->base->tkerr.mod->name;
+        fversion = identity->base->tkerr.mod->version;
     }
 
     ses_putstr(scb, (const xmlChar *)"<span class=\"yang_id\">");
     write_a(scb, cp, 
-	    fname, 
-	    fversion, 
-	    submod,
-	    identity->baseprefix,
-	    identity->basename, 
-	    linenum);
+            fname, 
+            fversion, 
+            submod,
+            identity->baseprefix,
+            identity->basename, 
+            linenum);
     ses_putstr(scb, (const xmlChar *)"</span>");
     ses_putchar(scb, ';');
 
@@ -752,32 +752,32 @@ static void
 *********************************************************************/
 static void
     write_href_id (ses_cb_t *scb,
-		   const xmlChar *submod,
-		   const xmlChar *kwname,
-		   const xmlChar *idname,
-		   int32 indent,
-		   uint32 linenum,
-		   boolean finsemi,
-		   boolean newln)
+                   const xmlChar *submod,
+                   const xmlChar *kwname,
+                   const xmlChar *idname,
+                   int32 indent,
+                   uint32 linenum,
+                   boolean finsemi,
+                   boolean newln)
 {
     if (newln) {
-	ses_putchar(scb, '\n');
+        ses_putchar(scb, '\n');
     }
     ses_indent(scb, indent);
     if (idname) {
-	write_id_a(scb, submod, idname, linenum);
+        write_id_a(scb, submod, idname, linenum);
     } else {
-	write_id_a(scb, submod, kwname, linenum);
+        write_id_a(scb, submod, kwname, linenum);
     }
     write_kw(scb, kwname);
     if (idname) {
-	ses_putchar(scb, ' ');
-	write_id(scb, idname);
+        ses_putchar(scb, ' ');
+        write_id(scb, idname);
     }
     if (finsemi) {
-	ses_putchar(scb, ';');
+        ses_putchar(scb, ';');
     } else {
-	ses_putstr(scb, START_SEC);
+        ses_putstr(scb, START_SEC);
     }
 
 }  /* write_href_id */
@@ -798,27 +798,27 @@ static void
 *********************************************************************/
 static void
     write_simple_str (ses_cb_t *scb,
-		      const xmlChar *kwname,
-		      const xmlChar *strval,
-		      int32 indent,
-		      uint32 quotes,
-		      boolean finsemi)
+                      const xmlChar *kwname,
+                      const xmlChar *strval,
+                      int32 indent,
+                      uint32 quotes,
+                      boolean finsemi)
 {
     ses_indent(scb, indent);
     write_kw(scb, kwname);
     if (strval) {
-	if (xml_strlen(strval) < 39) {
-	    ses_putchar(scb, ' ');
-	} else {
-	    indent += ses_indent_count(scb);
-	    ses_indent(scb, indent);
-	}
-	write_str(scb, strval, quotes, indent);
+        if (xml_strlen(strval) < 39) {
+            ses_putchar(scb, ' ');
+        } else {
+            indent += ses_indent_count(scb);
+            ses_indent(scb, indent);
+        }
+        write_str(scb, strval, quotes, indent);
     }
     if (finsemi) {
-	ses_putchar(scb, ';');
+        ses_putchar(scb, ';');
     } else {
-	ses_putstr(scb, START_SEC);
+        ses_putstr(scb, START_SEC);
     }
 
 }  /* write_simple_str */
@@ -838,14 +838,14 @@ static void
 *********************************************************************/
 static void
     write_status (ses_cb_t *scb,
-		  ncx_status_t status,
-		  int32 indent)
+                  ncx_status_t status,
+                  int32 indent)
 {
     if (status != NCX_STATUS_CURRENT && status != NCX_STATUS_NONE) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_STATUS,
-			 ncx_get_status_string(status),
-			 indent, 
+                         ncx_get_status_string(status),
+                         indent, 
                          2, 
                          TRUE);
     }
@@ -868,10 +868,10 @@ static void
 *********************************************************************/
 static void
     write_type (ses_cb_t *scb,
-		    const ncx_module_t *mod,
-		    const yangdump_cvtparms_t *cp,
-		    const typ_def_t *typdef,
-		    int32 indent)
+                    const ncx_module_t *mod,
+                    const yangdump_cvtparms_t *cp,
+                    const typ_def_t *typdef,
+                    int32 indent)
 {
     const xmlChar       *fname, *fversion, *submod;
 
@@ -885,32 +885,32 @@ static void
     fname = NULL;
     fversion = NULL;
     if (typdef->prefix && 
-	xml_strcmp(typdef->prefix, mod->prefix)) {
-	if (typdef->class == NCX_CL_NAMED && typdef->def.named.typ
-	    && typdef->def.named.typ->tkerr.mod) {
-	    fname = typdef->def.named.typ->tkerr.mod->name;
-	    fversion = typdef->def.named.typ->tkerr.mod->version;
-	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	}
+        xml_strcmp(typdef->prefix, mod->prefix)) {
+        if (typdef->class == NCX_CL_NAMED && typdef->def.named.typ
+            && typdef->def.named.typ->tkerr.mod) {
+            fname = typdef->def.named.typ->tkerr.mod->name;
+            fversion = typdef->def.named.typ->tkerr.mod->version;
+        } else {
+            SET_ERROR(ERR_INTERNAL_VAL);
+        }
     }
 
     /* write the identifier with an href to the type
      * unless the type is one of the yang builtin types
      */
     if (typdef->class == NCX_CL_NAMED) {
-	ses_putstr(scb, (const xmlChar *)"<span class=\"yang_id\">");
-	write_a(scb, 
+        ses_putstr(scb, (const xmlChar *)"<span class=\"yang_id\">");
+        write_a(scb, 
                 cp, 
                 fname, 
                 fversion, 
                 submod,
-		(fname) ? typdef->prefix : NULL,
-		typdef->typename, 
+                (fname) ? typdef->prefix : NULL,
+                typdef->typename, 
                 typdef->tkerr.linenum);
-	ses_putstr(scb, (const xmlChar *)"</span>");
+        ses_putstr(scb, (const xmlChar *)"</span>");
     } else {
-	write_id(scb, typdef->typename);
+        write_id(scb, typdef->typename);
     }
 
 }  /* write_type */
@@ -929,37 +929,37 @@ static void
 *********************************************************************/
 static void
     write_errinfo (ses_cb_t *scb,
-		   const ncx_errinfo_t *errinfo,
-		   int32 indent)
+                   const ncx_errinfo_t *errinfo,
+                   int32 indent)
 {
     if (errinfo->error_message) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_ERROR_MESSAGE,
-			 errinfo->error_message, 
+                         errinfo->error_message, 
                          indent, 
                          2, 
                          TRUE);
     }
     if (errinfo->error_app_tag) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_ERROR_APP_TAG,
-			 errinfo->error_app_tag, 
+                         errinfo->error_app_tag, 
                          indent, 
                          2, 
                          TRUE);
     }
     if (errinfo->descr) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_DESCRIPTION,
-			 errinfo->descr, 
+                         errinfo->descr, 
                          indent, 
                          2, 
                          TRUE);
     }
     if (errinfo->ref) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_REFERENCE,
-			 errinfo->ref, 
+                         errinfo->ref, 
                          indent, 
                          2, 
                          TRUE);
@@ -981,35 +981,35 @@ static void
 *********************************************************************/
 static void
     write_musts (ses_cb_t *scb,
-		 const dlq_hdr_t *mustQ,
-		 int32 indent)
+                 const dlq_hdr_t *mustQ,
+                 int32 indent)
 {
     const xpath_pcb_t   *must;
     const ncx_errinfo_t *errinfo;
 
     for (must = (const xpath_pcb_t *)dlq_firstEntry(mustQ);
-	 must != NULL;
-	 must = (const xpath_pcb_t *)dlq_nextEntry(must)) {
+         must != NULL;
+         must = (const xpath_pcb_t *)dlq_nextEntry(must)) {
 
-	errinfo = &must->errinfo;
-	if (errinfo->descr || errinfo->ref ||
-	    errinfo->error_app_tag || errinfo->error_message) {
-	    write_simple_str(scb, 
+        errinfo = &must->errinfo;
+        if (errinfo->descr || errinfo->ref ||
+            errinfo->error_app_tag || errinfo->error_message) {
+            write_simple_str(scb, 
                              YANG_K_MUST,
-			     must->exprstr, 
+                             must->exprstr, 
                              indent, 
                              2, 
                              FALSE);
-	    write_errinfo(scb, errinfo, indent + ses_indent_count(scb));
-	    ses_putstr_indent(scb, END_SEC, indent);
-	} else {
-	    write_simple_str(scb, 
+            write_errinfo(scb, errinfo, indent + ses_indent_count(scb));
+            ses_putstr_indent(scb, END_SEC, indent);
+        } else {
+            write_simple_str(scb, 
                              YANG_K_MUST,
-			     must->exprstr, 
+                             must->exprstr, 
                              indent, 
                              2, 
                              TRUE);
-	}
+        }
     }
 
 }  /* write_musts */
@@ -1031,10 +1031,10 @@ static void
 *********************************************************************/
 static void
     write_appinfoQ (ses_cb_t *scb,
-		 const ncx_module_t *mod,
-		 const yangdump_cvtparms_t *cp,
-		 const dlq_hdr_t *appinfoQ,
-		 int32 indent)
+                 const ncx_module_t *mod,
+                 const yangdump_cvtparms_t *cp,
+                 const dlq_hdr_t *appinfoQ,
+                 int32 indent)
 {
     const ncx_appinfo_t *appinfo;
     const xmlChar       *fname, *fversion, *submod;
@@ -1042,49 +1042,49 @@ static void
     submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
 
     for (appinfo = (const ncx_appinfo_t *)dlq_firstEntry(appinfoQ);
-	 appinfo != NULL;
-	 appinfo = (const ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
+         appinfo != NULL;
+         appinfo = (const ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
 
-	ses_indent(scb, indent);
-	if (appinfo->ext) {
-	    fname = NULL;
-	    fversion = NULL;
-	    if (appinfo->ext->tkerr.mod && 
+        ses_indent(scb, indent);
+        if (appinfo->ext) {
+            fname = NULL;
+            fversion = NULL;
+            if (appinfo->ext->tkerr.mod && 
                 (appinfo->ext->tkerr.mod != mod)) {
-		fname = appinfo->ext->tkerr.mod->name;
-		fversion = appinfo->ext->tkerr.mod->version;
-	    }
-	    write_a(scb, 
+                fname = appinfo->ext->tkerr.mod->name;
+                fversion = appinfo->ext->tkerr.mod->version;
+            }
+            write_a(scb, 
                     cp, 
                     fname, 
                     fversion, 
                     submod, 
                     appinfo->prefix,
-		    appinfo->name, 
+                    appinfo->name, 
                     appinfo->ext->tkerr.linenum);
-	} else {
-	    write_extkw(scb, appinfo->prefix, appinfo->name);
-	}
+        } else {
+            write_extkw(scb, appinfo->prefix, appinfo->name);
+        }
 
-	if (appinfo->value) {
-	    ses_putchar(scb, ' ');
-	    write_str(scb, 
+        if (appinfo->value) {
+            ses_putchar(scb, ' ');
+            write_str(scb, 
                       appinfo->value, 
                       2,
-		      indent+ses_indent_count(scb));
-	}
+                      indent+ses_indent_count(scb));
+        }
 
-	if (!dlq_empty(appinfo->appinfoQ)) {
-	    ses_putstr(scb, START_SEC);
-	    write_appinfoQ(scb, 
+        if (!dlq_empty(appinfo->appinfoQ)) {
+            ses_putstr(scb, START_SEC);
+            write_appinfoQ(scb, 
                            mod, 
                            cp, 
                            appinfo->appinfoQ,
-			   indent+ses_indent_count(scb));
-	    ses_putstr_indent(scb, END_SEC, indent);
-	} else {
-	    ses_putchar(scb, ';');
-	}
+                           indent+ses_indent_count(scb));
+            ses_putstr_indent(scb, END_SEC, indent);
+        } else {
+            ses_putchar(scb, ';');
+        }
     }
 
 }  /* write_appinfoQ */
@@ -1105,10 +1105,10 @@ static void
 *********************************************************************/
 static void
     write_type_contents (ses_cb_t *scb,
-			 const ncx_module_t *mod,
-			 const yangdump_cvtparms_t *cp,
-			 typ_def_t *typdef,
-			 int32 startindent)
+                         const ncx_module_t *mod,
+                         const yangdump_cvtparms_t *cp,
+                         typ_def_t *typdef,
+                         int32 startindent)
 {
     typ_unionnode_t       *un;
     const typ_enum_t      *bit, *enu;
@@ -1124,237 +1124,237 @@ static void
 
     switch (typdef->class) {
     case NCX_CL_BASE:
-	break;
+        break;
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp) {
-	    typdef = typdef->def.named.newtyp;
-	} else {
-	    break;
-	}
-	/* fall through if typdef set */
+        if (typdef->def.named.newtyp) {
+            typdef = typdef->def.named.newtyp;
+        } else {
+            break;
+        }
+        /* fall through if typdef set */
     case NCX_CL_SIMPLE:
-	switch (typdef->def.simple.btyp) {
-	case NCX_BT_UNION:
-	    for (un = typ_first_unionnode(typdef);
-		 un != NULL;
-		 un = (typ_unionnode_t *)dlq_nextEntry(un)) {
-		if (un->typdef) {
-		    write_type_clause(scb, mod, cp,
-				      un->typdef, startindent);
-		} else if (un->typ) {
-		    write_type_clause(scb, mod, cp, 
-				      &un->typ->typdef, startindent);
-		} else {
-		    SET_ERROR(ERR_INTERNAL_VAL);
-		}
-	    }
-	    break;
-	case NCX_BT_BITS:
-	    for (bit = typ_first_con_enumdef(typdef);
-		 bit != NULL;
-		 bit = (const typ_enum_t *)dlq_nextEntry(bit)) {
+        switch (typdef->def.simple.btyp) {
+        case NCX_BT_UNION:
+            for (un = typ_first_unionnode(typdef);
+                 un != NULL;
+                 un = (typ_unionnode_t *)dlq_nextEntry(un)) {
+                if (un->typdef) {
+                    write_type_clause(scb, mod, cp,
+                                      un->typdef, startindent);
+                } else if (un->typ) {
+                    write_type_clause(scb, mod, cp, 
+                                      &un->typ->typdef, startindent);
+                } else {
+                    SET_ERROR(ERR_INTERNAL_VAL);
+                }
+            }
+            break;
+        case NCX_BT_BITS:
+            for (bit = typ_first_con_enumdef(typdef);
+                 bit != NULL;
+                 bit = (const typ_enum_t *)dlq_nextEntry(bit)) {
 
-		write_simple_str(scb, 
+                write_simple_str(scb, 
                                  YANG_K_BIT, 
                                  bit->name,
-				 startindent, 
+                                 startindent, 
                                  2, 
                                  FALSE);
 
-		sprintf(buff, "%u", bit->pos);
-		write_simple_str(scb, 
+                sprintf(buff, "%u", bit->pos);
+                write_simple_str(scb, 
                                  YANG_K_POSITION,
-				 (const xmlChar *)buff,
-				 indent, 
+                                 (const xmlChar *)buff,
+                                 indent, 
                                  0, 
                                  TRUE);
 
-		write_status(scb, bit->status, indent);
+                write_status(scb, bit->status, indent);
 
-		if (bit->descr) {
-		    write_simple_str(scb, 
+                if (bit->descr) {
+                    write_simple_str(scb, 
                                      YANG_K_DESCRIPTION,
-				     bit->descr, 
+                                     bit->descr, 
                                      indent, 
                                      2, 
                                      TRUE);
-		}
+                }
 
-		if (bit->ref) {
-		    write_simple_str(scb, 
+                if (bit->ref) {
+                    write_simple_str(scb, 
                                      YANG_K_REFERENCE,
-				     bit->ref, 
+                                     bit->ref, 
                                      indent, 
                                      2, 
                                      TRUE);
-		}
+                }
 
-		write_appinfoQ(scb, mod, cp, &bit->appinfoQ, indent);
+                write_appinfoQ(scb, mod, cp, &bit->appinfoQ, indent);
 
-		ses_putstr_indent(scb, END_SEC, startindent);
-	    }
-	    break;
-	case NCX_BT_ENUM:
-	    for (enu = typ_first_con_enumdef(typdef);
-		 enu != NULL;
-		 enu = (const typ_enum_t *)dlq_nextEntry(enu)) {
+                ses_putstr_indent(scb, END_SEC, startindent);
+            }
+            break;
+        case NCX_BT_ENUM:
+            for (enu = typ_first_con_enumdef(typdef);
+                 enu != NULL;
+                 enu = (const typ_enum_t *)dlq_nextEntry(enu)) {
 
-		write_simple_str(scb, 
+                write_simple_str(scb, 
                                  YANG_K_ENUM, 
                                  enu->name,
-				 startindent, 
+                                 startindent, 
                                  2, 
                                  FALSE);
 
-		sprintf(buff, "%d", enu->val);
-		write_simple_str(scb, 
+                sprintf(buff, "%d", enu->val);
+                write_simple_str(scb, 
                                  YANG_K_VALUE,
-				 (const xmlChar *)buff,
-				 indent, 
+                                 (const xmlChar *)buff,
+                                 indent, 
                                  0, 
                                  TRUE);
 
-		write_status(scb, enu->status, indent);
+                write_status(scb, enu->status, indent);
 
-		if (enu->descr) {
-		    write_simple_str(scb, 
+                if (enu->descr) {
+                    write_simple_str(scb, 
                                      YANG_K_DESCRIPTION,
-				     enu->descr, 
+                                     enu->descr, 
                                      indent, 
                                      2, 
                                      TRUE);
-		}
+                }
 
-		if (enu->ref) {
-		    write_simple_str(scb, 
+                if (enu->ref) {
+                    write_simple_str(scb, 
                                      YANG_K_REFERENCE,
-				     enu->ref, 
+                                     enu->ref, 
                                      indent,
                                      2, 
                                      TRUE);
-		}
+                }
 
-		write_appinfoQ(scb, mod, cp, &enu->appinfoQ, indent);
+                write_appinfoQ(scb, mod, cp, &enu->appinfoQ, indent);
 
-		ses_putstr_indent(scb, END_SEC,  startindent);
-	    }
-	    break;
-	case NCX_BT_EMPTY:
-	case NCX_BT_BOOLEAN:
-	    /* appinfo only */
-	    break;
-	case NCX_BT_DECIMAL64:
-	    sprintf(buff, "%d", typ_get_fraction_digits(typdef));
-	    write_simple_str(scb,
-			     YANG_K_FRACTION_DIGITS,
-			     (const xmlChar *)buff,
-			     startindent,
-			     0,
-			     FALSE);
-	    /* fall through to check range */
-	case NCX_BT_INT8:
-	case NCX_BT_INT16:
-	case NCX_BT_INT32:
-	case NCX_BT_INT64:
-	case NCX_BT_UINT8:
-	case NCX_BT_UINT16:
-	case NCX_BT_UINT32:
-	case NCX_BT_UINT64:
-	case NCX_BT_FLOAT64:
-	    range = typ_get_crange_con(typdef);
-	    if (range && range->rangestr) {
-		errinfo_set = ncx_errinfo_set(&range->range_errinfo);
-		write_simple_str(scb,
+                ses_putstr_indent(scb, END_SEC,  startindent);
+            }
+            break;
+        case NCX_BT_EMPTY:
+        case NCX_BT_BOOLEAN:
+            /* appinfo only */
+            break;
+        case NCX_BT_DECIMAL64:
+            sprintf(buff, "%d", typ_get_fraction_digits(typdef));
+            write_simple_str(scb,
+                             YANG_K_FRACTION_DIGITS,
+                             (const xmlChar *)buff,
+                             startindent,
+                             0,
+                             FALSE);
+            /* fall through to check range */
+        case NCX_BT_INT8:
+        case NCX_BT_INT16:
+        case NCX_BT_INT32:
+        case NCX_BT_INT64:
+        case NCX_BT_UINT8:
+        case NCX_BT_UINT16:
+        case NCX_BT_UINT32:
+        case NCX_BT_UINT64:
+        case NCX_BT_FLOAT64:
+            range = typ_get_crange_con(typdef);
+            if (range && range->rangestr) {
+                errinfo_set = ncx_errinfo_set(&range->range_errinfo);
+                write_simple_str(scb,
                                  YANG_K_RANGE,
-				 range->rangestr,
-				 startindent,
+                                 range->rangestr,
+                                 startindent,
                                  2, 
                                  !errinfo_set);
-		if (errinfo_set) {
-		    write_errinfo(scb, &range->range_errinfo, indent);
-		    ses_putstr_indent(scb, END_SEC, startindent);
-		}
-	    }
-	    break;
-	case NCX_BT_STRING:
-	case NCX_BT_BINARY:
-	    range = typ_get_crange_con(typdef);
-	    if (range && range->rangestr) {
-		errinfo_set = ncx_errinfo_set(&range->range_errinfo);
-		write_simple_str(scb,
+                if (errinfo_set) {
+                    write_errinfo(scb, &range->range_errinfo, indent);
+                    ses_putstr_indent(scb, END_SEC, startindent);
+                }
+            }
+            break;
+        case NCX_BT_STRING:
+        case NCX_BT_BINARY:
+            range = typ_get_crange_con(typdef);
+            if (range && range->rangestr) {
+                errinfo_set = ncx_errinfo_set(&range->range_errinfo);
+                write_simple_str(scb,
                                  YANG_K_LENGTH,
-				 range->rangestr,
-				 startindent,
+                                 range->rangestr,
+                                 startindent,
                                  2,
                                  !errinfo_set);
-		if (errinfo_set) {
-		    write_errinfo(scb, &range->range_errinfo, indent);
-		    ses_putstr_indent(scb, END_SEC, startindent);
-		}
-	    }
+                if (errinfo_set) {
+                    write_errinfo(scb, &range->range_errinfo, indent);
+                    ses_putstr_indent(scb, END_SEC, startindent);
+                }
+            }
 
-	    for (pat = typ_get_first_cpattern(typdef);
-		 pat != NULL;
-		 pat = typ_get_next_cpattern(pat)) {
+            for (pat = typ_get_first_cpattern(typdef);
+                 pat != NULL;
+                 pat = typ_get_next_cpattern(pat)) {
 
-		errinfo_set = ncx_errinfo_set(&pat->pat_errinfo);
-		write_simple_str(scb, 
+                errinfo_set = ncx_errinfo_set(&pat->pat_errinfo);
+                write_simple_str(scb, 
                                  YANG_K_PATTERN, 
                                  pat->pat_str,
-				 startindent, 
+                                 startindent, 
                                  1, 
                                  !errinfo_set);
-		if (errinfo_set) {
-		    write_errinfo(scb, &pat->pat_errinfo, indent);
-		    ses_putstr_indent(scb, END_SEC, startindent);
-		}
-	    }
-	    break;
-	case NCX_BT_SLIST:
-	    break;
-	case NCX_BT_LEAFREF:
-	    str = typ_get_leafref_path(typdef);
-	    if (str) {
-		write_simple_str(scb, 
+                if (errinfo_set) {
+                    write_errinfo(scb, &pat->pat_errinfo, indent);
+                    ses_putstr_indent(scb, END_SEC, startindent);
+                }
+            }
+            break;
+        case NCX_BT_SLIST:
+            break;
+        case NCX_BT_LEAFREF:
+            str = typ_get_leafref_path(typdef);
+            if (str) {
+                write_simple_str(scb, 
                                  YANG_K_PATH, 
                                  str,
-				 startindent, 
+                                 startindent, 
                                  2, 
                                  TRUE);
-	    }
+            }
             break;
-	case NCX_BT_INSTANCE_ID:
-	    constrained_set = typ_get_constrained(typdef);
-	    write_simple_str(scb, 
+        case NCX_BT_INSTANCE_ID:
+            constrained_set = typ_get_constrained(typdef);
+            write_simple_str(scb, 
                              YANG_K_REQUIRE_INSTANCE,
-			     (constrained_set) 
-			     ? NCX_EL_TRUE : NCX_EL_FALSE,
-			     startindent, 
+                             (constrained_set) 
+                             ? NCX_EL_TRUE : NCX_EL_FALSE,
+                             startindent, 
                              2, 
                              TRUE);
-	    break;
-	case NCX_BT_IDREF:
-	    idref = typ_get_cidref(typdef);
-	    if (idref) {
-		write_idref_base(scb, 
+            break;
+        case NCX_BT_IDREF:
+            idref = typ_get_cidref(typdef);
+            if (idref) {
+                write_idref_base(scb, 
                                  mod, 
                                  cp, 
-				 idref, 
+                                 idref, 
                                  startindent);
-	    }
-	    break;
-	default:
-	    break;
-	}
-	break;
+            }
+            break;
+        default:
+            break;
+        }
+        break;
     case NCX_CL_COMPLEX:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	break;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        break;
     case NCX_CL_REF:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	break;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     write_appinfoQ(scb, mod, cp, &typdef->appinfoQ, startindent);
@@ -1377,22 +1377,22 @@ static void
 *********************************************************************/
 static void
     write_type_clause (ses_cb_t *scb,
-		       const ncx_module_t *mod,
-		       const yangdump_cvtparms_t *cp,
-		       typ_def_t *typdef,
-		       int32 startindent)
+                       const ncx_module_t *mod,
+                       const yangdump_cvtparms_t *cp,
+                       typ_def_t *typdef,
+                       int32 startindent)
 {
     write_type(scb, mod, cp, typdef, startindent);
     if (typ_has_subclauses(typdef)) {
-	ses_putstr(scb, START_SEC);
-	write_type_contents(scb, 
+        ses_putstr(scb, START_SEC);
+        write_type_contents(scb, 
                             mod, 
                             cp, 
                             typdef,
-			    startindent + ses_indent_count(scb));
-	ses_putstr_indent(scb, END_SEC, startindent);
+                            startindent + ses_indent_count(scb));
+        ses_putstr_indent(scb, END_SEC, startindent);
     } else {
-	ses_putchar(scb, ';');
+        ses_putchar(scb, ';');
     }
 }  /* write_type_clause */
 
@@ -1413,11 +1413,11 @@ static void
 *********************************************************************/
 static void
     write_typedef (ses_cb_t *scb,
-		   const ncx_module_t *mod,
-		   const yangdump_cvtparms_t *cp,
-		   typ_template_t *typ,
-		   int32 startindent,
-		   boolean first)
+                   const ncx_module_t *mod,
+                   const yangdump_cvtparms_t *cp,
+                   typ_template_t *typ,
+                   int32 startindent,
+                   boolean first)
 {
     const xmlChar           *submod;
     int32                    indent;
@@ -1428,10 +1428,10 @@ static void
     write_href_id(scb, 
                   submod, 
                   YANG_K_TYPEDEF, 
-		  typ->name, 
+                  typ->name, 
                   startindent, 
                   typ->tkerr.linenum,
-		  FALSE, 
+                  FALSE, 
                   !first);
 
     /* type field */
@@ -1439,9 +1439,9 @@ static void
 
     /* units field */
     if (typ->units) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_UNITS, 
-			 typ->units, 
+                         typ->units, 
                          indent, 
                          2, 
                          TRUE);
@@ -1449,9 +1449,9 @@ static void
 
     /* default field */
     if (typ->defval) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_DEFAULT, 
-			 typ->defval, 
+                         typ->defval, 
                          indent, 
                          2, 
                          TRUE);
@@ -1462,9 +1462,9 @@ static void
 
     /* description field */
     if (typ->descr) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_DESCRIPTION, 
-			 typ->descr, 
+                         typ->descr, 
                          indent, 
                          2, 
                          TRUE);
@@ -1472,9 +1472,9 @@ static void
 
     /* reference field */
     if (typ->ref) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_REFERENCE, 
-			 typ->ref, 
+                         typ->ref, 
                          indent,
                          2, 
                          TRUE);
@@ -1504,33 +1504,33 @@ static void
 *********************************************************************/
 static void
     write_typedefs (ses_cb_t *scb,
-		    const ncx_module_t *mod,
-		    const yangdump_cvtparms_t *cp,
-		    dlq_hdr_t *typedefQ,
-		    int32 startindent)
+                    const ncx_module_t *mod,
+                    const yangdump_cvtparms_t *cp,
+                    dlq_hdr_t *typedefQ,
+                    int32 startindent)
 {
     typ_template_t    *typ;
     boolean            first;
 
     if (dlq_empty(typedefQ)) {
-	return;
+        return;
     }
 
     if (typedefQ == &mod->typeQ) {
-	write_banner_cmt(scb, 
+        write_banner_cmt(scb, 
                          mod, 
                          cp,
-			 (const xmlChar *)"typedefs", 
+                         (const xmlChar *)"typedefs", 
                          startindent);
     }
 
     first = TRUE;
     for (typ = (typ_template_t *)dlq_firstEntry(typedefQ);
-	 typ != NULL;
-	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
+         typ != NULL;
+         typ = (typ_template_t *)dlq_nextEntry(typ)) {
 
-	write_typedef(scb, mod, cp, typ, startindent, first);
-	first = FALSE;
+        write_typedef(scb, mod, cp, typ, startindent, first);
+        first = FALSE;
     }
 
 }  /* write_typedefs */
@@ -1552,11 +1552,11 @@ static void
 *********************************************************************/
 static void
     write_grouping (ses_cb_t *scb,
-		    const ncx_module_t *mod,
-		    const yangdump_cvtparms_t *cp,
-		    grp_template_t *grp,
-		    int32 startindent,
-		    boolean first)
+                    const ncx_module_t *mod,
+                    const yangdump_cvtparms_t *cp,
+                    grp_template_t *grp,
+                    int32 startindent,
+                    boolean first)
 {
     const xmlChar           *submod;
     int32                    indent;
@@ -1564,20 +1564,20 @@ static void
 
     cooked = (strcmp(cp->objview, OBJVIEW_COOKED)) ? FALSE : TRUE;
     submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
-	
+        
     indent = startindent + ses_indent_count(scb);
 
     if (cooked && !grp_has_typedefs(grp)) {
-	return;
+        return;
     }
-	
+        
     write_href_id(scb, 
                   submod, 
                   YANG_K_GROUPING, 
-		  grp->name,
+                  grp->name,
                   startindent,
                   grp->tkerr.linenum, 
-		  FALSE,
+                  FALSE,
                   !first);
 
     /* status field */
@@ -1585,9 +1585,9 @@ static void
 
     /* description field */
     if (grp->descr) {
-	write_simple_str(scb,
+        write_simple_str(scb,
                          YANG_K_DESCRIPTION, 
-			 grp->descr, 
+                         grp->descr, 
                          indent, 
                          2, 
                          TRUE);
@@ -1595,9 +1595,9 @@ static void
 
     /* reference field */
     if (grp->ref) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_REFERENCE, 
-			 grp->ref,
+                         grp->ref,
                          indent,
                          2,
                          TRUE);
@@ -1608,7 +1608,7 @@ static void
     write_groupings(scb, mod, cp, &grp->groupingQ, indent);
 
     if (!cooked) {
-	write_objects(scb, mod, cp, &grp->datadefQ, indent);
+        write_objects(scb, mod, cp, &grp->datadefQ, indent);
     }
 
     /* appinfoQ */
@@ -1638,54 +1638,54 @@ static void
 *********************************************************************/
 static void
     write_groupings (ses_cb_t *scb,
-		     const ncx_module_t *mod,
-		     const yangdump_cvtparms_t *cp,
-		     dlq_hdr_t *groupingQ,
-		     int32 startindent)
+                     const ncx_module_t *mod,
+                     const yangdump_cvtparms_t *cp,
+                     dlq_hdr_t *groupingQ,
+                     int32 startindent)
 {
     grp_template_t          *grp;
     const xmlChar           *submod;
     boolean                  needed, cooked, first;
 
     if (dlq_empty(groupingQ)) {
-	return;
+        return;
     }
 
     cooked = (strcmp(cp->objview, OBJVIEW_COOKED)) ? FALSE : TRUE;
 
     submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
-	
+        
     /* groupings are only generated in cooked mode if they have
      * typedefs, and then just the typedefs are generated
      */
     if (cooked) {
-	needed = FALSE;
-	for (grp = (grp_template_t *)dlq_firstEntry(groupingQ);
-	     grp != NULL && needed==FALSE;
-	     grp = (grp_template_t *)dlq_nextEntry(grp)) {
-	    needed = grp_has_typedefs(grp);
-	}
-	if (!needed) {
-	    return;
-	}
+        needed = FALSE;
+        for (grp = (grp_template_t *)dlq_firstEntry(groupingQ);
+             grp != NULL && needed==FALSE;
+             grp = (grp_template_t *)dlq_nextEntry(grp)) {
+            needed = grp_has_typedefs(grp);
+        }
+        if (!needed) {
+            return;
+        }
     }
 
     /* put comment for first grouping only */
     if (groupingQ == &mod->groupingQ) {
-	write_banner_cmt(scb, 
+        write_banner_cmt(scb, 
                          mod, 
                          cp,
-			 (const xmlChar *)"groupings", 
+                         (const xmlChar *)"groupings", 
                          startindent);
     }
 
     first = TRUE;
     for (grp = (grp_template_t *)dlq_firstEntry(groupingQ);
-	 grp != NULL;
-	 grp = (grp_template_t *)dlq_nextEntry(grp)) {
+         grp != NULL;
+         grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
-	write_grouping(scb, mod, cp, grp, startindent, first);
-	first = FALSE;
+        write_grouping(scb, mod, cp, grp, startindent, first);
+        first = FALSE;
     }
 
 }  /* write_groupings */
@@ -1706,10 +1706,10 @@ static void
 *********************************************************************/
 static void
     write_iffeature (ses_cb_t *scb,
-		     const ncx_module_t *mod,
-		     const yangdump_cvtparms_t *cp,
-		     const ncx_iffeature_t *iffeature,
-		     int32 startindent)
+                     const ncx_module_t *mod,
+                     const yangdump_cvtparms_t *cp,
+                     const ncx_iffeature_t *iffeature,
+                     int32 startindent)
 {
     const xmlChar     *fname, *fversion, *submod;
     uint32             linenum;
@@ -1725,20 +1725,20 @@ static void
 
     /* get filename if-feature-stmt filled in */
     if (iffeature->feature) {
-	linenum = iffeature->feature->tkerr.linenum;
-	fname = iffeature->feature->tkerr.mod->name;
-	fversion = iffeature->feature->tkerr.mod->version;
+        linenum = iffeature->feature->tkerr.linenum;
+        fname = iffeature->feature->tkerr.mod->name;
+        fversion = iffeature->feature->tkerr.mod->version;
     }
 
     ses_putstr(scb, (const xmlChar *)"<span class=\"yang_id\">");
     write_a(scb, 
             cp, 
-	    fname, 
-	    fversion, 
-	    submod,
-	    iffeature->prefix,
-	    iffeature->name, 
-	    linenum);
+            fname, 
+            fversion, 
+            submod,
+            iffeature->prefix,
+            iffeature->name, 
+            linenum);
     ses_putstr(scb, (const xmlChar *)"</span>");
     ses_putchar(scb, ';');
 
@@ -1760,20 +1760,20 @@ static void
 *********************************************************************/
 static void
     write_iffeatureQ (ses_cb_t *scb,
-		      const ncx_module_t *mod,
-		      const yangdump_cvtparms_t *cp,
-		      const dlq_hdr_t *iffeatureQ,
-		      int32 startindent)
+                      const ncx_module_t *mod,
+                      const yangdump_cvtparms_t *cp,
+                      const dlq_hdr_t *iffeatureQ,
+                      int32 startindent)
 {
     const ncx_iffeature_t   *iffeature;
 
     for (iffeature = (const ncx_iffeature_t *)
-	     dlq_firstEntry(iffeatureQ);
-	 iffeature != NULL;
-	 iffeature = (const ncx_iffeature_t *)
-	     dlq_nextEntry(iffeature)) {
+             dlq_firstEntry(iffeatureQ);
+         iffeature != NULL;
+         iffeature = (const ncx_iffeature_t *)
+             dlq_nextEntry(iffeature)) {
 
-	write_iffeature(scb, mod, cp, iffeature, startindent);
+        write_iffeature(scb, mod, cp, iffeature, startindent);
     }
 
 }  /* write_iffeatureQ */
@@ -1864,7 +1864,7 @@ static void
                          2, 
                          TRUE);
     }
-	    
+            
     /* reference-stmt? */
     str = obj_get_reference(obj);
     if (str) {
@@ -1975,21 +1975,21 @@ static void
 
     if (maxset) {
         if (maxval == 0) {
-	    write_simple_str(scb, 
+            write_simple_str(scb, 
                              YANG_K_MAX_ELEMENTS, 
                              YANG_K_UNBOUNDED,
                              indent, 
                              2, 
                              TRUE);
         } else {
-	    sprintf(buff, "%u", maxval);
-	    write_simple_str(scb, 
+            sprintf(buff, "%u", maxval);
+            write_simple_str(scb, 
                              YANG_K_MAX_ELEMENTS, 
                              (const xmlChar *)buff,
                              indent, 
                              2, 
                              TRUE);
-	}
+        }
     }
 
 }  /* write_minmax */
@@ -2071,11 +2071,11 @@ static void
 *********************************************************************/
 static status_t
     write_object (ses_cb_t *scb,
-		  const ncx_module_t *mod,
-		  const yangdump_cvtparms_t *cp,
-		  obj_template_t *obj,
-		  int32 startindent,
-		  boolean first)
+                  const ncx_module_t *mod,
+                  const yangdump_cvtparms_t *cp,
+                  obj_template_t *obj,
+                  int32 startindent,
+                  boolean first)
 {
     obj_container_t   *con;
     obj_leaf_t        *leaf;
@@ -2095,8 +2095,8 @@ static status_t
     boolean            isempty, fullcase;
 
     if (obj_is_cloned(obj) && cp->rawmode) {
-	/* skip cloned objects in 'raw' object view mode */
-	return ERR_NCX_SKIPPED;
+        /* skip cloned objects in 'raw' object view mode */
+        return ERR_NCX_SKIPPED;
     }
 
     if (cp->rawmode) {
@@ -2115,48 +2115,48 @@ static status_t
         obj_has_name(obj) && 
         obj->objtype != OBJ_TYP_RPCIO) {
 
-	write_href_id(scb, 
+        write_href_id(scb, 
                       submod, 
                       obj_get_typestr(obj), 
                       obj_get_name(obj),
-		      startindent, 
+                      startindent, 
                       obj->tkerr.linenum, 
                       isempty, 
                       !first);
-	if (isempty) {
-	    return NO_ERR;
-	}
+        if (isempty) {
+            return NO_ERR;
+        }
     }
 
     switch (obj->objtype) {
     case OBJ_TYP_ANYXML:
         write_when(scb, obj, indent);
-	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
-	write_musts(scb, obj_get_mustQ(obj), indent);
+        write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+        write_musts(scb, obj_get_mustQ(obj), indent);
         write_config_stmt(scb, obj, indent);
         write_mandatory_stmt(scb, obj, indent);
         write_sdr(scb, obj, indent);
-	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
         break;
     case OBJ_TYP_CONTAINER:
-	con = obj->def.container;
+        con = obj->def.container;
         write_when(scb, obj, indent);
-	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
-	write_musts(scb, obj_get_mustQ(obj), indent);
+        write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+        write_musts(scb, obj_get_mustQ(obj), indent);
         str = obj_get_presence_string(obj);
         write_presence_stmt(scb, str, indent);
         write_config_stmt(scb, obj, indent);
         write_sdr(scb, obj, indent);
         write_typedefs(scb, mod, cp, con->typedefQ, indent);
         write_groupings(scb, mod, cp, con->groupingQ, indent);
-	write_objects(scb, mod, cp, con->datadefQ, indent);
-	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	write_endsec_cmt(scb, YANG_K_CONTAINER, con->name);
-	break;
+        write_objects(scb, mod, cp, con->datadefQ, indent);
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        write_endsec_cmt(scb, YANG_K_CONTAINER, con->name);
+        break;
     case OBJ_TYP_LEAF:
-	leaf = obj->def.leaf;
+        leaf = obj->def.leaf;
         write_when(scb, obj, indent);
         write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
         write_type_clause(scb, mod, cp, leaf->typdef, indent);
@@ -2184,71 +2184,71 @@ static status_t
         write_config_stmt(scb, obj, indent);
         write_mandatory_stmt(scb, obj, indent);
         write_sdr(scb, obj, indent);
-	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	break;
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        break;
     case OBJ_TYP_LEAF_LIST:
-	leaflist = obj->def.leaflist;
+        leaflist = obj->def.leaflist;
         write_when(scb, obj, indent);
-	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+        write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
         write_type_clause(scb, mod, cp, leaflist->typdef, indent);
-	if (leaflist->units) {
-	    write_simple_str(scb,
+        if (leaflist->units) {
+            write_simple_str(scb,
                              YANG_K_UNITS,
                              leaflist->units,
-			     indent,
+                             indent,
                              2,
                              TRUE);
-	}
-	write_musts(scb, obj_get_mustQ(obj), indent);
+        }
+        write_musts(scb, obj_get_mustQ(obj), indent);
         write_config_stmt(scb, obj, indent);
-	write_minmax(scb,
+        write_minmax(scb,
                      leaflist->minset,
                      leaflist->minelems,
                      leaflist->maxset,
                      leaflist->maxelems,
                      indent);
-	if (!leaflist->ordersys) {
-	    write_simple_str(scb, 
+        if (!leaflist->ordersys) {
+            write_simple_str(scb, 
                              YANG_K_ORDERED_BY, 
-			     YANG_K_USER,
-			     indent, 
+                             YANG_K_USER,
+                             indent, 
                              2, 
                              TRUE);
-	}
+        }
         write_sdr(scb, obj, indent);
-	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	break;
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        break;
     case OBJ_TYP_LIST:
-	list = obj->def.list;
+        list = obj->def.list;
         write_when(scb, obj, indent);
-	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
-	write_musts(scb, obj_get_mustQ(obj), indent);
+        write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+        write_musts(scb, obj_get_mustQ(obj), indent);
 
-	/* key field, manual generation to make links */
-	if (!dlq_empty(&list->keyQ)) {
-	    ses_indent(scb, indent);
-	    write_kw(scb, YANG_K_KEY);
-	    ses_putstr(scb, (const xmlChar *)" \"");
+        /* key field, manual generation to make links */
+        if (!dlq_empty(&list->keyQ)) {
+            ses_indent(scb, indent);
+            write_kw(scb, YANG_K_KEY);
+            ses_putstr(scb, (const xmlChar *)" \"");
 
-	    for (key = obj_first_key(obj);
-		 key != NULL; key = nextkey) {
-		nextkey = obj_next_key(key);
-		write_a(scb,
+            for (key = obj_first_key(obj);
+                 key != NULL; key = nextkey) {
+                nextkey = obj_next_key(key);
+                write_a(scb,
                         cp,
                         NULL,
                         NULL,
                         submod,
                         NULL,
-			obj_get_name(key->keyobj),
-			key->keyobj->tkerr.linenum);
-		if (nextkey) {
-		    ses_putchar(scb, ' ');
-		}
-	    }
-	    ses_putstr(scb, (const xmlChar *)"\";");
-	}
+                        obj_get_name(key->keyobj),
+                        key->keyobj->tkerr.linenum);
+                if (nextkey) {
+                    ses_putchar(scb, ' ');
+                }
+            }
+            ses_putstr(scb, (const xmlChar *)"\";");
+        }
 
         write_unique_stmts(scb, mod, cp, &list->uniqueQ, indent);
         write_config_stmt(scb, obj, indent);
@@ -2259,52 +2259,52 @@ static status_t
                      list->maxelems,
                      indent);
 
-	/* ordered-by field */
-	if (!list->ordersys) {
-	    write_simple_str(scb, 
+        /* ordered-by field */
+        if (!list->ordersys) {
+            write_simple_str(scb, 
                              YANG_K_ORDERED_BY, 
-			     YANG_K_USER,
-			     indent, 
+                             YANG_K_USER,
+                             indent, 
                              2, 
                              TRUE);
-	}
+        }
 
         write_sdr(scb, obj, indent);
         write_typedefs(scb, mod, cp, list->typedefQ, indent);
         write_groupings(scb, mod, cp, list->groupingQ, indent);
-	write_objects(scb, mod, cp, list->datadefQ, indent);
-	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	write_endsec_cmt(scb, YANG_K_LIST, list->name);
-	break;
+        write_objects(scb, mod, cp, list->datadefQ, indent);
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        write_endsec_cmt(scb, YANG_K_LIST, list->name);
+        break;
     case OBJ_TYP_CHOICE:
-	choic = obj->def.choic;
+        choic = obj->def.choic;
         write_when(scb, obj, indent);
-	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
-	if (choic->defval) {
-	    write_simple_str(scb,
+        write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+        if (choic->defval) {
+            write_simple_str(scb,
                              YANG_K_DEFAULT, 
-			     choic->defval,
+                             choic->defval,
                              indent,
                              2,
                              TRUE);
-	}
+        }
         write_mandatory_stmt(scb, obj, indent);
         write_sdr(scb, obj, indent);
-	write_objects(scb, mod, cp, choic->caseQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	write_endsec_cmt(scb, YANG_K_CHOICE, choic->name);
-	break;
+        write_objects(scb, mod, cp, choic->caseQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        write_endsec_cmt(scb, YANG_K_CHOICE, choic->name);
+        break;
     case OBJ_TYP_CASE:
-	cas = obj->def.cas;
+        cas = obj->def.cas;
         if (fullcase) {
             write_when(scb, obj, indent);
             write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
             write_sdr(scb, obj, indent);
-	}
+        }
 
-	write_objects(scb, 
+        write_objects(scb, 
                       mod, 
                       cp, 
                       cas->datadefQ, 
@@ -2315,184 +2315,184 @@ static status_t
             ses_putstr_indent(scb, END_SEC, startindent);
             write_endsec_cmt(scb, YANG_K_CASE, cas->name);
         }
-	break;
+        break;
     case OBJ_TYP_USES:
-	if (!cp->rawmode) {
-	    return ERR_NCX_SKIPPED;
-	}
-	uses = obj->def.uses;
+        if (!cp->rawmode) {
+            return ERR_NCX_SKIPPED;
+        }
+        uses = obj->def.uses;
 
 
-	if (!first) {
-	    ses_putchar(scb, '\n');
-	}
+        if (!first) {
+            ses_putchar(scb, '\n');
+        }
 
-	ses_indent(scb, startindent);
-	write_id_a(scb, submod, YANG_K_USES, obj->tkerr.linenum);
-	write_kw(scb, YANG_K_USES);
-	ses_putchar(scb, ' ');
-	fname = NULL;
-	fversion = NULL;
-	if (uses->prefix && 
-	    xml_strcmp(uses->prefix, mod->prefix)) {
-	    if (uses->grp && uses->grp->tkerr.mod) {
-		fname = uses->grp->tkerr.mod->name;
-		fversion = uses->grp->tkerr.mod->version;
-	    }
-	}
-	write_a(scb,
+        ses_indent(scb, startindent);
+        write_id_a(scb, submod, YANG_K_USES, obj->tkerr.linenum);
+        write_kw(scb, YANG_K_USES);
+        ses_putchar(scb, ' ');
+        fname = NULL;
+        fversion = NULL;
+        if (uses->prefix && 
+            xml_strcmp(uses->prefix, mod->prefix)) {
+            if (uses->grp && uses->grp->tkerr.mod) {
+                fname = uses->grp->tkerr.mod->name;
+                fversion = uses->grp->tkerr.mod->version;
+            }
+        }
+        write_a(scb,
                 cp, 
                 fname,
                 fversion, 
                 submod,
-		uses->prefix,
+                uses->prefix,
                 uses->name,
-		uses->grp->tkerr.linenum);
-	if (uses->descr || 
+                uses->grp->tkerr.linenum);
+        if (uses->descr || 
             uses->ref || 
             (obj->when && obj->when->exprstr) ||
-	    uses->status != NCX_STATUS_CURRENT ||
-	    !dlq_empty(uses->datadefQ) ||
-	    !dlq_empty(&obj->appinfoQ)) {
+            uses->status != NCX_STATUS_CURRENT ||
+            !dlq_empty(uses->datadefQ) ||
+            !dlq_empty(&obj->appinfoQ)) {
 
-	    ses_putstr(scb, START_SEC);
+            ses_putstr(scb, START_SEC);
             write_when(scb, obj, indent);
-	    write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+            write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
             write_sdr(scb, obj, indent);
-	    write_objects(scb, mod, cp, uses->datadefQ, indent);
-	    write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	    ses_putstr_indent(scb, END_SEC, startindent);
-	} else {
-	    ses_putchar(scb, ';');
-	}
-	break;
+            write_objects(scb, mod, cp, uses->datadefQ, indent);
+            write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+            ses_putstr_indent(scb, END_SEC, startindent);
+        } else {
+            ses_putchar(scb, ';');
+        }
+        break;
     case OBJ_TYP_AUGMENT:
-	if (!cp->rawmode) {
-	    return ERR_NCX_SKIPPED;
-	}
+        if (!cp->rawmode) {
+            return ERR_NCX_SKIPPED;
+        }
 
-	aug = obj->def.augment;
+        aug = obj->def.augment;
 
-	if (!first) {
-	    ses_putchar(scb, '\n');
-	}
+        if (!first) {
+            ses_putchar(scb, '\n');
+        }
 
-	ses_indent(scb, startindent);
-	write_id_a(scb, submod, YANG_K_AUGMENT, obj->tkerr.linenum);
-	write_kw(scb, YANG_K_AUGMENT);
-	ses_putchar(scb, ' ');
-	fname = NULL;
-	fversion = NULL;
-	if (aug->targobj && aug->targobj->tkerr.mod &&
-	    aug->targobj->tkerr.mod != mod) {
-	    fname = aug->targobj->tkerr.mod->name;
-	    fversion = aug->targobj->tkerr.mod->version;
-	}
-	write_a2(scb,
+        ses_indent(scb, startindent);
+        write_id_a(scb, submod, YANG_K_AUGMENT, obj->tkerr.linenum);
+        write_kw(scb, YANG_K_AUGMENT);
+        ses_putchar(scb, ' ');
+        fname = NULL;
+        fversion = NULL;
+        if (aug->targobj && aug->targobj->tkerr.mod &&
+            aug->targobj->tkerr.mod != mod) {
+            fname = aug->targobj->tkerr.mod->name;
+            fversion = aug->targobj->tkerr.mod->version;
+        }
+        write_a2(scb,
                  cp, 
                  fname, 
                  fversion, 
                  submod,
-		 obj_get_name(aug->targobj), 
-		 aug->targobj->tkerr.linenum, 
+                 obj_get_name(aug->targobj), 
+                 aug->targobj->tkerr.linenum, 
                  aug->target);
 
-	if (isempty) {
-	    ses_putchar(scb, ';');
-	    return NO_ERR;
-	}
+        if (isempty) {
+            ses_putchar(scb, ';');
+            return NO_ERR;
+        }
 
-	ses_putstr(scb, START_SEC);
+        ses_putstr(scb, START_SEC);
         write_when(scb, obj, indent);
-	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+        write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
         write_sdr(scb, obj, indent);
         write_objects(scb, mod, cp, &aug->datadefQ, indent);
-	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	break;
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        break;
     case OBJ_TYP_RPC:
-	rpc = obj->def.rpc;
-	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+        rpc = obj->def.rpc;
+        write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
         write_sdr(scb, obj, indent);
-	write_typedefs(scb, mod, cp, &rpc->typedefQ, indent);
-	write_groupings(scb, mod, cp, &rpc->groupingQ, indent);
-	write_objects(scb, mod, cp, &rpc->datadefQ, indent);
-	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	write_endsec_cmt(scb, YANG_K_RPC, rpc->name);
-	break;
+        write_typedefs(scb, mod, cp, &rpc->typedefQ, indent);
+        write_groupings(scb, mod, cp, &rpc->groupingQ, indent);
+        write_objects(scb, mod, cp, &rpc->datadefQ, indent);
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        write_endsec_cmt(scb, YANG_K_RPC, rpc->name);
+        break;
     case OBJ_TYP_RPCIO:
-	rpcio = obj->def.rpcio;
+        rpcio = obj->def.rpcio;
 
-	if (!dlq_empty(&rpcio->typedefQ) ||
-	    !dlq_empty(&rpcio->groupingQ) ||
-	    !dlq_empty(&rpcio->datadefQ) ||
-	    !dlq_empty(&obj->appinfoQ)) {
+        if (!dlq_empty(&rpcio->typedefQ) ||
+            !dlq_empty(&rpcio->groupingQ) ||
+            !dlq_empty(&rpcio->datadefQ) ||
+            !dlq_empty(&obj->appinfoQ)) {
 
-	    write_href_id(scb, 
+            write_href_id(scb, 
                           submod, 
                           obj_get_name(obj), 
                           NULL,
-			  startindent, 
+                          startindent, 
                           obj->tkerr.linenum,
                           FALSE, 
                           !first);
 
-	    write_typedefs(scb, mod, cp, &rpcio->typedefQ, indent);
-	    write_groupings(scb, mod, cp, &rpcio->groupingQ, indent);
-	    write_objects(scb, mod, cp, &rpcio->datadefQ, indent);
-	    write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	    ses_putstr_indent(scb, END_SEC, startindent);
-	}
-	break;
+            write_typedefs(scb, mod, cp, &rpcio->typedefQ, indent);
+            write_groupings(scb, mod, cp, &rpcio->groupingQ, indent);
+            write_objects(scb, mod, cp, &rpcio->datadefQ, indent);
+            write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+            ses_putstr_indent(scb, END_SEC, startindent);
+        }
+        break;
     case OBJ_TYP_NOTIF:
-	notif = obj->def.notif;
-	write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
+        notif = obj->def.notif;
+        write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
         write_sdr(scb, obj, indent);
-	write_typedefs(scb, mod, cp, &notif->typedefQ, indent);
-	write_groupings(scb, mod, cp, &notif->groupingQ, indent);
-	write_objects(scb, mod, cp, &notif->datadefQ, indent);
-	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	write_endsec_cmt(scb, YANG_K_NOTIFICATION, notif->name);
-	break;
+        write_typedefs(scb, mod, cp, &notif->typedefQ, indent);
+        write_groupings(scb, mod, cp, &notif->groupingQ, indent);
+        write_objects(scb, mod, cp, &notif->datadefQ, indent);
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        write_endsec_cmt(scb, YANG_K_NOTIFICATION, notif->name);
+        break;
     case OBJ_TYP_REFINE:
-	if (!cp->rawmode) {
-	    return ERR_NCX_SKIPPED;
-	}
-	refine = obj->def.refine;
-	if (!first) {
-	    ses_putchar(scb, '\n');
-	}
-	ses_indent(scb, startindent);
-	write_id_a(scb, 
+        if (!cp->rawmode) {
+            return ERR_NCX_SKIPPED;
+        }
+        refine = obj->def.refine;
+        if (!first) {
+            ses_putchar(scb, '\n');
+        }
+        ses_indent(scb, startindent);
+        write_id_a(scb, 
                    submod, 
                    YANG_K_REFINE, 
                    obj->tkerr.linenum);
-	write_kw(scb, YANG_K_REFINE);
-	ses_putchar(scb, ' ');
-	fname = NULL;
-	fversion = NULL;
-	if (refine->targobj && refine->targobj->tkerr.mod &&
-	    refine->targobj->tkerr.mod != mod) {
-	    fname = refine->targobj->tkerr.mod->name;
-	    fversion = refine->targobj->tkerr.mod->version;
-	}
-	write_a2(scb,
+        write_kw(scb, YANG_K_REFINE);
+        ses_putchar(scb, ' ');
+        fname = NULL;
+        fversion = NULL;
+        if (refine->targobj && refine->targobj->tkerr.mod &&
+            refine->targobj->tkerr.mod != mod) {
+            fname = refine->targobj->tkerr.mod->name;
+            fversion = refine->targobj->tkerr.mod->version;
+        }
+        write_a2(scb,
                  cp, 
                  fname, 
                  fversion, 
                  submod,
-		 obj_get_name(refine->targobj), 
-		 refine->targobj->tkerr.linenum, 
+                 obj_get_name(refine->targobj), 
+                 refine->targobj->tkerr.linenum, 
                  refine->target);
 
-	if (isempty) {
-	    ses_putchar(scb, ';');
-	    return NO_ERR;
-	}
+        if (isempty) {
+            ses_putchar(scb, ';');
+            return NO_ERR;
+        }
 
-	ses_putstr(scb, START_SEC);
+        ses_putstr(scb, START_SEC);
 
         switch (refine->targobj->objtype) {
         case OBJ_TYP_ANYXML:
@@ -2554,11 +2554,11 @@ static status_t
             ;
         }
 
-	write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
-	ses_putstr_indent(scb, END_SEC, startindent);
-	break;
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
+        ses_putstr_indent(scb, END_SEC, startindent);
+        break;
     default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     return NO_ERR;
@@ -2581,36 +2581,36 @@ static status_t
 *********************************************************************/
 static void
     write_objects (ses_cb_t *scb,
-		   const ncx_module_t *mod,
-		   const yangdump_cvtparms_t *cp,
-		   dlq_hdr_t *datadefQ,
-		   int32 startindent)
+                   const ncx_module_t *mod,
+                   const yangdump_cvtparms_t *cp,
+                   dlq_hdr_t *datadefQ,
+                   int32 startindent)
 {
     obj_template_t    *obj;
     status_t           res;
     boolean            first;
 
     if (dlq_empty(datadefQ)) {
-	return;
+        return;
     }
 
     if (datadefQ == &mod->datadefQ) {
-	write_banner_cmt(scb, 
+        write_banner_cmt(scb, 
                          mod, 
                          cp,
-			 (const xmlChar *)"objects", 
+                         (const xmlChar *)"objects", 
                          startindent);
     }
 
     first = TRUE;
     for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
-	
-	if (obj_is_hidden(obj)) {
-	    continue;
-	}
-	res = write_object(scb, 
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
+        
+        if (obj_is_hidden(obj)) {
+            continue;
+        }
+        res = write_object(scb, 
                            mod, 
                            cp, 
                            obj, 
@@ -2639,10 +2639,10 @@ static void
 *********************************************************************/
 static void
     write_extension (ses_cb_t *scb,
-		     const ncx_module_t *mod,
-		     const yangdump_cvtparms_t *cp,
-		     const ext_template_t *ext,
-		     int32 startindent)
+                     const ncx_module_t *mod,
+                     const yangdump_cvtparms_t *cp,
+                     const ext_template_t *ext,
+                     int32 startindent)
 {
     const xmlChar     *submod;
     int32              indent;
@@ -2653,7 +2653,7 @@ static void
     write_href_id(scb, 
                   submod, 
                   YANG_K_EXTENSION, 
-		  ext->name, 
+                  ext->name, 
                   startindent, 
                   ext->tkerr.linenum, 
                   FALSE, 
@@ -2661,19 +2661,19 @@ static void
 
     /* argument sub-clause */
     if (ext->arg) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_ARGUMENT, 
-			 ext->arg, 
+                         ext->arg, 
                          indent, 
                          2, 
                          FALSE);
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_YIN_ELEMENT, 
-			 ext->argel ? NCX_EL_TRUE : NCX_EL_FALSE,
-			 indent + ses_indent_count(scb),
+                         ext->argel ? NCX_EL_TRUE : NCX_EL_FALSE,
+                         indent + ses_indent_count(scb),
                          2,
                          FALSE);
-	ses_putstr_indent(scb, END_SEC, indent);
+        ses_putstr_indent(scb, END_SEC, indent);
     }
 
     /* status field */
@@ -2681,9 +2681,9 @@ static void
 
     /* description field */
     if (ext->descr) {
-	write_simple_str(scb,
+        write_simple_str(scb,
                          YANG_K_DESCRIPTION, 
-			 ext->descr,
+                         ext->descr,
                          indent,
                          2, 
                          TRUE);
@@ -2691,9 +2691,9 @@ static void
 
     /* reference field */
     if (ext->ref) {
-	write_simple_str(scb,
+        write_simple_str(scb,
                          YANG_K_REFERENCE, 
-			 ext->ref,
+                         ext->ref,
                          indent, 
                          2, 
                          TRUE);
@@ -2722,28 +2722,28 @@ static void
 *********************************************************************/
 static void
     write_extensions (ses_cb_t *scb,
-		      const ncx_module_t *mod,
-		      const yangdump_cvtparms_t *cp,
-		      const dlq_hdr_t *extensionQ,
-		      int32 startindent)
+                      const ncx_module_t *mod,
+                      const yangdump_cvtparms_t *cp,
+                      const dlq_hdr_t *extensionQ,
+                      int32 startindent)
 {
     const ext_template_t *ext;
 
     if (dlq_empty(extensionQ)) {
-	return;
+        return;
     }
 
     write_banner_cmt(scb, 
                      mod, 
                      cp,
-		     (const xmlChar *)"extensions", 
+                     (const xmlChar *)"extensions", 
                      startindent);
 
     for (ext = (const ext_template_t *)dlq_firstEntry(extensionQ);
-	 ext != NULL;
-	 ext = (const ext_template_t *)dlq_nextEntry(ext)) {
+         ext != NULL;
+         ext = (const ext_template_t *)dlq_nextEntry(ext)) {
 
-	write_extension(scb, mod, cp, ext, startindent);
+        write_extension(scb, mod, cp, ext, startindent);
     }
 
 }  /* write_extensions */
@@ -2764,10 +2764,10 @@ static void
 *********************************************************************/
 static void
     write_identity (ses_cb_t *scb,
-		    const ncx_module_t *mod,
-		    const yangdump_cvtparms_t *cp,
-		    const ncx_identity_t *identity,
-		    int32 startindent)
+                    const ncx_module_t *mod,
+                    const yangdump_cvtparms_t *cp,
+                    const ncx_identity_t *identity,
+                    int32 startindent)
 {
     const xmlChar     *submod;
     int32              indent;
@@ -2777,19 +2777,19 @@ static void
 
     write_href_id(scb, 
                   submod, 
-		  YANG_K_IDENTITY, 
-		  identity->name, 
-		  startindent, 
-		  identity->tkerr.linenum, 
-		  FALSE, 
+                  YANG_K_IDENTITY, 
+                  identity->name, 
+                  startindent, 
+                  identity->tkerr.linenum, 
+                  FALSE, 
                   TRUE);
 
     /* optional base sub-clause */
     if (identity->base) {
-	write_identity_base(scb, 
+        write_identity_base(scb, 
                             mod, 
                             cp,
-			    identity, 
+                            identity, 
                             indent);
     }
 
@@ -2798,20 +2798,20 @@ static void
 
     /* description field */
     if (identity->descr) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_DESCRIPTION, 
-			 identity->descr, 
-			 indent, 
+                         identity->descr, 
+                         indent, 
                          2, 
                          TRUE);
     }
 
     /* reference field */
     if (identity->ref) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_REFERENCE, 
-			 identity->ref, 
-			 indent, 
+                         identity->ref, 
+                         indent, 
                          2, 
                          TRUE);
     }
@@ -2819,8 +2819,8 @@ static void
     write_appinfoQ(scb, 
                    mod, 
                    cp, 
-		   &identity->appinfoQ, 
-		   indent);
+                   &identity->appinfoQ, 
+                   indent);
 
     /* end identity clause */
     ses_putstr_indent(scb, END_SEC, startindent);
@@ -2843,31 +2843,31 @@ static void
 *********************************************************************/
 static void
     write_identities (ses_cb_t *scb,
-		      const ncx_module_t *mod,
-		      const yangdump_cvtparms_t *cp,
-		      const dlq_hdr_t *identityQ,
-		      int32 startindent)
+                      const ncx_module_t *mod,
+                      const yangdump_cvtparms_t *cp,
+                      const dlq_hdr_t *identityQ,
+                      int32 startindent)
 {
     const ncx_identity_t *identity;
 
     if (dlq_empty(identityQ)) {
-	return;
+        return;
     }
 
     write_banner_cmt(scb, mod, cp,
-		     (const xmlChar *)"identities", 
-		     startindent);
+                     (const xmlChar *)"identities", 
+                     startindent);
 
     for (identity = (const ncx_identity_t *)
-	     dlq_firstEntry(identityQ);
-	 identity != NULL;
-	 identity = (const ncx_identity_t *)
-	     dlq_nextEntry(identity)) {
+             dlq_firstEntry(identityQ);
+         identity != NULL;
+         identity = (const ncx_identity_t *)
+             dlq_nextEntry(identity)) {
 
-	write_identity(scb, 
+        write_identity(scb, 
                        mod, 
                        cp, 
-		       identity, 
+                       identity, 
                        startindent);
     }
 
@@ -2889,10 +2889,10 @@ static void
 *********************************************************************/
 static void
     write_feature (ses_cb_t *scb,
-		   const ncx_module_t *mod,
-		   const yangdump_cvtparms_t *cp,
-		   const ncx_feature_t *feature,
-		   int32 startindent)
+                   const ncx_module_t *mod,
+                   const yangdump_cvtparms_t *cp,
+                   const ncx_feature_t *feature,
+                   int32 startindent)
 {
     const xmlChar     *submod;
     int32              indent;
@@ -2902,11 +2902,11 @@ static void
 
     write_href_id(scb, 
                   submod, 
-		  YANG_K_FEATURE, 
-		  feature->name, 
-		  startindent, 
-		  feature->tkerr.linenum, 
-		  FALSE, 
+                  YANG_K_FEATURE, 
+                  feature->name, 
+                  startindent, 
+                  feature->tkerr.linenum, 
+                  FALSE, 
                   TRUE);
 
     /* optional Q of if-feature statements */
@@ -2917,20 +2917,20 @@ static void
 
     /* description field */
     if (feature->descr) {
-	write_simple_str(scb,
+        write_simple_str(scb,
                          YANG_K_DESCRIPTION, 
-			 feature->descr, 
-			 indent, 
+                         feature->descr, 
+                         indent, 
                          2, 
                          TRUE);
     }
 
     /* reference field */
     if (feature->ref) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_REFERENCE, 
-			 feature->ref, 
-			 indent, 
+                         feature->ref, 
+                         indent, 
                          2, 
                          TRUE);
     }
@@ -2938,8 +2938,8 @@ static void
     write_appinfoQ(scb, 
                    mod, 
                    cp, 
-		   &feature->appinfoQ, 
-		   indent);
+                   &feature->appinfoQ, 
+                   indent);
 
     /* end feature clause */
     ses_putstr_indent(scb, END_SEC, startindent);
@@ -2962,31 +2962,31 @@ static void
 *********************************************************************/
 static void
     write_features (ses_cb_t *scb,
-		    const ncx_module_t *mod,
-		    const yangdump_cvtparms_t *cp,
-		    const dlq_hdr_t *featureQ,
-		    int32 startindent)
+                    const ncx_module_t *mod,
+                    const yangdump_cvtparms_t *cp,
+                    const dlq_hdr_t *featureQ,
+                    int32 startindent)
 {
     const ncx_feature_t *feature;
 
     if (dlq_empty(featureQ)) {
-	return;
+        return;
     }
 
     write_banner_cmt(scb, mod, cp,
-		     (const xmlChar *)"features", 
-		     startindent);
+                     (const xmlChar *)"features", 
+                     startindent);
 
     for (feature = (const ncx_feature_t *)
-	     dlq_firstEntry(featureQ);
-	 feature != NULL;
-	 feature = (const ncx_feature_t *)
-	     dlq_nextEntry(feature)) {
+             dlq_firstEntry(featureQ);
+         feature != NULL;
+         feature = (const ncx_feature_t *)
+             dlq_nextEntry(feature)) {
 
-	write_feature(scb, 
+        write_feature(scb, 
                       mod, 
                       cp, 
-		      feature, 
+                      feature, 
                       startindent);
     }
 
@@ -3035,7 +3035,7 @@ static void
 
     /* type-stmt */
     if (deviate->typdef) {
-	write_type_clause(scb, 
+        write_type_clause(scb, 
                           mod,
                           cp,
                           deviate->typdef,
@@ -3044,7 +3044,7 @@ static void
 
     /* units-stmt */
     if (deviate->units) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_UNITS, 
                          deviate->units, 
                          indent, 
@@ -3054,7 +3054,7 @@ static void
 
     /* default-stmt */
     if (deviate->defval) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_DEFAULT, 
                          deviate->defval, 
                          indent, 
@@ -3106,8 +3106,8 @@ static void
     write_appinfoQ(scb, 
                    mod, 
                    cp, 
-		   &deviate->appinfoQ, 
-		   indent);
+                   &deviate->appinfoQ, 
+                   indent);
 
     ses_putstr_indent(scb, END_SEC, startindent);
 
@@ -3173,20 +3173,20 @@ static void
 
     /* description field */
     if (deviation->descr) {
-	write_simple_str(scb,
+        write_simple_str(scb,
                          YANG_K_DESCRIPTION, 
-			 deviation->descr, 
-			 indent, 
+                         deviation->descr, 
+                         indent, 
                          2, 
                          TRUE);
     }
 
     /* reference field */
     if (deviation->ref) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_REFERENCE, 
-			 deviation->ref, 
-			 indent, 
+                         deviation->ref, 
+                         indent, 
                          2, 
                          TRUE);
     }
@@ -3203,8 +3203,8 @@ static void
     write_appinfoQ(scb, 
                    mod, 
                    cp, 
-		   &deviation->appinfoQ, 
-		   indent);
+                   &deviation->appinfoQ, 
+                   indent);
 
     /* end deviation statement */
     ses_putstr_indent(scb, END_SEC, startindent);
@@ -3235,22 +3235,22 @@ static void
     const obj_deviation_t *deviation;
 
     if (dlq_empty(deviationQ)) {
-	return;
+        return;
     }
 
     write_banner_cmt(scb, 
                      mod, 
                      cp,
-		     (const xmlChar *)"deviations", 
-		     startindent);
+                     (const xmlChar *)"deviations", 
+                     startindent);
 
     for (deviation = (const obj_deviation_t *)
-	     dlq_firstEntry(deviationQ);
-	 deviation != NULL;
-	 deviation = (const obj_deviation_t *)
-	     dlq_nextEntry(deviation)) {
+             dlq_firstEntry(deviationQ);
+         deviation != NULL;
+         deviation = (const obj_deviation_t *)
+             dlq_nextEntry(deviation)) {
 
-	write_deviation(scb, 
+        write_deviation(scb, 
                         mod, 
                         cp, 
                         deviation, 
@@ -3279,14 +3279,14 @@ static void
 *********************************************************************/
 static void
     write_import (ses_cb_t *scb,
-		  const ncx_module_t *mod,
-		  const yangdump_cvtparms_t *cp,
-		  const xmlChar *modprefix,
-		  const xmlChar *modname,
-		  const xmlChar *modrevision,
-		  const xmlChar *submod,
-		  const dlq_hdr_t *appinfoQ,
-		  int32 indent)
+                  const ncx_module_t *mod,
+                  const yangdump_cvtparms_t *cp,
+                  const xmlChar *modprefix,
+                  const xmlChar *modname,
+                  const xmlChar *modrevision,
+                  const xmlChar *submod,
+                  const dlq_hdr_t *appinfoQ,
+                  int32 indent)
 {
     ses_indent(scb, indent);
     write_kw(scb, YANG_K_IMPORT);
@@ -3294,8 +3294,8 @@ static void
     write_a(scb,
             cp, 
             modname, 
-	    (modrevision) ? modrevision : NULL,
-	    submod,
+            (modrevision) ? modrevision : NULL,
+            submod,
             NULL,
             NULL,
             0);
@@ -3303,24 +3303,24 @@ static void
     write_simple_str(scb, 
                      YANG_K_PREFIX, 
                      modprefix,
-		     indent + ses_indent_count(scb), 
+                     indent + ses_indent_count(scb), 
                      2, 
                      TRUE);
     if (modrevision) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_REVISION,
                          modrevision,
-			 indent + ses_indent_count(scb), 
+                         indent + ses_indent_count(scb), 
                          2, 
                          TRUE);
 
     }
     if (appinfoQ) {
-	write_appinfoQ(scb, 
+        write_appinfoQ(scb, 
                        mod, 
                        cp, 
                        appinfoQ,
-		       indent + ses_indent_count(scb));
+                       indent + ses_indent_count(scb));
     }
     ses_putstr_indent(scb, END_SEC, indent);
 
@@ -3344,9 +3344,9 @@ static void
 *********************************************************************/
 static void
     write_mod_header (ses_cb_t *scb,
-		      const ncx_module_t *mod,
-		      const yangdump_cvtparms_t *cp,
-		      int32 startindent)
+                      const ncx_module_t *mod,
+                      const yangdump_cvtparms_t *cp,
+                      int32 startindent)
 {
     const ncx_import_t       *imp;
     const yang_import_ptr_t  *impptr;
@@ -3361,9 +3361,9 @@ static void
     /* [sub]module name { */
     ses_indent(scb, startindent);
     if (mod->ismod) {
-	write_kw(scb, YANG_K_MODULE);
+        write_kw(scb, YANG_K_MODULE);
     } else {
-	write_kw(scb, YANG_K_SUBMODULE);
+        write_kw(scb, YANG_K_SUBMODULE);
     }
     ses_putchar(scb, ' ');
     write_id(scb, mod->name);
@@ -3377,7 +3377,7 @@ static void
     sprintf(buff, "%u", mod->langver);
     write_simple_str(scb, 
                      YANG_K_YANG_VERSION, 
-		     (const xmlChar *)buff, 
+                     (const xmlChar *)buff, 
                      indent, 
                      0, 
                      TRUE);
@@ -3385,17 +3385,17 @@ static void
 
     /* namespace or belongs-to */
     if (mod->ismod) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_NAMESPACE,
                          mod->ns,
-			 indent,
+                         indent,
                          2, 
                          TRUE);
     } else {
-	write_simple_str(scb,
+        write_simple_str(scb,
                          YANG_K_BELONGS_TO, 
                          mod->belongs,
-			 indent, 
+                         indent, 
                          2, 
                          TRUE);
     }
@@ -3403,10 +3403,10 @@ static void
 
     /* prefix for module only */ 
     if (mod->ismod) {
-	write_simple_str(scb,
+        write_simple_str(scb,
                          YANG_K_PREFIX,
                          mod->prefix,
-			 indent, 
+                         indent, 
                          2, 
                          TRUE);
     }
@@ -3416,148 +3416,148 @@ static void
 
     /* imports section */
     if (cp->unified) {
-	for (impptr = (const yang_import_ptr_t *)
+        for (impptr = (const yang_import_ptr_t *)
                  dlq_firstEntry(&mod->saveimpQ);
-	     impptr != NULL;
-	     impptr = (const yang_import_ptr_t *)dlq_nextEntry(impptr)) {
+             impptr != NULL;
+             impptr = (const yang_import_ptr_t *)dlq_nextEntry(impptr)) {
 
-	    /* the appinfoQ info is not saved in unified mode ouput!! */
-	    write_import(scb, 
+            /* the appinfoQ info is not saved in unified mode ouput!! */
+            write_import(scb, 
                          mod, 
                          cp, 
-			 impptr->modprefix,
-			 impptr->modname, 
-			 impptr->revision,
-			 submod, 
-			 NULL, 
-			 indent);
-	}
-	if (!dlq_empty(&mod->saveimpQ)) {
-	    ses_putchar(scb, '\n');
-	}
+                         impptr->modprefix,
+                         impptr->modname, 
+                         impptr->revision,
+                         submod, 
+                         NULL, 
+                         indent);
+        }
+        if (!dlq_empty(&mod->saveimpQ)) {
+            ses_putchar(scb, '\n');
+        }
     } else {
-	for (imp = (const ncx_import_t *)dlq_firstEntry(&mod->importQ);
-	     imp != NULL;
-	     imp = (const ncx_import_t *)dlq_nextEntry(imp)) {
+        for (imp = (const ncx_import_t *)dlq_firstEntry(&mod->importQ);
+             imp != NULL;
+             imp = (const ncx_import_t *)dlq_nextEntry(imp)) {
 
-	    write_import(scb, 
+            write_import(scb, 
                          mod, 
                          cp, 
-			 imp->prefix,
-			 imp->module, 
-			 imp->revision,
-			 submod, 
-			 &imp->appinfoQ, 
-			 indent);
+                         imp->prefix,
+                         imp->module, 
+                         imp->revision,
+                         submod, 
+                         &imp->appinfoQ, 
+                         indent);
 
-	}
-	if (!dlq_empty(&mod->importQ)) {
-	    ses_putchar(scb, '\n');
-	}
+        }
+        if (!dlq_empty(&mod->importQ)) {
+            ses_putchar(scb, '\n');
+        }
     }
 
-    /* includes section	*/
+    /* includes section        */
     if (!cp->unified) {
-	for (inc = (const ncx_include_t *)dlq_firstEntry(&mod->includeQ);
-	     inc != NULL;
-	     inc = (const ncx_include_t *)dlq_nextEntry(inc)) {
-	    ses_indent(scb, indent);
-	    write_kw(scb, YANG_K_INCLUDE);
-	    ses_putchar(scb, ' ');
-	    write_a(scb, 
+        for (inc = (const ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+             inc != NULL;
+             inc = (const ncx_include_t *)dlq_nextEntry(inc)) {
+            ses_indent(scb, indent);
+            write_kw(scb, YANG_K_INCLUDE);
+            ses_putchar(scb, ' ');
+            write_a(scb, 
                     cp, 
                     inc->submodule, 
-		    (inc->submod) ? inc->submod->version : NULL,
-		    submod, 
+                    (inc->submod) ? inc->submod->version : NULL,
+                    submod, 
                     NULL, 
                     NULL,
                     0);
-	    if (inc->revision || !dlq_empty(&inc->appinfoQ)) {
-		ses_putstr(scb, START_SEC);
-		if (inc->revision) {
-		    write_simple_str(scb, 
+            if (inc->revision || !dlq_empty(&inc->appinfoQ)) {
+                ses_putstr(scb, START_SEC);
+                if (inc->revision) {
+                    write_simple_str(scb, 
                                      YANG_K_REVISION, 
                                      inc->revision,
-				     indent + ses_indent_count(scb),
+                                     indent + ses_indent_count(scb),
                                      2, 
                                      TRUE);
-		}
-		write_appinfoQ(scb, 
+                }
+                write_appinfoQ(scb, 
                                mod,
                                cp,
                                &inc->appinfoQ,
-			       indent + ses_indent_count(scb));
-		ses_putstr_indent(scb, END_SEC, indent);
-	    } else {
-		ses_putchar(scb, ';');
-	    }
-	}
-	if (!dlq_empty(&mod->includeQ)) {
-	    ses_putchar(scb, '\n');
-	}
+                               indent + ses_indent_count(scb));
+                ses_putstr_indent(scb, END_SEC, indent);
+            } else {
+                ses_putchar(scb, ';');
+            }
+        }
+        if (!dlq_empty(&mod->includeQ)) {
+            ses_putchar(scb, '\n');
+        }
     }
 
     /* organization */
     if (mod->organization) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_ORGANIZATION,
-			 mod->organization, 
+                         mod->organization, 
                          indent,
                          2, 
                          TRUE);
-	ses_putchar(scb, '\n');	
+        ses_putchar(scb, '\n');        
     }
 
     /* contact */
     if (mod->contact_info) {
-	write_simple_str(scb,
+        write_simple_str(scb,
                          YANG_K_CONTACT,
-			 mod->contact_info, 
+                         mod->contact_info, 
                          indent,
                          2,
                          TRUE);
-	ses_putchar(scb, '\n');
+        ses_putchar(scb, '\n');
     }
 
     /* description */
     if (mod->descr) {
-	write_simple_str(scb,
+        write_simple_str(scb,
                          YANG_K_DESCRIPTION,
-			 mod->descr,
+                         mod->descr,
                          indent, 
                          2, 
                          TRUE);
-	ses_putchar(scb, '\n');
+        ses_putchar(scb, '\n');
     }
 
     /* reference */
     if (mod->ref) {
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_REFERENCE,
-			 mod->ref, 
+                         mod->ref, 
                          indent, 
                          2, 
                          TRUE);
-	ses_putchar(scb, '\n');
+        ses_putchar(scb, '\n');
     }
 
-    /* revision history section	*/
+    /* revision history section        */
     for (rev = (const ncx_revhist_t *)
              dlq_firstEntry(&mod->revhistQ);
-	 rev != NULL;
-	 rev = (const ncx_revhist_t *)dlq_nextEntry(rev)) {
+         rev != NULL;
+         rev = (const ncx_revhist_t *)dlq_nextEntry(rev)) {
 
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_REVISION, 
                          rev->version,
-			 indent, 
+                         indent, 
                          2, 
                          FALSE);
 
-	write_simple_str(scb, 
+        write_simple_str(scb, 
                          YANG_K_DESCRIPTION,
-			 (rev->descr) ? rev->descr : EMPTY_STRING,
-			 indent + ses_indent_count(scb),
+                         (rev->descr) ? rev->descr : EMPTY_STRING,
+                         indent + ses_indent_count(scb),
                          2, 
                          TRUE);
 
@@ -3570,8 +3570,8 @@ static void
                              TRUE);
         }
 
-	ses_putstr_indent(scb, END_SEC, indent);
-	ses_putchar(scb, '\n');
+        ses_putstr_indent(scb, END_SEC, indent);
+        ses_putchar(scb, '\n');
     }
 
 } /* write_mod_header */
@@ -3593,33 +3593,33 @@ static void
 *********************************************************************/
 static boolean
     datadefQ_toc_needed (const yangdump_cvtparms_t *cp,
-			 const dlq_hdr_t  *datadefQ,
-			 uint32 curlevel)
+                         const dlq_hdr_t  *datadefQ,
+                         uint32 curlevel)
 {
     const obj_template_t *obj;
     boolean               cooked;
 
     if (curlevel >= MENU_NEST_LEVEL) {
-	return FALSE;
+        return FALSE;
     }
 
     cooked = strcmp(cp->objview, OBJVIEW_COOKED) ? FALSE : TRUE;
 
     for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
-	if (obj_is_hidden(obj)) {
-	    continue;
-	}
-	if (cooked) {
-	    if (obj_is_data(obj) && obj_has_name(obj)) {
-		return TRUE;
-	    }
-	} else {
-	    if (obj_is_data(obj) && !obj_is_cloned(obj)) {
-		return TRUE;
-	    }
-	}
+         obj != NULL;
+         obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+        if (obj_is_hidden(obj)) {
+            continue;
+        }
+        if (cooked) {
+            if (obj_is_data(obj) && obj_has_name(obj)) {
+                return TRUE;
+            }
+        } else {
+            if (obj_is_data(obj) && !obj_is_cloned(obj)) {
+                return TRUE;
+            }
+        }
     }
     return FALSE;
 
@@ -3640,10 +3640,10 @@ static boolean
 *********************************************************************/
 static void
     write_toc_menu_datadefQ (ses_cb_t *scb,
-			     const ncx_module_t *mod,
-			     const yangdump_cvtparms_t *cp,
-			     const dlq_hdr_t  *datadefQ,
-			     int32 indent)
+                             const ncx_module_t *mod,
+                             const yangdump_cvtparms_t *cp,
+                             const dlq_hdr_t  *datadefQ,
+                             int32 indent)
 {
     const xmlChar        *submod;
     const obj_template_t *obj;
@@ -3654,34 +3654,34 @@ static void
     cooked = strcmp(cp->objview, OBJVIEW_COOKED) ? FALSE : TRUE;
 
     for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (obj_is_hidden(obj)) {
-	    continue;
-	}
+        if (obj_is_hidden(obj)) {
+            continue;
+        }
 
-	if (!obj_is_data(obj)) {
-	    continue;
-	}
+        if (!obj_is_data(obj)) {
+            continue;
+        }
 
-	if (cooked) {
-	    /* skip uses and augment objects in this mode */
-	    if (!obj_has_name(obj)) {
-		continue;
-	    }
-	} else {
-	    /* skip over cloned objects */
-	    if (obj_is_cloned(obj)) {
-		continue;
-	    }
-	}
+        if (cooked) {
+            /* skip uses and augment objects in this mode */
+            if (!obj_has_name(obj)) {
+                continue;
+            }
+        } else {
+            /* skip over cloned objects */
+            if (obj_is_cloned(obj)) {
+                continue;
+            }
+        }
 
-	childQ = obj_get_cdatadefQ(obj);
-	if (!childQ || 
+        childQ = obj_get_cdatadefQ(obj);
+        if (!childQ || 
             !datadefQ_toc_needed(cp, childQ, obj_get_level(obj))) {
-	    start_elem(scb, EL_LI, NULL, indent);
-	    write_a(scb, 
+            start_elem(scb, EL_LI, NULL, indent);
+            write_a(scb, 
                     cp, 
                     NULL, 
                     NULL, 
@@ -3689,10 +3689,10 @@ static void
                     NULL, 
                     obj_get_name(obj), 
                     obj->tkerr.linenum);
-	    end_elem(scb, EL_LI, -1);
-	} else {
-	    start_elem(scb, EL_LI, CL_DADDY, indent);
-	    write_a(scb, 
+            end_elem(scb, EL_LI, -1);
+        } else {
+            start_elem(scb, EL_LI, CL_DADDY, indent);
+            write_a(scb, 
                     cp, 
                     NULL, 
                     NULL, 
@@ -3700,15 +3700,15 @@ static void
                     NULL, 
                     obj_get_name(obj), 
                     obj->tkerr.linenum);
-	    start_elem(scb, EL_UL, NULL, indent + ses_indent_count(scb));
-	    write_toc_menu_datadefQ(scb,
+            start_elem(scb, EL_UL, NULL, indent + ses_indent_count(scb));
+            write_toc_menu_datadefQ(scb,
                                     mod,
                                     cp,
                                     childQ,
-				    indent + 2*ses_indent_count(scb));
-	    end_elem(scb, EL_UL, indent + ses_indent_count(scb));
-	    end_elem(scb, EL_LI, indent);
-	}
+                                    indent + 2*ses_indent_count(scb));
+            end_elem(scb, EL_UL, indent + ses_indent_count(scb));
+            end_elem(scb, EL_LI, indent);
+        }
     }
 }  /* write_toc_menu_datadefQ */
 
@@ -3726,9 +3726,9 @@ static void
 *********************************************************************/
 static void
     write_toc_menu_grp (ses_cb_t *scb,
-			const ncx_module_t *mod,
-			const yangdump_cvtparms_t *cp,
-			int32 indent)
+                        const ncx_module_t *mod,
+                        const yangdump_cvtparms_t *cp,
+                        int32 indent)
 {
     const xmlChar *submod;
     const grp_template_t *grp;
@@ -3736,11 +3736,11 @@ static void
     submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
 
     for (grp = (const grp_template_t *)dlq_firstEntry(&mod->groupingQ);
-	 grp != NULL;
-	 grp = (const grp_template_t *)dlq_nextEntry(grp)) {
-	if (!datadefQ_toc_needed(cp, &grp->datadefQ, 1)) {
-	    start_elem(scb, EL_LI, NULL, indent);
-	    write_a(scb, 
+         grp != NULL;
+         grp = (const grp_template_t *)dlq_nextEntry(grp)) {
+        if (!datadefQ_toc_needed(cp, &grp->datadefQ, 1)) {
+            start_elem(scb, EL_LI, NULL, indent);
+            write_a(scb, 
                     cp, 
                     NULL, 
                     NULL, 
@@ -3748,10 +3748,10 @@ static void
                     NULL, 
                     grp->name, 
                     grp->tkerr.linenum);
-	    end_elem(scb, EL_LI, -1);
-	} else {
-	    start_elem(scb, EL_LI, CL_DADDY, indent);
-	    write_a(scb, 
+            end_elem(scb, EL_LI, -1);
+        } else {
+            start_elem(scb, EL_LI, CL_DADDY, indent);
+            write_a(scb, 
                     cp, 
                     NULL, 
                     NULL, 
@@ -3759,14 +3759,14 @@ static void
                     NULL, 
                     grp->name, 
                     grp->tkerr.linenum);
-	    start_elem(scb, EL_UL, NULL, indent + ses_indent_count(scb));
-	    write_toc_menu_datadefQ(scb, 
+            start_elem(scb, EL_UL, NULL, indent + ses_indent_count(scb));
+            write_toc_menu_datadefQ(scb, 
                                     mod, 
                                     cp, &grp->datadefQ,
-				    indent + 2*ses_indent_count(scb));
-	    end_elem(scb, EL_UL, indent + ses_indent_count(scb));
-	    end_elem(scb, EL_LI, indent);
-	}
+                                    indent + 2*ses_indent_count(scb));
+            end_elem(scb, EL_UL, indent + ses_indent_count(scb));
+            end_elem(scb, EL_LI, indent);
+        }
     }
 
 }  /* write_toc_menu_grp */
@@ -3792,10 +3792,10 @@ static void
 *********************************************************************/
 static void
     check_obj_toc_needed (const ncx_module_t *mod,
-			  boolean cooked,
-			  boolean *anyobj,
-			  boolean *anyrpc,
-			  boolean *anynotif)
+                          boolean cooked,
+                          boolean *anyobj,
+                          boolean *anyrpc,
+                          boolean *anynotif)
 {
     const obj_template_t *obj;
 
@@ -3804,27 +3804,27 @@ static void
     *anynotif = FALSE;
 
     for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
-	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (obj_is_hidden(obj)) {
-	    continue;
-	}
+        if (obj_is_hidden(obj)) {
+            continue;
+        }
 
-	if (cooked) {
-	    if (obj_is_data(obj)) {
-		*anyobj = TRUE;
-	    }
-	} else {
-	    if (!obj_is_cloned(obj) && obj_is_data(obj)) {
-		*anyobj = TRUE;
-	    }
-	}
-	if (obj->objtype == OBJ_TYP_RPC) {
-	    *anyrpc = TRUE;
-	} else if (obj->objtype == OBJ_TYP_NOTIF) {
-	    *anynotif = TRUE;
-	}
+        if (cooked) {
+            if (obj_is_data(obj)) {
+                *anyobj = TRUE;
+            }
+        } else {
+            if (!obj_is_cloned(obj) && obj_is_data(obj)) {
+                *anyobj = TRUE;
+            }
+        }
+        if (obj->objtype == OBJ_TYP_RPC) {
+            *anyrpc = TRUE;
+        } else if (obj->objtype == OBJ_TYP_NOTIF) {
+            *anynotif = TRUE;
+        }
     }
 
 }  /* check_obj_toc_needed */
@@ -3843,9 +3843,9 @@ static void
 *********************************************************************/
 static void
     write_toc_menu_rpc (ses_cb_t *scb,
-			const ncx_module_t *mod,
-			const yangdump_cvtparms_t *cp,
-			int32 indent)
+                        const ncx_module_t *mod,
+                        const yangdump_cvtparms_t *cp,
+                        int32 indent)
 {
     const obj_template_t *obj;
     const xmlChar        *submod;
@@ -3853,47 +3853,47 @@ static void
     submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
 
     for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
-	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (obj->objtype != OBJ_TYP_RPC) {
-	    continue;
-	}
+        if (obj->objtype != OBJ_TYP_RPC) {
+            continue;
+        }
 
-	if (obj_is_hidden(obj)) {
-	    continue;
-	}
+        if (obj_is_hidden(obj)) {
+            continue;
+        }
 
-	if (dlq_empty(&obj->def.rpc->datadefQ)) {
-	    start_elem(scb, EL_LI, NULL, indent);
-	    write_a(scb, 
+        if (dlq_empty(&obj->def.rpc->datadefQ)) {
+            start_elem(scb, EL_LI, NULL, indent);
+            write_a(scb, 
                     cp, 
                     NULL, 
                     NULL, 
                     submod, 
                     NULL, 
-		    obj_get_name(obj), 
+                    obj_get_name(obj), 
                     obj->tkerr.linenum);
-	    end_elem(scb, EL_LI, -1);
-	} else {
-	    start_elem(scb, EL_LI, CL_DADDY, indent);
-	    write_a(scb, 
+            end_elem(scb, EL_LI, -1);
+        } else {
+            start_elem(scb, EL_LI, CL_DADDY, indent);
+            write_a(scb, 
                     cp, 
                     NULL, 
                     NULL, 
                     submod, 
                     NULL, 
-		    obj_get_name(obj), 
+                    obj_get_name(obj), 
                     obj->tkerr.linenum);
-	    start_elem(scb, EL_UL, NULL, indent + ses_indent_count(scb));
-	    write_toc_menu_datadefQ(scb, 
+            start_elem(scb, EL_UL, NULL, indent + ses_indent_count(scb));
+            write_toc_menu_datadefQ(scb, 
                                     mod, 
                                     cp,
-				    &obj->def.rpc->datadefQ,
-				    indent + 2*ses_indent_count(scb));
-	    end_elem(scb, EL_UL, indent + ses_indent_count(scb));
-	    end_elem(scb, EL_LI, indent);
-	}
+                                    &obj->def.rpc->datadefQ,
+                                    indent + 2*ses_indent_count(scb));
+            end_elem(scb, EL_UL, indent + ses_indent_count(scb));
+            end_elem(scb, EL_LI, indent);
+        }
     }
 
 } /* write_toc_menu_rpc */
@@ -3912,9 +3912,9 @@ static void
 *********************************************************************/
 static void
     write_toc_menu_notif (ses_cb_t *scb,
-			  const ncx_module_t *mod,
-			  const yangdump_cvtparms_t *cp,
-			  int32 indent)
+                          const ncx_module_t *mod,
+                          const yangdump_cvtparms_t *cp,
+                          int32 indent)
 {
     const obj_template_t *obj;
     const xmlChar        *submod;
@@ -3922,47 +3922,47 @@ static void
     submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
 
     for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
-	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (obj->objtype != OBJ_TYP_NOTIF) {
-	    continue;
-	}
+        if (obj->objtype != OBJ_TYP_NOTIF) {
+            continue;
+        }
 
-	if (obj_is_hidden(obj)) {
-	    continue;
-	}
+        if (obj_is_hidden(obj)) {
+            continue;
+        }
 
-	if (!datadefQ_toc_needed(cp, &obj->def.notif->datadefQ, 1)) {
-	    start_elem(scb, EL_LI, NULL, indent);
-	    write_a(scb, 
+        if (!datadefQ_toc_needed(cp, &obj->def.notif->datadefQ, 1)) {
+            start_elem(scb, EL_LI, NULL, indent);
+            write_a(scb, 
                     cp, 
                     NULL,
                     NULL,
                     submod,
                     NULL, 
-		    obj_get_name(obj), 
+                    obj_get_name(obj), 
                     obj->tkerr.linenum);
-	    end_elem(scb, EL_LI, -1);
-	} else {
-	    start_elem(scb, EL_LI, CL_DADDY, indent);
-	    write_a(scb, 
+            end_elem(scb, EL_LI, -1);
+        } else {
+            start_elem(scb, EL_LI, CL_DADDY, indent);
+            write_a(scb, 
                     cp, 
                     NULL, 
                     NULL,
                     submod,
                     NULL, 
-		    obj_get_name(obj),
+                    obj_get_name(obj),
                     obj->tkerr.linenum);
-	    start_elem(scb, EL_UL, NULL, indent + ses_indent_count(scb));
-	    write_toc_menu_datadefQ(scb, 
+            start_elem(scb, EL_UL, NULL, indent + ses_indent_count(scb));
+            write_toc_menu_datadefQ(scb, 
                                     mod,
                                     cp,
-				    &obj->def.notif->datadefQ,
-				    indent + 2*ses_indent_count(scb));
-	    end_elem(scb, EL_UL, indent + ses_indent_count(scb));
-	    end_elem(scb, EL_LI, indent);
-	}
+                                    &obj->def.notif->datadefQ,
+                                    indent + 2*ses_indent_count(scb));
+            end_elem(scb, EL_UL, indent + ses_indent_count(scb));
+            end_elem(scb, EL_LI, indent);
+        }
     }
 
 } /* write_toc_menu_notif */
@@ -3981,8 +3981,8 @@ static void
 *********************************************************************/
 static void
     write_toc_menu (ses_cb_t *scb,
-		    const ncx_module_t *mod,
-		    const yangdump_cvtparms_t *cp)
+                    const ncx_module_t *mod,
+                    const yangdump_cvtparms_t *cp)
 {
     const typ_template_t *typ;
     const ext_template_t *ext;
@@ -3993,14 +3993,14 @@ static void
     int32                 indent;
 
     if (!xml_strcmp(cp->html_toc, (const xmlChar *)"plain")) {
-	isplain = TRUE;
+        isplain = TRUE;
     } else if (!xml_strcmp(cp->html_toc, (const xmlChar *)"menu")) {
-	isplain = FALSE;
+        isplain = FALSE;
     } else if (!xml_strcmp(cp->html_toc, (const xmlChar *)"none")) {
-	return;
+        return;
     } else {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
 
     submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
@@ -4016,30 +4016,30 @@ static void
     /* check if any typedef ToC entries to generate */
     anytyp = dlq_empty(&mod->typeQ) ? FALSE : TRUE;
     if (cp->unified && mod->ismod) {
-	node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	while (!anytyp && node) {
-	    anytyp = dlq_empty(&node->submod->typeQ) ? FALSE : TRUE;
-	    node = (const yang_node_t *)dlq_nextEntry(node);
-	}
+        node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        while (!anytyp && node) {
+            anytyp = dlq_empty(&node->submod->typeQ) ? FALSE : TRUE;
+            node = (const yang_node_t *)dlq_nextEntry(node);
+        }
     }
 
     /* generate typedef ToC entries */
     if (anytyp) {
-	start_elem(scb, EL_LI, NULL, 2*indent);
-	write_a2(scb, 
+        start_elem(scb, EL_LI, NULL, 2*indent);
+        write_a2(scb, 
                  cp, 
                  NULL, 
                  NULL, 
                  NULL, 
                  EMPTY_STRING, 
                  0,
-		 (const xmlChar *)"Typedefs");
-	start_elem(scb, EL_UL, NULL,  3*indent);
-	for (typ = (const typ_template_t *)dlq_firstEntry(&mod->typeQ);
-	     typ != NULL;
-	     typ = (const typ_template_t *)dlq_nextEntry(typ)) {
-	    start_elem(scb, EL_LI, NULL, 4*indent);
-	    write_a(scb, 
+                 (const xmlChar *)"Typedefs");
+        start_elem(scb, EL_UL, NULL,  3*indent);
+        for (typ = (const typ_template_t *)dlq_firstEntry(&mod->typeQ);
+             typ != NULL;
+             typ = (const typ_template_t *)dlq_nextEntry(typ)) {
+            start_elem(scb, EL_LI, NULL, 4*indent);
+            write_a(scb, 
                     cp, 
                     NULL, 
                     NULL, 
@@ -4047,190 +4047,190 @@ static void
                     NULL, 
                     typ->name, 
                     typ->tkerr.linenum);
-	    end_elem(scb, EL_LI, -1);
-	}
-	if (cp->unified && mod->ismod) {
-	    for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-		 node != NULL;
-		 node = (const yang_node_t *)dlq_nextEntry(node)) {
-		for (typ = (const typ_template_t *)
-			 dlq_firstEntry(&node->submod->typeQ);
-		     typ != NULL;
-		     typ = (const typ_template_t *)dlq_nextEntry(typ)) {
-		    start_elem(scb, EL_LI, NULL, 4*indent);
-		    write_a(scb, 
+            end_elem(scb, EL_LI, -1);
+        }
+        if (cp->unified && mod->ismod) {
+            for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+                 node != NULL;
+                 node = (const yang_node_t *)dlq_nextEntry(node)) {
+                for (typ = (const typ_template_t *)
+                         dlq_firstEntry(&node->submod->typeQ);
+                     typ != NULL;
+                     typ = (const typ_template_t *)dlq_nextEntry(typ)) {
+                    start_elem(scb, EL_LI, NULL, 4*indent);
+                    write_a(scb, 
                             cp, 
                             NULL, 
                             NULL,
                             node->submod->name, 
-			    NULL,
+                            NULL,
                             typ->name,
                             typ->tkerr.linenum);
-		    end_elem(scb, EL_LI, -1);
-		}
-	    }
-	}
-	end_elem(scb, EL_UL, 3*indent);
-	end_elem(scb, EL_LI, 2*indent);
+                    end_elem(scb, EL_LI, -1);
+                }
+            }
+        }
+        end_elem(scb, EL_UL, 3*indent);
+        end_elem(scb, EL_LI, 2*indent);
     }
 
     /* check if any grouping ToC entries to generate */
     if (cooked) {
-	anygrp = FALSE;
+        anygrp = FALSE;
     } else {
-	anygrp = dlq_empty(&mod->groupingQ) ? FALSE : TRUE;
-	if (cp->unified && mod->ismod) {
-	    node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	    while (!anygrp && node) {
-		anygrp = dlq_empty(&node->submod->groupingQ) ? FALSE : TRUE;
-		node = (const yang_node_t *)dlq_nextEntry(node);
-	    }
-	}
+        anygrp = dlq_empty(&mod->groupingQ) ? FALSE : TRUE;
+        if (cp->unified && mod->ismod) {
+            node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+            while (!anygrp && node) {
+                anygrp = dlq_empty(&node->submod->groupingQ) ? FALSE : TRUE;
+                node = (const yang_node_t *)dlq_nextEntry(node);
+            }
+        }
     }
 
     /* generate grouping ToC entries in raw objview mode only */
     if (anygrp) {
-	start_elem(scb, EL_LI, NULL, 2*indent);
-	write_a2(scb, 
+        start_elem(scb, EL_LI, NULL, 2*indent);
+        write_a2(scb, 
                  cp, 
                  NULL, 
                  NULL, 
                  NULL, 
                  EMPTY_STRING,
                  0,
-		 (const xmlChar *)"Groupings");
-	start_elem(scb, EL_UL, NULL,  3*indent);
-	write_toc_menu_grp(scb, mod, cp, 4*indent);
-	if (cp->unified && mod->ismod) {
-	    for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-		 node != NULL;
-		 node = (const yang_node_t *)dlq_nextEntry(node)) {
-		write_toc_menu_grp(scb, node->submod, cp, 4*indent);
-	    }
-	}
-	end_elem(scb, EL_UL, 3*indent);
-	end_elem(scb, EL_LI, 2*indent);
+                 (const xmlChar *)"Groupings");
+        start_elem(scb, EL_UL, NULL,  3*indent);
+        write_toc_menu_grp(scb, mod, cp, 4*indent);
+        if (cp->unified && mod->ismod) {
+            for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+                 node != NULL;
+                 node = (const yang_node_t *)dlq_nextEntry(node)) {
+                write_toc_menu_grp(scb, node->submod, cp, 4*indent);
+            }
+        }
+        end_elem(scb, EL_UL, 3*indent);
+        end_elem(scb, EL_LI, 2*indent);
     }
 
     /* check if any object, RPC, or notification ToC entries to generate */
     check_obj_toc_needed(mod, cooked, &anyobj, &anyrpc, &anynotif);
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    check_obj_toc_needed(node->submod,
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            check_obj_toc_needed(node->submod,
                                  cooked,
                                  &anyobj, 
-				 &anyrpc,
+                                 &anyrpc,
                                  &anynotif);
-	}
+        }
     }
     
     /* generate data object ToC entries */
     if (anyobj) {
-	start_elem(scb, EL_LI, NULL, 2*indent);
-	write_a2(scb, 
+        start_elem(scb, EL_LI, NULL, 2*indent);
+        write_a2(scb, 
                  cp, 
                  NULL, 
                  NULL, 
                  NULL, 
                  EMPTY_STRING,
                  0,
-		 (const xmlChar *)"Objects");
-	start_elem(scb, EL_UL, NULL,  3*indent);
-	write_toc_menu_datadefQ(scb, mod, cp, &mod->datadefQ, 4*indent);
-	if (cp->unified && mod->ismod) {
-	    for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-		 node != NULL;
-		 node = (const yang_node_t *)dlq_nextEntry(node)) {
-		write_toc_menu_datadefQ(scb,
+                 (const xmlChar *)"Objects");
+        start_elem(scb, EL_UL, NULL,  3*indent);
+        write_toc_menu_datadefQ(scb, mod, cp, &mod->datadefQ, 4*indent);
+        if (cp->unified && mod->ismod) {
+            for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+                 node != NULL;
+                 node = (const yang_node_t *)dlq_nextEntry(node)) {
+                write_toc_menu_datadefQ(scb,
                                         node->submod,
                                         cp, 
-					&node->submod->datadefQ,
+                                        &node->submod->datadefQ,
                                         4*indent);
-	    }
-	}
-	end_elem(scb, EL_UL, 3*indent);
-	end_elem(scb, EL_LI, 2*indent);
+            }
+        }
+        end_elem(scb, EL_UL, 3*indent);
+        end_elem(scb, EL_LI, 2*indent);
     }
 
     /* generate RPC method ToC entries */
     if (anyrpc) {
-	start_elem(scb, EL_LI, NULL, 2*indent);
-	write_a2(scb,
+        start_elem(scb, EL_LI, NULL, 2*indent);
+        write_a2(scb,
                  cp, 
                  NULL,
                  NULL,
                  NULL,
                  EMPTY_STRING, 
                  0,
-		 (const xmlChar *)"RPC&nbsp;Methods");
-	start_elem(scb, EL_UL, NULL,  3*indent);
-	write_toc_menu_rpc(scb, mod, cp, 4*indent);
-	if (cp->unified && mod->ismod) {
-	    for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-		 node != NULL;
-		 node = (const yang_node_t *)dlq_nextEntry(node)) {
-		write_toc_menu_rpc(scb, node->submod, cp, 4*indent);
-	    }
-	}
-	end_elem(scb, EL_UL, 3*indent);
-	end_elem(scb, EL_LI, 2*indent);
+                 (const xmlChar *)"RPC&nbsp;Methods");
+        start_elem(scb, EL_UL, NULL,  3*indent);
+        write_toc_menu_rpc(scb, mod, cp, 4*indent);
+        if (cp->unified && mod->ismod) {
+            for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+                 node != NULL;
+                 node = (const yang_node_t *)dlq_nextEntry(node)) {
+                write_toc_menu_rpc(scb, node->submod, cp, 4*indent);
+            }
+        }
+        end_elem(scb, EL_UL, 3*indent);
+        end_elem(scb, EL_LI, 2*indent);
     }
 
     /* generate notofocation ToC entries */
     if (anynotif) {
-	start_elem(scb, EL_LI, NULL, 2*indent);
-	write_a2(scb,
+        start_elem(scb, EL_LI, NULL, 2*indent);
+        write_a2(scb,
                  cp, 
                  NULL, 
                  NULL, 
                  NULL, 
                  EMPTY_STRING,
                  0,
-		 (const xmlChar *)"Notifications");
-	start_elem(scb, EL_UL, NULL,  3*indent);
-	write_toc_menu_notif(scb, mod, cp, 4*indent);
-	if (cp->unified && mod->ismod) {
-	    for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-		 node != NULL;
-		 node = (const yang_node_t *)dlq_nextEntry(node)) {
-		write_toc_menu_notif(scb, node->submod, cp, 4*indent);
-	    }
-	}
-	end_elem(scb, EL_UL, 3*indent);
-	end_elem(scb, EL_LI, 2*indent);
+                 (const xmlChar *)"Notifications");
+        start_elem(scb, EL_UL, NULL,  3*indent);
+        write_toc_menu_notif(scb, mod, cp, 4*indent);
+        if (cp->unified && mod->ismod) {
+            for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+                 node != NULL;
+                 node = (const yang_node_t *)dlq_nextEntry(node)) {
+                write_toc_menu_notif(scb, node->submod, cp, 4*indent);
+            }
+        }
+        end_elem(scb, EL_UL, 3*indent);
+        end_elem(scb, EL_LI, 2*indent);
     }
 
     /* check if any extension ToC entries to generate */
     anyext = dlq_empty(&mod->extensionQ) ? FALSE : TRUE;
     if (cp->unified && mod->ismod) {
-	node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	while (!anyext && node) {
-	    anyext = dlq_empty(&node->submod->extensionQ) ? FALSE : TRUE;
-	    node = (const yang_node_t *)dlq_nextEntry(node);
-	}
+        node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        while (!anyext && node) {
+            anyext = dlq_empty(&node->submod->extensionQ) ? FALSE : TRUE;
+            node = (const yang_node_t *)dlq_nextEntry(node);
+        }
     }
 
     /* generate extension ToC entries */
     if (anyext) {
-	start_elem(scb, EL_LI, NULL, 2*indent);
-	write_a2(scb, 
+        start_elem(scb, EL_LI, NULL, 2*indent);
+        write_a2(scb, 
                  cp, 
                  NULL, 
                  NULL, 
                  NULL, 
                  EMPTY_STRING, 
                  0,
-		 (const xmlChar *)"Extensions");
-	start_elem(scb, EL_UL, NULL,  3*indent);
+                 (const xmlChar *)"Extensions");
+        start_elem(scb, EL_UL, NULL,  3*indent);
 
-	/* generate actual drop-down list items */
-	for (ext = (const ext_template_t *)dlq_firstEntry(&mod->extensionQ);
-	     ext != NULL;
-	     ext = (const ext_template_t *)dlq_nextEntry(ext)) {
-	    start_elem(scb, EL_LI, NULL, 4*indent);
-	    write_a(scb, 
+        /* generate actual drop-down list items */
+        for (ext = (const ext_template_t *)dlq_firstEntry(&mod->extensionQ);
+             ext != NULL;
+             ext = (const ext_template_t *)dlq_nextEntry(ext)) {
+            start_elem(scb, EL_LI, NULL, 4*indent);
+            write_a(scb, 
                     cp, 
                     NULL, 
                     NULL, 
@@ -4238,32 +4238,32 @@ static void
                     NULL, 
                     ext->name, 
                     ext->tkerr.linenum);
-	    end_elem(scb, EL_LI, -1);
-	}
-	if (cp->unified && mod->ismod) {
-	    for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-		 node != NULL;
-		 node = (const yang_node_t *)dlq_nextEntry(node)) {
-		for (ext = (const ext_template_t *)
-			 dlq_firstEntry(&node->submod->extensionQ);
-		     ext != NULL;
-		     ext = (const ext_template_t *)dlq_nextEntry(ext)) {
-		    start_elem(scb, EL_LI, NULL, 4*indent);
-		    write_a(scb, 
+            end_elem(scb, EL_LI, -1);
+        }
+        if (cp->unified && mod->ismod) {
+            for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+                 node != NULL;
+                 node = (const yang_node_t *)dlq_nextEntry(node)) {
+                for (ext = (const ext_template_t *)
+                         dlq_firstEntry(&node->submod->extensionQ);
+                     ext != NULL;
+                     ext = (const ext_template_t *)dlq_nextEntry(ext)) {
+                    start_elem(scb, EL_LI, NULL, 4*indent);
+                    write_a(scb, 
                             cp, 
                             NULL, 
                             NULL,
                             submod,
                             NULL, 
-			    ext->name,
+                            ext->name,
                             ext->tkerr.linenum);
-		    end_elem(scb, EL_LI, -1);
-		}
-	    }
-	}
+                    end_elem(scb, EL_LI, -1);
+                }
+            }
+        }
 
-	end_elem(scb, EL_UL, 3*indent);
-	end_elem(scb, EL_LI, 2*indent);
+        end_elem(scb, EL_UL, 3*indent);
+        end_elem(scb, EL_LI, 2*indent);
     }
 
     /* end the entire ToC list */
@@ -4286,8 +4286,8 @@ static void
 *********************************************************************/
 static void
     write_html_header (ses_cb_t *scb,
-		       const ncx_module_t *mod,
-		       int32 indent,
+                       const ncx_module_t *mod,
+                       int32 indent,
                        const xmlChar *css_file)
 {
     xmlChar   *filespec;
@@ -4295,40 +4295,40 @@ static void
     xmlChar    buffer[NCX_VERSION_BUFFSIZE];
  
     ses_putstr_indent(scb, (const xmlChar *)
-		      "<!DOCTYPE html PUBLIC \"-//W3C//DTD "
-		      "XHTML 1.0 Strict//EN\" "
-		      "\n    \"http://www.w3.org/TR/xhtml1/DTD"
-		      "/xhtml1-strict.dtd\">", 
+                      "<!DOCTYPE html PUBLIC \"-//W3C//DTD "
+                      "XHTML 1.0 Strict//EN\" "
+                      "\n    \"http://www.w3.org/TR/xhtml1/DTD"
+                      "/xhtml1-strict.dtd\">", 
                       0);
 
     ses_putstr_indent(scb, (const xmlChar *)"<html lang=\"en\" "
-		      "xmlns=\"http://www.w3.org/1999/xhtml\">", 
+                      "xmlns=\"http://www.w3.org/1999/xhtml\">", 
                       0);
     ses_putstr_indent(scb, (const xmlChar *)"<head>", 0);
     ses_putstr_indent(scb, (const xmlChar *)"<title>", indent);
     ses_putstr(scb, (const xmlChar *)"YANG ");
     ses_putstr(scb, 
                (mod->ismod) ?  (const xmlChar *)"Module " :
-	       (const xmlChar *)"Submodule ");
+               (const xmlChar *)"Submodule ");
     ses_putstr(scb, mod->name);
     ses_putstr(scb, (const xmlChar *)" Version ");
     if (mod->version) {
-	ses_putstr(scb, mod->version);
+        ses_putstr(scb, mod->version);
     } else {
-	ses_putstr(scb, NCX_EL_NONE);
+        ses_putstr(scb, NCX_EL_NONE);
     }
     ses_putstr(scb, (const xmlChar *)"</title>");
     ses_putstr_indent(scb, (const xmlChar *)
-		      "<meta http-equiv=\"Content-Type\" "
-		      "content=\"text/html; charset=UTF-8\"/>", 
+                      "<meta http-equiv=\"Content-Type\" "
+                      "content=\"text/html; charset=UTF-8\"/>", 
                       indent);
     ses_putstr_indent(scb, (const xmlChar *)
-		      "<meta name=\"description\" "
-		      "content=\"YANG data model documentation\"/>",
-		      2*indent);
+                      "<meta name=\"description\" "
+                      "content=\"YANG data model documentation\"/>",
+                      2*indent);
     ses_putstr_indent(scb, (const xmlChar *)
-		      "<meta name=\"generator\" "
-		      "content=\"yangdump ", 
+                      "<meta name=\"generator\" "
+                      "content=\"yangdump ", 
                       indent);
 
     res = ncx_get_version(buffer, NCX_VERSION_BUFFSIZE);
@@ -4338,7 +4338,7 @@ static void
         SET_ERROR(res);
     }
     ses_putstr(scb, (const xmlChar *)
-	       " (http://www.netconfcentral.org/)\"/>");
+               " (http://www.netconfcentral.org/)\"/>");
 
     filespec = NULL;
     if (css_file) {
@@ -4355,16 +4355,16 @@ static void
     if (filespec == NULL) {
         ses_putstr_indent(scb, (const xmlChar *)
                           "<link rel=\"stylesheet\" "
-			  "href=\"http://netconfcentral.org"
+                          "href=\"http://netconfcentral.org"
                           "/static/css/style.css\""
-			  " type=\"text/css\"/>", 
+                          " type=\"text/css\"/>", 
                           indent);
     }
 
     ses_putstr_indent(scb, (const xmlChar *)"</head>", 0);
 
     if (filespec) {
-	m__free(filespec);
+        m__free(filespec);
     }
 
 } /* write_html_header */
@@ -4384,36 +4384,36 @@ static void
 *********************************************************************/
 static void
     write_html_body (ses_cb_t *scb,
-		     ncx_module_t *mod,
-		     const yangdump_cvtparms_t *cp)
+                     ncx_module_t *mod,
+                     const yangdump_cvtparms_t *cp)
 {
     const yang_node_t     *node;
     const yang_stmt_t     *stmt;
     boolean                stmtmode;
 
     if (cp->html_div) {
-	/* start wrapper div */
-	start_elem(scb, EL_DIV, NULL, 0);
+        /* start wrapper div */
+        start_elem(scb, EL_DIV, NULL, 0);
     } else {
-	/* <body> */
-	start_elem(scb, EL_BODY, NULL, 0);
+        /* <body> */
+        start_elem(scb, EL_BODY, NULL, 0);
     }
     
     /* title */
     start_elem(scb, EL_H1, CL_YANG, cp->indent);
 #ifdef MATCH_HTML_TITLE
     if (mod->ismod) {
-	ses_putstr(scb, YANG_K_MODULE);
+        ses_putstr(scb, YANG_K_MODULE);
     } else {
-	ses_putstr(scb, YANG_K_SUBMODULE);
+        ses_putstr(scb, YANG_K_SUBMODULE);
     }
     ses_putstr(scb, (const xmlChar *)": ");
     ses_putstr(scb, mod->name);
     ses_putstr(scb, (const xmlChar *)", version: ");
     if (mod->version) {
-	ses_putstr(scb, mod->version);    
+        ses_putstr(scb, mod->version);    
     } else {
-	ses_putstr(scb, NCX_EL_NONE);    
+        ses_putstr(scb, NCX_EL_NONE);    
     }
 #else
     ses_putstr(scb, mod->sourcefn);
@@ -4423,8 +4423,8 @@ static void
 
     /* table of contents */
     if (cp->html_toc) {
-	write_toc_menu(scb, mod, cp);
-	ses_putstr(scb, (const xmlChar *)"\n<br />");
+        write_toc_menu(scb, mod, cp);
+        ses_putstr(scb, (const xmlChar *)"\n<br />");
     }
 
     /* start yellow box div */
@@ -4449,210 +4449,210 @@ static void
 
     /* 1) features */
     if (!stmtmode) {
-	write_features(scb, 
+        write_features(scb, 
                        mod,
                        cp, 
-		       &mod->featureQ, 
-		       2*cp->indent);
+                       &mod->featureQ, 
+                       2*cp->indent);
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_features(scb, 
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_features(scb, 
                                node->submod, 
                                cp, 
-			       &node->submod->featureQ, 
-			       2*cp->indent);
-	    }
-	}
+                               &node->submod->featureQ, 
+                               2*cp->indent);
+            }
+        }
     }
 
     /* 2) identities */
     if (!stmtmode) {
-	write_identities(scb,
+        write_identities(scb,
                          mod, 
                          cp, 
-			 &mod->identityQ, 
-			 2*cp->indent);
+                         &mod->identityQ, 
+                         2*cp->indent);
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_identities(scb,
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_identities(scb,
                                  node->submod,
                                  cp, 
-				 &node->submod->identityQ, 
-				 2*cp->indent);
-	    }
-	}
+                                 &node->submod->identityQ, 
+                                 2*cp->indent);
+            }
+        }
     }
 
     /* 3) typedefs */
     if (!stmtmode) {
-	write_typedefs(scb, mod, cp, &mod->typeQ, 2*cp->indent);
+        write_typedefs(scb, mod, cp, &mod->typeQ, 2*cp->indent);
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_typedefs(scb,
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_typedefs(scb,
                                node->submod,
                                cp, 
-			       &node->submod->typeQ, 
+                               &node->submod->typeQ, 
                                2*cp->indent);
-	    }
-	}
+            }
+        }
     }
 
     /* 4) groupings */
     if (!stmtmode) {
-	write_groupings(scb, mod, cp, &mod->groupingQ, 2*cp->indent);
+        write_groupings(scb, mod, cp, &mod->groupingQ, 2*cp->indent);
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_groupings(scb,
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_groupings(scb,
                                 node->submod,
                                 cp, 
                                 &node->submod->groupingQ,
                                 2*cp->indent);
-	    }
-	}
+            }
+        }
     }
 
     /* 5) extensions */
     if (!stmtmode) {
-	write_extensions(scb, mod, cp, &mod->extensionQ, 2*cp->indent);
+        write_extensions(scb, mod, cp, &mod->extensionQ, 2*cp->indent);
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_extensions(scb, 
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_extensions(scb, 
                                  node->submod,
                                  cp, 
-				 &node->submod->extensionQ,
+                                 &node->submod->extensionQ,
                                  2*cp->indent);
-	    }
-	}
+            }
+        }
     }
 
     /* 6) objects */
     if (!stmtmode) {
-	write_objects(scb, mod, cp, &mod->datadefQ, 2*cp->indent);
+        write_objects(scb, mod, cp, &mod->datadefQ, 2*cp->indent);
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_objects(scb,
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_objects(scb,
                               node->submod, 
                               cp, 
-			      &node->submod->datadefQ, 
+                              &node->submod->datadefQ, 
                               2*cp->indent);
-	    }
-	}
+            }
+        }
     }
 
     /* 6) deviations */
     if (!stmtmode) {
-	write_deviations(scb, mod, cp, &mod->deviationQ, 2*cp->indent);
+        write_deviations(scb, mod, cp, &mod->deviationQ, 2*cp->indent);
     }
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_deviations(scb,
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_deviations(scb,
                                  node->submod, 
                                  cp, 
                                  &node->submod->deviationQ, 
                                  2*cp->indent);
-	    }
-	}
+            }
+        }
     }
 
     /* check statement mode on top-level module only */
     if (stmtmode) {
-	for (stmt = (const yang_stmt_t *)dlq_firstEntry(&mod->stmtQ);
-	     stmt != NULL;
-	     stmt = (const yang_stmt_t *)dlq_nextEntry(stmt)) {
-	    switch (stmt->stmttype) {
-	    case YANG_ST_NONE:
-		SET_ERROR(ERR_INTERNAL_VAL);
-		break;
-	    case YANG_ST_TYPEDEF:
-		write_typedef(scb,
+        for (stmt = (const yang_stmt_t *)dlq_firstEntry(&mod->stmtQ);
+             stmt != NULL;
+             stmt = (const yang_stmt_t *)dlq_nextEntry(stmt)) {
+            switch (stmt->stmttype) {
+            case YANG_ST_NONE:
+                SET_ERROR(ERR_INTERNAL_VAL);
+                break;
+            case YANG_ST_TYPEDEF:
+                write_typedef(scb,
                               mod,
                               cp, 
-			      stmt->s.typ, 
-			      2*cp->indent,
+                              stmt->s.typ, 
+                              2*cp->indent,
                               FALSE);
-		break;
-	    case YANG_ST_GROUPING:
-		write_grouping(scb,
+                break;
+            case YANG_ST_GROUPING:
+                write_grouping(scb,
                                mod,
                                cp, 
-			       stmt->s.grp, 
-			       2*cp->indent,
+                               stmt->s.grp, 
+                               2*cp->indent,
                                FALSE);
-		break;
-	    case YANG_ST_EXTENSION:
-		write_extension(scb,
+                break;
+            case YANG_ST_EXTENSION:
+                write_extension(scb,
                                 mod,
                                 cp, 
-				stmt->s.ext, 
-				2*cp->indent);
-		break;
-	    case YANG_ST_OBJECT:
-		write_object(scb,
+                                stmt->s.ext, 
+                                2*cp->indent);
+                break;
+            case YANG_ST_OBJECT:
+                write_object(scb,
                              mod,
                              cp, 
-			     stmt->s.obj, 
-			     2*cp->indent, 
+                             stmt->s.obj, 
+                             2*cp->indent, 
                              FALSE);
-		break;
-	    case YANG_ST_IDENTITY:
-		write_identity(scb,
+                break;
+            case YANG_ST_IDENTITY:
+                write_identity(scb,
                                mod,
                                cp, 
-			       stmt->s.identity,
-			       2*cp->indent);
-		break;
-	    case YANG_ST_FEATURE:
-		write_feature(scb,
+                               stmt->s.identity,
+                               2*cp->indent);
+                break;
+            case YANG_ST_FEATURE:
+                write_feature(scb,
                               mod,
                               cp, 
-			      stmt->s.feature,
-			      2*cp->indent);
-		break;
-	    case YANG_ST_DEVIATION:
-		write_deviation(scb,
+                              stmt->s.feature,
+                              2*cp->indent);
+                break;
+            case YANG_ST_DEVIATION:
+                write_deviation(scb,
                                 mod,
                                 cp, 
                                 stmt->s.deviation,
                                 2*cp->indent);
-		break;
-	    default:
-		SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	}
+                break;
+            default:
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }
     }
 
     /* TBD: need a better way to generate all the top-level
@@ -4666,17 +4666,17 @@ static void
     write_appinfoQ(scb, mod, cp, &mod->appinfoQ, 2*cp->indent);
 
     if (cp->unified && mod->ismod) {
-	for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	     node != NULL;
-	     node = (const yang_node_t *)dlq_nextEntry(node)) {
-	    if (node->submod) {
-		write_appinfoQ(scb,
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_appinfoQ(scb,
                                node->submod,
                                cp, 
                                &node->submod->appinfoQ, 
                                2*cp->indent);
-	    }
-	}
+            }
+        }
     }
 
     /* end module and page */
@@ -4684,7 +4684,7 @@ static void
     ses_putchar(scb, '}');
     write_endsec_cmt(scb, 
                      (mod->ismod) ? 
-		     YANG_K_MODULE : YANG_K_SUBMODULE, 
+                     YANG_K_MODULE : YANG_K_SUBMODULE, 
                      mod->name);
     end_elem(scb, EL_PRE, 0);
 
@@ -4692,9 +4692,9 @@ static void
     end_elem(scb, EL_DIV, 0);
 
     if (cp->html_div) {
-	end_elem(scb, EL_DIV, 0);
+        end_elem(scb, EL_DIV, 0);
     } else {
-	end_elem(scb, EL_BODY, 0);
+        end_elem(scb, EL_BODY, 0);
     }
 
 } /* write_html_body */
@@ -4718,8 +4718,8 @@ static void
 *********************************************************************/
 status_t
     html_convert_module (yang_pcb_t *pcb,
-			 const yangdump_cvtparms_t *cp,
-			 ses_cb_t *scb)
+                         const yangdump_cvtparms_t *cp,
+                         ses_cb_t *scb)
 {
     ncx_module_t  *mod;
     status_t       res;
@@ -4729,17 +4729,17 @@ status_t
     /* the module should already be parsed and loaded */
     mod = pcb->top;
     if (!mod) {
-	return SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
     }
 
     if (!cp->html_div) {
-	write_html_header(scb, mod, cp->indent, cp->css_file);
+        write_html_header(scb, mod, cp->indent, cp->css_file);
     }
 
     write_html_body(scb, mod, cp);
 
     if (!cp->html_div) {
-	ses_putstr(scb, (const xmlChar *)"\n</html>\n");
+        ses_putstr(scb, (const xmlChar *)"\n</html>\n");
     }
 
     return res;

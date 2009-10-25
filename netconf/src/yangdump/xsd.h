@@ -3,20 +3,20 @@
 
 /*  FILE: xsd.h
 *********************************************************************
-*								    *
-*			 P U R P O S E				    *
-*								    *
+*                                                                   *
+*                         P U R P O S E                             *
+*                                                                   *
 *********************************************************************
 
   Convert NCX module to XSD format
  
 *********************************************************************
-*								    *
-*		   C H A N G E	 H I S T O R Y			    *
-*								    *
+*                                                                   *
+*                   C H A N G E         H I S T O R Y               *
+*                                                                   *
 *********************************************************************
 
-date	     init     comment
+date             init     comment
 ----------------------------------------------------------------------
 15-nov-06    abb      Begun
 
@@ -43,23 +43,23 @@ date	     init     comment
 #endif
 
 /********************************************************************
-*								    *
-*			 C O N S T A N T S			    *
-*								    *
+*                                                                   *
+*                         C O N S T A N T S                         *
+*                                                                   *
 *********************************************************************/
 
 
 /********************************************************************
-*								    *
-*			     T Y P E S				    *
-*								    *
+*                                                                   *
+*                             T Y P E S                             *
+*                                                                   *
 *********************************************************************/
 
 
 /********************************************************************
-*								    *
-*			F U N C T I O N S			    *
-*								    *
+*                                                                   *
+*                        F U N C T I O N S                          *
+*                                                                   *
 *********************************************************************/
 
 /* module entry point: convert an entire module to a value struct
@@ -68,12 +68,12 @@ date	     init     comment
 extern status_t 
     xsd_convert_module (yang_pcb_t *pcb,
                         ncx_module_t *mod,
-			yangdump_cvtparms_t *cp,
-			val_value_t **retval,
-			xml_attrs_t  *top_attrs);
+                        yangdump_cvtparms_t *cp,
+                        val_value_t **retval,
+                        xml_attrs_t  *top_attrs);
 
 
 extern status_t
     xsd_load_typenameQ (ncx_module_t *mod);
 
-#endif	    /* _H_xsd */
+#endif            /* _H_xsd */

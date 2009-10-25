@@ -848,6 +848,12 @@ extern status_t
     obj_gen_object_id (const obj_template_t *obj,
 		       xmlChar  **buff);
 
+/* generate a unique name for C code; handles augments */
+extern status_t
+    obj_gen_object_id_code (ncx_module_t *mod,
+                            const obj_template_t *obj,
+                            xmlChar  **buff);
+
 /* copy an object ID to a buffer */
 extern status_t
     obj_copy_object_id (const obj_template_t *obj,

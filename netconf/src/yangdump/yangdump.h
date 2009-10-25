@@ -3,20 +3,20 @@
 
 /*  FILE: yangdump.h
 *********************************************************************
-*								    *
-*			 P U R P O S E				    *
-*								    *
+*                                                                   *
+*                         P U R P O S E                             *
+*                                                                   *
 *********************************************************************
 
   Exports yangdump.ncx conversion CLI parameter struct
  
 *********************************************************************
-*								    *
-*		   C H A N G E	 H I S T O R Y			    *
-*								    *
+*                                                                   *
+*                   C H A N G E         H I S T O R Y               *
+*                                                                   *
 *********************************************************************
 
-date	     init     comment
+date             init     comment
 ----------------------------------------------------------------------
 01-mar-08    abb      Begun; moved from ncx/ncxtypes.h
 
@@ -37,9 +37,9 @@ date	     init     comment
 #endif
 
 /********************************************************************
-*								    *
-*			 C O N S T A N T S			    *
-*								    *
+*                                                                   *
+*                         C O N S T A N T S                         *
+*                                                                   *
 *********************************************************************/
 #define PROGNAME            "yangdump"
 
@@ -65,9 +65,9 @@ date	     init     comment
 #define OBJVIEW_COOKED  "cooked"
 
 /********************************************************************
-*								    *
-*			     T Y P E S				    *
-*								    *
+*                                                                   *
+*                             T Y P E S                             *
+*                                                                   *
 *********************************************************************/
 
 /* struct of yangdump conversion parameters */
@@ -115,4 +115,4 @@ typedef struct yangdump_cvtparms_t_ {
 } yangdump_cvtparms_t;
 
 
-#endif	    /* _H_yangdump */
+#endif            /* _H_yangdump */

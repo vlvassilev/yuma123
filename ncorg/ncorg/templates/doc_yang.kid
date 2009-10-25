@@ -22,7 +22,8 @@
 	<h2>NETMOD WG</h2>
 	<p>
           The <b>NETCONF Data Modeling Language Working Group</b> 
-	  <a href="http://www.ietf.org/html.charters/netmod-charter.html">
+	  <a target="_blank" 
+             href="http://www.ietf.org/html.charters/netmod-charter.html">
 	    (NETMOD)
 	  </a>
 	  is developing a high-level data modeling language for the 
@@ -30,7 +31,10 @@
 	</p>
 
         <p>
-          The NETMOD <a href="https://trac.tools.ietf.org/wg/netmod/">Wiki</a> 
+          The NETMOD 
+          <a target="_blank" 
+             href="https://trac.tools.ietf.org/wg/netmod/">Wiki
+          </a> 
           contains up-to-date information
           about the Internet Drafts under development by this WG.
         </p>
@@ -46,7 +50,8 @@
             notifications.
 	    <br/><br/>
 	    <b>Intended Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
-	    <a href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-07.txt">
+	    <a target="_blank" 
+               href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-08.txt">
               YANG - A data modeling language for NETCONF
 	    </a>
 	  </p>
@@ -57,7 +62,8 @@
             with the YANG data modeling language.
 	    <br/><br/>
 	    <b>Intended Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
-	    <a href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-types-03.txt">
+	    <a target="_blank" 
+               href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-types-04.txt">
               Common YANG Data Types
 	    </a>
 	  </p>
@@ -74,7 +80,8 @@
             based validation of such documents are also discussed.
 	    <br/><br/>
 	    <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	    <a href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-dsdl-map-03.txt">
+	    <a target="_blank" 
+               href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-dsdl-map-04.txt">
               Mapping YANG to Document Schema Definition Languages and Validating
               NETCONF Content
 	    </a>
@@ -95,7 +102,8 @@
 	    <br/><br/>
 	    <b>Intended Status:</b> Informational RFC, nothing-to-implement
             <br/><br/>
-	    <a href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-arch-02.txt">
+	    <a target="_blank" 
+               href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-arch-02.txt">
               An NETCONF- and NETMOD-based Architecture for Network Management
 	    </a>
 	  </p>
@@ -111,7 +119,8 @@
 	    <br/><br/>
 	    <b>Intended Status:</b> Informational RFC, nothing-to-implement
             <br/><br/>
-	    <a href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-usage-01.txt">
+	    <a target="_blank" 
+               href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-usage-01.txt">
               Guidelines for Authors and Reviewers of YANG Data Model Documents
 	    </a>
 	  </p>
@@ -123,15 +132,17 @@
 	<h2>YANG Central</h2>
 	<p>
           The WEB home for YANG information is
-	  <a href="http://www.yang-central.org/">
+	  <a target="_blank" href="http://www.yang-central.org/">
 	    YANG Central</a>, which has news and information about
 	  the YANG language.
 	</p>
 	<p>
 	  There are some 
-	  <a href="http://www.yang-central.org/twiki/bin/view/Main/YangTutorials">
+	  <a target="_blank" 
+             href="http://www.yang-central.org/twiki/bin/view/Main/YangTutorials">
 	    tutorials</a> and 
-	  <a href="http://www.yang-central.org/twiki/bin/view/Main/YangExamples">
+	  <a target="_blank" 
+             href="http://www.yang-central.org/twiki/bin/view/Main/YangExamples">
 	    examples</a>
 	  that may be helpful as well.
 	</p>

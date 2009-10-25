@@ -1633,7 +1633,9 @@ static status_t
 	res = ERR_NCX_INVALID_VALUE;
 	ncx_print_errormsg(NULL, NULL, res);
     }
-    if (!xml_strcmp(diffparms.old, diffparms.new)) {
+    if (diffparms.old != NULL &&
+        diffparms.new != NULL &&
+        !xml_strcmp(diffparms.old, diffparms.new)) {
 	log_error("\nError: The 'old' and 'new' "
                   "parameters must be different.");
 	res = ERR_NCX_INVALID_VALUE;
@@ -1641,7 +1643,6 @@ static status_t
     }
 
     if (res == NO_ERR) {
-
 	/* compare one file to another or 1 subtree to another */
 	if (diffparms.new_isdir) {
 	    res = ncxmod_process_subtree((const char *)diffparms.new,

@@ -98,9 +98,9 @@
 	  It is designed to be a replacement for Command
 	  Line Interface (CLI) based
 	  programmatic interfaces, such as
-	  <a href="http://www.perl.com/">Perl</a> + 
-	  <a href="http://expect.nist.gov/">Expect</a> over 
-	  <a href="http://tools.ietf.org/html/rfc4251">Secure Shell</a> (SSH).
+	  <a target="_blank" href="http://www.perl.com/">Perl</a> + 
+	  <a target="_blank" href="http://expect.nist.gov/">Expect</a> over 
+	  <a target="_blank" href="http://tools.ietf.org/html/rfc4251">Secure Shell</a> (SSH).
 	  The CLI is also used by humans, which increases the complexity
 	  and reduces the predictability of the API for real 
 	  application usage.
@@ -117,14 +117,14 @@
 	<p>
 	  The device configuration data, and the protocol itself, are
 	  encoded with the 
-	  <a href="http://www.w3.org/XML/">Extensible Markup Language</a>
+	  <a target="_blank" href="http://www.w3.org/XML/">Extensible Markup Language</a>
 	  (XML).  Standard
 	  XML tools such as 
-	  <a href="http://www.w3.org/TR/xpath">XML Path Language</a>
+	  <a target="_blank" href="http://www.w3.org/TR/xpath">XML Path Language</a>
 	  (XPath) are used to
 	  provide retrieval of a particular subset configuration data.
 	  All NETCONF messages are encoded in XML within
-	  <a href="http://www.w3.org/TR/REC-xml-names/">XML Namespaces</a>.
+	  <a target="_blank" href="http://www.w3.org/TR/REC-xml-names/">XML Namespaces</a>.
 	  The protocol messages usually contain user data in a different 
 	  namespace
 	  than the NETCONF protocol PDUs.
@@ -165,13 +165,13 @@
 	<h2>Base Protocol</h2>
 	<p>
           The <b>Network Configuration Protocol</b> is defined in 
-          <a href="http://tools.ietf.org/html/rfc4741">RFC 4741</a>,
+          <a target="_blank" href="http://tools.ietf.org/html/rfc4741">RFC 4741</a>,
 	  and was published as a Proposed Standard in December 2006, by the
-	  <a href="http://www.ietf.org/html.charters/netconf-charter.html">
+	  <a target="_blank" href="http://www.ietf.org/html.charters/netconf-charter.html">
 	    NETCONF Working Group
 	  </a>
 	  within the
-	  <a href="http://www.ietf.org/">
+	  <a target="_blank" href="http://www.ietf.org/">
 	    Internet Engineering Task Force</a> (IETF).
 	</p>
 	<p>
@@ -181,11 +181,11 @@
 	</p>
 	<p>
 	  The mandatory transport protocol for NETCONF is
-          <a href="http://tools.ietf.org/html/rfc4253">
+          <a target="_blank" href="http://tools.ietf.org/html/rfc4253">
 	    The Secure Shell Transport Layer Protocol</a> (SSH), 
 	  and the details for implementing this transport
 	  mapping are defined in 
-          <a href="http://tools.ietf.org/html/rfc4742">RFC 4742</a>.
+          <a target="_blank" href="http://tools.ietf.org/html/rfc4742">RFC 4742</a>.
 	  The default TCP port assigned for this mapping is 830.
 	  A NETCONF agent implementation must listen for connections
 	  to the 'netconf' subsystem on this port.
@@ -193,24 +193,24 @@
 	<p>
 	  An agent may optionally support additional transport
 	  mappings.  
-	  <a href="http://tools.ietf.org/html/rfc4743">RFC 4743</a>
+	  <a target="_blank" href="http://tools.ietf.org/html/rfc4743">RFC 4743</a>
 	  defines mappings to the
-	  <a href="http://www.w3.org/TR/soap12-part1/">
+	  <a target="_blank" href="http://www.w3.org/TR/soap12-part1/">
 	    Simple Object Access Protocol (SOAP).
 	  </a>
 	  Two different transport protocols are supported for SOAP.
-	  The <a href="http://tools.ietf.org/html/rfc3080">
+	  The <a target="_blank" href="http://tools.ietf.org/html/rfc3080">
 	    Blocks Extensible Exchange Protocol (BEEP)
 	  </a> mapping, called 'SOAP over BEEP',
 	  is defined in 
-	  <a href="http://tools.ietf.org/html/rfc4227">RFC 4227</a>.
+	  <a target="_blank" href="http://tools.ietf.org/html/rfc4227">RFC 4227</a>.
 	  The default TCP port for this mapping is 833.
-	  The <a href="http://tools.ietf.org/html/rfc2616">
+	  The <a target="_blank" href="http://tools.ietf.org/html/rfc2616">
 	    Hypertext Transfer Protocol (HTTP)
 	  </a> mapping is defined by BEEP.  NETCONF agents
 	  must provide secure HTTP (HTTPS), by running HTTP
 	  over the 
-	  <a href="http://tools.ietf.org/html/rfc4346">
+	  <a target="_blank" href="http://tools.ietf.org/html/rfc4346">
 	    Transport Layer Security Protocol (TLS).
 	  </a>.
 	  The default TCP port for this mapping is 832.
@@ -218,12 +218,12 @@
 	<p>
 	  The NETCONF protocol can also be run directly over BEEP.
 	  This mapping is defined in
-	  <a href="http://tools.ietf.org/html/rfc4744">RFC 4744</a>.
+	  <a target="_blank" href="http://tools.ietf.org/html/rfc4744">RFC 4744</a>.
 	  The default TCP port for this mapping is 831.
 	</p>
 	<p>
 	  The 
-	  <a href="http://www.iana.org/assignments/port-numbers">IANA port
+	  <a target="_blank" href="http://www.iana.org/assignments/port-numbers">IANA port
 	    assignments</a> for NETCONF can be summarized in 
 	  <b>/etc/services</b> format as follows:
 	</p>
@@ -242,7 +242,7 @@
 	<p>
 	  The XSD in RFC 4741 defining the NETCONF protocol
 	  has been converted to a YANG module, called
-	  <a href="${tg.url('/modulereport/netconf')}">
+	  <a target="_blank" href="${tg.url('/modulereport/netconf')}">
 	    netconf.yang.
 	  </a>
 	</p>
@@ -322,7 +322,8 @@
 	  which operate on one or more conceptual configuration
 	  databases.  For example, the &lt;target&gt; parameter
 	  for the 
-	  <a href="${tg.url('/modules/netconf/2009-02-24#edit-config.623')}">
+	  <a target="_blank" 
+             href="${tg.url('/modules/netconf/2009-04-10#edit-config.579')}">
 	    &lt;edit-config&gt;
 	  </a> operation specifies which database to edit.
 	</p>
@@ -998,7 +999,7 @@
 	<p>
 	  NETCONF has a notification delivery mechanism,
 	  defined in
-	  <a href="http://www.rfc-editor.org/rfc/rfc5277.txt">
+	  <a target="_blank" href="http://www.rfc-editor.org/rfc/rfc5277.txt">
 	    RFC 5277.
 	  </a>
 	</p>
@@ -1021,10 +1022,10 @@
 	</p>
 	<p>
 	  These definitions have been converted to YANG, named
-	  <a href="${tg.url('/modulereport/nc-notifications')}">
+	  <a target="_blank" href="${tg.url('/modulereport/nc-notifications')}">
 	    nc-notifications.yang
 	  </a> and
-	  <a href="${tg.url('/modulereport/notifications')}">
+	  <a target="_blank" href="${tg.url('/modulereport/notifications')}">
 	    notifications.yang.
 	  </a>
 	</p>
@@ -1039,7 +1040,7 @@
 	<p>
 	  Defines the NETCONF protocol RPC layer and operations layer.<br/><br/>
 	  <b>Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/rfc/rfc4741.txt">
+	  <a target="_blank" href="http://www.ietf.org/rfc/rfc4741.txt">
 	    NETCONF Configuration Protocol
 	  </a>
 	</p>
@@ -1048,7 +1049,7 @@
 	<p>
 	  Defines the NETCONF-over-SSH transport mapping.<br/><br/>
 	  <b>Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/rfc/rfc4742.txt">
+	  <a target="_blank" href="http://www.ietf.org/rfc/rfc4742.txt">
 	    Using the NETCONF Configuration Protocol over Secure Shell (SSH)
 	  </a>
 	</p>
@@ -1057,7 +1058,7 @@
 	<p>
 	  Defines the NETCONF-over-SOAP transport mapping.<br/><br/>
 	  <b>Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/rfc/rfc4743.txt">
+	  <a target="_blank" href="http://www.ietf.org/rfc/rfc4743.txt">
 	    Using NETCONF over the Simple Object Access Protocol (SOAP)
 	  </a>
 	</p>
@@ -1066,7 +1067,7 @@
 	<p>
 	  Defines the NETCONF-over-BEEP transport mapping.<br/><br/>
 	  <b>Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/rfc/rfc4744.txt">
+	  <a target="_blank" href="http://www.ietf.org/rfc/rfc4744.txt">
 	    Using the NETCONF Protocol over
             the Blocks Extensible Exchange Protocol (BEEP)
 	  </a>
@@ -1076,7 +1077,7 @@
 	<p>
 	  Defines the NETCONF notification delivery mechanisms.<br/><br/>
 	  <b>Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	    <a href="http://www.ietf.org/rfc/rfc5277.txt">
+	    <a target="_blank" href="http://www.ietf.org/rfc/rfc5277.txt">
 	      NETCONF Event Notifications
 	    </a>
 	</p>
@@ -1085,7 +1086,7 @@
 	<p>
 	  Documents some NETCONF-over-SOAP implementation experience.<br/><br/>
 	  <b>Status:</b> Informational RFC, nothing-to-implement<br/><br/>
-	    <a href="http://www.ietf.org/rfc/rfc5381.txt">
+	    <a target="_blank" href="http://www.ietf.org/rfc/rfc5381.txt">
 	      Experience of Implementing NETCONF over SOAP
 	    </a>
 	</p>
@@ -1094,7 +1095,7 @@
 	<p>
 	  Defines the NETCONF-over-TLS transport mapping.<br/><br/>
 	  <b>Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/rfc/rfc5539.txt">
+	  <a target="_blank" href="http://www.ietf.org/rfc/rfc5539.txt">
 	    NETCONF Over Transport Layer Security (TLS)
 	  </a>
 	</p>
@@ -1112,7 +1113,8 @@
 	  instance-identifier or XPath expressions) for the 
 	  NETCONF protocol.<br/><br/>
 	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-partial-lock-09.txt">
+	  <a target="_blank" 
+             href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-partial-lock-11.txt">
 	    Partial Lock RPC for NETCONF
 	  </a>
 	</p>
@@ -1122,7 +1124,8 @@
 	  Defines an agent monitoring data model and schema retrieval
 	  mechanism for the NETCONF protocol.<br/><br/>
 	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-monitoring-08.txt">
+	  <a target="_blank" 
+             href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-monitoring-09.txt">
 	    NETCONF Monitoring Schema
 	  </a>
 	</p>
@@ -1132,7 +1135,8 @@
 	  Defines a mechanism to control the filtering of leaf objects
           containing the 'default' value, during NETCONF retrieval operations.<br/><br/>
 	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-with-defaults-03.txt">
+	  <a target="_blank" 
+             href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-with-defaults-04.txt">
 	    With-defaults capability for NETCONF
 	  </a>
 	</p>
@@ -1141,7 +1145,8 @@
 	<p>
 	  Defines a minor update to the NETCONF protocol.<br/><br/>
 	  <b>Intended Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
-	  <a href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-4741bis-01.txt">
+	  <a target="_blank" 
+             href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-4741bis-01.txt">
 	    Network Configuration Protocol
 	  </a>
 	</p>
@@ -1154,45 +1159,54 @@
 	<h2>Additional NETCONF Resources</h2>
 	<ul>
 	  <li>
-	    <a href="http://www.ietf.org/dyn/wg/charter/netconf-charter.html">
+	    <a target="_blank" 
+               href="http://www.ietf.org/dyn/wg/charter/netconf-charter.html">
 	      NETCONF WG Charter
 	    </a>
 	  </li>
 	  <li>
-	    <a href="http://trac.tools.ietf.org/wg/netconf/trac/wiki">
+	    <a target="_blank" 
+               href="http://trac.tools.ietf.org/wg/netconf/trac/wiki">
 	      NETCONF WG Wiki Page
 	    </a>
 	  </li>
 	  <li>
-	    <a href="http://www.rfc-editor.org/errata_search.php?rfc=4742">
+	    <a target="_blank" 
+               href="http://www.rfc-editor.org/errata_search.php?rfc=4742">
 	      Errata for RFC 4742 (NETCONF Over SSH)
 	    </a>
 	  </li>
 	  <li>
-	    <a href="http://www.iana.org/assignments/xml-registry/ns/netconf.txt">
+	    <a target="_blank" 
+               href="http://www.iana.org/assignments/xml-registry/ns/netconf.txt">
 	      IANA assignment for NETCONF namespace
 	    </a>
 	  </li>
 	  <li>
-	    <a href="http://www.iana.org/assignments/xml-registry/ns/netconf/base/1.0.txt">
+	    <a target="_blank" 
+               href="http://www.iana.org/assignments/xml-registry/ns/netconf/base/1.0.txt">
 	      IANA assignment for NETCONF base namespace
 	    </a>
 	  </li>
 	  <li>
-	    <a href="http://www.iana.org/assignments/xml-registry/ns/netconf/soap.txt">
+	    <a target="_blank" 
+               href="http://www.iana.org/assignments/xml-registry/ns/netconf/soap.txt">
 	      IANA assignment for NETCONF over SOAP URI
 	    </a>
 	  </li>
 	  <li>
-	    <a href="http://www.iana.org/assignments/xml-registry/schema/netconf.xsd">
+	    <a target="_blank" 
+               href="http://www.iana.org/assignments/xml-registry/schema/netconf.xsd">
 	      IANA version of the NETCONF protocol XSD
 	    </a>
 	  </li>
 	  <li>
-	    <a href="${tg.url('/slides/netconf/netconf_tutorial.html')}">Tutorial Slides (circa 2004)</a>
+	    <a target="_blank" 
+               href="${tg.url('/slides/netconf/netconf_tutorial.html')}">Tutorial Slides (circa 2004)</a>
 	  </li>
 	  <li>
-	    <a href="${tg.url('/static/papers/df_netconf_white_paper.pdf')}">
+	    <a target="_blank" 
+               href="${tg.url('/static/papers/df_netconf_white_paper.pdf')}">
 	      NETCONF White Paper by David French (embeddedmind.com)</a>
 	  </li>
 	</ul>

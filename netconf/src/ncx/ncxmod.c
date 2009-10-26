@@ -1556,11 +1556,11 @@ static status_t
 #endif
             if (!pcb->top) {
                 pcb->top = testmod;
+                pcb->topfound = TRUE;
             }
             if (retmod) {
                 *retmod = testmod;
             }
-            pcb->topfound = TRUE;
             return testmod->status;
         }
     }

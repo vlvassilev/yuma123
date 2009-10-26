@@ -162,6 +162,7 @@ typedef struct yang_pcb_t_ {
     boolean       searchmode;  /* TRUE if just getting ns & version */
     boolean       parsemode;  /* TRUE if full parse but no reg-load */
     boolean       importmode;  /* TRUE if parsing from an import-stmt */
+    boolean       topfound;    /* TRUE if top found, not added */
     dlq_hdr_t     allimpQ;          /* Q of yang_import_ptr_t */
 
     dlq_hdr_t    *savedevQ;  /* ptr to Q of ncx_save_deviations_t */

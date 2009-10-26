@@ -2365,9 +2365,10 @@ static void
                 if (searchresult) {
                     searchresult->cap = cap;
                     if (searchresult->res != NO_ERR) {
-                        log_error("\nError: module search failed (%s)",
-                                  get_error_string(searchresult->res));
-                        ncxmod_free_search_result(searchresult);
+                        if (LOGDEBUG2) {
+                            log_debug2("\nLocal module search failed (%s)",
+                                       get_error_string(searchresult->res));
+                        }
                     } else if (searchresult->source) {
                         /* module with matching name, revision
                          * was found on the local system;
@@ -3960,12 +3961,17 @@ int
 	  const char *argv[])
 {
     status_t   res;
+    int32      retval;
 
 #ifdef MEMORY_DEBUG
     mtrace();
 #endif
 
     res = yangcli_init(argc, argv);
+
+    retval = xml_strcmp((const xmlChar *)"aaa",
+                        (const xmlChar *)"aa");
+
     if (res != NO_ERR) {
 	log_error("\nyangcli: init returned error (%s)\n", 
 		  get_error_string(res));

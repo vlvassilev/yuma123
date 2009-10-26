@@ -245,7 +245,12 @@ static status_t
     }
 	
     if (res == NO_ERR) {
-	if (LOGDEBUG2) {
+        if (LOGDEBUG) {
+            log_debug("\nSending autoload request for '%s', r'%s'",
+                      module,
+                      (revision) ? revision : EMPTY_STRING);
+        } 
+        if (LOGDEBUG2) {
 	    log_debug2("\nabout to send RPC request with reqdata:");
 	    val_dump_value_ex(reqdata, 
                               NCX_DEF_INDENT,
@@ -300,6 +305,11 @@ static status_t
 
     res = NO_ERR;
 
+    if (LOGDEBUG) {
+        log_debug("\nGot autoload reply for '%s' r'%s'",
+                  module,
+                  (revision) ? revision : EMPTY_STRING);
+    }
     if (LOGDEBUG2) {
 	log_debug2("\n*** output <get-schema> result "
                    "\n   module '%s'"
@@ -732,14 +742,20 @@ status_t
          searchresult = (ncxmod_search_result_t *)
              dlq_nextEntry(searchresult)) {
 
-        /* skip bad entries and found entries */
-        if (searchresult->module == NULL ||
-            searchresult->source != NULL ||
-            searchresult->res != NO_ERR) {
+        /* skip found entries */
+        if (searchresult->source != NULL) {
             continue;
         }
 
-        /* found an entry that needs to be retrieved */
+        /* skip found modules with errors */          
+        if (!(searchresult->res == ERR_NCX_WRONG_VERSION ||
+              searchresult->res == ERR_NCX_MOD_NOT_FOUND)) {
+            continue;
+        }
+
+        /* found an entry that needs to be retrieved
+         * either module not found or wrong version found
+         */
         server_cb->command_mode = CMD_MODE_AUTOLOAD;
         server_cb->cursearchresult = searchresult;
         done = TRUE;
@@ -865,10 +881,14 @@ status_t
          searchresult = (ncxmod_search_result_t *)
              dlq_nextEntry(searchresult)) {
 
-        /* skip bad entries and found entries */
-        if (searchresult->module == NULL ||
-            searchresult->source != NULL ||
-            searchresult->res != NO_ERR) {
+        /* skip found entries */
+        if (searchresult->source != NULL) {
+            continue;
+        }
+
+        /* skip found modules with errors */          
+        if (!(searchresult->res == ERR_NCX_WRONG_VERSION ||
+              searchresult->res == ERR_NCX_MOD_NOT_FOUND)) {
             continue;
         }
 

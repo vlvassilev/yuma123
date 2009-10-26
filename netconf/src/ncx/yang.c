@@ -2775,7 +2775,7 @@ void
     }
 #endif
 
-    if (pcb->top) {
+    if (pcb->top && !pcb->topfound) {
 	if (pcb->top->ismod) {
 	    if ((pcb->top->name &&
 		!xml_strcmp(pcb->top->name,

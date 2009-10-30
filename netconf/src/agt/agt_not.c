@@ -1013,7 +1013,8 @@ static status_t
         if (LOGDEBUG2) {
             log_debug2("\nNotification contents:");
             if (notif->msg) {
-                val_dump_value(notif->msg, NCX_DEF_INDENT);
+                val_dump_value(notif->msg, 
+                               ses_indent_count(sub->scb));
             }
             log_debug2("\n");
         }

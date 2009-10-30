@@ -612,7 +612,7 @@ void
 	if (nodetyp == NCX_NT_VAL && error_path) {
 	    log_debug3(" error-path: \n");
 	    val_dump_value((val_value_t *)error_path, 
-                           NCX_DEF_INDENT);
+                           ses_indent_count(scb));
 	    log_debug3("\n");
 	}
     }
@@ -782,7 +782,7 @@ void
     /* dump some error info to the log */
     if (LOGDEBUG3) {
 	log_debug3("\nagt_record_insert_error: ");
-	val_dump_value(errval, NCX_DEF_INDENT);
+	val_dump_value(errval, ses_indent_count(scb));
 	log_debug3("\n");
     }
 
@@ -861,7 +861,7 @@ void
     /* dump some error info to the log */
     if (LOGDEBUG3) {
 	log_debug3("\nagt_record_unique_error: ");
-	val_dump_value(errval, NCX_DEF_INDENT);
+	val_dump_value(errval, ses_indent_count(scb));
 	log_debug3("\n");
     }
 

@@ -157,7 +157,9 @@ static void
     }
 
     /* get default-style param */
-    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_DEFAULT_STYLE);
+    val = val_find_child(valset, 
+                         AGT_CLI_MODULE, 
+                         NCX_EL_DEFAULT_STYLE);
     if (val && val->res == NO_ERR) {
         agt_profile->agt_defaultStyle = VAL_ENUM_NAME(val);
         agt_profile->agt_defaultStyleEnum = 
@@ -171,6 +173,12 @@ static void
      * they may get reset here, if the conf file has
      * a different value selected
      */
+
+    /* get indent param */
+    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_INDENT);
+    if (val && val->res == NO_ERR) {
+        agt_profile->agt_indent = VAL_INT(val);
+    }
 
     /* get log param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_LOG);

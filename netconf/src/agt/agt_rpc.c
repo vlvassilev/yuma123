@@ -183,10 +183,10 @@ static void
                          const rpc_err_rec_t *err,
                          int32  indent)
 {
+    rpc_err_info_t *errinfo;
     status_t        res;
     xmlns_id_t      ncid;
     uint32          len;
-    rpc_err_info_t *errinfo;
     xmlChar         numbuff[NCX_MAX_NUMLEN];
 
 
@@ -210,7 +210,7 @@ static void
                          START);
 
     if (indent >= 0) {
-        indent += NCX_DEF_INDENT;
+        indent += ses_indent_count(scb);
     }
 
     /* generate each child variable */
@@ -305,7 +305,7 @@ static void
     }
 
     if (indent >= 0) {
-        indent -= NCX_DEF_INDENT;
+        indent -= ses_indent_count(scb);
     }
 
     /* generate the <error-info> end tag */
@@ -377,7 +377,7 @@ static status_t
                          &msg->mhdr, 
                          ncid, 
                          ncid, 
-                          NCX_EL_RPC_ERROR, 
+                         NCX_EL_RPC_ERROR, 
                          &attrs, 
                          ATTRQ, 
                          indent, 
@@ -386,7 +386,7 @@ static status_t
     xml_clean_attrs(&attrs);
 
     if (indent >= 0) {
-        indent += NCX_DEF_INDENT;
+        indent += ses_indent_count(scb);
     }
 
     /* generate the <error-type> field */
@@ -495,7 +495,7 @@ static status_t
                         indent);
 
     if (indent >= 0) {
-        indent -= NCX_DEF_INDENT;
+        indent -= ses_indent_count(scb);
     }
 
     /* generate the <rpc-error> end tag */
@@ -1341,8 +1341,10 @@ void
         res = NO_ERR;
         while (res==NO_ERR) {
             /* do not add errors such as unknown namespace */
-            res = agt_xml_consume_node(scb, &testnode,
-                   NCX_LAYER_NONE, NULL);
+            res = agt_xml_consume_node(scb, 
+                                       &testnode,
+                                       NCX_LAYER_NONE,
+                                       NULL);
             if (res==NO_ERR) {
                 res = ERR_NCX_UNKNOWN_ELEMENT;
                 errstr = (char *)xml_strdup((const xmlChar *)RPC_ROOT);

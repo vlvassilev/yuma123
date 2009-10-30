@@ -54,8 +54,16 @@ date         init     comment
 #include  "status.h"
 #endif
 
+#ifndef _H_yangconst
+#include "yangconst.h"
+#endif
+
 #ifndef _H_yangdump
 #include "yangdump.h"
+#endif
+
+#ifndef _H_yangdump_util
+#include "yangdump_util.h"
 #endif
 
 
@@ -702,6 +710,283 @@ void
 
 }  /* clean_cdefineQ */
 
+
+/********************************************************************
+* FUNCTION write_c_header
+* 
+* Write the C file header
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == module in progress
+*   cp == conversion parameters to use
+*
+*********************************************************************/
+void
+    write_c_header (ses_cb_t *scb,
+                    const ncx_module_t *mod,
+                    const yangdump_cvtparms_t *cp)
+{
+    int32                     indent;
+
+    indent = cp->indent;
+
+    /* banner comments */
+    ses_putstr(scb, START_COMMENT);    
+    ses_putchar(scb, '\n');
+
+    /* generater tag */
+    write_banner_session(scb);
+
+    /* copyright section
+     * ses_putstr(scb, (const xmlChar *)
+     *        "\n  *** Put copyright info here ***\n");
+     */
+
+    /* module name */
+    if (mod->ismod) {
+        ses_putstr_indent(scb, YANG_K_MODULE, indent);
+    } else {
+        ses_putstr_indent(scb, YANG_K_SUBMODULE, indent);
+    }
+    ses_putchar(scb, ' ');
+    ses_putstr(scb, mod->name);
+
+    /* version */
+    if (mod->version) {
+        write_c_simple_str(scb, 
+                           YANG_K_REVISION,
+                           mod->version, 
+                           indent,
+                           0);
+        ses_putchar(scb, '\n');
+    }
+
+    /* namespace or belongs-to */
+    if (mod->ismod) {
+        write_c_simple_str(scb, 
+                           YANG_K_NAMESPACE, 
+                           mod->ns,
+                           indent,
+                           0);
+    } else {
+        write_c_simple_str(scb, 
+                           YANG_K_BELONGS_TO, 
+                           mod->belongs,
+                           indent,
+                           0);
+    }
+
+    /* organization */
+    if (mod->organization) {
+        write_c_simple_str(scb, 
+                           YANG_K_ORGANIZATION,
+                           mod->organization, 
+                           indent,
+                           0);
+    }
+
+    ses_putchar(scb, '\n');
+    ses_putchar(scb, '\n');
+    ses_putstr(scb, END_COMMENT);
+    ses_putchar(scb, '\n');
+
+} /* write_c_header */
+
+
+/********************************************************************
+* FUNCTION write_c_footer
+* 
+* Write the C file footer
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == module in progress
+*
+*********************************************************************/
+void
+    write_c_footer (ses_cb_t *scb,
+                    const ncx_module_t *mod)
+{
+    ses_putstr(scb, (const xmlChar *)"\n/* END ");
+    write_c_safe_str(scb, ncx_get_modname(mod));
+    ses_putstr(scb, (const xmlChar *)".c */\n");
+
+} /* write_c_footer */
+
+
+/*******************************************************************
+* FUNCTION write_c_objtype
+* 
+* Generate the C data type for the NCX data type
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object template to check
+*
+**********************************************************************/
+void
+    write_c_objtype (ses_cb_t *scb,
+                     const obj_template_t *obj)
+{
+    boolean        needspace;
+    ncx_btype_t    btyp;
+
+    needspace = TRUE;
+    btyp = obj_get_basetype(obj);
+
+    switch (btyp) {
+    case NCX_BT_BOOLEAN:
+        ses_putstr(scb, BOOLEAN);
+        break;
+    case NCX_BT_INT8:
+        ses_putstr(scb, INT8);
+        break;
+    case NCX_BT_INT16:
+        ses_putstr(scb, INT16);
+        break;
+    case NCX_BT_INT32:
+        ses_putstr(scb, INT32);
+        break;
+    case NCX_BT_INT64:
+        ses_putstr(scb, INT64);
+        break;
+    case NCX_BT_UINT8:
+        ses_putstr(scb, UINT8);
+        break;
+    case NCX_BT_UINT16:
+        ses_putstr(scb, UINT16);
+        break;
+    case NCX_BT_UINT32:
+        ses_putstr(scb, UINT32);
+        break;
+    case NCX_BT_UINT64:
+        ses_putstr(scb, UINT64);
+        break;
+    case NCX_BT_DECIMAL64:
+        ses_putstr(scb, INT64);
+        break;
+    case NCX_BT_FLOAT64:
+        ses_putstr(scb, DOUBLE);
+        break;
+    case NCX_BT_ENUM:
+    case NCX_BT_STRING:
+    case NCX_BT_BINARY:
+    case NCX_BT_INSTANCE_ID:
+    case NCX_BT_LEAFREF:
+    case NCX_BT_SLIST:
+        ses_putstr(scb, STRING);
+        needspace = FALSE;
+        break;
+    case NCX_BT_IDREF:
+        ses_putstr(scb, IDREF);
+        needspace = FALSE;
+        break;
+    case NCX_BT_LIST:
+        ses_putstr(scb, QUEUE);
+        break;
+    default:
+        /* assume complex type */
+        write_identifier(scb,
+                         obj_get_mod_name(obj),
+                         DEF_TYPE,
+                         obj_get_name(obj));
+    }
+
+    if (needspace) {
+        ses_putchar(scb, ' ');
+    }
+
+    write_c_safe_str(scb, obj_get_name(obj));
+    ses_putchar(scb, ';');
+
+}  /* write_c_objtype */
+
+
+/*******************************************************************
+* FUNCTION write_c_val_macro_name
+* 
+* Generate the C VAL_FOO macro name for the data type
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object template to check
+*
+**********************************************************************/
+void
+    write_c_val_macro_type (ses_cb_t *scb,
+                            const obj_template_t *obj)
+{
+    ncx_btype_t    btyp;
+
+    btyp = obj_get_basetype(obj);
+
+    switch (btyp) {
+    case NCX_BT_EMPTY:
+        ses_putstr(scb, (const xmlChar *)"VAL_EMPTY");
+        break;
+    case NCX_BT_BOOLEAN:
+        ses_putstr(scb, (const xmlChar *)"VAL_BOOL");
+        break;
+    case NCX_BT_INT8:
+        ses_putstr(scb, (const xmlChar *)"VAL_INT8");
+        break;
+    case NCX_BT_INT16:
+        ses_putstr(scb, (const xmlChar *)"VAL_INT16");
+        break;
+    case NCX_BT_INT32:
+        ses_putstr(scb, (const xmlChar *)"VAL_INT");
+        break;
+    case NCX_BT_INT64:
+        ses_putstr(scb, (const xmlChar *)"VAL_LONG");
+        break;
+    case NCX_BT_UINT8:
+        ses_putstr(scb, (const xmlChar *)"VAL_UINT8");
+        break;
+    case NCX_BT_UINT16:
+        ses_putstr(scb, (const xmlChar *)"VAL_UINT16");
+        break;
+    case NCX_BT_UINT32:
+        ses_putstr(scb, (const xmlChar *)"VAL_UINT");
+        break;
+    case NCX_BT_UINT64:
+        ses_putstr(scb, (const xmlChar *)"VAL_ULONG");
+        break;
+    case NCX_BT_DECIMAL64:
+        ses_putstr(scb, (const xmlChar *)"VAL_DEC64");
+        break;
+    case NCX_BT_FLOAT64:
+        ses_putstr(scb, (const xmlChar *)"VAL_DOUBLE");
+        break;
+    case NCX_BT_ENUM:
+        ses_putstr(scb, (const xmlChar *)"VAL_ENUM_NAME");
+        break;
+    case NCX_BT_STRING:
+        ses_putstr(scb, (const xmlChar *)"VAL_STRING");
+        break;
+    case NCX_BT_BINARY:
+        ses_putstr(scb, (const xmlChar *)"VAL_BINARY");
+        break;
+    case NCX_BT_INSTANCE_ID:
+        ses_putstr(scb, (const xmlChar *)"VAL_INSTANCE_ID");
+        break;
+    case NCX_BT_LEAFREF:
+        ses_putstr(scb, (const xmlChar *)"VAL_STRING");
+        break;
+    case NCX_BT_IDREF:
+        ses_putstr(scb, (const xmlChar *)"VAL_IDREF");
+        break;
+    case NCX_BT_SLIST:
+        ses_putstr(scb, (const xmlChar *)"VAL_LIST");
+        break;
+    case NCX_BT_LIST:
+        ses_putstr(scb, QUEUE);
+        break;
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+}  /* write_c_val_macro_type */
 
 
 /* END c_util.c */

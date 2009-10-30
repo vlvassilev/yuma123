@@ -368,30 +368,8 @@ status_t
                              NULL, 
                              &agt_profile->agt_savedevQ,
                              &mysesmod);
-    return res;
-
-}  /* agt_ses_init */
-
-
-/********************************************************************
-* FUNCTION agt_ses_init2
-*
-* INIT 2:
-*   Initialize the virtual parmsets and their callbacks
-*   This must be done after the <running> config is loaded
-*
-* INPUTS:
-*   none
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    agt_ses_init2 (void)
-{
-    status_t  res;
-
-    if (!agt_ses_init_done) {
-	return ERR_INTERNAL_INIT_SEQ;
+    if (res != NO_ERR) {
+        return res;
     }
 
     /* set up get-my-session RPC operation */
@@ -412,9 +390,9 @@ status_t
         return SET_ERROR(res);
     }
 
-    return NO_ERR;
+    return res;
 
-}  /* agt_ses_init2 */
+}  /* agt_ses_init */
 
 
 /********************************************************************
@@ -610,9 +588,10 @@ ses_cb_t *
     agt_ses_new_session (ses_transport_t transport,
 			 int fd)
 {
-    ses_cb_t  *scb;
-    uint32     i, slot;
-    status_t   res;
+    ses_cb_t       *scb;
+    agt_profile_t  *profile;
+    uint32          i, slot;
+    status_t        res;
 
     if (!agt_ses_init_done) {
 	agt_ses_init();
@@ -641,6 +620,12 @@ ses_cb_t *
 	/* make sure there is memory for a session control block */
 	scb = ses_new_scb();
 	if (scb) {
+	    /* initialize the profile vars */
+            profile = agt_get_profile();
+            scb->linesize = profile->agt_linesize;
+            scb->withdef = profile->agt_defaultStyleEnum;
+            scb->indent = profile->agt_indent;
+
 	    /* initialize the static vars */
 	    scb->type = SES_TYP_NETCONF;
 	    scb->transport = transport;

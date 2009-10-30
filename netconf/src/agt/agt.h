@@ -188,6 +188,8 @@ typedef struct agt_profile_t_ {
     uint32              agt_maxburst;
     uint32              agt_hello_timeout;
     uint32              agt_idle_timeout;
+    uint32              agt_linesize;
+    int32               agt_indent;
     boolean             agt_usevalidate;
     ncx_withdefaults_t  agt_defaultStyleEnum;
     agt_acmode_t        agt_accesscontrol_enum;

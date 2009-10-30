@@ -1,14 +1,14 @@
-#ifndef _H_yangdump_util
-#define _H_yangdump_util
+#ifndef _H_c
+#define _H_c
 
-/*  FILE: yangdump_util.h
+/*  FILE: c.h
 *********************************************************************
 *								    *
 *			 P U R P O S E				    *
 *								    *
 *********************************************************************
 
-  YANGDUMP utilities
+  Convert YANG module to C file format 
  
 *********************************************************************
 *								    *
@@ -18,12 +18,24 @@
 
 date	     init     comment
 ----------------------------------------------------------------------
-23-oct-09    abb      Begun
+27-oct-09    abb      Begun
 
 */
 
 #ifndef _H_ses
 #include "ses.h"
+#endif
+
+#ifndef _H_status
+#include "status.h"
+#endif
+
+#ifndef _H_yang
+#include "yang.h"
+#endif
+
+#ifndef _H_yangdump
+#include "yangdump.h"
 #endif
 
 /********************************************************************
@@ -32,16 +44,23 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
 /********************************************************************
 *								    *
 *			     T Y P E S				    *
 *								    *
 *********************************************************************/
 
-extern void 
-    write_banner (void);
 
-extern void 
-    write_banner_session (ses_cb_t *scb);
+/********************************************************************
+*								    *
+*			F U N C T I O N S			    *
+*								    *
+*********************************************************************/
 
-#endif	    /* _H_yangdump_util */
+extern status_t 
+    c_convert_module (yang_pcb_t *pcb,
+		      const yangdump_cvtparms_t *cp,
+		      ses_cb_t *scb);
+
+#endif	    /* _H_c */

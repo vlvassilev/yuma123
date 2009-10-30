@@ -1610,6 +1610,24 @@ status_t
     superuser = NULL;
     acmode = AGT_ACMOD_ENFORCING;
     agt_acm_init_done = TRUE;
+
+    /* these callbacks are not used yet */
+    res = agt_cb_register_callback(AGT_ACM_MODULE,
+                                   nacm_OID_group,
+                                   NULL,
+                                   nacm_group_callback);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    res = agt_cb_register_callback(AGT_ACM_MODULE,
+                                   nacm_OID_moduleRule,
+                                   NULL,
+                                   nacm_rule_callback);
+    if (res != NO_ERR) {
+        return res;
+    }
+
     return NO_ERR;
 
 }  /* agt_acm_init */
@@ -1647,21 +1665,6 @@ status_t
         acmode = profile->agt_accesscontrol_enum;
     }
 
-    res = agt_cb_register_callback(AGT_ACM_MODULE,
-                                   nacm_OID_group,
-                                   NULL,
-                                   nacm_group_callback);
-    if (res != NO_ERR) {
-        return res;
-    }
-
-    res = agt_cb_register_callback(AGT_ACM_MODULE,
-                                   nacm_OID_moduleRule,
-                                   NULL,
-                                   nacm_rule_callback);
-    if (res != NO_ERR) {
-        return res;
-    }
 
     /* make sure the running config root is set */
     runningcfg = cfg_get_config(NCX_EL_RUNNING);

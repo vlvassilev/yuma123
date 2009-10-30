@@ -33,6 +33,10 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
+#ifndef _H_c
+#include  "c.h"
+#endif
+
 #ifndef _H_cli
 #include  "cli.h"
 #endif
@@ -1594,8 +1598,7 @@ static status_t
                 res = ERR_NCX_IMPORT_ERRORS;
                 ncx_print_errormsg(NULL, pcb->top, res);
             } else {
-                res = ERR_NCX_OPERATION_NOT_SUPPORTED;
-                /*** res = c_convert_module(pcb, cp, scb); ***/
+                res = c_convert_module(pcb, cp, scb);
                 if (res != NO_ERR) {
                     pr_err(res);
                 }

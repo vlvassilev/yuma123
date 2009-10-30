@@ -66,9 +66,6 @@ date             init     comment
 extern status_t
     agt_ses_init (void);
 
-extern status_t
-    agt_ses_init2 (void);
-
 extern void 
     agt_ses_cleanup (void);
 

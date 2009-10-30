@@ -402,7 +402,10 @@ status_t
     
     /* send the capabilities list */
     if (res == NO_ERR) {
-        xml_wr_full_val(scb, &msg, mycaps, NCX_DEF_INDENT);
+        xml_wr_full_val(scb, 
+                        &msg, 
+                        mycaps, 
+                        ses_indent_count(scb));
     }
 
     /* send the session ID */
@@ -412,7 +415,7 @@ status_t
                           nc_id, 
                           nc_id,
                           NCX_EL_SESSION_ID, 
-                          NCX_DEF_INDENT);
+                          ses_indent_count(scb));
     }
     if (res == NO_ERR) {
         sprintf((char *)numbuff, "%d", scb->sid);

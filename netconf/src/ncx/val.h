@@ -165,7 +165,13 @@ date	     init     comment
 /* macros to access simple value types */
 #define VAL_BOOL(V)    ((V)->v.bool)
 
+#define VAL_EMPTY(V)    ((V)->v.bool)
+
 #define VAL_DOUBLE(V)  ((V)->v.num.d)
+
+#define VAL_STRING(V)     ((V)->v.str)
+
+#define VAL_BINARY(V)     ((V)->v.str)
 
 #define VAL_ENU(V)     (&(V)->v.enu)
 
@@ -202,6 +208,8 @@ date	     init     comment
 #define VAL_UINT16(V)   ((uint16)((V)->v.num.u))
 
 #define VAL_ULONG(V)   ((V)->v.num.ul)
+
+#define VAL_DEC64(V)   ((V)->v.num.dec.val)
 
 #define VAL_LIST(V)    ((V)->v.list)
 

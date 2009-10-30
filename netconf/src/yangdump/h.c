@@ -29,7 +29,7 @@
 
 date         init     comment
 ----------------------------------------------------------------------
-28marr09      abb      begun
+28mar09      abb      begun
 
 *********************************************************************
 *                                                                   *
@@ -138,7 +138,7 @@ date         init     comment
 /********************************************************************
 * FUNCTION write_h_iffeature_start
 * 
-* Generate the C for 1 if-feature conditiona;
+* Generate the start C for 1 if-feature conditional;
 *
 * INPUTS:
 *   scb == session control block to use for writing
@@ -211,94 +211,6 @@ static void
     }
 
 }  /* write_h_iffeature_end */
-
-
-/*******************************************************************
-* FUNCTION write_h_objtype
-* 
-* Generate the C definitions for 1 datadef child type line
-*
-* INPUTS:
-*   scb == session control block to use for writing
-*   obj == obj_template_t to use
-*
-**********************************************************************/
-static void
-    write_h_objtype (ses_cb_t *scb,
-                     const obj_template_t *obj)
-
-{
-    ncx_btype_t    btyp;
-    boolean        needspace;
-
-    needspace = TRUE;
-
-    ses_putstr(scb, START_LINE);
-    btyp = obj_get_basetype(obj);
-
-    switch (btyp) {
-    case NCX_BT_BOOLEAN:
-        ses_putstr(scb, BOOLEAN);
-        break;
-    case NCX_BT_INT8:
-        ses_putstr(scb, INT8);
-        break;
-    case NCX_BT_INT16:
-        ses_putstr(scb, INT16);
-        break;
-    case NCX_BT_INT32:
-        ses_putstr(scb, INT32);
-        break;
-    case NCX_BT_INT64:
-        ses_putstr(scb, INT64);
-        break;
-    case NCX_BT_UINT8:
-        ses_putstr(scb, UINT8);
-        break;
-    case NCX_BT_UINT16:
-        ses_putstr(scb, UINT16);
-        break;
-    case NCX_BT_UINT32:
-        ses_putstr(scb, UINT32);
-        break;
-    case NCX_BT_UINT64:
-        ses_putstr(scb, UINT64);
-        break;
-    case NCX_BT_DECIMAL64:
-        ses_putstr(scb, INT64);
-        break;
-    case NCX_BT_FLOAT64:
-        ses_putstr(scb, DOUBLE);
-        break;
-    case NCX_BT_ENUM:
-    case NCX_BT_STRING:
-    case NCX_BT_BINARY:
-    case NCX_BT_INSTANCE_ID:
-    case NCX_BT_LEAFREF:
-    case NCX_BT_IDREF:
-    case NCX_BT_SLIST:
-        ses_putstr(scb, STRING);
-        needspace = FALSE;
-        break;
-    case NCX_BT_LIST:
-        ses_putstr(scb, QUEUE);
-        break;
-    default:
-        /* assume complex type */
-        write_identifier(scb,
-                         obj_get_mod_name(obj),
-                         DEF_TYPE,
-                         obj_get_name(obj));
-    }
-
-    if (needspace) {
-        ses_putchar(scb, ' ');
-    }
-
-    write_c_safe_str(scb, obj_get_name(obj));
-    ses_putchar(scb, ';');
-
-}  /* write_h_objtype */
 
 
 /********************************************************************
@@ -398,7 +310,8 @@ static void
 
     if (isleaflist) { 
         /* generate a line for the leaf-list data type */
-        write_h_objtype(scb, obj);
+        ses_indent(scb, ses_indent_count(scb));
+        write_c_objtype(scb, obj);
     } else {
         /* generate a line for each child node */
         for (childobj = obj_first_child(obj);
@@ -416,7 +329,8 @@ static void
                 ses_putstr(scb, cdef->valstr);
                 ses_putchar(scb, ';');
             } else {
-                write_h_objtype(scb, childobj);
+                ses_indent(scb, ses_indent_count(scb));
+                write_c_objtype(scb, childobj);
             }
         }
     }
@@ -532,7 +446,8 @@ static status_t
 /********************************************************************
 * FUNCTION write_h_rpcs
 * 
-* Generate the YANG for the RPC methods in the specified datadefQ
+* Generate the H file decls for the RPC methods in the 
+* specified datadefQ
 *
 * INPUTS:
 *   scb == session control block to use for writing
@@ -559,7 +474,9 @@ static void
          obj != NULL;
          obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-        if (!obj_is_rpc(obj)) {
+        if (!obj_is_rpc(obj) ||
+            !obj_is_enabled(obj) ||
+            obj_is_abstract(obj)) {
             continue;
         }
 
@@ -578,7 +495,8 @@ static void
 /********************************************************************
 * FUNCTION write_h_notifs
 * 
-* Generate the YANG for the notifications in the specified datadefQ
+* Generate the H file decls for the notifications in the 
+* specified datadefQ
 *
 * INPUTS:
 *   scb == session control block to use for writing
@@ -604,7 +522,9 @@ static void
          obj != NULL;
          obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-        if (!obj_is_notif(obj)) {
+        if (!obj_is_notif(obj) ||
+            !obj_is_enabled(obj) ||
+            obj_is_abstract(obj)) {
             continue;
         }
 
@@ -623,7 +543,7 @@ static void
 /********************************************************************
 * FUNCTION write_h_identity
 * 
-* Generate the C definition for 1 identity
+* Generate the #define for 1 identity
 *
 * INPUTS:
 *   scb == session control block to use for writing
@@ -652,7 +572,7 @@ static void
 /********************************************************************
 * FUNCTION write_h_identities
 * 
-* Generate the YANG for the specified identityQ
+* Generate the H file delcs for the specified identityQ
 *
 * INPUTS:
 *   scb == session control block to use for writing
@@ -686,7 +606,7 @@ static void
 /********************************************************************
 * FUNCTION write_h_oid
 * 
-* Generate the C definition for 1 object node identifier
+* Generate the #define for 1 object node identifier
 *
 * INPUTS:
 *   scb == session control block to use for writing
@@ -710,7 +630,7 @@ static void
 /********************************************************************
 * FUNCTION write_h_oids
 * 
-* Generate the C for the specified #define statements
+* Generate the #defines for the specified #define statements
 * for name identifier strings
 *
 * INPUTS:
@@ -763,13 +683,19 @@ static status_t
 	 obj != NULL;
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (obj_has_name(obj) && obj_is_data_db(obj)) {
-	    res = save_oid_cdefine(cdefineQ,
-                                   obj_get_mod_name(obj),
-                                   obj_get_name(obj));
-            if (res != NO_ERR) {
-                return res;
+	if (obj_has_name(obj) && 
+            !obj_is_cli(obj) &&
+            !obj_is_abstract(obj)) {
+
+            if (obj->objtype != OBJ_TYP_RPCIO) {
+                res = save_oid_cdefine(cdefineQ,
+                                       obj_get_mod_name(obj),
+                                       obj_get_name(obj));
+                if (res != NO_ERR) {
+                    return res;
+                }
             }
+
 	    childQ = obj_get_cdatadefQ(obj);
 	    if (childQ) {
 		res = save_h_oids(scb, childQ, cdefineQ);
@@ -788,7 +714,7 @@ static status_t
 /********************************************************************
 * FUNCTION write_h_feature
 * 
-* Generate the C for 1 feature statement
+* Generate the #define for 1 feature statement
 *
 * INPUTS:
 *   scb == session control block to use for writing
@@ -825,7 +751,7 @@ static void
 /********************************************************************
 * FUNCTION write_h_features
 * 
-* Generate the C definitions for the specified featureQ
+* Generate the H file decls for the specified featureQ
 *
 * INPUTS:
 *   scb == session control block to use for writing
@@ -856,90 +782,6 @@ static void
 
 
 /********************************************************************
-* FUNCTION write_h_header
-* 
-* Write the H file header
-*
-* INPUTS:
-*   scb == session control block to use for writing
-*   mod == module in progress
-*   cp == conversion parameters to use
-*
-* OUTPUTS:
-*  current indent count will be ses_indent_count(scb) upon exit
-*********************************************************************/
-static void
-    write_h_header (ses_cb_t *scb,
-                        const ncx_module_t *mod,
-                        const yangdump_cvtparms_t *cp)
-{
-    int32                     indent;
-
-    indent = cp->indent;
-
-    /* banner comments */
-    ses_putstr(scb, START_COMMENT);    
-    ses_putchar(scb, '\n');
-
-    /* generater tag */
-    write_banner();
-
-    /* copyright section */
-    ses_putstr(scb, (const xmlChar *)
-               "\n  *** Put copyright info here ***\n");
-
-    /* module name */
-    if (mod->ismod) {
-        ses_putstr_indent(scb, YANG_K_MODULE, indent);
-    } else {
-        ses_putstr_indent(scb, YANG_K_SUBMODULE, indent);
-    }
-    ses_putchar(scb, ' ');
-    ses_putstr(scb, mod->name);
-
-    /* version */
-    if (mod->version) {
-        write_c_simple_str(scb, 
-                           YANG_K_REVISION,
-                           mod->version, 
-                           indent,
-                           0);
-        ses_putchar(scb, '\n');
-    }
-
-    /* namespace or belongs-to */
-    if (mod->ismod) {
-        write_c_simple_str(scb, 
-                           YANG_K_NAMESPACE, 
-                           mod->ns,
-                           indent,
-                           0);
-    } else {
-        write_c_simple_str(scb, 
-                           YANG_K_BELONGS_TO, 
-                           mod->belongs,
-                           indent,
-                           0);
-    }
-
-    /* organization */
-    if (mod->organization) {
-        write_c_simple_str(scb, 
-                           YANG_K_ORGANIZATION,
-                           mod->organization, 
-                           indent,
-                           0);
-    }
-
-    ses_putchar(scb, '\n');
-    ses_putchar(scb, '\n');
-    ses_putstr(scb, END_COMMENT);
-    ses_putchar(scb, '\n');
-
-} /* write_h_header */
-
-
-/********************************************************************
 * FUNCTION write_h_includes
 * 
 * Write the H file #include statements
@@ -949,8 +791,6 @@ static void
 *   mod == module in progress
 *   cp == conversion parameters to use
 *
-* OUTPUTS:
-*  current indent count will be ses_indent_count(scb) upon exit
 *********************************************************************/
 static void
     write_h_includes (ses_cb_t *scb,
@@ -958,15 +798,19 @@ static void
                       const yangdump_cvtparms_t *cp)
 {
     const ncx_include_t      *inc;
+
+#ifdef LEAVE_OUT_FOR_NOW
     boolean                   needrpc, neednotif;
 
 
     needrpc = need_rpc_includes(mod, cp);
     neednotif = need_notif_includes(mod, cp);
+#endif
 
     /* add xmlChar include */
     write_ext_include(scb, (const xmlChar *)"xmlstring.h");
 
+#ifdef LEAVE_OUT_FOR_NOW
     /* add includes even if they may not get used
      * TBD: prune all unused include files
      */
@@ -985,9 +829,12 @@ static void
     }
 
     write_ncx_include(scb, (const xmlChar *)"agt_util");
+#endif
+
     write_ncx_include(scb, (const xmlChar *)"dlq");
     write_ncx_include(scb, (const xmlChar *)"ncxtypes");
 
+#ifdef LEAVE_OUT_FOR_NOW
     if (needrpc) {
         write_ncx_include(scb, (const xmlChar *)"rpc");
     }
@@ -995,13 +842,17 @@ static void
     if (needrpc || neednotif) {
         write_ncx_include(scb, (const xmlChar *)"ses");
     }
+#endif
 
     write_ncx_include(scb, (const xmlChar *)"status");
 
+#ifdef LEAVE_OUT_FOR_NOW
     if (needrpc || neednotif) {
         write_ncx_include(scb, (const xmlChar *)"val");
         write_ncx_include(scb, (const xmlChar *)"val_util");
     }
+#endif
+
 
     /* includes for submodules */
     if (!cp->unified) {
@@ -1053,13 +904,12 @@ static status_t
     ses_putstr(scb, BAR_H);
     write_c_safe_str(scb, mod->name);
 
-    write_h_header(scb, mod, cp);
+    write_c_header(scb, mod, cp);
 
     write_h_includes(scb, mod, cp);
 
     /* 1) features */
     write_h_features(scb, &mod->featureQ);
-
     if (cp->unified && mod->ismod) {
         for (node = (yang_node_t *)
                  dlq_firstEntry(&mod->saveincQ);
@@ -1106,7 +956,6 @@ static status_t
     }
 
     /* 4) typedefs for objects */
-
     if (res == NO_ERR) {
         res = save_h_objects(mod, &mod->datadefQ, &typenameQ);
         if (res == NO_ERR) {
@@ -1250,5 +1099,4 @@ status_t
 
 }   /* h_convert_module */
 
-
-/* END file cyang.c */
+/* END file h.c */

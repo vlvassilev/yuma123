@@ -1527,12 +1527,15 @@ static status_t
     write_config (const xmlChar *filespec,
                   cfg_template_t *cfg)
 {
+    agt_profile_t     *profile;
     status_t           res;
     xml_attrs_t        attrs;
 
     if (cfg->root == NULL) {
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
+
+    profile = agt_get_profile();
 
     /* write the new startup config */
     xml_init_attrs(&attrs);
@@ -1544,7 +1547,7 @@ static status_t
                             XMLMODE, 
                             WITHHDR, 
                             0,
-                            NCX_DEF_INDENT,
+                            profile->agt_indent,
                             agt_check_save);
 
     xml_clean_attrs(&attrs);
@@ -2744,6 +2747,7 @@ status_t
     cfg_template_t    *startup, *running;
     val_value_t       *copystartup;
     const xmlChar     *filename;
+    agt_profile_t     *profile;
     status_t           res;
     xml_attrs_t        attrs;
 
@@ -2760,6 +2764,7 @@ status_t
     startup = NULL;
     copystartup = NULL;
     res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+    profile = agt_get_profile();
 
     switch (cfg->cfg_loc) {
     case CFG_LOC_INTERNAL:
@@ -2815,7 +2820,7 @@ status_t
                                     XMLMODE, 
                                     WITHHDR, 
                                     0,
-                                    NCX_DEF_INDENT,
+                                    profile->agt_indent,
                                     agt_check_save);
 
             xml_clean_attrs(&attrs);
@@ -2866,6 +2871,7 @@ status_t
     agt_ncx_cfg_save_inline (const xmlChar *source_url,
                              val_value_t *newroot)
 {
+    agt_profile_t     *profile;
     cfg_template_t    *startup;
     val_value_t       *copystartup;
     status_t           res;
@@ -2880,6 +2886,7 @@ status_t
     startup = NULL;
     copystartup = NULL;
     res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+    profile = agt_get_profile();
 
     startup = cfg_get_config_id(NCX_CFGID_STARTUP);
     if (startup != NULL) {
@@ -2900,7 +2907,7 @@ status_t
                                 XMLMODE, 
                                 WITHHDR, 
                                 0,
-                                NCX_DEF_INDENT,
+                                profile->agt_indent,
                                 agt_check_save);
 
         xml_clean_attrs(&attrs);

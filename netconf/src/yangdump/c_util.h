@@ -84,6 +84,8 @@ date             init     comment
 
 #define STRING        (const xmlChar *)"xmlChar *"
 
+#define IDREF         (const xmlChar *)"val_idref_t *"
+
 #define BOOLEAN       (const xmlChar *)"boolean"
 #define FLOAT         (const xmlChar *)"float"
 #define DOUBLE        (const xmlChar *)"double"
@@ -98,6 +100,21 @@ date             init     comment
 #define START_LINE    (const xmlChar *)"\n    "
 
 #define Y_PREFIX      (const xmlChar *)"y_"
+
+#define FN_BANNER_START (const xmlChar *)\
+    "\n\n/********************************************************************\n* FUNCTION "
+
+#define FN_BANNER_LN (const xmlChar *)"\n* "
+
+#define FN_BANNER_INPUT (const xmlChar *)"\n* INPUTS:\n* "
+
+#define FN_BANNER_RETURN (const xmlChar *)"\n* RETURNS:\n* "
+
+#define FN_BANNER_RETURN_STATUS (const xmlChar *)\
+    "\n* RETURNS:\n*     error status"
+
+#define FN_BANNER_END (const xmlChar *)\
+    "\n********************************************************************/"
 
 /********************************************************************
 *                                                                   *
@@ -184,5 +201,22 @@ extern c_define_t *
 
 extern void
     clean_cdefineQ (dlq_hdr_t *cdefineQ);
+
+extern void
+    write_c_header (ses_cb_t *scb,
+                    const ncx_module_t *mod,
+                    const yangdump_cvtparms_t *cp);
+
+extern void
+    write_c_footer (ses_cb_t *scb,
+                    const ncx_module_t *mod);
+
+extern void
+    write_c_objtype (ses_cb_t *scb,
+                     const obj_template_t *obj);
+
+extern void
+    write_c_val_macro_type (ses_cb_t *scb,
+                            const obj_template_t *obj);
 
 #endif            /* _H_c_util */

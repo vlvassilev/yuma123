@@ -296,7 +296,10 @@ static status_t
 			    dlq_remove(msg);
 			    ses_msg_free_msg(scb, msg);
 			    msg = NULL;
-			}
+			} else {
+                            msg->ready = TRUE;
+                            ses_msg_make_inready(scb);
+                        }
 		    }
 
 		    /* reset reader state */

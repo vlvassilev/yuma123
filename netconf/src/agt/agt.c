@@ -160,8 +160,8 @@ static void
      */
     agt_profile.agt_targ = NCX_AGT_TARG_CANDIDATE;
     agt_profile.agt_start = NCX_AGT_START_MIRROR;
-    agt_profile.agt_has_startup = FALSE;
     agt_profile.agt_loglevel = log_get_debug_level();
+    agt_profile.agt_has_startup = FALSE;
     agt_profile.agt_usestartup = TRUE;
     agt_profile.agt_logappend = FALSE;
     agt_profile.agt_xmlorder = FALSE;
@@ -170,14 +170,17 @@ static void
     agt_profile.agt_logfile = NULL;
     agt_profile.agt_startup = NULL;
     agt_profile.agt_defaultStyle = NCX_EL_REPORT_ALL;
-    agt_profile.agt_defaultStyleEnum = NCX_WITHDEF_REPORT_ALL;
     agt_profile.agt_superuser = NCX_DEF_SUPERUSER;
     agt_profile.agt_eventlog_size = 1000;
     agt_profile.agt_maxburst = 10;
-    agt_profile.agt_usevalidate = TRUE;
     agt_profile.agt_hello_timeout = 300;
     agt_profile.agt_idle_timeout = 3600;
-
+    agt_profile.agt_linesize = 72;
+    agt_profile.agt_indent = NCX_DEF_INDENT;
+    agt_profile.agt_usevalidate = TRUE;
+    agt_profile.agt_defaultStyleEnum = NCX_WITHDEF_REPORT_ALL;
+    agt_profile.agt_accesscontrol_enum = AGT_ACMOD_ENFORCING;
+    
 } /* init_agent_profile */
 
 
@@ -359,8 +362,12 @@ status_t
 * FUNCTION agt_init2
 * 
 * Initialize the Agent Library
-* 
-* TBD -- put platform-specific agent init here
+* The agt_profile is set and the object database is
+* ready to have YANG modules loaded
+*
+* RPC and data node callbacks should be installed
+* after the module is loaded, and before the running config
+* is loaded.
 *
 * RETURNS:
 *   status
@@ -403,7 +410,6 @@ status_t
         return res;
     }
 
-
     /* setup an empty <running> config 
      * The config state is still CFG_ST_INIT
      * so no user access can occur yet (except OP_LOAD by root)
@@ -439,8 +445,8 @@ status_t
         }
     }
 
-    /* initialize the NCX agent core callback functions
-     * the schema (netconf.ncx) for these callbacks was 
+    /* initialize the NCX agent core callback functions.
+     * the schema (netconf.yang) for these callbacks was 
      * already loaded in the common ncx_init
      * */
     res = agt_ncx_init();
@@ -551,6 +557,8 @@ status_t
         return res;
     }
 
+    /************* L O A D   R U N N I N G   C O N F I G ***************/
+
     /* load the NV startup config into the running config if it exists */
     if (agt_profile.agt_usestartup) {
         load_running_config(agt_profile.agt_startup);
@@ -559,7 +567,7 @@ status_t
                  "to no-startup CLI option\n");
     }
 
-    /****   P H A S E   2   I N I T  ****  C O N F I G   D A T A  ***/
+    /**  P H A S E   2   I N I T  ****  N O N - C O N F I G   D A T A  **/
 
     /* load the nacm access control DM module */
     res = agt_acm_init2();
@@ -573,9 +581,6 @@ status_t
         return res;
     }
     
-    /* load the agent sessions callback functions and data */
-    agt_ses_init2();
-
     /* load the agent state monitoring callback functions and data */
     res = agt_state_init2();
     if (res != NO_ERR) {

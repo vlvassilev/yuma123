@@ -829,6 +829,26 @@ void
     write_c_objtype (ses_cb_t *scb,
                      const obj_template_t *obj)
 {
+    write_c_objtype_ex(scb, obj, ';');
+
+}  /* write_c_objtype */
+
+
+/*******************************************************************
+* FUNCTION write_c_objtype_ex
+* 
+* Generate the C data type for the NCX data type
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object template to check
+*   endchar == char to use at end (semi-colon, comma, right-paren)
+**********************************************************************/
+void
+    write_c_objtype_ex (ses_cb_t *scb,
+                        const obj_template_t *obj,
+                        xmlChar endchar)
+{
     boolean        needspace;
     ncx_btype_t    btyp;
 
@@ -898,9 +918,9 @@ void
     }
 
     write_c_safe_str(scb, obj_get_name(obj));
-    ses_putchar(scb, ';');
+    ses_putchar(scb, endchar);
 
-}  /* write_c_objtype */
+}  /* write_c_objtype_ex */
 
 
 /*******************************************************************

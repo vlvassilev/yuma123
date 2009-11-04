@@ -576,7 +576,7 @@ static void
 
     /* generate the function prototype lines */
     ses_putstr(scb, (const xmlChar *)"\nstatic status_t");
-    ses_indent(scb, cp->indent);
+    ses_indent(scb, indent);
     write_identifier(scb, 
                      modname,
                      NULL,
@@ -600,16 +600,17 @@ static void
     ses_putstr_indent(scb, 
                       (const xmlChar *)"status_t res;",
                       indent);
-    if (hasinput) {
-        if (is_validate) {
-            ses_putstr_indent(scb, 
-                              (const xmlChar *)"val_value_t *errorval;",
-                              indent);
-            ses_putstr_indent(scb, 
-                              (const xmlChar *)"const xmlChar *errorstr;",
-                              indent);
-        }
 
+    if (is_validate) {
+        ses_putstr_indent(scb, 
+                          (const xmlChar *)"val_value_t *errorval;",
+                          indent);
+        ses_putstr_indent(scb, 
+                          (const xmlChar *)"const xmlChar *errorstr;",
+                          indent);
+    }
+
+    if (hasinput) {
         /* declare value pointer node variables for 
          * the RPC input parameters 
          */
@@ -637,7 +638,7 @@ static void
                 continue;
             }
 
-            ses_indent(scb, cp->indent);
+            ses_indent(scb, indent);
             write_c_objtype(scb, obj);
         }
     }
@@ -647,17 +648,16 @@ static void
                       (const xmlChar *)"res = NO_ERR;",
                       indent);
 
+    if (is_validate) {
+        ses_putstr_indent(scb,
+                          (const xmlChar *)"errorval = NULL;",
+                          indent);
+        ses_putstr_indent(scb,
+                          (const xmlChar *)"errorstr = NULL;",
+                          indent);
+    }
+
     if (hasinput) {
-
-        if (is_validate) {
-            ses_putstr_indent(scb,
-                              (const xmlChar *)"errorval = NULL;",
-                              indent);
-            ses_putstr_indent(scb,
-                              (const xmlChar *)"errorstr = NULL;",
-                              indent);
-        }
-
         /* retrieve the parameter from the input */
         for (obj = obj_first_child(inputobj);
              obj != NULL;
@@ -733,17 +733,16 @@ static void
         ses_putchar(scb, '\n');
         ses_putstr_indent(scb,
                           (const xmlChar *)"/* invoke your device "
-                          "instrumentation code here */",
+                          "instrumentation code here */\n",
                           indent);
     }
 
     /* return NO_ERR */
-    ses_putchar(scb, '\n');
     ses_indent(scb, indent);
     ses_putstr(scb, (const xmlChar *)"return res;");
 
     /* end the function */
-    ses_putstr(scb, (const xmlChar *)"\n} /* ");
+    ses_putstr(scb, (const xmlChar *)"\n\n} /* ");
     write_identifier(scb, 
                      modname,
                      NULL,
@@ -795,7 +794,280 @@ static void
         write_c_rpc_fn(scb, mod, cp, obj, FALSE);
     }
 
-}  /* write_h_rpcs */
+}  /* write_c_rpcs */
+
+
+/********************************************************************
+* FUNCTION write_c_notif
+* 
+* Generate the C file decls for 1 notification
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   datadefQ == que of obj_template_t to use
+*   cp == conversion parms to use
+*********************************************************************/
+static void
+    write_c_notif (ses_cb_t *scb,
+                   obj_template_t *notifobj,
+                   const yangdump_cvtparms_t *cp)
+{
+    obj_template_t  *obj, *nextobj;
+    const xmlChar   *modname;
+    int32            indent;
+    boolean          haspayload;
+
+    modname = obj_get_mod_name(notifobj);
+    indent = cp->indent;
+    haspayload = obj_has_children(notifobj);
+
+    /* generate function banner comment */
+    ses_putstr(scb, FN_BANNER_START);
+    write_identifier(scb, 
+                     modname,
+                     NULL,
+                     obj_get_name(notifobj));
+    ses_putstr(scb, (const xmlChar *)"_send");
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, (const xmlChar *)"Send a ");
+    write_identifier(scb,
+                     obj_get_mod_name(notifobj),
+                     NULL,
+                     obj_get_name(notifobj));
+    ses_putstr(scb, (const xmlChar *)" notification");
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, 
+               (const xmlChar *)"Called by your code when "
+               "notification event occurs");
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, FN_BANNER_END);
+
+    /* generate the function prototype lines */
+    ses_putstr(scb, (const xmlChar *)"\nvoid");
+    ses_indent(scb, indent);
+    write_identifier(scb,
+                     obj_get_mod_name(notifobj),
+                     NULL,
+                     obj_get_name(notifobj));
+    ses_putstr(scb, (const xmlChar *)"_send (");
+
+    if (obj_has_children(notifobj)) {
+        for (obj = obj_first_child(notifobj);
+             obj != NULL;
+             obj = nextobj) {
+
+            nextobj = obj_next_child(obj);
+            ses_indent(scb, indent+indent);
+            write_c_objtype_ex(scb, 
+                               obj,
+                               (nextobj == NULL) ? ')' : ',');
+        }
+    } else {
+        ses_putstr(scb, (const xmlChar *)"void)");
+    }
+
+    ses_putchar(scb, '\n');
+    ses_putchar(scb, '{');
+
+    /* print a debug message */
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"agt_not_msg_t *notif;",
+                      indent);
+
+    if (haspayload) {
+        ses_putstr_indent(scb, 
+                          (const xmlChar *)"val_value_t *parmval;",
+                          indent);
+        ses_putstr_indent(scb, 
+                          (const xmlChar *)"status_t res;",
+                          indent);
+
+        ses_putchar(scb, '\n');
+        ses_putstr_indent(scb,
+                          (const xmlChar *)"res = NO_ERR;",
+                          indent);
+    }
+
+    ses_putchar(scb, '\n');
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"if (LOGDEBUG) {",
+                      indent);
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"log_debug(\"\\nGenerating <",
+                      indent+indent);
+    ses_putstr(scb, obj_get_name(notifobj));
+    ses_putstr(scb,
+               (const xmlChar *)"> notification\");");
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"}\n",
+                      indent);
+
+    /* allocate a new notification */
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"notif = agt_not_new_notification(",
+                      indent);
+    write_c_safe_str(scb, obj_get_name(notifobj));
+    ses_putstr(scb, (const xmlChar *)"_obj);");
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"if (notif == NULL) {",
+                      indent);
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"log_error(\"\\nError: "
+                      "malloc failed, cannot send <",
+                      indent+indent);
+    ses_putstr(scb, obj_get_name(notifobj));
+    ses_putstr(scb, (const xmlChar *)"> notification\");");
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"return;",
+                      indent+indent);
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"}\n",
+                      indent);
+
+
+    for (obj = obj_first_child(notifobj);
+         obj != NULL;
+         obj = obj_next_child(obj)) {
+
+        if (obj_is_abstract(obj) ||
+            obj_is_cli(obj)) {
+            continue;
+        }
+
+        if (obj->objtype != OBJ_TYP_LEAF) {
+            /* TBD: need to handle non-leafs automatically */
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"/* add ",
+                              indent);
+            ses_putstr(scb, obj_get_typestr(obj));
+            ses_putchar(scb, ' ');
+            write_c_safe_str(scb, obj_get_name(obj));
+            ses_putstr(scb, (const xmlChar *)" to payload");
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"* replace following line"
+                              "with real code",
+                              indent);
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"(void)",
+                              indent);
+            write_c_safe_str(scb, obj_get_name(obj));
+            ses_putstr(scb, (const xmlChar *)";\n");
+            continue;
+        }
+
+        /* this is a leaf parameter -- add starting comment */
+        ses_putstr_indent(scb,
+                          (const xmlChar *)"/* add ",
+                          indent);
+        write_c_safe_str(scb, obj_get_name(obj));
+        ses_putstr(scb, (const xmlChar *)" to payload */");
+
+        /* agt_make_leaf stmt */
+        ses_putstr_indent(scb, 
+                          (const xmlChar *)"parmval = agt_make_leaf(",
+                          indent);
+        ses_indent(scb, indent+indent);
+        write_c_safe_str(scb, obj_get_name(notifobj));
+        ses_putstr(scb, (const xmlChar *)"_obj,");
+        ses_indent(scb, indent+indent);
+        write_identifier(scb,
+                         modname,
+                         BAR_NODE,
+                         obj_get_name(obj));
+        ses_putchar(scb, ',');
+        ses_indent(scb, indent+indent);
+        write_c_safe_str(scb, obj_get_name(obj));
+        ses_putchar(scb, ',');
+        ses_putstr_indent(scb, 
+                          (const xmlChar *)"&res);",
+                          indent+indent);
+
+        /* check result stmt, Q leaf if non-NULL */
+        ses_putstr_indent(scb, 
+                          (const xmlChar *)"if (parmval == NULL) {",
+                          indent);
+
+        ses_putstr_indent(scb,
+                          (const xmlChar *)"log_error(",
+                          indent+indent);
+        ses_putstr_indent(scb,
+                          (const xmlChar *)"\"\\nError: "
+                          "make leaf failed (%s), cannot send <",
+                          indent*3);
+        ses_putstr(scb, obj_get_name(notifobj));
+        ses_putstr(scb, (const xmlChar *)"> notification\",");
+        ses_putstr_indent(scb,
+                          (const xmlChar *)"get_error_string(res));",
+                          indent*3);
+        ses_putstr_indent(scb,
+                          (const xmlChar *)"} else {",
+                          indent);
+        ses_putstr_indent(scb,
+                          (const xmlChar *)"agt_not_add_to_payload"
+                          "(notif, parmval);",
+                          indent+indent);
+        ses_putstr_indent(scb,
+                          (const xmlChar *)"}\n",
+                          indent);
+    }
+
+    /* save the malloced notification struct */
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"agt_not_queue_notification(notif);\n",
+                      indent);
+
+    /* end the function */
+    ses_putstr(scb, (const xmlChar *)"\n} /* ");
+    write_identifier(scb, 
+                     modname,
+                     NULL,
+                     obj_get_name(notifobj));
+    ses_putstr(scb, (const xmlChar *)"_send */\n");
+
+}  /* write_c_notif */
+
+
+/********************************************************************
+* FUNCTION write_c_notifs
+* 
+* Generate the C file decls for the notifications in the 
+* specified datadefQ
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == module in progress
+*   cp == conversion parms to use
+*********************************************************************/
+static void
+    write_c_notifs (ses_cb_t *scb,
+                    ncx_module_t *mod,
+                    const yangdump_cvtparms_t *cp)
+{
+    obj_template_t    *obj;
+    boolean            first;
+
+    first = TRUE;
+    for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
+
+        if (!obj_is_notif(obj) ||
+            !obj_is_enabled(obj) ||
+            obj_is_abstract(obj)) {
+            continue;
+        }
+
+        if (first) {
+            ses_putchar(scb, '\n');
+            first = FALSE;
+        }
+
+        write_c_notif(scb, obj, cp);
+    }
+
+}  /* write_c_notifs */
+
 
 /********************************************************************
 * FUNCTION write_c_init_fn
@@ -837,7 +1109,7 @@ static void
 
     /* generate the function prototype lines */
     ses_putstr(scb, (const xmlChar *)"\nstatus_t");
-    ses_indent(scb, cp->indent);
+    ses_indent(scb, indent);
     write_identifier(scb, 
                      modname,
                      NULL,
@@ -943,83 +1215,6 @@ static void
         
     }
 
-    ses_putstr_indent(scb,
-                      (const xmlChar *)"/* put your module "
-                      "initialization code here */\n",
-                      indent);
-
-
-    /* return res; */
-    ses_indent(scb, indent);
-    ses_putstr(scb, (const xmlChar *)"return res;");
-
-    /* end the function */
-    ses_putstr(scb, (const xmlChar *)"\n} /* ");
-    write_identifier(scb, 
-                     modname,
-                     NULL,
-                     (const xmlChar *)"init");
-    ses_putstr(scb, (const xmlChar *)" */\n");
-
-} /* write_c_init_fn */
-
-
-/********************************************************************
-* FUNCTION write_c_init2_fn
-* 
-* Generate the C code for the foo_init2 function
-*
-* INPUTS:
-*   scb == session control block to use for writing
-*   mod == module in progress
-*   cp == conversion parameters to use
-*
-*********************************************************************/
-static void
-    write_c_init2_fn (ses_cb_t *scb,
-                      ncx_module_t *mod,
-                      const yangdump_cvtparms_t *cp)
-{
-    obj_template_t  *obj;
-    const xmlChar   *modname;
-    int32            indent;
-    boolean          anyrpcs;
-
-    modname = ncx_get_modname(mod);
-    indent = cp->indent;
-    anyrpcs = FALSE;
-
-    /* generate function banner comment */
-    ses_putstr(scb, FN_BANNER_START);
-    write_identifier(scb, 
-                     modname,
-                     NULL,
-                     (const xmlChar *)"init2");
-    ses_putstr(scb, FN_BANNER_LN);
-    ses_putstr(scb, FN_BANNER_LN);
-    ses_putstr(scb, 
-               (const xmlChar *)"SIL initialization, phase 2: "
-               "data structures");
-    ses_putstr(scb, FN_BANNER_LN);
-    ses_putstr(scb, 
-               (const xmlChar *)"Called after running config is loaded");
-    ses_putstr(scb, FN_BANNER_LN);
-
-    ses_putstr(scb, FN_BANNER_RETURN_STATUS);
-    ses_putstr(scb, FN_BANNER_END);
-
-    /* generate the function prototype lines */
-    ses_putstr(scb, (const xmlChar *)"\nstatus_t");
-    ses_indent(scb, cp->indent);
-    write_identifier(scb, 
-                     modname,
-                     NULL,
-                     (const xmlChar *)"init2");
-    ses_putstr(scb, (const xmlChar *)" (void)\n{");
-
-    ses_indent(scb, indent);
-    ses_putstr(scb, (const xmlChar *)"status_t res;\n");
-
     /* initialize any RPC methods */
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
 	 obj != NULL;
@@ -1030,8 +1225,6 @@ static void
 	    obj_is_abstract(obj)) {
 	    continue;
 	}
-
-        anyrpcs = TRUE;
 
         /* register validate function */
         ses_putstr_indent(scb, 
@@ -1096,11 +1289,85 @@ static void
         write_if_res(scb, cp, indent);
     }
 
-    if (!anyrpcs) {
-        ses_putstr_indent(scb,
-                          (const xmlChar *)"res = NO_ERR;",
-                          indent);
-    }
+
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"/* put your module "
+                      "initialization code here */\n",
+                      indent);
+
+
+    /* return res; */
+    ses_indent(scb, indent);
+    ses_putstr(scb, (const xmlChar *)"return res;");
+
+    /* end the function */
+    ses_putstr(scb, (const xmlChar *)"\n} /* ");
+    write_identifier(scb, 
+                     modname,
+                     NULL,
+                     (const xmlChar *)"init");
+    ses_putstr(scb, (const xmlChar *)" */\n");
+
+} /* write_c_init_fn */
+
+
+/********************************************************************
+* FUNCTION write_c_init2_fn
+* 
+* Generate the C code for the foo_init2 function
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == module in progress
+*   cp == conversion parameters to use
+*
+*********************************************************************/
+static void
+    write_c_init2_fn (ses_cb_t *scb,
+                      ncx_module_t *mod,
+                      const yangdump_cvtparms_t *cp)
+{
+    const xmlChar   *modname;
+    int32            indent;
+
+    modname = ncx_get_modname(mod);
+    indent = cp->indent;
+
+    /* generate function banner comment */
+    ses_putstr(scb, FN_BANNER_START);
+    write_identifier(scb, 
+                     modname,
+                     NULL,
+                     (const xmlChar *)"init2");
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, 
+               (const xmlChar *)"SIL init phase 2: "
+               "non-config data structures");
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, 
+               (const xmlChar *)"Called after running config is loaded");
+    ses_putstr(scb, FN_BANNER_LN);
+
+    ses_putstr(scb, FN_BANNER_RETURN_STATUS);
+    ses_putstr(scb, FN_BANNER_END);
+
+    /* generate the function prototype lines */
+    ses_putstr(scb, (const xmlChar *)"\nstatus_t");
+    ses_indent(scb, indent);
+    write_identifier(scb, 
+                     modname,
+                     NULL,
+                     (const xmlChar *)"init2");
+    ses_putstr(scb, (const xmlChar *)" (void)\n{");
+
+    ses_indent(scb, indent);
+    ses_putstr(scb, (const xmlChar *)"status_t res;\n");
+
+
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"res = NO_ERR;",
+                      indent);
 
     ses_putstr_indent(scb, 
                       (const xmlChar *)"/* put your init2 code here */\n",
@@ -1159,7 +1426,7 @@ static void
 
     /* generate the function prototype lines */
     ses_putstr(scb, (const xmlChar *)"\nvoid");
-    ses_indent(scb, cp->indent);
+    ses_indent(scb, indent);
     write_identifier(scb, 
                      modname,
                      NULL,
@@ -1246,6 +1513,7 @@ static status_t
     write_c_init_static_vars_fn(scb, mod, cp);
 
     /* external functions */
+    write_c_notifs(scb, mod, cp);
     write_c_init_fn(scb, mod, cp);
     write_c_init2_fn(scb, mod, cp);
     write_c_cleanup_fn(scb, mod, cp);

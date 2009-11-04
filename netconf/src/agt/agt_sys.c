@@ -674,6 +674,15 @@ status_t
 	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
+    /* set up set-log-level RPC operation */
+    res = agt_rpc_register_method(AGT_SYS_MODULE,
+                                  system_N_set_log_level,
+                                  AGT_RPC_PH_INVOKE,
+                                  set_log_level_invoke);
+    if (res != NO_ERR) {
+        return SET_ERROR(res);
+    }
+
     return NO_ERR;
 
 }  /* agt_sys_init */
@@ -705,15 +714,6 @@ status_t
 
     if (!agt_sys_init_done) {
 	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
-    }
-
-    /* set up set-log-level RPC operation */
-    res = agt_rpc_register_method(AGT_SYS_MODULE,
-                                  system_N_set_log_level,
-                                  AGT_RPC_PH_INVOKE,
-                                  set_log_level_invoke);
-    if (res != NO_ERR) {
-        return SET_ERROR(res);
     }
 
     /* get the running config to add some static data into */

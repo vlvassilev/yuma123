@@ -216,6 +216,11 @@ extern void
                      const obj_template_t *obj);
 
 extern void
+    write_c_objtype_ex (ses_cb_t *scb,
+                        const obj_template_t *obj,
+                        xmlChar endchar);
+
+extern void
     write_c_val_macro_type (ses_cb_t *scb,
                             const obj_template_t *obj);
 

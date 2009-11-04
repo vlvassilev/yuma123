@@ -318,10 +318,13 @@ static void
              childobj != NULL;
              childobj = obj_next_child(childobj)) {
 
-            if (!obj_has_name(childobj) ||
-                !obj_is_data_db(childobj)) {
+            if (!obj_has_name(obj) || 
+                obj_is_cli(obj) ||
+                !obj_is_enabled(obj) ||
+                obj_is_abstract(obj)) {
                 continue;
             }
+
             if (childobj->objtype == OBJ_TYP_LEAF_LIST) {
                 ses_putstr(scb, START_LINE);
                 ses_putstr(scb, QUEUE);
@@ -360,6 +363,7 @@ static void
 {
     obj_template_t    *obj;
     dlq_hdr_t         *childdatadefQ;
+    boolean            dowrite;
 
     if (dlq_empty(datadefQ)) {
         return;
@@ -369,7 +373,10 @@ static void
          obj != NULL;
          obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-        if (!obj_has_name(obj) || !obj_is_data_db(obj)) {
+        if (!obj_has_name(obj) || 
+            obj_is_cli(obj) ||
+            !obj_is_enabled(obj) ||
+            obj_is_abstract(obj)) {
             continue;
         }
 
@@ -377,7 +384,27 @@ static void
         if (childdatadefQ) {
             write_h_objects(scb, childdatadefQ, typcdefQ);
         }
-        write_h_object_typdef(scb, obj, typcdefQ);
+
+        dowrite = TRUE;
+
+        switch (obj->objtype) {
+        case OBJ_TYP_RPC:
+            dowrite = FALSE;
+            break;
+        case OBJ_TYP_RPCIO:
+        case OBJ_TYP_NOTIF:
+        case OBJ_TYP_CONTAINER:
+        case OBJ_TYP_LIST:
+            if (obj_first_child(obj) == NULL) {
+                dowrite = FALSE;
+            }
+            break;
+        default:
+            ;
+        }
+        if (dowrite) {
+            write_h_object_typdef(scb, obj, typcdefQ);
+        }
     }
 
 }  /* write_h_objects */
@@ -416,7 +443,10 @@ static status_t
          obj != NULL;
          obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-        if (!obj_has_name(obj) || !obj_is_data_db(obj)) {
+        if (!obj_has_name(obj) || 
+            obj_is_cli(obj) ||
+            !obj_is_enabled(obj) ||
+            obj_is_abstract(obj)) {
             continue;
         }
 
@@ -493,6 +523,57 @@ static void
 
 
 /********************************************************************
+* FUNCTION write_h_notif
+* 
+* Generate the H file decls for 1 notification
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   datadefQ == que of obj_template_t to use
+*   cp == conversion parms to use
+*********************************************************************/
+static void
+    write_h_notif (ses_cb_t *scb,
+                   obj_template_t *notifobj,
+                   const yangdump_cvtparms_t *cp)
+{
+    obj_template_t    *obj, *nextobj;
+
+    ses_putstr(scb, (const xmlChar *)"\n/* send a ");
+    write_identifier(scb,
+                     obj_get_mod_name(notifobj),
+                     NULL,
+                     obj_get_name(notifobj));
+    ses_putstr(scb, (const xmlChar *)" notification */");
+    ses_putstr(scb, (const xmlChar *)"\nextern void");
+    ses_indent(scb, cp->indent);
+    write_identifier(scb,
+                     obj_get_mod_name(notifobj),
+                     NULL,
+                     obj_get_name(notifobj));
+    ses_putstr(scb, (const xmlChar *)"_send (");
+
+    if (obj_has_children(notifobj)) {
+        for (obj = obj_first_child(notifobj);
+             obj != NULL;
+             obj = nextobj) {
+
+            nextobj = obj_next_child(obj);
+            ses_indent(scb, cp->indent);
+            write_c_objtype_ex(scb, 
+                               obj,
+                               (nextobj == NULL) ? ')' : ',');
+        }
+    } else {
+        ses_putstr(scb, (const xmlChar *)"void)");
+    }
+
+    ses_putstr(scb, (const xmlChar *)";\n");
+
+}  /* write_h_notif */
+
+
+/********************************************************************
 * FUNCTION write_h_notifs
 * 
 * Generate the H file decls for the notifications in the 
@@ -501,23 +582,17 @@ static void
 * INPUTS:
 *   scb == session control block to use for writing
 *   datadefQ == que of obj_template_t to use
-*
+*   cp == conversion parms to use
 *********************************************************************/
 static void
     write_h_notifs (ses_cb_t *scb,
-                    dlq_hdr_t *datadefQ)
+                    dlq_hdr_t *datadefQ,
+                    const yangdump_cvtparms_t *cp)
 {
     obj_template_t    *obj;
-    /* dlq_hdr_t         *childdatadefQ; */
+    boolean            first;
 
-
-    (void)scb;
-
-
-    if (dlq_empty(datadefQ)) {
-        return;
-    }
-
+    first = TRUE;
     for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
          obj != NULL;
          obj = (obj_template_t *)dlq_nextEntry(obj)) {
@@ -528,13 +603,12 @@ static void
             continue;
         }
 
-        /*
-        childdatadefQ = obj_get_datadefQ(obj);
-        if (childdatadefQ) {
-            write_h_objects(scb, childdatadefQ);
+        if (first) {
+            ses_putchar(scb, '\n');
+            first = FALSE;
         }
-        write_h_notif(scb, obj);
-        */
+
+        write_h_notif(scb, obj, cp);
     }
 
 }  /* write_h_notifs */
@@ -684,6 +758,7 @@ static status_t
 	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
 	if (obj_has_name(obj) && 
+            obj_is_enabled(obj) &&
             !obj_is_cli(obj) &&
             !obj_is_abstract(obj)) {
 
@@ -1005,14 +1080,14 @@ static status_t
 
     /* 6) typedefs and function prototypes for notifications */
     if (res == NO_ERR) {
-        write_h_notifs(scb, &mod->datadefQ);
+        write_h_notifs(scb, &mod->datadefQ, cp);
         if (cp->unified && mod->ismod) {
             for (node = (yang_node_t *)
                      dlq_firstEntry(&mod->saveincQ);
                  node != NULL;
                  node = (yang_node_t *)dlq_nextEntry(node)) {
                 if (node->submod) {
-                    write_h_notifs(scb, &node->submod->datadefQ);
+                    write_h_notifs(scb, &node->submod->datadefQ, cp);
                 }
             }
         }

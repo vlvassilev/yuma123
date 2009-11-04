@@ -51,7 +51,11 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
-#define AGT_RPC_NUM_PHASES   4
+/* this constant is for the number of callback slots
+ * allocated in a 'cbset', and only includes the
+ * RPC phases that allow callback functions
+ */
+#define AGT_RPC_NUM_PHASES   3
 
 /********************************************************************
 *                                                                   *
@@ -72,12 +76,11 @@ date             init     comment
  *
  */
 typedef enum agt_rpc_phase_t_ {
-    AGT_RPC_PH_SETUP,       /* (1) cb before the input PSD is parsed */
-    AGT_RPC_PH_VALIDATE,     /* (3) cb after the input PSD is parsed */
-    AGT_RPC_PH_INVOKE,      /* (4) cb to invoke the requested method */
-    AGT_RPC_PH_PRERPY,       /* (5) cb before the reply is generated */ 
-    AGT_RPC_PH_PARSE,                    /* (2) NO CB FOR THIS STATE */ 
-    AGT_RPC_PH_REPLY                     /* (6) NO CB FOR THIS STATE */ 
+    AGT_RPC_PH_VALIDATE,         /* (2) cb after the input is parsed */
+    AGT_RPC_PH_INVOKE,      /* (3) cb to invoke the requested method */
+    AGT_RPC_PH_POSTRPY,       /* (5) cb after the reply is generated */ 
+    AGT_RPC_PH_PARSE,                    /* (1) NO CB FOR THIS STATE */ 
+    AGT_RPC_PH_REPLY                     /* (4) NO CB FOR THIS STATE */ 
 } agt_rpc_phase_t;
 
 

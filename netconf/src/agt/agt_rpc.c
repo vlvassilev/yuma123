@@ -915,9 +915,14 @@ status_t
     obj_template_t  *rpcobj;
     agt_rpc_cbset_t *cbset;
 
+#ifdef DEBUG
     if (!module || !method_name || !method) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
+    if (phase >= AGT_RPC_NUM_PHASES) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+#endif
 
     /* find the RPC template */
     rpcobj = find_rpc(module, method_name);
@@ -961,10 +966,12 @@ void
 {
     obj_template_t  *rpcobj;
 
+#ifdef DEBUG
     if (!module || !method_name) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
+#endif
 
     /* find the RPC template */
     rpcobj = find_rpc(module, method_name);
@@ -994,10 +1001,12 @@ void
 {
     obj_template_t  *rpcobj;
 
+#ifdef DEBUG
     if (!module || !method_name) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
+#endif
 
     /* find the RPC template */
     rpcobj = find_rpc(module, method_name);
@@ -1027,10 +1036,12 @@ void
 {
     obj_template_t       *rpcobj;
 
+#ifdef DEBUG
     if (!module || !method_name) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
+#endif
 
     /* find the RPC template */
     rpcobj = find_rpc(module, method_name);
@@ -1300,12 +1311,6 @@ void
     /* change the session state */
     scb->state = SES_ST_IN_MSG;
 
-    /* RPC setup state */
-    if (res == NO_ERR && cbset && cbset->acb[AGT_RPC_PH_SETUP]) {
-        msg->rpc_agt_state = AGT_RPC_PH_SETUP;
-        res = (*cbset->acb[AGT_RPC_PH_SETUP])(scb, msg, &method);
-    }
-
     /* parameter set parse state */
     if (res == NO_ERR) {
         res = parse_rpc_input(scb, msg, rpcobj, &method);
@@ -1389,20 +1394,26 @@ void
         res = (*cbset->acb[AGT_RPC_PH_VALIDATE])(scb, msg, &method);
     }
 
-    /* there does not always have to be an invoke callback */
+    /* there does not always have to be an invoke callback,
+     * especially since the return of data can be automated
+     * in the send_rpc_reply phase
+     */
     if ((res==NO_ERR) && cbset && cbset->acb[AGT_RPC_PH_INVOKE]) {
         msg->rpc_agt_state = AGT_RPC_PH_INVOKE;
         res = (*cbset->acb[AGT_RPC_PH_INVOKE])(scb, msg, &method);
     }
 
-    /* check if there is a pre-reply callback */
-    if ((res == NO_ERR) && cbset && cbset->acb[AGT_RPC_PH_PRERPY]) {
-        msg->rpc_agt_state = AGT_RPC_PH_PRERPY;
-        res = (*cbset->acb[AGT_RPC_PH_PRERPY])(scb, msg, &method);
-    }
-
+    /* always send an <rpc-reply> element in response to an <rpc> */
     msg->rpc_agt_state = AGT_RPC_PH_REPLY;
     send_rpc_reply(scb, msg);
+
+    /* check if there is a post-reply callback;
+     * call even if the RPC failed
+     */
+    if (cbset && cbset->acb[AGT_RPC_PH_POSTRPY]) {
+        msg->rpc_agt_state = AGT_RPC_PH_POSTRPY;
+        (void)(*cbset->acb[AGT_RPC_PH_POSTRPY])(scb, msg, &method);
+    }
 
     /* only reset the session state to idle if was not changed
      * to SES_ST_SHUTDOWN_REQ during this RPC call

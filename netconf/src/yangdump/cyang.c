@@ -607,6 +607,7 @@ static void
     const xmlChar         *str;
     const typ_range_t     *range;
     const typ_pattern_t   *pat;
+    const typ_idref_t     *idref;
     char                   buff[NCX_MAX_NUMLEN];
     int32                  indent;
     boolean                errinfo_set, constrained_set;
@@ -624,7 +625,7 @@ static void
         }
         /* fall through if typdef set */
     case NCX_CL_SIMPLE:
-        switch (typdef->def.simple.btyp) {
+        switch (typ_get_basetype(typdef)) {
         case NCX_BT_UNION:
             for (un = typ_first_unionnode(typdef);
                  un != NULL;
@@ -838,6 +839,19 @@ static void
                                    startindent, 
                                    2, 
                                    TRUE);
+            break;
+        case NCX_BT_IDREF:
+            idref = typ_get_idref(typdef);
+            ses_putstr_indent(scb, YANG_K_BASE, startindent);
+            ses_putchar(scb, ' ');
+            if (idref->baseprefix) {
+                write_cyang_extkw(scb, 
+                                  idref->baseprefix, 
+                                  idref->basename);
+            } else {
+                ses_putstr(scb, idref->basename);
+            }
+            ses_putchar(scb, ';');
             break;
         default:
             break;
@@ -2154,13 +2168,10 @@ static void
     if (identity->base) {
         ses_putstr_indent(scb, YANG_K_BASE, indent);
         ses_putchar(scb, ' ');
-        if (identity->baseprefix) {
-            write_cyang_extkw(scb, 
-                              identity->baseprefix, 
-                              identity->basename);
-        } else {
-            ses_putstr(scb, identity->basename);
-        }
+        write_cyang_extkw(scb, 
+                          (identity->baseprefix) ?
+                          identity->baseprefix : ncx_get_mod_prefix(mod),
+                          identity->basename);
         ses_putchar(scb, ';');
     }
 

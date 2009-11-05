@@ -88,8 +88,7 @@ extern void
 
 extern void
     agt_sys_send_sysConfigChange (const ses_cb_t *scb,
-				  const xmlChar *target,
-				  const xmlChar *operation);
+                                  dlq_hdr_t *auditrecQ);
 
 extern void
     agt_sys_send_sysCapabilityChange (ses_cb_t *changed_by,

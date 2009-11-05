@@ -140,16 +140,16 @@ static boolean            agt_shutdown_started;
 static ncx_shutdowntyp_t  agt_shutmode;
 
 /********************************************************************
-* FUNCTION init_agent_profile
+* FUNCTION init_server_profile
 * 
-* Hardwire the initial agent profile variables
+* Hardwire the initial server profile variables
 *
 * OUTPUTS:
 *  *agt_profile is filled in with params of defaults
 *
 *********************************************************************/
 static void
-    init_agent_profile (void)
+    init_server_profile (void)
 {
     memset(&agt_profile, 0x0, sizeof(agt_profile_t));
 
@@ -181,24 +181,24 @@ static void
     agt_profile.agt_defaultStyleEnum = NCX_WITHDEF_REPORT_ALL;
     agt_profile.agt_accesscontrol_enum = AGT_ACMOD_ENFORCING;
     
-} /* init_agent_profile */
+} /* init_server_profile */
 
 
 /********************************************************************
-* FUNCTION clean_agent_profile
+* FUNCTION clean_server_profile
 * 
-* Clean the agent profile variables
+* Clean the server profile variables
 *
 * OUTPUTS:
 *  *agt_profile is filled in with params of defaults
 *
 *********************************************************************/
 static void
-    clean_agent_profile (void)
+    clean_server_profile (void)
 {
     ncx_clean_save_deviationsQ(&agt_profile.agt_savedevQ);
 
-} /* clean_agent_profile */
+} /* clean_server_profile */
 
 
 /********************************************************************
@@ -288,9 +288,9 @@ static void
 /********************************************************************
 * FUNCTION agt_init1
 * 
-* Initialize the Agent Library: stage 1: CLI and profile
+* Initialize the Server Library: stage 1: CLI and profile
 * 
-* TBD -- put platform-specific agent init here
+* TBD -- put platform-specific server init here
 *
 * INPUTS:
 *   argc == command line argument count
@@ -318,7 +318,7 @@ status_t
     }
 
 #ifdef AGT_DEBUG
-    log_debug3("\nAgent Init Starting...");
+    log_debug3("\nServer Init Starting...");
 #endif
 
     res = NO_ERR;
@@ -334,7 +334,7 @@ status_t
     /* allow cleanup to run even if this fn does not complete */
     agt_init_done = TRUE;
 
-    init_agent_profile();
+    init_server_profile();
 
     /* get the command line params and also any config file params */
     res = agt_cli_process_input(argc, 
@@ -361,7 +361,7 @@ status_t
 /********************************************************************
 * FUNCTION agt_init2
 * 
-* Initialize the Agent Library
+* Initialize the Server Library
 * The agt_profile is set and the object database is
 * ready to have YANG modules loaded
 *
@@ -380,7 +380,7 @@ status_t
     status_t            res;
 
 #ifdef AGT_DEBUG
-    log_debug3("\nAgent Init-2 Starting...");
+    log_debug3("\nServer Init-2 Starting...");
 #endif
 
     /* init user callback support */
@@ -389,10 +389,10 @@ status_t
     /* initial signal handler first to allow clean exit */
     agt_signal_init();
 
-    /* initialize the agent timer service */
+    /* initialize the server timer service */
     agt_timer_init();
     
-    /* initialize the RPC agent callback structures */
+    /* initialize the RPC server callback structures */
     res = agt_rpc_init();
     if (res != NO_ERR) {
         return res;
@@ -419,9 +419,9 @@ status_t
         return res;
     }
 
-    /*** All Agent profile parameters should be set by now ***/
+    /*** All Server profile parameters should be set by now ***/
 
-    /* must set the agent capabilities after the profile is set */
+    /* must set the server capabilities after the profile is set */
     res = agt_cap_set_caps(agt_profile.agt_targ, 
                            agt_profile.agt_start,
                            agt_profile.agt_defaultStyle);
@@ -445,7 +445,7 @@ status_t
         }
     }
 
-    /* initialize the NCX agent core callback functions.
+    /* initialize the NCX server core callback functions.
      * the schema (netconf.yang) for these callbacks was 
      * already loaded in the common ncx_init
      * */
@@ -454,7 +454,7 @@ status_t
         return res;
     }
 
-    /* initialize the agent access control model */
+    /* initialize the server access control model */
     res = agt_acm_init();
     if (res != NO_ERR) {
         return res;
@@ -528,7 +528,7 @@ status_t
                                      NULL);
             if (res == NO_ERR) {
                 /*** TBD: load lib<modname>.<rev-date>.so 
-                 *** into the agent code
+                 *** into the server code
                  ***/
 
                 val = val_find_next_child(clivalset,
@@ -551,7 +551,7 @@ status_t
         return ERR_NCX_OPERATION_FAILED;
     }
 
-    /* set the initial module capabilities in the agent <hello> message */
+    /* set the initial module capabilities in the server <hello> message */
     res = agt_cap_set_modules(&agt_profile);
     if (res != NO_ERR) {
         return res;
@@ -581,7 +581,7 @@ status_t
         return res;
     }
     
-    /* load the agent state monitoring callback functions and data */
+    /* load the server state monitoring callback functions and data */
     res = agt_state_init2();
     if (res != NO_ERR) {
         return res;
@@ -640,9 +640,9 @@ status_t
 /********************************************************************
 * FUNCTION agt_cleanup
 *
-* Cleanup the Agent Library
+* Cleanup the Server Library
 * 
-* TBD -- put platform-specific agent cleanup here
+* TBD -- put platform-specific server cleanup here
 *
 *********************************************************************/
 void
@@ -650,10 +650,10 @@ void
 {
     if (agt_init_done) {
 #ifdef AGT_DEBUG
-        log_debug3("\nAgent Cleanup Starting...\n");
+        log_debug3("\nServer Cleanup Starting...\n");
 #endif
 
-        clean_agent_profile();
+        clean_server_profile();
         agt_acm_cleanup();
         agt_ncx_cleanup();
         agt_hello_cleanup();
@@ -683,12 +683,12 @@ void
 /********************************************************************
 * FUNCTION agt_get_profile
 * 
-* Get the agent profile struct
+* Get the server profile struct
 * 
 * INPUTS:
 *   none
 * RETURNS:
-*   const pointer to the agent profile
+*   const pointer to the server profile
 *********************************************************************/
 agt_profile_t *
     agt_get_profile (void)
@@ -701,7 +701,7 @@ agt_profile_t *
 /********************************************************************
 * FUNCTION agt_request_shutdown
 * 
-* Request some sort of agent shutdown
+* Request some sort of server shutdown
 * 
 * INPUTS:
 *   mode == requested shutdown mode
@@ -732,7 +732,7 @@ void
 /********************************************************************
 * FUNCTION agt_shutdown_requested
 * 
-* Check if some sort of agent shutdown is in progress
+* Check if some sort of server shutdown is in progress
 * 
 * RETURNS:
 *    TRUE if shutdown mode has been started
@@ -766,7 +766,7 @@ ncx_shutdowntyp_t
 /********************************************************************
 * FUNCTION agt_cbtype_name
 * 
-* Get the string for the agent callback phase
+* Get the string for the server callback phase
 * 
 * INPUTS:
 *   cbtyp == callback type enum

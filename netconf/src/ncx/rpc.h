@@ -117,6 +117,16 @@ typedef struct rpc_undo_rec_t_ {
 } rpc_undo_rec_t;
 
 
+/* struct of params to use when generating sysConfigChange
+ * notification.
+ */
+typedef struct rpc_audit_rec_t_ {
+    dlq_hdr_t       qhdr;
+    xmlChar        *target;
+    op_editop_t     editop;
+} rpc_audit_rec_t;
+
+
 /* NCX Agent RPC Request/Reply Message Header */
 typedef struct rpc_msg_t_ {
     dlq_hdr_t        qhdr;
@@ -168,6 +178,7 @@ typedef struct rpc_msg_t_ {
      */
     boolean          rpc_need_undo;   /* set by edit_config_validate */
     dlq_hdr_t        rpc_undoQ;       /* Q of rpc_undo_rec_t */
+    dlq_hdr_t        rpc_auditQ;       /* Q of rpc_audit_rec_t */
 
 } rpc_msg_t;
 
@@ -204,5 +215,13 @@ extern void
 
 extern void 
     rpc_clean_undorec (rpc_undo_rec_t *undo);
+
+extern rpc_audit_rec_t *
+    rpc_new_auditrec (const xmlChar *target,
+                      op_editop_t editop);
+
+extern void 
+    rpc_free_auditrec (rpc_audit_rec_t *auditrec);
+
 
 #endif            /* _H_rpc */

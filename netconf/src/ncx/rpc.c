@@ -103,6 +103,7 @@ rpc_msg_t *
     xml_msg_init_hdr(&msg->mhdr);
     dlq_createSQue(&msg->rpc_dataQ);
     dlq_createSQue(&msg->rpc_undoQ);
+    dlq_createSQue(&msg->rpc_auditQ);
 
     msg->rpc_input = val_new_value();
     if (!msg->rpc_input) {
@@ -158,8 +159,9 @@ rpc_msg_t *
 void 
     rpc_free_msg (rpc_msg_t *msg)
 {
-    rpc_undo_rec_t *undo;
-    val_value_t    *val;
+    rpc_undo_rec_t  *undo;
+    rpc_audit_rec_t *audit;
+    val_value_t     *val;
 
 #ifdef DEBUG
     if (!msg) {
@@ -195,6 +197,12 @@ void
     while (!dlq_empty(&msg->rpc_undoQ)) {
 	undo = (rpc_undo_rec_t *)dlq_deque(&msg->rpc_undoQ);
 	rpc_free_undorec(undo);
+    }
+
+    /* clean audit queue */
+    while (!dlq_empty(&msg->rpc_auditQ)) {
+	audit = (rpc_audit_rec_t *)dlq_deque(&msg->rpc_auditQ);
+	rpc_free_auditrec(audit);
     }
 
     m__free(msg);
@@ -354,6 +362,76 @@ void
     rpc_init_undorec(undo);
 
 } /* rpc_clean_undorec */
+
+
+/********************************************************************
+* FUNCTION rpc_new_auditrec
+*
+* Malloc and initialize a new rpc_audit_rec_t struct
+*
+* INPUTS:
+*   target == i-i string of edit target
+*   editop == edit operation enum
+*
+* RETURNS:
+*   pointer to struct or NULL or memory error
+*********************************************************************/
+rpc_audit_rec_t *
+    rpc_new_auditrec (const xmlChar *target,
+                      op_editop_t editop)
+{
+    rpc_audit_rec_t *auditrec;
+
+#ifdef DEBUG
+    if (target == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    auditrec = m__getObj(rpc_audit_rec_t);
+    if (!auditrec) {
+        return NULL;
+    }
+    memset(auditrec, 0x0, sizeof(rpc_audit_rec_t));
+    auditrec->target = xml_strdup(target);
+    if (auditrec->target == NULL) {
+        m__free(auditrec);
+        return NULL;
+    }
+    auditrec->editop = editop;
+    return auditrec;
+
+} /* rpc_new_auditrec */
+
+
+/********************************************************************
+* FUNCTION rpc_free_auditrec
+*
+* Free all the memory used by the specified rpc_audit_rec_t
+*
+* INPUTS:
+*   auditrec == rpc_audit_rec_t to clean and delete
+*
+* RETURNS:
+*   none
+*********************************************************************/
+void 
+    rpc_free_auditrec (rpc_audit_rec_t *auditrec)
+{
+#ifdef DEBUG
+    if (auditrec == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (auditrec->target) {
+        m__free(auditrec->target);
+    }
+    m__free(auditrec);
+
+} /* rpc_free_auditrec */
 
 
 /* END file rpc.c */

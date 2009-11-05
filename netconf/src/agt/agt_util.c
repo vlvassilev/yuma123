@@ -590,7 +590,6 @@ void
     xmlChar            *pathbuff;
     ses_total_stats_t  *totals;
 
-    (void)scb;
     errQ = (msghdr) ? &msghdr->errQ : NULL;
     totals = ses_get_total_stats();
     pathbuff = NULL;
@@ -612,7 +611,7 @@ void
 	if (nodetyp == NCX_NT_VAL && error_path) {
 	    log_debug3(" error-path: \n");
 	    val_dump_value((val_value_t *)error_path, 
-                           ses_indent_count(scb));
+                           (scb) ? ses_indent_count(scb) : NCX_DEF_INDENT);
 	    log_debug3("\n");
 	}
     }
@@ -775,14 +774,14 @@ void
     }
 #endif
 
-    (void)scb;
     errQ = (msghdr) ? &msghdr->errQ : NULL;
     totals = ses_get_total_stats();
 
     /* dump some error info to the log */
     if (LOGDEBUG3) {
 	log_debug3("\nagt_record_insert_error: ");
-	val_dump_value(errval, ses_indent_count(scb));
+	val_dump_value(errval, 
+                       (scb) ? ses_indent_count(scb) : NCX_DEF_INDENT);
 	log_debug3("\n");
     }
 
@@ -853,7 +852,6 @@ void
     }
 #endif
 
-    (void)scb;
     interr = ERR_NCX_UNIQUE_TEST_FAILED;
     errQ = (msghdr) ? &msghdr->errQ : NULL;
     totals = ses_get_total_stats();
@@ -861,7 +859,8 @@ void
     /* dump some error info to the log */
     if (LOGDEBUG3) {
 	log_debug3("\nagt_record_unique_error: ");
-	val_dump_value(errval, ses_indent_count(scb));
+	val_dump_value(errval, 
+                       (scb) ? ses_indent_count(scb) : NCX_DEF_INDENT);
 	log_debug3("\n");
     }
 

@@ -45,10 +45,6 @@ date         init     comment
 #include "agt_ncx.h"
 #endif
 
-#ifndef _H_agt_sys
-#include "agt_sys.h"
-#endif
-
 #ifndef _H_agt_util
 #include "agt_util.h"
 #endif
@@ -167,7 +163,7 @@ static status_t
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S                            *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -182,6 +178,7 @@ static status_t
 * INPUTS:
 *   editop == edit operation requested
 *   scb == session control block
+*   msg == RPC request message in progress
 *   node == top value node involved in edit
 *   res == result of edit operation
 *
@@ -191,10 +188,12 @@ static status_t
 static void
     handle_audit_record (op_editop_t editop,
                          ses_cb_t  *scb,
+                         rpc_msg_t *msg,
                          val_value_t *node,
                          status_t res)
 {
-    xmlChar  *ibuff, tbuff[TSTAMP_MIN_SIZE+1];
+    rpc_audit_rec_t   *auditrec;
+    xmlChar           *ibuff, tbuff[TSTAMP_MIN_SIZE+1];
 
     if (editop == OP_EDITOP_LOAD) {
         return;
@@ -226,9 +225,12 @@ static void
 
     /* generate a sysConfigChange notification */
     if (res == NO_ERR && ibuff) {
-        agt_sys_send_sysConfigChange(scb, 
-                                     ibuff, 
-                                     op_editop_name(editop));
+        auditrec = rpc_new_auditrec(ibuff, editop);
+        if (auditrec == NULL) {
+            log_error("\nError: malloc failed for audit record");
+        } else {
+            dlq_enque(auditrec, &msg->rpc_auditQ);
+        }
     }
 
     if (ibuff) {
@@ -266,10 +268,7 @@ static status_t
     agt_cb_fnset_t    *cbset;
     val_value_t       *val;
     status_t           res;
-
-    if (cbtyp > AGT_CB_ROLLBACK) {
-        return NO_ERR;
-    }
+    boolean            done;
 
     if (newnode) {
         val = newnode;
@@ -279,17 +278,57 @@ static status_t
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    if (val->obj->cbset) {
-        cbset = val->obj->cbset;
-        if (cbset->cbfn[cbtyp]) {
-            res = (*cbset->cbfn[cbtyp])
-                (scb, msg, cbtyp, editop, newnode, curnode);
+    if (LOGDEBUG3) {
+        log_debug3("\nChecking for %s user callback for %s edit on %s:%s",
+                   agt_cbtype_name(cbtyp),
+                   op_editop_name(editop),
+                   val_get_mod_name(val),
+                   val->name);
+    }
+
+    done = FALSE;
+    while (!done) {
+        cbset = NULL;
+        if (val->obj->cbset) {
+            cbset = val->obj->cbset;
+        }
+        if (cbset != NULL && cbset->cbfn[cbtyp] != NULL) {
+            if (LOGDEBUG2) {
+                log_debug2("\nFound %s user callback for %s:%s",
+                           agt_cbtype_name(cbtyp),
+                           op_editop_name(editop),
+                           val_get_mod_name(val),
+                           val->name);
+            }
+
+            res = (*cbset->cbfn[cbtyp])(scb, 
+                                        msg, 
+                                        cbtyp, 
+                                        editop, 
+                                        newnode, 
+                                        curnode);
             if (val->res == NO_ERR) {
                 val->res = res;
             }
+
+            if (LOGDEBUG2 && res != NO_ERR) {
+                log_debug("\n%s user callback failed (%s) for %s on %s:%s",
+                          agt_cbtype_name(cbtyp),
+                          get_error_string(res),
+                          op_editop_name(editop),
+                          val_get_mod_name(val),
+                          val->name);
+            }
             return res;
+        } else if (val->parent != NULL &&
+                   !obj_is_root(val->parent->obj) &&
+                   val_get_nsid(val) == val_get_nsid(val->parent)) {
+            val = val->parent;
+        } else {
+            done = TRUE;
         }
     }
+                   
     return NO_ERR;
 
 } /* handle_user_callback */
@@ -824,8 +863,8 @@ static status_t
     }
 
 #ifdef AGT_VAL_DEBUG
-    if (LOGDEBUG3) {
-        log_debug3("\napply_write_val: %s start", name);
+    if (LOGDEBUG4) {
+        log_debug4("\napply_write_val: %s start", name);
     }
 #endif
 
@@ -901,14 +940,16 @@ static status_t
         /* check the user callbacks before altering
          * the database
          */
-        res = handle_user_callback(AGT_CB_APPLY, 
-                                   editop,
-                                   scb, 
-                                   msg, 
-                                   newval, 
-                                   curval);
-        if (res != NO_ERR) {
-            return res;
+        if (target->cfg_id == NCX_CFGID_RUNNING) {
+            res = handle_user_callback(AGT_CB_APPLY, 
+                                       editop,
+                                       scb, 
+                                       msg, 
+                                       newval, 
+                                       curval);
+            if (res != NO_ERR) {
+                return res;
+            }
         }
 
         if (msg->rpc_need_undo) {
@@ -927,6 +968,7 @@ static status_t
         if (target->cfg_id == NCX_CFGID_RUNNING) {
             handle_audit_record(cur_editop, 
                                 scb, 
+                                msg,
                                 (curval) ? curval : newval,
                                 res);
         }
@@ -1043,8 +1085,6 @@ static status_t
 * Execute the AGT_CB_TEST_APPLY phase
 *
 * INPUTS:
-*   scb == session control block
-*   msg == incoming rpc_msg_t in progress
 *   parent == parent value of curval and newval
 *   newval == new value to apply
 *   curval == current instance of value (may be NULL if none)
@@ -1061,9 +1101,7 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    test_apply_write_val (ses_cb_t *scb,
-                          rpc_msg_t *msg,
-                          val_value_t  *parent,
+    test_apply_write_val (val_value_t  *parent,
                           val_value_t  *newval,
                           val_value_t  *curval,
                           boolean      *done)
@@ -1169,22 +1207,6 @@ static status_t
             log_debug3("\ntest_apply_write_val: %s start", newval->name);
         }
 #endif
-
-        /* check the user callbacks before altering
-         * the database
-         */
-        res = handle_user_callback(AGT_CB_TEST_APPLY, 
-                                   newval->editvars->editop,
-                                   scb, 
-                                   msg, 
-                                   newval, 
-                                   curval);
-        if (res != NO_ERR) {
-            if (testval) {
-                val_free_value(testval);
-            }
-            return res;
-        }
 
         /* make sure the node is not a virtual value */
         if (curval && val_is_virtual(curval)) {
@@ -1408,9 +1430,7 @@ static status_t
         } else {
             curparent = NULL;
         }
-        res = test_apply_write_val(scb,
-                                   msg,
-                                   curparent, 
+        res = test_apply_write_val(curparent, 
                                    newval, 
                                    curval, 
                                    &done);
@@ -1518,10 +1538,6 @@ static status_t
                                        (curval != NULL));
         }
 
-        if (res == NO_ERR && newval->btyp == NCX_BT_LIST) {
-            /**** unique test ****/
-        }
-
         if (res == NO_ERR) {
             res = check_insert_attr(scb, msg, newval);
             CHK_EXIT(res, retres);
@@ -1540,11 +1556,23 @@ static status_t
                              newval);
             CHK_EXIT(res, retres);
         }
+
+        /* check the user callback only if there is some
+         * operation in affect already
+         */
+        if (res == NO_ERR && 
+            newval->editvars->editop != OP_EDITOP_NONE) {
+
+            res = handle_user_callback(AGT_CB_VALIDATE, 
+                                       newval->editvars->editop,
+                                       scb, 
+                                       msg, 
+                                       newval, 
+                                       curval);
+        }
         break;
     case AGT_CB_TEST_APPLY:
-        retres = test_apply_write_val(scb,
-                                      msg,
-                                      newval->editvars->curparent, 
+        retres = test_apply_write_val(newval->editvars->curparent, 
                                       newval, 
                                       curval, 
                                       &done);
@@ -3448,7 +3476,7 @@ static void
 *********************************************************************/
 static status_t
     delete_dead_nodes (ses_cb_t  *scb,
-                       xml_msg_hdr_t *msg,
+                       rpc_msg_t *msg,
                        val_value_t *root,
                        boolean configmode,
                        boolean npcontainers)
@@ -3472,7 +3500,7 @@ static status_t
 
     if (npcontainers) {
         delete_empty_npcontainers(scb, 
-                                  msg, 
+                                  (msg) ? &msg->mhdr : NULL,
                                   root, 
                                   root, 
                                   configmode,
@@ -3498,6 +3526,7 @@ static status_t
             if (isrunning) {
                 handle_audit_record(OP_EDITOP_DELETE, 
                                     scb, 
+                                    msg,
                                     deleteval,
                                     NO_ERR);
             }
@@ -3510,7 +3539,7 @@ static status_t
 
         /* keep checking the root until no more deletes */
         res = when_stmt_check(scb, 
-                              msg, 
+                              (msg) ? &msg->mhdr : NULL,
                               root, 
                               root, 
                               configmode,
@@ -3533,14 +3562,14 @@ static status_t
                               deleteval->name);
                 }
 #endif
-
                 if (isrunning) {
                     handle_audit_record(OP_EDITOP_DELETE, 
                                         scb, 
+                                        msg,
                                         deleteval,
                                         NO_ERR);
                 }
-                
+
                 val_free_value(deleteval);
             }
         } else {
@@ -3912,26 +3941,26 @@ status_t
 * 
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
-*   msg == xml_msg_hdr t from msg in progress 
+*   msg == RPC msg in progress 
 *       == NULL MEANS NO RPC-ERRORS ARE RECORDED
 *   root == val_value_t for the target config being checked
 *
 * OUTPUTS:
 *   if msg not NULL:
-*      msg->msg_errQ may have rpc_err_rec_t structs added to it 
-*      which must be freed by the called with the 
-*      rpc_err_free_record function
+*      msg->mhdr.msg_errQ may have rpc_err_rec_t 
+*      structs added to it which must be freed by the 
+*      caller with the rpc_err_free_record function
 *
 * RETURNS:
 *   status of the operation, NO_ERR if no validation errors found
 *********************************************************************/
 status_t 
     agt_val_root_check (ses_cb_t *scb,
-                        xml_msg_hdr_t *msg,
+                        rpc_msg_t *msg,
                         val_value_t *root)
 {
-    ncx_module_t    *mod;
-    obj_template_t  *obj, *chobj;
+    ncx_module_t          *mod;
+    obj_template_t        *obj, *chobj;
     val_value_t           *chval;
     status_t               res, retres;
     xmlns_id_t             ncxid;
@@ -3964,7 +3993,7 @@ status_t
 
     /* check the instance counts for the subtrees that are present */
     res = agt_val_instance_check(scb, 
-                                 msg, 
+                                 (msg) ? &msg->mhdr : NULL,
                                  root, 
                                  root, 
                                  NCX_LAYER_CONTENT);
@@ -3979,10 +4008,15 @@ status_t
             continue;
         }
 
-        res = must_stmt_check(scb, msg, root, chval);
+        res = must_stmt_check(scb, 
+                              (msg) ? &msg->mhdr : NULL, 
+                              root, 
+                              chval);
         CHK_EXIT(res, retres);
 
-        res = unique_stmt_check(scb, msg, chval);
+        res = unique_stmt_check(scb, 
+                                (msg) ? &msg->mhdr : NULL, 
+                                chval);
         CHK_EXIT(res, retres);
     }
 
@@ -4014,14 +4048,14 @@ status_t
 
             if (chobj->objtype == OBJ_TYP_CHOICE) {
                 res = choice_check_agt(scb, 
-                                       msg, 
+                                       (msg) ? &msg->mhdr : NULL, 
                                        chobj, 
                                        root, 
                                        root, 
                                        NCX_LAYER_CONTENT);
             } else {
                 res = instance_check(scb, 
-                                     msg, 
+                                     (msg) ? &msg->mhdr : NULL, 
                                      chobj, 
                                      root, 
                                      root, 
@@ -4124,7 +4158,7 @@ status_t
                           copyroot);
 
     if (res == NO_ERR) {
-        res = agt_val_root_check(scb, &msg->mhdr, copyroot);
+        res = agt_val_root_check(scb, msg, copyroot);
     }
 
     val_free_value(copyroot);
@@ -4309,7 +4343,7 @@ status_t
      */
     if (res == NO_ERR) {
         res = delete_dead_nodes(scb, 
-                                &msg->mhdr, 
+                                msg, 
                                 target->root, 
                                 TRUE,
                                 FALSE);
@@ -4370,6 +4404,7 @@ status_t
     no_startup_errors = dlq_empty(&target->load_errQ);
     profile = agt_get_profile();
 
+#ifdef ALLOW_SKIP_EMPTY_COMMIT
     /* usually only save if the source config was touched */
     if (!cfg_get_dirty_flag(source)) {
         /* no need to merge the candidate into the running
@@ -4414,6 +4449,7 @@ status_t
         }
         return res;
     }
+#endif
 
     /* check if any config nodes have been deleted in the target */
     res = apply_commit_deletes(scb, 

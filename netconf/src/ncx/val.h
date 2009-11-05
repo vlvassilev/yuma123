@@ -245,6 +245,8 @@ typedef struct val_editvars_t_ {
     struct val_value_t_ *insertval;                   /* back-ptr */
     boolean        iskey;                     /* T: key, F: value */
     boolean        operset;                  /* nc:operation here */
+    void          *pcookie;                /* user pointer cookie */
+    int            icookie;                /* user integer cookie */
 } val_editvars_t;
 
 

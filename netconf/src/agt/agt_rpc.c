@@ -47,6 +47,10 @@ date         init     comment
 #include  "agt_ses.h"
 #endif
 
+#ifndef _H_agt_sys
+#include  "agt_sys.h"
+#endif
+
 #ifndef _H_agt_util
 #include  "agt_util.h"
 #endif
@@ -1413,6 +1417,13 @@ void
     if (cbset && cbset->acb[AGT_RPC_PH_POSTRPY]) {
         msg->rpc_agt_state = AGT_RPC_PH_POSTRPY;
         (void)(*cbset->acb[AGT_RPC_PH_POSTRPY])(scb, msg, &method);
+    }
+
+    /* check if there is any auditQ because changes to 
+     * the running config were made
+     */
+    if (!dlq_empty(&msg->rpc_auditQ)) {
+        agt_sys_send_sysConfigChange(scb, &msg->rpc_auditQ);
     }
 
     /* only reset the session state to idle if was not changed

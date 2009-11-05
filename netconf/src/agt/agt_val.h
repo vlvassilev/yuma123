@@ -113,7 +113,7 @@ extern status_t
 
 extern status_t 
     agt_val_root_check (ses_cb_t *scb,
-			xml_msg_hdr_t *msg,
+			rpc_msg_t *msg,
 			val_value_t *root);
 
 extern status_t 

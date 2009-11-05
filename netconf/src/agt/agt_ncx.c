@@ -1429,7 +1429,7 @@ static status_t
     }
 
     if (res == NO_ERR) {
-        res = agt_val_root_check(scb, &msg->mhdr, rootval);
+        res = agt_val_root_check(scb, msg, rootval);
     }
 
     return res;
@@ -1485,7 +1485,7 @@ static status_t
 
             if (res == NO_ERR) {
                 res = agt_val_root_check(scb, 
-                                         &msg->mhdr, 
+                                         msg, 
                                          candidate->root);
                 if (res != NO_ERR) {
                     errdone = TRUE;
@@ -1943,7 +1943,7 @@ static status_t
                                  msg->rpc_top_editop);
 
     if (res == NO_ERR) {
-        res = agt_val_root_check(scb, &msg->mhdr, val);
+        res = agt_val_root_check(scb, msg, val);
     }
     msg->rpc_user2 = val;
 

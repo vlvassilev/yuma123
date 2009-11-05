@@ -22,9 +22,9 @@ leaf /sysStartup/bootError/error-info
 notification /sysConfigChange
 leaf /sysConfigChange/userName
 leaf /sysConfigChange/sessionId
-list /sysConfigChange/editList
-leaf /sysConfigChange/editList/target
-leaf /sysConfigChange/editList/operation
+list /sysConfigChange/edit
+leaf /sysConfigChange/edit/target
+leaf /sysConfigChange/edit/operation
 notification /sysCapabilityChange
 container /sysCapabilityChange/changed-by
 choice /sysCapabilityChange/changed-by/server-or-user
@@ -199,11 +199,15 @@ date         init     comment
 #define system_N_sysNetconfServerId (const xmlChar *)"sysNetconfServerId"
 
 #define system_N_sysStartup (const xmlChar *)"sysStartup"
+
 #define system_N_sysConfigChange (const xmlChar *)"sysConfigChange"
+#define system_N_edit (const xmlChar *)"edit"
+
 #define system_N_sysCapabilityChange (const xmlChar *)"sysCapabilityChange"
 #define system_N_sysSessionStart (const xmlChar *)"sysSessionStart"
 #define system_N_sysSessionEnd (const xmlChar *)"sysSessionEnd"
 #define system_N_sysConfirmedCommit (const xmlChar *)"sysConfirmedCommit"
+
 
 
 #define system_N_userName (const xmlChar *)"userName"
@@ -1076,8 +1080,8 @@ void
 *
 * INPUTS:
 *   scb == session control block to use for payload values
-*   target == instance-identifier of edit target
-*   operation == nc:operation attribute value
+*   auditrecQ == Q of rpc_audit_rec_t structs to use
+*                for the notification payload contents
 *
 * OUTPUTS:
 *   notification generated and added to notificationQ
@@ -1085,15 +1089,16 @@ void
 *********************************************************************/
 void
     agt_sys_send_sysConfigChange (const ses_cb_t *scb,
-				  const xmlChar *target,
-				  const xmlChar *operation)
+				  dlq_hdr_t *auditrecQ)
 {
     agt_not_msg_t         *not;
-    val_value_t           *leafval;
+    rpc_audit_rec_t       *auditrec;
+    val_value_t           *leafval, *listval;
+    obj_template_t        *listobj;
     status_t               res;
 
 #ifdef DEBUG
-    if (!scb || !target || !operation) {
+    if (!scb || !auditrecQ) {
 	SET_ERROR(ERR_INTERNAL_PTR);
 	return;
     }
@@ -1113,28 +1118,52 @@ void
 
     add_common_session_parms(scb, not);
 
-    /* add sysConfigChange/target */
-    leafval = agt_make_leaf(sysConfigChangeobj,
-			    system_N_target,
-			    target,
-			    &res);
-    if (leafval) {
-	agt_not_add_to_payload(not, leafval);
+    listobj = obj_find_child(sysConfigChangeobj,
+                             system_N_system,
+                             system_N_edit);
+    if (listobj == NULL) {
+        SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     } else {
-	log_error("\nError: cannot make payload leaf (%s)",
-		  get_error_string(res));
-    }
+        for (auditrec = (rpc_audit_rec_t *)dlq_firstEntry(auditrecQ);
+             auditrec != NULL;
+             auditrec = (rpc_audit_rec_t *)dlq_nextEntry(auditrec)) {
 
-    /* add sysConfigChange/operation */
-    leafval = agt_make_leaf(sysConfigChangeobj,
-			    system_N_operation,
-			    operation,
-			    &res);
-    if (leafval) {
-	agt_not_add_to_payload(not, leafval);
-    } else {
-	log_error("\nError: cannot make payload leaf (%s)",
-		  get_error_string(res));
+            /* add sysConfigChange/edit */
+            listval = val_new_value();
+            if (listval == NULL) {
+                log_error("\nError: cannot make auditrec payload (%s)",
+                          get_error_string(ERR_INTERNAL_MEM));
+            } else {
+                val_init_from_template(listval, listobj);
+
+                /* pass off listval malloc here */
+                agt_not_add_to_payload(not, listval);            
+
+                /* add sysConfigChange/edit/target */
+                leafval = agt_make_leaf(listobj,
+                                        system_N_target,
+                                        auditrec->target,
+                                        &res);
+                if (leafval) {
+                    val_add_child(leafval, listval);
+                } else {
+                    log_error("\nError: cannot make payload leaf (%s)",
+                              get_error_string(res));
+                }
+
+                /* add sysConfigChange/edit/operation */
+                leafval = agt_make_leaf(listobj,
+                                        system_N_operation,
+                                        op_editop_name(auditrec->editop),
+                                        &res);
+                if (leafval) {
+                    val_add_child(leafval, listval);
+                } else {
+                    log_error("\nError: cannot make payload leaf (%s)",
+                              get_error_string(res));
+                }
+            }
+        }
     }
 
     agt_not_queue_notification(not);

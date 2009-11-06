@@ -72,8 +72,8 @@
          <if:name>pan0</if:name>
       </if:interface>
    </if:interfaces>
-   <t:uint16.1 xmlns:t="http://netconfcentral.com/ns/test">55</t:uint16.1>
-   <t:int8.1 xmlns:t="http://netconfcentral.com/ns/test">0</t:int8.1>
+   <t:uint16.1 xmlns:t="http://netconfcentral.com/ns/test">1234</t:uint16.1>
+   <t:int8.1 xmlns:t="http://netconfcentral.com/ns/test">3</t:int8.1>
    <t:int16.1 xmlns:t="http://netconfcentral.com/ns/test">44</t:int16.1>
    <t:int32.1 xmlns:t="http://netconfcentral.com/ns/test">99</t:int32.1>
    <t:int64.1 xmlns:t="http://netconfcentral.com/ns/test">55555</t:int64.1>

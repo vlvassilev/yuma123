@@ -411,8 +411,6 @@ static status_t
 #endif
 
     switch (cbtyp) {
-    case AGT_CB_LOAD_MOD:
-    case AGT_CB_UNLOAD_MOD:
     case AGT_CB_VALIDATE:
     case AGT_CB_APPLY:
         break;

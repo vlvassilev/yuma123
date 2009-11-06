@@ -180,7 +180,6 @@ static status_t
 *   scb == session control block
 *   msg == RPC request message in progress
 *   node == top value node involved in edit
-*   res == result of edit operation
 *
 * OUTPUTS:
 *   log message generated if log level set to LOG_INFO or higher
@@ -189,8 +188,7 @@ static void
     handle_audit_record (op_editop_t editop,
                          ses_cb_t  *scb,
                          rpc_msg_t *msg,
-                         val_value_t *node,
-                         status_t res)
+                         val_value_t *node)
 {
     rpc_audit_rec_t   *auditrec;
     xmlChar           *ibuff, tbuff[TSTAMP_MIN_SIZE+1];
@@ -212,28 +210,26 @@ static void
 
     if (LOGINFO) {
         log_info("\nedit-config: operation %s on session %d by %s@%s"
-                 "\n  at %s on target 'running' with result (%s)"
+                 "\n  at %s on target 'running'"
                  "\n  data: %s",
                  op_editop_name(editop),
                  scb->sid, 
-                 scb->username,
-                 scb->peeraddr,
+                 (scb->username) ? 
+                 scb->username : (const xmlChar *)"nobody",
+                 (scb->peeraddr) ? 
+                 scb->peeraddr : (const xmlChar *)"localhost",
                  tbuff,
-                 get_error_string(res),
                  (ibuff) ? (const char *)ibuff : "--");
     }
 
     /* generate a sysConfigChange notification */
-    if (res == NO_ERR && ibuff) {
+    if (ibuff) {
         auditrec = rpc_new_auditrec(ibuff, editop);
         if (auditrec == NULL) {
             log_error("\nError: malloc failed for audit record");
         } else {
             dlq_enque(auditrec, &msg->rpc_auditQ);
         }
-    }
-
-    if (ibuff) {
         m__free(ibuff);
     }
 
@@ -278,6 +274,10 @@ static status_t
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
+    if (obj_is_root(val->obj)) {
+        return NO_ERR;
+    }
+
     if (LOGDEBUG3) {
         log_debug3("\nChecking for %s user callback for %s edit on %s:%s",
                    agt_cbtype_name(cbtyp),
@@ -320,15 +320,16 @@ static status_t
                           val->name);
             }
             return res;
-        } else if (val->parent != NULL &&
+        } else if (obj_is_leafy(val->obj) &&
+                   (val->parent != NULL) &&
                    !obj_is_root(val->parent->obj) &&
-                   val_get_nsid(val) == val_get_nsid(val->parent)) {
+                   (val_get_nsid(val) == val_get_nsid(val->parent))) {
             val = val->parent;
         } else {
             done = TRUE;
         }
     }
-                   
+
     return NO_ERR;
 
 } /* handle_user_callback */
@@ -843,13 +844,14 @@ static status_t
     rpc_undo_rec_t   *undo;
     status_t          res;
     op_editop_t       cur_editop;
-    boolean           applyhere, freenew;
+    boolean           applyhere, freenew, add_defs_done;
     int               retval;
 
     res = NO_ERR;
     freenew = FALSE;
     undo = NULL;
     name = NULL;
+    add_defs_done = FALSE;
 
     if (newval) {
         cur_editop = newval->editvars->editop;
@@ -869,10 +871,10 @@ static status_t
 #endif
 
     /* check if this node needs the edit operation applied */
-    if (*done) {
+    if (*done || (newval && obj_is_root(newval->obj))) {
         applyhere = FALSE;
     } else if (editop == OP_EDITOP_COMMIT) {
-        applyhere = val_get_dirty_flag(newval);
+        applyhere = (newval) ? val_get_dirty_flag(newval) : FALSE;
         *done = applyhere;
     } else if (editop == OP_EDITOP_DELETE) {
         applyhere = TRUE;
@@ -894,6 +896,7 @@ static status_t
                     *done = TRUE;
                     return res;
                 }
+                add_defs_done = TRUE;
                 val_set_canonical_order(newval);
                 retval = val_compare_ex(newval, curval, TRUE);
                 if (retval == 0) {
@@ -923,6 +926,19 @@ static status_t
         }
     }
 
+    if (applyhere) {
+        /* check corner case applying to the config root */
+        if (newval && obj_is_root(newval->obj)) {
+            ;
+        } else if (!add_defs_done && editop != OP_EDITOP_DELETE) {
+            res = val_add_defaults(newval, FALSE);
+            if (res != NO_ERR) {
+                log_error("\nError: add defaults failed");
+                applyhere = FALSE;
+            }
+        }
+    }
+
     /* apply the requested edit operation */
     if (applyhere) {
 
@@ -931,11 +947,6 @@ static status_t
             log_debug2("\napply_write_val: %s applyhere", name);
         }
 #endif
-
-        /* check corner case applying to the config root */
-        if (newval && obj_is_root(newval->obj)) {
-
-        }
 
         /* check the user callbacks before altering
          * the database
@@ -952,25 +963,26 @@ static status_t
             }
         }
 
-        if (msg->rpc_need_undo) {
-            undo = add_undo_node(msg, 
-                                 editop,
-                                 newval,
-                                 curval, 
-                                 parent, 
-                                 NO_ERR, 
-                                 &res);
-            if (res != NO_ERR) {
-                return res;
-            }
+        undo = add_undo_node(msg, 
+                             editop,
+                             newval,
+                             curval, 
+                             parent, 
+                             NO_ERR, 
+                             &res);
+        if (res != NO_ERR) {
+            return res;
+        }
+
+        if (!msg->rpc_need_undo) {
+            undo = NULL;
         }
 
         if (target->cfg_id == NCX_CFGID_RUNNING) {
             handle_audit_record(cur_editop, 
                                 scb, 
                                 msg,
-                                (curval) ? curval : newval,
-                                res);
+                                (curval) ? curval : newval);
         }
 
         if (editop != OP_EDITOP_LOAD) {
@@ -1040,9 +1052,6 @@ static status_t
             val_set_canonical_order(parent);
             break;
         case OP_EDITOP_LOAD:
-            val_remove_child(newval);
-            val_set_canonical_order(newval);
-            res = cfg_apply_load_root(target, newval);
             break;
         case OP_EDITOP_DELETE:
             if (curval) {
@@ -1066,6 +1075,18 @@ static status_t
             move_mergedlist_node(newval, curval, parent, undo);
         } else {
             SET_ERROR(ERR_INTERNAL_VAL);
+            freenew = TRUE;
+        }
+    }
+
+    if (res == NO_ERR && 
+        newval &&
+        obj_is_root(newval->obj) &&
+        editop == OP_EDITOP_LOAD) {
+        val_remove_child(newval);
+        /* val_set_canonical_order(newval); */
+        res = cfg_apply_load_root(target, newval);
+        if (res != NO_ERR) {
             freenew = TRUE;
         }
     }
@@ -3527,8 +3548,7 @@ static status_t
                 handle_audit_record(OP_EDITOP_DELETE, 
                                     scb, 
                                     msg,
-                                    deleteval,
-                                    NO_ERR);
+                                    deleteval);
             }
 
             val_free_value(deleteval);
@@ -3566,8 +3586,7 @@ static status_t
                     handle_audit_record(OP_EDITOP_DELETE, 
                                         scb, 
                                         msg,
-                                        deleteval,
-                                        NO_ERR);
+                                        deleteval);
                 }
 
                 val_free_value(deleteval);
@@ -4313,8 +4332,7 @@ status_t
                           pducfg, 
                           target->root);
 
-    /* check if undo was in effect */
-    if (msg->rpc_need_undo) {
+    if (target->cfg_id == NCX_CFGID_RUNNING) {
         if (res==NO_ERR) {
             /* complete the operation */
             res = handle_callback(AGT_CB_COMMIT, 
@@ -4334,7 +4352,7 @@ status_t
                                   pducfg,
                                   target->root);
         }
-    }  /* else there was no rollback, so APPLY is the final phase */
+    }
 
 
     /* first need to delete all the false when-stmt
@@ -4482,28 +4500,25 @@ status_t
         }
     }
 
-    /* check if undo was in effect */
-    if (msg->rpc_need_undo) {
-        if (res==NO_ERR) {
-            /* complete the operation */
-            res = handle_callback(AGT_CB_COMMIT,
-                                  OP_EDITOP_COMMIT, 
-                                  scb, 
-                                  msg, 
-                                  target, 
-                                  source->root,
-                                  target->root);
-        } else {
-            /* rollback the operation */
-            res = handle_callback(AGT_CB_ROLLBACK,
-                                  OP_EDITOP_COMMIT, 
-                                  scb, 
-                                  msg, 
-                                  target, 
-                                  source->root,
-                                  target->root);
-        }
-    }  /* else there was no rollback, so APPLY is the final phase */
+    if (res==NO_ERR) {
+        /* complete the operation */
+        res = handle_callback(AGT_CB_COMMIT,
+                              OP_EDITOP_COMMIT, 
+                              scb, 
+                              msg, 
+                              target, 
+                              source->root,
+                              target->root);
+    } else {
+        /* rollback the operation */
+        res = handle_callback(AGT_CB_ROLLBACK,
+                              OP_EDITOP_COMMIT, 
+                              scb, 
+                              msg, 
+                              target, 
+                              source->root,
+                              target->root);
+    }
 
     if (res == NO_ERR && !profile->agt_has_startup) {
         if (save_nvstore) {

@@ -159,9 +159,7 @@ date         init     comment
 #define nacm_N_rules (const xmlChar *)"rules"
 #define nacm_N_userName (const xmlChar *)"userName"
 
-
-#define nacm_OID_group (const xmlChar *)"/nacm/groups/group"
-#define nacm_OID_moduleRule  (const xmlChar *)"/nacm/rules/moduleRule"
+#define nacm_OID_nacm (const xmlChar *)"/nacm"
 
 #define nacm_E_noRuleDefault_permit (const xmlChar *)"permit"
 #define nacm_E_noRuleDefault_deny   (const xmlChar *)"deny"
@@ -1462,62 +1460,9 @@ static boolean
 
 
 /********************************************************************
-* FUNCTION nacm_group_callback
+* FUNCTION nacm_nacm_callback
 *
-* nacm callback function [test]
-*
-* INPUTS:
-*    see agt/agt_cb.h  (agt_cb_pscb_t)
-*
-* RETURNS:
-*    status
-*********************************************************************/
-static status_t 
-    nacm_group_callback (ses_cb_t  *scb,
-                         rpc_msg_t  *msg,
-                         agt_cbtyp_t cbtyp,
-                         op_editop_t  editop,
-                         val_value_t  *newval,
-                         val_value_t  *curval)
-{
-
-    (void)scb;
-    (void)msg;
-    (void)editop;
-    (void)curval;
-
-#ifdef AGT_ACM_DEBUG
-    if (LOGDEBUG) {
-        log_debug("\n\n**** agt_acm_cb: (G) op:%s, n:%s s:%s\n", 
-                  op_editop_name(editop),
-                  newval->name,
-                  agt_cbtype_name(cbtyp));
-    }
-#endif
-
-    switch (cbtyp) {
-    case AGT_CB_LOAD_MOD:
-    case AGT_CB_UNLOAD_MOD:
-    case AGT_CB_VALIDATE:
-    case AGT_CB_APPLY:
-        break;
-    case AGT_CB_COMMIT:
-        break;
-    case AGT_CB_ROLLBACK:
-        break;
-    default:
-        return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-    
-    return NO_ERR;
-
-} /* nacm_group_callback */
-
-
-/********************************************************************
-* FUNCTION nacm_rule_callback
-*
-* nacm callback function [test]
+* top-level nacm callback function
 *
 * INPUTS:
 *    see agt/agt_cb.h  (agt_cb_pscb_t)
@@ -1526,45 +1471,57 @@ static status_t
 *    status
 *********************************************************************/
 static status_t 
-    nacm_rule_callback (ses_cb_t  *scb,
+    nacm_nacm_callback (ses_cb_t  *scb,
                         rpc_msg_t  *msg,
                         agt_cbtyp_t cbtyp,
                         op_editop_t  editop,
                         val_value_t  *newval,
                         val_value_t  *curval)
 {
+    status_t   res;
 
     (void)scb;
     (void)msg;
-    (void)editop;
     (void)curval;
 
 #ifdef AGT_ACM_DEBUG
-    if (LOGDEBUG) {
-        log_debug("\n\n**** agt_acm_cb: (R) op:%s, n:%s s:%s\n", 
-                  op_editop_name(editop),
-                  newval->name,
-                  agt_cbtype_name(cbtyp));
+    if (LOGDEBUG2) {
+        log_debug2("\nServer %s callback: t: %s:%s, op:%s\n", 
+                   agt_cbtype_name(cbtyp),
+                   val_get_mod_name(newval),
+                   newval->name,
+                   op_editop_name(editop));
     }
 #endif
 
+    res = NO_ERR;
+
     switch (cbtyp) {
-    case AGT_CB_LOAD_MOD:
-    case AGT_CB_UNLOAD_MOD:
     case AGT_CB_VALIDATE:
+        break;
     case AGT_CB_APPLY:
         break;
     case AGT_CB_COMMIT:
+        switch (editop) {
+        case OP_EDITOP_LOAD:
+        case OP_EDITOP_MERGE:
+        case OP_EDITOP_REPLACE:
+        case OP_EDITOP_CREATE:
+        case OP_EDITOP_DELETE:
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
         break;
     case AGT_CB_ROLLBACK:
         break;
     default:
-        return SET_ERROR(ERR_INTERNAL_VAL);
+        res = SET_ERROR(ERR_INTERNAL_VAL);
     }
     
-    return NO_ERR;
+    return res;
 
-} /* nacm_rule_callback */
+} /* nacm_nacm_callback */
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -1611,19 +1568,10 @@ status_t
     acmode = AGT_ACMOD_ENFORCING;
     agt_acm_init_done = TRUE;
 
-    /* these callbacks are not used yet */
     res = agt_cb_register_callback(AGT_ACM_MODULE,
-                                   nacm_OID_group,
+                                   nacm_OID_nacm,
                                    NULL,
-                                   nacm_group_callback);
-    if (res != NO_ERR) {
-        return res;
-    }
-
-    res = agt_cb_register_callback(AGT_ACM_MODULE,
-                                   nacm_OID_moduleRule,
-                                   NULL,
-                                   nacm_rule_callback);
+                                   nacm_nacm_callback);
     if (res != NO_ERR) {
         return res;
     }
@@ -1657,8 +1605,8 @@ status_t
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
+    res = NO_ERR;
     profile = agt_get_profile();
-
     superuser = profile->agt_superuser;
 
     if (profile->agt_accesscontrol_enum != AGT_ACMOD_NONE) {
@@ -1682,10 +1630,10 @@ status_t
         /* add /nacm/noRule*Default if they
          * are not already set
          */
-        res = val_add_defaults(nacmval, FALSE);
+        /* res = val_add_defaults(nacmval, FALSE); */
         
         /* minimum init done OK, so just exit */
-        return res;
+        return NO_ERR;
     }
         
     /* did not find the /nacm node so create one;
@@ -1732,10 +1680,7 @@ void
         return;
     }
 
-    agt_cb_unregister_callbacks(AGT_ACM_MODULE,        
-                                nacm_OID_group);
-    agt_cb_unregister_callbacks(AGT_ACM_MODULE,        
-                                nacm_OID_moduleRule);
+    agt_cb_unregister_callbacks(AGT_ACM_MODULE, nacm_OID_nacm);
     nacmmod = NULL;
     agt_acm_init_done = FALSE;
 

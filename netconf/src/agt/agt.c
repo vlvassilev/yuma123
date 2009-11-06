@@ -778,10 +778,6 @@ const xmlChar *
     agt_cbtype_name (agt_cbtyp_t cbtyp)
 {
     switch (cbtyp) {
-    case AGT_CB_LOAD_MOD:
-        return (const xmlChar *)"load-module";
-    case AGT_CB_UNLOAD_MOD:
-        return (const xmlChar *)"unload-module";
     case AGT_CB_VALIDATE:
         return (const xmlChar *)"validate";
     case AGT_CB_APPLY:

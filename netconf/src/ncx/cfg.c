@@ -1439,9 +1439,11 @@ status_t
     if (cfg->load_time) {
 	cfg->last_ch_time = xml_strdup(cfg->load_time);
 	if (!cfg->last_ch_time) {
+            cfg->root = NULL;
 	    return ERR_INTERNAL_MEM;
 	}
     } else {
+        cfg->root = NULL;
 	return ERR_INTERNAL_MEM;
     }
 

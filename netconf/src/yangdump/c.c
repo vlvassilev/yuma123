@@ -721,6 +721,18 @@ static void
         ses_putstr_indent(scb,
                           (const xmlChar *)"(void)scb;",
                           indent);
+
+        if (!hasinput) {
+            ses_putchar(scb, '\n');
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"/* remove the next line "
+                              "if msg is used */",
+                              indent);
+            ses_putstr_indent(scb,
+                              (const xmlChar *)"(void)msg;",
+                              indent);
+        }
+
         ses_putchar(scb, '\n');
         ses_putstr_indent(scb,
                           (const xmlChar *)"/* remove the next line "
@@ -1045,9 +1057,7 @@ static void
                     const yangdump_cvtparms_t *cp)
 {
     obj_template_t    *obj;
-    boolean            first;
 
-    first = TRUE;
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
          obj != NULL;
          obj = (obj_template_t *)dlq_nextEntry(obj)) {
@@ -1056,11 +1066,6 @@ static void
             !obj_is_enabled(obj) ||
             obj_is_abstract(obj)) {
             continue;
-        }
-
-        if (first) {
-            ses_putchar(scb, '\n');
-            first = FALSE;
         }
 
         write_c_notif(scb, obj, cp);

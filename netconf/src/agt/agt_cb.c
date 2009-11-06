@@ -158,7 +158,7 @@ static agt_cb_set_t *
     callback->loadstatus = AGTCB_STAT_INIT_DONE;
     callback->status = NO_ERR;
 
-    for (cbtyp = AGT_CB_LOAD_MOD;
+    for (cbtyp = AGT_CB_VALIDATE;
 	 cbtyp <= AGT_CB_ROLLBACK;
 	 cbtyp++) {
 	callback->cbset.cbfn[cbtyp] = cbset->cbfn[cbtyp];
@@ -580,7 +580,7 @@ status_t
     }
 
     memset(&cbset, 0x0, sizeof(agt_cb_fnset_t));
-    for (cbtyp = AGT_CB_LOAD_MOD;
+    for (cbtyp = AGT_CB_VALIDATE;
 	 cbtyp <= AGT_CB_ROLLBACK;
 	 cbtyp++) {
 	cbset.cbfn[cbtyp] = cbfn;
@@ -602,7 +602,7 @@ status_t
     /* data structures in place, now check if the module
      * is loaded yet
      */
-    mod = ncx_find_module(modname, NULL);
+    mod = ncx_find_module(modname, version);
     if (!mod) {
 	/* module not present yet */
 	return NO_ERR;
@@ -685,7 +685,7 @@ status_t
     /* data structures in place, now check if the module
      * is loaded yet
      */
-    mod = ncx_find_module(modname, NULL);
+    mod = ncx_find_module(modname, version);
     if (!mod) {
 	/* module not present yet */
 	return NO_ERR;

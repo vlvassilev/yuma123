@@ -230,9 +230,7 @@ static void
 {
     c_define_t              *cdef;
     obj_template_t          *childobj;
-    xmlChar                 *buffer;
     ncx_btype_t              btyp;
-    status_t                 res;
     boolean                  isleaflist;
 
     isleaflist = FALSE;
@@ -260,17 +258,7 @@ static void
     }
 
     /* generate the YOID as a comment */
-    res = obj_gen_object_id(obj, &buffer);
-    if (res != NO_ERR) {
-        SET_ERROR(res);
-        return;
-    }
-    ses_putstr(scb, START_COMMENT);
-    ses_putstr(scb, obj_get_typestr(obj));
-    ses_putchar(scb, ' ');
-    ses_putstr(scb, buffer);
-    ses_putstr(scb, END_COMMENT);
-    m__free(buffer);
+    write_c_oid_comment(scb, obj);
 
     /* start a new line and a C type definition */
     ses_putstr(scb, START_TYPEDEF);
@@ -408,69 +396,6 @@ static void
     }
 
 }  /* write_h_objects */
-
-
-/********************************************************************
-* FUNCTION save_h_objects
-* 
-* save the path name bindings for C typdefs
-*
-* INPUTS:
-*   mod == module in progress
-*   datadefQ == que of obj_template_t to use
-*   savecdefQ == Q of c_define_t structs to use
-*
-* OUTPUTS:
-*   savecdefQ may get new structs added
-*
-* RETURNS:
-*  status
-*********************************************************************/
-static status_t
-    save_h_objects (ncx_module_t *mod,
-                    dlq_hdr_t *datadefQ,
-                    dlq_hdr_t *savecdefQ)
-{
-    obj_template_t    *obj;
-    dlq_hdr_t         *childdatadefQ;
-    status_t           res;
-
-    if (dlq_empty(datadefQ)) {
-        return NO_ERR;
-    }
-
-    for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
-         obj != NULL;
-         obj = (obj_template_t *)dlq_nextEntry(obj)) {
-
-        if (!obj_has_name(obj) || 
-            obj_is_cli(obj) ||
-            !obj_is_enabled(obj) ||
-            obj_is_abstract(obj)) {
-            continue;
-        }
-
-        res = save_path_cdefine(savecdefQ,
-                                ncx_get_modname(mod), 
-                                obj);
-        if (res != NO_ERR) {
-            return res;
-        }
-
-        childdatadefQ = obj_get_datadefQ(obj);
-        if (childdatadefQ) {
-            res = save_h_objects(mod,
-                                 childdatadefQ,
-                                 savecdefQ);
-            if (res != NO_ERR) {
-                return res;
-            }
-        }
-    }
-
-    return NO_ERR;
-
-}  /* save_h_objects */
 
 
 /********************************************************************
@@ -1032,7 +957,10 @@ static status_t
 
     /* 4) typedefs for objects */
     if (res == NO_ERR) {
-        res = save_h_objects(mod, &mod->datadefQ, &typenameQ);
+        res = save_c_objects(mod, 
+                             &mod->datadefQ, 
+                             &typenameQ,
+                             C_MODE_TYPEDEF);
         if (res == NO_ERR) {
             if (cp->unified && mod->ismod) {
                 for (node = (yang_node_t *)
@@ -1040,9 +968,10 @@ static status_t
                      node != NULL && res == NO_ERR;
                      node = (yang_node_t *)dlq_nextEntry(node)) {
                     if (node->submod) {
-                        res = save_h_objects(node->submod,
+                        res = save_c_objects(node->submod,
                                              &node->submod->datadefQ, 
-                                             &typenameQ);
+                                             &typenameQ,
+                                             C_MODE_TYPEDEF);
                     }
                 }
             }

@@ -1460,7 +1460,7 @@ static boolean
 
 
 /********************************************************************
-* FUNCTION nacm_nacm_callback
+* FUNCTION nacm_callback
 *
 * top-level nacm callback function
 *
@@ -1471,12 +1471,12 @@ static boolean
 *    status
 *********************************************************************/
 static status_t 
-    nacm_nacm_callback (ses_cb_t  *scb,
-                        rpc_msg_t  *msg,
-                        agt_cbtyp_t cbtyp,
-                        op_editop_t  editop,
-                        val_value_t  *newval,
-                        val_value_t  *curval)
+    nacm_callback (ses_cb_t  *scb,
+                   rpc_msg_t  *msg,
+                   agt_cbtyp_t cbtyp,
+                   op_editop_t  editop,
+                   val_value_t  *newval,
+                   val_value_t  *curval)
 {
     status_t   res;
 
@@ -1521,7 +1521,7 @@ static status_t
     
     return res;
 
-} /* nacm_nacm_callback */
+} /* nacm_callback */
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -1571,7 +1571,7 @@ status_t
     res = agt_cb_register_callback(AGT_ACM_MODULE,
                                    nacm_OID_nacm,
                                    NULL,
-                                   nacm_nacm_callback);
+                                   nacm_callback);
     if (res != NO_ERR) {
         return res;
     }

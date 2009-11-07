@@ -101,6 +101,9 @@ date             init     comment
 
 #define Y_PREFIX      (const xmlChar *)"y_"
 
+#define EDIT_SUFFIX   (const xmlChar *)"_edit"
+#define GET_SUFFIX    (const xmlChar *)"_get"
+
 #define FN_BANNER_START (const xmlChar *)\
     "\n\n/********************************************************************\n* FUNCTION "
 
@@ -125,7 +128,8 @@ date             init     comment
 typedef enum c_mode_t_ {
     C_MODE_NONE,
     C_MODE_OID,
-    C_MODE_TYPEDEF
+    C_MODE_TYPEDEF,
+    C_MODE_CALLBACK
 } c_mode_t;
 
 /* ID to name string binding for #define statements */
@@ -193,7 +197,8 @@ extern status_t
 extern status_t
     save_path_cdefine (dlq_hdr_t *cdefineQ,
                        const xmlChar *modname,
-                       obj_template_t *obj);
+                       obj_template_t *obj,
+                       c_mode_t cmode);
 
 extern c_define_t *
     find_path_cdefine (dlq_hdr_t *cdefineQ,
@@ -223,5 +228,15 @@ extern void
 extern void
     write_c_val_macro_type (ses_cb_t *scb,
                             const obj_template_t *obj);
+
+extern void
+    write_c_oid_comment (ses_cb_t *scb,
+                         const obj_template_t *obj);
+
+extern status_t
+    save_c_objects (ncx_module_t *mod,
+                    dlq_hdr_t *datadefQ,
+                    dlq_hdr_t *savecdefQ,
+                    c_mode_t cmode);
 
 #endif            /* _H_c_util */

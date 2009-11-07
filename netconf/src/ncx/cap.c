@@ -1284,17 +1284,17 @@ status_t
     switch (withdef) {
     case NCX_WITHDEF_REPORT_ALL:
 	str += xml_strcpy(str, NCX_EL_TRIM);
-	*str++ = ':';
+	*str++ = ',';
 	xml_strcpy(str, NCX_EL_EXPLICIT);
 	break;
     case NCX_WITHDEF_TRIM:
 	str += xml_strcpy(str, NCX_EL_REPORT_ALL);
-	*str++  = ':';
+	*str++  = ',';
 	xml_strcpy(str, NCX_EL_EXPLICIT);
 	break;
     case NCX_WITHDEF_EXPLICIT:
 	str += xml_strcpy(str, NCX_EL_REPORT_ALL);
-	*str++ = ':';
+	*str++ = ',';
 	xml_strcpy(str, NCX_EL_TRIM);
 	break;
     default:

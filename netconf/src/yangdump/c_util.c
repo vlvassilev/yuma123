@@ -102,15 +102,21 @@ static c_define_t *
 
     /* get the idstr length */
     len = 0;
-    len += xml_strlen(Y_PREFIX);
-    len += xml_strlen(modname);
+
+    if (cmode != C_MODE_CALLBACK) {
+        len += xml_strlen(Y_PREFIX);
+        len += xml_strlen(modname);
+    }
 
     switch (cmode) {
     case C_MODE_OID:
         len += 3;  /* _N_ */
         break;
     case C_MODE_TYPEDEF:
-        len += 2; /* _T */
+        len += 2;  /* _T */
+        break;
+    case C_MODE_CALLBACK:
+        len += 1;
         break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
@@ -140,8 +146,10 @@ static c_define_t *
 
     /* fill in the idstr buffer */
     p = buffer;
-    p += xml_strcpy(p, Y_PREFIX);
-    p += copy_c_safe_str(p, modname);
+    if (cmode != C_MODE_CALLBACK) {
+        p += xml_strcpy(p, Y_PREFIX);
+        p += copy_c_safe_str(p, modname);
+    }
 
     switch (cmode) {
     case C_MODE_OID:
@@ -149,6 +157,9 @@ static c_define_t *
         break;
     case C_MODE_TYPEDEF:
         p += xml_strcpy(p, (const xmlChar *)"_T");
+        break;
+    case C_MODE_CALLBACK:
+        *p++ = 'd';
         break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
@@ -569,6 +580,7 @@ status_t
 *   cdefineQ == Q of c_define_t structs to use
 *   modname == base module name to use
 *   obj == object struct to use to generate path
+*   cmode == mode to use
 *
 * OUTPUTS:
 *   a new c_define_t is allocated and added to the cdefineQ
@@ -583,7 +595,8 @@ status_t
 status_t
     save_path_cdefine (dlq_hdr_t *cdefineQ,
                        const xmlChar *modname,
-                       obj_template_t *obj)
+                       obj_template_t *obj,
+                       c_mode_t cmode)
 {
     c_define_t    *newcdef, *testcdef;
     xmlChar       *buffer;
@@ -602,7 +615,7 @@ status_t
         return res;
     }
 
-    newcdef = new_c_define(modname, buffer, C_MODE_TYPEDEF);
+    newcdef = new_c_define(modname, buffer, cmode);
     m__free(buffer);
     buffer = NULL;
     if (newcdef == NULL) {
@@ -1008,6 +1021,106 @@ void
 
 }  /* write_c_val_macro_type */
 
+
+/*******************************************************************
+* FUNCTION write_c_oid_comment
+* 
+* Generate the object OID as a comment line
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object template to check
+*
+**********************************************************************/
+void
+    write_c_oid_comment (ses_cb_t *scb,
+                         const obj_template_t *obj)
+{
+    xmlChar    *buffer;
+    status_t    res;
+
+    /* generate the YOID as a comment */
+    res = obj_gen_object_id(obj, &buffer);
+    if (res != NO_ERR) {
+        SET_ERROR(res);
+        return;
+    }
+
+    ses_putstr(scb, START_COMMENT);
+    ses_putstr(scb, obj_get_typestr(obj));
+    ses_putchar(scb, ' ');
+    ses_putstr(scb, buffer);
+    ses_putstr(scb, END_COMMENT);
+    m__free(buffer);
+
+} /* write_c_oid_comment */
+
+
+/********************************************************************
+* FUNCTION save_c_objects
+* 
+* save the path name bindings for C typdefs
+*
+* INPUTS:
+*   mod == module in progress
+*   datadefQ == que of obj_template_t to use
+*   savecdefQ == Q of c_define_t structs to use
+*   cmode == C code generating mode to use
+*
+* OUTPUTS:
+*   savecdefQ may get new structs added
+*
+* RETURNS:
+*  status
+*********************************************************************/
+status_t
+    save_c_objects (ncx_module_t *mod,
+                    dlq_hdr_t *datadefQ,
+                    dlq_hdr_t *savecdefQ,
+                    c_mode_t cmode)
+{
+    obj_template_t    *obj;
+    dlq_hdr_t         *childdatadefQ;
+    status_t           res;
+
+    if (dlq_empty(datadefQ)) {
+        return NO_ERR;
+    }
+
+    for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
+
+        if (!obj_has_name(obj) || 
+            obj_is_cli(obj) ||
+            !obj_is_enabled(obj) ||
+            obj_is_abstract(obj)) {
+            continue;
+        }
+
+        res = save_path_cdefine(savecdefQ,
+                                ncx_get_modname(mod), 
+                                obj,
+                                cmode);
+        if (res != NO_ERR) {
+            return res;
+        }
+
+        childdatadefQ = obj_get_datadefQ(obj);
+        if (childdatadefQ) {
+            res = save_c_objects(mod,
+                                 childdatadefQ,
+                                 savecdefQ,
+                                 cmode);
+            if (res != NO_ERR) {
+                return res;
+            }
+        }
+    }
+
+    return NO_ERR;
+
+}  /* save_c_objects */
 
 /* END c_util.c */
 

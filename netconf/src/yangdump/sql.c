@@ -826,7 +826,9 @@ static void
     }
 
     /* column: istop */
-    sprintf(buff, "\n    '%u',",  (obj->parent) ? 0 : 1);
+    sprintf(buff, 
+            "\n    '%u',",  
+            (obj->parent && !obj_is_root(obj->parent)) ? 0 : 1);
     ses_putstr(scb, (const xmlChar *)buff);
 
     /* column: isdata -- config DB data only */

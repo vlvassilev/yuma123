@@ -1030,9 +1030,12 @@ static status_t
         ses_putstr(scb, (const xmlChar *)" module init 1");
         ses_putstr(scb, END_COMMENT);
         ses_putstr(scb, (const xmlChar *)"\nextern status_t");
-        ses_putstr_indent(scb, Y_PREFIX, indent);
-        ses_putstr(scb, mod->name);
-        ses_putstr(scb, (const xmlChar *)"_init (void);");
+        ses_indent(scb, indent);
+        write_identifier(scb,
+                         mod->name,
+                         NULL,
+                         (const xmlChar *)"init");
+        ses_putstr(scb, (const xmlChar *)" (void);");
 
         /* extern status_t y_<module>_init2 (void); */
         ses_putstr(scb, START_COMMENT);
@@ -1040,9 +1043,12 @@ static status_t
         ses_putstr(scb, (const xmlChar *)" module init 2");
         ses_putstr(scb, END_COMMENT);
         ses_putstr(scb, (const xmlChar *)"\nextern status_t");
-        ses_putstr_indent(scb, Y_PREFIX, indent);
-        ses_putstr(scb, mod->name);
-        ses_putstr(scb, (const xmlChar *)"_init2 (void);");
+        ses_indent(scb, indent);
+        write_identifier(scb,
+                         mod->name,
+                         NULL,
+                         (const xmlChar *)"init2");
+        ses_putstr(scb, (const xmlChar *)" (void);");
 
         /* extern void y_<module>_cleanup (void); */
         ses_putstr(scb, START_COMMENT);
@@ -1050,9 +1056,12 @@ static status_t
         ses_putstr(scb, (const xmlChar *)" module cleanup");
         ses_putstr(scb, END_COMMENT);
         ses_putstr(scb, (const xmlChar *)"\nextern void");
-        ses_putstr_indent(scb, Y_PREFIX, indent);
-        ses_putstr(scb, mod->name);
-        ses_putstr(scb, (const xmlChar *)"_cleanup (void);");
+        ses_indent(scb, indent);
+        write_identifier(scb,
+                         mod->name,
+                         NULL,
+                         (const xmlChar *)"cleanup");
+        ses_putstr(scb, (const xmlChar *)" (void);");
     }
 
     /* Write the end of the H file */

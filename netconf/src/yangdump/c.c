@@ -502,7 +502,7 @@ static void
 /********************************************************************
 * FUNCTION write_c_edit_cbfn
 * 
-* Generate the C code for the foo_object_cb function
+* Generate the C code for the foo_object_edit function
 *
 * INPUTS:
 *   scb == session control block to use for writing
@@ -556,6 +556,7 @@ static void
     ses_putstr(scb, (const xmlChar *)"\nstatic status_t");
     ses_putstr_indent(scb, cdef->idstr, indent);
     ses_putstr(scb, EDIT_SUFFIX);
+    ses_putstr(scb, (const xmlChar *)" (");
 
     ses_putstr_indent(scb, 
                       (const xmlChar *)"ses_cb_t *scb,",
@@ -698,12 +699,7 @@ static void
                       (const xmlChar *)"res = SET_ERROR(ERR_INTERNAL_VAL);",
                       indent+indent);
     ses_putstr_indent(scb,
-                      (const xmlChar *)"}\n",
-                      indent);
-
-    ses_putstr_indent(scb,
-                      (const xmlChar *)"/* invoke your device "
-                      "instrumentation code here */\n",
+                      (const xmlChar *)"}",
                       indent);
 
     write_if_record_error(scb,
@@ -723,6 +719,138 @@ static void
     ses_putstr(scb, (const xmlChar *)" */\n");
 
 } /* write_c_edit_cbfn */
+
+
+/********************************************************************
+* FUNCTION write_c_get_cbfn
+* 
+* Generate the C code for the foo_object_get function
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == module in progress
+*   cp == conversion parameters to use
+*   obj == object struct for the database object
+*   objnameQ == Q of c_define_t structs to search for this object
+*********************************************************************/
+static void
+    write_c_get_cbfn (ses_cb_t *scb,
+                      ncx_module_t *mod,
+                      const yangdump_cvtparms_t *cp,
+                      obj_template_t *obj,
+                      dlq_hdr_t *objnameQ)
+{
+    const xmlChar   *modname;
+    c_define_t      *cdef;
+    int32            indent;
+
+    modname = ncx_get_modname(mod);
+    indent = cp->indent;
+
+    cdef = find_path_cdefine(objnameQ, obj);
+    if (cdef == NULL) {
+        SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return;
+    }
+
+    /* generate function banner comment */
+    ses_putstr(scb, FN_BANNER_START);
+    ses_putstr(scb, cdef->idstr);
+    ses_putstr(scb, GET_SUFFIX);
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, (const xmlChar *)"Get database object callback");
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, (const xmlChar *)"Path: ");
+    ses_putstr(scb, cdef->valstr);
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, (const xmlChar *)"Fill in 'dstval' contents");
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, FN_BANNER_INPUT);
+    ses_putstr(scb, (const xmlChar *)"    see ncx/getcb.h for details");
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, FN_BANNER_RETURN_STATUS);
+    ses_putstr(scb, FN_BANNER_END);
+
+    /* generate the function prototype lines */
+    ses_putstr(scb, (const xmlChar *)"\nstatic status_t");
+    ses_putstr_indent(scb, cdef->idstr, indent);
+    ses_putstr(scb, GET_SUFFIX);
+    ses_putstr(scb, (const xmlChar *)" (");
+
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"ses_cb_t *scb,",
+                      indent+indent);
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"getcb_mode_t cbmode,",
+                      indent+indent);
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"const val_value_t *virval,",
+                      indent+indent);
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"val_value_t *dstval)",
+                      indent+indent);
+    ses_putstr(scb, (const xmlChar *)"\n{");
+
+    /* generate static vars */
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"status_t res;",
+                      indent);
+
+    /* initialize the static vars */
+    ses_putchar(scb, '\n');
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"res = NO_ERR;",
+                      indent);
+
+    ses_putchar(scb, '\n');
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"/* remove the next line "
+                      "if scb is used */",
+                      indent);
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"(void)scb;",
+                      indent);
+
+    ses_putchar(scb, '\n');
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"/* remove the next line "
+                      "if virval is used */",
+                      indent);
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"(void)virval;",
+                      indent);
+
+    /* generate if-stmt to screen out any other mode except 'get' */
+    ses_putchar(scb, '\n');
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"if (cbmode != GETCB_GET_VALUE) {",
+                      indent);
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"return ERR_NCX_OPERATION"
+                      "_NOT_SUPPORTED;",
+                      indent+indent);
+    ses_putstr_indent(scb, (const xmlChar *)"}", indent);
+
+
+    ses_putchar(scb, '\n');
+    ses_putstr_indent(scb,
+                      (const xmlChar *)"/* set the 'dstval' contents "
+                      "here */",
+                      indent);
+
+    /* return result */
+    ses_putchar(scb, '\n');
+    ses_indent(scb, indent);
+    ses_putstr(scb, (const xmlChar *)"return res;");
+
+    /* end the function */
+    ses_putstr(scb, (const xmlChar *)"\n\n} /* ");
+    ses_putstr(scb, cdef->idstr);
+    ses_putstr(scb, GET_SUFFIX);
+    ses_putstr(scb, (const xmlChar *)" */\n");
+
+} /* write_c_get_cbfn */
 
 
 /********************************************************************
@@ -779,7 +907,7 @@ static void
             write_c_edit_cbfn(scb, mod, cp, obj, objnameQ);
         } else {
             /* generate the foo_get function */
-            /* write_c_get_cbfn(scb, mod, cp, obj, objnameQ); */
+            write_c_get_cbfn(scb, mod, cp, obj, objnameQ);
         }
     }
 
@@ -1364,21 +1492,24 @@ static void
 /********************************************************************
 * FUNCTION write_c_init_fn
 * 
-* Generate the C code for the foo_init1 function
+* Generate the C code for the foo_init function
 *
 * INPUTS:
 *   scb == session control block to use for writing
 *   mod == module in progress
 *   cp == conversion parameters to use
-*
+*   objnameQ == Q of c_define_t structs to use to find
+*               the mapped C identifier for each object
 *********************************************************************/
 static void
     write_c_init_fn (ses_cb_t *scb,
                      ncx_module_t *mod,
-                     const yangdump_cvtparms_t *cp)
+                     const yangdump_cvtparms_t *cp,
+                     dlq_hdr_t *objnameQ)
 {
-    const xmlChar   *modname;
+    const xmlChar   *modname, *modversion;
     obj_template_t  *obj;
+    c_define_t      *cdef;
     int32            indent;
 
     modname = ncx_get_modname(mod);
@@ -1581,6 +1712,55 @@ static void
         write_if_res(scb, cp, indent);
     }
 
+    /* initialize any object callbacks here */
+    for (cdef = (c_define_t *)dlq_firstEntry(objnameQ);
+         cdef != NULL;
+         cdef = (c_define_t *)dlq_nextEntry(cdef)) {
+
+        if (!obj_is_data_db(cdef->obj) ||
+            obj_is_cli(cdef->obj) ||
+            obj_is_abstract(cdef->obj)) {
+            continue;
+        }
+
+        if (obj_get_config_flag(cdef->obj)) {
+            /* register the edit callback */
+            ses_putstr_indent(scb, 
+                              (const xmlChar *)"res = agt_cb_"
+                              "register_callback(",
+                          indent);
+
+            ses_indent(scb, indent+indent);
+            write_identifier(scb,
+                             modname,
+                             BAR_NODE,
+                             modname);
+            ses_putchar(scb, ',');
+
+            ses_indent(scb, indent+indent);
+            ses_putstr(scb, (const xmlChar *)"(const xmlChar *)\"");
+            ses_putstr(scb, cdef->valstr);
+            ses_putchar(scb, '"');
+            ses_putchar(scb, ',');
+            modversion = obj_get_mod_version(cdef->obj);
+            if (modversion == NULL) {
+                ses_putstr_indent(scb,
+                                  (const xmlChar *)"NULL,",
+                                  indent+indent);
+            } else {
+                ses_indent(scb, indent+indent);
+                ses_putstr(scb, (const xmlChar *)"(const xmlChar *)\"");
+                ses_putstr(scb, modversion);
+                ses_putchar(scb, '"');
+                ses_putchar(scb, ',');
+            }
+            ses_putstr_indent(scb, cdef->idstr, indent+indent);
+            ses_putstr(scb, (const xmlChar *)"_edit);");
+            write_if_res(scb, cp, indent);
+        } else {
+            /* nothing to do now for read-only objects */
+        }
+    }
 
     ses_putstr_indent(scb,
                       (const xmlChar *)"/* put your module "
@@ -1852,7 +2032,7 @@ static status_t
 
         /* external functions */
         write_c_notifs(scb, mod, cp);
-        write_c_init_fn(scb, mod, cp);
+        write_c_init_fn(scb, mod, cp, &objnameQ);
         write_c_init2_fn(scb, mod, cp);
         write_c_cleanup_fn(scb, mod, cp);
 

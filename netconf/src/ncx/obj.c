@@ -7363,6 +7363,32 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION obj_get_mod_version
+* 
+* Get the module version for this object
+*
+* INPUTS:
+*    obj  == object to check
+*
+* RETURNS:
+*    const pointer to mod version or NULL if none
+*********************************************************************/
+const xmlChar *
+    obj_get_mod_version (const obj_template_t  *obj)
+{
+#ifdef DEBUG
+    if (!obj || !obj->tkerr.mod) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return NULL;
+    }
+#endif
+
+    return obj->tkerr.mod->version;
+
+}  /* obj_get_mod_version */
+
+
+/********************************************************************
 * FUNCTION obj_get_type_name
 * 
 * Get the typename for an object

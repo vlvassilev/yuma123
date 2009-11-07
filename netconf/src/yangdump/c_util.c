@@ -159,7 +159,7 @@ static c_define_t *
         p += xml_strcpy(p, (const xmlChar *)"_T");
         break;
     case C_MODE_CALLBACK:
-        *p++ = 'd';
+        *p++ = 'y';
         break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);

@@ -955,6 +955,9 @@ extern const xmlChar *
     obj_get_mod_name (const obj_template_t  *obj);
 
 extern const xmlChar *
+    obj_get_mod_version (const obj_template_t  *obj);
+
+extern const xmlChar *
     obj_get_type_name (const obj_template_t  *obj);
 
 extern xmlns_id_t

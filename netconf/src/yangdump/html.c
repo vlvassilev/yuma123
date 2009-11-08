@@ -3959,7 +3959,7 @@ static void
 *
 *********************************************************************/
 static void
-    check_obj_toc_needed (const ncx_module_t *mod,
+    check_obj_toc_needed (ncx_module_t *mod,
                           boolean cooked,
                           boolean *anyobj,
                           boolean *anyrpc,
@@ -3971,9 +3971,9 @@ static void
     *anyrpc = FALSE;
     *anynotif = FALSE;
 
-    for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
+    for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
          obj != NULL;
-         obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
         if (obj_is_hidden(obj)) {
             continue;
@@ -4011,18 +4011,18 @@ static void
 *********************************************************************/
 static void
     write_toc_menu_rpc (ses_cb_t *scb,
-                        const ncx_module_t *mod,
+                        ncx_module_t *mod,
                         const yangdump_cvtparms_t *cp,
                         int32 indent)
 {
-    const obj_template_t *obj;
+    obj_template_t       *obj;
     const xmlChar        *submod;
 
     submod = (cp->unified && !mod->ismod) ? mod->name : NULL;
 
-    for (obj = (const obj_template_t *)dlq_firstEntry(&mod->datadefQ);
+    for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
          obj != NULL;
-         obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
         if (obj->objtype != OBJ_TYP_RPC) {
             continue;
@@ -4032,7 +4032,7 @@ static void
             continue;
         }
 
-        if (dlq_empty(&obj->def.rpc->datadefQ)) {
+        if (!(obj_rpc_has_input(obj) || obj_rpc_has_output(obj))) {
             start_elem(scb, EL_LI, NULL, indent);
             write_a(scb, 
                     cp, 
@@ -4149,7 +4149,7 @@ static void
 *********************************************************************/
 static void
     write_toc_menu (ses_cb_t *scb,
-                    const ncx_module_t *mod,
+                    ncx_module_t *mod,
                     const yangdump_cvtparms_t *cp)
 {
     const typ_template_t *typ;

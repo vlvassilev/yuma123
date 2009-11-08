@@ -1100,6 +1100,12 @@ extern uint32
 extern boolean
     obj_has_children (obj_template_t *obj);
 
+extern boolean
+    obj_rpc_has_input (obj_template_t *obj);
+
+extern boolean
+    obj_rpc_has_output (obj_template_t *obj);
+
 extern obj_metadata_t * 
     obj_new_metadata (void);
 

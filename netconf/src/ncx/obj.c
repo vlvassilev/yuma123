@@ -9251,7 +9251,7 @@ boolean
 #ifdef DEBUG
     if (!obj) {
         SET_ERROR(ERR_INTERNAL_PTR);
-        return 0;
+        return FALSE;
     }
 #endif
 
@@ -9263,6 +9263,86 @@ boolean
     }
 
 }   /* obj_has_children */
+
+
+/********************************************************************
+* FUNCTION obj_rpc_has_input
+*
+* Check if the RPC object has any real input children
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if there are any input children
+*   FALSE otherwise
+*********************************************************************/
+boolean
+    obj_rpc_has_input (obj_template_t *obj)
+{
+    obj_template_t *childobj;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    if (obj->objtype != OBJ_TYP_RPC) {
+        return FALSE;
+    }
+
+    childobj = obj_find_child(obj,
+                              obj_get_mod_name(obj),
+                              YANG_K_INPUT);
+    if (childobj) {
+	return obj_has_children(childobj);
+    } else {
+        return FALSE;
+    }
+
+}   /* obj_rpc_has_input */
+
+
+/********************************************************************
+* FUNCTION obj_rpc_has_output
+*
+* Check if the RPC object has any real output children
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if there are any output children
+*   FALSE otherwise
+*********************************************************************/
+boolean
+    obj_rpc_has_output (obj_template_t *obj)
+{
+    obj_template_t *childobj;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    if (obj->objtype != OBJ_TYP_RPC) {
+        return FALSE;
+    }
+
+    childobj = obj_find_child(obj,
+                              obj_get_mod_name(obj),
+                              YANG_K_OUTPUT);
+    if (childobj) {
+	return obj_has_children(childobj);
+    } else {
+        return FALSE;
+    }
+
+}   /* obj_rpc_has_output */
 
 
 /********************************************************************

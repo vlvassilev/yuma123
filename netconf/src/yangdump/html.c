@@ -852,6 +852,168 @@ static void
 }  /* write_status */
 
 
+#ifdef WORK_IN_PROGRESS
+/********************************************************************
+ * FUNCTION write_reference
+ * 
+ *   Create the appropriate A record for the reference, if possible
+ *
+ * INPUTS:
+ *   scb == session control block to use for writing
+ *   mod == module in progress
+ *   cp == conversion parameters to use
+ *   ref == reference clause to use
+ *   indent == start indent count
+ *
+ *********************************************************************/
+static void
+    write_reference (ses_cb_t *scb,
+                     const ncx_module_t *mod,
+                     const yangdump_cvtparms_t *cp,
+                     const xmlChar *ref,
+                     int32 indent)
+
+{
+    const xmlChar  *str, *p;
+    xmlChar        *buff, *q;
+    uint32          len, numlen, i;
+    xmlns_id_t      ncx_id;
+    boolean         done, wspace_only, a_started;
+
+    if (ref == NULL) {
+        return NULL;
+    }
+
+    ncx_id = xmlns_ncx_id();
+    len = xml_strlen(ref);
+    done = FALSE;
+    a_started = FALSE;
+
+    while (!done) {
+        /* check if the reference is to an RFC and if so generate
+         * a 'url' element as well
+         */
+        if (len > 4 
+            && !xml_strncmp(ref, (const xmlChar *)"RFC ", 4)) {
+            str = &ref[4];
+            p = str;
+            while (*p && isdigit(*p)) {
+                p++;
+            }
+            numlen = (uint32)(p-str);
+
+            /* IETF RFC URLs are currently hard-wired 4 digit number */
+            if (numlen && (numlen <= 4) && (len >= numlen+4)) {
+                buff = m__getMem(xml_strlen(XSD_RFC_URL) + 9);
+                if (!buff) {
+                    val_free_value(retval);
+                    return NULL;
+                }
+
+                q = buff;
+                q += xml_strcpy(q, XSD_RFC_URL);
+                for (i = 4 - numlen; i; i--) {
+                    *q++ = '0';
+                }
+                for (i=0; i<numlen; i++) {
+                    *q++ = *str++;
+                } 
+                xml_strcpy(q, (const xmlChar *)".txt");
+
+                ses_putstr(scb, (const xmlChar *)"<a href=\"");
+
+
+
+            }
+        } else if (len > 6 &&
+                   !xml_strncmp(ref, (const xmlChar *)"draft-", 6)) {
+            str = &ref[6];
+            while (*str && 
+                   (!xml_isspace(*str)) && 
+                   (*str != ';') && 
+                   (*str != ':') &&
+                   (*str != ',')) {
+                str++;
+            }
+
+            /* make sure did not end on a dot char */
+            if (str != &ref[6] && *str == '.') {\
+                str--;
+            }
+
+            numlen = (uint32)(str-ref);
+            buff = m__getMem(xml_strlen(XSD_DRAFT_URL) + numlen + 1);
+            if (!buff) {
+                val_free_value(retval);
+                return NULL;
+            }
+            q = buff;
+            q += xml_strcpy(q, XSD_DRAFT_URL);
+            q += xml_strncpy(q, ref, numlen);
+
+
+        } else {
+
+        }
+    }
+}   /* write_reference */
+
+
+/********************************************************************
+* FUNCTION write_reference_str
+* 
+* Generate a simple clause on 1 line
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == module in use
+*   cp == conversion parms to use
+*   ref == reference string to use
+*   indent == indent count to use
+*********************************************************************/
+static void
+    write_reference_str (ses_cb_t *scb,
+                         const ncx_module_t *mod,
+                         const yangdump_cvtparms_t *cp,
+                         const xmlChar *ref,
+                         int32 indent)
+{
+    const xmlChar    *str;
+    boolean           done;
+    uint32            len;
+
+    if (ref == NULL) {
+        return;
+    }
+
+
+    ses_indent(scb, indent);
+    write_kw(scb, YANG_K_REFERENCE);
+    indent += ses_indent_count(scb);
+    ses_indent(scb, indent);
+
+    ses_putstr(scb, (const xmlChar *)"<span class=\"yang_str\">");
+    ses_putchar(scb, '"');
+
+    str = ref;
+    done = FALSE;
+    while (!done) {
+
+
+
+    }
+    
+
+    ses_putchar(scb, '"');
+
+    ses_putstr(scb, (const xmlChar *)"</span>");
+
+    ses_putstr(scb, (const xmlChar *)";\n");
+
+}  /* write_reference_str */
+#endif /* WORK_IN_PROGRESS */
+
+
 /********************************************************************
 * FUNCTION write_type
 * 

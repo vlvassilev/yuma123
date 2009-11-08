@@ -1070,7 +1070,8 @@ static val_value_t *
     /* check if the reference is to an RFC and if so generate
      * a 'url' element as well
      */
-    if (len>4 && !xml_strncmp(ref, (const xmlChar *)"RFC ", 4)) {
+    if (len > 4 && 
+        !xml_strncmp(ref, (const xmlChar *)"RFC ", 4)) {
         str = &ref[4];
         p = str;
         while (*p && isdigit(*p)) {
@@ -1105,11 +1106,19 @@ static val_value_t *
                 val_add_child(urlval, retval);
             }
         }
-    } else if (!xml_strncmp(ref, (const xmlChar *)"draft-", 6)) {
+    } else if (len > 6 &&
+               !xml_strncmp(ref, (const xmlChar *)"draft-", 6)) {
         str = &ref[6];
-        while (*str && (!xml_isspace(*str)) && 
-               (*str != ';') && (*str != ':')) {
+        while (*str && 
+               (!xml_isspace(*str)) && 
+               (*str != ';') && 
+               (*str != ':') && 
+               (*str != ',')) {
             str++;
+        }
+
+        if (str != &ref[6] && *str == '.') {    \
+            str--;
         }
 
         numlen = (uint32)(str-ref);

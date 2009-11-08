@@ -412,6 +412,9 @@ extern void
 extern const xmlChar *
     typ_get_named_typename (const typ_def_t  *typdef);
 
+extern uint32
+    typ_get_named_type_linenum (const typ_def_t  *typdef);
+
 extern status_t
     typ_set_new_named (typ_def_t  *typdef, 
 		       ncx_btype_t btyp);
@@ -803,6 +806,12 @@ extern uint8
 extern status_t
     typ_set_fraction_digits (typ_def_t *typdef,
 			     uint8 digits);
+
+extern uint32
+    typ_get_typ_linenum (const typ_template_t  *typ);
+
+extern uint32
+    typ_get_typdef_linenum (const typ_def_t  *typdef);
 
 
 #endif	    /* _H_typ */

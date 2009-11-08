@@ -907,7 +907,7 @@ static void
                 submod,
                 (fname) ? typdef->prefix : NULL,
                 typdef->typename, 
-                typdef->tkerr.linenum);
+                typ_get_named_type_linenum(typdef));
         ses_putstr(scb, (const xmlChar *)"</span>");
     } else {
         write_id(scb, typdef->typename);
@@ -1430,7 +1430,7 @@ static void
                   YANG_K_TYPEDEF, 
                   typ->name, 
                   startindent, 
-                  typ->tkerr.linenum,
+                  typ_get_typ_linenum(typ),
                   FALSE, 
                   !first);
 
@@ -4046,7 +4046,7 @@ static void
                     submod, 
                     NULL, 
                     typ->name, 
-                    typ->tkerr.linenum);
+                    typ_get_typ_linenum(typ));
             end_elem(scb, EL_LI, -1);
         }
         if (cp->unified && mod->ismod) {
@@ -4065,7 +4065,7 @@ static void
                             node->submod->name, 
                             NULL,
                             typ->name,
-                            typ->tkerr.linenum);
+                            typ_get_typ_linenum(typ));
                     end_elem(scb, EL_LI, -1);
                 }
             }

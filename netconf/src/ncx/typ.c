@@ -611,6 +611,35 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION typ_get_named_type_linenum
+* 
+* Get the line number of the type template of the named type
+*
+* INPUTS:
+*     typdef == pointer to the typ_def_t struct to check
+*
+* RETURNS:
+*    pointer to type name, NULL if some error
+*********************************************************************/
+uint32
+    typ_get_named_type_linenum (const typ_def_t  *typdef)
+{
+#ifdef DEBUG
+    if (!typdef) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return 0;
+    }
+#endif
+
+    if (typdef->class != NCX_CL_NAMED) {
+	return 0;
+    }
+    return typ_get_typ_linenum(typdef->def.named.typ);
+
+}  /* typ_get_named_type_linenum */
+
+
+/********************************************************************
 * FUNCTION typ_set_new_named
 * 
 * Create a new typdef inside a typ_named_t struct inside a typ_def_t
@@ -4918,6 +4947,58 @@ status_t
     return NO_ERR;
 
 }  /* typ_set_fraction_digits */
+
+
+/********************************************************************
+* FUNCTION typ_get_typ_linenum
+* 
+* Get the line number for the typ_template_t
+*
+* INPUTS:
+*   typ == type template to check
+
+* RETURNS:
+*   line number
+*********************************************************************/
+uint32
+    typ_get_typ_linenum (const typ_template_t  *typ)
+{
+#ifdef DEBUG
+    if (!typ) { 
+	SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    return typ->tkerr.linenum;
+
+}  /* typ_get_typ_linenum */
+
+
+/********************************************************************
+* FUNCTION typ_get_typdef_linenum
+* 
+* Get the line number for the typ_def_t
+*
+* INPUTS:
+*   typ == typdef to check
+
+* RETURNS:
+*   line number
+*********************************************************************/
+uint32
+    typ_get_typdef_linenum (const typ_def_t  *typdef)
+{
+#ifdef DEBUG
+    if (!typdef) { 
+	SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    return typdef->tkerr.linenum;
+
+}  /* typ_get_typdef_linenum */
 
 
 /* END typ.c */

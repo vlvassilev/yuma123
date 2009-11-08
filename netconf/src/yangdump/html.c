@@ -3827,6 +3827,12 @@ static void
             continue;
         }
 
+        if (obj->objtype == OBJ_TYP_RPCIO &&
+            obj_get_child_count(obj) == 0) {
+            /* skip placeholder rpc/input and rpc/output */
+            continue;
+        }
+
         if (cooked) {
             /* skip uses and augment objects in this mode */
             if (!obj_has_name(obj)) {

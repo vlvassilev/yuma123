@@ -1101,6 +1101,9 @@ extern boolean
     obj_has_children (obj_template_t *obj);
 
 extern boolean
+    obj_has_ro_children (obj_template_t *obj);
+
+extern boolean
     obj_rpc_has_input (obj_template_t *obj);
 
 extern boolean

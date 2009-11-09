@@ -101,12 +101,8 @@ static c_define_t *
     uint32       len;
 
     /* get the idstr length */
-    len = 0;
-
-    if (cmode != C_MODE_CALLBACK) {
-        len += xml_strlen(Y_PREFIX);
-        len += xml_strlen(modname);
-    }
+    len = xml_strlen(Y_PREFIX);
+    len += xml_strlen(modname);
 
     switch (cmode) {
     case C_MODE_OID:
@@ -116,7 +112,6 @@ static c_define_t *
         len += 2;  /* _T */
         break;
     case C_MODE_CALLBACK:
-        len += 1;
         break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
@@ -146,10 +141,8 @@ static c_define_t *
 
     /* fill in the idstr buffer */
     p = buffer;
-    if (cmode != C_MODE_CALLBACK) {
-        p += xml_strcpy(p, Y_PREFIX);
-        p += copy_c_safe_str(p, modname);
-    }
+    p += xml_strcpy(p, Y_PREFIX);
+    p += copy_c_safe_str(p, modname);
 
     switch (cmode) {
     case C_MODE_OID:
@@ -159,7 +152,6 @@ static c_define_t *
         p += xml_strcpy(p, (const xmlChar *)"_T");
         break;
     case C_MODE_CALLBACK:
-        *p++ = 'y';
         break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
@@ -842,7 +834,7 @@ void
     write_c_objtype (ses_cb_t *scb,
                      const obj_template_t *obj)
 {
-    write_c_objtype_ex(scb, obj, ';');
+    write_c_objtype_ex(scb, obj, ';', FALSE);
 
 }  /* write_c_objtype */
 
@@ -856,11 +848,14 @@ void
 *   scb == session control block to use for writing
 *   obj == object template to check
 *   endchar == char to use at end (semi-colon, comma, right-paren)
+*   isconst == TRUE if a const pointer is needed
+*              FALSE if pointers should not be 'const'
 **********************************************************************/
 void
     write_c_objtype_ex (ses_cb_t *scb,
                         const obj_template_t *obj,
-                        xmlChar endchar)
+                        xmlChar endchar,
+                        boolean isconst)
 {
     boolean        needspace;
     ncx_btype_t    btyp;
@@ -908,10 +903,16 @@ void
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_LEAFREF:
     case NCX_BT_SLIST:
+        if (isconst) {
+            ses_putstr(scb, (const xmlChar *)"const ");
+        }
         ses_putstr(scb, STRING);
         needspace = FALSE;
         break;
     case NCX_BT_IDREF:
+        if (isconst) {
+            ses_putstr(scb, (const xmlChar *)"const ");
+        }
         ses_putstr(scb, IDREF);
         needspace = FALSE;
         break;
@@ -931,7 +932,10 @@ void
     }
 
     write_c_safe_str(scb, obj_get_name(obj));
-    ses_putchar(scb, endchar);
+
+    if (endchar != '\0') {
+        ses_putchar(scb, endchar);
+    }
 
 }  /* write_c_objtype_ex */
 

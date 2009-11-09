@@ -487,7 +487,8 @@ static void
             ses_indent(scb, cp->indent);
             write_c_objtype_ex(scb, 
                                obj,
-                               (nextobj == NULL) ? ')' : ',');
+                               (nextobj == NULL) ? ')' : ',',
+                               TRUE);
         }
     } else {
         ses_putstr(scb, (const xmlChar *)"void)");

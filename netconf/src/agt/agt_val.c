@@ -951,16 +951,14 @@ static status_t
         /* check the user callbacks before altering
          * the database
          */
-        if (target->cfg_id == NCX_CFGID_RUNNING) {
-            res = handle_user_callback(AGT_CB_APPLY, 
-                                       editop,
-                                       scb, 
-                                       msg, 
-                                       newval, 
-                                       curval);
-            if (res != NO_ERR) {
-                return res;
-            }
+        res = handle_user_callback(AGT_CB_APPLY, 
+                                   editop,
+                                   scb, 
+                                   msg, 
+                                   newval, 
+                                   curval);
+        if (res != NO_ERR) {
+            return res;
         }
 
         undo = add_undo_node(msg, 

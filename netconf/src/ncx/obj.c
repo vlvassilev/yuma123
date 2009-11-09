@@ -9266,6 +9266,49 @@ boolean
 
 
 /********************************************************************
+* FUNCTION obj_has_ro_children
+*
+* Check if there are any accessible read-only nodes within the object
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if there are any accessible read-only children
+*   FALSE if no datadb read-only child nodes found
+*********************************************************************/
+boolean
+    obj_has_ro_children (obj_template_t *obj)
+{
+    obj_template_t *childobj;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    for (childobj = obj_first_child(obj);
+         childobj != NULL;
+         childobj = obj_next_child(childobj)) {
+
+        if (obj_has_name(childobj) &&
+            obj_is_enabled(childobj) &&
+            !obj_is_abstract(childobj)) {
+
+            if (!obj_get_config_flag(childobj)) {
+                return TRUE;
+            }
+        }
+    }
+
+    return FALSE;
+
+}   /* obj_has_ro_children */
+
+
+/********************************************************************
 * FUNCTION obj_rpc_has_input
 *
 * Check if the RPC object has any real input children

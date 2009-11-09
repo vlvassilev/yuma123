@@ -103,6 +103,7 @@ date             init     comment
 
 #define EDIT_SUFFIX   (const xmlChar *)"_edit"
 #define GET_SUFFIX    (const xmlChar *)"_get"
+#define MRO_SUFFIX    (const xmlChar *)"_mro"
 
 #define FN_BANNER_START (const xmlChar *)\
     "\n\n/********************************************************************\n* FUNCTION "
@@ -223,7 +224,8 @@ extern void
 extern void
     write_c_objtype_ex (ses_cb_t *scb,
                         const obj_template_t *obj,
-                        xmlChar endchar);
+                        xmlChar endchar,
+                        boolean isconst);
 
 extern void
     write_c_val_macro_type (ses_cb_t *scb,

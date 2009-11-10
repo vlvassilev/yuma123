@@ -2478,8 +2478,8 @@ static xpath_result_t *
     (void)parmQ;
 
     result = new_nodeset(pcb, 
-			 pcb->context.node.objptr,
-			 pcb->context.node.valptr,
+			 pcb->orig_context.node.objptr,
+			 pcb->orig_context.node.valptr,
 			 1, 
 			 FALSE);
     if (!result) {
@@ -6454,7 +6454,7 @@ static status_t
     }
 
     bool = FALSE;
-    if (pcb->val) {
+    if (pcb->val || pcb->obj) {
 	leftbrack = TK_CUR(pcb->tkc);
 	contextset = *result;
 	if (!contextset) {
@@ -6866,6 +6866,7 @@ static status_t
 *
 * INPUTS:
 *    pcb == parser control block in progress
+*    result == result struct in progress or NULL if none
 *    res == address of result status
 *
 * OUTPUTS:
@@ -6877,13 +6878,14 @@ static status_t
 *********************************************************************/
 static xpath_result_t *
     parse_location_path (xpath_pcb_t *pcb,
+                         xpath_result_t *result,
 			 status_t *res)
 {
     xpath_result_t     *val1;
     tk_type_t           nexttyp;
     boolean             done;
 
-    val1 = NULL;
+    val1 = result;
 
     done = FALSE;
     while (!done && *res == NO_ERR) {
@@ -7340,7 +7342,7 @@ static xpath_result_t *
     case TK_TT_STAR:              /* rel, step, node, name */
     case TK_TT_NCNAME_STAR:       /* rel, step, node, name */
     case TK_TT_MSTRING:          /* rel, step, node, QName */
-	return parse_location_path(pcb, res);
+	return parse_location_path(pcb, NULL, res);
     case TK_TT_TSTRING:
 	/* some sort of identifier string to check
 	 * get the value of the string and the following token type
@@ -7351,19 +7353,19 @@ static xpath_result_t *
 	/* check 'axis-name ::' sequence */
 	if (nexttyp2==TK_TT_DBLCOLON && get_axis_id(nextval)) {
 	    /* this is an axis name */
-	    return parse_location_path(pcb, res);
+	    return parse_location_path(pcb, NULL, res);
 	}		
 
 	/* check 'NodeType (' sequence */
 	if (nexttyp2==TK_TT_LPAREN && get_nodetype_id(nextval)) {
 	    /* this is an nodetype name */
-	    return parse_location_path(pcb, res);
+	    return parse_location_path(pcb, NULL, res);
 	}
 
 	/* check not a function call, so must be a QName */
 	if (nexttyp2 != TK_TT_LPAREN) {
 	    /* this is an NameTest QName w/o a prefix */
-	    return parse_location_path(pcb, res);
+	    return parse_location_path(pcb, NULL, res);
 	}
 	break;
     default:
@@ -7386,17 +7388,12 @@ static xpath_result_t *
 	    curop = XP_EXOP_NONE;
 	}
 
-
-	/*** !!! probably all wrong !!! ****/
 	if (curop != XP_EXOP_NONE) {
-	    val2 = parse_location_path(pcb, res);
-	    if (*res == NO_ERR) {
-		/*   *res = eval_xpath_op(val1, val2, curop);  */
-            }
+	    val2 = parse_location_path(pcb, val1, res);
         } else {
 	    val2 = val1;
-	    val1 = NULL;
 	}
+        val1 = NULL;
     }
 
     if (val1) {
@@ -8449,11 +8446,12 @@ status_t
     pcb->val = NULL;
     pcb->val_docroot = NULL;
     pcb->context.node.objptr = NULL;
+    pcb->orig_context.node.objptr = NULL;
     pcb->parseres = NO_ERR;
 
     if (pcb->source == XP_SRC_INSTANCEID) {
 	pcb->flags |= XP_FL_INSTANCEID;
-	result = parse_location_path(pcb, &pcb->parseres);
+	result = parse_location_path(pcb, NULL, &pcb->parseres);
     } else {
 	result = parse_expr(pcb, &pcb->parseres);
     }
@@ -8582,6 +8580,7 @@ status_t
     }
 
     pcb->context.node.objptr = obj;
+    pcb->orig_context.node.objptr = obj;
 
     rootdone = FALSE;
     if (obj_is_root(obj) || obj_is_data_db(obj)) {
@@ -8613,10 +8612,9 @@ status_t
 
     /* validate the XPath expression against the 
      * full cooked object tree
-     * !!! not much checking done right now !!!
      */
     if (pcb->source == XP_SRC_INSTANCEID) {
-	result = parse_location_path(pcb, &pcb->validateres);
+	result = parse_location_path(pcb, NULL, &pcb->validateres);
     } else {
 	result = parse_expr(pcb, &pcb->validateres);
     }
@@ -8714,8 +8712,10 @@ xpath_result_t *
     pcb->logerrors = logerrors;
     if (val) {
 	pcb->context.node.valptr = val;
+	pcb->orig_context.node.valptr = val;
     } else {
 	pcb->context.node.valptr = docroot;
+	pcb->orig_context.node.valptr = docroot;
     }
 
     if (configonly ||
@@ -8726,7 +8726,7 @@ xpath_result_t *
     pcb->flags |= XP_FL_USEROOT;
 
     if (pcb->source == XP_SRC_INSTANCEID) {
-	result = parse_location_path(pcb, &pcb->valueres);
+	result = parse_location_path(pcb, NULL, &pcb->valueres);
     } else {
 	result = parse_expr(pcb, &pcb->valueres);
     }
@@ -8824,8 +8824,10 @@ xpath_result_t *
 
     if (val) {
 	pcb->context.node.valptr = val;
+	pcb->orig_context.node.valptr = val;
     } else {
 	pcb->context.node.valptr = docroot;
+	pcb->orig_context.node.valptr = docroot;
     }
 
     if (configonly ||
@@ -9321,8 +9323,11 @@ boolean
     xpath_init_result(&sresult, XP_RT_STRING);
     sresult.r.str = strval;
 
-    retval = compare_results(pcb, result, &sresult,
-			     XP_EXOP_EQUAL, res);
+    retval = compare_results(pcb, 
+                             result, 
+                             &sresult,
+			     XP_EXOP_EQUAL, 
+                             res);
     
     sresult.r.str = NULL;
     xpath_clean_result(&sresult);
@@ -9370,8 +9375,11 @@ boolean
     xpath_init_result(&sresult, XP_RT_NUMBER);
     ncx_copy_num(numval, &sresult.r.num, NCX_BT_FLOAT64);
 
-    retval = compare_results(pcb, result, &sresult,
-			     XP_EXOP_EQUAL, res);
+    retval = compare_results(pcb, 
+                             result, 
+                             &sresult,
+			     XP_EXOP_EQUAL, 
+                             res);
     
     xpath_clean_result(&sresult);
 

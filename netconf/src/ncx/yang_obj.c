@@ -5095,11 +5095,28 @@ static status_t
 		  xpath_pcb_t *when,
 		  obj_template_t *obj)
 {
+    boolean done;
+
     if (when->parseres != NO_ERR) {
 	/* some errors already reported so do not
 	 * duplicate messages; just skip 2nd pass
 	 */
 	return NO_ERR;
+    }
+
+    /* get the correct context node to use */
+    done = FALSE;
+    while (!done) {
+        if (obj->objtype == OBJ_TYP_CHOICE ||
+            obj->objtype == OBJ_TYP_CASE) {
+            if (obj->parent) {
+                obj = obj->parent;
+            } else {
+                return SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        } else {
+            done = TRUE;
+        }
     }
 
     return xpath1_validate_expr(mod, obj, when);
@@ -5951,7 +5968,9 @@ static status_t
     ncx_error_t       *tkerr;
     obj_unique_comp_t *unicomp, *testcomp;
     status_t           res, retres;
+    boolean            firstset;
 
+    firstset = FALSE;
     savestr = NULL;
     retres = NO_ERR;
     tkerr = (uni->tkerr.mod) ? &uni->tkerr : &obj->tkerr;
@@ -6027,18 +6046,30 @@ static status_t
 	} 
 
 	/* make sure there is a no config mismatch */
-	if (obj_is_config(obj) && !obj_is_config(uniobj)) {
-	    log_error("\nError: leaf '%s' on line %u not config in "
-		      "list '%s' unique-stmt",
-		      obj_get_name(uniobj),
-		      uniobj->tkerr.linenum,
-		      list->name);
-	    retres = ERR_NCX_INVALID_UNIQUE_NODE;
-	    tkc->curerr = tkerr;
-	    ncx_print_errormsg(tkc, mod, retres);
-	    m__free(savestr);
-	    continue;
-	}
+        if (firstset) {
+            if (obj_is_config(obj) && !uni->isconfig) {
+                /* mix of config and non-config leafs
+                 * in the unique-stmt
+                 */
+                log_error("\nError: leaf '%s' on line "
+                          "%u; unique-stmt config mismatch in "
+                          "list '%s'",
+                          obj_get_name(uniobj),
+                          uniobj->tkerr.linenum,
+                          list->name);
+                retres = ERR_NCX_INVALID_UNIQUE_NODE;
+                tkc->curerr = tkerr;
+                ncx_print_errormsg(tkc, mod, retres);
+                m__free(savestr);
+                continue;
+            }
+        } else {
+            /* unique-stmt can be for all config leafs or
+             * all non-config leafs, but no mix
+             */
+            uni->isconfig = obj_is_config(obj);
+            firstset = TRUE;
+        }
 
 	/* the final target seems to be a valid leaf
 	 * so check that its path back to the original

@@ -336,7 +336,8 @@ typedef struct xpath_pcb_t_ {
      * step results; initially NULL and modified until
      * the expression is done
      */
-    xpath_resnode_t      context;
+    xpath_resnode_t      context;      /* relative context */
+    xpath_resnode_t      orig_context;  /* for current() fn */
 
     /* The varbindQ is passed in as a parameter by the app
      * It contains zero or more ncx_var_t structs

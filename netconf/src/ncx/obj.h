@@ -226,6 +226,7 @@ typedef struct obj_unique_t_ {
     xmlChar        *xpath;       /* complete saved unique str */
     dlq_hdr_t       compQ;          /* Q of obj_unique_comp_t */
     boolean         seen;               /* needed by yangdiff */
+    boolean         isconfig;      /* constraint is on config */
     ncx_error_t     tkerr;
 } obj_unique_t;
 

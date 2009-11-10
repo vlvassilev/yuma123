@@ -2345,9 +2345,14 @@ static status_t
         while (unidef && retres == NO_ERR) {
             ++uninum;
 
-            res = one_unique_stmt_check(scb, msg, curval,
-                                        unidef, uninum);
-            CHK_EXIT(res, retres);
+            if (unidef->isconfig) {
+                res = one_unique_stmt_check(scb, 
+                                            msg, 
+                                            curval,
+                                            unidef, 
+                                            uninum);
+                CHK_EXIT(res, retres);
+            }
 
             unidef = obj_next_unique(unidef);
         }

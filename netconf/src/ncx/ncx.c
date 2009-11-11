@@ -1965,7 +1965,7 @@ obj_template_t *
 	}
     } else {
         cnt = 0;
-	for (mod = ncx_get_first_module();
+	for (mod = ncx_get_first_module_cli();
 	     mod != NULL;
 	     mod =  ncx_get_next_module(mod)) {
 
@@ -2012,7 +2012,7 @@ obj_template_t *
 #endif
 
     obj = NULL;
-    for (mod = ncx_get_first_module();
+    for (mod = ncx_get_first_module_cli();
 	 mod != NULL;
 	 mod =  ncx_get_next_module(mod)) {
 
@@ -2419,6 +2419,26 @@ ncx_module_t *
     return mod;
 
 }  /* ncx_get_first_module */
+
+
+/********************************************************************
+* FUNCTION ncx_get_first_module_cli
+* 
+* Get the first module in the ncx_sesmodQ or the ncx_modQ
+* 
+* RETURNS:
+*   pointer to the first entry or NULL if empty Q
+*********************************************************************/
+ncx_module_t *
+    ncx_get_first_module_cli (void)
+{
+    if (ncx_sesmodQ != NULL) {
+        return (ncx_module_t *)dlq_firstEntry(ncx_sesmodQ);
+    } else {
+        return ncx_get_first_module();
+    }
+
+}  /* ncx_get_first_module_cli */
 
 
 /********************************************************************

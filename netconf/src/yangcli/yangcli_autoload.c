@@ -602,6 +602,8 @@ static status_t
             log_error("\nError: Auto-load for module '%s' failed (%s)",
                       modname, 
                       get_error_string(res));
+        } else if (retmod != NULL && *retmod != NULL) {
+            (*retmod)->defaultrev = TRUE;
         }
     }
 

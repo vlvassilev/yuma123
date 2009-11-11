@@ -1965,7 +1965,7 @@ obj_template_t *
 	}
     } else {
         cnt = 0;
-	for (mod = ncx_get_first_module_cli();
+	for (mod = ncx_get_first_module();
 	     mod != NULL;
 	     mod =  ncx_get_next_module(mod)) {
 

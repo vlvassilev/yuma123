@@ -3320,6 +3320,44 @@ void
 
 
 /********************************************************************
+* FUNCTION ncxmod_get_yuma_home
+*
+*  Get the YUMA_HOME or --yuma-home parameter value,
+*  whichever is in effect, if any
+*
+* RETURNS:
+*   const point to the yuma_home variable, or NULL if not set
+*********************************************************************/
+const xmlChar *
+    ncxmod_get_yuma_home (void)
+{
+    return ncxmod_yuma_home;
+
+}  /* ncxmod_get_yuma_home */
+
+
+/********************************************************************
+* FUNCTION ncxmod_get_yuma_install
+*
+*  Get the YUMA_INSTALL or default install parameter value,
+*  whichever is in effect
+*
+* RETURNS:
+*   const point to the YUMA_INSTALL value
+*********************************************************************/
+const xmlChar *
+    ncxmod_get_yuma_install (void)
+{
+    if (ncxmod_env_install) {
+        return ncxmod_env_install;
+    } else {
+        return NCXMOD_DEFAULT_INSTALL;
+    }
+
+}  /* ncxmod_get_yuma_install */
+
+
+/********************************************************************
 * FUNCTION ncxmod_set_modpath
 * 
 *   Override the YUMA_MODPATH env var with the modpath CLI var

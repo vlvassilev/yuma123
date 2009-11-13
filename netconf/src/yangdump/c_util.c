@@ -142,7 +142,7 @@ static c_define_t *
     /* fill in the idstr buffer */
     p = buffer;
     p += xml_strcpy(p, Y_PREFIX);
-    p += copy_c_safe_str(p, modname);
+    p += ncx_copy_c_safe_str(p, modname);
 
     switch (cmode) {
     case C_MODE_OID:
@@ -156,7 +156,7 @@ static c_define_t *
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
     }
-    p += copy_c_safe_str(p, defname);    
+    p += ncx_copy_c_safe_str(p, defname);    
 
     cdef->idstr = buffer;     /* transfer buffer memory here */
     cdef->valstr = value;     /* transfer value memory here */    
@@ -293,44 +293,6 @@ void
     }
 
 }  /* write_c_safe_str */
-
-
-/********************************************************************
-* FUNCTION copy_c_safe_str
-* 
-* Generate a string token and copy to buffer
-*
-* INPUTS:
-*   buffer == buffer to write into
-*   strval == string value to copy
-*
-* RETURNS
-*   number of chars copied
-*********************************************************************/
-uint32
-    copy_c_safe_str (xmlChar *buffer,
-                     const xmlChar *strval)
-{
-    const xmlChar *s;
-    uint32         count;
-
-    count = 0;
-    s = strval;
-
-    while (*s) {
-        if (*s == '.' || *s == '-' || *s == NCXMOD_PSCHAR) {
-            *buffer++ = '_';
-        } else {
-            *buffer++ = *s;
-        }
-        s++;
-        count++;
-    }
-    *buffer = 0;
-
-    return count;
-
-}  /* copy_c_safe_str */
 
 
 /********************************************************************

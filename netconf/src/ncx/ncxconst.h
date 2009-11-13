@@ -667,4 +667,13 @@ date	     init     comment
 #define COPYRIGHT_STRING \
     "Copyright (c) 2009, Netconf Central, Inc., All Rights Reserved.\n"
 
+
+#define Y_PREFIX         (const xmlChar *)"y_"
+#define EDIT_SUFFIX      (const xmlChar *)"_edit"
+#define GET_SUFFIX       (const xmlChar *)"_get"
+#define MRO_SUFFIX       (const xmlChar *)"_mro"
+#define INIT_SUFFIX      (const xmlChar *)"_init"
+#define INIT2_SUFFIX     (const xmlChar *)"_init2"
+#define CLEANUP_SUFFIX   (const xmlChar *)"_cleanup"
+
 #endif	    /* _H_ncxconst */

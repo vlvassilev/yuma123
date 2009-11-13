@@ -314,6 +314,12 @@ extern xmlChar *
 extern void
     ncxmod_set_yuma_home (const xmlChar *yumahome);
 
+extern const xmlChar *
+    ncxmod_get_yuma_home (void);
+
+extern const xmlChar *
+    ncxmod_get_yuma_install (void);
+
 extern void
     ncxmod_set_modpath (const xmlChar *modpath);
 

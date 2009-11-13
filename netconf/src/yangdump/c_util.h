@@ -99,11 +99,6 @@ date             init     comment
 
 #define START_LINE    (const xmlChar *)"\n    "
 
-#define Y_PREFIX      (const xmlChar *)"y_"
-
-#define EDIT_SUFFIX   (const xmlChar *)"_edit"
-#define GET_SUFFIX    (const xmlChar *)"_get"
-#define MRO_SUFFIX    (const xmlChar *)"_mro"
 
 #define FN_BANNER_START (const xmlChar *)\
     "\n\n/********************************************************************\n* FUNCTION "
@@ -159,10 +154,6 @@ extern boolean
 extern void
     write_c_safe_str (ses_cb_t *scb,
                       const xmlChar *strval);
-
-extern uint32
-    copy_c_safe_str (xmlChar *buffer,
-                     const xmlChar *strval);
 
 extern void
     write_c_str (ses_cb_t *scb,

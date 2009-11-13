@@ -11548,5 +11548,46 @@ const xmlChar *
 
 }  /* ncx_get_confirm_event_str */
 
+/********************************************************************
+* FUNCTION ncx_copy_c_safe_str
+* 
+* Copy the string to the buffer, changing legal YANG identifier
+* chars that cannot be used in C function names to underscore
+*
+* !!! DOES NOT CHECK BUFFER OVERRUN !!!
+* !!! LENGTH OF STRING IS NOT CHANGED WHEN COPIED TO THE BUFFER !!!
+*
+* INPUTS:
+*   buffer == buffer to write into
+*   strval == string value to copy
+*
+* RETURNS
+*   number of chars copied
+*********************************************************************/
+uint32
+    ncx_copy_c_safe_str (xmlChar *buffer,
+                         const xmlChar *strval)
+{
+    const xmlChar *s;
+    uint32         count;
+
+    count = 0;
+    s = strval;
+
+    while (*s) {
+        if (*s == '.' || *s == '-' || *s == NCXMOD_PSCHAR) {
+            *buffer++ = '_';
+        } else {
+            *buffer++ = *s;
+        }
+        s++;
+        count++;
+    }
+    *buffer = 0;
+
+    return count;
+
+}  /* ncx_copy_c_safe_str */
+
 
 /* END file ncx.c */

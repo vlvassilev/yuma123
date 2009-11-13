@@ -2140,6 +2140,18 @@ static status_t
         }
     }
 
+#ifdef STATIC_SERVER
+    /* not doing anything here because the static
+     * code loading the module will initialize the
+     * server instrumentation
+     */
+#else
+    
+    if (res == NO_ERR && mod && module_added) {
+        res = agt_load_sil_code(mod, TRUE);
+    }
+#endif
+
     if (res == NO_ERR && mod && module_added) {
         res = agt_state_add_module_schema(mod);
     }

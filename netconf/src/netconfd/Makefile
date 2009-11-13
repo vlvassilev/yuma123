@@ -76,7 +76,8 @@ install:
 # this real rule keeps make from deleting the $(OBJS) as
 # intermediate files
 netconfd: $(OBJS) $(LIBTARGS)
-	$(LINK) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(PROG) $(LPATH) $(LIBS)
+	$(LINK) $(LFLAGS) -rdynamic $(OBJS) \
+	-o $(BIN_INST)/$(PROG) $(LPATH) $(LIBS)
 
 
 

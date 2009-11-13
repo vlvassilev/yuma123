@@ -20,6 +20,10 @@ date         init     comment
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef STATIC_SERVER
+#include <dlfcn.h>
+#endif
+
 #ifndef _H_procdefs
 #include  "procdefs.h"
 #endif
@@ -138,6 +142,7 @@ static agt_profile_t      agt_profile;
 static boolean            agt_shutdown;
 static boolean            agt_shutdown_started;
 static ncx_shutdowntyp_t  agt_shutmode;
+static dlq_hdr_t          agt_dynlibQ;
 
 /********************************************************************
 * FUNCTION init_server_profile
@@ -282,6 +287,47 @@ static void
 } /* load_running_config */
 
 
+
+/********************************************************************
+* FUNCTION new_dynlib_cb
+* 
+* Malloc and init a new dynamic library control block
+*
+* RETURNS:
+*    malloced struct or NULL if malloc error
+*********************************************************************/
+static agt_dynlib_cb_t *
+    new_dynlib_cb (void)
+{
+    agt_dynlib_cb_t *dynlib;
+
+    dynlib = m__getObj(agt_dynlib_cb_t);
+    if (dynlib == NULL) {
+        return NULL;
+    }
+    memset(dynlib, 0x0, sizeof(agt_dynlib_cb_t));
+    return dynlib;
+
+} /* new_dynlib_cb */
+
+
+/********************************************************************
+* FUNCTION free_dynlib_cb
+* 
+* Clean and free a new dynamic library control block
+*
+* INPUTS:
+*     dynlib == dynamic library control block to free
+*********************************************************************/
+static void
+    free_dynlib_cb (agt_dynlib_cb_t *dynlib)
+{
+
+    m__free(dynlib);
+
+} /* free_dynlib_cb */
+
+
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
@@ -327,6 +373,7 @@ status_t
     agt_shutdown = FALSE;
     agt_shutdown_started = FALSE;
     agt_shutmode = NCX_SHUT_NONE;
+    dlq_createSQue(&agt_dynlibQ);
 
     *showver = FALSE;
     *showhelpmode = HELP_MODE_NONE;
@@ -376,6 +423,7 @@ status_t
     agt_init2 (void)
 {
     const val_value_t  *clivalset;
+    ncx_module_t       *retmod;
     val_value_t        *val;
     status_t            res;
 
@@ -522,19 +570,20 @@ status_t
                              NCX_EL_MODULE);
 
         while (val && res == NO_ERR) {
+            retmod = NULL;
             res = ncxmod_load_module(VAL_STR(val),
                                      NULL,   /* parse revision TBD */
                                      &agt_profile.agt_savedevQ,
-                                     NULL);
+                                     &retmod);
             if (res == NO_ERR) {
-                /*** TBD: load lib<modname>.<rev-date>.so 
-                 *** into the server code
-                 ***/
+                res = agt_load_sil_code(retmod, FALSE);
 
-                val = val_find_next_child(clivalset,
-                                          NCXMOD_NETCONFD,
-                                          NCX_EL_MODULE,
-                                          val);
+                if (res == NO_ERR) {
+                    val = val_find_next_child(clivalset,
+                                              NCXMOD_NETCONFD,
+                                              NCX_EL_MODULE,
+                                              val);
+                }
             }
         }
     }
@@ -648,10 +697,24 @@ status_t
 void
     agt_cleanup (void)
 {
+    agt_dynlib_cb_t *dynlib;
+
     if (agt_init_done) {
 #ifdef AGT_DEBUG
         log_debug3("\nServer Cleanup Starting...\n");
 #endif
+
+        while (!dlq_empty(&agt_dynlibQ)) {
+            dynlib = (agt_dynlib_cb_t *)dlq_deque(&agt_dynlibQ);
+#ifndef STATIC_SERVER
+            if (!dynlib->cleanup_done) {
+                (*dynlib->cleanupfn)();
+            }
+            dlclose(dynlib->handle);
+#endif
+            free_dynlib_cb(dynlib);
+        }
+                
 
         clean_server_profile();
         agt_acm_cleanup();
@@ -793,6 +856,188 @@ const xmlChar *
         return (const xmlChar *)"invalid";
     }
 }  /* agt_cbtyp_name */
+
+
+#ifndef STATIC_SERVER
+/********************************************************************
+* FUNCTION agt_load_sil_code
+* 
+* Load the Server Instrumentation Library for the specified module
+* 
+* INPUTS:
+*   mod == module struct for the module that was loaded
+*   cfgloaded == TRUE if running config has already been done
+*                FALSE if running config not loaded yet
+*
+* RETURNS:
+*    const string for this enum
+*********************************************************************/
+status_t
+    agt_load_sil_code (ncx_module_t *mod,
+                       boolean cfgloaded)
+{
+    agt_dynlib_cb_t  *dynlib;
+    void             *handle;
+    status_t        (*initfn)(void);
+    status_t        (*init2fn)(void);
+    void            (*cleanupfn)(void);
+    char             *error;
+    xmlChar          *buffer, *p;
+    const xmlChar    *prepend, *yuma_install, *yuma_home;
+    uint32            bufflen;
+    status_t          res;
+
+
+    res = NO_ERR;
+    
+    yuma_home = ncxmod_get_yuma_home();
+    yuma_install = ncxmod_get_yuma_install();
+
+    if (yuma_home != NULL) {
+        prepend = yuma_home;
+    } else if (yuma_install != NULL) {
+        prepend = yuma_install;
+    } else {
+        prepend = EMPTY_STRING;
+    }
+
+    bufflen = xml_strlen(mod->name) + xml_strlen(prepend) + 24;
+
+    buffer = m__getMem(bufflen);
+    if (buffer == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    /* hard-wired order:
+     *  $YUMA_HOME/target/lib directory 
+     *  $YUMA_INSTALL/lib directory 
+     *  no directory name (maybe loaded with ldconfig)
+     */
+    p = buffer;
+    p += xml_strcpy(p, prepend);
+    if (p != buffer) {
+        if (*(p-1) != NCXMOD_PSCHAR) {
+            *p++ = NCXMOD_PSCHAR;
+        }
+        if (yuma_home != NULL) {
+            p += xml_strcpy(p, (const xmlChar *)"target/lib/");
+        } else {
+            p += xml_strcpy(p, (const xmlChar *)"lib/");
+        }
+    } 
+    p += xml_strcpy(p, (const xmlChar *)"lib");    
+    p += xml_strcpy(p, mod->name);
+    xml_strcpy(p, (const xmlChar *)".so");
+
+    handle = dlopen((const char *)buffer, RTLD_NOW);
+    if (handle == NULL) {
+        log_error("\nError: could not open '%s' (%s)\n", 
+                  buffer,
+                  dlerror());
+        m__free(buffer);
+        return ERR_NCX_OPERATION_FAILED;
+    } else if (LOGDEBUG2) {
+        log_debug2("\nOpened SIL (%s) OK", buffer);
+    }
+
+    p = buffer;
+    p += xml_strcpy(p, Y_PREFIX);
+    p += ncx_copy_c_safe_str(p, mod->name);
+    xml_strcpy(p, INIT_SUFFIX);
+
+    initfn = dlsym(handle, (const char *)buffer);
+    error = dlerror();
+    if (error != NULL) {
+        log_error("\nError: could not open '%s' (%s)\n", 
+                  buffer,
+                  dlerror());
+        m__free(buffer);
+        dlclose(handle);
+        return ERR_NCX_OPERATION_FAILED;
+    }
+
+    xml_strcpy(p, INIT2_SUFFIX);
+    init2fn = dlsym(handle, (const char *)buffer);
+    error = dlerror();
+    if (error != NULL) {
+        log_error("\nError: could not open '%s' (%s)\n", 
+                  buffer,
+                  dlerror());
+        m__free(buffer);
+        dlclose(handle);
+        return ERR_NCX_OPERATION_FAILED;
+    }
+
+    xml_strcpy(p, CLEANUP_SUFFIX);
+    cleanupfn = dlsym(handle, (const char *)buffer);
+    error = dlerror();
+    if (error != NULL) {
+        log_error("\nError: could not open '%s' (%s)\n", 
+                  buffer,
+                  dlerror());
+        m__free(buffer);
+        dlclose(handle);
+        return ERR_NCX_OPERATION_FAILED;
+    }
+
+    if (LOGDEBUG2) {
+        log_debug2("\nLoaded SIL functions OK");
+    }
+
+    m__free(buffer);
+    buffer = NULL;
+
+    dynlib = new_dynlib_cb();
+    if (dynlib == NULL) {
+        log_error("\nError: dynlib CB malloc failed");
+        dlclose(handle);
+        return ERR_INTERNAL_MEM;
+    }
+
+    dynlib->handle = handle;
+    dynlib->mod = mod;
+    dynlib->initfn = initfn;
+    dynlib->init2fn = init2fn;
+    dynlib->cleanupfn = cleanupfn;
+    dlq_enque(dynlib, &agt_dynlibQ);
+
+    res = (*initfn)();
+    dynlib->init_status = res;
+    if (res != NO_ERR) {
+        log_error("\nError: SIL init function "
+                  "failed for module %s (%s)",
+                  mod->name,
+                  get_error_string(res));
+        (*cleanupfn)();
+        dynlib->cleanup_done = TRUE;
+        return res;
+    } else if (LOGDEBUG2) {
+        log_debug2("\nRan SIL init function OK for module '%s'",
+                   mod->name);
+    }
+
+    if (cfgloaded) {
+        res = (*init2fn)();
+        dynlib->init2_done = TRUE;
+        dynlib->init2_status = res;
+        if (res != NO_ERR) {
+            log_error("\nError: SIL init2 function "
+                      "failed for module %s (%s)",
+                      mod->name,
+                      get_error_string(res));
+            (*cleanupfn)();
+            dynlib->cleanup_done = TRUE;
+            return res;
+        } else if (LOGDEBUG2) {
+            log_debug2("\nRan SIL init2 function OK for module '%s'",
+                       mod->name);
+        }
+    }
+
+    return NO_ERR;
+            
+}  /* agt_load_sil_code */
+#endif
 
 
 /* END file agt.c */

@@ -1022,4 +1022,8 @@ extern ncx_display_mode_t
 extern const xmlChar *
     ncx_get_confirm_event_str (ncx_confirm_event_t event);
 
+extern uint32
+    ncx_copy_c_safe_str (xmlChar *buffer,
+                         const xmlChar *strval);
+
 #endif	    /* _H_ncx */

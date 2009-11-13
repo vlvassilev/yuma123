@@ -198,6 +198,32 @@ typedef struct agt_profile_t_ {
 } agt_profile_t;
 
 
+/* SIL init function */
+typedef status_t (*agt_sil_init_fn_t)(void);
+
+/* SIL init2 function */
+typedef status_t (*agt_sil_init2_fn_t)(void);
+
+/* SIL cleanup function */
+typedef void (*agt_sil_cleanup_fn_t)(void);
+
+/* struct to keep track of the dynamic libraries
+ * opened by the 'load' command
+ */
+typedef struct agt_dynlib_cb_t_ {
+    dlq_hdr_t             qhdr;
+    void                 *handle;
+    ncx_module_t         *mod;
+    agt_sil_init_fn_t     initfn;
+    agt_sil_init2_fn_t    init2fn;
+    agt_sil_cleanup_fn_t  cleanupfn;
+    status_t              init_status;
+    status_t              init2_status;
+    boolean               init2_done;
+    boolean               cleanup_done;
+} agt_dynlib_cb_t;
+
+
 /********************************************************************
 *								    *
 *			F U N C T I O N S			    *
@@ -230,5 +256,9 @@ extern ncx_shutdowntyp_t
 
 extern const xmlChar *
     agt_cbtype_name (agt_cbtyp_t cbtyp);
+
+extern status_t
+    agt_load_sil_code (ncx_module_t *mod,
+                       boolean cfgloaded);
 
 #endif	    /* _H_agt */

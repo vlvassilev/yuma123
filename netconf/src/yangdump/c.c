@@ -1456,7 +1456,7 @@ static void
             ses_indent(scb, indent+indent);
             write_identifier(scb,
                              modname,
-                             BAR_NODE,
+                             BAR_MOD,
                              modname);
             ses_putchar(scb, ',');
 
@@ -1896,6 +1896,12 @@ static void
     ses_putstr(scb, mod->name);
     ses_putstr(scb, (const xmlChar *)" server instrumentation library");
     ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, FN_BANNER_INPUT);
+    ses_putstr(scb, (const xmlChar *)"   modname == requested module name");
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, (const xmlChar *)"   revision == requested "
+               "version (NULL for any)");
+    ses_putstr(scb, FN_BANNER_LN);
     ses_putstr(scb, FN_BANNER_RETURN_STATUS);
     ses_putstr(scb, FN_BANNER_END);
 
@@ -1906,7 +1912,14 @@ static void
                      modname,
                      NULL,
                      (const xmlChar *)"init");
-    ses_putstr(scb, (const xmlChar *)" (void)\n{");
+    ses_putstr(scb, (const xmlChar *)" (");
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"const xmlChar *modname,",
+                      indent+indent);
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"const xmlChar *revision)",
+                      indent+indent);
+    ses_putstr(scb, (const xmlChar *)"\n{");
 
     /* declare the function variables */
     ses_indent(scb, indent);
@@ -1917,17 +1930,43 @@ static void
 
     ses_putchar(scb, '\n');
 
-    /* init the function variables */
-    ses_indent(scb, indent);
-    ses_putstr(scb, (const xmlChar *)"agt_profile = agt_get_profile();");
-
     /* call the init_static_vars function */
     ses_indent(scb, indent);
     write_identifier(scb, 
                      modname,
                      NULL,
                      (const xmlChar *)"init_static_vars");
-    ses_putstr(scb, (const xmlChar *)"();");
+    ses_putstr(scb, (const xmlChar *)"();\n");
+
+    /* check the input variables */
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"/* change if custom handling done */",
+                      indent);
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"if (xml_strcmp(modname, ",
+                      indent);
+    write_identifier(scb, modname, BAR_MOD, modname);
+    ses_putstr(scb, (const xmlChar *)")) {");
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"return ERR_NCX_UNKNOWN_MODULE;",
+                      indent+indent);
+    ses_indent(scb, indent);
+    ses_putstr(scb, (const xmlChar *)"}\n");
+
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"if (revision && xml_strcmp(revision, ",
+                      indent);
+    write_identifier(scb, modname, BAR_REV, modname);
+    ses_putstr(scb, (const xmlChar *)")) {");
+    ses_putstr_indent(scb, 
+                      (const xmlChar *)"return ERR_NCX_WRONG_VERSION;",
+                      indent+indent);
+    ses_indent(scb, indent);
+    ses_putstr(scb, (const xmlChar *)"}\n");
+    
+    /* init the function variables */
+    ses_indent(scb, indent);
+    ses_putstr(scb, (const xmlChar *)"agt_profile = agt_get_profile();");
 
     /* load the module */
     if (mod->ismod) {
@@ -1938,16 +1977,16 @@ static void
         ses_indent(scb, indent+indent);
         write_identifier(scb, 
                          modname,
-                         BAR_NODE,
+                         BAR_MOD,
                          modname);
         ses_putchar(scb, ',');
 
         if (mod->version) {
             ses_indent(scb, indent+indent);
-            ses_putstr(scb, BAR_CONST);
-            ses_putchar(scb, '"');
-            ses_putstr(scb, mod->version);
-            ses_putchar(scb, '"');
+            write_identifier(scb,
+                             modname,
+                             BAR_REV,
+                             modname);
             ses_putchar(scb, ',');
         } else {
             ses_putstr_indent(scb,
@@ -2026,7 +2065,7 @@ static void
         ses_indent(scb, indent+indent);
         write_identifier(scb,
                          modname,
-                         BAR_NODE,
+                         BAR_MOD,
                          modname);
         ses_putchar(scb, ',');
 
@@ -2057,7 +2096,7 @@ static void
         ses_indent(scb, indent+indent);
         write_identifier(scb,
                          modname,
-                         BAR_NODE,
+                         BAR_MOD,
                          modname);
         ses_putchar(scb, ',');
 
@@ -2102,7 +2141,7 @@ static void
             ses_indent(scb, indent+indent);
             write_identifier(scb,
                              modname,
-                             BAR_NODE,
+                             BAR_MOD,
                              modname);
             ses_putchar(scb, ',');
 
@@ -2295,7 +2334,7 @@ static void
         ses_indent(scb, indent+indent);
         write_identifier(scb,
                          modname,
-                         BAR_NODE,
+                         BAR_MOD,
                          modname);
         ses_putchar(scb, ',');
 

@@ -258,6 +258,7 @@ static void
     }
 
     /* generate the YOID as a comment */
+    ses_putchar(scb, '\n');
     write_c_oid_comment(scb, obj);
 
     /* start a new line and a C type definition */
@@ -909,6 +910,33 @@ static status_t
 
     write_h_includes(scb, mod, cp);
 
+    /* mod name */
+    ses_putstr(scb, POUND_DEFINE);
+    write_identifier(scb,
+                     mod->name,
+                     BAR_MOD,
+                     mod->name);
+    ses_putchar(scb, ' ');
+    ses_putstr(scb, BAR_CONST);
+    ses_putchar(scb, '"');
+    ses_putstr(scb, mod->name);
+    ses_putchar(scb, '"');
+
+    /* mod version */
+    ses_putstr(scb, POUND_DEFINE);
+    write_identifier(scb,
+                     mod->name,
+                     BAR_REV,
+                     mod->name);
+    ses_putchar(scb, ' ');
+    ses_putstr(scb, BAR_CONST);
+    ses_putchar(scb, '"');
+    if (mod->version) {
+        ses_putstr(scb, mod->version);
+    }
+    ses_putchar(scb, '"');
+    ses_putchar(scb, '\n');
+    
     /* 1) features */
     write_h_features(scb, &mod->featureQ);
     if (cp->unified && mod->ismod) {
@@ -1036,9 +1064,16 @@ static status_t
                          mod->name,
                          NULL,
                          (const xmlChar *)"init");
-        ses_putstr(scb, (const xmlChar *)" (void);");
-
+        ses_putstr(scb, (const xmlChar *)" (");
+        ses_putstr_indent(scb, 
+                          (const xmlChar *)"const xmlChar *modname,",
+                          indent+indent);
+        ses_putstr_indent(scb, 
+                          (const xmlChar *)"const xmlChar *revision);",
+                          indent+indent);
+        
         /* extern status_t y_<module>_init2 (void); */
+        ses_putchar(scb, '\n');
         ses_putstr(scb, START_COMMENT);
         ses_putstr(scb, mod->name);
         ses_putstr(scb, (const xmlChar *)" module init 2");
@@ -1052,6 +1087,7 @@ static status_t
         ses_putstr(scb, (const xmlChar *)" (void);");
 
         /* extern void y_<module>_cleanup (void); */
+        ses_putchar(scb, '\n');
         ses_putstr(scb, START_COMMENT);
         ses_putstr(scb, mod->name);
         ses_putstr(scb, (const xmlChar *)" module cleanup");

@@ -199,7 +199,8 @@ typedef struct agt_profile_t_ {
 
 
 /* SIL init function */
-typedef status_t (*agt_sil_init_fn_t)(void);
+typedef status_t (*agt_sil_init_fn_t)(const xmlChar *modname,
+                                      const xmlChar *revision);
 
 /* SIL init2 function */
 typedef status_t (*agt_sil_init2_fn_t)(void);
@@ -213,6 +214,8 @@ typedef void (*agt_sil_cleanup_fn_t)(void);
 typedef struct agt_dynlib_cb_t_ {
     dlq_hdr_t             qhdr;
     void                 *handle;
+    xmlChar              *modname;
+    xmlChar              *revision;
     ncx_module_t         *mod;
     agt_sil_init_fn_t     initfn;
     agt_sil_init2_fn_t    init2fn;
@@ -258,7 +261,8 @@ extern const xmlChar *
     agt_cbtype_name (agt_cbtyp_t cbtyp);
 
 extern status_t
-    agt_load_sil_code (ncx_module_t *mod,
+    agt_load_sil_code (const xmlChar *modname,
+                       const xmlChar *revision,
                        boolean cfgloaded);
 
 #endif	    /* _H_agt */

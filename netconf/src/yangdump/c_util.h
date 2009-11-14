@@ -46,7 +46,7 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
-#define START_COMMENT (const xmlChar *)"\n\n/* "
+#define START_COMMENT (const xmlChar *)"\n/* "
 #define END_COMMENT   (const xmlChar *)" */"
 
 #define START_BLOCK  (const xmlChar *)" {"
@@ -57,6 +57,8 @@ date             init     comment
 #define BAR_FEAT      (const xmlChar *)"F"
 #define BAR_ID        (const xmlChar *)"I"
 #define BAR_NODE      (const xmlChar *)"N"
+#define BAR_MOD       (const xmlChar *)"M"
+#define BAR_REV       (const xmlChar *)"R"
 #define DEF_TYPE      (const xmlChar *)"T"
 
 #define BAR_CONST     (const xmlChar *)"(const xmlChar *)"

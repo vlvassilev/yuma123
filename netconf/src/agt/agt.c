@@ -323,6 +323,12 @@ static void
     free_dynlib_cb (agt_dynlib_cb_t *dynlib)
 {
 
+    if (dynlib->modname) {
+        m__free(dynlib->modname);
+    }
+    if (dynlib->revision) {
+        m__free(dynlib->revision);
+    }
     m__free(dynlib);
 
 } /* free_dynlib_cb */
@@ -570,20 +576,26 @@ status_t
                              NCX_EL_MODULE);
 
         while (val && res == NO_ERR) {
-            retmod = NULL;
-            res = ncxmod_load_module(VAL_STR(val),
-                                     NULL,   /* parse revision TBD */
-                                     &agt_profile.agt_savedevQ,
-                                     &retmod);
-            if (res == NO_ERR) {
-                res = agt_load_sil_code(retmod, FALSE);
+            retmod = ncx_find_module(VAL_STR(val), NULL);
+            if (retmod == NULL) {
+#ifdef STATIC_SERVER
+                res = ncxmod_load_module(VAL_STR(val),
+                                         NULL,   /* parse revision TBD */
+                                         &agt_profile.agt_savedevQ,
+                                         &retmod);
+#else
+                res = agt_load_sil_code(VAL_STR(val), NULL, FALSE);
+#endif
+            } else {
+                log_info("\nCLI: Skipping 'module' parm '%s', already loaded",
+                         VAL_STR(val));
+            }
 
-                if (res == NO_ERR) {
-                    val = val_find_next_child(clivalset,
-                                              NCXMOD_NETCONFD,
-                                              NCX_EL_MODULE,
-                                              val);
-                }
+            if (res == NO_ERR) {
+                val = val_find_next_child(clivalset,
+                                          NCXMOD_NETCONFD,
+                                          NCX_EL_MODULE,
+                                          val);
             }
         }
     }
@@ -865,7 +877,8 @@ const xmlChar *
 * Load the Server Instrumentation Library for the specified module
 * 
 * INPUTS:
-*   mod == module struct for the module that was loaded
+*   modname == name of the module to load
+*   revision == revision date of the module to load (may be NULL)
 *   cfgloaded == TRUE if running config has already been done
 *                FALSE if running config not loaded yet
 *
@@ -873,20 +886,26 @@ const xmlChar *
 *    const string for this enum
 *********************************************************************/
 status_t
-    agt_load_sil_code (ncx_module_t *mod,
+    agt_load_sil_code (const xmlChar *modname,
+                       const xmlChar *revision,
                        boolean cfgloaded)
 {
-    agt_dynlib_cb_t  *dynlib;
-    void             *handle;
-    status_t        (*initfn)(void);
-    status_t        (*init2fn)(void);
-    void            (*cleanupfn)(void);
-    char             *error;
-    xmlChar          *buffer, *p;
-    const xmlChar    *prepend, *yuma_install, *yuma_home;
-    uint32            bufflen;
-    status_t          res;
+    agt_dynlib_cb_t     *dynlib;
+    void                *handle;
+    agt_sil_init_fn_t    initfn;
+    agt_sil_init2_fn_t   init2fn;
+    agt_sil_cleanup_fn_t cleanupfn;
+    char                *error;
+    xmlChar             *buffer, *p;
+    const xmlChar       *prepend, *yuma_install, *yuma_home;
+    uint32               bufflen;
+    status_t             res;
 
+#ifdef DEBUG
+    if (modname == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
 
     res = NO_ERR;
     
@@ -901,7 +920,7 @@ status_t
         prepend = EMPTY_STRING;
     }
 
-    bufflen = xml_strlen(mod->name) + xml_strlen(prepend) + 24;
+    bufflen = xml_strlen(modname) + xml_strlen(prepend) + 24;
 
     buffer = m__getMem(bufflen);
     if (buffer == NULL) {
@@ -926,7 +945,7 @@ status_t
         }
     } 
     p += xml_strcpy(p, (const xmlChar *)"lib");    
-    p += xml_strcpy(p, mod->name);
+    p += xml_strcpy(p, modname);
     xml_strcpy(p, (const xmlChar *)".so");
 
     handle = dlopen((const char *)buffer, RTLD_NOW);
@@ -942,7 +961,7 @@ status_t
 
     p = buffer;
     p += xml_strcpy(p, Y_PREFIX);
-    p += ncx_copy_c_safe_str(p, mod->name);
+    p += ncx_copy_c_safe_str(p, modname);
     xml_strcpy(p, INIT_SUFFIX);
 
     initfn = dlsym(handle, (const char *)buffer);
@@ -995,25 +1014,43 @@ status_t
     }
 
     dynlib->handle = handle;
-    dynlib->mod = mod;
+
+    dynlib->modname = xml_strdup(modname);
+    if (dynlib->modname == NULL) {
+        log_error("\nError: dynlib CB malloc failed");
+        dlclose(handle);
+        free_dynlib_cb(dynlib);
+        return ERR_INTERNAL_MEM;
+    }
+
+    if (revision) {
+        dynlib->revision = xml_strdup(revision);
+        if (dynlib->revision == NULL) {
+            log_error("\nError: dynlib CB malloc failed");
+            dlclose(handle);
+            free_dynlib_cb(dynlib);
+            return ERR_INTERNAL_MEM;
+        }
+    }
+        
     dynlib->initfn = initfn;
     dynlib->init2fn = init2fn;
     dynlib->cleanupfn = cleanupfn;
     dlq_enque(dynlib, &agt_dynlibQ);
 
-    res = (*initfn)();
+    res = (*initfn)(modname, revision);
     dynlib->init_status = res;
     if (res != NO_ERR) {
         log_error("\nError: SIL init function "
                   "failed for module %s (%s)",
-                  mod->name,
+                  modname,
                   get_error_string(res));
         (*cleanupfn)();
         dynlib->cleanup_done = TRUE;
         return res;
     } else if (LOGDEBUG2) {
         log_debug2("\nRan SIL init function OK for module '%s'",
-                   mod->name);
+                   modname);
     }
 
     if (cfgloaded) {
@@ -1023,14 +1060,14 @@ status_t
         if (res != NO_ERR) {
             log_error("\nError: SIL init2 function "
                       "failed for module %s (%s)",
-                      mod->name,
+                      modname,
                       get_error_string(res));
             (*cleanupfn)();
             dynlib->cleanup_done = TRUE;
             return res;
         } else if (LOGDEBUG2) {
             log_debug2("\nRan SIL init2 function OK for module '%s'",
-                       mod->name);
+                       modname);
         }
     }
 

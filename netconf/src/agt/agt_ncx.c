@@ -2087,11 +2087,19 @@ static status_t
                 errdone = TRUE;
             }
         }
+
+
         if (res == NO_ERR) {
+#ifdef STATIC_SERVER
             res = ncxmod_load_module(VAL_STR(modval), 
                                      (revval) ? VAL_STR(revval) : NULL, 
                                      &agt_profile->agt_savedevQ,
                                      &mod);
+#else
+            res = agt_load_sil_code(VAL_STR(modval), 
+                                    (revval) ? VAL_STR(revval) : NULL, 
+                                    TRUE);
+#endif
             if (res == NO_ERR) {
                 module_added = TRUE;
             } else {
@@ -2139,18 +2147,6 @@ static status_t
             res = ERR_INTERNAL_MEM;
         }
     }
-
-#ifdef STATIC_SERVER
-    /* not doing anything here because the static
-     * code loading the module will initialize the
-     * server instrumentation
-     */
-#else
-    
-    if (res == NO_ERR && mod && module_added) {
-        res = agt_load_sil_code(mod, TRUE);
-    }
-#endif
 
     if (res == NO_ERR && mod && module_added) {
         res = agt_state_add_module_schema(mod);

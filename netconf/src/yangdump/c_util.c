@@ -700,7 +700,6 @@ void
 
     /* banner comments */
     ses_putstr(scb, START_COMMENT);    
-    ses_putchar(scb, '\n');
 
     /* generater tag */
     write_banner_session(scb);

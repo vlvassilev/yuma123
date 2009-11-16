@@ -2097,8 +2097,15 @@ static status_t
                                      &mod);
 #else
             res = agt_load_sil_code(VAL_STR(modval), 
-                                    (revval) ? VAL_STR(revval) : NULL, 
+                                    (revval) ? VAL_STR(revval) : NULL,
                                     TRUE);
+            if (res == NO_ERR) {
+                mod = ncx_find_module(VAL_STR(modval),
+                                      (revval) ? VAL_STR(revval) : NULL);
+                if (mod == NULL) {
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                }
+            }
 #endif
             if (res == NO_ERR) {
                 module_added = TRUE;
@@ -2139,10 +2146,11 @@ static status_t
     }
 
     /* generate the return value */
-    if (res == NO_ERR && mod && mod->version) {
+    if (res == NO_ERR && mod) {
         newval = val_make_string(val_get_nsid(modval),
                                  NCX_EL_MOD_REVISION,
-                                 mod->version);                                 
+                                 (mod->version) ? 
+                                 mod->version : EMPTY_STRING);
         if (newval == NULL) {
             res = ERR_INTERNAL_MEM;
         }
@@ -2185,8 +2193,10 @@ static status_t
         }
     } else {
         /* pass off newval memory here */
-        msg->rpc_data_type = RPC_DATA_YANG;
-        dlq_enque(newval, &msg->rpc_dataQ);
+        if (newval != NULL) {
+            msg->rpc_data_type = RPC_DATA_YANG;
+            dlq_enque(newval, &msg->rpc_dataQ);
+        }
     }
 
     return res;

@@ -431,6 +431,7 @@ status_t
     const val_value_t  *clivalset;
     ncx_module_t       *retmod;
     val_value_t        *val;
+    agt_dynlib_cb_t    *dynlib;
     status_t            res;
 
 #ifdef AGT_DEBUG
@@ -575,15 +576,21 @@ status_t
                              NCXMOD_NETCONFD,
                              NCX_EL_MODULE);
 
+        /* attempt all dynamically loaded modules */
         while (val && res == NO_ERR) {
             retmod = ncx_find_module(VAL_STR(val), NULL);
             if (retmod == NULL) {
 #ifdef STATIC_SERVER
+                /* load just the module
+                 * SIL initialization is assumed to be
+                 * handled elsewhere
+                 */
                 res = ncxmod_load_module(VAL_STR(val),
                                          NULL,   /* parse revision TBD */
                                          &agt_profile.agt_savedevQ,
                                          &retmod);
 #else
+                /* load the SIL and it will load its own module */
                 res = agt_load_sil_code(VAL_STR(val), NULL, FALSE);
 #endif
             } else {
@@ -666,6 +673,41 @@ status_t
         return res;
     }
 
+
+#ifdef STATIC_SERVER
+    /* iniit phase 2 for static modules should be 
+     * initialized here
+     */
+#else
+    for (dynlib = (agt_dynlib_cb_t *)dlq_firstEntry(&agt_dynlibQ);
+         dynlib != NULL;
+         dynlib = (agt_dynlib_cb_t *)dlq_nextEntry(dynlib)) {
+        if (dynlib->init_status == NO_ERR &&
+            !dynlib->init2_done &&
+            !dynlib->cleanup_done) {
+
+            if (LOGDEBUG2) {
+                log_debug2("\nCalling SIL Init2 fn for module '%s'",
+                           dynlib->modname);
+            }
+            res = (*dynlib->init2fn)();
+            if (res != NO_ERR) {
+                log_error("\nError: SIL init2 function "
+                          "failed for module '%s' (%s)",
+                          dynlib->modname,
+                          get_error_string(res));
+            }
+            dynlib->init2_status = res;
+            dynlib->init2_done = TRUE;
+
+            /* TBD: should cleanup be called and somehow
+             * remove the module that was loaded?
+             */
+        }
+    }
+#endif
+
+
     /* allow users to access the configuration databases now */
     cfg_set_state(NCX_CFGID_RUNNING, CFG_ST_READY);
 
@@ -716,6 +758,7 @@ void
         log_debug3("\nServer Cleanup Starting...\n");
 #endif
 
+        /* cleanup all the dynamically loaded modules */
         while (!dlq_empty(&agt_dynlibQ)) {
             dynlib = (agt_dynlib_cb_t *)dlq_deque(&agt_dynlibQ);
 #ifndef STATIC_SERVER

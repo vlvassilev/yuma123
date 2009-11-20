@@ -1158,6 +1158,9 @@ extern boolean
     obj_is_short_case (obj_template_t *obj);
 
 extern boolean
+    obj_is_top (const obj_template_t *obj);
+
+extern boolean
     obj_has_when_stmts (obj_template_t *obj);
 
 extern void

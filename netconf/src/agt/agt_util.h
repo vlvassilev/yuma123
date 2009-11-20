@@ -215,4 +215,16 @@ extern val_value_t *
 			   status_t *res);
 
 
+extern val_value_t *
+    agt_init_cache (const xmlChar *modname,
+                    const xmlChar *objname,
+                    status_t *res);
+
+
+extern status_t
+    agt_check_cache (val_value_t **cacheptr,
+                     val_value_t *newval,
+                     val_value_t *curval,
+                     op_editop_t editop);
+
 #endif	    /* _H_agt_util */

@@ -23,41 +23,43 @@ date	     init     comment
 
 */
 
+#include <time.h>
+
+#ifndef _H_dlq
+#include "dlq.h"
+#endif
+
 #ifndef _H_status
 #include "status.h"
 #endif
 
-/* handle for timer ID */
-typedef unsigned int agt_timer_t;
-
-/* type of event sent to a timer callback */
-typedef enum agt_timer_event_t_ {
-    AGT_TIMER_NONE,
-    AGT_TIME_EXPIRE,
-    AGT_TIMER_RESET,
-    AGT_TIMER_CANCEL,
-    AGT_TIMER_DESTROY
-} agt_timer_event_t;
-
 
 /* timer callback function
  *
- * Process the peridic event
+ * Process the timer expired event
  *
  * INPUTS:
- *    event_type == reason for callback
  *    timer_id == timer identifier 
- *    context == context pointer, such as a session control block,
+ *    cookie == context pointer, such as a session control block,
  *            passed to agt_timer_set function (may be NULL)
  *
  * RETURNS:
- *     0 == OK exit, keep the timer going
- *    -1 == error exit, call agt_timer_destroy upon return
+ *     0 == normal exit
+ *    -1 == error exit, delete timer upon return
  */
+typedef int (*agt_timer_fn_t) (uint32  timer_id,
+			       void *cookie);
 
-typedef int (*agt_timer_fn_t) (agt_timer_event_t event_type,
-			       agt_timer_t  timer_id,
-			       void *context);
+
+typedef struct agt_timer_cb_t_ {
+    dlq_hdr_t       qhdr;
+    boolean         timer_periodic;
+    uint32          timer_id;
+    agt_timer_fn_t  timer_cbfn;
+    time_t          timer_start_time;
+    uint32          timer_duration;   /* seconds */
+    void           *timer_cookie;
+} agt_timer_cb_t;
 
 
 /********************************************************************
@@ -80,26 +82,22 @@ extern void
 
 /* create a timer and start it going */
 extern status_t
-    agt_timer_set (uint32   seconds,
-		   agt_timer_fn_t  timer_fn,
-		   void *context,
-		   agt_timer_t *ret_timer);
+    agt_timer_create (uint32   seconds,
+                      boolean is_periodic,
+                      agt_timer_fn_t  timer_fn,
+                      void *cookie,
+                      uint32 *ret_timer_id);
 
 /* reset a timer -- give it a new timeout value */
 extern status_t
-    agt_timer_reset (uint32 seconds,
-		     agt_timer_t  timer_id);
+    agt_timer_restart (uint32 timer_id,
+                       uint32 seconds);
 
-/* make a timer inactive, but reusable */		   
-extern status_t
-    agt_timer_clear (agt_timer_t timer_id);
-
-/* destroy a timer; the ID may get reused if the agt_timer_set
- * function is called again with new parameters
- */		   
-extern status_t
-    agt_timer_destroy (agt_timer_t  timer_id);
-		   
-
+/* periodic timers need to be deleted to be stopped
+ * 1-shot timers will be deleted automatically after
+ * they expire and the callback is invoked
+ */
+extern void
+    agt_timer_delete (uint32  timer_id);
 
 #endif	    /* _H_agt_timer */

@@ -215,10 +215,14 @@ static status_t
                     foundobj = 
                         ncx_find_any_object_que(temp_modQ,
                                                 nodename);
+                    if (foundobj == NULL) {
+                        foundobj = ncx_find_any_object(nodename);
+                    }
                 } else {
                     foundobj = ncx_find_any_object(nodename);
                 }
-		if (foundobj && nsid && 
+		if (foundobj && 
+                    nsid && 
 		    obj_get_nsid(foundobj) != nsid) {
                     /* did not match the specified namespace ID */
 		    foundobj = NULL;
@@ -344,7 +348,8 @@ static status_t
 	if (pcb->logerrors) {
 	    if (prefix) {
 		log_error("\nError: object not found '%s:%s'",
-			  prefix, nodename);
+			  prefix, 
+                          nodename);
 	    } else {
 		log_error("\nError: object not found '%s'",
 			  nodename);

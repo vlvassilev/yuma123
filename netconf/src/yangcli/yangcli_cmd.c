@@ -6573,6 +6573,13 @@ status_t
         res = ERR_INTERNAL_MEM;
     }
 
+    /* check the load module corner case */
+    if (res == NO_ERR && 
+        !xml_strcmp(obj_get_mod_name(rpc), NCXMOD_NETCONFD) &&
+        !xml_strcmp(obj_get_name(rpc), NCX_EL_CLOSE_SESSION)) {
+        load = TRUE;
+    }
+
     /* should find an input node */
     input = obj_find_child(rpc, NULL, YANG_K_INPUT);
 
@@ -6623,9 +6630,10 @@ status_t
         }
     }
 
-    /* check the close-session corner cases */
-    if (res == NO_ERR && !xml_strcmp(obj_get_name(rpc), 
-                                     NCX_EL_CLOSE_SESSION)) {
+    /* check the close-session corner case */
+    if (res == NO_ERR && 
+        (obj_get_nsid(rpc) == xmlns_nc_id()) &&
+        !xml_strcmp(obj_get_name(rpc), NCX_EL_CLOSE_SESSION)) {
         shut = TRUE;
     }
             

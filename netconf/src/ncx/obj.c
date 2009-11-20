@@ -9953,6 +9953,31 @@ boolean
 
 
 /********************************************************************
+ * FUNCTION obj_is_top
+ * 
+ * Check if the object is top-level object within
+ * the YANG module that defines it
+ *
+ * INPUTS:
+ *    obj == object template to check
+ *********************************************************************/
+boolean
+    obj_is_top (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+	SET_ERROR(ERR_INTERNAL_PTR);
+	return FALSE;
+    }
+#endif
+
+    return (obj->flags & OBJ_FL_TOP) ? TRUE : FALSE;
+
+}  /* obj_is_top */
+
+
+/********************************************************************
  * FUNCTION obj_has_when_stmts
  * 
  * Check if any when-stmts apply to this object

@@ -53,6 +53,10 @@ date         init     comment
 #include  "agt_ses.h"
 #endif
 
+#ifndef _H_agt_timer
+#include  "agt_timer.h"
+#endif
+
 #ifndef _H_def_reg
 #include  "def_reg.h"
 #endif
@@ -284,6 +288,7 @@ status_t
                 } else {
                     /* !! put all polling callbacks here for now !! */
                     agt_ses_check_timeouts();
+                    agt_timer_handler();
                     send_some_notifications();
                 }
             } else {

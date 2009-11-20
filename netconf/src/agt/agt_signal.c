@@ -35,10 +35,6 @@ date         init     comment
 #include "agt_signal.h"
 #endif
 
-#ifndef _H_agt_timer
-#include "agt_timer.h"
-#endif
-
 #ifndef _H_ncx
 #include "ncx.h"
 #endif
@@ -148,8 +144,6 @@ void
         /* broken pipe ignored */
         break;
     case SIGALRM:
-        /* dispatch to the agent timer handler */
-        agt_timer_handler();
         break;
     default:
         /* ignore */;

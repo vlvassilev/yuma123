@@ -2601,6 +2601,22 @@ static status_t
         return NO_ERR;
     }
 
+    /* check if the child node is config
+     * this function only tests server requirements
+     * and ignores mandatory read-only nodes;
+     * otherwise the test on candidate would always fail
+     */
+    if (!obj_is_config(obj)) {
+#ifdef AGT_VAL_DEBUG
+        if (LOGDEBUG3) {
+            log_debug3("\ninstance_chk: skipping r/o node '%s:%s'",
+                       obj_get_mod_name(obj),
+                       obj_get_name(obj));
+        }
+#endif
+        return NO_ERR;
+    }
+
     /* check if the child object should be skipped because
      * of false if-feature or when-stmts
      */

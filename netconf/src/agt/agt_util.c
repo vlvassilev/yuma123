@@ -1818,4 +1818,119 @@ val_value_t *
 }  /* agt_make_virtual_leaf */
 
 
+/********************************************************************
+* FUNCTION agt_init_cache
+*
+* init a cache pointer during the init2 callback
+*
+* INPUTS:
+*   modname == name of module defining the top-level object
+*   objname == name of the top-level database object
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res is set to the return status
+*
+* RETURNS:
+*   pointer to object value node from running config,
+*   or NULL if error or not found
+*********************************************************************/
+val_value_t *
+    agt_init_cache (const xmlChar *modname,
+                    const xmlChar *objname,
+                    status_t *res)
+{
+    cfg_template_t  *cfg;
+    val_value_t     *retval;
+
+#ifdef DEBUG
+    if (modname == NULL || objname == NULL || res==NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    cfg = cfg_get_config_id(NCX_CFGID_RUNNING);
+    if (cfg == NULL) {
+        *res = ERR_NCX_CFG_NOT_FOUND;
+        return NULL;
+    }
+    if (cfg->root == NULL) {
+        *res = NO_ERR;
+        return NULL;
+    }
+
+    retval = val_find_child(cfg->root, modname, objname);
+
+    *res = NO_ERR;
+    return retval;
+
+}  /* agt_init_cache */
+
+
+/********************************************************************
+* FUNCTION agt_check_cache
+*
+* check if a cache pointer needs to be changed or NULLed out
+*
+INPUTS:
+*   cacheptr == address of pointer to cache value node
+*   newval == newval from the callback function
+*   curval == curval from the callback function
+*   editop == editop from the callback function
+*
+* OUTPUTS:
+*   *cacheptr may be changed, depending on the operation
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    agt_check_cache (val_value_t **cacheptr,
+                     val_value_t *newval,
+                     val_value_t *curval,
+                     op_editop_t editop)
+{
+
+#ifdef DEBUG
+    if (cacheptr == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    switch (editop) {
+    case OP_EDITOP_MERGE:
+        if (newval && curval) {
+            if (typ_is_simple(newval->btyp)) {
+                *cacheptr = newval;
+            } else {
+                *cacheptr = curval;
+            }
+        } else if (newval) {
+            *cacheptr = newval;
+        } else if (curval) {
+            *cacheptr = curval;
+        } else {
+            *cacheptr = NULL;
+        }
+        break;
+    case OP_EDITOP_REPLACE:
+    case OP_EDITOP_CREATE:
+        *cacheptr = newval;
+        break;
+    case OP_EDITOP_DELETE:
+        *cacheptr = NULL;
+        break;
+    case OP_EDITOP_LOAD:
+    case OP_EDITOP_COMMIT:
+        *cacheptr = newval;
+        break;
+    default:
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    return NO_ERR;
+
+}  /* agt_check_cache */
+
+
 /* END file agt_util.c */

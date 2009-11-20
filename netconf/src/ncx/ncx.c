@@ -2003,6 +2003,7 @@ obj_template_t *
 {
     obj_template_t *obj;
     ncx_module_t   *mod;
+    boolean         useses;
 
 #ifdef DEBUG
     if (!objname) {
@@ -2012,17 +2013,46 @@ obj_template_t *
 #endif
 
     obj = NULL;
-    for (mod = ncx_get_first_module_cli();
-	 mod != NULL;
-	 mod =  ncx_get_next_module(mod)) {
+    mod = NULL;
+    useses = FALSE;
 
-	obj = obj_find_template_top(mod, 
-				    ncx_get_modname(mod), 
-				    objname);
-	if (obj) {
-	    return obj;
-	}
+    if (ncx_sesmodQ != NULL) {
+        mod = (ncx_module_t *)dlq_firstEntry(ncx_sesmodQ);
+        if (mod != NULL) {
+            useses = TRUE;
+        }
     }
+    if (mod == NULL) {
+        mod = ncx_get_first_module();
+    }
+
+    for (;
+         mod != NULL;
+         mod =  ncx_get_next_module(mod)) {
+
+        obj = obj_find_template_top(mod, 
+                                    ncx_get_modname(mod), 
+                                    objname);
+        if (obj) {
+            return obj;
+        }
+    }
+
+    if (useses) {
+        /* make 1 more loop trying the main moduleQ */
+        for (mod = ncx_get_first_module();
+             mod != NULL;
+             mod = ncx_get_next_module(mod)) {
+
+            obj = obj_find_template_top(mod, 
+                                        ncx_get_modname(mod), 
+                                        objname);
+            if (obj) {
+                return obj;
+            }
+        }
+    }
+
     return NULL;
 
 }   /* ncx_find_any_object */
@@ -2419,26 +2449,6 @@ ncx_module_t *
     return mod;
 
 }  /* ncx_get_first_module */
-
-
-/********************************************************************
-* FUNCTION ncx_get_first_module_cli
-* 
-* Get the first module in the ncx_sesmodQ or the ncx_modQ
-* 
-* RETURNS:
-*   pointer to the first entry or NULL if empty Q
-*********************************************************************/
-ncx_module_t *
-    ncx_get_first_module_cli (void)
-{
-    if (ncx_sesmodQ != NULL) {
-        return (ncx_module_t *)dlq_firstEntry(ncx_sesmodQ);
-    } else {
-        return ncx_get_first_module();
-    }
-
-}  /* ncx_get_first_module_cli */
 
 
 /********************************************************************

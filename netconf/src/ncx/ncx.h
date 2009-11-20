@@ -216,9 +216,6 @@ extern ncx_module_t *
     ncx_get_first_module (void);
 
 extern ncx_module_t *
-    ncx_get_first_module_cli (void);
-
-extern ncx_module_t *
     ncx_get_first_session_module (void);
 
 extern ncx_module_t *

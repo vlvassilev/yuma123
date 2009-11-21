@@ -625,7 +625,7 @@ static void
 	break;
     case NCX_BT_EMPTY:
     case NCX_BT_BOOLEAN:
-	dest->v.bool = src->v.bool;
+	dest->v.boo = src->v.boo;
 	break;
     case NCX_BT_INT8:
     case NCX_BT_INT16:
@@ -831,7 +831,7 @@ static void
     } else if (val->btyp == NCX_BT_BITS) {
 	ncx_init_list(&val->v.list, NCX_BT_BITS);
     } else if (val->btyp == NCX_BT_EMPTY) {
-	val->v.bool = TRUE;
+	val->v.boo = TRUE;
     }
 
 }  /* init_from_template */
@@ -3541,12 +3541,12 @@ void
 	}
 	break;
     case NCX_BT_EMPTY:
-	if (!val->v.bool) {
+	if (!val->v.boo) {
 	    (*dumpfn)("(not set)");   /* should not happen */
 	}
 	break;
     case NCX_BT_BOOLEAN:
-	if (val->v.bool) {
+	if (val->v.boo) {
 	    (*dumpfn)("true");
 	} else {
 	    (*dumpfn)("false");
@@ -3666,7 +3666,7 @@ void
 			break;
 		    case NCX_BT_BOOLEAN:
 			(*dumpfn)("%s ",
-				  (listmem->val.bool) ? 
+				  (listmem->val.boo) ? 
 				  NCX_EL_TRUE : NCX_EL_FALSE);
 			break;
 		    default:
@@ -4267,17 +4267,17 @@ status_t
 	/* if supplied, match the flag name against the supplied value */
 	if (valstr) {
 	    if (!xml_strcmp(NCX_EL_TRUE, valstr)) {
-		val->v.bool = TRUE;
+		val->v.boo = TRUE;
 	    } else if (!xml_strcmp(NCX_EL_FALSE, valstr)) {
-		val->v.bool = FALSE;
+		val->v.boo = FALSE;
 	    } else if (!xml_strncmp(valstr, valname, valnamelen)) {
-		val->v.bool = TRUE;
+		val->v.boo = TRUE;
 	    } else {
 		res = ERR_NCX_INVALID_VALUE;
 	    }
 	} else {
 	    /* name indicates presence, so set val to TRUE */
-	    val->v.bool = TRUE;
+	    val->v.boo = TRUE;
 	}	    
 	break;
     case NCX_BT_SLIST:
@@ -4705,7 +4705,7 @@ val_value_t *
 	break;
     case NCX_BT_EMPTY:
     case NCX_BT_BOOLEAN:
-	copy->v.bool = val->v.bool;
+	copy->v.boo = val->v.boo;
 	break;
     case NCX_BT_INT8:
     case NCX_BT_INT16:
@@ -6881,9 +6881,9 @@ int32
     switch (btyp) {
     case NCX_BT_EMPTY:
     case NCX_BT_BOOLEAN:
-	if (val1->v.bool == val2->v.bool) {
+	if (val1->v.boo == val2->v.boo) {
 	    ret = 0;
-	} else if (val1->v.bool) {
+	} else if (val1->v.boo) {
 	    ret = 1;
 	} else {
 	    ret = -1;
@@ -7302,7 +7302,7 @@ status_t
     switch (btyp) {
     case NCX_BT_EMPTY:
 	/* flag is element name : <foo/>  */
-	if (val->v.bool) {
+	if (val->v.boo) {
 	    if (buff) {
 		icnt = sprintf((char *)buff, "<%s/>", val->name);
 		if (icnt < 0) {
@@ -7318,7 +7318,7 @@ status_t
 	}
 	break;
     case NCX_BT_BOOLEAN:
-	if (val->v.bool) {
+	if (val->v.boo) {
 	    if (buff) {
 		sprintf((char *)buff, "true");
 	    }
@@ -7481,7 +7481,7 @@ status_t
 		    s = VAL_ENUM_NAME(val);
 		    break;
 		case NCX_BT_BOOLEAN:
-		    if (val->v.bool) {
+		    if (val->v.boo) {
 			s = NCX_EL_TRUE;
 		    } else {
 			s = NCX_EL_FALSE;
@@ -7897,17 +7897,17 @@ status_t
     switch (btyp) {
     case NCX_BT_BOOLEAN:
 	if (attrval && !xml_strcmp(attrval, NCX_EL_TRUE)) {
-	    retval->v.bool = TRUE;
+	    retval->v.boo = TRUE;
 	} else if (attrval && 
 		   !xml_strcmp(attrval,
 			       (const xmlChar *)"1")) {
-	    retval->v.bool = TRUE;
+	    retval->v.boo = TRUE;
 	} else if (attrval && !xml_strcmp(attrval, NCX_EL_FALSE)) {
-	    retval->v.bool = FALSE;
+	    retval->v.boo = FALSE;
 	} else if (attrval && 
 		   !xml_strcmp(attrval,
 			       (const xmlChar *)"0")) {
-	    retval->v.bool = FALSE;
+	    retval->v.boo = FALSE;
 	} else {
 	    res = ERR_NCX_INVALID_VALUE;
 	}
@@ -8489,12 +8489,12 @@ boolean
     case NCX_BT_BOOLEAN:
 	if (ncx_is_true(def)) {
 	    /* default is true */
-	    if (val->v.bool) {
+	    if (val->v.boo) {
 		ret = TRUE;
 	    }
 	} else if (ncx_is_false(def)) {
 	    /* default is false */
-	    if (!val->v.bool) {
+	    if (!val->v.boo) {
 		ret = TRUE;
 	    }
 	}

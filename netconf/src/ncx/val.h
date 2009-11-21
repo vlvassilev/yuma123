@@ -163,9 +163,9 @@ date	     init     comment
 
 
 /* macros to access simple value types */
-#define VAL_BOOL(V)    ((V)->v.bool)
+#define VAL_BOOL(V)    ((V)->v.boo)
 
-#define VAL_EMPTY(V)    ((V)->v.bool)
+#define VAL_EMPTY(V)    ((V)->v.boo)
 
 #define VAL_DOUBLE(V)  ((V)->v.num.d)
 
@@ -179,7 +179,7 @@ date	     init     comment
 
 #define VAL_ENUM_NAME(V)    ((V)->v.enu.name)
 
-#define VAL_FLAG(V)    ((V)->v.bool)
+#define VAL_FLAG(V)    ((V)->v.boo)
 
 #define VAL_FLOAT(V)   ((V)->v.num.f)
 
@@ -353,7 +353,7 @@ typedef struct val_value_t_ {
 
 	ncx_binary_t binary;              /* NCX_BT_BINARY */
 	ncx_list_t list;      /* NCX_BT_BITS, NCX_BT_SLIST */
-	boolean    bool;   /* NCX_BT_EMPTY, NCX_BT_BOOLEAN */
+	boolean    boo;    /* NCX_BT_EMPTY, NCX_BT_BOOLEAN */
 	ncx_enum_t enu;       /* NCX_BT_UNION, NCX_BT_ENUM */
 	xmlChar   *fname;                 /* NCX_BT_EXTERN */
 	xmlChar   *intbuff;               /* NCX_BT_INTERN */

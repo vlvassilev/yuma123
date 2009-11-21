@@ -361,10 +361,10 @@ static boolean
     case NCX_BT_BOOLEAN:
         if (!xml_strcmp(testval, NCX_EL_TRUE) ||
             !xml_strcmp(testval, (const xmlChar *)"1")) {
-            testres = cmpval->v.bool;
+            testres = cmpval->v.boo;
         } else if (!xml_strcmp(testval, NCX_EL_FALSE) ||
                    !xml_strcmp(testval, (const xmlChar *)"0")) {
-            testres = !cmpval->v.bool;
+            testres = !cmpval->v.boo;
         }
         break;
     case NCX_BT_BINARY:

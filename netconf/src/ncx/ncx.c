@@ -6079,7 +6079,7 @@ status_t
 	    }
 	    break;
 	case NCX_BT_BOOLEAN:
-	    lcopy->val.bool = lmem->val.bool;
+	    lcopy->val.boo = lmem->val.boo;
 	    break;
 	default:
 	    if (typ_is_number(list1->btyp)) {
@@ -6586,7 +6586,7 @@ ncx_lmem_t *
     } else if (list->btyp == NCX_BT_BITS) {
         bit = &memval->val.bit;
     } else if (list->btyp == NCX_BT_BOOLEAN) {
-	bool = memval->val.bool;
+	bool = memval->val.boo;
     } else {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
@@ -6604,7 +6604,7 @@ ncx_lmem_t *
         } else if (bit) {
 		cmpval = ncx_compare_bits(&lmem->val.bit, bit);
 	} else {
-	    cmpval = (lmem->val.bool && bool) ? 0 : 1;
+	    cmpval = (lmem->val.boo && bool) ? 0 : 1;
 	}
 
 	if (!cmpval) {
@@ -6677,7 +6677,7 @@ void
 	} else if (list->btyp == NCX_BT_BITS) {
 	    bit = &memval->val.bit;
 	} else if (list->btyp == NCX_BT_BOOLEAN) {
-	    bool = memval->val.bool;
+	    bool = memval->val.boo;
 	} else {
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	    return;
@@ -6695,7 +6695,7 @@ void
 	    } else if (bit) {
 		cmpval = ncx_compare_bits(&lmem->val.bit, bit);
 	    } else {
-		if (lmem->val.bool) {
+		if (lmem->val.boo) {
 		    cmpval = (bool) ? 0 : 1;
 		} else {
 		    cmpval = (bool) ? -1 : 0;

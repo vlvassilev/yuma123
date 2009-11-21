@@ -793,7 +793,7 @@ static void
 	}
 	break;
     case NCX_BT_EMPTY:
-	if (useval->v.bool) {
+	if (useval->v.boo) {
 	    xml_wr_empty_elem(scb,
 			      msg,
 			      val_get_parent_nsid(useval),
@@ -803,7 +803,7 @@ static void
 	}
 	break;
     case NCX_BT_BOOLEAN:
-	if (useval->v.bool) {
+	if (useval->v.boo) {
 	    ses_putcstr(scb, NCX_EL_TRUE, indent);
 	} else {
 	    ses_putcstr(scb, NCX_EL_FALSE, indent);
@@ -944,7 +944,7 @@ static void
 		    break;
 		case NCX_BT_BOOLEAN:
 		    ses_putcstr(scb,
-				(listmem->val.bool) ?
+				(listmem->val.boo) ?
 				NCX_EL_TRUE : NCX_EL_FALSE,
 				indent);
 		    break;

@@ -292,7 +292,7 @@ static status_t
     case XML_NT_EMPTY:
 	/* treat this 'any' is an 'empty' data type  */
 	val_init_from_template(retval, ncx_get_gen_empty());
-	retval->v.bool = TRUE;
+	retval->v.boo = TRUE;
 	retval->nsid = startnode->nsid;
 	return NO_ERR;
     default:
@@ -340,7 +340,7 @@ static status_t
 	    if (res == NO_ERR) {
 		/* treat this start + end pair as an 'empty' data type */
 		val_init_from_template(retval, ncx_get_gen_empty());
-		retval->v.bool = TRUE;
+		retval->v.boo = TRUE;
 		retval->nsid = startnode->nsid;
 		return NO_ERR;
 	    }
@@ -636,7 +636,7 @@ static status_t
 
     /* record the value if no errors */
     if (res == NO_ERR) {
-	retval->v.bool = TRUE;
+	retval->v.boo = TRUE;
     }
 
     xml_clean_node(&endnode);
@@ -710,9 +710,9 @@ static status_t
 	case XML_NT_STRING:
 	    /* get the non-whitespace string here */
 	    if (ncx_is_true(valnode.simval)) {
-		retval->v.bool = TRUE;
+		retval->v.boo = TRUE;
 	    } else if (ncx_is_false(valnode.simval)) {
-		retval->v.bool = FALSE;
+		retval->v.boo = FALSE;
 	    } else {
 		res = ERR_NCX_INVALID_VALUE;
 	    }

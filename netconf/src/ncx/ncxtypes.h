@@ -435,7 +435,7 @@ typedef struct ncx_lmem_t_ {
 	ncx_str_t    str;
 	ncx_enum_t   enu;
 	ncx_bit_t    bit;
-	boolean      bool;
+	boolean      boo;
     } val;
     uint32   flags;
 } ncx_lmem_t;

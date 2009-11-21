@@ -448,7 +448,7 @@ val_value_t *
 	return NULL;
     }
     val->btyp = NCX_BT_EMPTY;
-    val->v.bool = TRUE;
+    val->v.boo = TRUE;
     val->typdef = typ_get_basetype_typdef(NCX_BT_EMPTY);
     val->name = name;
     val->nsid = nsid;

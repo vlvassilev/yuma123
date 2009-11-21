@@ -6561,8 +6561,8 @@ ncx_lmem_t *
     const ncx_str_t   *str;
     const ncx_enum_t  *enu;
     const ncx_bit_t   *bit;
-    int32            cmpval;
-    boolean          bool;
+    int32              cmpval;
+    boolean            boo;
 
 #ifdef DEBUG
     if (!list || !memval) {
@@ -6575,7 +6575,7 @@ ncx_lmem_t *
     str = NULL;
     enu = NULL;
     bit = NULL;
-    bool = FALSE;
+    boo = FALSE;
 
     if (typ_is_number(list->btyp)) {
 	num = &memval->val.num;
@@ -6586,7 +6586,7 @@ ncx_lmem_t *
     } else if (list->btyp == NCX_BT_BITS) {
         bit = &memval->val.bit;
     } else if (list->btyp == NCX_BT_BOOLEAN) {
-	bool = memval->val.boo;
+	boo = memval->val.boo;
     } else {
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return NULL;
@@ -6604,7 +6604,7 @@ ncx_lmem_t *
         } else if (bit) {
 		cmpval = ncx_compare_bits(&lmem->val.bit, bit);
 	} else {
-	    cmpval = (lmem->val.boo && bool) ? 0 : 1;
+	    cmpval = (lmem->val.boo && boo) ? 0 : 1;
 	}
 
 	if (!cmpval) {
@@ -6640,7 +6640,7 @@ void
     const ncx_enum_t  *enu;
     const ncx_bit_t   *bit;
     int32              cmpval;
-    boolean            bool;
+    boolean            boo;
 
 #ifdef DEBUG
     if (!list || !memval) {
@@ -6666,7 +6666,7 @@ void
 	str = NULL;
 	enu = NULL;
 	bit = NULL;
-	bool = FALSE;
+	boo = FALSE;
 
 	if (typ_is_number(list->btyp)) {
 	    num = &memval->val.num;
@@ -6677,7 +6677,7 @@ void
 	} else if (list->btyp == NCX_BT_BITS) {
 	    bit = &memval->val.bit;
 	} else if (list->btyp == NCX_BT_BOOLEAN) {
-	    bool = memval->val.boo;
+	    boo = memval->val.boo;
 	} else {
 	    SET_ERROR(ERR_INTERNAL_VAL);
 	    return;
@@ -6696,9 +6696,9 @@ void
 		cmpval = ncx_compare_bits(&lmem->val.bit, bit);
 	    } else {
 		if (lmem->val.boo) {
-		    cmpval = (bool) ? 0 : 1;
+		    cmpval = (boo) ? 0 : 1;
 		} else {
-		    cmpval = (bool) ? -1 : 0;
+		    cmpval = (boo) ? -1 : 0;
 		}
 	    }
 

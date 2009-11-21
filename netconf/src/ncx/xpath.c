@@ -2029,7 +2029,7 @@ void
 	}
 	break;
     case XP_RT_BOOLEAN:
-	result->r.bool = FALSE;
+	result->r.boo = FALSE;
 	break;
     case XP_RT_NONE:
 	break;
@@ -2355,7 +2355,7 @@ boolean
 	return (result->r.str && xml_strlen(result->r.str)) ?
 	    TRUE : FALSE;
     case XP_RT_BOOLEAN:
-	return result->r.bool;
+	return result->r.boo;
     default:
 	SET_ERROR(ERR_INTERNAL_VAL);
 	return FALSE;
@@ -2479,7 +2479,7 @@ void
 	}
 	break;
     case XP_RT_BOOLEAN:
-	if (result->r.bool) {
+	if (result->r.boo) {
 	    ncx_set_num_one(num, NCX_BT_FLOAT64);
 	} else {
 	    ncx_set_num_zero(num, NCX_BT_FLOAT64);
@@ -2571,7 +2571,7 @@ status_t
 	}
 	break;
     case XP_RT_BOOLEAN:
-	if (result->r.bool) {
+	if (result->r.boo) {
 	    *str = xml_strdup(NCX_EL_TRUE);
 	} else {
 	    *str = xml_strdup(NCX_EL_FALSE);

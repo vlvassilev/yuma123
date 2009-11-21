@@ -1424,7 +1424,7 @@ static boolean
 
     if (val2->restype == XP_RT_BOOLEAN) {
 	bool1 = xpath_cvt_boolean(val1);
-	bool2 = val2->r.bool;
+	bool2 = val2->r.boo;
 	return compare_booleans(bool1, bool2, exop);
     }
 
@@ -1654,8 +1654,8 @@ static boolean
 				   val2->r.str,
 				   exop);
 	case XP_RT_BOOLEAN:
-	    return compare_booleans(val1->r.bool,
-				    val2->r.bool,
+	    return compare_booleans(val1->r.boo,
+				    val2->r.boo,
 				    exop);
 	    break;
 	default:
@@ -1690,10 +1690,10 @@ static boolean
 	 */
 	if (val1->restype == XP_RT_BOOLEAN) {
 	    bool2 = xpath_cvt_boolean(val2);
-	    return compare_booleans(val1->r.bool, bool2, exop);
+	    return compare_booleans(val1->r.boo, bool2, exop);
 	}  else if (val2->restype == XP_RT_BOOLEAN) {
 	    bool1 = xpath_cvt_boolean(val1);
-	    return compare_booleans(bool1, val2->r.bool, exop);
+	    return compare_booleans(bool1, val2->r.boo, exop);
 	} else if (val1->restype == XP_RT_NUMBER) {
 	    ncx_init_num(&num2);
 	    xpath_cvt_number(val2, &num2);
@@ -1836,7 +1836,7 @@ static void
 	break;
     case XP_RT_BOOLEAN:
 	log_write("\n  typ: boolean = %s",
-		  (result->r.bool) ? "true" : "false");
+		  (result->r.boo) ? "true" : "false");
 	break;
     default:
 	log_write("\n  typ: INVALID (%d)", result->restype);
@@ -2125,7 +2125,7 @@ static xpath_result_t *
 	return NULL;
     }
 
-    result->r.bool = xpath_cvt_boolean(parm);
+    result->r.boo = xpath_cvt_boolean(parm);
     *res = NO_ERR;
     return result;
 
@@ -2366,9 +2366,9 @@ static xpath_result_t *
     } else {
 	if (strstr((const char *)str1, 
 		   (const char *)str2)) {
-	    result->r.bool = TRUE;
+	    result->r.boo = TRUE;
 	} else {
-	    result->r.bool = FALSE;
+	    result->r.boo = FALSE;
 	}
 	*res = NO_ERR;
     }
@@ -2527,7 +2527,7 @@ static xpath_result_t *
     if (!result) {
 	*res = ERR_INTERNAL_MEM;
     } else {
-	result->r.bool = FALSE;
+	result->r.boo = FALSE;
 	*res = NO_ERR;
     }
 
@@ -3182,14 +3182,14 @@ static xpath_result_t *
     if (parm->restype != XP_RT_BOOLEAN) {
 	boolresult = xpath_cvt_boolean(parm);
     } else {
-	boolresult = parm->r.bool;
+	boolresult = parm->r.boo;
     }
 
     result = new_result(pcb, XP_RT_BOOLEAN);
     if (!result) {
 	*res = ERR_INTERNAL_MEM;
     } else {
-	result->r.bool = !boolresult;
+	result->r.boo = !boolresult;
 	*res = NO_ERR;
     }
 
@@ -3474,11 +3474,11 @@ static xpath_result_t *
 	len2 = xml_strlen(str2);
 
 	if (len2 > len1) {
-	    result->r.bool = FALSE;
+	    result->r.boo = FALSE;
 	} else if (!xml_strncmp(str1, str2, len2)) {
-	    result->r.bool = TRUE;
+	    result->r.boo = TRUE;
 	} else {
-	    result->r.bool = FALSE;
+	    result->r.boo = FALSE;
 	}
 	*res = NO_ERR;
     }
@@ -4294,7 +4294,7 @@ static xpath_result_t *
     if (!result) {
 	*res = ERR_INTERNAL_MEM;
     } else {
-	result->r.bool = TRUE;
+	result->r.boo = TRUE;
 	*res = NO_ERR;
     }
     return result;
@@ -6444,7 +6444,7 @@ static status_t
     xpath_result_t  *val1, *contextset;
     xpath_resnode_t  lastcontext, *resnode, *nextnode;
     tk_token_t      *leftbrack;
-    boolean          bool;
+    boolean          boo;
     status_t         res;
     int64            position;
 
@@ -6453,7 +6453,7 @@ static status_t
 	return res;
     }
 
-    bool = FALSE;
+    boo = FALSE;
     if (pcb->val || pcb->obj) {
 	leftbrack = TK_CUR(pcb->tkc);
 	contextset = *result;
@@ -6487,7 +6487,7 @@ static status_t
 		 * with the resnode as the current context node
 		 */
 		TK_CUR(pcb->tkc) = leftbrack;
-		bool = FALSE;
+		boo = FALSE;
 
 		nextnode = (xpath_resnode_t *)
 		    dlq_nextEntry(resnode);
@@ -6528,17 +6528,17 @@ static status_t
 			 * of this node matches the position
 			 * value from this expression
 			 */
-			bool = (position == resnode->position) ?
+			boo = (position == resnode->position) ?
 			    TRUE : FALSE;
 		    } else {
-			bool = FALSE;
+			boo = FALSE;
 		    }
 		} else {
-		    bool = xpath_cvt_boolean(val1);
+		    boo = xpath_cvt_boolean(val1);
 		}
 		free_result(pcb, val1);
 
-		if (!bool) {
+		if (!boo) {
 		    /* predicate expression evaluated to false
 		     * so delete this resnode from the result
 		     */
@@ -6575,12 +6575,12 @@ static status_t
 	    }
 
 	    if (val1 && pcb->val) {
-		bool = xpath_cvt_boolean(val1);
+		boo = xpath_cvt_boolean(val1);
 	    }
 	    if (val1) {
 		free_result(pcb, val1);
 	    }
-	    if (pcb->val && !bool && *result) {
+	    if (pcb->val && !boo && *result) {
 		xpath_clean_result(*result);
 		xpath_init_result(*result, XP_RT_NONE);
 	    }
@@ -7540,7 +7540,7 @@ static xpath_result_t *
 	    /* odd number of negate ops requested */
 
 	    if (val1->restype == XP_RT_BOOLEAN) {
-		val1->r.bool = !val1->r.bool;
+		val1->r.boo = !val1->r.boo;
 		return val1;
 	    } else {
 		result = new_result(pcb, XP_RT_BOOLEAN);
@@ -7548,7 +7548,7 @@ static xpath_result_t *
 		    *res = ERR_INTERNAL_MEM;
 		    return NULL;
 		}
-		result->r.bool = xpath_cvt_boolean(val1);
+		result->r.boo = xpath_cvt_boolean(val1);
 		free_result(pcb, val1);
 		return result;
 	    }
@@ -7929,7 +7929,7 @@ static xpath_result_t *
 			if (!result) {
 			    *res = ERR_INTERNAL_MEM;
 			} else {
-			    result->r.bool = cmpresult;
+			    result->r.boo = cmpresult;
 			}
 		    }
 		}
@@ -8061,7 +8061,7 @@ static xpath_result_t *
 			    if (!result) {
 				*res = ERR_INTERNAL_MEM;
 			    } else {
-				result->r.bool = cmpresult;
+				result->r.boo = cmpresult;
 			    }
 			}
 		    }
@@ -8178,7 +8178,7 @@ static xpath_result_t *
 		    if (!result) {
 			*res = ERR_INTERNAL_MEM;
 		    } else {
-			result->r.bool = (bool1 && bool2) 
+			result->r.boo = (bool1 && bool2) 
 			    ? TRUE : FALSE;
 		    }
 		}
@@ -8274,7 +8274,7 @@ static xpath_result_t *
 		    if (!result) {
 			*res = ERR_INTERNAL_MEM;
 		    } else {
-			result->r.bool = (bool1 || bool2) 
+			result->r.boo = (bool1 || bool2) 
 			    ? TRUE : FALSE;
 		    }
 		}

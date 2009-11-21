@@ -281,7 +281,7 @@ typedef struct xpath_result_t_ {
     int64                last;    /* used with XP_RT_NODESET */
     union r_ {
 	dlq_hdr_t         nodeQ;       /* Q of xpath_resnode_t */
-	boolean           bool; 
+	boolean           boo; 
 	ncx_num_t         num;
 	xmlChar          *str;
     } r;

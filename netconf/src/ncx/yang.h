@@ -302,7 +302,7 @@ extern status_t
 extern status_t 
     yang_consume_boolean (tk_chain_t  *tkc,
 			  ncx_module_t *mod,
-			  boolean *bool,
+			  boolean *boolval,
 			  boolean *dupflag,
 			  dlq_hdr_t *appinfoQ);
 

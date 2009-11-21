@@ -1743,7 +1743,7 @@ status_t
 * INPUTS:
 *   tkc    == token chain
 *   mod    == module in progress
-*   bool == boolean value to set  (may be NULL)
+*   boolval == boolean value to set  (may be NULL)
 *   dupflag == flag to check if entry already found (may be NULL)
 *   appinfoQ == Q to hold any extensions found (may be NULL)
 *
@@ -1756,7 +1756,7 @@ status_t
 status_t 
     yang_consume_boolean (tk_chain_t  *tkc,
 			  ncx_module_t *mod,
-			  boolean *bool,
+			  boolean *boolval,
 			  boolean *dupflag,
 			  dlq_hdr_t *appinfoQ)
 {
@@ -1795,11 +1795,11 @@ status_t
     if (str) {
 	if (!xml_strcmp(str, NCX_EL_TRUE)) {
 	    if (save) {
-		*bool = TRUE;
+		*boolval = TRUE;
 	    }
 	} else if (!xml_strcmp(str, NCX_EL_FALSE)) {
 	    if (save) {
-		*bool = FALSE;
+		*boolval = FALSE;
 	    }
 	} else {
 	    retres = ERR_NCX_WRONG_TKVAL;

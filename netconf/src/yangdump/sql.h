@@ -8,7 +8,7 @@
 *								    *
 *********************************************************************
 
-  Convert NCX module to SQL format for the netconfcentral.com DB
+  Convert YANG module to SQL format for the netconfcentral.org DB
  
 *********************************************************************
 *								    *

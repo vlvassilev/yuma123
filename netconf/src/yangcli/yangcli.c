@@ -63,6 +63,10 @@ date         init     comment
 #include "log.h"
 #endif
 
+#ifndef _H_ncxmod
+#include "ncxmod.h"
+#endif
+
 #ifndef _H_mgr
 #include "mgr.h"
 #endif
@@ -2014,7 +2018,7 @@ static status_t
     }
 
     /* load in the NETCONF data types and RPC methods */
-    res = ncxmod_load_module(NC_MODULE, 
+    res = ncxmod_load_module(NCXMOD_NETCONF, 
                              NULL, 
                              NULL,
                              &netconf_mod);

@@ -41,6 +41,10 @@ date         init     comment
 #include  "ncxconst.h"
 #endif
 
+#ifndef _H_ncxmod
+#include  "ncxmod.h"
+#endif
+
 #ifndef _H_rpc
 #include  "rpc.h"
 #endif
@@ -237,7 +241,7 @@ static cfg_template_t *
     obj_template_t        *cfgobj;
 
     cfgobj = NULL;
-    mod = ncx_find_module(NCX_EL_NETCONF, NULL);
+    mod = ncx_find_module(NCXMOD_NETCONF, NULL);
     if (mod) {
 	cfgobj = ncx_find_object(mod, NCX_EL_CONFIG);
     }

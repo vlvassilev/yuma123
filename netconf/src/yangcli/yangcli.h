@@ -106,8 +106,8 @@ date	     init     comment
 #define YANGCLI_BOOT YANGCLI_MOD
 
 /* core modules auto-loaded at startup */
-#define NCXDTMOD       (const xmlChar *)"ncxtypes"
-#define XSDMOD         (const xmlChar *)"xsd"
+#define NCXDTMOD       (const xmlChar *)"yuma-types"
+#define XSDMOD         (const xmlChar *)"yuma-xsd"
 
 #define DEF_PROMPT     (const xmlChar *)"yangcli> "
 #define DEF_FN_PROMPT  (const xmlChar *)"yangcli:"

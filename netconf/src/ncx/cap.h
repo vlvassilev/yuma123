@@ -51,10 +51,6 @@ date             init     comment
 /* NETCONF Capability Identifier Base String */
 #define CAP_URN ((const xmlChar *)"urn:ietf:params:netconf:capability:")
 
-/* NCX Module Capability Identifier Base String !!! OBSOLETE !!! */
-#define CAP_MODURN ((const xmlChar *) \
-		    "http://netconfcentral.com/modules/")
-
 #define CAP_SEP_CH   '/'
 
 

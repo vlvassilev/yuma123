@@ -1950,25 +1950,27 @@ static status_t
                                  NULL, 
                                  NULL,
                                  NULL);
+    }
 
-	if (res == NO_ERR) {
-	    res = ncxmod_load_module(NCXMOD_NCX, 
-                                     NULL, 
-                                     NULL,
-                                     NULL);
-	    if (res == NO_ERR) {
-		res = ncx_stage2_init();
-	    }
-	}
+    if (res == NO_ERR) {
+        res = ncxmod_load_module(NCXMOD_NCX, 
+                                 NULL, 
+                                 NULL,
+                                 NULL);
+    }
 
-	if (res == NO_ERR) {
-	    res = process_cli_input(argc, argv, &diffparms);
-	}
+    if (res == NO_ERR) {
+        res = ncx_stage2_init();
+    }
+
+    if (res == NO_ERR) {
+        res = process_cli_input(argc, argv, &diffparms);
     }
 
     if (res != NO_ERR && res != ERR_NCX_SKIPPED) {
 	pr_err(res);
     }
+
     return res;
 
 }  /* main_init */

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <nc:config xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
-   <nacm:nacm xmlns:nacm="http://netconfcentral.com/ns/nacm">
+   <nacm:nacm xmlns:nacm="http://netconfcentral.org/ns/yuma-nacm">
       <nacm:noRuleReadDefault>permit</nacm:noRuleReadDefault>
       <nacm:noRuleWriteDefault>deny</nacm:noRuleWriteDefault>
       <nacm:noRuleExecDefault>permit</nacm:noRuleExecDefault>
@@ -25,13 +25,13 @@
       </nacm:groups>
       <nacm:rules>
          <nacm:moduleRule>
-            <nacm:moduleName>netconf</nacm:moduleName>
+            <nacm:moduleName>yuma-netconf</nacm:moduleName>
             <nacm:allowedRights>read write exec</nacm:allowedRights>
             <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
             <nacm:allowedGroup>nacm:monitor</nacm:allowedGroup>
          </nacm:moduleRule>
          <nacm:moduleRule>
-            <nacm:moduleName>netconf</nacm:moduleName>
+            <nacm:moduleName>yuma-netconf</nacm:moduleName>
             <nacm:allowedRights>read exec</nacm:allowedRights>
             <nacm:allowedGroup>nacm:guest</nacm:allowedGroup>
          </nacm:moduleRule>
@@ -51,14 +51,16 @@
          <nacm:dataRule>
             <nacm:name>itf-1</nacm:name>
             <nacm:path
-               xmlns:if="http://netconfcentral.com/ns/interfaces">/if:interfaces/if:interface</nacm:path>
+               xmlns:if="http://netconfcentral.org/ns/yuma-interfaces">
+              /if:interfaces/if:interface
+            </nacm:path>
             <nacm:allowedRights>read write</nacm:allowedRights>
             <nacm:allowedGroup>nacm:admin</nacm:allowedGroup>
             <nacm:comment>let admin read and write all interfaces</nacm:comment>
          </nacm:dataRule>
       </nacm:rules>
    </nacm:nacm>
-   <if:interfaces xmlns:if="http://netconfcentral.com/ns/interfaces">
+   <if:interfaces xmlns:if="http://netconfcentral.org/ns/yuma-interfaces">
       <if:interface>
          <if:name>lo</if:name>
       </if:interface>
@@ -72,12 +74,4 @@
          <if:name>pan0</if:name>
       </if:interface>
    </if:interfaces>
-   <t:uint16.1 xmlns:t="http://netconfcentral.com/ns/test">1234</t:uint16.1>
-   <t:int8.1 xmlns:t="http://netconfcentral.com/ns/test">3</t:int8.1>
-   <t:int16.1 xmlns:t="http://netconfcentral.com/ns/test">44</t:int16.1>
-   <t:int32.1 xmlns:t="http://netconfcentral.com/ns/test">99</t:int32.1>
-   <t:int64.1 xmlns:t="http://netconfcentral.com/ns/test">55555</t:int64.1>
-   <t:uint64.1 xmlns:t="http://netconfcentral.com/ns/test">777777</t:uint64.1>
-   <toast:toaster xmlns:toast="http://netconfcentral.com/ns/toaster">
-   </toast:toaster>
 </nc:config>

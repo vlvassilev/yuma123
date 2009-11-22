@@ -138,7 +138,7 @@ date         init     comment
  */
 #define AGT_SES_MAX_SESSIONS     1024
 
-#define AGT_SES_MODULE      (const xmlChar *)"mysession"
+#define AGT_SES_MODULE      (const xmlChar *)"yuma-mysession"
 
 #define AGT_SES_GET_MY_SESSION   (const xmlChar *)"get-my-session"
 

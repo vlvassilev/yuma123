@@ -113,7 +113,7 @@ date         init     comment
 #define AGT_PROC_DEBUG 1
 #endif
 
-#define proc_MOD        (const xmlChar *)"proc"
+#define proc_MOD        (const xmlChar *)"yuma-proc"
 
 #define proc_MOD_REV    NULL
 

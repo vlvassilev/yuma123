@@ -113,7 +113,7 @@ date         init     comment
 #define AGT_IF_DEBUG 1
 #endif
 
-#define interfaces_MOD        (const xmlChar *)"interfaces"
+#define interfaces_MOD        (const xmlChar *)"yuma-interfaces"
 
 #define interfaces_MOD_REV    NULL
 

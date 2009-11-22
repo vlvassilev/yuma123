@@ -591,36 +591,35 @@ static status_t
     dlq_createSQue(&savedevQ);
 
     if (res == NO_ERR) {
-
         /* load in the YANGDUMP converter parmset definition file */
         res = ncxmod_load_module(YANGDUMP_MOD, 
                                  NULL, 
                                  NULL,
                                  NULL);
+    }
 
-        if (res == NO_ERR) {
-            res = ncxmod_load_module(NCXMOD_NCX, 
-                                     NULL, 
-                                     NULL,
-                                     NULL);
-            if (res == NO_ERR) {
-                res = ncx_stage2_init();
-            }
-        }
+    if (res == NO_ERR) {
+        res = ncxmod_load_module(NCXMOD_NCX, 
+                                 NULL, 
+                                 NULL,
+                                 NULL);
+    }
 
-        /* Initialize the Notifications namespace */
+    if (res == NO_ERR) {
+        res = ncx_stage2_init();
+    }
+
+    /* Initialize the Notifications namespace */
+    if (res == NO_ERR) {
         res = xmlns_register_ns(NCN_URN, 
                                 NCN_PREFIX, 
                                 NCX_MODULE, 
                                 NULL, 
                                 &nsid);
-        if (res != NO_ERR) {
-            return res;
-        }
+    }
 
-        if (res == NO_ERR) {
-            res = process_cli_input(argc, argv, &cvtparms);
-        }
+    if (res == NO_ERR) {
+        res = process_cli_input(argc, argv, &cvtparms);
     }
 
     if (res != NO_ERR && res != ERR_NCX_SKIPPED) {

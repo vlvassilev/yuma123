@@ -36,14 +36,16 @@ date	     init     comment
 #define NC_VER          "1.0"
 #define NC_PREFIX       (const xmlChar *)"nc"
 
-#define NC_MODULE       (const xmlChar *)"netconf"
+#define NC_MODULE       (const xmlChar *)"yuma-netconf"
 
 #define NCN_MODULE       (const xmlChar *)"notifications"
+
+#define NCX_MODULE       (const xmlChar *)"yuma-ncx"
+#define NCX_PREFIX       (const xmlChar *)"ncx"
 
 #define NC_OK_REPLY  (const xmlChar *)"RpcOkReplyType"
 
 #define NC_URN  (const xmlChar *)"urn:ietf:params:xml:ns:netconf:base:1.0"
-
 
 /* NETCONF SSH End of Message Marker */
 #define NC_SSH_END "]]>]]>"
@@ -61,15 +63,6 @@ date	     init     comment
 
 #define NCX_SSH_PORT    22
 #define NCX_NCSSH_PORT  830
-
-
-/* ncx.yang module */
-#define NCX_MODULE       (const xmlChar *)"ncx"
-#define NCX_PREFIX       (const xmlChar *)"ncx"
-/**** MUST UPDATE NCX_REVISION DATE BY HAND TO GET
- **** typ_load_basetypes() TO WORK CORRECTLY
- ****/
-#define NCX_REVISION    (const xmlChar *)"2009-02-19"
 
 #define INVALID_URN    (const xmlChar *)"INVALID"
 
@@ -94,11 +87,8 @@ date	     init     comment
 #define NC_URN1         (const xmlChar *)"urn:netconf:params:xml:ns:"
 
 /* URN for NCX extensions */
-#define NCX_VER    "1.0"
-#define NCX_URN    (const xmlChar *)"http://netconfcentral.com/ncx"
-#define NCX_URL    (const xmlChar *)\
-		    "http://netconfcentral.com/xsd/ncx/ncx.xsd"
-#define NCX_MOD    (const xmlChar *)"ncx"
+#define NCX_URN    (const xmlChar *)"http://netconfcentral.org/ns/yuma-ncx"
+#define NCX_MOD    (const xmlChar *)"yuma-ncx"
 
 
 /* URN for XSD */
@@ -123,17 +113,11 @@ date	     init     comment
 #define NCN_PREFIX      (const xmlChar *)"ncn"
 
 
-/*** TEMP HARDWIRED ***/
-#define NCX_HOSTNAME    (const xmlChar *)"netconfcentral.com"
-
 /* schemaLocation string */
-#define NCX_SCHEMA_LOC  (const xmlChar *)"http://www.netconfcentral.com/xsd/"
+#define NCX_SCHEMA_LOC  (const xmlChar *)"http://www.netconfcentral.org/xsd/"
 
 #define NCX_XSD_EXT     (const xmlChar *)"xsd"
 
-/* Constructed URN format for NCX module namespace is:
- *    http://NCX_HOSTNAME/OWNER/APPNAME/APPVER
- */
 #define NCX_URNP1       (const xmlChar *)"http://"
 
 
@@ -154,13 +138,7 @@ date	     init     comment
 
 #define EMPTY_STRING  (const xmlChar *)""
 
-/* NCX owner for built-in definitions */
-#define NCX_OWNER       (const xmlChar *)"ncx"
-#define NCX_OWNER_LEN     3
-
-#define NCX_DEF_OWNER   (const xmlChar *)"netconf"
-
-#define NCX_DEF_MODULE  (const xmlChar *)"netconf"
+#define NCX_DEF_MODULE  (const xmlChar *)"yuma-netconf"
 
 #define NCX_DEF_LANG    (const xmlChar *)"en"
 

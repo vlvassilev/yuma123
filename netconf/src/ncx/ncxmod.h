@@ -88,14 +88,14 @@ date	     init     comment
  */
 #define NCXMOD_NETCONFD   (const xmlChar *)"netconfd"
 
-#define NCXMOD_NCX        (const xmlChar *)"ncx"
+#define NCXMOD_NCX        (const xmlChar *)"yuma-ncx"
 
 #define NCXMOD_WITH_DEFAULTS (const xmlChar *)"ietf-with-defaults"
 
 /* name of the NETCONF module containing NETCONF protocol definitions,
  * that is loaded by default during startup 
  */
-#define NCXMOD_NETCONF        (const xmlChar *)"netconf"
+#define NCXMOD_NETCONF        (const xmlChar *)"yuma-netconf"
 
 #define NCXMOD_IETF_NETCONF   (const xmlChar *)"ietf-netconf"
 

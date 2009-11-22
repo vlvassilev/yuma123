@@ -2234,7 +2234,7 @@ status_t
         } else if (isnetconf) {
             ;
         } else if (xml_strcmp(mod->name, ns->ns_module) &&
-            xml_strcmp(ns->ns_module, NCX_OWNER)) {
+                   xml_strcmp(ns->ns_module, NCX_MODULE)) {
             /* this NS string already registered to another module */
             log_error("\nncx reg: Module '%s' registering "
                       "duplicate namespace '%s'\n    "

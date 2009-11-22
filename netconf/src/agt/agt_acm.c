@@ -131,7 +131,7 @@ date         init     comment
 
 #define AGT_ACM_DEBUG 1
 
-#define AGT_ACM_MODULE      (const xmlChar *)"nacm"
+#define AGT_ACM_MODULE      (const xmlChar *)"yuma-nacm"
 
 #define nacm_I_nacmGroups (const xmlChar *)"nacmGroups"
 #define nacm_I_superuser (const xmlChar *)"superuser"
@@ -989,7 +989,11 @@ static boolean
                     dlq_enque(modrule_cache, &cache->modruleQ);
                 }
             } else {
-                res = SET_ERROR(ERR_INTERNAL_VAL);
+                /* this rule is for a module that is not
+                 * loaded into the system at this time
+                 * just skip this entry;
+                 */
+                ;
             }
         }
     }

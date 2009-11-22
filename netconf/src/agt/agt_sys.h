@@ -53,7 +53,7 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
-#define AGT_SYS_MODULE     (const xmlChar *)"system"
+#define AGT_SYS_MODULE     (const xmlChar *)"yuma-system"
 
 
 /********************************************************************

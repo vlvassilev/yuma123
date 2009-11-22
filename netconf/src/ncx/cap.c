@@ -91,7 +91,6 @@ date         init     comment
 /* controls extra attributes in the <capability> element */
 /* #define USE_EXTENDED_HELLO 0 */
 
-#define URL_COM    (const xmlChar *)"http://netconfcentral.com/"
 #define URL_START  (const xmlChar *)"xsd/"
 
 

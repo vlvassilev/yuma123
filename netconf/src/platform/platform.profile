@@ -61,6 +61,16 @@ else
    GRP=--group=root
 endif
 
+ifdef STATIC
+LIBSUFFIX=a
+else
+ifdef MAC
+LIBSUFFIX=dylib
+else
+LIBSUFFIX=so
+endif
+endif
+
 CC=gcc
 LINK=gcc
 LINT=splint

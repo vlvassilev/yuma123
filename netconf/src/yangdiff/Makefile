@@ -29,11 +29,7 @@ PROG=yangdiff
 
 LIBS =	-lncx -L/usr/lib -lxml2
 
-ifdef STATIC
-LIBTARGS= $(LBASE)/libncx.a
-else
-LIBTARGS= $(LBASE)/libncx.a
-endif
+LIBTARGS= $(LBASE)/libncx.$(LIBSUFFIX)
 
 ############################# MAKE RULES ##################
 all: yangdiff

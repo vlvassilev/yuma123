@@ -31,13 +31,8 @@ LIBS = 	-lmgr \
 	-L/usr/lib -lxml2 -lncurses -lssh2 \
 	-L/usr/local/lib -ltecla
 
-ifdef STATIC
 LIBTARGS= $(LBASE)/libmgr.a \
-	$(LBASE)/libncx.a
-else
-LIBTARGS= $(LBASE)/libmgr.a \
-	$(LBASE)/libncx.so
-endif
+	$(LBASE)/libncx.$(LIBSUFFIX)
 
 ############################# MAKE RULES ##################
 all: yangcli

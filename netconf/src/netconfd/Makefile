@@ -35,21 +35,11 @@ LIBS = 	-lagt \
 	-lncx \
 	-L/usr/lib -lxml2
 
-# hardwire the project library targets for now
-# to match the project dirs in the LIBS directive
-
-ifdef STATIC
 LIBTARGS= $(LBASE)/libagt.a \
-	$(LBASE)/libncx.a
-else
-LIBTARGS= $(LBASE)/libagt.a \
-	$(LBASE)/libncx.so
-endif
-
+	$(LBASE)/libncx.$(LIBSUFFIX)
 
 ############################# MAKE RULES ##################
 all: netconfd
-
 
 #################### PLATFORM DEFINITIONS ############
 include ../platform/platform.profile

@@ -963,7 +963,7 @@ status_t
         prepend = EMPTY_STRING;
     }
 
-    bufflen = xml_strlen(modname) + xml_strlen(prepend) + 24;
+    bufflen = xml_strlen(modname) + xml_strlen(prepend) + 32;
 
     buffer = m__getMem(bufflen);
     if (buffer == NULL) {
@@ -989,7 +989,12 @@ status_t
     } 
     p += xml_strcpy(p, (const xmlChar *)"lib");    
     p += xml_strcpy(p, modname);
+
+#ifdef MACOS
+    xml_strcpy(p, (const xmlChar *)".dylib");
+#else
     xml_strcpy(p, (const xmlChar *)".so");
+#endif
 
     handle = dlopen((const char *)buffer, RTLD_NOW);
     if (handle == NULL) {

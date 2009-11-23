@@ -45,6 +45,9 @@ ifndef MAC
 endif
 endif
 
+uninstall:
+	sudo rm	-f $(REAL_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
+
 ncxlib: $(LBASE)/lib$(SUBDIR_NM).$(LIBSUFFIX)
 
 # this dummy rule keeps make from deleting the $(OBJS) as

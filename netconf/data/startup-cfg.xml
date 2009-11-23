@@ -60,18 +60,4 @@
          </nacm:dataRule>
       </nacm:rules>
    </nacm:nacm>
-   <if:interfaces xmlns:if="http://netconfcentral.org/ns/yuma-interfaces">
-      <if:interface>
-         <if:name>lo</if:name>
-      </if:interface>
-      <if:interface>
-         <if:name>eth0</if:name>
-      </if:interface>
-      <if:interface>
-         <if:name>virbr0</if:name>
-      </if:interface>
-      <if:interface>
-         <if:name>pan0</if:name>
-      </if:interface>
-   </if:interfaces>
 </nc:config>

@@ -724,20 +724,19 @@ status_t
     agt_if_init_done = TRUE;
     agt_profile = agt_get_profile();
 
+    /* load the yuma-interfaces module */
+    res = ncxmod_load_module(interfaces_MOD,
+                             interfaces_MOD_REV,
+                             &agt_profile->agt_savedevQ,
+                             &ifmod);
+
     /* check if /interfaces file system supported */
     if (!is_interfaces_supported()) {
         if (LOGDEBUG) {
             log_debug("\nagt_interfaces: no /interfaces support found");
         }
         agt_if_not_supported = TRUE;
-        return NO_ERR;
     }
-
-    /* load the netconf-state module */
-    res = ncxmod_load_module(interfaces_MOD,
-                             interfaces_MOD_REV,
-                             &agt_profile->agt_savedevQ,
-                             &ifmod);
 
     return res;
 
@@ -764,12 +763,10 @@ status_t
     val_value_t           *interfacesval;
     status_t               res;
 
+    res = NO_ERR;
+
     if (!agt_if_init_done) {
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
-    }
-
-    if (agt_if_not_supported) {
-        return NO_ERR;
     }
 
     runningcfg = cfg_get_config_id(NCX_CFGID_RUNNING);
@@ -799,8 +796,10 @@ status_t
         /* handing off the malloced memory here */
         val_add_child(interfacesval, runningcfg->root);
     }
-    
-    res = add_interface_entries(interfacesval);
+
+    if (!agt_if_not_supported) {
+        res = add_interface_entries(interfacesval);
+    }
 
     return res;
 

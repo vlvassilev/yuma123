@@ -86,6 +86,8 @@ LPATH=-L$(LBASE)
 
 CEES = $(wildcard *.c)
 
+HEES = $(wildcard *.h)
+
 ################ OBJS RULE #############
 OBJS = $(patsubst %.c,$(TARGET)/%.o,$(CEES))
 
@@ -137,6 +139,24 @@ notabs:
 	  cp $$c $$c.save;\
 	  expand $$c > $$c.ex;\
 	  mv $$c.ex $$c;\
+	done
+
+addheader:
+	if [ ! -f ../platform/header.txt]; then \
+	  echo "Error: platform/header.txt is missing!"; \
+	  exit 1; \
+	fi
+	for c in $(CEES); do\
+	  cp $$c $$c.save;\
+	  cp ../platform/header.txt $$c.hdr;\
+	  cat $$c >> $$c.hdr;\
+	  mv $$c.hdr $$c;\
+	done
+	for h in $(HEES); do\
+	  cp $$h $$h.save;\
+	  cp ../platform/header.txt $$h.hdr;\
+	  cat $$h >> $$h.hdr;\
+	  mv $$h.hdr $$h;\
 	done
 
 

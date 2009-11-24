@@ -85,7 +85,7 @@ typedef struct rpc_err_map_t_ {
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -135,29 +135,29 @@ static void
     const xmlChar *prefix;
 
     log_write("\n  error-info: %s T:%s = ", 
-	   (errinfo->name) ? (const char *)errinfo->name : "--",
-	   tk_get_btype_sym(errinfo->val_btype));
+           (errinfo->name) ? (const char *)errinfo->name : "--",
+           tk_get_btype_sym(errinfo->val_btype));
 
     if (errinfo->isqname) {
-	prefix = xmlns_get_ns_prefix(errinfo->val_nsid);
-	log_write("%s:%s", 
-		  (prefix) ? prefix : (const xmlChar *)"--",
-		  (errinfo->v.strval) ? 
-		  (const char *)errinfo->v.strval : "--");
-	return;
+        prefix = xmlns_get_ns_prefix(errinfo->val_nsid);
+        log_write("%s:%s", 
+                  (prefix) ? prefix : (const xmlChar *)"--",
+                  (errinfo->v.strval) ? 
+                  (const char *)errinfo->v.strval : "--");
+        return;
     }
 
     switch (errinfo->val_btype) {
     case NCX_BT_BINARY:
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
-	log_write("%s", (errinfo->v.strval) ? 
-	       (const char *)errinfo->v.strval : "--");
-	break;
+        log_write("%s", (errinfo->v.strval) ? 
+               (const char *)errinfo->v.strval : "--");
+        break;
     case NCX_BT_BOOLEAN:
-	SET_ERROR(ERR_NCX_OPERATION_NOT_SUPPORTED);
-	/***/
-	break;
+        SET_ERROR(ERR_NCX_OPERATION_NOT_SUPPORTED);
+        /***/
+        break;
     case NCX_BT_INT8:
     case NCX_BT_INT16:
     case NCX_BT_INT32:
@@ -168,11 +168,11 @@ static void
     case NCX_BT_UINT64:
     case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
-	ncx_printf_num(&errinfo->v.numval, errinfo->val_btype);
-	break;
+        ncx_printf_num(&errinfo->v.numval, errinfo->val_btype);
+        break;
     default:
-	val_dump_value((val_value_t *)errinfo->v.cpxval,
-		       NCX_DEF_INDENT*2);
+        val_dump_value((val_value_t *)errinfo->v.cpxval,
+                       NCX_DEF_INDENT*2);
     }
 
 }  /* dump_error_info */
@@ -193,27 +193,27 @@ static void
     const rpc_err_info_t  *errinfo;
 
     log_write("\nrpc-error: (%u) %s L:%s S:%s ", 
-	      err->error_res,
-	      (err->error_tag) ? (const char *)err->error_tag : "--",
-	      ncx_get_layer(err->error_type),
-	      rpc_err_get_severity(err->error_severity));
+              err->error_res,
+              (err->error_tag) ? (const char *)err->error_tag : "--",
+              ncx_get_layer(err->error_type),
+              rpc_err_get_severity(err->error_severity));
     if (err->error_app_tag) {
-	log_write("app-tag:%s ", err->error_app_tag);
+        log_write("app-tag:%s ", err->error_app_tag);
     }
     if (err->error_path) {
-	log_write("\n   path:%s ", err->error_path);
+        log_write("\n   path:%s ", err->error_path);
     }
     if (err->error_message_lang) {
-	log_write("lang:%s ", err->error_message_lang);
+        log_write("lang:%s ", err->error_message_lang);
     }
     if (err->error_message) {
-	log_write("\n  msg:%s ", err->error_message);
+        log_write("\n  msg:%s ", err->error_message);
     }
 
     for (errinfo = (const rpc_err_info_t *)dlq_firstEntry(&err->error_info);
-	 errinfo != NULL;
-	 errinfo = (const rpc_err_info_t *)dlq_nextEntry(errinfo)) {
-	dump_error_info(errinfo);
+         errinfo != NULL;
+         errinfo = (const rpc_err_info_t *)dlq_nextEntry(errinfo)) {
+        dump_error_info(errinfo);
     }
     log_write("\n");
 
@@ -230,8 +230,8 @@ const xmlChar *
     rpc_err_get_errtag (rpc_err_t errid)
 {
     if (errid > RPC_ERR_PARTIAL_OPERATION) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	errid = RPC_ERR_NONE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        errid = RPC_ERR_NONE;
     }
     return rpc_err_map[errid].errtag;
 
@@ -287,12 +287,12 @@ rpc_err_rec_t *
 
     err = m__getObj(rpc_err_rec_t);
     if (!err) {
-	if (!staterr_inuse) {
-	    err = &staterr;
-	    staterr_inuse = TRUE;
-	} else {
-	    return NULL;
-	}
+        if (!staterr_inuse) {
+            err = &staterr;
+            staterr_inuse = TRUE;
+        } else {
+            return NULL;
+        }
     }
     rpc_err_init_record(err);
     return err;
@@ -315,8 +315,8 @@ void
 {
 #ifdef DEBUG
     if (!err) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -341,17 +341,17 @@ void
 {
 #ifdef DEBUG
     if (!err) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     rpc_err_clean_record(err);
     
     if (err == &staterr) {
-	staterr_inuse = FALSE;
+        staterr_inuse = FALSE;
     } else {
-	m__free(err);
+        m__free(err);
     }
 
 } /* rpc_err_free_record */
@@ -374,8 +374,8 @@ void
 
 #ifdef DEBUG
     if (!err) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -386,17 +386,17 @@ void
     err->error_tag = NULL;
     err->error_app_tag = NULL;
     if (err->error_path) {
-	m__free(err->error_path);
-	err->error_path = NULL;
+        m__free(err->error_path);
+        err->error_path = NULL;
     }
     if (err->error_message) {
-	m__free(err->error_message);
+        m__free(err->error_message);
     }
     err->error_message_lang = NULL;
 
     while (!dlq_empty(&err->error_info)) {
-	errinfo = (rpc_err_info_t *)dlq_deque(&err->error_info);
-	rpc_err_free_info(errinfo);
+        errinfo = (rpc_err_info_t *)dlq_deque(&err->error_info);
+        rpc_err_free_info(errinfo);
     }
 
 }  /* rpc_err_clean_record */
@@ -415,7 +415,7 @@ rpc_err_info_t *
 
     errinfo = m__getObj(rpc_err_info_t);
     if (!errinfo) {
-	return NULL;
+        return NULL;
     }
     memset(errinfo, 0x0, sizeof(rpc_err_info_t));
     return errinfo;
@@ -438,31 +438,31 @@ void
 {
 #ifdef DEBUG
     if (!errinfo) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (errinfo->badns) {
-	m__free(errinfo->badns);
+        m__free(errinfo->badns);
     }
     if (errinfo->dname) {
-	m__free(errinfo->dname);
+        m__free(errinfo->dname);
     }
     if (errinfo->dval) {
-	m__free(errinfo->dval);
+        m__free(errinfo->dval);
     }
     switch (errinfo->val_btype) {
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_LIST:
-	if (errinfo->v.cpxval) {
-	    val_free_value((val_value_t *)errinfo->v.cpxval);
-	}
-	break;
+        if (errinfo->v.cpxval) {
+            val_free_value((val_value_t *)errinfo->v.cpxval);
+        }
+        break;
     default:
-	;
+        ;
     }
     m__free(errinfo);
 
@@ -485,15 +485,15 @@ void
 
 #ifdef DEBUG
     if (!msg) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     for (err = (const rpc_err_rec_t *)dlq_firstEntry(&msg->mhdr.errQ);
-	 err != NULL;
-	 err = (const rpc_err_rec_t *)dlq_nextEntry(err)) {
-	dump_error(err);
+         err != NULL;
+         err = (const rpc_err_rec_t *)dlq_nextEntry(err)) {
+        dump_error(err);
     }
 
 }  /* rpc_err_dump_errors */
@@ -515,12 +515,12 @@ const xmlChar *
 {
     switch (sev) {
     case RPC_ERR_SEV_WARNING:
-	return NCX_EL_WARNING;
+        return NCX_EL_WARNING;
     case RPC_ERR_SEV_ERROR:
-	return NCX_EL_ERROR;
+        return NCX_EL_ERROR;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return EMPTY_STRING;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return EMPTY_STRING;
     }
 }  /* rpc_err_get_severity */
 
@@ -549,8 +549,8 @@ void
 
     /* clean error queue */
     while (!dlq_empty(errQ)) {
-	err = (rpc_err_rec_t *)dlq_deque(errQ);
-	rpc_err_free_record(err);
+        err = (rpc_err_rec_t *)dlq_deque(errQ);
+        rpc_err_free_record(err);
     }
 
 } /* rpc_err_clean_errQ */

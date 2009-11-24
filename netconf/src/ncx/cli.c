@@ -95,7 +95,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -124,9 +124,9 @@ date         init     comment
 *********************************************************************/
 static status_t
     parse_parm_cmn (val_value_t *new_parm,
-		    obj_template_t *obj,
-		    const xmlChar *strval,
-		    boolean script)
+                    obj_template_t *obj,
+                    const xmlChar *strval,
+                    boolean script)
 {
     val_value_t          *newchild;
     typ_def_t      *typdef;
@@ -149,34 +149,34 @@ static status_t
                                      ISPARM, 
                                      &res);
         } else {
-	    res = ERR_NCX_INVALID_VALUE;
+            res = ERR_NCX_INVALID_VALUE;
         }
     } else if (obj->objtype == OBJ_TYP_CONTAINER) {
 
-	/* check if the only child is an OBJ_TYP_CHOICE */
-	choiceobj = obj_first_child(obj);
-	if (choiceobj == NULL || 
-	    choiceobj->objtype != OBJ_TYP_CHOICE) {
-	    res = ERR_NCX_INVALID_VALUE;
-	} else {
-	    /* check if a child of any case is named 'strval' */
-	    targobj = obj_find_child(choiceobj,
-				     obj_get_mod_name(obj),
-				     strval);
-	    if (targobj && 
-		obj_get_basetype(targobj) == NCX_BT_EMPTY) {
-		/* found a match so create a value node */
-		newchild = val_new_value();
-		if (!newchild) {
-		    res = ERR_INTERNAL_MEM;
-		} else {
-		    val_init_from_template(newchild, targobj);
-		    val_add_child(newchild, new_parm);
-		}
-	    } else {
-		res = ERR_NCX_INVALID_VALUE;
-	    }
-	}
+        /* check if the only child is an OBJ_TYP_CHOICE */
+        choiceobj = obj_first_child(obj);
+        if (choiceobj == NULL || 
+            choiceobj->objtype != OBJ_TYP_CHOICE) {
+            res = ERR_NCX_INVALID_VALUE;
+        } else {
+            /* check if a child of any case is named 'strval' */
+            targobj = obj_find_child(choiceobj,
+                                     obj_get_mod_name(obj),
+                                     strval);
+            if (targobj && 
+                obj_get_basetype(targobj) == NCX_BT_EMPTY) {
+                /* found a match so create a value node */
+                newchild = val_new_value();
+                if (!newchild) {
+                    res = ERR_INTERNAL_MEM;
+                } else {
+                    val_init_from_template(newchild, targobj);
+                    val_add_child(newchild, new_parm);
+                }
+            } else {
+                res = ERR_NCX_INVALID_VALUE;
+            }
+        }
     } else if (obj->objtype == OBJ_TYP_CHOICE) {
         /* check if a child of any case is named 'strval' */
         targobj = obj_find_child(obj,
@@ -193,32 +193,32 @@ static status_t
             res = ERR_NCX_INVALID_VALUE;
         }
     } else {
-	/* get the base type value */
-	btyp = obj_get_basetype(obj);
+        /* get the base type value */
+        btyp = obj_get_basetype(obj);
 
-	if (btyp == NCX_BT_ANY || typ_is_simple(btyp)) {
-	    if (script) {
-		(void)var_get_script_val(obj, 
-					 new_parm,
-					 strval, 
-					 ISPARM, 
-					 &res);
-	    } else {
-		typdef = obj_get_typdef(obj);
-		if (btyp != NCX_BT_ANY) {
-		    res = val_simval_ok(typdef, strval);
-		}
-		if (res == NO_ERR) {
-		    res = val_set_simval(new_parm,
-					 typdef,  
-					 obj_get_nsid(obj),
-					 obj_get_name(obj),
-					 strval);
-		}
-	    }
-	} else {
-	    res = ERR_NCX_INVALID_VALUE;
-	}
+        if (btyp == NCX_BT_ANY || typ_is_simple(btyp)) {
+            if (script) {
+                (void)var_get_script_val(obj, 
+                                         new_parm,
+                                         strval, 
+                                         ISPARM, 
+                                         &res);
+            } else {
+                typdef = obj_get_typdef(obj);
+                if (btyp != NCX_BT_ANY) {
+                    res = val_simval_ok(typdef, strval);
+                }
+                if (res == NO_ERR) {
+                    res = val_set_simval(new_parm,
+                                         typdef,  
+                                         obj_get_nsid(obj),
+                                         obj_get_name(obj),
+                                         strval);
+                }
+            }
+        } else {
+            res = ERR_NCX_INVALID_VALUE;
+        }
     }
 
     return res;
@@ -250,9 +250,9 @@ static status_t
 *********************************************************************/
 static status_t
     parse_parm (val_value_t *val,
-		obj_template_t *obj,
-		const xmlChar *strval,
-		boolean script)
+                obj_template_t *obj,
+                const xmlChar *strval,
+                boolean script)
 {
     val_value_t          *new_parm;
     status_t              res;
@@ -268,9 +268,9 @@ static status_t
 
     /* save or free the new child node */
     if (res != NO_ERR) {
-	val_free_value(new_parm);
+        val_free_value(new_parm);
     } else {
-	val_add_child(new_parm, val);
+        val_add_child(new_parm, val);
     }
 
     return res;
@@ -304,11 +304,11 @@ static status_t
 *********************************************************************/
 static status_t
     parse_parm_ex (val_value_t *val,
-		   obj_template_t *obj,
-		   xmlns_id_t  nsid,
-		   const xmlChar *name,
-		   const xmlChar *strval,
-		   boolean script)
+                   obj_template_t *obj,
+                   xmlns_id_t  nsid,
+                   const xmlChar *name,
+                   const xmlChar *strval,
+                   boolean script)
 {
     val_value_t       *new_parm;
     status_t           res;
@@ -327,9 +327,9 @@ static status_t
     res = parse_parm_cmn(new_parm, obj, strval, script);
 
     if (res != NO_ERR) {
-	val_free_value(new_parm);
+        val_free_value(new_parm);
     } else {
-	val_add_child(new_parm, val);
+        val_add_child(new_parm, val);
     }
     return res;
 
@@ -351,24 +351,24 @@ static status_t
 *********************************************************************/
 static cli_rawparm_t *
     find_rawparm (dlq_hdr_t *parmQ,
-		  const char *name,
-		  int32 namelen)
+                  const char *name,
+                  int32 namelen)
 {
     cli_rawparm_t  *parm;
 
     if (!namelen) {
-	return NULL;
+        return NULL;
     }
 
     /* check exact match only */
     for (parm = (cli_rawparm_t *)dlq_firstEntry(parmQ);
-	 parm != NULL;
-	 parm = (cli_rawparm_t *)dlq_nextEntry(parm)) {
+         parm != NULL;
+         parm = (cli_rawparm_t *)dlq_nextEntry(parm)) {
 
-	if (strlen(parm->name) == (size_t)namelen &&
-	    !strncmp(parm->name, name, namelen)) {
-	    return parm;
-	}
+        if (strlen(parm->name) == (size_t)namelen &&
+            !strncmp(parm->name, name, namelen)) {
+            return parm;
+        }
     }
 
     return NULL;
@@ -564,19 +564,19 @@ static char *
     }
 
     for (parmnum=1; parmnum < argc; parmnum++) {
-	*bufflen += (strlen(argv[parmnum]) + padamount);
+        *bufflen += (strlen(argv[parmnum]) + padamount);
     }
 
     /* adjust extra spaces */
     if (*bufflen) {
-	*bufflen -= padamount;
+        *bufflen -= padamount;
     }
 
     buff = m__getMem(*bufflen + 1);
     if (!buff) {
-	/* non-recoverable error */
-	*res = ERR_INTERNAL_MEM;
-	return NULL;
+        /* non-recoverable error */
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
     }
 
     /* copy the argv strings into the buffer */
@@ -627,14 +627,14 @@ cli_rawparm_t *
 
 #ifdef DEBUG
     if (!name) {
-	return NULL;
+        return NULL;
     }
 #endif
 
     parm = m__getObj(cli_rawparm_t);
     if (parm) {
-	memset(parm, 0x0, sizeof(cli_rawparm_t));
-	parm->name = (const char *)name;
+        memset(parm, 0x0, sizeof(cli_rawparm_t));
+        parm->name = (const char *)name;
         parm->hasvalue = TRUE;
     }
     return parm;
@@ -660,14 +660,14 @@ cli_rawparm_t *
 
 #ifdef DEBUG
     if (!name) {
-	return NULL;
+        return NULL;
     }
 #endif
 
     parm = m__getObj(cli_rawparm_t);
     if (parm) {
-	memset(parm, 0x0, sizeof(cli_rawparm_t));
-	parm->name = (const char *)name;
+        memset(parm, 0x0, sizeof(cli_rawparm_t));
+        parm->name = (const char *)name;
     }
     return parm;
 
@@ -687,12 +687,12 @@ void
 {
 #ifdef DEBUG
     if (!parm) {
-	return;
+        return;
     }
 #endif
 
     if (parm->value) {
-	m__free(parm->value);
+        m__free(parm->value);
     }
     m__free(parm);
 
@@ -714,13 +714,13 @@ void
 
 #ifdef DEBUG
     if (!parmQ) {
-	return;
+        return;
     }
 #endif
 
     while (!dlq_empty(parmQ)) {
-	parm = (cli_rawparm_t *)dlq_deque(parmQ);
-	cli_free_rawparm(parm);
+        parm = (cli_rawparm_t *)dlq_deque(parmQ);
+        cli_free_rawparm(parm);
     }
 
 } /* cli_clean_rawparmQ */
@@ -740,17 +740,17 @@ void
 *********************************************************************/
 cli_rawparm_t *
     cli_find_rawparm (const xmlChar *name,
-		      dlq_hdr_t *parmQ)
+                      dlq_hdr_t *parmQ)
 {
 #ifdef DEBUG
     if (!name || !parmQ) {
-	return NULL;
+        return NULL;
     }
 #endif
 
     return find_rawparm(parmQ, 
                         (const char *)name, 
-			strlen((const char *)name));
+                        strlen((const char *)name));
 
 } /* cli_find_rawparm */
 
@@ -812,8 +812,8 @@ cli_rawparm_t *
 *********************************************************************/
 status_t
     cli_parse_raw (int argc, 
-		   const char *argv[],
-		   dlq_hdr_t *rawparmQ)
+                   const char *argv[],
+                   dlq_hdr_t *rawparmQ)
 {
     cli_rawparm_t  *rawparm;
     char           *parmname, *parmval, *str, *buff;
@@ -823,16 +823,16 @@ status_t
 
 #ifdef DEBUG
     if (!argv || !rawparmQ) {
-	return ERR_INTERNAL_PTR;
+        return ERR_INTERNAL_PTR;
     }
     if (dlq_empty(rawparmQ)) {
-	return ERR_INTERNAL_VAL;
+        return ERR_INTERNAL_VAL;
     }
 #endif
 
     /* check if there are any parameters at all to parse */
     if (argc < 2) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     if (LOGDEBUG2) {
@@ -864,123 +864,123 @@ status_t
      */
     while (buffpos < bufflen && res == NO_ERR) {
 
-	/* first skip starting whitespace */
-	while (buff[buffpos] && isspace(buff[buffpos])) {
-	    buffpos++;
-	}
+        /* first skip starting whitespace */
+        while (buff[buffpos] && isspace(buff[buffpos])) {
+            buffpos++;
+        }
 
-	/* check start of parameter name conventions 
-	 * allow zero, one, or two dashes before parmname
+        /* check start of parameter name conventions 
+         * allow zero, one, or two dashes before parmname
          *          foo   -foo   --foo
-	 */
-	if (!buff[buffpos]) {
-	    res = ERR_NCX_WRONG_LEN;
-	} else if (buff[buffpos] == NCX_CLI_START_CH) {
-	    if (!buff[buffpos+1]) {
-		res = ERR_NCX_WRONG_LEN;
-	    } else if (buff[buffpos+1] == NCX_CLI_START_CH) {
-		if (!buff[buffpos+2]) {
-		    res = ERR_NCX_WRONG_LEN;
-		} else {
-		    buffpos += 2;  /* skip past 2 dashes */
-		}
-	    } else {
-		buffpos++;    /* skip past 1 dash */
-	    }
-	} /* else no dashes, leave parmname pointer alone */
+         */
+        if (!buff[buffpos]) {
+            res = ERR_NCX_WRONG_LEN;
+        } else if (buff[buffpos] == NCX_CLI_START_CH) {
+            if (!buff[buffpos+1]) {
+                res = ERR_NCX_WRONG_LEN;
+            } else if (buff[buffpos+1] == NCX_CLI_START_CH) {
+                if (!buff[buffpos+2]) {
+                    res = ERR_NCX_WRONG_LEN;
+                } else {
+                    buffpos += 2;  /* skip past 2 dashes */
+                }
+            } else {
+                buffpos++;    /* skip past 1 dash */
+            }
+        } /* else no dashes, leave parmname pointer alone */
 
-	/* check for the end of the parm name, wsp or equal sign
-	 * get the parm template, and get ready to parse it
-	 */
-	if (res != NO_ERR) {
-	    continue;
-	}
+        /* check for the end of the parm name, wsp or equal sign
+         * get the parm template, and get ready to parse it
+         */
+        if (res != NO_ERR) {
+            continue;
+        }
 
-	/* check the parmname string for a terminating char */
-	parmname = &buff[buffpos];
-	str = &parmname[1];
-	while (*str && !isspace(*str) && *str != '=') {
-	    str++;
-	}
+        /* check the parmname string for a terminating char */
+        parmname = &buff[buffpos];
+        str = &parmname[1];
+        while (*str && !isspace(*str) && *str != '=') {
+            str++;
+        }
 
-	parmnamelen = str - parmname;
-	buffpos += parmnamelen;
+        parmnamelen = str - parmname;
+        buffpos += parmnamelen;
 
-	parmval = NULL;
+        parmval = NULL;
 
-	/* check if this parameter name is in the parmset def */
-	rawparm = find_rawparm(rawparmQ, parmname, parmnamelen);
-	if (rawparm) {
-	    rawparm->count++;
+        /* check if this parameter name is in the parmset def */
+        rawparm = find_rawparm(rawparmQ, parmname, parmnamelen);
+        if (rawparm) {
+            rawparm->count++;
             if (!rawparm->hasvalue) {
                 /* start over, since no value is expected
                  * for this known empty parm
                  */
                 continue;
             }
-	}
-
-	if ((buffpos < bufflen) &&
-	    ((buff[buffpos] == '=') || isspace(buff[buffpos]))) {
-
-	    /* assume that the parm followed by a 
-	     * space is the termination, try again on
-	     * the next keyword match
-	     */
-	    if (buff[buffpos] != '=' && !rawparm) {
-		continue;
-	    }
-
-	    buffpos++;  /* skip past '=' or whitespace */
-
-	    while (buff[buffpos] && isspace(buff[buffpos])) {
-		buffpos++;
-	    }
-
-	    /* if any chars left in buffer, get the parmval */
-	    if (buffpos < bufflen)  {
-		if (buff[buffpos] == NCX_QUOTE_CH) {
-		    /* set the start after quote */
-		    parmval = &buff[++buffpos];
-			
-		    /* find the end of the quoted string */
-		    str = &parmval[1];
-		    while (*str && *str != NCX_QUOTE_CH) {
-			str++;
-		    }
-		} else {
-		    /* set the start of the parmval */
-		    parmval = &buff[buffpos];
-		    
-		    /* find the end of the unquoted string */
-		    str = &parmval[1];
-		    while (*str && !isspace(*str)) {
-			str++;
-		    }
-		}
-
-		/* terminate string */
-		*str = 0;
-
-		/* skip buffpos past eo-string */
-		buffpos += (int32)((str - parmval) + 1);  
-	    }
         }
 
-	if (rawparm) {
-	    if (rawparm->value) {
-		m__free(rawparm->value);
-	    }
-	    rawparm->value = strdup(parmval);
-	    if (!rawparm->value) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		/* manually bump the malloc count since 
-		 * strdup did not do that
-		 */
-		malloc_cnt++;
-	    }
-	}
+        if ((buffpos < bufflen) &&
+            ((buff[buffpos] == '=') || isspace(buff[buffpos]))) {
+
+            /* assume that the parm followed by a 
+             * space is the termination, try again on
+             * the next keyword match
+             */
+            if (buff[buffpos] != '=' && !rawparm) {
+                continue;
+            }
+
+            buffpos++;  /* skip past '=' or whitespace */
+
+            while (buff[buffpos] && isspace(buff[buffpos])) {
+                buffpos++;
+            }
+
+            /* if any chars left in buffer, get the parmval */
+            if (buffpos < bufflen)  {
+                if (buff[buffpos] == NCX_QUOTE_CH) {
+                    /* set the start after quote */
+                    parmval = &buff[++buffpos];
+                        
+                    /* find the end of the quoted string */
+                    str = &parmval[1];
+                    while (*str && *str != NCX_QUOTE_CH) {
+                        str++;
+                    }
+                } else {
+                    /* set the start of the parmval */
+                    parmval = &buff[buffpos];
+                    
+                    /* find the end of the unquoted string */
+                    str = &parmval[1];
+                    while (*str && !isspace(*str)) {
+                        str++;
+                    }
+                }
+
+                /* terminate string */
+                *str = 0;
+
+                /* skip buffpos past eo-string */
+                buffpos += (int32)((str - parmval) + 1);  
+            }
+        }
+
+        if (rawparm) {
+            if (rawparm->value) {
+                m__free(rawparm->value);
+            }
+            rawparm->value = strdup(parmval);
+            if (!rawparm->value) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+                /* manually bump the malloc count since 
+                 * strdup did not do that
+                 */
+                malloc_cnt++;
+            }
+        }
     }
 
     m__free(buff);
@@ -1082,13 +1082,13 @@ status_t
 *********************************************************************/
 val_value_t *
     cli_parse (int argc, 
-	       const char *argv[],
-	       obj_template_t *obj,
-	       boolean valonly,
-	       boolean script,
-	       boolean autocomp,
+               const char *argv[],
+               obj_template_t *obj,
+               boolean valonly,
+               boolean script,
+               boolean autocomp,
                cli_mode_t mode,
-	       status_t  *status)
+               status_t  *status)
 {
 #define ERRLEN  127
 
@@ -1106,12 +1106,12 @@ val_value_t *
 
 #ifdef DEBUG
     if (!status) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
     if (!argv || !obj) {
-	*status = SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        *status = SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -1125,14 +1125,14 @@ val_value_t *
      * with the provided object template.
      */
     if (!script && !obj_ok_for_cli(obj)) {
-	*status = SET_ERROR(ERR_NCX_OPERATION_FAILED);
-	return NULL;
+        *status = SET_ERROR(ERR_NCX_OPERATION_FAILED);
+        return NULL;
     }
 
     /* check if there are any parameters at all to parse */
     if (argc < 2 && valonly) {
-	*status = NO_ERR;
-	return NULL;
+        *status = NO_ERR;
+        return NULL;
     }
 
     if (LOGDEBUG3) {
@@ -1145,25 +1145,25 @@ val_value_t *
     /* allocate a new container value to hold the output */
     val = val_new_value();
     if (!val) {
-	*status = ERR_INTERNAL_MEM;
-	return NULL;
+        *status = ERR_INTERNAL_MEM;
+        return NULL;
     }
     val_init_from_template(val, obj);
 
     if (script) {
-	/* set the parmset name to the application pathname */
-	val->dname = xml_strdup((const xmlChar *)argv[0]);
-	val->name = val->dname;
+        /* set the parmset name to the application pathname */
+        val->dname = xml_strdup((const xmlChar *)argv[0]);
+        val->name = val->dname;
     } else {
-	/* set the parmset name to the PSD static name */
-	val->name = obj_get_name(obj);
+        /* set the parmset name to the PSD static name */
+        val->name = obj_get_name(obj);
     }
 
     /* check for a malloc error */
     if (!val->name) {
-	*status = ERR_INTERNAL_MEM;
-	val_free_value(val);
-	return NULL;
+        *status = ERR_INTERNAL_MEM;
+        val_free_value(val);
+        return NULL;
     }
 
     bufflen = 0;
@@ -1217,294 +1217,294 @@ val_value_t *
      */
     while (buffpos < bufflen && res == NO_ERR) {
 
-	gotdashes = FALSE;
-	gotmatch = FALSE;
-	isdefaultparm = FALSE;
-	chobj = NULL;
-	parmval = NULL;
-	parmname = NULL;
-	parmnamelen = 0;
+        gotdashes = FALSE;
+        gotmatch = FALSE;
+        isdefaultparm = FALSE;
+        chobj = NULL;
+        parmval = NULL;
+        parmname = NULL;
+        parmnamelen = 0;
 
-	/* first skip starting whitespace */
-	while (buff[buffpos] && isspace(buff[buffpos])) {
-	    buffpos++;
-	}
+        /* first skip starting whitespace */
+        while (buff[buffpos] && isspace(buff[buffpos])) {
+            buffpos++;
+        }
 
-	/* check start of parameter name conventions 
-	 * allow zero, one, or two dashes before parmname
+        /* check start of parameter name conventions 
+         * allow zero, one, or two dashes before parmname
          *          foo   -foo   --foo
-	 */
-	if (!buff[buffpos]) {
-	    /* got some extra whitespace at the EOLN */
-	    continue;
-	} else if (buff[buffpos] == NCX_CLI_START_CH) {
-	    if (!buff[buffpos+1]) {
-		res = ERR_NCX_WRONG_LEN;
-	    } else if (buff[buffpos+1] == NCX_CLI_START_CH) {
-		if (!buff[buffpos+2]) {
-		    res = ERR_NCX_WRONG_LEN;
-		} else {
-		    buffpos += 2;  /* skip past 2 dashes */
-		    gotdashes = TRUE;
-		}
-	    } else {
-		buffpos++;    /* skip past 1 dash */
-		gotdashes = TRUE;
-	    }
-	} /* else no dashes, leave parmname pointer alone */
+         */
+        if (!buff[buffpos]) {
+            /* got some extra whitespace at the EOLN */
+            continue;
+        } else if (buff[buffpos] == NCX_CLI_START_CH) {
+            if (!buff[buffpos+1]) {
+                res = ERR_NCX_WRONG_LEN;
+            } else if (buff[buffpos+1] == NCX_CLI_START_CH) {
+                if (!buff[buffpos+2]) {
+                    res = ERR_NCX_WRONG_LEN;
+                } else {
+                    buffpos += 2;  /* skip past 2 dashes */
+                    gotdashes = TRUE;
+                }
+            } else {
+                buffpos++;    /* skip past 1 dash */
+                gotdashes = TRUE;
+            }
+        } /* else no dashes, leave parmname pointer alone */
 
-	/* should be pointing at start of the parm name
-	 * check for the end of the parm name, wsp or equal sign
-	 * get the parm template, and get ready to parse it
-	 */
-	if (res == NO_ERR) {
-	    /* check the parmname string for a terminating char */
-	    parmname = &buff[buffpos];
-	    parmnamelen = 0;
+        /* should be pointing at start of the parm name
+         * check for the end of the parm name, wsp or equal sign
+         * get the parm template, and get ready to parse it
+         */
+        if (res == NO_ERR) {
+            /* check the parmname string for a terminating char */
+            parmname = &buff[buffpos];
+            parmnamelen = 0;
 
-	    if (ncx_valid_fname_ch(*parmname)) {
-		str = &parmname[1];
-		while (*str && ncx_valid_name_ch(*str)) {
-		    str++;
-		}
-		parmnamelen = (uint32)(str - parmname);
+            if (ncx_valid_fname_ch(*parmname)) {
+                str = &parmname[1];
+                while (*str && ncx_valid_name_ch(*str)) {
+                    str++;
+                }
+                parmnamelen = (uint32)(str - parmname);
                 copylen = parmnamelen;
 
-		/* check if this parameter name is in the parmset def */
-		chobj = obj_find_child_str(obj, 
-					   NULL,
-					   (const xmlChar *)parmname,
-					   parmnamelen);
+                /* check if this parameter name is in the parmset def */
+                chobj = obj_find_child_str(obj, 
+                                           NULL,
+                                           (const xmlChar *)parmname,
+                                           parmnamelen);
 
-		/* check if parm was found, try partial name if not */
-		if (!chobj && autocomp) {
-		    matchcount = 0;
-		    chobj = 
-			obj_match_child_str(obj, 
-					    NULL,
-					    (const xmlChar *)parmname,
-					    parmnamelen,
-					    &matchcount);
-		    if (chobj) {
-			gotmatch = TRUE;
-			if (matchcount > 1) {
-			    res = ERR_NCX_AMBIGUOUS_CMD;
-			}
-		    } else {
-			copylen = 0;
-		    }
-		}
+                /* check if parm was found, try partial name if not */
+                if (!chobj && autocomp) {
+                    matchcount = 0;
+                    chobj = 
+                        obj_match_child_str(obj, 
+                                            NULL,
+                                            (const xmlChar *)parmname,
+                                            parmnamelen,
+                                            &matchcount);
+                    if (chobj) {
+                        gotmatch = TRUE;
+                        if (matchcount > 1) {
+                            res = ERR_NCX_AMBIGUOUS_CMD;
+                        }
+                    } else {
+                        copylen = 0;
+                    }
+                }
 
-		/* advance the buffer pointer */
-		buffpos += copylen;
+                /* advance the buffer pointer */
+                buffpos += copylen;
 
-	    }  /* else it could be a default-parm value */
+            }  /* else it could be a default-parm value */
 
 
-	    if (res != NO_ERR) {
-		continue;
-	    }
+            if (res != NO_ERR) {
+                continue;
+            }
 
-	    if (!chobj && !gotdashes) {
-		/* try the default parameter
-		 * if any defined, then use the unknown parm
-		 * name as a parameter value for the default parm
-		 */
-		chobj = obj_get_default_parm(obj);
-		if (chobj) {
-		    if (chobj->objtype != OBJ_TYP_LEAF_LIST &&
-			gotdefaultparm) {
-			log_error("\nError: default parm '%s' "
-				  "already entered",
-				  obj_get_name(chobj));
-			res = ERR_NCX_DUP_ENTRY;
-			continue;
-		    }
-		    gotdefaultparm = TRUE;
-		    isdefaultparm = TRUE;
-		}
-	    }
+            if (!chobj && !gotdashes) {
+                /* try the default parameter
+                 * if any defined, then use the unknown parm
+                 * name as a parameter value for the default parm
+                 */
+                chobj = obj_get_default_parm(obj);
+                if (chobj) {
+                    if (chobj->objtype != OBJ_TYP_LEAF_LIST &&
+                        gotdefaultparm) {
+                        log_error("\nError: default parm '%s' "
+                                  "already entered",
+                                  obj_get_name(chobj));
+                        res = ERR_NCX_DUP_ENTRY;
+                        continue;
+                    }
+                    gotdefaultparm = TRUE;
+                    isdefaultparm = TRUE;
+                }
+            }
 
-	    if (res != NO_ERR) {
-		/* got ambiguous cmd error */;
-	    } else if (!chobj) {
-		res = ERR_NCX_UNKNOWN_PARM;
-	    } else {
-		/* do not check parameter order for CLI */
-		btyp = obj_get_basetype(chobj);
-		parmval = NULL;
+            if (res != NO_ERR) {
+                /* got ambiguous cmd error */;
+            } else if (!chobj) {
+                res = ERR_NCX_UNKNOWN_PARM;
+            } else {
+                /* do not check parameter order for CLI */
+                btyp = obj_get_basetype(chobj);
+                parmval = NULL;
 
-		/* skip past any whitespace after the parm name */
-		if (!isdefaultparm) {
-		    while (isspace(buff[buffpos]) && buffpos < bufflen) {
-			buffpos++;
-		    }
-		}
+                /* skip past any whitespace after the parm name */
+                if (!isdefaultparm) {
+                    while (isspace(buff[buffpos]) && buffpos < bufflen) {
+                        buffpos++;
+                    }
+                }
 
-		/* check if ended on space of EOLN */
-		if (btyp == NCX_BT_EMPTY) {
-		    if (buff[buffpos] == '=') {
-			log_error("\nError: cannot assign value "
-				  "to empty leaf '%s'", 
-				  obj_get_name(obj));
-			res = ERR_NCX_INVALID_VALUE;
-		    }
-		} else if (buffpos < bufflen) {
-		    if (!isdefaultparm) {
-			if (buff[buffpos] == '=') {
-			    buffpos++;
+                /* check if ended on space of EOLN */
+                if (btyp == NCX_BT_EMPTY) {
+                    if (buff[buffpos] == '=') {
+                        log_error("\nError: cannot assign value "
+                                  "to empty leaf '%s'", 
+                                  obj_get_name(obj));
+                        res = ERR_NCX_INVALID_VALUE;
+                    }
+                } else if (buffpos < bufflen) {
+                    if (!isdefaultparm) {
+                        if (buff[buffpos] == '=') {
+                            buffpos++;
 
-			    /* skip any whitespace */
-			    while (buff[buffpos] && isspace(buff[buffpos])) {
-				buffpos++;
-			    }
-			} /* else whitespace already skipped */
-		    }
+                            /* skip any whitespace */
+                            while (buff[buffpos] && isspace(buff[buffpos])) {
+                                buffpos++;
+                            }
+                        } /* else whitespace already skipped */
+                    }
 
-		    /* if any chars left in buffer, get the parmval */
-		    if (buffpos < bufflen) {
-			if (buff[buffpos] == NCX_QUOTE_CH ||
-			    buff[buffpos] == NCX_SQUOTE_CH) {
+                    /* if any chars left in buffer, get the parmval */
+                    if (buffpos < bufflen) {
+                        if (buff[buffpos] == NCX_QUOTE_CH ||
+                            buff[buffpos] == NCX_SQUOTE_CH) {
 
-			    savechar = buff[buffpos];
+                            savechar = buff[buffpos];
 
-			    if (script) {
-				/* set the start at quote */
-				parmval = &buff[buffpos];
-			    } else {
-				/* set the start after quote */
-				parmval = &buff[++buffpos];
-			    }
+                            if (script) {
+                                /* set the start at quote */
+                                parmval = &buff[buffpos];
+                            } else {
+                                /* set the start after quote */
+                                parmval = &buff[++buffpos];
+                            }
 
-			    /* find the end of the quoted string */
-			    str = &parmval[1];
-			    while (*str && *str != savechar) {
-				str++;
-			    }
+                            /* find the end of the quoted string */
+                            str = &parmval[1];
+                            while (*str && *str != savechar) {
+                                str++;
+                            }
 
-			    if (*str == savechar) {
-				/* if script mode keep ending quote */
-				if (script) {
-				    str++;
-				}
-			    } else {
-				log_error("\nError: unfinished string "
-					  "found '%s'", parmval);
-				res = ERR_NCX_UNENDED_QSTRING;
-			    }
-			} else if (script && (buffpos+1 < bufflen) &&
-				   (buff[buffpos] == NCX_XML1a_CH) &&
-				   (buff[buffpos+1] == NCX_XML1b_CH)) {
-			    /* set the start of the XML parmval to the [ */
-			    parmval = &buff[buffpos];
-			    
-			    /* find the end of the inline XML */
-			    str = parmval+1;
-			    while (*str && !((*str==NCX_XML2a_CH) 
-					     && (str[1]==NCX_XML2b_CH))) {
-				str++;
-			    }
+                            if (*str == savechar) {
+                                /* if script mode keep ending quote */
+                                if (script) {
+                                    str++;
+                                }
+                            } else {
+                                log_error("\nError: unfinished string "
+                                          "found '%s'", parmval);
+                                res = ERR_NCX_UNENDED_QSTRING;
+                            }
+                        } else if (script && (buffpos+1 < bufflen) &&
+                                   (buff[buffpos] == NCX_XML1a_CH) &&
+                                   (buff[buffpos+1] == NCX_XML1b_CH)) {
+                            /* set the start of the XML parmval to the [ */
+                            parmval = &buff[buffpos];
+                            
+                            /* find the end of the inline XML */
+                            str = parmval+1;
+                            while (*str && !((*str==NCX_XML2a_CH) 
+                                             && (str[1]==NCX_XML2b_CH))) {
+                                str++;
+                            }
 
-			    if (!*str) {
-				/* did not find end of XML string */
-				res = ERR_NCX_DATA_MISSING;
-			    } else {
-				/* setup after the ] char to be zeroed */
-				str += 2;
-			    }
-			} else {
-			    /* set the start of the parmval */
-			    parmval = &buff[buffpos];
+                            if (!*str) {
+                                /* did not find end of XML string */
+                                res = ERR_NCX_DATA_MISSING;
+                            } else {
+                                /* setup after the ] char to be zeroed */
+                                str += 2;
+                            }
+                        } else {
+                            /* set the start of the parmval */
+                            parmval = &buff[buffpos];
 
-			    /* find the end of the unquoted string */
-			    str = &parmval[1];
-			    while (*str && !isspace(*str)) {
-				str++;
-			    }
-			}
+                            /* find the end of the unquoted string */
+                            str = &parmval[1];
+                            while (*str && !isspace(*str)) {
+                                str++;
+                            }
+                        }
 
-			/* terminate string */
-			*str = 0;
+                        /* terminate string */
+                        *str = 0;
 
-			/* skip buffpos past eo-string */
-			buffpos += (uint32)((str - parmval) + 1);  
-		    }
-		}
+                        /* skip buffpos past eo-string */
+                        buffpos += (uint32)((str - parmval) + 1);  
+                    }
+                }
 
-		/* make sure value entered if expected
+                /* make sure value entered if expected
                  * NCX_BT_EMPTY and NCX_BT_STRING 
                  * (if zero-length strings allowed)
                  */
-		if (res==NO_ERR && !parmval && btyp != NCX_BT_EMPTY) {
+                if (res==NO_ERR && !parmval && btyp != NCX_BT_EMPTY) {
                     if (!(typ_is_string(btyp) &&
                         (val_simval_ok(obj_get_typdef(chobj),
                                        EMPTY_STRING) == NO_ERR))) {
                         res = ERR_NCX_EMPTY_VAL;
                     }
-		}
-	    }
+                }
+            }
         }
 
-	/* create a new val_value struct and set the value */
-	if (res == NO_ERR) {
-	    res = parse_parm(val, 
-			     chobj, 
-			     (const xmlChar *)parmval,
-			     script);
-	} else if (res == ERR_NCX_EMPTY_VAL &&
-		   gotmatch && !gotdashes) {
-	    /* matched parm did not work out so
-	     * check if this is intended to be a
-	     * parameter value for the default-parm
-	     */
-	    chobj = obj_get_default_parm(obj);
-	    if (chobj) {
-		savechar = parmname[parmnamelen];
-		parmname[parmnamelen] = 0;
-		res = parse_parm(val, 
-				 chobj, 
-				 (const xmlChar *)parmname, 
-				 script);
-		parmname[parmnamelen] = savechar;
-	    }
-	}
+        /* create a new val_value struct and set the value */
+        if (res == NO_ERR) {
+            res = parse_parm(val, 
+                             chobj, 
+                             (const xmlChar *)parmval,
+                             script);
+        } else if (res == ERR_NCX_EMPTY_VAL &&
+                   gotmatch && !gotdashes) {
+            /* matched parm did not work out so
+             * check if this is intended to be a
+             * parameter value for the default-parm
+             */
+            chobj = obj_get_default_parm(obj);
+            if (chobj) {
+                savechar = parmname[parmnamelen];
+                parmname[parmnamelen] = 0;
+                res = parse_parm(val, 
+                                 chobj, 
+                                 (const xmlChar *)parmname, 
+                                 script);
+                parmname[parmnamelen] = savechar;
+            }
+        }
 
-	/* check any errors in the parm name or value */
-	if (res != NO_ERR) {
-	    msg = get_error_string(res);
-	    xml_strncpy(errbuff, (const xmlChar *)parmname, 
-			min(parmnamelen, ERRLEN));
-	    switch (res) {
-	    case ERR_NCX_UNKNOWN_PARM:
-		log_error("\nError: Unknown parameter (%s)", errbuff);
-		break;
-	    case ERR_NCX_AMBIGUOUS_CMD:
-		parmname[parmnamelen] = 0;
-		log_error("\nError: multiple matches for '%s'",
-			  parmname);
-		break;
-	    default:
-		if (buffpos < bufflen) {
-		    log_error("\nError: %s (%s = %s)", 
-			      msg, 
-			      errbuff, 
-			      &buff[buffpos]);
-		} else if (parmval) {
-		    log_error("\nError: %s (%s = %s)", 
-			      msg, 
-			      errbuff, 
-			      parmval);
-		} else {
-		    log_error("\nError: %s (%s)", 
-			      msg, 
-			      errbuff);
-		}
-	    }
-	    ncx_print_errormsg(NULL, NULL, res);
-	    m__free(buff);
-	    *status = res;
-	    return val;
-	}
+        /* check any errors in the parm name or value */
+        if (res != NO_ERR) {
+            msg = get_error_string(res);
+            xml_strncpy(errbuff, (const xmlChar *)parmname, 
+                        min(parmnamelen, ERRLEN));
+            switch (res) {
+            case ERR_NCX_UNKNOWN_PARM:
+                log_error("\nError: Unknown parameter (%s)", errbuff);
+                break;
+            case ERR_NCX_AMBIGUOUS_CMD:
+                parmname[parmnamelen] = 0;
+                log_error("\nError: multiple matches for '%s'",
+                          parmname);
+                break;
+            default:
+                if (buffpos < bufflen) {
+                    log_error("\nError: %s (%s = %s)", 
+                              msg, 
+                              errbuff, 
+                              &buff[buffpos]);
+                } else if (parmval) {
+                    log_error("\nError: %s (%s = %s)", 
+                              msg, 
+                              errbuff, 
+                              parmval);
+                } else {
+                    log_error("\nError: %s (%s)", 
+                              msg, 
+                              errbuff);
+                }
+            }
+            ncx_print_errormsg(NULL, NULL, res);
+            m__free(buff);
+            *status = res;
+            return val;
+        }
     }
 
     /* cleanup after loop */
@@ -1513,7 +1513,7 @@ val_value_t *
 
     /* 2) add any defaults for optional parms that are not set */
     if (res == NO_ERR && !valonly) {
-	res = val_add_defaults(val, script);
+        res = val_add_defaults(val, script);
     }
 
     /* 3) CLI Instance Check
@@ -1524,7 +1524,7 @@ val_value_t *
      * The choice test is also performed by this function call
      */
     if (res == NO_ERR && !valonly) {
-	res = val_instance_check(val, val->obj);
+        res = val_instance_check(val, val->obj);
     }
 
     *status = res;
@@ -1559,9 +1559,9 @@ val_value_t *
 *********************************************************************/
 status_t
     cli_parse_parm (val_value_t *val,
-		    obj_template_t *obj,
-		    const xmlChar *strval,
-		    boolean script)
+                    obj_template_t *obj,
+                    const xmlChar *strval,
+                    boolean script)
 {
     return parse_parm(val, obj, strval, script);
 
@@ -1596,17 +1596,17 @@ status_t
 *********************************************************************/
 status_t
     cli_parse_parm_ex (val_value_t *val,
-		       obj_template_t *obj,
-		       const xmlChar *strval,
-		       boolean script,
-		       ncx_bad_data_t  bad_data)
+                       obj_template_t *obj,
+                       const xmlChar *strval,
+                       boolean script,
+                       ncx_bad_data_t  bad_data)
 {
     obj_template_t  *genstr;
     status_t         res;
 
     res = parse_parm(val, obj, strval, script);
     if (res == NO_ERR || NEED_EXIT(res)) {
-	return res;
+        return res;
     }
 
     switch (bad_data) {
@@ -1617,21 +1617,21 @@ status_t
                      (strval) ? strval : EMPTY_STRING,
                      obj_get_name(obj));
         }
-	/* drop through */
+        /* drop through */
     case NCX_BAD_DATA_IGNORE:
-	genstr = ncx_get_gen_string();
-	res = parse_parm_ex(val, 
-			    genstr, 
-			    obj_get_nsid(obj),
-			    obj_get_name(obj),
-			    strval, 
-			    script);
-	return res;
+        genstr = ncx_get_gen_string();
+        res = parse_parm_ex(val, 
+                            genstr, 
+                            obj_get_nsid(obj),
+                            obj_get_name(obj),
+                            strval, 
+                            script);
+        return res;
     case NCX_BAD_DATA_CHECK:
     case NCX_BAD_DATA_ERROR:
-	return res;
+        return res;
     default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
     /*NOTREACHED*/
 

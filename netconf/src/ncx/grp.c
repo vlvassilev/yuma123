@@ -1,6 +1,6 @@
 /*  FILE: grp.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -88,7 +88,7 @@ grp_template_t *
 
     grp = m__getObj(grp_template_t);
     if (!grp) {
-	return NULL;
+        return NULL;
     }
     (void)memset(grp, 0x0, sizeof(grp_template_t));
     dlq_createSQue(&grp->typedefQ);
@@ -118,18 +118,18 @@ void
 #ifdef DEBUG
     if (!grp) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        return;
     }
 #endif
 
     if (grp->name) {
-	m__free(grp->name);
+        m__free(grp->name);
     }
     if (grp->descr) {
-	m__free(grp->descr);
+        m__free(grp->descr);
     }
     if (grp->ref) {
-	m__free(grp->ref);
+        m__free(grp->ref);
     }
 
     typ_clean_typeQ(&grp->typedefQ);
@@ -156,14 +156,14 @@ void
 
 #ifdef DEBUG
     if (!que) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     while (!dlq_empty(que)) {
-	grp = (grp_template_t *)dlq_deque(que);
-	grp_free_template(grp);
+        grp = (grp_template_t *)dlq_deque(que);
+        grp_free_template(grp);
     }
 
 }  /* grp_clean_groupingQ */
@@ -188,22 +188,22 @@ boolean
 
 #ifdef DEBUG
     if (!grp) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     if (!dlq_empty(&grp->typedefQ)) {
-	return TRUE;
+        return TRUE;
     }
 
     for (chgrp = (const grp_template_t *)
-	     dlq_firstEntry(&grp->groupingQ);
-	 chgrp != NULL;
-	 chgrp = (const grp_template_t *)dlq_nextEntry(chgrp)) {
-	if (grp_has_typedefs(chgrp)) {
-	    return TRUE;
-	}
+             dlq_firstEntry(&grp->groupingQ);
+         chgrp != NULL;
+         chgrp = (const grp_template_t *)dlq_nextEntry(chgrp)) {
+        if (grp_has_typedefs(chgrp)) {
+            return TRUE;
+        }
     }
 
     return FALSE;
@@ -227,15 +227,15 @@ const xmlChar *
 {
 #ifdef DEBUG
     if (!grp || !grp->tkerr.mod) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (grp->tkerr.mod->ismod) {
-	return grp->tkerr.mod->name;
+        return grp->tkerr.mod->name;
     } else {
-	return grp->tkerr.mod->belongs;
+        return grp->tkerr.mod->belongs;
     }
     /*NOTREACHED*/
 

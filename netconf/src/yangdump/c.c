@@ -406,32 +406,32 @@ static void
      * each top-level real object, RPC, or notification
      */
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_has_name(obj) ||
-	    !obj_is_enabled(obj) ||
-	    obj_is_cli(obj) || 
-	    obj_is_abstract(obj)) {
-	    continue;
-	}
+        if (!obj_has_name(obj) ||
+            !obj_is_enabled(obj) ||
+            obj_is_cli(obj) || 
+            obj_is_abstract(obj)) {
+            continue;
+        }
 
         ses_putstr(scb, (const xmlChar *)"\nstatic obj_template_t *");
         write_c_object_var(scb, obj_get_name(obj));
         ses_putchar(scb, ';');
     }
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_has_name(obj) ||
-	    !obj_is_enabled(obj) ||
-	    obj_is_cli(obj) || 
-	    obj_is_abstract(obj) ||
+        if (!obj_has_name(obj) ||
+            !obj_is_enabled(obj) ||
+            obj_is_cli(obj) || 
+            obj_is_abstract(obj) ||
             obj_is_rpc(obj) ||
             obj_is_notif(obj)) {
-	    continue;
-	}
+            continue;
+        }
 
         ses_putstr(scb, (const xmlChar *)"\nstatic val_value_t *");
         write_c_value_var(scb, obj_get_name(obj));
@@ -510,15 +510,15 @@ static void
      * real object, RPC, or notification
      */
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_has_name(obj) ||
-	    !obj_is_enabled(obj) ||
-	    obj_is_cli(obj) || 
-	    obj_is_abstract(obj)) {
-	    continue;
-	}
+        if (!obj_has_name(obj) ||
+            !obj_is_enabled(obj) ||
+            obj_is_cli(obj) || 
+            obj_is_abstract(obj)) {
+            continue;
+        }
 
         ses_indent(scb, indent);
         write_c_object_var(scb, obj_get_name(obj));
@@ -529,17 +529,17 @@ static void
      * real value cache pointer for a database object
      */
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_has_name(obj) ||
-	    !obj_is_enabled(obj) ||
-	    obj_is_cli(obj) || 
-	    obj_is_abstract(obj) ||
+        if (!obj_has_name(obj) ||
+            !obj_is_enabled(obj) ||
+            obj_is_cli(obj) || 
+            obj_is_abstract(obj) ||
             obj_is_rpc(obj) ||
             obj_is_notif(obj)) {
-	    continue;
-	}
+            continue;
+        }
 
         ses_indent(scb, indent);
         write_c_value_var(scb, obj_get_name(obj));
@@ -2102,15 +2102,15 @@ static void
 
     /* load the static object variable pointers */
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_has_name(obj) ||
-	    !obj_is_enabled(obj) ||
-	    obj_is_cli(obj) || 
-	    obj_is_abstract(obj)) {
-	    continue;
-	}
+        if (!obj_has_name(obj) ||
+            !obj_is_enabled(obj) ||
+            obj_is_cli(obj) || 
+            obj_is_abstract(obj)) {
+            continue;
+        }
 
         ses_indent(scb, indent);
         write_c_object_var(scb, obj_get_name(obj));
@@ -2140,14 +2140,14 @@ static void
 
     /* initialize any RPC methods */
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_is_rpc(obj) ||
-	    !obj_is_enabled(obj) ||
-	    obj_is_abstract(obj)) {
-	    continue;
-	}
+        if (!obj_is_rpc(obj) ||
+            !obj_is_enabled(obj) ||
+            obj_is_abstract(obj)) {
+            continue;
+        }
 
         /* register validate function */
         ses_putstr_indent(scb, 
@@ -2449,14 +2449,14 @@ static void
 
     /* cleanup any RPC methods */
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_is_rpc(obj) ||
-	    !obj_is_enabled(obj) ||
-	    obj_is_abstract(obj)) {
-	    continue;
-	}
+        if (!obj_is_rpc(obj) ||
+            !obj_is_enabled(obj) ||
+            obj_is_abstract(obj)) {
+            continue;
+        }
 
         /* unregister all callback fns for this RPC function */
         ses_putstr_indent(scb, 

@@ -1,7 +1,7 @@
 /*  FILE: mgr_signal.c
 
     Handle interrupt signals for the manager
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -62,7 +62,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -83,15 +83,15 @@ void
     mgr_signal_init (void)
 {
     if (!mgr_signal_init_done) {
-	ctl_c = NULL;
+        ctl_c = NULL;
 
-	/* setup mgr_signal_handler */
-	sh_int = signal(SIGINT, mgr_signal_handler);
-	sh_hup = signal(SIGHUP, mgr_signal_handler);
-	sh_term = signal(SIGTERM, mgr_signal_handler);
-	sh_pipe = signal(SIGPIPE, mgr_signal_handler);
-	sh_alarm = signal(SIGALRM, mgr_signal_handler);
-	mgr_signal_init_done = TRUE;
+        /* setup mgr_signal_handler */
+        sh_int = signal(SIGINT, mgr_signal_handler);
+        sh_hup = signal(SIGHUP, mgr_signal_handler);
+        sh_term = signal(SIGTERM, mgr_signal_handler);
+        sh_pipe = signal(SIGPIPE, mgr_signal_handler);
+        sh_alarm = signal(SIGALRM, mgr_signal_handler);
+        mgr_signal_init_done = TRUE;
     }
 
 } /* mgr_signal_init */
@@ -107,14 +107,14 @@ void
     mgr_signal_cleanup (void)
 {
     if (mgr_signal_init_done) {
-	/* restore previous handlers */
-	signal(SIGINT, sh_int);
-	signal(SIGHUP, sh_hup);
-	signal(SIGTERM, sh_term);
-	signal(SIGPIPE, sh_pipe);
-	signal(SIGALRM, sh_alarm);
-	ctl_c = NULL;
-	mgr_signal_init_done = FALSE;
+        /* restore previous handlers */
+        signal(SIGINT, sh_int);
+        signal(SIGHUP, sh_hup);
+        signal(SIGTERM, sh_term);
+        signal(SIGPIPE, sh_pipe);
+        signal(SIGALRM, sh_alarm);
+        ctl_c = NULL;
+        mgr_signal_init_done = FALSE;
     }
 
 } /* mgr_signal_cleanup */
@@ -134,30 +134,30 @@ void
 {
     switch (intr) {
     case SIGINT:
-	/* control-C */
-	if (ctl_c) {
-	    (*ctl_c)(intr);
-	} else {
-	    mgr_request_shutdown();
-	}
-	break;
+        /* control-C */
+        if (ctl_c) {
+            (*ctl_c)(intr);
+        } else {
+            mgr_request_shutdown();
+        }
+        break;
     case SIGHUP:
-	/* hang up treated as reset */
-	mgr_request_shutdown();
-	break;
+        /* hang up treated as reset */
+        mgr_request_shutdown();
+        break;
     case SIGTERM:
-	/* kill -1 */
-	mgr_request_shutdown();
-	break;
+        /* kill -1 */
+        mgr_request_shutdown();
+        break;
     case SIGPIPE:
-	/* broken pipe ignored */
-	break;
+        /* broken pipe ignored */
+        break;
     case SIGALRM:
-	/* dispatch to the agent timer handler */
-	/* mgr_timer_handler(); */
-	break;
+        /* dispatch to the agent timer handler */
+        /* mgr_timer_handler(); */
+        break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
     }
 
 } /* mgr_signal_handler */

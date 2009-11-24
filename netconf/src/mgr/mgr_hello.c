@@ -2,7 +2,7 @@
 
     Handle the NETCONF <hello> (top-level) element.
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -100,7 +100,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 static boolean mgr_hello_init_done = FALSE;
@@ -127,7 +127,7 @@ static boolean mgr_hello_init_done = FALSE;
 *********************************************************************/
 static status_t
     process_agent_hello (ses_cb_t *scb,
-			 val_value_t *hello)
+                         val_value_t *hello)
 {
 
     val_value_t  *caps, *sidval, *cap;
@@ -142,64 +142,64 @@ static status_t
      */
     caps = val_find_child(hello, NC_MODULE, NCX_EL_CAPABILITIES);
     if (!caps || caps->res != NO_ERR) {
-	return ERR_NCX_MISSING_VAL_INST;
-    }	
+        return ERR_NCX_MISSING_VAL_INST;
+    }   
 
     /* make sure the session-id element is present
      * This should not fail, since already parsed this far 
      */
     sidval = val_find_child(hello, NC_MODULE, NCX_EL_SESSION_ID);
     if (!sidval || sidval->res != NO_ERR) {
-	return ERR_NCX_MISSING_VAL_INST;
+        return ERR_NCX_MISSING_VAL_INST;
     } else {
-	mscb->agtsid = VAL_UINT(sidval);
+        mscb->agtsid = VAL_UINT(sidval);
     }
 
     /* go through the capability nodes and construct a caplist */
     for (cap = val_find_child(caps, NC_MODULE, NCX_EL_CAPABILITY);
-	 cap != NULL;
-	 cap = val_find_next_child(caps, 
+         cap != NULL;
+         cap = val_find_next_child(caps, 
                                    NC_MODULE, 
-				   NCX_EL_CAPABILITY, 
+                                   NCX_EL_CAPABILITY, 
                                    cap)) {
 
-	if (cap->res != NO_ERR) {
-	    continue;
-	}
-	
-	res = cap_add_std_string(&mscb->caplist, VAL_STR(cap));
-	if (res == ERR_NCX_SKIPPED) {
-	    res = cap_add_module_string(&mscb->caplist, VAL_STR(cap));
-	    if (res == ERR_NCX_SKIPPED) {
+        if (cap->res != NO_ERR) {
+            continue;
+        }
+        
+        res = cap_add_std_string(&mscb->caplist, VAL_STR(cap));
+        if (res == ERR_NCX_SKIPPED) {
+            res = cap_add_module_string(&mscb->caplist, VAL_STR(cap));
+            if (res == ERR_NCX_SKIPPED) {
                 if (ncx_warning_enabled(ERR_NCX_RCV_UNKNOWN_CAP)) {
                     log_warn("\nWarning: received unknown capability '%s'",
                              VAL_STR(cap));
                 }
-		res = cap_add_ent(&mscb->caplist, VAL_STR(cap));
-		if (res != NO_ERR) {
-		    return res;
-		}
-	    }
-	}
+                res = cap_add_ent(&mscb->caplist, VAL_STR(cap));
+                if (res != NO_ERR) {
+                    return res;
+                }
+            }
+        }
     }
 
     /* check if the mandatory base protocol capability was set */
     if (!cap_std_set(&mscb->caplist, CAP_STDID_V1)) {
-	return ERR_NCX_MISSING_VAL_INST;
-    }	
+        return ERR_NCX_MISSING_VAL_INST;
+    }   
 
     /* set target type var in the manager session control block */
     c1 = cap_std_set(&mscb->caplist, CAP_STDID_WRITE_RUNNING);
     c2 = cap_std_set(&mscb->caplist, CAP_STDID_CANDIDATE);
 
     if (c1 && c2) {
-	mscb->targtyp = NCX_AGT_TARG_CAND_RUNNING;
+        mscb->targtyp = NCX_AGT_TARG_CAND_RUNNING;
     } else if (c1) {
-	mscb->targtyp = NCX_AGT_TARG_RUNNING;
+        mscb->targtyp = NCX_AGT_TARG_RUNNING;
     } else if (c2) {
-	mscb->targtyp = NCX_AGT_TARG_CANDIDATE;
+        mscb->targtyp = NCX_AGT_TARG_CANDIDATE;
     } else {
-	mscb->targtyp = NCX_AGT_TARG_NONE;
+        mscb->targtyp = NCX_AGT_TARG_NONE;
         if (LOGINFO) {
             log_info("\nmgr_hello: no writable target found for"
                      " session %u (a:%u)", 
@@ -210,9 +210,9 @@ static status_t
 
     /* set the startup type in the mscb */
     if (cap_std_set(&mscb->caplist, CAP_STDID_STARTUP)) {
-	mscb->starttyp = NCX_AGT_START_DISTINCT;
+        mscb->starttyp = NCX_AGT_START_DISTINCT;
     } else {
-	mscb->starttyp = NCX_AGT_START_MIRROR;
+        mscb->starttyp = NCX_AGT_START_MIRROR;
     }
 
     return NO_ERR;
@@ -238,12 +238,12 @@ status_t
     status_t  res;
 
     if (!mgr_hello_init_done) {
-	res = top_register_node(NC_MODULE, NCX_EL_HELLO, 
-				mgr_hello_dispatch);
-	if (res != NO_ERR) {
-	    return res;
-	}
-	mgr_hello_init_done = TRUE;
+        res = top_register_node(NC_MODULE, NCX_EL_HELLO, 
+                                mgr_hello_dispatch);
+        if (res != NO_ERR) {
+            return res;
+        }
+        mgr_hello_init_done = TRUE;
     }
     return NO_ERR;
 
@@ -261,8 +261,8 @@ void
     mgr_hello_cleanup (void)
 {
     if (mgr_hello_init_done) {
-	top_unregister_node(NC_MODULE, NCX_EL_HELLO);
-	mgr_hello_init_done = FALSE;
+        top_unregister_node(NC_MODULE, NCX_EL_HELLO);
+        mgr_hello_init_done = FALSE;
     }
 
 } /* mgr_hello_cleanup */
@@ -279,7 +279,7 @@ void
 *********************************************************************/
 void 
     mgr_hello_dispatch (ses_cb_t *scb,
-			xml_node_t *top)
+                        xml_node_t *top)
 {
     val_value_t           *val;
     ncx_module_t          *mod;
@@ -291,8 +291,8 @@ void
 
 #ifdef DEBUG
     if (!scb || !top) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -301,7 +301,7 @@ void
         log_debug("\nmgr_hello got node");
     }
     if (LOGDEBUG2) {
-	xml_dump_node(top);
+        xml_dump_node(top);
     }
 #endif
 
@@ -309,12 +309,12 @@ void
 
     /* only process this message in hello wait state */
     if (scb->state != SES_ST_HELLO_WAIT) {
-	/* TBD: stats update */
+        /* TBD: stats update */
         if (LOGINFO) {
             log_info("\nmgr_hello dropped, wrong state for session %d",
                      scb->sid);
         }
-	return;
+        return;
     }
 
     /* init local vars */
@@ -327,31 +327,31 @@ void
     /* get a value struct to hold the agent hello msg */
     val = val_new_value();
     if (!val) {
-	res = ERR_INTERNAL_MEM;
+        res = ERR_INTERNAL_MEM;
     }
 
     /* get the type definition from the registry */
     if (res == NO_ERR) {
-	mod = ncx_find_module(NC_MODULE, NULL);
-	if (mod) {
-	    obj = ncx_find_object(mod, MGR_SERVER_HELLO_OBJ);
-	}
-	if (!obj) {
-	    /* netconf module should have loaded this definition */
-	    res = SET_ERROR(ERR_INTERNAL_PTR);
-	}
+        mod = ncx_find_module(NC_MODULE, NULL);
+        if (mod) {
+            obj = ncx_find_object(mod, MGR_SERVER_HELLO_OBJ);
+        }
+        if (!obj) {
+            /* netconf module should have loaded this definition */
+            res = SET_ERROR(ERR_INTERNAL_PTR);
+        }
     }
 
     /* parse an agent hello message */
     if (res == NO_ERR) {
-	res = mgr_val_parse(scb, obj, top, val);
+        res = mgr_val_parse(scb, obj, top, val);
     }
     
     /* examine the agent capability list
      * and it matches the agent protocol version
      */
     if (res == NO_ERR) {
-	res = process_agent_hello(scb, val);
+        res = process_agent_hello(scb, val);
     }
 
     /* report first error and close session */
@@ -364,13 +364,13 @@ void
                      res);
         }
     } else {
-	scb->state = SES_ST_IDLE;
+        scb->state = SES_ST_IDLE;
         if (LOGDEBUG) {
             log_debug("\nmgr_hello manager hello ok");
         }
     }
     if (val) {
-	val_free_value(val);
+        val_free_value(val);
     }
 
 } /* mgr_hello_dispatch */
@@ -400,7 +400,7 @@ status_t
 
 #ifdef DEBUG
     if (!scb) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -419,39 +419,39 @@ status_t
     /* get the agent caps */
     mycaps = mgr_cap_get_capsval();
     if (!mycaps) {
-	res = SET_ERROR(ERR_INTERNAL_PTR);
+        res = SET_ERROR(ERR_INTERNAL_PTR);
     }
 
     /* setup the prefix map with the NETCONF namespace */
     if (res == NO_ERR) {
-	res = xml_msg_build_prefix_map(&msg, &attrs, TRUE, FALSE);
+        res = xml_msg_build_prefix_map(&msg, &attrs, TRUE, FALSE);
     }
 
     /* send the <?xml?> directive */
     if (res == NO_ERR) {
-	res = ses_start_msg(scb);
+        res = ses_start_msg(scb);
     }
 
     /* start the hello element */
     if (res == NO_ERR) {
-	anyout = TRUE;
-	xml_wr_begin_elem_ex(scb, &msg, 0, nc_id, NCX_EL_HELLO, 
-			     &attrs, ATTRQ, 0, START);
+        anyout = TRUE;
+        xml_wr_begin_elem_ex(scb, &msg, 0, nc_id, NCX_EL_HELLO, 
+                             &attrs, ATTRQ, 0, START);
     }
     
     /* send the capabilities list */
     if (res == NO_ERR) {
-	xml_wr_full_val(scb, &msg, mycaps, NCX_DEF_INDENT);
+        xml_wr_full_val(scb, &msg, mycaps, NCX_DEF_INDENT);
     }
 
     /* finish the hello element */
     if (res == NO_ERR) {
-	xml_wr_end_elem(scb, &msg, nc_id, NCX_EL_HELLO, 0);
+        xml_wr_end_elem(scb, &msg, nc_id, NCX_EL_HELLO, 0);
     }
 
     /* finish the message */
     if (anyout) {
-	ses_finish_msg(scb);
+        ses_finish_msg(scb);
     }
 
     xml_clean_attrs(&attrs);

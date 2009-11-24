@@ -96,7 +96,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -122,15 +122,15 @@ date         init     comment
 *********************************************************************/
 static rpc_err_t
     get_rpcerr (status_t intres,
-		boolean isel,
-		rpc_err_sev_t *errsev,
+                boolean isel,
+                rpc_err_sev_t *errsev,
                 const xmlChar **apptag)
 {
 
     if (intres >= ERR_WARN_BASE) {
-	*errsev = RPC_ERR_SEV_WARNING;
+        *errsev = RPC_ERR_SEV_WARNING;
         *apptag = RPC_ERR_APPTAG_GEN_WARNING;
-	return RPC_ERR_NONE;
+        return RPC_ERR_NONE;
     }
     
     /* setup defaults */
@@ -140,18 +140,18 @@ static rpc_err_t
     /* translate the internal NCX error code to a netconf code */
     switch (intres) {
     case NO_ERR:
-	*errsev = RPC_ERR_SEV_NONE;
+        *errsev = RPC_ERR_SEV_NONE;
         *apptag = NCX_EL_NONE;
-	return RPC_ERR_NONE;
+        return RPC_ERR_NONE;
     case ERR_END_OF_FILE:
         *apptag = RPC_ERR_APPTAG_IO_ERROR;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_INTERNAL_PTR:
         *apptag = RPC_ERR_APPTAG_INT_ERROR;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_INTERNAL_MEM:
         *apptag = RPC_ERR_APPTAG_MALLOC_ERROR;
-	return RPC_ERR_RESOURCE_DENIED;
+        return RPC_ERR_RESOURCE_DENIED;
     case ERR_INTERNAL_VAL:
     case ERR_INTERNAL_BUFF:
     case ERR_INTERNAL_QDEL:
@@ -161,17 +161,17 @@ static rpc_err_t
     case ERR_BAD_QLINK:
     case ERR_Q_ALREADY:
         *apptag = RPC_ERR_APPTAG_INT_ERROR;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_TOO_MANY_ENTRIES:
     case ERR_BUFF_OVFL:
         *apptag = RPC_ERR_APPTAG_LIMIT_REACHED;
-	return RPC_ERR_RESOURCE_DENIED;
+        return RPC_ERR_RESOURCE_DENIED;
     case ERR_XML2_FAILED:
     case ERR_XML_READER_INTERNAL:
     case ERR_XML_READER_START_FAILED:
     case ERR_XML_READER_READ:
         *apptag = RPC_ERR_APPTAG_LIBXML2_ERROR;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_FIL_OPEN:
     case ERR_FIL_READ:
     case ERR_FIL_CLOSE:
@@ -184,7 +184,7 @@ static rpc_err_t
     case ERR_READ_DIR_FAILED:
     case ERR_PARSPOST_RD_INPUT:
         *apptag = RPC_ERR_APPTAG_IO_ERROR;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_DB_CONNECT_FAILED:
     case ERR_DB_ENTRY_EXISTS:
     case ERR_DB_NOT_FOUND:
@@ -196,20 +196,20 @@ static rpc_err_t
     case ERR_DB_WRITE_FAILED:
     case ERR_DB_INIT_FAILED:
         *apptag = RPC_ERR_APPTAG_SQL_ERROR;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_TR_BEEP_INIT:
     case ERR_TR_BEEP_NC_INIT:
         *apptag = RPC_ERR_APPTAG_BEEP_ERROR;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NO_CFGFILE:
     case ERR_NO_SRCFILE:
         *apptag = RPC_ERR_APPTAG_DATA_INCOMPLETE;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_FIL_BAD_DRIVE:
     case ERR_FIL_BAD_PATH:
     case ERR_FIL_BAD_FILENAME:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_DUP_VALPAIR:
     case ERR_PAGE_NOT_HANDLED:
     case ERR_PAGE_ACCESS_DENIED:
@@ -217,225 +217,225 @@ static rpc_err_t
     case ERR_FORM_STATE:
     case ERR_DUP_NS:
         *apptag = RPC_ERR_APPTAG_HTML_ERROR;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_XML_READER_NODETYP:
         *apptag = RPC_ERR_APPTAG_LIBXML2_ERROR;
-	return (isel)  ? RPC_ERR_UNKNOWN_ELEMENT 
-	    : RPC_ERR_UNKNOWN_ATTRIBUTE;
+        return (isel)  ? RPC_ERR_UNKNOWN_ELEMENT 
+            : RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_XML_READER_NULLNAME:
     case ERR_XML_READER_NULLVAL:
         *apptag = RPC_ERR_APPTAG_LIBXML2_ERROR;
-	return (isel) ? RPC_ERR_BAD_ELEMENT
-	    : RPC_ERR_BAD_ATTRIBUTE;
+        return (isel) ? RPC_ERR_BAD_ELEMENT
+            : RPC_ERR_BAD_ATTRIBUTE;
     case ERR_XML_READER_WRONGNAME:
         *apptag = RPC_ERR_APPTAG_LIBXML2_ERROR;
-	return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
-	    : RPC_ERR_UNKNOWN_ATTRIBUTE;
+        return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
+            : RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_XML_READER_WRONGVAL:
         *apptag = RPC_ERR_APPTAG_LIBXML2_ERROR;
-	return (isel) ? RPC_ERR_BAD_ELEMENT 
-	    : RPC_ERR_BAD_ATTRIBUTE;
+        return (isel) ? RPC_ERR_BAD_ELEMENT 
+            : RPC_ERR_BAD_ATTRIBUTE;
     case ERR_XML_READER_WRONGEL:
     case ERR_XML_READER_EXTRANODES:
         *apptag = RPC_ERR_APPTAG_LIBXML2_ERROR;
-	return RPC_ERR_UNKNOWN_ELEMENT;	
+        return RPC_ERR_UNKNOWN_ELEMENT; 
     case ERR_XML_READER_EOF:
         *apptag = RPC_ERR_APPTAG_LIBXML2_ERROR;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_WRONG_LEN:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_BAD_ELEMENT
-	    : RPC_ERR_BAD_ATTRIBUTE;
+        return (isel) ? RPC_ERR_BAD_ELEMENT
+            : RPC_ERR_BAD_ATTRIBUTE;
     case ERR_NCX_ENTRY_EXISTS:
     case ERR_NCX_DUP_ENTRY:
         *apptag = RPC_ERR_APPTAG_DUPLICATE_ERROR;
-	return RPC_ERR_DATA_EXISTS;
+        return RPC_ERR_DATA_EXISTS;
     case ERR_NCX_NOT_FOUND:
     case ERR_NCX_MISSING_FILE:
         *apptag = RPC_ERR_APPTAG_DATA_INCOMPLETE;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_UNKNOWN_PARM:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_UNKNOWN_ELEMENT;
+        return RPC_ERR_UNKNOWN_ELEMENT;
     case ERR_NCX_INVALID_NAME:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_BAD_ELEMENT
-	    : RPC_ERR_BAD_ATTRIBUTE;
+        return (isel) ? RPC_ERR_BAD_ELEMENT
+            : RPC_ERR_BAD_ATTRIBUTE;
     case ERR_NCX_UNKNOWN_NS:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_UNKNOWN_NAMESPACE;
+        return RPC_ERR_UNKNOWN_NAMESPACE;
     case ERR_NCX_WRONG_NS:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_UNKNOWN_NAMESPACE;
+        return RPC_ERR_UNKNOWN_NAMESPACE;
     case ERR_NCX_WRONG_TYPE:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_BAD_ELEMENT
-	    : RPC_ERR_BAD_ATTRIBUTE;
+        return (isel) ? RPC_ERR_BAD_ELEMENT
+            : RPC_ERR_BAD_ATTRIBUTE;
     case ERR_NCX_WRONG_VAL:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_BAD_ELEMENT
-	    : RPC_ERR_BAD_ATTRIBUTE;
+        return (isel) ? RPC_ERR_BAD_ELEMENT
+            : RPC_ERR_BAD_ATTRIBUTE;
     case ERR_NCX_MISSING_PARM:
         *apptag = RPC_ERR_APPTAG_DATA_INCOMPLETE;
-	return RPC_ERR_DATA_MISSING;
+        return RPC_ERR_DATA_MISSING;
     case ERR_NCX_EXTRA_PARM:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_UNKNOWN_ELEMENT;
+        return RPC_ERR_UNKNOWN_ELEMENT;
     case ERR_NCX_EMPTY_VAL:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_BAD_ELEMENT 
-	    : RPC_ERR_BAD_ATTRIBUTE;
+        return (isel) ? RPC_ERR_BAD_ELEMENT 
+            : RPC_ERR_BAD_ATTRIBUTE;
     case ERR_NCX_MOD_NOT_FOUND:
         *apptag = RPC_ERR_APPTAG_DATA_INCOMPLETE;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_LEN_EXCEEDED:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_INVALID_TOKEN:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_UNENDED_QSTRING:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_READ_FAILED:
         *apptag = RPC_ERR_APPTAG_IO_ERROR;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_INVALID_NUM:
     case ERR_NCX_INVALID_HEXNUM:
     case ERR_NCX_INVALID_REALNUM:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_BAD_ELEMENT 
-	    : RPC_ERR_BAD_ATTRIBUTE;
+        return (isel) ? RPC_ERR_BAD_ELEMENT 
+            : RPC_ERR_BAD_ATTRIBUTE;
     case ERR_NCX_EOF:
         *apptag = RPC_ERR_APPTAG_IO_ERROR;
-	return RPC_ERR_DATA_MISSING;
+        return RPC_ERR_DATA_MISSING;
     case ERR_NCX_WRONG_TKTYPE:
     case ERR_NCX_WRONG_TKVAL:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_INVALID_VALUE;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_BUFF_SHORT:
         *apptag = RPC_ERR_APPTAG_DATA_INCOMPLETE;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_INVALID_RANGE:
     case ERR_NCX_OVERLAP_RANGE:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_DEF_NOT_FOUND:
     case ERR_NCX_DEFSEG_NOT_FOUND:
         *apptag = RPC_ERR_APPTAG_DATA_INCOMPLETE;
-	return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
-	    : RPC_ERR_UNKNOWN_ATTRIBUTE;
+        return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
+            : RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_TYPE_NOT_INDEX:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_BAD_ELEMENT 
-	    : RPC_ERR_BAD_ATTRIBUTE;
+        return (isel) ? RPC_ERR_BAD_ELEMENT 
+            : RPC_ERR_BAD_ATTRIBUTE;
     case ERR_NCX_INDEX_TYPE_NOT_FOUND:
         *apptag = RPC_ERR_APPTAG_DATA_INCOMPLETE;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_TYPE_NOT_MDATA:
     case ERR_NCX_MDATA_NOT_ALLOWED:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_TOP_NOT_FOUND:
         *apptag = RPC_ERR_APPTAG_DATA_INCOMPLETE;
-	return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
-	    : RPC_ERR_UNKNOWN_ATTRIBUTE;
+        return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
+            : RPC_ERR_UNKNOWN_ATTRIBUTE;
 
     /*** match netconf errors here ***/
     case ERR_NCX_IN_USE:
         *apptag = RPC_ERR_APPTAG_RESOURCE_IN_USE;
-	return RPC_ERR_IN_USE;
+        return RPC_ERR_IN_USE;
     case ERR_NCX_INVALID_VALUE:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_TOO_BIG:
         *apptag = RPC_ERR_APPTAG_LIMIT_REACHED;
-	return RPC_ERR_TOO_BIG;
+        return RPC_ERR_TOO_BIG;
     case ERR_NCX_MISSING_ATTRIBUTE:
         *apptag = RPC_ERR_APPTAG_DATA_INCOMPLETE;
-	return RPC_ERR_MISSING_ATTRIBUTE;
+        return RPC_ERR_MISSING_ATTRIBUTE;
     case ERR_NCX_BAD_ATTRIBUTE:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_BAD_ATTRIBUTE;
+        return RPC_ERR_BAD_ATTRIBUTE;
     case ERR_NCX_UNKNOWN_ATTRIBUTE:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_UNKNOWN_ATTRIBUTE;
+        return RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_MISSING_ELEMENT:
         *apptag = RPC_ERR_APPTAG_DATA_INCOMPLETE;
-	return RPC_ERR_MISSING_ELEMENT;
+        return RPC_ERR_MISSING_ELEMENT;
     case ERR_NCX_BAD_ELEMENT:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_BAD_ELEMENT;
+        return RPC_ERR_BAD_ELEMENT;
     case ERR_NCX_UNKNOWN_ELEMENT:
         *apptag = RPC_ERR_APPTAG_DATA_INCOMPLETE;
-	return RPC_ERR_UNKNOWN_ELEMENT;
+        return RPC_ERR_UNKNOWN_ELEMENT;
     case ERR_NCX_UNKNOWN_NAMESPACE:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_UNKNOWN_NAMESPACE;
+        return RPC_ERR_UNKNOWN_NAMESPACE;
     case ERR_NCX_ACCESS_DENIED:
         *apptag = RPC_ERR_APPTAG_NO_ACCESS;
-	return RPC_ERR_ACCESS_DENIED;
+        return RPC_ERR_ACCESS_DENIED;
     case ERR_NCX_LOCK_DENIED:
         *apptag = RPC_ERR_APPTAG_NO_ACCESS;
-	return RPC_ERR_LOCK_DENIED;
+        return RPC_ERR_LOCK_DENIED;
     case ERR_NCX_RESOURCE_DENIED:
         *apptag = RPC_ERR_APPTAG_NO_ACCESS;
-	return RPC_ERR_RESOURCE_DENIED;
+        return RPC_ERR_RESOURCE_DENIED;
     case ERR_NCX_ROLLBACK_FAILED:
         *apptag = RPC_ERR_APPTAG_RECOVER_FAILED;
-	return RPC_ERR_ROLLBACK_FAILED;
+        return RPC_ERR_ROLLBACK_FAILED;
     case ERR_NCX_DATA_EXISTS:
         *apptag = RPC_ERR_APPTAG_NO_ACCESS;
-	return RPC_ERR_DATA_EXISTS;
+        return RPC_ERR_DATA_EXISTS;
     case ERR_NCX_DATA_MISSING:
         *apptag = RPC_ERR_APPTAG_DATA_INCOMPLETE;
-	return RPC_ERR_DATA_MISSING;
+        return RPC_ERR_DATA_MISSING;
     case ERR_NCX_OPERATION_NOT_SUPPORTED:
         *apptag = RPC_ERR_APPTAG_NO_SUPPORT;
-	return RPC_ERR_OPERATION_NOT_SUPPORTED;
+        return RPC_ERR_OPERATION_NOT_SUPPORTED;
     case ERR_NCX_OPERATION_FAILED:
         *apptag = RPC_ERR_APPTAG_GEN_ERROR;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_PARTIAL_OPERATION:
         *apptag = RPC_ERR_APPTAG_GEN_ERROR;
-	return RPC_ERR_PARTIAL_OPERATION;
+        return RPC_ERR_PARTIAL_OPERATION;
 
     /* netconf error extensions */
     case ERR_NCX_WRONG_NAMESPACE:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_UNKNOWN_NAMESPACE;
+        return RPC_ERR_UNKNOWN_NAMESPACE;
     case ERR_NCX_WRONG_NODEDEPTH:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_BAD_ELEMENT;
+        return RPC_ERR_BAD_ELEMENT;
     case ERR_NCX_WRONG_OWNER:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
-	    : RPC_ERR_UNKNOWN_ATTRIBUTE;
+        return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
+            : RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_WRONG_ELEMENT:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
-	    : RPC_ERR_UNKNOWN_ATTRIBUTE;
+        return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
+            : RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_WRONG_ORDER:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
-	    : RPC_ERR_UNKNOWN_ATTRIBUTE;
+        return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
+            : RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_EXTRA_NODE:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
-	    : RPC_ERR_UNKNOWN_ATTRIBUTE;
+        return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
+            : RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_WRONG_NODETYP:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
-	    : RPC_ERR_UNKNOWN_ATTRIBUTE;
+        return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
+            : RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_WRONG_NODETYP_SIM:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
-	    : RPC_ERR_UNKNOWN_ATTRIBUTE;
+        return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
+            : RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_WRONG_NODETYP_CPX:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
-	    : RPC_ERR_UNKNOWN_ATTRIBUTE;
+        return (isel) ? RPC_ERR_UNKNOWN_ELEMENT
+            : RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_WRONG_DATATYP:
     case ERR_NCX_WRONG_DATAVAL:
     case ERR_NCX_NUMLEN_TOOBIG:
@@ -443,176 +443,176 @@ static rpc_err_t
     case ERR_NCX_EXTRA_ENUMCH:
     case ERR_NCX_EXTRA_LISTSTR:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_BAD_ELEMENT 
-	    : RPC_ERR_BAD_ATTRIBUTE;
+        return (isel) ? RPC_ERR_BAD_ELEMENT 
+            : RPC_ERR_BAD_ATTRIBUTE;
     case ERR_NCX_NOT_IN_RANGE:
         *apptag = RPC_ERR_APPTAG_RANGE;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_VAL_NOTINSET:
         *apptag = RPC_ERR_APPTAG_VALUE_SET;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_UNKNOWN_OBJECT:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_UNKNOWN_ELEMENT;
+        return RPC_ERR_UNKNOWN_ELEMENT;
     case ERR_NCX_EXTRA_PARMINST:
     case ERR_NCX_EXTRA_CHOICE:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_UNKNOWN_ELEMENT 
-	    : RPC_ERR_UNKNOWN_ATTRIBUTE;
+        return (isel) ? RPC_ERR_UNKNOWN_ELEMENT 
+            : RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_MISSING_CHOICE:
         *apptag = RPC_ERR_APPTAG_CHOICE;
-	return RPC_ERR_DATA_MISSING;    /* 13.6 */
+        return RPC_ERR_DATA_MISSING;    /* 13.6 */
     case ERR_NCX_CFG_STATE:
         *apptag = RPC_ERR_APPTAG_NO_ACCESS;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_UNKNOWN_APP:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_UNKNOWN_ELEMENT;
+        return RPC_ERR_UNKNOWN_ELEMENT;
     case ERR_NCX_UNKNOWN_TYPE:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_UNKNOWN_ELEMENT 
-	    : RPC_ERR_UNKNOWN_ATTRIBUTE;
+        return (isel) ? RPC_ERR_UNKNOWN_ELEMENT 
+            : RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_NO_ACCESS_ACL:
         *apptag = RPC_ERR_APPTAG_NO_ACCESS;
-	return RPC_ERR_ACCESS_DENIED;
+        return RPC_ERR_ACCESS_DENIED;
     case ERR_NCX_NO_ACCESS_LOCK:
         *apptag = RPC_ERR_APPTAG_NO_ACCESS;
-	return RPC_ERR_IN_USE;
+        return RPC_ERR_IN_USE;
     case ERR_NCX_NO_ACCESS_STATE:
         *apptag = RPC_ERR_APPTAG_NO_ACCESS;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_NO_ACCESS_MAX:
         *apptag = RPC_ERR_APPTAG_LIMIT_REACHED;
-	return RPC_ERR_ACCESS_DENIED;
+        return RPC_ERR_ACCESS_DENIED;
     case ERR_NCX_WRONG_INDEX_TYPE:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_BAD_ELEMENT;
+        return RPC_ERR_BAD_ELEMENT;
     case ERR_NCX_WRONG_INSTANCE_TYPE:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_MISSING_INDEX:
         *apptag = RPC_ERR_APPTAG_DATA_INCOMPLETE;
-	return RPC_ERR_DATA_MISSING;
+        return RPC_ERR_DATA_MISSING;
     case ERR_NCX_CFG_NOT_FOUND:
         *apptag = RPC_ERR_APPTAG_DATA_INCOMPLETE;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_EXTRA_ATTR:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_UNKNOWN_ATTRIBUTE;
+        return RPC_ERR_UNKNOWN_ATTRIBUTE;
     case ERR_NCX_MISSING_ATTR:
         *apptag = RPC_ERR_APPTAG_DATA_INCOMPLETE;
-	return RPC_ERR_MISSING_ATTRIBUTE;
+        return RPC_ERR_MISSING_ATTRIBUTE;
     case ERR_NCX_MISSING_VAL_INST:
         *apptag = RPC_ERR_APPTAG_INSTANCE_REQ;
-	return RPC_ERR_DATA_MISSING;   /* 13.5 */
+        return RPC_ERR_DATA_MISSING;   /* 13.5 */
     case ERR_NCX_EXTRA_VAL_INST:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_UNKNOWN_ELEMENT;
+        return RPC_ERR_UNKNOWN_ELEMENT;
     case ERR_NCX_NOT_WRITABLE:
         *apptag = RPC_ERR_APPTAG_NO_ACCESS;
-	return RPC_ERR_ACCESS_DENIED;
+        return RPC_ERR_ACCESS_DENIED;
     case ERR_NCX_INVALID_PATTERN:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_BAD_ELEMENT 
-	    : RPC_ERR_BAD_ATTRIBUTE;
+        return (isel) ? RPC_ERR_BAD_ELEMENT 
+            : RPC_ERR_BAD_ATTRIBUTE;
     case ERR_NCX_WRONG_VERSION:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return (isel) ? RPC_ERR_BAD_ELEMENT 
-	    : RPC_ERR_BAD_ATTRIBUTE;
+        return (isel) ? RPC_ERR_BAD_ELEMENT 
+            : RPC_ERR_BAD_ATTRIBUTE;
     case ERR_NCX_CONNECT_FAILED:
     case ERR_NCX_SESSION_FAILED:
         *apptag = RPC_ERR_APPTAG_IO_ERROR;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_UNKNOWN_HOST:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_AUTH_FAILED:
         *apptag = RPC_ERR_APPTAG_NO_ACCESS;
-	return RPC_ERR_ACCESS_DENIED;
+        return RPC_ERR_ACCESS_DENIED;
     case ERR_NCX_UNENDED_COMMENT:
     case ERR_NCX_INVALID_CONCAT:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_IMP_NOT_FOUND:
     case ERR_NCX_MISSING_TYPE:
         *apptag = RPC_ERR_APPTAG_DATA_INCOMPLETE;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_RESTRICT_NOT_ALLOWED:
     case ERR_NCX_REFINE_NOT_ALLOWED:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_DEF_LOOP:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_DEFCHOICE_NOT_OPTIONAL:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_IMPORT_LOOP:
     case ERR_NCX_INCLUDE_LOOP:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_EXP_MODULE:
     case ERR_NCX_EXP_SUBMODULE:
     case ERR_NCX_PREFIX_NOT_FOUND:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_IMPORT_ERRORS:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_PATTERN_FAILED:
         *apptag = RPC_ERR_APPTAG_PATTERN;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_INVALID_TYPE_CHANGE:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_MANDATORY_NOT_ALLOWED:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_UNIQUE_TEST_FAILED:
         *apptag = RPC_ERR_APPTAG_UNIQUE_FAILED;
-	return RPC_ERR_OPERATION_FAILED;   /* 13.1 */
+        return RPC_ERR_OPERATION_FAILED;   /* 13.1 */
     case ERR_NCX_MAX_ELEMS_VIOLATION:
         *apptag = RPC_ERR_APPTAG_MAX_ELEMS;
-	return RPC_ERR_OPERATION_FAILED;   /* 13.2 */
+        return RPC_ERR_OPERATION_FAILED;   /* 13.2 */
     case ERR_NCX_MIN_ELEMS_VIOLATION:
         *apptag = RPC_ERR_APPTAG_MIN_ELEMS;
-	return RPC_ERR_OPERATION_FAILED;   /* 13.3 */
+        return RPC_ERR_OPERATION_FAILED;   /* 13.3 */
     case ERR_NCX_MUST_TEST_FAILED:
         *apptag = RPC_ERR_APPTAG_MUST;
-	return RPC_ERR_OPERATION_FAILED;   /* 13.4 */
+        return RPC_ERR_OPERATION_FAILED;   /* 13.4 */
     case ERR_NCX_DATA_REST_VIOLATION:
         *apptag = RPC_ERR_APPTAG_DATA_REST;
-	return RPC_ERR_INVALID_VALUE;     /* obsolete */
+        return RPC_ERR_INVALID_VALUE;     /* obsolete */
     case ERR_NCX_INSERT_MISSING_INSTANCE:
         *apptag = RPC_ERR_APPTAG_INSERT;
-	return RPC_ERR_BAD_ATTRIBUTE;      /* 13.7 */
+        return RPC_ERR_BAD_ATTRIBUTE;      /* 13.7 */
     case ERR_NCX_NOT_CONFIG:
         *apptag = RPC_ERR_APPTAG_NO_ACCESS;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_INVALID_CONDITIONAL:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_USING_OBSOLETE:
         *apptag = RPC_ERR_APPTAG_GEN_ERROR;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_INVALID_AUGTARGET:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
     case ERR_NCX_DUP_REFINE_STMT:
         *apptag = RPC_ERR_APPTAG_DUPLICATE_ERROR;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_INVALID_DEV_STMT:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_INVALID_XPATH_EXPR:
     case ERR_NCX_INVALID_INSTANCEID:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_MISSING_INSTANCE:  /* not used */
         *apptag = RPC_ERR_APPTAG_DATA_INCOMPLETE;
-	return RPC_ERR_DATA_MISSING;
+        return RPC_ERR_DATA_MISSING;
     case ERR_NCX_UNEXPECTED_INSERT_ATTRS:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_INVALID_UNIQUE_NODE:
     case ERR_NCX_INVALID_DUP_IMPORT:
     case ERR_NCX_INVALID_DUP_INCLUDE:
@@ -626,26 +626,26 @@ static rpc_err_t
     case ERR_NCX_DEC64_BASEOVFL:
     case ERR_NCX_DEC64_FRACOVFL:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_RPC_WHEN_FAILED:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_UNKNOWN_ELEMENT;
+        return RPC_ERR_UNKNOWN_ELEMENT;
     case ERR_NCX_NO_MATCHES:
         *apptag = RPC_ERR_APPTAG_NO_MATCHES;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_MISSING_REFTARGET:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
-	return RPC_ERR_INVALID_VALUE;
+        return RPC_ERR_INVALID_VALUE;
     case ERR_NCX_CANDIDATE_DIRTY:
         *apptag = RPC_ERR_APPTAG_NO_ACCESS;
-	return RPC_ERR_RESOURCE_DENIED;
+        return RPC_ERR_RESOURCE_DENIED;
     case ERR_NCX_TIMEOUT:
         *apptag = RPC_ERR_APPTAG_LIMIT_REACHED;
-	return RPC_ERR_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
 
     /* user warnings start at 400 and do not need to be listed here */
     default:
-	return RPC_ERR_OPERATION_FAILED;	
+        return RPC_ERR_OPERATION_FAILED;        
     }
     /*NOTREACHED*/
 
@@ -680,15 +680,15 @@ static rpc_err_t
 *********************************************************************/
 static status_t
     add_base_vars (rpc_err_rec_t  *err,
-		   rpc_err_t  rpcerr,
-		   const xml_node_t *errnode,
-		   const xmlChar *badval,
-		   const xmlChar *badns,
-		   xmlns_id_t  badnsid1,
-		   xmlns_id_t  badnsid2,
-		   const void *errparm1,
-		   const void *errparm2,
-		   const void *errparm4)
+                   rpc_err_t  rpcerr,
+                   const xml_node_t *errnode,
+                   const xmlChar *badval,
+                   const xmlChar *badns,
+                   xmlns_id_t  badnsid1,
+                   xmlns_id_t  badnsid2,
+                   const void *errparm1,
+                   const void *errparm2,
+                   const void *errparm4)
 {
     rpc_err_info_t       *errinfo;
     const xmlChar        *badel;
@@ -707,165 +707,165 @@ static status_t
     case RPC_ERR_UNKNOWN_ATTRIBUTE:
     case RPC_ERR_MISSING_ATTRIBUTE:
     case RPC_ERR_BAD_ATTRIBUTE:
-	/* badnsid1 == error attribute namespace ID
-	 * errparm2 == error attribute name
-	 */
-	if (errparm2) {
-	    badid = badnsid1;
-	    badel = (const xmlChar *)errparm2;
+        /* badnsid1 == error attribute namespace ID
+         * errparm2 == error attribute name
+         */
+        if (errparm2) {
+            badid = badnsid1;
+            badel = (const xmlChar *)errparm2;
 
-	    errinfo = rpc_err_new_info();
-	    if (!errinfo) {
-		return ERR_INTERNAL_MEM;
-	    }
-	
-	    /* generate bad-attribute value */
-	    errinfo->name_nsid = ncid;
-	    errinfo->name = NCX_EL_BAD_ATTRIBUTE;
-	    errinfo->val_btype = NCX_BT_STRING;
-	    errinfo->val_nsid = badid;
-	    if (badns && badid == xmlns_inv_id()) {
-		errinfo->badns = xml_strdup(badns);
-	    }
-	    errinfo->dval = xml_strdup(badel);
-	    if (!errinfo->dval) {
-		rpc_err_free_info(errinfo);
-		return ERR_INTERNAL_MEM;
-	    }
-	    errinfo->v.strval = errinfo->dval;
-	    errinfo->isqname = TRUE;
-	    dlq_enque(errinfo, &err->error_info);
-	} /* else internal error already recorded */
-	attrerr = TRUE;
-	/* fall through */
+            errinfo = rpc_err_new_info();
+            if (!errinfo) {
+                return ERR_INTERNAL_MEM;
+            }
+        
+            /* generate bad-attribute value */
+            errinfo->name_nsid = ncid;
+            errinfo->name = NCX_EL_BAD_ATTRIBUTE;
+            errinfo->val_btype = NCX_BT_STRING;
+            errinfo->val_nsid = badid;
+            if (badns && badid == xmlns_inv_id()) {
+                errinfo->badns = xml_strdup(badns);
+            }
+            errinfo->dval = xml_strdup(badel);
+            if (!errinfo->dval) {
+                rpc_err_free_info(errinfo);
+                return ERR_INTERNAL_MEM;
+            }
+            errinfo->v.strval = errinfo->dval;
+            errinfo->isqname = TRUE;
+            dlq_enque(errinfo, &err->error_info);
+        } /* else internal error already recorded */
+        attrerr = TRUE;
+        /* fall through */
     case RPC_ERR_UNKNOWN_ELEMENT:
     case RPC_ERR_MISSING_ELEMENT:
-    case RPC_ERR_BAD_ELEMENT:	
+    case RPC_ERR_BAD_ELEMENT:   
     case RPC_ERR_UNKNOWN_NAMESPACE:
-	/* check mandatory param for this rpcerr */
-	if (errnode) {
-	    badid = errnode->nsid;
-	    badel = errnode->elname;
-	} else if (attrerr) {
-	    badid = badnsid2;
-	    badel = (const xmlChar *)errparm4;
-	} else {
-	    badid = badnsid1;
-	    badel = (const xmlChar *)errparm2;
-	}
+        /* check mandatory param for this rpcerr */
+        if (errnode) {
+            badid = errnode->nsid;
+            badel = errnode->elname;
+        } else if (attrerr) {
+            badid = badnsid2;
+            badel = (const xmlChar *)errparm4;
+        } else {
+            badid = badnsid1;
+            badel = (const xmlChar *)errparm2;
+        }
 
-	/* generate bad-element value */
-	if (badel) {
-	    errinfo = rpc_err_new_info();
-	    if (!errinfo) {
-		return ERR_INTERNAL_MEM;
-	    }
-	    errinfo->name_nsid = ncid;
-	    errinfo->name = NCX_EL_BAD_ELEMENT;
-	    errinfo->val_btype = NCX_BT_STRING;
+        /* generate bad-element value */
+        if (badel) {
+            errinfo = rpc_err_new_info();
+            if (!errinfo) {
+                return ERR_INTERNAL_MEM;
+            }
+            errinfo->name_nsid = ncid;
+            errinfo->name = NCX_EL_BAD_ELEMENT;
+            errinfo->val_btype = NCX_BT_STRING;
 
-	    errinfo->val_nsid = badid;
-	    if (badns && badid == xmlns_inv_id()) {
-		errinfo->badns = xml_strdup(badns);
-	    }
+            errinfo->val_nsid = badid;
+            if (badns && badid == xmlns_inv_id()) {
+                errinfo->badns = xml_strdup(badns);
+            }
 
-	    errinfo->dval = xml_strdup(badel);
-	    if (!errinfo->dval) {
-		rpc_err_free_info(errinfo);
-		return ERR_INTERNAL_MEM;
-	    }
-	    errinfo->v.strval = errinfo->dval;
-	    errinfo->isqname = TRUE;
-	    dlq_enque(errinfo, &err->error_info);
-	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	}
+            errinfo->dval = xml_strdup(badel);
+            if (!errinfo->dval) {
+                rpc_err_free_info(errinfo);
+                return ERR_INTERNAL_MEM;
+            }
+            errinfo->v.strval = errinfo->dval;
+            errinfo->isqname = TRUE;
+            dlq_enque(errinfo, &err->error_info);
+        } else {
+            SET_ERROR(ERR_INTERNAL_VAL);
+        }
 
-	if (rpcerr == RPC_ERR_UNKNOWN_NAMESPACE) {
-	    if (badns) {
-		/* generate bad-namespace element */
-		errinfo = rpc_err_new_info();
-		if (!errinfo) {
-		    return ERR_INTERNAL_MEM;
-		}
-		errinfo->dval = xml_strdup(badns);
-		if (!errinfo->dval) {
-		    rpc_err_free_info(errinfo);
-		    return ERR_INTERNAL_MEM;
-		}
-		errinfo->name_nsid = ncid;
-		errinfo->name = NCX_EL_BAD_NAMESPACE;
-		errinfo->val_btype = NCX_BT_STRING;
-		errinfo->val_nsid = 0;
-		errinfo->v.strval = errinfo->dval;
-		dlq_enque(errinfo, &err->error_info);
-	    } else {
-		SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	}
-	break;
+        if (rpcerr == RPC_ERR_UNKNOWN_NAMESPACE) {
+            if (badns) {
+                /* generate bad-namespace element */
+                errinfo = rpc_err_new_info();
+                if (!errinfo) {
+                    return ERR_INTERNAL_MEM;
+                }
+                errinfo->dval = xml_strdup(badns);
+                if (!errinfo->dval) {
+                    rpc_err_free_info(errinfo);
+                    return ERR_INTERNAL_MEM;
+                }
+                errinfo->name_nsid = ncid;
+                errinfo->name = NCX_EL_BAD_NAMESPACE;
+                errinfo->val_btype = NCX_BT_STRING;
+                errinfo->val_nsid = 0;
+                errinfo->v.strval = errinfo->dval;
+                dlq_enque(errinfo, &err->error_info);
+            } else {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }
+        break;
     case RPC_ERR_LOCK_DENIED:
-	/* generate session-id value */
+        /* generate session-id value */
         badcfg = (const cfg_template_t *)errparm1;
-	sesid = badcfg->locked_by;
+        sesid = badcfg->locked_by;
 
-	errinfo = rpc_err_new_info();
-	if (!errinfo) {
-	    return ERR_INTERNAL_MEM;
-	}
-	errinfo->name_nsid = ncid;
-	errinfo->name = NCX_EL_SESSION_ID;
-	errinfo->val_btype = NCX_BT_UINT32;
-	errinfo->val_nsid = 0;
-	errinfo->v.numval.u = (uint32)sesid;
-	dlq_enque(errinfo, &err->error_info);
-	break;
+        errinfo = rpc_err_new_info();
+        if (!errinfo) {
+            return ERR_INTERNAL_MEM;
+        }
+        errinfo->name_nsid = ncid;
+        errinfo->name = NCX_EL_SESSION_ID;
+        errinfo->val_btype = NCX_BT_UINT32;
+        errinfo->val_nsid = 0;
+        errinfo->v.numval.u = (uint32)sesid;
+        dlq_enque(errinfo, &err->error_info);
+        break;
     case RPC_ERR_DATA_MISSING:
-	if (errparm2) {
-	    /* expecting the obj_template_t of the missing choice */
-	    badel = (const xmlChar *)errparm2;
-	    
-	    errinfo = rpc_err_new_info();
-	    if (!errinfo) {
-		return ERR_INTERNAL_MEM;
-	    }
-	    errinfo->dval = xml_strdup(badel);
-	    if (!errinfo->dval) {
-		rpc_err_free_info(errinfo);
-		return ERR_INTERNAL_MEM;
-	    }
-	    errinfo->name_nsid = xmlns_yang_id();
-	    errinfo->name = (const xmlChar *)"missing-choice";
-	    errinfo->val_btype = NCX_BT_STRING;
-	    errinfo->val_nsid = 0;
-	    errinfo->v.strval = errinfo->dval;
-	    dlq_enque(errinfo, &err->error_info);
-	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	}
-	break;
+        if (errparm2) {
+            /* expecting the obj_template_t of the missing choice */
+            badel = (const xmlChar *)errparm2;
+            
+            errinfo = rpc_err_new_info();
+            if (!errinfo) {
+                return ERR_INTERNAL_MEM;
+            }
+            errinfo->dval = xml_strdup(badel);
+            if (!errinfo->dval) {
+                rpc_err_free_info(errinfo);
+                return ERR_INTERNAL_MEM;
+            }
+            errinfo->name_nsid = xmlns_yang_id();
+            errinfo->name = (const xmlChar *)"missing-choice";
+            errinfo->val_btype = NCX_BT_STRING;
+            errinfo->val_nsid = 0;
+            errinfo->v.strval = errinfo->dval;
+            dlq_enque(errinfo, &err->error_info);
+        } else {
+            SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        break;
     default:
-	;   /* all other rpc-err_t enums handled elsewhere */
+        ;   /* all other rpc-err_t enums handled elsewhere */
     } 
 
     /* generate NCX extension bad-value */
     if (badval) {
-	errinfo = rpc_err_new_info();
-	if (!errinfo) {
-	    return ERR_INTERNAL_MEM;
-	}
-	errinfo->dval = xml_strdup(badval);
-	if (!errinfo->dval) {
-	    rpc_err_free_info(errinfo);
-	    return ERR_INTERNAL_MEM;
-	}
+        errinfo = rpc_err_new_info();
+        if (!errinfo) {
+            return ERR_INTERNAL_MEM;
+        }
+        errinfo->dval = xml_strdup(badval);
+        if (!errinfo->dval) {
+            rpc_err_free_info(errinfo);
+            return ERR_INTERNAL_MEM;
+        }
 
-	errinfo->name_nsid = ncxid;
-	errinfo->name = NCX_EL_BAD_VALUE;
-	errinfo->val_btype = NCX_BT_STRING;
-	errinfo->val_nsid = 0;
-	errinfo->v.strval = errinfo->dval;
-	dlq_enque(errinfo, &err->error_info);
+        errinfo->name_nsid = ncxid;
+        errinfo->name = NCX_EL_BAD_VALUE;
+        errinfo->val_btype = NCX_BT_STRING;
+        errinfo->val_nsid = 0;
+        errinfo->v.strval = errinfo->dval;
+        dlq_enque(errinfo, &err->error_info);
     }
 
     return NO_ERR;
@@ -949,19 +949,19 @@ static status_t
 *********************************************************************/
 rpc_err_rec_t *
     agt_rpcerr_gen_error (ncx_layer_t layer,
-			  status_t   interr,
-			  const xml_node_t *errnode,
-			  ncx_node_t  parmtyp,
-			  const void *error_parm,
-			  xmlChar *error_path)
+                          status_t   interr,
+                          const xml_node_t *errnode,
+                          ncx_node_t  parmtyp,
+                          const void *error_parm,
+                          xmlChar *error_path)
 {
     return agt_rpcerr_gen_error_errinfo(layer, 
-					interr, 
-					errnode, 
-					parmtyp, 
-					error_parm, 
-					error_path, 
-					NULL);
+                                        interr, 
+                                        errnode, 
+                                        parmtyp, 
+                                        error_parm, 
+                                        error_path, 
+                                        NULL);
 
 } /* agt_rpcerr_gen_error */
 
@@ -999,12 +999,12 @@ rpc_err_rec_t *
 *********************************************************************/
 rpc_err_rec_t *
     agt_rpcerr_gen_error_errinfo (ncx_layer_t layer,
-				  status_t   interr,
-				  const xml_node_t *errnode,
-				  ncx_node_t  parmtyp,
-				  const void *error_parm,
-				  xmlChar *error_path,
-				  const ncx_errinfo_t *errinfo)
+                                  status_t   interr,
+                                  const xml_node_t *errnode,
+                                  ncx_node_t  parmtyp,
+                                  const void *error_parm,
+                                  xmlChar *error_path,
+                                  const ncx_errinfo_t *errinfo)
 {
     rpc_err_rec_t            *err;
     const obj_template_t     *parm, *in, *obj;
@@ -1022,7 +1022,7 @@ rpc_err_rec_t *
     /* get a new error record */
     err = rpc_err_new_record();
     if (!err) {
-	return NULL;
+        return NULL;
     }
     
     parm = NULL;
@@ -1051,95 +1051,95 @@ rpc_err_rec_t *
     case ERR_NCX_MISSING_PARM:
     case ERR_NCX_EXTRA_CHOICE:
     case ERR_NCX_MISSING_CHOICE:
-	if (!error_parm) {
-	    SET_ERROR(ERR_INTERNAL_PTR);
-	} else {
-	    switch (parmtyp) {
-	    case NCX_NT_OBJ:
-		parm = (const obj_template_t *)error_parm;
-		if (parm) {
-		    badnsid1 = obj_get_nsid(parm);
-		    err2 = (const void *)obj_get_name(parm);
-		}
-		break;
-	    case NCX_NT_VAL:
-		valparm = (const val_value_t *)error_parm;
-		if (valparm) {
-		    badnsid1 = val_get_nsid(valparm);
-		    err2 = (const void *)valparm->name;
-		}
-		break;
-	    case NCX_NT_STRING:
-		badnsid1 = 0;
-		err2 = (const void *)error_parm;
-		break;
-	    default:
-		SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	}
-	break;
+        if (!error_parm) {
+            SET_ERROR(ERR_INTERNAL_PTR);
+        } else {
+            switch (parmtyp) {
+            case NCX_NT_OBJ:
+                parm = (const obj_template_t *)error_parm;
+                if (parm) {
+                    badnsid1 = obj_get_nsid(parm);
+                    err2 = (const void *)obj_get_name(parm);
+                }
+                break;
+            case NCX_NT_VAL:
+                valparm = (const val_value_t *)error_parm;
+                if (valparm) {
+                    badnsid1 = val_get_nsid(valparm);
+                    err2 = (const void *)valparm->name;
+                }
+                break;
+            case NCX_NT_STRING:
+                badnsid1 = 0;
+                err2 = (const void *)error_parm;
+                break;
+            default:
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }
+        break;
     case ERR_NCX_LOCK_DENIED:
-	if (!error_parm || parmtyp != NCX_NT_CFG) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
+        if (!error_parm || parmtyp != NCX_NT_CFG) {
+            SET_ERROR(ERR_INTERNAL_VAL);
         } else {
             err1 = error_parm;
         }
-	break;
+        break;
     case ERR_NCX_MISSING_INDEX:
-	if (!error_parm || parmtyp != NCX_NT_OBJ) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	} else {
-	    in = (const obj_template_t *)error_parm;
-	    if (in) {
-		badnsid1 = obj_get_nsid(in);
-		err2 = (const void *)obj_get_name(in);
-	    }
-	}
+        if (!error_parm || parmtyp != NCX_NT_OBJ) {
+            SET_ERROR(ERR_INTERNAL_VAL);
+        } else {
+            in = (const obj_template_t *)error_parm;
+            if (in) {
+                badnsid1 = obj_get_nsid(in);
+                err2 = (const void *)obj_get_name(in);
+            }
+        }
     case ERR_NCX_DEF_NOT_FOUND:
-	if (parmtyp == NCX_NT_STRING && error_parm) {
-	    err1 = error_parm;
-	}
-	break;
+        if (parmtyp == NCX_NT_STRING && error_parm) {
+            err1 = error_parm;
+        }
+        break;
     case ERR_NCX_MISSING_ATTR:
     case ERR_NCX_EXTRA_ATTR:
     case ERR_NCX_MISSING_VAL_INST:
     case ERR_NCX_EXTRA_VAL_INST:
-	/* this hack is needed because this error is generated
-	 * after the xml_attr_t record is gone
-	 *
-	 * First set the bad-attribute NS and name
-	 */
-	if (error_parm) {
-	    if (parmtyp == NCX_NT_QNAME) {
-		qname = (const xmlns_qname_t *)error_parm;
-		badnsid1 = qname->nsid;
-		err2 = (const void *)qname->name;
-	    } else if (parmtyp == NCX_NT_OBJ) {
-		obj = (const obj_template_t *)error_parm;
-		badnsid1 = obj_get_nsid(obj);
-		err2 = (const void *)obj_get_name(obj);
-	    } else if (parmtyp == NCX_NT_STRING) {
-		badnsid1 = 0;
-		err2 = (const void *)error_parm;
-	    } else {
-		SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	}
+        /* this hack is needed because this error is generated
+         * after the xml_attr_t record is gone
+         *
+         * First set the bad-attribute NS and name
+         */
+        if (error_parm) {
+            if (parmtyp == NCX_NT_QNAME) {
+                qname = (const xmlns_qname_t *)error_parm;
+                badnsid1 = qname->nsid;
+                err2 = (const void *)qname->name;
+            } else if (parmtyp == NCX_NT_OBJ) {
+                obj = (const obj_template_t *)error_parm;
+                badnsid1 = obj_get_nsid(obj);
+                err2 = (const void *)obj_get_name(obj);
+            } else if (parmtyp == NCX_NT_STRING) {
+                badnsid1 = 0;
+                err2 = (const void *)error_parm;
+            } else {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        } else {
+            SET_ERROR(ERR_INTERNAL_VAL);
+        }
 
-	/* hack: borrow the errnode pointer to use as a string 
-	 * for the bad-element name 
-	 */
-	if (errnode) {
-	    badnsid2 = qname->nsid;
-	    err4 = (const void *)errnode;
-	    /* make sure add_base_vars doesn't use as an xml_node_t */
-	    errnode = NULL;  
-	}
-	break;
+        /* hack: borrow the errnode pointer to use as a string 
+         * for the bad-element name 
+         */
+        if (errnode) {
+            badnsid2 = qname->nsid;
+            err4 = (const void *)errnode;
+            /* make sure add_base_vars doesn't use as an xml_node_t */
+            errnode = NULL;  
+        }
+        break;
     default:
-	break;
+        break;
     }
 
     rpcerr = get_rpcerr(interr, TRUE, &errsev, &apptag); 
@@ -1148,9 +1148,9 @@ rpc_err_rec_t *
      * if the xml_strdup fails with a malloc error
      */
     if (errinfo && errinfo->error_message) {
-	msg = errinfo->error_message;
+        msg = errinfo->error_message;
     } else {
-	msg = (const xmlChar *)get_error_string(interr);
+        msg = (const xmlChar *)get_error_string(interr);
     }
 
     /* ignoring possible malloc failure; 
@@ -1160,7 +1160,7 @@ rpc_err_rec_t *
     error_msg = (msg) ? xml_strdup(msg) : NULL;
 
     if (errinfo && errinfo->error_app_tag) {
-	apptag = errinfo->error_app_tag;
+        apptag = errinfo->error_app_tag;
     }
 
     /* setup the return record */
@@ -1181,35 +1181,35 @@ rpc_err_rec_t *
      */
     switch (rpcerr) {
     case RPC_ERR_MISSING_ELEMENT:
-	break;
+        break;
     case RPC_ERR_BAD_ELEMENT:
-	if (parmtyp==NCX_NT_STRING) {
-	    badval = (const xmlChar *)error_parm;
-	}
-	break;
+        if (parmtyp==NCX_NT_STRING) {
+            badval = (const xmlChar *)error_parm;
+        }
+        break;
     case RPC_ERR_UNKNOWN_ELEMENT:
-	break;
+        break;
     case RPC_ERR_UNKNOWN_NAMESPACE:
-	if (parmtyp==NCX_NT_STRING) {
-	    badns = (const xmlChar *)error_parm;
-	}
-	break;
+        if (parmtyp==NCX_NT_STRING) {
+            badns = (const xmlChar *)error_parm;
+        }
+        break;
     case RPC_ERR_LOCK_DENIED:
     case RPC_ERR_MISSING_ATTRIBUTE:
     case RPC_ERR_BAD_ATTRIBUTE:
     case RPC_ERR_UNKNOWN_ATTRIBUTE:
-	break;
+        break;
     case RPC_ERR_DATA_MISSING:
-	if (interr != ERR_NCX_MISSING_CHOICE) {
+        if (interr != ERR_NCX_MISSING_CHOICE) {
             just_errnum = TRUE;
-	}
-	break;
+        }
+        break;
     default:
-	if (error_parm && parmtyp==NCX_NT_STRING) {
-	    badval = (const xmlChar *)error_parm;
-	} else {
+        if (error_parm && parmtyp==NCX_NT_STRING) {
+            badval = (const xmlChar *)error_parm;
+        } else {
             just_errnum = TRUE;
-	}
+        }
     } 
 
     if (!just_errnum) {
@@ -1232,8 +1232,8 @@ rpc_err_rec_t *
 
     res = add_error_number(err, interr);
     if (res != NO_ERR) {
-	/*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
-	;    /* add error statistics (TBD) */
+        /*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
+        ;    /* add error statistics (TBD) */
     }
 
     return err;
@@ -1265,9 +1265,9 @@ rpc_err_rec_t *
 *********************************************************************/
 rpc_err_rec_t *
     agt_rpcerr_gen_insert_error (ncx_layer_t layer,
-				 status_t   interr,
-				 const val_value_t *errval,
-				 xmlChar *error_path)
+                                 status_t   interr,
+                                 const val_value_t *errval,
+                                 xmlChar *error_path)
 {
     rpc_err_rec_t            *err;
     xmlChar                  *error_msg;
@@ -1280,15 +1280,15 @@ rpc_err_rec_t *
 
 #ifdef DEBUG
     if (!errval) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     /* get a new error record */
     err = rpc_err_new_record();
     if (!err) {
-	return NULL;
+        return NULL;
     }
 
     badval = NULL;
@@ -1316,38 +1316,38 @@ rpc_err_rec_t *
     err->error_message_lang = NCX_DEF_LANG;
 
     if (errval->editvars) {
-	badval = errval->editvars->insertstr;
+        badval = errval->editvars->insertstr;
     }
 
     badnsid1 = xmlns_yang_id();
     if (errval->obj->objtype == OBJ_TYP_LIST) {
-	err2 = (const void *)NCX_EL_KEY;
+        err2 = (const void *)NCX_EL_KEY;
     } else {
-	err2 = (const void *)NCX_EL_VALUE;
+        err2 = (const void *)NCX_EL_VALUE;
     }
     badnsid2 = val_get_nsid(errval);
     err4 = (const void *)errval->name;
 
     /* add the required error-info, call even if err2 is NULL */
     res = add_base_vars(err, 
-			rpcerr, 
-			NULL, 
-			badval, 
-			NULL, 
-			badnsid1,
-			badnsid2,
-			NULL, 
-			err2, 
-			err4);
+                        rpcerr, 
+                        NULL, 
+                        badval, 
+                        NULL, 
+                        badnsid1,
+                        badnsid2,
+                        NULL, 
+                        err2, 
+                        err4);
     if (res != NO_ERR) {
-	/*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
-	;    /* add error statistics (TBD) */
+        /*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
+        ;    /* add error statistics (TBD) */
     }
 
     res = add_error_number(err, interr);
     if (res != NO_ERR) {
-	/*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
-	;    /* add error statistics (TBD) */
+        /*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
+        ;    /* add error statistics (TBD) */
     }
 
     return err;
@@ -1382,10 +1382,10 @@ rpc_err_rec_t *
 *********************************************************************/
 rpc_err_rec_t *
     agt_rpcerr_gen_unique_error (xml_msg_hdr_t *msghdr,
-				 ncx_layer_t layer,
-				 status_t   interr,
-				 const dlq_hdr_t *valuniqueQ,
-				 xmlChar *error_path)
+                                 ncx_layer_t layer,
+                                 status_t   interr,
+                                 const dlq_hdr_t *valuniqueQ,
+                                 xmlChar *error_path)
 {
     rpc_err_rec_t            *err;
     rpc_err_info_t           *errinfo;
@@ -1400,7 +1400,7 @@ rpc_err_rec_t *
     /* get a new error record */
     err = rpc_err_new_record();
     if (!err) {
-	return NULL;
+        return NULL;
     }
 
     rpcerr = RPC_ERR_OPERATION_FAILED;
@@ -1423,39 +1423,39 @@ rpc_err_rec_t *
     yangid = xmlns_yang_id();
 
     for (unival = (val_unique_t *)dlq_firstEntry(valuniqueQ);
-	 unival != NULL;
-	 unival = (val_unique_t *)dlq_nextEntry(unival)) {
+         unival != NULL;
+         unival = (val_unique_t *)dlq_nextEntry(unival)) {
 
-	pathbuff = NULL;
-	res = val_gen_instance_id(msghdr, 
-				  unival->valptr, 
-				  NCX_IFMT_XPATH1, 
-				  &pathbuff);
-	if (res != NO_ERR) {
-	    return err;
-	}
+        pathbuff = NULL;
+        res = val_gen_instance_id(msghdr, 
+                                  unival->valptr, 
+                                  NCX_IFMT_XPATH1, 
+                                  &pathbuff);
+        if (res != NO_ERR) {
+            return err;
+        }
 
-	errinfo = rpc_err_new_info();
-	if (!errinfo) {
-	    /* try to send the error as-is */
-	    m__free(pathbuff);
-	    return err;
-	}
-	
-	/* generate non-unique value */
-	errinfo->name_nsid = yangid;
-	errinfo->name = NCX_EL_NON_UNIQUE;
-	errinfo->val_btype = NCX_BT_INSTANCE_ID;
-	errinfo->val_nsid = 0;
-	errinfo->dval = pathbuff;
-	errinfo->v.strval = errinfo->dval;
-	dlq_enque(errinfo, &err->error_info);
+        errinfo = rpc_err_new_info();
+        if (!errinfo) {
+            /* try to send the error as-is */
+            m__free(pathbuff);
+            return err;
+        }
+        
+        /* generate non-unique value */
+        errinfo->name_nsid = yangid;
+        errinfo->name = NCX_EL_NON_UNIQUE;
+        errinfo->val_btype = NCX_BT_INSTANCE_ID;
+        errinfo->val_nsid = 0;
+        errinfo->dval = pathbuff;
+        errinfo->v.strval = errinfo->dval;
+        dlq_enque(errinfo, &err->error_info);
     }
 
     res = add_error_number(err, interr);
     if (res != NO_ERR) {
-	/*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
-	;    /* add error statistics (TBD) */
+        /*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
+        ;    /* add error statistics (TBD) */
     }
 
     return err;
@@ -1485,11 +1485,11 @@ rpc_err_rec_t *
 *********************************************************************/
 rpc_err_rec_t *
     agt_rpcerr_gen_attr_error (ncx_layer_t layer,
-			       status_t   interr,
-			       const xml_attr_t *attr,
-			       const xml_node_t *errnode,
-			       const xmlChar *badns,
-			       xmlChar *error_path)
+                               status_t   interr,
+                               const xml_attr_t *attr,
+                               const xml_node_t *errnode,
+                               const xmlChar *badns,
+                               xmlChar *error_path)
 {
     rpc_err_rec_t  *err;
     rpc_err_sev_t   errsev;
@@ -1503,7 +1503,7 @@ rpc_err_rec_t *
     /* get a new error record */
     err = rpc_err_new_record();
     if (!err) {
-	return NULL;
+        return NULL;
     }
 
     badval = NULL;
@@ -1513,10 +1513,10 @@ rpc_err_rec_t *
     apptag = NULL;
 
     if (attr) {
-	badnsid1 = attr->attr_ns;
-	err2 = (const void *)attr->attr_name;
+        badnsid1 = attr->attr_ns;
+        err2 = (const void *)attr->attr_name;
     } else {
-	err2 = NULL;
+        err2 = NULL;
     }
 
     rpcerr = get_rpcerr(interr, FALSE, &errsev, &apptag); 
@@ -1525,20 +1525,20 @@ rpc_err_rec_t *
     switch (rpcerr) {
     case RPC_ERR_UNKNOWN_ATTRIBUTE:
     case RPC_ERR_MISSING_ATTRIBUTE:
-	break;
+        break;
     case RPC_ERR_INVALID_VALUE:
-	rpcerr = RPC_ERR_BAD_ATTRIBUTE;
-	/* fall through */
+        rpcerr = RPC_ERR_BAD_ATTRIBUTE;
+        /* fall through */
     case RPC_ERR_BAD_ATTRIBUTE:
-	if (attr) {
-	    badval = attr->attr_val;
-	}
-	break;
+        if (attr) {
+            badval = attr->attr_val;
+        }
+        break;
     case RPC_ERR_UNKNOWN_NAMESPACE:
-	break;
+        break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     } 
 
     /* generate a default error message */
@@ -1557,24 +1557,24 @@ rpc_err_rec_t *
 
     /* add the required error-info */
     res = add_base_vars(err, 
-			rpcerr, 
-			errnode, 
-			badval, 
-			badns,
-			badnsid1,
-			badnsid2,
-			err1, 
-			err2, 
-			NULL);
+                        rpcerr, 
+                        errnode, 
+                        badval, 
+                        badns,
+                        badnsid1,
+                        badnsid2,
+                        err1, 
+                        err2, 
+                        NULL);
     if (res != NO_ERR) {
-	/*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
-	;    /* add error statistics (TBD) */
+        /*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
+        ;    /* add error statistics (TBD) */
     }
 
     res = add_error_number(err, interr);
     if (res != NO_ERR) {
-	/*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
-	;    /* add error statistics (TBD) */
+        /*** USE THIS ERROR NODE WITHOUT ALL THE VARS ANYWAY ***/
+        ;    /* add error statistics (TBD) */
     }
 
     return err;

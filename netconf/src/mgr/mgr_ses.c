@@ -119,7 +119,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -150,8 +150,8 @@ static ses_cb_t  *mgrses[MGR_SES_MAX_SESSIONS];
 *********************************************************************/
 static status_t
     connect_to_agent (ses_cb_t *scb,
-		      struct hostent *hent,
-		      uint16_t port)
+                      struct hostent *hent,
+                      uint16_t port)
 {
     struct sockaddr_in  targ;
     int                 ret;
@@ -160,14 +160,14 @@ static status_t
     /* get a file descriptor for the new socket */
     scb->fd = socket(AF_INET, SOCK_STREAM, 0);
     if (scb->fd == -1) {
-	return ERR_NCX_RESOURCE_DENIED;
+        return ERR_NCX_RESOURCE_DENIED;
     }
 
     /* set non-blocking IO */
     if (fcntl(scb->fd, F_SETFD, O_NONBLOCK)) {
-	if (LOGINFO) {
-	    log_info("\nmgr_ses: fnctl failed");
-	}
+        if (LOGINFO) {
+            log_info("\nmgr_ses: fnctl failed");
+        }
     }
 
     /* activate the socket in the select loop */
@@ -177,34 +177,34 @@ static status_t
     memset(&targ, 0x0, sizeof(targ));
     targ.sin_family = AF_INET;
     memcpy((char *)&targ.sin_addr.s_addr,
-	   hent->h_addr_list[0],
-	   (size_t)hent->h_length);
+           hent->h_addr_list[0],
+           (size_t)hent->h_length);
 
     /* try to connect to user-provided port or port 830 */
     if (port) {
-	userport = TRUE;
+        userport = TRUE;
     } else {
-	port = NCX_NCSSH_PORT;
-	userport = FALSE;
+        port = NCX_NCSSH_PORT;
+        userport = FALSE;
     }
     targ.sin_port = htons(port);
     ret = connect(scb->fd, 
-		  (struct sockaddr *)&targ,
-		  sizeof(struct sockaddr_in));
+                  (struct sockaddr *)&targ,
+                  sizeof(struct sockaddr_in));
     if (!ret) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     /* try SSH (port 22) next */
     if (!userport) {
-	port = NCX_SSH_PORT;
-	targ.sin_port = htons(port);
-	ret = connect(scb->fd, 
-		      (struct sockaddr *)&targ,
-		      sizeof(struct sockaddr_in));
-	if (!ret) {
-	    return NO_ERR;
-	}
+        port = NCX_SSH_PORT;
+        targ.sin_port = htons(port);
+        ret = connect(scb->fd, 
+                      (struct sockaddr *)&targ,
+                      sizeof(struct sockaddr_in));
+        if (!ret) {
+            return NO_ERR;
+        }
     }
 
     /* de-activate the socket in the select loop */
@@ -235,8 +235,8 @@ static status_t
 *********************************************************************/
 static status_t
     ssh2_setup (ses_cb_t *scb,
-		const char *user,
-		const char *password)
+                const char *user,
+                const char *password)
 {
     mgr_scb_t  *mscb;
     const char *fingerprint;
@@ -249,18 +249,18 @@ static status_t
 
     mscb->session = libssh2_session_init();
     if (!mscb->session) {
-	if (LOGINFO) {
-	    log_info("\nmgr_ses: SSH2 new session failed");
-	}
-	return ERR_NCX_SESSION_FAILED;
+        if (LOGINFO) {
+            log_info("\nmgr_ses: SSH2 new session failed");
+        }
+        return ERR_NCX_SESSION_FAILED;
     }
 
     ret = libssh2_session_startup(mscb->session, scb->fd);
     if (ret) {
-	if (LOGINFO) {
-	    log_info("\nmgr_ses: SSH2 establishment failed");
-	}
-	return ERR_NCX_SESSION_FAILED;
+        if (LOGINFO) {
+            log_info("\nmgr_ses: SSH2 establishment failed");
+        }
+        return ERR_NCX_SESSION_FAILED;
     }
 
 #ifdef MGR_SES_SSH2_TRACE
@@ -286,7 +286,7 @@ static status_t
 
     /* get the host fingerprint */
     fingerprint = libssh2_hostkey_hash(mscb->session, 
-				       LIBSSH2_HOSTKEY_HASH_MD5);
+                                       LIBSSH2_HOSTKEY_HASH_MD5);
 
     /* TBD: check fingerprint against known hosts files !!! */
 
@@ -296,71 +296,71 @@ static status_t
      * list of supported auth methods will be returned
      */
     userauthlist = libssh2_userauth_list(mscb->session,
-					 user, 
-					 strlen(user));
+                                         user, 
+                                         strlen(user));
     if (!userauthlist) {
-	/* check if the agent accepted NONE as an auth method */
-	if (libssh2_userauth_authenticated(mscb->session)) {
-	    if (LOGINFO) {
-		log_info("\nmgr_ses: agent accepted SSH_AUTH_NONE");
-	    }
-	    authdone = TRUE;
-	} else {
-	    if (LOGINFO) {
-		log_info("\nmgr_ses: SSH2 get authlist failed");
-	    }
-	    return ERR_NCX_SESSION_FAILED;
-	}
+        /* check if the agent accepted NONE as an auth method */
+        if (libssh2_userauth_authenticated(mscb->session)) {
+            if (LOGINFO) {
+                log_info("\nmgr_ses: agent accepted SSH_AUTH_NONE");
+            }
+            authdone = TRUE;
+        } else {
+            if (LOGINFO) {
+                log_info("\nmgr_ses: SSH2 get authlist failed");
+            }
+            return ERR_NCX_SESSION_FAILED;
+        }
     }
 
     if (LOGDEBUG2) {
-	log_debug2("\nmgr_ses: Got agent authentication methods: %s\n", 
-		   userauthlist);
+        log_debug2("\nmgr_ses: Got agent authentication methods: %s\n", 
+                   userauthlist);
     }
 
     if (!authdone) {
 
-	if (strstr(userauthlist, "publickey") != NULL) {
-	    ; /***/
-	}
+        if (strstr(userauthlist, "publickey") != NULL) {
+            ; /***/
+        }
 
-	if (!authdone && strstr(userauthlist, "password") != NULL) {
-	    ret = libssh2_userauth_password(mscb->session, user, password);
-	    if (ret) {
-		if (LOGINFO) {
-		    log_info("\nmgr_ses: SSH2 password authentication failed");
-		}
-		return ERR_NCX_AUTH_FAILED;
-	    } else {
-		authdone = TRUE;
-	    }
-	}
+        if (!authdone && strstr(userauthlist, "password") != NULL) {
+            ret = libssh2_userauth_password(mscb->session, user, password);
+            if (ret) {
+                if (LOGINFO) {
+                    log_info("\nmgr_ses: SSH2 password authentication failed");
+                }
+                return ERR_NCX_AUTH_FAILED;
+            } else {
+                authdone = TRUE;
+            }
+        }
 
     }
 
     if (!authdone) {
-	if (LOGINFO) {
-	    log_info("\nmgr_ses: No supported authentication methods found!\n");
-	}
-	return ERR_NCX_AUTH_FAILED;
+        if (LOGINFO) {
+            log_info("\nmgr_ses: No supported authentication methods found!\n");
+        }
+        return ERR_NCX_AUTH_FAILED;
     }
 
     /* Request a shell */
     mscb->channel = libssh2_channel_open_session(mscb->session);
     if (!mscb->channel) {
-	if (LOGINFO) {
-	    log_info("\nmgr_ses: SSH2 channel open failed");
-	}
-	return ERR_NCX_SESSION_FAILED;
+        if (LOGINFO) {
+            log_info("\nmgr_ses: SSH2 channel open failed");
+        }
+        return ERR_NCX_SESSION_FAILED;
     }
 
     /* Connect to the NETCONF subsystem */
     ret = libssh2_channel_subsystem(mscb->channel, "netconf");
     if (ret) {
-	if (LOGINFO) {
-	    log_info("\nmgr_ses: Unable to request netconf subsystem");
-	}
-	return ERR_NCX_SESSION_FAILED;
+        if (LOGINFO) {
+            log_info("\nmgr_ses: Unable to request netconf subsystem");
+        }
+        return ERR_NCX_SESSION_FAILED;
     }
 
     /* set IO mode to non-blocking;
@@ -443,11 +443,11 @@ void
     uint32 i;
 
     if (!mgr_ses_init_done) {
-	for (i=0; i<MGR_SES_MAX_SESSIONS; i++) {
-	    mgrses[i] = NULL;
-	}
-	next_sesid = 1;
-	mgr_ses_init_done = TRUE;
+        for (i=0; i<MGR_SES_MAX_SESSIONS; i++) {
+            mgrses[i] = NULL;
+        }
+        next_sesid = 1;
+        mgr_ses_init_done = TRUE;
     }
 
 }  /* mgr_ses_init */
@@ -469,13 +469,13 @@ void
     uint32 i;
 
     if (mgr_ses_init_done) {
-	for (i=0; i<MGR_SES_MAX_SESSIONS; i++) {
-	    if (mgrses[i]) {
-		mgr_ses_free_session(i);
-	    }
-	}
-	next_sesid = 0;
-	mgr_ses_init_done = FALSE;
+        for (i=0; i<MGR_SES_MAX_SESSIONS; i++) {
+            if (mgrses[i]) {
+                mgr_ses_free_session(i);
+            }
+        }
+        next_sesid = 0;
+        mgr_ses_init_done = FALSE;
     }
 
 }  /* mgr_ses_cleanup */
@@ -509,11 +509,11 @@ void
 *********************************************************************/
 status_t
     mgr_ses_new_session (const xmlChar *user,
-			 const xmlChar *password,
-			 const xmlChar *target,
-			 uint16 port,
+                         const xmlChar *password,
+                         const xmlChar *target,
+                         uint16 port,
                          ncxmod_temp_progcb_t *progcb,
-			 ses_id_t *retsid)
+                         ses_id_t *retsid)
 {
     ses_cb_t  *scb;
     mgr_scb_t *mscb;
@@ -523,56 +523,56 @@ status_t
 
 #ifdef DEBUG
     if (!user || !password || !target || !retsid) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
     if (!mgr_ses_init_done) {
-	mgr_ses_init();
+        mgr_ses_init();
     }
 
     *retsid = 0;
 
     /* check if any sessions are available */
     if (!next_sesid) {
-	/* end has already been reached, so now in brute force
-	 * session reclaim mode
-	 */
-	slot = 0;
-	for (i=1; i<MGR_SES_MAX_SESSIONS && !slot; i++) {
-	    if (!mgrses[i]) {
-		slot = i;
-	    }
-	}
+        /* end has already been reached, so now in brute force
+         * session reclaim mode
+         */
+        slot = 0;
+        for (i=1; i<MGR_SES_MAX_SESSIONS && !slot; i++) {
+            if (!mgrses[i]) {
+                slot = i;
+            }
+        }
     } else {
-	slot = next_sesid;
+        slot = next_sesid;
     }
     if (!slot) {
-	/* max concurrent sessions reached */
-	return ERR_NCX_RESOURCE_DENIED;
+        /* max concurrent sessions reached */
+        return ERR_NCX_RESOURCE_DENIED;
     }
 
     /* make sure there is memory for a session control block */
     scb = ses_new_scb();
     if (!scb) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     /* get the memory for the manager SCB */
     mscb = mgr_new_scb();
     if (!mscb) {
-	ses_free_scb(scb);
-	return ERR_INTERNAL_MEM;
+        ses_free_scb(scb);
+        return ERR_INTERNAL_MEM;
     }
     scb->mgrcb = mscb;
 
     /* make sure at least 1 outbuff buffer is available */
     res = ses_msg_new_buff(scb, &scb->outbuff);
     if (res != NO_ERR) {
-	mgr_free_scb(scb->mgrcb);
-	scb->mgrcb = NULL;
-	ses_free_scb(scb);
-	return res;
+        mgr_free_scb(scb->mgrcb);
+        scb->mgrcb = NULL;
+        ses_free_scb(scb);
+        return res;
     }
 
     /* initialize the static vars */
@@ -606,24 +606,24 @@ status_t
     /* get the hostname for the specified target */
     hent = gethostbyname((const char *)target);
     if (hent) {
-	/* entry OK, try to get a TCP connection to agent */
-	res = connect_to_agent(scb, hent, port);
+        /* entry OK, try to get a TCP connection to agent */
+        res = connect_to_agent(scb, hent, port);
     } else {
-	res = ERR_NCX_UNKNOWN_HOST;
+        res = ERR_NCX_UNKNOWN_HOST;
     } 
 
     /* if TCP OK, get an SSH connection and channel */
     if (res == NO_ERR) {
-	res = ssh2_setup(scb, 
+        res = ssh2_setup(scb, 
                          (const char *)user,
-			 (const char *)password);
+                         (const char *)password);
     }
 
     if (res != NO_ERR) {
-	mgr_free_scb(scb->mgrcb);
-	scb->mgrcb = NULL;
-	ses_free_scb(scb);
-	return res;
+        mgr_free_scb(scb->mgrcb);
+        scb->mgrcb = NULL;
+        ses_free_scb(scb);
+        return res;
     }
 
     /* do not have a session-ID from the agent yet 
@@ -635,27 +635,27 @@ status_t
 
     /* add the FD to SCB mapping in the definition registry */
     if (res == NO_ERR) {
-	res = def_reg_add_scb(scb->fd, scb);
+        res = def_reg_add_scb(scb->fd, scb);
     }
 
     /* send the manager hello to the agent */
     if (res == NO_ERR) {
-	res = mgr_hello_send(scb);
+        res = mgr_hello_send(scb);
     }
 
     if (res != NO_ERR) {
-	mgr_free_scb(scb->mgrcb);
-	scb->mgrcb = NULL;
-	ses_free_scb(scb);
-	scb = NULL;
+        mgr_free_scb(scb->mgrcb);
+        scb->mgrcb = NULL;
+        ses_free_scb(scb);
+        scb = NULL;
     } else {
         ncx_set_temp_modQ(&mscb->temp_modQ);
-	scb->state = SES_ST_HELLO_WAIT;
-	mgrses[slot] = scb;
-	if (++next_sesid==MGR_SES_MAX_SESSIONS) {
-	    /* reached the end, start hunting for open slots instead  */
-	    next_sesid = 0;
-	}
+        scb->state = SES_ST_HELLO_WAIT;
+        mgrses[slot] = scb;
+        if (++next_sesid==MGR_SES_MAX_SESSIONS) {
+            /* reached the end, start hunting for open slots instead  */
+            next_sesid = 0;
+        }
     }
 
     *retsid = slot;
@@ -681,32 +681,32 @@ void
 
 #ifdef DEBUG
     if (!mgr_ses_init_done) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
 #endif
 
     /* check if the session exists */
     scb = mgrses[sid];
     if (!scb) {
-	if (LOGINFO) {
-	    log_info("\nmgr_ses: delete invalid session (%d)", sid);
-	}
-	return;
+        if (LOGINFO) {
+            log_info("\nmgr_ses: delete invalid session (%d)", sid);
+        }
+        return;
     }
 
 
     /* close the session before deactivating the IO */
     if (scb->mgrcb) {
         ncx_clear_temp_modQ();
-	mgr_free_scb(scb->mgrcb);
-	scb->mgrcb = NULL;
+        mgr_free_scb(scb->mgrcb);
+        scb->mgrcb = NULL;
     }
 
     /* deactivate the session IO */
     if (scb->fd) {
-	mgr_io_deactivate_session(scb->fd);
-	def_reg_del_scb(scb->fd);
+        mgr_io_deactivate_session(scb->fd);
+        def_reg_del_scb(scb->fd);
     }
 
     ncxmod_clear_altpath();
@@ -742,60 +742,60 @@ boolean
 
     rdy = ses_msg_get_first_inready();
     if (!rdy) {
-	return FALSE;
+        return FALSE;
     }
 
     /* get the session control block that rdy is embedded into */
     scb = mgrses[rdy->sid];
     if (!scb) {
-	return FALSE;
+        return FALSE;
     }
 
 #ifdef MGR_SES_DEBUG
     if (LOGDEBUG2) {
-	log_debug2("\nmgr_ses: msg ready for session");
+        log_debug2("\nmgr_ses: msg ready for session");
     }
 #endif
 
     /* check the session control block state */
     if (scb->state >= SES_ST_SHUTDOWN_REQ) {
-	/* don't process the message or even it mark it
-	 * It will be cleaned up when the session is freed
-	 */
-	return TRUE;
+        /* don't process the message or even it mark it
+         * It will be cleaned up when the session is freed
+         */
+        return TRUE;
     }
 
 #ifdef MGR_SES_DEBUG
     /* make sure a message is really there */
     msg = (ses_msg_t *)dlq_firstEntry(&scb->msgQ);
     if (!msg || !msg->ready) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	log_error("\nmgr_ses: ready Q message not correct");
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        log_error("\nmgr_ses: ready Q message not correct");
+        return FALSE;
     } else if (LOGDEBUG2) {
-	cnt = xml_strcpy(buff, (const xmlChar *)"Incoming msg for session ");
-	sprintf((char *)(&buff[cnt]), "%u", scb->sid);
-	ses_msg_dump(msg, buff);
+        cnt = xml_strcpy(buff, (const xmlChar *)"Incoming msg for session ");
+        sprintf((char *)(&buff[cnt]), "%u", scb->sid);
+        ses_msg_dump(msg, buff);
     }
 #endif
 
     /* setup the XML parser */
     if (scb->reader) {
-	/* reset the xmlreader */
-	res = xml_reset_reader_for_session(ses_read_cb,
-					   NULL, scb, scb->reader);
+        /* reset the xmlreader */
+        res = xml_reset_reader_for_session(ses_read_cb,
+                                           NULL, scb, scb->reader);
     } else {
-	res = xml_get_reader_for_session(ses_read_cb,
-					 NULL, scb, &scb->reader);
+        res = xml_get_reader_for_session(ses_read_cb,
+                                         NULL, scb, &scb->reader);
     }
 
     /* process the message */
     if (res == NO_ERR) {
-	/* process the message */
-	mgr_top_dispatch_msg(scb);
+        /* process the message */
+        mgr_top_dispatch_msg(scb);
     } else {
-	log_error("\nReset xmlreader failed for session");
-	scb->state = SES_ST_SHUTDOWN_REQ;
+        log_error("\nReset xmlreader failed for session");
+        scb->state = SES_ST_SHUTDOWN_REQ;
     }
 
     /* free the message that was just processed */
@@ -805,7 +805,7 @@ boolean
     /* check if any messages left for this session */
     msg = (ses_msg_t *)dlq_firstEntry(&scb->msgQ);
     if (msg && msg->ready) {
-	ses_msg_make_inready(scb);
+        ses_msg_make_inready(scb);
     }
 
     return TRUE;
@@ -832,7 +832,7 @@ boolean
 *********************************************************************/
 uint32
     mgr_ses_fill_writeset (fd_set *fdset,
-			   int *maxfdnum)
+                           int *maxfdnum)
 {
     ses_ready_t *rdy;
     ses_cb_t    *scb;
@@ -843,19 +843,19 @@ uint32
     FD_ZERO(fdset);
     done = FALSE;
     while (!done) {
-	rdy = ses_msg_get_first_outready();
-	if (!rdy) {
-	    done = TRUE;
-	} else {
-	    scb = mgrses[rdy->sid];
-	    if (scb && scb->state < SES_ST_SHUTDOWN_REQ) {
-		cnt++;
-		FD_SET(scb->fd, fdset);
-		if (scb->fd > *maxfdnum) {
-		    *maxfdnum = scb->fd;
-		}
-	    }
-	}
+        rdy = ses_msg_get_first_outready();
+        if (!rdy) {
+            done = TRUE;
+        } else {
+            scb = mgrses[rdy->sid];
+            if (scb && scb->state < SES_ST_SHUTDOWN_REQ) {
+                cnt++;
+                FD_SET(scb->fd, fdset);
+                if (scb->fd > *maxfdnum) {
+                    *maxfdnum = scb->fd;
+                }
+            }
+        }
     }
     return cnt;
 
@@ -970,8 +970,8 @@ ses_cb_t *
 *********************************************************************/
 ssize_t 
     mgr_ses_readfn (void *s,
-		    char *buff,
-		    size_t bufflen,
+                    char *buff,
+                    size_t bufflen,
                     boolean *erragain)
 {
     ses_cb_t  *scb;
@@ -1002,19 +1002,19 @@ ssize_t
             log_ssh2_error(scb, mscb, "read");
         }
     } else if (ret > 0) {
-	if (LOGDEBUG2) {
-	    log_debug2("\nmgr_ses: channel read %d bytes OK "
-		       "on session %u (a:%u)",
-		       ret, 
-		       scb->sid,
-		       mscb->agtsid);
-	}
+        if (LOGDEBUG2) {
+            log_debug2("\nmgr_ses: channel read %d bytes OK "
+                       "on session %u (a:%u)",
+                       ret, 
+                       scb->sid,
+                       mscb->agtsid);
+        }
     } else {
-	if (LOGDEBUG2) {
-	    log_debug2("\nmgr_ses: channel closed on session %u (a:%u)", 
-		       scb->sid,
-		       mscb->agtsid);
-	}
+        if (LOGDEBUG2) {
+            log_debug2("\nmgr_ses: channel closed on session %u (a:%u)", 
+                       scb->sid,
+                       mscb->agtsid);
+        }
         mscb->closed = TRUE;
     }
 
@@ -1054,9 +1054,9 @@ status_t
     buff = (ses_msg_buff_t *)dlq_deque(&scb->outQ);
 
     if (!buff) {
-	if (LOGINFO) {
-	    log_info("\nmgr_ses: channel write no out buffer");
-	}
+        if (LOGINFO) {
+            log_info("\nmgr_ses: channel write no out buffer");
+        }
     }
 
     while (buff) {
@@ -1079,23 +1079,23 @@ status_t
         if (ret == 0) {
             res = ERR_NCX_SESSION_CLOSED;
         } else if (ret > 0) {
-	    if (LOGDEBUG2) {
-		log_debug2("\nmgr_ses: channel write %u bytes OK "
+            if (LOGDEBUG2) {
+                log_debug2("\nmgr_ses: channel write %u bytes OK "
                            "on session %u (a:%u)",
-			   buff->bufflen,
+                           buff->bufflen,
                            scb->sid,
                            mscb->agtsid);
-	    }
-	    if (LOGDEBUG3) {
-		for (i=0; i < buff->bufflen; i++) {
-		    log_debug3("%c", buff->buff[i]);
-		}
-	    }
-	} else {
+            }
+            if (LOGDEBUG3) {
+                for (i=0; i < buff->bufflen; i++) {
+                    log_debug3("%c", buff->buff[i]);
+                }
+            }
+        } else {
             res = ERR_NCX_OPERATION_FAILED;
         }
 
-	ses_msg_free_buff(scb, buff);
+        ses_msg_free_buff(scb, buff);
 
         if (res == NO_ERR) {
             buff = (ses_msg_buff_t *)dlq_deque(&scb->outQ);
@@ -1124,7 +1124,7 @@ ses_cb_t *
     mgr_ses_get_scb (ses_id_t sid)
 {
     if (sid==0 || sid>=MGR_SES_MAX_SESSIONS) {
-	return NULL;
+        return NULL;
     }
     return mgrses[sid];
 
@@ -1147,8 +1147,8 @@ mgr_scb_t *
 {
 #ifdef DEBUG
     if (!scb) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 

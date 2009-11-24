@@ -76,7 +76,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 static boolean   ses_msg_init_done = FALSE;
@@ -99,11 +99,11 @@ void
     ses_msg_init (void)
 {
     if (!ses_msg_init_done) {
-	freecnt = 0;
-	dlq_createSQue(&freeQ);
-	dlq_createSQue(&inreadyQ);
-	dlq_createSQue(&outreadyQ);
-	ses_msg_init_done = TRUE;
+        freecnt = 0;
+        dlq_createSQue(&freeQ);
+        dlq_createSQue(&inreadyQ);
+        dlq_createSQue(&outreadyQ);
+        ses_msg_init_done = TRUE;
     }
 
 }  /* ses_msg_init */
@@ -125,21 +125,21 @@ void
     ses_msg_t *msg;
 
     if (ses_msg_init_done) {
-	while (!dlq_empty(&freeQ)) {
-	    msg = (ses_msg_t *)dlq_deque(&freeQ);
-	    /* these do not belong to any session and do not have
-	     * any buffers, so just toss the memory instead of
-	     * using ses_msg_free_msg
-	     */
-	    m__free(msg);
-	}
+        while (!dlq_empty(&freeQ)) {
+            msg = (ses_msg_t *)dlq_deque(&freeQ);
+            /* these do not belong to any session and do not have
+             * any buffers, so just toss the memory instead of
+             * using ses_msg_free_msg
+             */
+            m__free(msg);
+        }
 
-	/* nothing malloced in these Qs now */
-	memset(&freeQ, 0x0, sizeof(dlq_hdr_t));
-	memset(&inreadyQ, 0x0, sizeof(dlq_hdr_t));
-	memset(&outreadyQ, 0x0, sizeof(dlq_hdr_t));
-	freecnt = 0;
-	ses_msg_init_done = FALSE;
+        /* nothing malloced in these Qs now */
+        memset(&freeQ, 0x0, sizeof(dlq_hdr_t));
+        memset(&inreadyQ, 0x0, sizeof(dlq_hdr_t));
+        memset(&outreadyQ, 0x0, sizeof(dlq_hdr_t));
+        freecnt = 0;
+        ses_msg_init_done = FALSE;
     }
 
 }  /* ses_msg_cleanup */
@@ -162,26 +162,26 @@ void
 *********************************************************************/
 status_t
     ses_msg_new_msg (ses_cb_t *scb, 
-		     ses_msg_t **msg)
+                     ses_msg_t **msg)
 {
     ses_msg_t *newmsg;
 
 #ifdef DEBUG
     if (!scb || !msg) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     /* try the freeQ first */
     newmsg = (ses_msg_t *)dlq_deque(&freeQ);
     if (newmsg) {
-	freecnt--;
+        freecnt--;
     } else {
-	/* freeQ is empty, malloc a msg */
-	newmsg = m__getObj(ses_msg_t);
-	if (!newmsg) {
-	    return ERR_INTERNAL_MEM;
-	}
+        /* freeQ is empty, malloc a msg */
+        newmsg = m__getObj(ses_msg_t);
+        if (!newmsg) {
+            return ERR_INTERNAL_MEM;
+        }
     }
 
     /* set the fields and exit */
@@ -205,29 +205,29 @@ status_t
 *********************************************************************/
 void
     ses_msg_free_msg (ses_cb_t *scb,
-		      ses_msg_t *msg)
+                      ses_msg_t *msg)
 {
     ses_msg_buff_t *buff;
 
 #ifdef DEBUG
     if (!scb || !msg) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     while (!dlq_empty(&msg->buffQ)) {
-	buff = dlq_deque(&msg->buffQ);
-	ses_msg_free_buff(scb, buff);
+        buff = dlq_deque(&msg->buffQ);
+        ses_msg_free_buff(scb, buff);
     }
 
     if (freecnt < MAX_FREE_MSGS) {
-	dlq_enque(msg, &freeQ);
-	freecnt++;
+        dlq_enque(msg, &freeQ);
+        freecnt++;
     } else {
-	m__free(msg);
+        m__free(msg);
     }
-	
+        
 } /* ses_msg_free_msg */
 
 
@@ -251,43 +251,43 @@ void
 *********************************************************************/
 status_t
     ses_msg_new_buff (ses_cb_t *scb, 
-		      ses_msg_buff_t **buff)
+                      ses_msg_buff_t **buff)
 {
     ses_msg_buff_t *newbuff;
 
 #ifdef DEBUG
     if (!scb || !buff) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     /* handle the session freeQ separately */
     if (scb->freecnt) {
-	newbuff = (ses_msg_buff_t *)dlq_deque(&scb->freeQ);
-	if (newbuff) {
-	    newbuff->bufflen = 0;
-	    newbuff->buffpos = 0;
+        newbuff = (ses_msg_buff_t *)dlq_deque(&scb->freeQ);
+        if (newbuff) {
+            newbuff->bufflen = 0;
+            newbuff->buffpos = 0;
 #ifdef DEBUG
-	    memset(newbuff->buff, 0x0, SES_MSG_BUFFSIZE);
+            memset(newbuff->buff, 0x0, SES_MSG_BUFFSIZE);
 #endif
-	    *buff = newbuff;
-	    scb->freecnt--;
-	    return NO_ERR;
-	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    scb->freecnt = 0;
-	}
+            *buff = newbuff;
+            scb->freecnt--;
+            return NO_ERR;
+        } else {
+            SET_ERROR(ERR_INTERNAL_VAL);
+            scb->freecnt = 0;
+        }
     }
 
     /* check buffers exceeded error */
     if (scb->buffcnt+1 >= SES_MAX_BUFFERS) {
-	return ERR_NCX_RESOURCE_DENIED;
+        return ERR_NCX_RESOURCE_DENIED;
     }
 
     /* malloc the buffer */
     newbuff = m__getObj(ses_msg_buff_t);
     if (!newbuff) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     /* set the fields and exit */
@@ -319,15 +319,15 @@ status_t
 *********************************************************************/
 void
     ses_msg_free_buff (ses_cb_t *scb,
-		       ses_msg_buff_t *buff)
+                       ses_msg_buff_t *buff)
 {
     if (scb->state < SES_ST_SHUTDOWN_REQ &&
-	scb->freecnt < SES_MAX_FREE_BUFFERS) {
-	dlq_enque(buff, &scb->freeQ);
-	scb->freecnt++;
+        scb->freecnt < SES_MAX_FREE_BUFFERS) {
+        dlq_enque(buff, &scb->freeQ);
+        scb->freecnt++;
     } else {
-	m__free(buff);
-	scb->buffcnt--;
+        m__free(buff);
+        scb->buffcnt--;
     }
 
 } /* ses_msg_free_buff */
@@ -348,20 +348,20 @@ void
 *********************************************************************/
 status_t
     ses_msg_write_buff (ses_msg_buff_t *buff,
-			uint32 ch)
+                        uint32 ch)
 {
 
 #ifdef DEBUG
     if (!buff) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     if (buff->bufflen < SES_MSG_BUFFSIZE) {
-	buff->buff[buff->bufflen++] = (xmlChar)ch;
-	return NO_ERR;
+        buff->buff[buff->bufflen++] = (xmlChar)ch;
+        return NO_ERR;
     } else {
-	return ERR_BUFF_OVFL;
+        return ERR_BUFF_OVFL;
     }
     
 } /* ses_msg_write_buff */
@@ -381,21 +381,21 @@ status_t
 *********************************************************************/
 status_t
     ses_msg_send_buff (int fd,
-		       ses_msg_buff_t *buff)
+                       ses_msg_buff_t *buff)
 {
     status_t  res;
 
 #ifdef DEBUG
     if (!buff) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!fd) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
     if (!buff->bufflen) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     res = send_buff(fd, (const char *)buff->buff, buff->bufflen);
@@ -430,20 +430,20 @@ status_t
 
 #ifdef DEBUG
     if (!scb) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     dologmsg = LOGDEBUG2;
 
     if (LOGDEBUG) {
-	log_debug("\nses got send request on session %d", 
+        log_debug("\nses got send request on session %d", 
                   scb->sid);
     }
 
     if (dologmsg) {
-	buff = (ses_msg_buff_t *)dlq_firstEntry(&scb->outQ);
-	if (buff) {
+        buff = (ses_msg_buff_t *)dlq_firstEntry(&scb->outQ);
+        if (buff) {
             if (LOGDEBUG3) {
                 log_debug3("\nses_msg_send full reply:\n%s",
                            &buff->buff[buff->buffpos]);
@@ -463,7 +463,7 @@ status_t
 
     /* check if an external write function is used */
     if (scb->wrfn) {
-	return (*scb->wrfn)(scb);
+        return (*scb->wrfn)(scb);
     }
 
     memset(iovs, 0x0, sizeof(iovs));
@@ -474,65 +474,65 @@ status_t
 
     /* setup the writev call */
     for (i=0; i<SES_MAX_BUFFSEND && !done && buff; i++) {
-	buffleft = buff->bufflen - buff->buffpos;
-	if ((total+buffleft) > SES_MAX_BYTESEND) {
-	    done = TRUE;
-	} else {
-	    total += buffleft;
-	    iovs[i].iov_base = &buff->buff[buff->buffpos];
-	    iovs[i].iov_len = buffleft;
-	    buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
+        buffleft = buff->bufflen - buff->buffpos;
+        if ((total+buffleft) > SES_MAX_BYTESEND) {
+            done = TRUE;
+        } else {
+            total += buffleft;
+            iovs[i].iov_base = &buff->buff[buff->buffpos];
+            iovs[i].iov_len = buffleft;
+            buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
 
-	    if (LOGDEBUG3) {
-		log_debug3("\nses_msg: setup send buff %d\n%s\n", 
-			   i,
-			   iovs[i].iov_base);
-	    }
-	    cnt++;
-	}
+            if (LOGDEBUG3) {
+                log_debug3("\nses_msg: setup send buff %d\n%s\n", 
+                           i,
+                           iovs[i].iov_base);
+            }
+            cnt++;
+        }
     }
 
     /* make sure there is at least one buffer set */
     if (!iovs[0].iov_base) {
-	return SET_ERROR(ERR_NCX_OPERATION_FAILED);
+        return SET_ERROR(ERR_NCX_OPERATION_FAILED);
     }
 
     /* write a packet to the session socket */
     retcnt = writev(scb->fd, iovs, cnt);
     if (retcnt < 0) {
-	/* should not need retries because the select loop
-	 * indicated this session was ready for output
-	 */
-	log_info("\nses msg write failed for session %d", scb->sid);
-	return errno_to_status();
+        /* should not need retries because the select loop
+         * indicated this session was ready for output
+         */
+        log_info("\nses msg write failed for session %d", scb->sid);
+        return errno_to_status();
     } else {
-	if (dologmsg) {
-	    log_debug2("\nses wrote %d of %d bytes on session %d\n", 
-		       retcnt, 
+        if (dologmsg) {
+            log_debug2("\nses wrote %d of %d bytes on session %d\n", 
+                       retcnt, 
                        total, 
                        scb->sid);
-	}
+        }
     }
 
     /* clean up the buffers that were written */
     buff = (ses_msg_buff_t *)dlq_firstEntry(&scb->outQ);
 
     while (retcnt && buff) {
-	/* get the number of bytes written from this buffer */
-	buffleft = buff->bufflen - buff->buffpos;
+        /* get the number of bytes written from this buffer */
+        buffleft = buff->bufflen - buff->buffpos;
 
-	/* free the buffer if all of it was written or just
-	 * bump the buffer pointer if not
-	 */
-	if ((uint32)retcnt >= buffleft) {
-	    dlq_remove(buff);
-	    ses_msg_free_buff(scb, buff);
-	    retcnt -= (ssize_t)buffleft;
-	    buff = (ses_msg_buff_t *)dlq_firstEntry(&scb->outQ);	    
-	} else {
-	    buff->buffpos += (uint32)retcnt;
-	    retcnt = 0;
-	}
+        /* free the buffer if all of it was written or just
+         * bump the buffer pointer if not
+         */
+        if ((uint32)retcnt >= buffleft) {
+            dlq_remove(buff);
+            ses_msg_free_buff(scb, buff);
+            retcnt -= (ssize_t)buffleft;
+            buff = (ses_msg_buff_t *)dlq_firstEntry(&scb->outQ);            
+        } else {
+            buff->buffpos += (uint32)retcnt;
+            retcnt = 0;
+        }
     }
 
     return NO_ERR;
@@ -562,7 +562,7 @@ status_t
 
 #ifdef DEBUG
     if (!scb || !scb->outbuff) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -592,14 +592,14 @@ void
 
 #ifdef DEBUG
     if (!scb) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (!scb->inready.inq) {
-	dlq_enque(&scb->inready, &inreadyQ);
-	scb->inready.inq = TRUE;
+        dlq_enque(&scb->inready, &inreadyQ);
+        scb->inready.inq = TRUE;
     }
 
 } /* ses_msg_make_inready */
@@ -622,14 +622,14 @@ void
 
 #ifdef DEBUG
     if (!scb) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (!scb->outready.inq) {
-	dlq_enque(&scb->outready, &outreadyQ);
-	scb->outready.inq = TRUE;
+        dlq_enque(&scb->outready, &outreadyQ);
+        scb->outready.inq = TRUE;
     }
 
 } /* ses_msg_make_outready */
@@ -653,16 +653,16 @@ void
 
 #ifdef DEBUG
     if (!scb) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (scb->outbuff && scb->outbuff->bufflen) {
-	scb->outbuff->buffpos = 0;
-	dlq_enque(scb->outbuff, &scb->outQ);
-	scb->outbuff = NULL;
-	(void)ses_msg_new_buff(scb, &scb->outbuff);
+        scb->outbuff->buffpos = 0;
+        dlq_enque(scb->outbuff, &scb->outQ);
+        scb->outbuff = NULL;
+        (void)ses_msg_new_buff(scb, &scb->outbuff);
     }
     ses_msg_make_outready(scb);
 
@@ -684,7 +684,7 @@ ses_ready_t *
 
     rdy = (ses_ready_t *)dlq_deque(&inreadyQ);
     if (rdy) {
-	rdy->inq = FALSE;
+        rdy->inq = FALSE;
     }
     return rdy;
 
@@ -706,7 +706,7 @@ ses_ready_t *
 
     rdy = (ses_ready_t *)dlq_deque(&outreadyQ);
     if (rdy) {
-	rdy->inq = FALSE;
+        rdy->inq = FALSE;
     }
     return rdy;
 
@@ -725,7 +725,7 @@ ses_ready_t *
 *********************************************************************/
 void
     ses_msg_dump (const ses_msg_t *msg,
-		  const xmlChar *text)
+                  const xmlChar *text)
 {
     const ses_msg_buff_t *buff;
     boolean anytext;
@@ -733,29 +733,29 @@ void
 
 #ifdef DEBUG
     if (!msg) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (text) {
-	log_write("\n%s\n", text);
-	anytext = TRUE;
+        log_write("\n%s\n", text);
+        anytext = TRUE;
     } else {
-	anytext = FALSE;
+        anytext = FALSE;
     }
 
     for (buff = (const ses_msg_buff_t *)dlq_firstEntry(&msg->buffQ);
-	 buff != NULL;
-	 buff = (const ses_msg_buff_t *)dlq_nextEntry(buff)) {
-	for (i=0; i<buff->bufflen; i++) {
-	    log_write("%c", buff->buff[i]);
-	}
-	anytext = TRUE;
+         buff != NULL;
+         buff = (const ses_msg_buff_t *)dlq_nextEntry(buff)) {
+        for (i=0; i<buff->bufflen; i++) {
+            log_write("%c", buff->buff[i]);
+        }
+        anytext = TRUE;
     }
 
     if (anytext) {
-	log_write("\n");
+        log_write("\n");
     }
 
 } /* ses_msg_dump */

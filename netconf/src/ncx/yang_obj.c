@@ -214,34 +214,34 @@ date         init     comment
  */
 #define CHK_OBJ_EXIT(obj, res, retres)\
     if (res != NO_ERR) {\
-	if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) {\
-	    obj_free_template(obj);\
-	    return res;\
-	} else {\
-	    retres = res;\
-	}\
+        if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) {\
+            obj_free_template(obj);\
+            return res;\
+        } else {\
+            retres = res;\
+        }\
     }
 
 
 #define CHK_DEV_EXIT(dev, res, retres)\
     if (res != NO_ERR) {\
-	if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) {\
-	    obj_free_deviation(dev);\
-	    return res;\
-	} else {\
-	    retres = res;\
-	}\
+        if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) {\
+            obj_free_deviation(dev);\
+            return res;\
+        } else {\
+            retres = res;\
+        }\
     }
 
 
 #define CHK_DEVI_EXIT(devi, res, retres)\
     if (res != NO_ERR) {\
-	if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) {\
-	    obj_free_deviate(devi);\
-	    return res;\
-	} else {\
-	    retres = res;\
-	}\
+        if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) {\
+            obj_free_deviate(devi);\
+            return res;\
+        } else {\
+            retres = res;\
+        }\
     }
 
 
@@ -263,58 +263,58 @@ date         init     comment
 static status_t 
     consume_datadef (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-		     ncx_module_t  *mod,
-		     dlq_hdr_t *que,
-		     obj_template_t *parent,
-		     grp_template_t *grp);
+                     ncx_module_t  *mod,
+                     dlq_hdr_t *que,
+                     obj_template_t *parent,
+                     grp_template_t *grp);
 
 static status_t 
     consume_case_datadef (yang_pcb_t *pcb,
                           tk_chain_t *tkc,
-			  ncx_module_t  *mod,
-			  dlq_hdr_t *que,
-			  obj_template_t *parent);
+                          ncx_module_t  *mod,
+                          dlq_hdr_t *que,
+                          obj_template_t *parent);
 
 static status_t 
     consume_refine (tk_chain_t *tkc,
-		    ncx_module_t  *mod,
-		    dlq_hdr_t *que,
-		    obj_template_t *parent);
+                    ncx_module_t  *mod,
+                    dlq_hdr_t *que,
+                    obj_template_t *parent);
 
 static status_t 
     consume_augment (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-		     ncx_module_t  *mod,
-		     dlq_hdr_t *que,
-		     obj_template_t *parent,
-		     grp_template_t *grp);
+                     ncx_module_t  *mod,
+                     dlq_hdr_t *que,
+                     obj_template_t *parent,
+                     grp_template_t *grp);
 
 static status_t 
     expand_augment (yang_pcb_t *pcb,
                     tk_chain_t *tkc,
-		    ncx_module_t  *mod,
-		    obj_template_t *obj,
-		    dlq_hdr_t *datadefQ);
+                    ncx_module_t  *mod,
+                    obj_template_t *obj,
+                    dlq_hdr_t *datadefQ);
 
 static status_t 
     resolve_datadef (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-		     ncx_module_t  *mod,
-		     obj_template_t *testobj,
-		     boolean redo);
+                     ncx_module_t  *mod,
+                     obj_template_t *testobj,
+                     boolean redo);
 
 static status_t 
     resolve_datadefs (yang_pcb_t *pcb,
                       tk_chain_t *tkc,
-		      ncx_module_t  *mod,
-		      dlq_hdr_t *datadefQ,
-		      boolean redo);
+                      ncx_module_t  *mod,
+                      dlq_hdr_t *datadefQ,
+                      boolean redo);
 
 static status_t 
     resolve_iffeatureQ (yang_pcb_t *pcb,
                         tk_chain_t *tkc,
-			ncx_module_t  *mod,
-			obj_template_t *obj);
+                        ncx_module_t  *mod,
+                        obj_template_t *obj);
 
 /*************    P A R S E   F U N C T I O N S    *************/
 
@@ -334,16 +334,16 @@ static void
     boolean flag;
 
     if (!(obj->flags & OBJ_FL_CONFSET)) {
-	if (obj->parent && !obj_is_root(obj->parent)) {
-	    flag = obj_get_config_flag(obj->parent);
-	    if (flag) {
-		obj->flags |= OBJ_FL_CONFIG;
-	    } else {
-		obj->flags &= ~OBJ_FL_CONFIG;
-	    }
-	} else if (OBJ_DEF_CONFIG) {
-	    obj->flags |= OBJ_FL_CONFIG;
-	}
+        if (obj->parent && !obj_is_root(obj->parent)) {
+            flag = obj_get_config_flag(obj->parent);
+            if (flag) {
+                obj->flags |= OBJ_FL_CONFIG;
+            } else {
+                obj->flags &= ~OBJ_FL_CONFIG;
+            }
+        } else if (OBJ_DEF_CONFIG) {
+            obj->flags |= OBJ_FL_CONFIG;
+        }
     }
 
 } /* finish_config_flag */
@@ -370,9 +370,9 @@ static void
 *********************************************************************/
 static status_t 
     add_object (tk_chain_t *tkc,
-		ncx_module_t  *mod,
-		dlq_hdr_t  *que,
-		obj_template_t *obj)
+                ncx_module_t  *mod,
+                dlq_hdr_t  *que,
+                obj_template_t *obj)
 {
     obj_template_t  *testobj;
     const xmlChar   *name;
@@ -383,43 +383,43 @@ static status_t
     name = obj_get_name(obj);
 
     if (que == &mod->datadefQ) {
-	testobj = obj_find_template_top(mod, 
-					obj_get_mod_name(obj), 
-					name);
+        testobj = obj_find_template_top(mod, 
+                                        obj_get_mod_name(obj), 
+                                        name);
     } else {
-	testobj = obj_find_template_test(que, 
-					 obj_get_mod_name(obj), 
-					 name);
+        testobj = obj_find_template_test(que, 
+                                         obj_get_mod_name(obj), 
+                                         name);
     }
     if (testobj) {
-	if (testobj->tkerr.mod != mod) {
-	    log_error("\nError: object '%s' already defined "
-		      "in submodule '%s' at line %u",
-		      name, 
+        if (testobj->tkerr.mod != mod) {
+            log_error("\nError: object '%s' already defined "
+                      "in submodule '%s' at line %u",
+                      name, 
                       mod->name, 
                       testobj->tkerr.linenum);
-	} else {
-	    log_error("\nError: object '%s' already defined at line %u",
-		      name, 
+        } else {
+            log_error("\nError: object '%s' already defined at line %u",
+                      name, 
                       testobj->tkerr.linenum);
-	}
-	res = ERR_NCX_DUP_ENTRY;
-	ncx_print_errormsg(tkc, mod, res);
-	obj_free_template(obj);
+        }
+        res = ERR_NCX_DUP_ENTRY;
+        ncx_print_errormsg(tkc, mod, res);
+        obj_free_template(obj);
     } else {
-	obj_set_ncx_flags(obj);
-	dlq_enque(obj, que);  /* may have some errors */
-	if (mod->stmtmode && que==&mod->datadefQ) {
-	    /* save top-level object order only */
-	    stmt = yang_new_obj_stmt(obj);
-	    if (stmt) {
-		dlq_enque(stmt, &mod->stmtQ);
-	    } else {
-		log_error("\nError: malloc failure for obj_stmt");
-		res = ERR_INTERNAL_MEM;
-		ncx_print_errormsg(tkc, mod, res);
-	    }
-	}
+        obj_set_ncx_flags(obj);
+        dlq_enque(obj, que);  /* may have some errors */
+        if (mod->stmtmode && que==&mod->datadefQ) {
+            /* save top-level object order only */
+            stmt = yang_new_obj_stmt(obj);
+            if (stmt) {
+                dlq_enque(stmt, &mod->stmtQ);
+            } else {
+                log_error("\nError: malloc failure for obj_stmt");
+                res = ERR_INTERNAL_MEM;
+                ncx_print_errormsg(tkc, mod, res);
+            }
+        }
     }
     return res;
 
@@ -451,9 +451,9 @@ OUTPUTS:
 *********************************************************************/
 static status_t 
     consume_semi_lbrace (tk_chain_t *tkc,
-			 ncx_module_t  *mod,
-			 obj_template_t *obj,
-			 boolean *done)
+                         ncx_module_t  *mod,
+                         obj_template_t *obj,
+                         boolean *done)
 {
     const char *expstr;
     status_t res;
@@ -463,24 +463,24 @@ static status_t
      */
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
-	*done = TRUE;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        *done = TRUE;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     switch (TK_CUR_TYP(tkc)) {
     case TK_TT_SEMICOL:
-	obj->flags |= OBJ_FL_EMPTY;
-	*done = TRUE;
-	break;
+        obj->flags |= OBJ_FL_EMPTY;
+        *done = TRUE;
+        break;
     case TK_TT_LBRACE:
-	*done = FALSE;
-	break;
+        *done = FALSE;
+        break;
     default:
-	res = ERR_NCX_WRONG_TKTYPE;
-	expstr = "semi-colon or left brace";
-	ncx_mod_exp_err(tkc, mod, res, expstr);
-	*done = TRUE;
+        res = ERR_NCX_WRONG_TKTYPE;
+        expstr = "semi-colon or left brace";
+        ncx_mod_exp_err(tkc, mod, res, expstr);
+        *done = TRUE;
     }
     return res;
 
@@ -510,10 +510,10 @@ static status_t
 *********************************************************************/
 static status_t 
     consume_anyxml (tk_chain_t *tkc,
-		    ncx_module_t  *mod,
-		    dlq_hdr_t  *que,
-		    obj_template_t *parent,
-		    grp_template_t *grp)
+                    ncx_module_t  *mod,
+                    dlq_hdr_t  *que,
+                    obj_template_t *parent,
+                    grp_template_t *grp)
 {
     obj_template_t  *obj;
     obj_leaf_t      *leaf;
@@ -540,9 +540,9 @@ static status_t
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_ANYXML);
     if (!obj) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     ncx_set_error(&obj->tkerr,
@@ -556,11 +556,11 @@ static status_t
 
     leaf = obj->def.leaf;
     if (que == &mod->datadefQ) {
-	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
+        obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
 
     if (leaf->typdef) {
-	typ_free_typdef(leaf->typdef);
+        typ_free_typdef(leaf->typdef);
     }
     leaf->typdef = typ_get_basetype_typdef(NCX_BT_ANY);
 
@@ -573,103 +573,103 @@ static status_t
 
     /* get the anyxml statements and any appinfo extensions */
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
-	flagset = FALSE;
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
+        flagset = FALSE;
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(obj, res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
+            CHK_OBJ_EXIT(obj, res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a keyword token string so check the value */
-	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_when(tkc, mod, obj, &when);
-	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, 
+        /* Got a keyword token string so check the value */
+        if (!xml_strcmp(val, YANG_K_WHEN)) {
+            res = yang_consume_when(tkc, mod, obj, &when);
+        } else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+            res = yang_consume_iffeature(tkc, 
                                          mod, 
-					 &obj->iffeatureQ,
-					 &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
-	    res = yang_consume_boolean(tkc, 
+                                         &obj->iffeatureQ,
+                                         &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_CONFIG)) {
+            res = yang_consume_boolean(tkc, 
                                        mod,
-				       &flagset,
-				       &conf, 
+                                       &flagset,
+                                       &conf, 
                                        &obj->appinfoQ);
-	    obj->flags |= OBJ_FL_CONFSET;
-	    if (flagset) {
-		obj->flags |= OBJ_FL_CONFIG;
-	    } else {
-		obj->flags &= ~OBJ_FL_CONFIG;
-	    }
-	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
-	    res = yang_consume_boolean(tkc, 
+            obj->flags |= OBJ_FL_CONFSET;
+            if (flagset) {
+                obj->flags |= OBJ_FL_CONFIG;
+            } else {
+                obj->flags &= ~OBJ_FL_CONFIG;
+            }
+        } else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
+            res = yang_consume_boolean(tkc, 
                                        mod,
-				       &flagset,
-				       &mand, 
+                                       &flagset,
+                                       &mand, 
                                        &obj->appinfoQ);
-	    obj->flags |= OBJ_FL_MANDSET;
-	    if (flagset) {
-		obj->flags |= OBJ_FL_MANDATORY;
-	    }
-	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, 
+            obj->flags |= OBJ_FL_MANDSET;
+            if (flagset) {
+                obj->flags |= OBJ_FL_MANDATORY;
+            }
+        } else if (!xml_strcmp(val, YANG_K_STATUS)) {
+            res = yang_consume_status(tkc, 
                                       mod, 
                                       &leaf->status,
-				      &stat, 
+                                      &stat, 
                                       &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &leaf->descr,
-				     &desc, 
+                                     &desc, 
                                      &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &leaf->ref,
-				     &ref, 
+                                     &ref, 
                                      &obj->appinfoQ);
 
-	} else {
-	    res = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	}
-	CHK_OBJ_EXIT(obj, res, retres);
+        } else {
+            res = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+        }
+        CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
     if (leaf->name && ncx_valid_name2(leaf->name)) {
-	res = add_object(tkc, mod, que, obj);
-	CHK_EXIT(res, retres);
+        res = add_object(tkc, mod, que, obj);
+        CHK_EXIT(res, retres);
     } else {
-	obj_free_template(obj);
+        obj_free_template(obj);
     }
 
     return retres;
@@ -702,10 +702,10 @@ static status_t
 static status_t 
     consume_container (yang_pcb_t *pcb,
                        tk_chain_t *tkc,
-		       ncx_module_t  *mod,
-		       dlq_hdr_t  *que,
-		       obj_template_t *parent,
-		       grp_template_t *grp)
+                       ncx_module_t  *mod,
+                       dlq_hdr_t  *que,
+                       obj_template_t *parent,
+                       grp_template_t *grp)
 {
     obj_template_t  *obj;
     obj_container_t *con;
@@ -732,9 +732,9 @@ static status_t
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_CONTAINER);
     if (!obj) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     ncx_set_error(&obj->tkerr,
@@ -748,9 +748,9 @@ static status_t
 
     con = obj->def.container;
     if (que == &mod->datadefQ) {
-	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
+        obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
-	
+        
     /* Get the mandatory container name */
     res = yang_consume_id_string(tkc, mod, &con->name);
     CHK_OBJ_EXIT(obj, res, retres);
@@ -760,117 +760,117 @@ static status_t
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
-	flagset = FALSE;
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
+        flagset = FALSE;
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(obj, res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
+            CHK_OBJ_EXIT(obj, res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
-	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_when(tkc, mod, obj, &when);
-	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, 
+        /* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_WHEN)) {
+            res = yang_consume_when(tkc, mod, obj, &when);
+        } else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+            res = yang_consume_iffeature(tkc, 
                                          mod, 
-					 &obj->iffeatureQ,
-					 &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    res = yang_typ_consume_typedef(pcb,
+                                         &obj->iffeatureQ,
+                                         &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
+            res = yang_typ_consume_typedef(pcb,
                                            tkc, 
                                            mod,
-					   con->typedefQ);
-	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(pcb,
+                                           con->typedefQ);
+        } else if (!xml_strcmp(val, YANG_K_GROUPING)) {
+            res = yang_grp_consume_grouping(pcb,
                                             tkc, 
                                             mod, 
-					    con->groupingQ, 
+                                            con->groupingQ, 
                                             obj);
-	} else if (!xml_strcmp(val, YANG_K_MUST)) {
-	    res = yang_consume_must(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_MUST)) {
+            res = yang_consume_must(tkc, 
                                     mod, 
                                     &con->mustQ,
-				    &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_PRESENCE)) {
-	    res = yang_consume_strclause(tkc, 
+                                    &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_PRESENCE)) {
+            res = yang_consume_strclause(tkc, 
                                          mod, 
-					 &con->presence,
-					 &pres, 
+                                         &con->presence,
+                                         &pres, 
                                          &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
-	    res = yang_consume_boolean(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_CONFIG)) {
+            res = yang_consume_boolean(tkc, 
                                        mod,
-				       &flagset,
-				       &conf, 
+                                       &flagset,
+                                       &conf, 
                                        &obj->appinfoQ);
-	    obj->flags |= OBJ_FL_CONFSET;
-	    if (flagset) {
-		obj->flags |= OBJ_FL_CONFIG;
-	    } else {
-		obj->flags &= ~OBJ_FL_CONFIG;
-	    }
-	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, 
+            obj->flags |= OBJ_FL_CONFSET;
+            if (flagset) {
+                obj->flags |= OBJ_FL_CONFIG;
+            } else {
+                obj->flags &= ~OBJ_FL_CONFIG;
+            }
+        } else if (!xml_strcmp(val, YANG_K_STATUS)) {
+            res = yang_consume_status(tkc, 
                                       mod, 
                                       &con->status,
-				      &stat, 
+                                      &stat, 
                                       &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &con->descr,
-				     &desc, 
+                                     &desc, 
                                      &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &con->ref,
-				     &ref, 
+                                     &ref, 
                                      &obj->appinfoQ);
-	} else {
-	    res = yang_obj_consume_datadef(pcb,
+        } else {
+            res = yang_obj_consume_datadef(pcb,
                                            tkc,
                                            mod,
-					   con->datadefQ, 
+                                           con->datadefQ, 
                                            obj);
-	}
-	CHK_OBJ_EXIT(obj, res, retres);
+        }
+        CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
     if (con->name && ncx_valid_name2(con->name)) {
-	res = add_object(tkc, mod, que, obj);
-	CHK_EXIT(res, retres);
+        res = add_object(tkc, mod, que, obj);
+        CHK_EXIT(res, retres);
     } else {
-	obj_free_template(obj);
+        obj_free_template(obj);
     }
 
     return retres;
@@ -903,10 +903,10 @@ static status_t
 static status_t 
     consume_leaf (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-		  ncx_module_t  *mod,
-		  dlq_hdr_t  *que,
-		  obj_template_t *parent,
-		  grp_template_t *grp)
+                  ncx_module_t  *mod,
+                  dlq_hdr_t  *que,
+                  obj_template_t *parent,
+                  grp_template_t *grp)
 {
     obj_template_t  *obj;
     obj_leaf_t      *leaf;
@@ -938,9 +938,9 @@ static status_t
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_LEAF);
     if (!obj) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     ncx_set_error(&obj->tkerr,
@@ -954,7 +954,7 @@ static status_t
 
     leaf = obj->def.leaf;
     if (que == &mod->datadefQ) {
-	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
+        obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
 
     /* Get the mandatory leaf name */
@@ -967,150 +967,150 @@ static status_t
 
     /* get the leaf statements and any appinfo extensions */
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
-	flagset = FALSE;
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
+        flagset = FALSE;
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(obj, res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
+            CHK_OBJ_EXIT(obj, res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a keyword token string so check the value */
-	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_when(tkc, mod, obj, &when);
-	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, 
+        /* Got a keyword token string so check the value */
+        if (!xml_strcmp(val, YANG_K_WHEN)) {
+            res = yang_consume_when(tkc, mod, obj, &when);
+        } else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+            res = yang_consume_iffeature(tkc, 
                                          mod, 
-					 &obj->iffeatureQ,
-					 &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_TYPE)) {
-	    if (typ) {
-		retres = ERR_NCX_DUP_ENTRY;
-		typeok = FALSE;
-		ncx_print_errormsg(tkc, mod, retres);
+                                         &obj->iffeatureQ,
+                                         &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_TYPE)) {
+            if (typ) {
+                retres = ERR_NCX_DUP_ENTRY;
+                typeok = FALSE;
+                ncx_print_errormsg(tkc, mod, retres);
 
-		/* toss the old typdef because this is a fatal
-		 * error anyway, and need to skip past the new
-		 * typedef; replace the old typedef!
-		 */
-		typ_clean_typdef(leaf->typdef);
-		res = yang_typ_consume_type(pcb,
+                /* toss the old typdef because this is a fatal
+                 * error anyway, and need to skip past the new
+                 * typedef; replace the old typedef!
+                 */
+                typ_clean_typdef(leaf->typdef);
+                res = yang_typ_consume_type(pcb,
                                             tkc, 
                                             mod, 
                                             leaf->typdef);
-	    } else {
-		typ = TRUE;
-		res = yang_typ_consume_type(pcb,
+            } else {
+                typ = TRUE;
+                res = yang_typ_consume_type(pcb,
                                             tkc, 
                                             mod, 
                                             leaf->typdef);
-		if (res == NO_ERR) {
-		    typeok = TRUE;
-		}
-	    }
-	} else if (!xml_strcmp(val, YANG_K_UNITS)) {
-	    res = yang_consume_strclause(tkc, 
+                if (res == NO_ERR) {
+                    typeok = TRUE;
+                }
+            }
+        } else if (!xml_strcmp(val, YANG_K_UNITS)) {
+            res = yang_consume_strclause(tkc, 
                                          mod, 
                                          &leaf->units,
-					 &units, 
+                                         &units, 
                                          &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_MUST)) {
-	    res = yang_consume_must(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_MUST)) {
+            res = yang_consume_must(tkc, 
                                     mod, 
                                     &leaf->mustQ,
-				    &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
-	    res = yang_consume_strclause(tkc, 
+                                    &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
+            res = yang_consume_strclause(tkc, 
                                          mod, 
-					 &leaf->defval,
-					 &def, &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
-	    res = yang_consume_boolean(tkc, 
+                                         &leaf->defval,
+                                         &def, &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_CONFIG)) {
+            res = yang_consume_boolean(tkc, 
                                        mod,
-				       &flagset,
-				       &conf, 
+                                       &flagset,
+                                       &conf, 
                                        &obj->appinfoQ);
-	    obj->flags |= OBJ_FL_CONFSET;
-	    if (flagset) {
-		obj->flags |= OBJ_FL_CONFIG;
-	    } else {
-		obj->flags &= ~OBJ_FL_CONFIG;
-	    }
-	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
-	    res = yang_consume_boolean(tkc, 
+            obj->flags |= OBJ_FL_CONFSET;
+            if (flagset) {
+                obj->flags |= OBJ_FL_CONFIG;
+            } else {
+                obj->flags &= ~OBJ_FL_CONFIG;
+            }
+        } else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
+            res = yang_consume_boolean(tkc, 
                                        mod,
-				       &flagset,
-				       &mand, 
+                                       &flagset,
+                                       &mand, 
                                        &obj->appinfoQ);
-	    obj->flags |= OBJ_FL_MANDSET;
-	    if (flagset) {
-		obj->flags |= OBJ_FL_MANDATORY;
-	    }
-	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, 
+            obj->flags |= OBJ_FL_MANDSET;
+            if (flagset) {
+                obj->flags |= OBJ_FL_MANDATORY;
+            }
+        } else if (!xml_strcmp(val, YANG_K_STATUS)) {
+            res = yang_consume_status(tkc, 
                                       mod, 
                                       &leaf->status,
-				      &stat, 
+                                      &stat, 
                                       &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &leaf->descr,
-				     &desc, 
+                                     &desc, 
                                      &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &leaf->ref,
-				     &ref, 
+                                     &ref, 
                                      &obj->appinfoQ);
-	} else {
-	    res = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	}
-	CHK_OBJ_EXIT(obj, res, retres);
+        } else {
+            res = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+        }
+        CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* check mandatory params */
     if (!typ) {
-	expstr = "mandatory type statement";
-	retres = ERR_NCX_DATA_MISSING;
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
+        expstr = "mandatory type statement";
+        retres = ERR_NCX_DATA_MISSING;
+        ncx_mod_exp_err(tkc, mod, retres, expstr);
     }
 
     /* save or delete the obj_template_t struct */
     if (leaf->name && ncx_valid_name2(leaf->name) && typeok) {
-	res = add_object(tkc, mod, que, obj);
-	CHK_EXIT(res, retres);
+        res = add_object(tkc, mod, que, obj);
+        CHK_EXIT(res, retres);
     } else {
-	obj_free_template(obj);
+        obj_free_template(obj);
     }
 
     return retres;
@@ -1143,10 +1143,10 @@ static status_t
 static status_t 
     consume_leaflist (yang_pcb_t *pcb,
                       tk_chain_t *tkc,
-		      ncx_module_t  *mod,
-		      dlq_hdr_t  *que,
-		      obj_template_t *parent,
-		      grp_template_t *grp)
+                      ncx_module_t  *mod,
+                      dlq_hdr_t  *que,
+                      obj_template_t *parent,
+                      grp_template_t *grp)
 {
     obj_template_t  *obj;
     obj_leaflist_t  *llist;
@@ -1181,9 +1181,9 @@ static status_t
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_LEAF_LIST);
     if (!obj) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     ncx_set_error(&obj->tkerr,
@@ -1197,7 +1197,7 @@ static status_t
 
     llist = obj->def.leaflist;
     if (que == &mod->datadefQ) {
-	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
+        obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
 
     /* Get the mandatory leaf-list name */
@@ -1210,150 +1210,150 @@ static status_t
 
     /* get the leaf-list statements and any appinfo extensions */
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(obj, res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
+            CHK_OBJ_EXIT(obj, res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a keyword token string so check the value */
-	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_when(tkc, mod, obj, &when);
-	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, 
+        /* Got a keyword token string so check the value */
+        if (!xml_strcmp(val, YANG_K_WHEN)) {
+            res = yang_consume_when(tkc, mod, obj, &when);
+        } else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+            res = yang_consume_iffeature(tkc, 
                                          mod, 
-					 &obj->iffeatureQ,
-					 &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_TYPE)) {
-	    if (typ) {
-		retres = ERR_NCX_DUP_ENTRY;
-		typeok = FALSE;
-		ncx_print_errormsg(tkc, mod, retres);
-		typ_clean_typdef(llist->typdef);
-		res = yang_typ_consume_type(pcb,
+                                         &obj->iffeatureQ,
+                                         &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_TYPE)) {
+            if (typ) {
+                retres = ERR_NCX_DUP_ENTRY;
+                typeok = FALSE;
+                ncx_print_errormsg(tkc, mod, retres);
+                typ_clean_typdef(llist->typdef);
+                res = yang_typ_consume_type(pcb,
                                             tkc, 
                                             mod, 
                                             llist->typdef);
-	    } else {
-		typ = TRUE;
-		res = yang_typ_consume_type(pcb,
+            } else {
+                typ = TRUE;
+                res = yang_typ_consume_type(pcb,
                                             tkc, 
                                             mod, 
                                             llist->typdef);
-		if (res == NO_ERR) {
-		    typeok = TRUE;
-		}
-	    }
-	} else if (!xml_strcmp(val, YANG_K_UNITS)) {
-	    res = yang_consume_strclause(tkc, 
+                if (res == NO_ERR) {
+                    typeok = TRUE;
+                }
+            }
+        } else if (!xml_strcmp(val, YANG_K_UNITS)) {
+            res = yang_consume_strclause(tkc, 
                                          mod, 
                                          &llist->units,
-					 &units, 
+                                         &units, 
                                          &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_MUST)) {
-	    res = yang_consume_must(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_MUST)) {
+            res = yang_consume_must(tkc, 
                                     mod, 
                                     &llist->mustQ,
-				    &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
-	    flagset = FALSE;
-	    res = yang_consume_boolean(tkc, 
+                                    &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_CONFIG)) {
+            flagset = FALSE;
+            res = yang_consume_boolean(tkc, 
                                        mod,
-				       &flagset,
-				       &conf, 
+                                       &flagset,
+                                       &conf, 
                                        &obj->appinfoQ);
-	    obj->flags |= OBJ_FL_CONFSET;
-	    if (flagset) {
-		obj->flags |= OBJ_FL_CONFIG;
-	    } else {
-		obj->flags &= ~OBJ_FL_CONFIG;
-	    }
-	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
-	    res = yang_consume_uint32(tkc, 
+            obj->flags |= OBJ_FL_CONFSET;
+            if (flagset) {
+                obj->flags |= OBJ_FL_CONFIG;
+            } else {
+                obj->flags &= ~OBJ_FL_CONFIG;
+            }
+        } else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
+            res = yang_consume_uint32(tkc, 
                                       mod,
-				      &llist->minelems,
-				      &minel, 
+                                      &llist->minelems,
+                                      &minel, 
                                       &obj->appinfoQ);
-	    llist->minset = TRUE;
-	} else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
-	    res = yang_consume_max_elements(tkc, 
+            llist->minset = TRUE;
+        } else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
+            res = yang_consume_max_elements(tkc, 
                                             mod,
-					    &llist->maxelems,
-					    &maxel, 
+                                            &llist->maxelems,
+                                            &maxel, 
                                             &obj->appinfoQ);
-	    llist->maxset = TRUE;
-	} else if (!xml_strcmp(val, YANG_K_ORDERED_BY)) {
-	    res = yang_consume_ordered_by(tkc, 
+            llist->maxset = TRUE;
+        } else if (!xml_strcmp(val, YANG_K_ORDERED_BY)) {
+            res = yang_consume_ordered_by(tkc, 
                                           mod, 
-					  &llist->ordersys,
-					  &ord, 
+                                          &llist->ordersys,
+                                          &ord, 
                                           &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_STATUS)) {
+            res = yang_consume_status(tkc, 
                                       mod, 
                                       &llist->status,
-				      &stat, 
+                                      &stat, 
                                       &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &llist->descr,
-				     &desc, 
+                                     &desc, 
                                      &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &llist->ref,
-				     &ref, 
+                                     &ref, 
                                      &obj->appinfoQ);
-	} else {
-	    res = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	}
-	CHK_OBJ_EXIT(obj, res, retres);
+        } else {
+            res = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+        }
+        CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* check mandatory params */
     if (!typ) {
-	expstr = "mandatory type-stmt";
-	retres = ERR_NCX_DATA_MISSING;
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
+        expstr = "mandatory type-stmt";
+        retres = ERR_NCX_DATA_MISSING;
+        ncx_mod_exp_err(tkc, mod, retres, expstr);
     }
 
     /* save or delete the obj_template_t struct */
     if (llist->name && ncx_valid_name2(llist->name) && typeok) {
-	res = add_object(tkc, mod, que, obj);
-	CHK_EXIT(res, retres);
+        res = add_object(tkc, mod, que, obj);
+        CHK_EXIT(res, retres);
     } else {
-	obj_free_template(obj);
+        obj_free_template(obj);
     }
 
     return retres;
@@ -1386,10 +1386,10 @@ static status_t
 static status_t 
     consume_list (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-		  ncx_module_t  *mod,
-		  dlq_hdr_t  *que,
-		  obj_template_t *parent,
-		  grp_template_t *grp)
+                  ncx_module_t  *mod,
+                  dlq_hdr_t  *que,
+                  obj_template_t *parent,
+                  grp_template_t *grp)
 {
     obj_template_t  *obj;
     obj_list_t      *list;
@@ -1424,9 +1424,9 @@ static status_t
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_LIST);
     if (!obj) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     ncx_set_error(&obj->tkerr,
@@ -1440,7 +1440,7 @@ static status_t
 
     list = obj->def.list;
     if (que == &mod->datadefQ) {
-	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
+        obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
 
     /* Get the mandatory list name */
@@ -1454,186 +1454,186 @@ static status_t
     /* get the list statements and any appinfo extensions */
     while (!done) {
 
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(obj, res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
+            CHK_OBJ_EXIT(obj, res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a keyword token string so check the value */
-	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_when(tkc, mod, obj, &when);
-	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, 
+        /* Got a keyword token string so check the value */
+        if (!xml_strcmp(val, YANG_K_WHEN)) {
+            res = yang_consume_when(tkc, mod, obj, &when);
+        } else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+            res = yang_consume_iffeature(tkc, 
                                          mod, 
-					 &obj->iffeatureQ,
-					 &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    res = yang_typ_consume_typedef(pcb,
+                                         &obj->iffeatureQ,
+                                         &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
+            res = yang_typ_consume_typedef(pcb,
                                            tkc, 
                                            mod,
-					   list->typedefQ);
-	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(pcb,
+                                           list->typedefQ);
+        } else if (!xml_strcmp(val, YANG_K_GROUPING)) {
+            res = yang_grp_consume_grouping(pcb,
                                             tkc, 
                                             mod,
-					    list->groupingQ, 
+                                            list->groupingQ, 
                                             obj);
-	} else if (!xml_strcmp(val, YANG_K_MUST)) {
-	    res = yang_consume_must(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_MUST)) {
+            res = yang_consume_must(tkc, 
                                     mod, 
                                     &list->mustQ,
-				    &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_KEY)) {
-	    ncx_set_error(&savetkerr,
+                                    &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_KEY)) {
+            ncx_set_error(&savetkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
 
-	    res = yang_consume_strclause(tkc, 
+            res = yang_consume_strclause(tkc, 
                                          mod, 
                                          &list->keystr,
-					 &key, 
+                                         &key, 
                                          &obj->appinfoQ);
-	    if (res == NO_ERR) {
-		ncx_set_error(&list->keytkerr,
+            if (res == NO_ERR) {
+                ncx_set_error(&list->keytkerr,
                               savetkerr.mod,
                               savetkerr.linenum,
                               savetkerr.linepos);
-	    }
-	} else if (!xml_strcmp(val, YANG_K_UNIQUE)) {
-	    objuniq = obj_new_unique();
-	    if (!objuniq) {
-		res = ERR_INTERNAL_MEM;
-		ncx_print_errormsg(tkc, mod, res);
-		obj_free_template(obj);
-		return res;
-	    }
+            }
+        } else if (!xml_strcmp(val, YANG_K_UNIQUE)) {
+            objuniq = obj_new_unique();
+            if (!objuniq) {
+                res = ERR_INTERNAL_MEM;
+                ncx_print_errormsg(tkc, mod, res);
+                obj_free_template(obj);
+                return res;
+            }
 
-	    ncx_set_error(&objuniq->tkerr,
+            ncx_set_error(&objuniq->tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
 
-	    res = yang_consume_strclause(tkc, 
+            res = yang_consume_strclause(tkc, 
                                          mod,
-					 &objuniq->xpath,
-					 NULL, 
+                                         &objuniq->xpath,
+                                         NULL, 
                                          &obj->appinfoQ);
-	    if (res == NO_ERR) {
-		dlq_enque(objuniq, &list->uniqueQ);
-	    } else {
-		obj_free_unique(objuniq);
-	    }
-	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
-	    flagset = FALSE;
-	    res = yang_consume_boolean(tkc, 
+            if (res == NO_ERR) {
+                dlq_enque(objuniq, &list->uniqueQ);
+            } else {
+                obj_free_unique(objuniq);
+            }
+        } else if (!xml_strcmp(val, YANG_K_CONFIG)) {
+            flagset = FALSE;
+            res = yang_consume_boolean(tkc, 
                                        mod,
-				       &flagset,
-				       &conf, 
+                                       &flagset,
+                                       &conf, 
                                        &obj->appinfoQ);
-	    obj->flags |= OBJ_FL_CONFSET;
-	    if (flagset) {
-		obj->flags |= OBJ_FL_CONFIG;
-	    } else {
-		obj->flags &= ~OBJ_FL_CONFIG;
-	    }
-	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
-	    res = yang_consume_uint32(tkc, 
+            obj->flags |= OBJ_FL_CONFSET;
+            if (flagset) {
+                obj->flags |= OBJ_FL_CONFIG;
+            } else {
+                obj->flags &= ~OBJ_FL_CONFIG;
+            }
+        } else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
+            res = yang_consume_uint32(tkc, 
                                       mod,
-				      &list->minelems,
-				      &minel, 
+                                      &list->minelems,
+                                      &minel, 
                                       &obj->appinfoQ);
-	    list->minset = TRUE;
-	} else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
-	    res = yang_consume_max_elements(tkc, 
+            list->minset = TRUE;
+        } else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
+            res = yang_consume_max_elements(tkc, 
                                             mod,
-					    &list->maxelems,
-					    &maxel, 
+                                            &list->maxelems,
+                                            &maxel, 
                                             &obj->appinfoQ);
-	    list->maxset = TRUE;
-	} else if (!xml_strcmp(val, YANG_K_ORDERED_BY)) {
-	    res = yang_consume_ordered_by(tkc, 
+            list->maxset = TRUE;
+        } else if (!xml_strcmp(val, YANG_K_ORDERED_BY)) {
+            res = yang_consume_ordered_by(tkc, 
                                           mod,
-					  &list->ordersys,
-					  &ord, 
+                                          &list->ordersys,
+                                          &ord, 
                                           &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_STATUS)) {
+            res = yang_consume_status(tkc, 
                                       mod, 
                                       &list->status,
-				      &stat, 
+                                      &stat, 
                                       &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &list->descr,
-				     &desc, 
+                                     &desc, 
                                      &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &list->ref,
-				     &ref, 
+                                     &ref, 
                                      &obj->appinfoQ);
-	} else {
-	    res = yang_obj_consume_datadef(pcb,
+        } else {
+            res = yang_obj_consume_datadef(pcb,
                                            tkc, 
                                            mod,
-					   list->datadefQ, 
+                                           list->datadefQ, 
                                            obj);
-	}
-	CHK_OBJ_EXIT(obj, res, retres);
+        }
+        CHK_OBJ_EXIT(obj, res, retres);
     }
 
     if (!list->keystr && (obj->flags & OBJ_FL_CONFIG)) {
-	log_error("\nError: No key entered for list '%s' on line %u",
-		  list->name, 
+        log_error("\nError: No key entered for list '%s' on line %u",
+                  list->name, 
                   obj->tkerr.linenum);
-	retres = ERR_NCX_DATA_MISSING;
-	ncx_print_errormsg(tkc, mod, retres);
+        retres = ERR_NCX_DATA_MISSING;
+        ncx_print_errormsg(tkc, mod, retres);
     }
 
     if (dlq_empty(list->datadefQ)) {
-	expstr = "mandatory data-def statement";
-	retres = ERR_NCX_DATA_MISSING;
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
+        expstr = "mandatory data-def statement";
+        retres = ERR_NCX_DATA_MISSING;
+        ncx_mod_exp_err(tkc, mod, retres, expstr);
     }
 
     /* save or delete the obj_template_t struct */
     if (list->name && ncx_valid_name2(list->name)) {
-	res = add_object(tkc, mod, que, obj);
-	CHK_EXIT(res, retres);
+        res = add_object(tkc, mod, que, obj);
+        CHK_EXIT(res, retres);
     } else {
-	obj_free_template(obj);
+        obj_free_template(obj);
     }
 
     return retres;
@@ -1675,10 +1675,10 @@ static status_t
 static status_t 
     consume_case (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-		  ncx_module_t  *mod,
-		  dlq_hdr_t *caseQ,
-		  obj_template_t *parent,
-		  boolean withcase)
+                  ncx_module_t  *mod,
+                  dlq_hdr_t *caseQ,
+                  obj_template_t *parent,
+                  boolean withcase)
 {
     obj_case_t      *cas, *testcas;
     obj_template_t  *obj, *testobj, *test2obj, *casobj;
@@ -1703,9 +1703,9 @@ static status_t
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_CASE);
     if (!obj) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     ncx_set_error(&obj->tkerr,
@@ -1719,117 +1719,117 @@ static status_t
 
     /* Get the mandatory case name */
     if (withcase) {
-	res = yang_consume_id_string(tkc, mod, &cas->name);
-	CHK_OBJ_EXIT(obj, res, retres);
+        res = yang_consume_id_string(tkc, mod, &cas->name);
+        CHK_OBJ_EXIT(obj, res, retres);
 
-	res = consume_semi_lbrace(tkc, mod, obj, &done);
-	CHK_OBJ_EXIT(obj, res, retres);
+        res = consume_semi_lbrace(tkc, mod, obj, &done);
+        CHK_OBJ_EXIT(obj, res, retres);
     } else {
-	/* shoarthand version, just 1 data-def-stmt per case */
-	anydone = TRUE;
-	res = consume_case_datadef(pcb,
+        /* shoarthand version, just 1 data-def-stmt per case */
+        anydone = TRUE;
+        res = consume_case_datadef(pcb,
                                    tkc, 
                                    mod,
-				   cas->datadefQ, 
+                                   cas->datadefQ, 
                                    obj);
-	CHK_OBJ_EXIT(obj, res, retres);
-	done = TRUE;
+        CHK_OBJ_EXIT(obj, res, retres);
+        done = TRUE;
     }
 
     /* get the case statements and any appinfo extensions */
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(obj, res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
+            CHK_OBJ_EXIT(obj, res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a keyword token string so check the value */
-	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_when(tkc, mod, obj, &when);
-	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, 
+        /* Got a keyword token string so check the value */
+        if (!xml_strcmp(val, YANG_K_WHEN)) {
+            res = yang_consume_when(tkc, mod, obj, &when);
+        } else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+            res = yang_consume_iffeature(tkc, 
                                          mod, 
-					 &obj->iffeatureQ,
-					 &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, 
+                                         &obj->iffeatureQ,
+                                         &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_STATUS)) {
+            res = yang_consume_status(tkc, 
                                       mod, 
                                       &cas->status,
-				      &stat, 
+                                      &stat, 
                                       &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &cas->descr,
-				     &desc, 
+                                     &desc, 
                                      &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &cas->ref,
-				     &ref, 
+                                     &ref, 
                                      &obj->appinfoQ);
-	} else {
-	    res = consume_case_datadef(pcb,
+        } else {
+            res = consume_case_datadef(pcb,
                                        tkc, 
                                        mod,
-				       cas->datadefQ, 
+                                       cas->datadefQ, 
                                        obj);
-	}
-	CHK_OBJ_EXIT(obj, res, retres);
+        }
+        CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* if shorthand version, copy leaf name to case name */
     if (!withcase && retres==NO_ERR) {
-	res = NO_ERR;
-	testobj = (obj_template_t *)dlq_firstEntry(cas->datadefQ);
-	if (testobj) {
-	    val = obj_get_name(testobj);
-	    if (val) {
-		cas->name = xml_strdup(val);
-		if (!cas->name) {
-		    res = ERR_INTERNAL_MEM;
-		}
-	    } else {
-		res = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	} else {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	}
+        res = NO_ERR;
+        testobj = (obj_template_t *)dlq_firstEntry(cas->datadefQ);
+        if (testobj) {
+            val = obj_get_name(testobj);
+            if (val) {
+                cas->name = xml_strdup(val);
+                if (!cas->name) {
+                    res = ERR_INTERNAL_MEM;
+                }
+            } else {
+                res = SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        } else {
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        }
     }
 
     /* check case arm already defined
@@ -1837,55 +1837,55 @@ static status_t
      * are already defined in a different case
      */
     if (retres == NO_ERR) {
-	res = NO_ERR;
-	for (casobj = (obj_template_t *)dlq_firstEntry(caseQ);
-	     casobj != NULL && res==NO_ERR;
-	     casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
+        res = NO_ERR;
+        for (casobj = (obj_template_t *)dlq_firstEntry(caseQ);
+             casobj != NULL && res==NO_ERR;
+             casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
 
-	    testcas = casobj->def.cas;
+            testcas = casobj->def.cas;
 
-	    if (!xml_strcmp(cas->name, testcas->name)) {
-		/* case arm name already used  error */
-		res = retres = ERR_NCX_DUP_ENTRY;
-		log_error("\nError: case name '%s' already used"
-			  " on line %u", 
+            if (!xml_strcmp(cas->name, testcas->name)) {
+                /* case arm name already used  error */
+                res = retres = ERR_NCX_DUP_ENTRY;
+                log_error("\nError: case name '%s' already used"
+                          " on line %u", 
                           testcas->name,
-			  casobj->tkerr.linenum);
-		ncx_print_errormsg(tkc, mod, retres);
-	    } else {
-		/* check object named within case arm already used */
-		for (testobj = (obj_template_t *)
-			 dlq_firstEntry(cas->datadefQ);
-		     testobj != NULL;
-		     testobj = (obj_template_t *)
-			 dlq_nextEntry(testobj)) {
+                          casobj->tkerr.linenum);
+                ncx_print_errormsg(tkc, mod, retres);
+            } else {
+                /* check object named within case arm already used */
+                for (testobj = (obj_template_t *)
+                         dlq_firstEntry(cas->datadefQ);
+                     testobj != NULL;
+                     testobj = (obj_template_t *)
+                         dlq_nextEntry(testobj)) {
 
-		    namestr = obj_get_name(testobj);
-		    test2obj = 
-			obj_find_template_test(testcas->datadefQ,
-					       obj_get_mod_name(testobj),
-					       namestr);
-		    if (test2obj) {
-			/* duplicate in another case arm error */
-			res = retres = ERR_NCX_DUP_ENTRY;
-			log_error("\nError: object name '%s' already used"
-				  " in case '%s', on line %u", 
-				  namestr, 
+                    namestr = obj_get_name(testobj);
+                    test2obj = 
+                        obj_find_template_test(testcas->datadefQ,
+                                               obj_get_mod_name(testobj),
+                                               namestr);
+                    if (test2obj) {
+                        /* duplicate in another case arm error */
+                        res = retres = ERR_NCX_DUP_ENTRY;
+                        log_error("\nError: object name '%s' already used"
+                                  " in case '%s', on line %u", 
+                                  namestr, 
                                   testcas->name, 
                                   test2obj->tkerr.linenum);
-			ncx_print_errormsg(tkc, mod, retres);
-		    } 
-		}
-	    }
-	}
+                        ncx_print_errormsg(tkc, mod, retres);
+                    } 
+                }
+            }
+        }
     }
-	
+        
     /* save or delete the obj_template_t struct */
     if (res==NO_ERR && cas->name && ncx_valid_name2(cas->name)) {
-	obj_set_ncx_flags(obj);
-	dlq_enque(obj, caseQ);
+        obj_set_ncx_flags(obj);
+        dlq_enque(obj, caseQ);
     } else {
-	obj_free_template(obj);
+        obj_free_template(obj);
     }
 
     return retres;
@@ -1918,10 +1918,10 @@ static status_t
 static status_t 
     consume_choice (yang_pcb_t *pcb,
                     tk_chain_t *tkc,
-		    ncx_module_t  *mod,
-		    dlq_hdr_t  *que,
-		    obj_template_t *parent,
-		    grp_template_t *grp)
+                    ncx_module_t  *mod,
+                    dlq_hdr_t  *que,
+                    obj_template_t *parent,
+                    grp_template_t *grp)
 {
     obj_template_t  *obj, *testobj, *test2obj, *casobj;
     obj_choice_t    *choic;
@@ -1950,9 +1950,9 @@ static status_t
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_CHOICE);
     if (!obj) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     ncx_set_error(&obj->tkerr,
@@ -1966,7 +1966,7 @@ static status_t
 
     choic = obj->def.choic;
     if (que == &mod->datadefQ) {
-	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
+        obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
 
     /* Get the mandatory choice name */
@@ -1978,194 +1978,194 @@ static status_t
 
     /* get the sub-section statements and any appinfo extensions */
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
-	flagset = FALSE;
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
+        flagset = FALSE;
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(obj, res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
+            CHK_OBJ_EXIT(obj, res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+            continue;
+        }
 
-	/* Got a keyword token string so check the value */
-	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_when(tkc, mod, obj, &when);
-	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, 
+        /* Got a keyword token string so check the value */
+        if (!xml_strcmp(val, YANG_K_WHEN)) {
+            res = yang_consume_when(tkc, mod, obj, &when);
+        } else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+            res = yang_consume_iffeature(tkc, 
                                          mod, 
-					 &obj->iffeatureQ,
-					 &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
-	    res = yang_consume_strclause(tkc, 
+                                         &obj->iffeatureQ,
+                                         &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
+            res = yang_consume_strclause(tkc, 
                                          mod, 
                                          &choic->defval,
-					 &def, 
+                                         &def, 
                                          &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
-	    res = yang_consume_boolean(tkc,
+        } else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
+            res = yang_consume_boolean(tkc,
                                        mod,
-				       &flagset,
-				       &mand,
+                                       &flagset,
+                                       &mand,
                                        &obj->appinfoQ);
-	    obj->flags |= OBJ_FL_MANDSET;
-	    if (flagset) {
-		obj->flags |= OBJ_FL_MANDATORY;
-	    }
-	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc,
+            obj->flags |= OBJ_FL_MANDSET;
+            if (flagset) {
+                obj->flags |= OBJ_FL_MANDATORY;
+            }
+        } else if (!xml_strcmp(val, YANG_K_STATUS)) {
+            res = yang_consume_status(tkc,
                                       mod,
                                       &choic->status,
-				      &stat,
+                                      &stat,
                                       &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc,
+        } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            res = yang_consume_descr(tkc,
                                      mod,
                                      &choic->descr,
-				     &desc,
+                                     &desc,
                                      &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc,
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+            res = yang_consume_descr(tkc,
                                      mod,
                                      &choic->ref,
-				     &ref,
+                                     &ref,
                                      &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
-	    res = yang_consume_boolean(tkc,
+        } else if (!xml_strcmp(val, YANG_K_CONFIG)) {
+            res = yang_consume_boolean(tkc,
                                        mod,
-				       &flagset,
-				       &conf,
+                                       &flagset,
+                                       &conf,
                                        &obj->appinfoQ);
-	    obj->flags |= OBJ_FL_CONFSET;
-	    if (flagset) {
-		obj->flags |= OBJ_FL_CONFIG;
-	    } else {
-		obj->flags &= OBJ_FL_CONFIG;
-	    }
-	} else if (!xml_strcmp(val, YANG_K_CASE)) {
-	    res = consume_case(pcb,
+            obj->flags |= OBJ_FL_CONFSET;
+            if (flagset) {
+                obj->flags |= OBJ_FL_CONFIG;
+            } else {
+                obj->flags &= OBJ_FL_CONFIG;
+            }
+        } else if (!xml_strcmp(val, YANG_K_CASE)) {
+            res = consume_case(pcb,
                                tkc, 
                                mod,
                                choic->caseQ,
                                obj, 
                                TRUE);
-	} else if (!xml_strcmp(val, YANG_K_ANYXML) ||
-		   !xml_strcmp(val, YANG_K_CONTAINER) ||
-		   !xml_strcmp(val, YANG_K_LEAF) ||
-		   !xml_strcmp(val, YANG_K_LEAF_LIST) ||
-		   !xml_strcmp(val, YANG_K_LIST)) {
-	    /* create an inline 1-obj case statement */
-	    res = consume_case(pcb,
+        } else if (!xml_strcmp(val, YANG_K_ANYXML) ||
+                   !xml_strcmp(val, YANG_K_CONTAINER) ||
+                   !xml_strcmp(val, YANG_K_LEAF) ||
+                   !xml_strcmp(val, YANG_K_LEAF_LIST) ||
+                   !xml_strcmp(val, YANG_K_LIST)) {
+            /* create an inline 1-obj case statement */
+            res = consume_case(pcb,
                                tkc, 
                                mod,
                                choic->caseQ,
                                obj, 
                                FALSE);
-	} else {
-	    res = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	}
-	CHK_OBJ_EXIT(obj, res, retres);
+        } else {
+            res = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+        }
+        CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
     if (choic->name && ncx_valid_name2(choic->name)) {
-	res = NO_ERR;
+        res = NO_ERR;
 
-	/* make sure sibling choice is not already defined with same name */
-	if (que == &mod->datadefQ) {
-	    testobj = obj_find_template_top(mod, 
-					    obj_get_mod_name(obj), 
-					    choic->name);
-	} else {
-	    testobj = obj_find_template_test(que, 
-					     obj_get_mod_name(obj),
-					     choic->name);
-	}
-	if (testobj) {
-	    if (testobj->tkerr.mod != mod) {
-		log_error("\nError: object '%s' already defined "
-			  "in submodule '%s' at line %u",
-			  choic->name, 
+        /* make sure sibling choice is not already defined with same name */
+        if (que == &mod->datadefQ) {
+            testobj = obj_find_template_top(mod, 
+                                            obj_get_mod_name(obj), 
+                                            choic->name);
+        } else {
+            testobj = obj_find_template_test(que, 
+                                             obj_get_mod_name(obj),
+                                             choic->name);
+        }
+        if (testobj) {
+            if (testobj->tkerr.mod != mod) {
+                log_error("\nError: object '%s' already defined "
+                          "in submodule '%s' at line %u",
+                          choic->name, 
                           testobj->tkerr.mod->name,
-			  testobj->tkerr.linenum);
-	    } else {
-		log_error("\nError: choice '%s' already defined at line %u",
-			  choic->name, 
                           testobj->tkerr.linenum);
-	    }
-	    res = retres = ERR_NCX_DUP_ENTRY;
-	    ncx_print_errormsg(tkc, mod, retres);
-	}
+            } else {
+                log_error("\nError: choice '%s' already defined at line %u",
+                          choic->name, 
+                          testobj->tkerr.linenum);
+            }
+            res = retres = ERR_NCX_DUP_ENTRY;
+            ncx_print_errormsg(tkc, mod, retres);
+        }
 
-	/* since the choice and case nodes do not really exist,
-	 * the objects within each case datadefQ must not conflict
-	 * with any sibling nodes of the choice itself
-	 */
-	for (casobj = (obj_template_t *)dlq_firstEntry(choic->caseQ);
-	     casobj != NULL;
-	     casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
+        /* since the choice and case nodes do not really exist,
+         * the objects within each case datadefQ must not conflict
+         * with any sibling nodes of the choice itself
+         */
+        for (casobj = (obj_template_t *)dlq_firstEntry(choic->caseQ);
+             casobj != NULL;
+             casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
 
-	    testcas = casobj->def.cas;
+            testcas = casobj->def.cas;
 
-	    /* check object named within choice sibling objects */
-	    for (testobj = (obj_template_t *)
-		     dlq_firstEntry(testcas->datadefQ);
-		 testobj != NULL;
-		 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
-		    
-		namestr = obj_get_name(testobj);
-		test2obj = 
-		    obj_find_template_test(que, 
-					   obj_get_mod_name(testobj), 
-					   namestr);
-		if (test2obj) {
-		    /* duplicate in the same Q as the choice */
-		    res = retres = ERR_NCX_DUP_ENTRY;
-		    log_error("\nError: object name '%s' in case '%s'"
-			      " already used in sibling node, on line %u", 
-			      namestr, 
+            /* check object named within choice sibling objects */
+            for (testobj = (obj_template_t *)
+                     dlq_firstEntry(testcas->datadefQ);
+                 testobj != NULL;
+                 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+                    
+                namestr = obj_get_name(testobj);
+                test2obj = 
+                    obj_find_template_test(que, 
+                                           obj_get_mod_name(testobj), 
+                                           namestr);
+                if (test2obj) {
+                    /* duplicate in the same Q as the choice */
+                    res = retres = ERR_NCX_DUP_ENTRY;
+                    log_error("\nError: object name '%s' in case '%s'"
+                              " already used in sibling node, on line %u", 
+                              namestr, 
                               obj_get_name(casobj),
                               test2obj->tkerr.linenum);
-		    ncx_print_errormsg(tkc, mod, retres);
-		} 
-	    }
-	}
+                    ncx_print_errormsg(tkc, mod, retres);
+                } 
+            }
+        }
 
-	if (res==NO_ERR) {
-	    obj_set_ncx_flags(obj);
-	    dlq_enque(obj, que);  /* may have some errors */	    
-	} else {
-	    obj_free_template(obj);
-	}
+        if (res==NO_ERR) {
+            obj_set_ncx_flags(obj);
+            dlq_enque(obj, que);  /* may have some errors */        
+        } else {
+            obj_free_template(obj);
+        }
     } else {
-	/* choice name was not valid */
-	obj_free_template(obj);
+        /* choice name was not valid */
+        obj_free_template(obj);
     }
 
     return retres;
@@ -2196,9 +2196,9 @@ static status_t
 *********************************************************************/
 static status_t 
     consume_refine (tk_chain_t *tkc,
-		    ncx_module_t  *mod,
-		    dlq_hdr_t *que,
-		    obj_template_t *parent)
+                    ncx_module_t  *mod,
+                    dlq_hdr_t *que,
+                    obj_template_t *parent)
 {
     obj_template_t  *obj;
     obj_refine_t    *refine;
@@ -2229,9 +2229,9 @@ static status_t
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_REFINE);
     if (!obj) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
     refine = obj->def.refine;
 
@@ -2252,151 +2252,151 @@ static status_t
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
-	flagset = FALSE;
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
+        flagset = FALSE;
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(obj, res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
+            CHK_OBJ_EXIT(obj, res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
-	if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    ncx_set_error(&refine->descr_tkerr,
+        /* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            ncx_set_error(&refine->descr_tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
-	    res = yang_consume_descr(tkc, 
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &refine->descr,
-				     &desc, 
+                                     &desc, 
                                      &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    ncx_set_error(&refine->ref_tkerr,
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+            ncx_set_error(&refine->ref_tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
-	    res = yang_consume_descr(tkc, 
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &refine->ref,
-				     &ref, 
+                                     &ref, 
                                      &obj->appinfoQ);
 
-	} else if (!xml_strcmp(val, YANG_K_PRESENCE)) {
-	    ncx_set_error(&refine->presence_tkerr,
+        } else if (!xml_strcmp(val, YANG_K_PRESENCE)) {
+            ncx_set_error(&refine->presence_tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
-	    res = yang_consume_strclause(tkc, 
+            res = yang_consume_strclause(tkc, 
                                          mod, 
-					 &refine->presence,
-					 &pres, 
+                                         &refine->presence,
+                                         &pres, 
                                          &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
-	    ncx_set_error(&refine->def_tkerr,
+        } else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
+            ncx_set_error(&refine->def_tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
-	    res = yang_consume_strclause(tkc, 
+            res = yang_consume_strclause(tkc, 
                                          mod, 
-					 &refine->def,
-					 &def, 
+                                         &refine->def,
+                                         &def, 
                                          &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
-	    ncx_set_error(&refine->config_tkerr,
+        } else if (!xml_strcmp(val, YANG_K_CONFIG)) {
+            ncx_set_error(&refine->config_tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
-	    res = yang_consume_boolean(tkc, 
+            res = yang_consume_boolean(tkc, 
                                        mod, 
                                        &flagset,
-				       &conf, 
+                                       &conf, 
                                        &obj->appinfoQ);
-	    obj->flags |= OBJ_FL_CONFSET;
-	    if (flagset) {
-		obj->flags |= OBJ_FL_CONFIG;
-	    } else {
-		obj->flags &= ~OBJ_FL_CONFIG;
-	    }
-	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
-	    ncx_set_error(&refine->mandatory_tkerr,
+            obj->flags |= OBJ_FL_CONFSET;
+            if (flagset) {
+                obj->flags |= OBJ_FL_CONFIG;
+            } else {
+                obj->flags &= ~OBJ_FL_CONFIG;
+            }
+        } else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
+            ncx_set_error(&refine->mandatory_tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
-	    res = yang_consume_boolean(tkc, 
+            res = yang_consume_boolean(tkc, 
                                        mod,
-				       &flagset,
-				       &mand, 
+                                       &flagset,
+                                       &mand, 
                                        &obj->appinfoQ);
-	    obj->flags |= OBJ_FL_MANDSET;
-	    if (flagset) {
-		obj->flags |= OBJ_FL_MANDATORY;
-	    }
-	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
-	    ncx_set_error(&refine->minelems_tkerr,
+            obj->flags |= OBJ_FL_MANDSET;
+            if (flagset) {
+                obj->flags |= OBJ_FL_MANDATORY;
+            }
+        } else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
+            ncx_set_error(&refine->minelems_tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
-	    res = yang_consume_uint32(tkc, 
+            res = yang_consume_uint32(tkc, 
                                       mod,
-				      &refine->minelems,
-				      &minel, 
+                                      &refine->minelems,
+                                      &minel, 
                                       &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
-	    ncx_set_error(&refine->maxelems_tkerr,
+        } else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
+            ncx_set_error(&refine->maxelems_tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
-	    res = yang_consume_max_elements(tkc, 
+            res = yang_consume_max_elements(tkc, 
                                             mod,
-					    &refine->maxelems,
-					    &maxel, 
+                                            &refine->maxelems,
+                                            &maxel, 
                                             &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_MUST)) {
-	    res = yang_consume_must(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_MUST)) {
+            res = yang_consume_must(tkc, 
                                     mod, 
                                     &refine->mustQ,
-				    &obj->appinfoQ);
-	} else {
-	    res = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	}
-	CHK_OBJ_EXIT(obj, res, retres);
+                                    &obj->appinfoQ);
+        } else {
+            res = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+        }
+        CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
     if (refine->target) {
-	res = add_object(tkc, mod, que, obj);
-	CHK_EXIT(res, retres);
+        res = add_object(tkc, mod, que, obj);
+        CHK_EXIT(res, retres);
     } else {
-	obj_free_template(obj);
+        obj_free_template(obj);
     }
 
     return res;
@@ -2429,10 +2429,10 @@ static status_t
 static status_t 
     consume_uses (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-		  ncx_module_t  *mod,
-		  dlq_hdr_t  *que,
-		  obj_template_t *parent,
-		  grp_template_t *grp)
+                  ncx_module_t  *mod,
+                  dlq_hdr_t  *que,
+                  obj_template_t *parent,
+                  grp_template_t *grp)
 {
     obj_template_t  *obj, *testobj;
     obj_uses_t      *uses;
@@ -2461,9 +2461,9 @@ static status_t
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_USES);
     if (!obj) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     ncx_set_error(&obj->tkerr,
@@ -2475,7 +2475,7 @@ static status_t
     obj->nsid = mod->nsid;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
-	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
+        obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
 
     uses = obj->def.uses;
@@ -2483,21 +2483,21 @@ static status_t
     /* Get the mandatory uses target [prefix:]name */
     res = yang_consume_pid_string(tkc, 
                                   mod,
-				  &uses->prefix,
-				  &uses->name);
+                                  &uses->prefix,
+                                  &uses->name);
     CHK_OBJ_EXIT(obj, res, retres);
 
     /* attempt to find grouping only if it is from another module */
     if (uses->prefix && xml_strcmp(uses->prefix, mod->prefix)) {
-	res = yang_find_imp_grouping(pcb,
+        res = yang_find_imp_grouping(pcb,
                                      tkc, 
                                      mod, 
                                      uses->prefix,
-				     uses->name, 
+                                     uses->name, 
                                      &obj->tkerr, 
                                      &impgrp);
-	CHK_OBJ_EXIT(obj, res, retres);
-	uses->grp = impgrp;
+        CHK_OBJ_EXIT(obj, res, retres);
+        uses->grp = impgrp;
     }
 
     res = consume_semi_lbrace(tkc, mod, obj, &done);
@@ -2507,111 +2507,111 @@ static status_t
 
     /* get the sub-section statements and any appinfo extensions */
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(obj, res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
+            CHK_OBJ_EXIT(obj, res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a keyword token string so check the value */
-	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_when(tkc, mod, obj, &when);
-	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, 
+        /* Got a keyword token string so check the value */
+        if (!xml_strcmp(val, YANG_K_WHEN)) {
+            res = yang_consume_when(tkc, mod, obj, &when);
+        } else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+            res = yang_consume_iffeature(tkc, 
                                          mod, 
-					 &obj->iffeatureQ,
-					 &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, 
+                                         &obj->iffeatureQ,
+                                         &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_STATUS)) {
+            res = yang_consume_status(tkc, 
                                       mod, 
                                       &uses->status,
-				      &stat, 
+                                      &stat, 
                                       &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &uses->descr,
-				     &desc, 
+                                     &desc, 
                                      &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &uses->ref,
-				     &ref, 
+                                     &ref, 
                                      &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_AUGMENT)) {
-	    res = consume_augment(pcb,
+        } else if (!xml_strcmp(val, YANG_K_AUGMENT)) {
+            res = consume_augment(pcb,
                                   tkc, 
                                   mod, 
                                   uses->datadefQ,
                                   obj, 
                                   NULL);
-	} else if (!xml_strcmp(val, YANG_K_REFINE)) {
-	    res = consume_refine(tkc, mod, uses->datadefQ, obj);
-	} else {
-	   res = ERR_NCX_WRONG_TKVAL;
-	   ncx_mod_exp_err(tkc, mod, res, expstr);
-	}
-	CHK_OBJ_EXIT(obj, res, retres);
+        } else if (!xml_strcmp(val, YANG_K_REFINE)) {
+            res = consume_refine(tkc, mod, uses->datadefQ, obj);
+        } else {
+           res = ERR_NCX_WRONG_TKVAL;
+           ncx_mod_exp_err(tkc, mod, res, expstr);
+        }
+        CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
     if (uses->name && ncx_valid_name2(uses->name)) {
-	testobj = obj_find_template_test(que, 
-					 obj_get_mod_name(obj),
-					 uses->name);
-	if (testobj) {
-	    log_error("\nError: object '%s' already defined at line %u",
-		      uses->name, 
+        testobj = obj_find_template_test(que, 
+                                         obj_get_mod_name(obj),
+                                         uses->name);
+        if (testobj) {
+            log_error("\nError: object '%s' already defined at line %u",
+                      uses->name, 
                       testobj->tkerr.linenum);
-	    retres = ERR_NCX_DUP_ENTRY;
-	    ncx_print_errormsg(tkc, mod, retres);
-	    obj_free_template(obj);
-	} else {
-	    obj_set_ncx_flags(obj);
-	    dlq_enque(obj, que);  /* may have some errors */
-	    if (mod->stmtmode && que==&mod->datadefQ) {
-		/* save top-level object order only */
-		stmt = yang_new_obj_stmt(obj);
-		if (stmt) {
-		    dlq_enque(stmt, &mod->stmtQ);
-		} else {
-		    log_error("\nError: malloc failure for obj_stmt");
-		    res = ERR_INTERNAL_MEM;
-		    ncx_print_errormsg(tkc, mod, res);
-		}
-	    }
-	}
+            retres = ERR_NCX_DUP_ENTRY;
+            ncx_print_errormsg(tkc, mod, retres);
+            obj_free_template(obj);
+        } else {
+            obj_set_ncx_flags(obj);
+            dlq_enque(obj, que);  /* may have some errors */
+            if (mod->stmtmode && que==&mod->datadefQ) {
+                /* save top-level object order only */
+                stmt = yang_new_obj_stmt(obj);
+                if (stmt) {
+                    dlq_enque(stmt, &mod->stmtQ);
+                } else {
+                    log_error("\nError: malloc failure for obj_stmt");
+                    res = ERR_INTERNAL_MEM;
+                    ncx_print_errormsg(tkc, mod, res);
+                }
+            }
+        }
     } else {
-	obj_free_template(obj);
+        obj_free_template(obj);
     }
 
     return retres;
@@ -2643,9 +2643,9 @@ static status_t
 static status_t 
     consume_rpcio (yang_pcb_t *pcb,
                    tk_chain_t *tkc,
-		   ncx_module_t  *mod,
-		   dlq_hdr_t  *que,
-		   obj_template_t *parent)
+                   ncx_module_t  *mod,
+                   dlq_hdr_t  *que,
+                   obj_template_t *parent)
 {
     obj_template_t  *obj, *testobj;
     obj_rpcio_t     *rpcio;
@@ -2667,9 +2667,9 @@ static status_t
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_RPCIO);
     if (!obj) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     ncx_set_error(&obj->tkerr,
@@ -2680,14 +2680,14 @@ static status_t
     obj->parent = parent;
     obj->nsid = mod->nsid;
     rpcio = obj->def.rpcio;
-	
+        
     /* Get the mandatory RPC method name */
     rpcio->name = xml_strdup(TK_CUR_VAL(tkc));
     if (!rpcio->name) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	obj_free_template(obj);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        obj_free_template(obj);
+        return res;
     }
 
     /* Get the starting left brace for the sub-clauses */
@@ -2696,76 +2696,76 @@ static status_t
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(obj, res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
+            CHK_OBJ_EXIT(obj, res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
-	if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    res = yang_typ_consume_typedef(pcb,
+        /* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
+            res = yang_typ_consume_typedef(pcb,
                                            tkc, 
                                            mod, 
                                            &rpcio->typedefQ);
-	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(pcb,
+        } else if (!xml_strcmp(val, YANG_K_GROUPING)) {
+            res = yang_grp_consume_grouping(pcb,
                                             tkc, 
                                             mod, 
-					    &rpcio->groupingQ, 
+                                            &rpcio->groupingQ, 
                                             obj);
-	} else {
-	    res = yang_obj_consume_datadef(pcb,
+        } else {
+            res = yang_obj_consume_datadef(pcb,
                                            tkc, 
                                            mod,
-					   &rpcio->datadefQ, 
+                                           &rpcio->datadefQ, 
                                            obj);
-	}
-	CHK_OBJ_EXIT(obj, res, retres);
+        }
+        CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
     testobj = obj_find_template_test(que, 
-				     obj_get_mod_name(obj),
-				     rpcio->name);
+                                     obj_get_mod_name(obj),
+                                     rpcio->name);
     if (testobj) {
-	log_error("\nError: '%s' statement already defined at line %u",
-		  rpcio->name, 
+        log_error("\nError: '%s' statement already defined at line %u",
+                  rpcio->name, 
                   testobj->tkerr.linenum);
-	retres = ERR_NCX_DUP_ENTRY;
-	ncx_print_errormsg(tkc, mod, retres);
-	obj_free_template(obj);
+        retres = ERR_NCX_DUP_ENTRY;
+        ncx_print_errormsg(tkc, mod, retres);
+        obj_free_template(obj);
     } else {
-	obj_set_ncx_flags(obj);
-	dlq_enque(obj, que);  /* may have some errors */
+        obj_set_ncx_flags(obj);
+        dlq_enque(obj, que);  /* may have some errors */
     }
 
     return retres;
@@ -2806,9 +2806,9 @@ static status_t
 static status_t 
     consume_augdata (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-		     ncx_module_t  *mod,
-		     dlq_hdr_t *que,
-		     obj_template_t *parent)
+                     ncx_module_t  *mod,
+                     dlq_hdr_t *que,
+                     obj_template_t *parent)
 {
     const xmlChar   *val;
     tk_type_t        tktyp;
@@ -2822,64 +2822,64 @@ static status_t
 
     /* check the current token type */
     if (tktyp != TK_TT_TSTRING) {
-	errdone = FALSE;
-	res = ERR_NCX_WRONG_TKTYPE;
+        errdone = FALSE;
+        res = ERR_NCX_WRONG_TKTYPE;
     } else {
-	/* Got a token string so check the value */
-	if (!xml_strcmp(val, YANG_K_ANYXML)) {
-	    res = consume_anyxml(tkc, mod, que, parent, NULL);
-	} else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
-	    res = consume_container(pcb,
+        /* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_ANYXML)) {
+            res = consume_anyxml(tkc, mod, que, parent, NULL);
+        } else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
+            res = consume_container(pcb,
                                     tkc, 
                                     mod, 
                                     que, 
                                     parent, 
                                     NULL);
-	} else if (!xml_strcmp(val, YANG_K_LEAF)) {
-	    res = consume_leaf(pcb,
+        } else if (!xml_strcmp(val, YANG_K_LEAF)) {
+            res = consume_leaf(pcb,
                                tkc, 
                                mod, 
                                que, 
                                parent, 
                                NULL);
-	} else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
-	    res = consume_leaflist(pcb,
+        } else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
+            res = consume_leaflist(pcb,
                                    tkc, 
                                    mod, 
                                    que, 
                                    parent, 
                                    NULL);
-	} else if (!xml_strcmp(val, YANG_K_LIST)) {
-	    res = consume_list(pcb,
+        } else if (!xml_strcmp(val, YANG_K_LIST)) {
+            res = consume_list(pcb,
                                tkc, 
                                mod, 
                                que, 
                                parent, 
                                NULL);
-	} else if (!xml_strcmp(val, YANG_K_CHOICE)) {
-	    res = consume_choice(pcb,
+        } else if (!xml_strcmp(val, YANG_K_CHOICE)) {
+            res = consume_choice(pcb,
                                  tkc, 
                                  mod, 
                                  que, 
                                  parent, 
                                  NULL);
-	} else if (!xml_strcmp(val, YANG_K_USES)) {
-	    res = consume_uses(pcb,
+        } else if (!xml_strcmp(val, YANG_K_USES)) {
+            res = consume_uses(pcb,
                                tkc, 
                                mod, 
                                que, 
                                parent, 
                                NULL);
-	} else {
-	    errdone = FALSE;
-	    res = ERR_NCX_WRONG_TKVAL;
-	}
+        } else {
+            errdone = FALSE;
+            res = ERR_NCX_WRONG_TKVAL;
+        }
     }
 
     if (res != NO_ERR && !errdone) {
-	ncx_mod_exp_err(tkc, mod, res,
-			"container, leaf, leaf-list, list, "
-			"choice, or uses keyword");
+        ncx_mod_exp_err(tkc, mod, res,
+                        "container, leaf, leaf-list, list, "
+                        "choice, or uses keyword");
     }
 
     return res;
@@ -2912,10 +2912,10 @@ static status_t
 static status_t 
     consume_augment (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-		     ncx_module_t  *mod,
-		     dlq_hdr_t *que,
-		     obj_template_t *parent,
-		     grp_template_t *grp)
+                     ncx_module_t  *mod,
+                     dlq_hdr_t *que,
+                     obj_template_t *parent,
+                     grp_template_t *grp)
 {
 
     obj_template_t  *obj;
@@ -2947,9 +2947,9 @@ static status_t
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_AUGMENT);
     if (!obj) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     ncx_set_error(&obj->tkerr,
@@ -2961,7 +2961,7 @@ static status_t
     obj->nsid = mod->nsid;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
-	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
+        obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
 
     aug = obj->def.augment;
@@ -2976,100 +2976,100 @@ static status_t
 
     /* get the sub-section statements and any appinfo extensions */
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(obj, res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
+            CHK_OBJ_EXIT(obj, res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a keyword token string so check the value */
-	if (!xml_strcmp(val, YANG_K_WHEN)) {
-	    res = yang_consume_when(tkc, mod, obj, &when);
-	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, 
+        /* Got a keyword token string so check the value */
+        if (!xml_strcmp(val, YANG_K_WHEN)) {
+            res = yang_consume_when(tkc, mod, obj, &when);
+        } else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+            res = yang_consume_iffeature(tkc, 
                                          mod, 
-					 &obj->iffeatureQ,
-					 &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, 
+                                         &obj->iffeatureQ,
+                                         &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_STATUS)) {
+            res = yang_consume_status(tkc, 
                                       mod, 
                                       &aug->status,
-				      &stat, 
+                                      &stat, 
                                       &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &aug->descr,
-				     &desc, 
+                                     &desc, 
                                      &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &aug->ref,
-				     &ref, 
+                                     &ref, 
                                      &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_CASE)) {
-	    res = consume_case(pcb,
+        } else if (!xml_strcmp(val, YANG_K_CASE)) {
+            res = consume_case(pcb,
                                tkc, 
                                mod, 
                                &aug->datadefQ,
                                obj, 
                                TRUE);
-	} else {
-	    res = consume_augdata(pcb,
+        } else {
+            res = consume_augdata(pcb,
                                   tkc, 
                                   mod, 
                                   &aug->datadefQ, 
                                   obj);
-	}
-	CHK_OBJ_EXIT(obj, res, retres);
+        }
+        CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
     if (aug->target) {
-	obj_set_ncx_flags(obj);
-	dlq_enque(obj, que);
-	if (mod->stmtmode && que==&mod->datadefQ) {
-	    /* save top-level object order only */
-	    stmt = yang_new_obj_stmt(obj);
-	    if (stmt) {
-		dlq_enque(stmt, &mod->stmtQ);
-	    } else {
-		log_error("\nError: malloc failure for obj_stmt");
-		res = ERR_INTERNAL_MEM;
-		ncx_print_errormsg(tkc, mod, res);
-	    }
-	}
+        obj_set_ncx_flags(obj);
+        dlq_enque(obj, que);
+        if (mod->stmtmode && que==&mod->datadefQ) {
+            /* save top-level object order only */
+            stmt = yang_new_obj_stmt(obj);
+            if (stmt) {
+                dlq_enque(stmt, &mod->stmtQ);
+            } else {
+                log_error("\nError: malloc failure for obj_stmt");
+                res = ERR_INTERNAL_MEM;
+                ncx_print_errormsg(tkc, mod, res);
+            }
+        }
     } else {
-	obj_free_template(obj);
+        obj_free_template(obj);
     }
 
     return retres;
@@ -3102,9 +3102,9 @@ static status_t
 static status_t 
     consume_case_datadef (yang_pcb_t *pcb,
                           tk_chain_t *tkc,
-			  ncx_module_t  *mod,
-			  dlq_hdr_t *que,
-			  obj_template_t *parent)
+                          ncx_module_t  *mod,
+                          dlq_hdr_t *que,
+                          obj_template_t *parent)
 {
     const xmlChar   *val;
     const char      *expstr;
@@ -3113,7 +3113,7 @@ static status_t
     status_t         res;
 
     expstr = "container, leaf, leaf-list, list, uses,"
-	"or augment keyword";
+        "or augment keyword";
     errdone = TRUE;
     res = NO_ERR;
     tktyp = TK_CUR_TYP(tkc);
@@ -3121,66 +3121,66 @@ static status_t
 
     /* check the current token type */
     if (tktyp != TK_TT_TSTRING) {
-	res = ERR_NCX_WRONG_TKTYPE;
-	errdone = FALSE;
+        res = ERR_NCX_WRONG_TKTYPE;
+        errdone = FALSE;
     } else {
-	/* Got a token string so check the value */
-	if (!xml_strcmp(val, YANG_K_ANYXML)) {
-	    res = consume_anyxml(tkc, 
+        /* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_ANYXML)) {
+            res = consume_anyxml(tkc, 
                                  mod, 
                                  que,
                                  parent, 
                                  NULL);
-	} else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
-	    res = consume_container(pcb,
+        } else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
+            res = consume_container(pcb,
                                     tkc, 
                                     mod, 
                                     que,
                                     parent,
                                     NULL);
-	} else if (!xml_strcmp(val, YANG_K_LEAF)) {
-	    res = consume_leaf(pcb,
+        } else if (!xml_strcmp(val, YANG_K_LEAF)) {
+            res = consume_leaf(pcb,
                                tkc, 
                                mod,
                                que,
                                parent,
                                NULL);
-	} else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
-	    res = consume_leaflist(pcb,
+        } else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
+            res = consume_leaflist(pcb,
                                    tkc,
                                    mod,
                                    que,
                                    parent,
                                    NULL);
-	} else if (!xml_strcmp(val, YANG_K_LIST)) {
-	    res = consume_list(pcb,
+        } else if (!xml_strcmp(val, YANG_K_LIST)) {
+            res = consume_list(pcb,
                                tkc,
                                mod,
                                que,
                                parent,
                                NULL);
-	} else if (!xml_strcmp(val, YANG_K_CHOICE)) {
-	    res = consume_choice(pcb,
+        } else if (!xml_strcmp(val, YANG_K_CHOICE)) {
+            res = consume_choice(pcb,
                                  tkc,
                                  mod,
                                  que,
                                  parent,
                                  NULL);
-	} else if (!xml_strcmp(val, YANG_K_USES)) {
-	    res = consume_uses(pcb,
+        } else if (!xml_strcmp(val, YANG_K_USES)) {
+            res = consume_uses(pcb,
                                tkc, 
                                mod, 
                                que, 
                                parent, 
                                NULL);
-	} else {
-	    res = ERR_NCX_WRONG_TKVAL;
-	    errdone = FALSE;
-	}
+        } else {
+            res = ERR_NCX_WRONG_TKVAL;
+            errdone = FALSE;
+        }
     }
 
     if (res != NO_ERR && !errdone) {
-	ncx_mod_exp_err(tkc, mod, res, expstr);
+        ncx_mod_exp_err(tkc, mod, res, expstr);
     }
 
     return res;
@@ -3213,10 +3213,10 @@ static status_t
 static status_t 
     consume_rpc (yang_pcb_t *pcb,
                  tk_chain_t *tkc,
-		 ncx_module_t  *mod,
-		 dlq_hdr_t  *que,
-		 obj_template_t *parent,
-		 grp_template_t *grp)
+                 ncx_module_t  *mod,
+                 dlq_hdr_t  *que,
+                 obj_template_t *parent,
+                 grp_template_t *grp)
 {
     obj_template_t        *obj, *chobj;
     const obj_template_t  *testobj;
@@ -3241,9 +3241,9 @@ static status_t
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_RPC);
     if (!obj) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     ncx_set_error(&obj->tkerr,
@@ -3255,11 +3255,11 @@ static status_t
     obj->nsid = mod->nsid;
     obj->grp = grp;
     if (que == &mod->datadefQ) {
-	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
+        obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
 
     rpc = obj->def.rpc;
-	
+        
     /* Get the mandatory RPC method name */
     res = yang_consume_id_string(tkc, mod, &rpc->name);
     CHK_OBJ_EXIT(obj, res, retres);
@@ -3269,157 +3269,157 @@ static status_t
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(obj, res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
+            CHK_OBJ_EXIT(obj, res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
-	if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, 
+        /* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+            res = yang_consume_iffeature(tkc, 
                                          mod, 
-					 &obj->iffeatureQ,
-					 &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    res = yang_typ_consume_typedef(pcb,
+                                         &obj->iffeatureQ,
+                                         &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
+            res = yang_typ_consume_typedef(pcb,
                                            tkc, 
                                            mod, 
                                            &rpc->typedefQ);
-	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(pcb,
+        } else if (!xml_strcmp(val, YANG_K_GROUPING)) {
+            res = yang_grp_consume_grouping(pcb,
                                             tkc, 
                                             mod, 
-					    &rpc->groupingQ, 
+                                            &rpc->groupingQ, 
                                             obj);
-	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_STATUS)) {
+            res = yang_consume_status(tkc, 
                                       mod, 
                                       &rpc->status,
-				      &stat, 
+                                      &stat, 
                                       &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &rpc->descr,
-				     &desc, 
+                                     &desc, 
                                      &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &rpc->ref,
-				     &ref, 
+                                     &ref, 
                                      &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_INPUT) ||
-		   !xml_strcmp(val, YANG_K_OUTPUT)) {
-	    res = consume_rpcio(pcb,
+        } else if (!xml_strcmp(val, YANG_K_INPUT) ||
+                   !xml_strcmp(val, YANG_K_OUTPUT)) {
+            res = consume_rpcio(pcb,
                                 tkc, 
                                 mod, 
                                 &rpc->datadefQ, 
                                 obj);
-	} else {
-	    res = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	}
-	CHK_OBJ_EXIT(obj, res, retres);
+        } else {
+            res = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+        }
+        CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
     if (rpc->name && ncx_valid_name2(rpc->name)) {
 
-	/* make sure the rpc node has an input and output node
-	 * for augment purposes
-	 */
-	testobj = obj_find_child(obj, NULL, YANG_K_INPUT);
-	if (!testobj) {
-	    chobj = obj_new_template(OBJ_TYP_RPCIO);
-	    if (!chobj) {
-		res = ERR_INTERNAL_MEM;
-		ncx_print_errormsg(tkc, mod, res);
-		obj_free_template(obj);
-		return res;
-	    }
+        /* make sure the rpc node has an input and output node
+         * for augment purposes
+         */
+        testobj = obj_find_child(obj, NULL, YANG_K_INPUT);
+        if (!testobj) {
+            chobj = obj_new_template(OBJ_TYP_RPCIO);
+            if (!chobj) {
+                res = ERR_INTERNAL_MEM;
+                ncx_print_errormsg(tkc, mod, res);
+                obj_free_template(obj);
+                return res;
+            }
 
             ncx_set_error(&chobj->tkerr,
                           mod,
                           obj->tkerr.linenum,
                           obj->tkerr.linepos);
 
-	    chobj->parent = obj;
+            chobj->parent = obj;
 
-	    chobj->def.rpcio->name = xml_strdup(YANG_K_INPUT);
-	    if (!chobj->def.rpcio->name) {
-		res = ERR_INTERNAL_MEM;
-		ncx_print_errormsg(tkc, mod, res);
-		obj_free_template(chobj);
-		obj_free_template(obj);
-		return res;
-	    }
-	    obj_set_ncx_flags(chobj);
-	    dlq_enque(chobj, &obj->def.rpc->datadefQ);
-	}
+            chobj->def.rpcio->name = xml_strdup(YANG_K_INPUT);
+            if (!chobj->def.rpcio->name) {
+                res = ERR_INTERNAL_MEM;
+                ncx_print_errormsg(tkc, mod, res);
+                obj_free_template(chobj);
+                obj_free_template(obj);
+                return res;
+            }
+            obj_set_ncx_flags(chobj);
+            dlq_enque(chobj, &obj->def.rpc->datadefQ);
+        }
 
-	testobj = obj_find_child(obj, NULL, YANG_K_OUTPUT);
-	if (!testobj) {
-	    chobj = obj_new_template(OBJ_TYP_RPCIO);
-	    if (!chobj) {
-		res = ERR_INTERNAL_MEM;
-		ncx_print_errormsg(tkc, mod, res);
-		obj_free_template(obj);
-		return res;
-	    }
+        testobj = obj_find_child(obj, NULL, YANG_K_OUTPUT);
+        if (!testobj) {
+            chobj = obj_new_template(OBJ_TYP_RPCIO);
+            if (!chobj) {
+                res = ERR_INTERNAL_MEM;
+                ncx_print_errormsg(tkc, mod, res);
+                obj_free_template(obj);
+                return res;
+            }
 
             ncx_set_error(&chobj->tkerr,
                           mod,
                           obj->tkerr.linenum,
                           obj->tkerr.linepos);
 
-	    chobj->parent = obj;
+            chobj->parent = obj;
 
-	    chobj->def.rpcio->name = xml_strdup(YANG_K_OUTPUT);
-	    if (!chobj->def.rpcio->name) {
-		res = ERR_INTERNAL_MEM;
-		ncx_print_errormsg(tkc, mod, res);
-		obj_free_template(chobj);
-		obj_free_template(obj);
-		return res;
-	    }
-	    obj_set_ncx_flags(chobj);
-	    dlq_enque(chobj, &obj->def.rpc->datadefQ);
-	}
-	
-	res = add_object(tkc, mod, que, obj);
-	CHK_EXIT(res, retres);
+            chobj->def.rpcio->name = xml_strdup(YANG_K_OUTPUT);
+            if (!chobj->def.rpcio->name) {
+                res = ERR_INTERNAL_MEM;
+                ncx_print_errormsg(tkc, mod, res);
+                obj_free_template(chobj);
+                obj_free_template(obj);
+                return res;
+            }
+            obj_set_ncx_flags(chobj);
+            dlq_enque(chobj, &obj->def.rpc->datadefQ);
+        }
+        
+        res = add_object(tkc, mod, que, obj);
+        CHK_EXIT(res, retres);
     } else {
-	obj_free_template(obj);
+        obj_free_template(obj);
     }
 
     return retres;
@@ -3452,10 +3452,10 @@ static status_t
 static status_t 
     consume_notif (yang_pcb_t *pcb,
                    tk_chain_t *tkc,
-		   ncx_module_t  *mod,
-		   dlq_hdr_t  *que,
-		   obj_template_t *parent,
-		   grp_template_t *grp)
+                   ncx_module_t  *mod,
+                   dlq_hdr_t  *que,
+                   obj_template_t *parent,
+                   grp_template_t *grp)
 {
     obj_template_t  *obj;
     obj_notif_t     *notif;
@@ -3479,9 +3479,9 @@ static status_t
     /* Get a new obj_template_t to fill in */
     obj = obj_new_template(OBJ_TYP_NOTIF);
     if (!obj) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     ncx_set_error(&obj->tkerr,
@@ -3493,11 +3493,11 @@ static status_t
     obj->grp = grp;
     obj->nsid = mod->nsid;
     if (que == &mod->datadefQ) {
-	obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
+        obj->flags |= (OBJ_FL_TOP | OBJ_FL_CONFSET | OBJ_FL_CONFIG);
     }
 
     notif = obj->def.notif;
-	
+        
     /* Get the mandatory RPC method name */
     res = yang_consume_id_string(tkc, mod, &notif->name);
     CHK_OBJ_EXIT(obj, res, retres);
@@ -3507,92 +3507,92 @@ static status_t
 
     /* get the container statements and any appinfo extensions */
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_template(obj);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
-	    CHK_OBJ_EXIT(obj, res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_template(obj);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &obj->appinfoQ);
+            CHK_OBJ_EXIT(obj, res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
-	if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    res = yang_typ_consume_typedef(pcb,
+        /* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
+            res = yang_typ_consume_typedef(pcb,
                                            tkc, 
                                            mod, 
                                            &notif->typedefQ);
-	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(pcb,
+        } else if (!xml_strcmp(val, YANG_K_GROUPING)) {
+            res = yang_grp_consume_grouping(pcb,
                                             tkc, 
                                             mod, 
-					    &notif->groupingQ, 
+                                            &notif->groupingQ, 
                                             obj);
-	} else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
-	    res = yang_consume_iffeature(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_IF_FEATURE)) {
+            res = yang_consume_iffeature(tkc, 
                                          mod, 
-					 &obj->iffeatureQ,
-					 &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, 
+                                         &obj->iffeatureQ,
+                                         &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_STATUS)) {
+            res = yang_consume_status(tkc, 
                                       mod, 
                                       &notif->status,
-				      &stat, 
+                                      &stat, 
                                       &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc,
+        } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            res = yang_consume_descr(tkc,
                                      mod, 
                                      &notif->descr,
-				     &desc,
+                                     &desc,
                                      &obj->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc,
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+            res = yang_consume_descr(tkc,
                                      mod,
                                      &notif->ref,
-				     &ref,
+                                     &ref,
                                      &obj->appinfoQ);
-	} else {
-	    res = consume_datadef(pcb,
+        } else {
+            res = consume_datadef(pcb,
                                   tkc,
                                   mod,
                                   &notif->datadefQ,
-				  obj,
+                                  obj,
                                   NULL);
-	}
-	CHK_OBJ_EXIT(obj, res, retres);
+        }
+        CHK_OBJ_EXIT(obj, res, retres);
     }
 
     /* save or delete the obj_template_t struct */
     if (notif->name && ncx_valid_name2(notif->name)) {
-	res = add_object(tkc, mod, que, obj);
-	CHK_EXIT(res, retres);
+        res = add_object(tkc, mod, que, obj);
+        CHK_EXIT(res, retres);
     } else {
-	obj_free_template(obj);
+        obj_free_template(obj);
     }
 
     return retres;
@@ -3625,10 +3625,10 @@ static status_t
 static status_t 
     apply_object_deviations (yang_pcb_t *pcb,
                              tk_chain_t *tkc,
-			     ncx_module_t  *mod,
-			     obj_template_t *targobj,
+                             ncx_module_t  *mod,
+                             obj_template_t *targobj,
                              obj_deviation_t *deviation,
-			     boolean *deleted)
+                             boolean *deleted)
 {
     obj_deviate_t      *devi;
     xmlChar           **strarg;
@@ -3646,377 +3646,377 @@ static status_t
     dlq_createSQue(&datadefQ);
 
     for (devi = (obj_deviate_t *)
-	     dlq_firstEntry(&deviation->deviateQ);
-	 devi != NULL && res == NO_ERR && !done;
-	 devi = (obj_deviate_t *)dlq_nextEntry(devi)) {
+             dlq_firstEntry(&deviation->deviateQ);
+         devi != NULL && res == NO_ERR && !done;
+         devi = (obj_deviate_t *)dlq_nextEntry(devi)) {
 
-	switch (devi->arg) {
-	case OBJ_DARG_NOT_SUPPORTED:
-	    /* make sure not deleting a key leaf */
-	    if (obj_is_key(targobj)) {
-		res = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: cannot remove key leaf %s:%s",
-			  obj_get_mod_name(targobj),
-			  obj_get_name(targobj));
-		tkc->curerr = &devi->tkerr;
-		ncx_print_errormsg(tkc, mod, res);
-		continue;
-	    }
+        switch (devi->arg) {
+        case OBJ_DARG_NOT_SUPPORTED:
+            /* make sure not deleting a key leaf */
+            if (obj_is_key(targobj)) {
+                res = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: cannot remove key leaf %s:%s",
+                          obj_get_mod_name(targobj),
+                          obj_get_name(targobj));
+                tkc->curerr = &devi->tkerr;
+                ncx_print_errormsg(tkc, mod, res);
+                continue;
+            }
 
-	    /* remove the node and toss it out */
-	    if (LOGDEBUG2) {
-		log_debug2("\napply_dev: mark target obj %s:%s for removal",
-			   obj_get_mod_name(targobj),
-			   obj_get_name(targobj));
-	    }
-	    targobj->flags |= OBJ_FL_DELETED;
-	    *deleted = TRUE;
-	    done = TRUE;
-	    break;
-	case OBJ_DARG_ADD:
-	case OBJ_DARG_REPLACE:
-	case OBJ_DARG_DELETE:
-	    /* type-stmt */
-	    if (devi->typdef) {
-		/* only allowed arg is replace, so
-		 * replace the typdef; minor alteration :-) 
-		 */
-		retest = TRUE;
-		if (LOGDEBUG3) {
-		    log_debug3("\napply_dev: replacing type in "
-			       "target obj %s:%s",
-			       obj_get_mod_name(targobj),
-			       obj_get_name(targobj));
-		}
-		switch (targobj->objtype) {
+            /* remove the node and toss it out */
+            if (LOGDEBUG2) {
+                log_debug2("\napply_dev: mark target obj %s:%s for removal",
+                           obj_get_mod_name(targobj),
+                           obj_get_name(targobj));
+            }
+            targobj->flags |= OBJ_FL_DELETED;
+            *deleted = TRUE;
+            done = TRUE;
+            break;
+        case OBJ_DARG_ADD:
+        case OBJ_DARG_REPLACE:
+        case OBJ_DARG_DELETE:
+            /* type-stmt */
+            if (devi->typdef) {
+                /* only allowed arg is replace, so
+                 * replace the typdef; minor alteration :-) 
+                 */
+                retest = TRUE;
+                if (LOGDEBUG3) {
+                    log_debug3("\napply_dev: replacing type in "
+                               "target obj %s:%s",
+                               obj_get_mod_name(targobj),
+                               obj_get_name(targobj));
+                }
+                switch (targobj->objtype) {
                 case OBJ_TYP_ANYXML:
-		case OBJ_TYP_LEAF:
-		    typ_free_typdef(targobj->def.leaf->typdef);
-		    targobj->def.leaf->typdef = devi->typdef;
-		    devi->typdef = NULL;
-		    break;
-		case OBJ_TYP_LEAF_LIST:
-		    typ_free_typdef(targobj->def.leaflist->typdef);
-		    targobj->def.leaflist->typdef = devi->typdef;
-		    devi->typdef = NULL;
-		    break;
-		default:
-		    res = SET_ERROR(ERR_INTERNAL_VAL);
-		    continue;
-		}
-	    }
+                case OBJ_TYP_LEAF:
+                    typ_free_typdef(targobj->def.leaf->typdef);
+                    targobj->def.leaf->typdef = devi->typdef;
+                    devi->typdef = NULL;
+                    break;
+                case OBJ_TYP_LEAF_LIST:
+                    typ_free_typdef(targobj->def.leaflist->typdef);
+                    targobj->def.leaflist->typdef = devi->typdef;
+                    devi->typdef = NULL;
+                    break;
+                default:
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                    continue;
+                }
+            }
 
-	    /* units-stmt */
-	    if (devi->units) {
-		switch (targobj->objtype) {
-		case OBJ_TYP_LEAF:
-		    strarg = &targobj->def.leaf->units;
-		    break;
-		case OBJ_TYP_LEAF_LIST:
-		    strarg = &targobj->def.leaflist->units;
-		    break;
-		default:
-		    res = SET_ERROR(ERR_INTERNAL_VAL);
-		    continue;
-		}
-		switch (devi->arg) {
-		case OBJ_DARG_ADD:
-		    if (LOGDEBUG3) {
-			log_debug3("\napply_dev: adding units to "
-				   "target obj %s:%s",
-				   obj_get_mod_name(targobj),
-				   obj_get_name(targobj));
-		    }
-		    if (*strarg != NULL) {
-			SET_ERROR(ERR_INTERNAL_VAL);
-			m__free(*strarg);
-		    }
-		    *strarg = devi->units;
-		    devi->units = NULL;
-		    break;
-		case OBJ_DARG_DELETE:
-		    if (LOGDEBUG3) {
-			log_debug3("\napply_dev: deleting units in "
-				   "target obj %s:%s",
-				   obj_get_mod_name(targobj),
-				   obj_get_name(targobj));
-		    }
-		    if (*strarg == NULL) {
-			SET_ERROR(ERR_INTERNAL_VAL);
-		    }
-		    m__free(*strarg);
-		    *strarg = NULL;
-		    break;
-		case OBJ_DARG_REPLACE:
-		    if (*strarg == NULL) {
-			SET_ERROR(ERR_INTERNAL_VAL);
-		    } else {
-			if (LOGDEBUG3) {
-			    log_debug3("\napply_dev: replacing units in "
-				       "target obj %s:%s",
-				       obj_get_mod_name(targobj),
-				       obj_get_name(targobj));
-			}
-			m__free(*strarg);
-			*strarg = devi->units;
-			devi->units = NULL;
-		    }
-		    break;
-		default:
-		    res = SET_ERROR(ERR_INTERNAL_VAL);
-		    continue;
-		}
-	    }
+            /* units-stmt */
+            if (devi->units) {
+                switch (targobj->objtype) {
+                case OBJ_TYP_LEAF:
+                    strarg = &targobj->def.leaf->units;
+                    break;
+                case OBJ_TYP_LEAF_LIST:
+                    strarg = &targobj->def.leaflist->units;
+                    break;
+                default:
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                    continue;
+                }
+                switch (devi->arg) {
+                case OBJ_DARG_ADD:
+                    if (LOGDEBUG3) {
+                        log_debug3("\napply_dev: adding units to "
+                                   "target obj %s:%s",
+                                   obj_get_mod_name(targobj),
+                                   obj_get_name(targobj));
+                    }
+                    if (*strarg != NULL) {
+                        SET_ERROR(ERR_INTERNAL_VAL);
+                        m__free(*strarg);
+                    }
+                    *strarg = devi->units;
+                    devi->units = NULL;
+                    break;
+                case OBJ_DARG_DELETE:
+                    if (LOGDEBUG3) {
+                        log_debug3("\napply_dev: deleting units in "
+                                   "target obj %s:%s",
+                                   obj_get_mod_name(targobj),
+                                   obj_get_name(targobj));
+                    }
+                    if (*strarg == NULL) {
+                        SET_ERROR(ERR_INTERNAL_VAL);
+                    }
+                    m__free(*strarg);
+                    *strarg = NULL;
+                    break;
+                case OBJ_DARG_REPLACE:
+                    if (*strarg == NULL) {
+                        SET_ERROR(ERR_INTERNAL_VAL);
+                    } else {
+                        if (LOGDEBUG3) {
+                            log_debug3("\napply_dev: replacing units in "
+                                       "target obj %s:%s",
+                                       obj_get_mod_name(targobj),
+                                       obj_get_name(targobj));
+                        }
+                        m__free(*strarg);
+                        *strarg = devi->units;
+                        devi->units = NULL;
+                    }
+                    break;
+                default:
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                    continue;
+                }
+            }
 
-	    /* default-stmt */
-	    if (devi->defval) {
-		retest = TRUE;
-		switch (targobj->objtype) {
-		case OBJ_TYP_LEAF:
-		    strarg = &targobj->def.leaf->defval;
-		    break;
-		case OBJ_TYP_CHOICE:
-		    strarg = &targobj->def.choic->defval;
-		    break;
-		default:
-		    res = SET_ERROR(ERR_INTERNAL_VAL);
-		    continue;
-		}
-		switch (devi->arg) {
-		case OBJ_DARG_ADD:
-		    if (*strarg != NULL) {
-			SET_ERROR(ERR_INTERNAL_VAL);
-		    } else {
-			if (LOGDEBUG3) {
-			    log_debug3("\napply_dev: adding default to "
-				       "target obj %s:%s",
-				       obj_get_mod_name(targobj),
-				       obj_get_name(targobj));
-			}
-			*strarg = devi->defval;
-			devi->defval = NULL;
-		    }
-		    break;
-		case OBJ_DARG_DELETE:
-		    if (*strarg == NULL) {
-			SET_ERROR(ERR_INTERNAL_VAL);
-		    } else {
-			if (LOGDEBUG3) {
-			    log_debug3("\napply_dev: deleting default in "
-				       "target obj %s:%s",
-				       obj_get_mod_name(targobj),
-				       obj_get_name(targobj));
-			}
-			m__free(*strarg);
-			*strarg = NULL;
-		    }
-		    break;
-		case OBJ_DARG_REPLACE:
-		    if (*strarg == NULL) {
-			SET_ERROR(ERR_INTERNAL_VAL);
-		    } else {
-			if (LOGDEBUG3) {
-			    log_debug3("\napply_dev: replacing default in "
-				       "target obj %s:%s",
-				       obj_get_mod_name(targobj),
-				       obj_get_name(targobj));
-			}
-			m__free(*strarg);
-			*strarg = devi->units;
-			devi->units = NULL;
-		    }
-		    break;
-		default:
-		    res = SET_ERROR(ERR_INTERNAL_VAL);
-		    continue;
-		}
-	    }
+            /* default-stmt */
+            if (devi->defval) {
+                retest = TRUE;
+                switch (targobj->objtype) {
+                case OBJ_TYP_LEAF:
+                    strarg = &targobj->def.leaf->defval;
+                    break;
+                case OBJ_TYP_CHOICE:
+                    strarg = &targobj->def.choic->defval;
+                    break;
+                default:
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                    continue;
+                }
+                switch (devi->arg) {
+                case OBJ_DARG_ADD:
+                    if (*strarg != NULL) {
+                        SET_ERROR(ERR_INTERNAL_VAL);
+                    } else {
+                        if (LOGDEBUG3) {
+                            log_debug3("\napply_dev: adding default to "
+                                       "target obj %s:%s",
+                                       obj_get_mod_name(targobj),
+                                       obj_get_name(targobj));
+                        }
+                        *strarg = devi->defval;
+                        devi->defval = NULL;
+                    }
+                    break;
+                case OBJ_DARG_DELETE:
+                    if (*strarg == NULL) {
+                        SET_ERROR(ERR_INTERNAL_VAL);
+                    } else {
+                        if (LOGDEBUG3) {
+                            log_debug3("\napply_dev: deleting default in "
+                                       "target obj %s:%s",
+                                       obj_get_mod_name(targobj),
+                                       obj_get_name(targobj));
+                        }
+                        m__free(*strarg);
+                        *strarg = NULL;
+                    }
+                    break;
+                case OBJ_DARG_REPLACE:
+                    if (*strarg == NULL) {
+                        SET_ERROR(ERR_INTERNAL_VAL);
+                    } else {
+                        if (LOGDEBUG3) {
+                            log_debug3("\napply_dev: replacing default in "
+                                       "target obj %s:%s",
+                                       obj_get_mod_name(targobj),
+                                       obj_get_name(targobj));
+                        }
+                        m__free(*strarg);
+                        *strarg = devi->units;
+                        devi->units = NULL;
+                    }
+                    break;
+                default:
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                    continue;
+                }
+            }
 
-	    /* config-stmt */
-	    if (devi->config_tkerr.mod) {
-		retest = TRUE;
-		if (LOGDEBUG3) {
-		    log_debug3("\napply_dev: replacing config-stmt in "
-			       "target obj %s:%s",
-			       obj_get_mod_name(targobj),
-			       obj_get_name(targobj));
-		}
+            /* config-stmt */
+            if (devi->config_tkerr.mod) {
+                retest = TRUE;
+                if (LOGDEBUG3) {
+                    log_debug3("\napply_dev: replacing config-stmt in "
+                               "target obj %s:%s",
+                               obj_get_mod_name(targobj),
+                               obj_get_name(targobj));
+                }
 
-		targobj->flags |= OBJ_FL_CONFSET;
-		if (devi->config) {
-		    targobj->flags |= OBJ_FL_CONFIG;
-		} else {
-		    targobj->flags &= ~OBJ_FL_CONFIG;
-		}
-	    }
+                targobj->flags |= OBJ_FL_CONFSET;
+                if (devi->config) {
+                    targobj->flags |= OBJ_FL_CONFIG;
+                } else {
+                    targobj->flags &= ~OBJ_FL_CONFIG;
+                }
+            }
 
-	    /* mandatory-stmt */
-	    if (devi->mandatory_tkerr.mod) {
-		retest = TRUE;
-		if (LOGDEBUG3) {
-		    log_debug3("\napply_dev: replacing mandatory-stmt in "
-			       "target obj %s:%s",
-			       obj_get_mod_name(targobj),
-			       obj_get_name(targobj));
-		}
+            /* mandatory-stmt */
+            if (devi->mandatory_tkerr.mod) {
+                retest = TRUE;
+                if (LOGDEBUG3) {
+                    log_debug3("\napply_dev: replacing mandatory-stmt in "
+                               "target obj %s:%s",
+                               obj_get_mod_name(targobj),
+                               obj_get_name(targobj));
+                }
 
-		targobj->flags |= OBJ_FL_MANDSET;
-		if (devi->mandatory) {
-		    targobj->flags |= OBJ_FL_MANDATORY;
-		} else {
-		    targobj->flags &= ~OBJ_FL_MANDATORY;
-		}
-	    }
+                targobj->flags |= OBJ_FL_MANDSET;
+                if (devi->mandatory) {
+                    targobj->flags |= OBJ_FL_MANDATORY;
+                } else {
+                    targobj->flags &= ~OBJ_FL_MANDATORY;
+                }
+            }
 
-	    /* min-elements-stmt */
-	    if (devi->minelems_tkerr.mod) {
-		retest = TRUE;
-		if (LOGDEBUG3) {
-		    log_debug3("\napply_dev: replacing min-elements in "
-			       "target obj %s:%s",
-			       obj_get_mod_name(targobj),
-			       obj_get_name(targobj));
-		}
-		switch (targobj->objtype) {
-		case OBJ_TYP_LIST:
-		    targobj->def.list->minelems = devi->minelems;
-		    break;
-		case OBJ_TYP_LEAF_LIST:
-		    targobj->def.leaflist->minelems = devi->minelems;
-		    break;
-		default:
-		    res = SET_ERROR(ERR_INTERNAL_VAL);
-		    continue;
-		}
-	    }
+            /* min-elements-stmt */
+            if (devi->minelems_tkerr.mod) {
+                retest = TRUE;
+                if (LOGDEBUG3) {
+                    log_debug3("\napply_dev: replacing min-elements in "
+                               "target obj %s:%s",
+                               obj_get_mod_name(targobj),
+                               obj_get_name(targobj));
+                }
+                switch (targobj->objtype) {
+                case OBJ_TYP_LIST:
+                    targobj->def.list->minelems = devi->minelems;
+                    break;
+                case OBJ_TYP_LEAF_LIST:
+                    targobj->def.leaflist->minelems = devi->minelems;
+                    break;
+                default:
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                    continue;
+                }
+            }
 
-	    /* max-elements-stmt */
-	    if (devi->maxelems_tkerr.mod) {
-		retest = TRUE;
-		if (LOGDEBUG3) {
-		    log_debug3("\napply_dev: replacing max-elements in "
-			       "target obj %s:%s",
-			       obj_get_mod_name(targobj),
-			       obj_get_name(targobj));
-		}
-		switch (targobj->objtype) {
-		case OBJ_TYP_LIST:
-		    targobj->def.list->maxelems = devi->maxelems;
-		    break;
-		case OBJ_TYP_LEAF_LIST:
-		    targobj->def.leaflist->maxelems = devi->maxelems;
-		    break;
-		default:
-		    res = SET_ERROR(ERR_INTERNAL_VAL);
-		    continue;
-		}
-	    }
+            /* max-elements-stmt */
+            if (devi->maxelems_tkerr.mod) {
+                retest = TRUE;
+                if (LOGDEBUG3) {
+                    log_debug3("\napply_dev: replacing max-elements in "
+                               "target obj %s:%s",
+                               obj_get_mod_name(targobj),
+                               obj_get_name(targobj));
+                }
+                switch (targobj->objtype) {
+                case OBJ_TYP_LIST:
+                    targobj->def.list->maxelems = devi->maxelems;
+                    break;
+                case OBJ_TYP_LEAF_LIST:
+                    targobj->def.leaflist->maxelems = devi->maxelems;
+                    break;
+                default:
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                    continue;
+                }
+            }
 
-	    /* must-stmt */
-	    if (!dlq_empty(&devi->mustQ)) {
-		targQ = obj_get_mustQ(targobj);
-		if (!targQ) {
-		    res = SET_ERROR(ERR_INTERNAL_VAL);
-		    continue;
-		}
-		switch (devi->arg) {
-		case OBJ_DARG_ADD:
-		    if (LOGDEBUG3) {
-			log_debug3("\napply_dev: adding must-stmt(s) to "
-				   "target obj %s:%s",
-				   obj_get_mod_name(targobj),
-				   obj_get_name(targobj));
-		    }
-		    dlq_block_enque(&devi->mustQ, targQ);
-		    break;
-		case OBJ_DARG_DELETE:
-		    if (LOGDEBUG3) {
-			log_debug3("\napply_dev: removing must-stmt(s) from "
-				   "target obj %s:%s",
-				   obj_get_mod_name(targobj),
-				   obj_get_name(targobj));
-		    }
-		    for (must = (xpath_pcb_t *)dlq_firstEntry(&devi->mustQ);
-			 must != NULL;
-			 must = (xpath_pcb_t *)dlq_nextEntry(must)) {
+            /* must-stmt */
+            if (!dlq_empty(&devi->mustQ)) {
+                targQ = obj_get_mustQ(targobj);
+                if (!targQ) {
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                    continue;
+                }
+                switch (devi->arg) {
+                case OBJ_DARG_ADD:
+                    if (LOGDEBUG3) {
+                        log_debug3("\napply_dev: adding must-stmt(s) to "
+                                   "target obj %s:%s",
+                                   obj_get_mod_name(targobj),
+                                   obj_get_name(targobj));
+                    }
+                    dlq_block_enque(&devi->mustQ, targQ);
+                    break;
+                case OBJ_DARG_DELETE:
+                    if (LOGDEBUG3) {
+                        log_debug3("\napply_dev: removing must-stmt(s) from "
+                                   "target obj %s:%s",
+                                   obj_get_mod_name(targobj),
+                                   obj_get_name(targobj));
+                    }
+                    for (must = (xpath_pcb_t *)dlq_firstEntry(&devi->mustQ);
+                         must != NULL;
+                         must = (xpath_pcb_t *)dlq_nextEntry(must)) {
 
-			targmust = xpath_find_pcb(targQ,
-						  must->exprstr);
-			if (targmust) {
-			    dlq_remove(targmust);
-			    xpath_free_pcb(targmust);
-			} else {
-			    res = SET_ERROR(ERR_INTERNAL_VAL);
-			}
-		    }
-		    break;
-		default:
-		    res = SET_ERROR(ERR_INTERNAL_VAL);
-		}
-	    }
+                        targmust = xpath_find_pcb(targQ,
+                                                  must->exprstr);
+                        if (targmust) {
+                            dlq_remove(targmust);
+                            xpath_free_pcb(targmust);
+                        } else {
+                            res = SET_ERROR(ERR_INTERNAL_VAL);
+                        }
+                    }
+                    break;
+                default:
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                }
+            }
 
-	    /* unique-stmt */
-	    if (!dlq_empty(&devi->uniqueQ)) {
-		if (targobj->objtype != OBJ_TYP_LIST) {
-		    res = SET_ERROR(ERR_INTERNAL_VAL);
-		    continue;
-		}
-		targQ = &targobj->def.list->uniqueQ;
-		if (!targQ) {
-		    res = SET_ERROR(ERR_INTERNAL_VAL);
-		    continue;
-		}
-		switch (devi->arg) {
-		case OBJ_DARG_ADD:
-		    if (LOGDEBUG3) {
-			log_debug3("\napply_dev: adding unique-stmt(s) to "
-				   "target obj %s:%s",
-				   obj_get_mod_name(targobj),
-				   obj_get_name(targobj));
-		    }
-		    dlq_block_enque(&devi->uniqueQ, targQ);
-		    break;
-		case OBJ_DARG_DELETE:
-		    if (LOGDEBUG3) {
-			log_debug3("\napply_dev: removing unique-stmt(s) from "
-				   "target obj %s:%s",
-				   obj_get_mod_name(targobj),
-				   obj_get_name(targobj));
-		    }
-		    for (unique = (obj_unique_t *)
-			     dlq_firstEntry(&devi->uniqueQ);
-			 unique != NULL;
-			 unique = (obj_unique_t *)dlq_nextEntry(unique)) {
+            /* unique-stmt */
+            if (!dlq_empty(&devi->uniqueQ)) {
+                if (targobj->objtype != OBJ_TYP_LIST) {
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                    continue;
+                }
+                targQ = &targobj->def.list->uniqueQ;
+                if (!targQ) {
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                    continue;
+                }
+                switch (devi->arg) {
+                case OBJ_DARG_ADD:
+                    if (LOGDEBUG3) {
+                        log_debug3("\napply_dev: adding unique-stmt(s) to "
+                                   "target obj %s:%s",
+                                   obj_get_mod_name(targobj),
+                                   obj_get_name(targobj));
+                    }
+                    dlq_block_enque(&devi->uniqueQ, targQ);
+                    break;
+                case OBJ_DARG_DELETE:
+                    if (LOGDEBUG3) {
+                        log_debug3("\napply_dev: removing unique-stmt(s) from "
+                                   "target obj %s:%s",
+                                   obj_get_mod_name(targobj),
+                                   obj_get_name(targobj));
+                    }
+                    for (unique = (obj_unique_t *)
+                             dlq_firstEntry(&devi->uniqueQ);
+                         unique != NULL;
+                         unique = (obj_unique_t *)dlq_nextEntry(unique)) {
 
-			targunique = obj_find_unique(targQ, unique->xpath);
-			if (targunique) {
-			    dlq_remove(targunique);
-			    obj_free_unique(targunique);
-			} else {
-			    res = SET_ERROR(ERR_INTERNAL_VAL);
-			}
-		    }
-		    break;
-		default:
-		    res = SET_ERROR(ERR_INTERNAL_VAL);
-		    continue;
-		}
-		break;
-	    }
-	    break;
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
+                        targunique = obj_find_unique(targQ, unique->xpath);
+                        if (targunique) {
+                            dlq_remove(targunique);
+                            obj_free_unique(targunique);
+                        } else {
+                            res = SET_ERROR(ERR_INTERNAL_VAL);
+                        }
+                    }
+                    break;
+                default:
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                    continue;
+                }
+                break;
+            }
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
     }
 
     if (res == NO_ERR && retest && !deleted) {
-	if (LOGDEBUG3) {
-	    log_debug3("\nRechecking %s:%s after "
-		       "applying deviation(s)",
-		       obj_get_mod_name(targobj),
-		       obj_get_name(targobj));
-	}
-	res = resolve_datadef(pcb,
+        if (LOGDEBUG3) {
+            log_debug3("\nRechecking %s:%s after "
+                       "applying deviation(s)",
+                       obj_get_mod_name(targobj),
+                       obj_get_name(targobj));
+        }
+        res = resolve_datadef(pcb,
                               tkc, 
                               mod, 
                               targobj, 
@@ -4047,7 +4047,7 @@ static status_t
 static status_t 
     apply_all_object_deviations (yang_pcb_t *pcb,
                                  tk_chain_t *tkc,
-				 ncx_module_t *mod)
+                                 ncx_module_t *mod)
 {
     obj_deviation_t    *deviation;
     obj_template_t     *parentobj, *targobj;
@@ -4060,8 +4060,8 @@ static status_t
 
     for (deviation = (obj_deviation_t *)
              dlq_firstEntry(&mod->deviationQ);
-	 deviation != NULL && res == NO_ERR;
-	 deviation = (obj_deviation_t *)
+         deviation != NULL && res == NO_ERR;
+         deviation = (obj_deviation_t *)
              dlq_nextEntry(deviation)) {
 
         /* make sure deviation is for this module */
@@ -4074,18 +4074,18 @@ static status_t
         }
 
         /* make sure not already processed
-	 * all the deviate structs from this deviation
-	 * have been moved to the object deviate Q
-	 */
-	 deleted = FALSE;
-	 parentobj = deviation->targobj->parent;
-	 res = apply_object_deviations(pcb,
+         * all the deviate structs from this deviation
+         * have been moved to the object deviate Q
+         */
+         deleted = FALSE;
+         parentobj = deviation->targobj->parent;
+         res = apply_object_deviations(pcb,
                                        tkc, 
-				       mod,
-				       deviation->targobj,
+                                       mod,
+                                       deviation->targobj,
                                        deviation,
-				       &deleted);
-	 CHK_EXIT(res, retres);
+                                       &deleted);
+         CHK_EXIT(res, retres);
     }
 
     if (!pcb->stmtmode) {
@@ -4122,9 +4122,9 @@ static status_t
 *********************************************************************/
 static status_t 
     check_deviate_collision (tk_chain_t *tkc,
-			     ncx_module_t  *mod,
-			     obj_deviate_t *devi,
-			     dlq_hdr_t *deviateQ)
+                             ncx_module_t  *mod,
+                             obj_deviate_t *devi,
+                             dlq_hdr_t *deviateQ)
 {
     obj_deviate_t     *testdevi;
     status_t           res;
@@ -4133,109 +4133,109 @@ static status_t
 
     /* check valid deviation-stmt syntax */
     if (devi->arg != OBJ_DARG_NOT_SUPPORTED) {
-	for (testdevi = (obj_deviate_t *)dlq_firstEntry(deviateQ);
-	     testdevi != NULL;
-	     testdevi = (obj_deviate_t *)dlq_nextEntry(testdevi)) {
+        for (testdevi = (obj_deviate_t *)dlq_firstEntry(deviateQ);
+             testdevi != NULL;
+             testdevi = (obj_deviate_t *)dlq_nextEntry(testdevi)) {
 
-	    /* check the deviateQ to see if a 'not-supported' clause
-	     * already entered; if so, call it a fatal error
-	     */
-	    if (testdevi->arg == OBJ_DARG_NOT_SUPPORTED) {
-		res = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: not-supported deviate-stmt "
-			  "already entered on line %u",
-			  testdevi->tkerr.linenum);
-		tkc->curerr = &devi->tkerr;
-		ncx_print_errormsg(tkc, mod, res);
-	    } else {
-		/* make sure none of the same sub-stmts are
-		 * touched in these 2 deviate structs
-		 */
-		if (devi->typdef && testdevi->typdef) {
-		    res = ERR_NCX_INVALID_DEV_STMT;
-		    log_error("\nError: 'type' deviate-stmt "
-			      "already entered on line %u",
-			      testdevi->tkerr.linenum);
-		    tkc->curerr = &devi->tkerr;
-		    ncx_print_errormsg(tkc, mod, res);
-		}
+            /* check the deviateQ to see if a 'not-supported' clause
+             * already entered; if so, call it a fatal error
+             */
+            if (testdevi->arg == OBJ_DARG_NOT_SUPPORTED) {
+                res = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: not-supported deviate-stmt "
+                          "already entered on line %u",
+                          testdevi->tkerr.linenum);
+                tkc->curerr = &devi->tkerr;
+                ncx_print_errormsg(tkc, mod, res);
+            } else {
+                /* make sure none of the same sub-stmts are
+                 * touched in these 2 deviate structs
+                 */
+                if (devi->typdef && testdevi->typdef) {
+                    res = ERR_NCX_INVALID_DEV_STMT;
+                    log_error("\nError: 'type' deviate-stmt "
+                              "already entered on line %u",
+                              testdevi->tkerr.linenum);
+                    tkc->curerr = &devi->tkerr;
+                    ncx_print_errormsg(tkc, mod, res);
+                }
 
-		if (devi->units && testdevi->units) {
-		    res = ERR_NCX_INVALID_DEV_STMT;
-		    log_error("\nError: 'units' deviate-stmt "
-			      "already entered on line %u",
-			      testdevi->tkerr.linenum);
-		    tkc->curerr = &devi->tkerr;
-		    ncx_print_errormsg(tkc, mod, res);
-		}
+                if (devi->units && testdevi->units) {
+                    res = ERR_NCX_INVALID_DEV_STMT;
+                    log_error("\nError: 'units' deviate-stmt "
+                              "already entered on line %u",
+                              testdevi->tkerr.linenum);
+                    tkc->curerr = &devi->tkerr;
+                    ncx_print_errormsg(tkc, mod, res);
+                }
 
-		if (devi->defval && testdevi->defval) {
-		    res = ERR_NCX_INVALID_DEV_STMT;
-		    log_error("\nError: 'default' deviate-stmt "
-			      "already entered on line %u",
-			      testdevi->tkerr.linenum);
-		    tkc->curerr = &devi->tkerr;
-		    ncx_print_errormsg(tkc, mod, res);
-		}
+                if (devi->defval && testdevi->defval) {
+                    res = ERR_NCX_INVALID_DEV_STMT;
+                    log_error("\nError: 'default' deviate-stmt "
+                              "already entered on line %u",
+                              testdevi->tkerr.linenum);
+                    tkc->curerr = &devi->tkerr;
+                    ncx_print_errormsg(tkc, mod, res);
+                }
 
-		if (devi->config_tkerr.mod && 
+                if (devi->config_tkerr.mod && 
                     testdevi->config_tkerr.mod) {
-		    res = ERR_NCX_INVALID_DEV_STMT;
-		    log_error("\nError: 'config' deviate-stmt "
-			      "already entered on line %u",
-			      testdevi->tkerr.linenum);
-		    tkc->curerr = &devi->tkerr;
-		    ncx_print_errormsg(tkc, mod, res);
-		}
+                    res = ERR_NCX_INVALID_DEV_STMT;
+                    log_error("\nError: 'config' deviate-stmt "
+                              "already entered on line %u",
+                              testdevi->tkerr.linenum);
+                    tkc->curerr = &devi->tkerr;
+                    ncx_print_errormsg(tkc, mod, res);
+                }
 
-		if (devi->mandatory_tkerr.mod && 
+                if (devi->mandatory_tkerr.mod && 
                     testdevi->mandatory_tkerr.mod) {
-		    res = ERR_NCX_INVALID_DEV_STMT;
-		    log_error("\nError: 'mandatory' deviate-stmt "
-			      "already entered on line %u",
-			      testdevi->tkerr.linenum);
-		    tkc->curerr = &devi->tkerr;
-		    ncx_print_errormsg(tkc, mod, res);
-		}
+                    res = ERR_NCX_INVALID_DEV_STMT;
+                    log_error("\nError: 'mandatory' deviate-stmt "
+                              "already entered on line %u",
+                              testdevi->tkerr.linenum);
+                    tkc->curerr = &devi->tkerr;
+                    ncx_print_errormsg(tkc, mod, res);
+                }
 
-		if (devi->minelems_tkerr.mod && 
+                if (devi->minelems_tkerr.mod && 
                     testdevi->minelems_tkerr.mod) {
-		    res = ERR_NCX_INVALID_DEV_STMT;
-		    log_error("\nError: 'min-elements' deviate-stmt "
-			      "already entered on line %u",
-			      testdevi->tkerr.linenum);
-		    tkc->curerr = &devi->tkerr;
-		    ncx_print_errormsg(tkc, mod, res);
-		}
+                    res = ERR_NCX_INVALID_DEV_STMT;
+                    log_error("\nError: 'min-elements' deviate-stmt "
+                              "already entered on line %u",
+                              testdevi->tkerr.linenum);
+                    tkc->curerr = &devi->tkerr;
+                    ncx_print_errormsg(tkc, mod, res);
+                }
 
-		if (devi->maxelems_tkerr.mod && 
+                if (devi->maxelems_tkerr.mod && 
                     testdevi->maxelems_tkerr.mod) {
-		    res = ERR_NCX_INVALID_DEV_STMT;
-		    log_error("\nError: 'max-elements' deviate-stmt "
-			      "already entered on line %u",
-			      testdevi->tkerr.linenum);
-		    tkc->curerr = &devi->tkerr;
-		    ncx_print_errormsg(tkc, mod, res);
-		}
+                    res = ERR_NCX_INVALID_DEV_STMT;
+                    log_error("\nError: 'max-elements' deviate-stmt "
+                              "already entered on line %u",
+                              testdevi->tkerr.linenum);
+                    tkc->curerr = &devi->tkerr;
+                    ncx_print_errormsg(tkc, mod, res);
+                }
 
-		/**** check devi->mustQ against testdevi->mustQ
-		 **** just ignore them for now
-		 ****/
+                /**** check devi->mustQ against testdevi->mustQ
+                 **** just ignore them for now
+                 ****/
 
-		/**** check devi->uniqueQ against testdevi->uniqueQ
-		 **** just ignore them for now
-		 ****/
-	    }
-	}
+                /**** check devi->uniqueQ against testdevi->uniqueQ
+                 **** just ignore them for now
+                 ****/
+            }
+        }
     } else {
-	/* adding a not-supported, so make sure the Q is empty */
-	if (!dlq_empty(deviateQ)) {
-	    res = ERR_NCX_INVALID_DEV_STMT;
-	    log_error("\nError: 'not-supported' deviate-stmt "
-		      "not allowed");
-	    tkc->curerr = &devi->tkerr;
-	    ncx_print_errormsg(tkc, mod, res);
-	}
+        /* adding a not-supported, so make sure the Q is empty */
+        if (!dlq_empty(deviateQ)) {
+            res = ERR_NCX_INVALID_DEV_STMT;
+            log_error("\nError: 'not-supported' deviate-stmt "
+                      "not allowed");
+            tkc->curerr = &devi->tkerr;
+            ncx_print_errormsg(tkc, mod, res);
+        }
     }
 
     return res;
@@ -4353,8 +4353,8 @@ static status_t
 static status_t 
     consume_deviate (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-		     ncx_module_t  *mod,
-		     obj_deviation_t *deviation)
+                     ncx_module_t  *mod,
+                     obj_deviation_t *deviation)
 {
     obj_deviate_t    *devi;
     obj_unique_t     *uniq;
@@ -4370,9 +4370,9 @@ static status_t
     /* Get a new obj_deviation_t to fill in */
     devi = obj_new_deviate();
     if (!devi) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     val = NULL;
@@ -4398,456 +4398,456 @@ static status_t
     CHK_DEVI_EXIT(devi, res, retres);
 
     if (res == NO_ERR) {
-	/* check the value */
-	if (!xml_strcmp(str, YANG_K_ADD)) {
-	    devi->arg = OBJ_DARG_ADD;
-	} else if (!xml_strcmp(str, YANG_K_DELETE)) {
-	    devi->arg = OBJ_DARG_DELETE;
-	} else if (!xml_strcmp(str, YANG_K_REPLACE)) {
-	    devi->arg = OBJ_DARG_REPLACE;
-	} else if (!xml_strcmp(str, YANG_K_NOT_SUPPORTED)) {
-	    devi->arg = OBJ_DARG_NOT_SUPPORTED;
-	} else {
-	    log_error("\nError: invalid deviate-stmt "
-		      "argument '%s'", str);
-	    retres = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	}
+        /* check the value */
+        if (!xml_strcmp(str, YANG_K_ADD)) {
+            devi->arg = OBJ_DARG_ADD;
+        } else if (!xml_strcmp(str, YANG_K_DELETE)) {
+            devi->arg = OBJ_DARG_DELETE;
+        } else if (!xml_strcmp(str, YANG_K_REPLACE)) {
+            devi->arg = OBJ_DARG_REPLACE;
+        } else if (!xml_strcmp(str, YANG_K_NOT_SUPPORTED)) {
+            devi->arg = OBJ_DARG_NOT_SUPPORTED;
+        } else {
+            log_error("\nError: invalid deviate-stmt "
+                      "argument '%s'", str);
+            retres = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+        }
     }
 
     if (str) {
-	m__free(str);
-	str = NULL;
+        m__free(str);
+        str = NULL;
     }
 
     /* Get the starting left brace or semi-colon */
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	obj_free_deviate(devi);
-	return res;
+        ncx_print_errormsg(tkc, mod, res);
+        obj_free_deviate(devi);
+        return res;
     }
 
     /* check for semi-colon or left brace */
     switch (TK_CUR_TYP(tkc)) {
     case TK_TT_SEMICOL:
-	/* only 1 arg type allowed to be empty */
-	if (devi->arg == OBJ_DARG_NOT_SUPPORTED) {
-	    devi->empty = TRUE;
-	} else {
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    expstr = "left brace";
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	}
-	done = TRUE;
-	break;
+        /* only 1 arg type allowed to be empty */
+        if (devi->arg == OBJ_DARG_NOT_SUPPORTED) {
+            devi->empty = TRUE;
+        } else {
+            retres = ERR_NCX_WRONG_TKTYPE;
+            expstr = "left brace";
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+        }
+        done = TRUE;
+        break;
     case TK_TT_LBRACE:
-	done = FALSE;
-	break;
+        done = FALSE;
+        break;
     default:
-	retres = ERR_NCX_WRONG_TKTYPE;
-	expstr = "semi-colon or left brace";
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
-	done = TRUE;
+        retres = ERR_NCX_WRONG_TKTYPE;
+        expstr = "semi-colon or left brace";
+        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        done = TRUE;
     }
 
     expstr = "deviate-stmt sub-clause";
 
     /* get the sub-section statements and any appinfo extensions */
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_deviate(devi);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_deviate(devi);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_deviate(devi);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &devi->appinfoQ);
-	    CHK_DEVI_EXIT(devi, res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_deviate(devi);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &devi->appinfoQ);
+            CHK_DEVI_EXIT(devi, res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a keyword token string so check the value */
-	if (!xml_strcmp(val, YANG_K_TYPE)) {
-	    ncx_set_error(&devi->type_tkerr,
+        /* Got a keyword token string so check the value */
+        if (!xml_strcmp(val, YANG_K_TYPE)) {
+            ncx_set_error(&devi->type_tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
 
-	    switch (devi->arg) {
-	    case OBJ_DARG_NONE:
-		/* argument was invalid so cannot check it further */
-		break;
-	    case OBJ_DARG_ADD:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: type-stmt cannot be added");
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    case OBJ_DARG_DELETE:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: type-stmt cannot be deleted");
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    case OBJ_DARG_REPLACE:
-		/* only allowed verb is 'replace' for type-stmt */
-		break;
-	    case OBJ_DARG_NOT_SUPPORTED:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: sub-clauses not allowed "
-			  "for 'not-supported'");
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    default:
-		retres = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
+            switch (devi->arg) {
+            case OBJ_DARG_NONE:
+                /* argument was invalid so cannot check it further */
+                break;
+            case OBJ_DARG_ADD:
+                retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: type-stmt cannot be added");
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            case OBJ_DARG_DELETE:
+                retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: type-stmt cannot be deleted");
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            case OBJ_DARG_REPLACE:
+                /* only allowed verb is 'replace' for type-stmt */
+                break;
+            case OBJ_DARG_NOT_SUPPORTED:
+                retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: sub-clauses not allowed "
+                          "for 'not-supported'");
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            default:
+                retres = SET_ERROR(ERR_INTERNAL_VAL);
+            }
 
-	    if (type) {
-		log_error("\nError: type-stmt already entered");
-		retres = ERR_NCX_ENTRY_EXISTS;		
-		dummy = typ_new_typdef();
-		if (!dummy) {
-		    res = ERR_INTERNAL_MEM;
-		    ncx_print_errormsg(tkc, mod, res);
-		    obj_free_deviate(devi);
-		    return res;
-		} else {
-		    res = yang_typ_consume_type(pcb,
+            if (type) {
+                log_error("\nError: type-stmt already entered");
+                retres = ERR_NCX_ENTRY_EXISTS;          
+                dummy = typ_new_typdef();
+                if (!dummy) {
+                    res = ERR_INTERNAL_MEM;
+                    ncx_print_errormsg(tkc, mod, res);
+                    obj_free_deviate(devi);
+                    return res;
+                } else {
+                    res = yang_typ_consume_type(pcb,
                                                 tkc, 
-						mod, 
-						dummy);
-		    typ_free_typdef(dummy);
-		}
-	    } else {
-		type = TRUE;
-		devi->typdef = typ_new_typdef();
-		if (!devi->typdef) {
-		    res = ERR_INTERNAL_MEM;
-		    ncx_print_errormsg(tkc, mod, res);
-		    obj_free_deviate(devi);
-		    return res;
-		} else {
-		    res = yang_typ_consume_type(pcb,
+                                                mod, 
+                                                dummy);
+                    typ_free_typdef(dummy);
+                }
+            } else {
+                type = TRUE;
+                devi->typdef = typ_new_typdef();
+                if (!devi->typdef) {
+                    res = ERR_INTERNAL_MEM;
+                    ncx_print_errormsg(tkc, mod, res);
+                    obj_free_deviate(devi);
+                    return res;
+                } else {
+                    res = yang_typ_consume_type(pcb,
                                                 tkc, 
-						mod, 
-						devi->typdef);
-		}
-	    }
-	} else if (!xml_strcmp(val, YANG_K_UNITS)) {
-	    ncx_set_error(&devi->units_tkerr,
+                                                mod, 
+                                                devi->typdef);
+                }
+            }
+        } else if (!xml_strcmp(val, YANG_K_UNITS)) {
+            ncx_set_error(&devi->units_tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
 
-	    switch (devi->arg) {
-	    case OBJ_DARG_NONE:
-		/* argument was invalid so cannot check it further */
-		break;
-	    case OBJ_DARG_ADD:
-		break;
-	    case OBJ_DARG_DELETE:
-		break;
-	    case OBJ_DARG_REPLACE:
-		break;
-	    case OBJ_DARG_NOT_SUPPORTED:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: sub-clauses not allowed "
-			  "for 'not-supported'");
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    default:
-		retres = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
+            switch (devi->arg) {
+            case OBJ_DARG_NONE:
+                /* argument was invalid so cannot check it further */
+                break;
+            case OBJ_DARG_ADD:
+                break;
+            case OBJ_DARG_DELETE:
+                break;
+            case OBJ_DARG_REPLACE:
+                break;
+            case OBJ_DARG_NOT_SUPPORTED:
+                retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: sub-clauses not allowed "
+                          "for 'not-supported'");
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            default:
+                retres = SET_ERROR(ERR_INTERNAL_VAL);
+            }
 
-	    res = yang_consume_strclause(tkc, 
+            res = yang_consume_strclause(tkc, 
                                          mod, 
                                          &devi->units,
-					 &units, 
+                                         &units, 
                                          &devi->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
-	    ncx_set_error(&devi->default_tkerr,
+        } else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
+            ncx_set_error(&devi->default_tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
 
-	    switch (devi->arg) {
-	    case OBJ_DARG_NONE:
-		/* argument was invalid so cannot check it further */
-		break;
-	    case OBJ_DARG_ADD:
-		break;
-	    case OBJ_DARG_DELETE:
-		break;
-	    case OBJ_DARG_REPLACE:
-		break;
-	    case OBJ_DARG_NOT_SUPPORTED:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: sub-clauses not allowed "
-			  "for 'not-supported'");
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    default:
-		retres = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
+            switch (devi->arg) {
+            case OBJ_DARG_NONE:
+                /* argument was invalid so cannot check it further */
+                break;
+            case OBJ_DARG_ADD:
+                break;
+            case OBJ_DARG_DELETE:
+                break;
+            case OBJ_DARG_REPLACE:
+                break;
+            case OBJ_DARG_NOT_SUPPORTED:
+                retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: sub-clauses not allowed "
+                          "for 'not-supported'");
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            default:
+                retres = SET_ERROR(ERR_INTERNAL_VAL);
+            }
 
-	    res = yang_consume_strclause(tkc, 
+            res = yang_consume_strclause(tkc, 
                                          mod, 
-					 &devi->defval,
-					 &def, 
+                                         &devi->defval,
+                                         &def, 
                                          &devi->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_CONFIG)) {
-	    ncx_set_error(&devi->config_tkerr,
+        } else if (!xml_strcmp(val, YANG_K_CONFIG)) {
+            ncx_set_error(&devi->config_tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
 
-	    switch (devi->arg) {
-	    case OBJ_DARG_NONE:
-		/* argument was invalid so cannot check it further */
-		break;
-	    case OBJ_DARG_ADD:
-		break;
-	    case OBJ_DARG_DELETE:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: config-stmt cannot be deleted");
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    case OBJ_DARG_REPLACE:
-		break;
-	    case OBJ_DARG_NOT_SUPPORTED:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: sub-clauses not allowed "
-			  "for 'not-supported'");
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    default:
-		retres = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
+            switch (devi->arg) {
+            case OBJ_DARG_NONE:
+                /* argument was invalid so cannot check it further */
+                break;
+            case OBJ_DARG_ADD:
+                break;
+            case OBJ_DARG_DELETE:
+                retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: config-stmt cannot be deleted");
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            case OBJ_DARG_REPLACE:
+                break;
+            case OBJ_DARG_NOT_SUPPORTED:
+                retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: sub-clauses not allowed "
+                          "for 'not-supported'");
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            default:
+                retres = SET_ERROR(ERR_INTERNAL_VAL);
+            }
 
-	    res = yang_consume_boolean(tkc,
+            res = yang_consume_boolean(tkc,
                                        mod,
-				       &devi->config,
-				       &conf,
+                                       &devi->config,
+                                       &conf,
                                        &devi->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
-	    ncx_set_error(&devi->mandatory_tkerr,
+        } else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
+            ncx_set_error(&devi->mandatory_tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
 
-	    switch (devi->arg) {
-	    case OBJ_DARG_NONE:
-		/* argument was invalid so cannot check it further */
-		break;
-	    case OBJ_DARG_ADD:
-		break;
-	    case OBJ_DARG_DELETE:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: mandatory-stmt cannot be deleted");
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    case OBJ_DARG_REPLACE:
-		break;
-	    case OBJ_DARG_NOT_SUPPORTED:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: sub-clauses not allowed "
-			  "for 'not-supported'");
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    default:
-		retres = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
+            switch (devi->arg) {
+            case OBJ_DARG_NONE:
+                /* argument was invalid so cannot check it further */
+                break;
+            case OBJ_DARG_ADD:
+                break;
+            case OBJ_DARG_DELETE:
+                retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: mandatory-stmt cannot be deleted");
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            case OBJ_DARG_REPLACE:
+                break;
+            case OBJ_DARG_NOT_SUPPORTED:
+                retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: sub-clauses not allowed "
+                          "for 'not-supported'");
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            default:
+                retres = SET_ERROR(ERR_INTERNAL_VAL);
+            }
 
-	    res = yang_consume_boolean(tkc,
+            res = yang_consume_boolean(tkc,
                                        mod,
-				       &devi->mandatory,
-				       &mand, 
+                                       &devi->mandatory,
+                                       &mand, 
                                        &devi->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
-	    ncx_set_error(&devi->minelems_tkerr,
+        } else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
+            ncx_set_error(&devi->minelems_tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
 
-	    switch (devi->arg) {
-	    case OBJ_DARG_NONE:
-		/* argument was invalid so cannot check it further */
-		break;
-	    case OBJ_DARG_ADD:
-		break;
-	    case OBJ_DARG_DELETE:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: min-elements-stmt cannot be deleted");
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    case OBJ_DARG_REPLACE:
-		break;
-	    case OBJ_DARG_NOT_SUPPORTED:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: sub-clauses not allowed "
-			  "for 'not-supported'");
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    default:
-		retres = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
+            switch (devi->arg) {
+            case OBJ_DARG_NONE:
+                /* argument was invalid so cannot check it further */
+                break;
+            case OBJ_DARG_ADD:
+                break;
+            case OBJ_DARG_DELETE:
+                retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: min-elements-stmt cannot be deleted");
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            case OBJ_DARG_REPLACE:
+                break;
+            case OBJ_DARG_NOT_SUPPORTED:
+                retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: sub-clauses not allowed "
+                          "for 'not-supported'");
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            default:
+                retres = SET_ERROR(ERR_INTERNAL_VAL);
+            }
 
-	    res = yang_consume_uint32(tkc, 
+            res = yang_consume_uint32(tkc, 
                                       mod,
-				      &devi->minelems,
-				      &minel, 
+                                      &devi->minelems,
+                                      &minel, 
                                       &devi->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
-	    ncx_set_error(&devi->maxelems_tkerr,
+        } else if (!xml_strcmp(val, YANG_K_MAX_ELEMENTS)) {
+            ncx_set_error(&devi->maxelems_tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
 
-	    switch (devi->arg) {
-	    case OBJ_DARG_NONE:
-		/* argument was invalid so cannot check it further */
-		break;
-	    case OBJ_DARG_ADD:
-		break;
-	    case OBJ_DARG_DELETE:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: max-elements-stmt cannot be deleted");
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    case OBJ_DARG_REPLACE:
-		break;
-	    case OBJ_DARG_NOT_SUPPORTED:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: sub-clauses not allowed "
-			  "for 'not-supported'");
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    default:
-		retres = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
+            switch (devi->arg) {
+            case OBJ_DARG_NONE:
+                /* argument was invalid so cannot check it further */
+                break;
+            case OBJ_DARG_ADD:
+                break;
+            case OBJ_DARG_DELETE:
+                retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: max-elements-stmt cannot be deleted");
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            case OBJ_DARG_REPLACE:
+                break;
+            case OBJ_DARG_NOT_SUPPORTED:
+                retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: sub-clauses not allowed "
+                          "for 'not-supported'");
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            default:
+                retres = SET_ERROR(ERR_INTERNAL_VAL);
+            }
 
-	    res = yang_consume_max_elements(tkc, 
+            res = yang_consume_max_elements(tkc, 
                                             mod,
-					    &devi->maxelems,
-					    &maxel,
+                                            &devi->maxelems,
+                                            &maxel,
                                             &devi->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_MUST)) {
-	    switch (devi->arg) {
-	    case OBJ_DARG_NONE:
-		/* argument was invalid so cannot check it further */
-		break;
-	    case OBJ_DARG_ADD:
-		break;
-	    case OBJ_DARG_DELETE:
-		break;
-	    case OBJ_DARG_REPLACE:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: must-stmt cannot be replaced");
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    case OBJ_DARG_NOT_SUPPORTED:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: sub-clauses not allowed "
-			  "for 'not-supported'");
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    default:
-		retres = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
+        } else if (!xml_strcmp(val, YANG_K_MUST)) {
+            switch (devi->arg) {
+            case OBJ_DARG_NONE:
+                /* argument was invalid so cannot check it further */
+                break;
+            case OBJ_DARG_ADD:
+                break;
+            case OBJ_DARG_DELETE:
+                break;
+            case OBJ_DARG_REPLACE:
+                retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: must-stmt cannot be replaced");
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            case OBJ_DARG_NOT_SUPPORTED:
+                retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: sub-clauses not allowed "
+                          "for 'not-supported'");
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            default:
+                retres = SET_ERROR(ERR_INTERNAL_VAL);
+            }
 
-	    res = yang_consume_must(tkc, 
+            res = yang_consume_must(tkc, 
                                     mod, 
                                     &devi->mustQ,
-				    &devi->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_UNIQUE)) {
-	    uniq = obj_new_unique();
-	    if (!uniq) {
-		res = ERR_INTERNAL_MEM;
-		ncx_print_errormsg(tkc, mod, res);
-		obj_free_deviate(devi);
-		return res;
-	    }
+                                    &devi->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_UNIQUE)) {
+            uniq = obj_new_unique();
+            if (!uniq) {
+                res = ERR_INTERNAL_MEM;
+                ncx_print_errormsg(tkc, mod, res);
+                obj_free_deviate(devi);
+                return res;
+            }
 
             ncx_set_error(&uniq->tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
                           TK_CUR_LPOS(tkc));
 
-	    switch (devi->arg) {
-	    case OBJ_DARG_NONE:
-		/* argument was invalid so cannot check it further */
-		break;
-	    case OBJ_DARG_ADD:
-		break;
-	    case OBJ_DARG_DELETE:
-		break;
-	    case OBJ_DARG_REPLACE:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: unique-stmt cannot be replaced");
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    case OBJ_DARG_NOT_SUPPORTED:
-		retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: sub-clauses not allowed "
-			  "for 'not-supported'");
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    default:
-		retres = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
+            switch (devi->arg) {
+            case OBJ_DARG_NONE:
+                /* argument was invalid so cannot check it further */
+                break;
+            case OBJ_DARG_ADD:
+                break;
+            case OBJ_DARG_DELETE:
+                break;
+            case OBJ_DARG_REPLACE:
+                retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: unique-stmt cannot be replaced");
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            case OBJ_DARG_NOT_SUPPORTED:
+                retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: sub-clauses not allowed "
+                          "for 'not-supported'");
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            default:
+                retres = SET_ERROR(ERR_INTERNAL_VAL);
+            }
 
-	    res = yang_consume_strclause(tkc,
+            res = yang_consume_strclause(tkc,
                                          mod,
-					 &uniq->xpath,
-					 NULL,
+                                         &uniq->xpath,
+                                         NULL,
                                          &devi->appinfoQ);
-	    CHK_DEVI_EXIT(devi, res, retres);
-	    if (res == NO_ERR) {
-		dlq_enque(uniq, &devi->uniqueQ);
-	    } else {
-		obj_free_unique(uniq);
-	    }
-	} else {
-	    retres = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	}
-	CHK_DEVI_EXIT(devi, res, retres);
+            CHK_DEVI_EXIT(devi, res, retres);
+            if (res == NO_ERR) {
+                dlq_enque(uniq, &devi->uniqueQ);
+            } else {
+                obj_free_unique(uniq);
+            }
+        } else {
+            retres = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+        }
+        CHK_DEVI_EXIT(devi, res, retres);
     }
 
     /* check valid deviation-stmt syntax */
     if (retres == NO_ERR) {
-	retres = check_deviate_collision(tkc, 
-					 mod, 
-					 devi,
-					 &deviation->deviateQ);
+        retres = check_deviate_collision(tkc, 
+                                         mod, 
+                                         devi,
+                                         &deviation->deviateQ);
     }
 
     /* not going to resolve this deviate-stmt if it has errors */
     if (retres != NO_ERR) {
-	obj_free_deviate(devi);
+        obj_free_deviate(devi);
     } else {
-	dlq_enque(devi, &deviation->deviateQ);
+        dlq_enque(devi, &deviation->deviateQ);
     }
 
     return retres;
@@ -4877,8 +4877,8 @@ static status_t
 *********************************************************************/
 static status_t 
     check_parent (tk_chain_t *tkc,
-		  ncx_module_t  *mod,
-		  obj_template_t *obj)
+                  ncx_module_t  *mod,
+                  obj_template_t *obj)
 {
     status_t      res;
     ncx_status_t  stat, parentstat;
@@ -4888,12 +4888,12 @@ static status_t
 
     /* check status stmt against the parent, if any */
     if (obj && obj->parent && !obj_is_root(obj->parent)) {
-	if (!obj_is_refine(obj)) {
-	    stat = obj_get_status(obj);
-	    parentstat = obj_get_status(obj->parent);
+        if (!obj_is_refine(obj)) {
+            stat = obj_get_status(obj);
+            parentstat = obj_get_status(obj->parent);
 
-	    /* check invalid status warning */
-	    if (stat < parentstat) {
+            /* check invalid status warning */
+            if (stat < parentstat) {
                 if (ncx_warning_enabled(ERR_NCX_INVALID_STATUS)) {
                     log_warn("\nWarning: Invalid status: "
                              "child node '%s' = '%s' and"
@@ -4908,30 +4908,30 @@ static status_t
             }
         }
 
-	/* check invalid config flag error for real object only */
-	if (obj->objtype <= OBJ_TYP_CASE &&
-	    obj->parent->objtype <= OBJ_TYP_CASE) {
-	    conf = obj_get_config_flag(obj);
-	    parentconf = obj_get_config_flag(obj->parent);
-	    if (!parentconf && conf) {
-		if (obj_is_data(obj)) {
-		    log_error("\nError: Node '%s' is marked as configuration, "
-			      "but parent node '%s' is not",
-			      obj_get_name(obj),
-			      obj_get_name(obj->parent));
+        /* check invalid config flag error for real object only */
+        if (obj->objtype <= OBJ_TYP_CASE &&
+            obj->parent->objtype <= OBJ_TYP_CASE) {
+            conf = obj_get_config_flag(obj);
+            parentconf = obj_get_config_flag(obj->parent);
+            if (!parentconf && conf) {
+                if (obj_is_data(obj)) {
+                    log_error("\nError: Node '%s' is marked as configuration, "
+                              "but parent node '%s' is not",
+                              obj_get_name(obj),
+                              obj_get_name(obj->parent));
                     SET_OBJ_CURERR(tkc, obj);
-		    res = ERR_NCX_INVALID_VALUE;
-		    ncx_print_errormsg(tkc, mod, res);
-		} else {
-		    log_info("\nInfo: Non-data node '%s' "
-			     "is marked as configuration : statement ignored",
-			     obj_get_name(obj));
+                    res = ERR_NCX_INVALID_VALUE;
+                    ncx_print_errormsg(tkc, mod, res);
+                } else {
+                    log_info("\nInfo: Non-data node '%s' "
+                             "is marked as configuration : statement ignored",
+                             obj_get_name(obj));
                     SET_OBJ_CURERR(tkc, obj);
-		    res = ERR_NCX_STMT_IGNORED;
-		    ncx_print_errormsg(tkc, mod, res);
-		}
-	    }
-	}
+                    res = ERR_NCX_STMT_IGNORED;
+                    ncx_print_errormsg(tkc, mod, res);
+                }
+            }
+        }
     }
 
     return res;
@@ -4959,8 +4959,8 @@ static status_t
 *********************************************************************/
 static status_t 
     resolve_default_parm (tk_chain_t *tkc,
-		   ncx_module_t  *mod,
-		   obj_template_t *obj)
+                   ncx_module_t  *mod,
+                   obj_template_t *obj)
 {
     obj_template_t    *targobj;
     ncx_appinfo_t     *appinfo;
@@ -4969,39 +4969,39 @@ static status_t
     res = NO_ERR;
 
     if (obj->objtype == OBJ_TYP_CONTAINER ||
-	(obj->objtype == OBJ_TYP_RPCIO &&
-	 !xml_strcmp(obj_get_name(obj), YANG_K_INPUT))) {
+        (obj->objtype == OBJ_TYP_RPCIO &&
+         !xml_strcmp(obj_get_name(obj), YANG_K_INPUT))) {
 
-	appinfo = ncx_find_appinfo(&obj->appinfoQ,
-				   NCX_PREFIX,
-				   NCX_EL_DEFAULT_PARM);
-	if (appinfo) {
-	    if (appinfo->value) {
-		targobj = obj_find_child(obj,
-					 obj_get_mod_name(obj),
-					 appinfo->value);
-		if (targobj) {
-		    if (obj->objtype == OBJ_TYP_CONTAINER) {
-			obj->def.container->defaultparm = targobj;
-		    } else {
-			obj->def.rpcio->defaultparm = targobj;
-		    }
-		} else {
-		    res = ERR_NCX_UNKNOWN_OBJECT;
-		}
-	    } else {
-		res = ERR_NCX_MISSING_PARM;
-	    }
+        appinfo = ncx_find_appinfo(&obj->appinfoQ,
+                                   NCX_PREFIX,
+                                   NCX_EL_DEFAULT_PARM);
+        if (appinfo) {
+            if (appinfo->value) {
+                targobj = obj_find_child(obj,
+                                         obj_get_mod_name(obj),
+                                         appinfo->value);
+                if (targobj) {
+                    if (obj->objtype == OBJ_TYP_CONTAINER) {
+                        obj->def.container->defaultparm = targobj;
+                    } else {
+                        obj->def.rpcio->defaultparm = targobj;
+                    }
+                } else {
+                    res = ERR_NCX_UNKNOWN_OBJECT;
+                }
+            } else {
+                res = ERR_NCX_MISSING_PARM;
+            }
 
-	    if (res != NO_ERR) {
-		log_error("\nError: invalid 'default-parm' extension");
-		ncx_print_errormsg(tkc, mod, res);
-	    }
-	}
+            if (res != NO_ERR) {
+                log_error("\nError: invalid 'default-parm' extension");
+                ncx_print_errormsg(tkc, mod, res);
+            }
+        }
     }
 
     return res;
-				    
+                                    
 }  /* resolve_default_parm */
 
 
@@ -5024,8 +5024,8 @@ static status_t
 *********************************************************************/
 static status_t 
     resolve_mustQ (tk_chain_t *tkc,
-		   ncx_module_t  *mod,
-		   obj_template_t *obj)
+                   ncx_module_t  *mod,
+                   obj_template_t *obj)
 {
     xpath_pcb_t    *must;
     dlq_hdr_t      *mustQ;
@@ -5033,37 +5033,37 @@ static status_t
 
     mustQ = obj_get_mustQ(obj);
     if (!mustQ) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     retres = NO_ERR;
     for (must = (xpath_pcb_t *)dlq_firstEntry(mustQ);
-	 must != NULL;
-	 must = (xpath_pcb_t *)dlq_nextEntry(must)) {
+         must != NULL;
+         must = (xpath_pcb_t *)dlq_nextEntry(must)) {
 
-	if (must->tkc == NULL) {
-	    /* this is a clone object and the xpath PCB
-	     * is a bare-minimum copy; need to parse
-	     * the expression again,
-	     */
+        if (must->tkc == NULL) {
+            /* this is a clone object and the xpath PCB
+             * is a bare-minimum copy; need to parse
+             * the expression again,
+             */
 
             /* if the must is from a grouping in a different
              * module, then the must->tk value will be
              * garbage at this point  !!!!
              */
             tkc->curerr = &must->tkerr;
-	    res = xpath1_parse_expr(tkc, mod, must, XP_SRC_YANG);
-	}
+            res = xpath1_parse_expr(tkc, mod, must, XP_SRC_YANG);
+        }
 
-	if (must->parseres != NO_ERR) {
-	    /* some errors already reported so do not
-	     * duplicate messages; just skip 2nd pass
-	     */
-	    continue;
-	}
+        if (must->parseres != NO_ERR) {
+            /* some errors already reported so do not
+             * duplicate messages; just skip 2nd pass
+             */
+            continue;
+        }
 
-	res = xpath1_validate_expr(mod, obj, must);
-	CHK_EXIT(res, retres);
+        res = xpath1_validate_expr(mod, obj, must);
+        CHK_EXIT(res, retres);
     }
     return retres;
 
@@ -5092,16 +5092,16 @@ static status_t
 *********************************************************************/
 static status_t 
     resolve_when (ncx_module_t  *mod,
-		  xpath_pcb_t *when,
-		  obj_template_t *obj)
+                  xpath_pcb_t *when,
+                  obj_template_t *obj)
 {
     boolean done;
 
     if (when->parseres != NO_ERR) {
-	/* some errors already reported so do not
-	 * duplicate messages; just skip 2nd pass
-	 */
-	return NO_ERR;
+        /* some errors already reported so do not
+         * duplicate messages; just skip 2nd pass
+         */
+        return NO_ERR;
     }
 
     /* get the correct context node to use */
@@ -5146,8 +5146,8 @@ static status_t
 static status_t 
     resolve_metadata (yang_pcb_t *pcb,
                       tk_chain_t *tkc,
-		      ncx_module_t  *mod,
-		      obj_template_t *obj)
+                      ncx_module_t  *mod,
+                      obj_template_t *obj)
 {
     dlq_hdr_t            *que;
     ncx_appinfo_t        *appinfo;
@@ -5160,129 +5160,129 @@ static status_t
     
     que = obj_get_appinfoQ2(obj);
     if (!que) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     usewarning = ncx_warning_enabled(ERR_NCX_USING_RESERVED_NAME);
 
     for (appinfo = 
-	     ncx_find_appinfo(que, 
+             ncx_find_appinfo(que, 
                               NCX_PREFIX, 
                               NCX_EL_METADATA);
-	 appinfo != NULL;
-	 appinfo = ncx_find_next_appinfo2(appinfo, 
+         appinfo != NULL;
+         appinfo = ncx_find_next_appinfo2(appinfo, 
                                           NCX_PREFIX,
                                           NCX_EL_METADATA)) {
 
-	/* parse the value string into 2 or 3 fields */
-	newchain = NULL;
-	meta = NULL;
-	res = NO_ERR;
+        /* parse the value string into 2 or 3 fields */
+        newchain = NULL;
+        meta = NULL;
+        res = NO_ERR;
 
-	/* turn the string into a Q of tokens */
-	newchain = tk_tokenize_metadata_string(mod,
-					       appinfo->value,
-					       &res);
-	if (res != NO_ERR) {
-	    log_error("\nError: Invalid metadata value string");
-	} else {
-	    meta = obj_new_metadata();
-	    if (!meta) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		/* check the tokens that are in the chain for
-		 * a YANG QName for the datatype and a YANG
-		 * identifier for the XML attribute name
-		 */
-		res = yang_typ_consume_metadata_type(pcb,
+        /* turn the string into a Q of tokens */
+        newchain = tk_tokenize_metadata_string(mod,
+                                               appinfo->value,
+                                               &res);
+        if (res != NO_ERR) {
+            log_error("\nError: Invalid metadata value string");
+        } else {
+            meta = obj_new_metadata();
+            if (!meta) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+                /* check the tokens that are in the chain for
+                 * a YANG QName for the datatype and a YANG
+                 * identifier for the XML attribute name
+                 */
+                res = yang_typ_consume_metadata_type(pcb,
                                                      newchain, 
                                                      mod, 
-						     meta->typdef);
-		if (res == NO_ERR) {
-		    /* make sure type OK for XML attribute */
-		    if (!typ_ok_for_metadata
-			(typ_get_basetype(meta->typdef))) {
-			log_error("\nError: Builtin type %s not "
-				  "allowed for metadata in object %s",
-				  tk_get_btype_sym
-				  (typ_get_basetype(meta->typdef)),
-				  obj_get_name(obj));
-			res = ERR_NCX_WRONG_TYPE;
-		    }
-		}
+                                                     meta->typdef);
+                if (res == NO_ERR) {
+                    /* make sure type OK for XML attribute */
+                    if (!typ_ok_for_metadata
+                        (typ_get_basetype(meta->typdef))) {
+                        log_error("\nError: Builtin type %s not "
+                                  "allowed for metadata in object %s",
+                                  tk_get_btype_sym
+                                  (typ_get_basetype(meta->typdef)),
+                                  obj_get_name(obj));
+                        res = ERR_NCX_WRONG_TYPE;
+                    }
+                }
 
-		if (res == NO_ERR) {
-		    /* got a type for the attribute
-		     * now need to get a valid name
-		     */
-		    res = yang_consume_id_string(newchain,
-						 mod,
-						 &meta->name);
-		    if (res == NO_ERR) {
-			/* check if the name clashes
-			 * with any standard attributes
-			 */
-			if (!xml_strcmp(meta->name, 
-					NC_OPERATION_ATTR_NAME)) {
+                if (res == NO_ERR) {
+                    /* got a type for the attribute
+                     * now need to get a valid name
+                     */
+                    res = yang_consume_id_string(newchain,
+                                                 mod,
+                                                 &meta->name);
+                    if (res == NO_ERR) {
+                        /* check if the name clashes
+                         * with any standard attributes
+                         */
+                        if (!xml_strcmp(meta->name, 
+                                        NC_OPERATION_ATTR_NAME)) {
                             if (usewarning) {
                                 log_warn("\nWarning: metadata using "
                                          "reserved name 'operation' "
                                          "for object %s",
                                          obj_get_name(obj));
                             }
-			} else if (!xml_strcmp(meta->name, 
-					       YANG_K_KEY)) {
+                        } else if (!xml_strcmp(meta->name, 
+                                               YANG_K_KEY)) {
                             if (usewarning) {
                                 log_warn("\nWarning: metadata using "
                                          "reserved name 'key' "
                                          "for object %s",
                                          obj_get_name(obj));
                             }
-			} else if (!xml_strcmp(meta->name, 
-					       YANG_K_INSERT)) {
+                        } else if (!xml_strcmp(meta->name, 
+                                               YANG_K_INSERT)) {
                             if (usewarning) {
                                 log_warn("\nWarning: metadata using "
                                          "reserved name 'insert' "
                                          "for object %s",
                                          obj_get_name(obj));
                             }
-			} else if (!xml_strcmp(meta->name, 
-					       YANG_K_VALUE)) {
+                        } else if (!xml_strcmp(meta->name, 
+                                               YANG_K_VALUE)) {
                             if (usewarning) {
                                 log_warn("\nWarning: metadata using "
                                          "reserved name 'value' "
                                          "for object %s",
                                          obj_get_name(obj));
                             }
-			}
+                        }
 
-			/* save the metadata even if the name clashes
-			 * because it is supposed to be used
-			 * with a namespace;  However, the
-			 * standard attribbutes are often used
-			 * without any prefix
-			 */
-			res = obj_add_metadata(meta, obj);
-		    }
-		}
-	    }
-	}
+                        /* save the metadata even if the name clashes
+                         * because it is supposed to be used
+                         * with a namespace;  However, the
+                         * standard attribbutes are often used
+                         * without any prefix
+                         */
+                        res = obj_add_metadata(meta, obj);
+                    }
+                }
+            }
+        }
 
-	if (res != NO_ERR) {
-	    log_error("\nError: Invalid ncx:metadata string");
-	    res = ERR_NCX_INVALID_VALUE;
-	    tkc->curerr = &appinfo->tkerr;
-	    ncx_print_errormsg(tkc, mod, res);
-	    retres = res;
-	}
+        if (res != NO_ERR) {
+            log_error("\nError: Invalid ncx:metadata string");
+            res = ERR_NCX_INVALID_VALUE;
+            tkc->curerr = &appinfo->tkerr;
+            ncx_print_errormsg(tkc, mod, res);
+            retres = res;
+        }
 
-	if (newchain) {
-	    tk_free_chain(newchain);
-	}
+        if (newchain) {
+            tk_free_chain(newchain);
+        }
 
-	if (res != NO_ERR && meta) {
-	    obj_free_metadata(meta);
-	}
+        if (res != NO_ERR && meta) {
+            obj_free_metadata(meta);
+        }
     }
 
     return retres;
@@ -5313,37 +5313,37 @@ static status_t
 static status_t 
     resolve_container (yang_pcb_t *pcb,
                        tk_chain_t *tkc,
-		       ncx_module_t  *mod,
-		       obj_container_t *con,
-		       obj_template_t *obj,
-		       boolean redo)
+                       ncx_module_t  *mod,
+                       obj_container_t *con,
+                       obj_template_t *obj,
+                       boolean redo)
 {
     status_t              res, retres;
 
     retres = NO_ERR;
 
     if (!redo) {
-	res = resolve_metadata(pcb,
+        res = resolve_metadata(pcb,
                                tkc, 
                                mod, 
                                obj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     if (!obj_is_refine(obj) && !redo) {
-	res = yang_typ_resolve_typedefs(pcb,
+        res = yang_typ_resolve_typedefs(pcb,
                                         tkc, 
                                         mod, 
                                         con->typedefQ, 
                                         obj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
 
-	res = yang_grp_resolve_groupings(pcb,
+        res = yang_grp_resolve_groupings(pcb,
                                          tkc, 
                                          mod, 
                                          con->groupingQ, 
                                          obj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     finish_config_flag(obj);
@@ -5359,7 +5359,7 @@ static status_t
     CHK_EXIT(res, retres);
 
     return retres;
-				    
+                                    
 }  /* resolve_container */
 
 
@@ -5422,7 +5422,7 @@ static status_t
     }
 
     return res;
-				    
+                                    
 }  /* resolve_container_final */
 
 
@@ -5448,31 +5448,31 @@ static status_t
 static status_t 
     resolve_leaf (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-		  ncx_module_t  *mod,
-		  obj_leaf_t *leaf,
-		  obj_template_t *obj,
-		  boolean redo)
+                  ncx_module_t  *mod,
+                  obj_leaf_t *leaf,
+                  obj_template_t *obj,
+                  boolean redo)
 {
     status_t res, retres;
 
     retres = NO_ERR;
 
     if (!redo) {
-	res = resolve_metadata(pcb,
+        res = resolve_metadata(pcb,
                                tkc, 
                                mod, 
                                obj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     if (!obj_is_refine(obj) || !redo) {
-	res = yang_typ_resolve_type(pcb,
+        res = yang_typ_resolve_type(pcb,
                                     tkc, 
                                     mod, 
                                     leaf->typdef,
-				    leaf->defval, 
+                                    leaf->defval, 
                                     obj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     finish_config_flag(obj);
@@ -5492,7 +5492,7 @@ static status_t
     CHK_EXIT(res, retres);
 
     return retres;
-				    
+                                    
 }  /* resolve_leaf */
 
 
@@ -5549,7 +5549,7 @@ static status_t
     }
 
     return res;
-				    
+                                    
 }  /* resolve_leaf_final */
 
 
@@ -5575,31 +5575,31 @@ static status_t
 static status_t 
     resolve_leaflist (yang_pcb_t *pcb,
                       tk_chain_t *tkc,
-		      ncx_module_t  *mod,
-		      obj_leaflist_t *llist,
-		      obj_template_t *obj,
-		      boolean redo)
+                      ncx_module_t  *mod,
+                      obj_leaflist_t *llist,
+                      obj_template_t *obj,
+                      boolean redo)
 {
     status_t res, retres;
 
     retres = NO_ERR;
 
     if (!redo) {
-	res = resolve_metadata(pcb,
+        res = resolve_metadata(pcb,
                                tkc, 
                                mod, 
                                obj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     if (!obj_is_refine(obj) && !redo) {
-	res = yang_typ_resolve_type(pcb,
+        res = yang_typ_resolve_type(pcb,
                                     tkc, 
                                     mod,
-				    llist->typdef, 
+                                    llist->typdef, 
                                     NULL, 
                                     obj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     /* mark default as zero or more entries
@@ -5615,17 +5615,17 @@ static status_t
 
     /* check if minelems and maxelems are valid */
     if (llist->minelems && llist->maxelems) {
-	if (llist->minelems > llist->maxelems) {
-	    log_error("\nError: leaf-list '%s' min-elements > max-elements",
-		      obj_get_name(obj));
-	    retres = ERR_NCX_INVALID_VALUE;
+        if (llist->minelems > llist->maxelems) {
+            log_error("\nError: leaf-list '%s' min-elements > max-elements",
+                      obj_get_name(obj));
+            retres = ERR_NCX_INVALID_VALUE;
             SET_OBJ_CURERR(tkc, obj);
-	    ncx_print_errormsg(tkc, mod, retres);
-	}
+            ncx_print_errormsg(tkc, mod, retres);
+        }
     }
 
     return retres;
-				    
+                                    
 }  /* resolve_leaflist */
 
 
@@ -5651,37 +5651,37 @@ static status_t
 static status_t 
     resolve_list (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-		  ncx_module_t  *mod,
-		  obj_list_t *list,
-		  obj_template_t *obj,
-		  boolean redo)
+                  ncx_module_t  *mod,
+                  obj_list_t *list,
+                  obj_template_t *obj,
+                  boolean redo)
 {
     status_t res, retres;
 
     retres = NO_ERR;
 
     if (!redo) {
-	res = resolve_metadata(pcb,
+        res = resolve_metadata(pcb,
                                tkc, 
                                mod, 
                                obj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     if (!obj_is_refine(obj) && !redo) {
-	res = yang_typ_resolve_typedefs(pcb,
+        res = yang_typ_resolve_typedefs(pcb,
                                         tkc, 
                                         mod, 
                                         list->typedefQ, 
                                         obj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
 
-	res = yang_grp_resolve_groupings(pcb,
+        res = yang_grp_resolve_groupings(pcb,
                                          tkc, 
                                          mod, 
                                          list->groupingQ, 
                                          obj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     finish_config_flag(obj);
@@ -5698,17 +5698,17 @@ static status_t
 
     /* check if minelems and maxelems are valid */
     if (list->minelems && list->maxelems) {
-	if (list->minelems > list->maxelems) {
-	    log_error("\nError: list '%s' min-elements > max-elements",
-		      obj_get_name(obj));
-	    retres = ERR_NCX_INVALID_VALUE;
+        if (list->minelems > list->maxelems) {
+            log_error("\nError: list '%s' min-elements > max-elements",
+                      obj_get_name(obj));
+            retres = ERR_NCX_INVALID_VALUE;
             SET_OBJ_CURERR(tkc, obj);
-	    ncx_print_errormsg(tkc, mod, retres);
-	}
+            ncx_print_errormsg(tkc, mod, retres);
+        }
     }
 
     return retres;
-				    
+                                    
 }  /* resolve_list */
 
 
@@ -5733,9 +5733,9 @@ static status_t
 static status_t 
     get_list_key (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-		  ncx_module_t  *mod,
-		  obj_list_t    *list,
-		  obj_template_t *obj)
+                  ncx_module_t  *mod,
+                  obj_list_t    *list,
+                  obj_template_t *obj)
 {
     obj_template_t    *keyobj;
     xmlChar           *str, *p, savech;
@@ -5751,17 +5751,17 @@ static status_t
     /* skip all leading whitespace */
     p = list->keystr;
     while (*p && xml_isspace(*p)) {
-	p++;
+        p++;
     }
 
     /* check whitespace only string */
     if (!*p) {
-	log_error("\nError: no identifiers entered in key '%s'",
-		  list->keystr);
-	retres = ERR_NCX_INVALID_VALUE;
-	tkc->curerr = tkerr;
-	ncx_print_errormsg(tkc, mod, retres);
-	return retres;
+        log_error("\nError: no identifiers entered in key '%s'",
+                  list->keystr);
+        retres = ERR_NCX_INVALID_VALUE;
+        tkc->curerr = tkerr;
+        ncx_print_errormsg(tkc, mod, retres);
+        return retres;
     }
 
     /* keep parsing Xpath strings until EOS reached
@@ -5769,104 +5769,104 @@ static status_t
      * child nodes are used as keys
      */
     while (*p) {
-	/* save start of identifier */
-	str = p;       
+        /* save start of identifier */
+        str = p;       
 
-	/* find end of the identifier string */
-	while (*p && !xml_isspace(*p)) {
-	    p++;
-	}
+        /* find end of the identifier string */
+        while (*p && !xml_isspace(*p)) {
+            p++;
+        }
 
-	/* make Zstring for 1 key identifier */
-	savech = *p;
-	*p = 0;
+        /* make Zstring for 1 key identifier */
+        savech = *p;
+        *p = 0;
 
-	/* check for a valid descendant-schema-nodeid string */
-	retres = xpath_find_schema_target_err(pcb,
+        /* check for a valid descendant-schema-nodeid string */
+        retres = xpath_find_schema_target_err(pcb,
                                               tkc, 
-					      mod, 
-					      obj,
-					      list->datadefQ,
-					      str, 
-					      &keyobj, 
-					      NULL, 
-					      tkerr);
+                                              mod, 
+                                              obj,
+                                              list->datadefQ,
+                                              str, 
+                                              &keyobj, 
+                                              NULL, 
+                                              tkerr);
 
 
-	/* check identifier is bogus, nothing found */
-	if (retres != NO_ERR) {
-	    log_error("\nError: invalid identifier in key"
-		      " for list '%s' (%s)", 
-		      list->name, str);
-	    tkc->curerr = tkerr;
-	    ncx_print_errormsg(tkc, mod, retres);
+        /* check identifier is bogus, nothing found */
+        if (retres != NO_ERR) {
+            log_error("\nError: invalid identifier in key"
+                      " for list '%s' (%s)", 
+                      list->name, str);
+            tkc->curerr = tkerr;
+            ncx_print_errormsg(tkc, mod, retres);
 
-	    /* waited to restore string so it could be used 
-	     * in the log_error msg above
-	     */
-	    *p = savech;
-	    while (*p && xml_isspace(*p)) {
-		p++;
-	    }
-	    continue;
-	}
+            /* waited to restore string so it could be used 
+             * in the log_error msg above
+             */
+            *p = savech;
+            while (*p && xml_isspace(*p)) {
+                p++;
+            }
+            continue;
+        }
 
-	/* mark the object as a key leaf for obj_is_key() fn */
-	keyobj->flags |= OBJ_FL_KEY;
+        /* mark the object as a key leaf for obj_is_key() fn */
+        keyobj->flags |= OBJ_FL_KEY;
 
-	/* restore string and skip any whitespace between key components */
-	*p = savech;
-	while (*p && xml_isspace(*p)) {
-	    p++;
-	}
+        /* restore string and skip any whitespace between key components */
+        *p = savech;
+        while (*p && xml_isspace(*p)) {
+            p++;
+        }
 
-	/* get the base type of the object */
-	btyp = obj_get_basetype(keyobj);
+        /* get the base type of the object */
+        btyp = obj_get_basetype(keyobj);
 
-	/* make sure the key is a leaf */
-	if (keyobj->objtype != OBJ_TYP_LEAF) {
-	    /* found the key node, but it is not a leaf */
-	    log_error("\nError: node '%s' on line %u not a leaf in key"
-		      " for list '%s' (%s)",
-		      obj_get_name(keyobj), 
-		      keyobj->tkerr.linenum,
-		      list->name, 
-		      obj_get_typestr(keyobj));
-	    retres = ERR_NCX_TYPE_NOT_INDEX;
-	    tkc->curerr = tkerr;
-	    ncx_print_errormsg(tkc, mod, retres);
-	    continue;
-	} 
+        /* make sure the key is a leaf */
+        if (keyobj->objtype != OBJ_TYP_LEAF) {
+            /* found the key node, but it is not a leaf */
+            log_error("\nError: node '%s' on line %u not a leaf in key"
+                      " for list '%s' (%s)",
+                      obj_get_name(keyobj), 
+                      keyobj->tkerr.linenum,
+                      list->name, 
+                      obj_get_typestr(keyobj));
+            retres = ERR_NCX_TYPE_NOT_INDEX;
+            tkc->curerr = tkerr;
+            ncx_print_errormsg(tkc, mod, retres);
+            continue;
+        } 
 
-	/* make sure the leaf is a child of the list object */
-	if (keyobj->parent != obj || 
+        /* make sure the leaf is a child of the list object */
+        if (keyobj->parent != obj || 
             keyobj->tkerr.mod != obj->tkerr.mod) {
-	    log_error("\nError: leaf node '%s' on line %u not child "
-		      "of list '%s'",
-		      obj_get_name(keyobj),
-		      keyobj->tkerr.linenum,
-		      list->name);
-	    retres = ERR_NCX_WRONG_INDEX_TYPE;
-	    tkc->curerr = tkerr;
-	    ncx_print_errormsg(tkc, mod, retres);
-	}
+            log_error("\nError: leaf node '%s' on line %u not child "
+                      "of list '%s'",
+                      obj_get_name(keyobj),
+                      keyobj->tkerr.linenum,
+                      list->name);
+            retres = ERR_NCX_WRONG_INDEX_TYPE;
+            tkc->curerr = tkerr;
+            ncx_print_errormsg(tkc, mod, retres);
+        }
 
-	/* make sure the base type is OK for an index */
-	if (!typ_ok_for_inline_index(btyp)) {
-	    log_error("\nError: leaf node '%s' on line %u not valid type "
-		      "in key, for list '%s' (%s)",
-		      obj_get_name(keyobj),
-		      keyobj->tkerr.linenum,
-		      list->name,
-		      tk_get_btype_sym(btyp));
-	    retres = ERR_NCX_TYPE_NOT_INDEX;
-	    tkc->curerr = tkerr;
-	    ncx_print_errormsg(tkc, mod, retres);
-	}
+        /* make sure the base type is OK for an index */
+        if (!typ_ok_for_inline_index(btyp)) {
+            log_error("\nError: leaf node '%s' on line %u not valid type "
+                      "in key, for list '%s' (%s)",
+                      obj_get_name(keyobj),
+                      keyobj->tkerr.linenum,
+                      list->name,
+                      tk_get_btype_sym(btyp));
+            retres = ERR_NCX_TYPE_NOT_INDEX;
+            tkc->curerr = tkerr;
+            ncx_print_errormsg(tkc, mod, retres);
+        }
 
-	/* make sure madatory=false is not set for the key leaf */
-	if ((keyobj->flags & OBJ_FL_MANDSET) && 
-	    !(keyobj->flags & OBJ_FL_MANDATORY)) {
+        /* make sure madatory=false is not set for the key leaf */
+        if ((keyobj->flags & OBJ_FL_MANDSET) && 
+            !(keyobj->flags & OBJ_FL_MANDATORY)) {
             if (ncx_warning_enabled(ERR_NCX_STMT_IGNORED)) {
                 log_warn("\nWarning: 'mandatory false;' "
                          "ignored in leaf '%s' "
@@ -5879,51 +5879,51 @@ static status_t
             }
         }
 
-	/* make sure config has same setting as the list parent */
-	keyconfig = obj_get_config_flag_deep(keyobj);
-	listconfig = obj_get_config_flag_deep(obj);
+        /* make sure config has same setting as the list parent */
+        keyconfig = obj_get_config_flag_deep(keyobj);
+        listconfig = obj_get_config_flag_deep(obj);
 
-	if (keyconfig != listconfig) {
-	    retres = ERR_NCX_WRONG_INDEX_TYPE;
-	    log_error("\nError: 'config-stmt for key leaf '%s' "
-		      "on line %u must match list '%s'",
-		      obj_get_name(keyobj), 
-		      keyobj->tkerr.linenum, 
-		      list->name);
-	    tkc->curerr = tkerr;
-	    ncx_print_errormsg(tkc, mod, retres);
-	}
+        if (keyconfig != listconfig) {
+            retres = ERR_NCX_WRONG_INDEX_TYPE;
+            log_error("\nError: 'config-stmt for key leaf '%s' "
+                      "on line %u must match list '%s'",
+                      obj_get_name(keyobj), 
+                      keyobj->tkerr.linenum, 
+                      list->name);
+            tkc->curerr = tkerr;
+            ncx_print_errormsg(tkc, mod, retres);
+        }
 
-	/* make sure key component not already used */
-	objkey = obj_find_key2(&list->keyQ, keyobj);
-	if (objkey) {
-	    log_error("\nError: duplicate key node '%s' on line %u "
-		      "for list '%s'",
-		      obj_get_name(keyobj), 
-		      keyobj->tkerr.linenum, 
-		      list->name);
-	    retres = ERR_NCX_DUP_ENTRY;
-	    tkc->curerr = tkerr;
-	    ncx_print_errormsg(tkc, mod, retres);
-	    continue;
-	}
+        /* make sure key component not already used */
+        objkey = obj_find_key2(&list->keyQ, keyobj);
+        if (objkey) {
+            log_error("\nError: duplicate key node '%s' on line %u "
+                      "for list '%s'",
+                      obj_get_name(keyobj), 
+                      keyobj->tkerr.linenum, 
+                      list->name);
+            retres = ERR_NCX_DUP_ENTRY;
+            tkc->curerr = tkerr;
+            ncx_print_errormsg(tkc, mod, retres);
+            continue;
+        }
 
-	/* get a new key record struct */
-	objkey = obj_new_key();
-	if (!objkey) {
-	    retres = ERR_INTERNAL_MEM;
-	    tkc->curerr = tkerr;
-	    ncx_print_errormsg(tkc, mod, retres);
-	    return retres;
-	}
+        /* get a new key record struct */
+        objkey = obj_new_key();
+        if (!objkey) {
+            retres = ERR_INTERNAL_MEM;
+            tkc->curerr = tkerr;
+            ncx_print_errormsg(tkc, mod, retres);
+            return retres;
+        }
 
-	/* everything OK so save the key
-	 * a backptr to 'objkey' in 'key' cannot be maintained
-	 * because 'key' may be inside a grouping, and a simple
-	 * uses foo; will cause the groupingQ to be used directly
-	 */
-	objkey->keyobj = keyobj;
-	dlq_enque(objkey, &list->keyQ);
+        /* everything OK so save the key
+         * a backptr to 'objkey' in 'key' cannot be maintained
+         * because 'key' may be inside a grouping, and a simple
+         * uses foo; will cause the groupingQ to be used directly
+         */
+        objkey->keyobj = keyobj;
+        dlq_enque(objkey, &list->keyQ);
     }
 
     return retres;
@@ -5958,10 +5958,10 @@ static status_t
 static status_t 
     get_unique_comps (yang_pcb_t *pcb,
                       tk_chain_t *tkc,
-		      ncx_module_t  *mod,
-		      obj_list_t *list,
-		      obj_template_t *obj,
-		      obj_unique_t *uni)
+                      ncx_module_t  *mod,
+                      obj_list_t *list,
+                      obj_template_t *obj,
+                      obj_unique_t *uni)
 {
     obj_template_t    *uniobj, *testobj;
     xmlChar           *str, *p, *savestr, savech;
@@ -5978,74 +5978,74 @@ static status_t
     /* skip all leading whitespace */
     p = uni->xpath;
     while (*p && xml_isspace(*p)) {
-	p++;
+        p++;
     }
     if (!*p) {
-	log_error("\nError: no identifiers entered in unique statement '%s'",
-		  uni->xpath);
-	retres = ERR_NCX_INVALID_VALUE;
-	tkc->curerr = tkerr;
-	ncx_print_errormsg(tkc, mod, retres);
-	return retres;
+        log_error("\nError: no identifiers entered in unique statement '%s'",
+                  uni->xpath);
+        retres = ERR_NCX_INVALID_VALUE;
+        tkc->curerr = tkerr;
+        ncx_print_errormsg(tkc, mod, retres);
+        return retres;
     }
 
     /* keep parsing Xpath strings until EOS reached */
     while (*p) {
-	/* find end of non-whitespace string */
-	str = p;
-	while (*p && !xml_isspace(*p)) {
-	    p++;
-	}
-	savech = *p;
-	*p = 0;
+        /* find end of non-whitespace string */
+        str = p;
+        while (*p && !xml_isspace(*p)) {
+            p++;
+        }
+        savech = *p;
+        *p = 0;
 
-	/* check for a valid descendant-schema-nodeid string */
-	res = xpath_find_schema_target_err(pcb,
+        /* check for a valid descendant-schema-nodeid string */
+        res = xpath_find_schema_target_err(pcb,
                                            tkc, 
                                            mod, 
                                            obj,
-					   list->datadefQ,
-					   str, 
+                                           list->datadefQ,
+                                           str, 
                                            &uniobj,
                                            NULL,
                                            tkerr);
-	CHK_EXIT(res, retres);
-	if (res == NO_ERR) {
-	    savestr = xml_strdup(str);
-	    if (!savestr) {
-		retres = ERR_INTERNAL_MEM;
-		tkc->curerr = tkerr;
-		ncx_print_errormsg(tkc, mod, retres);
-		return retres;
-	    }
-	}
+        CHK_EXIT(res, retres);
+        if (res == NO_ERR) {
+            savestr = xml_strdup(str);
+            if (!savestr) {
+                retres = ERR_INTERNAL_MEM;
+                tkc->curerr = tkerr;
+                ncx_print_errormsg(tkc, mod, retres);
+                return retres;
+            }
+        }
 
-	*p = savech;
-	while (*p && xml_isspace(*p)) {
-	    p++;   /* skip whitespace between strings */
-	}
-	if (res != NO_ERR) {
-	    continue;
-	}
+        *p = savech;
+        while (*p && xml_isspace(*p)) {
+            p++;   /* skip whitespace between strings */
+        }
+        if (res != NO_ERR) {
+            continue;
+        }
 
-	/* got a valid Xpath expression which points to a
-	 * child node in the obj_list_t datadefQ
-	 * make sure the unique target is a leaf
-	 */
-	if (uniobj->objtype != OBJ_TYP_LEAF) {
-	    log_error("\nError: node '%s' on line %u not leaf in "
-		      "list '%s' unique-stmt",
-		      obj_get_name(uniobj),
-		      uniobj->tkerr.linenum,
-		      list->name);
-	    retres = ERR_NCX_INVALID_UNIQUE_NODE;
-	    tkc->curerr = tkerr;
-	    ncx_print_errormsg(tkc, mod, retres);
-	    m__free(savestr);
-	    continue;
-	} 
+        /* got a valid Xpath expression which points to a
+         * child node in the obj_list_t datadefQ
+         * make sure the unique target is a leaf
+         */
+        if (uniobj->objtype != OBJ_TYP_LEAF) {
+            log_error("\nError: node '%s' on line %u not leaf in "
+                      "list '%s' unique-stmt",
+                      obj_get_name(uniobj),
+                      uniobj->tkerr.linenum,
+                      list->name);
+            retres = ERR_NCX_INVALID_UNIQUE_NODE;
+            tkc->curerr = tkerr;
+            ncx_print_errormsg(tkc, mod, retres);
+            m__free(savestr);
+            continue;
+        } 
 
-	/* make sure there is a no config mismatch */
+        /* make sure there is a no config mismatch */
         if (firstset) {
             if (obj_is_config(obj) && !uni->isconfig) {
                 /* mix of config and non-config leafs
@@ -6071,44 +6071,44 @@ static status_t
             firstset = TRUE;
         }
 
-	/* the final target seems to be a valid leaf
-	 * so check that its path back to the original
-	 * object is all static object types
-	 *   container, leaf, choice, case
-	 */
-	testobj = uniobj->parent;
-	res = NO_ERR;
-	while (testobj && (testobj != obj) && (res == NO_ERR)) {
-	    switch (testobj->objtype) {
-	    case OBJ_TYP_CONTAINER:
-	    case OBJ_TYP_CHOICE:
-	    case OBJ_TYP_CASE:
-		break;
-	    default:
-		res = ERR_NCX_INVALID_UNIQUE_NODE;
-		log_error("\nError: multi-instance node (%s) "
-			  "within unique stmt '%s'",
-			  obj_get_typestr(testobj),
-			  uni->xpath);
-		tkc->curerr = tkerr;
-		ncx_print_errormsg(tkc, mod, res);
-	    }
+        /* the final target seems to be a valid leaf
+         * so check that its path back to the original
+         * object is all static object types
+         *   container, leaf, choice, case
+         */
+        testobj = uniobj->parent;
+        res = NO_ERR;
+        while (testobj && (testobj != obj) && (res == NO_ERR)) {
+            switch (testobj->objtype) {
+            case OBJ_TYP_CONTAINER:
+            case OBJ_TYP_CHOICE:
+            case OBJ_TYP_CASE:
+                break;
+            default:
+                res = ERR_NCX_INVALID_UNIQUE_NODE;
+                log_error("\nError: multi-instance node (%s) "
+                          "within unique stmt '%s'",
+                          obj_get_typestr(testobj),
+                          uni->xpath);
+                tkc->curerr = tkerr;
+                ncx_print_errormsg(tkc, mod, res);
+            }
 
-	    testobj = testobj->parent;
-	}
-	if (res != NO_ERR) {
-	    m__free(savestr);
-	    CHK_EXIT(res, retres);
-	    continue;
-	}
+            testobj = testobj->parent;
+        }
+        if (res != NO_ERR) {
+            m__free(savestr);
+            CHK_EXIT(res, retres);
+            continue;
+        }
 
-	uniobj->flags |= OBJ_FL_UNIQUE;
+        uniobj->flags |= OBJ_FL_UNIQUE;
 
-	/* make sure this leaf component not already used */
-	for (testcomp = (obj_unique_comp_t *)dlq_firstEntry(&uni->compQ);
-	     testcomp != NULL && res==NO_ERR;
-	     testcomp = (obj_unique_comp_t *)dlq_nextEntry(testcomp)) {
-	    if (testcomp->unobj == uniobj) {
+        /* make sure this leaf component not already used */
+        for (testcomp = (obj_unique_comp_t *)dlq_firstEntry(&uni->compQ);
+             testcomp != NULL && res==NO_ERR;
+             testcomp = (obj_unique_comp_t *)dlq_nextEntry(testcomp)) {
+            if (testcomp->unobj == uniobj) {
                 if (ncx_warning_enabled(ERR_NCX_DUP_UNIQUE_COMP)) {
                     log_warn("\nWarning: duplicate unique "
                              "node '%s' on line %u "
@@ -6121,31 +6121,31 @@ static status_t
                                        mod,
                                        ERR_NCX_DUP_UNIQUE_COMP);
                 }
-	    }
-	}
+            }
+        }
 
-	/* try to save the info in a new unicomp struct */
-	if (retres == NO_ERR) {
-	    /* get a new unique component struct */
-	    unicomp = obj_new_unique_comp();
-	    if (!unicomp) {
-		retres = ERR_INTERNAL_MEM;
-		tkc->curerr = tkerr;
-		ncx_print_errormsg(tkc, mod, retres);
-		m__free(savestr);
-		return retres;
-	    } else {
-		/* everything OK so save the unique component
-		 * pass off the malloced savestr to the
-		 * unicomp record
-		 */
-		unicomp->unobj = uniobj;
-		unicomp->xpath = savestr;
-		dlq_enque(unicomp, &uni->compQ);
-	    }
-	} else {
-	    m__free(savestr);
-	}
+        /* try to save the info in a new unicomp struct */
+        if (retres == NO_ERR) {
+            /* get a new unique component struct */
+            unicomp = obj_new_unique_comp();
+            if (!unicomp) {
+                retres = ERR_INTERNAL_MEM;
+                tkc->curerr = tkerr;
+                ncx_print_errormsg(tkc, mod, retres);
+                m__free(savestr);
+                return retres;
+            } else {
+                /* everything OK so save the unique component
+                 * pass off the malloced savestr to the
+                 * unicomp record
+                 */
+                unicomp->unobj = uniobj;
+                unicomp->xpath = savestr;
+                dlq_enque(unicomp, &uni->compQ);
+            }
+        } else {
+            m__free(savestr);
+        }
     }
 
     return retres;
@@ -6174,9 +6174,9 @@ static status_t
 static status_t 
     resolve_list_final (yang_pcb_t *pcb,
                         tk_chain_t *tkc,
-			ncx_module_t  *mod,
-			obj_list_t *list,
-			obj_template_t *obj)
+                        ncx_module_t  *mod,
+                        obj_list_t *list,
+                        obj_template_t *obj)
 {
     obj_unique_t    *uni;
     status_t         res, retres;
@@ -6185,25 +6185,25 @@ static status_t
 
     /* validate key clause */
     if (list->keystr) {
-	res = get_list_key(pcb,
+        res = get_list_key(pcb,
                            tkc, 
                            mod, 
                            list, 
                            obj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     /* validate Q of unique clauses */
     for (uni = (obj_unique_t *)dlq_firstEntry(&list->uniqueQ);
-	 uni != NULL;
-	 uni = (obj_unique_t *)dlq_nextEntry(uni)) {
-	res = get_unique_comps(pcb,
+         uni != NULL;
+         uni = (obj_unique_t *)dlq_nextEntry(uni)) {
+        res = get_unique_comps(pcb,
                                tkc, 
                                mod, 
                                list, 
                                obj, 
                                uni);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -6233,10 +6233,10 @@ static status_t
 static status_t 
     resolve_case (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-		  ncx_module_t  *mod,
-		  obj_case_t *cas,
-		  obj_template_t *obj,
-		  boolean redo)
+                  ncx_module_t  *mod,
+                  obj_case_t *cas,
+                  obj_template_t *obj,
+                  boolean redo)
 {
     status_t res, retres;
 
@@ -6249,7 +6249,7 @@ static status_t
     CHK_EXIT(res, retres);
 
     return retres;
-				    
+                                    
 }  /* resolve_case */
 
 
@@ -6275,10 +6275,10 @@ static status_t
 static status_t 
     resolve_choice (yang_pcb_t *pcb,
                     tk_chain_t *tkc,
-		    ncx_module_t  *mod,
-		    obj_choice_t *choic,
-		    obj_template_t *obj,
-		    boolean redo)
+                    ncx_module_t  *mod,
+                    obj_choice_t *choic,
+                    obj_template_t *obj,
+                    boolean redo)
 {
     obj_case_t *cas;
     obj_template_t *cobj;
@@ -6290,12 +6290,12 @@ static status_t
     finish_config_flag(obj);
 
     if ((obj->flags & OBJ_FL_MANDATORY) && choic->defval) {
-	log_error("\nError: both mandatory and default statements present"
-		  "'%s'", 
+        log_error("\nError: both mandatory and default statements present"
+                  "'%s'", 
                   obj_get_name(obj));
-	retres = ERR_NCX_INVALID_VALUE;
+        retres = ERR_NCX_INVALID_VALUE;
         SET_OBJ_CURERR(tkc, obj);
-	ncx_print_errormsg(tkc, mod, retres);
+        ncx_print_errormsg(tkc, mod, retres);
     }
 
     res = check_parent(tkc, mod, obj);
@@ -6307,35 +6307,35 @@ static status_t
 
     /* check defval is valid case name */
     if (choic->defval) {
-	cas = obj_find_case(choic, 
+        cas = obj_find_case(choic, 
                             obj_get_mod_name(obj), 
-			    choic->defval);
-	if (!cas) {
-	    /* default is not a valid case name */
+                            choic->defval);
+        if (!cas) {
+            /* default is not a valid case name */
             SET_OBJ_CURERR(tkc, obj);
-	    retres = ERR_NCX_INVALID_VALUE;
-	    log_error("\nError: Choice default '%s' "
-		      "not a valid case name", 
+            retres = ERR_NCX_INVALID_VALUE;
+            log_error("\nError: Choice default '%s' "
+                      "not a valid case name", 
                       choic->defval);
-	    ncx_print_errormsg(tkc, mod, retres);
-	} else {
-	    /* valid case name, 
-	     * make sure 'cas' contains only optional data nodes
-	     */
-	    for (cobj = (obj_template_t *)dlq_firstEntry(cas->datadefQ);
-		 cobj != NULL;
-		 cobj = (obj_template_t *)dlq_nextEntry(cobj)) {
-		if (obj_is_mandatory(cobj)) {
-		    tkc->curerr = &cobj->tkerr;
-		    retres = ERR_NCX_DEFCHOICE_NOT_OPTIONAL;
-		    ncx_print_errormsg(tkc, mod, retres);
-		}
-	    }
-	}
+            ncx_print_errormsg(tkc, mod, retres);
+        } else {
+            /* valid case name, 
+             * make sure 'cas' contains only optional data nodes
+             */
+            for (cobj = (obj_template_t *)dlq_firstEntry(cas->datadefQ);
+                 cobj != NULL;
+                 cobj = (obj_template_t *)dlq_nextEntry(cobj)) {
+                if (obj_is_mandatory(cobj)) {
+                    tkc->curerr = &cobj->tkerr;
+                    retres = ERR_NCX_DEFCHOICE_NOT_OPTIONAL;
+                    ncx_print_errormsg(tkc, mod, retres);
+                }
+            }
+        }
     }
-	
+        
     return retres;
-				    
+                                    
 }  /* resolve_choice */
 
 
@@ -6392,7 +6392,7 @@ static status_t
     }
 
     return res;
-				    
+                                    
 }  /* resolve_choice_final */
 
 
@@ -6417,9 +6417,9 @@ static status_t
 *********************************************************************/
 static status_t 
     check_refine_allowed (tk_chain_t *tkc,
-			  ncx_module_t  *mod,
-			  obj_template_t *refineobj,
-			  obj_template_t *targobj)
+                          ncx_module_t  *mod,
+                          obj_template_t *refineobj,
+                          obj_template_t *targobj)
 {
     obj_refine_t   *refine;
     xpath_pcb_t    *must;
@@ -6440,109 +6440,109 @@ static status_t
 
     switch (targobj->objtype) {
     case OBJ_TYP_LEAF:
-	conf = TRUE;
-	mand = TRUE;
-	bmust = TRUE;
-	def = TRUE;
-	break;
+        conf = TRUE;
+        mand = TRUE;
+        bmust = TRUE;
+        def = TRUE;
+        break;
     case OBJ_TYP_ANYXML:
-	mand = TRUE;
-	break;
+        mand = TRUE;
+        break;
     case OBJ_TYP_LEAF_LIST:
-	conf = TRUE;
-	bmust = TRUE;
-	minel = TRUE;
-	maxel = TRUE;
-	break;
+        conf = TRUE;
+        bmust = TRUE;
+        minel = TRUE;
+        maxel = TRUE;
+        break;
     case OBJ_TYP_CONTAINER:
-	bmust = TRUE;
-	pres = TRUE;
-	conf = TRUE;
-	break;
+        bmust = TRUE;
+        pres = TRUE;
+        conf = TRUE;
+        break;
     case OBJ_TYP_LIST:
-	bmust = TRUE;
-	conf = TRUE;
-	minel = TRUE;
-	maxel = TRUE;
-	break;
+        bmust = TRUE;
+        conf = TRUE;
+        minel = TRUE;
+        maxel = TRUE;
+        break;
     case OBJ_TYP_CHOICE:
-	def = TRUE;
-	mand = TRUE;
-	break;
+        def = TRUE;
+        mand = TRUE;
+        break;
     case OBJ_TYP_CASE:
-	break;
+        break;
     default:
-	return NO_ERR;  /* error: should already be reported */
+        return NO_ERR;  /* error: should already be reported */
     }
 
     /* check all the fields except description and reference
      * since they are allowed to appear in every variant
      */
     if (refine->presence && !pres) {
-	res = ERR_NCX_REFINE_NOT_ALLOWED;
-	log_error("\nError: 'presence' refinement on %s '%s'",
-		  obj_get_typestr(targobj),
-		  obj_get_name(targobj));
-	tkc->curerr = &refine->presence_tkerr;
-	ncx_print_errormsg(tkc, mod, res);
+        res = ERR_NCX_REFINE_NOT_ALLOWED;
+        log_error("\nError: 'presence' refinement on %s '%s'",
+                  obj_get_typestr(targobj),
+                  obj_get_name(targobj));
+        tkc->curerr = &refine->presence_tkerr;
+        ncx_print_errormsg(tkc, mod, res);
     }
 
     if (refine->def && !def) {
-	res = ERR_NCX_REFINE_NOT_ALLOWED;
-	log_error("\nError: 'default' refinement on %s '%s'",
-		  obj_get_typestr(targobj),
-		  obj_get_name(targobj));
-	tkc->curerr = &refine->def_tkerr;
-	ncx_print_errormsg(tkc, mod, res);
+        res = ERR_NCX_REFINE_NOT_ALLOWED;
+        log_error("\nError: 'default' refinement on %s '%s'",
+                  obj_get_typestr(targobj),
+                  obj_get_name(targobj));
+        tkc->curerr = &refine->def_tkerr;
+        ncx_print_errormsg(tkc, mod, res);
     }
 
     if (refine->config_tkerr.mod && !conf) {
-	res = ERR_NCX_REFINE_NOT_ALLOWED;
-	log_error("\nError: 'config' refinement on %s '%s'",
-		  obj_get_typestr(targobj),
-		  obj_get_name(targobj));
-	tkc->curerr = &refine->config_tkerr;
-	ncx_print_errormsg(tkc, mod, res);
+        res = ERR_NCX_REFINE_NOT_ALLOWED;
+        log_error("\nError: 'config' refinement on %s '%s'",
+                  obj_get_typestr(targobj),
+                  obj_get_name(targobj));
+        tkc->curerr = &refine->config_tkerr;
+        ncx_print_errormsg(tkc, mod, res);
     }
 
     if (refine->mandatory_tkerr.mod && !mand) {
-	res = ERR_NCX_REFINE_NOT_ALLOWED;
-	log_error("\nError: 'mandatory' refinement on %s '%s'",
-		  obj_get_typestr(targobj),
-		  obj_get_name(targobj));
-	tkc->curerr = &refine->config_tkerr;
-	ncx_print_errormsg(tkc, mod, res);
+        res = ERR_NCX_REFINE_NOT_ALLOWED;
+        log_error("\nError: 'mandatory' refinement on %s '%s'",
+                  obj_get_typestr(targobj),
+                  obj_get_name(targobj));
+        tkc->curerr = &refine->config_tkerr;
+        ncx_print_errormsg(tkc, mod, res);
     }
 
     if (refine->minelems_tkerr.mod && !minel) {
-	res = ERR_NCX_REFINE_NOT_ALLOWED;
-	log_error("\nError: 'min-elements' refinement on %s '%s'",
-		  obj_get_typestr(targobj),
-		  obj_get_name(targobj));
-	tkc->curerr = &refine->minelems_tkerr;
-	ncx_print_errormsg(tkc, mod, res);
+        res = ERR_NCX_REFINE_NOT_ALLOWED;
+        log_error("\nError: 'min-elements' refinement on %s '%s'",
+                  obj_get_typestr(targobj),
+                  obj_get_name(targobj));
+        tkc->curerr = &refine->minelems_tkerr;
+        ncx_print_errormsg(tkc, mod, res);
     }
 
     if (refine->maxelems_tkerr.mod && !maxel) {
-	res = ERR_NCX_REFINE_NOT_ALLOWED;
-	log_error("\nError: 'max-elements' refinement on %s '%s'",
-		  obj_get_typestr(targobj),
-		  obj_get_name(targobj));
-	tkc->curerr = &refine->maxelems_tkerr;
-	ncx_print_errormsg(tkc, mod, res);
+        res = ERR_NCX_REFINE_NOT_ALLOWED;
+        log_error("\nError: 'max-elements' refinement on %s '%s'",
+                  obj_get_typestr(targobj),
+                  obj_get_name(targobj));
+        tkc->curerr = &refine->maxelems_tkerr;
+        ncx_print_errormsg(tkc, mod, res);
     }
 
     if (!dlq_empty(&refine->mustQ) && !bmust) {
-	res = ERR_NCX_REFINE_NOT_ALLOWED;
-	for (must = (xpath_pcb_t *)dlq_firstEntry(&refine->mustQ);
-	     must != NULL;
-	     must = (xpath_pcb_t *)dlq_nextEntry(must)) {
-	    log_error("\nError: 'must' refinement on %s '%s'",
-		      obj_get_typestr(targobj),
-		      obj_get_name(targobj));
-	    tkc->curerr = &must->tkerr;
-	    ncx_print_errormsg(tkc, mod, res);
-	}
+        res = ERR_NCX_REFINE_NOT_ALLOWED;
+        for (must = (xpath_pcb_t *)dlq_firstEntry(&refine->mustQ);
+             must != NULL;
+             must = (xpath_pcb_t *)dlq_nextEntry(must)) {
+            log_error("\nError: 'must' refinement on %s '%s'",
+                      obj_get_typestr(targobj),
+                      obj_get_name(targobj));
+            tkc->curerr = &must->tkerr;
+            ncx_print_errormsg(tkc, mod, res);
+        }
     }
 
     return res;
@@ -6575,10 +6575,10 @@ static status_t
 *********************************************************************/
 static status_t 
     combine_refine_objects (tk_chain_t *tkc,
-			    ncx_module_t  *mod,
-			    obj_template_t *keepobj,
-			    obj_template_t *mergeobj,
-			    obj_template_t *targobj)
+                            ncx_module_t  *mod,
+                            obj_template_t *keepobj,
+                            obj_template_t *mergeobj,
+                            obj_template_t *targobj)
 {
     obj_refine_t   *krefine, *mrefine;
     boolean         pres, def, conf, mand, minel, maxel, bmust;
@@ -6599,188 +6599,188 @@ static status_t
 
     switch (targobj->objtype) {
     case OBJ_TYP_LEAF:
-	conf = TRUE;
-	mand = TRUE;
-	bmust = TRUE;
-	def = TRUE;
-	break;
+        conf = TRUE;
+        mand = TRUE;
+        bmust = TRUE;
+        def = TRUE;
+        break;
     case OBJ_TYP_ANYXML:
-	mand = TRUE;
-	break;
+        mand = TRUE;
+        break;
     case OBJ_TYP_LEAF_LIST:
-	conf = TRUE;
-	bmust = TRUE;
-	minel = TRUE;
-	maxel = TRUE;
-	break;
+        conf = TRUE;
+        bmust = TRUE;
+        minel = TRUE;
+        maxel = TRUE;
+        break;
     case OBJ_TYP_CONTAINER:
-	bmust = TRUE;
-	pres = TRUE;
-	conf = TRUE;
-	break;
+        bmust = TRUE;
+        pres = TRUE;
+        conf = TRUE;
+        break;
     case OBJ_TYP_LIST:
-	bmust = TRUE;
-	conf = TRUE;
-	minel = TRUE;
-	maxel = TRUE;
-	break;
+        bmust = TRUE;
+        conf = TRUE;
+        minel = TRUE;
+        maxel = TRUE;
+        break;
     case OBJ_TYP_CHOICE:
-	def = TRUE;
-	mand = TRUE;
-	break;
+        def = TRUE;
+        mand = TRUE;
+        break;
     case OBJ_TYP_CASE:
-	break;
+        break;
     default:
-	return NO_ERR;  /* error: should already be reported */
+        return NO_ERR;  /* error: should already be reported */
     }
 
 
     if (mrefine->descr) {
-	if (krefine->descr) {
-	    res = ERR_NCX_DUP_REFINE_STMT;
-	    log_error("\nError: description-stmt set in refine on line %u",
-		      krefine->descr_tkerr.linenum);
-	    tkc->curerr = &mrefine->descr_tkerr;
-	    ncx_print_errormsg(tkc, mod, res);
-	} else {
-	    krefine->descr = mrefine->descr;
-	    ncx_set_error(&krefine->descr_tkerr,
+        if (krefine->descr) {
+            res = ERR_NCX_DUP_REFINE_STMT;
+            log_error("\nError: description-stmt set in refine on line %u",
+                      krefine->descr_tkerr.linenum);
+            tkc->curerr = &mrefine->descr_tkerr;
+            ncx_print_errormsg(tkc, mod, res);
+        } else {
+            krefine->descr = mrefine->descr;
+            ncx_set_error(&krefine->descr_tkerr,
                           mrefine->descr_tkerr.mod,
                           mrefine->descr_tkerr.linenum,
                           mrefine->descr_tkerr.linepos);
-	    mrefine->descr = NULL;
-	}
+            mrefine->descr = NULL;
+        }
     }
 
     if (mrefine->ref) {
-	if (krefine->ref) {
-	    res = ERR_NCX_DUP_REFINE_STMT;
-	    log_error("\nError: reference-stmt set in refine on line %u",
-		      krefine->ref_tkerr.linenum);
-	    tkc->curerr = &mrefine->ref_tkerr;
-	    ncx_print_errormsg(tkc, mod, res);
-	} else {
-	    krefine->ref = mrefine->ref;
-	    ncx_set_error(&krefine->ref_tkerr,
+        if (krefine->ref) {
+            res = ERR_NCX_DUP_REFINE_STMT;
+            log_error("\nError: reference-stmt set in refine on line %u",
+                      krefine->ref_tkerr.linenum);
+            tkc->curerr = &mrefine->ref_tkerr;
+            ncx_print_errormsg(tkc, mod, res);
+        } else {
+            krefine->ref = mrefine->ref;
+            ncx_set_error(&krefine->ref_tkerr,
                           mrefine->ref_tkerr.mod,
                           mrefine->ref_tkerr.linenum,
                           mrefine->ref_tkerr.linepos);
-	    mrefine->ref = NULL;
-	}
+            mrefine->ref = NULL;
+        }
     }
 
     if (mrefine->presence && pres) {
-	if (krefine->presence) {
-	    res = ERR_NCX_DUP_REFINE_STMT;
-	    log_error("\nError: presence-stmt set in refine on line %u",
-		      krefine->presence_tkerr.linenum);
-	    tkc->curerr = &mrefine->presence_tkerr;
-	    ncx_print_errormsg(tkc, mod, res);
-	} else {
-	    krefine->presence = mrefine->presence;
-	    ncx_set_error(&krefine->presence_tkerr,
+        if (krefine->presence) {
+            res = ERR_NCX_DUP_REFINE_STMT;
+            log_error("\nError: presence-stmt set in refine on line %u",
+                      krefine->presence_tkerr.linenum);
+            tkc->curerr = &mrefine->presence_tkerr;
+            ncx_print_errormsg(tkc, mod, res);
+        } else {
+            krefine->presence = mrefine->presence;
+            ncx_set_error(&krefine->presence_tkerr,
                           mrefine->presence_tkerr.mod,
                           mrefine->presence_tkerr.linenum,
                           mrefine->presence_tkerr.linepos);
-	    mrefine->presence = NULL;
-	}
+            mrefine->presence = NULL;
+        }
     }
 
     if (mrefine->def && def) {
-	if (krefine->def) {
-	    res = ERR_NCX_DUP_REFINE_STMT;
-	    log_error("\nError: default-stmt set in refine on line %u",
-		      krefine->def_tkerr.linenum);
-	    tkc->curerr = &mrefine->def_tkerr;
-	    ncx_print_errormsg(tkc, mod, res);
-	} else {
-	    krefine->def = mrefine->def;
-	    ncx_set_error(&krefine->def_tkerr,
+        if (krefine->def) {
+            res = ERR_NCX_DUP_REFINE_STMT;
+            log_error("\nError: default-stmt set in refine on line %u",
+                      krefine->def_tkerr.linenum);
+            tkc->curerr = &mrefine->def_tkerr;
+            ncx_print_errormsg(tkc, mod, res);
+        } else {
+            krefine->def = mrefine->def;
+            ncx_set_error(&krefine->def_tkerr,
                           mrefine->def_tkerr.mod,
                           mrefine->def_tkerr.linenum,
                           mrefine->def_tkerr.linepos);
-	    mrefine->def = NULL;
-	}
+            mrefine->def = NULL;
+        }
     }
 
     if (mrefine->config_tkerr.mod && conf) {
-	if (krefine->config_tkerr.mod) {
-	    res = ERR_NCX_DUP_REFINE_STMT;
-	    log_error("\nError: config-stmt set in refine on line %u",
-		      krefine->config_tkerr.linenum);
-	    tkc->curerr = &mrefine->config_tkerr;
-	    ncx_print_errormsg(tkc, mod, res);
-	} else {
-	    ncx_set_error(&krefine->config_tkerr,
+        if (krefine->config_tkerr.mod) {
+            res = ERR_NCX_DUP_REFINE_STMT;
+            log_error("\nError: config-stmt set in refine on line %u",
+                      krefine->config_tkerr.linenum);
+            tkc->curerr = &mrefine->config_tkerr;
+            ncx_print_errormsg(tkc, mod, res);
+        } else {
+            ncx_set_error(&krefine->config_tkerr,
                           mrefine->config_tkerr.mod,
                           mrefine->config_tkerr.linenum,
                           mrefine->config_tkerr.linepos);
-	    keepobj->flags |= OBJ_FL_CONFSET;
-	    if (mergeobj->flags & OBJ_FL_CONFIG) {
-		keepobj->flags |= OBJ_FL_CONFIG;
-	    } else {
-		keepobj->flags &= ~OBJ_FL_CONFIG;
-	    }
-	}
+            keepobj->flags |= OBJ_FL_CONFSET;
+            if (mergeobj->flags & OBJ_FL_CONFIG) {
+                keepobj->flags |= OBJ_FL_CONFIG;
+            } else {
+                keepobj->flags &= ~OBJ_FL_CONFIG;
+            }
+        }
     }
 
     if (mrefine->mandatory_tkerr.mod && mand) {
-	if (krefine->mandatory_tkerr.mod) {
-	    res = ERR_NCX_DUP_REFINE_STMT;
-	    log_error("\nError: mandatory-stmt set in refine on line %u",
-		      krefine->mandatory_tkerr.linenum);
-	    tkc->curerr = &mrefine->mandatory_tkerr;
-	    ncx_print_errormsg(tkc, mod, res);
-	} else {
-	    ncx_set_error(&krefine->mandatory_tkerr,
+        if (krefine->mandatory_tkerr.mod) {
+            res = ERR_NCX_DUP_REFINE_STMT;
+            log_error("\nError: mandatory-stmt set in refine on line %u",
+                      krefine->mandatory_tkerr.linenum);
+            tkc->curerr = &mrefine->mandatory_tkerr;
+            ncx_print_errormsg(tkc, mod, res);
+        } else {
+            ncx_set_error(&krefine->mandatory_tkerr,
                           mrefine->mandatory_tkerr.mod,
                           mrefine->mandatory_tkerr.linenum,
                           mrefine->mandatory_tkerr.linepos);
-	    keepobj->flags |= OBJ_FL_MANDSET;
-	    if (mergeobj->flags & OBJ_FL_MANDATORY) {
-		keepobj->flags |= OBJ_FL_MANDATORY;
-	    }
-	}
+            keepobj->flags |= OBJ_FL_MANDSET;
+            if (mergeobj->flags & OBJ_FL_MANDATORY) {
+                keepobj->flags |= OBJ_FL_MANDATORY;
+            }
+        }
     }
 
     if (mrefine->minelems_tkerr.mod && minel) {
-	if (krefine->minelems_tkerr.mod) {
-	    res = ERR_NCX_DUP_REFINE_STMT;
-	    log_error("\nError: min-elements-stmt set in refine on line %u",
-		      krefine->minelems_tkerr.linenum);
-	    tkc->curerr = &mrefine->minelems_tkerr;
-	    ncx_print_errormsg(tkc, mod, res);
-	} else {
-	    krefine->minelems = mrefine->minelems;
-	    ncx_set_error(&krefine->minelems_tkerr,
+        if (krefine->minelems_tkerr.mod) {
+            res = ERR_NCX_DUP_REFINE_STMT;
+            log_error("\nError: min-elements-stmt set in refine on line %u",
+                      krefine->minelems_tkerr.linenum);
+            tkc->curerr = &mrefine->minelems_tkerr;
+            ncx_print_errormsg(tkc, mod, res);
+        } else {
+            krefine->minelems = mrefine->minelems;
+            ncx_set_error(&krefine->minelems_tkerr,
                           mrefine->minelems_tkerr.mod,
                           mrefine->minelems_tkerr.linenum,
                           mrefine->minelems_tkerr.linepos);
-	}
+        }
     }
 
     if (mrefine->maxelems_tkerr.mod && maxel) {
-	if (krefine->maxelems_tkerr.mod) {
-	    res = ERR_NCX_DUP_REFINE_STMT;
-	    log_error("\nError: max-elements-stmt set in refine on line %u",
-		      krefine->maxelems_tkerr.linenum);
-	    tkc->curerr = &mrefine->maxelems_tkerr;
-	    ncx_print_errormsg(tkc, mod, res);
-	} else {
-	    krefine->maxelems = mrefine->maxelems;
-	    ncx_set_error(&krefine->maxelems_tkerr,
+        if (krefine->maxelems_tkerr.mod) {
+            res = ERR_NCX_DUP_REFINE_STMT;
+            log_error("\nError: max-elements-stmt set in refine on line %u",
+                      krefine->maxelems_tkerr.linenum);
+            tkc->curerr = &mrefine->maxelems_tkerr;
+            ncx_print_errormsg(tkc, mod, res);
+        } else {
+            krefine->maxelems = mrefine->maxelems;
+            ncx_set_error(&krefine->maxelems_tkerr,
                           mrefine->maxelems_tkerr.mod,
                           mrefine->maxelems_tkerr.linenum,
                           mrefine->maxelems_tkerr.linepos);
-	}
+        }
     }
 
     if (!dlq_empty(&mrefine->mustQ) && bmust) {
-	dlq_block_enque(&mrefine->mustQ, &krefine->mustQ);
+        dlq_block_enque(&mrefine->mustQ, &krefine->mustQ);
     }
 
     if (!dlq_empty(&mergeobj->appinfoQ)) {
-	dlq_block_enque(&mergeobj->appinfoQ, &keepobj->appinfoQ);
+        dlq_block_enque(&mergeobj->appinfoQ, &keepobj->appinfoQ);
     }
 
     return res;
@@ -6809,9 +6809,9 @@ static status_t
 static status_t 
     resolve_uses (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-		  ncx_module_t  *mod,
-		  obj_uses_t *uses,
-		  obj_template_t *obj)
+                  ncx_module_t  *mod,
+                  obj_uses_t *uses,
+                  obj_template_t *obj)
 {
     obj_template_t *chobj, *testobj, *cobj, *targobj, *nextobj;
     obj_case_t     *cas;
@@ -6824,27 +6824,27 @@ static status_t
      * a local grouping, and grp has not been set yet
      */
     if (!uses->grp) {
-	uses->grp = obj_find_grouping(obj, uses->name);
-	if (!uses->grp) {
-	    uses->grp = ncx_find_grouping(mod, uses->name);
-	    if (!uses->grp) {
-		log_error("\nError: grouping '%s' not found",
-			  uses->name);
-		retres = ERR_NCX_DEF_NOT_FOUND;
+        uses->grp = obj_find_grouping(obj, uses->name);
+        if (!uses->grp) {
+            uses->grp = ncx_find_grouping(mod, uses->name);
+            if (!uses->grp) {
+                log_error("\nError: grouping '%s' not found",
+                          uses->name);
+                retres = ERR_NCX_DEF_NOT_FOUND;
                 SET_OBJ_CURERR(tkc, obj);
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	}
+                ncx_print_errormsg(tkc, mod, retres);
+            }
+        }
     }
 
     /* check for nested uses -- a uses AA within grouping AA */
     if (uses->grp) {
-	uses->grp->used = TRUE;
-	res = yang_grp_check_nest_loop(tkc, mod, obj, uses->grp);
-	CHK_EXIT(res, retres);
-	if (res != NO_ERR) {
-	    uses->grp = NULL;   /* prevent recursive crash later */
-	}
+        uses->grp->used = TRUE;
+        res = yang_grp_check_nest_loop(tkc, mod, obj, uses->grp);
+        CHK_EXIT(res, retres);
+        if (res != NO_ERR) {
+            uses->grp = NULL;   /* prevent recursive crash later */
+        }
     }
 
 
@@ -6854,7 +6854,7 @@ static status_t
                                     mod, 
                                     uses->datadefQ);
     if (res != NO_ERR) {
-	retres = res;
+        retres = res;
     }
     res = check_parent(tkc, mod, obj);
     CHK_EXIT(res, retres);
@@ -6863,99 +6863,99 @@ static status_t
      * in the grouping
      */
     for (chobj = (obj_template_t *)dlq_firstEntry(uses->datadefQ);
-	 chobj != NULL;
-	 chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
+         chobj != NULL;
+         chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 
-	if (chobj->objtype != OBJ_TYP_REFINE) {
-	    continue;
-	}
+        if (chobj->objtype != OBJ_TYP_REFINE) {
+            continue;
+        }
 
-	refine = chobj->def.refine;
+        refine = chobj->def.refine;
 
-	/* find schema-nodeid target
-	 * the node being refined MUST exist in the grouping
-	 */
-	res = xpath_find_schema_target(pcb,
+        /* find schema-nodeid target
+         * the node being refined MUST exist in the grouping
+         */
+        res = xpath_find_schema_target(pcb,
                                        tkc, 
                                        mod, 
                                        obj,
-				       &uses->grp->datadefQ,
-				       refine->target, 
-				       &targobj, 
+                                       &uses->grp->datadefQ,
+                                       refine->target, 
+                                       &targobj, 
                                        NULL);
-	if (res != NO_ERR || !targobj) {
-	    /* error: refined obj not in the grouping */
-	    log_error("\nError: refinement node '%s' not found"
-		      " in grouping '%s'",
+        if (res != NO_ERR || !targobj) {
+            /* error: refined obj not in the grouping */
+            log_error("\nError: refinement node '%s' not found"
+                      " in grouping '%s'",
                       obj_get_name(chobj),
-		      uses->grp->name);
-	    retres = ERR_NCX_MISSING_REFTARGET;
-	    tkc->curerr = &chobj->tkerr;
-	    ncx_print_errormsg(tkc, mod, retres);
-	} else {
-	    /* refine target is valid, so save it */
-	    refine->targobj = targobj;
+                      uses->grp->name);
+            retres = ERR_NCX_MISSING_REFTARGET;
+            tkc->curerr = &chobj->tkerr;
+            ncx_print_errormsg(tkc, mod, retres);
+        } else {
+            /* refine target is valid, so save it */
+            refine->targobj = targobj;
 
-	    /* check any extra refinements not allowed for
-	     * the target object type
-	     */
-	    res = check_refine_allowed(tkc, 
+            /* check any extra refinements not allowed for
+             * the target object type
+             */
+            res = check_refine_allowed(tkc, 
                                        mod,
-				       chobj,
+                                       chobj,
                                        targobj);
-	    CHK_EXIT(res, retres);
+            CHK_EXIT(res, retres);
 
-	    /* check if any default statements are present,
-	     * and if they are OK for the target data type
-	     */
-	    if (targobj->objtype == OBJ_TYP_LEAF) {
-		if (refine->def) {
-		    res = val_simval_ok_ex(targobj->def.leaf->typdef,
+            /* check if any default statements are present,
+             * and if they are OK for the target data type
+             */
+            if (targobj->objtype == OBJ_TYP_LEAF) {
+                if (refine->def) {
+                    res = val_simval_ok_ex(targobj->def.leaf->typdef,
                                            refine->def,
                                            NULL,
                                            mod);
-		    if (res != NO_ERR) {
-			retres = res;
-			log_error("\nError: Leaf refinement '%s' has "
-				  "invalid default value (%s)",
-				  obj_get_name(targobj),
-				  refine->def);
-			tkc->curerr = &refine->def_tkerr;
-			ncx_print_errormsg(tkc, mod, retres);
-		    }
-		}
-	    } else if (targobj->objtype == OBJ_TYP_CHOICE) {
-		if (refine->def) {
-		    cas = obj_find_case(targobj->def.choic,
-					obj_get_mod_name(targobj),
-					refine->def);
-		    if (!cas) {
-			/* default is not a valid case name */
-			tkc->curerr = &refine->def_tkerr;
-			retres = ERR_NCX_INVALID_VALUE;
-			log_error("\nError: Refined choice default '%s' "
-				  "is not a valid case name",
-				  refine->def);
-			ncx_print_errormsg(tkc, mod, retres);
-		    } else {
-			/* valid case name, 
-			 * make sure 'cas' contains only optional data nodes
-			 */
-			for (cobj = (obj_template_t *)
-				 dlq_firstEntry(cas->datadefQ);
-			     cobj != NULL;
-			     cobj = (obj_template_t *)dlq_nextEntry(cobj)) {
-			    if (obj_has_name(cobj) &&
-				obj_is_mandatory(cobj)) {
-				tkc->curerr = &cobj->tkerr;
-				retres = ERR_NCX_DEFCHOICE_NOT_OPTIONAL;
-				ncx_print_errormsg(tkc, mod, retres);
-			    }
-			}
-		    }
-		}
-	    }
-	}
+                    if (res != NO_ERR) {
+                        retres = res;
+                        log_error("\nError: Leaf refinement '%s' has "
+                                  "invalid default value (%s)",
+                                  obj_get_name(targobj),
+                                  refine->def);
+                        tkc->curerr = &refine->def_tkerr;
+                        ncx_print_errormsg(tkc, mod, retres);
+                    }
+                }
+            } else if (targobj->objtype == OBJ_TYP_CHOICE) {
+                if (refine->def) {
+                    cas = obj_find_case(targobj->def.choic,
+                                        obj_get_mod_name(targobj),
+                                        refine->def);
+                    if (!cas) {
+                        /* default is not a valid case name */
+                        tkc->curerr = &refine->def_tkerr;
+                        retres = ERR_NCX_INVALID_VALUE;
+                        log_error("\nError: Refined choice default '%s' "
+                                  "is not a valid case name",
+                                  refine->def);
+                        ncx_print_errormsg(tkc, mod, retres);
+                    } else {
+                        /* valid case name, 
+                         * make sure 'cas' contains only optional data nodes
+                         */
+                        for (cobj = (obj_template_t *)
+                                 dlq_firstEntry(cas->datadefQ);
+                             cobj != NULL;
+                             cobj = (obj_template_t *)dlq_nextEntry(cobj)) {
+                            if (obj_has_name(cobj) &&
+                                obj_is_mandatory(cobj)) {
+                                tkc->curerr = &cobj->tkerr;
+                                retres = ERR_NCX_DEFCHOICE_NOT_OPTIONAL;
+                                ncx_print_errormsg(tkc, mod, retres);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /* go through the refinement objects one more time
@@ -6963,41 +6963,41 @@ static status_t
      * Generate an error for duplicate sub-clauses entered
      */
     for (chobj = (obj_template_t *)dlq_firstEntry(uses->datadefQ);
-	 chobj != NULL;
-	 chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
+         chobj != NULL;
+         chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 
-	if (chobj->objtype != OBJ_TYP_REFINE) {
-	    continue;
-	}
+        if (chobj->objtype != OBJ_TYP_REFINE) {
+            continue;
+        }
 
-	cobj = chobj->def.refine->targobj;
-	if (!cobj) {
-	    continue;
-	}
+        cobj = chobj->def.refine->targobj;
+        if (!cobj) {
+            continue;
+        }
 
-	/* look through rest of Q for any refine w/ same target */
-	for (testobj = (obj_template_t *)dlq_nextEntry(chobj);
-	     testobj != NULL; 
-	     testobj = nextobj) {
+        /* look through rest of Q for any refine w/ same target */
+        for (testobj = (obj_template_t *)dlq_nextEntry(chobj);
+             testobj != NULL; 
+             testobj = nextobj) {
 
-	    nextobj = (obj_template_t *)dlq_nextEntry(testobj);
+            nextobj = (obj_template_t *)dlq_nextEntry(testobj);
 
-	    if (testobj->objtype != OBJ_TYP_REFINE) {
-		continue;
-	    }
+            if (testobj->objtype != OBJ_TYP_REFINE) {
+                continue;
+            }
 
-	    if (testobj->def.refine->targobj == cobj) {
-		/* duplicate refine found, remove and combine */
-		dlq_remove(testobj);
-		res = combine_refine_objects(tkc,
+            if (testobj->def.refine->targobj == cobj) {
+                /* duplicate refine found, remove and combine */
+                dlq_remove(testobj);
+                res = combine_refine_objects(tkc,
                                              mod,
-					     chobj,
+                                             chobj,
                                              testobj,
                                              cobj);
-		obj_free_template(testobj);
-		CHK_EXIT(res, retres);
-	    }
-	}
+                obj_free_template(testobj);
+                CHK_EXIT(res, retres);
+            }
+        }
     }
 
     /* at this point there should be one refine object for
@@ -7005,7 +7005,7 @@ static status_t
      * error so will not continue anyways
      */
     return retres;
-				    
+                                    
 }  /* resolve_uses */
 
 
@@ -7031,9 +7031,9 @@ static status_t
 static status_t 
     expand_uses (yang_pcb_t *pcb,
                  tk_chain_t *tkc,
-		 ncx_module_t  *mod,
-		 obj_template_t *obj,
-		 dlq_hdr_t *datadefQ)
+                 ncx_module_t  *mod,
+                 obj_template_t *obj,
+                 dlq_hdr_t *datadefQ)
 {
     obj_uses_t     *uses;
     obj_template_t *chobj, *newobj, *testobj;
@@ -7045,10 +7045,10 @@ static status_t
     uses = obj->def.uses;
 
     if (!uses->grp) {
-	/* this node has errors, currently proccessing for
-	 * errors only, so just keep going
-	 */
-	return NO_ERR;
+        /* this node has errors, currently proccessing for
+         * errors only, so just keep going
+         */
+        return NO_ERR;
     }
 
     /* go through each node in the grouping
@@ -7058,77 +7058,77 @@ static status_t
      * clone the object and add it inline to the datadefQ
      */
     for (chobj = (obj_template_t *)
-	     dlq_firstEntry(&uses->grp->datadefQ);
-	 chobj != NULL;
-	 chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
+             dlq_firstEntry(&uses->grp->datadefQ);
+         chobj != NULL;
+         chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 
 #ifdef YANG_OBJ_DEBUG
-	if (LOGDEBUG3) {
-	    log_debug3("\nexpand_uses: mod %s, object %s, on line %u",
-		       mod->name,
+        if (LOGDEBUG3) {
+            log_debug3("\nexpand_uses: mod %s, object %s, on line %u",
+                       mod->name,
                        obj_get_name(chobj),
-		       chobj->tkerr.linenum);
-	}
+                       chobj->tkerr.linenum);
+        }
 #endif
 
-	switch (chobj->objtype) {
-	case OBJ_TYP_USES:    /* expand should already be done */
-	case OBJ_TYP_AUGMENT:
-	case OBJ_TYP_REFINE:
-	    break;
-	default:
-	    name = obj_get_name(chobj);
-	    testobj = obj_find_template_test(datadefQ, NULL, name);
-	    if (testobj) {
-		log_error("\nError: object '%s' already defined at line %u",
-			  name,
+        switch (chobj->objtype) {
+        case OBJ_TYP_USES:    /* expand should already be done */
+        case OBJ_TYP_AUGMENT:
+        case OBJ_TYP_REFINE:
+            break;
+        default:
+            name = obj_get_name(chobj);
+            testobj = obj_find_template_test(datadefQ, NULL, name);
+            if (testobj) {
+                log_error("\nError: object '%s' already defined at line %u",
+                          name,
                           testobj->tkerr.linenum);
-		retres = ERR_NCX_DUP_ENTRY;
-		tkc->curerr = &chobj->tkerr;
-		ncx_print_errormsg(tkc, mod, retres);
-	    } else {
-		newobj = obj_clone_template(mod,
+                retres = ERR_NCX_DUP_ENTRY;
+                tkc->curerr = &chobj->tkerr;
+                ncx_print_errormsg(tkc, mod, retres);
+            } else {
+                newobj = obj_clone_template(mod,
                                             chobj,
-					    uses->datadefQ);
-		if (!newobj) {
-		    retres = ERR_INTERNAL_MEM;
-		    tkc->curerr = &chobj->tkerr;
-		    ncx_print_errormsg(tkc, mod, retres);
-		    return retres;
-		} else {
-		    /* set the object module (and namespace)
-		     * to the target, not the module w/ grouping
-		     */
-		    newobj->tkerr.mod = obj->tkerr.mod;  /****/
-		    newobj->parent = obj->parent;
-		    newobj->usesobj = obj;
+                                            uses->datadefQ);
+                if (!newobj) {
+                    retres = ERR_INTERNAL_MEM;
+                    tkc->curerr = &chobj->tkerr;
+                    ncx_print_errormsg(tkc, mod, retres);
+                    return retres;
+                } else {
+                    /* set the object module (and namespace)
+                     * to the target, not the module w/ grouping
+                     */
+                    newobj->tkerr.mod = obj->tkerr.mod;  /****/
+                    newobj->parent = obj->parent;
+                    newobj->usesobj = obj;
 
-		    if (!(newobj->flags & OBJ_FL_CONFSET)) {
-			config = obj_get_config_flag_deep(newobj);
-			if (config) {
-			    newobj->flags |= OBJ_FL_CONFIG;
-			} else {
-			    newobj->flags &= ~OBJ_FL_CONFIG;
-			}
-		    }
-		    
-		    dlq_insertAhead(newobj, obj);
+                    if (!(newobj->flags & OBJ_FL_CONFSET)) {
+                        config = obj_get_config_flag_deep(newobj);
+                        if (config) {
+                            newobj->flags |= OBJ_FL_CONFIG;
+                        } else {
+                            newobj->flags &= ~OBJ_FL_CONFIG;
+                        }
+                    }
+                    
+                    dlq_insertAhead(newobj, obj);
 
 #ifdef YANG_OBJ_DEBUG
-		    if (LOGDEBUG3) {
-			log_debug3("\nexpand_uses: add new "
+                    if (LOGDEBUG3) {
+                        log_debug3("\nexpand_uses: add new "
                                    "obj %s to parent %s,"
-				   " uses.%u",
-				   obj_get_name(newobj),
-				   (obj->grp) ? obj->grp->name :
-				   ((obj->parent) ? 
-				    obj_get_name(obj->parent) : NCX_EL_NONE),
-				   obj->tkerr.linenum);
-		    }
+                                   " uses.%u",
+                                   obj_get_name(newobj),
+                                   (obj->grp) ? obj->grp->name :
+                                   ((obj->parent) ? 
+                                    obj_get_name(obj->parent) : NCX_EL_NONE),
+                                   obj->tkerr.linenum);
+                    }
 #endif
-		}
-	    }
-	}
+                }
+            }
+        }
     }
 
     /* go through each node in the uses datadefQ
@@ -7137,33 +7137,33 @@ static status_t
      * as the uses
      */
     for (chobj = (obj_template_t *)
-	     dlq_firstEntry(uses->datadefQ);
-	 chobj != NULL;
-	 chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
+             dlq_firstEntry(uses->datadefQ);
+         chobj != NULL;
+         chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 
-	if (chobj->objtype != OBJ_TYP_AUGMENT) {
-	    continue;
-	}
+        if (chobj->objtype != OBJ_TYP_AUGMENT) {
+            continue;
+        }
 
 #ifdef YANG_OBJ_DEBUG
-	if (LOGDEBUG3) {
-	    log_debug3("\nexpand_uses_augment: "
+        if (LOGDEBUG3) {
+            log_debug3("\nexpand_uses_augment: "
                        "mod %s, augment on line %u",
-		       mod->name, 
-		       chobj->tkerr.linenum);
-	}
+                       mod->name, 
+                       chobj->tkerr.linenum);
+        }
 #endif
 
-	res = expand_augment(pcb,
+        res = expand_augment(pcb,
                              tkc, 
                              mod, 
                              chobj, 
                              datadefQ);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     return retres;
-				    
+                                    
 }  /* expand_uses */
 
 
@@ -7188,9 +7188,9 @@ static status_t
 static status_t 
     resolve_augment (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-		     ncx_module_t  *mod,
-		     obj_augment_t *aug,
-		     obj_template_t *obj)
+                     ncx_module_t  *mod,
+                     obj_augment_t *aug,
+                     obj_template_t *obj)
 {
     status_t       res, retres;
 
@@ -7204,24 +7204,24 @@ static status_t
 
     /* check if correct target Xpath string form is present */
     if (obj->parent && !obj_is_root(obj->parent) && 
-	aug->target && *aug->target == '/') {
-	/* absolute-schema-nodeid target not allowed */
-	log_error("\nError: absolute schema-nodeid form"
-		  " not allowed in nested augment statement");
-	retres = ERR_NCX_INVALID_VALUE;
+        aug->target && *aug->target == '/') {
+        /* absolute-schema-nodeid target not allowed */
+        log_error("\nError: absolute schema-nodeid form"
+                  " not allowed in nested augment statement");
+        retres = ERR_NCX_INVALID_VALUE;
         SET_OBJ_CURERR(tkc, obj);
-	ncx_print_errormsg(tkc, mod, retres);
+        ncx_print_errormsg(tkc, mod, retres);
     }
 
     /* check if correct target Xpath string form is present */
     if ((!obj->parent || obj_is_root(obj->parent)) && 
-	(aug->target && *aug->target != '/')) {
-	/* absolute-schema-nodeid target must be used */
-	log_error("\nError: descendant schema-nodeid form"
-		  " not allowed in top-level augment statement");
-	retres = ERR_NCX_INVALID_AUGTARGET;
+        (aug->target && *aug->target != '/')) {
+        /* absolute-schema-nodeid target must be used */
+        log_error("\nError: descendant schema-nodeid form"
+                  " not allowed in top-level augment statement");
+        retres = ERR_NCX_INVALID_AUGTARGET;
         SET_OBJ_CURERR(tkc, obj);
-	ncx_print_errormsg(tkc, mod, retres);
+        ncx_print_errormsg(tkc, mod, retres);
     }
 
     /* resolve augment contents */
@@ -7232,7 +7232,7 @@ static status_t
     CHK_EXIT(res, retres);
 
     return retres;
-				    
+                                    
 }  /* resolve_augment */
 
 
@@ -7263,9 +7263,9 @@ static status_t
 static status_t 
     expand_augment (yang_pcb_t *pcb,
                     tk_chain_t *tkc,
-		    ncx_module_t  *mod,
-		    obj_template_t *obj,
-		    dlq_hdr_t *datadefQ)
+                    ncx_module_t  *mod,
+                    obj_template_t *obj,
+                    dlq_hdr_t *datadefQ)
 {
     obj_augment_t     *aug;
     obj_template_t    *targobj, *chobj, *newobj, *testobj;
@@ -7276,10 +7276,10 @@ static status_t
     
     aug = obj->def.augment;
     if (!aug->target) {
-	/* this node has errors, currently proccessing for
-	 * errors only, so just keep going
-	 */
-	return NO_ERR;
+        /* this node has errors, currently proccessing for
+         * errors only, so just keep going
+         */
+        return NO_ERR;
     }
 
     augQ = &aug->datadefQ;
@@ -7295,53 +7295,53 @@ static status_t
                                    mod, 
                                    obj, 
                                    datadefQ,
-				   aug->target, 
+                                   aug->target, 
                                    &targobj,
                                    NULL);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
-	
+        
     aug->targobj = targobj;
 
     augextern = xml_strcmp(obj_get_mod_name(obj),
-			   obj_get_mod_name(targobj));
+                           obj_get_mod_name(targobj));
 
     augdefcase = (targobj->objtype == OBJ_TYP_CASE && targobj->parent
-		  && targobj->parent->def.choic->defval &&
-		  !xml_strcmp(obj_get_name(targobj),
-			      targobj->parent->def.choic->defval)) 
-	? TRUE : FALSE;
+                  && targobj->parent->def.choic->defval &&
+                  !xml_strcmp(obj_get_name(targobj),
+                              targobj->parent->def.choic->defval)) 
+        ? TRUE : FALSE;
     
     /* check external augment for mandatory nodes */
     if (augextern || augdefcase) {
 
-	/* check that all the augment nodes are optional */
-	for (testobj = (obj_template_t *)dlq_firstEntry(augQ);
-	     testobj != NO_ERR;
-	     testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+        /* check that all the augment nodes are optional */
+        for (testobj = (obj_template_t *)dlq_firstEntry(augQ);
+             testobj != NO_ERR;
+             testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
-	    if (!obj_has_name(testobj)) {
-		continue;
-	    }
-	
-	    if (obj_is_mandatory(testobj)) {
-		if (augextern) {
-		    log_error("\nError: Mandatory object '%s' not allowed "
-			      "in external augment statement",
-			      obj_get_name(testobj));
-		} else {
-		    log_error("\nError: Mandatory object '%s' not allowed "
-			      "in default case '%s'",
-			      obj_get_name(testobj), 
-			      obj_get_name(targobj));
-		}
-		
-		retres = ERR_NCX_MANDATORY_NOT_ALLOWED;
-		tkc->curerr = &testobj->tkerr;
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	}
+            if (!obj_has_name(testobj)) {
+                continue;
+            }
+        
+            if (obj_is_mandatory(testobj)) {
+                if (augextern) {
+                    log_error("\nError: Mandatory object '%s' not allowed "
+                              "in external augment statement",
+                              obj_get_name(testobj));
+                } else {
+                    log_error("\nError: Mandatory object '%s' not allowed "
+                              "in default case '%s'",
+                              obj_get_name(testobj), 
+                              obj_get_name(targobj));
+                }
+                
+                retres = ERR_NCX_MANDATORY_NOT_ALLOWED;
+                tkc->curerr = &testobj->tkerr;
+                ncx_print_errormsg(tkc, mod, retres);
+            }
+        }
     }
 
     /* make sure the objects augmented the target node
@@ -7349,87 +7349,87 @@ static status_t
      */
     switch (targobj->objtype) {
     case OBJ_TYP_RPC:
-	retres = ERR_NCX_INVALID_AUGTARGET;
-	log_error("\nError: cannot augment rpc node '%s'; use 'input' "
-		  "or 'output' instead", 
-		  obj_get_name(targobj));
-	tkc->curerr = &obj->tkerr;
-	ncx_print_errormsg(tkc, mod, retres);
-	break;
+        retres = ERR_NCX_INVALID_AUGTARGET;
+        log_error("\nError: cannot augment rpc node '%s'; use 'input' "
+                  "or 'output' instead", 
+                  obj_get_name(targobj));
+        tkc->curerr = &obj->tkerr;
+        ncx_print_errormsg(tkc, mod, retres);
+        break;
     case OBJ_TYP_CHOICE:
-	for (testobj = (obj_template_t *)dlq_firstEntry(augQ);
-	     testobj != NULL;
-	     testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
-	    switch (testobj->objtype) {
-	    case OBJ_TYP_RPC:
-	    case OBJ_TYP_RPCIO:
-	    case OBJ_TYP_NOTIF:
-	    case OBJ_TYP_CHOICE:
-		retres = ERR_NCX_INVALID_AUGTARGET;
-		log_error("\nError: invalid %s '%s' augmenting choice node",
-			  obj_get_typestr(testobj),
-			  obj_get_name(testobj));
-		tkc->curerr = &obj->tkerr;
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    case OBJ_TYP_NONE:
-	    case OBJ_TYP_USES:
-	    case OBJ_TYP_AUGMENT:
-	    case OBJ_TYP_REFINE:
-		retres = SET_ERROR(ERR_INTERNAL_VAL);
-		break;
-	    default:
-		;
-	    }
-	}
-	break;
+        for (testobj = (obj_template_t *)dlq_firstEntry(augQ);
+             testobj != NULL;
+             testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+            switch (testobj->objtype) {
+            case OBJ_TYP_RPC:
+            case OBJ_TYP_RPCIO:
+            case OBJ_TYP_NOTIF:
+            case OBJ_TYP_CHOICE:
+                retres = ERR_NCX_INVALID_AUGTARGET;
+                log_error("\nError: invalid %s '%s' augmenting choice node",
+                          obj_get_typestr(testobj),
+                          obj_get_name(testobj));
+                tkc->curerr = &obj->tkerr;
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            case OBJ_TYP_NONE:
+            case OBJ_TYP_USES:
+            case OBJ_TYP_AUGMENT:
+            case OBJ_TYP_REFINE:
+                retres = SET_ERROR(ERR_INTERNAL_VAL);
+                break;
+            default:
+                ;
+            }
+        }
+        break;
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
-	break;
+        break;
     case OBJ_TYP_ANYXML:
-	retres = ERR_NCX_INVALID_AUGTARGET;
-	log_error("\nError: cannot augment anyxml node '%s'",
-		  obj_get_name(targobj));
-	tkc->curerr = &obj->tkerr;
-	ncx_print_errormsg(tkc, mod, retres);
-	break;
+        retres = ERR_NCX_INVALID_AUGTARGET;
+        log_error("\nError: cannot augment anyxml node '%s'",
+                  obj_get_name(targobj));
+        tkc->curerr = &obj->tkerr;
+        ncx_print_errormsg(tkc, mod, retres);
+        break;
     default:
-	for (testobj = (obj_template_t *)dlq_firstEntry(augQ);
-	     testobj != NULL;
-	     testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
-	    switch (testobj->objtype) {
-	    case OBJ_TYP_RPC:
-	    case OBJ_TYP_RPCIO:
-	    case OBJ_TYP_NOTIF:
-	    case OBJ_TYP_CASE:
-		retres = ERR_NCX_INVALID_AUGTARGET;
-		log_error("\nError: invalid %s '%s' augmenting data node",
-			  obj_get_typestr(testobj),
-			  obj_get_name(testobj));
-		tkc->curerr = &obj->tkerr;
-		ncx_print_errormsg(tkc, mod, retres);
-		break;
-	    case OBJ_TYP_NONE:
-	    case OBJ_TYP_AUGMENT:
-	    case OBJ_TYP_REFINE:
-		retres = SET_ERROR(ERR_INTERNAL_VAL);
-		break;
-	    default:
-		;
-	    }
-	}
+        for (testobj = (obj_template_t *)dlq_firstEntry(augQ);
+             testobj != NULL;
+             testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+            switch (testobj->objtype) {
+            case OBJ_TYP_RPC:
+            case OBJ_TYP_RPCIO:
+            case OBJ_TYP_NOTIF:
+            case OBJ_TYP_CASE:
+                retres = ERR_NCX_INVALID_AUGTARGET;
+                log_error("\nError: invalid %s '%s' augmenting data node",
+                          obj_get_typestr(testobj),
+                          obj_get_name(testobj));
+                tkc->curerr = &obj->tkerr;
+                ncx_print_errormsg(tkc, mod, retres);
+                break;
+            case OBJ_TYP_NONE:
+            case OBJ_TYP_AUGMENT:
+            case OBJ_TYP_REFINE:
+                retres = SET_ERROR(ERR_INTERNAL_VAL);
+                break;
+            default:
+                ;
+            }
+        }
     }
 
     /* get the augment target datadefQ */
     targQ = obj_get_datadefQ(targobj);
     if (!targQ) {
-	log_error("\nError: %s '%s' cannot be augmented",
-		  obj_get_typestr(targobj),
-		  obj_get_name(targobj));
-	retres = ERR_NCX_INVALID_AUGTARGET;
-	tkc->curerr = &targobj->tkerr;
-	ncx_print_errormsg(tkc, mod, retres);
-	return retres;
+        log_error("\nError: %s '%s' cannot be augmented",
+                  obj_get_typestr(targobj),
+                  obj_get_name(targobj));
+        retres = ERR_NCX_INVALID_AUGTARGET;
+        tkc->curerr = &targobj->tkerr;
+        ncx_print_errormsg(tkc, mod, retres);
+        return retres;
     }
 
     /* go through each node in the augment
@@ -7438,35 +7438,35 @@ static status_t
      * to the augment target
      */
     for (chobj = (obj_template_t *)dlq_firstEntry(augQ);
-	 chobj != NULL;
-	 chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
+         chobj != NULL;
+         chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 
 #ifdef YANG_OBJ_DEBUG
-	if (LOGDEBUG3) {
-	    log_debug3("\nexpand_aug: mod %s, object %s, on line %u",
-		       mod->name, obj_get_name(chobj),
-		       chobj->tkerr.linenum);
-	}
+        if (LOGDEBUG3) {
+            log_debug3("\nexpand_aug: mod %s, object %s, on line %u",
+                       mod->name, obj_get_name(chobj),
+                       chobj->tkerr.linenum);
+        }
 #endif
 
-	switch (chobj->objtype) {
-	case OBJ_TYP_USES:    /* expand should already be done */
-	    break;
-	case OBJ_TYP_AUGMENT:
-	    res = expand_augment(pcb,
+        switch (chobj->objtype) {
+        case OBJ_TYP_USES:    /* expand should already be done */
+            break;
+        case OBJ_TYP_AUGMENT:
+            res = expand_augment(pcb,
                                  tkc, 
                                  mod, 
                                  chobj, 
                                  &aug->datadefQ);
-	    CHK_EXIT(res, retres);
-	    break;
-	default:
-	    name = obj_get_name(chobj);
+            CHK_EXIT(res, retres);
+            break;
+        default:
+            name = obj_get_name(chobj);
 
-	    /* try to find the node in any namespace (warning) */
-	    testobj = obj_find_template_test(targQ, NULL, name);
-	    if (testobj && xml_strcmp(obj_get_mod_name(testobj),
-				      obj_get_mod_name(chobj))) {
+            /* try to find the node in any namespace (warning) */
+            testobj = obj_find_template_test(targQ, NULL, name);
+            if (testobj && xml_strcmp(obj_get_mod_name(testobj),
+                                      obj_get_mod_name(chobj))) {
                 if (ncx_warning_enabled(ERR_NCX_DUP_AUGNODE)) {
                     log_warn("\nWarning: sibling object '%s' "
                              "already defined "
@@ -7481,78 +7481,78 @@ static status_t
                 }
             }
 
-	    /* try to find the node in the target namespace (error) */
-	    testobj = obj_find_template_test(targQ, 
-					     obj_get_mod_name(targobj),
-					     name);
-	    if (testobj) {
-		log_error("\nError: object '%s' already defined "
-			  "in %smodule '%s' at line %u",
-			  name, 
-			  (testobj->tkerr.mod->ismod) ? "" : "sub",
-			  testobj->tkerr.mod->name,
-			  testobj->tkerr.linenum);
-		retres = ERR_NCX_DUP_ENTRY;
-		tkc->curerr = &chobj->tkerr;
-		ncx_print_errormsg(tkc, mod, retres);
-	    } else {
-		/* OK to create the new name
-		 * make a clone of the augment object in
-		 * case this augment is inside a grouping
-		 */
-		if (targobj->objtype == OBJ_TYP_CHOICE) {
-		    /* make sure all the child nodes are wrapped
-		     * in a OBJ_TYP_CASE node -- this has not
-		     * been checked yet
-		     */
-		    newobj = obj_clone_template_case(mod, chobj, NULL);
-		} else {
-		    /* create a cloned object with the namespace of the
-		     * module defining the augment
-		     */
-		    newobj = obj_clone_template(mod, chobj, NULL);
-		}
-		if (!newobj) {
-		    res = ERR_INTERNAL_MEM;
-		    tkc->curerr = &chobj->tkerr;
-		    ncx_print_errormsg(tkc, mod, res);
-		    return res;
-		} else {
-		    newobj->parent = targobj;
-		    newobj->flags |= OBJ_FL_AUGCLONE;
-		    newobj->augobj = obj;
-		    obj_set_ncx_flags(newobj);
-		    dlq_enque(newobj, targQ);
+            /* try to find the node in the target namespace (error) */
+            testobj = obj_find_template_test(targQ, 
+                                             obj_get_mod_name(targobj),
+                                             name);
+            if (testobj) {
+                log_error("\nError: object '%s' already defined "
+                          "in %smodule '%s' at line %u",
+                          name, 
+                          (testobj->tkerr.mod->ismod) ? "" : "sub",
+                          testobj->tkerr.mod->name,
+                          testobj->tkerr.linenum);
+                retres = ERR_NCX_DUP_ENTRY;
+                tkc->curerr = &chobj->tkerr;
+                ncx_print_errormsg(tkc, mod, retres);
+            } else {
+                /* OK to create the new name
+                 * make a clone of the augment object in
+                 * case this augment is inside a grouping
+                 */
+                if (targobj->objtype == OBJ_TYP_CHOICE) {
+                    /* make sure all the child nodes are wrapped
+                     * in a OBJ_TYP_CASE node -- this has not
+                     * been checked yet
+                     */
+                    newobj = obj_clone_template_case(mod, chobj, NULL);
+                } else {
+                    /* create a cloned object with the namespace of the
+                     * module defining the augment
+                     */
+                    newobj = obj_clone_template(mod, chobj, NULL);
+                }
+                if (!newobj) {
+                    res = ERR_INTERNAL_MEM;
+                    tkc->curerr = &chobj->tkerr;
+                    ncx_print_errormsg(tkc, mod, res);
+                    return res;
+                } else {
+                    newobj->parent = targobj;
+                    newobj->flags |= OBJ_FL_AUGCLONE;
+                    newobj->augobj = obj;
+                    obj_set_ncx_flags(newobj);
+                    dlq_enque(newobj, targQ);
 
-		    /* may need to set the config flag now, under the context
-		     * of the actual target, not within the grouping
-		     */
-		    if (!(newobj->flags & OBJ_FL_CONFSET)) {
-			config = obj_get_config_flag_deep(newobj);
-			if (config) {
-			    newobj->flags |= OBJ_FL_CONFIG;
-			} else {
-			    newobj->flags &= ~OBJ_FL_CONFIG;
-			}
-		    }
+                    /* may need to set the config flag now, under the context
+                     * of the actual target, not within the grouping
+                     */
+                    if (!(newobj->flags & OBJ_FL_CONFSET)) {
+                        config = obj_get_config_flag_deep(newobj);
+                        if (config) {
+                            newobj->flags |= OBJ_FL_CONFIG;
+                        } else {
+                            newobj->flags &= ~OBJ_FL_CONFIG;
+                        }
+                    }
 
 #ifdef YANG_OBJ_DEBUG
-		    if (LOGDEBUG3) {
-			log_debug3("\nexpand_aug: add new obj %s "
-				   "to target %s.%u, aug.%u",
-				   obj_get_name(newobj),
-				   obj_get_name(targobj),
-				   targobj->tkerr.linenum,
-				   obj->tkerr.linenum);
-		    }
+                    if (LOGDEBUG3) {
+                        log_debug3("\nexpand_aug: add new obj %s "
+                                   "to target %s.%u, aug.%u",
+                                   obj_get_name(newobj),
+                                   obj_get_name(targobj),
+                                   targobj->tkerr.linenum,
+                                   obj->tkerr.linenum);
+                    }
 #endif
-		}
-	    }
-	}
+                }
+            }
+        }
     }
 
     return retres;
-				    
+                                    
 }  /* expand_augment */
 
 
@@ -7576,8 +7576,8 @@ static status_t
 static status_t 
     resolve_deviation (yang_pcb_t *pcb,
                        tk_chain_t *tkc,
-		       ncx_module_t  *mod,
-		       obj_deviation_t *deviation)
+                       ncx_module_t  *mod,
+                       obj_deviation_t *deviation)
 {
     obj_deviate_t     *devi, *nextdevi;
     obj_template_t    *targobj;
@@ -7608,7 +7608,7 @@ static status_t
     if (res != NO_ERR) {
         return res;
     }
-	
+        
     deviation->targobj = targobj;
 
     deviation->targmodname = xml_strdup(obj_get_mod_name(targobj));
@@ -7620,395 +7620,395 @@ static status_t
      * are OK for that object type
      */
     for (devi = (obj_deviate_t *)
-	     dlq_firstEntry(&deviation->deviateQ);
-	 devi != NULL;
-	 devi = nextdevi) {
+             dlq_firstEntry(&deviation->deviateQ);
+         devi != NULL;
+         devi = nextdevi) {
 
-	nextdevi = (obj_deviate_t *)dlq_nextEntry(devi);
+        nextdevi = (obj_deviate_t *)dlq_nextEntry(devi);
 
-	res = NO_ERR;
+        res = NO_ERR;
 
-	/* check if no sub-clauses are expected */
-	if (devi->arg == OBJ_DARG_NOT_SUPPORTED) {
-	    continue;
-	} else if (devi->arg == OBJ_DARG_ADD) {
-	    /* current clause must not exist */
-	    instancetest = FALSE;
-	} else {
-	    /* current clause must exist */
-	    instancetest = TRUE;
-	}
+        /* check if no sub-clauses are expected */
+        if (devi->arg == OBJ_DARG_NOT_SUPPORTED) {
+            continue;
+        } else if (devi->arg == OBJ_DARG_ADD) {
+            /* current clause must not exist */
+            instancetest = FALSE;
+        } else {
+            /* current clause must exist */
+            instancetest = TRUE;
+        }
 
-	/* check the object type against the clauses
-	 * in this deviate statement;
-	 * check type-stmt first
-	 */
-	if (devi->typdef) {
-	    /* replace type statement entered */
-	    if (!obj_is_leafy(targobj)) {
-		res = retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: target '%s' is a '%s': "
-			  "type-stmt not allowed",
-			  deviation->target,
-			  obj_get_typestr(targobj));
+        /* check the object type against the clauses
+         * in this deviate statement;
+         * check type-stmt first
+         */
+        if (devi->typdef) {
+            /* replace type statement entered */
+            if (!obj_is_leafy(targobj)) {
+                res = retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: target '%s' is a '%s': "
+                          "type-stmt not allowed",
+                          deviation->target,
+                          obj_get_typestr(targobj));
                 if (tkc) {
                     tkc->curerr = &devi->tkerr;
                 }
-		ncx_print_errormsg(tkc, mod, retres);
-	    } else {
-		res = yang_typ_resolve_type(pcb,
+                ncx_print_errormsg(tkc, mod, retres);
+            } else {
+                res = yang_typ_resolve_type(pcb,
                                             tkc,
-					    mod,
-					    devi->typdef,
-					    obj_get_default(targobj),
-					    targobj);
-		CHK_EXIT(res, retres);
-	    }
-	}
+                                            mod,
+                                            devi->typdef,
+                                            obj_get_default(targobj),
+                                            targobj);
+                CHK_EXIT(res, retres);
+            }
+        }
 
-	/* check if units-stmt was entered */
-	if (devi->units) {
-	    if (!obj_is_leafy(targobj)) {
-		res = retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: target '%s' is a '%s': "
-			  "type-stmt not allowed",
-			  deviation->target,
-			  obj_get_typestr(targobj));
+        /* check if units-stmt was entered */
+        if (devi->units) {
+            if (!obj_is_leafy(targobj)) {
+                res = retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: target '%s' is a '%s': "
+                          "type-stmt not allowed",
+                          deviation->target,
+                          obj_get_typestr(targobj));
                 if (tkc) {
                     tkc->curerr = &devi->tkerr;
                 }
-		ncx_print_errormsg(tkc, mod, retres);
-	    } else {
-		switch (targobj->objtype) {
-		case OBJ_TYP_LEAF:
-		    curexists = (targobj->def.leaf->units) 
-			? TRUE : FALSE;
-		    break;
-		case OBJ_TYP_LEAF_LIST:
-		    curexists = (targobj->def.leaflist->units) 
-			? TRUE : FALSE;
-		    break;
-		default:
-		    curexists = FALSE;
-		    res = retres = SET_ERROR(ERR_INTERNAL_VAL);
-		}
+                ncx_print_errormsg(tkc, mod, retres);
+            } else {
+                switch (targobj->objtype) {
+                case OBJ_TYP_LEAF:
+                    curexists = (targobj->def.leaf->units) 
+                        ? TRUE : FALSE;
+                    break;
+                case OBJ_TYP_LEAF_LIST:
+                    curexists = (targobj->def.leaflist->units) 
+                        ? TRUE : FALSE;
+                    break;
+                default:
+                    curexists = FALSE;
+                    res = retres = SET_ERROR(ERR_INTERNAL_VAL);
+                }
 
-		if (instancetest && !curexists) {
-		    res = retres = ERR_NCX_INVALID_DEV_STMT;
-		    log_error("\nError: 'units' must exist in "
-			      "deviate target '%s'",
-			      deviation->target);
+                if (instancetest && !curexists) {
+                    res = retres = ERR_NCX_INVALID_DEV_STMT;
+                    log_error("\nError: 'units' must exist in "
+                              "deviate target '%s'",
+                              deviation->target);
                     if (tkc) {
                         tkc->curerr = &devi->tkerr;
                     }
-		    ncx_print_errormsg(tkc, mod, retres);
-		} else if (!instancetest && curexists) {
-		    res = retres = ERR_NCX_INVALID_DEV_STMT;
-		    log_error("\nError: 'units' must not exist in "
-			      "deviate target '%s'",
-			      deviation->target);
+                    ncx_print_errormsg(tkc, mod, retres);
+                } else if (!instancetest && curexists) {
+                    res = retres = ERR_NCX_INVALID_DEV_STMT;
+                    log_error("\nError: 'units' must not exist in "
+                              "deviate target '%s'",
+                              deviation->target);
                     if (tkc) {
                         tkc->curerr = &devi->tkerr;
                     }
-		    ncx_print_errormsg(tkc, mod, retres);
-		} else if (devi->arg == OBJ_DARG_DELETE &&
-			   xml_strcmp(devi->units,
-				      obj_get_units(targobj))) {
-		    res = retres = ERR_NCX_INVALID_DEV_STMT;
-		    log_error("\nError: 'units' value '%s' must match in "
-			      "deviate target '%s'",
-			      devi->units,
-			      deviation->target);
+                    ncx_print_errormsg(tkc, mod, retres);
+                } else if (devi->arg == OBJ_DARG_DELETE &&
+                           xml_strcmp(devi->units,
+                                      obj_get_units(targobj))) {
+                    res = retres = ERR_NCX_INVALID_DEV_STMT;
+                    log_error("\nError: 'units' value '%s' must match in "
+                              "deviate target '%s'",
+                              devi->units,
+                              deviation->target);
                     if (tkc) {
                         tkc->curerr = &devi->tkerr;
                     }
-		    ncx_print_errormsg(tkc, mod, retres);
-		}
-	    }
-	}
+                    ncx_print_errormsg(tkc, mod, retres);
+                }
+            }
+        }
 
-	/* check if default-stmt entered */
-	if (devi->defval) {
-	    if ((targobj->objtype == OBJ_TYP_LEAF) ||
-		targobj->objtype == OBJ_TYP_CHOICE) {
+        /* check if default-stmt entered */
+        if (devi->defval) {
+            if ((targobj->objtype == OBJ_TYP_LEAF) ||
+                targobj->objtype == OBJ_TYP_CHOICE) {
 
-		if (targobj->objtype == OBJ_TYP_CHOICE) {
-		    curval = targobj->def.choic->defval;
-		} else {
-		    curval = targobj->def.leaf->defval;
-		}
-		curexists = (curval) ? TRUE : FALSE;
+                if (targobj->objtype == OBJ_TYP_CHOICE) {
+                    curval = targobj->def.choic->defval;
+                } else {
+                    curval = targobj->def.leaf->defval;
+                }
+                curexists = (curval) ? TRUE : FALSE;
 
-		if (instancetest && !curexists) {
-		    res = retres = ERR_NCX_INVALID_DEV_STMT;
-		    log_error("\nError: 'default' must exist in "
-			      "deviate target '%s'",
-			      deviation->target);
+                if (instancetest && !curexists) {
+                    res = retres = ERR_NCX_INVALID_DEV_STMT;
+                    log_error("\nError: 'default' must exist in "
+                              "deviate target '%s'",
+                              deviation->target);
                     if (tkc) {
                         tkc->curerr = &devi->tkerr;
                     }
-		    ncx_print_errormsg(tkc, mod, retres);
-		} else if (!instancetest && curexists) {
-		    res = retres = ERR_NCX_INVALID_DEV_STMT;
-		    log_error("\nError: 'default' must not exist in "
-			      "deviate target '%s'",
-			      deviation->target);
+                    ncx_print_errormsg(tkc, mod, retres);
+                } else if (!instancetest && curexists) {
+                    res = retres = ERR_NCX_INVALID_DEV_STMT;
+                    log_error("\nError: 'default' must not exist in "
+                              "deviate target '%s'",
+                              deviation->target);
                     if (tkc) {
                         tkc->curerr = &devi->tkerr;
                     }
-		    ncx_print_errormsg(tkc, mod, retres);
-		} else if (devi->arg == OBJ_DARG_DELETE &&
-			   xml_strcmp(devi->defval, curval)) {
-		    res = retres = ERR_NCX_INVALID_DEV_STMT;
-		    log_error("\nError: 'default' value '%s' must match in "
-			      "deviate target '%s'",
-			      devi->defval,
-			      deviation->target);
+                    ncx_print_errormsg(tkc, mod, retres);
+                } else if (devi->arg == OBJ_DARG_DELETE &&
+                           xml_strcmp(devi->defval, curval)) {
+                    res = retres = ERR_NCX_INVALID_DEV_STMT;
+                    log_error("\nError: 'default' value '%s' must match in "
+                              "deviate target '%s'",
+                              devi->defval,
+                              deviation->target);
                     if (tkc) {
                         tkc->curerr = &devi->tkerr;
                     }
-		    ncx_print_errormsg(tkc, mod, retres);
-		}
-	    } else {
-		res = retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: target '%s' is a '%s': "
-			  "default-stmt not allowed",
-			  deviation->target,
-			  obj_get_typestr(targobj));
+                    ncx_print_errormsg(tkc, mod, retres);
+                }
+            } else {
+                res = retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: target '%s' is a '%s': "
+                          "default-stmt not allowed",
+                          deviation->target,
+                          obj_get_typestr(targobj));
                 if (tkc) {
                     tkc->curerr = &devi->tkerr;
                 }
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	}
+                ncx_print_errormsg(tkc, mod, retres);
+            }
+        }
 
-	/* check if config-stmt entered */
-	if (devi->config_tkerr.mod) {
-	    switch (targobj->objtype) {
-	    case OBJ_TYP_LEAF:
-		if (!devi->config && obj_is_key(targobj) &&
-		    obj_is_config(targobj)) {
-		    res = retres = ERR_NCX_INVALID_DEV_STMT;
-		    log_error("\nError: leaf %s:%s is a key; "
-			      "cannot change config to false",
-			      obj_get_mod_name(targobj),
-			      obj_get_name(targobj));
+        /* check if config-stmt entered */
+        if (devi->config_tkerr.mod) {
+            switch (targobj->objtype) {
+            case OBJ_TYP_LEAF:
+                if (!devi->config && obj_is_key(targobj) &&
+                    obj_is_config(targobj)) {
+                    res = retres = ERR_NCX_INVALID_DEV_STMT;
+                    log_error("\nError: leaf %s:%s is a key; "
+                              "cannot change config to false",
+                              obj_get_mod_name(targobj),
+                              obj_get_name(targobj));
                     if (tkc) {
                         tkc->curerr = &devi->tkerr;
                     }
-		    ncx_print_errormsg(tkc, mod, retres);		    
-		}
-		break;
-	    case OBJ_TYP_CONTAINER:
-	    case OBJ_TYP_LEAF_LIST:
-	    case OBJ_TYP_CHOICE:
-		break;
-	    case OBJ_TYP_LIST:
-		if (!obj_first_key(targobj) && devi->config) {
-		    res = retres = ERR_NCX_INVALID_DEV_STMT;
-		    log_error("\nError: list %s:%s has no key; "
-			      "cannot change config to true",
-			      obj_get_mod_name(targobj),
-			      obj_get_name(targobj));
+                    ncx_print_errormsg(tkc, mod, retres);                   
+                }
+                break;
+            case OBJ_TYP_CONTAINER:
+            case OBJ_TYP_LEAF_LIST:
+            case OBJ_TYP_CHOICE:
+                break;
+            case OBJ_TYP_LIST:
+                if (!obj_first_key(targobj) && devi->config) {
+                    res = retres = ERR_NCX_INVALID_DEV_STMT;
+                    log_error("\nError: list %s:%s has no key; "
+                              "cannot change config to true",
+                              obj_get_mod_name(targobj),
+                              obj_get_name(targobj));
                     if (tkc) {
                         tkc->curerr = &devi->tkerr;
                     }
-		    ncx_print_errormsg(tkc, mod, retres);		    
-		}
-		break;
-	    default:
-		res = retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: target '%s' is a '%s': "
-			  "config-stmt not allowed",
-			  deviation->target,
-			  obj_get_typestr(targobj));
+                    ncx_print_errormsg(tkc, mod, retres);                   
+                }
+                break;
+            default:
+                res = retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: target '%s' is a '%s': "
+                          "config-stmt not allowed",
+                          deviation->target,
+                          obj_get_typestr(targobj));
                 if (tkc) {
                     tkc->curerr = &devi->tkerr;
                 }
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	}
+                ncx_print_errormsg(tkc, mod, retres);
+            }
+        }
 
-	/* check if mandatory-stmt entered */
-	if (devi->mandatory_tkerr.mod) {
-	    switch (targobj->objtype) {
-	    case OBJ_TYP_CHOICE:
-	    case OBJ_TYP_LEAF:
+        /* check if mandatory-stmt entered */
+        if (devi->mandatory_tkerr.mod) {
+            switch (targobj->objtype) {
+            case OBJ_TYP_CHOICE:
+            case OBJ_TYP_LEAF:
             case OBJ_TYP_ANYXML:
-		break;
-	    default:
-		res = retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: target '%s' is a '%s': "
-			  "mandatory-stmt not allowed",
-			  deviation->target,
-			  obj_get_typestr(targobj));
+                break;
+            default:
+                res = retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: target '%s' is a '%s': "
+                          "mandatory-stmt not allowed",
+                          deviation->target,
+                          obj_get_typestr(targobj));
                 if (tkc) {
                     tkc->curerr = &devi->tkerr;
                 }
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	}
+                ncx_print_errormsg(tkc, mod, retres);
+            }
+        }
 
-	/* check if min-elements stmt entered */
-	if (devi->minelems_tkerr.mod) {
-	    switch (targobj->objtype) {
-	    case OBJ_TYP_LEAF_LIST:
-	    case OBJ_TYP_LIST:
-		break;
-	    default:
-		res = retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: target '%s' is a '%s': "
-			  "min-elements-stmt not allowed",
-			  deviation->target,
-			  obj_get_typestr(targobj));
+        /* check if min-elements stmt entered */
+        if (devi->minelems_tkerr.mod) {
+            switch (targobj->objtype) {
+            case OBJ_TYP_LEAF_LIST:
+            case OBJ_TYP_LIST:
+                break;
+            default:
+                res = retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: target '%s' is a '%s': "
+                          "min-elements-stmt not allowed",
+                          deviation->target,
+                          obj_get_typestr(targobj));
                 if (tkc) {
                     tkc->curerr = &devi->tkerr;
                 }
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	}
+                ncx_print_errormsg(tkc, mod, retres);
+            }
+        }
 
-	/* check if max-elements stmt entered */
-	if (devi->maxelems_tkerr.mod) {
-	    switch (targobj->objtype) {
-	    case OBJ_TYP_LEAF_LIST:
-	    case OBJ_TYP_LIST:
-		break;
-	    default:
-		res = retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: target '%s' is a '%s': "
-			  "max-elements-stmt not allowed",
-			  deviation->target,
-			  obj_get_typestr(targobj));
+        /* check if max-elements stmt entered */
+        if (devi->maxelems_tkerr.mod) {
+            switch (targobj->objtype) {
+            case OBJ_TYP_LEAF_LIST:
+            case OBJ_TYP_LIST:
+                break;
+            default:
+                res = retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: target '%s' is a '%s': "
+                          "max-elements-stmt not allowed",
+                          deviation->target,
+                          obj_get_typestr(targobj));
                 if (tkc) {
                     tkc->curerr = &devi->tkerr;
                 }
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	}
+                ncx_print_errormsg(tkc, mod, retres);
+            }
+        }
 
-	/* check if any must-stmts entered */
-	if (!dlq_empty(&devi->mustQ)) {
-	    switch (targobj->objtype) {
-	    case OBJ_TYP_CONTAINER:
+        /* check if any must-stmts entered */
+        if (!dlq_empty(&devi->mustQ)) {
+            switch (targobj->objtype) {
+            case OBJ_TYP_CONTAINER:
             case OBJ_TYP_ANYXML:
-	    case OBJ_TYP_LEAF:
-	    case OBJ_TYP_LEAF_LIST:
-	    case OBJ_TYP_LIST:
-		targQ = obj_get_mustQ(targobj);
-		if (!targQ) {
-		    res = SET_ERROR(ERR_INTERNAL_VAL);
-		    continue;
-		}
-		for (must = (xpath_pcb_t *)dlq_firstEntry(&devi->mustQ);
-		     must != NULL;
-		     must = (xpath_pcb_t *)dlq_nextEntry(must)) {
+            case OBJ_TYP_LEAF:
+            case OBJ_TYP_LEAF_LIST:
+            case OBJ_TYP_LIST:
+                targQ = obj_get_mustQ(targobj);
+                if (!targQ) {
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                    continue;
+                }
+                for (must = (xpath_pcb_t *)dlq_firstEntry(&devi->mustQ);
+                     must != NULL;
+                     must = (xpath_pcb_t *)dlq_nextEntry(must)) {
 
-		    targmust = xpath_find_pcb(targQ,
-					      must->exprstr);
-		    curexists = (targmust) ? TRUE : FALSE;
+                    targmust = xpath_find_pcb(targQ,
+                                              must->exprstr);
+                    curexists = (targmust) ? TRUE : FALSE;
 
-		    if (instancetest && !curexists) {
-			res = retres = ERR_NCX_INVALID_DEV_STMT;
-			log_error("\nError: 'must %s' must exist in "
-				  "deviate target '%s'",
-				  must->exprstr,
-				  deviation->target);
+                    if (instancetest && !curexists) {
+                        res = retres = ERR_NCX_INVALID_DEV_STMT;
+                        log_error("\nError: 'must %s' must exist in "
+                                  "deviate target '%s'",
+                                  must->exprstr,
+                                  deviation->target);
                         if (tkc) {
                             tkc->curerr = &devi->tkerr;
                         }
-			ncx_print_errormsg(tkc, mod, retres);
-		    } else if (!instancetest && curexists) {
-			res = retres = ERR_NCX_INVALID_DEV_STMT;
-			log_error("\nError: 'must %s' must not exist in "
-				  "deviate target '%s'",
-				  must->exprstr,
-				  deviation->target);
+                        ncx_print_errormsg(tkc, mod, retres);
+                    } else if (!instancetest && curexists) {
+                        res = retres = ERR_NCX_INVALID_DEV_STMT;
+                        log_error("\nError: 'must %s' must not exist in "
+                                  "deviate target '%s'",
+                                  must->exprstr,
+                                  deviation->target);
                         if (tkc) {
                             tkc->curerr = &devi->tkerr;
                         }
-			ncx_print_errormsg(tkc, mod, retres);
-		    }
-		}
-		break;
-	    default:
-		res = retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: target '%s' is a '%s': "
-			  "must-stmt not allowed",
-			  deviation->target,
-			  obj_get_typestr(targobj));
+                        ncx_print_errormsg(tkc, mod, retres);
+                    }
+                }
+                break;
+            default:
+                res = retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: target '%s' is a '%s': "
+                          "must-stmt not allowed",
+                          deviation->target,
+                          obj_get_typestr(targobj));
                 if (tkc) {
                     tkc->curerr = &devi->tkerr;
                 }
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	}
+                ncx_print_errormsg(tkc, mod, retres);
+            }
+        }
 
-	/* check if any unique-stmts entered */
-	if (!dlq_empty(&devi->uniqueQ)) {
-	    switch (targobj->objtype) {
-	    case OBJ_TYP_LIST:
-		targQ = &targobj->def.list->uniqueQ;
-		if (!targQ) {
-		    res = SET_ERROR(ERR_INTERNAL_VAL);
-		    continue;
-		}
-		for (unique = (obj_unique_t *)
-			 dlq_firstEntry(&devi->uniqueQ);
-		     unique != NULL;
-		     unique = (obj_unique_t *)dlq_nextEntry(unique)) {
+        /* check if any unique-stmts entered */
+        if (!dlq_empty(&devi->uniqueQ)) {
+            switch (targobj->objtype) {
+            case OBJ_TYP_LIST:
+                targQ = &targobj->def.list->uniqueQ;
+                if (!targQ) {
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                    continue;
+                }
+                for (unique = (obj_unique_t *)
+                         dlq_firstEntry(&devi->uniqueQ);
+                     unique != NULL;
+                     unique = (obj_unique_t *)dlq_nextEntry(unique)) {
 
-		    targunique = obj_find_unique(targQ, unique->xpath);
-		    curexists = (targunique) ? TRUE : FALSE;
+                    targunique = obj_find_unique(targQ, unique->xpath);
+                    curexists = (targunique) ? TRUE : FALSE;
 
-		    if (instancetest && !curexists) {
-			res = retres = ERR_NCX_INVALID_DEV_STMT;
-			log_error("\nError: 'unique %s' must exist in "
-				  "deviate target '%s'",
-				  unique->xpath,
-				  deviation->target);
+                    if (instancetest && !curexists) {
+                        res = retres = ERR_NCX_INVALID_DEV_STMT;
+                        log_error("\nError: 'unique %s' must exist in "
+                                  "deviate target '%s'",
+                                  unique->xpath,
+                                  deviation->target);
                         if (tkc) {
                             tkc->curerr = &devi->tkerr;
                         }
-			ncx_print_errormsg(tkc, mod, retres);
-		    } else if (!instancetest && curexists) {
-			res = retres = ERR_NCX_INVALID_DEV_STMT;
-			log_error("\nError: 'unique %s' must not exist in "
-				  "deviate target '%s'",
-				  unique->xpath,
-				  deviation->target);
+                        ncx_print_errormsg(tkc, mod, retres);
+                    } else if (!instancetest && curexists) {
+                        res = retres = ERR_NCX_INVALID_DEV_STMT;
+                        log_error("\nError: 'unique %s' must not exist in "
+                                  "deviate target '%s'",
+                                  unique->xpath,
+                                  deviation->target);
                         if (tkc) {
                             tkc->curerr = &devi->tkerr;
                         }
-			ncx_print_errormsg(tkc, mod, retres);
-		    }
-		}
-		break;
-	    default:
-		res = retres = ERR_NCX_INVALID_DEV_STMT;
-		log_error("\nError: target '%s' is a '%s': "
-			  "unique-stmt not allowed",
-			  deviation->target,
-			  obj_get_typestr(targobj));
+                        ncx_print_errormsg(tkc, mod, retres);
+                    }
+                }
+                break;
+            default:
+                res = retres = ERR_NCX_INVALID_DEV_STMT;
+                log_error("\nError: target '%s' is a '%s': "
+                          "unique-stmt not allowed",
+                          deviation->target,
+                          obj_get_typestr(targobj));
                 if (tkc) {
                     tkc->curerr = &devi->tkerr;
                 }
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	}
+                ncx_print_errormsg(tkc, mod, retres);
+            }
+        }
 
-	/* finally, if entire deviate-stmt is OK save it
-	 * or else toss it
-	 */
-	if (res != NO_ERR) {
-	    /* toss this deviate-stmt; it is no good */
-	    dlq_remove(devi);
-	    obj_free_deviate(devi);
-	} /* else leave in this Q for HTML or YANG output */
+        /* finally, if entire deviate-stmt is OK save it
+         * or else toss it
+         */
+        if (res != NO_ERR) {
+            /* toss this deviate-stmt; it is no good */
+            dlq_remove(devi);
+            obj_free_deviate(devi);
+        } /* else leave in this Q for HTML or YANG output */
     }
 
     return retres;
-				    
+                                    
 }  /* resolve_deviation */
 
 
@@ -8173,28 +8173,28 @@ static status_t
 static status_t 
     resolve_rpc (yang_pcb_t *pcb,
                  tk_chain_t *tkc,
-		 ncx_module_t  *mod,
-		 obj_rpc_t *rpc,
-		 obj_template_t *obj,
-		 boolean redo)
+                 ncx_module_t  *mod,
+                 obj_rpc_t *rpc,
+                 obj_template_t *obj,
+                 boolean redo)
 {
     status_t          res, retres;
 
     retres = NO_ERR;
 
     if (!redo) {
-	res = yang_typ_resolve_typedefs(pcb,
+        res = yang_typ_resolve_typedefs(pcb,
                                         tkc, 
                                         mod, 
                                         &rpc->typedefQ, obj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
 
-	res = yang_grp_resolve_groupings(pcb, 
+        res = yang_grp_resolve_groupings(pcb, 
                                          tkc, 
                                          mod, 
                                          &rpc->groupingQ, 
                                          obj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     res = resolve_datadefs(pcb, 
@@ -8205,7 +8205,7 @@ static status_t
     CHK_EXIT(res, retres);
 
     return retres;
-				    
+                                    
 }  /* resolve_rpc */
 
 
@@ -8231,29 +8231,29 @@ static status_t
 static status_t 
     resolve_rpcio (yang_pcb_t *pcb,
                    tk_chain_t *tkc,
-		   ncx_module_t  *mod,
-		   obj_rpcio_t *rpcio,
-		   obj_template_t *obj,
-		   boolean redo)
+                   ncx_module_t  *mod,
+                   obj_rpcio_t *rpcio,
+                   obj_template_t *obj,
+                   boolean redo)
 {
     status_t              res, retres;
 
     retres = NO_ERR;
 
     if (!redo) {
-	res = yang_typ_resolve_typedefs(pcb,
+        res = yang_typ_resolve_typedefs(pcb,
                                         tkc, 
                                         mod, 
                                         &rpcio->typedefQ, 
                                         obj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
 
-	res = yang_grp_resolve_groupings(pcb,
+        res = yang_grp_resolve_groupings(pcb,
                                          tkc, 
                                          mod, 
                                          &rpcio->groupingQ, 
                                          obj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     res = resolve_datadefs(pcb, 
@@ -8264,7 +8264,7 @@ static status_t
     CHK_EXIT(res, retres);
 
     return retres;
-				    
+                                    
 }  /* resolve_rpcio */
 
 
@@ -8290,29 +8290,29 @@ static status_t
 static status_t 
     resolve_notif (yang_pcb_t *pcb,
                    tk_chain_t *tkc,
-		   ncx_module_t  *mod,
-		   obj_notif_t *notif,
-		   obj_template_t *obj,
-		   boolean redo)
+                   ncx_module_t  *mod,
+                   obj_notif_t *notif,
+                   obj_template_t *obj,
+                   boolean redo)
 {
     status_t          res, retres;
 
     retres = NO_ERR;
 
     if (!redo) {
-	res = yang_typ_resolve_typedefs(pcb,
+        res = yang_typ_resolve_typedefs(pcb,
                                         tkc, 
                                         mod, 
                                         &notif->typedefQ, 
                                         obj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
 
-	res = yang_grp_resolve_groupings(pcb,
+        res = yang_grp_resolve_groupings(pcb,
                                          tkc, 
                                          mod, 
                                          &notif->groupingQ, 
                                          obj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     /* resolve notification contents */
@@ -8324,7 +8324,7 @@ static status_t
     CHK_EXIT(res, retres);
 
     return retres;
-				    
+                                    
 }  /* resolve_notif */
 
 
@@ -8353,9 +8353,9 @@ static status_t
 static status_t 
     resolve_datadef (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-		     ncx_module_t  *mod,
-		     obj_template_t *testobj,
-		     boolean redo)
+                     ncx_module_t  *mod,
+                     obj_template_t *testobj,
+                     boolean redo)
 {
     status_t         res, retres;
 
@@ -8363,117 +8363,117 @@ static status_t
     retres = NO_ERR;
 
     if (!redo) {
-	res = ncx_resolve_appinfoQ(pcb,
+        res = ncx_resolve_appinfoQ(pcb,
                                    tkc, 
                                    mod, 
                                    &testobj->appinfoQ);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
 
-	res = resolve_iffeatureQ(pcb,
+        res = resolve_iffeatureQ(pcb,
                                  tkc, 
                                  mod, 
                                  testobj);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     switch (testobj->objtype) {
     case OBJ_TYP_CONTAINER:
-	res = resolve_container(pcb,
+        res = resolve_container(pcb,
                                 tkc, 
                                 mod,
-				testobj->def.container, 
-				testobj, 
+                                testobj->def.container, 
+                                testobj, 
                                 redo);
-	break;
+        break;
     case OBJ_TYP_LEAF:
     case OBJ_TYP_ANYXML:
-	res = resolve_leaf(pcb,
+        res = resolve_leaf(pcb,
                            tkc, 
                            mod,
-			   testobj->def.leaf, 
-			   testobj, 
+                           testobj->def.leaf, 
+                           testobj, 
                            redo);
-	break;
+        break;
     case OBJ_TYP_LEAF_LIST:
-	res = resolve_leaflist(pcb,
+        res = resolve_leaflist(pcb,
                                tkc, 
                                mod,
-			       testobj->def.leaflist, 
-			       testobj, 
+                               testobj->def.leaflist, 
+                               testobj, 
                                redo);
-	break;
+        break;
     case OBJ_TYP_LIST:
-	res = resolve_list(pcb,
+        res = resolve_list(pcb,
                            tkc, 
                            mod,
-			   testobj->def.list, 
-			   testobj, 
+                           testobj->def.list, 
+                           testobj, 
                            redo);
-	break;
+        break;
     case OBJ_TYP_CHOICE:
-	res = resolve_choice(pcb,
+        res = resolve_choice(pcb,
                              tkc, 
                              mod,
-			     testobj->def.choic, 
-			     testobj, 
+                             testobj->def.choic, 
+                             testobj, 
                              redo);
-	break;
+        break;
     case OBJ_TYP_CASE:
-	res = resolve_case(pcb,
+        res = resolve_case(pcb,
                            tkc, 
                            mod,
-			   testobj->def.cas, 
-			   testobj, 
+                           testobj->def.cas, 
+                           testobj, 
                            redo);
-	break;
+        break;
     case OBJ_TYP_USES:
-	if (!redo) {
-	    res = resolve_uses(pcb,
+        if (!redo) {
+            res = resolve_uses(pcb,
                                tkc, 
                                mod,
-			       testobj->def.uses, 
+                               testobj->def.uses, 
                                testobj);
-	}
-	break;
+        }
+        break;
     case OBJ_TYP_AUGMENT:
-	if (!redo) {
-	    res = resolve_augment(pcb,
+        if (!redo) {
+            res = resolve_augment(pcb,
                                   tkc, 
                                   mod,
-				  testobj->def.augment, 
+                                  testobj->def.augment, 
                                   testobj);
-	}
-	break;
+        }
+        break;
     case OBJ_TYP_RPC:
-	res = resolve_rpc(pcb,
+        res = resolve_rpc(pcb,
                           tkc, 
                           mod,
-			  testobj->def.rpc, 
-			  testobj, 
+                          testobj->def.rpc, 
+                          testobj, 
                           redo);
-	break;
+        break;
     case OBJ_TYP_RPCIO:
-	res = resolve_rpcio(pcb,
+        res = resolve_rpcio(pcb,
                             tkc, 
                             mod,
-			    testobj->def.rpcio, 
-			    testobj, 
+                            testobj->def.rpcio, 
+                            testobj, 
                             redo);
-	break;
+        break;
     case OBJ_TYP_NOTIF:
-	res = resolve_notif(pcb,
+        res = resolve_notif(pcb,
                             tkc, 
                             mod,
-			    testobj->def.notif, 
-			    testobj, 
+                            testobj->def.notif, 
+                            testobj, 
                             redo);
-	break;
+        break;
     case OBJ_TYP_REFINE:
-	res = NO_ERR;
-	break;
+        res = NO_ERR;
+        break;
     case OBJ_TYP_NONE:
     default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
+        res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     CHK_EXIT(res, retres);
@@ -8506,9 +8506,9 @@ static status_t
 static status_t 
     resolve_datadefs (yang_pcb_t *pcb,
                       tk_chain_t *tkc,
-		      ncx_module_t  *mod,
-		      dlq_hdr_t *datadefQ,
-		      boolean redo)
+                      ncx_module_t  *mod,
+                      dlq_hdr_t *datadefQ,
+                      boolean redo)
 {
     obj_template_t  *testobj;
     status_t         res, retres;
@@ -8517,11 +8517,11 @@ static status_t
 
     /* first resolve all the local type names */
     for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 testobj != NULL;
-	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+         testobj != NULL;
+         testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
-	res = resolve_datadef(pcb, tkc, mod, testobj, redo);
-	CHK_EXIT(res, retres);
+        res = resolve_datadef(pcb, tkc, mod, testobj, redo);
+        CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -8559,10 +8559,10 @@ static status_t
 static status_t 
     consume_datadef (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-		     ncx_module_t  *mod,
-		     dlq_hdr_t *que,
-		     obj_template_t *parent,
-		     grp_template_t *grp)
+                     ncx_module_t  *mod,
+                     dlq_hdr_t *que,
+                     obj_template_t *parent,
+                     grp_template_t *grp)
 {
     const xmlChar   *val;
     const char      *expstr;
@@ -8571,7 +8571,7 @@ static status_t
     status_t         res;
 
     expstr = "anyxml, container, leaf, leaf-list, list, choice, uses,"
-	"or augment keyword";
+        "or augment keyword";
     errdone = TRUE;
     res = NO_ERR;
     tktyp = TK_CUR_TYP(tkc);
@@ -8579,68 +8579,68 @@ static status_t
 
     /* check the current token type */
     if (tktyp != TK_TT_TSTRING) {
-	res = ERR_NCX_WRONG_TKTYPE;
-	errdone = FALSE;
+        res = ERR_NCX_WRONG_TKTYPE;
+        errdone = FALSE;
     } else {
-	/* Got a token string so check the value */
-	if (!xml_strcmp(val, YANG_K_ANYXML)) {
-	    res = consume_anyxml(tkc, 
+        /* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_ANYXML)) {
+            res = consume_anyxml(tkc, 
                                  mod, 
                                  que, 
                                  parent, 
                                  grp);
-	} else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
-	    res = consume_container(pcb,
+        } else if (!xml_strcmp(val, YANG_K_CONTAINER)) {
+            res = consume_container(pcb,
                                     tkc, 
                                     mod, 
                                     que,
                                     parent,
                                     grp);
-	} else if (!xml_strcmp(val, YANG_K_LEAF)) {
-	    res = consume_leaf(pcb,
+        } else if (!xml_strcmp(val, YANG_K_LEAF)) {
+            res = consume_leaf(pcb,
                                tkc, 
                                mod,
                                que,
                                parent,
                                grp);
-	} else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
-	    res = consume_leaflist(pcb,
+        } else if (!xml_strcmp(val, YANG_K_LEAF_LIST)) {
+            res = consume_leaflist(pcb,
                                    tkc,
                                    mod,
                                    que,
                                    parent, 
                                    grp);
-	} else if (!xml_strcmp(val, YANG_K_LIST)) {
-	    res = consume_list(pcb,
+        } else if (!xml_strcmp(val, YANG_K_LIST)) {
+            res = consume_list(pcb,
                                tkc,
                                mod,
                                que,
                                parent, 
                                grp);
-	} else if (!xml_strcmp(val, YANG_K_CHOICE)) {
-	    res = consume_choice(pcb,
+        } else if (!xml_strcmp(val, YANG_K_CHOICE)) {
+            res = consume_choice(pcb,
                                  tkc,
                                  mod,
                                  que,
                                  parent, 
                                  grp);
-	} else if (!xml_strcmp(val, YANG_K_USES)) {
-	    res = consume_uses(pcb,
+        } else if (!xml_strcmp(val, YANG_K_USES)) {
+            res = consume_uses(pcb,
                                tkc, 
                                mod, 
                                que, 
                                parent, 
                                grp);
-	} else {
-	    res = ERR_NCX_WRONG_TKVAL;
-	    errdone = FALSE;
-	}
+        } else {
+            res = ERR_NCX_WRONG_TKVAL;
+            errdone = FALSE;
+        }
     }
 
     if (res != NO_ERR && !errdone) {
-	log_error("\nError: '%s' token not allowed here", val);
-	ncx_mod_exp_err(tkc, mod, res, expstr);
-	yang_skip_statement(tkc, mod);
+        log_error("\nError: '%s' token not allowed here", val);
+        ncx_mod_exp_err(tkc, mod, res, expstr);
+        yang_skip_statement(tkc, mod);
     }
 
     return res;
@@ -8668,8 +8668,8 @@ static status_t
 static status_t 
     resolve_iffeatureQ (yang_pcb_t *pcb,
                         tk_chain_t *tkc,
-			ncx_module_t  *mod,
-			obj_template_t *obj)
+                        ncx_module_t  *mod,
+                        obj_template_t *obj)
 {
     ncx_feature_t    *testfeature;
     ncx_iffeature_t  *iff;
@@ -8682,52 +8682,52 @@ static status_t
      * this object that need to be resolved
      */
     for (iff = (ncx_iffeature_t *)
-	     dlq_firstEntry(&obj->iffeatureQ);
-	 iff != NULL;
-	 iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
+             dlq_firstEntry(&obj->iffeatureQ);
+         iff != NULL;
+         iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
 
-	testfeature = NULL;
-	errdone = FALSE;
-	res = NO_ERR;
+        testfeature = NULL;
+        errdone = FALSE;
+        res = NO_ERR;
 
-	if (iff->prefix &&
-	    xml_strcmp(iff->prefix, mod->prefix)) {
-	    /* find the feature in another module */
-	    res = yang_find_imp_feature(pcb,
+        if (iff->prefix &&
+            xml_strcmp(iff->prefix, mod->prefix)) {
+            /* find the feature in another module */
+            res = yang_find_imp_feature(pcb,
                                         tkc, 
                                         mod, 
                                         iff->prefix,
-					iff->name, 
+                                        iff->name, 
                                         &iff->tkerr,
-					&testfeature);
-	    if (res != NO_ERR) {
-		retres = res;
-		errdone = TRUE;
-	    }
-	} else {
-	    testfeature = ncx_find_feature(mod, iff->name);
-	}
+                                        &testfeature);
+            if (res != NO_ERR) {
+                retres = res;
+                errdone = TRUE;
+            }
+        } else {
+            testfeature = ncx_find_feature(mod, iff->name);
+        }
 
-	if (!testfeature && !errdone) {
-	    log_error("\nError: Feature '%s' not found "
-		      "for if-feature statement in object '%s'",
-		      iff->name, 
+        if (!testfeature && !errdone) {
+            log_error("\nError: Feature '%s' not found "
+                      "for if-feature statement in object '%s'",
+                      iff->name, 
                       obj_get_name(obj));
-	    res = retres = ERR_NCX_DEF_NOT_FOUND;
-	    tkc->curerr = &iff->tkerr;
-	    ncx_print_errormsg(tkc, mod, retres);
-	}
+            res = retres = ERR_NCX_DEF_NOT_FOUND;
+            tkc->curerr = &iff->tkerr;
+            ncx_print_errormsg(tkc, mod, retres);
+        }
 
-	if (testfeature) {
-	    iff->feature = testfeature;
-	}
+        if (testfeature) {
+            iff->feature = testfeature;
+        }
     }
 
     /* check the feature mismatch corner cases later,
      * after the OBJ_FL_KEY flags have been set
      */
     return retres;
-				    
+                                    
 }  /* resolve_iffeatureQ */
 
 
@@ -8752,10 +8752,10 @@ static status_t
 *********************************************************************/
 static status_t 
     check_iffeature_mismatch (tk_chain_t *tkc,
-			      ncx_module_t  *mod,
-			      obj_template_t *ancestor,
-			      obj_template_t *testobj,
-			      ncx_iffeature_t *iff)
+                              ncx_module_t  *mod,
+                              obj_template_t *ancestor,
+                              obj_template_t *testobj,
+                              ncx_iffeature_t *iff)
 
 {
     status_t  res;
@@ -8763,18 +8763,18 @@ static status_t
     res = NO_ERR;
 
     if (!ncx_find_iffeature(&ancestor->iffeatureQ,
-			    iff->prefix,
-			    iff->name,
-			    mod->prefix)) {
-	res = ERR_NCX_INVALID_CONDITIONAL;
-	log_error("\nError: 'if-feature %s' present for "
-		  "%s %s, but not in list %s",
-		  iff->name, 
-		  obj_get_typestr(testobj),
-		  obj_get_name(testobj),
-		  obj_get_name(ancestor));
-	tkc->curerr = &iff->tkerr;
-	ncx_print_errormsg(tkc, mod, res);
+                            iff->prefix,
+                            iff->name,
+                            mod->prefix)) {
+        res = ERR_NCX_INVALID_CONDITIONAL;
+        log_error("\nError: 'if-feature %s' present for "
+                  "%s %s, but not in list %s",
+                  iff->name, 
+                  obj_get_typestr(testobj),
+                  obj_get_name(testobj),
+                  obj_get_name(ancestor));
+        tkc->curerr = &iff->tkerr;
+        ncx_print_errormsg(tkc, mod, res);
     }
     return res;
 }  /* check_iffeature_mismatch */
@@ -8799,43 +8799,43 @@ static status_t
 *********************************************************************/
 static status_t 
     check_one_when_mismatch (tk_chain_t *tkc,
-			     ncx_module_t  *mod,
-			     obj_template_t *test1,
-			     obj_template_t *test2)
+                             ncx_module_t  *mod,
+                             obj_template_t *test1,
+                             obj_template_t *test2)
 {
     if (!test1->when) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     if (test2->when) {
-	if (!xml_strcmp(test1->when->exprstr,
-			test2->when->exprstr)) {
-	    return NO_ERR;
-	}
+        if (!xml_strcmp(test1->when->exprstr,
+                        test2->when->exprstr)) {
+            return NO_ERR;
+        }
     }
-	
+        
     if (test2->usesobj && test2->usesobj->when) {
-	if (!xml_strcmp(test1->when->exprstr,
-			test2->usesobj->when->exprstr)) {
-	    return NO_ERR;
-	}
+        if (!xml_strcmp(test1->when->exprstr,
+                        test2->usesobj->when->exprstr)) {
+            return NO_ERR;
+        }
     }
-	
+        
     if (test2->augobj && test2->augobj->when) {
-	if (!xml_strcmp(test1->when->exprstr,
-			test2->augobj->when->exprstr)) {
-	    return NO_ERR;
-	}
+        if (!xml_strcmp(test1->when->exprstr,
+                        test2->augobj->when->exprstr)) {
+            return NO_ERR;
+        }
     }
 
     log_error("\nError: when-stmt '%s' not in affect "
-	      "for list %s",
-	      test1->when, obj_get_name(test2));
+              "for list %s",
+              test1->when, obj_get_name(test2));
     tkc->curerr = &test1->when->tkerr;
     ncx_print_errormsg(tkc, mod, ERR_NCX_INVALID_CONDITIONAL);
 
     return ERR_NCX_INVALID_CONDITIONAL;
-				    
+                                    
 }  /* check_one_conditional_mismatch */
 
 
@@ -8867,9 +8867,9 @@ static status_t
 *********************************************************************/
 static status_t 
     check_conditional_mismatch (tk_chain_t *tkc,
-				ncx_module_t  *mod,
-				obj_template_t *ancestor,
-				obj_template_t *child)
+                                ncx_module_t  *mod,
+                                obj_template_t *ancestor,
+                                obj_template_t *child)
 {
     obj_template_t   *testobj;
     ncx_iffeature_t  *iff;
@@ -8880,123 +8880,123 @@ static status_t
 
     testobj = child->parent;
     if (!testobj) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     if (ancestor->objtype==OBJ_TYP_CHOICE && 
-	child->objtype==OBJ_TYP_CASE) {
+        child->objtype==OBJ_TYP_CASE) {
 
 
     } else {
-	/* make sure that the child node does not introduce
-	 * any if-features that are not in the ancestor node
-	 */
-	testobj = child;
-	done = FALSE;
+        /* make sure that the child node does not introduce
+         * any if-features that are not in the ancestor node
+         */
+        testobj = child;
+        done = FALSE;
 
-	/* go up the tree from the child to the level before
-	 * the ancestor
-	 */
-	while (!done) {
-	    /* check all possible when clauses in the testobj
-	     * against the ancestor node
-	     */
-	    res = check_one_when_mismatch(tkc, 
+        /* go up the tree from the child to the level before
+         * the ancestor
+         */
+        while (!done) {
+            /* check all possible when clauses in the testobj
+             * against the ancestor node
+             */
+            res = check_one_when_mismatch(tkc, 
                                           mod, 
-					  testobj,
-					  ancestor);
-	    CHK_EXIT(res, retres);
+                                          testobj,
+                                          ancestor);
+            CHK_EXIT(res, retres);
 
-	    if (testobj->usesobj) {
-		res = check_one_when_mismatch(tkc, 
+            if (testobj->usesobj) {
+                res = check_one_when_mismatch(tkc, 
                                               mod, 
-					      testobj->usesobj,
-					      ancestor);
-		CHK_EXIT(res, retres);
-	    }
+                                              testobj->usesobj,
+                                              ancestor);
+                CHK_EXIT(res, retres);
+            }
 
-	    if (testobj->augobj) {
-		res = check_one_when_mismatch(tkc, 
+            if (testobj->augobj) {
+                res = check_one_when_mismatch(tkc, 
                                               mod, 
-					      testobj->augobj,
-					      ancestor);
-		CHK_EXIT(res, retres);
-	    }
+                                              testobj->augobj,
+                                              ancestor);
+                CHK_EXIT(res, retres);
+            }
 
-	    /* check all the if-features in the testnode
-	     * against the ones in the ancestor;
-	     * a missing if-feature in the ancestor is an error
-	     */
-	    for (iff = (ncx_iffeature_t *)
-		     dlq_firstEntry(&testobj->iffeatureQ);
-		 iff != NULL;
-		 iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
+            /* check all the if-features in the testnode
+             * against the ones in the ancestor;
+             * a missing if-feature in the ancestor is an error
+             */
+            for (iff = (ncx_iffeature_t *)
+                     dlq_firstEntry(&testobj->iffeatureQ);
+                 iff != NULL;
+                 iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
 
-		res = check_iffeature_mismatch(tkc, 
+                res = check_iffeature_mismatch(tkc, 
                                                mod, 
                                                ancestor,
-					       testobj, 
+                                               testobj, 
                                                iff);
-		CHK_EXIT(res, retres);
-	    }
+                CHK_EXIT(res, retres);
+            }
 
 
-	    /* check any extra if-features from the uses object */
-	    if (testobj->usesobj) {
-		for (iff = (ncx_iffeature_t *)
-			 dlq_firstEntry(&testobj->usesobj->iffeatureQ);
-		     iff != NULL;
-		     iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
+            /* check any extra if-features from the uses object */
+            if (testobj->usesobj) {
+                for (iff = (ncx_iffeature_t *)
+                         dlq_firstEntry(&testobj->usesobj->iffeatureQ);
+                     iff != NULL;
+                     iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
 
-		    if (!ncx_find_iffeature(&testobj->iffeatureQ,
-					    iff->prefix,
-					    iff->name,
-					    mod->prefix)) {
+                    if (!ncx_find_iffeature(&testobj->iffeatureQ,
+                                            iff->prefix,
+                                            iff->name,
+                                            mod->prefix)) {
 
-			res = check_iffeature_mismatch(tkc, 
+                        res = check_iffeature_mismatch(tkc, 
                                                        mod, 
                                                        ancestor,
-						       testobj, 
+                                                       testobj, 
                                                        iff);
-			CHK_EXIT(res, retres);
-		    }
-		}
-	    }
+                        CHK_EXIT(res, retres);
+                    }
+                }
+            }
 
-	    /* check any extra if-features from the augment object */
-	    if (testobj->augobj) {
-		for (iff = (ncx_iffeature_t *)
-			 dlq_firstEntry(&testobj->augobj->iffeatureQ);
-		     iff != NULL;
-		     iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
+            /* check any extra if-features from the augment object */
+            if (testobj->augobj) {
+                for (iff = (ncx_iffeature_t *)
+                         dlq_firstEntry(&testobj->augobj->iffeatureQ);
+                     iff != NULL;
+                     iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
 
-		    if (!ncx_find_iffeature(&testobj->iffeatureQ,
-					    iff->prefix,
-					    iff->name,
-					    mod->prefix)) {
+                    if (!ncx_find_iffeature(&testobj->iffeatureQ,
+                                            iff->prefix,
+                                            iff->name,
+                                            mod->prefix)) {
 
-			res = check_iffeature_mismatch(tkc, 
+                        res = check_iffeature_mismatch(tkc, 
                                                        mod, 
                                                        ancestor,
-						       testobj, 
+                                                       testobj, 
                                                        iff);
-			CHK_EXIT(res, retres);
-		    }
-		}
-	    }
+                        CHK_EXIT(res, retres);
+                    }
+                }
+            }
 
-	    testobj = testobj->parent;
-	    if (!testobj) {
-		return SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	    if (testobj == ancestor) {
-		done = TRUE;
-	    }
-	}
+            testobj = testobj->parent;
+            if (!testobj) {
+                return SET_ERROR(ERR_INTERNAL_VAL);
+            }
+            if (testobj == ancestor) {
+                done = TRUE;
+            }
+        }
     }
 
     return retres;
-				    
+                                    
 }  /* check_conditional_mismatch */
 
 
@@ -9026,8 +9026,8 @@ static status_t
 *********************************************************************/
 static status_t 
     resolve_xpath (tk_chain_t *tkc,
-		   ncx_module_t  *mod,
-		   dlq_hdr_t *datadefQ)
+                   ncx_module_t  *mod,
+                   dlq_hdr_t *datadefQ)
 {
     obj_template_t        *testobj, *targobj;
     obj_template_t        *leafobj;
@@ -9045,186 +9045,186 @@ static status_t
 
     /* first resolve all the local object names */
     for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 testobj != NULL;
-	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+         testobj != NULL;
+         testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
-	if (!obj_has_name(testobj)) {
-	    /* skip augment and uses */
-	    continue;
-	}
+        if (!obj_has_name(testobj)) {
+            /* skip augment and uses */
+            continue;
+        }
 
-	/* check the when-stmt in the object itself */
-	if (testobj->when) {
-	    res = resolve_when(mod, testobj->when, testobj);
-	    CHK_EXIT(res, retres);
-	}
+        /* check the when-stmt in the object itself */
+        if (testobj->when) {
+            res = resolve_when(mod, testobj->when, testobj);
+            CHK_EXIT(res, retres);
+        }
 
-	/* check the when-stmt in the uses object carried fwd */
-	if (testobj->usesobj && testobj->usesobj->when) {
-	    res = resolve_when(mod,
-			       testobj->usesobj->when,
-			       testobj);
-	    CHK_EXIT(res, retres);
-	}
+        /* check the when-stmt in the uses object carried fwd */
+        if (testobj->usesobj && testobj->usesobj->when) {
+            res = resolve_when(mod,
+                               testobj->usesobj->when,
+                               testobj);
+            CHK_EXIT(res, retres);
+        }
 
-	/* check the when-stmt in the augment object carried fwd */
-	if (testobj->augobj && testobj->augobj->when) {
+        /* check the when-stmt in the augment object carried fwd */
+        if (testobj->augobj && testobj->augobj->when) {
 
-	    targobj = testobj->augobj->def.augment->targobj;
+            targobj = testobj->augobj->def.augment->targobj;
 
-	    if (targobj->objtype == OBJ_TYP_CASE) {
-		targobj = targobj->parent;
-	    }
+            if (targobj->objtype == OBJ_TYP_CASE) {
+                targobj = targobj->parent;
+            }
 
-	    if (targobj->objtype == OBJ_TYP_CHOICE) {
-		targobj = targobj->parent;
-		if (!targobj) {
-		    targobj = ncx_get_gen_root();
-		}
-	    }
+            if (targobj->objtype == OBJ_TYP_CHOICE) {
+                targobj = targobj->parent;
+                if (!targobj) {
+                    targobj = ncx_get_gen_root();
+                }
+            }
 
-	    res = resolve_when(mod,
-			       testobj->augobj->when,
-			       targobj);
-	    CHK_EXIT(res, retres);
-	}
+            res = resolve_when(mod,
+                               testobj->augobj->when,
+                               targobj);
+            CHK_EXIT(res, retres);
+        }
 
-	/* validate correct Xpath in must clauses */
-	res = resolve_mustQ(tkc, mod, testobj);
-	CHK_EXIT(res, retres);
-	
-	switch (testobj->objtype) {
-	case OBJ_TYP_CONTAINER:
-	    /* check container children */
-	    res = resolve_xpath(tkc, 
+        /* validate correct Xpath in must clauses */
+        res = resolve_mustQ(tkc, mod, testobj);
+        CHK_EXIT(res, retres);
+        
+        switch (testobj->objtype) {
+        case OBJ_TYP_CONTAINER:
+            /* check container children */
+            res = resolve_xpath(tkc, 
                                 mod, 
-				testobj->def.container->datadefQ);
-	    break;
+                                testobj->def.container->datadefQ);
+            break;
         case OBJ_TYP_ANYXML:
             break;
-	case OBJ_TYP_LEAF:
-	case OBJ_TYP_LEAF_LIST:
-	    if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
+        case OBJ_TYP_LEAF:
+        case OBJ_TYP_LEAF_LIST:
+            if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
 #ifdef YANG_OBJ_DEBUG
-		if (LOGDEBUG3) {
-		    log_debug3("\nresolve_xpath: mod %s, "
+                if (LOGDEBUG3) {
+                    log_debug3("\nresolve_xpath: mod %s, "
                                "object %s, on line %u",
-			       mod->name,
+                               mod->name,
                                obj_get_name(testobj), 
-			       testobj->tkerr.linenum);
-		}
+                               testobj->tkerr.linenum);
+                }
 #endif
 
-		/* need to make a copy of the XPath PCB because
-		 * typedefs are treated as read-only when referenced
-		 * from a val_value_t node
-		 */
-		typdef = obj_get_typdef(testobj);
-		pcb = typ_get_leafref_pcb(typdef);
-		pcbclone = xpath_clone_pcb(pcb);
-		if (!pcbclone) {
-		    res = ERR_INTERNAL_MEM;
-		} else {
-		    tkc->curerr = &pcb->tkerr;
-		    res = xpath_yang_parse_path(tkc, 
-						mod, 
-						XP_SRC_LEAFREF,
-						pcbclone);
-		    if (res == NO_ERR) {
-			leafobj = NULL;
-			res = xpath_yang_validate_path(mod, 
-						       testobj, 
-						       pcbclone, 
-						       FALSE,
-						       &leafobj);
-			if (res == NO_ERR && leafobj) {
-			    typ_set_xref_typdef(typdef, 
-						obj_get_typdef(leafobj));
-			    if (testobj->objtype == OBJ_TYP_LEAF) {
-				testobj->def.leaf->leafrefobj = leafobj;
-			    } else {
-				testobj->def.leaflist->leafrefobj = leafobj;
-			    }
-			}
-		    }
-		    xpath_free_pcb(pcbclone);
-		}
-	    }
-	    break;
-	case OBJ_TYP_LIST:
-	    /* check that none of the key leafs have more
-	     * conditionals than their list parent
-	     */
-	    for (key = obj_first_key(testobj);
-		 key != NULL;
-		 key = obj_next_key(key)) {
+                /* need to make a copy of the XPath PCB because
+                 * typedefs are treated as read-only when referenced
+                 * from a val_value_t node
+                 */
+                typdef = obj_get_typdef(testobj);
+                pcb = typ_get_leafref_pcb(typdef);
+                pcbclone = xpath_clone_pcb(pcb);
+                if (!pcbclone) {
+                    res = ERR_INTERNAL_MEM;
+                } else {
+                    tkc->curerr = &pcb->tkerr;
+                    res = xpath_yang_parse_path(tkc, 
+                                                mod, 
+                                                XP_SRC_LEAFREF,
+                                                pcbclone);
+                    if (res == NO_ERR) {
+                        leafobj = NULL;
+                        res = xpath_yang_validate_path(mod, 
+                                                       testobj, 
+                                                       pcbclone, 
+                                                       FALSE,
+                                                       &leafobj);
+                        if (res == NO_ERR && leafobj) {
+                            typ_set_xref_typdef(typdef, 
+                                                obj_get_typdef(leafobj));
+                            if (testobj->objtype == OBJ_TYP_LEAF) {
+                                testobj->def.leaf->leafrefobj = leafobj;
+                            } else {
+                                testobj->def.leaflist->leafrefobj = leafobj;
+                            }
+                        }
+                    }
+                    xpath_free_pcb(pcbclone);
+                }
+            }
+            break;
+        case OBJ_TYP_LIST:
+            /* check that none of the key leafs have more
+             * conditionals than their list parent
+             */
+            for (key = obj_first_key(testobj);
+                 key != NULL;
+                 key = obj_next_key(key)) {
 
-		if (key->keyobj) {
-		    res = check_conditional_mismatch(tkc, 
+                if (key->keyobj) {
+                    res = check_conditional_mismatch(tkc, 
                                                      mod,
-						     testobj,
-						     key->keyobj);
-		    CHK_EXIT(res, retres);
-		}
-	    }
+                                                     testobj,
+                                                     key->keyobj);
+                    CHK_EXIT(res, retres);
+                }
+            }
 
-	    /* check that none of the unique set leafs have more
-	     * conditionals than their list parent
-	     */
-	    for (uniq = obj_first_unique(testobj);
-		 uniq != NULL;
-		 uniq = obj_next_unique(uniq)) {
+            /* check that none of the unique set leafs have more
+             * conditionals than their list parent
+             */
+            for (uniq = obj_first_unique(testobj);
+                 uniq != NULL;
+                 uniq = obj_next_unique(uniq)) {
 
-		for (uncomp = obj_first_unique_comp(uniq);
-		     uncomp != NULL;
-		     uncomp = obj_next_unique_comp(uncomp)) {
+                for (uncomp = obj_first_unique_comp(uniq);
+                     uncomp != NULL;
+                     uncomp = obj_next_unique_comp(uncomp)) {
 
-		    if (uncomp->unobj) {
-			res = check_conditional_mismatch(tkc, 
+                    if (uncomp->unobj) {
+                        res = check_conditional_mismatch(tkc, 
                                                          mod,
-							 testobj,
-							 uncomp->unobj);
-			CHK_EXIT(res, retres);
-		    }
-		}
-	    }
+                                                         testobj,
+                                                         uncomp->unobj);
+                        CHK_EXIT(res, retres);
+                    }
+                }
+            }
 
-	    /* check list children */
-	    res = resolve_xpath(tkc, 
+            /* check list children */
+            res = resolve_xpath(tkc, 
                                 mod, 
-				testobj->def.list->datadefQ);
-	    CHK_EXIT(res, retres);
-	    break;
-	case OBJ_TYP_CHOICE:
-	    res = resolve_xpath(tkc, 
+                                testobj->def.list->datadefQ);
+            CHK_EXIT(res, retres);
+            break;
+        case OBJ_TYP_CHOICE:
+            res = resolve_xpath(tkc, 
                                 mod, 
-				testobj->def.choic->caseQ);
-	    break;
-	case OBJ_TYP_CASE:
-	    res = resolve_xpath(tkc, 
+                                testobj->def.choic->caseQ);
+            break;
+        case OBJ_TYP_CASE:
+            res = resolve_xpath(tkc, 
                                 mod, 
-				testobj->def.cas->datadefQ);
-	    break;
-	case OBJ_TYP_RPC:
-	    res = resolve_xpath(tkc, 
+                                testobj->def.cas->datadefQ);
+            break;
+        case OBJ_TYP_RPC:
+            res = resolve_xpath(tkc, 
                                 mod, 
-				&testobj->def.rpc->datadefQ);
-	    break;
-	case OBJ_TYP_RPCIO:
-	    res = resolve_xpath(tkc, 
+                                &testobj->def.rpc->datadefQ);
+            break;
+        case OBJ_TYP_RPCIO:
+            res = resolve_xpath(tkc, 
                                 mod, 
-				&testobj->def.rpcio->datadefQ);
-	    break;
-	case OBJ_TYP_NOTIF:
-	    res = resolve_xpath(tkc, 
+                                &testobj->def.rpcio->datadefQ);
+            break;
+        case OBJ_TYP_NOTIF:
+            res = resolve_xpath(tkc, 
                                 mod, 
-				&testobj->def.notif->datadefQ);
-	    break;
-	case OBJ_TYP_NONE:
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-	CHK_EXIT(res, retres);
+                                &testobj->def.notif->datadefQ);
+            break;
+        case OBJ_TYP_NONE:
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -9264,15 +9264,15 @@ static status_t
 status_t 
     yang_obj_consume_datadef (yang_pcb_t *pcb,
                               tk_chain_t *tkc,
-			      ncx_module_t  *mod,
-			      dlq_hdr_t *que,
-			      obj_template_t *parent)
+                              ncx_module_t  *mod,
+                              dlq_hdr_t *que,
+                              obj_template_t *parent)
 {
     status_t         res;
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod || !que) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -9315,16 +9315,16 @@ status_t
 status_t 
     yang_obj_consume_datadef_grp (yang_pcb_t *pcb,
                                   tk_chain_t *tkc,
-				  ncx_module_t  *mod,
-				  dlq_hdr_t *que,
-				  obj_template_t *parent,
-				  grp_template_t *grp)
+                                  ncx_module_t  *mod,
+                                  dlq_hdr_t *que,
+                                  obj_template_t *parent,
+                                  grp_template_t *grp)
 {
     status_t         res;
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod || !que || !grp) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -9361,13 +9361,13 @@ status_t
 status_t 
     yang_obj_consume_rpc (yang_pcb_t *pcb,
                           tk_chain_t *tkc,
-			  ncx_module_t  *mod)
+                          ncx_module_t  *mod)
 {
     status_t         res;
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -9407,13 +9407,13 @@ status_t
 status_t 
     yang_obj_consume_notification (yang_pcb_t *pcb,
                                    tk_chain_t *tkc,
-				   ncx_module_t  *mod)
+                                   ncx_module_t  *mod)
 {
     status_t         res;
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -9453,13 +9453,13 @@ status_t
 status_t 
     yang_obj_consume_augment (yang_pcb_t *pcb,
                               tk_chain_t *tkc,
-			      ncx_module_t  *mod)
+                              ncx_module_t  *mod)
 {
     status_t         res;
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -9500,7 +9500,7 @@ status_t
 status_t 
     yang_obj_consume_deviation (yang_pcb_t *pcb,
                                 tk_chain_t *tkc,
-				ncx_module_t  *mod)
+                                ncx_module_t  *mod)
 {
     obj_deviation_t  *dev;
     const xmlChar    *val;
@@ -9513,16 +9513,16 @@ status_t
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     /* Get a new obj_deviation_t to fill in */
     dev = obj_new_deviation();
     if (!dev) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     val = NULL;
@@ -9545,106 +9545,106 @@ status_t
     /* Get the starting left brace or semi-colon */
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	obj_free_deviation(dev);
-	return res;
+        ncx_print_errormsg(tkc, mod, res);
+        obj_free_deviation(dev);
+        return res;
     }
 
     /* check for semi-colon or left brace */
     switch (TK_CUR_TYP(tkc)) {
     case TK_TT_SEMICOL:
-	dev->empty = TRUE;
-	done = TRUE;
-	break;
+        dev->empty = TRUE;
+        done = TRUE;
+        break;
     case TK_TT_LBRACE:
-	done = FALSE;
-	break;
+        done = FALSE;
+        break;
     default:
-	res = ERR_NCX_WRONG_TKTYPE;
-	expstr = "semi-colon or left brace";
-	ncx_mod_exp_err(tkc, mod, res, expstr);
-	done = TRUE;
+        res = ERR_NCX_WRONG_TKTYPE;
+        expstr = "semi-colon or left brace";
+        ncx_mod_exp_err(tkc, mod, res, expstr);
+        done = TRUE;
     }
 
     /* get the sub-section statements and any appinfo extensions */
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_deviation(dev);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_deviation(dev);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    obj_free_deviation(dev);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &dev->appinfoQ);
-	    CHK_DEV_EXIT(dev, res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            obj_free_deviation(dev);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &dev->appinfoQ);
+            CHK_DEV_EXIT(dev, res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a keyword token string so check the value */
-	if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, 
+        /* Got a keyword token string so check the value */
+        if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &dev->descr,
-				     &desc, 
+                                     &desc, 
                                      &dev->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &dev->ref,
-				     &ref, 
+                                     &ref, 
                                      &dev->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_DEVIATE)) {
-	    res = consume_deviate(pcb,
+        } else if (!xml_strcmp(val, YANG_K_DEVIATE)) {
+            res = consume_deviate(pcb,
                                   tkc, 
                                   mod, 
                                   dev);
-	} else {
-	    res = ERR_NCX_WRONG_TKVAL;
-	    expstr = "description, reference, or deviate";
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	}
-	CHK_DEV_EXIT(dev, res, retres);
+        } else {
+            res = ERR_NCX_WRONG_TKVAL;
+            expstr = "description, reference, or deviate";
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+        }
+        CHK_DEV_EXIT(dev, res, retres);
     }
 
     /* save or delete the obj_deviation_t struct */
     if (dev->target) {
-	dev->res = retres;
-	dlq_enque(dev, &mod->deviationQ);
-	if (mod->stmtmode) {
-	    /* save top-level deviation order */
-	    stmt = yang_new_deviation_stmt(dev);
-	    if (stmt) {
-		dlq_enque(stmt, &mod->stmtQ);
-	    } else {
-		log_error("\nError: malloc failure for obj_stmt");
-		res = ERR_INTERNAL_MEM;
-		ncx_print_errormsg(tkc, mod, res);
-	    }
-	}
+        dev->res = retres;
+        dlq_enque(dev, &mod->deviationQ);
+        if (mod->stmtmode) {
+            /* save top-level deviation order */
+            stmt = yang_new_deviation_stmt(dev);
+            if (stmt) {
+                dlq_enque(stmt, &mod->stmtQ);
+            } else {
+                log_error("\nError: malloc failure for obj_stmt");
+                res = ERR_INTERNAL_MEM;
+                ncx_print_errormsg(tkc, mod, res);
+            }
+        }
     } else {
-	obj_free_deviation(dev);
+        obj_free_deviation(dev);
     }
 
     return retres;
@@ -9676,14 +9676,14 @@ status_t
 status_t 
     yang_obj_resolve_datadefs (yang_pcb_t *pcb,
                                tk_chain_t *tkc,
-			       ncx_module_t  *mod,
-			       dlq_hdr_t *datadefQ)
+                               ncx_module_t  *mod,
+                               dlq_hdr_t *datadefQ)
 {
     status_t    retres;
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod || !datadefQ) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -9719,8 +9719,8 @@ status_t
 status_t 
     yang_obj_resolve_uses (yang_pcb_t *pcb,
                            tk_chain_t *tkc,
-			   ncx_module_t  *mod,
-			   dlq_hdr_t *datadefQ)
+                           ncx_module_t  *mod,
+                           dlq_hdr_t *datadefQ)
 {
     obj_template_t  *testobj, *casobj;
     obj_case_t      *cas;
@@ -9729,7 +9729,7 @@ status_t
 
 #ifdef DEBUG
     if (!tkc || !mod || !datadefQ) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -9738,136 +9738,136 @@ status_t
 
     /* first resolve all the local type names */
     for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 testobj != NULL;
-	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+         testobj != NULL;
+         testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
 #ifdef YANG_OBJ_DEBUG
-	if (LOGDEBUG3) {
-	    log_debug3("\nresolve_uses: mod %s, object %s, on line %u",
-		       mod->name, 
-		       obj_get_name(testobj),
-		       testobj->tkerr.linenum);
-	}
+        if (LOGDEBUG3) {
+            log_debug3("\nresolve_uses: mod %s, object %s, on line %u",
+                       mod->name, 
+                       obj_get_name(testobj),
+                       testobj->tkerr.linenum);
+        }
 #endif
 
-	switch (testobj->objtype) {
-	case OBJ_TYP_CONTAINER:
-	    res = 
+        switch (testobj->objtype) {
+        case OBJ_TYP_CONTAINER:
+            res = 
                 yang_grp_resolve_complete(pcb,
                                           tkc, 
                                           mod,
                                           testobj->def.container->groupingQ,
                                           testobj);
-	    CHK_EXIT(res, retres);
+            CHK_EXIT(res, retres);
 
-	    res = yang_obj_resolve_uses(pcb,
+            res = yang_obj_resolve_uses(pcb,
                                         tkc, 
                                         mod,
-					testobj->def.container->datadefQ);
-	    CHK_EXIT(res, retres);
-	    break;
+                                        testobj->def.container->datadefQ);
+            CHK_EXIT(res, retres);
+            break;
         case OBJ_TYP_ANYXML:
-	case OBJ_TYP_LEAF:
-	case OBJ_TYP_LEAF_LIST:
-	    break;
-	case OBJ_TYP_LIST:
-	    res = yang_grp_resolve_complete(pcb,
+        case OBJ_TYP_LEAF:
+        case OBJ_TYP_LEAF_LIST:
+            break;
+        case OBJ_TYP_LIST:
+            res = yang_grp_resolve_complete(pcb,
                                             tkc, 
                                             mod,
-					    testobj->def.list->groupingQ,
-					    testobj);
-	    CHK_EXIT(res, retres);
+                                            testobj->def.list->groupingQ,
+                                            testobj);
+            CHK_EXIT(res, retres);
 
-	    res = yang_obj_resolve_uses(pcb,
+            res = yang_obj_resolve_uses(pcb,
                                         tkc, 
                                         mod,
-					testobj->def.list->datadefQ);
-	    CHK_EXIT(res, retres);
-	    break;
-	case OBJ_TYP_CHOICE:
-	    for (casobj = (obj_template_t *)
-		     dlq_firstEntry(testobj->def.choic->caseQ);
-		 casobj != NULL;
-		 casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
-		cas = casobj->def.cas;
-		res = yang_obj_resolve_uses(pcb,
+                                        testobj->def.list->datadefQ);
+            CHK_EXIT(res, retres);
+            break;
+        case OBJ_TYP_CHOICE:
+            for (casobj = (obj_template_t *)
+                     dlq_firstEntry(testobj->def.choic->caseQ);
+                 casobj != NULL;
+                 casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
+                cas = casobj->def.cas;
+                res = yang_obj_resolve_uses(pcb,
                                             tkc, 
                                             mod, 
                                             cas->datadefQ);
-		CHK_EXIT(res, retres);
-	    }
-	    break;
-	case OBJ_TYP_CASE:
-	    cas = testobj->def.cas;
-	    res = yang_obj_resolve_uses(pcb,
+                CHK_EXIT(res, retres);
+            }
+            break;
+        case OBJ_TYP_CASE:
+            cas = testobj->def.cas;
+            res = yang_obj_resolve_uses(pcb,
                                         tkc, 
                                         mod, 
                                         cas->datadefQ);
-	    CHK_EXIT(res, retres);
-	    break;
-	case OBJ_TYP_USES:
-	    res = expand_uses(pcb,
+            CHK_EXIT(res, retres);
+            break;
+        case OBJ_TYP_USES:
+            res = expand_uses(pcb,
                               tkc, 
                               mod, 
                               testobj, 
                               datadefQ);
-	    CHK_EXIT(res, retres);
-	    break;
-	case OBJ_TYP_AUGMENT:
-	    aug = testobj->def.augment;
-	    res = yang_obj_resolve_uses(pcb,
+            CHK_EXIT(res, retres);
+            break;
+        case OBJ_TYP_AUGMENT:
+            aug = testobj->def.augment;
+            res = yang_obj_resolve_uses(pcb,
                                         tkc, 
                                         mod, 
                                         &aug->datadefQ);
-	    CHK_EXIT(res, retres);
-	    break;
-	case OBJ_TYP_RPC:
-	    res = yang_grp_resolve_complete(pcb,
+            CHK_EXIT(res, retres);
+            break;
+        case OBJ_TYP_RPC:
+            res = yang_grp_resolve_complete(pcb,
                                             tkc, 
                                             mod,
-					    &testobj->def.rpc->groupingQ,
-					    testobj);
-	    CHK_EXIT(res, retres);
+                                            &testobj->def.rpc->groupingQ,
+                                            testobj);
+            CHK_EXIT(res, retres);
 
-	    res = yang_obj_resolve_uses(pcb,
+            res = yang_obj_resolve_uses(pcb,
                                         tkc, 
                                         mod,
-					&testobj->def.rpc->datadefQ);
-	    CHK_EXIT(res, retres);
-	    break;
-	case OBJ_TYP_RPCIO:
-	    res = yang_grp_resolve_complete(pcb,
+                                        &testobj->def.rpc->datadefQ);
+            CHK_EXIT(res, retres);
+            break;
+        case OBJ_TYP_RPCIO:
+            res = yang_grp_resolve_complete(pcb,
                                             tkc, 
                                             mod,
-					    &testobj->def.rpcio->groupingQ,
-					    testobj);
-	    CHK_EXIT(res, retres);
+                                            &testobj->def.rpcio->groupingQ,
+                                            testobj);
+            CHK_EXIT(res, retres);
 
-	    res = yang_obj_resolve_uses(pcb,
+            res = yang_obj_resolve_uses(pcb,
                                         tkc, 
                                         mod,
-					&testobj->def.rpcio->datadefQ);
-	    CHK_EXIT(res, retres);
-	    break;
-	case OBJ_TYP_NOTIF:
-	    res = yang_grp_resolve_complete(pcb,
+                                        &testobj->def.rpcio->datadefQ);
+            CHK_EXIT(res, retres);
+            break;
+        case OBJ_TYP_NOTIF:
+            res = yang_grp_resolve_complete(pcb,
                                             tkc,
                                             mod,
-					    &testobj->def.notif->groupingQ,
-					    testobj);
-	    CHK_EXIT(res, retres);
+                                            &testobj->def.notif->groupingQ,
+                                            testobj);
+            CHK_EXIT(res, retres);
 
-	    res = yang_obj_resolve_uses(pcb,
+            res = yang_obj_resolve_uses(pcb,
                                         tkc,
                                         mod,
-					&testobj->def.notif->datadefQ);
-	    CHK_EXIT(res, retres);
-	    break;
-	case OBJ_TYP_NONE:
-	default:
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-	CHK_EXIT(res, retres);
+                                        &testobj->def.notif->datadefQ);
+            CHK_EXIT(res, retres);
+            break;
+        case OBJ_TYP_NONE:
+        default:
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -9899,15 +9899,15 @@ status_t
 status_t 
     yang_obj_resolve_augments (yang_pcb_t *pcb,
                                tk_chain_t *tkc,
-			       ncx_module_t  *mod,
-			       dlq_hdr_t *datadefQ)
+                               ncx_module_t  *mod,
+                               dlq_hdr_t *datadefQ)
 {
     obj_template_t  *testobj;
     status_t         res, retres;
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod || !datadefQ) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -9916,17 +9916,17 @@ status_t
 
     /* first resolve all the local type names */
     for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 testobj != NULL;
-	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+         testobj != NULL;
+         testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
-	if (testobj->objtype == OBJ_TYP_AUGMENT) {
-	    res = expand_augment(pcb,
+        if (testobj->objtype == OBJ_TYP_AUGMENT) {
+            res = expand_augment(pcb,
                                  tkc, 
                                  mod, 
                                  testobj, 
                                  datadefQ);
-	    CHK_EXIT(res, retres);
-	}
+            CHK_EXIT(res, retres);
+        }
     }
 
     return retres;
@@ -9953,8 +9953,8 @@ status_t
 *********************************************************************/
 status_t 
     yang_obj_resolve_deviations (yang_pcb_t *pcb,
-				 tk_chain_t *tkc,
-				 ncx_module_t  *mod)
+                                 tk_chain_t *tkc,
+                                 ncx_module_t  *mod)
 {
     obj_deviation_t        *deviation;
     ncx_save_deviations_t  *savedev, *nextdev;
@@ -9964,7 +9964,7 @@ status_t
 
 #ifdef DEBUG
     if (!tkc || !mod) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -10003,24 +10003,24 @@ status_t
 
     /* first resolve all the local deviations */
     for (deviation = (obj_deviation_t *)
-	     dlq_firstEntry(&mod->deviationQ);
-	 deviation != NULL;
-	 deviation = (obj_deviation_t *)
+             dlq_firstEntry(&mod->deviationQ);
+         deviation != NULL;
+         deviation = (obj_deviation_t *)
              dlq_nextEntry(deviation)) {
 
-	if (deviation->res != NO_ERR) {
-	    continue;
-	}
+        if (deviation->res != NO_ERR) {
+            continue;
+        }
 
-	anydevs = TRUE;
+        anydevs = TRUE;
 
-	res = resolve_deviation(pcb,
+        res = resolve_deviation(pcb,
                                 tkc, 
-				mod, 
-				deviation);
+                                mod, 
+                                deviation);
 
-	deviation->res = res;
-	CHK_EXIT(res, retres);
+        deviation->res = res;
+        CHK_EXIT(res, retres);
     }
 
     /* next gather all the external deviations that apply
@@ -10066,7 +10066,7 @@ status_t
      * patch them into the object tree
      */
     if (retres == NO_ERR && (anydevs || extdevcount)) {
-	retres = apply_all_object_deviations(pcb, tkc, mod);
+        retres = apply_all_object_deviations(pcb, tkc, mod);
     }
 
     return retres;
@@ -10100,8 +10100,8 @@ status_t
 status_t 
     yang_obj_resolve_final (yang_pcb_t *pcb,
                             tk_chain_t *tkc,
-			    ncx_module_t  *mod,
-			    dlq_hdr_t *datadefQ,
+                            ncx_module_t  *mod,
+                            dlq_hdr_t *datadefQ,
                             boolean ingrouping)
 {
     obj_template_t  *testobj;
@@ -10110,7 +10110,7 @@ status_t
 
 #ifdef DEBUG
     if (!tkc || !mod || !datadefQ) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -10119,209 +10119,209 @@ status_t
 
     /* first resolve all the local object names */
     for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 testobj != NULL;
-	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+         testobj != NULL;
+         testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
-	/* go through all the cloned nodes to find any lists
-	 * so their keyQ and uniqueQ structures can be
-	 * set with pointers to the cloned objects
-	 * instead of pointers to the original objects
-	 */
-	notclone = !obj_is_cloned(testobj);
+        /* go through all the cloned nodes to find any lists
+         * so their keyQ and uniqueQ structures can be
+         * set with pointers to the cloned objects
+         * instead of pointers to the original objects
+         */
+        notclone = !obj_is_cloned(testobj);
 
 #ifdef YANG_OBJ_DEBUG
-	if (LOGDEBUG3) {
-	    log_debug3("\nresolve_final: mod %s, object %s, on line %u",
-		       mod->name, 
-		       obj_get_name(testobj), 
-		       testobj->tkerr.linenum);
-	}
+        if (LOGDEBUG3) {
+            log_debug3("\nresolve_final: mod %s, object %s, on line %u",
+                       mod->name, 
+                       obj_get_name(testobj), 
+                       testobj->tkerr.linenum);
+        }
 #endif
-	
-	switch (testobj->objtype) {
-	case OBJ_TYP_CONTAINER:
+        
+        switch (testobj->objtype) {
+        case OBJ_TYP_CONTAINER:
             res = resolve_container_final(tkc, 
                                           mod, 
                                           testobj,
                                           ingrouping);
             CHK_EXIT(res, retres);
 
-	    if (notclone) {
-		res = 
+            if (notclone) {
+                res = 
                     yang_grp_resolve_final(pcb,
                                            tkc, 
                                            mod,
                                            testobj->def.container->groupingQ);
-		CHK_EXIT(res, retres);
-	    }
+                CHK_EXIT(res, retres);
+            }
 
-	    res = yang_obj_resolve_final(pcb,
+            res = yang_obj_resolve_final(pcb,
                                          tkc, 
                                          mod, 
                                          testobj->def.container->datadefQ,
                                          ingrouping);
-	    CHK_EXIT(res, retres);
+            CHK_EXIT(res, retres);
 
-	    if (notclone) {
-		res = resolve_default_parm(tkc, mod, testobj);
+            if (notclone) {
+                res = resolve_default_parm(tkc, mod, testobj);
 
-		yang_check_obj_used(tkc, 
+                yang_check_obj_used(tkc, 
                                     mod,
-				    testobj->def.container->typedefQ,
-				    testobj->def.container->groupingQ);
-	    }
-	    break;
-	case OBJ_TYP_LEAF:
+                                    testobj->def.container->typedefQ,
+                                    testobj->def.container->groupingQ);
+            }
+            break;
+        case OBJ_TYP_LEAF:
             res = resolve_leaf_final(tkc, mod, testobj, ingrouping);
             break;
         case OBJ_TYP_ANYXML:
-	case OBJ_TYP_LEAF_LIST:
-	    break;
-	case OBJ_TYP_LIST:
-	    if (notclone) {
-		res = yang_grp_resolve_final(pcb,
+        case OBJ_TYP_LEAF_LIST:
+            break;
+        case OBJ_TYP_LIST:
+            if (notclone) {
+                res = yang_grp_resolve_final(pcb,
                                              tkc, 
                                              mod, 
                                              testobj->def.list->groupingQ);
-		CHK_EXIT(res, retres);
-	    }
+                CHK_EXIT(res, retres);
+            }
 
-	    res = yang_obj_resolve_final(pcb,
+            res = yang_obj_resolve_final(pcb,
                                          tkc, 
                                          mod, 
                                          testobj->def.list->datadefQ,
                                          ingrouping);
-	    CHK_EXIT(res, retres);
+            CHK_EXIT(res, retres);
 
-	    if (notclone) {
-		yang_check_obj_used(tkc, 
+            if (notclone) {
+                yang_check_obj_used(tkc, 
                                     mod,
-				    testobj->def.list->typedefQ,
-				    testobj->def.list->groupingQ);
-	    }
+                                    testobj->def.list->typedefQ,
+                                    testobj->def.list->groupingQ);
+            }
 
-	    res = resolve_list_final(pcb,
+            res = resolve_list_final(pcb,
                                      tkc, 
                                      mod, 
-				     testobj->def.list, 
-				     testobj);
-	    break;
-	case OBJ_TYP_CHOICE:
+                                     testobj->def.list, 
+                                     testobj);
+            break;
+        case OBJ_TYP_CHOICE:
             res = resolve_choice_final(tkc, mod, testobj, ingrouping);
             CHK_EXIT(res, retres);
 
-	    res = yang_obj_resolve_final(pcb,
+            res = yang_obj_resolve_final(pcb,
                                          tkc, 
                                          mod, 
-					 testobj->def.choic->caseQ,
+                                         testobj->def.choic->caseQ,
                                          ingrouping);
-	    break;
-	case OBJ_TYP_CASE:
-	    res = yang_obj_resolve_final(pcb,
+            break;
+        case OBJ_TYP_CASE:
+            res = yang_obj_resolve_final(pcb,
                                          tkc, 
                                          mod, 
-					 testobj->def.cas->datadefQ,
+                                         testobj->def.cas->datadefQ,
                                          ingrouping);
-	    break;
-	case OBJ_TYP_USES:
-	    if (notclone) {
-		res = 
+            break;
+        case OBJ_TYP_USES:
+            if (notclone) {
+                res = 
                     yang_obj_resolve_final(pcb,
                                            tkc, 
                                            mod, 
                                            testobj->def.uses->datadefQ,
                                            ingrouping);
-	    }
-	    break;
-	case OBJ_TYP_AUGMENT:
-	    if (notclone) {
-		res = 
+            }
+            break;
+        case OBJ_TYP_AUGMENT:
+            if (notclone) {
+                res = 
                     yang_obj_resolve_final(pcb,
                                            tkc, 
                                            mod, 
                                            &testobj->def.augment->datadefQ,
                                            ingrouping);
-	    }
-	    break;
-	case OBJ_TYP_RPC:
-	    if (notclone) {
-		res = 
+            }
+            break;
+        case OBJ_TYP_RPC:
+            if (notclone) {
+                res = 
                     yang_grp_resolve_final(pcb,
                                            tkc, 
                                            mod, 
                                            &testobj->def.rpc->groupingQ);
-		CHK_EXIT(res, retres);
-	    }
+                CHK_EXIT(res, retres);
+            }
 
-	    res = yang_obj_resolve_final(pcb,
+            res = yang_obj_resolve_final(pcb,
                                          tkc, 
                                          mod, 
-					 &testobj->def.rpc->datadefQ,
+                                         &testobj->def.rpc->datadefQ,
                                          ingrouping);
 
-	    if (notclone) {
-		yang_check_obj_used(tkc, 
+            if (notclone) {
+                yang_check_obj_used(tkc, 
                                     mod,
-				    &testobj->def.rpc->typedefQ,
-				    &testobj->def.rpc->groupingQ);
-	    }
-	    break;
-	case OBJ_TYP_RPCIO:
-	    if (notclone) {
-		res = 
+                                    &testobj->def.rpc->typedefQ,
+                                    &testobj->def.rpc->groupingQ);
+            }
+            break;
+        case OBJ_TYP_RPCIO:
+            if (notclone) {
+                res = 
                     yang_grp_resolve_final(pcb,
                                            tkc, 
                                            mod, 
                                            &testobj->def.rpcio->groupingQ);
-		CHK_EXIT(res, retres);
-	    }
+                CHK_EXIT(res, retres);
+            }
 
-	    res = yang_obj_resolve_final(pcb,
+            res = yang_obj_resolve_final(pcb,
                                          tkc, 
                                          mod, 
-					 &testobj->def.rpcio->datadefQ,
+                                         &testobj->def.rpcio->datadefQ,
                                          ingrouping);
-	    CHK_EXIT(res, retres);
+            CHK_EXIT(res, retres);
 
-	    if (notclone) {
-		res = resolve_default_parm(tkc, mod, testobj);
-		yang_check_obj_used(tkc, 
+            if (notclone) {
+                res = resolve_default_parm(tkc, mod, testobj);
+                yang_check_obj_used(tkc, 
                                     mod,
-				    &testobj->def.rpcio->typedefQ,
-				    &testobj->def.rpcio->groupingQ);
-	    }
-	    break;
-	case OBJ_TYP_NOTIF:
-	    if (notclone) {
-		res = 
+                                    &testobj->def.rpcio->typedefQ,
+                                    &testobj->def.rpcio->groupingQ);
+            }
+            break;
+        case OBJ_TYP_NOTIF:
+            if (notclone) {
+                res = 
                     yang_grp_resolve_final(pcb,
                                            tkc, 
                                            mod, 
                                            &testobj->def.notif->groupingQ);
-		CHK_EXIT(res, retres);
-	    }
+                CHK_EXIT(res, retres);
+            }
 
-	    res = 
+            res = 
                 yang_obj_resolve_final(pcb,
                                        tkc, 
                                        mod, 
                                        &testobj->def.notif->datadefQ,
                                        ingrouping);
 
-	    if (notclone) {
-		yang_check_obj_used(tkc,
+            if (notclone) {
+                yang_check_obj_used(tkc,
                                     mod,
-				    &testobj->def.notif->typedefQ,
-				    &testobj->def.notif->groupingQ);
-	    }
-	    break;
-	case OBJ_TYP_REFINE:
-	    break;
-	case OBJ_TYP_NONE:
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
-	CHK_EXIT(res, retres);
+                                    &testobj->def.notif->typedefQ,
+                                    &testobj->def.notif->groupingQ);
+            }
+            break;
+        case OBJ_TYP_REFINE:
+            break;
+        case OBJ_TYP_NONE:
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -10355,8 +10355,8 @@ status_t
 *********************************************************************/
 status_t 
     yang_obj_resolve_xpath (tk_chain_t *tkc,
-			    ncx_module_t  *mod,
-			    dlq_hdr_t *datadefQ)
+                            ncx_module_t  *mod,
+                            dlq_hdr_t *datadefQ)
 {
     yang_node_t        *node;
     status_t            res, retres;
@@ -10364,7 +10364,7 @@ status_t
 
 #ifdef DEBUG
     if (!tkc || !mod || !datadefQ) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -10375,19 +10375,19 @@ status_t
     CHK_EXIT(res, retres);
 
     if (mod->ismod) {
-	done = FALSE;
-	for (node = (yang_node_t *)
-		 dlq_firstEntry(mod->allincQ);
-	     node != NULL && !done;
-	     node = (yang_node_t *)dlq_nextEntry(node)) {
+        done = FALSE;
+        for (node = (yang_node_t *)
+                 dlq_firstEntry(mod->allincQ);
+             node != NULL && !done;
+             node = (yang_node_t *)dlq_nextEntry(node)) {
 
-	    if (node->submod) {
-		res = resolve_xpath(tkc, 
-				    node->submod,
-				    &node->submod->datadefQ);
-		CHK_EXIT(res, retres);
-	    }
-	}
+            if (node->submod) {
+                res = resolve_xpath(tkc, 
+                                    node->submod,
+                                    &node->submod->datadefQ);
+                CHK_EXIT(res, retres);
+            }
+        }
     }
 
     return retres;
@@ -10414,8 +10414,8 @@ status_t
 *********************************************************************/
 status_t 
     yang_obj_check_leafref_loops (tk_chain_t *tkc,
-				  ncx_module_t *mod,
-				  dlq_hdr_t *datadefQ)
+                                  ncx_module_t *mod,
+                                  dlq_hdr_t *datadefQ)
 {
     obj_template_t  *testobj, *nextobj, *lastobj;
     dlq_hdr_t       *childdatadefQ;
@@ -10424,7 +10424,7 @@ status_t
 
 #ifdef DEBUG
     if (!tkc || !mod || !datadefQ) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -10433,81 +10433,81 @@ status_t
 
     /* first resolve all the local object names */
     for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 testobj != NULL;
-	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+         testobj != NULL;
+         testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
-	isleaf = FALSE;
-	switch (testobj->objtype) {
-	case OBJ_TYP_LEAF:
-	    isleaf = TRUE;
-	    /* fall through */
-	case OBJ_TYP_LEAF_LIST:
-	    if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
+        isleaf = FALSE;
+        switch (testobj->objtype) {
+        case OBJ_TYP_LEAF:
+            isleaf = TRUE;
+            /* fall through */
+        case OBJ_TYP_LEAF_LIST:
+            if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
 #ifdef YANG_OBJ_DEBUG
-		if (LOGDEBUG3) {
-		    log_debug3("\ncheck_leafref_loop: mod %s, "
-			       "object %s, on line %u",
-			       mod->name, 
+                if (LOGDEBUG3) {
+                    log_debug3("\ncheck_leafref_loop: mod %s, "
+                               "object %s, on line %u",
+                               mod->name, 
                                obj_get_name(testobj), 
-			       testobj->tkerr.linenum);
-		}
+                               testobj->tkerr.linenum);
+                }
 #endif
-		
-		if (isleaf) {
-		    nextobj = testobj->def.leaf->leafrefobj;
-		} else {
-		    nextobj = testobj->def.leaflist->leafrefobj;
-		}
+                
+                if (isleaf) {
+                    nextobj = testobj->def.leaf->leafrefobj;
+                } else {
+                    nextobj = testobj->def.leaflist->leafrefobj;
+                }
 
-		if (nextobj == testobj) {
-		    res = ERR_NCX_LEAFREF_LOOP;
-		    log_error("\nError: leafref path in "
-			      "%s %s loops with self",
-			      obj_get_typestr(testobj),
-			      obj_get_name(testobj));
-		    tkc->curerr = &testobj->tkerr;
-		    ncx_print_errormsg(tkc, mod, res);
-		} else {
-		    while (nextobj) {
-			if (obj_is_leafy(nextobj) &&
-			    obj_get_basetype(nextobj) == NCX_BT_LEAFREF) {
+                if (nextobj == testobj) {
+                    res = ERR_NCX_LEAFREF_LOOP;
+                    log_error("\nError: leafref path in "
+                              "%s %s loops with self",
+                              obj_get_typestr(testobj),
+                              obj_get_name(testobj));
+                    tkc->curerr = &testobj->tkerr;
+                    ncx_print_errormsg(tkc, mod, res);
+                } else {
+                    while (nextobj) {
+                        if (obj_is_leafy(nextobj) &&
+                            obj_get_basetype(nextobj) == NCX_BT_LEAFREF) {
 
-			    lastobj = nextobj;
-			    if (isleaf) {
-				nextobj = nextobj->def.leaf->leafrefobj;
-			    } else {
-				nextobj = nextobj->def.leaflist->leafrefobj;
-			    }
+                            lastobj = nextobj;
+                            if (isleaf) {
+                                nextobj = nextobj->def.leaf->leafrefobj;
+                            } else {
+                                nextobj = nextobj->def.leaflist->leafrefobj;
+                            }
 
-			    if (nextobj == testobj) {
-				res = ERR_NCX_LEAFREF_LOOP;
-				log_error("\nError: leafref path in "
-					  "%s %s loops with %s %s",
-					  obj_get_typestr(testobj),
-					  obj_get_name(testobj),
-					  obj_get_typestr(lastobj),
-					  obj_get_name(lastobj));
-				tkc->curerr = &testobj->tkerr;
-				ncx_print_errormsg(tkc, mod, res);
-				nextobj = NULL;
-			    }
-			} else {
-			    nextobj = NULL;
-			}
-		    }
-		}
-		CHK_EXIT(res, retres);
-	    }
-	    break;
-	default:
-	    childdatadefQ = obj_get_datadefQ(testobj);
-	    if (childdatadefQ) {
-		res = yang_obj_check_leafref_loops(tkc,
-						   mod,
-						   childdatadefQ);
-		CHK_EXIT(res, retres);
-	    }
-	}
+                            if (nextobj == testobj) {
+                                res = ERR_NCX_LEAFREF_LOOP;
+                                log_error("\nError: leafref path in "
+                                          "%s %s loops with %s %s",
+                                          obj_get_typestr(testobj),
+                                          obj_get_name(testobj),
+                                          obj_get_typestr(lastobj),
+                                          obj_get_name(lastobj));
+                                tkc->curerr = &testobj->tkerr;
+                                ncx_print_errormsg(tkc, mod, res);
+                                nextobj = NULL;
+                            }
+                        } else {
+                            nextobj = NULL;
+                        }
+                    }
+                }
+                CHK_EXIT(res, retres);
+            }
+            break;
+        default:
+            childdatadefQ = obj_get_datadefQ(testobj);
+            if (childdatadefQ) {
+                res = yang_obj_check_leafref_loops(tkc,
+                                                   mod,
+                                                   childdatadefQ);
+                CHK_EXIT(res, retres);
+            }
+        }
     }
 
     return retres;

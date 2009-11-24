@@ -12,7 +12,7 @@
    Debugging and schema-discovery module support is also
    provided.
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -103,7 +103,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -181,16 +181,16 @@ static void
     free_cap (cap_rec_t *cap)
 {
     if (cap->cap_uri) {
-	m__free(cap->cap_uri);
+        m__free(cap->cap_uri);
     }
     if (cap->cap_namespace) {
-	m__free(cap->cap_namespace);
+        m__free(cap->cap_namespace);
     }
     if (cap->cap_module) {
-	m__free(cap->cap_module);
+        m__free(cap->cap_module);
     }
     if (cap->cap_revision) {
-	m__free(cap->cap_revision);
+        m__free(cap->cap_revision);
     }
 
     ncx_clean_list(&cap->cap_feature_list);
@@ -216,8 +216,8 @@ static void
 *********************************************************************/
 static boolean
     get_features_len (const ncx_module_t *mod,
-		      ncx_feature_t *feature,
-		      void *cookie)
+                      ncx_feature_t *feature,
+                      void *cookie)
 {
     uint32  *count;
 
@@ -244,8 +244,8 @@ static boolean
 *********************************************************************/
 static boolean
     add_features (const ncx_module_t *mod,
-		  ncx_feature_t *feature,
-		  void *cookie)
+                  ncx_feature_t *feature,
+                  void *cookie)
 {
     xmlChar  **str;
 
@@ -319,9 +319,9 @@ static xmlChar *
     len += xml_strlen(modname);
 
     if (revision) {
-	len++;   /* & char */
-	len += xml_strlen(CAP_REVISION_EQ);
-	len += xml_strlen(revision);
+        len++;   /* & char */
+        len += xml_strlen(CAP_REVISION_EQ);
+        len += xml_strlen(revision);
     }
 
     if (mod) {
@@ -353,7 +353,7 @@ static xmlChar *
     /* get a string to hold the result */
     str = m__getMem(len+1);
     if (!str) {
-	return NULL;
+        return NULL;
     }
 
     /* repeat the previous steps for real */
@@ -365,9 +365,9 @@ static xmlChar *
     p += xml_strcpy(p, modname);
 
     if (revision) {
-	*p++ = (xmlChar)'&';
-	p += xml_strcpy(p, CAP_REVISION_EQ);
-	p += xml_strcpy(p, revision);
+        *p++ = (xmlChar)'&';
+        p += xml_strcpy(p, CAP_REVISION_EQ);
+        p += xml_strcpy(p, revision);
     }
 
     if (mod) {
@@ -479,10 +479,10 @@ static xmlChar *
 *********************************************************************/
 static status_t 
     parse_uri_parm (const xmlChar *parmname,
-		    uint32 *parmnamelen,
-		    const xmlChar **parmval,
-		    uint32 *parmvallen,
-		    const xmlChar **nextparmname)
+                    uint32 *parmnamelen,
+                    const xmlChar **parmval,
+                    uint32 *parmvallen,
+                    const xmlChar **nextparmname)
 {
     const xmlChar  *str, *equal;
 
@@ -494,18 +494,18 @@ static status_t
     /* find the equals sign after the parameter name */
     equal = parmname;
     while (*equal && *equal != (xmlChar)'=') {
-	equal++;
+        equal++;
     }
     if (!*equal || equal == parmname) {
-	/* error: skip to next parm or EOS */
-	while (*equal && *equal != (xmlChar)'&') {
-	    equal++;
-	}
-	if (*equal) {
-	    /* stopped on ampersand */
-	    *nextparmname = ++equal;
-	}
-	return ERR_NCX_INVALID_VALUE;
+        /* error: skip to next parm or EOS */
+        while (*equal && *equal != (xmlChar)'&') {
+            equal++;
+        }
+        if (*equal) {
+            /* stopped on ampersand */
+            *nextparmname = ++equal;
+        }
+        return ERR_NCX_INVALID_VALUE;
     }
 
     /* OK: got an equals sign after some non-zero string */
@@ -513,13 +513,13 @@ static status_t
     *parmval = str = equal+1;
 
     while (*str && *str != (xmlChar)'&') {
-	str++;
+        str++;
     }
 
     *parmvallen = (uint32)(str - *parmval);
     if (*str) {
-	/* stopped on ampersand so another param is expected */
-	*nextparmname = str+1;
+        /* stopped on ampersand so another param is expected */
+        *nextparmname = str+1;
     }
     return NO_ERR;
 
@@ -546,7 +546,7 @@ cap_list_t *
 
     caplist = m__getObj(cap_list_t);
     if (caplist) {
-	cap_init_caplist(caplist);
+        cap_init_caplist(caplist);
     }
     return caplist;
 
@@ -568,8 +568,8 @@ void
 {
 #ifdef DEBUG
     if (!caplist) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
     
@@ -597,33 +597,33 @@ void
 
 #ifdef DEBUG
     if (!caplist) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     caplist->cap_std = 0;
 
     if (caplist->cap_protos) {
-	m__free(caplist->cap_protos);
-	caplist->cap_protos = NULL;
+        m__free(caplist->cap_protos);
+        caplist->cap_protos = NULL;
     }
 
     if (caplist->cap_defstyle) {
-	m__free(caplist->cap_defstyle);
-	caplist->cap_defstyle = NULL;
+        m__free(caplist->cap_defstyle);
+        caplist->cap_defstyle = NULL;
     }
 
     if (caplist->cap_supported) {
-	m__free(caplist->cap_supported);
-	caplist->cap_supported = NULL;
+        m__free(caplist->cap_supported);
+        caplist->cap_supported = NULL;
     }
 
     /* drain the capability Q and free the memory */
     cap = (cap_rec_t *)dlq_deque(&caplist->capQ);
     while (cap != NULL) {
-	free_cap(cap);
-	cap = (cap_rec_t *)dlq_deque(&caplist->capQ);
+        free_cap(cap);
+        cap = (cap_rec_t *)dlq_deque(&caplist->capQ);
     }
 
 }  /* cap_clean_caplist */
@@ -644,8 +644,8 @@ void
 {
 #ifdef DEBUG
     if (!caplist) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -676,8 +676,8 @@ status_t
 #endif
 
     if (capstd < CAP_STDID_LAST_MARKER) {
-	m__setbit(caplist->cap_std, stdcaps[capstd].cap_bitnum); 
-	return NO_ERR;
+        m__setbit(caplist->cap_std, stdcaps[capstd].cap_bitnum); 
+        return NO_ERR;
     } else {
         return ERR_NCX_WRONG_VAL;
     }
@@ -697,7 +697,7 @@ status_t
 *********************************************************************/
 status_t
     cap_add_stdval (val_value_t *caplist,
-		    cap_stdid_t   capstd)
+                    cap_stdid_t   capstd)
 {
     val_value_t     *capval;
     xmlChar         *str, *p;
@@ -712,34 +712,34 @@ status_t
 
     /* setup the string */
     if (capstd==CAP_STDID_V1) {
-	pfix = CAP_BASE_URN;
-	cap = NULL;
-	len = xml_strlen(pfix);
+        pfix = CAP_BASE_URN;
+        cap = NULL;
+        len = xml_strlen(pfix);
     } else {
-	pfix = CAP_URN;
-	cap = stdcaps[capstd].cap_name;
-	len = xml_strlen(pfix) + xml_strlen(cap);
+        pfix = CAP_URN;
+        cap = stdcaps[capstd].cap_name;
+        len = xml_strlen(pfix) + xml_strlen(cap);
     }
 
     /* make the string */
     str = m__getMem(len+1);
     if (!str) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     /* concat the capability name if not the base string */
     p = str;
     p += xml_strcpy(str, pfix);
     if (cap) {
-	xml_strcpy(p, cap);
+        xml_strcpy(p, cap);
     }
 
     /* make the capability element */
     capval = xml_val_new_string(NCX_EL_CAPABILITY,
-				xmlns_nc_id(), str);
+                                xmlns_nc_id(), str);
     if (!capval) {
-	m__free(str);
-	return ERR_INTERNAL_MEM;
+        m__free(str);
+        return ERR_INTERNAL_MEM;
     }
 
     val_add_child(capval, caplist);
@@ -764,7 +764,7 @@ status_t
 *********************************************************************/
 status_t 
     cap_add_std_string (cap_list_t *caplist, 
-			const xmlChar *uri)
+                        const xmlChar *uri)
 {
     const xmlChar *str;
     uint32         caplen, namelen, schemelen, basiclen;
@@ -780,62 +780,62 @@ status_t
 
     /* the base capability is a different form than the rest */
     if (!xml_strcmp(uri, CAP_BASE_URN)) {
-	return cap_add_std(caplist, CAP_STDID_V1);
+        return cap_add_std(caplist, CAP_STDID_V1);
     } else if (!xml_strncmp(uri, CAP_URN, caplen)) {
-	/* matched the standard capability prefix string;
-	 * get the suffix with the capability name and version 
-	 */
-	str = uri + caplen;
+        /* matched the standard capability prefix string;
+         * get the suffix with the capability name and version 
+         */
+        str = uri + caplen;
 
-	/* go through the standard capability suffix strings */
-	for (stdid=CAP_STDID_WRITE_RUNNING;
-	     stdid < CAP_STDID_LAST_MARKER; stdid++) {
+        /* go through the standard capability suffix strings */
+        for (stdid=CAP_STDID_WRITE_RUNNING;
+             stdid < CAP_STDID_LAST_MARKER; stdid++) {
 
-	    switch (stdid) {
-	    case CAP_STDID_URL:
-		namelen = xml_strlen(stdcaps[stdid].cap_name);
-		if (!xml_strncmp(str, stdcaps[stdid].cap_name,
-				 namelen)) {
-		    str += namelen;
-		    if (*str == (xmlChar)'?') {
-			str++;
-			schemelen = xml_strlen(CAP_SCHEME_EQ);
-			if (!xml_strncmp(str,
-					 CAP_SCHEME_EQ,
-					 schemelen)) {
-			    str += schemelen;
-			    if (*str) {
-				return cap_add_url(caplist, str);
-			    }
-			}
-		    }
-		}
-		break;
-	    case CAP_STDID_WITH_DEFAULTS:
-		namelen = xml_strlen(stdcaps[stdid].cap_name);
-		if (!xml_strncmp(str, stdcaps[stdid].cap_name,
-				 namelen)) {
-		    str += namelen;
-		    if (*str == (xmlChar)'?') {
-			str++;
-			basiclen = xml_strlen(CAP_BASIC_EQ);
-			if (!xml_strncmp(str,
-					 CAP_BASIC_EQ,
-					 basiclen)) {
-			    str += basiclen;
-			    if (*str) {
-				return cap_add_withdef(caplist, str);
-			    }
-			}
-		    }
-		}
-		break;
-	    default:
-		if (!xml_strcmp(str, stdcaps[stdid].cap_name)) {
-		    return cap_add_std(caplist, stdid);
-		}
-	    }
-	}
+            switch (stdid) {
+            case CAP_STDID_URL:
+                namelen = xml_strlen(stdcaps[stdid].cap_name);
+                if (!xml_strncmp(str, stdcaps[stdid].cap_name,
+                                 namelen)) {
+                    str += namelen;
+                    if (*str == (xmlChar)'?') {
+                        str++;
+                        schemelen = xml_strlen(CAP_SCHEME_EQ);
+                        if (!xml_strncmp(str,
+                                         CAP_SCHEME_EQ,
+                                         schemelen)) {
+                            str += schemelen;
+                            if (*str) {
+                                return cap_add_url(caplist, str);
+                            }
+                        }
+                    }
+                }
+                break;
+            case CAP_STDID_WITH_DEFAULTS:
+                namelen = xml_strlen(stdcaps[stdid].cap_name);
+                if (!xml_strncmp(str, stdcaps[stdid].cap_name,
+                                 namelen)) {
+                    str += namelen;
+                    if (*str == (xmlChar)'?') {
+                        str++;
+                        basiclen = xml_strlen(CAP_BASIC_EQ);
+                        if (!xml_strncmp(str,
+                                         CAP_BASIC_EQ,
+                                         basiclen)) {
+                            str += basiclen;
+                            if (*str) {
+                                return cap_add_withdef(caplist, str);
+                            }
+                        }
+                    }
+                }
+                break;
+            default:
+                if (!xml_strcmp(str, stdcaps[stdid].cap_name)) {
+                    return cap_add_std(caplist, stdid);
+                }
+            }
+        }
     }
     return ERR_NCX_SKIPPED;
 
@@ -858,7 +858,7 @@ status_t
 *********************************************************************/
 status_t 
     cap_add_module_string (cap_list_t *caplist, 
-			   const xmlChar *uri)
+                           const xmlChar *uri)
 {
     cap_rec_t     *cap;
     const xmlChar *qmark, *parmname, *parmval, *nextparmname;
@@ -879,10 +879,10 @@ status_t
     /* look for the end of the URI, for any parameters */
     qmark = uri;
     while (*qmark && *qmark != (xmlChar)'?') {
-	qmark++;
+        qmark++;
     }
     if (!*qmark) {
-	return ERR_NCX_SKIPPED;
+        return ERR_NCX_SKIPPED;
     }
 
     baselen = (uint32)(qmark-uri);
@@ -914,19 +914,19 @@ status_t
 
     done = FALSE;
     while (!done) {
-	if (nextparmname) {
-	    parmname = nextparmname;
-	} else {
-	    done = TRUE;
-	    continue;
-	}
+        if (nextparmname) {
+            parmname = nextparmname;
+        } else {
+            done = TRUE;
+            continue;
+        }
 
-	res = parse_uri_parm(parmname, 
+        res = parse_uri_parm(parmname, 
                              &parmnamelen, 
-			     &parmval, 
+                             &parmval, 
                              &parmvallen, 
                              &nextparmname);
-	if (res != NO_ERR) {
+        if (res != NO_ERR) {
             if (usewarning) {
                 log_warn("\nWarning: skipping invalid "
                          "parameter syntax (%s) "
@@ -934,75 +934,75 @@ status_t
                          get_error_string(res), 
                          uri);
             }
-	    if (NEED_EXIT(res)) {
-		done = TRUE;
-	    }
-	    continue;
-	}
+            if (NEED_EXIT(res)) {
+                done = TRUE;
+            }
+            continue;
+        }
 
-	/* check that the parameter name matches one of the expected names */
-	if (!xml_strncmp(parmname, 
+        /* check that the parameter name matches one of the expected names */
+        if (!xml_strncmp(parmname, 
                          YANG_K_MODULE, 
                          xml_strlen(YANG_K_MODULE))) {
-	    if (curmod) {
+            if (curmod) {
                 if (usewarning) {
                     log_warn("\nWarning: skipping duplicate "
                              "'module' parameter "
                              "in capability URI '%s'", 
                              uri);
                 }
-	    } else {
-		curmod = TRUE;
-		module = parmval;
-		modulelen = parmvallen;
-	    }
-	} else if (!xml_strncmp(parmname, 
+            } else {
+                curmod = TRUE;
+                module = parmval;
+                modulelen = parmvallen;
+            }
+        } else if (!xml_strncmp(parmname, 
                                 YANG_K_REVISION, 
-				xml_strlen(YANG_K_REVISION))) {
-	    if (currev) {
+                                xml_strlen(YANG_K_REVISION))) {
+            if (currev) {
                 if (usewarning) {
                     log_warn("\nWarning: skipping duplicate "
                              "'revision' parameter "
                              "in capability URI '%s'", 
                              uri);
                 }
-	    } else {
-		currev = TRUE;
-		revision = parmval;
-		revisionlen = parmvallen;
-	    }
-	} else if (!xml_strncmp(parmname, 
+            } else {
+                currev = TRUE;
+                revision = parmval;
+                revisionlen = parmvallen;
+            }
+        } else if (!xml_strncmp(parmname, 
                                 YANG_K_FEATURES, 
-				xml_strlen(YANG_K_FEATURES))) {
-	    if (curfeat) {
+                                xml_strlen(YANG_K_FEATURES))) {
+            if (curfeat) {
                 if (usewarning) {
                     log_warn("\nWarning: skipping duplicate "
                              "'features' parameter "
                              "in capability URI '%s'", 
                              uri);
                 }
-	    } else {
-		curfeat = TRUE;
-		features = parmval;
-		featureslen = parmvallen;
-	    }
-	} else if (!xml_strncmp(parmname, 
+            } else {
+                curfeat = TRUE;
+                features = parmval;
+                featureslen = parmvallen;
+            }
+        } else if (!xml_strncmp(parmname, 
                                 YANG_K_DEVIATIONS, 
-				xml_strlen(YANG_K_DEVIATIONS))) {
-	    if (curdev) {
+                                xml_strlen(YANG_K_DEVIATIONS))) {
+            if (curdev) {
                 if (usewarning) {
                     log_warn("\nWarning: skipping duplicate "
                              "'deviations' parameter "
                              "in capability URI '%s'", 
                              uri);
                 }
-	    } else {
-		curdev = TRUE;
-		deviations = parmval;
-		deviationslen = parmvallen;
-	    }
+            } else {
+                curdev = TRUE;
+                deviations = parmval;
+                deviationslen = parmvallen;
+            }
         } else if (usewarning) {
-	    /* skip over this unknown parameter */
+            /* skip over this unknown parameter */
             log_warn("\nWarning: skipping unknown parameter '");
             for (i=0; i<parmnamelen; i++) {
                 log_warn("%c", parmname[i]);
@@ -1016,19 +1016,19 @@ status_t
     }
 
     if (NEED_EXIT(res)) {
-	return res;
+        return res;
     }
 
     if (!module) {
-	if (revision || features || deviations) {
+        if (revision || features || deviations) {
             if (usewarning) {
                 log_warn("\nWarning: 'module' parameter "
                          "missing from possible "
                          "capability URI '%s'", 
                          uri);
             }
-	}
-	return ERR_NCX_SKIPPED;
+        }
+        return ERR_NCX_SKIPPED;
     }
 
     /* assume this is a module capability URI
@@ -1040,95 +1040,95 @@ status_t
     }
     cap->cap_uri = xml_strdup(uri);
     if (!cap->cap_uri) {
-	free_cap(cap);
+        free_cap(cap);
         return ERR_INTERNAL_MEM;
     }
 
     cap->cap_namespace = xml_strndup(uri, baselen);
     if (!cap->cap_namespace) {
-	free_cap(cap);
+        free_cap(cap);
         return ERR_INTERNAL_MEM;
     }
 
     cap->cap_module = xml_strndup(module, modulelen);
     if (!cap->cap_module) {
-	free_cap(cap);
+        free_cap(cap);
         return ERR_INTERNAL_MEM;
     }
 
     /* check wrong module namespace base URI */
     if (foundnsid) {
-	parmname = xmlns_get_module(foundnsid);
-	if (xml_strcmp(parmname, cap->cap_module)) {
+        parmname = xmlns_get_module(foundnsid);
+        if (xml_strcmp(parmname, cap->cap_module)) {
             if (usewarning) {
                 log_warn("\nWarning: capability base URI mismatch, "
                          "got '%s' not '%s''", 
                          cap->cap_module,  
                          parmname);
             }
-	}
+        }
     }
 
     if (revision) {
-	cap->cap_revision = xml_strndup(revision, revisionlen);
-	if (!cap->cap_revision) {
-	    free_cap(cap);
-	    return ERR_INTERNAL_MEM;
-	}
+        cap->cap_revision = xml_strndup(revision, revisionlen);
+        if (!cap->cap_revision) {
+            free_cap(cap);
+            return ERR_INTERNAL_MEM;
+        }
     } else if (usewarning) {
-	log_warn("\nWarning: 'revision' parameter missing from "
-		 "capability URI '%s'", 
+        log_warn("\nWarning: 'revision' parameter missing from "
+                 "capability URI '%s'", 
                  uri);
     }
 
     if (features) {
-	liststr = xml_strndup(features, featureslen);
-	if (!liststr) {
-	    free_cap(cap);
-	    return ERR_INTERNAL_MEM;
-	}
+        liststr = xml_strndup(features, featureslen);
+        if (!liststr) {
+            free_cap(cap);
+            return ERR_INTERNAL_MEM;
+        }
 
-	commastr = liststr;
-	while (*commastr) {
-	    if (*commastr == (xmlChar)',') {
-		*commastr = (xmlChar)' ';
-	    }
-	    commastr++;
-	}
+        commastr = liststr;
+        while (*commastr) {
+            if (*commastr == (xmlChar)',') {
+                *commastr = (xmlChar)' ';
+            }
+            commastr++;
+        }
 
-	res = ncx_set_list(NCX_BT_STRING, 
+        res = ncx_set_list(NCX_BT_STRING, 
                            liststr, 
-			   &cap->cap_feature_list);
-	m__free(liststr);
-	if (res != NO_ERR) {
-	    free_cap(cap);
-	    return res;
-	}
+                           &cap->cap_feature_list);
+        m__free(liststr);
+        if (res != NO_ERR) {
+            free_cap(cap);
+            return res;
+        }
     }
 
     if (deviations) {
-	liststr = xml_strndup(deviations, deviationslen);
-	if (!liststr) {
-	    free_cap(cap);
-	    return ERR_INTERNAL_MEM;
-	}
+        liststr = xml_strndup(deviations, deviationslen);
+        if (!liststr) {
+            free_cap(cap);
+            return ERR_INTERNAL_MEM;
+        }
 
-	commastr = liststr;
-	while (*commastr) {
-	    if (*commastr == (xmlChar)',') {
-		*commastr = (xmlChar)' ';
-	    }
-	    commastr++;
-	}
+        commastr = liststr;
+        while (*commastr) {
+            if (*commastr == (xmlChar)',') {
+                *commastr = (xmlChar)' ';
+            }
+            commastr++;
+        }
 
-	res = ncx_set_list(NCX_BT_STRING, 
+        res = ncx_set_list(NCX_BT_STRING, 
                            liststr, 
-			   &cap->cap_deviation_list);
-	m__free(liststr);
-	if (res != NO_ERR) {
-	    free_cap(cap);
-	    return res;
-	}
+                           &cap->cap_deviation_list);
+        m__free(liststr);
+        if (res != NO_ERR) {
+            free_cap(cap);
+            return res;
+        }
     }
 
     cap->cap_subject = CAP_SUBJTYP_DM;
@@ -1152,7 +1152,7 @@ status_t
 *********************************************************************/
 status_t 
     cap_add_url (cap_list_t *caplist, 
-		 const xmlChar *proto_list)
+                 const xmlChar *proto_list)
 {
 #ifdef DEBUG
     if (!caplist || !proto_list) {
@@ -1183,7 +1183,7 @@ status_t
 *********************************************************************/
 status_t 
     cap_add_withdef (cap_list_t *caplist, 
-		     const xmlChar *defstyle)
+                     const xmlChar *defstyle)
 {
     const xmlChar *str;
     uint32         featureslen, basiclen;
@@ -1195,36 +1195,36 @@ status_t
 #endif
 
     m__setbit(caplist->cap_std, 
-	      stdcaps[CAP_STDID_WITH_DEFAULTS].cap_bitnum);
+              stdcaps[CAP_STDID_WITH_DEFAULTS].cap_bitnum);
 
     /* check for &features=foo:bar */
     str = defstyle;
     while (*str && *str != '&') {
-	str++;
+        str++;
     }
     if (*str) {
-	/* check parameter is really features= */
-	featureslen = xml_strlen(CAP_SUPPORTED_EQ);
-	basiclen = (uint32)(str - defstyle);
-	if (!xml_strncmp(++str, 
-			 CAP_SUPPORTED_EQ,
-			 featureslen)) {
-	    str += featureslen;
-	    caplist->cap_supported = xml_strdup(str);
-	    if (!caplist->cap_supported) {
-		return ERR_INTERNAL_MEM;
-	    }
-	    caplist->cap_defstyle = 
-		xml_strndup(defstyle, basiclen);
-	    if (!caplist->cap_defstyle) {
-		return ERR_INTERNAL_MEM;
-	    }
-	}
+        /* check parameter is really features= */
+        featureslen = xml_strlen(CAP_SUPPORTED_EQ);
+        basiclen = (uint32)(str - defstyle);
+        if (!xml_strncmp(++str, 
+                         CAP_SUPPORTED_EQ,
+                         featureslen)) {
+            str += featureslen;
+            caplist->cap_supported = xml_strdup(str);
+            if (!caplist->cap_supported) {
+                return ERR_INTERNAL_MEM;
+            }
+            caplist->cap_defstyle = 
+                xml_strndup(defstyle, basiclen);
+            if (!caplist->cap_defstyle) {
+                return ERR_INTERNAL_MEM;
+            }
+        }
     } else {
-	caplist->cap_defstyle = xml_strdup(defstyle);
-	if (!caplist->cap_defstyle) {
-	    return ERR_INTERNAL_MEM;
-	}
+        caplist->cap_defstyle = xml_strdup(defstyle);
+        if (!caplist->cap_defstyle) {
+            return ERR_INTERNAL_MEM;
+        }
     }
     return NO_ERR;
 
@@ -1245,7 +1245,7 @@ status_t
 *********************************************************************/
 status_t
     cap_add_withdefval (val_value_t *caplist,
-			const xmlChar *defstyle)
+                        const xmlChar *defstyle)
 {
 #define SUPPORTED_BUFFSIZE 64
 
@@ -1277,38 +1277,38 @@ status_t
      */
     withdef = ncx_get_withdefaults_enum(defstyle);
     if (withdef == NCX_WITHDEF_NONE) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
     str = buffer;
     switch (withdef) {
     case NCX_WITHDEF_REPORT_ALL:
-	str += xml_strcpy(str, NCX_EL_TRIM);
-	*str++ = ',';
-	xml_strcpy(str, NCX_EL_EXPLICIT);
-	break;
+        str += xml_strcpy(str, NCX_EL_TRIM);
+        *str++ = ',';
+        xml_strcpy(str, NCX_EL_EXPLICIT);
+        break;
     case NCX_WITHDEF_TRIM:
-	str += xml_strcpy(str, NCX_EL_REPORT_ALL);
-	*str++  = ',';
-	xml_strcpy(str, NCX_EL_EXPLICIT);
-	break;
+        str += xml_strcpy(str, NCX_EL_REPORT_ALL);
+        *str++  = ',';
+        xml_strcpy(str, NCX_EL_EXPLICIT);
+        break;
     case NCX_WITHDEF_EXPLICIT:
-	str += xml_strcpy(str, NCX_EL_REPORT_ALL);
-	*str++ = ',';
-	xml_strcpy(str, NCX_EL_TRIM);
-	break;
+        str += xml_strcpy(str, NCX_EL_REPORT_ALL);
+        *str++ = ',';
+        xml_strcpy(str, NCX_EL_TRIM);
+        break;
     default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     /* get the total length */
     len = xml_strlen(pfix) + xml_strlen(cap) + 1 +
-	xml_strlen(basic) + xml_strlen(defstyle) + 1 +
-	xml_strlen(supported) + xml_strlen(buffer);
+        xml_strlen(basic) + xml_strlen(defstyle) + 1 +
+        xml_strlen(supported) + xml_strlen(buffer);
 
     /* make the string */
     str = m__getMem(len+1);
     if (!str) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     /* build the capability string */
@@ -1324,11 +1324,11 @@ status_t
 
     /* make the capability element */
     capval = xml_val_new_string(NCX_EL_CAPABILITY,
-				xmlns_nc_id(), 
-				str);
+                                xmlns_nc_id(), 
+                                str);
     if (!capval) {
-	m__free(str);
-	return ERR_INTERNAL_MEM;
+        m__free(str);
+        return ERR_INTERNAL_MEM;
     }
 
     val_add_child(capval, caplist);
@@ -1351,7 +1351,7 @@ status_t
 *********************************************************************/
 status_t 
     cap_add_ent (cap_list_t *caplist, 
-		 const xmlChar *uristr)
+                 const xmlChar *uristr)
 {
     cap_rec_t    *cap;
 
@@ -1363,15 +1363,15 @@ status_t
 
     cap = new_cap();
     if (!cap) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     /* fill in the cap_rec_t struct */
     cap->cap_subject = CAP_SUBJTYP_OTHER;
     cap->cap_uri = xml_strdup(uristr);
     if (!cap->cap_uri) {
-	free_cap(cap);
-	return ERR_INTERNAL_MEM;
+        free_cap(cap);
+        return ERR_INTERNAL_MEM;
     }
 
     dlq_enque(cap, &caplist->capQ);
@@ -1394,7 +1394,7 @@ status_t
 *********************************************************************/
 status_t 
     cap_add_modval (val_value_t *caplist, 
-		    ncx_module_t *mod)
+                    ncx_module_t *mod)
 {
     xmlChar      *str;
     val_value_t  *capval;
@@ -1405,22 +1405,22 @@ status_t
     }
     if (!mod->name || !mod->ns || !mod->ismod) {
         return SET_ERROR(ERR_INTERNAL_VAL);
-    }	
+    }   
 #endif
 
     /* construct the module URN string */
     str = make_mod_urn(mod);
     if (!str) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     /* make the capability element */
     capval = xml_val_new_string(NCX_EL_CAPABILITY,
                                 xmlns_nc_id(), 
-				str);
+                                str);
     if (!capval) {
-	m__free(str);
-	return ERR_INTERNAL_MEM;
+        m__free(str);
+        return ERR_INTERNAL_MEM;
     }
 
     val_add_child(capval, caplist);
@@ -1455,22 +1455,22 @@ status_t
     }
     if (!savedev->devmodule || !savedev->devnamespace) {
         return SET_ERROR(ERR_INTERNAL_VAL);
-    }	
+    }   
 #endif
 
     /* construct the module URN string */
     str = make_devmod_urn(savedev);
     if (!str) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     /* make the capability element */
     capval = xml_val_new_string(NCX_EL_CAPABILITY,
                                 xmlns_nc_id(), 
-				str);
+                                str);
     if (!capval) {
-	m__free(str);
-	return ERR_INTERNAL_MEM;
+        m__free(str);
+        return ERR_INTERNAL_MEM;
     }
 
     val_add_child(capval, caplist);
@@ -1493,17 +1493,17 @@ status_t
 *********************************************************************/
 boolean 
     cap_std_set (const cap_list_t *caplist, 
-		 cap_stdid_t capstd)
+                 cap_stdid_t capstd)
 {
     if (!caplist) {
         return FALSE;
     }
     if (capstd < CAP_STDID_LAST_MARKER) {
-	return (m__bitset(caplist->cap_std, 
+        return (m__bitset(caplist->cap_std, 
                           stdcaps[capstd].cap_bitnum))
             ? TRUE : FALSE;
     } else {
-	return FALSE;
+        return FALSE;
     }
 }  /* cap_std_set */
 
@@ -1521,7 +1521,7 @@ boolean
 *********************************************************************/
 boolean 
     cap_set (const cap_list_t *caplist, 
-	     xmlChar *capuri) 
+             xmlChar *capuri) 
 {
     xmlChar    *str;
     cap_rec_t  *cap;
@@ -1534,9 +1534,9 @@ boolean
 
     /* check if this is the NETCONF V1 Base URN capability */
     if (!xml_strcmp(capuri, NC_URN)) {
-	return (m__bitset(caplist->cap_std, 
-			  stdcaps[CAP_STDID_V1].cap_bitnum)) ?
-	    TRUE : FALSE;
+        return (m__bitset(caplist->cap_std, 
+                          stdcaps[CAP_STDID_V1].cap_bitnum)) ?
+            TRUE : FALSE;
     }
 
     /* check if this is a NETCONF standard capability */
@@ -1546,25 +1546,25 @@ boolean
                      (const xmlChar *)CAP_URN, 
                      len)) {
 
-	/* set str to the 'capability-name:version-number' */
-	str = &capuri[len];    
+        /* set str to the 'capability-name:version-number' */
+        str = &capuri[len];    
 
-	/* check all the capability names */
-	for (i=1; i<CAP_STDID_LAST_MARKER; i++) {
-	    if (!xml_strcmp(str, stdcaps[i].cap_name)) {
-		return (m__bitset(caplist->cap_std, 
-				  stdcaps[i].cap_bitnum)) ?
-		    TRUE : FALSE;
-	    }
-	}
+        /* check all the capability names */
+        for (i=1; i<CAP_STDID_LAST_MARKER; i++) {
+            if (!xml_strcmp(str, stdcaps[i].cap_name)) {
+                return (m__bitset(caplist->cap_std, 
+                                  stdcaps[i].cap_bitnum)) ?
+                    TRUE : FALSE;
+            }
+        }
     }
 
     /* check the enterprise capability queue */
     for (cap=(cap_rec_t *)dlq_firstEntry(&caplist->capQ);
-	 cap != NULL; cap=(cap_rec_t *)dlq_nextEntry(cap)) {
-	if (!xml_strcmp(cap->cap_uri, capuri)) {
-	    return TRUE;
-	}
+         cap != NULL; cap=(cap_rec_t *)dlq_nextEntry(cap)) {
+        if (!xml_strcmp(cap->cap_uri, capuri)) {
+            return TRUE;
+        }
     }
     return FALSE;
 
@@ -1586,8 +1586,8 @@ const xmlChar *
 {
 #ifdef DEBUG
     if (!caplist) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -1612,24 +1612,24 @@ void
 
 #ifdef DEBUG
     if (!caplist) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (cap_std_set(caplist, CAP_STDID_V1)) {
-	log_write("\n   Protocol Version: RFC 4741");
+        log_write("\n   Protocol Version: RFC 4741");
     } else {
-	log_write("\n   Protocol Version: Unknown");
+        log_write("\n   Protocol Version: Unknown");
     }
 
     for (capid = CAP_STDID_WRITE_RUNNING;
-	 capid < CAP_STDID_LAST_MARKER;	 
+         capid < CAP_STDID_LAST_MARKER;  
          capid++) {
 
-	if (cap_std_set(caplist, capid)) {
-	    log_write("\n   %s", stdcaps[capid].cap_name);
-	}
+        if (cap_std_set(caplist, capid)) {
+            log_write("\n   %s", stdcaps[capid].cap_name);
+        }
     }
 
 } /* cap_dump_stdcaps */
@@ -1652,53 +1652,53 @@ void
 
 #ifdef DEBUG
     if (!caplist) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     anycaps = FALSE;
 
     for (cap = (cap_rec_t *)dlq_firstEntry(&caplist->capQ);
-	 cap != NULL;
-	 cap = (cap_rec_t *)dlq_nextEntry(cap)) {
+         cap != NULL;
+         cap = (cap_rec_t *)dlq_nextEntry(cap)) {
 
-	if (cap->cap_subject != CAP_SUBJTYP_DM) {
-	    continue;
-	}
+        if (cap->cap_subject != CAP_SUBJTYP_DM) {
+            continue;
+        }
 
-	anycaps = TRUE;
-	if (cap->cap_revision) {
-	    log_write("\n   %s/%s", cap->cap_module, cap->cap_revision);
-	} else {
-	    log_write("\n   %s", cap->cap_module);
-	}
-	
-	if (!dlq_empty(&cap->cap_feature_list.memQ)) {
-	    log_write("\n      Features: ");
-	    for (lmem = (ncx_lmem_t *)
-		     dlq_firstEntry(&cap->cap_feature_list.memQ);
-		 lmem != NULL;
-		 lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
+        anycaps = TRUE;
+        if (cap->cap_revision) {
+            log_write("\n   %s/%s", cap->cap_module, cap->cap_revision);
+        } else {
+            log_write("\n   %s", cap->cap_module);
+        }
+        
+        if (!dlq_empty(&cap->cap_feature_list.memQ)) {
+            log_write("\n      Features: ");
+            for (lmem = (ncx_lmem_t *)
+                     dlq_firstEntry(&cap->cap_feature_list.memQ);
+                 lmem != NULL;
+                 lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
 
-		log_write("\n         %s ", lmem->val.str);
-	    }
-	}
+                log_write("\n         %s ", lmem->val.str);
+            }
+        }
 
-	if (!dlq_empty(&cap->cap_deviation_list.memQ)) {
-	    log_write("\n      Deviations: ");
-	    for (lmem = (ncx_lmem_t *)
-		     dlq_firstEntry(&cap->cap_deviation_list.memQ);
-		 lmem != NULL;
-		 lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
+        if (!dlq_empty(&cap->cap_deviation_list.memQ)) {
+            log_write("\n      Deviations: ");
+            for (lmem = (ncx_lmem_t *)
+                     dlq_firstEntry(&cap->cap_deviation_list.memQ);
+                 lmem != NULL;
+                 lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
 
-		log_write("\n         %s ", lmem->val.str);
-	    }
-	}
+                log_write("\n         %s ", lmem->val.str);
+            }
+        }
     }
 
     if (!anycaps) {
-	log_write("\n   None");
+        log_write("\n   None");
     }
 
 } /* cap_dump_modcaps */
@@ -1721,25 +1721,25 @@ void
 
 #ifdef DEBUG
     if (!caplist) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     anycaps = FALSE;
 
     for (cap = (cap_rec_t *)dlq_firstEntry(&caplist->capQ);
-	 cap != NULL;
-	 cap = (cap_rec_t *)dlq_nextEntry(cap)) {
+         cap != NULL;
+         cap = (cap_rec_t *)dlq_nextEntry(cap)) {
 
-	if (cap->cap_subject != CAP_SUBJTYP_DM) {
-	    anycaps = TRUE;
-	    log_write("\n   %s", cap->cap_uri);
-	}
+        if (cap->cap_subject != CAP_SUBJTYP_DM) {
+            anycaps = TRUE;
+            log_write("\n   %s", cap->cap_uri);
+        }
     }
 
     if (!anycaps) {
-	log_write("\n   None");
+        log_write("\n   None");
     }
 
 } /* cap_dump_entcaps */
@@ -1764,19 +1764,19 @@ cap_rec_t *
 
 #ifdef DEBUG
     if (!caplist) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     for (cap = (cap_rec_t *)dlq_firstEntry(&caplist->capQ);
-	 cap != NULL;
-	 cap = (cap_rec_t *)dlq_nextEntry(cap)) {
+         cap != NULL;
+         cap = (cap_rec_t *)dlq_nextEntry(cap)) {
 
-	if (cap->cap_subject != CAP_SUBJTYP_DM) {
-	    continue;
-	}
-	return cap;
+        if (cap->cap_subject != CAP_SUBJTYP_DM) {
+            continue;
+        }
+        return cap;
     }
     return NULL;
 
@@ -1802,19 +1802,19 @@ cap_rec_t *
 
 #ifdef DEBUG
     if (!curcap) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     for (cap = (cap_rec_t *)dlq_nextEntry(curcap);
-	 cap != NULL;
-	 cap = (cap_rec_t *)dlq_nextEntry(cap)) {
+         cap != NULL;
+         cap = (cap_rec_t *)dlq_nextEntry(cap)) {
 
-	if (cap->cap_subject != CAP_SUBJTYP_DM) {
-	    continue;
-	}
-	return cap;
+        if (cap->cap_subject != CAP_SUBJTYP_DM) {
+            continue;
+        }
+        return cap;
     }
     return NULL;
 
@@ -1842,15 +1842,15 @@ cap_rec_t *
 *********************************************************************/
 void
     cap_split_modcap (cap_rec_t *cap,
-		      const xmlChar **module,
-		      const xmlChar **revision,
-		      const xmlChar **namespace)
+                      const xmlChar **module,
+                      const xmlChar **revision,
+                      const xmlChar **namespace)
 {
 
 #ifdef DEBUG
     if (!cap || !module || !revision || !namespace) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -1878,8 +1878,8 @@ xmlChar *
 
 #ifdef DEBUG
     if (!mod) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 

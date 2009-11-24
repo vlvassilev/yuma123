@@ -3,30 +3,30 @@
       dlq provides general queue and linked list support:
 
        QUEUE initialization/cleanup
-       * create queue	(create and initialize dynamic queue hdr)
-       * destroy queue	(destroy previously created dynamic queue)	   
-       * create Squeue	(initialize static queue hdr--no destroyS function)
+       * create queue   (create and initialize dynamic queue hdr)
+       * destroy queue  (destroy previously created dynamic queue)         
+       * create Squeue  (initialize static queue hdr--no destroyS function)
 
        FIFO queue operators
-       * enque	     (add node to end of list)
-       * deque	     (return first node - remove from list)
-       * empty	     (return TRUE if queue is empty, FALSE otherwise)
+       * enque       (add node to end of list)
+       * deque       (return first node - remove from list)
+       * empty       (return TRUE if queue is empty, FALSE otherwise)
 
        LINEAR search (linked list)
        * nextEntry   (return node AFTER param node - leave in list)
        * prevEntry   (return node BEFORE param node - leave in list)
        * insertAhead (add node in list ahead of param node)
        * insertAfter (add node in list after param node)
-       * remove	     (remove a node from a linked list)
+       * remove      (remove a node from a linked list)
 
 
 *********************************************************************
-*								    *
-*		   C H A N G E	 H I S T O R Y			    *
-*								    *
+*                                                                   *
+*                  C H A N G E   H I S T O R Y                      *
+*                                                                   *
 *********************************************************************
 
-date	     init     comment
+date         init     comment
 ----------------------------------------------------------------------
 07-jan-89    abb      Begun.
 24-mar-90    abb      Add que_firstEntry routine
@@ -42,9 +42,9 @@ date	     init     comment
 */
 
 /********************************************************************
-*								    *
-*		      I N C L U D E    F I L E S		    *
-*								    *
+*                                                                   *
+*                     I N C L U D E    F I L E S                    *
+*                                                                   *
 *********************************************************************/
 #include  <stdio.h>
 #include  <stdlib.h>
@@ -61,12 +61,12 @@ date	     init     comment
 #include "log.h"
 #endif
 
-#define	    err_msg(S)	log_error("\nerr: %s ",#S)
+#define     err_msg(S)  log_error("\nerr: %s ",#S)
 
 
 /* add enter and exit critical section hooks here */
 #ifndef ENTER_CRIT
-#define	ENTER_CRIT
+#define ENTER_CRIT
 #endif
 
 #ifndef EXIT_CRIT
@@ -76,9 +76,9 @@ date	     init     comment
 
 #ifdef CPP_DEBUG    
 /********************************************************************
-*								    *
-*			function dlq_dumpHdr			    *
-*								    *
+*                                                                   *
+*                       function dlq_dumpHdr                        *
+*                                                                   *
 *********************************************************************/
 void dlq_dumpHdr (const void *nodeP)
 {
@@ -86,42 +86,42 @@ void dlq_dumpHdr (const void *nodeP)
 
     if (p==NULL)
     {
-	log_debug("\ndlq: NULL hdr");
-	return;
+        log_debug("\ndlq: NULL hdr");
+        return;
     }
     log_debug("\ndlq: ");
     switch(p->hdr_typ)
     {
     case DLQ_NULL_NODE:
-	log_debug("unused	 ");
-	break;
+        log_debug("unused        ");
+        break;
     case DLQ_SHDR_NODE:
-	log_debug("shdr node");
-	break;
+        log_debug("shdr node");
+        break;
     case DLQ_DHDR_NODE:
-	log_debug("dhdr node");
-	break;
+        log_debug("dhdr node");
+        break;
     case DLQ_DATA_NODE:
-	log_debug("data node");
-	break;
+        log_debug("data node");
+        break;
     case DLQ_DEL_NODE:
-	log_debug("deleted	 ");
-	break;
+        log_debug("deleted       ");
+        break;
     default:
-	log_debug("invalid	 ");
+        log_debug("invalid       ");
     }
     
     log_debug("(%p) p (%p) n (%p)", p, p->prev, p->next);
 
 }   /* END dlq_dumpHdr */
-#endif	    /* CPP_DEBUG */
+#endif      /* CPP_DEBUG */
 
 
 
 /********************************************************************
-*								    *
-*			function dlq_createQue			    *
-*								    *
+*                                                                   *
+*                       function dlq_createQue                      *
+*                                                                   *
 *********************************************************************/
 dlq_hdrT * dlq_createQue (void)
 {
@@ -129,7 +129,7 @@ dlq_hdrT * dlq_createQue (void)
 
     retP = m__getObj(dlq_hdrT);
     if (retP==NULL) {
-	return NULL;
+        return NULL;
     }
 
     /* init empty list */
@@ -142,18 +142,18 @@ dlq_hdrT * dlq_createQue (void)
 
 
 /********************************************************************
-*								    *
-*			function dlq_createSQue			    *
-*								    *
+*                                                                   *
+*                       function dlq_createSQue                     *
+*                                                                   *
 *********************************************************************/
 void  dlq_createSQue (dlq_hdrT *queAddr)
-/* create static queue--init 'queAddr'	*/
+/* create static queue--init 'queAddr'  */
 {
 #ifdef CPP_ICHK
     if (queAddr==NULL)
     {
-	err_msg(ERR_INTERNAL_PTR);
-	return;
+        err_msg(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
     
@@ -168,29 +168,29 @@ void  dlq_createSQue (dlq_hdrT *queAddr)
 
 
 /********************************************************************
-*								    *
-*		     function dlq_destroyQue			    *
-*								    *
+*                                                                   *
+*                    function dlq_destroyQue                        *
+*                                                                   *
 *********************************************************************/
 void dlq_destroyQue (dlq_hdrT *listP)
 {
 #ifdef CPP_ICHK
     if (listP==NULL)
     {
-	err_msg(ERR_INTERNAL_PTR);
-	return;
+        err_msg(ERR_INTERNAL_PTR);
+        return;
     }
     if (!_hdr_node(listP) || !dlq_empty(listP))
     {
-	err_msg(ERR_INTERNAL_QDEL);
-	return;
+        err_msg(ERR_INTERNAL_QDEL);
+        return;
     }
 #endif
 
     if (listP->hdr_typ==DLQ_DHDR_NODE)
     {
-	listP->hdr_typ = DLQ_DEL_DHDR;
-	m__free(listP);
+        listP->hdr_typ = DLQ_DEL_DHDR;
+        m__free(listP);
     }
     
 }    /* END function dlq_destroyQue */
@@ -198,22 +198,22 @@ void dlq_destroyQue (dlq_hdrT *listP)
 
 
 /********************************************************************
-*								    *
-*			 function dlq_enque			    *
-*								    *
+*                                                                   *
+*                        function dlq_enque                         *
+*                                                                   *
 *********************************************************************/
 void dlq_enque (REG void *newP, REG dlq_hdrT *listP)
 {
 #ifdef CPP_ICHK
     if (newP==NULL || listP==NULL)
     {
-	err_msg(ERR_INTERNAL_PTR);
-	return;
+        err_msg(ERR_INTERNAL_PTR);
+        return;
     }
     else if (!_hdr_node(listP))
     {
-	err_msg(ERR_QNODE_NOT_HDR);
-	return;
+        err_msg(ERR_QNODE_NOT_HDR);
+        return;
     }
 #endif
 
@@ -231,9 +231,9 @@ void dlq_enque (REG void *newP, REG dlq_hdrT *listP)
 
 
 /********************************************************************
-*								    *
-*		      function dlq_deque			    *
-*								    *
+*                                                                   *
+*                     function dlq_deque                            *
+*                                                                   *
 *********************************************************************/
 void  *dlq_deque (dlq_hdrT *  listP)
 {
@@ -242,13 +242,13 @@ void  *dlq_deque (dlq_hdrT *  listP)
 #ifdef CPP_ICHK
     if (listP==NULL)
     {
-	err_msg(ERR_INTERNAL_PTR);
-	return NULL;
+        err_msg(ERR_INTERNAL_PTR);
+        return NULL;
     }
     else if (!_hdr_node(listP))
     {
-	err_msg(ERR_QNODE_NOT_HDR);
-	return NULL;
+        err_msg(ERR_QNODE_NOT_HDR);
+        return NULL;
     }
 #endif
 
@@ -256,8 +256,8 @@ void  *dlq_deque (dlq_hdrT *  listP)
     /* check que empty */
     if (listP==listP->next)
     {
-	EXIT_CRIT;
-	return NULL;
+        EXIT_CRIT;
+        return NULL;
     }
     
     /* 
@@ -270,9 +270,9 @@ void  *dlq_deque (dlq_hdrT *  listP)
 #ifdef CPP_ICHK
     if (!_data_node(nodeP))
     {
-	EXIT_CRIT;
-	err_msg(ERR_QNODE_NOT_DATA);
-	return NULL;
+        EXIT_CRIT;
+        err_msg(ERR_QNODE_NOT_DATA);
+        return NULL;
     }
 #endif
 
@@ -284,8 +284,8 @@ void  *dlq_deque (dlq_hdrT *  listP)
 
     /* remove the node from the linked list */
     ((dlq_hdrT *) nodeP)->hdr_typ = DLQ_DEL_NODE;
-    ((dlq_hdrT *) nodeP)->prev	 = NULL;
-    ((dlq_hdrT *) nodeP)->next	 = NULL;
+    ((dlq_hdrT *) nodeP)->prev   = NULL;
+    ((dlq_hdrT *) nodeP)->next   = NULL;
     EXIT_CRIT;
     
     return nodeP;
@@ -296,9 +296,9 @@ void  *dlq_deque (dlq_hdrT *  listP)
 
 #if defined(CPP_NO_MACROS)
 /********************************************************************
-*								    *
-*		      function dlq_nextEntry			    *
-*								    *
+*                                                                   *
+*                     function dlq_nextEntry                        *
+*                                                                   *
 *********************************************************************/
 void  *dlq_nextEntry (const void *nodeP)
 {
@@ -307,21 +307,21 @@ void  *dlq_nextEntry (const void *nodeP)
 #ifdef CPP_ICHK 
     if (nodeP==NULL)
     {
-	err_msg(ERR_INTERNAL_PTR);
-	return NULL;	/* error */
+        err_msg(ERR_INTERNAL_PTR);
+        return NULL;    /* error */
     }
 #endif
 
     ENTER_CRIT;
-    /* get next entry in list -- maybe	(hdr_node==end of list) */
+    /* get next entry in list -- maybe  (hdr_node==end of list) */
     nodeP = ((dlq_hdrT *) nodeP)->next;
 
 #ifdef CPP_ICHK
     if (!(_data_node(nodeP) || _hdr_node(nodeP)))
     {
-	EXIT_CRIT;
-	err_msg(ERR_BAD_QLINK);
-	return NULL;
+        EXIT_CRIT;
+        err_msg(ERR_BAD_QLINK);
+        return NULL;
     }
 #endif
     
@@ -331,14 +331,14 @@ void  *dlq_nextEntry (const void *nodeP)
     return retP;
 
 }   /* END function dlq_nextEntry */
-#endif	    /* CPP_NO_MACROS */
+#endif      /* CPP_NO_MACROS */
 
 
 #if defined(CPP_NO_MACROS)
 /********************************************************************
-*								    *
-*		      function dlq_prevEntry			    *
-*								    *
+*                                                                   *
+*                     function dlq_prevEntry                        *
+*                                                                   *
 *********************************************************************/
 void  *dlq_prevEntry (const void *nodeP)
 {
@@ -347,20 +347,20 @@ void  *dlq_prevEntry (const void *nodeP)
 #ifdef CPP_ICHK
     if (nodeP==NULL)   
     {
-	err_msg(ERR_INTERNAL_PTR);
-	return NULL;
+        err_msg(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
     ENTER_CRIT;
-    /* get prev entry in list -- maybe	(hdr_node==start of list) */
+    /* get prev entry in list -- maybe  (hdr_node==start of list) */
     nodeP = ((dlq_hdrT *) nodeP)->prev;
 
 #ifdef CPP_ICHK
     if (!(_data_node(nodeP) || _hdr_node(nodeP)))
     {
-	EXIT_CRIT;
-	err_msg(ERR_BAD_QLINK);
-	return NULL;
+        EXIT_CRIT;
+        err_msg(ERR_BAD_QLINK);
+        return NULL;
     }
 #endif
     
@@ -370,33 +370,33 @@ void  *dlq_prevEntry (const void *nodeP)
     return retP;
     
 }   /* END function dlq_prevEntry */
-#endif	    /* CPP_NO_MACROS */
+#endif      /* CPP_NO_MACROS */
 
 
 
 /********************************************************************
-*								    *
-*		     function dlq_insertAhead			    *
-*								    *
+*                                                                   *
+*                    function dlq_insertAhead                       *
+*                                                                   *
 *********************************************************************/
 void dlq_insertAhead (void *newP, void *nodeP)
 {
 #ifdef CPP_ICHK
     if (nodeP==NULL || newP==NULL)
     {
-	err_msg(ERR_INTERNAL_PTR);
-	return;
+        err_msg(ERR_INTERNAL_PTR);
+        return;
     }
     if (nodeP==newP)
     {
-	err_msg(ERR_INTERNAL_VAL);
-	return;
+        err_msg(ERR_INTERNAL_VAL);
+        return;
     }
 #endif
     ENTER_CRIT;
-    ((dlq_hdrT *) newP)->hdr_typ	    = DLQ_DATA_NODE;
-    ((dlq_hdrT *) newP)->next	    = nodeP;
-    ((dlq_hdrT *) newP)->prev	    = ((dlq_hdrT *) nodeP)->prev;
+    ((dlq_hdrT *) newP)->hdr_typ            = DLQ_DATA_NODE;
+    ((dlq_hdrT *) newP)->next       = nodeP;
+    ((dlq_hdrT *) newP)->prev       = ((dlq_hdrT *) nodeP)->prev;
     ((dlq_hdrT *) newP)->next->prev  = newP;
     ((dlq_hdrT *) newP)->prev->next  = newP;
     EXIT_CRIT;
@@ -406,29 +406,29 @@ void dlq_insertAhead (void *newP, void *nodeP)
 
 
 /********************************************************************
-*								    *
-*		     function dlq_insertAfter			    *
-*								    *
+*                                                                   *
+*                    function dlq_insertAfter                       *
+*                                                                   *
 *********************************************************************/
 void dlq_insertAfter (void *newP, void *nodeP)
 {
 #ifdef CPP_ICHK
     if (nodeP==NULL || newP==NULL)
     {
-	err_msg(ERR_INTERNAL_PTR);
-	return;
+        err_msg(ERR_INTERNAL_PTR);
+        return;
     }
     if (nodeP==newP)
     {
-	err_msg(ERR_INTERNAL_VAL);
-	return;
+        err_msg(ERR_INTERNAL_VAL);
+        return;
     }
 #endif
 
     ENTER_CRIT;    
-    ((dlq_hdrT *) newP)->hdr_typ	    = DLQ_DATA_NODE;
-    ((dlq_hdrT *) newP)->prev	    = nodeP;
-    ((dlq_hdrT *) newP)->next	    = ((dlq_hdrT *) nodeP)->next;
+    ((dlq_hdrT *) newP)->hdr_typ            = DLQ_DATA_NODE;
+    ((dlq_hdrT *) newP)->prev       = nodeP;
+    ((dlq_hdrT *) newP)->next       = ((dlq_hdrT *) nodeP)->next;
     ((dlq_hdrT *) newP)->next->prev  = newP;
     ((dlq_hdrT *) newP)->prev->next  = newP;
     EXIT_CRIT;
@@ -438,22 +438,22 @@ void dlq_insertAfter (void *newP, void *nodeP)
 
 
 /********************************************************************
-*								    *
-*			    function dlq_remove			    *
-*								    *
+*                                                                   *
+*                           function dlq_remove                     *
+*                                                                   *
 *********************************************************************/
 void dlq_remove (void *nodeP)
 {
 #ifdef CPP_ICHK
     if (nodeP==NULL)
     {
-	err_msg(ERR_INTERNAL_PTR);
-	return;
+        err_msg(ERR_INTERNAL_PTR);
+        return;
     }
     else if (!_data_node( ((dlq_hdrT *) nodeP) ))
     {
-	err_msg(ERR_QNODE_NOT_DATA);
-	return;
+        err_msg(ERR_QNODE_NOT_DATA);
+        return;
     }
 #endif
 
@@ -464,8 +464,8 @@ void dlq_remove (void *nodeP)
 
     /* remove the node from the linked list */
     ((dlq_hdrT *) nodeP)->hdr_typ = DLQ_DEL_NODE;
-    ((dlq_hdrT *) nodeP)->prev	 = NULL;
-    ((dlq_hdrT *) nodeP)->next	 = NULL;
+    ((dlq_hdrT *) nodeP)->prev   = NULL;
+    ((dlq_hdrT *) nodeP)->next   = NULL;
     EXIT_CRIT;
     
 }   /* END fuction dlq_remove */
@@ -473,22 +473,22 @@ void dlq_remove (void *nodeP)
 
 
 /********************************************************************
-*								    *
-*			    function dlq_remove			    *
-*								    *
+*                                                                   *
+*                           function dlq_remove                     *
+*                                                                   *
 *********************************************************************/
 void dlq_swap (void *new_node, void *cur_node)
 {
 #ifdef CPP_ICHK
     if (new_node==NULL || cur_node==NULL)
     {
-	err_msg(ERR_INTERNAL_PTR);
-	return;
+        err_msg(ERR_INTERNAL_PTR);
+        return;
     }
     else if (!_data_node( ((dlq_hdrT *) cur_node) ))
     {
-	err_msg(ERR_QNODE_NOT_DATA);
-	return;
+        err_msg(ERR_QNODE_NOT_DATA);
+        return;
     }
 #endif
 
@@ -517,24 +517,24 @@ void dlq_swap (void *new_node, void *cur_node)
 
 #if defined(CPP_NO_MACROS)
 /********************************************************************
-*								    *
-*		       function dlq_firstEntry			    *
-*								    *
+*                                                                   *
+*                      function dlq_firstEntry                      *
+*                                                                   *
 *********************************************************************/
-void *dlq_firstEntry (const dlq_hdrT *	  listP)
+void *dlq_firstEntry (const dlq_hdrT *    listP)
 {
     void    *retP;
     
 #ifdef CPP_ICHK
     if (listP==NULL)
     {
-	err_msg(ERR_INTERNAL_PTR);
-	return NULL;
+        err_msg(ERR_INTERNAL_PTR);
+        return NULL;
     }
     else if (!_hdr_node(listP))
     {
-	err_msg(ERR_QNODE_NOT_HDR);
-	return NULL;
+        err_msg(ERR_QNODE_NOT_HDR);
+        return NULL;
     }
 #endif
     ENTER_CRIT;
@@ -544,30 +544,30 @@ void *dlq_firstEntry (const dlq_hdrT *	  listP)
     return retP;
 
 }    /* END function dlq_firstEntry */
-#endif	    /* CPP_NO_MACROS */
+#endif      /* CPP_NO_MACROS */
 
 
 
 #if defined(CPP_NO_MACROS)
 /********************************************************************
-*								    *
-*			function dlq_lastEntry			    *
-*								    *
+*                                                                   *
+*                       function dlq_lastEntry                      *
+*                                                                   *
 *********************************************************************/
-void *dlq_lastEntry (const dlq_hdrT *	 listP)
+void *dlq_lastEntry (const dlq_hdrT *    listP)
 {
     void    *retP;
     
 #ifdef CPP_ICHK
     if (listP==NULL)
     {
-	err_msg(ERR_INTERNAL_PTR);
-	return NULL;
+        err_msg(ERR_INTERNAL_PTR);
+        return NULL;
     }
     else if (!_hdr_node(listP))
     {
-	err_msg(ERR_QNODE_NOT_HDR);
-	return NULL;
+        err_msg(ERR_QNODE_NOT_HDR);
+        return NULL;
     }
 #endif
 
@@ -578,14 +578,14 @@ void *dlq_lastEntry (const dlq_hdrT *	 listP)
     return retP;
 
 }    /* END function dlq_lastEntry */
-#endif	    /* CPP_NO_MACROS */
+#endif      /* CPP_NO_MACROS */
 
 
 #if defined(CPP_NO_MACROS)
 /********************************************************************
-*								    *
-*			function dlq_empty			    *
-*								    *
+*                                                                   *
+*                       function dlq_empty                          *
+*                                                                   *
 *********************************************************************/
 boolean dlq_empty (const dlq_hdrT *  listP)
 {
@@ -594,13 +594,13 @@ boolean dlq_empty (const dlq_hdrT *  listP)
 #ifdef CPP_ICHK
     if (listP==NULL)
     {
-	err_msg(ERR_INTERNAL_PTR);
-	return TRUE;
+        err_msg(ERR_INTERNAL_PTR);
+        return TRUE;
     }
     if (!_hdr_node(listP))
     {
-	err_msg(ERR_QNODE_NOT_HDR);
-	return TRUE;
+        err_msg(ERR_QNODE_NOT_HDR);
+        return TRUE;
     }
 #endif
 
@@ -616,59 +616,59 @@ boolean dlq_empty (const dlq_hdrT *  listP)
 
 
 /********************************************************************
-*								    *
-*			function dlq_block_enque		    *
-*								    *
+*                                                                   *
+*                       function dlq_block_enque                    *
+*                                                                   *
 *********************************************************************/
-void	   dlq_block_enque (dlq_hdrT * srcP, dlq_hdrT * dstP)
+void       dlq_block_enque (dlq_hdrT * srcP, dlq_hdrT * dstP)
 {
     dlq_hdrT  *sf, *sl, *dl;
     
 #ifdef CPP_ICHK
     if (srcP==NULL || dstP==NULL)
-	return;
+        return;
     if (!_hdr_node(srcP) || !_hdr_node(dstP))
     {
-	err_msg(ERR_QNODE_NOT_HDR);
-	return;
+        err_msg(ERR_QNODE_NOT_HDR);
+        return;
     }
 #endif
 
     /* check simple case first */
     if (dlq_empty(srcP))
-	return;		/* nothing to add to dst que */
+        return;         /* nothing to add to dst que */
 
     /* check next simple case--dst empty */
     if (dlq_empty(dstP))
     {
-	ENTER_CRIT;
-	/* copy srcP pointers to dstP */
-	dstP->next = srcP->next;
-	dstP->prev = srcP->prev;
-	
-	/* relink first and last data nodes */
-	dstP->next->prev = dstP;
-	dstP->prev->next = dstP;
-	
-	/* make src que empty */
-	srcP->next = srcP->prev = srcP;
-	EXIT_CRIT;
-	return;
+        ENTER_CRIT;
+        /* copy srcP pointers to dstP */
+        dstP->next = srcP->next;
+        dstP->prev = srcP->prev;
+        
+        /* relink first and last data nodes */
+        dstP->next->prev = dstP;
+        dstP->prev->next = dstP;
+        
+        /* make src que empty */
+        srcP->next = srcP->prev = srcP;
+        EXIT_CRIT;
+        return;
     }
 
     ENTER_CRIT;    
     /* else neither que is empty...move [sf..sl] after dl */
-    sf = srcP->next;	    /* source first */
-    sl = srcP->prev;	    /* source last */
-    dl = dstP->prev;	    /* dst last */
+    sf = srcP->next;        /* source first */
+    sl = srcP->prev;        /* source last */
+    dl = dstP->prev;        /* dst last */
     
     /* extend the dstQ */
-    dl->next = sf;	    /* link dl --> sf */
-    sf->prev = dl;	    /* link dl <-- sf */
+    dl->next = sf;          /* link dl --> sf */
+    sf->prev = dl;          /* link dl <-- sf */
 
     /* relink the new last data node in dstQ */
-    dstP->prev = sl;	    /* link hdr.prev --> sl */
-    sl->next = dstP;	    /* link hdr.prev <-- sl */
+    dstP->prev = sl;        /* link hdr.prev --> sl */
+    sl->next = dstP;        /* link hdr.prev <-- sl */
 
     /* make the srcQ empty */
     srcP->prev = srcP->next = srcP;
@@ -680,11 +680,11 @@ void	   dlq_block_enque (dlq_hdrT * srcP, dlq_hdrT * dstP)
 
 
 /********************************************************************
-*								    *
-*			function dlq_insertAhead		    *
-*								    *
+*                                                                   *
+*                       function dlq_insertAhead                    *
+*                                                                   *
 *********************************************************************/
-void	   dlq_block_insertAhead (dlq_hdrT * srcP, void *dstP)
+void       dlq_block_insertAhead (dlq_hdrT * srcP, void *dstP)
 {
     
     REG dlq_hdrT    *sf, *sl, *d1, *d2;
@@ -692,34 +692,34 @@ void	   dlq_block_insertAhead (dlq_hdrT * srcP, void *dstP)
 #ifdef CPP_ICHK
     if (srcP==NULL || dstP==NULL)
     {
-	err_msg(ERR_INTERNAL_PTR);
-	return;
+        err_msg(ERR_INTERNAL_PTR);
+        return;
     }
     if (!_hdr_node(srcP))
     {
-	err_msg(ERR_QNODE_NOT_HDR);
-	return;
+        err_msg(ERR_QNODE_NOT_HDR);
+        return;
     }
 
     if (!_data_node( ((dlq_hdrT *)dstP) ))
     {
-	err_msg(ERR_QNODE_NOT_DATA);
-	return;
+        err_msg(ERR_QNODE_NOT_DATA);
+        return;
     }
 #endif
 
     
     /* check simple case first */
     if (dlq_empty(srcP))
-	return;		/* nothing to add to dst que */
+        return;         /* nothing to add to dst que */
 
     ENTER_CRIT;
     /* source que is empty... */
-    sf = srcP->next;		/* source-first */
-    sl = srcP->prev;		/* source-last */
+    sf = srcP->next;            /* source-first */
+    sl = srcP->prev;            /* source-last */
     
-    d1 = ((dlq_hdrT *) dstP)->prev;	    /* dest-begin-insert */
-    d2 = (dlq_hdrT *) dstP;		    /* dest-end-insert (dstP) */
+    d1 = ((dlq_hdrT *) dstP)->prev;         /* dest-begin-insert */
+    d2 = (dlq_hdrT *) dstP;                 /* dest-end-insert (dstP) */
 
     /* link src-list into the dst-list */
     d1->next = sf;
@@ -738,11 +738,11 @@ void	   dlq_block_insertAhead (dlq_hdrT * srcP, void *dstP)
 
 
 /********************************************************************
-*								    *
-*			function dlq_block_insertAfter		    *
-*								    *
+*                                                                   *
+*                       function dlq_block_insertAfter              *
+*                                                                   *
 *********************************************************************/
-void	   dlq_block_insertAfter (dlq_hdrT * srcP, void *dstP)
+void       dlq_block_insertAfter (dlq_hdrT * srcP, void *dstP)
 {
     
     REG dlq_hdrT   *sf, *sl, *d1, *d2;
@@ -750,35 +750,35 @@ void	   dlq_block_insertAfter (dlq_hdrT * srcP, void *dstP)
 #ifdef CPP_ICHK
     if (srcP==NULL || dstP==NULL)
     {
-	err_msg(ERR_INTERNAL_PTR);
-	return;
+        err_msg(ERR_INTERNAL_PTR);
+        return;
     }
     if (!_hdr_node(srcP))
     {
-	err_msg(ERR_QNODE_NOT_HDR);
-	return;
+        err_msg(ERR_QNODE_NOT_HDR);
+        return;
     }
 
     if (!_data_node( ((dlq_hdrT *)dstP) ))
     {
-	err_msg(ERR_QNODE_NOT_DATA);
-	return;
+        err_msg(ERR_QNODE_NOT_DATA);
+        return;
     }
 #endif
 
     
     /* check simple case first */
     if (dlq_empty(srcP))
-	return;		/* nothing to add to dst que */
+        return;         /* nothing to add to dst que */
 
     ENTER_CRIT;
     /* source que is not empty... */
-    sf = srcP->next;		/* source-first */
-    sl = srcP->prev;		/* source-last */
+    sf = srcP->next;            /* source-first */
+    sl = srcP->prev;            /* source-last */
 
     /* make new chain: d1 + sf [ + ... ] + sl + d2 (+...) */
-    d1 = (dlq_hdrT *) dstP;			/* dest-begin-insert */
-    d2 = ((dlq_hdrT *) dstP)->next;		/* dest-end-insert (dstP) */
+    d1 = (dlq_hdrT *) dstP;                     /* dest-begin-insert */
+    d2 = ((dlq_hdrT *) dstP)->next;             /* dest-end-insert (dstP) */
 
     /* link src-list into the dst-list */
     d1->next = sf;
@@ -797,48 +797,48 @@ void	   dlq_block_insertAfter (dlq_hdrT * srcP, void *dstP)
 
 
 /********************************************************************
-*								    *
-*			function dlq_block_move			    *
-*								    *
+*                                                                   *
+*                       function dlq_block_move                     *
+*                                                                   *
 *********************************************************************/
-void	   dlq_block_move (dlq_hdrT * srcQ, void *srcP, dlq_hdrT * dstQ)
+void       dlq_block_move (dlq_hdrT * srcQ, void *srcP, dlq_hdrT * dstQ)
 {
     /* enque from [srcP ..  end of list] to the dstQ */
     
     REG dlq_hdrT   *sf, *sl;
-    dlq_hdrT	    tmpQ;
+    dlq_hdrT        tmpQ;
     
 #ifdef CPP_ICHK
     if (srcQ==NULL || srcP==NULL || dstQ==NULL)
     {
-	err_msg(ERR_INTERNAL_PTR);
-	return;
+        err_msg(ERR_INTERNAL_PTR);
+        return;
     }
     if (!_hdr_node(srcQ) || !_hdr_node(dstQ))
     {
-	err_msg(ERR_QNODE_NOT_HDR);
-	return;
+        err_msg(ERR_QNODE_NOT_HDR);
+        return;
     }
     if (!_data_node(srcP))
     {
-	err_msg(ERR_QNODE_NOT_DATA);
-	return;
+        err_msg(ERR_QNODE_NOT_DATA);
+        return;
     }
-#endif	
+#endif  
     /* check simple case first */
     if (dlq_empty(srcQ))
-	return;		/* nothing to add to dst que */
+        return;         /* nothing to add to dst que */
 
     ENTER_CRIT;    
     /* unlink the srcQ list from srcP to the end */
     sf = (dlq_hdrT *) srcP;
-    sf->prev->next = srcQ;	
+    sf->prev->next = srcQ;      
     sl = srcQ->prev;
     srcQ->prev = sf->prev;
 
     /* insert new chain into tmpQ */
     dlq_createSQue(&tmpQ);  
-    tmpQ.next = sf;	
+    tmpQ.next = sf;     
     sf->prev = &tmpQ;
     tmpQ.prev = sl;
     sl->next = &tmpQ;
@@ -851,9 +851,9 @@ void	   dlq_block_move (dlq_hdrT * srcQ, void *srcP, dlq_hdrT * dstQ)
 
 
 /********************************************************************
-*								    *
-*			function dlq_count 		            *
-*								    *
+*                                                                   *
+*                       function dlq_count                          *
+*                                                                   *
 *********************************************************************/
 unsigned int  dlq_count (const dlq_hdrT *listP)
 {
@@ -863,22 +863,22 @@ unsigned int  dlq_count (const dlq_hdrT *listP)
 #ifdef CPP_ICHK
     if (listP==NULL)
     {
-	err_msg(ERR_INTERNAL_PTR);
-	return;
+        err_msg(ERR_INTERNAL_PTR);
+        return;
     }
     if (!_hdr_node(listP))
     {
-	err_msg(ERR_QNODE_NOT_HDR);
-	return;
+        err_msg(ERR_QNODE_NOT_HDR);
+        return;
     }
 #endif
 
     cnt = 0;
 
     for (p = dlq_firstEntry(listP);
-	 p != NULL;
-	 p = dlq_nextEntry(p)) {
-	cnt++;
+         p != NULL;
+         p = dlq_nextEntry(p)) {
+        cnt++;
     }
 
     return cnt;

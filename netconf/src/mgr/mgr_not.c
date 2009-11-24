@@ -134,7 +134,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 static boolean               mgr_not_init_done = FALSE;
@@ -167,8 +167,8 @@ static mgr_not_msg_t *
 
     msg->notification = val_new_value();
     if (!msg->notification) {
-	m__free(msg);
-	return NULL;
+        m__free(msg);
+        return NULL;
     }
     /* xml_msg_init_hdr(&msg->mhdr); */
     return msg;
@@ -197,15 +197,15 @@ status_t
     status_t  res;
 
     if (!mgr_not_init_done) {
-	res = top_register_node(NCN_MODULE,
-				NCX_EL_NOTIFICATION, 
-				mgr_not_dispatch);
-	if (res != NO_ERR) {
-	    return res;
-	}
-	notification_obj = NULL;
-	callbackfn = NULL;
-	mgr_not_init_done = TRUE;
+        res = top_register_node(NCN_MODULE,
+                                NCX_EL_NOTIFICATION, 
+                                mgr_not_dispatch);
+        if (res != NO_ERR) {
+            return res;
+        }
+        notification_obj = NULL;
+        callbackfn = NULL;
+        mgr_not_init_done = TRUE;
     }
     return NO_ERR;
 
@@ -223,10 +223,10 @@ void
     mgr_not_cleanup (void)
 {
     if (mgr_not_init_done) {
-	top_unregister_node(NCN_MODULE, NCX_EL_NOTIFICATION);
-	notification_obj = NULL;
-	callbackfn = NULL;
-	mgr_not_init_done = FALSE;
+        top_unregister_node(NCN_MODULE, NCX_EL_NOTIFICATION);
+        notification_obj = NULL;
+        callbackfn = NULL;
+        mgr_not_init_done = FALSE;
     }
 
 } /* mgr_not_cleanup */
@@ -248,13 +248,13 @@ void
 {
 #ifdef DEBUG
     if (!msg) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (msg->notification) {
-	val_free_value(msg->notification);
+        val_free_value(msg->notification);
     }
 
     m__free(msg);
@@ -280,15 +280,15 @@ void
 
 #ifdef DEBUG
     if (!msgQ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     msg = (mgr_not_msg_t *)dlq_deque(msgQ);
     while (msg) {
-	mgr_not_free_msg(msg);
-	msg = (mgr_not_msg_t *)dlq_deque(msgQ);
+        mgr_not_free_msg(msg);
+        msg = (mgr_not_msg_t *)dlq_deque(msgQ);
     }
 
 } /* mgr_not_clean_msgQ */
@@ -305,7 +305,7 @@ void
 *********************************************************************/
 void 
     mgr_not_dispatch (ses_cb_t *scb,
-		      xml_node_t *top)
+                      xml_node_t *top)
 {
     obj_template_t          *notobj;
     mgr_not_msg_t           *msg;
@@ -316,8 +316,8 @@ void
 
 #ifdef DEBUG
     if (!scb || !top) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -326,21 +326,21 @@ void
 
     /* check if the notification template is already cached */
     if (notification_obj) {
-	notobj = notification_obj;
+        notobj = notification_obj;
     } else {
-	/* no: get the notification template */
-	notobj = NULL;
-	mod = ncx_find_module(NCN_MODULE, NULL);
-	if (mod) {
-	    notobj = ncx_find_object(mod, NCX_EL_NOTIFICATION);
-	}
-	if (notobj) {
-	    notification_obj = notobj;
-	} else {
-	    SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-	    mgr_xml_skip_subtree(scb->reader, top);
-	    return;
-	}
+        /* no: get the notification template */
+        notobj = NULL;
+        mod = ncx_find_module(NCN_MODULE, NULL);
+        if (mod) {
+            notobj = ncx_find_object(mod, NCX_EL_NOTIFICATION);
+        }
+        if (notobj) {
+            notification_obj = notobj;
+        } else {
+            SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+            mgr_xml_skip_subtree(scb->reader, top);
+            return;
+        }
     }
 
     /* the current node is 'notification' in the notifications namespace
@@ -348,29 +348,29 @@ void
      */
     msg = new_msg();
     if (!msg) {
-	log_error("\nError: mgr_not: skipping incoming message");
-	mgr_xml_skip_subtree(scb->reader, top);
-	return;
+        log_error("\nError: mgr_not: skipping incoming message");
+        mgr_xml_skip_subtree(scb->reader, top);
+        return;
     }
     
     /* parse the notification as a val_value_t tree,
      * stored in msg->notification
      */
     msg->res = mgr_val_parse_notification(scb, 
-					  notobj,
-					  top, 
-					  msg->notification);
-    if (msg->res != NO_ERR && LOGINFO) {	
-	log_info("\nmgr_not: got invalid notification on session %d (%s)",
-		 scb->sid, 
-		 get_error_string(msg->res));
+                                          notobj,
+                                          top, 
+                                          msg->notification);
+    if (msg->res != NO_ERR && LOGINFO) {        
+        log_info("\nmgr_not: got invalid notification on session %d (%s)",
+                 scb->sid, 
+                 get_error_string(msg->res));
     } 
 
     /* check that there is nothing after the <rpc-reply> element */
     if (msg->res==NO_ERR && 
-	!xml_docdone(scb->reader) && LOGINFO) {
-	log_info("\nmgr_not: got extra nodes in notification on session %d",
-		 scb->sid);
+        !xml_docdone(scb->reader) && LOGINFO) {
+        log_info("\nmgr_not: got extra nodes in notification on session %d",
+                 scb->sid);
     }
 
     consumed = FALSE;

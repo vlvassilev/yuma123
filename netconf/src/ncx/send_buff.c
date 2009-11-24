@@ -1,6 +1,6 @@
 /*  FILE: send_buff.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -50,8 +50,8 @@ date         init     comment
 *********************************************************************/
 status_t
     send_buff (int fd,
-	       const char *buffer, 
-	       size_t cnt)
+               const char *buffer, 
+               size_t cnt)
 {
     size_t sent, left;
     ssize_t  retsiz;
@@ -62,22 +62,22 @@ status_t
     left = cnt;
     
     while (sent < cnt) {
-	retsiz = write(fd, buffer, left);
-	if (retsiz < 0) {
-	    switch (errno) {
-	    case EAGAIN:
-	    case EBUSY:
-		if (--retry_cnt) {
-		    break;
-		} /* else fall through */
-	    default:
-		return errno_to_status();
-	    }
-	} else {
-	    sent += (size_t)retsiz;
-	    buffer += retsiz;
-	    left -= (size_t)retsiz;
-	}
+        retsiz = write(fd, buffer, left);
+        if (retsiz < 0) {
+            switch (errno) {
+            case EAGAIN:
+            case EBUSY:
+                if (--retry_cnt) {
+                    break;
+                } /* else fall through */
+            default:
+                return errno_to_status();
+            }
+        } else {
+            sent += (size_t)retsiz;
+            buffer += retsiz;
+            left -= (size_t)retsiz;
+        }
     }
 
     return NO_ERR;

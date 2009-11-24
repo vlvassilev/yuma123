@@ -1,6 +1,6 @@
 /*  FILE: ext.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -92,7 +92,7 @@ ext_template_t *
 
     ext = m__getObj(ext_template_t);
     if (!ext) {
-	return NULL;
+        return NULL;
     }
     (void)memset(ext, 0x0, sizeof(ext_template_t));
     dlq_createSQue(&ext->appinfoQ);
@@ -119,21 +119,21 @@ void
 #ifdef DEBUG
     if (!ext) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        return;
     }
 #endif
 
     if (ext->name) {
-	m__free(ext->name);
+        m__free(ext->name);
     }
     if (ext->descr) {
-	m__free(ext->descr);
+        m__free(ext->descr);
     }
     if (ext->ref) {
-	m__free(ext->ref);
+        m__free(ext->ref);
     }
     if (ext->arg) {
-	m__free(ext->arg);
+        m__free(ext->arg);
     }
 
     ncx_clean_appinfoQ(&ext->appinfoQ);
@@ -158,14 +158,14 @@ void
 
 #ifdef DEBUG
     if (!que) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     while (!dlq_empty(que)) {
-	ext = (ext_template_t *)dlq_deque(que);
-	ext_free_template(ext);
+        ext = (ext_template_t *)dlq_deque(que);
+        ext_free_template(ext);
     }
 
 }  /* ext_clean_groupingQ */
@@ -185,24 +185,24 @@ void
 *********************************************************************/
 ext_template_t *
     ext_find_extension (dlq_hdr_t *que,
-			const xmlChar *name)
+                        const xmlChar *name)
 {
     ext_template_t *ext;
 
 #ifdef DEBUG
     if (!que || !name) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     for (ext = (ext_template_t *)dlq_firstEntry(que);
-	 ext != NULL;
-	 ext = (ext_template_t *)dlq_nextEntry(ext)) {
+         ext != NULL;
+         ext = (ext_template_t *)dlq_nextEntry(ext)) {
 
-	if (!xml_strcmp(ext->name, name)) {
-	    return ext;
-	}
+        if (!xml_strcmp(ext->name, name)) {
+            return ext;
+        }
     }
     return NULL;
 

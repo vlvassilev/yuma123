@@ -1,6 +1,6 @@
 /*  FILE: obj.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -108,23 +108,23 @@ static void
 *********************************************************************/
 static typ_template_t *
     find_type_in_grpchain (grp_template_t *grp,
-			   const xmlChar *typname)
+                           const xmlChar *typname)
 {
     typ_template_t  *typ;
     grp_template_t  *testgrp;
 
     typ = ncx_find_type_que(&grp->typedefQ, typname);
     if (typ) {
-	return typ;
+        return typ;
     }
 
     testgrp = grp->parentgrp;
     while (testgrp) {
-	typ = ncx_find_type_que(&testgrp->typedefQ, typname);
-	if (typ) {
-	    return typ;
-	}
-	testgrp = testgrp->parentgrp;
+        typ = ncx_find_type_que(&testgrp->typedefQ, typname);
+        if (typ) {
+            return typ;
+        }
+        testgrp = testgrp->parentgrp;
     }
     return NULL;
 
@@ -149,7 +149,7 @@ static obj_template_t *
 
     obj = m__getObj(obj_template_t);
     if (!obj) {
-	return NULL;
+        return NULL;
     }
     (void)memset(obj, 0x0, sizeof(obj_template_t));
     dlq_createSQue(&obj->metadataQ);
@@ -175,8 +175,8 @@ static void
     xpath_pcb_t *must;
 
     while (!dlq_empty(mustQ)) {
-	must = (xpath_pcb_t *)dlq_deque(mustQ);
-	xpath_free_pcb(must);
+        must = (xpath_pcb_t *)dlq_deque(mustQ);
+        xpath_free_pcb(must);
     }
 
 }  /* clean_mustQ */
@@ -197,8 +197,8 @@ static void
     obj_metadata_t *meta;
 
     while (!dlq_empty(metadataQ)) {
-	meta = (obj_metadata_t *)dlq_deque(metadataQ);
-	obj_free_metadata(meta);
+        meta = (obj_metadata_t *)dlq_deque(metadataQ);
+        obj_free_metadata(meta);
     }
 
 }  /* clean_metadataQ */
@@ -223,10 +223,10 @@ static void
 *********************************************************************/
 static status_t
     clone_datadefQ (ncx_module_t *mod,
-		    dlq_hdr_t *newQ,
-		    dlq_hdr_t *srcQ,
-		    dlq_hdr_t *mobjQ,
-		    obj_template_t *parent)
+                    dlq_hdr_t *newQ,
+                    dlq_hdr_t *srcQ,
+                    dlq_hdr_t *mobjQ,
+                    obj_template_t *parent)
 {
     obj_template_t  *newobj, *srcobj, *testobj;
     status_t         res;
@@ -234,34 +234,34 @@ static status_t
     res = NO_ERR;
 
     for (srcobj = (obj_template_t *)dlq_firstEntry(srcQ);
-	 srcobj != NULL;
-	 srcobj = (obj_template_t *)dlq_nextEntry(srcobj)) {
+         srcobj != NULL;
+         srcobj = (obj_template_t *)dlq_nextEntry(srcobj)) {
 
-	if (!obj_has_name(srcobj)) {
-	    continue;
-	}
+        if (!obj_has_name(srcobj)) {
+            continue;
+        }
 
-	newobj = obj_clone_template(mod, srcobj, mobjQ);
-	if (!newobj) {
-	    log_error("\nError: clone of object %s failed",
-		      obj_get_name(srcobj));
-	    return ERR_INTERNAL_MEM;
-	} else {
-	    testobj = obj_find_template(newQ, 
-					obj_get_mod_name(newobj),
-					obj_get_name(newobj));
-	    if (testobj) {
-		log_error("\nError: Object %s on line %s "
-			  "already defined at line %u",
-			  obj_get_name(newobj),
-			  srcobj->tkerr.linenum,
-			  testobj->tkerr.linenum);
-		obj_free_template(newobj);
-	    } else {
-		newobj->parent = parent;
-		dlq_enque(newobj, newQ);
-	    }
-	}
+        newobj = obj_clone_template(mod, srcobj, mobjQ);
+        if (!newobj) {
+            log_error("\nError: clone of object %s failed",
+                      obj_get_name(srcobj));
+            return ERR_INTERNAL_MEM;
+        } else {
+            testobj = obj_find_template(newQ, 
+                                        obj_get_mod_name(newobj),
+                                        obj_get_name(newobj));
+            if (testobj) {
+                log_error("\nError: Object %s on line %s "
+                          "already defined at line %u",
+                          obj_get_name(newobj),
+                          srcobj->tkerr.linenum,
+                          testobj->tkerr.linenum);
+                obj_free_template(newobj);
+            } else {
+                newobj->parent = parent;
+                dlq_enque(newobj, newQ);
+            }
+        }
     }
 
     return res;
@@ -286,37 +286,37 @@ static status_t
 *********************************************************************/
 static status_t
     clone_appinfoQ (dlq_hdr_t *newQ,
-		    dlq_hdr_t *srcQ,
-		    dlq_hdr_t *merQ)
+                    dlq_hdr_t *srcQ,
+                    dlq_hdr_t *merQ)
 {
     ncx_appinfo_t  *newapp, *srcapp;
 
     for (srcapp = (ncx_appinfo_t *)dlq_firstEntry(srcQ);
-	 srcapp != NULL;
-	 srcapp = (ncx_appinfo_t *)dlq_nextEntry(srcapp)) {
+         srcapp != NULL;
+         srcapp = (ncx_appinfo_t *)dlq_nextEntry(srcapp)) {
 
-	newapp = ncx_clone_appinfo(srcapp);
-	if (!newapp) {
-	    log_error("\nError: clone of appinfo failed");
-	    return ERR_INTERNAL_MEM;
-	} else {
-	    dlq_enque(newapp, newQ);
-	}
+        newapp = ncx_clone_appinfo(srcapp);
+        if (!newapp) {
+            log_error("\nError: clone of appinfo failed");
+            return ERR_INTERNAL_MEM;
+        } else {
+            dlq_enque(newapp, newQ);
+        }
     }
 
     if (merQ) {
-	for (srcapp = (ncx_appinfo_t *)dlq_firstEntry(merQ);
-	     srcapp != NULL;
-	     srcapp = (ncx_appinfo_t *)dlq_nextEntry(srcapp)) {
+        for (srcapp = (ncx_appinfo_t *)dlq_firstEntry(merQ);
+             srcapp != NULL;
+             srcapp = (ncx_appinfo_t *)dlq_nextEntry(srcapp)) {
 
-	    newapp = ncx_clone_appinfo(srcapp);
-	    if (!newapp) {
-		log_error("\nError: clone of appinfo failed");
-		return ERR_INTERNAL_MEM;
-	    } else {
-		dlq_enque(newapp, newQ);
-	    }
-	}
+            newapp = ncx_clone_appinfo(srcapp);
+            if (!newapp) {
+                log_error("\nError: clone of appinfo failed");
+                return ERR_INTERNAL_MEM;
+            } else {
+                dlq_enque(newapp, newQ);
+            }
+        }
     }
 
     return NO_ERR;
@@ -345,10 +345,10 @@ static status_t
 *********************************************************************/
 static obj_case_t *
     clone_case (ncx_module_t *mod,
-		obj_case_t *cas,
-		obj_refine_t *mcas,
-		obj_template_t *obj,
-		dlq_hdr_t  *mobjQ)
+                obj_case_t *cas,
+                obj_refine_t *mcas,
+                obj_template_t *obj,
+                dlq_hdr_t  *mobjQ)
 {
     obj_case_t     *newcas;
     status_t        res;
@@ -357,7 +357,7 @@ static obj_case_t *
 
     newcas = new_case(TRUE);  /*** need a real datadefQ ***/
     if (!newcas) {
-	return NULL;
+        return NULL;
     }
 
     /* set the fields that cannot be refined */
@@ -366,41 +366,41 @@ static obj_case_t *
     newcas->status = cas->status;
 
     if (mcas && mcas->descr) {
-	newcas->descr = xml_strdup(mcas->descr);
-	if (!newcas->descr) {
-	    free_case(newcas);
-	    return NULL;
-	}
+        newcas->descr = xml_strdup(mcas->descr);
+        if (!newcas->descr) {
+            free_case(newcas);
+            return NULL;
+        }
     } else if (cas->descr) {
-	newcas->descr = xml_strdup(cas->descr);
-	if (!newcas->descr) {
-	    free_case(newcas);
-	    return NULL;
-	}
+        newcas->descr = xml_strdup(cas->descr);
+        if (!newcas->descr) {
+            free_case(newcas);
+            return NULL;
+        }
     }
 
     if (mcas && mcas->ref) {
-	newcas->ref = xml_strdup(mcas->ref);
-	if (!newcas->ref) {
-	    free_case(newcas);
-	    return NULL;
-	}
+        newcas->ref = xml_strdup(mcas->ref);
+        if (!newcas->ref) {
+            free_case(newcas);
+            return NULL;
+        }
     } else if (cas->ref) {
-	newcas->ref = xml_strdup(cas->ref);
-	if (!newcas->ref) {
-	    free_case(newcas);
-	    return NULL;
-	}
+        newcas->ref = xml_strdup(cas->ref);
+        if (!newcas->ref) {
+            free_case(newcas);
+            return NULL;
+        }
     }
 
     res = clone_datadefQ(mod, 
                          newcas->datadefQ, 
                          cas->datadefQ,
-			 mobjQ, 
+                         mobjQ, 
                          obj);
     if (res != NO_ERR) {
-	free_case(newcas);
-	return NULL;
+        free_case(newcas);
+        return NULL;
     }
 
     return newcas;
@@ -423,36 +423,36 @@ static obj_case_t *
 *********************************************************************/
 static status_t
     clone_mustQ (dlq_hdr_t *newQ,
-		 dlq_hdr_t *srcQ,
-		 dlq_hdr_t *mergeQ)
+                 dlq_hdr_t *srcQ,
+                 dlq_hdr_t *mergeQ)
 {
 
     xpath_pcb_t *srcmust, *newmust;
 
     for (srcmust = (xpath_pcb_t *)dlq_firstEntry(srcQ);
-	 srcmust != NULL;
-	 srcmust = (xpath_pcb_t *)dlq_nextEntry(srcmust)) {
+         srcmust != NULL;
+         srcmust = (xpath_pcb_t *)dlq_nextEntry(srcmust)) {
 
-	newmust = xpath_clone_pcb(srcmust);
-	if (!newmust) {
-	    return ERR_INTERNAL_MEM;
-	} else {
-	    dlq_enque(newmust, newQ);
-	}
+        newmust = xpath_clone_pcb(srcmust);
+        if (!newmust) {
+            return ERR_INTERNAL_MEM;
+        } else {
+            dlq_enque(newmust, newQ);
+        }
     }
 
     if (mergeQ) {
-	for (srcmust = (xpath_pcb_t *)dlq_firstEntry(mergeQ);
-	     srcmust != NULL;
-	     srcmust = (xpath_pcb_t *)dlq_nextEntry(srcmust)) {
+        for (srcmust = (xpath_pcb_t *)dlq_firstEntry(mergeQ);
+             srcmust != NULL;
+             srcmust = (xpath_pcb_t *)dlq_nextEntry(srcmust)) {
 
-	    newmust = xpath_clone_pcb(srcmust);
-	    if (!newmust) {
-		return ERR_INTERNAL_MEM;
-	    } else {
-		dlq_enque(newmust, newQ);
-	    }
-	}
+            newmust = xpath_clone_pcb(srcmust);
+            if (!newmust) {
+                return ERR_INTERNAL_MEM;
+            } else {
+                dlq_enque(newmust, newQ);
+            }
+        }
     }
 
     return NO_ERR;
@@ -479,33 +479,33 @@ static obj_container_t *
 
     con = m__getObj(obj_container_t);
     if (!con) {
-	return NULL;
+        return NULL;
     }
     (void)memset(con, 0x0, sizeof(obj_container_t));
 
     con->datadefQ = dlq_createQue();
     if (!con->datadefQ) {
-	m__free(con);
-	return NULL;
+        m__free(con);
+        return NULL;
     }
 
     if (isreal) {
-	con->typedefQ = dlq_createQue();
-	if (!con->typedefQ) {
-	    dlq_destroyQue(con->datadefQ);
-	    m__free(con);
-	    return NULL;
-	}
+        con->typedefQ = dlq_createQue();
+        if (!con->typedefQ) {
+            dlq_destroyQue(con->datadefQ);
+            m__free(con);
+            return NULL;
+        }
 
-	con->groupingQ = dlq_createQue();
-	if (!con->groupingQ) {
-	    dlq_destroyQue(con->datadefQ);
-	    dlq_destroyQue(con->typedefQ);
-	    m__free(con);
-	    return NULL;
-	}
+        con->groupingQ = dlq_createQue();
+        if (!con->groupingQ) {
+            dlq_destroyQue(con->datadefQ);
+            dlq_destroyQue(con->typedefQ);
+            m__free(con);
+            return NULL;
+        }
 
-	con->status = NCX_STATUS_CURRENT;
+        con->status = NCX_STATUS_CURRENT;
     }
 
     dlq_createSQue(&con->mustQ);
@@ -529,35 +529,35 @@ static obj_container_t *
 *********************************************************************/
 static void 
     free_container (obj_container_t *con,
-		    uint32 flags)
+                    uint32 flags)
 {
     boolean notclone;
 
     notclone = (flags & OBJ_FL_CLONE) ? FALSE : TRUE;
 
     if (con->name && notclone) {
-	m__free(con->name);
+        m__free(con->name);
     }
     if (con->descr) {
-	m__free(con->descr);
+        m__free(con->descr);
     }
     if (con->ref) {
-	m__free(con->ref);
+        m__free(con->ref);
     }
     if (con->presence) {
-	m__free(con->presence);
+        m__free(con->presence);
     }
 
     if (notclone) {
-	typ_clean_typeQ(con->typedefQ);
-	dlq_destroyQue(con->typedefQ);
-	grp_clean_groupingQ(con->groupingQ);
-	dlq_destroyQue(con->groupingQ);
+        typ_clean_typeQ(con->typedefQ);
+        dlq_destroyQue(con->typedefQ);
+        grp_clean_groupingQ(con->groupingQ);
+        dlq_destroyQue(con->groupingQ);
     }
 
     if (!con->datadefclone) {
-	obj_clean_datadefQ(con->datadefQ);
-	dlq_destroyQue(con->datadefQ);
+        obj_clean_datadefQ(con->datadefQ);
+        dlq_destroyQue(con->datadefQ);
     }
 
     clean_mustQ(&con->mustQ);
@@ -588,17 +588,17 @@ static void
 *********************************************************************/
 static obj_container_t *
     clone_container (ncx_module_t *mod,
-		     obj_template_t  *parent,
-		     obj_container_t *con,
-		     obj_refine_t *mcon,
-		     dlq_hdr_t  *mobjQ)
+                     obj_template_t  *parent,
+                     obj_container_t *con,
+                     obj_refine_t *mcon,
+                     dlq_hdr_t  *mobjQ)
 {
     obj_container_t *newcon;
     status_t         res;
 
     newcon = new_container(FALSE);
     if (!newcon) {
-	return NULL;
+        return NULL;
     }
 
     /* set the fields that cannot be refined */
@@ -610,63 +610,63 @@ static obj_container_t *
 
 
     if (mcon && mcon->descr) {
-	newcon->descr = xml_strdup(mcon->descr);
-	if (!newcon->descr) {
-	    free_container(newcon, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newcon->descr = xml_strdup(mcon->descr);
+        if (!newcon->descr) {
+            free_container(newcon, OBJ_FL_CLONE);
+            return NULL;
+        }
     } else if (con->descr) {
-	newcon->descr = xml_strdup(con->descr);
-	if (!newcon->descr) {
-	    free_container(newcon, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newcon->descr = xml_strdup(con->descr);
+        if (!newcon->descr) {
+            free_container(newcon, OBJ_FL_CLONE);
+            return NULL;
+        }
     }
 
     if (mcon && mcon->ref) {
-	newcon->ref = xml_strdup(mcon->ref);
-	if (!newcon->ref) {
-	    free_container(newcon, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newcon->ref = xml_strdup(mcon->ref);
+        if (!newcon->ref) {
+            free_container(newcon, OBJ_FL_CLONE);
+            return NULL;
+        }
     } else if (con->ref) {
-	newcon->ref = xml_strdup(con->ref);
-	if (!newcon->ref) {
-	    free_container(newcon, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newcon->ref = xml_strdup(con->ref);
+        if (!newcon->ref) {
+            free_container(newcon, OBJ_FL_CLONE);
+            return NULL;
+        }
     }
 
     if (mcon && mcon->presence) {
-	newcon->presence = xml_strdup(mcon->presence);
-	if (!newcon->presence) {
-	    free_container(newcon, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newcon->presence = xml_strdup(mcon->presence);
+        if (!newcon->presence) {
+            free_container(newcon, OBJ_FL_CLONE);
+            return NULL;
+        }
     } else if (con->presence) {
-	newcon->presence = xml_strdup(con->presence);
-	if (!newcon->presence) {
-	    free_container(newcon, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newcon->presence = xml_strdup(con->presence);
+        if (!newcon->presence) {
+            free_container(newcon, OBJ_FL_CLONE);
+            return NULL;
+        }
     }
 
     res = clone_mustQ(&newcon->mustQ, 
                       &con->mustQ,
-		      (mcon) ? &mcon->mustQ : NULL);
+                      (mcon) ? &mcon->mustQ : NULL);
     if (res != NO_ERR) {
-	free_container(newcon, OBJ_FL_CLONE);
-	return NULL;
+        free_container(newcon, OBJ_FL_CLONE);
+        return NULL;
     }
 
     res = clone_datadefQ(mod, 
                          newcon->datadefQ, 
-			 con->datadefQ, 
+                         con->datadefQ, 
                          mobjQ, 
                          parent);
     if (res != NO_ERR) {
-	free_container(newcon, OBJ_FL_CLONE);
-	return NULL;
+        free_container(newcon, OBJ_FL_CLONE);
+        return NULL;
     }
 
     return newcon;
@@ -693,18 +693,18 @@ static obj_leaf_t *
 
     leaf = m__getObj(obj_leaf_t);
     if (!leaf) {
-	return NULL;
+        return NULL;
     }
 
     (void)memset(leaf, 0x0, sizeof(obj_leaf_t));
 
     if (isreal) {
-	leaf->typdef = typ_new_typdef();
-	if (!leaf->typdef) {
-	    m__free(leaf);
-	    return NULL;
-	}
-	leaf->status = NCX_STATUS_CURRENT;
+        leaf->typdef = typ_new_typdef();
+        if (!leaf->typdef) {
+            m__free(leaf);
+            return NULL;
+        }
+        leaf->status = NCX_STATUS_CURRENT;
     }
 
     dlq_createSQue(&leaf->mustQ);
@@ -728,31 +728,31 @@ static obj_leaf_t *
 *********************************************************************/
 static void 
     free_leaf (obj_leaf_t *leaf,
-	       uint32 flags)
+               uint32 flags)
 {
     boolean notclone;
 
     notclone = (flags & OBJ_FL_CLONE) ? FALSE : TRUE;
 
     if (leaf->name && notclone) {
-	m__free(leaf->name);
+        m__free(leaf->name);
     }
     if (leaf->units && notclone) {
-	m__free(leaf->units);
+        m__free(leaf->units);
     }
     if (leaf->defval) {
-	m__free(leaf->defval);
+        m__free(leaf->defval);
     }
     if (leaf->descr) {
-	m__free(leaf->descr);
+        m__free(leaf->descr);
     }
     if (leaf->ref) {
-	m__free(leaf->ref);
+        m__free(leaf->ref);
     }
 
     if (leaf->typdef && (leaf->typdef->class != NCX_CL_BASE)
-	&& notclone) {
-	typ_free_typdef(leaf->typdef);
+        && notclone) {
+        typ_free_typdef(leaf->typdef);
     }
 
     clean_mustQ(&leaf->mustQ);
@@ -780,14 +780,14 @@ static void
 *********************************************************************/
 static obj_leaf_t *
     clone_leaf (obj_leaf_t *leaf,
-		obj_refine_t *mleaf)
+                obj_refine_t *mleaf)
 {
     obj_leaf_t      *newleaf;
     status_t         res;
 
     newleaf = new_leaf(FALSE);
     if (!newleaf) {
-	return NULL;
+        return NULL;
     }
 
     /* set the fields that cannot be refined */
@@ -797,53 +797,53 @@ static obj_leaf_t *
     newleaf->status = leaf->status;
 
     if (mleaf && mleaf->def) {
-	newleaf->defval = xml_strdup(mleaf->def);
-	if (!newleaf->defval) {
-	    free_leaf(newleaf, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newleaf->defval = xml_strdup(mleaf->def);
+        if (!newleaf->defval) {
+            free_leaf(newleaf, OBJ_FL_CLONE);
+            return NULL;
+        }
     } else if (leaf->defval) {
-	newleaf->defval = xml_strdup(leaf->defval);
-	if (!newleaf->defval) {
-	    free_leaf(newleaf, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newleaf->defval = xml_strdup(leaf->defval);
+        if (!newleaf->defval) {
+            free_leaf(newleaf, OBJ_FL_CLONE);
+            return NULL;
+        }
     }
 
     if (mleaf && mleaf->descr) {
-	newleaf->descr = xml_strdup(mleaf->descr);
-	if (!newleaf->descr) {
-	    free_leaf(newleaf, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newleaf->descr = xml_strdup(mleaf->descr);
+        if (!newleaf->descr) {
+            free_leaf(newleaf, OBJ_FL_CLONE);
+            return NULL;
+        }
     } else if (leaf->descr) {
-	newleaf->descr = xml_strdup(leaf->descr);
-	if (!newleaf->descr) {
-	    free_leaf(newleaf, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newleaf->descr = xml_strdup(leaf->descr);
+        if (!newleaf->descr) {
+            free_leaf(newleaf, OBJ_FL_CLONE);
+            return NULL;
+        }
     }
 
     if (mleaf && mleaf->ref) {
-	newleaf->ref = xml_strdup(mleaf->ref);
-	if (!newleaf->ref) {
-	    free_leaf(newleaf, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newleaf->ref = xml_strdup(mleaf->ref);
+        if (!newleaf->ref) {
+            free_leaf(newleaf, OBJ_FL_CLONE);
+            return NULL;
+        }
     } else if (leaf->ref) {
-	newleaf->ref = xml_strdup(leaf->ref);
-	if (!newleaf->ref) {
-	    free_leaf(newleaf, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newleaf->ref = xml_strdup(leaf->ref);
+        if (!newleaf->ref) {
+            free_leaf(newleaf, OBJ_FL_CLONE);
+            return NULL;
+        }
     }
 
     res = clone_mustQ(&newleaf->mustQ, 
                       &leaf->mustQ,
-		      (mleaf) ? &mleaf->mustQ : NULL);
+                      (mleaf) ? &mleaf->mustQ : NULL);
     if (res != NO_ERR) {
-	free_leaf(newleaf, OBJ_FL_CLONE);
-	return NULL;
+        free_leaf(newleaf, OBJ_FL_CLONE);
+        return NULL;
     }
 
     return newleaf;
@@ -870,19 +870,19 @@ static obj_leaflist_t *
 
     leaflist = m__getObj(obj_leaflist_t);
     if (!leaflist) {
-	return NULL;
+        return NULL;
     }
 
     (void)memset(leaflist, 0x0, sizeof(obj_leaflist_t));
 
     if (isreal) {
-	leaflist->typdef = typ_new_typdef();
-	if (!leaflist->typdef) {
-	    m__free(leaflist);
-	    return NULL;
-	}
-	leaflist->status = NCX_STATUS_CURRENT;
-	leaflist->ordersys = TRUE;
+        leaflist->typdef = typ_new_typdef();
+        if (!leaflist->typdef) {
+            m__free(leaflist);
+            return NULL;
+        }
+        leaflist->status = NCX_STATUS_CURRENT;
+        leaflist->ordersys = TRUE;
     }
 
     dlq_createSQue(&leaflist->mustQ);
@@ -906,27 +906,27 @@ static obj_leaflist_t *
 *********************************************************************/
 static void 
     free_leaflist (obj_leaflist_t *leaflist,
-		   uint32 flags)
+                   uint32 flags)
 {
     boolean notclone;
 
     notclone = (flags & OBJ_FL_CLONE) ? FALSE : TRUE;
 
     if (leaflist->name && notclone) {
-	m__free(leaflist->name);
+        m__free(leaflist->name);
     }
     if (leaflist->units && notclone) {
-	m__free(leaflist->units);
+        m__free(leaflist->units);
     }
     if (leaflist->descr) {
-	m__free(leaflist->descr);
+        m__free(leaflist->descr);
     }
     if (leaflist->ref) {
-	m__free(leaflist->ref);
+        m__free(leaflist->ref);
     }
 
     if (leaflist->typdef && notclone) {
-	typ_free_typdef(leaflist->typdef);
+        typ_free_typdef(leaflist->typdef);
     }
 
     clean_mustQ(&leaflist->mustQ);
@@ -954,14 +954,14 @@ static void
 *********************************************************************/
 static obj_leaflist_t *
     clone_leaflist (obj_leaflist_t *leaflist,
-		    obj_refine_t *mleaflist)
+                    obj_refine_t *mleaflist)
 {
     obj_leaflist_t      *newleaflist;
     status_t             res;
 
     newleaflist = new_leaflist(FALSE);
     if (!newleaflist) {
-	return NULL;
+        return NULL;
     }
 
     /* set the fields that cannot be refined */
@@ -972,54 +972,54 @@ static obj_leaflist_t *
     newleaflist->status = leaflist->status;
 
     if (mleaflist && mleaflist->descr) {
-	newleaflist->descr = xml_strdup(mleaflist->descr);
-	if (!newleaflist->descr) {
-	    free_leaflist(newleaflist, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newleaflist->descr = xml_strdup(mleaflist->descr);
+        if (!newleaflist->descr) {
+            free_leaflist(newleaflist, OBJ_FL_CLONE);
+            return NULL;
+        }
     } else if (leaflist->descr) {
-	newleaflist->descr = xml_strdup(leaflist->descr);
-	if (!newleaflist->descr) {
-	    free_leaflist(newleaflist, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newleaflist->descr = xml_strdup(leaflist->descr);
+        if (!newleaflist->descr) {
+            free_leaflist(newleaflist, OBJ_FL_CLONE);
+            return NULL;
+        }
     }
 
     if (mleaflist && mleaflist->ref) {
-	newleaflist->ref = xml_strdup(mleaflist->ref);
-	if (!newleaflist->ref) {
-	    free_leaflist(newleaflist, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newleaflist->ref = xml_strdup(mleaflist->ref);
+        if (!newleaflist->ref) {
+            free_leaflist(newleaflist, OBJ_FL_CLONE);
+            return NULL;
+        }
     } else if (leaflist->ref) {
-	newleaflist->ref = xml_strdup(leaflist->ref);
-	if (!newleaflist->ref) {
-	    free_leaflist(newleaflist, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newleaflist->ref = xml_strdup(leaflist->ref);
+        if (!newleaflist->ref) {
+            free_leaflist(newleaflist, OBJ_FL_CLONE);
+            return NULL;
+        }
     }
 
     res = clone_mustQ(&newleaflist->mustQ, &leaflist->mustQ,
-		     (mleaflist) ? &mleaflist->mustQ : NULL);
+                     (mleaflist) ? &mleaflist->mustQ : NULL);
     if (res != NO_ERR) {
-	free_leaflist(newleaflist, OBJ_FL_CLONE);
-	return NULL;
+        free_leaflist(newleaflist, OBJ_FL_CLONE);
+        return NULL;
     }
 
     if (mleaflist && mleaflist->minelems_tkerr.mod) {
-	newleaflist->minelems = mleaflist->minelems;
-	newleaflist->minset = TRUE;
+        newleaflist->minelems = mleaflist->minelems;
+        newleaflist->minset = TRUE;
     } else {
-	newleaflist->minelems = leaflist->minelems;
-	newleaflist->minset = leaflist->minset;
+        newleaflist->minelems = leaflist->minelems;
+        newleaflist->minset = leaflist->minset;
     }
 
     if (mleaflist && mleaflist->maxelems_tkerr.mod) {
-	newleaflist->maxelems = mleaflist->maxelems;
-	newleaflist->maxset = TRUE;
+        newleaflist->maxelems = mleaflist->maxelems;
+        newleaflist->maxset = TRUE;
     } else {
-	newleaflist->maxelems = leaflist->maxelems;
-	newleaflist->maxset = leaflist->maxset;
+        newleaflist->maxelems = leaflist->maxelems;
+        newleaflist->maxset = leaflist->maxset;
     }
 
     return newleaflist;
@@ -1041,7 +1041,7 @@ static obj_leaflist_t *
 *********************************************************************/
 static void 
     free_list (obj_list_t *list,
-	       uint32 flags)
+               uint32 flags)
 {
     obj_key_t     *key;
     obj_unique_t  *uni;
@@ -1050,39 +1050,39 @@ static void
     notclone = (flags & OBJ_FL_CLONE) ? FALSE : TRUE;
 
     if (list->name && notclone) {
-	m__free(list->name);
+        m__free(list->name);
     }
     if (list->keystr && notclone) {
-	m__free(list->keystr);
+        m__free(list->keystr);
     }
     if (list->descr) {
-	m__free(list->descr);
+        m__free(list->descr);
     }
     if (list->ref) {
-	m__free(list->ref);
+        m__free(list->ref);
     }
 
     while (!dlq_empty(&list->keyQ)) {
-	key = (obj_key_t *)dlq_deque(&list->keyQ);
-	obj_free_key(key);
+        key = (obj_key_t *)dlq_deque(&list->keyQ);
+        obj_free_key(key);
     }
 
     while (!dlq_empty(&list->uniqueQ)) {
-	uni = (obj_unique_t *)dlq_deque(&list->uniqueQ);
-	obj_free_unique(uni);
+        uni = (obj_unique_t *)dlq_deque(&list->uniqueQ);
+        obj_free_unique(uni);
     }
 
     if (notclone) {
-	typ_clean_typeQ(list->typedefQ);
-	dlq_destroyQue(list->typedefQ);
+        typ_clean_typeQ(list->typedefQ);
+        dlq_destroyQue(list->typedefQ);
 
-	grp_clean_groupingQ(list->groupingQ);
-	dlq_destroyQue(list->groupingQ);
+        grp_clean_groupingQ(list->groupingQ);
+        dlq_destroyQue(list->groupingQ);
     }
 
     if (!list->datadefclone) {
-	obj_clean_datadefQ(list->datadefQ);
-	dlq_destroyQue(list->datadefQ);
+        obj_clean_datadefQ(list->datadefQ);
+        dlq_destroyQue(list->datadefQ);
     }
 
     clean_mustQ(&list->mustQ);
@@ -1111,7 +1111,7 @@ static obj_list_t *
 
     list = m__getObj(obj_list_t);
     if (!list) {
-	return NULL;
+        return NULL;
     }
     (void)memset(list, 0x0, sizeof(obj_list_t));
 
@@ -1123,18 +1123,18 @@ static obj_list_t *
     list->ordersys = TRUE;
 
     if (isreal) {
-	list->typedefQ = dlq_createQue();
-	if (!list->typedefQ) {
-	    m__free(list);
-	    return NULL;
-	}
+        list->typedefQ = dlq_createQue();
+        if (!list->typedefQ) {
+            m__free(list);
+            return NULL;
+        }
 
-	list->groupingQ = dlq_createQue();
-	if (!list->groupingQ) {
-	    dlq_destroyQue(list->typedefQ);
-	    m__free(list);
-	    return NULL;
-	}
+        list->groupingQ = dlq_createQue();
+        if (!list->groupingQ) {
+            dlq_destroyQue(list->typedefQ);
+            m__free(list);
+            return NULL;
+        }
 
     }
 
@@ -1142,8 +1142,8 @@ static obj_list_t *
 
     list->datadefQ = dlq_createQue();
     if (!list->datadefQ) {
-	free_list(list, (isreal) ? 0U : OBJ_FL_CLONE);
-	return NULL;
+        free_list(list, (isreal) ? 0U : OBJ_FL_CLONE);
+        return NULL;
     }
 
     return list;
@@ -1172,17 +1172,17 @@ static obj_list_t *
 *********************************************************************/
 static obj_list_t *
     clone_list (ncx_module_t *mod,
-		obj_template_t *newparent,
-		obj_template_t *srclist,
-		obj_refine_t *mlist,
-		dlq_hdr_t *mobjQ)
+                obj_template_t *newparent,
+                obj_template_t *srclist,
+                obj_refine_t *mlist,
+                dlq_hdr_t *mobjQ)
 {
     obj_list_t      *list, *newlist;
     status_t         res;
 
     newlist = new_list(FALSE);
     if (!newlist) {
-	return NULL;
+        return NULL;
     }
 
     list = srclist->def.list;
@@ -1196,65 +1196,65 @@ static obj_list_t *
     newlist->status = list->status;
 
     if (mlist && mlist->descr) {
-	newlist->descr = xml_strdup(mlist->descr);
-	if (!newlist->descr) {
-	    free_list(newlist, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newlist->descr = xml_strdup(mlist->descr);
+        if (!newlist->descr) {
+            free_list(newlist, OBJ_FL_CLONE);
+            return NULL;
+        }
     } else if (list->descr) {
-	newlist->descr = xml_strdup(list->descr);
-	if (!newlist->descr) {
-	    free_list(newlist, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newlist->descr = xml_strdup(list->descr);
+        if (!newlist->descr) {
+            free_list(newlist, OBJ_FL_CLONE);
+            return NULL;
+        }
     }
 
     if (mlist && mlist->ref) {
-	newlist->ref = xml_strdup(mlist->ref);
-	if (!newlist->ref) {
-	    free_list(newlist, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newlist->ref = xml_strdup(mlist->ref);
+        if (!newlist->ref) {
+            free_list(newlist, OBJ_FL_CLONE);
+            return NULL;
+        }
     } else if (list->ref) {
-	newlist->ref = xml_strdup(list->ref);
-	if (!newlist->ref) {
-	    free_list(newlist, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newlist->ref = xml_strdup(list->ref);
+        if (!newlist->ref) {
+            free_list(newlist, OBJ_FL_CLONE);
+            return NULL;
+        }
     }
 
     res = clone_mustQ(&newlist->mustQ, 
                       &list->mustQ,
                       (mlist) ? &mlist->mustQ : NULL);
     if (res != NO_ERR) {
-	free_list(newlist, OBJ_FL_CLONE);
-	return NULL;
+        free_list(newlist, OBJ_FL_CLONE);
+        return NULL;
     }
 
     if (mlist && mlist->minelems_tkerr.mod) {
-	newlist->minelems = mlist->minelems;
-	newlist->minset = TRUE;
+        newlist->minelems = mlist->minelems;
+        newlist->minset = TRUE;
     } else {
-	newlist->minelems = list->minelems;
-	newlist->minset = list->minset;
+        newlist->minelems = list->minelems;
+        newlist->minset = list->minset;
     }
 
     if (mlist && mlist->maxelems_tkerr.mod) {
-	newlist->maxelems = mlist->maxelems;
-	newlist->maxset = TRUE;
+        newlist->maxelems = mlist->maxelems;
+        newlist->maxset = TRUE;
     } else {
-	newlist->maxelems = list->maxelems;
-	newlist->maxset = list->maxset;
+        newlist->maxelems = list->maxelems;
+        newlist->maxset = list->maxset;
     }
 
     res = clone_datadefQ(mod, 
                          newlist->datadefQ, 
                          list->datadefQ, 
-			 mobjQ, 
+                         mobjQ, 
                          newparent);
     if (res != NO_ERR) {
-	free_list(newlist, OBJ_FL_CLONE);
-	return NULL;
+        free_list(newlist, OBJ_FL_CLONE);
+        return NULL;
     }
 
     /* newlist->keyQ is still empty
@@ -1285,18 +1285,18 @@ static obj_case_t *
 
     cas = m__getObj(obj_case_t);
     if (!cas) {
-	return NULL;
+        return NULL;
     }
     (void)memset(cas, 0x0, sizeof(obj_case_t));
 
     cas->status = NCX_STATUS_CURRENT;
 
     if (isreal) {
-	cas->datadefQ = dlq_createQue();
-	if (!cas->datadefQ) {
-	    m__free(cas);
-	    return NULL;
-	}
+        cas->datadefQ = dlq_createQue();
+        if (!cas->datadefQ) {
+            m__free(cas);
+            return NULL;
+        }
     }
 
     return cas;
@@ -1317,17 +1317,17 @@ static void
     free_case (obj_case_t *cas)
 {
     if (cas->name && !cas->nameclone) {
-	m__free(cas->name);
+        m__free(cas->name);
     }
     if (cas->descr) {
-	m__free(cas->descr);
+        m__free(cas->descr);
     }
     if (cas->ref) {
-	m__free(cas->ref);
+        m__free(cas->ref);
     }
     if (!cas->datadefclone) {
-	obj_clean_datadefQ(cas->datadefQ);
-	dlq_destroyQue(cas->datadefQ);
+        obj_clean_datadefQ(cas->datadefQ);
+        dlq_destroyQue(cas->datadefQ);
     }
 
     m__free(cas);
@@ -1354,18 +1354,18 @@ static obj_choice_t *
 
     ch = m__getObj(obj_choice_t);
     if (!ch) {
-	return NULL;
+        return NULL;
     }
     (void)memset(ch, 0x0, sizeof(obj_choice_t));
 
     ch->caseQ = dlq_createQue();
     if (!ch->caseQ) {
-	m__free(ch);
-	return NULL;
+        m__free(ch);
+        return NULL;
     }
 
     if (isreal) {
-	ch->status = NCX_STATUS_CURRENT;
+        ch->status = NCX_STATUS_CURRENT;
     }
 
     return ch;
@@ -1387,28 +1387,28 @@ static obj_choice_t *
 *********************************************************************/
 static void 
     free_choice (obj_choice_t *choic,
-		 uint32 flags)
+                 uint32 flags)
 {
     boolean notclone;
 
     notclone = (flags & OBJ_FL_CLONE) ? FALSE : TRUE;
 
     if (choic->name && notclone) {
-	m__free(choic->name);
+        m__free(choic->name);
     }
     if (choic->defval) {
-	m__free(choic->defval);
+        m__free(choic->defval);
     }
     if (choic->descr) {
-	m__free(choic->descr);
+        m__free(choic->descr);
     }
     if (choic->ref) {
-	m__free(choic->ref);
+        m__free(choic->ref);
     }
 
     if (!choic->caseQclone) {
-	obj_clean_datadefQ(choic->caseQ);
-	dlq_destroyQue(choic->caseQ);
+        obj_clean_datadefQ(choic->caseQ);
+        dlq_destroyQue(choic->caseQ);
     }
 
     m__free(choic);
@@ -1437,17 +1437,17 @@ static void
 *********************************************************************/
 static obj_choice_t *
     clone_choice (ncx_module_t *mod,
-		  obj_choice_t *choic,
-		  obj_refine_t *mchoic,
-		  obj_template_t *obj,
-		  dlq_hdr_t  *mobjQ)
+                  obj_choice_t *choic,
+                  obj_refine_t *mchoic,
+                  obj_template_t *obj,
+                  dlq_hdr_t  *mobjQ)
 {
     obj_choice_t    *newchoic;
     status_t         res;
 
     newchoic = new_choice(FALSE);
     if (!newchoic) {
-	return NULL;
+        return NULL;
     }
 
     /* set the fields that cannot be refined */
@@ -1455,55 +1455,55 @@ static obj_choice_t *
     newchoic->status = choic->status;
 
     if (mchoic && mchoic->def) {
-	newchoic->defval = xml_strdup(mchoic->def);
-	if (!newchoic->defval) {
-	    free_choice(newchoic, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newchoic->defval = xml_strdup(mchoic->def);
+        if (!newchoic->defval) {
+            free_choice(newchoic, OBJ_FL_CLONE);
+            return NULL;
+        }
     } else if (choic->defval) {
-	newchoic->defval = xml_strdup(choic->defval);
-	if (!newchoic->defval) {
-	    free_choice(newchoic, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newchoic->defval = xml_strdup(choic->defval);
+        if (!newchoic->defval) {
+            free_choice(newchoic, OBJ_FL_CLONE);
+            return NULL;
+        }
     }
 
     if (mchoic && mchoic->descr) {
-	newchoic->descr = xml_strdup(mchoic->descr);
-	if (!newchoic->descr) {
-	    free_choice(newchoic, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newchoic->descr = xml_strdup(mchoic->descr);
+        if (!newchoic->descr) {
+            free_choice(newchoic, OBJ_FL_CLONE);
+            return NULL;
+        }
     } else if (choic->descr) {
-	newchoic->descr = xml_strdup(choic->descr);
-	if (!newchoic->descr) {
-	    free_choice(newchoic, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newchoic->descr = xml_strdup(choic->descr);
+        if (!newchoic->descr) {
+            free_choice(newchoic, OBJ_FL_CLONE);
+            return NULL;
+        }
     }
 
     if (mchoic && mchoic->ref) {
-	newchoic->ref = xml_strdup(mchoic->ref);
-	if (!newchoic->ref) {
-	    free_choice(newchoic, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newchoic->ref = xml_strdup(mchoic->ref);
+        if (!newchoic->ref) {
+            free_choice(newchoic, OBJ_FL_CLONE);
+            return NULL;
+        }
     } else if (choic->ref) {
-	newchoic->ref = xml_strdup(choic->ref);
-	if (!newchoic->ref) {
-	    free_choice(newchoic, OBJ_FL_CLONE);
-	    return NULL;
-	}
+        newchoic->ref = xml_strdup(choic->ref);
+        if (!newchoic->ref) {
+            free_choice(newchoic, OBJ_FL_CLONE);
+            return NULL;
+        }
     }
 
     res = clone_datadefQ(mod, 
                          newchoic->caseQ,
-			 choic->caseQ, 
+                         choic->caseQ, 
                          mobjQ, 
                          obj);
     if (res != NO_ERR) {
-	free_choice(newchoic, OBJ_FL_CLONE);
-	return NULL;
+        free_choice(newchoic, OBJ_FL_CLONE);
+        return NULL;
     }
 
     return newchoic;
@@ -1530,18 +1530,18 @@ static obj_uses_t *
 
     us = m__getObj(obj_uses_t);
     if (!us) {
-	return NULL;
+        return NULL;
     }
     (void)memset(us, 0x0, sizeof(obj_uses_t));
 
     if (isreal) {
-	us->status = NCX_STATUS_CURRENT;   /* default */
+        us->status = NCX_STATUS_CURRENT;   /* default */
     }
 
     us->datadefQ = dlq_createQue();
     if (!us->datadefQ) {
-	m__free(us);
-	return NULL;
+        m__free(us);
+        return NULL;
     }
 
     return us;
@@ -1564,16 +1564,16 @@ static void
     free_uses (obj_uses_t *us)
 {
     if (us->prefix) {
-	m__free(us->prefix);
+        m__free(us->prefix);
     }
     if (us->name) {
-	m__free(us->name);
+        m__free(us->name);
     }
     if (us->descr) {
-	m__free(us->descr);
+        m__free(us->descr);
     }
     if (us->ref) {
-	m__free(us->ref);
+        m__free(us->ref);
     }
 
     obj_clean_datadefQ(us->datadefQ);
@@ -1599,7 +1599,7 @@ static obj_refine_t *
 
     refi = m__getObj(obj_refine_t);
     if (!refi) {
-	return NULL;
+        return NULL;
     }
     (void)memset(refi, 0x0, sizeof(obj_refine_t));
 
@@ -1625,19 +1625,19 @@ static void
     free_refine (obj_refine_t *refi)
 {
     if (refi->target) {
-	m__free(refi->target);
+        m__free(refi->target);
     }
     if (refi->descr) {
-	m__free(refi->descr);
+        m__free(refi->descr);
     }
     if (refi->ref) {
-	m__free(refi->ref);
+        m__free(refi->ref);
     }
     if (refi->presence) {
-	m__free(refi->presence);
+        m__free(refi->presence);
     }
     if (refi->def) {
-	m__free(refi->def);
+        m__free(refi->def);
     }
 
     clean_mustQ(&refi->mustQ);
@@ -1666,14 +1666,14 @@ static obj_augment_t *
 
     aug = m__getObj(obj_augment_t);
     if (!aug) {
-	return NULL;
+        return NULL;
     }
     (void)memset(aug, 0x0, sizeof(obj_augment_t));
 
     dlq_createSQue(&aug->datadefQ);
 
     if (isreal) {
-	aug->status = NCX_STATUS_CURRENT;
+        aug->status = NCX_STATUS_CURRENT;
     }
 
     return aug;
@@ -1696,14 +1696,14 @@ static void
     free_augment (obj_augment_t *aug)
 {
     if (aug->target) {
-	m__free(aug->target);
+        m__free(aug->target);
     }
 
     if (aug->descr) {
-	m__free(aug->descr);
+        m__free(aug->descr);
     }
     if (aug->ref) {
-	m__free(aug->ref);
+        m__free(aug->ref);
     }
 
     obj_clean_datadefQ(&aug->datadefQ);
@@ -1728,7 +1728,7 @@ static obj_rpc_t *
 
     rpc = m__getObj(obj_rpc_t);
     if (!rpc) {
-	return NULL;
+        return NULL;
     }
     (void)memset(rpc, 0x0, sizeof(obj_rpc_t));
 
@@ -1762,13 +1762,13 @@ static void
     free_rpc (obj_rpc_t *rpc)
 {
     if (rpc->name) {
-	m__free(rpc->name);
+        m__free(rpc->name);
     }
     if (rpc->descr) {
-	m__free(rpc->descr);
+        m__free(rpc->descr);
     }
     if (rpc->ref) {
-	m__free(rpc->ref);
+        m__free(rpc->ref);
     }
     typ_clean_typeQ(&rpc->typedefQ);
     grp_clean_groupingQ(&rpc->groupingQ);
@@ -1796,7 +1796,7 @@ static obj_rpcio_t *
 
     rpcio = m__getObj(obj_rpcio_t);
     if (!rpcio) {
-	return NULL;
+        return NULL;
     }
     (void)memset(rpcio, 0x0, sizeof(obj_rpcio_t));
 
@@ -1821,7 +1821,7 @@ static void
     free_rpcio (obj_rpcio_t *rpcio)
 {
     if (rpcio->name) {
-	m__free(rpcio->name);
+        m__free(rpcio->name);
     }
     typ_clean_typeQ(&rpcio->typedefQ);
     grp_clean_groupingQ(&rpcio->groupingQ);
@@ -1846,7 +1846,7 @@ static obj_notif_t *
 
     notif = m__getObj(obj_notif_t);
     if (!notif) {
-	return NULL;
+        return NULL;
     }
     (void)memset(notif, 0x0, sizeof(obj_notif_t));
 
@@ -1872,13 +1872,13 @@ static void
     free_notif (obj_notif_t *notif)
 {
     if (notif->name) {
-	m__free(notif->name);
+        m__free(notif->name);
     }
     if (notif->descr) {
-	m__free(notif->descr);
+        m__free(notif->descr);
     }
     if (notif->ref) {
-	m__free(notif->ref);
+        m__free(notif->ref);
     }
     typ_clean_typeQ(&notif->typedefQ);
     grp_clean_groupingQ(&notif->groupingQ);
@@ -1918,11 +1918,11 @@ static void
 *********************************************************************/
 static obj_template_t *
     find_template (dlq_hdr_t  *que,
-		   const xmlChar *modname,
-		   const xmlChar *objname,
-		   boolean lookdeep,
-		   boolean match,
-		   uint32 *matchcount)
+                   const xmlChar *modname,
+                   const xmlChar *objname,
+                   boolean lookdeep,
+                   boolean match,
+                   uint32 *matchcount)
 {
     obj_template_t *obj, *chobj, *casobj, *matchobj;
     obj_case_t     *cas;
@@ -1934,40 +1934,40 @@ static obj_template_t *
     len = 0;
 
     if (match) {
-	len = xml_strlen(objname);
+        len = xml_strlen(objname);
     }
 
     /* check all the objects in this datadefQ */
     for (obj = (obj_template_t *)dlq_firstEntry(que);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	/* skip augment and uses */
-	if (!obj_has_name(obj) || !obj_is_enabled(obj)) {
-	    continue;
-	}
+        /* skip augment and uses */
+        if (!obj_has_name(obj) || !obj_is_enabled(obj)) {
+            continue;
+        }
 
-	name = obj_get_name(obj);
-	mname = obj_get_mod_name(obj);
+        name = obj_get_name(obj);
+        mname = obj_get_mod_name(obj);
 
-	if (match) {
-	    ret = xml_strncmp(objname, name, len);
-	} else {
-	    ret = xml_strcmp(objname, name);
-	}
+        if (match) {
+            ret = xml_strncmp(objname, name, len);
+        } else {
+            ret = xml_strcmp(objname, name);
+        }
 
-	if (!lookdeep) {
-	    /* if lookdeep == TRUE then look past
-	     * OBJ_TYP_CHOICE and OBJ_TYP_CASE objects
-	     * to see if any 'real' nodes match first
-	     * If not, then the case, then choice
-	     * name will be checked
-	     */
-	    if (modname && xml_strcmp(modname, mname)) {
-		continue;
-	    }
-	    if (ret == 0) {
-		if (match) {
+        if (!lookdeep) {
+            /* if lookdeep == TRUE then look past
+             * OBJ_TYP_CHOICE and OBJ_TYP_CASE objects
+             * to see if any 'real' nodes match first
+             * If not, then the case, then choice
+             * name will be checked
+             */
+            if (modname && xml_strcmp(modname, mname)) {
+                continue;
+            }
+            if (ret == 0) {
+                if (match) {
                     if (obj->objtype == OBJ_TYP_CHOICE ||
                         obj->objtype == OBJ_TYP_CASE) {
                         ;
@@ -1978,92 +1978,92 @@ static obj_template_t *
                         matchobj = obj;
                     }
                 } else {
-		    return obj;
-		}
-	    }
-	}
+                    return obj;
+                }
+            }
+        }
 
-	switch (obj->objtype) {
-	case OBJ_TYP_CHOICE:
-	    /* since the choice and case layers disappear, need
-	     * to check if any real node names would clash
-	     * will also check later that all choice nodes
-	     * within the same sibling set do not clash either
-	     */
-	    for (casobj = (obj_template_t *)
-		     dlq_firstEntry(obj->def.choic->caseQ);
-		 casobj != NULL;
-		 casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
-		cas = casobj->def.cas;
-		chobj = find_template(cas->datadefQ,
-				      modname, 
+        switch (obj->objtype) {
+        case OBJ_TYP_CHOICE:
+            /* since the choice and case layers disappear, need
+             * to check if any real node names would clash
+             * will also check later that all choice nodes
+             * within the same sibling set do not clash either
+             */
+            for (casobj = (obj_template_t *)
+                     dlq_firstEntry(obj->def.choic->caseQ);
+                 casobj != NULL;
+                 casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
+                cas = casobj->def.cas;
+                chobj = find_template(cas->datadefQ,
+                                      modname, 
                                       objname,
-				      lookdeep, 
+                                      lookdeep, 
                                       match, 
                                       matchcount);
-		if (chobj) {
-		    if (match) {
-			matchobj = chobj;
-		    } else {
-			return chobj;
-		    }
-		}
-	    }
+                if (chobj) {
+                    if (match) {
+                        matchobj = chobj;
+                    } else {
+                        return chobj;
+                    }
+                }
+            }
 
-	    /* last try: the choice name itself */
-	    if (ret == 0) {
-		if (!match) {
-		    return obj;
-		}
-	    }
-	    break;
-	case OBJ_TYP_CASE:
-	    cas = obj->def.cas;
-	    chobj = find_template(cas->datadefQ,
-				  modname, 
+            /* last try: the choice name itself */
+            if (ret == 0) {
+                if (!match) {
+                    return obj;
+                }
+            }
+            break;
+        case OBJ_TYP_CASE:
+            cas = obj->def.cas;
+            chobj = find_template(cas->datadefQ,
+                                  modname, 
                                   objname,
-				  lookdeep, 
+                                  lookdeep, 
                                   match, 
                                   matchcount);
-	    if (chobj) {
-		if (match) {
-		    matchobj = chobj;
-		} else {
-		    return chobj;
-		}
-	    } else if (ret == 0) {
-		/* try case name itself */
-		if (!match) {
-		    return obj;
-		}
-	    }
-	    break;
-	default:
-	    /* check if a specific module name requested,
-	     * and if so, skip any object not from that module
-	     */
-	    if (lookdeep) {
-		if (modname && xml_strcmp(modname, mname)) {
-		    continue;
-		}
-		if (ret == 0) {
-		    if (match) {
-			if (matchcount) {
-			    (*matchcount)++;
-			}
-			matchobj = obj;
-		    } else {
-			return obj;
-		    }
-		}
-	    }
-	}
+            if (chobj) {
+                if (match) {
+                    matchobj = chobj;
+                } else {
+                    return chobj;
+                }
+            } else if (ret == 0) {
+                /* try case name itself */
+                if (!match) {
+                    return obj;
+                }
+            }
+            break;
+        default:
+            /* check if a specific module name requested,
+             * and if so, skip any object not from that module
+             */
+            if (lookdeep) {
+                if (modname && xml_strcmp(modname, mname)) {
+                    continue;
+                }
+                if (ret == 0) {
+                    if (match) {
+                        if (matchcount) {
+                            (*matchcount)++;
+                        }
+                        matchobj = obj;
+                    } else {
+                        return obj;
+                    }
+                }
+            }
+        }
     }
 
     if (match) {
-	return matchobj;
+        return matchobj;
     } else {
-	return NULL;
+        return NULL;
     }
 
 }  /* find_template */
@@ -2092,7 +2092,7 @@ static obj_template_t *
 *********************************************************************/
 static boolean
     get_config_flag (const obj_template_t *obj,
-		     boolean *setflag)
+                     boolean *setflag)
 {
     switch (obj->objtype) {
     case OBJ_TYP_ANYXML:
@@ -2101,54 +2101,54 @@ static boolean
     case OBJ_TYP_LEAF_LIST:
     case OBJ_TYP_LIST:
     case OBJ_TYP_CHOICE:
-	if (obj_is_root(obj)) {
-	    *setflag = TRUE;
-	    return TRUE;
-	} else if ((obj->parent && 
-		    !obj_is_root(obj->parent)) || obj->grp) {
-	    *setflag = (obj->flags & OBJ_FL_CONFSET) 
-		? TRUE : FALSE;
-	} else {
-	    *setflag = TRUE;
-	}
-	return (obj->flags & OBJ_FL_CONFIG) ? TRUE : FALSE;
+        if (obj_is_root(obj)) {
+            *setflag = TRUE;
+            return TRUE;
+        } else if ((obj->parent && 
+                    !obj_is_root(obj->parent)) || obj->grp) {
+            *setflag = (obj->flags & OBJ_FL_CONFSET) 
+                ? TRUE : FALSE;
+        } else {
+            *setflag = TRUE;
+        }
+        return (obj->flags & OBJ_FL_CONFIG) ? TRUE : FALSE;
     case OBJ_TYP_CASE:
-	*setflag = FALSE;
-	if (obj->parent) {
-	    return (obj->parent->flags & OBJ_FL_CONFIG)
-		? TRUE : FALSE;
-	} else {
-	    /* should not happen */
-	    return FALSE;
-	}
-	/*NOTREACHED*/
+        *setflag = FALSE;
+        if (obj->parent) {
+            return (obj->parent->flags & OBJ_FL_CONFIG)
+                ? TRUE : FALSE;
+        } else {
+            /* should not happen */
+            return FALSE;
+        }
+        /*NOTREACHED*/
     case OBJ_TYP_USES:
     case OBJ_TYP_AUGMENT:
     case OBJ_TYP_REFINE:
-	/* no real setting -- not applicable */
-	*setflag = FALSE;
-	return FALSE;
+        /* no real setting -- not applicable */
+        *setflag = FALSE;
+        return FALSE;
     case OBJ_TYP_RPC:
-	/* no real setting for this, but has to be true
-	 * to allow rpc/input to be true
-	 */
-	*setflag = FALSE;
-	return TRUE;
+        /* no real setting for this, but has to be true
+         * to allow rpc/input to be true
+         */
+        *setflag = FALSE;
+        return TRUE;
     case OBJ_TYP_RPCIO:
-	*setflag = FALSE;
-	if (!xml_strcmp(obj->def.rpcio->name, YANG_K_INPUT)) {
-	    return TRUE;
-	} else {
-	    return FALSE;
-	}
-	break;
+        *setflag = FALSE;
+        if (!xml_strcmp(obj->def.rpcio->name, YANG_K_INPUT)) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+        break;
     case OBJ_TYP_NOTIF:
-	*setflag = FALSE;
-	return FALSE;
+        *setflag = FALSE;
+        return FALSE;
     case OBJ_TYP_NONE:
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
     }
 
     /*NOTREACHED*/
@@ -2182,11 +2182,11 @@ static boolean
 *********************************************************************/
 static status_t
     get_object_string (const obj_template_t *obj,
-		       xmlChar  *buff,
-		       uint32 bufflen,
-		       boolean normalmode,
+                       xmlChar  *buff,
+                       uint32 bufflen,
+                       boolean normalmode,
                        ncx_module_t *mod,
-		       uint32 *retlen)
+                       uint32 *retlen)
 {
     const xmlChar *name, *modname;
     uint32         namelen, modnamelen;
@@ -2198,20 +2198,20 @@ static status_t
     addmodname = FALSE;
 
     if (obj->parent && !obj_is_root(obj->parent)) {
-	res = get_object_string(obj->parent, 
+        res = get_object_string(obj->parent, 
                                 buff, 
-				bufflen, 
+                                bufflen, 
                                 normalmode,
                                 mod,
                                 retlen);
-	if (res != NO_ERR) {
-	    return res;
-	}
+        if (res != NO_ERR) {
+            return res;
+        }
     }
 
     if (!obj_has_name(obj)) {
-	/* should not enounter a uses or augment!! */
-	return NO_ERR;
+        /* should not enounter a uses or augment!! */
+        return NO_ERR;
     }
 
     modname = obj_get_mod_name(obj);
@@ -2241,12 +2241,12 @@ static status_t
      * keep track of the next child node to write 
      */
     if (buff) {
-	/* node separator char */
-	if (normalmode) {
-	    buff[*retlen] = '/';
-	} else {
-	    buff[*retlen] = '.';
-	}
+        /* node separator char */
+        if (normalmode) {
+            buff[*retlen] = '/';
+        } else {
+            buff[*retlen] = '.';
+        }
         if (addmodname) {
             xml_strcpy(&buff[*retlen + 1], modname);
             buff[*retlen + modnamelen + 2] = '_';
@@ -2292,7 +2292,7 @@ static status_t
  *********************************************************************/
 static obj_template_t *
     find_next_child (obj_template_t *chobj,
-		     const xml_node_t *chnode)
+                     const xml_node_t *chnode)
 {
 
     obj_template_t *chnext, *foundobj;
@@ -2301,49 +2301,49 @@ static obj_template_t *
     chnext = chobj;
 
     for (;;) {
-	switch (obj_get_iqualval(chnext)) {
-	case NCX_IQUAL_ONE:
-	case NCX_IQUAL_1MORE:
-	    /* the current child is mandatory; this is an error */
-	    return NULL;
-	    /* else fall through to next case */
-	case NCX_IQUAL_OPT:
-	case NCX_IQUAL_ZMORE:
-	    /* the current child is optional; keep trying
-	     * try to get the next child in the complex type 
-	     */
-	    chnext = obj_next_child(chnext);
-	    if (!chnext) {
-		return NULL;
-	    } else {
-		if (chnext->objtype==OBJ_TYP_CHOICE ||
-		    chnext->objtype==OBJ_TYP_CASE) {
-		    foundobj = obj_find_child(chnext,
-					      xmlns_get_module(chnode->nsid),
-					      chnode->elname);
-		    if (foundobj && 
-			(foundobj->objtype==OBJ_TYP_CHOICE ||
-			 foundobj->objtype==OBJ_TYP_CASE)) {
-			foundobj = NULL;
-		    }
-		    if (foundobj) {
-			return chnext;  /* not the nested foundobj! */
-		    }
-		} else {
-		    res = xml_node_match(chnode,
-					 obj_get_nsid(chnext), 
-					 obj_get_name(chnext), 
-					 XML_NT_NONE);
-		    if (res == NO_ERR) {
-			return chnext;
-		    }
-		}
-	    }
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return NULL;
-	}
+        switch (obj_get_iqualval(chnext)) {
+        case NCX_IQUAL_ONE:
+        case NCX_IQUAL_1MORE:
+            /* the current child is mandatory; this is an error */
+            return NULL;
+            /* else fall through to next case */
+        case NCX_IQUAL_OPT:
+        case NCX_IQUAL_ZMORE:
+            /* the current child is optional; keep trying
+             * try to get the next child in the complex type 
+             */
+            chnext = obj_next_child(chnext);
+            if (!chnext) {
+                return NULL;
+            } else {
+                if (chnext->objtype==OBJ_TYP_CHOICE ||
+                    chnext->objtype==OBJ_TYP_CASE) {
+                    foundobj = obj_find_child(chnext,
+                                              xmlns_get_module(chnode->nsid),
+                                              chnode->elname);
+                    if (foundobj && 
+                        (foundobj->objtype==OBJ_TYP_CHOICE ||
+                         foundobj->objtype==OBJ_TYP_CASE)) {
+                        foundobj = NULL;
+                    }
+                    if (foundobj) {
+                        return chnext;  /* not the nested foundobj! */
+                    }
+                } else {
+                    res = xml_node_match(chnode,
+                                         obj_get_nsid(chnext), 
+                                         obj_get_name(chnext), 
+                                         XML_NT_NONE);
+                    if (res == NO_ERR) {
+                        return chnext;
+                    }
+                }
+            }
+            break;
+        default:
+            SET_ERROR(ERR_INTERNAL_VAL);
+            return NULL;
+        }
     }
     /*NOTREACHED*/
 
@@ -2399,55 +2399,55 @@ static void
 *********************************************************************/
 static boolean
     process_one_walker_child (obj_walker_fn_t walkerfn,
-			      void *cookie1,
-			      void *cookie2,
-			      obj_template_t  *obj,
-			      const xmlChar *modname,
-			      const xmlChar *childname,
-			      boolean configonly,
-			      boolean textmode,
-			      boolean *fncalled)
-			      
+                              void *cookie1,
+                              void *cookie2,
+                              obj_template_t  *obj,
+                              const xmlChar *modname,
+                              const xmlChar *childname,
+                              boolean configonly,
+                              boolean textmode,
+                              boolean *fncalled)
+                              
 {
     boolean         fnresult;
 
     *fncalled = FALSE;
     if (!obj_has_name(obj)) {
-	return TRUE;
+        return TRUE;
     }
 
     if (configonly && !childname && 
-	!obj_is_config(obj)) {
-	return TRUE;
+        !obj_is_config(obj)) {
+        return TRUE;
     }
 
     fnresult = TRUE;
     if (textmode) {
-	if (obj_is_leafy(obj)) {
-	    fnresult = (*walkerfn)(obj, cookie1, cookie2);
-	    *fncalled = TRUE;
-	}
+        if (obj_is_leafy(obj)) {
+            fnresult = (*walkerfn)(obj, cookie1, cookie2);
+            *fncalled = TRUE;
+        }
     } else if (modname && childname) {
-	if (!xml_strcmp(modname, 
-			obj_get_mod_name(obj)) &&
-	    !xml_strcmp(childname, obj_get_name(obj))) {
+        if (!xml_strcmp(modname, 
+                        obj_get_mod_name(obj)) &&
+            !xml_strcmp(childname, obj_get_name(obj))) {
 
-	    fnresult = (*walkerfn)(obj, cookie1, cookie2);
-	    *fncalled = TRUE;
-	}
+            fnresult = (*walkerfn)(obj, cookie1, cookie2);
+            *fncalled = TRUE;
+        }
     } else if (modname) {
-	if (!xml_strcmp(modname, obj_get_mod_name(obj))) {
-	    fnresult = (*walkerfn)(obj, cookie1, cookie2);
-	    *fncalled = TRUE;
-	}
+        if (!xml_strcmp(modname, obj_get_mod_name(obj))) {
+            fnresult = (*walkerfn)(obj, cookie1, cookie2);
+            *fncalled = TRUE;
+        }
     } else if (childname) {
-	if (!xml_strcmp(childname, obj_get_name(obj))) {
-	    fnresult = (*walkerfn)(obj, cookie1, cookie2);
-	    *fncalled = TRUE;
-	}
+        if (!xml_strcmp(childname, obj_get_name(obj))) {
+            fnresult = (*walkerfn)(obj, cookie1, cookie2);
+            *fncalled = TRUE;
+        }
     } else {
-	fnresult = (*walkerfn)(obj, cookie1, cookie2);
-	*fncalled = TRUE;
+        fnresult = (*walkerfn)(obj, cookie1, cookie2);
+        *fncalled = TRUE;
     }
 
     return fnresult;
@@ -2493,43 +2493,43 @@ static boolean
 *********************************************************************/
 static boolean
     test_one_child (ncx_module_t *exprmod,
-		    obj_walker_fn_t walkerfn,
-		    void *cookie1,
-		    void *cookie2,
-		    obj_template_t *obj,
-		    const xmlChar *modname,
-		    const xmlChar *name,
-		    boolean configonly,
-		    boolean textmode)
+                    obj_walker_fn_t walkerfn,
+                    void *cookie1,
+                    void *cookie2,
+                    obj_template_t *obj,
+                    const xmlChar *modname,
+                    const xmlChar *name,
+                    boolean configonly,
+                    boolean textmode)
 {
     boolean               fnresult, fncalled;
 
     if (obj->objtype == OBJ_TYP_CHOICE ||
-	obj->objtype == OBJ_TYP_CASE) {
-	fnresult = obj_find_all_children(exprmod,
-					 walkerfn,
-					 cookie1,
-					 cookie2,
-					 obj,
-					 modname,
-					 name,
-					 configonly,
-					 textmode,
-					 FALSE);
+        obj->objtype == OBJ_TYP_CASE) {
+        fnresult = obj_find_all_children(exprmod,
+                                         walkerfn,
+                                         cookie1,
+                                         cookie2,
+                                         obj,
+                                         modname,
+                                         name,
+                                         configonly,
+                                         textmode,
+                                         FALSE);
     } else {
-	fnresult = process_one_walker_child(walkerfn,
-					    cookie1,
-					    cookie2,
-					    obj,
-					    modname, 
-					    name,
-					    configonly,
-					    textmode,
-					    &fncalled);
+        fnresult = process_one_walker_child(walkerfn,
+                                            cookie1,
+                                            cookie2,
+                                            obj,
+                                            modname, 
+                                            name,
+                                            configonly,
+                                            textmode,
+                                            &fncalled);
     }
 
     if (!fnresult) {
-	return FALSE;
+        return FALSE;
     }
 
     return TRUE;
@@ -2580,47 +2580,47 @@ static boolean
 *********************************************************************/
 static boolean
     test_one_ancestor (ncx_module_t *exprmod,
-		       obj_walker_fn_t walkerfn,
-		       void *cookie1,
-		       void *cookie2,
-		       obj_template_t *obj,
-		       const xmlChar *modname,
-		       const xmlChar *name,
-		       boolean configonly,
-		       boolean textmode,
-		       boolean orself,
-		       boolean *fncalled)
+                       obj_walker_fn_t walkerfn,
+                       void *cookie1,
+                       void *cookie2,
+                       obj_template_t *obj,
+                       const xmlChar *modname,
+                       const xmlChar *name,
+                       boolean configonly,
+                       boolean textmode,
+                       boolean orself,
+                       boolean *fncalled)
 {
     boolean               fnresult;
 
     if (obj->objtype == OBJ_TYP_CHOICE ||
-	obj->objtype == OBJ_TYP_CASE) {
-	fnresult = obj_find_all_ancestors(exprmod,
-					  walkerfn,
-					  cookie1,
-					  cookie2,
-					  obj,
-					  modname,
-					  name,
-					  configonly,
-					  textmode,
-					  FALSE,
-					  orself,
-					  fncalled);
+        obj->objtype == OBJ_TYP_CASE) {
+        fnresult = obj_find_all_ancestors(exprmod,
+                                          walkerfn,
+                                          cookie1,
+                                          cookie2,
+                                          obj,
+                                          modname,
+                                          name,
+                                          configonly,
+                                          textmode,
+                                          FALSE,
+                                          orself,
+                                          fncalled);
     } else {
-	fnresult = process_one_walker_child(walkerfn,
-					    cookie1,
-					    cookie2,
-					    obj,
-					    modname, 
-					    name,
-					    configonly,
-					    textmode,
-					    fncalled);
+        fnresult = process_one_walker_child(walkerfn,
+                                            cookie1,
+                                            cookie2,
+                                            obj,
+                                            modname, 
+                                            name,
+                                            configonly,
+                                            textmode,
+                                            fncalled);
     }
 
     if (!fnresult) {
-	return FALSE;
+        return FALSE;
     }
 
     return TRUE;
@@ -2671,87 +2671,87 @@ static boolean
 *********************************************************************/
 static boolean
     test_one_descendant (ncx_module_t *exprmod,
-			 obj_walker_fn_t walkerfn,
-			 void *cookie1,
-			 void *cookie2,
-			 obj_template_t *startobj,
-			 const xmlChar *modname,
-			 const xmlChar *name,
-			 boolean configonly,
-			 boolean textmode,
-			 boolean orself,
-			 boolean *fncalled)
+                         obj_walker_fn_t walkerfn,
+                         void *cookie1,
+                         void *cookie2,
+                         obj_template_t *startobj,
+                         const xmlChar *modname,
+                         const xmlChar *name,
+                         boolean configonly,
+                         boolean textmode,
+                         boolean orself,
+                         boolean *fncalled)
 {
     obj_template_t *obj;
     dlq_hdr_t      *datadefQ;
     boolean         fnresult;
 
     if (orself) {
-	fnresult = process_one_walker_child(walkerfn,
-					    cookie1,
-					    cookie2,
-					    startobj,
-					    modname, 
-					    name,
-					    configonly,
-					    textmode,
-					    fncalled);
-	if (!fnresult) {
-	    return FALSE;
-	}
+        fnresult = process_one_walker_child(walkerfn,
+                                            cookie1,
+                                            cookie2,
+                                            startobj,
+                                            modname, 
+                                            name,
+                                            configonly,
+                                            textmode,
+                                            fncalled);
+        if (!fnresult) {
+            return FALSE;
+        }
     }
 
     datadefQ = obj_get_datadefQ(startobj);
     if (!datadefQ) {
-	return TRUE;
+        return TRUE;
     }
 
     for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (obj->objtype == OBJ_TYP_CHOICE ||
-	    obj->objtype == OBJ_TYP_CASE) {
-	    fnresult = obj_find_all_descendants(exprmod,
-						walkerfn,
-						cookie1,
-						cookie2,
-						obj,
-						modname,
-						name,
-						configonly,
-						textmode,
-						FALSE,
-						orself,
-						fncalled);
-	} else {
-	    fnresult = process_one_walker_child(walkerfn,
-						cookie1,
-						cookie2,
-						obj,
-						modname, 
-						name,
-						configonly,
-						textmode,
-						fncalled);
-	    if (fnresult && !*fncalled) {
-		fnresult = obj_find_all_descendants(exprmod,
-						    walkerfn,
-						    cookie1,
-						    cookie2,
-						    obj,
-						    modname,
-						    name,
-						    configonly,
-						    textmode,
-						    FALSE,
-						    orself,
-						    fncalled);
-	    }
-	}
-	if (!fnresult) {
-	    return FALSE;
-	}
+        if (obj->objtype == OBJ_TYP_CHOICE ||
+            obj->objtype == OBJ_TYP_CASE) {
+            fnresult = obj_find_all_descendants(exprmod,
+                                                walkerfn,
+                                                cookie1,
+                                                cookie2,
+                                                obj,
+                                                modname,
+                                                name,
+                                                configonly,
+                                                textmode,
+                                                FALSE,
+                                                orself,
+                                                fncalled);
+        } else {
+            fnresult = process_one_walker_child(walkerfn,
+                                                cookie1,
+                                                cookie2,
+                                                obj,
+                                                modname, 
+                                                name,
+                                                configonly,
+                                                textmode,
+                                                fncalled);
+            if (fnresult && !*fncalled) {
+                fnresult = obj_find_all_descendants(exprmod,
+                                                    walkerfn,
+                                                    cookie1,
+                                                    cookie2,
+                                                    obj,
+                                                    modname,
+                                                    name,
+                                                    configonly,
+                                                    textmode,
+                                                    FALSE,
+                                                    orself,
+                                                    fncalled);
+            }
+        }
+        if (!fnresult) {
+            return FALSE;
+        }
     }
 
     return TRUE;
@@ -2807,18 +2807,18 @@ static boolean
 *********************************************************************/
 static boolean
     test_one_pfnode (ncx_module_t *exprmod,
-		     obj_walker_fn_t walkerfn,
-		     void *cookie1,
-		     void *cookie2,
-		     obj_template_t *obj,
-		     const xmlChar *modname,
-		     const xmlChar *name,
-		     boolean configonly,
-		     boolean dblslash,
-		     boolean textmode,
-		     boolean forward,
-		     ncx_xpath_axis_t axis,
-		     boolean *fncalled)
+                     obj_walker_fn_t walkerfn,
+                     void *cookie1,
+                     void *cookie2,
+                     obj_template_t *obj,
+                     const xmlChar *modname,
+                     const xmlChar *name,
+                     boolean configonly,
+                     boolean dblslash,
+                     boolean textmode,
+                     boolean forward,
+                     ncx_xpath_axis_t axis,
+                     boolean *fncalled)
 {
     obj_template_t *child;
     boolean         fnresult, needcont;
@@ -2828,116 +2828,116 @@ static boolean
      * it would match
      */
     if (obj->objtype == OBJ_TYP_LIST ||
-	obj->objtype == OBJ_TYP_LEAF_LIST) {
-	;
+        obj->objtype == OBJ_TYP_LEAF_LIST) {
+        ;
     } else if (forward) {
-	obj = (obj_template_t *)dlq_nextEntry(obj);
+        obj = (obj_template_t *)dlq_nextEntry(obj);
     } else {
-	obj = (obj_template_t *)dlq_prevEntry(obj);
+        obj = (obj_template_t *)dlq_prevEntry(obj);
     }
 
     while (obj) {
-	needcont = FALSE;
+        needcont = FALSE;
 
-	if (!obj_has_name(obj)) {
-	    needcont = TRUE;
-	}
+        if (!obj_has_name(obj)) {
+            needcont = TRUE;
+        }
 
-	if (configonly && !name && !obj_is_config(obj)) {
-	    needcont = TRUE;
-	}
+        if (configonly && !name && !obj_is_config(obj)) {
+            needcont = TRUE;
+        }
 
-	if (needcont) {
-	    /* get the next node to process */
-	    if (forward) {
-		obj = (obj_template_t *)dlq_nextEntry(obj);
-	    } else {
-		obj = (obj_template_t *)dlq_prevEntry(obj);
-	    }
-	    continue;
-	}
+        if (needcont) {
+            /* get the next node to process */
+            if (forward) {
+                obj = (obj_template_t *)dlq_nextEntry(obj);
+            } else {
+                obj = (obj_template_t *)dlq_prevEntry(obj);
+            }
+            continue;
+        }
 
-	if (obj->objtype == OBJ_TYP_CHOICE ||
-	    obj->objtype == OBJ_TYP_CASE) {
-	    for (child = (forward) ? obj_first_child(obj) :
-		     obj_last_child(obj);
-		 child != NULL;
-		 child = (forward) ? obj_next_child(child) :
-		     obj_previous_child(child)) {
+        if (obj->objtype == OBJ_TYP_CHOICE ||
+            obj->objtype == OBJ_TYP_CASE) {
+            for (child = (forward) ? obj_first_child(obj) :
+                     obj_last_child(obj);
+                 child != NULL;
+                 child = (forward) ? obj_next_child(child) :
+                     obj_previous_child(child)) {
 
-		fnresult = obj_find_all_pfaxis(exprmod,
-					       walkerfn,
-					       cookie1,
-					       cookie2,
-					       child,
-					       modname,
-					       name,
-					       configonly,
-					       dblslash,
-					       textmode,
-					       FALSE,
-					       axis,
-					       fncalled);
-		if (!fnresult) {
-		    return FALSE;
-		}
-	    }
-	} else {
-	    fnresult = process_one_walker_child(walkerfn,
-						cookie1,
-						cookie2,
-						obj,
-						modname,
-						name,
-						configonly,
-						textmode,
-						fncalled);
-	    if (!fnresult) {
-		return FALSE;
-	    }
+                fnresult = obj_find_all_pfaxis(exprmod,
+                                               walkerfn,
+                                               cookie1,
+                                               cookie2,
+                                               child,
+                                               modname,
+                                               name,
+                                               configonly,
+                                               dblslash,
+                                               textmode,
+                                               FALSE,
+                                               axis,
+                                               fncalled);
+                if (!fnresult) {
+                    return FALSE;
+                }
+            }
+        } else {
+            fnresult = process_one_walker_child(walkerfn,
+                                                cookie1,
+                                                cookie2,
+                                                obj,
+                                                modname,
+                                                name,
+                                                configonly,
+                                                textmode,
+                                                fncalled);
+            if (!fnresult) {
+                return FALSE;
+            }
 
-	    if (!*fncalled && dblslash) {
-		/* if /foo did not get added, than 
-		 * try /foo/bar, /foo/baz, etc.
-		 * check all the child nodes even if
-		 * one of them matches, because all
-		 * matches are needed with the '//' operator
-		 */
-		for (child = (forward) ?
-			 obj_first_child(obj) :
-			 obj_last_child(obj);
-		     child != NULL;
-		     child = (forward) ?
-			 obj_next_child(child) :
-			 obj_previous_child(child)) {
+            if (!*fncalled && dblslash) {
+                /* if /foo did not get added, than 
+                 * try /foo/bar, /foo/baz, etc.
+                 * check all the child nodes even if
+                 * one of them matches, because all
+                 * matches are needed with the '//' operator
+                 */
+                for (child = (forward) ?
+                         obj_first_child(obj) :
+                         obj_last_child(obj);
+                     child != NULL;
+                     child = (forward) ?
+                         obj_next_child(child) :
+                         obj_previous_child(child)) {
 
-		    fnresult = 
-			obj_find_all_pfaxis(exprmod,
-					    walkerfn, 
-					    cookie1, 
-					    cookie2,
-					    child, 
-					    modname, 
-					    name, 
-					    configonly,
-					    dblslash,
-					    textmode,
-					    FALSE,
-					    axis,
-					    fncalled);
-		    if (!fnresult) {
-			return FALSE;
-		    }
-		}
-	    }
-	}
+                    fnresult = 
+                        obj_find_all_pfaxis(exprmod,
+                                            walkerfn, 
+                                            cookie1, 
+                                            cookie2,
+                                            child, 
+                                            modname, 
+                                            name, 
+                                            configonly,
+                                            dblslash,
+                                            textmode,
+                                            FALSE,
+                                            axis,
+                                            fncalled);
+                    if (!fnresult) {
+                        return FALSE;
+                    }
+                }
+            }
+        }
 
-	/* get the next node to process */
-	if (forward) {
-	    obj = (obj_template_t *)dlq_nextEntry(obj);
-	} else {
-	    obj = (obj_template_t *)dlq_prevEntry(obj);
-	}
+        /* get the next node to process */
+        if (forward) {
+            obj = (obj_template_t *)dlq_nextEntry(obj);
+        } else {
+            obj = (obj_template_t *)dlq_prevEntry(obj);
+        }
 
     }
     return TRUE;
@@ -2966,14 +2966,14 @@ obj_template_t *
 
 #ifdef DEBUG
     if (!objtype || objtype > OBJ_TYP_NOTIF) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 #endif
 
     obj = m__getObj(obj_template_t);
     if (!obj) {
-	return NULL;
+        return NULL;
     }
 
     (void)memset(obj, 0x0, sizeof(obj_template_t));
@@ -2984,94 +2984,94 @@ obj_template_t *
     
     switch (objtype) {
     case OBJ_TYP_CONTAINER:
-	obj->def.container = new_container(TRUE);
-	if (!obj->def.container) {
-	    m__free(obj);
-	    return NULL;
-	}
-	break;
+        obj->def.container = new_container(TRUE);
+        if (!obj->def.container) {
+            m__free(obj);
+            return NULL;
+        }
+        break;
     case OBJ_TYP_LEAF:
     case OBJ_TYP_ANYXML:
-	obj->def.leaf = new_leaf(TRUE);
-	if (!obj->def.leaf) {
-	    m__free(obj);
-	    return NULL;
-	}
-	break;
+        obj->def.leaf = new_leaf(TRUE);
+        if (!obj->def.leaf) {
+            m__free(obj);
+            return NULL;
+        }
+        break;
     case OBJ_TYP_LEAF_LIST:
-	obj->def.leaflist = new_leaflist(TRUE);
-	if (!obj->def.leaflist) {
-	    m__free(obj);
-	    return NULL;
-	}
-	break;
+        obj->def.leaflist = new_leaflist(TRUE);
+        if (!obj->def.leaflist) {
+            m__free(obj);
+            return NULL;
+        }
+        break;
     case OBJ_TYP_LIST:
-	obj->def.list = new_list(TRUE);
-	if (!obj->def.list) {
-	    m__free(obj);
-	    return NULL;
-	}
-	break;
+        obj->def.list = new_list(TRUE);
+        if (!obj->def.list) {
+            m__free(obj);
+            return NULL;
+        }
+        break;
     case OBJ_TYP_CHOICE:
-	obj->def.choic = new_choice(TRUE);
-	if (!obj->def.choic) {
-	    m__free(obj);
-	    return NULL;
-	}
-	break;
+        obj->def.choic = new_choice(TRUE);
+        if (!obj->def.choic) {
+            m__free(obj);
+            return NULL;
+        }
+        break;
     case OBJ_TYP_CASE:
-	obj->def.cas = new_case(TRUE);
-	if (!obj->def.cas) {
-	    m__free(obj);
-	    return NULL;
-	}
-	break;
+        obj->def.cas = new_case(TRUE);
+        if (!obj->def.cas) {
+            m__free(obj);
+            return NULL;
+        }
+        break;
     case OBJ_TYP_USES:
-	obj->def.uses = new_uses(TRUE);
-	if (!obj->def.uses) {
-	    m__free(obj);
-	    return NULL;
-	}
-	break;
+        obj->def.uses = new_uses(TRUE);
+        if (!obj->def.uses) {
+            m__free(obj);
+            return NULL;
+        }
+        break;
     case OBJ_TYP_REFINE:
-	obj->def.refine = new_refine();
-	if (!obj->def.refine) {
-	    m__free(obj);
-	    return NULL;
-	}
-	break;
+        obj->def.refine = new_refine();
+        if (!obj->def.refine) {
+            m__free(obj);
+            return NULL;
+        }
+        break;
     case OBJ_TYP_AUGMENT:
-	obj->def.augment = new_augment(TRUE);
-	if (!obj->def.augment) {
-	    m__free(obj);
-	    return NULL;
-	}
-	break;
+        obj->def.augment = new_augment(TRUE);
+        if (!obj->def.augment) {
+            m__free(obj);
+            return NULL;
+        }
+        break;
     case OBJ_TYP_RPC:
-	obj->def.rpc = new_rpc();
-	if (!obj->def.rpc) {
-	    m__free(obj);
-	    return NULL;
-	}
-	break;
+        obj->def.rpc = new_rpc();
+        if (!obj->def.rpc) {
+            m__free(obj);
+            return NULL;
+        }
+        break;
     case OBJ_TYP_RPCIO:
-	obj->def.rpcio = new_rpcio();
-	if (!obj->def.rpcio) {
-	    m__free(obj);
-	    return NULL;
-	}
-	break;
+        obj->def.rpcio = new_rpcio();
+        if (!obj->def.rpcio) {
+            m__free(obj);
+            return NULL;
+        }
+        break;
     case OBJ_TYP_NOTIF:
-	obj->def.notif = new_notif();
-	if (!obj->def.notif) {
-	    m__free(obj);
-	    return NULL;
-	}
-	break;
+        obj->def.notif = new_notif();
+        if (!obj->def.notif) {
+            m__free(obj);
+            return NULL;
+        }
+        break;
     case OBJ_TYP_NONE:
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 
     return obj;
@@ -3096,7 +3096,7 @@ void
 #ifdef DEBUG
     if (!obj) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        return;
     }
 #endif
 
@@ -3105,74 +3105,74 @@ void
     ncx_clean_iffeatureQ(&obj->iffeatureQ);
 
     if (obj->when) {
-	xpath_free_pcb(obj->when);
+        xpath_free_pcb(obj->when);
     }
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	if (obj->def.container) {
-	    free_container(obj->def.container, obj->flags);
-	}
-	break;
+        if (obj->def.container) {
+            free_container(obj->def.container, obj->flags);
+        }
+        break;
     case OBJ_TYP_LEAF:
     case OBJ_TYP_ANYXML:
-	if (obj->def.leaf) {
-	    free_leaf(obj->def.leaf, obj->flags);
-	}
-	break;
+        if (obj->def.leaf) {
+            free_leaf(obj->def.leaf, obj->flags);
+        }
+        break;
     case OBJ_TYP_LEAF_LIST:
-	if (obj->def.leaflist) {
-	    free_leaflist(obj->def.leaflist, obj->flags);
-	}
-	break;
+        if (obj->def.leaflist) {
+            free_leaflist(obj->def.leaflist, obj->flags);
+        }
+        break;
     case OBJ_TYP_LIST:
-	if (obj->def.list) {
-	    free_list(obj->def.list, obj->flags);
-	}
-	break;
+        if (obj->def.list) {
+            free_list(obj->def.list, obj->flags);
+        }
+        break;
     case OBJ_TYP_CHOICE:
-	if (obj->def.choic) {
-	    free_choice(obj->def.choic, obj->flags);
-	}
-	break;
+        if (obj->def.choic) {
+            free_choice(obj->def.choic, obj->flags);
+        }
+        break;
     case OBJ_TYP_CASE:
-	if (obj->def.cas) {
-	    free_case(obj->def.cas);
-	}
-	break;
+        if (obj->def.cas) {
+            free_case(obj->def.cas);
+        }
+        break;
     case OBJ_TYP_USES:
-	if (obj->def.uses) {
-	    free_uses(obj->def.uses);
-	}
-	break;
+        if (obj->def.uses) {
+            free_uses(obj->def.uses);
+        }
+        break;
     case OBJ_TYP_REFINE:
-	if (obj->def.refine) {
-	    free_refine(obj->def.refine);
-	}
-	break;
+        if (obj->def.refine) {
+            free_refine(obj->def.refine);
+        }
+        break;
     case OBJ_TYP_AUGMENT:
-	if (obj->def.augment) {
-	    free_augment(obj->def.augment);
-	}
-	break;
+        if (obj->def.augment) {
+            free_augment(obj->def.augment);
+        }
+        break;
     case OBJ_TYP_RPC:
-	if (obj->def.rpc) {
-	    free_rpc(obj->def.rpc);
-	}
-	break;
+        if (obj->def.rpc) {
+            free_rpc(obj->def.rpc);
+        }
+        break;
     case OBJ_TYP_RPCIO:
-	if (obj->def.rpcio) {
-	    free_rpcio(obj->def.rpcio);
-	}
-	break;
+        if (obj->def.rpcio) {
+            free_rpcio(obj->def.rpcio);
+        }
+        break;
     case OBJ_TYP_NOTIF:
-	if (obj->def.notif) {
-	    free_notif(obj->def.notif);
-	}
-	break;
+        if (obj->def.notif) {
+            free_notif(obj->def.notif);
+        }
+        break;
     case OBJ_TYP_NONE:
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     m__free(obj);
@@ -3197,14 +3197,14 @@ void
 *********************************************************************/
 obj_template_t *
     obj_find_template (dlq_hdr_t  *que,
-		       const xmlChar *modname,
-		       const xmlChar *objname)
+                       const xmlChar *modname,
+                       const xmlChar *objname)
 {
 
 #ifdef DEBUG
     if (!que || !objname) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
@@ -3231,14 +3231,14 @@ obj_template_t *
 *********************************************************************/
 const obj_template_t *
     obj_find_template_con (dlq_hdr_t  *que,
-			   const xmlChar *modname,
-			   const xmlChar *objname)
+                           const xmlChar *modname,
+                           const xmlChar *objname)
 {
 
 #ifdef DEBUG
     if (!que || !objname) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
@@ -3264,14 +3264,14 @@ const obj_template_t *
 *********************************************************************/
 obj_template_t *
     obj_find_template_test (dlq_hdr_t  *que,
-			    const xmlChar *modname,
-			    const xmlChar *objname)
+                            const xmlChar *modname,
+                            const xmlChar *objname)
 {
 
 #ifdef DEBUG
     if (!que || !objname) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
@@ -3300,8 +3300,8 @@ obj_template_t *
 *********************************************************************/
 obj_template_t *
     obj_find_template_top (ncx_module_t *mod,
-			   const xmlChar *modname,
-			   const xmlChar *objname)
+                           const xmlChar *modname,
+                           const xmlChar *objname)
 {
     obj_template_t *obj;
     yang_node_t    *node;
@@ -3317,50 +3317,50 @@ obj_template_t *
     /* check the main module */
     obj = find_template(&mod->datadefQ, 
                         modname, 
-			objname, 
+                        objname, 
                         FALSE, 
                         FALSE, 
                         NULL);
     if (obj) {
-	return obj;
+        return obj;
     }
 
     if (!mod->allincQ) {
-	return NULL;  /* NCX module */
+        return NULL;  /* NCX module */
     }
 
     /* check all the submodules, but only the ones visible
      * to this module or submodule, YANG only
      */
     for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
-	 inc != NULL;
-	 inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+         inc != NULL;
+         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
 
-	/* get the real submodule struct */
-	if (!inc->submod) {
-	    node = yang_find_node(mod->allincQ, 
-				  inc->submodule,
-				  inc->revision);
-	    if (node) {
-		inc->submod = node->submod;
-	    }
-	    if (!inc->submod) {
-		/* include not found, should not be in Q !!! */
-		SET_ERROR(ERR_INTERNAL_VAL);
-		continue;
-	    }
-	}
+        /* get the real submodule struct */
+        if (!inc->submod) {
+            node = yang_find_node(mod->allincQ, 
+                                  inc->submodule,
+                                  inc->revision);
+            if (node) {
+                inc->submod = node->submod;
+            }
+            if (!inc->submod) {
+                /* include not found, should not be in Q !!! */
+                SET_ERROR(ERR_INTERNAL_VAL);
+                continue;
+            }
+        }
 
-	/* check the type Q in this submodule */
-	obj = find_template(&inc->submod->datadefQ,
-			    modname, 
+        /* check the type Q in this submodule */
+        obj = find_template(&inc->submod->datadefQ,
+                            modname, 
                             objname,
-			    FALSE, 
+                            FALSE, 
                             FALSE, 
                             NULL);
-	if (obj) {
-	    return obj;
-	}
+        if (obj) {
+            return obj;
+        }
     }
 
     return NULL;
@@ -3389,23 +3389,23 @@ obj_template_t *
 *********************************************************************/
 obj_template_t *
     obj_find_child (obj_template_t *obj,
-		    const xmlChar *modname,
-		    const xmlChar *objname)
+                    const xmlChar *modname,
+                    const xmlChar *objname)
 {
     dlq_hdr_t  *que;
 
 #ifdef DEBUG
     if (!obj || !objname) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
     que = obj_get_datadefQ(obj);
     if (que) {
-	return find_template(que, 
+        return find_template(que, 
                              modname, 
-			     objname, 
+                             objname, 
                              TRUE, 
                              FALSE, 
                              NULL);
@@ -3434,9 +3434,9 @@ obj_template_t *
 *********************************************************************/
 obj_template_t *
     obj_find_child_str (obj_template_t *obj,
-			const xmlChar *modname,
-			const xmlChar *objname,
-			uint32 objnamelen)
+                        const xmlChar *modname,
+                        const xmlChar *objname,
+                        uint32 objnamelen)
 {
     obj_template_t *template;
     dlq_hdr_t      *que;
@@ -3445,28 +3445,28 @@ obj_template_t *
 #ifdef DEBUG
     if (!obj || !objname) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
     if (objnamelen > NCX_MAX_NLEN) {
-	return NULL;
+        return NULL;
     }
     
     que = obj_get_datadefQ(obj);
     if (que) {
-	buff = m__getMem(objnamelen+1);
-	if (buff) {
-	    xml_strncpy(buff, objname, objnamelen);
-	    template = find_template(que, 
-				     modname, 
-				     buff, 
-				     TRUE, 
-				     FALSE, 
-				     NULL);
-	    m__free(buff);
-	    return template;
-	}
+        buff = m__getMem(objnamelen+1);
+        if (buff) {
+            xml_strncpy(buff, objname, objnamelen);
+            template = find_template(que, 
+                                     modname, 
+                                     buff, 
+                                     TRUE, 
+                                     FALSE, 
+                                     NULL);
+            m__free(buff);
+            return template;
+        }
     }
 
     return NULL;
@@ -3503,10 +3503,10 @@ obj_template_t *
 *********************************************************************/
 obj_template_t *
     obj_match_child_str (obj_template_t *obj,
-			 const xmlChar *modname,
-			 const xmlChar *objname,
-			 uint32 objnamelen,
-			 uint32 *matchcount)
+                         const xmlChar *modname,
+                         const xmlChar *objname,
+                         uint32 objnamelen,
+                         uint32 *matchcount)
 {
     obj_template_t  *template;
     dlq_hdr_t       *que;
@@ -3515,28 +3515,28 @@ obj_template_t *
 #ifdef DEBUG
     if (!obj || !objname) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
     if (objnamelen > NCX_MAX_NLEN) {
-	return NULL;
+        return NULL;
     }
     
     que = obj_get_datadefQ(obj);
     if (que) {
-	buff = m__getMem(objnamelen+1);
-	if (buff) {
-	    xml_strncpy(buff, objname, objnamelen);
-	    template = find_template(que, 
-				     modname, 
-				     buff, 
-				     TRUE, 
-				     TRUE, 
-				     matchcount);
-	    m__free(buff);
-	    return template;
-	}
+        buff = m__getMem(objnamelen+1);
+        if (buff) {
+            xml_strncpy(buff, objname, objnamelen);
+            template = find_template(que, 
+                                     modname, 
+                                     buff, 
+                                     TRUE, 
+                                     TRUE, 
+                                     matchcount);
+            m__free(buff);
+            return template;
+        }
     }
 
     return NULL;
@@ -3568,19 +3568,19 @@ obj_template_t *
 #ifdef DEBUG
     if (!obj) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
     que = obj_get_datadefQ(obj);
     if (que) {
-	for (chobj = (obj_template_t *)dlq_firstEntry(que);
-	     chobj != NULL;
-	     chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
-	    if (obj_has_name(chobj) && obj_is_enabled(chobj)) {
-		return chobj;
-	    }
-	}
+        for (chobj = (obj_template_t *)dlq_firstEntry(que);
+             chobj != NULL;
+             chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
+            if (obj_has_name(chobj) && obj_is_enabled(chobj)) {
+                return chobj;
+            }
+        }
     }
 
     return NULL;
@@ -3612,19 +3612,19 @@ obj_template_t *
 #ifdef DEBUG
     if (!obj) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
     que = obj_get_datadefQ(obj);
     if (que) {
-	for (chobj = (obj_template_t *)dlq_lastEntry(que);
-	     chobj != NULL;
-	     chobj = (obj_template_t *)dlq_prevEntry(chobj)) {
-	    if (obj_has_name(chobj) && obj_is_enabled(chobj)) {
-		return chobj;
-	    }
-	}
+        for (chobj = (obj_template_t *)dlq_lastEntry(que);
+             chobj != NULL;
+             chobj = (obj_template_t *)dlq_prevEntry(chobj)) {
+            if (obj_has_name(chobj) && obj_is_enabled(chobj)) {
+                return chobj;
+            }
+        }
     }
 
     return NULL;
@@ -3656,19 +3656,19 @@ obj_template_t *
 #ifdef DEBUG
     if (!obj) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
     next = obj;
     done = FALSE;
     while (!done) {
-	next = (obj_template_t *)dlq_nextEntry(next);
-	if (!next) {
-	    done = TRUE;
-	} else if (obj_has_name(next) && obj_is_enabled(next)) {
-	    return next;
-	}
+        next = (obj_template_t *)dlq_nextEntry(next);
+        if (!next) {
+            done = TRUE;
+        } else if (obj_has_name(next) && obj_is_enabled(next)) {
+            return next;
+        }
     }
     return NULL;
 
@@ -3699,19 +3699,19 @@ obj_template_t *
 #ifdef DEBUG
     if (!obj) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
     prev = obj;
     done = FALSE;
     while (!done) {
-	prev = (obj_template_t *)dlq_prevEntry(prev);
-	if (!prev) {
-	    done = TRUE;
-	} else if (obj_has_name(prev) && obj_is_enabled(prev)) {
-	    return prev;
-	}
+        prev = (obj_template_t *)dlq_prevEntry(prev);
+        if (!prev) {
+            done = TRUE;
+        } else if (obj_has_name(prev) && obj_is_enabled(prev)) {
+            return prev;
+        }
     }
     return NULL;
 
@@ -3743,7 +3743,7 @@ obj_template_t *
 #ifdef DEBUG
     if (!obj) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
@@ -3752,19 +3752,19 @@ obj_template_t *
      */
     que = obj_get_datadefQ(obj);
     if (que) {
-	for (chobj = (obj_template_t *)dlq_firstEntry(que);
-	     chobj != NULL;
-	     chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
+        for (chobj = (obj_template_t *)dlq_firstEntry(que);
+             chobj != NULL;
+             chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 
-	    if (obj_has_name(chobj) && obj_is_enabled(chobj)) {
-		if (chobj->objtype == OBJ_TYP_CHOICE ||
-		    chobj->objtype == OBJ_TYP_CASE) {
-		    return (obj_first_child_deep(chobj));
-		} else {
-		    return chobj;
-		}
-	    }
-	}
+            if (obj_has_name(chobj) && obj_is_enabled(chobj)) {
+                if (chobj->objtype == OBJ_TYP_CHOICE ||
+                    chobj->objtype == OBJ_TYP_CASE) {
+                    return (obj_first_child_deep(chobj));
+                } else {
+                    return chobj;
+                }
+            }
+        }
     }
 
     return NULL;
@@ -3796,7 +3796,7 @@ obj_template_t *
 #ifdef DEBUG
     if (!obj) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
@@ -3805,68 +3805,68 @@ obj_template_t *
      */
     next = obj;
     while (next) {
-	last = next;
+        last = next;
 
-	/* try next sibling */
-	next = obj_next_child(next);
-	if (next) {
-	    switch (next->objtype) {
-	    case OBJ_TYP_CHOICE:
-		/* dive into each case to find a first object
-		 * this should return the first object in the 
-		 * first case, but it checks the entire choice
-		 * to support empty case arms
-		 */
-		for (cas = obj_first_child(next);
-		     cas != NULL;
-		     cas = obj_next_child(next)) {
-		    child = obj_first_child(cas);
-		    if (child) {
-			return child;
-		    }
-		}
-		continue;
-	    case OBJ_TYP_CASE:
-		child = obj_first_child(next);
-		if (child) {
-		    return child;
-		}
-		continue;
-	    default:
-		return next;
-	    }
-	}
+        /* try next sibling */
+        next = obj_next_child(next);
+        if (next) {
+            switch (next->objtype) {
+            case OBJ_TYP_CHOICE:
+                /* dive into each case to find a first object
+                 * this should return the first object in the 
+                 * first case, but it checks the entire choice
+                 * to support empty case arms
+                 */
+                for (cas = obj_first_child(next);
+                     cas != NULL;
+                     cas = obj_next_child(next)) {
+                    child = obj_first_child(cas);
+                    if (child) {
+                        return child;
+                    }
+                }
+                continue;
+            case OBJ_TYP_CASE:
+                child = obj_first_child(next);
+                if (child) {
+                    return child;
+                }
+                continue;
+            default:
+                return next;
+            }
+        }
 
-	/* was last sibling, try parent if this is a case */
-	if (last->parent && 
-	    (last->parent->objtype==OBJ_TYP_CASE)) {
+        /* was last sibling, try parent if this is a case */
+        if (last->parent && 
+            (last->parent->objtype==OBJ_TYP_CASE)) {
 
- 	    cas = (obj_template_t *)
-		dlq_nextEntry(last->parent);
-	    if (!cas) {
-		/* no next case, try next object after choice */
-		return obj_next_child_deep(last->parent->parent);
-	    } else {
-		/* keep trying the next case until one with
-		 * a child node is found
-		 */
-		while (1) {
-		    next = obj_first_child(cas);
-		    if (next) {
-			return next;
-		    } else {
-			cas = (obj_template_t *)
-			    dlq_nextEntry(cas);
-			if (!cas) {
-			    /* no next case, ret. object after choice */
-			    return 
-				obj_next_child_deep(last->parent->parent);
-			}
-		    }
-		}
-		/*NOTREACHED*/
-	    }
-	}
+            cas = (obj_template_t *)
+                dlq_nextEntry(last->parent);
+            if (!cas) {
+                /* no next case, try next object after choice */
+                return obj_next_child_deep(last->parent->parent);
+            } else {
+                /* keep trying the next case until one with
+                 * a child node is found
+                 */
+                while (1) {
+                    next = obj_first_child(cas);
+                    if (next) {
+                        return next;
+                    } else {
+                        cas = (obj_template_t *)
+                            dlq_nextEntry(cas);
+                        if (!cas) {
+                            /* no next case, ret. object after choice */
+                            return 
+                                obj_next_child_deep(last->parent->parent);
+                        }
+                    }
+                }
+                /*NOTREACHED*/
+            }
+        }
     }
     return NULL;
 
@@ -3914,15 +3914,15 @@ obj_template_t *
 *********************************************************************/
 boolean
     obj_find_all_children (ncx_module_t *exprmod,
-			   obj_walker_fn_t walkerfn,
-			   void *cookie1,
-			   void *cookie2,
-			   obj_template_t *startnode,
-			   const xmlChar *modname,
-			   const xmlChar *childname,
-			   boolean configonly,
-			   boolean textmode,
-			   boolean useroot)
+                           obj_walker_fn_t walkerfn,
+                           void *cookie1,
+                           void *cookie2,
+                           obj_template_t *startnode,
+                           const xmlChar *modname,
+                           const xmlChar *childname,
+                           boolean configonly,
+                           boolean textmode,
+                           boolean useroot)
 {
     dlq_hdr_t         *datadefQ;
     obj_template_t    *obj;
@@ -3931,100 +3931,100 @@ boolean
 
 #ifdef DEBUG
     if (!exprmod || !walkerfn || !startnode) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     if (obj_is_root(startnode) && !useroot) {
 
-	for (obj = ncx_get_first_data_object(exprmod);
-	     obj != NULL;
-	     obj = ncx_get_next_data_object(exprmod, obj)) {
+        for (obj = ncx_get_first_data_object(exprmod);
+             obj != NULL;
+             obj = ncx_get_next_data_object(exprmod, obj)) {
 
-	    fnresult = test_one_child(exprmod,
-				      walkerfn,
-				      cookie1,
-				      cookie2,
-				      obj,
-				      modname,
-				      childname,
-				      configonly,
-				      textmode);
-	    if (!fnresult) {
-		return FALSE;
-	    }
-	}
+            fnresult = test_one_child(exprmod,
+                                      walkerfn,
+                                      cookie1,
+                                      cookie2,
+                                      obj,
+                                      modname,
+                                      childname,
+                                      configonly,
+                                      textmode);
+            if (!fnresult) {
+                return FALSE;
+            }
+        }
 
-	for (mod = ncx_get_first_module();
-	     mod != NULL;
-	     mod = ncx_get_next_module(mod)) {
+        for (mod = ncx_get_first_module();
+             mod != NULL;
+             mod = ncx_get_next_module(mod)) {
 
-	    for (obj = ncx_get_first_data_object(mod);
-		 obj != NULL;
-		 obj = ncx_get_next_data_object(mod, obj)) {
+            for (obj = ncx_get_first_data_object(mod);
+                 obj != NULL;
+                 obj = ncx_get_next_data_object(mod, obj)) {
 
-		fnresult = test_one_child(exprmod,
-					  walkerfn,
-					  cookie1,
-					  cookie2,
-					  obj,
-					  modname,
-					  childname,
-					  configonly,
-					  textmode);
-		if (!fnresult) {
-		    return FALSE;
-		}
-	    }
-	}
+                fnresult = test_one_child(exprmod,
+                                          walkerfn,
+                                          cookie1,
+                                          cookie2,
+                                          obj,
+                                          modname,
+                                          childname,
+                                          configonly,
+                                          textmode);
+                if (!fnresult) {
+                    return FALSE;
+                }
+            }
+        }
 
-	for (mod = ncx_get_first_session_module();
-	     mod != NULL;
-	     mod = ncx_get_next_session_module(mod)) {
+        for (mod = ncx_get_first_session_module();
+             mod != NULL;
+             mod = ncx_get_next_session_module(mod)) {
 
-	    for (obj = ncx_get_first_data_object(mod);
-		 obj != NULL;
-		 obj = ncx_get_next_data_object(mod, obj)) {
+            for (obj = ncx_get_first_data_object(mod);
+                 obj != NULL;
+                 obj = ncx_get_next_data_object(mod, obj)) {
 
-		fnresult = test_one_child(exprmod,
-					  walkerfn,
-					  cookie1,
-					  cookie2,
-					  obj,
-					  modname,
-					  childname,
-					  configonly,
-					  textmode);
-		if (!fnresult) {
-		    return FALSE;
-		}
-	    }
-	}
+                fnresult = test_one_child(exprmod,
+                                          walkerfn,
+                                          cookie1,
+                                          cookie2,
+                                          obj,
+                                          modname,
+                                          childname,
+                                          configonly,
+                                          textmode);
+                if (!fnresult) {
+                    return FALSE;
+                }
+            }
+        }
     } else {
 
-	datadefQ = obj_get_datadefQ(startnode);
-	if (!datadefQ) {
-	    return TRUE;
-	}
+        datadefQ = obj_get_datadefQ(startnode);
+        if (!datadefQ) {
+            return TRUE;
+        }
 
-	for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	     obj != NULL;
-	     obj = (obj_template_t *)dlq_nextEntry(obj)) {
+        for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
+             obj != NULL;
+             obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	    fnresult = test_one_child(exprmod,
-				      walkerfn,
-				      cookie1,
-				      cookie2,
-				      obj,
-				      modname,
-				      childname,
-				      configonly,
-				      textmode);
-	    if (!fnresult) {
-		return FALSE;
-	    }
-	}
+            fnresult = test_one_child(exprmod,
+                                      walkerfn,
+                                      cookie1,
+                                      cookie2,
+                                      obj,
+                                      modname,
+                                      childname,
+                                      configonly,
+                                      textmode);
+            if (!fnresult) {
+                return FALSE;
+            }
+        }
     }
 
     return TRUE;
@@ -4079,17 +4079,17 @@ boolean
 *********************************************************************/
 boolean
     obj_find_all_ancestors (ncx_module_t *exprmod,
-			    obj_walker_fn_t walkerfn,
-			    void *cookie1,
-			    void *cookie2,
-			    obj_template_t *startnode,
-			    const xmlChar *modname,
-			    const xmlChar *name,
-			    boolean configonly,
-			    boolean textmode,
-			    boolean useroot,
-			    boolean orself,
-			    boolean *fncalled)
+                            obj_walker_fn_t walkerfn,
+                            void *cookie1,
+                            void *cookie2,
+                            obj_template_t *startnode,
+                            const xmlChar *modname,
+                            const xmlChar *name,
+                            boolean configonly,
+                            boolean textmode,
+                            boolean useroot,
+                            boolean orself,
+                            boolean *fncalled)
 {
     obj_template_t       *obj;
     ncx_module_t         *mod;
@@ -4097,111 +4097,111 @@ boolean
 
 #ifdef DEBUG
     if (!exprmod || !walkerfn || !startnode || !fncalled) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     *fncalled = FALSE;
 
     if (orself) {
-	obj = startnode;
+        obj = startnode;
     } else {
-	obj = startnode->parent;
+        obj = startnode->parent;
     }
 
     if (obj && obj_is_root(obj) && !useroot) {
 
-	for (obj = ncx_get_first_data_object(exprmod);
-	     obj != NULL;
-	     obj = ncx_get_next_data_object(exprmod, obj)) {
+        for (obj = ncx_get_first_data_object(exprmod);
+             obj != NULL;
+             obj = ncx_get_next_data_object(exprmod, obj)) {
 
-	    fnresult = test_one_ancestor(exprmod,
-					 walkerfn,
-					 cookie1,
-					 cookie2,
-					 obj,
-					 modname,
-					 name,
-					 configonly,
-					 textmode,
-					 orself,
-					 fncalled);
-	    if (!fnresult) {
-		return FALSE;
-	    }
-	}
+            fnresult = test_one_ancestor(exprmod,
+                                         walkerfn,
+                                         cookie1,
+                                         cookie2,
+                                         obj,
+                                         modname,
+                                         name,
+                                         configonly,
+                                         textmode,
+                                         orself,
+                                         fncalled);
+            if (!fnresult) {
+                return FALSE;
+            }
+        }
 
-	for (mod = ncx_get_first_module();
-	     mod != NULL;
-	     mod = ncx_get_next_module(mod)) {
+        for (mod = ncx_get_first_module();
+             mod != NULL;
+             mod = ncx_get_next_module(mod)) {
 
-	    for (obj = ncx_get_first_data_object(mod);
-		 obj != NULL;
-		 obj = ncx_get_next_data_object(mod, obj)) {
+            for (obj = ncx_get_first_data_object(mod);
+                 obj != NULL;
+                 obj = ncx_get_next_data_object(mod, obj)) {
 
-		fnresult = test_one_ancestor(exprmod,
-					     walkerfn,
-					     cookie1,
-					     cookie2,
-					     obj,
-					     modname,
-					     name,
-					     configonly,
-					     textmode,
-					     orself,
-					     fncalled);
-		if (!fnresult) {
-		    return FALSE;
-		}
-	    }
-	}
+                fnresult = test_one_ancestor(exprmod,
+                                             walkerfn,
+                                             cookie1,
+                                             cookie2,
+                                             obj,
+                                             modname,
+                                             name,
+                                             configonly,
+                                             textmode,
+                                             orself,
+                                             fncalled);
+                if (!fnresult) {
+                    return FALSE;
+                }
+            }
+        }
 
-	for (mod = ncx_get_first_session_module();
-	     mod != NULL;
-	     mod = ncx_get_next_session_module(mod)) {
+        for (mod = ncx_get_first_session_module();
+             mod != NULL;
+             mod = ncx_get_next_session_module(mod)) {
 
-	    for (obj = ncx_get_first_data_object(mod);
-		 obj != NULL;
-		 obj = ncx_get_next_data_object(mod, obj)) {
+            for (obj = ncx_get_first_data_object(mod);
+                 obj != NULL;
+                 obj = ncx_get_next_data_object(mod, obj)) {
 
-		fnresult = test_one_ancestor(exprmod,
-					     walkerfn,
-					     cookie1,
-					     cookie2,
-					     obj,
-					     modname,
-					     name,
-					     configonly,
-					     textmode,
-					     orself,
-					     fncalled);
-		if (!fnresult) {
-		    return FALSE;
-		}
-	    }
-	}
+                fnresult = test_one_ancestor(exprmod,
+                                             walkerfn,
+                                             cookie1,
+                                             cookie2,
+                                             obj,
+                                             modname,
+                                             name,
+                                             configonly,
+                                             textmode,
+                                             orself,
+                                             fncalled);
+                if (!fnresult) {
+                    return FALSE;
+                }
+            }
+        }
     } else {
-	while (obj) {
-	    if (obj->objtype == OBJ_TYP_CHOICE ||
-		obj->objtype == OBJ_TYP_CASE) {
-		fnresult = TRUE;
-	    } else {
-		fnresult = process_one_walker_child(walkerfn,
-						    cookie1,
-						    cookie2,
-						    obj,
-						    modname, 
-						    name,
-						    configonly,
-						    textmode,
-						    fncalled);
-	    }
-	    if (!fnresult) {
-		return FALSE;
-	    }
-	    obj = obj->parent;
-	}
+        while (obj) {
+            if (obj->objtype == OBJ_TYP_CHOICE ||
+                obj->objtype == OBJ_TYP_CASE) {
+                fnresult = TRUE;
+            } else {
+                fnresult = process_one_walker_child(walkerfn,
+                                                    cookie1,
+                                                    cookie2,
+                                                    obj,
+                                                    modname, 
+                                                    name,
+                                                    configonly,
+                                                    textmode,
+                                                    fncalled);
+            }
+            if (!fnresult) {
+                return FALSE;
+            }
+            obj = obj->parent;
+        }
     }
 
     return TRUE;
@@ -4256,17 +4256,17 @@ boolean
 *********************************************************************/
 boolean
     obj_find_all_descendants (ncx_module_t *exprmod,
-			      obj_walker_fn_t walkerfn,
-			      void *cookie1,
-			      void *cookie2,
-			      obj_template_t *startnode,
-			      const xmlChar *modname,
-			      const xmlChar *name,
-			      boolean configonly,
-			      boolean textmode,
-			      boolean useroot,
-			      boolean orself,
-			      boolean *fncalled)
+                              obj_walker_fn_t walkerfn,
+                              void *cookie1,
+                              void *cookie2,
+                              obj_template_t *startnode,
+                              const xmlChar *modname,
+                              const xmlChar *name,
+                              boolean configonly,
+                              boolean textmode,
+                              boolean useroot,
+                              boolean orself,
+                              boolean *fncalled)
 {
     obj_template_t       *obj;
     ncx_module_t         *mod;
@@ -4274,8 +4274,8 @@ boolean
 
 #ifdef DEBUG
     if (!exprmod || !walkerfn || !startnode || !fncalled) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -4283,90 +4283,90 @@ boolean
 
     if (obj_is_root(startnode) && !useroot) {
 
-	for (obj = ncx_get_first_data_object(exprmod);
-	     obj != NULL;
-	     obj = ncx_get_next_data_object(exprmod, obj)) {
+        for (obj = ncx_get_first_data_object(exprmod);
+             obj != NULL;
+             obj = ncx_get_next_data_object(exprmod, obj)) {
 
-	    fnresult = test_one_descendant(exprmod,
-					   walkerfn,
-					   cookie1,
-					   cookie2,
-					   obj,
-					   modname,
-					   name,
-					   configonly,
-					   textmode,
-					   orself,
-					   fncalled);
-	    if (!fnresult) {
-		return FALSE;
-	    }
-	}
+            fnresult = test_one_descendant(exprmod,
+                                           walkerfn,
+                                           cookie1,
+                                           cookie2,
+                                           obj,
+                                           modname,
+                                           name,
+                                           configonly,
+                                           textmode,
+                                           orself,
+                                           fncalled);
+            if (!fnresult) {
+                return FALSE;
+            }
+        }
 
-	for (mod = ncx_get_first_module();
-	     mod != NULL;
-	     mod = ncx_get_next_module(mod)) {
+        for (mod = ncx_get_first_module();
+             mod != NULL;
+             mod = ncx_get_next_module(mod)) {
 
-	    for (obj = ncx_get_first_data_object(mod);
-		 obj != NULL;
-		 obj = ncx_get_next_data_object(mod, obj)) {
+            for (obj = ncx_get_first_data_object(mod);
+                 obj != NULL;
+                 obj = ncx_get_next_data_object(mod, obj)) {
 
-		fnresult = test_one_descendant(exprmod,
-					       walkerfn,
-					       cookie1,
-					       cookie2,
-					       obj,
-					       modname,
-					       name,
-					       configonly,
-					       textmode,
-					       orself,
-					       fncalled);
-		if (!fnresult) {
-		    return FALSE;
-		}
-	    }
-	}
+                fnresult = test_one_descendant(exprmod,
+                                               walkerfn,
+                                               cookie1,
+                                               cookie2,
+                                               obj,
+                                               modname,
+                                               name,
+                                               configonly,
+                                               textmode,
+                                               orself,
+                                               fncalled);
+                if (!fnresult) {
+                    return FALSE;
+                }
+            }
+        }
 
-	for (mod = ncx_get_first_session_module();
-	     mod != NULL;
-	     mod = ncx_get_next_session_module(mod)) {
+        for (mod = ncx_get_first_session_module();
+             mod != NULL;
+             mod = ncx_get_next_session_module(mod)) {
 
-	    for (obj = ncx_get_first_data_object(mod);
-		 obj != NULL;
-		 obj = ncx_get_next_data_object(mod, obj)) {
+            for (obj = ncx_get_first_data_object(mod);
+                 obj != NULL;
+                 obj = ncx_get_next_data_object(mod, obj)) {
 
-		fnresult = test_one_descendant(exprmod,
-					       walkerfn,
-					       cookie1,
-					       cookie2,
-					       obj,
-					       modname,
-					       name,
-					       configonly,
-					       textmode,
-					       orself,
-					       fncalled);
-		if (!fnresult) {
-		    return FALSE;
-		}
-	    }
-	}
+                fnresult = test_one_descendant(exprmod,
+                                               walkerfn,
+                                               cookie1,
+                                               cookie2,
+                                               obj,
+                                               modname,
+                                               name,
+                                               configonly,
+                                               textmode,
+                                               orself,
+                                               fncalled);
+                if (!fnresult) {
+                    return FALSE;
+                }
+            }
+        }
     } else {
-	fnresult = test_one_descendant(exprmod,
-				       walkerfn,
-				       cookie1,
-				       cookie2,
-				       startnode,
-				       modname,
-				       name,
-				       configonly,
-				       textmode,
-				       orself,
-				       fncalled);
-	if (!fnresult) {
-	    return FALSE;
-	}
+        fnresult = test_one_descendant(exprmod,
+                                       walkerfn,
+                                       cookie1,
+                                       cookie2,
+                                       startnode,
+                                       modname,
+                                       name,
+                                       configonly,
+                                       textmode,
+                                       orself,
+                                       fncalled);
+        if (!fnresult) {
+            return FALSE;
+        }
     }
     return TRUE;
 
@@ -4422,18 +4422,18 @@ boolean
 *********************************************************************/
 boolean
     obj_find_all_pfaxis (ncx_module_t *exprmod,
-			 obj_walker_fn_t walkerfn,
-			 void *cookie1,
-			 void *cookie2,
-			 obj_template_t *startnode,
-			 const xmlChar *modname,
-			 const xmlChar *name,
-			 boolean configonly,
-			 boolean dblslash,
-			 boolean textmode,
-			 boolean useroot,
-			 ncx_xpath_axis_t axis,
-			 boolean *fncalled)
+                         obj_walker_fn_t walkerfn,
+                         void *cookie1,
+                         void *cookie2,
+                         obj_template_t *startnode,
+                         const xmlChar *modname,
+                         const xmlChar *name,
+                         boolean configonly,
+                         boolean dblslash,
+                         boolean textmode,
+                         boolean useroot,
+                         ncx_xpath_axis_t axis,
+                         boolean *fncalled)
 {
     obj_template_t       *obj;
     ncx_module_t         *mod;
@@ -4441,8 +4441,8 @@ boolean
 
 #ifdef DEBUG
     if (!exprmod || !walkerfn || !startnode || !fncalled) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -4454,124 +4454,124 @@ boolean
      */
     switch (axis) {
     case XP_AX_PRECEDING:
-	dblslash = TRUE;
-	/* fall through */
+        dblslash = TRUE;
+        /* fall through */
     case XP_AX_PRECEDING_SIBLING:
-	/* execute the callback for all preceding nodes
-	 * that match the filter criteria 
-	 */
-	forward = FALSE;
-	break;
+        /* execute the callback for all preceding nodes
+         * that match the filter criteria 
+         */
+        forward = FALSE;
+        break;
     case XP_AX_FOLLOWING:
-	dblslash = TRUE;
-	/* fall through */
+        dblslash = TRUE;
+        /* fall through */
     case XP_AX_FOLLOWING_SIBLING:
-	forward = TRUE;
-	break;
+        forward = TRUE;
+        break;
     case XP_AX_NONE:
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
     }
 
     if (obj_is_root(startnode) && !dblslash) {
-	return TRUE;
+        return TRUE;
     }
 
     if (obj_is_root(startnode) && !useroot) {
 
-	for (obj = ncx_get_first_data_object(exprmod);
-	     obj != NULL;
-	     obj = ncx_get_next_data_object(exprmod, obj)) {
+        for (obj = ncx_get_first_data_object(exprmod);
+             obj != NULL;
+             obj = ncx_get_next_data_object(exprmod, obj)) {
 
-	    fnresult = test_one_pfnode(exprmod,
-				       walkerfn,
-				       cookie1,
-				       cookie2,
-				       obj,
-				       modname,
-				       name,
-				       configonly,
-				       dblslash,
-				       textmode,
-				       forward,
-				       axis,
-				       fncalled);
-	    if (!fnresult) {
-		return FALSE;
-	    }
-	}
+            fnresult = test_one_pfnode(exprmod,
+                                       walkerfn,
+                                       cookie1,
+                                       cookie2,
+                                       obj,
+                                       modname,
+                                       name,
+                                       configonly,
+                                       dblslash,
+                                       textmode,
+                                       forward,
+                                       axis,
+                                       fncalled);
+            if (!fnresult) {
+                return FALSE;
+            }
+        }
 
-	for (mod = ncx_get_first_module();
-	     mod != NULL;
-	     mod = ncx_get_next_module(mod)) {
+        for (mod = ncx_get_first_module();
+             mod != NULL;
+             mod = ncx_get_next_module(mod)) {
 
-	    for (obj = ncx_get_first_data_object(mod);
-		 obj != NULL;
-		 obj = ncx_get_next_data_object(mod, obj)) {
+            for (obj = ncx_get_first_data_object(mod);
+                 obj != NULL;
+                 obj = ncx_get_next_data_object(mod, obj)) {
 
-		fnresult = test_one_pfnode(exprmod,
-					   walkerfn,
-					   cookie1,
-					   cookie2,
-					   obj,
-					   modname,
-					   name,
-					   configonly,
-					   dblslash,
-					   textmode,
-					   forward,
-					   axis,
-					   fncalled);
-		if (!fnresult) {
-		    return FALSE;
-		}
-	    }
-	}
+                fnresult = test_one_pfnode(exprmod,
+                                           walkerfn,
+                                           cookie1,
+                                           cookie2,
+                                           obj,
+                                           modname,
+                                           name,
+                                           configonly,
+                                           dblslash,
+                                           textmode,
+                                           forward,
+                                           axis,
+                                           fncalled);
+                if (!fnresult) {
+                    return FALSE;
+                }
+            }
+        }
 
-	for (mod = ncx_get_first_session_module();
-	     mod != NULL;
-	     mod = ncx_get_next_session_module(mod)) {
+        for (mod = ncx_get_first_session_module();
+             mod != NULL;
+             mod = ncx_get_next_session_module(mod)) {
 
-	    for (obj = ncx_get_first_data_object(mod);
-		 obj != NULL;
-		 obj = ncx_get_next_data_object(mod, obj)) {
+            for (obj = ncx_get_first_data_object(mod);
+                 obj != NULL;
+                 obj = ncx_get_next_data_object(mod, obj)) {
 
-		fnresult = test_one_pfnode(exprmod,
-					   walkerfn,
-					   cookie1,
-					   cookie2,
-					   obj,
-					   modname,
-					   name,
-					   configonly,
-					   dblslash,
-					   textmode,
-					   forward,
-					   axis,
-					   fncalled);
-		if (!fnresult) {
-		    return FALSE;
-		}
-	    }
-	}
+                fnresult = test_one_pfnode(exprmod,
+                                           walkerfn,
+                                           cookie1,
+                                           cookie2,
+                                           obj,
+                                           modname,
+                                           name,
+                                           configonly,
+                                           dblslash,
+                                           textmode,
+                                           forward,
+                                           axis,
+                                           fncalled);
+                if (!fnresult) {
+                    return FALSE;
+                }
+            }
+        }
     } else {
-	fnresult = test_one_pfnode(exprmod,
-				   walkerfn,
-				   cookie1,
-				   cookie2,
-				   startnode,
-				   modname,
-				   name,
-				   configonly,
-				   dblslash,
-				   textmode,
-				   forward,
-				   axis,
-				   fncalled);
-	if (!fnresult) {
-	    return FALSE;
-	}
+        fnresult = test_one_pfnode(exprmod,
+                                   walkerfn,
+                                   cookie1,
+                                   cookie2,
+                                   startnode,
+                                   modname,
+                                   name,
+                                   configonly,
+                                   dblslash,
+                                   textmode,
+                                   forward,
+                                   axis,
+                                   fncalled);
+        if (!fnresult) {
+            return FALSE;
+        }
     }
 
     return TRUE;
@@ -4594,31 +4594,31 @@ boolean
 *********************************************************************/
 obj_case_t *
     obj_find_case (obj_choice_t *choic,
-		   const xmlChar *modname,
-		   const xmlChar *casname)
+                   const xmlChar *modname,
+                   const xmlChar *casname)
 {
     obj_template_t *casobj;
     obj_case_t     *cas;
 
 #ifdef DEBUG
     if (!choic || !casname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     for (casobj = (obj_template_t *)dlq_firstEntry(choic->caseQ);
-	 casobj != NULL;
-	 casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
+         casobj != NULL;
+         casobj = (obj_template_t *)dlq_nextEntry(casobj)) {
 
-	cas = casobj->def.cas;
-	if (modname && xml_strcmp(obj_get_mod_name(casobj), modname)) {
-	    continue;
-	}
+        cas = casobj->def.cas;
+        if (modname && xml_strcmp(obj_get_mod_name(casobj), modname)) {
+            continue;
+        }
 
-	if (!xml_strcmp(casname, cas->name)) {
-	    return cas;
-	}
+        if (!xml_strcmp(casname, cas->name)) {
+            return cas;
+        }
     }
     return NULL;
 
@@ -4641,25 +4641,25 @@ obj_case_t *
 *********************************************************************/
 obj_template_t * 
     obj_new_rpcio (obj_template_t *rpcobj,
-		   const xmlChar *name)
+                   const xmlChar *name)
 {
     obj_template_t  *rpcio;
 
 #ifdef DEBUG
     if (!rpcobj || !name) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     rpcio = obj_new_template(OBJ_TYP_RPCIO);
     if (!rpcio) {
-	return NULL;
+        return NULL;
     }
     rpcio->def.rpcio->name = xml_strdup(name);
     if (!rpcio->def.rpcio->name) {
-	obj_free_template(rpcio);
-	return NULL;
+        obj_free_template(rpcio);
+        return NULL;
     }
     ncx_set_error(&rpcio->tkerr,
                   rpcobj->tkerr.mod,
@@ -4688,14 +4688,14 @@ void
 
 #ifdef DEBUG
     if (!que) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     while (!dlq_empty(que)) {
-	obj = (obj_template_t *)dlq_deque(que);
-	obj_free_template(obj);
+        obj = (obj_template_t *)dlq_deque(que);
+        obj_free_template(obj);
     }
 
 }  /* obj_clean_datadefQ */
@@ -4715,7 +4715,7 @@ void
 *********************************************************************/
 typ_template_t *
     obj_find_type (obj_template_t *obj,
-		   const xmlChar *typname)
+                   const xmlChar *typname)
 {
     dlq_hdr_t      *que;
     typ_template_t *typ;
@@ -4732,20 +4732,20 @@ typ_template_t *
      * in the grouping first
      */
     if (obj->grp) {
-	que = &obj->grp->typedefQ;
-	typ = ncx_find_type_que(que, typname);
-	if (typ) {
-	    return typ;
-	}
+        que = &obj->grp->typedefQ;
+        typ = ncx_find_type_que(que, typname);
+        if (typ) {
+            return typ;
+        }
 
-	testgrp = obj->grp->parentgrp;
-	while (testgrp) {
-	    typ = ncx_find_type_que(&testgrp->typedefQ, typname);
-	    if (typ) {
-		return typ;
-	    }
-	    testgrp = testgrp->parentgrp;
-	}
+        testgrp = obj->grp->parentgrp;
+        while (testgrp) {
+            typ = ncx_find_type_que(&testgrp->typedefQ, typname);
+            if (typ) {
+                return typ;
+            }
+            testgrp = testgrp->parentgrp;
+        }
     }
 
     /* object not in directly in a group or nothing found
@@ -4755,47 +4755,47 @@ typ_template_t *
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	que = obj->def.container->typedefQ;
-	break;
+        que = obj->def.container->typedefQ;
+        break;
     case OBJ_TYP_ANYXML:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
-	break;
+        break;
     case OBJ_TYP_LIST:
-	que = obj->def.list->typedefQ;
-	break;
+        que = obj->def.list->typedefQ;
+        break;
     case OBJ_TYP_CHOICE:
     case OBJ_TYP_CASE:
     case OBJ_TYP_USES:
     case OBJ_TYP_REFINE:
     case OBJ_TYP_AUGMENT:
-	break;
+        break;
     case OBJ_TYP_RPC:
-	que = &obj->def.rpc->typedefQ;
-	break;
+        que = &obj->def.rpc->typedefQ;
+        break;
     case OBJ_TYP_RPCIO:
-	que = &obj->def.rpcio->typedefQ;
-	break;
+        que = &obj->def.rpcio->typedefQ;
+        break;
     case OBJ_TYP_NOTIF:
-	que = &obj->def.notif->typedefQ;
-	break;
+        que = &obj->def.notif->typedefQ;
+        break;
     case OBJ_TYP_NONE:
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 
     if (que) {
-	typ = ncx_find_type_que(que, typname);
-	if (typ) {
-	    return typ;
-	}
+        typ = ncx_find_type_que(que, typname);
+        if (typ) {
+            return typ;
+        }
     }
 
     if (obj->parent && !obj_is_root(obj->parent)) {
-	return obj_find_type(obj->parent, typname);
+        return obj_find_type(obj->parent, typname);
     } else {
-	return NULL;
+        return NULL;
     }
 
 }   /* obj_find_type */
@@ -4815,7 +4815,7 @@ typ_template_t *
 *********************************************************************/
 grp_template_t *
     obj_find_grouping (obj_template_t *obj,
-		       const xmlChar *grpname)
+                       const xmlChar *grpname)
 {
     dlq_hdr_t      *que;
     grp_template_t *grp, *testgrp;
@@ -4829,23 +4829,23 @@ grp_template_t *
 
     /* check direct nesting within a grouping chain */
     if (obj->grp) {
-	grp = ncx_find_grouping_que(&obj->grp->groupingQ, grpname);
-	if (grp) {
-	    return grp;
-	}
+        grp = ncx_find_grouping_que(&obj->grp->groupingQ, grpname);
+        if (grp) {
+            return grp;
+        }
 
-	testgrp = obj->grp->parentgrp;
-	while (testgrp) {
-	    if (!xml_strcmp(testgrp->name, grpname)) {
-		return testgrp;
-	    } else {
-		grp = ncx_find_grouping_que(&testgrp->groupingQ, grpname);
-		if (grp) {
-		    return grp;
-		}
-	    }
-	    testgrp = testgrp->parentgrp;
-	}
+        testgrp = obj->grp->parentgrp;
+        while (testgrp) {
+            if (!xml_strcmp(testgrp->name, grpname)) {
+                return testgrp;
+            } else {
+                grp = ncx_find_grouping_que(&testgrp->groupingQ, grpname);
+                if (grp) {
+                    return grp;
+                }
+            }
+            testgrp = testgrp->parentgrp;
+        }
     }
 
     /* check the object has a groupingQ within the object chain */
@@ -4853,47 +4853,47 @@ grp_template_t *
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	que = obj->def.container->groupingQ;
-	break;
+        que = obj->def.container->groupingQ;
+        break;
     case OBJ_TYP_ANYXML:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
-	break;
+        break;
     case OBJ_TYP_LIST:
-	que = obj->def.list->groupingQ;
-	break;
+        que = obj->def.list->groupingQ;
+        break;
     case OBJ_TYP_CHOICE:
     case OBJ_TYP_CASE:
     case OBJ_TYP_USES:
     case OBJ_TYP_REFINE:
     case OBJ_TYP_AUGMENT:
-	break;
+        break;
     case OBJ_TYP_RPC:
-	que = &obj->def.rpc->groupingQ;
-	break;
+        que = &obj->def.rpc->groupingQ;
+        break;
     case OBJ_TYP_RPCIO:
-	que = &obj->def.rpcio->groupingQ;
-	break;
+        que = &obj->def.rpcio->groupingQ;
+        break;
     case OBJ_TYP_NOTIF:
-	que = &obj->def.notif->groupingQ;
-	break;
+        que = &obj->def.notif->groupingQ;
+        break;
     case OBJ_TYP_NONE:
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 
     if (que) {
-	grp = ncx_find_grouping_que(que, grpname);
-	if (grp) {
-	    return grp;
-	}
+        grp = ncx_find_grouping_que(que, grpname);
+        if (grp) {
+            return grp;
+        }
     }
 
     if (obj->parent && !obj_is_root(obj->parent)) {
-	return obj_find_grouping(obj->parent, grpname);
+        return obj_find_grouping(obj->parent, grpname);
     } else {
-	return NULL;
+        return NULL;
     }
 
 }   /* obj_find_grouping */
@@ -4920,55 +4920,55 @@ grp_template_t *
 *********************************************************************/
 status_t 
     obj_set_named_type (tk_chain_t *tkc,
-			ncx_module_t *mod,
-			const xmlChar *typname,
-			typ_def_t *typdef,
-			obj_template_t *parent,
-			grp_template_t *grp)
+                        ncx_module_t *mod,
+                        const xmlChar *typname,
+                        typ_def_t *typdef,
+                        obj_template_t *parent,
+                        grp_template_t *grp)
 {
     typ_template_t *testtyp;
 
     if (typdef->class == NCX_CL_NAMED &&
-	typdef->def.named.typ==NULL) {
+        typdef->def.named.typ==NULL) {
 
-	/* assumed to be a named type from this module
-	 * because any named type from another module
-	 * would get resolved OK, or fail due to syntax
-	 * or dependency loop
-	 */
-	if (typname && !xml_strcmp(typname, typdef->typename)) {
-	    log_error("\nError: typedef '%s' cannot use type '%s'",
-		      typname, typname);
-	    tkc->curerr = &typdef->tkerr;
-	    return ERR_NCX_DEF_LOOP;
-	}
+        /* assumed to be a named type from this module
+         * because any named type from another module
+         * would get resolved OK, or fail due to syntax
+         * or dependency loop
+         */
+        if (typname && !xml_strcmp(typname, typdef->typename)) {
+            log_error("\nError: typedef '%s' cannot use type '%s'",
+                      typname, typname);
+            tkc->curerr = &typdef->tkerr;
+            return ERR_NCX_DEF_LOOP;
+        }
 
-	testtyp = NULL;
+        testtyp = NULL;
 
-	/* find the type within the specified typedef Q */
-	if (typdef->typename) {
-	    if (grp) {
-		testtyp = find_type_in_grpchain(grp, typdef->typename);
-	    }
+        /* find the type within the specified typedef Q */
+        if (typdef->typename) {
+            if (grp) {
+                testtyp = find_type_in_grpchain(grp, typdef->typename);
+            }
 
-	    if (!testtyp && parent) {
-		testtyp = obj_find_type(parent, typdef->typename);
-	    }
+            if (!testtyp && parent) {
+                testtyp = obj_find_type(parent, typdef->typename);
+            }
 
-	    if (!testtyp) {
-		testtyp = ncx_find_type(mod, typdef->typename);
-	    }
-	}
+            if (!testtyp) {
+                testtyp = ncx_find_type(mod, typdef->typename);
+            }
+        }
 
-	if (!testtyp) {
-	    log_error("\nError: type '%s' not found", typdef->typename);
-	    tkc->curerr = &typdef->tkerr;
-	    return ERR_NCX_UNKNOWN_TYPE;
-	} else {
-	    typdef->def.named.typ = testtyp;
-	    typdef->linenum = testtyp->tkerr.linenum;
-	    testtyp->used = TRUE;
-	}
+        if (!testtyp) {
+            log_error("\nError: type '%s' not found", typdef->typename);
+            tkc->curerr = &typdef->tkerr;
+            return ERR_NCX_UNKNOWN_TYPE;
+        } else {
+            typdef->def.named.typ = testtyp;
+            typdef->linenum = testtyp->tkerr.linenum;
+            testtyp->used = TRUE;
+        }
     }
     return NO_ERR;
 
@@ -5004,8 +5004,8 @@ status_t
 *********************************************************************/
 obj_template_t *
     obj_clone_template (ncx_module_t *mod,
-			obj_template_t *srcobj,
-			dlq_hdr_t *mobjQ)
+                        obj_template_t *srcobj,
+                        dlq_hdr_t *mobjQ)
 {
     obj_template_t     *newobj, *mobj, *testobj;
     status_t            res;
@@ -5016,7 +5016,7 @@ obj_template_t *
         return NULL;
     }
     if (srcobj->objtype == OBJ_TYP_NONE ||
-	srcobj->objtype > OBJ_TYP_AUGMENT) {
+        srcobj->objtype > OBJ_TYP_AUGMENT) {
         SET_ERROR(ERR_INTERNAL_VAL);
         return NULL;
     }
@@ -5024,7 +5024,7 @@ obj_template_t *
 
     newobj = new_blank_template();
     if (!newobj) {
-	return NULL;
+        return NULL;
     }
 
     if (srcobj->when) {
@@ -5052,120 +5052,120 @@ obj_template_t *
 
     mobj = NULL;
     if (mobjQ) {
-	for (testobj = (obj_template_t *)dlq_firstEntry(mobjQ);
-	     testobj != NULL && mobj == NULL;
-	     testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+        for (testobj = (obj_template_t *)dlq_firstEntry(mobjQ);
+             testobj != NULL && mobj == NULL;
+             testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
-	    if (testobj->objtype != OBJ_TYP_REFINE) {
-		continue;
-	    }
+            if (testobj->objtype != OBJ_TYP_REFINE) {
+                continue;
+            }
 
-	    if (testobj->def.refine->targobj == srcobj) {
-		mobj = testobj;
-	    }
-	}
+            if (testobj->def.refine->targobj == srcobj) {
+                mobj = testobj;
+            }
+        }
     }
 
     if (mobj) {
-	newobj->flags |= mobj->flags;
+        newobj->flags |= mobj->flags;
     }
 
     res = clone_appinfoQ(&newobj->appinfoQ,
-			 &srcobj->appinfoQ,
-			 (mobj) ? &mobj->appinfoQ : NULL);
+                         &srcobj->appinfoQ,
+                         (mobj) ? &mobj->appinfoQ : NULL);
     if (res != NO_ERR) {
-	free_blank_template(newobj);
-	return NULL;
+        free_blank_template(newobj);
+        return NULL;
     }
     
     /* set the specific object definition type */
     switch (srcobj->objtype) {
     case OBJ_TYP_CONTAINER:
-	newobj->def.container = 
-	    clone_container(mod, newobj, 
-			    srcobj->def.container,
-			    (mobj) ? mobj->def.refine : NULL,
-			    mobjQ);
-	if (!newobj->def.container) {
-	    res = ERR_INTERNAL_MEM;
-	}
-	break;
+        newobj->def.container = 
+            clone_container(mod, newobj, 
+                            srcobj->def.container,
+                            (mobj) ? mobj->def.refine : NULL,
+                            mobjQ);
+        if (!newobj->def.container) {
+            res = ERR_INTERNAL_MEM;
+        }
+        break;
     case OBJ_TYP_ANYXML:
     case OBJ_TYP_LEAF:
-	newobj->def.leaf = 
-	    clone_leaf(srcobj->def.leaf,
-		       (mobj) ? mobj->def.refine : NULL);
-	if (!newobj->def.leaf) {
-	    res = ERR_INTERNAL_MEM;
-	}
-	break;
+        newobj->def.leaf = 
+            clone_leaf(srcobj->def.leaf,
+                       (mobj) ? mobj->def.refine : NULL);
+        if (!newobj->def.leaf) {
+            res = ERR_INTERNAL_MEM;
+        }
+        break;
     case OBJ_TYP_LEAF_LIST:
-	newobj->def.leaflist = 
-	    clone_leaflist(srcobj->def.leaflist,
-			   (mobj) ? mobj->def.refine : NULL);
-	if (!newobj->def.leaflist) {
-	    res = ERR_INTERNAL_MEM;
-	}
-	break;
+        newobj->def.leaflist = 
+            clone_leaflist(srcobj->def.leaflist,
+                           (mobj) ? mobj->def.refine : NULL);
+        if (!newobj->def.leaflist) {
+            res = ERR_INTERNAL_MEM;
+        }
+        break;
     case OBJ_TYP_LIST:
-	newobj->def.list = 
-	    clone_list(mod, 
+        newobj->def.list = 
+            clone_list(mod, 
                        newobj, 
                        srcobj,
-		       (mobj) ? mobj->def.refine : NULL, 
-		       mobjQ);
-	if (!newobj->def.list) {
-	    res = ERR_INTERNAL_MEM;
-	}
-	break;
-    case OBJ_TYP_CHOICE:
-	newobj->def.choic = 
-	    clone_choice(mod, 
-                         srcobj->def.choic,
-			 (mobj) ? mobj->def.refine : NULL, 
-			 newobj, 
-                         mobjQ);
-	if (!newobj->def.choic) {
-	    res = ERR_INTERNAL_MEM;
-	}
-	break;
-    case OBJ_TYP_CASE:
-	newobj->def.cas = 
-	    clone_case(mod, 
-                       srcobj->def.cas,
-		       (mobj) ? mobj->def.refine : NULL,
-		       newobj, 
+                       (mobj) ? mobj->def.refine : NULL, 
                        mobjQ);
-	if (!newobj->def.cas) {
-	    res = ERR_INTERNAL_MEM;
-	}
-	break;
+        if (!newobj->def.list) {
+            res = ERR_INTERNAL_MEM;
+        }
+        break;
+    case OBJ_TYP_CHOICE:
+        newobj->def.choic = 
+            clone_choice(mod, 
+                         srcobj->def.choic,
+                         (mobj) ? mobj->def.refine : NULL, 
+                         newobj, 
+                         mobjQ);
+        if (!newobj->def.choic) {
+            res = ERR_INTERNAL_MEM;
+        }
+        break;
+    case OBJ_TYP_CASE:
+        newobj->def.cas = 
+            clone_case(mod, 
+                       srcobj->def.cas,
+                       (mobj) ? mobj->def.refine : NULL,
+                       newobj, 
+                       mobjQ);
+        if (!newobj->def.cas) {
+            res = ERR_INTERNAL_MEM;
+        }
+        break;
     case OBJ_TYP_USES:
-	if (mobj) {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	} else {
-	    newobj->def.uses = srcobj->def.uses;
-	    newobj->flags |= OBJ_FL_DEFCLONE;
-	}
-	break;
+        if (mobj) {
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        } else {
+            newobj->def.uses = srcobj->def.uses;
+            newobj->flags |= OBJ_FL_DEFCLONE;
+        }
+        break;
     case OBJ_TYP_AUGMENT:
-	if (mobj) {
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	} else {
-	    newobj->def.augment = srcobj->def.augment;
-	    newobj->flags |= OBJ_FL_DEFCLONE;
-	}
-	break;
+        if (mobj) {
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        } else {
+            newobj->def.augment = srcobj->def.augment;
+            newobj->flags |= OBJ_FL_DEFCLONE;
+        }
+        break;
     case OBJ_TYP_NONE:
     default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
+        res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     if (res != NO_ERR) {
-	free_blank_template(newobj);
-	return NULL;
+        free_blank_template(newobj);
+        return NULL;
     } else {
-	return newobj;
+        return newobj;
     }
 
 }   /* obj_clone_template */
@@ -5199,8 +5199,8 @@ obj_template_t *
 *********************************************************************/
 obj_template_t *
     obj_clone_template_case (ncx_module_t *mod,
-			     obj_template_t *srcobj,
-			     dlq_hdr_t *mobjQ)
+                             obj_template_t *srcobj,
+                             dlq_hdr_t *mobjQ)
 {
     obj_template_t     *casobj, *newobj;
 
@@ -5210,19 +5210,19 @@ obj_template_t *
         return NULL;
     }
     if (srcobj->objtype == OBJ_TYP_NONE ||
-	srcobj->objtype > OBJ_TYP_AUGMENT) {
+        srcobj->objtype > OBJ_TYP_AUGMENT) {
         SET_ERROR(ERR_INTERNAL_VAL);
         return NULL;
     }
 #endif
 
     if (srcobj->objtype == OBJ_TYP_CASE) {
-	return obj_clone_template(mod, srcobj, mobjQ);
+        return obj_clone_template(mod, srcobj, mobjQ);
     }
 
     casobj = new_blank_template();
     if (!casobj) {
-	return NULL;
+        return NULL;
     }
 
     /* set most of the common fields but leave the mod and parent NULL
@@ -5237,20 +5237,20 @@ obj_template_t *
     casobj->flags = OBJ_FL_CLONE;
     casobj->def.cas = new_case(TRUE);
     if (!casobj->def.cas) {
-	free_blank_template(casobj);
-	return NULL;
+        free_blank_template(casobj);
+        return NULL;
     }
     casobj->def.cas->name = xml_strdup(obj_get_name(srcobj));
     if (!casobj->def.cas->name) {
-	obj_free_template(casobj);
-	return NULL;
+        obj_free_template(casobj);
+        return NULL;
     }
     casobj->def.cas->status = obj_get_status(srcobj);
 
     newobj = obj_clone_template(mod, srcobj, mobjQ);
     if (!newobj) {
-	obj_free_template(casobj);
-	return NULL;
+        obj_free_template(casobj);
+        return NULL;
     }
 
     newobj->parent = casobj;
@@ -5352,13 +5352,13 @@ void
 #endif
 
     if (un->xpath) {
-	m__free(un->xpath);
-	un->xpath = NULL;
+        m__free(un->xpath);
+        un->xpath = NULL;
     }
 
     while (!dlq_empty(&un->compQ)) {
-	unc = (obj_unique_comp_t *)dlq_deque(&un->compQ);
-	obj_free_unique_comp(unc);
+        unc = (obj_unique_comp_t *)dlq_deque(&un->compQ);
+        obj_free_unique_comp(unc);
     }
 
 }  /* obj_clean_unique */
@@ -5406,7 +5406,7 @@ void
 #endif
 
     if (unc->xpath) {
-	m__free(unc->xpath);
+        m__free(unc->xpath);
     }
     m__free(unc);
 
@@ -5423,23 +5423,23 @@ void
 *********************************************************************/
 obj_unique_t *
     obj_find_unique (dlq_hdr_t *que,
-		     const xmlChar *xpath)
+                     const xmlChar *xpath)
 {
     obj_unique_t  *un;
 
 #ifdef DEBUG
     if (!que || !xpath) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     for (un = (obj_unique_t *)dlq_firstEntry(que);
-	 un != NULL;
-	 un = (obj_unique_t *)dlq_nextEntry(un)) {
-	if (!xml_strcmp(un->xpath, xpath)) {
-	    return un;
-	}
+         un != NULL;
+         un = (obj_unique_t *)dlq_nextEntry(un)) {
+        if (!xml_strcmp(un->xpath, xpath)) {
+            return un;
+        }
     }
     return NULL;
 
@@ -5463,17 +5463,17 @@ obj_unique_t *
 
 #ifdef DEBUG
     if (!listobj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (listobj->objtype != OBJ_TYP_LIST) {
-	return NULL;
+        return NULL;
     }
 
     return (obj_unique_t *)
-	dlq_firstEntry(&listobj->def.list->uniqueQ);
+        dlq_firstEntry(&listobj->def.list->uniqueQ);
 
 }  /* obj_first_unique */
 
@@ -5494,8 +5494,8 @@ obj_unique_t *
 {
 #ifdef DEBUG
     if (!un) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -5521,8 +5521,8 @@ obj_unique_comp_t *
 
 #ifdef DEBUG
     if (!un) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -5547,8 +5547,8 @@ obj_unique_comp_t *
 {
 #ifdef DEBUG
     if (!uncomp) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -5618,23 +5618,23 @@ void
 *********************************************************************/
 obj_key_t *
     obj_find_key (dlq_hdr_t *que,
-		  const xmlChar *keycompname)
+                  const xmlChar *keycompname)
 {
     obj_key_t  *key;
 
 #ifdef DEBUG
     if (!que || !keycompname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     for (key = (obj_key_t *)dlq_firstEntry(que);
-	 key != NULL;
-	 key = (obj_key_t *)dlq_nextEntry(key)) {
-	if (!xml_strcmp(obj_get_name(key->keyobj), keycompname)) {
-	    return key;
-	}
+         key != NULL;
+         key = (obj_key_t *)dlq_nextEntry(key)) {
+        if (!xml_strcmp(obj_get_name(key->keyobj), keycompname)) {
+            return key;
+        }
     }
     return NULL;
 
@@ -5656,23 +5656,23 @@ obj_key_t *
 *********************************************************************/
 obj_key_t *
     obj_find_key2 (dlq_hdr_t *que,
-		   obj_template_t *keyobj)
+                   obj_template_t *keyobj)
 {
     obj_key_t  *key;
 
 #ifdef DEBUG
     if (!que || !keyobj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     for (key = (obj_key_t *)dlq_firstEntry(que);
-	 key != NULL;
-	 key = (obj_key_t *)dlq_nextEntry(key)) {
-	if (keyobj == key->keyobj) {
-	    return key;
-	}
+         key != NULL;
+         key = (obj_key_t *)dlq_nextEntry(key)) {
+        if (keyobj == key->keyobj) {
+            return key;
+        }
     }
     return NULL;
 
@@ -5695,12 +5695,12 @@ obj_key_t *
 {
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
     if (obj->objtype != OBJ_TYP_LIST) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 #endif
 
@@ -5725,12 +5725,12 @@ const obj_key_t *
 {
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
     if (obj->objtype != OBJ_TYP_LIST) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 #endif
 
@@ -5755,8 +5755,8 @@ obj_key_t *
 {
 #ifdef DEBUG
     if (!objkey) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -5781,8 +5781,8 @@ const obj_key_t *
 {
 #ifdef DEBUG
     if (!objkey) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -5807,13 +5807,13 @@ uint32
 {
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
     if (obj->objtype != OBJ_TYP_LIST) {
-	return 0;
+        return 0;
     }
 
     return dlq_count(&obj->def.list->keyQ);
@@ -5839,17 +5839,17 @@ boolean
 
 #ifdef DEBUG
     if (!datadefQ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
-	if (obj->objtype == OBJ_TYP_RPC) {
-	    return TRUE;
-	}
+         obj != NULL;
+         obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+        if (obj->objtype == OBJ_TYP_RPC) {
+            return TRUE;
+        }
     }
     return FALSE;
 
@@ -5874,17 +5874,17 @@ boolean
 
 #ifdef DEBUG
     if (!datadefQ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
-	if (obj->objtype == OBJ_TYP_NOTIF) {
-	    return TRUE;
-	}
+         obj != NULL;
+         obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+        if (obj->objtype == OBJ_TYP_NOTIF) {
+            return TRUE;
+        }
     }
     return FALSE;
 
@@ -5906,7 +5906,7 @@ obj_deviate_t *
 
     deviate = m__getObj(obj_deviate_t);
     if (!deviate) {
-	return NULL;
+        return NULL;
     }
 
     memset(deviate, 0x0, sizeof(obj_deviate_t));
@@ -5935,26 +5935,26 @@ void
 
 #ifdef DEBUG
     if (!deviate) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (deviate->typdef) {
-	typ_free_typdef(deviate->typdef);
+        typ_free_typdef(deviate->typdef);
     }
     if (deviate->units) {
-	m__free(deviate->units);
+        m__free(deviate->units);
     }
     if (deviate->defval) {
-	m__free(deviate->defval);
+        m__free(deviate->defval);
     }
 
     clean_mustQ(&deviate->mustQ);
 
     while (!dlq_empty(&deviate->uniqueQ)) {
-	uni = (obj_unique_t *)dlq_deque(&deviate->uniqueQ);
-	obj_free_unique(uni);
+        uni = (obj_unique_t *)dlq_deque(&deviate->uniqueQ);
+        obj_free_unique(uni);
     }
 
     ncx_clean_appinfoQ(&deviate->appinfoQ);
@@ -6011,7 +6011,7 @@ obj_deviation_t *
 
     deviation = m__getObj(obj_deviation_t);
     if (!deviation) {
-	return NULL;
+        return NULL;
     }
 
     memset(deviation, 0x0, sizeof(obj_deviation_t));
@@ -6039,31 +6039,31 @@ void
 
 #ifdef DEBUG
     if (!deviation) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (deviation->target) {
-	m__free(deviation->target);
+        m__free(deviation->target);
     }
     if (deviation->targmodname) {
-	m__free(deviation->targmodname);
+        m__free(deviation->targmodname);
     }
     if (deviation->descr) {
-	m__free(deviation->descr);
+        m__free(deviation->descr);
     }
     if (deviation->ref) {
-	m__free(deviation->ref);
+        m__free(deviation->ref);
     }
     if (deviation->devmodname) {
-	m__free(deviation->devmodname);
+        m__free(deviation->devmodname);
     }
 
     while (!dlq_empty(&deviation->deviateQ)) {
-	deviate = (obj_deviate_t *)
-	    dlq_deque(&deviation->deviateQ);
-	obj_free_deviate(deviate);
+        deviate = (obj_deviate_t *)
+            dlq_deque(&deviation->deviateQ);
+        obj_free_deviate(deviate);
     }
 
     ncx_clean_appinfoQ(&deviation->appinfoQ);
@@ -6088,14 +6088,14 @@ void
 
 #ifdef DEBUG
     if (!deviationQ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     while (!dlq_empty(deviationQ)) {
-	deviation = (obj_deviation_t *)dlq_deque(deviationQ);
-	obj_free_deviation(deviation);
+        deviation = (obj_deviation_t *)dlq_deque(deviationQ);
+        obj_free_deviation(deviation);
     }
 
 } /* obj_clean_deviationQ */
@@ -6118,14 +6118,14 @@ void
 *********************************************************************/
 status_t
     obj_gen_object_id (const obj_template_t *obj,
-		       xmlChar  **buff)
+                       xmlChar  **buff)
 {
     uint32    len;
     status_t  res;
 
 #ifdef DEBUG 
     if (!obj || !buff) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -6134,21 +6134,21 @@ status_t
     /* figure out the length of the object ID */
     res = get_object_string(obj, NULL, 0, TRUE, NULL, &len);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* get a buffer to fit the instance ID string */
     *buff = (xmlChar *)m__getMem(len+1);
     if (!*buff) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     /* get the object ID for real this time */
     res = get_object_string(obj, *buff, len+1, TRUE, NULL, &len);
     if (res != NO_ERR) {
-	m__free(*buff);
-	*buff = NULL;
-	return SET_ERROR(res);
+        m__free(*buff);
+        *buff = NULL;
+        return SET_ERROR(res);
     }
 
     return NO_ERR;
@@ -6183,7 +6183,7 @@ status_t
 
 #ifdef DEBUG 
     if (!mod || !obj || !buff) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -6192,21 +6192,21 @@ status_t
     /* figure out the length of the object ID */
     res = get_object_string(obj, NULL, 0, TRUE, mod, &len);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* get a buffer to fit the instance ID string */
     *buff = (xmlChar *)m__getMem(len+1);
     if (!*buff) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     /* get the object ID for real this time */
     res = get_object_string(obj, *buff, len+1, TRUE, mod, &len);
     if (res != NO_ERR) {
-	m__free(*buff);
-	*buff = NULL;
-	return SET_ERROR(res);
+        m__free(*buff);
+        *buff = NULL;
+        return SET_ERROR(res);
     }
 
     return NO_ERR;
@@ -6236,13 +6236,13 @@ status_t
 *********************************************************************/
 status_t
     obj_copy_object_id (const obj_template_t *obj,
-			xmlChar  *buff,
-			uint32 bufflen,
-			uint32 *reallen)
+                        xmlChar  *buff,
+                        uint32 bufflen,
+                        uint32 *reallen)
 {
 #ifdef DEBUG 
     if (!obj || !buff) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -6275,7 +6275,7 @@ status_t
 *********************************************************************/
 status_t
     obj_gen_aughook_id (const obj_template_t *obj,
-			xmlChar  **buff)
+                        xmlChar  **buff)
 {
     xmlChar  *p;
     uint32    len, extra;
@@ -6283,7 +6283,7 @@ status_t
 
 #ifdef DEBUG 
     if (!obj || !buff) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -6292,7 +6292,7 @@ status_t
     /* figure out the length of the aughook ID */
     res = get_object_string(obj, NULL, 0, FALSE, NULL, &len);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* get the length for the aughook prefix and suffix */
@@ -6301,7 +6301,7 @@ status_t
     /* get a buffer to fit the instance ID string */
     *buff = (xmlChar *)m__getMem(len+extra+1);
     if (!*buff) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     /* put prefix in buffer */
@@ -6311,9 +6311,9 @@ status_t
     /* add the aughook ID to the buffer */
     res = get_object_string(obj, p, len+1, FALSE, NULL, &len);
     if (res != NO_ERR) {
-	m__free(*buff);
-	*buff = NULL;
-	return SET_ERROR(res);
+        m__free(*buff);
+        *buff = NULL;
+        return SET_ERROR(res);
     }
 
     /* add suffix to the buffer */
@@ -6341,41 +6341,41 @@ const xmlChar *
 {
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return (const xmlChar *)"<none>";
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return (const xmlChar *)"<none>";
     }
 #endif
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	return obj->def.container->name;
+        return obj->def.container->name;
     case OBJ_TYP_ANYXML:
     case OBJ_TYP_LEAF:
-	return obj->def.leaf->name;
+        return obj->def.leaf->name;
     case OBJ_TYP_LEAF_LIST:
-	return obj->def.leaflist->name;
+        return obj->def.leaflist->name;
     case OBJ_TYP_LIST:
-	return obj->def.list->name;
+        return obj->def.list->name;
     case OBJ_TYP_CHOICE:
-	return obj->def.choic->name;
+        return obj->def.choic->name;
     case OBJ_TYP_CASE:
-	return obj->def.cas->name;
+        return obj->def.cas->name;
     case OBJ_TYP_USES:
-	return YANG_K_USES;
+        return YANG_K_USES;
     case OBJ_TYP_AUGMENT:
-	return YANG_K_AUGMENT;
+        return YANG_K_AUGMENT;
     case OBJ_TYP_REFINE:
-	return YANG_K_REFINE;
+        return YANG_K_REFINE;
     case OBJ_TYP_RPC:
-	return obj->def.rpc->name;
+        return obj->def.rpc->name;
     case OBJ_TYP_RPCIO:
-	return obj->def.rpcio->name;
+        return obj->def.rpcio->name;
     case OBJ_TYP_NOTIF:
-	return obj->def.notif->name;
+        return obj->def.notif->name;
     case OBJ_TYP_NONE:
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NCX_EL_NONE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NCX_EL_NONE;
     }
     /*NOTREACHED*/
 
@@ -6399,8 +6399,8 @@ boolean
 {
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -6412,19 +6412,19 @@ boolean
     case OBJ_TYP_LIST:
     case OBJ_TYP_CHOICE:
     case OBJ_TYP_CASE:
-	return TRUE;
+        return TRUE;
     case OBJ_TYP_USES:
     case OBJ_TYP_AUGMENT:
     case OBJ_TYP_REFINE:
-	return FALSE;
+        return FALSE;
     case OBJ_TYP_RPC:
     case OBJ_TYP_RPCIO:
     case OBJ_TYP_NOTIF:
-	return TRUE;
+        return TRUE;
     case OBJ_TYP_NONE:
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
     }
     /*NOTREACHED*/
 
@@ -6449,17 +6449,17 @@ boolean
 {
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     switch (obj->objtype) {
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
-	return TRUE;
+        return TRUE;
     default:
-	return FALSE;
+        return FALSE;
     }
     /*NOTREACHED*/
 
@@ -6482,42 +6482,42 @@ ncx_status_t
 {
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NCX_STATUS_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_STATUS_NONE;
     }
 #endif
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	return obj->def.container->status;
+        return obj->def.container->status;
     case OBJ_TYP_ANYXML:
     case OBJ_TYP_LEAF:
-	return obj->def.leaf->status;
+        return obj->def.leaf->status;
     case OBJ_TYP_LEAF_LIST:
-	return obj->def.leaflist->status;
+        return obj->def.leaflist->status;
     case OBJ_TYP_LIST:
-	return obj->def.list->status;
+        return obj->def.list->status;
     case OBJ_TYP_CHOICE:
-	return obj->def.choic->status;
+        return obj->def.choic->status;
     case OBJ_TYP_CASE:
     case OBJ_TYP_REFINE:
-	return (obj->parent) ?
-	    obj_get_status(obj->parent) : NCX_STATUS_CURRENT;
+        return (obj->parent) ?
+            obj_get_status(obj->parent) : NCX_STATUS_CURRENT;
     case OBJ_TYP_USES:
-	return obj->def.uses->status;
+        return obj->def.uses->status;
     case OBJ_TYP_AUGMENT:
-	return obj->def.augment->status;
+        return obj->def.augment->status;
     case OBJ_TYP_RPC:
-	return obj->def.rpc->status;
+        return obj->def.rpc->status;
     case OBJ_TYP_RPCIO:
-	return (obj->parent) ?
-	    obj_get_status(obj->parent) : NCX_STATUS_CURRENT;
+        return (obj->parent) ?
+            obj_get_status(obj->parent) : NCX_STATUS_CURRENT;
     case OBJ_TYP_NOTIF:
-	return obj->def.notif->status;
+        return obj->def.notif->status;
     case OBJ_TYP_NONE:
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NCX_STATUS_NONE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NCX_STATUS_NONE;
     }
     /*NOTREACHED*/
 
@@ -6540,41 +6540,41 @@ const xmlChar *
 {
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	return obj->def.container->descr;
+        return obj->def.container->descr;
     case OBJ_TYP_ANYXML:
     case OBJ_TYP_LEAF:
-	return obj->def.leaf->descr;
+        return obj->def.leaf->descr;
     case OBJ_TYP_LEAF_LIST:
-	return obj->def.leaflist->descr;
+        return obj->def.leaflist->descr;
     case OBJ_TYP_LIST:
-	return obj->def.list->descr;
+        return obj->def.list->descr;
     case OBJ_TYP_CHOICE:
-	return obj->def.choic->descr;
+        return obj->def.choic->descr;
     case OBJ_TYP_CASE:
-	return obj->def.cas->descr;
+        return obj->def.cas->descr;
     case OBJ_TYP_USES:
-	return obj->def.uses->descr;
+        return obj->def.uses->descr;
     case OBJ_TYP_REFINE:
-	return obj->def.refine->descr;
+        return obj->def.refine->descr;
     case OBJ_TYP_AUGMENT:
-	return obj->def.augment->descr;
+        return obj->def.augment->descr;
     case OBJ_TYP_RPC:
-	return obj->def.rpc->descr;
+        return obj->def.rpc->descr;
     case OBJ_TYP_RPCIO:
-	return NULL;
+        return NULL;
     case OBJ_TYP_NOTIF:
-	return obj->def.notif->descr;
+        return obj->def.notif->descr;
     case OBJ_TYP_NONE:
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
     /*NOTREACHED*/
 
@@ -6597,41 +6597,41 @@ const xmlChar *
 {
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	return obj->def.container->ref;
+        return obj->def.container->ref;
     case OBJ_TYP_ANYXML:
     case OBJ_TYP_LEAF:
-	return obj->def.leaf->ref;
+        return obj->def.leaf->ref;
     case OBJ_TYP_LEAF_LIST:
-	return obj->def.leaflist->ref;
+        return obj->def.leaflist->ref;
     case OBJ_TYP_LIST:
-	return obj->def.list->ref;
+        return obj->def.list->ref;
     case OBJ_TYP_CHOICE:
-	return obj->def.choic->ref;
+        return obj->def.choic->ref;
     case OBJ_TYP_CASE:
-	return obj->def.cas->ref;
+        return obj->def.cas->ref;
     case OBJ_TYP_USES:
-	return obj->def.uses->ref;
+        return obj->def.uses->ref;
     case OBJ_TYP_REFINE:
-	return obj->def.refine->ref;
+        return obj->def.refine->ref;
     case OBJ_TYP_AUGMENT:
-	return obj->def.augment->ref;
+        return obj->def.augment->ref;
     case OBJ_TYP_RPC:
-	return obj->def.rpc->ref;
+        return obj->def.rpc->ref;
     case OBJ_TYP_RPCIO:
-	return NULL;
+        return NULL;
     case OBJ_TYP_NOTIF:
-	return obj->def.notif->ref;
+        return obj->def.notif->ref;
     case OBJ_TYP_NONE:
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
     /*NOTREACHED*/
 
@@ -6694,7 +6694,7 @@ boolean
 *********************************************************************/
 boolean
     obj_get_config_flag2 (const obj_template_t *obj,
-			 boolean *setflag)
+                         boolean *setflag)
 {
 #ifdef DEBUG
     if (!obj || !setflag) {
@@ -6732,9 +6732,9 @@ ncx_access_t
 #endif
 
     if (!get_config_flag(obj, &setflag)) {
-	return NCX_ACCESS_RO;
+        return NCX_ACCESS_RO;
     } else {
-	return NCX_ACCESS_RC;
+        return NCX_ACCESS_RC;
     }
 
     /*** !!! no support for read-write at this time !!! ***/
@@ -6758,8 +6758,8 @@ dlq_hdr_t *
 {
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -6784,8 +6784,8 @@ dlq_hdr_t *
 {
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -6810,25 +6810,25 @@ dlq_hdr_t *
 {
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	return &obj->def.container->mustQ;
+        return &obj->def.container->mustQ;
     case OBJ_TYP_ANYXML:
     case OBJ_TYP_LEAF:
-	return &obj->def.leaf->mustQ;
+        return &obj->def.leaf->mustQ;
     case OBJ_TYP_LEAF_LIST:
-	return &obj->def.leaflist->mustQ;
+        return &obj->def.leaflist->mustQ;
     case OBJ_TYP_LIST:
-	return &obj->def.list->mustQ;
+        return &obj->def.list->mustQ;
     case OBJ_TYP_REFINE:
-	return &obj->def.refine->mustQ;
+        return &obj->def.refine->mustQ;
     default:
-	return NULL;
+        return NULL;
     }
     /*NOTREACHED*/
 
@@ -6858,36 +6858,36 @@ const xmlChar *
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	return YANG_K_CONTAINER;
+        return YANG_K_CONTAINER;
     case OBJ_TYP_ANYXML:
-	return YANG_K_ANYXML;
+        return YANG_K_ANYXML;
     case OBJ_TYP_LEAF:
-	return YANG_K_LEAF;
+        return YANG_K_LEAF;
     case OBJ_TYP_LEAF_LIST:
-	return YANG_K_LEAF_LIST;
+        return YANG_K_LEAF_LIST;
     case OBJ_TYP_LIST:
-	return YANG_K_LIST;
+        return YANG_K_LIST;
     case OBJ_TYP_CHOICE:
-	return YANG_K_CHOICE;
+        return YANG_K_CHOICE;
     case OBJ_TYP_CASE:
-	return YANG_K_CASE;
+        return YANG_K_CASE;
     case OBJ_TYP_USES:
-	return YANG_K_USES;
+        return YANG_K_USES;
     case OBJ_TYP_REFINE:
-	return YANG_K_REFINE;
+        return YANG_K_REFINE;
     case OBJ_TYP_AUGMENT:
-	return YANG_K_AUGMENT;
+        return YANG_K_AUGMENT;
     case OBJ_TYP_RPC:
-	return YANG_K_RPC;
+        return YANG_K_RPC;
     case OBJ_TYP_RPCIO:
-	return YANG_K_CONTAINER;
+        return YANG_K_CONTAINER;
     case OBJ_TYP_NOTIF:
-	return YANG_K_NOTIFICATION;
+        return YANG_K_NOTIFICATION;
     case OBJ_TYP_NONE:
-	return NCX_EL_NONE;
+        return NCX_EL_NONE;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NCX_EL_NONE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NCX_EL_NONE;
     }
     /*NOTREACHED*/
 
@@ -6917,31 +6917,31 @@ dlq_hdr_t *
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	return obj->def.container->datadefQ;
+        return obj->def.container->datadefQ;
     case OBJ_TYP_ANYXML:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
     case OBJ_TYP_REFINE:
-	return NULL;
+        return NULL;
     case OBJ_TYP_LIST:
-	return obj->def.list->datadefQ;
+        return obj->def.list->datadefQ;
     case OBJ_TYP_CHOICE:
-	return obj->def.choic->caseQ;
+        return obj->def.choic->caseQ;
     case OBJ_TYP_CASE:
-	return obj->def.cas->datadefQ;
+        return obj->def.cas->datadefQ;
     case OBJ_TYP_USES:
-	return obj->def.uses->datadefQ;
+        return obj->def.uses->datadefQ;
     case OBJ_TYP_AUGMENT:
-	return &obj->def.augment->datadefQ;
+        return &obj->def.augment->datadefQ;
     case OBJ_TYP_RPC:
-	return &obj->def.rpc->datadefQ;
+        return &obj->def.rpc->datadefQ;
     case OBJ_TYP_RPCIO:
-	return &obj->def.rpcio->datadefQ;
+        return &obj->def.rpcio->datadefQ;
     case OBJ_TYP_NOTIF:
-	return &obj->def.notif->datadefQ;
+        return &obj->def.notif->datadefQ;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
     /*NOTREACHED*/
 
@@ -6971,31 +6971,31 @@ const dlq_hdr_t *
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	return obj->def.container->datadefQ;
+        return obj->def.container->datadefQ;
     case OBJ_TYP_ANYXML:
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
     case OBJ_TYP_REFINE:
-	return NULL;
+        return NULL;
     case OBJ_TYP_LIST:
-	return obj->def.list->datadefQ;
+        return obj->def.list->datadefQ;
     case OBJ_TYP_CHOICE:
-	return obj->def.choic->caseQ;
+        return obj->def.choic->caseQ;
     case OBJ_TYP_CASE:
-	return obj->def.cas->datadefQ;
+        return obj->def.cas->datadefQ;
     case OBJ_TYP_USES:
-	return obj->def.uses->datadefQ;
+        return obj->def.uses->datadefQ;
     case OBJ_TYP_AUGMENT:
-	return &obj->def.augment->datadefQ;
+        return &obj->def.augment->datadefQ;
     case OBJ_TYP_RPC:
-	return &obj->def.rpc->datadefQ;
+        return &obj->def.rpc->datadefQ;
     case OBJ_TYP_RPCIO:
-	return &obj->def.rpcio->datadefQ;
+        return &obj->def.rpcio->datadefQ;
     case OBJ_TYP_NOTIF:
-	return &obj->def.notif->datadefQ;
+        return &obj->def.notif->datadefQ;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
     /*NOTREACHED*/
 
@@ -7021,16 +7021,16 @@ const xmlChar *
 {
 #ifdef DEBUG 
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (obj->objtype != OBJ_TYP_LEAF) {
-	return NULL;
+        return NULL;
     }
     if (obj->def.leaf->defval) {
-	return obj->def.leaf->defval;
+        return obj->def.leaf->defval;
     }
     return typ_get_default(obj->def.leaf->typdef);
 
@@ -7053,19 +7053,19 @@ obj_template_t *
 {
 #ifdef DEBUG 
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
     if (obj->objtype != OBJ_TYP_CHOICE) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 #endif
 
     if (obj->def.choic->defval) {
-	return obj_find_child(obj, 
+        return obj_find_child(obj, 
                               obj_get_mod_name(obj),
-			      obj->def.choic->defval);
+                              obj->def.choic->defval);
     }
     return NULL;
 
@@ -7093,16 +7093,16 @@ uint32
 
 #ifdef DEBUG 
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
     level = 1;
     parent = obj->parent;
     while (parent && !obj_is_root(parent)) {
-	level++;
-	parent = parent->parent;
+        level++;
+        parent = parent->parent;
     }
     return level;
 
@@ -7131,60 +7131,60 @@ boolean
 
 #ifdef DEBUG 
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	typedefQ = obj->def.container->typedefQ;
-	groupingQ = obj->def.container->groupingQ;
-	datadefQ = obj->def.container->datadefQ;
-	break;
+        typedefQ = obj->def.container->typedefQ;
+        groupingQ = obj->def.container->groupingQ;
+        datadefQ = obj->def.container->datadefQ;
+        break;
     case OBJ_TYP_LIST:
-	typedefQ = obj->def.list->typedefQ;
-	groupingQ = obj->def.list->groupingQ;
-	datadefQ = obj->def.list->datadefQ;
-	break;
+        typedefQ = obj->def.list->typedefQ;
+        groupingQ = obj->def.list->groupingQ;
+        datadefQ = obj->def.list->datadefQ;
+        break;
     case OBJ_TYP_RPC:
-	typedefQ = &obj->def.rpc->typedefQ;
-	groupingQ = &obj->def.rpc->groupingQ;
-	datadefQ = &obj->def.rpc->datadefQ;
-	break;
+        typedefQ = &obj->def.rpc->typedefQ;
+        groupingQ = &obj->def.rpc->groupingQ;
+        datadefQ = &obj->def.rpc->datadefQ;
+        break;
     case OBJ_TYP_RPCIO:
-	typedefQ = &obj->def.rpcio->typedefQ;
-	groupingQ = &obj->def.rpcio->groupingQ;
-	datadefQ = &obj->def.rpcio->datadefQ;
-	break;
+        typedefQ = &obj->def.rpcio->typedefQ;
+        groupingQ = &obj->def.rpcio->groupingQ;
+        datadefQ = &obj->def.rpcio->datadefQ;
+        break;
     case OBJ_TYP_NOTIF:
-	typedefQ = &obj->def.notif->typedefQ;
-	groupingQ = &obj->def.notif->groupingQ;
-	datadefQ = &obj->def.notif->datadefQ;
-	break;
+        typedefQ = &obj->def.notif->typedefQ;
+        groupingQ = &obj->def.notif->groupingQ;
+        datadefQ = &obj->def.notif->datadefQ;
+        break;
     default:
-	return FALSE;
+        return FALSE;
     }
 
 
     if (!dlq_empty(typedefQ)) {
-	return TRUE;
+        return TRUE;
     }
-	
+        
     for (grp = (const grp_template_t *)dlq_firstEntry(groupingQ);
-	 grp != NULL;
-	 grp = (const grp_template_t *)dlq_nextEntry(grp)) {
-	if (grp_has_typedefs(grp)) {
-	    return TRUE;
-	}
+         grp != NULL;
+         grp = (const grp_template_t *)dlq_nextEntry(grp)) {
+        if (grp_has_typedefs(grp)) {
+            return TRUE;
+        }
     }
 
     for (chobj = (const obj_template_t *)dlq_firstEntry(datadefQ);
-	 chobj != NULL;
-	 chobj = (const obj_template_t *)dlq_nextEntry(chobj)) {
-	if (obj_has_typedefs(chobj)) {
-	    return TRUE;
-	}
+         chobj != NULL;
+         chobj = (const obj_template_t *)dlq_nextEntry(chobj)) {
+        if (obj_has_typedefs(chobj)) {
+            return TRUE;
+        }
     }
 
     return FALSE;
@@ -7209,11 +7209,11 @@ typ_def_t *
 {
     if (obj->objtype == OBJ_TYP_LEAF ||
         obj->objtype == OBJ_TYP_ANYXML) {
-	return obj->def.leaf->typdef;
+        return obj->def.leaf->typdef;
     } else if (obj->objtype == OBJ_TYP_LEAF_LIST) {
-	return obj->def.leaflist->typdef;
+        return obj->def.leaflist->typdef;
     } else {
-	return NULL;
+        return NULL;
     }
     /*NOTREACHED*/
 
@@ -7237,11 +7237,11 @@ const typ_def_t *
 {
     if (obj->objtype == OBJ_TYP_LEAF ||
         obj->objtype == OBJ_TYP_ANYXML) {
-	return obj->def.leaf->typdef;
+        return obj->def.leaf->typdef;
     } else if (obj->objtype == OBJ_TYP_LEAF_LIST) {
-	return obj->def.leaflist->typdef;
+        return obj->def.leaflist->typdef;
     } else {
-	return NULL;
+        return NULL;
     }
     /*NOTREACHED*/
 
@@ -7264,28 +7264,28 @@ ncx_btype_t
 {
     switch (obj->objtype) {
     case OBJ_TYP_LEAF:
-	return typ_get_basetype(obj->def.leaf->typdef);
+        return typ_get_basetype(obj->def.leaf->typdef);
     case OBJ_TYP_LEAF_LIST:
-	return typ_get_basetype(obj->def.leaflist->typdef);
+        return typ_get_basetype(obj->def.leaflist->typdef);
     case OBJ_TYP_CONTAINER:
-	return NCX_BT_CONTAINER;
+        return NCX_BT_CONTAINER;
     case OBJ_TYP_LIST:
-	return NCX_BT_LIST;
+        return NCX_BT_LIST;
     case OBJ_TYP_CHOICE:
-	return NCX_BT_CHOICE;
+        return NCX_BT_CHOICE;
     case OBJ_TYP_CASE:
-	return NCX_BT_CASE;
+        return NCX_BT_CASE;
     case OBJ_TYP_RPC:
-	return NCX_BT_CONTAINER;
+        return NCX_BT_CONTAINER;
     case OBJ_TYP_RPCIO:
-	return NCX_BT_CONTAINER;
+        return NCX_BT_CONTAINER;
     case OBJ_TYP_NOTIF:
-	return NCX_BT_CONTAINER;
+        return NCX_BT_CONTAINER;
     case OBJ_TYP_ANYXML:
-	return NCX_BT_ANY;
+        return NCX_BT_ANY;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NCX_BT_NONE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NCX_BT_NONE;
     }
     /*NOTREACHED*/
 
@@ -7348,15 +7348,15 @@ const xmlChar *
 {
 #ifdef DEBUG
     if (!obj || !obj->tkerr.mod) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (obj->tkerr.mod->ismod) {
-	return obj->tkerr.mod->name;
+        return obj->tkerr.mod->name;
     } else {
-	return obj->tkerr.mod->belongs;
+        return obj->tkerr.mod->belongs;
     }
 
 }  /* obj_get_mod_name */
@@ -7378,8 +7378,8 @@ const xmlChar *
 {
 #ifdef DEBUG
     if (!obj || !obj->tkerr.mod) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -7408,21 +7408,21 @@ const xmlChar *
 
 #ifdef DEBUG
     if (!obj || !obj->tkerr.mod) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     typdef = obj_get_ctypdef(obj);
     if (typdef) {
-	if (typdef->typename) {
-	    return typdef->typename;
-	} else {
-	    return (const xmlChar *)
-		tk_get_btype_sym(obj_get_basetype(obj));
-	}
+        if (typdef->typename) {
+            return typdef->typename;
+        } else {
+            return (const xmlChar *)
+                tk_get_btype_sym(obj_get_basetype(obj));
+        }
     } else {
-	return obj_get_typestr(obj);
+        return obj_get_typestr(obj);
     }
 
 }  /* obj_get_type_name */
@@ -7444,8 +7444,8 @@ xmlns_id_t
 {
 #ifdef DEBUG
     if (!obj || !obj->tkerr.mod) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
@@ -7472,8 +7472,8 @@ ncx_iqual_t
 
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NCX_IQUAL_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_IQUAL_NONE;
     }
 #endif
 
@@ -7497,14 +7497,14 @@ ncx_iqual_t
 *********************************************************************/
 ncx_iqual_t
     obj_get_iqualval_ex (obj_template_t  *obj,
-			 boolean required)
+                         boolean required)
 {
     ncx_iqual_t  ret;
 
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NCX_IQUAL_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_IQUAL_NONE;
     }
 #endif
 
@@ -7517,49 +7517,49 @@ ncx_iqual_t
     case OBJ_TYP_CHOICE:
     case OBJ_TYP_CASE:
     case OBJ_TYP_RPCIO:
-	ret = (required) ? NCX_IQUAL_ONE : NCX_IQUAL_OPT;
-	break;
+        ret = (required) ? NCX_IQUAL_ONE : NCX_IQUAL_OPT;
+        break;
     case OBJ_TYP_LEAF_LIST:
-	if (obj->def.leaflist->minset) {
-	    if (obj->def.leaflist->maxset && 
-		obj->def.leaflist->maxelems==1) {
-		ret = NCX_IQUAL_ONE;
-	    } else {
-		ret = NCX_IQUAL_1MORE;
-	    }
-	} else {
-	    if (obj->def.leaflist->maxset && 
-		obj->def.leaflist->maxelems==1) {
-		ret = NCX_IQUAL_OPT;
-	    } else {
-		ret = NCX_IQUAL_ZMORE;
-	    }
-	}
-	break;
+        if (obj->def.leaflist->minset) {
+            if (obj->def.leaflist->maxset && 
+                obj->def.leaflist->maxelems==1) {
+                ret = NCX_IQUAL_ONE;
+            } else {
+                ret = NCX_IQUAL_1MORE;
+            }
+        } else {
+            if (obj->def.leaflist->maxset && 
+                obj->def.leaflist->maxelems==1) {
+                ret = NCX_IQUAL_OPT;
+            } else {
+                ret = NCX_IQUAL_ZMORE;
+            }
+        }
+        break;
     case OBJ_TYP_LIST:
-	if (obj->def.list->minset) {
-	    if (obj->def.list->maxset && obj->def.list->maxelems==1) {
-		ret = NCX_IQUAL_ONE;
-	    } else {
-		ret = NCX_IQUAL_1MORE;
-	    }
-	} else {
-	    if (obj->def.list->maxset && obj->def.list->maxelems==1) {
-		ret = NCX_IQUAL_OPT;
-	    } else {
-		ret = NCX_IQUAL_ZMORE;
-	    }
-	}
-	break;
+        if (obj->def.list->minset) {
+            if (obj->def.list->maxset && obj->def.list->maxelems==1) {
+                ret = NCX_IQUAL_ONE;
+            } else {
+                ret = NCX_IQUAL_1MORE;
+            }
+        } else {
+            if (obj->def.list->maxset && obj->def.list->maxelems==1) {
+                ret = NCX_IQUAL_OPT;
+            } else {
+                ret = NCX_IQUAL_ZMORE;
+            }
+        }
+        break;
     case OBJ_TYP_REFINE:
-	ret = NCX_IQUAL_ZMORE;
-	break;
+        ret = NCX_IQUAL_ZMORE;
+        break;
     case OBJ_TYP_RPC:
     case OBJ_TYP_NOTIF:
-	ret = NCX_IQUAL_ONE;
-	break;
+        ret = NCX_IQUAL_ONE;
+        break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
     }
     return ret;
 
@@ -7583,28 +7583,28 @@ ncx_iqual_t
 *********************************************************************/
 boolean
     obj_get_min_elements (obj_template_t  *obj,
-			  uint32 *minelems)
+                          uint32 *minelems)
 {
 
 #ifdef DEBUG
     if (!obj || !minelems) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     switch (obj->objtype) {
     case OBJ_TYP_LEAF_LIST:
-	*minelems = obj->def.leaflist->minelems;
-	return obj->def.leaflist->minset;
+        *minelems = obj->def.leaflist->minelems;
+        return obj->def.leaflist->minset;
     case OBJ_TYP_LIST:
-	*minelems = obj->def.list->minelems;
-	return obj->def.list->minset;
+        *minelems = obj->def.list->minelems;
+        return obj->def.list->minset;
     case OBJ_TYP_REFINE:
-	*minelems = obj->def.refine->minelems;
-	return (obj->def.refine->minelems_tkerr.mod) ? TRUE : FALSE;
+        *minelems = obj->def.refine->minelems;
+        return (obj->def.refine->minelems_tkerr.mod) ? TRUE : FALSE;
     default:
-	return FALSE;
+        return FALSE;
     }
     /*NOTREACHED*/
 
@@ -7628,28 +7628,28 @@ boolean
 *********************************************************************/
 boolean
     obj_get_max_elements (obj_template_t  *obj,
-			  uint32 *maxelems)
+                          uint32 *maxelems)
 {
 
 #ifdef DEBUG
     if (!obj || !maxelems) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     switch (obj->objtype) {
     case OBJ_TYP_LEAF_LIST:
-	*maxelems = obj->def.leaflist->maxelems;
-	return obj->def.leaflist->maxset;
+        *maxelems = obj->def.leaflist->maxelems;
+        return obj->def.leaflist->maxset;
     case OBJ_TYP_LIST:
-	*maxelems = obj->def.list->maxelems;
-	return obj->def.list->maxset;
+        *maxelems = obj->def.list->maxelems;
+        return obj->def.list->maxset;
     case OBJ_TYP_REFINE:
-	*maxelems = obj->def.refine->maxelems;
-	return (obj->def.refine->maxelems_tkerr.mod) ? TRUE : FALSE;
+        *maxelems = obj->def.refine->maxelems;
+        return (obj->def.refine->maxelems_tkerr.mod) ? TRUE : FALSE;
     default:
-	return FALSE;
+        return FALSE;
     }
     /*NOTREACHED*/
 
@@ -7675,8 +7675,8 @@ const xmlChar *
 
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -7684,20 +7684,20 @@ const xmlChar *
 
     switch (obj->objtype) {
     case OBJ_TYP_LEAF:
-	units = obj->def.leaf->units;
-	break;
+        units = obj->def.leaf->units;
+        break;
     case OBJ_TYP_LEAF_LIST:
-	units = obj->def.leaflist->units;
-	break;
+        units = obj->def.leaflist->units;
+        break;
     default:
-	return NULL;
+        return NULL;
     }
 
     if (!units) {
-	typdef = obj_get_ctypdef(obj);
-	if (typdef) {
-	    units = typ_get_units_from_typdef(typdef);
-	}
+        typdef = obj_get_ctypdef(obj);
+        if (typdef) {
+            units = typ_get_units_from_typdef(typdef);
+        }
     }
     return units;
 
@@ -7720,8 +7720,8 @@ obj_template_t *
 {
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -7747,8 +7747,8 @@ const obj_template_t *
 {
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -7773,10 +7773,10 @@ boolean
     obj_is_leafy (const obj_template_t  *obj)
 {
     if (obj->objtype == OBJ_TYP_LEAF ||
-	obj->objtype == OBJ_TYP_LEAF_LIST) {
-	return TRUE;
+        obj->objtype == OBJ_TYP_LEAF_LIST) {
+        return TRUE;
     } else {
-	return FALSE;
+        return FALSE;
     }
     /*NOTREACHED*/
 
@@ -7809,42 +7809,42 @@ boolean
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	if (obj->def.container->presence) {
-	    return FALSE;
-	}
-	/* else drop through and check children */
+        if (obj->def.container->presence) {
+            return FALSE;
+        }
+        /* else drop through and check children */
     case OBJ_TYP_CASE:
     case OBJ_TYP_RPCIO:
-	for (chobj = obj_first_child(obj);
-	     chobj != NULL;
-	     chobj = obj_next_child(chobj)) {
-	    if (obj_is_mandatory(chobj)) {
-		return TRUE;
-	    }
-	}
-	return FALSE;
+        for (chobj = obj_first_child(obj);
+             chobj != NULL;
+             chobj = obj_next_child(chobj)) {
+            if (obj_is_mandatory(chobj)) {
+                return TRUE;
+            }
+        }
+        return FALSE;
     case OBJ_TYP_LEAF:
-	if (obj_is_key(obj)) {
-	    return TRUE;
-	} 
-	/* else fall through */
+        if (obj_is_key(obj)) {
+            return TRUE;
+        } 
+        /* else fall through */
     case OBJ_TYP_ANYXML:
     case OBJ_TYP_CHOICE:
-	return (obj->flags & OBJ_FL_MANDATORY) ? TRUE : FALSE;
+        return (obj->flags & OBJ_FL_MANDATORY) ? TRUE : FALSE;
     case OBJ_TYP_LEAF_LIST:
-	return (obj->def.leaflist->minelems) ? TRUE : FALSE;
+        return (obj->def.leaflist->minelems) ? TRUE : FALSE;
     case OBJ_TYP_LIST:
-	return (obj->def.list->minelems) ? TRUE : FALSE;
+        return (obj->def.list->minelems) ? TRUE : FALSE;
     case OBJ_TYP_USES:
     case OBJ_TYP_AUGMENT:
     case OBJ_TYP_REFINE:
     case OBJ_TYP_RPC:
     case OBJ_TYP_NOTIF:
-	return FALSE;
+        return FALSE;
     case OBJ_TYP_NONE:
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
     }
 
 }   /* obj_is_mandatory */
@@ -7877,51 +7877,51 @@ boolean
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	if (obj->def.container->presence) {
-	    return FALSE;
-	}
-	/* else drop through and check children */
+        if (obj->def.container->presence) {
+            return FALSE;
+        }
+        /* else drop through and check children */
     case OBJ_TYP_CASE:
     case OBJ_TYP_RPCIO:
-	for (chobj = obj_first_child(obj);
-	     chobj != NULL;
-	     chobj = obj_next_child(chobj)) {
-	    if (obj_is_mandatory_when(chobj)) {
-		return TRUE;
-	    }
-	}
-	return FALSE;
+        for (chobj = obj_first_child(obj);
+             chobj != NULL;
+             chobj = obj_next_child(chobj)) {
+            if (obj_is_mandatory_when(chobj)) {
+                return TRUE;
+            }
+        }
+        return FALSE;
     case OBJ_TYP_LEAF:
-	if (obj_is_key(obj)) {
-	    return TRUE;
-	} 
-	/* else fall through */
+        if (obj_is_key(obj)) {
+            return TRUE;
+        } 
+        /* else fall through */
     case OBJ_TYP_ANYXML:
     case OBJ_TYP_CHOICE:
         if (obj_has_when_stmts(obj)) {
             return FALSE;
         }
-	return (obj->flags & OBJ_FL_MANDATORY) ? TRUE : FALSE;
+        return (obj->flags & OBJ_FL_MANDATORY) ? TRUE : FALSE;
     case OBJ_TYP_LEAF_LIST:
         if (obj_has_when_stmts(obj)) {
             return FALSE;
         }
-	return (obj->def.leaflist->minelems) ? TRUE : FALSE;
+        return (obj->def.leaflist->minelems) ? TRUE : FALSE;
     case OBJ_TYP_LIST:
         if (obj_has_when_stmts(obj)) {
             return FALSE;
         }
-	return (obj->def.list->minelems) ? TRUE : FALSE;
+        return (obj->def.list->minelems) ? TRUE : FALSE;
     case OBJ_TYP_USES:
     case OBJ_TYP_AUGMENT:
     case OBJ_TYP_REFINE:
     case OBJ_TYP_RPC:
     case OBJ_TYP_NOTIF:
-	return FALSE;
+        return FALSE;
     case OBJ_TYP_NONE:
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
     }
 
 }   /* obj_is_mandatory_when */
@@ -8031,25 +8031,25 @@ boolean
 {
 #ifdef DEBUG 
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     switch (obj->objtype) {
     case OBJ_TYP_RPC:
     case OBJ_TYP_NOTIF:
-	return FALSE;
+        return FALSE;
     case OBJ_TYP_RPCIO:
-	return TRUE;  /* hack for yangdump HTML output */
+        return TRUE;  /* hack for yangdump HTML output */
     case OBJ_TYP_REFINE:
-	return FALSE;
+        return FALSE;
     default:
-	if (obj->parent && !obj_is_root(obj->parent)) {
-	    return obj_is_data(obj->parent);
-	} else {
-	    return TRUE;
-	}
+        if (obj->parent && !obj_is_root(obj->parent)) {
+            return obj_is_data(obj->parent);
+        } else {
+            return TRUE;
+        }
     }
     /*NOTREACHED*/
 
@@ -8075,8 +8075,8 @@ boolean
 {
 #ifdef DEBUG 
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -8087,19 +8087,19 @@ boolean
     switch (obj->objtype) {
     case OBJ_TYP_RPC:
     case OBJ_TYP_NOTIF:
-	return FALSE;
+        return FALSE;
     case OBJ_TYP_RPCIO:
-	return FALSE;
+        return FALSE;
     case OBJ_TYP_REFINE:
-	return FALSE;
+        return FALSE;
     default:
-	if (obj_is_root(obj)) {
-	    return TRUE;
-	} else if (obj->parent && !obj_is_root(obj->parent)) {
-	    return obj_is_data_db(obj->parent);
-	} else {
-	    return TRUE;
-	}
+        if (obj_is_root(obj)) {
+            return TRUE;
+        } else if (obj->parent && !obj_is_root(obj->parent)) {
+            return obj_is_data_db(obj->parent);
+        } else {
+            return TRUE;
+        }
     }
     /*NOTREACHED*/
 
@@ -8123,26 +8123,26 @@ boolean
 {
 #ifdef DEBUG 
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     switch (obj->objtype) {
     case OBJ_TYP_RPC:
     case OBJ_TYP_NOTIF:
-	return FALSE;
+        return FALSE;
     case OBJ_TYP_RPCIO:
-	return (!xml_strcmp(obj_get_name(obj), YANG_K_INPUT)) ?
-	    TRUE : FALSE;
+        return (!xml_strcmp(obj_get_name(obj), YANG_K_INPUT)) ?
+            TRUE : FALSE;
     case OBJ_TYP_REFINE:
-	return FALSE;
+        return FALSE;
     default:
-	if (obj->parent && !obj_is_root(obj->parent)) {
-	    return obj_in_rpc(obj->parent);
-	} else {
-	    return FALSE;
-	}
+        if (obj->parent && !obj_is_root(obj->parent)) {
+            return obj_in_rpc(obj->parent);
+        } else {
+            return FALSE;
+        }
     }
     /*NOTREACHED*/
 
@@ -8166,26 +8166,26 @@ boolean
 {
 #ifdef DEBUG 
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     switch (obj->objtype) {
     case OBJ_TYP_RPC:
     case OBJ_TYP_NOTIF:
-	return FALSE;
+        return FALSE;
     case OBJ_TYP_RPCIO:
-	return (!xml_strcmp(obj_get_name(obj), YANG_K_OUTPUT)) ?
-	    TRUE : FALSE;
+        return (!xml_strcmp(obj_get_name(obj), YANG_K_OUTPUT)) ?
+            TRUE : FALSE;
     case OBJ_TYP_REFINE:
-	return FALSE;
+        return FALSE;
     default:
-	if (obj->parent && !obj_is_root(obj->parent)) {
-	    return obj_in_rpc_reply(obj->parent);
-	} else {
-	    return FALSE;
-	}
+        if (obj->parent && !obj_is_root(obj->parent)) {
+            return obj_in_rpc_reply(obj->parent);
+        } else {
+            return FALSE;
+        }
     }
     /*NOTREACHED*/
 
@@ -8209,26 +8209,26 @@ boolean
 {
 #ifdef DEBUG 
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     switch (obj->objtype) {
     case OBJ_TYP_RPC:
-	return FALSE;
+        return FALSE;
     case OBJ_TYP_NOTIF:
-	return TRUE;
+        return TRUE;
     case OBJ_TYP_RPCIO:
-	return FALSE;
+        return FALSE;
     case OBJ_TYP_REFINE:
-	return FALSE;
+        return FALSE;
     default:
-	if (obj->parent && !obj_is_root(obj->parent)) {
-	    return obj_in_notif(obj->parent);
-	} else {
-	    return FALSE;
-	}
+        if (obj->parent && !obj_is_root(obj->parent)) {
+            return obj_in_notif(obj->parent);
+        } else {
+            return FALSE;
+        }
     }
     /*NOTREACHED*/
 
@@ -8252,8 +8252,8 @@ boolean
 {
 #ifdef DEBUG 
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -8279,8 +8279,8 @@ boolean
 {
 #ifdef DEBUG 
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -8333,18 +8333,18 @@ boolean
 *********************************************************************/
 boolean
     obj_is_match (const obj_template_t  *obj1,
-		  const obj_template_t *obj2)
+                  const obj_template_t *obj2)
 {
     if (xml_strcmp(obj_get_mod_name(obj1),
-		   obj_get_mod_name(obj2))) {
-	return FALSE;
+                   obj_get_mod_name(obj2))) {
+        return FALSE;
     }
 
     if (obj_has_name(obj1) && obj_has_name(obj2)) {
-	return xml_strcmp(obj_get_name(obj1), 
-			  obj_get_name(obj2)) ? FALSE : TRUE;
+        return xml_strcmp(obj_get_name(obj1), 
+                          obj_get_name(obj2)) ? FALSE : TRUE;
     } else {
-	return FALSE;
+        return FALSE;
     }
 
 }  /* obj_is_match */
@@ -8381,80 +8381,80 @@ void
     if (ncx_find_const_appinfo(appinfoQ, 
                                NCX_PREFIX, 
                                NCX_EL_PASSWORD)) {
-	obj->flags |= OBJ_FL_PASSWD;
+        obj->flags |= OBJ_FL_PASSWD;
     }
 
     if (ncx_find_const_appinfo(appinfoQ, 
                                NCX_PREFIX, 
                                NCX_EL_HIDDEN)) {
-	obj->flags |= OBJ_FL_HIDDEN;
+        obj->flags |= OBJ_FL_HIDDEN;
     }
 
     if (ncx_find_const_appinfo(appinfoQ, 
                                NCX_PREFIX, 
                                NCX_EL_XSDLIST)) {
-	obj->flags |= OBJ_FL_XSDLIST;
+        obj->flags |= OBJ_FL_XSDLIST;
     }
 
     if (ncx_find_const_appinfo(appinfoQ, 
                                NCX_PREFIX, 
                                NCX_EL_ROOT)) {
-	obj->flags |= OBJ_FL_ROOT;
+        obj->flags |= OBJ_FL_ROOT;
     }
 
     if (ncx_find_const_appinfo(appinfoQ, 
                                NCX_PREFIX, 
                                NCX_EL_CLI)) {
-	obj->flags |= OBJ_FL_CLI;
+        obj->flags |= OBJ_FL_CLI;
     }
 
     if (ncx_find_const_appinfo(appinfoQ, 
                                NCX_PREFIX, 
                                NCX_EL_ABSTRACT)) {
-	obj->flags |= OBJ_FL_ABSTRACT;
+        obj->flags |= OBJ_FL_ABSTRACT;
     }
 
     if (ncx_find_const_appinfo(appinfoQ, 
                                NCX_PREFIX, 
                                NCX_EL_SECURE)) {
-	obj->flags |= OBJ_FL_SECURE;
+        obj->flags |= OBJ_FL_SECURE;
     }
 
     if (ncx_find_const_appinfo(appinfoQ, 
                                NCX_PREFIX, 
                                NCX_EL_VERY_SECURE)) {
-	obj->flags |= OBJ_FL_VERY_SECURE;
+        obj->flags |= OBJ_FL_VERY_SECURE;
     }
 
     if (obj_is_leafy(obj)) {
-	typdef = obj_get_ctypdef(obj);
+        typdef = obj_get_ctypdef(obj);
 
-	/* ncx:xpath extension */
-	if (typ_is_xpath_string(typdef)) {
-	    obj->flags |= OBJ_FL_XPATH;
-	} else if (ncx_find_const_appinfo(appinfoQ, 
+        /* ncx:xpath extension */
+        if (typ_is_xpath_string(typdef)) {
+            obj->flags |= OBJ_FL_XPATH;
+        } else if (ncx_find_const_appinfo(appinfoQ, 
                                           NCX_PREFIX, 
                                           NCX_EL_XPATH)) {
-	    obj->flags |= OBJ_FL_XPATH;
-	}
+            obj->flags |= OBJ_FL_XPATH;
+        }
 
-	/* ncx:qname extension */
-	if (typ_is_qname_string(typdef)) {
-	    obj->flags |= OBJ_FL_QNAME;
-	} else if (ncx_find_const_appinfo(appinfoQ, 
+        /* ncx:qname extension */
+        if (typ_is_qname_string(typdef)) {
+            obj->flags |= OBJ_FL_QNAME;
+        } else if (ncx_find_const_appinfo(appinfoQ, 
                                           NCX_PREFIX, 
                                           NCX_EL_XPATH)) {
-	    obj->flags |= OBJ_FL_QNAME;
-	}
+            obj->flags |= OBJ_FL_QNAME;
+        }
 
-	/* ncx:schema-instance extension */
-	if (typ_is_schema_instance_string(typdef)) {
-	    obj->flags |= OBJ_FL_SCHEMAINST;
-	} else if (ncx_find_const_appinfo(appinfoQ, 
+        /* ncx:schema-instance extension */
+        if (typ_is_schema_instance_string(typdef)) {
+            obj->flags |= OBJ_FL_SCHEMAINST;
+        } else if (ncx_find_const_appinfo(appinfoQ, 
                                           NCX_PREFIX, 
                                           NCX_EL_SCHEMA_INSTANCE)) {
-	    obj->flags |= OBJ_FL_SCHEMAINST;
-	}
+            obj->flags |= OBJ_FL_SCHEMAINST;
+        }
     }
 
 }   /* obj_set_ncx_flags */
@@ -8680,8 +8680,8 @@ boolean
 #endif
 
     return ((obj->flags & (OBJ_FL_XPATH | OBJ_FL_SCHEMAINST)) ||
-	    obj_get_basetype(obj)==NCX_BT_INSTANCE_ID) 
-	? TRUE : FALSE;
+            obj_get_basetype(obj)==NCX_BT_INSTANCE_ID) 
+        ? TRUE : FALSE;
 
 }   /* obj_is_xpath_string */
 
@@ -8710,11 +8710,11 @@ boolean
 #endif
 
     if (obj_get_basetype(obj) != NCX_BT_STRING) {
-	return FALSE;
+        return FALSE;
     }
 
     return (obj->flags & OBJ_FL_SCHEMAINST)
-	? TRUE : FALSE;
+        ? TRUE : FALSE;
 
 }   /* obj_is_schema_instance_string */
 
@@ -8743,7 +8743,7 @@ boolean
 #endif
 
     return (obj->flags & OBJ_FL_SECURE)
-	? TRUE : FALSE;
+        ? TRUE : FALSE;
 
 }   /* obj_is_secure */
 
@@ -8772,7 +8772,7 @@ boolean
 #endif
 
     return (obj->flags & OBJ_FL_VERY_SECURE)
-	? TRUE : FALSE;
+        ? TRUE : FALSE;
 
 }   /* obj_is_very_secure */
 
@@ -8795,18 +8795,18 @@ boolean
 
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     switch (obj->objtype) {
     case OBJ_TYP_LEAF_LIST:
-	return obj->def.leaflist->ordersys;
+        return obj->def.leaflist->ordersys;
     case OBJ_TYP_LIST:
-	return obj->def.list->ordersys;
+        return obj->def.list->ordersys;
     default:
-	return TRUE;
+        return TRUE;
     }
     /*NOTREACHED*/
 
@@ -8831,13 +8831,13 @@ boolean
 
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     if (obj->objtype != OBJ_TYP_CONTAINER) {
-	return FALSE;
+        return FALSE;
     }
 
     return (obj->def.container->presence) ? FALSE : TRUE;
@@ -8863,13 +8863,13 @@ const xmlChar *
 
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (obj->objtype != OBJ_TYP_CONTAINER) {
-	return NULL;
+        return NULL;
     }
 
     return obj->def.container->presence;
@@ -8905,42 +8905,42 @@ boolean
 #endif
 
     if (obj->objtype != OBJ_TYP_CONTAINER) {
-	return FALSE;
+        return FALSE;
     }
 
     for (chobj = obj_first_child(obj);
-	 chobj != NULL;
-	 chobj = obj_next_child(chobj)) {
+         chobj != NULL;
+         chobj = obj_next_child(chobj)) {
 
-	switch (chobj->objtype) {
-	case OBJ_TYP_ANYXML:
-	    return TRUE;   /**** was FALSE ****/
-	case OBJ_TYP_LEAF:
-	case OBJ_TYP_LEAF_LIST:
-	    break;
-	case OBJ_TYP_CHOICE:
-	    for (casobj = obj_first_child(chobj);
-		 casobj != NULL;
-		 casobj = obj_next_child(casobj)) {
+        switch (chobj->objtype) {
+        case OBJ_TYP_ANYXML:
+            return TRUE;   /**** was FALSE ****/
+        case OBJ_TYP_LEAF:
+        case OBJ_TYP_LEAF_LIST:
+            break;
+        case OBJ_TYP_CHOICE:
+            for (casobj = obj_first_child(chobj);
+                 casobj != NULL;
+                 casobj = obj_next_child(casobj)) {
 
-		for (caschild = obj_first_child(casobj);
-		     caschild != NULL;
-		     caschild = obj_next_child(caschild)) {
-		    switch (caschild->objtype) {
-		    case OBJ_TYP_ANYXML:
-			return FALSE;
-		    case OBJ_TYP_LEAF:
-		    case OBJ_TYP_LEAF_LIST:
-			break;
-		    default:
-			return FALSE;
-		    }
-		}
-	    }
-	    break;
-	default:
-	    return FALSE;
-	}
+                for (caschild = obj_first_child(casobj);
+                     caschild != NULL;
+                     caschild = obj_next_child(caschild)) {
+                    switch (caschild->objtype) {
+                    case OBJ_TYP_ANYXML:
+                        return FALSE;
+                    case OBJ_TYP_LEAF:
+                    case OBJ_TYP_LEAF_LIST:
+                        break;
+                    default:
+                        return FALSE;
+                    }
+                }
+            }
+            break;
+        default:
+            return FALSE;
+        }
     }
 
     return TRUE;
@@ -8979,12 +8979,12 @@ boolean
  *********************************************************************/
 status_t 
     obj_get_child_node (obj_template_t *obj,
-			obj_template_t *chobj,
-			const xml_node_t *curnode,
-			boolean xmlorder,
+                        obj_template_t *chobj,
+                        const xml_node_t *curnode,
+                        boolean xmlorder,
                         dlq_hdr_t *force_modQ,
-			obj_template_t **rettop,
-			obj_template_t **retobj)
+                        obj_template_t **rettop,
+                        obj_template_t **retobj)
 {
     obj_template_t        *foundobj, *nextchobj;
     const xmlChar         *foundmodname;
@@ -8996,7 +8996,7 @@ status_t
 
 #ifdef DEBUG
     if (!obj || !curnode || !rettop || !retobj) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -9022,175 +9022,175 @@ status_t
     } 
 
     if (obj_is_root(obj)) {
-	/* the child node can be any top-level object
-	 * in the configuration database
-	 */
-	if (foundmodname) {
-	    /* get the name from 1 module */
-	    foundobj =  ncx_find_object(foundmod,
-					curnode->elname);
-	} else if (force_modQ) {
+        /* the child node can be any top-level object
+         * in the configuration database
+         */
+        if (foundmodname) {
+            /* get the name from 1 module */
+            foundobj =  ncx_find_object(foundmod,
+                                        curnode->elname);
+        } else if (force_modQ) {
             /* check this Q of modules for a top-level match */
-	    foundobj = ncx_find_any_object_que(force_modQ,
+            foundobj = ncx_find_any_object_que(force_modQ,
                                                curnode->elname);
-	    if (foundobj) {
-		foundmodname = obj_get_mod_name(foundobj);
-	    }
+            if (foundobj) {
+                foundmodname = obj_get_mod_name(foundobj);
+            }
         } else {
-	    /* NSID not set, get the name from any module */
-	    foundobj = ncx_find_any_object(curnode->elname);
-	    if (foundobj) {
-		foundmodname = obj_get_mod_name(foundobj);
-	    }
-	}
+            /* NSID not set, get the name from any module */
+            foundobj = ncx_find_any_object(curnode->elname);
+            if (foundobj) {
+                foundmodname = obj_get_mod_name(foundobj);
+            }
+        }
 
-	if (foundobj) {
-	    if (!obj_is_data_db(foundobj) ||
-		obj_is_abstract(foundobj) ||
-		obj_is_cli(foundobj)) {
-		foundobj = NULL;
-	    }
-	}
+        if (foundobj) {
+            if (!obj_is_data_db(foundobj) ||
+                obj_is_abstract(foundobj) ||
+                obj_is_cli(foundobj)) {
+                foundobj = NULL;
+            }
+        }
     } else if (obj_get_nsid(obj) == ncnid &&
-	       !xml_strcmp(obj_get_name(obj),
-			   NCX_EL_NOTIFICATION)) {
-	/* hack: special case handling of the
-	 * <notification> element
-	 * the child node can be <eventTime> or
-	 * any top-level OBJ_TYP_NOTIF node
-	 */
-	if (foundmodname) {
+               !xml_strcmp(obj_get_name(obj),
+                           NCX_EL_NOTIFICATION)) {
+        /* hack: special case handling of the
+         * <notification> element
+         * the child node can be <eventTime> or
+         * any top-level OBJ_TYP_NOTIF node
+         */
+        if (foundmodname) {
             /* try a child of <notification> */
             foundobj = obj_find_child(obj, 
                                       foundmodname,
                                       curnode->elname);
             if (!foundobj) {
                 /* try to find an <eventType> */
-		foundobj =  ncx_find_object(foundmod,
-					    curnode->elname);
-		if (foundobj && 
-		    foundobj->objtype != OBJ_TYP_NOTIF) {
-		    /* object is the wrong type */
-		    foundobj = NULL;
-		}
-	    }
-	} else {
-	    /* no namespace ID used
-	     * try to find any eventType object
-	     */
+                foundobj =  ncx_find_object(foundmod,
+                                            curnode->elname);
+                if (foundobj && 
+                    foundobj->objtype != OBJ_TYP_NOTIF) {
+                    /* object is the wrong type */
+                    foundobj = NULL;
+                }
+            }
+        } else {
+            /* no namespace ID used
+             * try to find any eventType object
+             */
             if (force_modQ) {
                 foundobj = ncx_find_any_object_que(force_modQ,
                                                    curnode->elname);
             } else {
                 foundobj = ncx_find_any_object(curnode->elname);
             }
-	    if (foundobj) {
-		if (foundobj->objtype != OBJ_TYP_NOTIF) {
-		    foundobj = NULL;
-		}
-	    } else {
-		/* try a child of obj (eventTime) */
-		foundobj = obj_find_child(obj, 
-					  NULL,
-					  curnode->elname);
-	    }
-	}
+            if (foundobj) {
+                if (foundobj->objtype != OBJ_TYP_NOTIF) {
+                    foundobj = NULL;
+                }
+            } else {
+                /* try a child of obj (eventTime) */
+                foundobj = obj_find_child(obj, 
+                                          NULL,
+                                          curnode->elname);
+            }
+        }
     } else if (xmlorder) {
-	/* the current node must match or one of the
-	 * subsequent child nodes must match
-	 */
-	if (chobj) {
-	    switch (chobj->objtype) {
-	    case OBJ_TYP_CHOICE:
-	    case OBJ_TYP_CASE:
-		/* these nodes are not really in the XML so
-		 * check all the child nodes of the
-		 * cases.  When found, need to remember
-		 * the current child node at the choice
-		 * or case level, so when the lower
-		 * level child pointer runs out, the
-		 * search can continue at the next
-		 * sibling of 'rettop'
-		 */
-		foundobj = obj_find_child(chobj,
-					  foundmodname,
-					  curnode->elname);
-		if (foundobj) {
-		    /* make sure this matched a real node instead
-		     * of match of choice or case name
-		     */
-		    if (foundobj->objtype==OBJ_TYP_CHOICE ||
-			foundobj->objtype==OBJ_TYP_CASE) {
-			foundobj = NULL;
-		    } else {
-			*rettop = chobj;
-			topdone = TRUE;
-		    }
-		}		    
-		break;
-	    default:
-		/* the YANG node and XML node line up,
-		 * so it is OK to compare them directly
-		 */
-		res = xml_node_match(curnode, 
-				     obj_get_nsid(chobj), 
-				     obj_get_name(chobj), 
-				     XML_NT_NONE);
+        /* the current node must match or one of the
+         * subsequent child nodes must match
+         */
+        if (chobj) {
+            switch (chobj->objtype) {
+            case OBJ_TYP_CHOICE:
+            case OBJ_TYP_CASE:
+                /* these nodes are not really in the XML so
+                 * check all the child nodes of the
+                 * cases.  When found, need to remember
+                 * the current child node at the choice
+                 * or case level, so when the lower
+                 * level child pointer runs out, the
+                 * search can continue at the next
+                 * sibling of 'rettop'
+                 */
+                foundobj = obj_find_child(chobj,
+                                          foundmodname,
+                                          curnode->elname);
+                if (foundobj) {
+                    /* make sure this matched a real node instead
+                     * of match of choice or case name
+                     */
+                    if (foundobj->objtype==OBJ_TYP_CHOICE ||
+                        foundobj->objtype==OBJ_TYP_CASE) {
+                        foundobj = NULL;
+                    } else {
+                        *rettop = chobj;
+                        topdone = TRUE;
+                    }
+                }                   
+                break;
+            default:
+                /* the YANG node and XML node line up,
+                 * so it is OK to compare them directly
+                 */
+                res = xml_node_match(curnode, 
+                                     obj_get_nsid(chobj), 
+                                     obj_get_name(chobj), 
+                                     XML_NT_NONE);
 
-		if (res == NO_ERR) {
-		    foundobj = chobj;
-		} else {
-		    foundobj = NULL;
-		}
-	    }
+                if (res == NO_ERR) {
+                    foundobj = chobj;
+                } else {
+                    foundobj = NULL;
+                }
+            }
 
-	    if (!foundobj) {
-		/* check if there are other child nodes that could
-		 * match, due to instance qualifiers 
-		 */
-		nextchobj = find_next_child(chobj, curnode);
-		if (nextchobj) {
-		    res = NO_ERR;
-		    foundobj = nextchobj;
-		} else if (*rettop) {
-		    nextchobj = find_next_child(*rettop, curnode);
-		    if (nextchobj) {
-			res = NO_ERR;
-			foundobj = nextchobj;
-		    }
-		}
-	    }
-	}
+            if (!foundobj) {
+                /* check if there are other child nodes that could
+                 * match, due to instance qualifiers 
+                 */
+                nextchobj = find_next_child(chobj, curnode);
+                if (nextchobj) {
+                    res = NO_ERR;
+                    foundobj = nextchobj;
+                } else if (*rettop) {
+                    nextchobj = find_next_child(*rettop, curnode);
+                    if (nextchobj) {
+                        res = NO_ERR;
+                        foundobj = nextchobj;
+                    }
+                }
+            }
+        }
     } else {
-	/* do not care about XML order, just match any node
-	 * within the current parent object
-	 */
-	if (curnode->nsid) {
-	    /* find the specified module first */
+        /* do not care about XML order, just match any node
+         * within the current parent object
+         */
+        if (curnode->nsid) {
+            /* find the specified module first */
 
-	    if (foundmodname) {
-		foundobj = obj_find_child(obj, 
-					  foundmodname,
-					  curnode->elname);
-	    }
-	} else {
-	    /* get the object from first match module */
-	    foundobj = obj_find_child(obj, 
-				      NULL,
-				      curnode->elname);
-	}
+            if (foundmodname) {
+                foundobj = obj_find_child(obj, 
+                                          foundmodname,
+                                          curnode->elname);
+            }
+        } else {
+            /* get the object from first match module */
+            foundobj = obj_find_child(obj, 
+                                      NULL,
+                                      curnode->elname);
+        }
     }
 
     if (foundobj) {
-	*retobj = foundobj;
-	if (!topdone) {
-	    *rettop = foundobj;
-	}
-	return NO_ERR;
+        *retobj = foundobj;
+        if (!topdone) {
+            *rettop = foundobj;
+        }
+        return NO_ERR;
     } else if (res != NO_ERR) {
-	return res;
+        return res;
     } else {
-	return ERR_NCX_DEF_NOT_FOUND;
+        return ERR_NCX_DEF_NOT_FOUND;
     }
     /*NOTREACHED*/
 
@@ -9223,9 +9223,9 @@ uint32
 
     datadefQ = obj_get_cdatadefQ(obj);
     if (datadefQ) {
-	return dlq_count(datadefQ);
+        return dlq_count(datadefQ);
     } else {
-	return 0;
+        return 0;
     }
 
 }   /* obj_get_child_count */
@@ -9257,9 +9257,9 @@ boolean
 
     childobj = obj_first_child_deep(obj);
     if (childobj) {
-	return TRUE;
+        return TRUE;
     } else {
-	return FALSE;
+        return FALSE;
     }
 
 }   /* obj_has_children */
@@ -9340,7 +9340,7 @@ boolean
                               obj_get_mod_name(obj),
                               YANG_K_INPUT);
     if (childobj) {
-	return obj_has_children(childobj);
+        return obj_has_children(childobj);
     } else {
         return FALSE;
     }
@@ -9380,7 +9380,7 @@ boolean
                               obj_get_mod_name(obj),
                               YANG_K_OUTPUT);
     if (childobj) {
-	return obj_has_children(childobj);
+        return obj_has_children(childobj);
     } else {
         return FALSE;
     }
@@ -9407,15 +9407,15 @@ obj_metadata_t *
 
     meta = m__getObj(obj_metadata_t);
     if (!meta) {
-	return NULL;
+        return NULL;
     }
 
     (void)memset(meta, 0x0, sizeof(obj_metadata_t));
 
     meta->typdef = typ_new_typdef();
     if (!meta->typdef) {
-	m__free(meta);
-	return NULL;
+        m__free(meta);
+        return NULL;
     }
 
     return meta;
@@ -9439,16 +9439,16 @@ void
 {
 #ifdef DEBUG
     if (!meta) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (meta->name) {
-	m__free(meta->name);
+        m__free(meta->name);
     }
     if (meta->typdef) {
-	typ_free_typdef(meta->typdef);
+        typ_free_typdef(meta->typdef);
     }
     m__free(meta);
 
@@ -9469,19 +9469,19 @@ void
 *********************************************************************/
 status_t
     obj_add_metadata (obj_metadata_t *meta,
-		      obj_template_t *obj)
+                      obj_template_t *obj)
 {
     obj_metadata_t *testmeta;
 
 #ifdef DEBUG
     if (!meta || !obj) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     testmeta = obj_find_metadata(obj, meta->name);
     if (testmeta) {
-	return ERR_NCX_ENTRY_EXISTS;
+        return ERR_NCX_ENTRY_EXISTS;
     }
 
     meta->parent = obj;
@@ -9506,26 +9506,26 @@ status_t
 *********************************************************************/
 obj_metadata_t *
     obj_find_metadata (const obj_template_t *obj,
-		       const xmlChar *name)
+                       const xmlChar *name)
 {
     obj_metadata_t *testmeta;
 
 #ifdef DEBUG
     if (!obj || !name) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     for (testmeta = (obj_metadata_t *)
-	     dlq_firstEntry(&obj->metadataQ);
-	 testmeta != NULL;
-	 testmeta = (obj_metadata_t *)
-	     dlq_nextEntry(testmeta)) {
+             dlq_firstEntry(&obj->metadataQ);
+         testmeta != NULL;
+         testmeta = (obj_metadata_t *)
+             dlq_nextEntry(testmeta)) {
 
-	if (!xml_strcmp(testmeta->name, name)) {
-	    return testmeta;
-	}
+        if (!xml_strcmp(testmeta->name, name)) {
+            return testmeta;
+        }
     }
 
     return NULL;
@@ -9550,13 +9550,13 @@ obj_metadata_t *
 
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     return (obj_metadata_t *)
-	dlq_firstEntry(&obj->metadataQ);
+        dlq_firstEntry(&obj->metadataQ);
 
 }  /* obj_first_metadata */
 
@@ -9578,8 +9578,8 @@ obj_metadata_t *
 
 #ifdef DEBUG
     if (!meta) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -9605,14 +9605,14 @@ obj_template_t *
 {
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	return obj->def.container->defaultparm;
+        return obj->def.container->defaultparm;
     case OBJ_TYP_LEAF:
     case OBJ_TYP_LEAF_LIST:
     case OBJ_TYP_LIST:
@@ -9623,15 +9623,15 @@ obj_template_t *
     case OBJ_TYP_REFINE:
     case OBJ_TYP_RPC:
     case OBJ_TYP_ANYXML:
-	return NULL;
+        return NULL;
     case OBJ_TYP_RPCIO:
-	return obj->def.rpcio->defaultparm;
+        return obj->def.rpcio->defaultparm;
     case OBJ_TYP_NOTIF:
-	return NULL;
+        return NULL;
     case OBJ_TYP_NONE:
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
     /*NOTREACHED*/
 
@@ -9665,52 +9665,52 @@ boolean
     case OBJ_TYP_LEAF_LIST:
     case OBJ_TYP_LIST:
     case OBJ_TYP_CHOICE:
-	if (obj_is_root(obj)) {
-	    return TRUE;
-	}
-	/* check if this normal object has a config-stmt */
-	if (obj->flags & OBJ_FL_CONFSET) {
-	    return (obj->flags & OBJ_FL_CONFIG) ? TRUE : FALSE;
-	}
+        if (obj_is_root(obj)) {
+            return TRUE;
+        }
+        /* check if this normal object has a config-stmt */
+        if (obj->flags & OBJ_FL_CONFSET) {
+            return (obj->flags & OBJ_FL_CONFIG) ? TRUE : FALSE;
+        }
 
-	if (obj->parent) {
-	    return obj_get_config_flag_deep(obj->parent);
-	}
+        if (obj->parent) {
+            return obj_get_config_flag_deep(obj->parent);
+        }
 
-	/* should not really get here, since all 
-	 * top-level objects should have the OBJ_FL_CONFSET
-	 * flag set: default ifor top-level is config=true
-	 */
-	return TRUE;
+        /* should not really get here, since all 
+         * top-level objects should have the OBJ_FL_CONFSET
+         * flag set: default ifor top-level is config=true
+         */
+        return TRUE;
     case OBJ_TYP_CASE:
-	if (obj->parent) {
-	    return obj_get_config_flag_deep(obj->parent);
-	} else {
-	    /* should not happen */
-	    return FALSE;
-	}
+        if (obj->parent) {
+            return obj_get_config_flag_deep(obj->parent);
+        } else {
+            /* should not happen */
+            return FALSE;
+        }
     case OBJ_TYP_USES:
     case OBJ_TYP_AUGMENT:
     case OBJ_TYP_REFINE:
-	/* no real setting -- not applicable */
-	return FALSE;
+        /* no real setting -- not applicable */
+        return FALSE;
     case OBJ_TYP_RPC:
-	/* no real setting for this, but has to be true
-	 * to allow rpc/input to be true
-	 */
-	return TRUE;
+        /* no real setting for this, but has to be true
+         * to allow rpc/input to be true
+         */
+        return TRUE;
     case OBJ_TYP_RPCIO:
-	if (!xml_strcmp(obj->def.rpcio->name, YANG_K_INPUT)) {
-	    return TRUE;
-	} else {
-	    return FALSE;
-	}
+        if (!xml_strcmp(obj->def.rpcio->name, YANG_K_INPUT)) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
     case OBJ_TYP_NOTIF:
-	return FALSE;
+        return FALSE;
     case OBJ_TYP_NONE:
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
     }
     /*NOTREACHED*/
 
@@ -9736,16 +9736,16 @@ uint8
 
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
     typdef = obj_get_ctypdef(obj);
     if (typdef) {
-	return typ_get_fraction_digits(typdef);
+        return typ_get_fraction_digits(typdef);
     } else {
-	return 0;
+        return 0;
     }
 
 }  /* obj_get_fraction_digits */
@@ -9769,13 +9769,13 @@ const ncx_iffeature_t *
 
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     return (const ncx_iffeature_t *)
-	dlq_firstEntry(&obj->iffeatureQ);
+        dlq_firstEntry(&obj->iffeatureQ);
 
 }  /* obj_get_first_iffeature */
 
@@ -9798,8 +9798,8 @@ const ncx_iffeature_t *
 
 #ifdef DEBUG
     if (!iffeature) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -9829,18 +9829,18 @@ boolean
 #ifdef DEBUG
     if (!obj) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        return FALSE;
     }
 #endif
 
     for (iffeature = obj_get_first_iffeature(obj);
-	 iffeature != NULL;
-	 iffeature = obj_get_next_iffeature(iffeature)) {
+         iffeature != NULL;
+         iffeature = obj_get_next_iffeature(iffeature)) {
 
-	if (!iffeature->feature ||
-	    !ncx_feature_enabled(iffeature->feature)) {
-	    return FALSE;
-	}
+        if (!iffeature->feature ||
+            !ncx_feature_enabled(iffeature->feature)) {
+            return FALSE;
+        }
     }
 
     return TRUE;
@@ -9865,27 +9865,27 @@ boolean
 
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return TRUE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return TRUE;
     }
 #endif
 
     while (obj != NULL) {
-	iqual = obj_get_iqualval(obj);
-	switch (iqual) {
-	case NCX_IQUAL_ZMORE:
-	case NCX_IQUAL_1MORE:
-	    return FALSE;
-	default:
-	    /* don't bother checking the root
-	     * and don't go past the root into
-	     * the RPC parameters
-	     */
-	    obj = obj->parent;
-	    if (obj && obj_is_root(obj)) {
-		obj = NULL;
-	    }
-	}
+        iqual = obj_get_iqualval(obj);
+        switch (iqual) {
+        case NCX_IQUAL_ZMORE:
+        case NCX_IQUAL_1MORE:
+            return FALSE;
+        default:
+            /* don't bother checking the root
+             * and don't go past the root into
+             * the RPC parameters
+             */
+            obj = obj->parent;
+            if (obj && obj_is_root(obj)) {
+                obj = NULL;
+            }
+        }
     }
     return TRUE;
 
@@ -9907,8 +9907,8 @@ boolean
 
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return TRUE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return TRUE;
     }
 #endif
 
@@ -9967,8 +9967,8 @@ boolean
 
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -9991,8 +9991,8 @@ boolean
 {
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -10033,8 +10033,8 @@ void
 
 #ifdef DEBUG
     if (!obj) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 

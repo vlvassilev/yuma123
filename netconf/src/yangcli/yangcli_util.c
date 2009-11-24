@@ -126,7 +126,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -149,39 +149,39 @@ boolean
 {
 #ifdef DEBUG
     if (!rpcname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     if (!xml_strcmp(rpcname, YANGCLI_CD)) {
-	;
+        ;
     } else if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
-	;
+        ;
     } else if (!xml_strcmp(rpcname, YANGCLI_EVENTLOG)) {
-	;
+        ;
     } else if (!xml_strcmp(rpcname, YANGCLI_FILL)) {
-	;
+        ;
     } else if (!xml_strcmp(rpcname, YANGCLI_HELP)) {
-	;
+        ;
     } else if (!xml_strcmp(rpcname, YANGCLI_HISTORY)) {
-	;
+        ;
     } else if (!xml_strcmp(rpcname, YANGCLI_LIST)) {
-	;
+        ;
     } else if (!xml_strcmp(rpcname, YANGCLI_MGRLOAD)) {
-	;
+        ;
     } else if (!xml_strcmp(rpcname, YANGCLI_PWD)) {
-	;
+        ;
     } else if (!xml_strcmp(rpcname, YANGCLI_QUIT)) {
-	;
+        ;
     } else if (!xml_strcmp(rpcname, YANGCLI_RECALL)) {
-	;
+        ;
     } else if (!xml_strcmp(rpcname, YANGCLI_RUN)) {
-	;
+        ;
     } else if (!xml_strcmp(rpcname, YANGCLI_SHOW)) {
-	;
+        ;
     } else {
-	return FALSE;
+        return FALSE;
     }
     return TRUE;
 
@@ -205,21 +205,21 @@ boolean
 *********************************************************************/
 modptr_t *
     new_modptr (ncx_module_t *mod,
-		ncx_list_t *feature_list,
-		ncx_list_t *deviation_list)
+                ncx_list_t *feature_list,
+                ncx_list_t *deviation_list)
 {
     modptr_t  *modptr;
 
 #ifdef DEBUG
     if (!mod) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     modptr = m__getObj(modptr_t);
     if (!modptr) {
-	return NULL;
+        return NULL;
     }
     memset(modptr, 0x0, sizeof(modptr_t));
     modptr->mod = mod;
@@ -246,8 +246,8 @@ void
 {
 #ifdef DEBUG
     if (!modptr) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -279,16 +279,16 @@ modptr_t *
 
 #ifdef DEBUG
     if (!modptrQ || !modname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     for (modptr = (modptr_t *)dlq_firstEntry(modptrQ);
-	 modptr != NULL;
-	 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+         modptr != NULL;
+         modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
-	if (xml_strcmp(modptr->mod->name, modname)) {
+        if (xml_strcmp(modptr->mod->name, modname)) {
             continue;
         }
 
@@ -296,7 +296,7 @@ modptr_t *
             modptr->mod->version &&
             !xml_strcmp(modptr->mod->version, revision)) {
             return modptr;
-	}
+        }
         if (revision == NULL) {
             return modptr;
         }
@@ -322,8 +322,8 @@ void
 
 #ifdef DEBUG
     if (!server_cb) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -334,8 +334,8 @@ void
     runstack_session_cleanup();
 
     while (!dlq_empty(&server_cb->modptrQ)) {
-	modptr = (modptr_t *)dlq_deque(&server_cb->modptrQ);
-	free_modptr(modptr);
+        modptr = (modptr_t *)dlq_deque(&server_cb->modptrQ);
+        free_modptr(modptr);
     }
     server_cb->mysid = 0;
     server_cb->state = MGR_IO_ST_IDLE;
@@ -367,7 +367,7 @@ boolean
     switch (state) {
     case MGR_IO_ST_INIT:
     case MGR_IO_ST_IDLE:
-	return TRUE;
+        return TRUE;
     case MGR_IO_ST_CONNECT:
     case MGR_IO_ST_CONN_START:
     case MGR_IO_ST_SHUT:
@@ -376,10 +376,10 @@ boolean
     case MGR_IO_ST_CONN_CANCELWAIT:
     case MGR_IO_ST_CONN_CLOSEWAIT:
     case MGR_IO_ST_CONN_SHUT:
-	return FALSE;
+        return FALSE;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
     }
 
 }  /* is_top */
@@ -401,9 +401,9 @@ boolean
     use_servercb (server_cb_t *server_cb)
 {
     if (!server_cb || is_top(server_cb->state)) {
-	return FALSE;
+        return FALSE;
     } else if (dlq_empty(&server_cb->modptrQ)) {
-	return FALSE;
+        return FALSE;
     }
     return TRUE;
 }  /* use_servercb */
@@ -426,27 +426,27 @@ boolean
 *********************************************************************/
 ncx_module_t *
     find_module (server_cb_t *server_cb,
-		 const xmlChar *modname)
+                 const xmlChar *modname)
 {
     modptr_t      *modptr;
     ncx_module_t  *mod;
 
 #ifdef DEBUG
     if (!modname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (use_servercb(server_cb)) {
-	for (modptr = (modptr_t *)dlq_firstEntry(&server_cb->modptrQ);
-	     modptr != NULL;
-	     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+        for (modptr = (modptr_t *)dlq_firstEntry(&server_cb->modptrQ);
+             modptr != NULL;
+             modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
-	    if (!xml_strcmp(modptr->mod->name, modname)) {
-		return modptr->mod;
-	    }
-	}
+            if (!xml_strcmp(modptr->mod->name, modname)) {
+                return modptr->mod;
+            }
+        }
     }
 
     mod = ncx_find_module(modname, NULL);
@@ -472,26 +472,26 @@ ncx_module_t *
 *********************************************************************/
 xmlChar *
     get_strparm (val_value_t *valset,
-		 const xmlChar *modname,
-		 const xmlChar *parmname)
+                 const xmlChar *modname,
+                 const xmlChar *parmname)
 {
     val_value_t    *parm;
     xmlChar        *str;
 
 #ifdef DEBUG
     if (!valset || !parmname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
     
     str = NULL;
     parm = findparm(valset, modname, parmname);
     if (parm) {
-	str = xml_strdup(VAL_STR(parm));
-	if (!str) {
-	    log_error("\nyangcli: Out of Memory error");
-	}
+        str = xml_strdup(VAL_STR(parm));
+        if (!str) {
+            log_error("\nyangcli: Out of Memory error");
+        }
     }
     return str;
 
@@ -514,25 +514,25 @@ xmlChar *
 *********************************************************************/
 val_value_t *
     findparm (val_value_t *valset,
-	      const xmlChar *modname,
-	      const xmlChar *parmname)
+              const xmlChar *modname,
+              const xmlChar *parmname)
 {
     val_value_t *parm;
 
 #ifdef DEBUG
     if (!parmname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (!valset) {
-	return NULL;
+        return NULL;
     }
 
     parm = val_find_child(valset, modname, parmname);
     if (!parm && get_autocomp()) {
-	parm = val_match_child(valset, modname, parmname);
+        parm = val_match_child(valset, modname, parmname);
     }
     return parm;
 
@@ -553,22 +553,22 @@ val_value_t *
 *********************************************************************/
 status_t
     add_clone_parm (const val_value_t *val,
-		    val_value_t *valset)
+                    val_value_t *valset)
 {
     val_value_t    *parm;
 
 #ifdef DEBUG
     if (!val || !valset) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     parm = val_clone(val);
     if (!parm) {
-	log_error("\nyangcli: val_clone failed");
-	return ERR_INTERNAL_MEM;
+        log_error("\nyangcli: val_clone failed");
+        return ERR_INTERNAL_MEM;
     } else {
-	val_add_child(parm, valset);
+        val_add_child(parm, valset);
     }
     return NO_ERR;
 
@@ -593,9 +593,9 @@ boolean
 
     modname = xmlns_get_module(ns);
     if (modname && !xml_strcmp(modname, YANGCLI_MOD)) {
-	return TRUE;
+        return TRUE;
     } else {
-	return FALSE;
+        return FALSE;
     }
 
 }  /* is_yangcli_ns */
@@ -616,18 +616,18 @@ void
 {
 #ifdef DEBUG
     if (!server_cb) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (server_cb->result_name) {
-	m__free(server_cb->result_name);
-	server_cb->result_name = NULL;
+        m__free(server_cb->result_name);
+        server_cb->result_name = NULL;
     }
     if (server_cb->result_filename) {
-	m__free(server_cb->result_filename);
-	server_cb->result_filename = NULL;
+        m__free(server_cb->result_filename);
+        server_cb->result_filename = NULL;
     }
 
 }  /* clear_result */
@@ -653,26 +653,26 @@ void
 *********************************************************************/
 status_t
     check_filespec (server_cb_t *server_cb,
-		    const xmlChar *filespec,
-		    const xmlChar *varname)
+                    const xmlChar *filespec,
+                    const xmlChar *varname)
 {
     const xmlChar *teststr;
 
 #ifdef DEBUG
     if (!server_cb || !filespec) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     if (!filespec || !*filespec) {
-	if (varname) {
-	    log_error("\nError: file assignment variable '%s' "
-		      "is empty string", varname);
-	} else {
-	    log_error("\nError: file assignment filespec "
-		      "is empty string");
-	}
-	return ERR_NCX_INVALID_VALUE;
+        if (varname) {
+            log_error("\nError: file assignment variable '%s' "
+                      "is empty string", varname);
+        } else {
+            log_error("\nError: file assignment filespec "
+                      "is empty string");
+        }
+        return ERR_NCX_INVALID_VALUE;
     }
 
     /* variable must be a string with only
@@ -681,49 +681,49 @@ status_t
      * if arbitrary strings are allowed here
      */
     if (val_need_quotes(filespec)) {
-	if (varname) {
-	    log_error("\nError: file assignment variable '%s' "
-		      "contains whitespace (%s)", 
-		      varname, filespec);
-	} else {
-	    log_error("\nError: file assignment filespec '%s' "
-		      "contains whitespace", filespec);
-	}
-	return ERR_NCX_INVALID_VALUE;
+        if (varname) {
+            log_error("\nError: file assignment variable '%s' "
+                      "contains whitespace (%s)", 
+                      varname, filespec);
+        } else {
+            log_error("\nError: file assignment filespec '%s' "
+                      "contains whitespace", filespec);
+        }
+        return ERR_NCX_INVALID_VALUE;
     }
 
     /* check for acceptable chars */
     teststr = filespec;
     while (*teststr) {
-	if (*teststr == NCXMOD_PSCHAR ||
-	    *teststr == '.' ||
+        if (*teststr == NCXMOD_PSCHAR ||
+            *teststr == '.' ||
 #ifdef WINDOWS
-	    *teststr == ':' ||
+            *teststr == ':' ||
 #endif
-	    ncx_valid_name_ch(*teststr)) {
-	    teststr++;
-	} else {
-	    if (varname) {
-		log_error("\nError: file assignment variable '%s' "
-			  "contains invalid filespec (%s)", 
-			  varname, filespec);
-	    } else {
-		log_error("\nError: file assignment filespec '%s' "
-			  "contains invalid filespec", filespec);
-	    }
-	    return ERR_NCX_INVALID_VALUE;
-	}
+            ncx_valid_name_ch(*teststr)) {
+            teststr++;
+        } else {
+            if (varname) {
+                log_error("\nError: file assignment variable '%s' "
+                          "contains invalid filespec (%s)", 
+                          varname, filespec);
+            } else {
+                log_error("\nError: file assignment filespec '%s' "
+                          "contains invalid filespec", filespec);
+            }
+            return ERR_NCX_INVALID_VALUE;
+        }
     }
 
     /* toss out the old value, if any */
     if (server_cb->result_filename) {
-	m__free(server_cb->result_filename);
+        m__free(server_cb->result_filename);
     }
 
     /* save the filename, may still be an invalid fspec  */
     server_cb->result_filename = xml_strdup(filespec);
     if (!server_cb->result_filename) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     return NO_ERR;
 
@@ -763,11 +763,11 @@ status_t
  *********************************************************************/
 val_value_t *
     get_instanceid_parm (server_cb_t *server_cb,
-			 const xmlChar *target,
-			 boolean schemainst,
-			 obj_template_t **targobj,
-			 val_value_t **targval,
-			 status_t *retres)
+                         const xmlChar *target,
+                         boolean schemainst,
+                         obj_template_t **targobj,
+                         val_value_t **targval,
+                         status_t *retres)
 {
     xpath_pcb_t           *xpathpcb;
     val_value_t           *retval;
@@ -775,8 +775,8 @@ val_value_t *
 
 #ifdef DEBUG
     if (!server_cb || !target || !targobj || !targval || !retres) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -787,36 +787,36 @@ val_value_t *
     /* get a parser block for the instance-id */
     xpathpcb = xpath_new_pcb(target);
     if (!xpathpcb) {
-	log_error("\nError: malloc failed");
-	*retres = ERR_INTERNAL_MEM;
-	return NULL;
+        log_error("\nError: malloc failed");
+        *retres = ERR_INTERNAL_MEM;
+        return NULL;
     }
 
     /* initial parse into a token chain */
     res = xpath_yang_parse_path(NULL, 
-				NULL, 
-				XP_SRC_INSTANCEID,
-				xpathpcb);
+                                NULL, 
+                                XP_SRC_INSTANCEID,
+                                xpathpcb);
     if (res != NO_ERR) {
-	log_error("\nError: parse XPath target '%s' failed",
-		  xpathpcb->exprstr);
-	xpath_free_pcb(xpathpcb);
-	*retres = res;
-	return NULL;
+        log_error("\nError: parse XPath target '%s' failed",
+                  xpathpcb->exprstr);
+        xpath_free_pcb(xpathpcb);
+        *retres = res;
+        return NULL;
     }
 
     /* validate against the object tree */
     res = xpath_yang_validate_path(NULL, 
-				   ncx_get_gen_root(),
-				   xpathpcb,
-				   schemainst,
-				   targobj);
+                                   ncx_get_gen_root(),
+                                   xpathpcb,
+                                   schemainst,
+                                   targobj);
     if (res != NO_ERR) {
-	log_error("\nError: validate XPath target '%s' failed",
-		  xpathpcb->exprstr);
-	xpath_free_pcb(xpathpcb);
-	*retres = res;
-	return NULL;
+        log_error("\nError: validate XPath target '%s' failed",
+                  xpathpcb->exprstr);
+        xpath_free_pcb(xpathpcb);
+        *retres = res;
+        return NULL;
     }
 
     /* have a valid target object, so follow the
@@ -824,8 +824,8 @@ val_value_t *
      * from the XPath expression
      */
     retval = xpath_yang_make_instanceid_val(xpathpcb, 
-					    &res,
-					    targval);
+                                            &res,
+                                            targval);
 
     xpath_free_pcb(xpathpcb);
     *retres = res;
@@ -855,42 +855,42 @@ boolean
 
 #ifdef DEBUG
     if (!filespec) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     len = xml_strlen(filespec);
     if (len < 5) {
-	return FALSE;
+        return FALSE;
     }
 
     teststr = &filespec[len-1];
 
     while (teststr > filespec && *teststr != '.') {
-	teststr--;
+        teststr--;
     }
 
     if (teststr == filespec) {
-	return FALSE;
+        return FALSE;
     }
 
     teststr++;
 
     if (!xml_strcmp(teststr, NCX_EL_YANG)) {
-	return TRUE;
+        return TRUE;
     }
 
     if (!xml_strcmp(teststr, NCX_EL_TXT)) {
-	return TRUE;
+        return TRUE;
     }
 
     if (!xml_strcmp(teststr, NCX_EL_TEXT)) {
-	return TRUE;
+        return TRUE;
     }
 
     if (!xml_strcmp(teststr, NCX_EL_LOG)) {
-	return TRUE;
+        return TRUE;
     }
 
     return FALSE;
@@ -926,19 +926,19 @@ boolean
  *********************************************************************/
 void
     init_completion_state (completion_state_t *completion_state,
-			   server_cb_t *server_cb,
-			   command_state_t  cmdstate)
+                           server_cb_t *server_cb,
+                           command_state_t  cmdstate)
 {
 #ifdef DEBUG
     if (!completion_state) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     memset(completion_state, 
-	   0x0, 
-	   sizeof(completion_state_t));
+           0x0, 
+           sizeof(completion_state_t));
     completion_state->server_cb = server_cb;
     completion_state->cmdstate = cmdstate;
 
@@ -958,24 +958,24 @@ void
  *********************************************************************/
 void
     set_completion_state (completion_state_t *completion_state,
-			  obj_template_t *rpc,
-			  obj_template_t *parm,
-			  command_state_t  cmdstate)
+                          obj_template_t *rpc,
+                          obj_template_t *parm,
+                          command_state_t  cmdstate)
 {
 #ifdef DEBUG
     if (!completion_state) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     completion_state->cmdstate = cmdstate;
     completion_state->cmdobj = rpc;
     if (rpc) {
-	completion_state->cmdinput =
-	    obj_find_child(rpc, NULL, YANG_K_INPUT);
+        completion_state->cmdinput =
+            obj_find_child(rpc, NULL, YANG_K_INPUT);
     } else {
-	completion_state->cmdinput = NULL;
+        completion_state->cmdinput = NULL;
     }
     completion_state->cmdcurparm = parm;
 
@@ -993,12 +993,12 @@ void
  *********************************************************************/
 void
     set_completion_state_curparm (completion_state_t *completion_state,
-				  obj_template_t *parm)
+                                  obj_template_t *parm)
 {
 #ifdef DEBUG
     if (!completion_state) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 

@@ -54,23 +54,23 @@ DESCRIPTION:
                 Decoding is the process in reverse.  A 'decode' lookup
                 table has been created to avoid string scans.
 
-DESIGN GOALS:	Specifically:
-		Code is a stand-alone utility to perform base64 
-		encoding/decoding. It should be genuinely useful 
-		when the need arises and it meets a need that is 
-		likely to occur for some users.  
-		Code acts as sample code to show the author's 
-		design and coding style.  
+DESIGN GOALS:   Specifically:
+                Code is a stand-alone utility to perform base64 
+                encoding/decoding. It should be genuinely useful 
+                when the need arises and it meets a need that is 
+                likely to occur for some users.  
+                Code acts as sample code to show the author's 
+                design and coding style.  
 
-		Generally: 
-		This program is designed to survive:
-		Everything you need is in a single source file.
-		It compiles cleanly using a vanilla ANSI C compiler.
-		It does its job correctly with a minimum of fuss.  
-		The code is not overly clever, not overly simplistic 
-		and not overly verbose. 
-		Access is 'cut and paste' from a web page.  
-		Terms of use are reasonable.  
+                Generally: 
+                This program is designed to survive:
+                Everything you need is in a single source file.
+                It compiles cleanly using a vanilla ANSI C compiler.
+                It does its job correctly with a minimum of fuss.  
+                The code is not overly clever, not overly simplistic 
+                and not overly verbose. 
+                Access is 'cut and paste' from a web page.  
+                Terms of use are reasonable.  
 
 VALIDATION:     Non-trivial code is never without errors.  This
                 file likely has some problems, since it has only
@@ -223,8 +223,8 @@ static const char cd64[]="|$$$}rstuvwxyz{$$$$$$$>?@ABCDEFGHIJKLMNOPQRSTUVW$$$$$$
 ** encode 3 8-bit binary bytes as 4 '6-bit' characters
 */
 static void encodeblock( unsigned char in[3], 
-			 unsigned char out[4], 
-			 unsigned int len )
+                         unsigned char out[4], 
+                         unsigned int len )
 {
     out[0] = cb64[ in[0] >> 2 ];
     out[1] = cb64[ ((in[0] & 0x03) << 4) | ((in[1] & 0xf0) >> 4) ];
@@ -277,11 +277,11 @@ static void decodeblock( unsigned char in[4], unsigned char out[3] )
  */
 status_t
     b64_encode (const unsigned char *inbuff,
-		unsigned int inbufflen,
-		unsigned char *outbuff, 
-		unsigned int outbufflen,
-		unsigned int linesize,
-		unsigned int *retlen)
+                unsigned int inbufflen,
+                unsigned char *outbuff, 
+                unsigned int outbufflen,
+                unsigned int linesize,
+                unsigned int *retlen)
 
 {
     unsigned char in[3], out[4];
@@ -289,17 +289,17 @@ status_t
 
 #ifdef DEBUG
     if (!inbuff || !retlen) {
-	return ERR_INTERNAL_PTR;
+        return ERR_INTERNAL_PTR;
     }
     if (outbufflen<4 || linesize < 3) {
-	return ERR_INTERNAL_VAL;
+        return ERR_INTERNAL_VAL;
     }
 #endif
 
     *retlen = 0;
 
     if (inbufflen == 0) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     blocksout = 0;
@@ -312,7 +312,7 @@ status_t
 
         for (i = 0; i < 3; i++) {
             if (inx < inbufflen) {
-		in[i] = inbuff[inx++];
+                in[i] = inbuff[inx++];
                 len++;
             } else {
                 in[i] = (unsigned char)0;
@@ -322,38 +322,38 @@ status_t
         if (len != 0) {
             encodeblock(in, out, len);
             for (i = 0; i < 4; i++) {
-		if (outx < outbufflen) {
-		    if (outbuff) {
-			outbuff[outx++] = out[i];
-		    } else {
-			outx++;
-		    }
-		} else {
-		    return ERR_BUFF_OVFL;
-		}
+                if (outx < outbufflen) {
+                    if (outbuff) {
+                        outbuff[outx++] = out[i];
+                    } else {
+                        outx++;
+                    }
+                } else {
+                    return ERR_BUFF_OVFL;
+                }
             }
             blocksout++;
         }
 
         if ((blocksout >= (linesize/4)) || (inx==inbufflen)) {
             if (blocksout > 0) {
-		if (outx+1 < outbufflen) {
-		    if (outbuff) {
-			outbuff[outx++] = '\r';
-			outbuff[outx++] = '\n';
-		    } else {
-			outx += 2;
-		    }
-		} else {
-		    return ERR_BUFF_OVFL;
-		}
+                if (outx+1 < outbufflen) {
+                    if (outbuff) {
+                        outbuff[outx++] = '\r';
+                        outbuff[outx++] = '\n';
+                    } else {
+                        outx += 2;
+                    }
+                } else {
+                    return ERR_BUFF_OVFL;
+                }
             }
             blocksout = 0;
         }
     }
 
     if (outbuff) {
-	outbuff[outx] = 0;
+        outbuff[outx] = 0;
     }
 
     *retlen = outx;
@@ -387,20 +387,20 @@ status_t
 
 status_t
     b64_decode (const unsigned char *inbuff, 
-		unsigned int inbufflen,
-		unsigned char *outbuff,
-		unsigned int outbufflen,
-		unsigned int *retlen)
+                unsigned int inbufflen,
+                unsigned char *outbuff,
+                unsigned int outbufflen,
+                unsigned int *retlen)
 {
     unsigned char in[4], out[3], v;
     unsigned int i, len, inx, outx;
 
 #ifdef DEBUG
     if (!inbuff || !retlen) {
-	return ERR_INTERNAL_PTR;
+        return ERR_INTERNAL_PTR;
     }
     if (!inbufflen || !outbufflen) {
-	return ERR_INTERNAL_VAL;
+        return ERR_INTERNAL_VAL;
     }
 #endif
 
@@ -432,14 +432,14 @@ status_t
             decodeblock(in, out);
             for (i = 0; i < len - 1; i++ ) {
                 if (outx < outbufflen) {
-		    if (outbuff) {
-			outbuff[outx++] = out[i];
-		    } else {
-			outx++;
-		    }
-		} else {
-		    return ERR_BUFF_OVFL;
-		}
+                    if (outbuff) {
+                        outbuff[outx++] = out[i];
+                    } else {
+                        outx++;
+                    }
+                } else {
+                    return ERR_BUFF_OVFL;
+                }
             }
         }
     }

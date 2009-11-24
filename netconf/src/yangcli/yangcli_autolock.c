@@ -256,7 +256,7 @@ static status_t
                               NCX_EL_UNLOCK);
     }
     if (!rpc) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     obj_nsid = obj_get_nsid(rpc);
@@ -264,22 +264,22 @@ static status_t
     /* get the 'input' section container */
     input = obj_find_child(rpc, NULL, YANG_K_INPUT);
     if (!input) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     /* construct a method + parameter tree */
     reqdata = xml_val_new_struct(obj_get_name(rpc), obj_nsid);
     if (!reqdata) {
-	log_error("\nError allocating a new RPC request");
-	return ERR_INTERNAL_MEM;
+        log_error("\nError allocating a new RPC request");
+        return ERR_INTERNAL_MEM;
     }
 
     /* set the [un]lock/input/target node to 'cfg_id' */
     targetval = xml_val_new_struct(NCX_EL_TARGET, obj_nsid);
     if (!targetval) {
-	log_error("\nError allocating a new RPC request");
+        log_error("\nError allocating a new RPC request");
         val_free_value(reqdata);
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     } else {
         val_add_child(targetval, reqdata);
     }
@@ -287,38 +287,38 @@ static status_t
     parmval = xml_val_new_flag(lockcb->config_name,
                                obj_nsid);
     if (!parmval) {
-	val_free_value(reqdata);
-	return ERR_INTERNAL_MEM;
+        val_free_value(reqdata);
+        return ERR_INTERNAL_MEM;
     } else {
         val_add_child(parmval, targetval);
     }
 
     scb = mgr_ses_get_scb(server_cb->mysid);
     if (!scb) {
-	res = SET_ERROR(ERR_INTERNAL_PTR);
+        res = SET_ERROR(ERR_INTERNAL_PTR);
     } else {
-	req = mgr_rpc_new_request(scb);
-	if (!req) {
-	    res = ERR_INTERNAL_MEM;
-	    log_error("\nError allocating a new RPC request");
-	} else {
-	    req->data = reqdata;
-	    req->rpc = rpc;
-	    req->timeout = server_cb->timeout;
-	}
+        req = mgr_rpc_new_request(scb);
+        if (!req) {
+            res = ERR_INTERNAL_MEM;
+            log_error("\nError allocating a new RPC request");
+        } else {
+            req->data = reqdata;
+            req->rpc = rpc;
+            req->timeout = server_cb->timeout;
+        }
     }
-	
+        
     /* if all OK, send the RPC request */
     if (res == NO_ERR) {
-	if (LOGDEBUG2) {
-	    log_debug2("\nabout to send RPC request with reqdata:");
-	    val_dump_value_ex(reqdata, 
+        if (LOGDEBUG2) {
+            log_debug2("\nabout to send RPC request with reqdata:");
+            val_dump_value_ex(reqdata, 
                               NCX_DEF_INDENT,
                               server_cb->display_mode);
-	}
+        }
 
-	/* the request will be stored if this returns NO_ERR */
-	res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
+        /* the request will be stored if this returns NO_ERR */
+        res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
         if (res == NO_ERR) {
             if (islock) {
                 lockcb->lock_state = LOCK_STATE_REQUEST_SENT;
@@ -332,13 +332,13 @@ static status_t
 
     /* cleanup and set next state */
     if (res != NO_ERR) {
-	if (req) {
-	    mgr_rpc_free_request(req);
-	} else if (reqdata) {
-	    val_free_value(reqdata);
-	}
+        if (req) {
+            mgr_rpc_free_request(req);
+        } else if (reqdata) {
+            val_free_value(reqdata);
+        }
     } else {
-	server_cb->state = MGR_IO_ST_CONN_RPYWAIT;
+        server_cb->state = MGR_IO_ST_CONN_RPYWAIT;
     }
 
     return res;
@@ -396,27 +396,27 @@ status_t
     valset = get_valset(server_cb, rpc, &line[len], &res);
     if (valset && res == NO_ERR) {
         /* get the overall lock timeout */
-	parm = val_find_child(valset, 
-			      YANGCLI_MOD, 
-			      YANGCLI_LOCK_TIMEOUT);
-	if (parm && parm->res == NO_ERR) {
-	    locks_timeout = VAL_UINT(parm);
+        parm = val_find_child(valset, 
+                              YANGCLI_MOD, 
+                              YANGCLI_LOCK_TIMEOUT);
+        if (parm && parm->res == NO_ERR) {
+            locks_timeout = VAL_UINT(parm);
         }
 
         /* get the retry interval between failed locks */
         parm = val_find_child(valset, 
                               YANGCLI_MOD, 
                               YANGCLI_RETRY_INTERVAL);
-	if (parm && parm->res == NO_ERR) {
-	    retry_interval = VAL_UINT(parm);
+        if (parm && parm->res == NO_ERR) {
+            retry_interval = VAL_UINT(parm);
         }
 
         /* get the auto-cleanup flag */
         parm = val_find_child(valset, 
                               YANGCLI_MOD, 
                               YANGCLI_CLEANUP);
-	if (parm && parm->res == NO_ERR) {
-	    cleanup = VAL_BOOL(parm);
+        if (parm && parm->res == NO_ERR) {
+            cleanup = VAL_BOOL(parm);
         }
     }
 
@@ -844,7 +844,7 @@ status_t
     rpc = ncx_find_object(get_netconf_mod(), 
                           NCX_EL_DISCARD_CHANGES);
     if (!rpc) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     obj_nsid = obj_get_nsid(rpc);
@@ -853,36 +853,36 @@ status_t
     reqdata = xml_val_new_flag(obj_get_name(rpc), 
                                obj_nsid);
     if (!reqdata) {
-	log_error("\nError allocating a new RPC request");
-	return ERR_INTERNAL_MEM;
+        log_error("\nError allocating a new RPC request");
+        return ERR_INTERNAL_MEM;
     }
 
     scb = mgr_ses_get_scb(server_cb->mysid);
     if (!scb) {
-	res = SET_ERROR(ERR_INTERNAL_PTR);
+        res = SET_ERROR(ERR_INTERNAL_PTR);
     } else {
-	req = mgr_rpc_new_request(scb);
-	if (!req) {
-	    res = ERR_INTERNAL_MEM;
-	    log_error("\nError allocating a new RPC request");
-	} else {
-	    req->data = reqdata;
-	    req->rpc = rpc;
-	    req->timeout = server_cb->timeout;
-	}
+        req = mgr_rpc_new_request(scb);
+        if (!req) {
+            res = ERR_INTERNAL_MEM;
+            log_error("\nError allocating a new RPC request");
+        } else {
+            req->data = reqdata;
+            req->rpc = rpc;
+            req->timeout = server_cb->timeout;
+        }
     }
-	
+        
     /* if all OK, send the RPC request */
     if (res == NO_ERR) {
-	if (LOGDEBUG2) {
-	    log_debug2("\nabout to send RPC request with reqdata:");
-	    val_dump_value_ex(reqdata, 
+        if (LOGDEBUG2) {
+            log_debug2("\nabout to send RPC request with reqdata:");
+            val_dump_value_ex(reqdata, 
                               NCX_DEF_INDENT,
                               server_cb->display_mode);
-	}
+        }
 
-	/* the request will be stored if this returns NO_ERR */
-	res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
+        /* the request will be stored if this returns NO_ERR */
+        res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
         if (res == NO_ERR) {
             server_cb->command_mode = CMD_MODE_AUTODISCARD;
         }
@@ -890,13 +890,13 @@ status_t
 
     /* cleanup and set next state */
     if (res != NO_ERR) {
-	if (req) {
-	    mgr_rpc_free_request(req);
-	} else if (reqdata) {
-	    val_free_value(reqdata);
-	}
+        if (req) {
+            mgr_rpc_free_request(req);
+        } else if (reqdata) {
+            val_free_value(reqdata);
+        }
     } else {
-	server_cb->state = MGR_IO_ST_CONN_RPYWAIT;
+        server_cb->state = MGR_IO_ST_CONN_RPYWAIT;
     }
 
     return res;

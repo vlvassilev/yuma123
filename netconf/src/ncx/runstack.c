@@ -74,9 +74,9 @@ date         init     comment
 #define RUNSTACK_BUFFLEN  32000
 
 /********************************************************************
-*								    *
-*			     T Y P E S				    *
-*								    *
+*                                                                   *
+*                            T Y P E S                              *
+*                                                                   *
 *********************************************************************/
 
 /* one script run level context entry
@@ -98,7 +98,7 @@ typedef struct stack_entry_t_ {
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -127,7 +127,7 @@ static dlq_hdr_t       zeroQ;      /* Q of ncx_var_t */
 *********************************************************************/
 static val_value_t *
     make_parmval (const xmlChar *name,
-		  const xmlChar *value)
+                  const xmlChar *value)
 {
     val_value_t    *val;
     status_t        res;
@@ -135,14 +135,14 @@ static val_value_t *
     /* create the parameter */
     val = val_new_value();
     if (!val) {
-	return NULL;
+        return NULL;
     }
 
     /* set the string value */
     res = val_set_string(val, name, value);
     if (res != NO_ERR) {
-	val_free_value(val);
-	return NULL;
+        val_free_value(val);
+        return NULL;
     }
     return val;
 
@@ -183,7 +183,7 @@ uint32
 *********************************************************************/
 status_t
     runstack_push (const xmlChar *source,
-		   FILE *fp)
+                   FILE *fp)
 {
     stack_entry_t  *se;
     val_value_t    *val;
@@ -192,7 +192,7 @@ status_t
 
     /* check if this would overflow the runstack */
     if (script_level+1 == RUNSTACK_MAX_NEST) {
-	return ERR_NCX_RESOURCE_DENIED;
+        return ERR_NCX_RESOURCE_DENIED;
     }
 
     /* check if this script is already being invoked
@@ -200,9 +200,9 @@ status_t
      * !! This test will be fooled by symbolic links !!
      */
     for (i=0; i<script_level; i++) {
-	if (!xml_strcmp(source, runstack[i].source)) {
-	    return ERR_NCX_DUP_ENTRY;
-	}
+        if (!xml_strcmp(source, runstack[i].source)) {
+            return ERR_NCX_DUP_ENTRY;
+        }
     }
 
     /* get the next open slot */
@@ -217,25 +217,25 @@ status_t
     /* get a new line input buffer */
     se->buff = m__getMem(RUNSTACK_BUFFLEN);
     if (!se->buff) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     /* set the script source */
     se->source = xml_strdup(source);
     if (!se->source) {
-	m__free(se->buff);
-	se->buff = NULL;
-	return ERR_INTERNAL_MEM;
+        m__free(se->buff);
+        se->buff = NULL;
+        return ERR_INTERNAL_MEM;
     }
 
     /* create the P0 parameter */
     val = make_parmval((const xmlChar *)"0", se->source);
     if (!val) {
-	m__free(se->buff);
-	se->buff = NULL;
-	m__free(se->source);
-	se->source = NULL;
-	return ERR_INTERNAL_MEM;
+        m__free(se->buff);
+        se->buff = NULL;
+        m__free(se->source);
+        se->source = NULL;
+        return ERR_INTERNAL_MEM;
     }
 
     /* need to increment script level now so var_set_move
@@ -247,13 +247,13 @@ status_t
     /* ceate a new var entry and add it to the runstack que */
     res = var_set_move((const xmlChar *)"0", 1, VAR_TYP_LOCAL, val);
     if (res != NO_ERR) {
-	val_free_value(val);
-	m__free(se->buff);
-	se->buff = NULL;
-	m__free(se->source);
-	se->source = NULL;
-	script_level--;
-	return res;
+        val_free_value(val);
+        m__free(se->buff);
+        se->buff = NULL;
+        m__free(se->source);
+        se->source = NULL;
+        script_level--;
+        return res;
     }
 
     log_info("\nrunstack: Starting level %u script %s",
@@ -280,38 +280,38 @@ void
     ncx_var_t      *var;
 
     if (script_level == 0) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
 
     se = &runstack[script_level-1];
 
     if (se->buff) {
-	m__free(se->buff);
-	se->buff = NULL;
+        m__free(se->buff);
+        se->buff = NULL;
     }
     if (se->fp) {
-	fclose(se->fp);
-	se->fp = NULL;
+        fclose(se->fp);
+        se->fp = NULL;
     }
     if (se->source) {
-	log_info("\nrunstack: Ending level %u script %s",
-	      script_level, se->source);
+        log_info("\nrunstack: Ending level %u script %s",
+              script_level, se->source);
 
-	m__free(se->source);
-	se->source = NULL;
+        m__free(se->source);
+        se->source = NULL;
     }
     se->bufflen = 0;
     se->linenum = 0;
 
     while (!dlq_empty(&se->parmQ)) {
-	var = (ncx_var_t *)dlq_deque(&se->parmQ);
-	var_free(var);
+        var = (ncx_var_t *)dlq_deque(&se->parmQ);
+        var_free(var);
     }
 
     while (!dlq_empty(&se->varQ)) {
-	var = (ncx_var_t *)dlq_deque(&se->varQ);
-	var_free(var);
+        var = (ncx_var_t *)dlq_deque(&se->varQ);
+        var_free(var);
     }
     
     script_level--;
@@ -348,8 +348,8 @@ xmlChar *
     int             len, total;
 
     if (script_level == 0) {
-	*res = SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 
     /* init locals */
@@ -372,86 +372,86 @@ xmlChar *
     /* get a command line, handling comment and continuation lines */
     while (!done) {
 
-	/* check overflow error */
-	if (total==se->bufflen) {
-	    *res = ERR_BUFF_OVFL;
-	    /* do not allow truncated command to execute */
-	    retstr = NULL;
-	    done = TRUE;
-	    continue;
-	}
+        /* check overflow error */
+        if (total==se->bufflen) {
+            *res = ERR_BUFF_OVFL;
+            /* do not allow truncated command to execute */
+            retstr = NULL;
+            done = TRUE;
+            continue;
+        }
 
-	/* read the next line from the file */
-	if (!fgets((char *)start, se->bufflen-total, se->fp)) {
-	    /* read line failed */
-	    /* ncx_print_errormsg(NULL, NULL, ERR_NCX_FILE_READ); */
-	    if (retstr) {
-		*res = NO_ERR;
-	    } else {
-		*res = ERR_NCX_READ_FAILED;
-	    }
-	    done = TRUE;
-	    continue;
-	}
+        /* read the next line from the file */
+        if (!fgets((char *)start, se->bufflen-total, se->fp)) {
+            /* read line failed */
+            /* ncx_print_errormsg(NULL, NULL, ERR_NCX_FILE_READ); */
+            if (retstr) {
+                *res = NO_ERR;
+            } else {
+                *res = ERR_NCX_READ_FAILED;
+            }
+            done = TRUE;
+            continue;
+        }
 
-	se->linenum++;  /* used for error messages */
+        se->linenum++;  /* used for error messages */
 
-	len = (int)xml_strlen(start);
-	
-	/* get rid of EOLN if present */
-	if (len && start[len-1]=='\n') {
-	    start[--len] = 0;
-	}
+        len = (int)xml_strlen(start);
+        
+        /* get rid of EOLN if present */
+        if (len && start[len-1]=='\n') {
+            start[--len] = 0;
+        }
 
-	/* check blank line */
-	str = start;
-	while (*str && xml_isspace(*str)) {
-	    str++;
-	}
-	if (!*str) {
-	    if (retstr) {
-		/* return the string we have so far */
-		*res = NO_ERR;
-		done = TRUE;
-	    } else {
-		/* try again */
-		continue;
-	    }
-	}
-		
-	/* check first line or line continuation in progress */
-	if (!retstr) {
-	    /* retstr not set yet, allowed to have a comment line here */
-	    if (*str == '#') {
-		/* got a comment, try for another line */
-		*start = 0;
-		continue;
-	    } else {
-		/* start the return string and keep going */
-		str = start;
-		retstr = start;
-	    }
-	}
+        /* check blank line */
+        str = start;
+        while (*str && xml_isspace(*str)) {
+            str++;
+        }
+        if (!*str) {
+            if (retstr) {
+                /* return the string we have so far */
+                *res = NO_ERR;
+                done = TRUE;
+            } else {
+                /* try again */
+                continue;
+            }
+        }
+                
+        /* check first line or line continuation in progress */
+        if (!retstr) {
+            /* retstr not set yet, allowed to have a comment line here */
+            if (*str == '#') {
+                /* got a comment, try for another line */
+                *start = 0;
+                continue;
+            } else {
+                /* start the return string and keep going */
+                str = start;
+                retstr = start;
+            }
+        }
 
-	/* check line continuation */
+        /* check line continuation */
 
-	if (len && start[len-1]=='\\') {
-	    /* get rid of the final backslash */
-	    total += len-1;
-	    start[len-1] = 0;
-	    start += len-1;
-	    /* get another line full */
-	} else {
-	    *res = NO_ERR;
-	    done = TRUE;
-	}
+        if (len && start[len-1]=='\\') {
+            /* get rid of the final backslash */
+            total += len-1;
+            start[len-1] = 0;
+            start += len-1;
+            /* get another line full */
+        } else {
+            *res = NO_ERR;
+            done = TRUE;
+        }
     }
 
     if (!retstr) {
-	runstack_pop();
+        runstack_pop();
     } else {
-	log_info("\nrunstack: run line %u, %s\n cmd: %s",
-		 se->linenum, 
+        log_info("\nrunstack: run line %u, %s\n cmd: %s",
+                 se->linenum, 
                  se->source, 
                  retstr);
     }
@@ -496,12 +496,12 @@ dlq_hdr_t *
 
     /* check global que */
     if (isglobal) {
-	return &globalQ;
+        return &globalQ;
     }
 
     /* check level zero local que */
     if (script_level == 0) {
-	return &zeroQ;
+        return &zeroQ;
     }
 
     /* get the current slot */
@@ -525,7 +525,7 @@ dlq_hdr_t *
     stack_entry_t  *se;
 
     if (script_level == 0) {
-	return NULL;
+        return NULL;
     }
 
     /* get the current slot */
@@ -546,14 +546,14 @@ void
     runstack_init (void)
 {
     if (!runstack_init_done) {
-	script_level = 0;
+        script_level = 0;
         script_cancel = FALSE;
-	dlq_createSQue(&globalQ);
-	dlq_createSQue(&zeroQ);
-	runstack_init_done = TRUE;
+        dlq_createSQue(&globalQ);
+        dlq_createSQue(&zeroQ);
+        runstack_init_done = TRUE;
     }
-	
-} /* runstack_init */		      
+        
+} /* runstack_init */                 
 
 
 /********************************************************************
@@ -568,23 +568,23 @@ void
     ncx_var_t *var;
 
     if (runstack_init_done) {
-	while (script_level > 0) {
-	    runstack_pop();
-	}
+        while (script_level > 0) {
+            runstack_pop();
+        }
 
-	while (!dlq_empty(&globalQ)) {
-	    var = (ncx_var_t *)dlq_deque(&globalQ);
-	    var_free(var);
-	}
+        while (!dlq_empty(&globalQ)) {
+            var = (ncx_var_t *)dlq_deque(&globalQ);
+            var_free(var);
+        }
 
-	while (!dlq_empty(&zeroQ)) {
-	    var = (ncx_var_t *)dlq_deque(&zeroQ);
-	    var_free(var);
-	}
-	runstack_init_done = FALSE;
+        while (!dlq_empty(&zeroQ)) {
+            var = (ncx_var_t *)dlq_deque(&zeroQ);
+            var_free(var);
+        }
+        runstack_init_done = FALSE;
     }
 
-} /* runstack_cleanup */		      
+} /* runstack_cleanup */                      
 
 
 /********************************************************************

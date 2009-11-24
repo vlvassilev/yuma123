@@ -1,6 +1,6 @@
 /*  FILE: log.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -51,7 +51,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -89,37 +89,37 @@ static FILE *altlogfile = NULL;
 *********************************************************************/
 status_t
     log_open (const char *fname,
-	      boolean append,
-	      boolean tstamps)
+              boolean append,
+              boolean tstamps)
 {
     const char *str;
     xmlChar buff[TSTAMP_MIN_SIZE];
 
 #ifdef DEBUG
     if (!fname) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     if (logfile) {
-	return ERR_NCX_DATA_EXISTS;
+        return ERR_NCX_DATA_EXISTS;
     }
 
     if (append) {
-	str="a";
+        str="a";
     } else {
-	str="w";
+        str="w";
     }
 
     logfile = fopen(fname, str);
     if (!logfile) {
-	return ERR_FIL_OPEN;
+        return ERR_FIL_OPEN;
     }
 
     use_tstamps = tstamps;
     if (tstamps) {
-	tstamp_datetime(buff);
-	fprintf(logfile, "\n*** log open at %s ***\n", buff);
+        tstamp_datetime(buff);
+        fprintf(logfile, "\n*** log open at %s ***\n", buff);
     }
 
     return NO_ERR;
@@ -141,12 +141,12 @@ void
     xmlChar buff[TSTAMP_MIN_SIZE];
 
     if (!logfile) {
-	return;
+        return;
     }
 
     if (use_tstamps) {
-	tstamp_datetime(buff);
-	fprintf(logfile, "\n*** log close at %s ***\n", buff);
+        tstamp_datetime(buff);
+        fprintf(logfile, "\n*** log close at %s ***\n", buff);
     }
 
     fclose(logfile);
@@ -175,19 +175,19 @@ status_t
 
 #ifdef DEBUG
     if (!fname) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     if (altlogfile) {
-	return ERR_NCX_DATA_EXISTS;
+        return ERR_NCX_DATA_EXISTS;
     }
 
     str="w";
 
     altlogfile = fopen(fname, str);
     if (!altlogfile) {
-	return ERR_FIL_OPEN;
+        return ERR_FIL_OPEN;
     }
 
     return NO_ERR;
@@ -207,7 +207,7 @@ void
     log_alt_close (void)
 {
     if (!altlogfile) {
-	return;
+        return;
     }
 
     fclose(altlogfile);
@@ -234,7 +234,7 @@ void
     va_list args;
 
     if (log_get_debug_level() == LOG_DEBUG_NONE) {
-	return;
+        return;
     }
 
     va_start(args, fstr);
@@ -261,17 +261,17 @@ void
     va_list args;
 
     if (log_get_debug_level() == LOG_DEBUG_NONE) {
-	return;
+        return;
     }
 
     va_start(args, fstr);
 
     if (logfile) {
-	vfprintf(logfile, fstr, args);
-	fflush(logfile);
+        vfprintf(logfile, fstr, args);
+        fflush(logfile);
     } else {
-	vprintf(fstr, args);
-	fflush(stdout);
+        vprintf(fstr, args);
+        fflush(stdout);
     }
 
     va_end(args);
@@ -297,8 +297,8 @@ void
     va_start(args, fstr);
 
     if (altlogfile) {
-	vfprintf(altlogfile, fstr, args);
-	fflush(altlogfile);
+        vfprintf(altlogfile, fstr, args);
+        fflush(altlogfile);
     }
 
     va_end(args);
@@ -322,10 +322,10 @@ void
     int32  i;
 
     if (indentcnt >= 0) {
-	log_alt_write("\n");
-	for (i=0; i<indentcnt; i++) {
-	    log_alt_write(" ");
-	}
+        log_alt_write("\n");
+        for (i=0; i<indentcnt; i++) {
+            log_alt_write(" ");
+        }
     }
 
 } /* log_alt_indent */
@@ -347,17 +347,17 @@ void
     va_list args;
 
     if (log_get_debug_level() < LOG_DEBUG_ERROR) {
-	return;
+        return;
     }
 
     va_start(args, fstr);
 
     if (logfile) {
-	vfprintf(logfile, fstr, args);
-	fflush(logfile);
+        vfprintf(logfile, fstr, args);
+        fflush(logfile);
     } else {
-	vprintf(fstr, args);
-	fflush(stdout);
+        vprintf(fstr, args);
+        fflush(stdout);
     }
 
     va_end(args);
@@ -381,17 +381,17 @@ void
     va_list args;
 
     if (log_get_debug_level() < LOG_DEBUG_WARN) {
-	return;
+        return;
     }
 
     va_start(args, fstr);
 
     if (logfile) {
-	vfprintf(logfile, fstr, args);
-	fflush(logfile);
+        vfprintf(logfile, fstr, args);
+        fflush(logfile);
     } else {
-	vprintf(fstr, args);
-	fflush(stdout);
+        vprintf(fstr, args);
+        fflush(stdout);
     }
 
     va_end(args);
@@ -415,17 +415,17 @@ void
     va_list args;
 
     if (log_get_debug_level() < LOG_DEBUG_INFO) {
-	return;
+        return;
     }
 
     va_start(args, fstr);
 
     if (logfile) {
-	vfprintf(logfile, fstr, args);
-	fflush(logfile);
+        vfprintf(logfile, fstr, args);
+        fflush(logfile);
     } else {
-	vprintf(fstr, args);
-	fflush(stdout);
+        vprintf(fstr, args);
+        fflush(stdout);
     }
 
     va_end(args);
@@ -449,17 +449,17 @@ void
     va_list args;
 
     if (log_get_debug_level() < LOG_DEBUG_DEBUG) {
-	return;
+        return;
     }
 
     va_start(args, fstr);
 
     if (logfile) {
-	vfprintf(logfile, fstr, args);
-	fflush(logfile);
+        vfprintf(logfile, fstr, args);
+        fflush(logfile);
     } else {
-	vprintf(fstr, args);
-	fflush(stdout);
+        vprintf(fstr, args);
+        fflush(stdout);
     }
 
     va_end(args);
@@ -483,17 +483,17 @@ void
     va_list args;
 
     if (log_get_debug_level() < LOG_DEBUG_DEBUG2) {
-	return;
+        return;
     }
 
     va_start(args, fstr);
 
     if (logfile) {
-	vfprintf(logfile, fstr, args);
-	fflush(logfile);
+        vfprintf(logfile, fstr, args);
+        fflush(logfile);
     } else {
-	vprintf(fstr, args);
-	fflush(stdout);
+        vprintf(fstr, args);
+        fflush(stdout);
     }
 
     va_end(args);
@@ -517,17 +517,17 @@ void
     va_list args;
 
     if (log_get_debug_level() < LOG_DEBUG_DEBUG3) {
-	return;
+        return;
     }
 
     va_start(args, fstr);
 
     if (logfile) {
-	vfprintf(logfile, fstr, args);
-	fflush(logfile);
+        vfprintf(logfile, fstr, args);
+        fflush(logfile);
     } else {
-	vprintf(fstr, args);
-	fflush(stdout);
+        vprintf(fstr, args);
+        fflush(stdout);
     }
 
     va_end(args);
@@ -551,17 +551,17 @@ void
     va_list args;
 
     if (log_get_debug_level() < LOG_DEBUG_DEBUG4) {
-	return;
+        return;
     }
 
     va_start(args, fstr);
 
     if (logfile) {
-	vfprintf(logfile, fstr, args);
-	fflush(logfile);
+        vfprintf(logfile, fstr, args);
+        fflush(logfile);
     } else {
-	vprintf(fstr, args);
-	fflush(stdout);
+        vprintf(fstr, args);
+        fflush(stdout);
     }
 
     va_end(args);
@@ -583,8 +583,8 @@ void
 {
 #ifdef DEBUG
     if (dlevel > LOG_DEBUG_DEBUG4) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	dlevel = LOG_DEBUG_DEBUG4;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        dlevel = LOG_DEBUG_DEBUG4;
     }
 #endif
 
@@ -625,37 +625,37 @@ log_debug_t
 {
 #ifdef DEBUG
     if (!str) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return LOG_DEBUG_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return LOG_DEBUG_NONE;
     }
 #endif
 
     if (!xml_strcmp((const xmlChar *)str,
-		    LOG_DEBUG_STR_OFF)) {
-	return LOG_DEBUG_OFF;
+                    LOG_DEBUG_STR_OFF)) {
+        return LOG_DEBUG_OFF;
     } else if (!xml_strcmp((const xmlChar *)str,
-			   LOG_DEBUG_STR_ERROR)) {
-	return LOG_DEBUG_ERROR;
+                           LOG_DEBUG_STR_ERROR)) {
+        return LOG_DEBUG_ERROR;
     } else if (!xml_strcmp((const xmlChar *)str,
-			   LOG_DEBUG_STR_WARN)) {
-	return LOG_DEBUG_WARN;
+                           LOG_DEBUG_STR_WARN)) {
+        return LOG_DEBUG_WARN;
     } else if (!xml_strcmp((const xmlChar *)str,
-			   LOG_DEBUG_STR_INFO)) {
-	return LOG_DEBUG_INFO;
+                           LOG_DEBUG_STR_INFO)) {
+        return LOG_DEBUG_INFO;
     } else if (!xml_strcmp((const xmlChar *)str,
-			   LOG_DEBUG_STR_DEBUG)) {
-	return LOG_DEBUG_DEBUG;
+                           LOG_DEBUG_STR_DEBUG)) {
+        return LOG_DEBUG_DEBUG;
     } else if (!xml_strcmp((const xmlChar *)str,
-			   LOG_DEBUG_STR_DEBUG2)) {
-	return LOG_DEBUG_DEBUG2;
+                           LOG_DEBUG_STR_DEBUG2)) {
+        return LOG_DEBUG_DEBUG2;
     } else if (!xml_strcmp((const xmlChar *)str,
-			   LOG_DEBUG_STR_DEBUG3)) {
-	return LOG_DEBUG_DEBUG3;
+                           LOG_DEBUG_STR_DEBUG3)) {
+        return LOG_DEBUG_DEBUG3;
     } else if (!xml_strcmp((const xmlChar *)str,
-			   LOG_DEBUG_STR_DEBUG4)) {
-	return LOG_DEBUG_DEBUG4;
+                           LOG_DEBUG_STR_DEBUG4)) {
+        return LOG_DEBUG_DEBUG4;
     } else {
-	return LOG_DEBUG_NONE;
+        return LOG_DEBUG_NONE;
     }
 
 }  /* log_get_debug_level_enum */
@@ -678,24 +678,24 @@ const xmlChar *
 {
     switch (level) {
     case LOG_DEBUG_OFF:
-	return LOG_DEBUG_STR_OFF;
+        return LOG_DEBUG_STR_OFF;
     case LOG_DEBUG_ERROR:
-	return LOG_DEBUG_STR_ERROR;
+        return LOG_DEBUG_STR_ERROR;
     case LOG_DEBUG_WARN:
-	return LOG_DEBUG_STR_WARN;
+        return LOG_DEBUG_STR_WARN;
     case LOG_DEBUG_INFO:
-	return LOG_DEBUG_STR_INFO;
+        return LOG_DEBUG_STR_INFO;
     case LOG_DEBUG_DEBUG:
-	return LOG_DEBUG_STR_DEBUG;
+        return LOG_DEBUG_STR_DEBUG;
     case LOG_DEBUG_DEBUG2:
-	return LOG_DEBUG_STR_DEBUG2;
+        return LOG_DEBUG_STR_DEBUG2;
     case LOG_DEBUG_DEBUG3:
-	return LOG_DEBUG_STR_DEBUG3;
+        return LOG_DEBUG_STR_DEBUG3;
     case LOG_DEBUG_DEBUG4:
-	return LOG_DEBUG_STR_DEBUG4;
+        return LOG_DEBUG_STR_DEBUG4;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return LOG_DEBUG_STR_OFF;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return LOG_DEBUG_STR_OFF;
     }
     /*NOTREACHED*/
 
@@ -733,10 +733,10 @@ void
     int32  i;
 
     if (indentcnt >= 0) {
-	log_write("\n");
-	for (i=0; i<indentcnt; i++) {
-	    log_write(" ");
-	}
+        log_write("\n");
+        for (i=0; i<indentcnt; i++) {
+            log_write(" ");
+        }
     }
 
 } /* log_indent */
@@ -757,10 +757,10 @@ void
     int32  i;
 
     if (indentcnt >= 0) {
-	log_stdout("\n");
-	for (i=0; i<indentcnt; i++) {
-	    log_stdout(" ");
-	}
+        log_stdout("\n");
+        for (i=0; i<indentcnt; i++) {
+            log_stdout(" ");
+        }
     }
 
 } /* log_stdout_indent */

@@ -128,14 +128,14 @@ static int maxrdnum;
  *********************************************************************/
 static boolean
     any_fd_set (fd_set *fd,
-		int maxfd)
+                int maxfd)
 {
     int  i;
 
     for (i=0; i<=maxfd; i++) {
-	if (FD_ISSET(i, fd)) {
-	    return TRUE;
-	}
+        if (FD_ISSET(i, fd)) {
+            return TRUE;
+        }
     }
     return FALSE;
 
@@ -300,12 +300,12 @@ void
 
     /*
     if (fd+1 > maxwrnum) {
-	maxwrnum = fd+1;
+        maxwrnum = fd+1;
     }
     */
 
     if (fd+1 > maxrdnum) {
-	maxrdnum = fd+1;
+        maxrdnum = fd+1;
     }
 
 } /* mgr_io_activate_session */
@@ -326,12 +326,12 @@ void
 
     /*
     if (fd+1 == maxwrnum) {
-	maxwrnum--;
+        maxwrnum--;
     }
     */
 
     if (fd+1 == maxrdnum) {
-	maxrdnum--;
+        maxrdnum--;
     }
 
 } /* mgr_io_deactivate_session */
@@ -360,28 +360,28 @@ status_t
     done = FALSE;
     while (!done) {
 
-	/* check exit program */
-	if (mgr_shutdown_requested()) {
-	    done = TRUE;
-	    continue;
-	}
+        /* check exit program */
+        if (mgr_shutdown_requested()) {
+            done = TRUE;
+            continue;
+        }
 
-	done2 = FALSE;
-	ret = 0;
+        done2 = FALSE;
+        ret = 0;
 
-	while (!done2) {
-	    /* will block in idle states waiting for user KBD input
-	     * while no command is active
-	     */
-	    if (stdin_handler != NULL) {
-		state = (*stdin_handler)();
-	    }
+        while (!done2) {
+            /* will block in idle states waiting for user KBD input
+             * while no command is active
+             */
+            if (stdin_handler != NULL) {
+                state = (*stdin_handler)();
+            }
 
-	    /* check exit program or session */
-	    if (mgr_shutdown_requested()) {
-		done = done2 = TRUE;
-		continue;
-	    } else if (state == MGR_IO_ST_CONN_SHUT) {
+            /* check exit program or session */
+            if (mgr_shutdown_requested()) {
+                done = done2 = TRUE;
+                continue;
+            } else if (state == MGR_IO_ST_CONN_SHUT) {
                 done2 = TRUE;
                 continue;
             } else if (state == MGR_IO_ST_SHUT) {
@@ -419,71 +419,71 @@ status_t
                 done = done2 = TRUE;
             }
 
-	    /* check error exit from this loop */
-	    if (done2) {
-		continue;
-	    }
+            /* check error exit from this loop */
+            if (done2) {
+                continue;
+            }
 
-	    /* setup select parameters */
-	    read_fd_set = active_fd_set;
-	    timeout.tv_sec = 0;
-	    timeout.tv_usec = 100;
+            /* setup select parameters */
+            read_fd_set = active_fd_set;
+            timeout.tv_sec = 0;
+            timeout.tv_usec = 100;
 
-	    /* check if there are no sessions active to wait for,
-	     * so just go back to the STDIN handler
-	     */
-	    if (!any_fd_set(&read_fd_set, maxrdnum)) {
-		continue;
-	    }
+            /* check if there are no sessions active to wait for,
+             * so just go back to the STDIN handler
+             */
+            if (!any_fd_set(&read_fd_set, maxrdnum)) {
+                continue;
+            }
 
-	    /* Block until input arrives on one or more active sockets. 
-	     * or the timer expires
-	     */
-	    ret = select(maxrdnum+1, 
-			 &read_fd_set, 
-			 &write_fd_set, 
-			 NULL, 
-			 &timeout);
-	    if (ret > 0) {
-		/* normal return with some bytes */
-		done2 = TRUE;
-	    } else if (ret < 0) {
-		if (!(errno == EINTR || errno==EAGAIN)) {
-		    done2 = TRUE;
-		}  /* else go again in the inner loop */
-	    } else {
+            /* Block until input arrives on one or more active sockets. 
+             * or the timer expires
+             */
+            ret = select(maxrdnum+1, 
+                         &read_fd_set, 
+                         &write_fd_set, 
+                         NULL, 
+                         &timeout);
+            if (ret > 0) {
+                /* normal return with some bytes */
+                done2 = TRUE;
+            } else if (ret < 0) {
+                if (!(errno == EINTR || errno==EAGAIN)) {
+                    done2 = TRUE;
+                }  /* else go again in the inner loop */
+            } else {
                 /* should only happen if a timeout occurred */
                 if (mgr_shutdown_requested()) {
                     done2 = TRUE; 
                 }
-	    }
-	}  /* end inner loop */
+            }
+        }  /* end inner loop */
 
-	/* check exit program */
-	if (mgr_shutdown_requested()) {
-	    done = TRUE;
-	    continue;
-	}
+        /* check exit program */
+        if (mgr_shutdown_requested()) {
+            done = TRUE;
+            continue;
+        }
 
-	/* check select return status for non-recoverable error */
-	if (ret < 0) {
-	    res = ERR_NCX_OPERATION_FAILED;
-	    log_error("\nmgr_io select failed (%s)", 
-		      strerror(errno));
-	    mgr_request_shutdown();
-	    done = TRUE;
-	    continue;
-	}
+        /* check select return status for non-recoverable error */
+        if (ret < 0) {
+            res = ERR_NCX_OPERATION_FAILED;
+            log_error("\nmgr_io select failed (%s)", 
+                      strerror(errno));
+            mgr_request_shutdown();
+            done = TRUE;
+            continue;
+        }
      
-	/* 2nd loop: go through the file descriptor numbers and
-	 * service all the sockets with input pending 
-	 */
-	for (i = 0; i <= maxrdnum; i++) {
-	    /* check read input from agent */
-	    if (FD_ISSET(i, &read_fd_set)) {
+        /* 2nd loop: go through the file descriptor numbers and
+         * service all the sockets with input pending 
+         */
+        for (i = 0; i <= maxrdnum; i++) {
+            /* check read input from agent */
+            if (FD_ISSET(i, &read_fd_set)) {
                 (void)read_session(i, 0);
-	    }
-	}
+            }
+        }
 
         /* drain the ready queue before accepting new input */
         if (!done) {
@@ -548,26 +548,26 @@ boolean
     read_fd_set = active_fd_set;
 
     if (!any_fd_set(&read_fd_set, maxrdnum)) {
-	return TRUE;
+        return TRUE;
     }
 
     /* Block until input arrives on one or more active sockets. 
      * or the short timer expires
      */
     ret = select(maxrdnum+1, 
-		 &read_fd_set, 
-		 &write_fd_set, 
-		 NULL, 
-		 &timeout);
+                 &read_fd_set, 
+                 &write_fd_set, 
+                 NULL, 
+                 &timeout);
     if (ret > 0) {
-	/* normal return with some bytes */
-	;
+        /* normal return with some bytes */
+        ;
     } else if (ret < 0) {
-	/* some error, don't care about EAGAIN here */
-	return TRUE;
+        /* some error, don't care about EAGAIN here */
+        return TRUE;
     } else {
-	/* == 0: timeout */
-	return TRUE;
+        /* == 0: timeout */
+        return TRUE;
     }
 
     retval = TRUE;
@@ -577,8 +577,8 @@ boolean
      */
     for (i = 0; i <= maxrdnum; i++) {
 
-	/* check read input from agent */
-	if (FD_ISSET(i, &read_fd_set)) {
+        /* check read input from agent */
+        if (FD_ISSET(i, &read_fd_set)) {
             retval = read_session(i, cursid);
         }
     }
@@ -586,11 +586,11 @@ boolean
     /* drain the ready queue before accepting new input */
     done = FALSE;
     while (!done) {
-	if (!mgr_ses_process_first_ready()) {
-	    done = TRUE;
-	} else if (mgr_shutdown_requested()) {
-	    done = TRUE;
-	}
+        if (!mgr_ses_process_first_ready()) {
+            done = TRUE;
+        } else if (mgr_shutdown_requested()) {
+            done = TRUE;
+        }
     }
 
     write_sessions();

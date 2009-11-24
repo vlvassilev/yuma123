@@ -1,6 +1,6 @@
 /*  FILE: typ.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -93,43 +93,43 @@ static void
 
 #ifdef DEBUG
     if (!sim) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (sim->range.rangestr) {
-	m__free(sim->range.rangestr);
-	sim->range.rangestr = NULL;
+        m__free(sim->range.rangestr);
+        sim->range.rangestr = NULL;
     }
     memset(&sim->range.tkerr, 0x0, sizeof(ncx_error_t));
 
     if (sim->idref.baseprefix) {
-	m__free(sim->idref.baseprefix);
-	sim->idref.baseprefix = NULL;
+        m__free(sim->idref.baseprefix);
+        sim->idref.baseprefix = NULL;
     }
 
     if (sim->idref.basename) {
-	m__free(sim->idref.basename);
-	sim->idref.basename = NULL;
+        m__free(sim->idref.basename);
+        sim->idref.basename = NULL;
     }
-	
+        
     sim->idref.base = NULL;
 
     /* clean the rangeQ only if it is used */
     if (!dlq_empty(&sim->range.rangeQ)) {
-	rtyp = typ_get_range_type(sim->btyp);
-	while (!dlq_empty(&sim->range.rangeQ)) {
-	    rv = (typ_rangedef_t *)dlq_deque(&sim->range.rangeQ);
-	    typ_free_rangedef(rv, rtyp);
-	}
+        rtyp = typ_get_range_type(sim->btyp);
+        while (!dlq_empty(&sim->range.rangeQ)) {
+            rv = (typ_rangedef_t *)dlq_deque(&sim->range.rangeQ);
+            typ_free_rangedef(rv, rtyp);
+        }
     }
     ncx_clean_errinfo(&sim->range.range_errinfo);
 
     /* clean the patternQ */
     while (!dlq_empty(&sim->patternQ)) {
-	pat = (typ_pattern_t *)dlq_deque(&sim->patternQ);
-	typ_free_pattern(pat);
+        pat = (typ_pattern_t *)dlq_deque(&sim->patternQ);
+        typ_free_pattern(pat);
     }
 
     
@@ -141,26 +141,26 @@ static void
             en = (typ_enum_t *)dlq_deque(&sim->valQ);
             typ_free_enum(en);
         }
-	break;
+        break;
     case NCX_BT_UNION:
         while (!dlq_empty(&sim->unionQ)) {
             un = (typ_unionnode_t *)dlq_deque(&sim->unionQ);
             typ_free_unionnode(un);
         }
-	break;
+        break;
     case NCX_BT_SLIST:
-	break;
+        break;
     default:
-	/* this will be non-empty for enums and strings */
-	while (!dlq_empty(&sim->valQ)) {
-	    sv = (typ_sval_t *)dlq_deque(&sim->valQ);
-	    typ_free_sval(sv);
-	}
+        /* this will be non-empty for enums and strings */
+        while (!dlq_empty(&sim->valQ)) {
+            sv = (typ_sval_t *)dlq_deque(&sim->valQ);
+            typ_free_sval(sv);
+        }
     }
 
     if (sim->xleafref) {
-	xpath_free_pcb(sim->xleafref);
-	sim->xleafref = NULL;
+        xpath_free_pcb(sim->xleafref);
+        sim->xleafref = NULL;
     }
 
     sim->btyp = NCX_BT_NONE;
@@ -218,38 +218,38 @@ status_t
     xmlns_id_t       xsd_id;
 
     if (typ_init_done) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     xsd_id = xmlns_xs_id();
     basetypes[NCX_BT_NONE] = NULL;
 
     for (btyp=NCX_FIRST_DATATYPE; btyp<=NCX_LAST_DATATYPE; btyp++) {
-	basetypes[btyp] = NULL;
+        basetypes[btyp] = NULL;
     }
 
     for (btyp=NCX_FIRST_DATATYPE; btyp<=NCX_LAST_DATATYPE; btyp++) {
-	/* create a typ_template_t struct */
-	typ = typ_new_template();
-	if (!typ) {
-	    return SET_ERROR(ERR_INTERNAL_MEM);
-	}
+        /* create a typ_template_t struct */
+        typ = typ_new_template();
+        if (!typ) {
+            return SET_ERROR(ERR_INTERNAL_MEM);
+        }
 
-	/* fill in the essential fields */
-	typ->name = xml_strdup((const xmlChar *)tk_get_btype_sym(btyp));
-	if (!typ->name) {
-	    m__free(typ);
-	    return SET_ERROR(ERR_INTERNAL_MEM);
-	}
+        /* fill in the essential fields */
+        typ->name = xml_strdup((const xmlChar *)tk_get_btype_sym(btyp));
+        if (!typ->name) {
+            m__free(typ);
+            return SET_ERROR(ERR_INTERNAL_MEM);
+        }
 
-	typ->typdef.iqual = NCX_IQUAL_ONE;
-	typ->typdef.class = NCX_CL_BASE;
-	typ->typdef.maxaccess = NCX_ACCESS_NONE;
-	typ->typdef.def.base = btyp;
-	typ->nsid = xsd_id;
+        typ->typdef.iqual = NCX_IQUAL_ONE;
+        typ->typdef.class = NCX_CL_BASE;
+        typ->typdef.maxaccess = NCX_ACCESS_NONE;
+        typ->typdef.def.base = btyp;
+        typ->nsid = xsd_id;
 
-	/* save the struct in the basetype queue */
-	basetypes[btyp] = typ;
+        /* save the struct in the basetype queue */
+        basetypes[btyp] = typ;
     }
 
     typ_init_done = TRUE;
@@ -271,13 +271,13 @@ void
     ncx_btype_t      btyp;
 
     if (!typ_init_done) {
-	return;
+        return;
     }
 
     for (btyp = NCX_FIRST_DATATYPE; btyp <= NCX_LAST_DATATYPE; btyp++) {
-	typ = basetypes[btyp];
-	typ_free_template(typ);
-	basetypes[btyp] = NULL;
+        typ = basetypes[btyp];
+        typ_free_template(typ);
+        basetypes[btyp] = NULL;
     }
     typ_init_done = FALSE;
 
@@ -299,7 +299,7 @@ typ_template_t *
 
     typ = m__getObj(typ_template_t);
     if (!typ) {
-	return NULL;
+        return NULL;
     }
     (void)memset(typ, 0x0, sizeof(typ_template_t));
     typ_init_typdef(&typ->typdef);
@@ -328,7 +328,7 @@ void
 #ifdef DEBUG
     if (!typ) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        return;
     }
 #endif
 
@@ -374,7 +374,7 @@ typ_def_t *
 
     typdef = m__getObj(typ_def_t);
     if (!typdef) {
-	return NULL;
+        return NULL;
     }
     typ_init_typdef(typdef);
     return typdef;
@@ -398,8 +398,8 @@ void
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -423,14 +423,14 @@ void
 *********************************************************************/
 void
     typ_init_simple (typ_def_t  *tdef, 
-		     ncx_btype_t btyp)
+                     ncx_btype_t btyp)
 {
     typ_simple_t  *sim;
 
 #ifdef DEBUG
     if (!tdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -438,7 +438,7 @@ void
     tdef->class = NCX_CL_SIMPLE;
 
     if (btyp == NCX_BT_BITS) {
-	tdef->mergetype = NCX_MERGE_SORT;
+        tdef->mergetype = NCX_MERGE_SORT;
     }
 
     sim = &tdef->def.simple;
@@ -470,8 +470,8 @@ void
 
 #ifdef DEBUG
     if (!tdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -497,7 +497,7 @@ void
 #ifdef DEBUG
     if (!typdef) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        return;
     }
 #endif
 
@@ -526,11 +526,11 @@ void
 #endif
     if (typdef->prefix) {
         m__free(typdef->prefix);
-	typdef->prefix = NULL;
+        typdef->prefix = NULL;
     }
     if (typdef->typename) {
         m__free(typdef->typename);
-	typdef->typename = NULL;
+        typdef->typename = NULL;
     }
 
     ncx_clean_appinfoQ(&typdef->appinfoQ);
@@ -565,12 +565,12 @@ void
 *********************************************************************/
 void
     typ_set_named_typdef (typ_def_t *typdef,
-			  typ_template_t *imptyp)
+                          typ_template_t *imptyp)
 {
 #ifdef DEBUG
     if (!typdef || !imptyp) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -597,13 +597,13 @@ const xmlChar *
 {
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (typdef->class != NCX_CL_NAMED) {
-	return NULL;
+        return NULL;
     }
     return typdef->def.named.typ->name;
 
@@ -626,13 +626,13 @@ uint32
 {
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
     if (typdef->class != NCX_CL_NAMED) {
-	return 0;
+        return 0;
     }
     return typ_get_typ_linenum(typdef->def.named.typ);
 
@@ -653,19 +653,19 @@ uint32
 *********************************************************************/
 status_t
     typ_set_new_named (typ_def_t  *typdef, 
-		       ncx_btype_t btyp)
+                       ncx_btype_t btyp)
 {
     typ_def_t *tdef;
 
 #ifdef DEBUG
     if (!typdef) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     tdef = typdef->def.named.newtyp = typ_new_typdef();
     if (!tdef) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     /* initialize the new typdef with the parent base type */
@@ -692,13 +692,13 @@ typ_def_t *
 {
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (typdef->class != NCX_CL_NAMED) {
-	return NULL;
+        return NULL;
     }
     return typdef->def.named.newtyp;
 
@@ -721,13 +721,13 @@ const typ_def_t *
 {
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (typdef->class != NCX_CL_NAMED) {
-	return NULL;
+        return NULL;
     }
     return typdef->def.named.newtyp;
 
@@ -746,12 +746,12 @@ const typ_def_t *
 *********************************************************************/
 void
     typ_set_simple_typdef (typ_template_t *typ,
-			   ncx_btype_t btyp)
+                           ncx_btype_t btyp)
 {
 #ifdef DEBUG
     if (!typ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -779,8 +779,8 @@ typ_enum_t *
 
 #ifdef DEBUG
     if (!name) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -791,8 +791,8 @@ typ_enum_t *
     memset(ev, 0, sizeof(typ_enum_t));
     ev->name = xml_strdup(name);
     if (!ev->name) {
-	m__free(ev);
-	return NULL;
+        m__free(ev);
+        return NULL;
     }
     dlq_createSQue(&ev->appinfoQ);
     return ev;
@@ -820,8 +820,8 @@ typ_enum_t *
 
 #ifdef DEBUG
     if (!name) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -856,13 +856,13 @@ void
 #endif
 
     if (en->name) {
-	m__free(en->name);
+        m__free(en->name);
     }
     if (en->descr) {
-	m__free(en->descr);
+        m__free(en->descr);
     }
     if (en->ref) {
-	m__free(en->ref);
+        m__free(en->ref);
     }
 
     ncx_clean_appinfoQ(&en->appinfoQ);
@@ -905,7 +905,7 @@ typ_rangedef_t *
 *********************************************************************/
 void
     typ_free_rangedef (typ_rangedef_t *rv, 
-		       ncx_btype_t  btyp)
+                       ncx_btype_t  btyp)
 {
 #ifdef DEBUG
     if (!rv) {
@@ -915,17 +915,17 @@ void
 #endif
 
     if (rv->rangestr) {
-	m__free(rv->rangestr);
+        m__free(rv->rangestr);
     }
 
     ncx_clean_num(btyp, &rv->lb);
     ncx_clean_num(btyp, &rv->ub);
 
     if (rv->lbstr) {
-	m__free(rv->lbstr);
+        m__free(rv->lbstr);
     }
     if (rv->ubstr) {
-	m__free(rv->ubstr);
+        m__free(rv->ubstr);
     }
 
     m__free(rv);
@@ -948,7 +948,7 @@ void
 *********************************************************************/
 void
     typ_normalize_rangeQ (dlq_hdr_t *rangeQ,
-			  ncx_btype_t  btyp)
+                          ncx_btype_t  btyp)
 {
     typ_rangedef_t *rv1, *rv2;
     boolean  concat;
@@ -972,73 +972,73 @@ void
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-	/* range type OK, continue on */
-	break;
+        /* range type OK, continue on */
+        break;
     case NCX_BT_DECIMAL64:
-	/***********/
-	break;
+        /***********/
+        break;
     case NCX_BT_FLOAT64:
-	/* cannot concat real numbers (by definition ;-) */
-	return;
+        /* cannot concat real numbers (by definition ;-) */
+        return;
     default:
-	/* not a number type, internal error */
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        /* not a number type, internal error */
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
 
     /* check empty rangeQ */
     rv1 = (typ_rangedef_t *)dlq_firstEntry(rangeQ);
     if (!rv1) {
-	return;
+        return;
     }
 
     /* get next entry to check against first */
     rv2 = (typ_rangedef_t *)dlq_nextEntry(rv1);
     while (rv2) {
-	switch (btyp) {
-	case NCX_BT_INT8:
-	case NCX_BT_INT16:
-	case NCX_BT_INT32:
-	    if (rv1->ub.i+1 == rv2->lb.i) {
-		rv1->ub.i = rv2->ub.i;
-		concat = TRUE;
-	    }
-	    break;
-	case NCX_BT_INT64:
-	    if (rv1->ub.l+1 == rv2->lb.l) {
-		rv1->ub.l = rv2->ub.l;
-		concat = TRUE;
-	    }
-	    break;
-	case NCX_BT_UINT8:
-	case NCX_BT_UINT16:
-	case NCX_BT_UINT32:
-	    if (rv1->ub.u+1 == rv2->lb.u) {
-		rv1->ub.u = rv2->ub.u;
-		concat = TRUE;
-	    }
-	    break;
-	case NCX_BT_UINT64:
-	    if (rv1->ub.ul+1 == rv2->lb.ul) {
-		rv1->ub.ul = rv2->ub.ul;
-		concat = TRUE;
-	    }
-	    break;
-	default:
-	    ;
-	}
+        switch (btyp) {
+        case NCX_BT_INT8:
+        case NCX_BT_INT16:
+        case NCX_BT_INT32:
+            if (rv1->ub.i+1 == rv2->lb.i) {
+                rv1->ub.i = rv2->ub.i;
+                concat = TRUE;
+            }
+            break;
+        case NCX_BT_INT64:
+            if (rv1->ub.l+1 == rv2->lb.l) {
+                rv1->ub.l = rv2->ub.l;
+                concat = TRUE;
+            }
+            break;
+        case NCX_BT_UINT8:
+        case NCX_BT_UINT16:
+        case NCX_BT_UINT32:
+            if (rv1->ub.u+1 == rv2->lb.u) {
+                rv1->ub.u = rv2->ub.u;
+                concat = TRUE;
+            }
+            break;
+        case NCX_BT_UINT64:
+            if (rv1->ub.ul+1 == rv2->lb.ul) {
+                rv1->ub.ul = rv2->ub.ul;
+                concat = TRUE;
+            }
+            break;
+        default:
+            ;
+        }
 
-	if (concat) {
-	    /* keep rv1 as the first rangedef to test */
-	    dlq_remove(rv2);
-	    typ_free_rangedef(rv2, btyp);
-	    rv2 = (typ_rangedef_t *)dlq_nextEntry(rv1);
-	    concat = FALSE;
-	} else {
-	    /* move along both rangedef pointers */
-	    rv1 = rv2;
-	    rv2 = (typ_rangedef_t *)dlq_nextEntry(rv2);
-	}
+        if (concat) {
+            /* keep rv1 as the first rangedef to test */
+            dlq_remove(rv2);
+            typ_free_rangedef(rv2, btyp);
+            rv2 = (typ_rangedef_t *)dlq_nextEntry(rv1);
+            concat = FALSE;
+        } else {
+            /* move along both rangedef pointers */
+            rv1 = rv2;
+            rv2 = (typ_rangedef_t *)dlq_nextEntry(rv2);
+        }
     }
 
  }  /* typ_normalize_rangeQ */
@@ -1062,30 +1062,30 @@ dlq_hdr_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (typdef->class) {
     case NCX_CL_BASE:
-	return NULL;
+        return NULL;
     case NCX_CL_SIMPLE:
-	return &typdef->def.simple.range.rangeQ;
+        return &typdef->def.simple.range.rangeQ;
     case NCX_CL_COMPLEX:
-	return NULL;
+        return NULL;
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp &&
-	    !dlq_empty(&typdef->def.named.newtyp->def.simple.range.rangeQ)) {
-	    return &typdef->def.named.newtyp->def.simple.range.rangeQ;
-	} else {
-	    return typ_get_rangeQ(&typdef->def.named.typ->typdef);
-	}
+        if (typdef->def.named.newtyp &&
+            !dlq_empty(&typdef->def.named.newtyp->def.simple.range.rangeQ)) {
+            return &typdef->def.named.newtyp->def.simple.range.rangeQ;
+        } else {
+            return typ_get_rangeQ(&typdef->def.named.typ->typdef);
+        }
     case NCX_CL_REF:
-	return typ_get_rangeQ(typdef->def.ref.typdef);
+        return typ_get_rangeQ(typdef->def.ref.typdef);
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 }  /* typ_get_rangeQ */
 
@@ -1108,30 +1108,30 @@ dlq_hdr_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (typdef->class) {
     case NCX_CL_BASE:
-	return NULL;
+        return NULL;
     case NCX_CL_SIMPLE:
-	return &typdef->def.simple.range.rangeQ;
+        return &typdef->def.simple.range.rangeQ;
     case NCX_CL_COMPLEX:
-	return NULL;
+        return NULL;
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp) {
-	    return &typdef->def.named.newtyp->def.simple.range.rangeQ;
-	} else {
-	    return NULL;
-	}
-	/*NOTREACHED*/
+        if (typdef->def.named.newtyp) {
+            return &typdef->def.named.newtyp->def.simple.range.rangeQ;
+        } else {
+            return NULL;
+        }
+        /*NOTREACHED*/
     case NCX_CL_REF:
-	return NULL;
+        return NULL;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 }  /* typ_get_rangeQ_con */
 
@@ -1154,31 +1154,31 @@ const dlq_hdr_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (typdef->class) {
     case NCX_CL_BASE:
-	return NULL;
+        return NULL;
     case NCX_CL_SIMPLE:
-	return &typdef->def.simple.range.rangeQ;
+        return &typdef->def.simple.range.rangeQ;
     case NCX_CL_COMPLEX:
-	return NULL;
+        return NULL;
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp &&
-	    !dlq_empty(&typdef->def.named.newtyp->def.simple.range.rangeQ)) {
-	    return &typdef->def.named.newtyp->def.simple.range.rangeQ;
-	} else {
-	    return typ_get_crangeQ(&typdef->def.named.typ->typdef);
-	}
-	/*NOTREACHED*/
+        if (typdef->def.named.newtyp &&
+            !dlq_empty(&typdef->def.named.newtyp->def.simple.range.rangeQ)) {
+            return &typdef->def.named.newtyp->def.simple.range.rangeQ;
+        } else {
+            return typ_get_crangeQ(&typdef->def.named.typ->typdef);
+        }
+        /*NOTREACHED*/
     case NCX_CL_REF:
-	return typ_get_crangeQ(typdef->def.ref.typdef);
+        return typ_get_crangeQ(typdef->def.ref.typdef);
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 }  /* typ_get_crangeQ */
 
@@ -1201,30 +1201,30 @@ const dlq_hdr_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (typdef->class) {
     case NCX_CL_BASE:
-	return NULL;
+        return NULL;
     case NCX_CL_SIMPLE:
-	return &typdef->def.simple.range.rangeQ;
+        return &typdef->def.simple.range.rangeQ;
     case NCX_CL_COMPLEX:
-	return NULL;
+        return NULL;
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp) {
-	    return &typdef->def.named.newtyp->def.simple.range.rangeQ;
-	} else {
-	    return NULL;
-	}
-	/*NOTREACHED*/
+        if (typdef->def.named.newtyp) {
+            return &typdef->def.named.newtyp->def.simple.range.rangeQ;
+        } else {
+            return NULL;
+        }
+        /*NOTREACHED*/
     case NCX_CL_REF:
-	return NULL;
+        return NULL;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 }  /* typ_get_crangeQ_con */
 
@@ -1247,30 +1247,30 @@ typ_range_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (typdef->class) {
     case NCX_CL_BASE:
-	return NULL;
+        return NULL;
     case NCX_CL_SIMPLE:
-	return &typdef->def.simple.range;
+        return &typdef->def.simple.range;
     case NCX_CL_COMPLEX:
-	return NULL;
+        return NULL;
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp) {
-	    return &typdef->def.named.newtyp->def.simple.range;
-	} else {
-	    return NULL;
-	}
-	/*NOTREACHED*/
+        if (typdef->def.named.newtyp) {
+            return &typdef->def.named.newtyp->def.simple.range;
+        } else {
+            return NULL;
+        }
+        /*NOTREACHED*/
     case NCX_CL_REF:
-	return NULL;
+        return NULL;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 }  /* typ_get_range_con */
 
@@ -1293,30 +1293,30 @@ const typ_range_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (typdef->class) {
     case NCX_CL_BASE:
-	return NULL;
+        return NULL;
     case NCX_CL_SIMPLE:
-	return &typdef->def.simple.range;
+        return &typdef->def.simple.range;
     case NCX_CL_COMPLEX:
-	return NULL;
+        return NULL;
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp) {
-	    return &typdef->def.named.newtyp->def.simple.range;
-	} else {
-	    return NULL;
-	}
-	/*NOTREACHED*/
+        if (typdef->def.named.newtyp) {
+            return &typdef->def.named.newtyp->def.simple.range;
+        } else {
+            return NULL;
+        }
+        /*NOTREACHED*/
     case NCX_CL_REF:
-	return NULL;
+        return NULL;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 }  /* typ_get_crange_con */
 
@@ -1338,30 +1338,30 @@ const xmlChar *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (typdef->class) {
     case NCX_CL_BASE:
-	return NULL;
+        return NULL;
     case NCX_CL_SIMPLE:
-	return typdef->def.simple.range.rangestr;
+        return typdef->def.simple.range.rangestr;
     case NCX_CL_COMPLEX:
-	return NULL;
+        return NULL;
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp &&
-	    typdef->def.named.newtyp->def.simple.range.rangestr) {
-	    return typdef->def.named.newtyp->def.simple.range.rangestr;
-	} else {
-	    return typ_get_rangestr(&typdef->def.named.typ->typdef);
-	}
+        if (typdef->def.named.newtyp &&
+            typdef->def.named.newtyp->def.simple.range.rangestr) {
+            return typdef->def.named.newtyp->def.simple.range.rangestr;
+        } else {
+            return typ_get_rangestr(&typdef->def.named.typ->typdef);
+        }
     case NCX_CL_REF:
-	return typ_get_rangestr(typdef->def.ref.typdef);
+        return typ_get_rangestr(typdef->def.ref.typdef);
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 }  /* typ_get_rangestr */
 
@@ -1385,16 +1385,16 @@ const typ_rangedef_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     rangeQ = typ_get_crangeQ(typdef);
     if (rangeQ) {
-	return (const typ_rangedef_t *)dlq_firstEntry(rangeQ);
+        return (const typ_rangedef_t *)dlq_firstEntry(rangeQ);
     } else {
-	return NULL;
+        return NULL;
     }
 }  /* typ_first_rangedef */
 
@@ -1417,31 +1417,31 @@ const typ_rangedef_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (typdef->class) {
     case NCX_CL_BASE:
-	return NULL;
+        return NULL;
     case NCX_CL_SIMPLE:
-	return (const typ_rangedef_t *)
-	    dlq_firstEntry(&typdef->def.simple.range.rangeQ);
+        return (const typ_rangedef_t *)
+            dlq_firstEntry(&typdef->def.simple.range.rangeQ);
     case NCX_CL_COMPLEX:
-	return NULL;
+        return NULL;
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp) {
-	    return (const typ_rangedef_t *)
-		dlq_firstEntry(&typdef->def.named.newtyp->def.simple.range.rangeQ);
-	} else {
-	    return NULL;
-	}
+        if (typdef->def.named.newtyp) {
+            return (const typ_rangedef_t *)
+                dlq_firstEntry(&typdef->def.named.newtyp->def.simple.range.rangeQ);
+        } else {
+            return NULL;
+        }
     case NCX_CL_REF:
-	return NULL;
+        return NULL;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 }  /* typ_first_rangedef_con */
 
@@ -1468,75 +1468,75 @@ const typ_rangedef_t *
 *********************************************************************/
 status_t
     typ_get_rangebounds_con (const typ_def_t *typdef,
-			     ncx_btype_t *btyp,
-			     const ncx_num_t **lb,
-			     const ncx_num_t **ub)
+                             ncx_btype_t *btyp,
+                             const ncx_num_t **lb,
+                             const ncx_num_t **ub)
 {
     const typ_rangedef_t *rdef;
     status_t res;
 
 #ifdef DEBUG
     if (!typdef || !btyp || !lb || !ub) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
     
     res = NO_ERR;
     switch (typdef->class) {
     case NCX_CL_BASE:
-	res = ERR_NCX_SKIPPED;
-	break;
+        res = ERR_NCX_SKIPPED;
+        break;
     case NCX_CL_SIMPLE:
-	/* get lower bound */
-	rdef = (const typ_rangedef_t *)
-	    dlq_firstEntry(&typdef->def.simple.range.rangeQ);
-	if (rdef ) {
-	    *btyp = rdef->btyp;
-	    *lb = &rdef->lb;
+        /* get lower bound */
+        rdef = (const typ_rangedef_t *)
+            dlq_firstEntry(&typdef->def.simple.range.rangeQ);
+        if (rdef ) {
+            *btyp = rdef->btyp;
+            *lb = &rdef->lb;
 
-	    /* get upper bound */
-	    rdef = (const typ_rangedef_t *)
-		dlq_lastEntry(&typdef->def.simple.range.rangeQ);
-	    if (rdef) {
-		*ub = &rdef->ub;
-	    } else {
-		res = SET_ERROR(ERR_INTERNAL_PTR);
-	    }
-	} else {
-	    res = ERR_NCX_NOT_FOUND;
-	}
-	break;
+            /* get upper bound */
+            rdef = (const typ_rangedef_t *)
+                dlq_lastEntry(&typdef->def.simple.range.rangeQ);
+            if (rdef) {
+                *ub = &rdef->ub;
+            } else {
+                res = SET_ERROR(ERR_INTERNAL_PTR);
+            }
+        } else {
+            res = ERR_NCX_NOT_FOUND;
+        }
+        break;
     case NCX_CL_COMPLEX:
-	res = ERR_NCX_WRONG_DATATYP;
-	break;
+        res = ERR_NCX_WRONG_DATATYP;
+        break;
     case NCX_CL_NAMED:
-	/* same check as simple type if newtyp exists */
-	if (typdef->def.named.newtyp) {
-	    rdef = (const typ_rangedef_t *)dlq_firstEntry
-		(&typdef->def.named.newtyp->def.simple.range.rangeQ);
-	    if (rdef ) {
-		*btyp = rdef->btyp;
-		*lb = &rdef->lb;
+        /* same check as simple type if newtyp exists */
+        if (typdef->def.named.newtyp) {
+            rdef = (const typ_rangedef_t *)dlq_firstEntry
+                (&typdef->def.named.newtyp->def.simple.range.rangeQ);
+            if (rdef ) {
+                *btyp = rdef->btyp;
+                *lb = &rdef->lb;
 
-		rdef = (const typ_rangedef_t *)dlq_lastEntry
-		    (&typdef->def.named.newtyp->def.simple.range.rangeQ);
-		if (rdef ) {
-		    *ub = &rdef->ub;
-		} else {
-		    res = SET_ERROR(ERR_INTERNAL_PTR);
-		}
-	    } else {
-		res = ERR_NCX_NOT_FOUND;
-	    }
-	} else {
-	    res = ERR_NCX_NOT_FOUND;
-	}
-	break;
+                rdef = (const typ_rangedef_t *)dlq_lastEntry
+                    (&typdef->def.named.newtyp->def.simple.range.rangeQ);
+                if (rdef ) {
+                    *ub = &rdef->ub;
+                } else {
+                    res = SET_ERROR(ERR_INTERNAL_PTR);
+                }
+            } else {
+                res = ERR_NCX_NOT_FOUND;
+            }
+        } else {
+            res = ERR_NCX_NOT_FOUND;
+        }
+        break;
     case NCX_CL_REF:
-	res = ERR_NCX_NOT_FOUND;
-	break;
+        res = ERR_NCX_NOT_FOUND;
+        break;
     default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
+        res = SET_ERROR(ERR_INTERNAL_VAL);
     }
     return res;
     
@@ -1559,8 +1559,8 @@ ncx_strrest_t
 {
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NCX_SR_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_SR_NONE;
     }
 #endif
 
@@ -1571,17 +1571,17 @@ ncx_strrest_t
     case NCX_CL_SIMPLE:
         return typdef->def.simple.strrest;
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp) {
-	    return typdef->def.named.newtyp->def.simple.strrest;
-	} else {
-	    return NCX_SR_NONE;
-	}
+        if (typdef->def.named.newtyp) {
+            return typdef->def.named.newtyp->def.simple.strrest;
+        } else {
+            return NCX_SR_NONE;
+        }
     case NCX_CL_REF:
-	if (typdef->def.ref.typdef) {
-	    return typ_get_strrest(typdef->def.ref.typdef);
-	} else {
-	    return NCX_SR_NONE;
-	}
+        if (typdef->def.ref.typdef) {
+            return typ_get_strrest(typdef->def.ref.typdef);
+        } else {
+            return NCX_SR_NONE;
+        }
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
         return NCX_SR_NONE;
@@ -1603,28 +1603,28 @@ ncx_strrest_t
 *********************************************************************/
 void
     typ_set_strrest (typ_def_t *typdef,
-		     ncx_strrest_t strrest)
+                     ncx_strrest_t strrest)
 {
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     switch (typdef->class) {
     case NCX_CL_NONE:
     case NCX_CL_BASE:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	break;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        break;
     case NCX_CL_SIMPLE:
         typdef->def.simple.strrest = strrest;
-	break;
+        break;
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp) {
-	    typdef->def.named.newtyp->def.simple.strrest = strrest;
-	}
-	break;
+        if (typdef->def.named.newtyp) {
+            typdef->def.named.newtyp->def.simple.strrest = strrest;
+        }
+        break;
     case NCX_CL_REF:
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
@@ -1646,18 +1646,18 @@ void
 *********************************************************************/
 typ_sval_t *
     typ_new_sval (const xmlChar *str,
-		  ncx_btype_t  btyp)
+                  ncx_btype_t  btyp)
 {
     typ_sval_t  *sv;
 
 #ifdef DEBUG
     if (!str) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
     if (!typ_is_string(btyp)) {
         SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        return NULL;
     }
 #endif
 
@@ -1668,8 +1668,8 @@ typ_sval_t *
     memset(sv, 0, sizeof(typ_sval_t));
     sv->val = xml_strdup(str);
     if (!sv->val) {
-	m__free(sv);
-	return NULL;
+        m__free(sv);
+        return NULL;
     }
     return sv;
 
@@ -1695,7 +1695,7 @@ void
 #endif
 
     if (sv->val) {
-	m__free(sv->val);
+        m__free(sv->val);
     }
     m__free(sv);
 
@@ -1791,7 +1791,7 @@ ncx_btype_t
         /* the rest of the data types don't have ranges, but to simplify
          * cleanup, a value is returned, even though the rangeQ
          * will be empty during cleanup
-	 * Do not flag an error, but do not return a valid type either
+         * Do not flag an error, but do not return a valid type either
          */
         return NCX_BT_NONE;
     }
@@ -1816,8 +1816,8 @@ ncx_btype_t
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NCX_BT_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_BT_NONE;
     }
 #endif
 
@@ -1829,17 +1829,17 @@ ncx_btype_t
     case NCX_CL_SIMPLE:
         return typdef->def.simple.btyp; 
     case NCX_CL_NAMED:
-	if (typdef->def.named.typ) {
-	    return typ_get_basetype(&typdef->def.named.typ->typdef);
-	} else {
-	    return NCX_BT_NONE;
-	}
+        if (typdef->def.named.typ) {
+            return typ_get_basetype(&typdef->def.named.typ->typdef);
+        } else {
+            return NCX_BT_NONE;
+        }
     case NCX_CL_REF:
-	if (typdef->def.ref.typdef) {
-	    return typ_get_basetype(typdef->def.ref.typdef);
-	} else {
-	    return NCX_BT_NONE;
-	}
+        if (typdef->def.ref.typdef) {
+            return typ_get_basetype(typdef->def.ref.typdef);
+        } else {
+            return NCX_BT_NONE;
+        }
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
         return NCX_BT_NONE;
@@ -1865,27 +1865,27 @@ const xmlChar *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (typdef->class) {
     case NCX_CL_NONE:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return EMPTY_STRING;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return EMPTY_STRING;
     case NCX_CL_BASE:
-	return (const xmlChar *)tk_get_btype_sym(typdef->def.base);
+        return (const xmlChar *)tk_get_btype_sym(typdef->def.base);
     case NCX_CL_SIMPLE:
-	return (const xmlChar *)
-	    tk_get_btype_sym(typdef->def.simple.btyp);
+        return (const xmlChar *)
+            tk_get_btype_sym(typdef->def.simple.btyp);
     case NCX_CL_NAMED:
-	return typdef->def.named.typ->name;
+        return typdef->def.named.typ->name;
     case NCX_CL_REF:
-	return typ_get_name(typdef->def.ref.typdef);
+        return typ_get_name(typdef->def.ref.typdef);
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return EMPTY_STRING;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return EMPTY_STRING;
     }
     /*NOTREACHED*/
 
@@ -1910,16 +1910,16 @@ const xmlChar *
 
 #ifdef DEBUG
     if (!typ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     btyp = typ_get_basetype(&typ->typdef);
     if (btyp != NCX_BT_NONE) {
-	return (const xmlChar *)tk_get_btype_sym(btyp);
+        return (const xmlChar *)tk_get_btype_sym(btyp);
     } else {
-	return EMPTY_STRING;
+        return EMPTY_STRING;
     }
     /*NOTREACHED*/
 
@@ -1942,15 +1942,15 @@ const xmlChar *
 
 #ifdef DEBUG
     if (!typ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (typ->typdef.class == NCX_CL_NAMED) {
-	return typ->typdef.def.named.typ->name;
+        return typ->typdef.def.named.typ->name;
     } else {
-	return EMPTY_STRING;
+        return EMPTY_STRING;
     }
     /*NOTREACHED*/
 
@@ -1974,8 +1974,8 @@ ncx_tclass_t
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NCX_CL_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_CL_NONE;
     }
 #endif
 
@@ -1985,13 +1985,13 @@ ncx_tclass_t
     case NCX_CL_BASE:
     case NCX_CL_SIMPLE:
     case NCX_CL_COMPLEX:
-	return typdef->class;
+        return typdef->class;
     case NCX_CL_NAMED:
-	if (typdef->def.named.typ) {
-	    return typ_get_base_class(&typdef->def.named.typ->typdef);
-	} else {
-	    return NCX_CL_NAMED;
-	}
+        if (typdef->def.named.typ) {
+            return typ_get_base_class(&typdef->def.named.typ->typdef);
+        } else {
+            return NCX_CL_NAMED;
+        }
     case NCX_CL_REF:
         return typ_get_base_class(typdef->def.ref.typdef);
     default:
@@ -2016,12 +2016,12 @@ typ_template_t *
     typ_get_basetype_typ (ncx_btype_t  btyp)
 {
     if (!typ_init_done) {
-	SET_ERROR(ERR_INTERNAL_INIT_SEQ);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+        return NULL;
     }
     if (btyp<NCX_FIRST_DATATYPE || btyp>NCX_LAST_DATATYPE) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
     return basetypes[btyp];
 
@@ -2042,12 +2042,12 @@ typ_def_t *
     typ_get_basetype_typdef (ncx_btype_t  btyp)
 {
     if (!typ_init_done) {
-	SET_ERROR(ERR_INTERNAL_INIT_SEQ);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+        return NULL;
     }
     if (btyp<NCX_FIRST_DATATYPE || btyp>NCX_LAST_DATATYPE) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
     return &basetypes[btyp]->typdef;
 
@@ -2071,8 +2071,8 @@ typ_def_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -2083,11 +2083,11 @@ typ_def_t *
     case NCX_CL_COMPLEX:
         return NULL;
     case NCX_CL_NAMED:
-	if (typdef->def.named.typ) {
-	    return &typdef->def.named.typ->typdef;
-	} else {
-	    return NULL;
-	}
+        if (typdef->def.named.typ) {
+            return &typdef->def.named.typ->typdef;
+        } else {
+            return NULL;
+        }
     case NCX_CL_REF:
         return typdef->def.ref.typdef;
     default:
@@ -2114,8 +2114,8 @@ const typ_template_t *
 
 #ifdef DEBUG
     if (!typ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -2126,7 +2126,7 @@ const typ_template_t *
     case NCX_CL_COMPLEX:
         return NULL;
     case NCX_CL_NAMED:
-	return typ->typdef.def.named.typ;
+        return typ->typdef.def.named.typ;
     case NCX_CL_REF:
         return NULL;
     default:
@@ -2154,8 +2154,8 @@ const typ_def_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -2166,7 +2166,7 @@ const typ_def_t *
     case NCX_CL_COMPLEX:
         return NULL;
     case NCX_CL_NAMED:
-	return &typdef->def.named.typ->typdef;
+        return &typdef->def.named.typ->typdef;
     case NCX_CL_REF:
         return typdef->def.ref.typdef;
     default:
@@ -2194,8 +2194,8 @@ typ_def_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -2206,11 +2206,11 @@ typ_def_t *
     case NCX_CL_COMPLEX:
         return typdef;
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp) {
-	    return typdef;
-	} else {
-	    return typ_get_next_typdef(&typdef->def.named.typ->typdef);
-	}
+        if (typdef->def.named.newtyp) {
+            return typdef;
+        } else {
+            return typ_get_next_typdef(&typdef->def.named.typ->typdef);
+        }
     case NCX_CL_REF:
         return typdef->def.ref.typdef;
     default:
@@ -2238,8 +2238,8 @@ typ_def_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -2250,7 +2250,7 @@ typ_def_t *
     case NCX_CL_COMPLEX:
         return typdef;
     case NCX_CL_NAMED:
-	return typ_get_base_typdef(&typdef->def.named.typ->typdef);
+        return typ_get_base_typdef(&typdef->def.named.typ->typdef);
     case NCX_CL_REF:
         return typdef->def.ref.typdef;
     default:
@@ -2278,8 +2278,8 @@ const typ_def_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -2290,7 +2290,7 @@ const typ_def_t *
     case NCX_CL_COMPLEX:
         return typdef;
     case NCX_CL_NAMED:
-	return typ_get_cbase_typdef(&typdef->def.named.typ->typdef);
+        return typ_get_cbase_typdef(&typdef->def.named.typ->typdef);
     case NCX_CL_REF:
         return typdef->def.ref.typdef;
     default:
@@ -2319,81 +2319,81 @@ const typ_def_t *
 *********************************************************************/
 typ_def_t *
     typ_get_qual_typdef (typ_def_t  *typdef,
-			 ncx_squal_t  squal)
+                         ncx_squal_t  squal)
 {
     typ_def_t *ntypdef;
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (typdef->class) {
     case NCX_CL_NONE:
-	return NULL;
+        return NULL;
     case NCX_CL_BASE:
-	if (squal==NCX_SQUAL_NONE) {
-	    return typdef;
-	} else {
-	    return NULL;
-	}
+        if (squal==NCX_SQUAL_NONE) {
+            return typdef;
+        } else {
+            return NULL;
+        }
     case NCX_CL_SIMPLE:
-	switch (squal) {
-	case NCX_SQUAL_NONE:
-	    return typdef;
-	case NCX_SQUAL_RANGE:
-	    return (dlq_empty(&typdef->def.simple.range.rangeQ)) ? 
-		NULL : typdef;
-	case NCX_SQUAL_VAL:
-	    return (dlq_empty(&typdef->def.simple.valQ)) ? 
-		NULL : typdef;
-	case NCX_SQUAL_META:
-	    return (dlq_empty(&typdef->def.simple.metaQ)) ? 
-		NULL : typdef;
-	case NCX_SQUAL_APPINFO:
-	    return (dlq_empty(&typdef->appinfoQ)) ? NULL : typdef;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return NULL;
-	}
-	/*NOTREACHED*/
+        switch (squal) {
+        case NCX_SQUAL_NONE:
+            return typdef;
+        case NCX_SQUAL_RANGE:
+            return (dlq_empty(&typdef->def.simple.range.rangeQ)) ? 
+                NULL : typdef;
+        case NCX_SQUAL_VAL:
+            return (dlq_empty(&typdef->def.simple.valQ)) ? 
+                NULL : typdef;
+        case NCX_SQUAL_META:
+            return (dlq_empty(&typdef->def.simple.metaQ)) ? 
+                NULL : typdef;
+        case NCX_SQUAL_APPINFO:
+            return (dlq_empty(&typdef->appinfoQ)) ? NULL : typdef;
+        default:
+            SET_ERROR(ERR_INTERNAL_VAL);
+            return NULL;
+        }
+        /*NOTREACHED*/
     case NCX_CL_NAMED:
-	ntypdef = typdef->def.named.newtyp;
-	if (!ntypdef) {
-	    return typ_get_qual_typdef(&typdef->def.named.typ->typdef, 
-				       squal);
-	}
-	switch (squal) {
-	case NCX_SQUAL_NONE:
-	    return typdef;
-	case NCX_SQUAL_RANGE:
-	    if (!dlq_empty(&ntypdef->def.simple.range.rangeQ)) {
-		return typdef;
-	    }
-	    break;
-	case NCX_SQUAL_VAL:
-	    if (!dlq_empty(&ntypdef->def.simple.valQ)) {
-		return typdef;
-	    }
-	    break;
-	case NCX_SQUAL_META:
-	    if (!dlq_empty(&ntypdef->def.simple.metaQ)) {
-		return typdef;
-	    }
-	    break;
-	case NCX_SQUAL_APPINFO:
-	    if (!dlq_empty(&typdef->appinfoQ)) {
-		return typdef;
-	    }
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return NULL;
-	}
-	return typ_get_qual_typdef(&typdef->def.named.typ->typdef,
-				   squal);
+        ntypdef = typdef->def.named.newtyp;
+        if (!ntypdef) {
+            return typ_get_qual_typdef(&typdef->def.named.typ->typdef, 
+                                       squal);
+        }
+        switch (squal) {
+        case NCX_SQUAL_NONE:
+            return typdef;
+        case NCX_SQUAL_RANGE:
+            if (!dlq_empty(&ntypdef->def.simple.range.rangeQ)) {
+                return typdef;
+            }
+            break;
+        case NCX_SQUAL_VAL:
+            if (!dlq_empty(&ntypdef->def.simple.valQ)) {
+                return typdef;
+            }
+            break;
+        case NCX_SQUAL_META:
+            if (!dlq_empty(&ntypdef->def.simple.metaQ)) {
+                return typdef;
+            }
+            break;
+        case NCX_SQUAL_APPINFO:
+            if (!dlq_empty(&typdef->appinfoQ)) {
+                return typdef;
+            }
+            break;
+        default:
+            SET_ERROR(ERR_INTERNAL_VAL);
+            return NULL;
+        }
+        return typ_get_qual_typdef(&typdef->def.named.typ->typdef,
+                                   squal);
     case NCX_CL_REF:
         return typ_get_qual_typdef(typdef->def.ref.typdef, squal);
     default:
@@ -2422,81 +2422,81 @@ typ_def_t *
 *********************************************************************/
 const typ_def_t *
     typ_get_cqual_typdef (const typ_def_t  *typdef,
-			  ncx_squal_t  squal)
+                          ncx_squal_t  squal)
 {
     const typ_def_t *ntypdef;
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (typdef->class) {
     case NCX_CL_NONE:
-	return NULL;
+        return NULL;
     case NCX_CL_BASE:
-	if (squal==NCX_SQUAL_NONE) {
-	    return typdef;
-	} else {
-	    return NULL;
-	}
+        if (squal==NCX_SQUAL_NONE) {
+            return typdef;
+        } else {
+            return NULL;
+        }
     case NCX_CL_SIMPLE:
-	switch (squal) {
-	case NCX_SQUAL_NONE:
-	    return typdef;
-	case NCX_SQUAL_RANGE:
-	    return (dlq_empty(&typdef->def.simple.range.rangeQ)) ? 
-		NULL : typdef;
-	case NCX_SQUAL_VAL:
-	    return (dlq_empty(&typdef->def.simple.valQ)) ? 
-		NULL : typdef;
-	case NCX_SQUAL_META:
-	    return (dlq_empty(&typdef->def.simple.metaQ)) ? 
-		NULL : typdef;
-	case NCX_SQUAL_APPINFO:
-	    return (dlq_empty(&typdef->appinfoQ)) ? NULL : typdef;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return NULL;
-	}
-	/*NOTREACHED*/
+        switch (squal) {
+        case NCX_SQUAL_NONE:
+            return typdef;
+        case NCX_SQUAL_RANGE:
+            return (dlq_empty(&typdef->def.simple.range.rangeQ)) ? 
+                NULL : typdef;
+        case NCX_SQUAL_VAL:
+            return (dlq_empty(&typdef->def.simple.valQ)) ? 
+                NULL : typdef;
+        case NCX_SQUAL_META:
+            return (dlq_empty(&typdef->def.simple.metaQ)) ? 
+                NULL : typdef;
+        case NCX_SQUAL_APPINFO:
+            return (dlq_empty(&typdef->appinfoQ)) ? NULL : typdef;
+        default:
+            SET_ERROR(ERR_INTERNAL_VAL);
+            return NULL;
+        }
+        /*NOTREACHED*/
     case NCX_CL_NAMED:
-	ntypdef = typdef->def.named.newtyp;
-	if (!ntypdef) {
-	    return typ_get_cqual_typdef(&typdef->def.named.typ->typdef, 
-					squal);
-	}
-	switch (squal) {
-	case NCX_SQUAL_NONE:
-	    return typdef;
-	case NCX_SQUAL_RANGE:
-	    if (!dlq_empty(&ntypdef->def.simple.range.rangeQ)) {
-		return typdef;
-	    }
-	    break;
-	case NCX_SQUAL_VAL:
-	    if (!dlq_empty(&ntypdef->def.simple.valQ)) {
-		return typdef;
-	    }
-	    break;
-	case NCX_SQUAL_META:
-	    if (!dlq_empty(&ntypdef->def.simple.metaQ)) {
-		return typdef;
-	    }
-	    break;
-	case NCX_SQUAL_APPINFO:
-	    if (!dlq_empty(&typdef->appinfoQ)) {
-		return typdef;
-	    }
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return NULL;
-	}
-	return typ_get_cqual_typdef(&typdef->def.named.typ->typdef,
-				    squal);
+        ntypdef = typdef->def.named.newtyp;
+        if (!ntypdef) {
+            return typ_get_cqual_typdef(&typdef->def.named.typ->typdef, 
+                                        squal);
+        }
+        switch (squal) {
+        case NCX_SQUAL_NONE:
+            return typdef;
+        case NCX_SQUAL_RANGE:
+            if (!dlq_empty(&ntypdef->def.simple.range.rangeQ)) {
+                return typdef;
+            }
+            break;
+        case NCX_SQUAL_VAL:
+            if (!dlq_empty(&ntypdef->def.simple.valQ)) {
+                return typdef;
+            }
+            break;
+        case NCX_SQUAL_META:
+            if (!dlq_empty(&ntypdef->def.simple.metaQ)) {
+                return typdef;
+            }
+            break;
+        case NCX_SQUAL_APPINFO:
+            if (!dlq_empty(&typdef->appinfoQ)) {
+                return typdef;
+            }
+            break;
+        default:
+            SET_ERROR(ERR_INTERNAL_VAL);
+            return NULL;
+        }
+        return typ_get_cqual_typdef(&typdef->def.named.typ->typdef,
+                                    squal);
     case NCX_CL_REF:
         return typ_get_cqual_typdef(typdef->def.ref.typdef, squal);
     default:
@@ -2522,8 +2522,8 @@ const typ_def_t *
 *********************************************************************/
 const ncx_appinfo_t *
     typ_find_appinfo (const typ_def_t *typdef,
-		      const xmlChar *prefix,
-		      const xmlChar *name)		      
+                      const xmlChar *prefix,
+                      const xmlChar *name)                    
 {
     const typ_def_t        *appdef;
     const ncx_appinfo_t    *appinfo;
@@ -2531,8 +2531,8 @@ const ncx_appinfo_t *
 
 #ifdef DEBUG
     if (!typdef || !name) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -2540,21 +2540,21 @@ const ncx_appinfo_t *
     appinfo = NULL;
 
     while (!done) {
-	appdef = typ_get_cqual_typdef(typdef, NCX_SQUAL_APPINFO);
-	if (appdef) {
-	    appinfo = ncx_find_const_appinfo(&appdef->appinfoQ, 
+        appdef = typ_get_cqual_typdef(typdef, NCX_SQUAL_APPINFO);
+        if (appdef) {
+            appinfo = ncx_find_const_appinfo(&appdef->appinfoQ, 
                                              prefix, 
                                              name);
-	    if (appinfo) {
-		done = TRUE;
-	    } else if (appdef->class == NCX_CL_NAMED) {
-		typdef = &appdef->def.named.typ->typdef;
-	    } else {
-		done = TRUE;
-	    }
-	} else {
-	    done = TRUE;
-	}
+            if (appinfo) {
+                done = TRUE;
+            } else if (appdef->class == NCX_CL_NAMED) {
+                typdef = &appdef->def.named.typ->typdef;
+            } else {
+                done = TRUE;
+            }
+        } else {
+            done = TRUE;
+        }
     }
 
     return appinfo;
@@ -2577,14 +2577,14 @@ const ncx_appinfo_t *
 *********************************************************************/
 const ncx_appinfo_t *
     typ_find_appinfo_con (const typ_def_t *typdef,
-			  const xmlChar *prefix,
-			  const xmlChar *name)		      
+                          const xmlChar *prefix,
+                          const xmlChar *name)                
 {
 
 #ifdef DEBUG
     if (!typdef || !name) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -2613,29 +2613,29 @@ boolean
     const typ_template_t  *test_typ;
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     if (typ_get_basetype(typdef) == NCX_BT_INSTANCE_ID) {
-	return TRUE;
+        return TRUE;
     }
 
     if (ncx_find_const_appinfo(&typdef->appinfoQ,
                                NCX_PREFIX, 
                                NCX_EL_XPATH)) {
-	return TRUE;
+        return TRUE;
     }
 
     if (typdef->class == NCX_CL_NAMED) {
-	if (typdef->def.named.newtyp &&
-	    ncx_find_const_appinfo(&typdef->def.named.newtyp->appinfoQ,
+        if (typdef->def.named.newtyp &&
+            ncx_find_const_appinfo(&typdef->def.named.newtyp->appinfoQ,
                                    NCX_PREFIX, 
                                    NCX_EL_XPATH)) {
-	    return TRUE;
-	}
-	if (typdef->def.named.typ) {
+            return TRUE;
+        }
+        if (typdef->def.named.typ) {
             test_typ = typdef->def.named.typ;
 
             /* hardwire the YANG xpath1.0 type */
@@ -2645,12 +2645,12 @@ boolean
                             (const xmlChar *)"xpath1.0")) {
                 return TRUE;
             }
-	    return typ_is_xpath_string(&test_typ->typdef);
-	} else {
-	    return FALSE;
-	}
+            return typ_is_xpath_string(&test_typ->typdef);
+        } else {
+            return FALSE;
+        }
     } else {
-	return FALSE;
+        return FALSE;
     }
 
 }  /* typ_is_xpath_string */
@@ -2674,31 +2674,31 @@ boolean
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     if (ncx_find_const_appinfo(&typdef->appinfoQ,
                                NCX_PREFIX, 
                                NCX_EL_QNAME)) {
-	return TRUE;
+        return TRUE;
     }
 
     if (typdef->class == NCX_CL_NAMED) {
-	if (typdef->def.named.newtyp &&
-	    ncx_find_const_appinfo(&typdef->def.named.newtyp->appinfoQ,
+        if (typdef->def.named.newtyp &&
+            ncx_find_const_appinfo(&typdef->def.named.newtyp->appinfoQ,
                                    NCX_PREFIX, 
                                    NCX_EL_QNAME)) {
-	    return TRUE;
-	}
-	if (typdef->def.named.typ) {
-	    return typ_is_qname_string(&typdef->def.named.typ->typdef);
-	} else {
-	    return FALSE;
-	}
+            return TRUE;
+        }
+        if (typdef->def.named.typ) {
+            return typ_is_qname_string(&typdef->def.named.typ->typdef);
+        } else {
+            return FALSE;
+        }
     } else {
-	return FALSE;
+        return FALSE;
     }
 
 }  /* typ_is_qname_string */
@@ -2723,36 +2723,36 @@ boolean
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     if (typ_get_basetype(typdef) != NCX_BT_STRING) {
-	return FALSE;
+        return FALSE;
     }
 
     if (ncx_find_const_appinfo(&typdef->appinfoQ,
                                NCX_PREFIX, 
                                NCX_EL_SCHEMA_INSTANCE)) {
-	return TRUE;
+        return TRUE;
     }
 
     if (typdef->class == NCX_CL_NAMED) {
-	if (typdef->def.named.newtyp &&
-	    ncx_find_const_appinfo(&typdef->def.named.newtyp->appinfoQ,
+        if (typdef->def.named.newtyp &&
+            ncx_find_const_appinfo(&typdef->def.named.newtyp->appinfoQ,
                                    NCX_PREFIX, 
                                    NCX_EL_SCHEMA_INSTANCE)) {
-	    return TRUE;
-	}
-	if (typdef->def.named.typ) {
-	    return typ_is_schema_instance_string
-		(&typdef->def.named.typ->typdef);
-	} else {
-	    return FALSE;
-	}
+            return TRUE;
+        }
+        if (typdef->def.named.typ) {
+            return typ_is_schema_instance_string
+                (&typdef->def.named.typ->typdef);
+        } else {
+            return FALSE;
+        }
     } else {
-	return FALSE;
+        return FALSE;
     }
 
 }  /* typ_is_schema_instance_string */
@@ -2774,22 +2774,22 @@ const xmlChar *
 
 #ifdef DEBUG
     if (!typ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (typ->defval) {
-	return typ->defval;
+        return typ->defval;
     }
 
     if (typ->typdef.class == NCX_CL_NAMED) {
-	return typ_get_defval(typ->typdef.def.named.typ);
+        return typ_get_defval(typ->typdef.def.named.typ);
     } else {
-	/* no check for NCX_CL_REF because only type templates
-	 * have default values, not embedded typdefs
-	 */
-	return NULL;
+        /* no check for NCX_CL_REF because only type templates
+         * have default values, not embedded typdefs
+         */
+        return NULL;
     }
 }  /* typ_get_defval */
 
@@ -2810,19 +2810,19 @@ const xmlChar *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (typdef->class == NCX_CL_NAMED) {
-	return typ_get_defval(typdef->def.named.typ);
+        return typ_get_defval(typdef->def.named.typ);
     } else {
-	/* Unless an embedded data node is a named type 
-	 * with a simple base type, it cannot have a default
-	 * !!! Not sure this always applies to NCX_CL_REF !!!
-	 */
-	return NULL;   
+        /* Unless an embedded data node is a named type 
+         * with a simple base type, it cannot have a default
+         * !!! Not sure this always applies to NCX_CL_REF !!!
+         */
+        return NULL;   
     }
 
     
@@ -2845,8 +2845,8 @@ ncx_iqual_t
 
 #ifdef DEBUG
     if (!typ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NCX_IQUAL_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_IQUAL_NONE;
     }
 #endif
 
@@ -2872,8 +2872,8 @@ ncx_iqual_t
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NCX_IQUAL_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_IQUAL_NONE;
     }
 #endif
 
@@ -2882,24 +2882,24 @@ ncx_iqual_t
     case NCX_CL_BASE:
     case NCX_CL_SIMPLE:
     case NCX_CL_COMPLEX:
-	btyp = typ_get_basetype(typdef);
-	if (btyp == NCX_BT_LIST && typdef->iqual==NCX_IQUAL_ONE) {
-	    return NCX_IQUAL_ZMORE;
-	} else {
-	    return typdef->iqual;
-	}
+        btyp = typ_get_basetype(typdef);
+        if (btyp == NCX_BT_LIST && typdef->iqual==NCX_IQUAL_ONE) {
+            return NCX_IQUAL_ZMORE;
+        } else {
+            return typdef->iqual;
+        }
     case NCX_CL_NAMED:
-	if (typdef->iqual != NCX_IQUAL_ONE) {
-	    return typdef->iqual;
-	} else {
-	    return typ_get_iqualval(typdef->def.named.typ);
-	}
+        if (typdef->iqual != NCX_IQUAL_ONE) {
+            return typdef->iqual;
+        } else {
+            return typ_get_iqualval(typdef->def.named.typ);
+        }
     case NCX_CL_REF:
-	if (typdef->iqual != NCX_IQUAL_ONE) {
-	    return typdef->iqual;
-	} else {
-	    return typdef->def.ref.typdef->iqual;
-	}
+        if (typdef->iqual != NCX_IQUAL_ONE) {
+            return typdef->iqual;
+        } else {
+            return typdef->def.ref.typdef->iqual;
+        }
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
         return NCX_IQUAL_NONE;
@@ -2924,13 +2924,13 @@ const xmlChar *
 
 #ifdef DEBUG
     if (!typ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (typ->units) {
-	return typ->units;
+        return typ->units;
     }
 
     return typ_get_units_from_typdef(&typ->typdef);
@@ -2959,27 +2959,27 @@ const xmlChar *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (typdef->class != NCX_CL_NAMED) {
-	return NULL;
+        return NULL;
     }
 
     done = FALSE;
     while (!done) {
-	typ = typdef->def.named.typ;
-	if (typ->units) {
-	    return typ->units;
-	}
+        typ = typdef->def.named.typ;
+        if (typ->units) {
+            return typ->units;
+        }
 
-	typdef = &typ->typdef;
-	
-	if (typdef->class != NCX_CL_NAMED) {
-	    done = TRUE;
-	}
+        typdef = &typ->typdef;
+        
+        if (typdef->class != NCX_CL_NAMED) {
+            done = TRUE;
+        }
     }
     return NULL;
 
@@ -3006,9 +3006,9 @@ boolean
     case NCX_BT_CASE:
     case NCX_BT_LIST:
     case NCX_BT_ANY:
-	return TRUE;
+        return TRUE;
     default:
-	return FALSE;
+        return FALSE;
     }
 }  /* typ_has_children */
 
@@ -3029,9 +3029,9 @@ boolean
 {
     switch (btyp) {
     case NCX_BT_LIST:
-	return TRUE;
+        return TRUE;
     default:
-	return FALSE;
+        return FALSE;
     }
 }  /* typ_has_index */
 
@@ -3052,7 +3052,7 @@ boolean
 {
     switch (btyp) {
     case NCX_BT_ANY:
-	return FALSE;
+        return FALSE;
     case NCX_BT_BITS:
     case NCX_BT_ENUM:
     case NCX_BT_EMPTY:
@@ -3074,17 +3074,17 @@ boolean
     case NCX_BT_LEAFREF:
     case NCX_BT_IDREF:
     case NCX_BT_SLIST:
-	return TRUE;
+        return TRUE;
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
     case NCX_BT_LIST:
     case NCX_BT_EXTERN:
     case NCX_BT_INTERN:
-	return FALSE;
+        return FALSE;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
     }
     /*NOTREACHED*/
 }  /* typ_is_simple */
@@ -3107,7 +3107,7 @@ boolean
     switch (btyp) {
     case NCX_BT_ANY:
     case NCX_BT_EMPTY:
-	return FALSE;
+        return FALSE;
     case NCX_BT_BITS:
     case NCX_BT_BOOLEAN:
     case NCX_BT_ENUM:
@@ -3128,17 +3128,17 @@ boolean
     case NCX_BT_LEAFREF:
     case NCX_BT_IDREF:
     case NCX_BT_INSTANCE_ID:
-	return TRUE;
+        return TRUE;
     case NCX_BT_CONTAINER:
     case NCX_BT_CHOICE:
     case NCX_BT_CASE:
     case NCX_BT_LIST:
     case NCX_BT_EXTERN:
     case NCX_BT_INTERN:
-	return FALSE;
+        return FALSE;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
     }
     /*NOTREACHED*/
 }  /* typ_is_xsd_simple */
@@ -3161,16 +3161,16 @@ typ_enum_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
     if (typdef->class != NCX_CL_SIMPLE) {
-	return NULL;
+        return NULL;
     }
 
     return (typ_enum_t *)
-	dlq_firstEntry(&typdef->def.simple.valQ);
+        dlq_firstEntry(&typdef->def.simple.valQ);
 
 }  /* typ_first_enumdef */
 
@@ -3192,8 +3192,8 @@ typ_enum_t *
 
 #ifdef DEBUG
     if (!enumdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -3219,17 +3219,17 @@ typ_enum_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (typdef->class != NCX_CL_SIMPLE) {
-	return NULL;
+        return NULL;
     }
 
     return (typ_enum_t *)
-	dlq_firstEntry(&typdef->def.simple.valQ);
+        dlq_firstEntry(&typdef->def.simple.valQ);
 
 }  /* typ_first_enumdef2 */
 
@@ -3251,27 +3251,27 @@ const typ_enum_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
     
     switch (typdef->class) {
     case NCX_CL_SIMPLE:
-	break;
+        break;
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp) {
-	    typdef = typdef->def.named.newtyp;
-	} else {
-	    return NULL;
-	}
-	break;
+        if (typdef->def.named.newtyp) {
+            typdef = typdef->def.named.newtyp;
+        } else {
+            return NULL;
+        }
+        break;
     default:
-	return NULL;
+        return NULL;
     }
 
     return (const typ_enum_t *)
-	dlq_firstEntry(&typdef->def.simple.valQ);
+        dlq_firstEntry(&typdef->def.simple.valQ);
 
 }  /* typ_first_con_enumdef */
 
@@ -3288,23 +3288,23 @@ const typ_enum_t *
 *********************************************************************/
 typ_enum_t *
     typ_find_enumdef (dlq_hdr_t *ebQ,
-		      const xmlChar *name)
+                      const xmlChar *name)
 {
     typ_enum_t *en;
 
 #ifdef DEBUG
     if (!ebQ || !name) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     for (en = (typ_enum_t *)dlq_firstEntry(ebQ);
-	 en != NULL;
-	 en = (typ_enum_t *)dlq_nextEntry(en)) {
-	if (!xml_strcmp(en->name, name)) {
-	    return en;
-	}
+         en != NULL;
+         en = (typ_enum_t *)dlq_nextEntry(en)) {
+        if (!xml_strcmp(en->name, name)) {
+            return en;
+        }
     }
     return NULL;
     
@@ -3328,13 +3328,13 @@ uint32
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
     if (typdef->class != NCX_CL_SIMPLE) {
-	return 0;
+        return 0;
     }
 
     return dlq_count(&typdef->def.simple.valQ);
@@ -3361,8 +3361,8 @@ const typ_sval_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -3370,28 +3370,28 @@ const typ_sval_t *
 
     btyp = typ_get_basetype(typdef);
     if (!typ_is_string(btyp)) {
-	return NULL;
+        return NULL;
     }
 
     switch (typdef->class) {
     case NCX_CL_NONE:
     case NCX_CL_BASE:
-	break;
+        break;
     case NCX_CL_SIMPLE:
-	retval = (const typ_sval_t *)
-	    dlq_firstEntry(&typdef->def.simple.valQ);
-	break;
+        retval = (const typ_sval_t *)
+            dlq_firstEntry(&typdef->def.simple.valQ);
+        break;
     case NCX_CL_COMPLEX:
-	break;
+        break;
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp) {
-	    retval = typ_first_strdef(typdef->def.named.newtyp);
-	}
-	break;
+        if (typdef->def.named.newtyp) {
+            retval = typ_first_strdef(typdef->def.named.newtyp);
+        }
+        break;
     case NCX_CL_REF:
-	/**** !!! SHOULD THIS BE NULL INSTEAD !!!  ****/
+        /**** !!! SHOULD THIS BE NULL INSTEAD !!!  ****/
         retval = typ_first_strdef(typdef->def.ref.typdef);
-	break;
+        break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
     }
@@ -3417,8 +3417,8 @@ uint32
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
@@ -3426,7 +3426,7 @@ uint32
     case NCX_CL_NONE:
     case NCX_CL_BASE:
     case NCX_CL_SIMPLE:
-	return 0;
+        return 0;
     case NCX_CL_NAMED:
         return typ_get_maxrows(&typdef->def.named.typ->typdef);
     case NCX_CL_REF:
@@ -3457,24 +3457,24 @@ ncx_access_t
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NCX_ACCESS_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_ACCESS_NONE;
     }
 #endif
 
     if (typdef->maxaccess != NCX_ACCESS_NONE) {
-	return typdef->maxaccess;
+        return typdef->maxaccess;
     }
 
     switch (typdef->class) {
     case NCX_CL_BASE:
     case NCX_CL_SIMPLE:
     case NCX_CL_COMPLEX:
-	return NCX_ACCESS_NONE;
+        return NCX_ACCESS_NONE;
     case NCX_CL_NAMED:
-	return typ_get_maxaccess(&typdef->def.named.typ->typdef);
+        return typ_get_maxaccess(&typdef->def.named.typ->typdef);
     case NCX_CL_REF:
-	return typ_get_maxaccess(typdef->def.ref.typdef);
+        return typ_get_maxaccess(typdef->def.ref.typdef);
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
         return NCX_ACCESS_NONE;
@@ -3502,24 +3502,24 @@ ncx_data_class_t
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NCX_ACCESS_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_ACCESS_NONE;
     }
 #endif
 
     if (typdef->dataclass != NCX_DC_NONE) {
-	return typdef->dataclass;
+        return typdef->dataclass;
     }
 
     switch (typdef->class) {
     case NCX_CL_BASE:
     case NCX_CL_SIMPLE:
     case NCX_CL_COMPLEX:
-	return NCX_DC_NONE;
+        return NCX_DC_NONE;
     case NCX_CL_NAMED:
-	return typ_get_dataclass(&typdef->def.named.typ->typdef);
+        return typ_get_dataclass(&typdef->def.named.typ->typdef);
     case NCX_CL_REF:
-	return typ_get_dataclass(typdef->def.ref.typdef);
+        return typ_get_dataclass(typdef->def.ref.typdef);
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
         return NCX_DC_NONE;
@@ -3546,8 +3546,8 @@ ncx_merge_t
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NCX_MERGE_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_MERGE_NONE;
     }
 #endif
 
@@ -3555,29 +3555,29 @@ ncx_merge_t
 
     switch (typdef->class) {
     case NCX_CL_BASE:
-	break;
+        break;
     case NCX_CL_SIMPLE:
     case NCX_CL_COMPLEX:
-	mtyp = typdef->mergetype;
-	break;
+        mtyp = typdef->mergetype;
+        break;
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp &&
-	    typdef->def.named.newtyp->mergetype != NCX_MERGE_NONE) {
-	    mtyp = typdef->def.named.newtyp->mergetype;
-	} else {
-	    return typ_get_mergetype(&typdef->def.named.typ->typdef);
-	}
-	break;
+        if (typdef->def.named.newtyp &&
+            typdef->def.named.newtyp->mergetype != NCX_MERGE_NONE) {
+            mtyp = typdef->def.named.newtyp->mergetype;
+        } else {
+            return typ_get_mergetype(&typdef->def.named.typ->typdef);
+        }
+        break;
     case NCX_CL_REF:
-	return typ_get_mergetype(typdef->def.ref.typdef);
+        return typ_get_mergetype(typdef->def.ref.typdef);
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
         return NCX_MERGE_NONE;
     }
     if (mtyp == NCX_MERGE_NONE) {
-	return NCX_DEF_MERGETYPE;
+        return NCX_DEF_MERGETYPE;
     } else {
-	return mtyp;
+        return mtyp;
     }
     /*NOTREACHED*/
     
@@ -3600,8 +3600,8 @@ xmlns_id_t
 
 #ifdef DEBUG
     if (!typ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
@@ -3630,19 +3630,19 @@ typ_template_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (typdef->class) {
     case NCX_CL_NAMED:
-	return typ_get_listtyp(&typdef->def.named.typ->typdef);
+        return typ_get_listtyp(&typdef->def.named.typ->typdef);
     case NCX_CL_REF:
-	ltypdef = typdef->def.ref.typdef;
-	break;
+        ltypdef = typdef->def.ref.typdef;
+        break;
     default:
-	ltypdef = typdef;
+        ltypdef = typdef;
     }
 
     btyp = typ_get_basetype(ltypdef);
@@ -3650,10 +3650,10 @@ typ_template_t *
     switch (btyp) {
     case NCX_BT_SLIST:
     case NCX_BT_BITS:
-	return ltypdef->def.simple.listtyp;
+        return ltypdef->def.simple.listtyp;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
     /*NOTREACHED*/
     
@@ -3680,29 +3680,29 @@ const typ_template_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (typdef->class) {
     case NCX_CL_NAMED:
-	return typ_get_clisttyp(&typdef->def.named.typ->typdef);
+        return typ_get_clisttyp(&typdef->def.named.typ->typdef);
     case NCX_CL_REF:
-	ltypdef = typdef->def.ref.typdef;
-	break;
+        ltypdef = typdef->def.ref.typdef;
+        break;
     default:
-	ltypdef = typdef;
+        ltypdef = typdef;
     }
 
     btyp = typ_get_basetype(ltypdef);
     switch (btyp) {
     case NCX_BT_SLIST:
     case NCX_BT_BITS:
-	return ltypdef->def.simple.listtyp;
+        return ltypdef->def.simple.listtyp;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
     
 }  /* typ_get_clisttyp */
@@ -3755,7 +3755,7 @@ void
     }
 #endif
     if (un->typdef) {
-	typ_free_typdef(un->typdef);
+        typ_free_typdef(un->typdef);
     }
     m__free(un);
 
@@ -3784,12 +3784,12 @@ typ_def_t *
     }
 #endif
     if (un->typdef) {
-	return un->typdef;
+        return un->typdef;
     } else if (un->typ) {
-	return &un->typ->typdef;
+        return &un->typ->typdef;
     } else {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 
 }  /* typ_get_unionnode_ptr */
@@ -3811,27 +3811,27 @@ typ_unionnode_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (typdef->class) {
     case NCX_CL_SIMPLE:
-	if (typdef->def.simple.btyp != NCX_BT_UNION) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return NULL;
-	} else {
-	    return (typ_unionnode_t *)
-		dlq_firstEntry(&typdef->def.simple.unionQ);
-	}
+        if (typdef->def.simple.btyp != NCX_BT_UNION) {
+            SET_ERROR(ERR_INTERNAL_VAL);
+            return NULL;
+        } else {
+            return (typ_unionnode_t *)
+                dlq_firstEntry(&typdef->def.simple.unionQ);
+        }
     case NCX_CL_NAMED:
-	return typ_first_unionnode(&typdef->def.named.typ->typdef);
+        return typ_first_unionnode(&typdef->def.named.typ->typdef);
     case NCX_CL_REF:
-	return typ_first_unionnode(typdef->def.ref.typdef);
+        return typ_first_unionnode(typdef->def.ref.typdef);
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
     /*NOTREACHED*/
 
@@ -3864,9 +3864,9 @@ boolean
     case NCX_BT_UINT64:
     case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
-	return TRUE;
+        return TRUE;
     default:
-	return FALSE;
+        return FALSE;
     }
 
 }  /* typ_is_number */
@@ -3890,11 +3890,11 @@ boolean
     switch (btyp) {
     case NCX_BT_STRING:
     case NCX_BT_INSTANCE_ID:
-	return TRUE;
+        return TRUE;
     case NCX_BT_LEAFREF:   /***/
-	return TRUE;
+        return TRUE;
     default:
-	return FALSE;
+        return FALSE;
     }
 
 }  /* typ_is_string */
@@ -3918,21 +3918,21 @@ typ_pattern_t *
 
 #ifdef DEBUG
     if (!pat_str) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     pat = m__getObj(typ_pattern_t);
     if (!pat) {
-	return NULL;
+        return NULL;
     }
     memset(pat, 0x0, sizeof(typ_pattern_t));
 
     pat->pat_str = xml_strdup(pat_str);
     if (!pat->pat_str) {
-	m__free(pat);
-	return NULL;
+        m__free(pat);
+        return NULL;
     }
     
     ncx_init_errinfo(&pat->pat_errinfo);
@@ -3957,16 +3957,16 @@ void
 {
 #ifdef DEBUG
     if (!pat) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (pat->pattern) {
-	xmlRegFreeRegexp(pat->pattern);
+        xmlRegFreeRegexp(pat->pattern);
     }
     if (pat->pat_str) {
-	m__free(pat->pat_str);
+        m__free(pat->pat_str);
     }
     ncx_clean_errinfo(&pat->pat_errinfo);
 
@@ -3996,15 +3996,15 @@ status_t
 
 #ifdef DEBUG
     if (!pat || !pat->pat_str) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     pat->pattern = xmlRegexpCompile(pat->pat_str);
     if (!pat->pattern) {
-	return ERR_NCX_INVALID_PATTERN;
+        return ERR_NCX_INVALID_PATTERN;
     } else {
-	return NO_ERR;
+        return NO_ERR;
     }
 
 }  /* typ_compile_pattern */
@@ -4027,8 +4027,8 @@ typ_pattern_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -4036,22 +4036,22 @@ typ_pattern_t *
     case NCX_CL_NONE:
     case NCX_CL_BASE:
     case NCX_CL_REF:
-	return NULL;
+        return NULL;
     case NCX_CL_SIMPLE:
-	return (typ_pattern_t *)
-	    dlq_firstEntry(&typdef->def.simple.patternQ);
+        return (typ_pattern_t *)
+            dlq_firstEntry(&typdef->def.simple.patternQ);
         break;
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp) {
-	    return typ_get_first_pattern(typdef->def.named.newtyp);
-	} else {
-	    /* constrained -- do not go to next typdef */
-	    return NULL;
-	}
-	/*NOTREACHED*/
+        if (typdef->def.named.newtyp) {
+            return typ_get_first_pattern(typdef->def.named.newtyp);
+        } else {
+            /* constrained -- do not go to next typdef */
+            return NULL;
+        }
+        /*NOTREACHED*/
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        return NULL;
     }
     /*NOTREACHED*/
 
@@ -4074,8 +4074,8 @@ typ_pattern_t *
 {
 #ifdef DEBUG
     if (!curpat) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -4102,8 +4102,8 @@ const typ_pattern_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -4111,22 +4111,22 @@ const typ_pattern_t *
     case NCX_CL_NONE:
     case NCX_CL_BASE:
     case NCX_CL_REF:
-	return NULL;
+        return NULL;
     case NCX_CL_SIMPLE:
-	return (const typ_pattern_t *)
-	    dlq_firstEntry(&typdef->def.simple.patternQ);
+        return (const typ_pattern_t *)
+            dlq_firstEntry(&typdef->def.simple.patternQ);
         break;
     case NCX_CL_NAMED: 
-	if (typdef->def.named.newtyp) {
-	    return typ_get_first_cpattern(typdef->def.named.newtyp);
-	} else {
-	    /* constrained -- do not go to next typdef */
-	    return NULL;
-	}
-	/*NOTREACHED*/
+        if (typdef->def.named.newtyp) {
+            return typ_get_first_cpattern(typdef->def.named.newtyp);
+        } else {
+            /* constrained -- do not go to next typdef */
+            return NULL;
+        }
+        /*NOTREACHED*/
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        return NULL;
     }
     /*NOTREACHED*/
 
@@ -4151,8 +4151,8 @@ const typ_pattern_t *
 
 #ifdef DEBUG
     if (!curpat) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -4180,20 +4180,20 @@ uint32
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
     cnt = 1;    
     pat = typ_get_first_cpattern(typdef);
     if (!pat) {
-	return 0;
+        return 0;
     }
     pat = typ_get_next_cpattern(pat);
     while (pat) {
-	cnt++;
-	pat = typ_get_next_cpattern(pat);
+        cnt++;
+        pat = typ_get_next_cpattern(pat);
     }
     return cnt;
 
@@ -4217,22 +4217,22 @@ ncx_errinfo_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     switch (typdef->class) {
     case NCX_CL_NAMED:
-	if (typdef->def.named.newtyp) {
-	    return &typdef->def.named.newtyp->def.simple.range.range_errinfo;
-	}
-	break;
+        if (typdef->def.named.newtyp) {
+            return &typdef->def.named.newtyp->def.simple.range.range_errinfo;
+        }
+        break;
     case NCX_CL_SIMPLE:
-	return &typdef->def.simple.range.range_errinfo;
+        return &typdef->def.simple.range.range_errinfo;
     case NCX_CL_REF:
     default:
-	;
+        ;
     }
     return NULL;
 
@@ -4255,14 +4255,14 @@ void
 
 #ifdef DEBUG
     if (!que) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     while (!dlq_empty(que)) {
-	typ = (typ_template_t *)dlq_deque(que);
-	typ_free_template(typ);
+        typ = (typ_template_t *)dlq_deque(que);
+        typ_free_template(typ);
     }
 
 }  /* typ_clean_typeQ */
@@ -4302,7 +4302,7 @@ boolean
     case NCX_BT_IDREF:
     case NCX_BT_SLIST:
     case NCX_BT_UNION:
-	return TRUE;
+        return TRUE;
     case NCX_BT_EMPTY:
     case NCX_BT_ANY:
     case NCX_BT_CONTAINER:
@@ -4311,7 +4311,7 @@ boolean
     case NCX_BT_NONE:
         return FALSE;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
         return FALSE;
     }
 }  /* typ_ok_for_inline_index */
@@ -4353,29 +4353,29 @@ boolean
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     switch (typdef->class) {
     case NCX_CL_BASE:
-	btyp = typ_get_basetype(typdef);
-	return typ_ok_for_inline_index(btyp);
+        btyp = typ_get_basetype(typdef);
+        return typ_ok_for_inline_index(btyp);
     case NCX_CL_SIMPLE:
-	btyp = typ_get_basetype(typdef);
-	return typ_ok_for_inline_index(btyp);
+        btyp = typ_get_basetype(typdef);
+        return typ_ok_for_inline_index(btyp);
     case NCX_CL_NAMED:
-	if (typdef->def.named.typ) {
-	    return typ_ok_for_index(&typdef->def.named.typ->typdef);
-	} else {
-	    return FALSE;
-	}
+        if (typdef->def.named.typ) {
+            return typ_ok_for_index(&typdef->def.named.typ->typdef);
+        } else {
+            return FALSE;
+        }
     case NCX_CL_REF:
-	return typ_ok_for_index(typdef->def.ref.typdef);
+        return typ_ok_for_index(typdef->def.ref.typdef);
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
     }
 
     /*NOTREACHED*/
@@ -4415,7 +4415,7 @@ boolean
     case NCX_BT_INSTANCE_ID:
     case NCX_BT_UNION:
     case NCX_BT_IDREF:
-	return TRUE;
+        return TRUE;
     case NCX_BT_EMPTY:
     case NCX_BT_LEAFREF:
     case NCX_BT_ANY:
@@ -4425,7 +4425,7 @@ boolean
     case NCX_BT_NONE:
         return FALSE;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
         return FALSE;
     }
 }  /* typ_ok_for_union */
@@ -4449,8 +4449,8 @@ boolean
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -4458,25 +4458,25 @@ boolean
     case NCX_CL_BASE:
     case NCX_CL_SIMPLE:
     case NCX_CL_COMPLEX:
-	return TRUE;
+        return TRUE;
     case NCX_CL_NAMED:
-	if (typdef->def.named.typ) {
-	    if (typdef->def.named.typ->res != NO_ERR) {
-		return FALSE;
-	    } else {
-		return typ_ok(&typdef->def.named.typ->typdef);
-	    }
-	} else {
-	    return FALSE;
-	}
+        if (typdef->def.named.typ) {
+            if (typdef->def.named.typ->res != NO_ERR) {
+                return FALSE;
+            } else {
+                return typ_ok(&typdef->def.named.typ->typdef);
+            }
+        } else {
+            return FALSE;
+        }
     case NCX_CL_REF:
-	if (typdef->def.ref.typdef) {
-	    return typ_ok(typdef->def.ref.typdef);
-	} else {
-	    return FALSE;
-	}
+        if (typdef->def.ref.typdef) {
+            return typ_ok(typdef->def.ref.typdef);
+        } else {
+            return FALSE;
+        }
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
         return FALSE;
     }
 }  /* typ_ok */
@@ -4497,7 +4497,7 @@ boolean
 {
     switch (btyp) {
     case NCX_BT_BITS:
-	return FALSE;
+        return FALSE;
     case NCX_BT_ENUM:
     case NCX_BT_BOOLEAN:
     case NCX_BT_INT8:
@@ -4511,19 +4511,19 @@ boolean
     case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
     case NCX_BT_STRING:   /*** really NMTOKEN, not string ***/
-	return TRUE;
+        return TRUE;
     case NCX_BT_BINARY:
     case NCX_BT_INSTANCE_ID:
-	return FALSE;
+        return FALSE;
     case NCX_BT_UNION:
     case NCX_BT_LEAFREF:
     case NCX_BT_EMPTY:
-	return FALSE;
+        return FALSE;
     case NCX_BT_ANY:
     case NCX_BT_NONE:
         return FALSE;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
         return FALSE;
     }
 }  /* typ_ok_for_xsdlist */
@@ -4548,20 +4548,20 @@ const xmlChar *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     pathstr = NULL;
 
     if (typ_get_basetype(typdef) != NCX_BT_LEAFREF) {
-	return NULL;
+        return NULL;
     }
 
     tdef = typ_get_cbase_typdef(typdef);
     if (tdef && tdef->def.simple.xleafref) {
-	pathstr = tdef->def.simple.xleafref->exprstr;
+        pathstr = tdef->def.simple.xleafref->exprstr;
     }
     return pathstr;
 
@@ -4586,20 +4586,20 @@ struct xpath_pcb_t_ *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (typ_get_basetype(typdef) != NCX_BT_LEAFREF) {
-	return NULL;
+        return NULL;
     }
 
     tdef = typ_get_base_typdef(typdef);
     if (tdef && tdef->def.simple.xleafref) {
-	return tdef->def.simple.xleafref;
+        return tdef->def.simple.xleafref;
     } else {
-	return NULL;
+        return NULL;
     }
     /*NOTREACHED*/
 
@@ -4624,16 +4624,16 @@ boolean
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     tdef = typ_get_cbase_typdef(typdef);
     if (tdef) {
-	return tdef->def.simple.constrained;
+        return tdef->def.simple.constrained;
     } else {
-	return FALSE;
+        return FALSE;
     }
     /*NOTREACHED*/
 
@@ -4652,30 +4652,30 @@ boolean
 *********************************************************************/
 void
     typ_set_xref_typdef (typ_def_t *typdef,
-			 typ_def_t *target)
+                         typ_def_t *target)
 {
     typ_def_t        *tdef;
     ncx_btype_t       btyp;
 
 #ifdef DEBUG
     if (!typdef || !target) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     btyp = typ_get_basetype(typdef);
     
     if (!(btyp == NCX_BT_LEAFREF || btyp == NCX_BT_INSTANCE_ID)) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
 
     tdef = typ_get_base_typdef(typdef);
     if (tdef && tdef->class == NCX_CL_SIMPLE) {
-	tdef->def.simple.xrefdef = target;
+        tdef->def.simple.xrefdef = target;
     } else {
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
     }
 
 }   /* typ_set_xref_typdef */
@@ -4702,16 +4702,16 @@ typ_def_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     btyp = typ_get_basetype(typdef);
     
     if (!(btyp == NCX_BT_LEAFREF || btyp == NCX_BT_INSTANCE_ID)) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 
     tdef = typ_get_base_typdef(typdef);
@@ -4723,8 +4723,8 @@ typ_def_t *
             return tdef->def.simple.xrefdef;
         }
     } else {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 
 }   /* typ_get_xref_typdef */
@@ -4749,63 +4749,63 @@ boolean
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     if (!dlq_empty(&typdef->appinfoQ)) {
-	return TRUE;
+        return TRUE;
     }
 
     switch (typdef->class) {
     case NCX_CL_BASE:
-	return FALSE;
+        return FALSE;
     case NCX_CL_SIMPLE:
-	switch (typdef->def.simple.btyp) {
-	case NCX_BT_UNION:
-	case NCX_BT_BITS:
-	case NCX_BT_ENUM:
-	    return TRUE;
-	case NCX_BT_EMPTY:
-	case NCX_BT_BOOLEAN:
-	case NCX_BT_INSTANCE_ID:
-	    return FALSE;
-	case NCX_BT_INT8:
-	case NCX_BT_INT16:
-	case NCX_BT_INT32:
-	case NCX_BT_INT64:
-	case NCX_BT_UINT8:
-	case NCX_BT_UINT16:
-	case NCX_BT_UINT32:
-	case NCX_BT_UINT64:
-	case NCX_BT_FLOAT64:
-	    return !dlq_empty(&typdef->def.simple.range.rangeQ);
-	case NCX_BT_DECIMAL64:
-	    return TRUE;
-	case NCX_BT_STRING:
-	case NCX_BT_BINARY:
-	    if (!dlq_empty(&typdef->def.simple.range.rangeQ)) {
-		return TRUE;
-	    }
-	    return !dlq_empty(&typdef->def.simple.valQ);
-	case NCX_BT_SLIST:
-	case NCX_BT_LEAFREF:
-	case NCX_BT_IDREF:
-	    return TRUE;
-	case NCX_BT_NONE:
-	default:
-	    return FALSE;
-	}
+        switch (typdef->def.simple.btyp) {
+        case NCX_BT_UNION:
+        case NCX_BT_BITS:
+        case NCX_BT_ENUM:
+            return TRUE;
+        case NCX_BT_EMPTY:
+        case NCX_BT_BOOLEAN:
+        case NCX_BT_INSTANCE_ID:
+            return FALSE;
+        case NCX_BT_INT8:
+        case NCX_BT_INT16:
+        case NCX_BT_INT32:
+        case NCX_BT_INT64:
+        case NCX_BT_UINT8:
+        case NCX_BT_UINT16:
+        case NCX_BT_UINT32:
+        case NCX_BT_UINT64:
+        case NCX_BT_FLOAT64:
+            return !dlq_empty(&typdef->def.simple.range.rangeQ);
+        case NCX_BT_DECIMAL64:
+            return TRUE;
+        case NCX_BT_STRING:
+        case NCX_BT_BINARY:
+            if (!dlq_empty(&typdef->def.simple.range.rangeQ)) {
+                return TRUE;
+            }
+            return !dlq_empty(&typdef->def.simple.valQ);
+        case NCX_BT_SLIST:
+        case NCX_BT_LEAFREF:
+        case NCX_BT_IDREF:
+            return TRUE;
+        case NCX_BT_NONE:
+        default:
+            return FALSE;
+        }
     case NCX_CL_COMPLEX:
-	return TRUE;
+        return TRUE;
     case NCX_CL_NAMED:
-	return (typdef->def.named.newtyp) ? TRUE : FALSE;
+        return (typdef->def.named.newtyp) ? TRUE : FALSE;
     case NCX_CL_REF:
-	return FALSE;
+        return FALSE;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
     }
 
 }   /* typ_has_subclauses */
@@ -4829,13 +4829,13 @@ typ_idref_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (typ_get_basetype(typdef) != NCX_BT_IDREF) {
-	return NULL;
+        return NULL;
     }
 
     basetypdef = typ_get_base_typdef(typdef);
@@ -4863,13 +4863,13 @@ const typ_idref_t *
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (typ_get_basetype(typdef) != NCX_BT_IDREF) {
-	return NULL;
+        return NULL;
     }
 
     basetypdef = typ_get_cbase_typdef(typdef);
@@ -4897,13 +4897,13 @@ uint8
 
 #ifdef DEBUG
     if (!typdef) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
     if (typ_get_basetype(typdef) != NCX_BT_DECIMAL64) {
-	return 0;
+        return 0;
     }
 
     basetypdef = typ_get_cbase_typdef(typdef);
@@ -4926,20 +4926,20 @@ uint8
 *********************************************************************/
 status_t
     typ_set_fraction_digits (typ_def_t  *typdef,
-			     uint8 digits)
+                             uint8 digits)
 {
 #ifdef DEBUG
     if (!typdef) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (typdef->class != NCX_CL_SIMPLE) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
     
     if (digits < TYP_DEC64_MIN_DIGITS ||
-	digits > TYP_DEC64_MAX_DIGITS) {
-	return ERR_NCX_INVALID_VALUE;
+        digits > TYP_DEC64_MAX_DIGITS) {
+        return ERR_NCX_INVALID_VALUE;
     }
 
     typdef->def.simple.digits = digits;
@@ -4965,7 +4965,7 @@ uint32
 {
 #ifdef DEBUG
     if (!typ) { 
-	SET_ERROR(ERR_INTERNAL_PTR);
+        SET_ERROR(ERR_INTERNAL_PTR);
         return 0;
     }
 #endif
@@ -4991,7 +4991,7 @@ uint32
 {
 #ifdef DEBUG
     if (!typdef) { 
-	SET_ERROR(ERR_INTERNAL_PTR);
+        SET_ERROR(ERR_INTERNAL_PTR);
         return 0;
     }
 #endif

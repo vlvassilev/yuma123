@@ -67,15 +67,15 @@ date         init     comment
 
 
 /********************************************************************
-*								    *
-*			     T Y P E S				    *
-*								    *
+*                                                                   *
+*                            T Y P E S                              *
+*                                                                   *
 *********************************************************************/
 
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -106,8 +106,8 @@ date         init     comment
 *********************************************************************/
 static status_t
     get_attrs (xmlTextReaderPtr reader,
-		   xml_attrs_t  *attrs,
-		   boolean nserr)
+                   xml_attrs_t  *attrs,
+                   boolean nserr)
 {
     int            i, cnt, ret;
     xmlChar       *value;
@@ -122,63 +122,63 @@ static status_t
     /* check the attribute count first */
     cnt = xmlTextReaderAttributeCount(reader);
     if (cnt==0) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     /* move through the list of attributes */
     for (i=0, done=FALSE; i<cnt && !done; i++) {
-	res = NO_ERR;
-	name = NULL;
-	value = NULL;
-	badns = NULL;
-	plen = 0;
-	nsid = 0;
+        res = NO_ERR;
+        name = NULL;
+        value = NULL;
+        badns = NULL;
+        plen = 0;
+        nsid = 0;
 
-	/* get the next attribute */
-	if (i==0) {
-	    ret = xmlTextReaderMoveToFirstAttribute(reader);
-	} else {
-	    ret = xmlTextReaderMoveToNextAttribute(reader);
-	}
-	if (ret != 1) {
-	    res = ERR_XML_READER_INTERNAL;
-	    done = TRUE;
-	} else {
-	    /* get the attribute name */
-	    name = xmlTextReaderConstName(reader);
-	    if (!name) {
-		res = ERR_XML_READER_NULLNAME;
-	    } else {
-		value = NULL;
-		res = xml_check_ns(reader, name, &nsid, &plen, &badns);
-		if (!nserr && res != NO_ERR) {
-		    nsid = xmlns_inv_id();
-		    plen = 0;
-		    res = NO_ERR;
-		}
-		
-		/* get the attribute value even if a NS error */
-		value = xmlTextReaderValue(reader);
-		if (value) {
-		    /* save the values as received, may be QName 
-		     * only error that can occur is a malloc fail
-		     */
-		    (void)xml_add_qattr(attrs, nsid, 
-					name, plen, 
-					value, &res);
-		    xmlFree(value);
-		} else {
-		    res = ERR_XML_READER_NULLVAL;
-		}
-	    }
-	}
+        /* get the next attribute */
+        if (i==0) {
+            ret = xmlTextReaderMoveToFirstAttribute(reader);
+        } else {
+            ret = xmlTextReaderMoveToNextAttribute(reader);
+        }
+        if (ret != 1) {
+            res = ERR_XML_READER_INTERNAL;
+            done = TRUE;
+        } else {
+            /* get the attribute name */
+            name = xmlTextReaderConstName(reader);
+            if (!name) {
+                res = ERR_XML_READER_NULLNAME;
+            } else {
+                value = NULL;
+                res = xml_check_ns(reader, name, &nsid, &plen, &badns);
+                if (!nserr && res != NO_ERR) {
+                    nsid = xmlns_inv_id();
+                    plen = 0;
+                    res = NO_ERR;
+                }
+                
+                /* get the attribute value even if a NS error */
+                value = xmlTextReaderValue(reader);
+                if (value) {
+                    /* save the values as received, may be QName 
+                     * only error that can occur is a malloc fail
+                     */
+                    (void)xml_add_qattr(attrs, nsid, 
+                                        name, plen, 
+                                        value, &res);
+                    xmlFree(value);
+                } else {
+                    res = ERR_XML_READER_NULLVAL;
+                }
+            }
+        }
     }
 
     /* reset the current node to where we started */
     ret = xmlTextReaderMoveToElement(reader);
     if (ret != 1 && res==NO_ERR) {
-	res = ERR_XML_READER_INTERNAL;
-    }	
+        res = ERR_XML_READER_INTERNAL;
+    }   
 
     return res;
 
@@ -202,9 +202,9 @@ static status_t
 *********************************************************************/
 static status_t 
     mconsume_node (xmlTextReaderPtr reader,
-		   xml_node_t  *node,
-		   boolean nserr,
-		   boolean adv)     
+                   xml_node_t  *node,
+                   boolean nserr,
+                   boolean adv)     
 {
     int             ret, nodetyp;
     const xmlChar  *str, *badns;
@@ -221,58 +221,58 @@ static status_t
 
     /* loop past any unused xmlTextReader node types */
     while (!done) {
-	if (adv) {
-	    /* advance the node pointer */
-	    ret = xmlTextReaderRead(reader);
-	    if (ret != 1) {
-		/* do not treat this as an internal error */
-		return ERR_XML_READER_EOF;
-	    }
-	} else {
-	    /* make sure no 2nd pass through the loop */
-	    done = TRUE;
-	}
+        if (adv) {
+            /* advance the node pointer */
+            ret = xmlTextReaderRead(reader);
+            if (ret != 1) {
+                /* do not treat this as an internal error */
+                return ERR_XML_READER_EOF;
+            }
+        } else {
+            /* make sure no 2nd pass through the loop */
+            done = TRUE;
+        }
 
-	/* get the node depth to match the end node correctly */
-	node->depth = xmlTextReaderDepth(reader);
-	if (node->depth == -1) {
-	    /* this never actaully happens */
-	    SET_ERROR(ERR_XML_READER_INTERNAL);
-	    node->depth = 0;
-	}
+        /* get the node depth to match the end node correctly */
+        node->depth = xmlTextReaderDepth(reader);
+        if (node->depth == -1) {
+            /* this never actaully happens */
+            SET_ERROR(ERR_XML_READER_INTERNAL);
+            node->depth = 0;
+        }
 
-	/* get the internal nodetype, check it and convert it */
-	nodetyp = xmlTextReaderNodeType(reader);
-	switch (nodetyp) {
-	case XML_ELEMENT_NODE:
-	    /* classify element as empty or start */
-	    if (xmlTextReaderIsEmptyElement(reader)) {
-		node->nodetyp = XML_NT_EMPTY;
-	    } else {
-		node->nodetyp = XML_NT_START;
-	    }
-	    done = TRUE;
-	    break;
-	case XML_ELEMENT_DECL:
-	    node->nodetyp = XML_NT_END;
-	    done = TRUE;
-	    break;
-	case XML_TEXT_NODE:
+        /* get the internal nodetype, check it and convert it */
+        nodetyp = xmlTextReaderNodeType(reader);
+        switch (nodetyp) {
+        case XML_ELEMENT_NODE:
+            /* classify element as empty or start */
+            if (xmlTextReaderIsEmptyElement(reader)) {
+                node->nodetyp = XML_NT_EMPTY;
+            } else {
+                node->nodetyp = XML_NT_START;
+            }
+            done = TRUE;
+            break;
+        case XML_ELEMENT_DECL:
+            node->nodetyp = XML_NT_END;
+            done = TRUE;
+            break;
+        case XML_TEXT_NODE:
      /* case XML_DTD_NODE: */
-	    node->nodetyp = XML_NT_STRING;
-	    done = TRUE;
-	    break;
-	default:
-	    /* unused node type -- keep trying */
+            node->nodetyp = XML_NT_STRING;
+            done = TRUE;
+            break;
+        default:
+            /* unused node type -- keep trying */
 #ifdef XML_UTIL_DEBUG
-	    log_debug3("\nxml_consume_node: skip unused node (%s)",
-		   xml_get_node_name(nodetyp));
+            log_debug3("\nxml_consume_node: skip unused node (%s)",
+                   xml_get_node_name(nodetyp));
 #endif
-	    if (done) {
-		/* re-get of current node should not fail */
-		res = ERR_XML_READER_INTERNAL;
-	    }
-	}
+            if (done) {
+                /* re-get of current node should not fail */
+                res = ERR_XML_READER_INTERNAL;
+            }
+        }
     }
 
     /* finish the node, depending on its type */
@@ -280,73 +280,73 @@ static status_t
     case XML_NT_START:
     case XML_NT_END:
     case XML_NT_EMPTY:
-	/* get the element QName */
-	str = xmlTextReaderConstName(reader);
-	if (!str) {
-	    /* this never really happens */
-	    SET_ERROR(ERR_XML_READER_NULLNAME);
-	    str = (const xmlChar *)"null";
-	}
-	node->qname = (const xmlChar *)str;
+        /* get the element QName */
+        str = xmlTextReaderConstName(reader);
+        if (!str) {
+            /* this never really happens */
+            SET_ERROR(ERR_XML_READER_NULLNAME);
+            str = (const xmlChar *)"null";
+        }
+        node->qname = (const xmlChar *)str;
 
-	/* check for namespace prefix in the name 
-	 * only error returned is unknown-namespace 
-	 */
-	len = 0;
-	res = xml_check_ns(reader, str, &node->nsid, &len, &badns);
-	if (!nserr && res != NO_ERR) {
-	    node->nsid = xmlns_inv_id();
-	    res = NO_ERR;
-	}
-	    
-	/* set the element name to the char after the prefix, if any */
-	node->elname = (const xmlChar *)(str+len);
-	
-	/* get all the attributes, except for XML_NT_END */
-	if (node->nodetyp != XML_NT_END) {
-	    res2 = get_attrs(reader, &node->attrs, nserr);
-	}
+        /* check for namespace prefix in the name 
+         * only error returned is unknown-namespace 
+         */
+        len = 0;
+        res = xml_check_ns(reader, str, &node->nsid, &len, &badns);
+        if (!nserr && res != NO_ERR) {
+            node->nsid = xmlns_inv_id();
+            res = NO_ERR;
+        }
+            
+        /* set the element name to the char after the prefix, if any */
+        node->elname = (const xmlChar *)(str+len);
+        
+        /* get all the attributes, except for XML_NT_END */
+        if (node->nodetyp != XML_NT_END) {
+            res2 = get_attrs(reader, &node->attrs, nserr);
+        }
 
-	/* Set the node owner */
-	if (node->nsid) {
-	    node->module = xmlns_get_module(node->nsid);
-	} else {
-	    /* no entry, use the default owner (netconf) */
-	    node->module = NCX_DEF_MODULE;
-	}
-	break;
+        /* Set the node owner */
+        if (node->nsid) {
+            node->module = xmlns_get_module(node->nsid);
+        } else {
+            /* no entry, use the default owner (netconf) */
+            node->module = NCX_DEF_MODULE;
+        }
+        break;
     case XML_NT_STRING:
-	/* get the text value */
-	node->simval = NULL;
-	valstr = xmlTextReaderValue(reader);
-	if (valstr) {
-	    node->simfree = xml_copy_clean_string(valstr);
-	    if (node->simfree) {
-		node->simlen = xml_strlen(node->simfree);
-		node->simval = (const xmlChar *)node->simfree;
-	    }
+        /* get the text value */
+        node->simval = NULL;
+        valstr = xmlTextReaderValue(reader);
+        if (valstr) {
+            node->simfree = xml_copy_clean_string(valstr);
+            if (node->simfree) {
+                node->simlen = xml_strlen(node->simfree);
+                node->simval = (const xmlChar *)node->simfree;
+            }
 
-	    /* see if this is a QName string; if so save the NSID */
-	    xml_check_qname_content(reader, node);
+            /* see if this is a QName string; if so save the NSID */
+            xml_check_qname_content(reader, node);
 
-	    xmlFree(valstr);
-	}
-	if (!node->simval) {
-	    /* prevent a NULL ptr reference */
-	    node->simval = (const xmlChar *)"";
-	    node->simlen = 0;
-	    node->simfree = NULL;
-	}
-	break;
+            xmlFree(valstr);
+        }
+        if (!node->simval) {
+            /* prevent a NULL ptr reference */
+            node->simval = (const xmlChar *)"";
+            node->simlen = 0;
+            node->simfree = NULL;
+        }
+        break;
     default:
-	break;
+        break;
     }
 
 #ifdef XML_UTIL_DEBUG
     log_debug3("\nmgr_xml_consume_node: return (%d)", 
-	   (res==NO_ERR) ? res2 : res);
+           (res==NO_ERR) ? res2 : res);
     if (LOGDEBUG3) {
-	xml_dump_node(node);
+        xml_dump_node(node);
     }
 #endif
 
@@ -419,7 +419,7 @@ static status_t
 *********************************************************************/
 status_t 
     mgr_xml_consume_node (xmlTextReaderPtr reader,
-			  xml_node_t      *node)
+                          xml_node_t      *node)
 {
     return mconsume_node(reader, node, TRUE, TRUE);
 
@@ -429,7 +429,7 @@ status_t
 
 status_t 
     mgr_xml_consume_node_nons (xmlTextReaderPtr reader,
-			       xml_node_t      *node)
+                               xml_node_t      *node)
 {
     return mconsume_node(reader, node, FALSE, TRUE);
 
@@ -437,7 +437,7 @@ status_t
 
 status_t 
     mgr_xml_consume_node_noadv (xmlTextReaderPtr reader,
-				xml_node_t      *node)
+                                xml_node_t      *node)
 {
     return mconsume_node(reader, node, TRUE, FALSE);
 
@@ -464,7 +464,7 @@ status_t
 *********************************************************************/
 status_t 
     mgr_xml_skip_subtree (xmlTextReaderPtr reader,
-			  const xml_node_t *startnode)
+                          const xml_node_t *startnode)
 {
     xml_node_t       node;
     const xmlChar   *qname, *elname, *badns;
@@ -476,7 +476,7 @@ status_t
 
 #ifdef DEBUG
     if (!reader || !startnode) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -484,85 +484,85 @@ status_t
 
     switch (startnode->nodetyp) {
     case XML_NT_START:
-	break;
+        break;
     case XML_NT_EMPTY:
-	return NO_ERR;
+        return NO_ERR;
     case XML_NT_STRING:
-	justone = TRUE;
-	break;
+        justone = TRUE;
+        break;
     case XML_NT_END:
-	return NO_ERR;
+        return NO_ERR;
     default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
     xml_init_node(&node);
     res = mgr_xml_consume_node_noadv(reader, &node);
     if (res == NO_ERR) {
-	res = xml_endnode_match(startnode, &node);
-	if (res == NO_ERR) {
-	    xml_clean_node(&node);
-	    return NO_ERR;
-	}
+        res = xml_endnode_match(startnode, &node);
+        if (res == NO_ERR) {
+            xml_clean_node(&node);
+            return NO_ERR;
+        }
     }
 
     xml_clean_node(&node);
     if (justone) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     done = FALSE;
     while (!done) {
 
-	/* advance the node pointer */
-	ret = xmlTextReaderRead(reader);
-	if (ret != 1) {
-	    /* fatal error */
-	    return ERR_XML_READER_EOF;
-	}
+        /* advance the node pointer */
+        ret = xmlTextReaderRead(reader);
+        if (ret != 1) {
+            /* fatal error */
+            return ERR_XML_READER_EOF;
+        }
 
-	/* get the node depth to match the end node correctly */
-	depth = xmlTextReaderDepth(reader);
-	if (depth == -1) {
-	    /* not sure if this can happen, treat as fatal error */
-	    return ERR_XML_READER_INTERNAL;
-	} else if (depth <= startnode->depth) {
-	    /* this depth override will cause errors to be ignored
+        /* get the node depth to match the end node correctly */
+        depth = xmlTextReaderDepth(reader);
+        if (depth == -1) {
+            /* not sure if this can happen, treat as fatal error */
+            return ERR_XML_READER_INTERNAL;
+        } else if (depth <= startnode->depth) {
+            /* this depth override will cause errors to be ignored
              *   - wrong namespace in matching end node
              *   - unknown namespace in matching end node
-	     *   - wrong name in 'matching' end node
-	     */
-	    done = TRUE;
-	}
+             *   - wrong name in 'matching' end node
+             */
+            done = TRUE;
+        }
 
-	/* get the internal nodetype, check it and convert it */
-	nodetyp = xmlTextReaderNodeType(reader);
+        /* get the internal nodetype, check it and convert it */
+        nodetyp = xmlTextReaderNodeType(reader);
 
-	/* get the element QName */
-	qname = xmlTextReaderConstName(reader);
-	if (qname) {
-	    /* check for namespace prefix in the name 
-	     * only error is 'unregistered namespace ID'
-	     * which doesn't matter in this case
-	     */
-	    nsid = 0;
-	    (void)xml_check_ns(reader, qname, &nsid, &len, &badns);
+        /* get the element QName */
+        qname = xmlTextReaderConstName(reader);
+        if (qname) {
+            /* check for namespace prefix in the name 
+             * only error is 'unregistered namespace ID'
+             * which doesn't matter in this case
+             */
+            nsid = 0;
+            (void)xml_check_ns(reader, qname, &nsid, &len, &badns);
 
-	    /* set the element name to the char after the prefix */
-	    elname = qname+len;
-	} else {
-	    qname = (const xmlChar *)"";
-	}
+            /* set the element name to the char after the prefix */
+            elname = qname+len;
+        } else {
+            qname = (const xmlChar *)"";
+        }
 
-	/* check the normal case to see if the search is done */
-	if (depth == startnode->depth &&
-	    !xml_strcmp(qname, startnode->qname) &&
-	    nodetyp == XML_ELEMENT_DECL) {
-	    done = TRUE;
-	}
+        /* check the normal case to see if the search is done */
+        if (depth == startnode->depth &&
+            !xml_strcmp(qname, startnode->qname) &&
+            nodetyp == XML_ELEMENT_DECL) {
+            done = TRUE;
+        }
 
 #ifdef XML_UTIL_DEBUG
-	log_debug3("\nxml_skip: %s L:%d T:%s",
-	       qname, depth, xml_get_node_name(nodetyp));
+        log_debug3("\nxml_skip: %s L:%d T:%s",
+               qname, depth, xml_get_node_name(nodetyp));
 #endif
     }
 

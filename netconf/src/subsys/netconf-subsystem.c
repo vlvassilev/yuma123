@@ -1,6 +1,6 @@
 /*  FILE: netconf-subsystem.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -77,7 +77,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -145,126 +145,126 @@ static status_t
     con = getenv("SSH_CONNECTION");
     if (!con) {
 #ifdef SUBSYS_TRACE
-	if (errfile) {
-	    fprintf(errfile, "\nGet SSH_CONNECTION variable failed\n");
-	}
+        if (errfile) {
+            fprintf(errfile, "\nGet SSH_CONNECTION variable failed\n");
+        }
 #endif
-	return ERR_INTERNAL_VAL;
+        return ERR_INTERNAL_VAL;
     }
 
     /* get the client addr */
     client_addr = strdup(con);
     if (!client_addr) {
 #ifdef SUBSYS_TRACE
-	if (errfile) {
-	    fprintf(errfile, "\nStrdup failed\n");
-	}
+        if (errfile) {
+            fprintf(errfile, "\nStrdup failed\n");
+        }
 #endif
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     cp = strchr(client_addr, ' ');
     if (!cp) {
 #ifdef SUBSYS_TRACE
-	if (errfile) {
-	    fprintf(errfile, "\nMalformed SSH_CONNECTION variable\n");
-	}
+        if (errfile) {
+            fprintf(errfile, "\nMalformed SSH_CONNECTION variable\n");
+        }
 #endif
-	return ERR_INTERNAL_VAL;
+        return ERR_INTERNAL_VAL;
     } else {
-	*cp = 0;
+        *cp = 0;
     }
 
     /* get the server connect port */
     cp = strrchr(con, ' ');
     if (cp && cp[1]) {
-	port = strdup(++cp);
+        port = strdup(++cp);
     }
     if (!port) {
 #ifdef SUBSYS_TRACE
-	if (errfile) {
-	    fprintf(errfile, "\nMalformed SSH_CONNECTION variable\n");
-	}
+        if (errfile) {
+            fprintf(errfile, "\nMalformed SSH_CONNECTION variable\n");
+        }
 #endif
-	return ERR_INTERNAL_VAL;
+        return ERR_INTERNAL_VAL;
     }
-	
+        
     /* get the username */
     cp = getenv("USER");
     if (!cp) {
 #ifdef SUBSYS_TRACE
-	if (errfile) {
-	    fprintf(errfile, "\nGet USER variable failed\n");
-	}
+        if (errfile) {
+            fprintf(errfile, "\nGet USER variable failed\n");
+        }
 #endif
-	return ERR_INTERNAL_VAL;
+        return ERR_INTERNAL_VAL;
     }
     user = strdup(cp);
     if (!user) {
 #ifdef SUBSYS_TRACE
-	if (errfile) {
-	    fprintf(errfile, "\nStrdup failed\n");
-	}
+        if (errfile) {
+            fprintf(errfile, "\nStrdup failed\n");
+        }
 #endif
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     /* make a socket to connect to the NCX server */
     ncxsock = socket(PF_LOCAL, SOCK_STREAM, 0);
     if (ncxsock < 0) {
 #ifdef SUBSYS_TRACE
-	if (errfile) {
-	    fprintf(errfile, "\nNCX Socket failed\n");
-	}
+        if (errfile) {
+            fprintf(errfile, "\nNCX Socket failed\n");
+        }
 #endif
-	return ERR_NCX_CONNECT_FAILED;
+        return ERR_NCX_CONNECT_FAILED;
     } 
     ncxname.sun_family = AF_LOCAL;
     strncpy(ncxname.sun_path, 
-	    NCXSERVER_SOCKNAME, 
-	    sizeof(ncxname.sun_path));
+            NCXSERVER_SOCKNAME, 
+            sizeof(ncxname.sun_path));
 
     /* try to connect to the NCX server */
     ret = connect(ncxsock,
-		  (const struct sockaddr *)&ncxname,
-		  SUN_LEN(&ncxname));
+                  (const struct sockaddr *)&ncxname,
+                  SUN_LEN(&ncxname));
     if (ret != 0) {
 #ifdef SUBSYS_TRACE
-	if (errfile) {
-	    fprintf(errfile, "\nNCX Socket connect failed\n");
-	}
+        if (errfile) {
+            fprintf(errfile, "\nNCX Socket connect failed\n");
+        }
 #endif
-	return ERR_NCX_OPERATION_FAILED;
+        return ERR_NCX_OPERATION_FAILED;
     } else {
 #ifdef SUBSYS_TRACE
-	if (errfile) {
-	    fprintf(errfile, 
-		    "\nNCX Socket connect OK on FD %d\n",
-		    ncxsock);
-	}
+        if (errfile) {
+            fprintf(errfile, 
+                    "\nNCX Socket connect OK on FD %d\n",
+                    ncxsock);
+        }
 #endif
-	ncxconnect = TRUE;
+        ncxconnect = TRUE;
     }
 
 #ifdef USE_NONBLOCKING_IO
     /* set non-blocking IO */
     if (fcntl(ncxsock, F_SETFD, O_NONBLOCK)) {
 #ifdef SUBSYS_TRACE
-	if (errfile) {
-	    fprintf(errfile, "\nfnctl failed");
-	}
+        if (errfile) {
+            fprintf(errfile, "\nfnctl failed");
+        }
 #endif
     }
 #endif
 
 #ifdef SUBSYS_TRACE
     if (infile) {
-	fflush(infile);
+        fflush(infile);
     }
     if (outfile) {
-	fflush(outfile);
+        fflush(outfile);
     }
     if (errfile) {
-	fflush(errfile);
+        fflush(errfile);
     }
 #endif
 
@@ -284,24 +284,24 @@ static void
     cleanup_subsys (void)
 {
     if (client_addr) {
-	m__free(client_addr);
+        m__free(client_addr);
     }
     if (user) {
-	m__free(user);
+        m__free(user);
     }
     if (ncxconnect) {
-	close(ncxsock);
+        close(ncxsock);
     }
 
 #ifdef SUBSYS_TRACE
     if (infile) {
-	fclose(infile);
+        fclose(infile);
     }
     if (outfile) {
-	fclose(outfile);
+        fclose(outfile);
     }
     if (errfile) {
-	fclose(errfile);
+        fclose(errfile);
     }
 #endif
 
@@ -326,14 +326,14 @@ static status_t
 
     memset(msgbuff, 0x0, BUFFLEN);
     sprintf(msgbuff, 
-	    connectmsg,
-	    (const char *)XML_START_MSG, 
-	    NCX_URN, 
-	    user, 
-	    client_addr, 
-	    NCX_SERVER_MAGIC, 
-	    port, 
-	    NC_SSH_END);
+            connectmsg,
+            (const char *)XML_START_MSG, 
+            NCX_URN, 
+            user, 
+            client_addr, 
+            NCX_SERVER_MAGIC, 
+            port, 
+            NC_SSH_END);
 
     res = send_buff(ncxsock, msgbuff, strlen(msgbuff));
     return res;
@@ -376,176 +376,176 @@ static status_t
     while (!done) {
 
 #ifdef SUBSYS_TRACE
-	if (infile && indirty) {
-	    fflush(infile);
-	    indirty = 0;
-	}
-	if (outfile && outdirty) {
-	    fflush(outfile);
-	    outdirty = 0;
-	}
-	if (errfile && errdirty) {
-	    fflush(errfile);
-	    errdirty = 0;
-	}
+        if (infile && indirty) {
+            fflush(infile);
+            indirty = 0;
+        }
+        if (outfile && outdirty) {
+            fflush(outfile);
+            outdirty = 0;
+        }
+        if (errfile && errdirty) {
+            fflush(errfile);
+            errdirty = 0;
+        }
 #else
-	usleep(USLEEP_CNT);
+        usleep(USLEEP_CNT);
 #endif
 
-	FD_SET(STDIN_FILENO, &fds);
-	FD_SET(ncxsock, &fds);
+        FD_SET(STDIN_FILENO, &fds);
+        FD_SET(ncxsock, &fds);
 
-	ret = select(FD_SETSIZE, &fds, NULL, NULL, NULL);
-	if (ret < 0) {
+        ret = select(FD_SETSIZE, &fds, NULL, NULL, NULL);
+        if (ret < 0) {
 #ifdef SUBSYS_TRACE
-	    if (errfile) {
-		fprintf(errfile, "\nnetconf select failed (%d)", ret);
-		errdirty = 1;
-	    }
+            if (errfile) {
+                fprintf(errfile, "\nnetconf select failed (%d)", ret);
+                errdirty = 1;
+            }
 #endif
-	    res = ERR_NCX_OPERATION_FAILED;
-	    done = TRUE;
-	    continue;
-	} else if (ret == 0) {
+            res = ERR_NCX_OPERATION_FAILED;
+            done = TRUE;
+            continue;
+        } else if (ret == 0) {
 #ifdef SUBSYS_TRACE
-	    if (errfile) {
-		fprintf(errfile, "\nnetconf select zero exit");
-		errdirty = 1;
-	    }
+            if (errfile) {
+                fprintf(errfile, "\nnetconf select zero exit");
+                errdirty = 1;
+            }
 #endif
-	    res = NO_ERR;
-	    done = TRUE;
-	    continue;
-	}
+            res = NO_ERR;
+            done = TRUE;
+            continue;
+        }
 
-	/* check any input from client */
-	if (FD_ISSET(STDIN_FILENO, &fds)) {
-	    retcnt = read(STDIN_FILENO, msgbuff, (size_t)BUFFLEN);
-	    if (retcnt < 0) {
+        /* check any input from client */
+        if (FD_ISSET(STDIN_FILENO, &fds)) {
+            retcnt = read(STDIN_FILENO, msgbuff, (size_t)BUFFLEN);
+            if (retcnt < 0) {
 #ifdef SUBSYS_TRACE
-		if (errfile) {
-		    fprintf(errfile, "\nnetconf client read failed (%d)",
-			    retcnt);
-		    errdirty = 1;
-		}
+                if (errfile) {
+                    fprintf(errfile, "\nnetconf client read failed (%d)",
+                            retcnt);
+                    errdirty = 1;
+                }
 #endif
-		res = ERR_NCX_READ_FAILED;
-		done = TRUE;
-		continue;
-	    } else if (retcnt == 0) {
+                res = ERR_NCX_READ_FAILED;
+                done = TRUE;
+                continue;
+            } else if (retcnt == 0) {
 #ifdef SUBSYS_TRACE
-		if (errfile) {
-		    fprintf(errfile, "\nnetconf client closed connection");
-		    errdirty = 1;
-		}
+                if (errfile) {
+                    fprintf(errfile, "\nnetconf client closed connection");
+                    errdirty = 1;
+                }
 #endif
-		res = NO_ERR;
-		done = TRUE;
-		continue;
-	    }
+                res = NO_ERR;
+                done = TRUE;
+                continue;
+            }
 
 #ifdef SUBSYS_TRACE
-	    if (errfile && errok) {
-		/* not an error */
-		fprintf(errfile, "\nnetconf read client (%d)", retcnt);
-		errdirty = 1;
-	    }
-	    if (infile) {
-		for (cnt = 0; cnt<retcnt; cnt++) {
-		    fprintf(infile, "%c", msgbuff[cnt]);
-		}
-		indirty = 1;
-	    }
+            if (errfile && errok) {
+                /* not an error */
+                fprintf(errfile, "\nnetconf read client (%d)", retcnt);
+                errdirty = 1;
+            }
+            if (infile) {
+                for (cnt = 0; cnt<retcnt; cnt++) {
+                    fprintf(infile, "%c", msgbuff[cnt]);
+                }
+                indirty = 1;
+            }
 #else
-	    usleep(USLEEP_CNT);
+            usleep(USLEEP_CNT);
 #endif
 
-	    /* send this buffer to the ncxserver */
-	    res = send_buff(ncxsock, msgbuff, (size_t)retcnt);
-	    if (res != NO_ERR) {
+            /* send this buffer to the ncxserver */
+            res = send_buff(ncxsock, msgbuff, (size_t)retcnt);
+            if (res != NO_ERR) {
 #ifdef SUBSYS_TRACE
-		if (errfile) {
-		    fprintf(errfile, 
-			    "\nnetconf send buff (%d) to ncxserver failed",
-			    retcnt);
-		    errdirty = 1;
-		}
+                if (errfile) {
+                    fprintf(errfile, 
+                            "\nnetconf send buff (%d) to ncxserver failed",
+                            retcnt);
+                    errdirty = 1;
+                }
 #endif
-		done = TRUE;
-		continue;
-	    }
+                done = TRUE;
+                continue;
+            }
 
 #ifdef SUBSYS_TRACE
-	    if (errfile && errok) {
-		/* not an error */
-		fprintf(errfile, "\nnetconf write ncxserver (%d)", retcnt);
-		errdirty = 1;
-	    }
+            if (errfile && errok) {
+                /* not an error */
+                fprintf(errfile, "\nnetconf write ncxserver (%d)", retcnt);
+                errdirty = 1;
+            }
 #else 
-	    usleep(USLEEP_CNT);
+            usleep(USLEEP_CNT);
 #endif
-	}
+        }
 
-	/* check any input from the ncxserver */
-	if (FD_ISSET(ncxsock, &fds)) {
-	    retcnt = read(ncxsock, msgbuff, (size_t)BUFFLEN);
-	    if (retcnt < 0) {
+        /* check any input from the ncxserver */
+        if (FD_ISSET(ncxsock, &fds)) {
+            retcnt = read(ncxsock, msgbuff, (size_t)BUFFLEN);
+            if (retcnt < 0) {
 #ifdef SUBSYS_TRACE
-		if (errfile) {
-		    fprintf(errfile, "\nnetconf read ncxserver failed (%d)",
-			    retcnt);
-		    errdirty = 1;
-		}
+                if (errfile) {
+                    fprintf(errfile, "\nnetconf read ncxserver failed (%d)",
+                            retcnt);
+                    errdirty = 1;
+                }
 #endif
-		res = ERR_NCX_READ_FAILED;
-		done = TRUE;
-		continue;
-	    } else if (retcnt == 0) {
+                res = ERR_NCX_READ_FAILED;
+                done = TRUE;
+                continue;
+            } else if (retcnt == 0) {
 #ifdef SUBSYS_TRACE
-		if (errfile) {
-		    fprintf(errfile, "\nnetconf read ncxserver len 0");
-		    errdirty = 1;
-		}
+                if (errfile) {
+                    fprintf(errfile, "\nnetconf read ncxserver len 0");
+                    errdirty = 1;
+                }
 #endif
 
-		res = NO_ERR;
-		done = TRUE;
-		continue;
-	    }
+                res = NO_ERR;
+                done = TRUE;
+                continue;
+            }
 
 #ifdef SUBSYS_TRACE
-	    if (errfile && errok) {
-		/* not an error */
-		fprintf(errfile, "\nnetconf read ncxserver (%d)", retcnt);
-		errdirty = 1;
-	    }
-	    if (outfile) {
-		for (cnt = 0; cnt<retcnt; cnt++) {
-		    fprintf(outfile, "%c", msgbuff[cnt]);
-		}
-		outdirty = 1;
-	    }
+            if (errfile && errok) {
+                /* not an error */
+                fprintf(errfile, "\nnetconf read ncxserver (%d)", retcnt);
+                errdirty = 1;
+            }
+            if (outfile) {
+                for (cnt = 0; cnt<retcnt; cnt++) {
+                    fprintf(outfile, "%c", msgbuff[cnt]);
+                }
+                outdirty = 1;
+            }
 #endif
-	    /* send this buffer to STDOUT */
-	    res = send_buff(STDOUT_FILENO, msgbuff, (size_t)retcnt);
-	    if (res != NO_ERR) {
+            /* send this buffer to STDOUT */
+            res = send_buff(STDOUT_FILENO, msgbuff, (size_t)retcnt);
+            if (res != NO_ERR) {
 #ifdef SUBSYS_TRACE
-		if (errfile) {
-		    fprintf(errfile, "\nnetconf send buff to client failed");
-		    errdirty = 1;
-		}
+                if (errfile) {
+                    fprintf(errfile, "\nnetconf send buff to client failed");
+                    errdirty = 1;
+                }
 #endif
-		done = TRUE;
-		continue;
-	    }
+                done = TRUE;
+                continue;
+            }
 #ifdef SUBSYS_TRACE
-	    if (errfile && errok) {
-		/* not an error */
-		fprintf(errfile, "\nnetconf write client (%d)", retcnt);
-		errdirty = 1;
-	    }
+            if (errfile && errok) {
+                /* not an error */
+                fprintf(errfile, "\nnetconf write client (%d)", retcnt);
+                errdirty = 1;
+            }
 #endif
-	}
+        }
     }
 
     return res;
@@ -573,38 +573,38 @@ int
 
     res = init_subsys();
     if (res != NO_ERR) {
-	msg = "init failed";
+        msg = "init failed";
     }
 
     if (res == NO_ERR) {
-	res = send_ncxconnect();
-	if (res != NO_ERR) {
-	    msg = "connect failed";
-	}
+        res = send_ncxconnect();
+        if (res != NO_ERR) {
+            msg = "connect failed";
+        }
     }
 
     if (res == NO_ERR) {
-	res = io_loop();
-	if (res != NO_ERR) {
-	    msg = "IO error";
-	}
+        res = io_loop();
+        if (res != NO_ERR) {
+            msg = "IO error";
+        }
     }
 
     if (res != NO_ERR) {
 #ifdef SUBSYS_TRACE
-	if (errfile) {
-	    fprintf(errfile, 
-		    "\nnetconf: %s (%s)", msg, get_error_string(res));
-	}
+        if (errfile) {
+            fprintf(errfile, 
+                    "\nnetconf: %s (%s)", msg, get_error_string(res));
+        }
 #endif
     }
 
     cleanup_subsys();
 
     if (res != NO_ERR) {
-	return 1;
+        return 1;
     } else {
-	return 0;
+        return 0;
     }
 
 } /* main */

@@ -1,6 +1,6 @@
 /*  FILE: xmlns.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -87,7 +87,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -143,7 +143,7 @@ static boolean xmlns_init_done = FALSE;
  *   zero if not valid, non-zero if valid
  */
 #define valid_id(I) ((I)&&((I)<=XMLNS_MAX_NS)&&(xmlns[(I)-1]) && \
-		     (xmlns[(I)-1]->ns_id==(I)))
+                     (xmlns[(I)-1]->ns_id==(I)))
 
 
 
@@ -163,7 +163,7 @@ static xmlns_t *
 
     rec = m__getObj(xmlns_t);
     if (!rec) {
-	return NULL;
+        return NULL;
     }
     memset(rec, 0x0, sizeof(xmlns_t));
     return rec;
@@ -183,13 +183,13 @@ static void
     free_xmlns (xmlns_t *rec)
 {
     if (rec->ns_pfix) {
-	m__free(rec->ns_pfix);
+        m__free(rec->ns_pfix);
     }
     if (rec->ns_name) {
-	m__free(rec->ns_name);
+        m__free(rec->ns_name);
     }
     if (rec->ns_module) {
-	m__free(rec->ns_module);
+        m__free(rec->ns_module);
     }
     m__free(rec);
 
@@ -250,10 +250,10 @@ void
 *********************************************************************/
 status_t 
     xmlns_register_ns (const xmlChar *ns,
-		       const xmlChar *pfix,
-		       const xmlChar *modname,
-		       void *modptr,
-		       xmlns_id_t *ns_id)
+                       const xmlChar *pfix,
+                       const xmlChar *modname,
+                       void *modptr,
+                       xmlns_id_t *ns_id)
 {
     xmlns_t  *rec;
     char      buff[NCX_MAX_NUMLEN+2];
@@ -272,20 +272,20 @@ status_t
     if (pfix) {
         plen = xml_strlen(pfix);
     } else {
-	buff[0] = 'n';
-	sprintf(&buff[1], "%d", xmlns_next_id);
-	pfix = (xmlChar *)buff;
+        buff[0] = 'n';
+        sprintf(&buff[1], "%d", xmlns_next_id);
+        pfix = (xmlChar *)buff;
         plen = xml_strlen(pfix);
     }
 
 #ifdef DEBUG
     if (!nlen || !mlen || !plen) {
-	return ERR_NCX_WRONG_LEN;
+        return ERR_NCX_WRONG_LEN;
     }
 #endif
 
     if (!xmlns_next_id || xmlns_next_id > XMLNS_MAX_NS) {
-	return ERR_TOO_MANY_ENTRIES;
+        return ERR_TOO_MANY_ENTRIES;
     }
 
     /* check duplicate entry */
@@ -296,30 +296,30 @@ status_t
     /* all ok - try to malloc the new entry at the end of the list */
     rec = new_xmlns();
     if (!rec) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     /* copy the prefix string */
     if (pfix) {
-	rec->ns_pfix = xml_strdup(pfix);
-	if (!rec->ns_pfix) {
-	    free_xmlns(rec);
-	    return ERR_INTERNAL_MEM;
-	}
+        rec->ns_pfix = xml_strdup(pfix);
+        if (!rec->ns_pfix) {
+            free_xmlns(rec);
+            return ERR_INTERNAL_MEM;
+        }
     }
 
     /* copy the name namespace URI string */
     rec->ns_name = xml_strdup(ns);
     if (!rec->ns_name) {
-	free_xmlns(rec);
-	return ERR_INTERNAL_MEM;
+        free_xmlns(rec);
+        return ERR_INTERNAL_MEM;
     }
 
     /* copy the name namespace URI string */
     rec->ns_module = xml_strdup(modname);
     if (!rec->ns_module) {
-	free_xmlns(rec);
-	return ERR_INTERNAL_MEM;
+        free_xmlns(rec);
+        return ERR_INTERNAL_MEM;
     }
 
     /* copy the module back-ptr */
@@ -331,38 +331,38 @@ status_t
     /* register the entry in the def_reg hash table */
     res = def_reg_add_ns(rec);
     if (res != NO_ERR) {
-	free_xmlns(rec);
-	return res;
+        free_xmlns(rec);
+        return res;
     }
 
     xmlns[xmlns_next_id-1] = rec;
 
     /* hack: check if this is one of the cached NS IDs */
     if (!xml_strcmp(ns, NC_URN)) {
-	xmlns_ncid = xmlns_next_id;
+        xmlns_ncid = xmlns_next_id;
     } else if (!xml_strcmp(ns, NCX_URN)) {
-	xmlns_ncxid = xmlns_next_id;
+        xmlns_ncxid = xmlns_next_id;
     } else if (!xml_strcmp(ns, NS_URN)) {
-	xmlns_nsid = xmlns_next_id;
+        xmlns_nsid = xmlns_next_id;
     } else if (!xml_strcmp(ns, XSD_URN)) {
-	xmlns_xsid = xmlns_next_id;
+        xmlns_xsid = xmlns_next_id;
     } else if (!xml_strcmp(ns, INVALID_URN)) {
-	xmlns_invid = xmlns_next_id;
+        xmlns_invid = xmlns_next_id;
     } else if (!xml_strcmp(ns, XSI_URN)) {
-	xmlns_xsiid = xmlns_next_id;
+        xmlns_xsiid = xmlns_next_id;
     } else if (!xml_strcmp(ns, XML_URN)) {
-	xmlns_xmlid = xmlns_next_id;
+        xmlns_xmlid = xmlns_next_id;
     } else if (!xml_strcmp(ns, NCN_URN)) {
-	xmlns_ncnid = xmlns_next_id;
+        xmlns_ncnid = xmlns_next_id;
     } else if (!xml_strcmp(ns, YANG_URN)) {
-	xmlns_yangid = xmlns_next_id;
+        xmlns_yangid = xmlns_next_id;
     }
 
     if (LOGDEBUG2) {
-	log_debug2("\nxmlns_reg: id:%2d mod:%s\turi: %s",
-		   rec->ns_id, 
-		   rec->ns_module, 
-		   rec->ns_name);
+        log_debug2("\nxmlns_reg: id:%2d mod:%s\turi: %s",
+                   rec->ns_id, 
+                   rec->ns_module, 
+                   rec->ns_name);
     }
 
     /* bump the next_id after returning the value used */
@@ -386,9 +386,9 @@ const xmlChar *
     xmlns_get_ns_prefix (xmlns_id_t  ns_id)
 {
     if (!valid_id(ns_id)) {
-	return (const xmlChar *)"--";
+        return (const xmlChar *)"--";
     } else {
-	return (const xmlChar *)xmlns[ns_id-1]->ns_pfix;
+        return (const xmlChar *)xmlns[ns_id-1]->ns_pfix;
     }
 } /* xmlns_get_ns_prefix */
 
@@ -407,9 +407,9 @@ const xmlChar *
     xmlns_get_ns_name (xmlns_id_t  ns_id)
 {
     if (!valid_id(ns_id)) {
-	return NULL;
+        return NULL;
     } else {
-	return (const xmlChar *)xmlns[ns_id-1]->ns_name;
+        return (const xmlChar *)xmlns[ns_id-1]->ns_name;
     }
 } /* xmlns_get_ns_name */
 
@@ -433,18 +433,18 @@ xmlns_id_t
 
 #ifdef DEBUG
     if (!modname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return XMLNS_NULL_NS_ID;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return XMLNS_NULL_NS_ID;
     } 
 #endif
 
     for (i=0; i<xmlns_next_id-1; i++) {
-	rec = xmlns[i];
-	if (rec->ns_module) {
+        rec = xmlns[i];
+        if (rec->ns_module) {
             if (!xml_strcmp(rec->ns_module, modname)) {
                 return rec->ns_id;
             }
-	}
+        }
     }
     return XMLNS_NULL_NS_ID;
 
@@ -469,17 +469,17 @@ xmlns_id_t
 
 #ifdef DEBUG
     if (!pfix) {
-	return XMLNS_NULL_NS_ID;
+        return XMLNS_NULL_NS_ID;
     } 
 #endif
 
     for (i=0; i<xmlns_next_id-1; i++) {
-	rec = xmlns[i];
-	if (rec->ns_pfix[0]) {
+        rec = xmlns[i];
+        if (rec->ns_pfix[0]) {
             if (!xml_strcmp(rec->ns_pfix, pfix)) {
                 return rec->ns_id;
             }
-	}
+        }
     }
     return XMLNS_NULL_NS_ID;
 
@@ -503,8 +503,8 @@ xmlns_id_t
 
 #ifdef DEBUG
     if (!name) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return XMLNS_NULL_NS_ID;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return XMLNS_NULL_NS_ID;
     } 
 #endif
 
@@ -532,29 +532,29 @@ xmlns_id_t
 *********************************************************************/
 xmlns_id_t 
     xmlns_find_ns_by_name_str (const xmlChar *name,
-			       uint32 namelen)
+                               uint32 namelen)
 {
     xmlns_t  *ns;
     uint32    i;
 
 #ifdef DEBUG
     if (!name) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return XMLNS_NULL_NS_ID;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return XMLNS_NULL_NS_ID;
     } 
     if (!namelen) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return XMLNS_NULL_NS_ID;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return XMLNS_NULL_NS_ID;
     } 
 #endif
 
     for (i=0; i<xmlns_next_id-1; i++) {
-	ns = xmlns[i];
-	if (ns->ns_name) {
+        ns = xmlns[i];
+        if (ns->ns_name) {
             if (!xml_strncmp(ns->ns_name, name, namelen)) {
                 return ns->ns_id;
             }
-	}
+        }
     }
 
     return XMLNS_NULL_NS_ID;
@@ -579,20 +579,20 @@ void
 
     if (xmlns_init_done) {
         for (i=0; i<xmlns_next_id-1; i++) {
-	    free_xmlns(xmlns[i]);
+            free_xmlns(xmlns[i]);
             xmlns[i] = NULL;
         }
 
-	xmlns_invid = 0;
-	xmlns_ncid = 0;
-	xmlns_nsid = 0;
-	xmlns_xsid = 0;
-	xmlns_ncxid = 0;
-	xmlns_xsiid = 0;
-	xmlns_xmlid = 0;
-	xmlns_ncnid = 0;
-	xmlns_yangid = 0;
-	xmlns_next_id = 1;
+        xmlns_invid = 0;
+        xmlns_ncid = 0;
+        xmlns_nsid = 0;
+        xmlns_xsid = 0;
+        xmlns_ncxid = 0;
+        xmlns_xsiid = 0;
+        xmlns_xmlid = 0;
+        xmlns_ncnid = 0;
+        xmlns_yangid = 0;
+        xmlns_next_id = 1;
         xmlns_init_done = FALSE;
     }
 
@@ -755,7 +755,7 @@ const xmlChar *
         return NULL;
     }
     if (!valid_id(nsid)) {
-	return NULL;
+        return NULL;
     }
     return xmlns[nsid-1]->ns_module;
 
@@ -780,7 +780,7 @@ void *
         return NULL;
     }
     if (!valid_id(nsid)) {
-	return NULL;
+        return NULL;
     }
     return xmlns[nsid-1]->ns_mod;
 
@@ -799,15 +799,15 @@ void *
 *********************************************************************/
 void
     xmlns_set_modptrs (const xmlChar *modname,
-		       void *modptr)
+                       void *modptr)
 {
     uint32    i;
     xmlns_t  *rec;
 
 #ifdef DEBUG
     if (!modname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -817,12 +817,12 @@ void
     }
 
     for (i=0; i<xmlns_next_id-1; i++) {
-	rec = xmlns[i];
-	if (rec->ns_module) {
+        rec = xmlns[i];
+        if (rec->ns_module) {
             if (!xml_strcmp(rec->ns_module, modname)) {
-		rec->ns_mod = modptr;
+                rec->ns_mod = modptr;
             }
-	}
+        }
     }
 
 }  /* xmlns_set_modptrs */
@@ -863,18 +863,18 @@ xmlns_pmap_t *
 
     pmap = m__getObj(xmlns_pmap_t);
     if (!pmap) {
-	return NULL;
+        return NULL;
     }
     memset(pmap, 0x0, sizeof(xmlns_pmap_t));
 
     if (buffsize) {
-	pmap->nm_pfix = m__getMem(buffsize);
-	if (!pmap->nm_pfix) {
-	    m__free(pmap);
-	    return NULL;
-	} else {
-	    memset(pmap->nm_pfix, 0x0, buffsize);
-	}
+        pmap->nm_pfix = m__getMem(buffsize);
+        if (!pmap->nm_pfix) {
+            m__free(pmap);
+            return NULL;
+        } else {
+            memset(pmap->nm_pfix, 0x0, buffsize);
+        }
     }
 
     return pmap;
@@ -896,13 +896,13 @@ void
 {
 #ifdef DEBUG
     if (!pmap) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (pmap->nm_pfix) {
-	m__free(pmap->nm_pfix);
+        m__free(pmap->nm_pfix);
     }
     m__free(pmap);
 
@@ -924,7 +924,7 @@ xmlns_qname_t *
 
     qname = m__getObj(xmlns_qname_t);
     if (!qname) {
-	return NULL;
+        return NULL;
     }
     memset(qname, 0x0, sizeof(xmlns_qname_t));
     return qname;
@@ -946,8 +946,8 @@ void
 {
 #ifdef DEBUG
     if (!qname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -972,12 +972,12 @@ void
 *********************************************************************/
 boolean
     xmlns_ids_equal (xmlns_id_t ns1,
-		     xmlns_id_t ns2)
+                     xmlns_id_t ns2)
 {
     if (ns1 && ns2) {
-	return (ns1==ns2) ? TRUE : FALSE;
+        return (ns1==ns2) ? TRUE : FALSE;
     } else {
-	return TRUE;
+        return TRUE;
     }
 
 }  /* xmlns_ids_equal */

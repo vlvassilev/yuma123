@@ -1,6 +1,6 @@
 /*  FILE: yangdiff_util.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -72,7 +72,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -90,8 +90,8 @@ void
     indent_in (yangdiff_diffparms_t *cp)
 {
     if (cp->indent) {
-	cp->curindent += cp->indent;
-	ses_set_indent(cp->scb, cp->curindent);
+        cp->curindent += cp->indent;
+        ses_set_indent(cp->scb, cp->curindent);
     }
     
 } /* indent_in */
@@ -110,12 +110,12 @@ void
     indent_out (yangdiff_diffparms_t *cp)
 {
     if (cp->indent) {
-	if (cp->curindent >= cp->indent) {
-	    cp->curindent -= cp->indent;
-	} else {
-	    cp->curindent = 0;
-	}
-	ses_set_indent(cp->scb, cp->curindent);
+        if (cp->curindent >= cp->indent) {
+            cp->curindent -= cp->indent;
+        } else {
+            cp->curindent = 0;
+        }
+        ses_set_indent(cp->scb, cp->curindent);
     }
     
 } /* indent_out */
@@ -143,47 +143,47 @@ void
 *********************************************************************/
 uint32
     str_field_changed (const xmlChar *fieldname,
-		       const xmlChar *oldstr,
-		       const xmlChar *newstr,
-		       boolean isrev,
-		       yangdiff_cdb_t *cdb)
+                       const xmlChar *oldstr,
+                       const xmlChar *newstr,
+                       boolean isrev,
+                       yangdiff_cdb_t *cdb)
 {
     uint32  ret;
 
     ret = 0;
 
     if (cdb) {
-	cdb->fieldname = fieldname;
-	cdb->oldval = oldstr;
-	cdb->newval = newstr;
+        cdb->fieldname = fieldname;
+        cdb->oldval = oldstr;
+        cdb->newval = newstr;
     }
 
     if (!oldstr && newstr) {
-	ret = 1;
-	if (cdb) {
-	    cdb->changed = TRUE;
-	    cdb->useval = newstr;
-	    cdb->chtyp = (isrev) ? ADD_STR : A_STR;
-	}
+        ret = 1;
+        if (cdb) {
+            cdb->changed = TRUE;
+            cdb->useval = newstr;
+            cdb->chtyp = (isrev) ? ADD_STR : A_STR;
+        }
     } else if (oldstr && !newstr) {
-	ret = 1;
-	if (cdb) {
-	    cdb->changed = TRUE;
-	    cdb->useval = oldstr;
-	    cdb->chtyp = (isrev) ? DEL_STR : D_STR;
-	}
+        ret = 1;
+        if (cdb) {
+            cdb->changed = TRUE;
+            cdb->useval = oldstr;
+            cdb->chtyp = (isrev) ? DEL_STR : D_STR;
+        }
     } else if (oldstr && newstr && 
-	       xml_strcmp_nosp(oldstr, newstr)) {
-	ret = 1;
-	if (cdb) {
-	    cdb->changed = TRUE;
-	    cdb->useval = newstr;
-	    cdb->chtyp = (isrev) ? MOD_STR : M_STR;
-	}
+               xml_strcmp_nosp(oldstr, newstr)) {
+        ret = 1;
+        if (cdb) {
+            cdb->changed = TRUE;
+            cdb->useval = newstr;
+            cdb->chtyp = (isrev) ? MOD_STR : M_STR;
+        }
     } else if (cdb) {
-	cdb->changed = FALSE;
-	cdb->useval = NULL;
-	cdb->chtyp = NULL;
+        cdb->changed = FALSE;
+        cdb->useval = NULL;
+        cdb->chtyp = NULL;
     }
     return ret;
 
@@ -211,31 +211,31 @@ uint32
 *********************************************************************/
 uint32
     bool_field_changed (const xmlChar *fieldname,
-		       boolean oldbool,
-		       boolean newbool,
-		       boolean isrev,
-		       yangdiff_cdb_t *cdb)
+                       boolean oldbool,
+                       boolean newbool,
+                       boolean isrev,
+                       yangdiff_cdb_t *cdb)
 {
     uint32 ret;
 
     ret = 0;
     if (cdb) {
-	cdb->fieldname = fieldname;
-	cdb->oldval = oldbool ? NCX_EL_TRUE : NCX_EL_FALSE;
-	cdb->newval = newbool ? NCX_EL_TRUE : NCX_EL_FALSE;
+        cdb->fieldname = fieldname;
+        cdb->oldval = oldbool ? NCX_EL_TRUE : NCX_EL_FALSE;
+        cdb->newval = newbool ? NCX_EL_TRUE : NCX_EL_FALSE;
     }
 
     if (oldbool != newbool) {
-	ret = 1;
-	if (cdb) {
-	    cdb->changed = TRUE;
-	    cdb->useval = cdb->newval;
-	    cdb->chtyp = (isrev) ? MOD_STR : M_STR;
-	}
+        ret = 1;
+        if (cdb) {
+            cdb->changed = TRUE;
+            cdb->useval = cdb->newval;
+            cdb->chtyp = (isrev) ? MOD_STR : M_STR;
+        }
     } else if (cdb) {
-	cdb->changed = FALSE;
-	cdb->useval = NULL;
-	cdb->chtyp = NULL;
+        cdb->changed = FALSE;
+        cdb->useval = NULL;
+        cdb->chtyp = NULL;
     }
     return ret;
 
@@ -262,31 +262,31 @@ uint32
 *********************************************************************/
 uint32
     status_field_changed (const xmlChar *fieldname,
-			  ncx_status_t oldstat,
-			  ncx_status_t newstat,
-			  boolean isrev,
-			  yangdiff_cdb_t *cdb)
+                          ncx_status_t oldstat,
+                          ncx_status_t newstat,
+                          boolean isrev,
+                          yangdiff_cdb_t *cdb)
 {
     uint32 ret;
 
     ret = 0;
 
     if (cdb) {
-	cdb->fieldname = fieldname;
-	cdb->oldval = ncx_get_status_string(oldstat);
-	cdb->newval = ncx_get_status_string(newstat);
+        cdb->fieldname = fieldname;
+        cdb->oldval = ncx_get_status_string(oldstat);
+        cdb->newval = ncx_get_status_string(newstat);
     }
     if (oldstat != newstat) {
-	ret = 1;
-	if (cdb) {
-	    cdb->changed = TRUE;
-	    cdb->useval = cdb->newval;
-	    cdb->chtyp = (isrev) ? MOD_STR : M_STR;
-	}
+        ret = 1;
+        if (cdb) {
+            cdb->changed = TRUE;
+            cdb->useval = cdb->newval;
+            cdb->chtyp = (isrev) ? MOD_STR : M_STR;
+        }
     } else if (cdb) {
-	cdb->changed = FALSE;
-	cdb->useval = NULL;
-	cdb->chtyp = NULL;
+        cdb->changed = FALSE;
+        cdb->useval = NULL;
+        cdb->chtyp = NULL;
     }
     return ret;
 
@@ -310,37 +310,37 @@ uint32
 *********************************************************************/
 uint32
     prefix_field_changed (const ncx_module_t *oldmod,
-			  const ncx_module_t *newmod,
-			  const xmlChar *oldprefix,
-			  const xmlChar *newprefix)
+                          const ncx_module_t *newmod,
+                          const xmlChar *oldprefix,
+                          const xmlChar *newprefix)
 {
     const ncx_import_t *oldimp, *newimp;
 
     if (str_field_changed(NULL, oldprefix, 
-			  newprefix, FALSE, NULL)) {
-	if (oldprefix && newprefix) {
-	    /* check if the different prefix values reference
-	     * the same module name
-	     */
-	    oldimp = ncx_find_pre_import(oldmod, oldprefix);
-	    newimp = ncx_find_pre_import(newmod, newprefix);
-	    if (oldimp && newimp &&
-		!xml_strcmp(oldimp->module, newimp->module)) {
-		return 0;
-	    } else {
-		return 1;
-	    }
-	} else if (oldprefix && 
-		   !xml_strcmp(oldprefix, oldmod->prefix)) {
-	    return 0;  /* using own module prefix */
-	} else if (newprefix && 
-		   !xml_strcmp(newprefix, newmod->prefix)) {
-	    return 0;  /* using own module prefix */
-	} else {
-	    return 1;
-	}
+                          newprefix, FALSE, NULL)) {
+        if (oldprefix && newprefix) {
+            /* check if the different prefix values reference
+             * the same module name
+             */
+            oldimp = ncx_find_pre_import(oldmod, oldprefix);
+            newimp = ncx_find_pre_import(newmod, newprefix);
+            if (oldimp && newimp &&
+                !xml_strcmp(oldimp->module, newimp->module)) {
+                return 0;
+            } else {
+                return 1;
+            }
+        } else if (oldprefix && 
+                   !xml_strcmp(oldprefix, oldmod->prefix)) {
+            return 0;  /* using own module prefix */
+        } else if (newprefix && 
+                   !xml_strcmp(newprefix, newmod->prefix)) {
+            return 0;  /* using own module prefix */
+        } else {
+            return 1;
+        }
     } else {
-	return 0;
+        return 0;
     }
     /*NOTREACHED*/
 
@@ -358,18 +358,18 @@ uint32
  *********************************************************************/
 void
     output_val (yangdiff_diffparms_t *cp,
-		const xmlChar *strval)
+                const xmlChar *strval)
 {
     uint32 i;
 
     ses_putchar(cp->scb, '\'');
     if (xml_strlen(strval) > cp->maxlen) {
-	for (i=0; i<cp->maxlen; i++) {
-	    ses_putchar(cp->scb, strval[i]);
-	}
-	ses_putstr(cp->scb, (const xmlChar *)"...");
+        for (i=0; i<cp->maxlen; i++) {
+            ses_putchar(cp->scb, strval[i]);
+        }
+        ses_putstr(cp->scb, (const xmlChar *)"...");
     } else {
-	ses_putstr(cp->scb, strval);
+        ses_putstr(cp->scb, strval);
     }
     ses_putchar(cp->scb, '\'');
 
@@ -392,21 +392,21 @@ void
  *********************************************************************/
 void
     output_mstart_line (yangdiff_diffparms_t *cp,
-			const xmlChar *fieldname,
-			const xmlChar *val,
-			boolean isid)
+                        const xmlChar *fieldname,
+                        const xmlChar *val,
+                        boolean isid)
 {
     ses_putstr_indent(cp->scb, 
-		      (cp->edifftype==YANGDIFF_DT_REVISION) 
-		      ? MOD_STR : M_STR, cp->curindent);
+                      (cp->edifftype==YANGDIFF_DT_REVISION) 
+                      ? MOD_STR : M_STR, cp->curindent);
     ses_putstr(cp->scb, fieldname);
     if (val) {
-	ses_putchar(cp->scb, ' ');
-	if (isid) {
-	    ses_putstr(cp->scb, val);
-	} else {
-	    output_val(cp, val);
-	}
+        ses_putchar(cp->scb, ' ');
+        if (isid) {
+            ses_putstr(cp->scb, val);
+        } else {
+            output_val(cp, val);
+        }
     }
 
 }  /* output_mstart_line */
@@ -423,12 +423,12 @@ void
  *********************************************************************/
 void
     output_cdb_line (yangdiff_diffparms_t *cp,
-		     const yangdiff_cdb_t *cdb)
+                     const yangdiff_cdb_t *cdb)
 {
     boolean showval;
 
     if (!cdb->changed) {
-	return;
+        return;
     }
 
     showval = (cp->edifftype == YANGDIFF_DT_TERSE) ? FALSE : TRUE;
@@ -436,21 +436,21 @@ void
     ses_putstr_indent(cp->scb, cdb->chtyp, cp->curindent);
     ses_putstr(cp->scb, cdb->fieldname);
     if (showval) {
-	ses_putchar(cp->scb, ' ');
-	if (cdb->oldval && cdb->newval) {
-	    if ((xml_strlen(cdb->oldval) < cp->maxlen) &&
-		(xml_strlen(cdb->newval) < cp->maxlen)) {
-		ses_putstr(cp->scb, FROM_STR);
-		output_val(cp, cdb->oldval);
-		ses_putchar(cp->scb, ' ');
-		ses_putstr(cp->scb, TO_STR);
-		output_val(cp, cdb->newval);
-	    }
-	} else if (cdb->useval) {
-	    output_val(cp, cdb->useval);
-	} else {
-	    ses_putstr(cp->scb, (const xmlChar *)" ''");
-	}
+        ses_putchar(cp->scb, ' ');
+        if (cdb->oldval && cdb->newval) {
+            if ((xml_strlen(cdb->oldval) < cp->maxlen) &&
+                (xml_strlen(cdb->newval) < cp->maxlen)) {
+                ses_putstr(cp->scb, FROM_STR);
+                output_val(cp, cdb->oldval);
+                ses_putchar(cp->scb, ' ');
+                ses_putstr(cp->scb, TO_STR);
+                output_val(cp, cdb->newval);
+            }
+        } else if (cdb->useval) {
+            output_val(cp, cdb->useval);
+        } else {
+            ses_putstr(cp->scb, (const xmlChar *)" ''");
+        }
     }
 
 }  /* output_cdb_line */
@@ -471,10 +471,10 @@ void
  *********************************************************************/
 void
     output_diff (yangdiff_diffparms_t *cp,
-		 const xmlChar *fieldname,
-		 const xmlChar *oldval,
-		 const xmlChar *newval,
-		 boolean isid)
+                 const xmlChar *fieldname,
+                 const xmlChar *oldval,
+                 const xmlChar *newval,
+                 boolean isid)
 {
     const xmlChar *useval, *astr, *dstr, *mstr;
     boolean finish, useto;
@@ -484,52 +484,52 @@ void
     finish = TRUE;
 
     if (cp->edifftype==YANGDIFF_DT_REVISION) {
-	astr = ADD_STR;
-	dstr = DEL_STR;
-	mstr = MOD_STR;
+        astr = ADD_STR;
+        dstr = DEL_STR;
+        mstr = MOD_STR;
     } else {
-	astr = A_STR;
-	dstr = D_STR;
-	mstr = M_STR;
+        astr = A_STR;
+        dstr = D_STR;
+        mstr = M_STR;
     }
 
     if (!oldval && newval) {
-	ses_putstr_indent(cp->scb, astr, cp->curindent);
-	useval = newval;
+        ses_putstr_indent(cp->scb, astr, cp->curindent);
+        useval = newval;
     } else if (oldval && !newval) {
-	ses_putstr_indent(cp->scb, dstr, cp->curindent);
-	useval = oldval;
+        ses_putstr_indent(cp->scb, dstr, cp->curindent);
+        useval = oldval;
     } else if (oldval && newval) {
-	if (xml_strcmp(oldval, newval)) {
-	    ses_putstr_indent(cp->scb, mstr, cp->curindent);
-	    useto = TRUE;
-	} else {
-	    finish = FALSE;
-	}
+        if (xml_strcmp(oldval, newval)) {
+            ses_putstr_indent(cp->scb, mstr, cp->curindent);
+            useto = TRUE;
+        } else {
+            finish = FALSE;
+        }
     } else {
-	finish = FALSE;
+        finish = FALSE;
     }
 
     if (finish) {
-	ses_putstr(cp->scb, fieldname);
-	if (useto) {
-	    if ((xml_strlen(oldval) < cp->maxlen) &&
-		(xml_strlen(newval) < cp->maxlen)) {
-		ses_putchar(cp->scb, ' ');
-		ses_putstr(cp->scb, FROM_STR);
-		output_val(cp, oldval);
-		ses_putchar(cp->scb, ' ');
-		ses_putstr(cp->scb, TO_STR);
-		output_val(cp, newval);
-	    }
-	} else {
-	    ses_putchar(cp->scb, ' ');
-	    if (isid) {
-		ses_putstr(cp->scb, useval);
-	    } else {
-		output_val(cp, useval);
-	    }
-	}
+        ses_putstr(cp->scb, fieldname);
+        if (useto) {
+            if ((xml_strlen(oldval) < cp->maxlen) &&
+                (xml_strlen(newval) < cp->maxlen)) {
+                ses_putchar(cp->scb, ' ');
+                ses_putstr(cp->scb, FROM_STR);
+                output_val(cp, oldval);
+                ses_putchar(cp->scb, ' ');
+                ses_putstr(cp->scb, TO_STR);
+                output_val(cp, newval);
+            }
+        } else {
+            ses_putchar(cp->scb, ' ');
+            if (isid) {
+                ses_putstr(cp->scb, useval);
+            } else {
+                output_val(cp, useval);
+            }
+        }
     }
 
 }  /* output_diff */
@@ -550,41 +550,41 @@ void
  *********************************************************************/
 void
     output_errinfo_diff (yangdiff_diffparms_t *cp,
-			 const ncx_errinfo_t *olderr,
-			 const ncx_errinfo_t *newerr)
+                         const ncx_errinfo_t *olderr,
+                         const ncx_errinfo_t *newerr)
 {
     if (!olderr && newerr) {
-	/* errinfo added in new revision */
-	output_diff(cp, YANG_K_ERROR_MESSAGE, NULL,
-		    newerr->error_message, FALSE);
-	output_diff(cp, YANG_K_ERROR_APP_TAG, NULL, 
-		    newerr->error_app_tag, FALSE);
-	output_diff(cp, YANG_K_DESCRIPTION, NULL, 
-		    newerr->descr, FALSE);
-	output_diff(cp, YANG_K_REFERENCE, NULL, 
-		    newerr->ref, FALSE);
+        /* errinfo added in new revision */
+        output_diff(cp, YANG_K_ERROR_MESSAGE, NULL,
+                    newerr->error_message, FALSE);
+        output_diff(cp, YANG_K_ERROR_APP_TAG, NULL, 
+                    newerr->error_app_tag, FALSE);
+        output_diff(cp, YANG_K_DESCRIPTION, NULL, 
+                    newerr->descr, FALSE);
+        output_diff(cp, YANG_K_REFERENCE, NULL, 
+                    newerr->ref, FALSE);
     } else if (olderr && !newerr) {
-	/* errinfo removed in new revision */
-	output_diff(cp, YANG_K_ERROR_MESSAGE,
-		    olderr->error_message, NULL, FALSE);
-	output_diff(cp, YANG_K_ERROR_APP_TAG,
-		    olderr->error_app_tag, NULL, FALSE);
-	output_diff(cp, YANG_K_DESCRIPTION,
-		    olderr->descr, NULL, FALSE);
-	output_diff(cp, YANG_K_REFERENCE,
-		    newerr->ref, NULL, FALSE);
+        /* errinfo removed in new revision */
+        output_diff(cp, YANG_K_ERROR_MESSAGE,
+                    olderr->error_message, NULL, FALSE);
+        output_diff(cp, YANG_K_ERROR_APP_TAG,
+                    olderr->error_app_tag, NULL, FALSE);
+        output_diff(cp, YANG_K_DESCRIPTION,
+                    olderr->descr, NULL, FALSE);
+        output_diff(cp, YANG_K_REFERENCE,
+                    newerr->ref, NULL, FALSE);
     } else if (olderr && newerr) {
-	/* errinfo maybe changed in new revision */
-	output_diff(cp, YANG_K_ERROR_MESSAGE,
-		    olderr->error_message,
-		    newerr->error_message, FALSE);
-	output_diff(cp, YANG_K_ERROR_APP_TAG,
-		    olderr->error_app_tag,
-		    newerr->error_app_tag, FALSE);
-	output_diff(cp, YANG_K_DESCRIPTION,
-		    olderr->descr, newerr->descr, FALSE);
-	output_diff(cp, YANG_K_REFERENCE,
-		    olderr->ref, newerr->ref, FALSE);
+        /* errinfo maybe changed in new revision */
+        output_diff(cp, YANG_K_ERROR_MESSAGE,
+                    olderr->error_message,
+                    newerr->error_message, FALSE);
+        output_diff(cp, YANG_K_ERROR_APP_TAG,
+                    olderr->error_app_tag,
+                    newerr->error_app_tag, FALSE);
+        output_diff(cp, YANG_K_DESCRIPTION,
+                    olderr->descr, newerr->descr, FALSE);
+        output_diff(cp, YANG_K_REFERENCE,
+                    olderr->ref, newerr->ref, FALSE);
     }
 } /* output_errinfo_diff */
 
@@ -604,42 +604,42 @@ void
 *********************************************************************/
 uint32
     errinfo_changed (const ncx_errinfo_t *olderr,
-		     const ncx_errinfo_t *newerr)
+                     const ncx_errinfo_t *newerr)
 {
     if ((!olderr && newerr) || (olderr && !newerr)) {
-	return 1;
+        return 1;
     } else if (olderr && newerr) {
-	if (str_field_changed(YANG_K_DESCRIPTION,
-			      olderr->descr, 
+        if (str_field_changed(YANG_K_DESCRIPTION,
+                              olderr->descr, 
                               newerr->descr,
-			      FALSE, 
+                              FALSE, 
                               NULL)) {
-	    return 1;
-	}
-	if (str_field_changed(YANG_K_REFERENCE,
-			      olderr->ref, 
+            return 1;
+        }
+        if (str_field_changed(YANG_K_REFERENCE,
+                              olderr->ref, 
                               newerr->ref,
-			      FALSE, 
+                              FALSE, 
                               NULL)) {
-	    return 1;
-	}
-	if (str_field_changed(YANG_K_ERROR_APP_TAG,
-			      olderr->error_app_tag,
-			      newerr->error_app_tag,
-			      FALSE, 
+            return 1;
+        }
+        if (str_field_changed(YANG_K_ERROR_APP_TAG,
+                              olderr->error_app_tag,
+                              newerr->error_app_tag,
+                              FALSE, 
                               NULL)) {
-	    return 1;
-	}
-	if (str_field_changed(YANG_K_ERROR_MESSAGE,
-			      olderr->error_message,
-			      newerr->error_message,
-			      FALSE, 
+            return 1;
+        }
+        if (str_field_changed(YANG_K_ERROR_MESSAGE,
+                              olderr->error_message,
+                              newerr->error_message,
+                              FALSE, 
                               NULL)) {
-	    return 1;
-	}
-	return 0;
+            return 1;
+        }
+        return 0;
     } else {
-	return 0;
+        return 0;
     }
     /*NOTREACHED*/
     
@@ -667,20 +667,20 @@ uint32
                        const ncx_iffeature_t *newif)
 {
     if ((!oldif && newif) || (oldif && !newif)) {
-	return 1;
+        return 1;
     } else if (oldif && newif) {
-	if (ncx_prefix_different(oldif->prefix, 
+        if (ncx_prefix_different(oldif->prefix, 
                                  newif->prefix,
                                  modprefix)) {
-	    return 1;
-	}
-	if (str_field_changed(YANG_K_IF_FEATURE,
-			      oldif->name, 
+            return 1;
+        }
+        if (str_field_changed(YANG_K_IF_FEATURE,
+                              oldif->name, 
                               newif->name,
-			      FALSE,
+                              FALSE,
                               NULL)) {
-	    return 1;
-	}
+            return 1;
+        }
     }
 
     return 0;    
@@ -721,46 +721,46 @@ uint32
     newcnt = dlq_count(newQ);
 
     if (oldcnt != newcnt) {
-	return 1;
+        return 1;
     }
 
     if (oldcnt == 0) {
-	return 0;
+        return 0;
     }
 
     for (newif = (ncx_iffeature_t *)dlq_firstEntry(newQ);
-	 newif != NULL;
-	 newif = (ncx_iffeature_t *)dlq_nextEntry(newif)) {
-	newif->seen = FALSE;
+         newif != NULL;
+         newif = (ncx_iffeature_t *)dlq_nextEntry(newif)) {
+        newif->seen = FALSE;
     }
 
     /* look through the old Q for matching entries in the new Q */
     for (oldif = (ncx_iffeature_t *)dlq_firstEntry(oldQ);
-	 oldif != NULL;
-	 oldif = (ncx_iffeature_t *)dlq_nextEntry(oldif)) {
+         oldif != NULL;
+         oldif = (ncx_iffeature_t *)dlq_nextEntry(oldif)) {
 
-	newif = ncx_find_iffeature(newQ, 
+        newif = ncx_find_iffeature(newQ, 
                                    oldif->prefix,
                                    oldif->name,
                                    modprefix);
-	if (newif) {
-	    if (iffeature_changed(modprefix, oldif, newif)) {
-		return 1;
-	    } else {
-		newif->seen = TRUE;
-	    }
-	} else {
-	    return 1;
-	}
+        if (newif) {
+            if (iffeature_changed(modprefix, oldif, newif)) {
+                return 1;
+            } else {
+                newif->seen = TRUE;
+            }
+        } else {
+            return 1;
+        }
     }
 
     /* look for iffeature-stmts that were added in the new module */
     for (newif = (ncx_iffeature_t *)dlq_firstEntry(newQ);
-	 newif != NULL;
-	 newif = (ncx_iffeature_t *)dlq_nextEntry(newif)) {
-	if (!newif->seen) {
-	    return 1;
-	}
+         newif != NULL;
+         newif = (ncx_iffeature_t *)dlq_nextEntry(newif)) {
+        if (!newif->seen) {
+            return 1;
+        }
     }
 
     return 0;
@@ -796,60 +796,60 @@ void
 #endif
 
     for (newif = (ncx_iffeature_t *)dlq_firstEntry(newQ);
-	 newif != NULL;
-	 newif = (ncx_iffeature_t *)dlq_nextEntry(newif)) {
-	newif->seen = FALSE;
+         newif != NULL;
+         newif = (ncx_iffeature_t *)dlq_nextEntry(newif)) {
+        newif->seen = FALSE;
     }
 
     /* look through the old Q for matching entries in the new Q */
     for (oldif = (ncx_iffeature_t *)dlq_firstEntry(oldQ);
-	 oldif != NULL;
-	 oldif = (ncx_iffeature_t *)dlq_nextEntry(oldif)) {
+         oldif != NULL;
+         oldif = (ncx_iffeature_t *)dlq_nextEntry(oldif)) {
 
-	newif = ncx_find_iffeature(newQ, 
+        newif = ncx_find_iffeature(newQ, 
                                    oldif->prefix,
                                    oldif->name,
                                    modprefix);
-	if (newif) {
-	    newif->seen = TRUE;
-	    if (iffeature_changed(modprefix, oldif, newif)) {
-		output_mstart_line(cp, 
-				   YANG_K_IF_FEATURE, 
-				   oldif->name, 
-				   FALSE);
-		if (cp->edifftype != YANGDIFF_DT_TERSE) {
-		    indent_in(cp);
-		    output_diff(cp, 
+        if (newif) {
+            newif->seen = TRUE;
+            if (iffeature_changed(modprefix, oldif, newif)) {
+                output_mstart_line(cp, 
+                                   YANG_K_IF_FEATURE, 
+                                   oldif->name, 
+                                   FALSE);
+                if (cp->edifftype != YANGDIFF_DT_TERSE) {
+                    indent_in(cp);
+                    output_diff(cp, 
                                 YANG_K_IF_FEATURE,
-				oldif->name, 
+                                oldif->name, 
                                 newif->name, 
                                 TRUE);
-		    indent_out(cp);
-		}
-	    }
-	} else {
-	    /* if-feature-stmt was removed from the new module */
-	    output_diff(cp, 
-			YANG_K_IF_FEATURE,  
-			oldif->name, 
-			NULL, 
-			FALSE);
-	}
+                    indent_out(cp);
+                }
+            }
+        } else {
+            /* if-feature-stmt was removed from the new module */
+            output_diff(cp, 
+                        YANG_K_IF_FEATURE,  
+                        oldif->name, 
+                        NULL, 
+                        FALSE);
+        }
     }
 
     /* look for must-stmts that were added in the new module */
     for (newif = (ncx_iffeature_t *)dlq_firstEntry(newQ);
-	 newif != NULL;
-	 newif = (ncx_iffeature_t *)dlq_nextEntry(newif)) {
+         newif != NULL;
+         newif = (ncx_iffeature_t *)dlq_nextEntry(newif)) {
 
-	if (!newif->seen) {
-	    /* must-stmt was added in the new module */
-	    output_diff(cp, 
-			YANG_K_IF_FEATURE,  
-			NULL, 
-			newif->name,
-			FALSE);
-	}
+        if (!newif->seen) {
+            /* must-stmt was added in the new module */
+            output_diff(cp, 
+                        YANG_K_IF_FEATURE,  
+                        NULL, 
+                        newif->name,
+                        FALSE);
+        }
     }
 
 }  /* output_iffeatureQ_diff */

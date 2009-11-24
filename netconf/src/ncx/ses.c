@@ -79,7 +79,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 static ses_total_stats_t totals;
@@ -106,7 +106,7 @@ static ses_total_stats_t totals;
 *********************************************************************/
 static status_t
     accept_buffer (ses_cb_t *scb,
-		   ses_msg_buff_t *buff)
+                   ses_msg_buff_t *buff)
 {
     ses_msg_t      *msg, *msg2;
     ses_msg_buff_t *buff2, *lastbuff;
@@ -122,23 +122,23 @@ static status_t
 
 #ifdef SES_DEBUG
     if (LOGDEBUG3) {
-	log_debug3("\nses: accept buffer (%u):\n%s\n", 
-		   buff->bufflen, buff->buff);
+        log_debug3("\nses: accept buffer (%u):\n%s\n", 
+                   buff->bufflen, buff->buff);
     } else if (LOGDEBUG2) {
-	log_debug2("\nses: accept buffer (%u)", buff->bufflen);
+        log_debug2("\nses: accept buffer (%u)", buff->bufflen);
     }
 #endif
 
     /* make sure there is a current message */
     msg = (ses_msg_t *)dlq_lastEntry(&scb->msgQ);
     if (!msg || msg->ready) {
-	/* need a new message */
-	res = ses_msg_new_msg(scb, &msg);
-	if (res != NO_ERR) {
-	    ses_msg_free_buff(scb, buff);
-	    return res;
-	}
-	dlq_enque(msg, &scb->msgQ);
+        /* need a new message */
+        res = ses_msg_new_msg(scb, &msg);
+        if (res != NO_ERR) {
+            ses_msg_free_buff(scb, buff);
+            return res;
+        }
+        dlq_enque(msg, &scb->msgQ);
     }
 
     /* check the chars in the buffer for the 
@@ -151,184 +151,184 @@ static status_t
      */
     while (!done) {
 
-	/* check if the internal buffer end has been reached */
-	if (buff->buffpos == buff->bufflen) {
-	    /* done checking the current buffer,
-	     * add this buffer to the current message and exit 
-	     */
-	    buff->buffpos = 0;
-	    dlq_enque(buff, &msg->buffQ);
-	    done = TRUE;
-	    continue;
-	}
+        /* check if the internal buffer end has been reached */
+        if (buff->buffpos == buff->bufflen) {
+            /* done checking the current buffer,
+             * add this buffer to the current message and exit 
+             */
+            buff->buffpos = 0;
+            dlq_enque(buff, &msg->buffQ);
+            done = TRUE;
+            continue;
+        }
 
-	/* get the next char in the input buffer and advance the pointer */
-	ch = buff->buff[buff->buffpos++];
+        /* get the next char in the input buffer and advance the pointer */
+        ch = buff->buff[buff->buffpos++];
 
-	/* handle the char just copied into the buffer
-	 * based on the input state 
-	 */
-	switch (scb->instate) {
-	case SES_INST_IDLE:
-	    /* check for EOM if SSH or just copy the char */
-	    if (scb->transport==SES_TRANSPORT_SSH && ch==*endmatch) {
-		scb->instate = SES_INST_INEND;
-		scb->inendpos = 1;
-	    } else {
-		scb->instate = SES_INST_INMSG;
-	    }
-	    break;
-	case SES_INST_INMSG:
-	    /* check for EOM if SSH or just copy the char */
-	    if (scb->transport==SES_TRANSPORT_SSH && ch==*endmatch) {
-		scb->instate = SES_INST_INEND;
-		scb->inendpos = 1;
-	    }
-	    break;
-	case SES_INST_INEND:
-	    /* already matched at least 1 EOM char
-	     * try to match the rest of the SSH EOM string 
-	     */
-	    if (ch == endmatch[scb->inendpos]) {
+        /* handle the char just copied into the buffer
+         * based on the input state 
+         */
+        switch (scb->instate) {
+        case SES_INST_IDLE:
+            /* check for EOM if SSH or just copy the char */
+            if (scb->transport==SES_TRANSPORT_SSH && ch==*endmatch) {
+                scb->instate = SES_INST_INEND;
+                scb->inendpos = 1;
+            } else {
+                scb->instate = SES_INST_INMSG;
+            }
+            break;
+        case SES_INST_INMSG:
+            /* check for EOM if SSH or just copy the char */
+            if (scb->transport==SES_TRANSPORT_SSH && ch==*endmatch) {
+                scb->instate = SES_INST_INEND;
+                scb->inendpos = 1;
+            }
+            break;
+        case SES_INST_INEND:
+            /* already matched at least 1 EOM char
+             * try to match the rest of the SSH EOM string 
+             */
+            if (ch == endmatch[scb->inendpos]) {
 
-		/* init local vars */
-		buff2 = NULL;
-		lastbuff = (ses_msg_buff_t *)dlq_lastEntry(&msg->buffQ);
+                /* init local vars */
+                buff2 = NULL;
+                lastbuff = (ses_msg_buff_t *)dlq_lastEntry(&msg->buffQ);
 
-		/* check message complete */
-		if (++scb->inendpos == NC_SSH_END_LEN) {
+                /* check message complete */
+                if (++scb->inendpos == NC_SSH_END_LEN) {
 
-		    /* completely matched the SSH EOM marker 
-		     * finish the current message and put it in the inreadyQ
-		     *
-		     * buff->buffpos points to the first char after
-		     * the EOM string, check any left over bytes
-		     * to start a new message
-		     */
-		    if (buff->buffpos == buff->bufflen-1 &&
-			buff->buff[buff->buffpos] == '\0') {
-			/* don't barf if the client sends a 
-			 * zero-terminated string instead of
-			 * just the contents of the string
-			 */
-			buff->bufflen--;
-		    }
+                    /* completely matched the SSH EOM marker 
+                     * finish the current message and put it in the inreadyQ
+                     *
+                     * buff->buffpos points to the first char after
+                     * the EOM string, check any left over bytes
+                     * to start a new message
+                     */
+                    if (buff->buffpos == buff->bufflen-1 &&
+                        buff->buff[buff->buffpos] == '\0') {
+                        /* don't barf if the client sends a 
+                         * zero-terminated string instead of
+                         * just the contents of the string
+                         */
+                        buff->bufflen--;
+                    }
 
-		    /* handle any bytes left at the end of 'buff' */
-		    if (buff->buffpos < buff->bufflen) {
+                    /* handle any bytes left at the end of 'buff' */
+                    if (buff->buffpos < buff->bufflen) {
 
-			/* get a new buffer to hold the overflow */
-			res = ses_msg_new_buff(scb, &buff2);
-			if (res == NO_ERR) {
-			    /* get a new message header for buff2 
-			     * but do not add buff2 to msg2 yet 
-			     */
-			    res = ses_msg_new_msg(scb, &msg2);
-			    if (res == NO_ERR) {
-				/* put msg2 in the msg Q and
-				 * copy the rest of buff into buff2 
-				 */
-				dlq_enque(msg2, &scb->msgQ);
-				buff2->bufflen = buff->bufflen - buff->buffpos;
-				memcpy(buff2->buff, 
-				       &buff->buff[buff->buffpos],
-				       buff2->bufflen);
-				buff->bufflen = buff->buffpos;
-			    }
-			}
-			if (res != NO_ERR) {
-			    if (buff2) {
-				ses_msg_free_buff(scb, buff2);
-				buff2 = NULL;
-			    }
-			    
-			    /* truncate the input and continue */
-			    buff->bufflen = buff->buffpos;
-			    if (LOGINFO) {
-				log_info("\nses: dropping input "
-					 "for session %d (%s)",
-					 scb->sid,
-					 get_error_string(res));
-			    }
+                        /* get a new buffer to hold the overflow */
+                        res = ses_msg_new_buff(scb, &buff2);
+                        if (res == NO_ERR) {
+                            /* get a new message header for buff2 
+                             * but do not add buff2 to msg2 yet 
+                             */
+                            res = ses_msg_new_msg(scb, &msg2);
+                            if (res == NO_ERR) {
+                                /* put msg2 in the msg Q and
+                                 * copy the rest of buff into buff2 
+                                 */
+                                dlq_enque(msg2, &scb->msgQ);
+                                buff2->bufflen = buff->bufflen - buff->buffpos;
+                                memcpy(buff2->buff, 
+                                       &buff->buff[buff->buffpos],
+                                       buff2->bufflen);
+                                buff->bufflen = buff->buffpos;
+                            }
+                        }
+                        if (res != NO_ERR) {
+                            if (buff2) {
+                                ses_msg_free_buff(scb, buff2);
+                                buff2 = NULL;
+                            }
+                            
+                            /* truncate the input and continue */
+                            buff->bufflen = buff->buffpos;
+                            if (LOGINFO) {
+                                log_info("\nses: dropping input "
+                                         "for session %d (%s)",
+                                         scb->sid,
+                                         get_error_string(res));
+                            }
 
-			    /* do not barf on input overflow error */
-			    res = NO_ERR;   
-			}
-		    }
+                            /* do not barf on input overflow error */
+                            res = NO_ERR;   
+                        }
+                    }
 
-		    /* save the buffer and make the message ready to parse 
-		     * don't let the xmlreader see the EOM string
-		     */
-		    if (buff->bufflen > NC_SSH_END_LEN) {
-			/* finish message and add to the ready Q */
-			buff->bufflen -= NC_SSH_END_LEN;
-			buff->buffpos = 0;
-			dlq_enque(buff, &msg->buffQ);
-			msg->curbuff = NULL;
-			msg->ready = TRUE;
-			ses_msg_make_inready(scb);
-		    }  else {
-			/* only thing in the buffer was an EOM string 
-			 * or part of the string, corner-case, need to
-			 * back out the EOM chars in 1 or more previous buffs
-			 */
-			left = NC_SSH_END_LEN - buff->bufflen;
-			ses_msg_free_buff(scb, buff);
+                    /* save the buffer and make the message ready to parse 
+                     * don't let the xmlreader see the EOM string
+                     */
+                    if (buff->bufflen > NC_SSH_END_LEN) {
+                        /* finish message and add to the ready Q */
+                        buff->bufflen -= NC_SSH_END_LEN;
+                        buff->buffpos = 0;
+                        dlq_enque(buff, &msg->buffQ);
+                        msg->curbuff = NULL;
+                        msg->ready = TRUE;
+                        ses_msg_make_inready(scb);
+                    }  else {
+                        /* only thing in the buffer was an EOM string 
+                         * or part of the string, corner-case, need to
+                         * back out the EOM chars in 1 or more previous buffs
+                         */
+                        left = NC_SSH_END_LEN - buff->bufflen;
+                        ses_msg_free_buff(scb, buff);
 
-			while (left && lastbuff) {
-			    if (lastbuff->bufflen <= left) {
-				left -= lastbuff->bufflen;
-				/* zap the last buffer, borrow 'buff' var */
-				buff = (ses_msg_buff_t *)
-				    dlq_prevEntry(lastbuff);
-				dlq_remove(lastbuff);
-				ses_msg_free_buff(scb, lastbuff);
-				lastbuff = buff;
-			    } else {
-				/* just truncate the last buffer */
-				lastbuff->bufflen -= left;
-				left = 0;
-			    }
-			}
+                        while (left && lastbuff) {
+                            if (lastbuff->bufflen <= left) {
+                                left -= lastbuff->bufflen;
+                                /* zap the last buffer, borrow 'buff' var */
+                                buff = (ses_msg_buff_t *)
+                                    dlq_prevEntry(lastbuff);
+                                dlq_remove(lastbuff);
+                                ses_msg_free_buff(scb, lastbuff);
+                                lastbuff = buff;
+                            } else {
+                                /* just truncate the last buffer */
+                                lastbuff->bufflen -= left;
+                                left = 0;
+                            }
+                        }
 
-			/* check anything left in the msg */
-			if (dlq_empty(&msg->buffQ)) {
-			    dlq_remove(msg);
-			    ses_msg_free_msg(scb, msg);
-			    msg = NULL;
-			} else {
+                        /* check anything left in the msg */
+                        if (dlq_empty(&msg->buffQ)) {
+                            dlq_remove(msg);
+                            ses_msg_free_msg(scb, msg);
+                            msg = NULL;
+                        } else {
                             msg->ready = TRUE;
                             ses_msg_make_inready(scb);
                         }
-		    }
+                    }
 
-		    /* reset reader state */
-		    scb->instate = SES_INST_IDLE;
-		    scb->inendpos = 0;
+                    /* reset reader state */
+                    scb->instate = SES_INST_IDLE;
+                    scb->inendpos = 0;
 
-		    /* check if more work to do */
-		    if (buff2) {
-			buff = buff2;
-			msg = msg2;
-		    } else {
-			done = TRUE;
-		    }
-		}
-	    } else {
-		/* char did not match the expected position in the 
-		 * EOM string, go back to MSG state
-		 */
-		scb->instate = SES_INST_INMSG;
-		scb->inendpos = 0;
-	    }
-	    break;
-	default:
-	    /* should not happen */
-	    if (buff) {
-		ses_msg_free_buff(scb, buff);
-	    }
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
+                    /* check if more work to do */
+                    if (buff2) {
+                        buff = buff2;
+                        msg = msg2;
+                    } else {
+                        done = TRUE;
+                    }
+                }
+            } else {
+                /* char did not match the expected position in the 
+                 * EOM string, go back to MSG state
+                 */
+                scb->instate = SES_INST_INMSG;
+                scb->inendpos = 0;
+            }
+            break;
+        default:
+            /* should not happen */
+            if (buff) {
+                ses_msg_free_buff(scb, buff);
+            }
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        }
     }
 
     return NO_ERR;
@@ -354,14 +354,14 @@ ses_cb_t *
     
     now = m__getMem(TSTAMP_MIN_SIZE);
     if (!now) {
-	return NULL;
+        return NULL;
     }
     tstamp_datetime(now);
 
     scb = m__getObj(ses_cb_t);
     if (!scb) {
-	m__free(now);
-	return NULL;
+        m__free(now);
+        return NULL;
     }
 
     memset(scb, 0x0, sizeof(ses_cb_t));
@@ -394,7 +394,7 @@ ses_cb_t *
 
     scb = ses_new_scb();
     if (!scb) {
-	return NULL;
+        return NULL;
     }
 
     scb->type = SES_TYP_DUMMY;
@@ -426,47 +426,47 @@ void
 
 #ifdef DEBUG
     if (!scb) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (scb->start_time) {
-	m__free(scb->start_time);
+        m__free(scb->start_time);
     }
 
     if (scb->username) {
-	m__free(scb->username);
+        m__free(scb->username);
     }
 
     if (scb->peeraddr) {
-	m__free(scb->peeraddr);
+        m__free(scb->peeraddr);
     }
 
     if (scb->reader) {
-	xml_free_reader(scb->reader);
+        xml_free_reader(scb->reader);
     }
 
     if (scb->fd) {
-	close(scb->fd);
+        close(scb->fd);
     }
 
     if (scb->fp) {
-	fclose(scb->fp);
+        fclose(scb->fp);
     }
 
     while (!dlq_empty(&scb->msgQ)) {
-	msg = (ses_msg_t *)dlq_deque(&scb->msgQ);
-	ses_msg_free_msg(scb, msg);
+        msg = (ses_msg_t *)dlq_deque(&scb->msgQ);
+        ses_msg_free_msg(scb, msg);
     }
 
     if (scb->outbuff) {
-	ses_msg_free_buff(scb, scb->outbuff);
+        ses_msg_free_buff(scb, scb->outbuff);
     }
 
     while (!dlq_empty(&scb->outQ)) {
-	buff = (ses_msg_buff_t *)dlq_deque(&scb->outQ);
-	ses_msg_free_buff(scb, buff);
+        buff = (ses_msg_buff_t *)dlq_deque(&scb->outQ);
+        ses_msg_free_buff(scb, buff);
     }
 
     /* the freeQ must be cleared after the outQ because
@@ -474,13 +474,13 @@ void
      * the scb->freeQ
      */
     while (!dlq_empty(&scb->freeQ)) {
-	buff = (ses_msg_buff_t *)dlq_deque(&scb->freeQ);
-	ses_msg_free_buff(scb, buff);
+        buff = (ses_msg_buff_t *)dlq_deque(&scb->freeQ);
+        ses_msg_free_buff(scb, buff);
     }
 
     if (scb->buffcnt) {
-	log_error("\nsession %d terminated with %d buffers",
-		  scb->sid, scb->buffcnt);
+        log_error("\nsession %d terminated with %d buffers",
+                  scb->sid, scb->buffcnt);
     }
 
     /* the mgrcb must be cleaned before this function is called */
@@ -509,47 +509,47 @@ void
 *********************************************************************/
 void
     ses_putchar (ses_cb_t *scb,
-		 uint32    ch)
+                 uint32    ch)
 {
     ses_msg_buff_t *buff;
     status_t res;
 
     if (scb->fd) {
-	/* Normal NETCONF session mode: */
-	res = NO_ERR;
-	if (!scb->outbuff) {
-	    res = ses_msg_new_buff(scb, &scb->outbuff);
-	}
-	if (scb->outbuff) {
-	    buff = scb->outbuff;
-	    res = ses_msg_write_buff(buff, ch);
-	    if (res == ERR_BUFF_OVFL) {
-		res = ses_msg_new_output_buff(scb);
-		if (res == NO_ERR) {
-		    buff = scb->outbuff;
-		    res = ses_msg_write_buff(buff, ch);
-		}
-	    }
-	} else {
-	    res = ERR_NCX_OPERATION_FAILED;
-	}
+        /* Normal NETCONF session mode: */
+        res = NO_ERR;
+        if (!scb->outbuff) {
+            res = ses_msg_new_buff(scb, &scb->outbuff);
+        }
+        if (scb->outbuff) {
+            buff = scb->outbuff;
+            res = ses_msg_write_buff(buff, ch);
+            if (res == ERR_BUFF_OVFL) {
+                res = ses_msg_new_output_buff(scb);
+                if (res == NO_ERR) {
+                    buff = scb->outbuff;
+                    res = ses_msg_write_buff(buff, ch);
+                }
+            }
+        } else {
+            res = ERR_NCX_OPERATION_FAILED;
+        }
 
-	if (res == NO_ERR) {
-	    scb->stats.out_bytes++;
-	    totals.stats.out_bytes++;
-	}
+        if (res == NO_ERR) {
+            scb->stats.out_bytes++;
+            totals.stats.out_bytes++;
+        }
     } else if (scb->fp) {
-	/* debug session, sending output to a file */
-	fputc((int)ch, scb->fp);
+        /* debug session, sending output to a file */
+        fputc((int)ch, scb->fp);
     } else {
-	/* debug session, sending output to the screen */
-	putchar((int)ch);
+        /* debug session, sending output to the screen */
+        putchar((int)ch);
     }
 
     if (ch=='\n') {
-	scb->stats.out_line = 0;
+        scb->stats.out_line = 0;
     } else {
-	scb->stats.out_line++;
+        scb->stats.out_line++;
     }
 
 }  /* ses_putchar */
@@ -569,10 +569,10 @@ void
 *********************************************************************/
 void
     ses_putstr (ses_cb_t *scb,
-		const xmlChar *str)
+                const xmlChar *str)
 {
     while (*str) {
-	ses_putchar(scb, *str++);
+        ses_putchar(scb, *str++);
     }
 
 }  /* ses_putstr */
@@ -595,21 +595,21 @@ void
 *********************************************************************/
 void
     ses_putstr_indent (ses_cb_t *scb,
-		       const xmlChar *str,
-		       int32 indent)
+                       const xmlChar *str,
+                       int32 indent)
 {
     ses_indent(scb, indent);
     while (*str) {
-	if (*str == '\n') {
-	    if (indent < 0) {
-		ses_putchar(scb, *str++);
-	    } else {
-		ses_indent(scb, indent);
-		str++;
-	    }
-	} else {
-	    ses_putchar(scb, *str++);
-	}
+        if (*str == '\n') {
+            if (indent < 0) {
+                ses_putchar(scb, *str++);
+            } else {
+                ses_indent(scb, indent);
+                str++;
+            }
+        } else {
+            ses_putchar(scb, *str++);
+        }
     }
 }  /* ses_putstr_indent */
 
@@ -630,30 +630,30 @@ void
 *********************************************************************/
 void
     ses_putcstr (ses_cb_t *scb,
-		 const xmlChar *str,
-		 int32 indent)
+                 const xmlChar *str,
+                 int32 indent)
 {
     while (*str) {
-	if (*str == '<') {
-	    ses_putstr(scb, LTSTR);
-	    str++;
-	} else if (*str == '>') {
-	    ses_putstr(scb, GTSTR);
-	    str++;
-	} else if (*str == '&') {
-	    ses_putstr(scb, AMPSTR);
-	    str++;
-	} else if ((scb->mode == SES_MODE_XMLDOC
-		    || scb->mode == SES_MODE_TEXT) && *str == '\n') {
-	    if (indent < 0) {
-		ses_putchar(scb, *str++);
-	    } else {
-		ses_indent(scb, indent);
-		str++;
-	    }
-	} else {
-	    ses_putchar(scb, *str++);
-	}
+        if (*str == '<') {
+            ses_putstr(scb, LTSTR);
+            str++;
+        } else if (*str == '>') {
+            ses_putstr(scb, GTSTR);
+            str++;
+        } else if (*str == '&') {
+            ses_putstr(scb, AMPSTR);
+            str++;
+        } else if ((scb->mode == SES_MODE_XMLDOC
+                    || scb->mode == SES_MODE_TEXT) && *str == '\n') {
+            if (indent < 0) {
+                ses_putchar(scb, *str++);
+            } else {
+                ses_indent(scb, indent);
+                str++;
+            }
+        } else {
+            ses_putchar(scb, *str++);
+        }
     }
 }  /* ses_putcstr */
 
@@ -676,7 +676,7 @@ void
 *********************************************************************/
 void
     ses_indent (ses_cb_t *scb,
-		int32 indent)
+                int32 indent)
 {
     int32 i;
 
@@ -684,10 +684,10 @@ void
     indent = min(indent, 255);
 
     if (indent >= 0) {
-	ses_putchar(scb, '\n');
+        ses_putchar(scb, '\n');
     }
     for (i=0; i<indent; i++) {
-	ses_putchar(scb, ' ');
+        ses_putchar(scb, ' ');
     }
 
 }  /* ses_indent */
@@ -723,12 +723,12 @@ int32
 *********************************************************************/
 void
     ses_set_indent (ses_cb_t *scb,
-		    int32 indent)
+                    int32 indent)
 {
     if (indent < 0) {
-	indent = 0;
+        indent = 0;
     } else if (indent > 9) {
-	indent = 9;
+        indent = 9;
     }
     scb->indent = indent;
 
@@ -748,7 +748,7 @@ void
 *********************************************************************/
 void
     ses_set_mode (ses_cb_t *scb,
-		  ses_mode_t mode)
+                  ses_mode_t mode)
 {
     scb->mode = mode;  /***/
 } /* ses_set_mode */
@@ -789,13 +789,13 @@ status_t
 
 #ifdef DEBUG
     if (!scb) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     /* check if this session will allow a msg to start now */
     if (scb->state >= SES_ST_SHUTDOWN) {
-	return ERR_NCX_OPERATION_FAILED;
+        return ERR_NCX_OPERATION_FAILED;
     }
 
     /* Generate Start of XML Message Directive
@@ -806,9 +806,9 @@ status_t
      * the first char must be the '<' to start the XML directive
      */
     if (scb->fp || scb->mode==SES_MODE_XMLDOC) {
-	ses_putstr(scb, XML_START_FILMSG);
+        ses_putstr(scb, XML_START_FILMSG);
     } else {
-	ses_putstr(scb, XML_START_MSG);
+        ses_putstr(scb, XML_START_MSG);
     }
 
     return NO_ERR;
@@ -832,24 +832,24 @@ void
 
 #ifdef DEBUG
     if (!scb) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     /* add the NETCONF EOM marker */
     if (scb->transport==SES_TRANSPORT_SSH) {
-	ses_putstr(scb, (const xmlChar *)NC_SSH_END);
+        ses_putstr(scb, (const xmlChar *)NC_SSH_END);
     }
 
     /* add a final newline when writing to a file or STDOUT */
     if (scb->fp || !scb->fd) {
-	ses_putchar(scb, '\n');
+        ses_putchar(scb, '\n');
     }
 
     /* queue for output if not done so already */
     if (scb->type != SES_TYP_DUMMY) {
-	ses_msg_finish_outmsg(scb);
+        ses_msg_finish_outmsg(scb);
     }
 
 }  /* ses_finish_msg */
@@ -882,8 +882,8 @@ void
 *********************************************************************/
 int
     ses_read_cb (void *context,
-		 char *buffer,
-		 int len)
+                 char *buffer,
+                 int len)
 {
     ses_cb_t         *scb;
     ses_msg_t        *msg;
@@ -897,12 +897,12 @@ int
 
     scb = (ses_cb_t *)context;
     if (scb->state >= SES_ST_SHUTDOWN_REQ) {
-	return -1;
+        return -1;
     }
 
     msg = (ses_msg_t *)dlq_firstEntry(&scb->msgQ);
     if (!msg) {
-	return 0;
+        return 0;
     }
 
     firstbuff = FALSE;
@@ -913,28 +913,28 @@ int
 
     /* check if this is the first read */
     if (!buff) {
-	buff = (ses_msg_buff_t *)dlq_firstEntry(&msg->buffQ);
-	if (!buff) {
-	    return 0;
-	} else {
-	    buff->buffpos = 0;
-	    msg->curbuff = buff;
+        buff = (ses_msg_buff_t *)dlq_firstEntry(&msg->buffQ);
+        if (!buff) {
+            return 0;
+        } else {
+            buff->buffpos = 0;
+            msg->curbuff = buff;
             firstbuff = TRUE;
-	}
+        }
     } else {
-	firstbuff = (buff == (ses_msg_buff_t *)
+        firstbuff = (buff == (ses_msg_buff_t *)
                      dlq_firstEntry(&msg->buffQ)) ? TRUE : FALSE;
     }
 
     /* check current buffer end has been reached */
     if (buff->buffpos == buff->bufflen) {
-	buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
-	if (!buff) {
-	    return 0;
-	} else {
-	    buff->buffpos = 0;
-	    msg->curbuff = buff;
-	}
+        buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
+        if (!buff) {
+            return 0;
+        } else {
+            buff->buffpos = 0;
+            msg->curbuff = buff;
+        }
     }
 
     /* hack: xmlTextReaderRead wants to start off
@@ -1009,26 +1009,26 @@ int
     done = FALSE;
     while (!done) {
 
-	buffer[retlen++] = (char)buff->buff[buff->buffpos++];
+        buffer[retlen++] = (char)buff->buff[buff->buffpos++];
 
-	/* check xmlreader buffer full */
-	if (retlen==len) {
-	    done = TRUE;
-	    continue;
-	}
+        /* check xmlreader buffer full */
+        if (retlen==len) {
+            done = TRUE;
+            continue;
+        }
 
-	/* check current buffer end has been reached */
-	if (buff->buffpos == buff->bufflen) {
-	    buff2 = (ses_msg_buff_t *)dlq_nextEntry(buff);
-	    if (!buff2) {
-		done = TRUE;
-		continue;
-	    } else {
-		buff = buff2;
-		buff->buffpos = 0;
-		msg->curbuff = buff;
-	    }
-	}
+        /* check current buffer end has been reached */
+        if (buff->buffpos == buff->bufflen) {
+            buff2 = (ses_msg_buff_t *)dlq_nextEntry(buff);
+            if (!buff2) {
+                done = TRUE;
+                continue;
+            } else {
+                buff = buff2;
+                buff->buffpos = 0;
+                msg->curbuff = buff;
+            }
+        }
     }
 
     return retlen;
@@ -1065,7 +1065,7 @@ status_t
 
 #ifdef DEBUG
     if (!scb) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -1073,26 +1073,26 @@ status_t
     done = FALSE;
 
     while (!done) {
-	if (scb->state >= SES_ST_SHUTDOWN_REQ) {
-	    return ERR_NCX_SESSION_CLOSED;
-	}
+        if (scb->state >= SES_ST_SHUTDOWN_REQ) {
+            return ERR_NCX_SESSION_CLOSED;
+        }
 
-	/* get a new buffer */
-	res = ses_msg_new_buff(scb, &buff);
-	if (res != NO_ERR) {
-	    return res;
-	}
+        /* get a new buffer */
+        res = ses_msg_new_buff(scb, &buff);
+        if (res != NO_ERR) {
+            return res;
+        }
 
         erragain = FALSE;
 
-	/* read data into the new buffer */
-	if (scb->rdfn) {
-	    ret = (*scb->rdfn)(scb, 
-			       (char *)buff->buff, 
-			       SES_MSG_BUFFSIZE,
+        /* read data into the new buffer */
+        if (scb->rdfn) {
+            ret = (*scb->rdfn)(scb, 
+                               (char *)buff->buff, 
+                               SES_MSG_BUFFSIZE,
                                &erragain);
-	} else {
-	    ret = read(scb->fd, 
+        } else {
+            ret = read(scb->fd, 
                        buff->buff, 
                        SES_MSG_BUFFSIZE);
         }
@@ -1165,22 +1165,22 @@ const xmlChar *
 {
     switch (state) {
     case SES_ST_NONE:
-	return (const xmlChar *)"none";
+        return (const xmlChar *)"none";
     case SES_ST_INIT:
-	return (const xmlChar *)"init";
+        return (const xmlChar *)"init";
     case SES_ST_HELLO_WAIT:
-	return (const xmlChar *)"hello-wait";
+        return (const xmlChar *)"hello-wait";
     case SES_ST_IDLE:
-	return (const xmlChar *)"idle";
+        return (const xmlChar *)"idle";
     case SES_ST_IN_MSG:
-	return (const xmlChar *)"in-msg";
+        return (const xmlChar *)"in-msg";
     case SES_ST_SHUTDOWN_REQ:
-	return (const xmlChar *)"shutdown-requested";
+        return (const xmlChar *)"shutdown-requested";
     case SES_ST_SHUTDOWN:
-	return (const xmlChar *)"shutdown";
+        return (const xmlChar *)"shutdown";
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return (const xmlChar *)"--";	
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return (const xmlChar *)"--";   
     }
     /*NOTREACHED*/
 
@@ -1222,9 +1222,9 @@ uint32
     ses_line_left (const ses_cb_t *scb)
 {
     if (scb->stats.out_line >= scb->linesize) {
-	return 0;
+        return 0;
     } else {
-	return scb->linesize - scb->stats.out_line;
+        return scb->linesize - scb->stats.out_line;
     }
 
 } /* ses_line_left */
@@ -1242,7 +1242,7 @@ uint32
 *********************************************************************/
 void
     ses_put_extern (ses_cb_t *scb,
-		    const xmlChar *fname)
+                    const xmlChar *fname)
 {
     FILE               *fil;
     boolean             done;
@@ -1250,19 +1250,19 @@ void
 
     fil = fopen((const char *)fname, "r");
     if (!fil) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     } 
 
     done = FALSE;
     while (!done) {
-	ch = fgetc(fil);
-	if (ch == EOF) {
-	    fclose(fil);
-	    done = TRUE;
-	} else {
-	    ses_putchar(scb, (uint32)ch);
-	}
+        ch = fgetc(fil);
+        if (ch == EOF) {
+            fclose(fil);
+            done = TRUE;
+        } else {
+            ses_putchar(scb, (uint32)ch);
+        }
     }
 
 } /* ses_put_extern */
@@ -1301,20 +1301,20 @@ const xmlChar *
     /* needs to match netconf-state DM values */
     switch (transport) {
     case SES_TRANSPORT_NONE:
-	return (const xmlChar *)"none";
+        return (const xmlChar *)"none";
     case SES_TRANSPORT_SSH:
-	return (const xmlChar *)"netconf-ssh";
+        return (const xmlChar *)"netconf-ssh";
     case SES_TRANSPORT_BEEP:
-	return (const xmlChar *)"netconf-beep";
+        return (const xmlChar *)"netconf-beep";
     case SES_TRANSPORT_SOAP:
-	return (const xmlChar *)"netconf-soap-over-https";
+        return (const xmlChar *)"netconf-soap-over-https";
     case SES_TRANSPORT_SOAPBEEP:
-	return (const xmlChar *)"netconf-soap-over-beep";
+        return (const xmlChar *)"netconf-soap-over-beep";
     case SES_TRANSPORT_TLS:
-	return (const xmlChar *)"netconf-tls";
+        return (const xmlChar *)"netconf-tls";
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return (const xmlChar *)"none";
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return (const xmlChar *)"none";
     }
 
 } /* ses_get_transport_name */

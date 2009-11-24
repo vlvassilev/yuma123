@@ -94,7 +94,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 static boolean mgr_init_done = FALSE;
@@ -119,8 +119,8 @@ status_t
     status_t  res;
 
     if (mgr_init_done) {
-	log_info("\nManager Init Redo skipped...");
-	return NO_ERR;
+        log_info("\nManager Init Redo skipped...");
+        return NO_ERR;
     }
 
 #ifdef MGR_DEBUG
@@ -131,22 +131,22 @@ status_t
 
     res = mgr_cap_set_caps();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     res = mgr_rpc_init();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     res = mgr_not_init();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     res = mgr_hello_init();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     mgr_ses_init();
@@ -175,14 +175,14 @@ void
         log_debug3("\nManager Cleanup Starting...\n");
 #endif
 
-	mgr_cap_cleanup();
-	mgr_rpc_cleanup();
-	mgr_not_cleanup();
-	mgr_ses_cleanup();
-	mgr_hello_cleanup();
-	mgr_signal_cleanup();
-	mgr_shutdown = FALSE;
-	mgr_init_done = FALSE;
+        mgr_cap_cleanup();
+        mgr_rpc_cleanup();
+        mgr_not_cleanup();
+        mgr_ses_cleanup();
+        mgr_hello_cleanup();
+        mgr_signal_cleanup();
+        mgr_shutdown = FALSE;
+        mgr_init_done = FALSE;
     }
 }   /* mgr_cleanup */
 
@@ -202,7 +202,7 @@ mgr_scb_t *
 
     mscb = m__getObj(mgr_scb_t);
     if (mscb) {
-	mgr_init_scb(mscb);
+        mgr_init_scb(mscb);
     }
     return mscb;
 
@@ -223,8 +223,8 @@ void
 {
 #ifdef DEBUG
     if (!mscb) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -250,8 +250,8 @@ void
 {
 #ifdef DEBUG
     if (!mscb) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -276,8 +276,8 @@ void
 
 #ifdef DEBUG
     if (!mscb) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -291,39 +291,39 @@ void
     cap_clean_caplist(&mscb->caplist);
 
     if (mscb->root) {
-	val_free_value(mscb->root);
-	mscb->root = NULL;
+        val_free_value(mscb->root);
+        mscb->root = NULL;
     }
 
     if (mscb->lastroot) {
-	val_free_value(mscb->lastroot);
-	mscb->lastroot = NULL;
+        val_free_value(mscb->lastroot);
+        mscb->lastroot = NULL;
     }
 
     if (mscb->chtime) {
-	m__free(mscb->chtime);
-	mscb->chtime = NULL;
+        m__free(mscb->chtime);
+        mscb->chtime = NULL;
     }
 
     if (mscb->lastchtime) {
-	m__free(mscb->lastchtime);
-	mscb->lastchtime = NULL;
+        m__free(mscb->lastchtime);
+        mscb->lastchtime = NULL;
     }
 
     if (mscb->target) {
-	m__free(mscb->target);
-	mscb->target = NULL;
+        m__free(mscb->target);
+        mscb->target = NULL;
     }
 
     if (mscb->channel) {
-	libssh2_channel_free(mscb->channel);
-	mscb->channel = NULL;
+        libssh2_channel_free(mscb->channel);
+        mscb->channel = NULL;
     }
 
     if (mscb->session) {
-	libssh2_session_disconnect(mscb->session, "SSH2 session closed");
-	libssh2_session_free(mscb->session);
-	mscb->session = NULL;
+        libssh2_session_disconnect(mscb->session, "SSH2 session closed");
+        libssh2_session_free(mscb->session);
+        mscb->session = NULL;
     }
 
     while (!dlq_empty(&mscb->temp_modQ)) {

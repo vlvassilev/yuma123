@@ -1,6 +1,6 @@
 /*  FILE: agt_cap.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -79,7 +79,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -104,14 +104,14 @@ void
     agt_cap_cleanup (void)
 {
     if (agt_caps) {
-	val_free_value(agt_caps);
-	agt_caps = NULL;
+        val_free_value(agt_caps);
+        agt_caps = NULL;
     }
 
     if (my_agt_caps) {
-	cap_clean_caplist(my_agt_caps);
-	m__free(my_agt_caps);
-	my_agt_caps = NULL;
+        cap_clean_caplist(my_agt_caps);
+        m__free(my_agt_caps);
+        my_agt_caps = NULL;
     }
 
 } /* agt_cap_cleanup */
@@ -132,8 +132,8 @@ void
 *********************************************************************/
 status_t 
     agt_cap_set_caps (ncx_agttarg_t  agttarg,
-		      ncx_agtstart_t agtstart,
-		      const xmlChar *defstyle)
+                      ncx_agtstart_t agtstart,
+                      const xmlChar *defstyle)
 {
     const agt_profile_t   *agt_profile;
     val_value_t           *oldcaps, *newcaps;
@@ -154,39 +154,39 @@ status_t
     /* get a new cap_list */
     newmycaps = cap_new_caplist();
     if (!newmycaps) {
-	res = ERR_INTERNAL_MEM;
+        res = ERR_INTERNAL_MEM;
     }
 
     /* get a new val_value_t cap list for agent <hello> messages */
     if (res == NO_ERR) {
-	newcaps = xml_val_new_struct(NCX_EL_CAPABILITIES, nc_id);
-	if (!newcaps) {
-	    res = ERR_INTERNAL_MEM;
-	}
+        newcaps = xml_val_new_struct(NCX_EL_CAPABILITIES, nc_id);
+        if (!newcaps) {
+            res = ERR_INTERNAL_MEM;
+        }
     }
 
     /* add capability for NETCONF version 1.0 support */
     if (res == NO_ERR) {
-	res = cap_add_std(newmycaps, CAP_STDID_V1);
-	if (res == NO_ERR) {
-	    res = cap_add_stdval(newcaps, CAP_STDID_V1);
-	}
+        res = cap_add_std(newmycaps, CAP_STDID_V1);
+        if (res == NO_ERR) {
+            res = cap_add_stdval(newcaps, CAP_STDID_V1);
+        }
     }
 
     if (res == NO_ERR) {
-	/* set the capabilities based on the native target */
-	switch (agttarg) {
-	case NCX_AGT_TARG_RUNNING:
-	    res = cap_add_std(newmycaps, CAP_STDID_WRITE_RUNNING);
-	    if (res == NO_ERR) {
-		res = cap_add_stdval(newcaps, CAP_STDID_WRITE_RUNNING);
-	    }
-	    break;
-	case NCX_AGT_TARG_CANDIDATE:
-	    res = cap_add_std(newmycaps, CAP_STDID_CANDIDATE);
-	    if (res == NO_ERR) {
-		res = cap_add_stdval(newcaps, CAP_STDID_CANDIDATE);
-	    }
+        /* set the capabilities based on the native target */
+        switch (agttarg) {
+        case NCX_AGT_TARG_RUNNING:
+            res = cap_add_std(newmycaps, CAP_STDID_WRITE_RUNNING);
+            if (res == NO_ERR) {
+                res = cap_add_stdval(newcaps, CAP_STDID_WRITE_RUNNING);
+            }
+            break;
+        case NCX_AGT_TARG_CANDIDATE:
+            res = cap_add_std(newmycaps, CAP_STDID_CANDIDATE);
+            if (res == NO_ERR) {
+                res = cap_add_stdval(newcaps, CAP_STDID_CANDIDATE);
+            }
 
             if (res == NO_ERR) {
                 res = cap_add_std(newmycaps, CAP_STDID_CONF_COMMIT);
@@ -194,19 +194,19 @@ status_t
                     res = cap_add_stdval(newcaps, CAP_STDID_CONF_COMMIT);
                 }
             }
-	    break;
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	    break;
-	}
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+            break;
+        }
     }
 
     if (res == NO_ERR) {
-	/* set the rollback-on-error capability */
-	res = cap_add_std(newmycaps, CAP_STDID_ROLLBACK_ERR);
-	if (res == NO_ERR) {
-	    res = cap_add_stdval(newcaps, CAP_STDID_ROLLBACK_ERR);
-	}
+        /* set the rollback-on-error capability */
+        res = cap_add_std(newmycaps, CAP_STDID_ROLLBACK_ERR);
+        if (res == NO_ERR) {
+            res = cap_add_stdval(newcaps, CAP_STDID_ROLLBACK_ERR);
+        }
     }
 
     if (res == NO_ERR) {
@@ -221,105 +221,105 @@ status_t
 
     /* check the startup type for distinct-startup capability */
     if (res == NO_ERR) {
-	if (agtstart==NCX_AGT_START_DISTINCT) {
-	    res = cap_add_std(newmycaps, CAP_STDID_STARTUP);
-	    if (res == NO_ERR) {
-		res = cap_add_stdval(newcaps, CAP_STDID_STARTUP);
-	    }
-	}
+        if (agtstart==NCX_AGT_START_DISTINCT) {
+            res = cap_add_std(newmycaps, CAP_STDID_STARTUP);
+            if (res == NO_ERR) {
+                res = cap_add_stdval(newcaps, CAP_STDID_STARTUP);
+            }
+        }
     }
 
 #ifdef NOT_YET
     /* set the url capability */
     if (res == NO_ERR) {
-	res = cap_add_url(newmycaps, (const xmlChar *)"file,sftp");
-	if (res == NO_ERR) {
-	    ; /***/
-	}
+        res = cap_add_url(newmycaps, (const xmlChar *)"file,sftp");
+        if (res == NO_ERR) {
+            ; /***/
+        }
     }
 #endif
 
     /* set the xpath capability */
     if (res == NO_ERR) {
-	res = cap_add_std(newmycaps, CAP_STDID_XPATH);
-	if (res == NO_ERR) {
-	    res = cap_add_stdval(newcaps, CAP_STDID_XPATH);
-	}
+        res = cap_add_std(newmycaps, CAP_STDID_XPATH);
+        if (res == NO_ERR) {
+            res = cap_add_stdval(newcaps, CAP_STDID_XPATH);
+        }
     }
 
     /* set the notification capability */
     if (res == NO_ERR) {
-	res = cap_add_std(newmycaps, CAP_STDID_NOTIFICATION);
-	if (res == NO_ERR) {
-	    res = cap_add_stdval(newcaps, CAP_STDID_NOTIFICATION);
-	}
+        res = cap_add_std(newmycaps, CAP_STDID_NOTIFICATION);
+        if (res == NO_ERR) {
+            res = cap_add_stdval(newcaps, CAP_STDID_NOTIFICATION);
+        }
     }
 
     /* set the interleave capability */
     if (res == NO_ERR) {
-	res = cap_add_std(newmycaps, CAP_STDID_INTERLEAVE);
-	if (res == NO_ERR) {
-	    res = cap_add_stdval(newcaps, CAP_STDID_INTERLEAVE);
-	}
+        res = cap_add_std(newmycaps, CAP_STDID_INTERLEAVE);
+        if (res == NO_ERR) {
+            res = cap_add_stdval(newcaps, CAP_STDID_INTERLEAVE);
+        }
     }
 
 #ifdef NOT_YET 
     /* set the partial-lock capability */
     if (res == NO_ERR) {
-	res = cap_add_std(newmycaps, CAP_STDID_PARTIAL_LOCK);
-	if (res == NO_ERR) {
-	    res = cap_add_stdval(newcaps, 
-				 CAP_STDID_PARTIAL_LOCK);
-	}
+        res = cap_add_std(newmycaps, CAP_STDID_PARTIAL_LOCK);
+        if (res == NO_ERR) {
+            res = cap_add_stdval(newcaps, 
+                                 CAP_STDID_PARTIAL_LOCK);
+        }
     }
 #endif
 
     /* set the with-defaults capability */
     if (res == NO_ERR) {
-	res = cap_add_withdef(newmycaps, defstyle);
-	if (res == NO_ERR) {
-	    res = cap_add_withdefval(newcaps, defstyle);
-	}
+        res = cap_add_withdef(newmycaps, defstyle);
+        if (res == NO_ERR) {
+            res = cap_add_withdefval(newcaps, defstyle);
+        }
     }
 
     /* set the netconf-monitoring capability */
     if (res == NO_ERR) {
-	res = cap_add_std(newmycaps, 
-			  CAP_STDID_NETCONF_MONITORING);
-	if (res == NO_ERR) {
-	    res = cap_add_stdval(newcaps, 
-				 CAP_STDID_NETCONF_MONITORING);
-	}
+        res = cap_add_std(newmycaps, 
+                          CAP_STDID_NETCONF_MONITORING);
+        if (res == NO_ERR) {
+            res = cap_add_stdval(newcaps, 
+                                 CAP_STDID_NETCONF_MONITORING);
+        }
     }
 
     /* set the schema-retrieval capability */
     if (res == NO_ERR) {
-	res = cap_add_std(newmycaps, 
-			  CAP_STDID_SCHEMA_RETRIEVAL);
-	if (res == NO_ERR) {
-	    res = cap_add_stdval(newcaps,
-				 CAP_STDID_SCHEMA_RETRIEVAL);
-	}
+        res = cap_add_std(newmycaps, 
+                          CAP_STDID_SCHEMA_RETRIEVAL);
+        if (res == NO_ERR) {
+            res = cap_add_stdval(newcaps,
+                                 CAP_STDID_SCHEMA_RETRIEVAL);
+        }
     }
 
     /* check the return value */
     if (res != NO_ERR) {
-	/* toss the new, put back the old */
-	cap_free_caplist(newmycaps);
-	val_free_value(newcaps);
-	my_agt_caps = oldmycaps;
-	agt_caps = oldcaps;
+        /* toss the new, put back the old */
+        cap_free_caplist(newmycaps);
+        val_free_value(newcaps);
+        my_agt_caps = oldmycaps;
+        agt_caps = oldcaps;
     } else {
-	/* toss the old, install the new */
-	if (oldmycaps) {
-	    cap_free_caplist(oldmycaps);
-	}
-	if (oldcaps) {
-	    val_free_value(oldcaps);
-	}
-	my_agt_caps = newmycaps;
-	agt_caps = newcaps;
-    }	
+        /* toss the old, install the new */
+        if (oldmycaps) {
+            cap_free_caplist(oldmycaps);
+        }
+        if (oldcaps) {
+            val_free_value(oldcaps);
+        }
+        my_agt_caps = newmycaps;
+        agt_caps = newcaps;
+    }   
 
     return res;
 
@@ -346,7 +346,7 @@ status_t
     status_t               res;
 
     if (!agt_caps || !my_agt_caps) {
-	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+        return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
     res = NO_ERR;
@@ -355,13 +355,13 @@ status_t
 
     /* add capability for each module loaded in ncxmod */
     while (mod && res == NO_ERR) {
-	/* keep internal modules out of the capabilities */
-	if (xml_strcmp(mod->name, NCX_EL_NETCONF) &&
-	    xml_strcmp(mod->name, NCX_EL_XSD)) {
+        /* keep internal modules out of the capabilities */
+        if (xml_strcmp(mod->name, NCX_EL_NETCONF) &&
+            xml_strcmp(mod->name, NCX_EL_XSD)) {
 
-	    res = cap_add_modval(agt_caps, mod);
-	}
-	mod = (ncx_module_t *)dlq_nextEntry(mod);
+            res = cap_add_modval(agt_caps, mod);
+        }
+        mod = (ncx_module_t *)dlq_nextEntry(mod);
     }
 
     /* add capability for each deviation module, not already
@@ -373,8 +373,8 @@ status_t
          savedev = (ncx_save_deviations_t *)
              dlq_nextEntry(savedev)) {
 
-	if (xml_strcmp(savedev->devmodule, NCX_EL_NETCONF) &&
-	    xml_strcmp(savedev->devmodule, NCX_EL_XSD)) {
+        if (xml_strcmp(savedev->devmodule, NCX_EL_NETCONF) &&
+            xml_strcmp(savedev->devmodule, NCX_EL_XSD)) {
 
             /* not a hard-wired internal module */
             mod = ncx_find_module(savedev->devmodule,
@@ -405,12 +405,12 @@ status_t
 {
 #ifdef DEBUG
     if (!mod) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     if (!agt_caps || !my_agt_caps) {
-	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+        return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
     return cap_add_modval(agt_caps, mod);

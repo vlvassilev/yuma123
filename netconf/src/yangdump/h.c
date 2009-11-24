@@ -677,14 +677,14 @@ static status_t
     status_t              res;
 
     if (dlq_empty(datadefQ)) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     for (obj = (const obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (const obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (const obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (obj_has_name(obj) && 
+        if (obj_has_name(obj) && 
             obj_is_enabled(obj) &&
             !obj_is_cli(obj) &&
             !obj_is_abstract(obj)) {
@@ -698,14 +698,14 @@ static status_t
                 }
             }
 
-	    childQ = obj_get_cdatadefQ(obj);
-	    if (childQ) {
-		res = save_h_oids(scb, childQ, cdefineQ);
+            childQ = obj_get_cdatadefQ(obj);
+            if (childQ) {
+                res = save_h_oids(scb, childQ, cdefineQ);
                 if (res != NO_ERR) {
                     return res;
                 }
-	    }
-	}
+            }
+        }
     }
 
     return NO_ERR;

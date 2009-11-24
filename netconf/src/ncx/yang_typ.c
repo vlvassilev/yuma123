@@ -140,13 +140,13 @@ date         init     comment
 static status_t 
     resolve_type (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-		  ncx_module_t  *mod,
-		  typ_def_t *typdef,
-		  const xmlChar *name,
-		  const xmlChar *defval,
-		  obj_template_t *obj,
-		  grp_template_t *grp,
-		  boolean fromdef);
+                  ncx_module_t  *mod,
+                  typ_def_t *typdef,
+                  const xmlChar *name,
+                  const xmlChar *defval,
+                  obj_template_t *obj,
+                  grp_template_t *grp,
+                  boolean fromdef);
 
 
 /********************************************************************
@@ -170,20 +170,20 @@ static status_t
     res = NO_ERR;
 
     if (typdef->class == NCX_CL_NAMED) {
-	testdef = typ_get_parent_typdef(typdef);
-	lastdef = testdef;
-	while (testdef && res==NO_ERR) {
-	    if (testdef == typdef) {
-		res = ERR_NCX_DEF_LOOP;
-		log_error("\nError: named type loops with "
-			  "type '%s' on line %u",
-			  testdef->typename,
-			  lastdef->tkerr.linenum);
-	    } else {
-		lastdef = testdef;    
-		testdef = typ_get_parent_typdef(testdef);
-	    }
-	}
+        testdef = typ_get_parent_typdef(typdef);
+        lastdef = testdef;
+        while (testdef && res==NO_ERR) {
+            if (testdef == typdef) {
+                res = ERR_NCX_DEF_LOOP;
+                log_error("\nError: named type loops with "
+                          "type '%s' on line %u",
+                          testdef->typename,
+                          lastdef->tkerr.linenum);
+            } else {
+                lastdef = testdef;    
+                testdef = typ_get_parent_typdef(testdef);
+            }
+        }
     }
 
     return res;
@@ -206,8 +206,8 @@ static status_t
 *********************************************************************/
 static status_t 
     one_restriction_test (tk_chain_t *tkc,
-		      ncx_module_t *mod,
-		      typ_def_t *newdef)
+                      ncx_module_t *mod,
+                      typ_def_t *newdef)
 {
     dlq_hdr_t      *rangeQ;
     typ_pattern_t  *pat;
@@ -229,15 +229,15 @@ static status_t
      * and strings only
      */
     if (rangeQ && !dlq_empty(rangeQ)) {
-	if (!(typ_is_number(btyp) || 
-	      typ_is_string(btyp) || btyp==NCX_BT_BINARY)) {
-	    log_error("\nError: Range or length not "
-			  "allowed for the %s builtin type",
-		      tk_get_btype_sym(btyp));
-	    retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
-	    tkc->curerr = &newdef->tkerr;
-	    ncx_print_errormsg(tkc, mod, retres);
-	}
+        if (!(typ_is_number(btyp) || 
+              typ_is_string(btyp) || btyp==NCX_BT_BINARY)) {
+            log_error("\nError: Range or length not "
+                          "allowed for the %s builtin type",
+                      tk_get_btype_sym(btyp));
+            retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
+            tkc->curerr = &newdef->tkerr;
+            ncx_print_errormsg(tkc, mod, retres);
+        }
     }
 
     /* Check that a pattern was actually entered
@@ -245,39 +245,39 @@ static status_t
      */
     pat = typ_get_first_pattern(newdef);
     if (pat) {
-	if (btyp != NCX_BT_STRING) {
-	    log_error("\nError: keyword 'pattern' "
-		      "within a restriction for a %s type",
-		      tk_get_btype_sym(btyp));
-	    doerr = TRUE;
-	}
+        if (btyp != NCX_BT_STRING) {
+            log_error("\nError: keyword 'pattern' "
+                      "within a restriction for a %s type",
+                      tk_get_btype_sym(btyp));
+            doerr = TRUE;
+        }
     } else {
-	switch (strrest) {
-	case NCX_SR_ENUM:
-	    if (btyp != NCX_BT_ENUM) {
-		log_error("\nError: keyword 'enumeration' "
-			  "within a restriction for a %s type",
-			  tk_get_btype_sym(btyp));
-		doerr = TRUE;
-	    }
-	    break;
-	case NCX_SR_BIT:
-	    if (btyp != NCX_BT_BITS) {
-		log_error("\nError: keyword 'bit' "
-			  "within a restriction for a %s type",
-			  tk_get_btype_sym(btyp));
-		doerr = TRUE;
-	    }
-	    break;
-	default:
-	    ;
-	}
+        switch (strrest) {
+        case NCX_SR_ENUM:
+            if (btyp != NCX_BT_ENUM) {
+                log_error("\nError: keyword 'enumeration' "
+                          "within a restriction for a %s type",
+                          tk_get_btype_sym(btyp));
+                doerr = TRUE;
+            }
+            break;
+        case NCX_SR_BIT:
+            if (btyp != NCX_BT_BITS) {
+                log_error("\nError: keyword 'bit' "
+                          "within a restriction for a %s type",
+                          tk_get_btype_sym(btyp));
+                doerr = TRUE;
+            }
+            break;
+        default:
+            ;
+        }
     }
 
     if (doerr) {
-	retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
-	tkc->curerr = &newdef->tkerr;
-	ncx_print_errormsg(tkc, mod, retres);
+        retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
+        tkc->curerr = &newdef->tkerr;
+        ncx_print_errormsg(tkc, mod, retres);
     }
 
     return retres;
@@ -301,8 +301,8 @@ static status_t
 *********************************************************************/
 static status_t 
     restriction_test (tk_chain_t *tkc,
-		      ncx_module_t *mod,
-		      typ_def_t *typdef)
+                      ncx_module_t *mod,
+                      typ_def_t *typdef)
 {
     typ_def_t    *testdef, *newdef;
     ncx_btype_t   btyp, testbtyp;
@@ -310,9 +310,9 @@ static status_t
 
 
     if (typdef->class == NCX_CL_SIMPLE) {
-	return one_restriction_test(tkc, mod, typdef);
+        return one_restriction_test(tkc, mod, typdef);
     } else if (typdef->class != NCX_CL_NAMED) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     res = NO_ERR;
@@ -325,30 +325,30 @@ static status_t
      */
     testdef = typdef;
     while (testdef && testdef->class==NCX_CL_NAMED) {
-	newdef = typ_get_new_named(testdef);
-	if (!newdef) {
-	    testdef = typ_get_parent_typdef(testdef);
-	    continue;
-	}
+        newdef = typ_get_new_named(testdef);
+        if (!newdef) {
+            testdef = typ_get_parent_typdef(testdef);
+            continue;
+        }
 
-	/* validate the 'newdef' typdef */
-	testbtyp = typ_get_basetype(newdef);
-	if (testbtyp==NCX_BT_NONE) {
-	    newdef->def.simple.btyp = btyp;
-	    res = one_restriction_test(tkc, mod, newdef);
-	    CHK_EXIT(res, retres);
-	} else if (testbtyp != btyp) {
-	    log_error("\nError: Derived type '%s' does not match "
-		      "the eventual builtin type (%s)",
-		      tk_get_btype_sym(testbtyp),
-		      tk_get_btype_sym(btyp));
-	    retres = ERR_NCX_WRONG_DATATYP;
-	    tkc->curerr = &typdef->tkerr;
-	    ncx_print_errormsg(tkc, mod, retres);
-	}
+        /* validate the 'newdef' typdef */
+        testbtyp = typ_get_basetype(newdef);
+        if (testbtyp==NCX_BT_NONE) {
+            newdef->def.simple.btyp = btyp;
+            res = one_restriction_test(tkc, mod, newdef);
+            CHK_EXIT(res, retres);
+        } else if (testbtyp != btyp) {
+            log_error("\nError: Derived type '%s' does not match "
+                      "the eventual builtin type (%s)",
+                      tk_get_btype_sym(testbtyp),
+                      tk_get_btype_sym(btyp));
+            retres = ERR_NCX_WRONG_DATATYP;
+            tkc->curerr = &typdef->tkerr;
+            ncx_print_errormsg(tkc, mod, retres);
+        }
 
-	/* setup the next (parent) typdef in the chain */
-	testdef = typ_get_parent_typdef(testdef);
+        /* setup the next (parent) typdef in the chain */
+        testdef = typ_get_parent_typdef(testdef);
     }
 
     return retres;
@@ -383,9 +383,9 @@ static status_t
 *********************************************************************/
 static status_t 
     consume_yang_rangedef (tk_chain_t *tkc,
-			   ncx_module_t *mod,
-			   typ_def_t *typdef,
-			   ncx_btype_t btyp)
+                           ncx_module_t *mod,
+                           typ_def_t *typdef,
+                           ncx_btype_t btyp)
 {
     typ_rangedef_t  *rv;
     const char      *expstr;
@@ -401,17 +401,17 @@ static status_t
 
     rangeQ = typ_get_rangeQ_con(typdef);
     if (!rangeQ) {
-	res = SET_ERROR(ERR_NCX_DATA_MISSING);
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = SET_ERROR(ERR_NCX_DATA_MISSING);
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     /* get a new range value struct */
     rv = typ_new_rangedef();
     if (!rv) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     /* save the range builtin type */
@@ -419,61 +419,61 @@ static status_t
 
     /* get the first range-boundary, check if min requested */
     if (TK_CUR_STR(tkc)) {
-	if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_MIN)) {
-	    /* flag lower bound min for later eval */
-	    rv->flags |= TYP_FL_LBMIN;
-	} else if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_MAX)) {
-	    /* flag lower bound max for later eval */
-	    rv->flags |= TYP_FL_LBMAX;
-	} else if (btyp==NCX_BT_FLOAT64) {
-	    /* -INF and INF keywords allowed for real numbers */
-	    if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_NEGINF)) {
-		/* flag lower bound -INF for later eval */
-		rv->flags |= TYP_FL_LBINF;
-	    } else if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_POSINF)) {
-		/* flag lower bound INF for later eval */
-		rv->flags |= TYP_FL_LBINF2;
-	    } else {
-		res = ERR_NCX_WRONG_TKVAL;
-	    }
-	} else {
-	    res = ERR_NCX_WRONG_TKVAL;
-	}
+        if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_MIN)) {
+            /* flag lower bound min for later eval */
+            rv->flags |= TYP_FL_LBMIN;
+        } else if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_MAX)) {
+            /* flag lower bound max for later eval */
+            rv->flags |= TYP_FL_LBMAX;
+        } else if (btyp==NCX_BT_FLOAT64) {
+            /* -INF and INF keywords allowed for real numbers */
+            if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_NEGINF)) {
+                /* flag lower bound -INF for later eval */
+                rv->flags |= TYP_FL_LBINF;
+            } else if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_POSINF)) {
+                /* flag lower bound INF for later eval */
+                rv->flags |= TYP_FL_LBINF2;
+            } else {
+                res = ERR_NCX_WRONG_TKVAL;
+            }
+        } else {
+            res = ERR_NCX_WRONG_TKVAL;
+        }
     } else if (TK_CUR_NUM(tkc)) {
-	if (btyp != NCX_BT_NONE) {
-	    if (btyp == NCX_BT_DECIMAL64) {
-		res = ncx_convert_tkc_dec64(tkc, 
-					    typ_get_fraction_digits(typdef), 
-					    &rv->lb);
-	    } else {
-		res = ncx_convert_tkcnum(tkc, btyp, &rv->lb);
-	    }
-	} else {
-	    rv->lbstr = xml_strdup(TK_CUR_VAL(tkc));
-	    if (!rv->lbstr) {
-		res = ERR_INTERNAL_MEM;
-	    }
-	}
+        if (btyp != NCX_BT_NONE) {
+            if (btyp == NCX_BT_DECIMAL64) {
+                res = ncx_convert_tkc_dec64(tkc, 
+                                            typ_get_fraction_digits(typdef), 
+                                            &rv->lb);
+            } else {
+                res = ncx_convert_tkcnum(tkc, btyp, &rv->lb);
+            }
+        } else {
+            rv->lbstr = xml_strdup(TK_CUR_VAL(tkc));
+            if (!rv->lbstr) {
+                res = ERR_INTERNAL_MEM;
+            }
+        }
     } else {
-	res = ERR_NCX_WRONG_TKTYPE;
+        res = ERR_NCX_WRONG_TKTYPE;
     }
 
     /* record any error so far */
     if (res != NO_ERR) {
-	retres = res;
-	ncx_mod_exp_err(tkc, mod, res, expstr);
-	if (NEED_EXIT(res)) {
-	    typ_free_rangedef(rv, btyp);
-	    return retres;
-	}
+        retres = res;
+        ncx_mod_exp_err(tkc, mod, res, expstr);
+        if (NEED_EXIT(res)) {
+            typ_free_rangedef(rv, btyp);
+            return retres;
+        }
     }
 
     /* move past lower range-boundary */
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	typ_free_rangedef(rv, btyp);
-	return res;
+        ncx_print_errormsg(tkc, mod, res);
+        typ_free_rangedef(rv, btyp);
+        return res;
     }
 
     /* check if done with this range part */
@@ -481,150 +481,150 @@ static status_t
     case TK_TT_SEMICOL:
     case TK_TT_LBRACE:
     case TK_TT_BAR:
-	/* normal end of range reached 
-	 * lower bound is the upper bound also
-	 */
-	if (rv->flags & TYP_FL_LBMIN) {
-	    rv->flags |= TYP_FL_UBMIN;
-	} else if (rv->flags & TYP_FL_LBMAX) {
-	    rv->flags |= TYP_FL_UBMAX;
-	} else if (rv->flags & TYP_FL_LBINF) {
-	    rv->flags |= TYP_FL_UBINF2;
-	} else if (rv->flags & TYP_FL_LBINF2) {
-	    rv->flags |= TYP_FL_UBINF;
-	} else {
-	    if (btyp != NCX_BT_NONE) {
-		res = ncx_copy_num(&rv->lb, &rv->ub, btyp);
-	    } else {
-		rv->ubstr = xml_strdup(rv->lbstr);
-		if (!rv->ubstr) {
-		    res = ERR_INTERNAL_MEM;
-		}
-	    }
-	}
-	done = TRUE;
-	break;
+        /* normal end of range reached 
+         * lower bound is the upper bound also
+         */
+        if (rv->flags & TYP_FL_LBMIN) {
+            rv->flags |= TYP_FL_UBMIN;
+        } else if (rv->flags & TYP_FL_LBMAX) {
+            rv->flags |= TYP_FL_UBMAX;
+        } else if (rv->flags & TYP_FL_LBINF) {
+            rv->flags |= TYP_FL_UBINF2;
+        } else if (rv->flags & TYP_FL_LBINF2) {
+            rv->flags |= TYP_FL_UBINF;
+        } else {
+            if (btyp != NCX_BT_NONE) {
+                res = ncx_copy_num(&rv->lb, &rv->ub, btyp);
+            } else {
+                rv->ubstr = xml_strdup(rv->lbstr);
+                if (!rv->ubstr) {
+                    res = ERR_INTERNAL_MEM;
+                }
+            }
+        }
+        done = TRUE;
+        break;
     case TK_TT_RANGESEP:
-	/* continue on to upper bound */
-	res = TK_ADV(tkc);
-	break;
+        /* continue on to upper bound */
+        res = TK_ADV(tkc);
+        break;
     default:
-	res = ERR_NCX_WRONG_TKTYPE;
+        res = ERR_NCX_WRONG_TKTYPE;
     }
 
     /* record any error in previous section */
     if (res != NO_ERR) {
-	ncx_mod_exp_err(tkc, mod, res, expstr);
-	retres = res;
-	if (NEED_EXIT(res)) {
-	    typ_free_rangedef(rv, btyp);
-	    return res;
-	}
+        ncx_mod_exp_err(tkc, mod, res, expstr);
+        retres = res;
+        if (NEED_EXIT(res)) {
+            typ_free_rangedef(rv, btyp);
+            return res;
+        }
     }
 
     /* get the last range-boundary, check if max requested */
     if (!done) {
-	if (TK_CUR_STR(tkc)) {
-	    if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_MIN)) {
-		/* flag upper bound min for later eval */
-		rv->flags |= TYP_FL_UBMIN;
-	    } else if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_MAX)) {
-		/* flag upper bound max for later eval */
-		rv->flags |= TYP_FL_UBMAX;
-	    } else if (btyp==NCX_BT_FLOAT64) {
-		if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_NEGINF)) {
-		    /* flag upper bound -INF for later eval */
-		    rv->flags |= TYP_FL_UBINF2;
-		} else if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_POSINF)) {
-		    /* flag upper bound INF for later eval */
-		    rv->flags |= TYP_FL_UBINF;
-		} else {
-		    res = ERR_NCX_WRONG_TKVAL;
-		}
-	    } else {
-		res = ERR_NCX_WRONG_TKVAL;
-	    }
-	} else if (TK_CUR_NUM(tkc)) {
-	    if (btyp != NCX_BT_NONE) {
-		if (btyp == NCX_BT_DECIMAL64) {
-		    res = ncx_convert_tkc_dec64
-			(tkc, 
-			 typ_get_fraction_digits(typdef), 
-			 &rv->ub);
-		} else {
-		    res = ncx_convert_tkcnum(tkc, btyp, &rv->ub);
-		}
-	    } else {
-		rv->ubstr = xml_strdup(TK_CUR_VAL(tkc));
-		if (!rv->ubstr) {
-		    res = ERR_INTERNAL_MEM;
-		}
-	    }
-	} else {
-	    res = ERR_NCX_WRONG_TKTYPE;
-	}
+        if (TK_CUR_STR(tkc)) {
+            if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_MIN)) {
+                /* flag upper bound min for later eval */
+                rv->flags |= TYP_FL_UBMIN;
+            } else if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_MAX)) {
+                /* flag upper bound max for later eval */
+                rv->flags |= TYP_FL_UBMAX;
+            } else if (btyp==NCX_BT_FLOAT64) {
+                if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_NEGINF)) {
+                    /* flag upper bound -INF for later eval */
+                    rv->flags |= TYP_FL_UBINF2;
+                } else if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_POSINF)) {
+                    /* flag upper bound INF for later eval */
+                    rv->flags |= TYP_FL_UBINF;
+                } else {
+                    res = ERR_NCX_WRONG_TKVAL;
+                }
+            } else {
+                res = ERR_NCX_WRONG_TKVAL;
+            }
+        } else if (TK_CUR_NUM(tkc)) {
+            if (btyp != NCX_BT_NONE) {
+                if (btyp == NCX_BT_DECIMAL64) {
+                    res = ncx_convert_tkc_dec64
+                        (tkc, 
+                         typ_get_fraction_digits(typdef), 
+                         &rv->ub);
+                } else {
+                    res = ncx_convert_tkcnum(tkc, btyp, &rv->ub);
+                }
+            } else {
+                rv->ubstr = xml_strdup(TK_CUR_VAL(tkc));
+                if (!rv->ubstr) {
+                    res = ERR_INTERNAL_MEM;
+                }
+            }
+        } else {
+            res = ERR_NCX_WRONG_TKTYPE;
+        }
 
-	/* record any error in previous section */
-	if (res != NO_ERR) {
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	    retres = res;
-	    if (NEED_EXIT(res)) {
-		typ_free_rangedef(rv, btyp);
-		return res;
-	    }
-	}
+        /* record any error in previous section */
+        if (res != NO_ERR) {
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+            retres = res;
+            if (NEED_EXIT(res)) {
+                typ_free_rangedef(rv, btyp);
+                return res;
+            }
+        }
 
-	/* move past this keyword or number */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	    typ_free_rangedef(rv, btyp);
-	    return res;
-	}
+        /* move past this keyword or number */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+            typ_free_rangedef(rv, btyp);
+            return res;
+        }
     }
 
     /* check basic overlap, still need to evaluate min max later */
     if (!(rv->flags & TYP_RANGE_FLAGS)) {
-	/* just numbers entered, no min.max.-INF, INF */
-	if (btyp != NCX_BT_NONE) {
-	    cmpval = ncx_compare_nums(&rv->lb, &rv->ub, btyp);
-	    if (cmpval > 0) {
-		retres = ERR_NCX_INVALID_RANGE;
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	}
+        /* just numbers entered, no min.max.-INF, INF */
+        if (btyp != NCX_BT_NONE) {
+            cmpval = ncx_compare_nums(&rv->lb, &rv->ub, btyp);
+            if (cmpval > 0) {
+                retres = ERR_NCX_INVALID_RANGE;
+                ncx_print_errormsg(tkc, mod, retres);
+            }
+        }
     } else {
-	/* check corner cases with min, max, -INF, INF keywords
-	 * check this LB > the last UB (if any lastrv) 
-	 */
-	if (rv->flags & (TYP_FL_LBMAX|TYP_FL_LBINF2)) {
-	    /* lower bound set to max or INF */
-	    if (!(rv->flags & (TYP_FL_UBMAX|TYP_FL_UBINF))) {
-		/* upper bound not set to max or INF */
-		retres = ERR_NCX_INVALID_RANGE;
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	}
-	if (rv->flags & (TYP_FL_UBMIN|TYP_FL_UBINF2)) {
-	    /* upper bound set to min or -INF */
-	    if (!(rv->flags & (TYP_FL_LBMIN|TYP_FL_LBINF))) {
-		/* lower bound not set to min or -INF */
-		retres = ERR_NCX_INVALID_RANGE;
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	}
-	if ((rv->flags & TYP_FL_LBINF) && !dlq_empty(rangeQ)) {
-	    /* LB set to -INF and the rangeQ is not empty */
-	    retres = ERR_NCX_OVERLAP_RANGE;
-	    ncx_print_errormsg(tkc, mod, retres);
-	}
+        /* check corner cases with min, max, -INF, INF keywords
+         * check this LB > the last UB (if any lastrv) 
+         */
+        if (rv->flags & (TYP_FL_LBMAX|TYP_FL_LBINF2)) {
+            /* lower bound set to max or INF */
+            if (!(rv->flags & (TYP_FL_UBMAX|TYP_FL_UBINF))) {
+                /* upper bound not set to max or INF */
+                retres = ERR_NCX_INVALID_RANGE;
+                ncx_print_errormsg(tkc, mod, retres);
+            }
+        }
+        if (rv->flags & (TYP_FL_UBMIN|TYP_FL_UBINF2)) {
+            /* upper bound set to min or -INF */
+            if (!(rv->flags & (TYP_FL_LBMIN|TYP_FL_LBINF))) {
+                /* lower bound not set to min or -INF */
+                retres = ERR_NCX_INVALID_RANGE;
+                ncx_print_errormsg(tkc, mod, retres);
+            }
+        }
+        if ((rv->flags & TYP_FL_LBINF) && !dlq_empty(rangeQ)) {
+            /* LB set to -INF and the rangeQ is not empty */
+            retres = ERR_NCX_OVERLAP_RANGE;
+            ncx_print_errormsg(tkc, mod, retres);
+        }
     }
 
     /* save and exit if rangedef is valid */
     if (retres == NO_ERR) {
-	dlq_enque(rv, rangeQ);
+        dlq_enque(rv, rangeQ);
     } else {
-	typ_free_rangedef(rv, btyp);
+        typ_free_rangedef(rv, btyp);
     }
     return retres;
 
@@ -656,9 +656,9 @@ static status_t
 *********************************************************************/
 static status_t 
     consume_yang_range (tk_chain_t *tkc,
-			ncx_module_t *mod,
-			typ_def_t *typdef,
-			boolean isrange)
+                        ncx_module_t *mod,
+                        typ_def_t *typdef,
+                        boolean isrange)
 {
     const char      *expstr;
     ncx_errinfo_t   *errinfo;
@@ -681,16 +681,16 @@ static status_t
 
     btyp = typ_get_basetype(typdef);
     if (btyp == NCX_BT_NONE) {
-	if (isrange) {
-	    /* signal that the range will be processed in phase 2 */
-	    rbtyp = NCX_BT_NONE; 
-	} else {
-	    /* length range is always uint32 */
-	    rbtyp = NCX_BT_UINT32;   
-	}
+        if (isrange) {
+            /* signal that the range will be processed in phase 2 */
+            rbtyp = NCX_BT_NONE; 
+        } else {
+            /* length range is always uint32 */
+            rbtyp = NCX_BT_UINT32;   
+        }
     } else {
-	/* get the correct number type for the range specification */
-	rbtyp = typ_get_range_type(btyp);
+        /* get the correct number type for the range specification */
+        rbtyp = typ_get_range_type(btyp);
     }
 
     /* move past start-of-range keyword
@@ -699,36 +699,36 @@ static status_t
      */
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     if (TK_CUR_STR(tkc)) {
-	if (range->rangestr) {
-	    m__free(range->rangestr);
-	}
-	range->rangestr = xml_strdup(TK_CUR_VAL(tkc));
-	if (!range->rangestr) {
-	    res = ERR_INTERNAL_MEM;
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	}
+        if (range->rangestr) {
+            m__free(range->rangestr);
+        }
+        range->rangestr = xml_strdup(TK_CUR_VAL(tkc));
+        if (!range->rangestr) {
+            res = ERR_INTERNAL_MEM;
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        }
 
-	/* undo quotes or identifier string into separate tokens 
-	 * In YANG there are very few tokens, so all these no-WSP
-	 * strings are valid. If quoted, the entire range clause
-	 * will be a single string.  If not, many combinations
-	 * of valid range clause tokens might be mis-classified
-	 * E.g.:
-	 *  range min..max;  (TSTRING)
-	 *  range 1..100;    (DNUM, STRING, DNUM)
-	 *  range -INF..47.8 (STRING, RNUM)
-	 */
-	res = tk_retokenize_cur_string(tkc, mod);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	}	    
+        /* undo quotes or identifier string into separate tokens 
+         * In YANG there are very few tokens, so all these no-WSP
+         * strings are valid. If quoted, the entire range clause
+         * will be a single string.  If not, many combinations
+         * of valid range clause tokens might be mis-classified
+         * E.g.:
+         *  range min..max;  (TSTRING)
+         *  range 1..100;    (DNUM, STRING, DNUM)
+         *  range -INF..47.8 (STRING, RNUM)
+         */
+        res = tk_retokenize_cur_string(tkc, mod);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        }           
     }
 
     /* get all the range-part sections */
@@ -736,7 +736,7 @@ static status_t
     while (!done) {
         /* get one range spec */
         res = consume_yang_rangedef(tkc, mod, typdef, rbtyp);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
 
         /* Current token is either a BAR or SEMICOL/LBRACE
          * Move past it if BAR and keep going
@@ -750,26 +750,26 @@ static status_t
         case TK_TT_BAR:
             res = TK_ADV(tkc);
             if (res != NO_ERR) {
-		ncx_print_errormsg(tkc, mod, res);
-		return res;
+                ncx_print_errormsg(tkc, mod, res);
+                return res;
             }
             break;
         default:
-	    expstr = "semi-colon, left brace, or vertical bar";
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
+            expstr = "semi-colon, left brace, or vertical bar";
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
         }
     }
 
     /* check sub-section for error-app-tag and error-message */
     if (TK_CUR_TYP(tkc)==TK_TT_LBRACE) {
-	errinfo = &range->range_errinfo;
-	res = yang_consume_error_stmts(tkc, 
+        errinfo = &range->range_errinfo;
+        res = yang_consume_error_stmts(tkc, 
                                        mod, 
-				       &errinfo,
-				       &typdef->appinfoQ);
-	CHK_EXIT(res, retres);
+                                       &errinfo,
+                                       &typdef->appinfoQ);
+        CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -797,8 +797,8 @@ static status_t
 *********************************************************************/
 static status_t 
     consume_yang_pattern (tk_chain_t *tkc,
-			  ncx_module_t *mod,
-			  typ_def_t *typdef)
+                          ncx_module_t *mod,
+                          typ_def_t *typdef)
 {
     typ_pattern_t   *pat;
     ncx_errinfo_t   *errinfo;
@@ -815,61 +815,61 @@ static status_t
     /* move past pattern keyword to pattern value, get 1 string */
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     if (TK_CUR_STR(tkc)) {
-	pat = typ_new_pattern(TK_CUR_VAL(tkc));
-	if (!pat) {
-	    res = ERR_INTERNAL_MEM;
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	}
+        pat = typ_new_pattern(TK_CUR_VAL(tkc));
+        if (!pat) {
+            res = ERR_INTERNAL_MEM;
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        }
 
-	/* make sure the pattern is valid */
-	res = typ_compile_pattern(pat);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    retres = res;
-	    if (NEED_EXIT(res)) {
-		return res;
-	    }
-	}
+        /* make sure the pattern is valid */
+        res = typ_compile_pattern(pat);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            retres = res;
+            if (NEED_EXIT(res)) {
+                return res;
+            }
+        }
 
-	/* save the struct in the patternQ early,
-	 * even if it didn't compile
-	 */
-	dlq_enque(pat, &typdef->def.simple.patternQ);
+        /* save the struct in the patternQ early,
+         * even if it didn't compile
+         */
+        dlq_enque(pat, &typdef->def.simple.patternQ);
     }
 
     /* move to the next token, which must be ';' or '{' */
     expstr = "semicolon or left brace";
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     switch (TK_CUR_TYP(tkc)) {
     case TK_TT_SEMICOL:
     case TK_TT_LBRACE:
-	break;
+        break;
     default:
-	retres = ERR_NCX_WRONG_TKTYPE;
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
+        retres = ERR_NCX_WRONG_TKTYPE;
+        ncx_mod_exp_err(tkc, mod, retres, expstr);
     }
 
     /* check sub-section for error-app-tag and error-message */
     if (TK_CUR_TYP(tkc)==TK_TT_LBRACE) {
-	errinfo = &pat->pat_errinfo;
-	res = yang_consume_error_stmts(tkc, 
+        errinfo = &pat->pat_errinfo;
+        res = yang_consume_error_stmts(tkc, 
                                        mod,
-				       &errinfo,
-				       &typdef->appinfoQ);
-	if (res != NO_ERR) {
-	    retres = res;
-	}
+                                       &errinfo,
+                                       &typdef->appinfoQ);
+        if (res != NO_ERR) {
+            retres = res;
+        }
     }
 
     return retres;
@@ -900,9 +900,9 @@ static status_t
 *********************************************************************/
 static status_t 
     finish_string_type (tk_chain_t  *tkc,
-			ncx_module_t *mod,
-			typ_def_t *typdef,
-			ncx_btype_t btyp)
+                        ncx_module_t *mod,
+                        typ_def_t *typdef,
+                        ncx_btype_t btyp)
 {
     const xmlChar *val;
     const char    *expstr;
@@ -918,64 +918,64 @@ static status_t
 
     while (!done) {
 
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT(res, retres);
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+            CHK_EXIT(res, retres);
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
+        /* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_LENGTH)) {
-	    if (lendone) {
-		retres = ERR_NCX_ENTRY_EXISTS;
-		log_error("\nError: length clause already entered");
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
+            if (lendone) {
+                retres = ERR_NCX_ENTRY_EXISTS;
+                log_error("\nError: length clause already entered");
+                ncx_print_errormsg(tkc, mod, retres);
+            }
 
-	    lendone = TRUE;
-	    res = consume_yang_range(tkc, mod, typdef, FALSE);
-	    CHK_EXIT(res, retres);
+            lendone = TRUE;
+            res = consume_yang_range(tkc, mod, typdef, FALSE);
+            CHK_EXIT(res, retres);
         } else if (!xml_strcmp(val, YANG_K_PATTERN)) {
-	    /* make sure this is not the 'binary' data type */
-	    if (btyp == NCX_BT_BINARY) {
-		log_error("\nPattern restriction not allowed"
-			  " for the binary type");
-		retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
-		ncx_print_errormsg(tkc, mod, retres);
-	    } 
+            /* make sure this is not the 'binary' data type */
+            if (btyp == NCX_BT_BINARY) {
+                log_error("\nPattern restriction not allowed"
+                          " for the binary type");
+                retres = ERR_NCX_RESTRICT_NOT_ALLOWED;
+                ncx_print_errormsg(tkc, mod, retres);
+            } 
 
-	    res = consume_yang_pattern(tkc, mod, typdef);
-	    CHK_EXIT(res, retres);
-	} else {
-	    retres = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	}
+            res = consume_yang_pattern(tkc, mod, typdef);
+            CHK_EXIT(res, retres);
+        } else {
+            retres = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+        }
     }
 
     return retres;
@@ -1006,9 +1006,9 @@ static status_t
 *********************************************************************/
 static status_t 
     finish_number_type (tk_chain_t  *tkc,
-			ncx_module_t *mod,
-			ncx_btype_t btyp,
-			typ_def_t *typdef)
+                        ncx_module_t *mod,
+                        ncx_btype_t btyp,
+                        typ_def_t *typdef)
 {
     const xmlChar *val;
     const char    *expstr;
@@ -1027,85 +1027,85 @@ static status_t
 
     while (!done) {
 
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT(res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+            CHK_EXIT(res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
+        /* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_RANGE)) {
-	    if (rangedone) {
-		retres = ERR_NCX_ENTRY_EXISTS;
-		log_error("\nError: range statement already entered");
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
+            if (rangedone) {
+                retres = ERR_NCX_ENTRY_EXISTS;
+                log_error("\nError: range statement already entered");
+                ncx_print_errormsg(tkc, mod, retres);
+            }
 
-	    rangedone = TRUE;
-	    res = consume_yang_range(tkc, mod, typdef, TRUE);
-	    CHK_EXIT(res, retres);
-	} else if (!xml_strcmp(val, YANG_K_FRACTION_DIGITS)) {
-	    res = yang_consume_uint32(tkc,
-				      mod,
-				      &digits,
-				      &digitsdone,
-				      &typdef->appinfoQ);
-	    if (res == NO_ERR && btyp != NCX_BT_DECIMAL64) {
-		retres = res = ERR_NCX_RESTRICT_NOT_ALLOWED;
-		log_error("\nError: fraction-digits found for '%s'",
-			  tk_get_btype_sym(btyp));
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
+            rangedone = TRUE;
+            res = consume_yang_range(tkc, mod, typdef, TRUE);
+            CHK_EXIT(res, retres);
+        } else if (!xml_strcmp(val, YANG_K_FRACTION_DIGITS)) {
+            res = yang_consume_uint32(tkc,
+                                      mod,
+                                      &digits,
+                                      &digitsdone,
+                                      &typdef->appinfoQ);
+            if (res == NO_ERR && btyp != NCX_BT_DECIMAL64) {
+                retres = res = ERR_NCX_RESTRICT_NOT_ALLOWED;
+                log_error("\nError: fraction-digits found for '%s'",
+                          tk_get_btype_sym(btyp));
+                ncx_print_errormsg(tkc, mod, retres);
+            }
 
-	    if (res == NO_ERR) {
-		/* check value is actually in proper range */
-		if (digits < TYP_DEC64_MIN_DIGITS ||
-		    digits > TYP_DEC64_MAX_DIGITS) {
-		    retres = res = ERR_NCX_INVALID_VALUE;
-		    log_error("\nError: fraction-digits '%u' out of range",
-			      digits);
-		    ncx_print_errormsg(tkc, mod, retres);
-		}
-	    }
+            if (res == NO_ERR) {
+                /* check value is actually in proper range */
+                if (digits < TYP_DEC64_MIN_DIGITS ||
+                    digits > TYP_DEC64_MAX_DIGITS) {
+                    retres = res = ERR_NCX_INVALID_VALUE;
+                    log_error("\nError: fraction-digits '%u' out of range",
+                              digits);
+                    ncx_print_errormsg(tkc, mod, retres);
+                }
+            }
 
-	    if (res == NO_ERR) {
-		res = typ_set_fraction_digits(typdef, (uint8)digits);
-		if (res != NO_ERR) {
-		    retres = res;
-		    log_error("\nError: set fraction-digits failed");
-		    ncx_print_errormsg(tkc, mod, retres);
-		}
-	    }
-	} else {
-	    retres = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	}
+            if (res == NO_ERR) {
+                res = typ_set_fraction_digits(typdef, (uint8)digits);
+                if (res != NO_ERR) {
+                    retres = res;
+                    log_error("\nError: set fraction-digits failed");
+                    ncx_print_errormsg(tkc, mod, retres);
+                }
+            }
+        } else {
+            retres = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+        }
     }
 
     return retres;
@@ -1135,8 +1135,8 @@ static status_t
 *********************************************************************/
 static status_t 
     finish_unknown_type (tk_chain_t  *tkc,
-			 ncx_module_t *mod,
-			 typ_def_t *typdef)
+                         ncx_module_t *mod,
+                         typ_def_t *typdef)
 {
     const xmlChar *val;
     const char    *expstr;
@@ -1153,77 +1153,77 @@ static status_t
 
     while (!done) {
 
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT(res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    res = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+            CHK_EXIT(res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            res = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
+        /* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_RANGE)) {
-	    if (lendone) {
-		retres = ERR_NCX_ENTRY_EXISTS;
-		log_error("\nError: length clause already entered,"
-			  "  range clause not allowed");
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	    if (rangedone) {
-		retres = ERR_NCX_ENTRY_EXISTS;
-		log_error("\nError: range clause already entered");
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
+            if (lendone) {
+                retres = ERR_NCX_ENTRY_EXISTS;
+                log_error("\nError: length clause already entered,"
+                          "  range clause not allowed");
+                ncx_print_errormsg(tkc, mod, retres);
+            }
+            if (rangedone) {
+                retres = ERR_NCX_ENTRY_EXISTS;
+                log_error("\nError: range clause already entered");
+                ncx_print_errormsg(tkc, mod, retres);
+            }
 
-	    rangedone = TRUE;
-	    res = consume_yang_range(tkc, mod, typdef, TRUE);
-	    CHK_EXIT(res, retres);
+            rangedone = TRUE;
+            res = consume_yang_range(tkc, mod, typdef, TRUE);
+            CHK_EXIT(res, retres);
         } else if (!xml_strcmp(val, YANG_K_LENGTH)) {
-	    if (rangedone) {
-		retres = ERR_NCX_ENTRY_EXISTS;
-		log_error("\nError: range clause already entered,"
-			  "  length clause not allowed");
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	    if (lendone) {
-		retres = ERR_NCX_ENTRY_EXISTS;
-		log_error("\nError: length clause already entered");
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	    lendone = TRUE;
-	    res = consume_yang_range(tkc, mod, typdef, FALSE);
-	    CHK_EXIT(res, retres);
-	} else if (!xml_strcmp(val, YANG_K_PATTERN)) {
-	    res = consume_yang_pattern(tkc, mod, typdef);
-	    CHK_EXIT(res, retres);
-	} else {
-	    retres = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	}
+            if (rangedone) {
+                retres = ERR_NCX_ENTRY_EXISTS;
+                log_error("\nError: range clause already entered,"
+                          "  length clause not allowed");
+                ncx_print_errormsg(tkc, mod, retres);
+            }
+            if (lendone) {
+                retres = ERR_NCX_ENTRY_EXISTS;
+                log_error("\nError: length clause already entered");
+                ncx_print_errormsg(tkc, mod, retres);
+            }
+            lendone = TRUE;
+            res = consume_yang_range(tkc, mod, typdef, FALSE);
+            CHK_EXIT(res, retres);
+        } else if (!xml_strcmp(val, YANG_K_PATTERN)) {
+            res = consume_yang_pattern(tkc, mod, typdef);
+            CHK_EXIT(res, retres);
+        } else {
+            retres = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+        }
     }
 
     return retres;
@@ -1253,11 +1253,11 @@ static status_t
 *********************************************************************/
 static status_t
     insert_yang_enumbit (tk_chain_t *tkc,
-			 ncx_module_t *mod,
-			 typ_enum_t *en, 
-			 typ_def_t *typdef,
-			 ncx_btype_t btyp,
-			 boolean valset)
+                         ncx_module_t *mod,
+                         typ_enum_t *en, 
+                         typ_def_t *typdef,
+                         ncx_btype_t btyp,
+                         boolean valset)
 {
     typ_simple_t *sim;
     typ_enum_t   *enl;
@@ -1271,84 +1271,84 @@ static status_t
          enl != NULL;
          enl = (typ_enum_t *)dlq_nextEntry(enl)) {
         if (!xml_strcmp(en->name, enl->name)) {
-	    res = ERR_NCX_DUP_ENTRY;
-	    log_error("\nError: duplicate enum or bit name (%s)", en->name);
-	    ncx_print_errormsg(tkc, mod, res);
+            res = ERR_NCX_DUP_ENTRY;
+            log_error("\nError: duplicate enum or bit name (%s)", en->name);
+            ncx_print_errormsg(tkc, mod, res);
             return res;
         } else if (valset && btyp==NCX_BT_ENUM && en->val==enl->val) {
-	    res = ERR_NCX_DUP_ENTRY;
-	    log_error("\nError: duplicate enum value (%d)", en->val);
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	} else if (valset && btyp==NCX_BT_BITS && en->pos==enl->pos) {
-	    res = ERR_NCX_DUP_ENTRY;
-	    log_error("\nError: duplicate bit position (%u)", en->pos);
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	}
+            res = ERR_NCX_DUP_ENTRY;
+            log_error("\nError: duplicate enum value (%d)", en->val);
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        } else if (valset && btyp==NCX_BT_BITS && en->pos==enl->pos) {
+            res = ERR_NCX_DUP_ENTRY;
+            log_error("\nError: duplicate bit position (%u)", en->pos);
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        }
     }
 
     if (valset) {
-	/* check if this is an out-of-order insert */
-	done = FALSE;
-	for (enl = (typ_enum_t *)dlq_firstEntry(&sim->valQ);
-	     enl != NULL && !done;
-	     enl = (typ_enum_t *)dlq_nextEntry(enl)) {
-	    if (btyp==NCX_BT_ENUM) {
-		if (en->val < enl->val) {
-		    res = ERR_NCX_ENUM_VAL_ORDER;
+        /* check if this is an out-of-order insert */
+        done = FALSE;
+        for (enl = (typ_enum_t *)dlq_firstEntry(&sim->valQ);
+             enl != NULL && !done;
+             enl = (typ_enum_t *)dlq_nextEntry(enl)) {
+            if (btyp==NCX_BT_ENUM) {
+                if (en->val < enl->val) {
+                    res = ERR_NCX_ENUM_VAL_ORDER;
                     if (ncx_warning_enabled(res)) {
                         log_warn("\nWarning: Out of order enum '%s' = %d",
                                  (char *)en->name, en->val);
                         ncx_print_errormsg(tkc, mod, res);
                     }
-		    done = TRUE;
-		}
-	    } else {
-		if (en->pos < enl->pos) {
-		    res = ERR_NCX_BIT_POS_ORDER;
+                    done = TRUE;
+                }
+            } else {
+                if (en->pos < enl->pos) {
+                    res = ERR_NCX_BIT_POS_ORDER;
                     if (ncx_warning_enabled(res)) {
                         log_warn("\nWarning: Out of order bit '%s' = %u",
                                  (char *)en->name, en->pos);
                         ncx_print_errormsg(tkc, mod, res);
                     }
-		    done = TRUE;
-		}
-	    }
-	}
+                    done = TRUE;
+                }
+            }
+        }
     } else {
-	/* value not set, use highest value + 1 */
-	if (dlq_empty(&sim->valQ)) {
-	    /* first enum set gets the value zero */
-	    if (btyp==NCX_BT_ENUM) {
-		en->val = 0;
-		sim->maxenum = 0;
-	    } else {
-		en->pos = 0;
-		sim->maxbit = 0;
-	    }
-	} else {
-	    /* assign the highest value in use + 1 */
-	    if (btyp==NCX_BT_ENUM) {
-		if (sim->maxenum < NCX_MAX_INT) {
-		    en->val = ++(sim->maxenum);
-		} else {
-		    res = ERR_NCX_INVALID_VALUE;
-		    log_error("\nError: Cannot auto-increment enum "
-			      "value beyond MAXINT");
-		    ncx_print_errormsg(tkc, mod, res);
-		}
-	    } else {
-		if (sim->maxbit < NCX_MAX_UINT) {
-		    en->pos = ++(sim->maxbit);
-		} else {
-		    res = ERR_NCX_INVALID_VALUE;
-		    log_error("\nError: Cannot auto-increment bit "
-			      "position beyond MAXUINT");
-		    ncx_print_errormsg(tkc, mod, res);
-		}
-	    }
-	}
+        /* value not set, use highest value + 1 */
+        if (dlq_empty(&sim->valQ)) {
+            /* first enum set gets the value zero */
+            if (btyp==NCX_BT_ENUM) {
+                en->val = 0;
+                sim->maxenum = 0;
+            } else {
+                en->pos = 0;
+                sim->maxbit = 0;
+            }
+        } else {
+            /* assign the highest value in use + 1 */
+            if (btyp==NCX_BT_ENUM) {
+                if (sim->maxenum < NCX_MAX_INT) {
+                    en->val = ++(sim->maxenum);
+                } else {
+                    res = ERR_NCX_INVALID_VALUE;
+                    log_error("\nError: Cannot auto-increment enum "
+                              "value beyond MAXINT");
+                    ncx_print_errormsg(tkc, mod, res);
+                }
+            } else {
+                if (sim->maxbit < NCX_MAX_UINT) {
+                    en->pos = ++(sim->maxbit);
+                } else {
+                    res = ERR_NCX_INVALID_VALUE;
+                    log_error("\nError: Cannot auto-increment bit "
+                              "position beyond MAXUINT");
+                    ncx_print_errormsg(tkc, mod, res);
+                }
+            }
+        }
     }
 
     /* always insert in the user-defined order == new last entry */
@@ -1378,8 +1378,8 @@ static status_t
 *********************************************************************/
 static status_t 
     consume_yang_bit (tk_chain_t *tkc,
-		      ncx_module_t *mod,
-		      typ_def_t *typdef)
+                      ncx_module_t *mod,
+                      typ_def_t *typdef)
 {
     typ_enum_t    *enu;
     xmlChar       *val, *str;
@@ -1405,138 +1405,138 @@ static status_t
     CHK_EXIT(res, retres);
 
     if (str) {
-	enu = typ_new_enum2(str);
+        enu = typ_new_enum2(str);
     } else {
-	enu = typ_new_enum((const xmlChar *)"none");
+        enu = typ_new_enum((const xmlChar *)"none");
     }
     if (!enu) {
-	res = ERR_INTERNAL_MEM;
-	if (str) {
-	    m__free(str);
-	}
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        if (str) {
+            m__free(str);
+        }
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     } else {
-	enu->flags |= TYP_FL_ISBITS;
+        enu->flags |= TYP_FL_ISBITS;
     }
 
     /* move past identifier-str to stmtsep */
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	typ_free_enum(enu);
-	return res;
+        ncx_print_errormsg(tkc, mod, res);
+        typ_free_enum(enu);
+        return res;
     }
 
     switch (TK_CUR_TYP(tkc)) {
     case TK_TT_SEMICOL:
-	done = TRUE;
-	break;
+        done = TRUE;
+        break;
     case TK_TT_LBRACE:
-	done = FALSE;
-	break;
+        done = FALSE;
+        break;
     default:
-	expstr = "semi-colon or left brace";
-	res = ERR_NCX_WRONG_TKTYPE;
-	ncx_mod_exp_err(tkc, mod, res, expstr);
-	typ_free_enum(enu);
-	return res;
+        expstr = "semi-colon or left brace";
+        res = ERR_NCX_WRONG_TKTYPE;
+        ncx_mod_exp_err(tkc, mod, res, expstr);
+        typ_free_enum(enu);
+        return res;
     }
 
     /* get all the bit sub-clauses */
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    typ_free_enum(enu);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            typ_free_enum(enu);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    typ_free_enum(enu);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &enu->appinfoQ);
-	    if (res != NO_ERR) {
-		retres = res;
-		if (NEED_EXIT(res)) {
-		    typ_free_enum(enu);
-		    return res;
-		}
-	    }
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    expstr = "bit sub-statement";
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            typ_free_enum(enu);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &enu->appinfoQ);
+            if (res != NO_ERR) {
+                retres = res;
+                if (NEED_EXIT(res)) {
+                    typ_free_enum(enu);
+                    return res;
+                }
+            }
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            expstr = "bit sub-statement";
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
+        /* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, 
+            res = yang_consume_descr(tkc, 
                                      mod, &enu->descr,
-				     &desc, 
+                                     &desc, 
                                      &enu->appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, 
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &enu->ref,
-				     &ref, 
+                                     &ref, 
                                      &enu->appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, 
+            res = yang_consume_status(tkc, 
                                       mod, 
                                       &enu->status,
                                       &stat, 
                                       &enu->appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_POSITION)) {
-	    res = yang_consume_uint32(tkc, 
+            res = yang_consume_uint32(tkc, 
                                       mod, 
                                       &enu->pos,
-				      &pos, 
+                                      &pos, 
                                       &enu->appinfoQ);
-	    enu->flags |= TYP_FL_ESET;   /* mark explicit set val */
-	} else {
-	    res = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	}
-	if (res != NO_ERR) {
-	    retres = res;
-	    if (NEED_EXIT(res)) {
-		typ_free_enum(enu);
-		return res;
-	    }
-	}
+            enu->flags |= TYP_FL_ESET;   /* mark explicit set val */
+        } else {
+            res = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+        }
+        if (res != NO_ERR) {
+            retres = res;
+            if (NEED_EXIT(res)) {
+                typ_free_enum(enu);
+                return res;
+            }
+        }
     }
 
     /* save the bit definition */
     if (retres == NO_ERR) {
-	res = insert_yang_enumbit(tkc, 
+        res = insert_yang_enumbit(tkc, 
                                   mod, 
                                   enu, 
                                   typdef,
-				  NCX_BT_BITS, 
+                                  NCX_BT_BITS, 
                                   pos);
-	if (res != NO_ERR) {
-	    typ_free_enum(enu);
-	}
+        if (res != NO_ERR) {
+            typ_free_enum(enu);
+        }
     } else {
-	typ_free_enum(enu);
+        typ_free_enum(enu);
     }
 
     return retres;
@@ -1566,8 +1566,8 @@ static status_t
 *********************************************************************/
 static status_t 
     finish_bits_type (tk_chain_t  *tkc,
-		      ncx_module_t *mod,
-		      typ_def_t *typdef)
+                      ncx_module_t *mod,
+                      typ_def_t *typdef)
 {
     const xmlChar *val;
     const char    *expstr;
@@ -1584,54 +1584,54 @@ static status_t
 
     while (!done) {
 
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT(res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+            CHK_EXIT(res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
+        /* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_BIT)) {
-	    bitdone = TRUE;
-	    res = consume_yang_bit(tkc, mod, typdef);
-	    CHK_EXIT(res, retres);
-	} else {
-	    retres = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	}
+            bitdone = TRUE;
+            res = consume_yang_bit(tkc, mod, typdef);
+            CHK_EXIT(res, retres);
+        } else {
+            retres = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+        }
     }
 
     /* check all the mandatory clauses are present */
     if (!bitdone) {
-	expstr = "mandatory bit clause";
-	retres = ERR_NCX_DATA_MISSING;
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
+        expstr = "mandatory bit clause";
+        retres = ERR_NCX_DATA_MISSING;
+        ncx_mod_exp_err(tkc, mod, retres, expstr);
     }
 
     return retres;
@@ -1659,8 +1659,8 @@ static status_t
 *********************************************************************/
 static status_t 
     consume_yang_enum (tk_chain_t *tkc,
-		       ncx_module_t *mod,
-		       typ_def_t *typdef)
+                       ncx_module_t *mod,
+                       typ_def_t *typdef)
 {
     typ_enum_t    *enu;
     xmlChar       *val, *str;
@@ -1687,45 +1687,45 @@ static status_t
 
     /* validate the enum string format */
     if (str) {
-	if (!*str) {
-	    res = ERR_NCX_WRONG_LEN;
-	    log_error("\nError: Zero length enum string");
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	    m__free(str);
-	    str = NULL;
-	} else if (xml_isspace(*str)) {
-	    res = ERR_NCX_INVALID_VALUE;
-	    log_error("\nError: Leading whitespace in enum string '%s'",
-		      str);
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	    m__free(str);
-	    str = NULL;
-	} else if (xml_isspace(str[xml_strlen(str)-1])) {
-	    res = ERR_NCX_INVALID_VALUE;
-	    log_error("\nError: Trailing whitespace in enum string '%s'",
-		      str);
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	    m__free(str);
-	    str = NULL;
-	} else {
-	    /* pass off the malloced string */
-	    enu = typ_new_enum2(str);
-	}
+        if (!*str) {
+            res = ERR_NCX_WRONG_LEN;
+            log_error("\nError: Zero length enum string");
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+            m__free(str);
+            str = NULL;
+        } else if (xml_isspace(*str)) {
+            res = ERR_NCX_INVALID_VALUE;
+            log_error("\nError: Leading whitespace in enum string '%s'",
+                      str);
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+            m__free(str);
+            str = NULL;
+        } else if (xml_isspace(str[xml_strlen(str)-1])) {
+            res = ERR_NCX_INVALID_VALUE;
+            log_error("\nError: Trailing whitespace in enum string '%s'",
+                      str);
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+            m__free(str);
+            str = NULL;
+        } else {
+            /* pass off the malloced string */
+            enu = typ_new_enum2(str);
+        }
     } else {
-	/* copy the placeholder string during error processing */
-	enu = typ_new_enum(NCX_EL_NONE);
+        /* copy the placeholder string during error processing */
+        enu = typ_new_enum(NCX_EL_NONE);
     }
 
     /* check enum malloced OK */
     if (!enu) {
-	if (res == NO_ERR) {
-	    res = ERR_INTERNAL_MEM;
-	    ncx_print_errormsg(tkc, mod, res);
-	}
-	if (str) {
-	    m__free(str);
-	}
-	return res;
+        if (res == NO_ERR) {
+            res = ERR_INTERNAL_MEM;
+            ncx_print_errormsg(tkc, mod, res);
+        }
+        if (str) {
+            m__free(str);
+        }
+        return res;
     }
 
     /* have malloced enum struct
@@ -1733,121 +1733,121 @@ static status_t
      */
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	typ_free_enum(enu);
-	return res;
+        ncx_print_errormsg(tkc, mod, res);
+        typ_free_enum(enu);
+        return res;
     }
 
     /* check statement exit or sub-statement start */
     switch (TK_CUR_TYP(tkc)) {
     case TK_TT_SEMICOL:
-	done = TRUE;
-	break;
+        done = TRUE;
+        break;
     case TK_TT_LBRACE:
-	done = FALSE;
-	break;
+        done = FALSE;
+        break;
     default:
-	expstr = "semi-colon or left brace";
-	res = ERR_NCX_WRONG_TKTYPE;
-	ncx_mod_exp_err(tkc, mod, res, expstr);
-	typ_free_enum(enu);
-	return res;
+        expstr = "semi-colon or left brace";
+        res = ERR_NCX_WRONG_TKTYPE;
+        ncx_mod_exp_err(tkc, mod, res, expstr);
+        typ_free_enum(enu);
+        return res;
     }
 
     /* get all the enum sub-clauses */
     while (!done) {
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    typ_free_enum(enu);
-	    return res;
-	}
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            typ_free_enum(enu);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    typ_free_enum(enu);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &enu->appinfoQ);
-	    if (res != NO_ERR) {
-		retres = res;
-		if (NEED_EXIT(res)) {
-		    typ_free_enum(enu);
-		    return res;
-		}
-	    }
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    expstr = "bit sub-statement";
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            typ_free_enum(enu);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &enu->appinfoQ);
+            if (res != NO_ERR) {
+                retres = res;
+                if (NEED_EXIT(res)) {
+                    typ_free_enum(enu);
+                    return res;
+                }
+            }
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            expstr = "bit sub-statement";
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
+        /* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, 
+            res = yang_consume_descr(tkc, 
                                      mod,  
                                      &enu->descr, 
-				     &desc,  
+                                     &desc,  
                                      &enu->appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, 
+            res = yang_consume_descr(tkc, 
                                      mod,  
                                      &enu->ref, 
-				     &ref,  
+                                     &ref,  
                                      &enu->appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, 
+            res = yang_consume_status(tkc, 
                                       mod,  
                                       &enu->status, 
                                       &stat,
                                       &enu->appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_VALUE)) {
-	    res = yang_consume_int32(tkc,
+            res = yang_consume_int32(tkc,
                                      mod,
                                      &enu->val, 
-				     &valdone,
+                                     &valdone,
                                      &enu->appinfoQ);
-	    enu->flags |= TYP_FL_ESET;   /* mark explicit set val */
-	} else {
-	    res = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	}
-	if (res != NO_ERR) {
-	    retres = res;
-	    if (NEED_EXIT(res)) {
-		typ_free_enum(enu);
-		return res;
-	    }
-	}
+            enu->flags |= TYP_FL_ESET;   /* mark explicit set val */
+        } else {
+            res = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+        }
+        if (res != NO_ERR) {
+            retres = res;
+            if (NEED_EXIT(res)) {
+                typ_free_enum(enu);
+                return res;
+            }
+        }
     }
 
     /* save the enum definition */
     if (retres == NO_ERR) {
-	res = insert_yang_enumbit(tkc,
+        res = insert_yang_enumbit(tkc,
                                   mod,
                                   enu,
                                   typdef,
-				  NCX_BT_ENUM,
+                                  NCX_BT_ENUM,
                                   valdone);
-	if (res != NO_ERR) {
-	    typ_free_enum(enu);
-	}
+        if (res != NO_ERR) {
+            typ_free_enum(enu);
+        }
     } else {
-	typ_free_enum(enu);
+        typ_free_enum(enu);
     }
 
     return retres;
@@ -1877,8 +1877,8 @@ static status_t
 *********************************************************************/
 static status_t 
     finish_enum_type (tk_chain_t  *tkc,
-		      ncx_module_t *mod,
-		      typ_def_t *typdef)
+                      ncx_module_t *mod,
+                      typ_def_t *typdef)
 {
     const xmlChar *val;
     const char    *expstr;
@@ -1896,54 +1896,54 @@ static status_t
 
     while (!done) {
 
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT(res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+            CHK_EXIT(res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
+        /* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_ENUM)) {
-	    enumdone = TRUE;
-	    res = consume_yang_enum(tkc, mod, typdef);
-	    CHK_EXIT(res, retres);
-	} else {
-	    retres = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	}
+            enumdone = TRUE;
+            res = consume_yang_enum(tkc, mod, typdef);
+            CHK_EXIT(res, retres);
+        } else {
+            retres = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+        }
     }
 
     /* check all the mandatory clauses are present */
     if (!enumdone) {
-	expstr = "mandatory enum clause";
-	retres = ERR_NCX_DATA_MISSING;
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
+        expstr = "mandatory enum clause";
+        retres = ERR_NCX_DATA_MISSING;
+        ncx_mod_exp_err(tkc, mod, retres, expstr);
     }
 
     return retres;
@@ -1975,8 +1975,8 @@ static status_t
 static status_t 
     finish_union_type (yang_pcb_t *pcb,
                        tk_chain_t  *tkc,
-		       ncx_module_t *mod,
-		       typ_def_t *typdef)
+                       ncx_module_t *mod,
+                       typ_def_t *typdef)
 {
     const xmlChar *val;
     const char    *expstr;
@@ -1993,84 +1993,84 @@ static status_t
 
     while (!done) {
 
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT(res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+            CHK_EXIT(res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
+        /* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_TYPE)) {
-	    typedone = TRUE;
-	    un = typ_new_unionnode(NULL);
-	    if (!un) {
-		res = ERR_INTERNAL_MEM;
-		ncx_print_errormsg(tkc, mod, res);
-		return res;
-	    } else {
-		un->typdef = typ_new_typdef();
-		if (!un->typdef) {
-		    res = ERR_INTERNAL_MEM;
-		    ncx_print_errormsg(tkc, mod, res);
-		    typ_free_unionnode(un);
-		    return res;
-		}
-	    }
+            typedone = TRUE;
+            un = typ_new_unionnode(NULL);
+            if (!un) {
+                res = ERR_INTERNAL_MEM;
+                ncx_print_errormsg(tkc, mod, res);
+                return res;
+            } else {
+                un->typdef = typ_new_typdef();
+                if (!un->typdef) {
+                    res = ERR_INTERNAL_MEM;
+                    ncx_print_errormsg(tkc, mod, res);
+                    typ_free_unionnode(un);
+                    return res;
+                }
+            }
 
-	    res = yang_typ_consume_type(pcb,
+            res = yang_typ_consume_type(pcb,
                                         tkc, 
                                         mod, 
                                         un->typdef);
-	    if (res != NO_ERR) {
-		retres = res;
-		if (NEED_EXIT(res)) {
-		    typ_free_unionnode(un);
-		    return res;
-		}
-	    }
+            if (res != NO_ERR) {
+                retres = res;
+                if (NEED_EXIT(res)) {
+                    typ_free_unionnode(un);
+                    return res;
+                }
+            }
 
-	    if (res == NO_ERR) {
-		dlq_enque(un, &typdef->def.simple.unionQ);
-	    } else {
-		typ_free_unionnode(un);
-	    }
-	} else {
-	    retres = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	}
+            if (res == NO_ERR) {
+                dlq_enque(un, &typdef->def.simple.unionQ);
+            } else {
+                typ_free_unionnode(un);
+            }
+        } else {
+            retres = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+        }
     }
 
     /* check all the mandatory clauses are present */
     if (!typedone) {
-	expstr = "mandatory type clause";
-	retres = ERR_NCX_DATA_MISSING;
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
+        expstr = "mandatory type clause";
+        retres = ERR_NCX_DATA_MISSING;
+        ncx_mod_exp_err(tkc, mod, retres, expstr);
     }
 
     return retres;
@@ -2100,8 +2100,8 @@ static status_t
 *********************************************************************/
 static status_t 
     finish_leafref_type (tk_chain_t  *tkc,
-			ncx_module_t *mod,
-			typ_def_t *typdef)
+                        ncx_module_t *mod,
+                        typ_def_t *typdef)
 {
     typ_simple_t  *sim;
     const xmlChar *val;
@@ -2120,110 +2120,110 @@ static status_t
     sim = &typdef->def.simple;
 
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT(res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+            CHK_EXIT(res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
+        /* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_PATH)) {
-	    if (pathdone) {
-		retres = ERR_NCX_ENTRY_EXISTS;
-		log_error("\nError: path statement already entered");
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
+            if (pathdone) {
+                retres = ERR_NCX_ENTRY_EXISTS;
+                log_error("\nError: path statement already entered");
+                ncx_print_errormsg(tkc, mod, retres);
+            }
 
-	    /* get the path string value and save it */
-	    res = TK_ADV(tkc);
-	    if (res != NO_ERR) {
-		ncx_print_errormsg(tkc, mod, res);
-		return res;
-	    }
+            /* get the path string value and save it */
+            res = TK_ADV(tkc);
+            if (res != NO_ERR) {
+                ncx_print_errormsg(tkc, mod, res);
+                return res;
+            }
 
-	    /* store, parse, and validate that the leafref
-	     * is well-formed. Do not check the objects
-	     * in the path string until later
-	     */
-	    if (TK_CUR_STR(tkc)) {
-		/* create an XPath parser control block and
-		 *  store the path string there
-		 */
-		if (!pathdone) {
-		    /* very little validation is done now
-		     * because the object using this leafref
-		     * data type is needed to set the starting
-		     * context node
-		     */
-		    sim->xleafref = xpath_new_pcb(TK_CUR_VAL(tkc));
-		    if (!sim->xleafref) {
-			res = ERR_INTERNAL_MEM;
-			ncx_print_errormsg(tkc, mod, res);
-			return res;
-		    } else {
+            /* store, parse, and validate that the leafref
+             * is well-formed. Do not check the objects
+             * in the path string until later
+             */
+            if (TK_CUR_STR(tkc)) {
+                /* create an XPath parser control block and
+                 *  store the path string there
+                 */
+                if (!pathdone) {
+                    /* very little validation is done now
+                     * because the object using this leafref
+                     * data type is needed to set the starting
+                     * context node
+                     */
+                    sim->xleafref = xpath_new_pcb(TK_CUR_VAL(tkc));
+                    if (!sim->xleafref) {
+                        res = ERR_INTERNAL_MEM;
+                        ncx_print_errormsg(tkc, mod, res);
+                        return res;
+                    } else {
                         ncx_set_error(&sim->xleafref->tkerr,
                                       mod,
                                       TK_CUR_LNUM(tkc),
                                       TK_CUR_LPOS(tkc));
-			res = xpath_yang_parse_path(tkc, 
-						    mod, 
-						    XP_SRC_LEAFREF,
-						    sim->xleafref);
-			if (res != NO_ERR) {
-			    /* errors already reported */
-			    retres = res;
-			}
-		    }
-		}
+                        res = xpath_yang_parse_path(tkc, 
+                                                    mod, 
+                                                    XP_SRC_LEAFREF,
+                                                    sim->xleafref);
+                        if (res != NO_ERR) {
+                            /* errors already reported */
+                            retres = res;
+                        }
+                    }
+                }
 
-		pathdone = TRUE;
-		
-		res = yang_consume_semiapp(tkc, mod, &typdef->appinfoQ);
-		CHK_EXIT(res, retres);
-	    }
+                pathdone = TRUE;
+                
+                res = yang_consume_semiapp(tkc, mod, &typdef->appinfoQ);
+                CHK_EXIT(res, retres);
+            }
             sim->constrained = TRUE;
-	} else {
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    expstr = "path or require-instance statement";
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	}
+        } else {
+            retres = ERR_NCX_WRONG_TKTYPE;
+            expstr = "path or require-instance statement";
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+        }
     }
 
     if (retres == NO_ERR && !pathdone) {
-	retres = ERR_NCX_MISSING_REFTARGET;
-	log_error("\nError: path missing in leafref type");
-	ncx_print_errormsg(tkc, mod, retres);
+        retres = ERR_NCX_MISSING_REFTARGET;
+        log_error("\nError: path missing in leafref type");
+        ncx_print_errormsg(tkc, mod, retres);
     }
 
     if (retres == NO_ERR && !constrained) {
-	/* set to default */
-	sim->constrained = TRUE;
+        /* set to default */
+        sim->constrained = TRUE;
     }
 
     return retres;
@@ -2253,8 +2253,8 @@ static status_t
 *********************************************************************/
 static status_t 
     finish_instanceid_type (tk_chain_t  *tkc,
-			    ncx_module_t *mod,
-			    typ_def_t *typdef)
+                            ncx_module_t *mod,
+                            typ_def_t *typdef)
 {
     typ_simple_t  *sim;
     const xmlChar *val;
@@ -2273,56 +2273,56 @@ static status_t
     sim = &typdef->def.simple;
 
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT(res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+            CHK_EXIT(res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
-	if (!xml_strcmp(val, YANG_K_REQUIRE_INSTANCE)) {
-	    res = yang_consume_boolean(tkc, 
+        /* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_REQUIRE_INSTANCE)) {
+            res = yang_consume_boolean(tkc, 
                                        mod, 
-				       &sim->constrained,
-				       &constrained,
-				       &typdef->appinfoQ);
-	    CHK_EXIT(res, retres);
-	} else {
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    expstr = "require-instance statement";
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	}
+                                       &sim->constrained,
+                                       &constrained,
+                                       &typdef->appinfoQ);
+            CHK_EXIT(res, retres);
+        } else {
+            retres = ERR_NCX_WRONG_TKTYPE;
+            expstr = "require-instance statement";
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+        }
     }
 
     if (retres == NO_ERR && !constrained) {
-	/* set to default */
-	sim->constrained = TRUE;
+        /* set to default */
+        sim->constrained = TRUE;
     }
 
     return retres;
@@ -2352,8 +2352,8 @@ static status_t
 *********************************************************************/
 static status_t 
     finish_idref_type (tk_chain_t  *tkc,
-		       ncx_module_t *mod,
-		       typ_def_t *typdef)
+                       ncx_module_t *mod,
+                       typ_def_t *typdef)
 {
     typ_simple_t  *sim;
     const xmlChar *val;
@@ -2372,52 +2372,52 @@ static status_t
 
     while (!done) {
 
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
-	    CHK_EXIT(res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &typdef->appinfoQ);
+            CHK_EXIT(res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
+        /* Got a token string so check the value */
         if (!xml_strcmp(val, YANG_K_BASE)) {
-	    sim->idref.modname = ncx_get_modname(mod);
-	    res = yang_consume_pid(tkc, 
+            sim->idref.modname = ncx_get_modname(mod);
+            res = yang_consume_pid(tkc, 
                                    mod,
-				   &sim->idref.baseprefix,
-				   &sim->idref.basename,
-				   &basedone,
-				   &typdef->appinfoQ);
-	    CHK_EXIT(res, retres);
-	} else {
-	    retres = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	}
+                                   &sim->idref.baseprefix,
+                                   &sim->idref.basename,
+                                   &basedone,
+                                   &typdef->appinfoQ);
+            CHK_EXIT(res, retres);
+        } else {
+            retres = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+        }
     }
 
     return retres;
@@ -2446,10 +2446,10 @@ static status_t
 *********************************************************************/
 static status_t 
     resolve_minmax (tk_chain_t *tkc,
-		    ncx_module_t *mod,
-		    typ_def_t *typdef,
-		    boolean simple,
-		    ncx_btype_t  rbtyp)
+                    ncx_module_t *mod,
+                    typ_def_t *typdef,
+                    boolean simple,
+                    ncx_btype_t  rbtyp)
 {
     dlq_hdr_t      *rangeQ, *parentQ;
     typ_rangedef_t *rv, *pfirstrv, *plastrv;
@@ -2458,7 +2458,7 @@ static status_t
 
     rangeQ = typ_get_rangeQ_con(typdef);
     if (!rangeQ || dlq_empty(rangeQ)) {
-	return ERR_NCX_SKIPPED;
+        return ERR_NCX_SKIPPED;
     }
 
     res = NO_ERR;
@@ -2467,129 +2467,129 @@ static status_t
 
     /* get the parent range bounds, if any */
     if (!simple) {
-	parentdef = typ_get_parent_typdef(typdef);
-	rangedef = typ_get_qual_typdef(parentdef, NCX_SQUAL_RANGE);
-	if (rangedef) {
-	    parentQ = typ_get_rangeQ_con(rangedef);
-	    if (!parentQ || dlq_empty(parentQ)) {
-		return SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	    pfirstrv = (typ_rangedef_t *)dlq_firstEntry(parentQ);
-	    plastrv = (typ_rangedef_t *)dlq_lastEntry(parentQ);
-	}
+        parentdef = typ_get_parent_typdef(typdef);
+        rangedef = typ_get_qual_typdef(parentdef, NCX_SQUAL_RANGE);
+        if (rangedef) {
+            parentQ = typ_get_rangeQ_con(rangedef);
+            if (!parentQ || dlq_empty(parentQ)) {
+                return SET_ERROR(ERR_INTERNAL_VAL);
+            }
+            pfirstrv = (typ_rangedef_t *)dlq_firstEntry(parentQ);
+            plastrv = (typ_rangedef_t *)dlq_lastEntry(parentQ);
+        }
     }
 
     for (rv = (typ_rangedef_t *)dlq_firstEntry(rangeQ);
-	 rv != NULL && res==NO_ERR;
-	 rv = (typ_rangedef_t *)dlq_nextEntry(rv)) {
+         rv != NULL && res==NO_ERR;
+         rv = (typ_rangedef_t *)dlq_nextEntry(rv)) {
 
-	if (rv->btyp ==NCX_BT_NONE) {
-	    rv->btyp = rbtyp;
-	} else if (rv->btyp != rbtyp) {
-	    res = ERR_NCX_WRONG_DATATYP;
-	}
+        if (rv->btyp ==NCX_BT_NONE) {
+            rv->btyp = rbtyp;
+        } else if (rv->btyp != rbtyp) {
+            res = ERR_NCX_WRONG_DATATYP;
+        }
 
-	/* set the lower bound if set to 'min' or 'max' */
-	if (rv->flags & TYP_FL_LBMIN) {
-	    if (pfirstrv) {
-		if (pfirstrv->flags & TYP_FL_LBINF) {
-		    rv->flags |= TYP_FL_LBINF;
-		} else if (pfirstrv->flags & TYP_FL_LBINF2) {
-		    rv->flags |= TYP_FL_LBINF2;
-		} else {
-		    res = ncx_copy_num(&pfirstrv->lb, &rv->lb, rbtyp);
-		}
-	    } else {
-		if (rbtyp==NCX_BT_FLOAT64) {
-		    rv->flags |= TYP_FL_LBINF;
-		} else {
-		    ncx_set_num_min(&rv->lb, rbtyp);
-		}
-	    }
-	} else if (rv->flags & TYP_FL_LBMAX) {
-	    if (plastrv) {
-		if (plastrv->flags & TYP_FL_UBINF) {
-		    rv->flags |= TYP_FL_LBINF2;
-		} else if (plastrv->flags & TYP_FL_UBINF2) {
-		    rv->flags |= TYP_FL_LBINF;
-		} else {
-		    res = ncx_copy_num(&plastrv->ub, &rv->lb, rbtyp);
-		}
-	    } else {
-		if (rbtyp==NCX_BT_FLOAT64) {
-		    rv->flags |= TYP_FL_LBINF2;
-		} else {
-		    ncx_set_num_max(&rv->lb, rbtyp);
-		}
-	    }
-	} else if (rv->lbstr) {
-	    res = ncx_decode_num(rv->lbstr, rbtyp, &rv->lb);
-	}
+        /* set the lower bound if set to 'min' or 'max' */
+        if (rv->flags & TYP_FL_LBMIN) {
+            if (pfirstrv) {
+                if (pfirstrv->flags & TYP_FL_LBINF) {
+                    rv->flags |= TYP_FL_LBINF;
+                } else if (pfirstrv->flags & TYP_FL_LBINF2) {
+                    rv->flags |= TYP_FL_LBINF2;
+                } else {
+                    res = ncx_copy_num(&pfirstrv->lb, &rv->lb, rbtyp);
+                }
+            } else {
+                if (rbtyp==NCX_BT_FLOAT64) {
+                    rv->flags |= TYP_FL_LBINF;
+                } else {
+                    ncx_set_num_min(&rv->lb, rbtyp);
+                }
+            }
+        } else if (rv->flags & TYP_FL_LBMAX) {
+            if (plastrv) {
+                if (plastrv->flags & TYP_FL_UBINF) {
+                    rv->flags |= TYP_FL_LBINF2;
+                } else if (plastrv->flags & TYP_FL_UBINF2) {
+                    rv->flags |= TYP_FL_LBINF;
+                } else {
+                    res = ncx_copy_num(&plastrv->ub, &rv->lb, rbtyp);
+                }
+            } else {
+                if (rbtyp==NCX_BT_FLOAT64) {
+                    rv->flags |= TYP_FL_LBINF2;
+                } else {
+                    ncx_set_num_max(&rv->lb, rbtyp);
+                }
+            }
+        } else if (rv->lbstr) {
+            res = ncx_decode_num(rv->lbstr, rbtyp, &rv->lb);
+        }
 
-	if (res != NO_ERR) {
-	    continue;
-	}
+        if (res != NO_ERR) {
+            continue;
+        }
 
-	/* set the upper bound if set to 'min' or 'max' */
-	if (rv->flags & TYP_FL_UBMAX) {
-	    if (plastrv) {
-		if (plastrv->flags & TYP_FL_UBINF) {
-		    rv->flags |= TYP_FL_UBINF;
-		} else if (plastrv->flags & TYP_FL_UBINF2) {
-		    rv->flags |= TYP_FL_UBINF2;
-		} else {
-		    res = ncx_copy_num(&plastrv->ub, &rv->ub, rbtyp);
-		}
-	    } else {
-		if (rbtyp==NCX_BT_FLOAT64) {
-		    rv->flags |= TYP_FL_UBINF;
-		} else {
-		    ncx_set_num_max(&rv->ub, rbtyp);
-		}
-	    }
-	} else if (rv->flags & TYP_FL_UBMIN) {
-	    if (pfirstrv) {
-		if (pfirstrv->flags & TYP_FL_LBINF) {
-		    rv->flags |= TYP_FL_UBINF2;
-		} else if (pfirstrv->flags & TYP_FL_LBINF2) {
-		    rv->flags |= TYP_FL_UBINF;
-		} else {
-		    res = ncx_copy_num(&pfirstrv->lb, &rv->ub, rbtyp);
-		}
-	    } else {
-		if (rbtyp==NCX_BT_FLOAT64) {
-		    rv->flags |= TYP_FL_UBINF2;
-		} else {
-		    ncx_set_num_min(&rv->ub, rbtyp);
-		}
-	    }
-	} else if (rv->ubstr) {
-	    res = ncx_decode_num(rv->ubstr, rbtyp, &rv->ub);
-	}
+        /* set the upper bound if set to 'min' or 'max' */
+        if (rv->flags & TYP_FL_UBMAX) {
+            if (plastrv) {
+                if (plastrv->flags & TYP_FL_UBINF) {
+                    rv->flags |= TYP_FL_UBINF;
+                } else if (plastrv->flags & TYP_FL_UBINF2) {
+                    rv->flags |= TYP_FL_UBINF2;
+                } else {
+                    res = ncx_copy_num(&plastrv->ub, &rv->ub, rbtyp);
+                }
+            } else {
+                if (rbtyp==NCX_BT_FLOAT64) {
+                    rv->flags |= TYP_FL_UBINF;
+                } else {
+                    ncx_set_num_max(&rv->ub, rbtyp);
+                }
+            }
+        } else if (rv->flags & TYP_FL_UBMIN) {
+            if (pfirstrv) {
+                if (pfirstrv->flags & TYP_FL_LBINF) {
+                    rv->flags |= TYP_FL_UBINF2;
+                } else if (pfirstrv->flags & TYP_FL_LBINF2) {
+                    rv->flags |= TYP_FL_UBINF;
+                } else {
+                    res = ncx_copy_num(&pfirstrv->lb, &rv->ub, rbtyp);
+                }
+            } else {
+                if (rbtyp==NCX_BT_FLOAT64) {
+                    rv->flags |= TYP_FL_UBINF2;
+                } else {
+                    ncx_set_num_min(&rv->ub, rbtyp);
+                }
+            }
+        } else if (rv->ubstr) {
+            res = ncx_decode_num(rv->ubstr, rbtyp, &rv->ub);
+        }
     }
 
     if (res != NO_ERR) {
-	if (simple) {
-	    tkc->curerr = &typdef->def.simple.range.tkerr;
-	} else {
-	    tkc->curerr = &typdef->tkerr;
-	}
-	ncx_print_errormsg(tkc, mod, res);
+        if (simple) {
+            tkc->curerr = &typdef->def.simple.range.tkerr;
+        } else {
+            tkc->curerr = &typdef->tkerr;
+        }
+        ncx_print_errormsg(tkc, mod, res);
     } else {
-	/* set flags even if boundary set explicitly so
-	 * the ncxdump program will suppress these clauses
-	 * unless really needed
-	 */
-	rv = (typ_rangedef_t *)dlq_firstEntry(rangeQ);
-	if (rv && ncx_is_min(&rv->lb, rbtyp)) {
-	    rv->flags |= TYP_FL_LBMIN;
-	}
-	rv = (typ_rangedef_t *)dlq_lastEntry(rangeQ);
-	if (rv && ncx_is_max(&rv->ub, rbtyp)) {
-	    rv->flags |= TYP_FL_UBMAX;
-	}
+        /* set flags even if boundary set explicitly so
+         * the ncxdump program will suppress these clauses
+         * unless really needed
+         */
+        rv = (typ_rangedef_t *)dlq_firstEntry(rangeQ);
+        if (rv && ncx_is_min(&rv->lb, rbtyp)) {
+            rv->flags |= TYP_FL_LBMIN;
+        }
+        rv = (typ_rangedef_t *)dlq_lastEntry(rangeQ);
+        if (rv && ncx_is_max(&rv->ub, rbtyp)) {
+            rv->flags |= TYP_FL_UBMAX;
+        }
     }
-	    
+            
     return res;
 
 }  /* resolve_minmax */
@@ -2614,9 +2614,9 @@ static status_t
 *********************************************************************/
 static status_t 
     finish_yang_range (tk_chain_t  *tkc,
-		       ncx_module_t *mod,
-		       typ_def_t *typdef,
-		       ncx_btype_t rbtyp)
+                       ncx_module_t *mod,
+                       typ_def_t *typdef,
+                       ncx_btype_t rbtyp)
 {
     dlq_hdr_t    *rangeQ;
     typ_def_t    *parentdef;
@@ -2626,40 +2626,40 @@ static status_t
 
     switch (typdef->class) {
     case NCX_CL_NAMED:
-	parentdef = typ_get_parent_typdef(typdef);
-	if (parentdef) {
-	    res = finish_yang_range(tkc, 
-				    mod,
-				    parentdef,
-				    rbtyp);
-	} else {
-	    res = ERR_NCX_MISSING_TYPE;
-	}
-	if (res == NO_ERR) {
-	    res = resolve_minmax(tkc, mod, typdef, FALSE, rbtyp);
-	    if (res == NO_ERR) {
-		rangeQ = typ_get_rangeQ_con(typdef);
-		typ_normalize_rangeQ(rangeQ, rbtyp);
-	    } else if (res == ERR_NCX_SKIPPED) {
-		res = NO_ERR;
-	    }
-	}
-	break;
+        parentdef = typ_get_parent_typdef(typdef);
+        if (parentdef) {
+            res = finish_yang_range(tkc, 
+                                    mod,
+                                    parentdef,
+                                    rbtyp);
+        } else {
+            res = ERR_NCX_MISSING_TYPE;
+        }
+        if (res == NO_ERR) {
+            res = resolve_minmax(tkc, mod, typdef, FALSE, rbtyp);
+            if (res == NO_ERR) {
+                rangeQ = typ_get_rangeQ_con(typdef);
+                typ_normalize_rangeQ(rangeQ, rbtyp);
+            } else if (res == ERR_NCX_SKIPPED) {
+                res = NO_ERR;
+            }
+        }
+        break;
     case NCX_CL_SIMPLE:
-	/* this is the final stop in the type chain
-	 * if this typdef has a range, then check it
-	 * and convert min/max to real numbers
-	 */
-	res = resolve_minmax(tkc, mod, typdef, TRUE, rbtyp);
-	if (res == NO_ERR) {
-	    rangeQ = typ_get_rangeQ_con(typdef);
-	    typ_normalize_rangeQ(rangeQ, rbtyp);
-	} else if (res == ERR_NCX_SKIPPED) {
-	    res = NO_ERR;
-	}
-	break;
+        /* this is the final stop in the type chain
+         * if this typdef has a range, then check it
+         * and convert min/max to real numbers
+         */
+        res = resolve_minmax(tkc, mod, typdef, TRUE, rbtyp);
+        if (res == NO_ERR) {
+            rangeQ = typ_get_rangeQ_con(typdef);
+            typ_normalize_rangeQ(rangeQ, rbtyp);
+        } else if (res == ERR_NCX_SKIPPED) {
+            res = NO_ERR;
+        }
+        break;
     default:
-	break;
+        break;
     }
 
     return res;
@@ -2683,8 +2683,8 @@ static status_t
 *********************************************************************/
 static status_t
     rv_fits_in_rangedef (ncx_btype_t  btyp,
-			 const typ_rangedef_t *testrv,
-			 const typ_rangedef_t *checkrv)
+                         const typ_rangedef_t *testrv,
+                         const typ_rangedef_t *checkrv)
 {
     int32            cmp;
     boolean          lbok, lbok2, ubok, ubok2;
@@ -2696,60 +2696,60 @@ static status_t
 
     /* make sure any INF corner cases are met */
     if (testrv->flags & TYP_FL_LBINF && !(checkrv->flags & TYP_FL_LBINF)) {
-	return ERR_NCX_NOT_IN_RANGE;
+        return ERR_NCX_NOT_IN_RANGE;
     }
     if (testrv->flags & TYP_FL_LBINF2 && !(checkrv->flags & TYP_FL_LBINF2)) {
-	return ERR_NCX_NOT_IN_RANGE;
+        return ERR_NCX_NOT_IN_RANGE;
     }
     if (testrv->flags & TYP_FL_UBINF && !(checkrv->flags & TYP_FL_UBINF)) {
-	return ERR_NCX_NOT_IN_RANGE;
+        return ERR_NCX_NOT_IN_RANGE;
     }
     if (testrv->flags & TYP_FL_UBINF2 && !(checkrv->flags & TYP_FL_UBINF2)) {
-	return ERR_NCX_NOT_IN_RANGE;
+        return ERR_NCX_NOT_IN_RANGE;
     }
 
     /* check lower bound */
     if (!(checkrv->flags & TYP_FL_LBINF)) {
-	cmp = ncx_compare_nums(&testrv->lb, &checkrv->lb, btyp);
-	if (cmp >= 0) {
-	    lbok = TRUE;
-	}
+        cmp = ncx_compare_nums(&testrv->lb, &checkrv->lb, btyp);
+        if (cmp >= 0) {
+            lbok = TRUE;
+        }
     } else {
-	/* LB == -INF, always passes the test */
-	lbok = TRUE;
+        /* LB == -INF, always passes the test */
+        lbok = TRUE;
     } 
     if (!(checkrv->flags & TYP_FL_UBINF)) {
-	cmp = ncx_compare_nums(&testrv->lb, &checkrv->ub, btyp);
-	if (cmp <= 0) {
-	    lbok2 = TRUE;
-	}
+        cmp = ncx_compare_nums(&testrv->lb, &checkrv->ub, btyp);
+        if (cmp <= 0) {
+            lbok2 = TRUE;
+        }
     } else {
-	/* UB == INF, always passes the test */
-	lbok2 = TRUE;
+        /* UB == INF, always passes the test */
+        lbok2 = TRUE;
     }
 
     /* check upper bound */
     if (!(checkrv->flags & TYP_FL_LBINF)) {
-	cmp = ncx_compare_nums(&testrv->ub, &checkrv->lb, btyp);
-	if (cmp >= 0) {
-	    ubok = TRUE;
-	}
+        cmp = ncx_compare_nums(&testrv->ub, &checkrv->lb, btyp);
+        if (cmp >= 0) {
+            ubok = TRUE;
+        }
     } else {
-	/* LB == -INF, always passes the test */
-	ubok = TRUE;
+        /* LB == -INF, always passes the test */
+        ubok = TRUE;
     } 
     if (!(checkrv->flags & TYP_FL_UBINF)) {
-	cmp = ncx_compare_nums(&testrv->ub, &checkrv->ub, btyp);
-	if (cmp <= 0) {
-	    ubok2 = TRUE;
-	}
+        cmp = ncx_compare_nums(&testrv->ub, &checkrv->ub, btyp);
+        if (cmp <= 0) {
+            ubok2 = TRUE;
+        }
     } else {
-	/* UB == INF, always passes the test */
-	ubok2 = TRUE;
+        /* UB == INF, always passes the test */
+        ubok2 = TRUE;
     }
 
     return (lbok && lbok2 && ubok && ubok2) ? NO_ERR :
-	ERR_NCX_NOT_IN_RANGE;
+        ERR_NCX_NOT_IN_RANGE;
 
 }  /* rv_fits_in_rangedef */
 
@@ -2774,9 +2774,9 @@ static status_t
 *********************************************************************/
 static status_t 
     validate_range_chain (tk_chain_t  *tkc,
-			  ncx_module_t *mod,
-			  typ_def_t *intypdef,
-			  const xmlChar *typname)
+                          ncx_module_t *mod,
+                          typ_def_t *intypdef,
+                          const xmlChar *typname)
 {
     dlq_hdr_t      *rangeQ, *prangeQ;
     typ_def_t      *typdef, *parentdef;
@@ -2790,14 +2790,14 @@ static status_t
 
     typdef = typ_get_qual_typdef(intypdef, NCX_SQUAL_RANGE);
     if (!typdef) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     res = NO_ERR;
     errdone = FALSE;
     rbtyp = typ_get_range_type(typ_get_basetype(typdef));
     if (!typname) {
-	typname = (const xmlChar *)"(unnamed type)";
+        typname = (const xmlChar *)"(unnamed type)";
     }
 
     /* Test 1: Individual tests
@@ -2807,77 +2807,77 @@ static status_t
      */
     while (typdef && res==NO_ERR) {
 
-	rangeQ = typ_get_rangeQ_con(typdef);
-	if (!rangeQ || dlq_empty(rangeQ)) {
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
+        rangeQ = typ_get_rangeQ_con(typdef);
+        if (!rangeQ || dlq_empty(rangeQ)) {
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        }
 
-	curmax = NULL;
-	ubinf = FALSE;
-	first = TRUE;
+        curmax = NULL;
+        ubinf = FALSE;
+        first = TRUE;
 
-	for (rv = (typ_rangedef_t *)dlq_firstEntry(rangeQ);
-	     rv != NULL && res==NO_ERR;
-	     rv = (typ_rangedef_t *)dlq_nextEntry(rv)) {
+        for (rv = (typ_rangedef_t *)dlq_firstEntry(rangeQ);
+             rv != NULL && res==NO_ERR;
+             rv = (typ_rangedef_t *)dlq_nextEntry(rv)) {
 
-	    /* check range-part after INF */
-	    if (ubinf) {
-		res = ERR_NCX_INVALID_RANGE;
-		log_error("\nError: INF already used and no more range"
-			  " part clauses are allowed in type '%s'",
-			  typname);
-		continue;
-	    }
+            /* check range-part after INF */
+            if (ubinf) {
+                res = ERR_NCX_INVALID_RANGE;
+                log_error("\nError: INF already used and no more range"
+                          " part clauses are allowed in type '%s'",
+                          typname);
+                continue;
+            }
 
-	    /* check upper-bound not >= lower-bound */
-	    retval = ncx_compare_nums(&rv->lb, &rv->ub, rbtyp);
-	    if (retval == 1) {
-		res = ERR_NCX_INVALID_RANGE;
-		log_error("\nError: lower bound is greater than "
-			  "upper bound in range part clause in type '%s'",
-			  typname);
-		continue;
-	    }
+            /* check upper-bound not >= lower-bound */
+            retval = ncx_compare_nums(&rv->lb, &rv->ub, rbtyp);
+            if (retval == 1) {
+                res = ERR_NCX_INVALID_RANGE;
+                log_error("\nError: lower bound is greater than "
+                          "upper bound in range part clause in type '%s'",
+                          typname);
+                continue;
+            }
 
-	    /* check -INF used in a range-part other than first */
-	    if (rv->flags & TYP_FL_LBINF) {
-		if (!first) {
-		    res = ERR_NCX_OVERLAP_RANGE;
-		    log_error("\nError: -INF not allowed here in type '%s'",
-			      typname);
-		    continue;
-		}
-	    }
+            /* check -INF used in a range-part other than first */
+            if (rv->flags & TYP_FL_LBINF) {
+                if (!first) {
+                    res = ERR_NCX_OVERLAP_RANGE;
+                    log_error("\nError: -INF not allowed here in type '%s'",
+                              typname);
+                    continue;
+                }
+            }
 
-	    /* check this lower-bound > any previous upper bound */
-	    if (rv->flags & TYP_FL_UBINF) {
-		ubinf = TRUE;
-	    } else if (!curmax) {
-		curmax = &rv->ub;
-	    } else {
-		retval = ncx_compare_nums(&rv->lb, curmax, rbtyp);
-		if (retval != 1) {
-		    res = ERR_NCX_OVERLAP_RANGE;
-		} else {
-		    curmax = &rv->ub;
-		}
-	    }
-	    first = FALSE;
-	}
+            /* check this lower-bound > any previous upper bound */
+            if (rv->flags & TYP_FL_UBINF) {
+                ubinf = TRUE;
+            } else if (!curmax) {
+                curmax = &rv->ub;
+            } else {
+                retval = ncx_compare_nums(&rv->lb, curmax, rbtyp);
+                if (retval != 1) {
+                    res = ERR_NCX_OVERLAP_RANGE;
+                } else {
+                    curmax = &rv->ub;
+                }
+            }
+            first = FALSE;
+        }
 
-	if (res == NO_ERR) {
-	    typdef = typ_get_parent_typdef(typdef);
-	    if (typdef) {
-		typdef = typ_get_qual_typdef(typdef, NCX_SQUAL_RANGE);
-	    }
-	} else {
-	    tkc->curerr = &typdef->tkerr;
-	}
+        if (res == NO_ERR) {
+            typdef = typ_get_parent_typdef(typdef);
+            if (typdef) {
+                typdef = typ_get_qual_typdef(typdef, NCX_SQUAL_RANGE);
+            }
+        } else {
+            tkc->curerr = &typdef->tkerr;
+        }
     }
 
     if (res != NO_ERR && !errdone) {
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     /* Test 2: Typdef Chain tests
@@ -2888,78 +2888,78 @@ static status_t
     typdef = typ_get_qual_typdef(intypdef, NCX_SQUAL_RANGE);
     while (typdef && res==NO_ERR) {
 
-	/* have a typdef with a range definition
-	 * rangeQ contains the rangedef structs to test
-	 * For each parent typdef with a range clause:
-	 *    check raneQ contents against prangeQ contents
-	 *
-	 * rv is the rangedef to test
-	 * checkrv is the rangedef to test against
-	 */
-	rangeQ = typ_get_rangeQ_con(typdef);
-	for (rv = (typ_rangedef_t *)dlq_firstEntry(rangeQ);
-	     rv != NULL && res==NO_ERR;
-	     rv = (typ_rangedef_t *)dlq_nextEntry(rv)) {
+        /* have a typdef with a range definition
+         * rangeQ contains the rangedef structs to test
+         * For each parent typdef with a range clause:
+         *    check raneQ contents against prangeQ contents
+         *
+         * rv is the rangedef to test
+         * checkrv is the rangedef to test against
+         */
+        rangeQ = typ_get_rangeQ_con(typdef);
+        for (rv = (typ_rangedef_t *)dlq_firstEntry(rangeQ);
+             rv != NULL && res==NO_ERR;
+             rv = (typ_rangedef_t *)dlq_nextEntry(rv)) {
 
-	    parentdef = typ_get_parent_typdef(typdef);
-	    if (parentdef) {
-		parentdef = typ_get_qual_typdef(parentdef, NCX_SQUAL_RANGE);
+            parentdef = typ_get_parent_typdef(typdef);
+            if (parentdef) {
+                parentdef = typ_get_qual_typdef(parentdef, NCX_SQUAL_RANGE);
 
-		while (parentdef && res==NO_ERR) {
-		    prangeQ = typ_get_rangeQ_con(parentdef);
+                while (parentdef && res==NO_ERR) {
+                    prangeQ = typ_get_rangeQ_con(parentdef);
 
-		    /* rv rangedef just has to fit within one
-		     * of the checkrv rangedefs to pass the test
-		     */
-		    done = FALSE;
-		    for (checkrv = (typ_rangedef_t *)dlq_firstEntry(prangeQ);
-			 checkrv != NULL && !done;
-			 checkrv = (typ_rangedef_t *)
-			     dlq_nextEntry(checkrv)) {
-			res2 = rv_fits_in_rangedef(rbtyp, rv, checkrv);
-			if (res2 == NO_ERR) {
-			    done = TRUE;
-			}
-		    }
+                    /* rv rangedef just has to fit within one
+                     * of the checkrv rangedefs to pass the test
+                     */
+                    done = FALSE;
+                    for (checkrv = (typ_rangedef_t *)dlq_firstEntry(prangeQ);
+                         checkrv != NULL && !done;
+                         checkrv = (typ_rangedef_t *)
+                             dlq_nextEntry(checkrv)) {
+                        res2 = rv_fits_in_rangedef(rbtyp, rv, checkrv);
+                        if (res2 == NO_ERR) {
+                            done = TRUE;
+                        }
+                    }
 
-		    if (!done) {
-			res = ERR_NCX_NOT_IN_RANGE;
-			log_error("\nError: Range definition not a "
-				  "valid restriction of parent type '%s'",
-				  typname);
-		    } else {
-			parentdef = typ_get_parent_typdef(parentdef);
-			if (parentdef) {
-			    parentdef = 
-				typ_get_qual_typdef(parentdef,
-						    NCX_SQUAL_RANGE);
-			}
-		    }
-		}
-	    }
-	}
+                    if (!done) {
+                        res = ERR_NCX_NOT_IN_RANGE;
+                        log_error("\nError: Range definition not a "
+                                  "valid restriction of parent type '%s'",
+                                  typname);
+                    } else {
+                        parentdef = typ_get_parent_typdef(parentdef);
+                        if (parentdef) {
+                            parentdef = 
+                                typ_get_qual_typdef(parentdef,
+                                                    NCX_SQUAL_RANGE);
+                        }
+                    }
+                }
+            }
+        }
 
-	if (res == NO_ERR) {
-	    /* setup next loop */
-	    typdef = typ_get_parent_typdef(typdef);
-	    if (typdef) {
-		typdef = typ_get_qual_typdef(typdef, NCX_SQUAL_RANGE);
-	    }
-	} else {
-	    /* set error token */
-	    range = typ_get_range_con(typdef);
-	    if (range) {
-		tkc->curerr = &range->tkerr;
-	    } else if (typdef) {
-		tkc->curerr = &typdef->tkerr;
-	    } else {
-		tkc->curerr = &intypdef->tkerr;
-	    }
-	}
+        if (res == NO_ERR) {
+            /* setup next loop */
+            typdef = typ_get_parent_typdef(typdef);
+            if (typdef) {
+                typdef = typ_get_qual_typdef(typdef, NCX_SQUAL_RANGE);
+            }
+        } else {
+            /* set error token */
+            range = typ_get_range_con(typdef);
+            if (range) {
+                tkc->curerr = &range->tkerr;
+            } else if (typdef) {
+                tkc->curerr = &typdef->tkerr;
+            } else {
+                tkc->curerr = &intypdef->tkerr;
+            }
+        }
     }
 
     if (res != NO_ERR && !errdone) {
-	ncx_print_errormsg(tkc, mod, res);
+        ncx_print_errormsg(tkc, mod, res);
     }
 
     return res;
@@ -2989,11 +2989,11 @@ static status_t
 static status_t 
     resolve_union_type (yang_pcb_t *pcb,
                         tk_chain_t *tkc,
-			ncx_module_t *mod,
-			dlq_hdr_t  *unionQ,
-			obj_template_t *parent,
-			grp_template_t *grp,
-			boolean fromdef)
+                        ncx_module_t *mod,
+                        dlq_hdr_t  *unionQ,
+                        obj_template_t *parent,
+                        grp_template_t *grp,
+                        boolean fromdef)
 {
     typ_unionnode_t *un;
     status_t         res, retres;
@@ -3003,34 +3003,34 @@ static status_t
 
     /* first resolve all the local type names */
     for (un = (typ_unionnode_t *)dlq_firstEntry(unionQ);
-	 un != NULL;
-	 un = (typ_unionnode_t *)dlq_nextEntry(un)) {
+         un != NULL;
+         un = (typ_unionnode_t *)dlq_nextEntry(un)) {
 
-	res = resolve_type(pcb,
+        res = resolve_type(pcb,
                            tkc, 
-			   mod, 
-			   un->typdef,
-			   NULL, 
-			   NULL, 
-			   parent, 
-			   grp, 
-			   fromdef);
-	CHK_EXIT(res, retres);
+                           mod, 
+                           un->typdef,
+                           NULL, 
+                           NULL, 
+                           parent, 
+                           grp, 
+                           fromdef);
+        CHK_EXIT(res, retres);
 
-	btyp = typ_get_basetype(un->typdef);
-	if (btyp != NCX_BT_NONE && !typ_ok_for_union(btyp)) {
-	    retres = ERR_NCX_WRONG_TYPE;
-	    log_error("\nError: builtin type '%s' not allowed"
-		      " within a union", 
+        btyp = typ_get_basetype(un->typdef);
+        if (btyp != NCX_BT_NONE && !typ_ok_for_union(btyp)) {
+            retres = ERR_NCX_WRONG_TYPE;
+            log_error("\nError: builtin type '%s' not allowed"
+                      " within a union", 
                       tk_get_btype_sym(btyp));
-	    tkc->curerr = &un->typdef->tkerr;
-	    ncx_print_errormsg(tkc, mod, retres);
-	}
+            tkc->curerr = &un->typdef->tkerr;
+            ncx_print_errormsg(tkc, mod, retres);
+        }
 
-	if (un->typdef->class == NCX_CL_NAMED) {
-	    un->typ = un->typdef->def.named.typ;
-	    /* keep the typdef around for ncxdump */
-	}
+        if (un->typdef->class == NCX_CL_NAMED) {
+            un->typ = un->typdef->def.named.typ;
+            /* keep the typdef around for ncxdump */
+        }
     }
 
     return retres;
@@ -3076,13 +3076,13 @@ static status_t
 static status_t 
     resolve_type (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-		  ncx_module_t  *mod,
-		  typ_def_t *typdef,
-		  const xmlChar *name,
-		  const xmlChar *defval,
-		  obj_template_t *obj,
-		  grp_template_t *grp,
-		  boolean fromdef)
+                  ncx_module_t  *mod,
+                  typ_def_t *typdef,
+                  const xmlChar *name,
+                  const xmlChar *defval,
+                  obj_template_t *obj,
+                  grp_template_t *grp,
+                  boolean fromdef)
 {
     typ_def_t        *testdef;
     typ_template_t   *errtyp;
@@ -3100,15 +3100,15 @@ static status_t
     errdone = FALSE;
 
     if (typdef->class == NCX_CL_BASE) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
 #ifdef YANG_TYP_DEBUG
     if (LOGDEBUG4) {
-	log_debug4("\nyang_typ: resolve type '%s' (name %s) on line %u",
-		   (typdef->typename) ? typdef->typename : NCX_EL_NONE,
-		   (name) ? name : NCX_EL_NONE,
-		   typdef->tkerr.linenum);
+        log_debug4("\nyang_typ: resolve type '%s' (name %s) on line %u",
+                   (typdef->typename) ? typdef->typename : NCX_EL_NONE,
+                   (name) ? name : NCX_EL_NONE,
+                   typdef->tkerr.linenum);
     }
 #endif
 
@@ -3118,14 +3118,14 @@ static status_t
                                mod, 
                                &typdef->appinfoQ);
     if (NEED_EXIT(res)) {
-	return res;
+        return res;
     } else {
-	res = NO_ERR;
+        res = NO_ERR;
     }
 
     /* first resolve all the local type names */
     if (res == NO_ERR) {
-	res = obj_set_named_type(tkc, 
+        res = obj_set_named_type(tkc, 
                                  mod, 
                                  name, 
                                  typdef, 
@@ -3135,26 +3135,26 @@ static status_t
 
     /* type name loop check */
     if (res == NO_ERR) {
-	res = loop_test(typdef);
+        res = loop_test(typdef);
     }
 
     /* If no loops then make sure base type is correct */
     if (res == NO_ERR) {
-	res = restriction_test(tkc, mod, typdef);
-	if (res != NO_ERR) {
-	    errdone = TRUE;
-	}
+        res = restriction_test(tkc, mod, typdef);
+        if (res != NO_ERR) {
+            errdone = TRUE;
+        }
     }
 
     /* print any errors so far, and exit if the typdef may
      * not be stable enough to test further
      */
     if (res != NO_ERR) {
-	if (!errdone) {
-	    tkc->curerr = &typdef->tkerr;
-	    ncx_print_errormsg(tkc, mod, res);
-	}
-	return res;
+        if (!errdone) {
+            tkc->curerr = &typdef->tkerr;
+            ncx_print_errormsg(tkc, mod, res);
+        }
+        return res;
     }
 
     /* OK so far: safe to process the typdef further
@@ -3163,10 +3163,10 @@ static status_t
      * Errors printed in the called fn
      */
     res = finish_yang_range(tkc, 
-			    mod, 
-			    typdef,
-			    typ_get_range_type
-			    (typ_get_basetype(typdef)));
+                            mod, 
+                            typdef,
+                            typ_get_range_type
+                            (typ_get_basetype(typdef)));
 
     /* validate that the ranges are valid now that min/max is set 
      * and all parent ranges are also set.  A range must be valid
@@ -3174,200 +3174,200 @@ static status_t
      * Errors printed in the called fn
      */
     if (res == NO_ERR) {
-	if (!name && (typdef->class == NCX_CL_NAMED)) {
-	    /* name field just used for error messages */
-	    errname = typdef->typename;
-	} else {
-	    errname = name;
-	}
-	res = validate_range_chain(tkc, mod, typdef, errname);
+        if (!name && (typdef->class == NCX_CL_NAMED)) {
+            /* name field just used for error messages */
+            errname = typdef->typename;
+        } else {
+            errname = name;
+        }
+        res = validate_range_chain(tkc, mod, typdef, errname);
     }
 
     /* check default value if any defined */
     btyp = typ_get_basetype(typdef);
     if ((res == NO_ERR) &&
-	(btyp != NCX_BT_NONE) && typ_ok(typdef)) {
+        (btyp != NCX_BT_NONE) && typ_ok(typdef)) {
 
-	if (defval) {
-	    if (btyp == NCX_BT_IDREF) {
-		res = val_parse_idref(mod, defval, NULL, NULL, NULL);
-	    } else {
-		res = val_simval_ok(typdef, defval);
-	    }
-	    if (res != NO_ERR) {
-		if (obj) {
-		    log_error("\nError: %s '%s' has invalid "
-			      "default value (%s)",
-			      (name) ? "Type" : 
-			      (const char *)obj_get_typestr(obj),
-			      (name) ? name : obj_get_name(obj), 
-			      defval);
-		} else {
-		    log_error("\nError: %s '%s' has invalid "
-			      "default value (%s)",
-			      (name) ? "Type" : "leaf or leaf-list",
-			      (name) ? (const char *)name : "--", 
-			      defval);
-		}
-		tkc->curerr = &typdef->tkerr;
-		ncx_print_errormsg(tkc, mod, res);
+        if (defval) {
+            if (btyp == NCX_BT_IDREF) {
+                res = val_parse_idref(mod, defval, NULL, NULL, NULL);
+            } else {
+                res = val_simval_ok(typdef, defval);
             }
-	} else if (typdef->class == NCX_CL_NAMED) {
-	    typdefval = typ_get_defval(typdef->def.named.typ);
-	    if (typdefval) {
-		if (btyp == NCX_BT_IDREF) {
-		    res = val_parse_idref(mod, 
-					  typdefval, 
-					  NULL, 
-					  NULL, 
-					  NULL);
-		} else {
-		    res = val_simval_ok(typdef, typdefval);
-		}
-		if (res != NO_ERR) {
-		    if (obj) {
-			log_error("\nError: %s '%s' has invalid "
-				  "inherited default value (%s)",
-				  (name) ? "Type" : 
-				  (const char *)obj_get_typestr(obj),
-				  (name) ? name : obj_get_name(obj), 
-				  typdefval);
-		    } else {
-			log_error("\nError: %s '%s' has invalid "
-				  "inherited default value (%s)",
-				  (name) ? "Type" : "leaf or leaf-list",
-				  (name) ? (const char *)name : "--", 
-				  typdefval);
-		    }
-		    tkc->curerr = &typdef->tkerr;
-		    ncx_print_errormsg(tkc, mod, res);
+            if (res != NO_ERR) {
+                if (obj) {
+                    log_error("\nError: %s '%s' has invalid "
+                              "default value (%s)",
+                              (name) ? "Type" : 
+                              (const char *)obj_get_typestr(obj),
+                              (name) ? name : obj_get_name(obj), 
+                              defval);
+                } else {
+                    log_error("\nError: %s '%s' has invalid "
+                              "default value (%s)",
+                              (name) ? "Type" : "leaf or leaf-list",
+                              (name) ? (const char *)name : "--", 
+                              defval);
                 }
-	    }
-	}
+                tkc->curerr = &typdef->tkerr;
+                ncx_print_errormsg(tkc, mod, res);
+            }
+        } else if (typdef->class == NCX_CL_NAMED) {
+            typdefval = typ_get_defval(typdef->def.named.typ);
+            if (typdefval) {
+                if (btyp == NCX_BT_IDREF) {
+                    res = val_parse_idref(mod, 
+                                          typdefval, 
+                                          NULL, 
+                                          NULL, 
+                                          NULL);
+                } else {
+                    res = val_simval_ok(typdef, typdefval);
+                }
+                if (res != NO_ERR) {
+                    if (obj) {
+                        log_error("\nError: %s '%s' has invalid "
+                                  "inherited default value (%s)",
+                                  (name) ? "Type" : 
+                                  (const char *)obj_get_typestr(obj),
+                                  (name) ? name : obj_get_name(obj), 
+                                  typdefval);
+                    } else {
+                        log_error("\nError: %s '%s' has invalid "
+                                  "inherited default value (%s)",
+                                  (name) ? "Type" : "leaf or leaf-list",
+                                  (name) ? (const char *)name : "--", 
+                                  typdefval);
+                    }
+                    tkc->curerr = &typdef->tkerr;
+                    ncx_print_errormsg(tkc, mod, res);
+                }
+            }
+        }
     }
 
     /* check builin type specific details */
     if (res == NO_ERR) {
-	switch (typ_get_basetype(typdef)) {
-	case NCX_BT_ENUM:
-	case NCX_BT_BITS:
-	    /* check each enumeration appinfoQ */
-	    if (typdef->class == NCX_CL_SIMPLE) {
-		for (enu = (typ_enum_t *)
-			 dlq_firstEntry(&typdef->def.simple.valQ);
-		     enu != NO_ERR;
-		     enu = (typ_enum_t *)dlq_nextEntry(enu)) {
+        switch (typ_get_basetype(typdef)) {
+        case NCX_BT_ENUM:
+        case NCX_BT_BITS:
+            /* check each enumeration appinfoQ */
+            if (typdef->class == NCX_CL_SIMPLE) {
+                for (enu = (typ_enum_t *)
+                         dlq_firstEntry(&typdef->def.simple.valQ);
+                     enu != NO_ERR;
+                     enu = (typ_enum_t *)dlq_nextEntry(enu)) {
 
-		    res = ncx_resolve_appinfoQ(pcb,
+                    res = ncx_resolve_appinfoQ(pcb,
                                                tkc, 
                                                mod, 
                                                &enu->appinfoQ);
-		    CHK_EXIT(res, retres);
-		}
-		res = NO_ERR;
-	    }
-	    break;
-	case NCX_BT_IDREF:
-	    idref = typ_get_idref(typdef);
-	    if (idref) {
-		testidentity = NULL;
-		if (idref->baseprefix &&
-		    xml_strcmp(idref->baseprefix, mod->prefix)) {
+                    CHK_EXIT(res, retres);
+                }
+                res = NO_ERR;
+            }
+            break;
+        case NCX_BT_IDREF:
+            idref = typ_get_idref(typdef);
+            if (idref) {
+                testidentity = NULL;
+                if (idref->baseprefix &&
+                    xml_strcmp(idref->baseprefix, mod->prefix)) {
 
-		    /* find the identity in another module */
-		    res = yang_find_imp_identity(pcb,
+                    /* find the identity in another module */
+                    res = yang_find_imp_identity(pcb,
                                                  tkc, 
-						 mod, 
-						 idref->baseprefix,
-						 idref->basename, 
-						 &typdef->tkerr,
-						 &testidentity);
-		} else {
-		    testidentity = ncx_find_identity
-			(mod, idref->basename);
-		    if (!testidentity) {
-			res = ERR_NCX_DEF_NOT_FOUND;
-		    } else {
-			idref->base = testidentity;
-		    }
-		}
-		idref->base = testidentity;
-		if (res != NO_ERR) {
-		    log_error("\nError: identityref '%s' has invalid "
-			      "base value (%s)",
-			      (name) ? (const char *)name : "--", 
-			      idref->basename);
-		    tkc->curerr = &typdef->tkerr;
-		    ncx_print_errormsg(tkc, mod, res);
-		}
-	    } else {
-		res = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	    break;
-	default:
-	    ;
-	}
+                                                 mod, 
+                                                 idref->baseprefix,
+                                                 idref->basename, 
+                                                 &typdef->tkerr,
+                                                 &testidentity);
+                } else {
+                    testidentity = ncx_find_identity
+                        (mod, idref->basename);
+                    if (!testidentity) {
+                        res = ERR_NCX_DEF_NOT_FOUND;
+                    } else {
+                        idref->base = testidentity;
+                    }
+                }
+                idref->base = testidentity;
+                if (res != NO_ERR) {
+                    log_error("\nError: identityref '%s' has invalid "
+                              "base value (%s)",
+                              (name) ? (const char *)name : "--", 
+                              idref->basename);
+                    tkc->curerr = &typdef->tkerr;
+                    ncx_print_errormsg(tkc, mod, res);
+                }
+            } else {
+                res = SET_ERROR(ERR_INTERNAL_VAL);
+            }
+            break;
+        default:
+            ;
+        }
     }
 
     /* special check for union typdefs, errors printed by called fn */
     if (res == NO_ERR) {
-	if (typdef->class == NCX_CL_SIMPLE &&
-	    typ_get_basetype(typdef) == NCX_BT_UNION) {
-	    testdef = typ_get_base_typdef(typdef);
-	    res = resolve_union_type(pcb,
+        if (typdef->class == NCX_CL_SIMPLE &&
+            typ_get_basetype(typdef) == NCX_BT_UNION) {
+            testdef = typ_get_base_typdef(typdef);
+            res = resolve_union_type(pcb,
                                      tkc, 
-				     mod,
-				     &testdef->def.simple.unionQ,
-				     obj, 
-				     grp, 
-				     fromdef);
-	}
+                                     mod,
+                                     &testdef->def.simple.unionQ,
+                                     obj, 
+                                     grp, 
+                                     fromdef);
+        }
     }
 
     /*  check shadow typedef name error, even if other errors so far */
     if (name) {
-	errtyp = NULL;
+        errtyp = NULL;
 
-	/* if object directly within a grouping, then need
-	 * to make sure that parent groupings do not contain
-	 * this type definition
-	 */
-	if (obj && obj->grp && obj->grp->parentgrp) {
-	    nextgrp = obj->grp->parentgrp;
-	    while (nextgrp) {
-		errtyp = ncx_find_type_que(&nextgrp->typedefQ, name);
-		if (errtyp) {
-		    nextgrp = NULL;
-		} else {
-		    nextgrp = nextgrp->parentgrp;
-		}
-	    }
-	}
+        /* if object directly within a grouping, then need
+         * to make sure that parent groupings do not contain
+         * this type definition
+         */
+        if (obj && obj->grp && obj->grp->parentgrp) {
+            nextgrp = obj->grp->parentgrp;
+            while (nextgrp) {
+                errtyp = ncx_find_type_que(&nextgrp->typedefQ, name);
+                if (errtyp) {
+                    nextgrp = NULL;
+                } else {
+                    nextgrp = nextgrp->parentgrp;
+                }
+            }
+        }
 
-	/* check local typedef shadowed further up the chain */
-	if (!errtyp && obj && obj->parent && 
-	    !obj_is_root(obj->parent)) {
-	    errtyp = obj_find_type(obj->parent, name);
-	}
+        /* check local typedef shadowed further up the chain */
+        if (!errtyp && obj && obj->parent && 
+            !obj_is_root(obj->parent)) {
+            errtyp = obj_find_type(obj->parent, name);
+        }
 
-	/* check module-global (exportable) typedef shadowed
-	 * only check for nested typedefs
-	 */
-	if (!errtyp && obj && 
-	    (name || obj->grp || 
-	     (obj->parent && !obj_is_root(obj->parent)))) {
-	    errtyp = ncx_find_type(mod, name);
-	}
+        /* check module-global (exportable) typedef shadowed
+         * only check for nested typedefs
+         */
+        if (!errtyp && obj && 
+            (name || obj->grp || 
+             (obj->parent && !obj_is_root(obj->parent)))) {
+            errtyp = ncx_find_type(mod, name);
+        }
 
-	if (errtyp) {
-	    res = ERR_NCX_DUP_ENTRY;
-	    log_error("\nError: local typedef %s shadows "
-		      "definition on line %u", 
+        if (errtyp) {
+            res = ERR_NCX_DUP_ENTRY;
+            log_error("\nError: local typedef %s shadows "
+                      "definition on line %u", 
                       name,
-		      errtyp->tkerr.linenum);
-	    tkc->curerr = &typdef->tkerr;
-	    ncx_print_errormsg(tkc, mod, res);
-	}
+                      errtyp->tkerr.linenum);
+            tkc->curerr = &typdef->tkerr;
+            ncx_print_errormsg(tkc, mod, res);
+        }
     }
 
     return (retres != NO_ERR) ? retres : res;
@@ -3397,10 +3397,10 @@ static status_t
 static status_t 
     resolve_typedef (yang_pcb_t *pcb,
                      tk_chain_t *tkc,
-		     ncx_module_t  *mod,
-		     typ_template_t *typ,
-		     obj_template_t *obj,
-		     grp_template_t *grp)
+                     ncx_module_t  *mod,
+                     typ_template_t *typ,
+                     obj_template_t *obj,
+                     grp_template_t *grp)
 {
     status_t   res, retres;
 
@@ -3409,8 +3409,8 @@ static status_t
     /* check the appinfoQ */
     typ->res = res = ncx_resolve_appinfoQ(pcb,
                                           tkc, 
-					  mod, 
-					  &typ->appinfoQ);
+                                          mod, 
+                                          &typ->appinfoQ);
     CHK_EXIT(res, retres);
 
     typ->res = res = resolve_type(pcb,
@@ -3452,9 +3452,9 @@ static status_t
 static status_t 
     consume_type (yang_pcb_t *pcb,
                   tk_chain_t *tkc,
-		  ncx_module_t  *mod,
-		  typ_def_t *intypdef,
-		  boolean metamode)
+                  ncx_module_t  *mod,
+                  typ_def_t *intypdef,
+                  boolean metamode)
 {
     const char     *expstr;
     typ_template_t *imptyp;
@@ -3480,109 +3480,109 @@ static status_t
     /* Get the mandatory base type */
     res = yang_consume_pid_string(tkc, 
                                   mod, 
-				  &intypdef->prefix,
-				  &intypdef->typename);
+                                  &intypdef->prefix,
+                                  &intypdef->typename);
     CHK_EXIT(res, retres);
 
     /* got ID and prefix if there is one */
     if (intypdef->prefix && intypdef->typename &&
-	xml_strcmp(intypdef->prefix, mod->prefix)) {
-	/* real import - not the same as this module's prefix */
-	res = yang_find_imp_typedef(pcb,
+        xml_strcmp(intypdef->prefix, mod->prefix)) {
+        /* real import - not the same as this module's prefix */
+        res = yang_find_imp_typedef(pcb,
                                     tkc, 
                                     mod,
-				    intypdef->prefix,
-				    intypdef->typename,
-				    NULL,
-				    &imptyp);
-	if (res != NO_ERR) {
-	    CHK_EXIT(res, retres);
-	    /* type not found but continue processing errors for now */
-	    typ_init_named(intypdef);
-	} else {
-	    /* found named type OK, setup typdef */
-	    typ_init_named(intypdef);
-	    btyp = typ_get_basetype(&imptyp->typdef);
-	    typ_set_named_typdef(intypdef, imptyp);
-	}
+                                    intypdef->prefix,
+                                    intypdef->typename,
+                                    NULL,
+                                    &imptyp);
+        if (res != NO_ERR) {
+            CHK_EXIT(res, retres);
+            /* type not found but continue processing errors for now */
+            typ_init_named(intypdef);
+        } else {
+            /* found named type OK, setup typdef */
+            typ_init_named(intypdef);
+            btyp = typ_get_basetype(&imptyp->typdef);
+            typ_set_named_typdef(intypdef, imptyp);
+        }
     } else if (intypdef->typename) {
-	/* there was no real prefix, so try to resolve this ID
-	 * as a builtin type, else save as a local type
-	 * btyp == NCX_BT_NONE indicates a local type
-	 */
-	btyp = tk_get_yang_btype_id(intypdef->typename,
-				    xml_strlen(intypdef->typename));
-	if (btyp != NCX_BT_NONE) {
-	    /* base type is builtin type */
-	    typ_init_simple(intypdef, btyp);
-	} else {
-	    /* base type local named type */
-	    typ_init_named(intypdef);
-	}
+        /* there was no real prefix, so try to resolve this ID
+         * as a builtin type, else save as a local type
+         * btyp == NCX_BT_NONE indicates a local type
+         */
+        btyp = tk_get_yang_btype_id(intypdef->typename,
+                                    xml_strlen(intypdef->typename));
+        if (btyp != NCX_BT_NONE) {
+            /* base type is builtin type */
+            typ_init_simple(intypdef, btyp);
+        } else {
+            /* base type local named type */
+            typ_init_named(intypdef);
+        }
     } else {
-	/* not even a typename to work with, error already set */
-	typ_init_named(intypdef);
-    }	
-		
+        /* not even a typename to work with, error already set */
+        typ_init_named(intypdef);
+    }   
+                
     /* check for ending semi-colon or starting left brace */
     if (!metamode) {
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	}
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        }
     }
 
     if (TK_CUR_TYP(tkc) == TK_TT_SEMICOL || metamode) {
-	/* got the type name and that's all.
-	 * Check if a named imported type is given
-	 * or a builtin type name, and gen an error
-	 * if any subclauses are expected
-	 */
-	if (imptyp) {
-	    return NO_ERR;
-	}
+        /* got the type name and that's all.
+         * Check if a named imported type is given
+         * or a builtin type name, and gen an error
+         * if any subclauses are expected
+         */
+        if (imptyp) {
+            return NO_ERR;
+        }
 
-	/* check if builtin type and missing data */
-	switch (btyp) {
-	case NCX_BT_BITS:
-	    retres = ERR_NCX_MISSING_TYPE;
-	    expstr = "bit definitions";
-	    break;
-	case NCX_BT_ENUM:
-	    retres = ERR_NCX_MISSING_TYPE;
-	    expstr = "enum definitions";
-	    break;
-	case NCX_BT_UNION:
-	    retres = ERR_NCX_MISSING_TYPE;
-	    expstr = "union member definitions";
-	    break;
-	case NCX_BT_LEAFREF:
-	    retres = ERR_NCX_MISSING_TYPE;
-	    expstr = "path specifier";
-	    break;
-	case NCX_BT_NONE:
-	    if (metamode && typ_get_basetype(intypdef) == NCX_BT_NONE) {
-		retres = obj_set_named_type(tkc, 
+        /* check if builtin type and missing data */
+        switch (btyp) {
+        case NCX_BT_BITS:
+            retres = ERR_NCX_MISSING_TYPE;
+            expstr = "bit definitions";
+            break;
+        case NCX_BT_ENUM:
+            retres = ERR_NCX_MISSING_TYPE;
+            expstr = "enum definitions";
+            break;
+        case NCX_BT_UNION:
+            retres = ERR_NCX_MISSING_TYPE;
+            expstr = "union member definitions";
+            break;
+        case NCX_BT_LEAFREF:
+            retres = ERR_NCX_MISSING_TYPE;
+            expstr = "path specifier";
+            break;
+        case NCX_BT_NONE:
+            if (metamode && typ_get_basetype(intypdef) == NCX_BT_NONE) {
+                retres = obj_set_named_type(tkc, 
                                             mod, 
                                             NULL,
-					    intypdef, 
+                                            intypdef, 
                                             NULL, 
                                             NULL);
-	    }
-	    return retres;
-	default:
-	    if (btyp == NCX_BT_INSTANCE_ID) {
-		intypdef->def.simple.constrained = TRUE;
-	    }
-	    return NO_ERR;
-	}
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
-	return retres;
+            }
+            return retres;
+        default:
+            if (btyp == NCX_BT_INSTANCE_ID) {
+                intypdef->def.simple.constrained = TRUE;
+            }
+            return NO_ERR;
+        }
+        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        return retres;
     } else if (TK_CUR_TYP(tkc) != TK_TT_LBRACE) {
-	retres = ERR_NCX_WRONG_TKTYPE;
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
-	return retres;
+        retres = ERR_NCX_WRONG_TKTYPE;
+        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        return retres;
     }
 
     /* got left brace, get the type sub-section clauses
@@ -3590,49 +3590,49 @@ static status_t
      * to a local named type (btyp not set yet)
      */
     if (imptyp || btyp == NCX_BT_NONE) {
-	res = typ_set_new_named(intypdef, btyp);
-	if (res == NO_ERR) {
-	    typdef = typ_get_new_named(intypdef);
-	    derived = TRUE;
-	    typdef->def.simple.flags |= TYP_FL_REPLACE;
-	} else {
-	    ncx_print_errormsg(tkc, mod, res);
-	    return res;
-	}
+        res = typ_set_new_named(intypdef, btyp);
+        if (res == NO_ERR) {
+            typdef = typ_get_new_named(intypdef);
+            derived = TRUE;
+            typdef->def.simple.flags |= TYP_FL_REPLACE;
+        } else {
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        }
     } else {
-	typdef = intypdef;
+        typdef = intypdef;
     }
 
 
     /* check for hard-wired builtin type sub-sections */
     switch (btyp) {
     case NCX_BT_NONE:
-	/* extending a local type that has not been resolved yet */
-	res = finish_unknown_type(tkc, mod, typdef);
-	CHK_EXIT(res, retres);
-	break;
+        /* extending a local type that has not been resolved yet */
+        res = finish_unknown_type(tkc, mod, typdef);
+        CHK_EXIT(res, retres);
+        break;
     case NCX_BT_ANY:
-	extonly = TRUE;
-	break;
+        extonly = TRUE;
+        break;
     case NCX_BT_BITS:
-	if (derived) {
-	    extonly = TRUE;
-	} else {
-	    res = finish_bits_type(tkc, mod, typdef);
-	    CHK_EXIT(res, retres);
-	}
-	break;
+        if (derived) {
+            extonly = TRUE;
+        } else {
+            res = finish_bits_type(tkc, mod, typdef);
+            CHK_EXIT(res, retres);
+        }
+        break;
     case NCX_BT_ENUM:
-	if (derived) {
-	    extonly = TRUE;
-	} else {
-	    res = finish_enum_type(tkc, mod, typdef);
-	    CHK_EXIT(res, retres);
-	}
-	break;
+        if (derived) {
+            extonly = TRUE;
+        } else {
+            res = finish_enum_type(tkc, mod, typdef);
+            CHK_EXIT(res, retres);
+        }
+        break;
     case NCX_BT_EMPTY:
-	extonly = TRUE;
-	break;
+        extonly = TRUE;
+        break;
     case NCX_BT_INT8:
     case NCX_BT_INT16:
     case NCX_BT_INT32:
@@ -3643,64 +3643,64 @@ static status_t
     case NCX_BT_UINT64:
     case NCX_BT_DECIMAL64:
     case NCX_BT_FLOAT64:
-	res = finish_number_type(tkc, mod, btyp, typdef);
-	CHK_EXIT(res, retres);
-	break;
+        res = finish_number_type(tkc, mod, btyp, typdef);
+        CHK_EXIT(res, retres);
+        break;
     case NCX_BT_STRING:
     case NCX_BT_BINARY:
-	res = finish_string_type(tkc, mod, typdef, btyp);
-	CHK_EXIT(res, retres);
-	break;
+        res = finish_string_type(tkc, mod, typdef, btyp);
+        CHK_EXIT(res, retres);
+        break;
     case NCX_BT_UNION:
-	if (derived) {
-	    extonly = TRUE;
-	} else {
-	    res = finish_union_type(pcb,
+        if (derived) {
+            extonly = TRUE;
+        } else {
+            res = finish_union_type(pcb,
                                     tkc, 
                                     mod, 
                                     typdef);
-	    CHK_EXIT(res, retres);
-	}
-	break;
+            CHK_EXIT(res, retres);
+        }
+        break;
     case NCX_BT_LEAFREF:
-	if (derived) {
-	    extonly = TRUE;
-	} else {
-	    res = finish_leafref_type(tkc, mod, typdef);
-	    CHK_EXIT(res, retres);
-	}
-	break;
+        if (derived) {
+            extonly = TRUE;
+        } else {
+            res = finish_leafref_type(tkc, mod, typdef);
+            CHK_EXIT(res, retres);
+        }
+        break;
     case NCX_BT_IDREF:
-	if (derived) {
-	    extonly = TRUE;
-	} else {
-	    res = finish_idref_type(tkc, mod, typdef);
-	    CHK_EXIT(res, retres);
-	}
-	break;
+        if (derived) {
+            extonly = TRUE;
+        } else {
+            res = finish_idref_type(tkc, mod, typdef);
+            CHK_EXIT(res, retres);
+        }
+        break;
     case NCX_BT_INSTANCE_ID:
-	if (derived) {
-	    extonly = TRUE;
-	} else {
-	    res = finish_instanceid_type(tkc, mod, typdef);
-	    CHK_EXIT(res, retres);
-	}
-	break;
+        if (derived) {
+            extonly = TRUE;
+        } else {
+            res = finish_instanceid_type(tkc, mod, typdef);
+            CHK_EXIT(res, retres);
+        }
+        break;
     default:
-	retres = SET_ERROR(ERR_INTERNAL_VAL);
-	ncx_print_errormsg(tkc, mod, retres);
+        retres = SET_ERROR(ERR_INTERNAL_VAL);
+        ncx_print_errormsg(tkc, mod, retres);
     }
 
     /* check if this sub-section is only allowed
      * to have extensions in it; no YANG statements
      */
     if (extonly) {
-	/* give back left brace and get the appinfo */
-	TK_BKUP(tkc);  
-	res = yang_consume_semiapp(tkc, 
+        /* give back left brace and get the appinfo */
+        TK_BKUP(tkc);  
+        res = yang_consume_semiapp(tkc, 
                                    mod,
-				   &typdef->appinfoQ);
-	CHK_EXIT(res, retres);
+                                   &typdef->appinfoQ);
+        CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -3734,12 +3734,12 @@ static status_t
 status_t 
     yang_typ_consume_type (yang_pcb_t *pcb,
                            tk_chain_t *tkc,
-			   ncx_module_t  *mod,
-			   typ_def_t *intypdef)
+                           ncx_module_t  *mod,
+                           typ_def_t *intypdef)
 {
 #ifdef DEBUG
     if (!tkc || !mod || !intypdef) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -3773,12 +3773,12 @@ status_t
 status_t 
     yang_typ_consume_metadata_type (yang_pcb_t *pcb,
                                     tk_chain_t *tkc,
-				    ncx_module_t  *mod,
-				    typ_def_t *intypdef)
+                                    ncx_module_t  *mod,
+                                    typ_def_t *intypdef)
 {
 #ifdef DEBUG
     if (!pcb || !tkc || !mod || !intypdef) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -3814,8 +3814,8 @@ status_t
 status_t 
     yang_typ_consume_typedef (yang_pcb_t *pcb,
                               tk_chain_t *tkc,
-			      ncx_module_t  *mod,
-			      dlq_hdr_t *que)
+                              ncx_module_t  *mod,
+                              dlq_hdr_t *que)
 {
     typ_template_t  *typ, *testtyp;
     const xmlChar   *val;
@@ -3846,9 +3846,9 @@ status_t
     /* Get a new typ_template_t to fill in */
     typ = typ_new_template();
     if (!typ) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     } else {
         ncx_set_error(&typ->tkerr,
                       mod,
@@ -3866,187 +3866,187 @@ status_t
 
     /* get the prefix clause and any appinfo extensions */
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    typ_free_template(typ);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            typ_free_template(typ);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    typ_free_template(typ);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &typ->typdef.appinfoQ);
-	    if (res != NO_ERR) {
-		retres = res;
-		if (NEED_EXIT(res)) {
-		    typ_free_template(typ);
-		}
-		return res;
-	    }
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	default:
-	    expstr = "keyword";
-	    res = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            typ_free_template(typ);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &typ->typdef.appinfoQ);
+            if (res != NO_ERR) {
+                retres = res;
+                if (NEED_EXIT(res)) {
+                    typ_free_template(typ);
+                }
+                return res;
+            }
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        default:
+            expstr = "keyword";
+            res = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
-	if (!xml_strcmp(val, YANG_K_TYPE)) {
-	    if (typdone) {
-		retres = ERR_NCX_ENTRY_EXISTS;
-		typeok = FALSE;
-		log_error("\nError: type-stmt already entered");
-		ncx_print_errormsg(tkc, mod, res);
-		typ_clean_typdef(&typ->typdef);
-	    }
-	    typdone = TRUE;
-	    res = yang_typ_consume_type(pcb,
+        /* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_TYPE)) {
+            if (typdone) {
+                retres = ERR_NCX_ENTRY_EXISTS;
+                typeok = FALSE;
+                log_error("\nError: type-stmt already entered");
+                ncx_print_errormsg(tkc, mod, res);
+                typ_clean_typdef(&typ->typdef);
+            }
+            typdone = TRUE;
+            res = yang_typ_consume_type(pcb,
                                         tkc, 
                                         mod, 
                                         &typ->typdef);
-	    if (res != NO_ERR) {
-		retres = res;
-		if (NEED_EXIT(res)) {
-		    typ_free_template(typ);
-		    return res;
-		}
-	    } else {
-		typeok = TRUE;
-	    }
-	} else if (!xml_strcmp(val, YANG_K_UNITS)) {
-	    res = yang_consume_strclause(tkc, 
+            if (res != NO_ERR) {
+                retres = res;
+                if (NEED_EXIT(res)) {
+                    typ_free_template(typ);
+                    return res;
+                }
+            } else {
+                typeok = TRUE;
+            }
+        } else if (!xml_strcmp(val, YANG_K_UNITS)) {
+            res = yang_consume_strclause(tkc, 
                                          mod, 
                                          &typ->units,
-					 &unit, 
+                                         &unit, 
                                          &typ->typdef.appinfoQ);
-	    if (res != NO_ERR) {
-		retres = res;
-		if (NEED_EXIT(res)) {
-		    typ_free_template(typ);
-		    return res;
-		}
-	    }
-	} else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
-	    res = yang_consume_strclause(tkc, 
+            if (res != NO_ERR) {
+                retres = res;
+                if (NEED_EXIT(res)) {
+                    typ_free_template(typ);
+                    return res;
+                }
+            }
+        } else if (!xml_strcmp(val, YANG_K_DEFAULT)) {
+            res = yang_consume_strclause(tkc, 
                                          mod, 
                                          &typ->defval,
-					 &def, 
+                                         &def, 
                                          &typ->typdef.appinfoQ);
-	    if (res != NO_ERR) {
-		retres = res;
-		if (NEED_EXIT(res)) {
-		    typ_free_template(typ);
-		    return res;
-		}
-	    }
-	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, 
+            if (res != NO_ERR) {
+                retres = res;
+                if (NEED_EXIT(res)) {
+                    typ_free_template(typ);
+                    return res;
+                }
+            }
+        } else if (!xml_strcmp(val, YANG_K_STATUS)) {
+            res = yang_consume_status(tkc, 
                                       mod, 
                                       &typ->status,
-				      &stat, 
+                                      &stat, 
                                       &typ->typdef.appinfoQ);
-	    if (res != NO_ERR) {
-		retres = res;
-		if (NEED_EXIT(res)) {
-		    typ_free_template(typ);
-		    return res;
-		}
-	    }
-	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, 
+            if (res != NO_ERR) {
+                retres = res;
+                if (NEED_EXIT(res)) {
+                    typ_free_template(typ);
+                    return res;
+                }
+            }
+        } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &typ->descr,
-				     &desc, 
+                                     &desc, 
                                      &typ->typdef.appinfoQ);
-	    if (res != NO_ERR) {
-		retres = res;
-		if (NEED_EXIT(res)) {
-		    typ_free_template(typ);
-		    return res;
-		}
-	    }
-	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, 
+            if (res != NO_ERR) {
+                retres = res;
+                if (NEED_EXIT(res)) {
+                    typ_free_template(typ);
+                    return res;
+                }
+            }
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &typ->ref,
-				     &ref, 
+                                     &ref, 
                                      &typ->typdef.appinfoQ);
-	    if (res != NO_ERR) {
-		retres = res;
-		if (NEED_EXIT(res)) {
-		    typ_free_template(typ);
-		    return res;
-		}
-	    }
-	} else {
-	    expstr = "keyword";
-	    retres = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	}
+            if (res != NO_ERR) {
+                retres = res;
+                if (NEED_EXIT(res)) {
+                    typ_free_template(typ);
+                    return res;
+                }
+            }
+        } else {
+            expstr = "keyword";
+            retres = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+        }
     }
 
     /* check all the mandatory clauses are present */
     if (!typdone) {
-	expstr = "mandatory type clause";
-	retres = ERR_NCX_DATA_MISSING;
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
+        expstr = "mandatory type clause";
+        retres = ERR_NCX_DATA_MISSING;
+        ncx_mod_exp_err(tkc, mod, retres, expstr);
     }
 
     /* check if the type name is already used in this module */
     if (typ->name && ncx_valid_name2(typ->name)) {
-	testtyp = ncx_find_type_que(que, typ->name);
-	if (testtyp) {
-	    /* fatal error for duplicate type w/ same name */
-	    retres = ERR_NCX_DUP_ENTRY;
-	    log_error("\nError: type '%s' is already defined on line %u",
-		      typ->name, 
+        testtyp = ncx_find_type_que(que, typ->name);
+        if (testtyp) {
+            /* fatal error for duplicate type w/ same name */
+            retres = ERR_NCX_DUP_ENTRY;
+            log_error("\nError: type '%s' is already defined on line %u",
+                      typ->name, 
                       testtyp->tkerr.linenum);
-	    tkc->curerr = &typ->tkerr;
-	    ncx_print_errormsg(tkc, mod, retres);
-	    typ_free_template(typ);
-	} else if (typeok) {
+            tkc->curerr = &typ->tkerr;
+            ncx_print_errormsg(tkc, mod, retres);
+            typ_free_template(typ);
+        } else if (typeok) {
 #ifdef YANG_TYP_DEBUG
-	    if (LOGDEBUG4) {
-		log_debug4("\nyang_typ: adding type (%s) to mod (%s)", 
-			   typ->name, 
-			   mod->name);
-	    }
+            if (LOGDEBUG4) {
+                log_debug4("\nyang_typ: adding type (%s) to mod (%s)", 
+                           typ->name, 
+                           mod->name);
+            }
 #endif
-	    dlq_enque(typ, que);
+            dlq_enque(typ, que);
 
-	    if (mod->stmtmode && que==&mod->typeQ) {
-		/* save stmt for top-level typedefs only */
-		stmt = yang_new_typ_stmt(typ);
-		if (stmt) {
-		    dlq_enque(stmt, &mod->stmtQ);
-		} else {
-		    log_error("\nError: malloc failure for typ_stmt");
-		    retres = ERR_INTERNAL_MEM;
-		    ncx_print_errormsg(tkc, mod, retres);
-		}
-	    }
-	} else {
-	    typ_free_template(typ);
-	}	    
+            if (mod->stmtmode && que==&mod->typeQ) {
+                /* save stmt for top-level typedefs only */
+                stmt = yang_new_typ_stmt(typ);
+                if (stmt) {
+                    dlq_enque(stmt, &mod->stmtQ);
+                } else {
+                    log_error("\nError: malloc failure for typ_stmt");
+                    retres = ERR_INTERNAL_MEM;
+                    ncx_print_errormsg(tkc, mod, retres);
+                }
+            }
+        } else {
+            typ_free_template(typ);
+        }           
     } else {
-	typ_free_template(typ);
+        typ_free_template(typ);
     }
 
     return retres;
@@ -4092,16 +4092,16 @@ status_t
 status_t 
     yang_typ_resolve_typedefs (yang_pcb_t *pcb,
                                tk_chain_t *tkc,
-			       ncx_module_t  *mod,
-			       dlq_hdr_t *typeQ,
-			       obj_template_t *parent)
+                               ncx_module_t  *mod,
+                               dlq_hdr_t *typeQ,
+                               obj_template_t *parent)
 {
     typ_template_t  *typ;
     status_t         res, retres;
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod || !typeQ) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -4109,16 +4109,16 @@ status_t
 
     /* first resolve all the local type names */
     for (typ = (typ_template_t *)dlq_firstEntry(typeQ);
-	 typ != NULL;
-	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
+         typ != NULL;
+         typ = (typ_template_t *)dlq_nextEntry(typ)) {
 
-	res = resolve_typedef(pcb,
+        res = resolve_typedef(pcb,
                               tkc, 
                               mod, 
                               typ, 
                               parent, 
                               NULL);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -4165,17 +4165,17 @@ status_t
 status_t 
     yang_typ_resolve_typedefs_grp (yang_pcb_t *pcb,
                                    tk_chain_t *tkc,
-				   ncx_module_t  *mod,
-				   dlq_hdr_t *typeQ,
-				   obj_template_t *parent,
-				   grp_template_t *grp)
+                                   ncx_module_t  *mod,
+                                   dlq_hdr_t *typeQ,
+                                   obj_template_t *parent,
+                                   grp_template_t *grp)
 {
     typ_template_t  *typ;
     status_t         res, retres;
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod || !typeQ) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -4183,16 +4183,16 @@ status_t
 
     /* first resolve all the local type names */
     for (typ = (typ_template_t *)dlq_firstEntry(typeQ);
-	 typ != NULL;
-	 typ = (typ_template_t *)dlq_nextEntry(typ)) {
+         typ != NULL;
+         typ = (typ_template_t *)dlq_nextEntry(typ)) {
 
-	res = resolve_typedef(pcb,
+        res = resolve_typedef(pcb,
                               tkc, 
                               mod, 
                               typ, 
                               parent, 
                               grp);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -4235,28 +4235,28 @@ status_t
 status_t 
     yang_typ_resolve_type (yang_pcb_t *pcb,
                            tk_chain_t *tkc,
-			   ncx_module_t  *mod,
-			   typ_def_t *typdef,
-			   const xmlChar *defval,
-			   obj_template_t *obj)
+                           ncx_module_t  *mod,
+                           typ_def_t *typdef,
+                           const xmlChar *defval,
+                           obj_template_t *obj)
 {
     status_t         res;
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod || !typdef) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     res = resolve_type(pcb,
                        tkc, 
-		       mod, 
-		       typdef, 
-		       NULL, 
-		       defval, 
-		       obj, 
-		       NULL, 
-		       FALSE);
+                       mod, 
+                       typdef, 
+                       NULL, 
+                       defval, 
+                       obj, 
+                       NULL, 
+                       FALSE);
     return res;
 
 }  /* yang_typ_resolve_type */
@@ -4278,7 +4278,7 @@ status_t
 *********************************************************************/
 status_t 
     yang_typ_rangenum_ok (typ_def_t *typdef,
-			  const ncx_num_t *num)
+                          const ncx_num_t *num)
 {
     typ_def_t   *rdef;
     status_t     res;
@@ -4289,14 +4289,14 @@ status_t
 
     rdef = typ_get_qual_typdef(typdef, NCX_SQUAL_RANGE);
     while (rdef && res==NO_ERR) {
-	res = val_range_ok(rdef, rbtyp, num);
-	if (res != NO_ERR) {
-	    continue;
-	}
-	rdef = typ_get_parent_typdef(rdef);
-	if (rdef) {
-	    rdef = typ_get_qual_typdef(rdef, NCX_SQUAL_RANGE);
-	}
+        res = val_range_ok(rdef, rbtyp, num);
+        if (res != NO_ERR) {
+            continue;
+        }
+        rdef = typ_get_parent_typdef(rdef);
+        if (rdef) {
+            rdef = typ_get_qual_typdef(rdef, NCX_SQUAL_RANGE);
+        }
     }
 
     return res;

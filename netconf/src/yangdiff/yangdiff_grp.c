@@ -1,6 +1,6 @@
 /*  FILE: yangdiff_grp.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -72,7 +72,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -90,8 +90,8 @@ date         init     comment
  *********************************************************************/
 static void
     output_one_grouping_diff (yangdiff_diffparms_t *cp,
-			      grp_template_t *oldgrp,
-			      grp_template_t *newgrp)
+                              grp_template_t *oldgrp,
+                              grp_template_t *newgrp)
 {
     yangdiff_cdb_t  cdb[3];
     uint32          changecnt, i;
@@ -105,76 +105,76 @@ static void
     changecnt = 0;
 
     if (typedefQ_changed(cp, 
-			 &oldgrp->typedefQ, 
-			 &newgrp->typedefQ)) {
-	tchanged = TRUE;
-	changecnt++;
+                         &oldgrp->typedefQ, 
+                         &newgrp->typedefQ)) {
+        tchanged = TRUE;
+        changecnt++;
     }
 
     if (groupingQ_changed(cp, 
-			  &oldgrp->groupingQ, 
-			  &newgrp->groupingQ)) {
-	gchanged = TRUE;
-	changecnt++;
+                          &oldgrp->groupingQ, 
+                          &newgrp->groupingQ)) {
+        gchanged = TRUE;
+        changecnt++;
     }
 
     if (datadefQ_changed(cp, 
-			 &oldgrp->datadefQ, 
-			 &newgrp->datadefQ)) {
-	dchanged = TRUE;
-	changecnt++;
+                         &oldgrp->datadefQ, 
+                         &newgrp->datadefQ)) {
+        dchanged = TRUE;
+        changecnt++;
     }
 
     changecnt += status_field_changed(YANG_K_STATUS,
-				      oldgrp->status, 
-				      newgrp->status, 
-				      isrev, 
-				      &cdb[0]);
+                                      oldgrp->status, 
+                                      newgrp->status, 
+                                      isrev, 
+                                      &cdb[0]);
     changecnt += str_field_changed(YANG_K_DESCRIPTION,
-				   oldgrp->descr, 
-				   newgrp->descr, 
-				   isrev, 
-				   &cdb[1]);
+                                   oldgrp->descr, 
+                                   newgrp->descr, 
+                                   isrev, 
+                                   &cdb[1]);
     changecnt += str_field_changed(YANG_K_REFERENCE,
-				   oldgrp->ref, 
-				   newgrp->ref, 
-				   isrev, 
-				   &cdb[2]);
+                                   oldgrp->ref, 
+                                   newgrp->ref, 
+                                   isrev, 
+                                   &cdb[2]);
     if (changecnt == 0) {
-	return;
+        return;
     }
 
     /* generate the diff output, based on the requested format */
     output_mstart_line(cp, YANG_K_GROUPING, oldgrp->name, TRUE);
 
     if (cp->edifftype == YANGDIFF_DT_TERSE) {
-	return;
+        return;
     }
 
     indent_in(cp);
 
     for (i=0; i<3; i++) {
-	if (cdb[i].changed) {
-	    output_cdb_line(cp, &cdb[i]);
-	}
+        if (cdb[i].changed) {
+            output_cdb_line(cp, &cdb[i]);
+        }
     }
 
     if (tchanged) {
-	output_typedefQ_diff(cp, 
-			     &oldgrp->typedefQ, 
-			     &newgrp->typedefQ);
+        output_typedefQ_diff(cp, 
+                             &oldgrp->typedefQ, 
+                             &newgrp->typedefQ);
     }
 
     if (gchanged) {
-	output_groupingQ_diff(cp, 
-			      &oldgrp->groupingQ, 
-			      &newgrp->groupingQ);
+        output_groupingQ_diff(cp, 
+                              &oldgrp->groupingQ, 
+                              &newgrp->groupingQ);
     }
 
     if (dchanged) {
-	output_datadefQ_diff(cp, 
-			     &oldgrp->datadefQ, 
-			     &newgrp->datadefQ);
+        output_datadefQ_diff(cp, 
+                             &oldgrp->datadefQ, 
+                             &newgrp->datadefQ);
     }
 
     indent_out(cp);
@@ -198,47 +198,47 @@ static void
  *********************************************************************/
 static uint32
     grouping_changed (yangdiff_diffparms_t *cp,
-		      grp_template_t *oldgrp,
-		      grp_template_t *newgrp)
+                      grp_template_t *oldgrp,
+                      grp_template_t *newgrp)
 {
     if (status_field_changed(YANG_K_STATUS,
-			     oldgrp->status, 
-			     newgrp->status, 
-			     FALSE, 
-			     NULL)) {
-	return 1;
+                             oldgrp->status, 
+                             newgrp->status, 
+                             FALSE, 
+                             NULL)) {
+        return 1;
     }
     if (str_field_changed(YANG_K_DESCRIPTION,
-			  oldgrp->descr, 
-			  newgrp->descr, 
-			  FALSE, 
-			  NULL)) {
-	return 1;
+                          oldgrp->descr, 
+                          newgrp->descr, 
+                          FALSE, 
+                          NULL)) {
+        return 1;
     }
     if (str_field_changed(YANG_K_REFERENCE,
-			  oldgrp->ref, 
-			  newgrp->ref, 
-			  FALSE, 
-			  NULL)) {
-	return 1;
+                          oldgrp->ref, 
+                          newgrp->ref, 
+                          FALSE, 
+                          NULL)) {
+        return 1;
     }
 
     if (typedefQ_changed(cp, 
-			 &oldgrp->typedefQ, 
-			 &newgrp->typedefQ)) {
-	return 1;
+                         &oldgrp->typedefQ, 
+                         &newgrp->typedefQ)) {
+        return 1;
     }
 
     if (groupingQ_changed(cp, 
-			  &oldgrp->groupingQ, 
-			  &newgrp->groupingQ)) {
-	return 1;
+                          &oldgrp->groupingQ, 
+                          &newgrp->groupingQ)) {
+        return 1;
     }
 
     if (datadefQ_changed(cp, 
-			 &oldgrp->datadefQ, 
-			 &newgrp->datadefQ)) {
-	return 1;
+                         &oldgrp->datadefQ, 
+                         &newgrp->datadefQ)) {
+        return 1;
     }
 
     return 0;
@@ -261,8 +261,8 @@ static uint32
  *********************************************************************/
 void
     output_groupingQ_diff (yangdiff_diffparms_t *cp,
-			   dlq_hdr_t *oldQ,
-			   dlq_hdr_t *newQ)
+                           dlq_hdr_t *oldQ,
+                           dlq_hdr_t *newQ)
 {
     grp_template_t *oldgrp, *newgrp;
 
@@ -270,43 +270,43 @@ void
      * first set all these flags to FALSE
      */
     for (newgrp = (grp_template_t *)dlq_firstEntry(newQ);
-	 newgrp != NULL;
-	 newgrp = (grp_template_t *)dlq_nextEntry(newgrp)) {
-	newgrp->used = FALSE;
+         newgrp != NULL;
+         newgrp = (grp_template_t *)dlq_nextEntry(newgrp)) {
+        newgrp->used = FALSE;
     }
 
     /* look through the old Q for matching entries in the new Q */
     for (oldgrp = (grp_template_t *)dlq_firstEntry(oldQ);
-	 oldgrp != NULL;
-	 oldgrp = (grp_template_t *)dlq_nextEntry(oldgrp)) {
+         oldgrp != NULL;
+         oldgrp = (grp_template_t *)dlq_nextEntry(oldgrp)) {
 
-	/* find this grouping in the new Q */
-	newgrp = ncx_find_grouping_que(newQ, oldgrp->name);
-	if (newgrp) {
-	    output_one_grouping_diff(cp, oldgrp, newgrp);
-	    newgrp->used = TRUE;
-	} else {
-	    /* grouping was removed from the new module */
-	    output_diff(cp, 
-			YANG_K_GROUPING, 
-			oldgrp->name, 
-			NULL, 
-			TRUE);
-	}
+        /* find this grouping in the new Q */
+        newgrp = ncx_find_grouping_que(newQ, oldgrp->name);
+        if (newgrp) {
+            output_one_grouping_diff(cp, oldgrp, newgrp);
+            newgrp->used = TRUE;
+        } else {
+            /* grouping was removed from the new module */
+            output_diff(cp, 
+                        YANG_K_GROUPING, 
+                        oldgrp->name, 
+                        NULL, 
+                        TRUE);
+        }
     }
 
     /* look for groupings that were added in the new module */
     for (newgrp = (grp_template_t *)dlq_firstEntry(newQ);
-	 newgrp != NULL;
-	 newgrp = (grp_template_t *)dlq_nextEntry(newgrp)) {
-	if (!newgrp->used) {
-	    /* this grouping was added in the new version */
-	    output_diff(cp, 
-			YANG_K_GROUPING, 
-			NULL, 
-			newgrp->name, 
-			TRUE);
-	}
+         newgrp != NULL;
+         newgrp = (grp_template_t *)dlq_nextEntry(newgrp)) {
+        if (!newgrp->used) {
+            /* this grouping was added in the new version */
+            output_diff(cp, 
+                        YANG_K_GROUPING, 
+                        NULL, 
+                        newgrp->name, 
+                        TRUE);
+        }
     }
 
 } /* output_groupingQ_diff */
@@ -328,46 +328,46 @@ void
  *********************************************************************/
 uint32
     groupingQ_changed (yangdiff_diffparms_t *cp,
-		       dlq_hdr_t *oldQ,
-		       dlq_hdr_t *newQ)
+                       dlq_hdr_t *oldQ,
+                       dlq_hdr_t *newQ)
 {
     grp_template_t *oldgrp, *newgrp;
 
     if (dlq_count(oldQ) != dlq_count(newQ)) {
-	return 1;
+        return 1;
     }
 
     /* borrowing the 'used' flag for marking matched groupings
      * first set all these flags to FALSE
      */
     for (newgrp = (grp_template_t *)dlq_firstEntry(oldQ);
-	 newgrp != NULL;
-	 newgrp = (grp_template_t *)dlq_nextEntry(newgrp)) {
-	newgrp->used = FALSE;
+         newgrp != NULL;
+         newgrp = (grp_template_t *)dlq_nextEntry(newgrp)) {
+        newgrp->used = FALSE;
     }
 
     /* look through the old type Q for matching types in the new type Q */
     for (oldgrp = (grp_template_t *)dlq_firstEntry(oldQ);
-	 oldgrp != NULL;
-	 oldgrp = (grp_template_t *)dlq_nextEntry(oldgrp)) {
+         oldgrp != NULL;
+         oldgrp = (grp_template_t *)dlq_nextEntry(oldgrp)) {
 
-	newgrp = ncx_find_grouping_que(newQ, oldgrp->name);
-	if (newgrp) {
-	    if (grouping_changed(cp, oldgrp, newgrp)) {
-		return 1;
-	    }
-	} else {
-	    return 1;
-	}
+        newgrp = ncx_find_grouping_que(newQ, oldgrp->name);
+        if (newgrp) {
+            if (grouping_changed(cp, oldgrp, newgrp)) {
+                return 1;
+            }
+        } else {
+            return 1;
+        }
     }
 
     /* look for groupings that were added in the new module */
     for (newgrp = (grp_template_t *)dlq_firstEntry(newQ);
-	 newgrp != NULL;
-	 newgrp = (grp_template_t *)dlq_nextEntry(newgrp)) {
-	if (!newgrp->used) {
-	    return 1;
-	}
+         newgrp != NULL;
+         newgrp = (grp_template_t *)dlq_nextEntry(newgrp)) {
+        if (!newgrp->used) {
+            return 1;
+        }
     }
 
     return 0;

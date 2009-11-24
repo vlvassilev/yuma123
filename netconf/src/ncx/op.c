@@ -1,7 +1,7 @@
 /*  FILE: op.c
 
    NETCONF Protocol Operations
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -67,33 +67,33 @@ const xmlChar *
 {
     switch (op_id) {
     case OP_NO_METHOD:
-	return NCX_EL_NONE;
+        return NCX_EL_NONE;
     case OP_GET_CONFIG:
-	return NCX_EL_GET_CONFIG;
+        return NCX_EL_GET_CONFIG;
     case OP_EDIT_CONFIG:
-	return NCX_EL_EDIT_CONFIG;
+        return NCX_EL_EDIT_CONFIG;
     case OP_COPY_CONFIG:
-	return NCX_EL_COPY_CONFIG;
+        return NCX_EL_COPY_CONFIG;
     case OP_DELETE_CONFIG:
-	return NCX_EL_DELETE_CONFIG;
+        return NCX_EL_DELETE_CONFIG;
     case OP_LOCK:
-	return NCX_EL_LOCK;
+        return NCX_EL_LOCK;
     case OP_UNLOCK:
-	return NCX_EL_UNLOCK;
+        return NCX_EL_UNLOCK;
     case OP_GET:
-	return NCX_EL_GET;
+        return NCX_EL_GET;
     case OP_CLOSE_SESSION:
-	return NCX_EL_CLOSE_SESSION;
+        return NCX_EL_CLOSE_SESSION;
     case OP_KILL_SESSION:
-	return NCX_EL_KILL_SESSION;
+        return NCX_EL_KILL_SESSION;
     case OP_COMMIT:
-	return NCX_EL_COMMIT;
+        return NCX_EL_COMMIT;
     case OP_DISCARD_CHANGES:
-	return NCX_EL_DISCARD_CHANGES;
+        return NCX_EL_DISCARD_CHANGES;
     case OP_VALIDATE:
-	return NCX_EL_VALIDATE;
+        return NCX_EL_VALIDATE;
     default:
-	return NCX_EL_ILLEGAL;
+        return NCX_EL_ILLEGAL;
     }
 }  /* op_method_name */
 
@@ -113,21 +113,21 @@ const xmlChar *
 {
     switch (ed_id) {
     case OP_EDITOP_NONE:
-	return NCX_EL_NONE;
+        return NCX_EL_NONE;
     case OP_EDITOP_MERGE:
-	return NCX_EL_MERGE;
+        return NCX_EL_MERGE;
     case OP_EDITOP_REPLACE:
-	return NCX_EL_REPLACE;
+        return NCX_EL_REPLACE;
     case OP_EDITOP_CREATE:
-	return NCX_EL_CREATE;
+        return NCX_EL_CREATE;
     case OP_EDITOP_DELETE:
-	return NCX_EL_DELETE;
+        return NCX_EL_DELETE;
     case OP_EDITOP_LOAD:
-	return NCX_EL_LOAD;
+        return NCX_EL_LOAD;
     case OP_EDITOP_COMMIT:
-	return NCX_EL_COMMIT;
+        return NCX_EL_COMMIT;
     default:
-	return (const xmlChar *) "illegal";
+        return (const xmlChar *) "illegal";
     }
 } /* op_editop_name */
 
@@ -147,33 +147,33 @@ op_editop_t
 {
 #ifdef DEBUG
     if (!opstr) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return OP_EDITOP_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return OP_EDITOP_NONE;
     }
 #endif
 
     if (!xml_strcmp(opstr, NCX_EL_MERGE)) {
-	return OP_EDITOP_MERGE;
+        return OP_EDITOP_MERGE;
     }
     if (!xml_strcmp(opstr, NCX_EL_REPLACE)) {
-	return OP_EDITOP_REPLACE;
+        return OP_EDITOP_REPLACE;
     }
     if (!xml_strcmp(opstr, NCX_EL_CREATE)) {
-	return OP_EDITOP_CREATE;
+        return OP_EDITOP_CREATE;
     }
     if (!xml_strcmp(opstr, NCX_EL_DELETE)) {
-	return OP_EDITOP_DELETE;
+        return OP_EDITOP_DELETE;
     }
     if (!xml_strcmp(opstr, NCX_EL_NONE)) {
-	return OP_EDITOP_NONE;
+        return OP_EDITOP_NONE;
     }
 
     /* internal extensions, should not be used */
     if (!xml_strcmp(opstr, NCX_EL_LOAD)) {
-	return OP_EDITOP_LOAD;
+        return OP_EDITOP_LOAD;
     }
     if (!xml_strcmp(opstr, NCX_EL_COMMIT)) {
-	return OP_EDITOP_COMMIT;
+        return OP_EDITOP_COMMIT;
     }
 
     return OP_EDITOP_NONE;
@@ -197,17 +197,17 @@ const xmlChar *
 {
     switch (ins_id) {
     case OP_INSOP_NONE:
-	return NCX_EL_NONE;
+        return NCX_EL_NONE;
     case OP_INSOP_FIRST:
-	return YANG_K_FIRST;
+        return YANG_K_FIRST;
     case OP_INSOP_LAST:
-	return YANG_K_LAST;
+        return YANG_K_LAST;
     case OP_INSOP_BEFORE:
-	return YANG_K_BEFORE;
+        return YANG_K_BEFORE;
     case OP_INSOP_AFTER:
-	return YANG_K_AFTER;
+        return YANG_K_AFTER;
     default:
-	return (const xmlChar *) "illegal";
+        return (const xmlChar *) "illegal";
     }
 } /* op_insertop_name */
 
@@ -227,22 +227,22 @@ op_insertop_t
 {
 #ifdef DEBUG
     if (!opstr) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return OP_INSOP_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return OP_INSOP_NONE;
     }
 #endif
 
     if (!xml_strcmp(opstr, YANG_K_FIRST)) {
-	return OP_INSOP_FIRST;
+        return OP_INSOP_FIRST;
     }
     if (!xml_strcmp(opstr, YANG_K_LAST)) {
-	return OP_INSOP_LAST;
+        return OP_INSOP_LAST;
     }
     if (!xml_strcmp(opstr, YANG_K_BEFORE)) {
-	return OP_INSOP_BEFORE;
+        return OP_INSOP_BEFORE;
     }
     if (!xml_strcmp(opstr, YANG_K_AFTER)) {
-	return OP_INSOP_AFTER;
+        return OP_INSOP_AFTER;
     }
     return OP_INSOP_NONE;
 
@@ -264,16 +264,16 @@ op_filtertyp_t
 {
 #ifdef DEBUG
     if (!filstr) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return OP_FILTER_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return OP_FILTER_NONE;
     }
 #endif
 
     if (!xml_strcmp(filstr, NCX_EL_SUBTREE)) {
-	return OP_FILTER_SUBTREE;
+        return OP_FILTER_SUBTREE;
     }
     if (!xml_strcmp(filstr, NCX_EL_XPATH)) {
-	return OP_FILTER_XPATH;
+        return OP_FILTER_XPATH;
     }
 
     return OP_FILTER_NONE;
@@ -296,17 +296,17 @@ const xmlChar *
 {
     switch (def_id) {
     case OP_DEFOP_NOT_SET:
-	return NCX_EL_NOT_SET;
+        return NCX_EL_NOT_SET;
     case OP_DEFOP_NONE:
-	return NCX_EL_NONE;
+        return NCX_EL_NONE;
     case OP_DEFOP_MERGE:
-	return NCX_EL_MERGE;
+        return NCX_EL_MERGE;
     case OP_DEFOP_REPLACE:
-	return NCX_EL_REPLACE;
+        return NCX_EL_REPLACE;
     case OP_DEFOP_NOT_USED:
-	return NCX_EL_NOT_USED;
+        return NCX_EL_NOT_USED;
     default:
-	return NCX_EL_ILLEGAL;
+        return NCX_EL_ILLEGAL;
     }
 } /* op_defop_name */
 
@@ -326,19 +326,19 @@ op_editop_t
 {
 #ifdef DEBUG
     if (!defstr) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return OP_EDITOP_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return OP_EDITOP_NONE;
     }
 #endif
 
     if (!xml_strcmp(defstr, NCX_EL_MERGE)) {
-	return OP_EDITOP_MERGE;
+        return OP_EDITOP_MERGE;
     }
     if (!xml_strcmp(defstr, NCX_EL_REPLACE)) {
-	return OP_EDITOP_REPLACE;
+        return OP_EDITOP_REPLACE;
     }
     if (!xml_strcmp(defstr, NCX_EL_NONE)) {
-	return OP_EDITOP_NONE;
+        return OP_EDITOP_NONE;
     }
     return OP_EDITOP_NONE;
 
@@ -360,15 +360,15 @@ const xmlChar *
 {
     switch (test_id) {
     case OP_TESTOP_NONE:
-	return NCX_EL_NONE;
+        return NCX_EL_NONE;
     case OP_TESTOP_TESTTHENSET:
-	return NCX_EL_TESTTHENSET;
+        return NCX_EL_TESTTHENSET;
     case OP_TESTOP_SET:
-	return NCX_EL_SET;
+        return NCX_EL_SET;
     case OP_TESTOP_TESTONLY:
-	return NCX_EL_TESTONLY;
+        return NCX_EL_TESTONLY;
     default:
-	return NCX_EL_ILLEGAL;
+        return NCX_EL_ILLEGAL;
     }
 } /* op_testop_name */
 
@@ -388,13 +388,13 @@ op_testop_t
     op_testop_enum (const xmlChar *teststr)
 {
     if (!xml_strcmp(teststr, NCX_EL_TESTONLY)) {
-	return OP_TESTOP_TESTONLY;
+        return OP_TESTOP_TESTONLY;
     } else if (!xml_strcmp(teststr, NCX_EL_TESTTHENSET)) {
-	return OP_TESTOP_TESTTHENSET;
+        return OP_TESTOP_TESTTHENSET;
     } else if (!xml_strcmp(teststr, NCX_EL_SET)) {
-	return OP_TESTOP_SET;
+        return OP_TESTOP_SET;
     } else {
-	return OP_TESTOP_NONE;
+        return OP_TESTOP_NONE;
     }
 } /* op_testop_enum */
 
@@ -414,15 +414,15 @@ const xmlChar *
 {
     switch (err_id) {
     case OP_ERROP_NONE:
-	return NCX_EL_NONE;
+        return NCX_EL_NONE;
     case OP_ERROP_STOP:
-	return NCX_EL_STOP_ON_ERROR;
+        return NCX_EL_STOP_ON_ERROR;
     case OP_ERROP_CONTINUE:
-	return NCX_EL_CONTINUE_ON_ERROR;
+        return NCX_EL_CONTINUE_ON_ERROR;
     case OP_ERROP_ROLLBACK:
-	return NCX_EL_ROLLBACK_ON_ERROR;
+        return NCX_EL_ROLLBACK_ON_ERROR;
     default:
-	return NCX_EL_ILLEGAL;
+        return NCX_EL_ILLEGAL;
     }
 } /* op_errop_name */
 
@@ -442,19 +442,19 @@ op_errop_t
 {
 #ifdef DEBUG
     if (!errstr) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return OP_ERROP_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return OP_ERROP_NONE;
     }
 #endif
 
     if (!xml_strcmp(errstr, NCX_EL_STOP_ON_ERROR)) {
-	return OP_ERROP_STOP;
+        return OP_ERROP_STOP;
     }
     if (!xml_strcmp(errstr, NCX_EL_CONTINUE_ON_ERROR)) {
-	return OP_ERROP_CONTINUE;
+        return OP_ERROP_CONTINUE;
     }
     if (!xml_strcmp(errstr, NCX_EL_ROLLBACK_ON_ERROR)) {
-	return OP_ERROP_ROLLBACK;
+        return OP_ERROP_ROLLBACK;
     }
     return OP_ERROP_NONE;
 
@@ -477,22 +477,22 @@ op_defop_t
 {
 #ifdef DEBUG
     if (!defstr) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return OP_DEFOP_NOT_SET;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return OP_DEFOP_NOT_SET;
     }
 #endif
 
     if (!xml_strcmp(defstr, NCX_EL_NONE)) {
-	return OP_DEFOP_NONE;
+        return OP_DEFOP_NONE;
     }
     if (!xml_strcmp(defstr, NCX_EL_MERGE)) {
-	return OP_DEFOP_MERGE;
+        return OP_DEFOP_MERGE;
     }
     if (!xml_strcmp(defstr, NCX_EL_REPLACE)) {
-	return OP_DEFOP_REPLACE;
+        return OP_DEFOP_REPLACE;
     }
     if (!xml_strcmp(defstr, NCX_EL_NOT_USED)) {
-	return OP_DEFOP_NOT_USED;
+        return OP_DEFOP_NOT_USED;
     }
     return OP_DEFOP_NOT_SET;
 

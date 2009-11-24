@@ -1,6 +1,6 @@
 /*  FILE: ncx.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -158,7 +158,7 @@ typedef struct warnoff_t_ {
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -277,9 +277,9 @@ static ncx_display_mode_t  display_mode;
 static status_t
     check_moddef (yang_pcb_t *pcb,
                   ncx_import_t *imp,
-		  const xmlChar *defname,
-		  ncx_node_t *dtyp,
-		  void **dptr)
+                  const xmlChar *defname,
+                  ncx_node_t *dtyp,
+                  void **dptr)
 {
     status_t       res, retres;
 
@@ -287,18 +287,18 @@ static status_t
 
     /* First find or load the module */
     if (!imp->mod) {
-	imp->mod = ncx_find_module(imp->module, imp->revision);
+        imp->mod = ncx_find_module(imp->module, imp->revision);
     }
 
     if (!imp->mod) {
-	res = ncxmod_load_module(imp->module, 
+        res = ncxmod_load_module(imp->module, 
                                  imp->revision, 
                                  pcb->savedevQ,
                                  &imp->mod);
-	CHK_EXIT(res, retres);
-	if (!imp->mod) {
-	    return ERR_NCX_MOD_NOT_FOUND;
-	}
+        CHK_EXIT(res, retres);
+        if (!imp->mod) {
+            return ERR_NCX_MOD_NOT_FOUND;
+        }
     }
 
     /* have a module loaded that might contain this def 
@@ -307,40 +307,40 @@ static status_t
      */
     switch (*dtyp) {
     case NCX_NT_TYP:
-	*dptr = ncx_find_type(imp->mod, defname);
-	break;
+        *dptr = ncx_find_type(imp->mod, defname);
+        break;
     case NCX_NT_GRP:
-	*dptr = ncx_find_grouping(imp->mod, defname);
-	break;
-	break;
+        *dptr = ncx_find_grouping(imp->mod, defname);
+        break;
+        break;
     case NCX_NT_OBJ:
-	*dptr = obj_find_template(&imp->mod->datadefQ, 
-				  imp->module, 
+        *dptr = obj_find_template(&imp->mod->datadefQ, 
+                                  imp->module, 
                                   defname);
-	break;
+        break;
     case NCX_NT_NONE:
-	*dptr = ncx_find_type(imp->mod, defname);
-	if (*dptr) {
-	    *dtyp = NCX_NT_TYP;
-	}
-	if (!*dptr) {
-	    *dptr = ncx_find_grouping(imp->mod, defname);
-	    if (*dptr) {
-		*dtyp = NCX_NT_GRP;
-	    }
-	}
-	if (!*dptr) {
-	    *dptr = obj_find_template(&imp->mod->datadefQ, 
-				      imp->module, 
+        *dptr = ncx_find_type(imp->mod, defname);
+        if (*dptr) {
+            *dtyp = NCX_NT_TYP;
+        }
+        if (!*dptr) {
+            *dptr = ncx_find_grouping(imp->mod, defname);
+            if (*dptr) {
+                *dtyp = NCX_NT_GRP;
+            }
+        }
+        if (!*dptr) {
+            *dptr = obj_find_template(&imp->mod->datadefQ, 
+                                      imp->module, 
                                       defname);
-	    if (*dptr) {
-		*dtyp = NCX_NT_OBJ;
-	    }
-	}
-	break;
+            if (*dptr) {
+                *dtyp = NCX_NT_OBJ;
+            }
+        }
+        break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	*dptr = NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        *dptr = NULL;
     }
 
     return (*dptr) ? NO_ERR : ERR_NCX_DEF_NOT_FOUND;
@@ -373,18 +373,18 @@ static status_t
 *********************************************************************/
 static status_t 
     consume_appinfo_entry (tk_chain_t *tkc,
-			   ncx_module_t  *mod,
-			   dlq_hdr_t     *appinfoQ,
-			   boolean bkup)
+                           ncx_module_t  *mod,
+                           dlq_hdr_t     *appinfoQ,
+                           boolean bkup)
 {
     ncx_appinfo_t   *appinfo;
     status_t         res, retres;
 
     /* right brace means appinfo is done */
     if (tkc->source == TK_SOURCE_YANG && !bkup) {
-	if (tk_next_typ(tkc)==TK_TT_RBRACE) {
-	    return ERR_NCX_SKIPPED;
-	}
+        if (tk_next_typ(tkc)==TK_TT_RBRACE) {
+            return ERR_NCX_SKIPPED;
+        }
     }
 
     res = NO_ERR;
@@ -393,9 +393,9 @@ static status_t
 
     appinfo = ncx_new_appinfo(FALSE);
     if (!appinfo) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     /* get the appinfo prefix value and variable name
@@ -406,14 +406,14 @@ static status_t
      */
     res = yang_consume_pid_string(tkc, 
                                   mod,
-				  &appinfo->prefix,
-				  &appinfo->name);
+                                  &appinfo->prefix,
+                                  &appinfo->name);
     if (res != NO_ERR) {
-	retres = res;
-	if (NEED_EXIT(res)) {
-	    ncx_free_appinfo(appinfo);
-	    return retres;
-	}
+        retres = res;
+        if (NEED_EXIT(res)) {
+            ncx_free_appinfo(appinfo);
+            return retres;
+        }
     }
 
     ncx_set_error(&appinfo->tkerr,
@@ -444,32 +444,32 @@ static status_t
     switch (tk_next_typ(tkc)) {
     case TK_TT_SEMICOL:
     case TK_TT_LBRACE:
-	break;
+        break;
     default:
-	res = yang_consume_string(tkc, mod, &appinfo->value);
-	if (res != NO_ERR) {
-	    retres = res;
-	    if (NEED_EXIT(res)) {
-		ncx_free_appinfo(appinfo);
-		return retres;
-	    }
-	}
+        res = yang_consume_string(tkc, mod, &appinfo->value);
+        if (res != NO_ERR) {
+            retres = res;
+            if (NEED_EXIT(res)) {
+                ncx_free_appinfo(appinfo);
+                return retres;
+            }
+        }
     }
 
     /* go around and get nested extension statements or semi-colon */
     res = yang_consume_semiapp(tkc, mod, appinfo->appinfoQ);
     if (res != NO_ERR) {
-	retres = res;
-	if (NEED_EXIT(res)) {
-	    ncx_free_appinfo(appinfo);
-	    return retres;
-	}
+        retres = res;
+        if (NEED_EXIT(res)) {
+            ncx_free_appinfo(appinfo);
+            return retres;
+        }
     }
 
     if (retres != NO_ERR || !appinfoQ) {
-	ncx_free_appinfo(appinfo);
+        ncx_free_appinfo(appinfo);
     } else {
-	dlq_enque(appinfo, appinfoQ);
+        dlq_enque(appinfo, appinfoQ);
     }
 
     return retres;
@@ -499,31 +499,31 @@ static status_t
 *********************************************************************/
 static status_t 
     consume_appinfo (tk_chain_t *tkc,
-		     ncx_module_t  *mod,
-		     dlq_hdr_t *appinfoQ,
-		     boolean bkup)
+                     ncx_module_t  *mod,
+                     dlq_hdr_t *appinfoQ,
+                     boolean bkup)
 {
     status_t       res;
     boolean        done;
 
     if (tkc->source == TK_SOURCE_YANG && bkup) {
-	/* hack: all the YANG fns that call this function
-	 * already parsed the MSTRING since extensions
-	 * can be spread out throughout the file
-	 */
-	TK_BKUP(tkc);
+        /* hack: all the YANG fns that call this function
+         * already parsed the MSTRING since extensions
+         * can be spread out throughout the file
+         */
+        TK_BKUP(tkc);
     }
 
     res = NO_ERR;
     done = FALSE;
     while (!done) {
-	res = consume_appinfo_entry(tkc, 
+        res = consume_appinfo_entry(tkc, 
                                     mod, 
                                     appinfoQ, 
                                     bkup);
-	if (res != NO_ERR || tkc->source == TK_SOURCE_YANG) {
-	    done = TRUE;
-	}
+        if (res != NO_ERR || tkc->source == TK_SOURCE_YANG) {
+            done = TRUE;
+        }
     }
 
     return res;
@@ -543,7 +543,7 @@ static status_t
 *********************************************************************/
 static status_t 
     set_toplevel_defs (ncx_module_t *mod,
-		       xmlns_id_t    nsid)
+                       xmlns_id_t    nsid)
 {
     typ_template_t *typ;
     grp_template_t *grp;
@@ -554,30 +554,30 @@ static status_t
          typ != NULL;
          typ = (typ_template_t *)dlq_nextEntry(typ)) {
 
-	typ->nsid = nsid;
+        typ->nsid = nsid;
     }
 
     for (grp = (grp_template_t *)dlq_firstEntry(&mod->groupingQ);
          grp != NULL;
          grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
-	grp->nsid = nsid;
+        grp->nsid = nsid;
     }
 
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (obj_is_data_db(obj) || obj_is_rpc(obj) 
-	    || obj_is_notif(obj)) {
-	    obj->parent = gen_root;
-	}
+        if (obj_is_data_db(obj) || obj_is_rpc(obj) 
+            || obj_is_notif(obj)) {
+            obj->parent = gen_root;
+        }
     }
 
     for (ext = (ext_template_t *)dlq_firstEntry(&mod->extensionQ);
          ext != NULL;
          ext = (ext_template_t *)dlq_nextEntry(ext)) {
-	ext->nsid = nsid;
+        ext->nsid = nsid;
     }
 
     return NO_ERR;
@@ -612,19 +612,19 @@ static void
 
     /* clear the revision Q */
     while (!dlq_empty(&mod->revhistQ)) {
-	revhist = (ncx_revhist_t *)dlq_deque(&mod->revhistQ);
+        revhist = (ncx_revhist_t *)dlq_deque(&mod->revhistQ);
         ncx_free_revhist(revhist);
     }
 
     /* clear the import Que */
     while (!dlq_empty(&mod->importQ)) {
-	import = (ncx_import_t *)dlq_deque(&mod->importQ);
+        import = (ncx_import_t *)dlq_deque(&mod->importQ);
         ncx_free_import(import);
     }
 
     /* clear the include Que */
     while (!dlq_empty(&mod->includeQ)) {
-	incl = (ncx_include_t *)dlq_deque(&mod->includeQ);
+        incl = (ncx_include_t *)dlq_deque(&mod->includeQ);
         ncx_free_include(incl);
     }
 
@@ -652,55 +652,55 @@ static void
 
     /* clear the YANG stmtQ, used for docmode only */
     while (!dlq_empty(&mod->stmtQ)) {
-	stmt = (yang_stmt_t *)dlq_deque(&mod->stmtQ);
-	yang_free_stmt(stmt);
+        stmt = (yang_stmt_t *)dlq_deque(&mod->stmtQ);
+        yang_free_stmt(stmt);
     }
 
     /* clear the YANG featureQ */
     while (!dlq_empty(&mod->featureQ)) {
-	feature = (ncx_feature_t *)dlq_deque(&mod->featureQ);
-	ncx_free_feature(feature);
+        feature = (ncx_feature_t *)dlq_deque(&mod->featureQ);
+        ncx_free_feature(feature);
     }
 
     /* clear the YANG identityQ */
     while (!dlq_empty(&mod->identityQ)) {
-	identity = (ncx_identity_t *)dlq_deque(&mod->identityQ);
-	ncx_free_identity(identity);
+        identity = (ncx_identity_t *)dlq_deque(&mod->identityQ);
+        ncx_free_identity(identity);
     }
 
     /* clear the name and other fields last for easier debugging */
     if (mod->name) {
-	m__free(mod->name);
+        m__free(mod->name);
     }
     if (mod->version) {
-	m__free(mod->version);
+        m__free(mod->version);
     }
     if (mod->organization) {
-	m__free(mod->organization);
+        m__free(mod->organization);
     }
     if (mod->contact_info) {
-	m__free(mod->contact_info);
+        m__free(mod->contact_info);
     }
     if (mod->descr) {
-	m__free(mod->descr);
+        m__free(mod->descr);
     }
     if (mod->ref) {
-	m__free(mod->ref);
+        m__free(mod->ref);
     }
     if (mod->ismod && mod->ns) {
-	m__free(mod->ns);
+        m__free(mod->ns);
     } 
     if (mod->prefix) {
-	m__free(mod->prefix);
+        m__free(mod->prefix);
     }
     if (mod->xmlprefix) {
-	m__free(mod->xmlprefix);
+        m__free(mod->xmlprefix);
     }
     if (mod->source) {
-	m__free(mod->source);
+        m__free(mod->source);
     }
     if (mod->belongs) {
-	m__free(mod->belongs);
+        m__free(mod->belongs);
     }
 
     ncx_clean_list(&mod->devmodlist);
@@ -729,17 +729,17 @@ static int32
 
     len = strlen((const char *)buff);
     if (!len) {
-	return 0;
+        return 0;
     }
 
     str = &buff[len-1];
 
     while (str >= buff && *str == '0') {
-	str--;
+        str--;
     }
 
     if (*str == '.') {
-	str--;
+        str--;
     }
 
     newlen = (int32)(str - buff) + 1;
@@ -778,9 +778,9 @@ static int32
 *********************************************************************/
 static status_t 
     bootstrap_cli (int argc,
-		   const char *argv[],
-		   log_debug_t dlevel,
-		   boolean logtstamps)
+                   const char *argv[],
+                   log_debug_t dlevel,
+                   boolean logtstamps)
 {
     dlq_hdr_t        parmQ;
     cli_rawparm_t   *parm;
@@ -799,54 +799,54 @@ static status_t
     /* create bootstrap parm: log-level */
     parm = cli_new_rawparm(NCX_EL_LOGLEVEL);
     if (parm) {
-	dlq_enque(parm, &parmQ);
+        dlq_enque(parm, &parmQ);
     } else {
-	log_error("\nError: malloc failed");
-	res = ERR_INTERNAL_MEM;
+        log_error("\nError: malloc failed");
+        res = ERR_INTERNAL_MEM;
     }
 
     /* create bootstrap parm: log */
     if (res == NO_ERR) {
-	parm = cli_new_rawparm(NCX_EL_LOG);
-	if (parm) {
-	    dlq_enque(parm, &parmQ);
-	} else {
-	    log_error("\nError: malloc failed");
-	    res = ERR_INTERNAL_MEM;
-	}
+        parm = cli_new_rawparm(NCX_EL_LOG);
+        if (parm) {
+            dlq_enque(parm, &parmQ);
+        } else {
+            log_error("\nError: malloc failed");
+            res = ERR_INTERNAL_MEM;
+        }
     }
 
     /* create bootstrap parm: log-append */
     if (res == NO_ERR) {
-	parm = cli_new_empty_rawparm(NCX_EL_LOGAPPEND);
-	if (parm) {
-	    dlq_enque(parm, &parmQ);
-	} else {
-	    log_error("\nError: malloc failed");
-	    res = ERR_INTERNAL_MEM;
-	}
+        parm = cli_new_empty_rawparm(NCX_EL_LOGAPPEND);
+        if (parm) {
+            dlq_enque(parm, &parmQ);
+        } else {
+            log_error("\nError: malloc failed");
+            res = ERR_INTERNAL_MEM;
+        }
     }
 
     /* create bootstrap parm: modpath */
     if (res == NO_ERR) {
-	parm = cli_new_rawparm(NCX_EL_MODPATH);
-	if (parm) {
-	    dlq_enque(parm, &parmQ);
-	} else {
-	    log_error("\nError: malloc failed");
-	    res = ERR_INTERNAL_MEM;
-	}
+        parm = cli_new_rawparm(NCX_EL_MODPATH);
+        if (parm) {
+            dlq_enque(parm, &parmQ);
+        } else {
+            log_error("\nError: malloc failed");
+            res = ERR_INTERNAL_MEM;
+        }
     }
 
     /* create bootstrap parm: yuma-home */
     if (res == NO_ERR) {
-	parm = cli_new_rawparm(NCX_EL_YUMA_HOME);
-	if (parm) {
-	    dlq_enque(parm, &parmQ);
-	} else {
-	    log_error("\nError: malloc failed");
-	    res = ERR_INTERNAL_MEM;
-	}
+        parm = cli_new_rawparm(NCX_EL_YUMA_HOME);
+        if (parm) {
+            dlq_enque(parm, &parmQ);
+        } else {
+            log_error("\nError: malloc failed");
+            res = ERR_INTERNAL_MEM;
+        }
     }
 
     /* check if any of these bootstrap parms are present
@@ -855,110 +855,110 @@ static status_t
      * validated, and then invoked
      */
     if (res == NO_ERR) {
-	res = cli_parse_raw(argc, argv, &parmQ);
-	if (res != NO_ERR) {
-	    log_error("\nError: bootstrap CLI failed (%s)",
-		      get_error_string(res));
-	}
+        res = cli_parse_raw(argc, argv, &parmQ);
+        if (res != NO_ERR) {
+            log_error("\nError: bootstrap CLI failed (%s)",
+                      get_error_string(res));
+        }
     }
 
     if (res != NO_ERR) {
-	cli_clean_rawparmQ(&parmQ);
-	return res;
+        cli_clean_rawparmQ(&parmQ);
+        return res;
     }
 
     /* --log-level=<debug_level> */
     parm = cli_find_rawparm(NCX_EL_LOGLEVEL, &parmQ);
     if (parm && parm->count) {
-	if (parm->count > 1) {
-	    log_error("\nError: Only one log-level parameter allowed");
-	    res = ERR_NCX_DUP_ENTRY;
-	} else if (parm->value) {
-	    loglevel = log_get_debug_level_enum(parm->value);
-	    if (loglevel == LOG_DEBUG_NONE) {
-		log_error("\nError: '%s' not valid log-level",
-			  parm->value);
-		res = ERR_NCX_INVALID_VALUE;
-	    } else {
-		log_set_debug_level(loglevel);
-	    }
-	} else {
-	    log_error("\nError: no value entered for "
-		      "'log-level' parameter");
-	    res = ERR_NCX_INVALID_VALUE;
-	}
+        if (parm->count > 1) {
+            log_error("\nError: Only one log-level parameter allowed");
+            res = ERR_NCX_DUP_ENTRY;
+        } else if (parm->value) {
+            loglevel = log_get_debug_level_enum(parm->value);
+            if (loglevel == LOG_DEBUG_NONE) {
+                log_error("\nError: '%s' not valid log-level",
+                          parm->value);
+                res = ERR_NCX_INVALID_VALUE;
+            } else {
+                log_set_debug_level(loglevel);
+            }
+        } else {
+            log_error("\nError: no value entered for "
+                      "'log-level' parameter");
+            res = ERR_NCX_INVALID_VALUE;
+        }
     } else {
-	log_set_debug_level(dlevel);
+        log_set_debug_level(dlevel);
     }
 
     /* --log-append */
     if (res == NO_ERR) {
-	parm = cli_find_rawparm(NCX_EL_LOGAPPEND, &parmQ);
-	logappend = (parm && parm->count) ? TRUE : FALSE;
-	if (parm->value) {
-	    log_error("\nError: log-append is empty parameter");
-	    res = ERR_NCX_INVALID_VALUE;
-	}
+        parm = cli_find_rawparm(NCX_EL_LOGAPPEND, &parmQ);
+        logappend = (parm && parm->count) ? TRUE : FALSE;
+        if (parm->value) {
+            log_error("\nError: log-append is empty parameter");
+            res = ERR_NCX_INVALID_VALUE;
+        }
     }
 
     /* --log=<logfilespec> */
     if (res == NO_ERR) {
-	parm = cli_find_rawparm(NCX_EL_LOG, &parmQ);
-	if (parm && parm->count) {
-	    if (parm->count > 1) {
-		log_error("\nError: Only one 'log' filename allowed");
-		res = ERR_NCX_DUP_ENTRY;
-	    } else if (parm->value) {
+        parm = cli_find_rawparm(NCX_EL_LOG, &parmQ);
+        if (parm && parm->count) {
+            if (parm->count > 1) {
+                log_error("\nError: Only one 'log' filename allowed");
+                res = ERR_NCX_DUP_ENTRY;
+            } else if (parm->value) {
                 res = NO_ERR;
-		logfilename = (char *)
+                logfilename = (char *)
                     ncx_get_source((const xmlChar *)parm->value, &res);
-		if (logfilename) {
-		    res = log_open(logfilename, logappend, logtstamps);
-		    if (res != NO_ERR) {
-			log_error("\nError: open logfile '%s' failed (%s)",
-				  logfilename,
+                if (logfilename) {
+                    res = log_open(logfilename, logappend, logtstamps);
+                    if (res != NO_ERR) {
+                        log_error("\nError: open logfile '%s' failed (%s)",
+                                  logfilename,
                                   get_error_string(res));
-		    }
+                    }
                     m__free(logfilename);
-		}
-	    } else {
-		log_error("\nError: no value entered for "
-			  "'log' parameter");
-		res = ERR_NCX_INVALID_VALUE;
-	    }
-	} /* else use default log (stdout) */
+                }
+            } else {
+                log_error("\nError: no value entered for "
+                          "'log' parameter");
+                res = ERR_NCX_INVALID_VALUE;
+            }
+        } /* else use default log (stdout) */
     }
 
     /* --modpath=<pathspeclist> */
     if (res == NO_ERR) {
-	parm = cli_find_rawparm(NCX_EL_MODPATH, &parmQ);
-	if (parm && parm->count) {
-	    if (parm->count > 1) {
-		log_error("\nError: Only one 'modpath' parameter allowed");
-		res = ERR_NCX_DUP_ENTRY;
-	    } else if (parm->value) {
-		/*** VALIDATE MODPATH FIRST ***/
-		ncxmod_set_modpath((const xmlChar *)parm->value);
-	    } else {
-		log_error("\nError: no value entered for "
-			  "'modpath' parameter");
-		res = ERR_NCX_INVALID_VALUE;
-	    }
-	} /* else use default modpath */
+        parm = cli_find_rawparm(NCX_EL_MODPATH, &parmQ);
+        if (parm && parm->count) {
+            if (parm->count > 1) {
+                log_error("\nError: Only one 'modpath' parameter allowed");
+                res = ERR_NCX_DUP_ENTRY;
+            } else if (parm->value) {
+                /*** VALIDATE MODPATH FIRST ***/
+                ncxmod_set_modpath((const xmlChar *)parm->value);
+            } else {
+                log_error("\nError: no value entered for "
+                          "'modpath' parameter");
+                res = ERR_NCX_INVALID_VALUE;
+            }
+        } /* else use default modpath */
     }
 
     /* --yuma-home=<$YUMA_HOME> */
     if (res == NO_ERR) {
-	parm = cli_find_rawparm(NCX_EL_YUMA_HOME, &parmQ);
-	if (parm && parm->count) {
-	    if (parm->count > 1) {
-		log_error("\nError: Only one 'yang-home' parameter allowed");
-		res = ERR_NCX_DUP_ENTRY;
+        parm = cli_find_rawparm(NCX_EL_YUMA_HOME, &parmQ);
+        if (parm && parm->count) {
+            if (parm->count > 1) {
+                log_error("\nError: Only one 'yang-home' parameter allowed");
+                res = ERR_NCX_DUP_ENTRY;
             } else {
-		/*** VALIDATE YUMA_HOME ***/
-		ncxmod_set_yuma_home((const xmlChar *)parm->value);
-	    }
-	} /* else use default modpath */
+                /*** VALIDATE YUMA_HOME ***/
+                ncxmod_set_yuma_home((const xmlChar *)parm->value);
+            }
+        } /* else use default modpath */
     }
 
     cli_clean_rawparmQ(&parmQ);
@@ -977,7 +977,7 @@ static status_t
 *********************************************************************/
 static void
     add_to_modQ (ncx_module_t *mod,
-		 dlq_hdr_t *modQ)
+                 dlq_hdr_t *modQ)
 {
     ncx_module_t   *testmod;
     boolean         done;
@@ -986,49 +986,49 @@ static void
     done = FALSE;
 
     for (testmod = (ncx_module_t *)dlq_firstEntry(modQ);
-	 testmod != NULL && !done;
-	 testmod = (ncx_module_t *)dlq_nextEntry(testmod)) {
+         testmod != NULL && !done;
+         testmod = (ncx_module_t *)dlq_nextEntry(testmod)) {
 
-	retval = xml_strcmp(mod->name, testmod->name);
-	if (retval == 0) {
-	    retval = yang_compare_revision_dates(mod->version,
-						 testmod->version);
-	    if (retval == 0) {
-		if ((!mod->version && !testmod->version) ||
-		    (mod->version && testmod->version)) {
-		    /* !!! adding duplicate version !!! */
-		    log_info("\nInfo: Adding duplicate revision '%s' of "
-			     "%s module (%s)",
-			     (mod->version) ? mod->version : EMPTY_STRING,
-			     mod->name,
-			     mod->source);
-		}
-		testmod->defaultrev = FALSE;
-		mod->defaultrev = TRUE;
-		dlq_insertAhead(mod, testmod);
-		done = TRUE;
-	    } else if (retval > 0) {
-		testmod->defaultrev = FALSE;
-		mod->defaultrev = TRUE;
-		dlq_insertAhead(mod, testmod);
-		done = TRUE;
-	    } else {
-		mod->defaultrev = FALSE;
-		dlq_insertAfter(mod, testmod);
-		done = TRUE;
-	    }
-	} else if (retval < 0) {
-	    mod->defaultrev = TRUE;
-	    dlq_insertAhead(mod, testmod);
-	    done = TRUE;
-	} /* else keep going */
+        retval = xml_strcmp(mod->name, testmod->name);
+        if (retval == 0) {
+            retval = yang_compare_revision_dates(mod->version,
+                                                 testmod->version);
+            if (retval == 0) {
+                if ((!mod->version && !testmod->version) ||
+                    (mod->version && testmod->version)) {
+                    /* !!! adding duplicate version !!! */
+                    log_info("\nInfo: Adding duplicate revision '%s' of "
+                             "%s module (%s)",
+                             (mod->version) ? mod->version : EMPTY_STRING,
+                             mod->name,
+                             mod->source);
+                }
+                testmod->defaultrev = FALSE;
+                mod->defaultrev = TRUE;
+                dlq_insertAhead(mod, testmod);
+                done = TRUE;
+            } else if (retval > 0) {
+                testmod->defaultrev = FALSE;
+                mod->defaultrev = TRUE;
+                dlq_insertAhead(mod, testmod);
+                done = TRUE;
+            } else {
+                mod->defaultrev = FALSE;
+                dlq_insertAfter(mod, testmod);
+                done = TRUE;
+            }
+        } else if (retval < 0) {
+            mod->defaultrev = TRUE;
+            dlq_insertAhead(mod, testmod);
+            done = TRUE;
+        } /* else keep going */
     }
 
     if (!done) {
-	mod->defaultrev = TRUE;
-	dlq_enque(mod, modQ);
+        mod->defaultrev = TRUE;
+        dlq_enque(mod, modQ);
     }
-	    
+            
 }  /* add_to_modQ */
 
 
@@ -1061,11 +1061,11 @@ static void
 *********************************************************************/
 status_t 
     ncx_init (boolean savestr,
-	      log_debug_t dlevel,
-	      boolean logtstamps,
-	      const char *startmsg,
-	      int argc,
-	      const char *argv[])
+              log_debug_t dlevel,
+              boolean logtstamps,
+              const char *startmsg,
+              int argc,
+              const char *argv[])
 {
     status_t     res;
     xmlns_id_t   nsid;
@@ -1105,11 +1105,11 @@ status_t
     /* deal with bootstrap CLI parms */
     res = bootstrap_cli(argc, argv, dlevel, logtstamps);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     if (startmsg) {
-	log_write(startmsg);
+        log_write(startmsg);
     }
 
     /* init runstack script support */
@@ -1128,78 +1128,78 @@ status_t
 
     /* Initialize the INVALID namespace to help filter handling */
     res = xmlns_register_ns(INVALID_URN, 
-			    INV_PREFIX, 
-			    NCX_MODULE, 
-			    NULL, 
-			    &nsid);
+                            INV_PREFIX, 
+                            NCX_MODULE, 
+                            NULL, 
+                            &nsid);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* Initialize the XML namespace for NETCONF */
     res = xmlns_register_ns(NC_URN, 
-			    NC_PREFIX, 
-			    NC_MODULE, 
-			    NULL, 
-			    &nsid);
+                            NC_PREFIX, 
+                            NC_MODULE, 
+                            NULL, 
+                            &nsid);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* Initialize the XML namespace for YANG */
     res = xmlns_register_ns(YANG_URN, 
-			    YANG_PREFIX, 
-			    YANG_MODULE, 
-			    NULL, 
-			    &nsid);
+                            YANG_PREFIX, 
+                            YANG_MODULE, 
+                            NULL, 
+                            &nsid);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* Initialize the XMLNS namespace for xmlns attributes */
     res = xmlns_register_ns(NS_URN, 
-			    NS_PREFIX, 
-			    NCX_MODULE, 
-			    NULL, 
-			    &nsid);
+                            NS_PREFIX, 
+                            NCX_MODULE, 
+                            NULL, 
+                            &nsid);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* Initialize the XSD namespace for ncxdump program */
     res = xmlns_register_ns(XSD_URN, 
-			    XSD_PREFIX, 
-			    NCX_MODULE, 
-			    NULL, 
-			    &nsid);
+                            XSD_PREFIX, 
+                            NCX_MODULE, 
+                            NULL, 
+                            &nsid);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* Initialize the XSI namespace for ncxdump program */
     res = xmlns_register_ns(XSI_URN, 
-			    XSI_PREFIX, 
-			    NCX_MODULE, 
-			    NULL, 
-			    &nsid);
+                            XSI_PREFIX, 
+                            NCX_MODULE, 
+                            NULL, 
+                            &nsid);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* Initialize the XML namespace for xml:lang attribute support */
     res = xmlns_register_ns(XML_URN, 
-			    XML_PREFIX, 
-			    NCX_MODULE, 
-			    NULL, 
-			    &nsid);
+                            XML_PREFIX, 
+                            NCX_MODULE, 
+                            NULL, 
+                            &nsid);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* load the basetypes into the definition registry */
     res = typ_load_basetypes();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* initialize the configuration manager */
@@ -1229,42 +1229,42 @@ status_t
     ncx_module_t     *mod;
 
     if (stage2_init_done) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     mod = ncx_find_module(NCX_MODULE, NULL);
     if (!mod) {
-	return ERR_NCX_MOD_NOT_FOUND;
+        return ERR_NCX_MOD_NOT_FOUND;
     }
 
     gen_anyxml = ncx_find_object(mod, NCX_EL_ANY);
     if (!gen_anyxml) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     gen_container = ncx_find_object(mod, NCX_EL_STRUCT);
     if (!gen_container) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     gen_string = ncx_find_object(mod, NCX_EL_STRING);
     if (!gen_string) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     gen_empty = ncx_find_object(mod, NCX_EL_EMPTY);
     if (!gen_empty) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     gen_root = ncx_find_object(mod, NCX_EL_ROOT);
     if (!gen_root) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     gen_binary = ncx_find_object(mod, NCX_EL_BINARY);
     if (!gen_binary) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     stage2_init_done = TRUE;
@@ -1286,30 +1286,30 @@ void
     warnoff_t      *warnoff;
 
     if (!ncx_init_done) {
-	return;
+        return;
     }
 
     while (!dlq_empty(&ncx_modQ)) {
-	mod = (ncx_module_t *)dlq_deque(&ncx_modQ);
-	free_module(mod);
+        mod = (ncx_module_t *)dlq_deque(&ncx_modQ);
+        free_module(mod);
     }
 
     while (!dlq_empty(&ncx_filptrQ)) {
-	filptr = (ncx_filptr_t *)dlq_deque(&ncx_filptrQ);
-	m__free(filptr);
+        filptr = (ncx_filptr_t *)dlq_deque(&ncx_filptrQ);
+        m__free(filptr);
     }
 
     while (!dlq_empty(&warnoffQ)) {
-	warnoff = (warnoff_t *)dlq_deque(&warnoffQ);
+        warnoff = (warnoff_t *)dlq_deque(&warnoffQ);
         m__free(warnoff);
     }
 
     if (stage2_init_done) {
-	gen_anyxml = NULL;
-	gen_container = NULL;
-	gen_string = NULL;
-	gen_empty = NULL;
-	gen_root = NULL;
+        gen_anyxml = NULL;
+        gen_container = NULL;
+        gen_string = NULL;
+        gen_empty = NULL;
+        gen_root = NULL;
         gen_binary = NULL;
     }
 
@@ -1343,7 +1343,7 @@ ncx_module_t *
 
     mod = m__getObj(ncx_module_t);
     if (!mod) {
-	return NULL;
+        return NULL;
     }
 
     (void)memset(mod, 0x0, sizeof(ncx_module_t));
@@ -1384,7 +1384,7 @@ ncx_module_t *
 *********************************************************************/
 ncx_module_t *
     ncx_find_module (const xmlChar *modname,
-		     const xmlChar *revision)
+                     const xmlChar *revision)
 {
     ncx_module_t *mod;
 
@@ -1444,23 +1444,23 @@ ncx_module_t *
          mod = (ncx_module_t *)dlq_nextEntry(mod)) {
 
         retval = xml_strcmp(modname, mod->name);
-	if (retval == 0) {
-	    if (!revision || !mod->version) {
-		if (mod->defaultrev) {
-		    return mod;
-		}
-	    } else {
-		retval = yang_compare_revision_dates(revision,
-						     mod->version);
-		if (retval == 0) {
-		    return mod;
-		} else if (retval > 0) {
-		    return NULL;
-		}
-	    }
-	} else if (retval < 0) {
-	    return NULL;
-	}
+        if (retval == 0) {
+            if (!revision || !mod->version) {
+                if (mod->defaultrev) {
+                    return mod;
+                }
+            } else {
+                retval = yang_compare_revision_dates(revision,
+                                                     mod->version);
+                if (retval == 0) {
+                    return mod;
+                } else if (retval > 0) {
+                    return NULL;
+                }
+            }
+        } else if (retval < 0) {
+            return NULL;
+        }
     }
     return NULL;
 
@@ -1556,11 +1556,11 @@ boolean
     ncx_module_t  *mod;
 
     for (mod = (ncx_module_t *)dlq_firstEntry(ncx_curQ);
-	 mod != NULL;
-	 mod = (ncx_module_t *)dlq_nextEntry(mod)) {
-	if (mod->status != NO_ERR) {
-	    return TRUE;
-	}
+         mod != NULL;
+         mod = (ncx_module_t *)dlq_nextEntry(mod)) {
+        if (mod->status != NO_ERR) {
+            return TRUE;
+        }
     }
 
     return FALSE;
@@ -1595,21 +1595,21 @@ boolean
     impQ = (mod->allimpQ) ? mod->allimpQ : &mod->saveimpQ;
 
     for (impptr = (yang_import_ptr_t *)dlq_firstEntry(impQ);
-	 impptr != NULL;
-	 impptr = (yang_import_ptr_t *)dlq_nextEntry(impptr)) {
+         impptr != NULL;
+         impptr = (yang_import_ptr_t *)dlq_nextEntry(impptr)) {
 
-	testmod = ncx_find_module(impptr->modname,
-				  impptr->revision);
-	if (!testmod) {
-	    /* missing import */
-	    return TRUE;
-	}
-	    
-	if (testmod->status != NO_ERR) {
-	    if (get_errtyp(testmod->status) < ERR_TYP_WARN) {
-		return TRUE;
-	    }
-	}
+        testmod = ncx_find_module(impptr->modname,
+                                  impptr->revision);
+        if (!testmod) {
+            /* missing import */
+            return TRUE;
+        }
+            
+        if (testmod->status != NO_ERR) {
+            if (get_errtyp(testmod->status) < ERR_TYP_WARN) {
+                return TRUE;
+            }
+        }
     }
 
     return FALSE;
@@ -1630,7 +1630,7 @@ boolean
 *********************************************************************/
 typ_template_t *
     ncx_find_type (ncx_module_t *mod,
-		   const xmlChar *typname)
+                   const xmlChar *typname)
 {
     typ_template_t *typ;
     yang_node_t    *node;
@@ -1646,7 +1646,7 @@ typ_template_t *
 
     typ = ncx_find_type_que(&mod->typeQ, typname);
     if (typ) {
-	return typ;
+        return typ;
     }
 
     que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
@@ -1655,29 +1655,29 @@ typ_template_t *
      * to this module or submodule, YANG only
      */
     for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
-	 inc != NULL;
-	 inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+         inc != NULL;
+         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
 
-	/* get the real submodule struct */
-	if (!inc->submod) {
-	    node = yang_find_node(que, 
-				  inc->submodule,
-				  inc->revision);
-	    if (node) {
-		inc->submod = node->submod;
-	    }
-	    if (!inc->submod) {
-		/* include not found, should not be in Q !!! */
-		SET_ERROR(ERR_INTERNAL_VAL);
-		continue;
-	    }
-	}
+        /* get the real submodule struct */
+        if (!inc->submod) {
+            node = yang_find_node(que, 
+                                  inc->submodule,
+                                  inc->revision);
+            if (node) {
+                inc->submod = node->submod;
+            }
+            if (!inc->submod) {
+                /* include not found, should not be in Q !!! */
+                SET_ERROR(ERR_INTERNAL_VAL);
+                continue;
+            }
+        }
 
-	/* check the type Q in this submodule */
-	typ = ncx_find_type_que(&inc->submod->typeQ, typname);
-	if (typ) {
-	    return typ;
-	}
+        /* check the type Q in this submodule */
+        typ = ncx_find_type_que(&inc->submod->typeQ, typname);
+        if (typ) {
+            return typ;
+        }
     }
 
     return NULL;
@@ -1699,7 +1699,7 @@ typ_template_t *
 *********************************************************************/
 typ_template_t *
     ncx_find_type_que (const dlq_hdr_t *typeQ,
-		       const xmlChar *typname)
+                       const xmlChar *typname)
 {
     typ_template_t *typ;
 
@@ -1736,7 +1736,7 @@ typ_template_t *
 *********************************************************************/
 grp_template_t *
     ncx_find_grouping (ncx_module_t *mod,
-		       const xmlChar *grpname)
+                       const xmlChar *grpname)
 {
     grp_template_t *grp;
     yang_node_t    *node;
@@ -1753,7 +1753,7 @@ grp_template_t *
     /* check the main module */
     grp = ncx_find_grouping_que(&mod->groupingQ, grpname);
     if (grp) {
-	return grp;
+        return grp;
     }
 
     que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
@@ -1762,29 +1762,29 @@ grp_template_t *
      * to this module or submodule, YANG only
      */
     for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
-	 inc != NULL;
-	 inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+         inc != NULL;
+         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
 
-	/* get the real submodule struct */
-	if (!inc->submod) {
-	    node = yang_find_node(que, 
-				  inc->submodule,
-				  inc->revision);
-	    if (node) {
-		inc->submod = node->submod;
-	    }
-	    if (!inc->submod) {
-		/* include not found, should not be in Q !!! */
-		SET_ERROR(ERR_INTERNAL_VAL);
-		continue;
-	    }
-	}
+        /* get the real submodule struct */
+        if (!inc->submod) {
+            node = yang_find_node(que, 
+                                  inc->submodule,
+                                  inc->revision);
+            if (node) {
+                inc->submod = node->submod;
+            }
+            if (!inc->submod) {
+                /* include not found, should not be in Q !!! */
+                SET_ERROR(ERR_INTERNAL_VAL);
+                continue;
+            }
+        }
 
-	/* check the type Q in this submodule */
-	grp = ncx_find_grouping_que(&inc->submod->groupingQ, grpname);
-	if (grp) {
-	    return grp;
-	}
+        /* check the type Q in this submodule */
+        grp = ncx_find_grouping_que(&inc->submod->groupingQ, grpname);
+        if (grp) {
+            return grp;
+        }
     }
 
     return NULL;
@@ -1806,7 +1806,7 @@ grp_template_t *
 *********************************************************************/
 grp_template_t *
     ncx_find_grouping_que (const dlq_hdr_t *groupingQ,
-			   const xmlChar *grpname)
+                           const xmlChar *grpname)
 {
     grp_template_t *grp;
 
@@ -1842,7 +1842,7 @@ grp_template_t *
 *********************************************************************/
 obj_template_t *
     ncx_find_rpc (const ncx_module_t *mod,
-		  const xmlChar *rpcname)
+                  const xmlChar *rpcname)
 {
     obj_template_t *rpc;
 
@@ -1857,9 +1857,9 @@ obj_template_t *
          rpc != NULL;
          rpc = (obj_template_t *)dlq_nextEntry(rpc)) {
         if (rpc->objtype == OBJ_TYP_RPC) {
-	    if (!xml_strcmp(obj_get_name(rpc), rpcname)) {
-		return rpc;
-	    }
+            if (!xml_strcmp(obj_get_name(rpc), rpcname)) {
+                return rpc;
+            }
         }
     }
     return NULL;
@@ -1885,7 +1885,7 @@ obj_template_t *
 *********************************************************************/
 obj_template_t *
     ncx_match_rpc (const ncx_module_t *mod,
-		   const xmlChar *rpcname,
+                   const xmlChar *rpcname,
                    uint32 *retcount)
 {
     obj_template_t *rpc, *firstfound;
@@ -1906,13 +1906,13 @@ obj_template_t *
     for (rpc = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
          rpc != NULL;
          rpc = (obj_template_t *)dlq_nextEntry(rpc)) {
-	if (rpc->objtype == OBJ_TYP_RPC) {
-	    if (!xml_strncmp(obj_get_name(rpc), rpcname, len)) {
+        if (rpc->objtype == OBJ_TYP_RPC) {
+            if (!xml_strncmp(obj_get_name(rpc), rpcname, len)) {
                 if (firstfound == NULL) {
                     firstfound = rpc;
                 }
                 cnt++;
-	    }
+            }
         }
     }
 
@@ -1941,7 +1941,7 @@ obj_template_t *
 *********************************************************************/
 obj_template_t *
     ncx_match_any_rpc (const xmlChar *module,
-		       const xmlChar *rpcname,
+                       const xmlChar *rpcname,
                        uint32 *retcount)
 {
     obj_template_t *rpc, *firstfound;
@@ -1959,25 +1959,25 @@ obj_template_t *
     *retcount = 0;
 
     if (module) {
-	mod = ncx_find_module(module, NULL);
-	if (mod) {
-	    firstfound = ncx_match_rpc(mod, rpcname, retcount);
-	}
+        mod = ncx_find_module(module, NULL);
+        if (mod) {
+            firstfound = ncx_match_rpc(mod, rpcname, retcount);
+        }
     } else {
         cnt = 0;
-	for (mod = ncx_get_first_module();
-	     mod != NULL;
-	     mod =  ncx_get_next_module(mod)) {
+        for (mod = ncx_get_first_module();
+             mod != NULL;
+             mod =  ncx_get_next_module(mod)) {
 
             tempcnt = 0;
-	    rpc = ncx_match_rpc(mod, rpcname, &tempcnt);
-	    if (rpc) {
+            rpc = ncx_match_rpc(mod, rpcname, &tempcnt);
+            if (rpc) {
                 if (firstfound == NULL) {
                     firstfound = rpc;
                 }
                 cnt += tempcnt;
-	    }
-	}
+            }
+        }
         *retcount = cnt;
     }
 
@@ -2087,15 +2087,15 @@ obj_template_t *
 
     obj = NULL;
     for (mod = (ncx_module_t *)dlq_firstEntry(modQ);
-	 mod != NULL;
-	 mod = (ncx_module_t *)dlq_nextEntry(mod)) {
+         mod != NULL;
+         mod = (ncx_module_t *)dlq_nextEntry(mod)) {
 
-	obj = obj_find_template_top(mod, 
-				    ncx_get_modname(mod), 
-				    objname);
-	if (obj) {
-	    return obj;
-	}
+        obj = obj_find_template_top(mod, 
+                                    ncx_get_modname(mod), 
+                                    objname);
+        if (obj) {
+            return obj;
+        }
     }
     return NULL;
 
@@ -2115,7 +2115,7 @@ obj_template_t *
 *********************************************************************/
 obj_template_t *
     ncx_find_object (ncx_module_t *mod,
-		     const xmlChar *objname)
+                     const xmlChar *objname)
 {
 #ifdef DEBUG
     if (!mod || !objname) {
@@ -2157,7 +2157,7 @@ status_t
 
 #ifdef DEBUG
     if (!mod) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -2174,7 +2174,7 @@ status_t
 
     /* if this is the XSD module, then use the NS ID already registered */
     if (!xml_strcmp(mod->name, NCX_EL_XSD)) {
-	mod->nsid = xmlns_xs_id();
+        mod->nsid = xmlns_xs_id();
     } else if (!xml_strcmp(mod->name,
                            (const xmlChar *)"ietf-netconf")) {
         mod->nsid = xmlns_nc_id();
@@ -2291,7 +2291,7 @@ status_t
 
 #ifdef DEBUG
     if (!mod) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -2299,61 +2299,61 @@ status_t
 
     /* check module parse code */
     if (mod->status != NO_ERR) {
-	res = mod->status;
-	if (NEED_EXIT(res)) {
-	    /* should not happen */
-	    log_error("\nError: cannot add module '%s' to registry"
-		      " with fatal errors", 
+        res = mod->status;
+        if (NEED_EXIT(res)) {
+            /* should not happen */
+            log_error("\nError: cannot add module '%s' to registry"
+                      " with fatal errors", 
                       mod->name);
-	    ncx_print_errormsg(NULL, mod, res);
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	} else {
-	    log_debug2("\nAdding module '%s' to registry"
-		       " with errors", 
+            ncx_print_errormsg(NULL, mod, res);
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        } else {
+            log_debug2("\nAdding module '%s' to registry"
+                       " with errors", 
                        mod->name);
-	    res = NO_ERR;
-	}
+            res = NO_ERR;
+        }
     }
 
     res = set_toplevel_defs(mod, mod->nsid);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* add all the submodules included in this module */
     for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	 node != NULL;
-	 node = (yang_node_t *)dlq_nextEntry(node)) {
+         node != NULL;
+         node = (yang_node_t *)dlq_nextEntry(node)) {
 
-	node->submod->nsid = mod->nsid;
-	res = set_toplevel_defs(node->submod, mod->nsid);
-	if (res != NO_ERR) {
-	    return res;
-	}
+        node->submod->nsid = mod->nsid;
+        res = set_toplevel_defs(node->submod, mod->nsid);
+        if (res != NO_ERR) {
+            return res;
+        }
     }
 
     /* add the module itself for fast lookup in imports
      * of other modules
      */
     if (mod->ismod) {
-	/* save the module in the module Q */
-	add_to_modQ(mod, &ncx_modQ);
-	mod->added = TRUE;
+        /* save the module in the module Q */
+        add_to_modQ(mod, &ncx_modQ);
+        mod->added = TRUE;
 
-	/* !!! hack to cleanup after xmlns init cycle !!!
-	 * check for netconf.yang or ncx.yang and back-fill
-	 * all the xmlns entries for those modules with the
-	 * real module pointer
-	 */
-	if (!xml_strcmp(mod->name, NC_MODULE)) {
-	    xmlns_set_modptrs(NC_MODULE, mod);
-	} else if (!xml_strcmp(mod->name, NCX_MODULE)) {
-	    xmlns_set_modptrs(NCX_MODULE, mod);
-	}
+        /* !!! hack to cleanup after xmlns init cycle !!!
+         * check for netconf.yang or ncx.yang and back-fill
+         * all the xmlns entries for those modules with the
+         * real module pointer
+         */
+        if (!xml_strcmp(mod->name, NC_MODULE)) {
+            xmlns_set_modptrs(NC_MODULE, mod);
+        } else if (!xml_strcmp(mod->name, NCX_MODULE)) {
+            xmlns_set_modptrs(NCX_MODULE, mod);
+        }
 
-	if (mod_load_callback) {
-	    (*mod_load_callback)(mod);
-	}
+        if (mod_load_callback) {
+            (*mod_load_callback)(mod);
+        }
 
     }
     
@@ -2406,7 +2406,7 @@ status_t
 *********************************************************************/
 boolean
     ncx_is_duplicate (ncx_module_t *mod,
-		      const xmlChar *defname)
+                      const xmlChar *defname)
 {
 #ifdef DEBUG
     if (!mod || !defname) {
@@ -2416,10 +2416,10 @@ boolean
 #endif
 
     if (ncx_find_type(mod, defname)) {
-	return TRUE;
+        return TRUE;
     }
     if (ncx_find_rpc(mod, defname)) {
-	return TRUE;
+        return TRUE;
     }
     return FALSE;
 
@@ -2441,10 +2441,10 @@ ncx_module_t *
 
     mod = (ncx_module_t *)dlq_firstEntry(ncx_curQ);
     while (mod) {
-	if (mod->defaultrev) {
-	    return mod;
-	}
-	mod = (ncx_module_t *)dlq_nextEntry(mod);
+        if (mod->defaultrev) {
+            return mod;
+        }
+        mod = (ncx_module_t *)dlq_nextEntry(mod);
     }
     return mod;
 
@@ -2473,10 +2473,10 @@ ncx_module_t *
 
     nextmod = (ncx_module_t *)dlq_nextEntry(mod);
     while (nextmod) {
-	if (nextmod->defaultrev) {
-	    return nextmod;
-	}
-	nextmod = (ncx_module_t *)dlq_nextEntry(nextmod);
+        if (nextmod->defaultrev) {
+            return nextmod;
+        }
+        nextmod = (ncx_module_t *)dlq_nextEntry(nextmod);
     }
     return nextmod;
 
@@ -2545,8 +2545,8 @@ const xmlChar *
 {
 #ifdef DEBUG
     if (!mod) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
     return (mod->ismod) ? mod->name : mod->belongs;
@@ -2567,8 +2567,8 @@ const xmlChar *
 {
 #ifdef DEBUG
     if (!mod) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
     return mod->version;
@@ -2589,8 +2589,8 @@ const xmlChar *
 {
 #ifdef DEBUG
     if (!mod) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
     return mod->ns;
@@ -2612,12 +2612,12 @@ ncx_module_t *
 
 #ifdef DEBUG
     if (!mod) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
     if (mod->ismod) {
-	return mod;
+        return mod;
     }
 
     /**** DO NOT KNOW THE REAL MAIN MODULE REVISION ****/
@@ -2652,40 +2652,40 @@ obj_template_t *
 #endif
 
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
-	if (!obj_has_name(obj) ||
-	    !obj_is_enabled(obj) ||
-	    obj_is_cli(obj) || 
-	    obj_is_abstract(obj)) {
-	    continue;
-	}
-	return obj;
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
+        if (!obj_has_name(obj) ||
+            !obj_is_enabled(obj) ||
+            obj_is_cli(obj) || 
+            obj_is_abstract(obj)) {
+            continue;
+        }
+        return obj;
     }
 
     for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	 node != NULL;
-	 node = (yang_node_t *)dlq_nextEntry(node)) {
+         node != NULL;
+         node = (yang_node_t *)dlq_nextEntry(node)) {
 
-	if (!node->submod) {
-	    SET_ERROR(ERR_INTERNAL_PTR);
-	    continue;
-	}
+        if (!node->submod) {
+            SET_ERROR(ERR_INTERNAL_PTR);
+            continue;
+        }
 
-	for (obj = (obj_template_t *)
-		 dlq_firstEntry(&node->submod->datadefQ);
-	     obj != NULL;
-	     obj = (obj_template_t *)dlq_nextEntry(obj)) {
+        for (obj = (obj_template_t *)
+                 dlq_firstEntry(&node->submod->datadefQ);
+             obj != NULL;
+             obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	    if (!obj_has_name(obj)  || 
-		!obj_is_enabled(obj) ||
-		obj_is_cli(obj) ||
-		obj_is_abstract(obj)) {
-		continue;
-	    }
+            if (!obj_has_name(obj)  || 
+                !obj_is_enabled(obj) ||
+                obj_is_cli(obj) ||
+                obj_is_abstract(obj)) {
+                continue;
+            }
 
-	    return obj;
-	}
+            return obj;
+        }
     }
 
     return NULL;
@@ -2704,7 +2704,7 @@ obj_template_t *
 *********************************************************************/
 obj_template_t *
     ncx_get_next_object (ncx_module_t *mod,
-			 obj_template_t *curobj)
+                         obj_template_t *curobj)
 {
     obj_template_t *obj;
     yang_node_t    *node;
@@ -2718,51 +2718,51 @@ obj_template_t *
 #endif
 
     for (obj = (obj_template_t *)dlq_nextEntry(curobj);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_has_name(obj) || 
-	    !obj_is_enabled(obj) ||
-	    obj_is_cli(obj) ||
-	    obj_is_abstract(obj)) {
-	    continue;
-	}
+        if (!obj_has_name(obj) || 
+            !obj_is_enabled(obj) ||
+            obj_is_cli(obj) ||
+            obj_is_abstract(obj)) {
+            continue;
+        }
 
-	return obj;
+        return obj;
     }
 
     start = (curobj->tkerr.mod == mod) ? TRUE : FALSE;
 
     for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	 node != NULL;
-	 node = (yang_node_t *)dlq_nextEntry(node)) {
+         node != NULL;
+         node = (yang_node_t *)dlq_nextEntry(node)) {
 
-	if (!node->submod) {
-	    SET_ERROR(ERR_INTERNAL_PTR);
-	    continue;
-	}
+        if (!node->submod) {
+            SET_ERROR(ERR_INTERNAL_PTR);
+            continue;
+        }
 
-	if (!start) {
-	    if (node->submod == curobj->tkerr.mod) {
-		start = TRUE;
-	    }
-	    continue;
-	}
+        if (!start) {
+            if (node->submod == curobj->tkerr.mod) {
+                start = TRUE;
+            }
+            continue;
+        }
 
-	for (obj = (obj_template_t *)
-		 dlq_firstEntry(&node->submod->datadefQ);
-	     obj != NULL;
-	     obj = (obj_template_t *)dlq_nextEntry(obj)) {
+        for (obj = (obj_template_t *)
+                 dlq_firstEntry(&node->submod->datadefQ);
+             obj != NULL;
+             obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	    if (!obj_has_name(obj) || 
-		!obj_is_enabled(obj) ||
-		obj_is_cli(obj) ||
-		obj_is_abstract(obj)) {
-		continue;
-	    }
+            if (!obj_has_name(obj) || 
+                !obj_is_enabled(obj) ||
+                obj_is_cli(obj) ||
+                obj_is_abstract(obj)) {
+                continue;
+            }
 
-	    return obj;
-	}
+            return obj;
+        }
     }
 
     return NULL;
@@ -2796,44 +2796,44 @@ obj_template_t *
 #endif
 
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
-	if (!obj_has_name(obj) || 
-	    !obj_is_enabled(obj) ||
-	    obj_is_cli(obj) ||
-	    obj_is_abstract(obj)) {
-	    continue;
-	}
-	if (obj_is_data_db(obj)) {
-	    return obj;
-	}
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
+        if (!obj_has_name(obj) || 
+            !obj_is_enabled(obj) ||
+            obj_is_cli(obj) ||
+            obj_is_abstract(obj)) {
+            continue;
+        }
+        if (obj_is_data_db(obj)) {
+            return obj;
+        }
     }
 
     for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	 node != NULL;
-	 node = (yang_node_t *)dlq_nextEntry(node)) {
+         node != NULL;
+         node = (yang_node_t *)dlq_nextEntry(node)) {
 
-	if (!node->submod) {
-	    SET_ERROR(ERR_INTERNAL_PTR);
-	    continue;
-	}
+        if (!node->submod) {
+            SET_ERROR(ERR_INTERNAL_PTR);
+            continue;
+        }
 
-	for (obj = (obj_template_t *)
-		 dlq_firstEntry(&node->submod->datadefQ);
-	     obj != NULL;
-	     obj = (obj_template_t *)dlq_nextEntry(obj)) {
+        for (obj = (obj_template_t *)
+                 dlq_firstEntry(&node->submod->datadefQ);
+             obj != NULL;
+             obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	    if (!obj_has_name(obj) || 
-		!obj_is_enabled(obj) ||
-		obj_is_cli(obj) ||
-		obj_is_abstract(obj)) {
-		continue;
-	    }
+            if (!obj_has_name(obj) || 
+                !obj_is_enabled(obj) ||
+                obj_is_cli(obj) ||
+                obj_is_abstract(obj)) {
+                continue;
+            }
 
-	    if (obj_is_data_db(obj)) {
-		return obj;
-	    }
-	}
+            if (obj_is_data_db(obj)) {
+                return obj;
+            }
+        }
     }
 
     return NULL;
@@ -2851,7 +2851,7 @@ obj_template_t *
 *********************************************************************/
 obj_template_t *
     ncx_get_next_data_object (ncx_module_t *mod,
-			      obj_template_t *curobj)
+                              obj_template_t *curobj)
 {
     obj_template_t *obj;
     yang_node_t    *node;
@@ -2865,55 +2865,55 @@ obj_template_t *
 #endif
 
     for (obj = (obj_template_t *)dlq_nextEntry(curobj);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_has_name(obj) || 
-	    !obj_is_enabled(obj) ||
-	    obj_is_cli(obj) ||
-	    obj_is_abstract(obj)) {
-	    continue;
-	}
+        if (!obj_has_name(obj) || 
+            !obj_is_enabled(obj) ||
+            obj_is_cli(obj) ||
+            obj_is_abstract(obj)) {
+            continue;
+        }
 
-	if (obj_is_data_db(obj)) {
-	    return obj;
-	}
+        if (obj_is_data_db(obj)) {
+            return obj;
+        }
     }
 
     start = (curobj->tkerr.mod == mod) ? TRUE : FALSE;
 
     for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
-	 node != NULL;
-	 node = (yang_node_t *)dlq_nextEntry(node)) {
+         node != NULL;
+         node = (yang_node_t *)dlq_nextEntry(node)) {
 
-	if (!node->submod) {
-	    SET_ERROR(ERR_INTERNAL_PTR);
-	    continue;
-	}
+        if (!node->submod) {
+            SET_ERROR(ERR_INTERNAL_PTR);
+            continue;
+        }
 
-	if (!start) {
-	    if (node->submod == curobj->tkerr.mod) {
-		start = TRUE;
-	    }
-	    continue;
-	}
+        if (!start) {
+            if (node->submod == curobj->tkerr.mod) {
+                start = TRUE;
+            }
+            continue;
+        }
 
-	for (obj = (obj_template_t *)
-		 dlq_firstEntry(&node->submod->datadefQ);
-	     obj != NULL;
-	     obj = (obj_template_t *)dlq_nextEntry(obj)) {
+        for (obj = (obj_template_t *)
+                 dlq_firstEntry(&node->submod->datadefQ);
+             obj != NULL;
+             obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	    if (!obj_has_name(obj) || 
-		!obj_is_enabled(obj) ||
-		obj_is_cli(obj) ||
-		obj_is_abstract(obj)) {
-		continue;
-	    }
+            if (!obj_has_name(obj) || 
+                !obj_is_enabled(obj) ||
+                obj_is_cli(obj) ||
+                obj_is_abstract(obj)) {
+                continue;
+            }
 
-	    if (obj_is_data_db(obj)) {
-		return obj;
-	    }
-	}
+            if (obj_is_data_db(obj)) {
+                return obj;
+            }
+        }
     }
 
     return NULL;
@@ -2936,7 +2936,7 @@ ncx_import_t *
 
     import = m__getObj(ncx_import_t);
     if (!import) {
-	return NULL;
+        return NULL;
     }
     (void)memset(import, 0x0, sizeof(ncx_import_t));
     dlq_createSQue(&import->appinfoQ);
@@ -2962,20 +2962,20 @@ void
 #ifdef DEBUG
     if (!import) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        return;
     }
 #endif
 
     if (import->module) {
-	m__free(import->module);
+        m__free(import->module);
     }
 
     if (import->prefix) {
-	m__free(import->prefix);
+        m__free(import->prefix);
     }
 
     if (import->revision) {
-	m__free(import->revision);
+        m__free(import->revision);
     }
 
     /* YANG only */
@@ -3000,12 +3000,12 @@ void
 *********************************************************************/
 ncx_import_t * 
     ncx_find_import (const ncx_module_t *mod,
-		     const xmlChar *module)
+                     const xmlChar *module)
 {
 #ifdef DEBUG
     if (!mod || !module) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
@@ -3035,17 +3035,17 @@ ncx_import_t *
 #ifdef DEBUG
     if (!importQ || !module) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
     for (import = (ncx_import_t *)dlq_firstEntry(importQ);
-	 import != NULL;
-	 import = (ncx_import_t *)dlq_nextEntry(import)) {
-	if (!xml_strcmp(import->module, module)) {
-	    import->used = TRUE;
-	    return import;
-	}
+         import != NULL;
+         import = (ncx_import_t *)dlq_nextEntry(import)) {
+        if (!xml_strcmp(import->module, module)) {
+            import->used = TRUE;
+            return import;
+        }
     }
     return NULL;
 
@@ -3067,23 +3067,23 @@ ncx_import_t *
 *********************************************************************/
 ncx_import_t * 
     ncx_find_import_test (const ncx_module_t *mod,
-			  const xmlChar *module)
+                          const xmlChar *module)
 {
     ncx_import_t  *import;
 
 #ifdef DEBUG
     if (!mod || !module) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
     for (import = (ncx_import_t *)dlq_firstEntry(&mod->importQ);
-	 import != NULL;
-	 import = (ncx_import_t *)dlq_nextEntry(import)) {
-	if (!xml_strcmp(import->module, module)) {
-	    return import;
-	}
+         import != NULL;
+         import = (ncx_import_t *)dlq_nextEntry(import)) {
+        if (!xml_strcmp(import->module, module)) {
+            return import;
+        }
     }
     return NULL;
 
@@ -3104,12 +3104,12 @@ ncx_import_t *
 *********************************************************************/
 ncx_import_t * 
     ncx_find_pre_import (const ncx_module_t *mod,
-			 const xmlChar *prefix)
+                         const xmlChar *prefix)
 {
 #ifdef DEBUG
     if (!mod || !prefix) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
@@ -3139,17 +3139,17 @@ ncx_import_t *
 #ifdef DEBUG
     if (!importQ || !prefix) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
     for (import = (ncx_import_t *)dlq_firstEntry(importQ);
-	 import != NULL;
-	 import = (ncx_import_t *)dlq_nextEntry(import)) {
-	if (import->prefix && !xml_strcmp(import->prefix, prefix)) {
-	    import->used = TRUE;
-	    return import;
-	}
+         import != NULL;
+         import = (ncx_import_t *)dlq_nextEntry(import)) {
+        if (import->prefix && !xml_strcmp(import->prefix, prefix)) {
+            import->used = TRUE;
+            return import;
+        }
     }
     return NULL;
 
@@ -3171,23 +3171,23 @@ ncx_import_t *
 *********************************************************************/
 ncx_import_t * 
     ncx_find_pre_import_test (const ncx_module_t *mod,
-			      const xmlChar *prefix)
+                              const xmlChar *prefix)
 {
     ncx_import_t  *import;
 
 #ifdef DEBUG
     if (!mod || !prefix) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
     for (import = (ncx_import_t *)dlq_firstEntry(&mod->importQ);
-	 import != NULL;
-	 import = (ncx_import_t *)dlq_nextEntry(import)) {
-	if (import->prefix && !xml_strcmp(import->prefix, prefix)) {
-	    return import;
-	}
+         import != NULL;
+         import = (ncx_import_t *)dlq_nextEntry(import)) {
+        if (import->prefix && !xml_strcmp(import->prefix, prefix)) {
+            return import;
+        }
     }
     return NULL;
 
@@ -3223,8 +3223,8 @@ ncx_import_t *
 void *
     ncx_locate_modqual_import (yang_pcb_t *pcb,
                                ncx_import_t *imp,
-			       const xmlChar *defname,
-			       ncx_node_t *deftyp)
+                               const xmlChar *defname,
+                               ncx_node_t *deftyp)
 {
     void *dptr;
     status_t  res;
@@ -3258,7 +3258,7 @@ ncx_include_t *
 
     inc = m__getObj(ncx_include_t);
     if (!inc) {
-	return NULL;
+        return NULL;
     }
     (void)memset(inc, 0x0, sizeof(ncx_include_t));
     dlq_createSQue(&inc->appinfoQ);
@@ -3284,16 +3284,16 @@ void
 #ifdef DEBUG
     if (!inc) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        return;
     }
 #endif
 
     if (inc->submodule) {
-	m__free(inc->submodule);
+        m__free(inc->submodule);
     }
 
     if (inc->revision) {
-	m__free(inc->revision);
+        m__free(inc->revision);
     }
 
     ncx_clean_appinfoQ(&inc->appinfoQ);
@@ -3316,22 +3316,22 @@ void
 *********************************************************************/
 ncx_include_t * 
     ncx_find_include (const ncx_module_t *mod,
-		      const xmlChar *submodule)
+                      const xmlChar *submodule)
 {
     ncx_include_t  *inc;
 
 #ifdef DEBUG
     if (!mod || !submodule) {
-	return NULL;
+        return NULL;
     }
 #endif
 
     for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
-	 inc != NULL;
-	 inc = (ncx_include_t *)dlq_nextEntry(inc)) {
-	if (!xml_strcmp(inc->submodule, submodule)) {
-	    return inc;
-	}
+         inc != NULL;
+         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+        if (!xml_strcmp(inc->submodule, submodule)) {
+            return inc;
+        }
     }
     return NULL;
 
@@ -3351,8 +3351,8 @@ void
 {
 #ifdef DEBUG
     if (!num) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -3375,12 +3375,12 @@ void
 *********************************************************************/
 void 
     ncx_clean_num (ncx_btype_t btyp,
-		   ncx_num_t *num)
+                   ncx_num_t *num)
 {
 #ifdef DEBUG
     if (!num) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return;  
+        return;  
     }
 #endif
 
@@ -3395,17 +3395,17 @@ void
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-	memset(num, 0x0, sizeof(ncx_num_t));
-	break;
+        memset(num, 0x0, sizeof(ncx_num_t));
+        break;
     case NCX_BT_DECIMAL64:
-	num->dec.val = 0;
-	num->dec.digits = 0;
-	break;
+        num->dec.val = 0;
+        num->dec.digits = 0;
+        break;
     case NCX_BT_FLOAT64:
-	num->d = 0;
-	break;
+        num->d = 0;
+        break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
     }
 
 }  /* ncx_clean_num */
@@ -3427,16 +3427,16 @@ void
 *********************************************************************/
 int32
     ncx_compare_nums (const ncx_num_t *num1,
-		      const ncx_num_t *num2,
-		      ncx_btype_t  btyp)
+                      const ncx_num_t *num2,
+                      ncx_btype_t  btyp)
 {
     int64    temp1, temp2;
     uint8    diffdigits;
 
 #ifdef DEBUG
     if (!num1 || !num2) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
@@ -3478,33 +3478,33 @@ int32
             return 1;
         }
     case NCX_BT_DECIMAL64:
-	/* check the base parts first */
-	temp1 = ncx_get_dec64_base(num1);
-	temp2 = ncx_get_dec64_base(num2);
+        /* check the base parts first */
+        temp1 = ncx_get_dec64_base(num1);
+        temp2 = ncx_get_dec64_base(num2);
 
-	if (temp1 < temp2) {
-	    return -1;
+        if (temp1 < temp2) {
+            return -1;
         } else if (temp1 == temp2) {
-	    /* check fraction parts next */
-	    temp1 = ncx_get_dec64_fraction(num1);
-	    temp2 = ncx_get_dec64_fraction(num2);
+            /* check fraction parts next */
+            temp1 = ncx_get_dec64_fraction(num1);
+            temp2 = ncx_get_dec64_fraction(num2);
 
-	    /* normalize these numbers to compare them */
-	    if (num1->dec.digits > num2->dec.digits) {
-		diffdigits = num1->dec.digits - num2->dec.digits;
-		temp2 *= (10 * diffdigits);
-	    } else if (num1->dec.digits < num2->dec.digits) {
-		diffdigits = num2->dec.digits - num1->dec.digits;
-		temp1 *= (10 * diffdigits);
-	    }
+            /* normalize these numbers to compare them */
+            if (num1->dec.digits > num2->dec.digits) {
+                diffdigits = num1->dec.digits - num2->dec.digits;
+                temp2 *= (10 * diffdigits);
+            } else if (num1->dec.digits < num2->dec.digits) {
+                diffdigits = num2->dec.digits - num1->dec.digits;
+                temp1 *= (10 * diffdigits);
+            }
 
-	    if (temp1 < temp2) {
-		return -1;
-	    } else if (temp1 == temp2) {
-		return 0;
-	    } else {
-		return 1;
-	    }
+            if (temp1 < temp2) {
+                return -1;
+            } else if (temp1 == temp2) {
+                return 0;
+            } else {
+                return 1;
+            }
         } else {
             return 1;
         }
@@ -3536,48 +3536,48 @@ int32
 *********************************************************************/
 void
     ncx_set_num_min (ncx_num_t *num,
-		     ncx_btype_t  btyp)
+                     ncx_btype_t  btyp)
 {
 #ifdef DEBUG
     if (!num) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     switch (btyp) {
     case NCX_BT_INT8:
-	num->i = NCX_MIN_INT8;
-	break;
+        num->i = NCX_MIN_INT8;
+        break;
     case NCX_BT_INT16:
-	num->i = NCX_MIN_INT16;
-	break;
+        num->i = NCX_MIN_INT16;
+        break;
     case NCX_BT_INT32:
-	num->i = NCX_MIN_INT;
-	break;
+        num->i = NCX_MIN_INT;
+        break;
     case NCX_BT_INT64:
-	num->l = NCX_MIN_LONG;
-	break;
+        num->l = NCX_MIN_LONG;
+        break;
     case NCX_BT_UINT8:
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
-	num->u = NCX_MIN_UINT;
-	break;
+        num->u = NCX_MIN_UINT;
+        break;
     case NCX_BT_UINT64:
-	num->ul = NCX_MIN_ULONG;
-	break;
+        num->ul = NCX_MIN_ULONG;
+        break;
     case NCX_BT_DECIMAL64:
-	num->dec.val = NCX_MIN_LONG;
-	break;
+        num->dec.val = NCX_MIN_LONG;
+        break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	num->d = -INFINITY;
+        num->d = -INFINITY;
 #else
-	num->d = NCX_MIN_LONG;
+        num->d = NCX_MIN_LONG;
 #endif
-	break;
+        break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
     }
 
 } /* ncx_set_num_min */
@@ -3595,52 +3595,52 @@ void
 *********************************************************************/
 void
     ncx_set_num_max (ncx_num_t *num,
-		     ncx_btype_t  btyp)
+                     ncx_btype_t  btyp)
 {
 #ifdef DEBUG
     if (!num) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     switch (btyp) {
     case NCX_BT_INT8:
-	num->i = NCX_MAX_INT8;
-	break;
+        num->i = NCX_MAX_INT8;
+        break;
     case NCX_BT_INT16:
-	num->i = NCX_MAX_INT16;
-	break;
+        num->i = NCX_MAX_INT16;
+        break;
     case NCX_BT_INT32:
-	num->i = NCX_MAX_INT;
-	break;
+        num->i = NCX_MAX_INT;
+        break;
     case NCX_BT_INT64:
-	num->l = NCX_MAX_LONG;
-	break;
+        num->l = NCX_MAX_LONG;
+        break;
     case NCX_BT_UINT8:
-	num->u = NCX_MAX_UINT8;
-	break;
+        num->u = NCX_MAX_UINT8;
+        break;
     case NCX_BT_UINT16:
-	num->u = NCX_MAX_UINT16;
-	break;
+        num->u = NCX_MAX_UINT16;
+        break;
     case NCX_BT_UINT32:
-	num->u = NCX_MAX_UINT;
-	break;
+        num->u = NCX_MAX_UINT;
+        break;
     case NCX_BT_UINT64:
-	num->ul = NCX_MAX_ULONG;
-	break;
+        num->ul = NCX_MAX_ULONG;
+        break;
     case NCX_BT_DECIMAL64:
-	num->dec.val = NCX_MAX_LONG;
-	break;
+        num->dec.val = NCX_MAX_LONG;
+        break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	num->d = INFINITY;
+        num->d = INFINITY;
 #else
-	num->d = NCX_MAX_LONG-1;
+        num->d = NCX_MAX_LONG-1;
 #endif
-	break;
+        break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
     }
 
 } /* ncx_set_num_max */
@@ -3658,12 +3658,12 @@ void
 *********************************************************************/
 void
     ncx_set_num_one (ncx_num_t *num,
-		     ncx_btype_t  btyp)
+                     ncx_btype_t  btyp)
 {
 #ifdef DEBUG
     if (!num) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -3671,25 +3671,25 @@ void
     case NCX_BT_INT8:
     case NCX_BT_INT16:
     case NCX_BT_INT32:
-	num->i = 1;
-	break;
+        num->i = 1;
+        break;
     case NCX_BT_INT64:
-	num->l = 1;
-	break;
+        num->l = 1;
+        break;
     case NCX_BT_UINT8:
-	num->u = 1;
-	break;
+        num->u = 1;
+        break;
     case NCX_BT_UINT64:
-	num->ul = 1;
-	break;
+        num->ul = 1;
+        break;
     case NCX_BT_DECIMAL64:
-	num->dec.val = 10 * num->dec.digits;
-	break;
+        num->dec.val = 10 * num->dec.digits;
+        break;
     case NCX_BT_FLOAT64:
-	num->d = 1;
-	break;
+        num->d = 1;
+        break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
     }
 
 } /* ncx_set_num_one */
@@ -3707,12 +3707,12 @@ void
 *********************************************************************/
 void
     ncx_set_num_zero (ncx_num_t *num,
-		      ncx_btype_t  btyp)
+                      ncx_btype_t  btyp)
 {
 #ifdef DEBUG
     if (!num) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -3720,25 +3720,25 @@ void
     case NCX_BT_INT8:
     case NCX_BT_INT16:
     case NCX_BT_INT32:
-	num->i = 0;
-	break;
+        num->i = 0;
+        break;
     case NCX_BT_INT64:
-	num->l = 0;
-	break;
+        num->l = 0;
+        break;
     case NCX_BT_UINT8:
-	num->u = 0;
-	break;
+        num->u = 0;
+        break;
     case NCX_BT_UINT64:
-	num->ul = 0;
-	break;
+        num->ul = 0;
+        break;
     case NCX_BT_DECIMAL64:
-	num->dec.val = 0;
-	break;
+        num->dec.val = 0;
+        break;
     case NCX_BT_FLOAT64:
-	num->d = 0;
-	break;
+        num->d = 0;
+        break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
     }
 
 } /* ncx_set_num_zero */
@@ -3756,20 +3756,20 @@ void
 *********************************************************************/
 void
     ncx_set_num_nan (ncx_num_t *num,
-		     ncx_btype_t  btyp)
+                     ncx_btype_t  btyp)
 {
 #ifdef DEBUG
     if (!num) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (btyp == NCX_BT_FLOAT64) {
 #ifdef HAS_FLOAT
-	num->d = NAN;
+        num->d = NAN;
 #else
-	num->d = NCX_MAX_LONG;
+        num->d = NCX_MAX_LONG;
 #endif
     }
 
@@ -3788,20 +3788,20 @@ void
 *********************************************************************/
 boolean
     ncx_num_is_nan (ncx_num_t *num,
-		    ncx_btype_t  btyp)
+                    ncx_btype_t  btyp)
 {
 #ifdef DEBUG
     if (!num) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return TRUE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return TRUE;
     }
 #endif
 
     if (btyp == NCX_BT_FLOAT64) {
 #ifdef HAS_FLOAT
-	return (num->d == NAN) ? TRUE : FALSE;
+        return (num->d == NAN) ? TRUE : FALSE;
 #else
-	return (num->d == NCX_MAX_LONG) ? TRUE : FALSE;
+        return (num->d == NCX_MAX_LONG) ? TRUE : FALSE;
 #endif
     }
     return FALSE;
@@ -3824,12 +3824,12 @@ boolean
 *********************************************************************/
 boolean
     ncx_num_zero (const ncx_num_t *num,
-		  ncx_btype_t  btyp)
+                  ncx_btype_t  btyp)
 {
 #ifdef DEBUG
     if (!num) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -3878,9 +3878,9 @@ boolean
 *********************************************************************/
 status_t
     ncx_convert_num (const xmlChar *numstr,
-		     ncx_numfmt_t   numfmt,
-		     ncx_btype_t  btyp,
-		     ncx_num_t    *val)
+                     ncx_numfmt_t   numfmt,
+                     ncx_btype_t  btyp,
+                     ncx_num_t    *val)
 {
     char  *err;
     long  l;
@@ -3896,12 +3896,12 @@ status_t
 
 #ifdef DEBUG
     if (!numstr || !val) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     if (*numstr == '\0') {
-	return ERR_NCX_INVALID_VALUE;
+        return ERR_NCX_INVALID_VALUE;
     }
 
     err = NULL;
@@ -3912,7 +3912,7 @@ status_t
 
     /* check the number format set to don't know */
     if (numfmt==NCX_NF_NONE) {
-	numfmt = ncx_get_numfmt(numstr);
+        numfmt = ncx_get_numfmt(numstr);
     }
 
 
@@ -3923,60 +3923,60 @@ status_t
         switch (numfmt) {
         case NCX_NF_OCTAL:
             l = strtol((const char *)numstr, &err, 8);
-	    break;
+            break;
         case NCX_NF_DEC:
             l = strtol((const char *)numstr, &err, 10);
-	    break;
+            break;
         case NCX_NF_HEX:
             l = strtol((const char *)numstr, &err, 16);
-	    break;
-        case NCX_NF_REAL:
-            return ERR_NCX_WRONG_NUMTYP;
-        default:
-            return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-
-	if (err && *err) {
-	    return ERR_NCX_INVALID_NUM;
-	}
-
-	switch (btyp) {
-	case NCX_BT_INT8:
-	    if (l < NCX_MIN_INT8 || l > NCX_MAX_INT8) {
-		return ERR_NCX_NOT_IN_RANGE;
-	    }
-	    break;
-	case NCX_BT_INT16:
-	    if (l < NCX_MIN_INT16 || l > NCX_MAX_INT16) {
-		return ERR_NCX_NOT_IN_RANGE;
-	    }
-	    break;
-	default:
-	    ;
-	}
-	val->i = (int32)l;
-        break;
-    case NCX_BT_INT64:
-        switch (numfmt) {
-        case NCX_NF_OCTAL:
-            ll = strtoll((const char *)numstr, &err, 8);
-	    break;
-        case NCX_NF_DEC:
-            ll = strtoll((const char *)numstr, &err, 10);
-	    break;
-        case NCX_NF_HEX:
-            ll = strtoll((const char *)numstr, &err, 16);
-	    break;
+            break;
         case NCX_NF_REAL:
             return ERR_NCX_WRONG_NUMTYP;
         default:
             return SET_ERROR(ERR_INTERNAL_VAL);
         }
 
-	if (err && *err) {
-	    return ERR_NCX_INVALID_NUM;
-	}
-	val->l = (int64)ll;
+        if (err && *err) {
+            return ERR_NCX_INVALID_NUM;
+        }
+
+        switch (btyp) {
+        case NCX_BT_INT8:
+            if (l < NCX_MIN_INT8 || l > NCX_MAX_INT8) {
+                return ERR_NCX_NOT_IN_RANGE;
+            }
+            break;
+        case NCX_BT_INT16:
+            if (l < NCX_MIN_INT16 || l > NCX_MAX_INT16) {
+                return ERR_NCX_NOT_IN_RANGE;
+            }
+            break;
+        default:
+            ;
+        }
+        val->i = (int32)l;
+        break;
+    case NCX_BT_INT64:
+        switch (numfmt) {
+        case NCX_NF_OCTAL:
+            ll = strtoll((const char *)numstr, &err, 8);
+            break;
+        case NCX_NF_DEC:
+            ll = strtoll((const char *)numstr, &err, 10);
+            break;
+        case NCX_NF_HEX:
+            ll = strtoll((const char *)numstr, &err, 16);
+            break;
+        case NCX_NF_REAL:
+            return ERR_NCX_WRONG_NUMTYP;
+        default:
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        }
+
+        if (err && *err) {
+            return ERR_NCX_INVALID_NUM;
+        }
+        val->l = (int64)ll;
         break;
     case NCX_BT_UINT8:
     case NCX_BT_UINT16:
@@ -3984,80 +3984,80 @@ status_t
         switch (numfmt) {
         case NCX_NF_OCTAL:
             ul = strtoul((const char *)numstr, &err, 8);
-	    break;
+            break;
         case NCX_NF_DEC:
             ul = strtoul((const char *)numstr, &err, 10);
-	    break;
+            break;
         case NCX_NF_HEX:
             ul = strtoul((const char *)numstr, &err, 16);
-	    break;
+            break;
         case NCX_NF_REAL:
             return ERR_NCX_WRONG_NUMTYP;
         default:
             return SET_ERROR(ERR_INTERNAL_VAL);
         }
 
-	if (err && *err) {
-	    return ERR_NCX_INVALID_NUM;
-	}
+        if (err && *err) {
+            return ERR_NCX_INVALID_NUM;
+        }
 
-	switch (btyp) {
-	case NCX_BT_UINT8:
-	    if (ul > NCX_MAX_UINT8) {
-		return ERR_NCX_NOT_IN_RANGE;
-	    }
-	    break;
-	case NCX_BT_UINT16:
-	    if (ul > NCX_MAX_UINT16) {
-		return ERR_NCX_NOT_IN_RANGE;
-	    }
-	    break;
-	default:
-	    ;
-	}
+        switch (btyp) {
+        case NCX_BT_UINT8:
+            if (ul > NCX_MAX_UINT8) {
+                return ERR_NCX_NOT_IN_RANGE;
+            }
+            break;
+        case NCX_BT_UINT16:
+            if (ul > NCX_MAX_UINT16) {
+                return ERR_NCX_NOT_IN_RANGE;
+            }
+            break;
+        default:
+            ;
+        }
 
-	if (*numstr == '-') {
-	    return ERR_NCX_NOT_IN_RANGE;
-	}
+        if (*numstr == '-') {
+            return ERR_NCX_NOT_IN_RANGE;
+        }
 
-	val->u = (uint32)ul;
-	break;
+        val->u = (uint32)ul;
+        break;
     case NCX_BT_UINT64:
         switch (numfmt) {
         case NCX_NF_OCTAL:
             ull = strtoull((const char *)numstr, &err, 8);
-	    break;
+            break;
         case NCX_NF_DEC:
             ull = strtoull((const char *)numstr, &err, 10);
-	    break;
+            break;
         case NCX_NF_HEX:
             ull = strtoull((const char *)numstr, &err, 16);
-	    break;
+            break;
         case NCX_NF_REAL:
             return ERR_NCX_WRONG_TKTYPE;
         default:
             return SET_ERROR(ERR_INTERNAL_VAL);
         }
 
-	if (err && *err) {
-	    return ERR_NCX_INVALID_NUM;
-	}
+        if (err && *err) {
+            return ERR_NCX_INVALID_NUM;
+        }
 
-	if (*numstr == '-') {
-	    return ERR_NCX_NOT_IN_RANGE;
-	}
+        if (*numstr == '-') {
+            return ERR_NCX_NOT_IN_RANGE;
+        }
 
-	val->ul = (uint64)ull;
-	break;
+        val->ul = (uint64)ull;
+        break;
     case NCX_BT_DECIMAL64:
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
         switch (numfmt) {
-	case NCX_NF_OCTAL:
+        case NCX_NF_OCTAL:
         case NCX_NF_DEC:
         case NCX_NF_REAL:
-	    errno = 0;
+            errno = 0;
             d = strtod((const char *)numstr, &err);
             if (errno) {
                 return ERR_NCX_INVALID_NUM;
@@ -4126,9 +4126,9 @@ status_t
 *********************************************************************/
 status_t
     ncx_convert_dec64 (const xmlChar *numstr,
-		       ncx_numfmt_t numfmt,
-		       uint8 digits,
-		       ncx_num_t *val)
+                       ncx_numfmt_t numfmt,
+                       uint8 digits,
+                       ncx_num_t *val)
 {
     const xmlChar  *point, *str;
     char           *err;
@@ -4140,14 +4140,14 @@ status_t
 
 #ifdef DEBUG
     if (!numstr || !val) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     if (*numstr == '\0') {
-	val->dec.val = 0;
-	val->dec.digits = digits;
-	return NO_ERR;
+        val->dec.val = 0;
+        val->dec.digits = digits;
+        return NO_ERR;
     }
 
     err = NULL;
@@ -4158,123 +4158,123 @@ status_t
 
     /* check the number format set to don't know */
     if (numfmt==NCX_NF_NONE) {
-	numfmt = ncx_get_numfmt(numstr);
+        numfmt = ncx_get_numfmt(numstr);
     }
 
     /* check the number string for plus or minus sign */
     str = numstr;
     if (*str == '+') {
-	str++;
+        str++;
     } else if (*str == '-') {
-	str++;
-	isneg = TRUE;
+        str++;
+        isneg = TRUE;
     }
     while (isdigit((char)*str)) {
-	str++;
+        str++;
     }
 
     /* check if stopped on a decimal point */
     if (*str == '.') {
-	/* get just the base part now */
-	point = str;
-	xml_strncpy(numbuff, 
-		    numstr, 
-		    (uint32)(point - numstr));
-	basenum = strtoll((const char *)numbuff, &err, 10);
+        /* get just the base part now */
+        point = str;
+        xml_strncpy(numbuff, 
+                    numstr, 
+                    (uint32)(point - numstr));
+        basenum = strtoll((const char *)numbuff, &err, 10);
     } else {
-	/* assume the entire string is just a base part
-	 * the token parser broke up the string
-	 * already so a string concat '123foo' should
-	 * not happen here
-	 */
-	switch (numfmt) {
-	case NCX_NF_OCTAL:
-	    basenum = strtoll((const char *)numstr, &err, 8);
-	    break;
-	case NCX_NF_DEC:
-	case NCX_NF_REAL:
-	    basenum = strtoll((const char *)numstr, &err, 10);
-	    break;
-	case NCX_NF_HEX:
-	    basenum = strtoll((const char *)numstr, &err, 16);
-	    break;
-	default:
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
+        /* assume the entire string is just a base part
+         * the token parser broke up the string
+         * already so a string concat '123foo' should
+         * not happen here
+         */
+        switch (numfmt) {
+        case NCX_NF_OCTAL:
+            basenum = strtoll((const char *)numstr, &err, 8);
+            break;
+        case NCX_NF_DEC:
+        case NCX_NF_REAL:
+            basenum = strtoll((const char *)numstr, &err, 10);
+            break;
+        case NCX_NF_HEX:
+            basenum = strtoll((const char *)numstr, &err, 16);
+            break;
+        default:
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        }
 
-	/* check if strtoll accepted the number string */
-	if (err && *err) {
-	    return ERR_NCX_INVALID_NUM;
-	}
+        /* check if strtoll accepted the number string */
+        if (err && *err) {
+            return ERR_NCX_INVALID_NUM;
+        }
     }
 
     /* check that the number is actually in range */
     if (isneg) {
-	testnum = NCX_MIN_LONG;
+        testnum = NCX_MIN_LONG;
     } else {
-	testnum = NCX_MAX_LONG;
+        testnum = NCX_MAX_LONG;
     }
 
     /* adjust the test number to the maximum for
      * the specified number of fraction digits
      */
     for (i = 0; i < digits; i++) {
-	testnum /= 10;
+        testnum /= 10;
     }
 
     /* check if the base number is OK wrt/ testnum */
     if (isneg) {
-	if (basenum < testnum) {
-	    return ERR_NCX_DEC64_BASEOVFL;
-	}
+        if (basenum < testnum) {
+            return ERR_NCX_DEC64_BASEOVFL;
+        }
     } else {
-	if (basenum > testnum) {
-	    return ERR_NCX_DEC64_BASEOVFL;
-	}
+        if (basenum > testnum) {
+            return ERR_NCX_DEC64_BASEOVFL;
+        }
     }
 
     /* check if there is a fraction part entered */
     if (point) {
-	fracnum = 0;
-	str = point + 1;
-	while (isdigit((char)*str)) {
-	    str++;
-	}
-	numdigits = (uint32)(str - point - 1);
+        fracnum = 0;
+        str = point + 1;
+        while (isdigit((char)*str)) {
+            str++;
+        }
+        numdigits = (uint32)(str - point - 1);
 
-	/* check if fraction part too big */
-	if (numdigits > (uint32)digits) {
-	    return ERR_NCX_DEC64_FRACOVFL;
-	}
+        /* check if fraction part too big */
+        if (numdigits > (uint32)digits) {
+            return ERR_NCX_DEC64_FRACOVFL;
+        }
 
-	if (numdigits) {
-	    err = NULL;
-	    xml_strncpy(numbuff, point+1, numdigits);
-	    fracnum = strtoll((const char *)numbuff, &err, 10);
+        if (numdigits) {
+            err = NULL;
+            xml_strncpy(numbuff, point+1, numdigits);
+            fracnum = strtoll((const char *)numbuff, &err, 10);
 
-	    /* check if strtoll accepted the number string */
-	    if (err && *err) {
-		return ERR_NCX_INVALID_NUM;
-	    }
+            /* check if strtoll accepted the number string */
+            if (err && *err) {
+                return ERR_NCX_INVALID_NUM;
+            }
 
-	    /* adjust the fraction part will trailing zeros
-	     * if the user omitted them
-	     */
-	    for (i = numdigits; i < digits; i++) {
-		fracnum *= 10;
-	    }
+            /* adjust the fraction part will trailing zeros
+             * if the user omitted them
+             */
+            for (i = numdigits; i < digits; i++) {
+                fracnum *= 10;
+            }
 
-	    if (isneg) {
-		fracnum *= -1;
-	    }
-	}
+            if (isneg) {
+                fracnum *= -1;
+            }
+        }
     }
 
     /* encode the base part shifted left 10 * fraction-digits */
     if (basenum) {
-	for (i= 0; i < digits; i++) {
-	    basenum *= 10;
-	}
+        for (i= 0; i < digits; i++) {
+            basenum *= 10;
+        }
     }
 
     /* save the number with the fraction-digits value added in */
@@ -4304,23 +4304,23 @@ status_t
 *********************************************************************/
 status_t 
     ncx_decode_num (const xmlChar *numstr,
-		    ncx_btype_t  btyp,
-		    ncx_num_t  *retnum)
+                    ncx_btype_t  btyp,
+                    ncx_num_t  *retnum)
 {
     const xmlChar *str;
 
 #ifdef DEBUG
     if (!numstr || !retnum) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     /* check if this is a hex number */
     if (*numstr == '0' && NCX_IS_HEX_CH(*(numstr+1))) {
-	return ncx_convert_num(numstr+2, 
-			       NCX_NF_HEX, 
-			       btyp, 
-			       retnum);
+        return ncx_convert_num(numstr+2, 
+                               NCX_NF_HEX, 
+                               btyp, 
+                               retnum);
     }
 
     /* check if this is a real number */
@@ -4329,22 +4329,22 @@ status_t
         str++;
     }
     if (*str) {
-	return ncx_convert_num(numstr, NCX_NF_REAL, btyp, retnum);
+        return ncx_convert_num(numstr, NCX_NF_REAL, btyp, retnum);
     }
 
     /* check octal number */
     if (*numstr == '0' && numstr[1] != '.') {
-	return ncx_convert_num(numstr, 
-			       NCX_NF_OCTAL, 
-			       btyp, 
-			       retnum);
+        return ncx_convert_num(numstr, 
+                               NCX_NF_OCTAL, 
+                               btyp, 
+                               retnum);
     }
 
     /* else assume this is a decimal number */
     return ncx_convert_num(numstr, 
-			   NCX_NF_DEC, 
-			   btyp, 
-			   retnum);
+                           NCX_NF_DEC, 
+                           btyp, 
+                           retnum);
 
 }  /* ncx_decode_num */
 
@@ -4367,23 +4367,23 @@ status_t
 *********************************************************************/
 status_t 
     ncx_decode_dec64 (const xmlChar *numstr,
-		      uint8  digits,
-		      ncx_num_t  *retnum)
+                      uint8  digits,
+                      ncx_num_t  *retnum)
 {
     const xmlChar *str;
 
 #ifdef DEBUG
     if (!numstr || !retnum) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     /* check if this is a hex number */
     if (*numstr == '0' && NCX_IS_HEX_CH(*(numstr+1))) {
-	return ncx_convert_dec64(numstr+2, 
-				 NCX_NF_HEX, 
-				 digits, 
-				 retnum);
+        return ncx_convert_dec64(numstr+2, 
+                                 NCX_NF_HEX, 
+                                 digits, 
+                                 retnum);
     }
 
     /* check if this is a real number */
@@ -4392,25 +4392,25 @@ status_t
         str++;
     }
     if (*str) {
-	return ncx_convert_dec64(numstr, 
-				 NCX_NF_REAL, 
-				 digits, 
-				 retnum);
+        return ncx_convert_dec64(numstr, 
+                                 NCX_NF_REAL, 
+                                 digits, 
+                                 retnum);
     }
 
     /* check octal number */
     if (*numstr == '0') {
-	return ncx_convert_dec64(numstr, 
-				 NCX_NF_OCTAL, 
-				 digits, 
-				 retnum);
+        return ncx_convert_dec64(numstr, 
+                                 NCX_NF_OCTAL, 
+                                 digits, 
+                                 retnum);
     }
 
     /* else assume this is a decimal number */
     return ncx_convert_dec64(numstr, 
-			     NCX_NF_DEC, 
-			     digits, 
-			     retnum);
+                             NCX_NF_DEC, 
+                             digits, 
+                             retnum);
 
 }  /* ncx_decode_dec64 */
 
@@ -4435,12 +4435,12 @@ status_t
 *********************************************************************/
 status_t
     ncx_copy_num (const ncx_num_t *num1,
-		  ncx_num_t *num2,
-		  ncx_btype_t  btyp)
+                  ncx_num_t *num2,
+                  ncx_btype_t  btyp)
 {
 #ifdef DEBUG
     if (!num1 || !num2) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -4496,16 +4496,16 @@ status_t
 *********************************************************************/
 status_t
     ncx_cast_num (const ncx_num_t *num1,
-		  ncx_btype_t  btyp1,
-		  ncx_num_t *num2,
-		  ncx_btype_t  btyp2)
+                  ncx_btype_t  btyp1,
+                  ncx_num_t *num2,
+                  ncx_btype_t  btyp2)
 {
     int64      testbase, testfrac;
     status_t   res;
 
 #ifdef DEBUG
     if (!num1 || !num2) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -4515,237 +4515,237 @@ status_t
     case NCX_BT_INT8:
     case NCX_BT_INT16:
     case NCX_BT_INT32:
-	switch (btyp2) {
-	case NCX_BT_INT8:
-	case NCX_BT_INT16:
-	case NCX_BT_INT32:
-	    num2->i = num1->i;
-	    break;
-	case NCX_BT_INT64:
-	    num2->l = (int64)num1->i;
-	    break;
-	case NCX_BT_UINT8:
-	case NCX_BT_UINT16:
-	case NCX_BT_UINT32:
-	    num2->u = (uint32)num1->i;
-	    break;
-	case NCX_BT_UINT64:
-	    num2->ul = (uint64)num1->i;
-	    break;
-	case NCX_BT_DECIMAL64:
-	    if (num2->dec.digits == 0) {
-		/* hack: set a default if none set already */
-		num2->dec.digits = NCX_DEF_FRACTION_DIGITS;
-	    }
-	    /* this may cause an overflow, but too bad !!! */
-	    num2->dec.val = 
-		(int64)(num1->i * (10 * num2->dec.digits));
-	    break;
-	case NCX_BT_FLOAT64:
+        switch (btyp2) {
+        case NCX_BT_INT8:
+        case NCX_BT_INT16:
+        case NCX_BT_INT32:
+            num2->i = num1->i;
+            break;
+        case NCX_BT_INT64:
+            num2->l = (int64)num1->i;
+            break;
+        case NCX_BT_UINT8:
+        case NCX_BT_UINT16:
+        case NCX_BT_UINT32:
+            num2->u = (uint32)num1->i;
+            break;
+        case NCX_BT_UINT64:
+            num2->ul = (uint64)num1->i;
+            break;
+        case NCX_BT_DECIMAL64:
+            if (num2->dec.digits == 0) {
+                /* hack: set a default if none set already */
+                num2->dec.digits = NCX_DEF_FRACTION_DIGITS;
+            }
+            /* this may cause an overflow, but too bad !!! */
+            num2->dec.val = 
+                (int64)(num1->i * (10 * num2->dec.digits));
+            break;
+        case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	    num2->d = (double)num1->i;
+            num2->d = (double)num1->i;
 #else
-	    num2->d = (int64)num1->i;
+            num2->d = (int64)num1->i;
 #endif
-	    break;
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
         break;
     case NCX_BT_INT64:
-	switch (btyp2) {
-	case NCX_BT_INT8:
-	case NCX_BT_INT16:
-	case NCX_BT_INT32:
-	case NCX_BT_UINT8:
-	case NCX_BT_UINT16:
-	case NCX_BT_UINT32:
-	    res = ERR_NCX_INVALID_VALUE;
-	    break;
-	case NCX_BT_INT64:
-	    num2->l = num1->l;
-	    break;
-	case NCX_BT_UINT64:
-	    num2->ul = (uint64)num1->l;
-	    break;
-	case NCX_BT_DECIMAL64:
-	    if (num2->dec.digits == 0) {
-		/* hack: set a default if none set already */
-		num2->dec.digits = NCX_DEF_FRACTION_DIGITS;
-	    }
-	    /* this may cause an overflow, but too bad !!! */
-	    num2->dec.val = 
-		(int64)(num1->l * (10 * num2->dec.digits));
-	    break;
-	case NCX_BT_FLOAT64:
+        switch (btyp2) {
+        case NCX_BT_INT8:
+        case NCX_BT_INT16:
+        case NCX_BT_INT32:
+        case NCX_BT_UINT8:
+        case NCX_BT_UINT16:
+        case NCX_BT_UINT32:
+            res = ERR_NCX_INVALID_VALUE;
+            break;
+        case NCX_BT_INT64:
+            num2->l = num1->l;
+            break;
+        case NCX_BT_UINT64:
+            num2->ul = (uint64)num1->l;
+            break;
+        case NCX_BT_DECIMAL64:
+            if (num2->dec.digits == 0) {
+                /* hack: set a default if none set already */
+                num2->dec.digits = NCX_DEF_FRACTION_DIGITS;
+            }
+            /* this may cause an overflow, but too bad !!! */
+            num2->dec.val = 
+                (int64)(num1->l * (10 * num2->dec.digits));
+            break;
+        case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	    num2->d = (double)num1->l;
+            num2->d = (double)num1->l;
 #else
-	    num2->d = (int64)num1->l;
+            num2->d = (int64)num1->l;
 #endif
-	    break;
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
         break;
     case NCX_BT_UINT8:
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
-	switch (btyp2) {
-	case NCX_BT_INT8:
-	case NCX_BT_INT16:
-	case NCX_BT_INT32:
-	    num2->i = (int32)num1->u;
-	    break;
-	case NCX_BT_INT64:
-	    num2->l = (int64)num1->u;
-	    break;
-	case NCX_BT_UINT8:
-	case NCX_BT_UINT16:
-	case NCX_BT_UINT32:
-	    num2->u = num1->u;
-	    break;
-	case NCX_BT_UINT64:
-	    num2->ul = (uint64)num1->u;
-	    break;
-	case NCX_BT_DECIMAL64:
-	    if (num2->dec.digits == 0) {
-		/* hack: set a default if none set already */
-		num2->dec.digits = NCX_DEF_FRACTION_DIGITS;
-	    }
-	    /* this may cause an overflow, but too bad !!! */
-	    num2->dec.val = 
-		(int64)(num1->u * (10 * num2->dec.digits));
-	    break;
-	case NCX_BT_FLOAT64:
+        switch (btyp2) {
+        case NCX_BT_INT8:
+        case NCX_BT_INT16:
+        case NCX_BT_INT32:
+            num2->i = (int32)num1->u;
+            break;
+        case NCX_BT_INT64:
+            num2->l = (int64)num1->u;
+            break;
+        case NCX_BT_UINT8:
+        case NCX_BT_UINT16:
+        case NCX_BT_UINT32:
+            num2->u = num1->u;
+            break;
+        case NCX_BT_UINT64:
+            num2->ul = (uint64)num1->u;
+            break;
+        case NCX_BT_DECIMAL64:
+            if (num2->dec.digits == 0) {
+                /* hack: set a default if none set already */
+                num2->dec.digits = NCX_DEF_FRACTION_DIGITS;
+            }
+            /* this may cause an overflow, but too bad !!! */
+            num2->dec.val = 
+                (int64)(num1->u * (10 * num2->dec.digits));
+            break;
+        case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	    num2->d = (double)num1->u;
+            num2->d = (double)num1->u;
 #else
-	    num2->d = (int64)num1->u;
+            num2->d = (int64)num1->u;
 #endif
-	    break;
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
         break;
     case NCX_BT_UINT64:
-	switch (btyp2) {
-	case NCX_BT_INT8:
-	case NCX_BT_INT16:
-	case NCX_BT_INT32:
-	case NCX_BT_UINT8:
-	case NCX_BT_UINT16:
-	case NCX_BT_UINT32:
-	    res = ERR_NCX_INVALID_VALUE;
-	    break;
-	case NCX_BT_INT64:
-	    num2->l = (int64)num1->ul;
-	    break;
-	case NCX_BT_UINT64:
-	    num2->ul = num1->ul;
-	    break;
-	case NCX_BT_DECIMAL64:
-	    if (num2->dec.digits == 0) {
-		/* hack: set a default if none set already */
-		num2->dec.digits = NCX_DEF_FRACTION_DIGITS;
-	    }
-	    /* this may cause an overflow, but too bad !!! */
-	    num2->dec.val = 
-		(int64)(num1->ul * (10 * num2->dec.digits));
-	    break;
-	case NCX_BT_FLOAT64:
+        switch (btyp2) {
+        case NCX_BT_INT8:
+        case NCX_BT_INT16:
+        case NCX_BT_INT32:
+        case NCX_BT_UINT8:
+        case NCX_BT_UINT16:
+        case NCX_BT_UINT32:
+            res = ERR_NCX_INVALID_VALUE;
+            break;
+        case NCX_BT_INT64:
+            num2->l = (int64)num1->ul;
+            break;
+        case NCX_BT_UINT64:
+            num2->ul = num1->ul;
+            break;
+        case NCX_BT_DECIMAL64:
+            if (num2->dec.digits == 0) {
+                /* hack: set a default if none set already */
+                num2->dec.digits = NCX_DEF_FRACTION_DIGITS;
+            }
+            /* this may cause an overflow, but too bad !!! */
+            num2->dec.val = 
+                (int64)(num1->ul * (10 * num2->dec.digits));
+            break;
+        case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	    num2->d = (double)num1->ul;
+            num2->d = (double)num1->ul;
 #else
-	    num2->d = (int64)num1->ul;
+            num2->d = (int64)num1->ul;
 #endif
-	    break;
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
         break;
     case NCX_BT_DECIMAL64:
-	if (num1->dec.digits == 0) {
-	    res = ERR_NCX_INVALID_VALUE;
-	} else {
-	    /* just use testbase for now;
-	     * not sure if this will ever be used
-	     */
-	    testbase = num1->dec.val / (10 * num1->dec.digits);
-	    testfrac = num1->dec.val % (10 * num1->dec.digits);
+        if (num1->dec.digits == 0) {
+            res = ERR_NCX_INVALID_VALUE;
+        } else {
+            /* just use testbase for now;
+             * not sure if this will ever be used
+             */
+            testbase = num1->dec.val / (10 * num1->dec.digits);
+            testfrac = num1->dec.val % (10 * num1->dec.digits);
 
-	    switch (btyp2) {
-	    case NCX_BT_INT8:
-	    case NCX_BT_INT16:
-	    case NCX_BT_INT32:
-	    case NCX_BT_UINT8:
-	    case NCX_BT_UINT16:
-	    case NCX_BT_UINT32:
-		return ERR_NCX_INVALID_VALUE;
-	    case NCX_BT_INT64:
-		/* just do a floor() function for now */
-		num2->l = testbase;
-		break;
-	    case NCX_BT_UINT64:
-		num2->ul = (uint64)testbase;
-		break;
-	    case NCX_BT_DECIMAL64:
-		num2->dec.val = num1->dec.val;
-		num2->dec.digits = num1->dec.digits;
-		break;
-	    case NCX_BT_FLOAT64:
-		num2->d = (double)testbase;
-		break;
-	    default:
-		res = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	}
-	break;
+            switch (btyp2) {
+            case NCX_BT_INT8:
+            case NCX_BT_INT16:
+            case NCX_BT_INT32:
+            case NCX_BT_UINT8:
+            case NCX_BT_UINT16:
+            case NCX_BT_UINT32:
+                return ERR_NCX_INVALID_VALUE;
+            case NCX_BT_INT64:
+                /* just do a floor() function for now */
+                num2->l = testbase;
+                break;
+            case NCX_BT_UINT64:
+                num2->ul = (uint64)testbase;
+                break;
+            case NCX_BT_DECIMAL64:
+                num2->dec.val = num1->dec.val;
+                num2->dec.digits = num1->dec.digits;
+                break;
+            case NCX_BT_FLOAT64:
+                num2->d = (double)testbase;
+                break;
+            default:
+                res = SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }
+        break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	switch (btyp2) {
-	case NCX_BT_INT8:
-	case NCX_BT_INT16:
-	case NCX_BT_INT32:
-	case NCX_BT_UINT8:
-	case NCX_BT_UINT16:
-	case NCX_BT_UINT32:
-	case NCX_BT_DECIMAL64:
-	    return ERR_NCX_INVALID_VALUE;
-	case NCX_BT_INT64:
-	    num2->l = (int64)lrint(num1->d);
-	    break;
-	case NCX_BT_UINT64:
-	    num2->ul = (uint64)lrint(num1->d);
-	    break;
-	case NCX_BT_FLOAT64:
-	    num2->d = num1->d;
-	    break;
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
+        switch (btyp2) {
+        case NCX_BT_INT8:
+        case NCX_BT_INT16:
+        case NCX_BT_INT32:
+        case NCX_BT_UINT8:
+        case NCX_BT_UINT16:
+        case NCX_BT_UINT32:
+        case NCX_BT_DECIMAL64:
+            return ERR_NCX_INVALID_VALUE;
+        case NCX_BT_INT64:
+            num2->l = (int64)lrint(num1->d);
+            break;
+        case NCX_BT_UINT64:
+            num2->ul = (uint64)lrint(num1->d);
+            break;
+        case NCX_BT_FLOAT64:
+            num2->d = num1->d;
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
 #else
-	switch (btyp2) {
-	case NCX_BT_INT8:
-	case NCX_BT_INT16:
-	case NCX_BT_INT32:
-	case NCX_BT_UINT8:
-	case NCX_BT_UINT16:
-	case NCX_BT_UINT32:
-	case NCX_BT_DECIMAL64:
-	    return ERR_NCX_INVALID_VALUE;
-	case NCX_BT_INT64:
-	    num2->l = num1->d;
-	    break;
-	case NCX_BT_UINT64:
-	    num2->ul = (uint64)num1->d;
-	    break;
-	case NCX_BT_FLOAT64:
-	    num2->d = num1->d;
-	    break;
-	default:
-	    res = SET_ERROR(ERR_INTERNAL_VAL);
-	}
+        switch (btyp2) {
+        case NCX_BT_INT8:
+        case NCX_BT_INT16:
+        case NCX_BT_INT32:
+        case NCX_BT_UINT8:
+        case NCX_BT_UINT16:
+        case NCX_BT_UINT32:
+        case NCX_BT_DECIMAL64:
+            return ERR_NCX_INVALID_VALUE;
+        case NCX_BT_INT64:
+            num2->l = num1->d;
+            break;
+        case NCX_BT_UINT64:
+            num2->ul = (uint64)num1->d;
+            break;
+        case NCX_BT_FLOAT64:
+            num2->d = num1->d;
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
 #endif
         break;
     default:
@@ -4778,14 +4778,14 @@ status_t
 *********************************************************************/
 status_t
     ncx_num_floor (const ncx_num_t *num1,
-		   ncx_num_t *num2,
-		   ncx_btype_t  btyp)
+                   ncx_num_t *num2,
+                   ncx_btype_t  btyp)
 {
     status_t   res;
 
 #ifdef DEBUG
     if (!num1 || !num2) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -4795,32 +4795,32 @@ status_t
     case NCX_BT_INT8:
     case NCX_BT_INT16:
     case NCX_BT_INT32:
-	num2->i = num1->i;
-	break;
+        num2->i = num1->i;
+        break;
     case NCX_BT_INT64:
-	num2->l = num1->l;
-	break;
+        num2->l = num1->l;
+        break;
     case NCX_BT_UINT8:
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
-	num2->u = num1->u;
-	break;
+        num2->u = num1->u;
+        break;
     case NCX_BT_UINT64:
-	num2->ul = num1->ul;
-	break;
+        num2->ul = num1->ul;
+        break;
     case NCX_BT_DECIMAL64:
-	num2->dec.digits = num1->dec.digits;
-	num2->dec.val = num1->dec.val % (10 * num1->dec.digits);
-	break;
+        num2->dec.digits = num1->dec.digits;
+        num2->dec.val = num1->dec.val % (10 * num1->dec.digits);
+        break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	num2->d = floor(num1->d);
+        num2->d = floor(num1->d);
 #else
-	num2->d = num1->d;
+        num2->d = num1->d;
 #endif
-	break;
+        break;
     default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
+        res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     return res;
@@ -4849,14 +4849,14 @@ status_t
 *********************************************************************/
 status_t
     ncx_num_ceiling (const ncx_num_t *num1,
-		     ncx_num_t *num2,
-		     ncx_btype_t  btyp)
+                     ncx_num_t *num2,
+                     ncx_btype_t  btyp)
 {
     status_t   res;
 
 #ifdef DEBUG
     if (!num1 || !num2) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -4866,33 +4866,33 @@ status_t
     case NCX_BT_INT8:
     case NCX_BT_INT16:
     case NCX_BT_INT32:
-	num2->i = num1->i;
-	break;
+        num2->i = num1->i;
+        break;
     case NCX_BT_INT64:
-	num2->l = num1->l;
-	break;
+        num2->l = num1->l;
+        break;
     case NCX_BT_UINT8:
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
-	num2->u = num1->u;
-	break;
+        num2->u = num1->u;
+        break;
     case NCX_BT_UINT64:
-	num2->ul = num1->ul;
-	break;
+        num2->ul = num1->ul;
+        break;
     case NCX_BT_DECIMAL64:
-	num2->dec.digits = num1->dec.digits;
-	/*** this is not right !!!! ***/
-	num2->dec.val = num1->dec.val % (10 * num1->dec.digits);
-	break;
+        num2->dec.digits = num1->dec.digits;
+        /*** this is not right !!!! ***/
+        num2->dec.val = num1->dec.val % (10 * num1->dec.digits);
+        break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	num2->d = ceil(num1->d);
+        num2->d = ceil(num1->d);
 #else
-	num2->d = num1->d;
+        num2->d = num1->d;
 #endif
-	break;
+        break;
     default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
+        res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     return res;
@@ -4921,14 +4921,14 @@ status_t
 *********************************************************************/
 status_t
     ncx_round_num (const ncx_num_t *num1,
-		   ncx_num_t *num2,
-		   ncx_btype_t  btyp)
+                   ncx_num_t *num2,
+                   ncx_btype_t  btyp)
 {
     status_t   res;
 
 #ifdef DEBUG
     if (!num1 || !num2) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -4938,34 +4938,34 @@ status_t
     case NCX_BT_INT8:
     case NCX_BT_INT16:
     case NCX_BT_INT32:
-	num2->i = num1->i;
-	break;
+        num2->i = num1->i;
+        break;
     case NCX_BT_INT64:
-	num2->l = num1->l;
-	break;
+        num2->l = num1->l;
+        break;
     case NCX_BT_UINT8:
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
-	num2->u = num1->u;
-	break;
+        num2->u = num1->u;
+        break;
     case NCX_BT_UINT64:
-	num2->ul = num1->ul;
-	break;
+        num2->ul = num1->ul;
+        break;
 
     case NCX_BT_DECIMAL64:
-	num2->dec.digits = num1->dec.digits;
-	/*** this is not right !!!! ***/
-	num2->dec.val = num1->dec.val % (10 * num1->dec.digits);
-	break;
+        num2->dec.digits = num1->dec.digits;
+        /*** this is not right !!!! ***/
+        num2->dec.val = num1->dec.val % (10 * num1->dec.digits);
+        break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	num2->d = round(num1->d);
+        num2->d = round(num1->d);
 #else
-	num2->d = num1->d;
+        num2->d = num1->d;
 #endif
-	break;
+        break;
     default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
+        res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     return res;
@@ -4992,7 +4992,7 @@ status_t
 *********************************************************************/
 boolean
     ncx_num_is_integral (const ncx_num_t *num,
-			 ncx_btype_t  btyp)
+                         ncx_btype_t  btyp)
 {
 #ifdef HAS_FLOAT
     double d;
@@ -5000,8 +5000,8 @@ boolean
 
 #ifdef DEBUG
     if (!num) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -5014,27 +5014,27 @@ boolean
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
     case NCX_BT_UINT64:
-	return TRUE;
+        return TRUE;
     case NCX_BT_DECIMAL64:
-	if (num->dec.digits == 0) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return FALSE;
-	}
-	if (num->dec.val / (10 * num->dec.digits)) {
-	    return TRUE;
-	} else {
-	    return FALSE;
-	}
+        if (num->dec.digits == 0) {
+            SET_ERROR(ERR_INTERNAL_VAL);
+            return FALSE;
+        }
+        if (num->dec.val / (10 * num->dec.digits)) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT        
-	d = round(num->d);
-	return (d == num->d) ? TRUE : FALSE;
+        d = round(num->d);
+        return (d == num->d) ? TRUE : FALSE;
 #else
-	return TRUE;
+        return TRUE;
 #endif
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
+        return FALSE;
     }
     /*NOTREACHED*/
 
@@ -5056,12 +5056,12 @@ boolean
 *********************************************************************/
 int64
     ncx_cvt_to_int64 (const ncx_num_t *num,
-		      ncx_btype_t  btyp)
+                      ncx_btype_t  btyp)
 {
 #ifdef DEBUG
     if (!num) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
@@ -5069,30 +5069,30 @@ int64
     case NCX_BT_INT8:
     case NCX_BT_INT16:
     case NCX_BT_INT32:
-	return (int64)num->i;
+        return (int64)num->i;
     case NCX_BT_INT64:
-	return num->l;
+        return num->l;
     case NCX_BT_UINT8:
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
-	return (int64)num->u;
+        return (int64)num->u;
     case NCX_BT_UINT64:
-	return (int64)num->ul;
+        return (int64)num->ul;
     case NCX_BT_DECIMAL64:
-	if (num->dec.digits == 0) {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return 0;
-	}
-	return (int64)(num->dec.val / (10 * num->dec.digits));
+        if (num->dec.digits == 0) {
+            SET_ERROR(ERR_INTERNAL_VAL);
+            return 0;
+        }
+        return (int64)(num->dec.val / (10 * num->dec.digits));
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT        
-	return lrint(num->d);
+        return lrint(num->d);
 #else
-	return num->d;
+        return num->d;
 #endif
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
-	return 0;
+        return 0;
     }
     /*NOTREACHED*/
 
@@ -5117,26 +5117,26 @@ ncx_numfmt_t
 {
 #ifdef DEBUG
     if (!numstr) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NCX_NF_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_NF_NONE;
     }
 #endif
 
     if (*numstr == '\0') {
-	return NCX_NF_NONE;
+        return NCX_NF_NONE;
     }
 
     /* check for a HEX string first */
     if (*numstr=='0' && (numstr[1]=='x' || numstr[1]=='X')) {
-	return NCX_NF_HEX;
+        return NCX_NF_HEX;
     }
 
     /* check real number next */
     while (*numstr && (*numstr != '.')) {
-	numstr++;
+        numstr++;
     }
     if (*numstr) {
-	return NCX_NF_REAL;
+        return NCX_NF_REAL;
     }
 
     /* leading zero means octal, otherwise decimal */
@@ -5157,7 +5157,7 @@ ncx_numfmt_t
 *********************************************************************/
 void
     ncx_printf_num (const ncx_num_t *num,
-		    ncx_btype_t  btyp)
+                    ncx_btype_t  btyp)
 {
     xmlChar   numbuff[VAL_MAX_NUMLEN];
     uint32    len;
@@ -5165,16 +5165,16 @@ void
 
 #ifdef DEBUG
     if (!num) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     res = ncx_sprintf_num(numbuff, num, btyp, &len);
     if (res != NO_ERR) {
-	log_write("invalid num '%s'", get_error_string(res));
+        log_write("invalid num '%s'", get_error_string(res));
     } else {
-	log_write("%s", numbuff);
+        log_write("%s", numbuff);
     }
 
 } /* ncx_printf_num */
@@ -5192,7 +5192,7 @@ void
 *********************************************************************/
 void
     ncx_alt_printf_num (const ncx_num_t *num,
-			ncx_btype_t  btyp)
+                        ncx_btype_t  btyp)
 {
     xmlChar   numbuff[VAL_MAX_NUMLEN];
     uint32    len;
@@ -5200,16 +5200,16 @@ void
 
 #ifdef DEBUG
     if (!num) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     res = ncx_sprintf_num(numbuff, num, btyp, &len);
     if (res != NO_ERR) {
-	log_alt_write("invalid num '%s'", get_error_string(res));
+        log_alt_write("invalid num '%s'", get_error_string(res));
     } else {
-	log_alt_write("%s", numbuff);
+        log_alt_write("%s", numbuff);
     }
 
 } /* ncx_alt_printf_num */
@@ -5234,9 +5234,9 @@ void
 *********************************************************************/
 status_t
     ncx_sprintf_num (xmlChar *buff,
-		     const ncx_num_t *num,
-		     ncx_btype_t  btyp,
-		     uint32   *len)
+                     const ncx_num_t *num,
+                     ncx_btype_t  btyp,
+                     uint32   *len)
 {
     xmlChar  *point;
     int32     ilen, pos, tzcount;
@@ -5246,12 +5246,12 @@ status_t
 
 #ifdef DEBUG
     if (!num || !len) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     if (!buff) {
-	buff = dumbuff;    
+        buff = dumbuff;    
     }
 
     ilen = 0;
@@ -5260,81 +5260,81 @@ status_t
     case NCX_BT_INT8:
     case NCX_BT_INT16:
     case NCX_BT_INT32:
-	ilen = sprintf((char *)buff, "%d", num->i);
-	break;
+        ilen = sprintf((char *)buff, "%d", num->i);
+        break;
     case NCX_BT_INT64:
-	ilen = sprintf((char *)buff, "%lld", num->l);
-	break;
+        ilen = sprintf((char *)buff, "%lld", num->l);
+        break;
     case NCX_BT_UINT8:
     case NCX_BT_UINT16:
     case NCX_BT_UINT32:
-	ilen = sprintf((char *)buff, "%u", num->u);
-	break;
+        ilen = sprintf((char *)buff, "%u", num->u);
+        break;
     case NCX_BT_UINT64:
-	ilen = sprintf((char *)buff, "%llu", num->ul);
-	break;
+        ilen = sprintf((char *)buff, "%llu", num->ul);
+        break;
     case NCX_BT_DECIMAL64:
-	if (num->dec.val == 0) {
-	    ilen = xml_strcpy(buff, (const xmlChar *)"0.0");
-	} else {
-	    if (num->dec.digits == 0) {
-		return SET_ERROR(ERR_INTERNAL_VAL);
-	    } else {
-		/* get the encoded number in the temp buffer */
-		pos = sprintf((char *)decbuff, 
-			      "%lld", 
-			      num->dec.val);
+        if (num->dec.val == 0) {
+            ilen = xml_strcpy(buff, (const xmlChar *)"0.0");
+        } else {
+            if (num->dec.digits == 0) {
+                return SET_ERROR(ERR_INTERNAL_VAL);
+            } else {
+                /* get the encoded number in the temp buffer */
+                pos = sprintf((char *)decbuff, 
+                              "%lld", 
+                              num->dec.val);
 
-		if (pos <= num->dec.digits) {
-		    return SET_ERROR(ERR_INTERNAL_VAL);
-		} else {
-		    /* find where the decimal point should go */
-		    point = &decbuff[pos - num->dec.digits];
+                if (pos <= num->dec.digits) {
+                    return SET_ERROR(ERR_INTERNAL_VAL);
+                } else {
+                    /* find where the decimal point should go */
+                    point = &decbuff[pos - num->dec.digits];
 
-		    /* copy the base part to the real buffer */
-		    ulen = xml_strncpy(buff, 
-				       decbuff, 
-				       (uint32)(point - decbuff));
+                    /* copy the base part to the real buffer */
+                    ulen = xml_strncpy(buff, 
+                                       decbuff, 
+                                       (uint32)(point - decbuff));
 
-		    buff[ulen] = '.';
+                    buff[ulen] = '.';
 
-		    xml_strcpy(&buff[ulen+1], point);
+                    xml_strcpy(&buff[ulen+1], point);
 
-		    /* current length is pos+1
-		     * need to check for trailing zeros
-		     * and remove them
-		     * (!!! need flag to override!!!)
-		     * !!! TBD: WAITING FOR WG TO DECIDE
-		     * !! RETURN WITH TRAILING ZEROS FOR NOW
-		     */
-		    ilen = pos + 1;
-		}
-	    }
-	}
-	break;
+                    /* current length is pos+1
+                     * need to check for trailing zeros
+                     * and remove them
+                     * (!!! need flag to override!!!)
+                     * !!! TBD: WAITING FOR WG TO DECIDE
+                     * !! RETURN WITH TRAILING ZEROS FOR NOW
+                     */
+                    ilen = pos + 1;
+                }
+            }
+        }
+        break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	ilen = sprintf((char *)buff, "%.14f", num->d);
-	tzcount = remove_trailing_zero_count(buff);
-	if (tzcount) {
-	    ilen -= tzcount;
-	    if (buff != dumbuff) {
-		buff[ilen] =  0;
-	    }
-	}
+        ilen = sprintf((char *)buff, "%.14f", num->d);
+        tzcount = remove_trailing_zero_count(buff);
+        if (tzcount) {
+            ilen -= tzcount;
+            if (buff != dumbuff) {
+                buff[ilen] =  0;
+            }
+        }
 #else
-	ilen = sprintf((char *)buff, "%lld", num->d);
+        ilen = sprintf((char *)buff, "%lld", num->d);
 #endif
-	break;
+        break;
     default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     /* check the sprintf return value */
     if (ilen < 0) {
-	return ERR_NCX_INVALID_NUM;
+        return ERR_NCX_INVALID_NUM;
     } else {
-	*len = (uint32)ilen;
+        *len = (uint32)ilen;
     }
     return NO_ERR;
 
@@ -5356,12 +5356,12 @@ status_t
 *********************************************************************/
 boolean
     ncx_is_min (const ncx_num_t *num,
-		ncx_btype_t  btyp)
+                ncx_btype_t  btyp)
 {
 #ifdef DEBUG
     if (!num) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -5385,9 +5385,9 @@ boolean
         return (num->dec.val == NCX_MIN_LONG) ? TRUE : FALSE;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	return (num->d == -INFINITY) ? TRUE : FALSE;
+        return (num->d == -INFINITY) ? TRUE : FALSE;
 #else
-	return (num->d == NCX_MIN_LONG) ? TRUE : FALSE;
+        return (num->d == NCX_MIN_LONG) ? TRUE : FALSE;
 #endif
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
@@ -5413,12 +5413,12 @@ boolean
 *********************************************************************/
 boolean
     ncx_is_max (const ncx_num_t *num,
-		ncx_btype_t  btyp)
+                ncx_btype_t  btyp)
 {
 #ifdef DEBUG
     if (!num) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -5443,9 +5443,9 @@ boolean
         return (num->dec.val == NCX_MAX_LONG) ? TRUE : FALSE;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-	return (num->d == INFINITY) ? TRUE : FALSE;
+        return (num->d == INFINITY) ? TRUE : FALSE;
 #else
-	return (num->d == NCX_MAX_LONG-1) ? TRUE : FALSE;
+        return (num->d == NCX_MAX_LONG-1) ? TRUE : FALSE;
 #endif
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
@@ -5474,42 +5474,42 @@ boolean
 *********************************************************************/
 status_t
     ncx_convert_tkcnum (tk_chain_t *tkc,
-			ncx_btype_t btyp,
-			ncx_num_t *val)
+                        ncx_btype_t btyp,
+                        ncx_num_t *val)
 {
     const xmlChar *numstr;
 
     if (btyp == NCX_BT_DECIMAL64) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     switch (TK_CUR_TYP(tkc)) {
     case TK_TT_DNUM:
-	numstr = TK_CUR_VAL(tkc);
-	if (numstr && *numstr=='0') {
-	    return ncx_convert_num(TK_CUR_VAL(tkc), 
-				   NCX_NF_OCTAL, 
-				   btyp, 
-				   val);
-	} else {
-	    return ncx_convert_num(TK_CUR_VAL(tkc), 
-				   NCX_NF_DEC, 
-				   btyp, 
-				   val);
-	}
+        numstr = TK_CUR_VAL(tkc);
+        if (numstr && *numstr=='0') {
+            return ncx_convert_num(TK_CUR_VAL(tkc), 
+                                   NCX_NF_OCTAL, 
+                                   btyp, 
+                                   val);
+        } else {
+            return ncx_convert_num(TK_CUR_VAL(tkc), 
+                                   NCX_NF_DEC, 
+                                   btyp, 
+                                   val);
+        }
     case TK_TT_HNUM:
-	return ncx_convert_num(TK_CUR_VAL(tkc), 
-			       NCX_NF_HEX, 
-			       btyp, 
-			       val);
+        return ncx_convert_num(TK_CUR_VAL(tkc), 
+                               NCX_NF_HEX, 
+                               btyp, 
+                               val);
     case TK_TT_RNUM:
-	return ncx_convert_num(TK_CUR_VAL(tkc), 
-			       NCX_NF_REAL, 
-			       btyp, 
-			       val);
+        return ncx_convert_num(TK_CUR_VAL(tkc), 
+                               NCX_NF_REAL, 
+                               btyp, 
+                               val);
     default:
-	/* if this is a string, then this might work */
-	return ncx_decode_num(TK_CUR_VAL(tkc), btyp, val);
+        /* if this is a string, then this might work */
+        return ncx_decode_num(TK_CUR_VAL(tkc), btyp, val);
     }
 }  /* ncx_convert_tkcnum */
 
@@ -5533,8 +5533,8 @@ status_t
 *********************************************************************/
 status_t
     ncx_convert_tkc_dec64 (tk_chain_t *tkc,
-			   uint8 digits,
-			   ncx_num_t *val)
+                           uint8 digits,
+                           ncx_num_t *val)
 {
     const xmlChar *numstr;
 
@@ -5546,33 +5546,33 @@ status_t
 
     switch (TK_CUR_TYP(tkc)) {
     case TK_TT_DNUM:
-	numstr = TK_CUR_VAL(tkc);
-	if (numstr && *numstr=='0' && numstr[1] != '.') {
-	    return ncx_convert_dec64(TK_CUR_VAL(tkc), 
-				     NCX_NF_OCTAL, 
-				     digits, 
-				     val);
-	} else {
-	    return ncx_convert_dec64(TK_CUR_VAL(tkc), 
-				     NCX_NF_DEC, 
-				     digits, 
-				     val);
-	}
+        numstr = TK_CUR_VAL(tkc);
+        if (numstr && *numstr=='0' && numstr[1] != '.') {
+            return ncx_convert_dec64(TK_CUR_VAL(tkc), 
+                                     NCX_NF_OCTAL, 
+                                     digits, 
+                                     val);
+        } else {
+            return ncx_convert_dec64(TK_CUR_VAL(tkc), 
+                                     NCX_NF_DEC, 
+                                     digits, 
+                                     val);
+        }
     case TK_TT_HNUM:
-	return ncx_convert_dec64(TK_CUR_VAL(tkc), 
-				 NCX_NF_HEX, 
-				 digits, 
-				 val);
+        return ncx_convert_dec64(TK_CUR_VAL(tkc), 
+                                 NCX_NF_HEX, 
+                                 digits, 
+                                 val);
     case TK_TT_RNUM:
-	return ncx_convert_dec64(TK_CUR_VAL(tkc), 
-				 NCX_NF_REAL, 
-				 digits, 
-				 val);
+        return ncx_convert_dec64(TK_CUR_VAL(tkc), 
+                                 NCX_NF_REAL, 
+                                 digits, 
+                                 val);
     default:
-	/* if this is a string, then this might work */
-	return ncx_decode_dec64(TK_CUR_VAL(tkc), 
-				digits, 
-				val);
+        /* if this is a string, then this might work */
+        return ncx_decode_dec64(TK_CUR_VAL(tkc), 
+                                digits, 
+                                val);
     }
 }  /* ncx_convert_tkc_dec64 */
 
@@ -5594,18 +5594,18 @@ status_t
 *********************************************************************/
 int32
     ncx_compare_strs (const ncx_str_t *str1,
-		      const ncx_str_t *str2,
-		      ncx_btype_t  btyp)
+                      const ncx_str_t *str2,
+                      ncx_btype_t  btyp)
 {
 #ifdef DEBUG
     if (!str1 || !str2) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
     if (!typ_is_string(btyp)) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return 0;
-    }	
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return 0;
+    }   
 #endif
 
     return xml_strcmp(*str1, *str2);
@@ -5633,25 +5633,25 @@ int32
 *********************************************************************/
 status_t
     ncx_copy_str (const ncx_str_t *str1,
-		  ncx_str_t *str2,
-		  ncx_btype_t  btyp)
+                  ncx_str_t *str2,
+                  ncx_btype_t  btyp)
 {
 #ifdef DEBUG
     if (!str1 || !str2) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!(typ_is_string(btyp) || btyp==NCX_BT_BITS)) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
-    }	
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }   
 #endif
 
     if (*str1) {
-	*str2 = xml_strdup(*str1);
-	if (!*str2) {
-	    return ERR_INTERNAL_MEM;
-	}
+        *str2 = xml_strdup(*str1);
+        if (!*str2) {
+            return ERR_INTERNAL_MEM;
+        }
     } else {
-	*str2 = NULL;
+        *str2 = NULL;
     }
     return NO_ERR;
 
@@ -5675,14 +5675,14 @@ void
 #ifdef DEBUG
     if (!str) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return;  
+        return;  
     }
 #endif
 
     /* clean the num->union, depending on base type */
     if (*str) {
-	m__free(*str);
-	*str = NULL;
+        m__free(*str);
+        *str = NULL;
     }
 
 }  /* ncx_clean_str */
@@ -5706,7 +5706,7 @@ ncx_list_t *
 
     list = m__getObj(ncx_list_t);
     if (list) {
-	ncx_init_list(list, btyp);
+        ncx_init_list(list, btyp);
     }
     return list;
 
@@ -5724,12 +5724,12 @@ ncx_list_t *
 *********************************************************************/
 void
     ncx_init_list (ncx_list_t *list,
-		   ncx_btype_t btyp)
+                   ncx_btype_t btyp)
 {
 #ifdef DEBUG
     if (!list) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -5754,16 +5754,16 @@ void
 
 #ifdef DEBUG
     if (!list) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     /* clean the string Q */
     while (!dlq_empty(&list->memQ)) {
-	lmem = (ncx_lmem_t *)dlq_deque(&list->memQ);
-	ncx_clean_lmem(lmem, list->btyp);
-	m__free(lmem);
+        lmem = (ncx_lmem_t *)dlq_deque(&list->memQ);
+        ncx_clean_lmem(lmem, list->btyp);
+        m__free(lmem);
     }
 
     list->btyp = NCX_BT_NONE;
@@ -5785,8 +5785,8 @@ void
 {
 #ifdef DEBUG
     if (!list) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -5814,16 +5814,16 @@ uint32
 
 #ifdef DEBUG
     if (!list) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
     cnt = 0;
     for (lmem = (const ncx_lmem_t *)dlq_firstEntry(&list->memQ);
-	 lmem != NULL;
-	 lmem = (const ncx_lmem_t *)dlq_nextEntry(lmem)) {
-	cnt++;
+         lmem != NULL;
+         lmem = (const ncx_lmem_t *)dlq_nextEntry(lmem)) {
+        cnt++;
     }
     return cnt;
 
@@ -5846,8 +5846,8 @@ boolean
 {
 #ifdef DEBUG
     if (!list) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return TRUE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return TRUE;
     }
 #endif
     
@@ -5871,14 +5871,14 @@ boolean
 *********************************************************************/
 boolean
     ncx_string_in_list (const xmlChar *str,
-			const ncx_list_t *list)
+                        const ncx_list_t *list)
 {
     const ncx_lmem_t *lmem;
 
 #ifdef DEBUG
     if (!str || !list) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -5887,33 +5887,33 @@ boolean
     case NCX_BT_STRING:
     case NCX_BT_ENUM:
     case NCX_BT_BITS:
-	break;
+        break;
     default:
-	SET_ERROR(ERR_NCX_WRONG_TYPE);
-	return FALSE;
+        SET_ERROR(ERR_NCX_WRONG_TYPE);
+        return FALSE;
     }
 
     /* search the list for a match */
     for (lmem = (const ncx_lmem_t *)dlq_firstEntry(&list->memQ);
-	 lmem != NULL;
-	 lmem = (const ncx_lmem_t *)dlq_nextEntry(lmem)) {
+         lmem != NULL;
+         lmem = (const ncx_lmem_t *)dlq_nextEntry(lmem)) {
 
         switch (list->btyp) {
         case NCX_BT_ENUM:
-	    if (!xml_strcmp(str, lmem->val.enu.name)) {
-		return TRUE;
-	    }
+            if (!xml_strcmp(str, lmem->val.enu.name)) {
+                return TRUE;
+            }
             break;
         case NCX_BT_BITS:
-	    if (!xml_strcmp(str, lmem->val.bit.name)) {
-		return TRUE;
-	    }
+            if (!xml_strcmp(str, lmem->val.bit.name)) {
+                return TRUE;
+            }
             break;
         default:
-	    if (!xml_strcmp(str, lmem->val.str)) {
-		return TRUE;
-	    }
-	}
+            if (!xml_strcmp(str, lmem->val.str)) {
+                return TRUE;
+            }
+        }
     }
 
     return FALSE;
@@ -5938,42 +5938,42 @@ boolean
 *********************************************************************/
 int32
     ncx_compare_lists (const ncx_list_t *list1,
-		       const ncx_list_t *list2)
+                       const ncx_list_t *list2)
 {
     const ncx_lmem_t  *s1, *s2;
     int                retval;
 
 #ifdef DEBUG
     if (!list1 || !list2) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return -1;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return -1;
     }
     if (list1->btyp != list2->btyp) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return -1;
-    }	
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return -1;
+    }   
 #endif
 
     /* get start strings */
     s1 = (const ncx_lmem_t *)dlq_firstEntry(&list1->memQ);
     s2 = (const ncx_lmem_t *)dlq_firstEntry(&list2->memQ);
-	
+        
     /* have 2 start structs to compare */
     for (;;) {
-	if (!s1 && !s2) {
-	    return 0;
-	} else if (!s1) {
-	    return -1;
-	} else if (!s2) {
-	    return 1;
-	}
+        if (!s1 && !s2) {
+            return 0;
+        } else if (!s1) {
+            return -1;
+        } else if (!s2) {
+            return 1;
+        }
 
         if (typ_is_string(list1->btyp)) {
-	    retval = ncx_compare_strs(&s1->val.str, 
+            retval = ncx_compare_strs(&s1->val.str, 
                                       &s2->val.str, 
                                       NCX_BT_STRING);
         } else if (typ_is_number(list1->btyp)) {
-	    retval = ncx_compare_nums(&s1->val.num, 
+            retval = ncx_compare_nums(&s1->val.num, 
                                       &s2->val.num,
                                       list1->btyp);
         } else {
@@ -6004,8 +6004,8 @@ int32
             return 0;
         }
 
-	s1 = (const ncx_lmem_t *)dlq_nextEntry(s1);
-	s2 = (const ncx_lmem_t *)dlq_nextEntry(s2);
+        s1 = (const ncx_lmem_t *)dlq_nextEntry(s1);
+        s2 = (const ncx_lmem_t *)dlq_nextEntry(s2);
     }
     /*NOTREACHED*/
 
@@ -6030,7 +6030,7 @@ int32
 *********************************************************************/
 status_t
     ncx_copy_list (const ncx_list_t *list1,
-		   ncx_list_t *list2)
+                   ncx_list_t *list2)
 {
     const ncx_lmem_t *lmem;
     ncx_lmem_t       *lcopy;
@@ -6038,7 +6038,7 @@ status_t
 
 #ifdef DEBUG
     if (!list1 || !list2) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -6048,55 +6048,55 @@ status_t
 
     /* go through all the list members and copy each one */
     for (lmem = (const ncx_lmem_t *)dlq_firstEntry(&list1->memQ);
-	 lmem != NULL;
-	 lmem = (const ncx_lmem_t *)dlq_nextEntry(lmem)) {
-	lcopy = ncx_new_lmem();
-	if (!lcopy) {
-	    return ERR_INTERNAL_MEM;
-	}
+         lmem != NULL;
+         lmem = (const ncx_lmem_t *)dlq_nextEntry(lmem)) {
+        lcopy = ncx_new_lmem();
+        if (!lcopy) {
+            return ERR_INTERNAL_MEM;
+        }
 
-	/* copy the string or number from lmem to lcopy */
-	switch (list1->btyp) {
-	case NCX_BT_STRING:
-	    res = ncx_copy_str(&lmem->val.str, &lcopy->val.str, list1->btyp);
-	    break;
-	case NCX_BT_BITS:
-	    lcopy->val.bit.pos = lmem->val.bit.pos;
-	    lcopy->val.bit.dname = xml_strdup(lmem->val.bit.name);
-	    if (!lcopy->val.bit.dname) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		lcopy->val.bit.name = lcopy->val.bit.dname;
-	    }
-	    break;
-	case NCX_BT_ENUM:
-	    lcopy->val.enu.val = lmem->val.enu.val;
-	    lcopy->val.enu.dname = xml_strdup(lmem->val.enu.name);
-	    if (!lcopy->val.enu.dname) {
-		res = ERR_INTERNAL_MEM;
-	    } else {
-		lcopy->val.enu.name = lcopy->val.enu.dname;
-	    }
-	    break;
-	case NCX_BT_BOOLEAN:
-	    lcopy->val.boo = lmem->val.boo;
-	    break;
-	default:
-	    if (typ_is_number(list1->btyp)) {
-		res = ncx_copy_num(&lmem->val.num, 
-				   &lcopy->val.num, list1->btyp);
-	    } else {
-		res = SET_ERROR(ERR_INTERNAL_VAL);
-	    }
-	}
+        /* copy the string or number from lmem to lcopy */
+        switch (list1->btyp) {
+        case NCX_BT_STRING:
+            res = ncx_copy_str(&lmem->val.str, &lcopy->val.str, list1->btyp);
+            break;
+        case NCX_BT_BITS:
+            lcopy->val.bit.pos = lmem->val.bit.pos;
+            lcopy->val.bit.dname = xml_strdup(lmem->val.bit.name);
+            if (!lcopy->val.bit.dname) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+                lcopy->val.bit.name = lcopy->val.bit.dname;
+            }
+            break;
+        case NCX_BT_ENUM:
+            lcopy->val.enu.val = lmem->val.enu.val;
+            lcopy->val.enu.dname = xml_strdup(lmem->val.enu.name);
+            if (!lcopy->val.enu.dname) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+                lcopy->val.enu.name = lcopy->val.enu.dname;
+            }
+            break;
+        case NCX_BT_BOOLEAN:
+            lcopy->val.boo = lmem->val.boo;
+            break;
+        default:
+            if (typ_is_number(list1->btyp)) {
+                res = ncx_copy_num(&lmem->val.num, 
+                                   &lcopy->val.num, list1->btyp);
+            } else {
+                res = SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }
 
-	if (res != NO_ERR) {
-	    ncx_free_lmem(lcopy, list1->btyp);
-	    return res;
-	}
+        if (res != NO_ERR) {
+            ncx_free_lmem(lcopy, list1->btyp);
+            return res;
+        }
 
-	/* save lcopy in list2 */
-	dlq_enque(lcopy, &list2->memQ);
+        /* save lcopy in list2 */
+        dlq_enque(lcopy, &list2->memQ);
     }
     return NO_ERR;
 
@@ -6134,59 +6134,59 @@ status_t
 *********************************************************************/
 void
     ncx_merge_list (ncx_list_t *src,
-		    ncx_list_t *dest,
-		    ncx_merge_t mergetyp,
-		    boolean allow_dups)
+                    ncx_list_t *dest,
+                    ncx_merge_t mergetyp,
+                    boolean allow_dups)
 {
     ncx_lmem_t      *lmem, *dest_lmem;
 
 #ifdef DEBUG
     if (!src || !dest) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
     if (src->btyp != dest->btyp) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
 #endif
 
     /* get rid of dups in the src list if duplicates not allowed */
     if (!allow_dups) {
-	for (dest_lmem = (ncx_lmem_t *)dlq_firstEntry(&dest->memQ);
-	     dest_lmem != NULL;
-	     dest_lmem = (ncx_lmem_t *)dlq_nextEntry(dest_lmem)) {
+        for (dest_lmem = (ncx_lmem_t *)dlq_firstEntry(&dest->memQ);
+             dest_lmem != NULL;
+             dest_lmem = (ncx_lmem_t *)dlq_nextEntry(dest_lmem)) {
 
-	    lmem = ncx_find_lmem(src, dest_lmem);
-	    if (lmem) {
-		dlq_remove(lmem);
-		ncx_free_lmem(lmem, dest->btyp);
-	    }
-	}
+            lmem = ncx_find_lmem(src, dest_lmem);
+            if (lmem) {
+                dlq_remove(lmem);
+                ncx_free_lmem(lmem, dest->btyp);
+            }
+        }
     }
 
     /* transfer the source members to the dest list */
     while (!dlq_empty(&src->memQ)) {
 
-	/* pick an entry to merge, reverse of the merge type
-	 * to preserve the source order in the dest list
-	 */
-	switch (mergetyp) {
-	case NCX_MERGE_FIRST:
-	    lmem = (ncx_lmem_t *)dlq_lastEntry(&src->memQ);
-	    break;
-	case NCX_MERGE_LAST:
-	case NCX_MERGE_SORT:
-	    lmem = (ncx_lmem_t *)dlq_firstEntry(&src->memQ);
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return;
-	}
-	dlq_remove(lmem);
+        /* pick an entry to merge, reverse of the merge type
+         * to preserve the source order in the dest list
+         */
+        switch (mergetyp) {
+        case NCX_MERGE_FIRST:
+            lmem = (ncx_lmem_t *)dlq_lastEntry(&src->memQ);
+            break;
+        case NCX_MERGE_LAST:
+        case NCX_MERGE_SORT:
+            lmem = (ncx_lmem_t *)dlq_firstEntry(&src->memQ);
+            break;
+        default:
+            SET_ERROR(ERR_INTERNAL_VAL);
+            return;
+        }
+        dlq_remove(lmem);
 
-	/* merge lmem into the dest list */
-	ncx_insert_lmem(dest, lmem, mergetyp);
+        /* merge lmem into the dest list */
+        ncx_insert_lmem(dest, lmem, mergetyp);
     }
 
 }  /* ncx_merge_list */
@@ -6208,11 +6208,11 @@ void
 *********************************************************************/
 status_t
     ncx_set_strlist (const xmlChar *liststr,
-		  ncx_list_t *list)
+                  ncx_list_t *list)
 {
 #ifdef DEBUG
     if (!liststr || !list) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -6247,8 +6247,8 @@ status_t
 *********************************************************************/
 status_t 
     ncx_set_list (ncx_btype_t btyp,
-		  const xmlChar *strval,
-		  ncx_list_t  *list)
+                  const xmlChar *strval,
+                  ncx_list_t  *list)
 {
     const xmlChar     *str1, *str2;
     ncx_lmem_t        *lmem;
@@ -6266,7 +6266,7 @@ status_t
     list->btyp = btyp;
 
     if (!*strval) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     str1 = strval;
@@ -6274,70 +6274,70 @@ status_t
     done = FALSE;
 
     while (!done) {
-	/* skip any leading whitespace */
-	while (xml_isspace(*str1)) {
-	    str1++;
-	}
-	if (!*str1) {
-	    done = TRUE;
-	    continue;
-	}
+        /* skip any leading whitespace */
+        while (xml_isspace(*str1)) {
+            str1++;
+        }
+        if (!*str1) {
+            done = TRUE;
+            continue;
+        }
 
-	/* set up a new list string struct */
-	lmem = ncx_new_lmem();
-	if (!lmem) {
-	    return ERR_INTERNAL_MEM;
-	}
+        /* set up a new list string struct */
+        lmem = ncx_new_lmem();
+        if (!lmem) {
+            return ERR_INTERNAL_MEM;
+        }
 
-	/* parse the string either as whitespace-allowed
-	 * or whitespace-not-allowed string
-	 */
-	if (*str1==NCX_STR_START) {
-	    /* The XML string starts with a double quote
-	     * so interpret the string as whitespace-allowed
-	     * do not save the double quote char 
-	     */
-	    str2 = ++str1;
-	    while (*str2 && (*str2 != NCX_STR_END)) {
-		str2++;
-	    }
-	    len = (uint32)(str2-str1);
-	    if (*str2) {
-		str2++;
-	    } else {
-		log_info("\nncx_set_list: missing EOS marker\n  (%s)",
-			  str1);
-	    }
-	} else {
-	    /* consume string until a WS, str-start, or EOS seen */
-	    str2 = str1+1;
-	    while (*str2 && !xml_isspace(*str2) && 
-		   (*str2 != NCX_STR_START)) {
-		str2++;
-	    }
-	    len = (uint32)(str2-str1);
-	}
+        /* parse the string either as whitespace-allowed
+         * or whitespace-not-allowed string
+         */
+        if (*str1==NCX_STR_START) {
+            /* The XML string starts with a double quote
+             * so interpret the string as whitespace-allowed
+             * do not save the double quote char 
+             */
+            str2 = ++str1;
+            while (*str2 && (*str2 != NCX_STR_END)) {
+                str2++;
+            }
+            len = (uint32)(str2-str1);
+            if (*str2) {
+                str2++;
+            } else {
+                log_info("\nncx_set_list: missing EOS marker\n  (%s)",
+                          str1);
+            }
+        } else {
+            /* consume string until a WS, str-start, or EOS seen */
+            str2 = str1+1;
+            while (*str2 && !xml_isspace(*str2) && 
+                   (*str2 != NCX_STR_START)) {
+                str2++;
+            }
+            len = (uint32)(str2-str1);
+        }
 
-	/* copy the string just parsed 
-	 * for now just separate into strings and do not
-	 * validate or parse into enums or numbers
-	 */
-	res = NO_ERR;
-	lmem->val.str = xml_strndup(str1, len);
-	if (!lmem->val.str) {
-	    res = ERR_INTERNAL_MEM;
-	}
+        /* copy the string just parsed 
+         * for now just separate into strings and do not
+         * validate or parse into enums or numbers
+         */
+        res = NO_ERR;
+        lmem->val.str = xml_strndup(str1, len);
+        if (!lmem->val.str) {
+            res = ERR_INTERNAL_MEM;
+        }
 
-	if (res != NO_ERR) {
-	    ncx_free_lmem(lmem, NCX_BT_STRING);
-	    return res;
-	}
+        if (res != NO_ERR) {
+            ncx_free_lmem(lmem, NCX_BT_STRING);
+            return res;
+        }
 
-	/* save the list member in the Q */
-	dlq_enque(lmem, &list->memQ);
+        /* save the list member in the Q */
+        dlq_enque(lmem, &list->memQ);
 
-	/* reset the string pointer and loop */
-	str1 = str2;
+        /* reset the string pointer and loop */
+        str1 = str2;
     }
 
     return NO_ERR;
@@ -6366,7 +6366,7 @@ status_t
 *********************************************************************/
 status_t
     ncx_finish_list (typ_def_t *typdef,
-		     ncx_list_t *list)
+                     ncx_list_t *list)
 {
     ncx_lmem_t      *lmem;
     xmlChar         *str;
@@ -6388,58 +6388,58 @@ status_t
     switch (btyp) {
     case NCX_BT_STRING:
     case NCX_BT_BOOLEAN:
-	return NO_ERR;
+        return NO_ERR;
     default:
-	;
+        ;
     }
 
     /* go through all the list members and check them */
     for (lmem = (ncx_lmem_t *)dlq_firstEntry(&list->memQ);
-	 lmem != NULL;
-	 lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
+         lmem != NULL;
+         lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
 
-	str = lmem->val.str;
-	if (btyp == NCX_BT_ENUM) {
-	    res = val_enum_ok(typdef, 
+        str = lmem->val.str;
+        if (btyp == NCX_BT_ENUM) {
+            res = val_enum_ok(typdef, 
                               str,
-			      &lmem->val.enu.val,
-			      &lmem->val.enu.name);
-	} else if (btyp == NCX_BT_BITS) {
-	    /* transfer the malloced string from 
-	     * val.str to val.bit.dname
-	     */
-	    lmem->val.bit.dname = str;
-	    lmem->val.bit.name = lmem->val.bit.dname;
-	    res = val_bit_ok(typdef, str, 
-			     &lmem->val.bit.pos);
-	} else if (typ_is_number(btyp)){
-	    res = ncx_decode_num(str, btyp, &lmem->val.num);
-	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	}
+                              &lmem->val.enu.val,
+                              &lmem->val.enu.name);
+        } else if (btyp == NCX_BT_BITS) {
+            /* transfer the malloced string from 
+             * val.str to val.bit.dname
+             */
+            lmem->val.bit.dname = str;
+            lmem->val.bit.name = lmem->val.bit.dname;
+            res = val_bit_ok(typdef, str, 
+                             &lmem->val.bit.pos);
+        } else if (typ_is_number(btyp)){
+            res = ncx_decode_num(str, btyp, &lmem->val.num);
+        } else {
+            SET_ERROR(ERR_INTERNAL_VAL);
+        }
 
-	if (btyp != NCX_BT_BITS) {
-	    m__free(str);
-	}
+        if (btyp != NCX_BT_BITS) {
+            m__free(str);
+        }
 
-	if (res != NO_ERR) {
-	    /* the string did not match this pattern */
-	    CHK_EXIT(res, retres);
-	    lmem->flags |= NCX_FL_VALUE_ERR;
-	} 
+        if (res != NO_ERR) {
+            /* the string did not match this pattern */
+            CHK_EXIT(res, retres);
+            lmem->flags |= NCX_FL_VALUE_ERR;
+        } 
     }
 
     if (retres == NO_ERR && btyp == NCX_BT_BITS) {
-	/* put bits in their canonical order */
-	dlq_createSQue(&tempQ);
-	dlq_block_enque(&list->memQ, &tempQ);
+        /* put bits in their canonical order */
+        dlq_createSQue(&tempQ);
+        dlq_block_enque(&list->memQ, &tempQ);
 
-	while (!dlq_empty(&tempQ)) {
-	    lmem = (ncx_lmem_t *)dlq_deque(&tempQ);
-	    ncx_insert_lmem(list, lmem, NCX_MERGE_SORT);
-	}
+        while (!dlq_empty(&tempQ)) {
+            lmem = (ncx_lmem_t *)dlq_deque(&tempQ);
+            ncx_insert_lmem(list, lmem, NCX_MERGE_SORT);
+        }
     }
-	
+        
     return retres;
 
 } /* ncx_finish_list */
@@ -6463,7 +6463,7 @@ ncx_lmem_t *
 
     lmem = m__getObj(ncx_lmem_t);
     if (!lmem) {
-	return NULL;
+        return NULL;
     }
     memset(lmem, 0x0, sizeof(ncx_lmem_t));
     return lmem;
@@ -6482,33 +6482,33 @@ ncx_lmem_t *
 *********************************************************************/
 void
     ncx_clean_lmem (ncx_lmem_t *lmem,
-		    ncx_btype_t btyp)
+                    ncx_btype_t btyp)
 {
 
 #ifdef DEBUG
     if (!lmem) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (typ_is_string(btyp)) {
-	ncx_clean_str(&lmem->val.str);
+        ncx_clean_str(&lmem->val.str);
     } else if (typ_is_number(btyp)) {
-	ncx_clean_num(btyp, &lmem->val.num);
+        ncx_clean_num(btyp, &lmem->val.num);
     } else {
-	switch (btyp) {
-	case NCX_BT_ENUM:
-	    ncx_clean_enum(&lmem->val.enu);
-	    break;
-	case NCX_BT_BITS:
-	    ncx_clean_bit(&lmem->val.bit);
-	    break;
-	case NCX_BT_BOOLEAN:
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	}
+        switch (btyp) {
+        case NCX_BT_ENUM:
+            ncx_clean_enum(&lmem->val.enu);
+            break;
+        case NCX_BT_BITS:
+            ncx_clean_bit(&lmem->val.bit);
+            break;
+        case NCX_BT_BOOLEAN:
+            break;
+        default:
+            SET_ERROR(ERR_INTERNAL_VAL);
+        }
     }
 
 } /* ncx_clean_lmem */
@@ -6526,12 +6526,12 @@ void
 *********************************************************************/
 void
     ncx_free_lmem (ncx_lmem_t *lmem,
-		   ncx_btype_t btyp)
+                   ncx_btype_t btyp)
 {
 #ifdef DEBUG
     if (!lmem) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
     ncx_clean_lmem(lmem, btyp);
@@ -6554,7 +6554,7 @@ void
 *********************************************************************/
 ncx_lmem_t *
     ncx_find_lmem (ncx_list_t *list,
-		   const ncx_lmem_t *memval)
+                   const ncx_lmem_t *memval)
 {
     ncx_lmem_t        *lmem;
     const ncx_num_t   *num;
@@ -6566,8 +6566,8 @@ ncx_lmem_t *
 
 #ifdef DEBUG
     if (!list || !memval) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -6578,38 +6578,38 @@ ncx_lmem_t *
     boo = FALSE;
 
     if (typ_is_number(list->btyp)) {
-	num = &memval->val.num;
+        num = &memval->val.num;
     } else if (typ_is_string(list->btyp)) {
-	str = &memval->val.str;
+        str = &memval->val.str;
     } else if (list->btyp == NCX_BT_ENUM) {
-	enu = &memval->val.enu;
+        enu = &memval->val.enu;
     } else if (list->btyp == NCX_BT_BITS) {
         bit = &memval->val.bit;
     } else if (list->btyp == NCX_BT_BOOLEAN) {
-	boo = memval->val.boo;
+        boo = memval->val.boo;
     } else {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 
     for (lmem = (ncx_lmem_t *)dlq_firstEntry(&list->memQ);
-	 lmem != NULL;
-	 lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
-	if (num) {
-	    cmpval = ncx_compare_nums(&lmem->val.num, num, list->btyp);
-	} else if (str) {
-	    cmpval = ncx_compare_strs(&lmem->val.str, str, list->btyp);
-	} else if (enu) {
-	    cmpval = ncx_compare_enums(&lmem->val.enu, enu);
+         lmem != NULL;
+         lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
+        if (num) {
+            cmpval = ncx_compare_nums(&lmem->val.num, num, list->btyp);
+        } else if (str) {
+            cmpval = ncx_compare_strs(&lmem->val.str, str, list->btyp);
+        } else if (enu) {
+            cmpval = ncx_compare_enums(&lmem->val.enu, enu);
         } else if (bit) {
-		cmpval = ncx_compare_bits(&lmem->val.bit, bit);
-	} else {
-	    cmpval = (lmem->val.boo && boo) ? 0 : 1;
-	}
+                cmpval = ncx_compare_bits(&lmem->val.bit, bit);
+        } else {
+            cmpval = (lmem->val.boo && boo) ? 0 : 1;
+        }
 
-	if (!cmpval) {
-	    return lmem;
-	}
+        if (!cmpval) {
+            return lmem;
+        }
     }
     return NULL;
 
@@ -6631,8 +6631,8 @@ ncx_lmem_t *
 *********************************************************************/
 void
     ncx_insert_lmem (ncx_list_t *list,
-		     ncx_lmem_t *memval,
-		     ncx_merge_t mergetyp)
+                     ncx_lmem_t *memval,
+                     ncx_merge_t mergetyp)
 {
     ncx_lmem_t        *lmem;
     const ncx_num_t   *num;
@@ -6644,77 +6644,77 @@ void
 
 #ifdef DEBUG
     if (!list || !memval) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     switch (mergetyp) {
     case NCX_MERGE_FIRST:
-	lmem = (ncx_lmem_t *)dlq_firstEntry(&list->memQ);
-	if (lmem) {
-	    dlq_insertAhead(memval, lmem);
-	} else {
-	    dlq_enque(memval, &list->memQ);
-	}
-	break;
+        lmem = (ncx_lmem_t *)dlq_firstEntry(&list->memQ);
+        if (lmem) {
+            dlq_insertAhead(memval, lmem);
+        } else {
+            dlq_enque(memval, &list->memQ);
+        }
+        break;
     case NCX_MERGE_LAST:
-	dlq_enque(memval, &list->memQ);
-	break;
+        dlq_enque(memval, &list->memQ);
+        break;
     case NCX_MERGE_SORT:
-	num = NULL;
-	str = NULL;
-	enu = NULL;
-	bit = NULL;
-	boo = FALSE;
+        num = NULL;
+        str = NULL;
+        enu = NULL;
+        bit = NULL;
+        boo = FALSE;
 
-	if (typ_is_number(list->btyp)) {
-	    num = &memval->val.num;
-	} else if (typ_is_string(list->btyp)) {
-	    str = &memval->val.str;
-	} else if (list->btyp == NCX_BT_ENUM) {
-	    enu = &memval->val.enu;
-	} else if (list->btyp == NCX_BT_BITS) {
-	    bit = &memval->val.bit;
-	} else if (list->btyp == NCX_BT_BOOLEAN) {
-	    boo = memval->val.boo;
-	} else {
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return;
-	}
+        if (typ_is_number(list->btyp)) {
+            num = &memval->val.num;
+        } else if (typ_is_string(list->btyp)) {
+            str = &memval->val.str;
+        } else if (list->btyp == NCX_BT_ENUM) {
+            enu = &memval->val.enu;
+        } else if (list->btyp == NCX_BT_BITS) {
+            bit = &memval->val.bit;
+        } else if (list->btyp == NCX_BT_BOOLEAN) {
+            boo = memval->val.boo;
+        } else {
+            SET_ERROR(ERR_INTERNAL_VAL);
+            return;
+        }
 
-	for (lmem = (ncx_lmem_t *)dlq_firstEntry(&list->memQ);
-	     lmem != NULL;
-	     lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
-	    if (num) {
-		cmpval = ncx_compare_nums(&lmem->val.num, num, list->btyp);
-	    } else if (str) {
-		cmpval = ncx_compare_strs(&lmem->val.str, str, list->btyp);
-	    } else if (enu) {
-		cmpval = ncx_compare_enums(&lmem->val.enu, enu);
-	    } else if (bit) {
-		cmpval = ncx_compare_bits(&lmem->val.bit, bit);
-	    } else {
-		if (lmem->val.boo) {
-		    cmpval = (boo) ? 0 : 1;
-		} else {
-		    cmpval = (boo) ? -1 : 0;
-		}
-	    }
+        for (lmem = (ncx_lmem_t *)dlq_firstEntry(&list->memQ);
+             lmem != NULL;
+             lmem = (ncx_lmem_t *)dlq_nextEntry(lmem)) {
+            if (num) {
+                cmpval = ncx_compare_nums(&lmem->val.num, num, list->btyp);
+            } else if (str) {
+                cmpval = ncx_compare_strs(&lmem->val.str, str, list->btyp);
+            } else if (enu) {
+                cmpval = ncx_compare_enums(&lmem->val.enu, enu);
+            } else if (bit) {
+                cmpval = ncx_compare_bits(&lmem->val.bit, bit);
+            } else {
+                if (lmem->val.boo) {
+                    cmpval = (boo) ? 0 : 1;
+                } else {
+                    cmpval = (boo) ? -1 : 0;
+                }
+            }
 
-	    if (cmpval >= 0) {
-		dlq_insertAhead(memval, lmem);
-		return;
-	    }
-	}
+            if (cmpval >= 0) {
+                dlq_insertAhead(memval, lmem);
+                return;
+            }
+        }
 
-	/* make new last entry */
-	dlq_enque(memval, &list->memQ);
-	break;
+        /* make new last entry */
+        dlq_enque(memval, &list->memQ);
+        break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
-    }	
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }   
 
 }  /* ncx_insert_lmem */
 
@@ -6735,8 +6735,8 @@ ncx_lmem_t *
 {
 #ifdef DEBUG
     if (!list) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
     return (ncx_lmem_t *)dlq_firstEntry(&list->memQ);
@@ -6762,7 +6762,7 @@ ncx_binary_t *
     
     binary = m__getObj(ncx_binary_t);
     if (!binary) {
-	return NULL;
+        return NULL;
     }
 
     ncx_init_binary(binary);
@@ -6785,8 +6785,8 @@ void
 
 #ifdef DEBUG
     if (!binary) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -6809,12 +6809,12 @@ void
 
 #ifdef DEBUG
     if (!binary) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
     if (binary->ustr) {
-	m__free(binary->ustr);
+        m__free(binary->ustr);
     }
     memset(binary, 0x0, sizeof(ncx_binary_t));
 
@@ -6835,8 +6835,8 @@ void
 {
 #ifdef DEBUG
     if (!binary) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
     ncx_clean_binary(binary);
@@ -6863,17 +6863,17 @@ ncx_appinfo_t *
 
     appinfo = m__getObj(ncx_appinfo_t);
     if (!appinfo) {
-	return NULL;
+        return NULL;
     }
     memset(appinfo, 0x0, sizeof(ncx_appinfo_t));
     appinfo->isclone = isclone;
 
     if (!isclone) {
-	appinfo->appinfoQ = dlq_createQue();
-	if (!appinfo->appinfoQ) {
-	    m__free(appinfo);
-	    appinfo = NULL;
-	}
+        appinfo->appinfoQ = dlq_createQue();
+        if (!appinfo->appinfoQ) {
+            m__free(appinfo);
+            appinfo = NULL;
+        }
     }
 
     return appinfo;
@@ -6895,24 +6895,24 @@ void
 #ifdef DEBUG
     if (!appinfo) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        return;
     }
 #endif
 
     if (!appinfo->isclone) {
-	if (appinfo->prefix) {
-	    m__free(appinfo->prefix);
-	}
-	if (appinfo->name) {
-	    m__free(appinfo->name);
-	}
-	if (appinfo->value) {
-	    m__free(appinfo->value);
-	}
-	if (appinfo->appinfoQ) {
-	    ncx_clean_appinfoQ(appinfo->appinfoQ);
-	    dlq_destroyQue(appinfo->appinfoQ);
-	}
+        if (appinfo->prefix) {
+            m__free(appinfo->prefix);
+        }
+        if (appinfo->name) {
+            m__free(appinfo->name);
+        }
+        if (appinfo->value) {
+            m__free(appinfo->value);
+        }
+        if (appinfo->appinfoQ) {
+            ncx_clean_appinfoQ(appinfo->appinfoQ);
+            dlq_destroyQue(appinfo->appinfoQ);
+        }
     }
     m__free(appinfo);
 
@@ -6938,30 +6938,30 @@ void
 *********************************************************************/
 ncx_appinfo_t *
     ncx_find_appinfo (dlq_hdr_t *appinfoQ,
-		      const xmlChar *prefix,
-		      const xmlChar *varname)
+                      const xmlChar *prefix,
+                      const xmlChar *varname)
 {
     ncx_appinfo_t *appinfo;
 
 #ifdef DEBUG
     if (!appinfoQ || !varname) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
     for (appinfo = (ncx_appinfo_t *)dlq_firstEntry(appinfoQ);
-	 appinfo != NULL;
-	 appinfo = (ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
+         appinfo != NULL;
+         appinfo = (ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
 
-	if (prefix && appinfo->prefix &&
-	    xml_strcmp(prefix, appinfo->prefix)) {
-	    continue;
-	}
+        if (prefix && appinfo->prefix &&
+            xml_strcmp(prefix, appinfo->prefix)) {
+            continue;
+        }
 
-	if (!xml_strcmp(varname, appinfo->name)) {
-	    return appinfo;
-	}
+        if (!xml_strcmp(varname, appinfo->name)) {
+            return appinfo;
+        }
     }
     return NULL;
 
@@ -6995,22 +6995,22 @@ const ncx_appinfo_t *
 #ifdef DEBUG
     if (!appinfoQ || !varname) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
     for (appinfo = (const ncx_appinfo_t *)dlq_firstEntry(appinfoQ);
-	 appinfo != NULL;
-	 appinfo = (const ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
+         appinfo != NULL;
+         appinfo = (const ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
 
-	if (prefix && appinfo->prefix &&
-	    xml_strcmp(prefix, appinfo->prefix)) {
-	    continue;
-	}
+        if (prefix && appinfo->prefix &&
+            xml_strcmp(prefix, appinfo->prefix)) {
+            continue;
+        }
 
-	if (!xml_strcmp(varname, appinfo->name)) {
-	    return appinfo;
-	}
+        if (!xml_strcmp(varname, appinfo->name)) {
+            return appinfo;
+        }
     }
     return NULL;
 
@@ -7037,30 +7037,30 @@ const ncx_appinfo_t *
 *********************************************************************/
 const ncx_appinfo_t *
     ncx_find_next_appinfo (const ncx_appinfo_t *current,
-			   const xmlChar *prefix,
-			   const xmlChar *varname)
+                           const xmlChar *prefix,
+                           const xmlChar *varname)
 {
     ncx_appinfo_t *appinfo;
 
 #ifdef DEBUG
     if (!current || !varname) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
     for (appinfo = (ncx_appinfo_t *)dlq_nextEntry(current);
-	 appinfo != NULL;
-	 appinfo = (ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
+         appinfo != NULL;
+         appinfo = (ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
 
-	if (prefix && appinfo->prefix &&
-	    xml_strcmp(prefix, appinfo->prefix)) {
-	    continue;
-	}
+        if (prefix && appinfo->prefix &&
+            xml_strcmp(prefix, appinfo->prefix)) {
+            continue;
+        }
 
-	if (!xml_strcmp(varname, appinfo->name)) {
-	    return appinfo;
-	}
+        if (!xml_strcmp(varname, appinfo->name)) {
+            return appinfo;
+        }
     }
     return NULL;
 
@@ -7087,30 +7087,30 @@ const ncx_appinfo_t *
 *********************************************************************/
 ncx_appinfo_t *
     ncx_find_next_appinfo2 (ncx_appinfo_t *current,
-			   const xmlChar *prefix,
-			   const xmlChar *varname)
+                           const xmlChar *prefix,
+                           const xmlChar *varname)
 {
     ncx_appinfo_t *appinfo;
 
 #ifdef DEBUG
     if (!current || !varname) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
     for (appinfo = (ncx_appinfo_t *)dlq_nextEntry(current);
-	 appinfo != NULL;
-	 appinfo = (ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
+         appinfo != NULL;
+         appinfo = (ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
 
-	if (prefix && appinfo->prefix &&
-	    xml_strcmp(prefix, appinfo->prefix)) {
-	    continue;
-	}
+        if (prefix && appinfo->prefix &&
+            xml_strcmp(prefix, appinfo->prefix)) {
+            continue;
+        }
 
-	if (!xml_strcmp(varname, appinfo->name)) {
-	    return appinfo;
-	}
+        if (!xml_strcmp(varname, appinfo->name)) {
+            return appinfo;
+        }
     }
     return NULL;
 
@@ -7137,13 +7137,13 @@ ncx_appinfo_t *
 #ifdef DEBUG
     if (!appinfo) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
     newapp = ncx_new_appinfo(TRUE);
     if (!newapp) {
-	return NULL;
+        return NULL;
     }
     newapp->prefix = appinfo->prefix;
     newapp->name = appinfo->name;
@@ -7172,12 +7172,12 @@ void
 #ifdef DEBUG
     if (!appinfoQ) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        return;
     }
 #endif
 
     while (!dlq_empty(appinfoQ)) {
-	appinfo = (ncx_appinfo_t *)dlq_deque(appinfoQ);
+        appinfo = (ncx_appinfo_t *)dlq_deque(appinfoQ);
         ncx_free_appinfo(appinfo);
     }
 } /* ncx_clean_appinfoQ */
@@ -7203,13 +7203,13 @@ void
 *********************************************************************/
 status_t 
     ncx_consume_appinfo (tk_chain_t *tkc,
-			 ncx_module_t  *mod,
-			 dlq_hdr_t *appinfoQ)
+                         ncx_module_t  *mod,
+                         dlq_hdr_t *appinfoQ)
 {
 
 #ifdef DEBUG
     if (!tkc || !appinfoQ) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -7241,12 +7241,12 @@ status_t
 *********************************************************************/
 status_t 
     ncx_consume_appinfo2 (tk_chain_t *tkc,
-			  ncx_module_t  *mod,
-			  dlq_hdr_t *appinfoQ)
+                          ncx_module_t  *mod,
+                          dlq_hdr_t *appinfoQ)
 {
 #ifdef DEBUG
     if (!tkc || !appinfoQ) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -7275,8 +7275,8 @@ status_t
 status_t 
     ncx_resolve_appinfoQ (yang_pcb_t *pcb,
                           tk_chain_t *tkc,
-			  ncx_module_t  *mod,
-			  dlq_hdr_t *appinfoQ)
+                          ncx_module_t  *mod,
+                          dlq_hdr_t *appinfoQ)
 {
      ncx_appinfo_t  *appinfo;
     ext_template_t  *ext;
@@ -7284,74 +7284,74 @@ status_t
 
 #ifdef DEBUG
     if (!tkc || !mod || !appinfoQ) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     retres = NO_ERR;
 
     for (appinfo = (ncx_appinfo_t *)dlq_firstEntry(appinfoQ);
-	 appinfo != NULL;
-	 appinfo = (ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
+         appinfo != NULL;
+         appinfo = (ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
 
-	if (appinfo->isclone) {
-	    continue;
-	}
+        if (appinfo->isclone) {
+            continue;
+        }
 
-	if (appinfo->ext) {
-	    /* this is a redo validation */
-	    continue;
-	}
+        if (appinfo->ext) {
+            /* this is a redo validation */
+            continue;
+        }
 
 
-	if (appinfo->prefix &&
-	    xml_strcmp(appinfo->prefix, mod->prefix)) {
+        if (appinfo->prefix &&
+            xml_strcmp(appinfo->prefix, mod->prefix)) {
 
-	    res = yang_find_imp_extension(pcb,
+            res = yang_find_imp_extension(pcb,
                                           tkc, 
                                           mod, 
                                           appinfo->prefix,
-					  appinfo->name, 
+                                          appinfo->name, 
                                           &appinfo->tkerr,
-					  &ext);
-	    CHK_EXIT(res, retres);
-	} else {
+                                          &ext);
+            CHK_EXIT(res, retres);
+        } else {
 
-	    ext = ext_find_extension(&mod->extensionQ, appinfo->name);
-	    if (!ext) {
-		log_error("\nError: Local module extension '%s' not found",
-			  appinfo->name);
-		res = retres = ERR_NCX_DEF_NOT_FOUND;
-		tkc->curerr = &appinfo->tkerr;
-		ncx_print_errormsg(tkc, mod, retres);
-	    } else {
-		res = NO_ERR;
-	    }
-	}
+            ext = ext_find_extension(&mod->extensionQ, appinfo->name);
+            if (!ext) {
+                log_error("\nError: Local module extension '%s' not found",
+                          appinfo->name);
+                res = retres = ERR_NCX_DEF_NOT_FOUND;
+                tkc->curerr = &appinfo->tkerr;
+                ncx_print_errormsg(tkc, mod, retres);
+            } else {
+                res = NO_ERR;
+            }
+        }
 
-	if (res == NO_ERR) {
-	    appinfo->ext = ext;
-	    if (ext->arg && !appinfo->value) {
-		retres = ERR_NCX_MISSING_PARM;
-		log_error("\nError: argument missing for extension '%s:%s' ",
-			  appinfo->prefix, ext->name);
-		tkc->curerr = &appinfo->tkerr;
-		ncx_print_errormsg(tkc, mod, retres);
-	    } else if (!ext->arg && appinfo->value) {
-		retres = ERR_NCX_EXTRA_PARM;
-		log_error("\nError: argument '%s' provided for"
-			  " extension '%s:%s' is not allowed",
-			  appinfo->value, 
+        if (res == NO_ERR) {
+            appinfo->ext = ext;
+            if (ext->arg && !appinfo->value) {
+                retres = ERR_NCX_MISSING_PARM;
+                log_error("\nError: argument missing for extension '%s:%s' ",
+                          appinfo->prefix, ext->name);
+                tkc->curerr = &appinfo->tkerr;
+                ncx_print_errormsg(tkc, mod, retres);
+            } else if (!ext->arg && appinfo->value) {
+                retres = ERR_NCX_EXTRA_PARM;
+                log_error("\nError: argument '%s' provided for"
+                          " extension '%s:%s' is not allowed",
+                          appinfo->value, 
                           appinfo->prefix, 
                           ext->name);
-		tkc->curerr = &appinfo->tkerr;
-		ncx_print_errormsg(tkc, mod, retres);
-	    }
-	}
+                tkc->curerr = &appinfo->tkerr;
+                ncx_print_errormsg(tkc, mod, retres);
+            }
+        }
 
-	/* recurse through any nested appinfo statements */
-	res = ncx_resolve_appinfoQ(pcb, tkc, mod, appinfo->appinfoQ);
-	CHK_EXIT(res, retres);
+        /* recurse through any nested appinfo statements */
+        res = ncx_resolve_appinfoQ(pcb, tkc, mod, appinfo->appinfoQ);
+        CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -7377,7 +7377,7 @@ ncx_iffeature_t *
 
     iff = m__getObj(ncx_iffeature_t);
     if (!iff) {
-	return NULL;
+        return NULL;
     }
     memset(iff, 0x0, sizeof(ncx_iffeature_t));
 
@@ -7401,16 +7401,16 @@ void
 
 #ifdef DEBUG
     if (!iff) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (iff->prefix) {
-	m__free(iff->prefix);
+        m__free(iff->prefix);
     }
     if (iff->name) {
-	m__free(iff->name);
+        m__free(iff->name);
     }
 
     m__free(iff);
@@ -7435,14 +7435,14 @@ void
 
 #ifdef DEBUG
     if (!iffeatureQ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     while (!dlq_empty(iffeatureQ)) {
-	iff = (ncx_iffeature_t *)dlq_deque(iffeatureQ);
-	ncx_free_iffeature(iff);
+        iff = (ncx_iffeature_t *)dlq_deque(iffeatureQ);
+        ncx_free_iffeature(iff);
     }
     
 } /* ncx_clean_iffeatureQ */
@@ -7461,36 +7461,36 @@ void
 *********************************************************************/
 ncx_iffeature_t *
     ncx_find_iffeature (dlq_hdr_t *iffeatureQ,
-			const xmlChar *prefix,
-			const xmlChar *name,
-			const xmlChar *modprefix)
+                        const xmlChar *prefix,
+                        const xmlChar *name,
+                        const xmlChar *modprefix)
 {
     ncx_iffeature_t  *iff;
 
 #ifdef DEBUG
     if (!iffeatureQ || !name) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     for (iff = (ncx_iffeature_t *)
-	     dlq_firstEntry(iffeatureQ);
-	 iff != NULL;
-	 iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
+             dlq_firstEntry(iffeatureQ);
+         iff != NULL;
+         iff = (ncx_iffeature_t *)dlq_nextEntry(iff)) {
 
-	/* check if name fields the same */
-	if (iff->name && !xml_strcmp(iff->name, name)) {
+        /* check if name fields the same */
+        if (iff->name && !xml_strcmp(iff->name, name)) {
 
-	    /* check if prefix fields reference
-	     * different modules, if set or implied
-	     */
-	    if (!ncx_prefix_different(prefix,
-				      iff->prefix,
-				      modprefix)) {
-		return iff;
-	    }
-	}
+            /* check if prefix fields reference
+             * different modules, if set or implied
+             */
+            if (!ncx_prefix_different(prefix,
+                                      iff->prefix,
+                                      modprefix)) {
+                return iff;
+            }
+        }
     }
     return NULL;
     
@@ -7515,7 +7515,7 @@ ncx_feature_t *
 
     feature = m__getObj(ncx_feature_t);
     if (!feature) {
-	return NULL;
+        return NULL;
     }
     memset(feature, 0x0, sizeof(ncx_feature_t));
 
@@ -7548,21 +7548,21 @@ void
 
 #ifdef DEBUG
     if (!feature) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (feature->name) {
-	m__free(feature->name);
+        m__free(feature->name);
     }
 
     if (feature->descr) {
-	m__free(feature->descr);
+        m__free(feature->descr);
     }
 
     if (feature->ref) {
-	m__free(feature->ref);
+        m__free(feature->ref);
     }
 
     ncx_clean_iffeatureQ(&feature->iffeatureQ);
@@ -7589,7 +7589,7 @@ void
 *********************************************************************/
 ncx_feature_t *
     ncx_find_feature (ncx_module_t *mod,
-		      const xmlChar *name)
+                      const xmlChar *name)
 {
     ncx_feature_t  *feature;
     dlq_hdr_t      *que;
@@ -7598,14 +7598,14 @@ ncx_feature_t *
 
 #ifdef DEBUG
     if (!mod || !name) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     feature = ncx_find_feature_que(&mod->featureQ, name);
     if (feature) {
-	return feature;
+        return feature;
     }
 
     que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
@@ -7614,29 +7614,29 @@ ncx_feature_t *
      * to this module or submodule, YANG only
      */
     for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
-	 inc != NULL;
-	 inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+         inc != NULL;
+         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
 
-	/* get the real submodule struct */
-	if (!inc->submod) {
-	    node = yang_find_node(que, 
-				  inc->submodule,
-				  inc->revision);
-	    if (node) {
-		inc->submod = node->submod;
-	    }
-	    if (!inc->submod) {
-		/* include not found, should not be in Q !!! */
-		SET_ERROR(ERR_INTERNAL_VAL);
-		continue;
-	    }
-	}
+        /* get the real submodule struct */
+        if (!inc->submod) {
+            node = yang_find_node(que, 
+                                  inc->submodule,
+                                  inc->revision);
+            if (node) {
+                inc->submod = node->submod;
+            }
+            if (!inc->submod) {
+                /* include not found, should not be in Q !!! */
+                SET_ERROR(ERR_INTERNAL_VAL);
+                continue;
+            }
+        }
 
-	/* check the type Q in this submodule */
-	feature = ncx_find_feature_que(&inc->submod->featureQ, name);
-	if (feature) {
-	    return feature;
-	}
+        /* check the type Q in this submodule */
+        feature = ncx_find_feature_que(&inc->submod->featureQ, name);
+        if (feature) {
+            return feature;
+        }
     }
 
     return NULL;
@@ -7658,27 +7658,27 @@ ncx_feature_t *
 *********************************************************************/
 ncx_feature_t *
     ncx_find_feature_que (dlq_hdr_t *featureQ,
-			  const xmlChar *name)
+                          const xmlChar *name)
 {
     ncx_feature_t *feature;
 
 #ifdef DEBUG
     if (!featureQ || !name) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     for (feature = (ncx_feature_t *)dlq_firstEntry(featureQ);
-	 feature != NULL;
-	 feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
+         feature != NULL;
+         feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
 
-	if (!xml_strcmp(feature->name, name)) {
-	    return feature;
-	}
+        if (!xml_strcmp(feature->name, name)) {
+            return feature;
+        }
     }
     return NULL;
-	 
+         
 } /* ncx_find_feature_que */
 
 
@@ -7697,9 +7697,9 @@ ncx_feature_t *
 *********************************************************************/
 void
     ncx_for_all_features (const ncx_module_t *mod,
-			  ncx_feature_cbfn_t  cbfn,
-			  void *cookie,
-			  boolean enabledonly)
+                          ncx_feature_cbfn_t  cbfn,
+                          void *cookie,
+                          boolean enabledonly)
 {
     ncx_feature_t        *feature;
     const dlq_hdr_t      *que;
@@ -7709,59 +7709,59 @@ void
 
 #ifdef DEBUG
     if (!mod || !cbfn) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     keepgoing = TRUE;
 
     for (feature = (ncx_feature_t *)dlq_firstEntry(&mod->featureQ);
-	 feature != NULL && keepgoing;
-	 feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
+         feature != NULL && keepgoing;
+         feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
 
-	if (enabledonly && !ncx_feature_enabled(feature)) {
-	    continue;
-	}
+        if (enabledonly && !ncx_feature_enabled(feature)) {
+            continue;
+        }
 
-	keepgoing = (*cbfn)(mod, feature, cookie);
-    }	
-	
+        keepgoing = (*cbfn)(mod, feature, cookie);
+    }   
+        
     que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
 
     /* check all the submodules, but only the ones visible
      * to this module or submodule, YANG only
      */
     for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
-	 inc != NULL && keepgoing;
-	 inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+         inc != NULL && keepgoing;
+         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
 
-	/* get the real submodule struct */
-	if (!inc->submod) {
-	    node = yang_find_node(que, 
-				  inc->submodule,
-				  inc->revision);
-	    if (node) {
-		inc->submod = node->submod;
-	    }
-	    if (!inc->submod) {
-		/* include not found, should not be in Q !!! */
-		SET_ERROR(ERR_INTERNAL_VAL);
-		continue;
-	    }
-	}
+        /* get the real submodule struct */
+        if (!inc->submod) {
+            node = yang_find_node(que, 
+                                  inc->submodule,
+                                  inc->revision);
+            if (node) {
+                inc->submod = node->submod;
+            }
+            if (!inc->submod) {
+                /* include not found, should not be in Q !!! */
+                SET_ERROR(ERR_INTERNAL_VAL);
+                continue;
+            }
+        }
 
-	for (feature = (ncx_feature_t *)
-		 dlq_firstEntry(&inc->submod->featureQ);
-	     feature != NULL && keepgoing;
-	     feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
+        for (feature = (ncx_feature_t *)
+                 dlq_firstEntry(&inc->submod->featureQ);
+             feature != NULL && keepgoing;
+             feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
 
-	    if (enabledonly && !ncx_feature_enabled(feature)) {
-		continue;
-	    }
+            if (enabledonly && !ncx_feature_enabled(feature)) {
+                continue;
+            }
 
-	    keepgoing = (*cbfn)(mod, feature, cookie);
-	}
+            keepgoing = (*cbfn)(mod, feature, cookie);
+        }
     }
 
 } /* ncx_for_all_features */
@@ -7780,7 +7780,7 @@ void
 *********************************************************************/
 uint32
     ncx_feature_count (const ncx_module_t *mod,
-		       boolean enabledonly)
+                       boolean enabledonly)
 {
     const ncx_feature_t  *feature;
     const yang_node_t    *node;
@@ -7790,58 +7790,58 @@ uint32
 
 #ifdef DEBUG
     if (!mod) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
     count = 0;
 
     for (feature = (const ncx_feature_t *)dlq_firstEntry(&mod->featureQ);
-	 feature != NULL;
-	 feature = (const ncx_feature_t *)dlq_nextEntry(feature)) {
+         feature != NULL;
+         feature = (const ncx_feature_t *)dlq_nextEntry(feature)) {
 
-	if (enabledonly && !ncx_feature_enabled(feature)) {
-	    continue;
-	}
+        if (enabledonly && !ncx_feature_enabled(feature)) {
+            continue;
+        }
 
-	count++;
-    }	
-	
+        count++;
+    }   
+        
     que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
 
     /* check all the submodules, but only the ones visible
      * to this module or submodule, YANG only
      */
     for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
-	 inc != NULL;
-	 inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+         inc != NULL;
+         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
 
-	/* get the real submodule struct */
-	if (!inc->submod) {
-	    node = yang_find_node(que, 
-				  inc->submodule,
-				  inc->revision);
-	    if (node) {
-		inc->submod = node->submod;
-	    }
-	    if (!inc->submod) {
-		/* include not found, should not be in Q !!! */
-		SET_ERROR(ERR_INTERNAL_VAL);
-		continue;
-	    }
-	}
+        /* get the real submodule struct */
+        if (!inc->submod) {
+            node = yang_find_node(que, 
+                                  inc->submodule,
+                                  inc->revision);
+            if (node) {
+                inc->submod = node->submod;
+            }
+            if (!inc->submod) {
+                /* include not found, should not be in Q !!! */
+                SET_ERROR(ERR_INTERNAL_VAL);
+                continue;
+            }
+        }
 
-	for (feature = (const ncx_feature_t *)
-		 dlq_firstEntry(&inc->submod->featureQ);
-	     feature != NULL;
-	     feature = (const ncx_feature_t *)dlq_nextEntry(feature)) {
+        for (feature = (const ncx_feature_t *)
+                 dlq_firstEntry(&inc->submod->featureQ);
+             feature != NULL;
+             feature = (const ncx_feature_t *)dlq_nextEntry(feature)) {
 
-	    if (enabledonly && !ncx_feature_enabled(feature)) {
-		continue;
-	    }
-	    count++;
-	}
+            if (enabledonly && !ncx_feature_enabled(feature)) {
+                continue;
+            }
+            count++;
+        }
     }
     return count;
 
@@ -7868,30 +7868,30 @@ boolean
 
 #ifdef DEBUG
     if (!feature) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     if (!feature->enabled) {
-	return FALSE;
+        return FALSE;
     }
 
     /* make sure all nested if-features are also enabled */
     for (iffeature = (const ncx_iffeature_t *)
-	     dlq_firstEntry(&feature->iffeatureQ);
-	 iffeature != NULL;
-	 iffeature = (const ncx_iffeature_t *)
-	     dlq_nextEntry(iffeature)) {
+             dlq_firstEntry(&feature->iffeatureQ);
+         iffeature != NULL;
+         iffeature = (const ncx_iffeature_t *)
+             dlq_nextEntry(iffeature)) {
 
-	if (!iffeature->feature) {
-	    /* feature was not found, so call it disabled */
-	    return FALSE;
-	}
+        if (!iffeature->feature) {
+            /* feature was not found, so call it disabled */
+            return FALSE;
+        }
 
-	if (!ncx_feature_enabled(iffeature->feature)) {
-	    return FALSE;
-	}
+        if (!ncx_feature_enabled(iffeature->feature)) {
+            return FALSE;
+        }
     }
 
     return TRUE;
@@ -7917,7 +7917,7 @@ ncx_identity_t *
 
     identity = m__getObj(ncx_identity_t);
     if (!identity) {
-	return NULL;
+        return NULL;
     }
     memset(identity, 0x0, sizeof(ncx_identity_t));
 
@@ -7944,8 +7944,8 @@ void
 
 #ifdef DEBUG
     if (!identity) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -7962,23 +7962,23 @@ void
     identity->idlink.identity = NULL;
 
     if (identity->name) {
-	m__free(identity->name);
+        m__free(identity->name);
     }
 
     if (identity->baseprefix) {
-	m__free(identity->baseprefix);
+        m__free(identity->baseprefix);
     }
 
     if (identity->basename) {
-	m__free(identity->basename);
+        m__free(identity->basename);
     }
 
     if (identity->descr) {
-	m__free(identity->descr);
+        m__free(identity->descr);
     }
 
     if (identity->ref) {
-	m__free(identity->ref);
+        m__free(identity->ref);
     }
 
     ncx_clean_appinfoQ(&identity->appinfoQ);
@@ -8003,7 +8003,7 @@ void
 *********************************************************************/
 ncx_identity_t *
     ncx_find_identity (ncx_module_t *mod,
-		       const xmlChar *name)
+                       const xmlChar *name)
 {
     ncx_identity_t  *identity;
     dlq_hdr_t       *que;
@@ -8012,14 +8012,14 @@ ncx_identity_t *
 
 #ifdef DEBUG
     if (!mod || !name) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     identity = ncx_find_identity_que(&mod->identityQ, name);
     if (identity) {
-	return identity;
+        return identity;
     }
 
     que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
@@ -8028,29 +8028,29 @@ ncx_identity_t *
      * to this module or submodule, YANG only
      */
     for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
-	 inc != NULL;
-	 inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+         inc != NULL;
+         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
 
-	/* get the real submodule struct */
-	if (!inc->submod) {
-	    node = yang_find_node(que, 
-				  inc->submodule,
-				  inc->revision);
-	    if (node) {
-		inc->submod = node->submod;
-	    }
-	    if (!inc->submod) {
-		/* include not found, should not be in Q !!! */
-		SET_ERROR(ERR_INTERNAL_VAL);
-		continue;
-	    }
-	}
+        /* get the real submodule struct */
+        if (!inc->submod) {
+            node = yang_find_node(que, 
+                                  inc->submodule,
+                                  inc->revision);
+            if (node) {
+                inc->submod = node->submod;
+            }
+            if (!inc->submod) {
+                /* include not found, should not be in Q !!! */
+                SET_ERROR(ERR_INTERNAL_VAL);
+                continue;
+            }
+        }
 
-	/* check the type Q in this submodule */
-	identity = ncx_find_identity_que(&inc->submod->identityQ, name);
-	if (identity) {
-	    return identity;
-	}
+        /* check the type Q in this submodule */
+        identity = ncx_find_identity_que(&inc->submod->identityQ, name);
+        if (identity) {
+            return identity;
+        }
     }
 
     return NULL;
@@ -8072,27 +8072,27 @@ ncx_identity_t *
 *********************************************************************/
 ncx_identity_t *
     ncx_find_identity_que (dlq_hdr_t *identityQ,
-			   const xmlChar *name)
+                           const xmlChar *name)
 {
     ncx_identity_t *identity;
 
 #ifdef DEBUG
     if (!identityQ || !name) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     for (identity = (ncx_identity_t *)dlq_firstEntry(identityQ);
-	 identity != NULL;
-	 identity = (ncx_identity_t *)dlq_nextEntry(identity)) {
+         identity != NULL;
+         identity = (ncx_identity_t *)dlq_nextEntry(identity)) {
 
-	if (!xml_strcmp(identity->name, name)) {
-	    return identity;
-	}
+        if (!xml_strcmp(identity->name, name)) {
+            return identity;
+        }
     }
     return NULL;
-	 
+         
 } /* ncx_find_identity_que */
 
 
@@ -8114,15 +8114,15 @@ ncx_filptr_t *
 
     /* check the cache first */
     if (ncx_cur_filptrs) {
-	filptr = (ncx_filptr_t *)dlq_deque(&ncx_filptrQ);
-	ncx_cur_filptrs--;
-	return filptr;
+        filptr = (ncx_filptr_t *)dlq_deque(&ncx_filptrQ);
+        ncx_cur_filptrs--;
+        return filptr;
     }
     
     /* create a new one */
     filptr = m__getObj(ncx_filptr_t);
     if (!filptr) {
-	return NULL;
+        return NULL;
     }
     memset (filptr, 0x0, sizeof(ncx_filptr_t));
     dlq_createSQue(&filptr->childQ);
@@ -8149,15 +8149,15 @@ void
 
 #ifdef DEBUG
     if (!filptr) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     /* recursively clean out the child Queues */
     while (!dlq_empty(&filptr->childQ)) {
-	fp = (ncx_filptr_t *)dlq_deque(&filptr->childQ);
-	ncx_free_filptr(fp);
+        fp = (ncx_filptr_t *)dlq_deque(&filptr->childQ);
+        ncx_free_filptr(fp);
     }
 
     /* check if any malloced memory inside */
@@ -8167,13 +8167,13 @@ void
 
     /* check if this entry should be put in the cache */
     if (ncx_cur_filptrs < ncx_max_filptrs) {
-	memset(filptr, 0x0, sizeof(ncx_filptr_t));
-	dlq_createSQue(&filptr->childQ);
-	dlq_enque(filptr, &ncx_filptrQ);
-	ncx_cur_filptrs++;
+        memset(filptr, 0x0, sizeof(ncx_filptr_t));
+        dlq_createSQue(&filptr->childQ);
+        dlq_enque(filptr, &ncx_filptrQ);
+        ncx_cur_filptrs++;
     } else {
         /* cache full, so just delete this entry */
-	m__free(filptr);
+        m__free(filptr);
     }
     
 } /* ncx_free_filptr */
@@ -8194,7 +8194,7 @@ ncx_revhist_t *
 
     revhist = m__getObj(ncx_revhist_t);
     if (!revhist) {
-	return NULL;
+        return NULL;
     }
     memset(revhist, 0x0, sizeof(ncx_revhist_t));
     return revhist;
@@ -8216,18 +8216,18 @@ void
 #ifdef DEBUG
     if (!revhist) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        return;
     }
 #endif
 
     if (revhist->version) {
-	m__free(revhist->version);
+        m__free(revhist->version);
     }
     if (revhist->descr) {
-	m__free(revhist->descr);
+        m__free(revhist->descr);
     }
     if (revhist->ref) {
-	m__free(revhist->ref);
+        m__free(revhist->ref);
     }
     m__free(revhist);
 
@@ -8248,22 +8248,22 @@ void
 *********************************************************************/
 ncx_revhist_t * 
     ncx_find_revhist (const ncx_module_t *mod,
-		      const xmlChar *ver)
+                      const xmlChar *ver)
 {
     ncx_revhist_t  *revhist;
 
 #ifdef DEBUG
     if (!mod || !ver) {
-	return NULL;
+        return NULL;
     }
 #endif
 
     for (revhist = (ncx_revhist_t *)dlq_firstEntry(&mod->revhistQ);
-	 revhist != NULL;
-	 revhist = (ncx_revhist_t *)dlq_nextEntry(revhist)) {
-	if (!xml_strcmp(revhist->version, ver)) {
-	    return revhist;
-	}
+         revhist != NULL;
+         revhist = (ncx_revhist_t *)dlq_nextEntry(revhist)) {
+        if (!xml_strcmp(revhist->version, ver)) {
+            return revhist;
+        }
     }
     return NULL;
 
@@ -8286,8 +8286,8 @@ void
 {
 #ifdef DEBUG
     if (!enu) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -8311,15 +8311,15 @@ void
 {
 #ifdef DEBUG
     if (!enu) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     enu->name = NULL;
     if (enu->dname) {
-	m__free(enu->dname);
-	enu->dname = NULL;
+        m__free(enu->dname);
+        enu->dname = NULL;
     }
     enu->val = 0;
 
@@ -8343,12 +8343,12 @@ void
 *********************************************************************/
 int32
     ncx_compare_enums (const ncx_enum_t *enu1,
-		       const ncx_enum_t *enu2)
+                       const ncx_enum_t *enu2)
 {
 #ifdef DEBUG
     if (!enu1 || !enu2) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
@@ -8374,8 +8374,8 @@ void
 {
 #ifdef DEBUG
     if (!bit) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -8399,14 +8399,14 @@ void
 {
 #ifdef DEBUG
     if (!bit) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (bit->dname) {
-	m__free(bit->dname);
-	bit->dname = NULL;
+        m__free(bit->dname);
+        bit->dname = NULL;
     }
     bit->pos = 0;
     bit->name = NULL;
@@ -8431,21 +8431,21 @@ void
 *********************************************************************/
 int32
     ncx_compare_bits (const ncx_bit_t *bitone,
-		      const ncx_bit_t *bittwo)
+                      const ncx_bit_t *bittwo)
 {
 #ifdef DEBUG
     if (!bitone || !bittwo) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
     if (bitone->pos < bittwo->pos) {
-	return -1;
+        return -1;
     } else if (bitone->pos > bittwo->pos) {
-	return 1;
+        return 1;
     } else {
-	return 0;
+        return 0;
     }
     /*NOTREACHED*/
 
@@ -8474,9 +8474,9 @@ int32
 *********************************************************************/
 status_t
     ncx_decode_enum (const xmlChar *enumval,
-		     int32 *retval,
-		     boolean *retset,
-		     uint32 *retlen)
+                     int32 *retval,
+                     boolean *retset,
+                     uint32 *retlen)
 {
     status_t       res, res2;
     const xmlChar  *str1, *str2;
@@ -8486,7 +8486,7 @@ status_t
 
 #ifdef DEBUG
     if (!enumval ||!retval ||!retset || !retlen) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -8494,64 +8494,64 @@ status_t
 
     /* split the buffer into name and value parts as needed */
     if (isdigit(*((const char *)enumval))) {
-	/* Can only be the 2nd form -- number only */
-	res = ncx_decode_num(enumval, NCX_BT_INT32, &num);
-	if (res == NO_ERR) {
-	    *retval = num.i;
-	    *retset = TRUE;
-	    *retlen = 0;
-	    return NO_ERR;
-	}
+        /* Can only be the 2nd form -- number only */
+        res = ncx_decode_num(enumval, NCX_BT_INT32, &num);
+        if (res == NO_ERR) {
+            *retval = num.i;
+            *retset = TRUE;
+            *retlen = 0;
+            return NO_ERR;
+        }
     } else {
-	/* look for the 3rd form -- name and number */
-	str1 = enumval;
-	while (*str1 && (*str1 != NCX_ENU_START)) {
-	    str1++;
-	}
-	if (!*str1) {
-	    /* did not find any left paren
-	     * can only be the 1st form 'foo'
-	     */
-	    *retval = 0;
-	    *retset = FALSE;
-	    *retlen = (uint32)(str1-enumval);
-	    return NO_ERR;
-	} else {
-	    /* found a left paren -- get a number and rparen */
-	    numstr[0] = 0;
-	    str2 = str1+1;
-	    for (i=0; i<NCX_MAX_NUMLEN && *str2!=NCX_ENU_END; i++) {
-		numstr[i] = *str2++;
-	    }
-	    if (i==NCX_MAX_NUMLEN) {
-		/* ran out of buffer before right paren 
-		 * the number couldn't be valid if this happens
-		 */
-		return ERR_NCX_NUMLEN_TOOBIG;
-	    } else {
-		/* setup the string return now */
-		*retlen = (uint32)(str1-enumval);
+        /* look for the 3rd form -- name and number */
+        str1 = enumval;
+        while (*str1 && (*str1 != NCX_ENU_START)) {
+            str1++;
+        }
+        if (!*str1) {
+            /* did not find any left paren
+             * can only be the 1st form 'foo'
+             */
+            *retval = 0;
+            *retset = FALSE;
+            *retlen = (uint32)(str1-enumval);
+            return NO_ERR;
+        } else {
+            /* found a left paren -- get a number and rparen */
+            numstr[0] = 0;
+            str2 = str1+1;
+            for (i=0; i<NCX_MAX_NUMLEN && *str2!=NCX_ENU_END; i++) {
+                numstr[i] = *str2++;
+            }
+            if (i==NCX_MAX_NUMLEN) {
+                /* ran out of buffer before right paren 
+                 * the number couldn't be valid if this happens
+                 */
+                return ERR_NCX_NUMLEN_TOOBIG;
+            } else {
+                /* setup the string return now */
+                *retlen = (uint32)(str1-enumval);
 
-		/* terminate the number buffer */
-		numstr[i] = 0;
+                /* terminate the number buffer */
+                numstr[i] = 0;
 
-		/* make sure the enum is terminated properly */
-		if (*(str2+1)) {
-		    /* should be zero -- treat this as a warning */
-		    res = ERR_NCX_EXTRA_ENUMCH;
-		} else {
-		    res = NO_ERR;
-		}
-	    }
-	    res2 = ncx_decode_num(numstr, NCX_BT_INT32, &num);
-	    if (res2 == NO_ERR) {
-		/* return the name and number that was decoded */
-		*retval = num.i;
-		*retset = TRUE;
-	    } else {
-		res = res2;   /* drop the res warning if set */
-	    }
-	}
+                /* make sure the enum is terminated properly */
+                if (*(str2+1)) {
+                    /* should be zero -- treat this as a warning */
+                    res = ERR_NCX_EXTRA_ENUMCH;
+                } else {
+                    res = NO_ERR;
+                }
+            }
+            res2 = ncx_decode_num(numstr, NCX_BT_INT32, &num);
+            if (res2 == NO_ERR) {
+                /* return the name and number that was decoded */
+                *retval = num.i;
+                *retset = TRUE;
+            } else {
+                res = res2;   /* drop the res warning if set */
+            }
+        }
     }
 
     return res;
@@ -8579,7 +8579,7 @@ status_t
 *********************************************************************/
 status_t
     ncx_set_enum (const xmlChar *enumval,
-		  ncx_enum_t *retenu)
+                  ncx_enum_t *retenu)
 {
     xmlChar       *str;
     int32          ev;
@@ -8589,18 +8589,18 @@ status_t
 
 #ifdef DEBUG
     if (!enumval ||!retenu) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     res = ncx_decode_enum(enumval, &ev, &evset, &namlen);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
     
     str = m__getMem(namlen+1);
     if (!str) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     xml_strncpy(str, enumval, namlen);
 
@@ -8631,7 +8631,7 @@ ncx_typname_t *
 
     tn = m__getObj(ncx_typname_t);
     if (!tn) {
-	return NULL;
+        return NULL;
     }
     memset(tn, 0x0, sizeof(ncx_typname_t));
     return tn;
@@ -8653,12 +8653,12 @@ void
 {
 #ifdef DEBUG
     if (!typnam) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
     if (typnam->typname_malloc) {
-	m__free(typnam->typname_malloc);
+        m__free(typnam->typname_malloc);
     }
     m__free(typnam);
 
@@ -8679,7 +8679,7 @@ void
 *********************************************************************/
 const xmlChar *
     ncx_find_typname (const typ_template_t *typ,
-		      const dlq_hdr_t *que)
+                      const dlq_hdr_t *que)
 {
     const ncx_typname_t  *tn;
 
@@ -8691,11 +8691,11 @@ const xmlChar *
 #endif
 
     for (tn = (const ncx_typname_t *)dlq_firstEntry(que);
-	 tn != NULL;
-	 tn = (const ncx_typname_t *)dlq_nextEntry(tn)) {
-	if (tn->typ == typ) {
-	    return tn->typname;
-	}
+         tn != NULL;
+         tn = (const ncx_typname_t *)dlq_nextEntry(tn)) {
+        if (tn->typ == typ) {
+            return tn->typname;
+        }
     }
     return NULL;
 
@@ -8717,7 +8717,7 @@ const xmlChar *
 *********************************************************************/
 const typ_template_t *
     ncx_find_typname_type (const dlq_hdr_t *que,
-			   const xmlChar *typname)
+                           const xmlChar *typname)
 {
     const ncx_typname_t  *tn;
 
@@ -8729,11 +8729,11 @@ const typ_template_t *
 #endif
 
     for (tn = (const ncx_typname_t *)dlq_firstEntry(que);
-	 tn != NULL;
-	 tn = (const ncx_typname_t *)dlq_nextEntry(tn)) {
-	if (!xml_strcmp(tn->typname, typname)) {
-	    return tn->typ;
-	}
+         tn != NULL;
+         tn = (const ncx_typname_t *)dlq_nextEntry(tn)) {
+        if (!xml_strcmp(tn->typname, typname)) {
+            return tn->typ;
+        }
     }
     return NULL;
 
@@ -8762,8 +8762,8 @@ void
 #endif
 
     while (!dlq_empty(que)) {
-	tn = (ncx_typname_t *)dlq_deque(que);
-	ncx_free_typname(tn);
+        tn = (ncx_typname_t *)dlq_deque(que);
+        ncx_free_typname(tn);
     }
 
 }  /* ncx_clean_typnameQ */
@@ -8779,7 +8779,7 @@ obj_template_t *
     ncx_get_gen_anyxml (void)
 {
     if (!stage2_init_done) {
-	return NULL;
+        return NULL;
     }
     return gen_anyxml;
 
@@ -8796,7 +8796,7 @@ obj_template_t *
     ncx_get_gen_container (void)
 {
     if (!stage2_init_done) {
-	return NULL;
+        return NULL;
     }
     return gen_container;
 
@@ -8813,7 +8813,7 @@ obj_template_t *
     ncx_get_gen_string (void)
 {
     if (!stage2_init_done) {
-	return NULL;
+        return NULL;
     }
     return gen_string;
 
@@ -8830,7 +8830,7 @@ obj_template_t *
     ncx_get_gen_empty (void)
 {
     if (!stage2_init_done) {
-	return NULL;
+        return NULL;
     }
     return gen_empty;
 
@@ -8847,7 +8847,7 @@ obj_template_t *
     ncx_get_gen_root (void)
 {
     if (!stage2_init_done) {
-	return NULL;
+        return NULL;
     }
     return gen_root;
 
@@ -8864,7 +8864,7 @@ obj_template_t *
     ncx_get_gen_binary (void)
 {
     if (!stage2_init_done) {
-	return NULL;
+        return NULL;
     }
     return gen_binary;
 
@@ -8887,18 +8887,18 @@ const xmlChar *
 {
     switch (layer) {
     case NCX_LAYER_NONE:
-	return (const xmlChar *)"none";
+        return (const xmlChar *)"none";
     case NCX_LAYER_TRANSPORT:
-	return (const xmlChar *)"transport";
+        return (const xmlChar *)"transport";
     case NCX_LAYER_RPC:
-	return (const xmlChar *)"rpc";
+        return (const xmlChar *)"rpc";
     case NCX_LAYER_OPERATION:
-	return (const xmlChar *)"protocol";
+        return (const xmlChar *)"protocol";
     case NCX_LAYER_CONTENT:
-	return (const xmlChar *)"application";
+        return (const xmlChar *)"application";
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return (const xmlChar *)"--";
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return (const xmlChar *)"--";
     }
 }  /* ncx_get_layer */
 
@@ -8921,15 +8921,15 @@ const xmlChar *
 *********************************************************************/
 const xmlChar *
     ncx_get_name_segment (const xmlChar *str,
-			  xmlChar  *buff,
-			  uint32 buffsize)
+                          xmlChar  *buff,
+                          uint32 buffsize)
 {
     const xmlChar *teststr;
 
 #ifdef DEBUG
     if (!str || !buff) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -8939,8 +8939,8 @@ const xmlChar *
     }
 
     if ((uint32)(teststr - str) >= buffsize) {
-	SET_ERROR(ERR_BUFF_OVFL);
-	return NULL;
+        SET_ERROR(ERR_BUFF_OVFL);
+        return NULL;
     }
 
     while (*str && *str != NCX_SCOPE_CH) {
@@ -9049,14 +9049,14 @@ const xmlChar *
     switch (status) {
     case NCX_STATUS_CURRENT:
     case NCX_STATUS_NONE:
-	return NCX_EL_CURRENT;
+        return NCX_EL_CURRENT;
     case NCX_STATUS_DEPRECATED:
-	return NCX_EL_DEPRECATED;
+        return NCX_EL_DEPRECATED;
     case NCX_STATUS_OBSOLETE:
-	return NCX_EL_OBSOLETE;
+        return NCX_EL_OBSOLETE;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return (const xmlChar *)"none";
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return (const xmlChar *)"none";
     }
     /*NOTREACHED*/
 
@@ -9077,44 +9077,44 @@ const xmlChar *
 *********************************************************************/
 status_t
     ncx_check_yang_status (ncx_status_t mystatus,
-			   ncx_status_t depstatus)
+                           ncx_status_t depstatus)
 {
     switch (mystatus) {
     case NCX_STATUS_CURRENT:
-	/* current definition can use another
-	 * current definition 
-	 */
-	switch (depstatus) {
-	case NCX_STATUS_CURRENT:
-	    return NO_ERR;
-	case NCX_STATUS_DEPRECATED:
-	    return ERR_NCX_USING_DEPRECATED;
-	case NCX_STATUS_OBSOLETE:
-	    return ERR_NCX_USING_OBSOLETE;
-	default:
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-	/*NOTRECHED*/
+        /* current definition can use another
+         * current definition 
+         */
+        switch (depstatus) {
+        case NCX_STATUS_CURRENT:
+            return NO_ERR;
+        case NCX_STATUS_DEPRECATED:
+            return ERR_NCX_USING_DEPRECATED;
+        case NCX_STATUS_OBSOLETE:
+            return ERR_NCX_USING_OBSOLETE;
+        default:
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        /*NOTRECHED*/
     case NCX_STATUS_DEPRECATED:
-	/* deprecated definition can use anything but an 
-	 * an obsolete definition
-	 */
-	switch (depstatus) {
-	case NCX_STATUS_CURRENT:
-	case NCX_STATUS_DEPRECATED:
-	    return NO_ERR;
-	case NCX_STATUS_OBSOLETE:
-	    return ERR_NCX_USING_OBSOLETE;
-	default:
-	    return SET_ERROR(ERR_INTERNAL_VAL);
-	}
-	/*NOTREACHED*/
+        /* deprecated definition can use anything but an 
+         * an obsolete definition
+         */
+        switch (depstatus) {
+        case NCX_STATUS_CURRENT:
+        case NCX_STATUS_DEPRECATED:
+            return NO_ERR;
+        case NCX_STATUS_OBSOLETE:
+            return ERR_NCX_USING_OBSOLETE;
+        default:
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        /*NOTREACHED*/
     case NCX_STATUS_OBSOLETE:
-	/* obsolete definition can use any definition */
-	return NO_ERR;
+        /* obsolete definition can use any definition */
+        return NO_ERR;
     case NCX_STATUS_NONE:
     default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
     /*NOTREACHED*/
 
@@ -9152,8 +9152,8 @@ boolean
 *********************************************************************/
 void
     ncx_print_errormsg (tk_chain_t *tkc,
-			ncx_module_t  *mod,
-			status_t     res)
+                        ncx_module_t  *mod,
+                        status_t     res)
 {
     ncx_print_errormsg_ex(tkc, mod, res, NULL, 0, TRUE);
 
@@ -9178,11 +9178,11 @@ void
 *********************************************************************/
 void
     ncx_print_errormsg_ex (tk_chain_t *tkc,
-			   ncx_module_t  *mod,
-			   status_t     res,
-			   const char *filename,
-			   uint32 linenum,
-			   boolean fineoln)
+                           ncx_module_t  *mod,
+                           status_t     res,
+                           const char *filename,
+                           uint32 linenum,
+                           boolean fineoln)
 {
     boolean      iserr;
 
@@ -9205,38 +9205,38 @@ void
     }
 
     if (mod) {
-	if (iserr) {
-	    mod->errors++;
-	} else {
-	    mod->warnings++;
-	}
+        if (iserr) {
+            mod->errors++;
+        } else {
+            mod->warnings++;
+        }
     }
 
     if (iserr) {
-	if (!LOGERROR) {
-	    /* errors turned off by the user! */
-	    return;
-	}
+        if (!LOGERROR) {
+            /* errors turned off by the user! */
+            return;
+        }
     } else if (!LOGWARN) {
-	/* warnings turned off by the user */
-	return;
+        /* warnings turned off by the user */
+        return;
     }
 
     if (tkc && tkc->curerr && tkc->curerr->mod) {
-	log_write("\n%s:", (tkc->curerr->mod->sourcefn) ? 
-		  (const char *)tkc->curerr->mod->sourcefn : "--");
+        log_write("\n%s:", (tkc->curerr->mod->sourcefn) ? 
+                  (const char *)tkc->curerr->mod->sourcefn : "--");
     } else if (mod && mod->sourcefn) {
-	log_write("\n%s:", (mod->sourcefn) ? 
-		  (const char *)mod->sourcefn : "--");
+        log_write("\n%s:", (mod->sourcefn) ? 
+                  (const char *)mod->sourcefn : "--");
     } else if (tkc && tkc->filename) {
-	log_write("\n%s:", tkc->filename);
+        log_write("\n%s:", tkc->filename);
     } else if (filename) {
-	log_write("\n%s:", filename);
-	if (linenum) {
-	    log_write("line %u:", linenum);
-	}
+        log_write("\n%s:", filename);
+        if (linenum) {
+            log_write("line %u:", linenum);
+        }
     } else {
-	log_write("\n");
+        log_write("\n");
     }
 
     if (tkc) {
@@ -9260,13 +9260,13 @@ void
     }
 
     if (iserr) {
-	log_write(" error(%u): %s", res, get_error_string(res));
+        log_write(" error(%u): %s", res, get_error_string(res));
     } else {
-	log_write(" warning(%u): %s", res, get_error_string(res));
+        log_write(" warning(%u): %s", res, get_error_string(res));
     }
 
     if (fineoln) {
-	log_write("\n");
+        log_write("\n");
     }
 
 } /* ncx_print_errormsg_ex */
@@ -9285,17 +9285,17 @@ void
 *********************************************************************/
 void
     ncx_conf_exp_err (tk_chain_t  *tkc,
-		      status_t result,
-		      const char *expstr)
+                      status_t result,
+                      const char *expstr)
 {
     ncx_print_errormsg_ex(tkc, 
                           NULL, 
                           result, 
                           NULL, 
                           0,
-			  (expstr) ? FALSE : TRUE);
+                          (expstr) ? FALSE : TRUE);
     if (expstr) {
-	log_write("  Expected: %s\n", expstr);
+        log_write("  Expected: %s\n", expstr);
     }
 
 }  /* ncx_conf_exp_err */
@@ -9315,9 +9315,9 @@ void
 *********************************************************************/
 void
     ncx_mod_exp_err (tk_chain_t  *tkc,
-		     ncx_module_t *mod,
-		     status_t result,
-		     const char *expstr)
+                     ncx_module_t *mod,
+                     status_t result,
+                     const char *expstr)
 {
     const char *gotval;
     tk_type_t   tktyp;
@@ -9327,61 +9327,61 @@ void
 
     skip = FALSE;
     if (TK_CUR(tkc)) {
-	tktyp = TK_CUR_TYP(tkc);
+        tktyp = TK_CUR_TYP(tkc);
     } else {
-	tktyp = TK_TT_NONE;
+        tktyp = TK_TT_NONE;
     }
 
     if (tktyp == TK_TT_NONE) {
-	gotval = NULL;
+        gotval = NULL;
     } else if (TK_CUR_TYP(tkc)==TK_TT_TSTRING || TK_CUR_NUM(tkc)) {
-	gotval = (const char *)TK_CUR_VAL(tkc);
+        gotval = (const char *)TK_CUR_VAL(tkc);
     } else if (TK_CUR_TYP(tkc) == TK_TT_LBRACE) {
-	gotval = "left brace, skipping to closing right brace";
-	skip = TRUE;
+        gotval = "left brace, skipping to closing right brace";
+        skip = TRUE;
     } else {
-	gotval = tk_get_token_name(tktyp);
+        gotval = tk_get_token_name(tktyp);
     }
 
     if (LOGERROR) {
-	if (gotval && expstr) {
-	    log_write("\nError:  Got '%s', Expected: %s", gotval, expstr);
-	} else if (expstr) {
-	    log_write("\nError:  Expected: %s", expstr);
-	}
-	ncx_print_errormsg_ex(tkc, 
+        if (gotval && expstr) {
+            log_write("\nError:  Got '%s', Expected: %s", gotval, expstr);
+        } else if (expstr) {
+            log_write("\nError:  Expected: %s", expstr);
+        }
+        ncx_print_errormsg_ex(tkc, 
                               mod, 
                               result, 
                               NULL, 
                               0,
-			      (expstr) ? FALSE : TRUE);
-	log_error("\n");
+                              (expstr) ? FALSE : TRUE);
+        log_error("\n");
     }
 
     if (skip) {
-	/* got an unexpected left brace, so skip to the
-	 * end of this unknown section to resynch;
-	 * otherwise the first unknown closing right brace
-	 * will end the parent section, which causes
-	 * a false 'unexpected EOF' error
-	 */
-	skipcount = 1;
-	done = FALSE;
-	res = NO_ERR;
-	while (!done && res == NO_ERR) {
-	    res = TK_ADV(tkc);
-	    if (res == NO_ERR) {
-		tktyp = TK_CUR_TYP(tkc);
-		if (tktyp == TK_TT_LBRACE) {
-		    skipcount++;
-		} else if (tktyp == TK_TT_RBRACE) {
-		    skipcount--;
-		}
-		if (!skipcount) {
-		    done = TRUE;
-		}
-	    }
-	}
+        /* got an unexpected left brace, so skip to the
+         * end of this unknown section to resynch;
+         * otherwise the first unknown closing right brace
+         * will end the parent section, which causes
+         * a false 'unexpected EOF' error
+         */
+        skipcount = 1;
+        done = FALSE;
+        res = NO_ERR;
+        while (!done && res == NO_ERR) {
+            res = TK_ADV(tkc);
+            if (res == NO_ERR) {
+                tktyp = TK_CUR_TYP(tkc);
+                if (tktyp == TK_TT_LBRACE) {
+                    skipcount++;
+                } else if (tktyp == TK_TT_RBRACE) {
+                    skipcount--;
+                }
+                if (!skipcount) {
+                    done = TRUE;
+                }
+            }
+        }
     }
 
 }  /* ncx_mod_exp_err */
@@ -9399,7 +9399,7 @@ void
 *********************************************************************/
 void
     ncx_free_node (ncx_node_t nodetyp,
-		   void *node)
+                   void *node)
 {
 #ifdef DEBUG
     if (!node) {
@@ -9410,32 +9410,32 @@ void
 
     switch (nodetyp) {
     case NCX_NT_NONE:                          /* uninitialized */
-	m__free(node);
-	break;
+        m__free(node);
+        break;
     case NCX_NT_TYP:                          /* typ_template_t */
-	typ_free_template(node);
-	break;
+        typ_free_template(node);
+        break;
     case NCX_NT_GRP:                          /* grp_template_t */
-	grp_free_template(node);
-	break;
+        grp_free_template(node);
+        break;
     case NCX_NT_VAL:                             /* val_value_t */
-	val_free_value(node);
-	break;
+        val_free_value(node);
+        break;
     case NCX_NT_OBJ:                          /* obj_template_t */
-	obj_free_template(node);
-	break;
+        obj_free_template(node);
+        break;
     case NCX_NT_STRING:                       /* xmlChar string */
-	m__free(node);
-	break;
+        m__free(node);
+        break;
     case NCX_NT_CFG:                          /* cfg_template_t */
-	cfg_free_template(node);
-	break;
+        cfg_free_template(node);
+        break;
     case NCX_NT_QNAME:                         /* xmlns_qname_t */
-	xmlns_free_qname(node);
-	break;
+        xmlns_free_qname(node);
+        break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	m__free(node);
+        SET_ERROR(ERR_INTERNAL_VAL);
+        m__free(node);
     }
 
 } /* ncx_free_node */
@@ -9487,14 +9487,14 @@ const xmlChar *
 {
     switch (dataclass) {
     case NCX_DC_NONE:
-	return NULL;
+        return NULL;
     case NCX_DC_CONFIG:
-	return NCX_EL_CONFIG;
+        return NCX_EL_CONFIG;
     case NCX_DC_STATE:
-	return NCX_EL_STATE;
+        return NCX_EL_STATE;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
     /*NOTREACHED*/
 
@@ -9675,14 +9675,14 @@ boolean
 *********************************************************************/
 boolean
     ncx_valid_name (const xmlChar *str, 
-		    uint32 len)
+                    uint32 len)
 {
     uint32  i;
 
 #ifdef DEBUG
     if (!str) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -9719,8 +9719,8 @@ boolean
 
 #ifdef DEBUG
     if (!str) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -9759,31 +9759,31 @@ boolean
 *********************************************************************/
 status_t
     ncx_parse_name (const xmlChar *str,
-		    uint32 *len)
+                    uint32 *len)
 {
     const xmlChar *s;
 
 #ifdef DEBUG
     if (!str || !len) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     if (!ncx_valid_fname_ch(*str)) {
-	*len = 0;
-	return ERR_NCX_INVALID_NAME;
+        *len = 0;
+        return ERR_NCX_INVALID_NAME;
     }
 
     s = str+1;
 
     while (ncx_valid_name_ch(*s)) {
-	s++;
+        s++;
     }
     *len = (uint32)(s - str);
     if (*len > NCX_MAX_NLEN) {
-	return ERR_NCX_TOO_BIG;
+        return ERR_NCX_TOO_BIG;
     } else {
-	return NO_ERR;
+        return NO_ERR;
     }
 
 } /* ncx_parse_name */
@@ -9806,16 +9806,16 @@ boolean
 {
 #ifdef DEBUG
     if (!str) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     if (!xml_strcmp(str, (const xmlChar *)"true") ||
-	!xml_strcmp(str, (const xmlChar *)"1")) {
-	return TRUE;
+        !xml_strcmp(str, (const xmlChar *)"1")) {
+        return TRUE;
     } else {
-	return FALSE;
+        return FALSE;
     }
 
 } /* ncx_is_true */
@@ -9838,16 +9838,16 @@ boolean
 {
 #ifdef DEBUG
     if (!str) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     if (!xml_strcmp(str, (const xmlChar *)"false") ||
-	!xml_strcmp(str, (const xmlChar *)"0")) {
-	return TRUE;
+        !xml_strcmp(str, (const xmlChar *)"0")) {
+        return TRUE;
     } else {
-	return FALSE;
+        return FALSE;
     }
 
 } /* ncx_is_false */
@@ -9875,9 +9875,9 @@ boolean
 *********************************************************************/
 status_t 
     ncx_consume_tstring (tk_chain_t *tkc,
-			 ncx_module_t *mod,
-			 const xmlChar *name,
-			 ncx_opt_t opt)
+                         ncx_module_t *mod,
+                         const xmlChar *name,
+                         ncx_opt_t opt)
 {
     status_t     res;
 
@@ -9890,27 +9890,27 @@ status_t
     res = TK_ADV(tkc);
 
     if (res == NO_ERR) {
-	if (TK_CUR_TYP(tkc) != TK_TT_TSTRING) {
-	    if (opt==NCX_OPT) {
-		TK_BKUP(tkc);
-		return ERR_NCX_SKIPPED;
-	    } else {
-		res = ERR_NCX_WRONG_TKTYPE;
-	    }
-	} else {
-	    if (xml_strcmp(TK_CUR_VAL(tkc), name)) {
-		if (opt==NCX_OPT) {
-		    TK_BKUP(tkc);
-		    return ERR_NCX_SKIPPED;
-		} else {
-		    res = ERR_NCX_WRONG_TKVAL;
-		}
-	    }
-	}
+        if (TK_CUR_TYP(tkc) != TK_TT_TSTRING) {
+            if (opt==NCX_OPT) {
+                TK_BKUP(tkc);
+                return ERR_NCX_SKIPPED;
+            } else {
+                res = ERR_NCX_WRONG_TKTYPE;
+            }
+        } else {
+            if (xml_strcmp(TK_CUR_VAL(tkc), name)) {
+                if (opt==NCX_OPT) {
+                    TK_BKUP(tkc);
+                    return ERR_NCX_SKIPPED;
+                } else {
+                    res = ERR_NCX_WRONG_TKVAL;
+                }
+            }
+        }
     }
 
     if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
+        ncx_print_errormsg(tkc, mod, res);
     }
 
     return res;
@@ -9947,18 +9947,18 @@ status_t
 *********************************************************************/
 status_t 
     ncx_consume_name (tk_chain_t *tkc,
-		      ncx_module_t *mod,
-		      const xmlChar *name,
-		      xmlChar **namebuff,
-		      ncx_opt_t opt,
-		      tk_type_t  ctyp)
+                      ncx_module_t *mod,
+                      const xmlChar *name,
+                      xmlChar **namebuff,
+                      ncx_opt_t opt,
+                      tk_type_t  ctyp)
 {
     const char  *expstr;
     status_t     res, retres;
 
 #ifdef DEBUG
     if (!tkc || !name || !namebuff) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -9968,7 +9968,7 @@ status_t
     /* check 'name' token */
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
-	ncx_mod_exp_err(tkc, mod, res, expstr);
+        ncx_mod_exp_err(tkc, mod, res, expstr);
         return res;
     }
     if (TK_CUR_TYP(tkc) != TK_TT_TSTRING) {
@@ -9976,8 +9976,8 @@ status_t
             TK_BKUP(tkc);
             return ERR_NCX_SKIPPED;
         } else {
-	    res = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
+            res = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, res, expstr);
         }
     }
     
@@ -9986,8 +9986,8 @@ status_t
             TK_BKUP(tkc);
             return ERR_NCX_SKIPPED;
         } else {
-	    res = ERR_NCX_WRONG_TKVAL;
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
+            res = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, res, expstr);
         }
     }
 
@@ -9997,20 +9997,20 @@ status_t
     /* check string value token */
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
-	ncx_mod_exp_err(tkc, mod, res, expstr);
-	return res;
+        ncx_mod_exp_err(tkc, mod, res, expstr);
+        return res;
     } else {
-	if (TK_CUR_TYP(tkc) != TK_TT_TSTRING) {
-	    res = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	} else {
-	    *namebuff = xml_strdup(TK_CUR_VAL(tkc));
-	    if (!*namebuff) {
-		res = ERR_INTERNAL_MEM;
-		ncx_print_errormsg(tkc, mod, res);
-		return res;
-	    }
-	}
+        if (TK_CUR_TYP(tkc) != TK_TT_TSTRING) {
+            res = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+        } else {
+            *namebuff = xml_strdup(TK_CUR_VAL(tkc));
+            if (!*namebuff) {
+                res = ERR_INTERNAL_MEM;
+                ncx_print_errormsg(tkc, mod, res);
+                return res;
+            }
+        }
     }
 
     retres = res;
@@ -10018,15 +10018,15 @@ status_t
 
     /* check for a closing token */
     if (ctyp != TK_TT_NONE) {
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_mod_exp_err(tkc, mod, res, expstr);
-	} else {
-	    if (TK_CUR_TYP(tkc) != ctyp) {
-		res = ERR_NCX_WRONG_TKTYPE;
-		ncx_mod_exp_err(tkc, mod, res, expstr);
-	    }
-	}
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+        } else {
+            if (TK_CUR_TYP(tkc) != ctyp) {
+                res = ERR_NCX_WRONG_TKTYPE;
+                ncx_mod_exp_err(tkc, mod, res, expstr);
+            }
+        }
     }
 
     return res;
@@ -10054,69 +10054,69 @@ status_t
 *********************************************************************/
 status_t 
     ncx_consume_token (tk_chain_t *tkc,
-		       ncx_module_t *mod,
-		       tk_type_t  ttyp)
+                       ncx_module_t *mod,
+                       tk_type_t  ttyp)
 {
     const char  *tkname;
     status_t     res;
 
 #ifdef DEBUG
     if (!tkc) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     res = (TK_CUR_TYP(tkc) == ttyp) ? 
-	NO_ERR : ERR_NCX_WRONG_TKTYPE;
+        NO_ERR : ERR_NCX_WRONG_TKTYPE;
 
     if (res != NO_ERR) {
-	tkname = tk_get_token_name(ttyp);
-	switch (tkc->source) {
-	case TK_SOURCE_YANG:
-	    ncx_mod_exp_err(tkc, mod, res, tkname);
+        tkname = tk_get_token_name(ttyp);
+        switch (tkc->source) {
+        case TK_SOURCE_YANG:
+            ncx_mod_exp_err(tkc, mod, res, tkname);
 
-	    /* if a token is missing and the token
-	     * parsed instead looks like the continuation
-	     * of a statement, or the end of a section,
-	     * then backup and let parsing continue
-	     */
-	    switch (ttyp) {
-	    case TK_TT_SEMICOL:
-	    case TK_TT_LBRACE:
-		switch (TK_CUR_TYP(tkc)) {
-		case TK_TT_TSTRING:
-		case TK_TT_MSTRING:
-		case TK_TT_RBRACE:
-		    TK_BKUP(tkc);
-		    break;
-		default:
-		    ;
-		}
-		break;
-	    case TK_TT_RBRACE:
-		switch (TK_CUR_TYP(tkc)) {
-		case TK_TT_TSTRING:
-		case TK_TT_MSTRING:
-		    TK_BKUP(tkc);
-		    break;
-		default:
-		    ;
-		}
-		break;
+            /* if a token is missing and the token
+             * parsed instead looks like the continuation
+             * of a statement, or the end of a section,
+             * then backup and let parsing continue
+             */
+            switch (ttyp) {
+            case TK_TT_SEMICOL:
+            case TK_TT_LBRACE:
+                switch (TK_CUR_TYP(tkc)) {
+                case TK_TT_TSTRING:
+                case TK_TT_MSTRING:
+                case TK_TT_RBRACE:
+                    TK_BKUP(tkc);
+                    break;
+                default:
+                    ;
+                }
+                break;
+            case TK_TT_RBRACE:
+                switch (TK_CUR_TYP(tkc)) {
+                case TK_TT_TSTRING:
+                case TK_TT_MSTRING:
+                    TK_BKUP(tkc);
+                    break;
+                default:
+                    ;
+                }
+                break;
 
-	    default:
-		;
-	    }
-	    break;
-	default:
-	    ;
-	}
+            default:
+                ;
+            }
+            break;
+        default:
+            ;
+        }
     }
 
     return res;
@@ -10139,7 +10139,7 @@ ncx_errinfo_t *
 
     err = m__getObj(ncx_errinfo_t);
     if (!err) {
-	return NULL;
+        return NULL;
     }
     ncx_init_errinfo(err);
     return err;
@@ -10190,20 +10190,20 @@ void
 #endif
 
     if (err->descr) {
-	m__free(err->descr);
-	err->descr = NULL;
+        m__free(err->descr);
+        err->descr = NULL;
     }
     if (err->ref) {
-	m__free(err->ref);
-	err->ref = NULL;
+        m__free(err->ref);
+        err->ref = NULL;
     }
     if (err->error_app_tag) {
-	m__free(err->error_app_tag);
-	err->error_app_tag = NULL;
+        m__free(err->error_app_tag);
+        err->error_app_tag = NULL;
     }
     if (err->error_message) {
-	m__free(err->error_message);
-	err->error_message = NULL;
+        m__free(err->error_message);
+        err->error_message = NULL;
     }
 
 }  /* ncx_clean_errinfo */
@@ -10254,15 +10254,15 @@ boolean
 
 #ifdef DEBUG
     if (!errinfo) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     if (errinfo->error_app_tag || errinfo->error_message) {
-	return TRUE;
+        return TRUE;
     } else {
-	return FALSE;
+        return FALSE;
     }
 
 }  /* ncx_errinfo_set */
@@ -10285,52 +10285,52 @@ boolean
 *********************************************************************/
 status_t
     ncx_copy_errinfo (const ncx_errinfo_t *src,
-		      ncx_errinfo_t *dest)
+                      ncx_errinfo_t *dest)
 {
 #ifdef DEBUG
     if (!src || !dest) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     if (src->descr) {
-	if (dest->descr) {
-	    m__free(dest->descr);
-	}
-	dest->descr = xml_strdup(src->descr);
-	if (!dest->descr) {
-	    return ERR_INTERNAL_MEM;
-	}
+        if (dest->descr) {
+            m__free(dest->descr);
+        }
+        dest->descr = xml_strdup(src->descr);
+        if (!dest->descr) {
+            return ERR_INTERNAL_MEM;
+        }
     }
 
     if (src->ref) {
-	if (dest->ref) {
-	    m__free(dest->ref);
-	}
-	dest->ref = xml_strdup(src->ref);
-	if (!dest->ref) {
-	    return ERR_INTERNAL_MEM;
-	}
+        if (dest->ref) {
+            m__free(dest->ref);
+        }
+        dest->ref = xml_strdup(src->ref);
+        if (!dest->ref) {
+            return ERR_INTERNAL_MEM;
+        }
     }
 
     if (src->error_app_tag) {
-	if (dest->error_app_tag) {
-	    m__free(dest->error_app_tag);
-	}
-	dest->error_app_tag = xml_strdup(src->error_app_tag);
-	if (!dest->error_app_tag) {
-	    return ERR_INTERNAL_MEM;
-	}
+        if (dest->error_app_tag) {
+            m__free(dest->error_app_tag);
+        }
+        dest->error_app_tag = xml_strdup(src->error_app_tag);
+        if (!dest->error_app_tag) {
+            return ERR_INTERNAL_MEM;
+        }
     }
 
     if (src->error_message) {
-	if (dest->error_message) {
-	    m__free(dest->error_message);
-	}
-	dest->error_message = xml_strdup(src->error_message);
-	if (!dest->error_message) {
-	    return ERR_INTERNAL_MEM;
-	}
+        if (dest->error_message) {
+            m__free(dest->error_message);
+        }
+        dest->error_message = xml_strdup(src->error_message);
+        if (!dest->error_message) {
+            return ERR_INTERNAL_MEM;
+        }
     }
 
     return NO_ERR;
@@ -10375,12 +10375,12 @@ xmlChar *
 
 #ifdef DEBUG
     if (!fspec || !res) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
     if (!*fspec) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 #endif
 
@@ -10391,79 +10391,79 @@ xmlChar *
     p = fspec;
 
     if (*p == NCXMOD_PSCHAR) {
-	/* absolute path */
-	buff = xml_strdup(fspec);
+        /* absolute path */
+        buff = xml_strdup(fspec);
         if (!buff) {
             *res = ERR_INTERNAL_MEM;
         }
     } else if (*p == NCXMOD_HMCHAR) {
-	/* starts with ~[username]/some/path */
-	if (p[1] && p[1] != NCXMOD_PSCHAR) {
-	    /* explicit user name */
-	    start = &p[1];   
-	    p = &p[2];
-	    while (*p && *p != NCXMOD_PSCHAR) {
-		p++;
-	    }
-	    userlen = (uint32)(p-start);
-	    user = ncxmod_get_userhome(start, userlen);
-	} else {
-	    /* implied current user */
-	    p++;   /* skip ~ char */
-	    /* get current user home dir */
-	    user = ncxmod_get_userhome(NULL, 0);
-	}
+        /* starts with ~[username]/some/path */
+        if (p[1] && p[1] != NCXMOD_PSCHAR) {
+            /* explicit user name */
+            start = &p[1];   
+            p = &p[2];
+            while (*p && *p != NCXMOD_PSCHAR) {
+                p++;
+            }
+            userlen = (uint32)(p-start);
+            user = ncxmod_get_userhome(start, userlen);
+        } else {
+            /* implied current user */
+            p++;   /* skip ~ char */
+            /* get current user home dir */
+            user = ncxmod_get_userhome(NULL, 0);
+        }
 
-	if (user == NULL) {
-	    log_error("\nError: invalid user name in path string (%s)",
-		      fspec);
+        if (user == NULL) {
+            log_error("\nError: invalid user name in path string (%s)",
+                      fspec);
             *res = ERR_NCX_INVALID_VALUE;
-	    return NULL;
-	}
+            return NULL;
+        }
 
         /* string pointer 'p' stopped on the PSCHAR to start the
          * rest of the path string
          */
         len = xml_strlen(user) + xml_strlen(p);
-	buff = m__getMem(len+1);
-	if (buff == NULL) {
+        buff = m__getMem(len+1);
+        if (buff == NULL) {
             *res = ERR_INTERNAL_MEM;
-	    return NULL;
-	}
+            return NULL;
+        }
 
-	bp = buff;
-	bp += xml_strcpy(bp, user);
-	xml_strcpy(bp, p);
+        bp = buff;
+        bp += xml_strcpy(bp, user);
+        xml_strcpy(bp, p);
     } else if (*p == NCXMOD_ENVCHAR) {
-	/* should start with $ENVVAR/some/path */
-	start = ++p;  /* skip dollar sign */
-	while (*p && *p != NCXMOD_PSCHAR) {
-		p++;
-	}
-	userlen = (uint32)(p-start);
-	if (userlen) {
-	    user = ncxmod_get_envvar(start, userlen);
-	}
-	if (!user) {
-	    log_error("\nError: environment variable in path string (%s)",
-		      fspec);
+        /* should start with $ENVVAR/some/path */
+        start = ++p;  /* skip dollar sign */
+        while (*p && *p != NCXMOD_PSCHAR) {
+                p++;
+        }
+        userlen = (uint32)(p-start);
+        if (userlen) {
+            user = ncxmod_get_envvar(start, userlen);
+        }
+        if (!user) {
+            log_error("\nError: environment variable in path string (%s)",
+                      fspec);
             *res = ERR_NCX_INVALID_VALUE;
-	    return NULL;
-	}
+            return NULL;
+        }
 
         /* string pointer 'p' stopped on the PSCHAR to start the
          * rest of the path string
          */
         len = xml_strlen(user) + xml_strlen(p);
-	buff = m__getMem(len+1);
-	if (buff == NULL) {
+        buff = m__getMem(len+1);
+        if (buff == NULL) {
             *res = ERR_INTERNAL_MEM;
-	    return NULL;
-	}
+            return NULL;
+        }
 
-	bp = buff;
-	bp += xml_strcpy(bp, user);
-	xml_strcpy(bp, p);
+        bp = buff;
+        bp += xml_strcpy(bp, user);
+        xml_strcpy(bp, p);
     } else if (*p == NCXMOD_DOTCHAR && p[1] == NCXMOD_PSCHAR) {
         /* check for ./some/path */
         p++;
@@ -10516,8 +10516,8 @@ void
 {
 #ifdef DEBUG
     if (!que) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -10560,8 +10560,8 @@ void
 {
 #ifdef DEBUG
     if (!que) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -10625,20 +10625,20 @@ void
 *********************************************************************/
 boolean
     ncx_prefix_different (const xmlChar *prefix1,
-			  const xmlChar *prefix2,
-			  const xmlChar *modprefix)
+                          const xmlChar *prefix2,
+                          const xmlChar *modprefix)
 {
     if (!prefix1) {
-	prefix1 = modprefix;
+        prefix1 = modprefix;
     }
     if (!prefix2) {
-	prefix2 = modprefix;
+        prefix2 = modprefix;
     }
     if (prefix1 == prefix2) {
-	return FALSE;
+        return FALSE;
     }
     if (prefix1 == NULL || prefix2 == NULL) {
-	return TRUE;
+        return TRUE;
     }
     return (xml_strcmp(prefix1, prefix2)) ? TRUE : FALSE;
 
@@ -10662,21 +10662,21 @@ ncx_bad_data_t
 {
 #ifdef DEBUG
     if (!valstr) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NCX_BAD_DATA_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_BAD_DATA_NONE;
     }
 #endif
 
     if (!xml_strcmp(valstr, E_BAD_DATA_IGNORE)) {
-	return NCX_BAD_DATA_IGNORE;
+        return NCX_BAD_DATA_IGNORE;
     } else if (!xml_strcmp(valstr, E_BAD_DATA_WARN)) {
-	return NCX_BAD_DATA_WARN;
+        return NCX_BAD_DATA_WARN;
     } else if (!xml_strcmp(valstr, E_BAD_DATA_CHECK)) {
-	return NCX_BAD_DATA_CHECK;
+        return NCX_BAD_DATA_CHECK;
     } else if (!xml_strcmp(valstr, E_BAD_DATA_ERROR)) {
-	return NCX_BAD_DATA_ERROR;
+        return NCX_BAD_DATA_ERROR;
     } else {
-	return NCX_BAD_DATA_NONE;
+        return NCX_BAD_DATA_NONE;
     }
     /*NOTREACHED*/
 
@@ -10700,18 +10700,18 @@ const xmlChar *
 {
     switch (baddata) {
     case NCX_BAD_DATA_NONE:
-	return NCX_EL_NONE;
+        return NCX_EL_NONE;
     case NCX_BAD_DATA_IGNORE:
-	return E_BAD_DATA_IGNORE;
+        return E_BAD_DATA_IGNORE;
     case NCX_BAD_DATA_WARN:
-	return E_BAD_DATA_WARN;
+        return E_BAD_DATA_WARN;
     case NCX_BAD_DATA_CHECK:
-	return E_BAD_DATA_CHECK;
+        return E_BAD_DATA_CHECK;
     case NCX_BAD_DATA_ERROR:
-	return E_BAD_DATA_ERROR;
+        return E_BAD_DATA_ERROR;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 
 }  /* ncx_get_baddata_string */
@@ -10734,16 +10734,16 @@ const xmlChar *
 {
     switch (withdef) {
     case NCX_WITHDEF_NONE:
-	return NCX_EL_NONE;
+        return NCX_EL_NONE;
     case NCX_WITHDEF_REPORT_ALL:
-	return NCX_EL_REPORT_ALL;
+        return NCX_EL_REPORT_ALL;
     case NCX_WITHDEF_TRIM:
-	return NCX_EL_TRIM;
+        return NCX_EL_TRIM;
     case NCX_WITHDEF_EXPLICIT:
-	return NCX_EL_EXPLICIT;
+        return NCX_EL_EXPLICIT;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 
 }  /* ncx_get_withdefaults_string */
@@ -10766,19 +10766,19 @@ ncx_withdefaults_t
 {
 #ifdef DEBUG
     if (!withdefstr) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NCX_WITHDEF_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_WITHDEF_NONE;
     }
 #endif
 
     if (!xml_strcmp(withdefstr, NCX_EL_REPORT_ALL)) {
-	return NCX_WITHDEF_REPORT_ALL;
+        return NCX_WITHDEF_REPORT_ALL;
     } else if (!xml_strcmp(withdefstr, NCX_EL_TRIM)) {
-	return NCX_WITHDEF_TRIM;
+        return NCX_WITHDEF_TRIM;
     } else if (!xml_strcmp(withdefstr, NCX_EL_EXPLICIT)) {
-	return NCX_WITHDEF_EXPLICIT;
+        return NCX_WITHDEF_EXPLICIT;
     } else {
-	return NCX_WITHDEF_NONE;
+        return NCX_WITHDEF_NONE;
     }
 
 }  /* ncx_get_withdefaults_enum */
@@ -10800,8 +10800,8 @@ const xmlChar *
 {
 #ifdef DEBUG
     if (!mod) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -10826,15 +10826,15 @@ const xmlChar *
 {
 #ifdef DEBUG
     if (!mod) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     if (mod->xmlprefix) {
-	return mod->xmlprefix;
+        return mod->xmlprefix;
     } else {
-	return mod->prefix;
+        return mod->prefix;
     }
 
 }  /* ncx_get_mod_xmlprefix */
@@ -10859,13 +10859,13 @@ int64
 
 #ifdef DEBUG
     if (!num) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
     temp1 = num->dec.val;
     if (num->dec.digits) {
-	 temp1 = temp1 / (10 * num->dec.digits);
+         temp1 = temp1 / (10 * num->dec.digits);
     }
     return temp1;
 
@@ -10890,15 +10890,15 @@ int64
 
 #ifdef DEBUG
     if (!num) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
     if (num->dec.digits) {
-	temp1 = num->dec.val % (10 * num->dec.digits);
+        temp1 = num->dec.val % (10 * num->dec.digits);
     } else {
-	temp1 = 0;
+        temp1 = 0;
     }
 
     return temp1;
@@ -10923,21 +10923,21 @@ ncx_display_mode_t
 {
 #ifdef DEBUG
     if (!dmstr) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NCX_DISPLAY_MODE_NONE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_DISPLAY_MODE_NONE;
     }
 #endif
 
     if (!xml_strcmp(dmstr, NCX_EL_PLAIN)) {
-	return NCX_DISPLAY_MODE_PLAIN;
+        return NCX_DISPLAY_MODE_PLAIN;
     } else if (!xml_strcmp(dmstr, NCX_EL_PREFIX)) {
-	return NCX_DISPLAY_MODE_PREFIX;
+        return NCX_DISPLAY_MODE_PREFIX;
     } else if (!xml_strcmp(dmstr, NCX_EL_MODULE)) {
-	return NCX_DISPLAY_MODE_MODULE;
+        return NCX_DISPLAY_MODE_MODULE;
     } else if (!xml_strcmp(dmstr, NCX_EL_XML)) {
-	return NCX_DISPLAY_MODE_XML;
+        return NCX_DISPLAY_MODE_XML;
     } else {
-	return NCX_DISPLAY_MODE_NONE;
+        return NCX_DISPLAY_MODE_NONE;
     }
 
 }  /* ncx_get_display_mode_enum */
@@ -11444,9 +11444,9 @@ void
 {
 #ifdef DEBUG
     if (!tkerr) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }	
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }   
 #endif
 
     tkerr->mod = mod;
@@ -11470,9 +11470,9 @@ void
 {
 #ifdef DEBUG
     if (!modQ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
-    }	
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }   
 #endif
 
     temp_modQ = modQ;

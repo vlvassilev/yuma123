@@ -157,7 +157,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -342,7 +342,7 @@ status_t
     uint32           i;
 
     if (agt_ses_init_done) {
-	return ERR_INTERNAL_INIT_SEQ;
+        return ERR_INTERNAL_INIT_SEQ;
     }
 
 #ifdef AGT_STATE_DEBUG
@@ -352,7 +352,7 @@ status_t
     agt_profile = agt_get_profile();
 
     for (i=0; i<AGT_SES_MAX_SESSIONS; i++) {
-	agtses[i] = NULL;
+        agtses[i] = NULL;
     }
     next_sesid = 1;
     mysesmod = NULL;
@@ -411,13 +411,13 @@ void
     uint32 i;
 
     if (agt_ses_init_done) {
-	for (i=0; i<AGT_SES_MAX_SESSIONS; i++) {
-	    if (agtses[i]) {
-		agt_ses_free_session(agtses[i]);
-	    }
-	}
+        for (i=0; i<AGT_SES_MAX_SESSIONS; i++) {
+            if (agtses[i]) {
+                agt_ses_free_session(agtses[i]);
+            }
+        }
 
-	next_sesid = 0;
+        next_sesid = 0;
 
         agt_rpc_unregister_method(AGT_SES_MODULE,
                                   AGT_SES_GET_MY_SESSION);
@@ -425,7 +425,7 @@ void
         agt_rpc_unregister_method(AGT_SES_MODULE,
                                   AGT_SES_SET_MY_SESSION);
 
-	agt_ses_init_done = FALSE;
+        agt_ses_init_done = FALSE;
     }
 
 }  /* agt_ses_cleanup */
@@ -447,19 +447,19 @@ ses_cb_t *
     ses_cb_t  *scb;
 
     if (!agt_ses_init_done) {
-	agt_ses_init();
+        agt_ses_init();
     }
 
     /* check if dummy session already cached */
     if (agtses[0]) {
-	SET_ERROR(ERR_INTERNAL_INIT_SEQ);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+        return NULL;
     }
 
     /* no, so create it */
     scb = ses_new_dummy_scb();
     if (!scb) {
-	return NULL;
+        return NULL;
     }
 
     agtses[0] = scb;
@@ -495,7 +495,7 @@ status_t
 #endif
 
     if (!agt_ses_init_done) {
-	agt_ses_init();
+        agt_ses_init();
     }
 
     scb = agtses[use_sid];
@@ -552,16 +552,16 @@ void
 {
 #ifdef DEBUG
     if (!scb) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
     if (!agt_ses_init_done) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
     if (scb->sid != 0 || !agtses[0]) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
 #endif
 
@@ -586,7 +586,7 @@ void
 *********************************************************************/
 ses_cb_t *
     agt_ses_new_session (ses_transport_t transport,
-			 int fd)
+                         int fd)
 {
     ses_cb_t       *scb;
     agt_profile_t  *profile;
@@ -594,7 +594,7 @@ ses_cb_t *
     status_t        res;
 
     if (!agt_ses_init_done) {
-	agt_ses_init();
+        agt_ses_init();
     }
 
     res = NO_ERR;
@@ -603,78 +603,78 @@ ses_cb_t *
 
     /* check if any sessions are available */
     if (next_sesid == 0) {
-	/* end has already been reached, so now in brute force
-	 * session reclaim mode
-	 */
-	slot = 0;
-	for (i=1; i<AGT_SES_MAX_SESSIONS && !slot; i++) {
-	    if (!agtses[i]) {
-		slot = i;
-	    }
-	}
+        /* end has already been reached, so now in brute force
+         * session reclaim mode
+         */
+        slot = 0;
+        for (i=1; i<AGT_SES_MAX_SESSIONS && !slot; i++) {
+            if (!agtses[i]) {
+                slot = i;
+            }
+        }
     } else {
-	slot = next_sesid;
+        slot = next_sesid;
     }
 
     if (slot) {
-	/* make sure there is memory for a session control block */
-	scb = ses_new_scb();
-	if (scb) {
-	    /* initialize the profile vars */
+        /* make sure there is memory for a session control block */
+        scb = ses_new_scb();
+        if (scb) {
+            /* initialize the profile vars */
             profile = agt_get_profile();
             scb->linesize = profile->agt_linesize;
             scb->withdef = profile->agt_defaultStyleEnum;
             scb->indent = profile->agt_indent;
 
-	    /* initialize the static vars */
-	    scb->type = SES_TYP_NETCONF;
-	    scb->transport = transport;
-	    scb->state = SES_ST_INIT;
-	    scb->mode = SES_MODE_XML;
-	    scb->sid = slot;
-	    scb->inready.sid = slot;
-	    scb->outready.sid = slot;
-	    scb->state = SES_ST_INIT;
-	    scb->fd = fd;
-	    scb->instate = SES_INST_IDLE;
-	    res = ses_msg_new_buff(scb, &scb->outbuff);
-	} else {
-	    res = ERR_INTERNAL_MEM;
-	}
+            /* initialize the static vars */
+            scb->type = SES_TYP_NETCONF;
+            scb->transport = transport;
+            scb->state = SES_ST_INIT;
+            scb->mode = SES_MODE_XML;
+            scb->sid = slot;
+            scb->inready.sid = slot;
+            scb->outready.sid = slot;
+            scb->state = SES_ST_INIT;
+            scb->fd = fd;
+            scb->instate = SES_INST_IDLE;
+            res = ses_msg_new_buff(scb, &scb->outbuff);
+        } else {
+            res = ERR_INTERNAL_MEM;
+        }
     } else {
-	res = ERR_NCX_RESOURCE_DENIED;
+        res = ERR_NCX_RESOURCE_DENIED;
     }
 
     /* add the FD to SCB mapping in the definition registry */
     if (res == NO_ERR) {
-	res = def_reg_add_scb(scb->fd, scb);
+        res = def_reg_add_scb(scb->fd, scb);
     }
 
     /* check result and add to session array if NO_ERR */
     if (res == NO_ERR) {
-	agtses[slot] = scb;
+        agtses[slot] = scb;
 
-	/* update the next slot now */
-	if (next_sesid) {
-	    if (++next_sesid==AGT_SES_MAX_SESSIONS) {
-		/* reached the end */
-		next_sesid = 0;
-	    }
-	}
-	if (LOGINFO) {
-	    log_info("\nNew session %d created OK", slot);
-	}
-	agttotals->inSessions++;
-	agttotals->active_sessions++;
+        /* update the next slot now */
+        if (next_sesid) {
+            if (++next_sesid==AGT_SES_MAX_SESSIONS) {
+                /* reached the end */
+                next_sesid = 0;
+            }
+        }
+        if (LOGINFO) {
+            log_info("\nNew session %d created OK", slot);
+        }
+        agttotals->inSessions++;
+        agttotals->active_sessions++;
     } else {
-	if (scb) {
-	    agt_ses_free_session(scb);
-	    scb = NULL;
-	}
-	if (LOGINFO) {
-	    log_info("\nNew session request failed (%s)",
-		     get_error_string(res));
-	}
+        if (scb) {
+            agt_ses_free_session(scb);
+            scb = NULL;
+        }
+        if (LOGINFO) {
+            log_info("\nNew session request failed (%s)",
+                     get_error_string(res));
+        }
     }
 
     return scb;
@@ -699,19 +699,19 @@ void
 
 #ifdef DEBUG
     if (!scb) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
     if (!agt_ses_init_done) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
 #endif
 
     slot = scb->sid;
 
     if (scb->fd) {
-	def_reg_del_scb(scb->fd);
+        def_reg_del_scb(scb->fd);
     }
 
     cfg_release_locks(slot);
@@ -722,9 +722,9 @@ void
     /* add this session to ses stats */
     agttotals->active_sessions--;
     if (scb->active) {
-	agttotals->closed_sessions++;
+        agttotals->closed_sessions++;
     } else {
-	agttotals->failed_sessions++;
+        agttotals->failed_sessions++;
     }
 
     /* make sure the ncxserver loop does not try
@@ -738,7 +738,7 @@ void
     agtses[slot] = NULL;
 
     if (LOGINFO) {
-	log_info("\nSession %d closed", slot);
+        log_info("\nSession %d closed", slot);
     }
 
 }  /* agt_ses_free_session */
@@ -758,9 +758,9 @@ boolean
     agt_ses_session_id_valid (ses_id_t  sid)
 {
     if (sid < AGT_SES_MAX_SESSIONS && agtses[sid]) {
-	return TRUE;
+        return TRUE;
     } else {
-	return FALSE;
+        return FALSE;
     }
 } /* agt_ses_session_id_valid */
 
@@ -780,25 +780,25 @@ boolean
 *********************************************************************/
 void
     agt_ses_request_close (ses_id_t sid,
-			   ses_id_t killedby,
-			   ses_term_reason_t termreason)
+                           ses_id_t killedby,
+                           ses_term_reason_t termreason)
 {
     ses_cb_t *scb;
 
     /* check the session ID */
     if (!sid || sid > AGT_SES_MAX_SESSIONS) {
-	return;
+        return;
     }
 
     /* check the session control block */
     scb = agtses[sid];
     if (!scb) {
-	return;
+        return;
     }
 
     /* N/A for dummy sessions */
     if (scb->type==SES_TYP_DUMMY) {
-	return;
+        return;
     }
 
     scb->killedbysid = killedby;
@@ -809,21 +809,21 @@ void
     case SES_ST_IDLE:
     case SES_ST_SHUTDOWN:
     case SES_ST_SHUTDOWN_REQ:
-	agt_ses_kill_session(scb->sid, 
-			     killedby,
-			     termreason);
-	break;
+        agt_ses_kill_session(scb->sid, 
+                             killedby,
+                             termreason);
+        break;
     case SES_ST_IN_MSG:
-	scb->state = SES_ST_SHUTDOWN_REQ;
-	break;
+        scb->state = SES_ST_SHUTDOWN_REQ;
+        break;
     default:
-	if (dlq_empty(&scb->outQ)) {
-	    agt_ses_kill_session(scb->sid, 
-				 killedby,
-				 termreason);
-	} else {
-	    scb->state = SES_ST_SHUTDOWN_REQ;
-	}
+        if (dlq_empty(&scb->outQ)) {
+            agt_ses_kill_session(scb->sid, 
+                                 killedby,
+                                 termreason);
+        } else {
+            scb->state = SES_ST_SHUTDOWN_REQ;
+        }
     }
 
 }  /* agt_ses_request_close */
@@ -841,23 +841,23 @@ void
 *********************************************************************/
 void
     agt_ses_kill_session (ses_id_t sid,
-			  ses_id_t killedby,
-			  ses_term_reason_t termreason)
+                          ses_id_t killedby,
+                          ses_term_reason_t termreason)
 {
     ses_cb_t *scb;
 
     if (!sid || sid > AGT_SES_MAX_SESSIONS) {
-	return;
+        return;
     }
 
     scb = agtses[sid];
     if (!scb) {
-	return;    /* no session found for this ID */
+        return;    /* no session found for this ID */
     }
 
     /* N/A for dummy sessions */
     if (scb->type==SES_TYP_DUMMY) {
-	return;
+        return;
     }
 
     if (agt_ncx_cc_active() && agt_ncx_cc_ses_id() == sid) {
@@ -865,8 +865,8 @@ void
     }
 
     agt_sys_send_sysSessionEnd(scb,
-			       termreason,
-			       killedby);
+                               termreason,
+                               killedby);
 
     /* clear all resources and delete the session control block */
     agt_ses_free_session(scb);
@@ -899,7 +899,7 @@ boolean
 
     rdy = ses_msg_get_first_inready();
     if (!rdy) {
-	return FALSE;
+        return FALSE;
     }
 
     /* get the session control block that rdy is embedded into */
@@ -918,31 +918,31 @@ boolean
 
 #ifdef AGT_SES_DEBUG
     if (LOGDEBUG2) {
-	log_debug2("\nagt_ses msg ready for session %d", scb->sid);
+        log_debug2("\nagt_ses msg ready for session %d", scb->sid);
     }
 #endif
 
     /* check the session control block state */
     if (scb->state >= SES_ST_SHUTDOWN_REQ) {
-	/* don't process the message or even it mark it
-	 * It will be cleaned up when the session is freed
-	 */
+        /* don't process the message or even it mark it
+         * It will be cleaned up when the session is freed
+         */
 #ifdef AGT_SES_DEBUG
-	if (LOGDEBUG) {
-	    log_debug("\nagt_ses drop input, session %d shutting down", 
-		      scb->sid);
-	}
+        if (LOGDEBUG) {
+            log_debug("\nagt_ses drop input, session %d shutting down", 
+                      scb->sid);
+        }
 #endif
 
-	return TRUE;
+        return TRUE;
     }
 
 #ifdef AGT_SES_DEBUG
     /* make sure a message is really there */
     msg = (ses_msg_t *)dlq_firstEntry(&scb->msgQ);
     if (!msg || !msg->ready) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	log_error("\nagt_ses ready Q message not correct");
+        SET_ERROR(ERR_INTERNAL_PTR);
+        log_error("\nagt_ses ready Q message not correct");
         if (msg) {
             cnt = xml_strcpy(buff, 
                              (const xmlChar *)"Incoming msg for session ");
@@ -950,40 +950,40 @@ boolean
             ses_msg_dump(msg, buff);
         }
             
-	return FALSE;
+        return FALSE;
     } else if (LOGDEBUG2) {
-	cnt = xml_strcpy(buff, 
-			 (const xmlChar *)"Incoming msg for session ");
-	sprintf((char *)(&buff[cnt]), "%u", scb->sid);
-	ses_msg_dump(msg, buff);
+        cnt = xml_strcpy(buff, 
+                         (const xmlChar *)"Incoming msg for session ");
+        sprintf((char *)(&buff[cnt]), "%u", scb->sid);
+        ses_msg_dump(msg, buff);
     }
 #endif
 
     /* setup the XML parser */
     if (scb->reader) {
-	    /* reset the xmlreader */
-	res = xml_reset_reader_for_session(ses_read_cb,
-					   NULL, 
-					   scb, 
-					   scb->reader);
+            /* reset the xmlreader */
+        res = xml_reset_reader_for_session(ses_read_cb,
+                                           NULL, 
+                                           scb, 
+                                           scb->reader);
     } else {
-	res = xml_get_reader_for_session(ses_read_cb,
-					 NULL, 
-					 scb, 
-					 &scb->reader);
+        res = xml_get_reader_for_session(ses_read_cb,
+                                         NULL, 
+                                         scb, 
+                                         &scb->reader);
     }
 
     /* process the message */
     if (res == NO_ERR) {
-	/* process the message */
-	agt_top_dispatch_msg(scb);
+        /* process the message */
+        agt_top_dispatch_msg(scb);
     } else {
-	if (LOGINFO) {
-	    log_info("\nReset xmlreader failed for session %d (%s)",
-		     scb->sid, 
-		     get_error_string(res));
-	}
-	scb->state = SES_ST_SHUTDOWN_REQ;
+        if (LOGINFO) {
+            log_info("\nReset xmlreader failed for session %d (%s)",
+                     scb->sid, 
+                     get_error_string(res));
+        }
+        scb->state = SES_ST_SHUTDOWN_REQ;
     }
 
     /* get the session control block again to make sure it was not
@@ -992,8 +992,8 @@ boolean
      */
     scb = agtses[mysid];
     if (scb) {
-	/* free the message that was just processed */
-	dlq_remove(msg);
+        /* free the message that was just processed */
+        dlq_remove(msg);
         ses_msg_free_msg(scb, msg);
 
 
@@ -1124,40 +1124,40 @@ boolean
     uint32         i;
 
     if (port == 0) {
-	return FALSE;
+        return FALSE;
     }
 
     profile = agt_get_profile();
     if (!profile) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
     }
 
     if (profile->agt_ports[0]) {
-	/* something configured, so use only that list */
-	for (i = 0; i < AGT_MAX_PORTS; i++) {
-	    if (port == profile->agt_ports[i]) {
-		return TRUE;
-	    }
-	}
-	return FALSE;
+        /* something configured, so use only that list */
+        for (i = 0; i < AGT_MAX_PORTS; i++) {
+            if (port == profile->agt_ports[i]) {
+                return TRUE;
+            }
+        }
+        return FALSE;
     } else {
-	/* no ports configured so allow 830 */
-	if (port==NCX_NCSSH_PORT) {
-	    return TRUE;
-	} else {
+        /* no ports configured so allow 830 */
+        if (port==NCX_NCSSH_PORT) {
+            return TRUE;
+        } else {
 #ifdef MACOSX
-	    /* there is a bug in the libssh2 and even though
-	     * connections on port 830 are accepted, they
-	     * are reported as port 22 (SSH) in the
-	     * SSH_CONNECTION environment variable
-	     */
-	    if (port==22) {
-		return TRUE;
-	    }
+            /* there is a bug in the libssh2 and even though
+             * connections on port 830 are accepted, they
+             * are reported as port 22 (SSH) in the
+             * SSH_CONNECTION environment variable
+             */
+            if (port==22) {
+                return TRUE;
+            }
 #endif
-	    return FALSE;
-	}
+            return FALSE;
+        }
     }
     /*NOTREACHED*/
 
@@ -1180,7 +1180,7 @@ boolean
 *********************************************************************/
 void
     agt_ses_fill_writeset (fd_set *fdset,
-			   int *maxfdnum)
+                           int *maxfdnum)
 {
     ses_ready_t *rdy;
     ses_cb_t *scb;
@@ -1189,18 +1189,18 @@ void
     FD_ZERO(fdset);
     done = FALSE;
     while (!done) {
-	rdy = ses_msg_get_first_outready();
-	if (!rdy) {
-	    done = TRUE;
-	} else {
-	    scb = agtses[rdy->sid];
-	    if (scb && scb->state <= SES_ST_SHUTDOWN_REQ) {
-		FD_SET(scb->fd, fdset);
-		if (scb->fd > *maxfdnum) {
-		    *maxfdnum = scb->fd;
-		}
-	    }
-	}
+        rdy = ses_msg_get_first_outready();
+        if (!rdy) {
+            done = TRUE;
+        } else {
+            scb = agtses[rdy->sid];
+            if (scb && scb->state <= SES_ST_SHUTDOWN_REQ) {
+                FD_SET(scb->fd, fdset);
+                if (scb->fd > *maxfdnum) {
+                    *maxfdnum = scb->fd;
+                }
+            }
+        }
     }
 
 }  /* agt_ses_fill_writeset */
@@ -1219,18 +1219,18 @@ void
 *********************************************************************/
 status_t 
     agt_ses_get_inSessions (ses_cb_t *scb,
-			    getcb_mode_t cbmode,
-			    const val_value_t *virval,
-			    val_value_t  *dstval)
+                            getcb_mode_t cbmode,
+                            const val_value_t *virval,
+                            val_value_t  *dstval)
 {
     (void)scb;
     (void)virval;
 
     if (cbmode == GETCB_GET_VALUE) {
-	VAL_UINT(dstval) = agttotals->inSessions;
-	return NO_ERR;
+        VAL_UINT(dstval) = agttotals->inSessions;
+        return NO_ERR;
     } else {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
 } /* agt_ses_get_inSessions */
@@ -1249,18 +1249,18 @@ status_t
 *********************************************************************/
 status_t 
     agt_ses_get_inBadHellos (ses_cb_t *scb,
-			     getcb_mode_t cbmode,
-			     const val_value_t *virval,
-			     val_value_t  *dstval)
+                             getcb_mode_t cbmode,
+                             const val_value_t *virval,
+                             val_value_t  *dstval)
 {
     (void)scb;
     (void)virval;
 
     if (cbmode == GETCB_GET_VALUE) {
-	VAL_UINT(dstval) = agttotals->inBadHellos;
-	return NO_ERR;
+        VAL_UINT(dstval) = agttotals->inBadHellos;
+        return NO_ERR;
     } else {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
 } /* agt_ses_get_inBadHellos */
@@ -1279,18 +1279,18 @@ status_t
 *********************************************************************/
 status_t 
     agt_ses_get_inRpcs (ses_cb_t *scb,
-			getcb_mode_t cbmode,
-			const val_value_t *virval,
-			val_value_t  *dstval)
+                        getcb_mode_t cbmode,
+                        const val_value_t *virval,
+                        val_value_t  *dstval)
 {
     (void)scb;
     (void)virval;
 
     if (cbmode == GETCB_GET_VALUE) {
-	VAL_UINT(dstval) = agttotals->stats.inRpcs;
-	return NO_ERR;
+        VAL_UINT(dstval) = agttotals->stats.inRpcs;
+        return NO_ERR;
     } else {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
 } /* agt_ses_get_inRpcs */
@@ -1309,18 +1309,18 @@ status_t
 *********************************************************************/
 status_t 
     agt_ses_get_inBadRpcs (ses_cb_t *scb,
-			   getcb_mode_t cbmode,
-			   const val_value_t *virval,
-			   val_value_t  *dstval)
+                           getcb_mode_t cbmode,
+                           const val_value_t *virval,
+                           val_value_t  *dstval)
 {
     (void)scb;
     (void)virval;
 
     if (cbmode == GETCB_GET_VALUE) {
-	VAL_UINT(dstval) = agttotals->stats.inBadRpcs;
-	return NO_ERR;
+        VAL_UINT(dstval) = agttotals->stats.inBadRpcs;
+        return NO_ERR;
     } else {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
 } /* agt_ses_get_inBadRpcs */
@@ -1339,18 +1339,18 @@ status_t
 *********************************************************************/
 status_t 
     agt_ses_get_outRpcErrors (ses_cb_t *scb,
-			      getcb_mode_t cbmode,
-			      const val_value_t *virval,
-			      val_value_t  *dstval)
+                              getcb_mode_t cbmode,
+                              const val_value_t *virval,
+                              val_value_t  *dstval)
 {
     (void)scb;
     (void)virval;
 
     if (cbmode == GETCB_GET_VALUE) {
-	VAL_UINT(dstval) = agttotals->stats.outRpcErrors;
-	return NO_ERR;
+        VAL_UINT(dstval) = agttotals->stats.outRpcErrors;
+        return NO_ERR;
     } else {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
 } /* agt_ses_get_outRpcErrors */
@@ -1369,18 +1369,18 @@ status_t
 *********************************************************************/
 status_t 
     agt_ses_get_outNotifications (ses_cb_t *scb,
-				  getcb_mode_t cbmode,
-				  const val_value_t *virval,
-				  val_value_t  *dstval)
+                                  getcb_mode_t cbmode,
+                                  const val_value_t *virval,
+                                  val_value_t  *dstval)
 {
     (void)scb;
     (void)virval;
 
     if (cbmode == GETCB_GET_VALUE) {
-	VAL_UINT(dstval) = agttotals->stats.outNotifications;
-	return NO_ERR;
+        VAL_UINT(dstval) = agttotals->stats.outNotifications;
+        return NO_ERR;
     } else {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
 } /* agt_ses_get_outNotifications */
@@ -1407,10 +1407,10 @@ status_t
     (void)virval;
 
     if (cbmode == GETCB_GET_VALUE) {
-	VAL_UINT(dstval) = agttotals->droppedSessions;
-	return NO_ERR;
+        VAL_UINT(dstval) = agttotals->droppedSessions;
+        return NO_ERR;
     } else {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
 } /* agt_ses_get_droppedSessions */
@@ -1440,7 +1440,7 @@ status_t
     (void)scb;
 
     if (cbmode != GETCB_GET_VALUE) {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
     sid = 0;
@@ -1480,7 +1480,7 @@ status_t
     (void)scb;
 
     if (cbmode != GETCB_GET_VALUE) {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
     sid = 0;
@@ -1520,7 +1520,7 @@ status_t
     (void)scb;
 
     if (cbmode != GETCB_GET_VALUE) {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
     sid = 0;
@@ -1560,7 +1560,7 @@ status_t
     (void)scb;
 
     if (cbmode != GETCB_GET_VALUE) {
-	return ERR_NCX_OPERATION_NOT_SUPPORTED;
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
     sid = 0;

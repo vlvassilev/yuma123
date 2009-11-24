@@ -7,7 +7,7 @@
 
   Each top-level node is keyed by the owner name and 
   the element name.  
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -96,7 +96,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -135,38 +135,38 @@ void
     /* get the first node */
     res = mgr_xml_consume_node(scb->reader, &top);
     if (res != NO_ERR) {
-	log_info("\nmgr_top: get node failed (%s); session dropped", 
-		 get_error_string(res));
-	xml_clean_node(&top);
-	scb->state = SES_ST_SHUTDOWN_REQ;
+        log_info("\nmgr_top: get node failed (%s); session dropped", 
+                 get_error_string(res));
+        xml_clean_node(&top);
+        scb->state = SES_ST_SHUTDOWN_REQ;
         return;
     }
 
 #ifdef MGR_TOP_DEBUG
     if (LOGDEBUG3) {
-	log_debug3("\nmgr_top: got node");
-	xml_dump_node(&top);
+        log_debug3("\nmgr_top: got node");
+        xml_dump_node(&top);
     }
 #endif
 
     /* check node type and if handler exists, then call it */
     if (top.nodetyp==XML_NT_START || top.nodetyp==XML_NT_EMPTY) {
-	/* find the module, elname tuple in the topQ */
-	handler = top_find_handler(top.module, top.elname);
-	if (handler) {
-	    /* call the handler */
-	    (*handler)(scb, &top);
-	} else {
-	    res = ERR_NCX_DEF_NOT_FOUND;
-	}
+        /* find the module, elname tuple in the topQ */
+        handler = top_find_handler(top.module, top.elname);
+        if (handler) {
+            /* call the handler */
+            (*handler)(scb, &top);
+        } else {
+            res = ERR_NCX_DEF_NOT_FOUND;
+        }
     } else {
-	res = ERR_NCX_WRONG_NODETYP;
+        res = ERR_NCX_WRONG_NODETYP;
     }
 
     /* check any error trying to invoke the top handler */
     if (res != NO_ERR) {
-	log_error("\nError: agt_top skipped msg for session %d (%s)",
-		  scb->sid, get_error_string(res));
+        log_error("\nError: agt_top skipped msg for session %d (%s)",
+                  scb->sid, get_error_string(res));
     }
 
     xml_clean_node(&top);

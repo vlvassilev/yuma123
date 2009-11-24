@@ -1,6 +1,6 @@
 /*  FILE: help.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -95,15 +95,15 @@ static uint32
     /* these are arbitrary numbers; need better plan */
     switch (mode) {
     case HELP_MODE_BRIEF:
-	return 9;
+        return 9;
     case HELP_MODE_NORMAL:
-	return 31;
+        return 31;
     case HELP_MODE_FULL:
-	return 0;
+        return 0;
     case HELP_MODE_NONE:
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return 1;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return 1;
     }
     /*NOTREACHED*/
 
@@ -121,31 +121,31 @@ static uint32
  *********************************************************************/
 static void
     dump_appinfoQ (const dlq_hdr_t *hdr,
-		   uint32 indent)
+                   uint32 indent)
 {
     const ncx_appinfo_t *appinfo;
     boolean   first;
 
     first = TRUE;
     for (appinfo = (const ncx_appinfo_t *)dlq_firstEntry(hdr);
-	 appinfo != NULL;
-	 appinfo = (const ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
+         appinfo != NULL;
+         appinfo = (const ncx_appinfo_t *)dlq_nextEntry(appinfo)) {
 
-	if (first) {
-	    help_write_lines((const xmlChar *)"Appinfo Queue:\n", 
-			     indent, TRUE);
-	    first = FALSE;
-	}
+        if (first) {
+            help_write_lines((const xmlChar *)"Appinfo Queue:\n", 
+                             indent, TRUE);
+            first = FALSE;
+        }
 
-	help_write_lines(EMPTY_STRING, indent+2, TRUE);
-	if (appinfo->value) {
-	    log_stdout("%s = %s", appinfo->name, appinfo->value);
-	} else {
-	    log_stdout("%s", appinfo->name);
-	}
+        help_write_lines(EMPTY_STRING, indent+2, TRUE);
+        if (appinfo->value) {
+            log_stdout("%s = %s", appinfo->name, appinfo->value);
+        } else {
+            log_stdout("%s", appinfo->name);
+        }
     }
     if (!first) {
-	log_stdout("\n");
+        log_stdout("\n");
     }
 
 } /* dump_appinfoQ */
@@ -166,8 +166,8 @@ static void
  *********************************************************************/
 static void
     dump_rpcQ (const dlq_hdr_t *hdr,
-	       help_mode_t mode,
-	       uint32 indent)
+               help_mode_t mode,
+               uint32 indent)
 {
 
     obj_template_t       *rpc;
@@ -177,17 +177,17 @@ static void
     nestlevel = get_nestlevel(mode);
     anyout = FALSE;
     for (rpc = (obj_template_t *)dlq_firstEntry(hdr);
-	 rpc != NULL;
-	 rpc = (obj_template_t *)dlq_nextEntry(rpc)) {
+         rpc != NULL;
+         rpc = (obj_template_t *)dlq_nextEntry(rpc)) {
 
-	if (rpc->objtype == OBJ_TYP_RPC) {
-	    anyout = TRUE;
-	    obj_dump_template(rpc, mode, nestlevel, indent);
-	}
+        if (rpc->objtype == OBJ_TYP_RPC) {
+            anyout = TRUE;
+            obj_dump_template(rpc, mode, nestlevel, indent);
+        }
     }
 
     if (anyout) {
-	log_stdout("\n");
+        log_stdout("\n");
     }
 
 } /* dump_rpcQ */
@@ -209,14 +209,14 @@ static void
     /* dump some header info */
     log_stdout("\n\nModule: %s", mod->name);
     if (mod->version) {
-	log_stdout(" (%s)", mod->version);
+        log_stdout(" (%s)", mod->version);
     }
     log_stdout("\nPrefix: %s", mod->prefix);
     if (mod->xmlprefix) {
-	log_stdout("\nXML prefix: %s", mod->xmlprefix);
+        log_stdout("\nXML prefix: %s", mod->xmlprefix);
     }
     log_stdout("\nNamespace: %s", (mod->ns) ?
-	       (const char *)mod->ns : "(none)");
+               (const char *)mod->ns : "(none)");
     log_stdout("\nSource: %s", mod->source);
 
 } /* dump_mod_hdr */
@@ -237,8 +237,8 @@ static void
 *********************************************************************/
 void
     help_program_module (const xmlChar *modname,
-			 const xmlChar *cliname,
-			 help_mode_t mode)
+                         const xmlChar *cliname,
+                         help_mode_t mode)
 {
     ncx_module_t         *mod;
     obj_template_t       *cli;
@@ -246,12 +246,12 @@ void
 
 #ifdef DEBUG
     if (!modname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
     if (mode == HELP_MODE_NONE || mode > HELP_MODE_FULL) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
 #endif
 
@@ -259,59 +259,59 @@ void
 
     mod = ncx_find_module(modname, NULL);
     if (!mod) {
-	log_error("\nhelp: Module '%s' not found", modname);
-	SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
-	return;
+        log_error("\nhelp: Module '%s' not found", modname);
+        SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
+        return;
     }
 
     log_stdout("\n\n  Program %s", mod->name);
     log_stdout("\n\n  Usage:");
     log_stdout("\n\n    %s [parameters]", mod->name);
     if (mode != HELP_MODE_BRIEF) {
-	log_stdout("\n\n  Parameters can be entered in any order, and have ");
-	log_stdout("the form:");
-	log_stdout("\n\n    [start] name separator [value]");
-	log_stdout("\n\n  where:");
-	log_stdout("\n\n    start == 0, 1, or 2 dashes (foo, -foo, --foo)");
-	log_stdout("\n\n    name == parameter name"
-		   "\n         Parameter name completion "
-		   "will be attempted "
-		   "\n         if a partial name is entered.");
-	log_stdout("\n\n    separator == whitespace or equals sign "
-		   "(foo=bar, foo bar)");
-	log_stdout("\n\n    value == string value for the parameter.");
-	log_stdout("\n         Strings with whitespace need to be "
-		   "double quoted "
-		   "\n         (--foo=\"some string\")");
+        log_stdout("\n\n  Parameters can be entered in any order, and have ");
+        log_stdout("the form:");
+        log_stdout("\n\n    [start] name separator [value]");
+        log_stdout("\n\n  where:");
+        log_stdout("\n\n    start == 0, 1, or 2 dashes (foo, -foo, --foo)");
+        log_stdout("\n\n    name == parameter name"
+                   "\n         Parameter name completion "
+                   "will be attempted "
+                   "\n         if a partial name is entered.");
+        log_stdout("\n\n    separator == whitespace or equals sign "
+                   "(foo=bar, foo bar)");
+        log_stdout("\n\n    value == string value for the parameter.");
+        log_stdout("\n         Strings with whitespace need to be "
+                   "double quoted "
+                   "\n         (--foo=\"some string\")");
     }
 
     if (mode == HELP_MODE_FULL && mod->descr) {
-	log_stdout("\n\n  Description:");
-	help_write_lines(mod->descr, 4, TRUE);
+        log_stdout("\n\n  Description:");
+        help_write_lines(mod->descr, 4, TRUE);
     }
 
     if (cliname) {
-	cli = ncx_find_object(mod, cliname);
-	if (!cli) {
-	    log_error("\nhelp: CLI Object %s not found", cliname);
-	    SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
-	    return;
-	} else if (cli->objtype == OBJ_TYP_CONTAINER) {
-	    log_stdout("\n\n  Command Line Parameters");
-	    log_stdout("\n\n    Key:  type name [built-in-type] [default]");
-	    log_stdout("\n          built-in YANG type is present for "
-		       "derived types only\n");
+        cli = ncx_find_object(mod, cliname);
+        if (!cli) {
+            log_error("\nhelp: CLI Object %s not found", cliname);
+            SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+            return;
+        } else if (cli->objtype == OBJ_TYP_CONTAINER) {
+            log_stdout("\n\n  Command Line Parameters");
+            log_stdout("\n\n    Key:  type name [built-in-type] [default]");
+            log_stdout("\n          built-in YANG type is present for "
+                       "derived types only\n");
 
-	    obj_dump_datadefQ(obj_get_datadefQ(cli), 
+            obj_dump_datadefQ(obj_get_datadefQ(cli), 
                               mode, 
-			      nestlevel, 
+                              nestlevel, 
                               4);
-	}
+        }
     }
 
     if (obj_any_rpcs(&mod->datadefQ) && mode != HELP_MODE_BRIEF) {
-	log_stdout("\n\n  Local Commands\n");
-	dump_rpcQ(&mod->datadefQ, mode, 4);
+        log_stdout("\n\n  Local Commands\n");
+        dump_rpcQ(&mod->datadefQ, mode, 4);
     }
 
 }  /* help_program_module */
@@ -328,7 +328,7 @@ void
 *********************************************************************/
 void
     help_data_module (const ncx_module_t *mod,
-		      help_mode_t mode)
+                      help_mode_t mode)
 {
 #ifdef DEBUG
     if (mod == NULL) {
@@ -340,17 +340,17 @@ void
     dump_mod_hdr(mod);
 
     if (mode == HELP_MODE_BRIEF) {
-	return;
+        return;
     }
 
     if (mode == HELP_MODE_FULL && mod->descr) {
-	log_stdout("\nDescription:\n %s", mod->descr);
+        log_stdout("\nDescription:\n %s", mod->descr);
     }
 
     dump_rpcQ(&mod->datadefQ, mode, 2);
 
     if (mode == HELP_MODE_FULL) {
-	dump_appinfoQ(&mod->appinfoQ, 2);
+        dump_appinfoQ(&mod->appinfoQ, 2);
     }
 
 }  /* help_data_module */
@@ -367,7 +367,7 @@ void
 *********************************************************************/
 void
     help_type (const typ_template_t *typ,
-	       help_mode_t mode)
+               help_mode_t mode)
 {
 #ifdef DEBUG
     if (typ == NULL) {
@@ -378,23 +378,23 @@ void
 
     log_stdout("\n  Type: %s", typ->name);
     log_stdout(" (%s)",
-	       tk_get_btype_sym(typ_get_basetype
-				((const typ_def_t *)&typ->typdef)));
+               tk_get_btype_sym(typ_get_basetype
+                                ((const typ_def_t *)&typ->typdef)));
 
     if (mode > HELP_MODE_BRIEF && typ->descr) {
-	log_stdout("\n Description: %s", typ->descr);
+        log_stdout("\n Description: %s", typ->descr);
     }
 
     if (typ->defval) {
-	log_stdout("\n Default: %s", typ->defval);
+        log_stdout("\n Default: %s", typ->defval);
     }
 
     if (typ->units) {
-	log_stdout("\n Units: %s", typ->units);
+        log_stdout("\n Units: %s", typ->units);
     }
 
     if (mode == HELP_MODE_FULL) {
-	dump_appinfoQ(&typ->typdef.appinfoQ, 1);
+        dump_appinfoQ(&typ->typdef.appinfoQ, 1);
     }
 
 }  /* help_type */
@@ -411,7 +411,7 @@ void
 *********************************************************************/
 void
     help_object (obj_template_t *obj,
-		 help_mode_t mode)
+                 help_mode_t mode)
 {
 #ifdef DEBUG
     if (obj == NULL) {
@@ -438,16 +438,16 @@ void
  *********************************************************************/
 void
     help_write_lines (const xmlChar *str,
-		      uint32 indent,
-		      boolean startnl)
+                      uint32 indent,
+                      boolean startnl)
 {
     uint32  i;
 
     if (startnl) {
-	log_stdout("\n");
-	for (i=0; i<indent; i++) {
-	    log_stdout(" ");
-	}
+        log_stdout("\n");
+        for (i=0; i<indent; i++) {
+            log_stdout(" ");
+        }
     }
 
     if (str) {
@@ -478,31 +478,31 @@ void
  *********************************************************************/
 void
     help_write_lines_max (const xmlChar *str,
-			  uint32 indent,
-			  boolean startnl,
-			  uint32 maxlen)
+                          uint32 indent,
+                          boolean startnl,
+                          uint32 maxlen)
 {
     uint32  i, cnt;
 
     cnt = 0;
 
     if (maxlen==0) {
-	return;
+        return;
     }
 
     if (startnl) {
-	log_stdout("\n");
-	if (++cnt > maxlen) {
-	    log_stdout("..."); 
-	    return;
-	}
-	for (i=0; i<indent; i++) {
-	    log_stdout(" ");
-	    if (++cnt > maxlen) {
-		log_stdout("..."); 
-		return;
-	    }
-	}
+        log_stdout("\n");
+        if (++cnt > maxlen) {
+            log_stdout("..."); 
+            return;
+        }
+        for (i=0; i<indent; i++) {
+            log_stdout(" ");
+            if (++cnt > maxlen) {
+                log_stdout("..."); 
+                return;
+            }
+        }
     }
 
     if (str) {

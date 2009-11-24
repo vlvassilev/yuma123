@@ -7,7 +7,7 @@
 
   Each top-level node is keyed by the owner name and 
   the element name.  
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -94,7 +94,7 @@ typedef struct top_entry_t_ {
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 static boolean top_init_done = FALSE;
@@ -114,7 +114,7 @@ static dlq_hdr_t topQ;
 *********************************************************************/
 static top_entry_t *
     find_entry (const xmlChar *owner,
-		const xmlChar *elname)
+                const xmlChar *elname)
 {
     top_entry_t *en;
 
@@ -166,7 +166,7 @@ void
             m__free(en);
         }
         memset(&topQ, 0x0, sizeof(dlq_hdr_t));
-	top_init_done = FALSE;
+        top_init_done = FALSE;
     }
 }   /* top_cleanup */
 
@@ -185,8 +185,8 @@ void
 *********************************************************************/
 status_t 
     top_register_node (const xmlChar *owner,
-		       const xmlChar *elname,
-		       top_handler_t handler)
+                       const xmlChar *elname,
+                       top_handler_t handler)
 {
     top_entry_t *en;
 
@@ -214,14 +214,14 @@ status_t
 
     en->owner = xml_strdup(owner);
     if (!en->owner) {
-	m__free(en);
+        m__free(en);
         return SET_ERROR(ERR_INTERNAL_MEM);
     }
 
     en->elname = xml_strdup(elname);
     if (!en->elname) {
-	m__free(en->owner);
-	m__free(en);
+        m__free(en->owner);
+        m__free(en);
         return SET_ERROR(ERR_INTERNAL_MEM);
     }
 
@@ -248,33 +248,33 @@ status_t
 *********************************************************************/
 void
     top_unregister_node (const xmlChar *owner,
-			     const xmlChar *elname)
+                             const xmlChar *elname)
 {
     top_entry_t *en;
 
     if (!top_init_done) {
         top_init();
         SET_ERROR(ERR_NCX_NOT_FOUND);
-	return;
+        return;
     }
     if (!owner || !elname) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        return;
     }
     
     en = find_entry(owner, elname);
     if (!en) {
         SET_ERROR(ERR_NCX_NOT_FOUND);
-	return;
+        return;
     }
 
     dlq_remove(en);
 
     if (en->owner) {
-	m__free(en->owner);
+        m__free(en->owner);
     }
     if (en->elname) {
-	m__free(en->elname);
+        m__free(en->elname);
     }
     m__free(en);
 
@@ -295,7 +295,7 @@ void
 *********************************************************************/
 top_handler_t
     top_find_handler (const xmlChar *owner,
-		      const xmlChar *elname)
+                      const xmlChar *elname)
 {
     top_entry_t *en;
 

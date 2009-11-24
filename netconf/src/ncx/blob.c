@@ -1,6 +1,6 @@
 /*  FILE: blob.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -34,7 +34,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -101,15 +101,15 @@ static char
 *********************************************************************/
 void 
     blob2bin (const char *pblob, 
-	      unsigned char *pbuff,
-	      uint32 bsize)
+              unsigned char *pbuff,
+              uint32 bsize)
 {
     uint32  i, b1, b2;
 
     for (i=0;i<bsize;i++) {
         b1 = c2i(pblob++);
         b2 = c2i(pblob++);
-	pbuff[i] = (unsigned char)((b1*16)+b2);
+        pbuff[i] = (unsigned char)((b1*16)+b2);
     }
 } /* blob2bin */
 
@@ -128,16 +128,16 @@ void
 *********************************************************************/
 void 
     bin2blob (const unsigned char *pbuff,
-	      char *pblob,
-	      uint32 bsize)
+              char *pblob,
+              uint32 bsize)
 {
     uint32  i, b1, b2;
 
     for (i=0;i<bsize;i++) {
         b1 = (uint32)(*pbuff >> 4);
         b2 = (uint32)(*pbuff++ & 0xf);
-	*pblob++ = i2c(b1);
-	*pblob++ = i2c(b2);
+        *pblob++ = i2c(b1);
+        *pblob++ = i2c(b2);
     }
     *pblob=0x0;
 } /* bin2blob */

@@ -135,7 +135,7 @@ typedef struct def_fdmap_t_ {
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -162,15 +162,15 @@ static boolean     def_reg_init_done = FALSE;
 *********************************************************************/
 static void * 
     find_top_node_h (def_nodetyp_t nodetyp,
-		     const xmlChar *key,
-		     uint32 *h)
+                     const xmlChar *key,
+                     uint32 *h)
 {
     uint32 len;
     def_hdr_t *hdr;
 
     len = xml_strlen(key);
     if (!len) {
-	return NULL;
+        return NULL;
     }
 
     /* get the hash value */
@@ -180,8 +180,8 @@ static void *
     *h &= DR_TOP_HASH_MASK;
 
     for (hdr = (def_hdr_t *)dlq_firstEntry(&topht[*h]);
-	 hdr != NULL;
-	 hdr = (def_hdr_t *)dlq_nextEntry(hdr)) {
+         hdr != NULL;
+         hdr = (def_hdr_t *)dlq_nextEntry(hdr)) {
         if (hdr->nodetyp==nodetyp && !xml_strcmp(key, hdr->key)) {
             return (void *)hdr;
         }
@@ -204,7 +204,7 @@ static void *
 *********************************************************************/
 static void * 
     find_top_node (def_nodetyp_t nodetyp,
-		   const xmlChar *key)
+                   const xmlChar *key)
 {
     uint32  h;
     return find_top_node_h(nodetyp, key, &h);
@@ -227,14 +227,14 @@ static void *
 *********************************************************************/
 static status_t 
     add_top_node (def_nodetyp_t  nodetyp,
-		  const xmlChar *key, 
-		  void *ptr)
+                  const xmlChar *key, 
+                  void *ptr)
 {
     uint32 h;
     def_topnode_t *top;
 
     if (!*key) {
-	return SET_ERROR(ERR_INTERNAL_VAL);  /* zero key len */
+        return SET_ERROR(ERR_INTERNAL_VAL);  /* zero key len */
     }
 
     h = 0;
@@ -248,7 +248,7 @@ static status_t
     /* create a new def_topnode_t struct and initialize it */
     top = m__getObj(def_topnode_t);
     if (top == NULL) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     (void)memset(top, 0x0, sizeof(def_topnode_t));
     top->hdr.nodetyp = nodetyp;
@@ -279,11 +279,11 @@ void
     uint32 i;
 
     if (!def_reg_init_done) {
-	/* initialize the application hash table */
-	for (i=0; i<DR_TOP_HASH_SIZE; i++) {
-	    dlq_createSQue(&topht[i]);
-	}
-	def_reg_init_done = TRUE;
+        /* initialize the application hash table */
+        for (i=0; i<DR_TOP_HASH_SIZE; i++) {
+            dlq_createSQue(&topht[i]);
+        }
+        def_reg_init_done = TRUE;
     }  /* else already done */
 
 }  /* def_reg_init */
@@ -309,28 +309,28 @@ void
     def_topnode_t *topnode;
 
     if (!def_reg_init_done) {
-	return;
+        return;
     }
 
     /* cleanup the top hash table */
     for (i=0; i<DR_TOP_HASH_SIZE; i++) {
-	while (!dlq_empty(&topht[i])) {
-	    hdr = (def_hdr_t *)dlq_deque(&topht[i]);
-	    switch (hdr->nodetyp) {
-	    case DEF_NT_NSNODE:
-		m__free(hdr);
-		break;
-	    case DEF_NT_FDNODE:
-		/* free the def_fdnode_t struct first */
-		topnode = (def_topnode_t *)hdr;
-		m__free(topnode->dptr);
-		m__free(topnode);
-		break;
-	    default:
-		SET_ERROR(ERR_INTERNAL_VAL);
-		m__free(hdr);  /* free it anyway */
-	    }
-	}
+        while (!dlq_empty(&topht[i])) {
+            hdr = (def_hdr_t *)dlq_deque(&topht[i]);
+            switch (hdr->nodetyp) {
+            case DEF_NT_NSNODE:
+                m__free(hdr);
+                break;
+            case DEF_NT_FDNODE:
+                /* free the def_fdnode_t struct first */
+                topnode = (def_topnode_t *)hdr;
+                m__free(topnode->dptr);
+                m__free(topnode);
+                break;
+            default:
+                SET_ERROR(ERR_INTERNAL_VAL);
+                m__free(hdr);  /* free it anyway */
+            }
+        }
     }
     (void)memset(topht, 0x0, sizeof(dlq_hdr_t)*DR_TOP_HASH_SIZE);
 
@@ -354,7 +354,7 @@ status_t
 {
 #ifdef DEBUG
     if (!ns) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -380,8 +380,8 @@ xmlns_t *
 
 #ifdef DEBUG
     if (!nsname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -434,7 +434,7 @@ void
 *********************************************************************/
 status_t 
     def_reg_add_scb (int fd,
-		     ses_cb_t *scb)
+                     ses_cb_t *scb)
 {
     def_fdmap_t *fdmap;
     int          ret;
@@ -442,22 +442,22 @@ status_t
 
 #ifdef DEBUG
     if (!scb) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     /* create an FD-to-SCB mapping */
     fdmap = m__getObj(def_fdmap_t);
     if (!fdmap) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     memset(fdmap, 0x0, sizeof(def_fdmap_t));
 
     /* get a string key */
     ret = sprintf((char *)fdmap->num, "%d", fd);
     if (ret <= 0) {
-	m__free(fdmap);
-	return ERR_NCX_INVALID_NUM;
+        m__free(fdmap);
+        return ERR_NCX_INVALID_NUM;
     }
 
     /* set the mapping */
@@ -467,7 +467,7 @@ status_t
     /* save the string-keyed mapping entry */
     res = add_top_node(DEF_NT_FDNODE, fdmap->num, fdmap);
     if (res != NO_ERR) {
-	m__free(fdmap);
+        m__free(fdmap);
     }
     return res;
 
@@ -494,12 +494,12 @@ ses_cb_t *
 
     ret = sprintf((char *)buff, "%d", fd);
     if (ret <= 0) {
-	return NULL;
+        return NULL;
     }
     
     fddef = find_top_node(DEF_NT_FDNODE, buff);
     if (!fddef) {
-	return NULL;
+        return NULL;
     }
     fdmap = fddef->dptr;
     return fdmap->scb;
@@ -526,14 +526,14 @@ void
 
     ret = sprintf((char *)buff, "%d", fd);
     if (ret <= 0) {
-	return;
+        return;
     }
 
     fddef = find_top_node(DEF_NT_FDNODE, buff);
     if (fddef) {
         dlq_remove(fddef);
         m__free(fddef->dptr);  /* free the def_fdmap_t */
-	m__free(fddef);
+        m__free(fddef);
     }
 } /* def_reg_del_scb */
 

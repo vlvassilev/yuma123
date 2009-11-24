@@ -1,6 +1,6 @@
 /*  FILE: cfg.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -102,7 +102,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 static boolean cfg_init_done = FALSE;
@@ -130,7 +130,7 @@ static xmlChar *
 
     str = m__getMem(CFG_DATETIME_LEN);
     if (!str) {
-	return NULL;
+        return NULL;
     }
     *str=0;
     tstamp_datetime(str);
@@ -155,12 +155,12 @@ static cfg_template_t *
     ncx_cfg_t id;
 
     for (id = NCX_CFGID_RUNNING; id <= MAX_CFGID; id++) {
-	if (!cfg_arr[id]) {
-	    continue;
-	}
-	if (!xml_strcmp(cfg_arr[id]->name, cfgname)) {
-	    return cfg_arr[id];
-	}
+        if (!cfg_arr[id]) {
+            continue;
+        }
+        if (!xml_strcmp(cfg_arr[id]->name, cfgname)) {
+            return cfg_arr[id];
+        }
     }
     return NULL;
 
@@ -185,34 +185,34 @@ static void
 
 #ifdef DEBUG
     if (!cfg) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (cfg->root) {
-	val_free_value(cfg->root);
+        val_free_value(cfg->root);
     }
 
     if (cfg->name) {
-	m__free(cfg->name);
+        m__free(cfg->name);
     }
     if (cfg->src_url) {
-	m__free(cfg->src_url);
+        m__free(cfg->src_url);
     }
     if (cfg->load_time) {
-	m__free(cfg->load_time);
+        m__free(cfg->load_time);
     }
     if (cfg->lock_time) {
-	m__free(cfg->lock_time);
+        m__free(cfg->lock_time);
     }
     if (cfg->last_ch_time) {
-	m__free(cfg->last_ch_time);
+        m__free(cfg->last_ch_time);
     } 
 
     while (!dlq_empty(&cfg->load_errQ)) {
-	err = (rpc_err_rec_t *)dlq_deque(&cfg->load_errQ);
-	rpc_err_free_record(err);
+        err = (rpc_err_rec_t *)dlq_deque(&cfg->load_errQ);
+        rpc_err_free_record(err);
     }
 
     m__free(cfg);
@@ -234,7 +234,7 @@ static void
 *********************************************************************/
 static cfg_template_t *
     new_template (const xmlChar *name,
-		  ncx_cfg_t cfg_id)
+                  ncx_cfg_t cfg_id)
 {
     ncx_module_t          *mod;
     cfg_template_t        *cfg;
@@ -243,33 +243,33 @@ static cfg_template_t *
     cfgobj = NULL;
     mod = ncx_find_module(NCXMOD_NETCONF, NULL);
     if (mod) {
-	cfgobj = ncx_find_object(mod, NCX_EL_CONFIG);
+        cfgobj = ncx_find_object(mod, NCX_EL_CONFIG);
     }
     if (!cfgobj) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
     }
 
     cfg = m__getObj(cfg_template_t);
     if (!cfg) {
-	return NULL;
+        return NULL;
     }
 
     memset(cfg, 0x0, sizeof(cfg_template_t));
 
     cfg->name = xml_strdup(name);
     if (!cfg->name) {
-	m__free(cfg);
-	return NULL;
+        m__free(cfg);
+        return NULL;
     }
 
     cfg->lock_time = m__getMem(TSTAMP_MIN_SIZE);
     if (!cfg->lock_time) {
-	m__free(cfg->name);
-	m__free(cfg);
-	return NULL;
+        m__free(cfg->name);
+        m__free(cfg);
+        return NULL;
     } else {
-	memset(cfg->lock_time, 0x0, TSTAMP_MIN_SIZE);
+        memset(cfg->lock_time, 0x0, TSTAMP_MIN_SIZE);
     }
 
     cfg->cfg_id = cfg_id;
@@ -277,14 +277,14 @@ static cfg_template_t *
     dlq_createSQue(&cfg->load_errQ);
 
     if (cfg_id != NCX_CFGID_CANDIDATE) {
-	cfg->root = val_new_value();
-	if (!cfg->root) {
-	    free_template(cfg);
-	    return NULL;
-	}
-	
-	/* finish setting up the <config> root value */
-	val_init_from_template(cfg->root, cfgobj);
+        cfg->root = val_new_value();
+        if (!cfg->root) {
+            free_template(cfg);
+            return NULL;
+        }
+        
+        /* finish setting up the <config> root value */
+        val_init_from_template(cfg->root, cfgobj);
     }  /* else root will be set next with val_clone_config */
 
     return cfg;
@@ -313,11 +313,11 @@ void
 
     if (!cfg_init_done) {
 
-	for (i=0; i<CFG_NUM_STATIC; i++) {
-	    cfg_arr[i] = NULL;
-	}
+        for (i=0; i<CFG_NUM_STATIC; i++) {
+            cfg_arr[i] = NULL;
+        }
 
-	cfg_init_done = TRUE;
+        cfg_init_done = TRUE;
     }
 
 } /* cfg_init */
@@ -339,13 +339,13 @@ void
     ncx_cfg_t   id;
 
     if (cfg_init_done) {
-	for (id=NCX_CFGID_RUNNING; id <= MAX_CFGID; id++) {
-	    if (cfg_arr[id]) {
-		free_template(cfg_arr[id]);
-		cfg_arr[id] = NULL;
-	    }
-	}
-	cfg_init_done = FALSE;
+        for (id=NCX_CFGID_RUNNING; id <= MAX_CFGID; id++) {
+            if (cfg_arr[id]) {
+                free_template(cfg_arr[id]);
+                cfg_arr[id] = NULL;
+            }
+        }
+        cfg_init_done = FALSE;
     }
 
 } /* cfg_cleanup */
@@ -369,36 +369,36 @@ status_t
     const xmlChar    *name;
 
     if (!cfg_init_done) {
-	cfg_init();
+        cfg_init();
     }
 
 #ifdef DEBUG
     if (cfg_id > MAX_CFGID) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
     if (cfg_arr[cfg_id]) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     /* get the hard-wired config name */
     switch (cfg_id) {
     case NCX_CFGID_RUNNING:
-	name = NCX_CFG_RUNNING;
-	break;
+        name = NCX_CFG_RUNNING;
+        break;
     case NCX_CFGID_CANDIDATE:
-	name = NCX_CFG_CANDIDATE;
-	break;
+        name = NCX_CFG_CANDIDATE;
+        break;
     case NCX_CFGID_STARTUP:
-	name = NCX_CFG_STARTUP;
-	break;
+        name = NCX_CFG_STARTUP;
+        break;
     default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     cfg = new_template(name, cfg_id);
     if (!cfg) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     cfg_arr[cfg_id] = cfg;
@@ -421,21 +421,21 @@ status_t
 *********************************************************************/
 cfg_template_t *
     cfg_new_template (const xmlChar *name,
-		      ncx_cfg_t cfg_id)
+                      ncx_cfg_t cfg_id)
 {
     cfg_template_t *cfg;
 
     cfg = m__getObj(cfg_template_t);
     if (!cfg) {
-	return NULL;
+        return NULL;
     }
 
     memset(cfg, 0x0, sizeof(cfg_template_t));
 
     cfg->name = xml_strdup(name);
     if (!cfg->name) {
-	m__free(cfg);
-	return NULL;
+        m__free(cfg);
+        return NULL;
     }
 
     cfg->cfg_id = cfg_id;
@@ -466,31 +466,31 @@ void
 
 #ifdef DEBUG
     if (!cfg) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (cfg->name) {
-	m__free(cfg->name);
+        m__free(cfg->name);
     }
     if (cfg->src_url) {
-	m__free(cfg->src_url);
+        m__free(cfg->src_url);
     }
     if (cfg->load_time) {
-	m__free(cfg->load_time);
+        m__free(cfg->load_time);
     }
     if (cfg->last_ch_time) {
-	m__free(cfg->last_ch_time);
+        m__free(cfg->last_ch_time);
     } 
 
     while (!dlq_empty(&cfg->load_errQ)) {
-	err = (rpc_err_rec_t *)dlq_deque(&cfg->load_errQ);
-	rpc_err_free_record(err);
+        err = (rpc_err_rec_t *)dlq_deque(&cfg->load_errQ);
+        rpc_err_free_record(err);
     }
 
     if (cfg->root) {
-	val_free_value(cfg->root);
+        val_free_value(cfg->root);
     }
 
     m__free(cfg);
@@ -511,16 +511,16 @@ void
 *********************************************************************/
 void
     cfg_set_state (ncx_cfg_t cfg_id,
-		   cfg_state_t  new_state)
+                   cfg_state_t  new_state)
 {
 #ifdef DEBUG
     if (cfg_id > MAX_CFGID) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
     if (!cfg_arr[cfg_id]) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
 #endif
 
@@ -544,13 +544,13 @@ cfg_state_t
 {
 #ifdef DEBUG
     if (cfg_id > MAX_CFGID) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return CFG_ST_NONE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return CFG_ST_NONE;
     }
 #endif
 
     if (!cfg_arr[cfg_id]) {
-	return CFG_ST_NONE;
+        return CFG_ST_NONE;
     }
 
     return cfg_arr[cfg_id]->cfg_state;
@@ -573,8 +573,8 @@ cfg_template_t *
 {
 #ifdef DEBUG
     if (!cfgname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -598,7 +598,7 @@ cfg_template_t *
 {
 
     if (cfgid <= MAX_CFGID) {
-	return cfg_arr[cfgid];
+        return cfg_arr[cfgid];
     }
     return NULL;
 
@@ -619,12 +619,12 @@ void
 {
 #ifdef DEBUG
     if (cfg_id > MAX_CFGID) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
     if (!cfg_arr[cfg_id]) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -650,8 +650,8 @@ status_t
 
 #ifdef DEBUG
     if (!cfg_arr[NCX_CFGID_RUNNING] ||
-	!cfg_arr[NCX_CFGID_CANDIDATE]) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        !cfg_arr[NCX_CFGID_CANDIDATE]) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
@@ -659,21 +659,21 @@ status_t
     candidate = cfg_arr[NCX_CFGID_CANDIDATE];
 
     if (!running->root) {
-	return ERR_NCX_DATA_MISSING;
+        return ERR_NCX_DATA_MISSING;
     }
 
     if (candidate->root) {
-	val_free_value(candidate->root);
-	candidate->root = NULL;
+        val_free_value(candidate->root);
+        candidate->root = NULL;
     }
 
     res = NO_ERR;
     candidate->root = 
-	val_clone_config_data(running->root, &res);
+        val_clone_config_data(running->root, &res);
 
     if (res == NO_ERR) {
-	/* clear the candidate dirty flag */
-	candidate->flags &= ~CFG_FL_DIRTY;
+        /* clear the candidate dirty flag */
+        candidate->flags &= ~CFG_FL_DIRTY;
     }
     return res;
 
@@ -698,7 +698,7 @@ status_t
 #ifdef DEBUG
     if (!cfg_arr[NCX_CFGID_CANDIDATE] ||
         !cfg_arr[NCX_CFGID_STARTUP]) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
@@ -706,12 +706,12 @@ status_t
     candidate = cfg_arr[NCX_CFGID_CANDIDATE];
 
     if (!startup->root) {
-	return ERR_NCX_DATA_MISSING;
+        return ERR_NCX_DATA_MISSING;
     }
 
     if (candidate->root) {
-	val_free_value(candidate->root);
-	candidate->root = NULL;
+        val_free_value(candidate->root);
+        candidate->root = NULL;
     }
 
     candidate->root = val_clone(startup->root);
@@ -752,15 +752,15 @@ status_t
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (!cfg_arr[NCX_CFGID_CANDIDATE]) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
 
     candidate = cfg_arr[NCX_CFGID_CANDIDATE];
 
     if (candidate->root) {
-	val_free_value(candidate->root);
-	candidate->root = NULL;
+        val_free_value(candidate->root);
+        candidate->root = NULL;
     }
 
     candidate->root = val_clone(newroot);
@@ -792,8 +792,8 @@ void
 {
 #ifdef DEBUG
     if (!cfg) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -816,8 +816,8 @@ boolean
 {
 #ifdef DEBUG
     if (!cfg) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -844,39 +844,39 @@ status_t
 
 #ifdef DEBUG
     if (!cfg) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     switch (cfg->cfg_state) {
     case CFG_ST_READY:
-	if (cfg->cfg_id == NCX_CFGID_CANDIDATE) {
-	    /* lock cannot be granted if any changes
-	     * to the candidate are already made
-	     */
-	    res = (cfg_get_dirty_flag(cfg)) ? 
-		ERR_NCX_CANDIDATE_DIRTY : NO_ERR;
-	} else {
-	    /* lock can be granted if state is ready */
-	    res = NO_ERR;
-	}
-	break;
+        if (cfg->cfg_id == NCX_CFGID_CANDIDATE) {
+            /* lock cannot be granted if any changes
+             * to the candidate are already made
+             */
+            res = (cfg_get_dirty_flag(cfg)) ? 
+                ERR_NCX_CANDIDATE_DIRTY : NO_ERR;
+        } else {
+            /* lock can be granted if state is ready */
+            res = NO_ERR;
+        }
+        break;
     case CFG_ST_PLOCK:
-	/* fall through -- TBD -- treat as full lock */
+        /* fall through -- TBD -- treat as full lock */
     case CFG_ST_FLOCK:
-	/* full lock already held by a session 
-	 * get the session ID of the lock holder 
-	 */
-	res = ERR_NCX_LOCK_DENIED;
-	break;
+        /* full lock already held by a session 
+         * get the session ID of the lock holder 
+         */
+        res = ERR_NCX_LOCK_DENIED;
+        break;
     case CFG_ST_NONE:
     case CFG_ST_INIT:
     case CFG_ST_CLEANUP:
-	/* config is in a state where locks cannot be granted */
-	res = ERR_NCX_NO_ACCESS_STATE;
-	break;
+        /* config is in a state where locks cannot be granted */
+        res = ERR_NCX_NO_ACCESS_STATE;
+        break;
     default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
+        res = SET_ERROR(ERR_INTERNAL_VAL);
 
     }
 
@@ -898,39 +898,39 @@ status_t
 *********************************************************************/
 status_t
     cfg_ok_to_unlock (const cfg_template_t *cfg,
-		      ses_id_t sesid)
+                      ses_id_t sesid)
 {
     status_t  res;
 
 #ifdef DEBUG
     if (!cfg) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     switch (cfg->cfg_state) {
     case CFG_ST_PLOCK:
-	/* Partial locks still TBD */
-	/* fall through */
+        /* Partial locks still TBD */
+        /* fall through */
     case CFG_ST_FLOCK:
-	/* lock is granted
-	 * setup the user1 scratchpad with the cfg to lock 
-	 */
-	if (cfg->locked_by == sesid) {
-	    res = NO_ERR;
-	} else {
-	    res = ERR_NCX_NO_ACCESS_LOCK;
-	}
-	break;
+        /* lock is granted
+         * setup the user1 scratchpad with the cfg to lock 
+         */
+        if (cfg->locked_by == sesid) {
+            res = NO_ERR;
+        } else {
+            res = ERR_NCX_NO_ACCESS_LOCK;
+        }
+        break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	/* fall through */
+        SET_ERROR(ERR_INTERNAL_VAL);
+        /* fall through */
     case CFG_ST_NONE:
     case CFG_ST_INIT:
     case CFG_ST_READY:
     case CFG_ST_CLEANUP:
-	/* config is not in a locked state */
-	res = ERR_NCX_NO_ACCESS_STATE;
+        /* config is not in a locked state */
+        res = ERR_NCX_NO_ACCESS_STATE;
     }
 
     return res;
@@ -955,7 +955,7 @@ status_t
 
 #ifdef DEBUG
     if (!cfg) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -964,16 +964,16 @@ status_t
     case CFG_ST_FLOCK:
     case CFG_ST_INIT:
     case CFG_ST_READY:
-	res = NO_ERR;
-	break;
+        res = NO_ERR;
+        break;
     case CFG_ST_NONE:
     case CFG_ST_CLEANUP:
-	/* config is not in a writable state */
-	res = ERR_NCX_NO_ACCESS_STATE;
-	break;
+        /* config is not in a writable state */
+        res = ERR_NCX_NO_ACCESS_STATE;
+        break;
     default:
-	res = SET_ERROR(ERR_INTERNAL_VAL);
-	break;
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+        break;
     }
 
     return res;
@@ -997,13 +997,13 @@ status_t
 *********************************************************************/
 status_t
     cfg_ok_to_write (const cfg_template_t *cfg,
-		     ses_id_t sesid)
+                     ses_id_t sesid)
 {
     status_t  res;
 
 #ifdef DEBUG
     if (!cfg) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -1014,47 +1014,47 @@ status_t
      * except for the <startup> config
      */
     if (cfg->cfg_state != CFG_ST_INIT) {
-	switch (cfg->cfg_id) {
-	case NCX_CFGID_RUNNING:
-	case NCX_CFGID_CANDIDATE:
-	case NCX_CFGID_STARTUP:
-	    break;
-	default:
-	    if (!(cfg->flags & CFG_FL_TARGET)) {
-		res = ERR_NCX_NOT_WRITABLE;
-	    }
-	}	
+        switch (cfg->cfg_id) {
+        case NCX_CFGID_RUNNING:
+        case NCX_CFGID_CANDIDATE:
+        case NCX_CFGID_STARTUP:
+            break;
+        default:
+            if (!(cfg->flags & CFG_FL_TARGET)) {
+                res = ERR_NCX_NOT_WRITABLE;
+            }
+        }       
     }
 
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* check the current config state */
     switch (cfg->cfg_state) {
     case CFG_ST_PLOCK:
-	/* Partial locks still TBD */
-	/* fall through */
+        /* Partial locks still TBD */
+        /* fall through */
     case CFG_ST_FLOCK:
-	if (cfg->locked_by == sesid) {
-	    res = NO_ERR;
-	} else {
-	    res = ERR_NCX_NO_ACCESS_LOCK;
-	}
-	break;
+        if (cfg->locked_by == sesid) {
+            res = NO_ERR;
+        } else {
+            res = ERR_NCX_NO_ACCESS_LOCK;
+        }
+        break;
     case CFG_ST_INIT:
     case CFG_ST_READY:
-	res = NO_ERR;
-	break;
+        res = NO_ERR;
+        break;
     case CFG_ST_NONE:
     case CFG_ST_CLEANUP:
-	/* config is not in a writable state */
-	res = ERR_NCX_NO_ACCESS_STATE;
-	break;
+        /* config is not in a writable state */
+        res = ERR_NCX_NO_ACCESS_STATE;
+        break;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	res = ERR_NCX_OPERATION_FAILED;
-	break;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        res = ERR_NCX_OPERATION_FAILED;
+        break;
     }
 
     return res;
@@ -1079,8 +1079,8 @@ boolean
 
 #ifdef DEBUG
     if (!cfg) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
@@ -1108,13 +1108,13 @@ boolean
 *********************************************************************/
 status_t
     cfg_get_global_lock_info (const cfg_template_t *cfg,
-			      ses_id_t  *sid,
-			      const xmlChar **locktime)
+                              ses_id_t  *sid,
+                              const xmlChar **locktime)
 {
 
 #ifdef DEBUG
     if (!cfg || !sid || !locktime) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -1122,11 +1122,11 @@ status_t
     *locktime = NULL;
 
     if (cfg->cfg_state == CFG_ST_FLOCK) {
-	*sid = cfg->locked_by;
-	*locktime = cfg->lock_time;
-	return NO_ERR;
+        *sid = cfg->locked_by;
+        *locktime = cfg->lock_time;
+        return NO_ERR;
     } else {
-	return ERR_NCX_SKIPPED;
+        return ERR_NCX_SKIPPED;
     }
     /*NOTREACHED*/
 
@@ -1149,24 +1149,24 @@ status_t
 *********************************************************************/
 status_t
     cfg_lock (cfg_template_t *cfg,
-	      ses_id_t locked_by,
-	      cfg_source_t  lock_src)
+              ses_id_t locked_by,
+              cfg_source_t  lock_src)
 {
     status_t  res;
 
 #ifdef DEBUG
     if (!cfg) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     res = cfg_ok_to_lock(cfg);
 
     if (res == NO_ERR) {
-	cfg->cfg_state = CFG_ST_FLOCK;
-	cfg->locked_by = locked_by;
-	cfg->lock_src = lock_src;
-	tstamp_datetime(cfg->lock_time);
+        cfg->cfg_state = CFG_ST_FLOCK;
+        cfg->locked_by = locked_by;
+        cfg->lock_src = lock_src;
+        tstamp_datetime(cfg->lock_time);
     }
 
     return res;
@@ -1187,22 +1187,22 @@ status_t
 *********************************************************************/
 status_t
     cfg_unlock (cfg_template_t *cfg,
-		ses_id_t locked_by)
+                ses_id_t locked_by)
 {
     status_t  res;
 
 #ifdef DEBUG
     if (!cfg) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     res = cfg_ok_to_unlock(cfg, locked_by);
 
     if (res == NO_ERR) {
-	cfg->cfg_state = CFG_ST_READY;
-	cfg->locked_by = 0;
-	cfg->lock_src = CFG_SRC_NONE;
+        cfg->cfg_state = CFG_ST_READY;
+        cfg->locked_by = 0;
+        cfg->lock_src = CFG_SRC_NONE;
 
         /* sec 8.3.5.2 requires a discard-changes
          * when a lock is released on the candidate
@@ -1234,17 +1234,17 @@ void
     status_t        res;
 
     if (!cfg_init_done) {
-	return;
+        return;
     }
 
     for (i=0; i<CFG_NUM_STATIC; i++) {
-	cfg = cfg_arr[i];
-	if (cfg && cfg->locked_by == sesid) {
-	    cfg->cfg_state = CFG_ST_READY;
-	    cfg->locked_by = 0;
-	    cfg->lock_src = CFG_SRC_NONE;
-	    log_info("\ncfg forced unlock on %s config, held by session %d",
-		     cfg->name, sesid);
+        cfg = cfg_arr[i];
+        if (cfg && cfg->locked_by == sesid) {
+            cfg->cfg_state = CFG_ST_READY;
+            cfg->locked_by = 0;
+            cfg->lock_src = CFG_SRC_NONE;
+            log_info("\ncfg forced unlock on %s config, held by session %d",
+                     cfg->name, sesid);
 
             /* sec 8.3.5.2 requires a discard-changes
              * when a lock is released on the candidate
@@ -1256,7 +1256,7 @@ void
                               get_error_string(res));
                 }
             }
-	}
+        }
     }
 
 } /* cfg_release_locks */
@@ -1278,7 +1278,7 @@ void
 *********************************************************************/
 void
     cfg_get_lock_list (ses_id_t sesid,
-		       val_value_t *retval)
+                       val_value_t *retval)
 {
 
     ncx_lmem_t *lmem;
@@ -1286,28 +1286,28 @@ void
 
 #ifdef DEBUG
     if (!retval) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     /* dummy session ID does not bother with locks */
     if (!sesid) {
-	return;
+        return;
     }
 
     for (i=0; i<CFG_NUM_STATIC; i++) {
-	if (cfg_arr[i] && cfg_arr[i]->locked_by == sesid) {
-	    lmem = ncx_new_lmem();
-	    if (lmem) {
-		lmem->val.str = xml_strdup(cfg_arr[i]->name);
-		if (lmem->val.str) {
-		    ncx_insert_lmem(&retval->v.list, lmem, NCX_MERGE_LAST);
-		} else {
-		    ncx_free_lmem(lmem, NCX_BT_STRING);
-		}
-	    }
-	}
+        if (cfg_arr[i] && cfg_arr[i]->locked_by == sesid) {
+            lmem = ncx_new_lmem();
+            if (lmem) {
+                lmem->val.str = xml_strdup(cfg_arr[i]->name);
+                if (lmem->val.str) {
+                    ncx_insert_lmem(&retval->v.list, lmem, NCX_MERGE_LAST);
+                } else {
+                    ncx_free_lmem(lmem, NCX_BT_STRING);
+                }
+            }
+        }
     }
 
 } /* cfg_get_lock_list */
@@ -1330,7 +1330,7 @@ void
 *********************************************************************/
 val_value_t *
     cfg_find_datanode (const xmlChar *target,
-		       ncx_cfg_t  cfgid)
+                       ncx_cfg_t  cfgid)
 {
     cfg_template_t  *cfg;
     val_value_t     *retval;
@@ -1338,24 +1338,24 @@ val_value_t *
 
 #ifdef DEBUG
     if (!target) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     cfg = cfg_get_config_id(cfgid);
     if (!cfg) {
-	return NULL;
+        return NULL;
     }
 
     res = xpath_find_val_target(cfg->root, 
                                 NULL,
-				target, 
+                                target, 
                                 &retval);
     if (res == NO_ERR) {
-	return retval;
+        return retval;
     } else {
-	return NULL;
+        return NULL;
     }
 
 } /* cfg_find_datanode */
@@ -1379,8 +1379,8 @@ val_value_t *
 *********************************************************************/
 val_value_t *
     cfg_find_modrel_datanode (ncx_module_t *mod,
-			      const xmlChar *target,
-			      ncx_cfg_t  cfgid)
+                              const xmlChar *target,
+                              ncx_cfg_t  cfgid)
 {
     cfg_template_t  *cfg;
     val_value_t     *retval;
@@ -1388,25 +1388,25 @@ val_value_t *
 
 #ifdef DEBUG
     if (!target) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     retval = NULL;
     cfg = cfg_get_config_id(cfgid);
     if (!cfg) {
-	return NULL;
+        return NULL;
     }
 
     res = xpath_find_val_target(cfg->root, 
                                 mod,
-				target, 
+                                target, 
                                 &retval);
     if (res == NO_ERR) {
-	return retval;
+        return retval;
     } else {
-	return NULL;
+        return NULL;
     }
 
 } /* cfg_find_modrel_datanode */
@@ -1426,7 +1426,7 @@ val_value_t *
 *********************************************************************/
 status_t
     cfg_apply_load_root (cfg_template_t *cfg,
-			 val_value_t *newroot)
+                         val_value_t *newroot)
 {
     if (cfg->root && val_child_cnt(cfg->root)) {
         return SET_ERROR(ERR_INTERNAL_VAL);
@@ -1441,14 +1441,14 @@ status_t
     /* set the load_time and last_ch_time timestamps */
     cfg->load_time = new_cur_datetime();
     if (cfg->load_time) {
-	cfg->last_ch_time = xml_strdup(cfg->load_time);
-	if (!cfg->last_ch_time) {
+        cfg->last_ch_time = xml_strdup(cfg->load_time);
+        if (!cfg->last_ch_time) {
             cfg->root = NULL;
-	    return ERR_INTERNAL_MEM;
-	}
+            return ERR_INTERNAL_MEM;
+        }
     } else {
         cfg->root = NULL;
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     return NO_ERR;

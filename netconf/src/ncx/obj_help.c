@@ -1,6 +1,6 @@
 /*  FILE: obj_help.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -107,12 +107,12 @@ static void
     ncx_btype_t       btyp;
 
     if (mode == HELP_MODE_BRIEF) {
-	return;
+        return;
     }
 
     typdef = obj_get_typdef(obj);
     if (!typdef) {
-	return;
+        return;
     }
     basetypdef = typ_get_base_typdef(typdef);
 
@@ -120,83 +120,83 @@ static void
 
     datastr = typ_get_rangestr(typdef);
     if (datastr) {
-	if (typ_is_string(btyp)) {
-	    help_write_lines((const xmlChar *)"length: ", indent, TRUE);
-	} else {
-	    help_write_lines((const xmlChar *)"range: ", indent, TRUE);
-	}
-	help_write_lines(datastr, 0, FALSE);
+        if (typ_is_string(btyp)) {
+            help_write_lines((const xmlChar *)"length: ", indent, TRUE);
+        } else {
+            help_write_lines((const xmlChar *)"range: ", indent, TRUE);
+        }
+        help_write_lines(datastr, 0, FALSE);
     }
 
     testdef = typdef;
     while (testdef) {
-	for (pattern = typ_get_first_pattern(testdef);
-	     pattern != NULL;
-	     pattern = typ_get_next_pattern(pattern)) {
+        for (pattern = typ_get_first_pattern(testdef);
+             pattern != NULL;
+             pattern = typ_get_next_pattern(pattern)) {
 
-	    help_write_lines((const xmlChar *)"pattern: ", indent, TRUE);
-	    help_write_lines(pattern->pat_str, 0, FALSE);
-	}
-	testdef = typ_get_parent_typdef(testdef);
+            help_write_lines((const xmlChar *)"pattern: ", indent, TRUE);
+            help_write_lines(pattern->pat_str, 0, FALSE);
+        }
+        testdef = typ_get_parent_typdef(testdef);
     }
 
     switch (btyp) {
     case NCX_BT_ENUM:
     case NCX_BT_BITS:
-	if (btyp == NCX_BT_ENUM) {
-	    help_write_lines((const xmlChar *)"enum values:",
-			     indent, 
+        if (btyp == NCX_BT_ENUM) {
+            help_write_lines((const xmlChar *)"enum values:",
+                             indent, 
                              TRUE);
-	} else {
-	    help_write_lines((const xmlChar *)"bit values:",
-			     indent, 
+        } else {
+            help_write_lines((const xmlChar *)"bit values:",
+                             indent, 
                              TRUE);
-	}
-	
-	for (tenum = typ_first_enumdef(basetypdef);
-	     tenum != NULL;
-	     tenum = typ_next_enumdef(tenum)) {
-	    if (mode == HELP_MODE_NORMAL) {
-		help_write_lines((const xmlChar *)" ", 0, FALSE);
-		help_write_lines(tenum->name, 0, FALSE);
-	    } else {
-		help_write_lines(tenum->name,
-				 indent+NCX_DEF_INDENT, 
+        }
+        
+        for (tenum = typ_first_enumdef(basetypdef);
+             tenum != NULL;
+             tenum = typ_next_enumdef(tenum)) {
+            if (mode == HELP_MODE_NORMAL) {
+                help_write_lines((const xmlChar *)" ", 0, FALSE);
+                help_write_lines(tenum->name, 0, FALSE);
+            } else {
+                help_write_lines(tenum->name,
+                                 indent+NCX_DEF_INDENT, 
                                  TRUE);
-		help_write_lines((const xmlChar *)"(", 0, FALSE);
+                help_write_lines((const xmlChar *)"(", 0, FALSE);
 
-		if (btyp == NCX_BT_ENUM) {
-		    sprintf((char *)numbuff, "%d", tenum->val);
-		} else {
-		    sprintf((char *)numbuff, "%u", tenum->pos);
-		}
+                if (btyp == NCX_BT_ENUM) {
+                    sprintf((char *)numbuff, "%d", tenum->val);
+                } else {
+                    sprintf((char *)numbuff, "%u", tenum->pos);
+                }
 
-		help_write_lines(numbuff, 0, FALSE);
-		help_write_lines((const xmlChar *)")", 0, FALSE);
-		if (tenum->descr) {
-		    help_write_lines(tenum->descr, 
-				     indent+(2*NCX_DEF_INDENT), 
-				     TRUE);
-		}
-		if (tenum->ref) {
-		    help_write_lines(tenum->ref, 
-				     indent+(2*NCX_DEF_INDENT), 
-				     TRUE);
-		}
-	    }
-	}
-	break;
+                help_write_lines(numbuff, 0, FALSE);
+                help_write_lines((const xmlChar *)")", 0, FALSE);
+                if (tenum->descr) {
+                    help_write_lines(tenum->descr, 
+                                     indent+(2*NCX_DEF_INDENT), 
+                                     TRUE);
+                }
+                if (tenum->ref) {
+                    help_write_lines(tenum->ref, 
+                                     indent+(2*NCX_DEF_INDENT), 
+                                     TRUE);
+                }
+            }
+        }
+        break;
     case NCX_BT_LEAFREF:
-	datastr = typ_get_leafref_path(basetypdef);
-	if (datastr) {
-	    help_write_lines((const xmlChar *)"leafref path:",
-			     indent, 
+        datastr = typ_get_leafref_path(basetypdef);
+        if (datastr) {
+            help_write_lines((const xmlChar *)"leafref path:",
+                             indent, 
                              TRUE);
-	    help_write_lines(datastr, indent+NCX_DEF_INDENT, TRUE);
-	}
-	break;
+            help_write_lines(datastr, indent+NCX_DEF_INDENT, TRUE);
+        }
+        break;
     default:
-	;
+        ;
     }
 
     
@@ -217,9 +217,9 @@ static void
 *********************************************************************/
 void
     obj_dump_template (obj_template_t *obj,
-		       help_mode_t mode,
-		       uint32 nestlevel,
-		       uint32 indent)
+                       help_mode_t mode,
+                       uint32 nestlevel,
+                       uint32 indent)
 {
     const xmlChar        *val;
     obj_template_t *testobj;
@@ -233,43 +233,43 @@ void
         return;
     }
     if (mode > HELP_MODE_FULL) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
 #endif
 
     if (!obj_has_name(obj)) {
-	return;
+        return;
     }
 
     if (mode==HELP_MODE_NONE) {
-	return;
+        return;
     }
 
     objnestlevel = obj_get_level(obj);
 
     if (mode == HELP_MODE_BRIEF && 
-	nestlevel > 0 &&
-	objnestlevel > nestlevel) {
-	return;
+        nestlevel > 0 &&
+        objnestlevel > nestlevel) {
+        return;
     }
 
     normalpass = (nestlevel && (objnestlevel > nestlevel))
-	? FALSE : TRUE;
+        ? FALSE : TRUE;
 
     if (obj->objtype == OBJ_TYP_RPCIO || 
-	obj->objtype == OBJ_TYP_RPC) {
-	help_write_lines(obj_get_name(obj), indent, TRUE);
-	count = 0;
+        obj->objtype == OBJ_TYP_RPC) {
+        help_write_lines(obj_get_name(obj), indent, TRUE);
+        count = 0;
     } else if (obj->objtype == OBJ_TYP_CASE) {
-	count = dlq_count(obj->def.cas->datadefQ);
+        count = dlq_count(obj->def.cas->datadefQ);
     } else {
-	count = 2;
+        count = 2;
     }
     if (count > 1) {
-	help_write_lines(obj_get_typestr(obj), indent, TRUE);
-	help_write_lines((const xmlChar *)" ", 0, FALSE);
-	help_write_lines(obj_get_name(obj), 0, FALSE);
+        help_write_lines(obj_get_typestr(obj), indent, TRUE);
+        help_write_lines((const xmlChar *)" ", 0, FALSE);
+        help_write_lines(obj_get_name(obj), 0, FALSE);
     }
 
     neednewline = FALSE;
@@ -281,307 +281,307 @@ void
     case OBJ_TYP_RPC:
     case OBJ_TYP_RPCIO:
     case OBJ_TYP_NOTIF:
-	break;
+        break;
     default:
-	/* print type and default for leafy and choice objects */
-	if (obj->objtype != OBJ_TYP_CHOICE) {
-	    help_write_lines((const xmlChar *)" [", 0, FALSE); 
-	    help_write_lines((const xmlChar *)
-			     obj_get_type_name(obj),
-			     0, 
+        /* print type and default for leafy and choice objects */
+        if (obj->objtype != OBJ_TYP_CHOICE) {
+            help_write_lines((const xmlChar *)" [", 0, FALSE); 
+            help_write_lines((const xmlChar *)
+                             obj_get_type_name(obj),
+                             0, 
                              FALSE);
-	    help_write_lines((const xmlChar *)"]", 0, FALSE); 
-	}
+            help_write_lines((const xmlChar *)"]", 0, FALSE); 
+        }
 
-	if (mode != HELP_MODE_BRIEF) {
-	    val = obj_get_default(obj);
-	    if (val) {
-		help_write_lines((const xmlChar *)" [d:", 0, FALSE); 
-		help_write_lines(val, 0, FALSE);
-		help_write_lines((const xmlChar *)"]", 0, FALSE); 
-	    }
-	}
+        if (mode != HELP_MODE_BRIEF) {
+            val = obj_get_default(obj);
+            if (val) {
+                help_write_lines((const xmlChar *)" [d:", 0, FALSE); 
+                help_write_lines(val, 0, FALSE);
+                help_write_lines((const xmlChar *)"]", 0, FALSE); 
+            }
+        }
     }
 
     if (normalpass) {
-	val = obj_get_description(obj);
-	if (val) {
-	    switch (mode) {
-	    case HELP_MODE_BRIEF:
-		if (obj->objtype == OBJ_TYP_RPC || 
-		    obj->objtype == OBJ_TYP_NOTIF) {
-		    help_write_lines_max(val, 
+        val = obj_get_description(obj);
+        if (val) {
+            switch (mode) {
+            case HELP_MODE_BRIEF:
+                if (obj->objtype == OBJ_TYP_RPC || 
+                    obj->objtype == OBJ_TYP_NOTIF) {
+                    help_write_lines_max(val, 
                                          indent+NCX_DEF_INDENT,
-					 TRUE, 
+                                         TRUE, 
                                          HELP_MODE_BRIEF_MAX); 
-		}
-		break;
-	    case HELP_MODE_NORMAL:
-		if (obj->objtype == OBJ_TYP_RPC || 
-		    obj->objtype == OBJ_TYP_NOTIF) {
-		    help_write_lines_max(val, 
+                }
+                break;
+            case HELP_MODE_NORMAL:
+                if (obj->objtype == OBJ_TYP_RPC || 
+                    obj->objtype == OBJ_TYP_NOTIF) {
+                    help_write_lines_max(val, 
                                          indent+NCX_DEF_INDENT,
-					 TRUE, 
+                                         TRUE, 
                                          HELP_MODE_NORMAL_MAX); 
-		}
-		break;
-	    case HELP_MODE_FULL:
-		help_write_lines(val, indent+NCX_DEF_INDENT, TRUE); 
-		break;
-	    default:
-		SET_ERROR(ERR_INTERNAL_VAL);
-		return;
-	    }
-	}
+                }
+                break;
+            case HELP_MODE_FULL:
+                help_write_lines(val, indent+NCX_DEF_INDENT, TRUE); 
+                break;
+            default:
+                SET_ERROR(ERR_INTERNAL_VAL);
+                return;
+            }
+        }
     }
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
-	switch (mode) {
-	case HELP_MODE_BRIEF:
+        switch (mode) {
+        case HELP_MODE_BRIEF:
             neednewline = TRUE;
-	    break;
-	case HELP_MODE_NORMAL:
-	    if (obj->def.container->presence) {
-		help_write_lines((const xmlChar *)" (P)", 
-				 0, 
+            break;
+        case HELP_MODE_NORMAL:
+            if (obj->def.container->presence) {
+                help_write_lines((const xmlChar *)" (P)", 
+                                 0, 
                                  FALSE); 
-	    } else {
-		help_write_lines((const xmlChar *)" (NP)", 
-				 0, 
+            } else {
+                help_write_lines((const xmlChar *)" (NP)", 
+                                 0, 
                                  FALSE); 
-	    }
-	    testobj = obj_get_default_parm(obj);
-	    if (testobj) {
-		help_write_lines((const xmlChar *)"default parameter: ", 
-				 indent+NCX_DEF_INDENT, 
+            }
+            testobj = obj_get_default_parm(obj);
+            if (testobj) {
+                help_write_lines((const xmlChar *)"default parameter: ", 
+                                 indent+NCX_DEF_INDENT, 
                                  TRUE); 
-		help_write_lines(obj_get_name(testobj), 0, FALSE);
-	    }
-	    break;
-	case HELP_MODE_FULL:
-	    if (obj->def.container->presence) {
-		help_write_lines((const xmlChar *)"presence: ", 
-				 indent+NCX_DEF_INDENT, 
+                help_write_lines(obj_get_name(testobj), 0, FALSE);
+            }
+            break;
+        case HELP_MODE_FULL:
+            if (obj->def.container->presence) {
+                help_write_lines((const xmlChar *)"presence: ", 
+                                 indent+NCX_DEF_INDENT, 
                                  TRUE); 
-		help_write_lines(obj->def.container->presence, 0, FALSE);
-	    }
-	    testobj = obj_get_default_parm(obj);
-	    if (testobj) {
-		help_write_lines((const xmlChar *)"default parameter: ", 
-				 indent+NCX_DEF_INDENT, 
+                help_write_lines(obj->def.container->presence, 0, FALSE);
+            }
+            testobj = obj_get_default_parm(obj);
+            if (testobj) {
+                help_write_lines((const xmlChar *)"default parameter: ", 
+                                 indent+NCX_DEF_INDENT, 
                                  TRUE); 
-		help_write_lines(obj_get_name(testobj), 0, FALSE);
-	    }
-	    if (mode == HELP_MODE_FULL) {
-		/*** add mustQ ***/;
-	    }
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    return;
-	}
-	obj_dump_datadefQ(obj->def.container->datadefQ, 
+                help_write_lines(obj_get_name(testobj), 0, FALSE);
+            }
+            if (mode == HELP_MODE_FULL) {
+                /*** add mustQ ***/;
+            }
+            break;
+        default:
+            SET_ERROR(ERR_INTERNAL_VAL);
+            return;
+        }
+        obj_dump_datadefQ(obj->def.container->datadefQ, 
                           mode, 
-			  nestlevel, 
+                          nestlevel, 
                           indent+NCX_DEF_INDENT);
-	break;
+        break;
     case OBJ_TYP_ANYXML:
         /* nothing interesting in the typdef to report */
         neednewline = TRUE;
         break;
     case OBJ_TYP_LEAF:
-	switch (mode) {
-	case HELP_MODE_BRIEF:
-	    break;
-	case HELP_MODE_NORMAL:
-	    if (normalpass) {
-		dump_typdef_data(obj, 
+        switch (mode) {
+        case HELP_MODE_BRIEF:
+            break;
+        case HELP_MODE_NORMAL:
+            if (normalpass) {
+                dump_typdef_data(obj, 
                                  mode, 
-				 indent+NCX_DEF_INDENT);
-	    }
-	    break;
-	case HELP_MODE_FULL:
-	    dump_typdef_data(obj,
-                             mode, 
-			     indent+NCX_DEF_INDENT);
-	    val = obj_get_units(obj);
-	    if (val) {
-		help_write_lines((const xmlChar *)"units: ", 
-				 indent,
-                                 TRUE); 
-		help_write_lines(val, 0, FALSE);
-	    }
-	    break;
-	default:
-	    ;
-	}
-	break;
-    case OBJ_TYP_LEAF_LIST:
-	switch (mode) {
-	case HELP_MODE_NORMAL:
-	    if (normalpass) {
-		dump_typdef_data(obj,
-                                 mode, 
-				 indent+NCX_DEF_INDENT);
-	    }
-	    break;
-	case HELP_MODE_FULL:
-	    dump_typdef_data(obj,
+                                 indent+NCX_DEF_INDENT);
+            }
+            break;
+        case HELP_MODE_FULL:
+            dump_typdef_data(obj,
                              mode, 
                              indent+NCX_DEF_INDENT);
-	    val = obj_get_units(obj);
-	    if (val) {
-		help_write_lines((const xmlChar *)"units: ", 
-				 indent, 
+            val = obj_get_units(obj);
+            if (val) {
+                help_write_lines((const xmlChar *)"units: ", 
+                                 indent,
                                  TRUE); 
-		help_write_lines(val, 0, FALSE);
-	    }
-	    if (!obj->def.leaflist->ordersys) {
-		help_write_lines((const xmlChar *)"ordered-by: user", 
-				 indent, 
+                help_write_lines(val, 0, FALSE);
+            }
+            break;
+        default:
+            ;
+        }
+        break;
+    case OBJ_TYP_LEAF_LIST:
+        switch (mode) {
+        case HELP_MODE_NORMAL:
+            if (normalpass) {
+                dump_typdef_data(obj,
+                                 mode, 
+                                 indent+NCX_DEF_INDENT);
+            }
+            break;
+        case HELP_MODE_FULL:
+            dump_typdef_data(obj,
+                             mode, 
+                             indent+NCX_DEF_INDENT);
+            val = obj_get_units(obj);
+            if (val) {
+                help_write_lines((const xmlChar *)"units: ", 
+                                 indent, 
                                  TRUE); 
-	    } else {
-		help_write_lines((const xmlChar *)"ordered-by: system", 
-				 indent, TRUE); 
-	    }
-	    if (obj->def.leaflist->minset) {
-		help_write_lines((const xmlChar *)"min-elements: ", 
-				 indent,
+                help_write_lines(val, 0, FALSE);
+            }
+            if (!obj->def.leaflist->ordersys) {
+                help_write_lines((const xmlChar *)"ordered-by: user", 
+                                 indent, 
                                  TRUE); 
-		sprintf(numbuff, "%u", obj->def.leaflist->minelems);
-		help_write_lines((const xmlChar *)numbuff, 0, FALSE);
-	    }
-	    if (obj->def.leaflist->maxset) {
-		help_write_lines((const xmlChar *)"max-elements: ", 
-				 indent,
+            } else {
+                help_write_lines((const xmlChar *)"ordered-by: system", 
+                                 indent, TRUE); 
+            }
+            if (obj->def.leaflist->minset) {
+                help_write_lines((const xmlChar *)"min-elements: ", 
+                                 indent,
                                  TRUE); 
-		sprintf(numbuff, "%u", obj->def.leaflist->maxelems);
-		help_write_lines((const xmlChar *)numbuff, 0, FALSE);
-	    }
-	    break;
-	default:
-	    ;
-	}
-	break;
+                sprintf(numbuff, "%u", obj->def.leaflist->minelems);
+                help_write_lines((const xmlChar *)numbuff, 0, FALSE);
+            }
+            if (obj->def.leaflist->maxset) {
+                help_write_lines((const xmlChar *)"max-elements: ", 
+                                 indent,
+                                 TRUE); 
+                sprintf(numbuff, "%u", obj->def.leaflist->maxelems);
+                help_write_lines((const xmlChar *)numbuff, 0, FALSE);
+            }
+            break;
+        default:
+            ;
+        }
+        break;
     case OBJ_TYP_CHOICE:
-	if (mode == HELP_MODE_BRIEF) {
+        if (mode == HELP_MODE_BRIEF) {
             neednewline = TRUE;
-	    break;
-	}
-	count = dlq_count(obj->def.choic->caseQ);
-	if (count) {
-	    obj_dump_datadefQ(obj->def.choic->caseQ,
+            break;
+        }
+        count = dlq_count(obj->def.choic->caseQ);
+        if (count) {
+            obj_dump_datadefQ(obj->def.choic->caseQ,
                               mode, 
-			      nestlevel, 
+                              nestlevel, 
                               indent+NCX_DEF_INDENT);
-	}
-	break;
+        }
+        break;
     case OBJ_TYP_CASE:
-	if (mode == HELP_MODE_BRIEF) {
+        if (mode == HELP_MODE_BRIEF) {
             neednewline = TRUE;
-	    break;
-	}
-	count = dlq_count(obj->def.cas->datadefQ);
-	if (count > 1) {
-	    obj_dump_datadefQ(obj->def.cas->datadefQ, 
+            break;
+        }
+        count = dlq_count(obj->def.cas->datadefQ);
+        if (count > 1) {
+            obj_dump_datadefQ(obj->def.cas->datadefQ, 
                               mode, 
-			      nestlevel,
+                              nestlevel,
                               indent+NCX_DEF_INDENT);
-	} else if (count == 1) {
-	    obj_dump_template(obj_first_child(obj),
+        } else if (count == 1) {
+            obj_dump_template(obj_first_child(obj),
                               mode, 
-			      nestlevel,
+                              nestlevel,
                               indent);
-	} /* else skip this case */
-	break;
+        } /* else skip this case */
+        break;
     case OBJ_TYP_LIST:
-	switch (mode) {
-	case HELP_MODE_BRIEF:
-	    break;
-	case HELP_MODE_NORMAL:
-	case HELP_MODE_FULL:
-	    if (obj->def.list->keystr) {
-		help_write_lines((const xmlChar *)"key: ", 
-				 indent, TRUE); 
-		help_write_lines(obj->def.list->keystr, 0, FALSE);
-	    }
-	    if (!obj->def.list->ordersys) {
-		help_write_lines((const xmlChar *)"ordered-by: user", 
-				 indent, TRUE); 
-	    }
+        switch (mode) {
+        case HELP_MODE_BRIEF:
+            break;
+        case HELP_MODE_NORMAL:
+        case HELP_MODE_FULL:
+            if (obj->def.list->keystr) {
+                help_write_lines((const xmlChar *)"key: ", 
+                                 indent, TRUE); 
+                help_write_lines(obj->def.list->keystr, 0, FALSE);
+            }
+            if (!obj->def.list->ordersys) {
+                help_write_lines((const xmlChar *)"ordered-by: user", 
+                                 indent, TRUE); 
+            }
 
-	    if (mode == HELP_MODE_NORMAL) {
-		break;
-	    }
+            if (mode == HELP_MODE_NORMAL) {
+                break;
+            }
 
-	    if (obj->def.list->minset) {
-		help_write_lines((const xmlChar *)"min-elements: ", 
-				 indent, TRUE); 
-		sprintf(numbuff, "%u", obj->def.list->minelems);
-		help_write_lines((const xmlChar *)numbuff, 0, FALSE);
-	    }
-	    if (obj->def.list->maxset) {
-		help_write_lines((const xmlChar *)"max-elements: ", 
-				 indent, TRUE); 
-		sprintf(numbuff, "%u", obj->def.list->maxelems);
-		help_write_lines((const xmlChar *)numbuff, 0, FALSE);
-	    }
-	    break;
-	default:
-	    ;
-	}
-	if (mode != HELP_MODE_BRIEF) {
-	    obj_dump_datadefQ(obj->def.list->datadefQ, 
+            if (obj->def.list->minset) {
+                help_write_lines((const xmlChar *)"min-elements: ", 
+                                 indent, TRUE); 
+                sprintf(numbuff, "%u", obj->def.list->minelems);
+                help_write_lines((const xmlChar *)numbuff, 0, FALSE);
+            }
+            if (obj->def.list->maxset) {
+                help_write_lines((const xmlChar *)"max-elements: ", 
+                                 indent, TRUE); 
+                sprintf(numbuff, "%u", obj->def.list->maxelems);
+                help_write_lines((const xmlChar *)numbuff, 0, FALSE);
+            }
+            break;
+        default:
+            ;
+        }
+        if (mode != HELP_MODE_BRIEF) {
+            obj_dump_datadefQ(obj->def.list->datadefQ, 
                               mode, 
-			      nestlevel,
+                              nestlevel,
                               indent+NCX_DEF_INDENT);
-	}
-	break;
+        }
+        break;
     case OBJ_TYP_RPC:
-	testobj = obj_find_child(obj, NULL, YANG_K_INPUT);
-	if (testobj && obj_get_child_count(testobj)) {
-	    obj_dump_template(testobj,
-			      mode,
-			      nestlevel,
-			      indent+NCX_DEF_INDENT);
-	}
+        testobj = obj_find_child(obj, NULL, YANG_K_INPUT);
+        if (testobj && obj_get_child_count(testobj)) {
+            obj_dump_template(testobj,
+                              mode,
+                              nestlevel,
+                              indent+NCX_DEF_INDENT);
+        }
 
-	testobj = obj_find_child(obj, NULL, YANG_K_OUTPUT);
-	if (testobj && obj_get_child_count(testobj)) {
-	    obj_dump_template(testobj,
-			      mode,
-			      nestlevel,
-			      indent+NCX_DEF_INDENT);
-	}
-	help_write_lines((const xmlChar *)"\n", 0, FALSE);
-	break;
+        testobj = obj_find_child(obj, NULL, YANG_K_OUTPUT);
+        if (testobj && obj_get_child_count(testobj)) {
+            obj_dump_template(testobj,
+                              mode,
+                              nestlevel,
+                              indent+NCX_DEF_INDENT);
+        }
+        help_write_lines((const xmlChar *)"\n", 0, FALSE);
+        break;
     case OBJ_TYP_RPCIO:
-	if (mode != HELP_MODE_BRIEF) {
-	    testobj = obj_get_default_parm(obj);
-	    if (testobj) {
-		help_write_lines((const xmlChar *)"default parameter: ", 
-				 indent+NCX_DEF_INDENT, 
+        if (mode != HELP_MODE_BRIEF) {
+            testobj = obj_get_default_parm(obj);
+            if (testobj) {
+                help_write_lines((const xmlChar *)"default parameter: ", 
+                                 indent+NCX_DEF_INDENT, 
                                  TRUE); 
-		help_write_lines(obj_get_name(testobj), 0, FALSE);
-	    }
-	}
-	obj_dump_datadefQ(&obj->def.rpcio->datadefQ, 
+                help_write_lines(obj_get_name(testobj), 0, FALSE);
+            }
+        }
+        obj_dump_datadefQ(&obj->def.rpcio->datadefQ, 
                           mode, 
-			  nestlevel,
+                          nestlevel,
                           indent+NCX_DEF_INDENT);
-	break;
+        break;
     case OBJ_TYP_NOTIF:
-	obj_dump_datadefQ(&obj->def.notif->datadefQ,
+        obj_dump_datadefQ(&obj->def.notif->datadefQ,
                           mode, 
-			  nestlevel, 
+                          nestlevel, 
                           indent+NCX_DEF_INDENT);
-	break;
+        break;
     case OBJ_TYP_AUGMENT:
     case OBJ_TYP_USES:
     case OBJ_TYP_REFINE:
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
+        SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     if (neednewline) {
@@ -606,9 +606,9 @@ void
 *********************************************************************/
 void
     obj_dump_datadefQ (dlq_hdr_t *datadefQ,
-		       help_mode_t mode,
-		       uint32 nestlevel,
-		       uint32 indent)
+                       help_mode_t mode,
+                       uint32 nestlevel,
+                       uint32 indent)
 {
     obj_template_t  *obj;
     uint32           objnestlevel;
@@ -619,42 +619,42 @@ void
         return;
     }
     if (mode > HELP_MODE_FULL) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
 #endif
 
     if (mode == HELP_MODE_NONE) {
-	return;
+        return;
     }
 
     for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
-	 obj != NULL;
-	 obj = (obj_template_t *)dlq_nextEntry(obj)) {
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
 
-	if (!obj_has_name(obj) ||
-	    !obj_is_enabled(obj)) {
-	    continue;
-	}
+        if (!obj_has_name(obj) ||
+            !obj_is_enabled(obj)) {
+            continue;
+        }
 
-	objnestlevel = obj_get_level(obj);
-	if (mode == HELP_MODE_BRIEF && objnestlevel > nestlevel) {
-	    continue;
-	}
+        objnestlevel = obj_get_level(obj);
+        if (mode == HELP_MODE_BRIEF && objnestlevel > nestlevel) {
+            continue;
+        }
 
-	obj_dump_template(obj, mode, nestlevel, indent);
+        obj_dump_template(obj, mode, nestlevel, indent);
 
-	switch (obj->objtype) {
-	case OBJ_TYP_RPCIO:
-	case OBJ_TYP_CHOICE:
-	    break;
-	case OBJ_TYP_CASE:
-	    if (obj_get_child_count(obj) > 1) {
-		break;
-	    }  /* else fall through */
-	default:
-	    help_write_lines((const xmlChar *)"\n", 0, FALSE);
-	}
+        switch (obj->objtype) {
+        case OBJ_TYP_RPCIO:
+        case OBJ_TYP_CHOICE:
+            break;
+        case OBJ_TYP_CASE:
+            if (obj_get_child_count(obj) > 1) {
+                break;
+            }  /* else fall through */
+        default:
+            help_write_lines((const xmlChar *)"\n", 0, FALSE);
+        }
     }
 
 }   /* obj_dump_datadefQ */

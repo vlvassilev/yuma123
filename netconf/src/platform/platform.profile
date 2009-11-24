@@ -84,8 +84,10 @@ LIBTOOL=ar
 LFLAGS=-lm
 LPATH=-L$(LBASE)
 
+CEES = $(wildcard *.c)
+
 ################ OBJS RULE #############
-OBJS = $(patsubst %.c,$(TARGET)/%.o,$(wildcard *.c))
+OBJS = $(patsubst %.c,$(TARGET)/%.o,$(CEES))
 
 ################ DEPS RULE #############
 DEPS = $(patsubst %.c,%.D,$(wildcard *.c))
@@ -128,4 +130,14 @@ lint:
 	$(CC) -MM -MG -MT $(TARGET)/$(patsubst %.c,%.o,$<) \
 	-Wall -Wcomment $(CPPFLAGS) $(PLATFORM_CPP) $(CINC) \
 	$(SUBDIR_CPP) $(TARGET_ARCH) -c $< > $@
+
+
+notabs:
+	for c in $(CEES); do\
+	  cp $$c $$c.save;\
+	  expand $$c > $$c.ex;\
+	  mv $$c.ex $$c;\
+	done
+
+
 

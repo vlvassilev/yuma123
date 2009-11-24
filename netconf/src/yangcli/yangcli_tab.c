@@ -122,7 +122,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -196,12 +196,12 @@ date         init     comment
  *********************************************************************/
 static status_t
     fill_one_parm_completion (WordCompletion *cpl,
-			      completion_state_t *comstate,
-			      const char *line,
-			      const char *parmval,
-			      int word_start,
-			      int word_end,
-			      int parmlen)
+                              completion_state_t *comstate,
+                              const char *line,
+                              const char *parmval,
+                              int word_start,
+                              int word_end,
+                              int parmlen)
 
 
 {
@@ -210,30 +210,30 @@ static status_t
 
     /* check no partial match so need to skip this one */
     if (parmlen > 0 &&
-	strncmp(parmval,
-		&line[word_start],
-		parmlen)) {
-	/* parameter value start is not the same so skip it */
-	return NO_ERR;
+        strncmp(parmval,
+                &line[word_start],
+                parmlen)) {
+        /* parameter value start is not the same so skip it */
+        return NO_ERR;
     }
 
     if (comstate->cmdstate == CMD_STATE_FULL) {
-	endchar = " ";
+        endchar = " ";
     } else {
-	endchar = "";
+        endchar = "";
     }
 
     retval = 
-	cpl_add_completion(cpl,
-			   line,
-			   word_start,
-			   word_end,
-			   (const char *)&parmval[parmlen],
-			   (const char *)"",
-			   endchar);
+        cpl_add_completion(cpl,
+                           line,
+                           word_start,
+                           word_end,
+                           (const char *)&parmval[parmlen],
+                           (const char *)"",
+                           endchar);
 
     if (retval != 0) {
-	return ERR_NCX_OPERATION_FAILED;
+        return ERR_NCX_OPERATION_FAILED;
     }
 
     return NO_ERR;
@@ -270,12 +270,12 @@ static status_t
  *********************************************************************/
 static status_t
     fill_parm_completion (obj_template_t *parmobj,
-			  WordCompletion *cpl,
-			  completion_state_t *comstate,
-			  const char *line,
-			  int word_start,
-			  int word_end,
-			  int parmlen)
+                          WordCompletion *cpl,
+                          completion_state_t *comstate,
+                          const char *line,
+                          int word_start,
+                          int word_end,
+                          int parmlen)
 {
     const xmlChar         *parmname;
     const char            *defaultstr;
@@ -293,43 +293,43 @@ static status_t
     switch (btyp) {
     case NCX_BT_ENUM:
     case NCX_BT_BITS:
-	for (typenum = typ_first_enumdef(basetypdef);
-	     typenum != NULL && res == NO_ERR;
-	     typenum = typ_next_enumdef(typenum)) {
+        for (typenum = typ_first_enumdef(basetypdef);
+             typenum != NULL && res == NO_ERR;
+             typenum = typ_next_enumdef(typenum)) {
 
-	    res = fill_one_parm_completion(cpl,
-					   comstate,
-					   line,
-					   (const char *)typenum->name,
-					   word_start,
-					   word_end,
-					   parmlen);
-	}
+            res = fill_one_parm_completion(cpl,
+                                           comstate,
+                                           line,
+                                           (const char *)typenum->name,
+                                           word_start,
+                                           word_end,
+                                           parmlen);
+        }
         return res;
     case NCX_BT_BOOLEAN:
-	res = fill_one_parm_completion(cpl,
-				       comstate,
-				       line,
-				       (const char *)NCX_EL_TRUE,
-				       word_start,
-				       word_end,
-				       parmlen);
-	if (res == NO_ERR) {
-	    res = fill_one_parm_completion(cpl,
-					   comstate,
-					   line,
-					   (const char *)NCX_EL_FALSE,
-					   word_start,
-					   word_end,
-					   parmlen);
-	}
+        res = fill_one_parm_completion(cpl,
+                                       comstate,
+                                       line,
+                                       (const char *)NCX_EL_TRUE,
+                                       word_start,
+                                       word_end,
+                                       parmlen);
+        if (res == NO_ERR) {
+            res = fill_one_parm_completion(cpl,
+                                           comstate,
+                                           line,
+                                           (const char *)NCX_EL_FALSE,
+                                           word_start,
+                                           word_end,
+                                           parmlen);
+        }
         return res;
     case NCX_BT_INSTANCE_ID:
-	break;
+        break;
     case NCX_BT_IDREF:
-	break;
+        break;
     default:
-	break;
+        break;
     }
 
     /* no current values to show;
@@ -379,11 +379,11 @@ static status_t
  *********************************************************************/
 static status_t
     fill_one_rpc_completion_parms (obj_template_t *rpc,
-				   WordCompletion *cpl,
-				   const char *line,
-				   int word_start,
-				   int word_end,
-				   int cmdlen)
+                                   WordCompletion *cpl,
+                                   const char *line,
+                                   int word_start,
+                                   int word_end,
+                                   int cmdlen)
 {
     obj_template_t        *inputobj, *obj;
     const xmlChar         *parmname;
@@ -393,40 +393,40 @@ static status_t
 
     inputobj = obj_find_child(rpc, NULL, YANG_K_INPUT);
     if (inputobj == NULL || !obj_has_children(inputobj)) {
-	/* no input parameters */
-	return NO_ERR;
+        /* no input parameters */
+        return NO_ERR;
     }
 
     for (obj = obj_first_child_deep(inputobj);
-	 obj != NULL;
-	 obj = obj_next_child_deep(obj)) {
+         obj != NULL;
+         obj = obj_next_child_deep(obj)) {
 
-	parmname = obj_get_name(obj);
+        parmname = obj_get_name(obj);
 
-	/* check if there is a partial command name */
-	if (cmdlen > 0 &&
-	    strncmp((const char *)parmname,
-		    &line[word_start],
-		    cmdlen)) {
-	    /* command start is not the same so skip it */
-	    continue;
-	}
+        /* check if there is a partial command name */
+        if (cmdlen > 0 &&
+            strncmp((const char *)parmname,
+                    &line[word_start],
+                    cmdlen)) {
+            /* command start is not the same so skip it */
+            continue;
+        }
 
-	btyp = obj_get_basetype(obj);
-	hasval = (btyp == NCX_BT_EMPTY) ? FALSE : TRUE;
+        btyp = obj_get_basetype(obj);
+        hasval = (btyp == NCX_BT_EMPTY) ? FALSE : TRUE;
 
-	retval = 
-	    cpl_add_completion(cpl,
-			       line,
-			       word_start,
-			       word_end,
-			       (const char *)&parmname[cmdlen],
-			       "",
-			       (hasval) ? "=" : " ");
+        retval = 
+            cpl_add_completion(cpl,
+                               line,
+                               word_start,
+                               word_end,
+                               (const char *)&parmname[cmdlen],
+                               "",
+                               (hasval) ? "=" : " ");
 
-	if (retval != 0) {
-	    return ERR_NCX_OPERATION_FAILED;
-	}
+        if (retval != 0) {
+            return ERR_NCX_OPERATION_FAILED;
+        }
     }
 
     return NO_ERR;
@@ -463,12 +463,12 @@ static status_t
  *********************************************************************/
 static status_t
     fill_one_module_completion_commands (ncx_module_t *mod,
-					 WordCompletion *cpl,
-					 completion_state_t *comstate,
-					 const char *line,
-					 int word_start,
-					 int word_end,
-					 int cmdlen)
+                                         WordCompletion *cpl,
+                                         completion_state_t *comstate,
+                                         const char *line,
+                                         int word_start,
+                                         int word_end,
+                                         int cmdlen)
 {
     obj_template_t        *obj;
     const xmlChar         *cmdname;
@@ -479,47 +479,47 @@ static status_t
     yangcli_mod = get_yangcli_mod();
     toponly = FALSE;
     if (mod == yangcli_mod &&
-	!use_servercb(comstate->server_cb)) {
-	toponly = TRUE;
+        !use_servercb(comstate->server_cb)) {
+        toponly = TRUE;
     }
 
     /* check all the OBJ_TYP_RPC objects in the module */
     for (obj = ncx_get_first_object(mod);
-	 obj != NULL;
-	 obj = ncx_get_next_object(mod, obj)) {
+         obj != NULL;
+         obj = ncx_get_next_object(mod, obj)) {
 
-	if (!obj_is_rpc(obj)) {
-	    continue;
-	}
+        if (!obj_is_rpc(obj)) {
+            continue;
+        }
 
-	cmdname = obj_get_name(obj);
+        cmdname = obj_get_name(obj);
 
-	if (toponly && !is_top_command(cmdname)) {
-	    continue;
-	}
+        if (toponly && !is_top_command(cmdname)) {
+            continue;
+        }
 
 
-	/* check if there is a partial command name */
-	if (cmdlen > 0 &&
-	    strncmp((const char *)cmdname,
-		    &line[word_start],
-		    cmdlen)) {
-	    /* command start is not the same so skip it */
-	    continue;
-	}
+        /* check if there is a partial command name */
+        if (cmdlen > 0 &&
+            strncmp((const char *)cmdname,
+                    &line[word_start],
+                    cmdlen)) {
+            /* command start is not the same so skip it */
+            continue;
+        }
 
-	retval = 
-	    cpl_add_completion(cpl,
-			       line,
-			       word_start,
-			       word_end,
-			       (const char *)&cmdname[cmdlen],
-			       (const char *)"",
-			       (const char *)" ");
+        retval = 
+            cpl_add_completion(cpl,
+                               line,
+                               word_start,
+                               word_end,
+                               (const char *)&cmdname[cmdlen],
+                               (const char *)"",
+                               (const char *)" ");
 
-	if (retval != 0) {
-	    return ERR_NCX_OPERATION_FAILED;
-	}
+        if (retval != 0) {
+            return ERR_NCX_OPERATION_FAILED;
+        }
     }
 
     return NO_ERR;
@@ -554,11 +554,11 @@ static status_t
  *********************************************************************/
 static status_t
     fill_one_completion_commands (WordCompletion *cpl,
-				  completion_state_t *comstate,
-				  const char *line,
-				  int word_start,
-				  int word_end,
-				  int cmdlen)
+                                  completion_state_t *comstate,
+                                  const char *line,
+                                  int word_start,
+                                  int word_end,
+                                  int cmdlen)
 {
     modptr_t     *modptr;
     status_t      res;
@@ -567,62 +567,62 @@ static status_t
 
     /* figure out which modules to use */
     if (comstate->cmdmodule) {
-	/* if foo:\t entered as the current token, then
-	 * the comstate->cmdmodule pointer will be set
-	 * to limit the definitions to that module 
-	 */
-	res = fill_one_module_completion_commands
-	    (comstate->cmdmodule,
-	     cpl,
-	     comstate,
-	     line,
-	     word_start,
-	     word_end,
-	     cmdlen);
+        /* if foo:\t entered as the current token, then
+         * the comstate->cmdmodule pointer will be set
+         * to limit the definitions to that module 
+         */
+        res = fill_one_module_completion_commands
+            (comstate->cmdmodule,
+             cpl,
+             comstate,
+             line,
+             word_start,
+             word_end,
+             cmdlen);
     } else {
-	if (use_servercb(comstate->server_cb)) {
-	    /* list server commands first */
-	    for (modptr = (modptr_t *)
-		     dlq_firstEntry(&comstate->server_cb->modptrQ);
-		 modptr != NULL && res == NO_ERR;
-		 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+        if (use_servercb(comstate->server_cb)) {
+            /* list server commands first */
+            for (modptr = (modptr_t *)
+                     dlq_firstEntry(&comstate->server_cb->modptrQ);
+                 modptr != NULL && res == NO_ERR;
+                 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
-		res = fill_one_module_completion_commands
-		    (modptr->mod,
-		     cpl,
-		     comstate,
-		     line,
-		     word_start,
-		     word_end,
-		     cmdlen);
-	    }
+                res = fill_one_module_completion_commands
+                    (modptr->mod,
+                     cpl,
+                     comstate,
+                     line,
+                     word_start,
+                     word_end,
+                     cmdlen);
+            }
 
-	    /* list manager loaded commands next */
-	    for (modptr = (modptr_t *)
-		     dlq_firstEntry(get_mgrloadQ());
-		 modptr != NULL && res == NO_ERR;
-		 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+            /* list manager loaded commands next */
+            for (modptr = (modptr_t *)
+                     dlq_firstEntry(get_mgrloadQ());
+                 modptr != NULL && res == NO_ERR;
+                 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
-		res = fill_one_module_completion_commands
-		    (modptr->mod,
-		     cpl,
-		     comstate,
-		     line,
-		     word_start,
-		     word_end,
-		     cmdlen);
-	    }
-	}
+                res = fill_one_module_completion_commands
+                    (modptr->mod,
+                     cpl,
+                     comstate,
+                     line,
+                     word_start,
+                     word_end,
+                     cmdlen);
+            }
+        }
 
-	/* use the yangcli top commands every time */
-	res = fill_one_module_completion_commands
-	    (get_yangcli_mod(),
-	     cpl,
-	     comstate,
-	     line,
-	     word_start,
-	     word_end,
-	     cmdlen);
+        /* use the yangcli top commands every time */
+        res = fill_one_module_completion_commands
+            (get_yangcli_mod(),
+             cpl,
+             comstate,
+             line,
+             word_start,
+             word_end,
+             cmdlen);
     }
 
     return res;
@@ -650,46 +650,46 @@ static status_t
  *********************************************************************/
 static boolean
     is_parm_start (const char *line,
-		   int word_start,
-		   int word_cur)
+                   int word_start,
+                   int word_cur)
 {
     const char            *str;
 
     if (word_start >= word_cur) {
-	return FALSE;
+        return FALSE;
     }
 
     str = &line[word_cur];
     if (*str == '-') {
-	if ((word_cur - 2) >= word_start) {
-	    /* check for previous char before '-' */
-	    if (line[word_cur - 2] == '-') {
-		if ((word_cur - 3) >= word_start) {
-		    /* check for previous char before '--' */
-		    if (isspace(line[word_cur - 3])) {
-			/* this a real '--' command start */
-			return TRUE;
-		    } else {
-			/* dash dash part of some value string */
-			return FALSE;
-		    }
-		} else {
-		    /* start of line is '--' */
-		    return TRUE;
-		}
-	    } else if (isspace(line[word_cur - 2])) {
-		/* this is a real '-' command start */
-		return TRUE;
-	    } else {
-		return FALSE;
-	    }
-	} else {
-	    /* start of line is '-' */
-	    return TRUE;
-	}
+        if ((word_cur - 2) >= word_start) {
+            /* check for previous char before '-' */
+            if (line[word_cur - 2] == '-') {
+                if ((word_cur - 3) >= word_start) {
+                    /* check for previous char before '--' */
+                    if (isspace(line[word_cur - 3])) {
+                        /* this a real '--' command start */
+                        return TRUE;
+                    } else {
+                        /* dash dash part of some value string */
+                        return FALSE;
+                    }
+                } else {
+                    /* start of line is '--' */
+                    return TRUE;
+                }
+            } else if (isspace(line[word_cur - 2])) {
+                /* this is a real '-' command start */
+                return TRUE;
+            } else {
+                return FALSE;
+            }
+        } else {
+            /* start of line is '-' */
+            return TRUE;
+        }
     } else {
-	/* previous char is not '-' */
-	return FALSE;
+        /* previous char is not '-' */
+        return FALSE;
     }
 
 } /* is_parm_start */
@@ -739,13 +739,13 @@ static boolean
  *********************************************************************/
 static status_t
     find_parm_start (obj_template_t *inputobj,
-		     const char *line,
-		     int word_start,
-		     int word_end,
-		     boolean *expectparm,
-		     boolean *emptyexit,
-		     obj_template_t **parmobj,
-		     int *tokenstart)
+                     const char *line,
+                     int word_start,
+                     int word_end,
+                     boolean *expectparm,
+                     boolean *emptyexit,
+                     obj_template_t **parmobj,
+                     int *tokenstart)
 
 {
     obj_template_t       *childobj;
@@ -769,34 +769,34 @@ static status_t
 
     /* check starting in between 2 token sequences */
     if (isspace(*str)) {
-	inbetween = TRUE;
+        inbetween = TRUE;
 
-	/* the tab was in between tokens, not inside a token
-	 * skip all the whitespace backwards
-	 */
-	while (str >= &line[word_start] && isspace(*str)) {
-	    str--;
-	}
+        /* the tab was in between tokens, not inside a token
+         * skip all the whitespace backwards
+         */
+        while (str >= &line[word_start] && isspace(*str)) {
+            str--;
+        }
 
-	if (isspace(*str)) {
-	    /* only found spaces, so this is the line start */
-	    *expectparm = TRUE;
-	    *tokenstart = word_end;
-	    return NO_ERR;
-	} /* else found the end of some text */
+        if (isspace(*str)) {
+            /* only found spaces, so this is the line start */
+            *expectparm = TRUE;
+            *tokenstart = word_end;
+            return NO_ERR;
+        } /* else found the end of some text */
     } else if (is_parm_start(line, 
-			     word_start, 
-			     (int)(str - line))) {
-	/* got valid -<tab> or --<tab> */
-	*expectparm = TRUE;
-	*tokenstart = word_end;
-	return NO_ERR;
+                             word_start, 
+                             (int)(str - line))) {
+        /* got valid -<tab> or --<tab> */
+        *expectparm = TRUE;
+        *tokenstart = word_end;
+        return NO_ERR;
     } else if (*str =='"' || *str == '\'') {
-	/* last char was the start or end of a string
-	 * no completions possible at this point
-	 */
-	*emptyexit = TRUE;
-	return NO_ERR;
+        /* last char was the start or end of a string
+         * no completions possible at this point
+         */
+        *emptyexit = TRUE;
+        return NO_ERR;
     }
 
     /* str is pointing at the last char in the token sequence
@@ -808,143 +808,143 @@ static status_t
      * this is a complete assignment statement
      */
     while (str >= &line[word_start] && !isspace(*str)) {
-	if (*str == '=') {
-	    if (equals == NULL) {
-		equals = str;
-	    }
-	    withequals++;
-	}
-	str--;
+        if (*str == '=') {
+            if (equals == NULL) {
+                equals = str;
+            }
+            withequals++;
+        }
+        str--;
     }
 
     /* figure out where the backwards search stopped */
     if (isspace(*str)) {
-	/* found a space entered so see if
-	 * the string following it looks like
-	 * the start of a parameter or a value
-	 */
-	seqstart = ++str;
-	inbetween2 = TRUE;
+        /* found a space entered so see if
+         * the string following it looks like
+         * the start of a parameter or a value
+         */
+        seqstart = ++str;
+        inbetween2 = TRUE;
     } else {
-	/* str backed up all the way to word_start
-	 * start the forward analysis from this char
-	 */
-	seqstart = str;
+        /* str backed up all the way to word_start
+         * start the forward analysis from this char
+         */
+        seqstart = str;
     }
 
     /* str is now pointing at the preceding token sequence
      * check if the parameter start sequence is next
      */
     if (*str == '-') {
-	/* try to find any matching parameters
-	 * within the rpc/input section
-	 */
-	seqstart++;
-	gotdashes = TRUE;
-	if (str+1 < &line[word_end]) {
-	    /* -<some-text ... <tab>  */
-	    str++;
-	    if (*str == '-') {
-		if (str+1 < &line[word_end]) {
-		    /* --<some-text ... <tab>  */
-		    seqstart++;
-		    str++;
-		} else {
-		    /* entire line is --<tab> 
-		     * return parameter list
-		     */
-		    *expectparm = TRUE;
-		    *tokenstart = word_end;
-		    return NO_ERR;
+        /* try to find any matching parameters
+         * within the rpc/input section
+         */
+        seqstart++;
+        gotdashes = TRUE;
+        if (str+1 < &line[word_end]) {
+            /* -<some-text ... <tab>  */
+            str++;
+            if (*str == '-') {
+                if (str+1 < &line[word_end]) {
+                    /* --<some-text ... <tab>  */
+                    seqstart++;
+                    str++;
+                } else {
+                    /* entire line is --<tab> 
+                     * return parameter list
+                     */
+                    *expectparm = TRUE;
+                    *tokenstart = word_end;
+                    return NO_ERR;
 
-		}
-	    } /*else  -<some-text ... <tab>  */
-	} else {
-	    /* entire line is -<tab> 
-	     * return parameter list
-	     */
-	    *expectparm = TRUE;
-	    *tokenstart = word_end;
-	    return NO_ERR;
-	}
+                }
+            } /*else  -<some-text ... <tab>  */
+        } else {
+            /* entire line is -<tab> 
+             * return parameter list
+             */
+            *expectparm = TRUE;
+            *tokenstart = word_end;
+            return NO_ERR;
+        }
     } /* else token does not start with any dashes */
 
     /* got a sequence start so figure out what to with it */
     if (inbetween) {
-	if (withequals == 1) {
-	    /* this profile fits 
-	     *   '[-]-<parmname>=<parmval><spaces><tab>'
-	     * assume that a new parameter is expected
-	     * and cause all of them to be listed
-	     */
-	    *expectparm = TRUE;
-	    *tokenstart = word_end;
-	    return NO_ERR;
-	} else {
-	    /* this profile fits 
-	     *    '[-]-<parmname><spaces><tab>'
-	     * this entire token needs to be matched to a
-	     * parameter in the RPC input section
-	     *
-	     * first find the end of the parameter name
-	     */
-	    str = seqstart;
+        if (withequals == 1) {
+            /* this profile fits 
+             *   '[-]-<parmname>=<parmval><spaces><tab>'
+             * assume that a new parameter is expected
+             * and cause all of them to be listed
+             */
+            *expectparm = TRUE;
+            *tokenstart = word_end;
+            return NO_ERR;
+        } else {
+            /* this profile fits 
+             *    '[-]-<parmname><spaces><tab>'
+             * this entire token needs to be matched to a
+             * parameter in the RPC input section
+             *
+             * first find the end of the parameter name
+             */
+            str = seqstart;
 
-	    while (str < &line[word_end] && 
-		   !isspace(*str) &&
-		   *str != '=') {
-		str++;
-	    }
+            while (str < &line[word_end] && 
+                   !isspace(*str) &&
+                   *str != '=') {
+                str++;
+            }
 
-	    /* try to find this parameter name */
-	    childobj = 
-		obj_find_child_str(inputobj,
-				   NULL,
-				   (const xmlChar *)seqstart,
-				   (uint32)(str - seqstart));
-	    if (childobj == NULL) {
-		matchcount = 0;
+            /* try to find this parameter name */
+            childobj = 
+                obj_find_child_str(inputobj,
+                                   NULL,
+                                   (const xmlChar *)seqstart,
+                                   (uint32)(str - seqstart));
+            if (childobj == NULL) {
+                matchcount = 0;
 
-		/* try to match this parameter name */
-		childobj = 
-		    obj_match_child_str(inputobj,
-					NULL,
-					(const xmlChar *)seqstart,
-					(uint32)(str - seqstart),
-					&matchcount);
+                /* try to match this parameter name */
+                childobj = 
+                    obj_match_child_str(inputobj,
+                                        NULL,
+                                        (const xmlChar *)seqstart,
+                                        (uint32)(str - seqstart),
+                                        &matchcount);
 
-		if (childobj && matchcount > 1) {
-		    /* ambiguous command error
-		     * but just return no completions
-		     */
-		    *emptyexit = TRUE;
-		    return NO_ERR;
-		}
-	    }
+                if (childobj && matchcount > 1) {
+                    /* ambiguous command error
+                     * but just return no completions
+                     */
+                    *emptyexit = TRUE;
+                    return NO_ERR;
+                }
+            }
 
-	    /* check find/match child result */
-	    if (childobj == NULL) {
-		/* do not recognize this parameter,
-		 * so just return no matches
-		 */
-		*emptyexit = TRUE;
-		return NO_ERR;
-	    }
+            /* check find/match child result */
+            if (childobj == NULL) {
+                /* do not recognize this parameter,
+                 * so just return no matches
+                 */
+                *emptyexit = TRUE;
+                return NO_ERR;
+            }
 
-	    /* else found one matching child object */
-	    *tokenstart = word_end;
+            /* else found one matching child object */
+            *tokenstart = word_end;
 
-	    /* check if the parameter is an empty, which
-	     * means another parameter is expected, not a value
-	     */
-	    if (obj_get_basetype(childobj) == NCX_BT_EMPTY) {
-		*expectparm = TRUE;
-	    } else {
-		/* normal leaf parameter; needs a value */
-		*parmobj = childobj;
-	    }
-	    return NO_ERR;
-	}
+            /* check if the parameter is an empty, which
+             * means another parameter is expected, not a value
+             */
+            if (obj_get_basetype(childobj) == NCX_BT_EMPTY) {
+                *expectparm = TRUE;
+            } else {
+                /* normal leaf parameter; needs a value */
+                *parmobj = childobj;
+            }
+            return NO_ERR;
+        }
     }
 
     /* not in between 2 tokens so tab is 'stuck' to
@@ -952,74 +952,74 @@ static status_t
      * or a value is expected
      */
     if (withequals == 1) {
-	/* this profile fits 
-	 *   '[--]<parmname>=<parmval><tab>'
-	 * assume that a parameter value is expected
-	 * and cause all of them to be listed that
-	 * match the partial value string
-	 */
-	*tokenstart = (int)((equals+1) - line);
+        /* this profile fits 
+         *   '[--]<parmname>=<parmval><tab>'
+         * assume that a parameter value is expected
+         * and cause all of them to be listed that
+         * match the partial value string
+         */
+        *tokenstart = (int)((equals+1) - line);
 
-	/* try to find the parameter name */
-	childobj = 
-	    obj_find_child_str(inputobj,
-			       NULL,
-			       (const xmlChar *)seqstart,
-			       (uint32)(equals - seqstart));
-	if (childobj == NULL) {
-	    matchcount = 0;
-	    
-	    /* try to match this parameter name */
-	    childobj = 
-		obj_match_child_str(inputobj,
-				    NULL,
-				    (const xmlChar *)seqstart,
-				    (uint32)(equals - seqstart),
-				    &matchcount);
+        /* try to find the parameter name */
+        childobj = 
+            obj_find_child_str(inputobj,
+                               NULL,
+                               (const xmlChar *)seqstart,
+                               (uint32)(equals - seqstart));
+        if (childobj == NULL) {
+            matchcount = 0;
+            
+            /* try to match this parameter name */
+            childobj = 
+                obj_match_child_str(inputobj,
+                                    NULL,
+                                    (const xmlChar *)seqstart,
+                                    (uint32)(equals - seqstart),
+                                    &matchcount);
 
-	    if (childobj && matchcount > 1) {
-		/* ambiguous command error
-		 * but just return no completions
-		 */
-		*emptyexit = TRUE;
-		return NO_ERR;
-	    }
-	}
+            if (childobj && matchcount > 1) {
+                /* ambiguous command error
+                 * but just return no completions
+                 */
+                *emptyexit = TRUE;
+                return NO_ERR;
+            }
+        }
 
-	/* check find/match child result */
-	if (childobj == NULL) {
-	    /* do not recognize this parameter,
-	     * so just return no matches
-	     */
-	    *emptyexit = TRUE;
-	} else {
-	    /* match the found parameter with a
-	     * partial value string
-	     */
-	    *parmobj = childobj;
-	}
-	return NO_ERR;
+        /* check find/match child result */
+        if (childobj == NULL) {
+            /* do not recognize this parameter,
+             * so just return no matches
+             */
+            *emptyexit = TRUE;
+        } else {
+            /* match the found parameter with a
+             * partial value string
+             */
+            *parmobj = childobj;
+        }
+        return NO_ERR;
     } else if (gotdashes) {
-	/* this profile fits 
-	 *   '--<parmname><tab>'
-	 * assume that a parameter name is expected
-	 * and cause all of them to be listed that
-	 * match the partial name string
-	 */
-	*tokenstart = (int)(seqstart - line);
-	*expectparm = TRUE;
+        /* this profile fits 
+         *   '--<parmname><tab>'
+         * assume that a parameter name is expected
+         * and cause all of them to be listed that
+         * match the partial name string
+         */
+        *tokenstart = (int)(seqstart - line);
+        *expectparm = TRUE;
     } else {
-	/* this profile fits 
-	 *   '[don't know]<parmwhat><tab>'
-	 * assume that a parameter name is expected
-	 * and cause all of them to be listed that
-	 * match the partial name string
-	 *
-	 * TBD: should check back another token
-	 * so see if a value or a name is expected
-	 */
-	*tokenstart = (int)(seqstart - line);
-	*expectparm = TRUE;  /****/
+        /* this profile fits 
+         *   '[don't know]<parmwhat><tab>'
+         * assume that a parameter name is expected
+         * and cause all of them to be listed that
+         * match the partial name string
+         *
+         * TBD: should check back another token
+         * so see if a value or a name is expected
+         */
+        *tokenstart = (int)(seqstart - line);
+        *expectparm = TRUE;  /****/
     }
        
     return NO_ERR;
@@ -1056,10 +1056,10 @@ static status_t
  *********************************************************************/
 static status_t
     parse_backwards_parm (WordCompletion *cpl,
-			  completion_state_t *comstate,
-			  const char *line,
-			  int word_start,
-			  int word_end)
+                          completion_state_t *comstate,
+                          const char *line,
+                          int word_start,
+                          int word_end)
 
 {
     obj_template_t        *rpc, *inputobj, *parmobj;
@@ -1068,7 +1068,7 @@ static status_t
     boolean                expectparm, emptyexit;
 
     if (word_end == 0) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     res = NO_ERR;
@@ -1080,42 +1080,42 @@ static status_t
     inputobj = comstate->cmdinput;
 
     res = find_parm_start(rpc,
-			  line,
-			  word_start,
-			  word_end,
-			  &expectparm,
-			  &emptyexit,
-			  &parmobj,
-			  &tokenstart);
+                          line,
+                          word_start,
+                          word_end,
+                          &expectparm,
+                          &emptyexit,
+                          &parmobj,
+                          &tokenstart);
     if (res != NO_ERR || emptyexit) {
-	return res;
+        return res;
     }
 
     if (expectparm) {
-	/* add all the parameters, even those that
-	 * might already be entered (oh well)
-	 * this is OK for leaf-lists but not leafs
-	 */
-	res = fill_one_rpc_completion_parms
-	    (rpc,
-	     cpl,
-	     line,
-	     tokenstart,
-	     word_end,
-	     word_end - tokenstart);
+        /* add all the parameters, even those that
+         * might already be entered (oh well)
+         * this is OK for leaf-lists but not leafs
+         */
+        res = fill_one_rpc_completion_parms
+            (rpc,
+             cpl,
+             line,
+             tokenstart,
+             word_end,
+             word_end - tokenstart);
     } else if (parmobj) {
-	/* have a parameter in progress and the
-	 * token start is supposed to be the value
-	 * for this parameter
-	 */
-	res = fill_parm_completion
-	    (parmobj,
-	     cpl,
-	     comstate,
-	     line,
-	     tokenstart,
-	     word_end,
-	     word_end - tokenstart);
+        /* have a parameter in progress and the
+         * token start is supposed to be the value
+         * for this parameter
+         */
+        res = fill_parm_completion
+            (parmobj,
+             cpl,
+             comstate,
+             line,
+             tokenstart,
+             word_end,
+             word_end - tokenstart);
     } /* else nothing to do */
 
     return res;
@@ -1150,27 +1150,27 @@ static status_t
  *********************************************************************/
 static status_t
     fill_parm_values (WordCompletion *cpl,
-		      completion_state_t *comstate,
-		      const char *line,
-		      int word_start,
-		      int word_end)
+                      completion_state_t *comstate,
+                      const char *line,
+                      int word_start,
+                      int word_end)
 {
     status_t               res;
 
     /* skip starting whitespace */
     while (word_start < word_end && isspace(line[word_start])) {
-	word_start++;
+        word_start++;
     }
 
     /*** NEED TO CHECK FOR STRING QUOTES ****/
 
     res = fill_parm_completion(comstate->cmdcurparm,
-			       cpl,
-			       comstate,
-			       line,
-			       word_start,
-			       word_end,
-			       word_end - word_start);
+                               cpl,
+                               comstate,
+                               line,
+                               word_start,
+                               word_end,
+                               word_end - word_start);
 
     return res;
 
@@ -1200,9 +1200,9 @@ static status_t
  *********************************************************************/
 static status_t
     fill_completion_commands (WordCompletion *cpl,
-			      completion_state_t *comstate,
-			      const char *line,
-			      int word_end)
+                              completion_state_t *comstate,
+                              const char *line,
+                              int word_end)
 
 {
     obj_template_t        *inputobj;
@@ -1221,26 +1221,26 @@ static status_t
 
     /* skip starting whitespace */
     while ((str < &line[word_end]) && isspace(*str)) {
-	str++;
+        str++;
     }
 
     /* check if any real characters entered yet */
     if (word_end == 0 || str == &line[word_end]) {
-	/* found only spaces so far or
-	 * nothing entered yet 
-	 */
-	res = 
-	    fill_one_completion_commands(cpl,
-					 comstate,
-					 line,
-					 word_end,
-					 word_end,
-					 0);
-	if (res != NO_ERR) {
-	    cpl_record_error(cpl,
-			     get_error_string(res));
-	}
-	return res;
+        /* found only spaces so far or
+         * nothing entered yet 
+         */
+        res = 
+            fill_one_completion_commands(cpl,
+                                         comstate,
+                                         line,
+                                         word_end,
+                                         word_end,
+                                         0);
+        if (res != NO_ERR) {
+            cpl_record_error(cpl,
+                             get_error_string(res));
+        }
+        return res;
     }
 
     /* else found a non-whitespace char in the buffer that
@@ -1248,81 +1248,81 @@ static status_t
      * check what kind of command line is in progress
      */
     if (*str == '@' || *str == '$') {
-	/* at-file-assign start sequence OR
-	 * variable assignment start sequence 
-	 * may deal with auto-completion for 
-	 * variables and files later
-	 * For now, skip until the end of the 
-	 * assignment is found or word_end hit
-	 */
-	comstate->assignstmt = TRUE;
-	equaldone = FALSE;
+        /* at-file-assign start sequence OR
+         * variable assignment start sequence 
+         * may deal with auto-completion for 
+         * variables and files later
+         * For now, skip until the end of the 
+         * assignment is found or word_end hit
+         */
+        comstate->assignstmt = TRUE;
+        equaldone = FALSE;
 
-	while ((str < &line[word_end]) && 
-	       !isspace(*str) && (*str != '=')) {
-	    str++;
-	}
+        while ((str < &line[word_end]) && 
+               !isspace(*str) && (*str != '=')) {
+            str++;
+        }
 
-	/* check where the string search stopped */
-	if (isspace(*str) || *str == '=') {
-	    /* stopped past the first word
-	     * so need to skip further
-	     */
-	    if (isspace(*str)) {
-		/* find equals sign or word_end */
-		while ((str < &line[word_end]) && 
-		       isspace(*str)) {
-		    str++;
-		}
-	    }
+        /* check where the string search stopped */
+        if (isspace(*str) || *str == '=') {
+            /* stopped past the first word
+             * so need to skip further
+             */
+            if (isspace(*str)) {
+                /* find equals sign or word_end */
+                while ((str < &line[word_end]) && 
+                       isspace(*str)) {
+                    str++;
+                }
+            }
 
-	    if ((*str == '=') && (str < &line[word_end])) {
-		equaldone = TRUE;
-		str++;  /* skip equals sign */
+            if ((*str == '=') && (str < &line[word_end])) {
+                equaldone = TRUE;
+                str++;  /* skip equals sign */
 
-		/* skip more whitespace */
-		while ((str < &line[word_end]) && 
-		       isspace(*str)) {
-		    str++;
-		}
-	    }
+                /* skip more whitespace */
+                while ((str < &line[word_end]) && 
+                       isspace(*str)) {
+                    str++;
+                }
+            }
 
-	    /* got past the '$foo =' part 
-	     * now looking for a command 
-	     */
-	    if (str < &line[word_end]) {
-		/* go to next part and look for
-		 * the end of this start command
-		 */
-		word_start = (int)(str - line);
-	    } else if (equaldone) {
-		res = 
-		    fill_one_completion_commands(cpl,
-						 comstate,
-						 line,
-						 word_end,
-						 word_end,
-						 0);
-		if (res != NO_ERR) {
-		    cpl_record_error(cpl,
-				     get_error_string(res));
-		}
-		return res;
-	    } else {
-		/* still inside the file or variable name */
-		return res;
-	    }
-	} else {
-	    /* word_end is still inside the first
-	     * word, which is an assignment of
-	     * some sort; not going to show
-	     * any completions for user vars and files yet
-	     */
-	    return res;
-	}
+            /* got past the '$foo =' part 
+             * now looking for a command 
+             */
+            if (str < &line[word_end]) {
+                /* go to next part and look for
+                 * the end of this start command
+                 */
+                word_start = (int)(str - line);
+            } else if (equaldone) {
+                res = 
+                    fill_one_completion_commands(cpl,
+                                                 comstate,
+                                                 line,
+                                                 word_end,
+                                                 word_end,
+                                                 0);
+                if (res != NO_ERR) {
+                    cpl_record_error(cpl,
+                                     get_error_string(res));
+                }
+                return res;
+            } else {
+                /* still inside the file or variable name */
+                return res;
+            }
+        } else {
+            /* word_end is still inside the first
+             * word, which is an assignment of
+             * some sort; not going to show
+             * any completions for user vars and files yet
+             */
+            return res;
+        }
     } else {
-	/* first word starts with a normal char */
-	word_start = (int)(str - line);
+        /* first word starts with a normal char */
+        word_start = (int)(str - line);
     }
 
     /* the word_start var is set to the first char
@@ -1332,26 +1332,26 @@ static status_t
      */
     cmdend = str;
     while (cmdend < &line[word_end] && !isspace(*cmdend)) {
-	cmdend++;
+        cmdend++;
     }
     cmdlen = (int)(cmdend - str);
 
     /* check if still inside the start command */
     if (cmdend == &line[word_end]) {
-	/* get all the commands that start with the same
-	 * characters for length == 'cmdlen'
-	 */
-	res = fill_one_completion_commands(cpl,
-					   comstate,
-					   line,
-					   word_start,
-					   word_end,
-					   cmdlen);
-	if (res != NO_ERR) {
-	    cpl_record_error(cpl,
-			     get_error_string(res));
-	}
-	return res;
+        /* get all the commands that start with the same
+         * characters for length == 'cmdlen'
+         */
+        res = fill_one_completion_commands(cpl,
+                                           comstate,
+                                           line,
+                                           word_start,
+                                           word_end,
+                                           cmdlen);
+        if (res != NO_ERR) {
+            cpl_record_error(cpl,
+                             get_error_string(res));
+        }
+        return res;
     }
 
     /* not inside the start command so get the command that
@@ -1361,28 +1361,28 @@ static status_t
     cmdname = &line[word_start];
 
     buffer = xml_strndup((const xmlChar *)cmdname,
-			 (uint32)cmdlen);
+                         (uint32)cmdlen);
     if (buffer == NULL) {
-	if (cpl != NULL) {
-	    cpl_record_error(cpl,
-			     get_error_string(ERR_INTERNAL_MEM));
-	}
-	return 1;
+        if (cpl != NULL) {
+            cpl_record_error(cpl,
+                             get_error_string(ERR_INTERNAL_MEM));
+        }
+        return 1;
     }
     retlen = 0;
     dtyp = NCX_NT_OBJ;
     comstate->cmdobj = (obj_template_t *)
-	parse_def(comstate->server_cb,
-		  &dtyp,
-		  buffer,
-		  &retlen);
+        parse_def(comstate->server_cb,
+                  &dtyp,
+                  buffer,
+                  &retlen);
     m__free(buffer);
 
     if (comstate->cmdobj == NULL) {
-	if (cpl != NULL) {
-	    cpl_record_error(cpl, "unknown command");
-	}
-	return 1;
+        if (cpl != NULL) {
+            cpl_record_error(cpl, "unknown command");
+        }
+        return 1;
     }
 
     /* have a command that is valid
@@ -1391,7 +1391,7 @@ static status_t
      */
     str = cmdend;
     while (str < &line[word_end] && isspace(*str)) {
-	str++;
+        str++;
     }
 
     /* set new word_start == word_end */
@@ -1399,29 +1399,29 @@ static status_t
 
     /* check where E-O-WSP search stopped */
     if (str == &line[word_end]) {
-	/* stopped before entering any parameters */
-	res = fill_one_rpc_completion_parms
-	    (comstate->cmdobj,
-	     cpl,
-	     line,
-	     word_start,
-	     word_end,
-	     0);
-	return res;
+        /* stopped before entering any parameters */
+        res = fill_one_rpc_completion_parms
+            (comstate->cmdobj,
+             cpl,
+             line,
+             word_start,
+             word_end,
+             0);
+        return res;
     }
 
     /* there is more text entered; check if this rpc
      * really has any input parameters or not
      */
     inputobj = obj_find_child(comstate->cmdobj,
-			      NULL, 
-			      YANG_K_INPUT);
+                              NULL, 
+                              YANG_K_INPUT);
     if (inputobj == NULL ||
-	!obj_has_children(inputobj)) {
-	/* no input parameters expected */
-	return NO_ERR;
+        !obj_has_children(inputobj)) {
+        /* no input parameters expected */
+        return NO_ERR;
     } else {
-	comstate->cmdinput = inputobj;
+        comstate->cmdinput = inputobj;
     }
 
     /* check if any strings entered on the line
@@ -1429,52 +1429,52 @@ static status_t
      */
     cmdend = str;
     while (cmdend < &line[word_end] &&
-	   *cmdend != '"' && 
-	   *cmdend != '\'') {
-	cmdend++;
+           *cmdend != '"' && 
+           *cmdend != '\'') {
+        cmdend++;
     }
 
     if (cmdend < &line[word_end]) {
-	/* found the start of a quoted string
-	 * look for the end of the last quoted
-	 * string
-	 */
-	done = FALSE;
-	while (!done) {
-	    /* match == start of quoted string */
-	    match = cmdend++;
-	    while (cmdend < &line[word_end] &&
-		   *cmdend != *match) {
-		cmdend++;
-	    }
-	    if (cmdend == &line[word_end]) {
-		/* entering a value inside a string
-		 * so just return, instead of
-		 * guessing the string value
-		 */
-		return res;
-	    } else {
-		cmdend++;
-		while (cmdend < &line[word_end] &&
-		       *cmdend != '"' && 
-		       *cmdend != '\'') {
-		    cmdend++;
-		}
-		if (cmdend == &line[word_end]) {
-		    /* did not find the start of
-		     * another string so set the
-		     * new word_start and call
-		     * the parse_backwards_parm fn
-		     */
-		    word_start = (int)(cmdend - line);
-		    done = TRUE;
-		} 
+        /* found the start of a quoted string
+         * look for the end of the last quoted
+         * string
+         */
+        done = FALSE;
+        while (!done) {
+            /* match == start of quoted string */
+            match = cmdend++;
+            while (cmdend < &line[word_end] &&
+                   *cmdend != *match) {
+                cmdend++;
+            }
+            if (cmdend == &line[word_end]) {
+                /* entering a value inside a string
+                 * so just return, instead of
+                 * guessing the string value
+                 */
+                return res;
+            } else {
+                cmdend++;
+                while (cmdend < &line[word_end] &&
+                       *cmdend != '"' && 
+                       *cmdend != '\'') {
+                    cmdend++;
+                }
+                if (cmdend == &line[word_end]) {
+                    /* did not find the start of
+                     * another string so set the
+                     * new word_start and call
+                     * the parse_backwards_parm fn
+                     */
+                    word_start = (int)(cmdend - line);
+                    done = TRUE;
+                } 
 
-		/* else stopped on another start of 
-		 * quoted string so loop again
-		 */
-	    }
-	}
+                /* else stopped on another start of 
+                 * quoted string so loop again
+                 */
+            }
+        }
     }
 
     /* got some edited text past the last 
@@ -1482,10 +1482,10 @@ static status_t
      * parm in progress and check for completions
      */
     res = parse_backwards_parm(cpl,
-			       comstate,
-			       line,
-			       word_start,
-			       word_end);
+                               comstate,
+                               line,
+                               word_start,
+                               word_end);
 
 
     return res;
@@ -1515,8 +1515,8 @@ static status_t
  *********************************************************************/
 static status_t
     fill_completion_yesno (WordCompletion *cpl,
-			   const char *line,
-			   int word_end)
+                           const char *line,
+                           int word_end)
 {
     const char            *str;
     int                    word_start, retval;
@@ -1526,41 +1526,41 @@ static status_t
 
     /* skip starting whitespace */
     while ((str < &line[word_end]) && isspace(*str)) {
-	str++;
+        str++;
     }
 
     /* check if any real characters entered yet */
     if (word_end == 0 || str == &line[word_end]) {
-	/* found only spaces so far or
-	 * nothing entered yet 
-	 */
+        /* found only spaces so far or
+         * nothing entered yet 
+         */
 
-	retval = 
-	    cpl_add_completion(cpl,
-			       line,
-			       word_start,
-			       word_end,
-			       (const char *)NCX_EL_YES,
-			       (const char *)"",
-			       (const char *)" ");
+        retval = 
+            cpl_add_completion(cpl,
+                               line,
+                               word_start,
+                               word_end,
+                               (const char *)NCX_EL_YES,
+                               (const char *)"",
+                               (const char *)" ");
 
-	if (retval != 0) {
-	    return ERR_NCX_OPERATION_FAILED;
-	}
+        if (retval != 0) {
+            return ERR_NCX_OPERATION_FAILED;
+        }
 
 
-	retval = 
-	    cpl_add_completion(cpl,
-			       line,
-			       word_start,
-			       word_end,
-			       (const char *)NCX_EL_NO,
-			       (const char *)"",
-			       (const char *)" ");
+        retval = 
+            cpl_add_completion(cpl,
+                               line,
+                               word_start,
+                               word_end,
+                               (const char *)NCX_EL_NO,
+                               (const char *)"",
+                               (const char *)" ");
 
-	if (retval != 0) {
-	    return ERR_NCX_OPERATION_FAILED;
-	}
+        if (retval != 0) {
+            return ERR_NCX_OPERATION_FAILED;
+        }
     }
 
     /*** !!!! ELSE NOT GIVING ANY PARTIAL COMPLETIONS YET !!! ***/
@@ -1604,9 +1604,9 @@ static status_t
  */
 int
     yangcli_tab_callback (WordCompletion *cpl, 
-			  void *data,
-			  const char *line, 
-			  int word_end)
+                          void *data,
+                          const char *line, 
+                          int word_end)
 {
     completion_state_t   *comstate;
     status_t              res;
@@ -1614,8 +1614,8 @@ int
 
 #ifdef DEBUG
     if (!cpl || !data || !line) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 1;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 1;
     }
 #endif
 
@@ -1625,54 +1625,54 @@ int
      * no matter what state; backslash char only allowed
      * for escaped-EOLN or char-sequence that we can't guess
      */
-    if (word_end > 0 &&	line[word_end] == '\\') {
-	return retval;
+    if (word_end > 0 && line[word_end] == '\\') {
+        return retval;
     }
 
     comstate = (completion_state_t *)data;
 
     if (comstate->server_cb && comstate->server_cb->climore) {
-	comstate->cmdstate = CMD_STATE_MORE;
+        comstate->cmdstate = CMD_STATE_MORE;
     }
 
     switch (comstate->cmdstate) {
     case CMD_STATE_FULL:
-	res = fill_completion_commands(cpl,
-				       comstate,
-				       line,
-				       word_end);
-	if (res != NO_ERR) {
-	    retval = 1;
-	}
-	break;
+        res = fill_completion_commands(cpl,
+                                       comstate,
+                                       line,
+                                       word_end);
+        if (res != NO_ERR) {
+            retval = 1;
+        }
+        break;
     case CMD_STATE_GETVAL:
-	res = fill_parm_values(cpl,
-			       comstate,
-			       line,
-			       0,
-			       word_end);
-	if (res != NO_ERR) {
-	    retval = 1;
-	}
-	break;
+        res = fill_parm_values(cpl,
+                               comstate,
+                               line,
+                               0,
+                               word_end);
+        if (res != NO_ERR) {
+            retval = 1;
+        }
+        break;
     case CMD_STATE_YESNO:
-	res = fill_completion_yesno(cpl, line, word_end);
-	if (res != NO_ERR) {
-	    retval = 1;
-	}
-	break;
+        res = fill_completion_yesno(cpl, line, word_end);
+        if (res != NO_ERR) {
+            retval = 1;
+        }
+        break;
     case CMD_STATE_MORE:
-	/*** NO SUPPORT FOR MORE MODE YET ***/
-	break;
+        /*** NO SUPPORT FOR MORE MODE YET ***/
+        break;
     case CMD_STATE_NONE:
-	/* command state not initialized */
-	SET_ERROR(ERR_INTERNAL_VAL);
-	retval = 1;
-	break;
+        /* command state not initialized */
+        SET_ERROR(ERR_INTERNAL_VAL);
+        retval = 1;
+        break;
     default:
-	/* command state garbage value */
-	SET_ERROR(ERR_INTERNAL_VAL);
-	retval = 1;
+        /* command state garbage value */
+        SET_ERROR(ERR_INTERNAL_VAL);
+        retval = 1;
     }
 
     return retval;

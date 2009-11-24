@@ -1,6 +1,6 @@
 /*  FILE: xml_val.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -104,7 +104,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -128,7 +128,7 @@ date         init     comment
 *********************************************************************/
 xmlChar *
     xml_val_make_qname (xmlns_id_t  nsid,
-			const xmlChar *name)
+                        const xmlChar *name)
 {
     xmlChar          *str, *str2;
     const xmlChar    *pfix;
@@ -136,14 +136,14 @@ xmlChar *
 
     pfix = xmlns_get_ns_prefix(nsid);
     if (!pfix) {
-	SET_ERROR(ERR_INTERNAL_VAL);   /* catch no namespace error */
-	return xml_strdup(name);
+        SET_ERROR(ERR_INTERNAL_VAL);   /* catch no namespace error */
+        return xml_strdup(name);
     }
 
     len = xml_strlen(name) + xml_strlen(pfix) + 2;
     str = m__getMem(len);
     if (!str) {
-	return NULL;
+        return NULL;
     }
 
     str2 = str;
@@ -171,14 +171,14 @@ xmlChar *
 *********************************************************************/
 uint32
     xml_val_qname_len (xmlns_id_t  nsid,
-		       const xmlChar *name)
+                       const xmlChar *name)
 {
     const xmlChar    *pfix;
 
     pfix = xmlns_get_ns_prefix(nsid);
     if (!pfix) {
-	SET_ERROR(ERR_INTERNAL_VAL);   /* catch no namespace error */
-	return xml_strlen(name);
+        SET_ERROR(ERR_INTERNAL_VAL);   /* catch no namespace error */
+        return xml_strlen(name);
     }
 
     return xml_strlen(name) + xml_strlen(pfix) + 1;
@@ -202,9 +202,9 @@ uint32
 *********************************************************************/
 uint32
     xml_val_sprintf_qname (xmlChar *buff,
-			   uint32 bufflen,
-			   xmlns_id_t  nsid,
-			   const xmlChar *name)
+                           uint32 bufflen,
+                           xmlns_id_t  nsid,
+                           const xmlChar *name)
 {
     xmlChar          *str;
     const xmlChar    *pfix;
@@ -212,14 +212,14 @@ uint32
 
     pfix = xmlns_get_ns_prefix(nsid);
     if (!pfix) {
-	SET_ERROR(ERR_INTERNAL_VAL);   /* catch no namespace error */
-	return 0;
+        SET_ERROR(ERR_INTERNAL_VAL);   /* catch no namespace error */
+        return 0;
     }
 
     len = xml_strlen(name) + xml_strlen(pfix) + 2;
     if (len > bufflen) {
-	SET_ERROR(ERR_BUFF_OVFL);
-	return 0;
+        SET_ERROR(ERR_BUFF_OVFL);
+        return 0;
     }
 
     /* construct the QName string */
@@ -249,16 +249,16 @@ uint32
 *********************************************************************/
 status_t
     xml_val_add_attr (const xmlChar *name,
-		      xmlns_id_t nsid,
-		      xmlChar *attrval,
-		      val_value_t *val)
+                      xmlns_id_t nsid,
+                      xmlChar *attrval,
+                      val_value_t *val)
 {
     val_value_t *newval;
 
     /* create a new value to hold the attribute name value pair */
     newval = val_new_value();
     if (!val) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     newval->btyp = NCX_BT_STRING;
     newval->typdef = typ_get_basetype_typdef(NCX_BT_STRING);
@@ -288,16 +288,16 @@ status_t
 *********************************************************************/
 status_t
     xml_val_add_cattr (const xmlChar *name,
-		       xmlns_id_t nsid,
-		       const xmlChar *cattrval,
-		       val_value_t *val)
+                       xmlns_id_t nsid,
+                       const xmlChar *cattrval,
+                       val_value_t *val)
 {
     val_value_t *newval;
 
     /* const value version of xml_val_add_attr */
     newval = val_new_value();
     if (!val) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     newval->btyp = NCX_BT_STRING;
     newval->typdef = typ_get_basetype_typdef(NCX_BT_STRING);
@@ -305,8 +305,8 @@ status_t
     newval->nsid = nsid;
     newval->v.str = xml_strdup(cattrval);
     if (!newval->v.str) {
-	val_free_value(newval);
-	return ERR_INTERNAL_MEM;
+        val_free_value(newval);
+        return ERR_INTERNAL_MEM;
     }
 
     dlq_enque(newval, &val->metaQ);
@@ -329,13 +329,13 @@ status_t
 *********************************************************************/
 val_value_t *
     xml_val_new_struct (const xmlChar *name,
-			xmlns_id_t     nsid)
+                        xmlns_id_t     nsid)
 {
     val_value_t *val;
 
     val = val_new_value();
     if (!val) {
-	return NULL;
+        return NULL;
     }
     val_init_complex(val, NCX_BT_CONTAINER);
     val->typdef = typ_get_basetype_typdef(NCX_BT_CONTAINER);
@@ -363,14 +363,14 @@ val_value_t *
 *********************************************************************/
 val_value_t *
     xml_val_new_string (const xmlChar *name,
-			xmlns_id_t     nsid,
-			xmlChar *strval)
+                        xmlns_id_t     nsid,
+                        xmlChar *strval)
 {
     val_value_t *val;
 
     val = val_new_value();
     if (!val) {
-	return NULL;
+        return NULL;
     }
     val->btyp = NCX_BT_STRING;
     val->typdef = typ_get_basetype_typdef(NCX_BT_STRING);
@@ -398,20 +398,20 @@ val_value_t *
 *********************************************************************/
 val_value_t *
     xml_val_new_cstring (const xmlChar *name,
-			 xmlns_id_t     nsid,
-			 const xmlChar *strval)
+                         xmlns_id_t     nsid,
+                         const xmlChar *strval)
 {
     val_value_t *val;
     xmlChar     *str;
 
     str = xml_strdup(strval);
     if (!str) {
-	return NULL;
+        return NULL;
     }
     val = val_new_value();
     if (!val) {
-	m__free(str);
-	return NULL;
+        m__free(str);
+        return NULL;
     }
     val->btyp = NCX_BT_STRING;
     val->typdef = typ_get_basetype_typdef(NCX_BT_STRING);
@@ -439,13 +439,13 @@ val_value_t *
 *********************************************************************/
 val_value_t *
     xml_val_new_flag (const xmlChar *name,
-		      xmlns_id_t     nsid)
+                      xmlns_id_t     nsid)
 {
     val_value_t *val;
 
     val = val_new_value();
     if (!val) {
-	return NULL;
+        return NULL;
     }
     val->btyp = NCX_BT_EMPTY;
     val->v.boo = TRUE;

@@ -111,14 +111,14 @@ date         init     comment
 /* used in parser routines to decide if processing can continue
  * will exit the function if critical error or continue if not
  */
-#define CHK_GRP_EXIT(res, retres)			  \
-    if (res != NO_ERR) {				  \
-	if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) { \
-	    grp_free_template(grp);			  \
-	    return res;					  \
-	} else {					  \
-	    retres = res;				  \
-	}						  \
+#define CHK_GRP_EXIT(res, retres)                         \
+    if (res != NO_ERR) {                                  \
+        if (res < ERR_LAST_SYS_ERR || res==ERR_NCX_EOF) { \
+            grp_free_template(grp);                       \
+            return res;                                   \
+        } else {                                          \
+            retres = res;                                 \
+        }                                                 \
     }
 
 
@@ -140,9 +140,9 @@ date         init     comment
 *********************************************************************/
 static status_t 
     follow_loop (tk_chain_t *tkc,
-		 ncx_module_t  *mod,
-		 grp_template_t *grp,
-		 grp_template_t *testgrp)
+                 ncx_module_t  *mod,
+                 grp_template_t *grp,
+                 grp_template_t *testgrp)
 {
     obj_template_t  *testobj;
     status_t         res, retres;
@@ -150,29 +150,29 @@ static status_t
     retres = NO_ERR;
 
     for (testobj = (obj_template_t *)dlq_firstEntry(&grp->datadefQ);
-	 testobj != NULL;
-	 testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+         testobj != NULL;
+         testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
-	if (testobj->objtype != OBJ_TYP_USES) {
-	    continue;
-	}
+        if (testobj->objtype != OBJ_TYP_USES) {
+            continue;
+        }
 
-	if (testobj->def.uses->grp == testgrp) {
-	    log_error("\nError: grouping '%s'"
-		      " on line %u loops in uses, defined "
-		      "in module %s, line %u",
-		      testgrp->name, 
+        if (testobj->def.uses->grp == testgrp) {
+            log_error("\nError: grouping '%s'"
+                      " on line %u loops in uses, defined "
+                      "in module %s, line %u",
+                      testgrp->name, 
                       testgrp->tkerr.linenum,
-		      testobj->tkerr.mod->name,
-		      testobj->tkerr.linenum);
-	    retres = ERR_NCX_DEF_LOOP;
-	    tkc->curerr = &testgrp->tkerr;
-	    ncx_print_errormsg(tkc, mod, retres);
-	} else if (testobj->def.uses->grp) {
-	    res = follow_loop(tkc, mod,
-			      testobj->def.uses->grp, testgrp);
-	    CHK_EXIT(res, retres);
-	}
+                      testobj->tkerr.mod->name,
+                      testobj->tkerr.linenum);
+            retres = ERR_NCX_DEF_LOOP;
+            tkc->curerr = &testgrp->tkerr;
+            ncx_print_errormsg(tkc, mod, retres);
+        } else if (testobj->def.uses->grp) {
+            res = follow_loop(tkc, mod,
+                              testobj->def.uses->grp, testgrp);
+            CHK_EXIT(res, retres);
+        }
     }
 
     return retres;
@@ -213,14 +213,14 @@ static status_t
 *********************************************************************/
 static status_t 
     check_chain_loop (tk_chain_t *tkc,
-		      ncx_module_t  *mod,
-		      grp_template_t *grp)
+                      ncx_module_t  *mod,
+                      grp_template_t *grp)
 {
     status_t         res;
 
 #ifdef DEBUG
     if (!tkc || !grp) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -257,9 +257,9 @@ static status_t
 status_t 
     yang_grp_consume_grouping (yang_pcb_t *pcb,
                                tk_chain_t *tkc,
-			       ncx_module_t  *mod,
-			       dlq_hdr_t *que,
-			       obj_template_t *parent)
+                               ncx_module_t  *mod,
+                               dlq_hdr_t *que,
+                               obj_template_t *parent)
 {
     grp_template_t  *grp, *testgrp;
     typ_template_t  *testtyp;
@@ -273,7 +273,7 @@ status_t
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod || !que) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -292,9 +292,9 @@ status_t
     /* Get a new grp_template_t to fill in */
     grp = grp_new_template();
     if (!grp) {
-	res = ERR_INTERNAL_MEM;
-	ncx_print_errormsg(tkc, mod, res);
-	return res;
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
     }
 
     ncx_set_error(&grp->tkerr,
@@ -314,146 +314,146 @@ status_t
      */
     res = TK_ADV(tkc);
     if (res != NO_ERR) {
-	ncx_print_errormsg(tkc, mod, res);
-	grp_free_template(grp);
-	return res;
+        ncx_print_errormsg(tkc, mod, res);
+        grp_free_template(grp);
+        return res;
     }
     switch (TK_CUR_TYP(tkc)) {
     case TK_TT_SEMICOL:
-	done = TRUE;
-	break;
+        done = TRUE;
+        break;
     case TK_TT_LBRACE:
-	break;
+        break;
     default:
-	retres = ERR_NCX_WRONG_TKTYPE;
-	expstr = "semi-colon or left brace";
-	ncx_mod_exp_err(tkc, mod, retres, expstr);
-	done = TRUE;
+        retres = ERR_NCX_WRONG_TKTYPE;
+        expstr = "semi-colon or left brace";
+        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        done = TRUE;
     }
 
     /* get the grouping statements and any appinfo extensions */
     while (!done) {
-	/* get the next token */
-	res = TK_ADV(tkc);
-	if (res != NO_ERR) {
-	    ncx_print_errormsg(tkc, mod, res);
-	    grp_free_template(grp);
-	    return res;
-	}
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            grp_free_template(grp);
+            return res;
+        }
 
-	tktyp = TK_CUR_TYP(tkc);
-	val = TK_CUR_VAL(tkc);
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
 
-	/* check the current token type */
-	switch (tktyp) {
-	case TK_TT_NONE:
-	    res = ERR_NCX_EOF;
-	    ncx_print_errormsg(tkc, mod, res);
-	    grp_free_template(grp);
-	    return res;
-	case TK_TT_MSTRING:
-	    /* vendor-specific clause found instead */
-	    res = ncx_consume_appinfo(tkc, mod, &grp->appinfoQ);
-	    CHK_GRP_EXIT(res, retres);
-	    continue;
-	case TK_TT_RBRACE:
-	    done = TRUE;
-	    continue;
-	case TK_TT_TSTRING:
-	    break;  /* YANG clause assumed */
-	default:
-	    retres = ERR_NCX_WRONG_TKTYPE;
-	    ncx_mod_exp_err(tkc, mod, retres, expstr);
-	    continue;
-	}
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            grp_free_template(grp);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, mod, &grp->appinfoQ);
+            CHK_GRP_EXIT(res, retres);
+            continue;
+        case TK_TT_RBRACE:
+            done = TRUE;
+            continue;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
 
-	/* Got a token string so check the value */
-	if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
-	    res = yang_typ_consume_typedef(pcb,
+        /* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_TYPEDEF)) {
+            res = yang_typ_consume_typedef(pcb,
                                            tkc, 
                                            mod,
-					   &grp->typedefQ);
-	} else if (!xml_strcmp(val, YANG_K_GROUPING)) {
-	    res = yang_grp_consume_grouping(pcb,
+                                           &grp->typedefQ);
+        } else if (!xml_strcmp(val, YANG_K_GROUPING)) {
+            res = yang_grp_consume_grouping(pcb,
                                             tkc, 
                                             mod,
-					    &grp->groupingQ, 
+                                            &grp->groupingQ, 
                                             parent);
-	} else if (!xml_strcmp(val, YANG_K_STATUS)) {
-	    res = yang_consume_status(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_STATUS)) {
+            res = yang_consume_status(tkc, 
                                       mod, 
                                       &grp->status,
-				      &stat, 
+                                      &stat, 
                                       &grp->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &grp->descr,
-				     &desc, 
+                                     &desc, 
                                      &grp->appinfoQ);
-	} else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-	    res = yang_consume_descr(tkc, 
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+            res = yang_consume_descr(tkc, 
                                      mod, 
                                      &grp->ref,
-				     &ref, 
+                                     &ref, 
                                      &grp->appinfoQ);
-	} else {
-	    res = yang_obj_consume_datadef_grp(pcb,
+        } else {
+            res = yang_obj_consume_datadef_grp(pcb,
                                                tkc, 
                                                mod,
-					       &grp->datadefQ,
-					       parent, 
+                                               &grp->datadefQ,
+                                               parent, 
                                                grp);
-	}
-	CHK_GRP_EXIT(res, retres);
+        }
+        CHK_GRP_EXIT(res, retres);
     }
 
     /* save or delete the grp_template_t struct */
     if (grp->name && ncx_valid_name2(grp->name)) {
-	testgrp = ncx_find_grouping_que(que, grp->name);
-	if (testgrp) {
-	    log_error("\nError: grouping '%s' already defined at line %u",
-		      grp->name, 
+        testgrp = ncx_find_grouping_que(que, grp->name);
+        if (testgrp) {
+            log_error("\nError: grouping '%s' already defined at line %u",
+                      grp->name, 
                       testgrp->tkerr.linenum);
-	    retres = ERR_NCX_DUP_ENTRY;
-	    ncx_print_errormsg(tkc, mod, retres);
-	    grp_free_template(grp);
-	} else {
-	    for (testgrp = (grp_template_t *)
-		     dlq_firstEntry(&grp->groupingQ);
-		 testgrp != NULL;
-		 testgrp = (grp_template_t *)dlq_nextEntry(testgrp)) {
-		testgrp->parentgrp = grp;
-	    }
-	    for (testtyp = (typ_template_t *)
-		     dlq_firstEntry(&grp->typedefQ);
-		 testtyp != NULL;
-		 testtyp = (typ_template_t *)dlq_nextEntry(testtyp)) {
-		testtyp->grp = grp;
-	    }
+            retres = ERR_NCX_DUP_ENTRY;
+            ncx_print_errormsg(tkc, mod, retres);
+            grp_free_template(grp);
+        } else {
+            for (testgrp = (grp_template_t *)
+                     dlq_firstEntry(&grp->groupingQ);
+                 testgrp != NULL;
+                 testgrp = (grp_template_t *)dlq_nextEntry(testgrp)) {
+                testgrp->parentgrp = grp;
+            }
+            for (testtyp = (typ_template_t *)
+                     dlq_firstEntry(&grp->typedefQ);
+                 testtyp != NULL;
+                 testtyp = (typ_template_t *)dlq_nextEntry(testtyp)) {
+                testtyp->grp = grp;
+            }
 #ifdef YANG_GRP_DEBUG
-	    if (LOGDEBUG4) {
-		log_debug4("\nyang_grp: adding grouping (%s) to mod (%s)", 
-			   grp->name, 
-			   mod->name);
-	    }
+            if (LOGDEBUG4) {
+                log_debug4("\nyang_grp: adding grouping (%s) to mod (%s)", 
+                           grp->name, 
+                           mod->name);
+            }
 #endif
-	    dlq_enque(grp, que);  /* may have some errors */
+            dlq_enque(grp, que);  /* may have some errors */
 
-	    if (mod->stmtmode && que==&mod->groupingQ) {
-		/* save stmt record for top-level groupings only */
-		stmt = yang_new_grp_stmt(grp);
-		if (stmt) {
-		    dlq_enque(stmt, &mod->stmtQ);
-		} else {
-		    log_error("\nError: malloc failure for grp_stmt");
-		    retres = ERR_INTERNAL_MEM;
-		    ncx_print_errormsg(tkc, mod, retres);
-		}
-	    }
-	}
+            if (mod->stmtmode && que==&mod->groupingQ) {
+                /* save stmt record for top-level groupings only */
+                stmt = yang_new_grp_stmt(grp);
+                if (stmt) {
+                    dlq_enque(stmt, &mod->stmtQ);
+                } else {
+                    log_error("\nError: malloc failure for grp_stmt");
+                    retres = ERR_INTERNAL_MEM;
+                    ncx_print_errormsg(tkc, mod, retres);
+                }
+            }
+        }
     } else {
-	grp_free_template(grp);
+        grp_free_template(grp);
     }
 
     return retres;
@@ -488,9 +488,9 @@ status_t
 status_t 
     yang_grp_resolve_groupings (yang_pcb_t *pcb,
                                 tk_chain_t *tkc,
-				ncx_module_t  *mod,
-				dlq_hdr_t *groupingQ,
-				obj_template_t *parent)
+                                ncx_module_t  *mod,
+                                dlq_hdr_t *groupingQ,
+                                obj_template_t *parent)
 {
     grp_template_t  *grp, *nextgrp, *errgrp;
     obj_template_t  *testobj;
@@ -498,7 +498,7 @@ status_t
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod || !groupingQ) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -509,118 +509,118 @@ status_t
      * and data-def statements
      */
     for (grp = (grp_template_t *)dlq_firstEntry(groupingQ);
-	 grp != NULL;
-	 grp = (grp_template_t *)dlq_nextEntry(grp)) {
+         grp != NULL;
+         grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
-	/* check the appinfoQ */
-	res = ncx_resolve_appinfoQ(pcb,
+        /* check the appinfoQ */
+        res = ncx_resolve_appinfoQ(pcb,
                                    tkc, 
                                    mod, 
                                    &grp->appinfoQ);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
 
-	/* check any local typedefs */
-	res = yang_typ_resolve_typedefs_grp(pcb,
+        /* check any local typedefs */
+        res = yang_typ_resolve_typedefs_grp(pcb,
                                             tkc, 
                                             mod,
-					    &grp->typedefQ,
-					    parent, 
+                                            &grp->typedefQ,
+                                            parent, 
                                             grp);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
 
-	/* check any local groupings */
-	res = yang_grp_resolve_groupings(pcb,
+        /* check any local groupings */
+        res = yang_grp_resolve_groupings(pcb,
                                          tkc, 
                                          mod,
-					 &grp->groupingQ, 
+                                         &grp->groupingQ, 
                                          parent);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
 
-	/* check any local objects */
-	res = yang_obj_resolve_datadefs(pcb,
+        /* check any local objects */
+        res = yang_obj_resolve_datadefs(pcb,
                                         tkc, 
                                         mod, 
                                         &grp->datadefQ);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     /* go through and check grouping shadow error
      * this cannot be checked until the previous loop completes
      */
     for (grp = (grp_template_t *)dlq_firstEntry(groupingQ);
-	 grp != NULL;
-	 grp = (grp_template_t *)dlq_nextEntry(grp)) {
+         grp != NULL;
+         grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
-	res = NO_ERR;
-	errgrp = NULL;
-	nextgrp = grp->parentgrp;
-	while (nextgrp && res==NO_ERR) {
-	    if (!xml_strcmp(nextgrp->name, grp->name)) {
-		res = ERR_NCX_DUP_ENTRY;
-		errgrp = nextgrp;
-	    } else if (&nextgrp->groupingQ != groupingQ) {
-		/* check local Q if it is at least 2 layers up */
-		errgrp = ncx_find_grouping_que(&nextgrp->groupingQ,
-					       grp->name);
-		if (errgrp) {
-		    res = ERR_NCX_DUP_ENTRY;
-		}
-	    }
-	    nextgrp = nextgrp->parentgrp;
-	}
+        res = NO_ERR;
+        errgrp = NULL;
+        nextgrp = grp->parentgrp;
+        while (nextgrp && res==NO_ERR) {
+            if (!xml_strcmp(nextgrp->name, grp->name)) {
+                res = ERR_NCX_DUP_ENTRY;
+                errgrp = nextgrp;
+            } else if (&nextgrp->groupingQ != groupingQ) {
+                /* check local Q if it is at least 2 layers up */
+                errgrp = ncx_find_grouping_que(&nextgrp->groupingQ,
+                                               grp->name);
+                if (errgrp) {
+                    res = ERR_NCX_DUP_ENTRY;
+                }
+            }
+            nextgrp = nextgrp->parentgrp;
+        }
 
-	if (res != NO_ERR) {
-	    log_error("\nError: local grouping '%s' shadows"
-		      " definition on line %u",
-		      grp->name,
-		      errgrp->tkerr.linenum);
-	    tkc->curerr = &grp->tkerr;
-	    ncx_print_errormsg(tkc, mod, res);
-	} else if (parent) {
-	    testobj = parent->parent;
-	    if (testobj) {
-		nextgrp = obj_find_grouping(testobj, grp->name);
-		if (nextgrp) {
-		    log_error("\nError: local grouping '%s' shadows"
-			      " definition on line %u",
-			      grp->name,
-			      nextgrp->tkerr.linenum);
-		    tkc->curerr = &grp->tkerr;
-		    ncx_print_errormsg(tkc, mod, res);
-		}
-	    }
-	}
+        if (res != NO_ERR) {
+            log_error("\nError: local grouping '%s' shadows"
+                      " definition on line %u",
+                      grp->name,
+                      errgrp->tkerr.linenum);
+            tkc->curerr = &grp->tkerr;
+            ncx_print_errormsg(tkc, mod, res);
+        } else if (parent) {
+            testobj = parent->parent;
+            if (testobj) {
+                nextgrp = obj_find_grouping(testobj, grp->name);
+                if (nextgrp) {
+                    log_error("\nError: local grouping '%s' shadows"
+                              " definition on line %u",
+                              grp->name,
+                              nextgrp->tkerr.linenum);
+                    tkc->curerr = &grp->tkerr;
+                    ncx_print_errormsg(tkc, mod, res);
+                }
+            }
+        }
 
-	/* check nesteed groupings for module-level conflict */
-	if (grp->parent) {
-	    nextgrp = ncx_find_grouping(mod, grp->name);
-	    if (nextgrp) {
-		log_error("\nError: local grouping '%s' shadows"
-			  " module definition on line %u",
-			  grp->name,
-			  nextgrp->tkerr.linenum);
-		res = ERR_NCX_DUP_ENTRY;
-		tkc->curerr = &grp->tkerr;
-		ncx_print_errormsg(tkc, mod, res);
-	    }
-	    CHK_EXIT(res, retres);
-	}
+        /* check nesteed groupings for module-level conflict */
+        if (grp->parent) {
+            nextgrp = ncx_find_grouping(mod, grp->name);
+            if (nextgrp) {
+                log_error("\nError: local grouping '%s' shadows"
+                          " module definition on line %u",
+                          grp->name,
+                          nextgrp->tkerr.linenum);
+                res = ERR_NCX_DUP_ENTRY;
+                tkc->curerr = &grp->tkerr;
+                ncx_print_errormsg(tkc, mod, res);
+            }
+            CHK_EXIT(res, retres);
+        }
     }
 
     /* go through the groupingQ again and check for uses chain loops */
     for (grp = (grp_template_t *)dlq_firstEntry(groupingQ);
-	 grp != NULL;
-	 grp = nextgrp) {
+         grp != NULL;
+         grp = nextgrp) {
 
-	nextgrp = (grp_template_t *)dlq_nextEntry(grp);
+        nextgrp = (grp_template_t *)dlq_nextEntry(grp);
 
-	/* check any group/uses loops */
-	res = check_chain_loop(tkc, mod, grp);
-	CHK_EXIT(res, retres);
-	if (res != NO_ERR) {
-	    dlq_remove(grp);
-	    grp_free_template(grp);
-	}
+        /* check any group/uses loops */
+        res = check_chain_loop(tkc, mod, grp);
+        CHK_EXIT(res, retres);
+        if (res != NO_ERR) {
+            dlq_remove(grp);
+            grp_free_template(grp);
+        }
     }
 
     return retres;
@@ -655,16 +655,16 @@ status_t
 status_t
     yang_grp_resolve_complete (yang_pcb_t *pcb,
                                tk_chain_t *tkc,
-			       ncx_module_t  *mod,
-			       dlq_hdr_t *groupingQ,
-			       obj_template_t *parent)
+                               ncx_module_t  *mod,
+                               dlq_hdr_t *groupingQ,
+                               obj_template_t *parent)
 {
     grp_template_t  *grp;
     status_t         res, retres;
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod || !groupingQ) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -675,28 +675,28 @@ status_t
      * and data-def statements
      */
     for (grp = (grp_template_t *)dlq_firstEntry(groupingQ);
-	 grp != NULL;
-	 grp = (grp_template_t *)dlq_nextEntry(grp)) {
+         grp != NULL;
+         grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
-	/* check any local groupings */
-	res = yang_grp_resolve_complete(pcb,
+        /* check any local groupings */
+        res = yang_grp_resolve_complete(pcb,
                                         tkc, 
                                         mod, 
                                         &grp->groupingQ, parent);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
 
     for (grp = (grp_template_t *)dlq_firstEntry(groupingQ);
-	 grp != NULL;
-	 grp = (grp_template_t *)dlq_nextEntry(grp)) {
+         grp != NULL;
+         grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
-	/* check any local objects for uses clauses */
-	res = yang_obj_resolve_uses(pcb,
+        /* check any local objects for uses clauses */
+        res = yang_obj_resolve_uses(pcb,
                                     tkc, 
                                     mod, 
                                     &grp->datadefQ);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
     }
 
     return retres;
@@ -726,15 +726,15 @@ status_t
 status_t 
     yang_grp_resolve_final (yang_pcb_t *pcb,
                             tk_chain_t *tkc,
-			    ncx_module_t  *mod,
-			    dlq_hdr_t *groupingQ)
+                            ncx_module_t  *mod,
+                            dlq_hdr_t *groupingQ)
 {
     grp_template_t  *grp;
     status_t         res, retres;
 
 #ifdef DEBUG
     if (!pcb || !tkc || !mod || !groupingQ) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -745,28 +745,28 @@ status_t
      * and data-def statements
      */
     for (grp = (grp_template_t *)dlq_firstEntry(groupingQ);
-	 grp != NULL && res==NO_ERR;
-	 grp = (grp_template_t *)dlq_nextEntry(grp)) {
+         grp != NULL && res==NO_ERR;
+         grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
-	/* check any local groupings */
-	res = yang_grp_resolve_final(pcb,
+        /* check any local groupings */
+        res = yang_grp_resolve_final(pcb,
                                      tkc, 
                                      mod, 
                                      &grp->groupingQ);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
 
-	/* final check on all objects within groupings */
-	res = yang_obj_resolve_final(pcb,
+        /* final check on all objects within groupings */
+        res = yang_obj_resolve_final(pcb,
                                      tkc, 
                                      mod, 
                                      &grp->datadefQ,
                                      TRUE);
-	CHK_EXIT(res, retres);
+        CHK_EXIT(res, retres);
 
-	yang_check_obj_used(tkc, 
+        yang_check_obj_used(tkc, 
                             mod, 
                             &grp->typedefQ,
-			    &grp->groupingQ);
+                            &grp->groupingQ);
 
     }
 
@@ -807,9 +807,9 @@ status_t
 *********************************************************************/
 status_t 
     yang_grp_check_nest_loop (tk_chain_t *tkc,
-			      ncx_module_t  *mod,
-			      obj_template_t *obj,
-			      grp_template_t *grp)
+                              ncx_module_t  *mod,
+                              obj_template_t *obj,
+                              grp_template_t *grp)
 {
     obj_template_t  *testobj;
     grp_template_t  *testgrp;
@@ -817,43 +817,43 @@ status_t
 
 #ifdef DEBUG
     if (!tkc || !obj || !grp) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     testobj = obj;
 
     while (testobj) {
-	if (testobj->grp == grp) {
-	    log_error("\nError: uses of '%s'"
-		      " is contained within that grouping, "
-		      "defined on line %u",
-		      grp->name, 
+        if (testobj->grp == grp) {
+            log_error("\nError: uses of '%s'"
+                      " is contained within that grouping, "
+                      "defined on line %u",
+                      grp->name, 
                       grp->tkerr.linenum);
-	    retres = ERR_NCX_DEF_LOOP;
-	    tkc->curerr = &obj->tkerr;
-	    ncx_print_errormsg(tkc, mod, retres);
-	    return retres;
-	} else if (testobj->grp) {
-	    testgrp = testobj->grp->parentgrp;
-	    while (testgrp) {
-		if (testgrp == grp) {
-		    log_error("\nError: uses of '%s'"
-			      " is contained within "
-			      "that grouping, defined on line %u",
-			      grp->name, 
+            retres = ERR_NCX_DEF_LOOP;
+            tkc->curerr = &obj->tkerr;
+            ncx_print_errormsg(tkc, mod, retres);
+            return retres;
+        } else if (testobj->grp) {
+            testgrp = testobj->grp->parentgrp;
+            while (testgrp) {
+                if (testgrp == grp) {
+                    log_error("\nError: uses of '%s'"
+                              " is contained within "
+                              "that grouping, defined on line %u",
+                              grp->name, 
                               grp->tkerr.linenum);
-		    retres = ERR_NCX_DEF_LOOP;
-		    tkc->curerr = &obj->tkerr;
-		    ncx_print_errormsg(tkc, mod, retres);
-		    return retres;
-		} else {
-		    testgrp = testgrp->parentgrp;
-		}
-	    }
-	}
-	
-	testobj = testobj->parent;
+                    retres = ERR_NCX_DEF_LOOP;
+                    tkc->curerr = &obj->tkerr;
+                    ncx_print_errormsg(tkc, mod, retres);
+                    return retres;
+                } else {
+                    testgrp = testgrp->parentgrp;
+                }
+            }
+        }
+        
+        testobj = testobj->parent;
     }
 
     return NO_ERR;

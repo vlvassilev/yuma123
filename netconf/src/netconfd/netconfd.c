@@ -1,6 +1,6 @@
 /*  FILE: netconfd.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -108,7 +108,7 @@ static status_t
                              NULL,
                              NULL);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* load in the NETCONF data types and RPC methods */
@@ -117,7 +117,7 @@ static status_t
                              NULL,
                              NULL);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     return res;
@@ -138,7 +138,7 @@ static status_t
 
 #ifdef NETCONFD_DEBUG
     if (LOGDEBUG2) {
-	log_debug2("\nnetconfd: Loading NCX Module");
+        log_debug2("\nnetconfd: Loading NCX Module");
     }
 #endif
 
@@ -148,7 +148,7 @@ static status_t
                              &profile->agt_savedevQ,
                              NULL);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* load in the with-defaults extension module */
@@ -157,7 +157,7 @@ static status_t
                              &profile->agt_savedevQ,
                              NULL);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* initialize the NETCONF operation attribute 
@@ -165,12 +165,12 @@ static status_t
      */
     res = ncx_stage2_init();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
 #ifdef NETCONFD_DEBUG
     if (LOGDEBUG2) {
-	log_debug2("\nnetconfd: Loading Debug Test Module");
+        log_debug2("\nnetconfd: Loading Debug Test Module");
     }
 #endif
 
@@ -185,9 +185,9 @@ static status_t
                              &profile->agt_savedevQ,
                              NULL);
     if (res != NO_ERR) {
-	return res;
+        return res;
     } else {
-	agt_disable_feature(TESTMOD, TESTFEATURE);
+        agt_disable_feature(TESTMOD, TESTFEATURE);
     }
 #endif
 
@@ -204,9 +204,9 @@ static status_t
  *********************************************************************/
 static status_t 
     cmn_init (int argc,
-	      const char *argv[],
-	      boolean *showver,
-	      help_mode_t *showhelpmode)
+              const char *argv[],
+              boolean *showver,
+              help_mode_t *showhelpmode)
 {
     status_t     res;
     log_debug_t  dlevel;
@@ -241,21 +241,21 @@ static status_t
     strcat(buff, COPYRIGHT_STRING);
 
     res = ncx_init(FALSE, 
-		   dlevel, 
-		   TRUE,
-		   buff,
-		   argc, 
+                   dlevel, 
+                   TRUE,
+                   buff,
+                   argc, 
                    argv);
 
     m__free(buff);
 
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
 #ifdef NETCONFD_DEBUG
     if (LOGDEBUG2) {
-	log_debug2("\nnetconfd: Starting Netconf Agent Library");
+        log_debug2("\nnetconfd: Starting Netconf Agent Library");
     }
 #endif
 
@@ -266,7 +266,7 @@ static status_t
     /* Load the core modules (netconfd and netconf) */
     res = load_base_schema();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* Initialize the Netconf Agent Library
@@ -274,29 +274,29 @@ static status_t
      */
     res = agt_init1(argc, argv, showver, showhelpmode);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* check quick-exit mode */
     if (*showver || *showhelpmode != HELP_MODE_NONE) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     /* Load the core modules (netconfd and netconf) */
     res = load_core_schema(agt_get_profile());
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* finidh initializing agent data structures */
     res = agt_init2();
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
 #ifdef NETCONFD_DEBUG
     if (LOGDEBUG) {
-	log_debug("\nnetconfd init OK, ready for sessions\n");
+        log_debug("\nnetconfd init OK, ready for sessions\n");
     }
 #endif
 
@@ -324,14 +324,14 @@ static status_t
 
 #ifdef NETCONFD_DEBUG
     if (LOGDEBUG) {
-	log_debug("\nStart running netconfd agent\n");
+        log_debug("\nStart running netconfd agent\n");
     }
 #endif
 
     res = agt_ncxserver_run();
     if (res != NO_ERR) {
-	log_error("\nncxserver failed (%s)",
-		  get_error_string(res));
+        log_error("\nncxserver failed (%s)",
+                  get_error_string(res));
     }
     return res;
     
@@ -350,7 +350,7 @@ static void
 
 #ifdef NETCONFD_DEBUG
     if (LOGDEBUG) {
-	log_debug("\nShutting down netconf agent\n");
+        log_debug("\nShutting down netconf agent\n");
     }
 #endif
 
@@ -365,12 +365,12 @@ static void
 
 /********************************************************************
 *                                                                   *
-*			FUNCTION main				    *
+*                       FUNCTION main                               *
 *                                                                   *
 *********************************************************************/
 int 
     main (int argc, 
-	  const char *argv[])
+          const char *argv[])
 {
     status_t           res;
     boolean            showver, stdlog, done;
@@ -389,16 +389,16 @@ int
 
     while (!done) {
 
-	res = cmn_init(argc, argv, &showver, &showhelpmode);
+        res = cmn_init(argc, argv, &showver, &showhelpmode);
 
-	stdlog = !log_is_open();
+        stdlog = !log_is_open();
     
-	if (res != NO_ERR) {
-	    log_error("\nnetconfd: init returned (%s)", 
-		      get_error_string(res));
-	    agt_request_shutdown(NCX_SHUT_EXIT);
-	} else {
-	    if (showver) {
+        if (res != NO_ERR) {
+            log_error("\nnetconfd: init returned (%s)", 
+                      get_error_string(res));
+            agt_request_shutdown(NCX_SHUT_EXIT);
+        } else {
+            if (showver) {
                 res = ncx_get_version(versionbuffer,
                                       NCX_VERSION_BUFFSIZE);
                 if (res == NO_ERR) {
@@ -407,34 +407,34 @@ int
                 } else {
                     SET_ERROR(res);
                 }
-		agt_request_shutdown(NCX_SHUT_EXIT);
-	    } else if (showhelpmode != HELP_MODE_NONE) {
-		help_program_module(NETCONFD_MOD,
-				    NETCONFD_CLI,
-				    showhelpmode);
-		agt_request_shutdown(NCX_SHUT_EXIT);
-	    } else {
-		res = netconfd_run();
-		if (res != NO_ERR) {
-		    agt_request_shutdown(NCX_SHUT_EXIT);
-		}
-	    }
-	}
+                agt_request_shutdown(NCX_SHUT_EXIT);
+            } else if (showhelpmode != HELP_MODE_NONE) {
+                help_program_module(NETCONFD_MOD,
+                                    NETCONFD_CLI,
+                                    showhelpmode);
+                agt_request_shutdown(NCX_SHUT_EXIT);
+            } else {
+                res = netconfd_run();
+                if (res != NO_ERR) {
+                    agt_request_shutdown(NCX_SHUT_EXIT);
+                }
+            }
+        }
 
-	shutmode = agt_shutdown_mode_requested();
+        shutmode = agt_shutdown_mode_requested();
 
-	netconfd_cleanup();
+        netconfd_cleanup();
 
         print_error_count();
 
-	if (shutmode == NCX_SHUT_EXIT) {
-	    done = TRUE;
-	}
+        if (shutmode == NCX_SHUT_EXIT) {
+            done = TRUE;
+        }
     }
 
     if (malloc_cnt != free_cnt) {
-	printf("\n*** netconfd error: memory leak (m:%u f:%u)\n", 
-	       malloc_cnt, free_cnt);
+        printf("\n*** netconfd error: memory leak (m:%u f:%u)\n", 
+               malloc_cnt, free_cnt);
     }
 
     print_errors();
@@ -442,7 +442,7 @@ int
     print_error_count();
 
     if (stdlog) {
-	printf("\n");
+        printf("\n");
     }
 
     return 0;

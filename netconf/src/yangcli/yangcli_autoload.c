@@ -171,19 +171,19 @@ static status_t
     rpc = ncx_find_rpc(mod,  NCX_EL_GET_SCHEMA);
     if (rpc) {
         nsid = obj_get_nsid(rpc);
-	input = obj_find_child(rpc, NULL, YANG_K_INPUT);
+        input = obj_find_child(rpc, NULL, YANG_K_INPUT);
     }
 
     if (!input) {
-	res = SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        res = SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     } else {
-	/* construct a method + parameter tree */
-	reqdata = xml_val_new_struct(obj_get_name(rpc), 
-				     nsid);
-	if (!reqdata) {
-	    log_error("\nError allocating a new RPC request");
-	    res = ERR_INTERNAL_MEM;
-	}
+        /* construct a method + parameter tree */
+        reqdata = xml_val_new_struct(obj_get_name(rpc), 
+                                     nsid);
+        if (!reqdata) {
+            log_error("\nError allocating a new RPC request");
+            res = ERR_INTERNAL_MEM;
+        }
     }
 
     /* add /get-schema/input/identifier */
@@ -229,8 +229,8 @@ static status_t
 
     /* check any errors so far */
     if (res != NO_ERR) {
-	val_free_value(reqdata);
-	return res;
+        val_free_value(reqdata);
+        return res;
     }
 
     /* allocate an RPC request and send it */
@@ -243,7 +243,7 @@ static status_t
         req->rpc = rpc;
         req->timeout = server_cb->timeout;
     }
-	
+        
     if (res == NO_ERR) {
         if (LOGDEBUG) {
             log_debug("\nSending autoload request for '%s', r'%s'",
@@ -251,24 +251,24 @@ static status_t
                       (revision) ? revision : EMPTY_STRING);
         } 
         if (LOGDEBUG2) {
-	    log_debug2("\nabout to send RPC request with reqdata:");
-	    val_dump_value_ex(reqdata, 
+            log_debug2("\nabout to send RPC request with reqdata:");
+            val_dump_value_ex(reqdata, 
                               NCX_DEF_INDENT,
                               server_cb->display_mode);
-	}
+        }
 
-	/* the request will be stored if this returns NO_ERR */
-	res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
+        /* the request will be stored if this returns NO_ERR */
+        res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
     }
 
     if (res != NO_ERR) {
-	if (req) {
-	    mgr_rpc_free_request(req);
-	} else if (reqdata) {
-	    val_free_value(reqdata);
-	}
+        if (req) {
+            mgr_rpc_free_request(req);
+        } else if (reqdata) {
+            val_free_value(reqdata);
+        }
     } else {
-	server_cb->state = MGR_IO_ST_CONN_RPYWAIT;
+        server_cb->state = MGR_IO_ST_CONN_RPYWAIT;
     }
 
     return res;
@@ -311,21 +311,21 @@ static status_t
                   (revision) ? revision : EMPTY_STRING);
     }
     if (LOGDEBUG2) {
-	log_debug2("\n*** output <get-schema> result "
+        log_debug2("\n*** output <get-schema> result "
                    "\n   module '%s'"
                    "\n   revision '%'s"
                    "\n   target '%s'",
                    module,
                    (revision) ? revision : EMPTY_STRING,
-		   targetfile);
+                   targetfile);
     }
 
     /* see if file already exists */
     statresult = stat((const char *)targetfile, &statbuf);
     if (statresult == 0) {
-	log_error("\nError: temporary file '%s' already exists",
-		  targetfile);
-	return ERR_NCX_DATA_EXISTS;
+        log_error("\nError: temporary file '%s' already exists",
+                  targetfile);
+        return ERR_NCX_DATA_EXISTS;
     }
     
     /* output in text format to the specified file */
@@ -369,8 +369,8 @@ static status_t
 *********************************************************************/
 static boolean
     reset_feature (const ncx_module_t *mod,
-		   ncx_feature_t *feature,
-		   void *cookie)
+                   ncx_feature_t *feature,
+                   void *cookie)
 {
     const ncx_list_t *feature_list;
 
@@ -378,8 +378,8 @@ static boolean
     feature_list = (const ncx_list_t *)cookie;
 
     feature->enabled = 
-	(ncx_string_in_list(feature->name, feature_list)) ?
-	TRUE : FALSE;
+        (ncx_string_in_list(feature->name, feature_list)) ?
+        TRUE : FALSE;
 
     return TRUE;
 
@@ -1055,16 +1055,16 @@ status_t
      * to match what the server has reported
      */
     for (modptr = (modptr_t *)
-	     dlq_firstEntry(&server_cb->modptrQ);
-	 modptr != NULL;
-	 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+             dlq_firstEntry(&server_cb->modptrQ);
+         modptr != NULL;
+         modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
-	if (modptr->feature_list) {
-	    ncx_for_all_features(modptr->mod,
-				 reset_feature,
-				 modptr->feature_list,
-				 FALSE);
-	}
+        if (modptr->feature_list) {
+            ncx_for_all_features(modptr->mod,
+                                 reset_feature,
+                                 modptr->feature_list,
+                                 FALSE);
+        }
     }
 
     server_cb->command_mode = CMD_MODE_NORMAL;

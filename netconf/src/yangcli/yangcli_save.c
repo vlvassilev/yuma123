@@ -154,40 +154,40 @@ static status_t
 
     /* get the <copy-config> template */
     rpc = ncx_find_object(get_netconf_mod(), 
-			  NCX_EL_COPY_CONFIG);
+                          NCX_EL_COPY_CONFIG);
     if (!rpc) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     /* get the 'input' section container */
     input = obj_find_child(rpc, NULL, YANG_K_INPUT);
     if (!input) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     /* construct a method + parameter tree */
     reqdata = xml_val_new_struct(obj_get_name(rpc), 
-				 obj_get_nsid(rpc));
+                                 obj_get_nsid(rpc));
     if (!reqdata) {
-	log_error("\nError allocating a new RPC request");
-	return ERR_INTERNAL_MEM;
+        log_error("\nError allocating a new RPC request");
+        return ERR_INTERNAL_MEM;
     }
 
     /* set the edit-config/input/target node to the default_target */
     child = obj_find_child(input, NC_MODULE, NCX_EL_TARGET);
     parm = val_new_value();
     if (!parm) {
-	val_free_value(reqdata);
-	return ERR_INTERNAL_MEM;
+        val_free_value(reqdata);
+        return ERR_INTERNAL_MEM;
     }
     val_init_from_template(parm, child);
     val_add_child(parm, reqdata);
 
     target = xml_val_new_flag((const xmlChar *)"startup",
-			      obj_get_nsid(child));
+                              obj_get_nsid(child));
     if (!target) {
-	val_free_value(reqdata);
-	return ERR_INTERNAL_MEM;
+        val_free_value(reqdata);
+        return ERR_INTERNAL_MEM;
     }
     val_add_child(target, parm);
 
@@ -195,56 +195,56 @@ static status_t
     child = obj_find_child(input, NC_MODULE, NCX_EL_SOURCE);
     parm = val_new_value();
     if (!parm) {
-	val_free_value(reqdata);
-	return ERR_INTERNAL_MEM;
+        val_free_value(reqdata);
+        return ERR_INTERNAL_MEM;
     }
     val_init_from_template(parm, child);
     val_add_child(parm, reqdata);
 
     source = xml_val_new_flag((const xmlChar *)"running",
-			      obj_get_nsid(child));
+                              obj_get_nsid(child));
     if (!source) {
-	val_free_value(reqdata);
-	return ERR_INTERNAL_MEM;
+        val_free_value(reqdata);
+        return ERR_INTERNAL_MEM;
     }
     val_add_child(source, parm);
 
     /* allocate an RPC request and send it */
     scb = mgr_ses_get_scb(server_cb->mysid);
     if (!scb) {
-	res = SET_ERROR(ERR_INTERNAL_PTR);
+        res = SET_ERROR(ERR_INTERNAL_PTR);
     } else {
-	req = mgr_rpc_new_request(scb);
-	if (!req) {
-	    res = ERR_INTERNAL_MEM;
-	    log_error("\nError allocating a new RPC request");
-	} else {
-	    req->data = reqdata;
-	    req->rpc = rpc;
-	    req->timeout = server_cb->timeout;
-	}
+        req = mgr_rpc_new_request(scb);
+        if (!req) {
+            res = ERR_INTERNAL_MEM;
+            log_error("\nError allocating a new RPC request");
+        } else {
+            req->data = reqdata;
+            req->rpc = rpc;
+            req->timeout = server_cb->timeout;
+        }
     }
-	
+        
     if (res == NO_ERR) {
-	if (LOGDEBUG2) {
-	    log_debug2("\nabout to send RPC request with reqdata:");
-	    val_dump_value_ex(reqdata, 
+        if (LOGDEBUG2) {
+            log_debug2("\nabout to send RPC request with reqdata:");
+            val_dump_value_ex(reqdata, 
                               NCX_DEF_INDENT,
                               server_cb->display_mode);
-	}
+        }
 
-	/* the request will be stored if this returns NO_ERR */
-	res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
+        /* the request will be stored if this returns NO_ERR */
+        res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
     }
 
     if (res != NO_ERR) {
-	if (req) {
-	    mgr_rpc_free_request(req);
-	} else if (reqdata) {
-	    val_free_value(reqdata);
-	}
+        if (req) {
+            mgr_rpc_free_request(req);
+        } else if (reqdata) {
+            val_free_value(reqdata);
+        }
     } else {
-	server_cb->state = MGR_IO_ST_CONN_RPYWAIT;
+        server_cb->state = MGR_IO_ST_CONN_RPYWAIT;
     }
 
     return res;
@@ -277,7 +277,7 @@ status_t
     /* get the session info */
     scb = mgr_ses_get_scb(server_cb->mysid);
     if (!scb) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
     mscb = (const mgr_scb_t *)scb->mgrcb;
 
@@ -286,44 +286,44 @@ status_t
     /* determine which commands to send */
     switch (mscb->targtyp) {
     case NCX_AGT_TARG_NONE:
-	log_stdout("\nWarning: No writable targets supported on this server");
-	break;
+        log_stdout("\nWarning: No writable targets supported on this server");
+        break;
     case NCX_AGT_TARG_CANDIDATE:
     case NCX_AGT_TARG_CAND_RUNNING:
-	line = xml_strdup(NCX_EL_COMMIT);
-	if (line) {
-	    res = conn_command(server_cb, line);
+        line = xml_strdup(NCX_EL_COMMIT);
+        if (line) {
+            res = conn_command(server_cb, line);
 #ifdef NOT_YET
-	    if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
-		log_stdout(" + copy-config <running> <startup>");
-	    }
+            if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
+                log_stdout(" + copy-config <running> <startup>");
+            }
 #endif
-	    m__free(line);
-	} else {
-	    log_stdout("\nError: Malloc failed");
-	}
-	break;
+            m__free(line);
+        } else {
+            log_stdout("\nError: Malloc failed");
+        }
+        break;
     case NCX_AGT_TARG_RUNNING:
-	if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
-	    res = send_copy_config_to_server(server_cb);
-	    if (res != NO_ERR) {
-		log_stdout("\nError: send copy-config failed (%s)",
-			   get_error_string(res));
-	    }
-	} else {
-	    log_stdout("\nWarning: No distinct save operation needed "
-		       "for this server");
-	}
-	break;
+        if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
+            res = send_copy_config_to_server(server_cb);
+            if (res != NO_ERR) {
+                log_stdout("\nError: send copy-config failed (%s)",
+                           get_error_string(res));
+            }
+        } else {
+            log_stdout("\nWarning: No distinct save operation needed "
+                       "for this server");
+        }
+        break;
     case NCX_AGT_TARG_LOCAL:
-	log_stdout("Error: Local URL target not supported");
-	break;
+        log_stdout("Error: Local URL target not supported");
+        break;
     case NCX_AGT_TARG_REMOTE:
-	log_stdout("Error: Local URL target not supported");
-	break;
+        log_stdout("Error: Local URL target not supported");
+        break;
     default:
-	log_stdout("Error: Internal target not set");
-	res = SET_ERROR(ERR_INTERNAL_VAL);
+        log_stdout("Error: Internal target not set");
+        res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     return res;

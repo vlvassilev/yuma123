@@ -189,7 +189,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -255,16 +255,16 @@ static void
     free_subscription (agt_not_subscription_t *sub)
 {
     if (sub->stream) {
-	m__free(sub->stream);
+        m__free(sub->stream);
     }
     if (sub->startTime) {
-	m__free(sub->startTime);
+        m__free(sub->startTime);
     }
     if (sub->stopTime) {
-	m__free(sub->stopTime);
+        m__free(sub->stopTime);
     }
     if (sub->filterval) {
-	val_free_value(sub->filterval);
+        val_free_value(sub->filterval);
     }
     if (sub->scb) {
         sub->scb->notif_active = FALSE;
@@ -301,36 +301,36 @@ static void
 *********************************************************************/
 static agt_not_subscription_t *
     new_subscription (ses_cb_t *scb,
-		      const xmlChar *stream,
-		      const xmlChar *curTime,
-		      xmlChar *startTime,
-		      xmlChar *stopTime,
-		      boolean futurestop,
+                      const xmlChar *stream,
+                      const xmlChar *curTime,
+                      xmlChar *startTime,
+                      xmlChar *stopTime,
+                      boolean futurestop,
                       op_filtertyp_t  filtertype,
-		      val_value_t *filterval,
-		      val_value_t *selectval)
+                      val_value_t *filterval,
+                      val_value_t *selectval)
 {
     agt_not_subscription_t  *sub;
     agt_not_stream_t         streamid;
 
     if (!xml_strcmp(stream, NCX_DEF_STREAM_NAME)) {
-	streamid = AGT_NOT_STREAM_NETCONF;
+        streamid = AGT_NOT_STREAM_NETCONF;
     } else {
-	/*** !!! ***/
-	SET_ERROR(ERR_INTERNAL_VAL);
-	streamid = AGT_NOT_STREAM_NETCONF;
+        /*** !!! ***/
+        SET_ERROR(ERR_INTERNAL_VAL);
+        streamid = AGT_NOT_STREAM_NETCONF;
     }
 
     sub = m__getObj(agt_not_subscription_t);
     if (!sub) {
-	return NULL;
+        return NULL;
     }
     memset(sub, 0x0, sizeof(agt_not_subscription_t));
 
     sub->stream = xml_strdup(stream);
     if (!sub->stream) {
-	free_subscription(sub);
-	return NULL;
+        free_subscription(sub);
+        return NULL;
     }
 
     sub->startTime = startTime;
@@ -343,7 +343,7 @@ static agt_not_subscription_t *
     sub->filterval = filterval;
     sub->selectval = selectval;
     if (futurestop) {
-	sub->flags = AGT_NOT_FL_FUTURESTOP;
+        sub->flags = AGT_NOT_FL_FUTURESTOP;
     }
     sub->state = AGT_NOT_STATE_INIT;
 
@@ -367,8 +367,8 @@ static agt_not_subscription_t *
 *********************************************************************/
 static status_t 
     create_subscription_validate (ses_cb_t *scb,
-				  rpc_msg_t *msg,
-				  xml_node_t *methnode)
+                                  rpc_msg_t *msg,
+                                  xml_node_t *methnode)
 {
     const xmlChar           *stream, *startTime, *stopTime;
     xmlChar                 *starttime_utc, *stoptime_utc;
@@ -402,74 +402,74 @@ static status_t
 
     /* get the stream parameter */
     valstream = 
-	val_find_child(msg->rpc_input, 
-		       AGT_NOT_MODULE1,
-		       notifications_N_create_subscription_stream);
+        val_find_child(msg->rpc_input, 
+                       AGT_NOT_MODULE1,
+                       notifications_N_create_subscription_stream);
     if (valstream) {
-	if (valstream->res == NO_ERR) {
-	    stream = VAL_STR(valstream);
-	    if (xml_strcmp(NCX_DEF_STREAM_NAME, stream)) {
-		/* not the hard-wired NETCONF stream and
-		 * no other strams supported at this time
-		 * report the error
-		 */
-		res = ERR_NCX_NOT_FOUND;
-		agt_record_error(scb, 
-				 &msg->mhdr, 
-				 NCX_LAYER_OPERATION, 
-				 res, 
-				 methnode, 
-				 NCX_NT_STRING, 
-				 stream,
-				 NCX_NT_VAL, 
-				 valstream);
-	    }  /* else name==NETCONF: OK */
-	} /* else error already reported */
+        if (valstream->res == NO_ERR) {
+            stream = VAL_STR(valstream);
+            if (xml_strcmp(NCX_DEF_STREAM_NAME, stream)) {
+                /* not the hard-wired NETCONF stream and
+                 * no other strams supported at this time
+                 * report the error
+                 */
+                res = ERR_NCX_NOT_FOUND;
+                agt_record_error(scb, 
+                                 &msg->mhdr, 
+                                 NCX_LAYER_OPERATION, 
+                                 res, 
+                                 methnode, 
+                                 NCX_NT_STRING, 
+                                 stream,
+                                 NCX_NT_VAL, 
+                                 valstream);
+            }  /* else name==NETCONF: OK */
+        } /* else error already reported */
     } /* else default NETCONF stream is going to be used */
 
     /* get the filter parameter */
     valfilter = 
-	val_find_child(msg->rpc_input, 
-		       AGT_NOT_MODULE1,
-		       notifications_N_create_subscription_filter);
+        val_find_child(msg->rpc_input, 
+                       AGT_NOT_MODULE1,
+                       notifications_N_create_subscription_filter);
     if (valfilter) {
-	if (valfilter->res == NO_ERR) {
-	    /* check if the optional filter parameter is ok */
-	    filterres = agt_validate_filter_ex(scb, msg, valfilter);
+        if (valfilter->res == NO_ERR) {
+            /* check if the optional filter parameter is ok */
+            filterres = agt_validate_filter_ex(scb, msg, valfilter);
             if (filterres == NO_ERR) {
                 filtertyp = msg->rpc_filter.op_filtyp;
                 if (filtertyp == OP_FILTER_XPATH) {
                     valselect = msg->rpc_filter.op_filter;
                 }
             } /* else error already recorded if not NO_ERR */
-	}
+        }
     }
 
     /* get the startTime parameter */
     valstartTime = 
-	val_find_child(msg->rpc_input, 
-		       AGT_NOT_MODULE1,
-		       notifications_N_create_subscription_startTime);
+        val_find_child(msg->rpc_input, 
+                       AGT_NOT_MODULE1,
+                       notifications_N_create_subscription_startTime);
     if (valstartTime) {
-	if (valstartTime->res == NO_ERR) {
-	    startTime = VAL_STR(valstartTime);
-	}
+        if (valstartTime->res == NO_ERR) {
+            startTime = VAL_STR(valstartTime);
+        }
     } 
 
     /* get the stopTime parameter */
     valstopTime = 
-	val_find_child(msg->rpc_input, 
-		       AGT_NOT_MODULE1,
-		       notifications_N_create_subscription_stopTime);
+        val_find_child(msg->rpc_input, 
+                       AGT_NOT_MODULE1,
+                       notifications_N_create_subscription_stopTime);
     if (valstopTime) {
-	if (valstopTime->res == NO_ERR) {
-	    stopTime = VAL_STR(valstopTime);
-	}
+        if (valstopTime->res == NO_ERR) {
+            stopTime = VAL_STR(valstopTime);
+        }
     } 
 
     if (startTime || stopTime) {
         res = NO_ERR;
-	/* Normalize the xsd:dateTime strings first */
+        /* Normalize the xsd:dateTime strings first */
         if (startTime) {
             isnegative = FALSE;
             starttime_utc = 
@@ -480,15 +480,15 @@ static status_t
                 if (isnegative) {
                     res = ERR_NCX_INVALID_VALUE;
                 }
-		agt_record_error(scb, 
-				 &msg->mhdr, 
-				 NCX_LAYER_OPERATION, 
-				 res, 
-				 methnode, 
-				 NCX_NT_STRING, 
-				 startTime,
-				 NCX_NT_VAL, 
-				 valstartTime);
+                agt_record_error(scb, 
+                                 &msg->mhdr, 
+                                 NCX_LAYER_OPERATION, 
+                                 res, 
+                                 methnode, 
+                                 NCX_NT_STRING, 
+                                 startTime,
+                                 NCX_NT_VAL, 
+                                 valstartTime);
             }
         }
 
@@ -503,73 +503,73 @@ static status_t
                 if (isnegative) {
                     res = ERR_NCX_INVALID_VALUE;
                 }
-		agt_record_error(scb, 
-				 &msg->mhdr, 
-				 NCX_LAYER_OPERATION, 
-				 res, 
-				 methnode, 
-				 NCX_NT_STRING, 
-				 stopTime,
-				 NCX_NT_VAL, 
-				 valstopTime);
+                agt_record_error(scb, 
+                                 &msg->mhdr, 
+                                 NCX_LAYER_OPERATION, 
+                                 res, 
+                                 methnode, 
+                                 NCX_NT_STRING, 
+                                 stopTime,
+                                 NCX_NT_VAL, 
+                                 valstopTime);
             }
         }
 
         /* check the start time against 'now' */
-	if (res == NO_ERR && starttime_utc) {
-	    ret = xml_strcmp(starttime_utc, tstampbuff);
-	    if (ret > 0) {
-		res = ERR_NCX_BAD_ELEMENT;
-		agt_record_error(scb, 
-				 &msg->mhdr, 
-				 NCX_LAYER_OPERATION, 
-				 res, 
-				 methnode, 
-				 NCX_NT_STRING, 
-				 startTime,
-				 NCX_NT_VAL, 
-				 valstartTime);
-	    }  /* else startTime before now (OK) */
+        if (res == NO_ERR && starttime_utc) {
+            ret = xml_strcmp(starttime_utc, tstampbuff);
+            if (ret > 0) {
+                res = ERR_NCX_BAD_ELEMENT;
+                agt_record_error(scb, 
+                                 &msg->mhdr, 
+                                 NCX_LAYER_OPERATION, 
+                                 res, 
+                                 methnode, 
+                                 NCX_NT_STRING, 
+                                 startTime,
+                                 NCX_NT_VAL, 
+                                 valstartTime);
+            }  /* else startTime before now (OK) */
 
             /* check the start time after the stop time */
-	    if (res == NO_ERR && stoptime_utc) {
-		ret = xml_strcmp(starttime_utc, stoptime_utc);
-		if (ret > 0) {
-		    res = ERR_NCX_BAD_ELEMENT;
-		    agt_record_error(scb, 
-				     &msg->mhdr, 
-				     NCX_LAYER_OPERATION, 
-				     res, 
-				     methnode, 
-				     NCX_NT_STRING, 
-				     stopTime,
-				     NCX_NT_VAL, 
-				     valstopTime);
-		}  /* else startTime before stopTime (OK) */
-	    }
-	}
+            if (res == NO_ERR && stoptime_utc) {
+                ret = xml_strcmp(starttime_utc, stoptime_utc);
+                if (ret > 0) {
+                    res = ERR_NCX_BAD_ELEMENT;
+                    agt_record_error(scb, 
+                                     &msg->mhdr, 
+                                     NCX_LAYER_OPERATION, 
+                                     res, 
+                                     methnode, 
+                                     NCX_NT_STRING, 
+                                     stopTime,
+                                     NCX_NT_VAL, 
+                                     valstopTime);
+                }  /* else startTime before stopTime (OK) */
+            }
+        }
 
         /* check stopTime but no startTime */
-	if (res == NO_ERR && stoptime_utc) {
-	    if (!starttime_utc) {
-		res = ERR_NCX_MISSING_ELEMENT;
-		agt_record_error(scb, 
-				 &msg->mhdr, 
-				 NCX_LAYER_OPERATION, 
-				 res, 
-				 methnode, 
-				 NCX_NT_NONE, 
-				 NULL,
-				 NCX_NT_VAL, 
-				 valstartTime);
-	    }
+        if (res == NO_ERR && stoptime_utc) {
+            if (!starttime_utc) {
+                res = ERR_NCX_MISSING_ELEMENT;
+                agt_record_error(scb, 
+                                 &msg->mhdr, 
+                                 NCX_LAYER_OPERATION, 
+                                 res, 
+                                 methnode, 
+                                 NCX_NT_NONE, 
+                                 NULL,
+                                 NCX_NT_VAL, 
+                                 valstartTime);
+            }
 
-	    /* treat stopTime in the future as an error */
-	    ret = xml_strcmp(stoptime_utc, tstampbuff);
-	    if (ret > 0) {
-		futurestop = TRUE;
-	    }
-	}
+            /* treat stopTime in the future as an error */
+            ret = xml_strcmp(stoptime_utc, tstampbuff);
+            if (ret > 0) {
+                futurestop = TRUE;
+            }
+        }
     }
 
     /* check if there is already a subscription 
@@ -579,12 +579,12 @@ static status_t
      */
     res2 = NO_ERR;
     for (testsub = (agt_not_subscription_t *)
-	     dlq_firstEntry(&subscriptionQ);
-	 testsub != NULL && res2 == NO_ERR;
+             dlq_firstEntry(&subscriptionQ);
+         testsub != NULL && res2 == NO_ERR;
          testsub = (agt_not_subscription_t *)
              dlq_nextEntry(testsub)) {
 
-	if (testsub->sid == scb->sid) {
+        if (testsub->sid == scb->sid) {
             res2 = ERR_NCX_IN_USE;
             agt_record_error(scb, 
                              &msg->mhdr, 
@@ -595,7 +595,7 @@ static status_t
                              NULL,
                              NCX_NT_NONE, 
                              NULL);
-	}
+        }
     }
 
     /* create a new subscription control block if no errors */
@@ -605,39 +605,39 @@ static status_t
          *    - stoptime_utc
          *    - valfilter
          */
-	sub = new_subscription(scb,
-			       stream,
-			       tstampbuff,
-			       starttime_utc,
-			       stoptime_utc,
-			       futurestop,
+        sub = new_subscription(scb,
+                               stream,
+                               tstampbuff,
+                               starttime_utc,
+                               stoptime_utc,
+                               futurestop,
                                filtertyp,
-			       valfilter,
+                               valfilter,
                                valselect);
-	if (!sub) {
-	    res = ERR_INTERNAL_MEM;
-	    agt_record_error(scb, 
-			     &msg->mhdr, 
-			     NCX_LAYER_OPERATION, 
-			     res, 
-			     methnode, 
-			     NCX_NT_NONE, 
-			     NULL,
-			     NCX_NT_NONE, 
-			     NULL);
-	} else {
-	    if (valfilter) {
-		/* passing off this memory now !! 
+        if (!sub) {
+            res = ERR_INTERNAL_MEM;
+            agt_record_error(scb, 
+                             &msg->mhdr, 
+                             NCX_LAYER_OPERATION, 
+                             res, 
+                             methnode, 
+                             NCX_NT_NONE, 
+                             NULL,
+                             NCX_NT_NONE, 
+                             NULL);
+        } else {
+            if (valfilter) {
+                /* passing off this memory now !! 
                  * the new_subscription function 
                  * saved a pointer to valfilter
                  * need to remove it from the 
                  * incoming PDU to prevent it 
                  * from be deleted after the <rpc> is done
                  */
-		val_remove_child(valfilter);
-	    }
-	    msg->rpc_user1 = sub;
-	}
+                val_remove_child(valfilter);
+            }
+            msg->rpc_user1 = sub;
+        }
 
         /* these malloced strings have been
          * stored in the new subscription, if used
@@ -674,8 +674,8 @@ static status_t
 *********************************************************************/
 static status_t 
     create_subscription_invoke (ses_cb_t *scb,
-				rpc_msg_t *msg,
-				xml_node_t *methnode)
+                                rpc_msg_t *msg,
+                                xml_node_t *methnode)
 {
     agt_not_subscription_t *sub;
     agt_not_msg_t          *not, *nextnot;
@@ -687,110 +687,110 @@ static status_t
     sub = (agt_not_subscription_t *)msg->rpc_user1;
 
     if (sub->startTime) {
-	/* this subscription has requested replay
-	 * go through the notificationQ and set
-	 * the start replay pointer
-	 */
-	sub->state = AGT_NOT_STATE_REPLAY;
-	done = FALSE;
-	for (not = (agt_not_msg_t *)
-		 dlq_firstEntry(&notificationQ);
-	     not != NULL && !done;
-	     not = (agt_not_msg_t *)dlq_nextEntry(not)) {
+        /* this subscription has requested replay
+         * go through the notificationQ and set
+         * the start replay pointer
+         */
+        sub->state = AGT_NOT_STATE_REPLAY;
+        done = FALSE;
+        for (not = (agt_not_msg_t *)
+                 dlq_firstEntry(&notificationQ);
+             not != NULL && !done;
+             not = (agt_not_msg_t *)dlq_nextEntry(not)) {
 
-	    ret = xml_strcmp(sub->startTime, not->eventTime);
-	    if (ret <= 0) {
-		sub->firstreplaymsg = not;
-		sub->firstreplaymsgid = not->msgid;
-		done = TRUE;
-	    }
-	}
+            ret = xml_strcmp(sub->startTime, not->eventTime);
+            if (ret <= 0) {
+                sub->firstreplaymsg = not;
+                sub->firstreplaymsgid = not->msgid;
+                done = TRUE;
+            }
+        }
 
-	if (!done) {
-	    /* the startTime is after the last available
-	     * notification eventTime, so replay is over
-	     */
-	    sub->flags |= AGT_NOT_FL_RC_READY;
-	} else if (sub->stopTime) {
-	    /* the sub->firstreplaymsg was set;
-	     * the subscription has requested to be
-	     * terminated after a specific time
-	     */
-	    if (sub->flags & AGT_NOT_FL_FUTURESTOP) {
-		/* just use the last replay buffer entry
-		 * as the end-of-replay marker
-		 */
-		sub->lastreplaymsg = (agt_not_msg_t *)
-		    dlq_lastEntry(&notificationQ);
-		sub->lastreplaymsgid = 
-		    sub->lastreplaymsg->msgid;
-	    } else {
-		/* first check that the start notification
-		 * is not already past the requested stopTime
-		 */
-		ret = xml_strcmp(sub->stopTime,
-				 sub->firstreplaymsg->eventTime);
-		if (ret <= 0) {
-		    sub->firstreplaymsg = NULL;
-		    sub->firstreplaymsgid = 0;
-		    sub->flags |= AGT_NOT_FL_RC_READY;
-		} else {
-		    /* check the notifications after the
-		     * start replay node, to find out
-		     * which one should be the last replay 
-		     */
-		    done = FALSE;
-		    for (not = sub->firstreplaymsg;
-			 not != NULL && !done;
-			 not = nextnot) {
-		 
-			nextnot = (agt_not_msg_t *)dlq_nextEntry(not);
-			if (nextnot) {
-			    ret = xml_strcmp(sub->stopTime, 
-					     nextnot->eventTime);
-			} else {
-			    ret = -1;
-			}
-			if (ret < 0) {
-			    /* the previous one checked was the winner */
-			    sub->lastreplaymsg = not;
-			    sub->lastreplaymsgid = not->msgid;
-			    done = TRUE;
-			}
-		    }
+        if (!done) {
+            /* the startTime is after the last available
+             * notification eventTime, so replay is over
+             */
+            sub->flags |= AGT_NOT_FL_RC_READY;
+        } else if (sub->stopTime) {
+            /* the sub->firstreplaymsg was set;
+             * the subscription has requested to be
+             * terminated after a specific time
+             */
+            if (sub->flags & AGT_NOT_FL_FUTURESTOP) {
+                /* just use the last replay buffer entry
+                 * as the end-of-replay marker
+                 */
+                sub->lastreplaymsg = (agt_not_msg_t *)
+                    dlq_lastEntry(&notificationQ);
+                sub->lastreplaymsgid = 
+                    sub->lastreplaymsg->msgid;
+            } else {
+                /* first check that the start notification
+                 * is not already past the requested stopTime
+                 */
+                ret = xml_strcmp(sub->stopTime,
+                                 sub->firstreplaymsg->eventTime);
+                if (ret <= 0) {
+                    sub->firstreplaymsg = NULL;
+                    sub->firstreplaymsgid = 0;
+                    sub->flags |= AGT_NOT_FL_RC_READY;
+                } else {
+                    /* check the notifications after the
+                     * start replay node, to find out
+                     * which one should be the last replay 
+                     */
+                    done = FALSE;
+                    for (not = sub->firstreplaymsg;
+                         not != NULL && !done;
+                         not = nextnot) {
+                 
+                        nextnot = (agt_not_msg_t *)dlq_nextEntry(not);
+                        if (nextnot) {
+                            ret = xml_strcmp(sub->stopTime, 
+                                             nextnot->eventTime);
+                        } else {
+                            ret = -1;
+                        }
+                        if (ret < 0) {
+                            /* the previous one checked was the winner */
+                            sub->lastreplaymsg = not;
+                            sub->lastreplaymsgid = not->msgid;
+                            done = TRUE;
+                        }
+                    }
 
-		    if (!done) {
-			sub->lastreplaymsg = (agt_not_msg_t *)
-			    dlq_lastEntry(&notificationQ);
-			sub->lastreplaymsgid = 
-			    sub->lastreplaymsg->msgid;
-		    }
-		}			
-	    }
-	}
+                    if (!done) {
+                        sub->lastreplaymsg = (agt_not_msg_t *)
+                            dlq_lastEntry(&notificationQ);
+                        sub->lastreplaymsgid = 
+                            sub->lastreplaymsg->msgid;
+                    }
+                }                       
+            }
+        }
     } else {
-	/* setup live subscription by setting the
-	 * lastmsg to the end of the replayQ
-	 * so none of the buffered notifications
-	 * are send to this subscription
-	 */
-	sub->state = AGT_NOT_STATE_LIVE;
-	sub->lastmsg = (agt_not_msg_t *)
-	    dlq_lastEntry(&notificationQ);
-	if (sub->lastmsg) {
-	    sub->lastmsgid = sub->lastmsg->msgid;
-	}
+        /* setup live subscription by setting the
+         * lastmsg to the end of the replayQ
+         * so none of the buffered notifications
+         * are send to this subscription
+         */
+        sub->state = AGT_NOT_STATE_LIVE;
+        sub->lastmsg = (agt_not_msg_t *)
+            dlq_lastEntry(&notificationQ);
+        if (sub->lastmsg) {
+            sub->lastmsgid = sub->lastmsg->msgid;
+        }
     }
 
     dlq_enque(sub, &subscriptionQ);
     anySubscriptions = TRUE;
 
     if (LOGDEBUG) {
-	log_debug("\nagt_not: Started %s subscription on stream "
-		  "'%s' for session '%u'",
-		  (sub->startTime) ? "replay" : "live",
-		  sub->stream, 
-		  sub->scb->sid);
+        log_debug("\nagt_not: Started %s subscription on stream "
+                  "'%s' for session '%u'",
+                  (sub->startTime) ? "replay" : "live",
+                  sub->stream, 
+                  sub->scb->sid);
     }
     return NO_ERR;
 
@@ -813,10 +813,10 @@ static void
     expire_subscription (agt_not_subscription_t *sub)
 {
     if (LOGDEBUG) {
-	log_debug("\nagt_not: Removed %s subscription "
-		  "for session '%u'",
-		  (sub->startTime) ? "replay" : "live",
-		  sub->scb->sid);
+        log_debug("\nagt_not: Removed %s subscription "
+                  "for session '%u'",
+                  (sub->startTime) ? "replay" : "live",
+                  sub->scb->sid);
     }
 
     free_subscription(sub);
@@ -844,12 +844,12 @@ static agt_not_msg_t *
     agt_not_msg_t *not;
 
     for (not = (agt_not_msg_t *)dlq_firstEntry(&notificationQ);
-	 not != NULL;
-	 not = (agt_not_msg_t *)dlq_nextEntry(not)) {
+         not != NULL;
+         not = (agt_not_msg_t *)dlq_nextEntry(not)) {
 
-	if (not->msgid > thismsgid) {
-	    return not;
-	}
+        if (not->msgid > thismsgid) {
+            return not;
+        }
     }
 
     return NULL;
@@ -879,8 +879,8 @@ static agt_not_msg_t *
 *********************************************************************/
 static status_t
     send_notification (agt_not_subscription_t *sub,
-		       agt_not_msg_t *notif,
-		       boolean checkfilter)
+                       agt_not_msg_t *notif,
+                       boolean checkfilter)
 {
     val_value_t        *topval, *eventTime;
     val_value_t        *eventType, *payloadval, *sequenceid;
@@ -895,43 +895,43 @@ static status_t
     totalstats = ses_get_total_stats();
 
     if (!notif->msg) {
-	/* need to construct the notification msg */
-	topval = val_new_value();
-	if (!topval) {
-	    log_error("\nError: malloc failed: cannot send notification");
-	    return ERR_INTERNAL_MEM;
-	}
-	val_init_from_template(topval, notificationobj);
+        /* need to construct the notification msg */
+        topval = val_new_value();
+        if (!topval) {
+            log_error("\nError: malloc failed: cannot send notification");
+            return ERR_INTERNAL_MEM;
+        }
+        val_init_from_template(topval, notificationobj);
 
-	eventTime = 
-	    val_make_simval_obj(eventTimeobj,
-				notif->eventTime,
-				&res);
-	if (!eventTime) {
-	    log_error("\nError: make simval failed (%s): cannot "
-		      "send notification", 
-		      get_error_string(res));
-	    val_free_value(topval);
-	    return res;
-	}
-	val_add_child(eventTime, topval);
+        eventTime = 
+            val_make_simval_obj(eventTimeobj,
+                                notif->eventTime,
+                                &res);
+        if (!eventTime) {
+            log_error("\nError: make simval failed (%s): cannot "
+                      "send notification", 
+                      get_error_string(res));
+            val_free_value(topval);
+            return res;
+        }
+        val_add_child(eventTime, topval);
 
-	eventType = val_new_value();
-	if (!eventType) {
-	    log_error("\nError: malloc failed: cannot send notification");
-	    val_free_value(topval);
-	    return ERR_INTERNAL_MEM;
-	}
-	val_init_from_template(eventType, notif->notobj);
-	val_add_child(eventType, topval);
-	notif->event = eventType;
+        eventType = val_new_value();
+        if (!eventType) {
+            log_error("\nError: malloc failed: cannot send notification");
+            val_free_value(topval);
+            return ERR_INTERNAL_MEM;
+        }
+        val_init_from_template(eventType, notif->notobj);
+        val_add_child(eventType, topval);
+        notif->event = eventType;
 
         /* move the payloadQ: transfer the memory here */
-	while (!dlq_empty(&notif->payloadQ)) {
-	    payloadval = (val_value_t *)
-		dlq_deque(&notif->payloadQ);
-	    val_add_child(payloadval, eventType);
-	}
+        while (!dlq_empty(&notif->payloadQ)) {
+            payloadval = (val_value_t *)
+                dlq_deque(&notif->payloadQ);
+            val_add_child(payloadval, eventType);
+        }
 
         /* only use a msgid on a real event, not replay */
         if (checkfilter) { 
@@ -948,7 +948,7 @@ static status_t
             }
         }
 
-	notif->msg = topval;
+        notif->msg = topval;
     }
 
     /* create an RPC message header struct */
@@ -1103,7 +1103,7 @@ static agt_not_msg_t *
 
     not = m__getObj(agt_not_msg_t);
     if (!not) {
-	return NULL;
+        return NULL;
     }
     (void)memset(not, 0x0, sizeof(agt_not_msg_t));
     dlq_createSQue(&not->payloadQ);
@@ -1137,14 +1137,14 @@ static void
 
     not = new_notification(replayCompleteobj, FALSE);
     if (!not) {
-	log_error("\nError: malloc failed; cannot "
-		  "send <replayComplete>");
-	return;
+        log_error("\nError: malloc failed; cannot "
+                  "send <replayComplete>");
+        return;
     }
 
     res = send_notification(sub, not, FALSE);
     if (res != NO_ERR && NEED_EXIT(res)) {
-	sub->state = AGT_NOT_STATE_SHUTDOWN;
+        sub->state = AGT_NOT_STATE_SHUTDOWN;
     }
 
     agt_not_free_notification(not);
@@ -1168,14 +1168,14 @@ static void
 
     not = new_notification(notificationCompleteobj, FALSE);
     if (!not) {
-	log_error("\nError: malloc failed; cannot "
-		  "send <notificationComplete>");
-	return;
+        log_error("\nError: malloc failed; cannot "
+                  "send <notificationComplete>");
+        return;
     }
 
     res = send_notification(sub, not, FALSE);
     if (res != NO_ERR && NEED_EXIT(res)) {
-	sub->state = AGT_NOT_STATE_SHUTDOWN;
+        sub->state = AGT_NOT_STATE_SHUTDOWN;
     }
 
     agt_not_free_notification(not);
@@ -1227,12 +1227,12 @@ status_t
     status_t        res;
 
     if (agt_not_init_done) {
-	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+        return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
 #ifdef AGT_NOT_DEBUG
     if (LOGDEBUG2) {
-	log_debug2("\nagt_not: Loading notifications module");
+        log_debug2("\nagt_not: Loading notifications module");
     }
 #endif
 
@@ -1249,7 +1249,7 @@ status_t
                              &agt_profile->agt_savedevQ,
                              &notifmod);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* load the nc-notifications module */
@@ -1258,44 +1258,44 @@ status_t
                              &agt_profile->agt_savedevQ,
                              &ncnotifmod);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* find the object definition for the notification element */
     notificationobj = ncx_find_object(notifmod,
-				      NCX_EL_NOTIFICATION);
+                                      NCX_EL_NOTIFICATION);
 
     if (!notificationobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     eventTimeobj = obj_find_child(notificationobj,
-				  AGT_NOT_MODULE1,
-				  notifications_N_eventTime);
+                                  AGT_NOT_MODULE1,
+                                  notifications_N_eventTime);
     if (!eventTimeobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     replayCompleteobj = 
-	ncx_find_object(ncnotifmod,
-			nc_notifications_N_replayComplete);
+        ncx_find_object(ncnotifmod,
+                        nc_notifications_N_replayComplete);
     if (!replayCompleteobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     notificationCompleteobj = 
-	ncx_find_object(ncnotifmod,
-			nc_notifications_N_notificationComplete);
+        ncx_find_object(ncnotifmod,
+                        nc_notifications_N_notificationComplete);
     if (!notificationCompleteobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     sequenceidobj = 
-	obj_find_child(notificationobj,
+        obj_find_child(notificationobj,
                        AGT_NOT_SEQID_MOD,
                        NCX_EL_SEQUENCE_ID);
     if (!sequenceidobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     return NO_ERR;
@@ -1327,87 +1327,87 @@ status_t
     xmlChar                tstampbuff[TSTAMP_MIN_SIZE];
 
     if (!agt_not_init_done) {
-	return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+        return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
     /* set up create-subscription RPC operation */
     res = agt_rpc_register_method(AGT_NOT_MODULE1,
-				  notifications_N_create_subscription,
-				  AGT_RPC_PH_VALIDATE,
-				  create_subscription_validate);
+                                  notifications_N_create_subscription,
+                                  AGT_RPC_PH_VALIDATE,
+                                  create_subscription_validate);
     if (res != NO_ERR) {
-	return SET_ERROR(res);
+        return SET_ERROR(res);
     }
 
     res = agt_rpc_register_method(AGT_NOT_MODULE1,
-				  notifications_N_create_subscription,
-				  AGT_RPC_PH_INVOKE,
-				  create_subscription_invoke);
+                                  notifications_N_create_subscription,
+                                  AGT_RPC_PH_INVOKE,
+                                  create_subscription_invoke);
     if (res != NO_ERR) {
-	return SET_ERROR(res);
+        return SET_ERROR(res);
     }
 
     /* get the running config to add some static data into */
     runningcfg = cfg_get_config(NCX_EL_RUNNING);
     if (!runningcfg || !runningcfg->root) {
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     /* get all the object nodes first */
     topobj = obj_find_template_top(ncnotifmod, 
-				   AGT_NOT_MODULE2,
-				   nc_notifications_N_netconf);
+                                   AGT_NOT_MODULE2,
+                                   nc_notifications_N_netconf);
     if (!topobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     streamsobj = obj_find_child(topobj, 
-				AGT_NOT_MODULE2, 
-				nc_notifications_N_streams);
+                                AGT_NOT_MODULE2, 
+                                nc_notifications_N_streams);
     if (!streamsobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     streamobj = obj_find_child(streamsobj,
-			       AGT_NOT_MODULE2,
-			       nc_notifications_N_stream);
+                               AGT_NOT_MODULE2,
+                               nc_notifications_N_stream);
     if (!streamobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     nameobj = obj_find_child(streamobj,
-			     AGT_NOT_MODULE2,
-			     nc_notifications_N_name);
+                             AGT_NOT_MODULE2,
+                             nc_notifications_N_name);
     if (!nameobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     descriptionobj = obj_find_child(streamobj,
-				    AGT_NOT_MODULE2,
-				    nc_notifications_N_description);
+                                    AGT_NOT_MODULE2,
+                                    nc_notifications_N_description);
     if (!descriptionobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     replaySupportobj = obj_find_child(streamobj,
-				      AGT_NOT_MODULE2,
-				      nc_notifications_N_replaySupport);
+                                      AGT_NOT_MODULE2,
+                                      nc_notifications_N_replaySupport);
     if (!replaySupportobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     replayLogCreationTimeobj 
-	= obj_find_child(streamobj,
-			 AGT_NOT_MODULE2,
-			 nc_notifications_N_replayLogCreationTime);
+        = obj_find_child(streamobj,
+                         AGT_NOT_MODULE2,
+                         nc_notifications_N_replayLogCreationTime);
     if (!replayLogCreationTimeobj) {
-	return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
     /* add /netconf */
     topval = val_new_value();
     if (!topval) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     val_init_from_template(topval, topobj);
 
@@ -1417,7 +1417,7 @@ status_t
     /* add /netconf/streams */
     streamsval = val_new_value();
     if (!streamsval) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     val_init_from_template(streamsval, streamsobj);
     val_add_child(streamsval, topval);
@@ -1427,7 +1427,7 @@ status_t
      */
     streamval = val_new_value();
     if (!streamval) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
     val_init_from_template(streamval, streamobj);
     val_add_child(streamval, streamsval);
@@ -1437,7 +1437,7 @@ status_t
                                    NCX_DEF_STREAM_NAME,
                                    &res);
     if (!childval) {
-	return res;
+        return res;
     }
     val_add_child(childval, streamval);
 
@@ -1446,7 +1446,7 @@ status_t
                                    NCX_DEF_STREAM_DESCR,
                                    &res);
     if (!childval) {
-	return res;
+        return res;
     }
     val_add_child(childval, streamval);
 
@@ -1455,7 +1455,7 @@ status_t
                                    NCX_EL_TRUE,
                                    &res);
     if (!childval) {
-	return res;
+        return res;
     }
     val_add_child(childval, streamval);
 
@@ -1467,7 +1467,7 @@ status_t
                                    tstampbuff,
                                    &res);
     if (!childval) {
-	return res;
+        return res;
     }
     val_add_child(childval, streamval);
 
@@ -1493,25 +1493,25 @@ void
     agt_not_msg_t          *msg;
 
     if (agt_not_init_done) {
-	init_static_vars();
+        init_static_vars();
 
-	agt_rpc_unregister_method(AGT_NOT_MODULE1, 
-				  notifications_N_create_subscription);
+        agt_rpc_unregister_method(AGT_NOT_MODULE1, 
+                                  notifications_N_create_subscription);
 
 
-	/* clear the subscriptionQ */
-	while (!dlq_empty(&subscriptionQ)) {
-	    sub = (agt_not_subscription_t *)dlq_deque(&subscriptionQ);
-	    free_subscription(sub);
-	}
+        /* clear the subscriptionQ */
+        while (!dlq_empty(&subscriptionQ)) {
+            sub = (agt_not_subscription_t *)dlq_deque(&subscriptionQ);
+            free_subscription(sub);
+        }
 
-	/* clear the notificationQ */
-	while (!dlq_empty(&notificationQ)) {
-	    msg = (agt_not_msg_t *)dlq_deque(&notificationQ);
-	    agt_not_free_notification(msg);
-	}
+        /* clear the notificationQ */
+        while (!dlq_empty(&notificationQ)) {
+            msg = (agt_not_msg_t *)dlq_deque(&notificationQ);
+            agt_not_free_notification(msg);
+        }
 
-	agt_not_init_done = FALSE;
+        agt_not_init_done = FALSE;
     }
 
 }  /* agt_not_cleanup */
@@ -1549,7 +1549,7 @@ uint32
 
 
     if (!anySubscriptions) {
-	return 0;
+        return 0;
     }
 
     agt_profile = agt_get_profile();
@@ -1557,200 +1557,200 @@ uint32
     tstamp_datetime(nowbuff);
 
     for (sub = (agt_not_subscription_t *)
-	     dlq_firstEntry(&subscriptionQ);
-	 sub != NULL;
-	 sub = nextsub) {
+             dlq_firstEntry(&subscriptionQ);
+         sub != NULL;
+         sub = nextsub) {
 
-	nextsub = (agt_not_subscription_t *)dlq_nextEntry(sub);
+        nextsub = (agt_not_subscription_t *)dlq_nextEntry(sub);
 
-	switch (sub->state) {
-	case AGT_NOT_STATE_NONE:
-	case AGT_NOT_STATE_INIT:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	    break;
-	case AGT_NOT_STATE_REPLAY:
-	    /* check if replayComplete is ready */
-	    if (sub->flags & AGT_NOT_FL_RC_READY) {
-		/* yes, check if it has already been done */
-		if (sub->flags & AGT_NOT_FL_RC_DONE) {
-		    /* yes, check if <notificationComplete> is
-		     * needed or if the state should be
-		     * changed to AGT_NOT_STATE_LIVE
-		     */
-		    if (sub->stopTime) {
-			/* need to terminate the subscription 
-			 * at some point
-			 */
-			if (sub->flags & AGT_NOT_FL_FUTURESTOP) {
-			    /* switch to timed mode */
-			    sub->state = AGT_NOT_STATE_TIMED;
-			} else {
-			    /* send <notificationComplete> */
-			    sub->flags |= AGT_NOT_FL_NC_READY;
-			    send_notificationComplete(sub);
-			    sub->flags |= AGT_NOT_FL_NC_DONE;
-			    notcount++;
+        switch (sub->state) {
+        case AGT_NOT_STATE_NONE:
+        case AGT_NOT_STATE_INIT:
+            SET_ERROR(ERR_INTERNAL_VAL);
+            break;
+        case AGT_NOT_STATE_REPLAY:
+            /* check if replayComplete is ready */
+            if (sub->flags & AGT_NOT_FL_RC_READY) {
+                /* yes, check if it has already been done */
+                if (sub->flags & AGT_NOT_FL_RC_DONE) {
+                    /* yes, check if <notificationComplete> is
+                     * needed or if the state should be
+                     * changed to AGT_NOT_STATE_LIVE
+                     */
+                    if (sub->stopTime) {
+                        /* need to terminate the subscription 
+                         * at some point
+                         */
+                        if (sub->flags & AGT_NOT_FL_FUTURESTOP) {
+                            /* switch to timed mode */
+                            sub->state = AGT_NOT_STATE_TIMED;
+                        } else {
+                            /* send <notificationComplete> */
+                            sub->flags |= AGT_NOT_FL_NC_READY;
+                            send_notificationComplete(sub);
+                            sub->flags |= AGT_NOT_FL_NC_DONE;
+                            notcount++;
 
-			    /* cleanup subscription next time
-			     * through this function 
-			     */
-			    sub->state = AGT_NOT_STATE_SHUTDOWN;
-			}
-		    } else {
-			/* no stopTime, so go to live mode */
-			sub->state = AGT_NOT_STATE_LIVE;
-		    }
-		} else {
-		    /* send <replayComplete> */
-		    send_replayComplete(sub);
-		    sub->flags |= AGT_NOT_FL_RC_DONE;
-		    notcount++;
-		    /* figure out the rest next time through fn */
-		}
-	    } else {
-		/* still sending replay notifications
-		 * figure out which one to send next
-		 */
-		if (sub->lastmsg) {
-		    not = (agt_not_msg_t *)
-			dlq_nextEntry(sub->lastmsg);
-		} else if (sub->lastmsgid) {
-		    /* use ID, back-ptr was cleared */
-		    not = get_entry_after(sub->lastmsgid);
-		} else {
-		    /* this is the first replay being sent */
-		    if (sub->firstreplaymsg) {
-			not = sub->firstreplaymsg;
-		    } else {
-			/* use ID, back-ptr was cleared */
-			not = get_entry_after(sub->firstreplaymsgid);
-		    }
-		}
-		if (not) {
-		    /* found a replay entry to send */
-		    res = send_notification(sub, not, TRUE);
-		    if (res != NO_ERR && NEED_EXIT(res)) {
-			/* treat as a fatal error */
-			sub->state = AGT_NOT_STATE_SHUTDOWN;
-		    } else {
-			/* msg sent OK; set up next loop through fn */
-			notcount++;
-			sub->lastmsg = not;
-			sub->lastmsgid = not->msgid;
-			if (sub->lastreplaymsg == not) {
-			    /* this was the last replay to send */
-			    sub->flags |= AGT_NOT_FL_RC_READY;
-			} else if (sub->lastreplaymsgid &&
-				   sub->lastreplaymsgid <= not->msgid) {
-			    /* this was the last replay to send */
-			    sub->flags |= AGT_NOT_FL_RC_READY;
-			}
-		    }
-		} else {
-		    /* nothing left in the replay buffer */
-		    sub->flags |= AGT_NOT_FL_RC_READY;
-		    send_replayComplete(sub);
-		    sub->flags |= AGT_NOT_FL_RC_DONE;
-		    notcount++;
+                            /* cleanup subscription next time
+                             * through this function 
+                             */
+                            sub->state = AGT_NOT_STATE_SHUTDOWN;
+                        }
+                    } else {
+                        /* no stopTime, so go to live mode */
+                        sub->state = AGT_NOT_STATE_LIVE;
+                    }
+                } else {
+                    /* send <replayComplete> */
+                    send_replayComplete(sub);
+                    sub->flags |= AGT_NOT_FL_RC_DONE;
+                    notcount++;
+                    /* figure out the rest next time through fn */
+                }
+            } else {
+                /* still sending replay notifications
+                 * figure out which one to send next
+                 */
+                if (sub->lastmsg) {
+                    not = (agt_not_msg_t *)
+                        dlq_nextEntry(sub->lastmsg);
+                } else if (sub->lastmsgid) {
+                    /* use ID, back-ptr was cleared */
+                    not = get_entry_after(sub->lastmsgid);
+                } else {
+                    /* this is the first replay being sent */
+                    if (sub->firstreplaymsg) {
+                        not = sub->firstreplaymsg;
+                    } else {
+                        /* use ID, back-ptr was cleared */
+                        not = get_entry_after(sub->firstreplaymsgid);
+                    }
+                }
+                if (not) {
+                    /* found a replay entry to send */
+                    res = send_notification(sub, not, TRUE);
+                    if (res != NO_ERR && NEED_EXIT(res)) {
+                        /* treat as a fatal error */
+                        sub->state = AGT_NOT_STATE_SHUTDOWN;
+                    } else {
+                        /* msg sent OK; set up next loop through fn */
+                        notcount++;
+                        sub->lastmsg = not;
+                        sub->lastmsgid = not->msgid;
+                        if (sub->lastreplaymsg == not) {
+                            /* this was the last replay to send */
+                            sub->flags |= AGT_NOT_FL_RC_READY;
+                        } else if (sub->lastreplaymsgid &&
+                                   sub->lastreplaymsgid <= not->msgid) {
+                            /* this was the last replay to send */
+                            sub->flags |= AGT_NOT_FL_RC_READY;
+                        }
+                    }
+                } else {
+                    /* nothing left in the replay buffer */
+                    sub->flags |= AGT_NOT_FL_RC_READY;
+                    send_replayComplete(sub);
+                    sub->flags |= AGT_NOT_FL_RC_DONE;
+                    notcount++;
 
-		    if (sub->stopTime) {
-			/* need to terminate the subscription 
-			 * at some point
-			 */
-			if (sub->flags & AGT_NOT_FL_FUTURESTOP) {
-			    /* switch to timed mode */
-			    sub->state = AGT_NOT_STATE_TIMED;
-			} else {
-			    sub->flags |= AGT_NOT_FL_NC_READY;
-			}
-		    } else {
-			/* no stopTime, so go to live mode */
-			sub->state = AGT_NOT_STATE_LIVE;
-		    }
-		}
-	    }
-	    break;
-	case AGT_NOT_STATE_TIMED:
-	    if (sub->lastmsg) {
-		not = (agt_not_msg_t *)dlq_nextEntry(sub->lastmsg);
-	    } else if (sub->lastmsgid) {
-		/* use ID, back-ptr was cleared */
-		not = get_entry_after(sub->lastmsgid);
-	    } else {
-		/* this is the first notification sent */
-		not = (agt_not_msg_t *)dlq_firstEntry(&notificationQ);
-	    }
+                    if (sub->stopTime) {
+                        /* need to terminate the subscription 
+                         * at some point
+                         */
+                        if (sub->flags & AGT_NOT_FL_FUTURESTOP) {
+                            /* switch to timed mode */
+                            sub->state = AGT_NOT_STATE_TIMED;
+                        } else {
+                            sub->flags |= AGT_NOT_FL_NC_READY;
+                        }
+                    } else {
+                        /* no stopTime, so go to live mode */
+                        sub->state = AGT_NOT_STATE_LIVE;
+                    }
+                }
+            }
+            break;
+        case AGT_NOT_STATE_TIMED:
+            if (sub->lastmsg) {
+                not = (agt_not_msg_t *)dlq_nextEntry(sub->lastmsg);
+            } else if (sub->lastmsgid) {
+                /* use ID, back-ptr was cleared */
+                not = get_entry_after(sub->lastmsgid);
+            } else {
+                /* this is the first notification sent */
+                not = (agt_not_msg_t *)dlq_firstEntry(&notificationQ);
+            }
 
-	    res = NO_ERR;
-	    if (not) {
-		sub->lastmsg = not;
-		sub->lastmsgid = not->msgid;
+            res = NO_ERR;
+            if (not) {
+                sub->lastmsg = not;
+                sub->lastmsgid = not->msgid;
 
-		ret = xml_strcmp(sub->stopTime, not->eventTime);
+                ret = xml_strcmp(sub->stopTime, not->eventTime);
 
-		res = send_notification(sub, not, TRUE);
-		if (res != NO_ERR && NEED_EXIT(res)) {
-		    /* treat as a fatal error */
-		    sub->state = AGT_NOT_STATE_SHUTDOWN;
-		} else {
-		    notcount++;
-		}
-	    } else {
-		/* there is no notification to send */
-		ret = xml_strcmp(sub->stopTime, nowbuff);
-	    }
+                res = send_notification(sub, not, TRUE);
+                if (res != NO_ERR && NEED_EXIT(res)) {
+                    /* treat as a fatal error */
+                    sub->state = AGT_NOT_STATE_SHUTDOWN;
+                } else {
+                    notcount++;
+                }
+            } else {
+                /* there is no notification to send */
+                ret = xml_strcmp(sub->stopTime, nowbuff);
+            }
 
-	    if (ret <= 0) {
-		/* the future stopTime has passed;
-		 * start killing the subscription next loop
-		 * through this function
-		 */
-		sub->flags |= AGT_NOT_FL_NC_READY;
-		sub->state = AGT_NOT_STATE_SHUTDOWN;
-	    } /* else stopTime still in the future */
-	    break;
-	case AGT_NOT_STATE_LIVE:
-	    if (sub->lastmsg) {
-		not = (agt_not_msg_t *)dlq_nextEntry(sub->lastmsg);
-	    } else if (sub->lastmsgid) {
-		/* use ID, back-ptr was cleared */
-		not = get_entry_after(sub->lastmsgid);
-	    } else {
-		/* this is the first notification sent */
-		not = (agt_not_msg_t *)dlq_firstEntry(&notificationQ);
-	    }
-	    if (not) {
-		sub->lastmsg = not;
-		sub->lastmsgid = not->msgid;
+            if (ret <= 0) {
+                /* the future stopTime has passed;
+                 * start killing the subscription next loop
+                 * through this function
+                 */
+                sub->flags |= AGT_NOT_FL_NC_READY;
+                sub->state = AGT_NOT_STATE_SHUTDOWN;
+            } /* else stopTime still in the future */
+            break;
+        case AGT_NOT_STATE_LIVE:
+            if (sub->lastmsg) {
+                not = (agt_not_msg_t *)dlq_nextEntry(sub->lastmsg);
+            } else if (sub->lastmsgid) {
+                /* use ID, back-ptr was cleared */
+                not = get_entry_after(sub->lastmsgid);
+            } else {
+                /* this is the first notification sent */
+                not = (agt_not_msg_t *)dlq_firstEntry(&notificationQ);
+            }
+            if (not) {
+                sub->lastmsg = not;
+                sub->lastmsgid = not->msgid;
 
-		res = send_notification(sub, not, TRUE);
-		if (res != NO_ERR && NEED_EXIT(res)) {
-		    /* treat as a fatal error */
-		    sub->state = AGT_NOT_STATE_SHUTDOWN;
-		} else {
-		    notcount++;
-		}
-	    } /* else don't do anything */
-	    break;
-	case AGT_NOT_STATE_SHUTDOWN:
-	    /* terminating the subscription after 
-	     * the <notificationComplete> is sent,
-	     * only if the stopTime was set
-	     */
-	    if (sub->stopTime) {
-		if (!(sub->flags & AGT_NOT_FL_NC_DONE)) {
-		    send_notificationComplete(sub);
-		    sub->flags |= AGT_NOT_FL_NC_DONE;
-		    notcount++;
-		    break;
-		}
-	    }
-	    dlq_remove(sub);
-	    expire_subscription(sub);
-	    break;
-	default:
-	    SET_ERROR(ERR_INTERNAL_VAL);
-	}
+                res = send_notification(sub, not, TRUE);
+                if (res != NO_ERR && NEED_EXIT(res)) {
+                    /* treat as a fatal error */
+                    sub->state = AGT_NOT_STATE_SHUTDOWN;
+                } else {
+                    notcount++;
+                }
+            } /* else don't do anything */
+            break;
+        case AGT_NOT_STATE_SHUTDOWN:
+            /* terminating the subscription after 
+             * the <notificationComplete> is sent,
+             * only if the stopTime was set
+             */
+            if (sub->stopTime) {
+                if (!(sub->flags & AGT_NOT_FL_NC_DONE)) {
+                    send_notificationComplete(sub);
+                    sub->flags |= AGT_NOT_FL_NC_DONE;
+                    notcount++;
+                    break;
+                }
+            }
+            dlq_remove(sub);
+            expire_subscription(sub);
+            break;
+        default:
+            SET_ERROR(ERR_INTERNAL_VAL);
+        }
     }
     return notcount;
 
@@ -1788,7 +1788,7 @@ void
             msg = (agt_not_msg_t *)dlq_deque(&notificationQ);
             agt_not_free_notification(msg);
         }
-	return;
+        return;
     }
 
     /* find the lowest msgid that has been delivered
@@ -1797,8 +1797,8 @@ void
      */
     lowestmsgid = NCX_MAX_UINT;
     for (sub = (agt_not_subscription_t *)
-	     dlq_firstEntry(&subscriptionQ);
-	 sub != NULL;
+             dlq_firstEntry(&subscriptionQ);
+         sub != NULL;
          sub = (agt_not_subscription_t *)dlq_nextEntry(sub)) {
 
         if (sub->lastmsgid && sub->lastmsgid < lowestmsgid) {
@@ -1842,19 +1842,19 @@ void
     agt_not_subscription_t  *sub;
 
     if (!anySubscriptions) {
-	return;
+        return;
     }
 
     for (sub = (agt_not_subscription_t *)
-	     dlq_firstEntry(&subscriptionQ);
-	 sub != NULL;
+             dlq_firstEntry(&subscriptionQ);
+         sub != NULL;
          sub = (agt_not_subscription_t *)dlq_nextEntry(sub)) {
 
-	if (sub->sid == sid) {
-	    dlq_remove(sub);
-	    expire_subscription(sub);
+        if (sub->sid == sid) {
+            dlq_remove(sub);
+            expire_subscription(sub);
             return;
-	}
+        }
     }
     
 }  /* agt_not_remove_subscription */
@@ -1876,8 +1876,8 @@ agt_not_msg_t *
 {
 #ifdef DEBUG
     if (!eventType) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -1905,17 +1905,17 @@ void
 #ifdef DEBUG
     if (!not) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        return;
     }
 #endif
 
     while (!dlq_empty(&not->payloadQ)) {
-	val = (val_value_t *)dlq_deque(&not->payloadQ);
-	val_free_value(val);
+        val = (val_value_t *)dlq_deque(&not->payloadQ);
+        val_free_value(val);
     }
 
     if (not->msg) {
-	val_free_value(not->msg);
+        val_free_value(not->msg);
     }
 
     m__free(not);
@@ -1943,12 +1943,12 @@ void
 *********************************************************************/
 void
     agt_not_add_to_payload (agt_not_msg_t *notif,
-			    val_value_t *val)
+                            val_value_t *val)
 {
 #ifdef DEBUG
     if (!notif || !val) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -1982,13 +1982,13 @@ void
 
 #ifdef DEBUG
     if (!notif) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (!agt_not_init_done) {
-	SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+        SET_ERROR(ERR_INTERNAL_INIT_SEQ);
         return;
     }
 

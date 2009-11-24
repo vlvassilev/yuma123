@@ -98,7 +98,7 @@ typedef struct agt_cb_set_t_ {
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 boolean    agt_cb_init_done = FALSE;
@@ -137,9 +137,9 @@ static void
 *********************************************************************/
 static agt_cb_set_t *
     new_callback (agt_cb_modhdr_t  *parent,
-		  const xmlChar *defpath,
-		  const xmlChar *version,
-		  const agt_cb_fnset_t *cbset)
+                  const xmlChar *defpath,
+                  const xmlChar *version,
+                  const agt_cb_fnset_t *cbset)
 {
 
     agt_cb_set_t *callback;
@@ -147,7 +147,7 @@ static agt_cb_set_t *
 
     callback = m__getObj(agt_cb_set_t);
     if (!callback) {
-	return NULL;
+        return NULL;
     }
 
     memset(callback, 0x0, sizeof(agt_cb_set_t));
@@ -159,9 +159,9 @@ static agt_cb_set_t *
     callback->status = NO_ERR;
 
     for (cbtyp = AGT_CB_VALIDATE;
-	 cbtyp <= AGT_CB_ROLLBACK;
-	 cbtyp++) {
-	callback->cbset.cbfn[cbtyp] = cbset->cbfn[cbtyp];
+         cbtyp <= AGT_CB_ROLLBACK;
+         cbtyp++) {
+        callback->cbset.cbfn[cbtyp] = cbset->cbfn[cbtyp];
     }
 
     return callback;
@@ -184,9 +184,9 @@ static void
     agt_cb_set_t  *callback;
 
     while (!dlq_empty(&modhdr->callbackQ)) {
-	callback = (agt_cb_set_t *)
-	    dlq_deque(&modhdr->callbackQ);
-	free_callback(callback);
+        callback = (agt_cb_set_t *)
+            dlq_deque(&modhdr->callbackQ);
+        free_callback(callback);
     }
 
     m__free(modhdr);
@@ -208,22 +208,22 @@ static void
 *********************************************************************/
 static agt_cb_set_t *
     find_callback (agt_cb_modhdr_t *modhdr,
-		   const xmlChar *defpath)
+                   const xmlChar *defpath)
 {
     agt_cb_set_t *callback;
     int           ret;
 
     for (callback = (agt_cb_set_t *)
-	     dlq_firstEntry(&modhdr->callbackQ);
-	 callback != NULL;
-	 callback = (agt_cb_set_t *)dlq_nextEntry(callback)) {
+             dlq_firstEntry(&modhdr->callbackQ);
+         callback != NULL;
+         callback = (agt_cb_set_t *)dlq_nextEntry(callback)) {
 
-	 ret = xml_strcmp(defpath, callback->defpath);
-	 if (ret == 0) {
-	     return callback;
-	 } else if (ret < 0) {
-	     return NULL;
-	 }
+         ret = xml_strcmp(defpath, callback->defpath);
+         if (ret == 0) {
+             return callback;
+         } else if (ret < 0) {
+             return NULL;
+         }
     }
     return NULL;
 
@@ -244,23 +244,23 @@ static agt_cb_set_t *
 *********************************************************************/
 static status_t
     add_callback (agt_cb_modhdr_t *modhdr,
-		  agt_cb_set_t *callback)
+                  agt_cb_set_t *callback)
 {
     agt_cb_set_t *cb;
     int           ret;
 
     for (cb = (agt_cb_set_t *)
-	     dlq_firstEntry(&modhdr->callbackQ);
-	 cb != NULL;
-	 cb = (agt_cb_set_t *)dlq_nextEntry(cb)) {
+             dlq_firstEntry(&modhdr->callbackQ);
+         cb != NULL;
+         cb = (agt_cb_set_t *)dlq_nextEntry(cb)) {
 
-	 ret = xml_strcmp(callback->defpath, cb->defpath);
-	 if (ret == 0) {
-	     return ERR_NCX_ENTRY_EXISTS;
-	 } else if (ret < 0) {
-	     dlq_insertAhead(callback, cb);
-	     return NO_ERR;
-	 }
+         ret = xml_strcmp(callback->defpath, cb->defpath);
+         if (ret == 0) {
+             return ERR_NCX_ENTRY_EXISTS;
+         } else if (ret < 0) {
+             dlq_insertAhead(callback, cb);
+             return NO_ERR;
+         }
     }
     dlq_enque(callback, &modhdr->callbackQ);
     return NO_ERR;
@@ -287,7 +287,7 @@ static agt_cb_modhdr_t *
 
     modhdr = m__getObj(agt_cb_modhdr_t);
     if (!modhdr) {
-	return NULL;
+        return NULL;
     }
 
     memset(modhdr, 0x0, sizeof(agt_cb_modhdr_t));
@@ -320,15 +320,15 @@ static agt_cb_modhdr_t *
     int           ret;
 
     for (modhdr = (agt_cb_modhdr_t *)dlq_firstEntry(&modhdrQ);
-	 modhdr != NULL;
-	 modhdr = (agt_cb_modhdr_t *)dlq_nextEntry(modhdr)) {
+         modhdr != NULL;
+         modhdr = (agt_cb_modhdr_t *)dlq_nextEntry(modhdr)) {
 
-	 ret = xml_strcmp(modname, modhdr->modname);
-	 if (ret == 0) {
-	     return modhdr;
-	 } else if (ret < 0) {
-	     return NULL;
-	 }
+         ret = xml_strcmp(modname, modhdr->modname);
+         if (ret == 0) {
+             return modhdr;
+         } else if (ret < 0) {
+             return NULL;
+         }
     }
     return NULL;
 
@@ -353,16 +353,16 @@ static status_t
     int              ret;
 
     for (mh = (agt_cb_modhdr_t *)dlq_firstEntry(&modhdrQ);
-	 mh != NULL;
-	 mh = (agt_cb_modhdr_t *)dlq_nextEntry(mh)) {
+         mh != NULL;
+         mh = (agt_cb_modhdr_t *)dlq_nextEntry(mh)) {
 
-	 ret = xml_strcmp(modhdr->modname, mh->modname);
-	 if (ret == 0) {
-	     return ERR_NCX_ENTRY_EXISTS;
-	 } else if (ret < 0) {
-	     dlq_insertAhead(modhdr, mh);
-	     return NO_ERR;
-	 }
+         ret = xml_strcmp(modhdr->modname, mh->modname);
+         if (ret == 0) {
+             return ERR_NCX_ENTRY_EXISTS;
+         } else if (ret < 0) {
+             dlq_insertAhead(modhdr, mh);
+             return NO_ERR;
+         }
     }
     dlq_enque(modhdr, &modhdrQ);
     return NO_ERR;
@@ -386,8 +386,8 @@ static status_t
 *********************************************************************/
 static status_t 
     load_callbacks (ncx_module_t *mod,
-		    agt_cb_modhdr_t *modhdr,
-		    agt_cb_set_t *callback)
+                    agt_cb_modhdr_t *modhdr,
+                    agt_cb_set_t *callback)
 {
     obj_template_t     *obj;
     status_t            res;
@@ -399,45 +399,45 @@ static status_t
 
     /* check if the version loaded is acceptable for this callback */
     if (callback->version) {
-	ret = yang_compare_revision_dates(modhdr->modversion, 
-					  callback->version);
-	if (ret != 0) {
-	    res = ERR_NCX_WRONG_VERSION;
-	    callback->loadstatus = AGTCB_STAT_LOAD_FAILED;
-	    callback->status = res;
+        ret = yang_compare_revision_dates(modhdr->modversion, 
+                                          callback->version);
+        if (ret != 0) {
+            res = ERR_NCX_WRONG_VERSION;
+            callback->loadstatus = AGTCB_STAT_LOAD_FAILED;
+            callback->status = res;
 
-	    log_error("\nError: load callbacks failed for module '%s'"
-		      "\n  wrong version: got '%s', need '%s'", 
-		      mod->name, 
-		      mod->version, 
-		      callback->version);
+            log_error("\nError: load callbacks failed for module '%s'"
+                      "\n  wrong version: got '%s', need '%s'", 
+                      mod->name, 
+                      mod->version, 
+                      callback->version);
 
-	    return res;
-	}
+            return res;
+        }
     }
 
     /* find the object template for this callback */
     res = xpath_find_schema_target_int(callback->defpath, &obj);
     if (res == NO_ERR) {
-	/* set the callbacks in the object */
-	obj->cbset = &callback->cbset;
-	callback->loadstatus = AGTCB_STAT_LOADED;
-	callback->status = NO_ERR;
+        /* set the callbacks in the object */
+        obj->cbset = &callback->cbset;
+        callback->loadstatus = AGTCB_STAT_LOADED;
+        callback->status = NO_ERR;
 
-	log_debug2("\nagt_cb: load OK for mod '%s', def '%s'",
-		   mod->name, callback->defpath);
+        log_debug2("\nagt_cb: load OK for mod '%s', def '%s'",
+                   mod->name, callback->defpath);
     } else {
-	callback->loadstatus = AGTCB_STAT_LOAD_FAILED;
-	callback->status = res;
+        callback->loadstatus = AGTCB_STAT_LOAD_FAILED;
+        callback->status = res;
 
-	log_error("\nError: load callbacks failed for module '%s'"
-		  "\n  '%s' for defpath '%s'",
-		  mod->name, 
-		  get_error_string(res), 
-		  callback->defpath);
+        log_error("\nError: load callbacks failed for module '%s'"
+                  "\n  '%s' for defpath '%s'",
+                  mod->name, 
+                  get_error_string(res), 
+                  callback->defpath);
 
     }
-	
+        
     return res;
 
 }  /* load_callbacks */
@@ -461,19 +461,19 @@ static void
     agt_cb_set_t    *callback;
 
     log_debug2("\nagt_cb: got new module '%s', rev '%s'",
-	       mod->name, mod->version);
+               mod->name, mod->version);
 
     modhdr = find_modhdr(mod->name);
     if (!modhdr) {
-	return;
+        return;
     }
 
     for (callback = (agt_cb_set_t *)
-	     dlq_firstEntry(&modhdr->callbackQ);
-	 callback != NULL;
-	 callback = (agt_cb_set_t *)
-	     dlq_nextEntry(callback)) {
-	(void)load_callbacks(mod, modhdr, callback);
+             dlq_firstEntry(&modhdr->callbackQ);
+         callback != NULL;
+         callback = (agt_cb_set_t *)
+             dlq_nextEntry(callback)) {
+        (void)load_callbacks(mod, modhdr, callback);
     }
 
 }   /* check_module_pending */
@@ -492,8 +492,8 @@ void
     agt_cb_init (void)
 {
     if (!agt_cb_init_done) {
-	dlq_createSQue(&modhdrQ);
-	agt_cb_init_done = TRUE;
+        dlq_createSQue(&modhdrQ);
+        agt_cb_init_done = TRUE;
     }
 
     ncx_set_load_callback(check_module_pending);
@@ -513,11 +513,11 @@ void
     agt_cb_modhdr_t *modhdr;
 
     if (agt_cb_init_done) {
-	while (!dlq_empty(&modhdrQ)) {
-	    modhdr = (agt_cb_modhdr_t *)dlq_deque(&modhdrQ);
-	    free_modhdr(modhdr);
-	}
-	agt_cb_init_done = FALSE;
+        while (!dlq_empty(&modhdrQ)) {
+            modhdr = (agt_cb_modhdr_t *)dlq_deque(&modhdrQ);
+            free_modhdr(modhdr);
+        }
+        agt_cb_init_done = FALSE;
     }
 }   /* agt_cb_cleanup */
 
@@ -544,9 +544,9 @@ void
 *********************************************************************/
 status_t 
     agt_cb_register_callback (const xmlChar *modname,
-			      const xmlChar *defpath,
-			      const xmlChar *version,
-			      const agt_cb_fn_t cbfn)
+                              const xmlChar *defpath,
+                              const xmlChar *version,
+                              const agt_cb_fn_t cbfn)
 {
     agt_cb_modhdr_t    *modhdr;
     agt_cb_set_t       *callback;
@@ -557,46 +557,46 @@ status_t
 
 #ifdef DEBUG
     if (!modname || !defpath || !cbfn) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     modhdr = find_modhdr(modname);
     if (!modhdr) {
-	modhdr = new_modhdr(modname);
-	if (!modhdr) {
-	    return ERR_INTERNAL_MEM;
-	}
-	res = add_modhdr(modhdr);
-	if (res != NO_ERR) {
-	    free_modhdr(modhdr);
-	    return res;
-	}
+        modhdr = new_modhdr(modname);
+        if (!modhdr) {
+            return ERR_INTERNAL_MEM;
+        }
+        res = add_modhdr(modhdr);
+        if (res != NO_ERR) {
+            free_modhdr(modhdr);
+            return res;
+        }
     }
 
     callback = find_callback(modhdr, defpath);
     if (callback) {
-	return SET_ERROR(ERR_NCX_DUP_ENTRY);
+        return SET_ERROR(ERR_NCX_DUP_ENTRY);
     }
 
     memset(&cbset, 0x0, sizeof(agt_cb_fnset_t));
     for (cbtyp = AGT_CB_VALIDATE;
-	 cbtyp <= AGT_CB_ROLLBACK;
-	 cbtyp++) {
-	cbset.cbfn[cbtyp] = cbfn;
+         cbtyp <= AGT_CB_ROLLBACK;
+         cbtyp++) {
+        cbset.cbfn[cbtyp] = cbfn;
     }
 
     callback = new_callback(modhdr, 
-			    defpath, 
-			    version, 
-			    &cbset);
+                            defpath, 
+                            version, 
+                            &cbset);
     if (!callback) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     res = add_callback(modhdr, callback);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* data structures in place, now check if the module
@@ -604,12 +604,12 @@ status_t
      */
     mod = ncx_find_module(modname, version);
     if (!mod) {
-	/* module not present yet */
-	return NO_ERR;
+        /* module not present yet */
+        return NO_ERR;
     }
 
     res = load_callbacks(mod, modhdr, callback);
-	
+        
     return res;
 
 }  /* agt_cb_register_callback */
@@ -636,9 +636,9 @@ status_t
 *********************************************************************/
 status_t 
     agt_cb_register_callbacks (const xmlChar *modname,
-			       const xmlChar *defpath,
-			       const xmlChar *version,
-			       const agt_cb_fnset_t *cbfnset)
+                               const xmlChar *defpath,
+                               const xmlChar *version,
+                               const agt_cb_fnset_t *cbfnset)
 {
     agt_cb_modhdr_t    *modhdr;
     agt_cb_set_t       *callback;
@@ -647,39 +647,39 @@ status_t
 
 #ifdef DEBUG
     if (!modname || !defpath || !cbfnset) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     modhdr = find_modhdr(modname);
     if (!modhdr) {
-	modhdr = new_modhdr(modname);
-	if (!modhdr) {
-	    return ERR_INTERNAL_MEM;
-	}
-	res = add_modhdr(modhdr);
-	if (res != NO_ERR) {
-	    free_modhdr(modhdr);
-	    return res;
-	}
+        modhdr = new_modhdr(modname);
+        if (!modhdr) {
+            return ERR_INTERNAL_MEM;
+        }
+        res = add_modhdr(modhdr);
+        if (res != NO_ERR) {
+            free_modhdr(modhdr);
+            return res;
+        }
     }
 
     callback = find_callback(modhdr, defpath);
     if (callback) {
-	return SET_ERROR(ERR_NCX_DUP_ENTRY);
+        return SET_ERROR(ERR_NCX_DUP_ENTRY);
     }
 
     callback = new_callback(modhdr, 
-			    defpath, 
-			    version, 
-			    cbfnset);
+                            defpath, 
+                            version, 
+                            cbfnset);
     if (!callback) {
-	return ERR_INTERNAL_MEM;
+        return ERR_INTERNAL_MEM;
     }
 
     res = add_callback(modhdr, callback);
     if (res != NO_ERR) {
-	return res;
+        return res;
     }
 
     /* data structures in place, now check if the module
@@ -687,12 +687,12 @@ status_t
      */
     mod = ncx_find_module(modname, version);
     if (!mod) {
-	/* module not present yet */
-	return NO_ERR;
+        /* module not present yet */
+        return NO_ERR;
     }
 
     res = load_callbacks(mod, modhdr, callback);
-	
+        
     return res;
 
 }  /* agt_cb_register_callbacks */
@@ -711,7 +711,7 @@ status_t
 *********************************************************************/
 void
     agt_cb_unregister_callbacks (const xmlChar *modname,
-				 const xmlChar *defpath)
+                                 const xmlChar *defpath)
 {
     agt_cb_modhdr_t  *modhdr;
     agt_cb_set_t     *callback;
@@ -720,34 +720,34 @@ void
 
 #ifdef DEBUG
     if (!modname || !defpath) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     modhdr = find_modhdr(modname);
     if (!modhdr) {
-	/* entry not found; assume it is an early exit cleanup */
-	return;
+        /* entry not found; assume it is an early exit cleanup */
+        return;
     }
 
     callback = find_callback(modhdr, defpath);
     if (!callback) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
 
     dlq_remove(callback);
     free_callback(callback);
 
     if (dlq_empty(&modhdr->callbackQ)) {
-	dlq_remove(modhdr);
-	free_modhdr(modhdr);
+        dlq_remove(modhdr);
+        free_modhdr(modhdr);
     }
 
     res = xpath_find_schema_target_int(defpath, &obj);
     if (res == NO_ERR) {
-	obj->cbset = NULL;
+        obj->cbset = NULL;
     }
 
 }  /* agt_cb_unregister_callbacks */

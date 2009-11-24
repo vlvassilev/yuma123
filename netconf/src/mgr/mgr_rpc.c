@@ -135,7 +135,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 static boolean mgr_rpc_init_done = FALSE;
@@ -164,8 +164,8 @@ static mgr_rpc_rpy_t *
 
     rpy->reply = val_new_value();
     if (!rpy->reply) {
-	m__free(rpy);
-	return NULL;
+        m__free(rpy);
+        return NULL;
     }
     /* xml_msg_init_hdr(&rpy->mhdr); */
     return rpy;
@@ -187,7 +187,7 @@ static mgr_rpc_rpy_t *
 *********************************************************************/
 static void
     add_request (ses_cb_t *scb,
-		 mgr_rpc_req_t  *req)
+                 mgr_rpc_req_t  *req)
 {
     mgr_scb_t *mscb;
 
@@ -219,7 +219,7 @@ static void
 *********************************************************************/
 static mgr_rpc_req_t *
     find_request (ses_cb_t *scb,
-		  const xmlChar *msg_id)
+                  const xmlChar *msg_id)
 {
     mgr_scb_t *mscb;
     mgr_rpc_req_t *req;
@@ -227,11 +227,11 @@ static mgr_rpc_req_t *
     mscb = mgr_ses_get_mscb(scb);
 
     for (req = (mgr_rpc_req_t *)dlq_firstEntry(&mscb->reqQ);
-	 req != NULL;
-	 req = (mgr_rpc_req_t *)dlq_nextEntry(req)) {
-	if (!xml_strcmp(msg_id, req->msg_id)) {
-	    return req;
-	}
+         req != NULL;
+         req = (mgr_rpc_req_t *)dlq_nextEntry(req)) {
+        if (!xml_strcmp(msg_id, req->msg_id)) {
+            return req;
+        }
     }
     return NULL;
 
@@ -259,13 +259,13 @@ status_t
     status_t  res;
 
     if (!mgr_rpc_init_done) {
-	res = top_register_node(NC_MODULE,
-				NCX_EL_RPC_REPLY, 
-				mgr_rpc_dispatch);
-	if (res != NO_ERR) {
-	    return res;
-	}
-	mgr_rpc_init_done = TRUE;
+        res = top_register_node(NC_MODULE,
+                                NCX_EL_RPC_REPLY, 
+                                mgr_rpc_dispatch);
+        if (res != NO_ERR) {
+            return res;
+        }
+        mgr_rpc_init_done = TRUE;
     }
     return NO_ERR;
 
@@ -283,8 +283,8 @@ void
     mgr_rpc_cleanup (void)
 {
     if (mgr_rpc_init_done) {
-	top_unregister_node(NC_MODULE, NCX_EL_RPC_REPLY);
-	mgr_rpc_init_done = FALSE;
+        top_unregister_node(NC_MODULE, NCX_EL_RPC_REPLY);
+        mgr_rpc_init_done = FALSE;
     }
 
 } /* mgr_rpc_cleanup */
@@ -310,23 +310,23 @@ mgr_rpc_req_t *
 
     req = m__getObj(mgr_rpc_req_t);
     if (!req) {
-	return NULL;
+        return NULL;
     }
     memset(req, 0x0, sizeof(mgr_rpc_req_t));
 
     mscb = mgr_ses_get_mscb(scb);
     if (mscb->next_id >= MGR_MAX_REQUEST_ID) {
-	mscb->next_id = 0;
+        mscb->next_id = 0;
     }
     sprintf(numbuff, "%u", ++mscb->next_id);
 
     req->msg_id = xml_strdup((const xmlChar *)numbuff);
     if (req->msg_id) {
-	xml_msg_init_hdr(&req->mhdr);
-	xml_init_attrs(&req->attrs);
+        xml_msg_init_hdr(&req->mhdr);
+        xml_init_attrs(&req->attrs);
     } else {
-	m__free(req);
-	req = NULL;
+        m__free(req);
+        req = NULL;
     }
     return req;
 
@@ -349,17 +349,17 @@ void
 {
 #ifdef DEBUG
     if (!req) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (req->msg_id) {
-	m__free(req->msg_id);
+        m__free(req->msg_id);
     }
     xml_clean_attrs(&req->attrs);
     if (req->data) {
-	val_free_value(req->data);
+        val_free_value(req->data);
     }
     m__free(req);
 
@@ -382,16 +382,16 @@ void
 {
 #ifdef DEBUG
     if (!rpy) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     if (rpy->msg_id) {
-	m__free(rpy->msg_id);
+        m__free(rpy->msg_id);
     }
     if (rpy->reply) {
-	val_free_value(rpy->reply);
+        val_free_value(rpy->reply);
     }
     m__free(rpy);
 
@@ -416,15 +416,15 @@ void
 
 #ifdef DEBUG
     if (!reqQ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     req = (mgr_rpc_req_t *)dlq_deque(reqQ);
     while (req) {
-	mgr_rpc_free_request(req);
-	req = (mgr_rpc_req_t *)dlq_deque(reqQ);
+        mgr_rpc_free_request(req);
+        req = (mgr_rpc_req_t *)dlq_deque(reqQ);
     }
 
 } /* mgr_rpc_clean_requestQ */
@@ -452,8 +452,8 @@ uint32
 
 #ifdef DEBUG
     if (!reqQ) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
     }
 #endif
 
@@ -461,23 +461,23 @@ uint32
     (void)time(&timenow);
 
     for (req = (mgr_rpc_req_t *)dlq_firstEntry(reqQ);
-	 req != NULL;
-	 req = nextreq) {
+         req != NULL;
+         req = nextreq) {
 
-	nextreq = (mgr_rpc_req_t *)dlq_nextEntry(req);
+        nextreq = (mgr_rpc_req_t *)dlq_nextEntry(req);
 
-	if (!req->timeout) {
-	    continue;
-	}
+        if (!req->timeout) {
+            continue;
+        }
 
-	timediff = difftime(timenow, req->starttime);
-	if (timediff >= (double)req->timeout) {
-	    log_debug("\nmgr_rpc: deleting timed out request '%s'",
-		      req->msg_id);
-	    deletecount++;
-	    dlq_remove(req);
-	    mgr_rpc_free_request(req);
-	}
+        timediff = difftime(timenow, req->starttime);
+        if (timediff >= (double)req->timeout) {
+            log_debug("\nmgr_rpc: deleting timed out request '%s'",
+                      req->msg_id);
+            deletecount++;
+            dlq_remove(req);
+            mgr_rpc_free_request(req);
+        }
     }
 
     return deletecount;
@@ -500,8 +500,8 @@ uint32
 *********************************************************************/
 status_t
     mgr_rpc_send_request (ses_cb_t *scb,
-			  mgr_rpc_req_t *req,
-			  mgr_rpc_cbfn_t rpyfn)
+                          mgr_rpc_req_t *req,
+                          mgr_rpc_cbfn_t rpyfn)
 {
     xml_msg_hdr_t msg;
     xml_attr_t   *attr;
@@ -511,13 +511,13 @@ status_t
 
 #ifdef DEBUG
     if (!scb || !req || !rpyfn) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
 #ifdef MGR_HELLO_DEBUG
     log_debug2("\nmgr sending RPC request %s on session %d", 
-	       req->msg_id, scb->sid);
+               req->msg_id, scb->sid);
 #endif
 
     anyout = FALSE;
@@ -527,61 +527,61 @@ status_t
     /* make sure the message-id attribute is not already present */
     attr = xml_find_attr_q(&req->attrs, 0, NCX_EL_MESSAGE_ID);
     if (attr) {
-	dlq_remove(attr);
-	xml_free_attr(attr);
+        dlq_remove(attr);
+        xml_free_attr(attr);
     }
 
     /* setup the prefix map with the NETCONF (and maybe NCX) namespace */
     res = xml_msg_build_prefix_map(&msg, 
-				   &req->attrs, 
-				   TRUE, 
-				   (req->data->nsid == xmlns_ncx_id()));
+                                   &req->attrs, 
+                                   TRUE, 
+                                   (req->data->nsid == xmlns_ncx_id()));
 
     /* add the message-id attribute */
     if (res == NO_ERR) {
-	res = xml_add_attr(&req->attrs, 
-			   0, 
-			   NCX_EL_MESSAGE_ID,
-			   req->msg_id);
+        res = xml_add_attr(&req->attrs, 
+                           0, 
+                           NCX_EL_MESSAGE_ID,
+                           req->msg_id);
     }
 
     /* send the <?xml?> directive */
     if (res == NO_ERR) {
-	res = ses_start_msg(scb);
+        res = ses_start_msg(scb);
     }
 
     /* start the <rpc> element */
     if (res == NO_ERR) {
-	anyout = TRUE;
-	xml_wr_begin_elem_ex(scb, 
-			     &msg, 
-			     0, 
-			     nc_id, 
-			     NCX_EL_RPC, 
-			     &req->attrs, 
-			     ATTRQ, 
-			     0, 
-			     START);
+        anyout = TRUE;
+        xml_wr_begin_elem_ex(scb, 
+                             &msg, 
+                             0, 
+                             nc_id, 
+                             NCX_EL_RPC, 
+                             &req->attrs, 
+                             ATTRQ, 
+                             0, 
+                             START);
     }
     
     /* send the method and parameters */
     if (res == NO_ERR) {
-	xml_wr_full_val(scb, &msg, req->data, NCX_DEF_INDENT);
+        xml_wr_full_val(scb, &msg, req->data, NCX_DEF_INDENT);
     }
 
     /* finish the <rpc> element */
     if (res == NO_ERR) {
-	xml_wr_end_elem(scb, &msg, nc_id, NCX_EL_RPC, 0);
+        xml_wr_end_elem(scb, &msg, nc_id, NCX_EL_RPC, 0);
     }
 
     /* finish the message */
     if (anyout) {
-	ses_finish_msg(scb);
+        ses_finish_msg(scb);
     }
 
     if (res == NO_ERR) {
-	req->replycb = rpyfn;
-	add_request(scb, req);
+        req->replycb = rpyfn;
+        add_request(scb, req);
     }
 
     xml_msg_clean_hdr(&msg);
@@ -601,7 +601,7 @@ status_t
 *********************************************************************/
 void 
     mgr_rpc_dispatch (ses_cb_t *scb,
-		      xml_node_t *top)
+                      xml_node_t *top)
 {
     obj_template_t          *rpyobj;
     mgr_rpc_rpy_t           *rpy;
@@ -615,8 +615,8 @@ void
 
 #ifdef DEBUG
     if (!scb || !top) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -626,10 +626,10 @@ void
 
     /* make sure any real session has been properly established */
     if (scb->type != SES_TYP_DUMMY && scb->state != SES_ST_IDLE) {
-	log_error("\nError: mgr_rpc: skipping incoming message '%s'",
-		  top->qname);
-	mgr_xml_skip_subtree(scb->reader, top);
-	return;
+        log_error("\nError: mgr_rpc: skipping incoming message '%s'",
+                  top->qname);
+        mgr_xml_skip_subtree(scb->reader, top);
+        return;
     }
 
     /* check if the reply template is already cached */
@@ -649,69 +649,69 @@ void
      */
     attr = xml_find_attr(top, 0, NCX_EL_MESSAGE_ID);
     if (attr && attr->attr_val) {
-	msg_id = xml_strdup(attr->attr_val);
+        msg_id = xml_strdup(attr->attr_val);
     }
     if (!msg_id) {
-	mgr_xml_skip_subtree(scb->reader, top);
-	log_error("\nError: mgr_rpc: skipping incoming message");
-	return;
-    }	    
+        mgr_xml_skip_subtree(scb->reader, top);
+        log_error("\nError: mgr_rpc: skipping incoming message");
+        return;
+    }       
 
     /* the current node is 'rpc-reply' in the netconf namespace
      * First get a new RPC reply struct
      */
     rpy = new_reply();
     if (!rpy) {
-	m__free(msg_id);
-	log_error("\nError: mgr_rpc: skipping incoming message");
-	mgr_xml_skip_subtree(scb->reader, top);
-	return;
+        m__free(msg_id);
+        log_error("\nError: mgr_rpc: skipping incoming message");
+        mgr_xml_skip_subtree(scb->reader, top);
+        return;
     } else {
-	rpy->msg_id = msg_id;
+        rpy->msg_id = msg_id;
     }
     
     /* get the NCX RPC group-id attribute if present */
     attr = xml_find_attr(top, xmlns_ncx_id(), NCX_EL_GROUP_ID);
     if (attr && attr->attr_val) {
-	res = ncx_decode_num(attr->attr_val, NCX_BT_UINT32, &num);
-	if (res == NO_ERR) {
-	    rpy->group_id = num.u;
-	}
+        res = ncx_decode_num(attr->attr_val, NCX_BT_UINT32, &num);
+        if (res == NO_ERR) {
+            rpy->group_id = num.u;
+        }
     }
 
     /* find the request that goes with this reply */
     req = find_request(scb, rpy->msg_id);
     if (!req) {
 #ifdef MGR_RPC_DEBUG
-	log_debug("\nmgr_rpc: go request found for msg (%s) on session %d", 
-		  rpy->msg_id, 
-		  scb->sid);
+        log_debug("\nmgr_rpc: go request found for msg (%s) on session %d", 
+                  rpy->msg_id, 
+                  scb->sid);
 #endif
-	mgr_xml_skip_subtree(scb->reader, top);
-	mgr_rpc_free_reply(rpy);
-	return;
+        mgr_xml_skip_subtree(scb->reader, top);
+        mgr_rpc_free_reply(rpy);
+        return;
     } else {
-	dlq_remove(req);
+        dlq_remove(req);
     }
 
     /* have a request/reply pair, so parse the reply 
      * as a val_value_t tree, stored in rpy->reply
      */
     rpy->res = mgr_val_parse_reply(scb, 
-				   rpyobj, 
-				   req->rpc, 
-				   top, 
-				   rpy->reply);
+                                   rpyobj, 
+                                   req->rpc, 
+                                   top, 
+                                   rpy->reply);
     if (rpy->res != NO_ERR && LOGINFO) {
-	log_info("\nmgr_rpc: got invalid reply on session %d (%s)",
-		 scb->sid, get_error_string(rpy->res));
+        log_info("\nmgr_rpc: got invalid reply on session %d (%s)",
+                 scb->sid, get_error_string(rpy->res));
     }
 
     /* check that there is nothing after the <rpc-reply> element */
     if (rpy->res==NO_ERR && 
-	!xml_docdone(scb->reader) && LOGINFO) {
-	log_info("\nmgr_rpc: got extra nodes in reply on session %d",
-		 scb->sid);
+        !xml_docdone(scb->reader) && LOGINFO) {
+        log_info("\nmgr_rpc: got extra nodes in reply on session %d",
+                 scb->sid);
     }
 
     /* invoke the reply handler */
@@ -722,7 +722,7 @@ void
      * to SES_ST_SHUTDOWN_REQ during this RPC call
      */
     if (scb->state == SES_ST_IN_MSG) {
-	scb->state = SES_ST_IDLE;
+        scb->state = SES_ST_IDLE;
     }
 
 #ifdef MGR_RPC_DEBUG

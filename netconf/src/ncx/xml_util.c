@@ -74,9 +74,9 @@ date         init     comment
 #endif
 
 /********************************************************************
-*								    *
-*			     T Y P E S				    *
-*								    *
+*                                                                   *
+*                            T Y P E S                              *
+*                                                                   *
 *********************************************************************/
 
 /* One entry to find a character entity value */
@@ -88,7 +88,7 @@ typedef struct xml_chcvt_t_ {
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -121,7 +121,7 @@ xml_node_t *
 
     node = m__getObj(xml_node_t);
     if (!node) {
-	return NULL;
+        return NULL;
     }
     xml_init_node(node);
     return node;
@@ -142,8 +142,8 @@ void
 {
 #ifdef DEBUG   
     if (!node) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -165,8 +165,8 @@ void
 {
 #ifdef DEBUG
     if (!node) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
     xml_clean_node(node);
@@ -187,8 +187,8 @@ void
 {
 #ifdef DEBUG
     if (!node) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -197,8 +197,8 @@ void
     node->qname = NULL;
     node->elname = NULL;
     if (node->simfree) {
-	m__free(node->simfree);
-	node->simfree = NULL;
+        m__free(node->simfree);
+        node->simfree = NULL;
     }
     node->simval = NULL;
     node->simlen = 0;
@@ -224,13 +224,13 @@ void
 *********************************************************************/
 status_t
     xml_get_reader_from_filespec (const char *filespec,
-				  xmlTextReaderPtr  *reader)
+                                  xmlTextReaderPtr  *reader)
 {
     int        options;
 
 #ifdef DEBUG
     if (!filespec || !reader) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     } 
 #endif
 
@@ -242,7 +242,7 @@ status_t
     options = XML_READER_OPTIONS + XML_PARSE_XINCLUDE;
     *reader = xmlReaderForFile(filespec, NULL, options);
     if (*reader==NULL) {
-	return ERR_XML_READER_START_FAILED;
+        return ERR_XML_READER_START_FAILED;
     }
     return NO_ERR;
 
@@ -266,15 +266,15 @@ status_t
 *********************************************************************/
 status_t
     xml_get_reader_for_session (xmlInputReadCallback readfn,
-				xmlInputCloseCallback closefn,
-				void *context,
-				xmlTextReaderPtr  *reader)
+                                xmlInputCloseCallback closefn,
+                                void *context,
+                                xmlTextReaderPtr  *reader)
 {
     int        options;
 
 #ifdef DEBUG
     if (!readfn || !reader) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     } 
 #endif
 
@@ -288,10 +288,10 @@ status_t
                              closefn, 
                              context, 
                              XML_SES_URL, 
-			     NULL, 
+                             NULL, 
                              options);
     if (*reader==NULL) {
-	return ERR_XML_READER_START_FAILED;
+        return ERR_XML_READER_START_FAILED;
     }
     return NO_ERR;
 
@@ -315,15 +315,15 @@ status_t
 *********************************************************************/
 status_t
     xml_reset_reader_for_session (xmlInputReadCallback readfn,
-				  xmlInputCloseCallback closefn,
-				  void *context,
-				  xmlTextReaderPtr  reader)
+                                  xmlInputCloseCallback closefn,
+                                  void *context,
+                                  xmlTextReaderPtr  reader)
 {
     int  ret, options;
 
 #ifdef DEBUG
     if (!readfn || !reader) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     } 
 #endif
 
@@ -334,9 +334,9 @@ status_t
      */
     options = XML_READER_OPTIONS;
     ret = xmlReaderNewIO(reader, readfn, closefn, context,
-			 XML_SES_URL, NULL, XML_READER_OPTIONS);
+                         XML_SES_URL, NULL, XML_READER_OPTIONS);
     if (ret != 0) {
-	return ERR_XML_READER_START_FAILED;
+        return ERR_XML_READER_START_FAILED;
     }
     return NO_ERR;
 
@@ -358,8 +358,8 @@ void
 {
 #ifdef DEBUG
     if (!reader) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
     xmlFreeTextReader(reader);
@@ -427,15 +427,15 @@ boolean
 
 #ifdef DEBUG
     if (!reader) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     /* advance the node pointer */
     ret = xmlTextReaderRead(reader);
     if (ret != 1) {
-	return FALSE;
+        return FALSE;
     }
     return TRUE;
 
@@ -457,36 +457,36 @@ boolean
 *********************************************************************/
 status_t 
     xml_node_match (const xml_node_t *node,
-		    xmlns_id_t        nsid,
-		    const xmlChar *elname,
-		    xml_nodetyp_t  nodetyp)
+                    xmlns_id_t        nsid,
+                    const xmlChar *elname,
+                    xml_nodetyp_t  nodetyp)
 {
 #ifdef DEBUG
     if (!node) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     if (nsid) {
-	/* namespace error only if namespaces are being used */
-	if (node->nsid && node->nsid != nsid) {
-	    return ERR_NCX_WRONG_NAMESPACE;
-	}
+        /* namespace error only if namespaces are being used */
+        if (node->nsid && node->nsid != nsid) {
+            return ERR_NCX_WRONG_NAMESPACE;
+        }
     }
 
     if (elname) {
-	if (!node->elname) {
-	    return ERR_NCX_UNKNOWN_ELEMENT;
-	}
-	if (xml_strcmp(elname, node->elname)) {
-	    return ERR_NCX_WRONG_ELEMENT;
-	}
+        if (!node->elname) {
+            return ERR_NCX_UNKNOWN_ELEMENT;
+        }
+        if (xml_strcmp(elname, node->elname)) {
+            return ERR_NCX_WRONG_ELEMENT;
+        }
     }
 
     if (nodetyp != XML_NT_NONE) {
-	if (nodetyp != node->nodetyp) {
-	    return ERR_NCX_WRONG_NODETYP;
-	}
+        if (nodetyp != node->nodetyp) {
+            return ERR_NCX_WRONG_NODETYP;
+        }
     }
 
     return NO_ERR;
@@ -508,32 +508,32 @@ status_t
 *********************************************************************/
 status_t 
     xml_endnode_match (const xml_node_t *startnode,
-		       const xml_node_t *endnode)
+                       const xml_node_t *endnode)
 {
 #ifdef DEBUG
     if (!startnode || !endnode) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     if (endnode->nodetyp != XML_NT_END) {
-	return ERR_NCX_WRONG_NODETYP;
+        return ERR_NCX_WRONG_NODETYP;
     }
 
     if (startnode->depth != endnode->depth) {
-	return ERR_NCX_WRONG_NODEDEPTH;
+        return ERR_NCX_WRONG_NODEDEPTH;
     }
 
     if (xml_strcmp(startnode->elname, endnode->elname)) {
-	return ERR_NCX_UNKNOWN_ELEMENT;
+        return ERR_NCX_UNKNOWN_ELEMENT;
     }
 
     if (startnode->nsid && !endnode->nsid) {
-	return ERR_NCX_UNKNOWN_NAMESPACE;
+        return ERR_NCX_UNKNOWN_NAMESPACE;
     }
 
     if (startnode->nsid != endnode->nsid) {
-	return ERR_NCX_WRONG_NAMESPACE;
+        return ERR_NCX_WRONG_NAMESPACE;
     }
 
     return NO_ERR;
@@ -560,17 +560,17 @@ boolean
 
 #ifdef DEBUG
     if (!reader) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return FALSE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
     }
 #endif
 
     /* advance the node pointer */
     ret = xmlTextReaderRead(reader);
     if (ret != 1) {
-	return TRUE;   /* assume ERR_XML_READER_EOF !! */
+        return TRUE;   /* assume ERR_XML_READER_EOF !! */
     } else {
-	return FALSE;  /* read was successful, doc is not done */
+        return FALSE;  /* read was successful, doc is not done */
     }
 } /* xml_docdone */
 
@@ -593,56 +593,56 @@ void
 
 #ifdef DEBUG
     if (!node) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
     switch (node->nodetyp) {
     case XML_NT_NONE:
-	typ = "NONE";
-	ok = nam = FALSE;
-	break;
+        typ = "NONE";
+        ok = nam = FALSE;
+        break;
     case XML_NT_EMPTY:
-	typ = "EMPTY";
-	ok = nam = TRUE;
-	break;
+        typ = "EMPTY";
+        ok = nam = TRUE;
+        break;
     case XML_NT_START:
-	typ = "START";
-	ok = nam = TRUE;
-	break;
+        typ = "START";
+        ok = nam = TRUE;
+        break;
     case XML_NT_END:
-	typ = "END";
-	ok = nam = TRUE;
-	break;
+        typ = "END";
+        ok = nam = TRUE;
+        break;
     case XML_NT_STRING:
-	typ = "STRING";
-	nam = FALSE;
-	ok = TRUE;
-	break;
+        typ = "STRING";
+        nam = FALSE;
+        ok = TRUE;
+        break;
     default:
-	typ = "ERR";
-	ok = nam = FALSE;
-	break;
+        typ = "ERR";
+        ok = nam = FALSE;
+        break;
     }
 
     if (ok) {
-	log_write("\nXML node (%d:%d): %s %s",
-		  node->nsid, node->depth, typ, 
-		  (nam) ? (const char *)node->elname : "");
+        log_write("\nXML node (%d:%d): %s %s",
+                  node->nsid, node->depth, typ, 
+                  (nam) ? (const char *)node->elname : "");
 
-	if (node->simval) {
-	    log_write("\n   val(%u):%s", node->simlen, node->simval);
-	}
-	for (attr = (const xml_attr_t *)dlq_firstEntry(&node->attrs);
-	     attr != NULL;
-	     attr = (const xml_attr_t *)dlq_nextEntry(attr)) {
-	    log_write("\n   attr: ns:%d name:%s (%s)",
-		   attr->attr_ns, (const char *)attr->attr_name, 
-		   (const char *)attr->attr_val);
-	}
+        if (node->simval) {
+            log_write("\n   val(%u):%s", node->simlen, node->simval);
+        }
+        for (attr = (const xml_attr_t *)dlq_firstEntry(&node->attrs);
+             attr != NULL;
+             attr = (const xml_attr_t *)dlq_nextEntry(attr)) {
+            log_write("\n   attr: ns:%d name:%s (%s)",
+                   attr->attr_ns, (const char *)attr->attr_name, 
+                   (const char *)attr->attr_val);
+        }
     } else {
-	log_write("\nXML node ERR (%s)", typ);
+        log_write("\nXML node ERR (%s)", typ);
     }
     log_write("\n");
 
@@ -665,7 +665,7 @@ void
 #ifdef DEBUG
     if (!attrs) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        return;
     }
 #endif
 
@@ -715,17 +715,17 @@ void
 #ifdef DEBUG
     if (!attr) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        return;
     }
 #endif
     if (attr->attr_dname) {
-	m__free(attr->attr_dname);
+        m__free(attr->attr_dname);
     }
     if (attr->attr_val) {
-	m__free(attr->attr_val);
+        m__free(attr->attr_val);
     }
     if (attr->attr_xpcb) {
-	xpath_free_pcb(attr->attr_xpcb);
+        xpath_free_pcb(attr->attr_xpcb);
     }
 
     m__free(attr);
@@ -748,9 +748,9 @@ void
 *********************************************************************/
 status_t
     xml_add_attr (xml_attrs_t *attrs, 
-		  xmlns_id_t  ns_id,
-		  const xmlChar *attr_name,
-		  const xmlChar *attr_val)
+                  xmlns_id_t  ns_id,
+                  const xmlChar *attr_name,
+                  const xmlChar *attr_val)
 {
     xml_attr_t  *attr;
 
@@ -768,13 +768,13 @@ status_t
     attr->attr_name = attr->attr_dname;
     attr->attr_qname = attr->attr_dname;
     if (!attr->attr_dname) {
-	xml_free_attr(attr);
+        xml_free_attr(attr);
         return SET_ERROR(ERR_INTERNAL_MEM);
     }
 
     attr->attr_val = xml_strdup(attr_val);
     if (!attr->attr_val) {
-	xml_free_attr(attr);
+        xml_free_attr(attr);
         return SET_ERROR(ERR_INTERNAL_MEM);
     }
     attr->attr_ns = ns_id;
@@ -804,40 +804,40 @@ status_t
 *********************************************************************/
 xml_attr_t *
     xml_add_qattr (xml_attrs_t *attrs, 
-		   xmlns_id_t  ns_id,
-		   const xmlChar *attr_qname,
-		   uint32  plen,
-		   const xmlChar *attr_val,
-		   status_t  *res)
+                   xmlns_id_t  ns_id,
+                   const xmlChar *attr_qname,
+                   uint32  plen,
+                   const xmlChar *attr_val,
+                   status_t  *res)
 {
     xml_attr_t  *attr;
 
 #ifdef DEBUG
     if (!attrs || !attr_qname || !attr_val || !res) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
     attr = xml_new_attr();
     if (!attr) {
         *res = ERR_INTERNAL_MEM;
-	return NULL;
+        return NULL;
     }
     attr->attr_dname = xml_strdup(attr_qname);
     if (!attr->attr_dname) {
-	xml_free_attr(attr);
+        xml_free_attr(attr);
         *res = ERR_INTERNAL_MEM;
-	return NULL;
+        return NULL;
     }
     attr->attr_qname = attr->attr_dname;
     attr->attr_name = attr->attr_dname+plen;
 
     attr->attr_val = xml_strdup(attr_val);
     if (!attr->attr_val) {
-	xml_free_attr(attr);
+        xml_free_attr(attr);
         *res = ERR_INTERNAL_MEM;
-	return NULL;
+        return NULL;
     }
 
     attr->attr_ns = ns_id;
@@ -864,8 +864,8 @@ xml_attr_t *
 *********************************************************************/
 status_t
     xml_add_xmlns_attr (xml_attrs_t *attrs, 
-			xmlns_id_t  ns_id,
-			const xmlChar *pfix)
+                        xmlns_id_t  ns_id,
+                        const xmlChar *pfix)
 {
     xml_attr_t    *attr;
     xmlChar       *s;
@@ -887,27 +887,27 @@ status_t
     /* get the namespace URI value */
     nsval = xmlns_get_ns_name(ns_id);
     if (!nsval) {
-	xml_free_attr(attr);
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        xml_free_attr(attr);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     /* copy the namespace URI as the attr value */
     attr->attr_val = xml_strdup(nsval);
     if (!attr->attr_val) {
-	xml_free_attr(attr);
+        xml_free_attr(attr);
         return SET_ERROR(ERR_INTERNAL_MEM);
     }
 
     /* get the dname buffer length to malloc */
     len = XMLNS_LEN+1;
     if (pfix) {
-	len += (xml_strlen(pfix) + 1);
+        len += (xml_strlen(pfix) + 1);
     }
 
     /* get a name buffer */
     attr->attr_dname = m__getMem(len);
     if (!attr->attr_dname) {
-	xml_free_attr(attr);
+        xml_free_attr(attr);
         return ERR_INTERNAL_MEM;
     }
     attr->attr_qname = attr->attr_dname;
@@ -918,13 +918,13 @@ status_t
 
     /* point the name field at the prefix value if there is one */
     if (pfix) {
-	*s++ = XMLNS_SEPCH;
-	attr->attr_name = s;
-	while (*pfix) {
-	    *s++ = *pfix++;
-	}
+        *s++ = XMLNS_SEPCH;
+        attr->attr_name = s;
+        while (*pfix) {
+            *s++ = *pfix++;
+        }
     } else {
-	attr->attr_name = attr->attr_dname;
+        attr->attr_name = attr->attr_dname;
     }
     *s = 0;
 
@@ -952,8 +952,8 @@ status_t
 *********************************************************************/
 status_t
     xml_add_xmlns_attr_string (xml_attrs_t *attrs, 
-			       const xmlChar *ns,
-			       const xmlChar *pfix)
+                               const xmlChar *ns,
+                               const xmlChar *pfix)
 {
     xml_attr_t    *attr;
     xmlChar       *s;
@@ -974,20 +974,20 @@ status_t
     /* copy the namespace URI as the attr value */
     attr->attr_val = xml_strdup(ns);
     if (!attr->attr_val) {
-	xml_free_attr(attr);
+        xml_free_attr(attr);
         return SET_ERROR(ERR_INTERNAL_MEM);
     }
 
     /* get the dname buffer length to malloc */
     len = XMLNS_LEN+1;
     if (pfix) {
-	len += (xml_strlen(pfix) + 1);
+        len += (xml_strlen(pfix) + 1);
     }
 
     /* get a name buffer */
     attr->attr_dname = m__getMem(len);
     if (!attr->attr_dname) {
-	xml_free_attr(attr);
+        xml_free_attr(attr);
         return ERR_INTERNAL_MEM;
     }
     attr->attr_qname = attr->attr_dname;
@@ -998,13 +998,13 @@ status_t
 
     /* point the name field at the prefix value if there is one */
     if (pfix) {
-	*s++ = XMLNS_SEPCH;
-	attr->attr_name = s;
-	while (*pfix) {
-	    *s++ = *pfix++;
-	}
+        *s++ = XMLNS_SEPCH;
+        attr->attr_name = s;
+        while (*pfix) {
+            *s++ = *pfix++;
+        }
     } else {
-	attr->attr_name = attr->attr_dname;
+        attr->attr_name = attr->attr_dname;
     }
     *s = 0;
 
@@ -1035,9 +1035,9 @@ status_t
 *********************************************************************/
 status_t
     xml_add_inv_xmlns_attr (xml_attrs_t *attrs, 
-			    xmlns_id_t  ns_id,
-			    const xmlChar *pfix,
-			    const xmlChar *nsval)
+                            xmlns_id_t  ns_id,
+                            const xmlChar *pfix,
+                            const xmlChar *nsval)
 {
     xml_attr_t    *attr;
     xmlChar       *s;
@@ -1056,26 +1056,26 @@ status_t
     }
     
     if (!nsval) {
-	nsval = (const xmlChar *)"INVALID";
+        nsval = (const xmlChar *)"INVALID";
     }
 
     /* copy the namespace URI as the attr value */
     attr->attr_val = xml_strdup(nsval);
     if (!attr->attr_val) {
-	xml_free_attr(attr);
+        xml_free_attr(attr);
         return SET_ERROR(ERR_INTERNAL_MEM);
     }
 
     /* get the dname buffer length to malloc */
     len = XMLNS_LEN+1;
     if (pfix) {
-	len += (xml_strlen(pfix) + 1);
+        len += (xml_strlen(pfix) + 1);
     }
 
     /* get a name buffer */
     attr->attr_dname = m__getMem(len);
     if (!attr->attr_dname) {
-	xml_free_attr(attr);
+        xml_free_attr(attr);
         return ERR_INTERNAL_MEM;
     }
     attr->attr_qname = attr->attr_dname;
@@ -1086,13 +1086,13 @@ status_t
 
     /* point the name field at the prefix value if there is one */
     if (pfix) {
-	*s++ = XMLNS_SEPCH;
-	attr->attr_name = s;
-	while (*pfix) {
-	    *s++ = *pfix++;
-	}
+        *s++ = XMLNS_SEPCH;
+        attr->attr_name = s;
+        while (*pfix) {
+            *s++ = *pfix++;
+        }
     } else {
-	attr->attr_name = attr->attr_dname;
+        attr->attr_name = attr->attr_dname;
     }
     *s = 0;
 
@@ -1119,8 +1119,8 @@ xml_attr_t *
 {
 #ifdef DEBUG
     if (!attrs) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -1144,8 +1144,8 @@ xml_attr_t *
 {
 #ifdef DEBUG
     if (!node) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -1169,9 +1169,9 @@ xml_attr_t *
 {
 #ifdef DEBUG
     if (!attr) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
-    }	
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }   
 #endif
 
     return (xml_attr_t *)dlq_nextEntry(attr);
@@ -1202,8 +1202,8 @@ void
 #endif
 
     while (!dlq_empty(attrs)) {
-	attr = (xml_attr_t *)dlq_deque(attrs);
-	xml_free_attr(attr);
+        attr = (xml_attr_t *)dlq_deque(attrs);
+        xml_free_attr(attr);
     }
 
 }  /* xml_clean_attrs */
@@ -1223,13 +1223,13 @@ void
 *********************************************************************/
 xml_attr_t *
     xml_find_attr (xml_node_t *node,
-		   xmlns_id_t        nsid,
-		   const xmlChar    *attrname)
+                   xmlns_id_t        nsid,
+                   const xmlChar    *attrname)
 {
 #ifdef DEBUG
     if (!node || !attrname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -1252,29 +1252,29 @@ xml_attr_t *
 *********************************************************************/
 xml_attr_t *
     xml_find_attr_q (xml_attrs_t *attrs,
-		     xmlns_id_t        nsid,
-		     const xmlChar    *attrname)
+                     xmlns_id_t        nsid,
+                     const xmlChar    *attrname)
 {
     xml_attr_t *attr;
 
 #ifdef DEBUG
     if (!attrs || !attrname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     for (attr = (xml_attr_t *)dlq_firstEntry(attrs);
-	 attr != NULL;
-	 attr = (xml_attr_t *)dlq_nextEntry(attr)) {
-	if (nsid && attr->attr_ns) {
-	    if (nsid==attr->attr_ns && 
-		!xml_strcmp(attr->attr_name, attrname)) {
-		return attr;
-	    }
-	} else if (!xml_strcmp(attr->attr_name, attrname)) {
-	    return attr;
-	}
+         attr != NULL;
+         attr = (xml_attr_t *)dlq_nextEntry(attr)) {
+        if (nsid && attr->attr_ns) {
+            if (nsid==attr->attr_ns && 
+                !xml_strcmp(attr->attr_name, attrname)) {
+                return attr;
+            }
+        } else if (!xml_strcmp(attr->attr_name, attrname)) {
+            return attr;
+        }
     }
     return NULL;
 
@@ -1295,29 +1295,29 @@ xml_attr_t *
 *********************************************************************/
 const xml_attr_t *
     xml_find_ro_attr (const xml_node_t *node,
-		   xmlns_id_t        nsid,
-		   const xmlChar    *attrname)
+                   xmlns_id_t        nsid,
+                   const xmlChar    *attrname)
 {
     const xml_attr_t *attr;
 
 #ifdef DEBUG
     if (!node || !attrname) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
     for (attr = (const xml_attr_t *)dlq_firstEntry(&node->attrs);
-	 attr != NULL;
-	 attr = (const xml_attr_t *)dlq_nextEntry(attr)) {
-	if (nsid && attr->attr_ns) {
-	    if (nsid==attr->attr_ns && 
-		!xml_strcmp(attr->attr_name, attrname)) {
-		return attr;
-	    }
-	} else if (!xml_strcmp(attr->attr_name, attrname)) {
-	    return attr;
-	}
+         attr != NULL;
+         attr = (const xml_attr_t *)dlq_nextEntry(attr)) {
+        if (nsid && attr->attr_ns) {
+            if (nsid==attr->attr_ns && 
+                !xml_strcmp(attr->attr_name, attrname)) {
+                return attr;
+            }
+        } else if (!xml_strcmp(attr->attr_name, attrname)) {
+            return attr;
+        }
     }
     return NULL;
 
@@ -1341,12 +1341,12 @@ uint32
 #ifdef DEBUG
     if (!str) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        return 0;
     }
 #endif
 
     while (*str++) {
-	len++;
+        len++;
     }
     return len;
 
@@ -1371,28 +1371,28 @@ uint32
 *********************************************************************/
 uint32 
     xml_strlen_sp (const xmlChar *str,
-		   boolean *sp)
+                   boolean *sp)
 {
     uint32   len = 0;
 
 #ifdef DEBUG
     if (!str || !sp) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        return 0;
     }
 #endif
 
     *sp = FALSE;
     for (;;) {
-	if (!*str) {
-	    return len;
-	} else if (!*sp) {
-	    if (xml_isspace(*str)) {
-		*sp = TRUE;
-	    }
-	}
-	str++;
-	len++;
+        if (!*str) {
+            return len;
+        } else if (!*sp) {
+            if (xml_isspace(*str)) {
+                *sp = TRUE;
+            }
+        }
+        str++;
+        len++;
     }
     /*NOTREACHED*/
 
@@ -1414,20 +1414,20 @@ uint32
 *********************************************************************/
 uint32 
     xml_strcpy (xmlChar *copyTo, 
-		const xmlChar *copyFrom)
+                const xmlChar *copyFrom)
 {
     uint32  cnt;
 
 #ifdef DEBUG
     if (!copyTo || !copyFrom) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        return 0;
     }
 #endif
     
     cnt = 0;
     while ((*copyTo++ = *copyFrom++) != (xmlChar)0x0) {
-	cnt++;
+        cnt++;
     }
     return cnt;
     
@@ -1448,22 +1448,22 @@ uint32
 *********************************************************************/
 uint32
     xml_strncpy (xmlChar *copyTo, 
-		 const xmlChar *copyFrom,
-		 uint32  maxlen)
+                 const xmlChar *copyFrom,
+                 uint32  maxlen)
 {
     uint32  i;
 
 #ifdef DEBUG
     if (!copyTo || !copyFrom) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return 0;
+        return 0;
     }
 #endif
     
     for (i=0; i<maxlen; i++) {
-	if ((*copyTo++ = *copyFrom++) == (xmlChar)0x0) {
-	    return i;
-	}
+        if ((*copyTo++ = *copyFrom++) == (xmlChar)0x0) {
+            return i;
+        }
     }
 
     /* if we get here then terminate the partial string */
@@ -1492,7 +1492,7 @@ xmlChar *
 #ifdef DEBUG
     if (!copyFrom) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
@@ -1501,12 +1501,12 @@ xmlChar *
     /* get a string  buffer */
     str = (xmlChar *)m__getMem(len+1);
     if (str==NULL) {
-	return NULL;
+        return NULL;
     }
 
     /* copy the string */
     for (i=0; i<len; i++) {
-	str[i] = *copyFrom++;
+        str[i] = *copyFrom++;
     }
     str[len] = 0;
     return str;
@@ -1526,14 +1526,14 @@ xmlChar *
 *********************************************************************/
 xmlChar * 
     xml_strcat (xmlChar *appendTo,
-		const xmlChar *appendFrom)
+                const xmlChar *appendFrom)
 {
     uint32  len;
 
 #ifdef DEBUG
     if (!appendTo || !appendFrom) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
@@ -1561,15 +1561,15 @@ xmlChar *
 *********************************************************************/
 xmlChar * 
     xml_strncat (xmlChar *appendTo,
-		 const xmlChar *appendFrom,
-		 uint32 maxlen)
+                 const xmlChar *appendFrom,
+                 uint32 maxlen)
 {
     uint32  len;
 
 #ifdef DEBUG
     if (!appendTo || !appendFrom || !maxlen) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
@@ -1596,7 +1596,7 @@ xmlChar *
 *********************************************************************/
 xmlChar * 
     xml_strndup (const xmlChar *copyFrom, 
-		 uint32 maxlen)
+                 uint32 maxlen)
 {
     xmlChar *str;
     uint32  len, i;
@@ -1604,7 +1604,7 @@ xmlChar *
 #ifdef DEBUG
     if (!copyFrom) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
@@ -1613,12 +1613,12 @@ xmlChar *
     /* get a string buffer */
     str = (xmlChar *)m__getMem(len+1);
     if (str==NULL) {
-	return NULL;
+        return NULL;
     }
 
     /* copy the string */
     for (i=0; i<len; i++) {
-	str[i] = *copyFrom++;
+        str[i] = *copyFrom++;
     }
     str[len] = 0;
     return str;
@@ -1638,7 +1638,7 @@ xmlChar *
 *********************************************************************/
 char * 
     xml_ch_strndup (const char *copyFrom, 
-		    uint32 maxlen)
+                    uint32 maxlen)
 {
     char *str;
     uint32  len, i;
@@ -1646,7 +1646,7 @@ char *
 #ifdef DEBUG
     if (!copyFrom) {
         SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        return NULL;
     }
 #endif
 
@@ -1655,12 +1655,12 @@ char *
     /* get a string buffer */
     str = (char *)m__getMem(len+1);
     if (str==NULL) {
-	return NULL;
+        return NULL;
     }
 
     /* copy the string */
     for (i=0; i<len; i++) {
-	str[i] = *copyFrom++;
+        str[i] = *copyFrom++;
     }
     str[len] = 0;
     return str;
@@ -1684,7 +1684,7 @@ char *
 *********************************************************************/
 int 
     xml_strcmp (const xmlChar *s1, 
-		const xmlChar *s2)
+                const xmlChar *s2)
 {
 #ifdef DEBUG
     if (!s1 || !s2) {
@@ -1724,8 +1724,8 @@ int
 *********************************************************************/
 int 
     xml_strncmp (const xmlChar *s1, 
-		 const xmlChar *s2,
-		 uint32 maxlen)
+                 const xmlChar *s2,
+                 uint32 maxlen)
 {
     uint32  i;
 
@@ -1790,17 +1790,17 @@ boolean
 {
 #ifdef DEBUG
     if (!str) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return TRUE;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return TRUE;
     }
 #endif
 
     while (*str) {
-	if (xml_isspace(*str)) {
-	    str++;
-	} else {
-	    return FALSE;
-	}
+        if (xml_isspace(*str)) {
+            str++;
+        } else {
+            return FALSE;
+        }
     }
     return TRUE;
 
@@ -1830,7 +1830,7 @@ boolean
 *********************************************************************/
 int 
     xml_strcmp_nosp (const xmlChar *s1, 
-		     const xmlChar *s2)
+                     const xmlChar *s2)
 {
 #ifdef DEBUG
     if (!s1 || !s2) {
@@ -1841,10 +1841,10 @@ int
 
     /* skip starting whitespace */
     while (*s1 && xml_isspace(*s1)) {
-	s1++;
+        s1++;
     }
     while (*s2 && xml_isspace(*s2)) {
-	s2++;
+        s2++;
     }
 
     /* use the first string as the master, the 2nd must track
@@ -1853,7 +1853,7 @@ int
      */
     while (*s1 && *s2) {
 
-	/* both strings point at non whitespace chars */
+        /* both strings point at non whitespace chars */
         if (*s1 < *s2) {
             return -1;
         } else if (*s1 > *s2) {
@@ -1862,26 +1862,26 @@ int
             return 0;
         }
 
-	/* both strings point at the same non-whitespace char */
+        /* both strings point at the same non-whitespace char */
         s1++;
         s2++;
-	if (xml_isspace(*s1) && xml_isspace(*s2)) {
-	    /* both strings point at some WSP ch, resynch non-WSP */
-	    while (*s1 && xml_isspace(*s1)) {
-		s1++;
-	    }
-	    while (*s2 && xml_isspace(*s2)) {
-		s2++;
-	    }
-	}
+        if (xml_isspace(*s1) && xml_isspace(*s2)) {
+            /* both strings point at some WSP ch, resynch non-WSP */
+            while (*s1 && xml_isspace(*s1)) {
+                s1++;
+            }
+            while (*s2 && xml_isspace(*s2)) {
+                s2++;
+            }
+        }
     }
 
     if (*s1 == *s2) {
-	return 0;
+        return 0;
     } else if (*s1 < *s2) {
-	return 1;
+        return 1;
     } else {
-	return -1;
+        return -1;
     }
 
 }  /* xml_strcmp_nosp */
@@ -1911,8 +1911,8 @@ xmlChar *
 
 #ifdef DEBUG
     if (!str) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
@@ -1922,35 +1922,35 @@ xmlChar *
     newstart = NULL;
 
     if (len) {
-	newstart = str;
-	endstr = str + len - 1;
-	while (endstr >= str && xml_isspace(*endstr)) {
-	    endstr--;
-	}
-	if (endstr < str) {
-	    allwhitespace = TRUE;
-	} else {
-	    newstart = str;
-	    while (xml_isspace(*newstart)) {
-		newstart++;
-	    }
-	}
+        newstart = str;
+        endstr = str + len - 1;
+        while (endstr >= str && xml_isspace(*endstr)) {
+            endstr--;
+        }
+        if (endstr < str) {
+            allwhitespace = TRUE;
+        } else {
+            newstart = str;
+            while (xml_isspace(*newstart)) {
+                newstart++;
+            }
+        }
 
-	if (!allwhitespace) {
-	    newlen = (uint32)(endstr - newstart + 1);
-	}
+        if (!allwhitespace) {
+            newlen = (uint32)(endstr - newstart + 1);
+        }
     }
 
     newstr = (xmlChar *)m__getMem(newlen+1);
     if (!newstr) {
-	SET_ERROR(ERR_INTERNAL_MEM);
-	return NULL;
+        SET_ERROR(ERR_INTERNAL_MEM);
+        return NULL;
     }
 
     if (len == newlen) {
-	xml_strcpy(newstr, str);
+        xml_strcpy(newstr, str);
     } else {
-	xml_strncpy(newstr, newstart, newlen);
+        xml_strncpy(newstr, newstart, newlen);
     }
 
     return newstr;
@@ -1972,30 +1972,30 @@ xmlChar *
 *********************************************************************/
 xmlChar
     xml_convert_char_entity (const xmlChar *str, 
-			     uint32 *used)
+                             uint32 *used)
 {
     xmlChar buff[MAX_CHAR_ENT];
     uint32 i;
 
 #ifdef DEBUG
     if (!str || !used) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return (xmlChar)' ';   /* error -- return blank */
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return (xmlChar)' ';   /* error -- return blank */
     }
 #endif
 
     /* make sure the start is okay */
     if (*str != '&') {
-	*used = 1;
-	return *str;
+        *used = 1;
+        return *str;
     } else {
-	str++;
+        str++;
     }
 
     /* get the char entity name */
     i = 0;
     while (*str && (*str != ';') && (i<MAX_CHAR_ENT)) {
-	buff[i++] = *str++;
+        buff[i++] = *str++;
     }
     buff[i] = 0;
     *used = i+2;
@@ -2003,10 +2003,10 @@ xmlChar
     /* look up the name in the conversion table */
     i = 0;
     while (chcvt[i].chstr) {
-	if (!xml_strcmp(chcvt[i].chstr, buff)) {
-	    return chcvt[i].ch;
-	}
-	i++;
+        if (!xml_strcmp(chcvt[i].chstr, buff)) {
+            return chcvt[i].ch;
+        }
+        i++;
     }
     
     /* not found */
@@ -2036,17 +2036,17 @@ xmlChar
 *********************************************************************/
 status_t
     xml_check_ns (xmlTextReaderPtr reader,
-		  const xmlChar   *elname,
-		  xmlns_id_t       *id,
-		  uint32           *pfix_len,
-		  const xmlChar   **badns)
+                  const xmlChar   *elname,
+                  xmlns_id_t       *id,
+                  uint32           *pfix_len,
+                  const xmlChar   **badns)
 {
     const xmlChar *str;
     xmlns_t  *ns;
 
 #ifdef DEBUG
     if (!reader || !elname || !id || !pfix_len || !badns) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -2071,8 +2071,8 @@ status_t
         if (ns) {
             *id = ns->ns_id;
         } else {
-	    *id = xmlns_inv_id();
-	    *badns = str;
+            *id = xmlns_inv_id();
+            *badns = str;
             return ERR_NCX_UNKNOWN_NS;
         }
     }  /* else treat as no namespace, no error */
@@ -2098,35 +2098,35 @@ status_t
 *********************************************************************/
 void
     xml_check_qname_content (xmlTextReaderPtr reader,
-			     xml_node_t      *node)
+                             xml_node_t      *node)
 {
     xmlChar *str, *ns;
 
     str = node->simfree;
     if (!str && node->simval) {
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
 
     /* find the first colon char */
     while (*str && *str != ':') {
-	str++;
+        str++;
     }
 
     if (*str == ':') {
-	*str = 0;
-	ns = xmlTextReaderLookupNamespace(reader, node->simfree);
-	if (ns) {
-	    node->contentnsid = xmlns_find_ns_by_name(ns);
-	    xmlFree(ns);
-	}
-	*str = ':';
+        *str = 0;
+        ns = xmlTextReaderLookupNamespace(reader, node->simfree);
+        if (ns) {
+            node->contentnsid = xmlns_find_ns_by_name(ns);
+            xmlFree(ns);
+        }
+        *str = ':';
     } else {
-	ns = xmlTextReaderLookupNamespace(reader, NULL);
-	if (ns) {
-	    node->contentnsid = xmlns_find_ns_by_name(ns);
-	    xmlFree(ns);
-	}
+        ns = xmlTextReaderLookupNamespace(reader, NULL);
+        if (ns) {
+            node->contentnsid = xmlns_find_ns_by_name(ns);
+            xmlFree(ns);
+        }
     }
 
 }  /* xml_check_qname_content */
@@ -2153,38 +2153,38 @@ void
 *********************************************************************/
 status_t
     xml_get_namespace_id (xmlTextReaderPtr reader,
-			  const xmlChar *prefix,
-			  uint32 prefixlen,
-			  xmlns_id_t  *retnsid)
+                          const xmlChar *prefix,
+                          uint32 prefixlen,
+                          xmlns_id_t  *retnsid)
 {
     xmlChar    *str, *ns;
 
 #ifdef DEBUG
     if (!reader || !retnsid) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     *retnsid = 0;
 
     if (prefix && prefixlen) {
-	str = xml_strndup(prefix, prefixlen);
-	if (!str) {
-	    return ERR_INTERNAL_MEM;
-	}
-	ns = xmlTextReaderLookupNamespace(reader, str);
-	if (ns) {
-	    *retnsid = xmlns_find_ns_by_name(ns);
-	    xmlFree(ns);
-	}
-	m__free(str);
+        str = xml_strndup(prefix, prefixlen);
+        if (!str) {
+            return ERR_INTERNAL_MEM;
+        }
+        ns = xmlTextReaderLookupNamespace(reader, str);
+        if (ns) {
+            *retnsid = xmlns_find_ns_by_name(ns);
+            xmlFree(ns);
+        }
+        m__free(str);
     } else {
-	ns = xmlTextReaderLookupNamespace(reader, NULL);
-	if (ns) {
-	    *retnsid = xmlns_find_ns_by_name(ns);
+        ns = xmlTextReaderLookupNamespace(reader, NULL);
+        if (ns) {
+            *retnsid = xmlns_find_ns_by_name(ns);
 
-	    xmlFree(ns);
-	}
+            xmlFree(ns);
+        }
     }
 
     if (*retnsid) {

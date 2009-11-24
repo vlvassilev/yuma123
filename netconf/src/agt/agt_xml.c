@@ -87,15 +87,15 @@ date         init     comment
 
 
 /********************************************************************
-*								    *
-*			     T Y P E S				    *
-*								    *
+*                                                                   *
+*                            T Y P E S                              *
+*                                                                   *
 *********************************************************************/
 
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -127,11 +127,11 @@ date         init     comment
 *********************************************************************/
 static status_t
     get_all_attrs (ses_cb_t *scb,
-		   xml_node_t *errnode,
-		   xml_attrs_t *attrs,
-		   ncx_layer_t layer,
-		   xml_msg_hdr_t *msghdr,
-		   boolean nserr)
+                   xml_node_t *errnode,
+                   xml_attrs_t *attrs,
+                   ncx_layer_t layer,
+                   xml_msg_hdr_t *msghdr,
+                   boolean nserr)
 {
     xmlChar        *value;
     const xmlChar  *badns, *name;
@@ -147,7 +147,7 @@ static status_t
     /* check the attribute count first */
     cnt = xmlTextReaderAttributeCount(scb->reader);
     if (cnt==0) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     name = NULL;
@@ -156,177 +156,177 @@ static status_t
 
     /* move through the list of attributes */
     for (i=0, done=FALSE; i<cnt && !done; i++) {
-	res = NO_ERR;
-	name = NULL;
-	value = NULL;
-	badns = NULL;
-	plen = 0;
-	nsid = 0;
+        res = NO_ERR;
+        name = NULL;
+        value = NULL;
+        badns = NULL;
+        plen = 0;
+        nsid = 0;
 
-	/* get the next attribute */
-	if (i==0) {
-	    ret = xmlTextReaderMoveToFirstAttribute(scb->reader);
-	} else {
-	    ret = xmlTextReaderMoveToNextAttribute(scb->reader);
-	}
-	if (ret != 1) {
-	    res = ERR_XML_READER_INTERNAL;
-	    done = TRUE;
-	} else {
-	    /* get the attribute name */
-	    name = xmlTextReaderConstName(scb->reader);
-	    if (!name) {
-		res = ERR_XML_READER_NULLNAME;
-	    } else {
-		res = xml_check_ns(scb->reader, 
-				   name, 
-				   &nsid, 
-				   &plen, 
-				   &badns);
-		if (!nserr && res != NO_ERR) {
-		    /* mask invalid namespace as requested */
-		    nsid = xmlns_inv_id();
-		    plen = 0;
-		    res = NO_ERR;
-		}
+        /* get the next attribute */
+        if (i==0) {
+            ret = xmlTextReaderMoveToFirstAttribute(scb->reader);
+        } else {
+            ret = xmlTextReaderMoveToNextAttribute(scb->reader);
+        }
+        if (ret != 1) {
+            res = ERR_XML_READER_INTERNAL;
+            done = TRUE;
+        } else {
+            /* get the attribute name */
+            name = xmlTextReaderConstName(scb->reader);
+            if (!name) {
+                res = ERR_XML_READER_NULLNAME;
+            } else {
+                res = xml_check_ns(scb->reader, 
+                                   name, 
+                                   &nsid, 
+                                   &plen, 
+                                   &badns);
+                if (!nserr && res != NO_ERR) {
+                    /* mask invalid namespace as requested */
+                    nsid = xmlns_inv_id();
+                    plen = 0;
+                    res = NO_ERR;
+                }
 
-		/* get the attribute value even if a NS error */
-		value = xmlTextReaderValue(scb->reader);
-		if (!value) {
-		    res = ERR_XML_READER_NULLVAL;
-		} else {
-		    /* save the values as received, may be QName 
-		     * only error that can occur is a malloc fail
-		     */
-		    attr = xml_add_qattr(attrs, 
-					 nsid, 
-					 name, 
-					 plen, 
-					 value, 
-					 &res);
-		    if (!attr) {
-			res = ERR_INTERNAL_MEM;
-		    } else {
-			/* special hack: do not know which
-			 * attributes within an XML node
-			 * are tagged as XPath strings at this point
-			 * To save resources, only the 'select' and
-			 * 'key' attributes are supported at this time.
-			 */
-			if (!xml_strcmp(&name[plen], NCX_EL_SELECT)) {
-			    attr->attr_xpcb = xpath_new_pcb(value);
-			    if (!attr->attr_xpcb) {
-				res = ERR_INTERNAL_MEM;
-			    } else {
-				/* do a first pass parsing to resolve all
-				 * the prefixes and check well-formed XPath
-				 */
-				result = xpath1_eval_xmlexpr
-				    (scb->reader,
-				     attr->attr_xpcb,
-				     NULL,
-				     NULL,
-				     FALSE,
-				     FALSE,
-				     &res);
-				if (result) {
-				    xpath_free_result(result);
-				}
-				if (res != NO_ERR) {
-				    xpatherror = TRUE;
-				}
-			    }
-			} else if (!xml_strcmp(&name[plen], NCX_EL_KEY)) {
-			    attr->attr_xpcb = xpath_new_pcb(value);
-			    if (!attr->attr_xpcb) {
-				res = ERR_INTERNAL_MEM;
-			    } else {
-				res = xpath_yang_validate_xmlkey
-				    (scb->reader,
-				     attr->attr_xpcb,
-				     NULL,
-				     FALSE);
-				if (res != NO_ERR) {
-				    xpatherror = TRUE;
-				}
-			    }
-			}
-		    }
-		}
-	    }
-	}
+                /* get the attribute value even if a NS error */
+                value = xmlTextReaderValue(scb->reader);
+                if (!value) {
+                    res = ERR_XML_READER_NULLVAL;
+                } else {
+                    /* save the values as received, may be QName 
+                     * only error that can occur is a malloc fail
+                     */
+                    attr = xml_add_qattr(attrs, 
+                                         nsid, 
+                                         name, 
+                                         plen, 
+                                         value, 
+                                         &res);
+                    if (!attr) {
+                        res = ERR_INTERNAL_MEM;
+                    } else {
+                        /* special hack: do not know which
+                         * attributes within an XML node
+                         * are tagged as XPath strings at this point
+                         * To save resources, only the 'select' and
+                         * 'key' attributes are supported at this time.
+                         */
+                        if (!xml_strcmp(&name[plen], NCX_EL_SELECT)) {
+                            attr->attr_xpcb = xpath_new_pcb(value);
+                            if (!attr->attr_xpcb) {
+                                res = ERR_INTERNAL_MEM;
+                            } else {
+                                /* do a first pass parsing to resolve all
+                                 * the prefixes and check well-formed XPath
+                                 */
+                                result = xpath1_eval_xmlexpr
+                                    (scb->reader,
+                                     attr->attr_xpcb,
+                                     NULL,
+                                     NULL,
+                                     FALSE,
+                                     FALSE,
+                                     &res);
+                                if (result) {
+                                    xpath_free_result(result);
+                                }
+                                if (res != NO_ERR) {
+                                    xpatherror = TRUE;
+                                }
+                            }
+                        } else if (!xml_strcmp(&name[plen], NCX_EL_KEY)) {
+                            attr->attr_xpcb = xpath_new_pcb(value);
+                            if (!attr->attr_xpcb) {
+                                res = ERR_INTERNAL_MEM;
+                            } else {
+                                res = xpath_yang_validate_xmlkey
+                                    (scb->reader,
+                                     attr->attr_xpcb,
+                                     NULL,
+                                     FALSE);
+                                if (res != NO_ERR) {
+                                    xpatherror = TRUE;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
-	/* check the result */
-	if (res != NO_ERR && msghdr) {
+        /* check the result */
+        if (res != NO_ERR && msghdr) {
 
-	    /* need a dummy attribute struct to report this error */
-	    memset(&errattr, 0x0, sizeof(xml_attr_t));
-	    errattr.attr_ns = 0;
-	    errattr.attr_qname = name;
-	    errattr.attr_name = name;
-	    errattr.attr_val = value;
+            /* need a dummy attribute struct to report this error */
+            memset(&errattr, 0x0, sizeof(xml_attr_t));
+            errattr.attr_ns = 0;
+            errattr.attr_qname = name;
+            errattr.attr_name = name;
+            errattr.attr_val = value;
 
-	    /* save the error info */
-	    if (xpatherror) {
-		res = ERR_NCX_INVALID_XPATH_EXPR;
+            /* save the error info */
+            if (xpatherror) {
+                res = ERR_NCX_INVALID_XPATH_EXPR;
 
-		/* generate an invalid-value error */
-		agt_record_attr_error(scb, 
-				      msghdr, 
-				      layer, 
-				      res,
-				      &errattr, 
-				      errnode, 
-				      NULL, 
-				      NCX_NT_NONE, 
-				      NULL);
-	    } else if (res==ERR_XML_READER_NULLVAL ||
-		res==ERR_NCX_UNKNOWN_NAMESPACE) {
-		/* generate a bad namespace error */
-		agt_record_attr_error(scb, 
-				      msghdr, 
-				      layer, 
-				      res, 
-				      &errattr, 
-				      errnode, 
-				      badns,
-				      NCX_NT_NONE,
-				      NULL);
-	    } else {
-		/* generate a generic error */
-		agt_record_attr_error(scb, 
-				      msghdr, 
-				      layer, 
-				      res, 
-				      &errattr,
-				      errnode,
-				      NULL,
-				      NCX_NT_NONE, 
-				      NULL);
-	    }
-	}
+                /* generate an invalid-value error */
+                agt_record_attr_error(scb, 
+                                      msghdr, 
+                                      layer, 
+                                      res,
+                                      &errattr, 
+                                      errnode, 
+                                      NULL, 
+                                      NCX_NT_NONE, 
+                                      NULL);
+            } else if (res==ERR_XML_READER_NULLVAL ||
+                res==ERR_NCX_UNKNOWN_NAMESPACE) {
+                /* generate a bad namespace error */
+                agt_record_attr_error(scb, 
+                                      msghdr, 
+                                      layer, 
+                                      res, 
+                                      &errattr, 
+                                      errnode, 
+                                      badns,
+                                      NCX_NT_NONE,
+                                      NULL);
+            } else {
+                /* generate a generic error */
+                agt_record_attr_error(scb, 
+                                      msghdr, 
+                                      layer, 
+                                      res, 
+                                      &errattr,
+                                      errnode,
+                                      NULL,
+                                      NCX_NT_NONE, 
+                                      NULL);
+            }
+        }
 
-	if (value) {
-	    xmlFree(value);
-	}
+        if (value) {
+            xmlFree(value);
+        }
     }
 
     /* reset the current node to where we started */
     ret = xmlTextReaderMoveToElement(scb->reader);
     if (ret != 1) {
-	if (msghdr) {
-	    res = ERR_XML_READER_INTERNAL;
-	    agt_record_error(scb, 
-			     msghdr, 
-			     layer, 
-			     res, 
-			     errnode, 
-			     NCX_NT_STRING, 
-			     name, 
-			     NCX_NT_NONE, 
-			     NULL);
-	}
-    }	
+        if (msghdr) {
+            res = ERR_XML_READER_INTERNAL;
+            agt_record_error(scb, 
+                             msghdr, 
+                             layer, 
+                             res, 
+                             errnode, 
+                             NCX_NT_STRING, 
+                             name, 
+                             NCX_NT_NONE, 
+                             NULL);
+        }
+    }   
 
     return res;
 
@@ -353,13 +353,13 @@ static status_t
 *********************************************************************/
 static status_t 
     consume_node (ses_cb_t *scb,
-		  boolean advance,
-		  xml_node_t *node,
-		  ncx_layer_t layer,
-		  xml_msg_hdr_t *msghdr,
-		  boolean eoferr,
-		  boolean nserr,
-		  boolean clean)
+                  boolean advance,
+                  xml_node_t *node,
+                  ncx_layer_t layer,
+                  xml_msg_hdr_t *msghdr,
+                  boolean eoferr,
+                  boolean nserr,
+                  boolean clean)
 {
     int             ret, nodetyp;
     const xmlChar  *str, *badns;
@@ -376,68 +376,68 @@ static status_t
 
     /* loop past any unused xmlTextReader node types */
     while (!done) {
-	/* check if a new node should be read */
-	if (advance) {
-	    /* advance the node pointer */
-	    ret = xmlTextReaderRead(scb->reader);
-	    if (ret != 1) {
-		/* do not treat this as an internal error */
-		res = ERR_XML_READER_EOF;
-		if (msghdr && eoferr) {
-		    /* generate an operation-failed error */
-		    agt_record_error(scb, 
-				     msghdr, 
-				     layer, 
-				     res, 
-				     NULL, 
-				     NCX_NT_NONE,
-				     NULL, 
-				     NCX_NT_NONE,
-				     NULL);
-		}
-		return res;
-	    }
-	}
+        /* check if a new node should be read */
+        if (advance) {
+            /* advance the node pointer */
+            ret = xmlTextReaderRead(scb->reader);
+            if (ret != 1) {
+                /* do not treat this as an internal error */
+                res = ERR_XML_READER_EOF;
+                if (msghdr && eoferr) {
+                    /* generate an operation-failed error */
+                    agt_record_error(scb, 
+                                     msghdr, 
+                                     layer, 
+                                     res, 
+                                     NULL, 
+                                     NCX_NT_NONE,
+                                     NULL, 
+                                     NCX_NT_NONE,
+                                     NULL);
+                }
+                return res;
+            }
+        }
 
-	/* get the node depth to match the end node correctly */
-	node->depth = xmlTextReaderDepth(scb->reader);
-	if (node->depth == -1) {
-	    /* this never actaully happens */
-	    SET_ERROR(ERR_XML_READER_INTERNAL);
-	    node->depth = 0;
-	}
+        /* get the node depth to match the end node correctly */
+        node->depth = xmlTextReaderDepth(scb->reader);
+        if (node->depth == -1) {
+            /* this never actaully happens */
+            SET_ERROR(ERR_XML_READER_INTERNAL);
+            node->depth = 0;
+        }
 
-	/* get the internal nodetype, check it and convert it */
-	nodetyp = xmlTextReaderNodeType(scb->reader);
-	switch (nodetyp) {
-	case XML_ELEMENT_NODE:
-	    /* classify element as empty or start */
-	    if (xmlTextReaderIsEmptyElement(scb->reader)) {
-		node->nodetyp = XML_NT_EMPTY;
-	    } else {
-		node->nodetyp = XML_NT_START;
-	    }
-	    done = TRUE;
-	    break;
-	case XML_ELEMENT_DECL:
-	    node->nodetyp = XML_NT_END;
-	    done = TRUE;
-	    break;
-	case XML_TEXT_NODE:
+        /* get the internal nodetype, check it and convert it */
+        nodetyp = xmlTextReaderNodeType(scb->reader);
+        switch (nodetyp) {
+        case XML_ELEMENT_NODE:
+            /* classify element as empty or start */
+            if (xmlTextReaderIsEmptyElement(scb->reader)) {
+                node->nodetyp = XML_NT_EMPTY;
+            } else {
+                node->nodetyp = XML_NT_START;
+            }
+            done = TRUE;
+            break;
+        case XML_ELEMENT_DECL:
+            node->nodetyp = XML_NT_END;
+            done = TRUE;
+            break;
+        case XML_TEXT_NODE:
      /* case XML_DTD_NODE: */
-	    node->nodetyp = XML_NT_STRING;
-	    done = TRUE;
-	    break;
-	default:
-	    /* unused node type -- keep trying */
+            node->nodetyp = XML_NT_STRING;
+            done = TRUE;
+            break;
+        default:
+            /* unused node type -- keep trying */
 #ifdef AGT_XML_DEBUG
-	    if (LOGDEBUG3) {
-		log_debug3("\nxml_consume_node: skip unused node (%s)",
-			   xml_get_node_name(nodetyp));
-	    }
+            if (LOGDEBUG3) {
+                log_debug3("\nxml_consume_node: skip unused node (%s)",
+                           xml_get_node_name(nodetyp));
+            }
 #endif
-	    advance = TRUE;
-	}
+            advance = TRUE;
+        }
     }
 
     /* finish the node, depending on its type */
@@ -445,110 +445,110 @@ static status_t
     case XML_NT_START:
     case XML_NT_END:
     case XML_NT_EMPTY:
-	/* get the element QName */
-	str = xmlTextReaderConstName(scb->reader);
-	if (!str) {
-	    /* this never really happens */
-	    SET_ERROR(ERR_XML_READER_NULLNAME);
-	    str = (const xmlChar *)"null";
-	}
-	node->qname = (const xmlChar *)str;
+        /* get the element QName */
+        str = xmlTextReaderConstName(scb->reader);
+        if (!str) {
+            /* this never really happens */
+            SET_ERROR(ERR_XML_READER_NULLNAME);
+            str = (const xmlChar *)"null";
+        }
+        node->qname = (const xmlChar *)str;
 
-	/* check for namespace prefix in the name 
-	 * only error returned is unknown-namespace 
-	 */
-	len = 0;
-	res = xml_check_ns(scb->reader, str, &node->nsid, &len, &badns);
-	if (!nserr && res != NO_ERR) {
-	    node->nsid = xmlns_inv_id();
-	    len = 0;
-	    res = NO_ERR;
-	}
-	    
-	/* set the element name to the char after the prefix, if any */
-	node->elname = (const xmlChar *)(str+len);
-	
-	/* get all the attributes, except for XML_NT_END */
-	if (res == NO_ERR && node->nodetyp != XML_NT_END) {
-	    res2 = get_all_attrs(scb, 
-				 node,
-				 &node->attrs, 
-				 layer, 
-				 msghdr, 
-				 nserr);
-	}
+        /* check for namespace prefix in the name 
+         * only error returned is unknown-namespace 
+         */
+        len = 0;
+        res = xml_check_ns(scb->reader, str, &node->nsid, &len, &badns);
+        if (!nserr && res != NO_ERR) {
+            node->nsid = xmlns_inv_id();
+            len = 0;
+            res = NO_ERR;
+        }
+            
+        /* set the element name to the char after the prefix, if any */
+        node->elname = (const xmlChar *)(str+len);
+        
+        /* get all the attributes, except for XML_NT_END */
+        if (res == NO_ERR && node->nodetyp != XML_NT_END) {
+            res2 = get_all_attrs(scb, 
+                                 node,
+                                 &node->attrs, 
+                                 layer, 
+                                 msghdr, 
+                                 nserr);
+        }
 
-	/* Set the node module */
-	if (res == NO_ERR) {
-	    if (node->nsid) {
-		node->module = xmlns_get_module(node->nsid);
-	    } else {
-		/* no entry, use the default module (ncx) */
-		node->module = NCX_DEF_MODULE;
-	    }
-	}
-	break;
+        /* Set the node module */
+        if (res == NO_ERR) {
+            if (node->nsid) {
+                node->module = xmlns_get_module(node->nsid);
+            } else {
+                /* no entry, use the default module (ncx) */
+                node->module = NCX_DEF_MODULE;
+            }
+        }
+        break;
     case XML_NT_STRING:
-	/* get the text value -- this is a malloced string */
-	node->simval = NULL;
-	valstr = xmlTextReaderValue(scb->reader);
-	if (valstr) {
-	    if (clean) {
-		node->simfree = xml_copy_clean_string(valstr);
-	    } else {
-		node->simfree = xml_strdup(valstr);
-	    }
-	    if (node->simfree) {
-		node->simlen = xml_strlen(node->simfree);
-		node->simval = (const xmlChar *)node->simfree;
-	    }
+        /* get the text value -- this is a malloced string */
+        node->simval = NULL;
+        valstr = xmlTextReaderValue(scb->reader);
+        if (valstr) {
+            if (clean) {
+                node->simfree = xml_copy_clean_string(valstr);
+            } else {
+                node->simfree = xml_strdup(valstr);
+            }
+            if (node->simfree) {
+                node->simlen = xml_strlen(node->simfree);
+                node->simval = (const xmlChar *)node->simfree;
+            }
 
-	    /* see if this is a QName string; if so save the NSID */
-	    xml_check_qname_content(scb->reader, node);
+            /* see if this is a QName string; if so save the NSID */
+            xml_check_qname_content(scb->reader, node);
 
-	    xmlFree(valstr);
-	}
-	if (!node->simval) {
-	    /* prevent a NULL ptr reference */
-	    node->simval = EMPTY_STRING;
-	    node->simlen = 0;
-	    node->simfree = NULL;
-	}
-	break;
+            xmlFree(valstr);
+        }
+        if (!node->simval) {
+            /* prevent a NULL ptr reference */
+            node->simval = EMPTY_STRING;
+            node->simlen = 0;
+            node->simfree = NULL;
+        }
+        break;
     default:
-	break;
+        break;
     }
 
     if ((res != NO_ERR) && msghdr) {
-	if (badns) {
-	    /* generate an operation-failed error */
-	    agt_record_error(scb,
-			     msghdr,
-			     layer, 
-			     res, 
-			     node,
-			     NCX_NT_STRING, 
-			     badns, 
-			     NCX_NT_NONE, 
-			     NULL);
-	} else {
-	    agt_record_error(scb,
-			     msghdr,
-			     layer,
-			     res, 
-			     node,
-			     NCX_NT_NONE,
-			     NULL, 
-			     NCX_NT_NONE, 
-			     NULL);
-	}
+        if (badns) {
+            /* generate an operation-failed error */
+            agt_record_error(scb,
+                             msghdr,
+                             layer, 
+                             res, 
+                             node,
+                             NCX_NT_STRING, 
+                             badns, 
+                             NCX_NT_NONE, 
+                             NULL);
+        } else {
+            agt_record_error(scb,
+                             msghdr,
+                             layer,
+                             res, 
+                             node,
+                             NCX_NT_NONE,
+                             NULL, 
+                             NCX_NT_NONE, 
+                             NULL);
+        }
     }
 
 #ifdef AGT_XML_DEBUG
     if (LOGDEBUG4) {
-	log_debug4("\nxml_consume_node: return (%d)", 
-		   (res==NO_ERR) ? res2 : res);
-	xml_dump_node(node);
+        log_debug4("\nxml_consume_node: return (%d)", 
+                   (res==NO_ERR) ? res2 : res);
+        xml_dump_node(node);
     }
 #endif
 
@@ -624,72 +624,72 @@ static status_t
 *********************************************************************/
 status_t 
     agt_xml_consume_node (ses_cb_t *scb,
-			  xml_node_t *node,
-			  ncx_layer_t layer,
-			  xml_msg_hdr_t *msghdr)
+                          xml_node_t *node,
+                          ncx_layer_t layer,
+                          xml_msg_hdr_t *msghdr)
 {
     return consume_node(scb, 
-			TRUE, 
-			node, 
-			layer, 
-			msghdr, 
-			TRUE, 
-			TRUE, 
-			TRUE);
+                        TRUE, 
+                        node, 
+                        layer, 
+                        msghdr, 
+                        TRUE, 
+                        TRUE, 
+                        TRUE);
 
 }  /* agt_xml_consume_node */
 
 
 status_t 
     agt_xml_consume_node_noeof (ses_cb_t *scb,
-				xml_node_t *node,
-				ncx_layer_t layer,
-				xml_msg_hdr_t *msghdr)
+                                xml_node_t *node,
+                                ncx_layer_t layer,
+                                xml_msg_hdr_t *msghdr)
 {
     return consume_node(scb, 
-			TRUE, 
-			node, 
-			layer, 
-			msghdr, 
-			FALSE, 
-			TRUE, 
-			TRUE);
+                        TRUE, 
+                        node, 
+                        layer, 
+                        msghdr, 
+                        FALSE, 
+                        TRUE, 
+                        TRUE);
 
 }  /* agt_xml_consume_node_noeof */
 
 
 status_t 
     agt_xml_consume_node_nons (ses_cb_t *scb,
-			       xml_node_t *node,
-			       ncx_layer_t layer,
-			       xml_msg_hdr_t *msghdr)
+                               xml_node_t *node,
+                               ncx_layer_t layer,
+                               xml_msg_hdr_t *msghdr)
 {
     return consume_node(scb, 
-			TRUE, 
-			node, 
-			layer, 
-			msghdr, 
-			FALSE, 
-			FALSE, 
-			TRUE);
+                        TRUE, 
+                        node, 
+                        layer, 
+                        msghdr, 
+                        FALSE, 
+                        FALSE, 
+                        TRUE);
 
 }  /* agt_xml_consume_node_nons */
 
 
 status_t 
     agt_xml_consume_node_noadv (ses_cb_t *scb,
-				xml_node_t *node,
-				ncx_layer_t layer,
-				xml_msg_hdr_t *msghdr)
+                                xml_node_t *node,
+                                ncx_layer_t layer,
+                                xml_msg_hdr_t *msghdr)
 {
     return consume_node(scb, 
-			FALSE, 
-			node, 
-			layer, 
-			msghdr, 
-			TRUE, 
-			TRUE, 
-			TRUE);
+                        FALSE, 
+                        node, 
+                        layer, 
+                        msghdr, 
+                        TRUE, 
+                        TRUE, 
+                        TRUE);
 
 }  /* agt_xml_consume_node_noadv */
 
@@ -714,7 +714,7 @@ status_t
 *********************************************************************/
 status_t 
     agt_xml_skip_subtree (ses_cb_t *scb,
-			  const xml_node_t *startnode)
+                          const xml_node_t *startnode)
 {
     xml_node_t       node;
     const xmlChar   *qname, *elname, *badns;
@@ -726,7 +726,7 @@ status_t
 
 #ifdef DEBUG
     if (!scb || !startnode) {
-	return SET_ERROR(ERR_INTERNAL_PTR);
+        return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
@@ -734,96 +734,96 @@ status_t
 
     switch (startnode->nodetyp) {
     case XML_NT_START:
-	break;
+        break;
     case XML_NT_EMPTY:
-	return NO_ERR;
+        return NO_ERR;
     case XML_NT_STRING:
-	justone = TRUE;
-	break;
+        justone = TRUE;
+        break;
     case XML_NT_END:
-	return NO_ERR;
+        return NO_ERR;
     default:
-	return SET_ERROR(ERR_INTERNAL_VAL);
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
     xml_init_node(&node);
     res = agt_xml_consume_node_noadv(scb, 
-				     &node, 
-				     NCX_LAYER_NONE, 
-				     NULL);
+                                     &node, 
+                                     NCX_LAYER_NONE, 
+                                     NULL);
     if (res == NO_ERR) {
-	res = xml_endnode_match(startnode, &node);
-	if (res == NO_ERR) {
-	    xml_clean_node(&node);
-	    return NO_ERR;
-	}
+        res = xml_endnode_match(startnode, &node);
+        if (res == NO_ERR) {
+            xml_clean_node(&node);
+            return NO_ERR;
+        }
     }
 
     xml_clean_node(&node);
     if (justone) {
-	return NO_ERR;
+        return NO_ERR;
     }
 
     done = FALSE;
     while (!done) {
 
-	/* advance the node pointer */
-	ret = xmlTextReaderRead(scb->reader);
-	if (ret != 1) {
-	    /* fatal error */
-	    return SET_ERROR(ERR_XML_READER_EOF);
-	}
+        /* advance the node pointer */
+        ret = xmlTextReaderRead(scb->reader);
+        if (ret != 1) {
+            /* fatal error */
+            return SET_ERROR(ERR_XML_READER_EOF);
+        }
 
-	/* get the node depth to match the end node correctly */
-	depth = xmlTextReaderDepth(scb->reader);
-	if (depth == -1) {
-	    /* not sure if this can happen, treat as fatal error */
-	    return SET_ERROR(ERR_XML_READER_INTERNAL);
-	} else if (depth <= startnode->depth) {
-	    /* this depth override will cause errors to be ignored
+        /* get the node depth to match the end node correctly */
+        depth = xmlTextReaderDepth(scb->reader);
+        if (depth == -1) {
+            /* not sure if this can happen, treat as fatal error */
+            return SET_ERROR(ERR_XML_READER_INTERNAL);
+        } else if (depth <= startnode->depth) {
+            /* this depth override will cause errors to be ignored
              *   - wrong namespace in matching end node
              *   - unknown namespace in matching end node
-	     *   - wrong name in 'matching' end node
-	     */
-	    done = TRUE;
-	}
+             *   - wrong name in 'matching' end node
+             */
+            done = TRUE;
+        }
 
-	/* get the internal nodetype, check it and convert it */
-	nodetyp = xmlTextReaderNodeType(scb->reader);
+        /* get the internal nodetype, check it and convert it */
+        nodetyp = xmlTextReaderNodeType(scb->reader);
 
-	/* get the element QName */
-	qname = xmlTextReaderConstName(scb->reader);
-	if (qname) {
-	    /* check for namespace prefix in the name 
-	     * only error is 'unregistered namespace ID'
-	     * which doesn't matter in this case
-	     */
-	    nsid = 0;
-	    (void)xml_check_ns(scb->reader, 
-			       qname, 
-			       &nsid, 
-			       &len, 
-			       &badns);
+        /* get the element QName */
+        qname = xmlTextReaderConstName(scb->reader);
+        if (qname) {
+            /* check for namespace prefix in the name 
+             * only error is 'unregistered namespace ID'
+             * which doesn't matter in this case
+             */
+            nsid = 0;
+            (void)xml_check_ns(scb->reader, 
+                               qname, 
+                               &nsid, 
+                               &len, 
+                               &badns);
 
-	    /* set the element name to the char after the prefix */
-	    elname = qname+len;
-	} else {
-	    qname = EMPTY_STRING;
-	}
+            /* set the element name to the char after the prefix */
+            elname = qname+len;
+        } else {
+            qname = EMPTY_STRING;
+        }
 
-	/* check the normal case to see if the search is done */
-	if (depth == startnode->depth &&
-	    !xml_strcmp(qname, startnode->qname) &&
-	    nodetyp == XML_ELEMENT_DECL) {
-	    done = TRUE;
-	}
+        /* check the normal case to see if the search is done */
+        if (depth == startnode->depth &&
+            !xml_strcmp(qname, startnode->qname) &&
+            nodetyp == XML_ELEMENT_DECL) {
+            done = TRUE;
+        }
 
 #ifdef AGT_XML_DEBUG
-	if (LOGDEBUG3) {
-	    log_debug3("\nxml_skip: %s L:%d T:%s",
-		       qname, 
-		       depth, 
-		       xml_get_node_name(nodetyp));
-	}
+        if (LOGDEBUG3) {
+            log_debug3("\nxml_skip: %s L:%d T:%s",
+                       qname, 
+                       depth, 
+                       xml_get_node_name(nodetyp));
+        }
 #endif
     }
 

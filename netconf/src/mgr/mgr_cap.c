@@ -1,6 +1,6 @@
 /*  FILE: mgr_cap.c
 
-		
+                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -47,7 +47,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -72,14 +72,14 @@ void
     mgr_cap_cleanup (void)
 {
     if (mgr_caps) {
-	val_free_value(mgr_caps);
-	mgr_caps = NULL;
+        val_free_value(mgr_caps);
+        mgr_caps = NULL;
     }
 
     if (my_mgr_caps) {
-	cap_clean_caplist(my_mgr_caps);
-	m__free(my_mgr_caps);
-	my_mgr_caps = NULL;
+        cap_clean_caplist(my_mgr_caps);
+        m__free(my_mgr_caps);
+        my_mgr_caps = NULL;
     }
 
 } /* mgr_cap_cleanup */
@@ -114,43 +114,43 @@ status_t
     /* get a new cap_list */
     newmycaps = cap_new_caplist();
     if (!newmycaps) {
-	res = ERR_INTERNAL_MEM;
+        res = ERR_INTERNAL_MEM;
     }
 
     /* get a new val_value_t cap list for agent <hello> messages */
     if (res == NO_ERR) {
-	newcaps = xml_val_new_struct(NCX_EL_CAPABILITIES, nc_id);
-	if (!newcaps) {
-	    res = ERR_INTERNAL_MEM;
-	}
+        newcaps = xml_val_new_struct(NCX_EL_CAPABILITIES, nc_id);
+        if (!newcaps) {
+            res = ERR_INTERNAL_MEM;
+        }
     }
 
     /* add capability for NETCONF version 1.0 support */
     if (res == NO_ERR) {
-	res = cap_add_std(newmycaps, CAP_STDID_V1);
-	if (res == NO_ERR) {
-	    res = cap_add_stdval(newcaps, CAP_STDID_V1);
-	}
+        res = cap_add_std(newmycaps, CAP_STDID_V1);
+        if (res == NO_ERR) {
+            res = cap_add_stdval(newcaps, CAP_STDID_V1);
+        }
     }
 
     /* check the return value */
     if (res != NO_ERR) {
-	/* toss the new, put back the old */
-	cap_free_caplist(newmycaps);
-	val_free_value(newcaps);
-	my_mgr_caps = oldmycaps;
-	mgr_caps = oldcaps;
+        /* toss the new, put back the old */
+        cap_free_caplist(newmycaps);
+        val_free_value(newcaps);
+        my_mgr_caps = oldmycaps;
+        mgr_caps = oldcaps;
     } else {
-	/* toss the old, install the new */
-	if (oldmycaps) {
-	    cap_free_caplist(oldmycaps);
-	}
-	if (oldcaps) {
-	    val_free_value(oldcaps);
-	}
-	my_mgr_caps = newmycaps;
-	mgr_caps = newcaps;
-    }	
+        /* toss the old, install the new */
+        if (oldmycaps) {
+            cap_free_caplist(oldmycaps);
+        }
+        if (oldcaps) {
+            val_free_value(oldcaps);
+        }
+        my_mgr_caps = newmycaps;
+        mgr_caps = newcaps;
+    }   
 
     return res;
 

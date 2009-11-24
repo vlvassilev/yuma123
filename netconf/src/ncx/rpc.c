@@ -74,7 +74,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S			    *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 
@@ -107,8 +107,8 @@ rpc_msg_t *
 
     msg->rpc_input = val_new_value();
     if (!msg->rpc_input) {
-	rpc_free_msg(msg);
-	return NULL;
+        rpc_free_msg(msg);
+        return NULL;
     }
 
     msg->rpc_top_editop = OP_EDITOP_MERGE;
@@ -178,7 +178,7 @@ void
 
     /* clean input parameter set */
     if (msg->rpc_input) {
-	val_free_value(msg->rpc_input);
+        val_free_value(msg->rpc_input);
     }
     msg->rpc_user1 = NULL;
     msg->rpc_user2 = NULL;
@@ -189,20 +189,20 @@ void
 
     /* clean data queue */
     while (!dlq_empty(&msg->rpc_dataQ)) {
-	val = (val_value_t *)dlq_deque(&msg->rpc_dataQ);
-	val_free_value(val);
+        val = (val_value_t *)dlq_deque(&msg->rpc_dataQ);
+        val_free_value(val);
     }
 
     /* clean undo queue */
     while (!dlq_empty(&msg->rpc_undoQ)) {
-	undo = (rpc_undo_rec_t *)dlq_deque(&msg->rpc_undoQ);
-	rpc_free_undorec(undo);
+        undo = (rpc_undo_rec_t *)dlq_deque(&msg->rpc_undoQ);
+        rpc_free_undorec(undo);
     }
 
     /* clean audit queue */
     while (!dlq_empty(&msg->rpc_auditQ)) {
-	audit = (rpc_audit_rec_t *)dlq_deque(&msg->rpc_auditQ);
-	rpc_free_auditrec(audit);
+        audit = (rpc_audit_rec_t *)dlq_deque(&msg->rpc_auditQ);
+        rpc_free_auditrec(audit);
     }
 
     m__free(msg);
@@ -226,18 +226,18 @@ const xmlChar *
 {
     switch (rpctyp) {
     case RPC_TYP_OTHER:
-	return NCX_EL_OTHER;
+        return NCX_EL_OTHER;
     case RPC_TYP_CONFIG:
-	return NCX_EL_CONFIG;
+        return NCX_EL_CONFIG;
     case RPC_TYP_EXEC:
-	return NCX_EL_EXEC;
+        return NCX_EL_EXEC;
     case RPC_TYP_MONITOR:
-	return NCX_EL_MONITOR;	
+        return NCX_EL_MONITOR;  
     case RPC_TYP_DEBUG:
-	return NCX_EL_DEBUG;
+        return NCX_EL_DEBUG;
     default:
-	SET_ERROR(ERR_INTERNAL_VAL);
-	return NCX_EL_NONE;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NCX_EL_NONE;
     }
     /*NOTREACHED*/
 
@@ -284,8 +284,8 @@ void
 {
 #ifdef DEBUG
     if (!undo) {
-	SET_ERROR(ERR_INTERNAL_PTR);
-	return;
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
     }
 #endif
 
@@ -350,13 +350,13 @@ void
     undo->newnode = NULL;  /*********************/
 
     if (undo->curnode) {
-	val_free_value(undo->curnode);
+        val_free_value(undo->curnode);
     }
 
     while (!dlq_empty(&undo->extra_deleteQ)) {
-	val = (val_value_t *)
-	    dlq_deque(&undo->extra_deleteQ);
-	val_free_value(val);
+        val = (val_value_t *)
+            dlq_deque(&undo->extra_deleteQ);
+        val_free_value(val);
     }
 
     rpc_init_undorec(undo);

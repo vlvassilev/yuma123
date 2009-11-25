@@ -12,7 +12,7 @@
   </head>
   <body>
     <div class="ncdocs">
-      <img src="${tg.url('/static/images/yangtools.png')}" 
+      <img src="${tg.url('/static/images/toolslide_web.png')}" 
 	   border="0" alt="YangTools"/>
       <p>&nbsp;</p>
       <div>

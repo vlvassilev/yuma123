@@ -74,8 +74,8 @@
     <div class="ncdocs">
       <h1>Network Configuration Protocol</h1>
 
-      <img src="${tg.url('/static/images/netconf_layers.png')}" 
-	   border="2" alt="netconf layers"/>
+      <img src="${tg.url('/static/images/netconf_functional_layers_web.png')}" 
+	   border="0" alt="netconf layers"/>
       <p>&nbsp;</p>
 
       <a name="summary"/>
@@ -139,12 +139,12 @@
 	  The protocol (and sometimes even the configuration data)
 	  is conceptually partitioned, based on a 'capability'.
 	  These capabilities are given unique identifiers and
-	  advertised by the agent when the manager starts a
+	  advertised by the server when the client starts a
 	  NETCONF session.
 	</p>
 	<p>
 	  A capability can be thought of as an 'API contract'
-	  between the agent and the manager.  It represents
+	  between the server and the client.  It represents
 	  a set of functionality that cannot be diminished
 	  by other capabilities.  They can be nested
 	  (i.e., one capability required in order to
@@ -152,9 +152,9 @@
 	</p>
 	<p>
 	  There are a core set of operations
-	  that must always be supported by the agent.
-	  To use any additional optional operations, the manager
-	  should make sure that the agent supports the capability
+	  that must always be supported by the server.
+	  To use any additional optional operations, the client
+	  should make sure that the server supports the capability
 	  associated with that operation.
 	</p>
       </div>
@@ -187,11 +187,11 @@
 	  mapping are defined in 
           <a target="_blank" href="http://tools.ietf.org/html/rfc4742">RFC 4742</a>.
 	  The default TCP port assigned for this mapping is 830.
-	  A NETCONF agent implementation must listen for connections
+	  A NETCONF server implementation must listen for connections
 	  to the 'netconf' subsystem on this port.
 	</p>
 	<p>
-	  An agent may optionally support additional transport
+	  A server may optionally support additional transport
 	  mappings.  
 	  <a target="_blank" href="http://tools.ietf.org/html/rfc4743">RFC 4743</a>
 	  defines mappings to the
@@ -207,7 +207,7 @@
 	  The default TCP port for this mapping is 833.
 	  The <a target="_blank" href="http://tools.ietf.org/html/rfc2616">
 	    Hypertext Transfer Protocol (HTTP)
-	  </a> mapping is defined by BEEP.  NETCONF agents
+	  </a> mapping is defined by BEEP.  NETCONF servers
 	  must provide secure HTTP (HTTPS), by running HTTP
 	  over the 
 	  <a target="_blank" href="http://tools.ietf.org/html/rfc4346">
@@ -258,9 +258,9 @@
 	  no standard security model for NETCONF yet, but it is assumed that
 	  a session represents a particular user with some set
 	  of access rights (assigned by an administrator).
-	  The NETCONF agent is required to authenticate the entity
+	  The NETCONF server is required to authenticate the entity
 	  requesting a session before processing any requests
-	  from the manager.
+	  from the client.
 	</p>
 	<p>
 	  NETCONF messages are encoded in XML, using the UTF-8 
@@ -272,25 +272,25 @@
           ]]&gt;]]&gt;
 
 	</pre>
-	<h3>Session Initiation For Managers</h3>
+	<h3>Session Initiation For Clients</h3>
 	<p>
-	  The manager must initiate the connection
+	  The client must initiate the connection
 	  and session establishment in NETCONF.  The
 	  mandatory (and most implemented) transport is SSH,
-	  so a manager must open an SSH2 connection to the
-	  <b>netconf sub-system</b> to reach the NETCONF agent,
+	  so a client must open an SSH2 connection to the
+	  <b>netconf sub-system</b> to reach the NETCONF server,
 	  as shown in the following command line example:
 	</p>
 	<pre>
 
-	  nms1&gt; ssh -s -p830 agent.example.com netconf
+	  nms1&gt; ssh -s -p830 server.example.com netconf
 
 	</pre>
 	<p>
-	  The agent should sent its hello message right away,
-	  and the manager should do the same.  The following
+	  The server should sent its hello message right away,
+	  and the client should do the same.  The following
 	  example shows the entire &lt;hello&gt; message that
-	  a manager is required to send:
+	  a client is required to send:
 	</p>
 	<pre>
 
@@ -303,11 +303,11 @@
 
 	</pre>
 	<p>
-	  At this point the agent should be waiting for &lt;rpc&gt;
-	  requests to process.  The agent should sent an &lt;rpc-reply&gt;
-	  for each &lt;rpc&gt; request.  The manager can add as many
+	  At this point the server should be waiting for &lt;rpc&gt;
+	  requests to process.  The server should sent an &lt;rpc-reply&gt;
+	  for each &lt;rpc&gt; request.  The client can add as many
 	  XML attributes to the &lt;rpc&gt; element as desired, and the
-	  agent will return all those attributes in the &lt;rpc-reply&gt;
+	  server will return all those attributes in the &lt;rpc-reply&gt;
 	  element.  The <b>message-id</b> attribute is required by the
 	  protocol, although this is not really needed.
 	</p>
@@ -344,13 +344,13 @@
 		It is the only mandatory standard database.
 	      </p>
 	      <p>
-		Unless the agent supports the <b>:candidate</b>
-		capability, the agent must allow this database
-		to be edited directly.  Otherwise, the agent
+		Unless the server supports the <b>:candidate</b>
+		capability, the server must allow this database
+		to be edited directly.  Otherwise, the server
 		is not required to support changing this database
 		directly.  If it does support it, then the
 		<b>:writable-running</b> capability will
-		be advertised by the agent to indicate this support.
+		be advertised by the server to indicate this support.
 	      </p>
 	      <p>
 		The &lt;running/&gt; database is also used to
@@ -368,11 +368,11 @@
 	    <li><b>&lt;candidate/&gt;</b>
 	      <p>
 		This database is available if the <b>:candidate</b>
-		capability is supported by the agent.  It is a
+		capability is supported by the server.  It is a
 		global scratchpad database that is used to collect
 		edits via 1 or more &lt;edit-config&gt; operations.
-		A manager can build up a set of changes which
-		may or may not be validated by the agent,
+		A client can build up a set of changes which
+		may or may not be validated by the server,
 		until explicitly committed to the running configuration,
 		all at once.
 	      </p>
@@ -382,7 +382,7 @@
 		take effect right away within the network device.</b>
 	      </p>
 	      <p>
-		When ready, the manager can use the &lt;commit&gt;
+		When ready, the client can use the &lt;commit&gt;
 		operation to activate the changes embodied
 		in the &lt;candidate/&gt; database, and make
 		them part of the &lt;running/&gt; configuration.
@@ -402,19 +402,19 @@
 	      </p>
 	      <p>
 		Since this is a global database,
-		the manager should use the &lt;discard-changes&gt;
+		the client should use the &lt;discard-changes&gt;
 		operation to remove any unwanted changes, if
 		the &lt;commit&gt; operation is not used.
 		This will clean out the &lt;candidate/&gt; database without
 		activating any changes that it may contain, and
-		prevent the next manager using this global database
+		prevent the next client using this global database
 		from making unintended changes.
 		Care must be taken (e.g., use locks) to make sure
 		multiple sessions do not make any database edits 
 		at the same time.
 	      </p>
               <p>
-		Agent platforms which support 
+		Server platforms which support 
 		the <b>:candidate</b> capability
 		usually do not also support the <b>:writable-running</b>
 		capability, since mixing direct edits to &lt;running/&gt;
@@ -426,23 +426,23 @@
 	    <li><b>&lt;startup/&gt;</b>
 	      <p>
 		This database is available if the <b>:startup</b>
-		capability is supported by the agent.  It represents
+		capability is supported by the server.  It represents
 		the configuration to use upon the next reboot of the
 		device.
 	      </p>
 	      <p>
 		If present,
-		then the agent will not automatically save changes
+		then the server will not automatically save changes
 		to the &lt;running/&gt; database in non-volatile
 		storage.  Instead, a &lt;copy-config&gt; operation
 		is needed to overwrite the contents of the &lt;startup/&gt;
 		database with the current configuration.
 	      </p>
 	      <p>
-		If not present, then the agent will automatically
+		If not present, then the server will automatically
 		update its non-volatile storage any time the
 		running configuration is modified.  In either case,
-		the agent is required to maintain non-volatile
+		the server is required to maintain non-volatile
 		storage of the running configuration, and be able
 		to restore a running configuration after a reboot.
 	      </p>
@@ -456,10 +456,10 @@
 	<br/>
 	<h2>Protocol Operations</h2>
 	<p>
-	  Once a NETCONF session is established, the manager knows
-	  which capabilities the agent supports.  The manager then
+	  Once a NETCONF session is established, the client knows
+	  which capabilities the server supports.  The client then
 	  can send RPC method requests and receive RPC replies 
-	  from the agent.  The agent's request queue is serialized,
+	  from the server.  The server's request queue is serialized,
 	  so requests will be processed in the order received.
 	</p>
 	<p>
@@ -471,8 +471,8 @@
 	<p>
 	  The following table summarizes the set of protocol
 	  operations, and shows which capabilities must be
-	  supported by the agent (see next section) in order
-	  for a manager to use the operation.
+	  supported by the server (see next section) in order
+	  for a client to use the operation.
 	</p>
 	<table align="center" border="1" width="90%">
 	  <tr>
@@ -562,9 +562,9 @@
 	</table>
 	<h3>Editing the Configuration</h3>
 	<p>
-	  Before using the NETCONF edit operations, the manager
+	  Before using the NETCONF edit operations, the client
 	  must determine which database to use as the target
-	  by examining the capabilities sent by the agent
+	  by examining the capabilities sent by the server
 	  during session establishment.
 	</p>
 	<pre>
@@ -576,12 +576,12 @@
 	  else if ':url' capability supported:
 	     target = &lt;url&gt;file://path/to/file&lt;/url&gt;
 	  else:
-	     target = None     #  Agent is non-complaint
+	     target = None     #  Server is non-complaint
 
 	</pre>
 	<p>
 	  Once the target of the edit operation is determined,
-	  the manager needs to determine the 'activate' operation
+	  the client needs to determine the 'activate' operation
 	  that will be needed for the configuration changes to 
 	  take effect.
 	</p>
@@ -606,7 +606,7 @@
 	</pre>
 	<p>
 	  After the 'target' and 'activate function' are determined,
-	  the manager needs to determine how the activated
+	  the client needs to determine how the activated
 	  configuration changes are saved in non-volatile storage.
 	</p>
 	<pre>
@@ -649,7 +649,7 @@
             &lt;/lock&gt;
           &lt;/rpc&gt;
 
-          # agent returns &lt;ok/&gt; status
+          # server returns &lt;ok/&gt; status
 
           &lt;rpc message-id="102" 
               xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -658,7 +658,7 @@
             &lt;/lock&gt;
           &lt;/rpc&gt;
 
-          # agent returns &lt;ok/&gt; status
+          # server returns &lt;ok/&gt; status
 
           &lt;rpc message-id="103" 
               xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -679,14 +679,14 @@
             &lt;/edit-config&gt;
           &lt;/rpc&gt;
 
-          # agent returns &lt;ok/&gt; status
+          # server returns &lt;ok/&gt; status
 
           &lt;rpc message-id="104" 
               xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
             &lt;commit/&gt;
           &lt;/rpc&gt;
 
-          # agent returns &lt;ok/&gt; status
+          # server returns &lt;ok/&gt; status
 
           &lt;rpc message-id="105" 
               xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -695,7 +695,7 @@
             &lt;/unlock&gt;
           &lt;/rpc&gt;
 
-          # agent returns &lt;ok/&gt; status
+          # server returns &lt;ok/&gt; status
 
           &lt;rpc message-id="106" 
               xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -704,7 +704,7 @@
             &lt;/unlock&gt;
           &lt;/rpc&gt;
 
-          # agent returns &lt;ok/&gt; status
+          # server returns &lt;ok/&gt; status
 
 	</pre>
 
@@ -738,7 +738,7 @@
             &lt;/lock&gt;
           &lt;/rpc&gt;
 
-          # agent returns &lt;ok/&gt; status
+          # server returns &lt;ok/&gt; status
 
           &lt;rpc message-id="108" 
               xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -747,7 +747,7 @@
             &lt;/lock&gt;
           &lt;/rpc&gt;
 
-          # agent returns &lt;ok/&gt; status
+          # server returns &lt;ok/&gt; status
 
           &lt;rpc message-id="109" 
               xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -768,7 +768,7 @@
             &lt;/edit-config&gt;
           &lt;/rpc&gt;
 
-          # agent returns &lt;ok/&gt; status
+          # server returns &lt;ok/&gt; status
 
           &lt;rpc message-id="110" 
               xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -778,7 +778,7 @@
             &lt;/copy-config&gt;
           &lt;/rpc&gt;
 
-          # agent returns &lt;ok/&gt; status
+          # server returns &lt;ok/&gt; status
 
           &lt;rpc message-id="111" 
               xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -787,7 +787,7 @@
             &lt;/unlock&gt;
           &lt;/rpc&gt;
 
-          # agent returns &lt;ok/&gt; status
+          # server returns &lt;ok/&gt; status
 
           &lt;rpc message-id="112" 
               xmlns="urn:ietf:params:xml:ns:netconf:base:1.0"&gt;
@@ -796,7 +796,7 @@
             &lt;/unlock&gt;
           &lt;/rpc&gt;
 
-          # agent returns &lt;ok/&gt; status
+          # server returns &lt;ok/&gt; status
 
 	</pre>
       </div>
@@ -809,11 +809,11 @@
 	  Many features and mechanisms within the NETCONF protocol
 	  do not apply to every use case or every device.  Optional
 	  mechanisms are given URI handles, which are sent by
-	  the agent during the NETCONF &lt;hello&gt; message exchange,
+	  the server during the NETCONF &lt;hello&gt; message exchange,
 	  during session initialization.
 	</p>
 	<p>
-	  For example, if an agent allows the running configuration
+	  For example, if a server allows the running configuration
 	  to be edited directly, then it will include the following
 	  &lt;capability&gt; element in its &lt;hello&gt; message:
 	</p>
@@ -840,9 +840,9 @@
 	  The NETCONF protocol itself has a capability URI assignment,
 	  which is used in the &lt;hello&gt; message exchange to
 	  ensure both peers are using the same version of the protocol.
-	  The manager and agent each send the following capability
-	  URI during this exchange.  For the manager, this is the
-	  only capability sent.  The agent will also include
+	  The client and server each send the following capability
+	  URI during this exchange.  For the client, this is the
+	  only capability sent.  The server will also include
 	  &lt;capability&gt; elements for each optional capability
 	  supported, if any.
 	</p>
@@ -865,34 +865,34 @@
 	<h3>Standard Capabilities</h3>
 	<p>
 	  The following table summarizes the standard capabilities
-	  which an agent may choose to support.
+	  which a server may choose to support.
 	</p>
 	<ul>
 	  <li><b>:candidate</b>
 	    <p>
-	      The agent supports the &lt;candidate/&gt; database.
+	      The server supports the &lt;candidate/&gt; database.
 	      It will allow this special database to be locked, edited,
-	      saved, and unlocked.  The agent will also support the
+	      saved, and unlocked.  The server will also support the
 	      &lt;discard-changes&gt; and basic &lt;commit&gt;
 	      operations.
 	    </p>
 	  </li>
 	  <li><b>:confirmed-commit</b>
 	    <p>
-	      For agents that support the <b>:candidate</b> capability,
+	      For servers that support the <b>:candidate</b> capability,
 	      this additional capability will also be advertised
-	      if the agent supports the 'confirmed commit' feature.
-	      <b>This special mode requires an agent to send two
+	      if the server supports the 'confirmed commit' feature.
+	      <b>This special mode requires a server to send two
 	      &lt;commit&gt; RPC method requests instead of one,
 	      to save any changes to the &lt;running/&gt; database.</b>
 	      If the second request does not arrive within a specified 
-	      time interval, the agent will automatically revert
+	      time interval, the server will automatically revert
 	      the running configuration to the previous version.
 	    </p>
 	  </li>
 	  <li><b>:interleave</b>
 	    <p>
-	      The agent will accept &lt;rpc&gt; requests
+	      The server will accept &lt;rpc&gt; requests
 	      (besides &lt;close-session&gt; while
 	      notification delivery is active.  The
 	      :notification capability must also be present
@@ -901,19 +901,19 @@
 	  </li>
 	  <li><b>:notification</b>
 	    <p>
-	      The agent supports the basic notification delivery
+	      The server supports the basic notification delivery
 	      mechanisms defined in RFC 5277, e.g., the
 	      &lt;create-subscription&gt; operation will
-	      be accepted by the agent.  Unless the
+	      be accepted by the server.  Unless the
 	      :interleave capability is also supported, only
 	      the &lt;close-session&gt; operation must be
-	      supported by the agent while notification
+	      supported by the server while notification
 	      delivery is active.
 	    </p>
 	  </li>
 	  <li><b>:rollback-on-error</b>
 	    <p>
-	      The agent supports the 'rollback-on-error'
+	      The server supports the 'rollback-on-error'
 	      value for the &lt;error-option&gt;
 	      parameter to the &lt;edit-config&gt; operation.
 	      If any error occurs during the requested edit
@@ -925,20 +925,20 @@
 	  </li>
 	  <li><b>:startup</b>
 	    <p>
-	      The agent supports the &lt;startup/&gt; database.
+	      The server supports the &lt;startup/&gt; database.
 	      It will allow the running configuration to be
 	      copied to this special database.  It can also be locked,
-	      and unlocked, but an agent is not required to allow
+	      and unlocked, but a server is not required to allow
 	      it to be edited.
 	    </p>
 	  </li>
 	  <li><b>:url</b>
 	    <p>
-	      The agent supports the &lt;url&gt; parameter value form to
+	      The server supports the &lt;url&gt; parameter value form to
 	      specify protocol operation source and target
 	      parameters.  The capability URI for this feature
 	      will indicate which schemes (e.g., file, https, sftp)
-	      that the agent supports within a particular URL value.
+	      that the server supports within a particular URL value.
 	      The 'file' scheme allows for editable local 
 	      configuration databases.   The other schemes allow
 	      for remote storage of configuration databases.
@@ -946,12 +946,12 @@
 	  </li>
 	  <li><b>:validate</b>
 	    <p>
-	      The agent supports the &lt;validate&gt; operation.
+	      The server supports the &lt;validate&gt; operation.
 	      When this operation is requested on a target database,
-	      the agent will perform some amount of parameter validation
+	      the server will perform some amount of parameter validation
 	      and referential integrity checking.  Since the standard
 	      does not define exactly what must be validated by this
-	      operation, a manager cannot really rely on it for anything
+	      operation, a client cannot really rely on it for anything
 	      useful.
 	    </p>
 	    <p>
@@ -965,25 +965,25 @@
 	  </li>
 	  <li><b>:writable-running</b>
 	    <p>
-	      The agent allows the manager to change the
+	      The server allows the client to change the
 	      running configuration directly.  Either this capability
 	      or the <b>:candidate</b> capability will be supported
-	      by the agent, but usually not both.
+	      by the server, but usually not both.
 	    </p>
 	  </li>
 	  <li><b>:xpath</b>
 	    <p>
-	      The agent fully supports the XPath 1.0 specification
+	      The server fully supports the XPath 1.0 specification
 	      for filtered retrieval
 	      of configuration and other database contents.
 	      The 'type' attribute within the &lt;filter&gt;
 	      parameter for &lt;get&gt; and &lt;get-config&gt;
 	      operations may be set to 'xpath'.  The 'select'
 	      attribute (which contains the XPath expression)
-	      will also be supported by the agent.
+	      will also be supported by the server.
 	    </p>
 	    <p>
-	      An agent may support partial XPath retrieval
+	      A server may support partial XPath retrieval
 	      filtering, but it cannot advertise the <b>:xpath</b>
 	      capability unless the entire XPath 1.0 specification
 	      is supported.
@@ -1121,7 +1121,7 @@
 
 	<h4>draft-ietf-netconf-monitoring</h4>
 	<p>
-	  Defines an agent monitoring data model and schema retrieval
+	  Defines a server monitoring data model and schema retrieval
 	  mechanism for the NETCONF protocol.<br/><br/>
 	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
 	  <a target="_blank" 

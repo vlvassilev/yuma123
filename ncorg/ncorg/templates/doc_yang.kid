@@ -14,8 +14,8 @@
     <div class="ncdocs">
       <h1>YANG Data Modeling Language</h1>
 
-      <img src="${tg.url('/static/images/yang_layers.png')}" 
-	   border="2" alt="yang layers"/>
+      <img src="${tg.url('/static/images/yang_as_source_code2_web.png')}" 
+	   border="0" alt="yang as source code"/>
       <p>&nbsp;</p>
 
       <div>

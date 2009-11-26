@@ -16,20 +16,23 @@
 ############### SOURCE PROFILE ##############################
 
 SUBDIR_NM=modules
-YANGDUMP=$(YUMA_HOME)/target/bin/yangdump
+YANGDUMP=../target/bin/yangdump
 SUBDIR_CPP=""
 SUBTREE_PARMS=--subtree=./yang --subtree=./ietf --subtree=./netconfcentral
 
 ############### TARGET PROFILE ##############################
 
+# copy modules to /usr/share/yuma
 TOP_INSTALL = /usr/share/yuma
+INSTALL_TARGET=$(TOP_INSTALL)/modules
 
+# setup files in ncorg WEB site
 TBASE=$(TRUNK)/ncorg/ncorg/static
 XSD_TARGET=$(TBASE)/xsd
 COPY_TARGET=$(TBASE)/src
 HTML_TARGET=$(TBASE)/modules
 COOKEDHTML_TARGET=$(TBASE)/cookedmodules
-INSTALL_TARGET=$(TOP_INSTALL)/modules
+
 SQLDB_TARGET=$(TRUNK)/mysql/newmod.sql
 
 WARNINGS=--warn-linelen=0 --warn-idlen=0 --log-level=warn
@@ -39,28 +42,37 @@ WARNINGS=--warn-linelen=0 --warn-idlen=0 --log-level=warn
 all: xsd html cookedhtml sqldb copy
 
 xsd:
-	$(YANGDUMP) --format=xsd $(SUBTREE_PARMS) --defnames=true \
-	--output=$(XSD_TARGET) --urlstart=/xsd $(WARNINGS)
+	if [ -d "$(TRUNK)" ]; then\
+	  $(YANGDUMP) --format=xsd $(SUBTREE_PARMS) --defnames=true \
+	  --output=$(XSD_TARGET) --urlstart=/xsd $(WARNINGS); \
+	fi
 
 html:
-	$(YANGDUMP) --format=html $(SUBTREE_PARMS) --defnames=true \
-	--output=$(HTML_TARGET) --html-div=true --html-toc=menu \
-	--urlstart=/modules --simurls=true $(WARNINGS)
+	if [ -d "$(TRUNK)" ]; then\
+	  $(YANGDUMP) --format=html $(SUBTREE_PARMS) --defnames=true \
+	  --output=$(HTML_TARGET) --html-div=true --html-toc=menu \
+	  --urlstart=/modules --simurls=true $(WARNINGS); \
+	fi
 
 cookedhtml:
-	$(YANGDUMP) --format=html $(SUBTREE_PARMS) --defnames=true \
-	--output=$(COOKEDHTML_TARGET) --html-div=true \
-	--html-toc=menu --urlstart=/modules --simurls=true \
-	--objview=cooked $(WARNINGS)
+	if [ -d "$(TRUNK)" ]; then\
+	  $(YANGDUMP) --format=html $(SUBTREE_PARMS) --defnames=true \
+	  --output=$(COOKEDHTML_TARGET) --html-div=true \
+	  --html-toc=menu --urlstart=/modules --simurls=true \
+	  --objview=cooked $(WARNINGS); \
+	fi
 
 sqldb:
-	$(YANGDUMP) --format=sqldb $(SUBTREE_PARMS) \
-	--output=$(SQLDB_TARGET) --urlstart=/modules \
-	--simurls=true $(WARNINGS)
-
+	if [ -d "$(TRUNK)" ]; then\
+	  $(YANGDUMP) --format=sqldb $(SUBTREE_PARMS) \
+	  --output=$(SQLDB_TARGET) --urlstart=/modules \
+	  --simurls=true $(WARNINGS); \
+	fi
 copy:
-	$(YANGDUMP) --format=copy $(SUBTREE_PARMS) --defnames=true \
-	--output=$(COPY_TARGET) $(WARNINGS)
+	if [ -d "$(TRUNK)" ]; then\
+	  $(YANGDUMP) --format=copy $(SUBTREE_PARMS) --defnames=true \
+	  --output=$(COPY_TARGET) $(WARNINGS); \
+	fi
 
 test:
 

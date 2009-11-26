@@ -1,0 +1,15 @@
+module testfeature {
+
+    namespace "http://netconfcentral.com/ns/testfeature";
+    prefix "tf";
+
+    revision 2008-12-02 {
+        description "Initial revision.";
+    }
+
+    feature A { if-feature B; }
+    feature B { if-feature C; }
+    feature C { if-feature A; }
+    feature D { if-feature B; }
+    feature E;
+}

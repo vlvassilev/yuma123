@@ -1,0 +1,336 @@
+module netconfd {
+
+    namespace "http://netconfcentral.org/ns/netconfd";
+
+    prefix "nd";
+
+    import yuma-ncx { prefix ncx; }
+
+    import yuma-types { prefix nt; }
+
+    import yuma-app-common { prefix ncxapp; }
+
+    import ietf-inet-types { prefix inet; }
+
+    import ietf-with-defaults { prefix wd; }
+
+    organization  "Netconf Central, Inc.";
+
+    contact "Andy Bierman <support@netconfcentral.org>.";
+
+    description "NCX Server Configuration Parameters and Statistics";
+
+    revision 2009-05-28 {
+       description 
+         "pre-beta1: work-in-progress version.";
+    }
+
+    revision 2008-08-01 {
+       description "Initial conversion from netconfd.ncx v 0.6";
+    }
+
+    grouping StartupChoice {
+      choice start {
+        description "select startup config for boot load";
+        // default is set in the agt_profile
+
+        leaf no-startup {
+          description
+             "If present, do not load the startup config file.";
+          type empty;
+        }
+
+        leaf startup {
+          description
+             "The full filespec of the startup config file to use.
+              If present, overrides the default startup config
+              file name 'startup-cfg.xml',  This will also
+              override the YUMA_DATAPATH environement variable
+              and the datapath CLI parameter, if the first
+              character is the forward slash '/', indicating
+              an absolute file path.";
+          type string;
+        }
+      }
+    }
+
+    container netconfd {
+      ncx:cli;
+
+      description
+         "Server CLI for the NETCONF protocol.
+          Usage:
+            netconfd [parameters]";
+
+      uses ncxapp:NcxAppCommon;
+
+      leaf access-control {
+        description
+          "Controls how access control is enforced by the server.";
+        type enumeration {
+           enum enforcing {
+             description 
+               "All configured access control rules will be
+                enforced.";
+           }
+           enum permissive {
+             description 
+               "All configured access control rules will be
+                enforced for write and execute requests.
+                All read requests will be allowed, unless
+                the requested object contains the
+                'ncx:very-secure' extension.  In that case,
+                all configured access control rules will
+                be enforced.";
+           }
+           enum disabled {
+             description 
+               "All read, write, and execute requests will be
+                allowed, unless the object contains the
+                'ncx:secure' or 'ncx:very-secure' extension.
+                If the 'ncx:secure' extension is in effect,
+                then all configured access control rules
+                will be enforced for write and execute requests.
+                If the 'ncx:very-secure' extension is in effect,
+                then all configured access control rules
+                will be enforced for all requests.
+                Use this mode with caution.";
+           }
+           enum off {
+             description
+               "All access control enforcement is disabled.
+                Use this mode with extreme caution.";
+           }
+        }
+        default enforcing;
+      }
+
+      leaf default-style {
+        description
+           "Selects the type of filtering behavior the server will
+            advertise as the 'basic' behavior in the 'with-defaults'
+            capability.  The server will use this default handling
+            behavior if the 'with-defaults' parameter is not 
+            explicitly set.
+
+            Also, when saving a configuration to NV-storage,
+            this value will be used for filtering defaults
+            from the saved configuration.";
+         type wd:with-defaults-mode-type;
+         default explicit;
+      }
+
+      leaf eventlog-size {
+        description
+           "Specifies the maximum number of notification events
+            that will be saved in the notification replay buffer.
+            The oldest entries will be deleted first.";
+         type uint32;
+         default 1000;
+      }
+
+      leaf hello-timeout {
+        description
+           "Specifies the number of seconds that a session
+            may exist before the hello PDU is received.
+            A seesion will be dropped if no hello PDU 
+            is received before this number of seconds elapses.
+
+            If this parameter is set to zero, then the server
+            will wait forever for a hello message, and not
+            drop any sessions stuck in 'hello-wait' state.
+
+            Setting this parameter to zero may permit
+            denial of service attacks, since only a limited
+            number of concurrent sessions are supported
+            by the server.";
+         type uint32 {
+            range "0 | 10 .. 3600";
+         }
+         units seconds;
+         default 600;    // 10 minutes
+      }
+
+      leaf idle-timeout {
+        description
+           "Specifies the number of seconds that a session
+            may remain idle without issuing any RPC requests.
+            A seesion will be dropped if it is idle for an
+            interval longer than this number of seconds.
+
+            Sessions that have a notification subscription
+            active are never dropped. 
+
+            If this parameter is set to zero, then the server
+            will never drop a session because it is idle.";
+         type uint32 {
+            range "0 | 10 .. 360000";
+         }
+         units seconds;
+         default 3600;    // 1 hour
+      }
+
+      leaf max-burst {
+        description
+          "Specifies the maximum number of notifications
+           that should be sent to one session, within a
+           one second time interval.  The value 0 indicates 
+           that the server should not limit notification
+           bursts at all.";
+        type uint32;
+        default 10;
+      }
+
+      leaf-list port {
+        max-elements 4;
+        description 
+          "Specify the TCP ports that the server will accept
+           connections from.  These ports must also be configured
+           in the /etc/ssh/sshd_config file for the SSH master
+           server to accept the connection and invoke the netconf
+           subsystem.
+
+           Up to 4 port numbers can be configured.
+
+           If any ports are configured, then only those values
+           will be accepted by the server.
+
+           If no ports are configured, then the server will accept
+           connections on the netconf-ssh port (tcp/830).";
+
+         type inet:port-number;
+      }
+
+      uses ncxapp:ModuleParm;
+
+      uses ncxapp:DeviationParm;
+
+      uses StartupChoice;
+
+      leaf superuser {
+        description
+          "The user name to use as the superuser account.
+           Any session associated with this user name 
+           will bypass all access control enforcement.
+           See nacm.yang for more details.
+
+           To disable the superuser account completely,
+           set this parameter to the empty string.";
+        type union {
+            type nt:NcxName;
+            type string { length 0; }
+        }
+        default "superuser";
+      }
+
+      leaf target {
+        description
+          "The database to use as the target of edit-config
+           operations.";
+        type enumeration {
+          enum running {
+            description 
+             "Write to the running config.
+              Also use distinct startup capability.
+              A copy-config operation must be used to 
+              save the running config to the startup config file.";
+          }
+          enum candidate {
+            description 
+              "Write to the candidate config.
+               Also automatically update the startup config
+               file after each 'commit' operation is
+               successfully completed.";
+          }
+        }
+        // default is set in the agt_profile
+        default candidate;
+      }
+
+      leaf with-startup {
+        description
+          "If set to 'true', then the :startup capability will be 
+           enabled. Otherwise, the :startup capability
+           will not be enabled.  This capability 
+           makes the NV-save operation an explicit operation
+           instead of an automatic save.";
+        type boolean;
+        default false;
+      }
+
+      leaf with-validate {
+        description
+          "If set to 'true', then the :validate capability will be 
+           enabled. Otherwise, the :validate capability
+           will not be enabled.  This capability requires
+           extensive memory resources.";
+        type boolean;
+        default true;
+      }
+
+      leaf xmlorder {
+        description
+          "If present, then XML element order will be enforced.
+           Otherwise, XML element order errors will not be
+           generated if possible. Default is no enforcement of
+           strict XML order.";
+        type empty;
+      }
+
+    }
+
+    rpc load {
+      ncx:secure;
+      description 
+        "Load a module into the server, if it is not already loaded.
+         Returns the module revision date (or today's date if none),
+         of the module that was loaded, or an error if not found
+         or the module found had errors and was not loaded
+         successfully.  If the module is already loaded, then the
+         revision date will simply be returned.";
+
+      input {
+        ncx:default-parm module;
+        leaf module {
+          description "Name of the module to load.";
+          mandatory true;
+          type nt:NcxName;
+        }
+        leaf revision {
+          description
+             "Module revision to load.";
+          type nt:Date;
+        }
+        uses ncxapp:DeviationParm;
+      }
+
+      output {
+        leaf mod-revision {
+          description  
+            "Revision date of the module in use by the server.
+             Will only be present if the module has a version";
+          type nt:Date;
+        }
+      }
+
+    }
+
+    rpc restart {
+      description 
+        "Restart the server. Does not reload the software image..";
+      ncx:secure;
+    }
+
+    rpc shutdown {
+      description 
+        "Shutdown the server.";
+      ncx:secure;
+    }
+
+    rpc no-op {
+      description 
+        "Just returns 'ok'. Used for debugging
+         or relative performance measurements.";
+    }
+
+}

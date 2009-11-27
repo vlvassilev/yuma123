@@ -317,6 +317,11 @@
       <div>
 	<br/>
 	<h2>Configuration Databases</h2>
+        <p>
+          <img src="${tg.url('/static/images/database_options_web.png')}" 
+	       border="0" alt="netconf layers"/>
+        </p>
+        <p>&nbsp;</p>
 	<p>
 	  The NETCONF protocol contains several standard operations
 	  which operate on one or more conceptual configuration

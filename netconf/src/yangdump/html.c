@@ -119,6 +119,10 @@ date         init     comment
 #include "yangdump.h"
 #endif
 
+#ifndef _H_yangdump_util
+#include "yangdump_util.h"
+#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -641,6 +645,60 @@ static void
 
 
 /********************************************************************
+* FUNCTION write_a_ref
+* 
+* Generate an anchor element for a reference
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   ref == reference string to use in URL; counted string
+*   reflen == length of 'ref'
+*
+*********************************************************************/
+static void
+    write_a_ref (ses_cb_t *scb,
+                 const xmlChar *ref,
+                 uint32 reflen)
+{
+    const xmlChar    *num;
+    uint32            len;
+
+    if (*ref == 'R') {
+        /* assume this is an RFC xxxx reference, find the number */
+        ses_putstr(scb, (const xmlChar *)"<a href=\"");
+        num = ref;
+        while (*num && !isdigit(*num)) {
+            num++;
+        }
+        ses_putstr(scb, XSD_RFC_URL);
+        while (*num && isdigit(*num)) {
+            ses_putchar(scb, *num++);
+        }
+        ses_putstr(scb, (const xmlChar *)".txt");
+    } else if (*ref == 'd') {
+        /* assume this is an draft- reference */
+        ses_putstr(scb, (const xmlChar *)"<a href=\"");
+        ses_putstr(scb, XSD_DRAFT_URL);
+        for (len = 0; len < reflen; len++) {
+            ses_putchar(scb, ref[len]);
+        }
+    } else {
+        /* skip this unsupported reference type */
+        return;
+    }
+    ses_putstr(scb, (const xmlChar *)"\">");
+
+    ses_putstr(scb, (const xmlChar *)"<span class=\"yang_str\">");
+    for (len = 0; len < reflen; len++) {
+        ses_putchar(scb, ref[len]);
+    }
+    ses_putstr(scb, (const xmlChar *)"</span>");
+    ses_putstr(scb, (const xmlChar *)"</a>");
+
+}  /* write_a_ref */
+
+
+/********************************************************************
 * FUNCTION write_idref_base
 * 
 * Generate a base QName; clause for an identityref
@@ -731,7 +789,8 @@ static void
     }
 
     ses_putstr(scb, (const xmlChar *)"<span class=\"yang_id\">");
-    write_a(scb, cp, 
+    write_a(scb, 
+            cp, 
             fname, 
             fversion, 
             submod,
@@ -862,113 +921,6 @@ static void
 }  /* write_status */
 
 
-#ifdef WORK_IN_PROGRESS
-/********************************************************************
- * FUNCTION write_reference
- * 
- *   Create the appropriate A record for the reference, if possible
- *
- * INPUTS:
- *   scb == session control block to use for writing
- *   mod == module in progress
- *   cp == conversion parameters to use
- *   ref == reference clause to use
- *   indent == start indent count
- *
- *********************************************************************/
-static void
-    write_reference (ses_cb_t *scb,
-                     const ncx_module_t *mod,
-                     const yangdump_cvtparms_t *cp,
-                     const xmlChar *ref,
-                     int32 indent)
-
-{
-    const xmlChar  *str, *p;
-    xmlChar        *buff, *q;
-    uint32          len, numlen, i;
-    xmlns_id_t      ncx_id;
-    boolean         done, wspace_only, a_started;
-
-    if (ref == NULL) {
-        return NULL;
-    }
-
-    ncx_id = xmlns_ncx_id();
-    len = xml_strlen(ref);
-    done = FALSE;
-    a_started = FALSE;
-
-    while (!done) {
-        /* check if the reference is to an RFC and if so generate
-         * a 'url' element as well
-         */
-        if (len > 4 
-            && !xml_strncmp(ref, (const xmlChar *)"RFC ", 4)) {
-            str = &ref[4];
-            p = str;
-            while (*p && isdigit(*p)) {
-                p++;
-            }
-            numlen = (uint32)(p-str);
-
-            /* IETF RFC URLs are currently hard-wired 4 digit number */
-            if (numlen && (numlen <= 4) && (len >= numlen+4)) {
-                buff = m__getMem(xml_strlen(XSD_RFC_URL) + 9);
-                if (!buff) {
-                    val_free_value(retval);
-                    return NULL;
-                }
-
-                q = buff;
-                q += xml_strcpy(q, XSD_RFC_URL);
-                for (i = 4 - numlen; i; i--) {
-                    *q++ = '0';
-                }
-                for (i=0; i<numlen; i++) {
-                    *q++ = *str++;
-                } 
-                xml_strcpy(q, (const xmlChar *)".txt");
-
-                ses_putstr(scb, (const xmlChar *)"<a href=\"");
-
-
-
-            }
-        } else if (len > 6 &&
-                   !xml_strncmp(ref, (const xmlChar *)"draft-", 6)) {
-            str = &ref[6];
-            while (*str && 
-                   (!xml_isspace(*str)) && 
-                   (*str != ';') && 
-                   (*str != ':') &&
-                   (*str != ',')) {
-                str++;
-            }
-
-            /* make sure did not end on a dot char */
-            if (str != &ref[6] && *str == '.') {\
-                str--;
-            }
-
-            numlen = (uint32)(str-ref);
-            buff = m__getMem(xml_strlen(XSD_DRAFT_URL) + numlen + 1);
-            if (!buff) {
-                val_free_value(retval);
-                return NULL;
-            }
-            q = buff;
-            q += xml_strcpy(q, XSD_DRAFT_URL);
-            q += xml_strncpy(q, ref, numlen);
-
-
-        } else {
-
-        }
-    }
-}   /* write_reference */
-
-
 /********************************************************************
 * FUNCTION write_reference_str
 * 
@@ -976,21 +928,17 @@ static void
 *
 * INPUTS:
 *   scb == session control block to use for writing
-*   mod == module in use
-*   cp == conversion parms to use
 *   ref == reference string to use
 *   indent == indent count to use
 *********************************************************************/
 static void
     write_reference_str (ses_cb_t *scb,
-                         const ncx_module_t *mod,
-                         const yangdump_cvtparms_t *cp,
                          const xmlChar *ref,
                          int32 indent)
 {
-    const xmlChar    *str;
+    const xmlChar    *str, *start;
     boolean           done;
-    uint32            len;
+    uint32            reflen, len;
 
     if (ref == NULL) {
         return;
@@ -1005,14 +953,46 @@ static void
     ses_putstr(scb, (const xmlChar *)"<span class=\"yang_str\">");
     ses_putchar(scb, '"');
 
-    str = ref;
     done = FALSE;
     while (!done) {
+        str = NULL;
+        start = ref;
+        reflen = 0;
 
+        len = find_reference(ref, &str, &reflen);
 
+        if (str != NULL) {
+            while (start < str) {
+                if (*start == '\n') {
+                    ses_indent(scb, indent);
+                    ses_putchar(scb, ' ');
+                    start++;
+                } else {
+                    ses_putchar(scb, *start++);
+                }
+            }
+            write_a_ref(scb, str, reflen);
+            ref += len;
+        } else {
+            while (len > 0) {
+                if (*ref == '\n') {
+                    ses_indent(scb, indent);
+                    ref++;
+                } else {
+                    ses_putchar(scb, *ref++);
+                }
+                len--;
+            }
+        }
 
+        /* only allow 1 reference per line at this time */
+        while (*ref && *ref != '\n') {
+            ses_putchar(scb, *ref++);
+        }
+        if (*ref != '\n') {
+            done = TRUE;
+        }
     }
-    
 
     ses_putchar(scb, '"');
 
@@ -1021,7 +1001,6 @@ static void
     ses_putstr(scb, (const xmlChar *)";\n");
 
 }  /* write_reference_str */
-#endif /* WORK_IN_PROGRESS */
 
 
 /********************************************************************
@@ -1129,12 +1108,7 @@ static void
                          TRUE);
     }
     if (errinfo->ref) {
-        write_simple_str(scb, 
-                         YANG_K_REFERENCE,
-                         errinfo->ref, 
-                         indent, 
-                         2, 
-                         TRUE);
+        write_reference_str(scb, errinfo->ref, indent);
     }
 }  /* write_errinfo */
 
@@ -1353,12 +1327,7 @@ static void
                 }
 
                 if (bit->ref) {
-                    write_simple_str(scb, 
-                                     YANG_K_REFERENCE,
-                                     bit->ref, 
-                                     indent, 
-                                     2, 
-                                     TRUE);
+                    write_reference_str(scb, bit->ref, indent);
                 }
 
                 write_appinfoQ(scb, mod, cp, &bit->appinfoQ, indent);
@@ -1398,12 +1367,7 @@ static void
                 }
 
                 if (enu->ref) {
-                    write_simple_str(scb, 
-                                     YANG_K_REFERENCE,
-                                     enu->ref, 
-                                     indent,
-                                     2, 
-                                     TRUE);
+                    write_reference_str(scb, enu->ref, indent);
                 }
 
                 write_appinfoQ(scb, mod, cp, &enu->appinfoQ, indent);
@@ -1644,12 +1608,7 @@ static void
 
     /* reference field */
     if (typ->ref) {
-        write_simple_str(scb, 
-                         YANG_K_REFERENCE, 
-                         typ->ref, 
-                         indent,
-                         2, 
-                         TRUE);
+        write_reference_str(scb, typ->ref, indent);
     }
 
     /* appinfoQ */
@@ -1767,12 +1726,7 @@ static void
 
     /* reference field */
     if (grp->ref) {
-        write_simple_str(scb, 
-                         YANG_K_REFERENCE, 
-                         grp->ref,
-                         indent,
-                         2,
-                         TRUE);
+        write_reference_str(scb, grp->ref, indent);
     }
 
     write_typedefs(scb, mod, cp, &grp->typedefQ, indent);
@@ -2040,12 +1994,7 @@ static void
     /* reference-stmt? */
     str = obj_get_reference(obj);
     if (str) {
-        write_simple_str(scb, 
-                         YANG_K_REFERENCE, 
-                         str, 
-                         indent, 
-                         2,
-                         TRUE);
+        write_reference_str(scb, str, indent);
     }
 
 }  /* write_sdr */
@@ -2863,12 +2812,7 @@ static void
 
     /* reference field */
     if (ext->ref) {
-        write_simple_str(scb,
-                         YANG_K_REFERENCE, 
-                         ext->ref,
-                         indent, 
-                         2, 
-                         TRUE);
+        write_reference_str(scb, ext->ref, indent);
     }
 
     write_appinfoQ(scb, mod, cp, &ext->appinfoQ, indent);
@@ -2980,12 +2924,7 @@ static void
 
     /* reference field */
     if (identity->ref) {
-        write_simple_str(scb, 
-                         YANG_K_REFERENCE, 
-                         identity->ref, 
-                         indent, 
-                         2, 
-                         TRUE);
+        write_reference_str(scb, identity->ref, indent);
     }
 
     write_appinfoQ(scb, 
@@ -3099,12 +3038,7 @@ static void
 
     /* reference field */
     if (feature->ref) {
-        write_simple_str(scb, 
-                         YANG_K_REFERENCE, 
-                         feature->ref, 
-                         indent, 
-                         2, 
-                         TRUE);
+        write_reference_str(scb, feature->ref, indent);
     }
 
     write_appinfoQ(scb, 
@@ -3355,12 +3289,7 @@ static void
 
     /* reference field */
     if (deviation->ref) {
-        write_simple_str(scb, 
-                         YANG_K_REFERENCE, 
-                         deviation->ref, 
-                         indent, 
-                         2, 
-                         TRUE);
+        write_reference_str(scb, deviation->ref, indent);
     }
 
     /* 0 or more deviate-stmts */
@@ -3704,14 +3633,11 @@ static void
 
     /* reference */
     if (mod->ref) {
-        write_simple_str(scb, 
-                         YANG_K_REFERENCE,
-                         mod->ref, 
-                         indent, 
-                         2, 
-                         TRUE);
+        write_reference_str(scb, mod->ref, indent);
         ses_putchar(scb, '\n');
+
     }
+
 
     /* revision history section        */
     for (rev = (const ncx_revhist_t *)
@@ -3734,12 +3660,9 @@ static void
                          TRUE);
 
         if (rev->ref) {
-            write_simple_str(scb, 
-                             YANG_K_REFERENCE,
-                             rev->ref,
-                             indent + ses_indent_count(scb),
-                             2, 
-                             TRUE);
+            write_reference_str(scb, 
+                                rev->ref, 
+                                indent + ses_indent_count(scb));
         }
 
         ses_putstr_indent(scb, END_SEC, indent);

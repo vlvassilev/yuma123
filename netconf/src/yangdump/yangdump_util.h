@@ -54,4 +54,9 @@ extern void
 extern void 
     write_banner_session (ses_cb_t *scb);
 
+extern uint32
+    find_reference (const xmlChar *buffer,
+                    const xmlChar **ref,
+                    uint32 *reflen);
+
 #endif	    /* _H_yangdump_util */

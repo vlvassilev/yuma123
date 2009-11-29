@@ -9,10 +9,10 @@ all:
 depend:
 
 clean:
-	sudo rm $(TOP_INSTALL)/etc/netconfd-sample.conf
-	sudo rm $(TOP_INSTALL)/etc/yangcli-sample.conf
-	sudo rm $(TOP_INSTALL)/etc/yangdiff-sample.conf
-	sudo rm $(TOP_INSTALL)/etc/yangdump-sample.conf
+	sudo rm -f $(TOP_INSTALL)/etc/netconfd-sample.conf
+	sudo rm -f $(TOP_INSTALL)/etc/yangcli-sample.conf
+	sudo rm -f $(TOP_INSTALL)/etc/yangdiff-sample.conf
+	sudo rm -f $(TOP_INSTALL)/etc/yangdump-sample.conf
 
 superclean: clean
 

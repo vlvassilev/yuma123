@@ -9,9 +9,11 @@
 # Put only the directories that build object files in the list
 
 # make all targets
-DIRS = src modules etc
+DIRS = src modules etc doc
 
 TOP_INSTALL = /usr/share/yuma
+
+DOC_INSTALL = /usr/share/doc/yuma
 
 JFLAG = -j3
 
@@ -44,6 +46,7 @@ treesuperclean:
         done
 
 treeinstall:
+	sudo mkdir -p $(DOC_INSTALL)
 	sudo mkdir -p $(TOP_INSTALL)
 	sudo mkdir -p $(TOP_INSTALL)/data
 	sudo mkdir -p $(TOP_INSTALL)/etc

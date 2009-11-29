@@ -12,6 +12,12 @@ module test {
     description
         "YANG test module 1.";
 
+    reference // testing
+      "RFC 1234;
+       RFC 3456.  more text
+       draft-ietf-netmod-yang-07.txt
+      ";
+
     revision 2009-06-10 {
         description "Test module in-progress.";
     }

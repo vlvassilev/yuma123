@@ -11,7 +11,7 @@ SUBDIR_CPP=
 
 TARGET=$(TBASE)/$(SUBDIR_NM)
 BIN_INST=$(TBASE)/bin
-REAL_INST=/usr/sbin
+REAL_INST=$(DESTDIR)/usr/sbin
 PROG=netconfd
 
 ifdef MAC

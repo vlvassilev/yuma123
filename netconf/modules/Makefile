@@ -23,7 +23,7 @@ SUBTREE_PARMS=--subtree=./yang --subtree=./ietf --subtree=./netconfcentral
 ############### TARGET PROFILE ##############################
 
 # copy modules to /usr/share/yuma
-TOP_INSTALL = /usr/share/yuma
+TOP_INSTALL = $(DESTDIR)/usr/share/yuma
 INSTALL_TARGET=$(TOP_INSTALL)/modules
 
 # setup files in ncorg WEB site
@@ -39,7 +39,11 @@ WARNINGS=--warn-linelen=0 --warn-idlen=0 --log-level=warn
 
 ######################### MAKE RULES ######################
 
-all: xsd html cookedhtml sqldb copy
+all: 
+
+.PHONY: ncorg
+
+ncorg: xsd html cookedhtml sqldb copy
 
 xsd:
 	if [ -d "$(TRUNK)" ]; then\

@@ -11,7 +11,7 @@ SUBDIR_CPP=
 
 TARGET=$(TBASE)/$(SUBDIR_NM)
 BIN_INST=$(TBASE)/bin
-REAL_INST=/usr/bin
+REAL_INST=$(DESTDIR)/usr/bin
 PROG=yangcli
 
 ##################### LIBRARIES ########################

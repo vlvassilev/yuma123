@@ -2,7 +2,7 @@
 #  
 #   etc directory
 
-TOP_INSTALL = /usr/share/yuma
+TOP_INSTALL = $(DESTDIR)/usr/share/yuma
 
 all:
 

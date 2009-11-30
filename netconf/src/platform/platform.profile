@@ -78,7 +78,13 @@ LINTFLAGS= '-weak -macrovarprefix "m_"'
 ##LIBFLAGS=-lsocket
 
 TBASE=../../target
+
+ifdef DESTDIR
+LBASE=$(DESTDIR)/target/lib
+else
 LBASE=$(TBASE)/lib
+endif
+
 LIBTOOL=ar
 #LFLAGS=-v --no-as-needed
 LFLAGS=-lm

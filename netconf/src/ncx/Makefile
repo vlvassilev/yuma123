@@ -15,7 +15,7 @@ LIB_INST=$(TBASE)/lib
 ifdef MAXWELL
 REAL_INST=/lib
 else
-REAL_INST=/usr/lib
+REAL_INST=$(DESTDIR)/usr/lib
 endif
 
 ######################### MAKE RULES ######################

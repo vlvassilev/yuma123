@@ -11,11 +11,15 @@
 # make all targets
 DIRS = src modules etc doc
 
-TOP_INSTALL = /usr/share/yuma
+TOP_INSTALL = $(DESTDIR)/usr/share/yuma
 
-DOC_INSTALL = /usr/share/doc/yuma
+DOC_INSTALL = $(DESTDIR)/usr/share/doc/yuma
 
+ifdef DESTDIR
+JFLAG=
+else
 JFLAG = -j3
+endif
 
 #################### PLATFORM DEFINITIONS ############
 
@@ -46,6 +50,14 @@ treesuperclean:
         done
 
 treeinstall:
+ifdef DESTDIR
+	mkdir -p $(DESTDIR)/usr/bin
+	mkdir -p $(DESTDIR)/usr/sbin
+	mkdir -p $(DESTDIR)/usr/local/bin
+	mkdir -p $(DESTDIR)/usr/local/sbin
+	mkdir -p $(DESTDIR)/etc
+	mkdir -p $(DESTDIR)/usr/share/doc
+endif
 	sudo mkdir -p $(DOC_INSTALL)
 	sudo mkdir -p $(TOP_INSTALL)
 	sudo mkdir -p $(TOP_INSTALL)/data

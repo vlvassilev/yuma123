@@ -17,7 +17,11 @@ DIRS = agt mgr ncx $(APPS)
 # make agent without other targets
 AGTDIRS = agt ncx netconfd
 
+ifdef DESTDIR
+JFLAG = 
+else
 JFLAG = -j3
+endif
 
 #################### PLATFORM DEFINITIONS ############
 

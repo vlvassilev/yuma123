@@ -4,23 +4,29 @@
 
 TOP_INSTALL = $(DESTDIR)/usr/share/yuma
 
+ifdef DESTDIR
+SUDO=
+else
+SUDO=sudo
+endif
+
 all:
 
 depend:
 
 clean:
-	sudo rm -f $(TOP_INSTALL)/etc/netconfd-sample.conf
-	sudo rm -f $(TOP_INSTALL)/etc/yangcli-sample.conf
-	sudo rm -f $(TOP_INSTALL)/etc/yangdiff-sample.conf
-	sudo rm -f $(TOP_INSTALL)/etc/yangdump-sample.conf
+	$(SUDO) rm -f $(TOP_INSTALL)/etc/netconfd-sample.conf
+	$(SUDO) rm -f $(TOP_INSTALL)/etc/yangcli-sample.conf
+	$(SUDO) rm -f $(TOP_INSTALL)/etc/yangdiff-sample.conf
+	$(SUDO) rm -f $(TOP_INSTALL)/etc/yangdump-sample.conf
 
 superclean: clean
 
 install:
-	sudo cp netconfd-sample.conf $(TOP_INSTALL)/etc/
-	sudo cp yangcli-sample.conf $(TOP_INSTALL)/etc/
-	sudo cp yangdiff-sample.conf $(TOP_INSTALL)/etc/
-	sudo cp yangdump-sample.conf $(TOP_INSTALL)/etc/
+	$(SUDO) cp netconfd-sample.conf $(TOP_INSTALL)/etc/
+	$(SUDO) cp yangcli-sample.conf $(TOP_INSTALL)/etc/
+	$(SUDO) cp yangdiff-sample.conf $(TOP_INSTALL)/etc/
+	$(SUDO) cp yangdump-sample.conf $(TOP_INSTALL)/etc/
 
 
 .PHONY: all clean depend superclean install

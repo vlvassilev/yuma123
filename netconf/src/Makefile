@@ -18,7 +18,7 @@ DIRS = agt mgr ncx $(APPS)
 AGTDIRS = agt ncx netconfd
 
 ifdef DESTDIR
-JFLAG = 
+JFLAG=
 else
 JFLAG = -j3
 endif

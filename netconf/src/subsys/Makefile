@@ -55,8 +55,8 @@ superclean:
 
 # needs to be done by root
 install:
-	sudo mkdir -p $(REAL_INST)
-	sudo install --owner=root $(GRP) $(BIN_INST)/$(PROG) $(REAL_INST)
+	$(SUDO) mkdir -p $(REAL_INST)
+	$(SUDO) install $(OWNER) $(GRP) $(BIN_INST)/$(PROG) $(REAL_INST)
 
 # this real rule keeps make from deleting the $(OBJS) as
 # intermediate files

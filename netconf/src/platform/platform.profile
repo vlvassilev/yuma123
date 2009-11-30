@@ -2,6 +2,14 @@
 # platform.profile
 #
 
+ifdef DESTDIR
+SUDO=
+OWNER=
+else
+SUDO=sudo
+OWNER= --owner=root
+endif
+
 ### GCC + [LINUX or MACOSX]
 
 # leave -Werror out of DEBUG BLDs

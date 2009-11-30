@@ -18,6 +18,7 @@ else
 REAL_INST=$(DESTDIR)/usr/lib
 endif
 
+
 ######################### MAKE RULES ######################
 
 all: ncxdummy ncxlib
@@ -37,16 +38,18 @@ test:
 install:
 ifdef STATIC
 else
-	sudo install --owner=root $(GRP) \
+	$(SUDO) install --owner=root $(GRP) \
 	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) \
 	$(REAL_INST)
-ifndef MAC
-	sudo ldconfig
+ifdef MAC
+ifndef DESTDIR
+	$(SUDO) ldconfig $(REAL_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
+endif
 endif
 endif
 
 uninstall:
-	sudo rm	-f $(REAL_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
+	$(SUDO) rm	-f $(REAL_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
 
 ncxlib: $(LBASE)/lib$(SUBDIR_NM).$(LIBSUFFIX)
 

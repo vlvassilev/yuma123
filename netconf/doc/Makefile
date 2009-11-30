@@ -4,19 +4,25 @@
 
 DOC_INSTALL = $(DESTDIR)/usr/share/doc/yuma
 
+ifdef DESTDIR
+SUDO=
+else
+SUDO=sudo
+endif
+
 all:
 
 depend:
 
 clean:
-	sudo rm -f $(DOC_INSTALL)/*
+	$(SUDO) rm -f $(DOC_INSTALL)/*
 
 superclean: clean
 
 install:
-	sudo cp yuma_docs/yuma-user-manual.pdf $(DOC_INSTALL)
+	$(SUDO) cp yuma_docs/yuma-user-manual.pdf $(DOC_INSTALL)
 ifndef FREE
-	sudo cp yuma_docs/yuma-dev-manual.pdf $(DOC_INSTALL)
+	$(SUDO) cp yuma_docs/yuma-dev-manual.pdf $(DOC_INSTALL)
 endif
 
 

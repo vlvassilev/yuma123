@@ -16,8 +16,10 @@ TOP_INSTALL = $(DESTDIR)/usr/share/yuma
 DOC_INSTALL = $(DESTDIR)/usr/share/doc/yuma
 
 ifdef DESTDIR
-JFLAG=
+JFLAG= 
+SUDO= 
 else
+SUDO=sudo
 JFLAG = -j3
 endif
 
@@ -58,12 +60,12 @@ ifdef DESTDIR
 	mkdir -p $(DESTDIR)/etc
 	mkdir -p $(DESTDIR)/usr/share/doc
 endif
-	sudo mkdir -p $(DOC_INSTALL)
-	sudo mkdir -p $(TOP_INSTALL)
-	sudo mkdir -p $(TOP_INSTALL)/data
-	sudo mkdir -p $(TOP_INSTALL)/etc
-	sudo mkdir -p $(TOP_INSTALL)/modules
-	sudo mkdir -p $(TOP_INSTALL)/scripts
+	$(SUDO) mkdir -p $(DOC_INSTALL)
+	$(SUDO) mkdir -p $(TOP_INSTALL)
+	$(SUDO) mkdir -p $(TOP_INSTALL)/data
+	$(SUDO) mkdir -p $(TOP_INSTALL)/etc
+	$(SUDO) mkdir -p $(TOP_INSTALL)/modules
+	$(SUDO) mkdir -p $(TOP_INSTALL)/scripts
 	for dir in $(DIRS); do\
           cd $$dir && $(MAKE) install && cd ..;\
         done

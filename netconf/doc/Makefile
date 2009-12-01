@@ -21,7 +21,12 @@ superclean: clean
 
 install:
 	$(SUDO) cp yuma_docs/yuma-user-manual.pdf $(DOC_INSTALL)
-ifndef FREE
+ifdef FREE
+	$(SUDO) cp extra/AUTHORS $(DOC_INSTALL)
+	$(SUDO) cp extra/ChangeLog $(DOC_INSTALL)
+	$(SUDO) cp extra/COPYING $(DOC_INSTALL)
+	$(SUDO) cp extra/README $(DOC_INSTALL)
+else
 	$(SUDO) cp yuma_docs/yuma-dev-manual.pdf $(DOC_INSTALL)
 endif
 

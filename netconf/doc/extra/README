@@ -1,0 +1,64 @@
+
+Yuma -- A Toolset for the YANG data modeling language 
+        and NETCONF protocol
+===========================================================
+
+Copyright (c) 2009, Netconf Central, Inc.
+
+See the file "COPYING" for information on usage and redistribution
+of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+
+FILES:
+------
+
+ - a binary linux program called 'yangdump'
+   /usr/bin/yangdump
+ - a binary linux program called 'yangdiff'
+   /usr/bin/yangdiff
+ - a binary linux program called 'yangcli'
+   /usr/bin/yangcli
+ - a binary linux program called 'netconfd'
+   /usr/sbin/netconfd
+ - a binary linux program called 'netconf-subsystem'
+   /usr/local/sbin/netconf-subsystem
+ - a binary linux library called 'libncx.so'
+   /usr/lib/libncx.so
+ - documentation pages
+   /usr/share/doc/yuma/*
+ - a set of freely available YANG modules 
+   /usr/share/yuma/modules/*
+ - a set of sample CLI 'conf' files for the programs above
+   /usr/share/yuma/etc/*
+
+Some of the YANG modules includes with this software were
+generated with the smidump program, available at:
+
+ http://www.ibr.cs.tu-bs.de/projects/libsmi/
+
+WARNING
+=======
+
+This version of yuma implements the YANG language specification
+as defined in:
+
+http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-08.txt
+
+Future versions of yuma may not maintain full 
+compatibility with this Internet Draft.
+
+IMPORTANT INSTALLATION NOTE
+===========================
+
+  **************************************************************
+  *                                                            *
+  *  These programs will not function unless the YANG          *
+  *  modules are properly installed and available in           *
+  *  the module path.                                          *
+  *                                                            *
+  *  These files must be installed in one of the default       *
+  *  locatations, such as ~/modules or /usr/share/yang/modules *
+  *                                                            *
+  *  These files are used for CLI and config file processing.  *
+  *                                                            *
+  **************************************************************
+

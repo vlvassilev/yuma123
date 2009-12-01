@@ -5,7 +5,7 @@
 ############### SOURCE PROFILE ##############################
 
 SUBDIR_NM=yangcli
-SUBDIR_CPP=
+SUBDIR_CPP=-I../../../libtecla
 
 ############### TARGET PROFILE ##############################
 
@@ -29,7 +29,7 @@ LIBS = 	-lmgr \
 	-lncx \
 	-L/lib \
 	-L/usr/lib -lxml2 -lncurses -lssh2 \
-	-L/usr/local/lib -ltecla
+	-L../../../libtecla -ltecla
 
 LIBTARGS= $(LBASE)/libmgr.a \
 	$(LBASE)/libncx.$(LIBSUFFIX)

@@ -43,7 +43,7 @@ dnl incremented.  The micro version number must be a small integer
 dnl number.
 
 AC_SUBST(MICRO_VER)
-MICRO_VER="1"
+MICRO_VER="2"
 
 dnl The AC_PROG_CC line looks for a C compiler, and if gcc is chosen,
 dnl sets the $GCC shell variable to "yes". Make sure that CFLAGS is

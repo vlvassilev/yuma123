@@ -22,11 +22,11 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 CDEFS=-DDEBUG -DLINUX -DGCC -DHAS_FLOAT 
 CFLAGS=$(CDEFS) $(CWARN) -fPIC
 
-# production (1) or debug (0) build
-ifdef BLD
-  CFLAGS += -O2
-else
+# production (0) or debug (1) build
+ifdef DEBUG
   CFLAGS += -ggdb3
+else
+  CFLAGS += -O2
 endif
 
 # memory leak debugging mode
@@ -53,9 +53,6 @@ ifdef MAC
 # MACOSX version
   CINC +=-I/sw/include
   CFLAGS += -DMACOSX=1
-else
-# LINUX version
-  CINC += -I/usr/local/include
 endif
 
 ifdef MAC

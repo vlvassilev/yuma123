@@ -58,9 +58,6 @@ ifdef MAC
 # MACOSX version
   CINC +=-I/sw/include
   CFLAGS += -DMACOSX=1
-else
-# LINUX version
-  CINC += -I/usr/local/include
 endif
 
 ifdef MAC

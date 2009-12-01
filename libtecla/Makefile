@@ -35,11 +35,11 @@ RANLIB = ranlib
 
 # Optional flags to pass to the linker.
 
-LDFLAGS = 
+LDFLAGS =  --build-id
 
 # Optional C pre-processor flags.
 
-CPPFLAGS = 
+CPPFLAGS =  
 
 # The following optional defines change the characteristics of the library.
 #
@@ -131,20 +131,23 @@ LIBS =  -lcurses
 # List the default target libraries. This should be one or
 # both of the words "normal" and "reentrant".
 #
-TARGETS = normal reentrant
+#TARGETS = normal reentrant
+TARGETS = normal
 
 #
 # List which types of the above libraries are required.
 # This should be one or both of the words "static" and "shared".
 #
-TARGET_LIBS = static shared
+#TARGET_LIBS = static shared
+TARGET_LIBS = static
 
 #
 # If you want the demo programs to be built, the following variable
 # should be assigned the single word: demos. If it isn't assigned
 # anything, the demo programs won't be built.
 #
-DEMOS = demos
+#DEMOS = demos
+DEMOS =
 
 #
 # List the programs that are to be made by default.
@@ -263,7 +266,9 @@ install_bin: $(BINDIR) $(PROGRAMS) $(PROGRAMS_R)
 	  $(srcdir)/install-sh -c -m 755 -s $$prog $(BINDIR)/; \
 	done
 
-install: install_lib install_inc install_man install_bin
+#install: install_lib install_inc install_man install_bin
+
+install: install_lib
 
 # Make any missing installation directories.
 

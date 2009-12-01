@@ -14,9 +14,6 @@ APPS = subsys netconfd yangdump yangdiff yangcli
 # make all targets
 DIRS = agt mgr ncx $(APPS)
 
-# make agent without other targets
-AGTDIRS = agt ncx netconfd
-
 ifdef DESTDIR
 JFLAG=
 else

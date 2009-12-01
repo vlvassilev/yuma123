@@ -548,6 +548,7 @@ static status_t
     val_idref_t *toasterToastType;
 
     res = NO_ERR;
+    toasterDoneness = 0;
 
     toasterDoneness_val = val_find_child(
         msg->rpc_input,

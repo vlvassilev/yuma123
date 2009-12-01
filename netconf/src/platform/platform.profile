@@ -66,7 +66,11 @@ endif
 ifdef MAC
    GRP=
 else
+ifdef DESTDIR
+   GRP=
+else
    GRP=--group=root
+endif
 endif
 
 ifdef STATIC

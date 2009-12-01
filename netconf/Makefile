@@ -55,9 +55,9 @@ treeinstall:
 ifdef DESTDIR
 	mkdir -p $(DESTDIR)/usr/bin
 	mkdir -p $(DESTDIR)/usr/sbin
+	mkdir -p $(DESTDIR)/usr/lib
 	mkdir -p $(DESTDIR)/usr/local/bin
 	mkdir -p $(DESTDIR)/usr/local/sbin
-	mkdir -p $(DESTDIR)/etc
 	mkdir -p $(DESTDIR)/usr/share/doc
 endif
 	$(SUDO) mkdir -p $(DOC_INSTALL)

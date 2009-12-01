@@ -38,7 +38,7 @@ test:
 install:
 ifdef STATIC
 else
-	$(SUDO) install --owner=root $(GRP) \
+	$(SUDO) install $(OWNER) $(GRP) \
 	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) \
 	$(REAL_INST)
 ifdef MAC

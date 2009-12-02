@@ -109,7 +109,7 @@ date	     init     comment
 
 #define NCXMOD_IETF_NETCONF   (const xmlChar *)"ietf-netconf"
 
-#define NCXMOD_IETF_NETCONF_STATE (const xmlChar *)"ietf-netconf-state"
+#define NCXMOD_IETF_NETCONF_STATE (const xmlChar *)"ietf-netconf-monitoring"
 
 /* name of the NCX modules directory appended when YUMA_HOME or HOME
  * ENV vars used to construct NCX module filespec

@@ -55,7 +55,7 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
-#define AGT_STATE_MODULE      (const xmlChar *)"ietf-netconf-state"
+#define AGT_STATE_MODULE      (const xmlChar *)"ietf-netconf-monitoring"
 
 /********************************************************************
 *                                                                   *

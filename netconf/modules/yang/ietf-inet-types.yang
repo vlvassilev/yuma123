@@ -1,6 +1,7 @@
+
  module ietf-inet-types {
 
-   namespace "urn:ietf:params:xml:ns:yang:ietf-inet-types-DRAFT-04";
+   namespace "urn:ietf:params:xml:ns:yang:ietf-inet-types-DRAFT-05";
    prefix "inet";
 
    organization
@@ -38,9 +39,9 @@
    // RFC Ed.: replace XXXX with actual RFC number and remove this note
 
    // RFC Ed.: remove this note
-   // Note: extracted from draft-ietf-netmod-yang-types-04.txt
+   // Note: extracted from draft-ietf-netmod-yang-types-05.txt
 
-   revision 2009-10-23 {
+   revision 2009-11-10 {
      description
       "Initial revision.";
      reference
@@ -248,7 +249,8 @@
        11.2.";
      reference
       "RFC 4291: IP Version 6 Addressing Architecture
-       RFC 4007: IPv6 Scoped Address Architecture";
+       RFC 4007: IPv6 Scoped Address Architecture
+       IDv6TREP: A Recommendation for IPv6 Address Text Representation";
    }
 
    typedef ip-prefix {

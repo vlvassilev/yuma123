@@ -15,66 +15,6 @@
 From draft-07:
 
 identifiers:
-container /netconf-state
-container /netconf-state/capabilities
-leaf-list /netconf-state/capabilities/capability
-container /netconf-state/datastores
-list /netconf-state/datastores/datastore
-container /netconf-state/datastores/datastore/name
-choice /netconf-state/datastores/datastore/name/datastore
-case /netconf-state/datastores/datastore/name/datastore/running
-leaf /netconf-state/datastores/datastore/name/datastore/running/running
-case /netconf-state/datastores/datastore/name/datastore/candidate
-leaf /netconf-state/datastores/datastore/name/datastore/candidate/candidate
-case /netconf-state/datastores/datastore/name/datastore/startup
-leaf /netconf-state/datastores/datastore/name/datastore/startup/startup
-container /netconf-state/datastores/datastore/locks
-choice /netconf-state/datastores/datastore/locks/lockType
-case /netconf-state/datastores/datastore/locks/lockType/globalLock
-container /netconf-state/datastores/datastore/locks/lockType/globalLock/globalLock
-leaf /netconf-state/datastores/datastore/locks/lockType/globalLock/globalLock/lockedBySession
-leaf /netconf-state/datastores/datastore/locks/lockType/globalLock/globalLock/lockedTime
-case /netconf-state/datastores/datastore/locks/lockType/partialLocks
-list /netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks
-leaf /netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/lockId
-leaf /netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/lockedBySession
-leaf /netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/lockedTime
-leaf-list /netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/select
-leaf-list /netconf-state/datastores/datastore/locks/lockType/partialLocks/partialLocks/lockedNodes
-container /netconf-state/schemas
-list /netconf-state/schemas/schema
-leaf /netconf-state/schemas/schema/identifier
-leaf /netconf-state/schemas/schema/version
-leaf /netconf-state/schemas/schema/format
-leaf /netconf-state/schemas/schema/namespace
-leaf-list /netconf-state/schemas/schema/location
-container /netconf-state/sessions
-list /netconf-state/sessions/session
-leaf /netconf-state/sessions/session/sessionId
-leaf /netconf-state/sessions/session/transport
-leaf /netconf-state/sessions/session/username
-leaf /netconf-state/sessions/session/sourceHost
-leaf /netconf-state/sessions/session/loginTime
-leaf /netconf-state/sessions/session/inRpcs
-leaf /netconf-state/sessions/session/inBadRpcs
-leaf /netconf-state/sessions/session/outRpcErrors
-leaf /netconf-state/sessions/session/outNotifications
-container /netconf-state/statistics
-leaf /netconf-state/statistics/netconfStartTime
-leaf /netconf-state/statistics/inBadHellos
-leaf /netconf-state/statistics/inSessions
-leaf /netconf-state/statistics/droppedSessions
-leaf /netconf-state/statistics/inRpcs
-leaf /netconf-state/statistics/inBadRpcs
-leaf /netconf-state/statistics/outRpcErrors
-leaf /netconf-state/statistics/outNotifications
-rpc /get-schema
-container /get-schema/input
-leaf /get-schema/input/identifier
-leaf /get-schema/input/version
-leaf /get-schema/input/format
-container /get-schema/output
-anyxml /get-schema/output/data
 
 *********************************************************************
 *                                                                   *
@@ -85,6 +25,7 @@ anyxml /get-schema/output/data
 date         init     comment
 ----------------------------------------------------------------------
 24feb09      abb      begun
+02dec09      abb      redo with new names
 
 *********************************************************************
 *                                                                   *
@@ -216,19 +157,21 @@ date         init     comment
 #define AGT_STATE_OBJ_SESSION         (const xmlChar *)"session"
 #define AGT_STATE_OBJ_SESSIONS        (const xmlChar *)"sessions"
 
-#define AGT_STATE_OBJ_SESSIONID       (const xmlChar *)"sessionId"
+#define AGT_STATE_OBJ_SESSIONID       (const xmlChar *)"session-id"
 #define AGT_STATE_OBJ_TRANSPORT       (const xmlChar *)"transport"
 #define AGT_STATE_OBJ_USERNAME        (const xmlChar *)"username"
-#define AGT_STATE_OBJ_SOURCEHOST      (const xmlChar *)"sourceHost"
-#define AGT_STATE_OBJ_LOGINTIME       (const xmlChar *)"loginTime"
+#define AGT_STATE_OBJ_SOURCEHOST      (const xmlChar *)"source-host"
+#define AGT_STATE_OBJ_LOGINTIME       (const xmlChar *)"login-time"
 
-#define AGT_STATE_OBJ_IN_RPCS         (const xmlChar *)"inRpcs"
-#define AGT_STATE_OBJ_IN_SESSIONS     (const xmlChar *)"inSessions"
-#define AGT_STATE_OBJ_IN_BAD_RPCS     (const xmlChar *)"inBadRpcs"
-#define AGT_STATE_OBJ_IN_BAD_HELLOS   (const xmlChar *)"inBadHellos"
-#define AGT_STATE_OBJ_OUT_RPC_ERRORS  (const xmlChar *)"outRpcErrors"
-#define AGT_STATE_OBJ_OUT_NOTIFICATIONS  (const xmlChar *)"outNotifications"
-#define AGT_STATE_OBJ_DROPPED_SESSIONS  (const xmlChar *)"droppedSessions"
+#define AGT_STATE_OBJ_IN_RPCS         (const xmlChar *)"in-rpcs"
+#define AGT_STATE_OBJ_IN_SESSIONS     (const xmlChar *)"in-sessions"
+#define AGT_STATE_OBJ_NETCONF_START_TIME \
+    (const xmlChar *)"netconf-start-time"
+#define AGT_STATE_OBJ_IN_BAD_RPCS     (const xmlChar *)"in-bad-rpcs"
+#define AGT_STATE_OBJ_IN_BAD_HELLOS   (const xmlChar *)"in-bad-hellos"
+#define AGT_STATE_OBJ_OUT_RPC_ERRORS  (const xmlChar *)"out-rpc-errors"
+#define AGT_STATE_OBJ_OUT_NOTIFICATIONS  (const xmlChar *)"out-notifications"
+#define AGT_STATE_OBJ_DROPPED_SESSIONS  (const xmlChar *)"dropped-sessions"
 #define AGT_STATE_OBJ_STATISTICS      (const xmlChar *)"statistics"
 
 #define AGT_STATE_FORMAT_YANG         (const xmlChar *)"yang"
@@ -729,7 +672,7 @@ static val_value_t *
     /* add statistics/netconfStartTime static leaf */
     tstamp_datetime(tbuff);
     childval = agt_make_leaf(statisticsobj,
-                             (const xmlChar *)"netconfStartTime",
+                             AGT_STATE_OBJ_NETCONF_START_TIME,
                              tbuff,
                              res);
     if (!childval) {
@@ -873,9 +816,14 @@ static status_t
         nsid = VAL_IDREF_NSID(valformat);
     }
 
-    if (!identifier || !version || !format) {
+    if (identifier == NULL) {
         /* should already be reported */
         return ERR_NCX_MISSING_PARM;
+    }
+
+    if (format == NULL) {
+        format = AGT_STATE_FORMAT_YANG;
+        nsid = statemod->nsid;
     }
 
     /* check the identifier: must be valid module name */
@@ -895,7 +843,7 @@ static status_t
     /* do not check the revision now 
      * it must be an exact match if non-empty string
      */
-    if (!*version) {
+    if (version && !*version) {
         /* send NULL instead of empty string */
         version = NULL;
     }

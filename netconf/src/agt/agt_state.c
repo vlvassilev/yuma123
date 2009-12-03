@@ -174,6 +174,11 @@ date         init     comment
 #define AGT_STATE_OBJ_DROPPED_SESSIONS  (const xmlChar *)"dropped-sessions"
 #define AGT_STATE_OBJ_STATISTICS      (const xmlChar *)"statistics"
 
+#define AGT_STATE_OBJ_GLOBAL_LOCK     (const xmlChar *)"global-lock"
+#define AGT_STATE_OBJ_NAME            (const xmlChar *)"name"
+#define AGT_STATE_OBJ_LOCKED_BY_SESSION (const xmlChar *)"locked-by-session"
+#define AGT_STATE_OBJ_LOCKED_TIME     (const xmlChar *)"locked-time"
+
 #define AGT_STATE_FORMAT_YANG         (const xmlChar *)"yang"
 
 #define AGT_STATE_ENUM_NETCONF        (const xmlChar *)"NETCONF"
@@ -221,14 +226,14 @@ static status_t
                val_value_t *virval,
                val_value_t  *dstval)
 {
-    val_value_t           *nameval, *targval, *newval, *globallockval;
-    obj_template_t  *globallock;
-    cfg_template_t        *cfg;
-    const xmlChar         *locktime;
-    status_t          res;
-    ses_id_t          sid;
-    boolean           globallocked;
-    xmlChar           numbuff[NCX_MAX_NUMLEN+1];
+    val_value_t       *nameval, *targval, *newval, *globallockval;
+    obj_template_t    *globallock;
+    cfg_template_t    *cfg;
+    const xmlChar     *locktime;
+    status_t           res;
+    ses_id_t           sid;
+    boolean            globallocked;
+    xmlChar            numbuff[NCX_MAX_NUMLEN+1];
 
     (void)scb;
     res = NO_ERR;
@@ -236,14 +241,14 @@ static status_t
     if (cbmode == GETCB_GET_VALUE) {
         globallock = obj_find_child(virval->obj,
                                     AGT_STATE_MODULE,
-                                    (const xmlChar *)"globalLock");
+                                    AGT_STATE_OBJ_GLOBAL_LOCK);
         if (!globallock) {
             return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
         }
 
         nameval = val_find_child(virval->parent,
                                  AGT_STATE_MODULE,
-                                 (const xmlChar *)"name");
+                                 AGT_STATE_OBJ_NAME);
         if (!nameval) {
             return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
         }
@@ -275,7 +280,7 @@ static status_t
                 /* add locks/globalLock/lockedBySession */ 
                 sprintf((char *)numbuff, "%u", sid);
                 newval = agt_make_leaf(globallock,
-                                       (const xmlChar *)"lockedBySession",
+                                       AGT_STATE_OBJ_LOCKED_BY_SESSION,
                                        numbuff, 
                                        &res);
                 if (newval) {
@@ -284,7 +289,7 @@ static status_t
 
                 /* add locks/globalLock/lockedTime */ 
                 newval = agt_make_leaf(globallock,
-                                       (const xmlChar *)"lockedTime",
+                                       AGT_STATE_OBJ_LOCKED_TIME,
                                        locktime, 
                                        &res);
                 if (newval) {

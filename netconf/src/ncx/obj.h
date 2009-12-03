@@ -905,7 +905,7 @@ extern const xmlChar *
 extern const xmlChar *
     obj_get_reference (const obj_template_t *obj);
 
-#define obj_is_config obj_get_config_flag
+#define obj_is_config obj_get_config_flag_deep
 
 extern boolean
     obj_get_config_flag (const obj_template_t *obj);

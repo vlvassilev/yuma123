@@ -6666,7 +6666,7 @@ const xmlChar *
 boolean
     obj_get_config_flag (const obj_template_t *obj)
 {
-    boolean setflag, retval;
+    boolean retval;
 
 #ifdef DEBUG
     if (!obj) {
@@ -6675,7 +6675,7 @@ boolean
     }
 #endif
 
-    retval = get_config_flag(obj, &setflag);
+    retval = obj_get_config_flag_deep(obj);
     return retval;
 
 }   /* obj_get_config_flag */
@@ -9649,7 +9649,7 @@ obj_template_t *
 
 
 /********************************************************************
-* FUNCTION get_config_flag_deep
+* FUNCTION obj_get_config_flag_deep
 *
 * Get the config flag for an obj_template_t 
 * Go all the way up the tree until an explicit

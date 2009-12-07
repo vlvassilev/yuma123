@@ -2153,6 +2153,44 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION tk_dump_token
+* 
+* Debug printf the specified token
+* !!! Very verbose !!!
+*
+* INPUTS:
+*   tk == token
+*
+*********************************************************************/
+void
+    tk_dump_token (const tk_token_t *tk)
+{
+#ifdef DEBUG
+    if (!tk) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (!LOGDEBUG2) {
+        return;
+    }
+
+    log_debug2("\nline(%u.%u), typ(%s)",
+               tk->linenum, 
+               tk->linepos, 
+               tk_get_token_name(tk->typ));
+    if (tk->val) {
+        if (xml_strlen(tk->val) > 40) {
+            log_debug2("\n");
+        }
+        log_debug2("  val(%s)", (const char *)tk->val);
+    }
+
+} /* tk_dump_token */
+
+
+/********************************************************************
 * FUNCTION tk_dump_chain
 * 
 * Debug printf the token chain
@@ -2165,10 +2203,10 @@ const xmlChar *
 *   none
 *********************************************************************/
 void
-    tk_dump_chain (tk_chain_t *tkc)
+    tk_dump_chain (const tk_chain_t *tkc)
 {
-    tk_token_t *tk;
-    int         i;
+    const tk_token_t *tk;
+    int               i;
 
 #ifdef DEBUG
     if (!tkc) {
@@ -2177,14 +2215,20 @@ void
     }
 #endif
 
+    if (!LOGDEBUG3) {
+        return;
+    }
+
     i = 0;
     for (tk = (tk_token_t *)dlq_firstEntry(&tkc->tkQ);
          tk != NULL;
          tk = (tk_token_t *)dlq_nextEntry(tk)) {
         log_debug3("\n%s line(%u.%u), tk(%d), typ(%s)",
                    (tk==tkc->cur) ? "*cur*" : "",
-                   tk->linenum, tk->linepos, 
-                   ++i, tk_get_token_name(tk->typ));
+                   tk->linenum, 
+                   tk->linepos, 
+                   ++i, 
+                   tk_get_token_name(tk->typ));
         if (tk->val) {
             if (xml_strlen(tk->val) > 40) {
                 log_debug3("\n");

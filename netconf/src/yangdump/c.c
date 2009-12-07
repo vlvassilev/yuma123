@@ -2641,7 +2641,7 @@ static status_t
 *
 * INPUTS:
 *   pcb == parser control block of module to convert
-*          This is returned from ncxmod_load_module_xsd
+*          This is returned from ncxmod_load_module_ex
 *   cp == conversion parms to use
 *   scb == session control block for writing output
 *

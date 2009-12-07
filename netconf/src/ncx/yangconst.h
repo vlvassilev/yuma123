@@ -45,6 +45,9 @@ date	     init     comment
 *********************************************************************/
 
 #define YANG_URN (const xmlChar *)"urn:ietf:params:xml:ns:yang:1"
+
+#define YIN_URN  (const xmlChar *)"urn:ietf:params:xml:ns:yang:yin:1"
+
 #define YANG_PREFIX (const xmlChar *)"y"
 #define YANG_MODULE (const xmlChar *)"yang"   /***  no mod ! ***/
 
@@ -64,9 +67,11 @@ date	     init     comment
 #define YANG_K_BIT               (const xmlChar *)"bit"
 #define YANG_K_CASE              (const xmlChar *)"case"
 #define YANG_K_CHOICE            (const xmlChar *)"choice"
+#define YANG_K_CONDITION         (const xmlChar *)"condition"
 #define YANG_K_CONFIG            (const xmlChar *)"config"
 #define YANG_K_CONTACT           (const xmlChar *)"contact"
 #define YANG_K_CONTAINER         (const xmlChar *)"container"
+#define YANG_K_DATE              (const xmlChar *)"date"
 #define YANG_K_DEFAULT           (const xmlChar *)"default"
 #define YANG_K_DELETE            (const xmlChar *)"delete"
 #define YANG_K_DESCRIPTION       (const xmlChar *)"description"
@@ -87,6 +92,7 @@ date	     init     comment
 #define YANG_K_IF_FEATURE        (const xmlChar *)"if-feature"
 #define YANG_K_IMPORT            (const xmlChar *)"import"
 #define YANG_K_INCLUDE           (const xmlChar *)"include"
+#define YANG_K_INFO              (const xmlChar *)"info"
 #define YANG_K_INPUT             (const xmlChar *)"input"
 #define YANG_K_INSERT            (const xmlChar *)"insert"
 #define YANG_K_KEY               (const xmlChar *)"key"
@@ -102,6 +108,7 @@ date	     init     comment
 #define YANG_K_MIN_ELEMENTS      (const xmlChar *)"min-elements"
 #define YANG_K_MODULE            (const xmlChar *)"module"
 #define YANG_K_MUST              (const xmlChar *)"must"
+#define YANG_K_NAME              (const xmlChar *)"name"
 #define YANG_K_NAMESPACE         (const xmlChar *)"namespace"
 #define YANG_K_NAN               (const xmlChar *)"NaN"
 #define YANG_K_NEGINF            (const xmlChar *)"-INF"
@@ -127,12 +134,16 @@ date	     init     comment
 #define YANG_K_STATUS            (const xmlChar *)"status"
 #define YANG_K_SUBMODULE         (const xmlChar *)"submodule"
 #define YANG_K_SYSTEM            (const xmlChar *)"system"
+#define YANG_K_TAG               (const xmlChar *)"tag"
+#define YANG_K_TEXT              (const xmlChar *)"text"
+#define YANG_K_TARGET_NODE       (const xmlChar *)"target-node"
 #define YANG_K_TYPE              (const xmlChar *)"type"
 #define YANG_K_TYPEDEF           (const xmlChar *)"typedef"
 #define YANG_K_UNBOUNDED         (const xmlChar *)"unbounded"
 #define YANG_K_UNION             (const xmlChar *)"union"
 #define YANG_K_UNIQUE            (const xmlChar *)"unique"
 #define YANG_K_UNITS             (const xmlChar *)"units"
+#define YANG_K_URI               (const xmlChar *)"uri"
 #define YANG_K_USER              (const xmlChar *)"user"
 #define YANG_K_USES              (const xmlChar *)"uses"
 #define YANG_K_VALUE             (const xmlChar *)"value"

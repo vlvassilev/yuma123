@@ -171,6 +171,10 @@ extern xmlns_id_t
 extern xmlns_id_t 
     xmlns_yang_id (void);
 
+/* get the YIN NS ID */
+extern xmlns_id_t 
+    xmlns_yin_id (void);
+
 /* get module name that registered this namespace */
 extern const xmlChar *
     xmlns_get_module (xmlns_id_t  nsid);

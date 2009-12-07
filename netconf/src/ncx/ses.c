@@ -808,18 +808,8 @@ status_t
         return ERR_NCX_OPERATION_FAILED;
     }
 
-    /* Generate Start of XML Message Directive
-     * hack to keep the xmlTextReader happy for now
-     * It requires the first char to be a '\n' if
-     * reading from the ses_read_cb function
-     * by if it uses its own reader from a file,
-     * the first char must be the '<' to start the XML directive
-     */
-    if (scb->fp || scb->mode==SES_MODE_XMLDOC) {
-        ses_putstr(scb, XML_START_FILMSG);
-    } else {
-        ses_putstr(scb, XML_START_MSG);
-    }
+    /* Generate Start of XML Message Directive */
+    ses_putstr(scb, XML_START_MSG);
 
     return NO_ERR;
 

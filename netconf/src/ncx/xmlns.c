@@ -102,34 +102,37 @@ date         init     comment
 *********************************************************************/
 
 /* INVALID namespace ID */
-static xmlns_id_t xmlns_invid = 0;
+static xmlns_id_t xmlns_invid;
 
 /* NETCONF namespace ID */
-static xmlns_id_t xmlns_ncid = 0;
+static xmlns_id_t xmlns_ncid;
 
 /* XMLNS namespace ID */
-static xmlns_id_t xmlns_nsid = 0;
+static xmlns_id_t xmlns_nsid;
 
 /* XSD namespace ID */
-static xmlns_id_t xmlns_xsid = 0;
+static xmlns_id_t xmlns_xsid;
 
 /* NETCONF Extensions namespace ID */
-static xmlns_id_t xmlns_ncxid = 0;
+static xmlns_id_t xmlns_ncxid;
 
 /* XSD Instance (XSI) namespace ID */
-static xmlns_id_t xmlns_xsiid = 0;
+static xmlns_id_t xmlns_xsiid;
 
 /* 1998 XML Namespace ID */
-static xmlns_id_t xmlns_xmlid = 0;
+static xmlns_id_t xmlns_xmlid;
 
 /* NETCONF Notifications namespace ID */
-static xmlns_id_t xmlns_ncnid = 0;
+static xmlns_id_t xmlns_ncnid;
 
 /* YANG namespace ID */
-static xmlns_id_t xmlns_yangid = 0;
+static xmlns_id_t xmlns_yangid;
+
+/* YIN namespace ID */
+static xmlns_id_t xmlns_yinid;
 
 /* next ID to allocate */
-static xmlns_id_t xmlns_next_id = 1;
+static xmlns_id_t xmlns_next_id;
 
 /* array of xmlns_t pointers */
 static xmlns_t   *xmlns[XMLNS_MAX_NS];
@@ -206,6 +209,42 @@ static void
 }  /* free_xmlns */
 
 
+
+/********************************************************************
+* FUNCTION xmlns_cleanup
+*
+* Cleanup module static data
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    none
+*********************************************************************/
+static void 
+    init_xmlns_static_vars (void)
+{
+    uint32 i;
+
+    for (i=0; i < XMLNS_MAX_NS; i++) {
+        xmlns[i] = NULL;
+    }
+
+    xmlns_invid = 0;
+    xmlns_ncid = 0;
+    xmlns_nsid = 0;
+    xmlns_xsid = 0;
+    xmlns_ncxid = 0;
+    xmlns_xsiid = 0;
+    xmlns_xmlid = 0;
+    xmlns_ncnid = 0;
+    xmlns_yangid = 0;
+    xmlns_yinid = 0;
+    xmlns_next_id = 1;
+    xmlns_init_done = FALSE;
+
+}  /* init_xmlns_static_vars */
+
+
 /********************************************************************
 *                                                                   *
 *                   E X P O R T E D    F U N C T I O N S            *
@@ -226,13 +265,8 @@ static void
 void 
     xmlns_init (void)
 {
-    int i;
-
     if (!xmlns_init_done) {
-
-        for (i=0; i<XMLNS_MAX_NS; i++) {
-            xmlns[i] = NULL;
-        }
+        init_xmlns_static_vars();
         xmlns_init_done = TRUE;
     }
 
@@ -366,6 +400,8 @@ status_t
         xmlns_ncnid = xmlns_next_id;
     } else if (!xml_strcmp(ns, YANG_URN)) {
         xmlns_yangid = xmlns_next_id;
+    } else if (!xml_strcmp(ns, YIN_URN)) {
+        xmlns_yinid = xmlns_next_id;
     }
 
     if (LOGDEBUG2) {
@@ -592,17 +628,7 @@ void
             free_xmlns(xmlns[i]);
             xmlns[i] = NULL;
         }
-
-        xmlns_invid = 0;
-        xmlns_ncid = 0;
-        xmlns_nsid = 0;
-        xmlns_xsid = 0;
-        xmlns_ncxid = 0;
-        xmlns_xsiid = 0;
-        xmlns_xmlid = 0;
-        xmlns_ncnid = 0;
-        xmlns_yangid = 0;
-        xmlns_next_id = 1;
+        init_xmlns_static_vars();
         xmlns_init_done = FALSE;
     }
 
@@ -745,6 +771,24 @@ xmlns_id_t
 {
     return xmlns_yangid;
 }  /* xmlns_yang_id */
+
+
+/********************************************************************
+* FUNCTION xmlns_yin_id
+*
+* Get the ID for the YIN namespace or 0 if it 
+* doesn't exist
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    YIN ID or 0 if not found
+*********************************************************************/
+xmlns_id_t 
+    xmlns_yin_id (void)
+{
+    return xmlns_yinid;
+}  /* xmlns_yin_id */
 
 
 /********************************************************************

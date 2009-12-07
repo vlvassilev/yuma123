@@ -279,13 +279,14 @@ extern status_t
 			 yang_parsetype_t ptyp);
 
 extern yang_pcb_t *
-    ncxmod_load_module_xsd (const xmlChar *modname,
-			    const xmlChar *revision,
-			    boolean subtree_mode,
-			    boolean with_submods,
-			    boolean cookedmode,
-                            dlq_hdr_t *savedevQ,
-			    status_t  *res);
+    ncxmod_load_module_ex (const xmlChar *modname,
+                           const xmlChar *revision,
+                           boolean subtree_mode,
+                           boolean with_submods,
+                           boolean cookedmode,
+                           boolean savetkc,
+                           dlq_hdr_t *savedevQ,
+                           status_t  *res);
 
 
 extern yang_pcb_t *

@@ -141,14 +141,44 @@ module yangdump {
     typedef FormatType {
         description "Conversion Output Formats.";
         type enumeration { 
-           enum xsd;
-           enum sql;
-           enum sqldb;
-           enum html;
-           enum yang;
-           enum copy;
-           enum h; 
-           enum c; 
+           enum xsd {
+              description "Convert YANG to XSD";
+           }
+           enum sql {
+              description 
+                 "Convert YANG to SQL history collection (TBD)";
+           }
+           enum sqldb {
+              description 
+                 "Convert YANG to SQL input for netconfcentral.org
+                  database.";
+           }
+           enum html {
+              description 
+                 "Convert YANG to HTML documentation format.";
+           }
+           enum yang {
+              description 
+                 "Convert YANG to canonical YANG format.";
+           }
+           enum copy {
+              description 
+                 "Copy and rename the YANG file to canonical name
+                  format.";
+           }
+           enum h {
+              description 
+                 "Generate server instrumentation library H file.";
+           }
+
+           enum c {
+              description 
+                 "Generate server instrumentation library C file.";
+           }
+           enum yin {
+              description 
+                 "Convert YANG to YIN format.";
+           }
         }
     }
 

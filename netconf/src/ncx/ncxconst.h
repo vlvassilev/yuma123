@@ -624,6 +624,7 @@ date	     init     comment
 #define NCX_EL_XSDLIST         (const xmlChar *)"xsdlist"
 #define NCX_EL_YANG            (const xmlChar *)"yang"
 #define NCX_EL_YES             (const xmlChar *)"yes"
+#define NCX_EL_YIN             (const xmlChar *)"yin"
 #define NCX_EL_YUMA_HOME       (const xmlChar *)"yuma-home"
 
 /* bit definitions for ncx_lstr_t flags field */

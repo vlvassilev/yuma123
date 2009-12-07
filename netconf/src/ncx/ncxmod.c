@@ -2702,7 +2702,7 @@ status_t
 
 
 /********************************************************************
-* FUNCTION ncxmod_load_module_xsd
+* FUNCTION ncxmod_load_module_ex
 *
 * Determine the location of the specified module
 * and then load it into the system, if not already loaded
@@ -2717,6 +2717,7 @@ status_t
 *                == FALSE if top-level mode skip process sub-modules 
 *   cookedmode == TRUE if producing cooked output
 *                 FALSE if producing raw output
+*   savetkc == TRUE if the parse chain should be saved (e.g., YIN)
 *   savedevQ == Q of ncx_save_deviations_t to use
 *   res == address of return status
 *
@@ -2727,13 +2728,14 @@ status_t
 *   pointer to malloced parser control block, or NULL of none
 *********************************************************************/
 yang_pcb_t *
-    ncxmod_load_module_xsd (const xmlChar *modname,
-                            const xmlChar *revision,
-                            boolean subtree_mode,
-                            boolean with_submods,
-                            boolean cookedmode,
-                            dlq_hdr_t *savedevQ,
-                            status_t *res)
+    ncxmod_load_module_ex (const xmlChar *modname,
+                           const xmlChar *revision,
+                           boolean subtree_mode,
+                           boolean with_submods,
+                           boolean cookedmode,
+                           boolean savetkc,
+                           dlq_hdr_t *savedevQ,
+                           status_t *res)
 {
     yang_pcb_t     *pcb;
 
@@ -2753,6 +2755,7 @@ yang_pcb_t *
         pcb->subtree_mode = subtree_mode;
         pcb->with_submods = with_submods;
         pcb->cookedmode = cookedmode;
+        pcb->savetkc = savetkc;
         *res = try_load_module(pcb,
                                YANG_PT_TOP,
                                modname, 
@@ -2762,7 +2765,7 @@ yang_pcb_t *
 
     return pcb;
 
-}  /* ncxmod_load_module_xsd */
+}  /* ncxmod_load_module_ex */
 
 
 /********************************************************************

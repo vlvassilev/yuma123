@@ -1925,11 +1925,15 @@ xmlChar *
     case NCX_CVTTYP_H:
         ext = (const xmlChar *)".h";
         break;
-    case NCX_CVTTYP_YANG:
-        ext = (const xmlChar *)".yang";
+    case NCX_CVTTYP_C:
+        ext = (const xmlChar *)".c";
         break;
+    case NCX_CVTTYP_YANG:
     case NCX_CVTTYP_COPY:
         ext = (const xmlChar *)".yang";
+        break;
+    case NCX_CVTTYP_YIN:
+        ext = (const xmlChar *)".yin";
         break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);

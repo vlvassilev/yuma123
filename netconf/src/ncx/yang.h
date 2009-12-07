@@ -173,9 +173,11 @@ typedef struct yang_pcb_t_ {
     boolean       parsemode;  /* TRUE if full parse but no reg-load */
     boolean       importmode;  /* TRUE if parsing from an import-stmt */
     boolean       topfound;    /* TRUE if top found, not added */
+    boolean       savetkc;     /* TRUE if tkc should be kept in tkc */
     dlq_hdr_t     allimpQ;          /* Q of yang_import_ptr_t */
 
     dlq_hdr_t    *savedevQ;  /* ptr to Q of ncx_save_deviations_t */
+    tk_chain_t   *tkc;              /* live or NULL parse chain  */
 
     /* 4 Qs of yang_node_t */
     dlq_hdr_t     impchainQ;      /* cur chain of import used */

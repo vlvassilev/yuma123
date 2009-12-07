@@ -139,6 +139,9 @@ date         init     comment
 #include  "yangdump_util.h"
 #endif
 
+#ifndef _H_yin
+#include  "yin.h"
+#endif
 
 /********************************************************************
 *                                                                   *
@@ -1311,13 +1314,15 @@ static status_t
     modname = (const xmlChar *)cp->curmodule;
 
     /* load in the requested module to convert */
-    pcb = ncxmod_load_module_xsd(modname,
-                                 revision,
-                                 cp->subtree ? TRUE : FALSE,
-                                 cp->unified, 
-                                 !cp->rawmode,
-                                 &savedevQ,
-                                 &res);
+    pcb = ncxmod_load_module_ex(modname,
+                                revision,
+                                cp->subtree ? TRUE : FALSE,
+                                cp->unified, 
+                                !cp->rawmode,
+                                (cp->format == NCX_CVTTYP_YIN) 
+                                ? TRUE : FALSE,
+                                &savedevQ,
+                                &res);
     if (res == ERR_NCX_SKIPPED) {
         if (pcb) {
             yang_free_pcb(pcb);
@@ -1363,14 +1368,15 @@ static status_t
     }
 
     /* check if output session needed, any reports requested or
-     * any format except XSD and NONE means a session will be used
+     * any format except XSD, and NONE means a session will be used
      * to write output.
      */
     if (cp->modversion || 
         cp->exports || 
         cp->dependencies || 
         cp->identifiers || 
-        !(cp->format==NCX_CVTTYP_NONE || cp->format==NCX_CVTTYP_XSD)) {
+        !(cp->format == NCX_CVTTYP_NONE || 
+          cp->format == NCX_CVTTYP_XSD)) {
 
         scb = get_output_session(pcb, cp, &res);
         if (!scb || res != NO_ERR) {
@@ -1425,7 +1431,6 @@ static status_t
                           ncx_get_modname(pcb->top),
                           pcb->top->sourcefn);
                 ncx_print_errormsg(NULL, pcb->top, res);
-                
             } else {
                         /* make a copy of the module namespace URI
                  * so the XSD targetNamespace will be generated
@@ -1436,6 +1441,7 @@ static status_t
         }
     }
 
+    /* should be ready to convert the requested [sub]module now */
     if (res == NO_ERR) {
         /* check the type of translation requested */
         switch (cp->format) {
@@ -1623,6 +1629,20 @@ static status_t
                 ncx_print_errormsg(NULL, pcb->top, res);
             } else {
                 res = cyang_convert_module(pcb, cp, scb);
+                if (res != NO_ERR) {
+                    pr_err(res);
+                }
+            }
+            break;
+        case NCX_CVTTYP_YIN:
+            if (ncx_any_dependency_errors(pcb->top)) {
+                log_error("\nError: one or more imported modules had errors."
+                          "\n       YIN conversion of '%s' terminated.",
+                          pcb->top->sourcefn);
+                res = ERR_NCX_IMPORT_ERRORS;
+                ncx_print_errormsg(NULL, pcb->top, res);
+            } else {
+                res = yin_convert_module(pcb, cp, scb);
                 if (res != NO_ERR) {
                     pr_err(res);
                 }

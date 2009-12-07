@@ -1081,7 +1081,7 @@ static void
 *
 * INPUTS:
 *   pcb == parser control block of module to convert
-*          This is returned from ncxmod_load_module_xsd
+*          This is returned from ncxmod_load_module_ex
 *   cp == convert parms struct to use
 *   scb == session to use for output
 *

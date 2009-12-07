@@ -3491,6 +3491,13 @@ status_t
     /* parse the module and validate it only if a token chain
      * was properly parsed
      */
+    if (res == NO_ERR && pcb->savetkc) {
+        pcb->tkc = tk_clone_chain(tkc);
+        if (pcb->tkc == NULL) {
+            res = ERR_INTERNAL_MEM;
+        }
+    }
+
     if (res == NO_ERR) {
         res = parse_yang_module(tkc, mod, pcb, ptyp, &wasadd);
         if (res != NO_ERR) {
@@ -3559,9 +3566,6 @@ status_t
     fclose(fp);
     if (tkc) {
         tkc->fp = NULL;
-    }
-
-    if (tkc) {
         tk_free_chain(tkc);
     }
 

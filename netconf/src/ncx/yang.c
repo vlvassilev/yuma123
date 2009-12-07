@@ -2756,7 +2756,7 @@ yang_pcb_t *
      */
     pcb->stmtmode = ncx_save_descr(); 
 
-    /* only ncxmod_load_module_xsd will set this to FALSE
+    /* only ncxmod_load_module_ex will set this to FALSE
      * T: merge deviations into cooked objects
      * F: leave deviations out of cooked objects
      */
@@ -2805,6 +2805,10 @@ void
     }
 
     yang_clean_import_ptrQ(&pcb->allimpQ);
+
+    if (pcb->tkc) {
+        tk_free_chain(pcb->tkc);
+    }
 
     yang_clean_nodeQ(&pcb->impchainQ);
     yang_clean_nodeQ(&pcb->allincQ);

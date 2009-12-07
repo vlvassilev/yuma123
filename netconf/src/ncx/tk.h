@@ -313,7 +313,10 @@ extern const xmlChar *
     tk_next_val (tk_chain_t *tkc);
 
 extern void
-    tk_dump_chain (tk_chain_t *tkc);
+    tk_dump_chain (const tk_chain_t *tkc);
+
+extern void
+    tk_dump_token (const tk_token_t *tk);
 
 extern boolean
     tk_is_wsp_string (const tk_token_t *tk);

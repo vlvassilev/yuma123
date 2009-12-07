@@ -8,17 +8,17 @@
  * specific language governing permissions and limitations
  * under the License.    
  */
-#ifndef _H_html
-#define _H_html
+#ifndef _H_yin
+#define _H_yin
 
-/*  FILE: html.h
+/*  FILE: yin.h
 *********************************************************************
 *								    *
 *			 P U R P O S E				    *
 *								    *
 *********************************************************************
 
-  Convert YANG module to HTML documentation format 
+  Convert YANG module to YIN format
  
 *********************************************************************
 *								    *
@@ -28,7 +28,7 @@
 
 date	     init     comment
 ----------------------------------------------------------------------
-23-feb-08    abb      Begun
+06-dec-09    abb      Begun
 
 */
 
@@ -69,8 +69,8 @@ date	     init     comment
 *********************************************************************/
 
 extern status_t 
-    html_convert_module (yang_pcb_t *pcb,
-			 const yangdump_cvtparms_t *cp,
-			 ses_cb_t *scb);
+    yin_convert_module (yang_pcb_t *pcb,
+                        const yangdump_cvtparms_t *cp,
+                        ses_cb_t *scb);
 
-#endif	    /* _H_html */
+#endif	    /* _H_yin */

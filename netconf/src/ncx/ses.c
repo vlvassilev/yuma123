@@ -76,9 +76,10 @@ date         init     comment
 #define SES_DEBUG 1
 #endif
 
-#define LTSTR     ((const xmlChar *)"&lt;")
-#define GTSTR     ((const xmlChar *)"&gt;")
-#define AMPSTR    ((const xmlChar *)"&amp;")
+#define LTSTR     (const xmlChar *)"&lt;"
+#define GTSTR     (const xmlChar *)"&gt;"
+#define AMPSTR    (const xmlChar *)"&amp;"
+#define QSTR      (const xmlChar *)"&quote;"
 
 /********************************************************************
 *                                                                   *
@@ -627,7 +628,7 @@ void
 /********************************************************************
 * FUNCTION ses_putcstr
 *
-* Write a zero-terminated content string to the session
+* Write a zero-terminated element content string to the session
 *
 * THIS FUNCTION DOES NOT CHECK ANY PARAMTERS TO SAVE TIME
 * EXCEPT THAT ILLEGAL XML CHARS ARE CONVERTED TO CHAR ENTITIES
@@ -666,6 +667,53 @@ void
         }
     }
 }  /* ses_putcstr */
+
+
+/********************************************************************
+* FUNCTION ses_putastr
+*
+* Write a zero-terminated attribute content string to the session
+*
+* THIS FUNCTION DOES NOT CHECK ANY PARAMTERS TO SAVE TIME
+* EXCEPT THAT ILLEGAL XML CHARS ARE CONVERTED TO CHAR ENTITIES
+*
+* INPUTS:
+*   scb == session control block to start msg 
+*   str == string to write
+*   indent == current indent amount
+*
+*********************************************************************/
+void
+    ses_putastr (ses_cb_t *scb,
+                 const xmlChar *str,
+                 int32 indent)
+{
+    while (*str) {
+        if (*str == '<') {
+            ses_putstr(scb, LTSTR);
+            str++;
+        } else if (*str == '>') {
+            ses_putstr(scb, GTSTR);
+            str++;
+        } else if (*str == '&') {
+            ses_putstr(scb, AMPSTR);
+            str++;
+        } else if (*str == '"') {
+            ses_putstr(scb, QSTR);
+            str++;
+        } else if ((scb->mode == SES_MODE_XMLDOC
+                    || scb->mode == SES_MODE_TEXT) && *str == '\n') {
+            if (indent < 0) {
+                ses_putchar(scb, *str++);
+            } else {
+                ses_indent(scb, indent);
+                str++;
+            }
+        } else {
+            ses_putchar(scb, *str++);
+        }
+    }
+}  /* ses_putastr */
 
 
 /********************************************************************

@@ -294,7 +294,7 @@ static void
 
 }  /* end_yin_elem */
 
-#ifdef NOT_YET
+
 /********************************************************************
 * FUNCTION start_ext_elem
 * 
@@ -345,7 +345,6 @@ static void
     ses_putchar(scb, '>');
 
 }  /* end_ext_elem */
-#endif
 
 
 /********************************************************************
@@ -433,6 +432,45 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION write_cur_token
+* 
+* Write the full value of the current token to the session
+*
+* INPUTS:
+*    scb == session control block
+*    pcb == YANG parser control block
+*    elem == TRUE if this is element content; FALSE if attribute
+*********************************************************************/
+static void
+    write_cur_token (ses_cb_t *scb,
+                     yang_pcb_t *pcb,
+                     boolean elem)
+{
+    const xmlChar   *prefix, *value;
+
+    prefix = TK_CUR_MOD(pcb->tkc);
+    if (prefix != NULL) {
+        if (elem) {
+            ses_putcstr(scb, prefix, -1);
+        } else {
+            ses_putastr(scb, prefix, -1);
+        }
+        ses_putchar(scb, ':');
+    }
+
+    value = TK_CUR_VAL(pcb->tkc);
+    if (value != NULL) {
+        if (elem) {
+            ses_putcstr(scb, value, -1);
+        } else {
+            ses_putastr(scb, value, -1);
+        }
+    }
+
+}  /* write_cur_token */
+
+
+/********************************************************************
 * FUNCTION write_yin_stmt
 *  
 * Go through the token chain and write YIN stmts
@@ -457,6 +495,9 @@ static status_t
                     boolean *done)
 {
     const yin_mapping_t  *mapping;
+    ncx_import_t         *import;
+    ext_template_t       *extension;
+    const xmlChar        *prefix, *modprefix;
     status_t              res;
     boolean               loopdone;
 
@@ -491,7 +532,9 @@ static status_t
 
         /* output [string] part if expected */
         if (mapping->argname == NULL) {
-            ses_putchar(scb, '>');
+            if (tk_next_typ(pcb->tkc) == TK_TT_LBRACE) {
+                ses_putchar(scb, '>');
+            }
         } else {
             /* move token pointer to the argument string */
             res = advance_token(pcb);
@@ -508,19 +551,19 @@ static status_t
                                mapping->argname,
                                startindent + cp->indent);
                 ses_putchar(scb, '>');
-                ses_putstr_indent(scb,
-                                  TK_CUR_VAL(pcb->tkc),
-                                  startindent + (cp->indent * 2));
+                ses_indent(scb, startindent + (cp->indent * 2));
+                write_cur_token(scb, pcb, TRUE);
                 end_yin_elem(scb, 
                              mapping->argname, 
                              startindent + cp->indent);
             } else {
                 /* encode argname,value as an attribute */
                 ses_putchar(scb, ' ');
-                write_yin_attr(scb,
-                               mapping->argname,
-                               TK_CUR_VAL(pcb->tkc),
-                               -1);
+                ses_putstr(scb, mapping->argname);
+                ses_putchar(scb, '=');
+                ses_putchar(scb, '"');
+                write_cur_token(scb, pcb, FALSE);
+                ses_putchar(scb, '"');
                 if (tk_next_typ(pcb->tkc) != TK_TT_SEMICOL) {
                     ses_putchar(scb, '>');
                 } /* else end with empty element */
@@ -588,6 +631,138 @@ static status_t
         break;
     case TK_TT_MSTRING:
         /* extension keyword */
+        prefix = TK_CUR_MOD(pcb->tkc);
+        modprefix = ncx_get_mod_prefix(pcb->top);
+        if (modprefix != NULL && !xml_strcmp(prefix, modprefix)) {
+            /* local module */
+            extension = ext_find_extension(&pcb->top->extensionQ, 
+                                           TK_CUR_VAL(pcb->tkc));
+        } else {
+            import = ncx_find_pre_import(pcb->top, prefix);
+            if (import == NULL || import->mod == NULL) {
+                return ERR_NCX_IMP_NOT_FOUND;
+            }
+            extension = ext_find_extension(&import->mod->extensionQ, 
+                                           TK_CUR_VAL(pcb->tkc));
+        }
+        if (extension == NULL) {
+            return ERR_NCX_DEF_NOT_FOUND;
+        }
+
+        /* got the extension for this external keyword
+         * output keyword part 
+         */
+        start_ext_elem(scb, 
+                       prefix,
+                       TK_CUR_VAL(pcb->tkc), 
+                       startindent);
+
+        /* output [string] part if expected */
+        if (extension->arg == NULL) {
+            if (tk_next_typ(pcb->tkc) == TK_TT_LBRACE) {
+                ses_putchar(scb, '>');
+            }
+        } else {
+            /* move token pointer to the argument string */
+            res = advance_token(pcb);
+            if (res != NO_ERR) {
+                return res;
+            }
+
+            /* write the string part */
+            if (extension->argel) {
+                ses_putchar(scb, '>');
+
+                /* encode argname,value as an element */
+                start_ext_elem(scb, 
+                               prefix,
+                               extension->arg,
+                               startindent + cp->indent);
+                ses_putchar(scb, '>');
+                ses_indent(scb, startindent + (cp->indent * 2));
+                write_cur_token(scb, pcb, TRUE);
+                end_ext_elem(scb, 
+                             prefix,
+                             extension->arg, 
+                             startindent + cp->indent);
+            } else {
+                /* encode argname,value as an attribute */
+                ses_putchar(scb, ' ');
+                ses_putstr(scb, extension->arg);
+                ses_putchar(scb, '=');
+                ses_putchar(scb, '"');
+                write_cur_token(scb, pcb, FALSE);
+                ses_putchar(scb, '"');
+                if (tk_next_typ(pcb->tkc) != TK_TT_SEMICOL) {
+                    ses_putchar(scb, '>');
+                } /* else end with empty element */
+            }
+        }
+
+        /* move token pointer to the stmt-end char */
+        res = advance_token(pcb);
+        if (res != NO_ERR) {
+            return res;
+        }
+
+        switch (TK_CUR_TYP(pcb->tkc)) {
+        case TK_TT_SEMICOL:
+            /* advance to next stmt, this one is done */
+            res = advance_token(pcb);
+            if (res != NO_ERR) {
+                return res;
+            }
+            if (extension->arg != NULL && extension->argel) {
+                /* end the complex element */
+                end_ext_elem(scb, 
+                             prefix,
+                             extension->name, 
+                             startindent);
+            } else {
+                /* end the empty element */
+                ses_putstr(scb, (const xmlChar *)" />");
+            }
+            break;
+        case TK_TT_LBRACE:
+            /* advance to next sub-stmt, this one has child nodes */
+            res = advance_token(pcb);
+            if (res != NO_ERR) {
+                return res;
+            }
+
+            /* write the nested sub-stmts as child nodes */
+            if (TK_CUR_TYP(pcb->tkc) != TK_TT_RBRACE) {
+                loopdone = FALSE;
+                while (!loopdone) {
+                    res = write_yin_stmt(pcb,
+                                         cp,
+                                         scb,
+                                         startindent + cp->indent,
+                                         done);
+                    if (res != NO_ERR) {
+                        return res;
+                    }
+                    if (TK_CUR_TYP(pcb->tkc) == TK_TT_RBRACE) {
+                        loopdone = TRUE;
+                    }
+                }
+            }
+
+            /* move to next stmt, this one is done */
+            res = advance_token(pcb);
+            if (res != NO_ERR) {
+                return res;
+            }
+
+            /* end the complex element */
+            end_ext_elem(scb, 
+                         prefix,
+                         extension->name,
+                         startindent);
+            break;
+        default:
+            return SET_ERROR(ERR_INTERNAL_VAL);
+        }
         break;
     default:
         return SET_ERROR(ERR_INTERNAL_VAL);
@@ -701,6 +876,17 @@ status_t
     /* write the YIN namespace decl as the default namespace */
     write_yin_attr(scb, XMLNS, YIN_URN, indent);
 
+    /* write the module prefix and module namespace */
+    if (pcb->top->ismod) {
+        ses_putstr_indent(scb, XMLNS, indent);
+        ses_putchar(scb, ':');
+        ses_putstr(scb, ncx_get_mod_prefix(pcb->top));
+        ses_putchar(scb, '=');
+        ses_putchar(scb, '"');
+        ses_putstr(scb, ncx_get_modnamespace(pcb->top));
+        ses_putchar(scb, '"');
+    }
+
     /* write the xmlns decls for all the imports used
      * by this [sub]module
      */
@@ -714,7 +900,6 @@ status_t
 
     /* finish the top-level start tag */
     ses_putchar(scb, '>');
-
 
     res = write_yin_contents(pcb, cp, scb);
 

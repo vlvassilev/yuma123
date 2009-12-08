@@ -305,10 +305,17 @@ extern void
 		       const xmlChar *str,
 		       int32 indent);
 
+/* write XML element safe content string */
 extern void
     ses_putcstr (ses_cb_t *scb,
 		 const xmlChar *str,
 		 int32 indent);
+
+/* write XML attribute safe content string */
+extern void
+    ses_putastr (ses_cb_t *scb,
+                 const xmlChar *str,
+                 int32 indent);
 
 extern void
     ses_indent (ses_cb_t *scb,

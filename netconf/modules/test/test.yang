@@ -413,6 +413,7 @@ module test {
    leaf data3 {
      if-feature t:feature1;
      type string;
+     default foo:bar;
    }
 
    leaf data4 {
@@ -428,6 +429,10 @@ module test {
      leaf a { 
        type string; 
        mandatory true; 
+     }
+     leaf b {
+       type string;
+       default '"';
      }
    }
  }

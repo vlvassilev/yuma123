@@ -3489,9 +3489,11 @@ status_t
     }
 
     /* parse the module and validate it only if a token chain
-     * was properly parsed
+     * was properly parsed; set this only once for the top module
      */
-    if (res == NO_ERR && pcb->savetkc) {
+    if (res == NO_ERR && 
+        pcb->savetkc &&
+        pcb->tkc == NULL) {
         pcb->tkc = tk_clone_chain(tkc);
         if (pcb->tkc == NULL) {
             res = ERR_INTERNAL_MEM;

@@ -1555,7 +1555,9 @@ static status_t
      * skip if this is parsemode in yangcli, and a new copy of the
      * module is desired
      */
-    if (!isfile && (pcb->importmode || !pcb->parsemode)) {
+    if (!isfile &&
+        !pcb->savetkc &&
+        (pcb->importmode || !pcb->parsemode)) {
         testmod = ncx_find_module(modname, revision);
         if (testmod) {
 #ifdef NCXMOD_DEBUG

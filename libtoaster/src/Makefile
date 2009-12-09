@@ -13,19 +13,22 @@ TARGET=../bin
 
 LIB_INST=../lib
 
-REAL_INST=$(YUMA_HOME)/target/lib
+WORK_INST=../../netconf/target/lib
+
+REAL_INST=$(DESTDIR)/usr/lib/yuma
+
 
 #################### MAKE RULES ########################
 
 all: sil_dummy sil_lib
 
 #################### PLATFORM DEFINITIONS ############
-include $(YUMA_HOME)/src/platform/platform.profile.sil
+include ../../netconf/src/platform/platform.profile.sil
 
 ################ DEPENDENCIES #########################
 # depend rule must be included after the 'all' make rule
 
-include $(YUMA_HOME)/src/platform/platform.profile.depend
+include ../../netconf/src/platform/platform.profile.depend
 
 
 test:

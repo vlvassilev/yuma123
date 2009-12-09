@@ -1,12 +1,12 @@
 Name:           yuma
-Version:        0.9.8
+Version:        0.9.9
 Release:        1%{?dist}
 Summary:        Yang-based Unified Modular Automation Tools
 
 Group:          Development/Tools
 License:        BSD
 URL:            http://www.netconfcentral.com/
-Source0:        yuma-0.9.8.tar.gz
+Source0:        yuma-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Requires: libc
@@ -52,6 +52,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/local/sbin/netconf-subsystem
 %{_datadir}/%{name}/
 %{_libdir}/libncx.so
+%{_libdir}/yuma/*
 
 
 %changelog

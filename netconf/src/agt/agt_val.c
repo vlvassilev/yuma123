@@ -3265,14 +3265,10 @@ static status_t
                      boolean *deleteme,
                      boolean rpcmode)
 {
-    obj_template_t  *obj;
-    xpath_pcb_t     *objwhen, *augwhen, *useswhen, *whendef;
-    xpath_pcb_t           *whenclone;
-    xpath_result_t        *result;
+    obj_template_t        *obj;
     val_value_t           *chval, *nextchild;
-    uint32                 loopcount;
     status_t               res, retres;
-    boolean                deletechild;
+    boolean                deletechild, condresult;
 
     *deleteme = FALSE;
     obj = curval->obj;
@@ -3282,110 +3278,54 @@ static status_t
     }
 
     retres = NO_ERR;
-    objwhen = obj->when;
-    augwhen = (obj->augobj) ? obj->augobj->when : NULL;
-    useswhen = (obj->usesobj) ? obj->usesobj->when : NULL;
 
-    /* execute all the when tests top down
-     * continue to descendants except if this
-     * node gets deleted (obviously)
-     */
-    if (objwhen || augwhen || useswhen) {
-
-        /* check each of the 3 when statmements */
-        for (loopcount = 0; loopcount < 3; loopcount++) {
-            switch (loopcount) {
-            case 0:
-                if (objwhen) {
-                    whendef = objwhen;
-                } else {
-                    continue;
-                }
-                break;
-            case 1:
-                if (augwhen) {
-                    whendef = augwhen;
-                } else {
-                    continue;
-                }
-                break;
-            case 2:
-                if (useswhen) {
-                    whendef = useswhen;
-                } else {
-                    continue;
-                }
-                break;
-            default:
-                return SET_ERROR(ERR_INTERNAL_VAL);
-            }
-
-            /* get a writable XPath parser control block */
-            whenclone = xpath_clone_pcb(whendef);
-            if (!whenclone) {
-                return ERR_INTERNAL_MEM;
-            }
-
-            res = NO_ERR;
-            result = xpath1_eval_expr(whenclone, 
-                                      curval, 
-                                      root, 
-                                      FALSE, 
-                                      TRUE, 
-                                      &res);
-            if (!result || res != NO_ERR) {
-                log_error("\nError: when_chk: failed for "
-                           "%s:%s (%s) '%s'",
-                          obj_get_mod_name(obj),
-                          obj_get_name(obj),
-                          get_error_string(res),
-                          whenclone->exprstr);
-            } else if (!xpath_cvt_boolean(result)) {
-                if (rpcmode) {
-                    agt_record_error(scb,
-                                     msg,
-                                     NCX_LAYER_OPERATION,
-                                     ERR_NCX_RPC_WHEN_FAILED,
-                                     NULL,
-                                     NCX_NT_STRING,
-                                     whenclone->exprstr,
-                                     NCX_NT_VAL,
-                                     curval);
-                } else {
+    condresult = FALSE;
+    retres = val_check_obj_when(curval,
+                                root,
+                                curval,
+                                obj,
+                                &condresult);
+    if (retres != NO_ERR) {
+        log_error("\nError: when_chk: failed for "
+                  "%s:%s (%s)",
+                  obj_get_mod_name(obj),
+                  obj_get_name(obj),
+                  get_error_string(retres));
+    } else if (!condresult) {
+        if (rpcmode) {
+            agt_record_error(scb,
+                             msg,
+                             NCX_LAYER_OPERATION,
+                             ERR_NCX_RPC_WHEN_FAILED,
+                             NULL,
+                             NCX_NT_NONE,
+                             NULL,
+                             NCX_NT_VAL,
+                             curval);
+        } else {
 #ifdef AGT_VAL_DEBUG
-                    if (LOGDEBUG2) {
-                        log_debug2("\nwhen_chk: test false for "
-                                   "node '%s:%s' expr '%s'", 
-                                   obj_get_mod_name(obj),
-                                   curval->name,
-                                   whenclone->exprstr);
-                    }
+            if (LOGDEBUG2) {
+                log_debug2("\nwhen_chk: test false for "
+                           "node '%s:%s'", 
+                           obj_get_mod_name(obj),
+                           curval->name);
+            }
 #endif
-                }
-                *deleteme = TRUE;
-            } else {
-#ifdef AGT_VAL_DEBUG
-                if (LOGDEBUG3) {
-                    log_debug3("\nwhen_chk: test passed for "
-                               "node '%s:%s' expr '%s'", 
-                               obj_get_mod_name(obj),
-                               curval->name,
-                               whenclone->exprstr);
-                }
-#endif
-            }
-
-            if (result) {
-                xpath_free_result(result);
-            }
-
-            xpath_free_pcb(whenclone);
-            whenclone = NULL;
-
-            if (*deleteme) {
-                return NO_ERR;
-            }
         }
+        *deleteme = TRUE;
+    } else {
+#ifdef AGT_VAL_DEBUG
+        if (LOGDEBUG3) {
+            log_debug3("\nwhen_chk: test passed for "
+                       "node '%s:%s'", 
+                       obj_get_mod_name(obj),
+                       curval->name);
+        }
+#endif
+    }
+
+    if (*deleteme) {
+        return NO_ERR;
     }
 
     /* recurse for every child node until leafs are hit */
@@ -3406,6 +3346,7 @@ static status_t
             continue;
         }
 
+        deletechild = FALSE;
         res = when_stmt_check(scb, 
                               msg, 
                               root, 

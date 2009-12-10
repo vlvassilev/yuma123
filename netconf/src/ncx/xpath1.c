@@ -8361,6 +8361,43 @@ static xpath_result_t *
 }  /* parse_expr */
 
 
+/********************************************************************
+* FUNCTION get_context_objnode
+* 
+* Get the correct context node according to YANG rules
+*
+* INPUTS:
+*   obj == object to check
+*
+* RETURNS:
+*   pointer to context object to use (probably obj)
+*********************************************************************/
+static obj_template_t *
+    get_context_objnode (obj_template_t *obj)
+{
+    boolean done;
+
+    /* get the correct context node to use */
+    done = FALSE;
+    while (!done) {
+        if (obj->objtype == OBJ_TYP_CHOICE ||
+            obj->objtype == OBJ_TYP_CASE ||
+            obj->objtype == OBJ_TYP_USES) {
+            if (obj->parent) {
+                obj = obj->parent;
+            } else {
+                SET_ERROR(ERR_INTERNAL_VAL);
+                return obj;
+            }
+        } else {
+            done = TRUE;
+        }
+    }
+    return obj;
+
+}  /* get_context_objnode */
+
+
 /************    E X T E R N A L   F U N C T I O N S    ************/
 
 
@@ -8589,8 +8626,8 @@ status_t
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    pcb->context.node.objptr = obj;
-    pcb->orig_context.node.objptr = obj;
+    pcb->context.node.objptr = get_context_objnode(obj);
+    pcb->orig_context.node.objptr = pcb->context.node.objptr;
 
     rootdone = FALSE;
     if (obj_is_root(obj) || obj_is_data_db(obj)) {

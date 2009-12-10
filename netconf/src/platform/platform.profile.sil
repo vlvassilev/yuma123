@@ -39,7 +39,7 @@ ifdef FREE
   CFLAGS += -DFREE_VERSION
 endif
 
-
+ifdef YUMA_HOME
 CINC = -I. \
      -I$(YUMA_HOME)/src/platform \
      -I$(YUMA_HOME)/src/ncx \
@@ -47,6 +47,15 @@ CINC = -I. \
      -I/usr/include \
      -I/usr/include/libxml2 \
      -I/usr/include/libxml2/libxml
+else
+CINC = -I. \
+     -I$../../netconf/src/platform \
+     -I$../../netconf/src/ncx \
+     -I$../../netconf/src/agt \
+     -I/usr/include \
+     -I/usr/include/libxml2 \
+     -I/usr/include/libxml2/libxml
+endif
 
 # added /sw/include for MacOSX
 ifdef MAC

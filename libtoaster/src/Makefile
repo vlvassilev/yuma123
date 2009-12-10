@@ -34,7 +34,10 @@ include ../../netconf/src/platform/platform.profile.depend
 test:
 
 install:
-	install $(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) $(REAL_INST)
+	$(SUDO) install $(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) $(REAL_INST)
+
+work:
+	install $(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) $(WORK_INST)
 
 sil_lib: $(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
 

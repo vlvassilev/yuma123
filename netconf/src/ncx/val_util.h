@@ -172,11 +172,20 @@ extern status_t
 			  xmlChar *buff,
 			  uint32  *len);
 
+/* checks if-feature and when-stmt */
 extern status_t
     val_check_child_conditional (val_value_t *val,
 				 val_value_t *valroot,
 				 obj_template_t *childobj,
 				 boolean *condresult);
+
+/* checks when-stmt only */
+extern status_t
+    val_check_obj_when (val_value_t *val,
+                        val_value_t *valroot,
+                        val_value_t *objval,
+                        obj_template_t *obj,
+                        boolean *condresult);
 
 extern boolean
     val_is_mandatory (val_value_t *val,

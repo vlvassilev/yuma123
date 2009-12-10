@@ -5105,30 +5105,12 @@ static status_t
                   xpath_pcb_t *when,
                   obj_template_t *obj)
 {
-    boolean done;
-
     if (when->parseres != NO_ERR) {
         /* some errors already reported so do not
          * duplicate messages; just skip 2nd pass
          */
         return NO_ERR;
     }
-
-    /* get the correct context node to use */
-    done = FALSE;
-    while (!done) {
-        if (obj->objtype == OBJ_TYP_CHOICE ||
-            obj->objtype == OBJ_TYP_CASE) {
-            if (obj->parent) {
-                obj = obj->parent;
-            } else {
-                return SET_ERROR(ERR_INTERNAL_VAL);
-            }
-        } else {
-            done = TRUE;
-        }
-    }
-
     return xpath1_validate_expr(mod, obj, when);
 
 }  /* resolve_when */
@@ -9039,7 +9021,7 @@ static status_t
                    ncx_module_t  *mod,
                    dlq_hdr_t *datadefQ)
 {
-    obj_template_t        *testobj, *targobj;
+    obj_template_t        *testobj;
     obj_template_t        *leafobj;
     obj_key_t             *key;
     obj_unique_t          *uniq;
@@ -9053,50 +9035,23 @@ static status_t
     res = NO_ERR;
     retres = NO_ERR;
 
-    /* first resolve all the local object names */
+    /* check the must and when stmts in the entire subtree */
     for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
          testobj != NULL;
          testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
-        if (!obj_has_name(testobj)) {
-            /* skip augment and uses */
-            continue;
-        }
-
-        /* check the when-stmt in the object itself */
+        /* check the when-stmt in the object itself 
+         * check uses and augment since they can have
+         * their own when statements
+         */
         if (testobj->when) {
             res = resolve_when(mod, testobj->when, testobj);
             CHK_EXIT(res, retres);
         }
 
-        /* check the when-stmt in the uses object carried fwd */
-        if (testobj->usesobj && testobj->usesobj->when) {
-            res = resolve_when(mod,
-                               testobj->usesobj->when,
-                               testobj);
-            CHK_EXIT(res, retres);
-        }
-
-        /* check the when-stmt in the augment object carried fwd */
-        if (testobj->augobj && testobj->augobj->when) {
-
-            targobj = testobj->augobj->def.augment->targobj;
-
-            if (targobj->objtype == OBJ_TYP_CASE) {
-                targobj = targobj->parent;
-            }
-
-            if (targobj->objtype == OBJ_TYP_CHOICE) {
-                targobj = targobj->parent;
-                if (!targobj) {
-                    targobj = ncx_get_gen_root();
-                }
-            }
-
-            res = resolve_when(mod,
-                               testobj->augobj->when,
-                               targobj);
-            CHK_EXIT(res, retres);
+        if (!obj_has_name(testobj)) {
+            /* skip augment and uses for the rest of the tests */
+            continue;
         }
 
         /* validate correct Xpath in must clauses */

@@ -806,6 +806,93 @@ static void
 }  /* purge_errors */
 
 
+/********************************************************************
+* FUNCTION check_when_stmt
+* 
+* Check if the specified when-stmt for the specified node
+*
+* INPUTS:
+*   val == parent value node of the object node to check
+*   valroot == database root for XPath purposes
+*   childobj == object template of child to check
+*   when-stmt == object to check
+*   condresult == address of conditional test result
+*   
+* OUTPUTS:
+*   *condresult == TRUE if conditional is true or there are none
+*                  FALSE if conditional test failed
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    check_when_stmt (val_value_t *val,
+                     val_value_t *valroot,
+                     val_value_t *childval,
+                     obj_template_t *childobj,
+                     xpath_pcb_t *whenstmt,
+                     boolean *condresult)
+{
+    val_value_t             *dummychild, *usechild;
+    xpath_result_t          *result;
+    status_t                 res;
+    boolean                  whentest;
+
+    dummychild = NULL;
+
+    if (childval == NULL) {
+        dummychild = val_new_value();
+        if (!dummychild) {
+            return ERR_INTERNAL_MEM;
+        }
+        val_init_from_template(dummychild, childobj);
+        val_add_child(dummychild, val);
+        usechild = dummychild;
+    } else {
+        usechild = childval;
+    }
+
+    result = xpath1_eval_expr(whenstmt,
+                              usechild,
+                              valroot,
+                              FALSE,
+                              TRUE,
+                              &res);
+    if (result == NULL) {
+        *condresult = FALSE;
+    } else {
+        whentest = xpath_cvt_boolean(result);
+        if (!whentest) {
+            if (LOGDEBUG3) {
+                log_debug3("\nval: when test '%s' failed "
+                           "for object %s in parent %s",
+                           whenstmt->exprstr,
+                           obj_get_name(childobj),
+                           val->name);
+            } else {
+                if (LOGDEBUG3) {
+                    log_debug3("\nval: when test '%s' OK "
+                               "for object %s in parent %s",
+                               whenstmt->exprstr,
+                               obj_get_name(childobj),
+                               val->name);
+                }
+            }
+            *condresult = FALSE;
+        }
+        xpath_free_result(result);
+    }
+
+    if (dummychild != NULL) {
+        val_remove_child(dummychild);
+        val_free_value(dummychild);
+    }
+
+    return res;
+
+} /* check_when_stmt */
+
+
 /*************** E X T E R N A L    F U N C T I O N S  *************/
 
 
@@ -1884,6 +1971,101 @@ status_t
 
 
 /********************************************************************
+* FUNCTION val_check_obj_when
+* 
+* Check if the specified object node is
+* conditionally TRUE or FALSE, based on any
+* when statements attached to the child node
+*
+* INPUTS:
+*   val == parent value node of the object node to check
+*   valroot == database root for XPath purposes
+*   objval == database value node to check (may be NULL)
+*   obj == object template of data node object to check
+*   condresult == address of conditional test result
+*   
+* OUTPUTS:
+*   *condresult == TRUE if conditional is true or there are none
+*                  FALSE if conditional test failed
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    val_check_obj_when (val_value_t *val,
+                        val_value_t *valroot,
+                        val_value_t *objval,
+                        obj_template_t *obj,
+                        boolean *condresult)
+{
+    obj_template_t          *whenobj;
+    status_t                 res;
+    boolean                  done;
+
+#ifdef DEBUG
+    if (!val || !valroot || !obj || !condresult) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* there are no false if-feature statements
+     * so check for any whan statements attached
+     * to this object
+     *  1) direct
+     *  2) inherited from augment-when
+     *  3) inherited from uses-when chain
+     */
+    res = NO_ERR;
+    if (obj->when) {
+        res = check_when_stmt(val, 
+                              valroot, 
+                              objval,
+                              obj, 
+                              obj->when,
+                              condresult);
+        if (res != NO_ERR || !*condresult) {
+            return res;
+        }
+    }
+
+    if (obj->augobj && obj->augobj->when) {
+        res = check_when_stmt(val, 
+                              valroot, 
+                              NULL,
+                              obj->augobj,
+                              obj->augobj->when,
+                              condresult);
+        if (res != NO_ERR || !*condresult) {
+            return res;
+        }
+    }
+
+    done = FALSE;
+    whenobj = obj->usesobj;
+    while (!done) {
+        if (whenobj != NULL && whenobj->when) {
+            res = check_when_stmt(val,
+                                  valroot,
+                                  NULL,
+                                  whenobj,
+                                  whenobj->when,
+                                  condresult);
+            if (res != NO_ERR || !*condresult) {
+                return res;
+            }
+            whenobj = whenobj->usesobj;
+        } else {
+            done = TRUE;
+        }
+    }
+
+    *condresult = TRUE;
+    return NO_ERR;
+
+} /* val_check_obj_when */
+
+
+/********************************************************************
 * FUNCTION val_check_child_conditional
 * 
 * Check if the specified child object node is
@@ -1909,12 +2091,6 @@ status_t
                                  obj_template_t *childobj,
                                  boolean *condresult)
 {
-    val_value_t             *dummychild;
-    xpath_result_t          *result;
-    xpath_pcb_t             *whenclone;
-    status_t                 res;
-    boolean                  whentest, done;
-
 #ifdef DEBUG
     if (!val || !valroot || !childobj || !condresult) {
         return SET_ERROR(ERR_INTERNAL_PTR);
@@ -1933,156 +2109,11 @@ status_t
      * so check for any whan statements attached
      * to this object
      */
-    res = NO_ERR;
-    if (childobj->when ||
-        (childobj->usesobj && childobj->usesobj->when) ||
-        (childobj->augobj && childobj->augobj->when)) {
-
-        dummychild = val_new_value();
-        if (!dummychild) {
-            return ERR_INTERNAL_MEM;
-        }
-        val_init_from_template(dummychild, childobj);
-        val_add_child(dummychild, val);
-
-        done = FALSE;
-
-        if (childobj->when) {
-            whenclone = xpath_clone_pcb(childobj->when);
-            if (!whenclone) {
-                res = ERR_INTERNAL_MEM;
-                done = TRUE;
-            } else {
-                result = xpath1_eval_expr(whenclone,
-                                          dummychild,
-                                          valroot,
-                                          FALSE,
-                                          TRUE,
-                                          &res);
-                if (!result) {
-                    *condresult = FALSE;
-                    done = TRUE;
-                } else {
-                    whentest = xpath_cvt_boolean(result);
-                    if (!whentest) {
-                        if (LOGDEBUG3) {
-                            log_debug3("\nval: when test '%s' failed "
-                                       "for object %s in parent %s",
-                                       whenclone->exprstr,
-                                       obj_get_name(childobj),
-                                       val->name);
-                        } else {
-                            if (LOGDEBUG3) {
-                                log_debug3("\nval: when test '%s' OK "
-                                           "for object %s in parent %s",
-                                           whenclone->exprstr,
-                                           obj_get_name(childobj),
-                                           val->name);
-                            }
-                        }
-                        *condresult = FALSE;
-                        done = TRUE;
-                    }
-                    xpath_free_result(result);
-                }
-                xpath_free_pcb(whenclone);
-            }
-        }
-                                   
-        if (!done && childobj->usesobj && childobj->usesobj->when) {
-            whenclone = xpath_clone_pcb(childobj->usesobj->when);
-            if (!whenclone) {
-                res = ERR_INTERNAL_MEM;
-                done = TRUE;
-            } else {
-                result = xpath1_eval_expr(whenclone,
-                                          dummychild,
-                                          valroot,
-                                          FALSE,
-                                          TRUE,
-                                          &res);
-                if (!result) {
-                    *condresult = FALSE;
-                    done = TRUE;
-                } else {
-                    whentest = xpath_cvt_boolean(result);
-                    if (!whentest) {
-                        if (LOGDEBUG3) {
-                            log_debug3("\nval: when test '%s' failed "
-                                       "for object %s in parent %s",
-                                       whenclone->exprstr,
-                                       obj_get_name(childobj),
-                                       val->name);
-                        } else {
-                            if (LOGDEBUG3) {
-                                log_debug3("\nval: when test '%s' OK "
-                                           "for object %s in parent %s",
-                                           whenclone->exprstr,
-                                           obj_get_name(childobj),
-                                           val->name);
-                            }
-                        }
-                        *condresult = FALSE;
-                        done = TRUE;
-                    }
-                    xpath_free_result(result);
-                }
-                xpath_free_pcb(whenclone);
-            }
-        }
-
-        if (!done && childobj->augobj && childobj->augobj->when) {
-            whenclone = xpath_clone_pcb(childobj->augobj->when);
-            if (!whenclone) {
-                res = ERR_INTERNAL_MEM;
-                done = TRUE;
-            } else {
-                result = xpath1_eval_expr(whenclone,
-                                          dummychild,
-                                          valroot,
-                                          FALSE,
-                                          TRUE,
-                                          &res);
-                if (!result) {
-                    *condresult = FALSE;
-                    done = TRUE;
-                } else {
-                    whentest = xpath_cvt_boolean(result);
-                    if (!whentest) {
-                        if (LOGDEBUG3) {
-                            log_debug3("\nval: when test '%s' failed "
-                                       "for object %s in parent %s",
-                                       whenclone->exprstr,
-                                       obj_get_name(childobj),
-                                       val->name);
-                        }
-                        *condresult = FALSE;
-                        done = TRUE;
-                    } else {
-                        if (LOGDEBUG3) {
-                            log_debug3("\nval: when test '%s' OK "
-                                       "for object %s in parent %s",
-                                       whenclone->exprstr,
-                                       obj_get_name(childobj),
-                                       val->name);
-                        }
-                    }
-                    xpath_free_result(result);
-                }
-                xpath_free_pcb(whenclone);
-            }
-        }
-
-        val_remove_child(dummychild);
-        val_free_value(dummychild);
-
-        if (done) {
-            return res;
-        }
-    }
-
-    *condresult = TRUE;
-    return NO_ERR;
+    return val_check_obj_when(val, 
+                              valroot, 
+                              NULL,
+                              childobj, 
+                              condresult);
 
 } /* val_check_child_conditional */
 

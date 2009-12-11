@@ -8249,7 +8249,9 @@ boolean
     }
 #endif
 
-    if (obj_is_data_db(val->obj) && 
+    if (obj_is_root(val->obj)) {
+        return TRUE;
+    } else if (obj_is_data_db(val->obj) && 
         obj_get_config_flag(val->obj)) {
         return TRUE;
     } else {

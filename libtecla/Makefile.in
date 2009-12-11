@@ -35,7 +35,12 @@ RANLIB = @RANLIB@
 
 # Optional flags to pass to the linker.
 
+ifdef DEBIAN
+LDFLAGS = @LDFLAGS@
+else
 LDFLAGS = @LDFLAGS@ --build-id
+endif
+
 
 # Optional C pre-processor flags.
 

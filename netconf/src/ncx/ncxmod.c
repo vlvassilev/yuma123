@@ -230,8 +230,10 @@ static status_t
     }
 
     total =  pathlen + path2len;
-    if (!pathsep && path2 && (*path2 != NCXMOD_PSCHAR)) {
-        total++;
+    if (!pathsep) {
+        if ((path2 && (*path2 != NCXMOD_PSCHAR)) || path2==NULL) {
+            total++;
+        }
     }
     if (path2 && path2len && !path2sep) {
         total++;
@@ -260,8 +262,10 @@ static status_t
         str += xml_strcpy(str, path);
     }
 
-    if (!pathsep && path2 && (*path2 != NCXMOD_PSCHAR)) {
-        *str++ = NCXMOD_PSCHAR;
+    if (!pathsep) {
+        if ((path2 && (*path2 != NCXMOD_PSCHAR)) || path2==NULL) {
+            *str++ = NCXMOD_PSCHAR;
+        }
     }
 
     if (path2 && path2len) {
@@ -466,6 +470,7 @@ static boolean
     p = &buff[total];
     p += xml_strcpy(p, filename);
 
+    memset(&statbuf, 0x0, sizeof(statbuf));
     ret = stat((const char *)buff, &statbuf);
     return (ret == 0 && S_ISREG(statbuf.st_mode)) ? TRUE : FALSE;
 
@@ -2955,6 +2960,116 @@ xmlChar *
     return NULL;
 
 }  /* ncxmod_find_data_file */
+
+
+
+/********************************************************************
+* FUNCTION ncxmod_find_sil_file
+*
+* Determine the location of the specified 
+* server instrumentation library file
+*
+* Search order:
+*
+*  1) $YUMA_HOME/target/lib directory 
+*  2) $YUMA_RUNPATH environment variable
+*  3) /usr/lib/yuma directory
+*
+* INPUTS:
+*   fname == SIL file name with extension
+*   generrors == TRUE if error message should be generated
+*                FALSE if no error message
+*   res == address of status result
+*
+* OUTPUTS:
+*   *res == status 
+*
+* RETURNS:
+*   pointer to the malloced and initialized string containing
+*   the complete filespec or NULL if not found
+*   It must be freed after use!!!
+*********************************************************************/
+xmlChar *
+    ncxmod_find_sil_file (const xmlChar *fname,
+                          boolean generrors,
+                          status_t *res)
+{
+    xmlChar  *buff;
+    uint32    flen, bufflen;
+
+#ifdef DEBUG
+    if (!fname || !res) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    *res = NO_ERR;
+
+#ifdef NCXMOD_DEBUG
+    if (generrors) {
+        if (LOGDEBUG2) {
+            log_debug2("\nNcxmod: Finding SIL file (%s)", 
+                       fname);
+        }
+    }
+#endif
+
+    flen = xml_strlen(fname);
+    if (!flen || flen>NCX_MAX_NLEN) {
+        *res = ERR_NCX_WRONG_LEN;
+        return NULL;
+    }
+
+    /* get a buffer to construct filespacs */
+    bufflen = NCXMOD_MAX_FSPEC_LEN+1;
+    buff = m__getMem(bufflen);
+    if (!buff) {
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+
+    /* 1) YUMA_HOME/target/lib directory */
+    if (ncxmod_yuma_home) {
+        if (test_file(buff, 
+                      bufflen, 
+                      ncxmod_yuma_home,
+                      (const xmlChar *)"target/lib/",
+                      fname)) {
+            return buff;
+        }
+    }
+
+    /* 2) try the YUMA_RUNPATH environment variable */
+    if (ncxmod_run_path) {
+        if (test_pathlist(ncxmod_run_path, 
+                          buff, 
+                          bufflen, 
+                          fname, 
+                          NULL)) {
+            return buff;
+        }
+    }
+
+
+    /* 3) /usr/lib/yuma directory */
+    if (test_file(buff, 
+                  bufflen, 
+                  NCXMOD_DEFAULT_YUMALIB,
+                  NULL,
+                  fname)) {
+        return buff;
+    }
+
+    if (generrors) {
+        log_error("\nError: SIL file (%s) not found.", fname);
+    }
+
+    m__free(buff);
+    *res = ERR_NCX_MOD_NOT_FOUND;
+    return NULL;
+
+}  /* ncxmod_find_sil_file */
 
 
 /********************************************************************

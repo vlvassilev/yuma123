@@ -143,6 +143,10 @@ date	     init     comment
 /* !! should import this from make !! */
 #define NCXMOD_DEFAULT_INSTALL (const xmlChar *)"/usr/share/yuma"
 
+/* !! should import this from make !! */
+#define NCXMOD_DEFAULT_YUMALIB (const xmlChar *)"/usr/lib/yuma"
+
+
 /* NCX Environment Variable for MODULE search path */
 #define NCXMOD_MODPATH      "YUMA_MODPATH"
 
@@ -308,6 +312,11 @@ extern xmlChar *
     ncxmod_find_data_file (const xmlChar *fname,
 			   boolean generrors,
 			   status_t *res);
+
+extern xmlChar *
+    ncxmod_find_sil_file (const xmlChar *fname,
+                          boolean generrors,
+                          status_t *res);
 
 extern xmlChar *
     ncxmod_make_data_filespec (const xmlChar *fname,

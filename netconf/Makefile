@@ -15,6 +15,8 @@ TOP_INSTALL = $(DESTDIR)/usr/share/yuma
 
 DOC_INSTALL = $(DESTDIR)/usr/share/doc/yuma
 
+LIB_INSTALL = $(DESTDIR)/usr/lib/yuma
+
 ifdef DESTDIR
 JFLAG= 
 SUDO= 
@@ -56,11 +58,11 @@ ifdef DESTDIR
 	mkdir -p $(DESTDIR)/usr/bin
 	mkdir -p $(DESTDIR)/usr/sbin
 	mkdir -p $(DESTDIR)/usr/lib
-	mkdir -p $(DESTDIR)/usr/lib/yuma
 	mkdir -p $(DESTDIR)/usr/local/bin
 	mkdir -p $(DESTDIR)/usr/local/sbin
 	mkdir -p $(DESTDIR)/usr/share/doc
 endif
+	$(SUDO) mkdir -p $(LIB_INSTALL)
 	$(SUDO) mkdir -p $(DOC_INSTALL)
 	$(SUDO) mkdir -p $(TOP_INSTALL)
 	$(SUDO) mkdir -p $(TOP_INSTALL)/data

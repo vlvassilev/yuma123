@@ -8782,6 +8782,7 @@ xpath_result_t *
         dump_result(pcb, result, "eval_expr");
     }
 
+    *res = NO_ERR;
     return result;
 
 }  /* xpath1_eval_expr */

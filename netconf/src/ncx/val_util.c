@@ -839,6 +839,7 @@ static status_t
     boolean                  whentest;
 
     dummychild = NULL;
+    res = NO_ERR;
 
     if (childval == NULL) {
         dummychild = val_new_value();

@@ -12,8 +12,6 @@ endif
 
 ### GCC + [LINUX or MACOSX]
 
-# leave -Werror out of DEBUG BLDs
-# only add when BLD=BLD is in the MAKE flags
 CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 	-Wmissing-include-dirs -Wswitch-default -Wunused-parameter \
 	-Wextra -Wundef -Wshadow -Wpointer-arith \

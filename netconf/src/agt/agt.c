@@ -949,8 +949,7 @@ status_t
     agt_sil_init2_fn_t   init2fn;
     agt_sil_cleanup_fn_t cleanupfn;
     char                *error;
-    xmlChar             *buffer, *p;
-    const xmlChar       *prepend, *yuma_install, *yuma_home;
+    xmlChar             *buffer, *p, *pathspec;
     uint32               bufflen;
     status_t             res;
 
@@ -962,41 +961,16 @@ status_t
 
     res = NO_ERR;
     
-    yuma_home = ncxmod_get_yuma_home();
-    yuma_install = ncxmod_get_yuma_install();
-
-    if (yuma_home != NULL) {
-        prepend = yuma_home;
-    } else if (yuma_install != NULL) {
-        prepend = yuma_install;
-    } else {
-        prepend = EMPTY_STRING;
-    }
-
-    bufflen = xml_strlen(modname) + xml_strlen(prepend) + 32;
-
+    /* create a buffer for the library name
+     * and later for function names
+     */
+    bufflen = xml_strlen(modname) + 32;
     buffer = m__getMem(bufflen);
     if (buffer == NULL) {
         return ERR_INTERNAL_MEM;
     }
 
-    /* hard-wired order:
-     *  $YUMA_HOME/target/lib directory 
-     *  $YUMA_INSTALL/lib directory 
-     *  no directory name (maybe loaded with ldconfig)
-     */
     p = buffer;
-    p += xml_strcpy(p, prepend);
-    if (p != buffer) {
-        if (*(p-1) != NCXMOD_PSCHAR) {
-            *p++ = NCXMOD_PSCHAR;
-        }
-        if (yuma_home != NULL) {
-            p += xml_strcpy(p, (const xmlChar *)"target/lib/");
-        } else {
-            p += xml_strcpy(p, (const xmlChar *)"lib/");
-        }
-    } 
     p += xml_strcpy(p, (const xmlChar *)"lib");    
     p += xml_strcpy(p, modname);
 
@@ -1006,15 +980,31 @@ status_t
     xml_strcpy(p, (const xmlChar *)".so");
 #endif
 
-    handle = dlopen((const char *)buffer, RTLD_NOW);
+    /* try to find it directly for loading */
+    pathspec = ncxmod_find_sil_file(buffer, TRUE, &res);
+
+    if (pathspec == NULL) {
+        handle = dlopen((const char *)buffer, RTLD_NOW);
+    } else {
+        handle = dlopen((const char *)pathspec, RTLD_NOW);
+    }
+
     if (handle == NULL) {
         log_error("\nError: could not open '%s' (%s)\n", 
-                  buffer,
+                  (pathspec) ? pathspec : buffer,
                   dlerror());
         m__free(buffer);
+        if (pathspec != NULL) {
+            m__free(pathspec);
+        }
         return ERR_NCX_OPERATION_FAILED;
     } else if (LOGDEBUG2) {
         log_debug2("\nOpened SIL (%s) OK", buffer);
+    }
+
+    if (pathspec != NULL) {
+        m__free(pathspec);
+        pathspec = NULL;
     }
 
     p = buffer;

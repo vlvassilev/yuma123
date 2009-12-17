@@ -456,7 +456,7 @@ static status_t
     case XML_NT_END:
     case XML_NT_EMPTY:
         /* get the element QName */
-        namestr = xmlTextReaderName(scb->reader);
+        namestr = xml_strdup(xmlTextReaderConstName(scb->reader));
         if (!namestr) {
             res = ERR_INTERNAL_MEM;
         } else {

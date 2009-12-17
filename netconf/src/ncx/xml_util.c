@@ -314,7 +314,7 @@ void
     node->nodetyp = XML_NT_NONE;
     node->nsid = 0;
     if (node->qname) {
-        xmlFree(node->qname);
+        m__free(node->qname);
         node->qname = NULL;
     }
     node->qname = NULL;
@@ -2425,7 +2425,7 @@ status_t
     case XML_NT_END:
     case XML_NT_EMPTY:
         /* get the element QName */
-        namestr = xmlTextReaderName(reader);
+        namestr = xml_strdup(xmlTextReaderConstName(reader));
         if (!namestr) {
             res = ERR_INTERNAL_MEM;
         } else {

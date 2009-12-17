@@ -1551,7 +1551,14 @@ status_t
     method.nodetyp = XML_NT_START;
     method.nsid = xmlns_nc_id();
     method.module = NC_MODULE;
-    method.qname = NCX_EL_LOAD_CONFIG;
+
+    method.qname = xml_strdup(NCX_EL_LOAD_CONFIG);
+    if (method.qname == NULL) {
+        rpc_free_msg(msg);
+        agt_ses_free_dummy_session(scb);
+        return ERR_INTERNAL_MEM;
+    }
+        
     method.elname = NCX_EL_LOAD_CONFIG;
     method.depth = 1;
 

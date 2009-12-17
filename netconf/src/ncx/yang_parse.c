@@ -122,6 +122,10 @@ date         init     comment
 #include "yang_typ.h"
 #endif
 
+#ifndef _H_yinyang
+#include "yinyang.h"
+#endif
+
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
@@ -3369,6 +3373,8 @@ static status_t
 *            YANG_PT_TOP == called from top-level file
 *            YANG_PT_INCLUDE == called from an include-stmt in a file
 *            YANG_PT_IMPORT == called from an import-stmt in a file
+*   isyang == TRUE if a YANG file is expected
+*             FALSE if a YIN file is expected
 *
 * OUTPUTS:
 *   an ncx_module is filled out and validated as the file
@@ -3386,7 +3392,8 @@ static status_t
 status_t 
     yang_parse_from_filespec (const xmlChar *filespec,
                               yang_pcb_t *pcb,
-                              yang_parsetype_t ptyp)
+                              yang_parsetype_t ptyp,
+                              boolean isyang)
 {
     tk_chain_t     *tkc;
     ncx_module_t   *mod;
@@ -3415,30 +3422,49 @@ status_t
         return res;
     }
 
-    /* open the YANG source file for reading */
-    fp = fopen((const char *)str, "r");
-    if (!fp) {
-        m__free(str);
-        return ERR_NCX_MISSING_FILE;
-    }
+    if (isyang) {
+        /* open the YANG source file for reading */
+        fp = fopen((const char *)str, "r");
+        if (!fp) {
+            m__free(str);
+            return ERR_NCX_MISSING_FILE;
+        }
+    } else {
+        /* just make sure the file exists for now */
+        if (!ncxmod_test_filespec(str)) {
+            m__free(str);
+            return ERR_NCX_MISSING_FILE;
+        }
+    }            
 
     if (LOGDEBUG2) {
-        log_debug2("\nLoading YANG module from file %s", 
+        log_debug2("\nLoading %s module from file %s", 
+                   (isyang) ? "YANG" : "YIN",
                    filespec);
     }
 
     /* get a new token chain */
     if (res == NO_ERR) {
-        tkc = tk_new_chain();
-        if (!tkc) {
-            res = ERR_INTERNAL_MEM;
-            log_error("\nyang_parse malloc error");
+        if (isyang) {
+            tkc = tk_new_chain();
+            if (tkc == NULL) {
+                res = ERR_INTERNAL_MEM;
+                log_error("\nyang_parse malloc error");
+            }
+        } else {
+            tkc = yinyang_convert_token_chain(str, &res);
+            if (tkc == NULL) {
+                log_error("\nyang_parse: Invalid YIN file (%s)",
+                          get_error_string(res));
+            }
         }
     }
 
     /* setup the token chain to parse this YANG file */
     if (res == NO_ERR) {
-        tk_setup_chain_yang(tkc, fp, str);
+        if (isyang) {
+            tk_setup_chain_yang(tkc, fp, str);
+        }
 
         /* start a new ncx_module_t struct */
         mod = ncx_new_module();
@@ -3477,11 +3503,14 @@ status_t
     }
 
     if (res == NO_ERR) {
-        /* serialize the file into language tokens
-         * !!! need to change this later because it may use too
-         * !!! much memory in embedded parsers
-         */
-        res = tk_tokenize_input(tkc, mod);
+
+        if (isyang) {
+            /* serialize the file into language tokens
+             * !!! need to change this later because it may use too
+             * !!! much memory in embedded parsers
+             */
+            res = tk_tokenize_input(tkc, mod);
+        }
 
 #ifdef YANG_PARSE_TK_DEBUG
         tk_dump_chain(tkc);
@@ -3565,7 +3594,10 @@ status_t
         }
     }
 
-    fclose(fp);
+    if (fp != NULL) {
+        fclose(fp);
+    }
+
     if (tkc) {
         tkc->fp = NULL;
         tk_free_chain(tkc);

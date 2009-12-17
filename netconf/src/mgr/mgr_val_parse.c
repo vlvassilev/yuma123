@@ -884,13 +884,13 @@ static status_t
 /********************************************************************
 * FUNCTION parse_string
 * 
-* Parse the XML input as a numeric data type 
+* Parse the XML input as a string data type 
 *
 * INPUTS:
 *     scb == session control block
 *            Input is read from scb->reader.
 *     obj == object template for this string type
-*     btyp == base type of the expected ordinal number type
+*     btyp == base type of the expected string type
 *     startnode == top node of the parameter to be parsed
 *            Parser function will attempt to consume all the
 *            nodes until the matching endnode is reached
@@ -988,7 +988,7 @@ static status_t
     }
 #endif
 
-    /* validate the number content */
+    /* validate the string content */
     switch (valnode.nodetyp) {
     case XML_NT_START:
         res = ERR_NCX_WRONG_NODETYP_CPX;

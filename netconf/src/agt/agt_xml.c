@@ -372,8 +372,8 @@ static status_t
                   boolean clean)
 {
     int             ret, nodetyp;
-    const xmlChar  *str, *badns;
-    xmlChar        *valstr;
+    const xmlChar  *badns;
+    xmlChar        *valstr, *namestr;
     uint32          len;
     status_t        res, res2;
     boolean         done;
@@ -456,45 +456,48 @@ static status_t
     case XML_NT_END:
     case XML_NT_EMPTY:
         /* get the element QName */
-        str = xmlTextReaderConstName(scb->reader);
-        if (!str) {
-            /* this never really happens */
-            SET_ERROR(ERR_XML_READER_NULLNAME);
-            str = (const xmlChar *)"null";
-        }
-        node->qname = (const xmlChar *)str;
+        namestr = xmlTextReaderName(scb->reader);
+        if (!namestr) {
+            res = ERR_INTERNAL_MEM;
+        } else {
+            node->qname = namestr;
 
-        /* check for namespace prefix in the name 
-         * only error returned is unknown-namespace 
-         */
-        len = 0;
-        res = xml_check_ns(scb->reader, str, &node->nsid, &len, &badns);
-        if (!nserr && res != NO_ERR) {
-            node->nsid = xmlns_inv_id();
+            /* check for namespace prefix in the name 
+             * only error returned is unknown-namespace 
+             */
             len = 0;
-            res = NO_ERR;
-        }
+            res = xml_check_ns(scb->reader, 
+                               namestr, 
+                               &node->nsid, 
+                               &len, 
+                               &badns);
+            if (!nserr && res != NO_ERR) {
+                node->nsid = xmlns_inv_id();
+                len = 0;
+                res = NO_ERR;
+            }
             
-        /* set the element name to the char after the prefix, if any */
-        node->elname = (const xmlChar *)(str+len);
+            /* set the element name to the char after the prefix, if any */
+            node->elname = (const xmlChar *)(namestr+len);
         
-        /* get all the attributes, except for XML_NT_END */
-        if (res == NO_ERR && node->nodetyp != XML_NT_END) {
-            res2 = get_all_attrs(scb, 
-                                 node,
-                                 &node->attrs, 
-                                 layer, 
-                                 msghdr, 
-                                 nserr);
-        }
+            /* get all the attributes, except for XML_NT_END */
+            if (res == NO_ERR && node->nodetyp != XML_NT_END) {
+                res2 = get_all_attrs(scb, 
+                                     node,
+                                     &node->attrs, 
+                                     layer, 
+                                     msghdr, 
+                                     nserr);
+            }
 
-        /* Set the node module */
-        if (res == NO_ERR) {
-            if (node->nsid) {
-                node->module = xmlns_get_module(node->nsid);
-            } else {
-                /* no entry, use the default module (ncx) */
-                node->module = NCX_DEF_MODULE;
+            /* Set the node module */
+            if (res == NO_ERR) {
+                if (node->nsid) {
+                    node->module = xmlns_get_module(node->nsid);
+                } else {
+                    /* no entry, use the default module (ncx) */
+                    node->module = NCX_DEF_MODULE;
+                }
             }
         }
         break;

@@ -1166,6 +1166,16 @@ status_t
         return res;
     }
 
+    /* Initialize the XML namespace for YIN */
+    res = xmlns_register_ns(YIN_URN, 
+                            YIN_PREFIX, 
+                            YIN_MODULE, 
+                            NULL, 
+                            &nsid);
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* Initialize the XMLNS namespace for xmlns attributes */
     res = xmlns_register_ns(NS_URN, 
                             NS_PREFIX, 
@@ -9677,7 +9687,7 @@ boolean
 /********************************************************************
 * FUNCTION ncx_valid_name
 * 
-* Check if an xmlChar string is a valid NCX name
+* Check if an xmlChar string is a valid YANG identifier value
 *
 * INPUTS:
 *   str == xmlChar string to check
@@ -9698,18 +9708,27 @@ boolean
     }
 #endif
 
-    if (!len || len>NCX_MAX_NLEN) {
+    if (len == 0 || len > NCX_MAX_NLEN) {
         return FALSE;
     }
     if (!ncx_valid_fname_ch(*str)) {
         return FALSE;
     }
-    for (i=1;i<len;i++) {
+    for (i=1; i<len; i++) {
         if (!ncx_valid_name_ch(str[i])) {
             return FALSE;
         }
     }
+
+    if (len >= 3 &&
+        ((*str == 'X' || *str == 'x') &&
+         (str[1] == 'M' || str[1] == 'm') &&
+         (str[2] == 'L' || str[2] == 'l'))) {
+        return FALSE;
+    }
+
     return TRUE;
+
 } /* ncx_valid_name */
 
 
@@ -9727,8 +9746,6 @@ boolean
 boolean
     ncx_valid_name2 (const xmlChar *str)
 {
-    uint32  i, len;
-
 #ifdef DEBUG
     if (!str) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -9736,19 +9753,8 @@ boolean
     }
 #endif
 
-    len = xml_strlen(str);
-    if (!len || len>NCX_MAX_NLEN) {
-        return FALSE;
-    }
-    if (!ncx_valid_fname_ch(*str)) {
-        return FALSE;
-    }
-    for (i=1;i<len;i++) {
-        if (!ncx_valid_name_ch(str[i])) {
-            return FALSE;
-        }
-    }
-    return TRUE;
+    return ncx_valid_name(str, xml_strlen(str));
+
 } /* ncx_valid_name2 */
 
 
@@ -10039,9 +10045,10 @@ status_t
                 ncx_mod_exp_err(tkc, mod, res, expstr);
             }
         }
+        CHK_EXIT(res, retres);
     }
 
-    return res;
+    return retres;
 
 } /* ncx_consume_name */
 

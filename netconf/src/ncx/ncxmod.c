@@ -100,7 +100,9 @@ date         init     comment
 typedef enum ncxmod_mode_t_ {
     NCXMOD_MODE_NONE,
     NCXMOD_MODE_YANG,
-    NCXMOD_MODE_FILEYANG
+    NCXMOD_MODE_YIN,
+    NCXMOD_MODE_FILEYANG,
+    NCXMOD_MODE_FILEYIN
 } ncxmod_mode_t;
 
 
@@ -168,11 +170,48 @@ static boolean
         return FALSE;
     }
 
-    str = &buff[count-5];
+    if (buff[count-5] != '.') {
+        return FALSE;
+    }
 
-    return (xml_strcmp(str, (const xmlChar *)".yang")) ? FALSE : TRUE;
+    str = &buff[count-4];
+    return (xml_strcmp(str, NCXMOD_YANG_SUFFIX)) ? FALSE : TRUE;
 
 } /* is_yang_file */
+
+
+/********************************************************************
+* FUNCTION is_yin_file
+*
+* Check the file suffix for .yin
+*
+* INPUTS:
+*    buff == buffer to check
+*
+* RETURNS:
+*   TRUE if .yang extension
+*   FALSE otherwise
+*********************************************************************/
+static boolean
+    is_yin_file (const xmlChar *buff)
+{
+    const xmlChar    *str;
+    uint32            count;
+
+    count = xml_strlen(buff);
+    if (count < 5) {
+        return FALSE;
+    }
+
+    if (buff[count-4] != '.') {
+        return FALSE;
+    }
+
+    str = &buff[count-3];
+
+    return (xml_strcmp(str, NCXMOD_YIN_SUFFIX)) ? FALSE : TRUE;
+
+} /* is_yin_file */
 
 
 /********************************************************************
@@ -204,11 +243,12 @@ static status_t
                   uint32 *cnt)
 {
     xmlChar *str;
-
-    uint32 pathlen, path2len, pathsep, path2sep, total;
+    uint32   pathlen, path2len, pathsep, path2sep, total;
+    boolean  needslash;
 
     *cnt = 0;
     *buff = 0;
+    needslash = FALSE;
 
     if (!path) {
         return NO_ERR;
@@ -231,10 +271,16 @@ static status_t
 
     total =  pathlen + path2len;
     if (!pathsep) {
-        if ((path2 && (*path2 != NCXMOD_PSCHAR)) || path2==NULL) {
+        if (path2 != NULL && *path2 != NCXMOD_PSCHAR) {
+            needslash = TRUE;
+            total++;
+        } else if (path2 == NULL &&
+                   !(is_yang_file(path) || is_yin_file(path))) {
+            needslash = TRUE;
             total++;
         }
     }
+
     if (path2 && path2len && !path2sep) {
         total++;
     }
@@ -262,10 +308,8 @@ static status_t
         str += xml_strcpy(str, path);
     }
 
-    if (!pathsep) {
-        if ((path2 && (*path2 != NCXMOD_PSCHAR)) || path2==NULL) {
-            *str++ = NCXMOD_PSCHAR;
-        }
+    if (needslash) {
+        *str++ = NCXMOD_PSCHAR;
     }
 
     if (path2 && path2len) {
@@ -285,7 +329,7 @@ static status_t
 /********************************************************************
 * FUNCTION try_module
 *
-* For YANG Modules Only!!!
+* For YANG and YIN Modules Only!!!
 *
 * Construct a filespec out of a path name and a module name
 * and try to load the filespec as a YANG module
@@ -299,10 +343,12 @@ static status_t
 *    mode == suffix mode
 *           == NCXMOD_MODE_YANG if YANG module and suffix is .yang
 *           == NCXMOD_MODE_FILEYANG if YANG filespec
+*           == NCXMOD_MODE_YIN if YIN module and suffix is .yin
+*           == NCXMOD_MODE_FILEYIN if YIN filespec
 *    usebuff == use buffer as-is, unless modname is present
 *    done == address of return done flag
 *    pcb == YANG parser control block (NULL if not used)
-*    ptyp == YANG parser source type (YANG_PT_TOP if NCX)
+*    ptyp == YANG parser source type (YANG_PT_TOP if YANG top module)
 *
 * OUTPUTS:
 *    *done == TRUE if module loaded and status==NO_ERR
@@ -333,6 +379,7 @@ static status_t
     const xmlChar *suffix;
     uint32         total, modlen, pathlen;
     status_t       res;
+    boolean        isyang;
     
     *done = FALSE;
     total = 0;
@@ -340,9 +387,19 @@ static status_t
     switch (mode) {
     case NCXMOD_MODE_YANG:
         suffix = NCXMOD_YANG_SUFFIX;
+        isyang = TRUE;
+        break;
+    case NCXMOD_MODE_YIN:
+        suffix = NCXMOD_YIN_SUFFIX;
+        isyang = FALSE;
         break;
     case NCXMOD_MODE_FILEYANG:
         suffix = EMPTY_STRING;
+        isyang = TRUE;
+        break;
+    case NCXMOD_MODE_FILEYIN:
+        suffix = EMPTY_STRING;
+        isyang = FALSE;
         break;
     default:
         *done = TRUE;
@@ -405,12 +462,12 @@ static status_t
     }
 
     /* attempt to load this filespec as a YANG module */
-    res = yang_parse_from_filespec(buff, pcb, ptyp);
+    res = yang_parse_from_filespec(buff, pcb, ptyp, isyang);
     switch (res) {
     case ERR_XML_READER_START_FAILED:
     case ERR_NCX_MISSING_FILE:
         /* not an error, *done == FALSE */
-        if (mode==NCXMOD_MODE_YANG) {
+        if (mode==NCXMOD_MODE_YANG || mode==NCXMOD_MODE_YIN) {
             res = NO_ERR;
         }
         break;
@@ -739,6 +796,8 @@ static boolean
 *    fname == filename (with extension) to find
 *    matchmode == TRUE if searching for a partial filename match
 *              == FALSE for full filename match 
+*   isyang == TRUE for YANG format
+*             FALSE for YIN format
 *    done == address of recurse done flag
 *
 * OUTPUTS:
@@ -753,6 +812,7 @@ static status_t
                     uint32 bufflen,
                     const xmlChar *fname,
                     boolean matchmode,
+                    boolean isyang,
                     boolean *done)
 {
     DIR           *dp;
@@ -852,6 +912,7 @@ static status_t
                                          bufflen, 
                                          fname, 
                                          matchmode, 
+                                         isyang,
                                          done);
                     if (*done) {
                         dirdone = TRUE;
@@ -870,13 +931,19 @@ static status_t
                  * further to see if it is a match
                  * check if length matches foo.YYYY-MM-DD.yang
                  */
-                if (dentlen == fnamelen + 16) {
-                    /* check if the file extension is really .yang
+                if ((dentlen == fnamelen + 16) ||
+                    (dentlen == fnamelen + 15)) {
+                    /* check if the file extension is
+                     * really .yang | .yin
                      * TBD: validate the date-string format
                      * even more TBD: search the entire dir
                      * for the highest valued date string
                      */
-                    if (!strcmp(&ep->d_name[fnamelen+11], ".yang")) {
+                    if (!xml_strcmp((const xmlChar *)
+                                    &ep->d_name[fnamelen+12], 
+                                    (isyang) ? 
+                                    NCXMOD_YANG_SUFFIX : 
+                                    NCXMOD_YIN_SUFFIX)) {
                         *done = TRUE;
                         if ((pathlen + dentlen) >= bufflen) {
                             res = ERR_BUFF_OVFL;
@@ -931,7 +998,7 @@ static status_t
     struct dirent *ep;
     xmlChar       *str;
     uint32         pathlen, dentlen;
-    boolean        dirdone, isyang;
+    boolean        dirdone, isyang, isyin;
     status_t       res;
 
     res = NO_ERR;
@@ -965,17 +1032,18 @@ static status_t
             }
 
             isyang = is_yang_file((const xmlChar *)ep->d_name);
+            isyin = is_yin_file((const xmlChar *)ep->d_name);
 
             /* check if this file needs to be listed */
             switch (searchtype) {
             case SEARCH_TYPE_MODULE:
-                if (!isyang) {
-                    continue;
+                if (isyang || isyin) {
+                    break;
                 }
-                break;
+                continue;
             case SEARCH_TYPE_DATA:
             case SEARCH_TYPE_SCRIPT:
-                if (isyang) {
+                if (isyang || isyin) {
                     continue;
                 }
                 break;
@@ -1240,6 +1308,8 @@ static status_t
 *              FALSE if the path should be appended with the 'modules' dir
 *   matchmode == TRUE if partial filename match OK
 *                FALSE for full filename match only
+*   isyang == TRUE for YANG format
+*             FALSE for YIN format
 *   done == address of return done flag
 *
 * OUTPUTS:
@@ -1259,6 +1329,7 @@ static status_t
                        yang_parsetype_t ptyp,
                        boolean usepath,
                        boolean matchmode,
+                       boolean isyang,
                        boolean *done)
 {
     const xmlChar  *path2;
@@ -1295,11 +1366,12 @@ static status_t
             return ERR_INTERNAL_MEM;
         }
 
-        /* try YANG file */
+        /* try YANG or YIN file */
         res = search_subdirs(buff, 
                              bufflen, 
                              fnamebuff, 
                              matchmode, 
+                             isyang,
                              done);
         if (*done && res == NO_ERR) {
             res = try_module(buff, 
@@ -1307,7 +1379,9 @@ static status_t
                              NULL, 
                              NULL,
                              NULL, 
-                             NCXMOD_MODE_FILEYANG,
+                             (isyang) ? 
+                             NCXMOD_MODE_FILEYANG : 
+                             NCXMOD_MODE_FILEYIN,
                              TRUE, 
                              done, 
                              pcb, 
@@ -1331,7 +1405,9 @@ static status_t
                      path,
                      path2,
                      modname,
-                     NCXMOD_MODE_YANG,
+                     (isyang) ? 
+                     NCXMOD_MODE_YANG : 
+                     NCXMOD_MODE_YIN,
                      FALSE, 
                      done,
                      pcb,
@@ -1365,6 +1441,8 @@ static status_t
 *   ptyp == parser source type
 *   matchmode == TRUE if partial filename match OK
 *                FALSE for full filename match only
+*   isyang == TRUE for YANG format
+*             FALSE for YIN format
 *   done == address of return done flag
 *
 * OUTPUTS:
@@ -1383,6 +1461,7 @@ static status_t
                            yang_pcb_t *pcb,
                            yang_parsetype_t ptyp,
                            boolean matchmode,
+                           boolean isyang,
                            boolean *done)
 {
     const xmlChar  *str, *p;
@@ -1424,6 +1503,7 @@ static status_t
                                 ptyp,
                                 TRUE,
                                 matchmode,
+                                isyang,
                                 done);
         if (*done) {
             m__free(pathbuff);
@@ -1489,7 +1569,9 @@ static status_t
     ncx_module_t   *testmod;
     uint32          modlen, bufflen;
     status_t        res, res2;
-    boolean         done, isfile;
+    boolean         done, isfile, isyang;
+    ncxmod_mode_t   mode;
+
 
 #ifdef NCXMOD_DEBUG
     if (LOGDEBUG2) {
@@ -1503,9 +1585,11 @@ static status_t
     res = NO_ERR;
     res2 = NO_ERR;
     isfile = FALSE;
+    isyang = TRUE;
     bufflen = 0;
     done = FALSE;
     modlen = xml_strlen(modname);
+    mode = NCXMOD_MODE_NONE;
 
     if (retmod) {
         *retmod = NULL;
@@ -1528,7 +1612,9 @@ static status_t
         }
     }
 
-    /* find the start of the file name extension, expecting .yang  */
+    /* find the start of the file name extension, 
+     * expecting .yang or .yin
+     */
     str = &modname[modlen];
     while (str > modname && *str != '.') {
         str--;
@@ -1540,8 +1626,13 @@ static status_t
          * only treat this string with a dot in it as a file if
          * it has a YANG file extension
          */
-        if (!xml_strcmp(++str, NCXMOD_YANG_SUFFIX)) {
+        if (!xml_strcmp(str+1, NCXMOD_YANG_SUFFIX)) {
             isfile = TRUE;
+            mode = NCXMOD_MODE_FILEYANG;
+        } else if (!xml_strcmp(str+1, NCXMOD_YIN_SUFFIX)) {
+            isfile = TRUE;
+            mode = NCXMOD_MODE_FILEYIN;
+            isyang = FALSE;
         }
     }
 
@@ -1595,12 +1686,15 @@ static status_t
      *    if it does not work, instead of trying other directories
      */
     if (isfile) {
+        if (mode == NCXMOD_MODE_NONE) {
+            mode = NCXMOD_MODE_FILEYANG;
+        }
         res = try_module(buff, 
                          bufflen,
                          modname, 
                          NULL,
                          NULL,
-                         NCXMOD_MODE_FILEYANG,
+                         mode,
                          FALSE,
                          &done, 
                          pcb,
@@ -1618,6 +1712,7 @@ static status_t
 
     /* 2) try alt_path variable if set; used by yangdiff */
     if (!done && ncxmod_alt_path) {
+        isyang = TRUE;
         res = check_module_path(ncxmod_alt_path,
                                 buff,
                                 bufflen,
@@ -1627,10 +1722,26 @@ static status_t
                                 ptyp,
                                 FALSE, 
                                 matchmode,
+                                isyang,
                                 &done);
+
+        if (!done) {
+            isyang = FALSE;
+            res = check_module_path(ncxmod_alt_path,
+                                    buff,
+                                    bufflen,
+                                    modname,
+                                    revision,
+                                    pcb,
+                                    ptyp,
+                                    FALSE, 
+                                    matchmode,
+                                    isyang,
+                                    &done);
+        }
     }
 
-    /* 3) try as module in current dir, YANG format  */
+    /* 3a) try as module in current dir, YANG format  */
     if (!done) {
         res = try_module(buff, 
                          bufflen,
@@ -1644,8 +1755,23 @@ static status_t
                          ptyp);
     }
 
+    /* 3b) try as module in current dir, YIN format  */
+    if (!done) {
+        res = try_module(buff, 
+                         bufflen,
+                         NULL,
+                         NULL,
+                         modname, 
+                         NCXMOD_MODE_YIN,
+                         FALSE,
+                         &done,
+                         pcb,
+                         ptyp);
+    }
+
     /* 4) try YUMA_MODPATH environment variable if set */
     if (!done && ncxmod_mod_path) {
+        isyang = TRUE;
         res = check_module_pathlist(ncxmod_mod_path,
                                     buff,
                                     bufflen,
@@ -1654,11 +1780,26 @@ static status_t
                                     pcb,
                                     ptyp, 
                                     matchmode, 
+                                    isyang,
                                     &done);
+        if (!done) {
+            isyang = FALSE;
+            res = check_module_pathlist(ncxmod_mod_path,
+                                        buff,
+                                        bufflen,
+                                        modname, 
+                                        revision,
+                                        pcb,
+                                        ptyp, 
+                                        matchmode, 
+                                        isyang,
+                                        &done);
+        }
     }
 
     /* 5) HOME/modules directory */
     if (!done && ncxmod_env_userhome) {
+        isyang = TRUE;
         res = check_module_path(ncxmod_env_userhome,
                                 buff,
                                 bufflen,
@@ -1668,11 +1809,27 @@ static status_t
                                 ptyp,
                                 FALSE, 
                                 matchmode,
+                                isyang,
                                 &done);
+        if (!done) {
+            isyang = FALSE;
+            res = check_module_path(ncxmod_env_userhome,
+                                    buff,
+                                    bufflen,
+                                    modname,
+                                    revision,
+                                    pcb,
+                                    ptyp,
+                                    FALSE, 
+                                    matchmode,
+                                    isyang,
+                                    &done);
+        }
     }
 
     /* 6) YUMA_HOME/modules directory */
     if (!done && ncxmod_yuma_home) {
+        isyang = TRUE;
         res = check_module_path(ncxmod_yuma_home,
                                 buff,
                                 bufflen,
@@ -1682,7 +1839,22 @@ static status_t
                                 ptyp,
                                 FALSE, 
                                 matchmode,
+                                isyang,
                                 &done);
+        if (!done) {
+            isyang = FALSE;
+            res = check_module_path(ncxmod_yuma_home,
+                                    buff,
+                                    bufflen,
+                                    modname, 
+                                    revision,
+                                    pcb,
+                                    ptyp,
+                                    FALSE, 
+                                    matchmode,
+                                    isyang,
+                                    &done);
+        }
     }
 
     /* 7) YUMA_INSTALL/modules directory or default install path
@@ -1691,6 +1863,7 @@ static status_t
      */
     if (!done) {
         if (ncxmod_env_install) {
+            isyang = TRUE;
             res = check_module_path(ncxmod_env_install, 
                                     buff,
                                     bufflen,
@@ -1700,8 +1873,25 @@ static status_t
                                     ptyp,
                                     FALSE, 
                                     matchmode,
+                                    isyang,
                                     &done);
+            if (!done) {
+                isyang = FALSE;
+                res = check_module_path(ncxmod_env_install, 
+                                        buff,
+                                        bufflen,
+                                        modname,
+                                        revision,
+                                        pcb,
+                                        ptyp,
+                                        FALSE, 
+                                        matchmode,
+                                        isyang,
+                                        &done);
+
+            }
         } else {
+            isyang = FALSE;
             res = check_module_path(NCXMOD_DEFAULT_INSTALL, 
                                     buff,
                                     bufflen,
@@ -1711,7 +1901,22 @@ static status_t
                                     ptyp,
                                     FALSE, 
                                     matchmode,
+                                    isyang,
                                     &done);
+            if (!done) {
+                isyang = FALSE;
+                res = check_module_path(NCXMOD_DEFAULT_INSTALL, 
+                                        buff,
+                                        bufflen,
+                                        modname, 
+                                        revision,
+                                        pcb,
+                                        ptyp,
+                                        FALSE, 
+                                        matchmode,
+                                        isyang,
+                                        &done);
+            }
         }
     }
 
@@ -4803,6 +5008,39 @@ void
     m__free(searchresult);
 
 }  /* ncxmod_free_search_result */
+
+
+
+/********************************************************************
+* FUNCTION ncxmod_test_filespec
+*
+* Check the exact filespec to see if it a file
+*
+* INPUTS:
+*    filespec == file spec to check
+*
+* RETURNS:
+*    TRUE if valid readable file
+*    FALSE otherwise
+*********************************************************************/
+boolean
+    ncxmod_test_filespec (const xmlChar *filespec)
+{
+    int         ret;
+    struct stat statbuf;
+
+#ifdef DEBUG
+    if (filespec == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    memset(&statbuf, 0x0, sizeof(statbuf));
+    ret = stat((const char *)filespec, &statbuf);
+    return (ret == 0 && S_ISREG(statbuf.st_mode)) ? TRUE : FALSE;
+
+}  /* ncxmod_test_filespec */
 
 
 /* END file ncxmod.c */

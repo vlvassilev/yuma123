@@ -45,11 +45,12 @@ date	     init     comment
 *********************************************************************/
 
 #define YANG_URN (const xmlChar *)"urn:ietf:params:xml:ns:yang:1"
-
-#define YIN_URN  (const xmlChar *)"urn:ietf:params:xml:ns:yang:yin:1"
-
 #define YANG_PREFIX (const xmlChar *)"y"
 #define YANG_MODULE (const xmlChar *)"yang"   /***  no mod ! ***/
+
+#define YIN_URN  (const xmlChar *)"urn:ietf:params:xml:ns:yang:yin:1"
+#define YIN_PREFIX (const xmlChar *)"yin"
+#define YIN_MODULE (const xmlChar *)"yin"   /***  no mod ! ***/
 
 #define YANG_VERSION_STR          (const xmlChar *)"1"
 #define YANG_VERSION_NUM          1

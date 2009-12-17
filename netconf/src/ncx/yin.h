@@ -8,22 +8,18 @@
  * specific language governing permissions and limitations
  * under the License.    
  */
-#ifndef _H_yang_parse
-#define _H_yang_parse
+#ifndef _H_yin
+#define _H_yin
 
-/*  FILE: yang_parse.h
+/*  FILE: yin.h
 *********************************************************************
 *								    *
 *			 P U R P O S E				    *
 *								    *
 *********************************************************************
 
-    YANG Module parser module
-
-
-    Data type conversion
-
-    
+  Convert YANG module to YIN format
+ 
 *********************************************************************
 *								    *
 *		   C H A N G E	 H I S T O R Y			    *
@@ -32,21 +28,31 @@
 
 date	     init     comment
 ----------------------------------------------------------------------
-26-oct-07    abb      Begun; start from ncx_parse.h
+06-dec-09    abb      Begun; split out from yangdump dir
 
 */
 
 #include <xmlstring.h>
 
-#ifndef _H_status
-#include "status.h"
-#endif
+
+/********************************************************************
+*								    *
+*			 C O N S T A N T S			    *
+*								    *
+*********************************************************************/
+
 
 /********************************************************************
 *								    *
 *			     T Y P E S				    *
 *								    *
 *********************************************************************/
+
+typedef struct yin_mapping_t_ {
+    const xmlChar *keyword;
+    const xmlChar *argname;       /* may be NULL */
+    boolean        elem;
+} yin_mapping_t;
 
 
 /********************************************************************
@@ -55,10 +61,7 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
-extern status_t 
-    yang_parse_from_filespec (const xmlChar *filespec,
-                              yang_pcb_t *pcb,
-			      yang_parsetype_t ptyp,
-                              boolean isyang);
+extern const yin_mapping_t *
+    yin_find_mapping (const xmlChar *name);
 
-#endif	    /* _H_yang_parse */
+#endif	    /* _H_yin */

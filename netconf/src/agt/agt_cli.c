@@ -304,8 +304,10 @@ static void
 
     /* version param handled externally */
 
-    /* get xmlorder param */
-    val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_XMLORDER);
+    /* get usexmlorder param */
+    val = val_find_child(valset, 
+                         AGT_CLI_MODULE, 
+                         NCX_EL_USEXMLORDER);
     if (val && val->res == NO_ERR) {
         agt_profile->agt_xmlorder = TRUE;
     }

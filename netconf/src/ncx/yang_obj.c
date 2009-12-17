@@ -5386,7 +5386,8 @@ static status_t
 
     res = NO_ERR;
 
-    if (!ingrouping &&
+    if (!ingrouping && 
+        !obj_is_abstract(obj) &&
         (obj->def.container->presence == NULL) &&
         obj_get_config_flag(obj) &&
         ((obj->parent != NULL && obj_is_root(obj->parent)) ||
@@ -5520,6 +5521,7 @@ static status_t
     res = NO_ERR;
 
     if (!ingrouping &&
+        !obj_is_abstract(obj) &&
         obj_is_mandatory_when(obj) &&
         obj_get_config_flag(obj) &&
         ((obj->parent && obj_is_root(obj->parent)) || 
@@ -6363,6 +6365,7 @@ static status_t
     res = NO_ERR;
 
     if (!ingrouping &&
+        !obj_is_abstract(obj) &&
         obj_is_mandatory_when(obj) &&
         obj_get_config_flag(obj) &&
         ((obj->parent && obj_is_root(obj->parent)) ||

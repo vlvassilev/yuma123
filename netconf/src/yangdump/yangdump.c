@@ -139,8 +139,8 @@ date         init     comment
 #include  "yangdump_util.h"
 #endif
 
-#ifndef _H_yin
-#include  "yin.h"
+#ifndef _H_yangyin
+#include  "yangyin.h"
 #endif
 
 /********************************************************************
@@ -1642,7 +1642,7 @@ static status_t
                 res = ERR_NCX_IMPORT_ERRORS;
                 ncx_print_errormsg(NULL, pcb->top, res);
             } else {
-                res = yin_convert_module(pcb, cp, scb);
+                res = yangyin_convert_module(pcb, cp, scb);
                 if (res != NO_ERR) {
                     pr_err(res);
                 }

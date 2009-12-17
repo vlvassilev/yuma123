@@ -92,6 +92,8 @@ date	     init     comment
 /* file extension for YANG Modules */
 #define NCXMOD_YANG_SUFFIX        (const xmlChar *)"yang"
 
+#define NCXMOD_YIN_SUFFIX         (const xmlChar *)"yin"
+
 
 /* name of the NCX module containing agent boot parameters
  * loaded during startup 
@@ -422,5 +424,8 @@ extern ncxmod_search_result_t *
 
 extern void
     ncxmod_free_search_result (ncxmod_search_result_t *searchresult);
+
+extern boolean
+    ncxmod_test_filespec (const xmlChar *filespec);
 
 #endif	    /* _H_ncxmod */

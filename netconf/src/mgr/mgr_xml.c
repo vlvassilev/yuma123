@@ -90,285 +90,6 @@ date         init     comment
 *********************************************************************/
 
 
-/********************************************************************
-* FUNCTION get_attrs
-* 
-*  Copy all the attributes from the current node to
-*  the xml_attrs_t queue
-*
-* INPUTS:
-*   reader == XmlReader already initialized from File, Memory,
-*             or whatever
-*    attrs == pointer to output var
-*    nserr == TRUE if unknown namespace should cause the
-*             function to fail and the attr not to be saved 
-*             This is the normal mode.
-*          == FALSE and the namespace will be marked INVALID
-*             but an error will not be returned
-*
-* OUTPUTS:
-*   attrs Q contains 0 or more entries
-*   *errQ may have rpc-errors added to it
-*
-* RETURNS:
-*   status of the operation
-*   returns NO_ERR if all copied okay or even zero copied
-*********************************************************************/
-static status_t
-    get_attrs (xmlTextReaderPtr reader,
-                   xml_attrs_t  *attrs,
-                   boolean nserr)
-{
-    int            i, cnt, ret;
-    xmlChar       *value;
-    const xmlChar *badns, *name;
-    xmlns_id_t     nsid;
-    status_t       res;
-    boolean        done;
-    uint32         plen;
-
-    res = NO_ERR;
-
-    /* check the attribute count first */
-    cnt = xmlTextReaderAttributeCount(reader);
-    if (cnt==0) {
-        return NO_ERR;
-    }
-
-    /* move through the list of attributes */
-    for (i=0, done=FALSE; i<cnt && !done; i++) {
-        res = NO_ERR;
-        name = NULL;
-        value = NULL;
-        badns = NULL;
-        plen = 0;
-        nsid = 0;
-
-        /* get the next attribute */
-        if (i==0) {
-            ret = xmlTextReaderMoveToFirstAttribute(reader);
-        } else {
-            ret = xmlTextReaderMoveToNextAttribute(reader);
-        }
-        if (ret != 1) {
-            res = ERR_XML_READER_INTERNAL;
-            done = TRUE;
-        } else {
-            /* get the attribute name */
-            name = xmlTextReaderConstName(reader);
-            if (!name) {
-                res = ERR_XML_READER_NULLNAME;
-            } else {
-                value = NULL;
-                res = xml_check_ns(reader, name, &nsid, &plen, &badns);
-                if (!nserr && res != NO_ERR) {
-                    nsid = xmlns_inv_id();
-                    plen = 0;
-                    res = NO_ERR;
-                }
-                
-                /* get the attribute value even if a NS error */
-                value = xmlTextReaderValue(reader);
-                if (value) {
-                    /* save the values as received, may be QName 
-                     * only error that can occur is a malloc fail
-                     */
-                    (void)xml_add_qattr(attrs, nsid, 
-                                        name, plen, 
-                                        value, &res);
-                    xmlFree(value);
-                } else {
-                    res = ERR_XML_READER_NULLVAL;
-                }
-            }
-        }
-    }
-
-    /* reset the current node to where we started */
-    ret = xmlTextReaderMoveToElement(reader);
-    if (ret != 1 && res==NO_ERR) {
-        res = ERR_XML_READER_INTERNAL;
-    }   
-
-    return res;
-
-}  /* get_attrs */
-
-
-/********************************************************************
-* FUNCTION mconsume_node
-* 
-* INPUTS:
-*    reader == xmlTextReader to use
-*    node == allocated and initialized xml_node_t to fill in
-*    nserr == TRUE if bad namespace should be checked
-*          == FALSE if not
-*    adv == TRUE if advance reader
-*        == FALSE if no advance (reget current node)
-*
-* RETURNS:
-*   status of the operation
-*   Try to fail on fatal errors only
-*********************************************************************/
-static status_t 
-    mconsume_node (xmlTextReaderPtr reader,
-                   xml_node_t  *node,
-                   boolean nserr,
-                   boolean adv)     
-{
-    int             ret, nodetyp;
-    const xmlChar  *str, *badns;
-    xmlChar        *valstr;
-    uint32          len;
-    status_t        res, res2;
-    boolean         done;
-
-    /* init local vars */
-    done = FALSE;
-    res = NO_ERR;
-    res2 = NO_ERR;
-    node->nodetyp = XML_NT_NONE;
-
-    /* loop past any unused xmlTextReader node types */
-    while (!done) {
-        if (adv) {
-            /* advance the node pointer */
-            ret = xmlTextReaderRead(reader);
-            if (ret != 1) {
-                /* do not treat this as an internal error */
-                return ERR_XML_READER_EOF;
-            }
-        } else {
-            /* make sure no 2nd pass through the loop */
-            done = TRUE;
-        }
-
-        /* get the node depth to match the end node correctly */
-        node->depth = xmlTextReaderDepth(reader);
-        if (node->depth == -1) {
-            /* this never actaully happens */
-            SET_ERROR(ERR_XML_READER_INTERNAL);
-            node->depth = 0;
-        }
-
-        /* get the internal nodetype, check it and convert it */
-        nodetyp = xmlTextReaderNodeType(reader);
-        switch (nodetyp) {
-        case XML_ELEMENT_NODE:
-            /* classify element as empty or start */
-            if (xmlTextReaderIsEmptyElement(reader)) {
-                node->nodetyp = XML_NT_EMPTY;
-            } else {
-                node->nodetyp = XML_NT_START;
-            }
-            done = TRUE;
-            break;
-        case XML_ELEMENT_DECL:
-            node->nodetyp = XML_NT_END;
-            done = TRUE;
-            break;
-        case XML_TEXT_NODE:
-     /* case XML_DTD_NODE: */
-            node->nodetyp = XML_NT_STRING;
-            done = TRUE;
-            break;
-        default:
-            /* unused node type -- keep trying */
-#ifdef XML_UTIL_DEBUG
-            log_debug3("\nxml_consume_node: skip unused node (%s)",
-                   xml_get_node_name(nodetyp));
-#endif
-            if (done) {
-                /* re-get of current node should not fail */
-                res = ERR_XML_READER_INTERNAL;
-            }
-        }
-    }
-
-    /* finish the node, depending on its type */
-    switch (node->nodetyp) {
-    case XML_NT_START:
-    case XML_NT_END:
-    case XML_NT_EMPTY:
-        /* get the element QName */
-        str = xmlTextReaderConstName(reader);
-        if (!str) {
-            /* this never really happens */
-            SET_ERROR(ERR_XML_READER_NULLNAME);
-            str = (const xmlChar *)"null";
-        }
-        node->qname = (const xmlChar *)str;
-
-        /* check for namespace prefix in the name 
-         * only error returned is unknown-namespace 
-         */
-        len = 0;
-        res = xml_check_ns(reader, str, &node->nsid, &len, &badns);
-        if (!nserr && res != NO_ERR) {
-            node->nsid = xmlns_inv_id();
-            res = NO_ERR;
-        }
-            
-        /* set the element name to the char after the prefix, if any */
-        node->elname = (const xmlChar *)(str+len);
-        
-        /* get all the attributes, except for XML_NT_END */
-        if (node->nodetyp != XML_NT_END) {
-            res2 = get_attrs(reader, &node->attrs, nserr);
-        }
-
-        /* Set the node owner */
-        if (node->nsid) {
-            node->module = xmlns_get_module(node->nsid);
-        } else {
-            /* no entry, use the default owner (netconf) */
-            node->module = NCX_DEF_MODULE;
-        }
-        break;
-    case XML_NT_STRING:
-        /* get the text value */
-        node->simval = NULL;
-        valstr = xmlTextReaderValue(reader);
-        if (valstr) {
-            node->simfree = xml_copy_clean_string(valstr);
-            if (node->simfree) {
-                node->simlen = xml_strlen(node->simfree);
-                node->simval = (const xmlChar *)node->simfree;
-            }
-
-            /* see if this is a QName string; if so save the NSID */
-            xml_check_qname_content(reader, node);
-
-            xmlFree(valstr);
-        }
-        if (!node->simval) {
-            /* prevent a NULL ptr reference */
-            node->simval = (const xmlChar *)"";
-            node->simlen = 0;
-            node->simfree = NULL;
-        }
-        break;
-    default:
-        break;
-    }
-
-#ifdef XML_UTIL_DEBUG
-    log_debug3("\nmgr_xml_consume_node: return (%d)", 
-           (res==NO_ERR) ? res2 : res);
-    if (LOGDEBUG3) {
-        xml_dump_node(node);
-    }
-#endif
-
-    /* return general error first, then attribute error 
-     * It doesn't really matter since the caller will 
-     * assume all error reports have been queued upon return
-     */
-    return (res==NO_ERR) ? res2 : res;
-
-}  /* mconsume_node */
-
-
 /************** E X T E R N A L   F U N C T I O N S   **************/
 
 
@@ -431,25 +152,26 @@ status_t
     mgr_xml_consume_node (xmlTextReaderPtr reader,
                           xml_node_t      *node)
 {
-    return mconsume_node(reader, node, TRUE, TRUE);
+    return xml_consume_node(reader, node, TRUE, TRUE);
 
 }  /* mgr_xml_consume_node */
-
 
 
 status_t 
     mgr_xml_consume_node_nons (xmlTextReaderPtr reader,
                                xml_node_t      *node)
 {
-    return mconsume_node(reader, node, FALSE, TRUE);
+    return xml_consume_node(reader, node, FALSE, TRUE);
 
 }  /* mgr_xml_consume_node_nons */
+
+
 
 status_t 
     mgr_xml_consume_node_noadv (xmlTextReaderPtr reader,
                                 xml_node_t      *node)
 {
-    return mconsume_node(reader, node, TRUE, FALSE);
+    return xml_consume_node(reader, node, TRUE, FALSE);
 
 }  /* mgr_xml_consume_node_noadv */
 

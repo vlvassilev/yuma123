@@ -8,18 +8,19 @@
  * specific language governing permissions and limitations
  * under the License.    
  */
-#ifndef _H_yin
-#define _H_yin
+#ifndef _H_yinyang
+#define _H_yinyang
 
-/*  FILE: yin.h
+/*  FILE: yinyang.h
 *********************************************************************
 *								    *
 *			 P U R P O S E				    *
 *								    *
 *********************************************************************
 
-  Convert YANG module to YIN format
- 
+    Convert YIN format to YANG format for input
+
+    
 *********************************************************************
 *								    *
 *		   C H A N G E	 H I S T O R Y			    *
@@ -28,31 +29,19 @@
 
 date	     init     comment
 ----------------------------------------------------------------------
-06-dec-09    abb      Begun
+12-dec-09    abb      Begun;
 
 */
 
-#ifndef _H_ses
-#include "ses.h"
-#endif
+#include <xmlstring.h>
 
 #ifndef _H_status
 #include "status.h"
 #endif
 
-#ifndef _H_yang
-#include "yang.h"
+#ifndef _H_tk
+#include "tk.h"
 #endif
-
-#ifndef _H_yangdump
-#include "yangdump.h"
-#endif
-
-/********************************************************************
-*								    *
-*			 C O N S T A N T S			    *
-*								    *
-*********************************************************************/
 
 
 /********************************************************************
@@ -67,10 +56,9 @@ date	     init     comment
 *			F U N C T I O N S			    *
 *								    *
 *********************************************************************/
+extern tk_chain_t *
+    yinyang_convert_token_chain (const xmlChar *sourcespec,
+                                 status_t *res);
 
-extern status_t 
-    yin_convert_module (yang_pcb_t *pcb,
-                        const yangdump_cvtparms_t *cp,
-                        ses_cb_t *scb);
 
-#endif	    /* _H_yin */
+#endif	    /* _H_yinyang */

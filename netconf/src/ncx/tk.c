@@ -371,7 +371,7 @@ static void
 * INPUTS:
 *  ttyp == token type
 *  mod == module name string, not z-terminated
-*  modlen == tmodule name length
+*  modlen == 'mod' string length
 *  tval == token value
 *  tlen == token value length
 *
@@ -1901,6 +1901,33 @@ void
 
 
 /********************************************************************
+* FUNCTION tk_setup_chain_yin
+* 
+* Setup a previously allocated chain for a YIN file
+*
+* INPUTS
+*    tkc == token chain to setup
+*    filename == source filespec
+*********************************************************************/
+void
+    tk_setup_chain_yin (tk_chain_t *tkc,
+                        const xmlChar *filename)
+{
+#ifdef DEBUG
+    if (!tkc) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    tkc->source = TK_SOURCE_YANG;
+    tkc->filename = filename;
+    tkc->flags |= TK_FL_MALLOC;
+           
+} /* tk_setup_chain_yin */
+
+
+/********************************************************************
 * FUNCTION tk_free_chain
 * 
 * Cleanup and deallocate a tk_chain_t 
@@ -2336,7 +2363,10 @@ status_t
         } else {
             memset(tkc->buff, 0x0, TK_BUFF_SIZE);
         }
-    } /* else tkc->buff expected to be setup already */
+    } else if (tkc->buff == NULL) {
+        /* tkc->buff expected to be setup already */
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
 
     /* setup buffer for parsing */
     res = NO_ERR;
@@ -2760,6 +2790,12 @@ tk_chain_t *
     tk_token_t  *token, *oldtoken;
     status_t     res;
 
+#ifdef DEBUG
+    if (oldtkc == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
 
     tkc = tk_new_chain();
     if (!tkc) {
@@ -2804,6 +2840,287 @@ tk_chain_t *
     return tkc;
            
 } /* tk_clone_chain */
+
+
+/********************************************************************
+* FUNCTION tk_add_id_token
+* 
+* Allocatate a new ID token and add it to the parse chain
+*
+* INPUTS:
+*   tkc == token chain to use
+*   valstr == ID name
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    tk_add_id_token (tk_chain_t *tkc,
+                     const xmlChar *valstr)
+{
+    tk_token_t   *tk;
+
+#ifdef DEBUG
+    if (tkc == NULL || valstr == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* hack for YIN input, no XML line numbers */
+    tkc->linenum++;
+
+    if (valstr == NULL) {
+        tk = new_token(TK_TT_TSTRING, NULL, 0);
+    } else {
+        /* normal case string -- non-zero length */
+        tk = new_token(TK_TT_TSTRING,
+                       valstr, 
+                       xml_strlen(valstr));
+    }
+    if (!tk) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    tk->linenum = tkc->linenum;
+    tk->linepos = 1;
+    dlq_enque(tk, &tkc->tkQ);
+
+    return NO_ERR;
+    
+}  /* tk_add_id_token */
+
+
+/********************************************************************
+* FUNCTION tk_add_pid_token
+* 
+* Allocatate a new prefixed ID token and add it to 
+* the parse chain
+*
+* INPUTS:
+*   tkc == token chain to use
+*   prefix == ID prefix
+*   prefixlen == 'prefix' length in bytes
+*   valstr == ID name
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    tk_add_pid_token (tk_chain_t *tkc,
+                      const xmlChar *prefix,
+                      uint32 prefixlen,
+                      const xmlChar *valstr)
+{
+    tk_token_t   *tk;
+
+#ifdef DEBUG
+    if (tkc == NULL || prefix == NULL || valstr == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* hack for YIN input, no XML line numbers */
+    tkc->linenum++;
+
+    tk = new_token_wmod(TK_TT_MSTRING,
+                        prefix, 
+                        prefixlen, 
+                        valstr,
+                        xml_strlen(valstr));
+
+    if (tk == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    tk->linenum = tkc->linenum;
+    tk->linepos = 1;
+    dlq_enque(tk, &tkc->tkQ);
+
+    return NO_ERR;
+    
+}  /* tk_add_pid_token */
+
+
+/********************************************************************
+* FUNCTION tk_add_string_token
+* 
+* Allocatate a new string token and add it to the parse chain
+*
+* INPUTS:
+*   tkc == token chain to use
+*   valstr == string value to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    tk_add_string_token (tk_chain_t *tkc,
+                         const xmlChar *valstr)
+{
+    tk_token_t   *tk;
+    tk_type_t     tktyp;
+    uint32        tklen;
+
+#ifdef DEBUG
+    if (tkc == NULL || valstr == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* hack for YIN input, no XML line numbers */
+    tkc->linenum++;
+
+    if (valstr == NULL) {
+        tk = new_token(TK_TT_QSTRING, NULL, 0);
+    } else {
+
+        tklen = xml_strlen(valstr);
+
+        if (val_need_quotes(valstr)) {
+            tktyp = TK_TT_QSTRING;
+        } else if (ncx_valid_name(valstr, tklen)) {
+            tktyp = TK_TT_TSTRING;
+        } else {
+            tktyp = TK_TT_STRING;
+        }
+
+        /* normal case string -- non-zero length */
+        tk = new_token(tktyp, valstr, tklen);
+    }
+    if (!tk) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    tk->linenum = tkc->linenum;
+    tk->linepos = 1;
+    dlq_enque(tk, &tkc->tkQ);
+
+    return NO_ERR;
+    
+}  /* tk_add_string_token */
+
+
+/********************************************************************
+* FUNCTION tk_add_lbrace_token
+* 
+* Allocatate a new left brace token and add it to the parse chain
+*
+* INPUTS:
+*   tkc == token chain to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    tk_add_lbrace_token (tk_chain_t *tkc)
+{
+    tk_token_t   *tk;
+
+#ifdef DEBUG
+    if (tkc == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* hack for YIN input, no XML line numbers */
+    tkc->linenum++;
+
+    tk = new_token(TK_TT_LBRACE,
+                   (const xmlChar *)"{",
+                   1);
+    if (!tk) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    tk->linenum = tkc->linenum;
+    tk->linepos = 1;
+    dlq_enque(tk, &tkc->tkQ);
+
+    return NO_ERR;
+    
+}  /* tk_add_lbrace_token */
+
+
+/********************************************************************
+* FUNCTION tk_add_rbrace_token
+* 
+* Allocatate a new right brace token and add it to the parse chain
+*
+* INPUTS:
+*   tkc == token chain to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    tk_add_rbrace_token (tk_chain_t *tkc)
+{
+    tk_token_t   *tk;
+
+#ifdef DEBUG
+    if (tkc == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* hack for YIN input, no XML line numbers */
+    tkc->linenum++;
+
+    tk = new_token(TK_TT_RBRACE,
+                   (const xmlChar *)"}",
+                   1);
+    if (!tk) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    tk->linenum = tkc->linenum;
+    tk->linepos = 1;
+    dlq_enque(tk, &tkc->tkQ);
+
+    return NO_ERR;
+    
+}  /* tk_add_rbrace_token */
+
+
+/********************************************************************
+* FUNCTION tk_add_semicol_token
+* 
+* Allocatate a new semi-colon token and add it to the parse chain
+*
+* INPUTS:
+*   tkc == token chain to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    tk_add_semicol_token (tk_chain_t *tkc)
+{
+    tk_token_t   *tk;
+
+#ifdef DEBUG
+    if (tkc == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* hack for YIN input, no XML line numbers */
+    tkc->linenum++;
+
+    tk = new_token(TK_TT_SEMICOL,
+                   (const xmlChar *)";",
+                   1);
+    if (!tk) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    tk->linenum = tkc->linenum;
+    tk->linepos = 1;
+    dlq_enque(tk, &tkc->tkQ);
+
+    return NO_ERR;
+    
+}  /* tk_add_semicol_token */
 
 
 /* END file tk.c */

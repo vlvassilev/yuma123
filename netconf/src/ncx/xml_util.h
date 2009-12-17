@@ -136,9 +136,9 @@ typedef struct xml_attr_t_ {
 typedef enum xml_nodetyp_t_ {
     XML_NT_NONE,
     XML_NT_EMPTY,                           /* standalone empty node */
-    XML_NT_START,                         /* start of a complex type */
-    XML_NT_END,                             /* end of a complex type */
-    XML_NT_STRING                      /* simple string content node */
+    XML_NT_START,                         /* start-tag of an element */
+    XML_NT_END,                             /* end-tag of an element */
+    XML_NT_STRING                             /* string content node */
 } xml_nodetyp_t;
 
     
@@ -152,7 +152,7 @@ typedef struct xml_node_t_ {
     xmlns_id_t     nsid;
     xmlns_id_t     contentnsid;
     const xmlChar *module;
-    const xmlChar *qname;
+    xmlChar       *qname;
     const xmlChar *elname;
     const xmlChar *simval;               /* may be cleaned val */
     uint32         simlen;
@@ -291,7 +291,7 @@ extern xml_attr_t *
 
 extern const xml_attr_t *
     xml_find_ro_attr (const xml_node_t *node,
-		   xmlns_id_t        nsid,
+                      xmlns_id_t        nsid,
 		      const xmlChar    *attrname);
 
 extern void
@@ -385,5 +385,14 @@ extern status_t
 			  const xmlChar *prefix,
 			  uint32 prefixlen,
 			  xmlns_id_t  *retnsid);
+
+
+/********************* YIN PARSING SUPPORT **********************/
+
+extern status_t 
+    xml_consume_node (xmlTextReaderPtr reader,
+                      xml_node_t  *xmlnode,
+                      boolean nserr,
+                      boolean adv);
 
 #endif	    /* _H_xml_util */

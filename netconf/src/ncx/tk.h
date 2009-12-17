@@ -158,10 +158,11 @@ date	     init     comment
 
 /* == 1: the tkc->buff field is malloced by this module
  *       and will be freed in tk_free_chain
- * == 0: the tkc-buff memory was provided externally
+ * == 0: the tkc->buff memory was provided externally
  *       and will not be freed in tk_free_chain
  */
 #define TK_FL_MALLOC      bit1
+
 
 /********************************************************************
 *								    *
@@ -283,6 +284,10 @@ extern void
 			 const xmlChar *filename);
 
 extern void
+    tk_setup_chain_yin (tk_chain_t *tkc,
+                        const xmlChar *filename);
+
+extern void
     tk_free_chain (tk_chain_t *tkc);
 
 extern tk_type_t 
@@ -348,8 +353,6 @@ extern tk_chain_t *
 			      uint32 curlinepos,
 			      status_t *res);
 
-
-
 extern uint32
     tk_token_count (const tk_chain_t *tkc);
 
@@ -359,4 +362,29 @@ extern void
 extern tk_chain_t *
     tk_clone_chain (tk_chain_t *oldtkc);
 
+extern status_t
+    tk_add_id_token (tk_chain_t *tkc,
+                     const xmlChar *valstr);
+
+extern status_t
+    tk_add_pid_token (tk_chain_t *tkc,
+                      const xmlChar *prefix,
+                      uint32 prefixlen,
+                      const xmlChar *valstr);
+
+extern status_t
+    tk_add_string_token (tk_chain_t *tkc,
+                         const xmlChar *valstr);
+
+extern status_t
+    tk_add_lbrace_token (tk_chain_t *tkc);
+
+extern status_t
+    tk_add_rbrace_token (tk_chain_t *tkc);
+
+
+extern status_t
+    tk_add_semicol_token (tk_chain_t *tkc);
+
+                         
 #endif	    /* _H_tk */

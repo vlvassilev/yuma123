@@ -268,7 +268,7 @@ module netconfd {
         default true;
       }
 
-      leaf xmlorder {
+      leaf usexmlorder {
         description
           "If present, then XML element order will be enforced.
            Otherwise, XML element order errors will not be

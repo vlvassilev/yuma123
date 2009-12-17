@@ -1451,7 +1451,7 @@ static status_t
     }
 #endif
 
-    /* validate the number content */
+    /* validate the string data type content */
     switch (valnode.nodetyp) {
     case XML_NT_START:
         res = ERR_NCX_WRONG_NODETYP_CPX;

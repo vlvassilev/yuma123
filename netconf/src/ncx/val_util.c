@@ -1984,10 +1984,16 @@ status_t
 *   objval == database value node to check (may be NULL)
 *   obj == object template of data node object to check
 *   condresult == address of conditional test result
-*   
+*   whencount == address of number of when-stmts tested
+*                 (may be NULL if caller does not care)
+*
 * OUTPUTS:
 *   *condresult == TRUE if conditional is true or there are none
 *                  FALSE if conditional test failed
+*   if non-NULL:
+*     *whencount == number of when-stmts tested
+*                   this can be 0 if *condresult == TRUE
+
 *
 * RETURNS:
 *   status
@@ -1997,17 +2003,22 @@ status_t
                         val_value_t *valroot,
                         val_value_t *objval,
                         obj_template_t *obj,
-                        boolean *condresult)
+                        boolean *condresult,
+                        uint32  *whencount)
 {
     obj_template_t          *whenobj;
     status_t                 res;
     boolean                  done;
+    uint32                   cnt;
 
 #ifdef DEBUG
     if (!val || !valroot || !obj || !condresult) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
+
+    cnt = 0;
+    res = NO_ERR;
 
     /* there are no false if-feature statements
      * so check for any whan statements attached
@@ -2016,8 +2027,8 @@ status_t
      *  2) inherited from augment-when
      *  3) inherited from uses-when chain
      */
-    res = NO_ERR;
     if (obj->when) {
+        cnt++;
         res = check_when_stmt(val, 
                               valroot, 
                               objval,
@@ -2025,11 +2036,15 @@ status_t
                               obj->when,
                               condresult);
         if (res != NO_ERR || !*condresult) {
+            if (whencount) {
+                *whencount = cnt;
+            }
             return res;
         }
     }
 
     if (obj->augobj && obj->augobj->when) {
+        cnt++;
         res = check_when_stmt(val, 
                               valroot, 
                               NULL,
@@ -2037,6 +2052,9 @@ status_t
                               obj->augobj->when,
                               condresult);
         if (res != NO_ERR || !*condresult) {
+            if (whencount) {
+                *whencount = cnt;
+            }
             return res;
         }
     }
@@ -2045,6 +2063,7 @@ status_t
     whenobj = obj->usesobj;
     while (!done) {
         if (whenobj != NULL && whenobj->when) {
+            cnt++;
             res = check_when_stmt(val,
                                   valroot,
                                   NULL,
@@ -2052,12 +2071,19 @@ status_t
                                   whenobj->when,
                                   condresult);
             if (res != NO_ERR || !*condresult) {
+                if (whencount) {
+                    *whencount = cnt;
+                }
                 return res;
             }
             whenobj = whenobj->usesobj;
         } else {
             done = TRUE;
         }
+    }
+
+    if (whencount) {
+        *whencount = cnt;
     }
 
     *condresult = TRUE;
@@ -2114,7 +2140,8 @@ status_t
                               valroot, 
                               NULL,
                               childobj, 
-                              condresult);
+                              condresult,
+                              NULL);
 
 } /* val_check_child_conditional */
 

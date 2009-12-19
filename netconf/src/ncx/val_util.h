@@ -185,7 +185,8 @@ extern status_t
                         val_value_t *valroot,
                         val_value_t *objval,
                         obj_template_t *obj,
-                        boolean *condresult);
+                        boolean *condresult,
+                        uint32 *whencount);
 
 extern boolean
     val_is_mandatory (val_value_t *val,

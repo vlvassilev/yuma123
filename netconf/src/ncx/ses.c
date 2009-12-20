@@ -1117,6 +1117,13 @@ status_t
     }
 #endif
 
+#ifdef SES_DEBUG
+    if (LOGDEBUG3) {
+        log_debug3("\nses_accept_input on session %d", 
+                   scb->sid);
+    }
+#endif
+
     res = NO_ERR;
     done = FALSE;
 

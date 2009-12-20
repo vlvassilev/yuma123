@@ -81,6 +81,9 @@ date         init     comment
 #define AMPSTR    (const xmlChar *)"&amp;"
 #define QSTR      (const xmlChar *)"&quote;"
 
+#define MAX_READ_TRIES   5
+
+
 /********************************************************************
 *                                                                   *
 *                           T Y P E S                               *
@@ -1109,7 +1112,8 @@ status_t
     ses_msg_buff_t *buff;
     status_t        res;
     ssize_t         ret;
-    boolean         done, erragain;
+    boolean         done, readdone, erragain;
+    uint32          readtries;
 
 #ifdef DEBUG
     if (!scb) {
@@ -1126,6 +1130,8 @@ status_t
 
     res = NO_ERR;
     done = FALSE;
+    readdone = FALSE;
+    readtries = 0;
 
     while (!done) {
         if (scb->state >= SES_ST_SHUTDOWN_REQ) {
@@ -1138,41 +1144,65 @@ status_t
             return res;
         }
 
-        erragain = FALSE;
+        readdone = FALSE;
+        while (!readdone && res == NO_ERR) {
 
-        /* read data into the new buffer */
-        if (scb->rdfn) {
-            ret = (*scb->rdfn)(scb, 
-                               (char *)buff->buff, 
-                               SES_MSG_BUFFSIZE,
-                               &erragain);
-        } else {
-            ret = read(scb->fd, 
-                       buff->buff, 
-                       SES_MSG_BUFFSIZE);
-        }
+            if (++readtries > MAX_READ_TRIES) {
+                if (LOGDEBUG3) {
+                    log_debug3("\nses: max EAGAIN reached for ses(%u)",
+                               scb->sid);
+                }
+                res = NO_ERR;  /* res = ERR_NCX_READ_FAILED; */
+                ses_msg_free_buff(scb, buff);
+                return res;
+            }
 
-        if (ret < 0) {
+            /* read data into the new buffer */
             if (scb->rdfn) {
-                if (!erragain) {
-                    res = ERR_NCX_READ_FAILED;
+                erragain = FALSE;
+                ret = (*scb->rdfn)(scb, 
+                                   (char *)buff->buff, 
+                                   SES_MSG_BUFFSIZE,
+                                   &erragain);
+            } else {
+                ret = read(scb->fd, 
+                           buff->buff, 
+                           SES_MSG_BUFFSIZE);
+            }
+
+            if (ret < 0) {
+                /* some error or EAGAIN */
+                res = NO_ERR;
+
+                if (scb->rdfn) {
+                    if (!erragain) {
+                        res = ERR_NCX_READ_FAILED;
+                    }
+                } else {
+                    if (errno != EAGAIN) {
+                        res = ERR_NCX_READ_FAILED;
+                    }
+                }
+
+                if (LOGDEBUG2 && res != NO_ERR) {
+                    log_debug2("\nses read failed on session %d (%s)", 
+                               scb->sid, 
+                               strerror(errno));
                 }
             } else {
-                if (errno != EAGAIN) {
-                    res = ERR_NCX_READ_FAILED;
-                }
+                /* channel closed or returned byte count */
+                res = NO_ERR;
+                readdone = TRUE;
             }
+        }
 
-#ifdef SES_DEBUG
-            if (LOGDEBUG2 && res != NO_ERR) {
-                log_debug2("\nses read failed on session %d (%s)", 
-                           scb->sid, 
-                           strerror(errno));
-            }
-#endif
+        if (res != NO_ERR) {
             ses_msg_free_buff(scb, buff);
             return res;
-        } else if (ret == 0) {
+        }
+
+        /* read was done if we reach here */
+        if (ret == 0) {
             /* session closed by remote peer */
             if (LOGINFO) {
                 log_info("\nses: session %d shut by remote peer", 
@@ -1181,14 +1211,12 @@ status_t
             ses_msg_free_buff(scb, buff);
             return ERR_NCX_SESSION_CLOSED;
         } else {
-
-#ifdef SES_DEBUG
             if (LOGDEBUG2) {
                 log_debug2("\nses read OK (%d) on session %d", 
                            ret, 
                            scb->sid);
-                }
-#endif
+            }
+
             buff->bufflen = (size_t)ret;
             scb->stats.in_bytes += (uint32)ret;
             totals.stats.in_bytes += (uint32)ret;

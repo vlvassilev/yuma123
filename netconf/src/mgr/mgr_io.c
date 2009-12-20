@@ -208,6 +208,12 @@ static boolean
 
     retval = TRUE;
 
+    if (LOGDEBUG3) {
+        log_debug3("\nmgr_io: read FD %d for session %u start",
+                   fd,
+                   cursid);
+    }
+
     /* Data arriving on an already-connected socket.
      * Need to have the xmlreader for this session
      * unless it is input from STDIO

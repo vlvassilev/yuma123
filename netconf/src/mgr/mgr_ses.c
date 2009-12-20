@@ -1004,6 +1004,13 @@ ssize_t
     mscb = mgr_ses_get_mscb(scb);
 
     ret = libssh2_channel_read(mscb->channel, buff, bufflen);
+
+    if (LOGDEBUG3) {
+        log_debug3("\nmgr_ses: read channel ses(%u) ret(%d)", 
+                   scb->sid,
+                   ret);
+    }
+
     mscb->returncode = ret;
     if (ret < 0) {
         if (ret == LIBSSH2_ERROR_EAGAIN) {

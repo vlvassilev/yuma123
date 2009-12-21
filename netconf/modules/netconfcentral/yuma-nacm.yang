@@ -20,8 +20,8 @@ module yuma-nacm {
           zero or more groups.  An extensible identityref
           object is used to specify the group name.
 
-       2) Permissions
-          Specific NETCONF protocol permissions are granted
+       2) Rights
+          Specific NETCONF protocol rights are granted
           to particular administrative groups.  This is
           limited to three standard values: read, write, 
           and exec, using a bits leaf called 'allowedRights'.
@@ -50,7 +50,7 @@ module yuma-nacm {
           are performed.  The standard operation 
           'close-session' is always allowed.
           The special user 'superuser' is allowed to invoke any
-          RPC operation.
+          RPC operation, if it is supported by the server.
 
        5) Database access
           Once the RPC method access has been granted, the
@@ -63,16 +63,17 @@ module yuma-nacm {
           to step 3.  If no moduleRule entry is found,
           then step 6 is followed.
 
-       6) No Rule Default
+       6) No Rule Defaults
           If the object being accessed is tagged
           as nacm:secure or nacm:very-secure, then
           default access is 'denied',  Otherwise,
-          the noRuleDefault leaf is used to permit or deny
+          the noRule*Default leaf is used to permit or deny
           access when a specific rule is not found in
-          the rpcRules or dataRules tables.";
+          the rpcRules or dataRules tables, for the 
+          specified access right (read, write, or exec).";
 
 
-    revision 2009-12-21 {
+    revision 2009-11-21 {
         description  
           "Initial version (work-in-progress).";
     }
@@ -113,37 +114,6 @@ module yuma-nacm {
       }
     }
 
-    extension secure {
-      description
-        "Used to indicate that the data model node 
-         represents a sensitive security system parameter.
-
-         If present, the NETCONF server will only allow
-         the designated 'superuser' to have write or execute
-         default nacm-rights for the node.  An explicit access
-         control rule is required for all other users.
-
-         The 'secure' extension may appear within the type-stmt,
-         or within a data node definition.  It is ignored
-         otherwise.";
-    }
-
-    extension very-secure {
-      description
-        "Used to indicate that the data model node 
-         controls a very sensitive security system parameter.
-
-         If present, the NETCONF server will only allow
-         the designated 'superuser' to have read, write, or execute
-         default nacm-rights for the node.  An explicit access
-         control rule is required for all other users.
-
-         The 'very-secure' extension may appear within the type-stmt,
-         or within a data node definition.  It is ignored
-         otherwise.";
-    }
-
-
     typedef nacm-group {
       description 
         "Type of administrative group that can be
@@ -175,6 +145,36 @@ module yuma-nacm {
                description "Requested action is denied.";
            }
        }
+    }
+
+    extension secure {
+      description
+        "Used to indicate that the data model node 
+         represents a sensitive security system parameter.
+
+         If present, the NETCONF server will only allow
+         the designated 'superuser' to have write or execute
+         default nacm-rights for the node.  An explicit access
+         control rule is required for all other users.
+
+         The 'secure' extension may appear within a data, rpc,
+         or notification node definition.  It is ignored 
+         otherwise.";
+    }
+
+    extension very-secure {
+      description
+        "Used to indicate that the data model node 
+         controls a very sensitive security system parameter.
+
+         If present, the NETCONF server will only allow
+         the designated 'superuser' to have read, write, or execute
+         default nacm-rights for the node.  An explicit access
+         control rule is required for all other users.
+
+         The 'very-secure' extension may appear within a data, rpc,
+         or notification node definition.  It is ignored
+         otherwise.";
     }
 
     identity nacm-groups {

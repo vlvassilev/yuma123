@@ -10,6 +10,9 @@ module yuma-netconf {
    // for NCX 'metadata' language extension
    import yuma-ncx { prefix "ncx"; }
 
+   // for NCX 'secure' language extension
+   import yuma-nacm { prefix "nacm"; }
+
    description 
       "NETCONF Protocol 
         * Data Types
@@ -745,7 +748,7 @@ module yuma-netconf {
    }
 
    rpc delete-config {
-      ncx:secure;
+      nacm:secure;
       description
         "Delete a configuration datastore.  The 'running' configuration
          datastore cannot be deleted.
@@ -1069,8 +1072,8 @@ module yuma-netconf {
 
    rpc load-config {
       ncx:hidden;
-      ncx:very-secure;
       ncx:abstract;
+      nacm:very-secure;
 
       description 
         "NCX internal load-config operation.

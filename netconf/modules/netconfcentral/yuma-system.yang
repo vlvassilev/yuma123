@@ -16,6 +16,8 @@ module yuma-system {
 
     import yuma-ncx { prefix ncx; }
 
+    import yuma-nacm { prefix nacm; }
+
     organization  "Netconf Central, Inc.";
 
     contact "Andy Bierman <andy@netconfcentral.org>.";
@@ -24,7 +26,7 @@ module yuma-system {
       "NETCONF Basic System Group.";
 
 
-    revision 2009-11-21 {
+    revision 2009-12-21 {
         description  
 	  "Rename system to yuma-system.";
     }
@@ -138,7 +140,7 @@ module yuma-system {
     }
 
     rpc set-log-level {
-        ncx:secure;
+        nacm:secure;
 
         description
             "Sets the server log verbosity level";

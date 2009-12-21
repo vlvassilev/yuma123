@@ -65,25 +65,19 @@ module yuma-nacm {
 
        6) No Rule Default
           If the object being accessed is tagged
-          as ncx:secure or ncx_very-secure, then
+          as nacm:secure or nacm:very-secure, then
           default access is 'denied',  Otherwise,
           the noRuleDefault leaf is used to permit or deny
           access when a specific rule is not found in
           the rpcRules or dataRules tables.";
 
 
-    revision 2009-10-21 {
+    revision 2009-12-21 {
         description  
-          "Rename nacm to yuma-nacm.";
+          "Initial version (work-in-progress).";
     }
 
-    revision 2009-05-13 {
-        description  
-	  "Initial version of the rewrite.
-	   Preliminary!! Work-in-progress!!";
-    }
-
-    typedef NacmUserName {
+    typedef nacm-user-name {
         description "General Purpose User Name string.";
         type string {
             length "1..63";
@@ -91,7 +85,7 @@ module yuma-nacm {
         }
     }
 
-    typedef NacmRights {
+    typedef nacm-rights {
       description 
         "NETCONF Access Rights; 
          These are individually assigned, not hierarchical.";
@@ -119,7 +113,38 @@ module yuma-nacm {
       }
     }
 
-    typedef NacmGroup {
+    extension secure {
+      description
+        "Used to indicate that the data model node 
+         represents a sensitive security system parameter.
+
+         If present, the NETCONF server will only allow
+         the designated 'superuser' to have write or execute
+         default nacm-rights for the node.  An explicit access
+         control rule is required for all other users.
+
+         The 'secure' extension may appear within the type-stmt,
+         or within a data node definition.  It is ignored
+         otherwise.";
+    }
+
+    extension very-secure {
+      description
+        "Used to indicate that the data model node 
+         controls a very sensitive security system parameter.
+
+         If present, the NETCONF server will only allow
+         the designated 'superuser' to have read, write, or execute
+         default nacm-rights for the node.  An explicit access
+         control rule is required for all other users.
+
+         The 'very-secure' extension may appear within the type-stmt,
+         or within a data node definition.  It is ignored
+         otherwise.";
+    }
+
+
+    typedef nacm-group {
       description 
         "Type of administrative group that can be
          assigned to the user, and specified in
@@ -134,11 +159,11 @@ module yuma-nacm {
            guest == guest account";
        
       type identityref {
-         base nacmGroups;
+         base nacm-groups;
       }
     }
 
-    typedef NacmAction {
+    typedef nacm-action {
        description
           "Action taken by the server when a particular
            rule matches.";
@@ -152,7 +177,7 @@ module yuma-nacm {
        }
     }
 
-    identity nacmGroups {
+    identity nacm-groups {
        description 
           "Root of all NETCONF Administrative Groups";
     }
@@ -160,23 +185,23 @@ module yuma-nacm {
     identity admin {
        description 
           "Administrator group.";
-       base nacmGroups;
+       base nacm-groups;
     }
 
     identity monitor {
        description 
           "Monitoring group.";
-       base nacmGroups;
+       base nacm-groups;
     }
 
     identity guest {
        description 
           "Guest user group.";
-       base nacmGroups;
+       base nacm-groups;
     }
 
     container nacm {
-        ncx:very-secure;
+        nacm:very-secure;
 
         presence 
          "An empty nacm container indicates that the NACM service
@@ -190,7 +215,7 @@ module yuma-nacm {
               "Controls whether read access is granted if
                no appropriate rule is found for a
                particular read request.";
-            type NacmAction;
+            type nacm-action;
             default "permit";
         }
 
@@ -199,7 +224,7 @@ module yuma-nacm {
               "Controls whether write access is granted if
                no appropriate rule is found for a
                particular write request.";
-            type NacmAction;
+            type nacm-action;
             default "deny";
         }
 
@@ -208,7 +233,7 @@ module yuma-nacm {
               "Controls whether exec access is granted if
                no appropriate rule is found for a
                particular RPC operation request.";
-            type NacmAction;
+            type nacm-action;
             default "permit";
         }
 
@@ -224,7 +249,7 @@ module yuma-nacm {
                 leaf groupIdentity {
                     description 
                       "Group identity associated with this entry.";
-                    type NacmGroup;
+                    type nacm-group;
                 }
 
                 leaf-list userName {
@@ -232,7 +257,7 @@ module yuma-nacm {
                       "Each entry identifies the user name of 
                        a member of the group associated with 
                        this entry.";
-                    type NacmUserName;
+                    type nacm-user-name;
                 }
             }
         }
@@ -295,13 +320,13 @@ module yuma-nacm {
                needs to be used with extreme caution.
 
                Note 3: Write or execution access to data
-               or RPC methods tagged as 'ncx:secure'
+               or RPC methods tagged as 'nacm:secure'
                will only be granted to the 'superuser' user
                if no rule is found.  The relevant 'noRuleDefault'
                leaf will be ignored in this case.
 
                Note 4: Read, write or execution access to data
-               or RPC methods tagged as 'ncx:very-secure'
+               or RPC methods tagged as 'nacm:very-secure'
                will only be granted to the 'superuser' user
                if no rule is found.  The relevant 'noRuleDefault'
                leaf will be ignored in this case.
@@ -316,7 +341,7 @@ module yuma-nacm {
                       "List of access rights granted to
                        specified administrative groups for the
                        content specified by the associated path.";
-                    type NacmRights;
+                    type nacm-rights;
                     mandatory true;
                 }
 
@@ -326,7 +351,7 @@ module yuma-nacm {
                        assigned the associated access rights
                        for the content specified by the associated
                        path.";
-                    type NacmGroup;
+                    type nacm-group;
                     min-elements 1;
                 }
 

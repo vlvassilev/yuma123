@@ -16,9 +16,9 @@ module yuma-ncx {
      The elements will be present in appinfo elements,
      used in YANG to XSD translation.";
 
-  revision 2009-11-21 {
+  revision 2009-12-21 {
     description 
-       "Rename ncx to yuma-ncx.";
+       "Moved secure and very-secure extensions to yuma-nacm.";
   }
 
   revision 2009-06-12 {
@@ -28,7 +28,7 @@ module yuma-ncx {
 
   revision 2009-04-10 {
     description 
-       "Removed rpc-type extension; use 'ncx:secure' instead";
+       "Removed rpc-type extension; use 'nacm:secure' instead";
   }
 
   revision 2008-08-23 {
@@ -508,31 +508,6 @@ module yuma-ncx {
        will be ignored.";
   }
 
-  extension secure {
-    description
-      "Used to indicate that the data model node 
-       controls a sensitive security system parameter.
-
-       If present, the netconfd server will only allow
-       the 'root' user to modify or delete the node.
-
-       The 'secure' extension may appear within the type-stmt,
-       or within a data node definition.  It is ignored
-       otherwise.";
-  }
-
-  extension very-secure {
-    description
-      "Used to indicate that the data model node 
-       controls a very sensitive security system parameter.
-
-       If present, the netconfd server will only allow
-       the 'root' user to access the node.
-
-       The 'very-secure' extension may appear within the type-stmt,
-       or within a data node definition.  It is ignored
-       otherwise.";
-  }
 
   extension schema-instance {
     description

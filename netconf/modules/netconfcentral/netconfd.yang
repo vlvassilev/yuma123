@@ -10,6 +10,8 @@ module netconfd {
 
     import yuma-app-common { prefix ncxapp; }
 
+    import yuma-nacm { prefix nacm; }
+
     import ietf-inet-types { prefix inet; }
 
     import ietf-with-defaults { prefix wd; }
@@ -79,7 +81,7 @@ module netconfd {
                 enforced for write and execute requests.
                 All read requests will be allowed, unless
                 the requested object contains the
-                'ncx:very-secure' extension.  In that case,
+                'nacm:very-secure' extension.  In that case,
                 all configured access control rules will
                 be enforced.";
            }
@@ -87,11 +89,11 @@ module netconfd {
              description 
                "All read, write, and execute requests will be
                 allowed, unless the object contains the
-                'ncx:secure' or 'ncx:very-secure' extension.
-                If the 'ncx:secure' extension is in effect,
+                'nacm:secure' or 'nacm:very-secure' extension.
+                If the 'nacm:secure' extension is in effect,
                 then all configured access control rules
                 will be enforced for write and execute requests.
-                If the 'ncx:very-secure' extension is in effect,
+                If the 'nacm:very-secure' extension is in effect,
                 then all configured access control rules
                 will be enforced for all requests.
                 Use this mode with caution.";
@@ -280,7 +282,7 @@ module netconfd {
     }
 
     rpc load {
-      ncx:secure;
+      nacm:secure;
       description 
         "Load a module into the server, if it is not already loaded.
          Returns the module revision date (or today's date if none),
@@ -318,13 +320,13 @@ module netconfd {
     rpc restart {
       description 
         "Restart the server. Does not reload the software image..";
-      ncx:secure;
+      nacm:secure;
     }
 
     rpc shutdown {
       description 
         "Shutdown the server.";
-      ncx:secure;
+      nacm:secure;
     }
 
     rpc no-op {

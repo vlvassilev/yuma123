@@ -35,11 +35,16 @@ RANLIB = @RANLIB@
 
 # Optional flags to pass to the linker.
 
+ifdef DEBIAN
 LDFLAGS = @LDFLAGS@
+else
+LDFLAGS = @LDFLAGS@ --build-id
+endif
+
 
 # Optional C pre-processor flags.
 
-CPPFLAGS = @CPPFLAGS@
+CPPFLAGS = @CPPFLAGS@ 
 
 # The following optional defines change the characteristics of the library.
 #
@@ -131,20 +136,23 @@ LIBS = @LIBS@
 # List the default target libraries. This should be one or
 # both of the words "normal" and "reentrant".
 #
-TARGETS = @TARGETS@
+#TARGETS = @TARGETS@
+TARGETS = normal
 
 #
 # List which types of the above libraries are required.
 # This should be one or both of the words "static" and "shared".
 #
-TARGET_LIBS = @TARGET_LIBS@
+#TARGET_LIBS = @TARGET_LIBS@
+TARGET_LIBS = static
 
 #
 # If you want the demo programs to be built, the following variable
 # should be assigned the single word: demos. If it isn't assigned
 # anything, the demo programs won't be built.
 #
-DEMOS = demos
+#DEMOS = demos
+DEMOS =
 
 #
 # List the programs that are to be made by default.
@@ -181,6 +189,8 @@ clean:
 	  lib="libtecla*$$alt" ; \
 	  rm -f $$lib; echo rm -f $$lib ; \
 	done
+
+superclean: clean
 
 distclean: clean
 	rm -rf config.cache config.status config.log Makefile libtecla.map.opt \
@@ -263,7 +273,9 @@ install_bin: $(BINDIR) $(PROGRAMS) $(PROGRAMS_R)
 	  $(srcdir)/install-sh -c -m 755 -s $$prog $(BINDIR)/; \
 	done
 
-install: install_lib install_inc install_man install_bin
+#install: install_lib install_inc install_man install_bin
+
+install:
 
 # Make any missing installation directories.
 

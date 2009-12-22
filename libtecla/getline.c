@@ -3984,10 +3984,17 @@ static int gl_terminal_move_cursor(GetLine *gl, int n)
 /*
  * Break down the current and target cursor locations into rows and columns.
  */
+  /**** BEGIN ABB: 2009-06-15  div-by-zero exception ***/
+  if (gl->ncolumn == 0) {
+      gl->ncolumn = 1;
+  }
+  /**** END ABB: 2009-06-15  div-by-zero exception ***/
+
   cur_row = gl->term_curpos / gl->ncolumn;
   cur_col = gl->term_curpos % gl->ncolumn;
   new_row = (gl->term_curpos + n) / gl->ncolumn;
   new_col = (gl->term_curpos + n) % gl->ncolumn;
+
 /*
  * Move down to the next line.
  */
@@ -10424,8 +10431,12 @@ static int gl_present_line(GetLine *gl, const char *prompt,
 /*
  * Load the line into the buffer.
  */
-    if(start_line != gl->line)
+    if(start_line != gl->line) {
+      /*** START ABB: 2009-06-18 ***/
+      gl_truncate_buffer(gl, 0);
+      /*** START ABB: 2009-06-18 ***/
       gl_buffer_string(gl, start_line, start_len, 0);
+    }
 /*
  * Strip off any trailing newline and carriage return characters.
  */
@@ -10433,6 +10444,13 @@ static int gl_present_line(GetLine *gl, const char *prompt,
 	(*cptr=='\n' || *cptr=='\r'); cptr--,gl->ntotal--)
       ;
     gl_truncate_buffer(gl, gl->ntotal < 0 ? 0 : gl->ntotal);
+
+    /*** ABB: gl->ntotal was still set to the last time
+     *** gl->line was set.  The previous loop should
+     *** have started at the end of start_line
+     *** and this length was not recorded
+     ***/
+
 /*
  * Where should the cursor be placed within the line?
  */
@@ -12173,6 +12191,7 @@ static int gl_erase_line(GetLine *gl)
 /*
  * Is a line currently displayed?
  */
+
   if(gl->displayed) {
 /*
  * Relative the the start of the input line, which terminal line of

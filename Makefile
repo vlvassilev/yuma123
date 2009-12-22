@@ -13,9 +13,7 @@ DIRS = libtecla netconf libtoaster
 
 ifdef DESTDIR
 JFLAG= 
-SUDO= 
 else
-SUDO=sudo
 JFLAG = -j3
 endif
 

@@ -61,7 +61,13 @@ test:
 
 
 install:
-	$(SUDO) install $(OWNER) $(GRP) $(BIN_INST)/$(PROG) $(REAL_INST)
+	install $(OWNER) $(GRP) $(BIN_INST)/$(PROG) $(REAL_INST)
+
+uninstall:
+	rm -f  $(REAL_INST)/$(PROG)
+
+distclean: superclean uninstall
+
 
 # this real rule keeps make from deleting the $(OBJS) as
 # intermediate files

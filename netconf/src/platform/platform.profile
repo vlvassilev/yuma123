@@ -3,10 +3,8 @@
 #
 
 ifdef DESTDIR
-SUDO=
 OWNER=
 else
-SUDO=sudo
 OWNER= --owner=root
 endif
 
@@ -110,7 +108,8 @@ DEPS = $(patsubst %.c,%.D,$(wildcard *.c))
 ######################## PLATFORM DEFINITIONS #############
 PLATFORM_CPP=
 
-.PHONY: all superclean clean test install depend lint
+.PHONY: all superclean clean test install uninstall \
+        distclean depend lint
 
 ######################### MAKE DEPENDENCIES ###############
 COMPILE.c= $(CC) $(CFLAGS) $(CPPFLAGS) $(PLATFORM_CPP) \

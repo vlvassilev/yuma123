@@ -15,7 +15,7 @@ LIB_INST=$(TBASE)/lib
 ifdef MAXWELL
 REAL_INST=/lib
 else
-REAL_INST=$(DESTDIR)/usr/lib
+REAL_INST=$(DESTDIR)/usr/lib/yuma
 endif
 
 
@@ -36,20 +36,19 @@ test:
 
 
 install:
-ifdef STATIC
-else
-	$(SUDO) install $(OWNER) $(GRP) \
+ifndef STATIC
+	mkdir -p $(REAL_INST)
+	install $(OWNER) $(GRP) \
 	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) \
 	$(REAL_INST)
-ifdef MAC
 ifndef DESTDIR
-	$(SUDO) ldconfig $(REAL_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
-endif
+	ldconfig $(REAL_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
 endif
 endif
 
+
 uninstall:
-	$(SUDO) rm	-f $(REAL_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
+	rm -f $(REAL_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
 
 ncxlib: $(LBASE)/lib$(SUBDIR_NM).$(LIBSUFFIX)
 
@@ -64,6 +63,7 @@ superclean:
 	rm -f *~  $(DEPS) dependencies $(OBJS) \
 	$(LBASE)/lib$(SUBDIR_NM).*
 
+distclean: superclean uninstall
 
 $(LBASE)/libncx.so: $(OBJS)
 	gcc -shared -dynamic -Wl,-soname,libncx.so -o $@ $(OBJS) -lc

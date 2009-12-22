@@ -19,9 +19,7 @@ LIB_INSTALL = $(DESTDIR)/usr/lib/yuma
 
 ifdef DESTDIR
 JFLAG= 
-SUDO= 
 else
-SUDO=sudo
 JFLAG = -j3
 endif
 
@@ -62,13 +60,13 @@ ifdef DESTDIR
 	mkdir -p $(DESTDIR)/usr/local/sbin
 	mkdir -p $(DESTDIR)/usr/share/doc
 endif
-	$(SUDO) mkdir -p $(LIB_INSTALL)
-	$(SUDO) mkdir -p $(DOC_INSTALL)
-	$(SUDO) mkdir -p $(TOP_INSTALL)
-	$(SUDO) mkdir -p $(TOP_INSTALL)/data
-	$(SUDO) mkdir -p $(TOP_INSTALL)/etc
-	$(SUDO) mkdir -p $(TOP_INSTALL)/modules
-	$(SUDO) mkdir -p $(TOP_INSTALL)/scripts
+	mkdir -p $(LIB_INSTALL)
+	mkdir -p $(DOC_INSTALL)
+	mkdir -p $(TOP_INSTALL)
+	mkdir -p $(TOP_INSTALL)/data
+	mkdir -p $(TOP_INSTALL)/etc
+	mkdir -p $(TOP_INSTALL)/modules
+	mkdir -p $(TOP_INSTALL)/scripts
 	for dir in $(DIRS); do\
           cd $$dir && $(MAKE) install && cd ..;\
         done

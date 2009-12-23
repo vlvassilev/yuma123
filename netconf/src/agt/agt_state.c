@@ -1196,6 +1196,12 @@ status_t
     val_value_t *session;
     status_t     res;
 
+#ifdef DEBUG
+    if (scb == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
     res = NO_ERR;
     session = make_session_val(scb, mysessionobj, &res);
     if (!session) {
@@ -1263,6 +1269,16 @@ status_t
 {
     val_value_t *schema;
     status_t     res;
+
+#ifdef DEBUG
+    if (mod == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (!agt_advertise_module_needed(mod->name)) {
+        return NO_ERR;
+    }
 
     res = NO_ERR;
     schema = make_schema_val(mod, myschemaobj, &res);

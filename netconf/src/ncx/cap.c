@@ -1679,7 +1679,7 @@ void
 
         anycaps = TRUE;
         if (cap->cap_revision) {
-            log_write("\n   %s/%s", cap->cap_module, cap->cap_revision);
+            log_write("\n   %s@%s", cap->cap_module, cap->cap_revision);
         } else {
             log_write("\n   %s", cap->cap_module);
         }

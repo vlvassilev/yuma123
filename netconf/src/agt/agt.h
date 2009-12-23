@@ -275,4 +275,7 @@ extern status_t
                        const xmlChar *revision,
                        boolean cfgloaded);
 
+extern boolean
+    agt_advertise_module_needed (const xmlChar *modname);
+
 #endif	    /* _H_agt */

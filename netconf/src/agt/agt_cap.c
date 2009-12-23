@@ -97,6 +97,7 @@ static val_value_t   *agt_caps = NULL;
 static cap_list_t    *my_agt_caps = NULL;
 
 
+
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
@@ -366,9 +367,7 @@ status_t
     /* add capability for each module loaded in ncxmod */
     while (mod && res == NO_ERR) {
         /* keep internal modules out of the capabilities */
-        if (xml_strcmp(mod->name, NCX_EL_NETCONF) &&
-            xml_strcmp(mod->name, NCX_EL_XSD)) {
-
+        if (agt_advertise_module_needed(mod->name)) {
             res = cap_add_modval(agt_caps, mod);
         }
         mod = (ncx_module_t *)dlq_nextEntry(mod);
@@ -383,10 +382,11 @@ status_t
          savedev = (ncx_save_deviations_t *)
              dlq_nextEntry(savedev)) {
 
-        if (xml_strcmp(savedev->devmodule, NCX_EL_NETCONF) &&
-            xml_strcmp(savedev->devmodule, NCX_EL_XSD)) {
+        if (agt_advertise_module_needed(savedev->devmodule)) {
 
-            /* not a hard-wired internal module */
+            /* make sure this is not a hard-wired internal module 
+             * or a duplicate already loaded as a regular module
+             */
             mod = ncx_find_module(savedev->devmodule,
                                   savedev->devrevision);
             if (mod == NULL) {
@@ -423,7 +423,11 @@ status_t
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
     }
 
-    return cap_add_modval(agt_caps, mod);
+    if (agt_advertise_module_needed(mod->name)) {
+        return cap_add_modval(agt_caps, mod);
+    } else {
+        return NO_ERR;
+    }
 
 } /* agt_cap_add_module */
 

@@ -1125,4 +1125,35 @@ status_t
 #endif
 
 
+/********************************************************************
+* FUNCTION agt_advertise_module_needed
+*
+* Check if the module should be advertised or not
+* Hard-wired hack at this time
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    none
+*********************************************************************/
+boolean
+    agt_advertise_module_needed (const xmlChar *modname)
+{
+    if (!xml_strcmp(modname, NCXMOD_NETCONF)) {
+        return FALSE;
+    }
+
+    if (!xml_strcmp(modname, NCX_EL_XSD)) {
+        return FALSE;
+    }
+
+    if (!xml_strcmp(modname, NCXMOD_NETCONFD)) {
+        return FALSE;
+    }
+
+    return TRUE;
+
+} /* agt_advertise_module_needed */
+
+
 /* END file agt.c */

@@ -121,7 +121,7 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 	TurboGears is Copyright &#169; 2007, Kevin Dangoor
       </p>
       <p py:if="copyright">
-	Last updated: 2009-12-02
+	Last updated: 2009-12-23
       </p>
     </div>
   </body>

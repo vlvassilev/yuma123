@@ -1105,24 +1105,24 @@
 	  </a>
 	</p>
 
+	<h4>RFC 5717</h4>
+	<p>
+	  Defines a partial database locking mechanism (based on
+	  instance-identifier or XPath expressions) for the 
+	  NETCONF protocol.<br/><br/>
+	  <b>Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
+	  <a target="_blank" 
+             href="http://www.ietf.org/rfc/rfc5717.txt">
+	    Partial Lock RPC for NETCONF
+	  </a>
+	</p>
+
       </div>
 
       <a name="work"/>
       <div class="publication-list">
 	<br/>
 	<h2>Standards Work in Progress</h2>
-
-	<h4>draft-ietf-netconf-partial-lock</h4>
-	<p>
-	  Defines a partial database locking mechanism (based on
-	  instance-identifier or XPath expressions) for the 
-	  NETCONF protocol.<br/><br/>
-	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
-	  <a target="_blank" 
-             href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-partial-lock-11.txt">
-	    Partial Lock RPC for NETCONF
-	  </a>
-	</p>
 
 	<h4>draft-ietf-netconf-monitoring</h4>
 	<p>

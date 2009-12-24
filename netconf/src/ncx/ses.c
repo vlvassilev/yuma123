@@ -1132,6 +1132,7 @@ status_t
     done = FALSE;
     readdone = FALSE;
     readtries = 0;
+    ret = 0;
 
     while (!done) {
         if (scb->state >= SES_ST_SHUTDOWN_REQ) {

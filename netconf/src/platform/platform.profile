@@ -5,7 +5,11 @@
 ifdef DESTDIR
 OWNER=
 else
+ifdef MAC
+OWNER=-oroot
+else
 OWNER= --owner=root
+endif
 endif
 
 ### GCC + [LINUX or MACOSX]

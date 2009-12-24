@@ -42,7 +42,9 @@ ifndef STATIC
 	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) \
 	$(REAL_INST)
 ifndef DESTDIR
+ifndef MAC
 	ldconfig $(REAL_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
+endif
 endif
 endif
 

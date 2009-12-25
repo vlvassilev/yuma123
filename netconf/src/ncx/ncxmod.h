@@ -89,12 +89,6 @@ date	     init     comment
 
 #define NCXMOD_DOTCHAR '.'
 
-/* file extension for YANG Modules */
-#define NCXMOD_YANG_SUFFIX        (const xmlChar *)"yang"
-
-#define NCXMOD_YIN_SUFFIX         (const xmlChar *)"yin"
-
-
 /* name of the NCX module containing agent boot parameters
  * loaded during startup 
  */

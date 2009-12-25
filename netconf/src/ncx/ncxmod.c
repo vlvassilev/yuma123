@@ -175,7 +175,7 @@ static boolean
     }
 
     str = &buff[count-4];
-    return (xml_strcmp(str, NCXMOD_YANG_SUFFIX)) ? FALSE : TRUE;
+    return (xml_strcmp(str, YANG_SUFFIX)) ? FALSE : TRUE;
 
 } /* is_yang_file */
 
@@ -209,7 +209,7 @@ static boolean
 
     str = &buff[count-3];
 
-    return (xml_strcmp(str, NCXMOD_YIN_SUFFIX)) ? FALSE : TRUE;
+    return (xml_strcmp(str, YIN_SUFFIX)) ? FALSE : TRUE;
 
 } /* is_yin_file */
 
@@ -386,11 +386,11 @@ static status_t
 
     switch (mode) {
     case NCXMOD_MODE_YANG:
-        suffix = NCXMOD_YANG_SUFFIX;
+        suffix = YANG_SUFFIX;
         isyang = TRUE;
         break;
     case NCXMOD_MODE_YIN:
-        suffix = NCXMOD_YIN_SUFFIX;
+        suffix = YIN_SUFFIX;
         isyang = FALSE;
         break;
     case NCXMOD_MODE_FILEYANG:
@@ -942,8 +942,8 @@ static status_t
                     if (!xml_strcmp((const xmlChar *)
                                     &ep->d_name[fnamelen+12], 
                                     (isyang) ? 
-                                    NCXMOD_YANG_SUFFIX : 
-                                    NCXMOD_YIN_SUFFIX)) {
+                                    YANG_SUFFIX : 
+                                    YIN_SUFFIX)) {
                         *done = TRUE;
                         if ((pathlen + dentlen) >= bufflen) {
                             res = ERR_BUFF_OVFL;
@@ -1358,7 +1358,9 @@ static status_t
         if (matchmode) {
             fnamebuff = xml_strdup(modname);
         } else {
-            fnamebuff = yang_make_filename(modname, revision);
+            fnamebuff = yang_make_filename(modname, 
+                                           revision,
+                                           isyang);
         }
 
         if (!fnamebuff) {
@@ -1626,10 +1628,10 @@ static status_t
          * only treat this string with a dot in it as a file if
          * it has a YANG file extension
          */
-        if (!xml_strcmp(str+1, NCXMOD_YANG_SUFFIX)) {
+        if (!xml_strcmp(str+1, YANG_SUFFIX)) {
             isfile = TRUE;
             mode = NCXMOD_MODE_FILEYANG;
-        } else if (!xml_strcmp(str+1, NCXMOD_YIN_SUFFIX)) {
+        } else if (!xml_strcmp(str+1, YIN_SUFFIX)) {
             isfile = TRUE;
             mode = NCXMOD_MODE_FILEYIN;
             isyang = FALSE;

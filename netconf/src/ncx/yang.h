@@ -479,8 +479,18 @@ extern int32
     yang_compare_revision_dates (const xmlChar *revstring1,
 				 const xmlChar *revstring2);
 
+
 extern xmlChar *
     yang_make_filename (const xmlChar *modname,
-			const xmlChar *revision);
+                        const xmlChar *revision,
+                        boolean isyang);
+
+extern status_t
+    yang_split_filename (const xmlChar *filename,
+                         const xmlChar **modname,
+                         uint32 *modnamelen,
+                         const xmlChar **revision,
+                         uint32 *revisionlen,
+                         boolean *isyang);
 
 #endif	    /* _H_yang */

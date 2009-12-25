@@ -3553,6 +3553,8 @@ int32
 * INPUTS:
 *   modname == [sub]module name
 *   revision == [sub]module revision date (may be NULL)
+*   isyang == TRUE for YANG extension
+*             FALSE for YIN extension
 *
 * RETURNS:
 *    malloced and filled in string buffer with filename
@@ -3560,10 +3562,11 @@ int32
 *********************************************************************/
 xmlChar *
     yang_make_filename (const xmlChar *modname,
-                        const xmlChar *revision)
+                        const xmlChar *revision,
+                        boolean isyang)
 {
     xmlChar    *buff, *p;
-    uint32      mlen, rlen;
+    uint32      mlen, rlen, slen;
 
 #ifdef DEBUG
     if (!modname) {
@@ -3574,12 +3577,13 @@ xmlChar *
 
     mlen = xml_strlen(modname);
     rlen = (revision) ? xml_strlen(revision) : 0;
-
     if (rlen) {
-        rlen++;
+        rlen++;   /* file sep char */
     }
+    slen = (isyang) ? xml_strlen(YANG_SUFFIX) :
+        xml_strlen(YIN_SUFFIX);
 
-    buff = m__getMem(mlen + rlen + 6);
+    buff = m__getMem(mlen + rlen + slen + 2);
     if (!buff) {
         return NULL;
     }
@@ -3588,15 +3592,117 @@ xmlChar *
 
     p += xml_strcpy(p, modname);
     if (revision && *revision) {
-        *p++ = '.';
+        *p++ = YANG_FILE_SEPCHAR;
         p += xml_strcpy(p, revision);
     }
     *p++ = '.';
-    xml_strcpy(p, (const xmlChar *)"yang");
+    if (isyang) {
+        xml_strcpy(p, YANG_SUFFIX);
+    } else {
+        xml_strcpy(p, YIN_SUFFIX);
+    }
 
     return buff;
 
 }  /* yang_make_filename */
+
+
+
+/********************************************************************
+* FUNCTION yang_split_filespec
+* 
+* Split a filename into its components
+*
+* INPUTS:
+*   filename == filename string
+*   modname == address of return [sub]module name
+*   modnamelen == address of return modname length
+*   revision == address of return [sub]module 
+*               revision date 
+*   revisionlen == address of return revision length
+*   isyang == address of return YANG or YIN flag
+*
+* OUTPUTS:
+*   *modname == pointer to return [sub]module name
+*   *modnamelen == module name length
+*   *revision == return [sub]module revision date 
+*   *revisionlen == pointer to return revision length
+*   *isyang == return YANG or YIN flag
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    yang_split_filename (const xmlChar *filename,
+                         const xmlChar **modname,
+                         uint32 *modnamelen,
+                         const xmlChar **revision,
+                         uint32 *revisionlen,
+                         boolean *isyang)
+{
+    const xmlChar *str, *last, *sepchar;
+    uint32         len, yangslen, yinslen;
+
+#ifdef DEBUG
+    if (filename == NULL ||
+        modname == NULL ||
+        modnamelen == NULL ||
+        revision == NULL ||
+        revisionlen == NULL ||
+        isyang == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    *modname = filename;
+    *modnamelen = 0;
+    *isyang = TRUE;
+    *revision = NULL;
+    *revisionlen = 0;
+
+    str = filename;
+    sepchar = NULL;
+
+    while (*str) {
+        if (*str == NEW_YANG_FILE_SEPCHAR) {
+            sepchar = str;
+        }
+        str++;
+    }
+
+    len = (uint32)(str - filename);
+    yangslen = xml_strlen(YANG_SUFFIX);
+    yinslen = xml_strlen(YIN_SUFFIX);
+    last = str;
+
+    /* check if a file extension is present */
+    if (len > yangslen + 1) {
+        if ((*(str - yangslen - 1) == '.') &&
+            (!xml_strcmp(str - yangslen, YANG_SUFFIX))) {
+            last = str - yangslen - 1;
+        }
+    } else if (len > yinslen + 1) {
+        if ((*(str - yinslen - 1) == '.') &&
+            (!xml_strcmp(str - yinslen, YIN_SUFFIX))) {
+            *isyang = FALSE;
+            last = str - yinslen - 1;
+        }
+    }
+
+    /* check if the revision should be set */
+    if (sepchar != NULL) {
+        *modnamelen = (uint32)(sepchar - filename);
+        if (sepchar < last) {
+            *revision = sepchar + 1;
+            *revisionlen = (uint32)(last - sepchar - 1);
+        }
+    } else {
+        *modnamelen = (uint32)(last - filename);
+    }
+
+    return NO_ERR;
+
+}  /* yang_split_filename */
 
 
 /* END file yang.c */

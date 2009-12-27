@@ -510,15 +510,6 @@ status_t
         }
     }
 
-    /* initialize the NCX server core callback functions.
-     * the schema (netconf.yang) for these callbacks was 
-     * already loaded in the common ncx_init
-     * */
-    res = agt_ncx_init();
-    if (res != NO_ERR) {
-        return res;
-    }
-
     /* initialize the server access control model */
     res = agt_acm_init();
     if (res != NO_ERR) {
@@ -557,7 +548,16 @@ status_t
     if (res != NO_ERR) {
         return res;
     }
-    
+
+    /* initialize the NCX server core callback functions.
+     * the schema (yuma-netconf.yang) for these callbacks was 
+     * already loaded in the common ncx_init
+     * */
+    res = agt_ncx_init();
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* check the module parameter set from CLI or conf file
      * for any modules to pre-load
      */

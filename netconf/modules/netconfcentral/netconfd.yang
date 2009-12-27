@@ -10,8 +10,6 @@ module netconfd {
 
     import yuma-app-common { prefix ncxapp; }
 
-    import yuma-nacm { prefix nacm; }
-
     import ietf-inet-types { prefix inet; }
 
     import ietf-with-defaults { prefix wd; }
@@ -213,7 +211,7 @@ module netconfd {
           "The user name to use as the superuser account.
            Any session associated with this user name 
            will bypass all access control enforcement.
-           See nacm.yang for more details.
+           See yuma-nacm.yang for more details.
 
            To disable the superuser account completely,
            set this parameter to the empty string.";

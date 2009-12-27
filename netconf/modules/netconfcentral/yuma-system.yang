@@ -12,6 +12,8 @@ module yuma-system {
 
     import notifications { prefix notif; }
 
+    import yuma-app-common { prefix yumaapp; }
+
     import yuma-types { prefix nt; }
 
     import yuma-ncx { prefix ncx; }
@@ -413,7 +415,7 @@ module yuma-system {
              "Module revision to load.";
           type nt:Date;
         }
-        uses ncxapp:DeviationParm;
+        uses yumaapp:DeviationParm;
       }
 
       output {

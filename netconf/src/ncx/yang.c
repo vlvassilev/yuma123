@@ -2037,6 +2037,8 @@ status_t
     }
 #endif
 
+    *typ = NULL;
+
     imp = ncx_find_pre_import(mod, prefix);
     if (!imp) {
         res = ERR_NCX_PREFIX_NOT_FOUND;
@@ -2111,6 +2113,7 @@ status_t
 #endif
 
     res = NO_ERR;
+    *grp = NULL;
 
     imp = ncx_find_pre_import(mod, prefix);
     if (!imp) {
@@ -2187,6 +2190,7 @@ status_t
     imod = NULL;
     res = NO_ERR;
     retres = NO_ERR;
+    *ext = NULL;
 
     imp = ncx_find_pre_import(mod, prefix);
     if (!imp) {
@@ -2278,6 +2282,7 @@ status_t
     imod = NULL;
     res = NO_ERR;
     retres = NO_ERR;
+    *feature = NULL;
 
     imp = ncx_find_pre_import(mod, prefix);
     if (!imp) {
@@ -2369,6 +2374,7 @@ status_t
     imod = NULL;
     res = NO_ERR;
     retres = NO_ERR;
+    *identity = NULL;
 
     imp = ncx_find_pre_import(mod, prefix);
     if (!imp) {

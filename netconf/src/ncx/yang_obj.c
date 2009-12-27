@@ -2499,6 +2499,7 @@ static status_t
 
     /* attempt to find grouping only if it is from another module */
     if (uses->prefix && xml_strcmp(uses->prefix, mod->prefix)) {
+        impgrp = NULL;
         res = yang_find_imp_grouping(pcb,
                                      tkc, 
                                      mod, 

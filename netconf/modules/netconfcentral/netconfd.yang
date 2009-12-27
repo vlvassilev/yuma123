@@ -20,15 +20,14 @@ module netconfd {
 
     contact "Andy Bierman <support@netconfcentral.org>.";
 
-    description "NCX Server Configuration Parameters and Statistics";
+    description 
+       "Configuration Parameters for netconfd;
+        This module is not advertised by the server.
+        It contains only CLI parameters.";
 
-    revision 2009-05-28 {
+    revision 2009-12-27 {
        description 
-         "pre-beta1: work-in-progress version.";
-    }
-
-    revision 2008-08-01 {
-       description "Initial conversion from netconfd.ncx v 0.6";
+         "Initial version.";
     }
 
     grouping StartupChoice {
@@ -279,60 +278,6 @@ module netconfd {
         type empty;
       }
 
-    }
-
-    rpc load {
-      nacm:secure;
-      description 
-        "Load a module into the server, if it is not already loaded.
-         Returns the module revision date (or today's date if none),
-         of the module that was loaded, or an error if not found
-         or the module found had errors and was not loaded
-         successfully.  If the module is already loaded, then the
-         revision date will simply be returned.";
-
-      input {
-        ncx:default-parm module;
-        leaf module {
-          description "Name of the module to load.";
-          mandatory true;
-          type nt:NcxName;
-        }
-        leaf revision {
-          description
-             "Module revision to load.";
-          type nt:Date;
-        }
-        uses ncxapp:DeviationParm;
-      }
-
-      output {
-        leaf mod-revision {
-          description  
-            "Revision date of the module in use by the server.
-             Will only be present if the module has a version";
-          type nt:Date;
-        }
-      }
-
-    }
-
-    rpc restart {
-      description 
-        "Restart the server. Does not reload the software image..";
-      nacm:secure;
-    }
-
-    rpc shutdown {
-      description 
-        "Shutdown the server.";
-      nacm:secure;
-    }
-
-    rpc no-op {
-      description 
-        "Just returns 'ok'. Used for debugging
-         or relative performance measurements.";
     }
 
 }

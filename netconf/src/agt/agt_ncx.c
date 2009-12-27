@@ -2054,7 +2054,7 @@ static status_t
 
     /* mandatory module name */
     modval = val_find_child(msg->rpc_input, 
-                            NCXMOD_NETCONFD,
+                            AGT_SYS_MODULE,
                             NCX_EL_MODULE);
     if (!modval || modval->res != NO_ERR) {
         /* error already recorded */
@@ -2063,7 +2063,7 @@ static status_t
 
     /* optional revision data string */
     revval = val_find_child(msg->rpc_input, 
-                            NCXMOD_NETCONFD,
+                            AGT_SYS_MODULE,
                             NCX_EL_REVISION);
     if (revval && revval->res != NO_ERR) {
         /* error already recorded */
@@ -2074,11 +2074,11 @@ static status_t
     mod = ncx_find_module(VAL_STR(modval), NULL);
     if (!mod) {
         for (devval = val_find_child(msg->rpc_input, 
-                                     NCXMOD_NETCONFD,
+                                     AGT_SYS_MODULE,
                                      NCX_EL_DEVIATION);
              devval != NULL && res == NO_ERR;
              devval = val_find_next_child(msg->rpc_input, 
-                                          NCXMOD_NETCONFD,
+                                          AGT_SYS_MODULE,
                                           NCX_EL_DEVIATION,
                                           devval)) {
 
@@ -2492,7 +2492,7 @@ static status_t
     }
 
     /* load module extension */
-    res = agt_rpc_register_method(AGT_CLI_MODULE, 
+    res = agt_rpc_register_method(AGT_SYS_MODULE, 
                                   NCX_EL_LOAD,
                                   AGT_RPC_PH_INVOKE,  
                                   load_invoke);
@@ -2501,7 +2501,7 @@ static status_t
     }
 
     /* restart extension */
-    res = agt_rpc_register_method(AGT_CLI_MODULE, 
+    res = agt_rpc_register_method(AGT_SYS_MODULE, 
                                   NCX_EL_RESTART,
                                   AGT_RPC_PH_INVOKE,  
                                   restart_invoke);
@@ -2510,7 +2510,7 @@ static status_t
     }
 
     /* shutdown extension */
-    res = agt_rpc_register_method(AGT_CLI_MODULE, 
+    res = agt_rpc_register_method(AGT_SYS_MODULE, 
                                   NCX_EL_SHUTDOWN,
                                   AGT_RPC_PH_INVOKE,  
                                   shutdown_invoke);
@@ -2519,7 +2519,7 @@ static status_t
     }
 
     /* no-op extension */
-    agt_rpc_support_method(AGT_CLI_MODULE, NCX_EL_NO_OP);
+    agt_rpc_support_method(AGT_SYS_MODULE, NCX_EL_NO_OP);
 
     return NO_ERR;
 
@@ -2587,16 +2587,16 @@ static void
     agt_rpc_unregister_method(NC_MODULE, NCX_EL_LOAD_CONFIG);
 
     /* load module extension */
-    agt_rpc_unregister_method(AGT_CLI_MODULE, NCX_EL_LOAD);
+    agt_rpc_unregister_method(AGT_SYS_MODULE, NCX_EL_LOAD);
 
     /* restart extension */
-    agt_rpc_unregister_method(AGT_CLI_MODULE, NCX_EL_RESTART);
+    agt_rpc_unregister_method(AGT_SYS_MODULE, NCX_EL_RESTART);
 
     /* shutdown extension */
-    agt_rpc_unregister_method(AGT_CLI_MODULE, NCX_EL_SHUTDOWN);
+    agt_rpc_unregister_method(AGT_SYS_MODULE, NCX_EL_SHUTDOWN);
 
     /* no-op extension */
-    agt_rpc_unsupport_method(AGT_CLI_MODULE, NCX_EL_NO_OP);
+    agt_rpc_unsupport_method(AGT_SYS_MODULE, NCX_EL_NO_OP);
 
 } /* unregister_nc_callbacks */
 

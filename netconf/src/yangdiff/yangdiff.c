@@ -1944,11 +1944,7 @@ static status_t
      * Set debug cutoff filter to user errors
      */
     res = ncx_init(TRUE,
-#ifdef DEBUG
                    LOG_DEBUG_INFO,
-#else
-                   LOG_DEBUG_WARN,
-#endif
                    FALSE,
                    NULL,
                    argc, 

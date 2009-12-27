@@ -32,8 +32,6 @@ date         init     comment
 #include <string.h>
 #include <unistd.h>
 
-/* #define MEMORY_DEBUG 1 */
-
 #ifdef MEMORY_DEBUG
 #include <mcheck.h>
 #endif
@@ -99,6 +97,11 @@ date         init     comment
 #define NETCONFD_CLI       (const xmlChar *)"netconfd"
 
 #define MAX_FILESPEC_LEN  1023
+
+#define START_MSG          "Starting netconfd...\n"
+
+#define TESTMOD            (const xmlChar *)"test"
+#define TESTFEATURE        (const xmlChar *)"feature2"
 
 
 /********************************************************************
@@ -178,16 +181,11 @@ static status_t
         return res;
     }
 
-#ifdef NETCONFD_DEBUG
+
+#ifdef NETCONFD_DEBUG_LOAD_TEST
     if (LOGDEBUG2) {
         log_debug2("\nnetconfd: Loading Debug Test Module");
     }
-#endif
-
-#ifdef NETCONFD_DEBUG_LOAD_TEST
-
-#define TESTMOD (const xmlChar *)"test"
-#define TESTFEATURE (const xmlChar *)"feature2"
 
     /* Load test module */
     res = ncxmod_load_module(TESTMOD,
@@ -224,17 +222,7 @@ static status_t
     char        *buff;
 
     /* set the default debug output level */
-#ifdef DEBUG
-#ifdef NETCONFD_DEBUG
-    dlevel = LOG_DEBUG_DEBUG;
-#else 
     dlevel = LOG_DEBUG_INFO;
-#endif
-#else
-    dlevel = LOG_DEBUG_WARN;
-#endif
-
-#define START_MSG "Starting netconfd...\n"
 
     /* initialize the NCX Library first to allow NCX modules
      * to be processed.  No module can get its internal config
@@ -444,7 +432,8 @@ int
 
     if (malloc_cnt != free_cnt) {
         printf("\n*** netconfd error: memory leak (m:%u f:%u)\n", 
-               malloc_cnt, free_cnt);
+               malloc_cnt, 
+               free_cnt);
     }
 
     print_errors();

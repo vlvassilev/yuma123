@@ -3022,11 +3022,7 @@ static status_t
 #endif
 
     /* set the default debug output level */
-#ifdef DEBUG
-    log_level = LOG_DEBUG_DEBUG;
-#else
     log_level = LOG_DEBUG_INFO;
-#endif
 
     dlq_createSQue(&savedevQ);
 

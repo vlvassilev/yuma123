@@ -2968,19 +2968,19 @@ static void
 
     /* check the contents of the reply */
     if (msg && msg->notification) {
-        if (LOGINFO) {
+        if (LOGWARN) {
             gl_normal_io(server_cb->cli_gl);
-            log_info("\n\nIncoming notification:");
-            if (LOGDEBUG) {
+            if (LOGINFO) {
+                log_info("\n\nIncoming notification:");
                 val_dump_value_ex(msg->notification, 
                                   NCX_DEF_INDENT,
                                   server_cb->display_mode);
-            } else {
-                if (msg->eventType) {
-                    log_info(" <%s>", msg->eventType->name);
-                }
+                log_info("\n\n");
+            } else if (msg->eventType) {
+                log_warn("\n\nIncoming <%s> "
+                         "notification\n\n", 
+                         msg->eventType->name);
             }
-            log_info("\n\n");
         }
 
         /* Log the notification by removing it from the message
@@ -3699,12 +3699,10 @@ void
             log_info("\nRPC Data Reply %s for session %u:\n",
                      rpy->msg_id, 
                      usesid);
-            if (LOGDEBUG) {
-                val_dump_value_ex(rpy->reply, 
-                                  0,
-                                  server_cb->display_mode);
-                log_info("\n");
-            }
+            val_dump_value_ex(rpy->reply, 
+                              0,
+                              server_cb->display_mode);
+            log_info("\n");
             anyout = TRUE;
         }
 

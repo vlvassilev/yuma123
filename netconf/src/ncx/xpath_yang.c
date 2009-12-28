@@ -134,13 +134,13 @@ static status_t
                       xmlns_id_t  nsid,
                       const xmlChar *nodename)
 {
-    obj_template_t  **useobj, *foundobj;
-    const xmlChar          *modname;
-    ncx_module_t           *targmod;
-    dlq_hdr_t              *temp_modQ;
-    status_t                res;
-    boolean                 laxnamespaces;
-    xmlns_id_t              ncid;
+    obj_template_t     **useobj, *foundobj;
+    const xmlChar       *modname;
+    ncx_module_t        *targmod;
+    dlq_hdr_t           *temp_modQ;
+    status_t             res;
+    boolean              laxnamespaces;
+    xmlns_id_t           ncid;
 
     /* TBD: change this to an agt_profile 'namespaces' */
     laxnamespaces = TRUE;
@@ -176,8 +176,16 @@ static status_t
                         targmod = ncx_find_module(modname, NULL);
                     }
                 } else if (temp_modQ) {
+                    /* try the temp Q first */
                     targmod = ncx_find_module_que_nsid(temp_modQ, 
                                                        nsid);
+                    if (targmod == NULL) {
+                        /* try to find a manager-loaded module */
+                        modname = xmlns_get_module(nsid);
+                        if (modname) {
+                            targmod = ncx_find_module(modname, NULL);
+                        }
+                    }
                 }
                 if (!targmod) {
                     res = ERR_NCX_DEF_NOT_FOUND;

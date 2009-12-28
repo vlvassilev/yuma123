@@ -1,6 +1,6 @@
 module test {
 
-    namespace "http://netconfcentral.com/ns/test";
+    namespace "http://netconfcentral.org/ns/test";
     prefix "t";
 
     organization
@@ -15,10 +15,10 @@ module test {
     reference // testing
       "RFC 1234;
        RFC 3456.  more text
-       draft-ietf-netmod-yang-07.txt
+       draft-ietf-netmod-yang-09.txt
       ";
 
-    revision 2009-06-10 {
+    revision 2009-12-26 {
         description "Test module in-progress.";
     }
 

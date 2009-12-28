@@ -1,6 +1,6 @@
 module toaster {
 
-    namespace "http://netconfcentral.com/ns/toaster";
+    namespace "http://netconfcentral.org/ns/toaster";
 
     prefix "toast";
 

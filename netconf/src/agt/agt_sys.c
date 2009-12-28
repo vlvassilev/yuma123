@@ -1129,7 +1129,7 @@ void
     add_common_session_parms(scb, not);
 
     listobj = obj_find_child(sysConfigChangeobj,
-                             system_N_system,
+                             AGT_SYS_MODULE,
                              system_N_edit);
     if (listobj == NULL) {
         SET_ERROR(ERR_NCX_DEF_NOT_FOUND);

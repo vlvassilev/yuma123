@@ -9023,8 +9023,13 @@ status_t
         if (curnode->nsid == ncid || force_modQ == NULL) {
             foundmod = xmlns_get_modptr(curnode->nsid);
         } else if (force_modQ) {
+            /* try a session module Q */
             foundmod = ncx_find_module_que_nsid(force_modQ,
                                                 curnode->nsid);
+            if (foundmod == NULL) {
+                /* try a client-loaded module */
+                foundmod = xmlns_get_modptr(curnode->nsid);
+            }
         }
         if (foundmod) {
             foundmodname = ncx_get_modname(foundmod);
@@ -9043,6 +9048,9 @@ status_t
             /* check this Q of modules for a top-level match */
             foundobj = ncx_find_any_object_que(force_modQ,
                                                curnode->elname);
+            if (foundobj == NULL && curnode->nsid == 0) {
+                foundobj = ncx_find_any_object(curnode->elname);
+            }                
             if (foundobj) {
                 foundmodname = obj_get_mod_name(foundobj);
             }

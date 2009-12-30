@@ -31,6 +31,10 @@ superclean: yumasuperclean
 install: yumainstall
 
 yumaall:
+	cd libtecla;\
+	if [ ! -f Makefile ]; then \
+	  ./configure; \
+	fi
 	for dir in $(DIRS); do\
 	  cd $$dir && $(MAKE) $(JFLAG) && cd ..;\
         done

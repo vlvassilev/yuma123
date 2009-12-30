@@ -49,7 +49,6 @@ rm -rf $RPM_BUILD_ROOT
 %doc /usr/share/doc/yuma/
 %{_bindir}/*
 %{_datadir}/%{name}/
-%{_libdir}/libncx.so
 %{_libdir}/yuma/*
 
 

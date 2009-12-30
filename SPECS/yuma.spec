@@ -52,7 +52,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 %{_sbindir}/*
 %{_datadir}/%{name}/
-%{_libdir}/libncx.so
 %{_libdir}/yuma/*
 
 

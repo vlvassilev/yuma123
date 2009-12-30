@@ -1,7 +1,7 @@
-Name:           yuma
+Name:           yuma-client
 Version:        0.9.9
 Release:        1%{?dist}
-Summary:        Yang-based Unified Modular Automation Tools
+Summary:        Yuma Tools (client side only)
 
 Group:          Development/Tools
 License:        BSD
@@ -16,10 +16,8 @@ Requires: libssh2
 Requires: libxml2
 
 %description
-Yuma Tools is a YANG-based NETCONF-over-SSH client and server
-development toolkit.  The netconfd server includes an automated
-central NETCONF protocol stack, based directly on YANG modules.
-The yangcli client provides a CLI-like interface
+Yuma Tools (client only) is a YANG-based NETCONF-over-SSH 
+client application, which provides a CLI-like interface
 for any NETCONF server that supports YANG modules.
 The yangdump and yangdiff development tools are also
 included, to compile and process YANG modules.
@@ -32,12 +30,12 @@ included, to compile and process YANG modules.
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make FREE=1 %{?_smp_mflags}
+make FREE=1 CLIENT=1 %{?_smp_mflags}
 
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id FREE=1 DESTDIR=$RPM_BUILD_ROOT
+make install LDFLAGS+=--build-id FREE=1 CLIENT=1 DESTDIR=$RPM_BUILD_ROOT
 
 %post
 ldconfig /usr/lib/yuma/libncx.so
@@ -50,7 +48,6 @@ rm -rf $RPM_BUILD_ROOT
 %defattr(-,root,root,-)
 %doc /usr/share/doc/yuma/
 %{_bindir}/*
-%{_sbindir}/*
 %{_datadir}/%{name}/
 %{_libdir}/libncx.so
 %{_libdir}/yuma/*

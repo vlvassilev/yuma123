@@ -15,7 +15,11 @@ LIB_INST=$(TBASE)/lib
 ifdef MAXWELL
 REAL_INST=/lib
 else
+ifdef MACOS
+REAL_INST=$(DESTDIR)/usr/lib
+else
 REAL_INST=$(DESTDIR)/usr/lib/yuma
+endif
 endif
 
 

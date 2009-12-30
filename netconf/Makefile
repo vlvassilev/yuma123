@@ -34,7 +34,14 @@ clean: treeclean
 
 superclean: treesuperclean
 
+distclean: distclean
+
 install: treeinstall
+
+uninstall: treeuninstall
+
+
+
 
 treeall:
 	for dir in $(DIRS); do\
@@ -51,13 +58,16 @@ treesuperclean:
 	  cd $$dir && $(MAKE) superclean && cd ..;\
         done
 
+treedistclean:
+	for dir in $(DIRS); do\
+	  cd $$dir && $(MAKE) distclean && cd ..;\
+        done
+
 treeinstall:
 ifdef DESTDIR
 	mkdir -p $(DESTDIR)/usr/bin
 	mkdir -p $(DESTDIR)/usr/sbin
 	mkdir -p $(DESTDIR)/usr/lib
-	mkdir -p $(DESTDIR)/usr/local/bin
-	mkdir -p $(DESTDIR)/usr/local/sbin
 	mkdir -p $(DESTDIR)/usr/share/doc
 endif
 	mkdir -p $(LIB_INSTALL)
@@ -72,9 +82,15 @@ endif
         done
 
 
+treeuninstall:
+	for dir in $(DIRS); do\
+          cd $$dir && $(MAKE) uninstall && cd ..;\
+        done
 
-.PHONY: all clean superclean install \
-	treeall treeclean treesuperclean treeinstall 
+
+.PHONY: all clean superclean distclean install uninstall \
+	treeall treeclean treesuperclean treedistclean \
+	treeinstall treeuninstall
 
 
 # prevent the make program from choking on all the symbols

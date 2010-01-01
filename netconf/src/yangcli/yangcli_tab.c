@@ -116,6 +116,12 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
+/* make sure this is not enabled in the checked in version
+ * will mess up STDOUT diplsay with debug messages!!!
+ */
+/* #define YANGCLI_TAB_DEBUG 1 */
+
+
 /********************************************************************
 *                                                                   *
 *                          T Y P E S                                *
@@ -294,6 +300,10 @@ static status_t
     ncx_btype_t            btyp;
     status_t               res;
 
+#ifdef YANGCLI_TAB_DEBUG
+    log_debug2("\n*** fill parm %s ***\n", obj_get_name(parmobj));
+#endif
+
     res = NO_ERR;
     parmname = obj_get_name(parmobj);
     typdef = obj_get_typdef(parmobj);
@@ -306,6 +316,10 @@ static status_t
         for (typenum = typ_first_enumdef(basetypdef);
              typenum != NULL && res == NO_ERR;
              typenum = typ_next_enumdef(typenum)) {
+
+#ifdef YANGCLI_TAB_DEBUG
+            log_debug2("\n*** found enubit  %s ***\n", typenum->name);
+#endif
 
             res = fill_one_parm_completion(cpl,
                                            comstate,
@@ -761,11 +775,10 @@ static status_t
     obj_template_t       *childobj;
     const char           *str, *seqstart, *equals;
     uint32                withequals, matchcount;
-    boolean               inbetween, inbetween2, gotdashes;
+    boolean               inbetween, gotdashes;
 
     withequals = 0;
     inbetween = FALSE;
-    inbetween2 = FALSE;
     gotdashes = FALSE;
     equals = NULL;
 
@@ -834,7 +847,6 @@ static status_t
          * the start of a parameter or a value
          */
         seqstart = ++str;
-        inbetween2 = TRUE;
     } else {
         /* str backed up all the way to word_start
          * start the forward analysis from this char
@@ -1089,7 +1101,7 @@ static status_t
     rpc = comstate->cmdobj;
     inputobj = comstate->cmdinput;
 
-    res = find_parm_start(rpc,
+    res = find_parm_start(inputobj,
                           line,
                           word_start,
                           word_end,
@@ -1106,26 +1118,34 @@ static status_t
          * might already be entered (oh well)
          * this is OK for leaf-lists but not leafs
          */
-        res = fill_one_rpc_completion_parms
-            (rpc,
-             cpl,
-             line,
-             tokenstart,
-             word_end,
-             word_end - tokenstart);
+
+#ifdef YANGCLI_TAB_DEBUG
+        log_debug2("\n*** fill one RPC %s parms ***\n", obj_get_name(rpc));
+#endif
+
+        res = fill_one_rpc_completion_parms(rpc,
+                                            cpl,
+                                            line,
+                                            tokenstart,
+                                            word_end,
+                                            word_end - tokenstart);
     } else if (parmobj) {
         /* have a parameter in progress and the
          * token start is supposed to be the value
          * for this parameter
          */
-        res = fill_parm_completion
-            (parmobj,
-             cpl,
-             comstate,
-             line,
-             tokenstart,
-             word_end,
-             word_end - tokenstart);
+
+#ifdef YANGCLI_TAB_DEBUG
+        log_debug2("\n*** fill one parm in backwards ***\n");
+#endif
+
+        res = fill_parm_completion(parmobj,
+                                   cpl,
+                                   comstate,
+                                   line,
+                                   tokenstart,
+                                   word_end,
+                                   word_end - tokenstart);
     } /* else nothing to do */
 
     return res;
@@ -1173,6 +1193,10 @@ static status_t
     }
 
     /*** NEED TO CHECK FOR STRING QUOTES ****/
+
+#ifdef YANGCLI_TAB_DEBUG
+    log_debug2("\n*** fill parm values ***\n");
+#endif
 
     res = fill_parm_completion(comstate->cmdcurparm,
                                cpl,

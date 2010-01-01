@@ -1,7 +1,7 @@
-Name:           yuma-client
+Name:           yuma-sdk
 Version:        0.9.9
 Release:        1%{?dist}
-Summary:        Yuma Tools (client side only)
+Summary:        Yuma Tools (development version)
 
 Group:          Development/Tools
 License:        BSD
@@ -16,11 +16,13 @@ Requires: libssh2
 Requires: libxml2
 
 %description
-Yuma Tools (client only) is a YANG-based NETCONF-over-SSH 
-client application, which provides a CLI-like interface
-for any NETCONF server that supports YANG modules.
-The yangdump and yangdiff development tools are also
-included, to compile and process YANG modules.
+Yuma Tools (SDK version) is a YANG-based 
+NETCONF-over-SSH server and client application,
+for any YANG modules.  The complete source files
+are included.  The yangdump and yangdiff development
+tools are also included, to compile and process YANG modules.
+Code generation is enabled in this version of yangdump.
+
 
 %prep
 %setup -q
@@ -30,12 +32,12 @@ included, to compile and process YANG modules.
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make FREE=1 CLIENT=1 %{?_smp_mflags}
+make DEVELOPER=1 %{?_smp_mflags}
 
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id FREE=1 CLIENT=1 DESTDIR=$RPM_BUILD_ROOT
+make install LDFLAGS+=--build-id DEVELOPER=1 DESTDIR=$RPM_BUILD_ROOT
 
 %post
 ldconfig /usr/lib/yuma/libncx.so
@@ -50,7 +52,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 %{_datadir}/yuma/
 %{_libdir}/yuma/*
-
+%{_includedir}/yuma/
 
 %changelog
 * Fri Nov 27 2009 Andy Bierman <andy at netconfcentral.org> 0.9.8.571

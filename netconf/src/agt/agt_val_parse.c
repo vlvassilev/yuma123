@@ -2008,6 +2008,9 @@ static status_t
  * Handles the following base types:
  *   NCX_BT_CONTAINER
  *   NCX_BT_LIST
+ *  May also work for
+ *   NCX_BT_CHOICE
+ *   NCX_BT_CASE
  *
  * E.g., container:
  *
@@ -2808,6 +2811,8 @@ static status_t
         break;
     case NCX_BT_CONTAINER:
     case NCX_BT_LIST:
+    case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
         res = parse_complex_nc(scb,
                                msg, 
                                obj,

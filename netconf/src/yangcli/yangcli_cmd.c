@@ -6520,7 +6520,7 @@ status_t
     ses_cb_t              *scb;
     uint32                 len, linelen;
     status_t               res;
-    boolean                shut, load;
+    boolean                shut;
     ncx_node_t             dtyp;
 
 #ifdef DEBUG
@@ -6534,7 +6534,6 @@ status_t
     valset = NULL;
     res = NO_ERR;
     shut = FALSE;
-    load = FALSE;
 
     /* make sure there is something to parse */
     linelen = xml_strlen(line);
@@ -6581,13 +6580,6 @@ status_t
     if (!reqdata) {
         log_error("\nError allocating a new RPC request");
         res = ERR_INTERNAL_MEM;
-    }
-
-    /* check the load module corner case */
-    if (res == NO_ERR && 
-        !xml_strcmp(obj_get_mod_name(rpc), NCXMOD_NETCONFD) &&
-        !xml_strcmp(obj_get_name(rpc), NCX_EL_CLOSE_SESSION)) {
-        load = TRUE;
     }
 
     /* should find an input node */

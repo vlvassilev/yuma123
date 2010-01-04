@@ -118,7 +118,6 @@ date         init     comment
 *
 * INPUTS:
 *   new_parm == complex val_value_t to add the parsed parm into
-*   obj == obj_template_t descriptor for the missing parm
 *   strval == string representation of the object value
 *             (may be NULL if obj btype is NCX_BT_EMPTY
 *   script == TRUE if parsing a script (in the manager)
@@ -134,17 +133,17 @@ date         init     comment
 *********************************************************************/
 static status_t
     parse_parm_cmn (val_value_t *new_parm,
-                    obj_template_t *obj,
                     const xmlChar *strval,
                     boolean script)
 {
     val_value_t          *newchild;
-    typ_def_t      *typdef;
-    obj_template_t *choiceobj, *targobj;
+    typ_def_t            *typdef;
+    obj_template_t       *obj, *choiceobj, *targobj;
     ncx_btype_t           btyp;
     status_t              res;
 
     res = NO_ERR;
+    obj = new_parm->obj;
 
     /* check special case where the parm is a container
      * with 1 child -- a choice of empty; for this
@@ -162,12 +161,26 @@ static status_t
             res = ERR_NCX_INVALID_VALUE;
         }
     } else if (obj->objtype == OBJ_TYP_CONTAINER) {
-
         /* check if the only child is an OBJ_TYP_CHOICE */
         choiceobj = obj_first_child(obj);
         if (choiceobj == NULL || 
             choiceobj->objtype != OBJ_TYP_CHOICE) {
             res = ERR_NCX_INVALID_VALUE;
+        } else if (strval != NULL &&
+                (*strval == '$' || *strval == '@')) {
+            /* this is a file or var reference */
+            if (script) {
+                newchild = var_get_script_val(choiceobj, 
+                                              NULL,
+                                              strval, 
+                                              ISPARM, 
+                                              &res);
+                if (newchild != NULL) {
+                    val_add_child(newchild, new_parm);
+                }
+            } else {
+                res = ERR_NCX_INVALID_VALUE;
+            }
         } else {
             /* check if a child of any case is named 'strval' */
             targobj = obj_find_child(choiceobj,
@@ -187,33 +200,49 @@ static status_t
                 res = ERR_NCX_INVALID_VALUE;
             }
         }
-    } else if (obj->objtype == OBJ_TYP_CHOICE) {
-        /* check if a child of any case is named 'strval' */
-        targobj = obj_find_child(obj,
-                                 obj_get_mod_name(obj),
-                                 strval);
-        if (targobj && 
-            obj_get_basetype(targobj) == NCX_BT_EMPTY) {
-            /* found a match so set the value node to type empty */
-            val_init_from_template(new_parm, targobj);
-            val_set_name(new_parm,
-                         obj_get_name(targobj),
-                         xml_strlen(obj_get_name(targobj)));
+    } else if (obj->objtype == OBJ_TYP_CHOICE &&
+               strval != NULL) {
+        if (*strval == '$' || *strval == '@') {
+            if (script) {
+                newchild = var_get_script_val(obj, 
+                                              NULL,
+                                              strval, 
+                                              ISPARM, 
+                                              &res);
+                if (newchild != NULL) {
+                    val_replace(newchild, new_parm);
+                    val_free_value(newchild);
+                }
+            } else {
+                res = ERR_NCX_INVALID_VALUE;
+            }
         } else {
-            res = ERR_NCX_INVALID_VALUE;
+            /* check if a child of any case is named 'strval' */
+            targobj = obj_find_child(obj,
+                                     obj_get_mod_name(obj),
+                                     strval);
+            if (targobj && 
+                obj_get_basetype(targobj) == NCX_BT_EMPTY) {
+                /* found a match so set the value node to type empty */
+                val_init_from_template(new_parm, targobj);
+                val_set_name(new_parm,
+                             obj_get_name(targobj),
+                             xml_strlen(obj_get_name(targobj)));
+            } else {
+                res = ERR_NCX_INVALID_VALUE;
+            }
         }
     } else {
-        /* get the base type value */
-        btyp = obj_get_basetype(obj);
-
-        if (btyp == NCX_BT_ANY || typ_is_simple(btyp)) {
-            if (script) {
-                (void)var_get_script_val(obj, 
-                                         new_parm,
-                                         strval, 
-                                         ISPARM, 
-                                         &res);
-            } else {
+        if (script) {
+            (void)var_get_script_val(obj, 
+                                     new_parm,
+                                     strval, 
+                                     ISPARM, 
+                                     &res);
+        } else {
+            /* get the base type value */
+            btyp = obj_get_basetype(obj);
+            if (btyp == NCX_BT_ANY || typ_is_simple(btyp)) {
                 typdef = obj_get_typdef(obj);
                 if (btyp != NCX_BT_ANY) {
                     res = val_simval_ok(typdef, strval);
@@ -225,9 +254,9 @@ static status_t
                                          obj_get_name(obj),
                                          strval);
                 }
+            } else {
+                res = ERR_NCX_WRONG_DATATYP;
             }
-        } else {
-            res = ERR_NCX_INVALID_VALUE;
         }
     }
 
@@ -274,7 +303,7 @@ static status_t
     }
     val_init_from_template(new_parm, obj);
 
-    res = parse_parm_cmn(new_parm, obj, strval, script);
+    res = parse_parm_cmn(new_parm, strval, script);
 
     /* save or free the new child node */
     if (res != NO_ERR) {
@@ -334,7 +363,7 @@ static status_t
     val_set_name(new_parm, name, xml_strlen(name));
     new_parm->nsid = nsid;
 
-    res = parse_parm_cmn(new_parm, obj, strval, script);
+    res = parse_parm_cmn(new_parm, strval, script);
 
     if (res != NO_ERR) {
         val_free_value(new_parm);

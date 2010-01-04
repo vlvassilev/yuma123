@@ -468,6 +468,159 @@ static status_t
 }  /* set_str */
 
 
+
+/********************************************************************
+* FUNCTION set_val_from_var
+* 
+* 
+* 
+*
+*
+* INPUTS:
+*   obj == expected object template 
+*          == NULL and will be set to NCX_BT_STRING for
+*             simple types
+*   varval == var value node that was found
+*   new_parm == value in progress to fill in
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    set_val_from_var (obj_template_t *obj,
+                      val_value_t *varval,
+                      val_value_t *new_parm)
+{
+    obj_template_t        *testobj, *targobj;
+    val_value_t           *cloneval, *newchild;
+    status_t               res;
+
+    res = NO_ERR;
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CHOICE:
+    case OBJ_TYP_CASE:
+        if (typ_is_string(varval->btyp) &&
+            new_parm->btyp == NCX_BT_CONTAINER) {
+            /* check if a child of any case is named with the 
+             * varval value 
+             */
+            targobj = obj_find_child(obj,
+                                     NULL,
+                                     VAL_STR(varval));
+            if (targobj != NULL &&
+                obj_get_basetype(targobj) == NCX_BT_EMPTY) {
+                /* found a match so create a value node */
+                newchild = val_new_value();
+                if (!newchild) {
+                    return ERR_INTERNAL_MEM;
+                } else {
+                    val_init_from_template(newchild, targobj);
+                    val_add_child(newchild, new_parm);
+                    return NO_ERR;
+                }
+            }
+        }
+
+        targobj = NULL;
+
+        if (obj_is_root(varval->obj)) {
+            /* look for the first real child that is
+             * a root parameter
+             */
+            for (testobj = obj_first_child_deep(obj);
+                 testobj != NULL && targobj == NULL;
+                 testobj = obj_next_child_deep(testobj)) {
+                if (obj_is_root(testobj)) {
+                    targobj = testobj;
+                }
+            }
+        }
+
+        if (targobj == NULL) {
+            /* look for the first real child that matches
+             * the same name, and replace the choice or case value
+             * with a case child node and its contents from varval
+             */
+            targobj = obj_find_child(obj, NULL, varval->name);
+        }
+
+        if (targobj != NULL) {
+            cloneval = val_clone(varval);
+            if (!cloneval) {
+                return ERR_INTERNAL_MEM;
+            } else {
+                if (obj_is_root(targobj)) {
+                    newchild = val_new_value();
+                    if (!newchild) {
+                        val_free_value(cloneval);
+                        return ERR_INTERNAL_MEM;
+                    } else {
+                        val_init_from_template(newchild, targobj);
+                    }
+                    val_move_children(cloneval, newchild);
+
+                    if (new_parm->btyp == NCX_BT_CONTAINER) {
+                        val_add_child(newchild, new_parm);
+                    } else {
+                        res = val_replace(newchild, new_parm);
+                        val_free_value(newchild);
+                    }
+                } else {
+                    res = val_replace(cloneval, new_parm);
+                }
+                val_free_value(cloneval);
+                return res;
+            }
+        }
+        break;
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+        /* check that the var and the useval have
+         * the same basic type
+         */
+        if (typ_is_simple(varval->btyp) && 
+            typ_is_simple(new_parm->btyp)) {
+            cloneval = val_clone(varval);
+            if (!cloneval) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+                res = val_replace(cloneval, new_parm);
+                val_free_value(cloneval);
+            }
+        } else {
+            res = ERR_NCX_WRONG_DATATYP;
+        }
+        break;
+    case OBJ_TYP_LIST:
+    case OBJ_TYP_CONTAINER:
+    case OBJ_TYP_ANYXML:
+        if (varval->btyp == new_parm->btyp) {
+            cloneval = val_clone(varval);
+            if (!cloneval) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+                val_move_children(cloneval, new_parm);
+                val_free_value(cloneval);
+                if (new_parm->btyp == NCX_BT_LIST) {
+                    res = val_gen_index_chain(new_parm->obj,
+                                               new_parm);
+                }                            
+            }
+        } else {
+            res = ERR_NCX_WRONG_DATATYP;
+        }
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    return res;
+
+}  /* set_val_from_var */
+
+
+
 /*************   E X T E R N A L   F U N C T I O N S   ************/
 
 
@@ -1432,10 +1585,9 @@ val_value_t *
                         boolean istop,
                         status_t *res)
 {
-    val_value_t           *varval, *cloneval;
+    val_value_t           *varval;
     const xmlChar         *str, *name;
     val_value_t           *newval, *useval;
-
     xmlChar               *fname, *intbuff;
     uint32                 namelen, len;
     boolean                isvarref;
@@ -1460,6 +1612,7 @@ val_value_t *
     }
 
     if (val) {
+        /* the obj and val->obj templates may not be the same */
         useval = val;
     } else {
         newval = val_new_value();
@@ -1474,11 +1627,15 @@ val_value_t *
 
     /* check if strval is NULL */
     if (!strval) {
-        *res = val_set_simval(useval,
-                              obj_get_typdef(obj),
-                              obj_get_nsid(obj),
-                              obj_get_name(obj),
-                              NULL);
+        if (typ_is_simple(useval->btyp)) {
+            *res = val_set_simval(useval,
+                                  obj_get_typdef(obj),
+                                  obj_get_nsid(obj),
+                                  obj_get_name(obj),
+                                  NULL);
+        } else {
+            *res = ERR_NCX_WRONG_DATATYP;
+        }
     } else if (*strval==NCX_AT_CH) {
         /* this is a NCX_BT_EXTERNAL value
          * find the file with the raw XML data
@@ -1494,6 +1651,10 @@ val_value_t *
          * get the value and clone it for the new value
          * flag an error if variable not found
          */
+        len = 0;
+        vartype = VAR_TYP_NONE;
+        name = NULL;
+        namelen = 0;
         *res = var_check_ref(strval, 
                              ISRIGHT, 
                              &len, 
@@ -1506,33 +1667,7 @@ val_value_t *
             if (!varval) {
                 *res = ERR_NCX_VAR_NOT_FOUND;
             } else {
-                /* check that the var and the useval have
-                 * the same basic type
-                 */
-                if (typ_is_simple(varval->btyp) && 
-                    typ_is_simple(useval->btyp)) {
-                    cloneval = val_clone(varval);
-                    if (!cloneval) {
-                        *res = ERR_INTERNAL_MEM;
-                    } else {
-                        *res = val_replace(cloneval, useval);
-                        val_free_value(cloneval);
-                    }
-                } else if (varval->btyp == useval->btyp) {
-                    cloneval = val_clone(varval);
-                    if (!cloneval) {
-                        *res = ERR_INTERNAL_MEM;
-                    } else {
-                        val_move_children(cloneval, useval);
-                        val_free_value(cloneval);
-                        if (useval->btyp == NCX_BT_LIST) {
-                            *res = val_gen_index_chain(useval->obj,
-                                                       useval);
-                        }                            
-                    }
-                } else {
-                    *res = ERR_NCX_WRONG_DATATYP;
-                }
+                *res = set_val_from_var(obj, varval, useval);
             }
         }
     } else if (*strval == NCX_QUOTE_CH) {

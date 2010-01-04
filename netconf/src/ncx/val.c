@@ -4879,8 +4879,21 @@ status_t
     }
 #endif
 
+    res = NO_ERR;
+
     if (!typ_is_simple(val->btyp)) {
-        return ERR_NCX_WRONG_TYPE;
+        clean_value(copy, TRUE);
+        val_init_from_template(copy, val->obj);
+        val_move_children(val, copy);
+        val_set_name(copy, val->name, xml_strlen(val->name));
+        copy->nsid = val->nsid;
+        if (copy->btyp == NCX_BT_LIST) {
+            res = val_gen_index_chain(copy->obj, copy);
+        }
+        if (res == NO_ERR) {
+            res = copy_editvars(val, copy);
+        }
+        return res;
     }
 
     buffer = NULL;

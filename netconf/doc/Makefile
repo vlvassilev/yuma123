@@ -9,12 +9,11 @@ all:
 depend:
 
 clean:
-	rm *~
+
+superclean:
 
 uninstall:
 	rm -f $(DOC_INSTALL)
-
-superclean: clean
 
 install:
 	mkdir -p $(DOC_INSTALL)

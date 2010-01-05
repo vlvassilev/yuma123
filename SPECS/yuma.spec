@@ -32,15 +32,15 @@ included, to compile and process YANG modules.
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make FREE=1 %{?_smp_mflags}
+make %{?_smp_mflags}
 
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id FREE=1 DESTDIR=$RPM_BUILD_ROOT
+make install LDFLAGS+=--build-id DESTDIR=$RPM_BUILD_ROOT
 
 %post
-ldconfig /usr/lib/yuma/libncx.so
+ldconfig /usr/lib/libncx.so
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -52,6 +52,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 %{_sbindir}/*
 %{_datadir}/%{name}/
+%{_libdir}/*
 %{_libdir}/yuma/*
 
 

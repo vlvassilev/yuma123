@@ -14,11 +14,6 @@ BIN_INST=$(TBASE)/bin
 REAL_INST=$(DESTDIR)/usr/sbin
 PROG=netconf-subsystem
 
-ifdef MAC
-   GRP=
-else
-   GRP=--group=root
-endif
 
 ##################### LIBRARIES ########################
 

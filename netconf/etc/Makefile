@@ -9,7 +9,6 @@ all:
 depend:
 
 clean:
-	rm *~
 
 uninstall:
 	rm -f $(ETC_INSTALL)

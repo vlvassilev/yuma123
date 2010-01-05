@@ -38,7 +38,7 @@ rm -rf $RPM_BUILD_ROOT
 make install LDFLAGS+=--build-id FREE=1 CLIENT=1 DESTDIR=$RPM_BUILD_ROOT
 
 %post
-ldconfig /usr/lib/yuma/libncx.so
+ldconfig /usr/lib/libncx.so
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -49,6 +49,7 @@ rm -rf $RPM_BUILD_ROOT
 %doc /usr/share/doc/yuma/
 %{_bindir}/*
 %{_datadir}/yuma/
+%{_libdir}/*
 %{_libdir}/yuma/*
 
 

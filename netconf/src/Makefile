@@ -3,16 +3,30 @@
 #   src directory
 
 ##################### PROGRAMS ########################
-APPS = subsys netconfd yangdump yangdiff yangcli
-
 ##################### LIBRARIES ########################
 #
-# DIRS:  
 # This is an ordered list
 # Put only the directories that build object files in the list
+#
 
-# make all targets
+ifdef CLIENT
+APPS = yangdump yangdiff yangcli
+DIRS = mgr ncx $(APPS)
+else
+ifdef SERVER
+APPS = subsys netconfd
+DIRS = agt ncx $(APPS)
+else
+ifdef DEVELOPER
+APPS = 
+DIRS = agt ncx
+else
+APPS = subsys netconfd yangdump yangdiff yangcli
 DIRS = agt mgr ncx $(APPS)
+endif
+endif
+endif
+
 
 ifdef DESTDIR
 JFLAG=

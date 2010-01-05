@@ -1,7 +1,7 @@
-Name:           yuma-dev
+Name:           yuma-server
 Version:        0.9.9
 Release:        1%{?dist}
-Summary:        Yuma Tools (development version)
+Summary:        Yang-based Unified Modular Automation Tools
 
 Group:          Development/Tools
 License:        BSD
@@ -11,31 +11,27 @@ BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Requires: libc
 Requires: libdl
-Requires: libncurses
-Requires: libssh2
 Requires: libxml2
 
 %description
-Yuma Tools (development version) is a YANG-based 
-NETCONF-over-SSH server and client application,
-for any YANG modules.  The development header files
-are included.  The yangdump and yangdiff development
-tools are also included, to compile and process YANG modules.
-Code generation is enabled in this version of yangdump.
-
+Yuma Tools is a YANG-based NETCONF-over-SSH client and server
+development toolkit.  The netconfd server includes an automated
+central NETCONF protocol stack, based directly on YANG modules.
 
 %prep
 %setup -q
 
 
 %build
-make DEVELOPER=1 %{?_smp_mflags}
+make FREE=1 SERVER=1 %{?_smp_mflags}
 
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id DEVELOPER=1 DESTDIR=$RPM_BUILD_ROOT
+make install LDFLAGS+=--build-id FREE=1 SERVER=1 DESTDIR=$RPM_BUILD_ROOT
 
+%post
+ldconfig /usr/lib/libncx.so
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -44,7 +40,11 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %doc /usr/share/doc/yuma/
-%{_includedir}/yuma/
+%{_sbindir}/*
+%{_datadir}/%{name}/
+%{_libdir}/*
+%{_libdir}/yuma/*
+
 
 %changelog
 * Fri Nov 27 2009 Andy Bierman <andy at netconfcentral.org> 0.9.8.571

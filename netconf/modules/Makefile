@@ -41,7 +41,7 @@ WARNINGS=--warn-linelen=0 --warn-idlen=0 --log-level=warn
 
 all: 
 
-.PHONY: ncorg
+.PHONY: ncorg clean-install
 
 ncorg: xsd html cookedhtml sqldb copy
 
@@ -108,9 +108,8 @@ uninstall:
 	rm -rf $(INSTALL_TARGET)
 
 clean:
-	rm -rf $(INSTALL_TARGET)/*
 
-superclean: clean
+superclean:
 
 distclean: uninstall
 

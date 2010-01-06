@@ -1,30 +1,4 @@
 #
-# platform.profile
-#
-
-CINC=-I. -I../agt -I../mgr \
-    -I../ncx -I../platform \
-    -I/usr/include -I/usr/include/libxml2 \
-    -I/usr/include/libxml2/libxml
-
-# added /sw/include for MacOSX
-ifdef MAC
-# MACOSX version
-  CINC +=-I/sw/include
-  CFLAGS += -DMACOSX=1
-endif
-
-TBASE=../../target
-
-ifdef DESTDIR
-LBASE=$(DESTDIR)/target/lib
-else
-LBASE=$(TBASE)/lib
-endif
-
-### platform.profile.cmn included inline here!!!
-
-#
 # platform.profile.cmn
 #
 

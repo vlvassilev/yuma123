@@ -25,6 +25,8 @@ all: sil_dummy sil_lib
 #################### PLATFORM DEFINITIONS ############
 include ../../netconf/src/platform/platform.profile.sil
 
+include ../../netconf/src/platform/platform.profile.cmn
+
 ################ DEPENDENCIES #########################
 # depend rule must be included after the 'all' make rule
 

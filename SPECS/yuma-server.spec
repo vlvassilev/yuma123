@@ -10,6 +10,7 @@ Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Requires: glibc
+Requires: openssh
 Requires: libxml2
 
 %description
@@ -31,6 +32,11 @@ make install LDFLAGS+=--build-id FREE=1 SERVER=1 DESTDIR=$RPM_BUILD_ROOT
 
 %post
 ldconfig /usr/lib/libncx.so
+if [ "`grep netconf-subsystem /etc/ssh/sshd_config -c`" == "0" ]; then \
+    echo "Port 22" >> /etc/ssh/sshd_config;\
+    echo "Port 830" >> /etc/ssh/sshd_config;\
+    echo "Subsystem netconf /usr/sbin/netconf-subsystem" >> /etc/ssh/sshd_config;\
+fi
 
 %clean
 rm -rf $RPM_BUILD_ROOT

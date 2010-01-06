@@ -40,12 +40,13 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %doc /usr/share/doc/yuma/
-%{_sbindir}/*
-%{_datadir}/%{name}/
+%{_sbindir}/netconfd
+%{_sbindir}/netconf-subsystem
+%{_datadir}/yuma/
 %{_libdir}/*
 %{_libdir}/yuma/*
 
 
 %changelog
-* Fri Nov 27 2009 Andy Bierman <andy at netconfcentral.org> 0.9.8.571
+* Wed Jan 6 2010 Andy Bierman <andy at netconfcentral.org> 0.9.8.601
 - First RPM build

@@ -10,7 +10,6 @@ Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Requires: libc
-Requires: libdl
 Requires: libncurses
 Requires: libssh2
 Requires: libxml2
@@ -47,12 +46,14 @@ rm -rf $RPM_BUILD_ROOT
 %files
 %defattr(-,root,root,-)
 %doc /usr/share/doc/yuma/
-%{_bindir}/*
+%{_bindir}/yangcli
+%{_bindir}/yangdump
+%{_bindir}/yangdiff
 %{_datadir}/yuma/
 %{_libdir}/*
 %{_libdir}/yuma/*
 
 
 %changelog
-* Fri Nov 27 2009 Andy Bierman <andy at netconfcentral.org> 0.9.8.571
+* Wed Jan 6 2010 Andy Bierman <andy at netconfcentral.org> 0.9.8.601
 - First RPM build

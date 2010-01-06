@@ -654,7 +654,7 @@ date	     init     comment
 #define E_BAD_DATA_ERROR  (const xmlChar *)"error"
 
 #define COPYRIGHT_STRING \
-    "Copyright (c) 2009, Netconf Central, Inc., All Rights Reserved.\n"
+    "Copyright (c) 2008-2010, Netconf Central, Inc., All Rights Reserved.\n"
 
 
 #define Y_PREFIX         (const xmlChar *)"y_"

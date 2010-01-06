@@ -9,7 +9,7 @@ URL:            http://www.netconfcentral.org/
 Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-Requires: libc
+Requires: glibc
 Requires: libxml2
 
 %description

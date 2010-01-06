@@ -10,6 +10,8 @@
 
 # make all targets
 DIRS = libtecla netconf libtoaster
+S_DIRS = netconf libtoaster
+C_DIRS = libtecla netconf
 
 ifdef DESTDIR
 JFLAG= 
@@ -30,7 +32,51 @@ superclean: yumasuperclean
 
 install: yumainstall
 
-yumaall:
+ifdef CLIENT
+yumaall: yuma-client
+else
+ifdef SERVER
+yumaall: yuma-server
+else
+ifdef DEVELOPER
+yumaall: yuma-dev
+else
+yumaall: yuma-all
+endif
+endif
+endif
+
+ifdef CLIENT
+yumainstall: yuma-client-install
+else
+ifdef SERVER
+yumainstall: yuma-server-install
+else
+ifdef DEVELOPER
+yumainstall: yuma-dev-install
+else
+yumainstall: yuma-all-install
+endif
+endif
+endif
+
+
+yuma-client:
+	cd libtecla;\
+	if [ ! -f Makefile ]; then \
+	  ./configure; \
+	fi
+	for dir in $(C_DIRS); do\
+	  cd $$dir && $(MAKE) $(JFLAG) && cd ..;\
+        done
+
+yuma-server:
+	for dir in $(S_DIRS); do\
+	  cd $$dir && $(MAKE) $(JFLAG) && cd ..;\
+        done
+
+
+yuma-all:
 	cd libtecla;\
 	if [ ! -f Makefile ]; then \
 	  ./configure; \
@@ -38,6 +84,7 @@ yumaall:
 	for dir in $(DIRS); do\
 	  cd $$dir && $(MAKE) $(JFLAG) && cd ..;\
         done
+
 
 yumaclean:
 	for dir in $(DIRS); do\
@@ -49,14 +96,33 @@ yumasuperclean:
 	  cd $$dir && $(MAKE) superclean && cd ..;\
         done
 
-yumainstall:
-	for dir in $(DIRS); do\
+
+yuma-client-install:
+	for dir in $(C_DIRS); do\
+          cd $$dir && $(MAKE) install && cd ..;\
+        done
+
+yuma-server-install:
+	for dir in $(S_DIRS); do\
           cd $$dir && $(MAKE) install && cd ..;\
         done
 
 
+yuma-dev-install:
+	for dir in $(DIRS); do\
+          cd $$dir && $(MAKE) install && cd ..;\
+        done
+
+yuma-all-install:
+	for dir in $(DIRS); do\
+          cd $$dir && $(MAKE) install && cd ..;\
+        done
+
 .PHONY: all clean superclean install \
-	yumaall yumaclean yumasuperclean yumainstall 
+	yumaall yumaclean yumasuperclean yumainstall \
+	yuma-client yuma-server yuma-dev yuma-all \
+	yuma-client-install yuma-server-install \
+	yuma-dev-install yuma-all-install
 
 
 # prevent the make program from choking on all the symbols

@@ -1893,7 +1893,7 @@ static status_t
 
             }
         } else {
-            isyang = FALSE;
+            isyang = TRUE;
             res = check_module_path(NCXMOD_DEFAULT_INSTALL, 
                                     buff,
                                     bufflen,

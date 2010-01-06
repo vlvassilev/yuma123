@@ -18,12 +18,12 @@ uninstall:
 install:
 	mkdir -p $(DOC_INSTALL)
 	cp yuma_docs/yuma-user-manual.pdf $(DOC_INSTALL)
-ifdef FREE
+	cp yuma_docs/yuma-quickstart-guide.pdf $(DOC_INSTALL)
 	cp extra/AUTHORS $(DOC_INSTALL)
 	cp extra/ChangeLog $(DOC_INSTALL)
 	cp extra/COPYING $(DOC_INSTALL)
 	cp extra/README $(DOC_INSTALL)
-else
+ifndef FREE
 	cp yuma_docs/yuma-dev-manual.pdf $(DOC_INSTALL)
 endif
 

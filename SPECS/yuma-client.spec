@@ -50,8 +50,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/yangdump
 %{_bindir}/yangdiff
 %{_datadir}/yuma/
-%{_libdir}/*
-%{_libdir}/yuma/*
+%{_libdir}/libncx.so
 
 
 %changelog

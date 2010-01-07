@@ -3,7 +3,7 @@ Yuma -- A Toolset for the YANG data modeling language
         and NETCONF protocol
 ===========================================================
 
-Copyright (c) 2009, Netconf Central, Inc.
+Copyright (c) 2008 - 2010, Netconf Central, Inc.
 
 See the file "COPYING" for information on usage and redistribution
 of this file, and for a DISCLAIMER OF ALL WARRANTIES.
@@ -41,7 +41,7 @@ WARNING
 This version of yuma implements the YANG language specification
 as defined in:
 
-http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-08.txt
+http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-09.txt
 
 Future versions of yuma may not maintain full 
 compatibility with this Internet Draft.

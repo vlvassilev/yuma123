@@ -1,13 +1,19 @@
 Yuma Change Log
  ----------------
 
+0.9.9
+ * Supporting yang-09 draft
+ * Supporting YIN translation and YIN input
+ * Add more yangcli variable support
+ * Supported new identifier restrictions
+	
 0.9.8
 
  * Supporting yang-08 draft and RFC 4741bis-01
  * Added client (yangcli) and server (netconfd, netconf-subsystem)
  * Added PDF user manual
  * Added RPM package installation	
- * Added /proc monitoring /interfaces, /netconf-state
+ * Added /proc monitoring /interfaces, /ietf-netconf-state
 
 0.9.4 
 

@@ -49,7 +49,9 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
+#ifndef RELEASE
 #include "curversion.h"
+#endif
 
 #ifndef _H_cfg
 #include "cfg.h"
@@ -11270,13 +11272,31 @@ status_t
 {
     xmlChar    *str;
     uint32      versionlen;
-
+#ifdef RELEASE
+    xmlChar     numbuff[NCX_MAX_NUMLEN];
+#endif
+    
 #ifdef DEBUG
     if (!buffer) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
+#ifdef RELEASE
+    sprintf((char *)numbuff, "%d", RELEASE);
+
+    versionlen = xml_strlen(YUMA_VERSION) +
+        xml_strlen(numbuff) + 1;
+
+    if (versionlen >= buffsize) {
+        return ERR_BUFF_OVFL;
+    }
+
+    str = buffer;
+    str += xml_strcpy(str, YUMA_VERSION);
+    *str++ = '-';
+    xml_strcpy(str, numbuff);
+#else
     versionlen = xml_strlen(YUMA_VERSION) +
         xml_strlen((const xmlChar *)SVNVERSION) + 1;
 
@@ -11288,6 +11308,8 @@ status_t
     str += xml_strcpy(str, YUMA_VERSION);
     *str++ = '.';
     xml_strcpy(str, (const xmlChar *)SVNVERSION);
+#endif
+
     return NO_ERR;
 
 }  /* ncx_get_version */

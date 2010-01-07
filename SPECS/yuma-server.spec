@@ -23,12 +23,13 @@ central NETCONF protocol stack, based directly on YANG modules.
 
 
 %build
-make FREE=1 SERVER=1 %{?_smp_mflags}
+make FREE=1 SERVER=1 RELEASE=1 %{?_smp_mflags}
 
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id FREE=1 SERVER=1 DESTDIR=$RPM_BUILD_ROOT
+make install LDFLAGS+=--build-id FREE=1 SERVER=1 RELEASE=1 \
+DESTDIR=$RPM_BUILD_ROOT
 
 %post
 ldconfig /usr/lib/libncx.so

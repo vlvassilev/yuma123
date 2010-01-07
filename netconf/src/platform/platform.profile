@@ -73,6 +73,9 @@ ifdef FREE
   CFLAGS += -DFREE_VERSION
 endif
 
+ifdef RELEASE
+  CFLAGS += -DRELEASE=$(RELEASE)
+endif
 
 ifdef MAC
    GRP=

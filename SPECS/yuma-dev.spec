@@ -26,12 +26,13 @@ Code generation is enabled in this version of yangdump.
 
 
 %build
-make DEVELOPER=1 %{?_smp_mflags}
+make DEVELOPER=1 RELEASE=1 %{?_smp_mflags}
 
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id DEVELOPER=1 DESTDIR=$RPM_BUILD_ROOT
+make install LDFLAGS+=--build-id DEVELOPER=1 RELEASE=1 \
+DESTDIR=$RPM_BUILD_ROOT
 
 
 %clean

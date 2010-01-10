@@ -17,9 +17,7 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
-	if [ ! -f libtecla/Makefile ]; then \
-	  (cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma) \
-	fi
+	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma)
 
 	touch configure-stamp
 

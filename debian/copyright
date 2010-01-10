@@ -1,0 +1,26 @@
+This package was debianized by Andy Bierman <andyb@iwl.com> on
+Sun, 10 Jan 2010 10:48:55 -0800.
+
+It was downloaded from <http://yuma.iwl.com>
+
+Upstream Author(s):
+
+    Andy Bierman <andyb@iwl.com>
+
+Copyright:
+
+    Copyright (C) 2008 - 2010, Netconf Central, Inc.
+
+License:
+
+    IWL
+
+The Debian packaging is:
+
+    Copyright (C) 2010, InterWorking Labs <yuma-support@iwl.com>
+
+and is licensed under the IWL license, 
+see `http://yuma.iwl.com/yuma-licenses'.
+
+# Please also look if there are files or directories which have a
+# different copyright/license attached and list them here.

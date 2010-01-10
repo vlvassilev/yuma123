@@ -20,7 +20,7 @@ FILES:
  - a binary linux program called 'netconfd'
    /usr/sbin/netconfd
  - a binary linux program called 'netconf-subsystem'
-   /usr/local/sbin/netconf-subsystem
+   /usr/sbin/netconf-subsystem
  - a binary linux library called 'libncx.so'
    /usr/lib/libncx.so
  - documentation pages

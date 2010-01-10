@@ -17,7 +17,9 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
-	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma)
+	if [ ! -f libtecla/Makefile ]; then \
+	  (cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma) \
+	fi
 
 	touch configure-stamp
 
@@ -55,6 +57,8 @@ install: build
 	# Add here commands to install the package into debian/yuma.
 	$(MAKE) FREE=1 DESTDIR=$(CURDIR)/debian/yuma install
 
+postinst:
+	ldconfig
 
 # Build architecture-independent files here.
 binary-indep: install

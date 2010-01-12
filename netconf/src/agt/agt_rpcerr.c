@@ -965,13 +965,15 @@ rpc_err_rec_t *
                           const void *error_parm,
                           xmlChar *error_path)
 {
-    return agt_rpcerr_gen_error_errinfo(layer, 
-                                        interr, 
-                                        errnode, 
-                                        parmtyp, 
-                                        error_parm, 
-                                        error_path, 
-                                        NULL);
+    return agt_rpcerr_gen_error_ex(layer, 
+                                   interr, 
+                                   errnode, 
+                                   parmtyp, 
+                                   error_parm, 
+                                   error_path, 
+                                   NULL,
+                                   NCX_NT_NONE,
+                                   NULL);
 
 } /* agt_rpcerr_gen_error */
 
@@ -1015,6 +1017,65 @@ rpc_err_rec_t *
                                   const void *error_parm,
                                   xmlChar *error_path,
                                   const ncx_errinfo_t *errinfo)
+{
+
+    return agt_rpcerr_gen_error_ex(layer, 
+                                   interr, 
+                                   errnode, 
+                                   parmtyp, 
+                                   error_parm, 
+                                   error_path, 
+                                   errinfo,
+                                   NCX_NT_NONE,
+                                   NULL);
+
+} /* agt_rpcerr_gen_error_errinfo */
+
+
+/********************************************************************
+* FUNCTION agt_rpc_gen_error_ex
+*
+* Generate an internal <rpc-error> record for an element
+*
+* INPUTS:
+*   layer == protocol layer where the error occurred
+*   interr == internal error code
+*             if NO_ERR than use the rpcerr only
+*   errnode == XML node where error occurred
+*           == NULL then there is no valid XML node (maybe the error!)
+*   parmtyp == type of node contained in error_parm
+*   error_parm == pointer to the extra parameter expected for
+*                this type of error.  
+*
+*                == (void *)pointer to session_id for lock-denied errors
+*                == (void *) pointer to the bad-value string to use
+*                   for some other errors
+*
+*  error_path == malloced string of the value (or type, etc.) instance
+*                ID string in NCX_IFMT_XPATH format; this will be added
+*                to the rpc_err_rec_t and freed later
+*             == NULL if not available
+*  errinfo == error info struct to use for whatever fields are set
+*  nodetyp == type of node contained in error_path_raw
+*  error_path_raw == pointer to the extra parameter expected for
+*                this type of error.  
+*
+* RETURNS:
+*   pointer to allocated and filled in rpc_err_rec_t struct
+*     ready to add to the msg->rpc_errQ
+*   NULL if a record could not be allocated or not enough
+*     val;id info in the parameters 
+*********************************************************************/
+rpc_err_rec_t *
+    agt_rpcerr_gen_error_ex (ncx_layer_t layer,
+                             status_t   interr,
+                             const xml_node_t *errnode,
+                             ncx_node_t  parmtyp,
+                             const void *error_parm,
+                             xmlChar *error_path,
+                             const ncx_errinfo_t *errinfo,
+                             ncx_node_t  nodetyp,
+                             const void *error_path_raw)
 {
     rpc_err_rec_t            *err;
     const obj_template_t     *parm, *in, *obj;
@@ -1146,6 +1207,13 @@ rpc_err_rec_t *
             err4 = (const void *)errnode;
             /* make sure add_base_vars doesn't use as an xml_node_t */
             errnode = NULL;  
+        } else if (error_path_raw) {
+            if (nodetyp == NCX_NT_VAL) {
+                /* element nsid:name for the attribute error */
+                valparm = (const val_value_t *)error_path_raw;
+                badnsid2 = val_get_nsid(valparm);
+                err4 = valparm->name;
+            }
         }
         break;
     default:
@@ -1248,7 +1316,7 @@ rpc_err_rec_t *
 
     return err;
 
-} /* agt_rpcerr_gen_error_errinfo */
+} /* agt_rpcerr_gen_error_ex */
 
 
 /********************************************************************

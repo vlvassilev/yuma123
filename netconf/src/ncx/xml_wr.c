@@ -405,8 +405,9 @@ static void
     val_value_t       *val;
     dlq_hdr_t         *hdr;
     const xmlChar     *pfix, *attr_name, *attr_qname;
+    xmlChar           *buffer;
     boolean            xneeded;
-    uint32             len, retcount;
+    uint32             len, retcount, bufferlen;;
     xmlns_id_t         ns_id, attr_nsid;
     status_t           res;
 
@@ -529,11 +530,32 @@ static void
         ses_putchar(scb, '=');
         ses_putchar(scb, '\"');
         if (isattrq) {
-            ses_putstr(scb, attr->attr_val);
+            ses_putastr(scb, attr->attr_val, -1);
+        } else if (typ_is_string(val->btyp)) {
+            ses_putastr(scb, VAL_STR(val), -1);
         } else {
-            /* write the simple value meta var */
-            xml_wr_val(scb, msg, val, -1);
-        }           
+            /* write the simple value meta var the slow way */
+            bufferlen = 0;
+            res = val_sprintf_simval_nc(NULL, val, &bufferlen);
+            if (res != NO_ERR) {
+                SET_ERROR(res);
+            } else {
+                buffer = m__getMem(bufferlen+1);
+                if (buffer == NULL) {
+                    SET_ERROR(ERR_INTERNAL_MEM);
+                } else {
+                    res = val_sprintf_simval_nc(buffer,
+                                                val,
+                                                &bufferlen);
+                    if (res != NO_ERR) {
+                        SET_ERROR(res);
+                    } else {
+                        ses_putastr(scb, buffer, -1);
+                    }
+                    m__free(buffer);
+                }
+            }
+        }
         ses_putchar(scb, '\"');
     }
 

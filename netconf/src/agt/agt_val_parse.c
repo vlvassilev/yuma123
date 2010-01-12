@@ -550,6 +550,7 @@ static status_t
     }
 
     if (getstrend) {
+        xml_clean_node(&nextnode);
         return NO_ERR;
     }
 

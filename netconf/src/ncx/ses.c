@@ -27,12 +27,13 @@ date         init     comment
 *                     I N C L U D E    F I L E S                    *
 *                                                                   *
 *********************************************************************/
-#include  <stdio.h>
-#include  <stdlib.h>
-#include  <string.h>
-#include  <memory.h>
-#include  <unistd.h>
-#include  <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <memory.h>
+#include <unistd.h>
+#include <errno.h>
+#include <ctype.h>
 
 #ifndef _H_procdefs
 #include  "procdefs.h"
@@ -348,6 +349,35 @@ static status_t
     return NO_ERR;
 
 }  /* accept_buffer */
+
+
+/********************************************************************
+* FUNCTION put_char_entity
+*
+* Write a character entity for the specified character
+*
+* INPUTS:
+*   scb == session control block to start msg 
+*   ch == character to write as a character entity
+*
+*********************************************************************/
+static void
+    put_char_entity (ses_cb_t *scb,
+                     xmlChar ch)
+{
+    xmlChar     numbuff[NCX_MAX_NUMLEN];
+
+    sprintf((char *)numbuff, "%u", (uint32)ch);
+
+    ses_putchar(scb, '&');
+    ses_putchar(scb, '#');
+    ses_putstr(scb, numbuff);
+    ses_putchar(scb, ';');
+
+}  /* put_char_entity */
+
+
+/************   E X T E R N A L   F U N C T I O N S     ***********/
 
 
 /********************************************************************
@@ -704,14 +734,20 @@ void
         } else if (*str == '"') {
             ses_putstr(scb, QSTR);
             str++;
-        } else if ((scb->mode == SES_MODE_XMLDOC
-                    || scb->mode == SES_MODE_TEXT) && *str == '\n') {
-            if (indent < 0) {
-                ses_putchar(scb, *str++);
+        } else if (*str == '\n') {
+            if (scb->mode == SES_MODE_XMLDOC || 
+                scb->mode == SES_MODE_TEXT) {
+                if (indent < 0) {
+                    ses_putchar(scb, *str++);
+                } else {
+                    ses_indent(scb, indent);
+                    str++;
+                }
             } else {
-                ses_indent(scb, indent);
-                str++;
+                put_char_entity(scb, *str++);
             }
+        } else if (isspace(*str)) {
+            put_char_entity(scb, *str++);
         } else {
             ses_putchar(scb, *str++);
         }

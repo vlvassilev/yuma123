@@ -517,7 +517,7 @@ const val_value_t *
 *            == NULL if not available 
 *    parmtyp == type of node in 'error_info'
 *    error_info == error data, specific to 'res'        <error-info>
-*               == NULL if not available
+*               == NULL if not available (then nodetyp ignored)
 *    nodetyp == type of node in 'error_path'
 *    error_path == internal data node with the error       <error-path>
 *            == NULL if not available or not used  
@@ -570,7 +570,7 @@ void
 *            == NULL if not available 
 *    parmtyp == type of node in 'error_info'
 *    error_info == error data, specific to 'res'        <error-info>
-*               == NULL if not available (then nodetyp ignred)
+*               == NULL if not available (then nodetyp ignored)
 *    nodetyp == type of node in 'error_path'
 *    error_path == internal data node with the error       <error-path>
 *            == NULL if not available or not used  
@@ -648,13 +648,15 @@ void
             }
         }
 
-        err = agt_rpcerr_gen_error_errinfo(layer, 
-                                           res, 
-                                           xmlnode, 
-                                           parmtyp, 
-                                           error_info, 
-                                           pathbuff, 
-                                           errinfo);
+        err = agt_rpcerr_gen_error_ex(layer, 
+                                      res, 
+                                      xmlnode, 
+                                      parmtyp, 
+                                      error_info, 
+                                      pathbuff, 
+                                      errinfo,
+                                      nodetyp,
+                                      error_path);
         if (err) {
             /* pass off pathbuff memory here */
             dlq_enque(err, errQ);
@@ -718,9 +720,9 @@ void
         if (errnode) {
             if (nodetyp==NCX_NT_STRING) {
                 buff = xml_strdup((const xmlChar *)errnode);
-            } else {
+            } else if (nodetyp==NCX_NT_VAL) {
                 (void)val_gen_instance_id(msghdr, 
-                                          errnode, 
+                                          (const val_value_t *)errnode, 
                                           NCX_IFMT_XPATH1, 
                                           &buff);
             }

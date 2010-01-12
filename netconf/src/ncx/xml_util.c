@@ -1632,6 +1632,7 @@ xmlChar *
         str[i] = *copyFrom++;
     }
     str[len] = 0;
+
     return str;
 
 }  /* xml_strdup */

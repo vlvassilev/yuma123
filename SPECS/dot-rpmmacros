@@ -1,0 +1,9 @@
+%_topdir      %(echo $HOME)/rpmbuild
+%_smp_mflags  -j3
+%__arch_install_post   /usr/lib/rpm/check-rpaths   /usr/lib/rpm/check-buildroot
+%packager Andy Bierman <andyb@iwl.com>
+%vendor InterWorking Labs
+%_signature gpg
+%_gpg_path /home/andy/.gnupg
+%_gpg_name Andy Bierman <andyb@iwl.com>
+%_gpgbin /usr/bin/gpg

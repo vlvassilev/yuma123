@@ -18,7 +18,6 @@
       <table id="tablist" border="1">
 	<tr id="tabheader">
 	  <td>Extension</td>
-	  <td>Argument</td>
 	  <td>Abstract</td>
 	</tr>
 	<tr py:for="ncextension in ncextensions" id="tablist">
@@ -36,10 +35,12 @@
 	  </td>
 	  <td id="${idfill}" py:if="not ncextension.docurl"
 	      py:content="ncextension.name"/>
-          <td  id="${idfill}" py:if="ncextension.argument"
-	       py:content="ncextension.argument[0:69]"/>
           <td  id="${idfill}"
-	       py:content="ncextension.description[0:69]"/>
+               py:if="len(ncextension.description) &lt; 256"
+	       py:content="ncextension.description"/>
+          <td  id="${idfill}"
+               py:if="len(ncextension.description) &gt; 255"
+	       py:content="ncextension.description[0:255] + '...'"/>
         </tr>
       </table>
     </div>

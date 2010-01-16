@@ -16,7 +16,6 @@
       <table id="tablist" border="1">
 	<tr id="tabheader">
 	  <td>Object</td>
-	  <td>Type</td>
 	  <td>Abstract</td>
 	</tr>
 	<tr py:for="ncobject in ncobjects" id="tablist">
@@ -34,16 +33,14 @@
 	  </td>
 	  <td id="${idfill}" py:if="not ncobject.docurl"
 	      py:content="ncobject.name"/>
-          <td id="${idfill}"
-	       py:content="ncobject.objtyp"/>
           <td id="${idfill}" py:if="ncobject.description"
-	       py:content="ncobject.description[0:69]"/>
+	       py:content="ncobject.description"/>
           <td id="${idfill}"
 	      py:if="(not ncobject.description) and ncobject.childlist"
-	       py:content="ncobject.childlist[0:69]"/>
+	       py:content="ncobject.childlist"/>
           <td id="${idfill}"
 	      py:if="(not ncobject.description) and not ncobject.childlist"
-	       py:content="'OID: ' + ncobject.objectid[0:69]"/>
+	       py:content="'OID: ' + ncobject.objectid"/>
         </tr>
       </table>
     </div>

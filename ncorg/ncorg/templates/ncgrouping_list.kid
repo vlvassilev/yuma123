@@ -16,7 +16,7 @@
       <table id="tablist" border="1">
 	<tr id="tabheader">
 	  <td>Grouping</td>
-	  <td>Objects</td>
+<!--	  <td>Objects</td>  -->
 	  <td>Abstract</td>
 	</tr>
 	<tr py:for="ncgrouping in ncgroupings" id="tablist">
@@ -35,9 +35,14 @@
 	  <td id="${idfill}" py:if="not ncgrouping.docurl"
 	      py:content="ncgrouping.name"/>
           <td id="${idfill}"
-	       py:content="ncgrouping.objectlist[0:79]"/>
+	      py:if="not ncgrouping.description"
+	       py:content="ncgrouping.objectlist"/>
           <td id="${idfill}"
-	       py:content="ncgrouping.description[0:79]"/>
+	      py:if="ncgrouping.description and len(ncgrouping.description) &lt; 256"
+              py:content="ncgrouping.description" />
+          <td id="${idfill}"
+	      py:if="len(ncgrouping.description) &gt; 255"
+	       py:content="ncgrouping.description[0:255] + '...'"/>
         </tr>
       </table>
     </div>

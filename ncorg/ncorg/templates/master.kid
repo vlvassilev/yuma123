@@ -96,6 +96,15 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 	    <li><a href="/yang_docs">YANG&nbsp;language</a></li>
 	    <li><a href="/database_docs">YANG&nbsp;database</a></li>
 	    <li><a href="/yang_auto">YANG-based&nbsp;automation</a></li>
+            <li class="daddy"><a href="">Yuma&nbsp;Tools</a>
+	      <ul>
+		<li><a href="/manpages/yangcli.1.html">yangcli</a></li>
+		<li><a href="/manpages/yangdiff.1.html">yangdiff</a></li>
+		<li><a href="/manpages/yangdump.1.html">yangdump</a></li>
+		<li><a href="/manpages/netconfd.1.html">netconfd</a></li>
+		<li><a href="/manpages/netconf-subsystem.1.html">netconf-subsystem</a></li>
+	      </ul>
+            </li>
 	  </ul>
 	</li>
       </ul>

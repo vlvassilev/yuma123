@@ -1,0 +1,111 @@
+<!-- Creator     : groff version 1.18.1.4 -->
+<!-- CreationDate: Sat Jan 16 11:02:34 2010 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>netconf-subsystem</title>
+</head>
+<body>
+
+<h1 align=center>netconf-subsystem</h1>
+<h2 align=center>Version 0.9.9</h2>
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#AUTHOR">AUTHOR</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+<a name="NAME"></a>
+<h2>NAME</h2>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>netconf-subsystem &minus; thin client to access netconfd
+server</p>
+</td>
+</table>
+<a name="SYNOPSIS"></a>
+<h2>SYNOPSIS</h2>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<pre>   netconf-subsystem
+
+</pre>
+</td>
+</table>
+<a name="DESCRIPTION"></a>
+<h2>DESCRIPTION</h2>
+<!-- INDENTATION -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p><b>netconf-subsystem</b> is a thin-client application
+that is called by the OpenSSH server to access the netconfd
+server, when the &rsquo;netconf&rsquo; subsystem is
+requested.</p>
+</td>
+</table>
+<a name="USAGE"></a>
+<h2>USAGE</h2>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>The location of this program needs to be configured in
+the /etc/ssh/sshd_config file. The following configuration
+needs to be present:</p>
+<!-- INDENTATION -->
+<pre>  Port 22
+  Port 830
+  Subsystem netconf /usr/sbin/netconf-subsystem
+
+</pre>
+<!-- INDENTATION -->
+<p>The actual filespec in the last line will depend on the
+location that this program is installed. The default value
+is shown in the example above.</p>
+<!-- INDENTATION -->
+<p>There are no program options or environment variables
+used by this program.</p>
+</td>
+</table>
+<a name="AUTHOR"></a>
+<h2>AUTHOR</h2>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>Andy Bierman, &lt;andyb at iwl dot com&gt;</p>
+</td>
+</table>
+<a name="SEE ALSO"></a>
+<h2>SEE ALSO</h2>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p><b>netconfd</b>(1)</p>
+</td>
+</table>
+<hr>
+</body>
+</html>

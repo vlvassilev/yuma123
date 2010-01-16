@@ -1,0 +1,1135 @@
+<!-- Creator     : groff version 1.18.1.4 -->
+<!-- CreationDate: Sat Jan 16 11:02:34 2010 -->
+<html>
+<head>
+<meta name="generator" content="groff -Thtml, see www.gnu.org">
+<meta name="Content-Style" content="text/css">
+<title>netconfd</title>
+</head>
+<body>
+
+<h1 align=center>netconfd</h1>
+<h2 align=center>Version 0.9.9</h2>
+<a href="#NAME">NAME</a><br>
+<a href="#SYNOPSIS">SYNOPSIS</a><br>
+<a href="#DESCRIPTION">DESCRIPTION</a><br>
+<a href="#USAGE">USAGE</a><br>
+<a href="#OPTIONS">OPTIONS</a><br>
+<a href="#INPUT FILES">INPUT FILES</a><br>
+<a href="#SEARCH PATH">SEARCH PATH</a><br>
+<a href="#ERROR LOGGING">ERROR LOGGING</a><br>
+<a href="#ENVIRONMENT">ENVIRONMENT</a><br>
+<a href="#CONFIGURATION FILES">CONFIGURATION FILES</a><br>
+<a href="#FILES">FILES</a><br>
+<a href="#DIAGNOSTICS">DIAGNOSTICS</a><br>
+<a href="#AUTHOR">AUTHOR</a><br>
+<a href="#SEE ALSO">SEE ALSO</a><br>
+
+<hr>
+<a name="NAME"></a>
+<h2>NAME</h2>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>netconfd &minus; YANG-based NETCONF-over-SSH server</p>
+</td>
+</table>
+<a name="SYNOPSIS"></a>
+<h2>SYNOPSIS</h2>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<pre>   netconfd [parameter=value...]
+
+  netconfd --help [brief | normal | full]
+
+  netconfd --version
+
+</pre>
+</td>
+</table>
+<a name="DESCRIPTION"></a>
+<h2>DESCRIPTION</h2>
+<!-- INDENTATION -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p><b>netconfd</b> is a YANG-based NETCONF server, which can
+be used with an SSH server such as OpenSSH. This version of
+netconfd supports the YANG data modeling language defined in
+<b>draft-ietf-netmod-yang-09.txt</b>.</p>
+</td>
+</table>
+<a name="USAGE"></a>
+<h2>USAGE</h2>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>Parameters can be entered in any order, and have the
+form:</p>
+<!-- INDENTATION -->
+<p><b>[start] name [separator [value]]</b></p>
+<!-- INDENTATION -->
+<p>where:</p>
+<!-- INDENTATION -->
+<p><b>start</b> == 0, 1, or 2 dashes (foo, -foo, --foo)</p>
+<!-- INDENTATION -->
+<p><b>name</b> == parameter name</p>
+<!-- INDENTATION -->
+<pre>         Parameter name completion will be attempted
+         if a partial name is entered.
+
+</pre>
+<!-- INDENTATION -->
+<p><b>separator</b> == whitespace or equals sign (foo=bar,
+foo bar)</p>
+<!-- INDENTATION -->
+<p><b>value</b> == string value for the parameter.</p>
+<!-- INDENTATION -->
+<pre>         Strings with whitespace need to be double quoted
+         (--foo=&quot;some string&quot;)
+
+</pre>
+<!-- INDENTATION -->
+<p>Some examples of valid command line parameters:</p>
+<!-- INDENTATION -->
+<pre>   foo=3
+   -foo=3
+   --foo=3
+   foo 3
+   foo=fred
+   --foo &quot;fred flintstone&quot;
+</pre>
+<!-- INDENTATION -->
+<p>Partial parameter names can be entered if they are
+unique.</p>
+</td>
+</table>
+<a name="OPTIONS"></a>
+<h2>OPTIONS</h2>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>access-control</b>=enum</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Controls how the yuma-nacm access control model will be
+enforced during server operation.</p>
+<!-- INDENTATION -->
+<pre> Enum values:
+    enforcing:
+      All configured access control rules will be
+      enforced.
+    permissive:
+      All configured access control rules will be
+      enforced for write and execute requests.
+      All read requests will be allowed, unless
+      the requested object contains the
+      &rsquo;nacm:very-secure&rsquo; extension.  In that case,
+      all configured access control rules will
+      be enforced.
+   disabled:
+      All read, write, and execute requests will be
+      allowed, unless the object contains the
+      &rsquo;nacm:secure&rsquo; or &rsquo;nacm:very-secure&rsquo; extension.
+      If the &rsquo;nacm:secure&rsquo; extension is in effect,
+      then all configured access control rules
+      will be enforced for write and execute requests.
+      If the &rsquo;nacm:very-secure&rsquo; extension is in effect,
+      then all configured access control rules
+      will be enforced for all requests.
+      Use this mode with caution.
+   off:
+      All access control enforcement is disabled.
+      Use this mode with extreme caution.
+</pre>
+</td>
+</table>
+<!-- INDENTATION -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>config</b>=filespec</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>The name of the configuration file to use. Any parameter
+except this one can be set in the config file. The default
+config file <i>/etc/yuma/netconfd.conf</i> will be not be
+checked if this parameter is present.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>datapath</b>=list</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Internal file search path for configuration data files.
+Overrides the YUMA_DATAPATH environment variable. This
+parameter affects the search for the startup configuration
+file (default: startup-cfg.xml).</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>default-style</b>=enum</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Selects the type of filtering behavior the server will
+advertise as the &rsquo;basic&rsquo; behavior in the
+&rsquo;with-defaults&rsquo; capability. The server will use
+this default handling behavior if the
+&rsquo;with-defaults&rsquo; parameter is not explicitly
+set.</p>
+<!-- INDENTATION -->
+<p>Also, when saving a configuration to NV-storage, this
+value will be used for filtering defaults from the saved
+configuration.</p>
+<!-- INDENTATION -->
+<pre>  Enum values:
+     report-all: report all values
+     trim: remove leafs containing the YANG
+        default value
+     explicit: report only the nodes that have
+        been created by the client or the server.
+        This is the default value.
+</pre>
+</td>
+</table>
+<!-- INDENTATION -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>deviation</b>=string</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>This parameter identifies a YANG module that should only
+be checked for deviation statements for external modules.
+These will be collected and applied to the real module(s)
+being processed.</p>
+<!-- INDENTATION -->
+<p>Deviations are applied as patches to the target module.
+Since they are not identified in the target module at all
+(ala imports), they have to be specified explicitly, so they
+will be correctly processed. Zero or more instances of this
+parameter are allowed.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>eventlog-size</b>=number</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Specifies the maximum number of notification events that
+will be saved in the notification replay buffer. The oldest
+entries will be deleted first. The default value is
+1000.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>hello-timeout</b>=number</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Specifies the number of seconds that a session may exist
+before the hello PDU is received. A seesion will be dropped
+if no hello PDU is received before this number of seconds
+elapses.</p>
+<!-- INDENTATION -->
+<p>If this parameter is set to zero, then the server will
+wait forever for a hello message, and not drop any sessions
+stuck in &rsquo;hello-wait&rsquo; state.</p>
+<!-- INDENTATION -->
+<p>Setting this parameter to zero may permit denial of
+service attacks, since only a limited number of concurrent
+sessions are supported by the server. (range 0 | 10 ..
+3600). The default value is 600 seconds (10 minutes).</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="3" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="13%"></td>
+<td width="8%">
+
+<p>--<b>help</b></p>
+</td>
+<td width="77%">
+
+<p>Print this help text and exit. The help-mode choice
+(--brief, --normal, or --full) may also be present to
+control the amount of help text printed.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>idle-timeout</b>=number</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Specifies the number of seconds that a session may remain
+idle without issuing any RPC requests. A seesion will be
+dropped if it is idle for an interval longer than this
+number of seconds.</p>
+<!-- INDENTATION -->
+<p>Sessions that have a notification subscription active are
+never dropped.</p>
+<!-- INDENTATION -->
+<p>If this parameter is set to zero, then the server will
+never drop a session because it is idle. (range 0 | 10 ..
+360000). The default value is 3600 seconds (1 hour).</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>indent</b>=number</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Number of spaces to indent (0..9) in formatted output.
+The default is 3 spaces.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>log</b>=filespec</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Filespec for the log file to use instead of STDOUT. If
+this string begins with a &rsquo;~&rsquo; character, then a
+username is expected to follow or a directory separator
+character. If it begins with a &rsquo;$&rsquo; character,
+then an environment variable name is expected to follow.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>log-append</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>If present, the log will be appended not over-written. If
+not, the log will be over-written. Only meaningful if the
+<b>log</b> parameter is also present.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>log-level</b>=enum</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Sets the debug logging level for the program.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>maxburst</b>=number</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Specifies the maximum number of notifications that should
+be sent to one session, within a one second time interval.
+The value 0 indicates that the server should not limit
+notification bursts at all. The default value is 10.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>modpath</b>=list</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Directory search path for YANG and YIN files. Overrides
+the YUMA_MODPATH environment variable.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>module</b>=string</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>YANG or YIN source module name to load at startup. The
+server will attempt to load the specified module and its
+corresponding server instrumentation library (SIL) .</p>
+<!-- INDENTATION -->
+<p>If this string represents a filespec, ending with the
+<b>.yang</b> or <b>.yin</b> extension, then only that file
+location will be checked.</p>
+<!-- INDENTATION -->
+<p>If this string represents a module name, then the module
+search path will be checked for a file the <b>.yang</b> or
+<b>.yin</b> extension.</p>
+<!-- INDENTATION -->
+<p>If this string begins with a &rsquo;~&rsquo; character,
+then a username is expected to follow or a directory
+separator character. If it begins with a &rsquo;$&rsquo;
+character, then an environment variable name is expected to
+follow.</p>
+<!-- INDENTATION -->
+<pre>      ~/some/path ==&gt; &lt;my-home-dir&gt;/some/path
+
+     ~fred/some/path ==&gt; &lt;fred-home-dir&gt;/some/path
+
+     $workdir/some/path ==&gt; &lt;workdir-env-var&gt;/some/path
+</pre>
+</td>
+</table>
+<!-- INDENTATION -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>port</b>=number</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Specifies the TCP ports that the server will accept
+connections from. These ports must also be configured in the
+/etc/ssh/sshd_config file for the SSH master server to
+accept the connection and invoke the netconf subsystem.</p>
+<!-- INDENTATION -->
+<p>Up to 4 port numbers can be configured.</p>
+<!-- INDENTATION -->
+<p>If any ports are configured, then only those values will
+be accepted by the server.</p>
+<!-- INDENTATION -->
+<p>If no ports are configured, then the server will accept
+connections on the netconf-ssh port (tcp/830).</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>startup</b>=filespec</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>The full or relative filespec of the startup config file
+to use. If present, overrides the default startup config
+file name &rsquo;startup-cfg.xml&rsquo;, This will also
+override the YUMA_DATAPATH environement variable and the
+datapath CLI parameter, if the first character is the
+forward slash &rsquo;/&rsquo;, indicating an absolute file
+path. If this parameter is present, then the --no-startup
+parameter cannot be present. This is the default, which will
+cause startup-cfg.xml to be used if not present.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>no-startup</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>If present, do not load the startup config file. Use only
+factory default values instead. If this parameter is
+present, then the --startup paraemter cannot be present.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>subdirs</b>=boolean</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>If false, the file search paths for modules, scripts, and
+data files will not include sub-directories if they exist in
+the specified path.</p>
+<!-- INDENTATION -->
+<p>If true, then these file search paths will include
+sub-directories, if present. Any directory name beginning
+with a dot (<b>.</b>) character, or named <b>CVS</b>, will
+be ignored. This is the default mode.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>superuser</b>=string</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>The user name to use as the superuser account. Any
+session associated with this user name will bypass all
+access control enforcement. See yuma-nacm.yang for more
+details.</p>
+<!-- INDENTATION -->
+<p>To disable the superuser account completely, set this
+parameter to the empty string. The default value is
+&rsquo;superuser&rsquo;.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>target</b>=enum</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Specifies the database to use as the target of
+edit-config operations.</p>
+<!-- INDENTATION -->
+<pre>  Enum values:
+    running:
+      Write to the running config and support the
+      :writable-running capability.
+    candidate:
+      Write to the candidate config and support the
+      :candidate and :confirmed-commit capabilities.
+</pre>
+</td>
+</table>
+<!-- INDENTATION -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>usexmlorder</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>If present, then XML element order will be enforced.
+Otherwise, XML element order errors will not be generated if
+possible. Default is no enforcement of strict XML order.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>version</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Print the program version string and exit.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>warn-idlen</b>=number</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Control whether identifier length warnings will be
+generated. The value zero disables all identifier length
+checking. If non-zero, then a warning will be generated if
+an identifier is defined which has a length is greater than
+this amount. range: 0 | 8 .. 1023. The default value is
+64.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>warn-linelen</b>=number</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Control whether line length warnings will be generated.
+The value zero disables all line length checking. If
+non-zero, then a warning will be generated if the line
+length is greater than this amount. Tab characters are
+counted as 8 spaces. range: 0 | 40 .. 4095. The default
+value is 72.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>warn-off</b>=number</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Control whether the specified warning number will be
+generated and counted in the warning total for the module
+being parsed. range: 400 .. 899. This parameter may be
+entered zero or more times.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>with-startup</b>=boolean</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>If set to &rsquo;true&rsquo;, then the :startup
+capability will be enabled. Otherwise, the :startup
+capability will not be enabled. This capability makes the
+NV-save operation an explicit operation instead of an
+automatic save. The default value is false.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>with-validate</b>=boolean</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>If set to &rsquo;true&rsquo;, then the :validate
+capability will be enabled. Otherwise, the :validate
+capability will not be enabled. This capability requires
+extensive memory resources. The default value is true.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>--<b>yuma-home</b>=string</p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Directory for the yuma project root to use. If present,
+this directory location will override the YUMA_HOME
+environment variable, if it is present. If a zero-length
+string is entered, then the YUMA_HOME environment variable
+will be ignored.</p>
+</td>
+</table>
+<a name="INPUT FILES"></a>
+<h2>INPUT FILES</h2>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>YANG modules can be loaded at startup with the
+&rsquo;--module&rsquo; command, or loaded at run-time with
+the &rsquo;load&rsquo; operation.</p>
+</td>
+</table>
+<a name="SEARCH PATH"></a>
+<h2>SEARCH PATH</h2>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>When a module name is entered as input, or when a module
+or submodule name is specified in an import or include
+statement within the file, the following search algorithm is
+used to find the file:</p>
+<!-- INDENTATION -->
+<pre>  1) file is in the current directory
+  2) YUMA_MODPATH environment var (or set by modpath parameter)
+  3) $HOME/modules directory
+  4) $YUMA_HOME/modules directory
+  5) $YUMA_INSTALL/modules directory OR
+     default install module location, &rsquo;/usr/share/yuma/modules&rsquo;
+
+</pre>
+<!-- INDENTATION -->
+<p>By default, the entire directory tree for all locations
+(except step 1) will be searched, not just the specified
+directory. The <b>subdirs</b> parameter can be used to
+prevent sub-directories from being searched.</p>
+<!-- INDENTATION -->
+<p>Any directory name beginning with a dot character
+(<b>.</b>) will be skipped. Also, any directory named
+<b>CVS</b> will be skipped in directory searches.</p>
+</td>
+</table>
+<a name="ERROR LOGGING"></a>
+<h2>ERROR LOGGING</h2>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>By default, warnings and errors are sent to STDOUT.</p>
+<!-- INDENTATION -->
+<p>A log file can be specified instead with the
+<b>log</b>&rsquo; parameter.</p>
+<!-- INDENTATION -->
+<p>Existing log files can be reused with the
+&rsquo;logappend&rsquo; parameter, otherwise log files are
+overwritten.</p>
+<!-- INDENTATION -->
+<p>The logging level can be controlled with the
+<b>log-level</b> parameter.</p>
+<!-- INDENTATION -->
+<p>The default log level is &rsquo;info&rsquo;. The
+log-levels are additive:</p>
+<!-- INDENTATION -->
+<pre>     off:    suppress all errors (not recommended!)
+             A program return code of &rsquo;1&rsquo; indicates some error.
+     error:  print errors
+     warn:   print warnings
+     info:   print generally interesting trace info
+     debug:  print general debugging trace info
+     debug2: print verbose debugging trace info
+     debug3: print very verbose debugging trace info
+
+</pre>
+</td>
+</table>
+<a name="ENVIRONMENT"></a>
+<h2>ENVIRONMENT</h2>
+<!-- INDENTATION -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>The following optional environment variables can be used
+to control module search behavior:</p>
+</td>
+</table>
+<!-- TABS -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="5" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="11%"></td>
+<td width="5%">
+
+<p><b>HOME</b></p>
+</td>
+<td width="13%"></td>
+<td width="66%">
+
+<p>The user&rsquo;s home directory (e.g., /home/andy)</p>
+</td>
+<td width="2%">
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p><b>YUMA_HOME</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>The root of the user&rsquo;s Yuma work directory (e.g.,
+/home/andy/swdev/netconf)</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p><b>YUMA_INSTALL</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>The root of the directory that yangdump is installed on
+this system (default is, /usr/share/yuma)</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p><b>YUMA_DATAPATH</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Colon-separated list of directories to search for data
+files. (e.g.:
+&rsquo;./workdir/data-files:/home/andy/data&rsquo;) The
+<b>datapath</b> parameter will override this environment
+variable, if both are present.</p>
+</td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p><b>YUMA_MODPATH</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>Colon-separated list of directories to search for modules
+and submodules. (e.g.:
+&rsquo;./workdir/modules:/home/andy/test-modules&rsquo;) The
+<b>modpath</b> parameter will override this environment
+variable, if both are present.</p>
+</td>
+</table>
+<a name="CONFIGURATION FILES"></a>
+<h2>CONFIGURATION FILES</h2>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p><b>yangdump.conf</b></p></td>
+</table>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="21%"></td>
+<td width="77%">
+<p>YANG config file The default is:
+<b>/etc/yuma/yangdump.conf</b></p>
+<!-- INDENTATION -->
+<p>An ASCII configuration file format is supported to store
+command line parameters.</p>
+<!-- INDENTATION -->
+<p>The <b>config</b> parameter is used to specify a specific
+config file, otherwise the default config file will be
+checked.</p>
+<!-- INDENTATION -->
+<pre>   - A hash mark until EOLN is treated as a comment
+   - All text is case-sensitive
+   - Whitespace within a line is not significant
+   - Whitespace to end a line is significant/
+     Unless the line starts a multi-line string,
+     an escaped EOLN (backslash EOLN) is needed
+     to enter a leaf on multiple lines.
+   - For parameters that define lists, the key components
+     are listed just after the parameter name, without
+     any name,  e.g.,
+
+           interface eth0 {
+              # name = eth0 is not listed inside the braces
+              ifMtu 1500
+              ifName mySystem
+            }
+
+</pre>
+<!-- INDENTATION -->
+<p>A config file can contain any number of parameter sets
+for different programs.</p>
+<!-- INDENTATION -->
+<p>Each program must have its own section, identifies by its
+name:</p>
+<!-- INDENTATION -->
+<pre>     # this is a comment
+     yangdump {
+        log-level debug
+        output &quot;~/swdev/testfiles&quot;
+     }
+
+    netconfd {
+        ...
+     }
+
+</pre>
+</td>
+</table>
+<a name="FILES"></a>
+<h2>FILES</h2>
+<!-- INDENTATION -->
+
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>The following data files must be present in the module
+search path in order for this program to function:</p>
+<!-- INDENTATION -->
+<p>* <b>YANG module library</b> default:
+/usr/share/yuma/modules/</p>
+</td>
+</table>
+<a name="DIAGNOSTICS"></a>
+<h2>DIAGNOSTICS</h2>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>Internal diagnostics may generate the following type of
+message if any bugs are detected at runtime:</p>
+<!-- INDENTATION -->
+<p>[E0] filename.c:linenum error-number (error-msg)</p>
+</td>
+</table>
+<a name="AUTHOR"></a>
+<h2>AUTHOR</h2>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p>Andy Bierman, &lt;andyb at iwl dot com&gt;</p>
+</td>
+</table>
+<a name="SEE ALSO"></a>
+<h2>SEE ALSO</h2>
+<!-- INDENTATION -->
+<table width="100%" border=0 rules="none" frame="void"
+       cols="2" cellspacing="0" cellpadding="0">
+<tr valign="top" align="left">
+<td width="10%"></td>
+<td width="89%">
+<p><b>netconf-subsystem</b>(1) <b>pyang</b>(1)
+<b>smidump</b>(1) <b>yangcli</b>(1) <b>yangdiff</b>(1)
+<b>yangdump</b>(1)</p>
+</td>
+</table>
+<hr>
+</body>
+</html>

@@ -33,14 +33,18 @@
 	  </td>
 	  <td id="${idfill}" py:if="not ncobject.docurl"
 	      py:content="ncobject.name"/>
-          <td id="${idfill}" py:if="ncobject.description"
-	       py:content="ncobject.description[0:79]"/>
+          <td id="${idfill}" 
+              py:if="ncobject.description and len(ncobject.description) &lt; 256"
+	      py:content="ncobject.description"/>
+          <td id="${idfill}"
+              py:if="ncobject.description and len(ncobject.description) &gt; 255"
+	      py:content="ncobject.description[0:255] + '...'"/>
           <td id="${idfill}"
 	      py:if="(not ncobject.description) and ncobject.childlist"
-	       py:content="ncobject.childlist[0:79]"/>
+	       py:content="ncobject.childlist"/>
           <td id="${idfill}"
 	      py:if="(not ncobject.description) and not ncobject.childlist"
-	       py:content="'OID: ' + ncobject.objectid[0:79]"/>
+	       py:content="'OID: ' + ncobject.objectid"/>
         </tr>
       </table>
     </div>

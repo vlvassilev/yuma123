@@ -48,7 +48,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_sbindir}/netconfd
 %{_sbindir}/netconf-subsystem
 %{_datadir}/yuma/
-%{_etcdir}/yuma/
+/etc/yuma/*
 %{_libdir}/*
 %{_mandir}/*
 

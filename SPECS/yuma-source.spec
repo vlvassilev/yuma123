@@ -51,7 +51,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/*
 %{_sbindir}/*
 %{_datadir}/yuma/
-%{_etcdir}/yuma/
+/etc/yuma/*
 %{_libdir}/*
 %{_includedir}/yuma/
 %{_mandir}/*

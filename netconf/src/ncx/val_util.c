@@ -2589,7 +2589,10 @@ void
 *
 * Check the specified value set for the 3 path CLI parms
 * and override the environment variable setting, if any.
-
+*
+* Not all of these parameters are supported in all programs
+* The object tree is not checked, just the value tree
+*
 * INPUTS:
 *   parentval == CLI container to check for the runpath,
 *                 modpath, and datapath variables
@@ -2612,7 +2615,7 @@ void
     }
 #endif
 
-    /* get the modnpath parameter */
+    /* get the modpath parameter */
     val = val_find_child(parentval, 
                          val_get_mod_name(parentval),
                          NCX_EL_MODPATH);
@@ -2637,6 +2640,45 @@ void
     }
     
 }  /* val_set_path_parms */
+
+
+
+/********************************************************************
+* FUNCTION val_set_subdirs_parm
+*   --subdirs
+*
+* Check the specified value set for the subdirs boolean
+*
+* INPUTS:
+*   parentval == CLI container to check for the subdirs parm
+*
+*********************************************************************/
+void
+    val_set_subdirs_parm (val_value_t *parentval)
+{
+    val_value_t        *val;
+
+#ifdef DEBUG
+    if (!parentval) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+    if (!(parentval->btyp == NCX_BT_CONTAINER || 
+          parentval->btyp == NCX_BT_LIST)) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+#endif
+
+    /* get the modpath parameter */
+    val = val_find_child(parentval, 
+                         val_get_mod_name(parentval),
+                         NCX_EL_SUBDIRS);
+    if (val && val->res == NO_ERR) {
+        ncxmod_set_subdirs(VAL_BOOL(val));
+    }
+    
+}  /* val_set_subdirs_parm */
 
 
 /* END file val_util.c */

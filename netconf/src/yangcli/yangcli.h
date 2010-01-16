@@ -100,7 +100,12 @@ date	     init     comment
 
 #define YANGCLI_DEF_FIXORDER   TRUE
 
+#define YANGCLI_DEF_CONF_FILE (const xmlChar *)"/etc/yuma/yangcli.conf"
+
+#define YANGCLI_DEF_SERVER (const xmlChar *)"default"
+
 #define YANGCLI_MOD  (const xmlChar *)"yangcli"
+
 
 #ifdef MACOSX
 #define ENV_HOST        (const char *)"HOST"

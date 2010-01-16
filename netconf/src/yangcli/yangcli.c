@@ -1777,7 +1777,7 @@ static status_t
                 val_init_from_template(mgr_cli_valset, obj);
             }
         } else {
-            /* parse the command line against the PSD */    
+            /* parse the command line against the object template */    
             mgr_cli_valset = cli_parse(argc, 
                                        argv, 
                                        obj,
@@ -1801,15 +1801,22 @@ static status_t
     confname = get_strparm(mgr_cli_valset, 
                            YANGCLI_MOD, 
                            YANGCLI_CONFIG);
-    if (confname) {
+    if (confname != NULL) {
         res = conf_parse_val_from_filespec(confname, 
                                            mgr_cli_valset,
                                            TRUE, 
                                            TRUE);
-        if (res != NO_ERR) {
-            return res;
-        }
+    } else {
+        res = conf_parse_val_from_filespec(YANGCLI_DEF_CONF_FILE,
+                                           mgr_cli_valset,
+                                           TRUE, 
+                                           FALSE);
     }
+
+    if (res != NO_ERR) {
+        return res;
+    }
+
 
     /****************************************************
      * go through the yangcli params in order,
@@ -1824,6 +1831,9 @@ static status_t
 
     /* set the warning control parameters */
     val_set_warning_parms(mgr_cli_valset);
+
+    /* set the subdirs parm */
+    val_set_subdirs_parm(mgr_cli_valset);
 
     /* get the server parameter */
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_SERVER);

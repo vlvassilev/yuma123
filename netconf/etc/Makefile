@@ -2,7 +2,7 @@
 #  
 #   etc directory
 
-ETC_INSTALL = $(DESTDIR)/usr/share/yuma/etc
+ETC_INSTALL = $(DESTDIR)/etc/yuma
 
 all:
 

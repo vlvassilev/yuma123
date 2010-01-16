@@ -67,7 +67,7 @@ date	     init     comment
 #define YANGDIFF_DEF_OUTPUT        (const xmlChar *)"stdout"
 #define YANGDIFF_DEF_DIFFTYPE      (const xmlChar *)"summary"
 #define YANGDIFF_DEF_DT            YANGDIFF_DT_NORMAL
-#define YANGDIFF_DEF_CONFIG        (const xmlChar *)"/etc/yangdiff.conf"
+#define YANGDIFF_DEF_CONFIG        (const xmlChar *)"/etc/yuma/yangdiff.conf"
 #define YANGDIFF_DEF_FILENAME      (const xmlChar *)"yangdiff.log"
 
 #define YANGDIFF_MOD               (const xmlChar *)"yangdiff"
@@ -82,7 +82,6 @@ date	     init     comment
 #define YANGDIFF_PARM_DIFFTYPE      (const xmlChar *)"difftype"
 #define YANGDIFF_PARM_OUTPUT        (const xmlChar *)"output"
 #define YANGDIFF_PARM_INDENT        (const xmlChar *)"indent"
-#define YANGDIFF_PARM_SUBDIRS       (const xmlChar *)"subdirs"
 #define YANGDIFF_PARM_HEADER        (const xmlChar *)"header"
 #define YANGDIFF_LINE (const xmlChar *)\
 "\n==================================================================="

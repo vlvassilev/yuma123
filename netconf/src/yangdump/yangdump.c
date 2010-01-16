@@ -155,7 +155,7 @@ date         init     comment
 
 #define YANGDUMP_DEF_OUTPUT   "stdout"
 
-#define YANGDUMP_DEF_CONFIG   (const xmlChar *)"/etc/yangdump.conf"
+#define YANGDUMP_DEF_CONFIG   (const xmlChar *)"/etc/yuma/yangdump.conf"
 
 #define YANGDUMP_DEF_TOC      (const xmlChar *)"menu"
 
@@ -176,7 +176,6 @@ date         init     comment
 #define YANGDUMP_PARM_INDENT        (const xmlChar *)"indent"
 #define YANGDUMP_PARM_MODULE        (const xmlChar *)"module"
 #define YANGDUMP_PARM_MODVERSION    (const xmlChar *)"modversion"
-#define YANGDUMP_PARM_SUBDIRS       (const xmlChar *)"subdirs"
 #define YANGDUMP_PARM_VERSIONNAMES  (const xmlChar *)"versionnames"
 #define YANGDUMP_PARM_OUTPUT        (const xmlChar *)"output"
 #define YANGDUMP_PARM_OBJVIEW       (const xmlChar *)"objview"
@@ -459,7 +458,7 @@ static status_t
     /* subdirs parameter */
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
-                         YANGDUMP_PARM_SUBDIRS);
+                         NCX_EL_SUBDIRS);
     if (val && val->res == NO_ERR) {
         cp->subdirs = VAL_BOOL(val);
     } else {

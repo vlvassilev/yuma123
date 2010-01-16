@@ -1885,7 +1885,7 @@ static status_t
     /* subdirs parameter */
     val = val_find_child(valset, 
                          YANGDIFF_MOD, 
-                         YANGDIFF_PARM_SUBDIRS);
+                         NCX_EL_SUBDIRS);
     if (val && val->res == NO_ERR) {
         cp->subdirs = VAL_BOOL(val);
     } else {

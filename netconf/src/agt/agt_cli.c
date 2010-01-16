@@ -302,6 +302,9 @@ static void
         }
     }
 
+    /* check the subdirs parameter */
+    val_set_subdirs_parm(valset);
+
     /* version param handled externally */
 
     /* get usexmlorder param */
@@ -319,6 +322,8 @@ static void
     if (val && val->res == NO_ERR) {
         agt_profile->agt_usevalidate = VAL_BOOL(val);
     }
+
+
 
 } /* set_agent_profile */
 
@@ -358,6 +363,7 @@ status_t
     ncx_module_t          *mod;
     obj_template_t        *obj;
     val_value_t           *valset, *val;
+    FILE                  *fp;
     status_t               res;
 
 #ifdef DEBUG
@@ -423,7 +429,24 @@ status_t
                     set_agent_profile(valset, agt_profile);
                 }
             }
-        } /* else no default config location */
+        } else {
+            fp = fopen((const char *)AGT_DEF_CONF_FILE, "r");
+            if (fp != NULL) {
+                fclose(fp);
+
+                /* use default config location */
+                res = conf_parse_val_from_filespec(AGT_DEF_CONF_FILE, 
+                                                   valset, 
+                                                   TRUE, 
+                                                   TRUE);
+                if (res != NO_ERR) {
+                    return res;
+                } else {
+                    /* transfer the parmset values again */
+                    set_agent_profile(valset, agt_profile);
+                }
+            }
+        }
 
         /* set the logging control parameters */
         val_set_logging_parms(valset);

@@ -144,6 +144,8 @@ date	     init     comment
 
 #define AGT_MAX_PORTS  4
 
+#define AGT_DEF_CONF_FILE (const xmlChar *)"/etc/yuma/netconfd.conf"
+
 
 /********************************************************************
 *								    *

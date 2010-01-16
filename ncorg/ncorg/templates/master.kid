@@ -92,17 +92,12 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
 	</li>
 	<li><a href="">Documentation</a>
 	  <ul>
-	    <li><a href="/database_docs">YANG&nbsp;database</a></li>
-	    <li><a href="/yangdump_manual">yangdump&nbsp;program</a></li>
-	    <li><a href="/yangdiff_manual">yangdiff&nbsp;program</a></li>
 	    <li><a href="/netconf_docs">NETCONF&nbsp;protocol</a></li>
 	    <li><a href="/yang_docs">YANG&nbsp;language</a></li>
+	    <li><a href="/database_docs">YANG&nbsp;database</a></li>
 	    <li><a href="/yang_auto">YANG-based&nbsp;automation</a></li>
 	  </ul>
 	</li>
-        <!--
-	<li><a href="/download">Free&nbsp;Downloads</a></li>
-        -->
       </ul>
     </div>
 
@@ -115,13 +110,13 @@ if (window.attachEvent) window.attachEvent("onload", sfHover);
     <div id="footer">
       <hr />
       <p>
-	Copyright &#169; 2008, 2009, Netconf Central, Inc., All Rights Reserved.
+	Copyright &#169; 2008 - 2010, Netconf Central, Inc., All Rights Reserved.
       </p>
       <p py:if="copyright">
 	TurboGears is Copyright &#169; 2007, Kevin Dangoor
       </p>
       <p py:if="copyright">
-	Last updated: 2009-12-23
+	Last updated: 2010-01-16
       </p>
     </div>
   </body>

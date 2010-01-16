@@ -4,6 +4,8 @@
 
 MAN_INSTALL = $(DESTDIR)/usr/share/man/man1
 
+WEB_INSTALL = $(DESTDIR)/home/andy/MAN_WEBPAGES
+
 ifdef CLIENT
 MAN_FILES = yangdump.1 yangdiff.1 yangcli.1
 else
@@ -33,6 +35,13 @@ install:
 	mkdir -p $(MAN_INSTALL)
 	for fil in $(MAN_FILES); do \
 	  gzip -c $$fil > $(MAN_INSTALL)/$$fil.gz;\
+	done
+
+
+webinstall:
+	mkdir -p $(WEB_INSTALL)
+	for fil in $(MAN_FILES); do \
+	  groff -mandoc -mwww -Thtml $$fil > $(WEB_INSTALL)/$$fil.html;\
 	done
 
 distclean: superclean uninstall

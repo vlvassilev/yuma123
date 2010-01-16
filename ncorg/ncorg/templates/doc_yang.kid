@@ -120,7 +120,7 @@
 	    <b>Intended Status:</b> Informational RFC, nothing-to-implement
             <br/><br/>
 	    <a target="_blank" 
-               href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-usage-02.txt">
+               href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-usage-03.txt">
               Guidelines for Authors and Reviewers of YANG Data Model Documents
 	    </a>
 	  </p>

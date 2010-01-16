@@ -418,7 +418,7 @@ void
             val = obj_get_units(obj);
             if (val) {
                 help_write_lines((const xmlChar *)"units: ", 
-                                 indent,
+                                 indent+NCX_DEF_INDENT,
                                  TRUE); 
                 help_write_lines(val, 0, FALSE);
             }
@@ -443,28 +443,29 @@ void
             val = obj_get_units(obj);
             if (val) {
                 help_write_lines((const xmlChar *)"units: ", 
-                                 indent, 
+                                 indent+NCX_DEF_INDENT, 
                                  TRUE); 
                 help_write_lines(val, 0, FALSE);
             }
             if (!obj->def.leaflist->ordersys) {
                 help_write_lines((const xmlChar *)"ordered-by: user", 
-                                 indent, 
+                                 indent+NCX_DEF_INDENT, 
                                  TRUE); 
             } else {
                 help_write_lines((const xmlChar *)"ordered-by: system", 
-                                 indent, TRUE); 
+                                 indent+NCX_DEF_INDENT, 
+                                 TRUE); 
             }
             if (obj->def.leaflist->minset) {
                 help_write_lines((const xmlChar *)"min-elements: ", 
-                                 indent,
+                                 indent+NCX_DEF_INDENT,
                                  TRUE); 
                 sprintf(numbuff, "%u", obj->def.leaflist->minelems);
                 help_write_lines((const xmlChar *)numbuff, 0, FALSE);
             }
             if (obj->def.leaflist->maxset) {
                 help_write_lines((const xmlChar *)"max-elements: ", 
-                                 indent,
+                                 indent+NCX_DEF_INDENT,
                                  TRUE); 
                 sprintf(numbuff, "%u", obj->def.leaflist->maxelems);
                 help_write_lines((const xmlChar *)numbuff, 0, FALSE);
@@ -513,12 +514,14 @@ void
         case HELP_MODE_FULL:
             if (obj->def.list->keystr) {
                 help_write_lines((const xmlChar *)"key: ", 
-                                 indent, TRUE); 
+                                 indent+NCX_DEF_INDENT, 
+                                 TRUE); 
                 help_write_lines(obj->def.list->keystr, 0, FALSE);
             }
             if (!obj->def.list->ordersys) {
                 help_write_lines((const xmlChar *)"ordered-by: user", 
-                                 indent, TRUE); 
+                                 indent+NCX_DEF_INDENT, 
+                                 TRUE); 
             }
 
             if (mode == HELP_MODE_NORMAL) {
@@ -527,13 +530,15 @@ void
 
             if (obj->def.list->minset) {
                 help_write_lines((const xmlChar *)"min-elements: ", 
-                                 indent, TRUE); 
+                                 indent+NCX_DEF_INDENT, 
+                                 TRUE); 
                 sprintf(numbuff, "%u", obj->def.list->minelems);
                 help_write_lines((const xmlChar *)numbuff, 0, FALSE);
             }
             if (obj->def.list->maxset) {
                 help_write_lines((const xmlChar *)"max-elements: ", 
-                                 indent, TRUE); 
+                                 indent+NCX_DEF_INDENT, 
+                                 TRUE); 
                 sprintf(numbuff, "%u", obj->def.list->maxelems);
                 help_write_lines((const xmlChar *)numbuff, 0, FALSE);
             }

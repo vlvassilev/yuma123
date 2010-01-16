@@ -23,8 +23,27 @@ module yangcli {
         Usage:
            yangcli [parameters]
 
+
         Normal Mode:
            An interactive CLI shell with command line history.
+
+        Autostart-mode:
+           If the 'server' parameter is present, then yangcli will
+           attempt to connect to that server upon startup.  If the
+           'user' and 'password' parameters are also present, then
+           the user will not be prompted before the connection
+           is attempted.  This parameter will be processed first,
+           if script-mode or batch-mode is used.
+    
+        Script-mode:
+           If the 'run-script' or 'run-command' parameter is present,
+           then the specified script or command will be run 
+           automatically upon startup.
+
+        Batch-mode:
+           If the 'batch-mode' parameter is present, then either the
+           'run-script' or 'run-command' parameter will be invoked, if
+           present, and then the program will exit.
 
         Autostart-mode:
            If the 'server' parameter is present, then yangcli will
@@ -36,11 +55,12 @@ module yangcli {
          Script-mode:
             If the 'run-script' parameter is present, then the
             specified script will be run automatically upon startup.
-      
+
          ";
 
-    revision 2009-03-19 {
-       description "Initial published version (TBD)";
+    revision 2010-01-14 {
+       description 
+          "Initial published version for 0.9.9 release";
     }
 
 
@@ -247,7 +267,7 @@ module yangcli {
 	  description
 	    "Number of seconds to wait for a response
 	     from the server before declaring a timeout.
-             Zero means no timeout at all.";
+             Zero means do not timeout at all.";
           type nt:Timeout;
         }
  
@@ -267,6 +287,8 @@ module yangcli {
 
       uses ncxapp:NcxAppCommon;
 
+      uses ncxapp:SubdirsParm;
+
       uses ConnectParms;
 
       leaf autocomp {
@@ -284,9 +306,9 @@ module yangcli {
         description
           "Controls whether any modules (except this one)
            will be automatically loaded upon startup or
-           upon session startup with an server. If false,
-           the 'load-module' command must be used to
-           explicitly load all the desired definition modules.";
+           upon session startup with a server. If false,
+           the 'mgrload' command must be used to
+           explicitly load all the desired YANG modules.";
         type boolean;
         default true;
       }
@@ -350,7 +372,7 @@ module yangcli {
       leaf default-module {
         description
            "Default module name string to use before 'netconf' 
-            and 'ncx' are tried.  The module prefix must be
+            and 'yangcli' are tried.  The module prefix may need to be
             used for other modules.";
          type nt:NcxName;
       }
@@ -394,6 +416,10 @@ module yangcli {
       uses ncxapp:ModuleParm;
 
       uses ncxapp:DeviationParm;
+
+      uses ncxapp:DatapathParm;
+
+      uses ncxapp:RunpathParm;
 
       choice auto-startup-mode {
         leaf run-script {

@@ -14,8 +14,8 @@ module yuma-app-common {
     description 
        "Common CLI parameters used in all yuma applications.";
 
-    revision 2009-04-10 {
-       description "Initial version.";
+    revision 2010-01-14 {
+       description "Initial version for 0.9.9 release.";
     }
 
     typedef CliWithDefaultsType {
@@ -60,6 +60,24 @@ module yuma-app-common {
         }
     }
 
+    grouping DatapathParm {
+        leaf datapath {
+          description
+             "Internal file search path for config files.
+              Overrides the YUMA_DATAPATH environment variable.";
+          type yt:NcPathList;
+        }
+    }
+
+    grouping RunpathParm {
+        leaf runpath {
+          description
+             "Internal file search path for executable modules.
+              Overrides the YUMA_RUNPATH environment variable.";
+          type yt:NcPathList;
+        }
+    }
+
     grouping NcxAppCommon {
 
         leaf config {
@@ -72,7 +90,7 @@ module yuma-app-common {
         }
 
         leaf help {
-          description "Print yangdump help file and exit.";
+          description "Print program help file and exit.";
           type empty;
         }
 
@@ -101,29 +119,16 @@ module yuma-app-common {
           type yt:NcDebugType;
         }
 
-        leaf datapath {
-          description
-             "Internal file search path for config files.
-              Overrides the YUMA_DATAPATH environment variable.";
-          type yt:NcPathList;
-        }
 
         leaf modpath {
           description
-             "Directory search path for YANG modules.
+             "Directory search path for YANG or YIN modules.
               Overrides the YUMA_MODPATH environment variable.";
           type yt:NcPathList;
         }
 
-        leaf runpath {
-          description
-             "Internal file search path for executable modules.
-              Overrides the YUMA_RUNPATH environment variable.";
-          type yt:NcPathList;
-        }
-
         leaf version {
-          description "Print yangdump version string and exit.";
+          description "Print program version string and exit.";
           type empty;
         }
 
@@ -181,13 +186,13 @@ module yuma-app-common {
               "YANG source module name to use.
 
                If this string represents a filespec, 
-	       ending with the '.yang' extension,
+	       ending with the '.yang' or '.yin' extension,
 	       then only that file location will be checked.
 
                If this string represents a module name, then
                the module search path will be checked for
                a file with the module name and the '.yang'
-               extension.
+               or '.yin.' extension.
 
                If this string begins with a '~' character,
                then a username is expected to follow or
@@ -251,13 +256,13 @@ module yuma-app-common {
                explicitly, so they will be correctly processed.
 
                If this string represents a filespec, 
-	       ending with the '.yang' extension,
+	       ending with the '.yang' or '.yin' extension,
 	       then only that file location will be checked.
 
                If this string represents a module name, then
                the module search path will be checked for
                a file with the module name and the '.yang' 
-               extension.
+               or '.yin' extension.
 
                If this string begins with a '~' character,
                then a username is expected to follow or

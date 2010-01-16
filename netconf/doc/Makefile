@@ -1,4 +1,4 @@
-# Makefile for Yuma etc directory
+# Makefile for Yuma doc directory
 #  
 #   doc directory
 

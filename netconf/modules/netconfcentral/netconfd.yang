@@ -23,9 +23,9 @@ module netconfd {
         This module is not advertised by the server.
         It contains only CLI parameters.";
 
-    revision 2009-12-27 {
+    revision 2010-01-14 {
        description 
-         "Initial version.";
+         "Initial version for 0.9.9 release.";
     }
 
     grouping StartupChoice {
@@ -41,7 +41,9 @@ module netconfd {
 
         leaf startup {
           description
-             "The full filespec of the startup config file to use.
+             "The full or relative filespec of the startup config 
+              file to use.
+
               If present, overrides the default startup config
               file name 'startup-cfg.xml',  This will also
               override the YUMA_DATAPATH environement variable
@@ -62,6 +64,8 @@ module netconfd {
             netconfd [parameters]";
 
       uses ncxapp:NcxAppCommon;
+
+      uses ncxapp:SubdirsParm;
 
       leaf access-control {
         description
@@ -183,7 +187,7 @@ module netconfd {
       leaf-list port {
         max-elements 4;
         description 
-          "Specify the TCP ports that the server will accept
+          "Specifies the TCP ports that the server will accept
            connections from.  These ports must also be configured
            in the /etc/ssh/sshd_config file for the SSH master
            server to accept the connection and invoke the netconf
@@ -203,6 +207,8 @@ module netconfd {
       uses ncxapp:ModuleParm;
 
       uses ncxapp:DeviationParm;
+
+      uses ncxapp:DatapathParm;
 
       uses StartupChoice;
 
@@ -229,17 +235,14 @@ module netconfd {
         type enumeration {
           enum running {
             description 
-             "Write to the running config.
-              Also use distinct startup capability.
-              A copy-config operation must be used to 
-              save the running config to the startup config file.";
+             "Write to the running config and support
+              the :writable-running capability.";
           }
           enum candidate {
             description 
-              "Write to the candidate config.
-               Also automatically update the startup config
-               file after each 'commit' operation is
-               successfully completed.";
+              "Write to the candidate config and support
+               the :candidate and :confirmed-commit 
+               capabilities.";
           }
         }
         // default is set in the agt_profile

@@ -34,11 +34,11 @@ module yangdump {
             is used to find the file:
 
             1) file is in the current directory
-            2) YANG_MODPATH environment var (or set by modpath parameter)
+            2) YUMA_MODPATH environment var (or set by modpath parameter)
             3) $HOME/modules directory
-            4) $YANG_HOME/modules directory
-            5) $YANG_INSTALL/modules directory OR
-               default install module location, '/usr/share/yang/modules'
+            4) $YUMA_HOME/modules directory
+            5) $YUMA_INSTALL/modules directory OR
+               default install module location, '/usr/share/yuma/modules'
 
             By default, the entire directory tree for all locations
             (except step 1) will be searched, not just the specified
@@ -60,6 +60,8 @@ module yangdump {
             For XSD 1.0 translation, use the 'format=xsd' parameter.
 
             For XHTML 1.0 translation, use the 'format=html' parameter.
+
+            For YIN translation, use the 'format=yin' parameter.
 
         MODULE REPORTS
 
@@ -133,9 +135,9 @@ module yangdump {
                debug2: print verbose debugging trace info
         ";
 
-    revision 2008-10-12 {
+    revision 2010-01-14 {
        description 
-          "Converted from yangdump.ncx.";
+          "Initial version for 0.9.9 release.";
     }
 
     typedef FormatType {
@@ -263,7 +265,7 @@ module yangdump {
 
              If the 'format' parameter is present, then one file
              with the default name will be generated for each
-             YANG file found in the sub-tree.";
+             YANG or YIN file found in the sub-tree.";
 
           type string;
         }

@@ -9,11 +9,9 @@
 # Put only the directories that build object files in the list
 
 # make all targets
-DIRS = src modules etc doc
+DIRS = src modules etc doc man
 
 TOP_INSTALL = $(DESTDIR)/usr/share/yuma
-
-DOC_INSTALL = $(DESTDIR)/usr/share/doc/yuma
 
 LIB_INSTALL = $(DESTDIR)/usr/lib/yuma
 
@@ -71,7 +69,6 @@ ifdef DESTDIR
 	mkdir -p $(DESTDIR)/usr/share/doc
 endif
 	mkdir -p $(LIB_INSTALL)
-	mkdir -p $(DOC_INSTALL)
 	mkdir -p $(TOP_INSTALL)
 	mkdir -p $(TOP_INSTALL)/data
 	mkdir -p $(TOP_INSTALL)/etc

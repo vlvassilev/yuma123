@@ -5,7 +5,7 @@ Summary:        Yuma Tools (development version)
 
 Group:          Development/Tools
 License:        BSD
-URL:            http://www.netconfcentral.org/
+URL:            http://yuma.iwl.com/
 Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -53,7 +53,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/yuma/
 %{_libdir}/*
 %{_includedir}/yuma/
+%{_mandir}/*
 
 %changelog
-* Wed Jan 6 2010 Andy Bierman <andy at netconfcentral.org> 0.9.8.601
+* Fri Jan 15 2010 Andy Bierman <andyb at iwl.com> 0.9.8.622
 - First RPM build

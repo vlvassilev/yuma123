@@ -5,11 +5,10 @@ Summary:        Yuma Tools (client side only)
 
 Group:          Development/Tools
 License:        BSD
-URL:            http://www.netconfcentral.org/
+URL:            http://yuma.iwl.com/
 Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-Requires: glibc
 Requires: ncurses
 Requires: libssh2
 Requires: libxml2
@@ -39,10 +38,12 @@ DESTDIR=$RPM_BUILD_ROOT
 
 %post
 ldconfig /usr/lib/libncx.so
+echo "Yuma client: yangcli, yangdump, and yangdiff installed"
+echo "Check the user manuals in /etc/share/doc/yuma"
+echo "or type 'man <program name>' for instructions on usage."
 
 %clean
 rm -rf $RPM_BUILD_ROOT
-
 
 %files
 %defattr(-,root,root,-)
@@ -52,8 +53,8 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/yangdiff
 %{_datadir}/yuma/
 %{_libdir}/libncx.so
-
+%{_mandir}/*
 
 %changelog
-* Wed Jan 6 2010 Andy Bierman <andy at netconfcentral.org> 0.9.8.601
+* Fri Jan 15 2010 Andy Bierman <andyb at iwl.com> 0.9.8.622
 - First RPM build

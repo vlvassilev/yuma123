@@ -22,9 +22,9 @@ Package: yuma-server
 Architecture: any
 Depends: yuma-client, ${shlibs:Depends}, ${misc:Depends}
 Description: YANG-based Unified Modular Automation tools
-Yuma Tools (client only) is a YANG-based NETCONF-over-SSH 
-client application, which provides a CLI-like interface
-for any NETCONF server that supports YANG modules.
-The yangdump and yangdiff development tools are also
-included, to compile and process YANG modules.
+ Yuma Tools (client only) is a YANG-based NETCONF-over-SSH 
+ client application, which provides a CLI-like interface
+ for any NETCONF server that supports YANG modules.
+ The yangdump and yangdiff development tools are also
+ included, to compile and process YANG modules.
 

@@ -1,7 +1,6 @@
 usr/sbin/netconfd
 usr/sbin/netconf-subsystem
 usr/lib/yuma/*
-usr/share/doc/yuma/yuma-dev-manual.pdf
 etc/yuma/netconfd-sample.conf
 
 

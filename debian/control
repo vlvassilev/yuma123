@@ -3,7 +3,7 @@ Section: devel
 Priority: extra
 Maintainer: Andy Bierman <andyb@iwl.com>
 Build-Depends: debhelper (>= 7)
-Standards-Version: 3.8.1
+Standards-Version: 3.8.4
 Homepage: http://yuma.iwl.com/
 
 Package: yuma-client

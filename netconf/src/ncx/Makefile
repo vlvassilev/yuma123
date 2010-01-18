@@ -11,6 +11,8 @@ SUBDIR_CPP=
 
 TARGET=$(TBASE)/$(SUBDIR_NM)
 LIB_INST=$(TBASE)/lib
+LIB_MAJOR_VERSION=1
+LIB_MINOR_VERSION=0
 
 ifdef MAXWELL
 REAL_INST=/lib
@@ -34,19 +36,26 @@ include ../platform/platform.profile.depend
 
 test:
 
-
+ifdef SERVER
+# nothing to do for debian SERVER build
+install:
+else
 ifdef DEVELOPER
+# just install the H files
 install: includes
 else
 install:
 ifndef STATIC
+# maybe install libncx
 	mkdir -p $(REAL_INST)
 	install $(OWNER) $(GRP) \
 	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) \
 	$(REAL_INST)
 ifndef DESTDIR
 ifndef MAC
-	ldconfig $(REAL_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
+# skip in MacOsX, RPM, and debian fakeroot build
+	ldconfig
+endif
 endif
 endif
 endif
@@ -55,10 +64,14 @@ endif
 uninstall:
 	rm -f $(REAL_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
 
+ifdef SERVER
+ncxlib:
+else
 ifdef DEVELOPER
 ncxlib:
 else
 ncxlib: $(LBASE)/lib$(SUBDIR_NM).$(LIBSUFFIX)
+endif
 endif
 
 # this dummy rule keeps make from deleting the $(OBJS) as
@@ -75,10 +88,16 @@ superclean:
 distclean: superclean uninstall
 
 $(LBASE)/libncx.so: $(OBJS)
-	gcc -shared -dynamic -Wl,-soname,libncx.so -o $@ $(OBJS) -lc
+	gcc -shared -Wl, -soname,libncx.so.1 \
+	-o $@.$(LIB_MAJOR_VERSION).$(LIB_MINOR_VERSION) $(OBJS) -lc
+
+
+
+#	gcc -shared -dynamic -Wl,-soname,libncx.so -o $@ $(OBJS) -lc
 
 $(LBASE)/libncx.dylib: $(OBJS)
-	gcc -shared -dynamiclib -std=gnu99 -current_version 1.0 \
+	gcc -shared -dynamiclib -std=gnu99 -current_version \
+	$(LIB_MAJOR_VERSION).$(LIB_MINOR_VERSION) \
 	-undefined dynamic_lookup \
 	-o $@ -install_name libncx.dylib $(OBJS) -lxml2
 

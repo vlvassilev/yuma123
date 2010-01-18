@@ -48,7 +48,7 @@ case "$1" in
     #: chmod a+x /etc/menu-methods/foo
 
     # Update ld.so cache
-    : ldconfig
+    ldconfig
 
     # Make our version of a program available
     #: update-alternatives \

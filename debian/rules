@@ -17,7 +17,7 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
-	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma; cd ..)
+	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma-client; cd ..)
 
 	touch configure-stamp
 
@@ -40,9 +40,10 @@ clean:
 
 	# Add here commands to clean up after the build process.
 	if [ ! -f libtecla/Makefile ]; then \
-	  (cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma; cd ..) \
+	  (cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma-client; cd ..) \
 	fi
-	$(MAKE) FREE=1 DEBIAN=1 DESTDIR=$(CURDIR)/debian/yuma clean
+	$(MAKE) FREE=1 DEBIAN=1 CLIENT=1 DESTDIR=$(CURDIR)/debian/yuma-client clean
+	$(MAKE) FREE=1 DEBIAN=1 SERVER=1 DESTDIR=$(CURDIR)/debian/yuma-server clean
 
 	dh_clean 
 
@@ -53,7 +54,8 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/yuma.
-	$(MAKE) FREE=1 DESTDIR=$(CURDIR)/debian/yuma install
+	$(MAKE) FREE=1 CLIENT=1 DESTDIR=$(CURDIR)/debian/yuma-client install
+	$(MAKE) FREE=1 SERVER=1 DESTDIR=$(CURDIR)/debian/yuma-server install
 
 postinst:
 	ldconfig

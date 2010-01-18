@@ -9,13 +9,24 @@ URL:            http://yuma.iwl.com/
 Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-%package: yuma-client
+%description
+Yuma Tools is a YANG-based NETCONF-over-SSH client and server
+development toolkit.  The netconfd server includes an automated
+central NETCONF protocol stack, based directly on YANG modules.
+The yangdump and yangdiff development tools are also
+included, to compile and process YANG modules.
+
+%package client
+
+Summary: YANG-based Unified Modular Automation Tools (client-side)
+Group:          Development/Tools
+License:        BSD
 
 Requires: ncurses
 Requires: libssh2
 Requires: libxml2
 
-%description
+%description client
 Yuma Tools (client only) is a YANG-based NETCONF-over-SSH 
 client application, which provides a CLI-like interface
 for any NETCONF server that supports YANG modules.
@@ -29,11 +40,11 @@ included, to compile and process YANG modules.
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make FREE=1 CLIENT=1 RELEASE=1 %{?_smp_mflags}
+make FREE=1 RELEASE=1 %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id FREE=1 CLIENT=1 RELEASE=1 \
+make install LDFLAGS+=--build-id FREE=1 RELEASE=1 \
 DESTDIR=$RPM_BUILD_ROOT
 
 %post
@@ -45,64 +56,47 @@ echo "or type 'man <program name>' for instructions on usage."
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files
+%files client
 %defattr(-,root,root,-)
 %doc /usr/share/doc/yuma/
 %{_bindir}/yangcli
 %{_bindir}/yangdump
 %{_bindir}/yangdiff
 %{_datadir}/yuma/
-/etc/yuma/*
+/etc/yuma/yangcli-sample.conf
+/etc/yuma/yangdiff-sample.conf
+/etc/yuma/yangdump-sample.conf
 %{_libdir}/libncx.so
-%{_mandir}/*
+%{_mandir}/man1/yangcli.1
+%{_mandir}/man1/yangdiff.1
+%{_mandir}/man1/yangdump.1
+
 
 %changelog
-* Sun Jan 17 2010 Andy Bierman <andyb at iwl.com> 0.9.8.629
+* Sun Jan 17 2010 Andy Bierman <andyb at iwl.com> 0.9.8.636
 - First RPM build
 
+%package server
 
-%package: yuma-client
-
+Summary:  YANG-based Unified Modular Automation Tools (server-side)
 Requires: openssh
 Requires: libxml2
+Requires: client
 
-%description
+%description server
 Yuma Tools is a YANG-based NETCONF-over-SSH client and server
 development toolkit.  The netconfd server includes an automated
 central NETCONF protocol stack, based directly on YANG modules.
 
-%prep
-%setup -q
-
-%build
-make FREE=1 SERVER=1 RELEASE=1 %{?_smp_mflags}
-
-%install
-rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id FREE=1 SERVER=1 RELEASE=1 \
-DESTDIR=$RPM_BUILD_ROOT
-
-%post
-ldconfig /usr/lib/libncx.so
-if [ "`grep netconf-subsystem /etc/ssh/sshd_config -c`" == "0" ]; then \
-    echo "Port 22" >> /etc/ssh/sshd_config;\
-    echo "Port 830" >> /etc/ssh/sshd_config;\
-    echo "Subsystem netconf /usr/sbin/netconf-subsystem" >> /etc/ssh/sshd_config;\
-fi
-echo "Yuma server: netconfd and netconf-subsystem installed"
-echo "Check the user manuals in /etc/share/doc/yuma"
-echo "or type 'man netconfd' for instructions on usage."
-
-%clean
-rm -rf $RPM_BUILD_ROOT
-
-%files
+%files server
 %defattr(-,root,root,-)
-%doc /usr/share/doc/yuma/
 %{_sbindir}/netconfd
 %{_sbindir}/netconf-subsystem
-%{_datadir}/yuma/
-/etc/yuma/*
-%{_libdir}/*
-%{_mandir}/*
+/etc/yuma/netconfd-sample.conf
+%{_libdir}/yuma/
+%{_mandir}/man1/netconfd.1
+%{_mandir}/man1/netconf-subsystem.1
+
+
+
 

@@ -48,9 +48,14 @@ install:
 ifndef STATIC
 # maybe install libncx
 	mkdir -p $(REAL_INST)
+ifdef MAC
 	install $(OWNER) $(GRP) \
-	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) \
+	  $(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) $(REAL_INST)
+else
+	install $(OWNER) $(GRP) \
+	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIB_MAJOR_VERSION).$(LIB_MINOR_VERSION) \
 	$(REAL_INST)
+endif
 ifndef DESTDIR
 ifndef MAC
 # skip in MacOsX, RPM, and debian fakeroot build
@@ -88,9 +93,8 @@ superclean:
 distclean: superclean uninstall
 
 $(LBASE)/libncx.so: $(OBJS)
-	gcc -shared -Wl, -soname,libncx.so.1 \
-	-o $@.$(LIB_MAJOR_VERSION).$(LIB_MINOR_VERSION) $(OBJS) -lc
-
+	gcc -shared -dynamic -Wl,-soname,libncx.so -o $@ $(OBJS) -lc
+	cp $@ $@.$(LIB_MAJOR_VERSION).$(LIB_MINOR_VERSION)
 
 
 #	gcc -shared -dynamic -Wl,-soname,libncx.so -o $@ $(OBJS) -lc

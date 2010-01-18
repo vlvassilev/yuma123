@@ -67,9 +67,9 @@ rm -rf $RPM_BUILD_ROOT
 /etc/yuma/yangdiff-sample.conf
 /etc/yuma/yangdump-sample.conf
 %{_libdir}/libncx.so.1.0
-%{_mandir}/man1/yangcli.1
-%{_mandir}/man1/yangdiff.1
-%{_mandir}/man1/yangdump.1
+%{_mandir}/man1/yangcli.1.gz
+%{_mandir}/man1/yangdiff.1.gz
+%{_mandir}/man1/yangdump.1.gz
 
 
 %changelog
@@ -94,8 +94,9 @@ central NETCONF protocol stack, based directly on YANG modules.
 %{_sbindir}/netconf-subsystem
 /etc/yuma/netconfd-sample.conf
 %{_libdir}/yuma/
-%{_mandir}/man1/netconfd.1
-%{_mandir}/man1/netconf-subsystem.1
+%{_mandir}/man1/netconfd.1.gz
+%{_mandir}/man1/netconf-subsystem.1.gz
+
 
 
 

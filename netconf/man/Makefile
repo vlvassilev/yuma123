@@ -12,11 +12,7 @@ else
 ifdef SERVER
 MAN_FILES = netconfd.1 netconf-subsystem.1
 else
-ifdef RELEASE
-MAN_FILES = 
-else
 MAN_FILES = yangdump.1 yangdiff.1 yangcli.1 netconfd.1 netconf-subsystem.1
-endif
 endif
 endif
 
@@ -29,7 +25,9 @@ clean:
 superclean:
 
 uninstall:
-	cd $(MAN_INSTALL) && rm -f $(MAN_FILES)
+	for fil in $(MAN_FILES); do \
+	  rm -f $(MAN_INSTALL)/$$fil.gz;\
+	done
 
 install:
 	mkdir -p $(MAN_INSTALL)

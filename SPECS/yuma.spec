@@ -66,7 +66,7 @@ rm -rf $RPM_BUILD_ROOT
 /etc/yuma/yangcli-sample.conf
 /etc/yuma/yangdiff-sample.conf
 /etc/yuma/yangdump-sample.conf
-%{_libdir}/libncx.so
+%{_libdir}/libncx.so.1.0
 %{_mandir}/man1/yangcli.1
 %{_mandir}/man1/yangdiff.1
 %{_mandir}/man1/yangdump.1

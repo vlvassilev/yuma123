@@ -81,6 +81,8 @@ copy:
 test:
 
 install:
+ifndef SERVER
+ifndef DEVELOPER
 	mkdir -p $(INSTALL_TARGET)
 	mkdir -p $(INSTALL_TARGET)/ietf
 	mkdir -p $(INSTALL_TARGET)/netconfcentral
@@ -90,6 +92,8 @@ install:
 	cp netconfcentral/*.yang $(INSTALL_TARGET)/netconfcentral
 	cp yang/*.yang $(INSTALL_TARGET)/yang
 	cp test/*.yang $(INSTALL_TARGET)/test
+endif
+endif
 
 
 clean-install:
@@ -104,8 +108,14 @@ clean-install:
 	cp yang/*.yang $(INSTALL_TARGET)/yang
 	cp test/*.yang $(INSTALL_TARGET)/test
 
+.PHONY: clean-install
+
 uninstall:
+ifndef CLIENT
+ifndef DEVELOPER
 	rm -rf $(INSTALL_TARGET)
+endif
+endif
 
 clean:
 

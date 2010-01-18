@@ -16,11 +16,17 @@ uninstall:
 superclean: clean
 
 install:
+ifndef DEVELOPER
 	mkdir -p $(ETC_INSTALL)
+ifndef CLIENT
 	cp netconfd-sample.conf $(ETC_INSTALL)/
+endif
+ifndef SERVER
 	cp yangcli-sample.conf $(ETC_INSTALL)/
 	cp yangdiff-sample.conf $(ETC_INSTALL)/
 	cp yangdump-sample.conf $(ETC_INSTALL)/
+endif
+endif
 
 
 distclean: superclean uninstall

@@ -1595,52 +1595,158 @@ status_t
                        obj_template_t *obj,
                        boolean        *whenflag)
 {
-    xmlChar       *str;
-    ncx_error_t    savetkerr;
-    status_t       res;
+    const xmlChar *val;
+    const char    *expstr;
+    xpath_pcb_t   *when;
+    tk_type_t      tktyp;
+    status_t       res, retres;
+    boolean        done, desc, ref;
 
 #ifdef DEBUG
-    if (!tkc || !mod || !obj || !whenflag) {
+    if (!tkc || !mod || !obj) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    ncx_set_error(&savetkerr,
+    retres = NO_ERR;
+
+    if (whenflag) {
+        if (*whenflag) {
+            retres = ERR_NCX_ENTRY_EXISTS;
+            ncx_print_errormsg(tkc, mod, retres);
+        } else {
+            *whenflag = TRUE;
+        }
+    }
+
+    when = xpath_new_pcb(NULL);
+    if (!when) {
+        res = ERR_INTERNAL_MEM;
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
+    }
+
+    ncx_set_error(&when->tkerr,
                   mod,
                   TK_CUR_LNUM(tkc),
                   TK_CUR_LPOS(tkc));
 
-    res = yang_consume_strclause(tkc, 
-                                 mod, 
-                                 &str,
-                                 whenflag, 
-                                 &obj->appinfoQ);
-    if (res == NO_ERR) {
-        obj->when = xpath_new_pcb(NULL);
-        if (!obj->when) {
-            m__free(str);
-            res = ERR_INTERNAL_MEM;
-            ncx_print_errormsg(tkc, mod, res);
-        } else {
-            ncx_set_error(&obj->when->tkerr,
-                          savetkerr.mod,
-                          savetkerr.linenum,
-                          savetkerr.linepos);
-            obj->when->exprstr = str;
-        }
-        str = NULL;
+    expstr = "Xpath expression string";
+    done = FALSE;
+    desc = FALSE;
+    ref = FALSE;
 
-        if (res == NO_ERR) {
-            res = xpath1_parse_expr(tkc, 
-                                    mod, 
-                                    obj->when,
-                                    XP_SRC_YANG);
+    /* pass off 'when' memory here */
+    obj->when = when;
+
+    /* get the Xpath string for the when expression */
+    res = yang_consume_string(tkc, mod, &when->exprstr);
+    if (res != NO_ERR) {
+        retres = res;
+        if (NEED_EXIT(res)) {
+            return retres;
         }
     }
 
-    return res;
+    /* parse the must expression for well-formed XPath */
+    res = xpath1_parse_expr(tkc, mod, when, XP_SRC_YANG);
+    if (res != NO_ERR) {
+        /* errors already reported */
+        retres = res;
+        if (NEED_EXIT(res)) {
+            return retres;
+        }
+    }
 
-} /* yang_consume_when */
+    /* move on to the must sub-clauses, if any */
+    expstr = "description or reference keywords";
+
+    res = TK_ADV(tkc);
+    if (res != NO_ERR) {
+        ncx_print_errormsg(tkc, mod, res);
+        return res;
+    }
+
+    switch (TK_CUR_TYP(tkc)) {
+    case TK_TT_SEMICOL:
+        return retres;
+    case TK_TT_LBRACE:
+        break;
+    default:
+        res = ERR_NCX_WRONG_TKTYPE;
+        ncx_mod_exp_err(tkc, mod, res, expstr);
+        return res;
+    }
+
+    while (!done) {
+        /* get the next token */
+        res = TK_ADV(tkc);
+        if (res != NO_ERR) {
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        }
+
+        tktyp = TK_CUR_TYP(tkc);
+        val = TK_CUR_VAL(tkc);
+
+        /* check the current token type */
+        switch (tktyp) {
+        case TK_TT_NONE:
+            res = ERR_NCX_EOF;
+            ncx_print_errormsg(tkc, mod, res);
+            return res;
+        case TK_TT_MSTRING:
+            /* vendor-specific clause found instead */
+            res = ncx_consume_appinfo(tkc, 
+                                      mod, 
+                                      &obj->appinfoQ);
+            if (res != NO_ERR) {
+                retres = res;
+                if (NEED_EXIT(res)) {
+                    return retres;
+                }
+            }
+            continue;
+        case TK_TT_RBRACE:
+            return retres;
+        case TK_TT_TSTRING:
+            break;  /* YANG clause assumed */
+        default:
+            retres = ERR_NCX_WRONG_TKTYPE;
+            ncx_mod_exp_err(tkc, mod, retres, expstr);
+            continue;
+        }
+
+        /* Got a token string so check the value */
+        if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
+            /* Optional 'description' field is present */
+            res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &when->errinfo.descr,
+                                     &desc, 
+                                     &obj->appinfoQ);
+        } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
+            /* Optional 'reference' field is present */
+            res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &when->errinfo.ref,
+                                     &ref, 
+                                     &obj->appinfoQ);
+        } else {
+            res = ERR_NCX_WRONG_TKVAL;
+            ncx_mod_exp_err(tkc, mod, res, expstr);
+        }
+        if (res != NO_ERR) {
+            retres = res;
+            if (NEED_EXIT(res)) {
+                return retres;
+            }
+        }
+    }
+
+    return retres;
+
+}  /* yang_consume_when */
 
 
 /********************************************************************
@@ -2796,12 +2902,16 @@ void
             if ((pcb->top->name &&
                 !xml_strcmp(pcb->top->name,
                             NCXMOD_IETF_NETCONF)) ||
-                pcb->searchmode) {
+                pcb->searchmode ||
+                (pcb->keepmode && !pcb->topadded)) {
                 /* special hack; the ietf-netconf module
                  * was used in yangdump, but it was not
                  * added to the registry; needs to be
                  * deleted here. Also searchmode modules
                  * must be deleted now.
+                 * In yangdump parse mode the keepmode
+                 * will be TRUE and this module is only
+                 * deleted if it was not added to the registry
                  */
                 ncx_free_module(pcb->top);
             }
@@ -3670,7 +3780,7 @@ status_t
     sepchar = NULL;
 
     while (*str) {
-        if (*str == NEW_YANG_FILE_SEPCHAR) {
+        if (*str == YANG_FILE_SEPCHAR) {
             sepchar = str;
         }
         str++;

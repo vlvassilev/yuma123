@@ -1138,8 +1138,10 @@ static void
          must = (const xpath_pcb_t *)dlq_nextEntry(must)) {
 
         errinfo = &must->errinfo;
-        if (errinfo->descr || errinfo->ref ||
-            errinfo->error_app_tag || errinfo->error_message) {
+        if (errinfo->descr || 
+            errinfo->ref ||
+            errinfo->error_app_tag || 
+            errinfo->error_message) {
             write_simple_str(scb, 
                              YANG_K_MUST,
                              must->exprstr, 
@@ -1920,14 +1922,29 @@ static void
                 const obj_template_t *obj,
                 int32 indent)
 {
+    const ncx_errinfo_t *errinfo;
+
     /* when-stmt? */
     if (obj->when && obj->when->exprstr) {
-        write_simple_str(scb, 
-                         YANG_K_WHEN, 
-                         obj->when->exprstr,
-                         indent, 
-                         2, 
-                         TRUE);
+
+        errinfo = &obj->when->errinfo;
+        if (errinfo->descr || errinfo->ref) {
+            write_simple_str(scb, 
+                             YANG_K_WHEN,
+                             obj->when->exprstr, 
+                             indent, 
+                             2, 
+                             FALSE);
+            write_errinfo(scb, errinfo, indent + ses_indent_count(scb));
+            ses_putstr_indent(scb, END_SEC, indent);
+        } else {
+            write_simple_str(scb, 
+                             YANG_K_WHEN,
+                             obj->when->exprstr, 
+                             indent, 
+                             2, 
+                             TRUE);
+        }
     }
 
 }  /* write_when */

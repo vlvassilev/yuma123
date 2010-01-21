@@ -36,7 +36,12 @@
 	  </td>
 	  <td id="${idfill}" py:content="nctypedef.modname"/>
 	  <td id="${idfill}" py:content="nctypedef.version"/>
-          <td id="${idfill}" py:content="nctypedef.description[0:69]"/>
+          <td id="${idfill}" 
+              py:if="len(nctypedef.description) &lt; 256"
+              py:content="nctypedef.description"/>
+          <td id="${idfill}" 
+              py:if="len(nctypedef.description) &gt; 255"
+              py:content="nctypedef.description[0:255] + '...'"/>
         </tr>
       </table>
     </div>

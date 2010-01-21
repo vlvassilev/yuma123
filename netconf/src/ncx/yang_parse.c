@@ -3531,6 +3531,9 @@ status_t
 
     if (res == NO_ERR) {
         res = parse_yang_module(tkc, mod, pcb, ptyp, &wasadd);
+        if (pcb->top == mod && wasadd) {
+            pcb->topadded = TRUE;
+        }
         if (res != NO_ERR) {
             if (!wasadd) {
                 if (pcb->top == mod) {
@@ -3562,7 +3565,9 @@ status_t
                          * the standard one to fill in the
                          * missing peices
                          */
-                        if (xml_strcmp(mod->name, NCXMOD_IETF_NETCONF)) {
+                        if (pcb->keepmode) {
+                            keepmod = TRUE;
+                        } else if (xml_strcmp(mod->name, NCXMOD_IETF_NETCONF)) {
                             /* swap with the real module already done */
                             pcb->top = ncx_find_module(mod->name,
                                                        mod->version);

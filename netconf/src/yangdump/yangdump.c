@@ -1316,6 +1316,7 @@ static status_t
                                 !cp->rawmode,
                                 (cp->format == NCX_CVTTYP_YIN) 
                                 ? TRUE : FALSE,
+                                TRUE,
                                 &savedevQ,
                                 &res);
     if (res == ERR_NCX_SKIPPED) {
@@ -1427,7 +1428,7 @@ static status_t
                           pcb->top->sourcefn);
                 ncx_print_errormsg(NULL, pcb->top, res);
             } else {
-                        /* make a copy of the module namespace URI
+                /* make a copy of the module namespace URI
                  * so the XSD targetNamespace will be generated
                  */
                 pcb->top->ns = mainmod->ns;

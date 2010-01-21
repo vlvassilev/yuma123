@@ -334,12 +334,22 @@ static status_t
 * Construct a filespec out of a path name and a module name
 * and try to load the filespec as a YANG module
 *
+* Used in several different modes:
+* Buffer mode:
+*   input is pre-constructed in 'buff'
+* Path Mode
+*   input is given in pieces, path and path2 are used
+* Current Dir Mode
+* Search Mod Path Mode
+*   input is given in modname and revision
+*
 * INPUTS:
 *    buff == buffer to use for filespec construction
 *    bufflen == length of buffer
 *    path == first piece of path string (may be NULL)
 *    path2 == optional 2nd piece of path string (may be NULL)
 *    modname == module name without file suffix (may be NULL)
+*    revision == revision date string (may be NULL)
 *    mode == suffix mode
 *           == NCXMOD_MODE_YANG if YANG module and suffix is .yang
 *           == NCXMOD_MODE_FILEYANG if YANG filespec
@@ -369,6 +379,7 @@ static status_t
                 const xmlChar *path, 
                 const xmlChar *path2,
                 const xmlChar *modname,
+                const xmlChar *revision,
                 ncxmod_mode_t mode,
                 boolean usebuff,
                 boolean *done,
@@ -408,20 +419,28 @@ static status_t
     
     if (usebuff) {
         if (modname) {
-            /* add module name to end of buffer, if no overflow */
+            /* add module name and maybe revision to end of buffer, 
+             * if no overflow 
+             */
             pathlen = xml_strlen(buff);
-            total =  pathlen + xml_strlen(modname) 
-                + xml_strlen(suffix) + 1;
+            total =  pathlen + 
+                xml_strlen(modname) + 
+                ((revision) ? xml_strlen(revision) + 1 : 0) +
+                xml_strlen(suffix) + 1;
             if (total >= bufflen) {
                 *done = TRUE;
                 log_error("\nncxmod: Filename too long error. Max: %d Got %u",
-                          NCXMOD_MAX_FSPEC_LEN, 
+                          bufflen,
                           total);
                 return ERR_BUFF_OVFL;
             }
             
             p = buff+pathlen;
             p += xml_strcpy(p, modname);
+            if (revision) {
+                *p++ = YANG_FILE_SEPCHAR;
+                p += xml_strcpy(p, revision);
+            }
             if (*suffix) {
                 *p++ = '.';
                 xml_strcpy(p, suffix);
@@ -438,22 +457,31 @@ static status_t
             modlen = xml_strlen(modname);
 
             /* construct an complete module filespec 
-             * <buff><modname>.<suffix>
+             * <buff><modname>[@<revision>].<suffix>
              */
-            pathlen = xml_strlen(suffix);
-            if (pathlen) {
-                pathlen += (modlen + 1);
+            if (*suffix) {
+                pathlen = xml_strlen(suffix) + 1;
+            } else {
+                pathlen = 0;
             }
-            if (total+pathlen >= bufflen) {
+            if (revision) {
+                pathlen += (xml_strlen(revision) + 1);
+            }
+
+            if (total + pathlen + modlen >= bufflen) {
                 log_info("\nncxmod: Filename too long error. Max: %d Got %u",
-                         NCXMOD_MAX_FSPEC_LEN, 
-                         total);
+                         bufflen,
+                         total + pathlen + modlen);
                 return ERR_BUFF_OVFL;
             }
 
             /* add module name and suffix */
             p = &buff[total];
             p += xml_strcpy(p, modname);
+            if (revision) {
+                *p++ = YANG_FILE_SEPCHAR;
+                p += xml_strcpy(p, revision);
+            }
             if (*suffix) {
                 *p++ = '.';
                 xml_strcpy(p, suffix);
@@ -928,8 +956,8 @@ static status_t
                              (const xmlChar *)ep->d_name,
                              fnamelen)) {
                 /* filename is a partial match so check it out
-                 * further to see if it is a match
-                 * check if length matches foo.YYYY-MM-DD.yang
+                 * further to see if it is a pattern match;
+                 * check if length matches foo@YYYY-MM-DD.yang
                  */
                 if ((dentlen == fnamelen + 16) ||
                     (dentlen == fnamelen + 15)) {
@@ -1381,6 +1409,7 @@ static status_t
                              NULL, 
                              NULL,
                              NULL, 
+                             NULL,
                              (isyang) ? 
                              NCXMOD_MODE_FILEYANG : 
                              NCXMOD_MODE_FILEYIN,
@@ -1407,6 +1436,7 @@ static status_t
                      path,
                      path2,
                      modname,
+                     revision,
                      (isyang) ? 
                      NCXMOD_MODE_YANG : 
                      NCXMOD_MODE_YIN,
@@ -1693,9 +1723,10 @@ static status_t
         }
         res = try_module(buff, 
                          bufflen,
-                         modname, 
+                         modname,   /****/
+                         NULL,      /* should be on this line? */
                          NULL,
-                         NULL,
+                         revision,
                          mode,
                          FALSE,
                          &done, 
@@ -1750,6 +1781,7 @@ static status_t
                          NULL,
                          NULL,
                          modname, 
+                         revision,
                          NCXMOD_MODE_YANG,
                          FALSE,
                          &done,
@@ -1764,6 +1796,7 @@ static status_t
                          NULL,
                          NULL,
                          modname, 
+                         revision,
                          NCXMOD_MODE_YIN,
                          FALSE,
                          &done,
@@ -2134,6 +2167,15 @@ static status_t
                       ptyp, 
                       FALSE, 
                       &testmod);
+
+    if (res == ERR_NCX_MOD_NOT_FOUND && revision == NULL) {
+        res = load_module(modname, 
+                          NULL,
+                          pcb, 
+                          ptyp, 
+                          TRUE, 
+                          &testmod);
+    }
     
     if (res == ERR_NCX_MOD_NOT_FOUND) {
         if (revision && *revision) {
@@ -2932,6 +2974,10 @@ status_t
 *   cookedmode == TRUE if producing cooked output
 *                 FALSE if producing raw output
 *   savetkc == TRUE if the parse chain should be saved (e.g., YIN)
+*   keepmode == TRUE if pcb->top should be saved even if it
+*               is already loaded;  FALSE will allow the mod
+*               to be swapped out and the new copy deleted
+*               yangdump sets this to true
 *   savedevQ == Q of ncx_save_deviations_t to use
 *   res == address of return status
 *
@@ -2948,6 +2994,7 @@ yang_pcb_t *
                            boolean with_submods,
                            boolean cookedmode,
                            boolean savetkc,
+                           boolean keepmode,
                            dlq_hdr_t *savedevQ,
                            status_t *res)
 {
@@ -2964,6 +3011,7 @@ yang_pcb_t *
     if (!pcb) {
         *res = ERR_INTERNAL_MEM;
     } else {
+        pcb->keepmode = keepmode;
         pcb->savedevQ = savedevQ;
         pcb->revision = revision;
         pcb->subtree_mode = subtree_mode;

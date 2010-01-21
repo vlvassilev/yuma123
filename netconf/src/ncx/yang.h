@@ -172,7 +172,9 @@ typedef struct yang_pcb_t_ {
     boolean       searchmode;  /* TRUE if just getting ns & version */
     boolean       parsemode;  /* TRUE if full parse but no reg-load */
     boolean       importmode;  /* TRUE if parsing from an import-stmt */
+    boolean       keepmode;    /* TRUE to keep new mod even if loaded */
     boolean       topfound;    /* TRUE if top found, not added */
+    boolean       topadded;    /* TRUE if top in registry; F: need free */
     boolean       savetkc;     /* TRUE if tkc should be kept in tkc */
     dlq_hdr_t     allimpQ;          /* Q of yang_import_ptr_t */
 

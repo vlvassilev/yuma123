@@ -285,6 +285,7 @@ extern yang_pcb_t *
                            boolean with_submods,
                            boolean cookedmode,
                            boolean savetkc,
+                           boolean keepmode,
                            dlq_hdr_t *savedevQ,
                            status_t  *res);
 

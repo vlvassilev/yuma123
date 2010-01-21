@@ -1982,7 +1982,7 @@ xmlChar *
             }
             p += xml_strcpy(p, mod->name);
             if (cp->versionnames && mod->version) {
-                *p++ = '.';
+                *p++ = YANG_FILE_SEPCHAR;
                 p += xml_strcpy(p, mod->version);
             }
             xml_strcpy(p, ext); 

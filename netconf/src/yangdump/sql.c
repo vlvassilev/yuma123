@@ -111,6 +111,10 @@ date         init     comment
 #include "yang.h"
 #endif
 
+#ifndef _H_yangconst
+#include "yangconst.h"
+#endif
+
 #ifndef _H_yangdump
 #include "yangdump.h"
 #endif
@@ -265,7 +269,7 @@ static void
         if (cp->simurls) {
             ses_putchar(scb, NCXMOD_PSCHAR);
         } else {            
-            ses_putchar(scb, '.');
+            ses_putchar(scb, YANG_FILE_SEPCHAR);
         }
         ses_putstr(scb, mod->version);
     }

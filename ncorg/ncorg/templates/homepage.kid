@@ -19,7 +19,8 @@
       <br/><br/>
       <h3><a href="/netconf_docs">Learn about NETCONF</a></h3>
       <h3><a href="/yang_docs">Learn about YANG</a></h3>
-      <h3><a href="/modulelist">List all the YANG modules in the database</a></h3>
+      <h3><a href="/modulelist">
+          List all the YANG modules in the database</a></h3>
       <h3><a href="/search">Search the YANG module database</a></h3>
       <h3><a href="/run_yangdump">Validate a YANG module</a></h3>
       <h3><a href="/run_yangdiff">Compare 2 revisions of a YANG module</a></h3>

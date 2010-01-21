@@ -36,7 +36,12 @@
 	  </td>
 	  <td id="${idfill}" py:content="ncext.modname"/>
 	  <td id="${idfill}" py:content="ncext.version"/>
-          <td id="${idfill}" py:content="ncext.description[0:69]"/>
+          <td id="${idfill}" 
+              py:if="len(ncext.description) &lt; 256"
+              py:content="ncext.description"/>
+          <td id="${idfill}" 
+              py:if="len(ncext.description) &gt; 255"
+              py:content="ncext.description[0:255] + '...'"/>
         </tr>
       </table>
     </div>

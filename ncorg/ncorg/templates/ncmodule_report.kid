@@ -149,7 +149,11 @@
 		<td id="${idfill}"
 		    py:content="nctypedef.basetypename"/>
 		<td  id="${idfill}"
-		     py:content="nctypedef.description[0:69]"/>
+                     py:if="len(nctypedef.description) &lt; 256"
+		     py:content="nctypedef.description"/>
+		<td  id="${idfill}"
+                     py:if="len(nctypedef.description) &gt; 255"
+		     py:content="nctypedef.description[0:255] + '...'"/>
               </tr>
 	    </table>
           </div>
@@ -180,9 +184,13 @@
 		<td id="${idfill}" py:if="not ncgrouping.docurl"
 		    py:content="ncgrouping.name"/>
 		<td id="${idfill}"
-		    py:content="ncgrouping.objectlist[0:79]"/>
+		    py:content="ncgrouping.objectlist"/>
 		<td id="${idfill}"
-		    py:content="ncgrouping.description[0:79]"/>
+                    py:if="len(ncgrouping.description) &lt; 256"
+		    py:content="ncgrouping.description"/>
+		<td id="${idfill}"
+                    py:if="len(ncgrouping.description) &gt; 255"
+		    py:content="ncgrouping.description[0:255] + '...'"/>
               </tr>
 	    </table>
           </div>
@@ -235,14 +243,18 @@
 		</td>
 		<td id="${l2fill}"
 		    py:content="ncobject.objtyp"/>
-		<td id="${idfill}" py:if="ncobject.description"
-		    py:content="ncobject.description[0:69]"/>
+		<td id="${idfill}" 
+                    py:if="ncobject.description and len(ncobject.description) &lt; 256"
+		    py:content="ncobject.description"/>
+		<td id="${idfill}" 
+                    py:if="len(ncobject.description) &gt; 255"
+		    py:content="ncobject.description[0:255] + '...'"/>
 		<td id="${idfill}"
 		    py:if="(not ncobject.description) and ncobject.childlist"
-		    py:content="ncobject.childlist[0:69]"/>
+		    py:content="ncobject.childlist"/>
 		<td id="${idfill}"
 		    py:if="(not ncobject.description) and not ncobject.childlist"
-		    py:content="'OID: ' + ncobject.objectid[0:69]"/>
+		    py:content="'OID: ' + ncobject.objectid"/>
               </tr>
 	    </table>
           </div>
@@ -272,14 +284,18 @@
 		</td>
 		<td id="${idfill}" py:if="not ncrpc.docurl"
 		    py:content="ncrpc.name"/>
-		<td id="${idfill}" py:if="ncrpc.description"
-		    py:content="ncrpc.description[0:79]"/>
+		<td id="${idfill}" 
+                    py:if="ncrpc.description and len(ncrpc.description) &lt; 256"
+		    py:content="ncrpc.description"/>
+		<td id="${idfill}" 
+                    py:if="len(ncrpc.description) &gt; 255"
+		    py:content="ncrpc.description[0:255] + '...'"/>
 		<td id="${idfill}"
 		    py:if="(not ncrpc.description) and ncrpc.childlist"
-		    py:content="ncrpc.childlist[0:79]"/>
+		    py:content="ncrpc.childlist"/>
 		<td id="${idfill}"
 		    py:if="(not ncrpc.description) and not ncrpc.childlist"
-		    py:content="'OID: ' + ncrpc.objectid[0:79]"/>
+		    py:content="'OID: ' + ncrpc.objectid"/>
               </tr>
 	    </table>
           </div>
@@ -309,8 +325,12 @@
 		</td>
 		<td id="${idfill}" py:if="not ncnotif.docurl"
 		    py:content="ncnotif.name"/>
-		<td id="${idfill}" py:if="ncnotif.description"
-		    py:content="ncnotif.description[0:79]"/>
+		<td id="${idfill}" 
+                    py:if="ncnotif.description and len(ncnotif.description) &lt; 256"
+		    py:content="ncnotif.description"/>
+		<td id="${idfill}" 
+                    py:if="ncnotif.description and len(ncnotif.description) &gt; 255"
+		    py:content="ncnotif.description[0:255] + '...'"/>
 		<td id="${idfill}"
 		    py:if="(not ncnotif.description) and ncnotif.childlist"
 		    py:content="ncnotif.childlist[0:79]"/>
@@ -347,10 +367,14 @@
 		<td id="${idfill}" py:if="not ncextension.docurl"
 		    py:content="ncextension.name"/>
 		<td  id="${idfill}" py:if="ncextension.argument"
-		     py:content="ncextension.argument[0:69]"/>
+		     py:content="ncextension.argument"/>
 		<td  id="${idfill}" py:if="not ncextension.argument">&nbsp;</td>
 		<td  id="${idfill}"
-		     py:content="ncextension.description[0:69]"/>
+                     py:if="len(ncextension.description) &lt; 256"
+		     py:content="ncextension.description"/>
+		<td  id="${idfill}"
+                     py:if="len(ncextension.description) &gt; 255"
+		     py:content="ncextension.description[0:255] + '...'"/>
               </tr>
 	    </table>
 	  </div>

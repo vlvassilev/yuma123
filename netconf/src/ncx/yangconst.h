@@ -57,8 +57,7 @@ date	     init     comment
 #define YANG_VERSION_STR          (const xmlChar *)"1"
 #define YANG_VERSION_NUM          1
 
-#define YANG_FILE_SEPCHAR         '.'
-#define NEW_YANG_FILE_SEPCHAR     '@'
+#define YANG_FILE_SEPCHAR         '@'
 
 /* YANG keyword/YIN element names */
 

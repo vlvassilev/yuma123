@@ -608,7 +608,7 @@ static void
 
     /* column: xsdurl
      * HARD-WIRED TO
-     *   /xsd/modname.xsd OR /xsd/modname.modversion.xsd
+     *   /xsd/modname.xsd OR /xsd/modname@modversion.xsd
      */
     ses_putstr(scb, (const xmlChar *)"\n    '/xsd/");
     if (cp->unified && !mod->ismod) {
@@ -617,7 +617,7 @@ static void
         ses_putstr(scb, mod->name);
     }
     if (cp->versionnames && mod->version) {
-        ses_putchar(scb, '.');
+        ses_putchar(scb, YANG_FILE_SEPCHAR);
         ses_putstr(scb, mod->version);
     }
     ses_putstr(scb, (const xmlChar *)".xsd',");
@@ -627,9 +627,9 @@ static void
 
     /* column: srcurl 
      * HARD-WIRED TO
-     *   /src/modname.yang (or .ncx)
+     *   /src/modname.yang
      *  OR
-     *   /src/modname.modversion.yang (or .ncx)
+     *   /src/modname@modversion.yang 
      */
     ses_putstr(scb, (const xmlChar *)"\n    '/src/");
     if (cp->unified && !mod->ismod) {
@@ -638,7 +638,7 @@ static void
         ses_putstr(scb, mod->name);
     }
     if (cp->versionnames && mod->version) {
-        ses_putchar(scb, '.');
+        ses_putchar(scb,  YANG_FILE_SEPCHAR);
         ses_putstr(scb, mod->version);
     }
     ses_putstr(scb, (const xmlChar *)".yang',");

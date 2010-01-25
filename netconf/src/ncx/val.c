@@ -8452,7 +8452,7 @@ val_value_t *
 /********************************************************************
 * FUNCTION val_is_default
 * 
-* Check if the specified value is set to the default value
+* Check if the specified value is set to the YANG default value
 * 
 * INPUTS:
 *   val == value to check

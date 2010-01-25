@@ -438,11 +438,13 @@ status_t
 status_t 
     agt_init2 (void)
 {
-    const val_value_t  *clivalset;
+    val_value_t        *clivalset;
     ncx_module_t       *retmod;
     val_value_t        *val;
     agt_dynlib_cb_t    *dynlib;
+    xmlChar            *savestr, *revision, savechar;
     status_t            res;
+    uint32              modlen;
 
 #ifdef AGT_DEBUG
     log_debug3("\nServer Init-2 Starting...");
@@ -588,7 +590,22 @@ status_t
 
         /* attempt all dynamically loaded modules */
         while (val && res == NO_ERR) {
-            retmod = ncx_find_module(VAL_STR(val), NULL);
+            /* see if the revision is present in the
+             * module parameter or not
+             */
+            modlen = 0;
+            revision = NULL;
+            savestr = NULL;
+            savechar = '\0';
+
+            if (yang_split_filename(VAL_STR(val), &modlen)) {
+                savestr = &(VAL_STR(val)[modlen]);
+                savechar = *savestr;
+                *savestr = '\0';
+                revision = savestr + 1;
+            }
+
+            retmod = ncx_find_module(VAL_STR(val), revision);
             if (retmod == NULL) {
 #ifdef STATIC_SERVER
                 /* load just the module
@@ -596,16 +613,22 @@ status_t
                  * handled elsewhere
                  */
                 res = ncxmod_load_module(VAL_STR(val),
-                                         NULL,   /* parse revision TBD */
+                                         revision,
                                          &agt_profile.agt_savedevQ,
                                          &retmod);
 #else
                 /* load the SIL and it will load its own module */
-                res = agt_load_sil_code(VAL_STR(val), NULL, FALSE);
+                res = agt_load_sil_code(VAL_STR(val), 
+                                        revision, 
+                                        FALSE);
 #endif
             } else {
                 log_info("\nCLI: Skipping 'module' parm '%s', already loaded",
                          VAL_STR(val));
+            }
+
+            if (savestr != NULL) {
+                *savestr = savechar;
             }
 
             if (res == NO_ERR) {

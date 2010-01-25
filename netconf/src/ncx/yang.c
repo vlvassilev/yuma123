@@ -3725,98 +3725,78 @@ xmlChar *
 
 
 /********************************************************************
-* FUNCTION yang_split_filespec
+* FUNCTION yang_split_filename
 * 
-* Split a filename into its components
+* Split a module parameter into its filename components
 *
 * INPUTS:
 *   filename == filename string
-*   modname == address of return [sub]module name
 *   modnamelen == address of return modname length
-*   revision == address of return [sub]module 
-*               revision date 
-*   revisionlen == address of return revision length
-*   isyang == address of return YANG or YIN flag
 *
 * OUTPUTS:
-*   *modname == pointer to return [sub]module name
 *   *modnamelen == module name length
-*   *revision == return [sub]module revision date 
-*   *revisionlen == pointer to return revision length
-*   *isyang == return YANG or YIN flag
 *
 * RETURNS:
-*    status
+*    TRUE if module@revision form was found
+*    FALSE if not, and ignore the output because a
+*      different form of the module parameter was used
 *********************************************************************/
-status_t
+boolean
     yang_split_filename (const xmlChar *filename,
-                         const xmlChar **modname,
-                         uint32 *modnamelen,
-                         const xmlChar **revision,
-                         uint32 *revisionlen,
-                         boolean *isyang)
+                         uint32 *modnamelen)
 {
-    const xmlChar *str, *last, *sepchar;
+    const xmlChar *str, *sepchar;
     uint32         len, yangslen, yinslen;
 
 #ifdef DEBUG
-    if (filename == NULL ||
-        modname == NULL ||
-        modnamelen == NULL ||
-        revision == NULL ||
-        revisionlen == NULL ||
-        isyang == NULL) {
+    if (filename == NULL || modnamelen == NULL) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    *modname = filename;
     *modnamelen = 0;
-    *isyang = TRUE;
-    *revision = NULL;
-    *revisionlen = 0;
 
     str = filename;
     sepchar = NULL;
 
+    /* check if special filespec first chars are present */
+    if (*str == '$' || *str == '~') {
+        return FALSE;
+    }
+
+    /* check if the revision separator is present
+     * or if any path sep chars are present
+     */
     while (*str) {
         if (*str == YANG_FILE_SEPCHAR) {
             sepchar = str;
+        } else if (*str == NCXMOD_PSCHAR) {
+            return FALSE;
         }
         str++;
     }
+    if (sepchar == NULL) {
+        return FALSE;
+    }
 
+    /* check if a file extension is present */
     len = (uint32)(str - filename);
     yangslen = xml_strlen(YANG_SUFFIX);
     yinslen = xml_strlen(YIN_SUFFIX);
-    last = str;
-
-    /* check if a file extension is present */
     if (len > yangslen + 1) {
         if ((*(str - yangslen - 1) == '.') &&
             (!xml_strcmp(str - yangslen, YANG_SUFFIX))) {
-            last = str - yangslen - 1;
+            return FALSE;
         }
     } else if (len > yinslen + 1) {
         if ((*(str - yinslen - 1) == '.') &&
             (!xml_strcmp(str - yinslen, YIN_SUFFIX))) {
-            *isyang = FALSE;
-            last = str - yinslen - 1;
+            return FALSE;
         }
     }
 
-    /* check if the revision should be set */
-    if (sepchar != NULL) {
-        *modnamelen = (uint32)(sepchar - filename);
-        if (sepchar < last) {
-            *revision = sepchar + 1;
-            *revisionlen = (uint32)(last - sepchar - 1);
-        }
-    } else {
-        *modnamelen = (uint32)(last - filename);
-    }
-
-    return NO_ERR;
+    *modnamelen = (uint32)(sepchar - filename);
+    return TRUE;
 
 }  /* yang_split_filename */
 

@@ -496,7 +496,7 @@ status_t
 * RETURNS:
 *    pointer to parmset or NULL if none
 *********************************************************************/
-const val_value_t *
+val_value_t *
     agt_cli_get_valset (void)
 {
     return cli_val;

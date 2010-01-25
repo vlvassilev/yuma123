@@ -487,12 +487,8 @@ extern xmlChar *
                         const xmlChar *revision,
                         boolean isyang);
 
-extern status_t
+extern boolean
     yang_split_filename (const xmlChar *filename,
-                         const xmlChar **modname,
-                         uint32 *modnamelen,
-                         const xmlChar **revision,
-                         uint32 *revisionlen,
-                         boolean *isyang);
+                         uint32 *modnamelen);
 
 #endif	    /* _H_yang */

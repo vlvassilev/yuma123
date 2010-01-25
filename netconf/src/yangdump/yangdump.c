@@ -1295,18 +1295,28 @@ static status_t
     ncx_module_t      *mainmod;
     val_value_t       *val;
     yang_pcb_t        *pcb;
-    xmlChar           *namebuff;
-    const xmlChar     *modname, *revision;
+    xmlChar           *modname, *namebuff, *savestr, savechar;
+    const xmlChar     *revision;
     xml_attrs_t        attrs;
     status_t           res;
     boolean            bannerdone;
+    uint32             modlen;
 
     scb = NULL;
     res = NO_ERR;
-    revision = NULL;   /*****/
+    revision = NULL;
+    savestr = NULL;
+    savechar = '\0';
     bannerdone = FALSE;
+    modlen = 0;
+    modname = (xmlChar *)cp->curmodule;
 
-    modname = (const xmlChar *)cp->curmodule;
+    if (yang_split_filename(modname, &modlen)) {
+        savestr = &modname[modlen];
+        savechar = *savestr;
+        *savestr = '\0';
+        revision = savestr + 1;
+    }
 
     /* load in the requested module to convert */
     pcb = ncxmod_load_module_ex(modname,
@@ -1319,6 +1329,11 @@ static status_t
                                 TRUE,
                                 &savedevQ,
                                 &res);
+
+    if (savestr != NULL) {
+        *savestr = savechar;
+    }
+
     if (res == ERR_NCX_SKIPPED) {
         if (pcb) {
             yang_free_pcb(pcb);
@@ -1331,9 +1346,9 @@ static status_t
             /* invalid module name and/or revision date */
             if (revision) {
                 log_error("\nError: module '%s' revision '%s' "
-                          "not found", modname, revision);
+                          "not loaded", modname, revision);
             } else {
-                log_error("\nError: module '%s' not found",
+                log_error("\nError: module '%s' not loaded",
                           modname);
             }
             ncx_print_errormsg(NULL, NULL, res);
@@ -1860,7 +1875,7 @@ int
                                  YANGDUMP_PARM_MODULE);
             while (val) {
                 done = TRUE;
-                cvtparms.curmodule = (const char *)VAL_STR(val);
+                cvtparms.curmodule = (char *)VAL_STR(val);
                 res = convert_one(&cvtparms);
                 if (NEED_EXIT(res)) {
                     val = NULL;

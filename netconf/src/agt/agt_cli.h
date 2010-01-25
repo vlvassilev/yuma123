@@ -80,7 +80,7 @@ extern status_t
 			   boolean *showver,
 			   help_mode_t *showhelpmode);
 
-extern const val_value_t *
+extern val_value_t *
     agt_cli_get_valset (void);
 
 extern void

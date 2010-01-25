@@ -112,8 +112,8 @@ typedef enum yangdiff_difftype_t_ {
 /* struct of yangdiff conversion parameters */
 typedef struct yangdiff_diffparms_t_ {
     /* external parameters */
-    const xmlChar  *old;
-    const xmlChar  *new;
+    xmlChar        *old;        /* not malloced */
+    xmlChar        *new;        /* not malloced */
     const xmlChar  *oldpath;
     const xmlChar  *modpath;
     const xmlChar  *newpath;

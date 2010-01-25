@@ -3020,9 +3020,11 @@ static status_t
               const char *argv[])
 {
     obj_template_t       *obj;
-    server_cb_t           *server_cb;
+    server_cb_t          *server_cb;
     val_value_t          *parm, *modval;
+    xmlChar              *savestr, *revision, savechar;
     status_t              res;
+    uint32                modlen;
     log_debug_t           log_level;
     dlq_hdr_t             savedevQ;
     xmlChar               versionbuffer[NCX_VERSION_BUFFSIZE];
@@ -3237,10 +3239,25 @@ static status_t
             log_info("\nyangcli: Loading requested module %s", 
                      VAL_STR(modval));
 
+            revision = NULL;
+            savestr = NULL;
+            savechar = '\0';
+            modlen = 0;
+
+            if (yang_split_filename(VAL_STR(modval), &modlen)) {
+                savestr = &(VAL_STR(modval)[modlen]);
+                savechar = *savestr;
+                *savestr = '\0';
+                revision = savestr + 1;
+            }
+
             res = ncxmod_load_module(VAL_STR(modval),
-                                     NULL,   /*** need revision parameter ***/
+                                     revision,
                                      &savedevQ,
                                      NULL);
+            if (savestr != NULL) {
+                savechar = *savestr;
+            }
             if (res != NO_ERR) {
                 log_error("\n load module failed (%s)", 
                           get_error_string(res));

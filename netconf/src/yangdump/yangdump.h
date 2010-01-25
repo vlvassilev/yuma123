@@ -84,7 +84,7 @@ date             init     comment
 typedef struct yangdump_cvtparms_t_ {
     /* external parameters */
     char           *module;   /* malloced due to subtree design */
-    const char     *curmodule;  /* not malloced when 2+ modules */
+    char           *curmodule;  /* not malloced when 2+ modules */
     const char     *output;
     const char     *subtree;
     const char     *objview;

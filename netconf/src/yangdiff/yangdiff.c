@@ -1194,13 +1194,19 @@ static status_t
 {
     yang_pcb_t        *oldpcb, *newpcb;
     const xmlChar     *logsource, *modpath, *revision;
+    xmlChar           *modparm, *savestr, savechar;
     status_t           res;
     boolean            skipreport;
+    uint32             modlen;
 
     res = NO_ERR;
     skipreport = FALSE;
     cp->curindent = 0;
-    revision = NULL;  /****/
+    savestr = NULL;
+    savechar = '\0';
+    revision = NULL;
+    modlen = 0;
+    modparm = (cp->curnew) ? cp->curnew : cp->new;
 
     /* force modules to be reloaded */
     ncx_set_cur_modQ(&cp->newmodQ);
@@ -1217,13 +1223,24 @@ static status_t
         ncxmod_set_modpath(EMPTY_STRING);
     }
 
-    newpcb = ncxmod_load_module_diff((cp->curnew) ? cp->curnew : cp->new,
+    if (yang_split_filename(modparm, &modlen)) {
+        savestr = &modparm[modlen];
+        savechar = *savestr;
+        *savestr = '\0';
+        revision = savestr + 1;
+    }
+
+    newpcb = ncxmod_load_module_diff(modparm,
                                      revision,
                                      (cp->curnew) ? TRUE : FALSE,
                                      FALSE, 
                                      modpath,
                                      NULL,
                                      &res);
+    if (savestr != NULL) {
+        *savestr = savechar;
+    }
+
     if (res == ERR_NCX_SKIPPED) {
         if (newpcb) {
             yang_free_pcb(newpcb);
@@ -1235,11 +1252,13 @@ static status_t
                 : newpcb->top->sourcefn;
             if (newpcb->top->errors) {
                 log_error("\n*** %s: %u Errors, %u Warnings\n", 
-                          logsource, newpcb->top->errors, 
+                          logsource, 
+                          newpcb->top->errors, 
                           newpcb->top->warnings);
             } else if (newpcb->top->warnings) {
                 log_warn("\n*** %s: %u Errors, %u Warnings\n", 
-                         logsource, newpcb->top->errors, 
+                         logsource, 
+                         newpcb->top->errors, 
                          newpcb->top->warnings);
             }
         } else {
@@ -1278,6 +1297,18 @@ static status_t
         return res;
     }
 
+    modlen = 0;
+    savestr = NULL;
+    savechar ='\0';
+    revision = NULL;
+    
+    if (yang_split_filename(cp->curold, &modlen)) {
+        savestr = &cp->curold[modlen];
+        savechar = *savestr;
+        *savestr = '\0';
+        revision = savestr + 1;
+    }
+
     /* force modules to be reloaded */
     ncx_set_cur_modQ(&cp->oldmodQ);
 
@@ -1297,7 +1328,6 @@ static status_t
      * if this is a subtree call, then the curnew pointer
      * will be set, otherwise the 'new' pointer must be set
      */
-    revision = NULL;   /*****/
     oldpcb = ncxmod_load_module_diff(cp->curold, 
                                      revision,
                                      (cp->new_isdir) ? TRUE : FALSE,
@@ -1305,6 +1335,10 @@ static status_t
                                      modpath,
                                      NULL,
                                      &res);
+    if (savestr != NULL) {
+        *savestr = savechar;
+    }
+
     if (res == ERR_NCX_SKIPPED) {
         /* this is probably a submodule being skipped in subtree mode */
         log_debug("\nyangdiff: New PCB OK but old PCB skipped (%s)",

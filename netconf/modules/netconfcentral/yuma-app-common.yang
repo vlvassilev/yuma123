@@ -14,6 +14,11 @@ module yuma-app-common {
     description 
        "Common CLI parameters used in all yuma applications.";
 
+    revision 2010-01-25 {
+       description 
+         "Allow revision date in module parm for 0.10 release.";
+    }
+
     revision 2010-01-14 {
        description "Initial version for 0.9.9 release.";
     }
@@ -186,13 +191,19 @@ module yuma-app-common {
               "YANG source module name to use.
 
                If this string represents a filespec, 
-	       ending with the '.yang' or '.yin' extension,
+               containing any path separation characters, and/or
+               ending with the '.yang' or '.yin' extension,
 	       then only that file location will be checked.
 
                If this string represents a module name, then
                the module search path will be checked for
                a file with the module name and the '.yang'
                or '.yin.' extension.
+
+               If this string contains a module name
+               followed by an 'at sign' character (@), 
+               followed by a revision string (e.g., foo@2010-01-01),
+               then that specific version of the module will be used.
 
                If this string begins with a '~' character,
                then a username is expected to follow or

@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH netconfd 1 "January 14, 2010" Linux "netconfd 0.9.9"
+.TH netconfd 1 "January 25, 2010" Linux "netconfd 0.10"
 .SH NAME
 netconfd \- YANG-based NETCONF-over-SSH server
 
@@ -252,6 +252,10 @@ If present, do not load the startup config file.
 Use only factory default values instead.
 If this parameter is present, then the --startup
 paraemter cannot be present.
+.IP --\fBstartup-error\fP=boolean
+If true, then errors in the startup configuration will be
+treated as fatal errors.  If false, the server will attempt
+to continue if any startup errors are found.
 .IP --\fBsubdirs\fP=boolean
 If false, the file search paths for modules, scripts, and data
 files will not include sub-directories if they exist in the

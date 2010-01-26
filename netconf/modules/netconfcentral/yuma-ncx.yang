@@ -508,7 +508,6 @@ module yuma-ncx {
        will be ignored.";
   }
 
-
   extension schema-instance {
     description
       "Used to indicate that the typedef or type statement
@@ -528,6 +527,6 @@ module yuma-ncx {
       or leaf-list-stmt, or directly within a leaf-stmt or
       leaf-list-stmt.";
   }
- 
+
 }
 

@@ -11,6 +11,11 @@ module yuma-types {
 
     description "Yuma Common Data Types";
 
+    revision 2010-01-25 {
+       description 
+          "Adjust name lengths in ranges and patterns.";
+    }
+
     revision 2008-11-21 {
        description 
           "Renamed ncxtypes to yuma-types.";
@@ -51,8 +56,8 @@ module yuma-types {
     typedef NcxName {
         description "General Purpose NCX Name string.";
         type string {
-            length "1..63";
-            pattern '[a-z,A-Z][a-z,A-Z,0-9,\-,_,\.]{0,62}';
+            length "1..64";
+            pattern '[a-z,A-Z,_][a-z,A-Z,0-9,\-,_,\.]{0,63}';
         }
     }
 
@@ -61,48 +66,11 @@ module yuma-types {
             "Qualified Name:
               module-name:NcxName OR owner-name:NcxName.";
         type string {
-            length "1..127";
-            pattern '(([a-z,A-Z][a-z,A-Z,0-9,\-,_,\.]{0,62}):)' +
-               '?([a-z,A-Z][a-z,A-Z,0-9,\-,_,\.]{0,62})';
+            length "1..129";
+            pattern '(([a-z,A-Z,_][a-z,A-Z,0-9,\-,_,\.]{0,63}):)' +
+               '?([a-z,A-Z][a-z,A-Z,0-9,\-,_,\.]{0,63})';
         }
     }
-
-
-/*
-    typedef NcxVarReference {
-      description
-        "A variable reference string:
-           $foo: try local 'foo' first, then global 'foo'
-           $$foo: try only global 'foo' var";
-      type string {
-         length "1..63";
-         pattern '$[$][a-z,A-Z][a-z,A-Z,0-9,\-,_,\.]{0,62}';
-      }
-    }
-*/
-
-
-/*
-    typedef NcxScopedId {
-        description "Scoped Definition Identifier string.";
-        type string {
-            length "3..max";
-            pattern '([a-z,A-Z][a-z,A-Z,0-9,\-,_]{0,62})\.' +
-              '(([a-z,A-Z][a-z,A-Z,0-9,\-,_]{0,62})+)';
-        }
-    }
-
-    typedef NcxModScopedId {
-        description 
-            "Module Qualified Scoped Definition Identifier string.";
-        type string {
-            length "5..max";
-            pattern '([a-z,A-Z][a-z,A-Z,0-9,\-,_]*):' +
-                  '([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)\.' +
-                  '(([a-z,A-Z][a-z,A-Z,0-9,\-,_]*)+)';
-        }
-    }
-*/
 
     typedef NcxIdentifier {
         description "Union of all the Identifier types.";
@@ -188,7 +156,8 @@ module yuma-types {
            info == log info messages 
            debug == log debug level 1 messages
            debug2 == log debug level 2 messages
-           debug3 == log debug level 3 messages";
+           debug3 == log debug level 3 messages
+           debug4 == log debug level 4 messages";
         type enumeration { 
              enum off;
              enum error; 
@@ -197,6 +166,7 @@ module yuma-types {
              enum debug;
              enum debug2;
              enum debug3;
+             enum debug4;
         }
         default "info";
     }
@@ -240,19 +210,35 @@ module yuma-types {
     typedef NcModuleSpec {
       description 
         "A string which specifies a module name, or a filespec
-         which represents a module.
+         which represents a module, with an optional revision date.
 
-         If the string is a simple identifier string, then
-         it will be treated as a module name, and the search
-         path will be used to find the complete filespec.
+               If this string represents a filespec, 
+               containing any path separation characters, and/or
+               ending with the '.yang' or '.yin' extension,
+	       then only that file location will be checked.
 
-         If the string:
-           -  ends in the sub-string '.yang' or '.ncx'
-           -  begins with the dot character '.'
-           -  contains any  or a path separator characters
-         then it is considered to be a filespec, not a module
-         name, and only that filespec will be used for input,
-         instead of using the module search path.";
+               If this string represents a module name, then
+               the module search path will be checked for
+               a file with the module name and the '.yang'
+               or '.yin.' extension.
+
+               If this string contains a module name
+               followed by an 'at sign' character (@), 
+               followed by a revision string (e.g., foo@2010-01-01),
+               then that specific version of the module will be used.
+
+               If this string begins with a '~' character,
+               then a username is expected to follow or
+               a directory separator character.  If it begins
+               with a '$' character, then an environment variable
+               name is expected to follow.
+
+               ~/some/path ==> <my-home-dir>/some/path
+
+               ~fred/some/path ==> <fred-home-dir>/some/path
+
+               $workdir/some/path ==> <workdir-env-var>/some/path
+            ";
       type string {
          length "1 .. 4095";
       }
@@ -294,5 +280,12 @@ module yuma-types {
         "Represents a specific date in YYYY-MM-DD format.";
     }
 
+    typedef FeatureSpec {
+      description
+        "Represents a feature specifier, which consists
+         of a module-name, colon character ':' and then
+         a feature name (e.g., 'foo:bar')";
+      type NcxQName;
+    }
 }
 

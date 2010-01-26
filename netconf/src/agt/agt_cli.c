@@ -271,6 +271,17 @@ static void
         agt_profile->agt_startup = VAL_STR(val);
     }
 
+    /* startup-error param */
+    val = val_find_child(valset, 
+                         AGT_CLI_MODULE, 
+                         AGT_CLI_STARTUP_ERROR);
+    if (val && val->res == NO_ERR) {
+        if (!xml_strcmp(VAL_ENUM_NAME(val),
+                        AGT_CLI_STARTUP_STOP)) {
+            agt_profile->agt_startup_error = TRUE;
+        }
+    }
+
     /* superuser param */
     val = val_find_child(valset, AGT_CLI_MODULE, AGT_CLI_SUPERUSER);
     if (val && val->res == NO_ERR) {

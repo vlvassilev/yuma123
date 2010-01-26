@@ -212,6 +212,29 @@ module netconfd {
 
       uses StartupChoice;
 
+      leaf startup-error {
+        description
+          "Controls the server behavior if any errors are 
+           encountered while loading the startup configuration
+           file into the running configuration at boot-time.";
+         type enumeration {
+           enum stop {
+             description
+               "Terminate the program if any errors are
+                encountered in the startup configuration.";
+           }
+           enum continue {
+             description
+               "Continue the program if any errors are
+                encountered in the startup configuration.
+                The entire module-specific data structure(s)
+                containing the error node(s) will not be added
+                to the running configuration at boot-time.";
+           }
+        }
+        default continue;
+      }
+
       leaf superuser {
         description
           "The user name to use as the superuser account.

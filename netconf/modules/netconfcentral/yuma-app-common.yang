@@ -188,39 +188,10 @@ module yuma-app-common {
     grouping ModuleParm {
         leaf-list module {
             description 
-              "YANG source module name to use.
-
-               If this string represents a filespec, 
-               containing any path separation characters, and/or
-               ending with the '.yang' or '.yin' extension,
-	       then only that file location will be checked.
-
-               If this string represents a module name, then
-               the module search path will be checked for
-               a file with the module name and the '.yang'
-               or '.yin.' extension.
-
-               If this string contains a module name
-               followed by an 'at sign' character (@), 
-               followed by a revision string (e.g., foo@2010-01-01),
-               then that specific version of the module will be used.
-
-               If this string begins with a '~' character,
-               then a username is expected to follow or
-               a directory separator character.  If it begins
-               with a '$' character, then an environment variable
-               name is expected to follow.
-
-               ~/some/path ==> <my-home-dir>/some/path
-
-               ~fred/some/path ==> <fred-home-dir>/some/path
-
-               $workdir/some/path ==> <workdir-env-var>/some/path
-             ";
+              "YANG source module name to use.";
             type yt:NcModuleSpec;
         }
     }
-
 
     grouping SubtreeParm {
         leaf-list subtree {
@@ -305,6 +276,64 @@ module yuma-app-common {
           default true;
         }
     }
+
+    grouping FeatureParms {
+       leaf feature-create-default {
+          description
+            "The default feature code generation type.";
+          type enumeration {
+            enum static {
+              description
+                "The default behavior for feature behavior
+                 is to use statically defined features at
+                 compile-time.";
+            }
+            enum dynamic {
+              description
+                "The default behavior for feature behavior
+                 is to use dynamically defined features at
+                 load-time.";
+            }
+          }
+          default dynamic;
+       }
+
+       leaf feature-enable-default {
+          description
+            "If true, then features will be enabled by default.
+             If false, then features will be disabled by default.";
+          type boolean;
+          default true;
+       }
+
+       leaf-list feature-static {
+          description
+            "Identifies a feature which is configured to be a
+             static feature, and therefore set at compile time.";
+          type yt:FeatureSpec;
+       }
+
+       leaf-list feature-dynamic {
+          description
+            "Identifies a feature which is configured to be a
+             static feature, and therefore set at compile time.";
+          type yt:FeatureSpec;
+       }
+
+       leaf-list feature-enable {
+          description
+            "Identifies a feature which should be considered
+             enabled.";
+          type yt:FeatureSpec;
+       }
+
+       leaf-list feature-disable {
+          description
+            "Identifies a feature which should be considered
+             disabled.";
+          type yt:FeatureSpec;
+       }
+
 }
 
 

@@ -62,6 +62,9 @@ date	     init     comment
 
 #define AGT_CLI_NOSTARTUP (const xmlChar *)"no-startup"
 #define AGT_CLI_STARTUP   (const xmlChar *)"startup"
+#define AGT_CLI_STARTUP_ERROR (const xmlChar *)"startup-error"
+#define AGT_CLI_STARTUP_STOP  (const xmlChar *)"stop"
+
 
 #define AGT_CLI_SUPERUSER NCX_EL_SUPERUSER
 

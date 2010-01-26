@@ -178,6 +178,7 @@ static void
     agt_profile.agt_loglevel = log_get_debug_level();
     agt_profile.agt_has_startup = FALSE;
     agt_profile.agt_usestartup = TRUE;
+    agt_profile.agt_startup_error = FALSE;
     agt_profile.agt_logappend = FALSE;
     agt_profile.agt_xmlorder = FALSE;
     agt_profile.agt_deleteall_ok = FALSE;
@@ -229,19 +230,24 @@ static void
 * OUTPUTS:
 *   The <running> config is loaded from NV-storage,
 *   if the NV-storage <startup> config can be found an read
+* RETURNS:
+*   status
 *********************************************************************/
-static void
+static status_t
     load_running_config (const xmlChar *startup)
 {
     cfg_template_t  *cfg;
     xmlChar         *fname;
+    agt_profile_t   *profile;
     status_t         res;
+
+    res = NO_ERR;
+    profile = agt_get_profile();
 
     cfg = cfg_get_config(NCX_CFG_RUNNING);
     if (!cfg) {
         log_error("\nagt: No running config found!!");
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return;
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     /* use the user-set startup or default filename */
@@ -250,36 +256,49 @@ static void
         fname = ncxmod_find_data_file(startup, FALSE, &res);
     } else {
         /* search for the default startup-cfg.xml filename */
-        fname = ncxmod_find_data_file(NCX_DEF_STARTUP_FILE, FALSE, &res);
+        fname = ncxmod_find_data_file(NCX_DEF_STARTUP_FILE, 
+                                      FALSE,
+                                      &res);
     }
 
     /* check if error finding the filespec */
-    if (startup && !fname) {
-        log_error("\nWarning: Startup config file (%s) not found."
-                 "\n   Booting with empty configuration!\n",
-                  startup);
-    }
-
     if (!fname) {
-        return;
+        if (startup) {
+            log_error("\nError: Startup config file (%s) not found.",
+                      startup);
+            return ERR_NCX_MISSING_FILE;
+        } else {
+            log_info("\nDefault startup config file (%s) not found."
+                     "\n   Booting with default running configuration!\n",
+                     NCX_DEF_STARTUP_FILE);
+            return NO_ERR;
+        }
     }
     
     /* try to load the config file that was found or given */
     res = agt_ncx_cfg_load(cfg, CFG_LOC_FILE, fname);
     if (res != NO_ERR) {
         if (!dlq_empty(&cfg->load_errQ)) {
-            log_error("\nError: configuration errors occurred loading the "
-                     "<running> database from NV-storage"
-                     "\n     (%s)\n", 
-                      fname);
+            if (profile->agt_startup_error) {
+                /* quit if any startup errors */
+                log_error("\nError: configuration errors occurred loading the "
+                          "<running> database from NV-storage"
+                          "\n     (%s)\n", 
+                          fname);
+            } else {
+                /* continue if any startup errors */
+                log_warn("\nWarning: configuration errors occurred loading the "
+                          "<running> database from NV-storage"
+                          "\n     (%s)\n", 
+                          fname);
+                res = NO_ERR;
+            }
         } else if (res == ERR_XML_READER_START_FAILED) {
             log_error("\nagt: Error: Could not open startup config file"
                       "\n     (%s)\n", 
                       fname);
         }
-    }
-
-    if (res == NO_ERR) {
+    } else {
         log_info("\nagt: Startup config loaded OK\n     Source: %s\n",
                  fname);
     }
@@ -294,8 +313,9 @@ static void
         m__free(fname);
     }
 
-} /* load_running_config */
+    return res;
 
+} /* load_running_config */
 
 
 /********************************************************************
@@ -662,7 +682,10 @@ status_t
 
     /* load the NV startup config into the running config if it exists */
     if (agt_profile.agt_usestartup) {
-        load_running_config(agt_profile.agt_startup);
+        res = load_running_config(agt_profile.agt_startup);
+        if (res != NO_ERR) {
+            return res;
+        }
     } else {
         log_info("\nagt: Startup configuration skipped due "
                  "to no-startup CLI option\n");

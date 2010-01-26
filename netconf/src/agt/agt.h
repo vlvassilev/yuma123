@@ -185,6 +185,7 @@ typedef struct agt_profile_t_ {
     log_debug_t         agt_loglevel;
     boolean             agt_has_startup;
     boolean             agt_usestartup;   /* --no-startup flag */
+    boolean             agt_startup_error;  /* T: stop, F: continue */
     boolean             agt_logappend;
     boolean             agt_xmlorder;
     boolean             agt_deleteall_ok;   /* TBD: not implemented */

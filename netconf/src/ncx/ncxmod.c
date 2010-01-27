@@ -3306,7 +3306,6 @@ xmlChar *
         }
     }
 
-
     /* 3) /usr/lib/yuma directory */
     if (test_file(buff, 
                   bufflen, 

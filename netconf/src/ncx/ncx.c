@@ -1370,6 +1370,7 @@ ncx_module_t *
 
     (void)memset(mod, 0x0, sizeof(ncx_module_t));
     mod->langver = 1;
+    mod->defaultrev = TRUE;
     dlq_createSQue(&mod->revhistQ);
     dlq_createSQue(&mod->importQ);
     dlq_createSQue(&mod->includeQ);

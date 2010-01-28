@@ -1,5 +1,5 @@
 Name:           yuma
-Version:        0.9.9
+Version:        0.10
 Release:        1%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
@@ -48,7 +48,7 @@ make install LDFLAGS+=--build-id FREE=1 RELEASE=1 \
 DESTDIR=$RPM_BUILD_ROOT
 
 %post
-ldconfig /usr/lib/libncx.so
+ldconfig
 echo "Yuma client: yangcli, yangdump, and yangdiff installed"
 echo "Check the user manuals in /etc/share/doc/yuma"
 echo "or type 'man <program name>' for instructions on usage."
@@ -73,6 +73,8 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Jan 29 2010 Andy Bierman <andyb at iwl.com> 0.9.8.646
+- Align with yang-draft-10; add some bugfixes
 * Sun Jan 17 2010 Andy Bierman <andyb at iwl.com> 0.9.8.636
 - First RPM build
 

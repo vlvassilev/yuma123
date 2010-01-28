@@ -1,7 +1,7 @@
 usr/bin/yangcli
 usr/bin/yangdump
 usr/bin/yangdiff
-usr/lib/libncx.so
+usr/lib/libncx*
 usr/share/doc/yuma/AUTHORS
 usr/share/doc/yuma/Changelog
 usr/share/doc/yuma/COPYING

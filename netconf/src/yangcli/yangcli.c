@@ -1835,6 +1835,9 @@ static status_t
     /* set the subdirs parm */
     val_set_subdirs_parm(mgr_cli_valset);
 
+    /* set the feature code generation parameters */
+    val_set_feature_parms(mgr_cli_valset);
+
     /* get the server parameter */
     parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_SERVER);
     if (parm && parm->res == NO_ERR) {

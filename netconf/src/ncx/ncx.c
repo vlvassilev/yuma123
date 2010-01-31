@@ -154,7 +154,6 @@ date         init     comment
 
 #define INV_PREFIX  ((const xmlChar *)"inv")
 
-
 /********************************************************************
 *                                                                   *
 *                            T Y P E S                              *
@@ -166,6 +165,17 @@ typedef struct warnoff_t_ {
     dlq_hdr_t    qhdr;
     status_t     res;
 } warnoff_t;
+
+/* feature code entry */
+typedef struct feature_entry_t_ {
+    dlq_hdr_t            qhdr;
+    xmlChar             *modname;
+    xmlChar             *feature;
+    ncx_feature_code_t   code;
+    boolean              code_set;
+    boolean              enable;
+    boolean              enable_set;
+} feature_entry_t;
 
 
 /********************************************************************
@@ -258,6 +268,17 @@ static dlq_hdr_t   *temp_modQ;
  * which uses a more complex schem for diplay-mode
  */
 static ncx_display_mode_t  display_mode;
+
+/* the default code generation mode for yangdump
+ * related to YANG features
+ */
+static ncx_feature_code_t feature_code_default;
+
+/* the default mode for enabling or disabling YANG features */
+static boolean feature_enable_default;
+
+/* Q of feature_entry_t parameters */
+static dlq_hdr_t feature_entryQ;
 
 
 /********************************************************************
@@ -1044,6 +1065,219 @@ static void
 }  /* add_to_modQ */
 
 
+/********************************************************************
+* FUNCTION split_feature_string
+* 
+* Split a feature string into its 2 parts
+*   modname:feature
+*
+* INPUTS:
+*   featstr == feature string parm to split
+*   modnamelen == address of return module name length
+*
+* OUTPUTS:
+*   *modnamelen == module name length
+*  
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    split_feature_string (const xmlChar *featstr,
+                          uint32 *modnamelen)
+{
+    const xmlChar *str, *found;
+
+    found = NULL;
+    str = featstr;
+    *modnamelen = 0;
+
+    while (*str) {
+        if (*str == ':') {
+            if (found != NULL) {
+                return ERR_NCX_INVALID_VALUE;
+            } else {
+                found = str;
+            }
+        }
+        str++;
+    }
+
+    if (found) {
+        *modnamelen = (uint32)(found - featstr);
+        return NO_ERR;
+    } else {
+        return ERR_NCX_INVALID_VALUE;
+    }
+
+}  /* split_feature_string */
+
+
+/********************************************************************
+* FUNCTION free_feature_entry
+* 
+* Free a feature_entry_t
+*
+* INPUTS:
+*   feature_entry == feature entry struct to free
+*********************************************************************/
+static void
+    free_feature_entry (feature_entry_t *feature_entry)
+{
+
+    if (feature_entry->modname) {
+        m__free(feature_entry->modname);
+    }
+    if (feature_entry->feature) {
+        m__free(feature_entry->feature);
+    }
+    m__free(feature_entry);
+
+}  /* free_feature_entry */
+
+
+/********************************************************************
+* FUNCTION new_feature_entry
+* 
+* Create a feature_entry_t
+*
+* INPUTS:
+*   featstr == feature string parm to use
+*********************************************************************/
+static feature_entry_t *
+    new_feature_entry (const xmlChar *featstr)
+{
+    feature_entry_t  *feature_entry;
+    uint32            len;
+    status_t          res;
+
+    len = 0;
+    res = split_feature_string(featstr, &len);
+    if (res != NO_ERR) {
+        return NULL;
+    }
+
+    feature_entry = m__getObj(feature_entry_t);
+    if (feature_entry == NULL) {
+        return NULL;
+    }
+    memset(feature_entry, 0x0, sizeof(feature_entry_t));
+
+    feature_entry->modname = xml_strndup(featstr, len);
+    if (feature_entry->modname == NULL) {
+        free_feature_entry(feature_entry);
+        return NULL;
+    }
+
+    feature_entry->feature = xml_strdup(&featstr[len+1]);
+    if (feature_entry->feature == NULL) {
+        free_feature_entry(feature_entry);
+        return NULL;
+    }
+
+    return feature_entry;
+
+}  /* new_feature_entry */
+
+
+/********************************************************************
+* FUNCTION find_feature_entry
+* 
+* Find a feature_entry_t
+*
+* INPUTS:
+*   featstr == feature string parm to use
+*   featQ == Q of feature_entry_t to use
+*
+* RETURNS:
+*   pointer to found entry or NULL if not found
+*********************************************************************/
+static feature_entry_t *
+    find_feature_entry (const xmlChar *featstr,
+                        dlq_hdr_t  *featQ)
+{
+    feature_entry_t  *feature_entry;
+    uint32            len, len2;
+    status_t          res;
+
+    len = 0;
+    res = split_feature_string(featstr, &len);
+    if (res != NO_ERR) {
+        return NULL;
+    }
+
+    for (feature_entry = (feature_entry_t *)dlq_firstEntry(featQ);
+         feature_entry != NULL;
+         feature_entry = (feature_entry_t *)
+             dlq_nextEntry(feature_entry)) {
+
+        /* match the module name */
+        len2 = xml_strlen(feature_entry->modname);
+        if (len != len2) {
+            continue;
+        }
+        if (xml_strncmp(feature_entry->modname,
+                        featstr,
+                        len)) {
+            continue;
+        }
+
+        /* match the feature name */
+        if (xml_strcmp(feature_entry->feature,
+                       &featstr[len+1])) {
+            continue;
+        }
+
+        return feature_entry;
+    }
+
+    return NULL;
+
+}  /* find_feature_entry */
+
+
+/********************************************************************
+* FUNCTION find_feature_entry2
+* 
+* Find a feature_entry_t 
+*
+* INPUTS:
+*   modname == module name
+*   feature == feature name
+*   featQ == Q of feature_entry_t to use
+*
+* RETURNS:
+*   pointer to found and removed entry or NULL if not found
+*********************************************************************/
+static feature_entry_t *
+    find_feature_entry2 (const xmlChar *modname,
+                         const xmlChar *feature,
+                         dlq_hdr_t  *featQ)
+{
+    feature_entry_t  *feature_entry;
+
+    for (feature_entry = (feature_entry_t *)dlq_firstEntry(featQ);
+         feature_entry != NULL;
+         feature_entry = (feature_entry_t *)
+             dlq_nextEntry(feature_entry)) {
+
+        /* match the module name */
+        if (xml_strcmp(feature_entry->modname, modname)) {
+            continue;
+        }
+
+        /* match the feature name */
+        if (xml_strcmp(feature_entry->feature, feature)) {
+            continue;
+        }
+
+        return feature_entry;
+    }
+
+    return NULL;
+
+}  /* find_feature_entry2 */
+
+
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
@@ -1091,6 +1325,9 @@ status_t
     save_descr = savestr;
     warn_idlen = NCX_DEF_WARN_IDLEN;
     warn_linelen = NCX_DEF_WARN_LINELEN;
+    feature_code_default = NCX_FEATURE_CODE_DYNAMIC;
+    feature_enable_default = TRUE;
+    dlq_createSQue(&feature_entryQ);
 
     mod_load_callback = NULL;
     log_set_debug_level(dlevel);
@@ -1101,6 +1338,7 @@ status_t
     ncx_sesmodQ = NULL;
     dlq_createSQue(&ncx_filptrQ);
     dlq_createSQue(&warnoffQ);
+
     temp_modQ = NULL;
 
     display_mode = NCX_DISPLAY_MODE_PREFIX;
@@ -1303,9 +1541,10 @@ status_t
 void
     ncx_cleanup (void)
 {
-    ncx_module_t   *mod;
-    ncx_filptr_t   *filptr;
-    warnoff_t      *warnoff;
+    ncx_module_t     *mod;
+    ncx_filptr_t     *filptr;
+    warnoff_t        *warnoff;
+    feature_entry_t  *feature_entry;
 
     if (!ncx_init_done) {
         return;
@@ -1324,6 +1563,11 @@ void
     while (!dlq_empty(&warnoffQ)) {
         warnoff = (warnoff_t *)dlq_deque(&warnoffQ);
         m__free(warnoff);
+    }
+
+    while (!dlq_empty(&feature_entryQ)) {
+        feature_entry = (feature_entry_t *)dlq_deque(&feature_entryQ);
+        free_feature_entry(feature_entry);
     }
 
     if (stage2_init_done) {
@@ -7534,7 +7778,7 @@ ncx_iffeature_t *
 ncx_feature_t *
     ncx_new_feature (void)
 {
-    ncx_feature_t *feature;
+    ncx_feature_t     *feature;
 
     feature = m__getObj(ncx_feature_t);
     if (!feature) {
@@ -7547,9 +7791,11 @@ ncx_feature_t *
 
     /*** setting feature enabled as the default
      *** the agent code needs to adjust this
-     *** with agt_disable_feature() ifneeded
+     *** with agt_enable_feature or 
+     *** agt_disable_feature() if needed
      ***/
-    feature->enabled = TRUE;
+    feature->enabled = feature_enable_default;
+    feature->code = feature_code_default;
 
     return feature;
 
@@ -11640,6 +11886,206 @@ uint32
     return count;
 
 }  /* ncx_copy_c_safe_str */
+
+
+/********************************************************************
+* FUNCTION ncx_set_feature_code_default
+* 
+* Set the feature_code_default enumeration
+*
+* INPUTS:
+*   code == feature code value
+*********************************************************************/
+void
+    ncx_set_feature_code_default (ncx_feature_code_t code)
+{
+    feature_code_default = code;
+}  /* ncx_set_feature_code_default */
+
+
+/********************************************************************
+* FUNCTION ncx_set_feature_enable_default
+* 
+* Set the feature_enable_default flag
+*
+* INPUTS:
+*   flag == feature enabled flag value
+*********************************************************************/
+void
+    ncx_set_feature_enable_default (boolean flag)
+{
+    feature_enable_default = flag;
+}  /* ncx_set_feature_enabled_default */
+
+
+/********************************************************************
+* FUNCTION ncx_set_feature_code_entry
+* 
+* Create or set a feature_entry struct for the specified 
+* feature code parameter
+*
+* INPUTS:
+*   featstr == feature parameter string
+*   featcode == ncx_feature_code_t enumeration to set
+*********************************************************************/
+status_t
+    ncx_set_feature_code_entry (const xmlChar *featstr,
+                                ncx_feature_code_t featcode)
+{
+    feature_entry_t  *fentry;
+    status_t          res;
+    uint32            cnt;
+
+#ifdef DEBUG
+    if (featstr == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+    fentry = find_feature_entry(featstr, &feature_entryQ);
+    if (fentry != NULL) {
+        if (fentry->code_set) {
+            if (fentry->code != featcode) {
+                log_error("\nError: feature '%s' already set with "
+                          "conflicting value",
+                          featstr);
+                res = ERR_NCX_INVALID_VALUE;
+            } else {
+                log_info("\nFeature '%s' already set with "
+                          "same value",
+                          featstr);
+            }
+        } else {
+            fentry->code_set = TRUE;
+            fentry->code = featcode;
+        }
+    } else {
+        cnt = 0;
+        res = split_feature_string(featstr, &cnt);
+        if (res == NO_ERR) {
+            fentry = new_feature_entry(featstr);
+            if (fentry == NULL) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+                fentry->code_set = TRUE;
+                fentry->code = featcode;
+                dlq_enque(fentry, &feature_entryQ);
+            }
+        }
+    }
+    return res;
+
+}  /* ncx_set_feature_code_entry */
+
+
+/********************************************************************
+* FUNCTION ncx_set_feature_enable_entry
+* 
+* Create or set a feature_entry struct for the specified 
+* feature enabled parameter
+*
+* INPUTS:
+*   featstr == feature parameter string
+*   flag == enabled flag
+*********************************************************************/
+status_t
+    ncx_set_feature_enable_entry (const xmlChar *featstr,
+                                  boolean flag)
+{
+
+    feature_entry_t  *fentry;
+    status_t          res;
+    uint32            cnt;
+
+#ifdef DEBUG
+    if (featstr == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+    fentry = find_feature_entry(featstr, &feature_entryQ);
+    if (fentry != NULL) {
+        if (fentry->enable_set) {
+            if (fentry->enable != flag) {
+                log_error("\nError: feature '%s' already set with "
+                          "conflicting value",
+                          featstr);
+                res = ERR_NCX_INVALID_VALUE;
+            } else {
+                log_info("\nFeature '%s' already set with "
+                          "same value",
+                          featstr);
+            }
+        } else {
+            fentry->enable_set = TRUE;
+            fentry->enable = flag;
+        }
+    } else {
+        cnt = 0;
+        res = split_feature_string(featstr, &cnt);
+        if (res == NO_ERR) {
+            fentry = new_feature_entry(featstr);
+            if (fentry == NULL) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+                fentry->enable_set = TRUE;
+                fentry->enable = flag;
+                dlq_enque(fentry, &feature_entryQ);
+            }
+        }
+    }
+    return res;
+
+}  /* ncx_set_feature_enable_entry */
+
+
+/********************************************************************
+* FUNCTION ncx_set_feature_parms
+* 
+* Check if any feature parameters were set for the specified 
+* feature struct
+*
+* INPUTS:
+*   feature == feature struct to check
+*
+* OUTPUTS:
+*   feature->code and/or feature->enabled may be set
+*********************************************************************/
+void
+    ncx_set_feature_parms (ncx_feature_t *feature)
+{
+
+    feature_entry_t  *fentry;
+
+#ifdef DEBUG
+    if (feature == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (feature->name == NULL ||
+        feature->tkerr.mod == NULL ||
+        ncx_get_modname(feature->tkerr.mod) == NULL) {
+        /* feature not filled in properly */
+        return;
+    }
+
+    fentry = find_feature_entry2(ncx_get_modname(feature->tkerr.mod),
+                                 feature->name,
+                                 &feature_entryQ);
+    if (fentry != NULL) {
+        if (fentry->code_set) {
+            feature->code = fentry->code;
+        }
+        if (fentry->enable_set) {
+            feature->enabled = fentry->enable;
+        }
+    }
+
+}  /* ncx_set_feature_parms */
 
 
 /* END file ncx.c */

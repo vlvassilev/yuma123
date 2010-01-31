@@ -2109,6 +2109,14 @@ static status_t
             res = agt_load_sil_code(VAL_STR(modval), 
                                     (revval) ? VAL_STR(revval) : NULL,
                                     TRUE);
+            if (res == ERR_NCX_SKIPPED) {
+                log_warn("\nWarning: SIL code for module '%s' not found",
+                         VAL_STR(modval));
+                res = ncxmod_load_module(VAL_STR(modval), 
+                                         (revval) ? VAL_STR(revval) : NULL, 
+                                         &agt_profile->agt_savedevQ,
+                                         &mod);
+            }
             if (res == NO_ERR) {
                 mod = ncx_find_module(VAL_STR(modval),
                                       (revval) ? VAL_STR(revval) : NULL);

@@ -141,6 +141,8 @@ date         init     comment
 
 #define AGT_STATE_GET_SCHEMA    (const xmlChar *)"get-schema"
 
+#define AGT_STATE_OBJ_CAPABILITIES  (const xmlChar *)"capabilities"
+
 #define AGT_STATE_OBJ_DATASTORE   (const xmlChar *)"datastore"
 #define AGT_STATE_OBJ_DATASTORES  (const xmlChar *)"datastores"
 #define AGT_STATE_OBJ_LOCKS           (const xmlChar *)"locks"
@@ -207,6 +209,50 @@ static val_value_t          *myschemasval;
 static obj_template_t *mysessionobj;
 
 static obj_template_t *myschemaobj;
+
+
+/********************************************************************
+* FUNCTION get_caps
+*
+* <get> operation handler for the capabilities NP container
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    get_caps (ses_cb_t *scb,
+              getcb_mode_t cbmode,
+              val_value_t *virval,
+              val_value_t  *dstval)
+{
+    val_value_t       *capsval;
+    status_t           res;
+
+    (void)scb;
+    (void)virval;
+    res = NO_ERR;
+
+    if (cbmode == GETCB_GET_VALUE) {
+        capsval = val_clone(agt_cap_get_capsval());
+        if (!capsval) {
+            return ERR_INTERNAL_MEM;
+        } else {
+            /* change the namespace to this module, 
+             * and get rid of the netconf NSID 
+             */
+            val_change_nsid(capsval, statemod->nsid);
+            val_move_children(capsval, dstval);
+            val_free_value(capsval);
+        }
+    } else {
+        res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+    return res;
+
+}  /* get_caps */
 
 
 /********************************************************************
@@ -966,13 +1012,13 @@ status_t
 {
     obj_template_t  *topobj, *confsobj, *confobj;
     obj_template_t  *sessionsobj, *statisticsobj;
-    obj_template_t  *schemasobj;
-    val_value_t           *topval, *capsval;
-    val_value_t           *confsval, *confval;
-    val_value_t           *sessionsval, *statisticsval;
-    cfg_template_t        *runningcfg;
-    ncx_module_t          *mod;
-    status_t  res;
+    obj_template_t  *schemasobj, *capsobj;
+    val_value_t     *topval, *capsval;
+    val_value_t     *confsval, *confval;
+    val_value_t     *sessionsval, *statisticsval;
+    cfg_template_t  *runningcfg;
+    ncx_module_t    *mod;
+    status_t         res;
 
     if (!agt_state_init_done) {
         return SET_ERROR(ERR_INTERNAL_INIT_SEQ);
@@ -997,6 +1043,13 @@ status_t
                                    AGT_STATE_MODULE,
                                    AGT_STATE_TOP_CONTAINER);
     if (!topobj) {
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
+    capsobj = obj_find_child(topobj, 
+                             AGT_STATE_MODULE, 
+                             AGT_STATE_OBJ_CAPABILITIES);
+    if (!capsobj) {
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
@@ -1059,17 +1112,13 @@ status_t
     /* handing off the malloced memory here */
     val_add_child(topval, runningcfg->root);
 
-    /* add /ietf-netconf-state/capabilities */
-    capsval = val_clone(agt_cap_get_capsval());
+    /* add /ietf-netconf-state/capabilities virtual node */
+    capsval = val_new_value();
     if (!capsval) {
         return ERR_INTERNAL_MEM;
-    } else {
-        /* change the namespace to this module, 
-         * and get rid of the netconf NSID 
-         */
-        val_change_nsid(capsval, statemod->nsid);
-        val_add_child(capsval, topval);
     }
+    val_init_virtual(capsval, get_caps, capsobj);
+    val_add_child(capsval, topval);
 
     /* add /ietf-netconf-state/datastores */
     confsval = val_new_value();

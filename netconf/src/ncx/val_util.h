@@ -228,4 +228,7 @@ extern void
 extern void
     val_set_subdirs_parm (val_value_t *parentval);
 
+extern void
+    val_set_feature_parms (val_value_t *parentval);
+
 #endif	    /* _H_val_util */

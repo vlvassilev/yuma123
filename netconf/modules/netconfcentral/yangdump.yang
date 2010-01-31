@@ -135,9 +135,9 @@ module yangdump {
                debug2: print verbose debugging trace info
         ";
 
-    revision 2010-01-14 {
+    revision 2010-01-30 {
        description 
-          "Initial version for 0.9.9 release.";
+          "Initial version for 0.10 release.";
     }
 
     typedef FormatType {
@@ -222,6 +222,8 @@ module yangdump {
          "CLI Parameter Set for the YANG Converter Application.";
 
         uses ncxapp:NcxAppCommon;
+
+        uses ncxapp:FeatureCodeParms;
 
         uses ncxapp:ModuleParm;
 

@@ -468,6 +468,9 @@ status_t
         /* set the warning control parameters */
         val_set_warning_parms(valset);
 
+        /* set the feature code generation parameters */
+        val_set_feature_parms(valset);
+
         /* check if version mode requested */
         val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_VERSION);
         *showver = (val) ? TRUE : FALSE;

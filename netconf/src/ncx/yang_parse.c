@@ -735,6 +735,9 @@ static status_t
 
     retres = NO_ERR;
 
+    /* check if there are any feature parameters set */
+    ncx_set_feature_parms(feature);
+     
     /* check if there are any if-feature statements inside
      * this feature that need to be resolved
      */

@@ -90,7 +90,7 @@ date         init     comment
 *********************************************************************/
 #ifdef DEBUG
 #define NETCONFD_DEBUG   1
-#define NETCONFD_DEBUG_LOAD_TEST 1
+/* #define NETCONFD_DEBUG_LOAD_TEST 1 */
 #endif
 
 #define NETCONFD_MOD       (const xmlChar *)"netconfd"
@@ -100,8 +100,11 @@ date         init     comment
 
 #define START_MSG          "Starting netconfd...\n"
 
-#define TESTMOD            (const xmlChar *)"test"
-#define TESTFEATURE        (const xmlChar *)"feature2"
+#define TESTMOD             (const xmlChar *)"test"
+#define TESTFEATURE1        (const xmlChar *)"feature1"
+#define TESTFEATURE2        (const xmlChar *)"feature2"
+#define TESTFEATURE3        (const xmlChar *)"feature3"
+#define TESTFEATURE4        (const xmlChar *)"feature4"
 
 
 /********************************************************************
@@ -195,7 +198,10 @@ static status_t
     if (res != NO_ERR) {
         return res;
     } else {
-        agt_disable_feature(TESTMOD, TESTFEATURE);
+        agt_enable_feature(TESTMOD, TESTFEATURE1);
+        agt_disable_feature(TESTMOD, TESTFEATURE2);
+        agt_enable_feature(TESTMOD, TESTFEATURE3);
+        agt_disable_feature(TESTMOD, TESTFEATURE4);
     }
 #endif
 

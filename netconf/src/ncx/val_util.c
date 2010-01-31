@@ -2681,4 +2681,135 @@ void
 }  /* val_set_subdirs_parm */
 
 
+/********************************************************************
+* FUNCTION val_set_feature_parms
+*   --feature-code-default
+*   --feature-enable-default
+*   --feature-static
+*   --feature-dynamic
+*   --feature-enable
+*   --feature-disable
+*
+* Handle the feature-related CLI parms for the specified value set
+*
+* Not all of these parameters are supported in all programs
+* The object tree is not checked, just the value tree
+*
+* INPUTS:
+*   parentval == CLI container to check for the feature parms
+*
+*********************************************************************/
+void
+    val_set_feature_parms (val_value_t *parentval)
+{
+    val_value_t        *val;
+    status_t            res;
+
+#ifdef DEBUG
+    if (!parentval) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+    if (!(parentval->btyp == NCX_BT_CONTAINER || 
+          parentval->btyp == NCX_BT_LIST)) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+#endif
+
+    /* get the feature-code-default parameter */
+    val = val_find_child(parentval, 
+                         val_get_mod_name(parentval),
+                         NCX_EL_FEATURE_CODE_DEFAULT);
+    if (val && val->res == NO_ERR) {
+        if (!xml_strcmp(VAL_ENUM_NAME(val),
+                        NCX_EL_DYNAMIC)) {
+            ncx_set_feature_code_default(NCX_FEATURE_CODE_DYNAMIC);
+        } else if (!xml_strcmp(VAL_ENUM_NAME(val),
+                               NCX_EL_STATIC)) {
+            ncx_set_feature_code_default(NCX_FEATURE_CODE_STATIC);
+        } else {
+            SET_ERROR(ERR_INTERNAL_VAL);
+        }
+    }
+
+    /* get the feature-enable-default parameter */
+    val = val_find_child(parentval, 
+                         val_get_mod_name(parentval),
+                         NCX_EL_FEATURE_ENABLE_DEFAULT);
+    if (val && val->res == NO_ERR) {
+        ncx_set_feature_enable_default(VAL_BOOL(val));
+    }
+
+    /* process the feature-static leaf-list */
+    val = val_find_child(parentval, 
+                         val_get_mod_name(parentval),
+                         NCX_EL_FEATURE_STATIC);
+    while (val && val->res == NO_ERR) {
+        res = ncx_set_feature_code_entry(VAL_STR(val),
+                                         NCX_FEATURE_CODE_STATIC);
+        if (res != NO_ERR) {
+            return;
+        }
+
+        val = val_find_next_child(parentval, 
+                                  val_get_mod_name(parentval),
+                                  NCX_EL_FEATURE_STATIC,
+                                  val);
+    }
+
+    /* process the feature-dynamic leaf-list */
+    val = val_find_child(parentval, 
+                         val_get_mod_name(parentval),
+                         NCX_EL_FEATURE_DYNAMIC);
+    while (val && val->res == NO_ERR) {
+        res = ncx_set_feature_code_entry(VAL_STR(val),
+                                         NCX_FEATURE_CODE_DYNAMIC);
+        if (res != NO_ERR) {
+            return;
+        }
+
+        val = val_find_next_child(parentval, 
+                                  val_get_mod_name(parentval),
+                                  NCX_EL_FEATURE_DYNAMIC,
+                                  val);
+    }
+
+
+    /* process the feature-enable leaf-list */
+    val = val_find_child(parentval, 
+                         val_get_mod_name(parentval),
+                         NCX_EL_FEATURE_ENABLE);
+    while (val && val->res == NO_ERR) {
+        res = ncx_set_feature_enable_entry(VAL_STR(val), TRUE);
+        if (res != NO_ERR) {
+            return;
+        }
+
+        val = val_find_next_child(parentval, 
+                                  val_get_mod_name(parentval),
+                                  NCX_EL_FEATURE_ENABLE,
+                                  val);
+    }
+
+    /* process the feature-disable leaf-list */
+    val = val_find_child(parentval, 
+                         val_get_mod_name(parentval),
+                         NCX_EL_FEATURE_DISABLE);
+    while (val && val->res == NO_ERR) {
+        res = ncx_set_feature_enable_entry(VAL_STR(val), FALSE);
+        if (res != NO_ERR) {
+            return;
+        }
+
+        val = val_find_next_child(parentval, 
+                                  val_get_mod_name(parentval),
+                                  NCX_EL_FEATURE_DISABLE,
+                                  val);
+    }
+
+    
+}  /* val_set_feature_parms */
+
+
 /* END file val_util.c */

@@ -512,6 +512,13 @@ typedef struct ncx_iffeature_t_ {
 } ncx_iffeature_t;
 
 
+typedef enum ncx_feature_code_t_ {
+    NCX_FEATURE_CODE_NONE,    /* enum not explicitly set */
+    NCX_FEATURE_CODE_STATIC,  /* compile-time if-feature code */
+    NCX_FEATURE_CODE_DYNAMIC  /* run-time if-feature code */
+} ncx_feature_code_t;
+
+
 /* YANG feature entry */
 typedef struct ncx_feature_t_ {
     dlq_hdr_t           qhdr;
@@ -523,6 +530,7 @@ typedef struct ncx_feature_t_ {
     dlq_hdr_t           appinfoQ;       /* Q of ncx_appinfo_t */
     status_t            res;    /* may be stored with errors */
     boolean             enabled;
+    ncx_feature_code_t  code;    /* dynamic or static code-gen */
     ncx_error_t         tkerr;
     boolean             seen;          /* for yangdiff */
 } ncx_feature_t;

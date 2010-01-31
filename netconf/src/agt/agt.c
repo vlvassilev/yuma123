@@ -641,6 +641,14 @@ status_t
                 res = agt_load_sil_code(VAL_STR(val), 
                                         revision, 
                                         FALSE);
+                if (res == ERR_NCX_SKIPPED) {
+                    log_warn("\nWarning: SIL code for module '%s' not found",
+                             VAL_STR(val));
+                    res = ncxmod_load_module(VAL_STR(val),
+                                             revision,
+                                             &agt_profile.agt_savedevQ,
+                                             &retmod);
+                }
 #endif
             } else {
                 log_info("\nCLI: Skipping 'module' parm '%s', already loaded",
@@ -1006,6 +1014,7 @@ status_t
 #endif
 
     res = NO_ERR;
+    handle = NULL;
     
     /* create a buffer for the library name
      * and later for function names
@@ -1027,14 +1036,13 @@ status_t
 #endif
 
     /* try to find it directly for loading */
-    pathspec = ncxmod_find_sil_file(buffer, TRUE, &res);
-
+    pathspec = ncxmod_find_sil_file(buffer, FALSE, &res);
     if (pathspec == NULL) {
-        handle = dlopen((const char *)buffer, RTLD_NOW);
-    } else {
-        handle = dlopen((const char *)pathspec, RTLD_NOW);
+        m__free(buffer);
+        return ERR_NCX_SKIPPED;
     }
 
+    handle = dlopen((const char *)pathspec, RTLD_NOW);
     if (handle == NULL) {
         log_error("\nError: could not open '%s' (%s)\n", 
                   (pathspec) ? pathspec : buffer,

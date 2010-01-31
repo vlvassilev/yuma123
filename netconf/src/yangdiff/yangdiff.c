@@ -1811,6 +1811,9 @@ static status_t
     /* set the warning control parameters */
     val_set_warning_parms(valset);
 
+    /* set the feature code generation parameters */
+    val_set_feature_parms(valset);
+
     /*** ORDER DOES NOT MATTER FOR REST OF PARAMETERS ***/
 
     /* difftype parameter */

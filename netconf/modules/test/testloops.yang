@@ -63,4 +63,10 @@ module testloops {
        uses grouploop2;
     }
 
+    feature A { if-feature B; }
+    feature B { if-feature C; }
+    feature C { if-feature A; }
+    feature D { if-feature B; }
+    feature E;
+
 }

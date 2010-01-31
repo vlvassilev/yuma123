@@ -91,10 +91,6 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-#ifdef DEBUG
-#define NCXMOD_DEBUG 1
-#endif
-
 
 /* Enumeration of the basic value type classifications */
 typedef enum ncxmod_mode_t_ {
@@ -1605,14 +1601,12 @@ static status_t
     ncxmod_mode_t   mode;
 
 
-#ifdef NCXMOD_DEBUG
     if (LOGDEBUG2) {
         log_debug2("\nAttempting to load module '%s'", modname);
         if (revision) {
             log_debug2(" r:%s", revision);
         }
     }
-#endif
 
     res = NO_ERR;
     res2 = NO_ERR;
@@ -1688,12 +1682,10 @@ static status_t
         (pcb->importmode || !pcb->parsemode)) {
         testmod = ncx_find_module(modname, revision);
         if (testmod) {
-#ifdef NCXMOD_DEBUG
             if (LOGDEBUG2) {
                 log_debug2("\nncxmod: module %s already loaded", 
                            modname);
             }
-#endif
             if (!pcb->top) {
                 pcb->top = testmod;
                 pcb->topfound = TRUE;
@@ -3145,14 +3137,10 @@ xmlChar *
 
     *res = NO_ERR;
 
-#ifdef NCXMOD_DEBUG
-    if (generrors) {
-        if (LOGDEBUG2) {
-            log_debug2("\nNcxmod: Finding data file (%s)", 
-                       fname);
-        }
+    if (LOGDEBUG2) {
+        log_debug2("\nNcxmod: Finding data file (%s)", 
+                   fname);
     }
-#endif
 
     flen = xml_strlen(fname);
     if (!flen || flen>NCX_MAX_NLEN) {
@@ -3261,14 +3249,10 @@ xmlChar *
 
     *res = NO_ERR;
 
-#ifdef NCXMOD_DEBUG
-    if (generrors) {
-        if (LOGDEBUG2) {
-            log_debug2("\nNcxmod: Finding SIL file (%s)", 
-                       fname);
-        }
+    if (LOGDEBUG2) {
+        log_debug2("\nNcxmod: Finding SIL file (%s)", 
+                   fname);
     }
-#endif
 
     flen = xml_strlen(fname);
     if (!flen || flen>NCX_MAX_NLEN) {
@@ -3582,12 +3566,10 @@ xmlChar *
 
     *res = NO_ERR;
 
-#ifdef NCXMOD_DEBUG
     if (LOGDEBUG2) {
         log_debug2("\nNcxmod: Finding script file (%s)", 
                    fname);
     }
-#endif
 
     flen = xml_strlen(fname);
     if (!flen || flen>NCX_MAX_NLEN) {

@@ -94,6 +94,28 @@ module yuma-app-common {
            type string;
         }
 
+        leaf feature-enable-default {
+          description
+            "If true, then features will be enabled by default.
+             If false, then features will be disabled by default.";
+          type boolean;
+          default true;
+        }
+
+        leaf-list feature-enable {
+          description
+            "Identifies a feature which should be considered
+             enabled.";
+          type yt:FeatureSpec;
+        }
+
+        leaf-list feature-disable {
+          description
+            "Identifies a feature which should be considered
+             disabled.";
+          type yt:FeatureSpec;
+        }
+
         leaf help {
           description "Print program help file and exit.";
           type empty;
@@ -182,6 +204,42 @@ module yuma-app-common {
               entered, then the YUMA_HOME environment variable
               will be ignored.";
           type string;
+        }
+    }
+
+    grouping FeatureCodeParms {
+        leaf feature-code-default {
+          description
+            "The default feature code generation type.";
+          type enumeration {
+            enum static {
+              description
+                "The default behavior for feature behavior
+                 is to use statically defined features at
+                 compile-time.";
+            }
+            enum dynamic {
+              description
+                "The default behavior for feature behavior
+                 is to use dynamically defined features at
+                 load-time.";
+            }
+          }
+          default dynamic;
+        }
+
+        leaf-list feature-static {
+          description
+            "Identifies a feature which is configured to be a
+             static feature, and therefore set at compile time.";
+          type yt:FeatureSpec;
+        }
+
+        leaf-list feature-dynamic {
+          description
+            "Identifies a feature which is configured to be a
+             static feature, and therefore set at compile time.";
+          type yt:FeatureSpec;
         }
     }
 
@@ -278,61 +336,6 @@ module yuma-app-common {
     }
 
     grouping FeatureParms {
-       leaf feature-create-default {
-          description
-            "The default feature code generation type.";
-          type enumeration {
-            enum static {
-              description
-                "The default behavior for feature behavior
-                 is to use statically defined features at
-                 compile-time.";
-            }
-            enum dynamic {
-              description
-                "The default behavior for feature behavior
-                 is to use dynamically defined features at
-                 load-time.";
-            }
-          }
-          default dynamic;
-       }
-
-       leaf feature-enable-default {
-          description
-            "If true, then features will be enabled by default.
-             If false, then features will be disabled by default.";
-          type boolean;
-          default true;
-       }
-
-       leaf-list feature-static {
-          description
-            "Identifies a feature which is configured to be a
-             static feature, and therefore set at compile time.";
-          type yt:FeatureSpec;
-       }
-
-       leaf-list feature-dynamic {
-          description
-            "Identifies a feature which is configured to be a
-             static feature, and therefore set at compile time.";
-          type yt:FeatureSpec;
-       }
-
-       leaf-list feature-enable {
-          description
-            "Identifies a feature which should be considered
-             enabled.";
-          type yt:FeatureSpec;
-       }
-
-       leaf-list feature-disable {
-          description
-            "Identifies a feature which should be considered
-             disabled.";
-          type yt:FeatureSpec;
-       }
    }
 
 }

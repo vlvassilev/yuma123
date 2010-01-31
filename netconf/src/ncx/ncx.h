@@ -1033,4 +1033,21 @@ extern uint32
     ncx_copy_c_safe_str (xmlChar *buffer,
                          const xmlChar *strval);
 
+extern void
+    ncx_set_feature_enable_default (boolean flag);
+
+extern void
+    ncx_set_feature_code_default (ncx_feature_code_t code);
+
+extern status_t
+    ncx_set_feature_code_entry (const xmlChar *featstr,
+                                ncx_feature_code_t featcode);
+
+extern status_t
+    ncx_set_feature_enable_entry (const xmlChar *featstr,
+                                  boolean flag);
+
+extern void
+    ncx_set_feature_parms (ncx_feature_t *feature);
+
 #endif	    /* _H_ncx */

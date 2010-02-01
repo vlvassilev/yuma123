@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH netconfd 1 "January 25, 2010" Linux "netconfd 0.10"
+.TH netconfd 1 "February 1, 2010" Linux "netconfd 0.10"
 .SH NAME
 netconfd \- YANG-based NETCONF-over-SSH server
 
@@ -137,6 +137,15 @@ Specifies the maximum number of notification events
 that will be saved in the notification replay buffer.
 The oldest entries will be deleted first.
 The default value is  1000.
+.IP --\fBfeature-disable\fP=module:feature
+Identifies a feature which should be considered disabled.
+Zero or more entries are allowed.
+.IP --\fBfeature-enable-default\fP=boolean
+If true (the default), then features will be enabled by default.
+If false, then features will be disabled by default.
+.IP --\fBfeature-enable\fP=module:feature
+Identifies a feature which should be considered enabled.
+Zero or more entries are allowed.
 .IP --\fBhello-timeout\fP=number
 Specifies the number of seconds that a session
 may exist before the hello PDU is received.
@@ -471,10 +480,20 @@ search path in order for this program to function:
 .SH DIAGNOSTICS
 Internal diagnostics may generate the following
 type of message if any bugs are detected at runtime:
-  
+.nf  
+
     [E0]
          filename.c:linenum error-number (error-msg)
-    
+
+.fi
+.SH LICENSE
+The Yuma Tools programs and documentation are subject to
+a software license, available at:
+.nf
+
+    http://yuma.iwl.com/licenses/yumatools-cs-license.pdf
+     
+.fi
 .SH AUTHOR
 Andy Bierman, <andyb at iwl dot com>
 

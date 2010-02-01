@@ -12,7 +12,11 @@ else
 ifdef SERVER
 MAN_FILES = netconfd.1 netconf-subsystem.1
 else
+ifdef SHLIBS
+MAN_FILES=
+else
 MAN_FILES = yangdump.1 yangdiff.1 yangcli.1 netconfd.1 netconf-subsystem.1
+endif
 endif
 endif
 
@@ -30,11 +34,12 @@ uninstall:
 	done
 
 install:
+ifndef SHLIBS
 	mkdir -p $(MAN_INSTALL)
 	for fil in $(MAN_FILES); do \
 	  gzip -c $$fil > $(MAN_INSTALL)/$$fil.gz;\
 	done
-
+endif
 
 webinstall:
 	mkdir -p $(WEB_INSTALL)

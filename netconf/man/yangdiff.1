@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH yangdiff 1 "January 25, 2010" Linux "yangdiff 0.10"
+.TH yangdiff 1 "February 1, 2010" Linux "yangdiff 0.10"
 .SH NAME
 yangdiff \-report semantic and syntactic changes between two revisions of a YANG module
 
@@ -118,6 +118,15 @@ in YANG revision-stmt format.  For example:
 
 .fi
 If missing, the the default value 'normal' is used.
+.IP --\fBfeature-disable\fP=module:feature
+Identifies a feature which should be considered disabled.
+Zero or more entries are allowed.
+.IP --\fBfeature-enable-default\fP=boolean
+If true (the default), then features will be enabled by default.
+If false, then features will be disabled by default.
+.IP --\fBfeature-enable\fP=module:feature
+Identifies a feature which should be considered enabled.
+Zero or more entries are allowed.
 .IP --\fBheader\fP=boolean
 If false, the header clauses will be skipped, and any 
 differences between the module headers will not be reported.
@@ -436,9 +445,20 @@ search path in order for this program to function:
 .SH DIAGNOSTICS
 Internal diagnostics may generate the following
 type of message if any bugs are detected at runtime:
+.nf
   
     [E0]
          filename.c:linenum error-number (error-msg)
+
+.fi
+.SH LICENSE
+The Yuma Tools programs and documentation are subject to
+a software license, available at:
+.nf
+
+    http://yuma.iwl.com/licenses/yumatools-cs-license.pdf
+     
+.fi
     
 .SH AUTHOR
 Andy Bierman, <andyb at iwl dot com>

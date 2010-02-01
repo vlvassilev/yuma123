@@ -39,9 +39,7 @@ clean:
 	rm -f build-stamp configure-stamp
 
 	# Add here commands to clean up after the build process.
-	if [ ! -f libtecla/Makefile ]; then \
-	  (cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma-client; cd ..) \
-	fi
+	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma-client; cd ..)
 	$(MAKE) FREE=1 DEBIAN=1 CLIENT=1 DESTDIR=$(CURDIR)/debian/yuma-client clean
 	$(MAKE) FREE=1 DEBIAN=1 SERVER=1 DESTDIR=$(CURDIR)/debian/yuma-server clean
 	$(MAKE) FREE=1 DEBIAN=1 SHLIBS=1 DESTDIR=$(CURDIR)/debian/yuma-shlibs clean

@@ -1,10 +1,22 @@
 usr/sbin/netconfd
 usr/sbin/netconf-subsystem
-usr/lib/yuma/*
 etc/yuma/netconfd-sample.conf
 usr/share/doc/yuma/yumatools-cs-license.pdf
 usr/share/doc/yuma/yumatools-legal-notices.pdf
-
+usr/share/doc/yuma/AUTHORS
+usr/share/doc/yuma/ChangeLog
+usr/share/doc/yuma/README
+usr/share/yuma/
+usr/man/man1/netconfd.1.gz
+usr/man/man1/netconf-subsystem.1.gz
+usr/share/yuma/modules/netconfcentral/netconfd.yang
+usr/share/yuma/modules/netconfcentral/toaster.yang
+usr/share/yuma/modules/netconfcentral/yuma-interfaces.yang
+usr/share/yuma/modules/netconfcentral/yuma-mysession.yang
+usr/share/yuma/modules/netconfcentral/yuma-nacm.yang
+usr/share/yuma/modules/netconfcentral/yuma-netconf.yang
+usr/share/yuma/modules/netconfcentral/yuma-proc.yang
+usr/share/yuma/modules/netconfcentral/yuma-system.yang
 
 
 

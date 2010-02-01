@@ -36,8 +36,16 @@ include ../platform/platform.profile.depend
 
 test:
 
+# build the library in any developer context
+# and in the 1-pass RPM RELEASE build
+# for ubunte RELEASE builds, only build if 
+# this is the SHLIBS pass, not CLIENT, SERVER, or DEVELOPER
 ifdef SERVER
 # nothing to do for debian SERVER build
+install:
+else
+ifdef CLIENT
+# nothing to do for debian CLIENT build
 install:
 else
 ifdef DEVELOPER
@@ -65,6 +73,7 @@ endif
 endif
 endif
 endif
+endif
 
 uninstall:
 	rm -f $(REAL_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
@@ -72,10 +81,14 @@ uninstall:
 ifdef SERVER
 ncxlib:
 else
+ifdef CLIENT
+ncxlib:
+else
 ifdef DEVELOPER
 ncxlib:
 else
 ncxlib: $(LBASE)/lib$(SUBDIR_NM).$(LIBSUFFIX)
+endif
 endif
 endif
 

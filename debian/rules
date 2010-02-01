@@ -44,6 +44,7 @@ clean:
 	fi
 	$(MAKE) FREE=1 DEBIAN=1 CLIENT=1 DESTDIR=$(CURDIR)/debian/yuma-client clean
 	$(MAKE) FREE=1 DEBIAN=1 SERVER=1 DESTDIR=$(CURDIR)/debian/yuma-server clean
+	$(MAKE) FREE=1 DEBIAN=1 SHLIBS=1 DESTDIR=$(CURDIR)/debian/yuma-shlibs clean
 
 	dh_clean 
 
@@ -56,6 +57,7 @@ install: build
 	# Add here commands to install the package into debian/yuma.
 	$(MAKE) FREE=1 CLIENT=1 DESTDIR=$(CURDIR)/debian/yuma-client install
 	$(MAKE) FREE=1 SERVER=1 DESTDIR=$(CURDIR)/debian/yuma-server install
+	$(MAKE) FREE=1 SHLIBS=1 DESTDIR=$(CURDIR)/debian/yuma-shlibs install
 
 postinst:
 	ldconfig

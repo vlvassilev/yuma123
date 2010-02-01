@@ -6,9 +6,17 @@ Build-Depends: debhelper (>= 7)
 Standards-Version: 3.8.1
 Homepage: http://yuma.iwl.com/
 
-Package: yuma-client
+Package: yuma-shlibs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: YANG-based Unified Modular Automation tools
+ Yuma Tools is a YANG-based NETCONF-over-SSH client and server
+ development toolkit.  The libncx.so library provides
+ common YANG, XML, XPath, and other processing functions.
+
+Package: yuma-client
+Architecture: any
+Depends: yuma-shlibs, ${shlibs:Depends}, ${misc:Depends}
 Description: YANG-based Unified Modular Automation tools
  Yuma Tools is a YANG-based NETCONF-over-SSH client and server
  development toolkit.  The netconfd server includes an automated
@@ -20,7 +28,7 @@ Description: YANG-based Unified Modular Automation tools
 
 Package: yuma-server
 Architecture: any
-Depends: yuma-client, ${shlibs:Depends}, ${misc:Depends}
+Depends: yuma-shlibs, ${shlibs:Depends}, ${misc:Depends}
 Description: YANG-based Unified Modular Automation tools
  Yuma Tools (client only) is a YANG-based NETCONF-over-SSH 
  client application, which provides a CLI-like interface

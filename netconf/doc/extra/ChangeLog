@@ -1,21 +1,30 @@
 Yuma Change Log
  ----------------
 
+0.10  2010-02-01  Andy Bierman <andyb@iwl.com>
+
+ * Supporting yang-10 draft
+ * Add support for revision in module param (foo@2010-01-15)
+ * Add feature CLI parms to control feature code generation
+ * Fixed netconf-state bug; capabilities were not dynamic;
+	changed capsval to a virtual node w/ callback
+
 0.9.9
+
  * Supporting yang-09 draft
  * Supporting YIN translation and YIN input
  * Add more yangcli variable support
  * Supported new identifier restrictions
-	
+
 0.9.8
 
  * Supporting yang-08 draft and RFC 4741bis-01
  * Added client (yangcli) and server (netconfd, netconf-subsystem)
  * Added PDF user manual
- * Added RPM package installation	
+ * Added RPM package installation
  * Added /proc monitoring /interfaces, /ietf-netconf-state
 
-0.9.4 
+0.9.4
 
  * Added error check for default and mandatory both set
    in leaf or choice statements
@@ -28,7 +37,7 @@ Yuma Change Log
    config flag properly, based on the target node
  * Converted all CLI processing to YANG-based data-def files
    - converted yangdump.ncx to yangdump.yang
-   - converted yangdiff.ncx to yangdiff.yang	
+   - converted yangdiff.ncx to yangdiff.yang
  * Added many extensions to ncx.yang
    * Added ncx:hidden which will cause an object containing
      this extension to be skipped during XSD, HTML, SQLDB,
@@ -37,24 +46,24 @@ Yuma Change Log
      added to the config database
    * Added ncx:root to allow an RPC input container parameter
      to be treated as a <config> root with implicit child
-     nodes that are all the top-level nodes within the system	
+     nodes that are all the top-level nodes within the system
    * Added ncx:password to cause password objects to be
      handled specially (no echo, filter-skip)
    * Added ncx:abstract to treat object definition as an abstract
      definition only -- used internally and to define error-info
-     data and OID type identifiers.  Object is not CLI and also 
+     data and OID type identifiers.  Object is not CLI and also
      not added to configuration database
  * Added oldpath and newpath parameters to yangdiff to improve control
    over the files imported/included by the old and new versions of a module
 
-	
 0.9.3  2008-07-17      Andy Bierman  <andy@netconfcentral.com>
+
   * Fixed print error msg bug that causes segmentation fault
   * Fixed output for 'identifiers' report in yangdump
-  * Fixed bug in pattern checking; now checking all patterns 
+  * Fixed bug in pattern checking; now checking all patterns
     in the type chain
   * Fixed bug in revision-stmt warning output
-  * Fixed output of multiple component list keys 
+  * Fixed output of multiple component list keys
   * Fixed incorrect parsing of yang-version statement
   * Fixed error exit even if the module had only warnings
   * Cleaned up HTML and YANG nested output formatting
@@ -74,16 +83,15 @@ Yuma Change Log
   * updated modules/ietf/netconf-state.yang to version in
     draft-ietf-netconf-monitoring-model-02.txt
 
-	
 0.9.2  2008-06-05      Andy Bierman  <andy@netconfcentral.com>
 
   * Fixed bug in ncxmod.c; modpath not always processed correctly
   * Fixed bugs in HTML output; '&' char not always escaped with &amp;
-	
+
 0.9.1  2008-05-15      Andy Bierman  <andy@netconfcentral.com>
 
   * Fixed minor formatting in HTML output; actual public release
-	
+
 0.9.0  2008-05-07      Andy Bierman  <andy@netconfcentral.com>
 
   * Changed name from yangto to yangdump
@@ -92,10 +100,10 @@ Yuma Change Log
 	* CLI parameter parsing bugs and error messages fixed
 	* XSD generation for list now places 'key' leafs first
 	* Changed config true in notifications from error to warning
-	* Changed XSD extension from ##any to substitutionGroup 
+	* Changed XSD extension from ##any to substitutionGroup
 	* Now generating XSD for top-level augments
 	* module version sometimes set to wrong revision date
-	* augment-stmt was rejecting valid anyxml-stmt 
+	* augment-stmt was rejecting valid anyxml-stmt
   * Enhancements
 	* added initial HTML generation support
 	* added initial canonical YANG generation support
@@ -105,9 +113,8 @@ Yuma Change Log
 	* added html-div parameter
 	* added objview parameter
 	* added number of errors and warnings summary
-	
+
 0.8.4   2008-03-07      Andy Bierman  <andy@andybierman.com>
 
   * Initial public release ; version 0.8.4
 
-	

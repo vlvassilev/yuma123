@@ -16,6 +16,22 @@ central NETCONF protocol stack, based directly on YANG modules.
 The yangdump and yangdiff development tools are also
 included, to compile and process YANG modules.
 
+%package shlibs
+
+Summary:  YANG-based Unified Modular Automation Tools (shared libs)
+Requires: libxml2
+
+
+%description shlibs
+Yuma Tools is a YANG-based NETCONF-over-SSH client and server
+development toolkit.  This package contains the libncx shared library.
+
+%files shlibs
+%defattr(-,root,root,-)
+%{_libdir}/libncx.so.1.0
+/usr/share/doc/yuma/yumatools-cs-license.pdf
+/usr/share/doc/yuma/yumatools-legal-notices.pdf
+
 %package client
 
 Summary: YANG-based Unified Modular Automation Tools (client-side)
@@ -25,6 +41,7 @@ License:        BSD
 Requires: ncurses
 Requires: libssh2
 Requires: libxml2
+Requires: shlibs
 
 %description client
 Yuma Tools (client only) is a YANG-based NETCONF-over-SSH 
@@ -66,24 +83,29 @@ rm -rf $RPM_BUILD_ROOT
 /etc/yuma/yangcli-sample.conf
 /etc/yuma/yangdiff-sample.conf
 /etc/yuma/yangdump-sample.conf
-%{_libdir}/libncx.so.1.0
 %{_mandir}/man1/yangcli.1.gz
 %{_mandir}/man1/yangdiff.1.gz
 %{_mandir}/man1/yangdump.1.gz
 
 
 %changelog
+*  Mon Feb 01 2010  Andy Bierman <andyb at iwl.com> 0.10.649
+ - Supporting yang-10 draft
+ - Add support for revision in module param (foo@2010-01-15)
+ - Add feature CLI parms to control feature code generation
+ - Fixed netconf-state bug; capabilities were not dynamic;
+   changed capsval to a virtual node w/ callback
 * Fri Jan 29 2010 Andy Bierman <andyb at iwl.com> 0.9.8.646
-- Align with yang-draft-10; add some bugfixes
+  - Align with yang-draft-10; add some bugfixes
 * Sun Jan 17 2010 Andy Bierman <andyb at iwl.com> 0.9.8.636
-- First RPM build
+  - First RPM build
 
 %package server
 
 Summary:  YANG-based Unified Modular Automation Tools (server-side)
 Requires: openssh
 Requires: libxml2
-Requires: client
+Requires: shlibs
 
 %description server
 Yuma Tools is a YANG-based NETCONF-over-SSH client and server
@@ -95,9 +117,12 @@ central NETCONF protocol stack, based directly on YANG modules.
 %{_sbindir}/netconfd
 %{_sbindir}/netconf-subsystem
 /etc/yuma/netconfd-sample.conf
+/usr/share/doc/yuma/yumatools-cs-license.pdf
+/usr/share/doc/yuma/yumatools-legal-notices.pdf
 %{_libdir}/yuma/
 %{_mandir}/man1/netconfd.1.gz
 %{_mandir}/man1/netconf-subsystem.1.gz
+
 
 
 

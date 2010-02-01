@@ -2,6 +2,8 @@ usr/sbin/netconfd
 usr/sbin/netconf-subsystem
 usr/lib/yuma/*
 etc/yuma/netconfd-sample.conf
+usr/share/doc/yuma/yumatools-cs-license.pdf
+usr/share/doc/yuma/yumatools-legal-notices.pdf
 
 
 

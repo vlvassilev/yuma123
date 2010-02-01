@@ -28,7 +28,6 @@ development toolkit.  This package contains the libncx shared library.
 
 %files shlibs
 %defattr(-,root,root,-)
-%doc /usr/share/doc/yuma/
 %{_libdir}/libncx.so.1.0
 /usr/share/doc/yuma/yumatools-cs-license.pdf
 /usr/share/doc/yuma/yumatools-legal-notices.pdf
@@ -92,6 +91,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_sysconfdir}/yuma/yangcli-sample.conf
 %{_sysconfdir}/yuma/yangdiff-sample.conf
 %{_sysconfdir}/yuma/yangdump-sample.conf
+/usr/share/doc/yuma/yumatools-cs-license.pdf
+/usr/share/doc/yuma/yumatools-legal-notices.pdf
+/usr/share/doc/yuma/AUTHORS
+/usr/share/doc/yuma/ChangeLog
+/usr/share/doc/yuma/README
 %{_mandir}/man1/yangcli.1.gz
 %{_mandir}/man1/yangdiff.1.gz
 %{_mandir}/man1/yangdump.1.gz
@@ -130,6 +134,9 @@ central NETCONF protocol stack, based directly on YANG modules.
 %{_sysconfdir}/yuma/netconfd-sample.conf
 /usr/share/doc/yuma/yumatools-cs-license.pdf
 /usr/share/doc/yuma/yumatools-legal-notices.pdf
+/usr/share/doc/yuma/AUTHORS
+/usr/share/doc/yuma/ChangeLog
+/usr/share/doc/yuma/README
 %{_libdir}/yuma/
 %{_mandir}/man1/netconfd.1.gz
 %{_mandir}/man1/netconf-subsystem.1.gz

@@ -96,6 +96,8 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/doc/yuma/AUTHORS
 /usr/share/doc/yuma/ChangeLog
 /usr/share/doc/yuma/README
+/usr/share/doc/yuma/yumatools-quickstart-guide.pdf
+/usr/share/doc/yuma/yumatools-user-manual.pdf
 %{_mandir}/man1/yangcli.1.gz
 %{_mandir}/man1/yangdiff.1.gz
 %{_mandir}/man1/yangdump.1.gz

@@ -62,10 +62,7 @@ endif
 
 
 yuma-client:
-	cd libtecla;\
-	if [ ! -f Makefile ]; then \
-	  ./configure; \
-	fi
+	cd libtecla && ./configure;
 	for dir in $(C_DIRS); do\
 	  cd $$dir && $(MAKE) $(JFLAG) && cd ..;\
         done
@@ -77,10 +74,7 @@ yuma-server:
 
 
 yuma-all:
-	cd libtecla;\
-	if [ ! -f Makefile ]; then \
-	  ./configure; \
-	fi
+	cd libtecla && ./configure; 
 	for dir in $(DIRS); do\
 	  cd $$dir && $(MAKE) $(JFLAG) && cd ..;\
         done

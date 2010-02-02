@@ -4,13 +4,8 @@ usr/bin/yangdiff
 etc/yuma/yangcli-sample.conf
 etc/yuma/yangdiff-sample.conf
 etc/yuma/yangdump-sample.conf
-usr/share/doc/yuma/yumatools-cs-license.pdf
-usr/share/doc/yuma/yumatools-legal-notices.pdf
-usr/share/doc/yuma/AUTHORS
-usr/share/doc/yuma/ChangeLog
-usr/share/doc/yuma/README
-usr/share/doc/yuma/yuma-quickstart-guide.pdf
-usr/share/doc/yuma/yuma-user-manual.pdf
+usr/share/doc/yuma/yuma-quickstart-guide.pdf.gz
+usr/share/doc/yuma/yuma-user-manual.pdf.gz
 usr/man/man1/yangcli.1.gz
 usr/man/man1/yangdiff.1.gz
 usr/man/man1/yangdump.1.gz

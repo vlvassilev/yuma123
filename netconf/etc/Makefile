@@ -18,10 +18,12 @@ superclean: clean
 
 ifdef SERVER
 install:
+	mkdir -p $(ETC_INSTALL)
 	cp netconfd-sample.conf $(ETC_INSTALL)/
 else
 ifdef CLIENT
 install:
+	mkdir -p $(ETC_INSTALL)
 	cp yangcli-sample.conf $(ETC_INSTALL)/
 	cp yangdiff-sample.conf $(ETC_INSTALL)/
 	cp yangdump-sample.conf $(ETC_INSTALL)/

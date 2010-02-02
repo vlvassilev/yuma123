@@ -28,7 +28,7 @@ development toolkit.  This package contains the libncx shared library.
 
 %files shlibs
 %defattr(-,root,root,-)
-%{_libdir}/libncx*
+%{_libdir}/libncx.so.1.0
 /usr/share/doc/yuma/yumatools-cs-license.pdf
 /usr/share/doc/yuma/yumatools-legal-notices.pdf
 /usr/share/doc/yuma/AUTHORS
@@ -74,11 +74,10 @@ rm -rf $RPM_BUILD_ROOT
 make install LDFLAGS+=--build-id FREE=1 RELEASE=1 \
 DESTDIR=$RPM_BUILD_ROOT
 
-%post
+%post shlibs
 ldconfig
-echo "Yuma client: yangcli, yangdump, and yangdiff installed"
+echo "Yuma Tools installed."
 echo "Check the user manuals in /etc/share/doc/yuma"
-echo "or type 'man <program name>' for instructions on usage."
 
 %clean
 rm -rf $RPM_BUILD_ROOT

@@ -11,22 +11,26 @@
 
 ifdef CLIENT
 APPS = yangdump yangdiff yangcli
-DIRS = mgr ncx $(APPS)
+DIRS = mgr $(APPS)
 else
 ifdef SERVER
 APPS = subsys netconfd
-DIRS = agt ncx $(APPS)
+DIRS = agt $(APPS)
 else
 ifdef DEVELOPER
 APPS = 
 DIRS = agt ncx
+else
+ifdef SHLIBS
+APPS =
+DIRS = ncx
 else
 APPS = subsys netconfd yangdump yangdiff yangcli
 DIRS = agt mgr ncx $(APPS)
 endif
 endif
 endif
-
+endif
 
 ifdef DESTDIR
 JFLAG=

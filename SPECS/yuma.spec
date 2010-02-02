@@ -28,7 +28,7 @@ development toolkit.  This package contains the libncx shared library.
 
 %files shlibs
 %defattr(-,root,root,-)
-%{_libdir}/libncx.so.1.0
+%{_libdir}/libncx*
 /usr/share/doc/yuma/yumatools-cs-license.pdf
 /usr/share/doc/yuma/yumatools-legal-notices.pdf
 /usr/share/doc/yuma/AUTHORS

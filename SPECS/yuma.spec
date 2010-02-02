@@ -51,7 +51,7 @@ License:        BSD
 Requires: ncurses
 Requires: libssh2
 Requires: libxml2
-Requires: shlibs
+Requires: yuma-shlibs
 
 %description client
 Yuma Tools (client only) is a YANG-based NETCONF-over-SSH 

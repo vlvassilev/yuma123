@@ -64,9 +64,11 @@ else
 	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIB_MAJOR_VERSION).$(LIB_MINOR_VERSION) \
 	$(REAL_INST)
 endif
-ifndef DESTDIR
+ifdef SHLIBS
+	ldconfig
+else
 ifndef MAC
-# skip in MacOsX, RPM, and debian fakeroot build
+# skip in MacOsX, RPM, and rest of debian fakeroot builds
 	ldconfig
 endif
 endif
@@ -76,7 +78,7 @@ endif
 endif
 
 uninstall:
-	rm -f $(REAL_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
+	rm -f $(REAL_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)*
 
 ifdef SERVER
 ncxlib:

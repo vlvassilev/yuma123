@@ -76,7 +76,15 @@ DESTDIR=$RPM_BUILD_ROOT
 
 %post shlibs
 ldconfig
-echo "Yuma Tools installed."
+echo "Yuma Tools shared libraries installed."
+echo "Check the user manuals in /etc/share/doc/yuma"
+
+%post client
+echo "Yuma Tools client programs installed."
+echo "Check the user manuals in /etc/share/doc/yuma"
+
+%post server
+echo "Yuma Tools server programs installed."
 echo "Check the user manuals in /etc/share/doc/yuma"
 
 %clean
@@ -105,7 +113,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/yuma/modules/netconfcentral/yangdump.yang
 
 %changelog
-*  Mon Feb 01 2010  Andy Bierman <andyb at iwl.com> 0.10.652
+*  Mon Feb 01 2010  Andy Bierman <andyb at iwl.com> 0.10.664
  - Supporting yang-10 draft
  - Add support for revision in module param (foo@2010-01-15)
  - Add feature CLI parms to control feature code generation
@@ -121,7 +129,7 @@ rm -rf $RPM_BUILD_ROOT
 Summary:  YANG-based Unified Modular Automation Tools (server-side)
 Requires: openssh
 Requires: libxml2
-Requires: shlibs
+Requires: yuma-shlibs
 
 %description server
 Yuma Tools is a YANG-based NETCONF-over-SSH client and server

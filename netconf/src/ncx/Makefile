@@ -65,8 +65,9 @@ else
 	$(REAL_INST)
 endif
 ifdef SHLIBS
-	(cd $(REAL_INST); ln -s lib$(SUBDIR_NM).$(LIBSUFFIX) \
-	lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIB_MAJOR_VERSION).$(LIB_MINOR_VERSION))
+	(cd $(REAL_INST); \
+	ln -s lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIB_MAJOR_VERSION).$(LIB_MINOR_VERSION) \
+	lib$(SUBDIR_NM).$(LIBSUFFIX))
 endif
 ifndef DESTDIR
 ifndef MAC

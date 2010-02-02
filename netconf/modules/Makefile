@@ -80,18 +80,58 @@ copy:
 
 test:
 
+ifdef SERVER
 install:
-ifndef SERVER
-ifndef DEVELOPER
 	mkdir -p $(INSTALL_TARGET)
-	mkdir -p $(INSTALL_TARGET)/ietf
 	mkdir -p $(INSTALL_TARGET)/netconfcentral
+	cp netconfcentral/netconfd.yang $(INSTALL_TARGET)/netconfcentral
+	cp netconfcentral/toaster.yang $(INSTALL_TARGET)/netconfcentral
+	cp netconfcentral/yuma-mysession.yang $(INSTALL_TARGET)/netconfcentral
+	cp netconfcentral/yuma-interfaces.yang $(INSTALL_TARGET)/netconfcentral
+	cp netconfcentral/yuma-mysession.yang $(INSTALL_TARGET)/netconfcentral
+	cp netconfcentral/yuma-nacm.yang $(INSTALL_TARGET)/netconfcentral
+	cp netconfcentral/yuma-netconf.yang $(INSTALL_TARGET)/netconfcentral
+	cp netconfcentral/yuma-proc.yang $(INSTALL_TARGET)/netconfcentral
+	cp netconfcentral/yuma-system.yang $(INSTALL_TARGET)/netconfcentral
+else
+ifdef CLIENT
+install:
+	mkdir -p $(INSTALL_TARGET)
+	mkdir -p $(INSTALL_TARGET)/netconfcentral
+	cp netconfcentral/yangcli.yang $(INSTALL_TARGET)/netconfcentral
+	cp netconfcentral/yangdump.yang $(INSTALL_TARGET)/netconfcentral
+	cp netconfcentral/yangdiff.yang $(INSTALL_TARGET)/netconfcentral
+else
+ifdef SHLIBS
+install:
+	mkdir -p $(INSTALL_TARGET)
+	mkdir -p $(INSTALL_TARGET)/netconfcentral
+	mkdir -p $(INSTALL_TARGET)/ietf
 	mkdir -p $(INSTALL_TARGET)/yang
 	mkdir -p $(INSTALL_TARGET)/test
 	cp ietf/*.yang $(INSTALL_TARGET)/ietf
-	cp netconfcentral/*.yang $(INSTALL_TARGET)/netconfcentral
 	cp yang/*.yang $(INSTALL_TARGET)/yang
 	cp test/*.yang $(INSTALL_TARGET)/test
+	cp netconfcentral/yuma-app-common.yang $(INSTALL_TARGET)/netconfcentral
+	cp netconfcentral/yuma-ncx.yang $(INSTALL_TARGET)/netconfcentral
+	cp netconfcentral/yuma-types.yang $(INSTALL_TARGET)/netconfcentral
+	cp netconfcentral/yuma-xsd.yang $(INSTALL_TARGET)/netconfcentral
+else
+ifdef DEVELOPER
+install:
+else
+install:
+	mkdir -p $(INSTALL_TARGET)
+	mkdir -p $(INSTALL_TARGET)/netconfcentral
+	mkdir -p $(INSTALL_TARGET)/ietf
+	mkdir -p $(INSTALL_TARGET)/yang
+	mkdir -p $(INSTALL_TARGET)/test
+	cp ietf/*.yang $(INSTALL_TARGET)/ietf
+	cp yang/*.yang $(INSTALL_TARGET)/yang
+	cp test/*.yang $(INSTALL_TARGET)/test
+	cp netconfcentral/*.yang $(INSTALL_TARGET)/netconfcentral
+endif
+endif
 endif
 endif
 
@@ -111,10 +151,8 @@ clean-install:
 .PHONY: clean-install
 
 uninstall:
-ifndef CLIENT
 ifndef DEVELOPER
 	rm -rf $(INSTALL_TARGET)
-endif
 endif
 
 clean:

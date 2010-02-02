@@ -15,7 +15,11 @@ else
 ifdef SHLIBS
 MAN_FILES=
 else
+ifdef DEVELOPER
+MAN_FILES=
+else
 MAN_FILES = yangdump.1 yangdiff.1 yangcli.1 netconfd.1 netconf-subsystem.1
+endif
 endif
 endif
 endif

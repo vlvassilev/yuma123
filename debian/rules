@@ -24,7 +24,7 @@ build-stamp: configure-stamp
 	dh_testdir
 
 	# Add here commands to compile the package.
-	$(MAKE) FREE=1 DEBIAN=1
+	$(MAKE) FREE=1 DEBIAN=1 RELEASE=1
 	#docbook-to-man debian/yuma.sgml > yuma.1
 
 	touch $@
@@ -49,9 +49,12 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/yuma.
-	$(MAKE) FREE=1 CLIENT=1 DESTDIR=$(CURDIR)/debian/yuma-client install
-	$(MAKE) FREE=1 SERVER=1 DESTDIR=$(CURDIR)/debian/yuma-server install
-	$(MAKE) FREE=1 SHLIBS=1 DESTDIR=$(CURDIR)/debian/yuma-shlibs install
+	$(MAKE) FREE=1 CLIENT=1 RELEASE=1 \
+	DESTDIR=$(CURDIR)/debian/yuma-client install
+	$(MAKE) FREE=1 SERVER=1 RELEASE=1 \
+	DESTDIR=$(CURDIR)/debian/yuma-server install
+	$(MAKE) FREE=1 SHLIBS=1 RELEASE=1 \
+	DESTDIR=$(CURDIR)/debian/yuma-shlibs install
 
 postinst: 
 	ldconfig

@@ -26,6 +26,11 @@ Requires: libxml2
 Yuma Tools is a YANG-based NETCONF-over-SSH client and server
 development toolkit.  This package contains the libncx shared library.
 
+%post shlibs
+ldconfig
+echo "Yuma Tools shared libraries installed."
+echo "Check the user manuals in /etc/share/doc/yuma"
+
 %files shlibs
 %defattr(-,root,root,-)
 %{_libdir}/libncx.so.1.0
@@ -74,17 +79,8 @@ rm -rf $RPM_BUILD_ROOT
 make install LDFLAGS+=--build-id FREE=1 RELEASE=1 \
 DESTDIR=$RPM_BUILD_ROOT
 
-%post shlibs
-ldconfig
-echo "Yuma Tools shared libraries installed."
-echo "Check the user manuals in /etc/share/doc/yuma"
-
 %post client
 echo "Yuma Tools client programs installed."
-echo "Check the user manuals in /etc/share/doc/yuma"
-
-%post server
-echo "Yuma Tools server programs installed."
 echo "Check the user manuals in /etc/share/doc/yuma"
 
 %clean
@@ -135,6 +131,10 @@ Requires: yuma-shlibs
 Yuma Tools is a YANG-based NETCONF-over-SSH client and server
 development toolkit.  The netconfd server includes an automated
 central NETCONF protocol stack, based directly on YANG modules.
+
+%post server
+echo "Yuma Tools server programs installed."
+echo "Check the user manuals in /etc/share/doc/yuma"
 
 %files server
 %defattr(-,root,root,-)

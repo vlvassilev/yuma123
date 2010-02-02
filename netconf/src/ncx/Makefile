@@ -64,6 +64,10 @@ else
 	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIB_MAJOR_VERSION).$(LIB_MINOR_VERSION) \
 	$(REAL_INST)
 endif
+ifdef SHLIBS
+	(cd $(REAL_INST); ln -s lib$(SUBDIR_NM).$(LIBSUFFIX) \
+	lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIB_MAJOR_VERSION).$(LIB_MINOR_VERSION))
+endif
 ifndef DESTDIR
 ifndef MAC
 # skip in MacOsX, RPM, and rest of debian fakeroot builds

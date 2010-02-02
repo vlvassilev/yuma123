@@ -64,9 +64,7 @@ else
 	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIB_MAJOR_VERSION).$(LIB_MINOR_VERSION) \
 	$(REAL_INST)
 endif
-ifdef SHLIBS
-	ldconfig
-else
+ifndef RELEASE
 ifndef MAC
 # skip in MacOsX, RPM, and rest of debian fakeroot builds
 	ldconfig

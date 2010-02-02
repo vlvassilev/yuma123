@@ -6,7 +6,7 @@ Build-Depends: debhelper (>= 7)
 Standards-Version: 3.8.1
 Homepage: http://yuma.iwl.com/
 
-Package: yuma_shlibs
+Package: yuma-shlibs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: YANG-based Unified Modular Automation tools
@@ -14,7 +14,7 @@ Description: YANG-based Unified Modular Automation tools
  development toolkit.  The libncx.so library provides
  common YANG, XML, XPath, and other processing functions.
 
-Package: yuma_client
+Package: yuma-client
 Architecture: any
 Depends: yuma-shlibs, ${shlibs:Depends}, ${misc:Depends}
 Description: YANG-based Unified Modular Automation tools
@@ -26,7 +26,7 @@ Description: YANG-based Unified Modular Automation tools
  The yangdump and yangdiff development tools are also
  included, to process YANG modules offline.
 
-Package: yuma_server
+Package: yuma-server
 Architecture: any
 Depends: yuma-shlibs, ${shlibs:Depends}, ${misc:Depends}
 Description: YANG-based Unified Modular Automation tools

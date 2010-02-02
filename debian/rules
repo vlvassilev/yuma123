@@ -13,7 +13,7 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
-	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma_client; cd ..)
+	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma-client; cd ..)
 
 	touch configure-stamp
 
@@ -35,10 +35,10 @@ clean:
 	rm -f build-stamp configure-stamp
 
 	# Add here commands to clean up after the build process.
-	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma_client; cd ..)
-	$(MAKE) FREE=1 DEBIAN=1 CLIENT=1 DESTDIR=$(CURDIR)/debian/yuma_client clean
-	$(MAKE) FREE=1 DEBIAN=1 SERVER=1 DESTDIR=$(CURDIR)/debian/yuma_server clean
-	$(MAKE) FREE=1 DEBIAN=1 SHLIBS=1 DESTDIR=$(CURDIR)/debian/yuma_shlibs clean
+	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma-client; cd ..)
+	$(MAKE) FREE=1 DEBIAN=1 CLIENT=1 DESTDIR=$(CURDIR)/debian/yuma-client clean
+	$(MAKE) FREE=1 DEBIAN=1 SERVER=1 DESTDIR=$(CURDIR)/debian/yuma-server clean
+	$(MAKE) FREE=1 DEBIAN=1 SHLIBS=1 DESTDIR=$(CURDIR)/debian/yuma-shlibs clean
 
 	dh_clean 
 
@@ -49,9 +49,9 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/yuma.
-	$(MAKE) FREE=1 CLIENT=1 DESTDIR=$(CURDIR)/debian/yuma_client install
-	$(MAKE) FREE=1 SERVER=1 DESTDIR=$(CURDIR)/debian/yuma_server install
-	$(MAKE) FREE=1 SHLIBS=1 DESTDIR=$(CURDIR)/debian/yuma_shlibs install
+	$(MAKE) FREE=1 CLIENT=1 DESTDIR=$(CURDIR)/debian/yuma-client install
+	$(MAKE) FREE=1 SERVER=1 DESTDIR=$(CURDIR)/debian/yuma-server install
+	$(MAKE) FREE=1 SHLIBS=1 DESTDIR=$(CURDIR)/debian/yuma-shlibs install
 
 postinst: 
 	ldconfig

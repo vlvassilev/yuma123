@@ -12,6 +12,7 @@
 DIRS = libtecla netconf libtoaster
 S_DIRS = netconf libtoaster
 C_DIRS = libtecla netconf
+L_DIRS = netconf
 
 ifdef DESTDIR
 JFLAG= 
@@ -34,32 +35,37 @@ install: yumainstall
 
 ifdef CLIENT
 yumaall: yuma-client
-else
-ifdef SERVER
-yumaall: yuma-server
-else
-ifdef DEVELOPER
-yumaall: yuma-dev
-else
-yumaall: yuma-all
-endif
-endif
-endif
 
-ifdef CLIENT
 yumainstall: yuma-client-install
 else
 ifdef SERVER
+yumaall: yuma-server
+
 yumainstall: yuma-server-install
 else
+ifdef SHLIBS
+yumaall: yuma-shlibs
+
+yumainstall: yuma-shlibs-install
+else
 ifdef DEVELOPER
+yumaall: yuma-dev
+
 yumainstall: yuma-dev-install
 else
+yumaall: yuma-all
+
 yumainstall: yuma-all-install
 endif
 endif
 endif
+endif
 
+
+yuma-shlibs:
+	for dir in $(L_DIRS); do\
+	  cd $$dir && $(MAKE) $(JFLAG) && cd ..;\
+        done
 
 yuma-client:
 	cd libtecla && ./configure;
@@ -90,6 +96,10 @@ yumasuperclean:
 	  cd $$dir && $(MAKE) superclean && cd ..;\
         done
 
+yuma-shlibs-install:
+	for dir in $(L_DIRS); do\
+          cd $$dir && $(MAKE) install && cd ..;\
+        done
 
 yuma-client-install:
 	for dir in $(C_DIRS); do\
@@ -116,7 +126,8 @@ yuma-all-install:
 	yumaall yumaclean yumasuperclean yumainstall \
 	yuma-client yuma-server yuma-dev yuma-all \
 	yuma-client-install yuma-server-install \
-	yuma-dev-install yuma-all-install
+	yuma-dev-install yuma-all-install \
+	yuma-shlibs yuma-shlibs-install
 
 
 # prevent the make program from choking on all the symbols

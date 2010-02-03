@@ -1,7 +1,7 @@
 
  module ietf-inet-types {
 
-   namespace "urn:ietf:params:xml:ns:yang:ietf-inet-types-DRAFT-05";
+   namespace "urn:ietf:params:xml:ns:yang:ietf-inet-types-DRAFT-06";
    prefix "inet";
 
    organization
@@ -24,7 +24,7 @@
     "This module contains a collection of generally useful derived
      YANG data types for Internet addresses and related things.
 
-     Copyright (c) 2009 IETF Trust and the persons identified as
+     Copyright (c) 2010 IETF Trust and the persons identified as
      the document authors.  All rights reserved.
 
      Redistribution and use in source and binary forms, with or
@@ -41,7 +41,7 @@
    // RFC Ed.: remove this note
    // Note: extracted from draft-ietf-netmod-yang-types-05.txt
 
-   revision 2009-11-10 {
+   revision 2010-02-03 {
      description
       "Initial revision.";
      reference
@@ -73,9 +73,7 @@
       "This value represents the version of the IP protocol.
 
        This type is in the value set and its semantics equivalent
-       to the InetVersion textual convention of the SMIv2. However,
-       the lexical appearance is different from the InetVersion
-       textual convention.";
+       to the InetVersion textual convention of the SMIv2.";
      reference
       "RFC  791: Internet Protocol
        RFC 2460: Internet Protocol, Version 6 (IPv6) Specification
@@ -136,7 +134,7 @@
      reference
       "RFC  768: User Datagram Protocol
        RFC  793: Transmission Control Protocol
-       RFC 2960: Stream Control Transmission Protocol
+       RFC 4960: Stream Control Transmission Protocol
        RFC 4340: Datagram Congestion Control Protocol (DCCP)
        RFC 4001: Textual Conventions for Internet Network Addresses";
    }
@@ -187,17 +185,9 @@
 
    typedef ipv4-address {
      type string {
-       pattern '((0'
-             +   '|(1[0-9]{0,2})'
-             +   '|(2(([0-4][0-9]?)|(5[0-5]?)|([6-9]?)))'
-             +   '|([3-9][0-9]?)'
-             +  ')'
-             + '\.){3}'
-             + '(0'
-             +  '|(1[0-9]{0,2})'
-             +  '|(2(([0-4][0-9]?)|(5[0-5]?)|([6-9]?)))'
-             +  '|([3-9][0-9]?)'
-             + ')(%[\p{N}\p{L}]+)?';
+       pattern '(([0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])\.){3}'
+             + '([0-1]?[0-9]?[0-9]|2[0-4][0-9]|25[0-5])'
+             + '(%[\p{N}\p{L}]+)?';
      }
      description
        "The ipv4-address type represents an IPv4 address in
@@ -242,7 +232,7 @@
        applied to the longest sequence of all-zero 16-bit chunks
        in an IPv6 address. If there is a tie, the first sequence
        of all-zero 16-bit chunks is replaced by ::. Single
-       all-zero 16-bit chunks are not compressed. The normalized
+       all-zero 16-bit chunks are not compressed. The canonical
        format uses lower-case characters and leading zeros are
        not allowed. The canonical format for the zone index is
        the numerical format as described in RFC 4007 section
@@ -316,7 +306,7 @@
        all-zero 16-bit chunks in an IPv6 address. If there is
        a tie, the first sequence of all-zero 16-bit chunks is
        replaced by ::. Single all-zero 16-bit chunks are not
-       compressed. The normalized format uses lower-case
+       compressed. The canonical format uses lower-case
        characters and leading zeros are not allowed.";
      reference
       "RFC 4291: IP Version 6 Addressing Architecture";
@@ -345,8 +335,8 @@
        that Internet host names have a stricter syntax (described
        in RFC 952) than the DNS recommendations in RFCs 1034 and
        1123, and that systems that want to store host names in
-       objects using the domain-name type are recommended to adhere
-       to this stricter standard to ensure interoperability.
+       schema nodes using the domain-name type are recommended to
+       adhere to this stricter standard to ensure interoperability.
 
        The encoding of DNS names in the DNS protocol is limited
        to 255 characters. Since the encoding consists of labels
@@ -354,13 +344,14 @@
        byte, only 253 characters can appear in the textual dotted
        notation.
 
-       The description clause of objects using the domain-name
-       type MUST describe how (and when) these names are
-       resolved to IP addresses. Note that the resolution of a
-       domain-name value may require to query multiple DNS records
-       (e.g., A for IPv4 and AAAA for IPv6). The order of the
-       resolution process and which DNS record takes precedence
-       depends on the configuration of the resolver.
+       The description clause of schema nodes using the domain-name
+       type MUST describe when and how these names are resolved to
+       IP addresses. Note that the resolution of a domain-name value
+       may require to query multiple DNS records (e.g., A for IPv4
+       and AAAA for IPv6). The order of the resolution process and
+       which DNS record takes precedence can either be defined
+       explicitely or it may depend on the configuration of the
+       resolver.
 
        The canonical format for domain-name values uses the
        US-ASCII encoding and case-insensitive characters are set
@@ -390,7 +381,7 @@
       "The uri type represents a Uniform Resource Identifier
        (URI) as defined by STD 66.
 
-       Objects using the uri type must be in US-ASCII encoding,
+       Objects using the uri type MUST be in US-ASCII encoding,
        and MUST be normalized as described by RFC 3986 Sections
        6.2.1, 6.2.2.1, and 6.2.2.2.  All unnecessary
        percent-encoding is removed, and all case-insensitive
@@ -409,7 +400,7 @@
        might not be appropriate.
 
        A zero-length URI is not a valid URI.  This can be used to
-       express 'URI absent' where required
+       express 'URI absent' where required.
 
        This type is in the value set and its semantics equivalent
        to the Uri SMIv2 textual convention defined in RFC 5017.";
@@ -424,3 +415,4 @@
    }
 
  }
+

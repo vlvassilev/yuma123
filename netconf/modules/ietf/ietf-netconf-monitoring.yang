@@ -45,7 +45,7 @@ module ietf-netconf-monitoring {
     description
       "Initial revision.";
     reference
-      "RFC XXXX: NETCONF Monitoring Schema";
+      "RFC XXXX: YANG Module for NETCONF Monitoring";
   // RFC Ed.: replace XXXX with actual RFC number and remove this note
   }
 
@@ -192,14 +192,12 @@ module ietf-netconf-monitoring {
   container netconf-state {
     config false;
     description
-      "The /netconf-state subtree is the root of the monitoring
-       data model.  It acts as the container for the other
-       monitored data.";
+      "The netconf-state container is the root of the monitoring
+       data model.";
 
     container capabilities {
       description
-        "The list of currently provided NETCONF capabilities
-         exchanged during session setup (i.e. hello).";
+        "List of NETCONF capabilities supported by the server.";
 
       leaf-list capability {
         type inet:uri;
@@ -208,9 +206,9 @@ module ietf-netconf-monitoring {
 
     container datastores {
       description
-        "List of NETCONF configuration datastores (e.g. running,
-         startup, candidate) supported on this device and related
-         information.";
+        "The datastores container provides the list of NETCONF
+         configuration datastores (e.g. running, startup, candidate)
+         supported on this device and related information.";
 
       list datastore {
         container name {
@@ -259,6 +257,10 @@ module ietf-netconf-monitoring {
               description
                 "List of partial locks.";
 
+              reference
+                "RFC 5717: Partial Lock Remote Procedure Call (RPC) for
+                 NETCONF";
+
               leaf lock-id {
                 type uint32;
                 description
@@ -281,7 +283,7 @@ module ietf-netconf-monitoring {
                    locked nodes).
 
                    The scope of the partial lock is defined by the list
-                   of locked nodes.  This list can change over time.";
+                   of locked nodes.";
               }
             }
           }
@@ -325,8 +327,8 @@ module ietf-netconf-monitoring {
             base schema-format;
           }
           description
-            "The data modeling language of the file/module.
-             Current selection of xsd, yang, yin, rng and rnc.
+            "The data modeling language the schema is written
+             in (currently xsd, yang, yin, rng or rnc).
 
              For YANG data models, 'yang' format MUST be supported and
              'yin' format MAY also be provided.";
@@ -363,25 +365,21 @@ module ietf-netconf-monitoring {
 
     container sessions {
       description
-        "Includes session specific data for NETCONF management sessions.
-         The session list MUST include all currently active NETCONF
-         sessions.";
+        "The sessions container includes session specific data for
+         NETCONF management sessions.  The session list MUST include
+         all currently active NETCONF sessions.";
 
       list session {
         key session-id;
         description
-          "Unique identifier for the session.  If the session is a
-           NETCONF session, this value is the NETCONF session
-           identifier.
+          "Unique identifier for the session.  This value is the
+           NETCONF session identifier, as defined in [RFC4741].
 
-           For purposes of NETCONF management all sessions are one of:
+           All NETCONF sessions managed by the NETCONF server
+           SHOULD be reported in this table.
 
-            Known session:  any session which can be managed by the
-              NETCONF server SHOULD be reported in this table.
-
-            Unknown session:  such sessions are not managed by the
-              NETCONF server and map to NETCONF session identifier 0.
-                 These MUST be excluded from the list as a result.";
+           Any sessions not managed by the NETCONF server with
+           session identifier 0 MUST be excluded.";
 
         leaf session-id {
           type session-id;
@@ -408,7 +406,9 @@ module ietf-netconf-monitoring {
         leaf source-host {
           type inet:host;
           description
-            "Host identifier (IP address or name) of the client.";
+            "Host identifier of the client.  The value returned is
+             likely to be implementation specific (e.g. hostname,
+             IP v4 address, IP v6 address)";
         }
         leaf login-time {
           type yang:date-and-time;

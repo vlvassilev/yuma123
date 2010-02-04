@@ -1838,15 +1838,27 @@ static void
         }
         break;
     case XP_RT_NUMBER:
-        log_write("\n  typ: number = ");
-        ncx_printf_num(&result->r.num, NCX_BT_FLOAT64);
+        if (result->isval) {
+            log_write("\n  typ: number = ");
+            ncx_printf_num(&result->r.num, NCX_BT_FLOAT64);
+        } else {
+            log_write("\n  typ: number");
+        }
         break;
     case XP_RT_STRING:
-        log_write("\n  typ: string = %s", result->r.str);
+        if (result->isval) {
+            log_write("\n  typ: string = %s", result->r.str);
+        } else {
+            log_write("\n  typ: string", result->r.str);
+        }
         break;
     case XP_RT_BOOLEAN:
-        log_write("\n  typ: boolean = %s",
-                  (result->r.boo) ? "true" : "false");
+        if (result->isval) {
+            log_write("\n  typ: boolean = %s",
+                      (result->r.boo) ? "true" : "false");
+        } else {
+            log_write("\n  typ: boolean");
+        }
         break;
     default:
         log_write("\n  typ: INVALID (%d)", result->restype);

@@ -595,6 +595,7 @@ void
     if (dlevel > LOG_DEBUG_DEBUG4) {
         SET_ERROR(ERR_INTERNAL_VAL);
         dlevel = LOG_DEBUG_DEBUG4;
+        return;
     }
 #endif
 

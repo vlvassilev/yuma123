@@ -7059,8 +7059,8 @@ static status_t
          chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 
 #ifdef YANG_OBJ_DEBUG
-        if (LOGDEBUG3) {
-            log_debug3("\nexpand_uses: mod %s, object %s, on line %u",
+        if (LOGDEBUG4) {
+            log_debug4("\nexpand_uses: mod %s, object %s, on line %u",
                        mod->name,
                        obj_get_name(chobj),
                        chobj->tkerr.linenum);
@@ -7111,8 +7111,8 @@ static status_t
                     dlq_insertAhead(newobj, obj);
 
 #ifdef YANG_OBJ_DEBUG
-                    if (LOGDEBUG3) {
-                        log_debug3("\nexpand_uses: add new "
+                    if (LOGDEBUG4) {
+                        log_debug4("\nexpand_uses: add new "
                                    "obj %s to parent %s,"
                                    " uses.%u",
                                    obj_get_name(newobj),
@@ -7438,8 +7438,8 @@ static status_t
          chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 
 #ifdef YANG_OBJ_DEBUG
-        if (LOGDEBUG3) {
-            log_debug3("\nexpand_aug: mod %s, object %s, on line %u",
+        if (LOGDEBUG4) {
+            log_debug4("\nexpand_aug: mod %s, object %s, on line %u",
                        mod->name, obj_get_name(chobj),
                        chobj->tkerr.linenum);
         }
@@ -7533,8 +7533,8 @@ static status_t
                     }
 
 #ifdef YANG_OBJ_DEBUG
-                    if (LOGDEBUG3) {
-                        log_debug3("\nexpand_aug: add new obj %s "
+                    if (LOGDEBUG4) {
+                        log_debug4("\nexpand_aug: add new obj %s "
                                    "to target %s.%u, aug.%u",
                                    obj_get_name(newobj),
                                    obj_get_name(targobj),
@@ -9075,8 +9075,8 @@ static status_t
         case OBJ_TYP_LEAF_LIST:
             if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
 #ifdef YANG_OBJ_DEBUG
-                if (LOGDEBUG3) {
-                    log_debug3("\nresolve_xpath: mod %s, "
+                if (LOGDEBUG4) {
+                    log_debug4("\nresolve_xpath: mod %s, "
                                "object %s, on line %u",
                                mod->name,
                                obj_get_name(testobj), 
@@ -9711,8 +9711,8 @@ status_t
          testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
 #ifdef YANG_OBJ_DEBUG
-        if (LOGDEBUG3) {
-            log_debug3("\nresolve_uses: mod %s, object %s, on line %u",
+        if (LOGDEBUG4) {
+            log_debug4("\nresolve_uses: mod %s, object %s, on line %u",
                        mod->name, 
                        obj_get_name(testobj),
                        testobj->tkerr.linenum);
@@ -10099,8 +10099,8 @@ status_t
         notclone = !obj_is_cloned(testobj);
 
 #ifdef YANG_OBJ_DEBUG
-        if (LOGDEBUG3) {
-            log_debug3("\nresolve_final: mod %s, object %s, on line %u",
+        if (LOGDEBUG4) {
+            log_debug4("\nresolve_final: mod %s, object %s, on line %u",
                        mod->name, 
                        obj_get_name(testobj), 
                        testobj->tkerr.linenum);
@@ -10413,8 +10413,8 @@ status_t
         case OBJ_TYP_LEAF_LIST:
             if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
 #ifdef YANG_OBJ_DEBUG
-                if (LOGDEBUG3) {
-                    log_debug3("\ncheck_leafref_loop: mod %s, "
+                if (LOGDEBUG4) {
+                    log_debug4("\ncheck_leafref_loop: mod %s, "
                                "object %s, on line %u",
                                mod->name, 
                                obj_get_name(testobj), 

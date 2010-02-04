@@ -1151,7 +1151,7 @@
 	  Defines a minor update to the NETCONF protocol.<br/><br/>
 	  <b>Intended Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
 	  <a target="_blank" 
-             href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-4741bis-01.txt">
+             href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-4741bis-02.txt">
 	    Network Configuration Protocol
 	  </a>
 	</p>

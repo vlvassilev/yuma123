@@ -17,7 +17,7 @@
 	Online YANG Module Database</h3>
       <br/>
       <br/><br/>
-      <h3><a href="http://yuma.iwl.com/">Announcing Yuma Tools, a complete NETCONF/YANG Client/Server Toolkit</a></h3>
+      <h3><a href="http://yuma.iwl.com/">Announcing Yuma Tools, a NETCONF Client/Server Toolkit</a></h3>
       <h3><a href="/netconf_docs">Learn about NETCONF</a></h3>
       <h3><a href="/yang_docs">Learn about YANG</a></h3>
       <h3><a href="/modulelist">

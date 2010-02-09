@@ -73,6 +73,7 @@ cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
 make FREE=1 RELEASE=2 %{?_smp_mflags}
+make DEVELOPER=1 RELEASE=2 %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -177,7 +178,8 @@ echo "Check the user manuals in /etc/share/doc/yuma"
 
 %files dev
 %defattr(-,root,root,-)
-%{_sindir}/make_sil_dir.sh
+%{_bindir}/make_sil_dir.sh
+%{_bindir}/yangdumpx
 /usr/share/doc/yuma/yumatools-dev-license.pdf
 /usr/share/doc/yuma/yumatools-legal-notices.pdf
 /usr/share/doc/yuma/yuma-dev-manual.pdf

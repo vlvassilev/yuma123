@@ -23,9 +23,6 @@ install:
 	mkdir -p $(DOC_INSTALL)
 	cp yuma_docs/yuma-user-manual.pdf $(DOC_INSTALL)
 	cp yuma_docs/yuma-quickstart-guide.pdf $(DOC_INSTALL)
-ifndef FREE
-	cp yuma_docs/yuma-dev-manual.pdf $(DOC_INSTALL)
-endif
 else
 ifdef SHLIBS
 install:
@@ -38,6 +35,9 @@ install:
 else
 ifdef DEVELOPER
 install:
+	mkdir -p $(DOC_INSTALL)
+	cp yuma_docs/yuma-dev-manual.pdf $(DOC_INSTALL)
+	cp extra/yumatools-dev-license.pdf $(DOC_INSTALL)
 else
 install:
 	mkdir -p $(DOC_INSTALL)
@@ -50,6 +50,7 @@ install:
 	cp extra/yumatools-legal-notices.pdf $(DOC_INSTALL)
 ifndef FREE
 	cp yuma_docs/yuma-dev-manual.pdf $(DOC_INSTALL)
+	cp extra/yumatools-dev-license.pdf $(DOC_INSTALL)
 endif
 endif
 endif

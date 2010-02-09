@@ -14,7 +14,6 @@ SUBDIR_CPP=-I../yangdump
 TARGET=$(TBASE)/$(SUBDIR_NM)
 BIN_INST=$(TBASE)/bin
 REAL_INST=$(DESTDIR)/usr/bin
-PROG=yangdump
 
 ifdef MAC
    GRP=
@@ -38,7 +37,7 @@ LIBS =	-lncx -L/usr/lib -lxml2
 LIBTARGS= $(LBASE)/libncx.$(LIBSUFFIX)
 
 ############################# MAKE RULES ##################
-all: yangdump
+all: yd
 
 
 #################### PLATFORM DEFINITIONS ############
@@ -49,6 +48,18 @@ include ../platform/platform.profile
 
 include ../platform/platform.profile.depend
 
+
+ifdef DEVELOPER
+yd: yangdumpx
+
+PROG=yangdumpx
+else
+yd: yangdump
+
+PROG=yangdump
+endif
+
+.PHONY: yd
 
 test:
 
@@ -64,6 +75,12 @@ uninstall:
 # this real test rule keeps make from deleting the $(OBJS) as
 # intermediate files
 yangdump: $(OBJS) $(LIBTARGS)
+	$(LINK) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(PROG) $(LPATH) $(LIBS)
+
+
+# this real test rule keeps make from deleting the $(OBJS) as
+# intermediate files
+yangdumpx: $(OBJS) $(LIBTARGS)
 	$(LINK) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(PROG) $(LPATH) $(LIBS)
 
 clean:

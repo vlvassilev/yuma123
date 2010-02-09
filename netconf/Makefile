@@ -11,11 +11,13 @@
 # make all targets
 DIRS = src modules etc doc man
 
+ifdef RELEASE
+  DIRS += util
+endif
+
 TOP_INSTALL = $(DESTDIR)/usr/share/yuma
 
-ifdef DESTDIR
-JFLAG= 
-else
+ifndef JFLAG
 JFLAG = -j3
 endif
 

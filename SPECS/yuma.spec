@@ -72,11 +72,11 @@ included, to compile and process YANG modules.
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make FREE=1 RELEASE=1 %{?_smp_mflags}
+make FREE=1 RELEASE=2 %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id FREE=1 RELEASE=1 \
+make install LDFLAGS+=--build-id FREE=1 RELEASE=2 \
 DESTDIR=$RPM_BUILD_ROOT
 
 %post client

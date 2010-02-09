@@ -5,9 +5,13 @@
 ##################### PROGRAMS ########################
 ##################### LIBRARIES ########################
 #
-# This is an ordered list
-# Put only the directories that build object files in the list
+# Check if this is a DEBIAN package build for
+# the target, which will be 1 of:
+#   SHLIBS, CLIENT, SERVER, DEVELOPER, SOURCE
 #
+# if not a DEBIAN build then none of these environment
+# variables will be defined, so it is either a normal
+# developer build or an RPM package build
 
 ifdef CLIENT
 APPS = yangdump yangdiff yangcli
@@ -32,9 +36,7 @@ endif
 endif
 endif
 
-ifdef DESTDIR
-JFLAG=
-else
+ifndef JFLAG
 JFLAG = -j3
 endif
 

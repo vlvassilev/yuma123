@@ -20,6 +20,9 @@ else
 REAL_INST=$(DESTDIR)/usr/lib
 endif
 
+# if the target is DEBIAN or RPM package, then
+# install the include files
+REAL_INC_INST=$(DESTDIR)/usr/include/yuma
 
 ######################### MAKE RULES ######################
 
@@ -52,9 +55,9 @@ ifdef DEVELOPER
 # just install the H files
 install: includes
 else
-install:
+install: includes
 ifndef STATIC
-# maybe install libncx
+# install dynamic libncx file
 	mkdir -p $(REAL_INST)
 ifdef MAC
 	install $(OWNER) $(GRP) \
@@ -65,6 +68,7 @@ else
 	$(REAL_INST)
 endif
 ifdef SHLIBS
+# this symbolic link needs to be created in the debian SHLIBS build
 	(cd $(REAL_INST); \
 	ln -s lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIB_MAJOR_VERSION).$(LIB_MINOR_VERSION) \
 	lib$(SUBDIR_NM).$(LIBSUFFIX))
@@ -124,7 +128,11 @@ $(LBASE)/libncx.dylib: $(OBJS)
 	-o $@ -install_name libncx.dylib $(OBJS) -lxml2
 
 includes:
-
+ifdef RELEASE
+	mkdir -p $(REAL_INC_INST)
+	cp *.h $(REAL_INC_INST)
+	cp ../platform/procdefs.h $(REAL_INC_INST)
+endif
 
 .PHONY: includes
 

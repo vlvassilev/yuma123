@@ -12,6 +12,10 @@ SUBDIR_CPP=
 TARGET=$(TBASE)/$(SUBDIR_NM)
 BIN_INST=$(TBASE)/bin
 
+# if the target is DEBIAN or RPM package, then
+# install the include files
+REAL_INC_INST=$(DESTDIR)/usr/include/yuma
+
 #################### MAKE RULES ########################
 
 all: agtdummy agtlib
@@ -24,10 +28,17 @@ include ../platform/platform.profile
 
 include ../platform/platform.profile.depend
 
-
 test:
 
+ifdef DEVELOPER
+install: includes
+else
+ifdef RELEASE
+install: includes
+else
 install:
+endif
+endif
 
 uninstall:
 
@@ -35,9 +46,14 @@ ifdef CLIENT
 agtlib:
 else
 ifdef DEVELOPER
-agtlib: includes
+agtlib:
 else
+ifdef SHLIBS
+agtlib:
+else
+# either SERVER or normal or RPM build
 agtlib: dependencies $(LBASE)/lib$(SUBDIR_NM).a
+endif
 endif
 endif
 
@@ -64,6 +80,10 @@ distclean: superclean
 
 
 includes:
+ifdef RELEASE
+	mkdir -p $(REAL_INC_INST)
+	cp *.h $(REAL_INC_INST)
+endif
 
 
 .PHONY: includes

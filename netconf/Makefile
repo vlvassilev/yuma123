@@ -13,8 +13,6 @@ DIRS = src modules etc doc man
 
 TOP_INSTALL = $(DESTDIR)/usr/share/yuma
 
-LIB_INSTALL = $(DESTDIR)/usr/lib/yuma
-
 ifdef DESTDIR
 JFLAG= 
 else
@@ -62,13 +60,6 @@ treedistclean:
         done
 
 treeinstall:
-ifdef DESTDIR
-	mkdir -p $(DESTDIR)/usr/bin
-	mkdir -p $(DESTDIR)/usr/sbin
-	mkdir -p $(DESTDIR)/usr/lib
-	mkdir -p $(DESTDIR)/usr/share/doc
-endif
-	mkdir -p $(LIB_INSTALL)
 	mkdir -p $(TOP_INSTALL)
 	mkdir -p $(TOP_INSTALL)/modules
 	for dir in $(DIRS); do\

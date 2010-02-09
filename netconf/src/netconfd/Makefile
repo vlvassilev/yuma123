@@ -12,6 +12,7 @@ SUBDIR_CPP=
 TARGET=$(TBASE)/$(SUBDIR_NM)
 BIN_INST=$(TBASE)/bin
 REAL_INST=$(DESTDIR)/usr/sbin
+LIB_INST=$(DESTDIR)/usr/lib/yuma
 PROG=netconfd
 
 ifdef MAC
@@ -61,10 +62,13 @@ test:
 
 
 install:
+	mkdir -p $(REAL_INST)
+	mkdir -p $(LIB_INST)
 	install $(OWNER) $(GRP) $(BIN_INST)/$(PROG) $(REAL_INST)
 
 uninstall:
 	rm -f  $(REAL_INST)/$(PROG)
+	rm -rf $(LIB_INST)
 
 distclean: superclean uninstall
 

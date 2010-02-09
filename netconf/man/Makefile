@@ -4,7 +4,7 @@
 
 MAN_INSTALL = $(DESTDIR)/usr/share/man/man1
 
-WEB_INSTALL = $(DESTDIR)/home/andy/MAN_WEBPAGES
+WEB_INSTALL = $(DESTDIR)/$(HOME)/MAN_WEBPAGES
 
 ifdef CLIENT
 MAN_FILES = yangdump.1 yangdiff.1 yangcli.1

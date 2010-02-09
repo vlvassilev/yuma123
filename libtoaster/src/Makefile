@@ -36,6 +36,7 @@ include ../../netconf/src/platform/platform.profile.depend
 test:
 
 install:
+	mkdir -p $(REAL_INST)
 	$(SUDO) install $(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) $(REAL_INST)
 
 work:

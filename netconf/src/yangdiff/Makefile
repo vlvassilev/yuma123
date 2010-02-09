@@ -49,6 +49,7 @@ test:
 
 # needs to be done by root
 install:
+	mkdir -p $(REAL_INST)
 	install $(OWNER) $(GRP) $(BIN_INST)/$(PROG) $(REAL_INST)
 
 uninstall:

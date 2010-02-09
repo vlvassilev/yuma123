@@ -1,6 +1,6 @@
 Name:           yuma
 Version:        0.10
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -157,4 +157,32 @@ echo "Check the user manuals in /etc/share/doc/yuma"
 %{_datadir}/yuma/modules/netconfcentral/yuma-netconf.yang
 %{_datadir}/yuma/modules/netconfcentral/yuma-proc.yang
 %{_datadir}/yuma/modules/netconfcentral/yuma-system.yang
+
+
+%package dev
+
+Summary:  YANG-based Unified Modular Automation Tools (developer)
+Requires: yuma-shlibs
+Requires: yuma-server
+
+%description dev
+Yuma Tools is a YANG-based NETCONF-over-SSH client and server
+development toolkit.  This package contains H files, scripts,
+and other files needed to create SIL code for use with
+the netconfd server.
+
+%post dev
+echo "Yuma Tools developer files installed."
+echo "Check the user manuals in /etc/share/doc/yuma"
+
+%files dev
+%defattr(-,root,root,-)
+%{_sindir}/make_sil_dir.sh
+/usr/share/doc/yuma/yumatools-dev-license.pdf
+/usr/share/doc/yuma/yumatools-legal-notices.pdf
+/usr/share/doc/yuma/yuma-dev-manual.pdf
+%{_includedir}/yuma/*
+%{_datadir}/yuma/util/
+
+
 

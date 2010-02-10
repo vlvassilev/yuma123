@@ -16,15 +16,18 @@ uninstall:
 	rm -f $(DOC_INSTALL)
 
 ifdef SERVER
+# nothing to install for the debian SERVER build
 install:
 else
 ifdef CLIENT
+# install the base user documentation in debian CLIENT build
 install:
 	mkdir -p $(DOC_INSTALL)
 	cp yuma_docs/yuma-user-manual.pdf $(DOC_INSTALL)
 	cp yuma_docs/yuma-quickstart-guide.pdf $(DOC_INSTALL)
 else
 ifdef SHLIBS
+# install the base license documentation in debian SHLIBS build
 install:
 	mkdir -p $(DOC_INSTALL)
 	cp extra/AUTHORS $(DOC_INSTALL)
@@ -34,11 +37,13 @@ install:
 	cp extra/yumatools-legal-notices.pdf $(DOC_INSTALL)
 else
 ifdef DEVELOPER
+# install the developer documentation in debian DEVELOPER build
 install:
 	mkdir -p $(DOC_INSTALL)
 	cp yuma_docs/yuma-dev-manual.pdf $(DOC_INSTALL)
 	cp extra/yumatools-dev-license.pdf $(DOC_INSTALL)
 else
+# install everything in real or RPM build
 install:
 	mkdir -p $(DOC_INSTALL)
 	cp yuma_docs/yuma-user-manual.pdf $(DOC_INSTALL)
@@ -48,10 +53,8 @@ install:
 	cp extra/README $(DOC_INSTALL)
 	cp extra/yumatools-cs-license.pdf $(DOC_INSTALL)
 	cp extra/yumatools-legal-notices.pdf $(DOC_INSTALL)
-ifndef FREE
 	cp yuma_docs/yuma-dev-manual.pdf $(DOC_INSTALL)
 	cp extra/yumatools-dev-license.pdf $(DOC_INSTALL)
-endif
 endif
 endif
 endif

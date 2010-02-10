@@ -37,7 +37,7 @@ LIBS =	-lncx -L/usr/lib -lxml2
 LIBTARGS= $(LBASE)/libncx.$(LIBSUFFIX)
 
 ############################# MAKE RULES ##################
-all: yd
+all: yangdump
 
 
 #################### PLATFORM DEFINITIONS ############
@@ -49,45 +49,28 @@ include ../platform/platform.profile
 include ../platform/platform.profile.depend
 
 
-ifdef DEVELOPER
-yd: yangdumpx
-
-PROG=yangdumpx
-else
-yd: yangdump
-
-PROG=yangdump
-endif
-
-.PHONY: yd
-
 test:
 
 
 # needs to be done by root
 install:
 	mkdir -p $(REAL_INST)
-	install $(OWNER) $(GRP) $(BIN_INST)/$(PROG) $(REAL_INST)
+	install $(OWNER) $(GRP) $(BIN_INST)/$(SUBDIR_NM) $(REAL_INST)
 
 uninstall:
-	rm -f  $(REAL_INST)/$(PROG)
+	rm -f  $(REAL_INST)/$(SUBDIR_NM)
 
 # this real test rule keeps make from deleting the $(OBJS) as
 # intermediate files
 yangdump: $(OBJS) $(LIBTARGS)
-	$(LINK) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(PROG) $(LPATH) $(LIBS)
+	$(LINK) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(SUBDIR_NM) $(LPATH) $(LIBS)
 
-
-# this real test rule keeps make from deleting the $(OBJS) as
-# intermediate files
-yangdumpx: $(OBJS) $(LIBTARGS)
-	$(LINK) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(PROG) $(LPATH) $(LIBS)
 
 clean:
-	rm -f $(OBJS) $(BIN_INST)/$(PROG)
+	rm -f $(OBJS) $(BIN_INST)/$(SUBDIR_NM)
 
 superclean:
-	rm -f *~  $(DEPS) dependencies $(OBJS) $(BIN_INST)/$(PROG)
+	rm -f *~  $(DEPS) dependencies $(OBJS) $(BIN_INST)/$(SUBDIR_NM)
 
 distclean: superclean uninstall
 

@@ -8681,6 +8681,8 @@ boolean
 boolean
     obj_is_xpath_string (const obj_template_t *obj)
 {
+    const typ_def_t   *typdef;
+    boolean            retval;
 
 #ifdef DEBUG
     if (!obj) {
@@ -8689,9 +8691,18 @@ boolean
     }
 #endif
 
-    return ((obj->flags & (OBJ_FL_XPATH | OBJ_FL_SCHEMAINST)) ||
-            obj_get_basetype(obj)==NCX_BT_INSTANCE_ID) 
+    retval = ((obj->flags & (OBJ_FL_XPATH | OBJ_FL_SCHEMAINST)) ||
+              obj_get_basetype(obj)==NCX_BT_INSTANCE_ID) 
         ? TRUE : FALSE;
+
+    if (!retval) {
+        typdef = obj_get_ctypdef(obj);
+        if (typdef != NULL) {
+            retval = typ_is_xpath_string(typdef);
+        }
+    }
+
+    return retval;
 
 }   /* obj_is_xpath_string */
 

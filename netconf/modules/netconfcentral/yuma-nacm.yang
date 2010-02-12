@@ -4,9 +4,11 @@ module yuma-nacm {
 
     prefix "nacm";
 
+    import ietf-yang-types { prefix yang; }
+
     // used just for ncx extensions
     import yuma-ncx { prefix ncx; }
-
+   
     organization  "Netconf Central, Inc.";
 
     contact "Andy Bierman <andy@netconfcentral.org>.";
@@ -73,7 +75,7 @@ module yuma-nacm {
           specified access right (read, write, or exec).";
 
 
-    revision 2009-11-21 {
+    revision 2010-02-11 {
         description  
           "Initial version (work-in-progress).";
     }
@@ -81,8 +83,8 @@ module yuma-nacm {
     typedef nacm-user-name {
         description "General Purpose User Name string.";
         type string {
-            length "1..63";
-            pattern '[a-z,A-Z][a-z,A-Z,0-9]{0,62}';
+            length "1..64";
+            pattern '[a-z,A-Z][a-z,A-Z,0-9]{0,63}';
         }
     }
 
@@ -145,6 +147,21 @@ module yuma-nacm {
                description "Requested action is denied.";
            }
        }
+    }
+
+    typedef schema-instance {
+      description
+        "Path expression used to represent a special schema-instance 
+         identifier string.
+       
+         A schema-instance value string is an unrestricted YANG
+         instance-identifier expression.  All the same rules
+         as an instance-identifier apply except predicates
+         for keys are optional.  If a key predicate is missing,
+         then all existing instances for that key are implied.";
+      type string {
+         ncx:schema-instance;  // need to remove for I-D version
+      }
     }
 
     extension secure {
@@ -235,6 +252,21 @@ module yuma-nacm {
                particular RPC operation request.";
             type nacm-action;
             default "permit";
+        }
+
+        leaf deniedRpcs {
+            description
+              "Number of times an RPC operation request was denied";
+            type yang:zero-based-counter32;
+            config false;
+        }
+
+        leaf deniedDataWrites {
+            description
+              "Number of times a request to alter a data node
+               was denied.";
+            type yang:zero-based-counter32;
+            config false;
         }
 
         container groups {
@@ -472,9 +504,7 @@ module yuma-nacm {
                      The special value '/' refers to all
                      possible database contents.";
 
-		  type string {
-                      ncx:schema-instance;
-                  }
+		  type schema-instance;
                   mandatory true;
                 }
 

@@ -296,8 +296,10 @@ static status_t
             /* If the child leaf is required then it is marked
              * as mandatory and no default exists
              * If mandatory, then default is ignored
+             * !!! ignore read-only objects !!!
              */
-            if (!obj_is_mandatory(chobj)) {
+            if (!obj_is_mandatory(chobj) && obj_is_config(chobj)) {
+                    
                 chval = val_find_child(val, 
                                        obj_get_mod_name(chobj),
                                        obj_get_name(chobj));

@@ -16,6 +16,8 @@ container /nacm
 leaf /nacm/noRuleReadDefault
 leaf /nacm/noRuleWriteDefault
 leaf /nacm/noRuleExecDefault
+leaf /nacm/rpcDeniedCount
+leaf /nacm/dataWriteDeniedCount
 container /nacm/groups
 list /nacm/groups/group
 leaf /nacm/groups/group/groupIdentity
@@ -169,6 +171,9 @@ date         init     comment
 #define nacm_N_rules (const xmlChar *)"rules"
 #define nacm_N_userName (const xmlChar *)"userName"
 
+#define nacm_N_deniedRpcs (const xmlChar *)"deniedRpcs"
+#define nacm_N_deniedDataWrites (const xmlChar *)"deniedDataWrites"
+
 #define nacm_OID_nacm (const xmlChar *)"/nacm"
 
 #define nacm_E_noRuleDefault_permit (const xmlChar *)"permit"
@@ -199,6 +204,10 @@ static ncx_module_t  *nacmmod;
 static const xmlChar *superuser;
 
 static agt_acmode_t   acmode;
+
+static uint32         deniedRpcCount;
+
+static uint32         deniedDataWriteCount;
 
 
 /********************************************************************
@@ -728,7 +737,7 @@ static boolean
                                    
     return granted;
 
-} /* check_accesse_bit */
+} /* check_access_bit */
 
 
 /********************************************************************
@@ -1474,6 +1483,66 @@ static boolean
 
 
 /********************************************************************
+* FUNCTION get_deniedRpcs
+*
+* <get> operation handler for the nacm/deniedRpcs counter
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    get_deniedRpcs (ses_cb_t *scb,
+                    getcb_mode_t cbmode,
+                    const val_value_t *virval,
+                    val_value_t  *dstval)
+{
+    (void)scb;
+    (void)virval;
+
+    if (cbmode != GETCB_GET_VALUE) {
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+    VAL_UINT(dstval) = deniedRpcCount;
+    return NO_ERR;
+
+} /* get_deniedRpcs */
+
+
+/********************************************************************
+* FUNCTION get_deniedDataWrites
+*
+* <get> operation handler for the nacm/deniedDataWrites counter
+*
+* INPUTS:
+*    see ncx/getcb.h getcb_fn_t for details
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    get_deniedDataWrites (ses_cb_t *scb,
+                          getcb_mode_t cbmode,
+                          const val_value_t *virval,
+                          val_value_t  *dstval)
+{
+    (void)scb;
+    (void)virval;
+
+    if (cbmode != GETCB_GET_VALUE) {
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+    VAL_UINT(dstval) = deniedDataWriteCount;
+    return NO_ERR;
+
+} /* get_deniedDataWrites */
+
+
+/********************************************************************
 * FUNCTION nacm_callback
 *
 * top-level nacm callback function
@@ -1580,6 +1649,8 @@ status_t
 
     superuser = NULL;
     acmode = AGT_ACMOD_ENFORCING;
+    deniedRpcCount = 0;
+    deniedDataWriteCount = 0;
     agt_acm_init_done = TRUE;
 
     res = agt_cb_register_callback(AGT_ACM_MODULE,
@@ -1612,7 +1683,7 @@ status_t
     const agt_profile_t   *profile;
     obj_template_t        *nacmobj;
     cfg_template_t        *runningcfg;
-    val_value_t           *nacmval;
+    val_value_t           *nacmval, *childval;
     status_t               res;
 
     if (!agt_acm_init_done) {
@@ -1634,46 +1705,66 @@ status_t
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
+    nacmobj = obj_find_template_top(nacmmod, 
+                                    AGT_ACM_MODULE,
+                                    nacm_N_nacm);
+    if (nacmobj == NULL) {
+        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+    }
+
     /* check to see if the /nacm branch already exists
      * if so, then skip all this init stuff
      */
     nacmval = val_find_child(runningcfg->root,
                              AGT_ACM_MODULE,
                              nacm_N_nacm);
-    if (nacmval) {
-        /* add /nacm/noRule*Default if they
-         * are not already set
+    if (nacmval == NULL) {
+        /* did not find the /nacm node so create one;
+         * get all the static object nodes first 
          */
-        /* res = val_add_defaults(nacmval, FALSE); */
-        
-        /* minimum init done OK, so just exit */
-        return NO_ERR;
+
+        /* create the static structure for the /nacm data model
+         * start with the top node /nacm
+         */
+        nacmval = val_new_value();
+        if (nacmval == NULL) {
+            res = ERR_INTERNAL_MEM;
+        } else {
+            val_init_from_template(nacmval, nacmobj);
+            
+            /* handing off the malloced memory here */
+            val_add_child(nacmval, runningcfg->root);
+
+            /* add /nacm/noRuleDefault */
+            res = val_add_defaults(nacmval, FALSE);
+        }
     }
-        
-    /* did not find the /nacm node so create one;
-     * get all the static object nodes first 
-     */
-    nacmobj = obj_find_template_top(nacmmod, 
-                                    AGT_ACM_MODULE,
-                                    nacm_N_nacm);
-    if (!nacmobj) {
-        return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+
+    /* add read-only virtual leafs to the nacm value node */
+    if (res == NO_ERR) {
+        /* create /nacm/deniedRpcs */
+        childval = agt_make_virtual_leaf(nacmobj,
+                                         nacm_N_deniedRpcs,
+                                         get_deniedRpcs,
+                                         &res);
+        if (childval != NULL) {
+            val_add_child(childval, nacmval);
+        }
     }
 
-    /* create the static structure for the /nacm data model
-     * start with the top node /nacm
-     */
-    nacmval = val_new_value();
-    if (!nacmval) {
-        res = ERR_INTERNAL_MEM;
-    } else {
-        val_init_from_template(nacmval, nacmobj);
+    if (res == NO_ERR) {
+        /* create /nacm/deniedDataWrites */
+        childval = agt_make_virtual_leaf(nacmobj,
+                                         nacm_N_deniedDataWrites,
+                                         get_deniedDataWrites,
+                                         &res);
+        if (childval != NULL) {
+            val_add_child(childval, nacmval);
+        }
+    }
 
-        /* handing off the malloced memory here */
-        val_add_child(nacmval, runningcfg->root);
-
-        /* add /nacm/noRuleDefault */
-        res = val_add_defaults(nacmval, FALSE);
+    if (res == NO_ERR) {
+        val_set_canonical_order(nacmval);
     }
 
     return res;
@@ -1833,6 +1924,10 @@ boolean
         }
     }
 
+    if (!retval) {
+        deniedRpcCount++;
+    }
+
     return retval;
 
 }   /* agt_acm_rpc_allowed */
@@ -1858,6 +1953,8 @@ boolean
                                const xmlChar *user,
                                const val_value_t *val)
 {
+    boolean  retval;
+
 #ifdef DEBUG
     if (!msg || !msg->acm_cache || !user || !val) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -1865,10 +1962,16 @@ boolean
     }
 #endif
 
-    return valnode_access_allowed(msg->acm_cache,
-                                  user,
-                                  val,
-                                  nacm_E_allowedRights_write);
+    retval = valnode_access_allowed(msg->acm_cache,
+                                    user,
+                                    val,
+                                    nacm_E_allowedRights_write);
+
+    if (!retval) {
+        deniedDataWriteCount++;
+    }
+
+    return retval;
 
 }   /* agt_acm_val_write_allowed */
 

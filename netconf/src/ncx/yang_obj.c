@@ -417,7 +417,7 @@ static status_t
         ncx_print_errormsg(tkc, mod, res);
         obj_free_template(obj);
     } else {
-        /* obj_set_ncx_flags(obj); */
+        obj_set_ncx_flags(obj);
         dlq_enque(obj, que);  /* may have some errors */
         if (mod->stmtmode && que==&mod->datadefQ) {
             /* save top-level object order only */
@@ -1892,7 +1892,7 @@ static status_t
         
     /* save or delete the obj_template_t struct */
     if (res==NO_ERR && cas->name && ncx_valid_name2(cas->name)) {
-        /* obj_set_ncx_flags(obj);  */
+        obj_set_ncx_flags(obj);
         dlq_enque(obj, caseQ);
     } else {
         obj_free_template(obj);
@@ -2168,7 +2168,7 @@ static status_t
         }
 
         if (res==NO_ERR) {
-            /* obj_set_ncx_flags(obj); */
+            obj_set_ncx_flags(obj);
             dlq_enque(obj, que);  /* may have some errors */        
         } else {
             obj_free_template(obj);
@@ -2607,7 +2607,7 @@ static status_t
             ncx_print_errormsg(tkc, mod, retres);
             obj_free_template(obj);
         } else {
-            /* obj_set_ncx_flags(obj); */
+            obj_set_ncx_flags(obj);
             dlq_enque(obj, que);  /* may have some errors */
             if (mod->stmtmode && que==&mod->datadefQ) {
                 /* save top-level object order only */
@@ -2775,7 +2775,7 @@ static status_t
         ncx_print_errormsg(tkc, mod, retres);
         obj_free_template(obj);
     } else {
-        /* obj_set_ncx_flags(obj); */
+        obj_set_ncx_flags(obj);
         dlq_enque(obj, que);  /* may have some errors */
     }
 
@@ -3066,7 +3066,7 @@ static status_t
 
     /* save or delete the obj_template_t struct */
     if (aug->target) {
-        /* obj_set_ncx_flags(obj); */
+        obj_set_ncx_flags(obj);
         dlq_enque(obj, que);
         if (mod->stmtmode && que==&mod->datadefQ) {
             /* save top-level object order only */
@@ -3394,7 +3394,7 @@ static status_t
                 obj_free_template(obj);
                 return res;
             }
-            /* obj_set_ncx_flags(chobj); */
+            obj_set_ncx_flags(chobj);
             dlq_enque(chobj, &obj->def.rpc->datadefQ);
         }
 
@@ -3423,7 +3423,7 @@ static status_t
                 obj_free_template(obj);
                 return res;
             }
-            /* obj_set_ncx_flags(chobj); */
+            obj_set_ncx_flags(chobj);
             dlq_enque(chobj, &obj->def.rpc->datadefQ);
         }
         
@@ -7517,7 +7517,7 @@ static status_t
                     newobj->parent = targobj;
                     newobj->flags |= OBJ_FL_AUGCLONE;
                     newobj->augobj = obj;
-                    /* obj_set_ncx_flags(newobj); */
+                    obj_set_ncx_flags(newobj);
                     dlq_enque(newobj, targQ);
 
                     /* may need to set the config flag now, under the context
@@ -8472,6 +8472,12 @@ static status_t
         res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
+    /* set the flags again; they were already
+     * set once during the consume_foo function
+     * which means that named typedefs and other
+     * references are not resolved yet; need to
+     * go through again and check some flags
+     */
     obj_set_ncx_flags(testobj);
 
     CHK_EXIT(res, retres);

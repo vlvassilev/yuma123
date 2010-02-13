@@ -53,6 +53,9 @@ date	     init     comment
 #define NCX_MODULE       (const xmlChar *)"yuma-ncx"
 #define NCX_PREFIX       (const xmlChar *)"ncx"
 
+/* source of secure and very-secure extensions! */
+#define NACM_PREFIX      (const xmlChar *)"nacm"
+
 #define NC_OK_REPLY  (const xmlChar *)"RpcOkReplyType"
 
 #define NC_URN  (const xmlChar *)"urn:ietf:params:xml:ns:netconf:base:1.0"

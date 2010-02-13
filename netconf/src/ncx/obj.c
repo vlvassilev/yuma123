@@ -8425,13 +8425,13 @@ void
     }
 
     if (ncx_find_const_appinfo(appinfoQ, 
-                               NCX_PREFIX, 
+                               NACM_PREFIX, 
                                NCX_EL_SECURE)) {
         obj->flags |= OBJ_FL_SECURE;
     }
 
     if (ncx_find_const_appinfo(appinfoQ, 
-                               NCX_PREFIX, 
+                               NACM_PREFIX, 
                                NCX_EL_VERY_SECURE)) {
         obj->flags |= OBJ_FL_VERY_SECURE;
     }

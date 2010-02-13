@@ -36,3 +36,13 @@ Description: YANG-based Unified Modular Automation tools
  The yangdump and yangdiff development tools are also
  included, to compile and process YANG modules.
 
+Package: yuma-dev
+Architecture: any
+Depends: yuma-shlibs, yuma-server, ${shlibs:Depends}, ${misc:Depends}
+Description: YANG-based Unified Modular Automation tools
+ Yuma Tools is a YANG-based NETCONF-over-SSH client and server
+ development toolkit.  This package contains H files, scripts,
+ and other files needed to create SIL code for use with
+ the netconfd server.
+
+

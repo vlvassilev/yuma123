@@ -8,13 +8,13 @@
 
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
+export MY_REL=2
 
 configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
 	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma-client; cd ..)
-
 	touch configure-stamp
 
 
@@ -24,7 +24,8 @@ build-stamp: configure-stamp
 	dh_testdir
 
 	# Add here commands to compile the package.
-	$(MAKE) FREE=1 DEBIAN=1 RELEASE=1
+	$(MAKE) FREE=1 DEBIAN=1 RELEASE=$(MY_REL)
+
 	#docbook-to-man debian/yuma.sgml > yuma.1
 
 	touch $@
@@ -36,9 +37,14 @@ clean:
 
 	# Add here commands to clean up after the build process.
 	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma-client; cd ..)
-	$(MAKE) FREE=1 DEBIAN=1 CLIENT=1 DESTDIR=$(CURDIR)/debian/yuma-client clean
-	$(MAKE) FREE=1 DEBIAN=1 SERVER=1 DESTDIR=$(CURDIR)/debian/yuma-server clean
-	$(MAKE) FREE=1 DEBIAN=1 SHLIBS=1 DESTDIR=$(CURDIR)/debian/yuma-shlibs clean
+	$(MAKE) FREE=1 DEBIAN=1 CLIENT=1 \
+	DESTDIR=$(CURDIR)/debian/yuma-client clean
+	$(MAKE) FREE=1 DEBIAN=1 SERVER=1 \
+	DESTDIR=$(CURDIR)/debian/yuma-server clean
+	$(MAKE) FREE=1 DEBIAN=1 SHLIBS=1 \
+	DESTDIR=$(CURDIR)/debian/yuma-shlibs clean
+	$(MAKE) DEBIAN=1 DEVELOPER=1 \
+	DESTDIR=$(CURDIR)/debian/yuma-dev clean
 
 	dh_clean 
 
@@ -49,12 +55,14 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/yuma.
-	$(MAKE) FREE=1 CLIENT=1 RELEASE=1 \
+	$(MAKE) FREE=1 CLIENT=1 RELEASE=$(MY_REL) \
 	DESTDIR=$(CURDIR)/debian/yuma-client install
-	$(MAKE) FREE=1 SERVER=1 RELEASE=1 \
+	$(MAKE) FREE=1 SERVER=1 RELEASE=$(MY_REL) \
 	DESTDIR=$(CURDIR)/debian/yuma-server install
-	$(MAKE) FREE=1 SHLIBS=1 RELEASE=1 \
+	$(MAKE) FREE=1 SHLIBS=1 RELEASE=$(MY_REL) \
 	DESTDIR=$(CURDIR)/debian/yuma-shlibs install
+	$(MAKE) DEVELOPER=1 RELEASE=$(MY_REL) \
+	DESTDIR=$(CURDIR)/debian/yuma-dev install
 
 postinst: 
 	ldconfig

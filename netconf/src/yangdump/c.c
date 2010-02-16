@@ -1431,7 +1431,7 @@ static void
     if (is_validate) {
         ses_putstr(scb, (const xmlChar *)"RPC validation phase");
         ses_putstr(scb, FN_BANNER_LN);
-        ses_putstr(scb, (const xmlChar *)"All YANG constriants have "
+        ses_putstr(scb, (const xmlChar *)"All YANG constraints have "
                    "passed at this point.");
         ses_putstr(scb, FN_BANNER_LN);
         ses_putstr(scb, (const xmlChar *)"Add description-stmt checks "
@@ -1439,7 +1439,7 @@ static void
     } else {
         ses_putstr(scb, (const xmlChar *)"RPC invocation phase");
         ses_putstr(scb, FN_BANNER_LN);
-        ses_putstr(scb, (const xmlChar *)"All constriants have "
+        ses_putstr(scb, (const xmlChar *)"All constraints have "
                    "passed at this point.");
         ses_putstr(scb, FN_BANNER_LN);
         ses_putstr(scb, (const xmlChar *)"Call "

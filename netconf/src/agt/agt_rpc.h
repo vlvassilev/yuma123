@@ -88,7 +88,7 @@ date             init     comment
 typedef enum agt_rpc_phase_t_ {
     AGT_RPC_PH_VALIDATE,         /* (2) cb after the input is parsed */
     AGT_RPC_PH_INVOKE,      /* (3) cb to invoke the requested method */
-    AGT_RPC_PH_POSTRPY,       /* (5) cb after the reply is generated */ 
+    AGT_RPC_PH_POST_REPLY,    /* (5) cb after the reply is generated */ 
     AGT_RPC_PH_PARSE,                    /* (1) NO CB FOR THIS STATE */ 
     AGT_RPC_PH_REPLY                     /* (4) NO CB FOR THIS STATE */ 
 } agt_rpc_phase_t;

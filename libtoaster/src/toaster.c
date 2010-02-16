@@ -526,7 +526,7 @@ static status_t
 * FUNCTION y_toaster_make_toast_invoke
 * 
 * RPC invocation phase
-* All constriants have passed at this point.
+* All constraints have passed at this point.
 * Call device instrumentation code in this function.
 * 
 * INPUTS:
@@ -574,7 +574,7 @@ static status_t
     }
     
 
-    /* abitrary formula to convert toaster doneness to the
+    /* arbitrary formula to convert toaster doneness to the
      * number of seconds the toaster should be on
      */
     toaster_duration = toasterDoneness * 12;
@@ -681,7 +681,7 @@ static status_t
 * FUNCTION y_toaster_cancel_toast_invoke
 * 
 * RPC invocation phase
-* All constriants have passed at this point.
+* All constraints have passed at this point.
 * Call device instrumentation code in this function.
 * 
 * INPUTS:

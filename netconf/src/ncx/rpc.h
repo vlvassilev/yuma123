@@ -137,7 +137,7 @@ typedef struct rpc_audit_rec_t_ {
 } rpc_audit_rec_t;
 
 
-/* NCX Agent RPC Request/Reply Message Header */
+/* NETCONF Server and Client RPC Request/Reply Message Header */
 typedef struct rpc_msg_t_ {
     dlq_hdr_t        qhdr;
 
@@ -153,8 +153,8 @@ typedef struct rpc_msg_t_ {
      */
     struct obj_template_t_ *rpc_method; 
 
-    /* incoming: AGENT RPC processing state */
-    int              rpc_agt_state;        /* rpc_agt_phase_t */
+    /* incoming: SERVER RPC processing state */
+    int              rpc_agt_state;        /* agt_rpc_phase_t */
     op_errop_t       rpc_err_option;
     op_editop_t      rpc_top_editop;
     val_value_t     *rpc_input;
@@ -174,8 +174,8 @@ typedef struct rpc_msg_t_ {
      * by the rpc_datacb function to generate a reply.
      */
     rpc_data_t      rpc_data_type;          /* type of data reply */
-    void           *rpc_datacb;              /* rpc_agt_data_cb_t */
-    dlq_hdr_t       rpc_dataQ;                    /* data reply */
+    void           *rpc_datacb;              /* agt_rpc_data_cb_t */
+    dlq_hdr_t       rpc_dataQ;       /* data reply: Q of val_value_t */
     op_filter_t     rpc_filter;        /* backptrs for get* methods */
 
     /* incoming: rollback or commit phase support builtin

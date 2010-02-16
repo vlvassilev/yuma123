@@ -1424,9 +1424,9 @@ void
     /* check if there is a post-reply callback;
      * call even if the RPC failed
      */
-    if (cbset && cbset->acb[AGT_RPC_PH_POSTRPY]) {
-        msg->rpc_agt_state = AGT_RPC_PH_POSTRPY;
-        (void)(*cbset->acb[AGT_RPC_PH_POSTRPY])(scb, msg, &method);
+    if (cbset && cbset->acb[AGT_RPC_PH_POST_REPLY]) {
+        msg->rpc_agt_state = AGT_RPC_PH_POST_REPLY;
+        (void)(*cbset->acb[AGT_RPC_PH_POST_REPLY])(scb, msg, &method);
     }
 
     /* check if there is any auditQ because changes to 

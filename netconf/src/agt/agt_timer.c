@@ -245,6 +245,7 @@ void
 * FUNCTION agt_timer_handler
 *
 * Handle an incoming agent timer polling interval
+* main routine called by agt_signal_handler
 *
 *********************************************************************/
 void 
@@ -299,7 +300,18 @@ void
 * Malloc and start a new timer control block
 *
 * INPUTS:
-*   
+*   seconds == number of seconds to wait between polls
+*   is_periodic == TRUE if periodic timer
+*                  FALSE if a 1-event timer
+*   timer_fn == address of callback function to invoke when
+*               the timer poll event occurs
+*   cookie == address of user cookie to pass to the timer_fn
+*   ret_timer_id == address of return timer ID
+*
+* OUTPUTS:
+*  *ret_timer_id == timer ID for the allocated timer, 
+*    if the return value is NO_ERR
+*
 * RETURNS:
 *   NO_ERR if all okay, the minimum spare requests will be malloced
 *********************************************************************/
@@ -390,6 +402,9 @@ status_t
 * FUNCTION agt_timer_delete
 *
 * Remove and delete a timer control block
+* periodic timers need to be deleted to be stopped
+* 1-shot timers will be deleted automatically after
+* they expire and the callback is invoked
 *
 * INPUTS:
 *   timer_id == timer ID to destroy

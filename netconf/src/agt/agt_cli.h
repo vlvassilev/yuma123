@@ -76,6 +76,29 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION agt_cli_process_input
+*
+* Process the param line parameters against the hardwired
+* parmset for the netconfd program
+*
+* INPUTS:
+*    argc == argument count
+*    argv == array of command line argument strings
+*    agt_profile == agent profile struct to fill in
+*    showver == address of version return quick-exit status
+*    showhelpmode == address of help return quick-exit status
+*
+* OUTPUTS:
+*    *agt_profile is filled in, with parms gathered or defaults
+*    *showver == TRUE if user requsted version quick-exit mode
+*    *showhelpmode == requested help mode 
+*                     (none, breief, normal, full)
+*
+* RETURNS:
+*    NO_ERR if all goes well
+*********************************************************************/
 extern status_t
     agt_cli_process_input (int argc,
 			   const char *argv[],
@@ -83,10 +106,27 @@ extern status_t
 			   boolean *showver,
 			   help_mode_t *showhelpmode);
 
+
+/********************************************************************
+* FUNCTION agt_cli_get_valset
+*
+*   Retrieve the command line parameter set from boot time
+*
+* RETURNS:
+*    pointer to parmset or NULL if none
+*********************************************************************/
 extern val_value_t *
     agt_cli_get_valset (void);
 
+
+/********************************************************************
+* FUNCTION agt_cli_cleanup
+*
+*   Cleanup the module static data
+*
+*********************************************************************/
 extern void
     agt_cli_cleanup (void);
+
 
 #endif	    /* _H_agt_cli */

@@ -65,9 +65,38 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
-/* generate an element (or non-attribute) related error
- * for any layer. Does not use the application layer fields
- */
+
+/********************************************************************
+* FUNCTION agt_rpc_gen_error
+*
+* Generate an internal <rpc-error> record for an element
+* (or non-attribute) related error for any layer. 
+*
+* INPUTS:
+*   layer == protocol layer where the error occurred
+*   interr == internal error code
+*             if NO_ERR than use the rpcerr only
+*   errnode == XML node where error occurred
+*           == NULL then there is no valid XML node (maybe the error!)
+*   parmtyp == type of node contained in error_parm
+*   error_parm == pointer to the extra parameter expected for
+*                this type of error.  
+*
+*                == (void *)pointer to session_id for lock-denied errors
+*                == (void *) pointer to the bad-value string to use
+*                   for some other errors
+*
+*  error_path == malloced string of the value (or type, etc.) instance
+*                ID string in NCX_IFMT_XPATH format; this will be added
+*                to the rpc_err_rec_t and freed later
+*             == NULL if not available
+*
+* RETURNS:
+*   pointer to allocated and filled in rpc_err_rec_t struct
+*     ready to add to the msg->rpc_errQ
+*   NULL if a record could not be allocated or not enough
+*     val;id info in the parameters 
+*********************************************************************/
 extern rpc_err_rec_t *
     agt_rpcerr_gen_error (ncx_layer_t layer,
 			  status_t   interr,
@@ -77,6 +106,37 @@ extern rpc_err_rec_t *
 			  xmlChar *error_path);
 
 
+/********************************************************************
+* FUNCTION agt_rpc_gen_error_errinfo
+*
+* Generate an internal <rpc-error> record for an element
+*
+* INPUTS:
+*   layer == protocol layer where the error occurred
+*   interr == internal error code
+*             if NO_ERR than use the rpcerr only
+*   errnode == XML node where error occurred
+*           == NULL then there is no valid XML node (maybe the error!)
+*   parmtyp == type of node contained in error_parm
+*   error_parm == pointer to the extra parameter expected for
+*                this type of error.  
+*
+*                == (void *)pointer to session_id for lock-denied errors
+*                == (void *) pointer to the bad-value string to use
+*                   for some other errors
+*
+*  error_path == malloced string of the value (or type, etc.) instance
+*                ID string in NCX_IFMT_XPATH format; this will be added
+*                to the rpc_err_rec_t and freed later
+*             == NULL if not available
+*  errinfo == error info struct to use for whatever fields are set
+*
+* RETURNS:
+*   pointer to allocated and filled in rpc_err_rec_t struct
+*     ready to add to the msg->rpc_errQ
+*   NULL if a record could not be allocated or not enough
+*     val;id info in the parameters 
+*********************************************************************/
 extern rpc_err_rec_t *
     agt_rpcerr_gen_error_errinfo (ncx_layer_t layer,
 				  status_t   interr,
@@ -87,6 +147,40 @@ extern rpc_err_rec_t *
 				  const ncx_errinfo_t *errinfo);
 
 
+/********************************************************************
+* FUNCTION agt_rpc_gen_error_ex
+*
+* Generate an internal <rpc-error> record for an element
+*
+* INPUTS:
+*   layer == protocol layer where the error occurred
+*   interr == internal error code
+*             if NO_ERR than use the rpcerr only
+*   errnode == XML node where error occurred
+*           == NULL then there is no valid XML node (maybe the error!)
+*   parmtyp == type of node contained in error_parm
+*   error_parm == pointer to the extra parameter expected for
+*                this type of error.  
+*
+*                == (void *)pointer to session_id for lock-denied errors
+*                == (void *) pointer to the bad-value string to use
+*                   for some other errors
+*
+*  error_path == malloced string of the value (or type, etc.) instance
+*                ID string in NCX_IFMT_XPATH format; this will be added
+*                to the rpc_err_rec_t and freed later
+*             == NULL if not available
+*  errinfo == error info struct to use for whatever fields are set
+*  nodetyp == type of node contained in error_path_raw
+*  error_path_raw == pointer to the extra parameter expected for
+*                this type of error.  
+*
+* RETURNS:
+*   pointer to allocated and filled in rpc_err_rec_t struct
+*     ready to add to the msg->rpc_errQ
+*   NULL if a record could not be allocated or not enough
+*     val;id info in the parameters 
+*********************************************************************/
 extern rpc_err_rec_t *
     agt_rpcerr_gen_error_ex (ncx_layer_t layer,
                              status_t   interr,
@@ -98,18 +192,29 @@ extern rpc_err_rec_t *
                              ncx_node_t  nodetyp,
                              const void *error_path_raw);
 
-/* generate an attribute related error for any layer. 
- *  Does not use the application layer fields
- */
-extern rpc_err_rec_t *
-    agt_rpcerr_gen_attr_error (ncx_layer_t layer,
-			       status_t   interr,
-			       const xml_attr_t *attr,
-			       const xml_node_t *errnode,
-			       const xmlChar *badns,
-			       xmlChar *error_path);
 
-/* generate a YANG missing-instance error */
+/********************************************************************
+* FUNCTION agt_rpc_gen_insert_error
+*
+* Generate an internal <rpc-error> record for an element
+* for an insert operation failed error
+*
+* INPUTS:
+*   layer == protocol layer where the error occurred
+*   interr == internal error code
+*             if NO_ERR than use the rpcerr only
+*   errval == pointer to the node with the insert error
+*  error_path == malloced string of the value (or type, etc.) instance
+*                ID string in NCX_IFMT_XPATH format; this will be added
+*                to the rpc_err_rec_t and freed later
+*             == NULL if not available
+*
+* RETURNS:
+*   pointer to allocated and filled in rpc_err_rec_t struct
+*     ready to add to the msg->rpc_errQ
+*   NULL if a record could not be allocated or not enough
+*     val;id info in the parameters 
+*********************************************************************/
 extern rpc_err_rec_t *
     agt_rpcerr_gen_insert_error (ncx_layer_t layer,
 				 status_t   interr,
@@ -117,6 +222,31 @@ extern rpc_err_rec_t *
 				 xmlChar *error_path);
 
 
+/********************************************************************
+* FUNCTION agt_rpc_gen_unique_error
+*
+* Generate an internal <rpc-error> record for an element
+* for a unique-stmt failed error (data-not-unique)
+*
+* INPUTS:
+*   msghdr == message header to use for prefix storage
+*   layer == protocol layer where the error occurred
+*   interr == internal error code
+*             if NO_ERR than use the rpcerr only
+*   errval == pointer to the node with the insert error
+*   valuniqueQ == Q of val_unique_t structs to
+*                   use for <non-unique> elements
+*  error_path == malloced string of the value (or type, etc.) instance
+*                ID string in NCX_IFMT_XPATH format; this will be added
+*                to the rpc_err_rec_t and freed later
+*             == NULL if not available
+*
+* RETURNS:
+*   pointer to allocated and filled in rpc_err_rec_t struct
+*     ready to add to the msg->rpc_errQ
+*   NULL if a record could not be allocated or not enough
+*     val;id info in the parameters 
+*********************************************************************/
 extern rpc_err_rec_t *
     agt_rpcerr_gen_unique_error (xml_msg_hdr_t *msghdr,
 				 ncx_layer_t layer,
@@ -124,5 +254,33 @@ extern rpc_err_rec_t *
 				 const dlq_hdr_t *valuniqueQ,
 				 xmlChar *error_path);
 
+
+/********************************************************************
+* FUNCTION agt_rpc_gen_attr_error
+*
+* Generate an internal <rpc-error> record for an attribute
+*
+* INPUTS:
+*   layer == protocol layer where the error occurred
+*   interr == internal error code
+*             if NO_ERR than use the rpcerr only
+*   attr   == attribute that had the error
+*   errnode == XML node where error occurred
+*           == NULL then there is no valid XML node (maybe the error!)
+*   badns == URI string of the namespace that is bad (or NULL)
+*
+* RETURNS:
+*   pointer to allocated and filled in rpc_err_rec_t struct
+*     ready to add to the msg->rpc_errQ (or add more error-info)
+*   NULL if a record could not be allocated or not enough
+*     valid info in the parameters to generate an error report
+*********************************************************************/
+extern rpc_err_rec_t *
+    agt_rpcerr_gen_attr_error (ncx_layer_t layer,
+			       status_t   interr,
+			       const xml_attr_t *attr,
+			       const xml_node_t *errnode,
+			       const xmlChar *badns,
+			       xmlChar *error_path);
 
 #endif            /* _H_agt_rpcerr */

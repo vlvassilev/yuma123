@@ -931,6 +931,7 @@ static status_t
 * FUNCTION agt_rpc_gen_error
 *
 * Generate an internal <rpc-error> record for an element
+* (or non-attribute) related error for any layer. 
 *
 * INPUTS:
 *   layer == protocol layer where the error occurred

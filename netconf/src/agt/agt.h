@@ -246,38 +246,161 @@ typedef struct agt_dynlib_cb_t_ {
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION agt_init1
+* 
+* Initialize the Server Library: stage 1: CLI and profile
+* 
+* TBD -- put platform-specific server init here
+*
+* INPUTS:
+*   argc == command line argument count
+*   argv == array of command line strings
+*   showver == address of version return quick-exit status
+*   showhelp == address of help return quick-exit status
+*
+* OUTPUTS:
+*   *showver == TRUE if user requsted version quick-exit mode
+*   *showhelp == TRUE if user requsted help quick-exit mode
+*
+* RETURNS:
+*   status of the initialization procedure
+*********************************************************************/
 extern status_t 
     agt_init1 (int argc,
 	       const char *argv[],
 	       boolean *showver,
 	       help_mode_t *showhelpmode);
 
+/********************************************************************
+* FUNCTION agt_init2
+* 
+* Initialize the Server Library
+* The agt_profile is set and the object database is
+* ready to have YANG modules loaded
+*
+* RPC and data node callbacks should be installed
+* after the module is loaded, and before the running config
+* is loaded.
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_init2 (void);
 
+
+/********************************************************************
+* FUNCTION agt_cleanup
+*
+* Cleanup the Server Library
+* 
+*********************************************************************/
 extern void 
     agt_cleanup (void);
 
+
+/********************************************************************
+* FUNCTION agt_get_profile
+* 
+* Get the server profile struct
+* 
+* INPUTS:
+*   none
+* RETURNS:
+*   pointer to the server profile
+*********************************************************************/
 extern agt_profile_t *
     agt_get_profile (void);
 
+
+/********************************************************************
+* FUNCTION agt_request_shutdown
+* 
+* Request some sort of server shutdown
+* 
+* INPUTS:
+*   mode == requested shutdown mode
+*
+*********************************************************************/
 extern void
     agt_request_shutdown (ncx_shutdowntyp_t mode);
 
+/********************************************************************
+* FUNCTION agt_shutdown_requested
+* 
+* Check if some sort of server shutdown is in progress
+* 
+* RETURNS:
+*    TRUE if shutdown mode has been started
+*
+*********************************************************************/
 extern boolean
     agt_shutdown_requested (void);
 
+
+/********************************************************************
+* FUNCTION agt_shutdown_mode_requested
+* 
+* Check what shutdown mode was requested
+* 
+* RETURNS:
+*    shutdown mode
+*
+*********************************************************************/
 extern ncx_shutdowntyp_t
     agt_shutdown_mode_requested (void);
 
+
+/********************************************************************
+* FUNCTION agt_cbtype_name
+* 
+* Get the string for the server callback phase
+* 
+* INPUTS:
+*   cbtyp == callback type enum
+*
+* RETURNS:
+*    const string for this enum
+*********************************************************************/
 extern const xmlChar *
     agt_cbtype_name (agt_cbtyp_t cbtyp);
 
+
+#ifndef STATIC_SERVER
+/********************************************************************
+* FUNCTION agt_load_sil_code
+* 
+* Load the Server Instrumentation Library for the specified module
+* 
+* INPUTS:
+*   modname == name of the module to load
+*   revision == revision date of the module to load (may be NULL)
+*   cfgloaded == TRUE if running config has already been done
+*                FALSE if running config not loaded yet
+*
+* RETURNS:
+*    const string for this enum
+*********************************************************************/
 extern status_t
     agt_load_sil_code (const xmlChar *modname,
                        const xmlChar *revision,
                        boolean cfgloaded);
+#endif
 
+
+/********************************************************************
+* FUNCTION agt_advertise_module_needed
+*
+* Check if the module should be advertised or not
+* Hard-wired hack at this time
+*
+* INPUTS:
+*    modname == module name to check
+* RETURNS:
+*    none
+*********************************************************************/
 extern boolean
     agt_advertise_module_needed (const xmlChar *modname);
 

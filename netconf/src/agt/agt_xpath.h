@@ -63,6 +63,29 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION agt_xpath_output_filter
+*
+* Evaluate the XPath filter against the specified 
+* config root, and output the result of the
+* <get> or <get-config> operation to the specified session
+*
+* INPUTS:
+*    scb == session control block
+*    msg == rpc_msg_t in progress
+*    cfg == config target to check against
+*    getop  == TRUE if this is a <get> and not a <get-config>
+*              The target is expected to be the <running> 
+*              config, and all state data will be available for the
+*              filter output.
+*              FALSE if this is a <get-config> and only the 
+*              specified target in available for filter output
+*    indent == start indent amount
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     agt_xpath_output_filter (ses_cb_t *scb,
 			     rpc_msg_t *msg,
@@ -70,6 +93,27 @@ extern status_t
 			     boolean getop,
 			     int32 indent);
 
+
+/********************************************************************
+* FUNCTION agt_xpath_test_filter
+*
+* Evaluate the XPath filter against the specified 
+* config root, and just test if there would be any
+* <eventType> element generated at all
+*
+* Does not write any output based on the XPath evaluation
+*
+* INPUTS:
+*    msghdr == message header in progress (for access control)
+*    scb == session control block
+*    selectval == filter value struct to use
+*    val == top of value tree to compare the filter against
+*        !!! not written -- not const in XPath in case
+*        !!! a set-by-xpath function ever implemented
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern boolean
     agt_xpath_test_filter (xml_msg_hdr_t *msghdr,
                            ses_cb_t *scb,

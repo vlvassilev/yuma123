@@ -1205,7 +1205,7 @@ status_t
 * Cleanup the module data structures
 *
 * INPUTS:
-*   
+*   none
 * RETURNS:
 *   none
 *********************************************************************/

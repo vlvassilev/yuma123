@@ -53,12 +53,47 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
+/********************************************************************
+* FUNCTION agt_if_init
+*
+* INIT 1:
+*   Initialize the interfaces monitor module data structures
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_if_init (void);
 
+
+/********************************************************************
+* FUNCTION agt_if_init2
+*
+* INIT 2:
+*   Initialize the monitoring data structures
+*   This must be done after the <running> config is loaded
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_if_init2 (void);
 
+
+/********************************************************************
+* FUNCTION agt_if_cleanup
+*
+* Cleanup the module data structures
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   none
+*********************************************************************/
 extern void 
     agt_if_cleanup (void);
 

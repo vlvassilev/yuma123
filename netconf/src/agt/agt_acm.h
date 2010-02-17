@@ -142,37 +142,151 @@ typedef struct agt_acm_cache_t_ {
 *								    *
 *********************************************************************/
 
+/********************************************************************
+* FUNCTION agt_acm_init
+* 
+* Initialize the NCX Agent access control module
+* 
+* INPUTS:
+*   none
+* RETURNS:
+*   status of the initialization procedure
+*********************************************************************/
 extern status_t 
     agt_acm_init (void);
 
+
+/********************************************************************
+* FUNCTION agt_acm_init2
+* 
+* Phase 2:
+*   Initialize the nacm.yang configuration data structures
+* 
+* INPUTS:
+*   none
+* RETURNS:
+*   status of the initialization procedure
+*********************************************************************/
 extern status_t 
     agt_acm_init2 (void);
 
+
+/********************************************************************
+* FUNCTION agt_acm_cleanup
+*
+* Cleanup the NCX Agent access control module
+* 
+*********************************************************************/
 extern void 
     agt_acm_cleanup (void);
 
+
+/********************************************************************
+* FUNCTION agt_acm_rpc_allowed
+*
+* Check if the specified user is allowed to invoke an RPC
+* 
+* INPUTS:
+*   msg == XML header in incoming message in progress
+*   user == user name string
+*   rpcobj == obj_template_t for the RPC method to check
+*
+* RETURNS:
+*   TRUE if user allowed invoke this RPC; FALSE otherwise
+*********************************************************************/
 extern boolean 
     agt_acm_rpc_allowed (xml_msg_hdr_t *msg,
 			 const xmlChar *user,
 			 const obj_template_t *rpcobj);
 
+/********************************************************************
+* FUNCTION agt_acm_val_write_allowed
+*
+* Check if the specified user is allowed to access a value node
+* The val->obj template will be checked against the val->editop
+* requested access and the user's configured max-access
+* 
+* INPUTS:
+*   msg == XML header from incoming message in progress
+*   user == user name string
+*   val  == val_value_t in progress to check
+*
+* RETURNS:
+*   TRUE if user allowed this level of access to the value node
+*********************************************************************/
 extern boolean 
     agt_acm_val_write_allowed (xml_msg_hdr_t *msg,
 			       const xmlChar *user,
 			       const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION agt_acm_val_read_allowed
+*
+* Check if the specified user is allowed to read a value node
+* 
+* INPUTS:
+*   msg == XML header from incoming message in progress
+*   user == user name string
+*   val  == val_value_t in progress to check
+*
+* RETURNS:
+*   TRUE if user allowed read access to the value node
+*********************************************************************/
 extern boolean 
     agt_acm_val_read_allowed (xml_msg_hdr_t *msg,
 			      const xmlChar *user,
 			      const val_value_t *val);
 
 
+/********************************************************************
+* FUNCTION agt_acm_init_msg_cache
+*
+* Malloc and initialize an agt_acm_cache_t struct
+* and attach it to the incoming message
+*
+* INPUTS:
+*   msg == message to use
+*
+* OUTPUTS:
+*   msg->acm_cache pointer set
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_acm_init_msg_cache (xml_msg_hdr_t *msg);
 
+
+/********************************************************************
+* FUNCTION agt_acm_clear_msg_cache
+*
+* Clear an agt_acm_cache_t struct
+* attached to the specified message
+*
+* INPUTS:
+*   msg == message to use
+*
+* OUTPUTS:
+*   msg->acm_cache pointer is freed and set to NULL
+*
+*********************************************************************/
 extern void
     agt_acm_clear_msg_cache (xml_msg_hdr_t *msg);
 
+
+/********************************************************************
+* FUNCTION agt_acm_session_is_superuser
+*
+* Check if the specified session is the superuser
+*
+* INPUTS:
+*   scb == session to check
+*
+* RETURNS:
+*   TRUE if session is for the superuser
+*   FALSE if session is not for the superuser
+*********************************************************************/
 extern boolean
     agt_acm_session_is_superuser (const ses_cb_t *scb);
 

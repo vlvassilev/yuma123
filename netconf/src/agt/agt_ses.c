@@ -411,7 +411,7 @@ status_t
 * Cleanup the session manager module data structures
 *
 * INPUTS:
-*   
+*   none
 * RETURNS:
 *   none
 *********************************************************************/

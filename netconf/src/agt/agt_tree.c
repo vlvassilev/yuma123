@@ -927,6 +927,7 @@ static void
 /********************************************************************
 * FUNCTION agt_tree_prune_filter
 *
+* get and get-config step 1
 * Need to evaluate the entire subtree filter and remove nodes
 * which are not in the result set
 *
@@ -1049,6 +1050,7 @@ ncx_filptr_t *
 /********************************************************************
 * FUNCTION agt_tree_output_filter
 *
+* get and get-config step 2
 * Output the pruned subtree filter to the specified session
 *
 * INPUTS:
@@ -1084,6 +1086,7 @@ void
 /********************************************************************
 * FUNCTION agt_tree_test_filter
 *
+* notification filter evaluation
 * Need to evaluate the entire subtree filter and return 'FALSE'
 * if any nodes in the filter are not in the result set
 * (this is probably a notification payload)

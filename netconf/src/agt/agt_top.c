@@ -119,6 +119,8 @@ date         init     comment
 * FUNCTION agt_top_dispatch_msg
 * 
 * Find the appropriate top node handler and call it
+* called by the transport manager (through the session manager)
+* when a new message is detected
 *
 * INPUTS:
 *   scb == session control block containing the xmlreader

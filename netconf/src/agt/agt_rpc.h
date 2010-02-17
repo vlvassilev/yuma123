@@ -73,12 +73,12 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
-/* There are 6 different callbacks possible in the
+/* There are 3 different callbacks possible in the
  * agent processing chain. 
  *
- * Only AGT_RPC_PH_INVOKE is mandatory
+ * Only AGT_RPC_PH_INVOKE is needed to do any work
  * Validate is needed if parameter checking beyond the
- * NCX syntax capabilities, such as checking if a needed
+ * YANG constraints, such as checking if a needed
  * lock is available
  *
  * The engine will check for optional callbacks during 
@@ -94,7 +94,7 @@ typedef enum agt_rpc_phase_t_ {
 } agt_rpc_phase_t;
 
 
-/* Template for RPC agent callbacks
+/* Template for RPC agentserver callbacks
  * The same template is used for all RPC callback phases
  */
 typedef status_t 
@@ -133,17 +133,50 @@ typedef status_t
 *                                                                   *
 *********************************************************************/
 
-/* should call once to init RPC agent module */
+
+/********************************************************************
+* FUNCTION agt_rpc_init
+*
+* Initialize the agt_rpc module
+* Adds the agt_rpc_dispatch function as the handler
+* for the NETCONF <rpc> top-level element.
+* should call once to init RPC agent module
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   NO_ERR if all okay, the minimum spare requests will be malloced
+*********************************************************************/
 extern status_t 
     agt_rpc_init (void);
 
 
-/* should call once to cleanup RPC agent module */
+/********************************************************************
+* FUNCTION agt_rpc_cleanup
+*
+* Cleanup the agt_rpc module.
+* Unregister the top-level NETCONF <rpc> element
+* should call once to cleanup RPC agent module
+*
+*********************************************************************/
 extern void 
     agt_rpc_cleanup (void);
 
 
-/* add callback for 1 phase of RPC processing */
+/********************************************************************
+* FUNCTION agt_rpc_register_method
+*
+* add callback for 1 phase of RPC processing 
+*
+* INPUTS:
+*    module == module name or RPC method
+*    method_name == RPC method name
+*    phase == RPC agent callback phase for this callback
+*    method == pointer to callback function
+*
+* RETURNS:
+*    status of the operation
+*********************************************************************/
 extern status_t 
     agt_rpc_register_method (const xmlChar *module,
 			     const xmlChar *method_name,
@@ -151,34 +184,93 @@ extern status_t
 			     agt_rpc_method_t method);
 
 
-/* remove callback node for all phases of RPC processing */
-extern void
-    agt_rpc_unregister_method (const xmlChar *module,
-			       const xmlChar *method_name);
-
-/* mark an RPC in the definition file as a supported operation */
+/********************************************************************
+* FUNCTION agt_rpc_support_method
+*
+* mark an RPC method as supported within the agent
+* this is needed for operations dependent on capabilities
+*
+* INPUTS:
+*    module == module name of RPC method (really module name)
+*    method_name == RPC method name
+*********************************************************************/
 extern void 
     agt_rpc_support_method (const xmlChar *module,
                             const xmlChar *method_name);
 
-/* mark an RPC in the definition file as an unsupported operation */
+
+/********************************************************************
+* FUNCTION agt_rpc_unsupport_method
+*
+* mark an RPC method as unsupported within the agent
+* this is needed for operations dependent on capabilities
+*
+* INPUTS:
+*    module == module name of RPC method (really module name)
+*    method_name == RPC method name
+*********************************************************************/
 extern void
     agt_rpc_unsupport_method (const xmlChar *module,
 			      const xmlChar *method_name);
 
 
-/* called by top.c: 
- * This function is registered with top_register_node
- * for the owner 'ietf', top-node 'rpc'
- */
+/********************************************************************
+* FUNCTION agt_rpc_unregister_method
+*
+* remove the callback functions for all phases of RPC processing 
+* for the specified RPC method
+*
+* INPUTS:
+*    module == module name of RPC method (really module name)
+*    method_name == RPC method name
+*********************************************************************/
+extern void
+    agt_rpc_unregister_method (const xmlChar *module,
+			       const xmlChar *method_name);
+
+
+/********************************************************************
+* FUNCTION agt_rpc_dispatch
+*
+* Dispatch an incoming <rpc> request
+* called by top.c: 
+* This function is registered with top_register_node
+* for the module 'yuma-netconf', top-node 'rpc'
+*
+* INPUTS:
+*   scb == session control block
+*   top == top element descriptor
+*********************************************************************/
 extern void
     agt_rpc_dispatch (ses_cb_t  *scb,
 		      xml_node_t *top);
 
-
-/* used for OP_EDITOP_LOAD to load the running from startup
- * and OP_EDITOP_REPLACE to restore running from backup
- */
+/********************************************************************
+* FUNCTION agt_rpc_load_config_file
+*
+* Dispatch an internal <load-config> request
+* used for OP_EDITOP_LOAD to load the running from startup
+* and OP_EDITOP_REPLACE to restore running from backup
+*
+*    - Create a dummy session and RPC message
+*    - Call a special agt_ps_parse function to parse the config file
+*    - Call the special agt_ncx function to invoke the proper 
+*      parmset and application 'validate' callback functions, and 
+*      record all the error/warning messages
+*    - Call the special ncx_agt function to invoke all the 'apply'
+*      callbacks as needed
+*    - transfer any error messages to the cfg->load_errQ
+*
+* INPUTS:
+*   filespec == XML config filespec to load
+*   cfg == cfg_template_t to fill in
+*   isload == TRUE for normal load-config
+*             FALSE for restore backup load-config
+*   use_sid == session ID to use for the access control
+*
+* RETURNS:
+*     status
+*********************************************************************/
 extern status_t
     agt_rpc_load_config_file (const xmlChar *filespec,
 			      cfg_template_t  *cfg,
@@ -186,7 +278,23 @@ extern status_t
                               ses_id_t  use_sid);
 
 
-/* used to make the sysStartup notification */
+/********************************************************************
+* FUNCTION agt_rpc_fill_rpc_error
+*
+* Fill one <rpc-error> like element using the specified
+* namespace and name, which may be different than NETCONF
+*
+* INPUTS:
+*   err == error record to use to fill 'rpcerror'
+*   rpcerror == NCX_BT_CONTAINER value struct already
+*               initialized.  The val_add_child function
+*               will use this parm as the parent.
+*               This namespace will be used for all
+*               child nodes
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_rpc_fill_rpc_error (const rpc_err_rec_t *err,
 			    val_value_t *rpcerror);

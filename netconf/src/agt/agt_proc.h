@@ -53,12 +53,48 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION agt_proc_init
+*
+* INIT 1:
+*   Initialize the proc monitor module data structures
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_proc_init (void);
 
+
+/********************************************************************
+* FUNCTION agt_proc_init2
+*
+* INIT 2:
+*   Initialize the monitoring data structures
+*   This must be done after the <running> config is loaded
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_proc_init2 (void);
 
+
+/********************************************************************
+* FUNCTION agt_proc_cleanup
+*
+* Cleanup the module data structures
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   none
+*********************************************************************/
 extern void 
     agt_proc_cleanup (void);
 

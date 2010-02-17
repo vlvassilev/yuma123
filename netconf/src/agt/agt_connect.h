@@ -58,12 +58,43 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION agt_connect_init
+*
+* Initialize the agt_connect module
+* Adds the agt_connect_dispatch function as the handler
+* for the NCX <ncx-connect> top-level element.
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   NO_ERR if all okay, the minimum spare requests will be malloced
+*********************************************************************/
 extern status_t 
     agt_connect_init (void);
 
+
+/********************************************************************
+* FUNCTION agt_connect_cleanup
+*
+* Cleanup the agt_connect module.
+* Unregister the top-level NCX <ncx-connect> element
+*
+*********************************************************************/
 extern void 
     agt_connect_cleanup (void);
 
+
+/********************************************************************
+* FUNCTION agt_connect_dispatch
+*
+* Handle an incoming <ncx-connect> request
+*
+* INPUTS:
+*   scb == session control block
+*   top == top element descriptor
+*********************************************************************/
 extern void
     agt_connect_dispatch (ses_cb_t *scb,
 			  xml_node_t *top);

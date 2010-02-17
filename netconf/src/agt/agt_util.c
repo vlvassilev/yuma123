@@ -1177,6 +1177,7 @@ boolean
 * FUNCTION agt_output_filter
 *
 * output the proper data for the get or get-config operation
+* generate the data that matched the subtree or XPath filter
 *
 * INPUTS:
 *    see rpc/agt_rpc.h   (agt_rpc_data_cb_t)
@@ -1294,7 +1295,7 @@ status_t
 /********************************************************************
 * FUNCTION agt_output_schema
 *
-* output the specified YANG file for the get-schema operation
+* generate the YANG file contents for the get-schema operation
 *
 * INPUTS:
 *    see rpc/agt_rpc.h   (agt_rpc_data_cb_t)

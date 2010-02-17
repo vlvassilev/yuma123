@@ -78,19 +78,63 @@ typedef struct agt_timer_cb_t_ {
 *								    *
 *********************************************************************/
 
-/* module init */
+
+/********************************************************************
+* FUNCTION agt_timer_init
+*
+* Initialize the agt_timer module
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   NO_ERR if all okay, the minimum spare requests will be malloced
+*********************************************************************/
 extern void
     agt_timer_init (void);
 
-/* module cleanup */
+
+/********************************************************************
+* FUNCTION agt_timer_cleanup
+*
+* Cleanup the agt_timer module.
+*
+*********************************************************************/
 extern void 
     agt_timer_cleanup (void);
 
-/* main routine called by agt_signal_handler */
+
+/********************************************************************
+* FUNCTION agt_timer_handler
+*
+* Handle an incoming agent timer polling interval
+* main routine called by agt_signal_handler
+*
+*********************************************************************/
 extern void
     agt_timer_handler (void);
 
-/* create a timer and start it going */
+
+/********************************************************************
+* FUNCTION agt_timer_create
+*
+* Malloc and start a new timer control block
+*
+* INPUTS:
+*   seconds == number of seconds to wait between polls
+*   is_periodic == TRUE if periodic timer
+*                  FALSE if a 1-event timer
+*   timer_fn == address of callback function to invoke when
+*               the timer poll event occurs
+*   cookie == address of user cookie to pass to the timer_fn
+*   ret_timer_id == address of return timer ID
+*
+* OUTPUTS:
+*  *ret_timer_id == timer ID for the allocated timer, 
+*    if the return value is NO_ERR
+*
+* RETURNS:
+*   NO_ERR if all okay, the minimum spare requests will be malloced
+*********************************************************************/
 extern status_t
     agt_timer_create (uint32   seconds,
                       boolean is_periodic,
@@ -98,15 +142,39 @@ extern status_t
                       void *cookie,
                       uint32 *ret_timer_id);
 
-/* reset a timer -- give it a new timeout value */
+
+/********************************************************************
+* FUNCTION agt_timer_restart
+*
+* Restart a timer with a new timeout value.
+* If this is a periodic timer, then the interval
+* will be changed to the new value.  Otherwise
+* a 1-shot timer will just be reset to the new value
+*
+* INPUTS:
+*   timer_id == timer ID to reset
+*   seconds == new timeout value
+*
+* RETURNS:
+*   status, NO_ERR if all okay,
+*********************************************************************/
 extern status_t
     agt_timer_restart (uint32 timer_id,
                        uint32 seconds);
 
-/* periodic timers need to be deleted to be stopped
- * 1-shot timers will be deleted automatically after
- * they expire and the callback is invoked
- */
+
+/********************************************************************
+* FUNCTION agt_timer_delete
+*
+* Remove and delete a timer control block
+* periodic timers need to be deleted to be stopped
+* 1-shot timers will be deleted automatically after
+* they expire and the callback is invoked
+*
+* INPUTS:
+*   timer_id == timer ID to destroy
+*
+*********************************************************************/
 extern void
     agt_timer_delete (uint32  timer_id);
 

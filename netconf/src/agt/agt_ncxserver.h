@@ -55,9 +55,26 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+/********************************************************************
+ * FUNCTION agt_ncxserver_run
+ * 
+ * IO server loop for the ncxserver socket
+ * 
+ * RETURNS:
+ *   status
+ *********************************************************************/
 extern status_t 
     agt_ncxserver_run (void);
 
+
+/********************************************************************
+ * FUNCTION agt_ncxserver_clear_fd
+ * 
+ * Clear a dead session from the select loop
+ * 
+ * INPUTS:
+ *   fd == file descriptor number for the socket to clear
+ *********************************************************************/
 extern void
     agt_ncxserver_clear_fd (int fd);
 

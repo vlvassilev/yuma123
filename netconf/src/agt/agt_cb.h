@@ -113,24 +113,81 @@ typedef struct agt_cb_fnset_t_ {
 *			F U N C T I O N S			    *
 *								    *
 *********************************************************************/
+
+/********************************************************************
+* FUNCTION agt_cb_init
+* 
+* Init the agent callback module
+*
+*********************************************************************/
 extern void
     agt_cb_init (void);
 
+
+/********************************************************************
+* FUNCTION agt_cb_cleanup
+* 
+* CLeanup the agent callback module
+*
+*********************************************************************/
 extern void
     agt_cb_cleanup (void);
 
-/* use the same fn for all callback phases 
- * all phases will be invoked
- */
+
+/********************************************************************
+* FUNCTION agt_cb_register_callback
+* 
+* Register an object specific callback function
+* use the same fn for all callback phases 
+* all phases will be invoked
+*
+*
+* INPUTS:
+*   modname == module that defines the target object for
+*              these callback functions 
+*   defpath == Xpath with default (or no) prefixes
+*              defining the object that will get the callbacks
+*   version == exact module revision date expected
+*              if condition not met then an error will
+*              be logged  (TBD: force unload of module!)
+*           == NULL means use any version of the module
+*   cbfn    == address of callback function to use for
+*              all callback phases
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t 
     agt_cb_register_callback (const xmlChar *modname,
 			      const xmlChar *defpath,
 			      const xmlChar *version,
 			      const agt_cb_fn_t cbfn);
 
-/* setup array of callbacks, could be different or NULL
- * to skip that phase
- */
+
+
+
+
+/********************************************************************
+* FUNCTION agt_cb_register_callbacks
+* 
+* Register an object specific callback function
+* setup array of callbacks, could be different or NULL
+* to skip that phase
+*
+* INPUTS:
+*   modname == module that defines the target object for
+*              these callback functions 
+*   defpath == Xpath with default (or no) prefixes
+*              defining the object that will get the callbacks
+*   version == exact module revision date expected
+*              if condition not met then an error will
+*              be logged  (TBD: force unload of module!)
+*           == NULL means use any version of the module
+*   cbfnset == address of callback function set to copy
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t 
     agt_cb_register_callbacks (const xmlChar *modname,
 			       const xmlChar *defpath,
@@ -138,6 +195,18 @@ extern status_t
 			       const agt_cb_fnset_t *cbfnset);
 
 
+/********************************************************************
+* FUNCTION agt_cb_unregister_callback
+* 
+* Unregister all callback functions for a specific object
+*
+* INPUTS:
+*   modname == module containing the object for this callback
+*   defpath == definition XPath location
+*
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     agt_cb_unregister_callbacks (const xmlChar *modname,
 				 const xmlChar *defpath);

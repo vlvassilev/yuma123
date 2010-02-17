@@ -43,12 +43,40 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION agt_signal_init
+*
+* Initialize the agt_signal module
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   NO_ERR if all okay, the minimum spare requests will be malloced
+*********************************************************************/
 extern void
     agt_signal_init (void);
 
+
+/********************************************************************
+* FUNCTION agt_signal_cleanup
+*
+* Cleanup the agt_signal module.
+*
+*********************************************************************/
 extern void 
     agt_signal_cleanup (void);
 
+
+/********************************************************************
+* FUNCTION agt_signal_handler
+*
+* Handle an incoming interrupt signal
+*
+* INPUTS:
+*   intr == interrupt numer
+*
+*********************************************************************/
 extern void
     agt_signal_handler (int intr);
 

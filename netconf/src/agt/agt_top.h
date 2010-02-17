@@ -45,9 +45,21 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
-/* called by the transport manager (through the session manager)
- * when a new message is detected
- */
+
+/********************************************************************
+* FUNCTION agt_top_dispatch_msg
+* 
+* Find the appropriate top node handler and call it
+* called by the transport manager (through the session manager)
+* when a new message is detected
+*
+* INPUTS:
+*   scb == session control block containing the xmlreader
+*          set at the start of an incoming message.
+*
+* RETURNS:
+*  none
+*********************************************************************/
 extern void
     agt_top_dispatch_msg (ses_cb_t  *scb);
 

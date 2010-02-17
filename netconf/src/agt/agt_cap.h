@@ -57,35 +57,108 @@ date	     init     comment
 *			F U N C T I O N S			    *
 *								    *
 *********************************************************************/
-#ifdef WILL_CHANGE_TO_STD_SDISC_MODULE
-extern status_t
-    agt_cap_init (void);
-#endif
 
+/********************************************************************
+* FUNCTION agt_cap_cleanup
+*
+* Clean the NETCONF agent capabilities
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    none
+*********************************************************************/
 extern void 
     agt_cap_cleanup (void);
 
-/* initial setup of agent capabilities structs */
+
+/********************************************************************
+* FUNCTION agt_cap_set_caps
+*
+* Initialize the NETCONF agent capabilities
+*
+* INPUTS:
+*    agttarg == the target of edit-config for this agent
+*    agtstart == the type of startup configuration for this agent
+*    defstyle == default with-defaults style for the entire agent
+*
+* RETURNS:
+*    NO_ERR if all goes well
+*********************************************************************/
 extern status_t 
     agt_cap_set_caps (ncx_agttarg_t  agttarg,
 		      ncx_agtstart_t agtstart,
 		      const xmlChar *defstyle);
 
+
+/********************************************************************
+* FUNCTION agt_cap_set_modules
+*
+* Initialize the NETCONF agent capabilities modules list
+* MUST call after agt_cap_set_caps
+*
+* INPUTS:
+*   profile == agent profile control block to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t 
     agt_cap_set_modules (agt_profile_t *profile);
 
+
+/********************************************************************
+* FUNCTION agt_cap_add_module
+*
+* Add a module at runtime, after the initial set has been set
+* MUST call after agt_cap_set_caps
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t 
     agt_cap_add_module (ncx_module_t *mod);
 
-extern void
-    agt_cap_set_modcaps_parmset (void);
 
+/********************************************************************
+* FUNCTION agt_cap_get_caps
+*
+* Get the NETCONF agent capabilities
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    pointer to the agent caps list
+*********************************************************************/
 extern cap_list_t * 
     agt_cap_get_caps (void);
 
+
+/********************************************************************
+* FUNCTION agt_cap_get_capsval
+*
+* Get the NETCONF agent capabilities ain val_value_t format
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    pointer to the agent caps list
+*********************************************************************/
 extern val_value_t * 
     agt_cap_get_capsval (void);
 
+
+/********************************************************************
+* FUNCTION agt_cap_std_set
+*
+* Check if the STD capability is set for the agent
+*
+* INPUTS:
+*    cap == ID of capability to check
+*
+* RETURNS:
+*    TRUE is STD cap set, FALSE otherwise
+*********************************************************************/
 extern boolean
     agt_cap_std_set (cap_stdid_t cap);
 

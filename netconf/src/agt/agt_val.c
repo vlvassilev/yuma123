@@ -3625,7 +3625,7 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION agt_val_rpcwhen_check
+* FUNCTION agt_val_rpc_xpath_check
 * 
 * Check for any nodes which are present
 * but have false when-stmts associated
@@ -4237,7 +4237,7 @@ status_t
 *   rpc_err_rec_t structs may be malloced and added to the msg->mhsr.errQ
 *
 * RETURNS:
-*   none
+*   status
 *********************************************************************/
 status_t
     agt_val_apply_write (ses_cb_t  *scb,
@@ -4331,7 +4331,7 @@ status_t
 *   to the msg->mhsr.errQ
 *
 * RETURNS:
-*   none
+*   status
 *********************************************************************/
 status_t
     agt_val_apply_commit (ses_cb_t  *scb,

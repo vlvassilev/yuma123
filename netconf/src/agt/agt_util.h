@@ -82,22 +82,98 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION agt_get_cfg_from_parm
+*
+* Get the cfg_template_t for the config in the target param
+*
+* INPUTS:
+*    parmname == parameter to get from (e.g., target)
+*    msg == incoming rpc_msg_t in progress
+*    methnode == XML node for RPC method (for errors)
+*    retcfg == address of return cfg pointer
+* 
+* OUTPUTS:
+*   *retcfg is set to the address of the cfg_template_t struct 
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t 
     agt_get_cfg_from_parm (const xmlChar *parmname,
 			   rpc_msg_t *msg,
 			   xml_node_t *methnode,
 			   cfg_template_t  **retcfg);
 
+
+/********************************************************************
+* FUNCTION agt_get_inline_cfg_from_parm
+*
+* Get the val_value_t node for the inline config element
+*
+* INPUTS:
+*    parmname == parameter to get from (e.g., source)
+*    msg == incoming rpc_msg_t in progress
+*    methnode == XML node for RPC method (for errors)
+*    retval == address of return value node pointer
+* 
+* OUTPUTS:
+*   *retval is set to the address of the val_value_t struct 
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t 
     agt_get_inline_cfg_from_parm (const xmlChar *parmname,
                                   rpc_msg_t *msg,
                                   xml_node_t *methnode,
                                   val_value_t  **retval);
 
+
+/********************************************************************
+* FUNCTION agt_get_parmval
+*
+* Get the identified val_value_t for a given parameter
+* Used for error purposes!
+* INPUTS:
+*    parmname == parameter to get
+*    msg == incoming rpc_msg_t in progress
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern const val_value_t *
     agt_get_parmval (const xmlChar *parmname,
 		     rpc_msg_t *msg);
 
+
+/********************************************************************
+* FUNCTION agt_record_error
+*
+* Generate an rpc_err_rec_t and save it in the msg
+*
+* INPUTS:
+*    scb == session control block 
+*        == NULL and no stats will be recorded
+*    msghdr == XML msg header with error Q
+*          == NULL, no errors will be recorded!
+*    layer == netconf layer error occured               <error-type>
+*    res == internal error code                      <error-app-tag>
+*    xmlnode == XML node causing error  <bad-element>   <error-path> 
+*            == NULL if not available 
+*    parmtyp == type of node in 'error_info'
+*    error_info == error data, specific to 'res'        <error-info>
+*               == NULL if not available (then nodetyp ignored)
+*    nodetyp == type of node in 'error_path'
+*    error_path == internal data node with the error       <error-path>
+*            == NULL if not available or not used  
+* OUTPUTS:
+*   errQ has error message added if no malloc errors
+*   scb->stats may be updated if scb non-NULL
+*
+* RETURNS:
+*    none
+*********************************************************************/
 extern void
     agt_record_error (ses_cb_t *scb,
 		      xml_msg_hdr_t *msghdr,
@@ -109,6 +185,37 @@ extern void
 		      ncx_node_t nodetyp,
 		      void *error_path);
 
+
+/********************************************************************
+* FUNCTION agt_record_error_errinfo
+*
+* Generate an rpc_err_rec_t and save it in the msg
+* Use the provided error info record for <rpc-error> fields
+*
+* INPUTS:
+*    scb == session control block 
+*        == NULL and no stats will be recorded
+*    msghdr == XML msg header with error Q
+*          == NULL, no errors will be recorded!
+*    layer == netconf layer error occured               <error-type>
+*    res == internal error code                      <error-app-tag>
+*    xmlnode == XML node causing error  <bad-element>   <error-path> 
+*            == NULL if not available 
+*    parmtyp == type of node in 'error_info'
+*    error_info == error data, specific to 'res'        <error-info>
+*               == NULL if not available (then nodetyp ignored)
+*    nodetyp == type of node in 'error_path'
+*    error_path == internal data node with the error       <error-path>
+*            == NULL if not available or not used  
+*    errinfo == error info record to use
+*
+* OUTPUTS:
+*   errQ has error message added if no malloc errors
+*   scb->stats may be updated if scb non-NULL
+
+* RETURNS:
+*    none
+*********************************************************************/
 extern void
     agt_record_error_errinfo (ses_cb_t *scb,
 			      xml_msg_hdr_t *msghdr,
@@ -121,6 +228,32 @@ extern void
 			      void *error_path,
 			      const ncx_errinfo_t *errinfo);
 
+
+/********************************************************************
+* FUNCTION agt_record_attr_error
+*
+* Generate an rpc_err_rec_t and save it in the msg
+*
+* INPUTS:
+*    scb == session control block
+*    msghdr == XML msg header with error Q
+*          == NULL, no errors will be recorded!
+*    layer == netconf layer error occured
+*    res == internal error code
+*    xmlattr == XML attribute node causing error
+*               (NULL if not available)
+*    xmlnode == XML node containing the attr
+*    badns == bad namespace string value
+*    nodetyp == type of node in 'errnode'
+*    errnode == internal data node with the error
+*            == NULL if not used
+*
+* OUTPUTS:
+*   errQ has error message added if no malloc errors
+*
+* RETURNS:
+*    none
+*********************************************************************/
 extern void
     agt_record_attr_error (ses_cb_t *scb,
 			   xml_msg_hdr_t *msghdr,
@@ -133,12 +266,59 @@ extern void
 			   const void *errnode);
 
 
+/********************************************************************
+* FUNCTION agt_record_insert_error
+*
+* Generate an rpc_err_rec_t and save it in the msg
+* Use the provided error info record for <rpc-error> fields
+*
+* For YANG 'missing-instance' error-app-tag
+*
+* INPUTS:
+*    scb == session control block 
+*        == NULL and no stats will be recorded
+*    msghdr == XML msg header with error Q
+*          == NULL, no errors will be recorded!
+*    res == internal error code                      <error-app-tag>
+*    errval == value node generating the insert error
+*
+* OUTPUTS:
+*   errQ has error message added if no malloc errors
+*   scb->stats may be updated if scb non-NULL
+
+* RETURNS:
+*    none
+*********************************************************************/
 extern void
     agt_record_insert_error (ses_cb_t *scb,
 			     xml_msg_hdr_t *msghdr,
 			     status_t  res,
 			     val_value_t *errval);
 
+
+/********************************************************************
+* FUNCTION agt_record_unique_error
+*
+* Generate an rpc_err_rec_t and save it in the msg
+* Use the provided error info record for <rpc-error> fields
+*
+* For YANG 'data-not-unique' error-app-tag
+*
+* INPUTS:
+*    scb == session control block 
+*        == NULL and no stats will be recorded
+*    msghdr == XML msg header with error Q
+*          == NULL, no errors will be recorded!
+*    errval == list value node that contains the unique-stmt
+*    valuniqueQ == Q of val_unique_t structs for error-info
+*
+* OUTPUTS:
+*   errQ has error message added if no malloc errors
+*   scb->stats may be updated if scb non-NULL
+
+* RETURNS:
+*    none
+*********************************************************************/
 extern void
     agt_record_unique_error (ses_cb_t *scb,
 			     xml_msg_hdr_t *msghdr,
@@ -146,55 +326,192 @@ extern void
 			     dlq_hdr_t  *valuniqueQ);
 
 
+/********************************************************************
+* FUNCTION agt_validate_filter
+*
+* Validate the <filter> parameter if present
+*
+* INPUTS:
+*    scb == session control block
+*    msg == rpc_msg_t in progress
+*
+* OUTPUTS:
+*    msg->rpc_filter is filled in if NO_ERR; type could be NONE
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t 
     agt_validate_filter (ses_cb_t *scb,
 			 rpc_msg_t *msg);
 
+
+/********************************************************************
+* FUNCTION agt_validate_filter_ex
+*
+* Validate the <filter> parameter if present
+*
+* INPUTS:
+*    scb == session control block
+*    msg == rpc_msg_t in progress
+*    filter == filter element to use
+* OUTPUTS:
+*    msg->rpc_filter is filled in if NO_ERR; type could be NONE
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t 
     agt_validate_filter_ex (ses_cb_t *scb,
 			    rpc_msg_t *msg,
 			    val_value_t *filter);
 
 
-/* next 3: val_nodetest_fn_t template */
+/********************************************************************
+* FUNCTION agt_check_config
+*
+* val_nodetest_fn_t callback
+*
+* Used by the <get-config> operation to return any type of 
+* configuration data
+*
+* INPUTS:
+*    see ncx/val_util.h   (val_nodetest_fn_t)
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern boolean
     agt_check_config (ncx_withdefaults_t withdef,
                       boolean realtest,
 		      const val_value_t *node);
 
 
-/* default handler when no filter is present */
+/********************************************************************
+* FUNCTION agt_check_default
+*
+* val_nodetest_fn_t callback
+*
+* Used by the <get*> operation to return only values
+* not set to the default
+*
+* INPUTS:
+*    see ncx/val_util.h   (val_nodetest_fn_t)
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern boolean
     agt_check_default (ncx_withdefaults_t withdef,
                        boolean realtest,
 		       const val_value_t *node);
 
 
-/* filter: returns TRUE for NCX_DC_CONFIG 
- * and with-defaults test passes as well
- */
+
+/********************************************************************
+* FUNCTION agt_check_save
+*
+* val_nodetest_fn_t callback
+*
+* Used by agt_ncx_cfg_save function to filter just what
+* is supposed to be saved in the <startup> config file
+*
+* INPUTS:
+*    see ncx/val_util.h   (val_nodetest_fn_t)
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern boolean
     agt_check_save (ncx_withdefaults_t withdef,
                     boolean realtest,
 		    const val_value_t *node);
 
-/* generate the data that matched the subtree or XPath filter */
+
+/********************************************************************
+* FUNCTION agt_output_filter
+*
+* output the proper data for the get or get-config operation
+* generate the data that matched the subtree or XPath filter
+*
+* INPUTS:
+*    see rpc/agt_rpc.h   (agt_rpc_data_cb_t)
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     agt_output_filter (ses_cb_t *scb,
 		       rpc_msg_t *msg,
 		       int32 indent);
 
-/* generate the YANG file contents for the get-schema operation */
+
+/********************************************************************
+* FUNCTION agt_output_schema
+*
+* generate the YANG file contents for the get-schema operation
+*
+* INPUTS:
+*    see rpc/agt_rpc.h   (agt_rpc_data_cb_t)
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     agt_output_schema (ses_cb_t *scb,
 		       rpc_msg_t *msg,
 		       int32 indent);
 
+
+/********************************************************************
+* FUNCTION agt_check_max_access
+* 
+* Check if the max-access for a parameter is exceeded
+*
+* INPUTS:
+*   op == requested op
+*   acc == max-access for the parameter
+*   cur_exists == TRUE if the corresponding node in the target exists
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_check_max_access (op_editop_t  op,
 			  ncx_access_t acc,
 			  boolean cur_exists);
 
+
+/********************************************************************
+* FUNCTION agt_check_editop
+* 
+* Check if the edit operation is okay
+*
+* INPUTS:
+*   pop == parent edit operation in affect
+*          Starting at the data root, the parent edit-op
+*          is derived from the default-operation parameter
+*   cop == address of child operation (MAY BE ADJUSTED ON EXIT!!!)
+*          This is the edit-op field in the new node corresponding
+*          to the curnode position in the data model
+*   newnode == pointer to new node in the edit-config PDU
+*   curnode == pointer to the current node in the data model
+*              being affected by this operation, if any.
+*           == NULL if no current node exists
+*   iqual == effective instance qualifier for this value
+* 
+* OUTPUTS:
+*   *cop may be adjusted to simplify further processing,
+*    based on the following reduction algorithm:
+*
+*    create, replace, and delete operations are 'sticky'.
+*    Once set, any nested edit-ops must be valid
+*    within the context of the fixed operation (create or delete)
+*    and the child operation gets changed to the sticky parent edit-op
+*
+*   if the parent is create or delete, and the child
+*   is merge or replace, then the child can be ignored
+*   and will be changed to the parent, since the create
+*   or delete must be carried through all the way to the leaves
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_check_editop (op_editop_t pop,
 		      op_editop_t *cop,
@@ -203,21 +520,88 @@ extern status_t
 		      ncx_iqual_t  iqual);
 
 
+/********************************************************************
+* FUNCTION agt_enable_feature
+* 
+* Enable a YANG feature in the agent
+* This will not be detected by any sessions in progress!!!
+* It will take affect the next time a <hello> message
+* is sent by the agent
+*
+* INPUTS:
+*   modname == module name containing the feature
+*   featurename == feature name to enable
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_enable_feature (const xmlChar *modname,
 			const xmlChar *featurename);
 
+
+/********************************************************************
+* FUNCTION agt_disable_feature
+* 
+* Disable a YANG feature in the agent
+* This will not be detected by any sessions in progress!!!
+* It will take affect the next time a <hello> message
+* is sent by the agent
+*
+* INPUTS:
+*   modname == module name containing the feature
+*   featurename == feature name to disable
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_disable_feature (const xmlChar *modname,
 			 const xmlChar *featurename);
 
 
+/********************************************************************
+* FUNCTION agt_make_leaf
+*
+* make a val_value_t struct for a specified leaf or leaf-list
+*
+INPUTS:
+*   parentobj == parent object to find child leaf object
+*   leafname == name of leaf to find (namespace hardwired)
+*   leafstrval == string version of value to set for leaf
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced value struct or NULL if some error
+*********************************************************************/
 extern val_value_t *
     agt_make_leaf (obj_template_t *parentobj,
 		   const xmlChar *leafname,
 		   const xmlChar *leafstrval,
 		   status_t *res);
 
+
+/********************************************************************
+* FUNCTION agt_make_virtual_leaf
+*
+* make a val_value_t struct for a specified virtual 
+* leaf or leaf-list
+*
+INPUTS:
+*   parentobj == parent object to find child leaf object
+*   leafname == name of leaf to find (namespace hardwired)
+*   callbackfn == get callback function to install
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced value struct or NULL if some error
+*********************************************************************/
 extern val_value_t *
     agt_make_virtual_leaf (obj_template_t *parentobj,
 			   const xmlChar *leafname,
@@ -225,12 +609,46 @@ extern val_value_t *
 			   status_t *res);
 
 
+/********************************************************************
+* FUNCTION agt_init_cache
+*
+* init a cache pointer during the init2 callback
+*
+* INPUTS:
+*   modname == name of module defining the top-level object
+*   objname == name of the top-level database object
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res is set to the return status
+*
+* RETURNS:
+*   pointer to object value node from running config,
+*   or NULL if error or not found
+*********************************************************************/
 extern val_value_t *
     agt_init_cache (const xmlChar *modname,
                     const xmlChar *objname,
                     status_t *res);
 
 
+/********************************************************************
+* FUNCTION agt_check_cache
+*
+* check if a cache pointer needs to be changed or NULLed out
+*
+INPUTS:
+*   cacheptr == address of pointer to cache value node
+*   newval == newval from the callback function
+*   curval == curval from the callback function
+*   editop == editop from the callback function
+*
+* OUTPUTS:
+*   *cacheptr may be changed, depending on the operation
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_check_cache (val_value_t **cacheptr,
                      val_value_t *newval,

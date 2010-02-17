@@ -536,6 +536,8 @@ void
 * FUNCTION agt_cb_register_callback
 * 
 * Register an object specific callback function
+* use the same fn for all callback phases 
+* all phases will be invoked
 *
 * INPUTS:
 *   modname == module that defines the target object for
@@ -629,6 +631,8 @@ status_t
 * FUNCTION agt_cb_register_callbacks
 * 
 * Register an object specific callback function
+* setup array of callbacks, could be different or NULL
+* to skip that phase
 *
 * INPUTS:
 *   modname == module that defines the target object for
@@ -714,6 +718,7 @@ status_t
 * Unregister all callback functions for a specific object
 *
 * INPUTS:
+*   modname == module containing the object for this callback
 *   defpath == definition XPath location
 *
 * RETURNS:

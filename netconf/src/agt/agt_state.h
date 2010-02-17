@@ -70,29 +70,93 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION agt_state_init
+*
+* INIT 1:
+*   Initialize the agent state monitor module data structures
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_state_init (void);
 
+
+/********************************************************************
+* FUNCTION agt_state_init2
+*
+* INIT 2:
+*   Initialize the monitoring data structures
+*   This must be done after the <running> config is loaded
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_state_init2 (void);
 
+
+/********************************************************************
+* FUNCTION agt_state_cleanup
+*
+* Cleanup the module data structures
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   none
+*********************************************************************/
 extern void 
     agt_state_cleanup (void);
 
+
+/********************************************************************
+* FUNCTION agt_state_add_session
+*
+* Add a session entry to the netconf-state DM
+*
+* INPUTS:
+*   scb == session control block to use for the info
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_state_add_session (ses_cb_t *scb);
 
+
+/********************************************************************
+* FUNCTION agt_state_remove_session
+*
+* Remove a session entry from the netconf-state DM
+*
+* INPUTS:
+*   sid == session ID to find and delete
+*
+*********************************************************************/
 extern void
     agt_state_remove_session (ses_id_t sid);
 
+
+/********************************************************************
+* FUNCTION agt_state_add_module_schema
+*
+* Add a schema entry to the netconf-state DM
+*
+* INPUTS:
+*   mod == module to add
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_state_add_module_schema (ncx_module_t *mod);
-
-extern status_t
-    agt_state_add_subscription (agt_not_subscription_t *sub);
-
-extern void
-    agt_state_remove_subscription (ses_id_t sid);
 
 
 #endif            /* _H_agt_state */

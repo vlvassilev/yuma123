@@ -168,37 +168,170 @@ typedef struct agt_not_subscription_t_ {
 *                                                                   *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION agt_not_init
+*
+* INIT 1:
+*   Initialize the agent notification module data structures
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_not_init (void);
 
+
+/********************************************************************
+* FUNCTION agt_not_init2
+*
+* INIT 2:
+*   Initialize the monitoring data structures
+*   This must be done after the <running> config is loaded
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     agt_not_init2 (void);
 
+
+/********************************************************************
+* FUNCTION agt_not_cleanup
+*
+* Cleanup the module data structures
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   none
+*********************************************************************/
 extern void 
     agt_not_cleanup (void);
 
+
+/********************************************************************
+* FUNCTION agt_not_send_notifications
+*
+* Send out some notifications to the configured subscriptions
+* if needed.
+*
+* Simple design:
+*   go through all the subscriptions and send at most one 
+*   notification to each one if needed.  This will build
+*   in some throttling based on the ncxserver select loop
+*   timeout (or however this function is called).
+*
+* OUTPUTS:
+*     notifications may be written to some active sessions
+*
+* RETURNS:
+*    number of notifications sent;
+*    used for simple burst throttling
+*********************************************************************/
 extern uint32
     agt_not_send_notifications (void);
 
+
+/********************************************************************
+* FUNCTION agt_not_clean_eventlog
+*
+* Remove any delivered notifications when the replay buffer
+* size is set to zero
+*
+*********************************************************************/
 extern void
     agt_not_clean_eventlog (void);
 
+
+/********************************************************************
+* FUNCTION agt_not_remove_subscription
+*
+* Remove and expire a subscription with the specified session ID.
+* The session is being removed.
+*
+* INPUTS:
+*    sid == session ID to use
+*********************************************************************/
 extern void
     agt_not_remove_subscription (ses_id_t sid);
 
+
+/********************************************************************
+* FUNCTION agt_not_new_notification
+* 
+* Malloc and initialize the fields in an agt_not_msg_t
+*
+* INPUTS:
+*   eventType == object template of the event type
+*
+* RETURNS:
+*   pointer to the malloced and initialized struct or NULL if an error
+*********************************************************************/
 extern agt_not_msg_t * 
     agt_not_new_notification (obj_template_t *eventType);
 
+
+/********************************************************************
+* FUNCTION agt_not_free_notification
+* 
+* Scrub the memory in an agt_not_template_t by freeing all
+* the sub-fields and then freeing the entire struct itself 
+* The struct must be removed from any queue it is in before
+* this function is called.
+*
+* INPUTS:
+*    not == agt_not_template_t to delete
+*********************************************************************/
 extern void 
     agt_not_free_notification (agt_not_msg_t *not);
 
-/* consumes 'val'; will be freed later */
+
+/********************************************************************
+* FUNCTION agt_not_add_to_payload
+*
+* Queue the specified value node into the payloadQ
+* for the specified notification
+*
+* INPUTS:
+*   notif == notification to send
+*   val == value to add to payloadQ
+*            !!! THIS IS LIVE MALLOCED MEMORY PASSED OFF
+*            !!! TO THIS FUNCTION.  IT WILL BE FREED LATER
+*            !!! DO NOT CALL val_free_value
+*            !!! AFTER THIS CALL
+*
+* OUTPUTS:
+*   val added to the notif->payloadQ
+*
+*********************************************************************/
 extern void
     agt_not_add_to_payload (agt_not_msg_t *notif,
 			    val_value_t *val);
 
 
-/* consumes 'notif'; will be freed later */
+/********************************************************************
+* FUNCTION agt_not_queue_notification
+*
+* Queue the specified notification in the replay log.
+* It will be sent to all the active subscriptions
+* as needed.
+*
+* INPUTS:
+*   notif == notification to send
+*            !!! THIS IS LIVE MALLOCED MEMORY PASSED OFF
+*            !!! TO THIS FUNCTION.  IT WILL BE FREED LATER
+*            !!! DO NOT CALL agt_not_free_notification
+*            !!! AFTER THIS CALL
+*
+* OUTPUTS:
+*   message added to the notificationQ
+*
+*********************************************************************/
 extern void
     agt_not_queue_notification (agt_not_msg_t *notif);
 

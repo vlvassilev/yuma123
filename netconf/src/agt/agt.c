@@ -383,7 +383,7 @@ static void
 * OUTPUTS:
 *   *showver == TRUE if user requsted version quick-exit mode
 *   *showhelp == TRUE if user requsted help quick-exit mode
-(
+*
 * RETURNS:
 *   status of the initialization procedure
 *********************************************************************/
@@ -870,7 +870,7 @@ void
 * INPUTS:
 *   none
 * RETURNS:
-*   const pointer to the server profile
+*   pointer to the server profile
 *********************************************************************/
 agt_profile_t *
     agt_get_profile (void)
@@ -1186,7 +1186,7 @@ status_t
 * Hard-wired hack at this time
 *
 * INPUTS:
-*    none
+*    modname == module name to check
 * RETURNS:
 *    none
 *********************************************************************/

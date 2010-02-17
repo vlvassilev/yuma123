@@ -863,6 +863,7 @@ static status_t
 * Initialize the agt_rpc module
 * Adds the agt_rpc_dispatch function as the handler
 * for the NETCONF <rpc> top-level element.
+* should call once to init RPC agent module
 *
 * INPUTS:
 *   none
@@ -893,6 +894,7 @@ status_t
 *
 * Cleanup the agt_rpc module.
 * Unregister the top-level NETCONF <rpc> element
+* should call once to cleanup RPC agent module
 *
 *********************************************************************/
 void 
@@ -1077,6 +1079,9 @@ void
 * FUNCTION agt_rpc_dispatch
 *
 * Dispatch an incoming <rpc> request
+* called by top.c: 
+* This function is registered with top_register_node
+* for the module 'yuma-netconf', top-node 'rpc'
 *
 * INPUTS:
 *   scb == session control block
@@ -1460,6 +1465,8 @@ void
 * FUNCTION agt_rpc_load_config_file
 *
 * Dispatch an internal <load-config> request
+* used for OP_EDITOP_LOAD to load the running from startup
+* and OP_EDITOP_REPLACE to restore running from backup
 *
 *    - Create a dummy session and RPC message
 *    - Call a special agt_ps_parse function to parse the config file

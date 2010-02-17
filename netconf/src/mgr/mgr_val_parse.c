@@ -2254,7 +2254,8 @@ status_t
 
 /********************************************************************
 * FUNCTION mgr_val_parse_reply
-* 
+*
+* parse an <rpc-reply> element 
 * parse a value for a YANG type from a NETCONF PDU XML stream 
 * Use the RPC object output type to parse any data
 *
@@ -2326,6 +2327,7 @@ status_t
 /********************************************************************
 * FUNCTION mgr_val_parse_notification
 * 
+* parse a <notification> element
 * parse a value for a YANG type from a NETCONF PDU XML stream 
 * Use the notification object output type to parse any data
 *

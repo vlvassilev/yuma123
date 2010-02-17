@@ -105,27 +105,97 @@ typedef struct mgr_scb_t_ {
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION mgr_init
+* 
+* Initialize the Manager Library
+* 
+* RETURNS:
+*   status of the initialization procedure
+*********************************************************************/
 extern status_t 
     mgr_init (void);
 
+
+/********************************************************************
+* FUNCTION mgr_cleanup
+*
+* Cleanup the Manager Library
+* 
+*********************************************************************/
 extern void 
     mgr_cleanup (void);
 
+
+/********************************************************************
+* FUNCTION mgr_new_scb
+* 
+* Malloc and Initialize the Manager Session Control Block
+* 
+* RETURNS:
+*   manager session control block struct or NULL if malloc error
+*********************************************************************/
 extern mgr_scb_t *
     mgr_new_scb (void);
 
+
+/********************************************************************
+* FUNCTION mgr_init_scb
+* 
+* Initialize the Manager Session Control Block
+* 
+* INPUTS:
+*   mscb == manager session control block struct to initialize
+*
+*********************************************************************/
 extern void
     mgr_init_scb (mgr_scb_t *mscb);
 
+
+/********************************************************************
+* FUNCTION mgr_free_scb
+* 
+* Clean and Free a Manager Session Control Block
+* 
+* INPUTS:
+*   mscb == manager session control block struct to free
+*********************************************************************/
 extern void
     mgr_free_scb (mgr_scb_t *mscb);
 
+
+/********************************************************************
+* FUNCTION mgr_clean_scb
+* 
+* Clean a Manager Session Control Block
+* 
+* INPUTS:
+*   mscb == manager session control block struct to clean
+*********************************************************************/
 extern void
     mgr_clean_scb (mgr_scb_t *mscb);
 
+
+/********************************************************************
+* FUNCTION mgr_request_shutdown
+* 
+* Request a manager shutdown
+* 
+*********************************************************************/
 extern void
     mgr_request_shutdown (void);
 
+
+/********************************************************************
+* FUNCTION mgr_shutdown_requested
+* 
+* Check if a manager shutdown is in progress
+* 
+* RETURNS:
+*    TRUE if shutdown mode has been started
+*
+*********************************************************************/
 extern boolean
     mgr_shutdown_requested (void);
 

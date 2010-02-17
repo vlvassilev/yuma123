@@ -47,15 +47,53 @@ typedef void (*sighandler_t)(int signum);
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION mgr_signal_init
+*
+* Initialize the mgr_signal module
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   NO_ERR if all okay, the minimum spare requests will be malloced
+*********************************************************************/
 extern void
     mgr_signal_init (void);
 
+
+/********************************************************************
+* FUNCTION mgr_signal_cleanup
+*
+* Cleanup the mgr_signal module.
+*
+*********************************************************************/
 extern void 
     mgr_signal_cleanup (void);
 
+
+/********************************************************************
+* FUNCTION mgr_signal_handler
+*
+* Handle an incoming interrupt signal
+*
+* INPUTS:
+*   intr == interrupt numer
+*
+*********************************************************************/
 extern void
     mgr_signal_handler (int intr);
 
+
+/********************************************************************
+* FUNCTION mgr_signal_install_break_handler (control-c)
+*
+* Install an application-specific handler for the break interrupt
+*
+* INPUTS:
+*   handler == interrupt handler to call when control-C is entered
+*
+*********************************************************************/
 extern void 
     mgr_signal_install_break_handler (sighandler_t handler);
 

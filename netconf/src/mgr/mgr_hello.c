@@ -230,6 +230,9 @@ static status_t
 } /* process_agent_hello */
 
 
+/**************    E X T E R N A L   F U N C T I O N S **********/
+
+
 /********************************************************************
 * FUNCTION mgr_hello_init
 *

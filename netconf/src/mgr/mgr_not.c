@@ -193,6 +193,7 @@ static mgr_not_msg_t *
 * FUNCTION mgr_not_init
 *
 * Initialize the mgr_not module
+* call once to init module
 * Adds the mgr_not_dispatch function as the handler
 * for the NETCONF <rpc> top-level element.
 *
@@ -226,6 +227,7 @@ status_t
 * FUNCTION mgr_not_cleanup
 *
 * Cleanup the mgr_not module.
+* call once to cleanup module
 * Unregister the top-level NETCONF <rpc> element
 *
 *********************************************************************/
@@ -308,6 +310,10 @@ void
 * FUNCTION mgr_not_dispatch
 *
 * Dispatch an incoming <rpc-reply> response
+* handle the <notification> element
+* called by mgr_top.c: 
+* This function is registered with top_register_node
+* for the module 'notification', top-node 'notification'
 *
 * INPUTS:
 *   scb == session control block
@@ -420,11 +426,11 @@ void
 } /* mgr_not_dispatch */
 
 
-
 /********************************************************************
 * FUNCTION mgr_not_set_callback_fn
 *
-* Set the application callback function
+* Set the application callback function to handle
+* notifications when they arrive
 *
 * INPUTS:
 *   cbfn == callback function to use

@@ -63,16 +63,60 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION mgr_hello_init
+*
+* Initialize the mgr_hello module
+* Adds the mgr_hello_dispatch function as the handler
+* for the NETCONF <hello> top-level element.
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   NO_ERR if all okay, the minimum spare requests will be malloced
+*********************************************************************/
 extern status_t 
     mgr_hello_init (void);
 
+
+/********************************************************************
+* FUNCTION mgr_hello_cleanup
+*
+* Cleanup the mgr_hello module.
+* Unregister the top-level NETCONF <hello> element
+*
+*********************************************************************/
 extern void 
     mgr_hello_cleanup (void);
 
+
+/********************************************************************
+* FUNCTION mgr_hello_dispatch
+*
+* Handle an incoming <hello> message from the client
+*
+* INPUTS:
+*   scb == session control block
+*   top == top element descriptor
+*********************************************************************/
 extern void 
     mgr_hello_dispatch (ses_cb_t *scb,
 			xml_node_t *top);
 
+
+/********************************************************************
+* FUNCTION mgr_hello_send
+*
+* Send the manager <hello> message to the agent on the 
+* specified session
+*
+* INPUTS:
+*   scb == session control block
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     mgr_hello_send (ses_cb_t *scb);
 

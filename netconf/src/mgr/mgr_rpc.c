@@ -255,6 +255,7 @@ static mgr_rpc_req_t *
 * FUNCTION mgr_rpc_init
 *
 * Initialize the mgr_rpc module
+* call once to init RPC mgr module
 * Adds the mgr_rpc_dispatch function as the handler
 * for the NETCONF <rpc> top-level element.
 *
@@ -286,6 +287,7 @@ status_t
 * FUNCTION mgr_rpc_cleanup
 *
 * Cleanup the mgr_rpc module.
+* call once to cleanup RPC mgr module
 * Unregister the top-level NETCONF <rpc> element
 *
 *********************************************************************/
@@ -446,6 +448,10 @@ void
 * Clean the request Q of mgr_rpc_req_t entries
 * Only remove the entries that have timed out
 *
+* returning number of msgs timed out
+* need a callback-based cleanup later on
+* to support N concurrent requests per agent
+*
 * INPUTS:
 *   reqQ == Q of entries to check
 *
@@ -499,6 +505,8 @@ uint32
 * FUNCTION mgr_rpc_send_request
 *
 * Send an <rpc> request to the agent on the specified session
+* non-blocking send, reply function will be called when
+* one is received or a timeout occurs
 *
 * INPUTS:
 *   scb == session control block
@@ -604,6 +612,10 @@ status_t
 * FUNCTION mgr_rpc_dispatch
 *
 * Dispatch an incoming <rpc-reply> response
+* handle the <rpc-reply> element
+* called by mgr_top.c: 
+* This function is registered with top_register_node
+* for the module 'netconf', top-node 'rpc-reply'
 *
 * INPUTS:
 *   scb == session control block

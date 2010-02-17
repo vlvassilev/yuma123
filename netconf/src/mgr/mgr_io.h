@@ -98,21 +98,84 @@ typedef mgr_io_state_t (*mgr_io_stdin_fn_t) (void);
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+ * FUNCTION mgr_io_init
+ * 
+ * Init the IO server loop vars for the ncx manager
+ * Must call this function before any other function can
+ * be used from this module
+ *********************************************************************/
 extern void
     mgr_io_init (void);
 
+
+/********************************************************************
+ * FUNCTION mgr_io_set_stdin_handler
+ * 
+ * Set the callback function for STDIN processing
+ * 
+ * INPUTS:
+ *   handler == address of the STDIN handler function
+ *********************************************************************/
 extern void
     mgr_io_set_stdin_handler (mgr_io_stdin_fn_t handler);
 
+
+/********************************************************************
+ * FUNCTION mgr_io_activate_session
+ * 
+ * Tell the IO manager to start listening on the specified socket
+ * 
+ * INPUTS:
+ *   fd == file descriptor number of the socket
+ *********************************************************************/
 extern void
     mgr_io_activate_session (int fd);
 
+
+/********************************************************************
+ * FUNCTION mgr_io_deactivate_session
+ * 
+ * Tell the IO manager to stop listening on the specified socket
+ * 
+ * INPUTS:
+ *   fd == file descriptor number of the socket
+ *********************************************************************/
 extern void
     mgr_io_deactivate_session (int fd);
 
+
+/********************************************************************
+ * FUNCTION mgr_io_run
+ * 
+ * IO server loop for the ncx manager
+ * 
+ * RETURNS:
+ *   status
+ *********************************************************************/
 extern status_t 
     mgr_io_run (void);
 
+
+/********************************************************************
+ * FUNCTION mgr_io_process_timeout
+ * 
+ * mini server loop while waiting for KBD input
+ * 
+ * INPUTS:
+ *    cursid == current session ID to check
+ *    wantdata == address of return wantdata flag
+ *
+ * OUTPUTS:
+ *   *wantdata == TRUE if the agent has sent a keepalive
+ *                and is expecting a request
+ *             == FALSE if no keepalive received this time
+ *
+ * RETURNS:
+ *   TRUE if session alive or not confirmed
+ *   FALSE if cursid confirmed dropped
+ *********************************************************************/
 extern boolean
     mgr_io_process_timeout (ses_id_t  cursid,
                             boolean *wantdata);

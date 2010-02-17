@@ -44,6 +44,19 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION mgr_top_dispatch_msg
+* 
+* Find the appropriate top node handler and call it
+*
+* INPUTS:
+*   scb == session control block containing the xmlreader
+*          set at the start of an incoming message.
+*
+* RETURNS:
+*  none
+*********************************************************************/
 extern void
     mgr_top_dispatch_msg (ses_cb_t  *scb);
 

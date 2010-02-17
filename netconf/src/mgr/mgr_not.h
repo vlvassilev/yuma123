@@ -104,33 +104,94 @@ typedef void (*mgr_not_cbfn_t) (ses_cb_t *scb,
 *                                                                   *
 *********************************************************************/
 
-/* should call once to init module */
+
+/********************************************************************
+* FUNCTION mgr_not_init
+*
+* Initialize the mgr_not module
+* call once to init module
+* Adds the mgr_not_dispatch function as the handler
+* for the NETCONF <rpc> top-level element.
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   NO_ERR if all okay, the minimum spare requests will be malloced
+*********************************************************************/
 extern status_t 
     mgr_not_init (void);
 
-/* should call once to cleanup module */
+
+/********************************************************************
+* FUNCTION mgr_not_cleanup
+*
+* Cleanup the mgr_not module.
+* call once to cleanup module
+* Unregister the top-level NETCONF <rpc> element
+*
+*********************************************************************/
 extern void 
     mgr_not_cleanup (void);
 
+
+/********************************************************************
+* FUNCTION mgr_not_free_msg
+*
+* Free a mgr_not_msg_t struct
+*
+* INPUTS:
+*   msg == struct to free
+*
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     mgr_not_free_msg (mgr_not_msg_t *msg);
 
+
+/********************************************************************
+* FUNCTION mgr_not_clean_msgQ
+*
+* Clean the msg Q of mgr_not_msg_t entries
+*
+* INPUTS:
+*   msgQ == Q of entries to free; the Q itself is not freed
+*
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     mgr_not_clean_msgQ (dlq_hdr_t *msgQ);
 
 
-/* handle the <notification> element
- * called by mgr_top.c: 
- * This function is registered with top_register_node
- * for the module 'notification', top-node 'notification'
- */
+/********************************************************************
+* FUNCTION mgr_not_dispatch
+*
+* Dispatch an incoming <rpc-reply> response
+* handle the <notification> element
+* called by mgr_top.c: 
+* This function is registered with top_register_node
+* for the module 'notification', top-node 'notification'
+*
+* INPUTS:
+*   scb == session control block
+*   top == top element descriptor
+*********************************************************************/
 extern void
     mgr_not_dispatch (ses_cb_t  *scb,
 		      xml_node_t *top);
 
-/* temp: just one notification callback; 
- * not per eventType or any other filter
- */
+
+/********************************************************************
+* FUNCTION mgr_not_set_callback_fn
+*
+* Set the application callback function to handle
+* notifications when they arrive
+*
+* INPUTS:
+*   cbfn == callback function to use
+*        == NULL to clear the callback function
+*********************************************************************/
 extern void
     mgr_not_set_callback_fn (mgr_not_cbfn_t cbfn);
 

@@ -50,15 +50,61 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION mgr_cap_cleanup
+*
+* Clean the NETCONF manager capabilities
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    none
+*********************************************************************/
 extern void 
     mgr_cap_cleanup (void);
 
+
+/********************************************************************
+* FUNCTION mgr_cap_set_caps
+*
+* Initialize the NETCONF manager capabilities
+*
+* TEMP !!! JUST SET EVERYTHING, WILL REALLY GET FROM MGR STARTUP
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    NO_ERR if all goes well
+*********************************************************************/
 extern status_t 
     mgr_cap_set_caps (void);
 
+
+/********************************************************************
+* FUNCTION mgr_cap_get_caps
+*
+* Get the NETCONF manager capabilities
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    pointer to the manager caps list
+*********************************************************************/
 extern cap_list_t * 
     mgr_cap_get_caps (void);
 
+
+/********************************************************************
+* FUNCTION mgr_cap_get_capsval
+*
+* Get the NETCONF manager capabilities ain val_value_t format
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    pointer to the agent caps list
+*********************************************************************/
 extern val_value_t * 
     mgr_cap_get_capsval (void);
 

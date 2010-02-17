@@ -21,28 +21,6 @@
 
     Configuration segments are stored in sequential order.
 
-    OLD NCX MODEL
-    =============
-
-    Configuration database (running, candidate, startup, etc.)
-      +
-      |
-      +-- (root: /)
-           +
-           |
-           +--- application X  (netconf, security, routing, etc.)
-           |         |
-           |         +---- parmset A , B, C
-           |           
-           +--- application Y
-           |         |
-           |         +---- parmset D , E
-           V
-
-
-   Parmset A is defined (hard-wired) to belong to application X
-
-
    NEW YANG OBJECT MODEL
    =====================
 
@@ -203,102 +181,446 @@ typedef struct cfg_template_t_ {
 *                                                                   *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION cfg_init
+*
+* Initialize the config manager
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    none
+*********************************************************************/
 extern void
     cfg_init (void);
 
+
+/********************************************************************
+* FUNCTION cfg_cleanup
+*
+* Cleanup the config manager
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    none
+*********************************************************************/
 extern void
     cfg_cleanup (void);
 
+
+/********************************************************************
+* FUNCTION cfg_init_static_db
+*
+* Initialize the specified static configuration slot
+*
+* INPUTS:
+*    id   == cfg ID to intialize
+*    
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     cfg_init_static_db (ncx_cfg_t cfg_id);
 
+
+/********************************************************************
+* FUNCTION cfg_new_template
+*
+* Malloc and initialize a cfg_template_t struct
+*
+* INPUTS:
+*    name == cfg name
+*    cfg_id   == cfg ID
+* RETURNS:
+*    malloced struct or NULL if some error
+*    This struct needs to be freed by the caller
+*********************************************************************/
 extern cfg_template_t *
     cfg_new_template (const xmlChar *name,
 		      ncx_cfg_t cfg_id);
 
+
+/********************************************************************
+* FUNCTION cfg_free_template
+*
+* Clean and free the cfg_template_t struct
+*
+* INPUTS:
+*    cfg = cfg_template_t to clean and free
+* RETURNS:
+*    none
+*********************************************************************/
 extern void
     cfg_free_template (cfg_template_t *cfg);
 
-extern cfg_state_t
-    cfg_get_state (ncx_cfg_t cfg_id);
 
+/********************************************************************
+* FUNCTION cfg_set_state
+*
+* Change the state of the specified static config
+*
+* INPUTS:
+*    cfg_id = Config ID to change
+*    new_state == new config state to set 
+* RETURNS:
+*    none
+*********************************************************************/
 extern void
     cfg_set_state (ncx_cfg_t cfg_id,
 		   cfg_state_t new_state);
 
+
+/********************************************************************
+* FUNCTION cfg_get_state
+*
+* Get the state of the specified static config
+*
+* INPUTS:
+*    cfg_id = Config ID
+* RETURNS:
+*    config state  (CFG_ST_NONE if some error)
+*********************************************************************/
+extern cfg_state_t
+    cfg_get_state (ncx_cfg_t cfg_id);
+
+
+/********************************************************************
+* FUNCTION cfg_get_config
+*
+* Get the config struct from its name
+*
+* INPUTS:
+*    cfgname = Config Name
+* RETURNS:
+*    pointer to config struct or NULL if not found
+*********************************************************************/
 extern cfg_template_t *
     cfg_get_config (const xmlChar *cfgname);
 
+
+/********************************************************************
+* FUNCTION cfg_get_config_id
+*
+* Get the config struct from its ID
+*
+* INPUTS:
+*    cfgid == config ID
+* RETURNS:
+*    pointer to config struct or NULL if not found
+*********************************************************************/
 extern cfg_template_t *
     cfg_get_config_id (ncx_cfg_t cfgid);
 
+
+/********************************************************************
+* FUNCTION cfg_set_target
+*
+* Set the CFG_FL_TARGET flag in the specified config
+*
+* INPUTS:
+*    cfg_id = Config ID to set as a valid target
+*
+*********************************************************************/
 extern void
     cfg_set_target (ncx_cfg_t cfg_id);
 
+
+/********************************************************************
+* FUNCTION cfg_fill_candidate_from_running
+*
+* Fill the <candidate> config with the config contents
+* of the <running> config
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     cfg_fill_candidate_from_running (void);
 
+
+/********************************************************************
+* FUNCTION cfg_fill_candidate_from_startup
+*
+* Fill the <candidate> config with the config contents
+* of the <startup> config
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     cfg_fill_candidate_from_startup (void);
 
+
+/********************************************************************
+* FUNCTION cfg_fill_candidate_from_inline
+*
+* Fill the <candidate> config with the config contents
+* of the <config> inline XML node
+*
+* INPUTS:
+*   newroot == new root for the candidate config
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     cfg_fill_candidate_from_inline (val_value_t *newroot);
 
+
+/********************************************************************
+* FUNCTION cfg_set_dirty_flag
+*
+* Mark the config as 'changed'
+*
+* INPUTS:
+*    cfg == configuration template to set
+*
+*********************************************************************/
 extern void
     cfg_set_dirty_flag (cfg_template_t *cfg);
 
+
+/********************************************************************
+* FUNCTION cfg_get_dirty_flag
+*
+* Get the config dirty flag value
+*
+* INPUTS:
+*    cfg == configuration template to check
+*
+*********************************************************************/
 extern boolean
     cfg_get_dirty_flag (const cfg_template_t *cfg);
 
+
+/********************************************************************
+* FUNCTION cfg_ok_to_lock
+*
+* Check if the specified config can be locked right now
+*
+* INPUTS:
+*    cfg = Config template to check 
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     cfg_ok_to_lock (const cfg_template_t *cfg);
 
+
+/********************************************************************
+* FUNCTION cfg_ok_to_unlock
+*
+* Check if the specified config can be unlocked right now
+* by the specified session ID
+*
+* INPUTS:
+*    cfg = Config template to check 
+*    sesid == session ID requesting to unlock the config
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     cfg_ok_to_unlock (const cfg_template_t *cfg,
 		      ses_id_t sesid);
 
+
+/********************************************************************
+* FUNCTION cfg_ok_to_read
+*
+* Check if the specified config can be read right now
+*
+* INPUTS:
+*    cfg = Config template to check 
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     cfg_ok_to_read (const cfg_template_t *cfg);
 
+
+/********************************************************************
+* FUNCTION cfg_ok_to_write
+*
+* Check if the specified config can be written right now
+* by the specified session ID
+*
+* This is not an access control check,
+* only locks and config state will be checked
+*
+* INPUTS:
+*    cfg = Config template to check 
+*    sesid == session ID requesting to write to the config
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     cfg_ok_to_write (const cfg_template_t *cfg,
 		     ses_id_t sesid);
 
+
+/********************************************************************
+* FUNCTION cfg_is_global_locked
+*
+* Check if the specified config has ab active global lock
+*
+* INPUTS:
+*    cfg = Config template to check 
+*
+* RETURNS:
+*    TRUE if global lock active, FALSE if not
+*********************************************************************/
 extern boolean
     cfg_is_global_locked (const cfg_template_t *cfg);
 
+
+/********************************************************************
+* FUNCTION cfg_get_global_lock_info
+*
+* Get the current global lock info
+*
+* INPUTS:
+*    cfg = Config template to check 
+*    sid == address of return session ID
+*    locktime == address of return locktime pointer
+*
+* OUTPUTS:
+*    *sid == session ID of lock holder
+*    *locktime == pointer to lock time string
+*
+* RETURNS:
+*    status, NCX_ERR_SKIPPED if not locked
+*********************************************************************/
 extern status_t
     cfg_get_global_lock_info (const cfg_template_t *cfg,
 			      ses_id_t  *sid,
 			      const xmlChar **locktime);
 
+
+/********************************************************************
+* FUNCTION cfg_lock
+*
+* Lock the specified config.
+* This will not really have an effect unless the
+* CFG_FL_TARGET flag in the specified config is also set
+*
+* INPUTS:
+*    cfg = Config template to lock
+*    locked_by == session ID of the lock owner
+*    lock_src == enum classifying the lock source
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     cfg_lock (cfg_template_t *cfg,
 	      ses_id_t locked_by,
 	      cfg_source_t  lock_src);
 
+
+/********************************************************************
+* FUNCTION cfg_unlock
+*
+* Unlock the specified config.
+*
+* INPUTS:
+*    cfg = Config template to unlock
+*    locked_by == session ID of the lock owner
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     cfg_unlock (cfg_template_t *cfg,
 		ses_id_t locked_by);
 
+
+/********************************************************************
+* FUNCTION cfg_release_locks
+*
+* Release any configuration locks held by the specified session
+*
+* INPUTS:
+*    sesid == session ID to check for
+*
+*********************************************************************/
 extern void
     cfg_release_locks (ses_id_t sesid);
 
+
+/********************************************************************
+* FUNCTION cfg_get_lock_list
+*
+* Get a list of all the locks held by a session
+*
+* INPUTS:
+*    sesid == session ID to check for any locks
+*    retval == pointer to malloced and initialized NCX_BT_SLIST
+*
+* OUTPUTS:
+*   *retval is filled in with any lock entryies or left empty
+*   if none found
+* 
+*********************************************************************/
 extern void
     cfg_get_lock_list (ses_id_t sesid,
 		       val_value_t *retval);
 
 
+/********************************************************************
+* FUNCTION cfg_find_datanode
+*
+* Find the specified data node instance,
+* using absolute path XPath and default prefix names.
+* A missing prefix is an error
+* The expression must start from root
+*
+* INPUTS:
+*   target == XPath expression for single target to find
+*   cfgid == ID of configuration to use
+*
+* RETURNS:
+*   pointer to found node, or NULL if not found
+*********************************************************************/
 extern val_value_t *
     cfg_find_datanode (const xmlChar *target,
 		       ncx_cfg_t  cfgid);
 
+
+/********************************************************************
+* FUNCTION cfg_find_modrel_datanode
+*
+* Find the specified data node instance,
+* using absolute path XPath and module-relative prefix names.
+* A missing prefix is defaulted to the specified module
+* The expression must start from root
+*
+* INPUTS:
+*   mod  == module to use for the default and prefix evaluation
+*   target == XPath expression for single target to find
+*   cfgid == ID of configuration to use
+*
+* RETURNS:
+*   pointer to found node, or NULL if not found
+*********************************************************************/
 extern val_value_t *
     cfg_find_modrel_datanode (ncx_module_t *mod,
 			      const xmlChar *target,
 			      ncx_cfg_t  cfgid);
 
 
+/********************************************************************
+* FUNCTION cfg_apply_load_root
+*
+* Apply the AGT_CB_APPLY function for the OP_EDITOP_LOAD operation
+*
+* INPUTS:
+*    cfg == config target
+*    newroot == new config tree
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     cfg_apply_load_root (cfg_template_t *cfg,
 			 val_value_t *newroot);

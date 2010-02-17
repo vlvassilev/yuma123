@@ -11,8 +11,8 @@
 /*  FILE: bobhash.c
  *
 
-  From Packet Sampling Techniques
-  <draft-ietf-psamp-sample-tech-07.txt>
+  From Packet Sampling Techniques RFC 5475
+  implemented from <draft-ietf-psamp-sample-tech-07.txt>
 
   BOB Hash Function  
      
@@ -132,6 +132,17 @@ date         init     comment
 
 /********************************************************************
 * FUNCTION bobhash
+*
+* Calculate a 32-bit BOB hash value
+*
+*
+* [Jenk97]   B. Jenkins, "Algorithm Alley", Dr. Dobb's Journal,
+*              September 1997.
+*              http://burtleburtle.net/bob/hash/doobs.html.
+*
+* Copied From:
+*   Sampling and Filtering Techniques for IP Packet Selection
+*   RFC 5475
 *
 *   Returns a 32-bit value.  Every bit of the key affects every bit 
 *   of the return value.  Every 1-bit and 2-bit delta achieves 

@@ -66,35 +66,100 @@ typedef enum help_mode_t_ {
 } help_mode_t;
 
 
-
 /********************************************************************
 *								    *
 *			F U N C T I O N S			    *
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION help_program_module
+*
+* Print the full help text for an entire program module to STDOUT
+*
+* INPUTS:
+*    modname == module name without file suffix
+*    cliname == name of CLI parmset within the modname module
+*
+*********************************************************************/
 extern void
     help_program_module (const xmlChar *modname,
 			 const xmlChar *cliname,
 			 help_mode_t mode);
 
+
+/********************************************************************
+* FUNCTION help_data_module
+*
+* Print the full help text for an entire data module to STDOUT
+*
+* INPUTS:
+*    mod     == data module struct
+*    mode == help mode requested
+*********************************************************************/
 extern void
     help_data_module (const ncx_module_t *mod,
 		      help_mode_t mode);
 
+
+/********************************************************************
+* FUNCTION help_type
+*
+* Print the full help text for a data type to STDOUT
+*
+* INPUTS:
+*    typ     == type template struct
+*    mode == help mode requested
+*********************************************************************/
 extern void
     help_type (const typ_template_t *typ,
 	       help_mode_t mode);
 
+
+/********************************************************************
+* FUNCTION help_object
+*
+* Print the full help text for a RPC method template to STDOUT
+*
+* INPUTS:
+*    obj     == object template
+*    mode == help mode requested
+*********************************************************************/
 extern void
     help_object (obj_template_t *obj,
 		 help_mode_t mode);
 
+
+/********************************************************************
+ * FUNCTION help_write_lines
+ * 
+ * write some indented output to STDOUT
+ *
+ * INPUTS:
+ *    str == string to print; 'indent' number of spaces
+ *           will be added to each new line
+ *    indent == indent count
+ *    startnl == TRUE if start with a newline, FALSE otherwise
+ *********************************************************************/
 extern void
     help_write_lines (const xmlChar *str,
 		      uint32 indent,
 		      boolean startnl);
 
+
+/********************************************************************
+ * FUNCTION help_write_lines_max
+ * 
+ * write some indented output to STDOUT
+ *
+ * INPUTS:
+ *    str == string to print; 'indent' number of spaces
+ *           will be added to each new line
+ *    indent == indent count
+ *    startnl == TRUE if start with a newline, FALSE otherwise
+ *    maxlen == 0..N max number of chars to output
+ *********************************************************************/
 extern void
     help_write_lines_max (const xmlChar *str,
 			  uint32 indent,

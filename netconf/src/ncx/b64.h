@@ -42,6 +42,33 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/*
+ * b64_encode
+ *
+ * base64 encode a stream adding padding and line breaks as per spec.
+ *
+ * adapted from the b64 function for 2 FILE parameters
+ * using internal buffers instead
+ *
+ * INPUTS:
+ *   inbuff == pointer to buffer of binary chars
+ *   inbufflen == number of binary chars in inbuff
+ *   outbuff == pointer to the output buffer to use
+ *              MAY BE NULL; just get encoded length in that case
+ *   outbufflen == max number of chars to write to outbuff
+ *   linesize == the output line length to use
+ *   retlen == address of return length
+ *   
+ * OUTPUTS:
+ *   *retlen == number of chars written to outbuff,
+ *             or would have been written if it was non-NULL
+ *
+ * RETURNS:
+ *   status:
+ *     NO_ERR if all OK
+ *     ERR_BUFF_OVFL if outbuff not big enough
+ */
 extern status_t
     b64_encode (const unsigned char *inbuff,
 		unsigned int inbufflen,
@@ -51,6 +78,28 @@ extern status_t
 		unsigned int *retlen);
 
 
+/*
+ * b64_decode
+ *
+ * decode a base64 encoded stream discarding padding, line breaks and noise
+ *
+ * INPUTS:
+ *   inbuff == pointer to buffer of base64 chars
+ *   inbufflen == number of chars in inbuff
+ *   outbuff == pointer to the output buffer to use
+ *              MAY BE NULL; just get encoded length in that case
+ *   outbufflen == max number of chars to write to outbuff
+ *   linesize == the output line length to use
+ *   retlen == address of return length
+ *   
+ * OUTPUTS:
+ *   *retlen == number of chars written to outbuff
+ *
+ * RETURNS:
+ *   status:
+ *     NO_ERR if all OK
+ *     ERR_BUFF_OVFL if outbuff not big enough
+ */
 extern status_t
     b64_decode (const unsigned char *inbuff, 
 		unsigned int inbufflen,

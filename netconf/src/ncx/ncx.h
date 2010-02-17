@@ -117,6 +117,31 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION ncx_init
+* 
+* Initialize the NCX module
+*
+* INPUTS:
+*    savestr == TRUE if parsed description strings that are
+*               not needed by the agent at runtime should
+*               be saved anyway.  Converters should use this value.
+*                 
+*            == FALSE if uneeded strings should not be saved.
+*               Embedded agents should use this value
+*
+*    dlevel == desired debug output level
+*    logtstamps == TRUE if log should use timestamps
+*                  FALSE if not; not used unless 'log' is present
+*    startmsg == log_debug2 message to print before starting;
+*                NULL if not used;
+*    argc == CLI argument count for bootstrap CLI
+*    argv == array of CLI parms for bootstrap CLI
+*
+* RETURNS:
+*   status of the initialization procedure
+*********************************************************************/
 extern status_t 
     ncx_init (boolean savestr,
 	      log_debug_t dlevel,
@@ -126,671 +151,1397 @@ extern status_t
 	      const char *argv[]);
 
 
+/********************************************************************
+* FUNCTION ncx_stage2_init
+* 
+* Initialize the NCX module during stage 2 startup,
+* after the object database has been loaded, but before the 
+* agent has started accepting PDUs
+*
+* RETURNS:
+*   status of the initialization procedure
+*********************************************************************/
 extern status_t
     ncx_stage2_init (void);
 
+
+/********************************************************************
+* FUNCTION ncx_cleanup
+*
+*  cleanup NCX module
+*********************************************************************/
 extern void 
     ncx_cleanup (void);
 
-/**************** ncx_module_t *********************/
+
+/********************************************************************
+* FUNCTION ncx_new_module
+* 
+* Malloc and initialize the fields in a ncx_module_t
+*
+* RETURNS:
+*   pointer to the malloced and initialized struct or NULL if an error
+*********************************************************************/
 extern ncx_module_t * 
     ncx_new_module (void);
 
+
+/********************************************************************
+* FUNCTION ncx_find_module
+*
+* Find a ncx_module_t in the ncx_modQ
+* These are the modules that are already loaded
+*
+* INPUTS:
+*   modname == module name
+*   revision == module revision date
+*
+* RETURNS:
+*  module pointer if found or NULL if not
+*********************************************************************/
 extern ncx_module_t *
     ncx_find_module (const xmlChar *modname,
 		     const xmlChar *revision);
 
+
+/********************************************************************
+* FUNCTION ncx_find_module_que
+*
+* Find a ncx_module_t in the specified Q
+* Check the namespace ID
+*
+* INPUTS:
+*   modQ == module Q to search
+*   modname == module name
+*   revision == module revision date
+*
+* RETURNS:
+*  module pointer if found or NULL if not
+*********************************************************************/
 extern ncx_module_t *
     ncx_find_module_que (dlq_hdr_t *modQ,
                          const xmlChar *modname,
                          const xmlChar *revision);
 
 
+/********************************************************************
+* FUNCTION ncx_find_module_que_nsid
+*
+* Find a ncx_module_t in the specified Q
+* Check the namespace ID
+*
+* INPUTS:
+*   modQ == module Q to search
+*   nsid == xmlns ID to find
+*
+* RETURNS:
+*  module pointer if found or NULL if not
+*********************************************************************/
 extern ncx_module_t *
     ncx_find_module_que_nsid (dlq_hdr_t *modQ,
                               xmlns_id_t nsid);
 
-/* use if module was not added to registry */
+
+/********************************************************************
+* FUNCTION ncx_free_module
+* 
+* Scrub the memory in a ncx_module_t by freeing all
+* the sub-fields and then freeing the entire struct itself 
+* use if module was not added to registry
+*
+* MUST remove this struct from the ncx_modQ before calling
+* Does not remove module definitions from the registry
+*
+* Use the ncx_remove_module function if the module was 
+* already successfully added to the modQ and definition registry
+*
+* INPUTS:
+*    mod == ncx_module_t data structure to free
+*********************************************************************/
 extern void 
     ncx_free_module (ncx_module_t *mod);
 
 
-/* check if any YANG modules loaded with non-fatal errors
- * NCX files are loaded with no errors or nothing
- */
+/********************************************************************
+* FUNCTION ncx_any_mod_errors
+* 
+* Check if any of the loaded modules are loaded with non-fatal errors
+*
+* RETURNS:
+*    TRUE if any modules are loaded with non-fatal errors
+*    FALSE if all modules present have a status of NO_ERR
+*********************************************************************/
 extern boolean
     ncx_any_mod_errors (void);
 
-/* check if any imported modules that the specified module uses
- * has any errors
- */
+
+/********************************************************************
+* FUNCTION ncx_any_dependency_errors
+* 
+* Check if any of the imports that this module relies on
+* were loadeds are loaded with non-fatal errors
+*
+* RETURNS:
+*    TRUE if any modules are loaded with non-fatal errors
+*    FALSE if all modules present have a status of NO_ERR
+*********************************************************************/
 extern boolean
     ncx_any_dependency_errors (const ncx_module_t *mod);
 
+
+/********************************************************************
+* FUNCTION ncx_find_type
+*
+* Check if a typ_template_t in the mod->typeQ
+*
+* INPUTS:
+*   mod == ncx_module to check
+*   typname == type name
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
 extern typ_template_t * 
     ncx_find_type (ncx_module_t *mod,
 		   const xmlChar *typname);
 
+
+/********************************************************************
+* FUNCTION ncx_find_type_que
+*
+* Check if a typ_template_t in the mod->typeQ
+*
+* INPUTS:
+*   que == type Q to check
+*   typname == type name
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
 extern typ_template_t *
     ncx_find_type_que (const dlq_hdr_t *typeQ,
 		       const xmlChar *typname);
 
+
+/********************************************************************
+* FUNCTION ncx_find_grouping
+*
+* Check if a grp_template_t in the mod->groupingQ
+*
+* INPUTS:
+*   mod == ncx_module to check
+*   grpname == group name
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
 extern grp_template_t * 
     ncx_find_grouping (ncx_module_t *mod,
 		       const xmlChar *grpname);
 
+
+/********************************************************************
+* FUNCTION ncx_find_grouping_que
+*
+* Check if a grp_template_t in the specified Q
+*
+* INPUTS:
+*   groupingQ == Queue of grp_template_t to check
+*   grpname == group name
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
 extern grp_template_t *
     ncx_find_grouping_que (const dlq_hdr_t *groupingQ,
 			   const xmlChar *grpname);
 
+
+/********************************************************************
+* FUNCTION ncx_find_rpc
+*
+* Check if a rpc_template_t in the mod->rpcQ
+*
+* INPUTS:
+*   mod == ncx_module to check
+*   rpcname == RPC name
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
 extern obj_template_t * 
     ncx_find_rpc (const ncx_module_t *mod,
 		  const xmlChar *rpcname);
 
+
+/********************************************************************
+* FUNCTION ncx_match_rpc
+*
+* Check if a rpc_template_t in the mod->rpcQ
+*
+* INPUTS:
+*   mod == ncx_module to check
+*   rpcname == RPC name to match
+*   retcount == address of return match count
+*
+* OUTPUTS:
+*   *retcount == number of matches found
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
 extern obj_template_t * 
     ncx_match_rpc (const ncx_module_t *mod,
 		   const xmlChar *rpcname,
                    uint32 *retcount);
 
+
+/********************************************************************
+* FUNCTION ncx_match_any_rpc
+*
+* Check if a rpc_template_t in in any module that
+* matches the rpc name string and maybe the owner
+*
+* INPUTS:
+*   module == module name to check (NULL == check all)
+*   rpcname == RPC name to match
+*   retcount == address of return count of matches
+*
+* OUTPUTS:
+*   *retcount == number of matches found
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
 extern obj_template_t * 
     ncx_match_any_rpc (const xmlChar *module,
 		       const xmlChar *rpcname,
                        uint32 *retcount);
 
+
+/********************************************************************
+* FUNCTION ncx_find_any_object
+*
+* Check if an obj_template_t in in any module that
+* matches the object name string
+*
+* INPUTS:
+*   objname == object name to match
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
 extern obj_template_t *
     ncx_find_any_object (const xmlChar *objname);
 
+
+/********************************************************************
+* FUNCTION ncx_find_any_object_que
+*
+* Check if an obj_template_t in in any module that
+* matches the object name string
+*
+* INPUTS:
+*   modQ == Q of modules to check
+*   objname == object name to match
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
 extern obj_template_t *
     ncx_find_any_object_que (dlq_hdr_t *modQ,
                              const xmlChar *objname);
 
+
+/********************************************************************
+* FUNCTION ncx_find_object
+*
+* Find a top level module object
+*
+* INPUTS:
+*   mod == ncx_module to check
+*   typname == type name
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
 extern obj_template_t *
     ncx_find_object (ncx_module_t *mod,
 		     const xmlChar *objname);
 
+
+/********************************************************************
+* FUNCTION ncx_add_namespace_to_registry
+*
+* Add the namespace and prefix to the registry
+* or retrieve it if already set
+* 
+* INPUTS:
+*   mod == module to add to registry
+*   tempmod == TRUE if this is a temporary add mode
+*              FALSE if this is a real registry add
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
 extern status_t 
     ncx_add_namespace_to_registry (ncx_module_t *mod,
                                    boolean tempmod);
 
+
+
+/********************************************************************
+* FUNCTION ncx_add_to_registry
+*
+* Add all the definitions stored in an ncx_module_t to the registry
+* This step is deferred to keep the registry stable as possible
+* and only add modules in an all-or-none fashion.
+* 
+* INPUTS:
+*   mod == module to add to registry
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
 extern status_t 
     ncx_add_to_registry (ncx_module_t *mod);
 
+
+/********************************************************************
+* FUNCTION ncx_add_to_modQ
+*
+* Add module to the current module Q
+* Used by yangdiff to bypass add_to_registry to support
+* N different module trees
+*
+* INPUTS:
+*   mod == module to add to current module Q
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
 extern status_t 
     ncx_add_to_modQ (ncx_module_t *mod);
 
+
+/********************************************************************
+* FUNCTION ncx_is_duplicate
+* 
+* Search the specific module for the specified definition name.
+* This function is for modules in progress which have not been
+* added to the registry yet.
+*
+* INPUTS:
+*     mod == ncx_module_t to check
+*     defname == name of definition to find
+* RETURNS:
+*    TRUE if found, FALSE otherwise
+*********************************************************************/
 extern boolean
     ncx_is_duplicate (ncx_module_t *mod,
 		      const xmlChar *defname);
 
+
+/********************************************************************
+* FUNCTION ncx_get_first_module
+* 
+* Get the first module in the ncx_modQ
+* 
+* RETURNS:
+*   pointer to the first entry or NULL if empty Q
+*********************************************************************/
 extern ncx_module_t *
     ncx_get_first_module (void);
 
-extern ncx_module_t *
-    ncx_get_first_session_module (void);
 
-extern ncx_module_t *
-    ncx_get_next_session_module (const ncx_module_t *mod);
-
+/********************************************************************
+* FUNCTION ncx_get_next_module
+* 
+* Get the next module in the ncx_modQ
+* 
+* INPUTS:
+*   mod == current module to find next 
+*
+* RETURNS:
+*   pointer to the first entry or NULL if empty Q
+*********************************************************************/
 extern ncx_module_t *
     ncx_get_next_module (const ncx_module_t *mod);
 
-/* returns mod->name for main mod, mod->belongs for submod */
+
+/********************************************************************
+* FUNCTION ncx_get_first_session_module
+* 
+* Get the first module in the ncx_sesmodQ
+* 
+* RETURNS:
+*   pointer to the first entry or NULL if empty Q
+*********************************************************************/
+extern ncx_module_t *
+    ncx_get_first_session_module (void);
+
+
+/********************************************************************
+* FUNCTION ncx_get_next_session_module
+* 
+* Get the next module in the ncx_sesmodQ
+* 
+* RETURNS:
+*   pointer to the first entry or NULL if empty Q
+*********************************************************************/
+extern ncx_module_t *
+    ncx_get_next_session_module (const ncx_module_t *mod);
+
+
+/********************************************************************
+* FUNCTION ncx_get_modname
+* 
+* Get the main module name
+* 
+* INPUTS:
+*   mod == module or submodule to get main module name
+*
+* RETURNS:
+*   main module name or NULL if error
+*********************************************************************/
 extern const xmlChar *
     ncx_get_modname (const ncx_module_t *mod);
 
-/* returns highest revision date or NULL if none */
+
+/********************************************************************
+* FUNCTION ncx_get_modversion
+* 
+* Get the [sub]module version
+
+* INPUTS:
+*   mod == module or submodule to get module version
+* 
+* RETURNS:
+*   module version or NULL if error
+*********************************************************************/
 extern const xmlChar *
     ncx_get_modversion (const ncx_module_t *mod);
 
-/* get the module namespace URI */
+
+
+/********************************************************************
+* FUNCTION ncx_get_modnamespace
+* 
+* Get the module namespace URI
+*
+* INPUTS:
+*   mod == module or submodule to get module namespace
+* 
+* RETURNS:
+*   module namespace or NULL if error
+*********************************************************************/
 extern const xmlChar *
     ncx_get_modnamespace (const ncx_module_t *mod);
 
+
+/********************************************************************
+* FUNCTION ncx_get_mainmod
+* 
+* Get the main module
+* 
+* INPUTS:
+*   mod == submodule to get main module
+*
+* RETURNS:
+*   main module NULL if error
+*********************************************************************/
 extern ncx_module_t *
     ncx_get_mainmod (ncx_module_t *mod);
 
 
-/************* top obj_template_t in module **************/
+/********************************************************************
+* FUNCTION ncx_get_first_object
+* 
+* Get the first object in the datadefQs for the specified module
+* Get any object with a name
+* 
+* INPUTS:
+*   mod == module to search for the first object
+*
+* RETURNS:
+*   pointer to the first object or NULL if empty Q
+*********************************************************************/
 extern obj_template_t *
     ncx_get_first_object (ncx_module_t *mod);
 
+
+/********************************************************************
+* FUNCTION ncx_get_next_object
+* 
+* Get the next object in the specified module
+* Get any object with a name
+*
+* INPUTS:
+*    mod == module struct to get the next object from
+*    curobj == pointer to the current object to get the next for
+*
+* RETURNS:
+*   pointer to the next object or NULL if none
+*********************************************************************/
 extern obj_template_t *
     ncx_get_next_object (ncx_module_t *mod,
 			 obj_template_t *curobj);
 
+
+/********************************************************************
+* FUNCTION ncx_get_first_data_object
+* 
+* Get the first database object in the datadefQs 
+* for the specified module
+* 
+* INPUTS:
+*   mod == module to search for the first object
+*
+* RETURNS:
+*   pointer to the first object or NULL if empty Q
+*********************************************************************/
 extern obj_template_t *
     ncx_get_first_data_object (ncx_module_t *mod);
 
+
+/********************************************************************
+* FUNCTION ncx_get_next_data_object
+* 
+* Get the next database object in the specified module
+* 
+* INPUTS:
+*    mod == pointer to module to get object from
+*    curobj == pointer to current object to get next from
+*
+* RETURNS:
+*   pointer to the next object or NULL if none
+*********************************************************************/
 extern obj_template_t *
     ncx_get_next_data_object (ncx_module_t *mod,
 			      obj_template_t *curobj);
 
-/******************** ncx_import_t ******************/
 
+/********************************************************************
+* FUNCTION ncx_new_import
+* 
+* Malloc and initialize the fields in a ncx_import_t
+*
+* RETURNS:
+*   pointer to the malloced and initialized struct or NULL if an error
+*********************************************************************/
 extern ncx_import_t * 
     ncx_new_import (void);
 
+
+/********************************************************************
+* FUNCTION ncx_free_import
+* 
+* Scrub the memory in a ncx_import_t by freeing all
+* the sub-fields and then freeing the entire struct itself 
+* The struct must be removed from any queue it is in before
+* this function is called.
+*
+* INPUTS:
+*    import == ncx_import_t data structure to free
+*********************************************************************/
 extern void 
     ncx_free_import (ncx_import_t *import);
 
+
+/********************************************************************
+* FUNCTION ncx_find_import
+* 
+* Search the importQ for a specified module name
+* 
+* INPUTS:
+*   mod == module to search (mod->importQ)
+*   module == module name to find
+*
+* RETURNS:
+*   pointer to the node if found, NULL if not found
+*********************************************************************/
 extern ncx_import_t * 
     ncx_find_import (const ncx_module_t *mod,
 		     const xmlChar *module);
 
+
+/********************************************************************
+* FUNCTION ncx_find_import_que
+* 
+* Search the specified importQ for a specified module name
+* 
+* INPUTS:
+*   importQ == Q of ncx_import_t to search
+*   module == module name to find
+*
+* RETURNS:
+*   pointer to the node if found, NULL if not found
+*********************************************************************/
 extern ncx_import_t * 
     ncx_find_import_que (const dlq_hdr_t *importQ,
                          const xmlChar *module);
 
+
+/********************************************************************
+* FUNCTION ncx_find_import_test
+* 
+* Search the importQ for a specified module name
+* Do not set used flag
+*
+* INPUTS:
+*   mod == module to search (mod->importQ)
+*   module == module name to find
+*
+* RETURNS:
+*   pointer to the node if found, NULL if not found
+*********************************************************************/
 extern ncx_import_t * 
     ncx_find_import_test (const ncx_module_t *mod,
 			  const xmlChar *module);
 
+
+/********************************************************************
+* FUNCTION ncx_find_pre_import
+* 
+* Search the importQ for a specified prefix value
+* 
+* INPUTS:
+*   mod == module to search (mod->importQ)
+*   prefix == prefix string to find
+*
+* RETURNS:
+*   pointer to the node if found, NULL if not found
+*********************************************************************/
 extern ncx_import_t * 
     ncx_find_pre_import (const ncx_module_t *mod,
 			 const xmlChar *prefix);
 
+
+/********************************************************************
+* FUNCTION ncx_find_pre_import_que
+* 
+* Search the specified importQ for a specified prefix value
+* 
+* INPUTS:
+*   importQ == Q of ncx_import_t to search
+*   prefix == prefix string to find
+*
+* RETURNS:
+*   pointer to the node if found, NULL if not found
+*********************************************************************/
 extern ncx_import_t * 
     ncx_find_pre_import_que (const dlq_hdr_t *importQ,
                              const xmlChar *prefix);
 
+
+/********************************************************************
+* FUNCTION ncx_find_pre_import_test
+* 
+* Search the importQ for a specified prefix value
+* Test only, do not set used flag
+*
+* INPUTS:
+*   mod == module to search (mod->importQ)
+*   prefix == prefix string to find
+*
+* RETURNS:
+*   pointer to the node if found, NULL if not found
+*********************************************************************/
 extern ncx_import_t * 
     ncx_find_pre_import_test (const ncx_module_t *mod,
 			      const xmlChar *prefix);
 
+
+/********************************************************************
+* FUNCTION ncx_locate_modqual_import
+* 
+* Search the specific module for the specified definition name.
+*
+* Okay for YANG or NCX
+*
+*  - typ_template_t (NCX_NT_TYP)
+*  - grp_template_t (NCX_NT_GRP)
+*  - obj_template_t (NCX_NT_OBJ)
+*  - rpc_template_t  (NCX_NT_RPC)
+*  - not_template_t (NCX_NT_NOTIF)
+*
+* INPUTS:
+*     pcb == parser control block to use
+*     imp == NCX import struct to use
+*     defname == name of definition to find
+*     *deftyp == specified type or NCX_NT_NONE if any will do
+*
+* OUTPUTS:
+*    imp->mod may get set if not already
+*    *deftyp == type retrieved if NO_ERR
+*
+* RETURNS:
+*    pointer to the located definition or NULL if not found
+*********************************************************************/
 extern void *
     ncx_locate_modqual_import (yang_pcb_t *pcb,
                                ncx_import_t *imp,
 			       const xmlChar *defname,
 			       ncx_node_t *deftyp);
 
-/******************** ncx_include_t ******************/
 
+/********************************************************************
+* FUNCTION ncx_new_include
+* 
+* Malloc and initialize the fields in a ncx_include_t
+*
+* RETURNS:
+*   pointer to the malloced and initialized struct or NULL if an error
+*********************************************************************/
 extern ncx_include_t * 
     ncx_new_include (void);
 
+
+/********************************************************************
+* FUNCTION ncx_free_include
+* 
+* Scrub the memory in a ncx_include_t by freeing all
+* the sub-fields and then freeing the entire struct itself 
+* The struct must be removed from any queue it is in before
+* this function is called.
+*
+* INPUTS:
+*    inc == ncx_include_t data structure to free
+*********************************************************************/
 extern void 
     ncx_free_include (ncx_include_t *inc);
 
+
+/********************************************************************
+* FUNCTION ncx_find_include
+* 
+* Search the includeQ for a specified submodule name
+* 
+* INPUTS:
+*   mod == module to search (mod->includeQ)
+*   submodule == submodule name to find
+*
+* RETURNS:
+*   pointer to the node if found, NULL if not found
+*********************************************************************/
 extern ncx_include_t * 
     ncx_find_include (const ncx_module_t *mod,
 		      const xmlChar *submodule);
 
-/********************** ncx_num_t *********************/
 
-extern void
-    ncx_init_num (ncx_num_t *num);
-
-extern void 
-    ncx_clean_num (ncx_btype_t btyp,
-		   ncx_num_t *num);
-
-extern int32
-    ncx_compare_nums (const ncx_num_t *num1,
-		      const ncx_num_t *num2,
-		      ncx_btype_t  btyp);
-
-extern void
-    ncx_set_num_min (ncx_num_t *num,
-		     ncx_btype_t  btyp);
-
-extern void
-    ncx_set_num_max (ncx_num_t *num,
-		     ncx_btype_t  btyp);
-
-extern void
-    ncx_set_num_one (ncx_num_t *num,
-		     ncx_btype_t  btyp);
-
-extern void
-    ncx_set_num_zero (ncx_num_t *num,
-		      ncx_btype_t  btyp);
-
-extern void
-    ncx_set_num_nan (ncx_num_t *num,
-		     ncx_btype_t  btyp);
-
-extern boolean
-    ncx_num_is_nan (ncx_num_t *num,
-		    ncx_btype_t  btyp);
-
-extern boolean
-    ncx_num_zero (const ncx_num_t *num,
-		  ncx_btype_t  btyp);
-
-extern status_t
-    ncx_convert_num (const xmlChar *numstr,
-		     ncx_numfmt_t numfmt,
-		     ncx_btype_t  btyp,
-		     ncx_num_t    *val);
-
-extern status_t
-    ncx_convert_dec64 (const xmlChar *numstr,
-		       ncx_numfmt_t numfmt,
-		       uint8 digits,
-		       ncx_num_t *val);
-
-extern status_t 
-    ncx_decode_num (const xmlChar *numstr,
-		    ncx_btype_t  btyp,
-		    ncx_num_t  *retnum);
-
-extern status_t 
-    ncx_decode_dec64 (const xmlChar *numstr,
-		      uint8 digits,
-		      ncx_num_t  *retnum);
-
-extern status_t
-    ncx_copy_num (const ncx_num_t *num1,
-		  ncx_num_t *num2,
-		  ncx_btype_t  btyp);
-
-extern status_t
-    ncx_cast_num (const ncx_num_t *num1,
-		  ncx_btype_t  btyp1,
-		  ncx_num_t *num2,
-		  ncx_btype_t  btyp2);
-
-extern status_t
-    ncx_num_floor (const ncx_num_t *num1,
-		   ncx_num_t *num2,
-		   ncx_btype_t  btyp);
-
-extern status_t
-    ncx_num_ceiling (const ncx_num_t *num1,
-		     ncx_num_t *num2,
-		     ncx_btype_t  btyp);
-
-extern status_t
-    ncx_round_num (const ncx_num_t *num1,
-		   ncx_num_t *num2,
-		   ncx_btype_t  btyp);
-
-extern boolean
-    ncx_num_is_integral (const ncx_num_t *num,
-			 ncx_btype_t  btyp);
-
-extern int64
-    ncx_cvt_to_int64 (const ncx_num_t *num,
-		      ncx_btype_t  btyp);
-
-extern ncx_numfmt_t
-    ncx_get_numfmt (const xmlChar *numstr);
-
-extern void
-    ncx_printf_num (const ncx_num_t *num,
-		    ncx_btype_t  btyp);
-
-extern void
-    ncx_alt_printf_num (const ncx_num_t *num,
-			ncx_btype_t  btyp);
-
-extern status_t
-    ncx_sprintf_num (xmlChar *buff,
-		     const ncx_num_t *num,
-		     ncx_btype_t  btyp,
-		     uint32  *len);
-
-extern boolean
-    ncx_is_min (const ncx_num_t *num,
-		ncx_btype_t btyp);
-
-extern boolean
-    ncx_is_max (const ncx_num_t *num,
-		ncx_btype_t btyp);
-
-extern status_t
-    ncx_convert_tkcnum (tk_chain_t *tkc,
-			ncx_btype_t  btyp,
-			ncx_num_t *val);
-
-extern status_t
-    ncx_convert_tkc_dec64 (tk_chain_t *tkc,
-			   uint8 digits,
-			   ncx_num_t *val);
-
-/********************** ncx_str_t *********************/
-
-extern int32
-    ncx_compare_strs (const ncx_str_t *str1,
-		      const ncx_str_t *str2,
-		      ncx_btype_t  btyp);
-
-extern status_t
-    ncx_copy_str (const ncx_str_t *str1,
-		  ncx_str_t *str2,
-		  ncx_btype_t  btyp);
-
-extern void 
-    ncx_clean_str (ncx_str_t *str);
-
-/********************** ncx_list_t *********************/
-
-extern ncx_list_t *
-    ncx_new_list (ncx_btype_t btyp);
-
-extern void
-    ncx_init_list (ncx_list_t *list,
-		   ncx_btype_t btyp);
-
-extern void 
-    ncx_clean_list (ncx_list_t *list);
-
-extern void
-    ncx_free_list (ncx_list_t *list);
-
-extern uint32
-    ncx_list_cnt (const ncx_list_t *list);
-
-extern boolean
-    ncx_list_empty (const ncx_list_t *list);
-
-extern boolean
-    ncx_string_in_list (const xmlChar *str,
-			const ncx_list_t *list);
-
-extern int32
-    ncx_compare_lists (const ncx_list_t *list1,
-		       const ncx_list_t *list2);
-
-extern status_t
-    ncx_copy_list (const ncx_list_t *list1,
-		   ncx_list_t *list2);
-
-extern void
-    ncx_merge_list (ncx_list_t *src,
-		    ncx_list_t *dest,
-		    ncx_merge_t mergetyp,
-		    boolean allow_dups);
-
-/* consume a generic string list with no type checking */
-extern status_t
-    ncx_set_strlist (const xmlChar *liststr,
-		     ncx_list_t *list);
-
-/* consume a generic string list with base type checking */
-extern status_t 
-    ncx_set_list (ncx_btype_t btyp,
-		  const xmlChar *strval,
-		  ncx_list_t  *list);
-
-/* 2nd pass of parsing a ncx_list_t */
-extern status_t
-    ncx_finish_list (typ_def_t *typdef,
-		     ncx_list_t *list);
-
-/********************** ncx_lmem_t *********************/
-extern ncx_lmem_t *
-    ncx_new_lmem (void);
-
-extern void
-    ncx_clean_lmem (ncx_lmem_t *lmem,
-		    ncx_btype_t btyp);
-
-extern void
-    ncx_free_lmem (ncx_lmem_t *lmem,
-		   ncx_btype_t btyp);
-
-extern ncx_lmem_t *
-    ncx_find_lmem (ncx_list_t *list,
-		   const ncx_lmem_t *memval);
-
-extern void
-    ncx_insert_lmem (ncx_list_t *list,
-		     ncx_lmem_t *memval,
-		     ncx_merge_t mergetyp);
-
-extern ncx_lmem_t *
-    ncx_first_lmem (ncx_list_t *list);
-
-/********************** ncx_binary_t *********************/
+/********************************************************************
+* FUNCTION ncx_new_binary
+*
+* Malloc and fill in a new ncx_binary_t struct
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   pointer to malloced and initialized ncx_binary_t struct
+*   NULL if malloc error
+*********************************************************************/
 extern ncx_binary_t *
     ncx_new_binary (void);
 
+
+/********************************************************************
+* FUNCTION ncx_init_binary
+* 
+* Init the memory of a ncx_binary_t struct
+*
+* INPUTS:
+*    binary == ncx_binary_t struct to init
+*********************************************************************/
 extern void
     ncx_init_binary (ncx_binary_t *binary);
 
+
+/********************************************************************
+* FUNCTION ncx_clean_binary
+* 
+* Scrub the memory of a ncx_binary_t but do not delete it
+*
+* INPUTS:
+*    binary == ncx_binary_t struct to clean
+*********************************************************************/
 extern void
     ncx_clean_binary (ncx_binary_t *binary);
 
+
+/********************************************************************
+* FUNCTION ncx_free_binary
+*
+* Free all the memory in a  ncx_binary_t struct
+*
+* INPUTS:
+*   binary == struct to clean and free
+*
+*********************************************************************/
 extern void
     ncx_free_binary (ncx_binary_t *binary);
 
 
-/********************** ncx_appinfo_t *********************/
-
-extern ncx_appinfo_t * 
-    ncx_new_appinfo (boolean isclone);
-
-extern void 
-    ncx_free_appinfo (ncx_appinfo_t *appinfo);
-
-extern ncx_appinfo_t *
-    ncx_find_appinfo (dlq_hdr_t *appinfoQ,
-		      const xmlChar *prefix,
-		      const xmlChar *varname);
-
-extern const ncx_appinfo_t *
-    ncx_find_const_appinfo (const dlq_hdr_t *appinfoQ,
-                            const xmlChar *prefix,
-                            const xmlChar *varname);
-
-extern const ncx_appinfo_t *
-    ncx_find_next_appinfo (const ncx_appinfo_t *current,
-			   const xmlChar *prefix,
-			   const xmlChar *varname);
-
-extern ncx_appinfo_t *
-    ncx_find_next_appinfo2 (ncx_appinfo_t *current,
-                            const xmlChar *prefix,
-                            const xmlChar *varname);
-
-extern ncx_appinfo_t *
-    ncx_clone_appinfo (ncx_appinfo_t *appinfo);
-
-extern void 
-    ncx_clean_appinfoQ (dlq_hdr_t *appinfoQ);
-
-extern status_t 
-    ncx_consume_appinfo (tk_chain_t *tkc,
-			 ncx_module_t  *mod,
-			 dlq_hdr_t *appinfoQ);
-
-extern status_t 
-    ncx_consume_appinfo2 (tk_chain_t *tkc,
-			  ncx_module_t  *mod,
-			  dlq_hdr_t *appinfoQ);
-
-extern status_t 
-    ncx_resolve_appinfoQ (yang_pcb_t *pcb,
-                          tk_chain_t *tkc,
-			  ncx_module_t  *mod,
-			  dlq_hdr_t *appinfoQ);
-
-
-/********************** ncx_iffeature_t *********************/
-
-extern ncx_iffeature_t * 
-    ncx_new_iffeature (void);
-
-extern void 
-    ncx_free_iffeature (ncx_iffeature_t *iffeature);
-
-extern void 
-    ncx_clean_iffeatureQ (dlq_hdr_t *iffeatureQ);
-
-extern ncx_iffeature_t *
-    ncx_find_iffeature (dlq_hdr_t *iffeatureQ,
-			const xmlChar *prefix,
-			const xmlChar *name,
-			const xmlChar *modprefix);
-
-
-/********************** ncx_feature_t *********************/
-
-extern ncx_feature_t * 
-    ncx_new_feature (void);
-
-extern void 
-    ncx_free_feature (ncx_feature_t *feature);
-
-extern ncx_feature_t *
-    ncx_find_feature (ncx_module_t *mod,
-		      const xmlChar *name);
-
-extern ncx_feature_t *
-    ncx_find_feature_que (dlq_hdr_t *featureQ,
-			  const xmlChar *name);
-
-extern void
-    ncx_for_all_features (const ncx_module_t *mod,
-			  ncx_feature_cbfn_t  cbfn,
-			  void *cookie,
-			  boolean enabledonly);
-
-extern uint32
-    ncx_feature_count (const ncx_module_t *mod,
-		       boolean enabledonly);
-
-extern boolean
-    ncx_feature_enabled (const ncx_feature_t *feature);
-
-/********************** ncx_identity_t *********************/
-
+/********************************************************************
+* FUNCTION ncx_new_identity
+* 
+* Get a new ncx_identity_t struct
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    pointer to a malloced ncx_identity_t struct,
+*    or NULL if malloc error
+*********************************************************************/
 extern ncx_identity_t * 
     ncx_new_identity (void);
 
+
+/********************************************************************
+* FUNCTION ncx_free_identity
+* 
+* Free a malloced ncx_identity_t struct
+*
+* INPUTS:
+*    identity == struct to free
+*
+*********************************************************************/
 extern void 
     ncx_free_identity (ncx_identity_t *identity);
 
+
+/********************************************************************
+* FUNCTION ncx_find_identity
+* 
+* Find a ncx_identity_t struct in the module and perhaps
+* any of its submodules
+*
+* INPUTS:
+*    mod == module to search
+*    name == identity name to find
+*
+* RETURNS:
+*    pointer to found feature or NULL if not found
+*********************************************************************/
 extern ncx_identity_t *
     ncx_find_identity (ncx_module_t *mod,
 		       const xmlChar *name);
 
+
+/********************************************************************
+* FUNCTION ncx_find_identity_que
+* 
+* Find a ncx_identity_t struct in the specified Q
+*
+* INPUTS:
+*    identityQ == Q of ncx_identity_t to search
+*    name == identity name to find
+*
+* RETURNS:
+*    pointer to found identity or NULL if not found
+*********************************************************************/
 extern ncx_identity_t *
     ncx_find_identity_que (dlq_hdr_t *identityQ,
 			   const xmlChar *name);
 
-/********************** ncx_filptr_t *********************/
 
+/********************************************************************
+* FUNCTION ncx_new_filptr
+* 
+* Get a new ncx_filptr_t struct
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    pointer to a malloced or cached ncx_filptr_t struct,
+*    or NULL if none available
+*********************************************************************/
 extern ncx_filptr_t *
     ncx_new_filptr (void);
 
+
+/********************************************************************
+* FUNCTION ncx_free_filptr
+* 
+* Free a new ncx_filptr_t struct or add to the cache if room
+*
+* INPUTS:
+*    filptr == struct to free
+* RETURNS:
+*    none
+*********************************************************************/
 extern void 
     ncx_free_filptr (ncx_filptr_t *filptr);
 
-/********************** ncx_revhist_t *********************/
 
-
+/********************************************************************
+* FUNCTION ncx_new_revhist
+* 
+* Create a revision history entry
+*
+* RETURNS:
+*    malloced revision history entry or NULL if malloc error
+*********************************************************************/
 extern ncx_revhist_t * 
     ncx_new_revhist (void);
 
+
+/********************************************************************
+* FUNCTION ncx_free_revhist
+* 
+* Free a revision history entry
+*
+* INPUTS:
+*    revhist == ncx_revhist_t data structure to free
+*********************************************************************/
 extern void 
     ncx_free_revhist (ncx_revhist_t *revhist);
 
+
+/********************************************************************
+* FUNCTION ncx_find_revhist
+* 
+* Search the revhistQ for a specified revision
+* 
+* INPUTS:
+*   mod == module to search (mod->importQ)
+*   ver == version string to find
+*
+* RETURNS:
+*   pointer to the node if found, NULL if not found
+*********************************************************************/
 extern ncx_revhist_t * 
     ncx_find_revhist (const ncx_module_t *mod,
 		      const xmlChar *ver);
 
-/********************** ncx_enum_t *********************/
 
+/********************************************************************
+* FUNCTION ncx_init_enum
+* 
+* Init the memory of a ncx_enum_t
+*
+* INPUTS:
+*    enu == ncx_enum_t struct to init
+*********************************************************************/
 extern void
     ncx_init_enum (ncx_enum_t *enu);
 
+
+/********************************************************************
+* FUNCTION ncx_clean_enum
+* 
+* Scrub the memory of a ncx_enum_t but do not delete it
+*
+* INPUTS:
+*    enu == ncx_enum_t struct to clean
+*********************************************************************/
 extern void
     ncx_clean_enum (ncx_enum_t *enu);
 
+
+/********************************************************************
+* FUNCTION ncx_compare_enums
+* 
+* Compare 2 enum values
+*
+* INPUTS:
+*    enu1 == first  ncx_enum_t check
+*    enu2 == second ncx_enum_t check
+*   
+* RETURNS:
+*     -1 if enu1 is < enu2
+*      0 if enu1 == enu2
+*      1 if enu1 is > enu2
+
+*********************************************************************/
 extern int32
     ncx_compare_enums (const ncx_enum_t *enu1,
 		       const ncx_enum_t *enu2);
 
+
+/********************************************************************
+* FUNCTION ncx_decode_enum
+* 
+* Parse an enumerated integer string into its 2 parts
+*
+* Form 1: name only : foo
+* Form 2: number only : 16
+* Form 3: name and number : foo(16)
+*
+* INPUTS:
+*    enumval == enum string value to parse
+*    retval == pointer to return integer variable
+*    retlen == pointer to return string name length variable
+* OUTPUTS:
+*    *retval == integer value of enum
+*    *retset == TRUE if *retval is set
+*    *retlen == length of enumval that is the name portion
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     ncx_decode_enum (const xmlChar *enumval,
 		     int32 *retval,
 		     boolean *retset,
 		     uint32 *retlen);
 
+
+/********************************************************************
+* FUNCTION ncx_set_enum
+* 
+* Parse an enumerated integer string into an ncx_enum_t
+* without matching it against any typdef
+*
+* Mallocs a copy of the enum name, using the enu->dname field
+*
+* INPUTS:
+*    enumval == enum string value to parse
+*    retenu == pointer to return enuym variable to fill in
+*    
+* OUTPUTS:
+*    *retenu == enum filled in
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     ncx_set_enum (const xmlChar *enumval,
 		  ncx_enum_t *retenu);
 
 
-/********************** ncx_bit_t *********************/
-
+/********************************************************************
+* FUNCTION ncx_init_bit
+* 
+* Init the memory of a ncx_bit_t
+*
+* INPUTS:
+*    bit == ncx_bit_t struct to init
+*********************************************************************/
 extern void
     ncx_init_bit (ncx_bit_t *bit);
 
+
+/********************************************************************
+* FUNCTION ncx_clean_bit
+* 
+* Scrub the memory of a ncx_bit_t but do not delete it
+*
+* INPUTS:
+*    bit == ncx_bit_t struct to clean
+*********************************************************************/
 extern void
     ncx_clean_bit (ncx_bit_t *bit);
 
+
+/********************************************************************
+* FUNCTION ncx_compare_bits
+* 
+* Compare 2 bit values by their schema order position
+*
+* INPUTS:
+*    bitone == first ncx_bit_t check
+*    bitone == second ncx_bit_t check
+*   
+* RETURNS:
+*     -1 if bitone is < bittwo
+*      0 if bitone == bittwo
+*      1 if bitone is > bittwo
+*
+*********************************************************************/
 extern int32
     ncx_compare_bits (const ncx_bit_t *bitone,
 		      const ncx_bit_t *bittwo);
 
-/********************** ncx_typname_t *********************/
 
+/********************************************************************
+* FUNCTION ncx_new_typname
+* 
+*   Malloc and init a typname struct
+*
+* RETURNS:
+*   malloced struct or NULL if memory error
+*********************************************************************/
 extern ncx_typname_t *
     ncx_new_typname (void);
 
+
+/********************************************************************
+* FUNCTION ncx_free_typname
+* 
+*   Free a typname struct
+*
+* INPUTS:
+*    typnam == ncx_typname_t struct to free
+*
+*********************************************************************/
 extern void
     ncx_free_typname (ncx_typname_t *typnam);
 
+
+/********************************************************************
+* FUNCTION ncx_find_typname
+* 
+*   Find a typname struct in the specified Q for a typ pointer
+*
+* INPUTS:
+*    que == Q of ncx_typname_t struct to check
+*    typ == matching type template to find
+*
+* RETURNS:
+*   name assigned to this type template
+*********************************************************************/
 extern const xmlChar *
     ncx_find_typname (const typ_template_t *typ,
 		      const dlq_hdr_t *que);
 
 
+/********************************************************************
+* FUNCTION ncx_find_typname_type
+* 
+*   Find a typ_template_t pointer in a typename mapping, 
+*   in the specified Q
+*
+* INPUTS:
+*    que == Q of ncx_typname_t struct to check
+*    typname == matching type name to find
+*
+* RETURNS:
+*   pointer to the stored typstatus
+*********************************************************************/
 extern const typ_template_t *
     ncx_find_typname_type (const dlq_hdr_t *que,
 			   const xmlChar *typname);
 
+
+/********************************************************************
+* FUNCTION ncx_clean_typnameQ
+* 
+*   Delete all the Q entries, of typname mapping structs
+*
+* INPUTS:
+*    que == Q of ncx_typname_t struct to delete
+*
+*********************************************************************/
 extern void
     ncx_clean_typnameQ (dlq_hdr_t *que);
 
-/************** General NCX Utilities ******************/
 
-extern void
-    ncx_printf_indent (int32 indentcnt);
-
-extern void
-    ncx_stdout_indent (int32 indentcnt);
-
-/* 4 internal objects for subtree filter processing */
+/********************************************************************
+* FUNCTION ncx_get_gen_anyxml
+* 
+* Get the object template for the NCX generic anyxml container
+*
+* RETURNS:
+*   pointer to generic anyxml object template
+*********************************************************************/
 extern obj_template_t *
     ncx_get_gen_anyxml (void);
 
+
+/********************************************************************
+* FUNCTION ncx_get_gen_container
+* 
+* Get the object template for the NCX generic container
+*
+* RETURNS:
+*   pointer to generic container object template
+*********************************************************************/
 extern obj_template_t *
     ncx_get_gen_container (void);
 
+
+/********************************************************************
+* FUNCTION ncx_get_gen_string
+* 
+* Get the object template for the NCX generic string leaf
+*
+* RETURNS:
+*   pointer to generic string object template
+*********************************************************************/
 extern obj_template_t *
     ncx_get_gen_string (void);
 
+
+/********************************************************************
+* FUNCTION ncx_get_gen_empty
+* 
+* Get the object template for the NCX generic empty leaf
+*
+* RETURNS:
+*   pointer to generic empty object template
+*********************************************************************/
 extern obj_template_t *
     ncx_get_gen_empty (void);
 
+
+/********************************************************************
+* FUNCTION ncx_get_gen_root
+* 
+* Get the object template for the NCX generic root container
+*
+* RETURNS:
+*   pointer to generic root container object template
+*********************************************************************/
 extern obj_template_t *
     ncx_get_gen_root (void);
 
+
+/********************************************************************
+* FUNCTION ncx_get_gen_binary
+* 
+* Get the object template for the NCX generic binary leaf
+*
+* RETURNS:
+*   pointer to generic binary object template
+*********************************************************************/
 extern obj_template_t *
     ncx_get_gen_binary (void);
 
-/* translate ncx_layer_t enum to a string */
+
+/********************************************************************
+* FUNCTION ncx_get_layer
+*
+* translate ncx_layer_t enum to a string
+* Get the ncx_layer_t string
+*
+* INPUTS:
+*   layer == ncx_layer_t to convert to a string
+*
+* RETURNS:
+*  const pointer to the string value
+*********************************************************************/
 extern const xmlChar *
     ncx_get_layer (ncx_layer_t  layer);
 
 
+/********************************************************************
+* FUNCTION ncx_get_name_segment
+* 
+* Get the name string between the dots
+*
+* INPUTS:
+*    str == scoped string
+*    buff == address of return buffer
+*    buffsize == buffer size
+*
+* OUTPUTS:
+*    buff is filled in with the namestring segment
+*
+* RETURNS:
+*    current string pointer after operation
+*********************************************************************/
 extern const xmlChar *
     ncx_get_name_segment (const xmlChar *str,
 			  xmlChar  *buff,
 			  uint32 buffsize);
 
+
+/********************************************************************
+* FUNCTION ncx_get_cvttyp_enum
+* 
+* Get the enum for the string name of a ncx_cvttyp_t enum
+* 
+* INPUTS:
+*   str == string name of the enum value 
+*
+* RETURNS:
+*   enum value
+*********************************************************************/
+extern ncx_cvttyp_t
+    ncx_get_cvttyp_enum (const char *str);
+
+
+/********************************************************************
+* FUNCTION ncx_get_status_enum
+* 
+* Get the enum for the string name of a ncx_status_t enum
+* 
+* INPUTS:
+*   str == string name of the enum value 
+*
+* RETURNS:
+*   enum value
+*********************************************************************/
+extern ncx_status_t
+    ncx_get_status_enum (const xmlChar *str);
+
+
+/********************************************************************
+* FUNCTION ncx_get_status_string
+* 
+* Get the string for the enum value of a ncx_status_t enum
+* 
+* INPUTS:
+*   status == enum value
+*
+* RETURNS:
+*   string name of the enum value 
+*********************************************************************/
+extern const xmlChar *
+    ncx_get_status_string (ncx_status_t status);
+
+
+/********************************************************************
+* FUNCTION ncx_check_yang_status
+* 
+* Check the backward compatibility of the 2 YANG status fields
+* 
+* INPUTS:
+*   mystatus == enum value for the node to be tested
+*   depstatus == status value of the dependency
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+extern status_t
+    ncx_check_yang_status (ncx_status_t mystatus,
+			   ncx_status_t depstatus);
+
+
+/********************************************************************
+* FUNCTION ncx_save_descr
+* 
+* Get the value of the save description strings variable
+*
+* RETURNS:
+*    TRUE == descriptive strings should be save
+*    FALSE == descriptive strings should not be saved
+*********************************************************************/
 extern boolean
     ncx_save_descr (void);
 
+
+/********************************************************************
+* FUNCTION ncx_print_errormsg
+* 
+*   Print an parse error message to STDOUT
+*
+* INPUTS:
+*   tkc == token chain   (may be NULL)
+*   mod == module in progress  (may be NULL)
+*   res == error status
+*
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     ncx_print_errormsg (tk_chain_t *tkc,
 			ncx_module_t  *mod,
 			status_t     res);
 
+
+/********************************************************************
+* FUNCTION ncx_print_errormsg_ex
+* 
+*   Print an parse error message to STDOUT (Extended)
+*
+* INPUTS:
+*   tkc == token chain   (may be NULL)
+*   mod == module in progress  (may be NULL)
+*   res == error status
+*   filename == script finespec
+*   linenum == script file number
+*   fineoln == TRUE if finish with a newline, FALSE if not
+*
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     ncx_print_errormsg_ex (tk_chain_t *tkc,
 			   ncx_module_t  *mod,
@@ -800,74 +1551,261 @@ extern void
 			   boolean fineoln);
 
 
+/********************************************************************
+* FUNCTION ncx_conf_exp_err
+* 
+* Print an error for wrong token, expected a different token
+* 
+* INPUTS:
+*   tkc == token chain
+*   result == error code
+*   expstr == expected token description
+*
+*********************************************************************/
 extern void
     ncx_conf_exp_err (tk_chain_t  *tkc,
 		      status_t result,
 		      const char *expstr);
 
+
+/********************************************************************
+* FUNCTION ncx_mod_exp_err
+* 
+* Print an error for wrong token, expected a different token
+* 
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   result == error code
+*   expstr == expected token description
+*
+*********************************************************************/
 extern void
     ncx_mod_exp_err (tk_chain_t  *tkc,
 		     ncx_module_t *mod,
 		     status_t result,
 		     const char *expstr);
 
+
+/********************************************************************
+* FUNCTION ncx_free_node
+* 
+* Delete a node based on its type
+*
+* INPUTS:
+*     nodetyp == NCX node type
+*     node == node top free
+*
+*********************************************************************/
 extern void
     ncx_free_node (ncx_node_t nodetyp,
 		   void *node);
 
+
+/********************************************************************
+* FUNCTION ncx_get_data_class_enum
+* 
+* Get the enum for the string name of a ncx_data_class_t enum
+* 
+* INPUTS:
+*   str == string name of the enum value 
+*
+* RETURNS:
+*   enum value
+*********************************************************************/
 extern ncx_data_class_t 
     ncx_get_data_class_enum (const xmlChar *str);
 
+
+/********************************************************************
+* FUNCTION ncx_get_data_class_str
+* 
+* Get the string value for the ncx_data_class_t enum
+* 
+* INPUTS:
+*   dataclass == enum value to convert
+*
+* RETURNS:
+*   striong value for the enum
+*********************************************************************/
 extern const xmlChar *
     ncx_get_data_class_str (ncx_data_class_t dataclass);
 
+
+/********************************************************************
+* FUNCTION ncx_get_access_str
+* 
+* Get the string name of a ncx_access_t enum
+* 
+* INPUTS:
+*   access == enum value
+*
+* RETURNS:
+*   string value
+*********************************************************************/
 extern const xmlChar * 
     ncx_get_access_str (ncx_access_t max_access);
 
+
+/********************************************************************
+* FUNCTION ncx_get_access_enum
+* 
+* Get the enum for the string name of a ncx_access_t enum
+* 
+* INPUTS:
+*   str == string name of the enum value 
+*
+* RETURNS:
+*   enum value
+*********************************************************************/
 extern ncx_access_t
     ncx_get_access_enum (const xmlChar *str);
 
-extern ncx_cvttyp_t
-    ncx_get_cvttyp_enum (const char *str);
 
-extern ncx_status_t
-    ncx_get_status_enum (const xmlChar *str);
-
-extern const xmlChar *
-    ncx_get_status_string (ncx_status_t status);
-
-extern status_t
-    ncx_check_yang_status (ncx_status_t mystatus,
-			   ncx_status_t depstatus);
-
+/********************************************************************
+* FUNCTION ncx_get_tclass
+* 
+* Get the token class
+*
+* INPUTS:
+*     btyp == base type enum
+* RETURNS:
+*     tclass enum
+*********************************************************************/
 extern ncx_tclass_t
     ncx_get_tclass (ncx_btype_t btyp);
 
+
+/********************************************************************
+* FUNCTION ncx_get_tclass
+* 
+* Get the token class
+*
+* INPUTS:
+*     btyp == base type enum
+* RETURNS:
+*     tclass enum
+*********************************************************************/
 extern boolean
     ncx_valid_name_ch (uint32 ch);
 
+
+/********************************************************************
+* FUNCTION ncx_valid_fname_ch
+* 
+* Check if an xmlChar is a valid NCX name string first char
+*
+* INPUTS:
+*   ch == xmlChar to check
+* RETURNS:
+*   TRUE if a valid first name char, FALSE otherwise
+*********************************************************************/
 extern boolean
     ncx_valid_fname_ch (uint32 ch);
 
+
+/********************************************************************
+* FUNCTION ncx_valid_name
+* 
+* Check if an xmlChar string is a valid YANG identifier value
+*
+* INPUTS:
+*   str == xmlChar string to check
+*   len == length of the string to check (in case of substr)
+* RETURNS:
+*   TRUE if a valid name string, FALSE otherwise
+*********************************************************************/
 extern boolean
     ncx_valid_name (const xmlChar *str, 
 		    uint32 len);
 
+
+/********************************************************************
+* FUNCTION ncx_valid_name2
+* 
+* Check if an xmlChar string is a valid NCX name
+*
+* INPUTS:
+*   str == xmlChar string to check (zero-terminated)
+
+* RETURNS:
+*   TRUE if a valid name string, FALSE otherwise
+*********************************************************************/
 extern boolean
     ncx_valid_name2 (const xmlChar *str);
 
+
+/********************************************************************
+* FUNCTION ncx_parse_name
+* 
+* Check if the next N chars represent a valid NcxName
+* Will end on the first non-name char
+*
+* INPUTS:
+*   str == xmlChar string to check
+*   len == address of name length
+*
+* OUTPUTS:
+*   *len == 0 if no valid name parsed
+*         > 0 for the numbers of chars in the NcxName
+*
+* RETURNS:
+*   status_t  (error if name too long)
+*********************************************************************/
 extern status_t
     ncx_parse_name (const xmlChar *str,
 		    uint32 *len);
 
+
+/********************************************************************
+* FUNCTION ncx_is_true
+* 
+* Check if an xmlChar string is a string OK for XSD boolean
+*
+* INPUTS:
+*   str == xmlChar string to check
+*
+* RETURNS:
+*   TRUE if a valid boolean value indicating true
+*   FALSE otherwise
+*********************************************************************/
 extern boolean
     ncx_is_true (const xmlChar *str);
 
+
+/********************************************************************
+* FUNCTION ncx_is_false
+* 
+* Check if an xmlChar string is a string OK for XSD boolean
+*
+* INPUTS:
+*   str == xmlChar string to check
+*
+* RETURNS:
+*   TRUE if a valid boolean value indicating false
+*   FALSE otherwise
+*********************************************************************/
 extern boolean
     ncx_is_false (const xmlChar *str);
 
 
-/** parse utilities **/
+/********************************************************************
+* FUNCTION ncx_consume_tstring
+* 
+* Consume a TK_TT_TSTRING with the specified value
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain 
+*   mod == module in progress (NULL if none)
+*   name == token name
+*   opt == TRUE for optional param
+*       == FALSE for mandatory param
+* RETURNS:
+*   status of the operation
+*********************************************************************/
 extern status_t 
     ncx_consume_tstring (tk_chain_t *tkc,
 			 ncx_module_t  *mod,
@@ -875,6 +1813,33 @@ extern status_t
 			 ncx_opt_t opt);
 
 
+/********************************************************************
+* FUNCTION ncx_consume_name
+* 
+* Consume a TK_TSTRING that matches the 'name', then
+* retrieve the next TK_TSTRING token into the namebuff
+* If ctk specified, then consume the specified close token
+*
+* Store the results in a malloced buffer
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain 
+*   mod == module in progress (NULL if none)
+*   name == first token name
+*   namebuff == ptr to output name string
+*   opt == NCX_OPT for optional param
+*       == NCX_REQ for mandatory param
+*   ctyp == close token (use TK_TT_NONE to skip this part)
+*
+* OUTPUTS:
+*   *namebuff points at the malloced name string
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
 extern status_t 
     ncx_consume_name (tk_chain_t *tkc,
 		      ncx_module_t *mod,
@@ -883,130 +1848,567 @@ extern status_t
 		      ncx_opt_t opt,
 		      tk_type_t  ctyp);
 
+
+/********************************************************************
+* FUNCTION ncx_consume_token
+* 
+* Consume the next token which should be a 1 or 2 char token
+* without any value. However this function does not check the value,
+* just the token type.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain 
+*   mod == module in progress (NULL if none)
+*   ttyp == token type
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
 extern status_t 
     ncx_consume_token (tk_chain_t *tkc,
 		       ncx_module_t *mod,
 		       tk_type_t  ttyp);
 
 
+/********************************************************************
+* FUNCTION ncx_new_errinfo
+* 
+* Malloc and init a new ncx_errinfo_t
+*
+* RETURNS:
+*    pointer to malloced ncx_errinfo_t, or NULL if memory error
+*********************************************************************/
 extern ncx_errinfo_t *
     ncx_new_errinfo (void);
 
+
+/********************************************************************
+* FUNCTION ncx_init_errinfo
+* 
+* Init the fields in an ncx_errinfo_t struct
+*
+* INPUTS:
+*    err == ncx_errinfo_t data structure to init
+*********************************************************************/
 extern void 
     ncx_init_errinfo (ncx_errinfo_t *err);
 
+
+/********************************************************************
+* FUNCTION ncx_clean_errinfo
+* 
+* Scrub the memory in a ncx_errinfo_t by freeing all
+* the sub-fields
+*
+* INPUTS:
+*    err == ncx_errinfo_t data structure to clean
+*********************************************************************/
 extern void 
     ncx_clean_errinfo (ncx_errinfo_t *err);
 
+
+/********************************************************************
+* FUNCTION ncx_free_errinfo
+* 
+* Scrub the memory in a ncx_errinfo_t by freeing all
+* the sub-fields, then free the errinfo struct
+*
+* INPUTS:
+*    err == ncx_errinfo_t data structure to free
+*********************************************************************/
 extern void 
     ncx_free_errinfo (ncx_errinfo_t *err);
 
-/* check if error-app-tag or error-message set */
+
+/********************************************************************
+* FUNCTION ncx_errinfo_set
+* 
+* Check if error-app-tag or error-message set
+* Check if the errinfo struct is set or empty
+* Checks only the error_app_tag and error_message fields
+*
+* INPUTS:
+*    errinfo == ncx_errinfo_t struct to check
+*
+* RETURNS:
+*   TRUE if at least one field set
+*   FALSE if the errinfo struct is empty
+*********************************************************************/
 extern boolean
     ncx_errinfo_set (const ncx_errinfo_t *errinfo);
 
+
+/********************************************************************
+* FUNCTION ncx_copy_errinfo
+* 
+* Copy the fields from one errinfo to a blank errinfo
+*
+* INPUTS:
+*    src == struct with starting contents
+*    dest == struct to get copy of src contents
+*
+* OUTPUTS:
+*    *dest fields set which are set in src
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     ncx_copy_errinfo (const ncx_errinfo_t *src,
 		      ncx_errinfo_t *dest);
 
+
+/********************************************************************
+* FUNCTION ncx_get_source
+* 
+* Get a malloced buffer containing the complete filespec
+* for the given input string.  If this is a complete dirspec,
+* this this will just strdup the value.
+*
+* This is just a best effort to get the full spec.
+* If the full spec is greater than 1500 bytes,
+* then a NULL value (error) will be returned
+*
+*   - Change ./ --> cwd/
+*   - Remove ~/  --> $HOME
+*   - add trailing '/' if not present
+*
+* INPUTS:
+*    fspec == input filespec
+*    res == address of return status
+*
+* OUTPUTS:
+*   *res == return status, NO_ERR if return is non-NULL
+*
+* RETURNS:
+*   malloced buffer containing possibly expanded full filespec
+*********************************************************************/
 extern xmlChar *
     ncx_get_source (const xmlChar *fspec,
                     status_t *res);
 
+
+/********************************************************************
+* FUNCTION ncx_set_cur_modQ
+* 
+* Set the current module Q to an alternate (for yangdiff)
+* This will be used for module searches usually in ncx_modQ
+*
+* INPUTS:
+*    que == Q of ncx_module_t to use
+*********************************************************************/
 extern void
     ncx_set_cur_modQ (dlq_hdr_t *que);
 
+
+/********************************************************************
+* FUNCTION ncx_reset_modQ
+* 
+* Set the current module Q to the original ncx_modQ
+*
+*********************************************************************/
 extern void
     ncx_reset_modQ (void);
 
+
+/********************************************************************
+* FUNCTION ncx_set_session_modQ
+* 
+* !!! THIS HACK IS NEEDED BECAUSE val.c
+* !!! USES ncx_find_module sometimes, and
+* !!! yangcli sessions are not loaded into the
+* !!! main database of modules.
+* !!! THIS DOES NOT WORK FOR MULTIPLE CONCURRENT PROCESSES
+*
+* Set the current session module Q to an alternate (for yangdiff)
+* This will be used for module searches usually in ncx_modQ
+*
+* INPUTS:
+*    que == Q of ncx_module_t to use
+*********************************************************************/
 extern void
     ncx_set_session_modQ (dlq_hdr_t *que);
 
-extern void
-    ncx_set_load_callback (ncx_load_cbfn_t cbfn);
 
+/********************************************************************
+* FUNCTION ncx_clear_session_modQ
+* 
+* !!! THIS HACK IS NEEDED BECAUSE val.c
+* !!! USES ncx_find_module sometimes, and
+* !!! yangcli sessions are not loaded into the
+* !!! main database of modules.
+* !!! THIS DOES NOT WORK FOR MULTIPLE CONCURRENT PROCESSES
+*
+* Clear the current session module Q
+*
+*********************************************************************/
 extern void
     ncx_clear_session_modQ (void);
 
+
+/********************************************************************
+* FUNCTION ncx_set_load_callback
+* 
+* Set the callback function for a load-module event
+*
+* INPUT:
+*   cbfn == callback function to use
+*
+*********************************************************************/
+extern void
+    ncx_set_load_callback (ncx_load_cbfn_t cbfn);
+
+
+/********************************************************************
+* FUNCTION ncx_prefix_different
+* 
+* Check if the specified prefix pair reference different modules
+* 
+* INPUT:
+*   prefix1 == 1st prefix to check (may be NULL)
+*   prefix2 == 2nd prefix to check (may be NULL)
+*   modprefix == module prefix to check (may be NULL)
+*
+* RETURNS:
+*   TRUE if prefix1 and prefix2 reference different modules
+*   FALSE if prefix1 and prefix2 reference the same modules
+*********************************************************************/
 extern boolean
     ncx_prefix_different (const xmlChar *prefix1,
 			  const xmlChar *prefix2,
 			  const xmlChar *modprefix);
 
+
+/********************************************************************
+* FUNCTION ncx_get_baddata_enum
+* 
+* Check if the specified string matches an ncx_baddata_t enum
+* 
+* INPUT:
+*   valstr == value string to check
+*
+* RETURNS:
+*   enum value if OK
+*   NCX_BAD_DATA_NONE if an error
+*********************************************************************/
 extern ncx_bad_data_t
     ncx_get_baddata_enum (const xmlChar *valstr);
 
+
+/********************************************************************
+* FUNCTION ncx_get_baddata_string
+* 
+* Get the string for the specified enum value
+* 
+* INPUT:
+*   baddatar == enum value to check
+*
+* RETURNS:
+*   string pointer if OK
+*   NULL if an error
+*********************************************************************/
 extern const xmlChar *
     ncx_get_baddata_string (ncx_bad_data_t baddata);
 
+
+
+/********************************************************************
+* FUNCTION ncx_get_withdefaults_string
+* 
+* Get the string for the specified enum value
+* 
+* INPUT:
+*   withdef == enum value to check
+*
+* RETURNS:
+*   string pointer if OK
+*   NULL if an error
+*********************************************************************/
 extern const xmlChar *
     ncx_get_withdefaults_string (ncx_withdefaults_t withdef);
 
+
+/********************************************************************
+* FUNCTION ncx_get_withdefaults_enum
+* 
+* Get the enum for the specified string value
+* 
+* INPUT:
+*   withdefstr == string value to check
+*
+* RETURNS:
+*   enum value for the string
+*   NCX_WITHDEF_NONE if invalid value
+*********************************************************************/
 extern ncx_withdefaults_t
     ncx_get_withdefaults_enum (const xmlChar *withdefstr);
 
+
+/********************************************************************
+* FUNCTION ncx_get_mod_prefix
+* 
+* Get the module prefix for the specified module
+* 
+* INPUT:
+*   mod == module to check
+*
+* RETURNS:
+*   pointer to module YANG prefix
+*********************************************************************/
 extern const xmlChar *
     ncx_get_mod_prefix (const ncx_module_t *mod);
 
+
+/********************************************************************
+* FUNCTION ncx_get_mod_xmlprefix
+* 
+* Get the module XML prefix for the specified module
+* 
+* INPUT:
+*   mod == module to check
+*
+* RETURNS:
+*   pointer to module XML prefix
+*********************************************************************/
 extern const xmlChar *
     ncx_get_mod_xmlprefix (const ncx_module_t *mod);
 
-extern int64
-    ncx_get_dec64_base (const ncx_num_t *num);
 
-extern int64
-    ncx_get_dec64_fraction (const ncx_num_t *num);
-
+/********************************************************************
+* FUNCTION ncx_get_display_mode_enum
+* 
+* Get the enum for the specified string value
+* 
+* INPUT:
+*   dmstr == string value to check
+*
+* RETURNS:
+*   enum value for the string
+*   NCX_DISPLAY_MODE_NONE if invalid value
+*********************************************************************/
 extern ncx_display_mode_t
     ncx_get_display_mode_enum (const xmlChar *dmstr);
 
+
+/********************************************************************
+* FUNCTION ncx_get_display_mode_str
+* 
+* Get the string for the specified enum value
+* 
+* INPUT:
+*   dmode == enum display mode value to check
+*
+* RETURNS:
+*   string value for the enum
+*   NULL if none found
+*********************************************************************/
 extern const xmlChar *
     ncx_get_display_mode_str (ncx_display_mode_t dmode);
 
+
+/********************************************************************
+* FUNCTION ncx_set_warn_idlen
+* 
+* Set the warning length for identifiers
+* 
+* INPUT:
+*   warnlen == warning length to use
+*
+*********************************************************************/
 extern void
     ncx_set_warn_idlen (uint32 warnlen);
 
+
+/********************************************************************
+* FUNCTION ncx_get_warn_idlen
+* 
+* Get the warning length for identifiers
+* 
+* RETURNS:
+*   warning length to use
+*********************************************************************/
 extern uint32
     ncx_get_warn_idlen (void);
 
+
+/********************************************************************
+* FUNCTION ncx_set_warn_linelen
+* 
+* Set the warning length for YANG file lines
+* 
+* INPUT:
+*   warnlen == warning length to use
+*
+*********************************************************************/
 extern void
     ncx_set_warn_linelen (uint32 warnlen);
 
+
+/********************************************************************
+* FUNCTION ncx_get_warn_linelen
+* 
+* Get the warning length for YANG file lines
+* 
+* RETURNS:
+*   warning length to use
+*
+*********************************************************************/
 extern uint32
     ncx_get_warn_linelen (void);
 
+
+/********************************************************************
+* FUNCTION ncx_check_warn_idlen
+* 
+* Check if the identifier length is greater than
+* the specified amount.
+*
+* INPUTS:
+*   tkc == token chain to use (for warning message only)
+*   mod == module (for warning message only)
+*   id == identifier string to check; must be Z terminated
+*
+* OUTPUTS:
+*    may generate log_warn ouput
+*********************************************************************/
 extern void
     ncx_check_warn_idlen (tk_chain_t *tkc,
                           ncx_module_t *mod,
                           const xmlChar *id);
 
+
+/********************************************************************
+* FUNCTION ncx_check_warn_linelen
+* 
+* Check if the line display length is greater than
+* the specified amount.
+*
+* INPUTS:
+*   tkc == token chain to use
+*   mod == module (used in warning message only
+*   linelen == line length to check
+*
+* OUTPUTS:
+*    may generate log_warn ouput
+*********************************************************************/
 extern void
     ncx_check_warn_linelen (tk_chain_t *tkc,
                             ncx_module_t *mod,
                             const xmlChar *line);
 
+
+/********************************************************************
+* FUNCTION ncx_turn_off_warning
+* 
+* Add ar warning suppression entry
+*
+* INPUTS:
+*   res == internal status code to suppress
+*
+* RETURNS:
+*   status (duplicates are silently dropped)
+*********************************************************************/
 extern status_t
     ncx_turn_off_warning (status_t res);
 
+
+/********************************************************************
+* FUNCTION ncx_warning_enabled
+* 
+* Check if a specific status_t code is enabled
+*
+* INPUTS:
+*   res == internal status code to check
+*
+* RETURNS:
+*   TRUE if warning is enabled
+*   FALSE if warning is suppressed
+*********************************************************************/
 extern boolean
     ncx_warning_enabled (status_t res);
 
+
+/********************************************************************
+* FUNCTION ncx_get_version
+* 
+* Get the the Yuma version ID string
+*
+* INPUT:
+*    buffer == buffer to hold the version string
+*    buffsize == number of bytes in buffer
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     ncx_get_version (xmlChar *buffer,
                      uint32 buffsize);
 
+/********************************************************************
+* FUNCTION ncx_new_save_deviations
+* 
+* create a deviation save structure
+*
+* INPUTS:
+*   devmodule == deviations module name
+*   devrevision == deviation module revision (optional)
+*   devnamespace == deviation module namespace URI value
+*   devprefix == local module prefix (optional)
+*
+* RETURNS:
+*   malloced and initialized save_deviations struct, 
+*   or NULL if malloc error
+*********************************************************************/
 extern ncx_save_deviations_t *
     ncx_new_save_deviations (const xmlChar *devmodule,
                              const xmlChar *devrevision,
                              const xmlChar *devnamespace,
                              const xmlChar *devprefix);
 
+
+/********************************************************************
+* FUNCTION ncx_free_save_deviations
+* 
+* free a deviation save struct
+*
+* INPUT:
+*    savedev == struct to clean and delete
+*********************************************************************/
 extern void
     ncx_free_save_deviations (ncx_save_deviations_t *savedev);
 
+
+/********************************************************************
+* FUNCTION ncx_clean_save_deviationsQ
+* 
+* clean a Q of deviation save structs
+*
+* INPUT:
+*    savedevQ == Q of ncx_save_deviations_t to clean
+*********************************************************************/
 extern void
     ncx_clean_save_deviationsQ (dlq_hdr_t *savedevQ);
 
+
+/********************************************************************
+* FUNCTION ncx_set_error
+* 
+* Set the fields in an ncx_error_t struct
+* When called from NACM or <get> internally, there is no
+* module or line number info
+*
+* INPUTS:
+*   tkerr== address of ncx_error_t struct to set
+*   mod == [sub]module containing tkerr
+*   linenum == current linenum
+*   linepos == current column position on the current line
+*
+* OUTPUTS:
+*   *tkerr is filled in
+*********************************************************************/
 extern void
     ncx_set_error (ncx_error_t *tkerr,
                    ncx_module_t *mod,
@@ -1014,40 +2416,66 @@ extern void
                    uint32 linepos);
 
 
+/********************************************************************
+* FUNCTION ncx_set_temp_modQ
+* 
+* Set the temp_modQ for yangcli session-specific module list
+*
+* INPUTS:
+*   modQ == new Q pointer to use
+*
+*********************************************************************/
 extern void
     ncx_set_temp_modQ (dlq_hdr_t *modQ);
 
+
+/********************************************************************
+* FUNCTION ncx_get_temp_modQ
+* 
+* Get the temp_modQ for yangcli session-specific module list
+*
+* RETURNS:
+*   pointer to the temp modQ, if set
+*********************************************************************/
 extern dlq_hdr_t *
     ncx_get_temp_modQ (void);
 
+
+/********************************************************************
+* FUNCTION ncx_clear_temp_modQ
+* 
+* Clear the temp_modQ for yangcli session-specific module list
+*
+*********************************************************************/
 extern void
     ncx_clear_temp_modQ (void);
 
+
+/********************************************************************
+* FUNCTION ncx_get_display_mode
+* 
+* Get the current default display mode
+*
+* RETURNS:
+*  the current dispay mode enumeration
+*********************************************************************/
 extern ncx_display_mode_t
     ncx_get_display_mode (void);
 
+
+/********************************************************************
+* FUNCTION ncx_get_confirm_event_str
+* 
+* Get the string for the specified enum value
+* 
+* INPUT:
+*   event == enum confirm event value to convert
+*
+* RETURNS:
+*   string value for the enum
+*   NULL if none found
+*********************************************************************/
 extern const xmlChar *
     ncx_get_confirm_event_str (ncx_confirm_event_t event);
-
-extern uint32
-    ncx_copy_c_safe_str (xmlChar *buffer,
-                         const xmlChar *strval);
-
-extern void
-    ncx_set_feature_enable_default (boolean flag);
-
-extern void
-    ncx_set_feature_code_default (ncx_feature_code_t code);
-
-extern status_t
-    ncx_set_feature_code_entry (const xmlChar *featstr,
-                                ncx_feature_code_t featcode);
-
-extern status_t
-    ncx_set_feature_enable_entry (const xmlChar *featstr,
-                                  boolean flag);
-
-extern void
-    ncx_set_feature_parms (ncx_feature_t *feature);
 
 #endif	    /* _H_ncx */

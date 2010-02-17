@@ -48,6 +48,34 @@ date	     init     comment
 *			F U N C T I O N S			    *
 *								    *
 *********************************************************************/
+
+
+/********************************************************************
+* FUNCTION conf_parse_from_filespec
+* 
+* Parse a file as an NCX text config file against
+* a specific parmset definition.  Fill in an
+* initialized parmset (and could be partially filled in)
+*
+* Error messages are printed by this function!!
+*
+* If a value is already set, and only one value is allowed
+* then the 'keepvals' parameter will control whether that
+* value will be kept or overwitten
+*
+* INPUTS:
+*   filespec == absolute path or relative path
+*               This string is used as-is without adjustment.
+*   val       == value struct to fill in, must be initialized
+*                already with val_new_value or val_init_value
+*   keepvals == TRUE if old values should always be kept
+*               FALSE if old vals should be overwritten
+*   fileerr == TRUE to generate a missing file error
+*              FALSE to return NO_ERR instead, if file not found
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
 extern status_t 
     conf_parse_val_from_filespec (const xmlChar *filespec,
 				  val_value_t *val,

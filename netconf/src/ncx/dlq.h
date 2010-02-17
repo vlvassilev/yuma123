@@ -135,24 +135,94 @@ typedef struct TAGdlq_hdrT
 *                          F U N C T I O N S
 *
 *********************************************************************/
+
+#ifdef CPP_DEBUG
+/********************************************************************
+* FUNCTION dlq_dumpHdr
+* 
+* use log_debug to dump a Queue header contents
+*
+* INPUTS:
+*   nodeP == Q header cast as a void *
+*********************************************************************/
+extern void dlq_dumpHdr (const void *nodeP);
+#endif
+
+
+/********************************************************************
+* FUNCTION dlq_createQue
+* 
+* create a dynamic queue header
+* 
+* RETURNS:
+*   pointer to malloced queue header
+*   NULL if memory error
+*********************************************************************/
 extern dlq_hdrT * dlq_createQue (void);
 
-extern void dlq_destroyQue (dlq_hdrT * listP);
 
+/********************************************************************
+* FUNCTION dlq_createSQue
+* 
+* create a static queue header
+* 
+* INPUTS:
+*   queAddr == pointer to malloced queue header to initialize
+*********************************************************************/
 extern void dlq_createSQue (dlq_hdrT * queAddr);
 
-extern void dlq_enque (void *newP, dlq_hdrT * listP);
 
-extern void dlq_block_enque (dlq_hdrT * srcP, dlq_hdrT * dstP);
+/********************************************************************
+* FUNCTION dlq_destroyQue
+* 
+* free a dynamic queue header previously allocated
+* with dlq_createQue
+*
+* INPUTS:
+*   listP == pointer to malloced queue header to free
+*********************************************************************/
+extern void dlq_destroyQue (dlq_hdrT * listP);
 
+
+/********************************************************************
+* FUNCTION dlq_enque
+* 
+* add a queue node to the end of a queue list
+*
+* INPUTS:
+*   newP == pointer to queue entry to add
+*   listP == pointer to queue list to put newP
+*********************************************************************/
+extern void dlq_enque (REG void *newP, REG dlq_hdrT * listP);
+
+
+/********************************************************************
+* FUNCTION dlq_deque
+* 
+* remove the first queue node from the queue list
+*
+* INPUTS:
+*   listP == pointer to queue list remove the first entry
+*
+* RETURNS:
+*   pointer to removed first entry
+*   NULL if the queue was empty
+*********************************************************************/
 extern void *dlq_deque (dlq_hdrT * listP);
 
-#if defined(CPP_NO_MACROS)
-extern boolean dlq_empty (const dlq_hdrT * listP);
-#else
-#define dlq_empty(P) (boolean)((P)==((const dlq_hdrT *)(P))->next)
-#endif        /* CPP_NO_MACROS */
 
+/********************************************************************
+* FUNCTION dlq_nextEntry
+* 
+* get the next queue entry after the current entry
+*
+* INPUTS:
+*   nodeP == pointer to current queue entry to use
+*
+* RETURNS:
+*   pointer to next queue entry
+*   NULL if the no next entry was found
+*********************************************************************/
 #if defined(CPP_NO_MACROS)
 extern void *dlq_nextEntry (const void *nodeP);
 #else
@@ -160,6 +230,19 @@ extern void *dlq_nextEntry (const void *nodeP);
       ((const dlq_hdrT *) (P))->next : NULL)
 #endif        /* END CPP_NO_MACROS */
 
+
+/********************************************************************
+* FUNCTION dlq_prevEntry
+* 
+* get the previous queue entry before the current entry
+*
+* INPUTS:
+*   nodeP == pointer to current queue entry to use
+*
+* RETURNS:
+*   pointer to previous queue entry
+*   NULL if the no previous entry was found
+*********************************************************************/
 #if defined(CPP_NO_MACROS)
 extern void *dlq_prevEntry (const void *nodeP);
 #else
@@ -167,6 +250,72 @@ extern void *dlq_prevEntry (const void *nodeP);
       ((const dlq_hdrT *) (P))->prev : NULL)
 #endif    /* CPP_NO_MACROS */
 
+
+/********************************************************************
+* FUNCTION dlq_insertAhead
+* 
+* insert the new queue entry before the current entry
+*
+* INPUTS:
+*   newP == pointer to new queue entry to insert ahead of nodeP
+*   nodeP == pointer to current queue entry to insert ahead
+*********************************************************************/
+extern void dlq_insertAhead (void *newP, void *nodeP);
+
+
+/********************************************************************
+* FUNCTION dlq_insertAfter
+* 
+* insert the new queue entry after the current entry
+*
+* INPUTS:
+*   newP == pointer to new queue entry to insert after nodeP
+*   nodeP == pointer to current queue entry to insert after
+*********************************************************************/
+extern void dlq_insertAfter (void *newP, void *nodeP);
+
+
+/********************************************************************
+* FUNCTION dlq_remove
+* 
+* remove the queue entry from its queue list
+* entry MUST have been enqueued somehow before
+* this function is called
+*
+* INPUTS:
+*   nodeP == pointer to queue entry to remove from queue
+*********************************************************************/
+extern void dlq_remove (void *nodeP);
+
+
+/********************************************************************
+* FUNCTION dlq_swap
+* 
+* remove the cur_node queue entry from its queue list
+* and replace it with the new_node
+* cur_node entry MUST have been enqueued somehow before
+* this function is called. 
+* new_node MUST NOT already be in a queue
+*
+* INPUTS:
+*   new_node == pointer to new queue entry to put into queue
+*   cur_node == pointer to current queue entry to remove from queue
+*********************************************************************/
+extern void dlq_swap (void *new_node, void *cur_node);
+
+
+/********************************************************************
+* FUNCTION dlq_firstEntry
+* 
+* get the first entry in the queue list
+*
+* INPUTS:
+*   listP == pointer to queue list to get the first entry from
+*
+* RETURNS:
+*   pointer to first queue entry
+*   NULL if the queue is empty
+*********************************************************************/
 #if defined(CPP_NO_MACROS)
 extern void *dlq_firstEntry (const dlq_hdrT * listP);
 #else
@@ -174,12 +323,19 @@ extern void *dlq_firstEntry (const dlq_hdrT * listP);
         ((const dlq_hdrT *)(P))->next : NULL)
 #endif        /* CPP_NO_MACROS */
 
-#define dlq_firstROEntry(P) ((P) != ((dlq_hdrT *)(P))->next ? \
-        ((const dlq_hdrT *)(P))->next : NULL)
 
-#define dlq_nextROEntry(P)  (_data_node(((dlq_hdrT *) (P))->next) ? \
-      ((const dlq_hdrT *) (P))->next : NULL)
-
+/********************************************************************
+* FUNCTION dlq_lastEntry
+* 
+* get the last entry in the queue list
+*
+* INPUTS:
+*   listP == pointer to queue list to get the last entry from
+*
+* RETURNS:
+*   pointer to last queue entry
+*   NULL if the queue is empty
+*********************************************************************/
 #if defined(CPP_NO_MACROS)
 extern void *dlq_lastEntry (const dlq_hdrT * listP);
 #else
@@ -187,25 +343,97 @@ extern void *dlq_lastEntry (const dlq_hdrT * listP);
         ((const dlq_hdrT *)(P))->prev : NULL)
 #endif        /* CPP_NO_MACROS */
 
-extern void dlq_insertAhead (void *newP, void *nodeP);
 
-extern void dlq_insertAfter (void *newP, void *nodeP);
+/********************************************************************
+* FUNCTION dlq_empty
+* 
+* check if queue list is empty
+*
+* INPUTS:
+*   listP == pointer to queue list to check
+*
+* RETURNS:
+*   TRUE if queue is empty
+*   FALSE if queue is not empty
+*********************************************************************/
+#if defined(CPP_NO_MACROS)
+extern boolean dlq_empty (const dlq_hdrT * listP);
+#else
+#define dlq_empty(P) (boolean)((P)==((const dlq_hdrT *)(P))->next)
+#endif        /* CPP_NO_MACROS */
 
+
+/********************************************************************
+* FUNCTION dlq_block_enque
+* 
+* add all the queue entries in the srcP queue list to the
+* end of the dstP queue list
+*
+* INPUTS:
+*   srcP == pointer to queue list entry to add end of dstP list
+*   dstP == pointer to queue list to add all newP entries
+*********************************************************************/
+extern void dlq_block_enque (dlq_hdrT * srcP, dlq_hdrT * dstP);
+
+
+/********************************************************************
+* FUNCTION dlq_block_insertAhead
+* 
+* insert all the entries in the srcP queue list before 
+* the dstP queue entry
+*
+* INPUTS:
+*   srcP == pointer to new queue list to insert all entries
+*           ahead of dstP
+*   dstP == pointer to current queue entry to insert ahead
+*********************************************************************/
 extern void dlq_block_insertAhead (dlq_hdrT *srcP, void *dstP);
 
+
+/********************************************************************
+* FUNCTION dlq_block_insertAfter
+* 
+* insert all the entries in the srcP queue list after
+* the dstP queue entry
+*
+* INPUTS:
+*   srcP == pointer to new queue list to insert all entries
+*           after dstP
+*   dstP == pointer to current queue entry to insert after
+*********************************************************************/
 extern void dlq_block_insertAfter (dlq_hdrT *srcP, void *dstP);
 
+
+/********************************************************************
+* FUNCTION dlq_block_move
+* 
+* enque from [srcP ..  end of srcQ list] to the dstQ
+* insert all the entries in the srcP queue list after
+* the dstP queue entry
+*
+* INPUTS:
+*   srcQ == pointer to source queue list to move entries from
+*   srcP == pointer to source queue entry in the srcQ
+*           move this entry and all entries to the end of
+*           the srcQ to the end of dstQ
+*   dstQ == pointer to destination queue list to move the
+*           entries from the srcQ to the end of this queue
+*********************************************************************/
 extern void dlq_block_move (dlq_hdrT *srcQ, void *srcP, dlq_hdrT * dstQ);
 
-extern void dlq_remove (void *nodeP);
 
-extern void dlq_swap (void *new_node, void *cur_node);
-
-
-#ifdef CPP_DEBUG
-extern void dlq_dumpHdr (const void *nodeP);
-#endif
-
+/********************************************************************
+* FUNCTION dlq_count
+* 
+* get the number of queue entries in the listP queue list
+*
+* INPUTS:
+*   listP == pointer to queue list to check
+*
+* RETURNS:
+*   number of queue entries found in listP queue
+*********************************************************************/
 extern unsigned int dlq_count (const dlq_hdrT *listP);
+
 
 #endif    /* _H_dlq */

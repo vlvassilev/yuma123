@@ -148,6 +148,18 @@ date         init     comment
 #include "ncx.h"
 #endif
 
+#ifndef _H_ncx_appinfo
+#include "ncx_appinfo.h"
+#endif
+
+#ifndef _H_ncx_feature
+#include "ncx_feature.h"
+#endif
+
+#ifndef _H_ncx_list
+#include "ncx_list.h"
+#endif
+
 #ifndef _H_obj
 #include "obj.h"
 #endif

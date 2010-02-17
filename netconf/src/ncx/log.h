@@ -87,77 +87,332 @@ typedef enum log_debug_t_ {
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION log_open
+*
+*   Open a logfile for writing
+*   DO NOT use this function to send log entries to STDOUT
+*   Leave the logfile NULL instead.
+*
+* INPUTS:
+*   fname == full filespec string for logfile
+*   append == TRUE if the log should be appended
+*          == FALSE if it should be rewriten
+*   tstamps == TRUE if the datetime stamp should be generated
+*             at log-open and log-close time
+*          == FALSE if no open and close timestamps should be generated
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     log_open (const char *fname,
 	      boolean append,
 	      boolean tstamps);
 
+
+/********************************************************************
+* FUNCTION log_close
+*
+*   Close the logfile
+*
+* RETURNS:
+*    none
+*********************************************************************/
 extern void
     log_close (void);
 
+
+/********************************************************************
+* FUNCTION log_alt_open
+*
+*   Open an alternate logfile for writing
+*   DO NOT use this function to send log entries to STDOUT
+*   Leave the logfile NULL instead.
+*
+* INPUTS:
+*   fname == full filespec string for logfile
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     log_alt_open (const char *fname);
 
+
+/********************************************************************
+* FUNCTION log_alt_close
+*
+*   Close the alternate logfile
+*
+* RETURNS:
+*    none
+*********************************************************************/
 extern void
     log_alt_close (void);
 
+
+/********************************************************************
+* FUNCTION log_stdout
+*
+*   Write lines of text to STDOUT, even if the logfile
+*   is open, unless the debug mode is set to NONE
+*   to indicate silent batch mode
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   ... == any additional arguments for printf
+*
+*********************************************************************/
 extern void 
     log_stdout (const char *fstr, ...);
 
+
+/********************************************************************
+* FUNCTION log_write
+*
+*   Generate a log entry, regardless of log level
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   ... == any additional arguments for printf
+*
+*********************************************************************/
 extern void 
     log_write (const char *fstr, ...);
 
+
+/********************************************************************
+* FUNCTION log_alt_write
+*
+*   Write to the alternate log file
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   ... == any additional arguments for fprintf
+*
+*********************************************************************/
 extern void 
     log_alt_write (const char *fstr, ...);
 
+
+/********************************************************************
+* FUNCTION log_alt_indent
+* 
+* Printf a newline to the alternate logfile,
+* then the specified number of space chars
+*
+* INPUTS:
+*    indentcnt == number of indent chars, -1 == skip everything
+*
+*********************************************************************/
 extern void
     log_alt_indent (int32 indentcnt);
 
-extern void 
-    log_fatal (const char *fstr, ...);
 
+/********************************************************************
+* FUNCTION log_error
+*
+*   Generate a LOG_DEBUG_ERROR log entry
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   ... == any additional arguments for printf
+*
+*********************************************************************/
 extern void 
     log_error (const char *fstr, ...);
 
+
+/********************************************************************
+* FUNCTION log_warn
+*
+*   Generate LOG_DEBUG_WARN log output
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   ... == any additional arguments for printf
+*
+*********************************************************************/
 extern void 
     log_warn (const char *fstr, ...);
 
+
+/********************************************************************
+* FUNCTION log_info
+*
+*   Generate a LOG_DEBUG_INFO log entry
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   ... == any additional arguments for printf
+*
+*********************************************************************/
 extern void 
     log_info (const char *fstr, ...);
 
+
+/********************************************************************
+* FUNCTION log_debug
+*
+*   Generate a LOG_DEBUG_DEBUG log entry
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   ... == any additional arguments for printf
+*
+*********************************************************************/
 extern void 
     log_debug (const char *fstr, ...);
 
+
+/********************************************************************
+* FUNCTION log_debug2
+*
+*   Generate LOG_DEBUG_DEBUG2 log trace output
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   ... == any additional arguments for printf
+*
+*********************************************************************/
 extern void 
     log_debug2 (const char *fstr, ...);
 
+
+/********************************************************************
+* FUNCTION log_debug3
+*
+*   Generate LOG_DEBUG_DEBUG3 log trace output
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   ... == any additional arguments for printf
+*
+*********************************************************************/
 extern void 
     log_debug3 (const char *fstr, ...);
 
+
+/********************************************************************
+* FUNCTION log_debug4
+*
+*   Generate LOG_DEBUG_DEBUG4 log trace output
+*
+* INPUTS:
+*   fstr == format string in printf format
+*   ... == any additional arguments for printf
+*
+*********************************************************************/
 extern void 
     log_debug4 (const char *fstr, ...);
 
+
+/********************************************************************
+* FUNCTION log_set_debug_level
+* 
+* Set the global debug filter threshold level
+* 
+* INPUTS:
+*   dlevel == desired debug level
+*
+*********************************************************************/
 extern void
     log_set_debug_level (log_debug_t dlevel);
 
+
+/********************************************************************
+* FUNCTION log_get_debug_level
+* 
+* Get the global debug filter threshold level
+* 
+* RETURNS:
+*   the global debug level
+*********************************************************************/
 extern log_debug_t
     log_get_debug_level (void);
 
+
+/********************************************************************
+* FUNCTION log_get_debug_level_enum
+* 
+* Get the corresponding debug enum for the specified string
+* 
+* INPUTS:
+*   str == string value to convert
+*
+* RETURNS:
+*   the corresponding enum for the specified debug level
+*********************************************************************/
 extern log_debug_t
     log_get_debug_level_enum (const char *str);
 
+
+/********************************************************************
+* FUNCTION log_get_debug_level_string
+* 
+* Get the corresponding string for the debug enum
+* 
+* INPUTS:
+*   level ==  the enum for the specified debug level
+*
+* RETURNS:
+*   the string value for this enum
+
+*********************************************************************/
 extern const xmlChar *
     log_get_debug_level_string (log_debug_t level);
 
+
+/********************************************************************
+* FUNCTION log_is_open
+* 
+* Check if the logfile is active
+* 
+* RETURNS:
+*   TRUE if logfile open, FALSE otherwise
+*********************************************************************/
 extern boolean
     log_is_open (void);
 
+
+/********************************************************************
+* FUNCTION log_indent
+* 
+* Printf a newline, then the specified number of chars
+*
+* INPUTS:
+*    indentcnt == number of indent chars, -1 == skip everything
+*
+*********************************************************************/
 extern void
     log_indent (int32 indentcnt);
 
+
+/********************************************************************
+* FUNCTION log_stdout_indent
+* 
+* Printf a newline to stdout, then the specified number of chars
+*
+* INPUTS:
+*    indentcnt == number of indent chars, -1 == skip everything
+*
+*********************************************************************/
 extern void
     log_stdout_indent (int32 indentcnt);
 
+
+/********************************************************************
+* FUNCTION log_get_logfile
+* 
+* Get the open logfile for direct output
+* Needed by libtecla to write command line history
+*
+* RETURNS:
+*   pointer to open FILE if any
+*   NULL if no open logfile
+*********************************************************************/
 extern FILE *
     log_get_logfile (void);
 

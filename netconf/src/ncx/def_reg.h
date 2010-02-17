@@ -78,44 +78,125 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
-/* initialize the module -- SHOULD call once before use 
- * This will be called inline from other APIs if not done
- */
+
+/********************************************************************
+* FUNCTION def_reg_init
+* 
+* Initialize the def_reg module
+*
+* RETURNS:
+*    none
+*********************************************************************/
 extern void 
     def_reg_init (void);
 
-/* cleanup the module -- SHOULD call once after use 
- * to free malloced memory
- */
+
+/********************************************************************
+* FUNCTION def_reg_cleanup
+* 
+* Cleanup all the malloced memory in this module
+* and return the module to an uninitialized state
+* After this fn, the def_reg_init fn could be called again
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    none
+*********************************************************************/
 extern void 
     def_reg_cleanup (void);
 
+
 /*********************** NS ***************************/
 
-/* add one xmlns_t to the registry */
+
+/********************************************************************
+* FUNCTION def_reg_add_ns
+*   
+* add one xmlns_t to the registry
+*
+* INPUTS:
+*    ns == namespace record to add
+* RETURNS:
+*    status of the operation
+*********************************************************************/
 extern status_t 
     def_reg_add_ns (xmlns_t  *ns);
 
-/* find a xmlns_t by its value (name) */
+
+/********************************************************************
+* FUNCTION def_reg_find_ns
+*   
+* find one xmlns_t in the registry
+* find a xmlns_t by its value (name)
+*
+* INPUTS:
+*    nsname == namespace ID to find
+* RETURNS:
+*    pointer to xmlns_t or NULL if not found
+*********************************************************************/
 extern xmlns_t * 
     def_reg_find_ns (const xmlChar *nsname);
 
-/* unregister a xmlns_t */
+
+/********************************************************************
+* FUNCTION def_reg_del_ns
+*   
+* unregister a xmlns_t
+* delete one ncx_module from the registry
+*
+* INPUTS:
+*    nsname == namespace name to delete
+* RETURNS:
+*    none
+*********************************************************************/
 extern void
     def_reg_del_ns (const xmlChar *nsname);
 
+
 /*********************** SCB ***************************/
 
-/* add one FD to ses_cb_t mapping to the registry */
+
+/********************************************************************
+* FUNCTION def_reg_add_scb
+*
+* add one FD to SCB mapping to the registry
+*
+* INPUTS:
+*    fd == file descriptor to add
+*    session == ses_cb_t for the session
+* RETURNS:
+*    status of the operation
+*********************************************************************/
 extern status_t 
     def_reg_add_scb (int fd,
 		     ses_cb_t *scb);
 
-/* find a xmlns_t by its value (name) */
+
+/********************************************************************
+* FUNCTION def_reg_find_scb
+*   
+* find one FD-to-SCB mapping in the registry
+*
+* INPUTS:
+*    fd == file descriptor ID to find
+* RETURNS:
+*    pointer to ses_cb_t or NULL if not found
+*********************************************************************/
 extern ses_cb_t * 
     def_reg_find_scb (int fd);
 
-/* unregister a xmlns_t */
+
+/********************************************************************
+* FUNCTION def_reg_del_scb
+*   
+* delete one FD to SCB mapping from the registry
+*
+* INPUTS:
+*    fd == file descriptor index to delete
+* RETURNS:
+*    none
+*********************************************************************/
 extern void
     def_reg_del_scb (int fd);
 

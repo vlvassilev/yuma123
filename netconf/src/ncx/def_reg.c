@@ -377,6 +377,7 @@ status_t
 * FUNCTION def_reg_find_ns
 *   
 * find one xmlns_t in the registry
+* find a xmlns_t by its value (name)
 *
 * INPUTS:
 *    nsname == namespace ID to find
@@ -403,7 +404,8 @@ xmlns_t *
 
 /********************************************************************
 * FUNCTION def_reg_del_ns
-*   
+*
+* unregister a xmlns_t
 * delete one ncx_module from the registry
 *
 * INPUTS:
@@ -433,7 +435,7 @@ void
 
 /********************************************************************
 * FUNCTION def_reg_add_scb
-*   
+*
 * add one FD to SCB mapping to the registry
 *
 * INPUTS:

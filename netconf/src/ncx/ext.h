@@ -92,20 +92,57 @@ typedef struct ext_template_t_ {
 *********************************************************************/
 
 
-/****************** ALLOCATION FUNCTIONS **********************/
-
-/* malloc and init a YANG extension template */
+/********************************************************************
+* FUNCTION ext_new_template
+* 
+* Malloc and initialize the fields in a ext_template_t
+*
+* RETURNS:
+*   pointer to the malloced and initialized struct or NULL if an error
+*********************************************************************/
 extern ext_template_t *
     ext_new_template (void);
 
-/* free a YANG extension template */
+
+/********************************************************************
+* FUNCTION ext_free_template
+* 
+* Scrub the memory in a ext_template_t by freeing all
+* the sub-fields and then freeing the entire struct itself 
+* The struct must be removed from any queue it is in before
+* this function is called.
+*
+* INPUTS:
+*    ext == ext_template_t data structure to free
+*********************************************************************/
 extern void 
     ext_free_template (ext_template_t *ext);
 
-/* clean Q of ext_template_t */
+
+/********************************************************************
+* FUNCTION ext_clean_extensionQ
+* 
+* Clean a queue of ext_template_t structs
+*
+* INPUTS:
+*    que == Q of ext_template_t data structures to free
+*********************************************************************/
 extern void
     ext_clean_extensionQ (dlq_hdr_t *que);
 
+
+/********************************************************************
+* FUNCTION ext_find_extension
+* 
+* Search a queue of ext_template_t structs for a given name
+*
+* INPUTS:
+*    que == Q of ext_template_t data structures to search
+*    name == name string to find
+*
+* RETURNS:
+*   pointer to found entry, or NULL if not found
+*********************************************************************/
 extern ext_template_t *
     ext_find_extension (dlq_hdr_t *que,
 			const xmlChar *name);

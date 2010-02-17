@@ -3205,7 +3205,6 @@ xmlChar *
 }  /* ncxmod_find_data_file */
 
 
-
 /********************************************************************
 * FUNCTION ncxmod_find_sil_file
 *
@@ -5039,7 +5038,6 @@ void
     m__free(searchresult);
 
 }  /* ncxmod_free_search_result */
-
 
 
 /********************************************************************

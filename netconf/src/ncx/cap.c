@@ -64,6 +64,14 @@ date         init     comment
 #include  "ncx.h"
 #endif
 
+#ifndef _H_ncx_feature
+#include  "ncx_feature.h"
+#endif
+
+#ifndef _H_ncx_list
+#include  "ncx_list.h"
+#endif
+
 #ifndef _H_ncxconst
 #include  "ncxconst.h"
 #endif
@@ -540,14 +548,14 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION cap_init_caplist
+* FUNCTION cap_new_caplist
 *
-* Initialize the fields in a pre-allocated cap_list_t struct
+* Malloc and initialize the fields in a cap_list_t struct
 *
 * INPUTS:
-*    caplist == struct to initialize
+*    none
 * RETURNS:
-*    status, should always be NO_ERR
+*    malloced cap_list or NULL if memory error
 *********************************************************************/
 cap_list_t *
     cap_new_caplist (void)
@@ -567,6 +575,7 @@ cap_list_t *
 * FUNCTION cap_init_caplist
 *
 * Initialize the fields in a pre-allocated cap_list_t struct
+* memory for caplist already allocated -- this just inits fields
 *
 * INPUTS:
 *    caplist == struct to initialize
@@ -1585,6 +1594,7 @@ boolean
 * FUNCTION cap_get_protos
 *
 * get the #url capability protocols list if it exists
+* get the protocols field for the :url capability
 *
 * INPUTS:
 *    caplist == capability list to check
@@ -1609,6 +1619,7 @@ const xmlChar *
 /********************************************************************
 * FUNCTION cap_dump_stdcaps
 *
+* debug function
 * Printf the standard protocol capabilities list
 *
 * INPUTS:
@@ -1649,6 +1660,7 @@ void
 * FUNCTION cap_dump_modcaps
 *
 * Printf the standard data model module capabilities list
+* debug function
 *
 * INPUTS:
 *    caplist == capability list to print
@@ -1718,6 +1730,7 @@ void
 * FUNCTION cap_dump_entcaps
 *
 * Printf the enterprise capabilities list
+* debug function
 *
 * INPUTS:
 *    caplist == capability list to print
@@ -1875,6 +1888,7 @@ void
 * FUNCTION cap_make_moduri
 *
 * Malloc and construct a module URI for the specified module
+* make the module URI string (for sysCapabilityChange event)
 *
 * INPUTS:
 *    mod ==  module to use

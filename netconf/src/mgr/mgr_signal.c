@@ -79,6 +79,10 @@ date         init     comment
 static boolean mgr_signal_init_done = FALSE;
 static sighandler_t sh_int, sh_hup, sh_term, sh_pipe, sh_alarm, ctl_c;
 
+
+/**************    E X T E R N A L   F U N C T I O N S **********/
+
+
 /********************************************************************
 * FUNCTION mgr_signal_init
 *

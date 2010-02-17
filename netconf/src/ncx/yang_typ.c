@@ -99,6 +99,14 @@ date         init     comment
 #include "ncx.h"
 #endif
 
+#ifndef _H_ncx_appinfo
+#include "ncx_appinfo.h"
+#endif
+
+#ifndef _H_ncx_num
+#include "ncx_num.h"
+#endif
+
 #ifndef _H_obj
 #include "obj.h"
 #endif

@@ -96,9 +96,14 @@ static char
 } /* i2c */
 
 
+/**************    E X T E R N A L   F U N C T I O N S **********/
+
+
 /********************************************************************
 * FUNCTION blob2bin
+*
 * Convert a mySQL BLOB to a binary string
+*
 * INPUTS:
 *   pblob == pointer to BLOB to convert; must be of the
 *            same type as the binary object; this blob will be
@@ -126,7 +131,9 @@ void
 
 /********************************************************************
 * FUNCTION bin2blob
+*
 * Convert a binary string to to a mySQL BLOB
+*
 * INPUTS:
 *   pbuff == pointer to buffer to convert; must be at least
 *            bsize+1 bytes in length

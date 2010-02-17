@@ -651,6 +651,7 @@ static char *
 /********************************************************************
 * FUNCTION cli_new_rawparm
 * 
+* bootstrap CLI support
 * Malloc and init a raw parm entry
 *
 * INPUTS:
@@ -1032,6 +1033,7 @@ status_t
 /********************************************************************
 * FUNCTION cli_parse
 * 
+* schema based CLI support
 * Generate 1 val_value_t struct from a Unix Command Line,
 * which should conform to the specified obj_template_t definition.
 *

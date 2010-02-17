@@ -47,6 +47,10 @@ date         init     comment
 #include  "log.h"
 #endif
 
+#ifndef _H_ncx_list
+#include  "ncx_list.h"
+#endif
+
 #ifndef _H_ncxconst
 #include  "ncxconst.h"
 #endif
@@ -364,13 +368,13 @@ void
 /********************************************************************
 * FUNCTION cfg_init_static_db
 *
-* Initialize the config manager
+* Initialize the specified static configuration slot
 *
 * INPUTS:
-*    id   == cfg ID
+*    id   == cfg ID to intialize
 *    
 * RETURNS:
-*    none
+*    status
 *********************************************************************/
 status_t
     cfg_init_static_db (ncx_cfg_t cfg_id)
@@ -517,7 +521,7 @@ void
 *    cfg_id = Config ID to change
 *    new_state == new config state to set 
 * RETURNS:
-*    status; no-op change (new_state == old_state) is not an error
+*    none
 *********************************************************************/
 void
     cfg_set_state (ncx_cfg_t cfg_id,
@@ -899,6 +903,7 @@ status_t
 * FUNCTION cfg_ok_to_unlock
 *
 * Check if the specified config can be unlocked right now
+* by the specified session ID
 *
 * INPUTS:
 *    cfg = Config template to check 
@@ -995,6 +1000,7 @@ status_t
 * FUNCTION cfg_ok_to_write
 *
 * Check if the specified config can be written right now
+* by the specified session ID
 *
 * This is not an access control check,
 * only locks and config state will be checked

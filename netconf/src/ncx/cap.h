@@ -150,6 +150,7 @@ typedef enum cap_stdid_t_ {
 } cap_stdid_t;
 
 
+/* 1 capabilities list */
 typedef struct cap_list_t_ {
     uint32          cap_std;         /* bitset of std caps */
     xmlChar        *cap_protos;  /* URL capability protocol list */
@@ -186,113 +187,375 @@ typedef struct cap_rec_t_ {
 *                                                                   *
 *********************************************************************/
 
-/* memory for caplist already allocated -- this just inits fields */
+
+/********************************************************************
+* FUNCTION cap_new_caplist
+*
+* Malloc and initialize the fields in a cap_list_t struct
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    malloced cap_list or NULL if memory error
+*********************************************************************/
 extern cap_list_t *
     cap_new_caplist (void);
 
-/* memory for caplist already allocated -- this just inits fields */
+
+/********************************************************************
+* FUNCTION cap_init_caplist
+*
+* Initialize the fields in a pre-allocated cap_list_t struct
+* memory for caplist already allocated -- this just inits fields
+*
+* INPUTS:
+*    caplist == struct to initialize
+* RETURNS:
+*    status, should always be NO_ERR
+*********************************************************************/
 extern void
     cap_init_caplist (cap_list_t *caplist);
 
-/* memory for caplist not deallocated -- this just cleans fields */
+
+/********************************************************************
+* FUNCTION cap_clean_caplist
+*
+* Clean the fields in a pre-allocated cap_list_t struct
+* Memory for caplist not deallocated -- this just cleans fields
+*
+* INPUTS:
+*    caplist == struct to clean
+* RETURNS:
+*    none, silent programming errors ignored 
+*********************************************************************/
 extern void 
     cap_clean_caplist (cap_list_t *caplist);
 
-/* memory for caplist not deallocated -- this just cleans fields */
+
+/********************************************************************
+* FUNCTION cap_free_caplist
+*
+* Clean the fields in a pre-allocated cap_list_t struct
+* Then free the caplist memory
+*
+* INPUTS:
+*    caplist == struct to free
+*
+*********************************************************************/
 extern void 
     cap_free_caplist (cap_list_t *caplist);
 
 
-/* add a standard protocol capability to the list */
+/********************************************************************
+* FUNCTION cap_add_std
+*
+* Add a standard protocol capability to the list
+*
+* INPUTS:
+*    caplist == capability list that will contain the standard cap 
+*    capstd == the standard capability ID
+* RETURNS:
+*    status, should always be NO_ERR
+*********************************************************************/
 extern status_t 
     cap_add_std (cap_list_t *caplist, 
 		 cap_stdid_t   capstd);
 
-/* add a standard capability to the value struct version */
+
+/********************************************************************
+* FUNCTION cap_add_stdval
+*
+* Add a standard protocol capability to the list (val_value_t version)
+*
+* INPUTS:
+*    caplist == capability list that will contain the standard cap 
+*    capstd == the standard capability ID
+* OUTPUTS:
+*    status
+*********************************************************************/
 extern status_t
     cap_add_stdval (val_value_t *caplist,
 		    cap_stdid_t   capstd);
 
 
+/********************************************************************
+* FUNCTION cap_add_std_string
+*
+* Add a standard protocol capability to the list by URI string
+*
+* INPUTS:
+*    caplist == capability list that will contain the standard cap 
+*    uri == the string holding the capability URI
+*
+* RETURNS:
+*    status, NO_ERR if valid STD capability 
+*    ERR_NCX_SKIPPED if this is not a standard capability
+*    any other result is a non-recoverable error
+*********************************************************************/
 extern status_t 
     cap_add_std_string (cap_list_t *caplist, 
 			const xmlChar *uri);
 
+
+/********************************************************************
+* FUNCTION cap_add_module_string
+*
+* Add a standard protocol capability to the list by URI string
+*
+* INPUTS:
+*    caplist == capability list that will contain the standard cap 
+*    uri == the URI string holding the capability identifier
+*
+* RETURNS:
+*    status, NO_ERR if valid STD capability 
+*    ERR_NCX_SKIPPED if this is not a module capability
+*    any other result is a non-recoverable error
+*********************************************************************/
 extern status_t 
     cap_add_module_string (cap_list_t *caplist, 
 			   const xmlChar *uri);
 
-/* add the :url capability to the list */
+
+/********************************************************************
+* FUNCTION cap_add_url
+*
+* Add the #url capability to the list
+*
+* INPUTS:
+*    caplist == capability list that will contain the standard cap 
+*    proto_list == the protocol list for the :url capability
+*
+* RETURNS:
+*    status, should always be NO_ERR
+*********************************************************************/
 extern status_t 
     cap_add_url (cap_list_t *caplist, 
 		 const xmlChar *proto_list);
 
-/* add the :with-defaults capability to the list */
+
+/********************************************************************
+* FUNCTION cap_add_withdef
+*
+* Add the #with-defaults capability to the list
+*
+* INPUTS:
+*    caplist == capability list that will contain the standard cap 
+*    
+* RETURNS:
+*    status, should always be NO_ERR
+*********************************************************************/
 extern status_t 
     cap_add_withdef (cap_list_t *caplist, 
 		     const xmlChar *defstyle);
 
-/* add the :with-defaults cap as a value struct */
+
+/********************************************************************
+* FUNCTION cap_add_withdefval
+*
+* Add the #with-defaults capability to t`he list
+* valuse struct version
+*
+* INPUTS:
+*    caplist == capability list that will contain the standard cap 
+*    capstd == the standard capability ID
+* OUTPUTS:
+*    status
+*********************************************************************/
 extern status_t
     cap_add_withdefval (val_value_t *caplist,
 			const xmlChar *defstyle);
 
-/* add a generic enterprise capability */
+
+/********************************************************************
+* FUNCTION cap_add_ent
+*
+* Add an enterprise capability to the list
+*
+* INPUTS:
+*    caplist == capability list that will contain the module caps
+*    uristr == URI string to add
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t 
     cap_add_ent (cap_list_t *caplist, 
 		 const xmlChar *uristr);
 
-/* add a capability string for a data model module */
+
+/********************************************************************
+* FUNCTION cap_add_modval
+*
+* Add a module capability to the list (val_value_t version)
+*
+* INPUTS:
+*    caplist == capability list that will contain the enterprise cap 
+*    mod == module to add
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t 
     cap_add_modval (val_value_t *caplist, 
 		    ncx_module_t *mod);
 
+
+/********************************************************************
+* FUNCTION cap_add_devmodval
+*
+* Add a deviation module capability to the list (val_value_t version)
+*
+* INPUTS:
+*    caplist == capability list that will contain the enterprise cap 
+*    savedev == save_deviations struct to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t 
     cap_add_devmodval (val_value_t *caplist, 
                        ncx_save_deviations_t *savedev);
 
-/* fast search of standard protocol capability set */
+
+/********************************************************************
+* FUNCTION cap_std_set
+*
+* fast search of standard protocol capability set
+*
+* INPUTS:
+*    caplist == capability list to check
+*    capstd == the standard capability ID
+* RETURNS:
+*    TRUE if indicated std capability is set, FALSE if not
+*********************************************************************/
 extern boolean 
     cap_std_set (const cap_list_t *caplist,
 		 cap_stdid_t capstd);
 
-/* linear search of capability list, will check for std uris as well */
+
+/********************************************************************
+* FUNCTION cap_set
+*
+* linear search of capability list, will check for std uris as well
+*
+* INPUTS:
+*    caplist == capability list to check
+*    capuri == the capability URI to find
+* RETURNS:
+*    TRUE if indicated capability is set, FALSE if not
+*********************************************************************/
 extern boolean 
     cap_set (const cap_list_t *caplist,
 	     xmlChar *capuri);
 
-#ifdef CPP_DEBUG
-/* printf the capability list as an XML sequence */
-extern void 
-    cap_printf_XML (cap_list_t *caplist);
-#endif
 
-/* get the protocols field for the :url capability */
+/********************************************************************
+* FUNCTION cap_get_protos
+*
+* get the #url capability protocols list if it exists
+* get the protocols field for the :url capability
+*
+* INPUTS:
+*    caplist == capability list to check
+* RETURNS:
+*    pointer to protocols string if any, or NULL if not
+*********************************************************************/
 extern const xmlChar *
     cap_get_protos (cap_list_t *caplist);
 
 
-/* debug function */
+/********************************************************************
+* FUNCTION cap_dump_stdcaps
+*
+* debug function
+* Printf the standard protocol capabilities list
+*
+* INPUTS:
+*    caplist == capability list to print
+*
+*********************************************************************/
 extern void
     cap_dump_stdcaps (const cap_list_t *caplist);
 
-/* debug function */
+
+/********************************************************************
+* FUNCTION cap_dump_modcaps
+*
+* Printf the standard data model module capabilities list
+* debug function
+*
+* INPUTS:
+*    caplist == capability list to print
+*********************************************************************/
 extern void
     cap_dump_modcaps (const cap_list_t *caplist);
 
-/* debug function */
+
+/********************************************************************
+* FUNCTION cap_dump_entcaps
+*
+* Printf the enterprise capabilities list
+* debug function
+*
+* INPUTS:
+*    caplist == capability list to print
+*
+*********************************************************************/
 extern void
     cap_dump_entcaps (const cap_list_t *caplist);
 
-/* app processing access */
+
+/********************************************************************
+* FUNCTION cap_first_modcap
+*
+* Get the first module capability in the list
+*
+* INPUTS:
+*    caplist == capability list to check
+*
+* RETURNS:
+*  pointer to first record, to use for next record
+*  NULL if no first record
+*********************************************************************/
 extern cap_rec_t *
     cap_first_modcap (cap_list_t *caplist);
 
-/* app processing access */
+
+/********************************************************************
+* FUNCTION cap_next_modcap
+*
+* Get the next module capability in the list
+*
+* INPUTS:
+*    curcap == current mod_cap entry
+*
+* RETURNS:
+*  pointer to next record
+*  NULL if no next record
+*********************************************************************/
 extern cap_rec_t *
     cap_next_modcap (cap_rec_t *curcap);
 
-/* app processing access */
+
+/********************************************************************
+* FUNCTION cap_split_modcap
+*
+* Split the modcap string into 3 parts
+*
+* INPUTS:
+*    cap ==  capability rec to parse
+*    module == address of return module name
+*    revision == address of return module revision date string
+*    namespace == address of return module namespace
+*
+* OUTPUTS:
+*    *module == return module name
+*    *revision == return module revision date string
+*    *namespace == return module namepsace
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern void
     cap_split_modcap (cap_rec_t *cap,
 		      const xmlChar **module,
@@ -300,7 +563,18 @@ extern void
 		      const xmlChar **namespace);
 
 
-/* make the module URI string (for sysCapabilityChange event) */
+/********************************************************************
+* FUNCTION cap_make_moduri
+*
+* Malloc and construct a module URI for the specified module
+* make the module URI string (for sysCapabilityChange event)
+*
+* INPUTS:
+*    mod ==  module to use
+*
+* RETURNS:
+*    malloced string containing the URI !!! must be freed later !!!
+*********************************************************************/
 extern xmlChar *
     cap_make_moduri (ncx_module_t *mod);
 

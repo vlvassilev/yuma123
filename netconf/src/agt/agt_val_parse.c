@@ -88,6 +88,18 @@ date         init     comment
 #include "ncx.h"
 #endif
 
+#ifndef _H_ncx_num
+#include "ncx_num.h"
+#endif
+
+#ifndef _H_ncx_str
+#include "ncx_str.h"
+#endif
+
+#ifndef _H_ncx_list
+#include "ncx_list.h"
+#endif
+
 #ifndef _H_ncxconst
 #include "ncxconst.h"
 #endif

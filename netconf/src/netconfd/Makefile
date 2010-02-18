@@ -15,12 +15,6 @@ REAL_INST=$(DESTDIR)/usr/sbin
 LIB_INST=$(DESTDIR)/usr/lib/yuma
 PROG=netconfd
 
-ifdef MAC
-   GRP=
-else
-   GRP=--group=root
-endif
-
 ##################### LIBRARIES ########################
 
 # The order of these LIBS matters!

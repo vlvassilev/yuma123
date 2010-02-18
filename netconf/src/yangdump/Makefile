@@ -15,12 +15,6 @@ TARGET=$(TBASE)/$(SUBDIR_NM)
 BIN_INST=$(TBASE)/bin
 REAL_INST=$(DESTDIR)/usr/bin
 
-ifdef MAC
-   GRP=
-else
-   GRP=--group=root
-endif
-
 ##################### LIBRARIES ########################
 
 # The order of these LIBS matters!

@@ -1201,6 +1201,8 @@ val_value_t *
 * FUNCTION val_init_complex
 * 
 * Initialize the fields in a complex val_value_t
+* this is deprecated and should only be called 
+* by val_init_from_template
 *
 * MUST CALL val_new_value FIRST
 *
@@ -1525,6 +1527,7 @@ status_t
 /********************************************************************
 * FUNCTION val_string_ok_errinfo
 * 
+* retrieve the YANG custom error info if any 
 * Check a string to make sure the value is valid based
 * on the restrictions in the specified typdef
 * Retrieve the configured error info struct if any error
@@ -1652,6 +1655,11 @@ status_t
 * 
 * Check a list to make sure the all the strings are valid based
 * on the specified typdef
+*
+* validate all the ncx_lmem_t entries in the list
+* against the specified typdef.  Mark any errors
+* in the ncx_lmem_t flags field of each member
+* in the list with an error
 *
 * INPUTS:
 *    typdef == typ_def_t for the designated list type
@@ -3265,7 +3273,7 @@ void
 * INPUTS:
 *    val == value to printf
 *    startindent == start indent char count
-*
+*    display_mode == display mode to use
 *********************************************************************/
 void
     val_dump_value_ex (val_value_t *val,
@@ -3363,7 +3371,7 @@ void
 * INPUTS:
 *    val == value to printf
 *    startindent == start indent char count
-*
+*    display_mode == display mode to use
 *********************************************************************/
 void
     val_stdout_value_ex (val_value_t *val,
@@ -3793,8 +3801,10 @@ void
 /********************************************************************
 * FUNCTION val_set_string
 * 
+* set a generic string using the builtin string typdef
 * Set an initialized val_value_t as a simple type
 * namespace set to 0 !!!
+* use after calling val_new_value
 *
 * INPUTS:
 *    val == value to set
@@ -3840,6 +3850,7 @@ status_t
 /********************************************************************
 * FUNCTION val_set_string2
 * 
+* set a string with any typdef
 * Set an initialized val_value_t as a simple type
 * namespace set to 0 !!!
 *
@@ -3933,6 +3944,8 @@ status_t
 * FUNCTION val_reset_empty
 * 
 * Recast an already initialized value as an NCX_BT_EMPTY
+* clean a value and set it to empty type
+* used by yangcli to delete leafs
 *
 * INPUTS:
 *    val == value to set
@@ -3963,6 +3976,7 @@ status_t
 /********************************************************************
 * FUNCTION val_set_simval
 * 
+* set any simple value with any typdef
 * Set an initialized val_value_t as a simple type
 *
 * INPUTS:
@@ -4012,6 +4026,7 @@ status_t
 /********************************************************************
 * FUNCTION val_set_simval_str
 * 
+* set any simple value with any typdef, and a counted string
 * Set an initialized val_value_t as a simple type
 *
 * The string value will be converted to a value
@@ -4330,6 +4345,7 @@ status_t
 * FUNCTION val_make_simval
 * 
 * Create and set a val_value_t as a simple type
+* same as val_set_simval, but malloc the value first
 *
 * INPUTS:
 *    typdef == typdef of expected type
@@ -4423,7 +4439,6 @@ val_value_t *
     return val;
 
 }  /* val_make_string */
-
 
 
 /********************************************************************
@@ -4835,6 +4850,9 @@ val_value_t *
 * 
 * Clone a specified val_value_t struct and sub-trees
 * Filter with the val_is_config_data callback function
+* pass in a config node, such as <config> root
+* will call val_clone_test with the val_is_config_data
+* callbacck function
 *
 * INPUTS:
 *    val == config data value to clone
@@ -4978,6 +4996,7 @@ void
 /********************************************************************
 * FUNCTION val_add_child_clean
 * 
+*  add an object and delete any extra cases
 *  Add a child value node to a parent value node
 *  This is only called by the agent when adding nodes
 *  to a target database.
@@ -5194,7 +5213,6 @@ void
 *
 * INPUTS:
 *    child == node to store in the parent
-*    parent == complex value node with a childQ
 *
 *********************************************************************/
 void
@@ -5601,6 +5619,7 @@ val_value_t *
 * FUNCTION val_first_child_name
 * 
 * Get the first corresponding child node instance, by name
+* find first -- really for resolve index function
 * 
 * INPUTS:
 *    parent == parent complex type to check
@@ -5746,6 +5765,7 @@ val_value_t *
 /********************************************************************
 * FUNCTION val_first_child_string
 * 
+* find first name value pair
 * Get the first corresponding child node instance, by name
 * and by string value.
 * Child node must be a base type of 
@@ -5804,6 +5824,7 @@ val_value_t *
 * FUNCTION val_child_cnt
 * 
 * Get the number of child nodes present
+* get number of child nodes present -- for choice checking
 * 
 * INPUTS:
 *    parent == parent complex type to check
@@ -5843,6 +5864,7 @@ uint32
 * FUNCTION val_child_inst_cnt
 * 
 * Get the corresponding child instance count by name
+* get instance count -- for instance qualifer checking
 * 
 * INPUTS:
 *    parent == parent complex type to check
@@ -8323,6 +8345,8 @@ boolean
 * and must be malloced with val_new_value
 * before calling this function
 * 
+* must free the return val; not cached
+*
 * If the val->getcb is NULL, then an error will be returned
 *
 * Caller should check for *res == ERR_NCX_SKIPPED
@@ -8388,6 +8412,7 @@ val_value_t *
 /********************************************************************
 * FUNCTION val_cache_virtual_value
 * 
+* get + cache as val->virtualval; DO NOT FREE the return val
 * Get the value of a value node and store the malloced
 * pointer in the virtualval cache 
 * 
@@ -8737,6 +8762,7 @@ uint32
 /********************************************************************
 * FUNCTION val_set_extra_instance_errors
 * 
+* mark ERR_NCX_EXTRA_VAL_INST errors for nodes > 'maxelems'
 * Count the number of instances of the specified object name
 * in the parent value struct.  This only checks the first
 * level under the parent, not the entire subtree

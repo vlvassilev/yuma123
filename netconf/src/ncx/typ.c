@@ -224,6 +224,8 @@ static void
 * 
 * Create typ_template_t structs for the base types
 * Must be called before any modules are loaded
+* load the typ_template_t structs for the ncx_btype_t types
+* MUST be called during ncx_init startup
 *
 * RETURNS:
 *     status
@@ -280,6 +282,8 @@ status_t
 * FUNCTION typ_unload_basetypes
 * 
 * Unload and destroy the typ_template_t structs for the base types
+* unload the typ_template_t structs for the ncx_btype_t types
+* SHOULD be called during ncx_cleanup
 *
 *********************************************************************/
 void
@@ -403,6 +407,7 @@ typ_def_t *
 /********************************************************************
 * FUNCTION typ_init_typdef
 * 
+* init a pre-allocated typdef (done first)
 * Initialize the fields in a typ_def_t
 * !! Still need to call typ_init_simple
 * !! when the actual builting type is determined
@@ -428,12 +433,11 @@ void
 }  /* typ_init_typdef */
 
 
-
-
 /********************************************************************
 * FUNCTION typ_init_simple
 * 
 * Init a typ_simple_t struct inside a typ_def_t
+* init a simple data type after typ_init_typdef
 *
 * INPUTS:
 *     typdef == pointer to the typ_def_t  struct to init
@@ -477,6 +481,7 @@ void
 * FUNCTION typ_init_named
 * 
 * Init a typ_named_t struct inside a typ_def_t
+* init a named data type after typ_init_typdef
 *
 * INPUTS:
 *     typdef == pointer to the typ_def_t  struct to init
@@ -783,6 +788,7 @@ void
 * FUNCTION typ_new_enum
 * 
 * Alloc and Init a typ_enum_t struct
+* malloc and init an enumeration descriptor, strdup name ptr
 *
 * INPUTS:
 *   name == name string for the enumeration
@@ -823,6 +829,7 @@ typ_enum_t *
 * 
 * Alloc and Init a typ_enum_t struct
 * Use the string value as-=is, instead of mallocing a new one
+* malloc and init an enumeration descriptor, pass off name ptr
 * 
 * INPUTS:
 *   name == name string for the enumeration (will get free-ed later!!)
@@ -859,6 +866,7 @@ typ_enum_t *
 * FUNCTION typ_free_enum
 * 
 * Free a typ_enum_t struct
+* free an enumeration descriptor
 *
 * INPUTS:
 *   en == enum struct to free
@@ -893,7 +901,7 @@ void
 /********************************************************************
 * FUNCTION typ_new_rangedef
 * 
-* Alloc and Init a typ_rangedef_t struct
+* Alloc and Init a typ_rangedef_t struct (range-stmt)
 *
 * RETURNS:
 *   pointer to malloced struct or NULL if memory error
@@ -915,7 +923,7 @@ typ_rangedef_t *
 /********************************************************************
 * FUNCTION typ_free_rangedef
 * 
-* Free a typ_rangedef_t struct
+* Free a typ_rangedef_t struct (range-stmt)
 * 
 * INPUTS:
 *   rv == rangeval struct to delete
@@ -957,6 +965,7 @@ void
 * Start with a valid rangedef chain
 * Combine any consecutive range definitions like
 *   1..4|5|6|7..9  would break replaced with 1..9
+* concat consecutive rangedef sections for integral numbers
 *
 * Not done for NCX_BT_FLOAT64 data types
 *
@@ -1391,7 +1400,7 @@ const xmlChar *
 * Follow typdef chains if needed until first range found
 *
 * INPUTS:
-*    typ_def == typ def struct to check
+*    typdef == typ def struct to check
 *
 * RETURNS:
 *   pointer to the first rangedef struct or NULL if none
@@ -1424,7 +1433,7 @@ const typ_rangedef_t *
 * Constain search to this typdef
 *
 * INPUTS:
-*    typ_def == typ def struct to check
+*    typdef == typ def struct to check
 *
 * RETURNS:
 *   pointer to the first rangedef struct or NULL if none
@@ -1469,6 +1478,7 @@ const typ_rangedef_t *
 *
 * Return the lower and upper bound range number
 * Constain search to this typdef
+* deprecated -- does not support multi-part ranges
 *
 * INPUTS:
 *    typ_def == typ def struct to check
@@ -1655,10 +1665,11 @@ void
 * FUNCTION typ_new_sval
 * 
 * Alloc and Init a typ_sval_t struct
+* malloc and init a string descriptor
 *
 * INPUTS:
 *   str == string value inside token to copy
-    btyp == type of string (NCX_BT_STRING/LIST, OSTRING/OLIST)
+*   btyp == type of string (NCX_BT_STRING/LIST, OSTRING/OLIST)
 * RETURNS:
 *   pointer to malloced struct or NULL if memory error
 *********************************************************************/
@@ -1698,6 +1709,7 @@ typ_sval_t *
 * FUNCTION typ_free_sval
 * 
 * Free a typ_sval_t struct
+* free a string descriptor
 *
 * INPUTS:
 *   sv == typ_sval_t struct to free
@@ -1725,6 +1737,7 @@ void
 * FUNCTION typ_new_listval
 * 
 * Alloc and Init a typ_listval_t struct
+* malloc and init a list descriptor
 *
 * RETURNS:
 *   pointer to malloced struct or NULL if memory error
@@ -1749,6 +1762,7 @@ typ_listval_t *
 * FUNCTION typ_free_listval
 * 
 * Free a typ_listval_t struct
+* free a list descriptor
 *
 * INPUTS:
 *   lv == typ_listval_t struct to free
@@ -1778,6 +1792,7 @@ void
 * 
 * Get the correct typ_rangedef_t data type for the
 * indicated base type
+* get the proper range base type to use for a given base type
 *
 * INPUTS:
 *     btyp == base type enum
@@ -1822,6 +1837,8 @@ ncx_btype_t
 * FUNCTION typ_get_basetype
 * 
 * Get the final base type of the specified typ_def_t
+* Follow any typdef links and get the actual base type of 
+* the specified typedef 
 *
 * INPUTS:
 *     typdef == typdef to  check
@@ -2024,6 +2041,7 @@ ncx_tclass_t
 * FUNCTION typ_get_basetype_typ
 * 
 * Get the default typ_template_t for the specified base type
+* Get the default type template for the specified base type
 *
 * INPUTS:
 *     btyp == base type to get
@@ -2078,6 +2096,9 @@ typ_def_t *
 * Get the next typ_def_t in a chain -- for NCX_CL_NAMED chained typed
 * Also NCX_CL_REF pointer typdefs
 * Ignores current named type even if if has new restrictions
+* Get the parent typdef for NCX_CL_NAMED and NCX_CL_REF
+* Returns NULL for all other classes
+*
 * INPUTS:
 *     typdef == typdef to  check
 * RETURNS:
@@ -2200,6 +2221,8 @@ const typ_def_t *
 * 
 * Get the next typ_def_t in a chain -- for NCX_CL_NAMED chained typed
 * Also NCX_CL_REF pointer typdefs
+* Get the next typdef in the chain for NCX_CL_NAMED or NCX_CL_REF
+* Returns the input typdef for all other typdef classes
 *
 * INPUTS:
 *     typdef == typdef to  check
@@ -2244,6 +2267,9 @@ typ_def_t *
 * 
 * Get the base typ_def_t in a chain -- for NCX_CL_NAMED chained typed
 * Also NCX_CL_REF pointer typdefs
+* get the real typdef that describes the type, if the
+* input is one of the 'pointer' typdef classes. Otherwise,
+* just return the input typdef
 *
 * INPUTS:
 *     typdef == typdef to check
@@ -2324,6 +2350,11 @@ const typ_def_t *
 * 
 * Get the final typ_def_t of the specified typ_def_t
 * based on the qualifier
+* Get the next typdef in the chain for NCX_CL_NAMED or NCX_CL_REF
+* Skip any named types without the specific restriction defined
+*
+* Returns the input typdef for simple typdef classes
+*
 * INPUTS:
 *     typdef == typdef to check
 *     squal == type of search qualifier desired
@@ -2528,7 +2559,7 @@ const typ_def_t *
 /********************************************************************
 * FUNCTION typ_find_appinfo
 *
-* Find the specified appinfo name
+* Find the specified appinfo variable by its prefix and name
 *
 * INPUTS:
 *  typdef ==  typedef to check
@@ -2780,6 +2811,7 @@ boolean
 * FUNCTION typ_get_defval
 *
 * Find the default value string for the specified type template
+* get default from template
 *
 * INPUTS:
 *  typ == typ_template_t struct to check
@@ -2816,6 +2848,7 @@ const xmlChar *
 * FUNCTION typ_get_default
 *
 * Check if this typdef has a default value defined
+* get default from typdef
 *
 * INPUTS:
 *   typdef == typ_def_t struct to check
@@ -2962,6 +2995,7 @@ const xmlChar *
 * Find the units string for the specified typdef template
 * Follow any NCX_CL_NAMED typdefs and check for a units
 * clause in the the nearest ancestor typdef
+* get units from named type if any
 *
 * INPUTS:
 *  typdef == typ_def_t struct to check
@@ -3166,6 +3200,7 @@ boolean
 * FUNCTION typ_first_enumdef
 *
 * Get the first enum def struct
+* looks past named typedefs to base typedef
 *
 * INPUTS:
 *    typdef == typ def struct to check
@@ -3256,6 +3291,7 @@ typ_enum_t *
 * FUNCTION typ_first_con_enumdef
 *
 * Get the first enum def struct
+* constrained to this typdef
 *
 * INPUTS:
 *    typdef == typ def struct to check
@@ -3292,6 +3328,7 @@ const typ_enum_t *
         dlq_firstEntry(&typdef->def.simple.valQ);
 
 }  /* typ_first_con_enumdef */
+
 
 /********************************************************************
 * FUNCTION typ_find_enumdef
@@ -4590,7 +4627,7 @@ const xmlChar *
 * FUNCTION typ_get_leafref_pcb
 * 
 *   Get the XPath parser control block for the leafref data type
-*
+*   returns xpath_pcb_t but cannot import due to H file loop
 * INPUTS:
 *    typdef == typdef for the the leafref
 *
@@ -4628,6 +4665,7 @@ struct xpath_pcb_t_ *
 * FUNCTION typ_get_constrained
 * 
 *   Get the constrained true/false field for the data type
+*   leafref or instance-identifier constrained flag
 *
 * INPUTS:
 *    typdef == typdef for the the leafref or instance-identifier
@@ -4900,6 +4938,8 @@ const typ_idref_t *
 * FUNCTION typ_get_fraction_digits
 * 
 * Get the fraction-digits field from the typdef chain
+* typdef must be an NCX_BT_DECIMAL64 or 0 will be returned
+* valid values are 1..18
 *
 * INPUTS:
 *     typdef == typdef to  check

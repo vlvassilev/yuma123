@@ -368,36 +368,155 @@ typedef struct rpc_err_rec_t_ {
 *                                                                   *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION rpc_err_get_errtag
+*
+* Get the RPC error-tag for an rpc_err_t enumeration
+*
+* INPUTS:
+*   errid == rpc error enum to convert to a string
+*
+* RETURNS:
+*   string for the specified error-tag enum
+*********************************************************************/
 extern const xmlChar *
     rpc_err_get_errtag (rpc_err_t errid);
 
+
+/********************************************************************
+* FUNCTION rpc_err_get_errtag_enum
+*
+* Get the RPC error-tag enum for an error-tag string
+*
+* INPUTS:
+*   errtag == error-tag string to check
+*
+* RETURNS:
+*   enum for this error-tag
+*********************************************************************/
 extern rpc_err_t
     rpc_err_get_errtag_enum (const xmlChar *errtag);
 
+
+/********************************************************************
+* FUNCTION rpc_err_new_record
+*
+* Malloc and init an rpc_err_rec_t struct
+*
+* RETURNS:
+*   malloced error record or NULL if memory error
+*********************************************************************/
 extern rpc_err_rec_t *
     rpc_err_new_record (void);
 
+
+/********************************************************************
+* FUNCTION rpc_err_init_record
+*
+* Init an rpc_err_rec_t struct
+*
+* INPUTS:
+*   err == rpc_err_rec_t struct to init
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     rpc_err_init_record (rpc_err_rec_t *err);
 
+
+/********************************************************************
+* FUNCTION rpc_err_free_record
+*
+* Clean and free an rpc_err_rec_t struct
+*
+* INPUTS:
+*   err == rpc_err_rec_t struct to clean and free
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     rpc_err_free_record (rpc_err_rec_t *err);
 
+
+/********************************************************************
+* FUNCTION rpc_err_clean_record
+*
+* Clean an rpc_err_rec_t struct
+*
+* INPUTS:
+*   err == rpc_err_rec_t struct to clean
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     rpc_err_clean_record (rpc_err_rec_t *err);
 
+
+/********************************************************************
+* FUNCTION rpc_err_new_info
+*
+* Malloc and init an rpc_err_info_t struct
+*
+* RETURNS:
+*   malloced error-info record, or NULL if memory error
+*********************************************************************/
 extern rpc_err_info_t *
     rpc_err_new_info (void);
 
+
+/********************************************************************
+* FUNCTION rpc_err_free_info
+*
+* Clean and free an rpc_err_info_t struct
+*
+* INPUTS:
+*   errinfo == rpc_err_info_t struct to clean and free
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     rpc_err_free_info (rpc_err_info_t *errinfo);
 
+
+/********************************************************************
+* FUNCTION rpc_err_dump_errors
+*
+* Dump the error messages in the RPC message error Q
+*
+* INPUTS:
+*   msg == rpc_msg_t struct to check for errors
+*
+*********************************************************************/
 extern void
     rpc_err_dump_errors (const rpc_msg_t  *msg);
 
+
+/********************************************************************
+* FUNCTION rpc_err_get_severity
+*
+* Translate an rpc_err_sev_t to a string 
+*
+* INPUTS:
+*   sev == rpc_err_sev_t enum to translate
+*
+* RETURNS:
+* const pointer to the enum string
+*********************************************************************/
 extern const xmlChar *
     rpc_err_get_severity (rpc_err_sev_t  sev);
 
+
+/********************************************************************
+* FUNCTION rpc_err_clean_errQ
+*
+* Clean all the entries from a Q of rpc_err_rec_t
+*
+* INPUTS:
+*   errQ == Q of rpc_err_rec_t to clean
+* RETURNS:
+*   none
+*********************************************************************/
 extern void 
     rpc_err_clean_errQ (dlq_hdr_t *errQ);
 

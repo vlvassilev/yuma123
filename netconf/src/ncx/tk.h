@@ -270,82 +270,326 @@ typedef struct tk_chain_t_ {
 *			F U N C T I O N S			    *
 *								    *
 *********************************************************************/
+
+
+/********************************************************************
+* FUNCTION tk_new_chain
+* 
+* Allocatate a new token parse chain
+*
+* RETURNS:
+*  new parse chain or NULL if memory error
+*********************************************************************/
 extern tk_chain_t *
     tk_new_chain (void);
 
+
+/********************************************************************
+* FUNCTION tk_setup_chain_conf
+* 
+* Setup a previously allocated chain for a text config file
+*
+* INPUTS
+*    tkc == token chain to setup
+*    fp == open file to use for text source
+*    filename == source filespec
+*********************************************************************/
 extern void
     tk_setup_chain_conf (tk_chain_t *tkc,
 			 FILE *fp,
 			 const xmlChar *filename);
 
+
+/********************************************************************
+* FUNCTION tk_setup_chain_yang
+* 
+* Setup a previously allocated chain for a YANG file
+*
+* INPUTS
+*    tkc == token chain to setup
+*    fp == open file to use for text source
+*    filename == source filespec
+*********************************************************************/
 extern void
     tk_setup_chain_yang (tk_chain_t *tkc,
 			 FILE *fp,
 			 const xmlChar *filename);
 
+
+/********************************************************************
+* FUNCTION tk_setup_chain_yin
+* 
+* Setup a previously allocated chain for a YIN file
+*
+* INPUTS
+*    tkc == token chain to setup
+*    filename == source filespec
+*********************************************************************/
 extern void
     tk_setup_chain_yin (tk_chain_t *tkc,
                         const xmlChar *filename);
 
+
+/********************************************************************
+* FUNCTION tk_free_chain
+* 
+* Cleanup and deallocate a tk_chain_t 
+* INPUTS:
+*   tkc == TK chain to delete
+* RETURNS:
+*  none
+*********************************************************************/
 extern void
     tk_free_chain (tk_chain_t *tkc);
 
-extern tk_type_t 
-    tk_get_token_id (const xmlChar *buff, 
-		     uint32 len);
 
-/* checks for valid YANG data type name */
+/********************************************************************
+* FUNCTION tk_get_yang_btype_id
+* 
+* Check if the specified string is a YANG builtin type name
+* checks for valid YANG data type name
+*
+* INPUTS:
+*   buff == token string to check -- NOT ZERO-TERMINATED
+*   len == length of string to check
+* RETURNS:
+*   btype found or NCX_BT_NONE if no match
+*********************************************************************/
 extern ncx_btype_t 
     tk_get_yang_btype_id (const xmlChar *buff, 
 			  uint32 len);
 
-extern const char *
-    tk_get_btype_sym (ncx_btype_t btyp);
 
+/********************************************************************
+* FUNCTION tk_get_token_name
+* 
+* Get the symbolic token name
+*
+* INPUTS:
+*   ttyp == token type
+* RETURNS:
+*   const string to the name; will not be NULL
+*********************************************************************/
 extern const char *
     tk_get_token_name (tk_type_t ttyp);
 
+
+/********************************************************************
+* FUNCTION tk_get_token_sym
+* 
+* Get the symbolic token symbol
+*
+* INPUTS:
+*   ttyp == token type
+* RETURNS:
+*   const string to the symbol; will not be NULL
+*********************************************************************/
 extern const char *
     tk_get_token_sym (tk_type_t ttyp);
 
+
+/********************************************************************
+* FUNCTION tk_get_btype_sym
+* 
+* Get the symbolic token symbol for one of the base types
+*
+* INPUTS:
+*   btyp == base type
+* RETURNS:
+*   const string to the symbol; will not be NULL
+*********************************************************************/
+extern const char *
+    tk_get_btype_sym (ncx_btype_t btyp);
+
+
+/********************************************************************
+* FUNCTION tk_next_typ
+* 
+* Get the token type of the next token
+*
+* INPUTS:
+*   tkc == token chain 
+* RETURNS:
+*   token type
+*********************************************************************/
 extern tk_type_t
     tk_next_typ (tk_chain_t *tkc);
 
+
+/********************************************************************
+* FUNCTION tk_next_typ2
+* 
+* Get the token type of the token after the next token
+*
+* INPUTS:
+*   tkc == token chain 
+* RETURNS:
+*   token type
+*********************************************************************/
 extern tk_type_t
     tk_next_typ2 (tk_chain_t *tkc);
 
+
+/********************************************************************
+* FUNCTION tk_next_val
+* 
+* Get the token type of the next token
+*
+* INPUTS:
+*   tkc == token chain 
+* RETURNS:
+*   token type
+*********************************************************************/
 extern const xmlChar *
     tk_next_val (tk_chain_t *tkc);
 
-extern void
-    tk_dump_chain (const tk_chain_t *tkc);
 
+/********************************************************************
+* FUNCTION tk_dump_token
+* 
+* Debug printf the specified token
+* !!! Very verbose !!!
+*
+* INPUTS:
+*   tk == token
+*
+*********************************************************************/
 extern void
     tk_dump_token (const tk_token_t *tk);
 
+
+/********************************************************************
+* FUNCTION tk_dump_chain
+* 
+* Debug printf the token chain
+* !!! Very verbose !!!
+*
+* INPUTS:
+*   tkc == token chain 
+*
+* RETURNS:
+*   none
+*********************************************************************/
+extern void
+    tk_dump_chain (const tk_chain_t *tkc);
+
+
+/********************************************************************
+* FUNCTION tk_is_wsp_string
+* 
+* Check if the current token is a string with whitespace in it
+*
+* INPUTS:
+*   tk == token to check
+*
+* RETURNS:
+*    TRUE if a string with whitespace in it
+*    FALSE if not a string or no whitespace in the string
+*********************************************************************/
 extern boolean
     tk_is_wsp_string (const tk_token_t *tk);
 
-/* mod used just for additional error info, may be NULL */
+
+/********************************************************************
+* FUNCTION tk_tokenize_input
+* 
+* Parse the input (FILE or buffer) into tk_token_t structs
+*
+* The tkc param must be initialized to use the internal
+* buffer to read from the specified filespec:
+*
+*    tkc->filename
+*    tkc->flags
+*    tkc->fp
+*    tkc->source
+*
+* External buffer mode:
+*
+* If no filename is provided, the the TK_FL_MALLOC 
+* flag will not be set, and the tkc->buff field 
+* must be initialized before this function is called.  
+* This function will not free the buffer,
+* but just read from it until a '0' char is reached.
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   tkc == token chain 
+*   mod == module in progress (NULL if not used)
+*          !!! Just used for error messages !!!
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
 extern status_t 
     tk_tokenize_input (tk_chain_t *tkc,
 		       ncx_module_t *mod);
 
 
-/* mod used just for additional error info, may be NULL */
+/********************************************************************
+* FUNCTION tk_retokenize_cur_string
+* 
+* The current token is some sort of a string
+* Reparse it according to the full NCX token list, as needed
+*
+* The current token may be replaced with one or more tokens
+*
+* INPUTS:
+*   tkc == token chain 
+*   mod == module in progress (NULL if not used)
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
 extern status_t 
     tk_retokenize_cur_string (tk_chain_t *tkc,
 			      ncx_module_t *mod);
 
-/* convert the ncx:metadata content to 1 or 2 tokens */
+
+/********************************************************************
+* FUNCTION tk_tokenize_metadata_string
+* 
+* The specified ncx:metadata string is parsed into tokens
+* convert the ncx:metadata content to 1 or 2 tokens
+*
+* INPUTS:
+*   mod == module in progress for error purposes (may be NULL)
+*   str == string to tokenize
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == error status, if return NULL or non-NULL
+*
+* RETURNS:
+*   pointer to malloced and filled in token chain
+*   ready to be traversed; always check *res for valid syntax
+*********************************************************************/
 extern tk_chain_t *
     tk_tokenize_metadata_string (ncx_module_t *mod,
 				 xmlChar *str,
 				 status_t *res);
 
-/* convert an XPath string to tokens
- * mod can be NULL -- used for error reporting
- */
+
+/********************************************************************
+* FUNCTION tk_tokenize_xpath_string
+* 
+* The specified XPath string is parsed into tokens
+*
+* INPUTS:
+*   mod == module in progress for error purposes (may be NULL)
+*   str == string to tokenize
+*   curlinenum == current line number
+*   curlinepos == current line position
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == error status, if return NULL or non-NULL
+*
+* RETURNS:
+*   pointer to malloced and filled in token chain
+*   ready to be traversed; always check *res for valid syntax
+*********************************************************************/
 extern tk_chain_t *
     tk_tokenize_xpath_string (ncx_module_t *mod,
 			      xmlChar *str,
@@ -353,36 +597,149 @@ extern tk_chain_t *
 			      uint32 curlinepos,
 			      status_t *res);
 
+
+/********************************************************************
+* FUNCTION tk_token_count
+* 
+* Get the number of tokens in the queue
+*
+* INPUTS:
+*   tkc == token chain to check
+*
+* RETURNS:
+*   number of tokens in the queue
+*********************************************************************/
 extern uint32
     tk_token_count (const tk_chain_t *tkc);
 
+
+/********************************************************************
+* FUNCTION tk_reset_chain
+* 
+* Reset the token chain current pointer to the start
+*
+* INPUTS:
+*   tkc == token chain to reset
+*
+*********************************************************************/
 extern void
     tk_reset_chain (tk_chain_t *tkc);
 
+
+/********************************************************************
+* FUNCTION tk_clone_chain
+* 
+* Allocatate and a new token parse chain and fill
+* it with the specified token chain contents 
+*
+* INPUTS:
+*   oldtkc == token chain to clone
+*
+* RETURNS:
+*    new cloned parse chain or NULL if memory error
+*********************************************************************/
 extern tk_chain_t *
     tk_clone_chain (tk_chain_t *oldtkc);
 
+
+/********************************************************************
+* FUNCTION tk_add_id_token
+* 
+* Allocatate a new ID token and add it to the parse chain
+*
+* INPUTS:
+*   tkc == token chain to use
+*   valstr == ID name
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     tk_add_id_token (tk_chain_t *tkc,
                      const xmlChar *valstr);
 
+
+/********************************************************************
+* FUNCTION tk_add_pid_token
+* 
+* Allocatate a new prefixed ID token and add it to 
+* the parse chain
+*
+* INPUTS:
+*   tkc == token chain to use
+*   prefix == ID prefix
+*   prefixlen == 'prefix' length in bytes
+*   valstr == ID name
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     tk_add_pid_token (tk_chain_t *tkc,
                       const xmlChar *prefix,
                       uint32 prefixlen,
                       const xmlChar *valstr);
 
+
+/********************************************************************
+* FUNCTION tk_add_string_token
+* 
+* Allocatate a new string token and add it to the parse chain
+*
+* INPUTS:
+*   tkc == token chain to use
+*   valstr == string value to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     tk_add_string_token (tk_chain_t *tkc,
                          const xmlChar *valstr);
 
+
+/********************************************************************
+* FUNCTION tk_add_lbrace_token
+* 
+* Allocatate a new left brace token and add it to the parse chain
+*
+* INPUTS:
+*   tkc == token chain to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     tk_add_lbrace_token (tk_chain_t *tkc);
 
+
+
+/********************************************************************
+* FUNCTION tk_add_rbrace_token
+* 
+* Allocatate a new right brace token and add it to the parse chain
+*
+* INPUTS:
+*   tkc == token chain to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     tk_add_rbrace_token (tk_chain_t *tkc);
 
 
+/********************************************************************
+* FUNCTION tk_add_semicol_token
+* 
+* Allocatate a new semi-colon token and add it to the parse chain
+*
+* INPUTS:
+*   tkc == token chain to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     tk_add_semicol_token (tk_chain_t *tkc);
 

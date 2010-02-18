@@ -283,89 +283,402 @@ typedef struct ses_cb_t_ {
 *                                                                   *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION ses_new_scb
+*
+* Create a new session control block
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   pointer to initialized SCB, or NULL if malloc error
+*********************************************************************/
 extern ses_cb_t *
     ses_new_scb (void);
 
+
+/********************************************************************
+* FUNCTION ses_new_dummy_scb
+*
+* Create a new dummy session control block
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   pointer to initialized SCB, or NULL if malloc error
+*********************************************************************/
 extern ses_cb_t *
     ses_new_dummy_scb (void);
 
+
+/********************************************************************
+* FUNCTION ses_free_scb
+*
+* Free a session control block
+*
+* INPUTS:
+*   scb == session control block to free
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     ses_free_scb (ses_cb_t *scb);
 
+
+/********************************************************************
+* FUNCTION ses_putchar
+*
+* Write one char to the session, without any translation
+*
+* THIS FUNCTION DOES NOT CHECK ANY PARAMETERS TO SAVE TIME
+*
+* NO CHARS ARE ACTUALLY WRITTEN TO A REAL SESSION!!!
+* The 'output ready' indicator will be set and the session
+* queued in the outreadyQ.  Non-blocking IO functions
+* will send the data when the connection allows.
+*
+* INPUTS:
+*   scb == session control block to start msg 
+*   ch = xmlChar to write, cast as uint32 to avoid compiler warnings
+*
+*********************************************************************/
 extern void
     ses_putchar (ses_cb_t *scb,
 		 uint32    ch);
 
+
+/********************************************************************
+* FUNCTION ses_putstr
+*
+* Write a zero-terminated string to the session
+*
+* THIS FUNCTION DOES NOT CHECK ANY PARAMTERS TO SAVE TIME
+*
+* INPUTS:
+*   scb == session control block to start msg 
+*   str == string to write
+*
+*********************************************************************/
 extern void
     ses_putstr (ses_cb_t *scb,
 		const xmlChar *str);
 
+
+/********************************************************************
+* FUNCTION ses_putstr_indent
+*
+* Write a zero-terminated content string to the session
+* with indentation
+*
+* THIS FUNCTION DOES NOT CHECK ANY PARAMTERS TO SAVE TIME
+* EXCEPT THAT ILLEGAL XML CHARS ARE CONVERTED TO CHAR ENTITIES
+*
+* INPUTS:
+*   scb == session control block to start msg 
+*   str == string to write
+*   indent == current indent amount
+*
+*********************************************************************/
 extern void
     ses_putstr_indent (ses_cb_t *scb,
 		       const xmlChar *str,
 		       int32 indent);
 
-/* write XML element safe content string */
+
+/********************************************************************
+* FUNCTION ses_putcstr
+*
+* write XML element safe content string
+* Write a zero-terminated element content string to the session
+*
+* THIS FUNCTION DOES NOT CHECK ANY PARAMTERS TO SAVE TIME
+* EXCEPT THAT ILLEGAL XML CHARS ARE CONVERTED TO CHAR ENTITIES
+*
+* INPUTS:
+*   scb == session control block to start msg 
+*   str == string to write
+*   indent == current indent amount
+*
+*********************************************************************/
 extern void
     ses_putcstr (ses_cb_t *scb,
 		 const xmlChar *str,
 		 int32 indent);
 
-/* write XML attribute safe content string */
+
+/********************************************************************
+* FUNCTION ses_putastr
+*
+* write XML attribute safe content string
+* Write a zero-terminated attribute content string to the session
+*
+* THIS FUNCTION DOES NOT CHECK ANY PARAMTERS TO SAVE TIME
+* EXCEPT THAT ILLEGAL XML CHARS ARE CONVERTED TO CHAR ENTITIES
+*
+* INPUTS:
+*   scb == session control block to start msg 
+*   str == string to write
+*   indent == current indent amount
+*
+*********************************************************************/
 extern void
     ses_putastr (ses_cb_t *scb,
                  const xmlChar *str,
                  int32 indent);
 
+
+/********************************************************************
+* FUNCTION ses_indent
+*
+* Write the proper newline + indentation to the specified session
+*
+* THIS FUNCTION DOES NOT CHECK ANY PARAMETERS TO SAVE TIME
+*
+* INPUTS:
+*   scb == session control block to start msg 
+*   indent == number of chars to indent after a newline
+*             will be ignored if indent is turned off
+*             in the agent profile
+*          == -1 means no newline or indent
+*          == 0 means just newline
+*
+*********************************************************************/
 extern void
     ses_indent (ses_cb_t *scb,
 		int32 indent);
 
+
+/********************************************************************
+* FUNCTION ses_indent_count
+*
+* Get the indent count for this session
+*
+* THIS FUNCTION DOES NOT CHECK ANY PARAMETERS TO SAVE TIME
+*
+* INPUTS:
+*   scb == session control block to check
+*
+* RETURNS:
+*   indent value for the session
+*********************************************************************/
 extern int32
     ses_indent_count (const ses_cb_t *scb);
 
+
+/********************************************************************
+* FUNCTION ses_set_indent
+*
+* Set the indent count for this session
+*
+* INPUTS:
+*   scb == session control block to check
+*   indent == value to use (may get adjusted)
+*
+*********************************************************************/
 extern void
     ses_set_indent (ses_cb_t *scb,
 		    int32 indent);
 
+
+/********************************************************************
+* FUNCTION ses_set_mode
+*
+* Set the output mode for the specified session
+*
+* INPUTS:
+*   scb == session control block to set
+*   mode == new mode value
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     ses_set_mode (ses_cb_t *scb,
 		  ses_mode_t mode);
 
+
+/********************************************************************
+* FUNCTION ses_get_mode
+*
+* Get the output mode for the specified session
+*
+* INPUTS:
+*   scb == session control block to get
+*
+* RETURNS:
+*   session mode value
+*********************************************************************/
 extern ses_mode_t
     ses_get_mode (ses_cb_t *scb);
 
+
+/********************************************************************
+* FUNCTION ses_start_msg
+*
+* Start a new outbound message on the specified session
+*
+* INPUTS:
+*   scb == session control block to start msg 
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     ses_start_msg (ses_cb_t *scb);
 
+
+/********************************************************************
+* FUNCTION ses_finish_msg
+*
+* Finish an outbound message on the specified session
+*
+* INPUTS:
+*   scb == session control block to finish msg 
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     ses_finish_msg (ses_cb_t *scb);
 
+
+/********************************************************************
+* FUNCTION ses_read_cb
+*
+* The IO input front-end for the xmlTextReader parser read fn
+*
+* Need to separate the input stream into separate XML instance
+* documents and reset the xmlTextReader each time a new document
+* is encountered.  For SSH, also need to detect the EOM flag
+* and remove it + control input to the reader.
+*
+* Uses a complex state machine which does not assume that the
+* input from the network is going to arrive in well-formed chunks.
+* It has to be treated as a byte stream (SOCK_STREAM).
+*
+* Does not remove char entities or any XML, just the SSH EOM directive
+*
+* INPUTS:
+*   context == scb pointer for the session to read
+*   buffer == char buffer to fill
+*   len == length of the buffer
+*
+* RETURNS:
+*   number of bytes read into the buffer
+*   -1     indicates error and EOF
+*********************************************************************/
 extern int
     ses_read_cb (void *context,
 		 char *buffer,
 		 int len);
 
+
+/********************************************************************
+* FUNCTION ses_accept_input
+*
+* The IO input handler for the ncxserver loop
+*
+* Need to separate the input stream into separate XML instance
+* documents and reset the xmlTextReader each time a new document
+* is encountered.  For SSH, also need to detect the EOM flag
+* and remove it + control input to the reader.
+*
+* This function breaks the byte stream into ses_msg_t structs
+* that get queued on the session's msgQ
+*
+* INPUTS:
+*   scb == session control block to accept input for
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     ses_accept_input (ses_cb_t *scb);
 
+
+/********************************************************************
+* FUNCTION ses_state_name
+*
+* Get the name of a session state from the enum value
+*
+* INPUTS:
+*   state == session state enum value
+*
+* RETURNS:
+*   staing corresponding to the state name
+*********************************************************************/
 extern const xmlChar *
     ses_state_name (ses_state_t state);
 
+
+/********************************************************************
+* FUNCTION ses_withdef
+*
+* Get the with-defaults value for this session
+*
+* INPUTS:
+*   scb == session control block to check
+*
+* RETURNS:
+*   with-defaults value for the session
+*********************************************************************/
 extern ncx_withdefaults_t
     ses_withdef (const ses_cb_t *scb);
 
+
+/********************************************************************
+* FUNCTION ses_line_left
+*
+* Get the number of bytes that can be added to the current line
+* before the session linesize limit is reached
+*
+* INPUTS:
+*   scb == session control block to check
+*
+* RETURNS:
+*   number of bytes left, or zero if limit already reached
+*********************************************************************/
 extern uint32
     ses_line_left (const ses_cb_t *scb);
 
 
+/********************************************************************
+* FUNCTION ses_put_extern
+* 
+*  write the contents of a file to the session
+*
+* INPUTS:
+*    scb == session to write
+*    fspec == filespec to write
+*
+*********************************************************************/
 extern void
     ses_put_extern (ses_cb_t *scb,
 		    const xmlChar *fname);
 
+
+/********************************************************************
+* FUNCTION ses_get_total_stats
+* 
+*  Get a r/w pointer to the the session totals stats
+*
+* RETURNS:
+*  pointer to the global session stats struct 
+*********************************************************************/
 extern ses_total_stats_t *
     ses_get_total_stats (void);
 
+
+/********************************************************************
+* FUNCTION ses_get_transport_name
+* 
+*  Get the name of the transport for a given enum value
+*
+* INPUTS:
+*   transport == ses_transport_t enum value
+*
+* RETURNS:
+*   pointer to the string value for the specified enum
+*********************************************************************/
 extern const xmlChar *
     ses_get_transport_name (ses_transport_t transport);
 

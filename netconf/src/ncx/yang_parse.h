@@ -55,6 +55,38 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION yang_parse_from_filespec
+* 
+* Parse a file as a YANG module
+*
+* Error messages are printed by this function!!
+*
+* INPUTS:
+*   filespec == absolute path or relative path
+*               This string is used as-is without adjustment.
+*   pcb == parser control block used as very top-level struct
+*   ptyp == parser call type
+*            YANG_PT_TOP == called from top-level file
+*            YANG_PT_INCLUDE == called from an include-stmt in a file
+*            YANG_PT_IMPORT == called from an import-stmt in a file
+*   isyang == TRUE if a YANG file is expected
+*             FALSE if a YIN file is expected
+*
+* OUTPUTS:
+*   an ncx_module is filled out and validated as the file
+*   is parsed.  If no errors:
+*     TOP, IMPORT:
+*        the module is loaded into the definition registry with 
+*        the ncx_add_to_registry function
+*     INCLUDE:
+*        the submodule is loaded into the top-level module,
+*        specified in the pcb
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
 extern status_t 
     yang_parse_from_filespec (const xmlChar *filespec,
                               yang_pcb_t *pcb,

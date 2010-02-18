@@ -1142,6 +1142,7 @@ void
     runstack_cleanup();
     ncxmod_cleanup();
     xmlCleanupParser();
+    status_cleanup();
     ncx_init_done = FALSE;
     stage2_init_done = FALSE;
 

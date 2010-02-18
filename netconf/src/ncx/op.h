@@ -167,42 +167,188 @@ typedef struct op_filter_t_ {
 *                                                                   *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION op_method_name
+*
+* Get the keyword for the specified STD RPC method
+*
+* INPUTS:  
+*    op_id == proto op ID
+* RETURNS:
+*    string for the operation, or "none" or "illegal"
+*********************************************************************/
 extern const xmlChar * 
     op_method_name (op_method_t op_id);
 
+
+/********************************************************************
+* FUNCTION op_editop_name
+*
+* Get the keyword for the specified op_editop_t enumeration
+*
+* INPUTS:  
+*    ed_id == edit operation ID
+* RETURNS:
+*    string for the edit operation type, or "none" or "illegal"
+*********************************************************************/
 extern const xmlChar * 
     op_editop_name (op_editop_t ed_id);
 
+
+/********************************************************************
+* FUNCTION op_editop_id
+*
+* Get the ID for the editop from its keyword
+*
+* INPUTS:  
+*    opstr == string for the edit operation type
+* RETURNS:
+*    the op_editop_t enumeration value for the string
+*********************************************************************/
 extern op_editop_t 
     op_editop_id (const xmlChar *opstr);
 
+
+/********************************************************************
+* FUNCTION op_insertop_name
+*
+* Get the keyword for the specified op_insertop_t enumeration
+*
+* INPUTS:  
+*    ed_id == insert operation ID
+*
+* RETURNS:
+*    string for the insert operation type, or "none" or "illegal"
+*********************************************************************/
 extern const xmlChar * 
     op_insertop_name (op_insertop_t ins_id);
 
+
+/********************************************************************
+* FUNCTION op_insertop_id
+*
+* Get the ID for the insert operation from its keyword
+*
+* INPUTS:  
+*    opstr == string for the insert operation type
+* RETURNS:
+*    the op_insertop_t enumeration value for the string
+*********************************************************************/
 extern op_insertop_t 
     op_insertop_id (const xmlChar *opstr);
 
+
+/********************************************************************
+* FUNCTION op_filtertyp_id
+*
+* Get the ID for the filter type from its keyword
+*
+* INPUTS:  
+*    filstr == string for the filter type
+* RETURNS:
+*    the op_filtertyp_t enumeration value for the string
+*********************************************************************/
 extern op_filtertyp_t 
     op_filtertyp_id (const xmlChar *filstr);
 
+
+/********************************************************************
+* FUNCTION op_defop_name
+*
+* Get the keyword for the specified op_defop_t enumeration
+*
+* INPUTS:  
+*    def_id == default operation ID
+* RETURNS:
+*    string for the default operation type, or "none" or "illegal"
+*********************************************************************/
 extern const xmlChar * 
     op_defop_name (op_defop_t def_id);
 
+
+/********************************************************************
+* FUNCTION op_defop_id
+*
+* Get the ID for the default-operation from its keyword
+*
+* INPUTS:  
+*    defstr == string for the default operation
+* RETURNS:
+*    the op_editop_t enumeration value for the string
+*********************************************************************/
 extern op_editop_t 
     op_defop_id (const xmlChar *defstr);
 
+
+/********************************************************************
+* FUNCTION op_testop_name
+*
+* Get the keyword for the specified op_testop_t enumeration
+*
+* INPUTS:  
+*    test_id == test operation ID
+* RETURNS:
+*    string for the test operation type, or "none" or "illegal"
+*********************************************************************/
 extern const xmlChar * 
     op_testop_name (op_testop_t test_id);
 
+
+/********************************************************************
+* FUNCTION op_testop_enum
+*
+* Get the enum for the specified op_testop_t string
+*
+* INPUTS:  
+*    teststr == string for the test operation type
+* RETURNS:
+*    test_id == test operation ID
+*    
+*********************************************************************/
 extern op_testop_t
     op_testop_enum (const xmlChar *teststr);
 
+
+/********************************************************************
+* FUNCTION op_errop_name
+*
+* Get the keyword for the specified op_errop_t enumeration
+*
+* INPUTS:  
+*    err_id == error operation ID
+* RETURNS:
+*    string for the error operation type, or "none" or "illegal"
+*********************************************************************/
 extern const xmlChar * 
     op_errop_name (op_errop_t err_id);
 
+
+/********************************************************************
+* FUNCTION op_errop_id
+*
+* Get the ID for the error-option from its keyword
+*
+* INPUTS:  
+*    errstr == string for the error option
+* RETURNS:
+*    the op_errop_t enumeration value for the string
+*********************************************************************/
 extern op_errop_t 
     op_errop_id (const xmlChar *errstr);
 
+
+/********************************************************************
+* FUNCTION op_defop_id2
+*
+* Get the ID for the default-operation from its keyword
+* Return the op_defop_t, not the op_editop_t conversion
+*
+* INPUTS:  
+*    defstr == string for the default operation
+* RETURNS:
+*    the op_defop_t enumeration value for the string
+*********************************************************************/
 extern op_defop_t 
     op_defop_id2 (const xmlChar *defstr);
 

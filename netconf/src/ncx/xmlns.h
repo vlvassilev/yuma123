@@ -103,12 +103,54 @@ typedef struct xmlns_pmap_t_ {
 *                                                                   *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION xmlns_init
+*
+* Initialize the module static variables
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    none
+*********************************************************************/
 extern void 
     xmlns_init (void);
 
+
+/********************************************************************
+* FUNCTION xmlns_cleanup
+*
+* Cleanup module static data
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    none
+*********************************************************************/
 extern void 
     xmlns_cleanup (void);
 
+
+/********************************************************************
+* FUNCTION xmlns_register_ns
+* 
+* Register the specified namespace.  Each namespace or prefix
+* can only be registered once.  An entry must be removed and
+* added back in order to change it.
+*
+* INPUTS:
+*    ns == namespace name
+*    pfix == namespace prefix to use (if none provided but needed)
+*    modname == name string of module associated with this NS
+*    modptr == back-ptr to ncx_module_t struct (may be NULL)
+*
+* OUTPUTS:
+*    *ns_id contains the ID assigned to the namespace
+*
+* RETURNS:
+*    status, NO_ERR if all okay
+*********************************************************************/
 extern status_t 
     xmlns_register_ns (const xmlChar *ns,
 		       const xmlChar *pfix,
@@ -116,87 +158,350 @@ extern status_t
 		       void *modptr,
 		       xmlns_id_t *ns_id);
 
+
+/********************************************************************
+* FUNCTION xmlns_get_ns_prefix
+*
+* Get the prefix for the specified namespace 
+*
+* INPUTS:
+*    ns_id == namespace ID
+* RETURNS:
+*    pointer to prefix or NULL if bad params
+*********************************************************************/
 extern const xmlChar * 
     xmlns_get_ns_prefix (xmlns_id_t ns_id);
 
+
+/********************************************************************
+* FUNCTION xmlns_get_ns_name
+*
+* Get the name for the specified namespace 
+*
+* INPUTS:
+*    ns_id == namespace ID
+* RETURNS:
+*    pointer to name or NULL if bad params
+*********************************************************************/
 extern const xmlChar * 
     xmlns_get_ns_name (xmlns_id_t ns_id);
 
+
+/********************************************************************
+* FUNCTION xmlns_find_ns_by_module
+*
+* Find the NS ID from its module name that registered it
+*
+* INPUTS:
+*    modname == module name string to find
+*
+* RETURNS:
+*    namespace ID or XMLNS_NULL_NS_ID if error
+*********************************************************************/
 extern xmlns_id_t
     xmlns_find_ns_by_module (const xmlChar *modname);
 
+
+/********************************************************************
+* FUNCTION xmlns_find_ns_by_prefix
+*
+* Find the NS ID from its prefix
+*
+* INPUTS:
+*    pfix == pointer to prefix string
+* RETURNS:
+*    namespace ID or XMLNS_NULL_NS_ID if error
+*********************************************************************/
 extern xmlns_id_t  
     xmlns_find_ns_by_prefix (const xmlChar *pfix);
 
+
+/********************************************************************
+* FUNCTION xmlns_find_ns_by_name
+*
+* Find the NS ID from its name
+*
+* INPUTS:
+*    name == pointer to name string
+* RETURNS:
+*    namespace ID or XMLNS_NULL_NS_ID if error
+*********************************************************************/
 extern xmlns_id_t  
     xmlns_find_ns_by_name (const xmlChar *name);
 
+
+/********************************************************************
+* FUNCTION xmlns_find_ns_by_name_str
+*
+* Find the NS ID from its name (counted string version)
+*
+* INPUTS:
+*    name == pointer to name string
+*    namelen == length of name string
+*
+* RETURNS:
+*    namespace ID or XMLNS_NULL_NS_ID if error
+*********************************************************************/
 extern xmlns_id_t  
     xmlns_find_ns_by_name_str (const xmlChar *name,
 			       uint32 namelen);
 
 
-/* get the NETCONF NS ID */
+/********************************************************************
+* FUNCTION xmlns_nc_id
+*
+* Get the ID for the NETCONF namespace or 0 if it doesn't exist
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    NETCONF NS ID or 0 if not found
+*********************************************************************/
 extern xmlns_id_t  
     xmlns_nc_id (void);
 
-/* get the NCX NS ID */
+
+/********************************************************************
+* FUNCTION xmlns_ncx_id
+*
+* Get the ID for the NETCONF Extensions namespace or 0 if it doesn't exist
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    NETCONF-X NS ID or 0 if not found
+*********************************************************************/
 extern xmlns_id_t  
     xmlns_ncx_id (void);
 
-/* get the XMLNS NS ID */
+
+/********************************************************************
+* FUNCTION xmlns_ns_id
+*
+* Get the ID for the XMLNS namespace or 0 if it doesn't exist
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    XMLNS NS ID or 0 if not found
+*********************************************************************/
 extern xmlns_id_t  
     xmlns_ns_id (void);
 
-/* get the INVALID NS ID */
+
+/********************************************************************
+* FUNCTION xmlns_inv_id
+*
+* Get the INVALID namespace ID 
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    INVALID NS ID or 0 if not set yet
+*********************************************************************/
 extern xmlns_id_t  
     xmlns_inv_id (void);
 
-/* get the XSD NS ID */
+
+/********************************************************************
+* FUNCTION xmlns_xs_id
+*
+* Get the ID for the XSD namespace or 0 if it doesn't exist
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    XSD NS ID or 0 if not found
+*********************************************************************/
 extern xmlns_id_t 
     xmlns_xs_id (void);
 
-/* get the XSI NS ID */
+
+/********************************************************************
+* FUNCTION xmlns_xsi_id
+*
+* Get the ID for the XSD Instance (XSI) namespace or 0 if it doesn't exist
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    XSI ID or 0 if not found
+*********************************************************************/
 extern xmlns_id_t 
     xmlns_xsi_id (void);
 
+
+/********************************************************************
+* FUNCTION xmlns_xml_id
+*
+* Get the ID for the 1998 XML namespace or 0 if it doesn't exist
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    XML ID or 0 if not found
+*********************************************************************/
 extern xmlns_id_t 
     xmlns_xml_id (void);
 
-/* get the NETCONF Notifications NS ID */
+
+/********************************************************************
+* FUNCTION xmlns_ncn_id
+*
+* Get the ID for the NETCONF Notifications namespace or 0 if it 
+* doesn't exist
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    NCN ID or 0 if not found
+*********************************************************************/
 extern xmlns_id_t 
     xmlns_ncn_id (void);
 
-/* get the YANG NS ID */
+
+/********************************************************************
+* FUNCTION xmlns_yang_id
+*
+* Get the ID for the YANG namespace or 0 if it 
+* doesn't exist
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    YANG ID or 0 if not found
+*********************************************************************/
 extern xmlns_id_t 
     xmlns_yang_id (void);
 
-/* get the YIN NS ID */
+
+/********************************************************************
+* FUNCTION xmlns_yin_id
+*
+* Get the ID for the YIN namespace or 0 if it 
+* doesn't exist
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    YIN ID or 0 if not found
+*********************************************************************/
 extern xmlns_id_t 
     xmlns_yin_id (void);
 
-/* get module name that registered this namespace */
+
+/********************************************************************
+* FUNCTION xmlns_get_module
+*
+* get the module name of the namespace ID
+* get module name that registered this namespace
+*
+* INPUTS:
+*    nsid == namespace ID to check
+* RETURNS:
+*    none
+*********************************************************************/
 extern const xmlChar *
     xmlns_get_module (xmlns_id_t  nsid);
 
+
+/********************************************************************
+* FUNCTION xmlns_get_modptr
+*
+* get the module pointer for the namespace ID
+*
+* INPUTS:
+*    nsid == namespace ID to check
+* RETURNS:
+*    void * cast of the module or NULL
+*********************************************************************/
 extern void *
     xmlns_get_modptr (xmlns_id_t nsid);
 
+
+/********************************************************************
+* FUNCTION xmlns_set_modptrs
+*
+* get the module pointer for the namespace ID
+*
+* INPUTS:
+*    modname == module owner name to find
+*    modptr == ncx_module_t back-ptr to set
+*
+*********************************************************************/
 extern void
     xmlns_set_modptrs (const xmlChar *modname,
 		       void *modptr);
+
+
+/********************************************************************
+* FUNCTION xmlns_new_pmap
+*
+* malloc and initialize a new xmlns_pmap_t struct
+*
+* INPUTS:
+*   buffsize == size of the prefix buffer to allocate 
+*               within this pmap (0 == do not malloc yet)
+*
+* RETURNS:
+*    pointer to new struct or NULL if malloc error
+*********************************************************************/
 extern xmlns_pmap_t *
     xmlns_new_pmap (uint32 buffsize);
 
+
+/********************************************************************
+* FUNCTION xmlns_free_pmap
+*
+* free a xmlns_pmap_t struct
+*
+* INPUTS:
+*   pmap == prefix map struct to free
+*
+*********************************************************************/
 extern void
     xmlns_free_pmap (xmlns_pmap_t *pmap);
 
+
+/********************************************************************
+* FUNCTION xmlns_new_qname
+*
+* malloc and initialize a new xmlns_qname_t struct
+*
+* RETURNS:
+*    pointer to new struct or NULL if malloc error
+*********************************************************************/
 extern xmlns_qname_t *
     xmlns_new_qname (void);
 
+
+/********************************************************************
+* FUNCTION xmlns_free_qname
+*
+* free a xmlns_qname_t struct
+*
+* INPUTS:
+*   qname == QName struct to free
+*
+*********************************************************************/
 extern void
     xmlns_free_qname (xmlns_qname_t *qname);
 
+
+/********************************************************************
+* FUNCTION xmlns_ids_equal
+*
+* compare 2 namespace IDs only if they are both non-zero
+* and return TRUE if they are equal
+*
+* INPUTS:
+*   ns1 == namespace ID 1
+*   ns2 == namespace ID 2
+*
+* RETURNS:
+*  TRUE if equal or both IDs are not zero
+*  FALSE if both IDs are non-zero and they are different
+*********************************************************************/
 extern boolean
     xmlns_ids_equal (xmlns_id_t ns1,
 		     xmlns_id_t ns2);

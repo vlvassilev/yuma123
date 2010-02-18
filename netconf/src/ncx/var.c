@@ -207,7 +207,7 @@ static dlq_hdr_t *
 
 
 /********************************************************************
-* FUNCTION var_insert
+* FUNCTION insert_var
 * 
 * Insert a user var 
 * 
@@ -468,13 +468,10 @@ static status_t
 }  /* set_str */
 
 
-
 /********************************************************************
 * FUNCTION set_val_from_var
 * 
-* 
-* 
-*
+* set a value struct from a var parm
 *
 * INPUTS:
 *   obj == expected object template 
@@ -618,7 +615,6 @@ static status_t
     return res;
 
 }  /* set_val_from_var */
-
 
 
 /*************   E X T E R N A L   F U N C T I O N S   ************/

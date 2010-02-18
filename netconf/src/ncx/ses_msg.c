@@ -95,6 +95,7 @@ static dlq_hdr_t freeQ;
 static dlq_hdr_t inreadyQ;
 static dlq_hdr_t outreadyQ;
 
+
 /********************************************************************
 * FUNCTION ses_msg_init
 *
@@ -125,7 +126,7 @@ void
 * Cleanup the session message manager module data structures
 *
 * INPUTS:
-*   
+*   none
 * RETURNS:
 *   none
 *********************************************************************/

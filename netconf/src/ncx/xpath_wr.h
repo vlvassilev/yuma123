@@ -52,6 +52,23 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION xpath_wr_expr
+* 
+* Write the specified XPath expression to the current session
+* using the default prefixes
+*
+* The XPath pcb must be previously parsed and found valid
+*
+* INPUTS:
+*    scb == session control block to use
+*    msg == message header to use
+*    xpathval == the value containing the XPath expr to write
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xpath_wr_expr (ses_cb_t *scb,
 		   val_value_t *xpathval);

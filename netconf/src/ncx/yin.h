@@ -61,7 +61,20 @@ typedef struct yin_mapping_t_ {
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION find_yin_mapping
+* 
+* Find a static yin mapping entry
+*
+* INPUTS:
+*   name == keyword name to find
+*
+* RETURNS:
+*   pointer to found entry, NULL if none found
+*********************************************************************/
 extern const yin_mapping_t *
     yin_find_mapping (const xmlChar *name);
+
 
 #endif	    /* _H_yin */

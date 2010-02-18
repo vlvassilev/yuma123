@@ -159,6 +159,9 @@ static val_value_t *
 }  /* make_parmval */
 
 
+/**************    E X T E R N A L   F U N C T I O N S **********/
+
+
 /********************************************************************
 * FUNCTION runstack_level
 * 
@@ -567,9 +570,9 @@ void
 
 
 /********************************************************************
-* FUNCTION runstack_init
+* FUNCTION runstack_cleanup
 * 
-*  Init this modulke before using it!!!
+*  Must cleanup this module after using it!!!
 *
 *********************************************************************/
 void

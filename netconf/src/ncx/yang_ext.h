@@ -59,6 +59,25 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION yang_ext_consume_extension
+* 
+* Parse the next N tokens as an extension-stmt
+* Create an ext_template_t struct and add it to the specified Q
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* Current token is the 'extension' keyword
+*
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
 extern status_t 
     yang_ext_consume_extension (tk_chain_t *tkc,
 				ncx_module_t  *mod);

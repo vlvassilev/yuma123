@@ -109,6 +109,9 @@ static void
 } /* time_to_dirname */
 
 
+/**************    E X T E R N A L   F U N C T I O N S **********/
+
+
 /********************************************************************
 * FUNCTION tstamp_datetime
 *

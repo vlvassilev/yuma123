@@ -56,6 +56,25 @@ date	     init     comment
 *			F U N C T I O N S			    *
 *								    *
 *********************************************************************/
+
+
+/********************************************************************
+* FUNCTION yinyang_convert_token_chain
+* 
+* Try to open a file as a YIN formatted XML file
+* and convert it to a token chain for processing
+* by yang_parse_from_token_chain
+*
+* INPUTS:
+*   sourcespec == file spec for the YIN file to read
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == status of the operation
+*
+* RETURNS:
+*   malloced token chain containing the converted YIN file
+*********************************************************************/
 extern tk_chain_t *
     yinyang_convert_token_chain (const xmlChar *sourcespec,
                                  status_t *res);

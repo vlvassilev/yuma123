@@ -393,6 +393,9 @@ static status_t
 } /* parse_yin_stmt */
 
 
+/**************    E X T E R N A L   F U N C T I O N S **********/
+
+
 /********************************************************************
 * FUNCTION yinyang_convert_token_chain
 * 
@@ -401,9 +404,8 @@ static status_t
 * by yang_parse_from_token_chain
 *
 * INPUTS:
-* 
-* 
-* 
+*   sourcespec == file spec for the YIN file to read
+*   res == address of return status
 *
 * OUTPUTS:
 *   *res == status of the operation

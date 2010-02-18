@@ -180,6 +180,7 @@ static const xmlChar *top_keywords[] =
 /********************************************************************
 * FUNCTION yang_consume_semiapp
 * 
+* consume a stmtsep clause
 * Consume a semi-colon to end a simple clause, or
 * consume a vendor extension
 *
@@ -270,6 +271,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_string
 * 
+* consume 1 string token
 * Consume a YANG string token in any of the 3 forms
 *
 * Error messages are printed by this function!!
@@ -369,7 +371,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_keyword
 * 
-* Consume a YANG keyword
+* consume 1 YANG keyword or vendor extension keyword
 *
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
@@ -466,6 +468,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_nowsp_string
 * 
+* consume 1 string without any whitespace
 * Consume a YANG string token in any of the 3 forms
 * Check No whitespace allowed!
 *
@@ -542,6 +545,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_id_string
 * 
+* consume an identifier-str token
 * Consume a YANG string token in any of the 3 forms
 * Check that it is a valid YANG identifier string
 
@@ -610,6 +614,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_pid_string
 * 
+* consume an identifier-ref-str token
 * Consume a YANG string token in any of the 3 forms
 * Check that it is a valid identifier-ref-string
 * Get the prefix if any is set
@@ -761,6 +766,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_error_stmts
 * 
+* consume the range. length. pattern. must error info extensions
 * Parse the sub-section as a sub-section for error-app-tag
 * and error-message clauses
 *
@@ -908,6 +914,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_descr
 * 
+* consume one descriptive string clause
 * Parse the description or reference statement
 *
 * Current token is the starting keyword
@@ -982,6 +989,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_pid
 * 
+* consume one [prefix:]name clause
 * Parse the rest of the statement (2 forms):
 *
 *        keyword [prefix:]name;
@@ -1058,6 +1066,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_strclause
 * 
+* consume one normative string clause
 * Parse the string-parameter-based statement
 *
 * Current token is the starting keyword
@@ -1126,6 +1135,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_status
 * 
+* consume one status clause
 * Parse the status statement
 *
 * Current token is the 'status' keyword
@@ -1216,6 +1226,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_ordered_by
 * 
+* consume one ordered-by clause
 * Parse the ordered-by statement
 *
 * Current token is the 'ordered-by' keyword
@@ -1310,6 +1321,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_max_elements
 * 
+* consume one max-elements clause
 * Parse the max-elements statement
 *
 * Current token is the 'max-elements' keyword
@@ -1382,6 +1394,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_must
 * 
+* consume one must-stmt into mustQ
 * Parse the must statement
 *
 * Current token is the 'must' keyword
@@ -1579,6 +1592,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_when
 * 
+* consume one when-stmt into obj->when
 * Parse the when statement
 *
 * Current token is the 'when' keyword
@@ -1764,6 +1778,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_iffeature
 * 
+* consume one if-feature-stmt into iffeatureQ
 * Parse the if-feature statement
 *
 * Current token is the 'if-feature' keyword
@@ -1861,6 +1876,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_boolean
 * 
+* consume one boolean clause
 * Parse the boolean parameter based statement
 *
 * Current token is the starting keyword
@@ -1952,6 +1968,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_int32
 * 
+* consume one int32 clause
 * Parse the int32 based parameter statement
 *
 * Current token is the starting keyword
@@ -2034,6 +2051,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_consume_uint32
 * 
+* consume one uint32 clause
 * Parse the uint32 based parameter statement
 *
 * Current token is the starting keyword
@@ -2542,6 +2560,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_check_obj_used
 * 
+* generate warnings if local typedefs/groupings not used
 * Check if the local typedefs and groupings are actually used
 * Generate warnings if not used
 *
@@ -2601,6 +2620,7 @@ void
 /********************************************************************
 * FUNCTION yang_check_imports_used
 * 
+* generate warnings if imports not used
 * Check if the imports statements are actually used
 * Check if the  import is newer than the importing module
 * Generate warnings if so
@@ -2952,6 +2972,9 @@ void
 * 
 * Create a new YANG stmt node for a typedef
 *
+* INPUTS:
+*   typ == type template to use for new statement struct
+*
 * RETURNS:
 *   pointer to new and initialized struct, NULL if memory error
 *********************************************************************/
@@ -2983,6 +3006,9 @@ yang_stmt_t *
 * FUNCTION yang_new_grp_stmt
 * 
 * Create a new YANG stmt node for a grouping
+*
+* INPUTS:
+*   grp == grouping template to use for new statement struct
 *
 * RETURNS:
 *   pointer to new and initialized struct, NULL if memory error
@@ -3016,6 +3042,9 @@ yang_stmt_t *
 * 
 * Create a new YANG stmt node for an extension
 *
+* INPUTS:
+*   ext == extension template to use for new statement struct
+*
 * RETURNS:
 *   pointer to new and initialized struct, NULL if memory error
 *********************************************************************/
@@ -3047,6 +3076,9 @@ yang_stmt_t *
 * FUNCTION yang_new_obj_stmt
 * 
 * Create a new YANG stmt node for an object
+*
+* INPUTS:
+*   obj == object template to use for new statement struct
 *
 * RETURNS:
 *   pointer to new and initialized struct, NULL if memory error
@@ -3080,6 +3112,9 @@ yang_stmt_t *
 * 
 * Create a new YANG stmt node for an identity
 *
+* INPUTS:
+*   identity == identity template to use for new statement struct
+*
 * RETURNS:
 *   pointer to new and initialized struct, NULL if memory error
 *********************************************************************/
@@ -3112,6 +3147,9 @@ yang_stmt_t *
 * 
 * Create a new YANG stmt node for a feature definition
 *
+* INPUTS:
+*   feature == feature template to use for new statement struct
+*
 * RETURNS:
 *   pointer to new and initialized struct, NULL if memory error
 *********************************************************************/
@@ -3143,6 +3181,9 @@ yang_stmt_t *
 * FUNCTION yang_new_deviation_stmt
 * 
 * Create a new YANG stmt node for a deviation definition
+*
+* INPUTS:
+*   deviation == deviation template to use for new statement struct
 *
 * RETURNS:
 *   pointer to new and initialized struct, NULL if memory error
@@ -3733,7 +3774,6 @@ xmlChar *
     return buff;
 
 }  /* yang_make_filename */
-
 
 
 /********************************************************************

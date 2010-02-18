@@ -234,11 +234,19 @@ static void
 }  /* dump_error */
 
 
+/**************    E X T E R N A L   F U N C T I O N S **********/
+
+
 /********************************************************************
 * FUNCTION rpc_err_get_errtag
 *
 * Get the RPC error-tag for an rpc_err_t enumeration
 *
+* INPUTS:
+*   errid == rpc error enum to convert to a string
+*
+* RETURNS:
+*   string for the specified error-tag enum
 *********************************************************************/
 const xmlChar *
     rpc_err_get_errtag (rpc_err_t errid)
@@ -293,6 +301,8 @@ rpc_err_t
 *
 * Malloc and init an rpc_err_rec_t struct
 *
+* RETURNS:
+*   malloced error record or NULL if memory error
 *********************************************************************/
 rpc_err_rec_t *
     rpc_err_new_record (void)
@@ -421,6 +431,8 @@ void
 *
 * Malloc and init an rpc_err_info_t struct
 *
+* RETURNS:
+*   malloced error-info record, or NULL if memory error
 *********************************************************************/
 rpc_err_info_t *
     rpc_err_new_info (void)

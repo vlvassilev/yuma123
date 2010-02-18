@@ -823,14 +823,12 @@ xml_attr_t *
 
 
 /********************************************************************
-* FUNCTION xml_add_attr
+* FUNCTION xml_free_attr
 *
-* add an attribute to an attribute list
+* free an attribute 
 *
 * INPUTS:
-*    none
-* RETURNS:
-*    pointer to new xml_attr_t or NULL if malloc error
+*    attr == xml_attr_t to free
 *********************************************************************/
 void
     xml_free_attr (xml_attr_t *attr)
@@ -1283,7 +1281,8 @@ xml_attr_t *
 * get the next attribute in the list
 *
 * INPUTS:
-*    attr == attribute queue to init
+*    attr == attribute entry to get next for
+*
 * RETURNS:
 *    pointer to the next entry or NULL if none
 *********************************************************************/
@@ -1479,6 +1478,7 @@ uint32
 /********************************************************************
 * FUNCTION xml_strlen_sp
 * 
+* get length and check if any whitespace at the same time
 * String len for xmlChar -- does not check for buffer overflow
 * Check for any whitespace in the string as well
 *
@@ -1804,7 +1804,6 @@ char *
 *   == -1 : string 1 is less than string 2
 *   == 0  : strings are equal
 *   == 1  : string 1 is greater than string 2
-
 *********************************************************************/
 int 
     xml_strcmp (const xmlChar *s1, 
@@ -1929,8 +1928,6 @@ boolean
     return TRUE;
 
 } /* xml_isspace_str */
-
-
 
 
 /********************************************************************
@@ -2324,6 +2321,8 @@ status_t
 /********************************************************************
 * FUNCTION xml_consume_node
 * 
+* parse function for YIN input
+*
 * INPUTS:
 *    reader == xmlTextReader to use
 *    node == address of node pointer to use

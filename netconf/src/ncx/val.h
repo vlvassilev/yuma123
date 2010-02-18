@@ -439,51 +439,193 @@ typedef enum val_dumpvalue_mode_t_ {
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION val_new_value
+* 
+* Malloc and initialize the fields in a val_value_t
+*
+* RETURNS:
+*   pointer to the malloced and initialized struct or NULL if an error
+*********************************************************************/
 extern val_value_t *
     val_new_value (void);
 
-/* this is deprecated and should only be called 
- * by val_init_from_template
- */
+
+/********************************************************************
+* FUNCTION val_init_complex
+* 
+* Initialize the fields in a complex val_value_t
+* this is deprecated and should only be called 
+* by val_init_from_template
+*
+* MUST CALL val_new_value FIRST
+*
+* INPUTS:
+*   val == pointer to the malloced struct to initialize
+*********************************************************************/
 extern void
     val_init_complex (val_value_t *val, 
 		      ncx_btype_t btyp);
 
+
+/********************************************************************
+* FUNCTION val_init_virtual
+* 
+* Special function to initialize a virtual value node
+*
+* MUST CALL val_new_value FIRST
+*
+* INPUTS:
+*   val == pointer to the malloced struct to initialize
+*   cbfn == get callback function to use
+*   obj == object template to use
+*********************************************************************/
 extern void
     val_init_virtual (val_value_t *val,
 		      void *cbfn,
 		      struct obj_template_t_ *obj);
 
+
+/********************************************************************
+* FUNCTION val_init_from_template
+* 
+* Initialize a value node from its object template
+*
+* MUST CALL val_new_value FIRST
+*
+* INPUTS:
+*   val == pointer to the initialized value struct to bind
+*   obj == object template to use
+*********************************************************************/
 extern void
     val_init_from_template (val_value_t *val,
 			    struct obj_template_t_ *obj);
 
+
+/********************************************************************
+* FUNCTION val_free_value
+* 
+* Scrub the memory in a val_value_t by freeing all
+* the sub-fields and then freeing the entire struct itself 
+* The struct must be removed from any queue it is in before
+* this function is called.
+*
+* INPUTS:
+*    val == val_value_t to delete
+*********************************************************************/
 extern void 
     val_free_value (val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_new_editvars
+* 
+* Malloc and initialize the val->editvars field
+*
+* INPUTS:
+*    val == val_value_t data structure to use
+*
+* OUTPUTS:
+*    val->editvars is malloced and initialized
+* 
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     val_new_editvars (val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_free_editvars
+* 
+* Clean and free the val->editvars field
+*
+* INPUTS:
+*    val == val_value_t data structure to use
+*
+* OUTPUTS:
+*    val->editvars is cleaned, freed, and set to NULL
+*********************************************************************/
 extern void
     val_free_editvars (val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_set_name
+* 
+* Set (or reset) the name of a value struct
+*
+* INPUTS:
+*    val == val_value_t data structure to check
+*    name == name string to set
+*    namelen == length of name string
+*********************************************************************/
 extern void 
     val_set_name (val_value_t *val,
 		  const xmlChar *name,
 		  uint32 namelen);
 
+
+/********************************************************************
+* FUNCTION val_set_qname
+* 
+* Set (or reset) the name and namespace ID of a value struct
+*
+* INPUTS:
+*    val == val_value_t data structure to check
+*    nsid == namespace ID to set
+*    name == name string to set
+*    namelen == length of name string
+*********************************************************************/
 extern void 
     val_set_qname (val_value_t *val,
 		   xmlns_id_t   nsid,
 		   const xmlChar *name,
 		   uint32 namelen);
 
+
+/********************************************************************
+* FUNCTION val_string_ok
+* 
+* Check a string to make sure the value is valid based
+* on the restrictions in the specified typdef
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated string type
+*    btyp == basetype of the string
+*    strval == string value to check
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     val_string_ok (typ_def_t *typdef,
 		   ncx_btype_t  btyp,
 		   const xmlChar *strval);
 
-/* retrieve the YANG custom error info if any */
+
+/********************************************************************
+* FUNCTION val_string_ok_errinfo
+* 
+* retrieve the YANG custom error info if any 
+* Check a string to make sure the value is valid based
+* on the restrictions in the specified typdef
+* Retrieve the configured error info struct if any error
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated string type
+*    btyp == basetype of the string
+*    strval == string value to check
+*    errinfo == address of return errinfo block (may be NULL)
+*
+* OUTPUTS:
+*   if non-NULL: 
+*       *errinfo == error record to use if return error
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     val_string_ok_errinfo (typ_def_t *typdef,
 			   ncx_btype_t  btyp,
@@ -491,33 +633,142 @@ extern status_t
 			   ncx_errinfo_t **errinfo);
 
 
-/* validate all the ncx_lmem_t entries in the list
- * against the specified typdef.  Mark any errors
- * in the ncx_lmem_t flags field of each member
- * in the list with an error
- */
+/********************************************************************
+* FUNCTION val_list_ok
+* 
+* Check a list to make sure the all the strings are valid based
+* on the specified typdef
+*
+* validate all the ncx_lmem_t entries in the list
+* against the specified typdef.  Mark any errors
+* in the ncx_lmem_t flags field of each member
+* in the list with an error
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated list type
+*    btyp == base type (NCX_BT_SLIST or NCX_BT_BITS)
+*    list == list struct with ncx_lmem_t structs to check
+*
+* OUTPUTS:
+*   If return other than NO_ERR:
+*     each list->lmem.flags field may contain bits set
+*     for errors:
+*        NCX_FL_RANGE_ERR: size out of range
+*        NCX_FL_VALUE_ERR  value not permitted by value set, 
+*                          or pattern
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     val_list_ok (typ_def_t *typdef,
 		 ncx_btype_t btyp,
 		 ncx_list_t *list);
 
+
+/********************************************************************
+* FUNCTION val_list_ok_errinfo
+* 
+* Check a list to make sure the all the strings are valid based
+* on the specified typdef
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated list type
+*    btyp == base type (NCX_BT_SLIST or NCX_BT_BITS)
+*    list == list struct with ncx_lmem_t structs to check
+*    errinfo == address of return rpc-error info struct
+*
+* OUTPUTS:
+*   If return other than NO_ERR:
+*     *errinfo contains the YANG specified error info, if any*   
+*     each list->lmem.flags field may contain bits set
+*     for errors:
+*        NCX_FL_RANGE_ERR: size out of range
+*        NCX_FL_VALUE_ERR  value not permitted by value set, 
+*                          or pattern
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     val_list_ok_errinfo (typ_def_t *typdef,
 			 ncx_btype_t btyp,
 			 ncx_list_t *list,
 			 ncx_errinfo_t **errinfo);
 
+  
+/********************************************************************
+* FUNCTION val_enum_ok
+* 
+* Check an enumerated integer string to make sure the value 
+* is valid based on the specified typdef
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated enum type
+*    enumval == enum string value to check
+*    retval == pointer to return integer variable
+*    retstr == pointer to return string name variable
+* 
+* OUTPUTS:
+*    *retval == integer value of enum
+*    *retstr == pointer to return string name variable 
+* 
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     val_enum_ok (typ_def_t *typdef,
 		 const xmlChar *enumval,
 		 int32 *retval,
 		 const xmlChar **retstr);
 
+
+/********************************************************************
+* FUNCTION val_bit_ok
+* 
+* Check a bit name is valid for the typedef
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated bits type
+*    bitname == bit name value to check
+*    position == address of return bit struct position value
+*
+* OUTPUTS:
+*  if non-NULL:
+*     *position == bit position value
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     val_bit_ok (typ_def_t *typdef,
 		const xmlChar *bitname,
 		uint32 *position);
 
+
+/********************************************************************
+* FUNCTION val_idref_ok
+* 
+* Check if an identityref QName is valid for the typedef
+* The QName must match an identity that has the same base
+* as specified in the typdef
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated identityref type
+*    qname == QName or local-name string to check
+*    nsid == namespace ID from XML node for NS of QName
+*            this NSID will be used and not the prefix in qname
+*            it was parsed in the XML node and is not a module prefix
+*    name == address of return local name part of QName
+*    id == address of return identity, if found
+*
+* OUTPUTS:
+*  if non-NULL:
+*     *name == pointer into the qname string at the start of
+*              the local name part
+*     *id == pointer to ncx_identity_t found
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     val_idref_ok (typ_def_t *typdef,
 		  const xmlChar *qname,
@@ -525,6 +776,31 @@ extern status_t
 		  const xmlChar **name,
 		  const ncx_identity_t **id);
 
+
+/********************************************************************
+* FUNCTION val_parse_idref
+* 
+* Parse a CLI BASED identityref QName into its various parts
+*
+* INPUTS:
+*    mod == module containing the default-stmt (or NULL if N/A)
+*    qname == QName or local-name string to parse
+*    nsid == address of return namespace ID of the module
+*            indicated by the prefix. If mod==NULL then
+*            a prefix MUST be present
+*    name == address of return local name part of QName
+*    id == address of return identity, if found
+*
+* OUTPUTS:
+*  if non-NULL:
+*     *nsid == namespace ID for the prefix part of the QName
+*     *name == pointer into the qname string at the start of
+*              the local name part
+*     *id == pointer to ncx_identity_t found (if any, not an error)
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     val_parse_idref (ncx_module_t *mod,
 		     const xmlChar *qname,
@@ -532,20 +808,46 @@ extern status_t
 		     const xmlChar **name,
 		     const ncx_identity_t **id);
 
+
+/********************************************************************
+* FUNCTION val_range_ok
+* 
+* Check a number to see if it is in range or not
+* Could be a number or size range
+*
+* INPUTS:
+*    typdef == typ_def_t for the simple type to check
+*    btyp == base type of num
+*    num == number to check
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     val_range_ok (typ_def_t *typdef,
 		  ncx_btype_t  btyp,
 		  const ncx_num_t *num);
 
-extern status_t
-    val_pattern_ok (typ_def_t *typdef,
-		    const xmlChar *strval);
 
-extern status_t
-    val_pattern_ok_errinfo (typ_def_t *typdef,
-			    const xmlChar *strval,
-			    ncx_errinfo_t **errinfo);
-
+/********************************************************************
+* FUNCTION val_range_ok_errinfo
+* 
+* Check a number to see if it is in range or not
+* Could be a number or size range
+*
+* INPUTS:
+*    typdef == typ_def_t for the simple type to check
+*    btyp == base type of num
+*    num == number to check
+*    errinfo == address of return error struct
+*
+* OUTPUTS:
+*   if non-NULL:
+*     *errinfo == errinfo record on error exit
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     val_range_ok_errinfo (typ_def_t *typdef,
 			  ncx_btype_t  btyp,
@@ -553,37 +855,194 @@ extern status_t
 			  ncx_errinfo_t **errinfo);
 
 
+/********************************************************************
+* FUNCTION val_pattern_ok
+* 
+* Check a string against all the patterns in a big AND expression
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated enum type
+*    strval == string value to check
+* 
+* RETURNS:
+*    NO_ERR if pattern OK or no patterns found to check; error otherwise
+*********************************************************************/
+extern status_t
+    val_pattern_ok (typ_def_t *typdef,
+		    const xmlChar *strval);
 
-/* check any simple type to see if it is valid,
- * but do not retrieve the value; used to check the
- * default parameter for example
- */
+
+/********************************************************************
+* FUNCTION val_pattern_ok_errinfo
+* 
+* Check a string against all the patterns in a big AND expression
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated enum type
+*    strval == string value to check
+*    errinfo == address of return errinfo struct for err-pattern
+*
+* OUTPUTS:
+*   *errinfo set to error info struct if any, and if error exit
+*
+* RETURNS:
+*    NO_ERR if pattern OK or no patterns found to check; 
+*    error otherwise, and *errinfo will be set if the pattern
+*    that failed has any errinfo defined in it
+*********************************************************************/
+extern status_t
+    val_pattern_ok_errinfo (typ_def_t *typdef,
+			    const xmlChar *strval,
+			    ncx_errinfo_t **errinfo);
+
+
+/********************************************************************
+* FUNCTION val_simval_ok
+* 
+* check any simple type to see if it is valid,
+* but do not retrieve the value; used to check the
+* default parameter for example
+*
+* INPUTS:
+*    typdef == typ_def_t for the simple type to check
+*    simval == value string to check (NULL means empty string)
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     val_simval_ok (typ_def_t *typdef,
 		   const xmlChar *simval);
 		   
+
+
+/********************************************************************
+* FUNCTION val_simval_ok_errinfo
+* 
+* check any simple type to see if it is valid,
+* but do not retrieve the value; used to check the
+* default parameter for example
+*
+* INPUTS:
+*    typdef == typ_def_t for the simple type to check
+*    simval == value string to check (NULL means empty string)
+*    errinfo == address of return error struct
+*
+* OUTPUTS:
+*   if non-NULL:
+*      *errinfo == error struct on error exit
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     val_simval_ok_errinfo (typ_def_t *typdef,
 			   const xmlChar *simval,
 			   ncx_errinfo_t **errinfo);
 
+
+/********************************************************************
+* FUNCTION val_simval_ok_ex
+* 
+* check any simple type to see if it is valid,
+* but do not retrieve the value; used to check the
+* default parameter for example
+*
+* INPUTS:
+*    typdef == typ_def_t for the simple type to check
+*    simval == value string to check (NULL means empty string)
+*    errinfo == address of return error struct
+*    mod == module in progress to use for idref and other
+*           strings with prefixes in them
+* OUTPUTS:
+*   if non-NULL:
+*      *errinfo == error struct on error exit
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     val_simval_ok_ex (typ_def_t *typdef,
                       const xmlChar *simval,
                       ncx_errinfo_t **errinfo,
                       ncx_module_t *mod);
 
+
+/********************************************************************
+* FUNCTION val_union_ok
+* 
+* Check a union to make sure the string is valid based
+* on the specified typdef, and convert the string to
+* an NCX internal format
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated union type
+*    strval == the value to check against the member typ defs
+*    retval == pointer to output struct for converted value
+*
+* OUTPUTS:
+*   If return NO_ERR:
+*   retval->str or retval->num will be set with the converted value
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     val_union_ok (typ_def_t *typdef,
 		  const xmlChar *strval,
 		  val_value_t *retval);
 
+
+/********************************************************************
+* FUNCTION val_union_ok_errinfo
+* 
+* Check a union to make sure the string is valid based
+* on the specified typdef, and convert the string to
+* an NCX internal format
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated union type
+*    strval == the value to check against the member typ defs
+*    retval == pointer to output struct for converted value
+*    errinfo == address of error struct
+*
+* OUTPUTS:
+*   If return NO_ERR:
+*   retval->str or retval->num will be set with the converted value
+*   *errinfo == error struct on error exit
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     val_union_ok_errinfo (typ_def_t *typdef,
 			  const xmlChar *strval,
 			  val_value_t *retval,
 			  ncx_errinfo_t **errinfo);
 
+
+/********************************************************************
+* FUNCTION val_union_ok_ex
+* 
+* Check a union to make sure the string is valid based
+* on the specified typdef, and convert the string to
+* an NCX internal format
+*
+* INPUTS:
+*    typdef == typ_def_t for the designated union type
+*    strval == the value to check against the member typ defs
+*    retval == pointer to output struct for converted value
+*    errinfo == address of error struct
+*    mod == module in progress, if any
+*
+* OUTPUTS:
+*   If return NO_ERR:
+*   retval->str or retval->num will be set with the converted value
+*   *errinfo == error struct on error exit
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     val_union_ok_ex (typ_def_t *typdef,
                      const xmlChar *strval,
@@ -591,63 +1050,243 @@ extern status_t
                      ncx_errinfo_t **errinfo,
                      ncx_module_t *mod);
 
+
+/********************************************************************
+* FUNCTION val_get_metaQ
+* 
+* Get the meta Q header for the value
+* 
+* INPUTS:
+*    val == value node to check
+*
+* RETURNS:
+*   pointer to the metaQ for this value
+*********************************************************************/
 extern dlq_hdr_t *
     val_get_metaQ (val_value_t  *val);
 
+
+/********************************************************************
+* FUNCTION val_get_first_meta
+* 
+* Get the first metaQ entry from the specified Queue
+* 
+* INPUTS:
+*    queue == queue of meta-vals to check
+*
+* RETURNS:
+*   pointer to the first meta-var in the Queue if found, 
+*   or NULL if none
+*********************************************************************/
 extern val_value_t *
     val_get_first_meta (dlq_hdr_t *queue);
 
+
+/********************************************************************
+* FUNCTION val_get_first_meta_val
+* 
+* Get the first metaQ entry from the specified Queue
+* 
+* INPUTS:
+*    value node to get the metaQ from
+*
+* RETURNS:
+*   pointer to the first meta-var in the Queue if found, 
+*   or NULL if none
+*********************************************************************/
 extern val_value_t *
     val_get_first_meta_val (val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_get_next_meta
+* 
+* Get the next metaQ entry from the specified entry
+* 
+* INPUTS:
+*    curnode == current meta-var node
+*
+* RETURNS:
+*   pointer to the next meta-var in the Queue if found, 
+*   or NULL if none
+*********************************************************************/
 extern val_value_t *
     val_get_next_meta (val_value_t *curmeta);
 
+
+/********************************************************************
+* FUNCTION val_meta_empty
+* 
+* Check if the metaQ is empty for the value node
+*
+* INPUTS:
+*   val == value to check
+*   
+* RETURNS:
+*   TRUE if the metaQ for the value is empty
+*   FALSE otherwise
+*********************************************************************/
 extern boolean
     val_meta_empty (val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_find_meta
+* 
+* Get the corresponding meta data node 
+* 
+* INPUTS:
+*    val == value to check for metadata
+*    nsid == namespace ID of 'name'; 0 == don't use
+*    name == name of metadata variable name
+*
+* RETURNS:
+*   pointer to the child if found or NULL if not found
+*********************************************************************/
 extern val_value_t *
     val_find_meta (val_value_t *val,
 		   xmlns_id_t   nsid,
 		   const xmlChar *name);
 
+
+/********************************************************************
+* FUNCTION val_meta_match
+* 
+* Return true if the corresponding attribute exists and has
+* the same value 
+* 
+* INPUTS:
+*    val == value to check for metadata
+*    metaval == value to match in the val->metaQ 
+*
+* RETURNS:
+*   TRUE if the specified attr if found and has the same value
+*   FALSE otherwise
+*********************************************************************/
 extern boolean
     val_meta_match (val_value_t *val,
 		    val_value_t *metaval);
 
 
+/********************************************************************
+* FUNCTION val_metadata_inst_count
+* 
+* Get the number of instances of the specified attribute
+*
+* INPUTS:
+*     val == value to check for metadata instance count
+*     nsid == namespace ID of the meta data variable
+*     name == name of the meta data variable
+*
+* RETURNS:
+*   number of instances found in val->metaQ
+*********************************************************************/
 extern uint32
     val_metadata_inst_count (val_value_t  *val,
 			     xmlns_id_t nsid,
 			     const xmlChar *name);
 
 
-
-/* print a val_value_t struct contents to logfile or stdout */
+/********************************************************************
+* FUNCTION val_dump_value
+* 
+* Printf the specified val_value_t struct to 
+* the logfile, or stdout if none set
+* Uses conf file format (see ncx/conf.h)
+*
+* INPUTS:
+*    val == value to printf
+*    startindent == start indent char count
+*
+*********************************************************************/
 extern void
     val_dump_value (val_value_t *val,
 		    int32 startindent);
 
+
+/********************************************************************
+* FUNCTION val_dump_value_ex
+* 
+* Printf the specified val_value_t struct to 
+* the logfile, or stdout if none set
+* Uses conf file format (see ncx/conf.h)
+*
+* INPUTS:
+*    val == value to printf
+*    startindent == start indent char count
+*    display_mode == display mode to use
+*********************************************************************/
 extern void
     val_dump_value_ex (val_value_t *val,
                        int32 startindent,
                        ncx_display_mode_t display_mode);
 
-/* print a val_value_t struct contents to alternate logfile */
+
+/********************************************************************
+* FUNCTION val_dump_alt_value
+* 
+* Printf the specified val_value_t struct to 
+* the alternate logfile
+* Uses conf file format (see ncx/conf.h)
+*
+* INPUTS:
+*    val == value to printf
+*    startindent == start indent char count
+*
+*********************************************************************/
 extern void
     val_dump_alt_value (val_value_t *val,
 			int32 startindent);
 
-/* print a val_value_t struct contents to stdout */
+
+/********************************************************************
+* FUNCTION val_stdout_value
+* 
+* Printf the specified val_value_t struct to stdout
+* Uses conf file format (see ncx/conf.h)
+*
+* INPUTS:
+*    val == value to printf
+*    startindent == start indent char count
+*
+*********************************************************************/
 extern void
     val_stdout_value (val_value_t *val,
 		      int32 startindent);
 
+/********************************************************************
+* FUNCTION val_stdout_value_ex
+* 
+* Printf the specified val_value_t struct to stdout
+* Uses conf file format (see ncx/conf.h)
+*
+* INPUTS:
+*    val == value to printf
+*    startindent == start indent char count
+*    display_mode == display mode to use
+*********************************************************************/
 extern void
     val_stdout_value_ex (val_value_t *val,
                          int32 startindent,
                          ncx_display_mode_t display_mode);
 
+
+/********************************************************************
+* FUNCTION val_dump_value_max
+* 
+* Printf the specified val_value_t struct to 
+* the logfile, or stdout if none set
+* Uses conf file format (see ncx/conf.h)
+*
+* INPUTS:
+*    val == value to dump
+*    startindent == start indent char count
+*    indent_amount == number of spaces for each indent
+*    dumpmode == logging mode to use
+*    display_mode == formatting mode for display
+*    with_meta == TRUE if metaQ should be printed
+*                 FALSE to skip meta data
+*********************************************************************/
 extern void
     val_dump_value_max (val_value_t *val,
                         int32 startindent,
@@ -656,17 +1295,53 @@ extern void
                         ncx_display_mode_t display_mode,
                         boolean with_meta);
 
-/* use next 4 functions after calling
- * val_new_value().
- */
 
-/* set a generic string using the builtin string typdef */
+/********************************************************************
+* FUNCTION val_set_string
+* 
+* set a generic string using the builtin string typdef
+* Set an initialized val_value_t as a simple type
+* namespace set to 0 !!!
+* use after calling val_new_value
+*
+* INPUTS:
+*    val == value to set
+*    valname == name of simple value
+*    valstr == simple value encoded as a string
+*
+* OUTPUTS:
+*    *val is filled in if return NO_ERR
+* RETURNS:
+*  status
+*********************************************************************/
 extern status_t 
     val_set_string (val_value_t  *val,
 		    const xmlChar *valname,
 		    const xmlChar *valstr);
 
-/* set a string with any typdef */
+
+/********************************************************************
+* FUNCTION val_set_string2
+* 
+* set a string with any typdef
+* Set an initialized val_value_t as a simple type
+* namespace set to 0 !!!
+*
+* Will check if the string is OK for the typdef!
+*
+* INPUTS:
+*    val == value to set
+*    valname == name of simple value
+*    typdef == parm typdef (may be NULL)
+*    valstr == simple value encoded as a string
+*    valstrlen == length of valstr to use
+*
+* OUTPUTS:
+*    *val is filled in if return NO_ERR
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t 
     val_set_string2 (val_value_t  *val,
 		     const xmlChar *valname,
@@ -674,13 +1349,44 @@ extern status_t
 		     const xmlChar *valstr,
 		     uint32 valstrlen);
 
-/* clean a value and set it to empty type
- * used by yangcli to delete leafs
- */
+
+/********************************************************************
+* FUNCTION val_reset_empty
+* 
+* Recast an already initialized value as an NCX_BT_EMPTY
+* clean a value and set it to empty type
+* used by yangcli to delete leafs
+*
+* INPUTS:
+*    val == value to set
+*
+* OUTPUTS:
+*    *val is filled in if return NO_ERR
+* RETURNS:
+*  status
+*********************************************************************/
 extern status_t 
     val_reset_empty (val_value_t  *val);
 
-/* set any simple value with any typdef */
+
+/********************************************************************
+* FUNCTION val_set_simval
+* 
+* set any simple value with any typdef
+* Set an initialized val_value_t as a simple type
+*
+* INPUTS:
+*    val == value to set
+*    typdef == typdef of expected type
+*    nsid == namespace ID of this field
+*    valname == name of simple value
+*    valstr == simple value encoded as a string
+*
+* OUTPUTS:
+*    *val is filled in if return NO_ERR
+* RETURNS:
+*  status
+*********************************************************************/
 extern status_t 
     val_set_simval (val_value_t  *val,
 		    typ_def_t *typdef,
@@ -688,7 +1394,53 @@ extern status_t
 		    const xmlChar *valname,
 		    const xmlChar *valstr);
 
-/* set any simple value with any typdef, and a counted string */
+
+/********************************************************************
+* FUNCTION val_set_simval_str
+* 
+* set any simple value with any typdef, and a counted string
+* Set an initialized val_value_t as a simple type
+*
+* The string value will be converted to a value
+* struct format and checked against the provided typedef
+*
+* Handles the following data types:
+* 
+*  NCX_BT_INT8
+*  NCX_BT_INT16
+*  NCX_BT_INT32
+*  NCX_BT_INT64
+*  NCX_BT_UINT8
+*  NCX_BT_UINT16
+*  NCX_BT_UINT32
+*  NCX_BT_UINT64
+*  NCX_BT_DECIMAL64
+*  NCX_BT_FLOAT64
+*  NCX_BT_BINARY
+*  NCX_BT_STRING
+*  NCX_BT_INSTANCE_ID
+*  NCX_BT_ENUM
+*  NCX_BT_EMPTY
+*  NCX_BT_BOOLEAN
+*  NCX_BT_SLIST
+*  NCX_BT_BITS
+*  NCX_BT_UNION
+*  NCX_BT_LEAFREF
+*  NCX_BT_IDREF
+*
+* INPUTS:
+*    val == value to set
+*    typdef == typdef of expected type
+*    nsid == namespace ID of this field
+*    valname == name of simple value
+*    valnamelen == length of name string to compare
+*    valstr == simple value encoded as a string
+*
+* OUTPUTS:
+*    *val is filled in if return NO_ERR
+* RETURNS:
+*  status
+*********************************************************************/
 extern status_t 
     val_set_simval_str (val_value_t  *val,
 			typ_def_t *typdef,
@@ -697,7 +1449,27 @@ extern status_t
 			uint32 valnamelen,
 			const xmlChar *valstr);
 
-/* same as val_set_simval, but malloc the value first */
+
+/********************************************************************
+* FUNCTION val_make_simval
+* 
+* Create and set a val_value_t as a simple type
+* same as val_set_simval, but malloc the value first
+*
+* INPUTS:
+*    typdef == typdef of expected type
+*    nsid == namespace ID of this field
+*    valname == name of simple value
+*    valstr == simple value encoded as a string
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    pointer to malloced and filled in val_value_t struct
+*    NULL if some error
+*********************************************************************/
 extern val_value_t *
     val_make_simval (typ_def_t *typdef,
 		     xmlns_id_t    nsid,
@@ -705,89 +1477,404 @@ extern val_value_t *
 		     const xmlChar *valstr,
 		     status_t  *res);
 
+
+/********************************************************************
+* FUNCTION val_make_string
+* 
+* Malloc and set a val_value_t as a generic NCX_BT_STRING
+* namespace set to 0 !!!
+*
+* INPUTS:
+*    nsid == namespace ID to use
+*    valname == name of simple value
+*    valstr == simple value encoded as a string
+*
+* RETURNS:
+*   malloced val struct filled in; NULL if malloc or strdup failed
+*********************************************************************/
 extern val_value_t *
     val_make_string (xmlns_id_t nsid,
 		     const xmlChar *valname,
 		     const xmlChar *valstr);
 
+
+/********************************************************************
+* FUNCTION val_merge
+* 
+* Merge src val into dest val (! MUST be same type !)
+* Any meta vars in src are also merged into dest
+*
+* This function is not used to merge complex objects
+* !!! For typ_is_simple() only !!!
+*
+* INPUTS:
+*    src == val to merge from
+*
+*       !!! destructive -- entries will be moved, not copied !!!
+*       !!! Must be dequeued before calling this function !!!
+*       !!! Must not use src pointer value again if *freesrc == FALSE
+
+*    dest == val to merge into
+*
+* RETURNS:
+*       TRUE if the source value needs to be deleted because the
+*          memory was not transfered to the parent val childQ.
+*       FALSE if the source value should not be freed because 
+*         the memory is still in use, but transferred to the target
+*********************************************************************/
 extern boolean
     val_merge (val_value_t *src,
 	       val_value_t *dest);
 
+
+/********************************************************************
+* FUNCTION val_clone
+* 
+* Clone a specified val_value_t struct and sub-trees
+*
+* INPUTS:
+*    val == value to clone
+*
+* RETURNS:
+*   clone of val, or NULL if a malloc failure
+*********************************************************************/
 extern val_value_t *
     val_clone (const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_clone_test
+* 
+* Clone a specified val_value_t struct and sub-trees
+* Only clone the nodes that pass the test function callback
+*
+* INPUTS:
+*    val == value to clone
+*    testcb  == filter test callback function to use
+*               NULL means no filter
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == resturn status
+*
+* RETURNS:
+*   clone of val, or NULL if a malloc failure or entire node filtered
+*********************************************************************/
 extern val_value_t *
     val_clone_test (const val_value_t *val,
 		    val_test_fn_t  testfn,
 		    status_t *res);
 
-/* pass in a config node, such as <config> root
- * will call val_clone_test with the val_is_config_data
- * callbacck function
- */
+
+/********************************************************************
+* FUNCTION val_clone_config_data
+* 
+* Clone a specified val_value_t struct and sub-trees
+* Filter with the val_is_config_data callback function
+* pass in a config node, such as <config> root
+* will call val_clone_test with the val_is_config_data
+* callbacck function
+*
+* INPUTS:
+*    val == config data value to clone
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*   clone of val, or NULL if a malloc failure
+*********************************************************************/
 extern val_value_t *
     val_clone_config_data (const val_value_t *val,
 			   status_t *res);
 
+
+/********************************************************************
+* FUNCTION val_replace
+* 
+* Replace a specified val_value_t struct and sub-trees
+*
+* INPUTS:
+*    val == value to clone from
+*    copy == address of value to replace
+*
+* OUTPUTS:
+*   *copy has been deleted and reforms with the contents of 'val'
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     val_replace (val_value_t *val,
 		 val_value_t *copy);
 
+
+/********************************************************************
+* FUNCTION val_add_child
+* 
+*   Add a child value node to a parent value node
+*
+* INPUTS:
+*    child == node to store in the parent
+*    parent == complex value node with a childQ
+*
+*********************************************************************/
 extern void
     val_add_child (val_value_t *child,
 		   val_value_t *parent);
 
-/* add an object and delete any extra cases */
+
+/********************************************************************
+* FUNCTION val_add_child_clean
+* 
+*  add an object and delete any extra cases
+*  Add a child value node to a parent value node
+*  This is only called by the agent when adding nodes
+*  to a target database.
+*
+*  If the child node being added is part of a choice/case,
+*  then all sibling nodes in other cases within the same
+*  choice will be deleted
+*
+*  The insert operation will also be check to see
+*  if the child is a list oo a leaf-list, which is ordered-by user
+*
+*  The default insert mode is always 'last'
+*
+* INPUTS:
+*    child == node to store in the parent
+*    parent == complex value node with a childQ
+*    cleanQ == address of Q to receive any deleted sibling nodes
+*
+* OUTPUTS:
+*    cleanQ may have nodes added if the child being added
+*    is part of a case.  All other cases will be deleted
+*    from the parent Q and moved to the cleanQ
+*
+*********************************************************************/
 extern void
     val_add_child_clean (val_value_t *child,
 			 val_value_t *parent,
 			 dlq_hdr_t *cleanQ);
 
 
+/********************************************************************
+* FUNCTION val_add_child_clean_editvars
+* 
+*  Add a child value node to a parent value node
+*  This is only called by the agent when adding nodes
+*  to a target database.
+*
+*   Pass in the editvar to use
+*
+*  If the child node being added is part of a choice/case,
+*  then all sibling nodes in other cases within the same
+*  choice will be deleted
+*
+*  The insert operation will also be check to see
+*  if the child is a list oo a leaf-list, which is ordered-by user
+*
+*  The default insert mode is always 'last'
+*
+* INPUTS:
+*    editvars == val_editvars_t struct to use
+*    child == node to store in the parent
+*    parent == complex value node with a childQ
+*    cleanQ == address of Q to receive any deleted sibling nodes
+*
+* OUTPUTS:
+*    cleanQ may have nodes added if the child being added
+*    is part of a case.  All other cases will be deleted
+*    from the parent Q and moved to the cleanQ
+*
+*********************************************************************/
 extern void
     val_add_child_clean_editvars (val_editvars_t *editvars,
 				  val_value_t *child,
 				  val_value_t *parent,
 				  dlq_hdr_t *cleanQ);
 
+
+/********************************************************************
+* FUNCTION val_insert_child
+* 
+*   Insert a child value node to a parent value node
+*
+* INPUTS:
+*    child == node to store in the parent
+*    current == current node to insert after; 
+*               NULL to make new first entry
+*    parent == complex value node with a childQ
+*
+*********************************************************************/
 extern void
     val_insert_child (val_value_t *child,
 		      val_value_t *current,
 		      val_value_t *parent);
 
+
+/********************************************************************
+* FUNCTION val_remove_child
+* 
+*   Remove a child value node from its parent value node
+*
+* INPUTS:
+*    child == node to store in the parent
+*
+*********************************************************************/
 extern void
     val_remove_child (val_value_t *child);
 
+
+/********************************************************************
+* FUNCTION val_swap_child
+* 
+*   Swap a child value node with a current value node
+*
+* INPUTS:
+*    newchild == node to store in the place of the curchild
+*    curchild == node to remove from the parent
+*
+*********************************************************************/
 extern void
     val_swap_child (val_value_t *newchild,
 		    val_value_t *curchild);
 
+
+/********************************************************************
+* FUNCTION val_first_child_match
+* 
+* Get the first instance of the corresponding child node 
+* 
+* INPUTS:
+*    parent == parent value to check
+*    child == child value to find (e.g., from a NETCONF PDU) 
+*
+* RETURNS:
+*   pointer to the child if found or NULL if not found
+*********************************************************************/
 extern val_value_t *
     val_first_child_match (val_value_t *parent,
 			   val_value_t *child);
 
+
+/********************************************************************
+* FUNCTION val_next_child_match
+* 
+* Get the next instance of the corresponding child node 
+* 
+* INPUTS:
+*    parent == parent value to check
+*    child == child value to find (e.g., from a NETCONF PDU) 
+*    curmatch == current child of parent that matched
+*                
+* RETURNS:
+*   pointer to the next child match if found or NULL if not found
+*********************************************************************/
 extern val_value_t *
     val_next_child_match (val_value_t *parent,
 			  val_value_t *child,
 			  val_value_t *curmatch);
 
+
+/********************************************************************
+* FUNCTION val_get_first_child
+* 
+* Get the child node
+* 
+* INPUTS:
+*    parent == parent complex type to check
+*
+* RETURNS:
+*   pointer to the child if found or NULL if not found
+*********************************************************************/
 extern val_value_t *
     val_get_first_child (const val_value_t *parent);
 
+
+/********************************************************************
+* FUNCTION val_get_next_child
+* 
+* Get the next child node
+* 
+* INPUTS:
+*    curchild == current child node
+*
+* RETURNS:
+*   pointer to the next child if found or NULL if not found
+*********************************************************************/
 extern val_value_t *
     val_get_next_child (const val_value_t *curchild);
 
+
+/********************************************************************
+* FUNCTION val_find_child
+* 
+* Find the first instance of the specified child node
+*
+* INPUTS:
+*    parent == parent complex type to check
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    childname == name of child node to find
+*
+* RETURNS:
+*   pointer to the child if found or NULL if not found
+*********************************************************************/
 extern val_value_t *
     val_find_child (const val_value_t  *parent,
 		    const xmlChar  *modname,
 		    const xmlChar *childname);
 
+
+/********************************************************************
+* FUNCTION val_match_child
+* 
+* Match the first instance of the specified child node
+*
+* INPUTS:
+*    parent == parent complex type to check
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    childname == name of child node to find
+*
+* RETURNS:
+*   pointer to the child if found or NULL if not found
+*********************************************************************/
 extern val_value_t *
     val_match_child (const val_value_t  *parent,
 		     const xmlChar  *modname,
 		     const xmlChar *childname);
 
+
+/********************************************************************
+* FUNCTION val_find_next_child
+* 
+* Find the next instance of the specified child node
+* 
+* INPUTS:
+*    parent == parent complex type to check
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    childname == name of child node to find
+*    curchild == current child of this object type to start search
+*
+* RETURNS:
+*   pointer to the child if found or NULL if not found
+*********************************************************************/
 extern val_value_t *
     val_find_next_child (const val_value_t  *parent,
 			 const xmlChar  *modname,
@@ -795,16 +1882,57 @@ extern val_value_t *
 			 const val_value_t *curchild);
 
 
-/* find first -- really for resolve index function */
+/********************************************************************
+* FUNCTION val_first_child_name
+* 
+* Get the first corresponding child node instance, by name
+* find first -- really for resolve index function
+* 
+* INPUTS:
+*    parent == parent complex type to check
+*    name == child name to find
+*
+* RETURNS:
+*   pointer to the FIRST match if found, or NULL if not found
+*********************************************************************/
 extern val_value_t *
     val_first_child_name (val_value_t *parent,
 			  const xmlChar *name);
 
+
+/********************************************************************
+* FUNCTION val_first_child_qname
+* 
+* Get the first corresponding child node instance, by QName
+* 
+* INPUTS:
+*    parent == parent complex type to check
+*    nsid == namespace ID to use, 0 for any
+*    name == child name to find
+*
+* RETURNS:
+*   pointer to the first match if found, or NULL if not found
+*********************************************************************/
 extern val_value_t *
     val_first_child_qname (val_value_t *parent,
 			   xmlns_id_t   nsid,
 			   const xmlChar *name);
 
+
+/********************************************************************
+* FUNCTION val_next_child_qname
+* 
+* Get the next corresponding child node instance, by QName
+* 
+* INPUTS:
+*    parent == parent complex type to check
+*    nsid == namespace ID to use, 0 for any
+*    name == child name to find
+*    curchild == current child match to start from
+*
+* RETURNS:
+*   pointer to the next match if found, or NULL if not found
+*********************************************************************/
 extern val_value_t *
     val_next_child_qname (val_value_t *parent,
 			  xmlns_id_t   nsid,
@@ -812,29 +1940,100 @@ extern val_value_t *
 			  val_value_t *curchild);
 
 
-/* find first name value pair */
+/********************************************************************
+* FUNCTION val_first_child_string
+* 
+* find first name value pair
+* Get the first corresponding child node instance, by name
+* and by string value.
+* Child node must be a base type of 
+*   NCX_BT_STRING
+*   NCX_BT_INSTANCE_ID
+*   NCX_BT_LEAFREF
+*
+* INPUTS:
+*    parent == parent complex type to check
+*    name == child name to find
+*    strval == string value to find 
+* RETURNS:
+*   pointer to the FIRST match if found, or NULL if not found
+*********************************************************************/
 extern val_value_t *
     val_first_child_string (val_value_t *parent,
 			    const xmlChar *name,
 			    const xmlChar *strval);
 
 
-/* get number of child nodes present -- for choice checking */
+/********************************************************************
+* FUNCTION val_child_cnt
+* 
+* Get the number of child nodes present
+* get number of child nodes present -- for choice checking
+* 
+* INPUTS:
+*    parent == parent complex type to check
+*
+* RETURNS:
+*   the number of child nodes found
+*********************************************************************/
 extern uint32
     val_child_cnt (val_value_t *parent);
 
-/* get instance count -- for instance qualifer checking */
+
+/********************************************************************
+* FUNCTION val_child_inst_cnt
+* 
+* Get the corresponding child instance count by name
+* get instance count -- for instance qualifer checking
+* 
+* INPUTS:
+*    parent == parent complex type to check
+*    modname == module name defining the child (may be NULL)
+*    name == child name to find and count
+*
+* RETURNS:
+*   the instance count
+*********************************************************************/
 extern uint32
     val_child_inst_cnt (const val_value_t *parent,
 			const xmlChar *modname,
 			const xmlChar *name);
 
 
-extern uint32
-    val_get_child_inst_id (const val_value_t *parent,
-			   const val_value_t *child);
-
-
+/********************************************************************
+* FUNCTION val_find_all_children
+* 
+* Find all occurances of the specified node(s)
+* within the children of the current node. 
+* The walker fn will be called for each match.  
+*
+* If the walker function returns TRUE, then the 
+* walk will continue; If FALSE it will terminate right away
+*
+* INPUTS:
+*    walkerfn == callback function to use
+*    cookie1 == cookie1 value to pass to walker fn
+*    cookie2 == cookie2 value to pass to walker fn
+*    startnode == node to check
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    name == name of child node to find
+*              == NULL to match any child name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if childname == NULL
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
+*
+* RETURNS:
+*   TRUE if normal termination occurred
+*   FALSE if walker fn requested early termination
+*********************************************************************/
 extern boolean
     val_find_all_children (val_walker_fn_t walkerfn,
 			   void *cookie1,
@@ -845,6 +2044,41 @@ extern boolean
 			   boolean configonly,
 			   boolean textmode);
 
+
+/********************************************************************
+* FUNCTION val_find_all_ancestors
+* 
+* Find all the ancestor instances of the specified node
+* within the path to root from the current node;
+* use the filter criteria provided
+*
+* INPUTS:
+*
+*    walkerfn == callback function to use
+*    cookie1 == cookie1 value to pass to walker fn
+*    cookie2 == cookie2 value to pass to walker fn
+*    startnode == node to start search at
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    name == name of ancestor node to find
+*              == NULL to match any node name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if name == NULL
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
+*    orself == TRUE if axis is really ancestor-or-self
+*              FALSE if axis is ancestor
+*
+* RETURNS:
+*   TRUE if normal termination occurred
+*   FALSE if walker fn requested early termination
+*********************************************************************/
 extern boolean
     val_find_all_ancestors (val_walker_fn_t walkerfn,
 			    void *cookie1,
@@ -856,6 +2090,46 @@ extern boolean
 			    boolean textmode,
 			    boolean orself);
 
+
+/********************************************************************
+* FUNCTION val_find_all_descendants
+* 
+* Find all occurances of the specified node
+* within the current subtree. The walker fn will
+* be called for each match.  
+*
+* If the walker function returns TRUE, then the 
+* walk will continue; If FALSE it will terminate right away
+*
+* INPUTS:
+*    walkerfn == callback function to use
+*    cookie1 == cookie1 value to pass to walker fn
+*    cookie2 == cookie2 value to pass to walker fn
+*    startnode == startnode complex type to check
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    name == name of descendent node to find
+*              == NULL to match any node name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if decname == NULL
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
+*    orself == TRUE if axis is really ancestor-or-self
+*              FALSE if axis is ancestor
+*    forceall == TRUE to invoke the descendant callbacks
+*                even if fncalled was true from the current
+*               (parent) node;  FALSE to skip descendants
+*               if fncalled was TRUE
+* RETURNS:
+*   TRUE if normal termination occurred
+*   FALSE if walker fn requested early termination
+*********************************************************************/
 extern boolean
     val_find_all_descendants (val_walker_fn_t walkerfn,
 			      void *cookie1,
@@ -868,7 +2142,53 @@ extern boolean
 			      boolean orself,
 			      boolean forceall);
 
-			      
+
+/********************************************************************
+* FUNCTION val_find_all_pfaxis
+* 
+* Find all occurances of the specified node
+* for the specified preceding or following axis
+*
+*   preceding::*
+*   following::*
+*
+* within the current subtree. The walker fn will
+* be called for each match.  Because the callbacks
+* will be done in sequential order, starting from
+* the 
+*
+* If the walker function returns TRUE, then the 
+* walk will continue; If FALSE it will terminate right away
+*
+* INPUTS:
+*    walkerfn == callback function to use
+*    cookie1 == cookie1 value to pass to walker fn
+*    cookie2 == cookie2 value to pass to walker fn
+*    topnode == topnode used as the relative root for
+*               calculating node position
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    name == name of preceding or following node to find
+*              == NULL to match any node name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if decname == NULL
+*    dblslash == TRUE if all decendents of the preceding
+*                 or following nodes should be checked
+*                FALSE only 1 level is checked, not their descendants
+*    textmode == TRUE if just testing for text() nodes
+*                name modname will be ignored in this mode
+*                FALSE if using name and modname to filter
+*    axis == axis enum to use
+*
+* RETURNS:
+*   TRUE if normal termination occurred
+*   FALSE if walker fn requested early termination
+*********************************************************************/
 extern boolean
     val_find_all_pfaxis (val_walker_fn_t walkerfn,
 			 void *cookie1,
@@ -882,6 +2202,51 @@ extern boolean
 			 ncx_xpath_axis_t axis);
 			      
 
+/********************************************************************
+* FUNCTION val_find_all_pfsibling_axis
+* 
+* Find all occurances of the specified node
+* for the specified axis
+*
+*   preceding-sibling::*
+*   following-sibling::*
+*
+* within the current subtree. The walker fn will
+* be called for each match.  Because the callbacks
+* will be done in sequential order, starting from
+* the 
+*
+* If the walker function returns TRUE, then the 
+* walk will continue; If FALSE it will terminate right away
+*
+* INPUTS:
+*    walkerfn == callback function to use
+*    cookie1 == cookie1 value to pass to walker fn
+*    cookie2 == cookie2 value to pass to walker fn
+*    startnode == starting sibling node to check
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    name == name of preceding or following node to find
+*              == NULL to match any node name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if decname == NULL
+*    dblslash == TRUE if all decendents of the preceding
+*                 or following nodes should be checked
+*                FALSE only 
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
+*    axis == axis enum to use
+*
+* RETURNS:
+*   TRUE if normal termination occurred
+*   FALSE if walker fn requested early termination
+*********************************************************************/
 extern boolean
     val_find_all_pfsibling_axis (val_walker_fn_t  walkerfn,
 				 void *cookie1,
@@ -893,7 +2258,50 @@ extern boolean
 				 boolean dblslash,
 				 boolean textmode,
 				 ncx_xpath_axis_t axis);
-			      
+
+
+/********************************************************************
+* FUNCTION val_get_axisnode
+* 
+* Find the specified node based on the context node,
+* a context position and an axis
+*
+*   ancestor::*
+*   ancestor-or-self::*
+*   child::*
+*   descendant::*
+*   descendant-or-self::*
+*   following::*
+*   following-sibling::*
+*   preceding::*
+*   preceding-sibling::*
+*   self::*
+*
+* INPUTS:
+*    startnode == context node to run tests from
+*    modname == module name; 
+*                the first match in this module namespace
+*                will be returned
+*            == NULL:
+*                 the first match in any namespace will
+*                 be  returned;
+*    name == name of preceding or following node to find
+*              == NULL to match any node name
+*    configonly == TRUE to skip over non-config nodes
+*                  FALSE to check all nodes
+*                  Only used if decname == NULL
+*    dblslash == TRUE if all decendents of the preceding
+*                 or following nodes should be checked
+*                FALSE only 
+*    textmode == TRUE if just testing for text() nodes
+*                name and modname will be ignored in this mode
+*                FALSE if using name and modname to filter
+*    axis == axis enum to use
+*    position == position to find in the specified axis
+*
+* RETURNS:
+*   pointer to found value or NULL if none
+*********************************************************************/
 extern val_value_t *
     val_get_axisnode (val_value_t *startnode,
 		      const xmlChar *modname,
@@ -904,121 +2312,639 @@ extern val_value_t *
 		      ncx_xpath_axis_t axis,
 		      int64 position);
 
-		    
+
+/********************************************************************
+* FUNCTION val_get_child_inst_id
+* 
+* Get the instance ID for this child node within the parent context
+* 
+* INPUTS:
+*    parent == parent complex type to check
+*    child == child node to find ID for
+*
+* RETURNS:
+*   the instance ID num (1 .. N), or 0 if some error
+*********************************************************************/
+extern uint32
+    val_get_child_inst_id (const val_value_t *parent,
+			   const val_value_t *child);
+
+
+/********************************************************************
+* FUNCTION val_liststr_count
+* 
+* Get the number of strings in the list type
+* 
+* INPUTS:
+*    val == value to check
+*
+* RETURNS:
+*  number of list entries; also zero for error
+*********************************************************************/
 extern uint32
     val_liststr_count (const val_value_t *val);
 
 
+/********************************************************************
+* FUNCTION val_index_match
+* 
+* Check 2 val_value structs for the same instance ID
+* 
+* The node data types must match, and must be
+*    NCX_BT_LIST
+*
+* All index components must exactly match.
+* 
+* INPUTS:
+*    val1 == first value to index match
+*    val2 == second value to index match
+*
+* RETURNS:
+*   TRUE if the index chains match
+*********************************************************************/
 extern boolean
     val_index_match (val_value_t *val1,
 		     val_value_t *val2);
 
+
+/********************************************************************
+* FUNCTION val_compare_ex
+* 
+* Compare 2 val_value_t struct value contents
+* Check all or config only
+*
+* Handles NCX_CL_BASE and NCX_CL_SIMPLE data classes
+* by comparing the simple value.
+*
+* Handle NCX_CL_COMPLEX by checking the index if needed
+* and then checking all the child nodes recursively
+*
+* !!!! Meta-value contents are ignored for this test !!!!
+* 
+* INPUTS:
+*    val1 == first value to check
+*    val2 == second value to check
+*    configonly == TRUE to compare config=true nodes only
+*                  FALSE to compare all nodes
+*
+* RETURNS:
+*   compare result
+*     -1: val1 is less than val2 (if complex just different or error)
+*      0: val1 is the same as val2 
+*      1: val1 is greater than val2
+*********************************************************************/
 extern int32
     val_compare_ex (val_value_t *val1,
                     val_value_t *val2,
                     boolean configonly);
 
+
+/********************************************************************
+* FUNCTION val_compare
+* 
+* Compare 2 val_value_t struct value contents
+*
+* Handles NCX_CL_BASE and NCX_CL_SIMPLE data classes
+* by comparing the simple value.
+*
+* Handle NCX_CL_COMPLEX by checking the index if needed
+* and then checking all the child nodes recursively
+*
+* !!!! Meta-value contents are ignored for this test !!!!
+* 
+* INPUTS:
+*    val1 == first value to check
+*    val2 == second value to check
+*
+* RETURNS:
+*   compare result
+*     -1: val1 is less than val2 (if complex just different or error)
+*      0: val1 is the same as val2 
+*      1: val1 is greater than val2
+*********************************************************************/
 extern int32
     val_compare (val_value_t *val1,
 		 val_value_t *val2);
 
-extern int32
-    val_compare_for_replace (val_value_t *val1,
-                             val_value_t *val2);
 
-
+/********************************************************************
+* FUNCTION val_compare_to_string
+* 
+* Compare a val_value_t struct value contents to a string
+* 
+* Handles NCX_CL_BASE and NCX_CL_SIMPLE data classes
+* by comparing the simple value.
+*
+* !!!! Meta-value contents are ignored for this test !!!!
+* 
+* INPUTS:
+*    val1 == first value to check
+*    strval2 == second value to check 
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*   compare result
+*     -1: val1 is less than val2 (if complex just different or error)
+*      0: val1 is the same as val2 
+*      1: val1 is greater than val2
+*********************************************************************/
 extern int32
     val_compare_to_string (val_value_t *val1,
 			   const xmlChar *strval2,
 			   status_t *res);
 
+
+/********************************************************************
+* FUNCTION val_compare_for_replace
+* 
+* Compare 2 val_value_t struct value contents
+* for the nc:operation=replace procedures
+* Only check the child nodes to see if the
+* config nodes are the same
+*
+* !!!! Meta-value contents are ignored for this test !!!!
+* 
+* INPUTS:
+*    val1 == new value to check
+*    val2 == current value to check
+*
+* RETURNS:
+*   compare result
+*     -1: val1 is less than val2 (if complex just different or error)
+*      0: val1 is the same as val2 
+*      1: val1 is greater than val2
+*********************************************************************/
+extern int32
+    val_compare_for_replace (val_value_t *val1,
+                             val_value_t *val2);
+
+
+/********************************************************************
+* FUNCTION val_sprintf_simval_nc
+* 
+* Sprintf the xmlChar string NETCONF representation of a simple value
+*
+* buff is allowed to be NULL; if so, then this fn will
+* just return the length of the string (w/o EOS ch) 
+*
+* USAGE:
+*  call 1st time with a NULL buffer to get the length
+*  call the 2nd time with a buffer of the returned length
+*
+* !!!! DOES NOT CHECK BUFF OVERRUN IF buff is non-NULL !!!!
+*
+* INPUTS:
+*    buff == buffer to write (NULL means get length only)
+*    val == value to check
+*
+* OUTPUTS:
+*   *len == number of bytes written (or just length if buff == NULL)
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     val_sprintf_simval_nc (xmlChar *buff,
 			   const val_value_t  *val,
 			   uint32  *len);
 
+
+/********************************************************************
+* FUNCTION val_resolve_scoped_name
+* 
+* Find the scoped identifier in the specified complex value
+* 
+* E.g.: foo.bar.baz
+*
+* INPUTS:
+*    val == complex type to check
+*    name == scoped name string of a nested node to find
+*    chval == address of return child val
+*
+* OUTPUTS:
+*    *chval is set to the value of the found local scoped 
+*      child member, if NO_ERR
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t 
     val_resolve_scoped_name (val_value_t *val,
 			     const xmlChar *name,
 			     val_value_t **chval);
 
+
+/********************************************************************
+* FUNCTION val_get_iqualval
+* 
+* Get the effective instance qualifier value for this value
+* 
+* INPUTS:
+*    val == value construct to check
+*
+* RETURNS:
+*   iqual value
+*********************************************************************/
 extern ncx_iqual_t 
     val_get_iqualval (const val_value_t *val);
 
 
+/********************************************************************
+* FUNCTION val_duplicates_allowed
+* 
+* Determine if duplicates are allowed for the given val type
+* The entire definition chain is checked to see if a 'no-duplicates'
+*
+* The default is config, so some sort of named type or parameter
+* must be declared to create a non-config data element
+*
+* Fishing order:
+*  1) typdef chain
+*  2) parm definition
+*  3) parmset definition
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     TRUE if the value is classified as configuration
+*     FALSE if the value is not classified as configuration
+*********************************************************************/
 extern boolean
     val_duplicates_allowed (val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_has_content
+* 
+* Determine if there is a value or any child nodes for this val
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     TRUE if the value has some content
+*     FALSE if the value does not have any content
+*********************************************************************/
 extern boolean
     val_has_content (const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_has_index
+* 
+* Determine if this value has an index
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     TRUE if the value has an index
+*     FALSE if the value does not have an index
+*********************************************************************/
 extern boolean
     val_has_index (const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_get_first_index
+* 
+* Get the first index entry, if any for this value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*    pointer to first val_index_t node,  NULL if none
+*********************************************************************/
 extern val_index_t *
     val_get_first_index (const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_get_next_index
+* 
+* Get the next index entry, if any for this value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*    pointer to next val_index_t node,  NULL if none
+*********************************************************************/
 extern val_index_t *
     val_get_next_index (const val_index_t *valindex);
 
+
+
+/********************************************************************
+* FUNCTION val_parse_meta
+* 
+* Parse the metadata descriptor against the typdef
+* Check only that the value is ok, not instance count
+*
+* INPUTS:
+*     typdef == typdef to check
+*     attr == XML attribute to check
+*     retval == initialized val_value_t to fill in
+*
+* OUTPUTS:
+*   *retval == filled in if return is NO_ERR
+* RETURNS:
+*   status of the operation
+*********************************************************************/
 extern status_t
     val_parse_meta (typ_def_t *typdef,
 		    xml_attr_t *attr,
 		    val_value_t *retval);
 
+
+/********************************************************************
+* FUNCTION val_set_extern
+* 
+* Setup an NCX_BT_EXTERN value
+*
+* INPUTS:
+*     val == value to setup
+*     fname == filespec string to set as the value
+*********************************************************************/
 extern void
     val_set_extern (val_value_t  *val,
 		    xmlChar *fname);
 
+
+/********************************************************************
+* FUNCTION val_set_intern
+* 
+* Setup an NCX_BT_INTERN value
+*
+* INPUTS:
+*     val == value to setup
+*     intbuff == internal buffer to set as the value
+*********************************************************************/
 extern void
     val_set_intern (val_value_t  *val,
 		    xmlChar *intbuff);
 
+
+/********************************************************************
+* FUNCTION val_fit_oneline
+* 
+* Check if the XML encoding for the specified val_value_t
+* should take one line or more than one line
+*
+* Simple types should not use more than one line or introduce
+* any extra whitespace in any simple content element
+* 
+* !!!The calculation includes the XML start and end tags!!!
+*
+*  totalsize: <foo:node>value</foo:node>  == 26
+*
+* INPUTS:
+*   val == value to check
+*   linelen == length of line to check against
+*   
+* RETURNS:
+*   TRUE if the val is a type that should or must fit on one line
+*   FALSE otherwise
+*********************************************************************/
 extern boolean
     val_fit_oneline (const val_value_t *val,
                      uint32 linesize);
 
 
+/********************************************************************
+* FUNCTION val_create_allowed
+* 
+* Check if the specified value is allowed to have a
+* create edit-config operation attribute
+* 
+* INPUTS:
+*   val == value to check
+*   
+* RETURNS:
+*   TRUE if the val is allowed to have the edit-op
+*   FALSE otherwise
+*********************************************************************/
 extern boolean
     val_create_allowed (const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_delete_allowed
+* 
+* Check if the specified value is allowed to have a
+* delete edit-config operation attribute
+* 
+* INPUTS:
+*   val == value to check
+*   
+* RETURNS:
+*   TRUE if the val is allowed to have the edit-op
+*   FALSE otherwise
+*********************************************************************/
 extern boolean
     val_delete_allowed (const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_is_config_data
+* 
+* Check if the specified value is a config DB object instance
+* 
+* INPUTS:
+*   val == value to check
+*   
+* RETURNS:
+*   TRUE if the val is a config DB object instance
+*   FALSE otherwise
+*********************************************************************/
 extern boolean
     val_is_config_data (const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_is_virtual
+* 
+* Check if the specified value is a virtual value
+* such that a 'get' callback function is required
+* to access the real value contents
+* 
+* INPUTS:
+*   val == value to check
+*   
+* RETURNS:
+*   TRUE if the val is a virtual value
+*   FALSE otherwise
+*********************************************************************/
 extern boolean
     val_is_virtual (const val_value_t *val);
 
-/* must free the return val; not cached */
+
+/********************************************************************
+* FUNCTION val_get_virtual_value
+* 
+* Get the value of a value node
+* The top-level value is provided by the caller
+* and must be malloced with val_new_value
+* before calling this function
+* 
+* must free the return val; not cached
+*
+* If the val->getcb is NULL, then an error will be returned
+*
+* Caller should check for *res == ERR_NCX_SKIPPED
+* This will be returned if virtual value has no
+* instance at this time.
+*
+* INPUTS:
+*   session == session CB ptr cast as void *
+*              that is getting the virtual value
+*   val == virtual value to get value for
+*   res == pointer to output function return status value
+*
+* OUTPUTS:
+*    *res == the function return status
+*
+* RETURNS:
+*   A malloced and filled in val_value_t struct
+*   The val_free_value function must be called if the
+*   return value is non-NULL
+*********************************************************************/
 extern val_value_t *
     val_get_virtual_value (void *session,  /* really ses_cb_t *   */
 			   const val_value_t *val,
 			   status_t *res);
 
-/* get + cache as val->virtualval; DO NOT FREE the return val */
+
+/********************************************************************
+* FUNCTION val_cache_virtual_value
+* 
+* get + cache as val->virtualval; DO NOT FREE the return val
+* Get the value of a value node and store the malloced
+* pointer in the virtualval cache 
+* 
+* If the val->getcb is NULL, then an error will be returned
+*
+* Caller should check for *res == ERR_NCX_SKIPPED
+* This will be returned if virtual value has no
+* instance at this time.
+*
+* INPUTS:
+*   session == session CB ptr cast as void *
+*              that is getting the virtual value
+*   val == virtual value to get value for
+*   res == pointer to output function return status value
+*
+* OUTPUTS:
+*    val->virtualval set to the malloced val; will be cleared
+*        if already set
+*    *res == the function return status
+*
+* RETURNS:
+*   A malloced and filled in val_value_t struct
+*   The val_free_value function must be called if the
+*   return value is non-NULL
+*********************************************************************/
 extern val_value_t *
     val_cache_virtual_value (void *session,  /* really ses_cb_t *   */
                              val_value_t *val,
                              status_t *res);
 
+
+/********************************************************************
+* FUNCTION val_is_default
+* 
+* Check if the specified value is set to the YANG default value
+* 
+* INPUTS:
+*   val == value to check
+*   
+* RETURNS:
+*   TRUE if the val is set to the default value
+*   FALSE otherwise
+*********************************************************************/
 extern boolean
     val_is_default (const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_is_real
+* 
+* Check if the specified value is a real value
+*
+*  return TRUE if not virtual or NCX_BT_EXTERN or NCX_BT_INTERN)
+* 
+* INPUTS:
+*   val == value to check
+*   
+* RETURNS:
+*   TRUE if the val is a real value
+*   FALSE otherwise
+*********************************************************************/
 extern boolean
     val_is_real (const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_get_parent_nsid
+* 
+*    Try to get the parent namespace ID
+* 
+* INPUTS:
+*   val == value to check
+*   
+* RETURNS:
+*   namespace ID of parent, or 0 if not found or not a value parent
+*********************************************************************/
 extern xmlns_id_t 
     val_get_parent_nsid (const val_value_t *val);
 
-/* count child instances of modname:objname within parent 'val' */
+
+/********************************************************************
+* FUNCTION val_instance_count
+* 
+* Count the number of instances of the specified object name
+* in the parent value struct.  This only checks the first
+* level under the parent, not the entire subtree
+*
+*
+* INPUTS:
+*   val == value to check
+*   modname == name of module which defines the object to count
+*              NULL (do not check module names)
+*   objname == name of object to count
+*
+* RETURNS:
+*   number of instances found
+*********************************************************************/
 extern uint32
     val_instance_count (val_value_t  *val,
 			const xmlChar *modname,
 			const xmlChar *objname);
 
-/* mark ERR_NCX_EXTRA_VAL_INST errors for nodes > 'maxelems' */
+
+/********************************************************************
+* FUNCTION val_set_extra_instance_errors
+* 
+* mark ERR_NCX_EXTRA_VAL_INST errors for nodes > 'maxelems'
+* Count the number of instances of the specified object name
+* in the parent value struct.  This only checks the first
+* level under the parent, not the entire subtree
+* Set the val-res status for all instances beyond the 
+* specified 'maxelems' count to ERR_NCX_EXTRA_VAL_INST
+*
+* INPUTS:
+*   val == value to check
+*   modname == name of module which defines the object to count
+*              NULL (do not check module names)
+*   objname == name of object to count
+*   maxelems == number of allowed instances
+*
+*********************************************************************/
 extern void
     val_set_extra_instance_errors (val_value_t  *val,
 				   const xmlChar *modname,
@@ -1026,74 +2952,343 @@ extern void
 				   uint32 maxelems);
 
 
+/********************************************************************
+* FUNCTION val_need_quotes
+* 
+* Check if a string needs to be quoted to be output
+* within a conf file or ncxcli stdout output
+*
+* INPUTS:
+*    str == string to check
+*
+* RETURNS:
+*    TRUE if double quoted string is needed
+*    FALSE if not needed
+*********************************************************************/
 extern boolean
     val_need_quotes (const xmlChar *str);
 
 
+/********************************************************************
+* FUNCTION val_all_whitespace
+* 
+* Check if a string is all whitespace
+*
+* INPUTS:
+*    str == string to check
+*
+* RETURNS:
+*    TRUE if string is all whitespace or empty length
+*    FALSE if non-whitespace char found
+*********************************************************************/
 extern boolean
     val_all_whitespace (const xmlChar *str);
 
 
+/********************************************************************
+* FUNCTION val_match_metaval
+* 
+* Match the specific attribute value and namespace ID
+*
+* INPUTS:
+*     attr == attr to check
+*     nsid == mamespace ID to match against
+*     name == attribute name to match against
+*
+* RETURNS:
+*     TRUE if attr is a match; FALSE otherwise
+*********************************************************************/
 extern boolean
     val_match_metaval (const xml_attr_t *attr,
 		       xmlns_id_t  nsid,
 		       const xmlChar *name);
 
 
+/********************************************************************
+* FUNCTION val_get_dirty_flag
+* 
+* Get the dirty flag for this value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     TRUE if value is dirty, false otherwise
+*********************************************************************/
 extern boolean
     val_get_dirty_flag (const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_set_dirty_flag
+* 
+* Set the dirty flag for this value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     TRUE if value is dirty, false otherwise
+*********************************************************************/
 extern void
     val_set_dirty_flag (val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_clear_dirty_flag
+* 
+* Clear the dirty flag for this value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     TRUE if value is dirty, false otherwise
+*********************************************************************/
 extern void
     val_clear_dirty_flag (val_value_t *val);
 
+
+/********************************************************************
+ * FUNCTION val_clean_tree
+ * 
+ * Clear the dirty flag and the operation for all
+ * nodes within a value struct
+ *
+ * INPUTS:
+ *   val == value node to clean
+ *
+ * OUTPUTS:
+ *   val and all its child nodes (if any) are cleaned
+ *     val->flags: VAL_FL_DIRTY bit cleared to 0
+ *     val->editop: cleared to OP_EDITOP_NONE
+ *     val->curparent: cleared to NULL
+ *********************************************************************/
 extern void
     val_clean_tree (val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_get_nest_level
+* 
+* Get the next level of the value
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     nest level from the root
+*********************************************************************/
 extern uint32
     val_get_nest_level (val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_get_first_leaf
+* 
+* Get the first leaf or leaflist node in the 
+* specified value tree
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     pointer to first leaf found within this val struct
+*    pointer to val if val is a leaf
+*********************************************************************/
 extern val_value_t *
     val_get_first_leaf (val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_get_mod_name
+* 
+* Get the module name associated with this value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     const pointer to module name string
+*     NULL if not found
+*********************************************************************/
 extern const xmlChar *
     val_get_mod_name (const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_get_mod_prefix
+* 
+* Get the module prefix associated with this value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     const pointer to module name string
+*     NULL if not found
+*********************************************************************/
 extern const xmlChar *
     val_get_mod_prefix (const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_get_nsid
+* 
+* Get the namespace ID for the specified value node
+*
+* INPUTS:
+*     val == value node to check
+*
+* RETURNS:
+*     const pointer to module name string
+*     NULL if not found
+*********************************************************************/
 extern xmlns_id_t
     val_get_nsid (const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_change_nsid
+* 
+* Change the namespace ID fora value node and all its descendants
+*
+* INPUTS:
+*     val == value node to change
+*    nsid == new namespace ID to use
+*
+*********************************************************************/
 extern void
     val_change_nsid (val_value_t *val,
 		     xmlns_id_t nsid);
 
+
+/********************************************************************
+* FUNCTION val_make_from_insertxpcb
+* 
+* Make a val_value_t for a list, with the
+* child nodes for key leafs, specified in the
+* key attribute string given to the insert operation
+*
+* INPUTS:
+*   sourceval == list val_value_t from the PDU with the insertxpcb
+*               to process 
+*   status == address of return status (may be NULL, ignored)
+*
+* OUTPUTS:
+*   if non-NULL:
+*      *status == return status
+*
+* RETURNS:
+*   malloced list val_value_t struct with converted value
+*********************************************************************/
 extern val_value_t *
     val_make_from_insertxpcb (val_value_t  *sourceval,
 			      status_t *res);
 
+
+/********************************************************************
+* FUNCTION val_new_unique
+* 
+* Malloc and initialize the fields in a val_unique_t
+*
+* RETURNS:
+*   pointer to the malloced and initialized struct or NULL if an error
+*********************************************************************/
 extern val_unique_t * 
     val_new_unique (void);
 
+
+/********************************************************************
+* FUNCTION val_free_unique
+* 
+* CLean and free a val_unique_t struct
+*
+* INPUTS:
+*    valuni == val_unique struct to free
+*********************************************************************/
 extern void
     val_free_unique (val_unique_t *valuni);
 
+
+/********************************************************************
+* FUNCTION val_get_typdef
+* 
+* Get the typdef field for a value struct
+*
+* INPUTS:
+*    val == val_value_t struct to use
+*
+* RETURNS:
+*   pointer to the typdef or NULL if none
+*********************************************************************/
 extern const typ_def_t *
     val_get_typdef (const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_set_by_default
+* 
+* Check if the value was set by val_add_defaults
+*
+* INPUTS:
+*    val == val_value_t struct to check
+*
+* RETURNS:
+*   TRUE if set by default
+*   FALSE if set explicitly by some user or the ctartup config
+*********************************************************************/
 extern boolean
     val_set_by_default (const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_is_metaval
+* 
+* Check if the value is a meta-val (XML attribute)
+*
+* INPUTS:
+*    val == val_value_t struct to check
+*
+* RETURNS:
+*   TRUE if val is a meta-val
+*   FALSE if val is not a meta-val
+*********************************************************************/
 extern boolean
     val_is_metaval (const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_move_chidren
+* 
+* Move all the child nodes from src to dest
+* Source and dest must both be containers!
+*
+* INPUTS:
+*    srcval == source val_value_t struct to move
+*    destval == destination value struct ot use
+*
+*********************************************************************/
 extern void
     val_move_children (val_value_t *srcval,
                        val_value_t *destval);
 
+
+/********************************************************************
+* FUNCTION val_cvt_generic
+* 
+* Convert all the database object pointers to
+* generic object pointers to decouple a user
+* variable in yangcli from the server-specific
+* object definition (which goes away when the
+* session is terminated)
+*
+* INPUTS:
+*    val == val_value_t struct to convert to generic
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     val_cvt_generic (val_value_t *val);
 

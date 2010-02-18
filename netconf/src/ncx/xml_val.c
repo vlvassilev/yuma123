@@ -125,6 +125,7 @@ date         init     comment
 /********************************************************************
 * FUNCTION xml_val_make_qname
 * 
+*   Build output value: add child node to a struct node
 *   Malloc a string buffer and create a QName string
 *   This is complete; The m__free function must be called
 *   with the return value if it is non-NULL;
@@ -247,6 +248,7 @@ uint32
 * FUNCTION xml_val_add_attr
 * 
 *   Set up a new attr val and add it to the specified val
+*   hand off a malloced attribute string
 *
 * INPUTS:
 *    name == attr name
@@ -286,6 +288,7 @@ status_t
 * FUNCTION xml_val_add_cattr
 * 
 *   Set up a new const attr val and add it to the specified val
+*   copy a const attribute string
 *
 * INPUTS:
 *    name == attr name
@@ -362,6 +365,7 @@ val_value_t *
 * FUNCTION xml_val_new_string
 * 
 *  Set up a new string element; reuse the value instead of copying it
+*  hand off a malloced string
 *
 * INPUTS:
 *    name == element name
@@ -397,6 +401,7 @@ val_value_t *
 * FUNCTION xml_val_new_cstring
 * 
 *   Set up a new string from a const string
+*   copy a const string
 *
 * INPUTS:
 *    name == element name

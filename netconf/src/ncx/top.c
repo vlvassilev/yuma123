@@ -163,7 +163,7 @@ void
 /********************************************************************
 * FUNCTION top_cleanup
 *
-*  cleanup Top Element Library
+*  cleanup Top Element Handler
 *********************************************************************/
 void
     top_cleanup (void)

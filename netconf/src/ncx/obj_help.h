@@ -52,16 +52,43 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION obj_dump_template
+*
+* Dump the contents of an obj_template_t struct for help text
+*
+* INPUTS:
+*   obj == obj_template to dump help for
+*   mode == requested help mode
+*   nestlevel == number of levels from the top-level
+*                that should be printed; 0 == all levels
+*   indent == start indent count
+*********************************************************************/
 extern void
     obj_dump_template (obj_template_t *obj,
 		       help_mode_t mode,
 		       uint32 nestlevel,
 		       uint32 indent);
 
+
+/********************************************************************
+* FUNCTION obj_dump_datadefQ
+*
+* Dump the contents of a datadefQ for debugging
+*
+* INPUTS:
+*   datadefQ == Q of obj_template to dump
+*   mode    ==  desired help mode (brief, normal, full)
+*   nestlevel == number of levels from the top-level
+*                that should be printed; 0 == all levels
+*   indent == start indent count
+*********************************************************************/
 extern void
     obj_dump_datadefQ (dlq_hdr_t *datadefQ,
 		       help_mode_t mode,
 		       uint32 nestlevel,
 		       uint32 indent);
+
 
 #endif	    /* _H_obj_help */

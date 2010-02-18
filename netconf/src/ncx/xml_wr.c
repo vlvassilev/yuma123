@@ -1508,6 +1508,7 @@ void
 /********************************************************************
 * FUNCTION xml_wr_val
 * 
+* output val_value_t node contents only
 * Write an NCX value node in XML encoding
 * See xml_wr_check_write for full details of this fn.
 * It is the same, except a NULL testfn is supplied.
@@ -1539,6 +1540,7 @@ void
 /********************************************************************
 * FUNCTION xml_wr_full_check_val
 * 
+* generate entire val_value_t *w/filter)
 * Write an entire val_value_t out as XML, including the top level
 * Using an optional testfn to filter output
 *
@@ -1715,6 +1717,7 @@ void
 /********************************************************************
 * FUNCTION xml_wr_full_val
 * 
+* generate entire val_value_t
 * Write an entire val_value_t out as XML, including the top level
 *
 * INPUTS:

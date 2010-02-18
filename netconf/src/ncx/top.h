@@ -86,21 +86,75 @@ typedef void (*top_handler_t) (ses_cb_t   *scb,
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION top_init
+* 
+* Initialize the Top Elelment Handler
+* 
+*********************************************************************/
 extern void
     top_init (void);
 
+
+/********************************************************************
+* FUNCTION top_cleanup
+*
+*  cleanup Top Element Handler
+*********************************************************************/
 extern void 
     top_cleanup (void);
 
+
+/********************************************************************
+* FUNCTION top_register_node
+* 
+* Register a top entry handler function
+*
+* INPUTS:
+*   owner == owner name  (really module name)
+*   elname == element name
+*   handler == callback function for this element
+* RETURNS:
+*  status
+*********************************************************************/
 extern status_t 
     top_register_node (const xmlChar *owner,
 		       const xmlChar *elname,
 		       top_handler_t handler);
 
+
+/********************************************************************
+* FUNCTION top_unregister_node
+* 
+* Remove a top entry handler function
+* This will not affect calls to the handler currently
+* in progress, but new calls to top_dispatch_msg
+* will no longer find this node.
+*
+* INPUTS:
+*   owner == owner name
+*   elname == element name
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     top_unregister_node (const xmlChar *owner,
 			 const xmlChar *elname);
 
+
+/********************************************************************
+* FUNCTION top_find_handler
+* 
+* Find the top_handler in the topQ
+*
+* INPUTS:
+*   owner == owner name
+*   elname == element name
+*
+* RETURNS:
+*  pointer to top_handler or NULL if not found
+*********************************************************************/
 extern top_handler_t
     top_find_handler (const xmlChar *owner,
 		      const xmlChar *elname);

@@ -213,6 +213,9 @@ static void
 }  /* dump_typdef_data */
 
 
+/**************    E X T E R N A L   F U N C T I O N S **********/
+
+
 /********************************************************************
 * FUNCTION obj_dump_template
 *
@@ -613,8 +616,7 @@ void
 *
 * INPUTS:
 *   datadefQ == Q of obj_template to dump
-*    full    == TRUE if a full report desired
-*               FALSE if a partial report desired
+*   mode    ==  desired help mode (brief, normal, full)
 *   nestlevel == number of levels from the top-level
 *                that should be printed; 0 == all levels
 *   indent == start indent count

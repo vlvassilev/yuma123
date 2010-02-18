@@ -5197,6 +5197,9 @@ obj_template_t *
 *
 * Copy the pointers from the srcobj into the new obj
 *
+* Create an OBJ_TYP_CASE wrapper if needed,
+* for a short-case-stmt data def 
+*
 * If the mobj is non-NULL, then the non-NULL revisable
 * fields in the mobj struct will be merged into the new object
 *
@@ -5276,7 +5279,6 @@ obj_template_t *
     return casobj;
 
 }   /* obj_clone_template_case */
-
 
 
 /********************************************************************
@@ -5435,6 +5437,11 @@ void
 * FUNCTION obj_find_unique
 * 
 * Find a specific unique-stmt
+*
+* INPUTS:
+*    que == queue of obj_unique_t to check
+*    xpath == relative path expression for the
+*             unique node to find
 *
 * RETURNS:
 *   pointer to found entry or NULL if not found
@@ -6179,6 +6186,7 @@ status_t
 * 
 * Malloc and Generate the object ID for an object node
 * for C code usage
+* generate a unique name for C code; handles augments
 *
 * INPUTS:
 *   mod == current module in progress
@@ -6236,6 +6244,7 @@ status_t
 * FUNCTION obj_copy_object_id
 * 
 * Generate the object ID for an object node and copy to the buffer
+* copy an object ID to a buffer
 * 
 * INPUTS:
 *   obj == node to generate the instance ID for
@@ -6405,6 +6414,11 @@ const xmlChar *
 * 
 * Check if the specified object type has a name
 *
+* this function is used throughout the code to 
+* filter out uses and augment nodes from the
+* real nodes.  Those are the only YANG nodes that
+* do not have a name assigned to them
+*
 * INPUTS:
 *   obj == the specific object to check
 *
@@ -6551,7 +6565,7 @@ ncx_status_t
 *   obj == the specific object to check
 *
 * RETURNS:
-*   YANG status clause for this object
+*   YANG description string for this object
 *********************************************************************/
 const xmlChar *
     obj_get_description (const obj_template_t *obj)
@@ -6608,7 +6622,7 @@ const xmlChar *
 *   obj == the specific object to check
 *
 * RETURNS:
-*   YANG status clause for this object
+*   YANG reference string for this object
 *********************************************************************/
 const xmlChar *
     obj_get_reference (const obj_template_t *obj)
@@ -6769,7 +6783,7 @@ ncx_access_t
 *   obj == the specific object to check
 *
 * RETURNS:
-*   YANG status clause for this object
+*   pointer to the appinfoQ for this object
 *********************************************************************/
 dlq_hdr_t *
     obj_get_appinfoQ (obj_template_t *obj)
@@ -6787,32 +6801,6 @@ dlq_hdr_t *
 
 
 /********************************************************************
-* FUNCTION obj_get_appinfoQ2
-* 
-* Get the appinfoQ for this obj (not const)
-*
-* INPUTS:
-*   obj == the specific object to check
-*
-* RETURNS:
-*   YANG status clause for this object
-*********************************************************************/
-dlq_hdr_t *
-    obj_get_appinfoQ2 (obj_template_t *obj)
-{
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    return &obj->appinfoQ;
-
-}  /* obj_get_appinfoQ2 */
-
-
-/********************************************************************
 * FUNCTION obj_get_mustQ
 * 
 * Get the mustQ for this obj
@@ -6821,7 +6809,7 @@ dlq_hdr_t *
 *   obj == the specific object to check
 *
 * RETURNS:
-*   YANG status clause for this object
+*   pointer to the mustQ for this object
 *********************************************************************/
 dlq_hdr_t *
     obj_get_mustQ (const obj_template_t *obj)
@@ -7508,7 +7496,7 @@ ncx_iqual_t
 *
 * INPUTS:
 *    obj  == object to check
-*    mand == value to use for 'is_mandatory()' logic
+*    required == value to use for 'is_mandatory()' logic
 *
 * RETURNS:
 *    instance qualifier enumeration
@@ -7773,6 +7761,553 @@ const obj_template_t *
     return obj->parent;
 
 }  /* obj_get_cparent */
+
+
+/********************************************************************
+* FUNCTION obj_get_presence_string
+*
+* Get the present-stmt value, if any
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   pointer to string
+*   NULL if none
+*********************************************************************/
+const xmlChar *
+    obj_get_presence_string (const obj_template_t *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    if (obj->objtype != OBJ_TYP_CONTAINER) {
+        return NULL;
+    }
+
+    return obj->def.container->presence;
+
+}  /* obj_get_presence_string */
+
+
+/********************************************************************
+ * FUNCTION obj_get_child_node
+ * 
+ * Get the correct child node for the specified parent and
+ * current XML node
+ * complex logic for finding the right module namespace
+ * and child node, given the current context
+ *
+ *
+ * INPUTS:
+ *    obj == parent object template
+ *    chobj == current child node (may be NULL if the
+ *             xmlorder param is FALSE
+ *     xmlorder == TRUE if should follow strict XML element order
+ *              == FALSE if sibling node order errors should be 
+ *                 ignored; find child nodes out of order
+ *                 and check too-many-instances later
+ *    curnode == current XML start or empty node to check
+ *    force_modQ == Q of ncx_module_t to check, if set
+ *               == NULL and the xmlns registry of module pointers
+ *                  will be used instead (except netconf.yang)
+ *    rettop == address of return topchild object
+ *    retobj == address of return object to use
+ *
+ * OUTPUTS:
+ *    *rettop set to top-level found object if return OK
+ *     and currently within a choice
+ *    *retobj set to found object if return OK
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+status_t 
+    obj_get_child_node (obj_template_t *obj,
+                        obj_template_t *chobj,
+                        const xml_node_t *curnode,
+                        boolean xmlorder,
+                        dlq_hdr_t *force_modQ,
+                        obj_template_t **rettop,
+                        obj_template_t **retobj)
+{
+    obj_template_t        *foundobj, *nextchobj;
+    const xmlChar         *foundmodname;
+    ncx_module_t          *foundmod;
+    status_t               res;
+    ncx_node_t             dtyp;
+    boolean                topdone;
+    xmlns_id_t             ncnid, ncid;
+
+#ifdef DEBUG
+    if (!obj || !curnode || !rettop || !retobj) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    foundobj = NULL;
+    foundmodname = NULL;
+    foundmod = NULL;
+    dtyp = NCX_NT_OBJ;
+    res = NO_ERR;
+    topdone = FALSE;
+    ncid = xmlns_nc_id();
+    ncnid = xmlns_ncn_id();
+
+    if (curnode->nsid) {
+        if (curnode->nsid == ncid || force_modQ == NULL) {
+            foundmod = xmlns_get_modptr(curnode->nsid);
+        } else if (force_modQ) {
+            /* try a session module Q */
+            foundmod = ncx_find_module_que_nsid(force_modQ,
+                                                curnode->nsid);
+            if (foundmod == NULL) {
+                /* try a client-loaded module */
+                foundmod = xmlns_get_modptr(curnode->nsid);
+            }
+        }
+        if (foundmod) {
+            foundmodname = ncx_get_modname(foundmod);
+        }
+    } 
+
+    if (obj_is_root(obj)) {
+        /* the child node can be any top-level object
+         * in the configuration database
+         */
+        if (foundmodname) {
+            /* get the name from 1 module */
+            foundobj =  ncx_find_object(foundmod,
+                                        curnode->elname);
+        } else if (force_modQ) {
+            /* check this Q of modules for a top-level match */
+            foundobj = ncx_find_any_object_que(force_modQ,
+                                               curnode->elname);
+            if (foundobj == NULL && curnode->nsid == 0) {
+                foundobj = ncx_find_any_object(curnode->elname);
+            }                
+            if (foundobj) {
+                foundmodname = obj_get_mod_name(foundobj);
+            }
+        } else {
+            /* NSID not set, get the name from any module */
+            foundobj = ncx_find_any_object(curnode->elname);
+            if (foundobj) {
+                foundmodname = obj_get_mod_name(foundobj);
+            }
+        }
+
+        if (foundobj) {
+            if (!obj_is_data_db(foundobj) ||
+                obj_is_abstract(foundobj) ||
+                obj_is_cli(foundobj)) {
+                foundobj = NULL;
+            }
+        }
+    } else if (obj_get_nsid(obj) == ncnid &&
+               !xml_strcmp(obj_get_name(obj),
+                           NCX_EL_NOTIFICATION)) {
+        /* hack: special case handling of the
+         * <notification> element
+         * the child node can be <eventTime> or
+         * any top-level OBJ_TYP_NOTIF node
+         */
+        if (foundmodname) {
+            /* try a child of <notification> */
+            foundobj = obj_find_child(obj, 
+                                      foundmodname,
+                                      curnode->elname);
+            if (!foundobj) {
+                /* try to find an <eventType> */
+                foundobj =  ncx_find_object(foundmod,
+                                            curnode->elname);
+                if (foundobj && 
+                    foundobj->objtype != OBJ_TYP_NOTIF) {
+                    /* object is the wrong type */
+                    foundobj = NULL;
+                }
+            }
+        } else {
+            /* no namespace ID used
+             * try to find any eventType object
+             */
+            if (force_modQ) {
+                foundobj = ncx_find_any_object_que(force_modQ,
+                                                   curnode->elname);
+            } else {
+                foundobj = ncx_find_any_object(curnode->elname);
+            }
+            if (foundobj) {
+                if (foundobj->objtype != OBJ_TYP_NOTIF) {
+                    foundobj = NULL;
+                }
+            } else {
+                /* try a child of obj (eventTime) */
+                foundobj = obj_find_child(obj, 
+                                          NULL,
+                                          curnode->elname);
+            }
+        }
+    } else if (xmlorder) {
+        /* the current node must match or one of the
+         * subsequent child nodes must match
+         */
+        if (chobj) {
+            switch (chobj->objtype) {
+            case OBJ_TYP_CHOICE:
+            case OBJ_TYP_CASE:
+                /* these nodes are not really in the XML so
+                 * check all the child nodes of the
+                 * cases.  When found, need to remember
+                 * the current child node at the choice
+                 * or case level, so when the lower
+                 * level child pointer runs out, the
+                 * search can continue at the next
+                 * sibling of 'rettop'
+                 */
+                foundobj = obj_find_child(chobj,
+                                          foundmodname,
+                                          curnode->elname);
+                if (foundobj) {
+                    /* make sure this matched a real node instead
+                     * of match of choice or case name
+                     */
+                    if (foundobj->objtype==OBJ_TYP_CHOICE ||
+                        foundobj->objtype==OBJ_TYP_CASE) {
+                        foundobj = NULL;
+                    } else {
+                        *rettop = chobj;
+                        topdone = TRUE;
+                    }
+                }                   
+                break;
+            default:
+                /* the YANG node and XML node line up,
+                 * so it is OK to compare them directly
+                 */
+                res = xml_node_match(curnode, 
+                                     obj_get_nsid(chobj), 
+                                     obj_get_name(chobj), 
+                                     XML_NT_NONE);
+
+                if (res == NO_ERR) {
+                    foundobj = chobj;
+                } else {
+                    foundobj = NULL;
+                }
+            }
+
+            if (!foundobj) {
+                /* check if there are other child nodes that could
+                 * match, due to instance qualifiers 
+                 */
+                nextchobj = find_next_child(chobj, curnode);
+                if (nextchobj) {
+                    res = NO_ERR;
+                    foundobj = nextchobj;
+                } else if (*rettop) {
+                    nextchobj = find_next_child(*rettop, curnode);
+                    if (nextchobj) {
+                        res = NO_ERR;
+                        foundobj = nextchobj;
+                    }
+                }
+            }
+        }
+    } else {
+        /* do not care about XML order, just match any node
+         * within the current parent object
+         */
+        if (curnode->nsid) {
+            /* find the specified module first */
+
+            if (foundmodname) {
+                foundobj = obj_find_child(obj, 
+                                          foundmodname,
+                                          curnode->elname);
+            }
+        } else {
+            /* get the object from first match module */
+            foundobj = obj_find_child(obj, 
+                                      NULL,
+                                      curnode->elname);
+        }
+    }
+
+    if (foundobj) {
+        *retobj = foundobj;
+        if (!topdone) {
+            *rettop = foundobj;
+        }
+        return NO_ERR;
+    } else if (res != NO_ERR) {
+        return res;
+    } else {
+        return ERR_NCX_DEF_NOT_FOUND;
+    }
+    /*NOTREACHED*/
+
+}  /* obj_get_child_node */
+
+
+/********************************************************************
+* FUNCTION obj_get_child_count
+*
+* Get the number of child nodes the object has
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   number of child nodes
+*********************************************************************/
+uint32
+    obj_get_child_count (const obj_template_t *obj)
+{
+
+    const dlq_hdr_t   *datadefQ;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    datadefQ = obj_get_cdatadefQ(obj);
+    if (datadefQ) {
+        return dlq_count(datadefQ);
+    } else {
+        return 0;
+    }
+
+}   /* obj_get_child_count */
+
+
+/********************************************************************
+* FUNCTION obj_get_default_parm
+* 
+* Get the ncx:default-parm object for this object
+* Only supported for OBJ_TYP_CONTAINER and OBJ_TYP_RPCIO (input)
+*
+* INPUTS:
+*   obj == the specific object to check
+*
+* RETURNS:
+*   pointer to the name field, NULL if some error or unnamed
+*********************************************************************/
+obj_template_t * 
+    obj_get_default_parm (obj_template_t *obj)
+{
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+        return obj->def.container->defaultparm;
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+    case OBJ_TYP_LIST:
+    case OBJ_TYP_CHOICE:
+    case OBJ_TYP_CASE:
+    case OBJ_TYP_USES:
+    case OBJ_TYP_AUGMENT:
+    case OBJ_TYP_REFINE:
+    case OBJ_TYP_RPC:
+    case OBJ_TYP_ANYXML:
+        return NULL;
+    case OBJ_TYP_RPCIO:
+        return obj->def.rpcio->defaultparm;
+    case OBJ_TYP_NOTIF:
+        return NULL;
+    case OBJ_TYP_NONE:
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+    /*NOTREACHED*/
+
+}  /* obj_get_default_parm */
+
+
+/********************************************************************
+* FUNCTION obj_get_config_flag_deep
+*
+* get config flag during augment expand
+* Get the config flag for an obj_template_t 
+* Go all the way up the tree until an explicit
+* set node or the root is found
+*
+* Used by get_list_key because the config flag
+* of the parent is not set yet when a key leaf is expanded
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if config set to TRUE
+*   FALSE if config set to FALSE
+*********************************************************************/
+boolean
+    obj_get_config_flag_deep (const obj_template_t *obj)
+{
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+    case OBJ_TYP_ANYXML:
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+    case OBJ_TYP_LIST:
+    case OBJ_TYP_CHOICE:
+        if (obj_is_root(obj)) {
+            return TRUE;
+        }
+        /* check if this normal object has a config-stmt */
+        if (obj->flags & OBJ_FL_CONFSET) {
+            return (obj->flags & OBJ_FL_CONFIG) ? TRUE : FALSE;
+        }
+
+        if (obj->parent) {
+            return obj_get_config_flag_deep(obj->parent);
+        }
+
+        /* should not really get here, since all 
+         * top-level objects should have the OBJ_FL_CONFSET
+         * flag set: default ifor top-level is config=true
+         */
+        return TRUE;
+    case OBJ_TYP_CASE:
+        if (obj->parent) {
+            return obj_get_config_flag_deep(obj->parent);
+        } else {
+            /* should not happen */
+            return FALSE;
+        }
+    case OBJ_TYP_USES:
+    case OBJ_TYP_AUGMENT:
+    case OBJ_TYP_REFINE:
+        /* no real setting -- not applicable */
+        return FALSE;
+    case OBJ_TYP_RPC:
+        /* no real setting for this, but has to be true
+         * to allow rpc/input to be true
+         */
+        return TRUE;
+    case OBJ_TYP_RPCIO:
+        if (!xml_strcmp(obj->def.rpcio->name, YANG_K_INPUT)) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    case OBJ_TYP_NOTIF:
+        return FALSE;
+    case OBJ_TYP_NONE:
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
+    }
+    /*NOTREACHED*/
+
+}   /* obj_get_config_flag_deep */
+
+
+/********************************************************************
+* FUNCTION obj_get_fraction_digits
+* 
+* Get the fraction-digits field from the object typdef
+*
+* INPUTS:
+*     obj == object template to  check
+*
+* RETURNS:
+*     number of fixed decimal digits expected (1..18)
+*     0 if some error
+*********************************************************************/
+uint8
+    obj_get_fraction_digits (const obj_template_t  *obj)
+{
+    const typ_def_t  *typdef;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    typdef = obj_get_ctypdef(obj);
+    if (typdef) {
+        return typ_get_fraction_digits(typdef);
+    } else {
+        return 0;
+    }
+
+}  /* obj_get_fraction_digits */
+
+
+/********************************************************************
+* FUNCTION obj_get_first_iffeature
+* 
+* Get the first if-feature clause (if any) for the specified object
+*
+* INPUTS:
+*     obj == object template to  check
+*
+* RETURNS:
+*     pointer to first if-feature struct
+*     NULL if none available
+*********************************************************************/
+const ncx_iffeature_t *
+    obj_get_first_iffeature (const obj_template_t  *obj)
+{
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    return (const ncx_iffeature_t *)
+        dlq_firstEntry(&obj->iffeatureQ);
+
+}  /* obj_get_first_iffeature */
+
+
+/********************************************************************
+* FUNCTION obj_get_next_iffeature
+* 
+* Get the next if-feature clause (if any)
+*
+* INPUTS:
+*     iffeature == current iffeature struct
+*
+* RETURNS:
+*     pointer to next if-feature struct
+*     NULL if none available
+*********************************************************************/
+const ncx_iffeature_t *
+    obj_get_next_iffeature (const ncx_iffeature_t  *iffeature)
+{
+
+#ifdef DEBUG
+    if (!iffeature) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    return (const ncx_iffeature_t *)dlq_nextEntry(iffeature);
+
+}  /* obj_get_next_iffeature */
 
 
 /********************************************************************
@@ -8369,116 +8904,6 @@ boolean
 
 
 /********************************************************************
-* FUNCTION obj_set_ncx_flags
-*
-* Check the NCX appinfo extensions and set flags as needed
-*
-** INPUTS:
-*   obj == obj_template to check
-*
-* OUTPUTS:
-*   may set additional bits in the obj->flags field
-*
-*********************************************************************/
-void
-    obj_set_ncx_flags (obj_template_t *obj)
-{
-
-    const dlq_hdr_t  *appinfoQ;
-    const typ_def_t  *typdef;
-
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    appinfoQ = obj_get_appinfoQ(obj);
-
-    if (ncx_find_const_appinfo(appinfoQ, 
-                               NCX_PREFIX, 
-                               NCX_EL_PASSWORD)) {
-        obj->flags |= OBJ_FL_PASSWD;
-    }
-
-    if (ncx_find_const_appinfo(appinfoQ, 
-                               NCX_PREFIX, 
-                               NCX_EL_HIDDEN)) {
-        obj->flags |= OBJ_FL_HIDDEN;
-    }
-
-    if (ncx_find_const_appinfo(appinfoQ, 
-                               NCX_PREFIX, 
-                               NCX_EL_XSDLIST)) {
-        obj->flags |= OBJ_FL_XSDLIST;
-    }
-
-    if (ncx_find_const_appinfo(appinfoQ, 
-                               NCX_PREFIX, 
-                               NCX_EL_ROOT)) {
-        obj->flags |= OBJ_FL_ROOT;
-    }
-
-    if (ncx_find_const_appinfo(appinfoQ, 
-                               NCX_PREFIX, 
-                               NCX_EL_CLI)) {
-        obj->flags |= OBJ_FL_CLI;
-    }
-
-    if (ncx_find_const_appinfo(appinfoQ, 
-                               NCX_PREFIX, 
-                               NCX_EL_ABSTRACT)) {
-        obj->flags |= OBJ_FL_ABSTRACT;
-    }
-
-    if (ncx_find_const_appinfo(appinfoQ, 
-                               NACM_PREFIX, 
-                               NCX_EL_SECURE)) {
-        obj->flags |= OBJ_FL_SECURE;
-    }
-
-    if (ncx_find_const_appinfo(appinfoQ, 
-                               NACM_PREFIX, 
-                               NCX_EL_VERY_SECURE)) {
-        obj->flags |= OBJ_FL_VERY_SECURE;
-    }
-
-    if (obj_is_leafy(obj)) {
-        typdef = obj_get_ctypdef(obj);
-
-        /* ncx:xpath extension */
-        if (typ_is_xpath_string(typdef)) {
-            obj->flags |= OBJ_FL_XPATH;
-        } else if (ncx_find_const_appinfo(appinfoQ, 
-                                          NCX_PREFIX, 
-                                          NCX_EL_XPATH)) {
-            obj->flags |= OBJ_FL_XPATH;
-        }
-
-        /* ncx:qname extension */
-        if (typ_is_qname_string(typdef)) {
-            obj->flags |= OBJ_FL_QNAME;
-        } else if (ncx_find_const_appinfo(appinfoQ, 
-                                          NCX_PREFIX, 
-                                          NCX_EL_XPATH)) {
-            obj->flags |= OBJ_FL_QNAME;
-        }
-
-        /* ncx:schema-instance extension */
-        if (typ_is_schema_instance_string(typdef)) {
-            obj->flags |= OBJ_FL_SCHEMAINST;
-        } else if (ncx_find_const_appinfo(appinfoQ, 
-                                          NCX_PREFIX, 
-                                          NCX_EL_SCHEMA_INSTANCE)) {
-            obj->flags |= OBJ_FL_SCHEMAINST;
-        }
-    }
-
-}   /* obj_set_ncx_flags */
-
-
-/********************************************************************
 * FUNCTION obj_is_hidden
 *
 * Check if object is marked as a hidden object
@@ -8875,35 +9300,183 @@ boolean
 
 
 /********************************************************************
-* FUNCTION obj_get_presence_string
-*
-* Get the present-stmt value, if any
+* FUNCTION obj_is_enabled
+* 
+* Check any if-feature statement that may
+* cause the specified object to be invisible
 *
 * INPUTS:
-*   obj == obj_template to check
+*    obj == obj_template_t to check
+
+* RETURNS:
+*    TRUE if object is enabled
+*    FALSE if any if-features are present and FALSE
+*********************************************************************/
+boolean
+    obj_is_enabled (const obj_template_t *obj)
+{
+    const ncx_iffeature_t   *iffeature;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    for (iffeature = obj_get_first_iffeature(obj);
+         iffeature != NULL;
+         iffeature = obj_get_next_iffeature(iffeature)) {
+
+        if (!iffeature->feature ||
+            !ncx_feature_enabled(iffeature->feature)) {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+
+}  /* obj_is_enabled */
+
+
+/********************************************************************
+* FUNCTION obj_is_single_instance
+* 
+* Check if the object is a single instance of if it
+* allows multiple instances; check all of the
+* ancestors if needed
+*
+* INPUTS:
+*    obj == object template to check
+* RETURNS:
+*    TRUE if object is a single instance object
+*    FALSE if multiple instances are allowed
+*********************************************************************/
+boolean
+    obj_is_single_instance (obj_template_t *obj)
+{
+    ncx_iqual_t  iqual;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return TRUE;
+    }
+#endif
+
+    while (obj != NULL) {
+        iqual = obj_get_iqualval(obj);
+        switch (iqual) {
+        case NCX_IQUAL_ZMORE:
+        case NCX_IQUAL_1MORE:
+            return FALSE;
+        default:
+            /* don't bother checking the root
+             * and don't go past the root into
+             * the RPC parameters
+             */
+            obj = obj->parent;
+            if (obj && obj_is_root(obj)) {
+                obj = NULL;
+            }
+        }
+    }
+    return TRUE;
+
+}  /* obj_is_single_instance */
+
+
+/********************************************************************
+* FUNCTION obj_is_short_case
+* 
+* Check if the object is a short case statement
+*
+* INPUTS:
+*    obj == object template to check
 *
 * RETURNS:
-*   pointer to string
-*   NULL if none
+*    TRUE if object is a 1 object case statement
+*    FALSE otherwise
 *********************************************************************/
-const xmlChar *
-    obj_get_presence_string (const obj_template_t *obj)
+boolean
+    obj_is_short_case (obj_template_t *obj)
+{
+    const obj_case_t   *cas;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return TRUE;
+    }
+#endif
+
+    if (obj->objtype != OBJ_TYP_CASE) {
+        return FALSE;
+    }
+
+    cas = obj->def.cas;
+
+    if (dlq_count(cas->datadefQ) != 1) {
+        return FALSE;
+    }
+
+    if (obj->when && obj->when->exprstr) {
+        return FALSE;
+    }
+
+    if (obj_get_first_iffeature(obj) != NULL) {
+        return FALSE;
+    }
+
+    if (obj_get_status(obj) != NCX_STATUS_CURRENT) {
+        return FALSE;
+    }
+
+    if (obj_get_description(obj) != NULL) {
+        return FALSE;
+    }
+
+    if (obj_get_reference(obj) != NULL) {
+        return FALSE;
+    }
+
+    if (dlq_count(obj_get_appinfoQ(obj)) > 0) {
+        return FALSE;
+    }
+
+    return TRUE;
+
+
+}  /* obj_is_short_case */
+
+
+/********************************************************************
+* FUNCTION obj_is_top
+* 
+* Check if the object is top-level object within
+* the YANG module that defines it
+*
+* INPUTS:
+*    obj == object template to check
+*
+* RETURNS:
+*    TRUE if obj is a top-level object
+*    FALSE otherwise
+*********************************************************************/
+boolean
+    obj_is_top (const obj_template_t *obj)
 {
 
 #ifdef DEBUG
     if (!obj) {
         SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
+        return FALSE;
     }
 #endif
 
-    if (obj->objtype != OBJ_TYP_CONTAINER) {
-        return NULL;
-    }
+    return (obj->flags & OBJ_FL_TOP) ? TRUE : FALSE;
 
-    return obj->def.container->presence;
-
-}  /* obj_get_presence_string */
+}  /* obj_is_top */
 
 
 /********************************************************************
@@ -8975,297 +9548,6 @@ boolean
     return TRUE;
 
 }   /* obj_ok_for_cli */
-
-
-/********************************************************************
- * FUNCTION obj_get_child_node
- * 
- * Get the correct child node for the specified parent and
- * current XML node
- *
- * INPUTS:
- *    obj == parent object template
- *    chobj == current child node (may be NULL if the
- *             xmlorder param is FALSE
- *     xmlorder == TRUE if should follow strict XML element order
- *              == FALSE if sibling node order errors should be 
- *                 ignored; find child nodes out of order
- *                 and check too-many-instances later
- *    curnode == current XML start or empty node to check
- *    force_modQ == Q of ncx_module_t to check, if set
- *               == NULL and the xmlns registry of module pointers
- *                  will be used instead (except netconf.yang)
- *    rettop == address of return topchild object
- *    retobj == address of return object to use
- *
- * OUTPUTS:
- *    *rettop set to top-level found object if return OK
- *     and currently within a choice
- *    *retobj set to found object if return OK
- *
- * RETURNS:
- *   status
- *********************************************************************/
-status_t 
-    obj_get_child_node (obj_template_t *obj,
-                        obj_template_t *chobj,
-                        const xml_node_t *curnode,
-                        boolean xmlorder,
-                        dlq_hdr_t *force_modQ,
-                        obj_template_t **rettop,
-                        obj_template_t **retobj)
-{
-    obj_template_t        *foundobj, *nextchobj;
-    const xmlChar         *foundmodname;
-    ncx_module_t          *foundmod;
-    status_t               res;
-    ncx_node_t             dtyp;
-    boolean                topdone;
-    xmlns_id_t             ncnid, ncid;
-
-#ifdef DEBUG
-    if (!obj || !curnode || !rettop || !retobj) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    foundobj = NULL;
-    foundmodname = NULL;
-    foundmod = NULL;
-    dtyp = NCX_NT_OBJ;
-    res = NO_ERR;
-    topdone = FALSE;
-    ncid = xmlns_nc_id();
-    ncnid = xmlns_ncn_id();
-
-    if (curnode->nsid) {
-        if (curnode->nsid == ncid || force_modQ == NULL) {
-            foundmod = xmlns_get_modptr(curnode->nsid);
-        } else if (force_modQ) {
-            /* try a session module Q */
-            foundmod = ncx_find_module_que_nsid(force_modQ,
-                                                curnode->nsid);
-            if (foundmod == NULL) {
-                /* try a client-loaded module */
-                foundmod = xmlns_get_modptr(curnode->nsid);
-            }
-        }
-        if (foundmod) {
-            foundmodname = ncx_get_modname(foundmod);
-        }
-    } 
-
-    if (obj_is_root(obj)) {
-        /* the child node can be any top-level object
-         * in the configuration database
-         */
-        if (foundmodname) {
-            /* get the name from 1 module */
-            foundobj =  ncx_find_object(foundmod,
-                                        curnode->elname);
-        } else if (force_modQ) {
-            /* check this Q of modules for a top-level match */
-            foundobj = ncx_find_any_object_que(force_modQ,
-                                               curnode->elname);
-            if (foundobj == NULL && curnode->nsid == 0) {
-                foundobj = ncx_find_any_object(curnode->elname);
-            }                
-            if (foundobj) {
-                foundmodname = obj_get_mod_name(foundobj);
-            }
-        } else {
-            /* NSID not set, get the name from any module */
-            foundobj = ncx_find_any_object(curnode->elname);
-            if (foundobj) {
-                foundmodname = obj_get_mod_name(foundobj);
-            }
-        }
-
-        if (foundobj) {
-            if (!obj_is_data_db(foundobj) ||
-                obj_is_abstract(foundobj) ||
-                obj_is_cli(foundobj)) {
-                foundobj = NULL;
-            }
-        }
-    } else if (obj_get_nsid(obj) == ncnid &&
-               !xml_strcmp(obj_get_name(obj),
-                           NCX_EL_NOTIFICATION)) {
-        /* hack: special case handling of the
-         * <notification> element
-         * the child node can be <eventTime> or
-         * any top-level OBJ_TYP_NOTIF node
-         */
-        if (foundmodname) {
-            /* try a child of <notification> */
-            foundobj = obj_find_child(obj, 
-                                      foundmodname,
-                                      curnode->elname);
-            if (!foundobj) {
-                /* try to find an <eventType> */
-                foundobj =  ncx_find_object(foundmod,
-                                            curnode->elname);
-                if (foundobj && 
-                    foundobj->objtype != OBJ_TYP_NOTIF) {
-                    /* object is the wrong type */
-                    foundobj = NULL;
-                }
-            }
-        } else {
-            /* no namespace ID used
-             * try to find any eventType object
-             */
-            if (force_modQ) {
-                foundobj = ncx_find_any_object_que(force_modQ,
-                                                   curnode->elname);
-            } else {
-                foundobj = ncx_find_any_object(curnode->elname);
-            }
-            if (foundobj) {
-                if (foundobj->objtype != OBJ_TYP_NOTIF) {
-                    foundobj = NULL;
-                }
-            } else {
-                /* try a child of obj (eventTime) */
-                foundobj = obj_find_child(obj, 
-                                          NULL,
-                                          curnode->elname);
-            }
-        }
-    } else if (xmlorder) {
-        /* the current node must match or one of the
-         * subsequent child nodes must match
-         */
-        if (chobj) {
-            switch (chobj->objtype) {
-            case OBJ_TYP_CHOICE:
-            case OBJ_TYP_CASE:
-                /* these nodes are not really in the XML so
-                 * check all the child nodes of the
-                 * cases.  When found, need to remember
-                 * the current child node at the choice
-                 * or case level, so when the lower
-                 * level child pointer runs out, the
-                 * search can continue at the next
-                 * sibling of 'rettop'
-                 */
-                foundobj = obj_find_child(chobj,
-                                          foundmodname,
-                                          curnode->elname);
-                if (foundobj) {
-                    /* make sure this matched a real node instead
-                     * of match of choice or case name
-                     */
-                    if (foundobj->objtype==OBJ_TYP_CHOICE ||
-                        foundobj->objtype==OBJ_TYP_CASE) {
-                        foundobj = NULL;
-                    } else {
-                        *rettop = chobj;
-                        topdone = TRUE;
-                    }
-                }                   
-                break;
-            default:
-                /* the YANG node and XML node line up,
-                 * so it is OK to compare them directly
-                 */
-                res = xml_node_match(curnode, 
-                                     obj_get_nsid(chobj), 
-                                     obj_get_name(chobj), 
-                                     XML_NT_NONE);
-
-                if (res == NO_ERR) {
-                    foundobj = chobj;
-                } else {
-                    foundobj = NULL;
-                }
-            }
-
-            if (!foundobj) {
-                /* check if there are other child nodes that could
-                 * match, due to instance qualifiers 
-                 */
-                nextchobj = find_next_child(chobj, curnode);
-                if (nextchobj) {
-                    res = NO_ERR;
-                    foundobj = nextchobj;
-                } else if (*rettop) {
-                    nextchobj = find_next_child(*rettop, curnode);
-                    if (nextchobj) {
-                        res = NO_ERR;
-                        foundobj = nextchobj;
-                    }
-                }
-            }
-        }
-    } else {
-        /* do not care about XML order, just match any node
-         * within the current parent object
-         */
-        if (curnode->nsid) {
-            /* find the specified module first */
-
-            if (foundmodname) {
-                foundobj = obj_find_child(obj, 
-                                          foundmodname,
-                                          curnode->elname);
-            }
-        } else {
-            /* get the object from first match module */
-            foundobj = obj_find_child(obj, 
-                                      NULL,
-                                      curnode->elname);
-        }
-    }
-
-    if (foundobj) {
-        *retobj = foundobj;
-        if (!topdone) {
-            *rettop = foundobj;
-        }
-        return NO_ERR;
-    } else if (res != NO_ERR) {
-        return res;
-    } else {
-        return ERR_NCX_DEF_NOT_FOUND;
-    }
-    /*NOTREACHED*/
-
-}  /* obj_get_child_node */
-
-
-/********************************************************************
-* FUNCTION obj_get_child_count
-*
-* Get the number of child nodes the object has
-*
-* INPUTS:
-*   obj == obj_template to check
-*
-* RETURNS:
-*   number of child nodes
-*********************************************************************/
-uint32
-    obj_get_child_count (const obj_template_t *obj)
-{
-
-    const dlq_hdr_t   *datadefQ;
-
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return 0;
-    }
-#endif
-
-    datadefQ = obj_get_cdatadefQ(obj);
-    if (datadefQ) {
-        return dlq_count(datadefQ);
-    } else {
-        return 0;
-    }
-
-}   /* obj_get_child_count */
 
 
 /********************************************************************
@@ -9423,6 +9705,43 @@ boolean
     }
 
 }   /* obj_rpc_has_output */
+
+
+/********************************************************************
+ * FUNCTION obj_has_when_stmts
+ * 
+ * Check if any when-stmts apply to this object
+ * Does not check if they are true, just any when-stmts present
+ *
+ * INPUTS:
+ *    obj == object template to check
+ *
+ * RETURNS:
+ *   TRUE if object has any when-stmts associated with it
+ *   FALSE otherwise
+ *********************************************************************/
+boolean
+    obj_has_when_stmts (obj_template_t *obj)
+{
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    if (obj->when) {
+        return TRUE;;
+    }
+    if (obj->augobj && obj->augobj->when) {
+        return TRUE;
+    }
+    if (obj->usesobj && obj->usesobj->when) {
+        return TRUE;
+    }
+    return FALSE;
+
+}  /* obj_has_when_stmts */
 
 
 /********************************************************************
@@ -9626,428 +9945,6 @@ obj_metadata_t *
 
 
 /********************************************************************
-* FUNCTION obj_get_default_parm
-* 
-* Get the ncx:default-parm object for this object
-* Only supported for OBJ_TYP_CONTAINER and OBJ_TYP_RPCIO (input)
-*
-* INPUTS:
-*   obj == the specific object to check
-*
-* RETURNS:
-*   pointer to the name field, NULL if some error or unnamed
-*********************************************************************/
-obj_template_t * 
-    obj_get_default_parm (obj_template_t *obj)
-{
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    switch (obj->objtype) {
-    case OBJ_TYP_CONTAINER:
-        return obj->def.container->defaultparm;
-    case OBJ_TYP_LEAF:
-    case OBJ_TYP_LEAF_LIST:
-    case OBJ_TYP_LIST:
-    case OBJ_TYP_CHOICE:
-    case OBJ_TYP_CASE:
-    case OBJ_TYP_USES:
-    case OBJ_TYP_AUGMENT:
-    case OBJ_TYP_REFINE:
-    case OBJ_TYP_RPC:
-    case OBJ_TYP_ANYXML:
-        return NULL;
-    case OBJ_TYP_RPCIO:
-        return obj->def.rpcio->defaultparm;
-    case OBJ_TYP_NOTIF:
-        return NULL;
-    case OBJ_TYP_NONE:
-    default:
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return NULL;
-    }
-    /*NOTREACHED*/
-
-}  /* obj_get_default_parm */
-
-
-/********************************************************************
-* FUNCTION obj_get_config_flag_deep
-*
-* Get the config flag for an obj_template_t 
-* Go all the way up the tree until an explicit
-* set node or the root is found
-*
-* Used by get_list_key because the config flag
-* of the parent is not set yet when a key leaf is expanded
-*
-* INPUTS:
-*   obj == obj_template to check
-*
-* RETURNS:
-*   TRUE if config set to TRUE
-*   FALSE if config set to FALSE
-*********************************************************************/
-boolean
-    obj_get_config_flag_deep (const obj_template_t *obj)
-{
-    switch (obj->objtype) {
-    case OBJ_TYP_CONTAINER:
-    case OBJ_TYP_ANYXML:
-    case OBJ_TYP_LEAF:
-    case OBJ_TYP_LEAF_LIST:
-    case OBJ_TYP_LIST:
-    case OBJ_TYP_CHOICE:
-        if (obj_is_root(obj)) {
-            return TRUE;
-        }
-        /* check if this normal object has a config-stmt */
-        if (obj->flags & OBJ_FL_CONFSET) {
-            return (obj->flags & OBJ_FL_CONFIG) ? TRUE : FALSE;
-        }
-
-        if (obj->parent) {
-            return obj_get_config_flag_deep(obj->parent);
-        }
-
-        /* should not really get here, since all 
-         * top-level objects should have the OBJ_FL_CONFSET
-         * flag set: default ifor top-level is config=true
-         */
-        return TRUE;
-    case OBJ_TYP_CASE:
-        if (obj->parent) {
-            return obj_get_config_flag_deep(obj->parent);
-        } else {
-            /* should not happen */
-            return FALSE;
-        }
-    case OBJ_TYP_USES:
-    case OBJ_TYP_AUGMENT:
-    case OBJ_TYP_REFINE:
-        /* no real setting -- not applicable */
-        return FALSE;
-    case OBJ_TYP_RPC:
-        /* no real setting for this, but has to be true
-         * to allow rpc/input to be true
-         */
-        return TRUE;
-    case OBJ_TYP_RPCIO:
-        if (!xml_strcmp(obj->def.rpcio->name, YANG_K_INPUT)) {
-            return TRUE;
-        } else {
-            return FALSE;
-        }
-    case OBJ_TYP_NOTIF:
-        return FALSE;
-    case OBJ_TYP_NONE:
-    default:
-        SET_ERROR(ERR_INTERNAL_VAL);
-        return FALSE;
-    }
-    /*NOTREACHED*/
-
-}   /* obj_get_config_flag_deep */
-
-
-/********************************************************************
-* FUNCTION obj_get_fraction_digits
-* 
-* Get the fraction-digits field from the object typdef
-*
-* INPUTS:
-*     obj == object template to  check
-*
-* RETURNS:
-*     number of fixed decimal digits expected (1..18)
-*     0 if some error
-*********************************************************************/
-uint8
-    obj_get_fraction_digits (const obj_template_t  *obj)
-{
-    const typ_def_t  *typdef;
-
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return 0;
-    }
-#endif
-
-    typdef = obj_get_ctypdef(obj);
-    if (typdef) {
-        return typ_get_fraction_digits(typdef);
-    } else {
-        return 0;
-    }
-
-}  /* obj_get_fraction_digits */
-
-
-/********************************************************************
-* FUNCTION obj_get_first_iffeature
-* 
-* Get the first if-feature clause (if any) for the specified object
-*
-* INPUTS:
-*     obj == object template to  check
-*
-* RETURNS:
-*     pointer to first if-feature struct
-*     NULL if none available
-*********************************************************************/
-const ncx_iffeature_t *
-    obj_get_first_iffeature (const obj_template_t  *obj)
-{
-
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    return (const ncx_iffeature_t *)
-        dlq_firstEntry(&obj->iffeatureQ);
-
-}  /* obj_get_first_iffeature */
-
-
-/********************************************************************
-* FUNCTION obj_get_next_iffeature
-* 
-* Get the next if-feature clause (if any)
-*
-* INPUTS:
-*     iffeature == current iffeature struct
-*
-* RETURNS:
-*     pointer to next if-feature struct
-*     NULL if none available
-*********************************************************************/
-const ncx_iffeature_t *
-    obj_get_next_iffeature (const ncx_iffeature_t  *iffeature)
-{
-
-#ifdef DEBUG
-    if (!iffeature) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    return (const ncx_iffeature_t *)dlq_nextEntry(iffeature);
-
-}  /* obj_get_next_iffeature */
-
-
-/********************************************************************
-* FUNCTION obj_is_enabled
-* 
-* Check any if-feature statement that may
-* cause the specified object to be invisible
-*
-* INPUTS:
-*    obj == obj_template_t to check
-
-* RETURNS:
-*    TRUE if object is enabled
-*    FALSE if any if-features are present and FALSE
-*********************************************************************/
-boolean
-    obj_is_enabled (const obj_template_t *obj)
-{
-    const ncx_iffeature_t   *iffeature;
-
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
-
-    for (iffeature = obj_get_first_iffeature(obj);
-         iffeature != NULL;
-         iffeature = obj_get_next_iffeature(iffeature)) {
-
-        if (!iffeature->feature ||
-            !ncx_feature_enabled(iffeature->feature)) {
-            return FALSE;
-        }
-    }
-
-    return TRUE;
-
-}  /* obj_is_enabled */
-
-
-/********************************************************************
- * FUNCTION obj_is_single_instance
- * 
- * Check if the object is a single instance of if it
- * allows multiple instances; check all of the
- * ancestors if needed
- *
- * INPUTS:
- *    obj == object template to check
- *********************************************************************/
-boolean
-    obj_is_single_instance (obj_template_t *obj)
-{
-    ncx_iqual_t  iqual;
-
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return TRUE;
-    }
-#endif
-
-    while (obj != NULL) {
-        iqual = obj_get_iqualval(obj);
-        switch (iqual) {
-        case NCX_IQUAL_ZMORE:
-        case NCX_IQUAL_1MORE:
-            return FALSE;
-        default:
-            /* don't bother checking the root
-             * and don't go past the root into
-             * the RPC parameters
-             */
-            obj = obj->parent;
-            if (obj && obj_is_root(obj)) {
-                obj = NULL;
-            }
-        }
-    }
-    return TRUE;
-
-}  /* obj_is_single_instance */
-
-
-/********************************************************************
- * FUNCTION obj_is_short_case
- * 
- * Check if the object is a short case statement
- *
- * INPUTS:
- *    obj == object template to check
- *********************************************************************/
-boolean
-    obj_is_short_case (obj_template_t *obj)
-{
-    const obj_case_t   *cas;
-
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return TRUE;
-    }
-#endif
-
-    if (obj->objtype != OBJ_TYP_CASE) {
-        return FALSE;
-    }
-
-    cas = obj->def.cas;
-
-    if (dlq_count(cas->datadefQ) != 1) {
-        return FALSE;
-    }
-
-    if (obj->when && obj->when->exprstr) {
-        return FALSE;
-    }
-
-    if (obj_get_first_iffeature(obj) != NULL) {
-        return FALSE;
-    }
-
-    if (obj_get_status(obj) != NCX_STATUS_CURRENT) {
-        return FALSE;
-    }
-
-    if (obj_get_description(obj) != NULL) {
-        return FALSE;
-    }
-
-    if (obj_get_reference(obj) != NULL) {
-        return FALSE;
-    }
-
-    if (dlq_count(obj_get_appinfoQ(obj)) > 0) {
-        return FALSE;
-    }
-
-    return TRUE;
-
-
-}  /* obj_is_short_case */
-
-
-/********************************************************************
- * FUNCTION obj_is_top
- * 
- * Check if the object is top-level object within
- * the YANG module that defines it
- *
- * INPUTS:
- *    obj == object template to check
- *********************************************************************/
-boolean
-    obj_is_top (const obj_template_t *obj)
-{
-
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
-
-    return (obj->flags & OBJ_FL_TOP) ? TRUE : FALSE;
-
-}  /* obj_is_top */
-
-
-/********************************************************************
- * FUNCTION obj_has_when_stmts
- * 
- * Check if any when-stmts apply to this object
- * Does not check if they are true, just any when-stmts present
- *
- * INPUTS:
- *    obj == object template to check
- *********************************************************************/
-boolean
-    obj_has_when_stmts (obj_template_t *obj)
-{
-#ifdef DEBUG
-    if (!obj) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return FALSE;
-    }
-#endif
-
-    if (obj->when) {
-        return TRUE;;
-    }
-    if (obj->augobj && obj->augobj->when) {
-        return TRUE;
-    }
-    if (obj->usesobj && obj->usesobj->when) {
-        return TRUE;
-    }
-    return FALSE;
-
-}  /* obj_has_when_stmts */
-
-
-/********************************************************************
  * FUNCTION obj_sort_children
  * 
  * Check all the child nodes of the specified object
@@ -10125,6 +10022,116 @@ void
     dlq_block_enque(&sortQ, datadefQ);
 
 }  /* obj_sort_children */
+
+
+/********************************************************************
+* FUNCTION obj_set_ncx_flags
+*
+* Check the NCX appinfo extensions and set flags as needed
+*
+** INPUTS:
+*   obj == obj_template to check
+*
+* OUTPUTS:
+*   may set additional bits in the obj->flags field
+*
+*********************************************************************/
+void
+    obj_set_ncx_flags (obj_template_t *obj)
+{
+
+    const dlq_hdr_t  *appinfoQ;
+    const typ_def_t  *typdef;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    appinfoQ = obj_get_appinfoQ(obj);
+
+    if (ncx_find_const_appinfo(appinfoQ, 
+                               NCX_PREFIX, 
+                               NCX_EL_PASSWORD)) {
+        obj->flags |= OBJ_FL_PASSWD;
+    }
+
+    if (ncx_find_const_appinfo(appinfoQ, 
+                               NCX_PREFIX, 
+                               NCX_EL_HIDDEN)) {
+        obj->flags |= OBJ_FL_HIDDEN;
+    }
+
+    if (ncx_find_const_appinfo(appinfoQ, 
+                               NCX_PREFIX, 
+                               NCX_EL_XSDLIST)) {
+        obj->flags |= OBJ_FL_XSDLIST;
+    }
+
+    if (ncx_find_const_appinfo(appinfoQ, 
+                               NCX_PREFIX, 
+                               NCX_EL_ROOT)) {
+        obj->flags |= OBJ_FL_ROOT;
+    }
+
+    if (ncx_find_const_appinfo(appinfoQ, 
+                               NCX_PREFIX, 
+                               NCX_EL_CLI)) {
+        obj->flags |= OBJ_FL_CLI;
+    }
+
+    if (ncx_find_const_appinfo(appinfoQ, 
+                               NCX_PREFIX, 
+                               NCX_EL_ABSTRACT)) {
+        obj->flags |= OBJ_FL_ABSTRACT;
+    }
+
+    if (ncx_find_const_appinfo(appinfoQ, 
+                               NACM_PREFIX, 
+                               NCX_EL_SECURE)) {
+        obj->flags |= OBJ_FL_SECURE;
+    }
+
+    if (ncx_find_const_appinfo(appinfoQ, 
+                               NACM_PREFIX, 
+                               NCX_EL_VERY_SECURE)) {
+        obj->flags |= OBJ_FL_VERY_SECURE;
+    }
+
+    if (obj_is_leafy(obj)) {
+        typdef = obj_get_ctypdef(obj);
+
+        /* ncx:xpath extension */
+        if (typ_is_xpath_string(typdef)) {
+            obj->flags |= OBJ_FL_XPATH;
+        } else if (ncx_find_const_appinfo(appinfoQ, 
+                                          NCX_PREFIX, 
+                                          NCX_EL_XPATH)) {
+            obj->flags |= OBJ_FL_XPATH;
+        }
+
+        /* ncx:qname extension */
+        if (typ_is_qname_string(typdef)) {
+            obj->flags |= OBJ_FL_QNAME;
+        } else if (ncx_find_const_appinfo(appinfoQ, 
+                                          NCX_PREFIX, 
+                                          NCX_EL_XPATH)) {
+            obj->flags |= OBJ_FL_QNAME;
+        }
+
+        /* ncx:schema-instance extension */
+        if (typ_is_schema_instance_string(typdef)) {
+            obj->flags |= OBJ_FL_SCHEMAINST;
+        } else if (ncx_find_const_appinfo(appinfoQ, 
+                                          NCX_PREFIX, 
+                                          NCX_EL_SCHEMA_INSTANCE)) {
+            obj->flags |= OBJ_FL_SCHEMAINST;
+        }
+    }
+
+}   /* obj_set_ncx_flags */
 
 
 /* END obj.c */

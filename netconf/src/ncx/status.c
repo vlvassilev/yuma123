@@ -85,7 +85,22 @@ static uint32 error_count;
 /********************************************************************
 * FUNCTION set_error 
 *
+*  Generate an error stack entry or if log_error is enabled,
+*  then log the error report right now.
 *
+* Used to flag internal code errors
+*
+* DO NOT USE THIS FUNCTION DIRECTLY!
+* USE THE SET_ERROR MACRO INSTEAD!
+*
+* INPUTS:
+*    filename == C filename that caused the error
+*    linenum -- line number in the C file that caused the error
+*    status == internal error code
+*    sqlError = mySQL error code (deprecated)
+*
+* RETURNS
+*    the 'status' parameter will be returned
 *********************************************************************/
 status_t set_error (const char *filename, 
                     int linenum, 
@@ -119,6 +134,7 @@ status_t set_error (const char *filename,
 /********************************************************************
 * FUNCTION print_errors
 *
+* Dump any entries stored in the error_stack.
 *
 *********************************************************************/
 void print_errors (void)
@@ -142,6 +158,7 @@ void print_errors (void)
 /********************************************************************
 * FUNCTION clear_errors
 *
+* Clear the error_stack if it has any errors stored in it
 *
 *********************************************************************/
 void clear_errors (void)
@@ -751,12 +768,11 @@ const char *
 *
 * INPUTS:
 *   none; must be called just after error occurred to prevent
-        the errno variable from being overwritten by a new operation
+*        the errno variable from being overwritten by a new operation
 *
 * RETURNS:
 *     status_t for the errno enum
 *********************************************************************/
-
 status_t
     errno_to_status (void)
 {
@@ -796,6 +812,20 @@ void
     error_count = 0;
 
 } /* status_init */
+
+
+/********************************************************************
+* FUNCTION status_cleanup
+*
+* Cleanup this module
+*
+*********************************************************************/
+void
+    status_cleanup (void)
+{
+    clear_errors();
+
+} /* status_cleanup */
 
 
 /********************************************************************

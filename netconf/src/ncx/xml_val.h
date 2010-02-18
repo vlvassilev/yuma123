@@ -52,52 +52,180 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
-/* Build output value: add child node to a struct node */
 
+/********************************************************************
+* FUNCTION xml_val_make_qname
+* 
+*   Build output value: add child node to a struct node
+*   Malloc a string buffer and create a QName string
+*   This is complete; The m__free function must be called
+*   with the return value if it is non-NULL;
+*
+* INPUTS:
+*    nsid == namespace ID to use
+*    name == condition clause (may be NULL)
+*
+* RETURNS:
+*   malloced value string or NULL if malloc error
+*********************************************************************/
 extern xmlChar *
     xml_val_make_qname (xmlns_id_t  nsid,
 			const xmlChar *name);
 
+
+/********************************************************************
+* FUNCTION xml_val_qname_len
+* 
+*   Determine the length of the qname string that would be generated
+*   with the xml_val_make_qname function
+*
+* INPUTS:
+*    nsid == namespace ID to use
+*    name == condition clause (may be NULL)
+*
+* RETURNS:
+*   length of string needed for this QName
+*********************************************************************/
 extern uint32
     xml_val_qname_len (xmlns_id_t  nsid,
 		       const xmlChar *name);
 
+
+/********************************************************************
+* FUNCTION xml_val_sprintf_qname
+* 
+*   construct a QName into a buffer
+*
+* INPUTS:
+*    buff == buffer
+*    bufflen == size of buffer
+*    nsid == namespace ID to use
+*    name == condition clause (may be NULL)
+*
+* RETURNS:
+*   number of bytes written to the buffer
+*********************************************************************/
 extern uint32
     xml_val_sprintf_qname (xmlChar *buff,
 			   uint32 bufflen,
 			   xmlns_id_t  nsid,
 			   const xmlChar *name);
 
-/* hand off a malloced attribute string */
+
+/********************************************************************
+* FUNCTION xml_val_add_attr
+* 
+*   Set up a new attr val and add it to the specified val
+*   hand off a malloced attribute string
+*
+* INPUTS:
+*    name == attr name
+*    nsid == namespace ID of attr
+*    attrval  == attr val to add (do not use strdup)
+*    val == parent val struct to hold the new attr
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xml_val_add_attr (const xmlChar *name,
 		      xmlns_id_t nsid,
 		      xmlChar *attrval,
 		      val_value_t *val);
 
-/* copy a const attribute string */
+
+/********************************************************************
+* FUNCTION xml_val_add_cattr
+* 
+*   Set up a new const attr val and add it to the specified val
+*   copy a const attribute string
+*
+* INPUTS:
+*    name == attr name
+*    nsid == namespace ID of attr
+*    cattrval  == const attr val to add (use strdup)
+*    val == parent val struct to hold the new attr
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xml_val_add_cattr (const xmlChar *name,
 		       xmlns_id_t nsid,
 		       const xmlChar *cattrval,
 		       val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION xml_val_new_struct
+* 
+*   Set up a new struct
+*
+* INPUTS:
+*    name == element name
+*    nsid == namespace ID of name
+* 
+* RETURNS:
+*   new struct or NULL if malloc error
+*********************************************************************/
 extern val_value_t *
     xml_val_new_struct (const xmlChar *name,
 			xmlns_id_t     nsid);
 
-/* hand off a malloced string */
+
+/********************************************************************
+* FUNCTION xml_val_new_string
+* 
+*  Set up a new string element; reuse the value instead of copying it
+*  hand off a malloced string
+*
+* INPUTS:
+*    name == element name
+*    nsid == namespace ID of name
+*    strval == malloced string value that will be freed later
+* 
+* RETURNS:
+*   new string or NULL if malloc error
+*********************************************************************/
 extern val_value_t *
     xml_val_new_string (const xmlChar *name,
 			xmlns_id_t     nsid,
 			xmlChar *strval);
 
-/* copy a const string */
+
+/********************************************************************
+* FUNCTION xml_val_new_cstring
+* 
+*   Set up a new string from a const string
+*   copy a const string
+*
+* INPUTS:
+*    name == element name
+*    nsid == namespace ID of name
+*    strval == const string value that will strduped first
+* 
+* RETURNS:
+*   new string or NULL if malloc error
+*********************************************************************/
 extern val_value_t *
     xml_val_new_cstring (const xmlChar *name,
 			 xmlns_id_t     nsid,
 			 const xmlChar *strval);
 
+
+/********************************************************************
+* FUNCTION xml_val_new_flag
+* 
+*   Set up a new flag
+*   This is not complete; more nodes will be added
+*
+* INPUTS:
+*    name == element name
+*    nsid == namespace ID of name
+* 
+* RETURNS:
+*   new struct or NULL if malloc error
+*********************************************************************/
 extern val_value_t *
     xml_val_new_flag (const xmlChar *name,
 		      xmlns_id_t     nsid);

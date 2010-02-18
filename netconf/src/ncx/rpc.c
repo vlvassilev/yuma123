@@ -221,15 +221,15 @@ void
 
 
 /********************************************************************
-* FUNCTION ncx_get_access_enum
+* FUNCTION rpc_get_rpctype_str
 * 
-* Get the enum for the string name of a ncx_access_t enum
+* Get the string for the enum value for the RPC type
 * 
 * INPUTS:
-*   str == string name of the enum value 
+*   rpctyp == enum for the RPC type
 *
 * RETURNS:
-*   enum value
+*   string name of the specified enum
 *********************************************************************/
 const xmlChar *
     rpc_get_rpctype_str (rpc_type_t rpctyp)

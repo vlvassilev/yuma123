@@ -200,36 +200,152 @@ typedef struct rpc_msg_t_ {
 *********************************************************************/
 
 
-/********************** RPC MESSAGES **************************/
-
+/********************************************************************
+* FUNCTION rpc_new_msg
+*
+* Malloc and initialize a new rpc_msg_t struct
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   pointer to struct or NULL or memory error
+*********************************************************************/
 extern rpc_msg_t * 
     rpc_new_msg (void);
 
+
+/********************************************************************
+* FUNCTION rpc_new_out_msg
+*
+* Malloc and initialize a new rpc_msg_t struct for output
+* or for dummy use
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   pointer to struct or NULL or memory error
+*********************************************************************/
 extern rpc_msg_t * 
     rpc_new_out_msg (void);
 
+
+/********************************************************************
+* FUNCTION rpc_free_msg
+*
+* Free all the memory used by the specified rpc_msg_t
+*
+* INPUTS:
+*   msg == rpc_msg_t to clean and delete
+* RETURNS:
+*   none
+*********************************************************************/
 extern void 
     rpc_free_msg (rpc_msg_t *msg);
 
+
+/********************************************************************
+* FUNCTION rpc_get_rpctype_str
+* 
+* Get the string for the enum value for the RPC type
+* 
+* INPUTS:
+*   rpctyp == enum for the RPC type
+*
+* RETURNS:
+*   string name of the specified enum
+*********************************************************************/
 extern const xmlChar *
     rpc_get_rpctype_str (rpc_type_t rpctyp);
 
+
+/********************************************************************
+* FUNCTION rpc_new_undorec
+*
+* Malloc and initialize a new rpc_undo_rec_t struct
+*
+* INPUTS:
+*   none
+* RETURNS:
+*   pointer to struct or NULL or memory error
+*********************************************************************/
 extern rpc_undo_rec_t *
     rpc_new_undorec (void);
 
+
+/********************************************************************
+* FUNCTION rpc_init_undorec
+*
+* Initialize a new rpc_undo_rec_t struct
+*
+* INPUTS:
+*   undo == rpc_undo_rec_t memory to initialize
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     rpc_init_undorec (rpc_undo_rec_t *undo);
 
+
+/********************************************************************
+* FUNCTION rpc_free_undorec
+*
+* Free all the memory used by the specified rpc_undo_rec_t
+*
+* INPUTS:
+*   undo == rpc_undo_rec_t to clean and delete
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     rpc_free_undorec (rpc_undo_rec_t *undorec);
 
+
+/********************************************************************
+* FUNCTION rpc_clean_undorec
+*
+* Clean all the memory used by the specified rpc_undo_rec_t
+* but do not free the struct itself
+*
+*  !!! The caller must free internal pointers that were malloced
+*  !!! instead of copied.  This function does not check them!!!
+*  
+* INPUTS:
+*   undo == rpc_undo_rec_t to clean
+* RETURNS:
+*   none
+*********************************************************************/
 extern void 
     rpc_clean_undorec (rpc_undo_rec_t *undo);
 
+
+/********************************************************************
+* FUNCTION rpc_new_auditrec
+*
+* Malloc and initialize a new rpc_audit_rec_t struct
+*
+* INPUTS:
+*   target == i-i string of edit target
+*   editop == edit operation enum
+*
+* RETURNS:
+*   pointer to struct or NULL or memory error
+*********************************************************************/
 extern rpc_audit_rec_t *
     rpc_new_auditrec (const xmlChar *target,
                       op_editop_t editop);
 
+
+/********************************************************************
+* FUNCTION rpc_free_auditrec
+*
+* Free all the memory used by the specified rpc_audit_rec_t
+*
+* INPUTS:
+*   auditrec == rpc_audit_rec_t to clean and delete
+*
+* RETURNS:
+*   none
+*********************************************************************/
 extern void 
     rpc_free_auditrec (rpc_audit_rec_t *auditrec);
 

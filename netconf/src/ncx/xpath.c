@@ -1436,6 +1436,7 @@ static status_t
 /********************************************************************
 * FUNCTION xpath_find_schema_target
 * 
+* find target, save in *targobj
 * Follow the absolute-path or descendant-node path expression
 * and return the obj_template_t that it indicates, and the
 * que that the object is in
@@ -1487,6 +1488,7 @@ status_t
 /********************************************************************
 * FUNCTION xpath_find_schema_target_err
 * 
+* find target, save in *targobj, use the errtk if error
 * Same as xpath_find_schema_target except a token struct
 * is provided to use for the error token, instead of 'obj'
 *
@@ -1558,6 +1560,7 @@ status_t
 /********************************************************************
 * FUNCTION xpath_find_schema_target_int
 * 
+* internal find target, without any error reporting
 * Follow the absolute-path expression
 * and return the obj_template_t that it indicates
 *
@@ -1594,6 +1597,9 @@ status_t
 /********************************************************************
 * FUNCTION xpath_find_val_target
 * 
+* used by cfg.c to find parms in the value struct for
+* a config file (ncx:cli)
+*
 * Follow the absolute-path Xpath expression as used
 * internally to identify a config DB node
 * and return the val_value_t that it indicates
@@ -1643,6 +1649,9 @@ status_t
 /********************************************************************
 * FUNCTION xpath_find_val_unique
 * 
+* called by server to find a descendant value node
+* based  on a relative-path sub-clause of a unique-stmt
+*
 * Follow the relative-path Xpath expression as used
 * internally to identify a config DB node
 * and return the val_value_t that it indicates
@@ -1702,6 +1711,10 @@ status_t
 /********************************************************************
 * FUNCTION xpath_new_pcb
 * 
+* malloc a new XPath parser control block
+* xpathstr is allowed to be NULL, otherwise
+* a strdup will be made and exprstr will be set
+*
 * Create and initialize an XPath parser control block
 *
 * INPUTS:
@@ -1747,6 +1760,8 @@ xpath_pcb_t *
 * FUNCTION xpath_clone_pcb
 * 
 * Clone an XPath PCB for a  must clause copy
+* copy from typdef to object for leafref
+* of object to value for NETCONF PDU processing
 *
 * INPUTS:
 *    srcpcb == struct with starting contents
@@ -1827,6 +1842,7 @@ xpath_pcb_t *
 * FUNCTION xpath_find_pcb
 * 
 * Find an XPath PCB
+* find by exact match of the expressions string
 *
 * INPUTS:
 *    pcbQ == Q of xpath_pcb_t structs to check
@@ -1918,6 +1934,7 @@ void
 /********************************************************************
 * FUNCTION xpath_new_result
 * 
+* malloc an XPath result
 * Create and initialize an XPath result struct
 *
 * INPUTS:
@@ -1945,6 +1962,7 @@ xpath_result_t *
 * FUNCTION xpath_init_result
 * 
 * Initialize an XPath result struct
+* malloc an XPath result node
 *
 * INPUTS:
 *   result == pointer to result struct to initialize

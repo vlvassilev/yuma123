@@ -48,6 +48,23 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION send_buff
+*
+* Send the buffer to the ncxserver
+*
+* This function is used by applications which do not
+* select for write_fds, and may not block (if fnctl used)
+* 
+* INPUTS:
+*   fd == the socket to write to
+*   buffer == the buffer to write
+*   cnt == the number of bytes to write
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     send_buff (int fd,
 	       const char *buffer, 

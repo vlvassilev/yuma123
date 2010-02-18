@@ -539,7 +539,7 @@ void
 *
 * Write one char to the session, without any translation
 *
-* THIS FUNCTION DOES NOT CHECK ANY PARAMTERS TO SAVE TIME
+* THIS FUNCTION DOES NOT CHECK ANY PARAMETERS TO SAVE TIME
 *
 * NO CHARS ARE ACTUALLY WRITTEN TO A REAL SESSION!!!
 * The 'output ready' indicator will be set and the session
@@ -661,6 +661,7 @@ void
 /********************************************************************
 * FUNCTION ses_putcstr
 *
+* write XML element safe content string
 * Write a zero-terminated element content string to the session
 *
 * THIS FUNCTION DOES NOT CHECK ANY PARAMTERS TO SAVE TIME
@@ -705,6 +706,7 @@ void
 /********************************************************************
 * FUNCTION ses_putastr
 *
+* write XML attribute safe content string
 * Write a zero-terminated attribute content string to the session
 *
 * THIS FUNCTION DOES NOT CHECK ANY PARAMTERS TO SAVE TIME
@@ -794,6 +796,8 @@ void
 *
 * Get the indent count for this session
 *
+* THIS FUNCTION DOES NOT CHECK ANY PARAMETERS TO SAVE TIME
+*
 * INPUTS:
 *   scb == session control block to check
 *
@@ -822,6 +826,13 @@ void
     ses_set_indent (ses_cb_t *scb,
                     int32 indent)
 {
+#ifdef DEBUG
+    if (scb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
     if (indent < 0) {
         indent = 0;
     } else if (indent > 9) {
@@ -847,7 +858,14 @@ void
     ses_set_mode (ses_cb_t *scb,
                   ses_mode_t mode)
 {
-    scb->mode = mode;  /***/
+#ifdef DEBUG
+    if (scb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    scb->mode = mode;
 } /* ses_set_mode */
 
 
@@ -865,6 +883,13 @@ void
 ses_mode_t
     ses_get_mode (ses_cb_t *scb)
 {
+#ifdef DEBUG
+    if (scb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return SES_MODE_NONE;
+    }
+#endif
+
     return scb->mode;
 } /* ses_get_mode */
 
@@ -1321,6 +1346,13 @@ const xmlChar *
 ncx_withdefaults_t
     ses_withdef (const ses_cb_t *scb)
 {
+#ifdef DEBUG
+    if (!scb) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NCX_WITHDEF_NONE;
+    }
+#endif
+
     return scb->withdef;
 
 } /* ses_withdef */
@@ -1356,7 +1388,7 @@ uint32
 *  write the contents of a file to the session
 *
 * INPUTS:
-     scb == session to write
+*    scb == session to write
 *    fspec == filespec to write
 *
 *********************************************************************/
@@ -1403,7 +1435,6 @@ ses_total_stats_t *
 } /* ses_get_total_stats */
 
 
-
 /********************************************************************
 * FUNCTION ses_get_transport_name
 * 
@@ -1411,7 +1442,7 @@ ses_total_stats_t *
 *
 * INPUTS:
 *   transport == ses_transport_t enum value
-
+*
 * RETURNS:
 *   pointer to the string value for the specified enum
 *********************************************************************/

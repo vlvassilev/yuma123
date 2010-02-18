@@ -5163,7 +5163,7 @@ static status_t
 
     retres = NO_ERR;
     
-    que = obj_get_appinfoQ2(obj);
+    que = obj_get_appinfoQ(obj);
     if (!que) {
         return NO_ERR;
     }
@@ -9237,8 +9237,6 @@ static status_t
 *
 * Current token is the first keyword, starting the specific
 * data definition
-*
-*   
 *
 * INPUTS:
 *   pcb == parser control block to use

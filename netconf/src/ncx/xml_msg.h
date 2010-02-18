@@ -117,12 +117,56 @@ typedef boolean (*xml_msg_authfn_t) (xml_msg_hdr_t *msg,
 *                                                                   *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION xml_msg_init_hdr
+*
+* Initialize a new xml_msg_hdr_t struct
+*
+* INPUTS:
+*   msg == xml_msg_hdr_t memory to initialize
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     xml_msg_init_hdr (xml_msg_hdr_t *msg);
 
+
+/********************************************************************
+* FUNCTION xml_msg_clean_hdr
+*
+* Clean all the memory used by the specified xml_msg_hdr_t
+* but do not free the struct itself
+*
+* INPUTS:
+*   msg == xml_msg_hdr_t to clean
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     xml_msg_clean_hdr (xml_msg_hdr_t *msg);
 
+
+/********************************************************************
+* FUNCTION xml_msg_get_prefix
+*
+* Find the namespace prefix for the specified namespace ID
+* If it is not there then create one
+*
+* INPUTS:
+*    msg  == message to search
+*    parent_nsid == parent namespace ID
+*    nsid == namespace ID to find
+*    curelem == value node for current element if available
+*    xneeded == pointer to xmlns needed flag output value
+*
+* OUTPUTS:
+*   *xneeded == TRUE if the prefix is new and an xmlns
+*               decl is needed in the element being generated
+*
+* RETURNS:
+*   pointer to prefix if found, else NULL if not found
+*********************************************************************/
 extern const xmlChar *
     xml_msg_get_prefix (xml_msg_hdr_t *msg,
 			xmlns_id_t parent_nsid,
@@ -130,22 +174,99 @@ extern const xmlChar *
 			val_value_t *curelem,
 			boolean  *xneeded);
 
-/* creates a new pfixmap if needed */
+
+/********************************************************************
+* FUNCTION xml_msg_get_prefix_xpath
+*
+* Find the namespace prefix for the specified namespace ID
+* If it is not there then create one in the msg prefix map
+* Always returns a prefix, instead of using a default
+*
+* creates a new pfixmap if needed
+*
+* !!! MUST BE CALLED BEFORE THE <rpc-reply> XML OUTPUT
+* !!! HAS BEGUN.  CANNOT BE CALLED BY OUTPUT FUNCTIONS
+* !!! DURING THE <get> OR <get-config> OUTPUT GENERATION
+*
+* INPUTS:
+*    msg  == message to search
+*    nsid == namespace ID to find
+*
+* RETURNS:
+*   pointer to prefix if found, else NULL if not found
+*********************************************************************/
 extern const xmlChar *
     xml_msg_get_prefix_xpath (xml_msg_hdr_t *msg,
 			      xmlns_id_t nsid);
 
-/* does not create any pfixmap, just returns NULL if not found */
+
+/********************************************************************
+* FUNCTION xml_msg_get_prefix_start_tag
+*
+* Find the namespace prefix for the specified namespace ID
+* DO NOT CREATE A NEW PREFIX MAP IF IT IS NOT THERE
+* does not create any pfixmap, just returns NULL if not found
+*
+* INPUTS:
+*    msg  == message to search
+*    nsid == namespace ID to find
+*
+* RETURNS:
+*   pointer to prefix if found, else NULL if not found
+*********************************************************************/
 extern const xmlChar *
     xml_msg_get_prefix_start_tag (xml_msg_hdr_t *msg,
 				  xmlns_id_t nsid);
 
+
+/********************************************************************
+* FUNCTION xml_msg_gen_new_prefix
+*
+* Generate a new namespace prefix
+* 
+* INPUTS:
+*    msg  == message to search and generate a prefix for
+*    nsid == namespace ID to generate prefix for
+*    retbuff == address of return buffer
+*    buffsize == buffer size
+* OUTPUTS:
+*   if *retbuff is NULL it will be created
+*   else *retbuff is filled in with the new prefix if NO_ERR
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t 
     xml_msg_gen_new_prefix (xml_msg_hdr_t *msg,
 			    xmlns_id_t  nsid,
 			    xmlChar **retbuff,
 			    uint32 buffsize);
 
+
+/********************************************************************
+* FUNCTION xml_msg_build_prefix_map
+*
+* Build a queue of xmlns_pmap_t records for the current message
+* 
+* INPUTS:
+*    msg == message in progrss
+*    attrs == the top-level attrs list (e;g, rpc_in_attrs)
+*    addncid == TRUE if a prefix entry for the NC namespace
+*                should be added
+*            == FALSE if the NC nsid should not be added
+*    addncxid == TRUE if a prefix entry for the NCX namespace
+*                should be added
+*             == FALSE if the NCX nsid should not be added
+* OUTPUTS:
+*   msg->prefixQ will be populated as needed,
+*   could be partially populated if some error returned
+*
+*   XMLNS Entries for NETCONF and NCX will be added if they 
+*   are not present
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xml_msg_build_prefix_map (xml_msg_hdr_t *msg,
 			      xml_attrs_t *attrs,
@@ -153,6 +274,27 @@ extern status_t
 			      boolean addncxid);
 
 
+/********************************************************************
+* FUNCTION xml_msg_check_xmlns_attr
+*
+* Check the default NS and the prefix map in the msg;
+* 
+* INPUTS:
+*    msg == message in progress
+*    nsid == namespace ID to check
+*    badns == namespace URI of the bad namespace
+*             used if the nsid is the INVALID marker
+*    attrs == Q to hold the xml_attr_t, if generated
+*
+* OUTPUTS:
+*   msg->prefixQ will be populated as needed,
+*   could be partially populated if some error returned
+*  
+*   XMLNS attr entry may be added to the attrs Q
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xml_msg_check_xmlns_attr (xml_msg_hdr_t *msg, 
 			      xmlns_id_t nsid,
@@ -160,6 +302,25 @@ extern status_t
 			      xml_attrs_t  *attrs);
 
 
+/********************************************************************
+* FUNCTION xml_msg_gen_xmlns_attrs
+*
+* Generate any xmlns directives in the top-level
+* attribute Q
+*
+* INPUTS:
+*    msg == message in progress
+*    attrs == xmlns_attrs_t Q to process
+*    addncx == TRUE if an xmlns for the NCX prefix (for errors)
+*              should be added to the <rpc-reply> element
+*              FALSE if not
+*
+* OUTPUTS:
+*   *attrs will be populated as needed,
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xml_msg_gen_xmlns_attrs (xml_msg_hdr_t *msg, 
 			     xml_attrs_t *attrs,

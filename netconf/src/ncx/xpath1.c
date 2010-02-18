@@ -8422,6 +8422,9 @@ static obj_template_t *
 * 
 * Parse the XPATH 1.0 expression string.
 *
+* parse initial expr with YANG prefixes: must/when
+* the object is left out in case it is in a grouping
+*
 * This is just a first pass done when the
 * XPath string is consumed.  If this is a
 * YANG file source then the prefixes will be
@@ -8585,6 +8588,10 @@ status_t
 *     the pcb->functions array
 *   - variable references exist in the pcb->varbindQ
 *
+* parse expr with YANG prefixes: must/when
+* called from final OBJ xpath check after all
+* cooked objects are in place
+*
 * Called after all 'uses' and 'augment' expansion
 * so validation against cooked object tree can be done
 *
@@ -8698,6 +8705,7 @@ status_t
 /********************************************************************
 * FUNCTION xpath1_eval_expr
 * 
+* use if the prefixes are YANG: must/when
 * Evaluate the expression and get the expression nodeset result
 *
 * INPUTS:
@@ -8807,6 +8815,7 @@ xpath_result_t *
 /********************************************************************
 * FUNCTION xpath1_eval_xmlexpr
 * 
+* use if the prefixes are XML: select
 * Evaluate the expression and get the expression nodeset result
 * Called from inside the XML parser, so the XML reader
 * must be used to get the XML namespace to prefix mappings

@@ -1968,6 +1968,7 @@ void
 * FUNCTION tk_get_yang_btype_id
 * 
 * Check if the specified string is a YANG builtin type name
+* checks for valid YANG data type name
 *
 * INPUTS:
 *   buff == token string to check -- NOT ZERO-TERMINATED
@@ -2621,6 +2622,7 @@ status_t
 * FUNCTION tk_tokenize_metadata_string
 * 
 * The specified ncx:metadata string is parsed into tokens
+* convert the ncx:metadata content to 1 or 2 tokens
 *
 * INPUTS:
 *   mod == module in progress for error purposes (may be NULL)

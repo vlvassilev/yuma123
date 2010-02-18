@@ -106,58 +106,206 @@ typedef enum var_side_t_ {
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION var_free
+* 
+* Free a ncx_var_t struct
+* 
+* INPUTS:
+*   var == var struct to free
+* 
+*********************************************************************/
 extern void
     var_free (ncx_var_t *var);
 
+
+/********************************************************************
+* FUNCTION var_clean_varQ
+* 
+* Clean a Q of ncx_var_t
+* 
+* INPUTS:
+*   varQ == Q of var structs to free
+* 
+*********************************************************************/
 extern void
     var_clean_varQ (dlq_hdr_t *varQ);
 
 
-/*****   S E T   F U N C T I O N S  *****/
-
+/********************************************************************
+* FUNCTION var_set_str
+* 
+* Find and set (or create a new) global user variable
+* 
+* INPUTS:
+*   name == var name to set
+*   namelen == length of name
+*   value == var value to set
+*   vartype == variable type
+* 
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     var_set_str (const xmlChar *name,
 		 uint32 namelen,
 		 const val_value_t *value,
 		 var_type_t vartype);
 
+
+/********************************************************************
+* FUNCTION var_set
+* 
+* Find and set (or create a new) global user variable
+* 
+* INPUTS:
+*   name == var name to set
+*   value == var value to set
+*   vartype == variable type
+* 
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     var_set (const xmlChar *name,
 	     const val_value_t *value,
 	     var_type_t vartype);
 
 
+/********************************************************************
+* FUNCTION var_set_str_que
+* 
+* Find and set (or create a new) global user variable
+* 
+* INPUTS:
+*   varQ == variable binding Q to use instead of runstack
+*   name == var name to set
+*   namelen == length of name
+*   value == var value to set
+* 
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     var_set_str_que (dlq_hdr_t  *varQ,
 		     const xmlChar *name,
 		     uint32 namelen,
 		     const val_value_t *value);
 
+
+/********************************************************************
+* FUNCTION var_set_que
+* 
+* Find and set (or create a new) Q-based user variable
+* 
+* INPUTS:
+*   varQ == varbind Q to use
+*   name == var name to set
+*   value == var value to set
+* 
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     var_set_que (dlq_hdr_t *varQ,
 		 const xmlChar *name,
 		 const val_value_t *value);
 
+
+/********************************************************************
+* FUNCTION var_set_move
+* 
+* Find and set (or create a new) global user variable
+* Use the provided entry which will be freed later
+* This function will not clone the value like var_set
+*
+* INPUTS:
+*   name == var name to set
+*   namelen == length of name string
+*   vartype == variable type
+*   value == var value to set
+* 
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     var_set_move (const xmlChar *name,
 		  uint32 namelen,
 		  var_type_t vartype,
 		  val_value_t *value);
 
+
+/********************************************************************
+* FUNCTION var_set_sys
+* 
+* Find and set (or create a new) global system variable
+* 
+* INPUTS:
+*   name == var name to set
+*   value == var value to set
+* 
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     var_set_sys (const xmlChar *name,
 		 const val_value_t *value);
 
+
+/********************************************************************
+* FUNCTION var_set_from_string
+* 
+* Find and set (or create a new) global user variable
+* from a string value instead of a val_value_t struct
+*
+* INPUTS:
+*   name == var name to set
+*   valstr == value string to set
+*   vartype == variable type
+* 
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     var_set_from_string (const xmlChar *name,
 			 const xmlChar *valstr,
 			 var_type_t vartype);
 
+
+/********************************************************************
+* FUNCTION var_unset
+* 
+* Find and remove a local or global user variable
+*
+* !!! This function does not try global if local fails !!!
+* 
+* INPUTS:
+*   name == var name to unset
+*   namelen == length of name string
+*   vartype == variable type
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     var_unset (const xmlChar *name,
 	       uint32 namelen,
 	       var_type_t vartype);
 
+
+/********************************************************************
+* FUNCTION var_unset_que
+* 
+* Find and remove a Q-based user variable
+* 
+* INPUTS:
+*   varQ == Q of ncx_var_t to use
+*   name == var name to unset
+*   namelen == length of name string
+*   nsid == namespace ID to check if non-zero
+* 
+*********************************************************************/
 extern status_t
     var_unset_que (dlq_hdr_t *varQ,
 		   const xmlChar *name,
@@ -165,49 +313,201 @@ extern status_t
 		   xmlns_id_t  nsid);
 
 
-/*****   G E T   F U N C T I O N S  *****/
-
+/********************************************************************
+* FUNCTION var_get_str
+* 
+* Find a global user variable
+* 
+* INPUTS:
+*   name == var name to get
+*   namelen == length of name
+*   vartype == variable type
+*
+* RETURNS:
+*   pointer to value, or NULL if not found
+*********************************************************************/
 extern val_value_t *
     var_get_str (const xmlChar *name,
 		 uint32 namelen,
 		 var_type_t vartype);
 
+
+/********************************************************************
+* FUNCTION var_get
+* 
+* Find a local or global user variable
+* 
+* INPUTS:
+*   name == var name to get
+*   vartype == variable type
+* 
+* RETURNS:
+*   pointer to value, or NULL if not found
+*********************************************************************/
 extern val_value_t *
     var_get (const xmlChar *name,
 	     var_type_t vartype);
 
+
+/********************************************************************
+* FUNCTION var_get_type_str
+* 
+* Find a user variable; get its var type
+* 
+* INPUTS:
+*   name == var name to get
+*   namelen == length of name
+*   globalonly == TRUE to check only the global Q
+*                 FALSE to check local, then global Q
+*
+* RETURNS:
+*   var type if found, or VAR_TYP_NONE
+*********************************************************************/
 extern var_type_t
     var_get_type_str (const xmlChar *name,
 		      uint32 namelen,
 		      boolean globalonly);
 
+
+/********************************************************************
+* FUNCTION var_get_type
+* 
+* Get the var type of a specified var name
+* 
+* INPUTS:
+*   name == var name to get
+*   globalonly == TRUE to check only the global Q
+*                 FALSE to check local, then global Q
+*
+* RETURNS:
+*   var type or VAR_TYP_NONE if not found
+*********************************************************************/
 extern var_type_t
     var_get_type (const xmlChar *name,
 		  boolean globalonly);
 
+
+/********************************************************************
+* FUNCTION var_get_str_que
+* 
+* Find a global user variable
+* 
+* INPUTS:
+*   varQ == queue of ncx_var_t to use
+*   name == var name to get
+*   namelen == length of name
+*   nsid == namespace ID  for name (0 if not used)
+*
+* RETURNS:
+*   pointer to value, or NULL if not found
+*********************************************************************/
 extern val_value_t *
     var_get_str_que (dlq_hdr_t *varQ,
 		     const xmlChar *name,
 		     uint32 namelen,
 		     xmlns_id_t nsid);
 
+
+/********************************************************************
+* FUNCTION var_get_que
+* 
+* Find a Q-based user variable
+* 
+* INPUTS:
+*   varQ == Q of ncx_var_t to use
+*   name == var name to get
+*   nsid == namespace ID  for name (0 if not used)
+* 
+* RETURNS:
+*   pointer to value, or NULL if not found
+*********************************************************************/
 extern val_value_t *
     var_get_que (dlq_hdr_t *varQ,
 		 const xmlChar *name,
 		 xmlns_id_t nsid);
 
+
+/********************************************************************
+* FUNCTION var_get_que_raw
+* 
+* Find a Q-based user variable; return the var struct instead
+* of just the value
+* 
+* INPUTS:
+*   varQ == Q of ncx_var_t to use
+*   nsid == namespace ID to match (0 if not used)
+*   name == var name to get
+* 
+* RETURNS:
+*   pointer to value, or NULL if not found
+*********************************************************************/
 extern ncx_var_t *
     var_get_que_raw (dlq_hdr_t *varQ,
 		     xmlns_id_t  nsid,
 		     const xmlChar *name);
 
+
+/********************************************************************
+* FUNCTION var_get_local
+* 
+* Find a local user variable
+* 
+* INPUTS:
+*   name == var name to get
+* 
+* RETURNS:
+*   pointer to value, or NULL if not found
+*********************************************************************/
 extern val_value_t *
     var_get_local (const xmlChar *name);
 
+
+/********************************************************************
+* FUNCTION var_get_local_str
+* 
+* Find a local user variable, count-based name string
+* 
+* INPUTS:
+*   name == var name to get
+* 
+* RETURNS:
+*   pointer to value, or NULL if not found
+*********************************************************************/
 extern val_value_t *
     var_get_local_str (const xmlChar *name,
 		       uint32 namelen);
 
+
+/********************************************************************
+* FUNCTION var_check_ref
+* 
+* Check if the immediate command sub-string is a variable
+* reference.  If so, return the (vartype, name, namelen)
+* tuple that identifies the reference.  Also return
+* the total number of chars consumed from the input line.
+* 
+* E.g.,
+*
+*   $foo = get-config filter=@filter.xml
+*
+* INPUTS:
+*   line == command line string to expand
+*   isleft == TRUE if left hand side of an expression
+*          == FALSE if right hand side ($1 type vars allowed)
+*   len  == address of number chars parsed so far in line
+*   vartype == address of return variable Q type
+*   name == address of string start return val
+*   namelen == address of name length return val
+*
+* OUTPUTS:
+*   *len == number chars consumed by this function
+*   *vartype == variable type enum
+*   *name == start of name string
+*   *namelen == length of *name string
+*
+* RETURNS:
+*    status   
+*********************************************************************/
 extern status_t
     var_check_ref (const xmlChar *line,
 		   var_side_t side,
@@ -217,9 +517,34 @@ extern status_t
 		   uint32 *namelen);
 
 
-/*****   C L I   F U N C T I O N S  *****/
-
-
+/********************************************************************
+* FUNCTION var_get_script_val
+* 
+* Create or fill in a val_value_t struct for a parameter assignment
+* within the script processing mode
+*
+* See ncxcli.c for details on the script syntax
+*
+* INPUTS:
+*   obj == expected type template 
+*          == NULL and will be set to NCX_BT_STRING for
+*             simple types
+*   val == value to fill in :: val->obj MUST be set
+*          == NULL to create a new one
+*   strval == string value to check
+*   istop == TRUE (ISTOP) if calling from top level assignment
+*            An unquoted string is the start of a command
+*         == FALSE (ISPARM) if calling from a parameter parse
+*            An unquoted string is just a string
+*   res == address of status result
+*
+* OUTPUTS:
+*   *res == status
+*
+* RETURNS:
+*   If error, then returns NULL;
+*   If no error, then returns pointer to new val or filled in 'val'
+*********************************************************************/
 extern val_value_t *
     var_get_script_val (obj_template_t *obj,
 			val_value_t *val,
@@ -228,6 +553,32 @@ extern val_value_t *
 			status_t *res);
 
 
+/********************************************************************
+* FUNCTION var_check_script_val
+* 
+* Create a val_value_t struct for a parameter assignment
+* within the script processing mode, if a var ref is found
+*
+* See yangcli documentation for details on the script syntax
+*
+* INPUTS:
+*   obj == expected object template 
+*          == NULL and will be set to NCX_BT_STRING for
+*             simple types
+*   strval == string value to check
+*   istop == TRUE if calling from top level assignment
+*            An unquoted string is the start of a command
+*         == FALSE if calling from a parameter parse
+*            An unquoted string is just a string
+*   res == address of status result
+*
+* OUTPUTS:
+*   *res == status
+*
+* RETURNS:
+*   If no error, then returns pointer to new malloced val 
+*   If error, then returns NULL
+*********************************************************************/
 extern val_value_t *
     var_check_script_val (obj_template_t *obj,
 			  const xmlChar *strval,
@@ -235,7 +586,16 @@ extern val_value_t *
 			  status_t *res);
 
 
-/* yangcli session cleanup */
+/********************************************************************
+* FUNCTION var_queue_cvt_generic
+* 
+* Cleanup after a yangcli session has ended
+*
+* INPUTS:
+*   varQ == Q of ncx_var_t to cleanup and change to generic
+*           object pointers
+*
+*********************************************************************/
 extern void
     var_cvt_generic (dlq_hdr_t *varQ);
 

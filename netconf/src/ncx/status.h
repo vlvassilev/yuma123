@@ -56,9 +56,17 @@ date             init     comment
 /* for backward compatability */
 #define statusT         status_t
 
+/* macro SET_ERROR
+ * 
+ * call the set_error function with hard-wired parameters
+ *
+ * INPUTS:
+ *    E == status_t : error enumeration
+ *
+ * RETURNS:
+ *   E
+ */
 #define SET_ERROR(E) set_error(__FILE__, __LINE__, E, 0)
-
-#define SET_DB_ERROR(E) set_error(__FILE__, __LINE__, E, 1)
 
 
 /********************************************************************
@@ -67,6 +75,7 @@ date             init     comment
 *								    *
 *********************************************************************/
 
+/* error type  */
 typedef enum errtyp_t_
 {
     ERR_TYP_NONE,
@@ -362,31 +371,138 @@ typedef enum status_t_
 } status_t;
 
 
+/********************************************************************
+* FUNCTION set_error 
+*
+*  Generate an error stack entry or if log_error is enabled,
+*  then log the error report right now.
+*
+* Used to flag internal code errors
+*
+* DO NOT USE THIS FUNCTION DIRECTLY!
+* USE THE SET_ERROR MACRO INSTEAD!
+*
+* INPUTS:
+*    filename == C filename that caused the error
+*    linenum -- line number in the C file that caused the error
+*    status == internal error code
+*    sqlError = mySQL error code (deprecated)
+*
+* RETURNS
+*    the 'status' parameter will be returned
+*********************************************************************/
 extern status_t 
     set_error (const char *filename, int linenum, 
                status_t status, int sqlError);
 
+
+/********************************************************************
+* FUNCTION print_errors
+*
+* Dump any entries stored in the error_stack.
+*
+*********************************************************************/
 extern void 
     print_errors (void);
 
+
+/********************************************************************
+* FUNCTION clear_errors
+*
+* Clear the error_stack if it has any errors stored in it
+*
+*********************************************************************/
 extern void 
     clear_errors (void);
 
+
+/********************************************************************
+* FUNCTION get_errtyp
+*
+* Get the error classification for the result code
+*
+* INPUTS:
+*   res == result code
+*
+* RETURNS:
+*     error type for 'res' parameter
+*********************************************************************/
 extern errtyp_t
     get_errtyp (status_t res);
 
+
+
+/********************************************************************
+* FUNCTION get_error_string
+*
+* Get the error message for a specific internal error
+*
+* INPUTS:
+*   res == internal status_t error code
+*
+* RETURNS:
+*   const pointer to error message
+*********************************************************************/
 extern const char *
     get_error_string (status_t res);
 
+
+/********************************************************************
+* FUNCTION errno_to_status
+*
+* Get the errno variable and convert it to a status_t
+*
+* INPUTS:
+*   none; must be called just after error occurred to prevent
+*        the errno variable from being overwritten by a new operation
+*
+* RETURNS:
+*     status_t for the errno enum
+*********************************************************************/
 extern status_t
     errno_to_status (void);
 
+
+/********************************************************************
+* FUNCTION status_init
+*
+* Init this module
+*
+*********************************************************************/
 extern void
     status_init (void);
 
+
+/********************************************************************
+* FUNCTION status_cleanup
+*
+* Cleanup this module
+*
+*********************************************************************/
+extern void
+    status_cleanup (void);
+
+
+/********************************************************************
+* FUNCTION print_error_count
+*
+* Print the error_count field, if it is non-zero
+* to STDOUT or the logfile
+* Clears out the error_count afterwards so
+* the count will start over after printing!!!
+*
+*********************************************************************/
 extern void
     print_error_count (void);
 
+
+/********************************************************************
+* FUNCTION print_error_messages
+*
+* Print the error number and error message for each error
+* to STDOUT or the logfile
+*
+*********************************************************************/
 extern void
     print_error_messages (void);
 

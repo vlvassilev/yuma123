@@ -1259,6 +1259,7 @@ status_t
 /********************************************************************
  * FUNCTION val_add_defaults
  * 
+ * add defaults to an initialized complex value
  * Go through the specified value struct and add in any defaults
  * for missing leaf and choice nodes, that have defaults.
  *
@@ -1980,6 +1981,7 @@ status_t
 /********************************************************************
 * FUNCTION val_check_obj_when
 * 
+* checks when-stmt only
 * Check if the specified object node is
 * conditionally TRUE or FALSE, based on any
 * when statements attached to the child node
@@ -1999,7 +2001,6 @@ status_t
 *   if non-NULL:
 *     *whencount == number of when-stmts tested
 *                   this can be 0 if *condresult == TRUE
-
 *
 * RETURNS:
 *   status
@@ -2101,6 +2102,7 @@ status_t
 /********************************************************************
 * FUNCTION val_check_child_conditional
 * 
+* checks if-feature and when-stmt
 * Check if the specified child object node is
 * conditionally TRUE or FALSE, based on any
 * if-feature of when statements attached to the child node

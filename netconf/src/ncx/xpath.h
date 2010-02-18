@@ -443,7 +443,36 @@ typedef struct xpath_stringwalkerparms_t_ {
 *								    *
 *********************************************************************/
 
-/* find target, save in *targobj */
+
+/********************************************************************
+* FUNCTION xpath_find_schema_target
+* 
+* find target, save in *targobj
+* Follow the absolute-path or descendant-node path expression
+* and return the obj_template_t that it indicates, and the
+* que that the object is in
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    tkc == token chain in progress  (may be NULL: errmsg only)
+*    mod == module in progress
+*    obj == augment object initiating search, NULL to start at top
+*    datadefQ == Q of obj_template_t containing 'obj'
+*    target == Xpath expression string to evaluate
+*    targobj == address of return object  (may be NULL)
+*    targQ == address of return target queue (may be NULL)
+*
+* OUTPUTS:
+*   if non-NULL inputs:
+*      *targobj == target object
+*      *targQ == datadefQ Q header which contains targobj
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xpath_find_schema_target (yang_pcb_t *pcb,
                               tk_chain_t *tkc,
@@ -454,14 +483,35 @@ extern status_t
 			      obj_template_t **targobj,
 			      dlq_hdr_t **targQ);
 
-/* find target module name, return malloced module name string */
-extern xmlChar *
-    xpath_find_schema_target_modname (tk_chain_t *tkc,
-                                      ncx_module_t *mod,
-                                      const xmlChar *target,
-                                      status_t *res);
 
-/* find target, save in *targobj, use the errtk if error */
+/********************************************************************
+* FUNCTION xpath_find_schema_target_err
+* 
+* find target, save in *targobj, use the errtk if error
+* Same as xpath_find_schema_target except a token struct
+* is provided to use for the error token, instead of 'obj'
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*    tkc == token chain in progress (may be NULL: errmsg only)
+*    mod == module in progress
+*    obj == augment object initiating search, NULL to start at top
+*    datadefQ == Q of obj_template_t containing 'obj'
+*    target == Xpath expression string to evaluate
+*    targobj == address of return object  (may be NULL)
+*    targQ == address of return target queue (may be NULL)
+*    tkerr == error struct to use if any messages generated
+*
+* OUTPUTS:
+*   if non-NULL inputs:
+*      *targobj == target object
+*      *targQ == datadefQ header for targobj
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xpath_find_schema_target_err (yang_pcb_t *pcb,
                                   tk_chain_t *tkc,
@@ -474,23 +524,109 @@ extern status_t
 				  ncx_error_t *tkerr);
 
 
-/* internal find target, without any error reporting */
+/********************************************************************
+* FUNCTION xpath_find_schema_target_int
+* 
+* internal find target, without any error reporting
+* Follow the absolute-path expression
+* and return the obj_template_t that it indicates
+*
+* Internal access version
+* Error messages are not printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*    target == absolute Xpath expression string to evaluate
+*    targobj == address of return object  (may be NULL)
+*
+* OUTPUTS:
+*   if non-NULL inputs:
+*      *targobj == target object
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xpath_find_schema_target_int (const xmlChar *target,
 				  obj_template_t **targobj);
 
-/* used by cfg.c to find parms in the value struct for
- * a config file (ncx:cli)
- */
+
+/********************************************************************
+* FUNCTION xpath_find_val_target
+* 
+* used by cfg.c to find parms in the value struct for
+* a config file (ncx:cli)
+*
+* Follow the absolute-path Xpath expression as used
+* internally to identify a config DB node
+* and return the val_value_t that it indicates
+*
+* Expression must be the node-path from root for
+* the desired node.
+*
+* Error messages are logged by this function
+*
+* INPUTS:
+*    startval == top-level start element to search
+*    mod == module to use for the default context
+*           and prefixes will be relative to this module's
+*           import statements.
+*        == NULL and the default registered prefixes
+*           will be used
+*    target == Xpath expression string to evaluate
+*    targval == address of return value  (may be NULL)
+*
+* OUTPUTS:
+*   if non-NULL inputs and value node found:
+*      *targval == target value node
+*   If non-NULL targval and error exit:
+*      *targval == last good node visited in expression (if any)
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xpath_find_val_target (val_value_t *startval,
 			   ncx_module_t *mod,
 			   const xmlChar *target,
 			   val_value_t **targval);
 
-/* called by agent to find a descendant value node
- * based  on a relative-path sub-clause of a unique-stmt
- */
+/********************************************************************
+* FUNCTION xpath_find_val_unique
+* 
+* called by server to find a descendant value node
+* based  on a relative-path sub-clause of a unique-stmt
+*
+* Follow the relative-path Xpath expression as used
+* internally to identify a config DB node
+* and return the val_value_t that it indicates
+*
+* Expression must be the node-path from root for
+* the desired node.
+*
+* Error messages are logged by this function
+* only if logerrors is TRUE
+*
+* INPUTS:
+*    cfg == configuration to search
+*    mod == module to use for the default context
+*           and prefixes will be relative to this module's
+*           import statements.
+*        == NULL and the default registered prefixes
+*           will be used
+*    target == Xpath expression string to evaluate
+*    logerrors == TRUE to use log_error, FALSE to skip it
+*    targval == address of return value  (may be NULL)
+*
+* OUTPUTS:
+*   if non-NULL inputs and value node found:
+*      *targval == target value node
+*   If non-NULL targval and error exit:
+*      *targval == last good node visited in expression (if any)
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xpath_find_val_unique (val_value_t *startval,
 			   ncx_module_t *mod,
@@ -498,84 +634,324 @@ extern status_t
 			   boolean logerrors,
 			   val_value_t **targval);
 
-/* malloc a new XPath parser control block
- * xpathstr is allowed to be NULL, otherwise
- * a strdup will be made and exprstr will be set
- */
+
+/********************************************************************
+* FUNCTION xpath_new_pcb
+* 
+* malloc a new XPath parser control block
+* xpathstr is allowed to be NULL, otherwise
+* a strdup will be made and exprstr will be set
+*
+* Create and initialize an XPath parser control block
+*
+* INPUTS:
+*   xpathstr == XPath expression string to save (a copy will be made)
+*            == NULL if this step should be skipped
+*
+* RETURNS:
+*   pointer to malloced struct, NULL if malloc error
+*********************************************************************/
 extern xpath_pcb_t *
     xpath_new_pcb (const xmlChar *xpathstr);
 
-/* copy from typdef to object for leafref
- * of object to value for NETCONF PDU processing
- */
+
+/********************************************************************
+* FUNCTION xpath_clone_pcb
+* 
+* Clone an XPath PCB for a  must clause copy
+* copy from typdef to object for leafref
+* of object to value for NETCONF PDU processing
+*
+* INPUTS:
+*    srcpcb == struct with starting contents
+*
+* RETURNS:
+*   new xpatyh_pcb_t clone of the srcmust, NULL if malloc error
+*   It will not be processed or parsed.  Only the starter
+*   data will be set
+*********************************************************************/
 extern xpath_pcb_t *
     xpath_clone_pcb (const xpath_pcb_t *srcpcb);
 
-/* find by exact match of the expressions string */
+
+/********************************************************************
+* FUNCTION xpath_find_pcb
+* 
+* Find an XPath PCB
+* find by exact match of the expressions string
+*
+* INPUTS:
+*    pcbQ == Q of xpath_pcb_t structs to check
+*    exprstr == XPath expression string to find
+*
+* RETURNS:
+*   pointer to found xpath_pcb_t or NULL if not found
+*********************************************************************/
 extern xpath_pcb_t *
     xpath_find_pcb (dlq_hdr_t *pcbQ, 
 		    const xmlChar *exprstr);
 
-/* free an XPath parser control block */
+
+/********************************************************************
+* FUNCTION xpath_free_pcb
+* 
+* Free a malloced XPath parser control block
+*
+* INPUTS:
+*   pcb == pointer to parser control block to free
+*********************************************************************/
 extern void
     xpath_free_pcb (xpath_pcb_t *pcb);
 
-/* malloc an XPath result */
+
+/********************************************************************
+* FUNCTION xpath_new_result
+* 
+* malloc an XPath result
+* Create and initialize an XPath result struct
+*
+* INPUTS:
+*   restype == the desired result type
+*
+* RETURNS:
+*   pointer to malloced struct, NULL if malloc error
+*********************************************************************/
 extern xpath_result_t *
     xpath_new_result (xpath_restype_t restype);
 
-/* malloc an XPath result node */
+
+/********************************************************************
+* FUNCTION xpath_init_result
+* 
+* Initialize an XPath result struct
+* malloc an XPath result node
+*
+* INPUTS:
+*   result == pointer to result struct to initialize
+*   restype == the desired result type
+*********************************************************************/
 extern void 
     xpath_init_result (xpath_result_t *result,
 		       xpath_restype_t restype);
 
-/* free an XPath result */
+
+/********************************************************************
+* FUNCTION xpath_free_result
+* 
+* Free a malloced XPath result struct
+*
+* INPUTS:
+*   result == pointer to result struct to free
+*********************************************************************/
 extern void
     xpath_free_result (xpath_result_t *result);
 
+
+/********************************************************************
+* FUNCTION xpath_clean_result
+* 
+* Clean an XPath result struct
+*
+* INPUTS:
+*   result == pointer to result struct to clean
+*********************************************************************/
 extern void
     xpath_clean_result (xpath_result_t *result);
 
+
+/********************************************************************
+* FUNCTION xpath_new_resnode
+* 
+* Create and initialize an XPath result node struct
+*
+* INPUTS:
+*   restype == the desired result type
+*
+* RETURNS:
+*   pointer to malloced struct, NULL if malloc error
+*********************************************************************/
 extern xpath_resnode_t *
     xpath_new_resnode (void);
 
+
+/********************************************************************
+* FUNCTION xpath_init_resnode
+* 
+* Initialize an XPath result node struct
+*
+* INPUTS:
+*   resnode == pointer to result node struct to initialize
+*********************************************************************/
 extern void 
     xpath_init_resnode (xpath_resnode_t *resnode);
 
+
+/********************************************************************
+* FUNCTION xpath_free_resnode
+* 
+* Free a malloced XPath result node struct
+*
+* INPUTS:
+*   resnode == pointer to result node struct to free
+*********************************************************************/
 extern void
     xpath_free_resnode (xpath_resnode_t *resnode);
 
+
+/********************************************************************
+* FUNCTION xpath_clean_resnode
+* 
+* Clean an XPath result node struct
+*
+* INPUTS:
+*   resnode == pointer to result node struct to clean
+*********************************************************************/
 extern void
     xpath_clean_resnode (xpath_resnode_t *resnode);
 
 
+/********************************************************************
+* FUNCTION xpath_get_curmod_from_prefix
+* 
+* Get the correct module to use for a given prefix
+*
+* INPUTS:
+*    prefix == string to check
+*    mod == module to use for the default context
+*           and prefixes will be relative to this module's
+*           import statements.
+*        == NULL and the default registered prefixes
+*           will be used
+*    targmod == address of return module
+*
+* OUTPUTS:
+*    *targmod == target moduke to use
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xpath_get_curmod_from_prefix (const xmlChar *prefix,
 				  ncx_module_t *mod,
 				  ncx_module_t **targmod);
 
+
+/********************************************************************
+* FUNCTION xpath_get_curmod_from_prefix_str
+* 
+* Get the correct module to use for a given prefix
+* Unended string version
+*
+* INPUTS:
+*    prefix == string to check
+*    prefixlen == length of prefix
+*    mod == module to use for the default context
+*           and prefixes will be relative to this module's
+*           import statements.
+*        == NULL and the default registered prefixes
+*           will be used
+*    targmod == address of return module
+*
+* OUTPUTS:
+*    *targmod == target moduke to use
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xpath_get_curmod_from_prefix_str (const xmlChar *prefix,
 				      uint32 prefixlen,
 				      ncx_module_t *mod,
 				      ncx_module_t **targmod);
 
+
+/********************************************************************
+* FUNCTION xpath_parse_token
+* 
+* Parse the XPath token sequence for a specific token type
+* It has already been tokenized
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*    pcb == parser control block in progress
+*    tktyp == expected token type
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xpath_parse_token (xpath_pcb_t *pcb,
 		       tk_type_t  tktype);
 
+
+/********************************************************************
+* FUNCTION xpath_cvt_boolean
+* 
+* Convert an XPath result to a boolean answer
+*
+* INPUTS:
+*    result == result struct to convert to boolean
+*
+* RETURNS:
+*   TRUE or FALSE depending on conversion
+*********************************************************************/
 extern boolean
     xpath_cvt_boolean (const xpath_result_t *result);
 
+
+/********************************************************************
+* FUNCTION xpath_cvt_number
+* 
+* Convert an XPath result to a number answer
+*
+* INPUTS:
+*    result == result struct to convert to a number
+*    num == pointer to ncx_num_t to hold the conversion result
+*
+* OUTPUTS:
+*   *num == numeric result from conversion
+*
+*********************************************************************/
 extern void
     xpath_cvt_number (const xpath_result_t *result,
 		      ncx_num_t *num);
 
+
+/********************************************************************
+* FUNCTION xpath_cvt_string
+* 
+* Convert an XPath result to a string answer
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    result == result struct to convert to a number
+*    str == pointer to xmlChar * to hold the conversion result
+*
+* OUTPUTS:
+*   *str == pointer to malloced string from conversion
+*
+* RETURNS:
+*   status; could get an ERR_INTERNAL_MEM error or NO_RER
+*********************************************************************/
 extern status_t
     xpath_cvt_string (xpath_pcb_t *pcb,
 		      const xpath_result_t *result,
 		      xmlChar **str);
 
+
+/********************************************************************
+* FUNCTION xpath_get_resnodeQ
+* 
+* Get the renodeQ from a result struct
+*
+* INPUTS:
+*    result == result struct to check
+*
+* RETURNS:
+*   pointer to resnodeQ or NULL if some error
+*********************************************************************/
 extern dlq_hdr_t *
     xpath_get_resnodeQ (xpath_result_t *result);
 

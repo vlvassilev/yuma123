@@ -211,9 +211,9 @@ static void
 
 
 /********************************************************************
-* FUNCTION xmlns_cleanup
+* FUNCTION init_xmlns_static_vars
 *
-* Cleanup module static data
+* Initialze the module static variables
 *
 * INPUTS:
 *    none
@@ -271,6 +271,33 @@ void
     }
 
 } /* xmlns_init */
+
+
+/********************************************************************
+* FUNCTION xmlns_cleanup
+*
+* Cleanup module static data
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    none
+*********************************************************************/
+void 
+    xmlns_cleanup (void)
+{
+    uint32 i;
+
+    if (xmlns_init_done) {
+        for (i=0; i<xmlns_next_id-1; i++) {
+            free_xmlns(xmlns[i]);
+            xmlns[i] = NULL;
+        }
+        init_xmlns_static_vars();
+        xmlns_init_done = FALSE;
+    }
+
+}  /* xmlns_cleanup */
 
 
 /********************************************************************
@@ -609,33 +636,6 @@ xmlns_id_t
 
 
 /********************************************************************
-* FUNCTION xmlns_cleanup
-*
-* Cleanup module static data
-*
-* INPUTS:
-*    none
-* RETURNS:
-*    none
-*********************************************************************/
-void 
-    xmlns_cleanup (void)
-{
-    uint32 i;
-
-    if (xmlns_init_done) {
-        for (i=0; i<xmlns_next_id-1; i++) {
-            free_xmlns(xmlns[i]);
-            xmlns[i] = NULL;
-        }
-        init_xmlns_static_vars();
-        xmlns_init_done = FALSE;
-    }
-
-}  /* xmlns_cleanup */
-
-
-/********************************************************************
 * FUNCTION xmlns_nc_id
 *
 * Get the ID for the NETCONF namespace or 0 if it doesn't exist
@@ -650,7 +650,6 @@ xmlns_id_t
 {
     return xmlns_ncid;
 }  /* xmlns_nc_id */
-
 
 
 /********************************************************************
@@ -668,6 +667,7 @@ xmlns_id_t
 {
     return xmlns_ncxid;
 }  /* xmlns_ncx_id */
+
 
 /********************************************************************
 * FUNCTION xmlns_ns_id
@@ -702,6 +702,22 @@ xmlns_id_t
     return xmlns_invid;
 }  /* xmlns_inv_id */
 
+
+/********************************************************************
+* FUNCTION xmlns_xs_id
+*
+* Get the ID for the XSD namespace or 0 if it doesn't exist
+*
+* INPUTS:
+*    none
+* RETURNS:
+*    XSD NS ID or 0 if not found
+*********************************************************************/
+xmlns_id_t 
+    xmlns_xs_id (void)
+{
+    return xmlns_xsid;
+}  /* xmlns_xs_id */
 
 /********************************************************************
 * FUNCTION xmlns_xsi_id
@@ -795,6 +811,7 @@ xmlns_id_t
 * FUNCTION xmlns_get_module
 *
 * get the module name of the namespace ID
+* get module name that registered this namespace
 *
 * INPUTS:
 *    nsid == namespace ID to check
@@ -881,22 +898,6 @@ void
 
 }  /* xmlns_set_modptrs */
 
-
-/********************************************************************
-* FUNCTION xmlns_xs_id
-*
-* Get the ID for the XSD namespace or 0 if it doesn't exist
-*
-* INPUTS:
-*    none
-* RETURNS:
-*    XSD NS ID or 0 if not found
-*********************************************************************/
-xmlns_id_t 
-    xmlns_xs_id (void)
-{
-    return xmlns_xsid;
-}  /* xmlns_xs_id */
 
 /********************************************************************
 * FUNCTION xmlns_new_pmap

@@ -106,11 +106,50 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION xml_wr_buff
+*
+* Write some xmlChars to the specified session
+*
+* INPUTS:
+*   scb == session control block to start msg 
+*   buff == buffer to write
+*   bufflen == number of bytes to write, not including any
+*              EOS char at the end of the buffer
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     xml_wr_buff (ses_cb_t *scb,
 		 const xmlChar *buff,
 		 uint32 bufflen);
 
+
+/********************************************************************
+* FUNCTION xml_wr_begin_elem_ex
+*
+* Write a start or empty XML tag to the specified session
+*
+* INPUTS:
+*   scb == session control block
+*   msg == top header from message in progress
+*   parent_nsid == namespace ID of the parent element, if known
+*   nsid == namespace ID of the element to write
+*   elname == unqualified name of element to write
+*   attrQ == Q of xml_attr_t or val_value_t records to write in
+*            the element; NULL == none
+*   isattrq == TRUE if the qQ contains xml_attr_t nodes
+*              FALSE if the Q contains val_value_t nodes (metadata)
+*   indent == number of chars to indent after a newline
+*           == -1 means no newline or indent
+*           == 0 means just newline
+*   empty == TRUE for empty node
+*         == FALSE for start node
+*
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     xml_wr_begin_elem_ex (ses_cb_t *scb,
 			  xml_msg_hdr_t *msg,
@@ -123,6 +162,24 @@ extern void
 			  boolean empty);
 
 
+/********************************************************************
+* FUNCTION xml_wr_begin_elem
+*
+* Write a start XML tag to the specified session without attributes
+*
+* INPUTS:
+*   scb == session control block
+*   msg == top header from message in progress
+*   parent_nsid == namespace ID of the parent element
+*   nsid == namespace ID of the element to write
+*   elname == unqualified name of element to write
+*   indent == number of chars to indent after a newline
+*           == -1 means no newline or indent
+*           == 0 means just newline
+*
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     xml_wr_begin_elem (ses_cb_t *scb,
 		       xml_msg_hdr_t *msg,
@@ -132,6 +189,24 @@ extern void
 		       int32 indent);
 
 
+/********************************************************************
+* FUNCTION xml_wr_empty_elem
+*
+* Write an empty XML tag to the specified session without attributes
+*
+* INPUTS:
+*   scb == session control block
+*   msg == top header from message in progress
+*   parent_nsid == namespace ID of the parent element
+*   nsid == namespace ID of the element to write
+*   elname == unqualified name of element to write
+*   indent == number of chars to indent after a newline
+*           == -1 means no newline or indent
+*           == 0 means just newline
+*
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     xml_wr_empty_elem (ses_cb_t *scb,
 		       xml_msg_hdr_t *msg,
@@ -141,6 +216,25 @@ extern void
 		       int32 indent);
 
 
+/********************************************************************
+* FUNCTION xml_wr_end_elem
+*
+* Write an end tag to the specified session
+*
+* INPUTS:
+*   scb == session control block to start msg 
+*   msg == header from message in progress
+*   nsid == namespace ID of the element to write
+*   elname == unqualified name of element to write
+*   indent == number of chars to indent after a newline
+*             will be ignored if indent is turned off
+*             in the agent profile
+*           == -1 means no newline or indent
+*           == 0 means just newline
+*
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     xml_wr_end_elem (ses_cb_t *scb,
 		     xml_msg_hdr_t *msg,
@@ -149,6 +243,33 @@ extern void
 		     int32 indent);
 
 
+/********************************************************************
+* FUNCTION xml_wr_string_elem
+*
+* Write a start tag, simple string content, and an end tag
+* to the specified session.  A flag element and
+* ename will vary from this format.
+*
+* Simple content nodes are completed on a single line to
+* prevent introduction of extra whitespace
+*
+* INPUTS:
+*   scb == session control block
+*   msg == header from message in progress
+*   str == simple string to write as element content
+*   parent_nsid == namespace ID of the parent element
+*   nsid == namespace ID of the element to write
+*   elname == unqualified name of element to write
+*   attrQ == Q of xml_attr_t records to write in
+*            the element; NULL == none
+*   isattrq == TRUE for Q of xml_attr_t, FALSE for val_value_t
+*   indent == number of chars to indent after a newline
+*           == -1 means no newline or indent
+*           == 0 means just newline
+*  
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     xml_wr_string_elem (ses_cb_t *scb,
 			xml_msg_hdr_t *msg,
@@ -160,6 +281,33 @@ extern void
 			boolean isattrq,
 			int32 indent);
 
+
+/********************************************************************
+* FUNCTION xml_wr_qname_elem
+*
+* Write a start tag, QName string content, and an end tag
+* to the specified session.
+*
+* The ses_start_msg must be called before this
+* function, in order for it to allow any writes
+*
+* INPUTS:
+*   scb == session control block
+*   msg == header from message in progres
+*   val_nsid == namespace ID of the QName prefix
+*   str == local-name part of the QName
+*   parent_nsid == namespace ID of the parent element
+*   nsid == namespace ID of the element to write
+*   elname == unqualified name of element to write
+*   attrQ == Q of xml_attr_t records to write in
+*            the element; NULL == none
+*   isattrq == TRUE for Q of xml_attr_t, FALSE for val_value_t
+*   indent == number of chars to indent after a newline
+*           == -1 means no newline or indent
+*           == 0 means just newline
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     xml_wr_qname_elem (ses_cb_t *scb,
 		       xml_msg_hdr_t *msg,
@@ -172,8 +320,36 @@ extern void
 		       boolean isattrq,
 		       int32 indent);
 
-
-/* output val_value_t node contents only (w/filter) */
+/********************************************************************
+* FUNCTION xml_wr_check_val
+* 
+* Write an NCX value in XML encoding
+* while checking nodes for suppression of output with
+* the supplied test fn
+*
+* !!! NOTE !!!
+* 
+* This function generates the contents of the val_value_t
+* but not the top node itself.  This function is called
+* recursively and this is the intended behavior.
+*
+* To generate XML for an entire val_value_t, including
+* the top-level node, use the xml_wr_full_val fn.
+*
+* If the acm_cache and acm_cbfn fields are set in
+* the msg header then access control will be checked
+* If FALSE, then nothing will be written to the output session
+*
+* INPUTS:
+*   scb == session control block
+*   msg == xml_msg_hdr_t in progress
+*   val == value to write
+*   indent == start indent amount if indent enabled
+*   testcb == callback function to use, NULL if not used
+*   
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     xml_wr_check_val (ses_cb_t *scb,
 		      xml_msg_hdr_t *msg,
@@ -182,14 +358,47 @@ extern void
 		      val_nodetest_fn_t testfn);
 
 
-/* output val_value_t node contents only */
+/********************************************************************
+* FUNCTION xml_wr_val
+* 
+* output val_value_t node contents only
+* Write an NCX value node in XML encoding
+* See xml_wr_check_write for full details of this fn.
+* It is the same, except a NULL testfn is supplied.
+*
+* INPUTS:
+*   scb == session control block
+*   msg == xml_msg_hdr_t in progress
+*   val == value to write
+*   indent == start indent amount if indent enabled
+*   
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     xml_wr_val (ses_cb_t *scb,
 		xml_msg_hdr_t *msg,
 		val_value_t *val,
 		int32 indent);
 
-/* generate entire val_value_t *w/filter) */
+
+/********************************************************************
+* FUNCTION xml_wr_full_check_val
+* 
+* generate entire val_value_t *w/filter)
+* Write an entire val_value_t out as XML, including the top level
+* Using an optional testfn to filter output
+*
+* INPUTS:
+*   scb == session control block
+*   msg == xml_msg_hdr_t in progress
+*   val == value to write
+*   indent == start indent amount if indent enabled
+*   testcb == callback function to use, NULL if not used
+*   
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     xml_wr_full_check_val (ses_cb_t *scb,
 			   xml_msg_hdr_t *msg,
@@ -197,13 +406,49 @@ extern void
 			   int32  indent,
 			   val_nodetest_fn_t testfn);
 
-/* generate entire val_value_t */
+
+/********************************************************************
+* FUNCTION xml_wr_full_val
+* 
+* generate entire val_value_t
+* Write an entire val_value_t out as XML, including the top level
+*
+* INPUTS:
+*   scb == session control block
+*   msg == xml_msg_hdr_t in progress
+*   val == value to write
+*   indent == start indent amount if indent enabled
+*   
+* RETURNS:
+*   none
+*********************************************************************/
 extern void
     xml_wr_full_val (ses_cb_t *scb,
 		     xml_msg_hdr_t *msg,
 		     val_value_t *val,
 		     int32  indent);
 
+
+/********************************************************************
+* FUNCTION xml_wr_check_open_file
+* 
+* Write the specified value to an open FILE in XML format
+*
+* INPUTS:
+*    fp == open FILE control block
+*    val == value for output
+*    attrs == top-level attributes to generate
+*    docmode == TRUE if XML_DOC output mode should be used
+*            == FALSE if XML output mode should be used
+*    xmlhdr == TRUE if <?xml?> directive should be output
+*            == FALSE if not
+*    startindent == starting indent point
+*    indent == indent amount (0..9 spaces)
+*    testfn == callback test function to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     xml_wr_check_open_file (FILE *fp, 
                             val_value_t *val,
@@ -214,6 +459,27 @@ extern status_t
                             int32  indent,
                             val_nodetest_fn_t testfn);
 
+
+/********************************************************************
+* FUNCTION xml_wr_check_file
+* 
+* Write the specified value to a FILE in XML format
+*
+* INPUTS:
+*    filespec == exact path of filename to open
+*    val == value for output
+*    attrs == top-level attributes to generate
+*    docmode == TRUE if XML_DOC output mode should be used
+*            == FALSE if XML output mode should be used
+*    xmlhdr == TRUE if <?xml?> directive should be output
+*            == FALSE if not
+*    startindent == starting indent point
+*    indent == indent amount (0..9 spaces)
+*    testfn == callback test function to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     xml_wr_check_file (const xmlChar *filespec, 
 		       val_value_t *val,
@@ -225,6 +491,25 @@ extern status_t
 		       val_nodetest_fn_t testfn);
 
 
+/********************************************************************
+* FUNCTION xml_wr_file
+* 
+* Write the specified value to a FILE in XML format
+*
+* INPUTS:
+*    filespec == exact path of filename to open
+*    val == value for output
+*    attrs == top-level attributes to generate
+*    docmode == TRUE if XML_DOC output mode should be used
+*            == FALSE if XML output mode should be used
+*    xmlhdr == TRUE if <?xml?> directive should be output
+*            == FALSE if not
+*    startindent == starting indent point
+*    indent == indent amount (0..9 spaces)
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     xml_wr_file (const xmlChar *filespec, 
 		 val_value_t *val,

@@ -35,39 +35,90 @@ date	     init     comment
 #define TSTAMP_DATE_SIZE  12
 #define TSTAMP_SQL_SIZE   20
 
-/*
- * Set the current date and time in an XML dateTime string format
- *
- * INPUTS:
- *   buff == pointer to buffer to hold output
- *           MUST BE AT LEAST 50 CHARS
- */
+
+/********************************************************************
+* FUNCTION tstamp_datetime
+*
+* Set the current date and time in an XML dateTime string format
+*
+* INPUTS:
+*   buff == pointer to buffer to hold output
+*           MUST BE AT LEAST 21 CHARS
+* OUTPUTS:
+*   buff is filled in
+*********************************************************************/
 extern void 
     tstamp_datetime (xmlChar *buff);
 
 
-/* get just the current date string 
- * BUFFER MUST BE AT LEAST 12 chars
- */
+/********************************************************************
+* FUNCTION tstamp_date
+*
+* Set the current date in an XML dateTime string format
+*
+* INPUTS:
+*   buff == pointer to buffer to hold output
+*           MUST BE AT LEAST 11 CHARS
+* OUTPUTS:
+*   buff is filled in
+*********************************************************************/
 extern void 
     tstamp_date (xmlChar *buff);
 
 
-/*
- * Set the current date and time in an SQL datetime string format
- *
- * INPUTS:
- *   buff == pointer to buffer to hold output
- *           MUST BE AT LEAST 20 CHARS
- */
+/********************************************************************
+* FUNCTION tstamp_datetime_sql
+*
+* Set the current date and time in an XML dateTime string format
+*
+* INPUTS:
+*   buff == pointer to buffer to hold output
+*           MUST BE AT LEAST 20 CHARS
+* OUTPUTS:
+*   buff is filled in
+*********************************************************************/
 extern void 
     tstamp_datetime_sql (xmlChar *buff);
 
+
+/********************************************************************
+* FUNCTION tstamp_convert_to_utctime
+*
+* Check if the specified string is a valid dateTime or 
+* date-and-time string is valid and if so, convert it
+* to 
+*
+* INPUTS:
+*   buff == pointer to buffer to check
+*   isNegative == address of return negative date flag
+*   res == address of return status
+*
+* OUTPUTS:
+*   *isNegative == TRUE if a negative dateTime string is given
+*                  FALSE if no starting '-' sign found
+*   *res == return status
+*
+* RETURNS:
+*   malloced pointer to converted date time string
+*   or NULL if some error
+*********************************************************************/
 extern xmlChar *
     tstamp_convert_to_utctime (const xmlChar *timestr,
 			       boolean *isNegative,
 			       status_t *res);
 
+
+/********************************************************************
+* FUNCTION tstamp_datetime_dirname
+*
+* Set the current date and time in an XML dateTime string format
+*
+* INPUTS:
+*   buff == pointer to buffer to hold output
+*           MUST BE AT LEAST 21 CHARS
+* OUTPUTS:
+*   buff is filled in
+*********************************************************************/
 extern void 
     tstamp_datetime_dirname (xmlChar *buff);
 

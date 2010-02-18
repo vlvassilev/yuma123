@@ -250,6 +250,7 @@ static status_t
 /********************************************************************
 * FUNCTION yang_grp_consume_grouping
 * 
+* 2nd pass parsing
 * Parse the next N tokens as a grouping-stmt
 * Create a grp_template_t struct and add it to the specified Q
 *
@@ -478,6 +479,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_grp_resolve_groupings
 * 
+* 3rd pass parsing
 * Analyze the entire 'groupingQ' within the module struct
 * Finish all the clauses within this struct that
 * may have been defered because of possible forward references
@@ -645,6 +647,7 @@ status_t
 /********************************************************************
 * FUNCTION yang_grp_resolve_complete
 * 
+* 4th pass parsing
 * Analyze the entire 'groupingQ' within the module struct
 * Expand any uses and augment statements within the group and 
 * validate as much as possible
@@ -873,8 +876,6 @@ status_t
     return NO_ERR;
 
 }  /* yang_grp_check_nest_loop */
-
-
 
 
 /* END file yang_grp.c */

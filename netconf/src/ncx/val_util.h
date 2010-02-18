@@ -103,45 +103,266 @@ typedef boolean
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+ * FUNCTION val_set_canonical_order
+ * 
+ * Change the child XML nodes throughout an entire subtree
+ * to the canonical order defined in the object template
+ *
+ * >>> IT IS ASSUMED THAT ONLY VALID NODES ARE PRESENT
+ * >>> AND ALL ERROR NODES HAVE BEEN PURGED ALREADY
+ *
+ * There is no canonical order defined for 
+ * the contents of the following nodes:
+ *    - anyxml leaf
+ *    - ordered-by user leaf-list
+ *
+ * These nodes are not ordered, but their child nodes are ordered
+ *    - ncx:root container
+ *    - ordered-by user list
+ *      
+ * Leaf objects will not be processed, if val is OBJ_TYP_LEAF
+ * Leaf-list objects will not be processed, if val is 
+ * OBJ_TYP_LEAF_LIST.  These object types must be processed
+ * within the context of the parent object.
+ *
+ * List child key nodes are ordered first among all
+ * of the list's child nodes.
+ *
+ * List nodes with system keys are not kept in sorted order
+ * This is not required by YANG.  Instead the user-given
+ * order servers as the canonical order.  It is up to
+ * the application setting the config to pick an
+ * order for the list nodes.
+ *
+ * Also, leaf-list order is not changed, regardless of
+ * the order. The default insert order is 'last'.
+ *
+ * INPUTS:
+ *   val == value node to change to canonical order
+ *
+ * OUTPUTS:
+ *   val->v.childQ may be reordered, for all complex types
+ *   in the subtree
+ *
+ *********************************************************************/
 extern void
     val_set_canonical_order (val_value_t *val);
 
+
+/********************************************************************
+ * FUNCTION val_gen_index_comp
+ * 
+ * Create an index component
+ *
+ * INPUTS:
+ *   in == obj_key_t in the chain to process
+ *   val == the just parsed table row with the childQ containing
+ *          nodes to check as index nodes
+ *
+ * OUTPUTS:
+ *   val->indexQ will get a val_index_t record added if return NO_ERR
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
 extern status_t 
     val_gen_index_comp  (const obj_key_t *in,
 			 val_value_t *val);
 
+
+/********************************************************************
+ * FUNCTION val_gen_key_entry
+ * 
+ * Create a key record within an index comp
+ *
+ * INPUTS:
+ *   in == obj_key_t in the chain to process
+ *   keyval == the just parsed table row with the childQ containing
+ *          nodes to check as index nodes
+ *
+ * OUTPUTS:
+ *   val->indexQ will get a val_index_t record added if return NO_ERR
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
 extern status_t 
     val_gen_key_entry  (val_value_t *keyval);
 
+
+/********************************************************************
+ * FUNCTION val_gen_index_chain
+ * 
+ * Create an index chain for the just-parsed table or container struct
+ *
+ * INPUTS:
+ *   obj == list object containing the keyQ
+ *   val == the just parsed table row with the childQ containing
+ *          nodes to check as index nodes
+ *
+ * OUTPUTS:
+ *   *val->indexQ has entries added for each index component, if NO_ERR
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
 extern status_t 
     val_gen_index_chain (const obj_template_t *obj,
 			 val_value_t *val);
 
-/* add defaults to an initialized complex value */
+
+/********************************************************************
+ * FUNCTION val_add_defaults
+ * 
+ * add defaults to an initialized complex value
+ * Go through the specified value struct and add in any defaults
+ * for missing leaf and choice nodes, that have defaults.
+ *
+ * !!! Only the child nodes will be checked for missing defaults
+ * !!! The top-level value passed to this function is assumed to
+ * !!! be already set
+ *
+ * This function does not handle top-level choice object subtrees.
+ * This special case must be handled with the datadefQ
+ * for the module.  If a top-level leaf value is passed in,
+ * which is from a top-level choice case-arm, then the
+ * rest of the case-arm objects will not get added by
+ * this function.
+ *
+ * It is assumed that even top-level data-def-stmts will
+ * be handled within a <config> container, so the top-level
+ * object should always a container.
+ *
+ * INPUTS:
+ *   val == the value struct to modify
+ *   scriptmode == TRUE if the value is a script object access
+ *              == FALSE for normal val_get_simval access instead
+ *
+ * OUTPUTS:
+ *   *val and any sub-nodes are set to the default value as requested
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
 extern status_t 
     val_add_defaults (val_value_t *val,
 		      boolean scriptmode);
 
+
+/********************************************************************
+* FUNCTION val_instance_check
+* 
+* Check for the proper number of object instances for
+* the specified value struct. Checks the direct accessible
+* children of 'val' only!!!
+* 
+* The 'obj' parameter is usually the val->obj field
+* except for choice/case processing
+*
+* Log errors as needed and mark val->res as needed
+*
+* INPUTS:
+*   val == value to check
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     val_instance_check (val_value_t  *val,
 			obj_template_t *obj);
 
+
+/********************************************************************
+* FUNCTION val_get_choice_first_set
+* 
+* Check a val_value_t struct against its expected OBJ
+* to determine if a specific choice has already been set
+* Get the value struct for the first value set for
+* the specified choice
+*
+* INPUTS:
+*   val == val_value_t to check
+*   obj == choice object to check
+*
+* RETURNS:
+*   pointer to first value struct or NULL if choice not set
+*********************************************************************/
 extern val_value_t *
     val_get_choice_first_set (val_value_t *val,
 			      const obj_template_t *obj);
 
+
+/********************************************************************
+* FUNCTION val_get_choice_next_set
+* 
+* Check a val_value_t struct against its expected OBJ
+* to determine if a specific choice has already been set
+* Get the value struct for the next value set from the
+* specified choice, afvter 'curval'
+*
+* INPUTS:
+*   val == val_value_t to check
+*   obj == choice object to check
+*   curchild == current child selected from this choice (obj)
+*
+* RETURNS:
+*   pointer to first value struct or NULL if choice not set
+*********************************************************************/
 extern val_value_t *
     val_get_choice_next_set (val_value_t *val,
 			     const obj_template_t *obj,
 			     val_value_t *curchild);
 
+
+/********************************************************************
+* FUNCTION val_choice_is_set
+* 
+* Check a val_value_t struct against its expected OBJ
+* to determine if a specific choice has already been set
+* Check that all the mandatory config fields in the selected
+* case are set
+*
+* INPUTS:
+*   val == parent of the choice object to check
+*   obj == choice object to check
+*
+* RETURNS:
+*   pointer to first value struct or NULL if choice not set
+*********************************************************************/
 extern boolean
     val_choice_is_set (val_value_t *val,
 		       obj_template_t *obj);
 
+
+/********************************************************************
+* FUNCTION val_purge_errors_from_root
+* 
+* Remove any error nodes under a root container
+* that were saved for error recording purposes
+*
+* INPUTS:
+*   val == root container to purge
+*
+*********************************************************************/
 extern void
     val_purge_errors_from_root (val_value_t *val);
 
+
+/********************************************************************
+ * FUNCTION val_new_child_val
+ * 
+ * INPUTS:
+ *   nsid == namespace ID of name
+ *   name == name string (direct or strdup, based on copyname)
+ *   copyname == TRUE is dname strdup should be used
+ *   parent == parent node
+ *   editop == requested edit operation
+ *   
+ * RETURNS:
+ *   status
+ *********************************************************************/
 extern val_value_t *
     val_new_child_val (xmlns_id_t   nsid,
 		       const xmlChar *name,
@@ -150,6 +371,26 @@ extern val_value_t *
 		       op_editop_t editop);
 
 
+/********************************************************************
+* FUNCTION val_gen_instance_id
+* 
+* Malloc and Generate the instance ID string for this value node, 
+* 
+* INPUTS:
+*   mhdr == message hdr w/ prefix map or NULL to just use
+*           the internal prefix mappings
+*   val == node to generate the instance ID for
+*   format == desired output format (NCX or Xpath)
+*   buff == pointer to address of buffer to use
+*
+* OUTPUTS
+*   mhdr.pmap may have entries added if prefixes used
+*      in the instance identifier which are not already in the pmap
+*   *buff == malloced buffer with the instance ID
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     val_gen_instance_id (xml_msg_hdr_t *mhdr,
 			 const val_value_t  *val, 
@@ -157,6 +398,29 @@ extern status_t
 			 xmlChar  **buff);
 
 
+/********************************************************************
+* FUNCTION val_gen_split_instance_id
+* 
+* Malloc and Generate the instance ID string for this value node, 
+* Add the last node from the parameters, not the value node
+*
+* INPUTS:
+*   mhdr == message hdr w/ prefix map or NULL to just use
+*           the internal prefix mappings
+*   val == node to generate the instance ID for
+*   format == desired output format (NCX or Xpath)
+*   leaf_pfix == namespace prefix string of the leaf to add
+*   leaf_name ==  name string of the leaf to add
+*   buff == pointer to address of buffer to use
+*
+* OUTPUTS
+*   mhdr.pmap may have entries added if prefixes used
+*      in the instance identifier which are not already in the pmap
+*   *buff == malloced buffer with the instance ID
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     val_gen_split_instance_id (xml_msg_hdr_t *mhdr,
 			       const val_value_t  *val, 
@@ -165,6 +429,29 @@ extern status_t
 			       const xmlChar *leaf_name,
 			       xmlChar  **buff);
 
+
+/********************************************************************
+* FUNCTION val_get_index_string
+* 
+* Get the index string for the specified table or container entry
+* 
+* INPUTS:
+*   mhdr == message hdr w/ prefix map or NULL to just use
+*           the internal prefix mappings
+*   format == desired output format
+*   val == val_value_t for table or container
+*   buff == buffer to hold result; 
+         == NULL means get length only
+*   
+* OUTPUTS:
+*   mhdr.pmap may have entries added if prefixes used
+*      in the instance identifier which are not already in the pmap
+*   *len = number of bytes that were (or would have been) written 
+*          to buff
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     val_get_index_string (xml_msg_hdr_t *mhdr,
 			  ncx_instfmt_t format,
@@ -172,14 +459,34 @@ extern status_t
 			  xmlChar *buff,
 			  uint32  *len);
 
-/* checks if-feature and when-stmt */
-extern status_t
-    val_check_child_conditional (val_value_t *val,
-				 val_value_t *valroot,
-				 obj_template_t *childobj,
-				 boolean *condresult);
 
-/* checks when-stmt only */
+/********************************************************************
+* FUNCTION val_check_obj_when
+* 
+* checks when-stmt only
+* Check if the specified object node is
+* conditionally TRUE or FALSE, based on any
+* when statements attached to the child node
+*
+* INPUTS:
+*   val == parent value node of the object node to check
+*   valroot == database root for XPath purposes
+*   objval == database value node to check (may be NULL)
+*   obj == object template of data node object to check
+*   condresult == address of conditional test result
+*   whencount == address of number of when-stmts tested
+*                 (may be NULL if caller does not care)
+*
+* OUTPUTS:
+*   *condresult == TRUE if conditional is true or there are none
+*                  FALSE if conditional test failed
+*   if non-NULL:
+*     *whencount == number of when-stmts tested
+*                   this can be 0 if *condresult == TRUE
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     val_check_obj_when (val_value_t *val,
                         val_value_t *valroot,
@@ -188,46 +495,251 @@ extern status_t
                         boolean *condresult,
                         uint32 *whencount);
 
+
+/********************************************************************
+* FUNCTION val_check_child_conditional
+* 
+* checks if-feature and when-stmt
+* Check if the specified child object node is
+* conditionally TRUE or FALSE, based on any
+* if-feature of when statements attached to the child node
+*
+* INPUTS:
+*   val == parent value node of the object node to check
+*   valroot == database root for XPath purposes
+*   childobj == object template of child to check
+*   condresult == address of conditional test result
+*   
+* OUTPUTS:
+*   *condresult == TRUE if conditional is true or there are none
+*                  FALSE if conditional test failed
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    val_check_child_conditional (val_value_t *val,
+				 val_value_t *valroot,
+				 obj_template_t *childobj,
+				 boolean *condresult);
+
+
+/********************************************************************
+* FUNCTION val_is_mandatory
+*
+* Figure out if the value node is YANG mandatory or not
+*
+* INPUTS:
+*   val == parent value node of the object node to check
+*   valroot == database root for XPath purposes
+*   childobj == object template of child to check
+*   
+* RETURNS:
+*   TRUE if value is mandatory
+*   FALSE if value is not mandatory
+*********************************************************************/
 extern boolean
     val_is_mandatory (val_value_t *val,
 		      val_value_t *valroot,
 		      obj_template_t *childobj);
 
 
+/********************************************************************
+* FUNCTION val_get_cond_iqualval
+* 
+* Get the instance qualifier enum for this value node
+* Check all the conditional statements that can make
+* the object required or not
+*
+* INPUTS:
+*   val == parent value node of the object node to check
+*   valroot == database root for XPath purposes
+*   dobj == object template of child to check
+*   
+* RETURNS:
+*   instance qualifier value
+*********************************************************************/
 extern ncx_iqual_t 
     val_get_cond_iqualval (val_value_t *val,
 			   val_value_t *valroot,
 			   obj_template_t *obj);
 
+
+/********************************************************************
+* FUNCTION val_get_xpathpcb
+* 
+* Get the XPath parser control block in the specified value struct
+* 
+* INPUTS:
+*   val == value struct to check
+*
+* RETURNS:
+*    pointer to xpath control block or NULL if none
+*********************************************************************/
 extern xpath_pcb_t *
     val_get_xpathpcb (val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_get_const_xpathpcb
+* 
+* Get the XPath parser control block in the specified value struct
+* 
+* INPUTS:
+*   val == value struct to check
+*
+* RETURNS:
+*    pointer to xpath control block or NULL if none
+*********************************************************************/
 extern const xpath_pcb_t *
     val_get_const_xpathpcb (const val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_make_simval_obj
+* 
+* Create and set a val_value_t as a simple type
+* from an object template instead of individual fields
+* Calls val_make_simval with the object settings
+*
+* INPUTS:
+*    obj == object template to use
+*    valstr == simple value encoded as a string
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    pointer to malloced and filled in val_value_t struct
+*    NULL if some error
+*********************************************************************/
 extern val_value_t *
     val_make_simval_obj (obj_template_t *obj,
 			 const xmlChar *valstr,
 			 status_t  *res);
 
+
+/********************************************************************
+* FUNCTION val_set_simval_obj
+* 
+* Set an initialized val_value_t as a simple type
+
+* Set a pre-initialized val_value_t as a simple type
+* from an object template instead of individual fields
+* Calls val_set_simval with the object settings
+*
+* INPUTS:
+*    val == value struct to set
+*    obj == object template to use
+*    valstr == simple value encoded as a string to set
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t 
     val_set_simval_obj (val_value_t  *val,
 			obj_template_t *obj,
 			const xmlChar *valstr);
 
 
+/********************************************************************
+* FUNCTION val_set_warning_parms
+* 
+* Check the parent value struct (expected to be a container or list)
+* for the common warning control parameters.
+* invoke the warning parms that are present
+*
+*   --warn-idlen
+*   --warn-linelen
+*   --warn-off
+*
+* INPUTS:
+*    parentval == parent value struct to check
+*
+* OUTPUTS:
+*  prints an error message if a warn-off record cannot be added
+*
+*********************************************************************/
 extern void
     val_set_warning_parms (val_value_t *parentval);
 
+
+/********************************************************************
+* FUNCTION val_set_logging_parms
+* 
+* Check the parent value struct (expected to be a container or list)
+* for the common warning control parameters.
+* invoke the warning parms that are present
+*
+*   --log=filename
+*   --log-level=<debug-enum>
+*   --log-append=<boolean>
+*
+* INPUTS:
+*    parentval == parent value struct to check
+*
+* OUTPUTS:
+*  prints an error message if any errors occur
+*
+*********************************************************************/
 extern void
     val_set_logging_parms (val_value_t *parentval);
 
+
+/********************************************************************
+* FUNCTION val_set_path_parms
+*   --datapath
+*   --modpath
+*   --runpath
+*
+* Check the specified value set for the 3 path CLI parms
+* and override the environment variable setting, if any.
+*
+* Not all of these parameters are supported in all programs
+* The object tree is not checked, just the value tree
+*
+* INPUTS:
+*   parentval == CLI container to check for the runpath,
+*                 modpath, and datapath variables
+*
+*********************************************************************/
 extern void
     val_set_path_parms (val_value_t *parentval);
 
+
+/********************************************************************
+* FUNCTION val_set_subdirs_parm
+*   --subdirs
+*
+* Check the specified value set for the subdirs boolean
+*
+* INPUTS:
+*   parentval == CLI container to check for the subdirs parm
+*
+*********************************************************************/
 extern void
     val_set_subdirs_parm (val_value_t *parentval);
 
+
+/********************************************************************
+* FUNCTION val_set_feature_parms
+*   --feature-code-default
+*   --feature-enable-default
+*   --feature-static
+*   --feature-dynamic
+*   --feature-enable
+*   --feature-disable
+*
+* Handle the feature-related CLI parms for the specified value set
+*
+* Not all of these parameters are supported in all programs
+* The object tree is not checked, just the value tree
+*
+* INPUTS:
+*   parentval == CLI container to check for the feature parms
+*
+*********************************************************************/
 extern void
     val_set_feature_parms (val_value_t *parentval);
 

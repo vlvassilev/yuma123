@@ -290,7 +290,6 @@ static boolean
 /************** E X T E R N A L   F U N C T I O N S  ***************/
 
 
-
 /********************************************************************
 * FUNCTION xml_msg_init_hdr
 *
@@ -469,6 +468,8 @@ const xmlChar *
 * If it is not there then create one in the msg prefix map
 * Always returns a prefix, instead of using a default
 *
+* creates a new pfixmap if needed
+*
 * !!! MUST BE CALLED BEFORE THE <rpc-reply> XML OUTPUT
 * !!! HAS BEGUN.  CANNOT BE CALLED BY OUTPUT FUNCTIONS
 * !!! DURING THE <get> OR <get-config> OUTPUT GENERATION
@@ -536,6 +537,7 @@ const xmlChar *
 *
 * Find the namespace prefix for the specified namespace ID
 * DO NOT CREATE A NEW PREFIX MAP IF IT IS NOT THERE
+* does not create any pfixmap, just returns NULL if not found
 *
 * INPUTS:
 *    msg  == message to search
@@ -870,7 +872,7 @@ status_t
 *    badns == namespace URI of the bad namespace
 *             used if the nsid is the INVALID marker
 *    attrs == Q to hold the xml_attr_t, if generated
-
+*
 * OUTPUTS:
 *   msg->prefixQ will be populated as needed,
 *   could be partially populated if some error returned

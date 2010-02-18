@@ -62,6 +62,7 @@ date         init     comment
 #include  "yangconst.h"
 #endif
 
+
 /********************************************************************
 * FUNCTION op_method_name
 *

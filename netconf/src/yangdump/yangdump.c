@@ -1549,10 +1549,6 @@ static status_t
             pr_err(res);
             break;
         case NCX_CVTTYP_SQLDB:
-#ifdef FREE_VERSION
-            log_error("\nError: sqldb translation is only supported "
-                      "in the SDK version of yangdump\n");
-#else
             if (ncx_any_dependency_errors(pcb->top)) {
                 log_error("\nError: one or more imported modules had errors."
                           "\n       SQL object database conversion of "
@@ -1566,7 +1562,6 @@ static status_t
                     pr_err(res);
                 }
             }
-#endif
             break;
         case NCX_CVTTYP_COPY:
             if (ncx_any_dependency_errors(pcb->top)) {
@@ -1597,10 +1592,6 @@ static status_t
             }
             break;
         case NCX_CVTTYP_H:
-#ifdef FREE_VERSION
-            log_error("\nError: H file translation is only supported "
-                      "in the SDK version of yangdump\n");
-#else
             if (ncx_any_dependency_errors(pcb->top)) {
                 log_error("\nError: one or more imported modules had errors."
                           "\n       H file conversion of '%s' terminated.",
@@ -1613,13 +1604,8 @@ static status_t
                     pr_err(res);
                 }
             }
-#endif
             break;
         case NCX_CVTTYP_C:
-#ifdef FREE_VERSION
-            log_error("\nError: C file translation is only supported "
-                      "in the SDK version of yangdump\n");
-#else
             if (ncx_any_dependency_errors(pcb->top)) {
                 log_error("\nError: one or more imported modules had errors."
                           "\n       H file conversion of '%s' terminated.",
@@ -1632,7 +1618,6 @@ static status_t
                     pr_err(res);
                 }
             }
-#endif
             break;
         case NCX_CVTTYP_YANG:
             if (ncx_any_dependency_errors(pcb->top)) {

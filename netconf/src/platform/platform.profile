@@ -68,11 +68,7 @@ ifdef MEMTRACE
   CFLAGS += -DMEMORY_DEBUG=1
 endif
 
-# free or SDK version
-ifdef FREE
-  CFLAGS += -DFREE_VERSION
-endif
-
+# check if debian or RPM release build
 ifdef RELEASE
   CFLAGS += -DRELEASE=$(RELEASE)
 endif

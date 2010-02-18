@@ -42,11 +42,6 @@ ifdef MEMTRACE
   CFLAGS += -DMEMORY_DEBUG=1
 endif
 
-# free or SDK version
-ifdef FREE
-  CFLAGS += -DFREE_VERSION
-endif
-
 ifdef RELEASE
   CFLAGS += -DRELEASE=$(RELEASE)
 endif

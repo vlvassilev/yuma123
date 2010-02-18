@@ -639,163 +639,6 @@ static void
 
 
 /********************************************************************
- * FUNCTION output_one_type_diff
- * 
- *  Output the differences report for one type section
- *  within a leaf, leaf-list, or typedef definition
- *
- * type_changed should be called first to determine
- * if the type actually changed.  Otherwise a 'M typedef foo'
- * output line will result and be a false positive
- *
- * INPUTS:
- *    cp == parameter block to use
- *    oldtypdef == old internal typedef
- *    newtypdef == new internal typedef
- *
- *********************************************************************/
-void
-    output_one_type_diff (yangdiff_diffparms_t *cp,
-                          typ_def_t *oldtypdef,
-                          typ_def_t *newtypdef)
-{
-    xmlChar            *p, *oldp, *newp;
-    const xmlChar      *oldname, *newname;
-    const xmlChar      *oldpath, *newpath;
-    yangdiff_cdb_t      typcdb[5];
-    ncx_btype_t         oldbtyp, newbtyp;
-    ncx_tclass_t        oldclass, newclass;
-    boolean             isrev;
-
-    isrev = (cp->edifftype==YANGDIFF_DT_REVISION) ? TRUE : FALSE;
-
-    oldclass = oldtypdef->class;
-    newclass = newtypdef->class;
-
-    oldname = typ_get_name(oldtypdef);
-    newname = typ_get_name(newtypdef);
-
-    oldbtyp = typ_get_basetype(oldtypdef);
-    newbtyp = typ_get_basetype(newtypdef);
-
-    if (oldbtyp == NCX_BT_LEAFREF) {
-        oldpath = typ_get_leafref_path(oldtypdef);
-    } else {
-        oldpath = NULL;
-    }
-    if (newbtyp==NCX_BT_LEAFREF) {
-        newpath = typ_get_leafref_path(newtypdef);
-    } else {
-        newpath = NULL;
-    }
-
-    /* check if there is a module prefix involved
-     * in the change.  This may be a false positive
-     * if the prefix simply changed
-     * create YANG QNames for the type change record
-     * use the scratch buffer cp->buff for both strings
-     */
-    p = cp->buff;
-    if (oldtypdef->prefix) {
-        oldp = p;
-        p += xml_strcpy(p, oldtypdef->prefix);
-        *p++ = ':';
-        p += xml_strcpy(p, oldname);
-        if (oldtypdef->class==NCX_CL_NAMED) {
-            *p++ = ' ';
-            *p++ = '(';
-            p += xml_strcpy(p, (const xmlChar *)
-                            tk_get_btype_sym(oldbtyp));
-            *p++ = ')';
-            *p = 0;         
-        }
-        p++;   /* leave last NULL char in place */
-        oldname = oldp;
-    }
-    if (newtypdef->prefix) {
-        newp = p;
-        p += xml_strcpy(p, newtypdef->prefix);
-        *p++ = ':';
-        p += xml_strcpy(p, newname);
-        if (newtypdef->class==NCX_CL_NAMED) {
-            *p++ = ' ';
-            *p++ = '(';
-            p += xml_strcpy(p, (const xmlChar *)
-                            tk_get_btype_sym(newbtyp));
-            *p++ = ')';
-            *p = 0;
-        }
-        newname = newp;
-    }
-
-    /* Print the type name change set only if it really
-     * changed; otherwise force an M line to be printed
-     */
-    if (str_field_changed(YANG_K_TYPE, oldname, newname, 
-                          isrev, &typcdb[0])) {
-        output_cdb_line(cp, &typcdb[0]);
-    } else {
-        output_mstart_line(cp, YANG_K_TYPE, NULL, FALSE);
-    }
-
-    /* check invalid change of builtin type */
-    if (oldbtyp != newbtyp) {
-        /* need to figure out what type changes are really allowed */
-        if (!((typ_is_number(oldbtyp) && typ_is_number(newbtyp)) ||
-              (typ_is_string(oldbtyp) && typ_is_string(newbtyp)))) {
-            /* ses_putstr(cp->scb, (const xmlChar *)" (invalid)"); */
-            return;
-        }
-    }
-
-    /* check if that is all the data requested */
-    if (cp->edifftype == YANGDIFF_DT_TERSE) {
-        return;
-    }
-
-    /* check corner-case, no sub-fields to compare */
-    if (oldclass==NCX_CL_BASE && newclass==NCX_CL_BASE) {
-        /* type field is a plain builtin like 'int32;' */
-        return;
-    }
-
-    /* in all modes except 'normal', indent 1 level and
-     * show the specific sub-clauses that have changed
-     */
-    indent_in(cp);
-
-    /* special case -- check leafref here */
-    if (oldpath || newpath) {
-        output_diff(cp, YANG_K_PATH, oldpath, newpath, FALSE);
-    }
-
-    if (typ_is_number(oldbtyp)) {
-        output_range_diff(cp, YANG_K_RANGE, oldtypdef, newtypdef);
-    } else if (typ_is_string(oldbtyp)) {
-        output_range_diff(cp, YANG_K_LENGTH, oldtypdef, newtypdef);
-        output_patternQ_diff(cp, oldtypdef, newtypdef);
-    } else {
-        switch (oldbtyp) {
-        case NCX_BT_ENUM:
-            output_eb_type_diff(cp, oldtypdef, newtypdef, FALSE);
-            break;
-        case NCX_BT_BITS:
-            output_eb_type_diff(cp, oldtypdef, newtypdef, TRUE);
-            break;
-        case NCX_BT_UNION:
-            output_union_diff(cp, oldtypdef, newtypdef);
-            break;
-        default:
-            ;
-        }
-    }
-
-    indent_out(cp);
-
-} /* output_one_type_diff */
-
-
-/********************************************************************
 * FUNCTION pattern_changed
 *
 * Check if the pattern-stmt changed at all
@@ -1200,8 +1043,6 @@ uint32
 } /* type_changed */
 
 
-
-
 /********************************************************************
  * FUNCTION typedef_changed
  * 
@@ -1254,64 +1095,6 @@ uint32
     return 0;
 
 } /* typedef_changed */
-
-
-/********************************************************************
- * FUNCTION output_typedefQ_diff
- * 
- *  Output the differences report for a Q of typedef definitions
- *  Not always called for top-level typedefs; Can be called
- *  for nested typedefs
- *
- * INPUTS:
- *    cp == parameter block to use
- *    oldQ == Q of old typ_template_t to use
- *    newQ == Q of new typ_template_t to use
- *
- *********************************************************************/
-void
-    output_typedefQ_diff (yangdiff_diffparms_t *cp,
-                          dlq_hdr_t *oldQ,
-                          dlq_hdr_t *newQ)
-{
-    typ_template_t *oldtyp, *newtyp;
-
-    /* borrowing the 'used' flag for marking matched typedefs
-     * first set all these flags to FALSE
-     */
-    for (newtyp = (typ_template_t *)dlq_firstEntry(newQ);
-         newtyp != NULL;
-         newtyp = (typ_template_t *)dlq_nextEntry(newtyp)) {
-        newtyp->used = FALSE;
-    }
-
-    /* look through the old type Q for matching types in the new type Q */
-    for (oldtyp = (typ_template_t *)dlq_firstEntry(oldQ);
-         oldtyp != NULL;
-         oldtyp = (typ_template_t *)dlq_nextEntry(oldtyp)) {
-
-        /* find this revision in the new module */
-        newtyp = ncx_find_type_que(newQ, oldtyp->name);
-        if (newtyp) {
-            output_one_typedef_diff(cp, oldtyp, newtyp);
-            newtyp->used = TRUE;
-        } else {
-            /* typedef was removed from the new module */
-            output_diff(cp, YANG_K_TYPEDEF, oldtyp->name, NULL, TRUE);
-        }
-    }
-
-    /* look for typedefs that were added in the new module */
-    for (newtyp = (typ_template_t *)dlq_firstEntry(newQ);
-         newtyp != NULL;
-         newtyp = (typ_template_t *)dlq_nextEntry(newtyp)) {
-        if (!newtyp->used) {
-            /* this typedef was added in the new version */
-            output_diff(cp, YANG_K_TYPEDEF, NULL, newtyp->name, TRUE);
-        }
-    }
-
-} /* output_typedefQ_diff */
 
 
 /********************************************************************
@@ -1376,6 +1159,222 @@ uint32
     return 0;
 
 }  /* typedefQ_changed */
+
+
+/********************************************************************
+ * FUNCTION output_typedefQ_diff
+ * 
+ *  Output the differences report for a Q of typedef definitions
+ *  Not always called for top-level typedefs; Can be called
+ *  for nested typedefs
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    oldQ == Q of old typ_template_t to use
+ *    newQ == Q of new typ_template_t to use
+ *
+ *********************************************************************/
+void
+    output_typedefQ_diff (yangdiff_diffparms_t *cp,
+                          dlq_hdr_t *oldQ,
+                          dlq_hdr_t *newQ)
+{
+    typ_template_t *oldtyp, *newtyp;
+
+    /* borrowing the 'used' flag for marking matched typedefs
+     * first set all these flags to FALSE
+     */
+    for (newtyp = (typ_template_t *)dlq_firstEntry(newQ);
+         newtyp != NULL;
+         newtyp = (typ_template_t *)dlq_nextEntry(newtyp)) {
+        newtyp->used = FALSE;
+    }
+
+    /* look through the old type Q for matching types in the new type Q */
+    for (oldtyp = (typ_template_t *)dlq_firstEntry(oldQ);
+         oldtyp != NULL;
+         oldtyp = (typ_template_t *)dlq_nextEntry(oldtyp)) {
+
+        /* find this revision in the new module */
+        newtyp = ncx_find_type_que(newQ, oldtyp->name);
+        if (newtyp) {
+            output_one_typedef_diff(cp, oldtyp, newtyp);
+            newtyp->used = TRUE;
+        } else {
+            /* typedef was removed from the new module */
+            output_diff(cp, YANG_K_TYPEDEF, oldtyp->name, NULL, TRUE);
+        }
+    }
+
+    /* look for typedefs that were added in the new module */
+    for (newtyp = (typ_template_t *)dlq_firstEntry(newQ);
+         newtyp != NULL;
+         newtyp = (typ_template_t *)dlq_nextEntry(newtyp)) {
+        if (!newtyp->used) {
+            /* this typedef was added in the new version */
+            output_diff(cp, YANG_K_TYPEDEF, NULL, newtyp->name, TRUE);
+        }
+    }
+
+} /* output_typedefQ_diff */
+
+
+/********************************************************************
+ * FUNCTION output_one_type_diff
+ * 
+ *  Output the differences report for one type section
+ *  within a leaf, leaf-list, or typedef definition
+ *
+ * type_changed should be called first to determine
+ * if the type actually changed.  Otherwise a 'M typedef foo'
+ * output line will result and be a false positive
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    oldtypdef == old internal typedef
+ *    newtypdef == new internal typedef
+ *
+ *********************************************************************/
+void
+    output_one_type_diff (yangdiff_diffparms_t *cp,
+                          typ_def_t *oldtypdef,
+                          typ_def_t *newtypdef)
+{
+    xmlChar            *p, *oldp, *newp;
+    const xmlChar      *oldname, *newname;
+    const xmlChar      *oldpath, *newpath;
+    yangdiff_cdb_t      typcdb[5];
+    ncx_btype_t         oldbtyp, newbtyp;
+    ncx_tclass_t        oldclass, newclass;
+    boolean             isrev;
+
+    isrev = (cp->edifftype==YANGDIFF_DT_REVISION) ? TRUE : FALSE;
+
+    oldclass = oldtypdef->class;
+    newclass = newtypdef->class;
+
+    oldname = typ_get_name(oldtypdef);
+    newname = typ_get_name(newtypdef);
+
+    oldbtyp = typ_get_basetype(oldtypdef);
+    newbtyp = typ_get_basetype(newtypdef);
+
+    if (oldbtyp == NCX_BT_LEAFREF) {
+        oldpath = typ_get_leafref_path(oldtypdef);
+    } else {
+        oldpath = NULL;
+    }
+    if (newbtyp==NCX_BT_LEAFREF) {
+        newpath = typ_get_leafref_path(newtypdef);
+    } else {
+        newpath = NULL;
+    }
+
+    /* check if there is a module prefix involved
+     * in the change.  This may be a false positive
+     * if the prefix simply changed
+     * create YANG QNames for the type change record
+     * use the scratch buffer cp->buff for both strings
+     */
+    p = cp->buff;
+    if (oldtypdef->prefix) {
+        oldp = p;
+        p += xml_strcpy(p, oldtypdef->prefix);
+        *p++ = ':';
+        p += xml_strcpy(p, oldname);
+        if (oldtypdef->class==NCX_CL_NAMED) {
+            *p++ = ' ';
+            *p++ = '(';
+            p += xml_strcpy(p, (const xmlChar *)
+                            tk_get_btype_sym(oldbtyp));
+            *p++ = ')';
+            *p = 0;         
+        }
+        p++;   /* leave last NULL char in place */
+        oldname = oldp;
+    }
+    if (newtypdef->prefix) {
+        newp = p;
+        p += xml_strcpy(p, newtypdef->prefix);
+        *p++ = ':';
+        p += xml_strcpy(p, newname);
+        if (newtypdef->class==NCX_CL_NAMED) {
+            *p++ = ' ';
+            *p++ = '(';
+            p += xml_strcpy(p, (const xmlChar *)
+                            tk_get_btype_sym(newbtyp));
+            *p++ = ')';
+            *p = 0;
+        }
+        newname = newp;
+    }
+
+    /* Print the type name change set only if it really
+     * changed; otherwise force an M line to be printed
+     */
+    if (str_field_changed(YANG_K_TYPE, oldname, newname, 
+                          isrev, &typcdb[0])) {
+        output_cdb_line(cp, &typcdb[0]);
+    } else {
+        output_mstart_line(cp, YANG_K_TYPE, NULL, FALSE);
+    }
+
+    /* check invalid change of builtin type */
+    if (oldbtyp != newbtyp) {
+        /* need to figure out what type changes are really allowed */
+        if (!((typ_is_number(oldbtyp) && typ_is_number(newbtyp)) ||
+              (typ_is_string(oldbtyp) && typ_is_string(newbtyp)))) {
+            /* ses_putstr(cp->scb, (const xmlChar *)" (invalid)"); */
+            return;
+        }
+    }
+
+    /* check if that is all the data requested */
+    if (cp->edifftype == YANGDIFF_DT_TERSE) {
+        return;
+    }
+
+    /* check corner-case, no sub-fields to compare */
+    if (oldclass==NCX_CL_BASE && newclass==NCX_CL_BASE) {
+        /* type field is a plain builtin like 'int32;' */
+        return;
+    }
+
+    /* in all modes except 'normal', indent 1 level and
+     * show the specific sub-clauses that have changed
+     */
+    indent_in(cp);
+
+    /* special case -- check leafref here */
+    if (oldpath || newpath) {
+        output_diff(cp, YANG_K_PATH, oldpath, newpath, FALSE);
+    }
+
+    if (typ_is_number(oldbtyp)) {
+        output_range_diff(cp, YANG_K_RANGE, oldtypdef, newtypdef);
+    } else if (typ_is_string(oldbtyp)) {
+        output_range_diff(cp, YANG_K_LENGTH, oldtypdef, newtypdef);
+        output_patternQ_diff(cp, oldtypdef, newtypdef);
+    } else {
+        switch (oldbtyp) {
+        case NCX_BT_ENUM:
+            output_eb_type_diff(cp, oldtypdef, newtypdef, FALSE);
+            break;
+        case NCX_BT_BITS:
+            output_eb_type_diff(cp, oldtypdef, newtypdef, TRUE);
+            break;
+        case NCX_BT_UNION:
+            output_union_diff(cp, oldtypdef, newtypdef);
+            break;
+        default:
+            ;
+        }
+    }
+
+    indent_out(cp);
+
+} /* output_one_type_diff */
+
 
 /* END yangdiff_typ.c */
 

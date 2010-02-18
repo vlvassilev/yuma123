@@ -3244,6 +3244,7 @@ static void
 /********************************************************************
 * FUNCTION cyang_convert_module
 * 
+*  Generate Canonical YANG from the specified module(s)
 *
 * INPUTS:
 *   pcb == parser control block of module to convert

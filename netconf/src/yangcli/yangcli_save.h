@@ -47,6 +47,19 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+ * FUNCTION do_save
+ * 
+ * INPUTS:
+ *    server_cb == server control block to use
+ *
+ * OUTPUTS:
+ *   copy-config and/or commit operation will be sent to server
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
 extern status_t
     do_save (server_cb_t *server_cb);
 

@@ -183,62 +183,276 @@ typedef struct xsd_keychain_t_ {
 *								    *
 *********************************************************************/
 
-/* Build output value: add child node to a struct node */
 
+/********************************************************************
+* FUNCTION xsd_typename
+* 
+*   Get the corresponding XSD type name for the NCX base type
+*
+* INPUTS:
+*    btyp == base type
+*
+* RETURNS:
+*   const pointer to the XSD base type name string, NULL if error
+*********************************************************************/
 extern const xmlChar *
     xsd_typename (ncx_btype_t btyp);
 
+
+/********************************************************************
+* FUNCTION xsd_make_basename
+* 
+*   Malloc a string buffer and create a basename string
+*   for a base type and metaSimpleType pair
+*
+*   This is complete; The m__free function must be called
+*   with the return value if it is non-NULL;
+*
+* INPUTS:
+*    nsid == namespace ID to use
+*    name == condition clause (may be NULL)
+*
+* RETURNS:
+*   malloced value string or NULL if malloc error
+*********************************************************************/
 extern xmlChar *
     xsd_make_basename (const typ_template_t *typ);
 
 
+/********************************************************************
+* FUNCTION xsd_make_enum_appinfo
+* 
+*   Go through the appinfoQ and add a child node to the
+*   parent struct, which should be named 'appinfo'
+*   This is complete; The m__free function must be called
+*   with the return value if it is non-NULL;
+*
+* INPUTS:
+*    enuval == enum value
+*    appinfoQ == queue to check
+*    status == definition status
+*
+* RETURNS:
+*   malloced value containing all the appinfo or NULL if malloc error
+*********************************************************************/
 extern val_value_t *
     xsd_make_enum_appinfo (int32 enuval,
 			   const dlq_hdr_t  *appinfoQ,
 			   ncx_status_t status);
 
+
+/********************************************************************
+* FUNCTION xsd_make_bit_appinfo
+* 
+*   Go through the appinfoQ and add a child node to the
+*   parent struct, which should be named 'appinfo'
+*   This is complete; The m__free function must be called
+*   with the return value if it is non-NULL;
+*
+* INPUTS:
+*    bitupos == bit position
+*    appinfoQ == queue to check
+*    status == definition status
+*
+* RETURNS:
+*   malloced value containing all the appinfo or NULL if malloc error
+*********************************************************************/
 extern val_value_t *
     xsd_make_bit_appinfo (uint32 bitpos,
 			  const dlq_hdr_t  *appinfoQ,
 			  ncx_status_t status);
 
+
+/********************************************************************
+* FUNCTION xsd_make_err_appinfo
+* 
+*   Make an appinfo node for the error-app-tag and or
+*   error-message extensions
+*
+* INPUTS:
+*    ref == reference clause (may be NULL)
+*    errmsg == error msg string (1 may be NULL)
+*    errtag == error app tag string (1 may be NULL)
+*
+* RETURNS:
+*   malloced value containing the requested appinfo 
+*   or NULL if malloc error
+*********************************************************************/
 extern val_value_t *
     xsd_make_err_appinfo (const xmlChar *ref,
 			  const xmlChar *errmsg,
 			  const xmlChar *errtag);
 
+
+/********************************************************************
+* FUNCTION xsd_make_schema_location
+* 
+*   Get the schemaLocation string for this module
+*   This is complete; The m__free function must be called
+*   with the return value if it is non-NULL;
+*
+* INPUTS:
+*    mod == module
+*    schemaloc == CLI schmeloc parameter for URL start string
+*    versionnames == TRUE if version in filename requested (CLI default)
+*                 == FALSE for no version names in the filenames
+*
+* RETURNS:
+*   malloced string or NULL if malloc error
+*********************************************************************/
 extern xmlChar *
     xsd_make_schema_location (const ncx_module_t *mod,
 			      const xmlChar *schemaloc,
 			      boolean versionnames);
 
+
+/********************************************************************
+* FUNCTION xsd_make_output_filename
+* 
+* Construct an output filename spec, based on the 
+* conversion parameters
+*
+* INPUTS:
+*    mod == module
+*    cp == conversion parameters to use
+*
+* RETURNS:
+*   malloced string or NULL if malloc error
+*********************************************************************/
 extern xmlChar *
     xsd_make_output_filename (const ncx_module_t *mod,
 			      const yangdump_cvtparms_t *cp);
 
+
+/********************************************************************
+* FUNCTION xsd_do_documentation
+* 
+*   Create a value struct representing the description node
+*   This is complete; The val_free_value function must be called
+*   with the return value if it is non-NULL;
+*
+* INPUTS:
+*    descr == reference clause
+*    val == struct to contain added clause
+*
+* OUTPUT:
+*   val->v.childQ has entries added if descr is non-NULL
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_do_documentation (const xmlChar *descr,
 			  val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION xsd_do_reference
+* 
+*   Create a value struct representing the reference node
+*   This is complete; The val_free_value function must be called
+*   with the return value if it is non-NULL;
+*
+* INPUTS:
+*    ref == reference clause
+*    val == struct to contain added clause
+*
+* OUTPUT:
+*   val->v.childQ has entries added if descr and ref are non-NULL
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_do_reference (const xmlChar *ref,
 		      val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION xsd_add_mod_documentation
+* 
+*   Create multiple <documentation> elements representing the 
+*   module-level documentation node
+*
+* INPUTS:
+*    mod == module in progress
+*    annot == annotation node to add the documentation node into
+*
+* OUTPUTS:
+*    annot->a.childQ has nodes added if NO_ERR
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     xsd_add_mod_documentation (const ncx_module_t *mod,
 			       val_value_t *annot);
 
+
+/********************************************************************
+* FUNCTION xsd_add_imports
+* 
+*   Add the required imports nodes
+*
+* INPUTS:
+*    pcb == parser control block
+*    mod == module in progress
+*    cp == conversion parameters in use
+*    val == struct parent to contain child nodes for each import
+*
+* OUTPUTS:
+*    val->childQ has entries added for the imports required
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_add_imports (yang_pcb_t *pcb,
                      const ncx_module_t *mod,
 		     const yangdump_cvtparms_t *cp,
 		     val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION xsd_add_includes
+* 
+*   Add the required include nodes
+*
+* INPUTS:
+*    mod == module in progress
+*    cp == conversion parameters in use
+*    val == struct parent to contain child nodes for each include
+*
+* OUTPUTS:
+*    val->childQ has entries added for the includes required
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_add_includes (const ncx_module_t *mod,
 		      const yangdump_cvtparms_t *cp,
 		      val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION xsd_new_element
+* 
+*   Set up a new struct as an element
+*
+* INPUTS:
+*    mod == module conversion in progress
+*    name == element name
+*    typdef == typ def for child node in progress
+*    parent == typ def for parent node in progress (may be NULL)
+*    hasnodes == TRUE if there are child nodes for this element
+*             == FALSE if this is an empty node, maybe with attributes
+*    hasindex == TRUE if this type has an index clause
+*             == FALSE if this type does not have an index clause
+*    
+* RETURNS:
+*   new element data struct or NULL if malloc error
+*********************************************************************/
 extern val_value_t *
     xsd_new_element (const ncx_module_t *mod,
 		     const xmlChar *name,
@@ -247,6 +461,25 @@ extern val_value_t *
 		     boolean hasnodes,
 		     boolean hasindex);
 
+
+/********************************************************************
+* FUNCTION xsd_new_leaf_element
+* 
+*   Set up a new YANG leaf or leaf-list as an element
+*
+* INPUTS:
+*    mod == module conversion in progress
+*    obj == object to use (leaf of leaf-list)
+*    hasnodes == TRUE if a struct should be used
+*                FALSE if an empty element should be used
+*    addtype == TRUE if a type attribute should be added
+*               FALSE if type attribute should not be added
+*    iskey == TRUE if a this is a key leaf
+*             FALSE if this is not a key leaf
+*
+* RETURNS:
+*   new element data struct or NULL if malloc error
+*********************************************************************/
 extern val_value_t *
     xsd_new_leaf_element (const ncx_module_t *mod,
 			  const obj_template_t *obj,
@@ -254,6 +487,23 @@ extern val_value_t *
 			  boolean addtype,
 			  boolean iskey);
 
+
+/********************************************************************
+* FUNCTION xsd_add_parmtype_attr
+* 
+*   Generate a type attribute for a type template
+*
+* INPUTS:
+*    targns == targetNamespace ID
+*    typ == type template for the parm 
+*    val == struct parent to contain child nodes for each type
+*
+* OUTPUTS:
+*    val->metaQ has an entry added for this attribute
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_add_parmtype_attr (xmlns_id_t targns,
 			   const typ_template_t *typ,
@@ -266,6 +516,29 @@ extern status_t
  *		 val_value_t *val);
  */
 
+
+/********************************************************************
+* FUNCTION xsd_do_annotation
+* 
+*   Add an annotation element if needed
+*   Deprecated -- used by NCX only
+*
+* INPUTS:
+*    descr == description string (may be NULL)
+*    condition == condition string (may be NULL)
+*    units == units clause contents (or NULL if not used)
+*    maxacc == max-access clause (NONE == omit)
+*    status == status clause (NONE or CURRENT to omit
+*    appinfoQ  == queue of cx_appinfo_t records (may be NULL)
+*    val == struct parent to contain child nodes for this annotation
+*
+* OUTPUTS:
+*    val->v.childQ has an entry added for the annotation if
+*    any of the content parameters are actually present
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_do_annotation (const xmlChar *descr,
 		       const xmlChar *condition,
@@ -276,31 +549,151 @@ extern status_t
 		       val_value_t  *val);
 
 
-extern status_t
-    xsd_do_type_annotation (const typ_template_t *typ,
-			    val_value_t *val);
-
+/********************************************************************
+* FUNCTION xsd_make_obj_annotation
+* 
+*   Make an annotation element for an object, if needed
+*
+* INPUTS:
+*    obj == obj_template to check
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    pointer to malloced object value struct
+*    NULL if nothing to do (*res == NO_ERR)
+*    NULL if some error (*res != NO_ERR)
+*********************************************************************/
 extern val_value_t *
     xsd_make_obj_annotation (obj_template_t *obj,
 			     status_t  *res);
 
+
+/********************************************************************
+* FUNCTION xsd_do_type_annotation
+* 
+*   Add an annotation element for a typedef, if needed
+*   
+* INPUTS:
+*    typ == typ_template to check
+*    val == value struct to add nodes to
+*
+* OUTPUTS:
+*    val->v.childQ has an <annotation> node added, if needed
+*
+* RETURNS:
+*    status
+*********************************************************************/
+extern status_t
+    xsd_do_type_annotation (const typ_template_t *typ,
+			    val_value_t *val);
+
+
+/********************************************************************
+* FUNCTION xsd_make_group_annotation
+* 
+*   Make an annotation element for a grouping, if needed
+*
+* INPUTS:
+*    grp == grp_template to check
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    pointer to malloced object value struct
+*    NULL if nothing to do (*res == NO_ERR)
+*    NULL if some error (*res != NO_ERR)
+*********************************************************************/
 extern val_value_t *
     xsd_make_group_annotation (const grp_template_t *grp,
 			       status_t  *res);
 
+
+/********************************************************************
+* FUNCTION xsd_add_aughook
+* 
+*   Add an abstract element to set a substitutionGroup that
+*   can be used by an augment clause to create new nodes
+*   within an existing structure.  This allows any namespace,
+*   not just external namespaces like xsd_add_any
+*
+*   augment /foo/bar  -->   substitutionGroup='__.foo.bar.A__'
+*
+*   This function is called for /foo and /foo/bar, which
+*   creates abstract elements /foo/__.foo.A__ and /foo/bar/__.foo.bar.A__
+*
+*   The YANG name length restrictions, and internal NcxName
+*   restrictions do not matter since these constructed element names
+*   are only used within the XSD
+*  
+* INPUTS:
+*    val == val_value_t struct to add new last child leaf 
+*    obj == object to use as the template for the new last leaf
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_add_aughook (val_value_t *val,
 		     const obj_template_t *obj);
 
+
+/********************************************************************
+* FUNCTION xsd_make_rpc_output_typename
+* 
+*   Create a type name for the RPC function output data structure
+*
+* INPUTS:
+*    obj == reference clause (may be NULL)
+*    
+* RETURNS:
+*   malloced buffer with the typename
+*********************************************************************/
 extern xmlChar *
     xsd_make_rpc_output_typename (const obj_template_t *obj);
 
 
+/********************************************************************
+* FUNCTION xsd_add_type_attr
+* 
+*   Generate a type attribute
+*
+* INPUTS:
+*    mod == module in progress
+*           contains targetNamespace ID
+*    typdef == typ_def for the typ_template struct to use for 
+*              the attribute list source
+*    val == struct parent to contain child nodes for each type
+*
+* OUTPUTS:
+*    val->metaQ has an entry added for this attribute
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_add_type_attr (const ncx_module_t *mod,
 		       const typ_def_t *typdef,
 		       val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION test_basetype_attr
+* 
+*   Test for the OK generate a type or base attribute
+*
+* INPUTS:
+*    mod == module in progress
+*    typdef == typ_def for the typ_template struct to use for 
+*              the attribute list source
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     test_basetype_attr (const ncx_module_t *mod,
                         const typ_def_t *typdef);

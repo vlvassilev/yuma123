@@ -68,6 +68,21 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION cyang_convert_module
+* 
+*  Generate Canonical YANG from the specified module(s)
+*
+* INPUTS:
+*   pcb == parser control block of module to convert
+*          This is returned from ncxmod_load_module_ex
+*   cp == conversion parms to use
+*   scb == session control block for writing output
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t 
     cyang_convert_module (const yang_pcb_t *pcb,
 			  const yangdump_cvtparms_t *cp,

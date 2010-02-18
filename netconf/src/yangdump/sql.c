@@ -1080,7 +1080,7 @@ static void
 /********************************************************************
 * FUNCTION sql_convert_module
 * 
-*  Convert the YANG or NCX module to SQL for input to
+*  Convert the YANG module to SQL for input to
 *  the netconfcentral object dictionary database
 *
 * INPUTS:

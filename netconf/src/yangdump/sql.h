@@ -79,6 +79,22 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION sql_convert_module
+* 
+*  Convert the YANG module to SQL for input to
+*  the netconfcentral object dictionary database
+*
+* INPUTS:
+*   pcb == parser control block of module to convert
+*          This is returned from ncxmod_load_module_ex
+*   cp == convert parms struct to use
+*   scb == session to use for output
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t 
     sql_convert_module (const yang_pcb_t *pcb,
 			const yangdump_cvtparms_t *cp,

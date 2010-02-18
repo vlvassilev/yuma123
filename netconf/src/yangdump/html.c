@@ -4824,6 +4824,7 @@ static void
 /********************************************************************
 * FUNCTION html_convert_module
 * 
+*  Generate HTML version of the specified module(s)
 *
 * INPUTS:
 *   pcb == parser control block of module to convert

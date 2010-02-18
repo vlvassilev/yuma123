@@ -1129,6 +1129,7 @@ static status_t
 /********************************************************************
 * FUNCTION h_convert_module
 * 
+*  Generate the SIL H file code for the specified module(s)
 *
 * INPUTS:
 *   pcb == parser control block of module to convert

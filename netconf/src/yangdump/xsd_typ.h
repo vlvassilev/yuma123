@@ -68,24 +68,115 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION xsd_add_types
+* 
+*   Add the required type nodes
+*
+* INPUTS:
+*    mod == module in progress
+*    val == struct parent to contain child nodes for each type
+*
+* OUTPUTS:
+*    val->childQ has entries added for the types in this module
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_add_types (const ncx_module_t *mod,
 		   val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION xsd_add_local_types
+* 
+*   Add the required type nodes for the local types in the typnameQ
+*   YANG Only -- NCX does not have local types
+*
+* INPUTS:
+*    mod == module in progress
+*    val == struct parent to contain child nodes for each type
+*
+* OUTPUTS:
+*    val->childQ has entries added for the types in this module
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_add_local_types (const ncx_module_t *mod,
 			 val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION xsd_finish_simpleType
+* 
+*   Generate a simpleType elment based on the typdef
+*   Note: NCX_BT_ENAME is considered a
+*         complexType for XSD conversion purposes
+*
+* INPUTS:
+*    mod == module in progress
+*    typdef == typ def for the typ_template struct to convert
+*    val == struct parent to contain child nodes for each type
+*
+* OUTPUTS:
+*    val->v.childQ has entries added for the types in this module
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_finish_simpleType (const ncx_module_t *mod,
 			   typ_def_t *typdef,
 			   val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION xsd_finish_namedType
+* 
+*   Generate a complexType elment based on the typdef for a named type
+*   The tclass must be NCX_CL_NAMED for the typdef data struct
+*
+*   Note: The "+=" type extension mechanism in NCX is not supportable
+*         in XSD for strings, so it must not be used at this time.
+*         It is not supported for any data type, even enum.
+*
+* INPUTS:
+*    mod == module in progress
+*    typdef == typ def for the typ_template struct to convert
+*    val == struct parent to contain child nodes for each type
+*
+* OUTPUTS:
+*    val->v.childQ has entries added for the types in this module
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_finish_namedType (const ncx_module_t *mod,
 			  typ_def_t *typdef,
 			  val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION xsd_finish_union
+* 
+*   Generate the XSD for a union element 
+*
+* INPUTS:
+*    mod == module in progress
+*    typdef == typdef for the list
+*    val == struct parent to contain child nodes for each type
+*
+* OUTPUTS:
+*    val->v.childQ has entries added for the nodes in this typdef
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_finish_union (const ncx_module_t *mod,
 		      typ_def_t *typdef,

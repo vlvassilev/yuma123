@@ -201,6 +201,9 @@ static void
 }  /* free_c_define */
 
 
+/**************    E X T E R N A L   F U N C T I O N S **********/
+
+
 /********************************************************************
 * FUNCTION need_rpc_includes
 * 
@@ -916,7 +919,7 @@ void
 
 
 /*******************************************************************
-* FUNCTION write_c_val_macro_name
+* FUNCTION write_c_val_macro_type
 * 
 * Generate the C VAL_FOO macro name for the data type
 *

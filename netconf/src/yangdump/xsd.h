@@ -72,9 +72,33 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
-/* module entry point: convert an entire module to a value struct
- * representing an XML element which represents an XSD
- */
+
+/********************************************************************
+* FUNCTION xsd_convert_module
+* 
+*   Convert a [sub]module to XSD 1.0 format
+*   module entry point: convert an entire module to a value struct
+*   representing an XML element which represents an XSD
+*
+* INPUTS:
+*   mod == module to convert
+*   cp == conversion parms struct to use
+*   retval == address of val_value_t to receive a malloced value struct
+*             representing the XSD.  Extra mallocs will be avoided by
+*             referencing the mod_module_t strings.  
+*             Do not remove the module from the registry while this
+*             val struct is being used!!!
+*   top_attrs == pointer to receive the top element attributes
+*               HACK: rpc_agt needs the top-level attrs to
+*               be in xml_attr_t format, not val_value_t metaval format
+*
+* OUTPUTS:
+*   *retval = malloced return value; MUST FREE THIS LATER
+*   *top_attrs = filled in attrs queue
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t 
     xsd_convert_module (yang_pcb_t *pcb,
                         ncx_module_t *mod,
@@ -83,6 +107,21 @@ extern status_t
                         xml_attrs_t  *top_attrs);
 
 
+/********************************************************************
+* FUNCTION xsd_load_typenameQ
+* 
+*   Generate unique type names for the entire module
+*   including any submodules that were parsed as well
+*
+* INPUTS:
+*   mod == module to process
+*
+* OUTPUTS:
+*   *val = malloced return value
+*   *retattrs = malled attrs queue
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_load_typenameQ (ncx_module_t *mod);
 

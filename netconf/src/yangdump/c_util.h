@@ -155,23 +155,85 @@ typedef struct c_define_t_ {
 *                                                                   *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION need_rpc_includes
+* 
+* Check if the include-stmts for RPC methods are needed
+*
+* INPUTS:
+*   mod == module in progress
+*   cp == conversion parameters to use
+*
+* RETURNS:
+*  TRUE if RPCs found
+*  FALSE if no RPCs found
+*********************************************************************/
 extern boolean
     need_rpc_includes (const ncx_module_t *mod,
                        const yangdump_cvtparms_t *cp);
 
+
+/********************************************************************
+* FUNCTION need_notif_includes
+* 
+* Check if the include-stmts for notifications are needed
+*
+* INPUTS:
+*   mod == module in progress
+*   cp == conversion parameters to use
+*
+* RETURNS:
+*   TRUE if notifcations found
+*   FALSE if no notifications found
+*********************************************************************/
 extern boolean
     need_notif_includes (const ncx_module_t *mod,
                          const yangdump_cvtparms_t *cp);
 
+
+/********************************************************************
+* FUNCTION write_c_safe_str
+* 
+* Generate a string token at the current line location
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   strval == string value
+*********************************************************************/
 extern void
     write_c_safe_str (ses_cb_t *scb,
                       const xmlChar *strval);
 
+
+/********************************************************************
+* FUNCTION write_c_str
+* 
+* Generate a string token at the current line location
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   strval == string value
+*   quotes == quotes style (0, 1, 2)
+*********************************************************************/
 extern void
     write_c_str (ses_cb_t *scb,
                  const xmlChar *strval,
                  uint32 quotes);
 
+
+/********************************************************************
+* FUNCTION write_c_simple_str
+* 
+* Generate a simple clause on 1 line
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   kwname == keyword name
+*   strval == string value
+*   indent == indent count to use
+*   quotes == quotes style (0, 1, 2)
+*********************************************************************/
 extern void
     write_c_simple_str (ses_cb_t *scb,
                         const xmlChar *kwname,
@@ -179,65 +241,265 @@ extern void
                         int32 indent,
                         uint32 quotes);
 
+
+/********************************************************************
+*
+* FUNCTION write_identifier
+* 
+* Generate an identifier
+*
+*  #module_DEFTYPE_idname
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   modname == module name start-string to use
+*   defpart == internal string for deftype part
+*   idname == identifier name
+*
+*********************************************************************/
 extern void
     write_identifier (ses_cb_t *scb,
                       const xmlChar *modname,
                       const xmlChar *defpart,
                       const xmlChar *idname);
 
+
+/********************************************************************
+* FUNCTION write_ext_include
+* 
+* Generate an include statement for an external file
+*
+*  #include <foo,h>
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   hfile == H file name == file name to include (foo.h)
+*
+*********************************************************************/
 extern void
     write_ext_include (ses_cb_t *scb,
                        const xmlChar *hfile);
 
+
+/********************************************************************
+* FUNCTION write_ncx_include
+* 
+* Generate an include statement for an NCX file
+*
+*  #ifndef _H_foo
+*  #include "foo,h"
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   modname == module name to include (foo)
+*
+*********************************************************************/
 extern void
     write_ncx_include (ses_cb_t *scb,
                        const xmlChar *modname);
 
+
+/********************************************************************
+* FUNCTION save_oid_cdefine
+* 
+* Generate a #define binding for a definition and save it in the
+* specified Q of c_define_t structs
+*
+* INPUTS:
+*   cdefineQ == Q of c_define_t structs to use
+*   modname == module name to use
+*   defname == object definition name to use
+*
+* OUTPUTS:
+*   a new c_define_t is allocated and added to the cdefineQ
+*   if returning NO_ERR;
+*
+* RETURNS:
+*   status; duplicate C identifiers not supported yet
+*      foo-1 -->  foo_1
+*      foo.1 -->  foo_1
+*   An error message will be generated if this type of error occurs
+*********************************************************************/
 extern status_t
     save_oid_cdefine (dlq_hdr_t *cdefineQ,
                       const xmlChar *modname,
                       const xmlChar *defname);
 
+
+/********************************************************************
+* FUNCTION save_path_cdefine
+* 
+* Generate a #define binding for a definition and save it in the
+* specified Q of c_define_t structs
+*
+* INPUTS:
+*   cdefineQ == Q of c_define_t structs to use
+*   modname == base module name to use
+*   obj == object struct to use to generate path
+*   cmode == mode to use
+*
+* OUTPUTS:
+*   a new c_define_t is allocated and added to the cdefineQ
+*   if returning NO_ERR;
+*
+* RETURNS:
+*   status; duplicate C identifiers not supported yet
+*      foo-1/a/b -->  foo_1_a_b
+*      foo.1/a.2 -->  foo_1_a_b
+*   An error message will be generated if this type of error occurs
+*********************************************************************/
 extern status_t
     save_path_cdefine (dlq_hdr_t *cdefineQ,
                        const xmlChar *modname,
                        obj_template_t *obj,
                        c_mode_t cmode);
 
+
+/********************************************************************
+* FUNCTION find_path_cdefine
+* 
+* Find a #define binding for a definition in the
+* specified Q of c_define_t structs
+*
+* INPUTS:
+*   cdefineQ == Q of c_define_t structs to use
+*   obj == object struct to find
+*
+* RETURNS:
+*   pointer to found entry
+*   NULL if not found
+*********************************************************************/
 extern c_define_t *
     find_path_cdefine (dlq_hdr_t *cdefineQ,
                        obj_template_t *obj);
 
+
+/********************************************************************
+* FUNCTION clean_cdefineQ
+* 
+* Clean a Q of c_define_t structs
+*
+* INPUTS:
+*   cdefineQ == Q of c_define_t structs to use
+*********************************************************************/
 extern void
     clean_cdefineQ (dlq_hdr_t *cdefineQ);
 
+
+
+/********************************************************************
+* FUNCTION write_c_header
+* 
+* Write the C file header
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == module in progress
+*   cp == conversion parameters to use
+*
+*********************************************************************/
 extern void
     write_c_header (ses_cb_t *scb,
                     const ncx_module_t *mod,
                     const yangdump_cvtparms_t *cp);
 
+
+/********************************************************************
+* FUNCTION write_c_footer
+* 
+* Write the C file footer
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   mod == module in progress
+*
+*********************************************************************/
 extern void
     write_c_footer (ses_cb_t *scb,
                     const ncx_module_t *mod);
 
+
+/*******************************************************************
+* FUNCTION write_c_objtype
+* 
+* Generate the C data type for the NCX data type
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object template to check
+*
+**********************************************************************/
 extern void
     write_c_objtype (ses_cb_t *scb,
                      const obj_template_t *obj);
 
+
+/*******************************************************************
+* FUNCTION write_c_objtype_ex
+* 
+* Generate the C data type for the NCX data type
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object template to check
+*   endchar == char to use at end (semi-colon, comma, right-paren)
+*   isconst == TRUE if a const pointer is needed
+*              FALSE if pointers should not be 'const'
+**********************************************************************/
 extern void
     write_c_objtype_ex (ses_cb_t *scb,
                         const obj_template_t *obj,
                         xmlChar endchar,
                         boolean isconst);
 
+
+/*******************************************************************
+* FUNCTION write_c_val_macro_type
+* 
+* Generate the C VAL_FOO macro name for the data type
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object template to check
+*
+**********************************************************************/
 extern void
     write_c_val_macro_type (ses_cb_t *scb,
                             const obj_template_t *obj);
 
+
+/*******************************************************************
+* FUNCTION write_c_oid_comment
+* 
+* Generate the object OID as a comment line
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object template to check
+*
+**********************************************************************/
 extern void
     write_c_oid_comment (ses_cb_t *scb,
                          const obj_template_t *obj);
 
+
+/********************************************************************
+* FUNCTION save_c_objects
+* 
+* save the path name bindings for C typdefs
+*
+* INPUTS:
+*   mod == module in progress
+*   datadefQ == que of obj_template_t to use
+*   savecdefQ == Q of c_define_t structs to use
+*   cmode == C code generating mode to use
+*
+* OUTPUTS:
+*   savecdefQ may get new structs added
+*
+* RETURNS:
+*  status
+*********************************************************************/
 extern status_t
     save_c_objects (ncx_module_t *mod,
                     dlq_hdr_t *datadefQ,

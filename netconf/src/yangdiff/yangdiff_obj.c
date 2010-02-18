@@ -2019,6 +2019,9 @@ static void
 } /* output_one_object_diff */
 
 
+/**************    E X T E R N A L   F U N C T I O N S **********/
+
+
 /********************************************************************
  * FUNCTION output_datadefQ_diff
  * 

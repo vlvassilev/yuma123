@@ -42,6 +42,39 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/*.......................................................................
+ *
+ * FUNCTION yangcli_tab_callback (word_complete_cb)
+ *
+ *   libtecla tab-completion callback function
+ *
+ * Matches the CplMatchFn typedef
+ *
+ * From /usr/lib/include/libtecla.h:
+ * 
+ * Callback functions declared and prototyped using the following macro
+ * are called upon to return an array of possible completion suffixes
+ * for the token that precedes a specified location in the given
+ * input line. It is up to this function to figure out where the token
+ * starts, and to call cpl_add_completion() to register each possible
+ * completion before returning.
+ *
+ * Input:
+ *  cpl  WordCompletion *  An opaque pointer to the object that will
+ *                         contain the matches. This should be filled
+ *                         via zero or more calls to cpl_add_completion().
+ *  data           void *  The anonymous 'data' argument that was
+ *                         passed to cpl_complete_word() or
+ *                         gl_customize_completion()).
+ *  line     const char *  The current input line.
+ *  word_end        int    The index of the character in line[] which
+ *                         follows the end of the token that is being
+ *                         completed.
+ * Output
+ *  return          int    0 - OK.
+ *                         1 - Error.
+ */
 extern int
     yangcli_tab_callback (WordCompletion *cpl, 
 			  void *data,

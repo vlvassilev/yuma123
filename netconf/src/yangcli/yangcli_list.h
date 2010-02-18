@@ -53,6 +53,25 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+ * FUNCTION do_list (local RPC)
+ * 
+ * list objects   [module=mod-name]
+ *      ids
+ *      commands
+ *
+ * List the specified information based on the parameters
+ *
+ * INPUTS:
+ * server_cb == server control block to use
+ *    rpc == RPC method for the show command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
 extern status_t
     do_list (server_cb_t *server_cb,
 	     obj_template_t *rpc,

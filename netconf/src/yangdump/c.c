@@ -2638,6 +2638,7 @@ static status_t
 /********************************************************************
 * FUNCTION c_convert_module
 * 
+* Generate the SIL C code for the specified module(s)
 *
 * INPUTS:
 *   pcb == parser control block of module to convert

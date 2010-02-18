@@ -632,6 +632,9 @@ static status_t
 }  /* autoload_module */
 
 
+/**************    E X T E R N A L   F U N C T I O N S **********/
+
+
 /********************************************************************
 * FUNCTION autoload_setup_tempdir
 * 

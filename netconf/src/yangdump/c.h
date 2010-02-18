@@ -68,6 +68,21 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION c_convert_module
+* 
+* Generate the SIL C code for the specified module(s)
+*
+* INPUTS:
+*   pcb == parser control block of module to convert
+*          This is returned from ncxmod_load_module_ex
+*   cp == conversion parms to use
+*   scb == session control block for writing output
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t 
     c_convert_module (yang_pcb_t *pcb,
 		      const yangdump_cvtparms_t *cp,

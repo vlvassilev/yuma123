@@ -70,25 +70,92 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+* FUNCTION xsd_add_groupings
+* 
+*   Add the required group nodes
+*
+* INPUTS:
+*    mod == module in progress
+*    val == struct parent to contain child nodes for each group
+*
+* OUTPUTS:
+*    val->childQ has entries added for the groupings required
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_add_groupings (ncx_module_t *mod,
 		       val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION xsd_add_objects
+* 
+*   Add the required element nodes for each object in the module
+*   RPC methods and notifications are mixed in with the objects
+*
+* INPUTS:
+*    mod == module in progress
+*    val == struct parent to contain child nodes for each object
+*
+* OUTPUTS:
+*    val->childQ has entries added for the RPC methods in this module
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_add_objects (ncx_module_t *mod,
 		     val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION xsd_do_typedefs_groupingQ
+* 
+* Analyze the entire 'groupingQ' within the module struct
+* Generate local typedef mappings as needed
+*
+* INPUTS:
+*    mod == module conversion in progress
+*    groupingQ == Q of grp_template_t structs to check
+*    typnameQ == Q of xsd_typname_t to hold new local type names
+*
+* OUTPUTS:
+*    typnameQ has entries added for each type
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_do_typedefs_groupingQ (ncx_module_t *mod,
 			       dlq_hdr_t *groupingQ,
 			       dlq_hdr_t *typnameQ);
 
+
+/********************************************************************
+* FUNCTION xsd_do_typedefs_datadefQ
+* 
+* Analyze the entire 'datadefQ' within the module struct
+* Generate local typedef mappings as needed
+*
+* INPUTS:
+*    mod == module conversion in progress
+*    datadefQ == Q of obj_template_t structs to check
+*    typnameQ == Q of xsd_typname_t to hold new local type names
+*
+* OUTPUTS:
+*    typnameQ has entries added for each type
+*
+* RETURNS:
+*   status
+*********************************************************************/
 extern status_t
     xsd_do_typedefs_datadefQ (ncx_module_t *mod,
 			      dlq_hdr_t *datadefQ,
 			      dlq_hdr_t *typnameQ);
 
-extern void
-    xsd_clean_typnameQ (dlq_hdr_t *que);
 
 #endif	    /* _H_xsd_yang */

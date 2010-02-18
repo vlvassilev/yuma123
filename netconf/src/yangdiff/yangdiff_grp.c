@@ -256,6 +256,9 @@ static uint32
 } /* grouping_changed */
 
 
+/**************    E X T E R N A L   F U N C T I O N S **********/
+
+
 /********************************************************************
  * FUNCTION output_groupingQ_diff
  * 

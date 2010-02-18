@@ -43,14 +43,44 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+ * FUNCTION output_datadefQ_diff
+ * 
+ *  Output the differences report for a Q of data definitions
+ *  Not always called for top-level objects; Can be called
+ *  for nested objects
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    oldQ == Q of old obj_template_t to use
+ *    newQ == Q of new obj_template_t to use
+ *
+ *********************************************************************/
+extern void
+    output_datadefQ_diff (yangdiff_diffparms_t *cp,
+			  dlq_hdr_t *oldQ,
+			  dlq_hdr_t *newQ);
+
+
+/********************************************************************
+ * FUNCTION datadefQ_changed
+ * 
+ *  Check if a Q of data definitions changed
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    oldQ == Q of old obj_template_t to use
+ *    newQ == Q of new obj_template_t to use
+ *
+ * RETURNS:
+ *    1 if field changed
+ *    0 if field not changed
+ *********************************************************************/
 extern uint32
     datadefQ_changed (yangdiff_diffparms_t *cp,
 		      dlq_hdr_t *oldQ,
 		      dlq_hdr_t *newQ);
 
-extern void
-    output_datadefQ_diff (yangdiff_diffparms_t *cp,
-			  dlq_hdr_t *oldQ,
-			  dlq_hdr_t *newQ);
 
 #endif	    /* _H_yangdiff_obj */

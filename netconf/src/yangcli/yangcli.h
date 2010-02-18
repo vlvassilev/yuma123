@@ -432,48 +432,190 @@ typedef struct server_cb_t_ {
 typedef void (*logfn_t) (const char *fstr, ...);
 
 
+
+/********************************************************************
+* FUNCTION get_autocomp
+* 
+*  Get the autocomp parameter value
+* 
+* RETURNS:
+*    autocomp boolean value
+*********************************************************************/
 extern boolean
     get_autocomp (void);
 
+
+/********************************************************************
+* FUNCTION get_autoload
+* 
+*  Get the autoload parameter value
+* 
+* RETURNS:
+*    autoload boolean value
+*********************************************************************/
 extern boolean
     get_autoload (void);
 
+
+/********************************************************************
+* FUNCTION get_batchmode
+* 
+*  Get the batchmode parameter value
+* 
+* RETURNS:
+*    batchmode boolean value
+*********************************************************************/
 extern boolean
     get_batchmode (void);
 
+
+/********************************************************************
+* FUNCTION get_default_module
+* 
+*  Get the default module
+* 
+* RETURNS:
+*    default module value
+*********************************************************************/
 extern const xmlChar *
     get_default_module (void);
 
+
+/********************************************************************
+* FUNCTION get_runscript
+* 
+*  Get the runscript variable
+* 
+* RETURNS:
+*    runscript value
+*********************************************************************/
 extern const xmlChar *
     get_runscript (void);
 
+
+/********************************************************************
+* FUNCTION get_baddata
+* 
+*  Get the baddata parameter
+* 
+* RETURNS:
+*    baddata enum value
+*********************************************************************/
 extern ncx_bad_data_t
     get_baddata (void);
 
+
+/********************************************************************
+* FUNCTION get_netconf_mod
+* 
+*  Get the netconf module
+* 
+* RETURNS:
+*    netconf module
+*********************************************************************/
 extern ncx_module_t *
     get_netconf_mod (void);
 
+
+/********************************************************************
+* FUNCTION get_yangcli_mod
+* 
+*  Get the yangcli module
+* 
+* RETURNS:
+*    yangcli module
+*********************************************************************/
 extern ncx_module_t *
     get_yangcli_mod (void);
 
+
+/********************************************************************
+* FUNCTION get_mgr_cli_valset
+* 
+*  Get the CLI value set
+* 
+* RETURNS:
+*    mgr_cli_valset variable
+*********************************************************************/
 extern val_value_t *
     get_mgr_cli_valset (void);
 
+
+/********************************************************************
+* FUNCTION get_connect_valset
+* 
+*  Get the connect value set
+* 
+* RETURNS:
+*    connect_valset variable
+*********************************************************************/
 extern val_value_t *
     get_connect_valset (void);
 
+
+/********************************************************************
+* FUNCTION replace_connect_valset
+* 
+*  Replace the current connect value set with a clone
+* of the specified connect valset
+* 
+* INPUTS:
+*    valset == value node to clone that matches the object type
+*              of the input section of the connect operation
+*
+* RETURNS:
+*    status
+*********************************************************************/
 extern status_t
     replace_connect_valset (const val_value_t *valset);
 
+
+/********************************************************************
+* FUNCTION get_mgrloadQ
+* 
+*  Get the mgrloadQ value pointer
+* 
+* RETURNS:
+*    mgrloadQ variable
+*********************************************************************/
 extern dlq_hdr_t *
     get_mgrloadQ (void);
 
-/* forward decl needed by send_copy_config_to_server function */
+
+
+/********************************************************************
+ * FUNCTION yangcli_reply_handler
+ * 
+ *  handle incoming <rpc-reply> messages
+ * 
+ * INPUTS:
+ *   scb == session receiving RPC reply
+ *   req == original request returned for freeing or reusing
+ *   rpy == reply received from the server (for checking then freeing)
+ *
+ * RETURNS:
+ *   none
+ *********************************************************************/
 extern void
     yangcli_reply_handler (ses_cb_t *scb,
 			   mgr_rpc_req_t *req,
 			   mgr_rpc_rpy_t *rpy);
 
+
+/********************************************************************
+ * FUNCTION finish_result_assign
+ * 
+ * finish the assignment to result_name or result_filename
+ * use 1 of these 2 parms:
+ *    resultval == result to output to file
+ *    resultstr == result to output as string
+ *
+ * INPUTS:
+ *   server_cb == server control block to use
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
 extern status_t
     finish_result_assign (server_cb_t *server_cb,
 			  val_value_t *resultvar,

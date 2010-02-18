@@ -356,6 +356,9 @@ static status_t
 } /* send_lock_pdu_to_server */
 
 
+/**************    E X T E R N A L   F U N C T I O N S **********/
+
+
 /********************************************************************
  * FUNCTION do_get_locks (local RPC)
  * 
@@ -946,7 +949,6 @@ void
     }
 
 }  /* clear_lock_cbs */
-
 
 
 /* END yangcli_autolock.c */

@@ -3419,6 +3419,43 @@ static void
 }  /* yangcli_cleanup */
 
 
+/********************************************************************
+ * FUNCTION get_rpc_error_tag
+ * 
+ *  Determine why the RPC operation failed
+ *
+ * INPUTS:
+ *   replyval == <rpc-reply> to use to look for <rpc-error>s
+ *
+ * RETURNS:
+ *   the RPC error code for the <rpc-error> that was found
+ *********************************************************************/
+static rpc_err_t
+    get_rpc_error_tag (val_value_t *replyval)
+{
+    val_value_t  *errval, *tagval;
+
+    errval = val_find_child(replyval, 
+                            NC_MODULE,
+                            NCX_EL_RPC_ERROR);
+    if (errval == NULL) {
+        log_error("\nError: No <rpc-error> elemenst found");
+        return RPC_ERR_NONE;
+    }
+
+    tagval = val_find_child(errval, 
+                            NC_MODULE,
+                            NCX_EL_ERROR_TAG);
+    if (tagval == NULL) {
+        log_error("\nError: <rpc-error> did not contain an <error-tag>");
+        return RPC_ERR_NONE;
+    }
+
+    return rpc_err_get_errtag_enum(VAL_ENUM_NAME(tagval));
+
+}  /* get_rpc_error_tag */
+
+
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
@@ -3627,45 +3664,9 @@ dlq_hdr_t *
 
 
 /********************************************************************
- * FUNCTION get_rpc_error_tag
- * 
- *  Determine why the RPC operation failed
- *
- * INPUTS:
- *   replyval == <rpc-reply> to use to look for <rpc-error>s
- *
- * RETURNS:
- *   the RPC error code for the <rpc-error> that was found
- *********************************************************************/
-static rpc_err_t
-    get_rpc_error_tag (val_value_t *replyval)
-{
-    val_value_t  *errval, *tagval;
-
-    errval = val_find_child(replyval, 
-                            NC_MODULE,
-                            NCX_EL_RPC_ERROR);
-    if (errval == NULL) {
-        log_error("\nError: No <rpc-error> elemenst found");
-        return RPC_ERR_NONE;
-    }
-
-    tagval = val_find_child(errval, 
-                            NC_MODULE,
-                            NCX_EL_ERROR_TAG);
-    if (tagval == NULL) {
-        log_error("\nError: <rpc-error> did not contain an <error-tag>");
-        return RPC_ERR_NONE;
-    }
-
-    return rpc_err_get_errtag_enum(VAL_ENUM_NAME(tagval));
-
-}  /* get_rpc_error_tag */
-
-
-/********************************************************************
  * FUNCTION yangcli_reply_handler
  * 
+ *  handle incoming <rpc-reply> messages
  * 
  * INPUTS:
  *   scb == session receiving RPC reply

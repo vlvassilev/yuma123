@@ -1010,6 +1010,82 @@ static uint32
 
 
 /********************************************************************
+ * FUNCTION output_one_typedef_diff
+ * 
+ *  Output the differences report for one typedef definition
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    oldtyp == old typedef
+ *    newtyp == new typedef
+ *
+ *********************************************************************/
+static void
+    output_one_typedef_diff (yangdiff_diffparms_t *cp,
+                             typ_template_t *oldtyp,
+                             typ_template_t *newtyp)
+{
+    yangdiff_cdb_t  typcdb[5];
+    uint32          changecnt, i;
+    boolean         isrev, tchanged;
+
+    isrev = (cp->edifftype==YANGDIFF_DT_REVISION) ? TRUE : FALSE;
+
+    tchanged = FALSE;
+    changecnt = 0;
+
+    if (type_changed(cp, &oldtyp->typdef, &newtyp->typdef)) {
+        tchanged = TRUE;
+        changecnt++;
+    }
+
+    changecnt += str_field_changed(YANG_K_UNITS,
+                                   oldtyp->units, newtyp->units, 
+                                   isrev, &typcdb[0]);
+    changecnt += str_field_changed(YANG_K_DEFAULT,
+                                   oldtyp->defval, newtyp->defval, 
+                                   isrev, &typcdb[1]);
+    changecnt += status_field_changed(YANG_K_STATUS,
+                                      oldtyp->status, newtyp->status, 
+                                      isrev, &typcdb[2]);
+    changecnt += str_field_changed(YANG_K_DESCRIPTION,
+                                   oldtyp->descr, newtyp->descr, 
+                                   isrev, &typcdb[3]);
+    changecnt += str_field_changed(YANG_K_REFERENCE,
+                                   oldtyp->ref, newtyp->ref, 
+                                   isrev, &typcdb[4]);
+    if (changecnt == 0) {
+        return;
+    }
+
+    /* generate the diff output, based on the requested format */
+    output_mstart_line(cp, YANG_K_TYPEDEF, oldtyp->name, TRUE);
+
+    if (cp->edifftype == YANGDIFF_DT_TERSE) {
+        return;
+    }
+
+    indent_in(cp);
+
+    for (i=0; i<5; i++) {
+        if (typcdb[i].changed) {
+            output_cdb_line(cp, &typcdb[i]);
+        }
+    }
+
+    if (tchanged) {
+        output_one_type_diff(cp, &oldtyp->typdef, &newtyp->typdef);
+    }
+
+    indent_out(cp);
+
+} /* output_one_typedef_diff */
+
+
+/**************    E X T E R N A L   F U N C T I O N S **********/
+
+
+/********************************************************************
 * FUNCTION type_changed
 *
 * Check if the type clause and sub-clauses changed at all
@@ -1124,77 +1200,6 @@ uint32
 } /* type_changed */
 
 
-/********************************************************************
- * FUNCTION output_one_typedef_diff
- * 
- *  Output the differences report for one typedef definition
- *
- * INPUTS:
- *    cp == parameter block to use
- *    oldtyp == old typedef
- *    newtyp == new typedef
- *
- *********************************************************************/
-static void
-    output_one_typedef_diff (yangdiff_diffparms_t *cp,
-                             typ_template_t *oldtyp,
-                             typ_template_t *newtyp)
-{
-    yangdiff_cdb_t  typcdb[5];
-    uint32          changecnt, i;
-    boolean         isrev, tchanged;
-
-    isrev = (cp->edifftype==YANGDIFF_DT_REVISION) ? TRUE : FALSE;
-
-    tchanged = FALSE;
-    changecnt = 0;
-
-    if (type_changed(cp, &oldtyp->typdef, &newtyp->typdef)) {
-        tchanged = TRUE;
-        changecnt++;
-    }
-
-    changecnt += str_field_changed(YANG_K_UNITS,
-                                   oldtyp->units, newtyp->units, 
-                                   isrev, &typcdb[0]);
-    changecnt += str_field_changed(YANG_K_DEFAULT,
-                                   oldtyp->defval, newtyp->defval, 
-                                   isrev, &typcdb[1]);
-    changecnt += status_field_changed(YANG_K_STATUS,
-                                      oldtyp->status, newtyp->status, 
-                                      isrev, &typcdb[2]);
-    changecnt += str_field_changed(YANG_K_DESCRIPTION,
-                                   oldtyp->descr, newtyp->descr, 
-                                   isrev, &typcdb[3]);
-    changecnt += str_field_changed(YANG_K_REFERENCE,
-                                   oldtyp->ref, newtyp->ref, 
-                                   isrev, &typcdb[4]);
-    if (changecnt == 0) {
-        return;
-    }
-
-    /* generate the diff output, based on the requested format */
-    output_mstart_line(cp, YANG_K_TYPEDEF, oldtyp->name, TRUE);
-
-    if (cp->edifftype == YANGDIFF_DT_TERSE) {
-        return;
-    }
-
-    indent_in(cp);
-
-    for (i=0; i<5; i++) {
-        if (typcdb[i].changed) {
-            output_cdb_line(cp, &typcdb[i]);
-        }
-    }
-
-    if (tchanged) {
-        output_one_type_diff(cp, &oldtyp->typdef, &newtyp->typdef);
-    }
-
-    indent_out(cp);
-
-} /* output_one_typedef_diff */
 
 
 /********************************************************************

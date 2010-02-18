@@ -53,6 +53,26 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+ * FUNCTION do_show (local RPC)
+ * 
+ * show module=mod-name
+ *      modules
+ *      def=def-nmae
+ *
+ * Get the specified parameter and show the internal info,
+ * based on the parameter
+ *
+ * INPUTS:
+ * server_cb == server control block to use
+ *    rpc == RPC method for the show command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
 extern status_t
     do_show (server_cb_t *server_cb,
 	     obj_template_t *rpc,

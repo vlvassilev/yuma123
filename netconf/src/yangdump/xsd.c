@@ -271,10 +271,15 @@ static status_t
 }   /* add_module_defs */
 
 
+/**************    E X T E R N A L   F U N C T I O N S **********/
+
+
 /********************************************************************
 * FUNCTION xsd_convert_module
 * 
 *   Convert a [sub]module to XSD 1.0 format
+*   module entry point: convert an entire module to a value struct
+*   representing an XML element which represents an XSD
 *
 * INPUTS:
 *   mod == module to convert
@@ -567,7 +572,6 @@ status_t
 *
 * INPUTS:
 *   mod == module to process
-
 *
 * OUTPUTS:
 *   *val = malloced return value

@@ -97,6 +97,9 @@ void
 *
 * Write the yangdump startup banner to a session
 *
+* INPUTS:
+*   scb == session control block to use
+*
 *********************************************************************/
 void 
     write_banner_session (ses_cb_t *scb)

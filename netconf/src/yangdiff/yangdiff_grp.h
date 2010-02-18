@@ -43,14 +43,44 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+
+/********************************************************************
+ * FUNCTION output_groupingQ_diff
+ * 
+ *  Output the differences report for a Q of grouping definitions
+ *  Not always called for top-level groupings; Can be called
+ *  for nested groupings
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    oldQ == Q of old grp_template_t to use
+ *    newQ == Q of new grp_template_t to use
+ *
+ *********************************************************************/
+extern void
+    output_groupingQ_diff (yangdiff_diffparms_t *cp,
+			   dlq_hdr_t *oldQ,
+			   dlq_hdr_t *newQ);
+
+
+/********************************************************************
+ * FUNCTION groupingQ_changed
+ * 
+ *  Check if a (nested) Q of groupings changed
+ *
+ * INPUTS:
+ *    cp == parameter block to use
+ *    oldQ == Q of old grp_template_t to use
+ *    newQ == Q of new grp_template_t to use
+ *
+ * RETURNS:
+ *    1 if field changed
+ *    0 if field not changed
+ *********************************************************************/
 extern uint32
     groupingQ_changed (yangdiff_diffparms_t *cp,
 		       dlq_hdr_t *oldQ,
 		       dlq_hdr_t *newQ);
 
-extern void
-    output_groupingQ_diff (yangdiff_diffparms_t *cp,
-			   dlq_hdr_t *oldQ,
-			   dlq_hdr_t *newQ);
 
 #endif	    /* _H_yangdiff_grp */

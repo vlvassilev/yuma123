@@ -1606,7 +1606,7 @@ static status_t
 
 /*.......................................................................
  *
- * FUNCTION word_complete_cb
+ * FUNCTION yangcli_tab_callback (word_complete_cb)
  *
  *   libtecla tab-completion callback function
  *

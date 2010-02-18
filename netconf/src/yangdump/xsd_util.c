@@ -1608,7 +1608,6 @@ xmlChar *
 }   /* xsd_make_basename */
 
 
-
 /********************************************************************
 * FUNCTION xsd_make_enum_appinfo
 * 
@@ -2914,103 +2913,6 @@ status_t
 } /* xsd_do_annotation */
 
 
-#if 0
-/********************************************************************
-* FUNCTION xsd_do_rpc_annotation
-* 
-*   Add an annotation element for an RPC method element
-*   FOR NCX RPCs ONLY
-*
-* INPUTS:
-*    rpc == rpc template in progress
-*    val == struct parent to contain child nodes for this annotation
-*
-* OUTPUTS:
-*    val->v.childQ has an entry added for the annotation
-*
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    xsd_do_rpc_annotation (const rpc_template_t *rpc,
-                           val_value_t  *val)
-{
-    val_value_t  *annot, *newval, *appval;
-    xmlns_id_t     xsd_id, ncx_id;
-
-    xsd_id = xmlns_xs_id();
-    ncx_id = xmlns_ncx_id();
-
-    annot = xml_val_new_struct(XSD_ANNOTATION, xsd_id);
-    if (!annot) {
-        return ERR_INTERNAL_MEM;
-    } else {
-        val_add_child(annot, val);
-    }
-
-    /* convert the description to a documentation element */
-    if (rpc->descr) {
-        newval = make_documentation(rpc->descr);
-        if (!newval) {
-            return ERR_INTERNAL_MEM;
-        } else {
-            val_add_child(newval, annot);
-        }
-    }
-
-    /* create the appinfo here instead of using make_appinfo */
-    appval = xml_val_new_struct(NCX_EL_APPINFO, xsd_id);
-    if (!appval) {
-        return ERR_INTERNAL_MEM;
-    } else {
-        val_add_child(appval, annot);
-    }
-
-    /* add the rpc-type element */
-    newval = xml_val_new_cstring(NCX_EL_RPC_TYPE, ncx_id, 
-                            rpc_get_rpctype_str(rpc->rpc_typ));
-    if (!newval) {
-        return ERR_INTERNAL_MEM;
-    } else {
-        val_add_child(newval, appval);
-    }
-
-    /* add the rpc-output element */
-    newval = xml_val_new_cstring(NCX_EL_RPC_OUTPUT, ncx_id, 
-                                 rpc->out_data_name);
-    if (!newval) {
-        return ERR_INTERNAL_MEM;
-    } else {
-        val_add_child(newval, appval);
-    }
-
-    /* add condition clause if needed */
-    if (rpc->condition) {
-        newval = xml_val_new_cstring(NCX_EL_CONDITION, ncx_id, rpc->condition);
-        if (!newval) {
-            return ERR_INTERNAL_MEM;
-        } else {
-            val_add_child(newval, appval);
-        }
-    }
-
-    if (!dlq_empty(&rpc->appinfoQ)) {
-        appval = make_appinfo(&rpc->appinfoQ,
-                              NCX_ACCESS_NONE, 
-                              NULL, NULL, NCX_STATUS_CURRENT);
-        if (!appval) {
-            return ERR_INTERNAL_MEM;
-        } else {
-            val_add_child(appval, annot);
-        }
-    }        
-
-    return NO_ERR;
-
-} /* xsd_do_rpc_annotation */
-#endif
-
-
 /********************************************************************
 * FUNCTION xsd_make_obj_annotation
 * 
@@ -3282,58 +3184,6 @@ val_value_t *
     return annot;
 
 } /* xsd_make_group_annotation */
-
-
-#if 0
-/********************************************************************
-* FUNCTION xsd_add_any
-* 
-*   Add the 'any' construct to indicate the node can be
-*   augmented.
-*
-* INPUTS:
-*    val == val_value_t struct to add new last child leaf 
-*
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    xsd_add_any (val_value_t *val)
-{
-    val_value_t   *any;
-    status_t       res;
-    
-    any = xml_val_new_flag(XSD_ANY, xmlns_xs_id());
-    if (!any) {
-        return ERR_INTERNAL_MEM;
-    } else {
-        val_add_child(any, val);  /* add early */
-    }
-
-    res = xml_val_add_cattr(XSD_MIN_OCCURS, 0, XSD_ZERO, any);
-    if (res != NO_ERR) {
-        return res;
-    }
-
-    res = xml_val_add_cattr(XSD_MAX_OCCURS, 0, XSD_UNBOUNDED, any);
-    if (res != NO_ERR) {
-        return res;
-    }
-
-    res = xml_val_add_cattr(NCX_EL_NAMESPACE, 0, XSD_OTHER, any);
-    if (res != NO_ERR) {
-        return res;
-    }
-
-    res = xml_val_add_cattr(XSD_PROC_CONTENTS, 0, XSD_LAX, any);
-    if (res != NO_ERR) {
-        return res;
-    }
-
-    return NO_ERR;
-
-}   /* xsd_add_any */
-#endif
 
 
 /********************************************************************

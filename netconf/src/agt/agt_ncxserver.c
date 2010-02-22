@@ -37,10 +37,12 @@ date         init     comment
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/un.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
-#include <sys/un.h>
+
 
      
 #ifndef _H_procdefs
@@ -162,6 +164,15 @@ static status_t
         return ERR_NCX_OPERATION_FAILED;
     }
 
+    /* change the permissions */
+    ret = chmod(filename, (S_IRUSR | S_IWUSR |
+                           S_IRGRP | S_IWGRP |
+                           S_IROTH | S_IWOTH));
+    if (ret != 0) {
+        perror ("chmod");
+        return ERR_NCX_OPERATION_FAILED;
+    }
+
     return NO_ERR;
 } /* make_named_socket */
 
@@ -247,6 +258,8 @@ status_t
                   "\n*** try deleting /tmp/ncxserver.sock\n");
         return res;
     }
+
+    
 
     if (listen(ncxsock, 1) < 0) {
         log_error("\nError: listen failed");

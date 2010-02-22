@@ -277,6 +277,8 @@ static status_t
                      NCX_DEF_STARTUP_FILE);
             return NO_ERR;
         }
+    } else if (LOGDEBUG2) {
+        log_debug2("\nFound startup config: '%s'", fname);
     }
     
     /* try to load the config file that was found or given */
@@ -694,6 +696,9 @@ status_t
 
     /* load the NV startup config into the running config if it exists */
     if (agt_profile.agt_usestartup) {
+        if (LOGDEBUG2) {
+            log_debug2("\nAttempting to load running config from startup");
+        }
         res = load_running_config(agt_profile.agt_startup);
         if (res != NO_ERR) {
             return res;

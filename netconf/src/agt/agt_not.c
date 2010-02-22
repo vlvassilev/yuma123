@@ -55,6 +55,10 @@ date         init     comment
 #include  "agt.h"
 #endif
 
+#ifndef _H_agt_acm
+#include  "agt_acm.h"
+#endif
+
 #ifndef _H_agt_cap
 #include  "agt_cap.h"
 #endif
@@ -1556,6 +1560,7 @@ uint32
     status_t                 res;
     int                      ret;
     uint32                   notcount;
+    boolean                  dosend;
 
 
     if (!anySubscriptions) {
@@ -1572,6 +1577,7 @@ uint32
          sub = nextsub) {
 
         nextsub = (agt_not_subscription_t *)dlq_nextEntry(sub);
+        dosend = TRUE;
 
         switch (sub->state) {
         case AGT_NOT_STATE_NONE:
@@ -1638,13 +1644,22 @@ uint32
                 }
                 if (not) {
                     /* found a replay entry to send */
-                    res = send_notification(sub, not, TRUE);
+                    if (!agt_acm_notif_allowed(sub->scb->username,
+                                               not->notobj)) {
+                        log_debug("\nAccess denied to user '%s' "
+                                  "for notification '%s'",
+                                  sub->scb->username,
+                                  obj_get_name(not->notobj));
+                        res = NO_ERR;
+                    } else {
+                        notcount++;
+                        res = send_notification(sub, not, TRUE);
+                    }
                     if (res != NO_ERR && NEED_EXIT(res)) {
                         /* treat as a fatal error */
                         sub->state = AGT_NOT_STATE_SHUTDOWN;
                     } else {
                         /* msg sent OK; set up next loop through fn */
-                        notcount++;
                         sub->lastmsg = not;
                         sub->lastmsgid = not->msgid;
                         if (sub->lastreplaymsg == not) {
@@ -1698,12 +1713,21 @@ uint32
 
                 ret = xml_strcmp(sub->stopTime, not->eventTime);
 
-                res = send_notification(sub, not, TRUE);
+                if (!agt_acm_notif_allowed(sub->scb->username,
+                                           not->notobj)) {
+                    log_debug("\nAccess denied to user '%s' "
+                              "for notification '%s'",
+                              sub->scb->username,
+                              obj_get_name(not->notobj));
+                    res = NO_ERR;
+                } else {
+                    notcount++;
+                    res = send_notification(sub, not, TRUE);
+                }
+
                 if (res != NO_ERR && NEED_EXIT(res)) {
                     /* treat as a fatal error */
                     sub->state = AGT_NOT_STATE_SHUTDOWN;
-                } else {
-                    notcount++;
                 }
             } else {
                 /* there is no notification to send */
@@ -1733,12 +1757,20 @@ uint32
                 sub->lastmsg = not;
                 sub->lastmsgid = not->msgid;
 
-                res = send_notification(sub, not, TRUE);
+                if (!agt_acm_notif_allowed(sub->scb->username,
+                                           not->notobj)) {
+                    log_debug("\nAccess denied to user '%s' "
+                              "for notification '%s'",
+                              sub->scb->username,
+                              obj_get_name(not->notobj));
+                    res = NO_ERR;
+                } else {
+                    notcount++;
+                    res = send_notification(sub, not, TRUE);
+                }
                 if (res != NO_ERR && NEED_EXIT(res)) {
                     /* treat as a fatal error */
                     sub->state = AGT_NOT_STATE_SHUTDOWN;
-                } else {
-                    notcount++;
                 }
             } /* else don't do anything */
             break;
@@ -2028,5 +2060,46 @@ void
 
 }  /* agt_not_queue_notification */
 
+
+
+
+
+/********************************************************************
+* FUNCTION agt_not_is_replay_event
+*
+* Check if the specified notfication is the replayComplete
+* or notificationComplete notification events
+*
+* INPUTS:
+*   notifobj == notification object to check
+*
+* RETURNS:
+*   TRUE if the notification object is one of the special
+*        replay buffer events
+*   FALSE otherwise
+*********************************************************************/
+boolean
+    agt_not_is_replay_event (const obj_template_t *notifobj)
+{
+#ifdef DEBUG
+    if (notifobj == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    if (!agt_not_init_done) {
+        SET_ERROR(ERR_INTERNAL_INIT_SEQ);
+        return FALSE;
+    }
+
+    if (notifobj == replayCompleteobj ||
+        notifobj == notificationCompleteobj) {
+        return TRUE;
+    }
+
+    return FALSE;
+
+}  /* agt_not_is_replay_event */
 
 /* END file agt_not.c */

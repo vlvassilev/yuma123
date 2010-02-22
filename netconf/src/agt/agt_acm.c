@@ -13,35 +13,44 @@
 object identifiers:
 
 container /nacm
-leaf /nacm/noRuleReadDefault
-leaf /nacm/noRuleWriteDefault
-leaf /nacm/noRuleExecDefault
-leaf /nacm/rpcDeniedCount
-leaf /nacm/dataWriteDeniedCount
+leaf /nacm/enable-nacm
+leaf /nacm/read-default
+leaf /nacm/write-default
+leaf /nacm/exec-default
+leaf /nacm/denied-rpcs
+leaf /nacm/denied-data-writes
 container /nacm/groups
 list /nacm/groups/group
-leaf /nacm/groups/group/groupIdentity
-leaf-list /nacm/groups/group/userName
+leaf /nacm/groups/group/group-identity
+leaf-list /nacm/groups/group/user-name
 container /nacm/rules
-list /nacm/rules/moduleRule
-leaf /nacm/rules/moduleRule/moduleName
-leaf /nacm/rules/moduleRule/allowedRights
-leaf-list /nacm/rules/moduleRule/allowedGroup
-leaf /nacm/rules/moduleRule/comment
-list /nacm/rules/rpcRule
-leaf /nacm/rules/rpcRule/rpcModuleName
-leaf /nacm/rules/rpcRule/rpcName
-leaf /nacm/rules/rpcRule/allowedRights
-leaf-list /nacm/rules/rpcRule/allowedGroup
-leaf /nacm/rules/rpcRule/comment
-list /nacm/rules/dataRule
-leaf /nacm/rules/dataRule/name
-leaf /nacm/rules/dataRule/path
-leaf /nacm/rules/dataRule/allowedRights
-leaf-list /nacm/rules/dataRule/allowedGroup
-leaf /nacm/rules/dataRule/comment
+list /nacm/rules/module-rule
+leaf /nacm/rules/module-rule/module-name
+leaf /nacm/rules/module-rule/rule-name
+leaf /nacm/rules/module-rule/allowed-rights
+leaf-list /nacm/rules/module-rule/allowed-group
+leaf /nacm/rules/module-rule/comment
+list /nacm/rules/rpc-rule
+leaf /nacm/rules/rpc-rule/rpc-module-name
+leaf /nacm/rules/rpc-rule/rpc-name
+leaf /nacm/rules/rpc-rule/rule-name
+leaf /nacm/rules/rpc-rule/allowed-rights
+leaf-list /nacm/rules/rpc-rule/allowed-group
+leaf /nacm/rules/rpc-rule/comment
+list /nacm/rules/data-rule
+leaf /nacm/rules/data-rule/path
+leaf /nacm/rules/data-rule/rule-name
+leaf /nacm/rules/data-rule/allowed-rights
+leaf-list /nacm/rules/data-rule/allowed-group
+leaf /nacm/rules/data-rule/comment
+list /nacm/rules/notification-rule
+leaf /nacm/rules/notification-rule/notification-module-name
+leaf /nacm/rules/notification-rule/notification-name
+leaf /nacm/rules/notification-rule/rule-name
+leaf /nacm/rules/notification-rule/allowed-rights
+leaf-list /nacm/rules/notification-rule/allowed-group
+leaf /nacm/rules/notification-rule/comment
 
-                
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -52,6 +61,9 @@ date         init     comment
 ----------------------------------------------------------------------
 04feb06      abb      begun
 01aug08      abb      convert from NCX PSD to YANG OBJ design
+20feb10      abb      add enable-nacm leaf and notification-rules
+                      change indexing to user-ordered rule-name
+                      instead of allowed-rights bits field
 
 *********************************************************************
 *                                                                   *
@@ -76,6 +88,10 @@ date         init     comment
 
 #ifndef _H_agt_cb
 #include  "agt_cb.h"
+#endif
+
+#ifndef _H_agt_not
+#include  "agt_not.h"
 #endif
 
 #ifndef _H_agt_util
@@ -158,31 +174,39 @@ date         init     comment
 #define nacm_I_admin (const xmlChar *)"admin"
 #define nacm_I_guest (const xmlChar *)"guest"
 
-#define nacm_N_allowedGroup (const xmlChar *)"allowedGroup"
-#define nacm_N_allowedRights (const xmlChar *)"allowedRights"
+#define nacm_N_allowedGroup (const xmlChar *)"allowed-group"
+#define nacm_N_allowedRights (const xmlChar *)"allowed-rights"
 #define nacm_N_comment (const xmlChar *)"comment"
-#define nacm_N_dataRule (const xmlChar *)"dataRule"
+#define nacm_N_dataRule (const xmlChar *)"data-rule"
+#define nacm_N_enableNacm (const xmlChar *)"enable-nacm"
 #define nacm_N_group (const xmlChar *)"group"
-#define nacm_N_groupIdentity (const xmlChar *)"groupIdentity"
+#define nacm_N_groupIdentity (const xmlChar *)"group-identity"
 #define nacm_N_groups (const xmlChar *)"groups"
-#define nacm_N_moduleName (const xmlChar *)"moduleName"
-#define nacm_N_moduleRule (const xmlChar *)"moduleRule"
+#define nacm_N_moduleName (const xmlChar *)"module-name"
+#define nacm_N_moduleRule (const xmlChar *)"module-rule"
 #define nacm_N_nacm (const xmlChar *)"nacm"
-#define nacm_N_name (const xmlChar *)"name"
-#define nacm_N_noRuleReadDefault (const xmlChar *)"noRuleReadDefault"
-#define nacm_N_noRuleWriteDefault (const xmlChar *)"noRuleWriteDefault"
-#define nacm_N_noRuleExecDefault (const xmlChar *)"noRuleExecDefault"
+#define nacm_N_rule_name (const xmlChar *)"rule-name"
+#define nacm_N_notificationModuleName \
+    (const xmlChar *)"notification-module-name"
+#define nacm_N_notificationName \
+    (const xmlChar *)"notification-name"
+#define nacm_N_notificationRule \
+    (const xmlChar *)"notification-rule"
+#define nacm_N_readDefault (const xmlChar *)"read-default"
+#define nacm_N_writeDefault (const xmlChar *)"write-default"
+#define nacm_N_execDefault (const xmlChar *)"exec-default"
 #define nacm_N_path (const xmlChar *)"path"
-#define nacm_N_rpcModuleName (const xmlChar *)"rpcModuleName"
-#define nacm_N_rpcName (const xmlChar *)"rpcName"
-#define nacm_N_rpcRule (const xmlChar *)"rpcRule"
+#define nacm_N_rpcModuleName (const xmlChar *)"rpc-module-name"
+#define nacm_N_rpcName (const xmlChar *)"rpc-name"
+#define nacm_N_rpcRule (const xmlChar *)"rpc-rule"
 #define nacm_N_rules (const xmlChar *)"rules"
-#define nacm_N_userName (const xmlChar *)"userName"
+#define nacm_N_userName (const xmlChar *)"user-name"
 
-#define nacm_N_deniedRpcs (const xmlChar *)"deniedRpcs"
-#define nacm_N_deniedDataWrites (const xmlChar *)"deniedDataWrites"
+#define nacm_N_deniedRpcs (const xmlChar *)"denied-rpcs"
+#define nacm_N_deniedDataWrites (const xmlChar *)"denied-data-writes"
 
 #define nacm_OID_nacm (const xmlChar *)"/nacm"
+#define nacm_OID_nacm_enable_nacm (const xmlChar *)"/nacm/enable-nacm"
 
 #define nacm_E_noRuleDefault_permit (const xmlChar *)"permit"
 #define nacm_E_noRuleDefault_deny   (const xmlChar *)"deny"
@@ -194,7 +218,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                    *
-*                             T Y P E S                                    *
+*                             T Y P E S                              *
 *                                                                    *
 *********************************************************************/
 
@@ -202,7 +226,7 @@ date         init     comment
 
 /********************************************************************
 *                                                                   *
-*                       V A R I A B L E S                            *
+*                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
 static boolean agt_acm_init_done = FALSE;
@@ -216,6 +240,8 @@ static agt_acmode_t   acmode;
 static uint32         deniedRpcCount;
 
 static uint32         deniedDataWriteCount;
+
+static agt_acm_cache_t  *notif_cache;
 
 
 /********************************************************************
@@ -250,7 +276,6 @@ static boolean
 * Check the access-control mode being used
 * 
 * INPUTS:
-*   cache == cache to use
 *   access == requested access mode
 *   obj == object template to check
 *
@@ -259,14 +284,14 @@ static boolean
 *   FALSE to check the rules and find out
 *********************************************************************/
 static boolean 
-    check_mode (agt_acm_cache_t *cache,
-                const xmlChar *access,
+    check_mode (const xmlChar *access,
                 const obj_template_t *obj)
 {
-    boolean    isread;
+    boolean      isread;
 
     /* check if this is a read or a write */
-    if (!xml_strcmp(access, nacm_E_allowedRights_write)) {
+    if (!xml_strcmp(access, 
+                    nacm_E_allowedRights_write)) {
         isread = FALSE;
     } else if (!xml_strcmp(access, 
                            nacm_E_allowedRights_exec)) {
@@ -275,7 +300,7 @@ static boolean
         isread = TRUE;
     }
 
-    switch (cache->mode) {
+    switch (acmode) {
     case AGT_ACMOD_ENFORCING:
         break;
     case AGT_ACMOD_PERMISSIVE:
@@ -555,7 +580,11 @@ static agt_acm_usergroups_t *
 
     memset(usergroups, 0x0, sizeof(agt_acm_usergroups_t));
     dlq_createSQue(&usergroups->groupQ);
-    usergroups->username = username;
+    usergroups->username = xml_strdup(username);
+    if (usergroups->username == NULL) {
+        m__free(usergroups);
+        return NULL;
+    }
 
     return usergroups;
 
@@ -580,6 +609,9 @@ static void
         grptr = (agt_acm_group_t *)
             dlq_deque(&usergroups->groupQ);
         free_group_ptr(grptr);
+    }
+    if (usergroups->username) {
+        m__free(usergroups->username);
     }
     m__free(usergroups);
 
@@ -678,6 +710,67 @@ static agt_acm_usergroups_t *
     return usergroups;
     
 }  /* get_usergroups_entry */
+
+
+/********************************************************************
+* FUNCTION new_acm_cache
+*
+* Malloc and initialize an agt_acm_cache_t stuct
+*
+* RETURNS:
+*   malloced msg cache or NULL if error
+*********************************************************************/
+static agt_acm_cache_t  *
+    new_acm_cache (void)
+{
+    agt_acm_cache_t  *acm_cache;
+
+    acm_cache = m__getObj(agt_acm_cache_t);
+    if (!acm_cache) {
+        return NULL;
+    }
+    memset(acm_cache, 0x0, sizeof(agt_acm_cache_t));
+    dlq_createSQue(&acm_cache->modruleQ);
+    dlq_createSQue(&acm_cache->dataruleQ);
+    acm_cache->mode = acmode;
+    return acm_cache;
+
+} /* new_acm_cache */
+
+
+/********************************************************************
+* FUNCTION free_acm_cache
+*
+* Clean and free a agt_acm_cache_t struct
+*
+* INPUTS:
+*   acm_cache == cache struct to free
+*********************************************************************/
+static void
+    free_acm_cache (agt_acm_cache_t  *acm_cache)
+{
+    agt_acm_modrule_t    *modrule;
+    agt_acm_datarule_t   *datarule;
+
+    while (!dlq_empty(&acm_cache->modruleQ)) {
+        modrule = (agt_acm_modrule_t *)
+            dlq_deque(&acm_cache->modruleQ);
+        free_modrule(modrule);
+    }
+
+    while (!dlq_empty(&acm_cache->dataruleQ)) {
+        datarule = (agt_acm_datarule_t *)
+            dlq_deque(&acm_cache->dataruleQ);
+        free_datarule(datarule);
+    }
+
+    if (acm_cache->usergroups) {
+        free_usergroups(acm_cache->usergroups);
+    }
+
+    m__free(acm_cache);
+
+} /* free_acm_cache */
 
 
 /********************************************************************
@@ -817,7 +910,7 @@ static boolean
 
     noRule = val_find_child(nacmroot,
                             AGT_ACM_MODULE,
-                            nacm_N_noRuleExecDefault);
+                            nacm_N_execDefault);
     if (!noRule) {
         cache->flags |= (FL_ACM_DEFEXEC_SET | FL_ACM_DEFEXEC_OK);
         return TRUE;  /* default is TRUE */
@@ -842,7 +935,7 @@ static boolean
 /********************************************************************
 * FUNCTION check_rpc_rules
 *
-* Check the configured /nacm/rules/rpcRule list to see if the
+* Check the configured /nacm/rules/rpc-rule list to see if the
 * user is allowed to invoke the specified RPC method
 *
 * INPUTS:
@@ -897,7 +990,7 @@ static boolean
         /* get the rpc operation name key */
         rpcname = val_find_child(rpcrule,
                                  AGT_ACM_MODULE,
-                                 nacm_N_rpcModuleName);
+                                 nacm_N_rpcName);
         if (!rpcname) {
             res = SET_ERROR(ERR_INTERNAL_VAL);
             continue;
@@ -1139,7 +1232,7 @@ static boolean
         }
         noRule = val_find_child(nacmroot,
                                 AGT_ACM_MODULE,
-                                nacm_N_noRuleWriteDefault);
+                                nacm_N_writeDefault);
         if (!noRule) {
             cache->flags |= FL_ACM_DEFWRITE_SET;
             return FALSE;  /* default is FALSE */
@@ -1163,7 +1256,7 @@ static boolean
         }
         noRule = val_find_child(nacmroot,
                                 AGT_ACM_MODULE,
-                                nacm_N_noRuleReadDefault);
+                                nacm_N_readDefault);
         if (!noRule) {
             cache->flags |= (FL_ACM_DEFREAD_SET | FL_ACM_DEFREAD_OK);
             return TRUE;  /* default is TRUE */
@@ -1389,7 +1482,7 @@ static boolean
     }
 
     /* check if access granted without any rules */
-    if (check_mode(cache, access, val->obj)) {
+    if (check_mode(access, val->obj)) {
         return TRUE;
     }
 
@@ -1491,6 +1584,171 @@ static boolean
 
 
 /********************************************************************
+* FUNCTION check_notif_rules
+*
+* Check the configured /nacm/rules/notification-rule list to see if the
+* user is allowed to invoke the specified RPC method
+*
+* INPUTS:
+*    rulesval == /nacm/rules node, pre-fetched
+*    notifobj == notification template requested
+*    usergroups == user-to-group mapping for access processing
+*    done == address of return done processing flag
+*
+* OUTPUTS:
+*    *done == TRUE if a rule was found, so return value is
+*             the final answer
+*          == FALSE if no rpcRule was found to match
+*
+* RETURNS:
+*    only valid if *done == TRUE:
+*      TRUE if authorization to receive the notification is granted
+*      FALSE if authorization to receive the notification is not granted
+*********************************************************************/
+static boolean
+    check_notif_rules (val_value_t *rulesval,
+                       const obj_template_t *notifobj,
+                       agt_acm_usergroups_t *usergroups,
+                       boolean *done)
+{
+    val_value_t      *notifrule, *modname, *notifname;
+    boolean           granted, done2;
+    status_t          res;
+
+    *done = FALSE;
+    granted = FALSE;
+    res = NO_ERR;
+
+    /* check all the rpcRule entries */
+    for (notifrule = val_find_child(rulesval, 
+                                    AGT_ACM_MODULE, 
+                                    nacm_N_notificationRule);
+         notifrule != NULL && res == NO_ERR && !*done;
+         notifrule = val_find_next_child(rulesval,
+                                         AGT_ACM_MODULE,
+                                         nacm_N_notificationRule,
+                                         notifrule)) {
+
+        /* get the module name key */
+        modname = val_find_child(notifrule,
+                                 AGT_ACM_MODULE,
+                                 nacm_N_notificationModuleName);
+        if (!modname) {
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+            continue;
+        }
+
+        /* get the notification name key */
+        notifname = val_find_child(notifrule,
+                                   AGT_ACM_MODULE,
+                                   nacm_N_notificationName);
+        if (!notifname) {
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+            continue;
+        }
+
+        /* check if this is the right module */
+        if (xml_strcmp(obj_get_mod_name(notifobj),
+                       VAL_STR(modname))) {
+            continue;
+        }
+
+        /* check if this is the right notification event */
+        if (xml_strcmp(obj_get_name(notifobj),
+                       VAL_STR(notifname))) {
+            continue;
+        }
+
+        /* this notification-rule is for the specified event
+         * check if any of the groups in the usergroups
+         * list for this user match any of the groups in
+         * the allowed-group leaf-list
+         */
+        done2 = FALSE;
+        granted = check_access_bit(notifrule,
+                                   nacm_E_allowedRights_read,
+                                   usergroups,
+                                   &done2);
+        if (done2) {
+            *done = TRUE;
+        } else {
+            granted = FALSE;
+        }
+    }
+
+    if (res != NO_ERR) {
+        granted = FALSE;
+        *done = TRUE;
+    }
+
+    return granted;
+
+} /* check_notif_rules */
+
+
+/********************************************************************
+* FUNCTION get_default_notif_response
+*
+* get the default response for the specified notification object
+* there are no rules that match any groups with this user
+*
+*  INPUTS:
+*    cache == agt_acm cache to check
+*    nacmroot == pre-fectched NACM root
+*    notifobj == notification template for this request
+*    
+* RETURNS:
+*   TRUE if access granted
+*   FALSE if access denied
+*********************************************************************/
+static boolean
+    get_default_notif_response (agt_acm_cache_t *cache,
+                                val_value_t *nacmroot,
+                                const obj_template_t *notifobj)
+{
+    val_value_t  *noRule;
+    boolean       retval;
+
+    /* check if the notification event is tagged as 
+     * nacm:secure or nacm:very-secure and
+     * deny access if so
+     */
+    if (obj_is_secure(notifobj) ||
+        obj_is_very_secure(notifobj)) {
+        return FALSE;
+    }
+
+    /* check the read-default setting */
+    if (cache->flags & FL_ACM_DEFREAD_SET) {
+        return (cache->flags & FL_ACM_DEFREAD_OK) ? 
+            TRUE : FALSE;
+    }
+
+    noRule = val_find_child(nacmroot,
+                            AGT_ACM_MODULE,
+                            nacm_N_readDefault);
+    if (!noRule) {
+        cache->flags |= (FL_ACM_DEFREAD_SET | FL_ACM_DEFREAD_OK);
+        return TRUE;  /* default is TRUE */
+    } 
+
+    if (!xml_strcmp(VAL_ENUM_NAME(noRule),
+                    nacm_E_noRuleDefault_permit)) {
+        retval = TRUE;
+    } else {
+        retval = FALSE;
+    }
+    cache->flags |= FL_ACM_DEFREAD_SET;
+    if (retval) {
+        cache->flags |= FL_ACM_DEFREAD_OK;
+    }
+
+    return retval;
+
+}  /* get_default_notif_response */
+
+
+/********************************************************************
 * FUNCTION get_deniedRpcs
 *
 * <get> operation handler for the nacm/deniedRpcs counter
@@ -1570,6 +1828,83 @@ static status_t
                    val_value_t  *curval)
 {
     status_t   res;
+    boolean    clear_cache;
+
+    (void)scb;
+    (void)msg;
+    (void)curval;
+
+#ifdef AGT_ACM_DEBUG
+    if (LOGDEBUG2) {
+        log_debug2("\nServer %s callback: t: %s:%s, op:%s\n", 
+                   agt_cbtype_name(cbtyp),
+                   val_get_mod_name(newval),
+                   newval->name,
+                   op_editop_name(editop));
+    }
+#endif
+
+    res = NO_ERR;
+    clear_cache = FALSE;
+
+    switch (cbtyp) {
+    case AGT_CB_VALIDATE:
+        break;
+    case AGT_CB_APPLY:
+        break;
+    case AGT_CB_COMMIT:
+        switch (editop) {
+        case OP_EDITOP_LOAD:
+            break;
+        case OP_EDITOP_MERGE:
+        case OP_EDITOP_REPLACE:
+        case OP_EDITOP_CREATE:
+        case OP_EDITOP_DELETE:
+            clear_cache = TRUE;
+            break;
+        default:
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
+        break;
+    case AGT_CB_ROLLBACK:
+        clear_cache = TRUE;
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if (clear_cache) {
+        if (notif_cache != NULL) {
+            free_acm_cache(notif_cache);
+            notif_cache = NULL;
+        }
+    }
+
+    return res;
+
+} /* nacm_callback */
+
+
+/********************************************************************
+* FUNCTION nacm_enable_nacm_callback
+*
+* /nacm/enable-nacm callback function
+*
+* INPUTS:
+*    see agt/agt_cb.h  (agt_cb_pscb_t)
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t 
+    nacm_enable_nacm_callback (ses_cb_t  *scb,
+                               rpc_msg_t  *msg,
+                               agt_cbtyp_t cbtyp,
+                               op_editop_t  editop,
+                               val_value_t  *newval,
+                               val_value_t  *curval)
+{
+    status_t   res;
 
     (void)scb;
     (void)msg;
@@ -1598,6 +1933,18 @@ static status_t
         case OP_EDITOP_MERGE:
         case OP_EDITOP_REPLACE:
         case OP_EDITOP_CREATE:
+            if (VAL_BOOL(newval)) {
+                if (acmode != AGT_ACMOD_ENFORCING) {
+                    if (LOGDEBUG) {
+                        log_debug("\nEnabling NACM");
+                    }
+                }
+                acmode = AGT_ACMOD_ENFORCING;
+            } else {
+                log_warn("\nWarning: Disabling NACM");
+                acmode = AGT_ACMOD_OFF;
+            }
+            break;
         case OP_EDITOP_DELETE:
             break;
         default:
@@ -1612,7 +1959,7 @@ static status_t
     
     return res;
 
-} /* nacm_callback */
+} /* nacm_enable_nacm_callback */
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -1645,6 +1992,7 @@ status_t
     agt_profile = agt_get_profile();
 
     nacmmod = NULL;
+    notif_cache = NULL;
 
     /* load in the access control parameters */
     res = ncxmod_load_module(AGT_ACM_MODULE, 
@@ -1665,6 +2013,14 @@ status_t
                                    nacm_OID_nacm,
                                    NULL,
                                    nacm_callback);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    res = agt_cb_register_callback(AGT_ACM_MODULE,
+                                   nacm_OID_nacm_enable_nacm,
+                                   NULL,
+                                   nacm_enable_nacm_callback);
     if (res != NO_ERR) {
         return res;
     }
@@ -1775,6 +2131,11 @@ status_t
         val_set_canonical_order(nacmval);
     }
 
+    notif_cache = new_acm_cache();
+    if (notif_cache == NULL) {
+        res = ERR_INTERNAL_MEM;
+    }
+
     return res;
 
 }  /* agt_acm_init2 */
@@ -1795,6 +2156,9 @@ void
 
     agt_cb_unregister_callbacks(AGT_ACM_MODULE, nacm_OID_nacm);
     nacmmod = NULL;
+    if (notif_cache != NULL) {
+        free_acm_cache(notif_cache);
+    }
     agt_acm_init_done = FALSE;
 
 }   /* agt_acm_cleanup */
@@ -1831,6 +2195,10 @@ boolean
     }
 #endif
 
+    if (acmode == AGT_ACMOD_DISABLED) {
+        return TRUE;
+    }
+
     /* super user is allowed to access anything */
     if (is_superuser(user)) {
         return TRUE;
@@ -1843,18 +2211,13 @@ boolean
         return TRUE;
     }
 
-    cache = msg->acm_cache;
-
     /* check if access granted without any rules */
-    if (check_mode(cache, 
-                   nacm_E_allowedRights_exec, 
+    if (check_mode(nacm_E_allowedRights_exec, 
                    rpcobj)) {
         return TRUE;
     }
 
-    if (cache->mode == AGT_ACMOD_DISABLED) {
-        return TRUE;
-    }
+    cache = msg->acm_cache;
 
     /* get the NACM root to decide any more */
     if (cache->nacmroot) {
@@ -1939,6 +2302,150 @@ boolean
     return retval;
 
 }   /* agt_acm_rpc_allowed */
+
+
+/********************************************************************
+* FUNCTION agt_acm_notif_allowed
+*
+* Check if the specified user is allowed to receive
+* a notification event
+* 
+* INPUTS:
+*   user == user name string
+*   notifobj == obj_template_t for the notification event to check
+*
+* RETURNS:
+*   TRUE if user allowed receive this notification event;
+*   FALSE otherwise
+*********************************************************************/
+boolean 
+    agt_acm_notif_allowed (const xmlChar *user,
+                           const obj_template_t *notifobj)
+{
+    val_value_t             *nacmroot, *rulesval;
+    agt_acm_usergroups_t    *usergroups;
+    uint32                   groupcnt;
+    boolean                  retval, done;
+
+#ifdef DEBUG
+    if (!user || !notifobj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    if (acmode == AGT_ACMOD_DISABLED) {
+        return TRUE;
+    }
+
+    /* super user is allowed to access anything */
+    if (is_superuser(user)) {
+        return TRUE;
+    }
+
+    /* do not block a replayComplete or notificationComplete event */
+    if (agt_not_is_replay_event(notifobj)) {
+        return TRUE;
+    }
+
+    /* check if access granted without any rules */
+    if (check_mode(nacm_E_allowedRights_read, 
+                   notifobj)) {
+        return TRUE;
+    }
+
+    /* get the notification acm cache */
+    if (notif_cache == NULL) {
+        notif_cache = new_acm_cache();
+        if (notif_cache == NULL) {
+            log_error("\nagt_acm: malloc failed");
+            return FALSE;
+        }
+    }
+
+    /* get the NACM root to decide any more */
+    if (notif_cache->nacmroot) {
+        nacmroot = notif_cache->nacmroot;
+    } else {
+        nacmroot = get_nacm_root();
+        if (!nacmroot) {
+            SET_ERROR(ERR_INTERNAL_VAL);
+            return FALSE;
+        } else {
+            notif_cache->nacmroot = nacmroot;
+        }
+    }
+
+    groupcnt = 0;
+
+    if (notif_cache->usergroups &&
+        !xml_strcmp(notif_cache->usergroups->username, user)) {
+        usergroups = notif_cache->usergroups;
+        groupcnt = notif_cache->groupcnt;
+    } else {
+        usergroups = get_usergroups_entry(nacmroot, 
+                                          user, 
+                                          &groupcnt);
+        if (!usergroups) {
+            /* out of memory! deny all access! */
+            return FALSE;
+        } else {
+            if (notif_cache->usergroups) {
+                free_usergroups(notif_cache->usergroups);
+            }
+            notif_cache->usergroups = usergroups;
+            notif_cache->groupcnt = groupcnt;
+        }
+    }
+
+    /* usergroups malloced at this point */
+    retval = FALSE;
+
+    if (groupcnt == 0) {
+        /* just check the default for this notification */
+        retval = get_default_notif_response(notif_cache,
+                                            nacmroot, 
+                                            notifobj);
+    } else {
+        /* get the /nacm/rules node to decide any more */
+        rulesval = val_find_child(nacmroot,
+                                  AGT_ACM_MODULE,
+                                  nacm_N_rules);
+        if (!rulesval) {
+            /* no rules at all so use the default */
+            retval = get_default_notif_response(notif_cache,
+                                                nacmroot, 
+                                                notifobj);
+        } else {
+            /* there is a rules node so check the notification-rules */
+            done = FALSE;
+            retval = check_notif_rules(rulesval,
+                                       notifobj,
+                                       usergroups, 
+                                       &done);
+            if (!done) {
+                /* no notification rule found;
+                 * try a module namespace rule
+                 */
+                retval = check_module_rules(notif_cache,
+                                            rulesval,
+                                            notifobj,
+                                            nacm_E_allowedRights_read,
+                                            usergroups, 
+                                            &done);
+                if (!done) {
+                    /* no module rule so use the default */
+                    retval = get_default_notif_response(notif_cache,
+                                                        nacmroot, 
+                                                        notifobj);
+                }
+            }
+        }
+    }
+
+    return retval;
+
+}   /* agt_acm_notif_allowed */
 
 
 /********************************************************************
@@ -2035,8 +2542,6 @@ boolean
 status_t
     agt_acm_init_msg_cache (xml_msg_hdr_t *msg)
 {
-    agt_acm_cache_t  *acm_cache;
-
 #ifdef DEBUG
     if (!msg) {
         return SET_ERROR(ERR_INTERNAL_PTR);
@@ -2048,17 +2553,13 @@ status_t
         agt_acm_clear_msg_cache(msg);
     }
 
-    acm_cache = m__getObj(agt_acm_cache_t);
-    if (!acm_cache) {
-        return ERR_INTERNAL_MEM;
-    }
-    memset(acm_cache, 0x0, sizeof(agt_acm_cache_t));
-    dlq_createSQue(&acm_cache->modruleQ);
-    dlq_createSQue(&acm_cache->dataruleQ);
-    acm_cache->mode = acmode;
-    msg->acm_cache = acm_cache;
     msg->acm_cbfn = agt_acm_val_read_allowed;
-    return NO_ERR;
+    msg->acm_cache = new_acm_cache();
+    if (!msg->acm_cache) {
+        return ERR_INTERNAL_MEM;
+    } else {
+        return NO_ERR;
+    }
 
 } /* agt_acm_init_msg_cache */
 
@@ -2079,9 +2580,6 @@ status_t
 void
     agt_acm_clear_msg_cache (xml_msg_hdr_t *msg)
 {
-    agt_acm_modrule_t    *modrule;
-    agt_acm_datarule_t   *datarule;
-
 #ifdef DEBUG
     if (!msg) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -2090,28 +2588,10 @@ void
 #endif
 
     msg->acm_cbfn = NULL;
-    if (!msg->acm_cache) {
-        return;
+    if (msg->acm_cache) {
+        free_acm_cache(msg->acm_cache);
+        msg->acm_cache = NULL;
     }
-
-    while (!dlq_empty(&msg->acm_cache->modruleQ)) {
-        modrule = (agt_acm_modrule_t *)
-            dlq_deque(&msg->acm_cache->modruleQ);
-        free_modrule(modrule);
-    }
-
-    while (!dlq_empty(&msg->acm_cache->dataruleQ)) {
-        datarule = (agt_acm_datarule_t *)
-            dlq_deque(&msg->acm_cache->dataruleQ);
-        free_datarule(datarule);
-    }
-
-    if (msg->acm_cache->usergroups) {
-        free_usergroups(msg->acm_cache->usergroups);
-    }
-
-    m__free(msg->acm_cache);
-    msg->acm_cache = NULL;
 
 } /* agt_acm_clear_msg_cache */
 

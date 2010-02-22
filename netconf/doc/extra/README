@@ -24,12 +24,21 @@ FILES:
    /usr/sbin/netconf-subsystem
  - a binary linux library called 'libncx.so'
    /usr/lib/libncx.so
+ - a binary linux library called 'libtoaster.so'
+   /usr/lib/yuma/libtoaster.so
  - documentation pages
    /usr/share/doc/yuma/*
  - a set of freely available YANG modules 
    /usr/share/yuma/modules/*
  - a set of sample CLI 'conf' files for the programs above
    /etc/yuma/etc/*
+ - developer utilities
+   /usr/share/yuma/util/*
+ - yangcli user-history file
+   $HOME/.yuma/.yangcli_history
+ - yangcli user-specific temporary files
+   $HOME/.yuma/tmp/*
+
 
 Some of the YANG modules includes with this software were
 generated with the smidump program, available at:

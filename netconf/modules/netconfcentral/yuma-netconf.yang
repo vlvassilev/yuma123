@@ -7,6 +7,9 @@ module yuma-netconf {
    // for the uri data type
    import ietf-inet-types { prefix "inet"; }
 
+   // for the xpath data type
+   import ietf-yang-types { prefix "yang"; }
+
    // for NCX 'metadata' language extension
    import yuma-ncx { prefix "ncx"; }
 
@@ -405,7 +408,7 @@ module yuma-netconf {
          the XPath expression is interpreted, the set of namespace
          declarations are those in scope on the rpc-error element,
          including the default namespace.";
-       type instance-identifier;
+       type yang:xpath1.0;
      }
 
      leaf error-message {

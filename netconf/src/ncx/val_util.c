@@ -438,7 +438,9 @@ static status_t
     total = 0;
 
     /* get the data type to determine if a quoted string is needed */
-    if (typ_is_string(val->btyp)) {
+    if (format==NCX_IFMT_XPATH1 || format==NCX_IFMT_XPATH2) {
+        quotes = TRUE;
+    } else if (typ_is_string(val->btyp)) {
         quotes = (format==NCX_IFMT_CLI) ?
             val_need_quotes(VAL_STR(val)) : TRUE;
     } else if (typ_is_number(val->btyp)) {

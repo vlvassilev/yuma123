@@ -72,6 +72,10 @@ date         init     comment
 #include "xpath.h"
 #endif
 
+#ifndef _H_yangconst
+#include "yangconst.h"
+#endif
+
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
@@ -2769,6 +2773,7 @@ boolean
 boolean
     typ_is_schema_instance_string (const typ_def_t *typdef)
 {
+    const typ_template_t  *test_typ;
 
 #ifdef DEBUG
     if (!typdef) {
@@ -2795,8 +2800,13 @@ boolean
             return TRUE;
         }
         if (typdef->def.named.typ) {
-            return typ_is_schema_instance_string
-                (&typdef->def.named.typ->typdef);
+            test_typ = typdef->def.named.typ;
+
+            /* hardwire the nacm schema-instance-identifier type */
+            if (!xml_strcmp(test_typ->name, YANG_SII_STRING)) {
+                return TRUE;
+            }
+            return typ_is_schema_instance_string(&test_typ->typdef);
         } else {
             return FALSE;
         }

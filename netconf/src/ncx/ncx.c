@@ -4745,9 +4745,9 @@ void
 
     if (LOGERROR) {
         if (gotval && expstr) {
-            log_write("\nError:  Got '%s', Expected: %s", gotval, expstr);
+            log_error("\nError:  Got '%s', Expected: %s", gotval, expstr);
         } else if (expstr) {
-            log_write("\nError:  Expected: %s", expstr);
+            log_error("\nError:  Expected: %s", expstr);
         }
         ncx_print_errormsg_ex(tkc, 
                               mod, 

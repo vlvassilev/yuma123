@@ -104,7 +104,7 @@ typedef struct agt_acm_group_t_ {
 /* list of group identities that the user is a member */
 typedef struct agt_acm_usergroups_t_ {
     dlq_hdr_t         qhdr;
-    const xmlChar    *username;
+    xmlChar          *username;
     dlq_hdr_t         groupQ;   /* Q of group_ptr_t */
 } agt_acm_usergroups_t;
 
@@ -198,6 +198,26 @@ extern boolean
     agt_acm_rpc_allowed (xml_msg_hdr_t *msg,
 			 const xmlChar *user,
 			 const obj_template_t *rpcobj);
+
+
+/********************************************************************
+* FUNCTION agt_acm_notif_allowed
+*
+* Check if the specified user is allowed to receive
+* a notification event
+* 
+* INPUTS:
+*   user == user name string
+*   notifobj == obj_template_t for the notification event to check
+*
+* RETURNS:
+*   TRUE if user allowed receive this notification event;
+*   FALSE otherwise
+*********************************************************************/
+extern boolean 
+    agt_acm_notif_allowed (const xmlChar *user,
+                           const obj_template_t *notifobj);
+
 
 /********************************************************************
 * FUNCTION agt_acm_val_write_allowed

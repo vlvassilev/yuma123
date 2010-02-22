@@ -59,6 +59,9 @@ date	     init     comment
 
 #define YANG_FILE_SEPCHAR         '@'
 
+#define YANG_SII_STRING \
+    (const xmlChar *)"schema-instance-identifier"
+
 /* YANG keyword/YIN element names */
 
 #define YANG_K_ADD               (const xmlChar *)"add"

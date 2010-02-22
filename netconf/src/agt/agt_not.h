@@ -336,4 +336,21 @@ extern void
     agt_not_queue_notification (agt_not_msg_t *notif);
 
 
+/********************************************************************
+* FUNCTION agt_not_is_replay_event
+*
+* Check if the specified notfication is the replayComplete
+* or notificationComplete notification events
+*
+* INPUTS:
+*   notifobj == notification object to check
+*
+* RETURNS:
+*   TRUE if the notification object is one of the special
+*        replay buffer events
+*   FALSE otherwise
+*********************************************************************/
+extern boolean
+    agt_not_is_replay_event (const obj_template_t *notifobj);
+
 #endif            /* _H_agt_not */

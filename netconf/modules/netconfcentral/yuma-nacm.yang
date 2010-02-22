@@ -6,76 +6,14 @@ module yuma-nacm {
 
     import ietf-yang-types { prefix yang; }
 
-    // used just for ncx extensions
-    import yuma-ncx { prefix ncx; }
-   
     organization  "Netconf Central, Inc.";
 
     contact "Andy Bierman <andy@netconfcentral.org>.";
 
     description 
-      "NETCONF Server Access Control Model:
+      "NETCONF Server Access Control Model";
 
-       1) Administrative Groups
-          Group membership is configured by adding user names
-          to the 'groups' table.  A user may belong to
-          zero or more groups.  An extensible identityref
-          object is used to specify the group name.
-
-       2) Rights
-          Specific NETCONF protocol rights are granted
-          to particular administrative groups.  This is
-          limited to three standard values: read, write, 
-          and exec, using a bits leaf called 'allowedRights'.
-
-       3) YANG Module Access
-          Any RPC method or database node access
-          within a specific XML namespace
-          is controlled by the moduleRules list.
-          If no rpcRule is found for a particular
-          RPC operation, then the moduleRule list
-          will be checked for a matching entry.
-          If the requested XML namespace matches the
-          namespace-uri of a configured YANG module
-          then access to that module is limited
-          by the specific allowedRights leaf configured in
-          that entry.
-
-       4) RPC Method Invocation
-          In order to invoke a specific RPC method,
-          the 'rpcRules' list, then the 'moduleRule' list
-          is checked to see if the particular group has 
-          'exec' rights.  If not, the 'noRuleDefault' leaf
-          is checked for this requested RPC operation.
-          If denied, the RPC operation is rejected with 
-          an 'access-denied' error-tag, and no actions 
-          are performed.  The standard operation 
-          'close-session' is always allowed.
-          The special user 'superuser' is allowed to invoke any
-          RPC operation, if it is supported by the server.
-
-       5) Database access
-          Once the RPC method access has been granted, the
-          server will check any internal database access,
-          using the 'dataRules' table.  This is a user-ordered
-          list of instance-identifier rules.  If no dataRule
-          entries are found, then the the YANG module
-          associated with the accessed data node will
-          be checked in the moduleRules list, similar
-          to step 3.  If no moduleRule entry is found,
-          then step 6 is followed.
-
-       6) No Rule Defaults
-          If the object being accessed is tagged
-          as nacm:secure or nacm:very-secure, then
-          default access is 'denied',  Otherwise,
-          the noRule*Default leaf is used to permit or deny
-          access when a specific rule is not found in
-          the rpcRules or dataRules tables, for the 
-          specified access right (read, write, or exec).";
-
-
-    revision 2010-02-11 {
+    revision 2010-02-21 {
         description  
           "Initial version (work-in-progress).";
     }
@@ -84,14 +22,13 @@ module yuma-nacm {
         description "General Purpose User Name string.";
         type string {
             length "1..64";
-            pattern '[a-z,A-Z][a-z,A-Z,0-9]{0,63}';
+            pattern '[a-z,A-Z,_][a-z,A-Z,0-9,\-,_,@,.]{0,63}';
         }
     }
 
     typedef nacm-rights {
       description 
-        "NETCONF Access Rights; 
-         These are individually assigned, not hierarchical.";
+        "NETCONF Access Rights";
 
       type bits {
 	bit read {
@@ -111,7 +48,7 @@ module yuma-nacm {
 	bit exec {
            description
               "Execution access to the specified RPC operation.
-               Any RPC method invocation is an exec operation.";
+               Any RPC operation invocation is an exec operation.";
         }
       }
     }
@@ -124,11 +61,8 @@ module yuma-nacm {
 
          The identityref data type is used to allow as 
          many groups to be added as needed.  There are
-         three default groups defined here:
-
-           superuser == root account
-           admin == administrative account
-           guest == guest account";
+         no standard semantics for each identity.
+         It simply represents a unique group name.";
        
       type identityref {
          base nacm-groups;
@@ -149,19 +83,18 @@ module yuma-nacm {
        }
     }
 
-    typedef schema-instance {
+    typedef schema-instance-identifier {
       description
-        "Path expression used to represent a special schema-instance 
-         identifier string.
+        "Path expression used to represent a special 
+         schema-instance identifier string.
        
-         A schema-instance value string is an unrestricted YANG
-         instance-identifier expression.  All the same rules
-         as an instance-identifier apply except predicates
-         for keys are optional.  If a key predicate is missing,
-         then all existing instances for that key are implied.";
-      type string {
-         ncx:schema-instance;  // need to remove for I-D version
-      }
+         A schema-instance-identifier value string is an 
+         unrestricted YANG instance-identifier expression.
+         All the same rules as an instance-identifier apply
+         except predicates for keys are optional.  If a key
+         predicate is missing, then the schema-instance-identifier
+         represents all possible server instances for that key.";
+      type string;
     }
 
     extension secure {
@@ -201,33 +134,44 @@ module yuma-nacm {
 
     identity admin {
        description 
-          "Administrator group.";
+          "Example Administrator group.";
        base nacm-groups;
     }
 
     identity monitor {
        description 
-          "Monitoring group.";
+          "Example Monitoring group.";
        base nacm-groups;
     }
 
     identity guest {
        description 
-          "Guest user group.";
+          "Example Guest group.";
        base nacm-groups;
     }
 
     container nacm {
         nacm:very-secure;
 
-        presence 
-         "An empty nacm container indicates that the NACM service
-          is running, using all default parameters.";
-
         description
           "Parameters for NETCONF Access Control Model.";
 
-        leaf noRuleReadDefault {
+        presence 
+         "An empty nacm container indicates that the 
+          NACM service is running, and possibly using
+          all default parameters.";
+
+        leaf enable-nacm {
+           description
+             "Enable or disable all NETCONF access control
+              enforcement.  If 'true', then enforcement
+              is enabled.  If 'false', then enforcement
+              is disabled.";
+           type boolean;
+           default true;
+        } 
+
+        leaf read-default {
             description
               "Controls whether read access is granted if
                no appropriate rule is found for a
@@ -236,7 +180,7 @@ module yuma-nacm {
             default "permit";
         }
 
-        leaf noRuleWriteDefault {
+        leaf write-default {
             description
               "Controls whether write access is granted if
                no appropriate rule is found for a
@@ -245,7 +189,7 @@ module yuma-nacm {
             default "deny";
         }
 
-        leaf noRuleExecDefault {
+        leaf exec-default {
             description
               "Controls whether exec access is granted if
                no appropriate rule is found for a
@@ -254,14 +198,14 @@ module yuma-nacm {
             default "permit";
         }
 
-        leaf deniedRpcs {
+        leaf denied-rpcs {
             description
               "Number of times an RPC operation request was denied";
             type yang:zero-based-counter32;
             config false;
         }
 
-        leaf deniedDataWrites {
+        leaf denied-data-writes {
             description
               "Number of times a request to alter a data node
                was denied.";
@@ -271,20 +215,20 @@ module yuma-nacm {
 
         container groups {
             description 
-              "NETCONF Access Control Group Table";
+              "NACM Group Table";
 
             list group {
-                description "One NETCONF ACM Group Entry";
+                description "One NACM Group Entry";
 
-                key groupIdentity;
+                key group-identity;
 
-                leaf groupIdentity {
+                leaf group-identity {
                     description 
                       "Group identity associated with this entry.";
                     type nacm-group;
                 }
 
-                leaf-list userName {
+                leaf-list user-name {
                     description 
                       "Each entry identifies the user name of 
                        a member of the group associated with 
@@ -296,79 +240,19 @@ module yuma-nacm {
 
         container rules {
             description 
-              "NETCONF Access Control Rules Table.
-               Processing model for RPC method acme:reset
-               which touches database node /X/Y/Z:
+              "NETCONF Access Control Rules.";
 
-               Find an 'rpcRule' or 'moduleRule' for the 
-               specified RPC operation, and allow invocation
-               access if the 'allowedRights' leaf includes
-               the 'exec' bit.
+            grouping common-rule-parms {
+                leaf rule-name {
+                    description
+                      "Arbitrary name assigned to the
+                       access control rule.";
+                    type string {
+                       length "1..1023";
+                    }
+                }
 
-               If no rule is found, then the appropriate
-               'noRuleDefault' parameter is usually used to 
-               allow or deny access. (See note 3 and note 4.)
-
-               If RPC operation invocation permission is
-               granted, then the server must also make sure
-               that any database data access (in the candidate
-               or running database) is also checked
-               in the 'dataRules' section.
-
-               The module rules are evaluated for data access
-               as the requested operation is being processed.
-               If a specific module is requested which matches
-               a rule in the moduleRules list, then it is
-               applied.  This is done before the dataRules list
-               is checked.
-
-               The data rules are evaluated in the order they
-               are entered by the user.  If the RPC operation
-               internal access is a read operation, and
-               a matching rule contains the 'read' bit
-               then database access permission is granted.
-               If the RPC operation internal access is a write
-               operation, and a matching rule contains the 
-               'write' bit, then database access permission 
-               is granted.
-
-               If no data rule is found, then the 'module rules'
-               are evaluated again, for access to the module
-               associated with the data node.
-
-               If no module rule is found, then the appropriate
-               'noRuleDefault' parameter is usually used to allow
-                or deny access.  (See note 3 and note 4.)
-              
-               Note 1: Access to the 'close-session'
-               RPC operation is always granted, even if
-               no rule exists controlling its access.
-
-               Note 2: Access is always granted to the
-               special user named 'superuser', even if not
-               yet configured in the 'groups' container.
-               This allows bootstrap and ACM repair
-               but as always, the 'superuser' account
-               needs to be used with extreme caution.
-
-               Note 3: Write or execution access to data
-               or RPC methods tagged as 'nacm:secure'
-               will only be granted to the 'superuser' user
-               if no rule is found.  The relevant 'noRuleDefault'
-               leaf will be ignored in this case.
-
-               Note 4: Read, write or execution access to data
-               or RPC methods tagged as 'nacm:very-secure'
-               will only be granted to the 'superuser' user
-               if no rule is found.  The relevant 'noRuleDefault'
-               leaf will be ignored in this case.
-
-               Note 5: A traditional 'deny' rule is created by
-               simply omitting bits from the allowedRights
-               for the specific data and administrative groups.";
-
-            grouping RulesCommon {
-                leaf allowedRights {
+                leaf allowed-rights {
                     description
                       "List of access rights granted to
                        specified administrative groups for the
@@ -377,7 +261,7 @@ module yuma-nacm {
                     mandatory true;
                 }
 
-                leaf-list allowedGroup {
+                leaf-list allowed-group {
                     description
                       "List of administrative groups which will be
                        assigned the associated access rights
@@ -396,104 +280,91 @@ module yuma-nacm {
                 }
             }
 
-            list moduleRule {
+            list module-rule {
                 description 
                    "One Module Access Rule.
+                    Rules are processed in user-defined order.
                     A module rule is considered a match if
                     the XML namespace for the specified module
                     name matches the XML namespace used within
                     a NETCONF PDU, and the administrative group
-                    associated with the requestor session is
-                    specified in the 'allowedGroups' ";
+                    associated with the requesting session is
+                    specified in the 'allowed-group' leaf-list.";
 
-                key "moduleName allowedRights";
+                ordered-by user;
 
-                ordered-by system;
+                key "module-name rule-name";
 
-                leaf moduleName {
+                leaf module-name {
                     description
-                      "Name of the YANG module associated with 
+                      "Name of the module associated with 
                        this rule.";
                     type string {
 			length "1..max";
                     }
                 }
 
-                uses RulesCommon;
+                uses common-rule-parms;
             }
 
-            list rpcRule {
+            list rpc-rule {
                 description 
-                   "One RPC Method Access Rule.
+                   "One RPC Operation Access Rule.
+                    Rules are processed in user-defined order.
                     An RPC rule is considered a match if
                     the module name of the requested RPC
-                    operation matches 'rpcModuleName',
+                    operation matches 'rpc-module-name',
                     the requested RPC operation matches
-                    'rpcName', and the administrative group
-                    associated with the requesting session
-                    is listed in one of the 'allowedGroup'
-                    leaf-list objects.";
+                    'rpc-name', and an administrative group
+                    associated with the session user
+                    is listed in the 'allowed-group'
+                    leaf-list";
 
-                /* unique-stmt prevents the same
-                 * group from being used in multiple
-                 * entries for the same RPC operation
-                 * except that unique-stmt is not allowed
-                 * for leaf-lists so it cannot be used
-                 *
-                 * unique "rpcModuleName rpcName allowedGroup";
-                 */
+                ordered-by user;
 
-                key "rpcModuleName rpcName allowedRights";
+                key "rpc-module-name 
+                     rpc-name 
+                     rule-name";
 
-                ordered-by system;
-
-                leaf rpcModuleName {
+                leaf rpc-module-name {
                     description
-                      "Name of the YANG module defining this 
-                       RPC method.";
+                      "Name of the module defining this 
+                       RPC operation.";
                     type string {
 			length "1..max";
                     }
                 }
 
-                leaf rpcName {
+                leaf rpc-name {
                     description
-                      "Name of the RPC method.";
+                      "Name of the RPC operation.";
                     type string {
 			length "1..max";
                     }
                 }
 
-                uses RulesCommon;
+                uses common-rule-parms;
             }
 
-            list dataRule {
+            list data-rule {
                 description 
-                  "One Data Access Control Rule
+                  "One Data Access Control Rule.
+                   Rules are processed in user-defined order.
                    A data rule is considered to match when
                    the path expression identifies
                    the same node that is being accessed
                    in the NETCONF database, and the administrative
                    group associated with the session is identified
-                   in one of the 'allowedGroup' leaf-list entries.";
+                   in the 'allowed-group' leaf-list.";
 
-                key "name";
+                key "rule-name";
 
                 ordered-by user;
 
-                leaf name {
-                    description
-                      "Arbitrary name assigned to this data rule.";
-                    type string {
-                       length "1..1023";
-                    }
-                }
-
 		leaf path {
                   description
-                    "Instance identifier associated with
-                     the configuration or state data
-                     controlled by this rule.
+                    "Schema Instance Identifier associated with
+                     the data node controlled by this rule.
 
                      Configuration data or state data
                      instance identifiers start with
@@ -504,11 +375,48 @@ module yuma-nacm {
                      The special value '/' refers to all
                      possible database contents.";
 
-		  type schema-instance;
+		  type schema-instance-identifier;
                   mandatory true;
                 }
 
-                uses RulesCommon;
+                uses common-rule-parms;
+            }
+
+            list notification-rule {
+                description 
+                   "One Notification Access Rule.
+                    A notification is considered a match if
+                    the module name of the requested
+                    event type matches 'notification-module-name',
+                    the requested event type matches the
+                    'notification-name', and the administrative group
+                    associated with the requesting session
+                    is listed in the 'allowed-group' leaf-list.";
+
+                ordered-by user;
+
+                key "notification-module-name 
+                     notification-name 
+                     rule-name";
+
+                leaf notification-module-name {
+                    description
+                      "Name of the module defining this 
+                       notification event type.";
+                    type string {
+			length "1..max";
+                    }
+                }
+
+                leaf notification-name {
+                    description
+                      "Name of the notification event.";
+                    type string {
+			length "1..max";
+                    }
+                }
+
+                uses common-rule-parms;
             }
         }
     }      

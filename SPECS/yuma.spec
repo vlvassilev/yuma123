@@ -110,6 +110,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/yuma/modules/netconfcentral/yangdump.yang
 
 %changelog
+*  Mon Feb 22 2010  Andy Bierman <andyb at iwl.com> 0.10.714
+ - Supporting new ietf-yang-types and ietf-netconf-monitoring 
+   modules
+ - Updated yuma-nacm module to match I-D version
+ - Fixed bug in netconfd <error-path> for unknown nodes
 *  Mon Feb 01 2010  Andy Bierman <andyb at iwl.com> 0.10.664
  - Supporting yang-10 draft
  - Add support for revision in module param (foo@2010-01-15)

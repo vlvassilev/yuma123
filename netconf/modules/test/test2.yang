@@ -1,6 +1,6 @@
 module test2 {
 
-    namespace "http://netconfcentral.com/ns/test2";
+    namespace "http://netconfcentral.org/ns/test2";
     prefix "t2";
 
     import test1 { prefix t1; }

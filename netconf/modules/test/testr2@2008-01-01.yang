@@ -1,6 +1,6 @@
 module testr2 {
 
-    namespace "http://netconfcentral.com/ns/testr2";
+    namespace "http://netconfcentral.org/ns/testr2";
     prefix "r2";
 
     organization

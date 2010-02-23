@@ -1,6 +1,6 @@
 module testdev {
 
-    namespace "http://netconfcentral.com/ns/testdev";
+    namespace "http://netconfcentral.org/ns/testdev";
     prefix "td";
 
     revision 2009-08-02 {

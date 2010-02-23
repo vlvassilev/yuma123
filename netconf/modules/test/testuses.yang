@@ -1,6 +1,6 @@
 module testuses {
 
-    namespace "http://netconfcentral.com/ns/testuses";
+    namespace "http://netconfcentral.org/ns/testuses";
     prefix "tu";
 
     organization

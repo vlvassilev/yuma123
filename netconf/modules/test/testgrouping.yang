@@ -1,6 +1,6 @@
 module testgrouping {
 
-    namespace "http://netconfcentral.com/ns/testgrouping";
+    namespace "http://netconfcentral.org/ns/testgrouping";
     prefix "foo";
 
     revision 2009-07-28 {

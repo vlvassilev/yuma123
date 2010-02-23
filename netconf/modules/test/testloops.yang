@@ -1,6 +1,6 @@
 module testloops {
 
-    namespace "urn:ietf:params:xml:ns:yang:testloops";
+    namespace "http://netconfcentral.org/ns/testloops";
     prefix "tl";
 
     import testloops {

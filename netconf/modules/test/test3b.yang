@@ -1,6 +1,6 @@
 module test3b {
 
-    namespace "http://netconfcentral.com/ns/test3b";
+    namespace "http://netconfcentral.org/ns/test3b";
     prefix "t3";
 
 

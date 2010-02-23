@@ -1,6 +1,6 @@
 module testmust {
 
-    namespace "http://netconfcentral.com/ns/testmust";
+    namespace "http://netconfcentral.org/ns/testmust";
     prefix "tm";
 
     organization

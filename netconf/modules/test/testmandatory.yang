@@ -1,6 +1,6 @@
 module testmandatory {
 
-    namespace "http://netconfcentral.com/ns/testmandatory";
+    namespace "http://netconfcentral.org/ns/testmandatory";
     prefix "tm";
 
     revision 2009-08-29 {

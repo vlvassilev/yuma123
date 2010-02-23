@@ -1,6 +1,6 @@
 module testgrouping2 {
 
-    namespace "http://netconfcentral.com/ns/testgrouping2";
+    namespace "http://netconfcentral.org/ns/testgrouping2";
     prefix "foo2";
 
     import testgrouping { prefix foo1; }

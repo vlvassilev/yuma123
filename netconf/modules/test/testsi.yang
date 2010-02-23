@@ -1,6 +1,6 @@
 module testsi {
 
-    namespace "http://netconfcentral.com/ns/testsi";
+    namespace "http://netconfcentral.org/ns/testsi";
     prefix "tsi";
 
     import yuma-ncx { prefix ncx; }

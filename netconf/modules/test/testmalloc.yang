@@ -1,6 +1,6 @@
 module testmalloc {
 
-    namespace "urn:ietf:params:xml:ns:yang:testmalloc";
+    namespace "http://netconfcentral.org/ns/testmalloc";
     prefix "tm";
 
     revision 2008-10-15 {

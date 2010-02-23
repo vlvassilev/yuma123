@@ -1,6 +1,6 @@
 module testrev {
 
-    namespace "http://netconfcentral.com/ns/testrev";
+    namespace "http://netconfcentral.org/ns/testrev";
     prefix "trev";
 
     import testr1 {

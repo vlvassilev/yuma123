@@ -1,6 +1,6 @@
 module test1 {
 
-    namespace "http://netconfcentral.com/ns/test1";
+    namespace "http://netconfcentral.org/ns/test1";
     prefix "t1";
 
     include test1a;

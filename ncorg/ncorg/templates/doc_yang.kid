@@ -51,7 +51,7 @@
 	    <br/><br/>
 	    <b>Intended Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
 	    <a target="_blank" 
-               href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-10.txt">
+               href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-11.txt">
               YANG - A data modeling language for NETCONF
 	    </a>
 	  </p>
@@ -63,7 +63,7 @@
 	    <br/><br/>
 	    <b>Intended Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
 	    <a target="_blank" 
-               href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-types-06.txt">
+               href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-types-07.txt">
               Common YANG Data Types
 	    </a>
 	  </p>

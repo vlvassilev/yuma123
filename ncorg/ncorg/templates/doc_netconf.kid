@@ -1130,7 +1130,7 @@
 	  mechanism for the NETCONF protocol.<br/><br/>
 	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
 	  <a target="_blank" 
-             href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-monitoring-11.txt">
+             href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-monitoring-12.txt">
 	    NETCONF Monitoring Schema
 	  </a>
 	</p>

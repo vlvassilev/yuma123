@@ -191,8 +191,6 @@ date	     init     comment
 
 #define VAL_FLAG(V)    ((V)->v.boo)
 
-#define VAL_FLOAT(V)   ((V)->v.num.f)
-
 #define VAL_LONG(V)    ((V)->v.num.l)
 
 #define VAL_INT(V)     ((V)->v.num.i)
@@ -2498,7 +2496,8 @@ extern int32
 *
 * INPUTS:
 *    buff == buffer to write (NULL means get length only)
-*    val == value to check
+*    val == value to print
+*    len == address of return length
 *
 * OUTPUTS:
 *   *len == number of bytes written (or just length if buff == NULL)
@@ -2510,6 +2509,24 @@ extern status_t
     val_sprintf_simval_nc (xmlChar *buff,
 			   const val_value_t  *val,
 			   uint32  *len);
+
+
+/********************************************************************
+* FUNCTION val_make_sprintf_string
+*
+* Malloc a buffer and then sprintf the xmlChar string 
+* NETCONF representation of a simple value
+*
+* INPUTS:
+*    val == value to print
+*
+* RETURNS:
+*   malloced buffer with string represetation of the
+*      'val' value node
+*   NULL if some error
+*********************************************************************/
+extern xmlChar *
+    val_make_sprintf_string (const val_value_t *val);
 
 
 /********************************************************************
@@ -3291,5 +3308,73 @@ extern void
 *********************************************************************/
 extern status_t
     val_cvt_generic (val_value_t *val);
+
+
+/********************************************************************
+* FUNCTION val_set_pcookie
+* 
+* Set the SIL pointer cookie in the editvars for
+* the specified value node
+*
+* INPUTS:
+*    val == val_value_t struct to set
+*    pcookie == pointer cookie value to set
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    val_set_pcookie (val_value_t *val,
+                     void *pcookie);
+
+
+/********************************************************************
+* FUNCTION val_set_icookie
+* 
+* Set the SIL integer cookie in the editvars for
+* the specified value node
+*
+* INPUTS:
+*    val == val_value_t struct to set
+*    icookie == integer cookie value to set
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    val_set_icookie (val_value_t *val,
+                     int icookie);
+
+
+/********************************************************************
+* FUNCTION val_get_pcookie
+* 
+* Get the SIL pointer cookie in the editvars for
+* the specified value node
+*
+* INPUTS:
+*    val == val_value_t struct to set
+*
+* RETURNS:
+*    pointer cookie value or NULL if none
+*********************************************************************/
+extern void *
+    val_get_pcookie (val_value_t *val);
+
+
+/********************************************************************
+* FUNCTION val_get_icookie
+* 
+* Get the SIL integer cookie in the editvars for
+* the specified value node
+*
+* INPUTS:
+*    val == val_value_t struct to set
+*
+* RETURNS:
+*    integer cookie value or 0 if none
+*********************************************************************/
+extern int
+    val_get_icookie (val_value_t *val);
 
 #endif	    /* _H_val */

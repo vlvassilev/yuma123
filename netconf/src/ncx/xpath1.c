@@ -1111,6 +1111,7 @@ static boolean
                        void *cookie1,
                        void *cookie2)
 {
+    val_value_t              *useval, *newval;
     xpath_compwalkerparms_t  *parms;
     xmlChar                  *buffer;
     status_t                  res;
@@ -1124,31 +1125,50 @@ static boolean
         return TRUE;
     }
 
+    newval = NULL;
+    res = NO_ERR;
+
+    if (val_is_virtual(val)) {
+        newval = val_get_virtual_value(NULL, val, &res);
+        if (newval == NULL) {
+            parms->res = res;
+            parms->cmpresult = FALSE;
+            return FALSE;
+        } else {
+            useval = newval;
+        }
+    } else {
+        useval = val;
+    }
+
     if (obj_is_password(val->obj)) {
         parms->cmpresult = FALSE;
     } else if (typ_is_string(val->btyp)) {
         if (parms->cmpstring) {
             parms->cmpresult = 
                 compare_strings(parms->cmpstring, 
-                                VAL_STR(val),
+                                VAL_STR(useval),
                                 parms->exop);
         } else {
             parms->cmpresult = 
                 compare_numbers(parms->cmpnum, 
-                                VAL_STR(val),
+                                VAL_STR(useval),
                                 parms->exop);
         }
     } else {
         /* get value sprintf size */
-        res = val_sprintf_simval_nc(NULL, val, &cnt);
+        res = val_sprintf_simval_nc(NULL, useval, &cnt);
         if (res != NO_ERR) {
             parms->res = res;
+            if (newval != NULL) {
+                val_free_value(newval);
+            }
             return FALSE;
         }
 
         if (cnt < parms->buffsize) {
             /* use pre-allocated buffer */
-            res = val_sprintf_simval_nc(parms->buffer, val, &cnt);
+            res = val_sprintf_simval_nc(parms->buffer, useval, &cnt);
             if (res == NO_ERR) {
                 if (parms->cmpstring) {
                     parms->cmpresult = 
@@ -1163,6 +1183,9 @@ static boolean
                 }
             } else {
                 parms->res = res;
+                if (newval != NULL) {
+                    val_free_value(newval);
+                }
                 return FALSE;
             }
         } else {
@@ -1173,9 +1196,12 @@ static boolean
                 return FALSE;
             }
 
-            res = val_sprintf_simval_nc(buffer, val, &cnt);
+            res = val_sprintf_simval_nc(buffer, useval, &cnt);
             if (res != NO_ERR) {
                 m__free(buffer);
+                if (newval) {
+                    val_free_value(newval);
+                }
                 parms->res = res;
                 return FALSE;
             }
@@ -1194,6 +1220,10 @@ static boolean
 
             m__free(buffer);
         }
+    }
+
+    if (newval != NULL) {
+        val_free_value(newval);
     }
 
     return !parms->cmpresult;
@@ -1240,7 +1270,7 @@ static boolean
     xmlChar                  *buffer, *comparestr;
     xpath_pcb_t              *pcb;
     xpath_resnode_t          *resnode;
-    val_value_t              *testval;
+    val_value_t              *testval, *useval, *newval;
     status_t                  res;
     uint32                    cnt;
     boolean                   fnresult, cfgonly;
@@ -1255,23 +1285,44 @@ static boolean
 
     res = NO_ERR;
     buffer = NULL;
+    newval = NULL;
+
     cfgonly = (pcb->flags & XP_FL_CONFIGONLY) ? TRUE : FALSE;
 
+    if (val_is_virtual(val)) {
+        newval = val_get_virtual_value(NULL, val, &res);
+        if (newval == NULL) {
+            parms->res = res;
+            parms->cmpresult = FALSE;
+            return FALSE;
+        } else {
+            useval = newval;
+        }
+    } else {
+        useval = val;
+    }
+        
     if (typ_is_string(val->btyp)) {
-        comparestr = VAL_STR(val);
+        comparestr = VAL_STR(useval);
     } else {
         /* get value sprintf size */
-        res = val_sprintf_simval_nc(NULL, val, &cnt);
+        res = val_sprintf_simval_nc(NULL, useval, &cnt);
         if (res != NO_ERR) {
             parms->res = res;
+            if (newval) {
+                val_free_value(newval);
+            }
             return FALSE;
         }
 
         if (cnt < parms->buffsize) {
             /* use pre-allocated buffer */
-            res = val_sprintf_simval_nc(parms->buffer, val, &cnt);
+            res = val_sprintf_simval_nc(parms->buffer, useval, &cnt);
             if (res != NO_ERR) {
                 parms->res = res;
+                if (newval) {
+                    val_free_value(newval);
+                }
                 return FALSE;
             }
             comparestr = parms->buffer;
@@ -1280,13 +1331,19 @@ static boolean
             buffer = m__getMem(cnt+1);
             if (!buffer) {
                 parms->res = ERR_INTERNAL_MEM;
+                if (newval) {
+                    val_free_value(newval);
+                }
                 return FALSE;
             }
 
-            res = val_sprintf_simval_nc(buffer, val, &cnt);
+            res = val_sprintf_simval_nc(buffer, useval, &cnt);
             if (res != NO_ERR) {
                 m__free(buffer);
                 parms->res = res;
+                if (newval) {
+                    val_free_value(newval);
+                }
                 return FALSE;
             }
             comparestr = buffer;
@@ -1302,6 +1359,9 @@ static boolean
             m__free(buffer);
         }
         parms->res = ERR_INTERNAL_MEM;
+        if (newval) {
+            val_free_value(newval);
+        }
         return FALSE;
     }
     newparms.buffsize = TEMP_BUFFSIZE;
@@ -1348,9 +1408,14 @@ static boolean
         }
     }
 
-    if (buffer) {
+    if (buffer != NULL) {
         m__free(buffer);
     }
+
+    if (newval != NULL) {
+        val_free_value(newval);
+    }
+
     m__free(newparms.buffer);
 
     return TRUE;
@@ -1386,7 +1451,7 @@ static boolean
 {
     xpath_resnode_t         *resnode;
     xpath_result_t          *tempval;
-    val_value_t             *testval;
+    val_value_t             *testval, *newval;
     xmlChar                 *cmpstring;
     ncx_num_t                cmpnum;
     int32                    cmpresult;
@@ -1451,6 +1516,18 @@ static boolean
          resnode = (xpath_resnode_t *)dlq_nextEntry(resnode)) {
 
         testval = resnode->node.valptr;
+        newval = NULL;
+        myres = NO_ERR;
+
+        if (val_is_virtual(testval)) {
+            newval = val_get_virtual_value(NULL, testval, &myres);
+            if (newval == NULL) {
+                *res = myres;
+                continue;
+            } else {
+                testval = newval;
+            }
+        }
 
         switch (val2->restype) {
         case XP_RT_STRING:
@@ -1499,6 +1576,10 @@ static boolean
             break;
         default:
             SET_ERROR(ERR_INTERNAL_VAL);
+        }
+
+        if (newval) {
+            val_free_value(newval);
         }
     }
 
@@ -2038,6 +2119,7 @@ static boolean
                          void *cookie2)
 {
     xpath_stringwalkerparms_t  *parms;
+    val_value_t                *newval, *useval;
     status_t                    res;
     uint32                      cnt;
 
@@ -2060,46 +2142,76 @@ static boolean
         return TRUE;
     }
 
-    if (typ_is_string(val->btyp)) {
-        cnt = xml_strlen(VAL_STR(val));
+    newval = NULL;
+    res = NO_ERR;
+
+    if (val_is_virtual(val)) {
+        newval = val_get_virtual_value(NULL, val, &res);
+        if (newval == NULL) {
+            parms->res = res;
+            return FALSE;
+        } else {
+            useval = newval;
+        }
+    } else {
+        useval = val;
+    }
+        
+    if (typ_is_string(useval->btyp)) {
+        cnt = xml_strlen(VAL_STR(useval));
         if (parms->buffer) {
             if (parms->buffpos+cnt+2 < parms->buffsize) {
                 parms->buffer[parms->buffpos++] = '\n';
                 xml_strcpy(&parms->buffer[parms->buffpos],
-                           VAL_STR(val));
+                           VAL_STR(useval));
             } else {
                 parms->res = ERR_BUFF_OVFL;
+                if (newval) {
+                    val_free_value(newval);
+                }
                 return FALSE;
             }
             parms->buffpos += cnt;
         } else {
             parms->buffpos += (cnt+1); 
         }
-
     } else {
         /* get value sprintf size */
-        res = val_sprintf_simval_nc(NULL, val, &cnt);
+        res = val_sprintf_simval_nc(NULL, useval, &cnt);
         if (res != NO_ERR) {
             parms->res = res;
+            if (newval) {
+                val_free_value(newval);
+            }
             return FALSE;
         }
         if (parms->buffer) {
             if (parms->buffpos+cnt+2 < parms->buffsize) {
                 parms->buffer[parms->buffpos++] = '\n';
                 res = val_sprintf_simval_nc
-                    (&parms->buffer[parms->buffpos], val, &cnt);
+                    (&parms->buffer[parms->buffpos], useval, &cnt);
                 if (res != NO_ERR) {
                     parms->res = res;
+                    if (newval) {
+                        val_free_value(newval);
+                    }
                     return FALSE;
                 }
             } else {
                 parms->res = ERR_BUFF_OVFL;
+                if (newval) {
+                    val_free_value(newval);
+                }
                 return FALSE;
             }
             parms->buffpos += cnt;
         } else {
             parms->buffpos += (cnt+1);
         }
+    }
+
+    if (newval) {
+        val_free_value(newval);
     }
 
     return TRUE;
@@ -4555,16 +4667,32 @@ static xpath_result_t *
     cvt_from_value (xpath_pcb_t *pcb,
                     const val_value_t *val)
 {
-    xpath_result_t   *result;
-    status_t          res;
-    uint32            len;
+    xpath_result_t    *result;
+    val_value_t       *newval;
+    const val_value_t *useval;
+    status_t           res;
+    uint32             len;
 
     result = NULL;
-    if (typ_is_string(val->btyp)) {
+    newval = NULL;
+    res = NO_ERR;
+
+    if (val_is_virtual(val)) {
+        newval = val_get_virtual_value(NULL, val, &res);
+        if (newval == NULL) {
+            return NULL;
+        } else {
+            useval = newval;
+        }
+    } else {
+        useval = val;
+    }
+
+    if (typ_is_string(useval->btyp)) {
         result = new_result(pcb, XP_RT_STRING);
         if (result) {
-            if (VAL_STR(val)) {
-                result->r.str = xml_strdup(VAL_STR(val));
+            if (VAL_STR(useval)) {
+                result->r.str = xml_strdup(VAL_STR(useval));
             } else {
                 result->r.str = xml_strdup(EMPTY_STRING);
             }
@@ -4573,11 +4701,11 @@ static xpath_result_t *
                 result = NULL;
             }
         }
-    } else if (typ_is_number(val->btyp)) {
+    } else if (typ_is_number(useval->btyp)) {
         result = new_result(pcb, XP_RT_NUMBER);
         if (result) {
-            res = ncx_cast_num(&val->v.num, 
-                               val->btyp,
+            res = ncx_cast_num(&useval->v.num, 
+                               useval->btyp,
                                &result->r.num,
                                NCX_BT_FLOAT64);
             if (res != NO_ERR) {
@@ -4585,9 +4713,9 @@ static xpath_result_t *
                 result = NULL;
             }
         }
-    } else if (typ_is_simple(val->btyp)) {
+    } else if (typ_is_simple(useval->btyp)) {
         len = 0;
-        res = val_sprintf_simval_nc(NULL, val, &len);
+        res = val_sprintf_simval_nc(NULL, useval, &len);
         if (res == NO_ERR) {
             result = new_result(pcb, XP_RT_STRING);
             if (result) {
@@ -4596,8 +4724,9 @@ static xpath_result_t *
                     free_result(pcb, result);
                     result = NULL;
                 } else {
-                    res = val_sprintf_simval_nc
-                        (result->r.str, val, &len);
+                    res = val_sprintf_simval_nc(result->r.str, 
+                                                useval, 
+                                                &len);
                     if (res != NO_ERR) {
                         free_result(pcb, result);
                         result = NULL;
@@ -4605,6 +4734,10 @@ static xpath_result_t *
                 }
             }
         }
+    }
+
+    if (newval) {
+        val_free_value(newval);
     }
 
     return result;

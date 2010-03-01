@@ -7208,7 +7208,7 @@ int32
 * !!!! Meta-value contents are ignored for this test !!!!
 * 
 * INPUTS:
-*    val1 == new value to check
+*    val1 == new value to print
 *    val2 == current value to check
 *
 * RETURNS:
@@ -7326,6 +7326,7 @@ int32
 * INPUTS:
 *    buff == buffer to write (NULL means get length only)
 *    val == value to check
+*    len == address of return length
 *
 * OUTPUTS:
 *   *len == number of bytes written (or just length if buff == NULL)
@@ -7609,6 +7610,47 @@ status_t
     return NO_ERR;
 
 }  /* val_sprintf_simval_nc */
+
+
+/********************************************************************
+* FUNCTION val_make_sprintf_string
+*
+* Malloc a buffer and then sprintf the xmlChar string 
+* NETCONF representation of a simple value
+*
+* INPUTS:
+*    val == value to print
+*
+* RETURNS:
+*   malloced buffer with string represetation of the
+*     'val' value node
+*   NULL if some error
+*********************************************************************/
+xmlChar *
+    val_make_sprintf_string (const val_value_t *val)
+{
+    xmlChar   *buff;
+    uint32     len;
+    status_t   res;
+    
+    len = 0;
+    res = val_sprintf_simval_nc(NULL, val, &len);
+    if (res != NO_ERR) {
+        return NULL;
+    }
+    buff = m__getMem(len+1);
+    if (buff == NULL) {
+        return NULL;
+    }
+    res = val_sprintf_simval_nc(buff, val, &len);
+    if (res != NO_ERR) {
+        m__free(buff);
+        return NULL;
+    }
+
+    return buff;
+
+}  /* val_make_sprintf_string */
 
 
 /********************************************************************
@@ -9671,6 +9713,134 @@ status_t
     return res;
 
 }  /* val_cvt_generic */
+
+
+/********************************************************************
+* FUNCTION val_set_pcookie
+* 
+* Set the SIL pointer cookie in the editvars for
+* the specified value node
+*
+* INPUTS:
+*    val == val_value_t struct to set
+*    pcookie == pointer cookie value to set
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    val_set_pcookie (val_value_t *val,
+                     void *pcookie)
+{
+#ifdef DEBUG
+    if (val == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (val->editvars == NULL) {
+        return ERR_NCX_NOT_FOUND;
+    }
+
+    val->editvars->pcookie = pcookie;
+    return NO_ERR;
+
+} /* val_set_pcookie */
+
+
+/********************************************************************
+* FUNCTION val_set_icookie
+* 
+* Set the SIL integer cookie in the editvars for
+* the specified value node
+*
+* INPUTS:
+*    val == val_value_t struct to set
+*    icookie == integer cookie value to set
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    val_set_icookie (val_value_t *val,
+                     int icookie)
+{
+#ifdef DEBUG
+    if (val == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (val->editvars == NULL) {
+        return ERR_NCX_NOT_FOUND;
+    }
+
+    val->editvars->icookie = icookie;
+    return NO_ERR;
+
+} /* val_set_icookie */
+
+
+/********************************************************************
+* FUNCTION val_get_pcookie
+* 
+* Get the SIL pointer cookie in the editvars for
+* the specified value node
+*
+* INPUTS:
+*    val == val_value_t struct to set
+*
+* RETURNS:
+*    pointer cookie value or NULL if none
+*********************************************************************/
+void *
+    val_get_pcookie (val_value_t *val)
+{
+#ifdef DEBUG
+    if (val == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    if (val->editvars == NULL) {
+        return NULL;
+    }
+
+    return val->editvars->pcookie;
+
+} /* val_get_pcookie */
+
+
+/********************************************************************
+* FUNCTION val_get_icookie
+* 
+* Get the SIL integer cookie in the editvars for
+* the specified value node
+*
+* INPUTS:
+*    val == val_value_t struct to set
+*
+* RETURNS:
+*    integer cookie value or 0 if none
+*********************************************************************/
+int
+    val_get_icookie (val_value_t *val)
+{
+#ifdef DEBUG
+    if (val == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    if (val->editvars == NULL) {
+        return 0;
+    }
+
+    return val->editvars->icookie;
+
+} /* val_get_icookie */
 
 
 /* END file val.c */

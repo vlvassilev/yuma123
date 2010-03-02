@@ -77,16 +77,16 @@ date	     init     comment
  * a specific named object
  * 
  * INPUTS:
- *   scb == session control block
+ *   scb == session control block making the request
  *   msg == incoming rpc_msg_t in progress
  *   cbtyp == reason for the callback
  *   editop == the parent edit-config operation type, which
  *             is also used for all other callbacks
  *             that operate on objects
- *   newobj == container object holding the proposed changes to
+ *   newval == container object holding the proposed changes to
  *           apply to the current config, depending on
  *           the editop value. Will not be NULL.
- *   curobj == current container values from the <running> 
+ *   curval == current container values from the <running> 
  *           or <candidate> configuration, if any. Could be NULL
  *           for create and other operations.
  *

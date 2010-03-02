@@ -250,7 +250,7 @@ date	     init     comment
 #define NCX_DEF_CONFIRM_TIMEOUT  600
 
 /* default value for the with-defaults option */
-#define NCX_DEF_WITHDEF   NCX_WITHDEF_REPORT_ALL
+#define NCX_DEF_WITHDEF   NCX_WITHDEF_EXPLICIT
 
 /* default value for the with-metadata option */
 #define NCX_DEF_WITHMETA  FALSE

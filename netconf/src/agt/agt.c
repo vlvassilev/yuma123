@@ -230,15 +230,19 @@ static void
 *   startup == startup filespec provided by the user
 *           == NULL if not set by user 
 *              (use default name and specified search path instead)
+*   loaded == address of return config loaded flag
 *
 * OUTPUTS:
+*   *loaded == TRUE if some config file was loaded
+*
 *   The <running> config is loaded from NV-storage,
 *   if the NV-storage <startup> config can be found an read
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t
-    load_running_config (const xmlChar *startup)
+    load_running_config (const xmlChar *startup,
+                         boolean *loaded)
 {
     cfg_template_t  *cfg;
     xmlChar         *fname;
@@ -246,6 +250,7 @@ static status_t
     status_t         res;
 
     res = NO_ERR;
+    *loaded = FALSE;
     profile = agt_get_profile();
 
     cfg = cfg_get_config(NCX_CFG_RUNNING);
@@ -305,6 +310,7 @@ static status_t
                       fname);
         }
     } else {
+        *loaded = TRUE;
         log_info("\nagt: Startup config loaded OK\n     Source: %s\n",
                  fname);
     }
@@ -469,12 +475,16 @@ status_t
     val_value_t        *val;
     agt_dynlib_cb_t    *dynlib;
     xmlChar            *savestr, *revision, savechar;
+    cfg_template_t     *cfg;
     status_t            res;
     uint32              modlen;
+    boolean             startup_loaded;
 
 #ifdef AGT_DEBUG
     log_debug3("\nServer Init-2 Starting...");
 #endif
+
+    startup_loaded = FALSE;
 
     /* init user callback support */
     agt_cb_init();
@@ -699,7 +709,7 @@ status_t
         if (LOGDEBUG2) {
             log_debug2("\nAttempting to load running config from startup");
         }
-        res = load_running_config(agt_profile.agt_startup);
+        res = load_running_config(agt_profile.agt_startup, &startup_loaded);
         if (res != NO_ERR) {
             return res;
         }
@@ -780,6 +790,17 @@ status_t
     }
 #endif
 
+    /* dump the running config at boot-time */
+    if ((LOGDEBUG && !startup_loaded) || LOGDEBUG3) {
+        if (startup_loaded) {
+            log_debug("\nRunning config contents at boot-time");
+        } else {
+            log_debug("\nFactory default running config contents");
+        }
+        cfg = cfg_get_config(NCX_CFG_RUNNING);
+        val_dump_value(cfg->root, 0);
+        log_debug("\n");
+    }
 
     /* allow users to access the configuration databases now */
     cfg_set_state(NCX_CFGID_RUNNING, CFG_ST_READY);

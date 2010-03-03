@@ -1591,7 +1591,7 @@ status_t
         if (res != NO_ERR) {
             retres = res;
         }
-        if (!NEED_EXIT(res)) {
+        if (!(NEED_EXIT(res) || res==ERR_XML_READER_EOF)) {
             /* keep going if there were errors in the input
              * in case more errors can be found or 
              * continue-on-error is in use
@@ -1613,7 +1613,7 @@ status_t
      ***/
 
     /* call all the object validate callbacks */
-    if (res==NO_ERR && cbset->acb[AGT_RPC_PH_VALIDATE]) {
+    if (res == NO_ERR && cbset->acb[AGT_RPC_PH_VALIDATE]) {
         msg->rpc_agt_state = AGT_RPC_PH_VALIDATE;
         res = (*cbset->acb[AGT_RPC_PH_VALIDATE])(scb, msg, &method);
         if (res != NO_ERR) {
@@ -1627,17 +1627,21 @@ status_t
      * be done by now,
      * Also set the canonical order for the root node
      */
-    testval = val_find_child(msg->rpc_input, NULL, NCX_EL_CONFIG);
-    if (testval) {
-        val_purge_errors_from_root(testval);
-        /* val_set_canonical_order(testval); */
+    if (res == NO_ERR) {
+        testval = val_find_child(msg->rpc_input, NULL, NCX_EL_CONFIG);
+        if (testval) {
+            val_purge_errors_from_root(testval);
+            /* val_set_canonical_order(testval); */
+        }
     }
 
     /* call all the object invoke callbacks, only callbacks for valid
      * subtrees will be called 
      * !!! NEED TO MAKE SURE NO MEMORY LEAKS FROM THIS
      */
-    if (valdone && cbset->acb[AGT_RPC_PH_INVOKE]) {
+    if (res == NO_ERR &&
+        valdone && 
+        cbset->acb[AGT_RPC_PH_INVOKE]) {
         msg->rpc_agt_state = AGT_RPC_PH_INVOKE;
         res = (*cbset->acb[AGT_RPC_PH_INVOKE])(scb, msg, &method);
         if (res != NO_ERR) {

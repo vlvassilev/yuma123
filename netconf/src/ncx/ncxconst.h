@@ -243,6 +243,15 @@ date	     init     comment
 /* Default startup config data file name */
 #define NCX_DEF_STARTUP_FILE  (const xmlChar *)"startup-cfg.xml"
 
+#define NCX_YUMA_HOME_STARTUP_FILE  (const xmlChar *)\
+    "$YUMA_HOME/data/startup-cfg.xml"
+
+#define NCX_YUMA_INSTALL_STARTUP_FILE  (const xmlChar *)\
+    "$YUMA_INSTALL/data/startup-cfg.xml"
+
+#define NCX_DEF_INSTALL_STARTUP_FILE  (const xmlChar *)\
+    "/etc/yuma/startup-cfg.xml"
+
 /* Default backup config data file name */
 #define NCX_DEF_BACKUP_FILE  (const xmlChar *)"backup-cfg.xml"
 

@@ -333,10 +333,9 @@ static status_t
                           val->name);
             }
             return res;
-        } else if (obj_is_leafy(val->obj) &&
-                   (val->parent != NULL) &&
+        } else if (val->parent != NULL &&
                    !obj_is_root(val->parent->obj) &&
-                   (val_get_nsid(val) == val_get_nsid(val->parent))) {
+                   val_get_nsid(val) == val_get_nsid(val->parent)) {
             val = val->parent;
         } else {
             done = TRUE;

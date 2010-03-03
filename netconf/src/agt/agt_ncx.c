@@ -2782,7 +2782,8 @@ status_t
 {
     cfg_template_t    *startup, *running;
     val_value_t       *copystartup;
-    const xmlChar     *filename;
+    const xmlChar     *filename, *yumahome, *yumainstall;
+    xmlChar           *filebuffer;
     agt_profile_t     *profile;
     status_t           res;
     xml_attrs_t        attrs;
@@ -2797,6 +2798,7 @@ status_t
 #endif
 
     filename = NULL;
+    filebuffer = NULL;
     startup = NULL;
     copystartup = NULL;
     res = ERR_NCX_OPERATION_NOT_SUPPORTED;
@@ -2830,44 +2832,60 @@ status_t
         }
 
         if (res == NO_ERR) {
+            yumahome = ncxmod_get_yuma_home();
+            yumainstall = ncxmod_get_yuma_install();
+
             if (cfg->src_url != NULL) {
                 filename = cfg->src_url;
             } else if (startup && startup->src_url) {
                 filename = startup->src_url;
             } else if (running && running->src_url) {
                 filename = running->src_url;
+            } else if (yumahome != NULL) {
+                filebuffer = 
+                    ncx_get_source(NCX_YUMA_HOME_STARTUP_FILE,
+                                   &res);
+                filename = filebuffer;
+            } else if (yumainstall != NULL) {
+                filebuffer = 
+                    ncx_get_source(NCX_YUMA_INSTALL_STARTUP_FILE,
+                                   &res);
+                filename = filebuffer;
             } else {
-                filename = NCX_DEF_STARTUP_FILE;
+                filebuffer = 
+                    ncx_get_source(NCX_DEF_INSTALL_STARTUP_FILE,
+                                   &res);
             }
 
-            if (LOGDEBUG) {
-                log_debug("\nWriting <%s> config to file '%s'",
-                          cfg->name,
-                          filename);
-                          
-            }
-            /* write the new startup config */
-            xml_init_attrs(&attrs);
-
-            /* output to the specified file or STDOUT */
-            res = xml_wr_check_file(filename,
-                                    cfg->root, 
-                                    &attrs,
-                                    XMLMODE, 
-                                    WITHHDR, 
-                                    0,
-                                    profile->agt_indent,
-                                    agt_check_save);
-
-            xml_clean_attrs(&attrs);
-
-            if (res == NO_ERR && copystartup != NULL) {
-                /* toss the old startup and save the new one */
-                if (startup->root) {
-                    val_free_value(startup->root);
+            if (res == NO_ERR) {
+                if (LOGDEBUG) {
+                    log_debug("\nWriting <%s> config to file '%s'",
+                              cfg->name,
+                              filename);
                 }
-                startup->root = copystartup;
-                copystartup = NULL;
+                /* write the new startup config */
+                xml_init_attrs(&attrs);
+
+                /* output to the specified file or STDOUT */
+                res = xml_wr_check_file(filename,
+                                        cfg->root, 
+                                        &attrs,
+                                        XMLMODE, 
+                                        WITHHDR, 
+                                        0,
+                                        profile->agt_indent,
+                                        agt_check_save);
+
+                xml_clean_attrs(&attrs);
+
+                if (res == NO_ERR && copystartup != NULL) {
+                    /* toss the old startup and save the new one */
+                    if (startup->root) {
+                        val_free_value(startup->root);
+                    }
+                    startup->root = copystartup;
+                    copystartup = NULL;
+                }
             }
         }
         break;
@@ -2883,6 +2901,10 @@ status_t
 
     if (copystartup) {
         val_free_value(copystartup);
+    }
+
+    if (filebuffer) {
+        m__free(filebuffer);
     }
 
     return res;

@@ -1,3 +1,8 @@
+yuma (0.11-1) unstable; urgency=low
+  * Align with YANG draft-11
+  * Changed default startup-cfg.xml creation path so
+    the current directory is not used.
+ -- Andy Bierman <andyb@iwl.com>  Wed, 03 Mar 2010 00:00:00 -0800
 yuma (0.10-2) unstable; urgency=low
   * Supporting new ietf-yang-types and ietf-netconf-monitoring
     modules

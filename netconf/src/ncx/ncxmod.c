@@ -3099,10 +3099,14 @@ yang_pcb_t *
 *
 * Search order:
 *
-* 1) current directory or absolute path
-* 2) YUMA_DATAPATH environment var (or set by datapath CLI var)
+* 1) YUMA_DATAPATH environment var (or set by datapath CLI var)
+* 2) current directory or absolute path
 * 3) HOME/data directory
 * 4) YUMA_HOME/data directory
+* 5) HOME/.yuma/ directory
+* 6a) YUMA_INSTALL/data directory OR
+* 6b) /usr/share/yuma/data directory
+* 7) /etc/yuma directory
 *
 * INPUTS:
 *   fname == file name with extension
@@ -3156,13 +3160,10 @@ xmlChar *
         return NULL;
     }
 
-    /* 1) current directory or absolute path */
-    if (test_file(buff, bufflen, NULL, NULL, fname)) {
-        return buff;
-    }
-
-    /* 2) try the YUMA_DATAPATH environment variable */
-    if (ncxmod_data_path) {
+    /* 1) try the YUMA_DATAPATH environment variable
+     * only if it is not an absolute path string
+     */
+    if (ncxmod_data_path && (*fname != NCXMOD_PSCHAR)) {
         if (test_pathlist(ncxmod_data_path, 
                           buff, 
                           bufflen, 
@@ -3170,6 +3171,11 @@ xmlChar *
                           NULL)) {
             return buff;
         }
+    }
+
+    /* 2) current directory or absolute path */
+    if (test_file(buff, bufflen, NULL, NULL, fname)) {
+        return buff;
     }
 
     /* 3) HOME/data directory */
@@ -3192,6 +3198,44 @@ xmlChar *
                       fname)) {
             return buff;
         }
+    }
+
+    /* 5) HOME/.yuma directory */
+    if (ncxmod_env_userhome) {
+        if (test_file(buff, 
+                      bufflen, 
+                      ncxmod_env_userhome, 
+                      NCXMOD_YUMA_DIRNAME,
+                      fname)) {
+            return buff;
+        }
+    }
+
+    /* 6a) YUMA_INSTALL/data directory */
+    if (ncxmod_env_install) {
+        if (test_file(buff, 
+                      bufflen, 
+                      ncxmod_env_install,
+                      NCXMOD_DATA_DIR, 
+                      fname)) {
+            return buff;
+        }
+    } else if (test_file(buff, 
+                         bufflen, 
+                         NCXMOD_DEFAULT_INSTALL,
+                         NCXMOD_DATA_DIR, 
+                         fname)) {
+        /* 6b) default YUMA_INSTALL data directory */
+        return buff;
+    }
+
+    /* 7) default Yuma data directory */
+    if (test_file(buff, 
+                  bufflen, 
+                  NCXMOD_ETC_DATA,
+                  NULL,
+                  fname)) {
+        return buff;
     }
 
     if (generrors) {
@@ -3319,9 +3363,10 @@ xmlChar *
 * 1) YUMA_DATAPATH environment var (or set by datapath CLI var)
 * 2) HOME/data directory
 * 3) YUMA_HOME/data directory
-* 4) YUMA_INSTALL/data directory
-* 5) current directory
-
+* 4) HOME/.yuma directory
+* 5) YUMA_INSTALL/data directory
+* 6) current directory
+*
 * INPUTS:
 *   fname == file name with extension
 *            if the first char is '.' or '/', then an absolute
@@ -3405,7 +3450,18 @@ xmlChar *
         }
     }
 
-    /* 4) YUMA_INSTALL/data directory */
+    /* 4) HOME/.yuma directory */
+    if (ncxmod_env_userhome) {
+        if (test_file_make(buff, 
+                           bufflen, 
+                           ncxmod_env_userhome, 
+                           NCXMOD_YUMA_DIRNAME, 
+                           fname) == NO_ERR) {
+            return buff;
+        }
+    }
+
+    /* 5) YUMA_INSTALL/data directory */
     if (ncxmod_env_install) {
         if (test_file_make(buff, 
                            bufflen, 
@@ -3424,7 +3480,7 @@ xmlChar *
         }
     }
 
-    /* 5) current directory */
+    /* 6) current directory */
     if (test_file_make(buff, 
                        bufflen, 
                        NULL,
@@ -4056,6 +4112,7 @@ void
 * 2) YUMA_DATAPATH environment var (or set by datapath CLI var)
 * 3) HOME/data directory
 * 4) YUMA_HOME/data directory
+* 5) YUMA_INSTALL/data directory
 *
 * INPUTS:
 *   helpmode == BRIEF, NORMAL or FULL 
@@ -4138,6 +4195,30 @@ status_t
         if (pathlen + 6 < bufflen) {
             p = buff;
             p += xml_strcpy(p, ncxmod_yuma_home);
+            *p++ = NCXMOD_PSCHAR;
+            p += xml_strcpy(p, (const xmlChar *)"data");
+            *p++ = NCXMOD_PSCHAR;
+            *p = '\0';
+
+            res = list_subdirs(buff, 
+                               bufflen, 
+                               SEARCH_TYPE_DATA,
+                               helpmode,
+                               logstdout,
+                               TRUE);
+            if (res != NO_ERR) {
+                m__free(buff);
+                return res;
+            }
+        }
+    }
+
+    /* 5) YUMA_INSTALL/data directory */
+    if (ncxmod_env_install) {
+        pathlen = xml_strlen(ncxmod_env_install);;
+        if (pathlen + 6 < bufflen) {
+            p = buff;
+            p += xml_strcpy(p, ncxmod_env_install);
             *p++ = NCXMOD_PSCHAR;
             p += xml_strcpy(p, (const xmlChar *)"data");
             *p++ = NCXMOD_PSCHAR;
@@ -4461,6 +4542,54 @@ status_t
     return NO_ERR;
 
 }  /* ncxmod_list_yang_files */
+
+
+/********************************************************************
+* FUNCTION ncxmod_setup_yumadir
+*
+* Setup the ~/.yuma directory if it does not exist
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    ncxmod_setup_yumadir (void)
+{
+    xmlChar       *yumadir_path;
+    DIR           *dp;
+    status_t       res;
+    int            retcode;
+
+    /* get the full filespec for ~/.yuma */
+    res = NO_ERR;
+    yumadir_path = ncx_get_source(NCXMOD_YUMA_DIR, &res);
+    if (yumadir_path == NULL) {
+        return res;
+    }
+
+    /* try to open ~/.yuma directory */
+    res = NO_ERR;
+    dp = opendir((const char *)yumadir_path);
+    if (dp == NULL) {
+        /* create a ~/.yuma directory with 700 permissions */
+        retcode = mkdir((const char *)yumadir_path, S_IRWXU);
+        if (retcode != 0) {
+            res = errno_to_status();
+        }
+    } else {
+        /* use the existing ~/.yuma/tmp directory */
+        (void)closedir(dp);
+    }
+
+    m__free(yumadir_path);
+
+    if (res != NO_ERR) {
+        log_error("\nError: Could not setup Yuma work directory");
+    }
+
+    return res;
+
+}  /* ncxmod_setup_yumadir */
 
 
 /********************************************************************

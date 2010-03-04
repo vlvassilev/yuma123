@@ -1,6 +1,6 @@
 Name:           yuma
-Version:        0.10
-Release:        2%{?dist}
+Version:        0.11
+Release:        1%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -72,12 +72,12 @@ included, to compile and process YANG modules.
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make RELEASE=2 %{?_smp_mflags}
-make DEVELOPER=1 RELEASE=2 %{?_smp_mflags}
+make RELEASE=1 %{?_smp_mflags}
+make DEVELOPER=1 RELEASE=1 %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id RELEASE=2 \
+make install LDFLAGS+=--build-id RELEASE=1 \
 DESTDIR=$RPM_BUILD_ROOT
 
 %post client
@@ -110,6 +110,10 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/yuma/modules/netconfcentral/yangdump.yang
 
 %changelog
+* Wed, 03 Mar 2010 Andy Bierman <andy at @iwl.com> 0.11.721
+  * Align with YANG draft-11
+  * Changed default startup-cfg.xml creation path so
+    the current directory is not used.
 *  Mon Feb 22 2010  Andy Bierman <andyb at iwl.com> 0.10.714
  - Supporting new ietf-yang-types and ietf-netconf-monitoring 
    modules

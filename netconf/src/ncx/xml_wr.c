@@ -1969,6 +1969,7 @@ status_t
 
     fp = fopen((const char *)filespec, "w");
     if (!fp) {
+        log_error("\nError: Cannot open XML file '%s'", filespec);
         return ERR_FIL_OPEN;
     }
     res = xml_wr_check_open_file(fp,

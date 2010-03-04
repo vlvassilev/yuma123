@@ -431,6 +431,12 @@ status_t
 
     init_server_profile();
 
+    /* setup $HOME/.yuma directory */
+    res = ncxmod_setup_yumadir();
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* get the command line params and also any config file params */
     res = agt_cli_process_input(argc, 
                                 argv, 
@@ -447,7 +453,6 @@ status_t
     }
 
     /* loglevel and log file already set */
-
     return res;
 
 } /* agt_init1 */
@@ -798,7 +803,14 @@ status_t
             log_debug("\nFactory default running config contents");
         }
         cfg = cfg_get_config(NCX_CFG_RUNNING);
-        val_dump_value(cfg->root, 0);
+        val_dump_value_max(cfg->root, 
+                           0,
+                           NCX_DEF_INDENT,
+                           DUMP_VAL_STDOUT,
+                           NCX_DISPLAY_MODE_PREFIX,
+                           FALSE,
+                           TRUE);
+        
         log_debug("\n");
     }
 

@@ -246,6 +246,9 @@ date	     init     comment
 #define NCX_YUMA_HOME_STARTUP_FILE  (const xmlChar *)\
     "$YUMA_HOME/data/startup-cfg.xml"
 
+#define NCX_DOT_YUMA_STARTUP_FILE  (const xmlChar *)\
+    "~/.yuma/startup-cfg.xml"
+
 #define NCX_YUMA_INSTALL_STARTUP_FILE  (const xmlChar *)\
     "$YUMA_INSTALL/data/startup-cfg.xml"
 

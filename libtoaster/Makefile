@@ -11,17 +11,11 @@
 # make all targets
 DIRS = src
 
-ifdef DESTDIR
-JFLAG= 
-SUDO= 
-else
-SUDO=sudo
-JFLAG = -j3
-endif
+SRC_INST=$(DESTDIR)/usr/share/yuma/src/libtoaster
 
 #################### PLATFORM DEFINITIONS ############
-
 all: toasterall
+
 
 ################################ MAKE RULES #################################
 #
@@ -34,7 +28,7 @@ install: toasterinstall
 
 toasterall:
 	for dir in $(DIRS); do\
-	  cd $$dir && $(MAKE) $(JFLAG) && cd ..;\
+	  cd $$dir && $(MAKE) && cd ..;\
         done
 
 toasterclean:
@@ -51,7 +45,23 @@ toasterinstall:
 	for dir in $(DIRS); do\
           cd $$dir && $(MAKE) install && cd ..;\
         done
-
+ifdef RELEASE
+ifndef SHLIBS
+ifndef SERVER
+ifndef CLIENT
+	mkdir -p $(SRC_INST)
+	mkdir -p $(SRC_INST)/src
+	mkdir -p $(SRC_INST)/lib
+	mkdir -p $(SRC_INST)/bin
+	cp Makefile $(SRC_INST)
+	cp src/*start $(SRC_INST)/src/
+	cp src/*c $(SRC_INST)/src/
+	cp src/*h $(SRC_INST)/src/
+	cp src/Makefile $(SRC_INST)/src/
+endif
+endif
+endif
+endif
 
 .PHONY: all clean superclean install \
 	toasterall toasterclean toastersuperclean toasterinstall 

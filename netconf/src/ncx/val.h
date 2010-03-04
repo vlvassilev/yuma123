@@ -1284,6 +1284,8 @@ extern void
 *    display_mode == formatting mode for display
 *    with_meta == TRUE if metaQ should be printed
 *                 FALSE to skip meta data
+*    configonly == TRUE if config only nodes should be displayed
+*                  FALSE if all nodes should be displayed
 *********************************************************************/
 extern void
     val_dump_value_max (val_value_t *val,
@@ -1291,7 +1293,8 @@ extern void
                         int32 indent_amount,
                         val_dumpvalue_mode_t dumpmode,
                         ncx_display_mode_t display_mode,
-                        boolean with_meta);
+                        boolean with_meta,
+                        boolean configonly);
 
 
 /********************************************************************

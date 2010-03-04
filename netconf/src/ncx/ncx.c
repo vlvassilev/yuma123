@@ -5841,17 +5841,26 @@ xmlChar *
         if (userlen) {
             user = ncxmod_get_envvar(start, userlen);
         }
+
+        len = 0;
         if (!user) {
-            log_error("\nError: environment variable in path string (%s)",
-                      fspec);
-            *res = ERR_NCX_INVALID_VALUE;
-            return NULL;
+            /* ignoring this environment variable
+             * could be something like $DESTDIR/usr/share
+             */
+            if (LOGDEBUG) {
+                log_debug("\nEnvironment variable not "
+                          "found in path string (%s)",
+                          fspec);
+            }
+        } else {
+            len = xml_strlen(user);
         }
 
         /* string pointer 'p' stopped on the PSCHAR to start the
          * rest of the path string
          */
-        len = xml_strlen(user) + xml_strlen(p);
+        len += xml_strlen(p);
+
         buff = m__getMem(len+1);
         if (buff == NULL) {
             *res = ERR_INTERNAL_MEM;
@@ -5859,7 +5868,9 @@ xmlChar *
         }
 
         bp = buff;
-        bp += xml_strcpy(bp, user);
+        if (user) {
+            bp += xml_strcpy(bp, user);
+        }
         xml_strcpy(bp, p);
     } else if (*p == NCXMOD_DOTCHAR && p[1] == NCXMOD_PSCHAR) {
         /* check for ./some/path */

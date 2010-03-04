@@ -36,6 +36,6 @@ date             init     comment
 *                                                                   *
 *********************************************************************/
 
-#define YUMA_VERSION  (const xmlChar *)"0.10"
+#define YUMA_VERSION  (const xmlChar *)"0.11"
 
 #endif            /* _H_version */

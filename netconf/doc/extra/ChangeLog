@@ -1,6 +1,17 @@
 Yuma Change Log
  ----------------
 
+0.11-1  2010-03-03  Andy Bierman <andyb@iwl.com>
+
+ * Supporting yang-11 draft
+ * Updated yuma-nacm.yang
+   * Supporting the draft-bierman-netconf-access-control-01
+     draft and module, except in the Yuma namespace.
+ * Fixed bugs in complex XPath processing
+ * Cleaned up default save path for startup-cfg.xml
+ * Changed startup-cfg so it is saved
+   with the 'explicit' mode instead of 'report-all' mode
+
 0.10  2010-02-01  Andy Bierman <andyb@iwl.com>
 
  * Supporting yang-10 draft

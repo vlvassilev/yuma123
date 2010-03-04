@@ -111,7 +111,6 @@ yuma-server-install:
           cd $$dir && $(MAKE) install && cd ..;\
         done
 
-
 yuma-dev-install:
 	for dir in $(DIRS); do\
           cd $$dir && $(MAKE) install && cd ..;\

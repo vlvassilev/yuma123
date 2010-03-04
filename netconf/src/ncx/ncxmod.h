@@ -142,6 +142,9 @@ date	     init     comment
 /* !! should import this from make !! */
 #define NCXMOD_DEFAULT_YUMALIB (const xmlChar *)"/usr/lib/yuma"
 
+/* !! should import this from make !! */
+#define NCXMOD_ETC_DATA (const xmlChar *)"/etc/yuma"
+
 
 /* NCX Environment Variable for MODULE search path */
 #define NCXMOD_MODPATH      "YUMA_MODPATH"
@@ -154,6 +157,9 @@ date	     init     comment
 
 /* per user yangcli internal data home */
 #define NCXMOD_YUMA_DIR (const xmlChar *)"~/.yuma"
+
+/* Yuma work directory name */
+#define NCXMOD_YUMA_DIRNAME    (const xmlChar *)".yuma"
 
 /* directory yangcli uses to store local per-session workdirs */
 #define NCXMOD_YUMA_TEMPDIR (const xmlChar *)"~/.yuma/tmp"
@@ -520,10 +526,14 @@ extern yang_pcb_t *
 *
 * Search order:
 *
-* 1) current directory or absolute path
-* 2) YUMA_DATAPATH environment var (or set by datapath CLI var)
+* 1) YUMA_DATAPATH environment var (or set by datapath CLI var)
+* 2) current directory or absolute path
 * 3) HOME/data directory
 * 4) YUMA_HOME/data directory
+* 5) HOME/.yuma/ directory
+* 6a) YUMA_INSTALL/data directory OR
+* 6b) /usr/share/yuma/data directory
+* 7) /etc/yuma directory
 *
 * INPUTS:
 *   fname == file name with extension
@@ -589,9 +599,10 @@ extern xmlChar *
 * 1) YUMA_DATAPATH environment var (or set by datapath CLI var)
 * 2) HOME/data directory
 * 3) YUMA_HOME/data directory
-* 4) YUMA_INSTALL/data directory
-* 5) current directory
-
+* 4) HOME/.yuma directory
+* 5) YUMA_INSTALL/data directory
+* 6) current directory
+*
 * INPUTS:
 *   fname == file name with extension
 *            if the first char is '.' or '/', then an absolute
@@ -885,6 +896,7 @@ extern void
 * 2) YUMA_DATAPATH environment var (or set by datapath CLI var)
 * 3) HOME/data directory
 * 4) YUMA_HOME/data directory
+* 5) YUMA_INSTALL/data directory
 *
 * INPUTS:
 *   helpmode == BRIEF, NORMAL or FULL 
@@ -949,6 +961,18 @@ extern status_t
 extern status_t
     ncxmod_list_yang_files (help_mode_t helpmode,
                             boolean logstdout);
+
+
+/********************************************************************
+* FUNCTION ncxmod_setup_yumadir
+*
+* Setup the ~/.yuma directory if it does not exist
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    ncxmod_setup_yumadir (void);
 
 
 /********************************************************************

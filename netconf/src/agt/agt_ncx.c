@@ -2782,7 +2782,7 @@ status_t
 {
     cfg_template_t    *startup, *running;
     val_value_t       *copystartup;
-    const xmlChar     *filename, *yumahome, *yumainstall;
+    const xmlChar     *filename, *yumahome;
     xmlChar           *filebuffer;
     agt_profile_t     *profile;
     status_t           res;
@@ -2833,8 +2833,15 @@ status_t
 
         if (res == NO_ERR) {
             yumahome = ncxmod_get_yuma_home();
-            yumainstall = ncxmod_get_yuma_install();
 
+            /* get the right filespec to use
+             *
+             * 1) use the existing filespec
+             * 2) use the startup filespec
+             * 3) use the running filespec
+             * 4) use $YUMA_HOME/data/startup-cfg.xml
+             * 5) use $HOME/.yuma/startup-cfg.xml
+             */
             if (cfg->src_url != NULL) {
                 filename = cfg->src_url;
             } else if (startup && startup->src_url) {
@@ -2846,17 +2853,12 @@ status_t
                     ncx_get_source(NCX_YUMA_HOME_STARTUP_FILE,
                                    &res);
                 filename = filebuffer;
-            } else if (yumainstall != NULL) {
-                filebuffer = 
-                    ncx_get_source(NCX_YUMA_INSTALL_STARTUP_FILE,
-                                   &res);
-                filename = filebuffer;
             } else {
                 filebuffer = 
-                    ncx_get_source(NCX_DEF_INSTALL_STARTUP_FILE,
+                    ncx_get_source(NCX_DOT_YUMA_STARTUP_FILE,
                                    &res);
+                filename = filebuffer;
             }
-
             if (res == NO_ERR) {
                 if (LOGDEBUG) {
                     log_debug("\nWriting <%s> config to file '%s'",

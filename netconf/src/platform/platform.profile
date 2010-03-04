@@ -53,7 +53,12 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 # -Wunreachable-code removed due to -O3
 # -O3 changed to -O2 due to code bloat from inline functions
 
-CDEFS=-DDEBUG -DLINUX -DGCC -DHAS_FLOAT 
+CDEFS=-DDEBUG -DLINUX -DGCC
+
+ifndef NOFLOAT
+  CDEFS += -DHAS_FLOAT
+endif
+
 CFLAGS=$(CDEFS) $(CWARN) -fPIC
 
 # production (0) or debug (1) build

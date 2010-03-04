@@ -3258,6 +3258,7 @@ void
                        NCX_DEF_INDENT,
                        DUMP_VAL_LOG, 
                        ncx_get_display_mode(),
+                       FALSE,
                        FALSE);
 
 } /* val_dump_value */
@@ -3292,6 +3293,7 @@ void
                        NCX_DEF_INDENT,
                        DUMP_VAL_LOG,
                        display_mode,
+                       FALSE,
                        FALSE);
 
 } /* val_dump_value_ex */
@@ -3325,6 +3327,7 @@ void
                        NCX_DEF_INDENT,
                        DUMP_VAL_ALT_LOG,
                        ncx_get_display_mode(),
+                       FALSE,
                        FALSE);
 
 } /* val_dump_alt_value */
@@ -3357,6 +3360,7 @@ void
                        NCX_DEF_INDENT,
                        DUMP_VAL_STDOUT,
                        ncx_get_display_mode(),
+                       FALSE,
                        FALSE);
 
 } /* val_stdout_value */
@@ -3390,6 +3394,7 @@ void
                        NCX_DEF_INDENT,
                        DUMP_VAL_STDOUT,
                        display_mode,
+                       FALSE,
                        FALSE);
 
 } /* val_stdout_value_ex */
@@ -3410,6 +3415,8 @@ void
 *    display_mode == formatting mode for display
 *    with_meta == TRUE if metaQ should be printed
 *                 FALSE to skip meta data
+*    configonly == TRUE if config only nodes should be displayed
+*                  FALSE if all nodes should be displayed
 *********************************************************************/
 void
     val_dump_value_max (val_value_t *val,
@@ -3417,7 +3424,8 @@ void
                         int32 indent_amount,
                         val_dumpvalue_mode_t dumpmode,
                         ncx_display_mode_t display_mode,
-                        boolean with_meta)
+                        boolean with_meta,
+                        boolean configonly)
 {
     dumpfn_t            dumpfn, errorfn;
     indentfn_t          indentfn;
@@ -3443,6 +3451,12 @@ void
 #endif
 
     bump_amount = max(0, indent_amount);
+
+    if (configonly) {
+        if (!val_is_config_data(val)) {
+            return;
+        }
+    }
 
     if (display_mode == NCX_DISPLAY_MODE_XML) {
         outputfile = log_get_logfile();
@@ -3721,7 +3735,8 @@ void
                                indent_amount,
                                dumpmode,
                                display_mode,
-                               with_meta);
+                               with_meta,
+                               configonly);
         }
         (*indentfn)(startindent);
         (*dumpfn)("}");
@@ -3790,7 +3805,8 @@ void
                                    indent_amount,
                                    dumpmode,
                                    display_mode,
-                                   with_meta);
+                                   with_meta,
+                                   configonly);
             }
         }
     }

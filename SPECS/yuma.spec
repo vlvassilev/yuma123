@@ -193,6 +193,8 @@ echo "Check the user manuals in /etc/share/doc/yuma"
 /usr/share/doc/yuma/yuma-dev-manual.pdf
 %{_includedir}/yuma/
 %{_datadir}/yuma/util/
+%{_datadir}/yuma/src/libtoaster/
+
 
 
 

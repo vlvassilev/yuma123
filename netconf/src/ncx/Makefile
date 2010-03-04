@@ -129,9 +129,16 @@ $(LBASE)/libncx.dylib: $(OBJS)
 
 includes:
 ifdef RELEASE
-	mkdir -p $(REAL_INC_INST)
-	cp *.h $(REAL_INC_INST)
-	cp ../platform/procdefs.h $(REAL_INC_INST)
+ifndef SHLIBS
+ifndef SERVER
+ifndef CLIENT
+	mkdir -p $(REAL_INC_INST)/ncx
+	mkdir -p $(REAL_INC_INST)/platform
+	cp *.h $(REAL_INC_INST)/ncx
+	cp ../platform/procdefs.h $(REAL_INC_INST)/platform
+endif
+endif
+endif
 endif
 
 .PHONY: includes

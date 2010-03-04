@@ -81,8 +81,14 @@ distclean: superclean
 
 includes:
 ifdef RELEASE
-	mkdir -p $(REAL_INC_INST)
-	cp *.h $(REAL_INC_INST)
+ifndef SHLIBS
+ifndef SERVER
+ifndef CLIENT
+	mkdir -p $(REAL_INC_INST)/agt
+	cp *.h $(REAL_INC_INST)/agt
+endif
+endif
+endif
 endif
 
 

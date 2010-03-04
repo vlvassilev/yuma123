@@ -110,7 +110,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/yuma/modules/netconfcentral/yangdump.yang
 
 %changelog
-* Wed, 03 Mar 2010 Andy Bierman <andy at @iwl.com> 0.11.721
+* Thu Mar 04 2010 Andy Bierman <andy at @iwl.com> 0.11.724
   * Align with YANG draft-11
   * Changed default startup-cfg.xml creation path so
     the current directory is not used.

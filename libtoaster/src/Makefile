@@ -207,8 +207,14 @@ dependencies: $(DEPS)
 test:
 
 install:
+ifndef SHLIBS
+ifndef CLIENT
+ifndef DEVELOPER
 	mkdir -p $(REAL_INST)
 	install $(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) $(REAL_INST)
+endif
+endif
+endif
 
 work:
 	install $(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) $(WORK_INST)

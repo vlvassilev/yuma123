@@ -24,30 +24,16 @@ all: sil_dummy sil_lib
 
 #################### PLATFORM DEFINITIONS ############
 
-ifdef RELEASE
-CINC = -I. \
-     -I../../netconf/src/platform \
-     -I../../netconf/src/ncx \
-     -I../../netconf/src/agt
-else
 ifdef YUMA_HOME
 CINC = -I. \
      -I$(YUMA_HOME)/src/platform \
      -I$(YUMA_HOME)/src/ncx \
      -I$(YUMA_HOME)/src/agt
 else
-ifdef YUMA_INSTALL
 CINC = -I. \
-     -I$(YUMA_INSTALL)/src/platform \
-     -I$(YUMA_INSTALL)/src/ncx \
-     -I$(YUMA_INSTALL)/src/agt
-else
-CINC = -I. \
-     -I/usr/share/yuma/src/netconf/src/platform \
-     -I/usr/share/yuma/src/netconf/src/ncx \
-     -I/usr/share/yuma/src/netconf/src/agt
-endif
-endif
+     -I../../netconf/src/platform \
+     -I../../netconf/src/ncx \
+     -I../../netconf/src/agt
 endif
 
 CINC += -I/usr/include -I/usr/include/libxml2 -I/usr/include/libxml2/libxml

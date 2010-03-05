@@ -3058,11 +3058,16 @@ static status_t
     /* special hack -- check if this is the ietf-netconf
      * YANG module, in which case do not load it because
      * the internal netconf.yang needs to be used instead
+     *
+     * Only do this hack in the client and server, 
+     * if yuma-netconf.yang is already loaded.
      */
     if (mod->ismod && 
         !xml_strcmp(mod->name, NCXMOD_IETF_NETCONF)) {
-        loaded = TRUE;
-        mod->nsid = xmlns_nc_id();
+        if (ncx_find_module(NCXMOD_NETCONF, NULL) != NULL) {
+            loaded = TRUE;
+            mod->nsid = xmlns_nc_id();
+        }
     }
 
     /* check if this module is already loaded, except in diff mode */

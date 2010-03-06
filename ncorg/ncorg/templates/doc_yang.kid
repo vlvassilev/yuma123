@@ -81,7 +81,7 @@
 	    <br/><br/>
 	    <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
 	    <a target="_blank" 
-               href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-dsdl-map-04.txt">
+               href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-dsdl-map-05.txt">
               Mapping YANG to Document Schema Definition Languages and Validating
               NETCONF Content
 	    </a>

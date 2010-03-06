@@ -1141,7 +1141,7 @@
           containing the 'default' value, during NETCONF retrieval operations.<br/><br/>
 	  <b>Intended Status:</b> Proposed Standard RFC, optional-to-implement<br/><br/>
 	  <a target="_blank" 
-             href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-with-defaults-04.txt">
+             href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-with-defaults-05.txt">
 	    With-defaults capability for NETCONF
 	  </a>
 	</p>

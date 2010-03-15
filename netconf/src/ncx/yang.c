@@ -2931,21 +2931,11 @@ void
 
     if (pcb->top && !pcb->topfound) {
         if (pcb->top->ismod) {
-            if ((pcb->top->name &&
-                !xml_strcmp(pcb->top->name,
-                            NCXMOD_IETF_NETCONF)) ||
-                pcb->searchmode ||
-                (pcb->keepmode && !pcb->topadded)) {
-                /* special hack; the ietf-netconf module
-                 * was used in yangdump, but it was not
-                 * added to the registry; needs to be
-                 * deleted here. Also searchmode modules
-                 * must be deleted now.
-                 * In yangdump parse mode the keepmode
-                 * will be TRUE and this module is only
-                 * deleted if it was not added to the registry
-                 */
-                ncx_free_module(pcb->top);
+            if (!pcb->topadded) {
+                if (pcb->searchmode || pcb->keepmode) {
+                    /* need to get rid of the module, it is not wanted */
+                    ncx_free_module(pcb->top);
+                }
             }
         } else {
             ncx_free_module(pcb->top);

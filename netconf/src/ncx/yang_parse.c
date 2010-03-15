@@ -2908,7 +2908,7 @@ static status_t
     yang_node_t    *node;
     ncx_feature_t  *feature;
     ncx_identity_t *identity;
-    boolean         ismain, loaded, done;
+    boolean         ismain, loaded, ietfnetconf, done;
     status_t        res, retres;
 
 #ifdef YANG_PARSE_DEBUG_TRACE
@@ -2924,6 +2924,7 @@ static status_t
 #endif
 
     loaded = FALSE;
+    ietfnetconf = FALSE;
     ismain = TRUE;
     retres = NO_ERR;
     *wasadded = FALSE;
@@ -3064,9 +3065,10 @@ static status_t
      */
     if (mod->ismod && 
         !xml_strcmp(mod->name, NCXMOD_IETF_NETCONF)) {
+
         if (ncx_find_module(NCXMOD_NETCONF, NULL) != NULL) {
-            loaded = TRUE;
             mod->nsid = xmlns_nc_id();
+            ietfnetconf = TRUE;
         }
     }
 
@@ -3323,7 +3325,9 @@ static status_t
             
             /* add this regular module to the registry */
             if (!loaded) {
-                if (pcb->diffmode || pcb->parsemode) {
+                if (ietfnetconf) {
+                    res = NO_ERR;
+                } else if (pcb->diffmode || pcb->parsemode) {
                     res = ncx_add_to_modQ(mod);
                 } else {
                     res = ncx_add_to_registry(mod);
@@ -3334,7 +3338,9 @@ static status_t
                     /* if mod==top, and top is a submodule, then 
                      * yang_free_pcb will delete the submodule later
                      */
-                    *wasadded = TRUE;
+                    if (!ietfnetconf) {
+                        *wasadded = TRUE;
+                    }
                 }
             }
         } else {

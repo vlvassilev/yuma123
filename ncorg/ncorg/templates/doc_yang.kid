@@ -103,7 +103,7 @@
 	    <b>Intended Status:</b> Informational RFC, nothing-to-implement
             <br/><br/>
 	    <a target="_blank" 
-               href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-arch-03.txt">
+               href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-arch-04.txt">
               An NETCONF- and NETMOD-based Architecture for Network Management
 	    </a>
 	  </p>

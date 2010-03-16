@@ -1161,7 +1161,7 @@
 	  Defines a minor update to the NETCONF protocol over Secure Shell document.<br/><br/>
 	  <b>Intended Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
 	  <a target="_blank" 
-             href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-4742bis-00.txt">
+             href="http://www.ietf.org/internet-drafts/draft-ietf-netconf-rfc4742bis-00.txt">
 	    Using the Network Configuration Protocol over Secure Shell
 	  </a>
 	</p>

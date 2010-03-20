@@ -135,6 +135,11 @@ module yangdump {
                debug2: print verbose debugging trace info
         ";
 
+    revision 2010-03-11 {
+       description 
+          "Added new format enum for TG2 code generation.";
+    }
+
     revision 2010-01-30 {
        description 
           "Initial version for 0.10 release.";
@@ -180,6 +185,10 @@ module yangdump {
            enum yin {
               description 
                  "Convert YANG to YIN format.";
+           }
+           enum tg2 {
+              description 
+                 "Convert YANG to Turbogears 2 Source code files.";
            }
         }
     }

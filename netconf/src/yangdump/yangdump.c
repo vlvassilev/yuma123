@@ -95,6 +95,10 @@ date         init     comment
 #include  "status.h"
 #endif
 
+#ifndef _H_tg2
+#include  "tg2.h"
+#endif
+
 #ifndef _H_val
 #include  "val.h"
 #endif
@@ -1374,7 +1378,8 @@ static status_t
             if (!(cvtparms.format == NCX_CVTTYP_XSD ||
                   cvtparms.format == NCX_CVTTYP_HTML ||
                   cvtparms.format == NCX_CVTTYP_H ||
-                  cvtparms.format == NCX_CVTTYP_C)) {
+                  cvtparms.format == NCX_CVTTYP_C ||
+                  cvtparms.format == NCX_CVTTYP_TG2)) {
                 print_score_banner(pcb);
                 bannerdone = TRUE;
             }
@@ -1427,6 +1432,7 @@ static status_t
     /* get the namespace info for submodules */
     if (cp->format == NCX_CVTTYP_XSD ||
         cp->format == NCX_CVTTYP_SQLDB ||
+        cp->format == NCX_CVTTYP_TG2 ||
         cp->format == NCX_CVTTYP_HTML) {
 
         if (!pcb->top->ismod) {
@@ -1647,6 +1653,22 @@ static status_t
                 }
             }
             break;
+        case NCX_CVTTYP_TG2:
+            if (ncx_any_dependency_errors(pcb->top)) {
+                log_error("\nError: one or more imported modules had errors."
+                          "\n       TG2 source code conversion of "
+                          "'%s' terminated.",
+                          pcb->top->sourcefn);
+                res = ERR_NCX_IMPORT_ERRORS;
+                ncx_print_errormsg(NULL, pcb->top, res);
+            } else {
+                res = tg2_convert_module_model(pcb, cp, scb);
+                if (res != NO_ERR) {
+                    pr_err(res);
+                }
+            }
+            break;
+
         default:
             res = SET_ERROR(ERR_INTERNAL_VAL);
             pr_err(res);

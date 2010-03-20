@@ -4389,6 +4389,8 @@ ncx_cvttyp_t
         return NCX_CVTTYP_COPY;
     } else if (!xml_strcmp(NCX_EL_YIN, (const xmlChar *)str)) {
         return NCX_CVTTYP_YIN;
+    } else if (!xml_strcmp(NCX_EL_TG2, (const xmlChar *)str)) {
+        return NCX_CVTTYP_TG2;
     } else {
         return NCX_CVTTYP_NONE;
     }

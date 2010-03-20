@@ -42,6 +42,21 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+#define COPYRIGHT_HEADER (const xmlChar *)\
+"\n * Copyright (c) 2010, Netconf Central, Inc.\
+\n * All Rights Reserved.\
+\n *\
+\n * Unless required by applicable law or agreed to in writing,\
+\n * software distributed under the License is distributed on an\
+\n * \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\
+\n * KIND, either express or implied.  See the License for the\
+\n * specific language governing permissions and limitations\
+\n * under the License.\
+\n *"
+
+#define PY_CODING (const xmlChar *)"# -*- coding: utf-8 -*-"
+
+
 /********************************************************************
 *								    *
 *			     T Y P E S				    *
@@ -70,6 +85,21 @@ extern void
 *********************************************************************/
 extern void 
     write_banner_session (ses_cb_t *scb);
+
+
+/********************************************************************
+* write_banner_session_ex
+*
+* Write the yangdump startup banner to a session
+*
+* INPUTS:
+*   scb == session control block to use
+*   wcopy == TRUE if the copyright string should be used
+*            FALSE if not
+*********************************************************************/
+extern void 
+    write_banner_session_ex (ses_cb_t *scb,
+                             boolean wcopy);
 
 
 /********************************************************************

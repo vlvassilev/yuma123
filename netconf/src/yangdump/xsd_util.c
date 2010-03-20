@@ -1938,6 +1938,10 @@ xmlChar *
     case NCX_CVTTYP_YIN:
         ext = (const xmlChar *)".yin";
         break;
+    case NCX_CVTTYP_TG2:
+        /*** check cp for submode of TG2 ***/
+        ext = (const xmlChar *)".py";
+        break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
         return NULL;

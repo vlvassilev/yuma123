@@ -716,15 +716,12 @@ void
     indent = cp->indent;
 
     /* banner comments */
-    ses_putstr(scb, START_COMMENT);    
+    ses_putstr(scb, START_COMMENT);
+
+    ses_putstr_indent(scb, COPYRIGHT_HEADER, 0);
 
     /* generater tag */
-    write_banner_session(scb);
-
-    /* copyright section
-     * ses_putstr(scb, (const xmlChar *)
-     *        "\n  *** Put copyright info here ***\n");
-     */
+    write_banner_session_ex(scb, FALSE);
 
     /* module name */
     if (mod->ismod) {

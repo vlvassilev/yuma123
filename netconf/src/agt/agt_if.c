@@ -791,23 +791,23 @@ status_t
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
-    /* check to see if the /interfaces subtree already exists */
-    interfacesval = val_find_child(runningcfg->root,
-                                   interfaces_MOD,
-                                   interfaces_N_interfaces);
-    if (interfacesval == NULL) {
-        /* need to create the /interfaces root */
-        interfacesval = val_new_value();
-        if (interfacesval == NULL) {
-            return ERR_INTERNAL_MEM;
-        }
-        val_init_from_template(interfacesval, interfacesobj);
-
-        /* handing off the malloced memory here */
-        val_add_child(interfacesval, runningcfg->root);
-    }
-
     if (!agt_if_not_supported) {
+	/* check to see if the /interfaces subtree already exists */
+	interfacesval = val_find_child(runningcfg->root,
+				       interfaces_MOD,
+				       interfaces_N_interfaces);
+	if (interfacesval == NULL) {
+	    /* need to create the /interfaces root */
+	    interfacesval = val_new_value();
+	    if (interfacesval == NULL) {
+		return ERR_INTERNAL_MEM;
+	    }
+	    val_init_from_template(interfacesval, interfacesobj);
+
+	    /* handing off the malloced memory here */
+	    val_add_child(interfacesval, runningcfg->root);
+	}
+
         res = add_interface_entries(interfacesval);
     }
 

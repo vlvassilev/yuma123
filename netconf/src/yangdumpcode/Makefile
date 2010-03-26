@@ -1,13 +1,13 @@
 # Makefile for YANG Converter Application
 #  
-#   yangdump application directory
+#   yangdumpcode application directory
 #
 # Convert a YANG module to different formats such as XSD
 
 ############### SOURCE PROFILE ##############################
 
-SUBDIR_NM=yangdump
-SUBDIR_CPP=-I../yangdump
+SUBDIR_NM=yangdumpcode
+SUBDIR_CPP=-I../yangdump -I../yangdumpcode
 
 ############### TARGET PROFILE ##############################
 
@@ -29,10 +29,10 @@ REAL_INST=$(DESTDIR)/usr/bin
 
 LIBS =	-lncx -L/usr/lib -lxml2
 
-LIBTARGS= $(LBASE)/libncx.$(LIBSUFFIX)
+LIBTARGS= $(LBASE)/libncx.$(LIBSUFFIX) $(LBASE)/libyangdump.a
 
 ############################# MAKE RULES ##################
-all: yangdump yangdumpcode
+all: yangdumpcode
 
 
 #################### PLATFORM DEFINITIONS ############
@@ -55,8 +55,9 @@ install:
 uninstall:
 	rm -f  $(REAL_INST)/$(SUBDIR_NM)
 
-yangdump: $(OBJS) $(LIBTARGS)
+yangdumpcode: $(OBJS) $(LIBTARGS)
 	$(LINK) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(SUBDIR_NM) $(LPATH) $(LIBS)
+
 
 clean:
 	rm -f $(OBJS) $(BIN_INST)/$(SUBDIR_NM)

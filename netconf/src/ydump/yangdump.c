@@ -8,7 +8,7 @@
  * specific language governing permissions and limitations
  * under the License.    
  */
-/*  FILE: yangdumpcode.c
+/*  FILE: yangdump.c
 
                 
 *********************************************************************
@@ -19,7 +19,7 @@
 
 date         init     comment
 ----------------------------------------------------------------------
-24-mar-10    abb      begun; split out from yangdump.c
+01-nov-06    abb      begun
 
 *********************************************************************
 *                                                                   *
@@ -52,7 +52,7 @@ date         init     comment
 #endif
 
 #ifndef _H_ydump
-#include  "yangdump.h"
+#include  "ydump.h"
 #endif
 
 
@@ -69,7 +69,7 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-static yangdump_cvtparms_t   cvtparms;
+static yangdump_cvtparms_t   mycvtparms;
 
 
 /********************************************************************
@@ -81,13 +81,16 @@ int
     main (int argc, 
           const char *argv[])
 {
+    val_value_t  *val;
     status_t      res;
+    boolean       done, quickexit;
+    xmlChar       buffer[NCX_VERSION_BUFFSIZE];
 
 #ifdef MEMORY_DEBUG
     mtrace();
 #endif
 
-    res = ydump_init(argc, argv, TRUE, &mycvtparms);
+    res = ydump_init(argc, argv, FALSE, &mycvtparms);
 
     if (res == NO_ERR) {
 	res = ydump_main(&mycvtparms);
@@ -112,7 +115,8 @@ int
 
 } /* main */
 
-/* END yangdumpcode.c */
+
+/* END yangdump.c */
 
 
 

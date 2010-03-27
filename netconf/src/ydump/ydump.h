@@ -8,17 +8,17 @@
  * specific language governing permissions and limitations
  * under the License.    
  */
-#ifndef _H_yangdump
-#define _H_yangdump
+#ifndef _H_ydump
+#define _H_ydump
 
-/*  FILE: yangdump.h
+/*  FILE: ydump.h
 *********************************************************************
 *                                                                   *
 *                         P U R P O S E                             *
 *                                                                   *
 *********************************************************************
 
-  Exports yangdump.ncx conversion CLI parameter struct
+  Exports yangdump.yang conversion CLI parameter struct
  
 *********************************************************************
 *                                                                   *
@@ -36,10 +36,6 @@ date             init     comment
 
 #ifndef _H_help
 #include "help.h"
-#endif
-
-#ifndef _H_log
-#include "log.h"
 #endif
 
 #ifndef _H_ncxtypes
@@ -73,7 +69,6 @@ date             init     comment
 
 #define OBJVIEW_RAW     "raw"
 #define OBJVIEW_COOKED  "cooked"
-
 
 /* this should match the buffer size in ncx/tk.h */
 #define YANGDUMP_BUFFSIZE   0xffff
@@ -157,9 +152,68 @@ typedef struct yangdump_cvtparms_t_ {
     ncx_module_t   *mod;
     char           *srcfile;
     char           *buff;
+    val_value_t    *cli_val;
     uint32          bufflen;
     boolean         firstdone;
+    dlq_hdr_t       savedevQ;
 } yangdump_cvtparms_t;
 
 
-#endif            /* _H_yangdump */
+/********************************************************************
+ * FUNCTION ydump_init
+ * 
+ * Parse all CLI parameters and fill in the conversion parameters
+ * 
+ * INPUTS:
+ *   argc == number of argv parameters
+ *   argv == array of CLI parameters
+ *   allowcode == TRUE if code generation should be allowed
+ *                FALSE otherwise
+ *   cvtparms == address of conversion parms to fill in
+ *
+ * OUTPUTS:
+ *  *cvtparms filled in, maybe partial if errors
+ *
+ * RETURNS:
+ *    status
+ *********************************************************************/
+extern status_t 
+    ydump_init (int argc,
+                const char *argv[],
+                boolean allowcode,
+                yangdump_cvtparms_t *cvtparms);
+
+
+/********************************************************************
+* FUNCTION ydump_main
+*
+* Run the yangdump conversion, according to the specified
+* yangdump conversion parameters set
+*
+* INPUTS:
+*   cvtparms == conversion parameters to use
+*
+* OUTPUTS:
+*   the conversion (if any) will be done and output to
+*   the specified files, or STDOUT
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    ydump_main (yangdump_cvtparms_t *cvtparms);
+
+
+/********************************************************************
+ * FUNCTION ydump_cleanup
+ * 
+ * INPUTS:
+ *  cvtparms == conversion parameters to clean but not free
+ * 
+ *********************************************************************/
+extern void
+    ydump_cleanup (yangdump_cvtparms_t *cvtparms);
+
+
+
+#endif            /* _H_ydump */

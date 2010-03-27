@@ -8,7 +8,7 @@
  * specific language governing permissions and limitations
  * under the License.    
  */
-/*  FILE: yangdump.c
+/*  FILE: ydump.c
 
                 
 *********************************************************************
@@ -20,6 +20,7 @@
 date         init     comment
 ----------------------------------------------------------------------
 01-nov-06    abb      begun
+26-mar-10    abb      split out into library ydump
 
 *********************************************************************
 *                                                                   *
@@ -30,14 +31,6 @@ date         init     comment
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
-/* #define MEMORY_DEBUG 1 */
-
-#ifdef MEMORY_DEBUG
-#include <mcheck.h>
-#endif
-
-#define _C_main 1
 
 #ifndef _H_procdefs
 #include  "procdefs.h"
@@ -152,42 +145,7 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-/* #define YANGDUMP_DEBUG   1 */
-
-/* this should match the buffer size in ncx/tk.h */
-#define YANGDUMP_BUFFSIZE   0xffff
-
-#define YANGDUMP_DEF_OUTPUT   "stdout"
-
-#define YANGDUMP_DEF_CONFIG   (const xmlChar *)"/etc/yuma/yangdump.conf"
-
-#define YANGDUMP_DEF_TOC      (const xmlChar *)"menu"
-
-#define YANGDUMP_DEF_OBJVIEW  OBJVIEW_RAW
-
-#define YANGDUMP_MOD          (const xmlChar *)"yangdump"
-#define YANGDUMP_CONTAINER    (const xmlChar *)"yangdump"
-
-#define YANGDUMP_PARM_CONFIG        (const xmlChar *)"config"
-#define YANGDUMP_PARM_DEFNAMES      (const xmlChar *)"defnames"
-#define YANGDUMP_PARM_DEPENDENCIES  (const xmlChar *)"dependencies"
-#define YANGDUMP_PARM_DEVIATION     (const xmlChar *)"deviation"
-#define YANGDUMP_PARM_EXPORTS       (const xmlChar *)"exports"
-#define YANGDUMP_PARM_FORMAT        (const xmlChar *)"format"
-#define YANGDUMP_PARM_HTML_DIV      (const xmlChar *)"html-div"
-#define YANGDUMP_PARM_HTML_TOC      (const xmlChar *)"html-toc"
-#define YANGDUMP_PARM_IDENTIFIERS   (const xmlChar *)"identifiers"
-#define YANGDUMP_PARM_INDENT        (const xmlChar *)"indent"
-#define YANGDUMP_PARM_MODULE        (const xmlChar *)"module"
-#define YANGDUMP_PARM_MODVERSION    (const xmlChar *)"modversion"
-#define YANGDUMP_PARM_VERSIONNAMES  (const xmlChar *)"versionnames"
-#define YANGDUMP_PARM_OUTPUT        (const xmlChar *)"output"
-#define YANGDUMP_PARM_OBJVIEW       (const xmlChar *)"objview"
-#define YANGDUMP_PARM_XSD_SCHEMALOC (const xmlChar *)"xsd-schemaloc"
-#define YANGDUMP_PARM_SIMURLS       (const xmlChar *)"simurls"
-#define YANGDUMP_PARM_SUBTREE       (const xmlChar *)"subtree"
-#define YANGDUMP_PARM_URLSTART      (const xmlChar *)"urlstart"
-#define YANGDUMP_PARM_UNIFIED       (const xmlChar *)"unified"
+/* #define YDUMP_DEBUG   1 */
 
 /********************************************************************
 *                                                                   *
@@ -195,9 +153,6 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-static val_value_t          *cli_val;
-static yangdump_cvtparms_t   mycvtparms;
-static dlq_hdr_t             savedevQ;
 
 /********************************************************************
 * FUNCTION pr_err
@@ -305,7 +260,7 @@ static status_t
         pr_usage();
         return ERR_NCX_SKIPPED;
     } else {
-        cli_val = valset;
+        cp->cli_val = valset;
     }
 
     /* next get any params from the conf file */
@@ -1258,7 +1213,7 @@ static status_t
                                 (cp->format == NCX_CVTTYP_YIN) 
                                 ? TRUE : FALSE,
                                 TRUE,
-                                &savedevQ,
+                                &cp->savedevQ,
                                 &res);
 
     if (savestr != NULL) {
@@ -1367,7 +1322,7 @@ static status_t
              */
             res = ncxmod_load_module(ncx_get_modname(pcb->top), 
                                      NULL, 
-                                     &savedevQ,
+                                     &cp->savedevQ,
                                      &mainmod);
             if (res != NO_ERR) {
                 log_error("\nError: main module '%s' had errors."
@@ -1674,53 +1629,12 @@ static status_t
 
 
 
-/********************************************************************
-*                                                                   *
-*                        FUNCTION main                              *
-*                                                                   *
-*********************************************************************/
-int 
-    main (int argc, 
-          const char *argv[])
-{
-    val_value_t  *val;
-    status_t      res;
-    boolean       done, quickexit;
-    xmlChar       buffer[NCX_VERSION_BUFFSIZE];
+/*****************    E X T E R N A L    F U N C T I O N S   ************/
 
-#ifdef MEMORY_DEBUG
-    mtrace();
-#endif
-
-    done = FALSE;
-    res = yangdump_init(argc, argv, FALSE, &mycvtparms);
-
-    if (res == NO_ERR) {
-	res = yangdump_main(&mycvtparms);
-    }
-
-    /* if warnings+ are enabled, then res could be NO_ERR and still
-     * have output to STDOUT
-     */
-    if (res == NO_ERR) {
-        log_warn("\n");   /*** producing extra blank lines ***/
-    }
-
-    print_errors();
-
-    print_error_count();
-
-    yangdump_cleanup(&mycvtparms);
-
-    print_error_count();
-
-    return (res == NO_ERR) ? 0 : 1;
-
-} /* main */
 
 
 /********************************************************************
- * FUNCTION yangdump_init
+ * FUNCTION ydump_init
  * 
  * Parse all CLI parameters and fill in the conversion parameters
  * 
@@ -1738,10 +1652,10 @@ int
  *    status
  *********************************************************************/
 status_t 
-    yangdump_init (int argc,
-		   const char *argv[],
-		   boolean allowcode,
-		   yangdump_cvtparms_t *cvtparms)
+    ydump_init (int argc,
+                const char *argv[],
+                boolean allowcode,
+                yangdump_cvtparms_t *cvtparms)
 {
     status_t       res;
     xmlns_id_t     nsid;
@@ -1753,8 +1667,7 @@ status_t
     memset(cvtparms, 0x0, sizeof(yangdump_cvtparms_t));
 
     cvtparms->allowcode = allowcode;
-
-    cli_val = NULL;
+    dlq_createSQue(&cvtparms->savedevQ);
 
     /* initialize the NCX Library first to allow NCX modules
      * to be processed.  No module can get its internal config
@@ -1769,7 +1682,7 @@ status_t
                    argc, 
                    argv);
 
-    dlq_createSQue(&savedevQ);
+    dlq_createSQue(&cvtparms->savedevQ);
 
     if (res == NO_ERR) {
         /* load in the YANGDUMP converter parmset definition file */
@@ -1809,16 +1722,27 @@ status_t
 
     return res;
 
-}  /* yangdump_init */
+}  /* ydump_init */
 
 
 /********************************************************************
-* FUNCTION yangdump_main
+* FUNCTION ydump_main
 *
+* Run the yangdump conversion, according to the specified
+* yangdump conversion parameters set
 *
+* INPUTS:
+*   cvtparms == conversion parameters to use
+*
+* OUTPUTS:
+*   the conversion (if any) will be done and output to
+*   the specified files, or STDOUT
+*
+* RETURNS:
+*   status
 *********************************************************************/
-satus_t
-    yangdump_main (yangdump_cvtparms_t *cvtparms)
+status_t
+    ydump_main (yangdump_cvtparms_t *cvtparms)
 {
     val_value_t  *val;
     status_t      res;
@@ -1882,15 +1806,16 @@ satus_t
 
     /* first check if there are any deviations to load */
     res = NO_ERR;
-    val = val_find_child(cli_val, 
+    val = val_find_child(cvtparms->cli_val, 
 			 YANGDUMP_MOD, 
 			 YANGDUMP_PARM_DEVIATION);
     while (val) {
-	res = ncxmod_load_deviation(VAL_STR(val), &savedevQ);
+	res = ncxmod_load_deviation(VAL_STR(val), 
+                                    &cvtparms->savedevQ);
 	if (NEED_EXIT(res)) {
 	    val = NULL;
 	} else {
-	    val = val_find_next_child(cli_val,
+	    val = val_find_next_child(cvtparms->cli_val,
 				      YANGDUMP_MOD,
 				      YANGDUMP_PARM_DEVIATION,
 				      val);
@@ -1899,7 +1824,7 @@ satus_t
 
     /* convert one file or N files or 1 subtree */
     res = NO_ERR;
-    val = val_find_child(cli_val, 
+    val = val_find_child(cvtparms->cli_val, 
 			 YANGDUMP_MOD, 
 			 YANGDUMP_PARM_MODULE);
     while (val) {
@@ -1909,7 +1834,7 @@ satus_t
 	if (NEED_EXIT(res)) {
 	    val = NULL;
 	} else {
-	    val = val_find_next_child(cli_val,
+	    val = val_find_next_child(cvtparms->cli_val,
 				      YANGDUMP_MOD,
 				      YANGDUMP_PARM_MODULE,
 				      val);
@@ -1926,7 +1851,7 @@ satus_t
 	    cvtparms->defnames = TRUE;
 	}
                    
-	val = val_find_child(cli_val, 
+	val = val_find_child(cvtparms->cli_val, 
 			     YANGDUMP_MOD, 
 			     YANGDUMP_PARM_SUBTREE);
 	while (val) {
@@ -1938,7 +1863,7 @@ satus_t
 	    if (NEED_EXIT(res)) {
 		val = NULL;
 	    } else {
-		val = val_find_next_child(cli_val,
+		val = val_find_next_child(cvtparms->cli_val,
 					  YANGDUMP_MOD,
 					  YANGDUMP_PARM_SUBTREE,
 					  val);
@@ -1956,21 +1881,28 @@ satus_t
 
     return res;
 
-}  /* yangdump_main */
+}  /* ydump_main */
 
 
 /********************************************************************
- * FUNCTION yangdump_cleanup
+ * FUNCTION ydump_cleanup
  * 
  * INPUTS:
  *  cvtparms == conversion parameters to clean but not free
  * 
  *********************************************************************/
 void
-    yangdump_cleanup (yangdump_cvtparms_t *cvtparms)
+    ydump_cleanup (yangdump_cvtparms_t *cvtparms)
 {
-    if (cli_val) {
-        val_free_value(cli_val);
+#ifdef DEBUG
+    if (cvtparms == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (cvtparms->cli_val) {
+        val_free_value(cvtparms->cli_val);
     }
 
     /* free the input parameters */
@@ -1990,7 +1922,7 @@ void
         m__free(cvtparms->buff);
     }
 
-    ncx_clean_save_deviationsQ(&savedevQ);
+    ncx_clean_save_deviationsQ(&cvtparms->savedevQ);
 
     /* cleanup the NCX engine and registries */
     ncx_cleanup();
@@ -2003,11 +1935,10 @@ void
 
     log_close();
 
-}  /* yangdump_cleanup */
+}  /* ydump_cleanup */
 
 
-
-/* END yangdump.c */
+/* END ydump.c */
 
 
 

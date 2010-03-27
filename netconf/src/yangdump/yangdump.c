@@ -51,6 +51,10 @@ date         init     comment
 #include  "status.h"
 #endif
 
+#ifndef _H_yangdump
+#include  "yangdump.h"
+#endif
+
 #ifndef _H_ydump
 #include  "ydump.h"
 #endif
@@ -81,14 +85,14 @@ int
     main (int argc, 
           const char *argv[])
 {
-    val_value_t  *val;
     status_t      res;
-    boolean       done, quickexit;
-    xmlChar       buffer[NCX_VERSION_BUFFSIZE];
 
 #ifdef MEMORY_DEBUG
     mtrace();
 #endif
+
+    malloc_cnt = 0;
+    free_cnt = 0;
 
     res = ydump_init(argc, argv, FALSE, &mycvtparms);
 

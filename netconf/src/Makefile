@@ -15,22 +15,22 @@
 
 ifdef CLIENT
 APPS = yangdump yangdiff yangcli
-DIRS = mgr $(APPS)
+DIRS = mgr ydump $(APPS)
 else
 ifdef SERVER
 APPS = subsys netconfd
 DIRS = agt $(APPS)
 else
 ifdef DEVELOPER
-APPS = yangdump
-DIRS = agt ncx
+APPS = yangdumpcode
+DIRS = agt ydump ncx
 else
 ifdef SHLIBS
 APPS =
 DIRS = ncx
 else
-APPS = subsys netconfd yangdump yangdiff yangcli
-DIRS = agt mgr ncx $(APPS)
+APPS = subsys netconfd yangdump yangdumpcode yangdiff yangcli
+DIRS = agt mgr ncx ydump $(APPS)
 endif
 endif
 endif

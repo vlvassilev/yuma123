@@ -140,6 +140,10 @@ date         init     comment
 #include  "yangyin.h"
 #endif
 
+#ifndef _H_ydump
+#include  "ydump.h"
+#endif
+
 /********************************************************************
 *                                                                   *
 *                       C O N S T A N T S                           *
@@ -1163,6 +1167,49 @@ static void
 
 
 /********************************************************************
+ * FUNCTION format_allowed
+ * 
+ *  Check if the conversion format is allowed for yangdump or
+ *  yangdumpcode
+ *  
+ * INPUTS:
+ *    cp == conversion parameters
+ *
+ * RETURNS:
+ *    TRUE if format conversion allowed; FALSE if not
+ * 
+ *********************************************************************/
+static boolean
+    format_allowed (const yangdump_cvtparms_t *cp)
+{
+
+    if (cp->allowcode) {
+        return TRUE;
+    }
+
+    switch (cp->format) {
+    case NCX_CVTTYP_NONE:
+    case NCX_CVTTYP_XSD:
+    case NCX_CVTTYP_HTML:
+    case NCX_CVTTYP_YANG:
+    case NCX_CVTTYP_COPY:
+    case NCX_CVTTYP_YIN:
+        return TRUE;
+    case NCX_CVTTYP_SQL:
+    case NCX_CVTTYP_SQLDB:
+    case NCX_CVTTYP_H:
+    case NCX_CVTTYP_C:
+    case NCX_CVTTYP_TG2:
+        return FALSE;
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    return FALSE;
+
+}   /* format_allowed */
+
+
+/********************************************************************
  * FUNCTION convert_one
  * 
  *  Validate and then perhaps convert one module to the specified format
@@ -1254,11 +1301,11 @@ static status_t
             print_score_banner(pcb);
             bannerdone = TRUE;            
         } else {
-            if (!(cvtparms.format == NCX_CVTTYP_XSD ||
-                  cvtparms.format == NCX_CVTTYP_HTML ||
-                  cvtparms.format == NCX_CVTTYP_H ||
-                  cvtparms.format == NCX_CVTTYP_C ||
-                  cvtparms.format == NCX_CVTTYP_TG2)) {
+            if (!(cp->format == NCX_CVTTYP_XSD ||
+                  cp->format == NCX_CVTTYP_HTML ||
+                  cp->format == NCX_CVTTYP_H ||
+                  cp->format == NCX_CVTTYP_C ||
+                  cp->format == NCX_CVTTYP_TG2)) {
                 print_score_banner(pcb);
                 bannerdone = TRUE;
             }
@@ -1773,7 +1820,7 @@ status_t
 	}
     }
 
-    if (cvtparms.helpmode) {
+    if (cvtparms->helpmode) {
 	help_program_module(YANGDUMP_MOD, 
 			    YANGDUMP_CONTAINER, 
 			    cvtparms->helpsubmode);
@@ -1785,6 +1832,14 @@ status_t
 
     if (quickexit) {
 	return NO_ERR;
+    }
+
+    /* check if the requested format is allowed */
+    if (!format_allowed(cvtparms)) {
+        log_error("\nError: The requested conversion format "
+                  "is not supported by yangdump."
+                  "\nUse the yangdumpcode program in the SDK instead.");
+        return ERR_NCX_OPERATION_NOT_SUPPORTED;
     }
 
     /* check if subdir search suppression is requested */

@@ -18,7 +18,7 @@
 *                                                                   *
 *********************************************************************
 
-  Exports yangdump.ncx conversion CLI parameter struct
+  Exports yangdump.yang conversion CLI parameter struct
  
 *********************************************************************
 *                                                                   *
@@ -36,10 +36,6 @@ date             init     comment
 
 #ifndef _H_help
 #include "help.h"
-#endif
-
-#ifndef _H_log
-#include "log.h"
 #endif
 
 #ifndef _H_ncxtypes
@@ -73,7 +69,6 @@ date             init     comment
 
 #define OBJVIEW_RAW     "raw"
 #define OBJVIEW_COOKED  "cooked"
-
 
 /* this should match the buffer size in ncx/tk.h */
 #define YANGDUMP_BUFFSIZE   0xffff
@@ -157,8 +152,10 @@ typedef struct yangdump_cvtparms_t_ {
     ncx_module_t   *mod;
     char           *srcfile;
     char           *buff;
+    val_value_t    *cli_val;
     uint32          bufflen;
     boolean         firstdone;
+    dlq_hdr_t       savedevQ;
 } yangdump_cvtparms_t;
 
 

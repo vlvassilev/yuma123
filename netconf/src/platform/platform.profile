@@ -4,6 +4,7 @@
 
 CINC=-I. -I../agt -I../mgr \
     -I../ncx -I../platform \
+    -I../ydump \
     -I/usr/include -I/usr/include/libxml2 \
     -I/usr/include/libxml2/libxml
 

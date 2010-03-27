@@ -7,7 +7,7 @@
 ############### SOURCE PROFILE ##############################
 
 SUBDIR_NM=yangdump
-SUBDIR_CPP=-I../yangdump
+SUBDIR_CPP=-I../ydump
 
 ############### TARGET PROFILE ##############################
 
@@ -27,12 +27,12 @@ REAL_INST=$(DESTDIR)/usr/bin
 # that contains 'bar'. 
 
 
-LIBS =	-lncx -L/usr/lib -lxml2
+LIBS =	-lydump -lncx -L/usr/lib -lxml2
 
-LIBTARGS= $(LBASE)/libncx.$(LIBSUFFIX)
+LIBTARGS= $(LBASE)/libncx.$(LIBSUFFIX) $(LBASE)/libydump.a
 
 ############################# MAKE RULES ##################
-all: yangdump yangdumpcode
+all: yangdump
 
 
 #################### PLATFORM DEFINITIONS ############
@@ -42,7 +42,6 @@ include ../platform/platform.profile
 # depend rule must be included after the 'all' make rule
 
 include ../platform/platform.profile.depend
-
 
 test:
 

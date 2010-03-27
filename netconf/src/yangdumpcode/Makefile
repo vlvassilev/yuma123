@@ -7,7 +7,7 @@
 ############### SOURCE PROFILE ##############################
 
 SUBDIR_NM=yangdumpcode
-SUBDIR_CPP=-I../yangdump -I../yangdumpcode
+SUBDIR_CPP=-I../ydump
 
 ############### TARGET PROFILE ##############################
 
@@ -27,9 +27,9 @@ REAL_INST=$(DESTDIR)/usr/bin
 # that contains 'bar'. 
 
 
-LIBS =	-lncx -L/usr/lib -lxml2
+LIBS =	-lydump -lncx -L/usr/lib -lxml2
 
-LIBTARGS= $(LBASE)/libncx.$(LIBSUFFIX) $(LBASE)/libyangdump.a
+LIBTARGS= $(LBASE)/libncx.$(LIBSUFFIX) $(LBASE)/libydump.a
 
 ############################# MAKE RULES ##################
 all: yangdumpcode

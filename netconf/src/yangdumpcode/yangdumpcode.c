@@ -51,8 +51,12 @@ date         init     comment
 #include  "status.h"
 #endif
 
-#ifndef _H_ydump
+#ifndef _H_yangdump
 #include  "yangdump.h"
+#endif
+
+#ifndef _H_ydump
+#include  "ydump.h"
 #endif
 
 
@@ -69,7 +73,7 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-static yangdump_cvtparms_t   cvtparms;
+static yangdump_cvtparms_t   mycvtparms;
 
 
 /********************************************************************
@@ -86,6 +90,9 @@ int
 #ifdef MEMORY_DEBUG
     mtrace();
 #endif
+
+    malloc_cnt = 0;
+    free_cnt = 0;
 
     res = ydump_init(argc, argv, TRUE, &mycvtparms);
 

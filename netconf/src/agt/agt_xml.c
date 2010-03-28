@@ -561,7 +561,9 @@ static status_t
     if (LOGDEBUG4) {
         log_debug4("\nxml_consume_node: return (%d)", 
                    (res==NO_ERR) ? res2 : res);
-        xml_dump_node(node);
+        if (scb->state != SES_ST_INIT) {
+            xml_dump_node(node);
+        }
     }
 #endif
 

@@ -647,6 +647,7 @@ ses_cb_t *
             scb->state = SES_ST_INIT;
             scb->fd = fd;
             scb->instate = SES_INST_IDLE;
+            scb->stream_output = TRUE;
             res = ses_msg_new_buff(scb, &scb->outbuff);
         } else {
             res = ERR_INTERNAL_MEM;
@@ -953,7 +954,8 @@ boolean
     if (!msg || !msg->ready) {
         SET_ERROR(ERR_INTERNAL_PTR);
         log_error("\nagt_ses ready Q message not correct");
-        if (msg) {
+        if (msg && scb->state != SES_ST_INIT) {
+            /* do not echo the ncx-connect message */
             cnt = xml_strcpy(buff, 
                              (const xmlChar *)"Incoming msg for session ");
             sprintf((char *)(&buff[cnt]), "%u", scb->sid);
@@ -961,7 +963,7 @@ boolean
         }
             
         return FALSE;
-    } else if (LOGDEBUG2) {
+    } else if (LOGDEBUG2 && scb->state != SES_ST_INIT) {
         cnt = xml_strcpy(buff, 
                          (const xmlChar *)"Incoming msg for session ");
         sprintf((char *)(&buff[cnt]), "%u", scb->sid);

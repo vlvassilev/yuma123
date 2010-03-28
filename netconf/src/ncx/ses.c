@@ -136,7 +136,7 @@ static status_t
     msg2 = NULL;
 
 #ifdef SES_DEBUG
-    if (LOGDEBUG3) {
+    if (LOGDEBUG3 && scb->state != SES_ST_INIT) {
         log_debug3("\nses: accept buffer (%u):\n%s\n", 
                    buff->bufflen, buff->buff);
     } else if (LOGDEBUG2) {

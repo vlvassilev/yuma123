@@ -186,23 +186,6 @@ extern status_t
 
 
 /********************************************************************
-* FUNCTION ses_msg_send_buff
-*
-* Send a buffer to the session client socket
-*
-* INPUTS:
-*   fd == session file descriptor number
-*   buff == buffer to write to
-*
-* RETURNS:
-*   status
-*********************************************************************/
-extern status_t
-    ses_msg_send_buff (int fd,
-		       ses_msg_buff_t *buff);
-
-
-/********************************************************************
 * FUNCTION ses_msg_send_buffs
 *
 * Send multiple buffers to the session client socket

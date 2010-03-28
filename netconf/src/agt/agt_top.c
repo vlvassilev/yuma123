@@ -170,9 +170,11 @@ void
     }
 
 #ifdef AGT_TOP_DEBUG
-    log_debug3("\nagt_top: got node");
     if (LOGDEBUG3) {
-        xml_dump_node(&top);
+        log_debug3("\nagt_top: got node");
+        if (LOGDEBUG4 && scb->state != SES_ST_INIT) {
+            xml_dump_node(&top);
+        }
     }
 #endif
 

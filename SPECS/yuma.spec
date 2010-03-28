@@ -1,6 +1,6 @@
 Name:           yuma
 Version:        0.11
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -188,9 +188,11 @@ echo "Check the user manuals in /etc/share/doc/yuma"
 %files dev
 %defattr(-,root,root,-)
 %{_bindir}/make_sil_dir.sh
+%{_bindir}/yangdumpcode
 /usr/share/doc/yuma/yumatools-dev-license.pdf
 /usr/share/doc/yuma/yumatools-legal-notices.pdf
 /usr/share/doc/yuma/yuma-dev-manual.pdf
+%{_mandir}/man1/yangdumpcode.1.gz
 %{_includedir}/yuma/
 %{_datadir}/yuma/util/
 %{_datadir}/yuma/src/libtoaster/

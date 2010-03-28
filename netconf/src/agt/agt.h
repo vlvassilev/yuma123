@@ -140,7 +140,8 @@ date	     init     comment
 #define AGT_NUM_CB   (AGT_CB_ROLLBACK+1)
 
 /* ncxserver magic cookie hack */
-#define NCX_SERVER_MAGIC "x56o8ab17eg92z343i55a0a964a864aOal1"
+#define NCX_SERVER_MAGIC \
+  "x56o8937ab17eg922z34rwhobskdbyswfehkpsqq3i55a0an960ccw24a4ek864aOpal1t2p"
 
 #define AGT_MAX_PORTS  4
 

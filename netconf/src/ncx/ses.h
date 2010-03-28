@@ -253,6 +253,7 @@ typedef struct ses_cb_t_ {
     xmlChar         *peeraddr;           /* Inet address string */
     boolean          active;            /* <hello> completed ok */
     boolean          notif_active;       /* subscription active */
+    boolean          stream_output;        /* buffer/stream svr */
     xmlTextReaderPtr reader;             /* input stream reader */
     FILE            *fp;             /* set if output to a file */
     int              fd;           /* set if output to a socket */

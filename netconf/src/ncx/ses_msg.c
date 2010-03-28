@@ -379,45 +379,6 @@ status_t
 
 
 /********************************************************************
-* FUNCTION ses_msg_send_buff
-*
-* Send a buffer to the session client socket
-*
-* INPUTS:
-*   fd == session file descriptor number
-*   buff == buffer to write to
-*
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    ses_msg_send_buff (int fd,
-                       ses_msg_buff_t *buff)
-{
-    status_t  res;
-
-#ifdef DEBUG
-    if (!buff) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-    if (!fd) {
-        return SET_ERROR(ERR_INTERNAL_VAL);
-    }
-#endif
-
-    if (!buff->bufflen) {
-        return NO_ERR;
-    }
-
-    res = send_buff(fd, (const char *)buff->buff, buff->bufflen);
-    buff->bufflen = 0;
-    buff->buffpos = 0;
-    return res;
-
-} /* ses_msg_send_buff */
-
-
-/********************************************************************
 * FUNCTION ses_msg_send_buffs
 *
 * Send multiple buffers to the session client socket
@@ -570,6 +531,8 @@ status_t
 status_t
     ses_msg_new_output_buff (ses_cb_t *scb)
 {
+    ses_msg_buff_t *buff;
+    status_t        res;
 
 #ifdef DEBUG
     if (!scb || !scb->outbuff) {
@@ -577,11 +540,38 @@ status_t
     }
 #endif
 
-    scb->outbuff->buffpos = 0;
-    dlq_enque(scb->outbuff, &scb->outQ);
-    ses_msg_make_outready(scb);
-    scb->outbuff = NULL;
-    return ses_msg_new_buff(scb, &scb->outbuff);
+    buff = scb->outbuff;
+    buff->buffpos = 0;
+
+    if (scb->stream_output) {
+        /* send this buffer right now 
+         * this works because the agt_ncxserver loop and mgr_io
+         * loop are single threaded and a notification cannot
+         * be in the middle of being sent right now
+         * If that code is changed, then make sure a notification
+         * is not being streamed right now
+         */
+        if (buff->bufflen) {
+            res = send_buff(scb->fd, 
+                            (const char *)buff->buff, 
+                            buff->bufflen);
+            buff->bufflen = 0;
+            buff->buffpos = 0;
+        } else {
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
+
+        /* reuse the same outbuff again */
+    } else {
+        /* save the buffer in the message loop do be sent when
+         * the main loop checks if any output pending
+         */
+        dlq_enque(scb->outbuff, &scb->outQ);
+        ses_msg_make_outready(scb);
+        scb->outbuff = NULL;
+        res = ses_msg_new_buff(scb, &scb->outbuff);
+    }
+    return res;
 
 } /* ses_msg_new_output_buff */
 
@@ -661,6 +651,7 @@ void
 void
     ses_msg_finish_outmsg (ses_cb_t *scb)
 {
+    status_t   res;
 
 #ifdef DEBUG
     if (!scb) {
@@ -669,13 +660,26 @@ void
     }
 #endif
 
-    if (scb->outbuff && scb->outbuff->bufflen) {
-        scb->outbuff->buffpos = 0;
-        dlq_enque(scb->outbuff, &scb->outQ);
-        scb->outbuff = NULL;
-        (void)ses_msg_new_buff(scb, &scb->outbuff);
+    if (scb->stream_output) {
+        if (scb->outbuff && scb->outbuff->bufflen) {
+            res = send_buff(scb->fd, 
+                            (const char *)scb->outbuff->buff, 
+                            scb->outbuff->bufflen);
+            scb->outbuff->bufflen = 0;
+            scb->outbuff->buffpos = 0;
+            if (res != NO_ERR) {
+                log_error("\nError: IO failed on session '%d'", scb->sid);
+            }
+        }
+    } else {
+        if (scb->outbuff && scb->outbuff->bufflen) {
+            scb->outbuff->buffpos = 0;
+            dlq_enque(scb->outbuff, &scb->outQ);
+            scb->outbuff = NULL;
+            (void)ses_msg_new_buff(scb, &scb->outbuff);
+        }
+        ses_msg_make_outready(scb);
     }
-    ses_msg_make_outready(scb);
 
 } /* ses_msg_finish_outmsg */
 

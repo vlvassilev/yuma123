@@ -3,25 +3,28 @@
 .\"
 .TH yangdump 1 "February 1, 2010" Linux "yangdump 0.10"
 .SH NAME
-yangdump \- validate YANG modules and convert them to different formats
+yangdumpcode \- validate YANG modules and convert them to different formats
 
 .SH SYNOPSIS
 .nf
 
-   yangdump (module=value | subtree=value)+ [parameter=value...]
+   yangdumpcode (module=value | subtree=value)+ [parameter=value...]
 
-   yangdump  --help [brief | normal | full]
+   yangdumpcode  --help [brief | normal | full]
 
-   yangdump  --version
+   yangdumpcode  --version
 
-   yangdump  --show-errors
+   yangdumpcode  --show-errors
 
 .fi
 .SH DESCRIPTION
-.B yangdump
+.B yangdumpcode
 provides validation and translation of YANG data models.
+This version also generates various client and server code
+formats.
+
 Information about a module or submodule can be generated as well.
-This version of yangdump supports the YANG data modeling language
+This version of yangdumpcode supports the YANG data modeling language
 defined in \fBdraft-ietf-netmod-yang-09.txt\fP.
 
 The \fBformat\fP parameter is used to select a translation output mode.
@@ -90,7 +93,7 @@ Partial parameter names can be entered if they are unique.
 The name of the configuration file to use.
 Any parameter except this one can be set in the config file.
 The default config file 
-.I /etc/yuma/yangdump.conf
+.I /etc/yuma/yangdumpcode.conf
 will be not be checked if this parameter is present.
 .IP --\fBdefnames\fP=boolean
 If true, output to a file with the default name for the format,
@@ -151,9 +154,12 @@ The following translation formats are available:
 .nf
 
    xsd:   XSD 1.0 
+   sqldb: netconfcentral SQL database format (SDK version only)
    html:  XHTML 1.0
    yang:  Canonical YANG (in progress)
    copy:  Validate, and copy with a new name
+   c:     Server instrumentation C code (SDK version only)
+   h:     Server instrumentation H code (SDK version only)
    yin:   YIN format
 
 .fi
@@ -410,7 +416,7 @@ in the module FOO (version 2008-01-01) would be:
 
 .fi
 .IP --\fBversion\fP
-Print yangdump version string and exit.
+Print yangdumpcode version string and exit.
 .IP --\fBversionnames\fP=boolean
 If false, the default filenames will not contain
 the module version string.  If true, the [sub]module
@@ -490,13 +496,13 @@ with the \fBsubtree\fP parameter.  Unless the \fBhelp\fP,
 \fBversion\fP, or \fBshow-errors\fP parameters is entered, 
 one of these input file parameters is mandatory.
 Each of these parameters may be entered multiple times.
-The default parameter for yangdump is 'module', so these
+The default parameter for yangdumpcode is 'module', so these
 commands are wquivalent:
 .nf
 
-   yangdump --module=foo
+   yangdumpcode --module=foo
 
-   yangdump foo
+   yangdumpcode foo
 
 .fi
 Note that 'foo' must not match another parameter name.
@@ -504,7 +510,7 @@ If it does, the module parameter name must be used for that module.
 For example,
 .nf
 
-   yangdump --module=help
+   yangdumpcode --module=help
 
 .fi
 
@@ -581,7 +587,7 @@ The user's home directory  (e.g., /home/andy)
 The root of the user's Yuma work directory
 (e.g., /home/andy/swdev/netconf)
 .IP \fBYUMA_INSTALL\fP
-The root of the directory that yangdump
+The root of the directory that yangdumpcode
 is installed on this system (default is, /usr/share/yuma)
 .IP \fBYUMA_MODPATH\fP
 Colon-separated list of directories to
@@ -593,9 +599,9 @@ The \fBmodpath\fP parameter will override this
 environment variable, if both are present.
 
 .SH CONFIGURATION FILES
-.IP \fByangdump.conf\fP
+.IP \fByangdumpcode.conf\fP
 YANG config file
-The default is: \fB/etc/yuma/yangdump.conf\fP
+The default is: \fB/etc/yuma/yangdumpcode.conf\fP
     
 An ASCII configuration file format is supported to
 store command line parameters. 
@@ -673,4 +679,4 @@ Andy Bierman, <andyb at iwl dot com>
 .BR netconfd (1)
 .BR yangcli (1)
 .BR yangdiff (1)
-.BR yangdumpcode (1)
+.BR yangdump (1)

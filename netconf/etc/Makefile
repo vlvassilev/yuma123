@@ -33,6 +33,7 @@ install:
 else
 ifdef DEVELOPER
 install:
+	mkdir -p $(ETC_INSTALL)
 	cp yangdumpcode-sample.conf $(ETC_INSTALL)/
 else
 install:

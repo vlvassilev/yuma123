@@ -52,8 +52,8 @@ else
 fi
 
 cd $1/src
-yangdump format=h indent=4 module=$1 output=$1.h
-yangdump format=c indent=4 module=$1 output=$1.c
+yangdumpcode format=h indent=4 module=$1 output=$1.h
+yangdumpcode format=c indent=4 module=$1 output=$1.c
 cd ../..
 
 

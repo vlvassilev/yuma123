@@ -25,18 +25,13 @@ all: sil_dummy sil_lib
 
 #################### PLATFORM DEFINITIONS ############
 ifdef YUMA_HOME
-CINC = -I. \
-     -I$(YUMA_HOME)/src/platform \
-     -I$(YUMA_HOME)/src/ncx \
-     -I$(YUMA_HOME)/src/agt
+CINCBASE=$(YUMA_HOME)/src
 else
-CINC = -I. \
-     -I../../netconf/src/platform \
-     -I../../netconf/src/ncx \
-     -I../../netconf/src/agt
+CINCBASE=/usr/include/yuma
 endif
 
-CINC += -I/usr/include -I/usr/include/libxml2 -I/usr/include/libxml2/libxml
+CINC = -I. -I$(CINCBASE)/platform -I$(CINCBASE)/ncx -I$(CINCBASE)/agt \
+     -I/usr/include -I/usr/include/libxml2 -I/usr/include/libxml2/libxml
 
 # added /sw/include for MacOSX
 ifdef MAC
@@ -236,8 +231,8 @@ $(LBASE)/lib$(SUBDIR_NM).dylib: $(OBJS)
 	-o $@ -install_name lib$(SUBDIR_NM).dylib $(OBJS) -lxml2
 
 code:
-	yangdump format=h indent=4 module=$(SUBDIR_NM) output=$(SUBDIR_NM).h
-	yangdump format=c indent=4 module=$(SUBDIR_NM) output=$(SUBDIR_NM).c
+	yangdumpcode format=h indent=4 module=$(SUBDIR_NM) output=$(SUBDIR_NM).h
+	yangdumpcode format=c indent=4 module=$(SUBDIR_NM) output=$(SUBDIR_NM).c
 
 
 # prevent the make program from choking on all the symbols

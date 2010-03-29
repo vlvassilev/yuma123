@@ -30,13 +30,26 @@ include ../platform/platform.profile.depend
 
 test:
 
-ifdef DEVELOPER
-install: includes
-else
-ifdef RELEASE
-install: includes
-else
+ifdef SHLIBS
+# nothing to do for debian SHLIBS build
 install:
+else 
+ifdef SERVER
+# nothing to do for debian SERVER build
+install:
+else 
+ifdef CLIENT
+# nothing to do for debian CLIENT build
+install:
+else 
+ifdef DEVELOPER
+# just install the H files
+install: includes
+else
+# just install the H files
+install: includes
+endif
+endif
 endif
 endif
 
@@ -80,13 +93,11 @@ distclean: superclean
 
 
 includes:
-ifdef RELEASE
 ifndef SHLIBS
 ifndef SERVER
 ifndef CLIENT
 	mkdir -p $(REAL_INC_INST)/agt
 	cp *.h $(REAL_INC_INST)/agt
-endif
 endif
 endif
 endif

@@ -128,7 +128,6 @@ $(LBASE)/libncx.dylib: $(OBJS)
 	-o $@ -install_name libncx.dylib $(OBJS) -lxml2
 
 includes:
-ifdef RELEASE
 ifndef SHLIBS
 ifndef SERVER
 ifndef CLIENT
@@ -136,7 +135,6 @@ ifndef CLIENT
 	mkdir -p $(REAL_INC_INST)/platform
 	cp *.h $(REAL_INC_INST)/ncx
 	cp ../platform/procdefs.h $(REAL_INC_INST)/platform
-endif
 endif
 endif
 endif

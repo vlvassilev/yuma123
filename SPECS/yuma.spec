@@ -189,6 +189,7 @@ echo "Check the user manuals in /etc/share/doc/yuma"
 %defattr(-,root,root,-)
 %{_bindir}/make_sil_dir.sh
 %{_bindir}/yangdumpcode
+%{_sysconfdir}/yuma/yangdumpcode-sample.conf
 /usr/share/doc/yuma/yumatools-dev-license.pdf
 /usr/share/doc/yuma/yumatools-legal-notices.pdf
 /usr/share/doc/yuma/yuma-dev-manual.pdf

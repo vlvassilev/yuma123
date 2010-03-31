@@ -5,7 +5,7 @@ module yuma-mysession {
   prefix "myses";
 
   import yuma-app-common { prefix appcmn; }
-  import ietf-with-defaults { prefix wd; }
+  import ietf-netconf-with-defaults { prefix wd; }
 
   organization  
     "Netconf Central, Inc.";
@@ -38,7 +38,7 @@ module yuma-mysession {
         "The desired maximum number of characters printed
          per line.  The server may exceed this number.
          It is only a suggestion, not a hard limit.";
-      type wd:with-defaults-mode-type;
+      type wd:with-defaults-mode;
     }
   }
 

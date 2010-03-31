@@ -2330,8 +2330,8 @@ static void
         log_warn("\nWarning: NETCONF v1 capability not found");
     }
 
-    retrieval_supported = cap_std_set(&mscb->caplist,
-                                      CAP_STDID_SCHEMA_RETRIEVAL);
+    retrieval_supported = cap_set(&mscb->caplist,
+                                  CAP_SCHEMA_RETRIEVAL);
 
     /**** !!! HARDWIRE ADD NETCONF V1 TO THE QUEUE
      **** !!! EVEN IF THE SERVER LEFT IT OUT

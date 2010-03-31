@@ -1239,6 +1239,10 @@ boolean
         return FALSE;
     }
 
+    if (!xml_strcmp(modname, NCXMOD_IETF_NETCONF)) {
+        return FALSE;
+    }
+
     if (!xml_strcmp(modname, NCX_EL_XSD)) {
         return FALSE;
     }

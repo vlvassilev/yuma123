@@ -16,7 +16,7 @@
 ############### SOURCE PROFILE ##############################
 
 SUBDIR_NM=modules
-YANGDUMP=../target/bin/yangdump
+YANGDUMP=../target/bin/yangdumpcode
 SUBDIR_CPP=""
 SUBTREE_PARMS=--subtree=./yang --subtree=./ietf --subtree=./netconfcentral
 
@@ -90,7 +90,6 @@ install:
 	cp netconfcentral/yuma-interfaces.yang $(INSTALL_TARGET)/netconfcentral
 	cp netconfcentral/yuma-mysession.yang $(INSTALL_TARGET)/netconfcentral
 	cp netconfcentral/yuma-nacm.yang $(INSTALL_TARGET)/netconfcentral
-	cp netconfcentral/yuma-netconf.yang $(INSTALL_TARGET)/netconfcentral
 	cp netconfcentral/yuma-proc.yang $(INSTALL_TARGET)/netconfcentral
 	cp netconfcentral/yuma-system.yang $(INSTALL_TARGET)/netconfcentral
 else
@@ -116,6 +115,7 @@ install:
 	cp netconfcentral/yuma-ncx.yang $(INSTALL_TARGET)/netconfcentral
 	cp netconfcentral/yuma-types.yang $(INSTALL_TARGET)/netconfcentral
 	cp netconfcentral/yuma-xsd.yang $(INSTALL_TARGET)/netconfcentral
+	cp netconfcentral/yuma-netconf.yang $(INSTALL_TARGET)/netconfcentral
 else
 ifdef DEVELOPER
 install:

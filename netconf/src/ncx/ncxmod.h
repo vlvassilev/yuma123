@@ -96,7 +96,7 @@ date	     init     comment
 
 #define NCXMOD_NCX        (const xmlChar *)"yuma-ncx"
 
-#define NCXMOD_WITH_DEFAULTS (const xmlChar *)"ietf-with-defaults"
+#define NCXMOD_WITH_DEFAULTS (const xmlChar *)"ietf-netconf-with-defaults"
 
 /* name of the NETCONF module containing NETCONF protocol definitions,
  * that is loaded by default during startup 

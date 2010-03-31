@@ -85,8 +85,6 @@ date             init     comment
 #define CAP_BIT_INTERLEAVE    bit10
 #define CAP_BIT_PARTIAL_LOCK  bit11
 #define CAP_BIT_WITH_DEFAULTS bit12
-#define CAP_BIT_NETCONF_MONITORING bit13
-#define CAP_BIT_SCHEMA_RETRIEVAL bit14
 
 /* put the version numbers in the capability names for now */
 #define CAP_NAME_V1                 ((const xmlChar *)"")
@@ -101,9 +99,7 @@ date             init     comment
 #define CAP_NAME_NOTIFICATION       ((const xmlChar *)"notification:1.0")
 #define CAP_NAME_INTERLEAVE         ((const xmlChar *)"interleave:1.0")
 #define CAP_NAME_PARTIAL_LOCK       ((const xmlChar *)"partial-lock:1.0")
-#define CAP_NAME_WITH_DEFAULTS      ((const xmlChar *)"with-defaults:1.0")
-#define CAP_NAME_NETCONF_MONITORING ((const xmlChar *)"netconf-monitoring:1.0")
-#define CAP_NAME_SCHEMA_RETRIEVAL   ((const xmlChar *)"schema-retrieval:1.0")
+#define CAP_NAME_WITH_DEFAULTS      ((const xmlChar *)"with-defaults")
 
 /* some YANG capability details */
 #define CAP_REVISION_EQ        (const xmlChar *)"revision="
@@ -111,8 +107,13 @@ date             init     comment
 #define CAP_FEATURES_EQ        (const xmlChar *)"features="
 #define CAP_DEVIATIONS_EQ      (const xmlChar *)"deviations="
 #define CAP_SCHEME_EQ          (const xmlChar *)"scheme="
-#define CAP_BASIC_EQ           (const xmlChar *)"basic="
-#define CAP_SUPPORTED_EQ       (const xmlChar *)"supported="
+#define CAP_BASIC_EQ           (const xmlChar *)"basic-mode="
+#define CAP_SUPPORTED_EQ       (const xmlChar *)"also-supported="
+
+
+#define CAP_SCHEMA_RETRIEVAL \
+    (const xmlChar *)"urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring"
+
 
 /********************************************************************
 *                                                                   *
@@ -144,8 +145,6 @@ typedef enum cap_stdid_t_ {
     CAP_STDID_INTERLEAVE,
     CAP_STDID_PARTIAL_LOCK,
     CAP_STDID_WITH_DEFAULTS,
-    CAP_STDID_NETCONF_MONITORING,
-    CAP_STDID_SCHEMA_RETRIEVAL,
     CAP_STDID_LAST_MARKER
 } cap_stdid_t;
 
@@ -155,7 +154,7 @@ typedef struct cap_list_t_ {
     uint32          cap_std;         /* bitset of std caps */
     xmlChar        *cap_protos;  /* URL capability protocol list */
     xmlChar        *cap_defstyle;  /* with-defaults 'basic' parm */
-    xmlChar        *cap_supported;  /* with-defaults 'supported' parm */
+    xmlChar        *cap_supported;  /* with-defaults 'also-supported' parm */
     dlq_hdr_t       capQ;              /* queue of non-std caps */
 } cap_list_t;
 
@@ -446,7 +445,7 @@ extern boolean
 *********************************************************************/
 extern boolean 
     cap_set (const cap_list_t *caplist,
-	     xmlChar *capuri);
+	     const xmlChar *capuri);
 
 
 /********************************************************************

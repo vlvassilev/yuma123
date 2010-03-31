@@ -1,7 +1,7 @@
 module ietf-netconf-monitoring {
 
   namespace
-  "urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring:DRAFT-10";
+  "urn:ietf:params:xml:ns:yang:ietf-netconf-monitoring:DRAFT-12";
   prefix "ns";
 
   import ietf-yang-types { prefix yang; }
@@ -41,7 +41,7 @@ module ietf-netconf-monitoring {
      the RFC itself for full legal notices.";
    // RFC Ed.: replace XXXX with actual RFC number and remove this note
 
-  revision 2009-11-20 {
+  revision 2010-02-18 {
     description
       "Initial revision.";
     reference
@@ -89,6 +89,8 @@ module ietf-netconf-monitoring {
 
   identity netconf-ssh {
     base transport;
+    description
+      "NETCONF over Secure Shell (SSH).";
     reference
       "RFC 4742: Using the NETCONF Configuration Protocol
                  over Secure SHell (SSH)";
@@ -96,6 +98,9 @@ module ietf-netconf-monitoring {
 
   identity netconf-soap-over-beep {
     base transport;
+    description
+      "NETCONF Simple Object Access Protocol (SOAP) over
+       Blocks Extensible Exchange Protocol (BEEP).";
     reference
       "RFC 4743: Using NETCONF over the Simple Object
                  Access Protocol (SOAP)";
@@ -103,6 +108,9 @@ module ietf-netconf-monitoring {
 
   identity netconf-soap-over-https {
     base transport;
+    description
+      "NETCONF Simple Object Access Protocol (SOAP)
+      over Hypertext Transfer Protocol Secure (HTTPS).";
     reference
       "RFC 4743: Using NETCONF over the Simple Object
                  Access Protocol (SOAP)";
@@ -110,6 +118,8 @@ module ietf-netconf-monitoring {
 
   identity netconf-beep {
     base transport;
+    description
+      "NETCONF over Blocks Extensible Exchange Protocol (BEEP).";
     reference
       "RFC 4744: Using the NETCONF Protocol over the
                  Blocks Extensible Exchange Protocol (BEEP)";
@@ -117,6 +127,8 @@ module ietf-netconf-monitoring {
 
   identity netconf-tls {
     base transport;
+    description
+      "NETCONF over Transport Layer Security (TLS).";
     reference
       "RFC 5539: NETCONF over Transport Layer Security (TLS)";
   }
@@ -128,19 +140,18 @@ module ietf-netconf-monitoring {
 
   identity xsd {
     base schema-format;
+    description
+      "XML Schema Definition.";
     reference
       "W3C REC REC-xmlschema-1-20041028: XML Schema Part 1: Structure
        W3C REC REC-xmlschema-2-20041028: XML Schema Part 2: Datatypes";
   }
 
-  identity rng {
-    base schema-format;
-    reference
-      "ISO/IEC 19757-2: RELAX NG";
-  }
-
   identity yang {
     base schema-format;
+    description
+      "YANG is a data modeling language used to model configuration
+      and state data manipulated by the NETCONF protocol.";
     reference
       "RFC XXXX:  YANG - A data modeling language for NETCONF";
    // RFC Ed.: replace XXXX with actual RFC number and remove this note
@@ -148,13 +159,25 @@ module ietf-netconf-monitoring {
 
   identity yin {
     base schema-format;
+    description   // reference
+      "YIN is an alternative, equivalent XML syntax for YANG.";
     reference
       "RFC XXXX:  YANG - A data modeling language for NETCONF";
    // RFC Ed.: replace XXXX with actual RFC number and remove this note
   }
 
+  identity rng {
+    base schema-format;
+    description
+      "Regular Language for XML Next Generation (RELAX NG).";
+    reference
+      "ISO/IEC 19757-2: RELAX NG";
+  }
+
   identity rnc {
     base schema-format;
+    description
+      "Relax NG Compact Syntax";
     reference
       "ISO/IEC 19757-2: RELAX NG";
   }
@@ -447,7 +470,6 @@ module ietf-netconf-monitoring {
         description
           "Number of sessions started.  This counter is incremented
            when a <hello> message with a <session-id> is sent.
-
           'in-sessions' - 'in-bad-hellos' = 'number of correctly started
                                              netconf sessions'";
       }

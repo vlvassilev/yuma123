@@ -293,26 +293,6 @@ status_t
         }
     }
 
-    /* set the netconf-monitoring capability */
-    if (res == NO_ERR) {
-        res = cap_add_std(newmycaps, 
-                          CAP_STDID_NETCONF_MONITORING);
-        if (res == NO_ERR) {
-            res = cap_add_stdval(newcaps, 
-                                 CAP_STDID_NETCONF_MONITORING);
-        }
-    }
-
-    /* set the schema-retrieval capability */
-    if (res == NO_ERR) {
-        res = cap_add_std(newmycaps, 
-                          CAP_STDID_SCHEMA_RETRIEVAL);
-        if (res == NO_ERR) {
-            res = cap_add_stdval(newcaps,
-                                 CAP_STDID_SCHEMA_RETRIEVAL);
-        }
-    }
-
     /* check the return value */
     if (res != NO_ERR) {
         /* toss the new, put back the old */

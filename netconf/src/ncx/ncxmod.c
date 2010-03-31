@@ -1694,6 +1694,27 @@ static status_t
                 *retmod = testmod;
             }
             return testmod->status;
+        } else {
+            /*** hack for now, check if this is ietf-netconf ***/
+            if (!xml_strcmp(modname, NCXMOD_IETF_NETCONF)) {
+                /* check if yuma-netconf already loaded */
+                testmod = ncx_find_module(NCXMOD_NETCONF, NULL);
+                if (testmod) {
+                    /* use yuma-netconf instead of ietf-netconf */
+                    if (LOGDEBUG2) {
+                        log_debug2("\nncxmod: cannot load ietf-netconf; "
+                                   "yuma-netconf already loaded");
+                    }
+                    if (!pcb->top) {
+                        pcb->top = testmod;
+                        pcb->topfound = TRUE;
+                    }
+                    if (retmod) {
+                        *retmod = testmod;
+                    }
+                    return testmod->status;
+                }
+            }
         }
     }
 

@@ -148,10 +148,6 @@ static cap_stdrec_t stdcaps[] =
     CAP_NAME_PARTIAL_LOCK },
   { CAP_STDID_WITH_DEFAULTS, CAP_BIT_WITH_DEFAULTS, 
     CAP_NAME_WITH_DEFAULTS },
-  { CAP_STDID_NETCONF_MONITORING, CAP_BIT_NETCONF_MONITORING, 
-    CAP_NAME_NETCONF_MONITORING },
-  { CAP_STDID_SCHEMA_RETRIEVAL, CAP_BIT_SCHEMA_RETRIEVAL, 
-    CAP_NAME_SCHEMA_RETRIEVAL },
   { CAP_STDID_LAST_MARKER, 0x0, 
     (const xmlChar *)"" } /* end-of-list marker */
 };
@@ -1216,13 +1212,12 @@ status_t
     m__setbit(caplist->cap_std, 
               stdcaps[CAP_STDID_WITH_DEFAULTS].cap_bitnum);
 
-    /* check for &features=foo:bar */
+
     str = defstyle;
     while (*str && *str != '&') {
         str++;
     }
     if (*str) {
-        /* check parameter is really features= */
         featureslen = xml_strlen(CAP_SUPPORTED_EQ);
         basiclen = (uint32)(str - defstyle);
         if (!xml_strncmp(++str, 
@@ -1245,6 +1240,7 @@ status_t
             return ERR_INTERNAL_MEM;
         }
     }
+
     return NO_ERR;
 
 } /* cap_add_withdef */
@@ -1283,15 +1279,15 @@ status_t
 #endif
 
     /* setup the string 
-     * <capability-uri>:with-defaults:1.0?basic=<defstyle>
-     *    &supported=<other-two-enums>
+     * <capability-uri>:with-defaults:1.0?basic-mode=<defstyle>
+     *    &also-supported=<other-two-enums>
      */
     pfix = CAP_URN;
     basic = CAP_BASIC_EQ;
     supported = CAP_SUPPORTED_EQ;
     cap = stdcaps[CAP_STDID_WITH_DEFAULTS].cap_name;
 
-    /* figure out what the supported parameter value
+    /* figure out what the also-supported parameter value
      * should be and fill the buffer
      */
     withdef = ncx_get_withdefaults_enum(defstyle);
@@ -1320,9 +1316,14 @@ status_t
     }
 
     /* get the total length */
-    len = xml_strlen(pfix) + xml_strlen(cap) + 1 +
-        xml_strlen(basic) + xml_strlen(defstyle) + 1 +
-        xml_strlen(supported) + xml_strlen(buffer);
+    len = xml_strlen(pfix) + 
+        xml_strlen(cap) + 
+        1 +
+        xml_strlen(basic) + 
+        xml_strlen(defstyle) + 
+        1 +
+        xml_strlen(supported) + 
+        xml_strlen(buffer);
 
     /* make the string */
     str = m__getMem(len+1);
@@ -1540,16 +1541,18 @@ boolean
 *********************************************************************/
 boolean 
     cap_set (const cap_list_t *caplist, 
-             xmlChar *capuri) 
+             const xmlChar *capuri) 
 {
-    xmlChar    *str;
-    cap_rec_t  *cap;
-    int         i;
-    uint32      len;
+    const xmlChar    *str;
+    cap_rec_t        *cap;
+    int               i;
+    uint32            len, capurilen;
 
     if (!caplist || !capuri) {
         return FALSE;
     }
+
+    capurilen = xml_strlen(capuri);
 
     /* check if this is the NETCONF V1 Base URN capability */
     if (!xml_strcmp(capuri, NC_URN)) {
@@ -1560,7 +1563,7 @@ boolean
 
     /* check if this is a NETCONF standard capability */
     len = xml_strlen(CAP_URN);
-    if ((xml_strlen(capuri) > len+1) && 
+    if ((capurilen > len+1) && 
         !xml_strncmp(capuri, 
                      (const xmlChar *)CAP_URN, 
                      len)) {
@@ -1578,13 +1581,26 @@ boolean
         }
     }
 
-    /* check the enterprise capability queue */
+    /* check the enterprise capability queue
+     * try exact match first
+     */
     for (cap=(cap_rec_t *)dlq_firstEntry(&caplist->capQ);
          cap != NULL; cap=(cap_rec_t *)dlq_nextEntry(cap)) {
         if (!xml_strcmp(cap->cap_uri, capuri)) {
             return TRUE;
         }
     }
+
+    /* check the enterprise capability queue
+     * match the beginning part, not requiring a complete match
+     */
+    for (cap=(cap_rec_t *)dlq_firstEntry(&caplist->capQ);
+         cap != NULL; cap=(cap_rec_t *)dlq_nextEntry(cap)) {
+        if (!xml_strncmp(cap->cap_uri, capuri, capurilen)) {
+            return TRUE;
+        }
+    }
+
     return FALSE;
 
 }  /* cap_set */

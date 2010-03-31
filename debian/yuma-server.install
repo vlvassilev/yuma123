@@ -8,7 +8,6 @@ usr/share/yuma/modules/netconfcentral/toaster.yang
 usr/share/yuma/modules/netconfcentral/yuma-interfaces.yang
 usr/share/yuma/modules/netconfcentral/yuma-mysession.yang
 usr/share/yuma/modules/netconfcentral/yuma-nacm.yang
-usr/share/yuma/modules/netconfcentral/yuma-netconf.yang
 usr/share/yuma/modules/netconfcentral/yuma-proc.yang
 usr/share/yuma/modules/netconfcentral/yuma-system.yang
 

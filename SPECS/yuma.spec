@@ -44,6 +44,7 @@ echo "Check the user manuals in /etc/share/doc/yuma"
 %{_datadir}/yuma/modules/netconfcentral/yuma-ncx.yang
 %{_datadir}/yuma/modules/netconfcentral/yuma-types.yang
 %{_datadir}/yuma/modules/netconfcentral/yuma-xsd.yang
+%{_datadir}/yuma/modules/netconfcentral/yuma-netconf.yang
 %{_datadir}/yuma/modules/test/*
 %{_datadir}/yuma/modules/yang/*
 
@@ -164,7 +165,6 @@ echo "Check the user manuals in /etc/share/doc/yuma"
 %{_datadir}/yuma/modules/netconfcentral/yuma-interfaces.yang
 %{_datadir}/yuma/modules/netconfcentral/yuma-mysession.yang
 %{_datadir}/yuma/modules/netconfcentral/yuma-nacm.yang
-%{_datadir}/yuma/modules/netconfcentral/yuma-netconf.yang
 %{_datadir}/yuma/modules/netconfcentral/yuma-proc.yang
 %{_datadir}/yuma/modules/netconfcentral/yuma-system.yang
 

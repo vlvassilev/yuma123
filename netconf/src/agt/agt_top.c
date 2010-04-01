@@ -214,8 +214,8 @@ void
                scb->state == SES_ST_SHUTDOWN_REQ) {
         /* session was closed */
         agt_ses_kill_session(scb->sid,
-                             scb->sid,
-                             SES_TR_CLOSED);
+                             scb->killedbysid,
+                             scb->termreason);
     }
 
     xml_clean_node(&top);

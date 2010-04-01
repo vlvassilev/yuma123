@@ -1224,6 +1224,7 @@ static status_t
     } else if (cp->modpath) {
         ncxmod_set_modpath(cp->modpath);
     } else {
+        /* clear out any old value */
         ncxmod_set_modpath(EMPTY_STRING);
     }
 

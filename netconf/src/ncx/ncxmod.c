@@ -1364,6 +1364,9 @@ static status_t
     *done = FALSE;
     res = NO_ERR;
     res2 = NO_ERR;
+    /* T == use path directly, leave path2 NULL
+     * F == add 'modules' to end of path by setting path2
+     */
     path2 = (usepath) ? NULL : NCXMOD_DIR;
 
     total = xml_strlen(path);
@@ -1766,7 +1769,7 @@ static status_t
                                 revision,
                                 pcb,
                                 ptyp,
-                                FALSE, 
+                                TRUE, 
                                 matchmode,
                                 isyang,
                                 &done);
@@ -1780,7 +1783,7 @@ static status_t
                                     revision,
                                     pcb,
                                     ptyp,
-                                    FALSE, 
+                                    TRUE, 
                                     matchmode,
                                     isyang,
                                     &done);

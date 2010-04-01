@@ -452,7 +452,7 @@ static ncxmod_temp_filcb_t *
     p = filebuffer;
     p += xml_strcpy(p, module);
     if (revision) {
-        *p++ = '.';
+        *p++ = '@';
         p += xml_strcpy(p, revision);
     }
     p += xml_strcpy(p, (const xmlChar *)".yang");
@@ -1010,6 +1010,10 @@ status_t
 
         searchresult = (ncxmod_search_result_t *)
             dlq_deque(&server_cb->searchresultQ);
+
+	if (searchresult->res == ERR_NCX_MOD_NOT_FOUND){
+            searchresult->res = NO_ERR;
+	}
 
         if (searchresult->res != NO_ERR ||
             searchresult->source == NULL) {

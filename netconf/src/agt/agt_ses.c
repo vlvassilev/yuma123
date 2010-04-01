@@ -987,7 +987,9 @@ boolean
 
     /* process the message */
     if (res == NO_ERR) {
-        /* process the message */
+        /* process the message 
+         * the scb pointer may get deleted !!!
+         */
         agt_top_dispatch_msg(scb);
     } else {
         if (LOGINFO) {
@@ -995,12 +997,13 @@ boolean
                      scb->sid, 
                      get_error_string(res));
         }
-        scb->state = SES_ST_SHUTDOWN_REQ;
+        agt_ses_kill_session(scb->sid, 0, SES_TR_OTHER);
+        scb = NULL;
     }
 
     /* get the session control block again to make sure it was not
      * removed due to invalid <ncxconnect> that caused the session
-     * to be deleted
+     * to be deleted, or a close-session or kill-session operation
      */
     scb = agtses[mysid];
     if (scb) {

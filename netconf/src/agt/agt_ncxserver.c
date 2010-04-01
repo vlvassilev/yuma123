@@ -241,14 +241,15 @@ static void
 status_t
     agt_ncxserver_run (void)
 {
-    ses_cb_t *scb;
-    int ncxsock, maxwrnum, maxrdnum;
-    int i, new, ret;
-    struct sockaddr_un clientname;
-    struct timeval timeout;
-    socklen_t size;
-    status_t res;
-    boolean done, done2;
+    ses_cb_t              *scb;
+    agt_profile_t         *profile;
+    int                    ncxsock, maxwrnum, maxrdnum;
+    int                    i, new, ret;
+    struct sockaddr_un     clientname;
+    struct timeval         timeout;
+    socklen_t              size;
+    status_t               res;
+    boolean                done, done2, stream_output;
 
     /* Create the socket and set it up to accept connections. */
     res = make_named_socket(NCXSERVER_SOCKNAME, &ncxsock);
@@ -259,7 +260,12 @@ status_t
         return res;
     }
 
-    
+    profile = agt_get_profile();
+    if (profile == NULL) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    stream_output = profile->agt_stream_output;
 
     if (listen(ncxsock, 1) < 0) {
         log_error("\nError: listen failed");
@@ -341,7 +347,7 @@ status_t
         for (i = 0; i < max(maxrdnum+1, maxwrnum+1) && !done2; i++) {
 
             /* check write output to client sessions */
-            if (FD_ISSET(i, &write_fd_set)) {
+            if (!stream_output && FD_ISSET(i, &write_fd_set)) {
                 /* try to send 1 packet worth of buffers for a session */
                 scb = def_reg_find_scb(i);
                 if (scb) {
@@ -354,6 +360,8 @@ status_t
                                          "closing session %d ", 
                                          scb->sid);
                             }
+                        }
+                        if (res != NO_ERR) {
                             agt_ses_kill_session(scb->sid, 
                                                  scb->sid,
                                                  SES_TR_OTHER);

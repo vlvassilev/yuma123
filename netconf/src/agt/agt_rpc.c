@@ -1098,15 +1098,19 @@ void
     rpc_msg_t             *msg;
     obj_template_t        *rpcobj;
     obj_rpc_t             *rpc;
-    obj_template_t       *testobj;
+    obj_template_t        *testobj;
     agt_rpc_cbset_t       *cbset;
     ses_total_stats_t     *agttotals;
     xmlChar               *buff;
     char                  *errstr;
     xml_node_t             method, testnode;
-    status_t               res;
+    status_t               res, res2;
     boolean                errdone;
     xmlChar                tstampbuff[TSTAMP_MIN_SIZE];
+
+#ifndef IGNORE_STRICT_RFC4741
+    xml_attr_t             *attr, errattr;
+#endif
 
 #ifdef DEBUG
     if (!scb || !top) {
@@ -1117,8 +1121,10 @@ void
 
     /* init local vars */
     res = NO_ERR;
+    res2 = NO_ERR;
     cbset = NULL;
     rpcobj = NULL;
+
 
     agttotals = ses_get_total_stats();
 
@@ -1187,11 +1193,11 @@ void
     /* set the default for the with-defaults parameter */
     msg->mhdr.withdef = ses_withdef(scb);
 
-#ifdef STRICT_RFC4741
+#ifndef IGNORE_STRICT_RFC4741
     /* get the NC RPC message-id attribute; must be present */
     attr = xml_find_attr(top, 0, NCX_EL_MESSAGE_ID);
     if (!attr || !attr->attr_val) {
-        res = ERR_NCX_MISSING_ATTRIBUTE;
+        res2 = ERR_NCX_MISSING_ATTRIBUTE;
             
         memset(&errattr, 0x0, sizeof(xml_attr_t));
         errattr.attr_ns = xmlns_nc_id();
@@ -1200,7 +1206,7 @@ void
         agt_record_attr_error(scb, 
                               &msg->mhdr, 
                               NCX_LAYER_RPC,
-                              res, 
+                              res2, 
                               &errattr, 
                               top, 
                               NULL, 
@@ -1237,7 +1243,7 @@ void
     }
 
     /* check any errors in the <rpc> node */
-    if (res != NO_ERR) {
+    if (res != NO_ERR || res2 != NO_ERR) {
         send_rpc_reply(scb, msg);
         agt_acm_clear_msg_cache(&msg->mhdr);
         rpc_free_msg(msg);

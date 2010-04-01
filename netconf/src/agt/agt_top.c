@@ -45,12 +45,16 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
-#ifndef _H_agt_top
-#include "agt_top.h"
+#ifndef _H_agt
+#include "agt.h"
 #endif
 
 #ifndef _H_agt_ses
 #include "agt_ses.h"
+#endif
+
+#ifndef _H_agt_top
+#include "agt_top.h"
 #endif
 
 #ifndef _H_agt_xml
@@ -133,10 +137,11 @@ void
     agt_top_dispatch_msg (ses_cb_t  *scb)
 {
     ses_total_stats_t  *myagttotals;
+    agt_profile_t      *profile;
     xml_node_t          top;
     status_t            res;
     top_handler_t       handler;
-
+    
 #ifdef DEBUG
     if (!scb) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -145,6 +150,7 @@ void
 #endif
 
     myagttotals = ses_get_total_stats();
+    profile = agt_get_profile();
 
     xml_init_node(&top);
 
@@ -204,6 +210,12 @@ void
                      get_error_string(res));
         }
         agt_ses_free_session(scb);
+    } else if (profile->agt_stream_output &&
+               scb->state == SES_ST_SHUTDOWN_REQ) {
+        /* session was closed */
+        agt_ses_kill_session(scb->sid,
+                             scb->sid,
+                             SES_TR_CLOSED);
     }
 
     xml_clean_node(&top);

@@ -190,6 +190,7 @@ typedef struct agt_profile_t_ {
     boolean             agt_logappend;
     boolean             agt_xmlorder;
     boolean             agt_deleteall_ok;   /* TBD: not implemented */
+    boolean             agt_stream_output;   /* TBD: no CLI support yet */
     const xmlChar      *agt_accesscontrol;
     const xmlChar      *agt_conffile;
     const xmlChar      *agt_logfile;

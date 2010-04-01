@@ -40,6 +40,8 @@ echo "Check the user manuals in /etc/share/doc/yuma"
 /usr/share/doc/yuma/ChangeLog
 /usr/share/doc/yuma/README
 %{_datadir}/yuma/modules/ietf/*
+%{_datadir}/yuma/modules/netconfcentral/toaster.yang
+%{_datadir}/yuma/modules/netconfcentral/yuma-nacm.yang
 %{_datadir}/yuma/modules/netconfcentral/yuma-app-common.yang
 %{_datadir}/yuma/modules/netconfcentral/yuma-ncx.yang
 %{_datadir}/yuma/modules/netconfcentral/yuma-types.yang
@@ -161,10 +163,8 @@ echo "Check the user manuals in /etc/share/doc/yuma"
 %{_mandir}/man1/netconfd.1.gz
 %{_mandir}/man1/netconf-subsystem.1.gz
 %{_datadir}/yuma/modules/netconfcentral/netconfd.yang
-%{_datadir}/yuma/modules/netconfcentral/toaster.yang
 %{_datadir}/yuma/modules/netconfcentral/yuma-interfaces.yang
 %{_datadir}/yuma/modules/netconfcentral/yuma-mysession.yang
-%{_datadir}/yuma/modules/netconfcentral/yuma-nacm.yang
 %{_datadir}/yuma/modules/netconfcentral/yuma-proc.yang
 %{_datadir}/yuma/modules/netconfcentral/yuma-system.yang
 

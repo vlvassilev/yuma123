@@ -7,8 +7,10 @@ usr/share/doc/yuma/README.gz
 usr/share/yuma/modules/ietf/*
 usr/share/yuma/modules/test/*
 usr/share/yuma/modules/yang/*
+usr/share/yuma/modules/netconfcentral/toaster.yang
 usr/share/yuma/modules/netconfcentral/yuma-app-common.yang
 usr/share/yuma/modules/netconfcentral/yuma-ncx.yang
 usr/share/yuma/modules/netconfcentral/yuma-types.yang
 usr/share/yuma/modules/netconfcentral/yuma-xsd.yang
 usr/share/yuma/modules/netconfcentral/yuma-netconf.yang
+usr/share/yuma/modules/netconfcentral/yuma-nacm.yang

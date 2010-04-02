@@ -15,14 +15,14 @@
       <h1 py:content="mod"/>
       <div class="tabber" id="nclist">
         <?python
-           showcooked = 0
+           showhtml = 0
 	   if ncmodules.count()==1:
 	      for ncmodule in ncmodules:
 	         if ncmodule.isyang:
-	            showcooked = 1
+	            showhtml = 1
         ?>
-        <div class="tabbertab" py:if="showcooked == 1">
-          <h2>Cooked HTML</h2>
+        <div class="tabbertab" py:if="showhtml == 1">
+          <h2>HTML</h2>
           <div>
 	    <?python
        import os,sys
@@ -32,7 +32,7 @@
        if version=='latest':
           version = ncmodule.version
 
-       fname = os.getcwd() + "/ncorg/static/cookedmodules/" + \
+       fname = os.getcwd() + "/ncorg/static/modules/" + \
           mod + "@" + version + ".div"
        try:
            f = open(fname, 'r')
@@ -104,11 +104,20 @@
 
               <tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 
+              <!--
               <tr py:if="ncmodule.docurl">
                 <td>HTML</td>
 		<td><a href="${tg.url(ncmodule.docurl)}" 
 		       py:content="ncmodule.docurl"/></td>
               </tr>
+              -->
+              <tr>
+                <td>Cooked</td>
+		<td>
+                  <a href="${tg.url('/cookedmodules/' + ncmodule.submodname + '/' + ncmodule.version)}"
+		     py:content="'/cookedmodules/' + ncmodule.submodname + '/' + ncmodule.version"/></td>
+              </tr>
+
               <tr py:if="ncmodule.srcurl">
                 <td py:if="ncmodule.isyang == 1">YANG</td>
                 <td py:if="ncmodule.isyang != 1">NCX</td>

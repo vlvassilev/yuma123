@@ -894,6 +894,26 @@ class Root(controllers.RootController):
                     copyright=0)
                     
 
+
+    #################################################################################
+    #
+    # Show module source page
+    # generated with yangdump -f html
+    @expose(template="ncorg.templates.ncmodule_cooked_source")
+    def cookedmodules(self, mod, version='latest', *args, **kw):
+        if version=="latest":
+            ncmodules = Ncmodule.select(AND(Ncmodule.q.modname==mod, 
+                                            Ncmodule.q.islatest=="1"),
+                                        orderBy=Ncmodule.q.modname)
+            for ncmodule in ncmodules:
+                version = ncmodule.version
+
+        return dict(modmenu=moduleJumpMenu,
+                    mod=mod,
+                    version=version,
+                    copyright=0)
+                    
+
     #################################################################################
     #
     # Run Yangdump page

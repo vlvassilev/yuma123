@@ -253,6 +253,7 @@ void
     ncx_module_t         *mod;
     obj_template_t       *cli;
     uint32                nestlevel;
+    help_mode_t           usemode;
 
 #ifdef DEBUG
     if (!modname) {
@@ -283,16 +284,16 @@ void
         log_stdout("\n\n    [start] name separator [value]");
         log_stdout("\n\n  where:");
         log_stdout("\n\n    start == 0, 1, or 2 dashes (foo, -foo, --foo)");
-        log_stdout("\n\n    name == parameter name"
-                   "\n         Parameter name completion "
+        log_stdout("\n\n    name == parameter name (foo)"
+                   "\n\n  Parameter name completion "
                    "will be attempted "
-                   "\n         if a partial name is entered.");
+                   "\n  if a partial name is entered.");
         log_stdout("\n\n    separator == whitespace or equals sign "
                    "(foo=bar, foo bar)");
-        log_stdout("\n\n    value == string value for the parameter.");
-        log_stdout("\n         Strings with whitespace need to be "
-                   "double quoted "
-                   "\n         (--foo=\"some string\")");
+        log_stdout("\n\n    value == string value for the parameter");
+        log_stdout("\n\n Strings with whitespace need to be "
+                   "double quoted."
+                   "\n    (--foo=\"some string\")");
     }
 
     if (mode == HELP_MODE_FULL && mod->descr) {
@@ -307,19 +308,25 @@ void
             SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
             return;
         } else if (cli->objtype == OBJ_TYP_CONTAINER) {
-            log_stdout("\n\n  Command Line Parameters");
-            log_stdout("\n\n    Key:  type name [built-in-type] [default]");
-            log_stdout("\n          built-in YANG type is present for "
-                       "derived types only\n");
+            log_stdout("\n\n Command Line Parameters");
+            log_stdout("\n\n Key:  parm-name [built-in-type] [d:default]\n");
 
+
+            if (mode == HELP_MODE_BRIEF) {
+                usemode = HELP_MODE_NORMAL;
+            } else {
+                usemode = HELP_MODE_FULL;
+            }
+                
             obj_dump_datadefQ(obj_get_datadefQ(cli), 
-                              mode, 
+                              usemode, 
                               nestlevel, 
                               4);
+            log_stdout("\n");
         }
     }
 
-    if (obj_any_rpcs(&mod->datadefQ) && mode != HELP_MODE_BRIEF) {
+    if (obj_any_rpcs(&mod->datadefQ) && mode == HELP_MODE_FULL) {
         log_stdout("\n\n  Local Commands\n");
         dump_rpcQ(&mod->datadefQ, mode, 4);
     }

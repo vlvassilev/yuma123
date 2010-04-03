@@ -85,11 +85,9 @@ install:
 	mkdir -p $(INSTALL_TARGET)
 	mkdir -p $(INSTALL_TARGET)/netconfcentral
 	cp netconfcentral/netconfd.yang $(INSTALL_TARGET)/netconfcentral
-	cp netconfcentral/toaster.yang $(INSTALL_TARGET)/netconfcentral
 	cp netconfcentral/yuma-mysession.yang $(INSTALL_TARGET)/netconfcentral
 	cp netconfcentral/yuma-interfaces.yang $(INSTALL_TARGET)/netconfcentral
 	cp netconfcentral/yuma-mysession.yang $(INSTALL_TARGET)/netconfcentral
-	cp netconfcentral/yuma-nacm.yang $(INSTALL_TARGET)/netconfcentral
 	cp netconfcentral/yuma-proc.yang $(INSTALL_TARGET)/netconfcentral
 	cp netconfcentral/yuma-system.yang $(INSTALL_TARGET)/netconfcentral
 else
@@ -111,6 +109,8 @@ install:
 	cp ietf/*.yang $(INSTALL_TARGET)/ietf
 	cp yang/*.yang $(INSTALL_TARGET)/yang
 	cp test/*.yang $(INSTALL_TARGET)/test
+	cp netconfcentral/toaster.yang $(INSTALL_TARGET)/netconfcentral
+	cp netconfcentral/yuma-nacm.yang $(INSTALL_TARGET)/netconfcentral
 	cp netconfcentral/yuma-app-common.yang $(INSTALL_TARGET)/netconfcentral
 	cp netconfcentral/yuma-ncx.yang $(INSTALL_TARGET)/netconfcentral
 	cp netconfcentral/yuma-types.yang $(INSTALL_TARGET)/netconfcentral

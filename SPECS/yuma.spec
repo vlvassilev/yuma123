@@ -113,16 +113,25 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/yuma/modules/netconfcentral/yangdump.yang
 
 %changelog
-* Thu Mar 04 2010 Andy Bierman <andy at @iwl.com> 0.11.724
+* Fri Apr 02 2010 Andy Bierman <andy at @iwl.com> 0.11-2
+  * Added 'stream_output' boolean to session hdr to disable
+    server output streaming, if desired
+  * Updated ietf-yang-types and ietf-netconf-with-defaults
+    modules
+  * Split yangdump SIL code generation out into yangdumpcode
+  * Fixed packaging bug that put some YANG modules in the
+    wrong package
+  * Fixed bug in yangcli autoload feature
+* Thu Mar 04 2010 Andy Bierman <andy at @iwl.com> 0.11-1
   * Align with YANG draft-11
   * Changed default startup-cfg.xml creation path so
     the current directory is not used.
-*  Mon Feb 22 2010  Andy Bierman <andyb at iwl.com> 0.10.714
+*  Mon Feb 22 2010  Andy Bierman <andyb at iwl.com> 0.10-2
  - Supporting new ietf-yang-types and ietf-netconf-monitoring 
    modules
  - Updated yuma-nacm module to match I-D version
  - Fixed bug in netconfd <error-path> for unknown nodes
-*  Mon Feb 01 2010  Andy Bierman <andyb at iwl.com> 0.10.664
+*  Mon Feb 01 2010  Andy Bierman <andyb at iwl.com> 0.10-1
  - Supporting yang-10 draft
  - Add support for revision in module param (foo@2010-01-15)
  - Add feature CLI parms to control feature code generation

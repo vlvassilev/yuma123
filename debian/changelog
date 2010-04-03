@@ -4,7 +4,10 @@ yuma (0.11-2) unstable; urgency=low
   * Updated ietf-yang-types and ietf-netconf-with-defaults
     modules
   * Split yangdump SIL code generation out into yangdumpcode
- -- Andy Bierman <andyb@iwl.com>  Mon, 05 Apr 2010 15:20:00 -0800
+  * Fixed packaging bug that put some YANG modules in the
+    wrong package
+  * Fixed bug in yangcli autoload feature
+ -- Andy Bierman <andyb@iwl.com>  Fri, 02 Apr 2010 17:49:00 -0800
 yuma (0.11-1) unstable; urgency=low
   * Align with YANG draft-11
   * Changed default startup-cfg.xml creation path so

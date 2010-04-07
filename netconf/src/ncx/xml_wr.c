@@ -141,6 +141,15 @@ static boolean
         return TRUE;
     }
 
+    /* make sure leafs are printed without leading and
+     * trailing whitespace in a normal session
+     */
+    if (scb->mode == SES_MODE_XML) {
+        if (obj_is_leafy(val->obj)) {
+            return TRUE;
+        }
+    }
+
     if (!val_fit_oneline(val, SES_LINESIZE(scb))) {
         return FALSE;
     }
@@ -1822,8 +1831,6 @@ status_t
         sesmode = ses_get_mode(scb);
         ses_set_mode(scb, SES_MODE_XMLDOC);
     }
-
-    fitoneline = val_fit_oneline(val, SES_LINESIZE(scb));
     
     /* send the XML declaration */
     if (res == NO_ERR && xmlhdr) {
@@ -1888,6 +1895,8 @@ status_t
         anyout = TRUE;
 
         if (hascontent) {
+            fitoneline = fit_on_line(scb, val);
+
             /* output the contents of the value */
             xml_wr_check_val(scb, 
                              &msg->mhdr, 

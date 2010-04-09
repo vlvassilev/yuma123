@@ -402,7 +402,6 @@ static status_t
             return ERR_NCX_WRONG_TYPE;
         }
 
-
         if (vartype == VAR_TYP_CONFIG && var->val->typdef != NULL) {
             /* do not replace this typdef since it might
              * not be generic like all the user variables
@@ -835,6 +834,42 @@ status_t
     return var_set_str_que(varQ, name, xml_strlen(name), value);
 
 }  /* var_set_que */
+
+
+/********************************************************************
+* FUNCTION var_set_move_que
+* 
+* Find or create and set a Q-based user variable
+* 
+* INPUTS:
+*   varQ == varbind Q to use
+*   name == var name to set
+*   value == var value to set (pass off memory, do not clone!)
+* 
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    var_set_move_que (dlq_hdr_t *varQ,
+                      const xmlChar *name,
+                      val_value_t *value)
+{
+    status_t      res;
+
+#ifdef DEBUG
+    if (!varQ || !name) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = set_str(varQ, 
+                  name, 
+                  xml_strlen(name), 
+                  value,   /* pass off value memory here */
+                  VAR_TYP_QUEUE);
+    return res;
+
+}  /* var_set_move_que */
 
 
 /********************************************************************

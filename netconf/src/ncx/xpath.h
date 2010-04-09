@@ -270,6 +270,28 @@ typedef enum xpath_nodetype_t_ {
 } xpath_nodetype_t;
 
 
+/* xpath_getvar_fn_t
+ *
+ * Callback function for retrieval of a variable binding
+ * 
+ * INPUTS:
+ *   pcb   == XPath parser control block in use
+ *   varname == variable name requested
+ *   res == address of return status
+ *
+ * OUTPUTS:
+ *  *res == return status
+ *
+ * RETURNS:
+ *    pointer to the ncx_var_t data structure
+ *    for the specified varbind (malloced and filled in)
+ */
+typedef ncx_var_t *
+    (*xpath_getvar_fn_t) (struct xpath_pcb_t_ *pcb,
+                          const xmlChar *varname,
+                          status_t *res);
+
+
 /* XPath result node struct */
 typedef struct xpath_resnode_t_ {
     dlq_hdr_t             qhdr;
@@ -330,17 +352,18 @@ typedef struct xpath_pcb_t_ {
     xpath_curmode_t        curmode;     /* select targ/alt/var obj */
 
     /* these parms are used by leafref and XPath1 parsing */
-    obj_template_t  *obj;            /* bptr to start object */
-    ncx_module_t          *objmod;        /* module containing obj */
-    obj_template_t  *docroot;        /* bptr to <config> obj */
-    xpath_document_t       doctype;
-    val_value_t           *val;                  /* current() node */
-    val_value_t           *val_docroot;        /* cfg->root for db */
+    obj_template_t    *obj;            /* bptr to start object */
+    ncx_module_t      *objmod;        /* module containing obj */
+    obj_template_t    *docroot;        /* bptr to <config> obj */
+    val_value_t       *val;                  /* current() node */
+    val_value_t       *val_docroot;        /* cfg->root for db */
+    xpath_document_t   doctype;
+
     /* these parms are used for XPath1 processing
      * against a target database 
      */
-    uint32               flags;
-    xpath_result_t      *result;
+    uint32              flags;
+    xpath_result_t     *result;
 
     /* additive XPath1 context back- pointer to current 
      * step results; initially NULL and modified until
@@ -349,10 +372,21 @@ typedef struct xpath_pcb_t_ {
     xpath_resnode_t      context;      /* relative context */
     xpath_resnode_t      orig_context;  /* for current() fn */
 
-    /* The varbindQ is passed in as a parameter by the app
-     * It contains zero or more ncx_var_t structs
+    /* The getvar_fn callback function may be set to allow
+     * user variables to be supported in this XPath expression
      */
-    dlq_hdr_t           *varbindQ;         /* Q of ncx_var_t */
+    xpath_getvar_fn_t    getvar_fn;
+
+    /* The varbindQ may be used instead of the getvar_fn
+     * to store user variables to be supported in 
+     * this XPath expression
+     */
+    dlq_hdr_t            varbindQ;
+
+    /* this cookie is used by the getvar callback function
+     * to save some context, like a session control block back-ptr
+     */
+    void                *cookie;
 
     /* The function Q is a copy of the global Q
      * It is not hardwired in case app-specific extensions
@@ -647,12 +681,16 @@ extern status_t
 * INPUTS:
 *   xpathstr == XPath expression string to save (a copy will be made)
 *            == NULL if this step should be skipped
+*   getvar_fn == callback function to retirieve an XPath
+*                variable binding
+*                NULL if no variables are used
 *
 * RETURNS:
 *   pointer to malloced struct, NULL if malloc error
 *********************************************************************/
 extern xpath_pcb_t *
-    xpath_new_pcb (const xmlChar *xpathstr);
+    xpath_new_pcb (const xmlChar *xpathstr,
+                   xpath_getvar_fn_t  getvar_fn);
 
 
 /********************************************************************
@@ -954,5 +992,50 @@ extern status_t
 *********************************************************************/
 extern dlq_hdr_t *
     xpath_get_resnodeQ (xpath_result_t *result);
+
+
+/********************************************************************
+* FUNCTION xpath_get_varbindQ
+* 
+* Get the varbindQ from a parser control block struct
+*
+* INPUTS:
+*    pcb == parser control block to use
+*
+* RETURNS:
+*   pointer to varbindQ or NULL if some error
+*********************************************************************/
+extern dlq_hdr_t *
+    xpath_get_varbindQ (xpath_pcb_t *pcb);
+
+
+/********************************************************************
+* FUNCTION xpath_set_cookie
+* 
+* Set the pcb cookie
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    cookie == cookie value to set
+*********************************************************************/
+extern void
+    xpath_set_cookie (xpath_pcb_t *pcb,
+                      void *cookie);
+
+
+/********************************************************************
+* FUNCTION xpath_get_cookie
+* 
+* Get the pcb cookie
+*
+* INPUTS:
+*    pcb == parser control block to use
+*
+* RETURNS:
+*    cookie value from pcb
+*********************************************************************/
+extern void *
+    xpath_get_cookie (xpath_pcb_t *pcb);
+
 
 #endif	    /* _H_xpath */

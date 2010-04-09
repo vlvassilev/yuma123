@@ -51,6 +51,15 @@ date	     init     comment
 #include "status.h"
 #endif
 
+#ifndef _H_var
+#include "var.h"
+#endif
+
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
+
 /********************************************************************
 *								    *
 *			 C O N S T A N T S			    *
@@ -96,6 +105,10 @@ typedef struct mgr_scb_t_ {
     /* RPC request info */
     uint32           next_id;
     dlq_hdr_t        reqQ;
+
+    /* XPath variable binding callback function */
+    xpath_getvar_fn_t   getvar_fn;
+
 } mgr_scb_t;
 
 
@@ -198,5 +211,24 @@ extern void
 *********************************************************************/
 extern boolean
     mgr_shutdown_requested (void);
+
+
+/********************************************************************
+* FUNCTION mgr_set_getvar_fn
+* 
+* Set the getvar_fn callback for the session
+* 
+* INPUTS:
+*   sid == manager session ID to use
+*   getvar_fn == function to use 
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    mgr_set_getvar_fn (ses_id_t  sid,
+                       xpath_getvar_fn_t getvar_fn);
+
+
 
 #endif	    /* _H_mgr */

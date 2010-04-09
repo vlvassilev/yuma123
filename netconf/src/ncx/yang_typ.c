@@ -2199,7 +2199,8 @@ static status_t
                      * data type is needed to set the starting
                      * context node
                      */
-                    sim->xleafref = xpath_new_pcb(TK_CUR_VAL(tkc));
+                    sim->xleafref = xpath_new_pcb(TK_CUR_VAL(tkc), 
+                                                  NULL);
                     if (!sim->xleafref) {
                         res = ERR_INTERNAL_MEM;
                         ncx_print_errormsg(tkc, mod, res);

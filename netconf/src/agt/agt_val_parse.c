@@ -1512,9 +1512,12 @@ static status_t
                 break;
             }  /* else fall through and parse XPath string */
         case NCX_BT_INSTANCE_ID:
-            retval->xpathpcb = xpath_new_pcb(valnode.simval);
+            res = NO_ERR;
+            retval->xpathpcb = agt_new_xpath_pcb(scb,
+                                                 valnode.simval,
+                                                 &res);
             if (!retval->xpathpcb) {
-                res = ERR_INTERNAL_MEM;
+                ; /* res already set */
             } else if (btyp == NCX_BT_INSTANCE_ID ||
                        obj_is_schema_instance_string(obj)) {
                 /* do a first pass parsing to resolve all

@@ -4503,45 +4503,36 @@ static ncx_var_t *
                  const xmlChar *name,
                  status_t  *res)
 {
-    ncx_module_t *targmod;
     ncx_var_t    *var;
-    xmlns_id_t    nsid;
 
-    nsid = 0;
+    var = NULL;
     *res = NO_ERR;
 
-    /* check if prefix set and specifies an import */
-    if (pcb->source != XP_SRC_XML) {
-        if (prefix && prefixlen && 
-            xml_strlen(pcb->tkerr.mod->prefix) == prefixlen &&
-            xml_strncmp(pcb->tkerr.mod->prefix, prefix, prefixlen)) {
-
-            *res = xpath_get_curmod_from_prefix_str(prefix,
-                                                    prefixlen,
-                                                    pcb->tkerr.mod,
-                                                    &targmod);
-            if (*res == NO_ERR) {
-                nsid = targmod->nsid;
+    /* 
+     * varbinds with prefixes are not supported in NETCONF
+     * there is no way to define a varbind in a YANG module
+     * so they do not correlate to modules.
+     *
+     * They are name to value node bindings in yuma
+     * and the pcb needs to be pre-configured with
+     * a queue of varbinds or a callback function to get the
+     * requested variable binding 
+     */
+    if (prefix && prefixlen) {
+        /* no variables with prefixes allowed !!! */
+        *res = ERR_NCX_DEF_NOT_FOUND;
+    } else {
+        /* try to find the variable */
+        if (pcb->getvar_fn) {
+            var = (*pcb->getvar_fn)(pcb, name, res);
+        } else {
+            var = var_get_que_raw(&pcb->varbindQ, 0, name);
+            if (!var) {
+                *res = ERR_NCX_DEF_NOT_FOUND;
             }
         }
-    } else if (pcb->reader) {
-        *res = xml_get_namespace_id(pcb->reader,
-                                    prefix,
-                                    prefixlen,
-                                    &nsid);
-    } else {
-        *res = ERR_NCX_DEF_NOT_FOUND;
     }
 
-    if (*res != NO_ERR) {
-        return NULL;
-    }
-
-    /* try to find the variable */
-    var = var_get_que_raw(pcb->varbindQ, nsid, name);
-    if (!var) {
-        *res = ERR_NCX_DEF_NOT_FOUND;
-    }
     return var;
 
 }  /* get_varbind */
@@ -7250,10 +7241,14 @@ static xpath_result_t *
             return NULL;
         }
 
-        /* get QName or NCName variable reference */
-        if (*res == NO_ERR) {
+        /* get QName or NCName variable reference
+         * but only if this get is a real one
+         */
+        if (*res == NO_ERR && pcb->val) {
             if (TK_CUR_TYP(pcb->tkc) == TK_TT_VARBIND) {
-                varbind = get_varbind(pcb, NULL, 0, 
+                varbind = get_varbind(pcb, 
+                                      NULL, 
+                                      0, 
                                       TK_CUR_VAL(pcb->tkc), res);
                 errstr = TK_CUR_VAL(pcb->tkc);
             } else {
@@ -8719,7 +8714,7 @@ status_t
 *   - QName prefixes are valid
 *   - function calls are well-formed and exist in
 *     the pcb->functions array
-*   - variable references exist in the pcb->varbindQ
+*   - variable references exist in the &pcb->varbindQ
 *
 * parse expr with YANG prefixes: must/when
 * called from final OBJ xpath check after all

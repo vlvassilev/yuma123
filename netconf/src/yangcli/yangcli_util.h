@@ -51,6 +51,10 @@ date	     init     comment
 #include "yangcli.h"
 #endif
 
+#ifndef _H_var
+#include "var.h"
+#endif
+
 
 /********************************************************************
 *								    *
@@ -421,5 +425,31 @@ extern void
 extern void
     set_completion_state_curparm (completion_state_t *completion_state,
 				  obj_template_t *parm);
+
+
+/********************************************************************
+* FUNCTION xpath_getvar_fn
+ *
+ * see ncx/xpath.h -- matches xpath_getvar_fn_t template
+ *
+ * Callback function for retrieval of a variable binding
+ * 
+ * INPUTS:
+ *   pcb   == XPath parser control block in use
+ *   varname == variable name requested
+ *   res == address of return status
+ *
+ * OUTPUTS:
+ *  *res == return status
+ *
+ * RETURNS:
+ *    pointer to the ncx_var_t data structure
+ *    for the specified varbind
+*********************************************************************/
+extern ncx_var_t *
+    xpath_getvar_fn (struct xpath_pcb_t_ *pcb,
+                     const xmlChar *varname,
+                     status_t *res);
+
 
 #endif	    /* _H_yangcli_util */

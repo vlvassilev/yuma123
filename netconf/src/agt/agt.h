@@ -147,6 +147,8 @@ date	     init     comment
 
 #define AGT_DEF_CONF_FILE (const xmlChar *)"/etc/yuma/netconfd.conf"
 
+#define AGT_USER_VAR      (const xmlChar *)"user"
+
 
 /********************************************************************
 *								    *

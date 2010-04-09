@@ -1950,4 +1950,71 @@ status_t
 }  /* agt_check_cache */
 
 
+
+/********************************************************************
+* FUNCTION agt_new_xpath_pcb
+*
+* Get a new XPath parser control block and
+* set up the server variable bindings
+*
+* INPUTS:
+*   scb == session evaluating the XPath expression
+*   expr == expression string to use (may be NULL)
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced and initialied xpath_pcb_t structure
+*   NULL if some error
+*********************************************************************/
+xpath_pcb_t *
+    agt_new_xpath_pcb (ses_cb_t *scb,
+                       const xmlChar *expr,
+                       status_t *res)
+{
+    val_value_t   *userval;
+    xpath_pcb_t   *pcb;
+    dlq_hdr_t     *varbindQ;
+
+#ifdef DEBUG
+    if (scb == NULL || res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+    if (scb->username == NULL) {
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+#endif
+
+    pcb = xpath_new_pcb(expr, NULL);
+    if (pcb == NULL) {
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+
+    userval = val_make_string(0, AGT_USER_VAR, scb->username);
+    if (userval == NULL) {
+        xpath_free_pcb(pcb);
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+
+    varbindQ = xpath_get_varbindQ(pcb);
+
+    *res = var_set_move_que(varbindQ, AGT_USER_VAR, userval);
+    if (*res != NO_ERR) {
+        val_free_value(userval);
+        xpath_free_pcb(pcb);
+        pcb = NULL;
+    } /* else userval memory stored in varbindQ now */
+
+    return pcb;
+    
+}  /* agt_new_xpath_pcb */
+
+
+
 /* END file agt_util.c */

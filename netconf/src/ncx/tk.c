@@ -1405,23 +1405,25 @@ static status_t
     tokenize_varbind_string (tk_chain_t *tkc)
 {
     xmlChar        *str;
-    const xmlChar  *prefix, *item;
+    const xmlChar  *prefix, *name, *item;
     tk_token_t     *tk;
     uint32          len, prelen;
     status_t        res;
-
+    
     prefix = NULL;
+    name = NULL;
     item = NULL;
     prelen = 0;
 
     /* the bptr is pointing at the dollar sign char */
     str = tkc->bptr+1;
+    name = str;
     while (ncx_valid_name_ch(*str)) {
         str++;
     }
 
     /* check reasonable length for a QName */
-    len = (uint32)(str - tkc->bptr+1);
+    len = (uint32)(str - name);
     if (!len || len > NCX_MAX_NLEN) {
         return finish_string(tkc, str);
     }

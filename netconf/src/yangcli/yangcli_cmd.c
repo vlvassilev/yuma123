@@ -1972,12 +1972,19 @@ static void
                               server, 
                               port, 
                               server_cb->temp_progcb,
-                              &server_cb->mysid);
+                              &server_cb->mysid,
+                              xpath_getvar_fn);
     if (res == NO_ERR) {
         server_cb->state = MGR_IO_ST_CONN_START;
         log_debug("\nyangcli: Start session %d OK for server '%s'", 
                   server_cb->mysid, 
                   server_cb->name);
+
+        res = mgr_set_getvar_fn(server_cb->mysid,
+                                xpath_getvar_fn);
+        if (res != NO_ERR) {
+            log_error("\nError: Could not set XPath variable callback");
+        }
     } else {
         log_info("\nyangcli: Start session failed for user %s on "
                  "%s (%s)\n", 

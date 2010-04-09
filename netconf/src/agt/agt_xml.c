@@ -224,9 +224,12 @@ static status_t
                          * 'key' attributes are supported at this time.
                          */
                         if (!xml_strcmp(&name[plen], NCX_EL_SELECT)) {
-                            attr->attr_xpcb = xpath_new_pcb(value);
+                            res = NO_ERR;
+                            attr->attr_xpcb = agt_new_xpath_pcb(scb,
+                                                                value,
+                                                                &res);
                             if (!attr->attr_xpcb) {
-                                res = ERR_INTERNAL_MEM;
+                                ;  /* res already set */
                             } else {
                                 /* do a first pass parsing to resolve all
                                  * the prefixes and check well-formed XPath
@@ -247,9 +250,12 @@ static status_t
                                 }
                             }
                         } else if (!xml_strcmp(&name[plen], NCX_EL_KEY)) {
-                            attr->attr_xpcb = xpath_new_pcb(value);
+                            res = NO_ERR;
+                            attr->attr_xpcb = agt_new_xpath_pcb(scb,
+                                                                value,
+                                                                &res);
                             if (!attr->attr_xpcb) {
-                                res = ERR_INTERNAL_MEM;
+                                ;  /* res already set */
                             } else {
                                 res = xpath_yang_validate_xmlkey
                                     (scb->reader,

@@ -1602,7 +1602,7 @@ status_t
         /* else fall through and treat XPath string */
     case NCX_BT_INSTANCE_ID:
         /* instance-identifier is handled with xpath.c xpath1.c */
-        xpathpcb = xpath_new_pcb(strval);
+        xpathpcb = xpath_new_pcb(strval, NULL);
         if (xpathpcb == NULL) {
             res = ERR_INTERNAL_MEM;
         } else if (btyp == NCX_BT_INSTANCE_ID ||
@@ -4233,7 +4233,7 @@ status_t
             } else if (typ_is_xpath_string(val->typdef) ||
                        (val->obj && obj_is_xpath_string(val->obj))) {
 
-                xpathpcb = xpath_new_pcb(VAL_STR(val));
+                xpathpcb = xpath_new_pcb(VAL_STR(val), NULL);
                 if (!xpathpcb) {
                     res = ERR_INTERNAL_MEM;
                 } else {
@@ -4265,7 +4265,7 @@ status_t
         if (!VAL_STR(val)) {
             res = ERR_INTERNAL_MEM;
         } else {
-            xpathpcb = xpath_new_pcb(VAL_STR(val));
+            xpathpcb = xpath_new_pcb(VAL_STR(val), NULL);
             if (!xpathpcb) {
                 res = ERR_INTERNAL_MEM;
             } else {

@@ -48,6 +48,10 @@ date             init     comment
 #include "status.h"
 #endif
 
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -117,6 +121,7 @@ extern void
 *          == NULL if a session temp files control block is not
 *             needed
 *   retsid == address of session ID output
+*   getvar_cb == XPath get varbind callback function
 *
 * OUTPUTS:
 *   *retsid == session ID, if no error
@@ -130,7 +135,8 @@ extern status_t
 			 const xmlChar *target,
 			 uint16 port,
                          ncxmod_temp_progcb_t *progcb,
-			 ses_id_t *retsid);
+			 ses_id_t *retsid,
+                         xpath_getvar_fn_t getvar_fn);
 
 
 /********************************************************************

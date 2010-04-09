@@ -510,6 +510,7 @@ void
 *          == NULL if a session temp files control block is not
 *             needed
 *   retsid == address of session ID output
+*   getvar_cb == XPath get varbind callback function
 *
 * OUTPUTS:
 *   *retsid == session ID, if no error
@@ -523,7 +524,8 @@ status_t
                          const xmlChar *target,
                          uint16 port,
                          ncxmod_temp_progcb_t *progcb,
-                         ses_id_t *retsid)
+                         ses_id_t *retsid,
+                         xpath_getvar_fn_t getvar_fn)
 {
     ses_cb_t  *scb;
     mgr_scb_t *mscb;
@@ -594,7 +596,7 @@ status_t
     scb->instate = SES_INST_IDLE;
     scb->rdfn = mgr_ses_readfn;
     scb->wrfn = mgr_ses_writefn;
-
+    
     /* get a temp files directory for this session */
     if (progcb != NULL) {
         res = NO_ERR;
@@ -612,6 +614,7 @@ status_t
     /* not important if the user name is missing on the manager */
     scb->username = xml_strdup((const xmlChar *)user);
     mscb->target = xml_strdup(target);
+    mscb->getvar_fn = getvar_fn;
 
     /* get the hostname for the specified target */
     hent = gethostbyname((const char *)target);
@@ -686,7 +689,6 @@ status_t
 void
     mgr_ses_free_session (ses_id_t sid)
 {
-
     ses_cb_t  *scb;
 
 #ifdef DEBUG

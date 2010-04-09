@@ -214,6 +214,25 @@ extern status_t
 
 
 /********************************************************************
+* FUNCTION var_set_move_que
+* 
+* Find or create and set a Q-based user variable
+* 
+* INPUTS:
+*   varQ == varbind Q to use
+*   name == var name to set
+*   value == var value to set (pass off memory, do not clone!)
+* 
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    var_set_move_que (dlq_hdr_t *varQ,
+                      const xmlChar *name,
+                      val_value_t *value);
+
+
+/********************************************************************
 * FUNCTION var_set_move
 * 
 * Find and set (or create a new) global user variable

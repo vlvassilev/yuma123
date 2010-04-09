@@ -2,7 +2,7 @@ yangcli README version 1
 
 Overview
 
-    Simple single-threaded, single-session NETCONF manager
+    Simple single-threaded, single-session NETCONF client
     Provides CLI interface to NETCONF operations for testing purposes
 
     Interactive mode provides a basic CLI interface for 
@@ -14,13 +14,13 @@ Overview
 
     NETCONF operations defined in netconf.yang
     (rpc constructs) are available as commands when connected
-    to an agent.
+    to a server.
 
     Local commands available at any time are defined in
     yangcli.yang.
 
     Any RPC method defined in any NCX module is available
-    as a command when connected to an agent.
+    as a command when connected to a server.
 
     Script mode provides a basic script environment.
 
@@ -107,7 +107,7 @@ Overview
 
     If the module prefix is not present, then the default-module
     will be used instead first, and then (if connected) the 
-    agent RPC methods will be checked.
+    server RPC methods will be checked.
 
        edit-config test-option=test-only config=$myconfig \
           error-option=stop-on-error default-operation=none
@@ -187,5 +187,5 @@ Overview
        run script=connect-script P1=myserver.example.com
 
        # script connect using global user and password
-       connect user=$$username password=$$pass agent=$1
+       connect user=$$username password=$$pass server=$1
 

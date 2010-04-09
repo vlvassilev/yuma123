@@ -87,6 +87,10 @@ date         init     comment
 #include "val_util.h"
 #endif
 
+#ifndef _H_var
+#include "var.h"
+#endif
+
 #ifndef _H_xmlns
 #include "xmlns.h"
 #endif
@@ -795,7 +799,7 @@ val_value_t *
     *retres = NO_ERR;
 
     /* get a parser block for the instance-id */
-    xpathpcb = xpath_new_pcb(target);
+    xpathpcb = xpath_new_pcb(target, NULL);
     if (!xpathpcb) {
         log_error("\nError: malloc failed");
         *retres = ERR_INTERNAL_MEM;
@@ -1015,6 +1019,46 @@ void
     completion_state->cmdcurparm = parm;
 
 }  /* set_completion_state_curparm */
+
+
+
+/********************************************************************
+* FUNCTION xpath_getvar_fn
+ *
+ * see ncx/xpath.h -- matches xpath_getvar_fn_t template
+ *
+ * Callback function for retrieval of a variable binding
+ * 
+ * INPUTS:
+ *   pcb   == XPath parser control block in use
+ *   varname == variable name requested
+ *   res == address of return status
+ *
+ * OUTPUTS:
+ *  *res == return status
+ *
+ * RETURNS:
+ *    pointer to the ncx_var_t data structure
+ *    for the specified varbind
+*********************************************************************/
+ncx_var_t *
+    xpath_getvar_fn (struct xpath_pcb_t_ *pcb,
+                     const xmlChar *varname,
+                     status_t *res)
+{
+#ifdef DEBUG
+    if (pcb == NULL || varname == NULL || res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    (void)pcb;
+    (void)varname;
+    *res = ERR_NCX_DEF_NOT_FOUND;
+    return NULL;
+
+}  /* xpath_getvar_fn */
 
 
 /* END yangcli_util.c */

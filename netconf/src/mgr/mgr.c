@@ -91,6 +91,10 @@ date         init     comment
 #include  "val.h"
 #endif
 
+#ifndef _H_var
+#include  "var.h"
+#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -376,6 +380,36 @@ boolean
     return mgr_shutdown;
 
 }  /* mgr_shutdown_requested */
+
+
+/********************************************************************
+* FUNCTION mgr_set_getvar_fn
+* 
+* Set the getvar_fn callback for the session
+* 
+* INPUTS:
+*   sid == manager session ID to use
+*   getvar_fn == function to use 
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    mgr_set_getvar_fn (ses_id_t  sid,
+                       xpath_getvar_fn_t getvar_fn)
+{
+    ses_cb_t               *scb;
+    mgr_scb_t              *mscb;
+
+    scb = mgr_ses_get_scb(sid);
+    if (scb == NULL) {
+        return ERR_NCX_NOT_FOUND;
+    }
+    mscb = mgr_ses_get_mscb(scb);
+    mscb->getvar_fn = getvar_fn;
+    return NO_ERR;
+
+}  /* mgr_set_getvar_fn */
 
 
 /* END file mgr.c */

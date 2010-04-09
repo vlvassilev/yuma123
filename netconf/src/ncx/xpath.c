@@ -69,6 +69,10 @@ date         init     comment
 #include "typ.h"
 #endif
 
+#ifndef _H_var
+#include "var.h"
+#endif
+
 #ifndef _H_xpath
 #include "xpath.h"
 #endif
@@ -1720,12 +1724,16 @@ status_t
 * INPUTS:
 *   xpathstr == XPath expression string to save (a copy will be made)
 *            == NULL if this step should be skipped
+*   getvar_fn == callback function to retirieve an XPath
+*                variable binding
+*                NULL if no variables are used
 *
 * RETURNS:
 *   pointer to malloced struct, NULL if malloc error
 *********************************************************************/
 xpath_pcb_t *
-    xpath_new_pcb (const xmlChar *xpathstr)
+    xpath_new_pcb (const xmlChar *xpathstr,
+                   xpath_getvar_fn_t  getvar_fn)
 {
     xpath_pcb_t *pcb;
 
@@ -1747,9 +1755,11 @@ xpath_pcb_t *
     ncx_init_errinfo(&pcb->errinfo);
 
     pcb->functions = xpath1_get_functions_ptr();
+    pcb->getvar_fn = getvar_fn;
 
     dlq_createSQue(&pcb->result_cacheQ);
     dlq_createSQue(&pcb->resnode_cacheQ);
+    dlq_createSQue(&pcb->varbindQ);
 
     return pcb;
 
@@ -1784,7 +1794,7 @@ xpath_pcb_t *
     }
 #endif
 
-    newpcb = xpath_new_pcb(srcpcb->exprstr);
+    newpcb = xpath_new_pcb(srcpcb->exprstr, srcpcb->getvar_fn);
     if (!newpcb) {
         return NULL;
     }
@@ -1822,7 +1832,6 @@ xpath_pcb_t *
     newpcb->flags = srcpcb->flags;
     /*** skip copying the scratch result ***/
     /*** ??? context ??? ***/
-    /*** ??? varbindQ ??? ***/
     newpcb->functions = srcpcb->functions;
     /* result_cacheQ not copied */
     /* resnode_cacheQ not copied */
@@ -1832,6 +1841,8 @@ xpath_pcb_t *
     newpcb->validateres = srcpcb->validateres;
     newpcb->valueres = srcpcb->valueres;
     newpcb->seen = srcpcb->seen;
+
+    /*** does the varbindQ need to be cloned?  ***/
 
     return newpcb;
 
@@ -1925,6 +1936,7 @@ void
         xpath_free_resnode(resnode);
     }
 
+    var_clean_varQ(&pcb->varbindQ);
 
     m__free(pcb);
 
@@ -2649,5 +2661,78 @@ dlq_hdr_t *
 
 }  /* xpath_get_resnodeQ */
 
+
+/********************************************************************
+* FUNCTION xpath_get_varbindQ
+* 
+* Get the varbindQ from a parser control block struct
+*
+* INPUTS:
+*    pcb == parser control block to use
+*
+* RETURNS:
+*   pointer to varbindQ or NULL if some error
+*********************************************************************/
+dlq_hdr_t *
+    xpath_get_varbindQ (xpath_pcb_t *pcb)
+{
+#ifdef DEBUG
+    if (!pcb) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    return &pcb->varbindQ;
+
+}  /* xpath_get_varbindQ */
+
+
+/********************************************************************
+* FUNCTION xpath_set_cookie
+* 
+* Set the pcb cookie
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    cookie == cookie value to set
+*********************************************************************/
+void
+    xpath_set_cookie (xpath_pcb_t *pcb,
+                      void *cookie)
+{
+#ifdef DEBUG
+    if (pcb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+    pcb->cookie = cookie;
+
+}  /* xpath_set_cookie */
+
+
+/********************************************************************
+* FUNCTION xpath_get_cookie
+* 
+* Get the pcb cookie
+*
+* INPUTS:
+*    pcb == parser control block to use
+*
+* RETURNS:
+*    cookie value from pcb
+*********************************************************************/
+void *
+    xpath_get_cookie (xpath_pcb_t *pcb)
+{
+#ifdef DEBUG
+    if (pcb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+    return pcb->cookie;
+}  /* xpath_get_cookie */
 
 /* END xpath.c */

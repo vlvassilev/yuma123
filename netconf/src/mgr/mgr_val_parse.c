@@ -1048,7 +1048,7 @@ static status_t
                 break;
             }  /* else fall through and parse XPath string */
         case NCX_BT_INSTANCE_ID:
-            retval->xpathpcb = xpath_new_pcb(valnode.simval);
+            retval->xpathpcb = xpath_new_pcb(valnode.simval, NULL);
             if (!retval->xpathpcb) {
                 res = ERR_INTERNAL_MEM;
             } else if (btyp == NCX_BT_INSTANCE_ID ||

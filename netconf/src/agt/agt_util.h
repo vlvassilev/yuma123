@@ -76,6 +76,10 @@ date	     init     comment
 #include "xml_util.h"
 #endif
 
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
 /********************************************************************
 *								    *
 *			F U N C T I O N S			    *
@@ -654,5 +658,30 @@ extern status_t
                      val_value_t *newval,
                      val_value_t *curval,
                      op_editop_t editop);
+
+
+/********************************************************************
+* FUNCTION agt_new_xpath_pcb
+*
+* Get a new XPath parser control block and
+* set up the server variable bindings
+*
+* INPUTS:
+*   scb == session evaluating the XPath expression
+*   expr == expression string to use (may be NULL)
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced and initialied xpath_pcb_t structure
+*   NULL if some error
+*********************************************************************/
+extern xpath_pcb_t *
+    agt_new_xpath_pcb (ses_cb_t *scb,
+                       const xmlChar *expr,
+                       status_t *res);
+
 
 #endif	    /* _H_agt_util */

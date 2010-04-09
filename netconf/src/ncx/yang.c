@@ -1434,7 +1434,7 @@ status_t
     }
 #endif
 
-    must = xpath_new_pcb(NULL);
+    must = xpath_new_pcb(NULL, NULL);
     if (!must) {
         res = ERR_INTERNAL_MEM;
         ncx_print_errormsg(tkc, mod, res);
@@ -1645,7 +1645,7 @@ status_t
         }
     }
 
-    when = xpath_new_pcb(NULL);
+    when = xpath_new_pcb(NULL, NULL);
     if (!when) {
         res = ERR_INTERNAL_MEM;
         ncx_print_errormsg(tkc, mod, res);

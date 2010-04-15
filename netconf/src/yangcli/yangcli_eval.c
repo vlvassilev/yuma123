@@ -1,0 +1,343 @@
+/*
+ * Copyright (c) 2010, Netconf Central, Inc.
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.    
+ */
+/*  FILE: yangcli_eval.c
+
+   NETCONF YANG-based CLI Tool
+
+   XPath evaluation support
+
+*********************************************************************
+*                                                                   *
+*                  C H A N G E   H I S T O R Y                      *
+*                                                                   *
+*********************************************************************
+
+date         init     comment
+----------------------------------------------------------------------
+13-aug-09    abb      begun; started from yangcli_cmd.c
+
+*********************************************************************
+*                                                                   *
+*                     I N C L U D E    F I L E S                    *
+*                                                                   *
+*********************************************************************/
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <libssh2.h>
+#include <netinet/in.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <stdio.h>
+#include <ctype.h>
+#include "libtecla.h"
+
+#ifndef _H_procdefs
+#include "procdefs.h"
+#endif
+
+#ifndef _H_log
+#include "log.h"
+#endif
+
+#ifndef _H_mgr
+#include "mgr.h"
+#endif
+
+#ifndef _H_mgr_ses
+#include "mgr_ses.h"
+#endif
+
+#ifndef _H_ncx
+#include "ncx.h"
+#endif
+
+#ifndef _H_ncx_num
+#include "ncx_num.h"
+#endif
+
+#ifndef _H_ncxconst
+#include "ncxconst.h"
+#endif
+
+#ifndef _H_ncxmod
+#include "ncxmod.h"
+#endif
+
+#ifndef _H_obj
+#include "obj.h"
+#endif
+
+#ifndef _H_op
+#include "op.h"
+#endif
+
+#ifndef _H_rpc
+#include "rpc.h"
+#endif
+
+#ifndef _H_rpc_err
+#include "rpc_err.h"
+#endif
+
+#ifndef _H_status
+#include "status.h"
+#endif
+
+#ifndef _H_val_util
+#include "val_util.h"
+#endif
+
+#ifndef _H_var
+#include "var.h"
+#endif
+
+#ifndef _H_xmlns
+#include "xmlns.h"
+#endif
+
+#ifndef _H_xml_util
+#include "xml_util.h"
+#endif
+
+#ifndef _H_xml_val
+#include "xml_val.h"
+#endif
+
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
+#ifndef _H_xpath1
+#include "xpath1.h"
+#endif
+
+#ifndef _H_yangconst
+#include "yangconst.h"
+#endif
+
+#ifndef _H_yangcli
+#include "yangcli.h"
+#endif
+
+#ifndef _H_yangcli_eval
+#include "yangcli_eval.h"
+#endif
+
+#ifndef _H_yangcli_cmd
+#include "yangcli_cmd.h"
+#endif
+
+#ifndef _H_yangcli_util
+#include "yangcli_util.h"
+#endif
+
+
+/********************************************************************
+ * FUNCTION convert_result_to_val
+ * 
+ * Convert an Xpath result to a val_value_t struct
+ * representing the rpc output in xpath-result-group
+ * in yuma-xpath.yang
+ *
+ * INPUTS:
+ *    result == XPath result to convert
+ *
+ * RETURNS:
+ *    malloced and filled out value node
+ *********************************************************************/
+static val_value_t *
+    convert_result_to_val (xpath_result_t *result)
+{
+    val_value_t      *resultval, *childval;
+    xpath_resnode_t  *resnode;
+    xmlns_id_t        ncid;
+
+    resultval = NULL;
+    ncid = xmlns_nc_id();
+
+    switch (result->restype) {
+    case XP_RT_NONE:
+        /* this should be an error, but treat as an empty result */
+        resultval = xml_val_new_flag(NCX_EL_DATA, ncid);
+        break;
+    case XP_RT_NODESET:
+        if (dlq_empty(&result->r.nodeQ)) {
+            resultval = xml_val_new_flag(NCX_EL_DATA, ncid);
+        } else {
+            resultval = xml_val_new_struct(NCX_EL_DATA, ncid);
+            for (resnode = (xpath_resnode_t *)
+                     dlq_firstEntry(&result->r.nodeQ);
+                 resnode != NULL;
+                 resnode = (xpath_resnode_t *)
+                     dlq_nextEntry(resnode)) {
+
+                childval = val_clone(resnode->node.valptr);
+                if (childval == NULL) {
+                    val_free_value(resultval);
+                    return NULL;
+                }
+                val_add_child(childval, resultval);
+            }
+        }
+        break;
+    case XP_RT_NUMBER:
+        resultval = xml_val_new_number(NCX_EL_DATA,
+                                       ncid,
+                                       &result->r.num,
+                                       NCX_BT_FLOAT64);
+        break;
+    case XP_RT_STRING:
+        resultval = xml_val_new_cstring(NCX_EL_DATA, ncid, result->r.str);
+        break;
+    case XP_RT_BOOLEAN:
+        resultval = xml_val_new_boolean(NCX_EL_DATA, ncid, result->r.boo);
+        break;
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    return resultval;
+
+}  /* convert_result_to_val */
+
+
+/********************************************************************
+ * FUNCTION do_eval (local RPC)
+ * 
+ * eval select='expr' docroot=$myvar
+ *
+ * Evaluate the XPath expression 
+ *
+ * INPUTS:
+ *    server_cb == server control block to use
+ *    rpc == RPC method for the exec command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *
+ * RETURNS:
+ *    status
+ *********************************************************************/
+status_t
+    do_eval (server_cb_t *server_cb,
+             obj_template_t *rpc,
+             const xmlChar *line,
+             uint32  len)
+{
+    val_value_t        *valset, *docroot, *sel, *resultval;
+    xpath_pcb_t        *pcb;
+    xpath_result_t     *result;
+    status_t            res;
+
+    docroot = NULL;
+    sel = NULL;
+    pcb = NULL;
+    result = NULL;
+    resultval = NULL;
+
+    res = NO_ERR;
+
+    valset = get_valset(server_cb, rpc, &line[len], &res);
+    if (valset == NULL) {
+        return res;
+    }
+    if (res != NO_ERR) {
+        val_free_value(valset);
+        return res;
+    }
+    if (valset->res != NO_ERR) {
+        res = valset->res;
+        val_free_value(valset);
+        return res;
+    }
+
+    /* get the sel parameter */
+    sel = val_find_child(valset, 
+                            YANGCLI_MOD, 
+                            YANGCLI_SELECT);
+    if (sel == NULL) {
+        res = ERR_NCX_MISSING_PARM;
+    } else if (sel->res != NO_ERR) {
+        res = sel->res;
+    }
+
+    if (res == NO_ERR) {
+        /* get the docroot parameter */
+        docroot = val_find_child(valset, 
+                                 YANGCLI_MOD, 
+                                 YANGCLI_DOCROOT);
+        if (docroot == NULL) {
+            res = ERR_NCX_MISSING_PARM;
+        } else if (docroot->res != NO_ERR) {
+            res = docroot->res;
+        }
+    }
+
+    if (res == NO_ERR) {
+        /* got all the parameters, not setup the XPath control block */
+        pcb = xpath_new_pcb(VAL_STR(sel), xpath_getvar_fn);
+        if (pcb == NULL) {
+            res = ERR_INTERNAL_MEM;
+        } else {
+            /* try to parse the XPath expression */
+            result = xpath1_eval_expr(pcb, 
+                                      docroot, /* context */
+                                      docroot,
+                                      TRUE,
+                                      FALSE,
+                                      &res);
+
+            if (result != NULL && res == NO_ERR) {
+                /* create a result val out of the XPath result */
+                resultval = convert_result_to_val(result);
+                if (resultval == NULL) {
+                    res = ERR_INTERNAL_MEM;
+                }
+            }
+        }
+    }
+
+    /* check save result or clear it */
+    if (res == NO_ERR) {
+        if (server_cb->result_name || 
+            server_cb->result_filename) {
+            /* save the filled in value */
+            res = finish_result_assign(server_cb, 
+                                       resultval, 
+                                       NULL);
+            resultval = NULL;
+        }
+    } else {
+        clear_result(server_cb);
+    }
+    
+    /* cleanup and exit */
+    if (valset) {
+        val_free_value(valset);
+    }
+    if (pcb) {
+        xpath_free_pcb(pcb);
+    }
+    if (result) {
+        xpath_free_result(result);
+    }
+    if (resultval) {
+        val_free_value(resultval);
+    }
+    return res;
+
+}  /* do_eval */
+
+
+/* END yangcli_eval.c */

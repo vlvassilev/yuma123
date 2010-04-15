@@ -590,7 +590,6 @@ static status_t
         break;
     case OBJ_TYP_LIST:
     case OBJ_TYP_CONTAINER:
-    case OBJ_TYP_ANYXML:
         if (varval->btyp == new_parm->btyp) {
             cloneval = val_clone(varval);
             if (!cloneval) {
@@ -602,6 +601,19 @@ static status_t
                     res = val_gen_index_chain(new_parm->obj,
                                                new_parm);
                 }                            
+            }
+        } else {
+            res = ERR_NCX_WRONG_DATATYP;
+        }
+        break;
+    case OBJ_TYP_ANYXML:
+        if (!typ_is_simple(varval->btyp)) {
+            cloneval = val_clone(varval);
+            if (!cloneval) {
+                res = ERR_INTERNAL_MEM;
+            } else {
+                val_move_children(cloneval, new_parm);
+                val_free_value(cloneval);
             }
         } else {
             res = ERR_NCX_WRONG_DATATYP;

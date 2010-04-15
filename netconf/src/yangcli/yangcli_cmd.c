@@ -180,6 +180,10 @@ date         init     comment
 #include "yangcli_cmd.h"
 #endif
 
+#ifndef _H_yangcli_eval
+#include "yangcli_eval.h"
+#endif
+
 #ifndef _H_yangcli_list
 #include "yangcli_list.h"
 #endif
@@ -6400,6 +6404,8 @@ static status_t
         res = do_cd(server_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
         res = do_connect(server_cb, rpc, line, len, FALSE);
+    } else if (!xml_strcmp(rpcname, YANGCLI_EVAL)) {
+        res = do_eval(server_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_EVENTLOG)) {
         res = do_eventlog(server_cb, rpc, line, len);
     } else if (!xml_strcmp(rpcname, YANGCLI_FILL)) {

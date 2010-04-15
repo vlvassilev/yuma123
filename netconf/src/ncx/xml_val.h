@@ -230,4 +230,46 @@ extern val_value_t *
     xml_val_new_flag (const xmlChar *name,
 		      xmlns_id_t     nsid);
 
+
+/********************************************************************
+* FUNCTION xml_val_new_boolean
+* 
+*   Set up a new boolean
+*   This is not complete; more nodes will be added
+*
+* INPUTS:
+*    name == element name
+*    nsid == namespace ID of name
+*    boo == boolean value to set
+*
+* RETURNS:
+*   new struct or NULL if malloc error
+*********************************************************************/
+extern val_value_t *
+    xml_val_new_boolean (const xmlChar *name,
+                         xmlns_id_t     nsid,
+                         boolean boo);
+
+
+/********************************************************************
+* FUNCTION xml_val_new_number
+* 
+*   Set up a new number
+*
+* INPUTS:
+*    name == element name
+*    nsid == namespace ID of name
+*    num == number value to set
+*    btyp == base type of 'num'
+*
+* RETURNS:
+*   new struct or NULL if malloc error
+*********************************************************************/
+extern val_value_t *
+    xml_val_new_number (const xmlChar *name,
+                        xmlns_id_t     nsid,
+                        ncx_num_t *num,
+                        ncx_btype_t btyp);
+
+
 #endif	    /* _H_xml_val */

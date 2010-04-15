@@ -137,7 +137,6 @@ date	     init     comment
  * matches parm clauses in yangcli container in yangcli.yang
  */
 
-#define YANGCLI_SERVER       (const xmlChar *)"server"
 #define YANGCLI_AUTOCOMP    (const xmlChar *)"autocomp"
 #define YANGCLI_AUTOHISTORY (const xmlChar *)"autohistory"
 #define YANGCLI_AUTOLOAD    (const xmlChar *)"autoload"
@@ -180,6 +179,7 @@ date	     init     comment
 #define YANGCLI_RUN_SCRIPT  (const xmlChar *)"run-script"
 #define YANGCLI_START       (const xmlChar *)"start"
 #define YANGCLI_SCRIPTS     (const xmlChar *)"scripts"
+#define YANGCLI_SERVER      (const xmlChar *)"server"
 #define YANGCLI_TEST_OPTION (const xmlChar *)"test-option"
 #define YANGCLI_TIMEOUT     (const xmlChar *)"timeout"
 #define YANGCLI_USER        (const xmlChar *)"user"
@@ -196,6 +196,7 @@ date	     init     comment
 #define YANGCLI_CONNECT (const xmlChar *)"connect"
 #define YANGCLI_CREATE  (const xmlChar *)"create"
 #define YANGCLI_DELETE  (const xmlChar *)"delete"
+#define YANGCLI_EVAL    (const xmlChar *)"eval"
 #define YANGCLI_EVENTLOG (const xmlChar *)"eventlog"
 #define YANGCLI_FILL    (const xmlChar *)"fill"
 #define YANGCLI_GET_LOCKS (const xmlChar *)"get-locks"
@@ -227,6 +228,9 @@ date	     init     comment
 /* retry for a lock request once per second */
 #define YANGCLI_RETRY_INTERNVAL   1
 
+#define YANGCLI_SELECT (const xmlChar *)"select"
+#define YANGCLI_DOCROOT (const xmlChar *)"docroot"
+#define YANGCLI_CONTEXT (const xmlChar *)"context"
 
 /********************************************************************
 *								    *

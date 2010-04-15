@@ -4,6 +4,8 @@ module yangcli {
 
     prefix yc;
 
+    import ietf-yang-types { prefix yang; }
+
     import yuma-ncx { prefix ncx; }
 
     import yuma-app-common { prefix ncxapp; }
@@ -549,6 +551,63 @@ module yangcli {
             type LogCount;
             default 25;
           }
+        }
+      }
+    }
+
+    rpc eval {
+      description 
+        "Evaluate an XPath expression locally on the manager.
+         All local variables will be available to the session
+         context, in the following precedence:
+            1) current script run level
+            2) global variable
+        ";
+
+      input {
+        ncx:default-parm select;
+
+        leaf select {
+          description
+            "XPath expression string to evaluate.
+             Use quotes if there are any whitespace or
+             special characters in the expression.";
+          type yang:xpath1.0 {
+            length "1..max";
+          }
+          mandatory true;
+        }
+
+        anyxml docroot {
+          description 
+            "Use the contents of the specified variable or
+             external XML file as the conceptual document to
+             apply the expression specified in the 'select' parameter.
+
+             If this parameter is missing then a dummy document
+             will be used.  This is only allowed if the
+             expression only contains variable references
+             or numeric/string constants.";
+        }
+      }
+
+      output {
+        anyxml data {
+          description
+            "The XPath result, returned in a data element.
+
+             The content will be a simple string for boolean, string,
+             and number result types.
+
+             The content will be zero or more child elements, 
+             in their proper namespaces, if the result is a node-set.
+             Only the requested node(s) will be returned,
+             not their entire path to the document root,
+             like the get and get-config operations.
+
+             An empty 'data' element will be returned if the result
+             is an empty node-set.";
+          mandatory true;
         }
       }
     }

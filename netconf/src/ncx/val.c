@@ -9591,8 +9591,7 @@ void
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }
-    if (!(srcval->btyp == NCX_BT_CONTAINER &&
-          destval->btyp == NCX_BT_CONTAINER)) {
+    if (typ_is_simple(srcval->btyp) || typ_is_simple(destval->btyp)) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return;
     }

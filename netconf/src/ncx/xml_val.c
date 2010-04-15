@@ -56,6 +56,14 @@ date         init     comment
 #include "ncx.h"
 #endif
 
+#ifndef _H_ncx_num
+#include "ncx_num.h"
+#endif
+
+#ifndef _H_ncxtypes
+#include "ncxtypes.h"
+#endif
+
 #ifndef _H_ncxconst
 #include "ncxconst.h"
 #endif
@@ -443,7 +451,6 @@ val_value_t *
 * FUNCTION xml_val_new_flag
 * 
 *   Set up a new flag
-*   This is not complete; more nodes will be added
 *
 * INPUTS:
 *    name == element name
@@ -472,6 +479,91 @@ val_value_t *
     return val;
 
 }   /* xml_val_new_flag */
+
+
+/********************************************************************
+* FUNCTION xml_val_new_boolean
+* 
+*   Set up a new boolean
+*
+* INPUTS:
+*    name == element name
+*    nsid == namespace ID of name
+*    boo == boolean value to set
+*
+* RETURNS:
+*   new struct or NULL if malloc error
+*********************************************************************/
+val_value_t *
+    xml_val_new_boolean (const xmlChar *name,
+                         xmlns_id_t     nsid,
+                         boolean boo)
+{
+    val_value_t *val;
+
+    val = val_new_value();
+    if (!val) {
+        return NULL;
+    }
+    val->btyp = NCX_BT_EMPTY;
+    val->v.boo = boo;
+    val->typdef = typ_get_basetype_typdef(NCX_BT_EMPTY);
+    val->name = name;
+    val->nsid = nsid;
+    val->obj = ncx_get_gen_empty();
+
+    return val;
+
+}   /* xml_val_new_boolean */
+
+
+/********************************************************************
+* FUNCTION xml_val_new_number
+* 
+*   Set up a new number
+*
+* INPUTS:
+*    name == element name
+*    nsid == namespace ID of name
+*    num == number value to set
+*    btyp == base type of 'num'
+*
+* RETURNS:
+*   new struct or NULL if malloc error
+*********************************************************************/
+val_value_t *
+    xml_val_new_number (const xmlChar *name,
+                        xmlns_id_t     nsid,
+                        ncx_num_t *num,
+                        ncx_btype_t btyp)
+{
+    val_value_t *val;
+    status_t     res;
+
+    val = val_new_value();
+    if (!val) {
+        return NULL;
+    }
+    val->btyp = btyp;
+
+    res = ncx_copy_num(num, &val->v.num, btyp);
+    if (res != NO_ERR) {
+        val_free_value(val);
+        return NULL;
+    }
+
+    val->typdef = typ_get_basetype_typdef(btyp);
+    val->name = name;
+    val->nsid = nsid;
+
+    /* borrowing the generic string object
+     * not sure it will really matter
+     * since the val(nsid,name) is used instead
+     */
+    val->obj = ncx_get_gen_string();
+    return val;
+
+}   /* xml_val_new_number */
 
 
 /* END file xml_val.c */

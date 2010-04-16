@@ -211,7 +211,7 @@ status_t
              const xmlChar *line,
              uint32  len)
 {
-    val_value_t        *valset, *docroot, *sel;
+    val_value_t        *valset, *docroot, *expr;
     val_value_t        *resultval, *dummydoc, *childval;
     xpath_pcb_t        *pcb;
     xpath_result_t     *result;
@@ -220,7 +220,7 @@ status_t
     uint32              childcnt;
 
     docroot = NULL;
-    sel = NULL;
+    expr = NULL;
     pcb = NULL;
     result = NULL;
     resultval = NULL;
@@ -243,14 +243,14 @@ status_t
         return res;
     }
 
-    /* get the sel parameter */
-    sel = val_find_child(valset, 
-                            YANGCLI_MOD, 
-                            YANGCLI_SELECT);
-    if (sel == NULL) {
+    /* get the expr parameter */
+    expr = val_find_child(valset, 
+                          YANGCLI_MOD, 
+                          YANGCLI_EXPR);
+    if (expr == NULL) {
         res = ERR_NCX_MISSING_PARM;
-    } else if (sel->res != NO_ERR) {
-        res = sel->res;
+    } else if (expr->res != NO_ERR) {
+        res = expr->res;
     }
 
     if (res == NO_ERR) {
@@ -274,7 +274,7 @@ status_t
 
     if (res == NO_ERR) {
         /* got all the parameters, and setup the XPath control block */
-        pcb = xpath_new_pcb(VAL_STR(sel), xpath_getvar_fn);
+        pcb = xpath_new_pcb(VAL_STR(expr), xpath_getvar_fn);
         if (pcb == NULL) {
             res = ERR_INTERNAL_MEM;
         } else {

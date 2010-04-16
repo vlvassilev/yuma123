@@ -60,11 +60,15 @@ module yangcli {
 
          ";
 
+    revision 2010-04-16 {
+       description 
+          "Added eval command for XPath expression support";
+    }
+
     revision 2010-01-14 {
        description 
           "Initial published version for 0.9.9 release";
     }
-
 
     typedef LogCount {
        description 
@@ -564,20 +568,19 @@ module yangcli {
             2) global variable
 
          When the result of an eval command is saved
-         to a user variable, it may be altered as
-         follows:
+         to a user variable, it may be altered as follows:
 
-          Convert to string:
-            <data> is a simple type
-            <data> contains 1 node that is a simple type
+           Convert to string:
+            - <data> is a simple type
+            - <data> contains 1 node that is a simple type
              
-          Remove the <data> container:
-            <data> contains a single complex element
+           Remove the <data> container:
+            - <data> contains a single complex element
              
-         Retain the <data> container:
-            <data> contains multiple elements
+           Retain the <data> container:
+            - <data> contains multiple elements
 
-      Examples:
+         Usage Examples:
 
          > $x = 5
              x = '5'
@@ -597,9 +600,9 @@ module yangcli {
         ";
 
       input {
-        ncx:default-parm select;
+        ncx:default-parm expr;
 
-        leaf select {
+        leaf expr {
           description
             "XPath expression string to evaluate.
              Use quotes if there are any whitespace or
@@ -614,7 +617,7 @@ module yangcli {
           description 
             "Use the contents of the specified variable or
              external XML file as the conceptual document to
-             apply the expression specified in the 'select' parameter.
+             apply the expression specified in the 'expr' parameter.
 
              If this parameter is missing then a dummy document
              will be used.  This is only allowed if the

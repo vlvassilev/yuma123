@@ -228,7 +228,7 @@ date	     init     comment
 /* retry for a lock request once per second */
 #define YANGCLI_RETRY_INTERNVAL   1
 
-#define YANGCLI_SELECT (const xmlChar *)"select"
+#define YANGCLI_EXPR    (const xmlChar *)"expr"
 #define YANGCLI_DOCROOT (const xmlChar *)"docroot"
 #define YANGCLI_CONTEXT (const xmlChar *)"context"
 

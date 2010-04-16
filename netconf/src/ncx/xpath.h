@@ -383,11 +383,6 @@ typedef struct xpath_pcb_t_ {
      */
     dlq_hdr_t            varbindQ;
 
-    /* this cookie is used by the getvar callback function
-     * to save some context, like a session control block back-ptr
-     */
-    void                *cookie;
-
     /* The function Q is a copy of the global Q
      * It is not hardwired in case app-specific extensions
      * are added later -- array of xpath_fncb_t
@@ -1007,35 +1002,6 @@ extern dlq_hdr_t *
 *********************************************************************/
 extern dlq_hdr_t *
     xpath_get_varbindQ (xpath_pcb_t *pcb);
-
-
-/********************************************************************
-* FUNCTION xpath_set_cookie
-* 
-* Set the pcb cookie
-*
-* INPUTS:
-*    pcb == parser control block to use
-*    cookie == cookie value to set
-*********************************************************************/
-extern void
-    xpath_set_cookie (xpath_pcb_t *pcb,
-                      void *cookie);
-
-
-/********************************************************************
-* FUNCTION xpath_get_cookie
-* 
-* Get the pcb cookie
-*
-* INPUTS:
-*    pcb == parser control block to use
-*
-* RETURNS:
-*    cookie value from pcb
-*********************************************************************/
-extern void *
-    xpath_get_cookie (xpath_pcb_t *pcb);
 
 
 #endif	    /* _H_xpath */

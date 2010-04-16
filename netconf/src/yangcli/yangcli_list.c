@@ -79,14 +79,6 @@ date         init     comment
 #include "op.h"
 #endif
 
-#ifndef _H_rpc
-#include "rpc.h"
-#endif
-
-#ifndef _H_rpc_err
-#include "rpc_err.h"
-#endif
-
 #ifndef _H_status
 #include "status.h"
 #endif

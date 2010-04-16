@@ -326,7 +326,6 @@ static ncx_var_t *
     if (!varQ) {
         varQ = get_que(vartype, name);
         if (!varQ) {
-            SET_ERROR(ERR_INTERNAL_VAL);
             return NULL;
         }
     }
@@ -2033,5 +2032,47 @@ void
     }
 
 } /* var_cvt_generic */
+
+
+/********************************************************************
+* FUNCTION var_find
+* 
+* Find a complete var struct for use with XPath
+*
+* INPUTS:
+*   varname == variable name string
+*   nsid == namespace ID for varname (0 is OK)
+*
+* RETURNS:
+*   pointer to ncx_var_t for the first match found (local or global)
+*********************************************************************/
+extern ncx_var_t *
+    var_find (const xmlChar *varname,
+              xmlns_id_t nsid)
+{
+    ncx_var_t   *retvar;
+    uint32       namelen;
+
+#ifdef DEBUG
+    if (varname == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    namelen = xml_strlen(varname);
+    if (namelen == 0) {
+        return NULL;
+    }
+
+    retvar = find_var(NULL, varname, namelen, nsid, VAR_TYP_LOCAL);
+    if (retvar == NULL) {
+        retvar = find_var(NULL, varname, namelen, nsid, VAR_TYP_GLOBAL);
+    }
+
+    return retvar;
+
+}  /* var_find */
+
 
 /* END var.c */

@@ -266,7 +266,7 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION parse_parm
+* FUNCTION parse_cli_parm
 * 
 * Create a val_value_t struct for the specified parm value,
 * and insert it into the value set
@@ -288,10 +288,10 @@ static status_t
 *   status 
 *********************************************************************/
 static status_t
-    parse_parm (val_value_t *val,
-                obj_template_t *obj,
-                const xmlChar *strval,
-                boolean script)
+    parse_cli_parm (val_value_t *val,
+                    obj_template_t *obj,
+                    const xmlChar *strval,
+                    boolean script)
 {
     val_value_t          *new_parm;
     status_t              res;
@@ -314,7 +314,7 @@ static status_t
 
     return res;
 
-}  /* parse_parm */
+}  /* parse_cli_parm */
 
 
 /********************************************************************
@@ -1488,10 +1488,10 @@ val_value_t *
 
         /* create a new val_value struct and set the value */
         if (res == NO_ERR) {
-            res = parse_parm(val, 
-                             chobj, 
-                             (const xmlChar *)parmval,
-                             script);
+            res = parse_cli_parm(val, 
+                                 chobj, 
+                                 (const xmlChar *)parmval,
+                                 script);
         } else if (res == ERR_NCX_EMPTY_VAL &&
                    gotmatch && !gotdashes) {
             /* matched parm did not work out so
@@ -1502,10 +1502,10 @@ val_value_t *
             if (chobj) {
                 savechar = parmname[parmnamelen];
                 parmname[parmnamelen] = 0;
-                res = parse_parm(val, 
-                                 chobj, 
-                                 (const xmlChar *)parmname, 
-                                 script);
+                res = parse_cli_parm(val, 
+                                     chobj, 
+                                     (const xmlChar *)parmname, 
+                                     script);
                 parmname[parmnamelen] = savechar;
             }
         }
@@ -1513,7 +1513,8 @@ val_value_t *
         /* check any errors in the parm name or value */
         if (res != NO_ERR) {
             msg = get_error_string(res);
-            xml_strncpy(errbuff, (const xmlChar *)parmname, 
+            xml_strncpy(errbuff, 
+                        (const xmlChar *)parmname, 
                         min(parmnamelen, ERRLEN));
             switch (res) {
             case ERR_NCX_UNKNOWN_PARM:
@@ -1604,7 +1605,7 @@ status_t
                     const xmlChar *strval,
                     boolean script)
 {
-    return parse_parm(val, obj, strval, script);
+    return parse_cli_parm(val, obj, strval, script);
 
 }  /* cli_parse_parm */
 
@@ -1645,7 +1646,7 @@ status_t
     obj_template_t  *genstr;
     status_t         res;
 
-    res = parse_parm(val, obj, strval, script);
+    res = parse_cli_parm(val, obj, strval, script);
     if (res == NO_ERR || NEED_EXIT(res)) {
         return res;
     }

@@ -618,4 +618,22 @@ extern val_value_t *
 extern void
     var_cvt_generic (dlq_hdr_t *varQ);
 
+
+/********************************************************************
+* FUNCTION var_find
+* 
+* Find a complete var struct for use with XPath
+*
+* INPUTS:
+*   varname == variable name string
+*   nsid == namespace ID for varname (0 is OK)
+*
+* RETURNS:
+*   pointer to ncx_var_t for the first match found (local or global)
+*********************************************************************/
+extern ncx_var_t *
+    var_find (const xmlChar *varname,
+              xmlns_id_t nsid);
+
+
 #endif	    /* _H_var */

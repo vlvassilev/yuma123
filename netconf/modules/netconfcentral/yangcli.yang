@@ -562,6 +562,38 @@ module yangcli {
          context, in the following precedence:
             1) current script run level
             2) global variable
+
+         When the result of an eval command is saved
+         to a user variable, it may be altered as
+         follows:
+
+          Convert to string:
+            <data> is a simple type
+            <data> contains 1 node that is a simple type
+             
+          Remove the <data> container:
+            <data> contains a single complex element
+             
+         Retain the <data> container:
+            <data> contains multiple elements
+
+      Examples:
+
+         > $x = 5
+             x = '5'
+         > $x = eval '$x + 10'
+             x = '15'
+         > $y = xget /system
+             y = data {
+                   system { ... }
+                 }
+         > $z = eval '//sysname' docroot=$y
+             z = 'Linux'
+         > $w = eval '/system/uname' docroot=$y
+             w = uname {
+                   sysname 'Linux'
+                   ...
+                 }
         ";
 
       input {

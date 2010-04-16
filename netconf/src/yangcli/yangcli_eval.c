@@ -51,14 +51,6 @@ date         init     comment
 #include "log.h"
 #endif
 
-#ifndef _H_mgr
-#include "mgr.h"
-#endif
-
-#ifndef _H_mgr_ses
-#include "mgr_ses.h"
-#endif
-
 #ifndef _H_ncx
 #include "ncx.h"
 #endif
@@ -71,24 +63,8 @@ date         init     comment
 #include "ncxconst.h"
 #endif
 
-#ifndef _H_ncxmod
-#include "ncxmod.h"
-#endif
-
 #ifndef _H_obj
 #include "obj.h"
-#endif
-
-#ifndef _H_op
-#include "op.h"
-#endif
-
-#ifndef _H_rpc
-#include "rpc.h"
-#endif
-
-#ifndef _H_rpc_err
-#include "rpc_err.h"
 #endif
 
 #ifndef _H_status
@@ -235,16 +211,21 @@ status_t
              const xmlChar *line,
              uint32  len)
 {
-    val_value_t        *valset, *docroot, *sel, *resultval;
+    val_value_t        *valset, *docroot, *sel;
+    val_value_t        *resultval, *dummydoc, *childval;
     xpath_pcb_t        *pcb;
     xpath_result_t     *result;
+    xmlChar            *resultstr;
     status_t            res;
+    uint32              childcnt;
 
     docroot = NULL;
     sel = NULL;
     pcb = NULL;
     result = NULL;
     resultval = NULL;
+    resultstr = NULL;
+    dummydoc = NULL;
 
     res = NO_ERR;
 
@@ -273,19 +254,26 @@ status_t
     }
 
     if (res == NO_ERR) {
-        /* get the docroot parameter */
+        /* get the optional docroot parameter */
         docroot = val_find_child(valset, 
                                  YANGCLI_MOD, 
                                  YANGCLI_DOCROOT);
-        if (docroot == NULL) {
-            res = ERR_NCX_MISSING_PARM;
-        } else if (docroot->res != NO_ERR) {
+        if (docroot && docroot->res != NO_ERR) {
             res = docroot->res;
         }
     }
 
+    if (res == NO_ERR && docroot == NULL) {
+        dummydoc = xml_val_new_struct(NCX_EL_DATA, xmlns_nc_id());
+        if (dummydoc == NULL) {
+            res = ERR_INTERNAL_MEM;
+        } else {
+            docroot = dummydoc;
+        }
+    }
+
     if (res == NO_ERR) {
-        /* got all the parameters, not setup the XPath control block */
+        /* got all the parameters, and setup the XPath control block */
         pcb = xpath_new_pcb(VAL_STR(sel), xpath_getvar_fn);
         if (pcb == NULL) {
             res = ERR_INTERNAL_MEM;
@@ -312,11 +300,70 @@ status_t
     if (res == NO_ERR) {
         if (server_cb->result_name || 
             server_cb->result_filename) {
-            /* save the filled in value */
-            res = finish_result_assign(server_cb, 
-                                       resultval, 
-                                       NULL);
-            resultval = NULL;
+
+            /* decide if the saved variable should be
+             * a string or a <data> element
+             *
+             * Convert to string:
+             *   <data> is a simple type
+             *   <data> contains 1 node that is a simple type
+             *
+             * Remove the <data> container:
+             *   <data> contains a single complex element
+             *
+             * Retain the <data> container:
+             *   <data> contains multiple elements
+             */
+            if (typ_is_simple(resultval->btyp)) {
+                resultstr = val_make_sprintf_string(resultval);
+                if (resultstr == NULL) {
+                    res = ERR_INTERNAL_MEM;
+                } else {
+                    val_free_value(resultval);
+                    resultval = NULL;
+                }
+            } else {
+                childcnt = val_child_cnt(resultval);
+                if (childcnt == 1) {
+                    /* check if the child is a simple 
+                     * type or complex type
+                     */
+                    childval = val_get_first_child(resultval);
+                    if (childval == NULL) {
+                        res = SET_ERROR(ERR_INTERNAL_VAL);
+                    } else if (typ_is_simple(childval->btyp)) {
+                        /* convert the simple val to a string */
+                        resultstr = val_make_sprintf_string(childval);
+                        if (resultstr == NULL) {
+                            res = ERR_INTERNAL_MEM;
+                        } else {
+                            val_free_value(resultval);
+                            resultval = NULL;
+                        }
+                    } else {
+                        /* remove the complex node from the
+                         * data container
+                         */
+                        val_remove_child(childval);
+                        val_free_value(resultval);
+                        resultval = childval;
+                    }
+                } else {
+                    /* either 0 or 2+ entries so leave the
+                     * data container in place
+                     */
+                    ;
+                }
+            }
+                
+            if (res == NO_ERR) {
+                /* save the filled in value */
+                res = finish_result_assign(server_cb, 
+                                           resultval, 
+                                           resultstr);
+                /* resultvar is freed no matter what */
+                resultval = NULL;
+            }
         }
     } else {
         clear_result(server_cb);
@@ -334,6 +381,12 @@ status_t
     }
     if (resultval) {
         val_free_value(resultval);
+    }
+    if (resultstr) {
+        m__free(resultstr);
+    }
+    if (dummydoc) {
+        val_free_value(dummydoc);
     }
     return res;
 

@@ -1048,17 +1048,24 @@ ncx_var_t *
                      const xmlChar *varname,
                      status_t *res)
 {
+    ncx_var_t  *retvar;
+
 #ifdef DEBUG
-    if (pcb == NULL || varname == NULL || res == NULL) {
+    if (varname == NULL || res == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
 #endif
 
     (void)pcb;
-    (void)varname;
-    *res = ERR_NCX_DEF_NOT_FOUND;
-    return NULL;
+    retvar = var_find(varname, 0);
+    if (retvar == NULL) {
+        *res = ERR_NCX_DEF_NOT_FOUND;
+    } else {
+        *res = NO_ERR;
+    }
+
+    return retvar;
 
 }  /* xpath_getvar_fn */
 

@@ -615,7 +615,11 @@ static status_t
                 val_free_value(cloneval);
             }
         } else {
-            res = ERR_NCX_WRONG_DATATYP;
+            /* convert the new_parm to a string because
+             * ANYXML is allowed to change from complex
+             * to a simple type
+             */
+            res = val_replace(varval, new_parm);
         }
         break;
     default:

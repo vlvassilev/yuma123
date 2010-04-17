@@ -4100,6 +4100,7 @@ status_t
     status_t              res;
     uint32                ulen;
     xmlns_id_t            qname_nsid;
+    boolean               startsimple;
 
 #ifdef DEBUG
     if (!val || !typdef) {
@@ -4107,8 +4108,20 @@ status_t
     }
 #endif
 
+    startsimple = typ_is_simple(val->btyp);
+
+    /* clean the old value even if it was ANY */
+    clean_value(val, FALSE);
+
     res = NO_ERR;
     val->btyp = typ_get_basetype(typdef);
+
+    if (!startsimple) {
+        /* clear out the childQ so it does not appear
+         * to be a bogus string that needs to be cleaned
+         */
+        memset(&val->v.childQ, 0x0, sizeof(dlq_hdr_t));
+    }
 
     if (!(val->btyp == NCX_BT_INSTANCE_ID ||
           typ_is_schema_instance_string(typdef) ||
@@ -4119,8 +4132,6 @@ status_t
             return res;
         }
     }
-
-    clean_value(val, FALSE);
 
     /* only set name if it is not already set */
     if (!val->name && valname) {

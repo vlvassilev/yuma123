@@ -4108,7 +4108,11 @@ status_t
     }
 #endif
 
-    startsimple = typ_is_simple(val->btyp);
+    if (val->btyp != NCX_BT_NONE) {
+        startsimple = typ_is_simple(val->btyp);
+    } else {
+        startsimple = TRUE;
+    }
 
     /* clean the old value even if it was ANY */
     clean_value(val, FALSE);

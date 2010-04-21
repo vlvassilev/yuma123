@@ -23,7 +23,7 @@
 	  <li>modulename@revision-date.yang  (foo@2009-03-17.yang)</li>
 	</ul>
 	Modules that are listed on Netconf Central do not need
-	to be uploaded for module validatation, but if a different version
+	to be uploaded for module validation, but if a different version
 	is uploaded, it will be used instead.
       </p>
       <br />

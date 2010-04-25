@@ -56,6 +56,10 @@ date	     init     comment
 #include "mgr_rpc.h"
 #endif
 
+#ifndef _H_runstack
+#include "runstack.h"
+#endif
+
 #ifndef _H_ses
 #include "ses.h"
 #endif
@@ -196,6 +200,9 @@ date	     init     comment
 #define YANGCLI_CONNECT (const xmlChar *)"connect"
 #define YANGCLI_CREATE  (const xmlChar *)"create"
 #define YANGCLI_DELETE  (const xmlChar *)"delete"
+#define YANGCLI_ELSE    (const xmlChar *)"else"
+#define YANGCLI_ELIF    (const xmlChar *)"elif"
+#define YANGCLI_END     (const xmlChar *)"end"
 #define YANGCLI_EVAL    (const xmlChar *)"eval"
 #define YANGCLI_EVENTLOG (const xmlChar *)"eventlog"
 #define YANGCLI_FILL    (const xmlChar *)"fill"
@@ -203,6 +210,7 @@ date	     init     comment
 #define YANGCLI_HELP    (const xmlChar *)"help"
 #define YANGCLI_HISTORY (const xmlChar *)"history"
 #define YANGCLI_INSERT  (const xmlChar *)"insert"
+#define YANGCLI_IF      (const xmlChar *)"if"
 #define YANGCLI_LIST    (const xmlChar *)"list"
 #define YANGCLI_MERGE   (const xmlChar *)"merge"
 #define YANGCLI_MGRLOAD (const xmlChar *)"mgrload"
@@ -217,6 +225,7 @@ date	     init     comment
 #define YANGCLI_SGET    (const xmlChar *)"sget"
 #define YANGCLI_SGET_CONFIG   (const xmlChar *)"sget-config"
 #define YANGCLI_SHOW    (const xmlChar *)"show"
+#define YANGCLI_WHILE   (const xmlChar *)"while"
 #define YANGCLI_XGET    (const xmlChar *)"xget"
 #define YANGCLI_XGET_CONFIG   (const xmlChar *)"xget-config"
 
@@ -415,6 +424,9 @@ typedef struct server_cb_t_ {
     /* support for temp directory for downloaded modules */
     ncxmod_temp_progcb_t *temp_progcb;
     ncxmod_temp_sescb_t  *temp_sescb;
+
+    /* runstack context for script processing */
+    runstack_context_t  *runstack_context;
 
     /* per-session CLI support */
     const xmlChar       *cli_fn;

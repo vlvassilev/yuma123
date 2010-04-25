@@ -32,6 +32,7 @@ date         init     comment
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #ifndef _H_procdefs
 #include "procdefs.h"
@@ -79,7 +80,6 @@ date         init     comment
 #define RUNSTACK_DEBUG   1
 #endif
 
-#define RUNSTACK_MAX_NEST  64
 
 #define RUNSTACK_BUFFLEN  32000
 
@@ -89,22 +89,6 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-/* one script run level context entry
- * each time a 'run script' command is
- * encountered, a new stack context is created,
- * unless level[RUNSTACK_MAX_NEST - 1] is reached
- */
-typedef struct stack_entry_t_ {
-    uint32     level;
-    FILE      *fp;
-    xmlChar   *source;
-    xmlChar   *buff;
-    int        bufflen;
-    uint32     linenum;
-    dlq_hdr_t  parmQ;
-    dlq_hdr_t  varQ;
-} stack_entry_t;
-
 
 /********************************************************************
 *                                                                   *
@@ -113,12 +97,8 @@ typedef struct stack_entry_t_ {
 *********************************************************************/
 
 /* nested run command support */
-static boolean         runstack_init_done = FALSE;
-static boolean         script_cancel;
-static uint32          script_level;
-static stack_entry_t   runstack[RUNSTACK_MAX_NEST];
-static dlq_hdr_t       globalQ;    /* Q of ncx_var_t */
-static dlq_hdr_t       zeroQ;      /* Q of ncx_var_t */
+static boolean            runstack_init_done = FALSE;
+static runstack_context_t defcxt;
 
 
 /********************************************************************
@@ -159,6 +139,92 @@ static val_value_t *
 }  /* make_parmval */
 
 
+/********************************************************************
+* FUNCTION free_stack_entry
+* 
+* Clean and free a runstack entry
+*
+* INPUTS:
+*   se == stack entry to free
+*
+* INPUTS:
+*    se == stack entry to free
+*********************************************************************/
+static void
+    free_stack_entry (runstack_entry_t *se)
+{
+    ncx_var_t  *var;
+
+    if (se->buff) {
+        m__free(se->buff);
+    }
+    if (se->fp) {
+        fclose(se->fp);
+    }
+    if (se->source) {
+        m__free(se->source);
+    }
+    while (!dlq_empty(&se->parmQ)) {
+        var = (ncx_var_t *)dlq_deque(&se->parmQ);
+        var_free(var);
+    }
+    while (!dlq_empty(&se->varQ)) {
+        var = (ncx_var_t *)dlq_deque(&se->varQ);
+        var_free(var);
+    }
+    m__free(se);
+
+}  /* free_stack_entry */
+
+
+/********************************************************************
+* FUNCTION new_stack_entry
+* 
+* Malloc and init a new runstack entry
+*
+* INPUTS:
+*   source == file source
+*
+* RETURNS:
+*   pointer to new val struct, NULL if an error
+*********************************************************************/
+static runstack_entry_t *
+    new_stack_entry (const xmlChar *source)
+{
+    runstack_entry_t *se;
+
+    se = m__getObj(runstack_entry_t);
+    if (se == NULL) {
+        return NULL;
+    }
+
+    memset(se, 0x0, sizeof(runstack_entry_t));
+
+    dlq_createSQue(&se->parmQ);
+    dlq_createSQue(&se->varQ);
+
+    /* get a new line input buffer */
+    se->buff = m__getMem(RUNSTACK_BUFFLEN);
+    if (!se->buff) {
+        free_stack_entry(se);
+        return NULL;
+    }
+
+    /* set the script source */
+    se->source = xml_strdup(source);
+    if (!se->source) {
+        free_stack_entry(se);
+        return NULL;
+    }
+
+    return se;
+
+}  /* new_stack_entry */
+
+
+
+
+
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
@@ -166,14 +232,21 @@ static val_value_t *
 * FUNCTION runstack_level
 * 
 *  Get the current stack level
+
+* INPUTS:
+*    rcxt == runstack context to use
 *
 * RETURNS:
 *   current stack level; 0 --> not in any script
 *********************************************************************/
-uint32
-    runstack_level (void)
+extern uint32
+    runstack_level (runstack_context_t *rcxt)
 {
-    return script_level;
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
+    return rcxt->script_level;
+
 }  /* runstack_level */
 
 
@@ -188,6 +261,7 @@ uint32
 *  with the runstack_setparm
 *
 * INPUTS:
+*   rcxt == runstack context to use
 *   source == file source
 *   fp == file pointer
 *
@@ -195,59 +269,41 @@ uint32
 *   status
 *********************************************************************/
 status_t
-    runstack_push (const xmlChar *source,
+    runstack_push (runstack_context_t *rcxt,
+                   const xmlChar *source,
                    FILE *fp)
 {
-    stack_entry_t  *se;
-    val_value_t    *val;
-    uint32          i;
-    status_t        res;
+    runstack_entry_t  *se;
+    val_value_t       *val;
+    status_t           res;
+
+#ifdef DEBUG
+    if (source == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
 
     /* check if this would overflow the runstack */
-    if (script_level+1 == RUNSTACK_MAX_NEST) {
+    if (rcxt->script_level+1 == rcxt->max_script_level) {
         return ERR_NCX_RESOURCE_DENIED;
     }
 
-    /* check if this script is already being invoked
-     * and prevent looping until the stack level maxes out
-     * !! This test will be fooled by symbolic links !!
-     */
-    for (i=0; i<script_level; i++) {
-        if (!xml_strcmp(source, runstack[i].source)) {
-            return ERR_NCX_DUP_ENTRY;
-        }
+    se = new_stack_entry(source);
+    if (se == NULL) {
+        return ERR_INTERNAL_MEM;
     }
-
-    /* get the next open slot */
-    se = &runstack[script_level];
 
     se->fp = fp;
     se->bufflen = RUNSTACK_BUFFLEN;
-    se->linenum = 0;
-    dlq_createSQue(&se->parmQ);
-    dlq_createSQue(&se->varQ);
-
-    /* get a new line input buffer */
-    se->buff = m__getMem(RUNSTACK_BUFFLEN);
-    if (!se->buff) {
-        return ERR_INTERNAL_MEM;
-    }
-
-    /* set the script source */
-    se->source = xml_strdup(source);
-    if (!se->source) {
-        m__free(se->buff);
-        se->buff = NULL;
-        return ERR_INTERNAL_MEM;
-    }
 
     /* create the P0 parameter */
-    val = make_parmval((const xmlChar *)"0", se->source);
+    val = make_parmval((const xmlChar *)"0", source);
     if (!val) {
-        m__free(se->buff);
-        se->buff = NULL;
-        m__free(se->source);
-        se->source = NULL;
+        free_stack_entry(se);
         return ERR_INTERNAL_MEM;
     }
 
@@ -255,24 +311,28 @@ status_t
      * will work, and the correct script parameter queue
      * will be used for the P0 parameter
      */
-    script_level++;
+    dlq_enque(se, &rcxt->runstackQ);
+    rcxt->script_level++;
 
     /* ceate a new var entry and add it to the runstack que */
-    res = var_set_move((const xmlChar *)"0", 1, VAR_TYP_LOCAL, val);
+    res = var_set_move(rcxt,
+                       (const xmlChar *)"0", 
+                       1, 
+                       VAR_TYP_LOCAL, 
+                       val);
     if (res != NO_ERR) {
         val_free_value(val);
-        m__free(se->buff);
-        se->buff = NULL;
-        m__free(se->source);
-        se->source = NULL;
-        script_level--;
+        dlq_remove(se);
+        free_stack_entry(se);
+        rcxt->script_level--;
         return res;
     }
 
-    log_info("\nrunstack: Starting level %u script %s",
-             script_level, 
-             se->source);
-
+    if (LOGDEBUG) {
+        log_debug("\nrunstack: Starting level %u script %s",
+                  rcxt->script_level, 
+                  source);
+    }
 
     return NO_ERR;
 
@@ -285,49 +345,40 @@ status_t
 *  Remove a script nest level context from the stack
 *  Call just after script is completed
 * 
+* INPUTS:
+*     rcxt == runstack context to use
 *********************************************************************/
 void
-    runstack_pop (void)
+    runstack_pop (runstack_context_t *rcxt)
 {
-    stack_entry_t  *se;
-    ncx_var_t      *var;
+    runstack_entry_t  *se;
 
-    if (script_level == 0) {
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
+
+    if (rcxt->script_level == 0) {
         SET_ERROR(ERR_INTERNAL_VAL);
         return;
     }
 
-    se = &runstack[script_level-1];
-
-    if (se->buff) {
-        m__free(se->buff);
-        se->buff = NULL;
-    }
-    if (se->fp) {
-        fclose(se->fp);
-        se->fp = NULL;
-    }
-    if (se->source) {
-        log_info("\nrunstack: Ending level %u script %s",
-              script_level, se->source);
-
-        m__free(se->source);
-        se->source = NULL;
-    }
-    se->bufflen = 0;
-    se->linenum = 0;
-
-    while (!dlq_empty(&se->parmQ)) {
-        var = (ncx_var_t *)dlq_deque(&se->parmQ);
-        var_free(var);
+    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
+    if (se == NULL) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
     }
 
-    while (!dlq_empty(&se->varQ)) {
-        var = (ncx_var_t *)dlq_deque(&se->varQ);
-        var_free(var);
+    dlq_remove(se);
+
+    if (se->source && LOGDEBUG) {
+        log_debug("\nrunstack: Ending level %u script %s",
+                  rcxt->script_level, 
+                  se->source);
     }
     
-    script_level--;
+    free_stack_entry(se);
+
+    rcxt->script_level--;
 
 }  /* runstack_pop */
 
@@ -343,6 +394,7 @@ void
 *      concatenation, an error will be returned
 * 
 * INPUTS:
+*   rcxt == runstack context to use
 *   res == address of status result
 *
 * OUTPUTS:
@@ -353,32 +405,49 @@ void
 *   NULL if some error
 *********************************************************************/
 xmlChar *
-    runstack_get_cmd (status_t *res)
+    runstack_get_cmd (runstack_context_t *rcxt,
+                      status_t *res)
 {
-    stack_entry_t  *se;
-    xmlChar        *retstr, *start, *str;
-    boolean         done;
-    int             len, total;
+    runstack_entry_t  *se;
+    xmlChar           *retstr, *start, *str;
+    boolean            done;
+    int                len, total;
 
-    if (script_level == 0) {
+#ifdef DEBUG
+    if (res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
+
+    if (rcxt->script_level == 0) {
         *res = SET_ERROR(ERR_INTERNAL_VAL);
         return NULL;
     }
 
     /* init locals */
-    se = &runstack[script_level-1];
+    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
+    if (se == NULL) {
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+
     retstr = NULL;  /* start of return string */
     start = se->buff;
     total = 0;
     done = FALSE;
 
-    if (script_cancel) {
+    if (rcxt->script_cancel) {
         if (LOGINFO) {
             log_info("\nScript '%s' canceled", se->source);
         }
         done = TRUE;
-        if (script_level <= 1) {
-            script_cancel = FALSE;
+        if (rcxt->script_level <= 1) {
+            rcxt->script_cancel = FALSE;
         }
     }
 
@@ -396,10 +465,13 @@ xmlChar *
 
         /* read the next line from the file */
         if (!fgets((char *)start, se->bufflen-total, se->fp)) {
-            /* read line failed */
-            /* ncx_print_errormsg(NULL, NULL, ERR_NCX_FILE_READ); */
+
+            int errint = feof(se->fp);
+
             if (retstr) {
                 *res = NO_ERR;
+            } else if (errint) {
+                *res = ERR_NCX_EOF;
             } else {
                 *res = ERR_NCX_READ_FAILED;
             }
@@ -461,12 +533,12 @@ xmlChar *
     }
 
     if (!retstr) {
-        runstack_pop();
-    } else {
-        log_info("\nrunstack: run line %u, %s\n cmd: %s",
-                 se->linenum, 
-                 se->source, 
-                 retstr);
+        runstack_pop(rcxt);
+    } else if (LOGDEBUG) {
+        log_debug("\nrunstack: run line %u, %s\n cmd: %s",
+                  se->linenum, 
+                  se->source, 
+                  retstr);
     }
 
     return retstr;
@@ -479,12 +551,17 @@ xmlChar *
 * 
 *  Cancel all running scripts
 *
+* INPUTS:
+*     rcxt == runstack context to use
 *********************************************************************/
 void
-    runstack_cancel (void)
+    runstack_cancel (runstack_context_t *rcxt)
 {
-    if (script_level) {
-        script_cancel = TRUE;
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
+    if (rcxt->script_level) {
+        rcxt->script_cancel = TRUE;
     }
 }  /* runstack_cencel */
 
@@ -496,6 +573,7 @@ void
 *  out which queue to get
 *
 * INPUTS:
+*   rcxt == runstack context to use
 *   isglobal == TRUE if global queue desired
 *            == FALSE if the runstack var que is desired
 *
@@ -503,22 +581,30 @@ void
 *   pointer to the requested que
 *********************************************************************/
 dlq_hdr_t *
-    runstack_get_que (boolean isglobal)
+    runstack_get_que (runstack_context_t *rcxt,
+                      boolean isglobal)
 {
-    stack_entry_t  *se;
+    runstack_entry_t  *se;
+
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
 
     /* check global que */
     if (isglobal) {
-        return &globalQ;
+        return &rcxt->globalQ;
     }
 
     /* check level zero local que */
-    if (script_level == 0) {
-        return &zeroQ;
+    if (rcxt->script_level == 0) {
+        return &rcxt->zeroQ;
     }
 
     /* get the current slot */
-    se = &runstack[script_level-1];
+    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
+    if (se == NULL) {
+        return NULL;
+    }
     return &se->varQ;
 
 }  /* runstack_get_que */
@@ -529,20 +615,30 @@ dlq_hdr_t *
 * 
 *  Get the parameter queue for the current stack level
 *
+* INPUTS:
+*     rcxt == runstack context to use
+*
 * RETURNS:
 *   que for current stack level, NULL if an error
 *********************************************************************/
 dlq_hdr_t *
-    runstack_get_parm_que (void)
+    runstack_get_parm_que (runstack_context_t *rcxt)
 {
-    stack_entry_t  *se;
+    runstack_entry_t  *se;
 
-    if (script_level == 0) {
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
+
+    if (rcxt->script_level == 0) {
         return NULL;
     }
 
     /* get the current slot */
-    se = &runstack[script_level-1];
+    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
+    if (se == NULL) {
+        return NULL;
+    }
 
     return &se->parmQ;
 
@@ -559,13 +655,9 @@ void
     runstack_init (void)
 {
     if (!runstack_init_done) {
-        script_level = 0;
-        script_cancel = FALSE;
-        dlq_createSQue(&globalQ);
-        dlq_createSQue(&zeroQ);
+        runstack_init_context(&defcxt);
         runstack_init_done = TRUE;
     }
-        
 } /* runstack_init */                 
 
 
@@ -578,26 +670,122 @@ void
 void
     runstack_cleanup (void)
 {
-    ncx_var_t *var;
-
     if (runstack_init_done) {
-        while (script_level > 0) {
-            runstack_pop();
-        }
-
-        while (!dlq_empty(&globalQ)) {
-            var = (ncx_var_t *)dlq_deque(&globalQ);
-            var_free(var);
-        }
-
-        while (!dlq_empty(&zeroQ)) {
-            var = (ncx_var_t *)dlq_deque(&zeroQ);
-            var_free(var);
-        }
+        runstack_clean_context(&defcxt);
         runstack_init_done = FALSE;
     }
-
 } /* runstack_cleanup */                      
+
+
+/********************************************************************
+* FUNCTION runstack_clean_context
+* 
+*  INPUTS:
+*     rcxt == runstack context to clean, but not free
+*
+*********************************************************************/
+void
+    runstack_clean_context (runstack_context_t *rcxt)
+{
+    ncx_var_t *var;
+
+#ifdef DEBUG
+    if (rcxt == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    while (rcxt->script_level > 0) {
+        runstack_pop(rcxt);
+    }
+
+    while (!dlq_empty(&rcxt->globalQ)) {
+        var = (ncx_var_t *)dlq_deque(&rcxt->globalQ);
+        var_free(var);
+    }
+
+    while (!dlq_empty(&rcxt->zeroQ)) {
+        var = (ncx_var_t *)dlq_deque(&rcxt->zeroQ);
+        var_free(var);
+    }
+
+} /* runstack_clean_context */ 
+
+
+/********************************************************************
+* FUNCTION runstack_free_context
+* 
+*  INPUTS:
+*     rcxt == runstack context to free
+*
+*********************************************************************/
+void
+    runstack_free_context (runstack_context_t *rcxt)
+{
+#ifdef DEBUG
+    if (rcxt == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    runstack_clean_context(rcxt);
+    m__free(rcxt);
+
+} /* runstack_free_context */ 
+
+
+/********************************************************************
+* FUNCTION runstack_init_context
+* 
+* Initialize a pre-malloced runstack context
+*
+*  INPUTS:
+*     rcxt == runstack context to free
+*
+*********************************************************************/
+void
+    runstack_init_context (runstack_context_t *rcxt)
+{
+#ifdef DEBUG
+    if (rcxt == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    memset(rcxt, 0x0, sizeof(runstack_context_t));
+    dlq_createSQue(&rcxt->globalQ);
+    dlq_createSQue(&rcxt->zeroQ);
+    dlq_createSQue(&rcxt->runstackQ);
+    rcxt->max_script_level = RUNSTACK_MAX_NEST;
+
+} /* runstack_init_context */ 
+
+
+/********************************************************************
+* FUNCTION runstack_new_context
+* 
+*  Malloc a new runstack context
+*
+*  RETURNS:
+*     malloced and initialized runstack context
+*
+*********************************************************************/
+runstack_context_t *
+    runstack_new_context (void)
+{
+    runstack_context_t *rcxt;
+
+    rcxt = m__getObj(runstack_context_t);
+    if (rcxt == NULL) {
+        return NULL;
+    }
+    runstack_init_context(rcxt);
+    return rcxt;
+
+} /* runstack_new_context */ 
 
 
 /********************************************************************
@@ -605,17 +793,26 @@ void
 * 
 * Cleanup after a yangcli session has ended
 *
+*  INPUTS:
+*     rcxt == runstack context to use
+*
 *********************************************************************/
 void
-    runstack_session_cleanup (void)
+    runstack_session_cleanup (runstack_context_t *rcxt)
 {
-    uint32      level;
+    runstack_entry_t   *se;
 
-    var_cvt_generic(&globalQ);
-    var_cvt_generic(&zeroQ);
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
 
-    for (level = 0; level < script_level; level++) {
-        var_cvt_generic(&runstack[level].varQ);
+    var_cvt_generic(&rcxt->globalQ);
+    var_cvt_generic(&rcxt->zeroQ);
+    
+    for (se = (runstack_entry_t *)dlq_firstEntry(&rcxt->runstackQ);
+         se != NULL;
+         se = (runstack_entry_t *)dlq_nextEntry(se)) {
+        var_cvt_generic(&se->varQ);
     }
 
 } /* runstack_session_cleanup */

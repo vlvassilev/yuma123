@@ -310,7 +310,8 @@ static status_t
                 if (!chval) {
                     defval = obj_get_default(chobj);
                     if (defval) {
-                        res = cli_parse_parm(val, 
+                        res = cli_parse_parm(NULL,
+                                             val, 
                                              chobj,
                                              defval, 
                                              scriptmode);

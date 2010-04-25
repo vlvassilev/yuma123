@@ -46,6 +46,10 @@ date	     init     comment
 #include "obj.h"
 #endif
 
+#ifndef _H_runstack
+#include "runstack.h"
+#endif
+
 #ifndef _H_val
 #include "val.h"
 #endif
@@ -99,7 +103,6 @@ typedef enum var_side_t_ {
 } var_side_t;
 
 
-
 /********************************************************************
 *								    *
 *			F U N C T I O N S			    *
@@ -139,6 +142,7 @@ extern void
 * Find and set (or create a new) global user variable
 * 
 * INPUTS:
+*   rcxt == runstack context to use to find the var
 *   name == var name to set
 *   namelen == length of name
 *   value == var value to set
@@ -148,7 +152,8 @@ extern void
 *   status
 *********************************************************************/
 extern status_t
-    var_set_str (const xmlChar *name,
+    var_set_str (runstack_context_t *rcxt,
+                 const xmlChar *name,
 		 uint32 namelen,
 		 const val_value_t *value,
 		 var_type_t vartype);
@@ -160,6 +165,7 @@ extern status_t
 * Find and set (or create a new) global user variable
 * 
 * INPUTS:
+*   rcxt == runstack context to use to find the var
 *   name == var name to set
 *   value == var value to set
 *   vartype == variable type
@@ -168,7 +174,8 @@ extern status_t
 *   status
 *********************************************************************/
 extern status_t
-    var_set (const xmlChar *name,
+    var_set (runstack_context_t *rcxt,
+             const xmlChar *name,
 	     const val_value_t *value,
 	     var_type_t vartype);
 
@@ -240,6 +247,7 @@ extern status_t
 * This function will not clone the value like var_set
 *
 * INPUTS:
+*   rcxt == runstack context to use to find the var
 *   name == var name to set
 *   namelen == length of name string
 *   vartype == variable type
@@ -249,7 +257,8 @@ extern status_t
 *   status
 *********************************************************************/
 extern status_t
-    var_set_move (const xmlChar *name,
+    var_set_move (runstack_context_t *rcxt,
+                  const xmlChar *name,
 		  uint32 namelen,
 		  var_type_t vartype,
 		  val_value_t *value);
@@ -261,6 +270,7 @@ extern status_t
 * Find and set (or create a new) global system variable
 * 
 * INPUTS:
+*   rcxt == runstack context to use to find the var
 *   name == var name to set
 *   value == var value to set
 * 
@@ -268,7 +278,8 @@ extern status_t
 *   status
 *********************************************************************/
 extern status_t
-    var_set_sys (const xmlChar *name,
+    var_set_sys (runstack_context_t *rcxt,
+                 const xmlChar *name,
 		 const val_value_t *value);
 
 
@@ -279,6 +290,7 @@ extern status_t
 * from a string value instead of a val_value_t struct
 *
 * INPUTS:
+*   rcxt == runstack context to use
 *   name == var name to set
 *   valstr == value string to set
 *   vartype == variable type
@@ -287,7 +299,8 @@ extern status_t
 *   status
 *********************************************************************/
 extern status_t
-    var_set_from_string (const xmlChar *name,
+    var_set_from_string (runstack_context_t *rcxt,
+                         const xmlChar *name,
 			 const xmlChar *valstr,
 			 var_type_t vartype);
 
@@ -300,6 +313,7 @@ extern status_t
 * !!! This function does not try global if local fails !!!
 * 
 * INPUTS:
+*   rcxt == runstack context to use
 *   name == var name to unset
 *   namelen == length of name string
 *   vartype == variable type
@@ -308,7 +322,8 @@ extern status_t
 *   status
 *********************************************************************/
 extern status_t
-    var_unset (const xmlChar *name,
+    var_unset (runstack_context_t *rcxt,
+               const xmlChar *name,
 	       uint32 namelen,
 	       var_type_t vartype);
 
@@ -338,6 +353,7 @@ extern status_t
 * Find a global user variable
 * 
 * INPUTS:
+*   rcxt == runstack context to use
 *   name == var name to get
 *   namelen == length of name
 *   vartype == variable type
@@ -346,7 +362,8 @@ extern status_t
 *   pointer to value, or NULL if not found
 *********************************************************************/
 extern val_value_t *
-    var_get_str (const xmlChar *name,
+    var_get_str (runstack_context_t *rcxt,
+                 const xmlChar *name,
 		 uint32 namelen,
 		 var_type_t vartype);
 
@@ -357,6 +374,7 @@ extern val_value_t *
 * Find a local or global user variable
 * 
 * INPUTS:
+*   rcxt == runstack context to use
 *   name == var name to get
 *   vartype == variable type
 * 
@@ -364,7 +382,8 @@ extern val_value_t *
 *   pointer to value, or NULL if not found
 *********************************************************************/
 extern val_value_t *
-    var_get (const xmlChar *name,
+    var_get (runstack_context_t *rcxt,
+             const xmlChar *name,
 	     var_type_t vartype);
 
 
@@ -374,6 +393,7 @@ extern val_value_t *
 * Find a user variable; get its var type
 * 
 * INPUTS:
+*   rcxt == runstack context to use
 *   name == var name to get
 *   namelen == length of name
 *   globalonly == TRUE to check only the global Q
@@ -383,7 +403,8 @@ extern val_value_t *
 *   var type if found, or VAR_TYP_NONE
 *********************************************************************/
 extern var_type_t
-    var_get_type_str (const xmlChar *name,
+    var_get_type_str (runstack_context_t *rcxt,
+                      const xmlChar *name,
 		      uint32 namelen,
 		      boolean globalonly);
 
@@ -394,6 +415,7 @@ extern var_type_t
 * Get the var type of a specified var name
 * 
 * INPUTS:
+*   rcxt == runstack context to use
 *   name == var name to get
 *   globalonly == TRUE to check only the global Q
 *                 FALSE to check local, then global Q
@@ -402,7 +424,8 @@ extern var_type_t
 *   var type or VAR_TYP_NONE if not found
 *********************************************************************/
 extern var_type_t
-    var_get_type (const xmlChar *name,
+    var_get_type (runstack_context_t *rcxt,
+                  const xmlChar *name,
 		  boolean globalonly);
 
 
@@ -472,13 +495,15 @@ extern ncx_var_t *
 * Find a local user variable
 * 
 * INPUTS:
+*   rcxt == runstack context to use
 *   name == var name to get
 * 
 * RETURNS:
 *   pointer to value, or NULL if not found
 *********************************************************************/
 extern val_value_t *
-    var_get_local (const xmlChar *name);
+    var_get_local (runstack_context_t *rcxt,
+                   const xmlChar *name);
 
 
 /********************************************************************
@@ -487,13 +512,15 @@ extern val_value_t *
 * Find a local user variable, count-based name string
 * 
 * INPUTS:
+*   rcxt == runstack context to use
 *   name == var name to get
 * 
 * RETURNS:
 *   pointer to value, or NULL if not found
 *********************************************************************/
 extern val_value_t *
-    var_get_local_str (const xmlChar *name,
+    var_get_local_str (runstack_context_t *rcxt,
+                       const xmlChar *name,
 		       uint32 namelen);
 
 
@@ -510,6 +537,7 @@ extern val_value_t *
 *   $foo = get-config filter=@filter.xml
 *
 * INPUTS:
+*   rcxt == runstack context to use
 *   line == command line string to expand
 *   isleft == TRUE if left hand side of an expression
 *          == FALSE if right hand side ($1 type vars allowed)
@@ -528,7 +556,8 @@ extern val_value_t *
 *    status   
 *********************************************************************/
 extern status_t
-    var_check_ref (const xmlChar *line,
+    var_check_ref (runstack_context_t *rcxt,
+                   const xmlChar *line,
 		   var_side_t side,
 		   uint32   *len,
 		   var_type_t *vartype,
@@ -545,6 +574,7 @@ extern status_t
 * See ncxcli.c for details on the script syntax
 *
 * INPUTS:
+*   rcxt == runstack context to use
 *   obj == expected type template 
 *          == NULL and will be set to NCX_BT_STRING for
 *             simple types
@@ -565,7 +595,8 @@ extern status_t
 *   If no error, then returns pointer to new val or filled in 'val'
 *********************************************************************/
 extern val_value_t *
-    var_get_script_val (obj_template_t *obj,
+    var_get_script_val (runstack_context_t *rcxt,
+                        obj_template_t *obj,
 			val_value_t *val,
 			const xmlChar *strval,
 			boolean istop,
@@ -581,6 +612,7 @@ extern val_value_t *
 * See yangcli documentation for details on the script syntax
 *
 * INPUTS:
+*   rcxt == runstack context to use
 *   obj == expected object template 
 *          == NULL and will be set to NCX_BT_STRING for
 *             simple types
@@ -599,14 +631,15 @@ extern val_value_t *
 *   If error, then returns NULL
 *********************************************************************/
 extern val_value_t *
-    var_check_script_val (obj_template_t *obj,
+    var_check_script_val (runstack_context_t *rcxt,
+                          obj_template_t *obj,
 			  const xmlChar *strval,
 			  boolean istop,
 			  status_t *res);
 
 
 /********************************************************************
-* FUNCTION var_queue_cvt_generic
+* FUNCTION var_cvt_generic
 * 
 * Cleanup after a yangcli session has ended
 *
@@ -625,6 +658,7 @@ extern void
 * Find a complete var struct for use with XPath
 *
 * INPUTS:
+*   rcxt == runstack context to use
 *   varname == variable name string
 *   nsid == namespace ID for varname (0 is OK)
 *
@@ -632,7 +666,8 @@ extern void
 *   pointer to ncx_var_t for the first match found (local or global)
 *********************************************************************/
 extern ncx_var_t *
-    var_find (const xmlChar *varname,
+    var_find (runstack_context_t *rcxt,
+              const xmlChar *varname,
               xmlns_id_t nsid);
 
 

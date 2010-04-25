@@ -211,6 +211,7 @@ date         init     comment
 *  Call the cli_parse for an RPC input value set
 * 
 * INPUTS:
+*   server_cb == server control block to use
 *   rpc == RPC to parse CLI for
 *   line == input line to parse, starting with the parms to parse
 *   res == pointer to status output
@@ -223,7 +224,8 @@ date         init     comment
 *    may have errors, check *res
 *********************************************************************/
 static val_value_t *
-    parse_rpc_cli (obj_template_t *rpc,
+    parse_rpc_cli (server_cb_t *server_cb,
+                   obj_template_t *rpc,
                    const xmlChar *args,
                    status_t  *res)
 {
@@ -237,7 +239,8 @@ static val_value_t *
     if (obj && obj_get_child_count(obj)) {
         myargv[0] = (const char *)obj_get_name(rpc);
         myargv[1] = (const char *)args;
-        return cli_parse(2, 
+        return cli_parse(server_cb->runstack_context,
+                         2, 
                          myargv, 
                          obj, 
                          VALONLY, 
@@ -900,7 +903,8 @@ static status_t
         /* no input, use default or old value or EMPTY_STRING */
         if (def) {
             /* use default */
-            res = cli_parse_parm_ex(valset, 
+            res = cli_parse_parm_ex(server_cb->runstack_context,
+                                    valset, 
                                     parm, 
                                     def, 
                                     SCRIPTMODE, 
@@ -908,7 +912,8 @@ static status_t
         } else if (oldparm) {
             /* no default, try old value */
             if (btyp==NCX_BT_EMPTY) {
-                res = cli_parse_parm_ex(valset, 
+                res = cli_parse_parm_ex(server_cb->runstack_context,
+                                        valset, 
                                         parm, 
                                         NULL,
                                         SCRIPTMODE, 
@@ -923,7 +928,8 @@ static status_t
                 }
             }
         } else if (btyp == NCX_BT_EMPTY) {
-            res = cli_parse_parm_ex(valset, 
+            res = cli_parse_parm_ex(server_cb->runstack_context,
+                                    valset, 
                                     parm, 
                                     NULL,
                                     SCRIPTMODE, 
@@ -931,7 +937,8 @@ static status_t
         } else if (!iscomplex && 
                    (val_simval_ok(obj_get_typdef(parm), 
                                   EMPTY_STRING) == NO_ERR)) {
-            res = cli_parse_parm_ex(valset, 
+            res = cli_parse_parm_ex(server_cb->runstack_context,
+                                    valset, 
                                     parm, 
                                     EMPTY_STRING,
                                     SCRIPTMODE, 
@@ -943,7 +950,8 @@ static status_t
     } else if (btyp==NCX_BT_EMPTY) {
         /* empty data type handled special Y: set, N: leave out */
         if (*start=='Y' || *start=='y') {
-            res = cli_parse_parm_ex(valset, 
+            res = cli_parse_parm_ex(server_cb->runstack_context,
+                                    valset, 
                                     parm, 
                                     NULL, 
                                     SCRIPTMODE, 
@@ -952,7 +960,8 @@ static status_t
             ; /* skip; do not add the flag */
         } else if (oldparm) {
             /* previous value was set, so add this flag */
-            res = cli_parse_parm_ex(valset, 
+            res = cli_parse_parm_ex(server_cb->runstack_context,
+                                    valset, 
                                     parm, 
                                     NULL,
                                     SCRIPTMODE, 
@@ -963,7 +972,8 @@ static status_t
         }
     } else {
         /* normal case: input for regular data type */
-        res = cli_parse_parm_ex(valset, 
+        res = cli_parse_parm_ex(server_cb->runstack_context,
+                                valset, 
                                 parm, 
                                 start,
                                 SCRIPTMODE, 
@@ -1059,7 +1069,8 @@ static status_t
                     continue;
                 } else if (*start2 == 'Y' || *start2 == 'y') {
                     /* use the invalid value */
-                    res = cli_parse_parm_ex(valset, 
+                    res = cli_parse_parm_ex(server_cb->runstack_context,
+                                            valset, 
                                             parm, 
                                             saveline, 
                                             SCRIPTMODE, 
@@ -1170,7 +1181,11 @@ static status_t
     if (obj_get_child_count(cas) == 1) {
         parm = obj_first_child(cas);
         if (parm && obj_get_basetype(parm)==NCX_BT_EMPTY) {
-            return cli_parse_parm(valset, parm, NULL, FALSE);
+            return cli_parse_parm(server_cb->runstack_context,
+                                  valset, 
+                                  parm, 
+                                  NULL, 
+                                  FALSE);
         }
     }
 
@@ -2485,7 +2500,9 @@ static status_t
         m__free(fspec);
         return ERR_NCX_MISSING_FILE;
     } else {
-        res = runstack_push(fspec, fp);
+        res = runstack_push(server_cb->runstack_context,
+                            fspec, 
+                            fp);
         m__free(fspec);
         if (res != NO_ERR) {
             fclose(fp);
@@ -2505,16 +2522,20 @@ static status_t
                                          buff) : NULL;
         if (parm) {
             /* store P7 named as ASCII 7 */
-            res = var_set_str(buff+1, 1, parm, VAR_TYP_LOCAL);
+            res = var_set_str(server_cb->runstack_context,
+                              buff+1, 
+                              1, 
+                              parm, 
+                              VAR_TYP_LOCAL);
             if (res != NO_ERR) {
-                runstack_pop();
+                runstack_pop(server_cb->runstack_context);
                 return res;
             }
         }
     }
 
     /* execute the first command in the script */
-    str = runstack_get_cmd(&res);
+    str = runstack_get_cmd(server_cb->runstack_context, &res);
     if (str && res == NO_ERR) {
         /* execute the line as an RPC command */
         if (is_top(server_cb->state)) {
@@ -4171,7 +4192,8 @@ static val_value_t *
                               YANGCLI_MOD, 
                               YANGCLI_VALUE);
         if (parm && parm->res == NO_ERR) {
-            curparm = var_get_script_val(targobj, 
+            curparm = var_get_script_val(server_cb->runstack_context,
+                                         targobj, 
                                          NULL, 
                                          VAL_STR(parm),
                                          ISPARM, 
@@ -4387,7 +4409,9 @@ static val_value_t *
             vartype = VAR_TYP_LOCAL;
         }
         if (fromstr) {
-            userval = var_get(fromstr, vartype);
+            userval = var_get(server_cb->runstack_context,
+                              fromstr, 
+                              vartype);
             if (!userval) {
                 log_error("\nError: variable '%s' not found", 
                           fromstr);
@@ -6608,7 +6632,10 @@ status_t
         }
 
         if (len < linelen) {
-            valset = parse_rpc_cli(rpc, &line[len], &res);
+            valset = parse_rpc_cli(server_cb,
+                                   rpc, 
+                                   &line[len], 
+                                   &res);
             if (res != NO_ERR) {
                 log_error("\nError in the parameters for RPC %s (%s)",
                           obj_get_name(rpc), get_error_string(res));
@@ -7019,7 +7046,10 @@ status_t
             start++;
         }
         if (line[start]) {
-            valset = parse_rpc_cli(rpc, &line[start], &res);
+            valset = parse_rpc_cli(server_cb,
+                                   rpc, 
+                                   &line[start], 
+                                   &res);
             if (!valset || res != NO_ERR) {
                 if (valset) {
                     val_free_value(valset);
@@ -7439,7 +7469,10 @@ val_value_t *
 
     /* check any non-whitespace entered after RPC method name */
     if (line[len]) {
-        valset = parse_rpc_cli(rpc, &line[len], res);
+        valset = parse_rpc_cli(server_cb,
+                               rpc, 
+                               &line[len], 
+                               res);
         if (*res == ERR_NCX_SKIPPED) {
             log_stdout("\nError: no parameters defined for RPC %s",
                        obj_get_name(rpc));

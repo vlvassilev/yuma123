@@ -46,14 +46,51 @@ date	     init     comment
 *								    *
 *********************************************************************/
 
+/* this is an arbitrary limit, but it must match the
+ * yangcli:run rpc P1 - Pn variables, currently set to 9
+ * $1 to $9 parameters passed by yangcli to next script
+ */
 #define RUNSTACK_MAX_PARMS  9
 
+
+/* this is an arbitrary limit to limit resources
+ * and run-away scripts that are called recursively
+ */
+#define RUNSTACK_MAX_NEST   512
 
 /********************************************************************
 *								    *
 *			     T Y P E S				    *
 *								    *
 *********************************************************************/
+
+/* one script run level context entry
+ * each time a 'run script' command is
+ * encountered, a new stack context is created,
+ * unless max_script_level is reached
+ */
+typedef struct runstack_entry_t_ {
+    dlq_hdr_t    qhdr;
+    uint32       level;
+    FILE        *fp;
+    xmlChar     *source;
+    xmlChar     *buff;
+    int          bufflen;
+    uint32       linenum;
+    dlq_hdr_t    parmQ;         /* Q of ncx_var_t */
+    dlq_hdr_t    varQ;          /* Q of ncx_var_t */
+} runstack_entry_t;
+
+
+typedef struct runstack_context_ {
+    xmlChar           *name;
+    boolean            script_cancel;
+    uint32             script_level;
+    uint32             max_script_level;
+    dlq_hdr_t          runstackQ;    /* Q of runstack_entry_t */
+    dlq_hdr_t          globalQ;             /* Q of ncx_var_t */
+    dlq_hdr_t          zeroQ;               /* Q of ncx_var_t */
+} runstack_context_t;
 
 
 /********************************************************************
@@ -68,11 +105,14 @@ date	     init     comment
 * 
 *  Get the current stack level
 *
+* INPUTS:
+*    rcxt == runstack context to use
+*
 * RETURNS:
 *   current stack level; 0 --> not in any script
 *********************************************************************/
 extern uint32
-    runstack_level (void);
+    runstack_level (runstack_context_t *rcxt);
 
 
 /********************************************************************
@@ -86,6 +126,7 @@ extern uint32
 *  with the runstack_setparm
 *
 * INPUTS:
+*   rcxt == runstack context to use
 *   source == file source
 *   fp == file pointer
 *
@@ -93,7 +134,8 @@ extern uint32
 *   status
 *********************************************************************/
 extern status_t
-    runstack_push (const xmlChar *source,
+    runstack_push (runstack_context_t *rcxt,
+                   const xmlChar *source,
 		   FILE *fp);
 
 /********************************************************************
@@ -102,9 +144,11 @@ extern status_t
 *  Remove a script nest level context from the stack
 *  Call just after script is completed
 * 
+* INPUTS:
+*     rcxt == runstack context to use
 *********************************************************************/
 extern void
-    runstack_pop (void);
+    runstack_pop (runstack_context_t *rcxt);
 
 
 /********************************************************************
@@ -118,6 +162,7 @@ extern void
 *      concatenation, an error will be returned
 * 
 * INPUTS:
+*   rcxt == runstack context to use
 *   res == address of status result
 *
 * OUTPUTS:
@@ -128,7 +173,8 @@ extern void
 *   NULL if some error
 *********************************************************************/
 extern xmlChar *
-    runstack_get_cmd (status_t *res);
+    runstack_get_cmd (runstack_context_t *rcxt,
+                      status_t *res);
 
 
 /********************************************************************
@@ -136,9 +182,11 @@ extern xmlChar *
 * 
 *  Cancel all running scripts
 *
+* INPUTS:
+*     rcxt == runstack context to use
 *********************************************************************/
 extern void
-    runstack_cancel (void);
+    runstack_cancel (runstack_context_t *rcxt);
 
 
 /********************************************************************
@@ -148,6 +196,7 @@ extern void
 *  out which queue to get
 *
 * INPUTS:
+*   rcxt == runstack context to use
 *   isglobal == TRUE if global queue desired
 *            == FALSE if the runstack var que is desired
 *
@@ -155,7 +204,8 @@ extern void
 *   pointer to the requested que
 *********************************************************************/
 extern dlq_hdr_t *
-    runstack_get_que (boolean isglobal);
+    runstack_get_que (runstack_context_t *rcxt,
+                      boolean isglobal);
 
 
 /********************************************************************
@@ -163,11 +213,14 @@ extern dlq_hdr_t *
 * 
 *  Get the parameter queue for the current stack level
 *
+* INPUTS:
+*   rcxt == runstack context to use
+*
 * RETURNS:
 *   que for current stack level, NULL if an error
 *********************************************************************/
 extern dlq_hdr_t *
-    runstack_get_parm_que (void);
+    runstack_get_parm_que (runstack_context_t *rcxt);
 
 
 /********************************************************************
@@ -189,14 +242,65 @@ extern void
 extern void
     runstack_cleanup (void);
 
+/********************************************************************
+* FUNCTION runstack_clean_context
+* 
+*  INPUTS:
+*     rcxt == runstack context to clean, but not free
+*
+*********************************************************************/
+extern void
+    runstack_clean_context (runstack_context_t *rcxt);
+
+
+/********************************************************************
+* FUNCTION runstack_free_context
+* 
+*  INPUTS:
+*     rcxt == runstack context to free
+*
+*********************************************************************/
+extern void
+    runstack_free_context (runstack_context_t *rcxt);
+
+
+/********************************************************************
+* FUNCTION runstack_init_context
+* 
+* Initialize a pre-malloced runstack context
+*
+*  INPUTS:
+*     rcxt == runstack context to free
+*
+*********************************************************************/
+extern void
+    runstack_init_context (runstack_context_t *rcxt);
+
+
+/********************************************************************
+* FUNCTION runstack_new_context
+* 
+*  Malloc a new runstack context
+*
+*  RETURNS:
+*     malloced and initialized runstack context
+*
+*********************************************************************/
+extern runstack_context_t *
+    runstack_new_context (void);
+
 
 /********************************************************************
 * FUNCTION runstack_session_cleanup
 * 
 * Cleanup after a yangcli session has ended
 *
+*  INPUTS:
+*     rcxt == runstack context to use
+*
 *********************************************************************/
 extern void
-    runstack_session_cleanup (void);
+    runstack_session_cleanup (runstack_context_t *rcxt);
+
 
 #endif	    /* _H_runstack */

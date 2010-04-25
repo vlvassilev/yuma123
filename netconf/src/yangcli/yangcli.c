@@ -557,6 +557,10 @@ static void
         mgr_not_free_msg(notif);
     }
 
+    if (server_cb->runstack_context) {
+        runstack_free_context(server_cb->runstack_context);
+    }
+
     m__free(server_cb);
 
 }  /* free_server_cb */
@@ -583,8 +587,14 @@ static server_cb_t *
     if (server_cb == NULL) {
         return NULL;
     }
-
     memset(server_cb, 0x0, sizeof(server_cb_t));
+
+    server_cb->runstack_context = runstack_new_context();
+    if (server_cb->runstack_context == NULL) {
+        m__free(server_cb);
+        return NULL;
+    }
+
     dlq_createSQue(&server_cb->varbindQ);
     dlq_createSQue(&server_cb->searchresultQ);
     dlq_createSQue(&server_cb->modptrQ);
@@ -984,12 +994,14 @@ static status_t
     /* update the variable value for user access */
     if (res == NO_ERR) {
         if (newval) {
-            res = var_set_move(configval->name, 
+            res = var_set_move(server_cb->runstack_context,
+                               configval->name, 
                                xml_strlen(configval->name),
                                VAR_TYP_CONFIG, 
                                newval);
         } else {
-            res = var_set_from_string(configval->name,
+            res = var_set_from_string(server_cb->runstack_context,
+                                      configval->name,
                                       newvalstr, 
                                       VAR_TYP_CONFIG);
         }
@@ -1250,7 +1262,8 @@ static status_t
 
     if (*str == '$') {
         /* check if a valid variable assignment is being made */
-        res = var_check_ref(str, 
+        res = var_check_ref(server_cb->runstack_context,
+                            str, 
                             ISLEFT, 
                             &tlen, 
                             &vartype, 
@@ -1272,7 +1285,10 @@ static status_t
              * it is supposed to contain the filespec
              * for the output file
              */
-            curval = var_get_str(name, nlen, vartype);
+            curval = var_get_str(server_cb->runstack_context,
+                                 name, 
+                                 nlen, 
+                                 vartype);
             if (curval == NULL) {
                 log_error("\nError: file assignment variable "
                           "not found");
@@ -1307,11 +1323,16 @@ static status_t
                 return ERR_NCX_VAR_READ_ONLY;
             case VAR_TYP_GLOBAL:
             case VAR_TYP_CONFIG:
-                curval = var_get_str(name, nlen, vartype);
+                curval = var_get_str(server_cb->runstack_context,
+                                     name, 
+                                     nlen, 
+                                     vartype);
                 break;
             case VAR_TYP_LOCAL:
             case VAR_TYP_SESSION:
-                curval = var_get_local_str(name, nlen);
+                curval = var_get_local_str(server_cb->runstack_context,
+                                           name, 
+                                           nlen);
                 break;
             default:
                 return SET_ERROR(ERR_INTERNAL_VAL);
@@ -1398,7 +1419,10 @@ static status_t
             }
 
             /* else try to unset this variable */
-            res = var_unset(name, nlen, vartype);
+            res = var_unset(server_cb->runstack_context,
+                            name, 
+                            nlen, 
+                            vartype);
         }
         *len = str - line;
         return res;
@@ -1418,7 +1442,11 @@ static status_t
     }
 
     /* get the script or CLI input as a new val_value_t struct */
-    val = var_check_script_val(obj, str, ISTOP, &res);
+    val = var_check_script_val(server_cb->runstack_context,
+                               obj, 
+                               str, 
+                               ISTOP, 
+                               &res);
     if (val) {
         /* a script value reference was found */
         if (obj==NULL || !xml_strcmp(val->name, NCX_EL_STRING)) {
@@ -1449,7 +1477,11 @@ static status_t
                 /* val is a malloced struct, pass it over to the
                  * var struct instead of cloning it
                  */
-                res = var_set_move(name, nlen, vartype, val);
+                res = var_set_move(server_cb->runstack_context,
+                                   name, 
+                                   nlen, 
+                                   vartype, 
+                                   val);
             }
             if (res != NO_ERR) {
                 val_free_value(val);
@@ -1498,6 +1530,7 @@ static status_t
  * create a read-only system variable
  *
  * INPUTS:
+ *   server_cb == server control block to use
  *   varname == variable name
  *   varval  == variable string value (may be NULL)
  *
@@ -1505,12 +1538,14 @@ static status_t
  *    status
  *********************************************************************/
 static status_t
-    create_system_var (const char *varname,
+    create_system_var (server_cb_t *server_cb,
+                       const char *varname,
                        const char *varval)
 {
     status_t  res;
 
-    res = var_set_from_string((const xmlChar *)varname,
+    res = var_set_from_string(server_cb->runstack_context,
+                              (const xmlChar *)varname,
                               (const xmlChar *)varval,
                               VAR_TYP_SYSTEM);
     return res;
@@ -1524,6 +1559,7 @@ static status_t
  * create a read-write system variable
  *
  * INPUTS:
+ *   server_cb == server control block
  *   varname == variable name
  *   varval  == variable string value (may be NULL)
  *
@@ -1531,12 +1567,14 @@ static status_t
  *    status
  *********************************************************************/
 static status_t
-    create_config_var (const xmlChar *varname,
+    create_config_var (server_cb_t *server_cb,
+                       const xmlChar *varname,
                        const xmlChar *varval)
 {
     status_t  res;
 
-    res = var_set_from_string(varname, 
+    res = var_set_from_string(server_cb->runstack_context,
+                              varname, 
                               varval,
                               VAR_TYP_CONFIG);
     return res;
@@ -1549,71 +1587,74 @@ static status_t
  * 
  * create the read-only system variables
  *
+ * INPUTS:
+ *   server_cb == server control block to use
+ *
  * RETURNS:
  *   status
  *********************************************************************/
 static status_t
-    init_system_vars (void)
+    init_system_vars (server_cb_t *server_cb)
 {
     const char *envstr;
     status_t    res;
 
     envstr = getenv(NCXMOD_PWD);
-    res = create_system_var(NCXMOD_PWD, envstr);
+    res = create_system_var(server_cb, NCXMOD_PWD, envstr);
     if (res != NO_ERR) {
         return res;
     }
 
     envstr = getenv(USER_HOME);
-    res = create_system_var(USER_HOME, envstr);
+    res = create_system_var(server_cb, USER_HOME, envstr);
     if (res != NO_ERR) {
         return res;
     }
 
     envstr = getenv(ENV_HOST);
-    res = create_system_var(ENV_HOST, envstr);
+    res = create_system_var(server_cb, ENV_HOST, envstr);
     if (res != NO_ERR) {
         return res;
     }
 
     envstr = getenv(ENV_SHELL);
-    res = create_system_var(ENV_SHELL, envstr);
+    res = create_system_var(server_cb, ENV_SHELL, envstr);
     if (res != NO_ERR) {
         return res;
     }
 
     envstr = getenv(ENV_USER);
-    res = create_system_var(ENV_USER, envstr);
+    res = create_system_var(server_cb, ENV_USER, envstr);
     if (res != NO_ERR) {
         return res;
     }
 
     envstr = getenv(ENV_LANG);
-    res = create_system_var(ENV_LANG, envstr);
+    res = create_system_var(server_cb, ENV_LANG, envstr);
     if (res != NO_ERR) {
         return res;
     }
 
     envstr = getenv(NCXMOD_HOME);
-    res = create_system_var(NCXMOD_HOME, envstr);
+    res = create_system_var(server_cb, NCXMOD_HOME, envstr);
     if (res != NO_ERR) {
         return res;
     }
 
     envstr = getenv(NCXMOD_MODPATH);
-    res = create_system_var(NCXMOD_MODPATH, envstr);
+    res = create_system_var(server_cb, NCXMOD_MODPATH, envstr);
     if (res != NO_ERR) {
         return res;
     }
 
     envstr = getenv(NCXMOD_DATAPATH);
-    res = create_system_var(NCXMOD_DATAPATH, envstr);
+    res = create_system_var(server_cb, NCXMOD_DATAPATH, envstr);
     if (res != NO_ERR) {
         return res;
     }
 
     envstr = getenv(NCXMOD_RUNPATH);
-    res = create_system_var(NCXMOD_RUNPATH, envstr);
+    res = create_system_var(server_cb, NCXMOD_RUNPATH, envstr);
     if (res != NO_ERR) {
         return res;
     }
@@ -1628,11 +1669,14 @@ static status_t
  * 
  * create the read-write global variables
  *
+ * INPUTS:
+ *   server_cb == server control block to use
+ *
  * RETURNS:
  *   status
  *********************************************************************/
 static status_t
-    init_config_vars (void)
+    init_config_vars (server_cb_t *server_cb)
 {
     val_value_t    *parm;
     const xmlChar  *strval;
@@ -1644,35 +1688,42 @@ static status_t
     if (parm) {
         strval = VAL_STR(parm);
     }
-    res = create_config_var(YANGCLI_SERVER, strval);
+    res = create_config_var(server_cb,
+                            YANGCLI_SERVER, 
+                            strval);
     if (res != NO_ERR) {
         return res;
     }
 
-    res = create_config_var(YANGCLI_AUTOCOMP, 
+    res = create_config_var(server_cb,
+                            YANGCLI_AUTOCOMP, 
                             (autocomp) ? NCX_EL_TRUE : NCX_EL_FALSE);
     if (res != NO_ERR) {
         return res;
     }
 
-    res = create_config_var(YANGCLI_AUTOLOAD, 
+    res = create_config_var(server_cb,
+                            YANGCLI_AUTOLOAD, 
                             (autoload) ? NCX_EL_TRUE : NCX_EL_FALSE);
     if (res != NO_ERR) {
         return res;
     }
 
-    res = create_config_var(YANGCLI_BADDATA, 
+    res = create_config_var(server_cb,
+                            YANGCLI_BADDATA, 
                             ncx_get_baddata_string(baddata));
     if (res != NO_ERR) {
         return res;
     }
 
-    res = create_config_var(YANGCLI_DEF_MODULE, default_module);
+    res = create_config_var(server_cb,
+                            YANGCLI_DEF_MODULE, default_module);
     if (res != NO_ERR) {
         return res;
     }
 
-    res = create_config_var(YANGCLI_DISPLAY_MODE, 
+    res = create_config_var(server_cb,
+                            YANGCLI_DISPLAY_MODE, 
                             ncx_get_display_mode_str(display_mode));
     if (res != NO_ERR) {
         return res;
@@ -1686,28 +1737,37 @@ static status_t
         strval = (const xmlChar *)getenv(ENV_USER);
     }
 
-    res = create_config_var(YANGCLI_USER, strval);
+    res = create_config_var(server_cb,
+                            YANGCLI_USER, 
+                            strval);
     if (res != NO_ERR) {
         return res;
     }
 
-    res = create_config_var(YANGCLI_TEST_OPTION, NCX_EL_NONE);
+    res = create_config_var(server_cb,
+                            YANGCLI_TEST_OPTION,
+                            NCX_EL_NONE);
     if (res != NO_ERR) {
         return res;
     }
 
-    res = create_config_var(YANGCLI_ERROR_OPTION, NCX_EL_NONE); 
+    res = create_config_var(server_cb,
+                            YANGCLI_ERROR_OPTION,
+                            NCX_EL_NONE); 
     if (res != NO_ERR) {
         return res;
     }
 
     sprintf((char *)numbuff, "%u", default_timeout);
-    res = create_config_var(YANGCLI_TIMEOUT, numbuff);
+    res = create_config_var(server_cb,
+                            YANGCLI_TIMEOUT, 
+                            numbuff);
     if (res != NO_ERR) {
         return res;
     }
 
-    res = create_config_var(YANGCLI_OPTIONAL, 
+    res = create_config_var(server_cb,
+                            YANGCLI_OPTIONAL, 
                             (cur_server_cb->get_optional) 
                             ? NCX_EL_TRUE : NCX_EL_FALSE);
     if (res != NO_ERR) {
@@ -1715,25 +1775,31 @@ static status_t
     }
 
     /* could have changed during CLI processing */
-    res = create_config_var(NCX_EL_LOGLEVEL, 
+    res = create_config_var(server_cb,
+                            NCX_EL_LOGLEVEL, 
                             log_get_debug_level_string
                             (log_get_debug_level()));
     if (res != NO_ERR) {
         return res;
     }
 
-    res = create_config_var(YANGCLI_FIXORDER, 
+    res = create_config_var(server_cb,
+                            YANGCLI_FIXORDER, 
                             (fixorder) ? NCX_EL_TRUE : NCX_EL_FALSE);
     if (res != NO_ERR) {
         return res;
     }
 
-    res = create_config_var(YANGCLI_WITH_DEFAULTS, NCX_EL_NONE); 
+    res = create_config_var(server_cb,
+                            YANGCLI_WITH_DEFAULTS,
+                            NCX_EL_NONE); 
     if (res != NO_ERR) {
         return res;
     }
 
-    res = create_config_var(NCX_EL_DEFAULT_OPERATION, NCX_EL_NONE); 
+    res = create_config_var(server_cb,
+                            NCX_EL_DEFAULT_OPERATION,
+                            NCX_EL_NONE); 
     if (res != NO_ERR) {
         return res;
     }
@@ -1750,6 +1816,7 @@ static status_t
 * parmset for the ncxmgr program
 *
 * INPUTS:
+*    server_cb == server control block to use
 *    argc == argument count
 *    argv == array of command line argument strings
 *
@@ -1761,7 +1828,8 @@ static status_t
 *    NO_ERR if all goes well
 *********************************************************************/
 static status_t
-    process_cli_input (int argc,
+    process_cli_input (server_cb_t *server_cb,
+                       int argc,
                        const char *argv[])
 {
     obj_template_t        *obj;
@@ -1790,7 +1858,8 @@ static status_t
             }
         } else {
             /* parse the command line against the object template */    
-            mgr_cli_valset = cli_parse(argc, 
+            mgr_cli_valset = cli_parse(server_cb->runstack_context,
+                                       argc, 
                                        argv, 
                                        obj,
                                        FULLTEST, 
@@ -2685,8 +2754,8 @@ static mgr_io_state_t
                 if (check_locks_timeout(server_cb)) {
                     res = ERR_NCX_TIMEOUT;
 
-                    if (runstack_level()) {
-                        runstack_cancel();
+                    if (runstack_level(server_cb->runstack_context)) {
+                        runstack_cancel(server_cb->runstack_context);
                     }
 
                     switch (server_cb->command_mode) {
@@ -2785,8 +2854,8 @@ static mgr_io_state_t
             }
 
             if (res != NO_ERR) {
-                if (runstack_level()) {
-                    runstack_cancel();
+                if (runstack_level(server_cb->runstack_context)) {
+                    runstack_cancel(server_cb->runstack_context);
                 }
                 server_cb->state = MGR_IO_ST_CONN_IDLE;
 
@@ -2871,10 +2940,14 @@ static mgr_io_state_t
     }
 
     /* get a line of user input */
-    if (runstack_level()) {
+    if (runstack_level(server_cb->runstack_context)) {
         /* get one line of script text */
-        line = runstack_get_cmd(&res);
+        line = runstack_get_cmd(server_cb->runstack_context,
+                                &res);
         if (line==NULL || res != NO_ERR) {
+            if (res == ERR_NCX_EOF) {
+                ;
+            }
             if (batchmode) {
                 mgr_request_shutdown();
             }
@@ -3171,8 +3244,17 @@ static status_t
         val_init_from_template(connect_valset, obj);
     }
 
+    /* create a default server control block */
+    server_cb = new_server_cb(YANGCLI_DEF_SERVER);
+    if (server_cb==NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+    dlq_enque(server_cb, &server_cbQ);
+
+    cur_server_cb = server_cb;
+
     /* Get any command line and conf file parameters */
-    res = process_cli_input(argc, argv);
+    res = process_cli_input(server_cb, argc, argv);
     if (res != NO_ERR) {
         return res;
     }
@@ -3204,15 +3286,6 @@ static status_t
     if (temp_progcb == NULL || res != NO_ERR) {
         return res;
     }
-
-    /* create a default server control block */
-    server_cb = new_server_cb(YANGCLI_DEF_SERVER);
-    if (server_cb==NULL) {
-        return ERR_INTERNAL_MEM;
-    }
-    dlq_enque(server_cb, &server_cbQ);
-
-    cur_server_cb = server_cb;
 
     /* set the CLI handler */
     mgr_io_set_stdin_handler(yangcli_stdin_handler);
@@ -3294,13 +3367,13 @@ static status_t
     }
 
     /* load the system (read-only) variables */
-    res = init_system_vars();
+    res = init_system_vars(server_cb);
     if (res != NO_ERR) {
         return res;
     }
 
     /* load the system config variables */
-    res = init_config_vars();
+    res = init_config_vars(server_cb);
     if (res != NO_ERR) {
         return res;
     }
@@ -3785,8 +3858,8 @@ void
     }
 
     /* check if a script is running */
-    if (anyerrors && runstack_level()) {
-        runstack_cancel();
+    if (anyerrors && runstack_level(server_cb->runstack_context)) {
+        runstack_cancel(server_cb->runstack_context);
     }
 
     if (anyerrors && rpy->reply) {
@@ -3949,7 +4022,8 @@ status_t
         }
     } else if (server_cb->result_name) {
         if (server_cb->result_vartype == VAR_TYP_CONFIG) {
-            configvar = var_get(server_cb->result_name,
+            configvar = var_get(server_cb->runstack_context,
+                                server_cb->result_name,
                                 VAR_TYP_CONFIG);
             if (configvar==NULL) {
                 res = SET_ERROR(ERR_INTERNAL_VAL);
@@ -3967,7 +4041,8 @@ status_t
              * hand off the malloced 'resultvar' here
              */
             if (res == NO_ERR) {
-                res = var_set_move(server_cb->result_name, 
+                res = var_set_move(server_cb->runstack_context,
+                                   server_cb->result_name, 
                                    xml_strlen(server_cb->result_name),
                                    server_cb->result_vartype,
                                    resultvar);
@@ -3982,7 +4057,8 @@ status_t
             }
         } else {
             /* this is just a string assignment */
-            res = var_set_from_string(server_cb->result_name,
+            res = var_set_from_string(server_cb->runstack_context,
+                                      server_cb->result_name,
                                       resultstr, 
                                       server_cb->result_vartype);
             if (res != NO_ERR) {

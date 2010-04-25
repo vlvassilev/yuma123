@@ -376,6 +376,7 @@ typedef struct xpath_pcb_t_ {
      * user variables to be supported in this XPath expression
      */
     xpath_getvar_fn_t    getvar_fn;
+    void                *cookie;
 
     /* The varbindQ may be used instead of the getvar_fn
      * to store user variables to be supported in 
@@ -686,6 +687,32 @@ extern status_t
 extern xpath_pcb_t *
     xpath_new_pcb (const xmlChar *xpathstr,
                    xpath_getvar_fn_t  getvar_fn);
+
+
+/********************************************************************
+* FUNCTION xpath_new_pcb_ex
+* 
+* malloc a new XPath parser control block
+* xpathstr is allowed to be NULL, otherwise
+* a strdup will be made and exprstr will be set
+*
+* Create and initialize an XPath parser control block
+*
+* INPUTS:
+*   xpathstr == XPath expression string to save (a copy will be made)
+*            == NULL if this step should be skipped
+*   getvar_fn == callback function to retirieve an XPath
+*                variable binding
+*                NULL if no variables are used
+*   cookie == runstack context pointer to use, cast as a cookie
+*
+* RETURNS:
+*   pointer to malloced struct, NULL if malloc error
+*********************************************************************/
+extern xpath_pcb_t *
+    xpath_new_pcb_ex (const xmlChar *xpathstr,
+                      xpath_getvar_fn_t  getvar_fn,
+                      void *cookie);
 
 
 /********************************************************************

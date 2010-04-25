@@ -274,7 +274,9 @@ status_t
 
     if (res == NO_ERR) {
         /* got all the parameters, and setup the XPath control block */
-        pcb = xpath_new_pcb(VAL_STR(expr), xpath_getvar_fn);
+        pcb = xpath_new_pcb_ex(VAL_STR(expr), 
+                               xpath_getvar_fn,
+                               server_cb->runstack_context);
         if (pcb == NULL) {
             res = ERR_INTERNAL_MEM;
         } else {

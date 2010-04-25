@@ -1761,7 +1761,8 @@ static status_t
 
     /* parse the command line against the PSD */
     if (res == NO_ERR) {
-        valset = cli_parse(argc, 
+        valset = cli_parse(NULL,
+                           argc, 
                            argv, 
                            obj,
                            FULLTEST, 

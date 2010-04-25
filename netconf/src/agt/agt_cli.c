@@ -401,7 +401,8 @@ status_t
     res = NO_ERR;
     valset = NULL;
     if (argc > 0) {
-        valset = cli_parse(argc, 
+        valset = cli_parse(NULL,
+                           argc, 
                            argv, 
                            obj,
                            FULLTEST, 

@@ -279,6 +279,34 @@ module yangcli {
  
     }
 
+    grouping XPathParms {
+        description
+          "Common parameters used for XPath script constructs";
+
+        leaf expr {
+          description
+            "XPath expression string to evaluate.
+             Use quotes if there are any whitespace or
+             special characters in the expression.";
+          type yang:xpath1.0 {
+            length "1..max";
+          }
+          mandatory true;
+        }
+
+        anyxml docroot {
+          description 
+            "Use the contents of the specified variable or
+             external XML file as the conceptual document to
+             apply the expression specified in the 'expr' parameter.
+
+             If this parameter is missing then a dummy document
+             will be used.  This is only allowed if the
+             expression only contains variable references
+             or numeric/string constants.";
+        }
+    }
+
     /*************************************************************
      *
      *         CLI parameter set for yangcli program
@@ -518,45 +546,35 @@ module yangcli {
       }
     }
 
-    rpc eventlog {
-      description "Access the notification event log";
+    rpc elif {
+      description 
+        "Evaluate an XPath expression locally on the manager.
+         and execute the block of commands that follow
+         if the expression is true.  The block ends
+         when a matching 'elif', 'else', or 'end' command is reached.
+         This may only be used after an 'if' or 'elif' command
+         or an error (no matching if command) will occur.
+        ";
       input {
-        ncx:default-parm show;
-
-        choice eventlog-action {
-          default show-case;
-
-          case show-case {
-            leaf show {
-              description 
-                "Show the specified number of event log
-                 buffer entries. -1 means show all entries.
-                 If the --full or --brief help-mode parameters
-                 are entered, then the output will be altered.";
-              type LogCount;
-              default -1;
-            }
-
-            leaf start {
-              description 
-                "Start at the specified event index number instead of
-                 the beginning of the event log.";
-              type LogIndex;
-            }
-
-            uses ncxapp:HelpMode;
-          }
-
-          leaf clear {
-            description 
-              "Clear the specified number of notification 
-               event log entries.  The value zero means
-               clear all the entries.";
-            type LogCount;
-            default 25;
-          }
-        }
+        ncx:default-parm expr;
+        uses XPathParms;
       }
+    }
+
+    rpc else {
+      description 
+        "End an 'if' or 'elif' command block, and start a new
+         command block that must end with an 'end' command.
+         If no 'if' or 'elif' block is in progress then an error 
+         will occur.
+        ";
+    }
+
+    rpc end {
+      description 
+        "End an 'if' command block or a 'while' command block.
+         If no block is in progress then an error will occur.
+        ";
     }
 
     rpc eval {
@@ -601,29 +619,7 @@ module yangcli {
 
       input {
         ncx:default-parm expr;
-
-        leaf expr {
-          description
-            "XPath expression string to evaluate.
-             Use quotes if there are any whitespace or
-             special characters in the expression.";
-          type yang:xpath1.0 {
-            length "1..max";
-          }
-          mandatory true;
-        }
-
-        anyxml docroot {
-          description 
-            "Use the contents of the specified variable or
-             external XML file as the conceptual document to
-             apply the expression specified in the 'expr' parameter.
-
-             If this parameter is missing then a dummy document
-             will be used.  This is only allowed if the
-             expression only contains variable references
-             or numeric/string constants.";
-        }
+        uses XPathParms;
       }
 
       output {
@@ -643,6 +639,47 @@ module yangcli {
              An empty 'data' element will be returned if the result
              is an empty node-set.";
           mandatory true;
+        }
+      }
+    }
+
+    rpc eventlog {
+      description "Access the notification event log";
+      input {
+        ncx:default-parm show;
+
+        choice eventlog-action {
+          default show-case;
+
+          case show-case {
+            leaf show {
+              description 
+                "Show the specified number of event log
+                 buffer entries. -1 means show all entries.
+                 If the --full or --brief help-mode parameters
+                 are entered, then the output will be altered.";
+              type LogCount;
+              default -1;
+            }
+
+            leaf start {
+              description 
+                "Start at the specified event index number instead of
+                 the beginning of the event log.";
+              type LogIndex;
+            }
+
+            uses ncxapp:HelpMode;
+          }
+
+          leaf clear {
+            description 
+              "Clear the specified number of notification 
+               event log entries.  The value zero means
+               clear all the entries.";
+            type LogCount;
+            default 25;
+          }
         }
       }
     }
@@ -795,6 +832,18 @@ module yangcli {
       }
     }
 
+    rpc if {
+      description 
+        "Evaluate an XPath expression locally on the manager.
+         and execute the block of commands that follow
+         if the expression is true.  The block ends
+         when a matching 'elif', 'else', or 'end' command is reached.
+        ";
+      input {
+        ncx:default-parm expr;
+        uses XPathParms;
+      }
+    }
 
     rpc insert {
       description
@@ -1154,6 +1203,19 @@ module yangcli {
           }
         }
         uses ncxapp:HelpMode;
+      }
+    }
+
+    rpc while {
+      description 
+        "Evaluate an XPath expression locally on the manager.
+         and execute the block of commands that follow
+         while the expression is true.  The block ends
+         when a matching 'end' command is reached.
+        ";
+      input {
+        ncx:default-parm expr;
+        uses XPathParms;
       }
     }
 

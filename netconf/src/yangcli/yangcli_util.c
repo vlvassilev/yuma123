@@ -347,7 +347,7 @@ void
      * server-specific object trees that have been freed
      * already by mgr_ses_free_session
      */
-    runstack_session_cleanup();
+    runstack_session_cleanup(server_cb->runstack_context);
 
     while (!dlq_empty(&server_cb->modptrQ)) {
         modptr = (modptr_t *)dlq_deque(&server_cb->modptrQ);
@@ -1048,7 +1048,8 @@ ncx_var_t *
                      const xmlChar *varname,
                      status_t *res)
 {
-    ncx_var_t  *retvar;
+    ncx_var_t           *retvar;
+    runstack_context_t  *rcxt;
 
 #ifdef DEBUG
     if (varname == NULL || res == NULL) {
@@ -1057,8 +1058,11 @@ ncx_var_t *
     }
 #endif
 
-    (void)pcb;
-    retvar = var_find(varname, 0);
+    /* if the runstack context is not set then the default
+     * context will be used
+     */
+    rcxt = (runstack_context_t *)pcb->cookie;
+    retvar = var_find(rcxt, varname, 0);
     if (retvar == NULL) {
         *res = ERR_NCX_DEF_NOT_FOUND;
     } else {

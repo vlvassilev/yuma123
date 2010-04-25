@@ -53,6 +53,10 @@ date	     init     comment
 #include "obj.h"
 #endif
 
+#ifndef _H_runstack
+#include "runstack.h"
+#endif
+
 #ifndef _H_status
 #include "status.h"
 #endif
@@ -299,6 +303,7 @@ extern status_t
 * has been called, and returns NO_ERR.
 * 
 * INPUTS:
+*   rcxt == runstack context to use
 *   argc == number of strings passed in 'argv'
 *   argv == array of command line argument strings
 *   obj == obj_template_t of the container 
@@ -329,7 +334,8 @@ extern status_t
 *   pointer to the malloced and filled in val_value_t
 *********************************************************************/
 extern val_value_t *
-    cli_parse (int argc, 
+    cli_parse (runstack_context_t *rcxt,
+               int argc, 
 	       const char *argv[],
 	       obj_template_t *obj,
 	       boolean valonly,
@@ -349,6 +355,7 @@ extern val_value_t *
 * ALLOWS SCRIPT EXTENSIONS TO BE PRESENT
 *
 * INPUTS:
+*   rcxt == runstack context to use
 *   val == parent value struct to adjust
 *   parm == obj_template_t descriptor for the missing parm
 *   strval == string representation of the parm value
@@ -364,7 +371,8 @@ extern val_value_t *
 *   status 
 *********************************************************************/
 extern status_t
-    cli_parse_parm (val_value_t *val,
+    cli_parse_parm (runstack_context_t *rcxt,
+                    val_value_t *val,
 		    obj_template_t *obj,
 		    const xmlChar *strval,
 		    boolean script);
@@ -381,6 +389,7 @@ extern status_t
 * ALLOWS SCRIPT EXTENSIONS TO BE PRESENT
 *
 * INPUTS:
+*   rcxt == runstack context to use
 *   val == parent value struct to adjust
 *   parm == obj_template_t descriptor for the missing parm
 *   strval == string representation of the parm value
@@ -397,7 +406,8 @@ extern status_t
 *   status 
 *********************************************************************/
 extern status_t
-    cli_parse_parm_ex (val_value_t *val,
+    cli_parse_parm_ex (runstack_context_t *rcxt,
+                       val_value_t *val,
 		       obj_template_t *obj,
 		       const xmlChar *strval,
 		       boolean script,

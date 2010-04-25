@@ -1735,6 +1735,37 @@ xpath_pcb_t *
     xpath_new_pcb (const xmlChar *xpathstr,
                    xpath_getvar_fn_t  getvar_fn)
 {
+
+    return xpath_new_pcb_ex(xpathstr, getvar_fn, NULL);
+
+}  /* xpath_new_pcb */
+
+
+/********************************************************************
+* FUNCTION xpath_new_pcb_ex
+* 
+* malloc a new XPath parser control block
+* xpathstr is allowed to be NULL, otherwise
+* a strdup will be made and exprstr will be set
+*
+* Create and initialize an XPath parser control block
+*
+* INPUTS:
+*   xpathstr == XPath expression string to save (a copy will be made)
+*            == NULL if this step should be skipped
+*   getvar_fn == callback function to retirieve an XPath
+*                variable binding
+*                NULL if no variables are used
+*   cookie == runstack context pointer to use, cast as a cookie
+*
+* RETURNS:
+*   pointer to malloced struct, NULL if malloc error
+*********************************************************************/
+xpath_pcb_t *
+    xpath_new_pcb_ex (const xmlChar *xpathstr,
+                      xpath_getvar_fn_t  getvar_fn,
+                      void *cookie)
+{
     xpath_pcb_t *pcb;
 
     pcb = m__getObj(xpath_pcb_t);
@@ -1756,6 +1787,7 @@ xpath_pcb_t *
 
     pcb->functions = xpath1_get_functions_ptr();
     pcb->getvar_fn = getvar_fn;
+    pcb->cookie = cookie;
 
     dlq_createSQue(&pcb->result_cacheQ);
     dlq_createSQue(&pcb->resnode_cacheQ);
@@ -1763,7 +1795,7 @@ xpath_pcb_t *
 
     return pcb;
 
-}  /* xpath_new_pcb */
+}  /* xpath_new_pcb_ex */
 
 
 /********************************************************************

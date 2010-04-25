@@ -287,7 +287,8 @@ static status_t
 
     /* System Script Variables */
     if (!shortmode) {
-        que = runstack_get_que(ISGLOBAL);
+        que = runstack_get_que(server_cb->runstack_context,
+                               ISGLOBAL);
         first = TRUE;
         for (var = (ncx_var_t *)dlq_firstEntry(que);
              var != NULL;
@@ -315,7 +316,8 @@ static status_t
 
     /* System Config Variables */
     if (!shortmode) {
-        que = runstack_get_que(ISGLOBAL);
+        que = runstack_get_que(server_cb->runstack_context,
+                               ISGLOBAL);
         first = TRUE;
         for (var = (ncx_var_t *)dlq_firstEntry(que);
              var != NULL;
@@ -343,7 +345,8 @@ static status_t
 
     /* Global Script Variables */
     if (!shortmode || isglobal) {
-        que = runstack_get_que(ISGLOBAL);
+        que = runstack_get_que(server_cb->runstack_context,
+                               ISGLOBAL);
         first = TRUE;
         for (var = (ncx_var_t *)dlq_firstEntry(que);
              var != NULL;
@@ -371,7 +374,8 @@ static status_t
 
     /* Local Script Variables */
     if (!shortmode || !isglobal || isany) {
-        que = runstack_get_que(ISLOCAL);
+        que = runstack_get_que(server_cb->runstack_context,
+                               ISLOCAL);
         first = TRUE;
         for (var = (ncx_var_t *)dlq_firstEntry(que);
              var != NULL;
@@ -433,19 +437,26 @@ static status_t
 
     if (isany) {
         /* skipping VAR_TYP_SESSION for now */
-        val = var_get_local(name);
+        val = var_get_local(server_cb->runstack_context,
+                            name);
         if (val) {
             vartype = VAR_TYP_LOCAL;
         } else {
-            val = var_get(name, VAR_TYP_GLOBAL);
+            val = var_get(server_cb->runstack_context,
+                          name, 
+                          VAR_TYP_GLOBAL);
             if (val) {
                 vartype = VAR_TYP_GLOBAL;
             } else {
-                val = var_get(name, VAR_TYP_CONFIG);
+                val = var_get(server_cb->runstack_context,
+                              name, 
+                              VAR_TYP_CONFIG);
                 if (val) {
                     vartype = VAR_TYP_CONFIG;
                 } else {
-                    val = var_get(name, VAR_TYP_SYSTEM);
+                    val = var_get(server_cb->runstack_context,
+                                  name, 
+                                  VAR_TYP_SYSTEM);
                     if (val) {
                         vartype = VAR_TYP_SYSTEM;
                     }
@@ -453,7 +464,9 @@ static status_t
             }
         }
     } else {
-        val = var_get(name, vartype);
+        val = var_get(server_cb->runstack_context,
+                      name, 
+                      vartype);
     }
 
     if (val) {

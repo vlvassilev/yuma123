@@ -66,6 +66,10 @@ date         init     comment
 #include "obj.h"
 #endif
 
+#ifndef _H_runstack
+#include "runstack.h"
+#endif
+
 #ifndef _H_status
 #include  "status.h"
 #endif
@@ -117,6 +121,7 @@ date         init     comment
 * and insert it into the value set
 *
 * INPUTS:
+*   rcxt == runstack context to use
 *   new_parm == complex val_value_t to add the parsed parm into
 *   strval == string representation of the object value
 *             (may be NULL if obj btype is NCX_BT_EMPTY
@@ -132,7 +137,8 @@ date         init     comment
 *   status 
 *********************************************************************/
 static status_t
-    parse_parm_cmn (val_value_t *new_parm,
+    parse_parm_cmn (runstack_context_t *rcxt,
+                    val_value_t *new_parm,
                     const xmlChar *strval,
                     boolean script)
 {
@@ -152,7 +158,8 @@ static status_t
      */
     if (obj_is_root(obj)) {
         if (script) {
-            (void)var_get_script_val(obj, 
+            (void)var_get_script_val(rcxt,
+                                     obj, 
                                      new_parm,
                                      strval, 
                                      ISPARM, 
@@ -170,7 +177,8 @@ static status_t
                 (*strval == '$' || *strval == '@')) {
             /* this is a file or var reference */
             if (script) {
-                newchild = var_get_script_val(choiceobj, 
+                newchild = var_get_script_val(rcxt,
+                                              choiceobj, 
                                               NULL,
                                               strval, 
                                               ISPARM, 
@@ -204,7 +212,8 @@ static status_t
                strval != NULL) {
         if (*strval == '$' || *strval == '@') {
             if (script) {
-                newchild = var_get_script_val(obj, 
+                newchild = var_get_script_val(rcxt,
+                                              obj, 
                                               NULL,
                                               strval, 
                                               ISPARM, 
@@ -234,7 +243,8 @@ static status_t
         }
     } else {
         if (script) {
-            (void)var_get_script_val(obj, 
+            (void)var_get_script_val(rcxt,
+                                     obj, 
                                      new_parm,
                                      strval, 
                                      ISPARM, 
@@ -272,6 +282,7 @@ static status_t
 * and insert it into the value set
 *
 * INPUTS:
+*   rcxt == runstack context to use
 *   val == complex val_value_t to add the parsed parm into
 *   obj == obj_template_t descriptor for the missing parm
 *   strval == string representation of the object value
@@ -288,7 +299,8 @@ static status_t
 *   status 
 *********************************************************************/
 static status_t
-    parse_cli_parm (val_value_t *val,
+    parse_cli_parm (runstack_context_t *rcxt,
+                    val_value_t *val,
                     obj_template_t *obj,
                     const xmlChar *strval,
                     boolean script)
@@ -303,7 +315,7 @@ static status_t
     }
     val_init_from_template(new_parm, obj);
 
-    res = parse_parm_cmn(new_parm, strval, script);
+    res = parse_parm_cmn(rcxt, new_parm, strval, script);
 
     /* save or free the new child node */
     if (res != NO_ERR) {
@@ -324,6 +336,7 @@ static status_t
 * and insert it into the value set (extended)
 *
 * INPUTS:
+*   rcxt == runstack context to use
 *   val == complex val_value_t to add the parsed parm into
 *   obj == obj_template_t descriptor for the missing parm
 *   nsid == namespace ID to really use
@@ -342,7 +355,8 @@ static status_t
 *   status 
 *********************************************************************/
 static status_t
-    parse_parm_ex (val_value_t *val,
+    parse_parm_ex (runstack_context_t *rcxt,
+                   val_value_t *val,
                    obj_template_t *obj,
                    xmlns_id_t  nsid,
                    const xmlChar *name,
@@ -363,7 +377,7 @@ static status_t
     val_set_name(new_parm, name, xml_strlen(name));
     new_parm->nsid = nsid;
 
-    res = parse_parm_cmn(new_parm, strval, script);
+    res = parse_parm_cmn(rcxt, new_parm, strval, script);
 
     if (res != NO_ERR) {
         val_free_value(new_parm);
@@ -1092,6 +1106,7 @@ status_t
 * has been called, and returns NO_ERR.
 * 
 * INPUTS:
+*   rcxt == runstack context to use
 *   argc == number of strings passed in 'argv'
 *   argv == array of command line argument strings
 *   obj == obj_template_t of the container 
@@ -1122,7 +1137,8 @@ status_t
 *   pointer to the malloced and filled in val_value_t
 *********************************************************************/
 val_value_t *
-    cli_parse (int argc, 
+    cli_parse (runstack_context_t *rcxt,
+               int argc, 
                const char *argv[],
                obj_template_t *obj,
                boolean valonly,
@@ -1488,7 +1504,8 @@ val_value_t *
 
         /* create a new val_value struct and set the value */
         if (res == NO_ERR) {
-            res = parse_cli_parm(val, 
+            res = parse_cli_parm(rcxt,
+                                 val, 
                                  chobj, 
                                  (const xmlChar *)parmval,
                                  script);
@@ -1502,7 +1519,8 @@ val_value_t *
             if (chobj) {
                 savechar = parmname[parmnamelen];
                 parmname[parmnamelen] = 0;
-                res = parse_cli_parm(val, 
+                res = parse_cli_parm(rcxt,
+                                     val, 
                                      chobj, 
                                      (const xmlChar *)parmname, 
                                      script);
@@ -1585,6 +1603,7 @@ val_value_t *
 * ALLOWS SCRIPT EXTENSIONS TO BE PRESENT
 *
 * INPUTS:
+*   rcxt == runstack context to use
 *   val == parent value struct to adjust
 *   parm == obj_template_t descriptor for the missing parm
 *   strval == string representation of the parm value
@@ -1600,12 +1619,13 @@ val_value_t *
 *   status 
 *********************************************************************/
 status_t
-    cli_parse_parm (val_value_t *val,
+    cli_parse_parm (runstack_context_t *rcxt,
+                    val_value_t *val,
                     obj_template_t *obj,
                     const xmlChar *strval,
                     boolean script)
 {
-    return parse_cli_parm(val, obj, strval, script);
+    return parse_cli_parm(rcxt, val, obj, strval, script);
 
 }  /* cli_parse_parm */
 
@@ -1621,6 +1641,7 @@ status_t
 * ALLOWS SCRIPT EXTENSIONS TO BE PRESENT
 *
 * INPUTS:
+*   rcxt == runstack context to use
 *   val == parent value struct to adjust
 *   parm == obj_template_t descriptor for the missing parm
 *   strval == string representation of the parm value
@@ -1637,7 +1658,8 @@ status_t
 *   status 
 *********************************************************************/
 status_t
-    cli_parse_parm_ex (val_value_t *val,
+    cli_parse_parm_ex (runstack_context_t *rcxt,
+                       val_value_t *val,
                        obj_template_t *obj,
                        const xmlChar *strval,
                        boolean script,
@@ -1646,7 +1668,7 @@ status_t
     obj_template_t  *genstr;
     status_t         res;
 
-    res = parse_cli_parm(val, obj, strval, script);
+    res = parse_cli_parm(rcxt, val, obj, strval, script);
     if (res == NO_ERR || NEED_EXIT(res)) {
         return res;
     }
@@ -1662,7 +1684,8 @@ status_t
         /* drop through */
     case NCX_BAD_DATA_IGNORE:
         genstr = ncx_get_gen_string();
-        res = parse_parm_ex(val, 
+        res = parse_parm_ex(rcxt,
+                            val, 
                             genstr, 
                             obj_get_nsid(obj),
                             obj_get_name(obj),

@@ -127,6 +127,9 @@ date	     init     comment
 #define XP_FN_TRANSLATE            (const xmlChar *)"translate"
 #define XP_FN_TRUE                 (const xmlChar *)"true"
 
+/* yuma function extensions */
+#define XP_FN_MODULE_LOADED        (const xmlChar *)"module-loaded"
+#define XP_FN_FEATURE_ENABLED      (const xmlChar *)"feature-enabled"
 
 
 /* XPath NodeType values */

@@ -1779,20 +1779,20 @@ val_value_t *
                 *res = set_val_from_var(obj, varval, useval);
             }
         }
-    } else if (*strval == NCX_QUOTE_CH) {
-        /* this is a quoted string literal */
-        /* set the start after quote */
-        str = ++strval;
+    } else if (*strval == NCX_QUOTE_CH || *strval == NCX_SQUOTE_CH) {
+        /* this is a quoted string literal
+         * set the start after quote 
+         */
+        strval++;
 
-        /* find the end of the quoted string */
-        while (*str && *str != NCX_QUOTE_CH) {
-            str++;
-        }
+        /* set the counted string and leave off the last char
+         * which is the ending quote
+         */
         *res = val_set_string2(useval, 
                                obj_get_name(obj), 
                                obj_get_typdef(obj), 
                                strval, 
-                               (uint32)(str-strval)); 
+                               xml_strlen(strval)-1); 
     } else if ((*strval == NCX_XML1a_CH) &&
                (strval[1] == NCX_XML1b_CH)) {
 

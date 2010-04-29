@@ -70,6 +70,14 @@ date         init     comment
 #include "xml_util.h"
 #endif
 
+#ifndef _H_xpath
+#include "xpath.h"
+#endif
+
+#ifndef _H_xpath1
+#include "xpath1.h"
+#endif
+
 
 /********************************************************************
 *                                                                   *
@@ -96,13 +104,12 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-/* nested run command support */
 static boolean            runstack_init_done = FALSE;
 static runstack_context_t defcxt;
 
 
 /********************************************************************
-* FUNCTION make_var
+* FUNCTION make_parmvar
 * 
 * 
 *  Still need to add the script parameters (if any)
@@ -140,6 +147,275 @@ static val_value_t *
 
 
 /********************************************************************
+* FUNCTION get_parent_cond_state
+* 
+* Get the parent conditional state
+*
+* INPUTS:
+*   condcb == current conditional control block
+*
+* RETURNS:
+*   TRUE if parent conditiona; state is TRUE
+*   FALSE otherwise
+*********************************************************************/
+static boolean
+    get_parent_cond_state (runstack_condcb_t *condcb)
+
+{
+    runstack_condcb_t *testcb;
+
+    testcb = (runstack_condcb_t *)dlq_prevEntry(condcb);
+    if (testcb == NULL) {
+        return TRUE;
+    } else if (testcb->cond_type == RUNSTACK_COND_IF) {
+        return testcb->u.ifcb.curcond;
+    } else {
+        return testcb->u.loopcb.startcond;     
+    }
+
+}  /* get_parent_cond_state */
+
+
+/********************************************************************
+* FUNCTION reset_cond_state
+* 
+* Reset the runstack context condition state
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*
+*********************************************************************/
+static void
+    reset_cond_state (runstack_context_t *rcxt)
+
+{
+    runstack_entry_t  *se;
+    dlq_hdr_t         *useQ;
+    runstack_condcb_t *condcb;
+
+    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
+    if (se == NULL) {
+        useQ = &rcxt->zero_condcbQ;
+    } else {
+        useQ = &se->condcbQ;
+    }
+
+    condcb = (runstack_condcb_t *)dlq_lastEntry(useQ);
+    if (condcb == NULL) {
+        rcxt->cond_state = TRUE;
+    } else if (condcb->cond_type == RUNSTACK_COND_IF) {
+        rcxt->cond_state = condcb->u.ifcb.curcond;
+    } else {
+        rcxt->cond_state = condcb->u.loopcb.startcond;     
+    }
+
+}  /* reset_cond_state */
+
+
+/********************************************************************
+* FUNCTION free_line_entry
+* 
+* Clean and free a runstack line entry
+*
+* INPUTS:
+*   le == line entry to free
+*
+*********************************************************************/
+static void
+    free_line_entry (runstack_line_t *le)
+
+{
+    if (le->line) {
+        m__free(le->line);
+    }
+    m__free(le);
+
+}  /* free_line_entry */
+
+
+/********************************************************************
+* FUNCTION new_line_entry
+* 
+* Malloc and init a new runstack line entry
+*
+* INPUTS:
+*   line == line to save, a copy will be made
+*
+* RETURNS:
+*   pointer to new runstack line entry, NULL if an error
+*********************************************************************/
+static runstack_line_t *
+    new_line_entry (const xmlChar *line)
+{
+    runstack_line_t *le;
+
+    le = m__getObj(runstack_line_t);
+    if (le == NULL) {
+        return NULL;
+    }
+
+    memset(le, 0x0, sizeof(runstack_line_t));
+
+    le->line = xml_strdup(line);
+    if (le->line == NULL) {
+        m__free(le);
+        return NULL;
+    }
+    return le;
+
+}  /* new_line_entry */
+
+
+/********************************************************************
+* FUNCTION get_loopcb
+* 
+* Get the most recent loop control block
+* 
+* INPUTS:
+*   rcxt == runstack contect to use
+*
+* RETURNS:
+*   pointer to last cond block with loopcb or NULL if none
+*********************************************************************/
+static runstack_condcb_t *
+    get_loopcb (runstack_context_t *rcxt)
+{
+    runstack_entry_t  *se;
+    dlq_hdr_t         *useQ;
+    runstack_condcb_t *condcb;
+
+    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
+    if (se == NULL) {
+        useQ = &rcxt->zero_condcbQ;
+    } else {
+        useQ = &se->condcbQ;
+    }
+
+    for (condcb = (runstack_condcb_t *)dlq_lastEntry(useQ);
+         condcb != NULL;
+         condcb = (runstack_condcb_t *)dlq_prevEntry(condcb)) {
+        if (condcb->cond_type == RUNSTACK_COND_LOOP) {
+            return condcb;
+        }
+    }
+
+    return NULL;
+
+}  /* get_loopcb */
+
+
+/********************************************************************
+* FUNCTION get_first_loopcb
+* 
+* Get the first loop, which has the lineQ
+*
+* INPUTS:
+*   rcxt == runstack contect to use
+*
+* RETURNS:
+*   pointer to first cond block with loopcb or NULL if none
+*********************************************************************/
+static runstack_condcb_t *
+    get_first_loopcb (runstack_context_t *rcxt)
+{
+    runstack_entry_t  *se;
+    dlq_hdr_t         *useQ;
+    runstack_condcb_t *condcb;
+
+    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
+    if (se == NULL) {
+        useQ = &rcxt->zero_condcbQ;
+    } else {
+        useQ = &se->condcbQ;
+    }
+
+    for (condcb = (runstack_condcb_t *)dlq_firstEntry(useQ);
+         condcb != NULL;
+         condcb = (runstack_condcb_t *)dlq_nextEntry(condcb)) {
+        if (condcb->cond_type == RUNSTACK_COND_LOOP) {
+            return condcb;
+        }
+    }
+
+    return NULL;
+
+}  /* get_first_loopcb */
+
+
+/********************************************************************
+* FUNCTION free_condcb
+* 
+* Clean and free a runstack cond. control block
+*
+* INPUTS:
+*   condcb == conditional control block to clean and free
+*
+*********************************************************************/
+static void
+    free_condcb (runstack_condcb_t *condcb)
+{
+    runstack_line_t    *le;
+    runstack_loopcb_t  *loopcb;
+
+    switch (condcb->cond_type) {
+    case RUNSTACK_COND_NONE:
+        SET_ERROR(ERR_INTERNAL_PTR);
+        break;
+    case RUNSTACK_COND_IF:
+        break;
+    case RUNSTACK_COND_LOOP:
+        loopcb = &condcb->u.loopcb;
+        if (loopcb->xpathpcb != NULL) {
+            xpath_free_pcb(loopcb->xpathpcb);
+        }
+        if (loopcb->docroot != NULL) {
+            val_free_value(loopcb->docroot);
+        }
+        while (!dlq_empty(&loopcb->lineQ)) {
+            le = (runstack_line_t *)dlq_deque(&loopcb->lineQ);
+            free_line_entry(le);
+        }
+        break;
+    default:
+        SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    m__free(condcb);
+
+}  /* free_condcb */
+
+
+/********************************************************************
+* FUNCTION new_condcb
+* 
+* Malloc and init a new runstack cond control block
+*
+* INPUTS:
+*   cond_type == condition control block type
+*
+* RETURNS:
+*   pointer to new runstack if control block entry, NULL if an error
+*********************************************************************/
+static runstack_condcb_t *
+    new_condcb (runstack_condtype_t cond_type)
+{
+    runstack_condcb_t *condcb;
+
+    condcb = m__getObj(runstack_condcb_t);
+    if (condcb == NULL) {
+        return NULL;
+    }
+
+    memset(condcb, 0x0, sizeof(runstack_condcb_t));
+    condcb->cond_type = cond_type;
+    if (cond_type == RUNSTACK_COND_LOOP) {
+        dlq_createSQue(&condcb->u.loopcb.lineQ);
+    }
+    return condcb;
+
+}  /* new_condcb */
+
+
+/********************************************************************
 * FUNCTION free_stack_entry
 * 
 * Clean and free a runstack entry
@@ -153,7 +429,8 @@ static val_value_t *
 static void
     free_stack_entry (runstack_entry_t *se)
 {
-    ncx_var_t  *var;
+    ncx_var_t          *var;
+    runstack_condcb_t  *condcb;
 
     if (se->buff) {
         m__free(se->buff);
@@ -171,6 +448,10 @@ static void
     while (!dlq_empty(&se->varQ)) {
         var = (ncx_var_t *)dlq_deque(&se->varQ);
         var_free(var);
+    }
+    while (!dlq_empty(&se->condcbQ)) {
+        condcb = (runstack_condcb_t *)dlq_deque(&se->condcbQ);
+        free_condcb(condcb);
     }
     m__free(se);
 
@@ -202,6 +483,7 @@ static runstack_entry_t *
 
     dlq_createSQue(&se->parmQ);
     dlq_createSQue(&se->varQ);
+    dlq_createSQue(&se->condcbQ);
 
     /* get a new line input buffer */
     se->buff = m__getMem(RUNSTACK_BUFFLEN);
@@ -220,9 +502,6 @@ static runstack_entry_t *
     return se;
 
 }  /* new_stack_entry */
-
-
-
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -313,6 +592,7 @@ status_t
      */
     dlq_enque(se, &rcxt->runstackQ);
     rcxt->script_level++;
+    rcxt->cur_src = RUNSTACK_SRC_SCRIPT;
 
     /* ceate a new var entry and add it to the runstack que */
     res = var_set_move(rcxt,
@@ -352,6 +632,7 @@ void
     runstack_pop (runstack_context_t *rcxt)
 {
     runstack_entry_t  *se;
+    runstack_condcb_t *condcb;
 
     if (rcxt == NULL) {
         rcxt = &defcxt;
@@ -380,6 +661,18 @@ void
 
     rcxt->script_level--;
 
+    /* reset the current input source */
+    condcb = get_loopcb(rcxt);
+    if (condcb == NULL) {
+        rcxt->cur_src = (rcxt->script_level) 
+            ? RUNSTACK_SRC_SCRIPT : RUNSTACK_SRC_USER;
+    } else if (condcb->u.loopcb.loop_state == RUNSTACK_LOOP_COLLECTING) {
+        rcxt->cur_src = (rcxt->script_level) 
+            ? RUNSTACK_SRC_SCRIPT : RUNSTACK_SRC_USER;
+    } else {
+        rcxt->cur_src = RUNSTACK_SRC_LOOP;
+    }
+    
 }  /* runstack_pop */
 
 
@@ -411,7 +704,7 @@ xmlChar *
     runstack_entry_t  *se;
     xmlChar           *retstr, *start, *str;
     boolean            done;
-    int                len, total;
+    int                len, total, errint;
 
 #ifdef DEBUG
     if (res == NULL) {
@@ -465,10 +758,14 @@ xmlChar *
 
         /* read the next line from the file */
         if (!fgets((char *)start, se->bufflen-total, se->fp)) {
-
-            int errint = feof(se->fp);
+            /* check if the file ended and that is why
+             * no line was retrieved
+             */
+            errint = feof(se->fp);
 
             if (retstr) {
+                log_warn("\nWarning: script possibly truncated."
+                         "\n   Ended on a continuation line");
                 *res = NO_ERR;
             } else if (errint) {
                 *res = ERR_NCX_EOF;
@@ -563,7 +860,7 @@ void
     if (rcxt->script_level) {
         rcxt->script_cancel = TRUE;
     }
-}  /* runstack_cencel */
+}  /* runstack_cancel */
 
 
 /********************************************************************
@@ -687,7 +984,8 @@ void
 void
     runstack_clean_context (runstack_context_t *rcxt)
 {
-    ncx_var_t *var;
+    ncx_var_t          *var;
+    runstack_condcb_t  *condcb;
 
 #ifdef DEBUG
     if (rcxt == NULL) {
@@ -708,6 +1006,11 @@ void
     while (!dlq_empty(&rcxt->zeroQ)) {
         var = (ncx_var_t *)dlq_deque(&rcxt->zeroQ);
         var_free(var);
+    }
+
+    while (!dlq_empty(&rcxt->zero_condcbQ)) {
+        condcb= (runstack_condcb_t *)dlq_deque(&rcxt->zero_condcbQ);
+        free_condcb(condcb);
     }
 
 } /* runstack_clean_context */ 
@@ -759,7 +1062,10 @@ void
     dlq_createSQue(&rcxt->globalQ);
     dlq_createSQue(&rcxt->zeroQ);
     dlq_createSQue(&rcxt->runstackQ);
+    dlq_createSQue(&rcxt->zero_condcbQ);
     rcxt->max_script_level = RUNSTACK_MAX_NEST;
+    rcxt->cond_state = TRUE;
+    rcxt->cur_src = RUNSTACK_SRC_USER;
 
 } /* runstack_init_context */ 
 
@@ -816,6 +1122,877 @@ void
     }
 
 } /* runstack_session_cleanup */
+
+
+/********************************************************************
+* FUNCTION runstack_get_source
+* 
+* Determine which input source is active for
+* the specified runstack context
+*
+*  INPUTS:
+*     rcxt == runstack context to use
+*
+*********************************************************************/
+runstack_src_t
+    runstack_get_source (runstack_context_t *rcxt)
+{
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
+
+    return rcxt->cur_src;
+
+} /* runstack_get_source */
+
+
+/********************************************************************
+* FUNCTION runstack_save_line
+* 
+* Save the current line if needed if a loop is active
+*
+* INPUTS:
+*    rcxt == runstack context to use
+*    line == line to save, a copy will be made
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    runstack_save_line (runstack_context_t *rcxt,
+                        const xmlChar *line)
+{
+    runstack_entry_t   *se;
+    runstack_condcb_t  *condcb;
+    runstack_loopcb_t  *loopcb;
+    runstack_line_t    *le;
+    dlq_hdr_t          *useQ;
+
+#ifdef DEBUG
+    if (line == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
+
+    if (rcxt->cur_src == RUNSTACK_SRC_LOOP) {
+        return NO_ERR;
+    }
+
+    condcb = get_loopcb(rcxt);
+    if (condcb != NULL) {
+        loopcb = &condcb->u.loopcb;
+        if (loopcb->loop_state == RUNSTACK_LOOP_COLLECTING) {
+            /* save this line */
+            le = new_line_entry(line);
+            if (le == NULL) {
+                return ERR_INTERNAL_MEM;
+            }
+            if (loopcb->collector != NULL) {
+                dlq_enque(le, &loopcb->collector->lineQ);
+            } else {
+                dlq_enque(le, &loopcb->lineQ);
+            }
+
+            /* adjust any loopcb first_line pointers that
+             * need to be set
+             */
+
+            se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
+            if (se == NULL) {
+                useQ = &rcxt->zero_condcbQ;
+            } else {
+                useQ = &se->condcbQ;
+            }
+            for (condcb = (runstack_condcb_t *)dlq_firstEntry(useQ);
+                 condcb != NULL;
+                 condcb = (runstack_condcb_t *)dlq_nextEntry(condcb)) {
+
+                if (condcb->cond_type != RUNSTACK_COND_LOOP) {
+                    continue;
+                }
+
+                loopcb = &condcb->u.loopcb;
+                if (!loopcb->empty_block && loopcb->first_line == NULL) {
+                    /* the first line needs to be set */
+                    loopcb->first_line = le;
+                }
+            }
+        }
+    }
+    return NO_ERR;
+
+} /* runstack_save_line */
+
+
+/********************************************************************
+* FUNCTION runstack_get_loop_cmd
+* 
+* Get the next command during loop processing.
+* This function is called after the while loop end
+* has been reached, and buffered commands are used
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*   res == address of status result
+*
+* OUTPUTS:
+*   *res == function result status
+*        == ERR_NCX_LOOP_ENDED if the loop expr was just
+*           evaluated to FALSE; In this case the caller must
+*           use the runstack_get_source function to determine
+*           the source of the next line.  If this occurs,
+*           the loopcb (and while context) will be removed from
+*           the curent runstack frame
+*
+* RETURNS:
+*   pointer to the command line to process (should treat as CONST !!!)
+*   NULL if some error
+*********************************************************************/
+xmlChar *
+    runstack_get_loop_cmd (runstack_context_t *rcxt,
+                           status_t *res)
+{
+    runstack_condcb_t  *condcb;
+    runstack_loopcb_t  *loopcb, *test_loopcb, *first_loopcb;
+    runstack_line_t    *le;
+    xpath_result_t     *result;
+    boolean             needremove, needeval, cond;
+
+#ifdef DEBUG
+    if (res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    first_loopcb = NULL;
+    loopcb = NULL;
+    le = NULL;
+    result = NULL;
+    needremove = FALSE;
+    needeval = FALSE;
+    cond = FALSE;
+    *res = NO_ERR;
+
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
+
+    condcb = get_loopcb(rcxt);
+    if (condcb == NULL) {
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+    loopcb = &condcb->u.loopcb;
+
+    if (loopcb->loop_state == RUNSTACK_LOOP_COLLECTING) {
+        /* need to get a previous loopcb that is looping */
+        first_loopcb = loopcb->collector;
+        if (first_loopcb == NULL) {
+            *res = SET_ERROR(ERR_INTERNAL_VAL);
+            return NULL;
+        }
+        test_loopcb = first_loopcb;
+    } else {
+        test_loopcb = loopcb;
+    }
+
+    if (loopcb->empty_block) {
+        /* corner-case, no statements */
+        needeval = TRUE;
+    } else if (test_loopcb->cur_line == NULL) {
+        /* the next line is supposed to be the first line */
+        le = test_loopcb->cur_line = test_loopcb->first_line;
+        if (first_loopcb != NULL) {
+            if (loopcb->first_line == NULL) {
+                loopcb->first_line = le;
+            }
+        }
+        /* the following test may compare cur_line to a 
+         * NULL last_line if the collector is different
+         * than the current loop. This is OK; the
+         * outside loop is looping and only the inside
+         * loop is collecting, so the last_line is not
+         * set until runstack_handle_end sets it
+         */
+    } else if (test_loopcb->cur_line == loopcb->last_line) {
+        /* the next line is supposed to be the first line 
+         * set the inside loop cur line not the outside
+         * loop cur line.  Since the last line is actually
+         * set on the inside loop, the state is now LOOPING
+         * so the inside loop cur_line pointer will be used
+         * until the loopcb is deleted
+         */
+        le = loopcb->cur_line = loopcb->first_line;
+        needeval = TRUE;
+        loopcb->loop_count++;
+        if (loopcb->maxloops) {
+            if (loopcb->loop_count == loopcb->maxloops) {
+                log_debug("\nrunstack: max loop iterations ('%u') reached",
+                          loopcb->maxloops);
+                
+                /* need to remove the loopcb and change the
+                 * script source
+                 */
+                needremove = TRUE;
+                needeval = FALSE;
+            }
+        }
+    } else {
+        /* in the list somewhere 1 .. N 
+        * the outside loop is looping and the inside
+        * loop is collecting; or there is only 1 loop
+        * which is collecting or looping
+        */
+        le = test_loopcb->cur_line = 
+            (runstack_line_t *)dlq_nextEntry(test_loopcb->cur_line);
+        if (first_loopcb != NULL) {
+            if (loopcb->first_line == NULL) {
+                loopcb->first_line = le;
+            }
+        }            
+    }
+
+    if (*res == NO_ERR && needeval) {
+        /* get current condition state
+         * correct syntax will not allow the current context
+         * to be inside an if-stmt already, so checking the
+         * current if-stmt status should give the outside 
+         * loop context
+         */
+        cond = runstack_get_cond_state(rcxt);
+
+        if (cond) {
+            /* try to parse the XPath expression */
+            result = xpath1_eval_expr(loopcb->xpathpcb, 
+                                      loopcb->docroot, /* context */
+                                      loopcb->docroot,
+                                      TRUE,
+                                      FALSE,
+                                      res);
+
+            if (result != NULL && *res == NO_ERR) {
+                /* get new condition state for this loop */
+                cond = xpath_cvt_boolean(result);
+                xpath_free_result(result);
+            } else {
+                /* error in the XPath expression */
+                if (result != NULL) {
+                    xpath_free_result(result);
+                }
+                return NULL;
+            }
+        }
+
+        if (!cond) {
+            needremove = TRUE;
+        }
+    }
+
+    if (needremove) {
+        /* save a pointer to the last line;
+         * since this was not the first loopcb,
+         * the last_line pointer will be valid
+         * in the previous loopcb on the queue
+         */
+        le = loopcb->last_line;
+
+        dlq_remove(condcb);
+        free_condcb(condcb);
+        *res = ERR_NCX_LOOP_ENDED;
+
+        /* reset the runstack context data structures
+         * check if there are any more active loops
+         */
+        condcb = get_loopcb(rcxt);
+        if (condcb == NULL) {
+            /* done with all looping */
+            rcxt->cur_src = (rcxt->script_level) 
+                ? RUNSTACK_SRC_SCRIPT : RUNSTACK_SRC_USER;
+        } else {
+            /* set the cur line pointer to the end of this
+             * just deleted loop
+             */
+            loopcb = &condcb->u.loopcb;
+            if (loopcb->loop_state == RUNSTACK_LOOP_LOOPING) {
+                rcxt->cur_src = RUNSTACK_SRC_LOOP;
+            } else {
+                rcxt->cur_src = (rcxt->script_level) 
+                    ? RUNSTACK_SRC_SCRIPT : RUNSTACK_SRC_USER;
+            }
+        }
+        reset_cond_state(rcxt);
+        le = NULL;
+    }
+
+    if (LOGDEBUG2) {
+        if (le) {
+            log_debug2("\nrunstack: loop cmd '%s'", le->line);
+        } else {
+            log_debug2("\nrunstack: loop cmd NULL");
+        }
+    }
+
+    return (le) ? le->line : NULL;
+
+}  /* runstack_get_loop_cmd */
+
+
+/********************************************************************
+* FUNCTION runstack_get_cond_state
+* 
+* Get the current conditional code state for the context
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*
+* RETURNS:
+*   TRUE if in a TRUE conditional or no conditional
+*   FALSE if in a FALSE conditional statement right now
+*********************************************************************/
+boolean
+    runstack_get_cond_state (runstack_context_t *rcxt)
+{
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
+    return rcxt->cond_state;
+
+} /* runstack_get_cond_state */
+
+
+/********************************************************************
+* FUNCTION runstack_handle_while
+* 
+* Process the current command, which is a 'while' command.
+* This must be called before the next command is retrieved
+* during runstack context processing
+*
+* INPUTS:
+*    rcxt == runstack context to use
+*    maxloops == max number of loop iterations
+*    xpathpcb == XPath control block to save which contains
+*                the expression to be processed.
+*                !!! this memory is handed off here; it will
+*                !!!  be freed as part of the loopcb context
+*    docroot == docroot var struct that represents
+*               the XML document to run the XPath expr against
+*                !!! this memory is handed off here; it will
+*                !!!  be freed as part of the loopcb context
+*
+* RETURNS:
+*    status; if status != NO_ERR then the xpathpcb and docroot
+*    parameters need to be freed by the caller
+*********************************************************************/
+status_t
+    runstack_handle_while (runstack_context_t *rcxt,
+                           uint32 maxloops,
+                           xpath_pcb_t *xpathpcb,
+                           val_value_t *docroot)
+{
+    runstack_entry_t     *se;
+    dlq_hdr_t            *useQ;
+    runstack_condcb_t    *condcb, *testloopcb;
+    runstack_loopcb_t    *loopcb;
+    xpath_result_t       *result;
+    status_t              res;
+
+#ifdef DEBUG
+    if (xpathpcb == NULL || docroot == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
+
+    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
+    if (se == NULL) {
+        useQ = &rcxt->zero_condcbQ;
+    } else {
+        useQ = &se->condcbQ;
+    }
+
+    condcb = new_condcb(RUNSTACK_COND_LOOP);
+    if (condcb == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+    loopcb = &condcb->u.loopcb;
+
+    loopcb->loop_state = RUNSTACK_LOOP_COLLECTING;
+    loopcb->maxloops = maxloops;
+
+    if (rcxt->cond_state) {
+        /* figure out if the first loop is enabled or not */
+        result = xpath1_eval_expr(xpathpcb, 
+                                  docroot, /* context */
+                                  docroot,
+                                  TRUE,
+                                  FALSE,
+                                  &res);
+
+        if (result != NULL && res == NO_ERR) {
+            /* get new condition state for this loop */
+            rcxt->cond_state = loopcb->startcond = xpath_cvt_boolean(result);
+        } 
+        if (result != NULL) {
+            xpath_free_result(result);
+        }
+        if (res != NO_ERR) {
+            free_condcb(condcb);
+            return res;
+        }
+    } else {
+        /* do not bother evaluating the loop cond inside
+         * a nested false conditional
+         */
+        loopcb->startcond = FALSE;
+    }
+
+    /* check if this is a nested loop or the first loop */
+    testloopcb = get_first_loopcb(rcxt);
+    if (testloopcb != NULL) {
+        loopcb->collector = &testloopcb->u.loopcb;
+    }
+
+    dlq_enque(condcb, useQ);
+
+    /* accept xpathpcb and docroot memory here */
+    loopcb->xpathpcb = xpathpcb;
+    loopcb->docroot = docroot;
+
+    return NO_ERR;
+
+}  /* runstack_handle_while */
+
+
+/********************************************************************
+* FUNCTION runstack_handle_if
+* 
+* Handle the if command for the specific runstack context
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*   startcond == start condition state for this if block
+*                may be FALSE because the current conditional
+*                state is already FALSE
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    runstack_handle_if (runstack_context_t *rcxt,
+                        boolean startcond)
+{
+    runstack_entry_t     *se;
+    dlq_hdr_t            *useQ;
+    runstack_condcb_t    *condcb;
+    runstack_ifcb_t      *ifcb;
+
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
+
+    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
+    if (se == NULL) {
+        useQ = &rcxt->zero_condcbQ;
+    } else {
+        useQ = &se->condcbQ;
+    }
+
+    condcb = new_condcb(RUNSTACK_COND_IF);
+    if (condcb == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+    ifcb = &condcb->u.ifcb;
+
+    ifcb->ifstate = RUNSTACK_IF_IF;
+    ifcb->ifused = ifcb->startcond = startcond;
+
+    dlq_enque(condcb, useQ);
+
+    /* only allow TRUE --> TRUE/FALSE transition
+     * because a FALSE conditional is always inherited
+     */
+    if (rcxt->cond_state) {
+        rcxt->cond_state = startcond;
+    }
+
+    return NO_ERR;
+
+} /* runstack_handle_if */
+
+
+/********************************************************************
+* FUNCTION runstack_handle_elif
+* 
+* Handle the elif command for the specific runstack context
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*   startcond == start condition state for this elif block
+*                may be FALSE because the current conditional
+*                block has already used its TRUE block
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    runstack_handle_elif (runstack_context_t *rcxt,
+                          boolean startcond)
+{
+    runstack_entry_t     *se;
+    dlq_hdr_t            *useQ;
+    runstack_condcb_t    *condcb;
+    runstack_ifcb_t      *ifcb;
+    status_t              res;
+
+    res = NO_ERR;
+
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
+
+    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
+    if (se == NULL) {
+        useQ = &rcxt->zero_condcbQ;
+    } else {
+        useQ = &se->condcbQ;
+    }
+
+    condcb = (runstack_condcb_t *)dlq_lastEntry(useQ);
+    if (condcb == NULL) {
+        log_error("\nError: unexpected 'elif' command");
+        return ERR_NCX_INVALID_VALUE;
+    }
+
+    /* make sure this conditional block is an ifcb */
+    if (condcb->cond_type != RUNSTACK_COND_IF) {
+        log_error("\nError: unexpected 'elif' command");
+        return ERR_NCX_INVALID_VALUE;
+    }
+
+    /* make sure the current state is IF or ELIF */
+    switch (condcb->u.ifcb.ifstate) {
+    case RUNSTACK_IF_NONE:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+        break;
+    case RUNSTACK_IF_IF:
+    case RUNSTACK_IF_ELIF:
+        ifcb = &condcb->u.ifcb;
+
+        /* this is the expected state, update to ELIF state */
+        ifcb->ifstate = RUNSTACK_IF_ELIF;
+
+        /* set the elif conditional state depending
+         * on if any of the previous if or elif blocks
+         * were true or not
+         *
+         * figure out the new conditional state
+         */
+        if (get_parent_cond_state(condcb)) {
+            if (ifcb->ifused) {
+                /* this has to be a false block */
+                rcxt->cond_state = FALSE;
+                ifcb->curcond = FALSE;
+            } else {
+                ifcb->ifused = startcond;
+                rcxt->cond_state = startcond;
+                ifcb->curcond = startcond;
+            }
+        }
+        break;
+    case RUNSTACK_IF_ELSE:
+        log_error("\nError: unexpected 'elif'; previous 'else' command "
+                  "already active");
+        res = ERR_NCX_INVALID_VALUE;
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    return res;
+
+} /* runstack_handle_elif */
+
+
+/********************************************************************
+* FUNCTION runstack_handle_else
+* 
+* Handle the elsecommand for the specific runstack context
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    runstack_handle_else (runstack_context_t *rcxt)
+{
+    runstack_entry_t     *se;
+    dlq_hdr_t            *useQ;
+    runstack_condcb_t    *condcb;
+    status_t              res;
+
+    res = NO_ERR;
+
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
+
+    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
+    if (se == NULL) {
+        useQ = &rcxt->zero_condcbQ;
+    } else {
+        useQ = &se->condcbQ;
+    }
+
+    condcb = (runstack_condcb_t *)dlq_lastEntry(useQ);
+    if (condcb == NULL) {
+        log_error("\nError: unexpected 'else' command");
+        return ERR_NCX_INVALID_VALUE;
+    }
+
+    /* make sure this conditional block is an ifcb */
+    if (condcb->cond_type != RUNSTACK_COND_IF) {
+        log_error("\nError: unexpected 'else' command");
+        return ERR_NCX_INVALID_VALUE;
+    }
+
+    /* make sure the current state is IF or ELIF */
+    switch (condcb->u.ifcb.ifstate) {
+    case RUNSTACK_IF_NONE:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+        break;
+    case RUNSTACK_IF_IF:
+    case RUNSTACK_IF_ELIF:
+        /* this is the expected state, update to ELSE state */
+        condcb->u.ifcb.ifstate = RUNSTACK_IF_ELSE;
+
+        /* set the else conditional state depending
+         * on if any of the previous if or elif blocks
+         * were true or not
+         *
+         * figure out the new conditional state
+         */
+        rcxt->cond_state = condcb->u.ifcb.curcond = !condcb->u.ifcb.ifused;
+        break;
+    case RUNSTACK_IF_ELSE:
+        log_error("\nError: unexpected 'else'; previous 'else' command "
+                  "already active");
+        res = ERR_NCX_INVALID_VALUE;
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    return res;
+
+} /* runstack_handle_else */
+
+
+/********************************************************************
+* FUNCTION runstack_handle_end
+* 
+* Handle the end command for the specific runstack context
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    runstack_handle_end (runstack_context_t *rcxt)
+{
+    runstack_entry_t     *se;
+    dlq_hdr_t            *useQ;
+    runstack_condcb_t    *condcb;
+    runstack_loopcb_t    *loopcb;
+    runstack_line_t      *le;
+    status_t              res;
+    boolean               need_free_condcb;
+
+    res = NO_ERR;
+    need_free_condcb = FALSE;
+
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
+
+    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
+    if (se == NULL) {
+        useQ = &rcxt->zero_condcbQ;
+    } else {
+        useQ = &se->condcbQ;
+    }
+
+    condcb = (runstack_condcb_t *)dlq_lastEntry(useQ);
+    if (condcb == NULL) {
+        log_error("\nError: unexpected 'end' command");
+        return ERR_NCX_INVALID_VALUE;
+    }
+
+
+    if (condcb->cond_type == RUNSTACK_COND_IF) {
+        if (LOGDEBUG2) {
+            log_debug2("\nrunstack: end for if command");
+        }
+
+        /* this 'end' completes this queue entry
+         * remove it from the stack and delete it
+         */
+        need_free_condcb = TRUE;
+    } else {
+        if (LOGDEBUG2) {
+            log_debug2("\nrunstack: end for while command");
+        }
+
+        loopcb = &condcb->u.loopcb;
+        if (loopcb->loop_state != RUNSTACK_LOOP_COLLECTING) {
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+        } else if (loopcb->startcond) {
+            /* get the 'end' entry in the lineQ */
+            if (loopcb->collector) {
+                if (rcxt->cur_src == RUNSTACK_SRC_LOOP) {
+                    /* looping in the outside loop and
+                     * collecting in the inside loop
+                     * the 'end' command may not be last
+                     */
+                    le = loopcb->collector->cur_line;
+                } else {
+                    /* collecting so the 'end' command is last */
+                    useQ = &loopcb->collector->lineQ;
+                    le = (runstack_line_t *)dlq_lastEntry(useQ);
+                }
+            } else {
+                /* only loop collecting so the 'end' command is last */
+                useQ = &loopcb->lineQ;
+                le = (runstack_line_t *)dlq_lastEntry(useQ);
+            }
+
+            if (le == NULL) {
+                res = SET_ERROR(ERR_INTERNAL_VAL);
+            } else {
+                /* check if the first line is this end line */
+                if (loopcb->first_line == le) {
+                    loopcb->first_line = NULL;
+                }
+
+                /* get pointer for loopcb.last_line */
+                if (loopcb->collector == NULL) {
+                    /* outside loop so need to delete this 'end' line */
+                    dlq_remove(le);
+                    free_line_entry(le);
+
+                    /* get the new last while loop line */
+                    le = (runstack_line_t *)dlq_lastEntry(useQ);
+                } else {
+                    /* get the next to last line */
+                    le = (runstack_line_t *)dlq_prevEntry(le);
+                }
+
+                /* set the last_line pointer for this loopcb */
+                if (le == NULL) {
+                    /* there are no lines in this while loop */
+                    loopcb->empty_block = TRUE;
+                    loopcb->first_line = NULL;
+                    loopcb->last_line = NULL;
+                } else {
+                    loopcb->last_line = le;
+                }
+
+                /* need to go back to the start of the
+                 * while loop and test the eval condition again
+                 */
+                /* loopcb->cur_line = NULL; */
+                loopcb->loop_state = RUNSTACK_LOOP_LOOPING;
+                loopcb->loop_count = 1;
+                rcxt->cur_src = RUNSTACK_SRC_LOOP;
+            }
+        } else {
+            /* this is a FALSE conditional loop so just
+             * delete it and do not go back to the first command
+             */
+            need_free_condcb = TRUE;
+        }
+    }
+
+    if (need_free_condcb) {
+        /* this 'end' completes this queue entry
+         * remove it from the stack and delete it
+         */
+        dlq_remove(condcb);
+        free_condcb(condcb);
+
+        /* figure out the new conditional state */
+        condcb = (runstack_condcb_t *)dlq_lastEntry(useQ);
+        if (condcb == NULL) {
+            /* no conditionals at all in this frame now */
+            rcxt->cond_state = TRUE;
+        } else if (condcb->cond_type == RUNSTACK_COND_IF) {
+            rcxt->cond_state = condcb->u.ifcb.curcond;
+        } else {
+            rcxt->cond_state = condcb->u.loopcb.startcond;
+        }
+    }
+
+    return res;
+
+} /* runstack_handle_end */
+
+
+/********************************************************************
+* FUNCTION runstack_get_if_used
+* 
+* Check if the run context, which should be inside an if-stmt
+* now, has used the 'true' block already
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*
+* RETURNS:
+*   TRUE if TRUE block already used
+*   FALSE if FALSE not already used or not in an if-block
+*********************************************************************/
+boolean
+    runstack_get_if_used (runstack_context_t *rcxt)
+{
+    if (rcxt == NULL) {
+        rcxt = &defcxt;
+    }
+
+    runstack_entry_t  *se;
+    dlq_hdr_t         *useQ;
+    runstack_condcb_t *condcb;
+
+    se = (runstack_entry_t *)dlq_lastEntry(&rcxt->runstackQ);
+    if (se == NULL) {
+        useQ = &rcxt->zero_condcbQ;
+    } else {
+        useQ = &se->condcbQ;
+    }
+
+    condcb = (runstack_condcb_t *)dlq_lastEntry(useQ);
+    if (condcb == NULL) {
+        /* error -- not in any conditional block */
+        return FALSE;
+    } else if (condcb->cond_type == RUNSTACK_COND_IF) {
+        return condcb->u.ifcb.ifused;
+    } else {
+        /* error -- in a while loop */
+        return FALSE;
+    }
+
+} /* runstack_get_if_used */
 
 
 /* END runstack.c */

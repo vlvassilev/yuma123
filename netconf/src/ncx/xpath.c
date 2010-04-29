@@ -2033,9 +2033,11 @@ void
     case XP_RT_NUMBER:
         ncx_init_num(&result->r.num);
         ncx_set_num_zero(&result->r.num, NCX_BT_FLOAT64);
+        result->isval = TRUE;
         break;
     case XP_RT_STRING:
     case XP_RT_BOOLEAN:
+        result->isval = TRUE;
         break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);

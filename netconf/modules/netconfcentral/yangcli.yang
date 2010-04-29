@@ -951,6 +951,66 @@ module yangcli {
       }
     }
 
+    rpc log-error {
+      description
+       "Write a message to the output log if the log-level
+        is greater or equal to 'error'.";
+      input {
+        ncx:default-parm msg;
+        leaf msg {
+          description 
+            "The formatted text string to write to the log.";
+          type string;
+          mandatory true;
+        }
+      }
+    }
+
+    rpc log-warn {
+      description
+       "Write a message to the output log if the log-level
+        is greater or equal to 'warn'.";
+      input {
+        ncx:default-parm msg;
+        leaf msg {
+          description 
+            "The formatted text string to write to the log.";
+          type string;
+          mandatory true;
+        }
+      }
+    }
+
+    rpc log-info {
+      description
+       "Write a message to the output log if the log-level
+        is greater or equal to 'info'.";
+      input {
+        ncx:default-parm msg;
+        leaf msg {
+          description 
+            "The formatted text string to write to the log.";
+          type string;
+          mandatory true;
+        }
+      }
+    }
+
+    rpc log-debug {
+      description
+       "Write a message to the output log if the log-level
+        is greater or equal to 'debug'.";
+      input {
+        ncx:default-parm msg;
+        leaf msg {
+          description 
+            "The formatted text string to write to the log.";
+          type string;
+          mandatory true;
+        }
+      }
+    }
+
     rpc merge {
       description
        "Merge some NETCONF config data with the edit-config operation";
@@ -1216,6 +1276,15 @@ module yangcli {
       input {
         ncx:default-parm expr;
         uses XPathParms;
+        leaf maxloops {
+          description
+            "Set a maximum number of loops that can be
+             iterated for this while command.
+             The value zero means that no maximum will be
+             enforced.  Use this mode with caustion.";
+          type uint32;
+          default 65535;
+        }
       }
     }
 

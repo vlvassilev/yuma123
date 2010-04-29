@@ -129,8 +129,10 @@ date	     init     comment
 #define XSDMOD         (const xmlChar *)"yuma-xsd"
 
 #define DEF_PROMPT     (const xmlChar *)"yangcli> "
+#define DEF_FALSE_PROMPT  (const xmlChar *)"yangcli[F]> "
 #define DEF_FN_PROMPT  (const xmlChar *)"yangcli:"
 #define MORE_PROMPT    (const xmlChar *)"   more> "
+#define FALSE_PROMPT (const xmlChar *)"[F]"
 
 #define YESNO_NODEF  0
 #define YESNO_CANCEL 0
@@ -212,6 +214,10 @@ date	     init     comment
 #define YANGCLI_INSERT  (const xmlChar *)"insert"
 #define YANGCLI_IF      (const xmlChar *)"if"
 #define YANGCLI_LIST    (const xmlChar *)"list"
+#define YANGCLI_LOG_ERROR (const xmlChar *)"log-error"
+#define YANGCLI_LOG_WARN (const xmlChar *)"log-warn"
+#define YANGCLI_LOG_INFO (const xmlChar *)"log-info"
+#define YANGCLI_LOG_DEBUG (const xmlChar *)"log-debug"
 #define YANGCLI_MERGE   (const xmlChar *)"merge"
 #define YANGCLI_MGRLOAD (const xmlChar *)"mgrload"
 #define YANGCLI_PWD     (const xmlChar *)"pwd"
@@ -240,6 +246,11 @@ date	     init     comment
 #define YANGCLI_EXPR    (const xmlChar *)"expr"
 #define YANGCLI_DOCROOT (const xmlChar *)"docroot"
 #define YANGCLI_CONTEXT (const xmlChar *)"context"
+
+#define YANGCLI_MSG      (const xmlChar *)"msg"
+#define YANGCLI_MAXLOOPS (const xmlChar *)"maxloops"
+
+#define YANGCLI_DEF_MAXLOOPS  65535
 
 /********************************************************************
 *								    *

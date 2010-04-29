@@ -29,7 +29,10 @@
 date	     init     comment
 ----------------------------------------------------------------------
 22-aug-07    abb      Begun; split from ncxcli.c
-
+24-apr-10    abb      Redesign to use dynamic memory,
+                      allow recursion, and support multiple 
+                      concurrent contexts
+26-apr-10    abb      added conditional cmd and loop support
 */
 
 #ifndef _H_dlq
@@ -38,6 +41,10 @@ date	     init     comment
 
 #ifndef _H_status
 #include "status.h"
+#endif
+
+#ifndef _H_val
+#include "val.h"
 #endif
 
 /********************************************************************
@@ -53,16 +60,113 @@ date	     init     comment
 #define RUNSTACK_MAX_PARMS  9
 
 
-/* this is an arbitrary limit to limit resources
+/* this is an arbitrary max to limit resources
  * and run-away scripts that are called recursively
  */
 #define RUNSTACK_MAX_NEST   512
+
+/* this is an arbitrary max to limit 
+ * run-away scripts that have bugs
+ */
+#define RUNSTACK_MAX_LOOP   65535
+
 
 /********************************************************************
 *								    *
 *			     T Y P E S				    *
 *								    *
 *********************************************************************/
+
+/* identify the runstack input source */
+typedef enum runstack_src_t_ {
+    RUNSTACK_SRC_NONE,
+    RUNSTACK_SRC_USER,
+    RUNSTACK_SRC_SCRIPT,
+    RUNSTACK_SRC_LOOP
+} runstack_src_t;
+
+
+/* identify the runstack conditional control block type */
+typedef enum runstack_condtype_t_ {
+    RUNSTACK_COND_NONE,
+    RUNSTACK_COND_IF,
+    RUNSTACK_COND_LOOP
+} runstack_condtype_t;
+
+
+/* keep track of the if,elif,else,end sequence */
+typedef enum runstack_ifstate_t_ {
+    RUNSTACK_IF_NONE,
+    RUNSTACK_IF_IF,
+    RUNSTACK_IF_ELIF,
+    RUNSTACK_IF_ELSE
+} runstack_ifstate_t;
+
+
+/* keep track of the while,end sequence */
+typedef enum runstack_loopstate_t_ {
+    RUNSTACK_LOOP_NONE,
+    RUNSTACK_LOOP_COLLECTING,
+    RUNSTACK_LOOP_LOOPING
+} runstack_loopstate_t;
+    
+
+/* control the conditional state for 1 if...end sequence */
+typedef struct runstack_ifcb_t_ {
+    runstack_ifstate_t    ifstate;
+    boolean               startcond;
+    boolean               curcond;
+    boolean               ifused;  /* T already used up */
+} runstack_ifcb_t;
+
+
+/* save 1 line for looping purposes */
+typedef struct runstack_line_t_ {
+    dlq_hdr_t             qhdr;
+    xmlChar              *line;
+} runstack_line_t;
+
+
+/* control the looping for 1 while - end sequence */
+typedef struct runstack_loopcb_t_ {
+    uint32                     maxloops;
+    uint32                     loop_count;
+    runstack_loopstate_t       loop_state;
+    boolean                    startcond;
+
+    /* condition to evaluate before each loop iteration */
+    struct xpath_pcb_t_       *xpathpcb;
+    val_value_t               *docroot;
+
+    /* if the collector is non-NULL, then save lines
+     * in this outer while loop
+     */
+    struct runstack_loopcb_t_ *collector;
+
+    /* these may point to entries in this lineQ or
+     * the collector's lineQ; only the commands
+     * that are part of the loop contents are saved
+     */
+    runstack_line_t           *first_line;
+    runstack_line_t           *cur_line;
+    runstack_line_t           *last_line;
+    boolean                    empty_block;
+
+    /* this Q will only be used if collector is NULL */
+    dlq_hdr_t                  lineQ;   /* Q of runstack_line_t */
+} runstack_loopcb_t;
+
+
+/* control the looping for 1 while - end sequence */
+typedef struct runstack_condcb_t_ {
+    dlq_hdr_t                  qhdr;
+    runstack_condtype_t        cond_type;
+    union u_ {
+        runstack_loopcb_t      loopcb;
+        runstack_ifcb_t        ifcb;
+    } u;
+} runstack_condcb_t;
+
 
 /* one script run level context entry
  * each time a 'run script' command is
@@ -77,19 +181,22 @@ typedef struct runstack_entry_t_ {
     xmlChar     *buff;
     int          bufflen;
     uint32       linenum;
-    dlq_hdr_t    parmQ;         /* Q of ncx_var_t */
-    dlq_hdr_t    varQ;          /* Q of ncx_var_t */
+    dlq_hdr_t    parmQ;                /* Q of ncx_var_t */
+    dlq_hdr_t    varQ;                 /* Q of ncx_var_t */
+    dlq_hdr_t    condcbQ;        /* Q of runstack_condcb_t */
 } runstack_entry_t;
 
 
-typedef struct runstack_context_ {
-    xmlChar           *name;
+typedef struct runstack_context_t_ {
+    boolean            cond_state;
     boolean            script_cancel;
     uint32             script_level;
     uint32             max_script_level;
+    runstack_src_t     cur_src;
     dlq_hdr_t          runstackQ;    /* Q of runstack_entry_t */
     dlq_hdr_t          globalQ;             /* Q of ncx_var_t */
     dlq_hdr_t          zeroQ;               /* Q of ncx_var_t */
+    dlq_hdr_t          zero_condcbQ;  /* Q of runstack_condcb_t */
 } runstack_context_t;
 
 
@@ -242,6 +349,7 @@ extern void
 extern void
     runstack_cleanup (void);
 
+
 /********************************************************************
 * FUNCTION runstack_clean_context
 * 
@@ -302,5 +410,194 @@ extern runstack_context_t *
 extern void
     runstack_session_cleanup (runstack_context_t *rcxt);
 
+
+/********************************************************************
+* FUNCTION runstack_get_source
+* 
+* Get the current input source for the runstack context
+*
+*  INPUTS:
+*     rcxt == runstack context to use
+*
+*********************************************************************/
+extern runstack_src_t
+    runstack_get_source (runstack_context_t *rcxt);
+
+
+/********************************************************************
+* FUNCTION runstack_save_line
+* 
+* Save the current line if needed if a loop is active
+*
+* INPUTS:
+*    rcxt == runstack context to use
+*    line == line to save, a copy will be made
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    runstack_save_line (runstack_context_t *rcxt,
+                        const xmlChar *line);
+
+
+/********************************************************************
+* FUNCTION runstack_get_loop_cmd
+* 
+* Get the next command during loop processing.
+* This function is called after the while loop end
+* has been reached, and buffered commands are used
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*   res == address of status result
+*
+* OUTPUTS:
+*   *res == function result status
+*        == ERR_NCX_LOOP_ENDED if the loop expr was just
+*           evaluated to FALSE; In this case the caller must
+*           use the runstack_get_source function to determine
+*           the source of the next line.  If this occurs,
+*           the loopcb (and while context) will be removed from
+*           the curent runstack frame
+*
+* RETURNS:
+*   pointer to the command line to process (should treat as CONST !!!)
+*   NULL if some error
+*********************************************************************/
+extern xmlChar *
+    runstack_get_loop_cmd (runstack_context_t *rcxt,
+                           status_t *res);
+
+
+/********************************************************************
+* FUNCTION runstack_get_cond_state
+* 
+* Get the current conditional code state for the context
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*
+* RETURNS:
+*   TRUE if in a TRUE conditional or no conditional
+*   FALSE if in a FALSE conditional statement right now
+*********************************************************************/
+extern boolean
+    runstack_get_cond_state (runstack_context_t *rcxt);
+
+
+/********************************************************************
+* FUNCTION runstack_handle_while
+* 
+* Process the current command, which is a 'while' command.
+* This must be called before the next command is retrieved
+* during runstack context processing
+*
+* INPUTS:
+*    rcxt == runstack context to use
+*    maxloops == max number of loop iterations
+*    xpathpcb == XPath control block to save which contains
+*                the expression to be processed.
+*                !!! this memory is handed off here; it will
+*                !!!  be freed as part of the loopcb context
+*    docroot == docroot var struct that represents
+*               the XML document to run the XPath expr against
+*                !!! this memory is handed off here; it will
+*                !!!  be freed as part of the loopcb context
+*
+* RETURNS:
+*    status; if status != NO_ERR then the xpathpcb and docroot
+*    parameters need to be freed by the caller
+*********************************************************************/
+extern status_t
+    runstack_handle_while (runstack_context_t *rcxt,
+                           uint32 maxloops,
+                           struct xpath_pcb_t_ *xpathpcb,
+                           val_value_t *docroot);
+
+
+/********************************************************************
+* FUNCTION runstack_handle_if
+* 
+* Handle the if command for the specific runstack context
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*   startcond == start condition state for this if block
+*                may be FALSE because the current conditional
+*                state is already FALSE
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    runstack_handle_if (runstack_context_t *rcxt,
+                        boolean startcond);
+
+
+/********************************************************************
+* FUNCTION runstack_handle_elif
+* 
+* Handle the elif command for the specific runstack context
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*   startcond == start condition state for this if block
+*                may be FALSE because the current conditional
+*                state is already FALSE
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    runstack_handle_elif (runstack_context_t *rcxt,
+                          boolean startcond);
+
+
+/********************************************************************
+* FUNCTION runstack_handle_else
+* 
+* Handle the elsecommand for the specific runstack context
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    runstack_handle_else (runstack_context_t *rcxt);
+
+
+/********************************************************************
+* FUNCTION runstack_handle_end
+* 
+* Handle the end command for the specific runstack context
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    runstack_handle_end (runstack_context_t *rcxt);
+
+
+/********************************************************************
+* FUNCTION runstack_get_if_used
+* 
+* Check if the run context, which should be inside an if-stmt
+* now, has used the 'true' block already
+*
+* INPUTS:
+*   rcxt == runstack context to use
+*
+* RETURNS:
+*   TRUE if TRUE block already used
+*   FALSE if FALSE not already used or not in an if-block
+*********************************************************************/
+extern boolean
+    runstack_get_if_used (runstack_context_t *rcxt);
 
 #endif	    /* _H_runstack */

@@ -366,7 +366,8 @@ typedef enum status_t_
     ERR_PARS_SECDONE=ERR_INFO_BASE,     /* 900 */
     ERR_NCX_SKIPPED,                    /* 901 */
     ERR_NCX_CANCELED,                   /* 902 */
-    ERR_LAST_INFO                       /* 903 -- not really used */
+    ERR_NCX_LOOP_ENDED,                 /* 903 */
+    ERR_LAST_INFO                       /* 904 -- not really used */
 
 } status_t;
 

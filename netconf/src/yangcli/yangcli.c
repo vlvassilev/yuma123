@@ -1400,8 +1400,8 @@ static status_t
         str++;
     }
 
-    /* check end of string */
-    if (!*str) {
+    /* check end of string == unset command, but only if in a TRUE conditional */
+    if (!*str && runstack_get_cond_state(server_cb->runstack_context)) {
         if (*fileassign) {
             /* got file assignment (@foo) =  EOLN
              * treat this as a request to delete the file
@@ -2682,6 +2682,82 @@ static boolean
 }  /* get_lock_worked */
 
 
+
+/********************************************************************
+* FUNCTION get_input_line
+ *
+ * get a line of input text from the appropriate source
+ *
+ * INPUTS:
+ *   server_sb == server control block to use
+ *   res == address of return status
+ *
+ * OUTPUTS:
+ *   *res == return status
+ *
+ * RETURNS:
+ *    pointer to the line to use; do not free this memory
+*********************************************************************/
+static xmlChar *
+    get_input_line (server_cb_t *server_cb,
+                     status_t *res)
+{
+    xmlChar        *line;
+    boolean         done;
+    runstack_src_t  rsrc;
+    
+    /* get a line of user input
+     * this is really a const pointer
+     */
+    *res = NO_ERR;
+    done = FALSE;
+    line = NULL;
+
+    while (!done && *res == NO_ERR) {
+        /* figure out where to get the next input line */
+        rsrc = runstack_get_source(server_cb->runstack_context);
+
+        switch (rsrc) {
+        case RUNSTACK_SRC_NONE:
+            *res = SET_ERROR(ERR_INTERNAL_VAL);
+            break;
+        case RUNSTACK_SRC_USER:
+            /* block until user enters some input */
+            line = get_cmd_line(server_cb, res);
+            break;
+        case RUNSTACK_SRC_SCRIPT:
+            /* get one line of script text */
+            line = runstack_get_cmd(server_cb->runstack_context, res);
+            break;
+        case RUNSTACK_SRC_LOOP:
+            /* get one line of script text */
+            line = runstack_get_loop_cmd(server_cb->runstack_context,
+                                         res);
+            if (line == NULL || *res != NO_ERR) {
+                if (*res == ERR_NCX_LOOP_ENDED) {
+                    /* did not get a loop line, try again */
+                    *res = NO_ERR;
+                    continue;
+                }
+                return NULL;
+            }
+            break;
+        default:
+            *res = SET_ERROR(ERR_INTERNAL_VAL);
+        }
+
+        if (*res == NO_ERR) {
+            *res = runstack_save_line(server_cb->runstack_context,
+                                      line);
+        }
+        /* only 1 time through loop in normal conditions */
+        done = TRUE;
+    }
+    return line;
+
+}  /* get_input_line */
+
+
 /********************************************************************
 * yangcli_stdin_handler
 *
@@ -2705,6 +2781,7 @@ static mgr_io_state_t
     boolean         getrpc, fileassign, done;
     status_t        res;
     uint32          len;
+    runstack_src_t  rsrc;
 
     /* assuming cur_server_cb will be set dynamically
      * at some point; currently 1 session supported in yangcli
@@ -2939,11 +3016,27 @@ static mgr_io_state_t
         return server_cb->state;
     }
 
-    /* get a line of user input */
-    if (runstack_level(server_cb->runstack_context)) {
+
+    /* get a line of user input
+     * this is really a const pointer
+     */
+    res = NO_ERR;
+    line = get_input_line(server_cb, &res);
+
+    /* figure out where to get the next input line */
+    rsrc = runstack_get_source(server_cb->runstack_context);
+
+    switch (rsrc) {
+    case RUNSTACK_SRC_NONE:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+        break;
+    case RUNSTACK_SRC_USER:
+        if (line==NULL) {
+            return server_cb->state;
+        }
+        break;
+    case RUNSTACK_SRC_SCRIPT:
         /* get one line of script text */
-        line = runstack_get_cmd(server_cb->runstack_context,
-                                &res);
         if (line==NULL || res != NO_ERR) {
             if (res == ERR_NCX_EOF) {
                 ;
@@ -2953,13 +3046,22 @@ static mgr_io_state_t
             }
             return server_cb->state;
         }
-    } else {
-        /* block until user enters some input */
-        line = get_cmd_line(server_cb, &res);
-        if (line==NULL) {
+        break;
+    case RUNSTACK_SRC_LOOP:
+        if (line==NULL || res != NO_ERR) {
+            if (batchmode) {
+                mgr_request_shutdown();
+            }
             return server_cb->state;
         }
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
     }
+
+    if (res != NO_ERR) {
+        return server_cb->state;
+    }        
 
     /* check if this is an assignment statement */
     res = check_assign_statement(server_cb, 
@@ -3244,6 +3346,15 @@ static status_t
         val_init_from_template(connect_valset, obj);
     }
 
+    /* create the program instance temporary directory */
+    temp_progcb = ncxmod_new_program_tempdir(&res);
+    if (temp_progcb == NULL || res != NO_ERR) {
+        return res;
+    }
+
+    /* set the CLI handler */
+    mgr_io_set_stdin_handler(yangcli_stdin_handler);
+
     /* create a default server control block */
     server_cb = new_server_cb(YANGCLI_DEF_SERVER);
     if (server_cb==NULL) {
@@ -3280,15 +3391,6 @@ static status_t
     if (helpmode || versionmode) {
         return NO_ERR;
     }
-
-    /* create the program instance temporary directory */
-    temp_progcb = ncxmod_new_program_tempdir(&res);
-    if (temp_progcb == NULL || res != NO_ERR) {
-        return res;
-    }
-
-    /* set the CLI handler */
-    mgr_io_set_stdin_handler(yangcli_stdin_handler);
 
     /* Load the NETCONF, XSD, SMI and other core modules */
     if (autoload) {
@@ -3420,7 +3522,7 @@ static void
     yangcli_cleanup (void)
 {
     server_cb_t  *server_cb;
-    modptr_t    *modptr;
+    modptr_t     *modptr;
 
     log_debug2("\nShutting down yangcli\n");
 
@@ -3429,21 +3531,15 @@ static void
         free_modptr(modptr);
     }
 
-    /* Cleanup the Netconf Server Library */
-    mgr_cleanup();
-
-    /* cleanup the NCX engine and registries */
-    ncx_cleanup();
+    while (!dlq_empty(&server_cbQ)) {
+        server_cb = (server_cb_t *)dlq_deque(&server_cbQ);
+        free_server_cb(server_cb);
+    }
 
     /* clean and reset all module static vars */
     if (cur_server_cb) {
         cur_server_cb->state = MGR_IO_ST_NONE;
         cur_server_cb->mysid = 0;
-    }
-
-    while (!dlq_empty(&server_cbQ)) {
-        server_cb = (server_cb_t *)dlq_deque(&server_cbQ);
-        free_server_cb(server_cb);
     }
 
     if (mgr_cli_valset) {
@@ -3480,6 +3576,12 @@ static void
         ncxmod_free_program_tempdir(temp_progcb);
         temp_progcb = NULL;
     }
+
+    /* Cleanup the Netconf Server Library */
+    mgr_cleanup();
+
+    /* cleanup the NCX engine and registries */
+    ncx_cleanup();
 
     if (malloc_cnt != free_cnt) {
         log_error("\n*** Error: memory leak (m:%u f:%u)\n", 

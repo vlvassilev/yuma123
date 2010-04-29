@@ -176,13 +176,29 @@ boolean
         ;
     } else if (!xml_strcmp(rpcname, YANGCLI_EVENTLOG)) {
         ;
+    } else if (!xml_strcmp(rpcname, YANGCLI_ELIF)) {
+        ;
+    } else if (!xml_strcmp(rpcname, YANGCLI_ELSE)) {
+        ;
+    } else if (!xml_strcmp(rpcname, YANGCLI_END)) {
+        ;
     } else if (!xml_strcmp(rpcname, YANGCLI_FILL)) {
         ;
     } else if (!xml_strcmp(rpcname, YANGCLI_HELP)) {
         ;
+    } else if (!xml_strcmp(rpcname, YANGCLI_IF)) {
+        ;
     } else if (!xml_strcmp(rpcname, YANGCLI_HISTORY)) {
         ;
     } else if (!xml_strcmp(rpcname, YANGCLI_LIST)) {
+        ;
+    } else if (!xml_strcmp(rpcname, YANGCLI_LOG_ERROR)) {
+        ;
+    } else if (!xml_strcmp(rpcname, YANGCLI_LOG_WARN)) {
+        ;
+    } else if (!xml_strcmp(rpcname, YANGCLI_LOG_INFO)) {
+        ;
+    } else if (!xml_strcmp(rpcname, YANGCLI_LOG_DEBUG)) {
         ;
     } else if (!xml_strcmp(rpcname, YANGCLI_MGRLOAD)) {
         ;
@@ -195,6 +211,8 @@ boolean
     } else if (!xml_strcmp(rpcname, YANGCLI_RUN)) {
         ;
     } else if (!xml_strcmp(rpcname, YANGCLI_SHOW)) {
+        ;
+    } else if (!xml_strcmp(rpcname, YANGCLI_WHILE)) {
         ;
     } else {
         return FALSE;

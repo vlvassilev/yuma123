@@ -451,5 +451,4 @@ extern ncx_var_t *
                      const xmlChar *varname,
                      status_t *res);
 
-
 #endif	    /* _H_yangcli_util */

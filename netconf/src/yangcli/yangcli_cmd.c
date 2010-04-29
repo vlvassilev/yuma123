@@ -176,6 +176,10 @@ date         init     comment
 #include "yangcli_autolock.h"
 #endif
 
+#ifndef _H_yangcli_cond
+#include "yangcli_cond.h"
+#endif
+
 #ifndef _H_yangcli_cmd
 #include "yangcli_cmd.h"
 #endif
@@ -274,12 +278,16 @@ static void
 {
     xmlChar        *p;
     val_value_t    *parm;
-    uint32          len;
+    uint32          len, condlen;
+    boolean         cond;
 
     if (server_cb->climore) {
         xml_strncpy(buff, MORE_PROMPT, bufflen);
         return;
     }
+
+    cond = runstack_get_cond_state(server_cb->runstack_context);
+    condlen = (cond) ? xml_strlen(FALSE_PROMPT) : 0;
 
     switch (server_cb->state) {
     case MGR_IO_ST_INIT:
@@ -288,17 +296,26 @@ static void
     case MGR_IO_ST_CONN_START:
     case MGR_IO_ST_SHUT:
         if (server_cb->cli_fn) {
-            if ((xml_strlen(DEF_FN_PROMPT) 
-                 + xml_strlen(server_cb->cli_fn) + 2) < bufflen) {
+            len = xml_strlen(DEF_FN_PROMPT) 
+                + xml_strlen(server_cb->cli_fn) 
+                + condlen + 2;
+            if (len < bufflen) {
                 p = buff;
                 p += xml_strcpy(p, DEF_FN_PROMPT);
                 p += xml_strcpy(p, server_cb->cli_fn);
+                if (condlen) {
+                    p += xml_strcpy(p, FALSE_PROMPT);
+                }
                 xml_strcpy(p, (const xmlChar *)"> ");
-            } else {
+            } else if (cond) {
                 xml_strncpy(buff, DEF_PROMPT, bufflen);
+            } else {
+                xml_strncpy(buff, DEF_FALSE_PROMPT, bufflen);
             }
-        } else {
+        } else if (cond ) {
             xml_strncpy(buff, DEF_PROMPT, bufflen);
+        } else {
+            xml_strncpy(buff, DEF_FALSE_PROMPT, bufflen);
         }
         break;
     case MGR_IO_ST_CONN_IDLE:
@@ -369,6 +386,14 @@ static void
             len = xml_strncpy(p, server_cb->cli_fn, --bufflen);
             p += len;
             bufflen -= len;
+        }
+
+        if (!cond) {
+            len = xml_strlen(FALSE_PROMPT);
+            if (bufflen > len) {
+                p += xml_strcpy(p, FALSE_PROMPT);
+                bufflen -= len;
+            }
         }
 
         if (bufflen > 2) {
@@ -2479,7 +2504,8 @@ static status_t
                      const xmlChar *source,
                      val_value_t *valset)
 {
-    xmlChar       *str, *fspec;
+    /* xmlChar       *str, *fspec; */
+    xmlChar       *fspec;
     FILE          *fp;
     val_value_t   *parm;
     status_t       res;
@@ -2534,16 +2560,26 @@ static status_t
         }
     }
 
+#if 0
     /* execute the first command in the script */
     str = runstack_get_cmd(server_cb->runstack_context, &res);
     if (str && res == NO_ERR) {
-        /* execute the line as an RPC command */
+        /* do not need to save this command
+         * the new script would not have started
+         * if the condiition state was FALSE
+         * Now there is a new runstack frame and there
+         * connot be any while loops started alread
+         * so the runstack_save_line function is not needed
+         *
+         * just execute the line as an RPC command 
+         */
         if (is_top(server_cb->state)) {
             res = top_command(server_cb, str);
         } else {
             res = conn_command(server_cb, str);
         }
     }
+#endif
 
     return res;
 
@@ -2608,6 +2644,79 @@ static status_t
     return res;
 
 }  /* do_run */
+
+
+/********************************************************************
+ * FUNCTION do_log (local RPC)
+ * 
+ * log-error msg=string
+ * log-warn msg=string
+ * log-info msg=string
+ * log-debug msg=string
+ *
+ * Print the log message if the log-level is high enough
+ *
+ * INPUTS:
+ *    server_cb == server control block to use
+ *    rpc == RPC method for the show command
+ *    line == CLI input in progress
+ *    len == offset into line buffer to start parsing
+ *    level == required log level
+ *
+ * RETURNS:
+ *    status
+ *********************************************************************/
+static status_t
+    do_log (server_cb_t *server_cb,
+            obj_template_t *rpc,
+            const xmlChar *line,
+            uint32  len,
+            log_debug_t level)
+{
+    val_value_t  *valset, *parm;
+    status_t      res;
+
+    res = NO_ERR;
+
+    /* get the 'script' parameter */
+    valset = get_valset(server_cb, rpc, &line[len], &res);
+
+    if (valset && res == NO_ERR) {
+        /* there is 1 parm */
+        parm = val_find_child(valset, 
+                              YANGCLI_MOD, 
+                              YANGCLI_MSG);
+        if (!parm) {
+            res = ERR_NCX_DEF_NOT_FOUND;
+        } else if (parm->res != NO_ERR) {
+            res = parm->res;
+        } else if (VAL_STR(parm)) {
+            switch (level) {
+            case LOG_DEBUG_ERROR:
+                log_error("\nError: %s\n", VAL_STR(parm));
+                break;
+            case LOG_DEBUG_WARN:
+                log_warn("\nWarning: %s\n", VAL_STR(parm));
+                break;
+            case LOG_DEBUG_INFO:
+                log_info("\nInfo: %s\n", VAL_STR(parm));
+                break;
+            case LOG_DEBUG_DEBUG:
+                log_debug("\nDebug: %s\n", VAL_STR(parm));
+                break;
+            default:
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }
+    }
+
+    if (valset) {
+        val_free_value(valset);
+    }
+
+    return res;
+
+}  /* do_log */
 
 
 /********************************************************************
@@ -6352,43 +6461,75 @@ static status_t
 {
     const xmlChar *rpcname;
     status_t       res;
+    boolean        cond;
 
     res = NO_ERR;
     rpcname = obj_get_name(rpc);
+    cond = runstack_get_cond_state(server_cb->runstack_context);
 
     if (!xml_strcmp(rpcname, YANGCLI_CREATE)) {
-        res = do_edit(server_cb, rpc, line, len, OP_EDITOP_CREATE);
+        if (cond) {
+            res = do_edit(server_cb, rpc, line, len, OP_EDITOP_CREATE);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_DELETE)) {
-        res = do_edit(server_cb, rpc, line, len, OP_EDITOP_DELETE);
+        if (cond) {
+            res = do_edit(server_cb, rpc, line, len, OP_EDITOP_DELETE);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_GET_LOCKS)) {
-        res = do_get_locks(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_get_locks(server_cb, rpc, line, len);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_INSERT)) {
-        res = do_insert(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_insert(server_cb, rpc, line, len);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_MERGE)) {
-        res = do_edit(server_cb, rpc, line, len, OP_EDITOP_MERGE);
+        if (cond) {
+            res = do_edit(server_cb, rpc, line, len, OP_EDITOP_MERGE);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_RELEASE_LOCKS)) {
-        res = do_release_locks(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_release_locks(server_cb, rpc, line, len);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_REPLACE)) {
-        res = do_edit(server_cb, rpc, line, len, OP_EDITOP_REPLACE);
+        if (cond) {
+            res = do_edit(server_cb, rpc, line, len, OP_EDITOP_REPLACE);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_SAVE)) {
-        if (len < xml_strlen(line)) {
-            res = ERR_NCX_INVALID_VALUE;
-            log_error("\nError: Extra characters found (%s)",
-                      &line[len]);
-        } else {
-            res = do_save(server_cb);
+        if (cond) {
+            if (len < xml_strlen(line)) {
+                res = ERR_NCX_INVALID_VALUE;
+                log_error("\nError: Extra characters found (%s)",
+                          &line[len]);
+            } else {
+                res = do_save(server_cb);
+            }
         }
     } else if (!xml_strcmp(rpcname, YANGCLI_SGET)) {
-        res = do_sget(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_sget(server_cb, rpc, line, len);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_SGET_CONFIG)) {
-        res = do_sget_config(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_sget_config(server_cb, rpc, line, len);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_XGET)) {
-        res = do_xget(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_xget(server_cb, rpc, line, len);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_XGET_CONFIG)) {
-        res = do_xget_config(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_xget_config(server_cb, rpc, line, len);
+        }
     } else {
         res = ERR_NCX_SKIPPED;
     }
+
+    if (res == NO_ERR && !cond && LOGDEBUG) {
+        log_debug("\nrSkipping false conditional command '%s'",
+                  rpcname);
+    }
+
     return res;
 
 } /* do_local_conn_command */
@@ -6420,43 +6561,110 @@ static status_t
 {
     const xmlChar *rpcname;
     status_t       res;
+    boolean        cond, didcmd;
 
     res = NO_ERR;
+    didcmd = FALSE;
     rpcname = obj_get_name(rpc);
+    cond = runstack_get_cond_state(server_cb->runstack_context);
 
     if (!xml_strcmp(rpcname, YANGCLI_CD)) {
-        res = do_cd(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_cd(server_cb, rpc, line, len);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_CONNECT)) {
-        res = do_connect(server_cb, rpc, line, len, FALSE);
+        if (cond) {
+            res = do_connect(server_cb, rpc, line, len, FALSE);
+        }
+    } else if (!xml_strcmp(rpcname, YANGCLI_ELIF)) {
+        res = do_elif(server_cb, rpc, line, len);
+        didcmd = TRUE;
+    } else if (!xml_strcmp(rpcname, YANGCLI_ELSE)) {
+        res = do_else(server_cb, rpc, line, len);
+        didcmd = TRUE;
+    } else if (!xml_strcmp(rpcname, YANGCLI_END)) {
+        res = do_end(server_cb, rpc, line, len);
+        didcmd = TRUE;
     } else if (!xml_strcmp(rpcname, YANGCLI_EVAL)) {
-        res = do_eval(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_eval(server_cb, rpc, line, len);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_EVENTLOG)) {
-        res = do_eventlog(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_eventlog(server_cb, rpc, line, len);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_FILL)) {
-        res = do_fill(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_fill(server_cb, rpc, line, len);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_HELP)) {
-        res = do_help(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_help(server_cb, rpc, line, len);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_HISTORY)) {
-        res = do_history(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_history(server_cb, rpc, line, len);
+        }
+    } else if (!xml_strcmp(rpcname, YANGCLI_IF)) {
+        res = do_if(server_cb, rpc, line, len);
+        didcmd = TRUE;
     } else if (!xml_strcmp(rpcname, YANGCLI_LIST)) {
-        res = do_list(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_list(server_cb, rpc, line, len);
+        }
+    } else if (!xml_strcmp(rpcname, YANGCLI_LOG_ERROR)) {
+        if (cond) {
+            res = do_log(server_cb, rpc, line, len, LOG_DEBUG_ERROR);
+        }
+    } else if (!xml_strcmp(rpcname, YANGCLI_LOG_WARN)) {
+        if (cond) {
+            res = do_log(server_cb, rpc, line, len, LOG_DEBUG_WARN);
+        }
+    } else if (!xml_strcmp(rpcname, YANGCLI_LOG_INFO)) {
+        if (cond) {
+            res = do_log(server_cb, rpc, line, len, LOG_DEBUG_INFO);
+        }
+    } else if (!xml_strcmp(rpcname, YANGCLI_LOG_DEBUG)) {
+        if (cond) {
+            res = do_log(server_cb, rpc, line, len, LOG_DEBUG_DEBUG);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_MGRLOAD)) {
-        res = do_mgrload(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_mgrload(server_cb, rpc, line, len);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_PWD)) {
-        res = do_pwd(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_pwd(server_cb, rpc, line, len);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_QUIT)) {
-        server_cb->state = MGR_IO_ST_SHUT;
-        mgr_request_shutdown();
+        if (cond) {
+            server_cb->state = MGR_IO_ST_SHUT;
+            mgr_request_shutdown();
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_RECALL)) {
-        res = do_recall(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_recall(server_cb, rpc, line, len);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_RUN)) {
-        res = do_run(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_run(server_cb, rpc, line, len);
+        }
     } else if (!xml_strcmp(rpcname, YANGCLI_SHOW)) {
-        res = do_show(server_cb, rpc, line, len);
+        if (cond) {
+            res = do_show(server_cb, rpc, line, len);
+        }
+    } else if (!xml_strcmp(rpcname, YANGCLI_WHILE)) {
+        res = do_while(server_cb, rpc, line, len);
+        didcmd = TRUE;
     } else {
         res = ERR_NCX_INVALID_VALUE;
         log_error("\nError: The %s command is not allowed in this mode",
                    rpcname);
+    }
+
+    if (res == NO_ERR && !cond && !didcmd && LOGDEBUG) {
+        log_debug("\nrSkipping false conditional command '%s'",
+                  rpcname);
     }
 
     return res;
@@ -6613,8 +6821,13 @@ status_t
     }
 
     /* else treat this as an RPC request going to the server
-     * first construct a method + parameter tree 
+     * make sure this is a TRUE conditional command
      */
+
+
+
+
+    /* construct a method + parameter tree */
     reqdata = xml_val_new_struct(obj_get_name(rpc), 
                                  obj_get_nsid(rpc));
     if (!reqdata) {

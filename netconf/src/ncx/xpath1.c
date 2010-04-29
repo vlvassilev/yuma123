@@ -57,6 +57,10 @@ date         init     comment
 #include "ncx.h"
 #endif
 
+#ifndef _H_ncx_feature
+#include "ncx_feature.h"
+#endif
+
 #ifndef _H_ncx_num
 #include "ncx_num.h"
 #endif
@@ -246,6 +250,16 @@ static xpath_result_t *
              dlq_hdr_t *parmQ,
              status_t  *res);
 
+static xpath_result_t *
+    module_loaded_fn (xpath_pcb_t *pcb,
+                      dlq_hdr_t *parmQ,
+                      status_t  *res);
+
+static xpath_result_t *
+    feature_enabled_fn (xpath_pcb_t *pcb,
+                        dlq_hdr_t *parmQ,
+                        status_t  *res);
+
 
 /********************************************************************
 *                                                                   *
@@ -282,6 +296,8 @@ static xpath_fncb_t functions [] = {
     { XP_FN_SUM, XP_RT_NUMBER, 1, sum_fn },
     { XP_FN_TRANSLATE, XP_RT_STRING, 3, translate_fn },
     { XP_FN_TRUE, XP_RT_BOOLEAN, 0, true_fn },
+    { XP_FN_MODULE_LOADED, XP_RT_BOOLEAN, -1, module_loaded_fn },
+    { XP_FN_FEATURE_ENABLED, XP_RT_BOOLEAN, 2, feature_enabled_fn },
     { NULL, XP_RT_NONE, 0, NULL }   /* last entry marker */
 };
 
@@ -4438,6 +4454,208 @@ static xpath_result_t *
     return result;
 
 }  /* true_fn */
+
+
+/********************************************************************
+* FUNCTION module_loaded_fn
+* 
+* boolean module-loaded(string [,string])
+*   parm1 == module name
+*   parm2 == optional revision-date
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 1 object to convert to boolean
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    module_loaded_fn (xpath_pcb_t *pcb,
+                      dlq_hdr_t *parmQ,
+                      status_t  *res)
+{
+    xpath_result_t  *parm, *parm2, *result;
+    xmlChar         *modstr, *revstr, *str1, *str2;
+
+    if (!pcb->val && !pcb->obj) {
+        return NULL;
+    }
+
+    *res = NO_ERR;
+
+    modstr = NULL;
+    revstr = NULL;
+    str1 = NULL;
+    str2 = NULL;
+
+    if (dlq_count(parmQ) > 2) {
+        /* should already be reported in obj mode */
+        *res = ERR_NCX_EXTRA_PARM;
+        return NULL;
+    }
+
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (parm == NULL) {
+        /* should already be reported in obj mode */
+        *res = ERR_NCX_MISSING_PARM;
+        return NULL;
+    }
+
+    parm2 = (xpath_result_t *)dlq_nextEntry(parm);
+
+    result = new_result(pcb, XP_RT_BOOLEAN);
+    if (result == NULL) {
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+    result->r.boo = FALSE;
+
+    if (parm->restype != XP_RT_STRING) {
+        *res = xpath_cvt_string(pcb, parm, &str1);
+        if (*res == NO_ERR) {
+            modstr = str1;
+        }
+    } else {
+        modstr = parm->r.str;
+    }
+
+    if (*res == NO_ERR && parm2 != NULL) {
+        if (parm2->restype != XP_RT_STRING) {
+            *res = xpath_cvt_string(pcb, parm2, &str2);
+            if (*res == NO_ERR) {
+                revstr = str2;
+            }
+        } else {
+            revstr = parm2->r.str;
+        }
+    }
+
+    if (*res == NO_ERR) {
+        if (ncx_valid_name2(modstr)) {
+            if (ncx_find_module(modstr, revstr)) {
+                result->r.boo = TRUE;
+            }
+        }
+    }
+
+    if (str1 != NULL) {
+        m__free(str1);
+    }
+
+    if (str2 != NULL) {
+        m__free(str2);
+    }
+
+    return result;
+
+}  /* module_loaded_fn */
+
+
+/********************************************************************
+* FUNCTION feature_enabled_fn
+* 
+* boolean feature-enabled(string ,string)
+*   parm1 == module name
+*   parm2 == feature name
+*
+* INPUTS:
+*    pcb == parser control block to use
+*    parmQ == parmQ with 1 object to convert to boolean
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    malloced xpath_result_t if no error and results being processed
+*    NULL if error
+*********************************************************************/
+static xpath_result_t *
+    feature_enabled_fn (xpath_pcb_t *pcb,
+                        dlq_hdr_t *parmQ,
+                        status_t  *res)
+{
+    xpath_result_t  *parm, *parm2, *result;
+    xmlChar         *modstr, *featstr, *str1, *str2;
+    ncx_module_t    *mod;
+    ncx_feature_t   *feat;
+
+    if (!pcb->val && !pcb->obj) {
+        return NULL;
+    }
+
+    *res = NO_ERR;
+
+    modstr = NULL;
+    featstr = NULL;
+    str1 = NULL;
+    str2 = NULL;
+
+    parm = (xpath_result_t *)dlq_firstEntry(parmQ);
+    if (parm == NULL) {
+        /* should already be reported in obj mode */
+        *res = ERR_NCX_MISSING_PARM;
+        return NULL;
+    }
+
+    parm2 = (xpath_result_t *)dlq_nextEntry(parm);
+
+    result = new_result(pcb, XP_RT_BOOLEAN);
+    if (result == NULL) {
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+    result->r.boo = FALSE;
+
+    if (parm->restype != XP_RT_STRING) {
+        *res = xpath_cvt_string(pcb, parm, &str1);
+        if (*res == NO_ERR) {
+            modstr = str1;
+        }
+    } else {
+        modstr = parm->r.str;
+    }
+
+    if (*res == NO_ERR) {
+        if (parm2->restype != XP_RT_STRING) {
+            *res = xpath_cvt_string(pcb, parm2, &str2);
+            if (*res == NO_ERR) {
+                featstr = str2;
+            }
+        } else {
+            featstr = parm2->r.str;
+        }
+    }
+
+    if (*res == NO_ERR) {
+        if (ncx_valid_name2(modstr)) {
+            mod = ncx_find_module(modstr, NULL);
+            if (mod != NULL) {
+                feat = ncx_find_feature(mod, featstr);
+                if (feat != NULL && ncx_feature_enabled(feat)) {
+                    result->r.boo = TRUE;
+                }
+            }
+        }
+    }
+
+    if (str1 != NULL) {
+        m__free(str1);
+    }
+
+    if (str2 != NULL) {
+        m__free(str2);
+    }
+
+    return result;
+
+}  /* feature_enabled_fn */
 
 
 /****************   U T I L I T Y    F U N C T I O N S   ***********/
@@ -8884,8 +9102,8 @@ xpath_result_t *
     } else {
         pcb->tkc = tk_tokenize_xpath_string(NULL, 
                                             pcb->exprstr, 
-                                            0, 
-                                            0, 
+                                            1, 
+                                            1, 
                                             res);
         if (!pcb->tkc || *res != NO_ERR) {
             if (logerrors) {
@@ -8930,11 +9148,14 @@ xpath_result_t *
         result = parse_expr(pcb, &pcb->valueres);
     }
 
+    if (pcb->valueres != NO_ERR) {
+        *res = pcb->valueres;
+    }
+
     if (LOGDEBUG3 && result) {
         dump_result(pcb, result, "eval_expr");
     }
 
-    *res = NO_ERR;
     return result;
 
 }  /* xpath1_eval_expr */
@@ -9004,8 +9225,8 @@ xpath_result_t *
     } else {
         pcb->tkc = tk_tokenize_xpath_string(NULL, 
                                             pcb->exprstr, 
-                                            0, 
-                                            0, 
+                                            1, 
+                                            1, 
                                             res);
         if (!pcb->tkc || *res != NO_ERR) {
             if (logerrors) {

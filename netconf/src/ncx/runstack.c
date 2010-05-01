@@ -1260,7 +1260,7 @@ xmlChar *
     runstack_loopcb_t  *loopcb, *test_loopcb, *first_loopcb;
     runstack_line_t    *le;
     xpath_result_t     *result;
-    boolean             needremove, needeval, cond;
+    boolean             needremove, needeval, needmax, cond;
 
 #ifdef DEBUG
     if (res == NULL) {
@@ -1275,6 +1275,7 @@ xmlChar *
     result = NULL;
     needremove = FALSE;
     needeval = FALSE;
+    needmax = FALSE;
     cond = FALSE;
     *res = NO_ERR;
 
@@ -1304,6 +1305,7 @@ xmlChar *
     if (loopcb->empty_block) {
         /* corner-case, no statements */
         needeval = TRUE;
+        needmax = TRUE;
     } else if (test_loopcb->cur_line == NULL) {
         /* the next line is supposed to be the first line */
         le = test_loopcb->cur_line = test_loopcb->first_line;
@@ -1329,19 +1331,7 @@ xmlChar *
          */
         le = loopcb->cur_line = loopcb->first_line;
         needeval = TRUE;
-        loopcb->loop_count++;
-        if (loopcb->maxloops) {
-            if (loopcb->loop_count == loopcb->maxloops) {
-                log_debug("\nrunstack: max loop iterations ('%u') reached",
-                          loopcb->maxloops);
-                
-                /* need to remove the loopcb and change the
-                 * script source
-                 */
-                needremove = TRUE;
-                needeval = FALSE;
-            }
-        }
+        needmax = TRUE;
     } else {
         /* in the list somewhere 1 .. N 
         * the outside loop is looping and the inside
@@ -1355,6 +1345,22 @@ xmlChar *
                 loopcb->first_line = le;
             }
         }            
+    }
+
+    if (*res == NO_ERR && needmax) {
+        loopcb->loop_count++;
+        if (loopcb->maxloops) {
+            if (loopcb->loop_count == loopcb->maxloops) {
+                log_debug("\nrunstack: max loop iterations ('%u') reached",
+                          loopcb->maxloops);
+                
+                /* need to remove the loopcb and change the
+                 * script source
+                 */
+                needremove = TRUE;
+                needeval = FALSE;
+            }
+        }
     }
 
     if (*res == NO_ERR && needeval) {

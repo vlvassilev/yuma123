@@ -259,7 +259,7 @@ module yangcli {
           ncx:password;
         }
 
-        leaf port {
+        leaf ncport {
           description 
             "NETCONF port number to use.  If not present, then
              port 830, followed by port 22, will be tried.";
@@ -455,7 +455,7 @@ module yangcli {
 
       uses ncxapp:RunpathParm;
 
-      choice auto-startup-mode {
+      choice run-startup-mode {
         leaf run-script {
           description
             "The specified script will be invoked upon startup.

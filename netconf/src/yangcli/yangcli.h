@@ -179,7 +179,7 @@ date	     init     comment
 #define YANGCLI_OPTIONAL    (const xmlChar *)"optional"
 #define YANGCLI_ORDER       (const xmlChar *)"order"
 #define YANGCLI_PASSWORD    (const xmlChar *)"password"
-#define YANGCLI_PORT        (const xmlChar *)"port"
+#define YANGCLI_PORT        (const xmlChar *)"ncport"
 #define YANGCLI_RETRY_INTERVAL (const xmlChar *)"retry-interval"
 #define YANGCLI_RUN_COMMAND (const xmlChar *)"run-command"
 #define YANGCLI_RUN_SCRIPT  (const xmlChar *)"run-script"

@@ -3041,7 +3041,7 @@ static mgr_io_state_t
             if (res == ERR_NCX_EOF) {
                 ;
             }
-            if (batchmode) {
+            if (batchmode && res != NO_ERR) {
                 mgr_request_shutdown();
             }
             return server_cb->state;
@@ -3049,7 +3049,7 @@ static mgr_io_state_t
         break;
     case RUNSTACK_SRC_LOOP:
         if (line==NULL || res != NO_ERR) {
-            if (batchmode) {
+            if (batchmode && res != NO_ERR) {
                 mgr_request_shutdown();
             }
             return server_cb->state;

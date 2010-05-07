@@ -5225,4 +5225,47 @@ boolean
 }  /* ncxmod_test_filespec */
 
 
+/********************************************************************
+* FUNCTION ncxmod_get_pathlen_from_filespec
+*
+* Get the length of the path part of the filespec string
+*
+* INPUTS:
+*    filespec == file spec to check
+*
+* RETURNS:
+*    number of chars to keep for the path spec
+*********************************************************************/
+uint32
+    ncxmod_get_pathlen_from_filespec (const xmlChar *filespec)
+{
+    const xmlChar  *str;
+    uint32          len;
+    
+#ifdef DEBUG
+    if (filespec == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    len = xml_strlen(filespec);
+    if (len == 0) {
+        return 0;
+    }
+
+    str = &filespec[len-1];
+
+    while (*str && *str != NCXMOD_PSCHAR) {
+        str--;
+    }
+
+    if (*str) {
+        return (uint32)((str - filespec) + 1);
+    } else {
+        return 0;
+    }
+}  /* ncxmod_get_pathlen_from_filespec */
+
+
 /* END file ncxmod.c */

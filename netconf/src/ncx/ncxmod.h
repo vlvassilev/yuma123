@@ -1145,4 +1145,19 @@ extern void
 extern boolean
     ncxmod_test_filespec (const xmlChar *filespec);
 
+
+/********************************************************************
+* FUNCTION ncxmod_get_pathlen_from_filespec
+*
+* Get the length of th path part of the filespec string
+*
+* INPUTS:
+*    filespec == file spec to check
+*
+* RETURNS:
+*    number of chars to keep for the path spec
+*********************************************************************/
+extern uint32
+    ncxmod_get_pathlen_from_filespec (const xmlChar *filespec);
+
 #endif	    /* _H_ncxmod */

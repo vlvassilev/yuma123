@@ -77,6 +77,9 @@ date             init     comment
 #define RPC_STR_GRP_ID  "group-id"
 
 
+#define RPC_ERR_QUEUE(MSG) &(MSG)->mhdr.errQ
+
+
 /********************************************************************
 *                                                                   *
 *                             T Y P E S                             *

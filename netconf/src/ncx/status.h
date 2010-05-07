@@ -367,7 +367,9 @@ typedef enum status_t_
     ERR_NCX_SKIPPED,                    /* 901 */
     ERR_NCX_CANCELED,                   /* 902 */
     ERR_NCX_LOOP_ENDED,                 /* 903 */
-    ERR_LAST_INFO                       /* 904 -- not really used */
+    ERR_NCX_FOUND_INLINE,               /* 904 */
+    ERR_NCX_FOUND_URL,                  /* 905 */
+    ERR_LAST_INFO                       /* 906 -- not really used */
 
 } status_t;
 

@@ -27,6 +27,12 @@ module yuma-netconf {
      "Translated by Andy Bierman.
       Send comments to <andy@netconfcentral.org>.";
 
+   revision "2010-05-06" {
+     description 
+       "Remove nacm:secure on delete-config;
+        Fix bugs in parameters that did not match ietf-netconf.yang.";
+   }
+
    revision "2009-04-10" {
      description 
        "Remove rpc-type extension usage.";
@@ -552,17 +558,6 @@ module yuma-netconf {
                 "Only available if 'startup' capability supported.";
               type empty;
             }
-            leaf url {
-              if-feature url;
-              description 
-                "URL pointing to config data. Only available
-                 if 'url' capability supported.";
-             type ConfigURIType;
-            }
-            container config {
-              description "this is anyxml in ietf-netconf.yang";
-              ncx:root;
-            }
           }
         }
         anyxml filter {
@@ -693,6 +688,7 @@ module yuma-netconf {
               type empty;
             }
             leaf running {
+              if-feature writable-running;
               type empty;
             }
             leaf startup {
@@ -751,7 +747,6 @@ module yuma-netconf {
    }
 
    rpc delete-config {
-      nacm:secure;
       description
         "Delete a configuration datastore.  The 'running' configuration
          datastore cannot be deleted.
@@ -817,13 +812,6 @@ module yuma-netconf {
                 "Only available if 'startup' capability supported.";
               type empty;
             }
-            leaf url {
-              if-feature url;
-              description 
-                "URL pointing to config data. Only available
-                 if 'url' capability supported.";
-              type ConfigURIType;
-            }
           }
         }
       }
@@ -868,13 +856,6 @@ module yuma-netconf {
               description 
                 "Only available if 'startup' capability supported.";
               type empty;
-            }
-            leaf url {
-              if-feature url;
-              description 
-                "URL pointing to config data. Only available
-                 if 'url' capability supported.";
-              type ConfigURIType;
             }
           }
         }
@@ -1048,8 +1029,6 @@ module yuma-netconf {
               type empty;
             }
             leaf running {
-              // ed: not sure why this is here, since the
-              // running config should be valid all the time
               type empty;
             }
             leaf startup {

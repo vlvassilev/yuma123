@@ -123,8 +123,6 @@ static boolean cfg_init_done = FALSE;
 
 static cfg_template_t  *cfg_arr[CFG_NUM_STATIC];
 
-/* static dlq_hdr_t        cfg_dynQ; */
-
 
 /********************************************************************
 * FUNCTION new_cur_datetime
@@ -1327,105 +1325,6 @@ void
     }
 
 } /* cfg_get_lock_list */
-
-
-/********************************************************************
-* FUNCTION cfg_find_datanode
-*
-* Find the specified data node instance,
-* using absolute path XPath and default prefix names.
-* A missing prefix is an error
-* The expression must start from root
-*
-* INPUTS:
-*   target == XPath expression for single target to find
-*   cfgid == ID of configuration to use
-*
-* RETURNS:
-*   pointer to found node, or NULL if not found
-*********************************************************************/
-val_value_t *
-    cfg_find_datanode (const xmlChar *target,
-                       ncx_cfg_t  cfgid)
-{
-    cfg_template_t  *cfg;
-    val_value_t     *retval;
-    status_t         res;
-
-#ifdef DEBUG
-    if (!target) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    cfg = cfg_get_config_id(cfgid);
-    if (!cfg) {
-        return NULL;
-    }
-
-    res = xpath_find_val_target(cfg->root, 
-                                NULL,
-                                target, 
-                                &retval);
-    if (res == NO_ERR) {
-        return retval;
-    } else {
-        return NULL;
-    }
-
-} /* cfg_find_datanode */
-
-
-/********************************************************************
-* FUNCTION cfg_find_modrel_datanode
-*
-* Find the specified data node instance,
-* using absolute path XPath and module-relative prefix names.
-* A missing prefix is defaulted to the specified module
-* The expression must start from root
-*
-* INPUTS:
-*   mod  == module to use for the default and prefix evaluation
-*   target == XPath expression for single target to find
-*   cfgid == ID of configuration to use
-*
-* RETURNS:
-*   pointer to found node, or NULL if not found
-*********************************************************************/
-val_value_t *
-    cfg_find_modrel_datanode (ncx_module_t *mod,
-                              const xmlChar *target,
-                              ncx_cfg_t  cfgid)
-{
-    cfg_template_t  *cfg;
-    val_value_t     *retval;
-    status_t         res;
-
-#ifdef DEBUG
-    if (!target) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    retval = NULL;
-    cfg = cfg_get_config_id(cfgid);
-    if (!cfg) {
-        return NULL;
-    }
-
-    res = xpath_find_val_target(cfg->root, 
-                                mod,
-                                target, 
-                                &retval);
-    if (res == NO_ERR) {
-        return retval;
-    } else {
-        return NULL;
-    }
-
-} /* cfg_find_modrel_datanode */
 
 
 /********************************************************************

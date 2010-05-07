@@ -190,7 +190,7 @@ static void
     agt_profile.agt_conffile = NULL;
     agt_profile.agt_logfile = NULL;
     agt_profile.agt_startup = NULL;
-    agt_profile.agt_defaultStyle = NCX_EL_REPORT_ALL;
+    agt_profile.agt_defaultStyle = NCX_EL_EXPLICIT;
     agt_profile.agt_superuser = NCX_DEF_SUPERUSER;
     agt_profile.agt_eventlog_size = 1000;
     agt_profile.agt_maxburst = 10;
@@ -199,7 +199,8 @@ static void
     agt_profile.agt_linesize = 72;
     agt_profile.agt_indent = NCX_DEF_INDENT;
     agt_profile.agt_usevalidate = TRUE;
-    agt_profile.agt_defaultStyleEnum = NCX_WITHDEF_REPORT_ALL;
+    agt_profile.agt_useurl = TRUE;
+    agt_profile.agt_defaultStyleEnum = NCX_WITHDEF_EXPLICIT;
     agt_profile.agt_accesscontrol_enum = AGT_ACMOD_ENFORCING;
     
 } /* init_server_profile */

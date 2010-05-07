@@ -151,10 +151,10 @@ typedef enum cap_stdid_t_ {
 
 /* 1 capabilities list */
 typedef struct cap_list_t_ {
-    uint32          cap_std;         /* bitset of std caps */
-    xmlChar        *cap_protos;  /* URL capability protocol list */
-    xmlChar        *cap_defstyle;  /* with-defaults 'basic' parm */
-    xmlChar        *cap_supported;  /* with-defaults 'also-supported' parm */
+    uint32          cap_std;           /* bitset of std caps */
+    xmlChar        *cap_schemes;       /* URL capability protocol list */
+    xmlChar        *cap_defstyle;      /* with-defaults 'basic' parm */
+    xmlChar        *cap_supported;     /* with-defaults 'also-supported' parm */
     dlq_hdr_t       capQ;              /* queue of non-std caps */
 } cap_list_t;
 
@@ -322,23 +322,42 @@ extern status_t
 *
 * INPUTS:
 *    caplist == capability list that will contain the standard cap 
-*    proto_list == the protocol list for the :url capability
+*    scheme_list == the scheme list for the :url capability
 *
 * RETURNS:
 *    status, should always be NO_ERR
 *********************************************************************/
 extern status_t 
     cap_add_url (cap_list_t *caplist, 
-		 const xmlChar *proto_list);
+		 const xmlChar *scheme_list);
 
+
+/********************************************************************
+* FUNCTION cap_add_urlval
+*
+* Add the :url capability to the list
+* value struct version
+*
+* INPUTS:
+*    caplist == capability list that will contain the standard cap 
+*    scheme_list == the list of schemes supported
+*
+* OUTPUTS:
+*    status
+*********************************************************************/
+extern status_t
+    cap_add_urlval (val_value_t *caplist,
+                    const xmlChar *scheme_list);
+    
 
 /********************************************************************
 * FUNCTION cap_add_withdef
 *
-* Add the #with-defaults capability to the list
+* Add the :with-defaults capability to the list
 *
 * INPUTS:
 *    caplist == capability list that will contain the standard cap 
+*    defstyle == the basic-mode with-default style
 *    
 * RETURNS:
 *    status, should always be NO_ERR
@@ -351,12 +370,13 @@ extern status_t
 /********************************************************************
 * FUNCTION cap_add_withdefval
 *
-* Add the #with-defaults capability to t`he list
-* valuse struct version
+* Add the :with-defaults capability to t`he list
+* value struct version
 *
 * INPUTS:
 *    caplist == capability list that will contain the standard cap 
-*    capstd == the standard capability ID
+*    defstyle == the basic-mode with-default style
+*
 * OUTPUTS:
 *    status
 *********************************************************************/

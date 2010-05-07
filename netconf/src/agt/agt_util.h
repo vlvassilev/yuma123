@@ -135,6 +135,57 @@ extern status_t
 
 
 /********************************************************************
+* FUNCTION agt_get_url_from_parm
+*
+* Get the URL string for the config in the target param
+*
+*  1) an edit-content choice for edit-config
+*  2) a source or target config-choice option for copy-config
+*  3) a target of delete-config
+*  4) config-source choice option for validate
+*
+* INPUTS:
+*    parmname == parameter to get from (e.g., target)
+*    msg == incoming rpc_msg_t in progress
+*    methnode == XML node for RPC method (for errors)
+*    returl == address of return URL string pointer
+* 
+* OUTPUTS:
+*   *returl is set to the address of the URL string
+*   pointing to the memory inside the found parameter
+*
+* RETURNS:
+*    status
+*********************************************************************/
+extern status_t 
+    agt_get_url_from_parm (const xmlChar *parmname,
+                           rpc_msg_t *msg,
+                           xml_node_t *methnode,
+                           const xmlChar **returl);
+
+
+/********************************************************************
+* FUNCTION agt_get_filespec_from_url
+*
+* Check the URL and get the filespec part out of it
+*
+* INPUTS:
+*    urlstr == URL to check
+*    res == address of return status
+* 
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*    malloced URL string; must be freed by caller!!
+*    NULL if some error
+*********************************************************************/
+extern xmlChar *
+    agt_get_filespec_from_url (const xmlChar *urlstr,
+                               status_t *res);
+
+
+/********************************************************************
 * FUNCTION agt_get_parmval
 *
 * Get the identified val_value_t for a given parameter
@@ -683,5 +734,47 @@ extern xpath_pcb_t *
                        const xmlChar *expr,
                        status_t *res);
 
+
+/********************************************************************
+* FUNCTION agt_get_startup_filespec
+*
+* Figure out where to store the startup file
+*
+* INPUTS:
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+
+* RETURNS:
+*   malloced and filled in filespec string; must be freed by caller
+*   NULL if malloc error
+*********************************************************************/
+extern xmlChar *
+    agt_get_startup_filespec (status_t *res);
+
+
+/********************************************************************
+* FUNCTION agt_get_target_filespec
+*
+* Figure out where to store the URL target file
+*
+* INPUTS:
+*   target_url == target url spec to use; this is
+*                 treated as a relative pathspec, and
+*                 the appropriate data directory is used
+*                 to create this file
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced and filled in filespec string; must be freed by caller
+*   NULL if some error
+*********************************************************************/
+extern xmlChar *
+    agt_get_target_filespec (const xmlChar *target_url,
+                             status_t *res);
 
 #endif	    /* _H_agt_util */

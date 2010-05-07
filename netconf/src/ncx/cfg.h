@@ -158,7 +158,6 @@ typedef enum cfg_location_t_ {
 
 /* struct representing 1 configuration database */
 typedef struct cfg_template_t_ {
-    dlq_hdr_t      qhdr;
     ncx_cfg_t      cfg_id;
     cfg_location_t cfg_loc;
     cfg_state_t    cfg_state;
@@ -565,48 +564,6 @@ extern void
 extern void
     cfg_get_lock_list (ses_id_t sesid,
 		       val_value_t *retval);
-
-
-/********************************************************************
-* FUNCTION cfg_find_datanode
-*
-* Find the specified data node instance,
-* using absolute path XPath and default prefix names.
-* A missing prefix is an error
-* The expression must start from root
-*
-* INPUTS:
-*   target == XPath expression for single target to find
-*   cfgid == ID of configuration to use
-*
-* RETURNS:
-*   pointer to found node, or NULL if not found
-*********************************************************************/
-extern val_value_t *
-    cfg_find_datanode (const xmlChar *target,
-		       ncx_cfg_t  cfgid);
-
-
-/********************************************************************
-* FUNCTION cfg_find_modrel_datanode
-*
-* Find the specified data node instance,
-* using absolute path XPath and module-relative prefix names.
-* A missing prefix is defaulted to the specified module
-* The expression must start from root
-*
-* INPUTS:
-*   mod  == module to use for the default and prefix evaluation
-*   target == XPath expression for single target to find
-*   cfgid == ID of configuration to use
-*
-* RETURNS:
-*   pointer to found node, or NULL if not found
-*********************************************************************/
-extern val_value_t *
-    cfg_find_modrel_datanode (ncx_module_t *mod,
-			      const xmlChar *target,
-			      ncx_cfg_t  cfgid);
 
 
 /********************************************************************

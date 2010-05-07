@@ -619,9 +619,9 @@ void
 
     caplist->cap_std = 0;
 
-    if (caplist->cap_protos) {
-        m__free(caplist->cap_protos);
-        caplist->cap_protos = NULL;
+    if (caplist->cap_schemes) {
+        m__free(caplist->cap_schemes);
+        caplist->cap_schemes = NULL;
     }
 
     if (caplist->cap_defstyle) {
@@ -1160,24 +1160,24 @@ status_t
 *
 * INPUTS:
 *    caplist == capability list that will contain the standard cap 
-*    proto_list == the protocol list for the :url capability
+*    scheme_list == the protocol list for the :url capability
 *
 * RETURNS:
 *    status, should always be NO_ERR
 *********************************************************************/
 status_t 
     cap_add_url (cap_list_t *caplist, 
-                 const xmlChar *proto_list)
+                 const xmlChar *scheme_list)
 {
 #ifdef DEBUG
-    if (!caplist || !proto_list) {
+    if (!caplist || !scheme_list) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
     m__setbit(caplist->cap_std, stdcaps[CAP_STDID_URL].cap_bitnum);
-    caplist->cap_protos = xml_strdup(proto_list);
-    if (!caplist->cap_protos) {
+    caplist->cap_schemes = xml_strdup(scheme_list);
+    if (!caplist->cap_schemes) {
         return ERR_INTERNAL_MEM;
     }
     return NO_ERR;
@@ -1186,12 +1186,85 @@ status_t
 
 
 /********************************************************************
-* FUNCTION cap_add_withdef
+* FUNCTION cap_add_urlval
 *
-* Add the #with-defaults capability to the list
+* Add the :url capability to the list
+* value struct version
 *
 * INPUTS:
 *    caplist == capability list that will contain the standard cap 
+*    scheme_list == the list of schemes supported
+*
+* OUTPUTS:
+*    status
+*********************************************************************/
+status_t
+    cap_add_urlval (val_value_t *caplist,
+                    const xmlChar *scheme_list)
+{
+    val_value_t          *capval;
+    xmlChar              *str, *p;
+    const xmlChar        *pfix, *cap;
+    const xmlChar        *scheme;
+    uint32                len;
+
+#ifdef DEBUG
+    if (!caplist || !scheme_list) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    /* setup the string 
+     * <capability-uri>:with-defaults:1.0?basic-mode=<defstyle>
+     *    &also-supported=<other-two-enums>
+     */
+    pfix = CAP_URN;
+    scheme = CAP_SCHEME_EQ;
+    cap = stdcaps[CAP_STDID_URL].cap_name;
+
+    /* get the total length */
+    len = xml_strlen(pfix) + 
+        xml_strlen(cap) + 1 +
+        xml_strlen(scheme) + 
+        xml_strlen(scheme_list) + 1;
+
+    /* make the string */
+    str = m__getMem(len+1);
+    if (!str) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    /* build the capability string */
+    p = str;
+    p += xml_strcpy(p, pfix);
+    p += xml_strcpy(p, cap);
+    *p++ = '?';
+    p += xml_strcpy(p, scheme);
+    xml_strcpy(p, scheme_list);
+
+    /* make the capability element */
+    capval = xml_val_new_string(NCX_EL_CAPABILITY,
+                                xmlns_nc_id(), 
+                                str);
+    if (!capval) {
+        m__free(str);
+        return ERR_INTERNAL_MEM;
+    }
+
+    val_add_child(capval, caplist);
+    return NO_ERR;
+
+}  /* cap_add_urlval */
+
+
+/********************************************************************
+* FUNCTION cap_add_withdef
+*
+* Add the :with-defaults capability to the list
+*
+* INPUTS:
+*    caplist == capability list that will contain the standard cap 
+*    defstyle == the basic-mode with-default style
 *    
 * RETURNS:
 *    status, should always be NO_ERR
@@ -1249,12 +1322,13 @@ status_t
 /********************************************************************
 * FUNCTION cap_add_withdefval
 *
-* Add the #with-defaults capability to t`he list
-* valuse struct version
+* Add the :with-defaults capability to the list
+* value struct version
 *
 * INPUTS:
 *    caplist == capability list that will contain the standard cap 
-*    capstd == the standard capability ID
+*    defstyle == the basic-mode with-default style
+*
 * OUTPUTS:
 *    status
 *********************************************************************/
@@ -1627,7 +1701,7 @@ const xmlChar *
     }
 #endif
 
-    return (const xmlChar *)caplist->cap_protos;
+    return (const xmlChar *)caplist->cap_schemes;
 
 } /* cap_get_protos */
 

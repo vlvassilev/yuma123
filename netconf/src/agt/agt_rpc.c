@@ -859,6 +859,220 @@ static status_t
 }  /* post_psd_state */
 
 
+/********************************************************************
+* FUNCTION load_config_file
+*
+* Dispatch an internal <load-config> request
+* used for OP_EDITOP_LOAD to load the running from startup
+* and OP_EDITOP_REPLACE to restore running from backup
+*
+*    - Create a dummy session and RPC message
+*    - Call a special agt_ps_parse function to parse the config file
+*    - Call the special agt_ncx function to invoke the proper 
+*      parmset and application 'validate' callback functions, and 
+*      record all the error/warning messages
+*    - Call the special ncx_agt function to invoke all the 'apply'
+*      callbacks as needed
+*    - transfer any error messages to the cfg->load_errQ
+*
+* INPUTS:
+*   filespec == XML config filespec to load
+*   cfg == cfg_template_t to fill in
+*   isload == TRUE for normal load-config
+*             FALSE for restore backup load-config
+*   use_sid == session ID to use for the access control
+*   justval == TRUE if just the <config> element is needed
+*   configval == address of return config val
+*   errorQ == address of Q to hold errors if justval is TRUE
+*
+* OUTPUTS:
+*    *configval set to the processed config node
+*       if NO_ERR, it has been removed from the rpc_input
+*       data strcuture and needs to be freed by the caller
+*    errorQ contains any rpc_err_rec_t structs that were
+*       generated during this RPC operation
+*
+* RETURNS:
+*     status
+*********************************************************************/
+static status_t
+    load_config_file (const xmlChar *filespec,
+                      cfg_template_t  *cfg,
+                      boolean isload,
+                      ses_id_t  use_sid,
+                      boolean justval,
+                      val_value_t **configval,
+                      dlq_hdr_t *errorQ)
+{
+    ses_cb_t        *scb;
+    rpc_msg_t       *msg;
+    obj_template_t  *rpcobj;
+    agt_rpc_cbset_t *cbset;
+    val_value_t     *testval;
+    xml_node_t       method;
+    status_t         res, retres;
+    boolean          valdone;
+
+    retres = NO_ERR;
+
+    /* first make sure the load-config RPC is registered */
+    rpcobj = find_rpc(NC_MODULE, NCX_EL_LOAD_CONFIG);
+    if (!rpcobj) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* make sure the agent callback set for this RPC is ok */
+    cbset = (agt_rpc_cbset_t *)rpcobj->cbset;
+    if (!cbset) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* create a dummy session control block */
+    scb = agt_ses_new_dummy_session();
+    if (!scb) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    /* set the ACM profile to use for rollback */
+    res = agt_ses_set_dummy_session_acm(scb, use_sid);
+    if (res != NO_ERR) {
+        agt_ses_free_dummy_session(scb);        
+        return res;
+    }
+
+    /* create a dummy RPC msg */
+    msg = rpc_new_msg();
+    if (!msg) {
+        agt_ses_free_dummy_session(scb);
+        return ERR_INTERNAL_MEM;
+    }
+
+    /* setup the config file as the xmlTextReader input */
+    res = xml_get_reader_from_filespec((const char *)filespec, 
+                                       &scb->reader);
+    if (res != NO_ERR) {
+        rpc_free_msg(msg);
+        agt_ses_free_dummy_session(scb);
+        return res;
+    }
+
+    msg->rpc_in_attrs = NULL;
+
+    /* create a dummy method XML node */
+    xml_init_node(&method);
+    method.nodetyp = XML_NT_START;
+    method.nsid = xmlns_nc_id();
+    method.module = NC_MODULE;
+
+    method.qname = xml_strdup(NCX_EL_LOAD_CONFIG);
+    if (method.qname == NULL) {
+        rpc_free_msg(msg);
+        agt_ses_free_dummy_session(scb);
+        return ERR_INTERNAL_MEM;
+    }
+        
+    method.elname = NCX_EL_LOAD_CONFIG;
+    method.depth = 1;
+
+    msg->rpc_method = rpcobj;
+    msg->rpc_user1 = cfg;
+    msg->rpc_err_option = OP_ERROP_CONTINUE;
+    if (isload) {
+        msg->rpc_top_editop = OP_EDITOP_LOAD;
+    } else {
+        msg->rpc_top_editop = OP_EDITOP_REPLACE;
+    }
+
+    res = NO_ERR;
+    valdone = FALSE;
+
+    /* parse the config file as a root object */
+    if (res == NO_ERR) {
+        res = parse_rpc_input(scb, msg, rpcobj, &method);
+        if (res != NO_ERR) {
+            retres = res;
+        }
+        if (!(NEED_EXIT(res) || res==ERR_XML_READER_EOF)) {
+            /* keep going if there were errors in the input
+             * in case more errors can be found or 
+             * continue-on-error is in use
+             * Each value node has a status field (val->res)
+             * which will retain the error status 
+             */
+            res = post_psd_state(scb, msg, res);
+            if (res != NO_ERR) {
+                retres = res;
+            }
+        }
+    }
+
+    /* call all the object validate callbacks
+     * but only if there were no parse errors so far
+     */
+    if (res == NO_ERR && cbset->acb[AGT_RPC_PH_VALIDATE]) {
+        msg->rpc_agt_state = AGT_RPC_PH_VALIDATE;
+        res = (*cbset->acb[AGT_RPC_PH_VALIDATE])(scb, msg, &method);
+        if (res != NO_ERR) {
+            retres = res;
+        }
+        valdone = TRUE;
+    }
+
+    /* get rid of the error nodes after the validation and instance
+     * checks are done; must checks and unique checks should also
+     * be done by now,
+     * Also set the canonical order for the root node
+     */
+    if (res == NO_ERR) {
+        testval = val_find_child(msg->rpc_input, NULL, NCX_EL_CONFIG);
+        if (testval) {
+            val_purge_errors_from_root(testval);
+            /* val_set_canonical_order(testval); */
+
+            if (justval) {
+                /* remove this node and return it */
+                val_remove_child(testval);
+                *configval = testval;
+            }
+        }
+    }
+
+    /* call all the object invoke callbacks, only callbacks for valid
+     * subtrees will be called; skip if valonly mode
+     */
+    if (res == NO_ERR &&
+        !justval &&
+        valdone && 
+        cbset->acb[AGT_RPC_PH_INVOKE]) {
+        msg->rpc_agt_state = AGT_RPC_PH_INVOKE;
+        res = (*cbset->acb[AGT_RPC_PH_INVOKE])(scb, msg, &method);
+        if (res != NO_ERR) {
+            /*** DO NOT ROLLBACK, JUST CONTINUE !!!! ***/
+            retres = res;
+        }
+    }
+
+#ifdef AGT_RPC_DEBUG
+    if (LOGDEBUG) {
+        if (!dlq_empty(&msg->mhdr.errQ)) {
+            rpc_err_dump_errors(msg);
+        }
+    }
+#endif
+
+    /* move any error messages to the config error Q */
+    dlq_block_enque(&msg->mhdr.errQ, errorQ);
+
+    /* cleanup and exit */
+    xml_clean_node(&method);
+    rpc_free_msg(msg);
+    agt_ses_free_dummy_session(scb);
+
+    return retres;
+
+} /* load_config_file */
+
+
 /************** E X T E R N A L   F U N C T I O N S  ***************/
 
 /********************************************************************
@@ -1503,14 +1717,7 @@ status_t
                               boolean isload,
                               ses_id_t  use_sid)
 {
-    ses_cb_t        *scb;
-    rpc_msg_t       *msg;
-    obj_template_t  *rpcobj;
-    agt_rpc_cbset_t *cbset;
-    val_value_t     *testval;
-    xml_node_t       method;
-    status_t         res, retres;
-    boolean          valdone;
+    status_t         res;
 
 #ifdef DEBUG
     if (!filespec || !cfg) {
@@ -1518,163 +1725,80 @@ status_t
     }
 #endif
 
-    retres = NO_ERR;
+    res = load_config_file(filespec,
+                           cfg,
+                           isload,
+                           use_sid,
+                           FALSE,
+                           NULL,
+                           &cfg->load_errQ);
 
-    /* first make sure the load-config RPC is registered */
-    rpcobj = find_rpc(NC_MODULE, NCX_EL_LOAD_CONFIG);
-    if (!rpcobj) {
-        return SET_ERROR(ERR_INTERNAL_VAL);
-    }
+    return res;
 
-    /* make sure the agent callback set for this RPC is ok */
-    cbset = (agt_rpc_cbset_t *)rpcobj->cbset;
-    if (!cbset) {
-        return SET_ERROR(ERR_INTERNAL_VAL);
-    }
+} /* agt_rpc_load_config_file */
 
-    /* create a dummy session control block */
-    scb = agt_ses_new_dummy_session();
-    if (!scb) {
-        return ERR_INTERNAL_MEM;
-    }
 
-    /* set the ACM profile to use for rollback */
-    res = agt_ses_set_dummy_session_acm(scb, use_sid);
-    if (res != NO_ERR) {
-        agt_ses_free_dummy_session(scb);        
-        return res;
-    }
+/********************************************************************
+* FUNCTION agt_rpc_get_config_file
+*
+* Dispatch an internal <load-config> request
+* except skip the INVOKE phase and just remove
+* the 'config' node from the input and return it
+*
+*    - Create a dummy session and RPC message
+*    - Call a special agt_ps_parse function to parse the config file
+*    - Call the special agt_ncx function to invoke the proper 
+*      parmset and application 'validate' callback functions, and 
+*      record all the error/warning messages
+*    - return the <config> element if no errors
+*    - otherwise return all the error messages in a Q
+*
+* INPUTS:
+*   filespec == XML config filespec to get
+*   targetcfg == target database to validate against
+*   use_sid == session ID to use for the access control
+*   errorQ == address of return queue of rpc_err_rec_t structs
+*   res == address of return status
+*
+* OUTPUTS:
+*   if any errors, the error structs are transferred to
+*   the errorQ (if it is non-NULL).  In this case, the caller
+*   must free these data structures with ncx/rpc_err_clean_errQ
+* 
+*   *res == return status
+*
+* RETURNS:
+*   malloced and filled in struct representing a <config> element
+*   NULL if some error, check errorQ and *res
+*********************************************************************/
+val_value_t *
+    agt_rpc_get_config_file (const xmlChar *filespec,
+                             cfg_template_t *targetcfg,
+                             ses_id_t  use_sid,
+                             dlq_hdr_t *errorQ,
+                             status_t *res)
+{
+    val_value_t  *retval;
 
-    /* create a dummy RPC msg */
-    msg = rpc_new_msg();
-    if (!msg) {
-        agt_ses_free_dummy_session(scb);
-        return ERR_INTERNAL_MEM;
-    }
-
-    /* setup the config file as the xmlTextReader input */
-    res = xml_get_reader_from_filespec((const char *)filespec, 
-                                       &scb->reader);
-    if (res != NO_ERR) {
-        rpc_free_msg(msg);
-        agt_ses_free_dummy_session(scb);
-        return res;
-    }
-
-    msg->rpc_in_attrs = NULL;
-
-    /* create a dummy method XML node */
-    xml_init_node(&method);
-    method.nodetyp = XML_NT_START;
-    method.nsid = xmlns_nc_id();
-    method.module = NC_MODULE;
-
-    method.qname = xml_strdup(NCX_EL_LOAD_CONFIG);
-    if (method.qname == NULL) {
-        rpc_free_msg(msg);
-        agt_ses_free_dummy_session(scb);
-        return ERR_INTERNAL_MEM;
-    }
-        
-    method.elname = NCX_EL_LOAD_CONFIG;
-    method.depth = 1;
-
-    msg->rpc_method = rpcobj;
-    msg->rpc_user1 = cfg;
-    msg->rpc_err_option = OP_ERROP_CONTINUE;
-    if (isload) {
-        msg->rpc_top_editop = OP_EDITOP_LOAD;
-    } else {
-        msg->rpc_top_editop = OP_EDITOP_REPLACE;
-    }
-
-    res = NO_ERR;
-    valdone = FALSE;
-
-    /* parse the config file as a root object */
-    if (res == NO_ERR) {
-        res = parse_rpc_input(scb, msg, rpcobj, &method);
-        if (res != NO_ERR) {
-            retres = res;
-        }
-        if (!(NEED_EXIT(res) || res==ERR_XML_READER_EOF)) {
-            /* keep going if there were errors in the input
-             * in case more errors can be found or 
-             * continue-on-error is in use
-             * Each value node has a status field (val->res)
-             * which will retain the error status 
-             */
-            res = post_psd_state(scb, msg, res);
-            if (res != NO_ERR) {
-                retres = res;
-            }
-        }
-    }
-
-    /*** !!!  SHOULD ERRORS BE PURGED FOR ALL RPCs EXCEPT 
-     *** !!! load-config, validate, edit-config, get, get-config
-     *** !!!
-     *** !!! ALL VALIDATE FUNCTIONS MUST CHECK THE val->res FIELD
-     *** !!! IN THE VALIDATE CALLBACK FUNCTIONS BEFORE USING val
-     ***/
-
-    /* call all the object validate callbacks */
-    if (res == NO_ERR && cbset->acb[AGT_RPC_PH_VALIDATE]) {
-        msg->rpc_agt_state = AGT_RPC_PH_VALIDATE;
-        res = (*cbset->acb[AGT_RPC_PH_VALIDATE])(scb, msg, &method);
-        if (res != NO_ERR) {
-            retres = res;
-        }
-        valdone = TRUE;
-    }
-
-    /* get rid of the error nodes after the validation and instance
-     * checks are done; must checks and unique checks should also
-     * be done by now,
-     * Also set the canonical order for the root node
-     */
-    if (res == NO_ERR) {
-        testval = val_find_child(msg->rpc_input, NULL, NCX_EL_CONFIG);
-        if (testval) {
-            val_purge_errors_from_root(testval);
-            /* val_set_canonical_order(testval); */
-        }
-    }
-
-    /* call all the object invoke callbacks, only callbacks for valid
-     * subtrees will be called 
-     * !!! NEED TO MAKE SURE NO MEMORY LEAKS FROM THIS
-     */
-    if (res == NO_ERR &&
-        valdone && 
-        cbset->acb[AGT_RPC_PH_INVOKE]) {
-        msg->rpc_agt_state = AGT_RPC_PH_INVOKE;
-        res = (*cbset->acb[AGT_RPC_PH_INVOKE])(scb, msg, &method);
-        if (res != NO_ERR) {
-            /*** DO NOT ROLLBACK, JUST CONTINUE !!!! ***/
-            retres = res;
-        }
-    }
-
-#ifdef AGT_RPC_DEBUG
-    if (LOGDEBUG) {
-        if (!dlq_empty(&msg->mhdr.errQ)) {
-            rpc_err_dump_errors(msg);
-        }
+#ifdef DEBUG
+    if (!filespec || !errorQ) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
     }
 #endif
 
-    /* move any error messages to the config error Q */
-    dlq_block_enque(&msg->mhdr.errQ, &cfg->load_errQ);
+    retval = NULL;
+    *res = load_config_file(filespec,
+                            targetcfg,
+                            FALSE,
+                            use_sid,
+                            TRUE,
+                            &retval,
+                            errorQ);
 
-    /* cleanup and exit */
-    xml_clean_node(&method);
-    rpc_free_msg(msg);
-    agt_ses_free_dummy_session(scb);
+    return retval;
 
-    return retres;
-
-} /* agt_rpc_load_config_file */
+} /* agt_rpc_get_config_file */
 
 
 /********************************************************************
@@ -1790,6 +1914,9 @@ status_t
     return retres;
 
 }  /* agt_rpc_fill_rpc_error */
+
+
+
 
 
 /* END file agt_rpc.c */

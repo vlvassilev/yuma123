@@ -246,8 +246,13 @@ date	     init     comment
 #define NCX_YUMA_HOME_STARTUP_FILE  (const xmlChar *)\
     "$YUMA_HOME/data/startup-cfg.xml"
 
+#define NCX_YUMA_HOME_STARTUP_DIR  (const xmlChar *)\
+    "$YUMA_HOME/data/"
+
 #define NCX_DOT_YUMA_STARTUP_FILE  (const xmlChar *)\
     "~/.yuma/startup-cfg.xml"
+
+#define NCX_DOT_YUMA_STARTUP_DIR  (const xmlChar *)"~/.yuma/"
 
 #define NCX_YUMA_INSTALL_STARTUP_FILE  (const xmlChar *)\
     "$YUMA_INSTALL/data/startup-cfg.xml"
@@ -642,6 +647,7 @@ date	     init     comment
 #define NCX_EL_WITH_DEFAULTS   (const xmlChar *)"with-defaults"
 #define NCX_EL_WITH_METADATA   (const xmlChar *)"with-metadata"
 #define NCX_EL_WITH_STARTUP    (const xmlChar *)"with-startup"
+#define NCX_EL_WITH_URL        (const xmlChar *)"with-url"
 #define NCX_EL_WITH_VALIDATE   (const xmlChar *)"with-validate"
 #define NCX_EL_XCONTAINER      (const xmlChar *)"xcontainer"
 #define NCX_EL_XLIST           (const xmlChar *)"xlist"

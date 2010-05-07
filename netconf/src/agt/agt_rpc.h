@@ -279,6 +279,47 @@ extern status_t
 
 
 /********************************************************************
+* FUNCTION agt_rpc_get_config_file
+*
+* Dispatch an internal <load-config> request
+* except skip the INVOKE phase and just remove
+* the 'config' node from the input and return it
+*
+*    - Create a dummy session and RPC message
+*    - Call a special agt_ps_parse function to parse the config file
+*    - Call the special agt_ncx function to invoke the proper 
+*      parmset and application 'validate' callback functions, and 
+*      record all the error/warning messages
+*    - return the <config> element if no errors
+*    - otherwise return all the error messages in a Q
+*
+* INPUTS:
+*   filespec == XML config filespec to get
+*   targetcfg == target database to validate against
+*   use_sid == session ID to use for the access control
+*   errorQ == address of return queue of rpc_err_rec_t structs
+*   res == address of return status
+*
+* OUTPUTS:
+*   if any errors, the error structs are transferred to
+*   the errorQ (if it is non-NULL).  In this case, the caller
+*   must free these data structures with ncx/rpc_err_clean_errQ
+* 
+*   *res == return status
+*
+* RETURNS:
+*   malloced and filled in struct representing a <config> element
+*   NULL if some error, check errorQ and *res
+*********************************************************************/
+extern val_value_t *
+    agt_rpc_get_config_file (const xmlChar *filespec,
+                             cfg_template_t *targetcfg,
+                             ses_id_t  use_sid,
+                             dlq_hdr_t *errorQ,
+                             status_t *res);
+
+
+/********************************************************************
 * FUNCTION agt_rpc_fill_rpc_error
 *
 * Fill one <rpc-error> like element using the specified

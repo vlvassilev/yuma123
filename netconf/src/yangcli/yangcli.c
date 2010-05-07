@@ -3572,13 +3572,17 @@ static void
         runcommand = NULL;
     }
 
+    /* Cleanup the Netconf Server Library */
+    mgr_cleanup();
+
+    /* free this after the mgr_cleanup in case any session is active
+     * and needs to be cleaned up before this main temp_progcb is freed
+     */
     if (temp_progcb) {
         ncxmod_free_program_tempdir(temp_progcb);
         temp_progcb = NULL;
     }
 
-    /* Cleanup the Netconf Server Library */
-    mgr_cleanup();
 
     /* cleanup the NCX engine and registries */
     ncx_cleanup();

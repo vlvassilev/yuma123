@@ -240,15 +240,15 @@ status_t
         }
     }
 
-#ifdef NOT_YET
     /* set the url capability */
     if (res == NO_ERR) {
-        res = cap_add_url(newmycaps, (const xmlChar *)"file,sftp");
-        if (res == NO_ERR) {
-            ; /***/
+        if (agt_profile->agt_useurl) {
+            res = cap_add_url(newmycaps, AGT_URL_SCHEME_LIST);
+            if (res == NO_ERR) {
+                res = cap_add_urlval(newcaps, AGT_URL_SCHEME_LIST);
+            }
         }
     }
-#endif
 
     /* set the xpath capability */
     if (res == NO_ERR) {

@@ -87,6 +87,10 @@ date         init     comment
 #include  "ncx.h"
 #endif
 
+#ifndef _H_ncxmod
+#include  "ncxmod.h"
+#endif
+
 #ifndef _H_ncx_feature
 #include  "ncx_feature.h"
 #endif
@@ -280,6 +284,7 @@ status_t
                            xml_node_t *methnode,
                            cfg_template_t  **retcfg)
 {
+    agt_profile_t     *profile;
     cfg_template_t    *cfg;
     val_value_t       *val;
     val_value_t       *errval;
@@ -331,7 +336,11 @@ status_t
         if (val) {
             switch (val->btyp) {
             case NCX_BT_STRING:
-                cfgname = VAL_STR(val);
+                if (!xml_strcmp(val->name, NCX_EL_URL)) {
+                    return ERR_NCX_FOUND_URL;
+                } else {
+                    cfgname = VAL_STR(val);
+                }
                 break;
             case NCX_BT_EMPTY:
                 cfgname = val->name;
@@ -339,7 +348,7 @@ status_t
             case NCX_BT_CONTAINER:
                 if (!xml_strcmp(parmname, NCX_EL_SOURCE) &&
                     !xml_strcmp(val->name, NCX_EL_CONFIG)) {
-                    return ERR_NCX_SKIPPED;
+                    return ERR_NCX_FOUND_INLINE;
                 } else {
                     res = ERR_NCX_INVALID_VALUE;
                 }
@@ -354,12 +363,22 @@ status_t
     }
 
     if (cfgname != NULL && res == NO_ERR) {
-        /* get the config template from the config name */
-        cfg = cfg_get_config(cfgname);
-        if (!cfg) {
-            res = ERR_NCX_CFG_NOT_FOUND;
+        /* check if the <url> param was given */
+        if (!xml_strcmp(cfgname, NCX_EL_URL)) {
+            profile = agt_get_profile();
+            if (profile->agt_useurl) {
+                return ERR_NCX_FOUND_URL;
+            } else {
+                res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+            }
         } else {
-            *retcfg = cfg;
+            /* get the config template from the config name */
+            cfg = cfg_get_config(cfgname);
+            if (!cfg) {
+                res = ERR_NCX_CFG_NOT_FOUND;
+            } else {
+                *retcfg = cfg;
+            }
         }
     }
 
@@ -477,6 +496,200 @@ status_t
     return res;
 
 } /* agt_get_inline_cfg_from_parm */
+
+
+/********************************************************************
+* FUNCTION agt_get_url_from_parm
+*
+* Get the URL string for the config in the target param
+*
+* INPUTS:
+*    parmname == parameter to get from (e.g., target)
+*    msg == incoming rpc_msg_t in progress
+*    methnode == XML node for RPC method (for errors)
+*    returl == address of return URL string pointer
+* 
+* OUTPUTS:
+*   *returl is set to the address of the URL string
+*   pointing to the memory inside the found parameter
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t 
+    agt_get_url_from_parm (const xmlChar *parmname,
+                           rpc_msg_t *msg,
+                           xml_node_t *methnode,
+                           const xmlChar **returl)
+{
+    agt_profile_t     *profile;
+    val_value_t       *val;
+    val_value_t       *errval;
+    status_t           res;
+
+#ifdef DEBUG
+    if (!parmname || !msg || !methnode || !returl) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    val = val_find_child(msg->rpc_input, 
+                         val_get_mod_name(msg->rpc_input), 
+                         parmname);
+    if (!val || val->res != NO_ERR) {
+        if (!val) {
+            res = ERR_NCX_MISSING_PARM;
+        } else {
+            res = val->res;
+        }
+        agt_record_error(NULL, 
+                         &msg->mhdr, 
+                         NCX_LAYER_OPERATION,
+                         res, 
+                         methnode, 
+                         NCX_NT_NONE, 
+                         NULL, 
+                         NCX_NT_VAL, 
+                         msg->rpc_input);
+        return res;
+    }
+
+    errval = val;
+    res = NO_ERR;
+    
+    /* got some value in *val */
+    switch (val->btyp) {
+    case NCX_BT_STRING:
+        if (xml_strcmp(parmname, NCX_EL_URL)) {
+            res = ERR_NCX_INVALID_VALUE;
+        } else {
+            *returl = VAL_STR(val);
+        }
+        break;
+    case NCX_BT_EMPTY:
+        res = ERR_NCX_INVALID_VALUE;
+        break;
+    case NCX_BT_CONTAINER:
+        val = val_get_first_child(val);
+        if (val) {
+            errval = val;
+            switch (val->btyp) {
+            case NCX_BT_STRING:
+                if (xml_strcmp(val->name, NCX_EL_URL)) {
+                    res = ERR_NCX_INVALID_VALUE;                    
+                } else {
+                    *returl = VAL_STRING(val);
+                }
+                break;
+            case NCX_BT_EMPTY:
+                res = ERR_NCX_INVALID_VALUE;
+                break;
+            case NCX_BT_CONTAINER:
+                res = ERR_NCX_INVALID_VALUE;
+                break;
+            default:
+                res = SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }           
+        break;
+    default:
+        res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+    }
+
+    if (res == NO_ERR) {
+        /* check if the <url> param was given */
+        profile = agt_get_profile();
+        if (!profile->agt_useurl) {
+            res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+            *returl = NULL;
+        }
+    }
+
+    if (res != NO_ERR) {
+        agt_record_error(NULL, 
+                         &msg->mhdr, 
+                         NCX_LAYER_OPERATION,
+                         res, 
+                         methnode,
+                         NCX_NT_NONE,
+                         NULL,
+                         NCX_NT_VAL, 
+                         errval);
+    }
+
+    return res;
+
+} /* agt_get_url_from_parm */
+
+
+/********************************************************************
+* FUNCTION agt_get_filespec_from_url
+*
+* Check the URL and get the filespec part out of it
+*
+* INPUTS:
+*    urlstr == URL to check
+*    res == address of return status
+* 
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*    malloced URL string; must be freed by caller!!
+*    NULL if some error
+*********************************************************************/
+xmlChar *
+    agt_get_filespec_from_url (const xmlChar *urlstr,
+                               status_t *res)
+{
+    const xmlChar *str;
+    xmlChar       *retstr;
+    uint32         schemelen, urlstrlen;
+
+#ifdef DEBUG
+    if (urlstr == NULL || res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    schemelen = xml_strlen(AGT_FILE_SCHEME);
+    urlstrlen = xml_strlen(urlstr);
+
+    if (urlstrlen <= (schemelen+1)) {
+        *res = ERR_NCX_INVALID_VALUE;
+        return NULL;
+    }
+        
+    /* only the file scheme file:///foospec is supported at this time */
+    if (xml_strncmp(urlstr, AGT_FILE_SCHEME, schemelen)) {
+        *res = ERR_NCX_INVALID_VALUE;
+        return NULL;
+    }
+
+    /* convert URL to a regular string */
+    /****/
+
+    /* check for whitespace and other chars */
+    str = &urlstr[schemelen];
+    while (*str) {
+        if (xml_isspace(*str) || *str==';' || *str==NCXMOD_PSCHAR) {
+            *res = ERR_NCX_INVALID_VALUE;
+            return NULL;
+        }
+        str++;
+    }
+
+    retstr = xml_strdup(&urlstr[schemelen]);
+    if (retstr == NULL) {
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+
+    *res = NO_ERR;
+    return retstr;
+
+}  /* agt_get_filespec_from_url */
 
 
 /********************************************************************
@@ -2015,6 +2228,177 @@ xpath_pcb_t *
     
 }  /* agt_new_xpath_pcb */
 
+
+/********************************************************************
+* FUNCTION agt_get_startup_filespec
+*
+* Figure out where to store the startup file
+*
+* INPUTS:
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+
+* RETURNS:
+*   malloced and filled in filespec string; must be freed by caller
+*   NULL if malloc error
+*********************************************************************/
+xmlChar *
+    agt_get_startup_filespec (status_t *res)
+{
+    cfg_template_t    *startup, *running;    
+    const xmlChar     *yumahome;
+    xmlChar           *filename;
+
+#ifdef DEBUG
+    if (res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    *res = NO_ERR;
+
+    running = cfg_get_config_id(NCX_CFGID_RUNNING);
+    if (running == NULL) {
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+
+    startup = cfg_get_config_id(NCX_CFGID_STARTUP);
+
+    yumahome = ncxmod_get_yuma_home();
+
+    /* get the right filespec to use
+     *
+     * 1) use the startup filespec
+     * 2) use the running filespec
+     * 3) use $YUMA_HOME/data/startup-cfg.xml
+     * 4) use $HOME/.yuma/startup-cfg.xml
+     */
+    if (startup && startup->src_url) {
+        filename = xml_strdup(startup->src_url);
+        if (filename == NULL) {
+            *res = ERR_INTERNAL_MEM;
+        }
+    } else if (running && running->src_url) {
+        filename = xml_strdup(running->src_url);
+        if (filename == NULL) {
+            *res = ERR_INTERNAL_MEM;
+        }
+    } else if (yumahome != NULL) {
+        filename = ncx_get_source(NCX_YUMA_HOME_STARTUP_FILE, res);
+    } else {
+        filename = ncx_get_source(NCX_DOT_YUMA_STARTUP_FILE, res);
+    }
+
+    return filename;
+
+}  /* agt_get_startup_filespec */
+
+
+/********************************************************************
+* FUNCTION agt_get_target_filespec
+*
+* Figure out where to store the URL target file
+*
+* INPUTS:
+*   target_url == target url spec to use; this is
+*                 treated as a relative pathspec, and
+*                 the appropriate data directory is used
+*                 to create this file
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced and filled in filespec string; must be freed by caller
+*   NULL if some error
+*********************************************************************/
+xmlChar *
+    agt_get_target_filespec (const xmlChar *target_url,
+                             status_t *res)
+{
+    cfg_template_t    *startup, *running;    
+    const xmlChar     *yumahome;
+    xmlChar           *filename, *tempbuff, *str;
+    uint32             len;
+
+#ifdef DEBUG
+    if (target_url == NULL || res == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    *res = NO_ERR;
+    filename = NULL;
+    tempbuff = NULL;
+
+    running = cfg_get_config_id(NCX_CFGID_RUNNING);
+    if (running == NULL) {
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+
+    startup = cfg_get_config_id(NCX_CFGID_STARTUP);
+
+    yumahome = ncxmod_get_yuma_home();
+
+    /* get the right filespec to use
+     *
+     * 1) use the startup filespec
+     * 2) use the running filespec
+     * 3) use $YUMA_HOME/data/startup-cfg.xml
+     * 4) use $HOME/.yuma/startup-cfg.xml
+     */
+    if (startup && startup->src_url) {
+        len = ncxmod_get_pathlen_from_filespec(startup->src_url);
+        filename = m__getMem(len + xml_strlen(target_url) + 1);
+        if (filename == NULL) {
+            *res = ERR_INTERNAL_MEM;
+        } else {
+            str = filename;
+            str += xml_strncpy(str, startup->src_url, len);
+            xml_strcpy(str, target_url);
+        }
+    } else if (running && running->src_url) {
+        len = ncxmod_get_pathlen_from_filespec(running->src_url);
+        filename = m__getMem(len + xml_strlen(target_url) + 1);
+        if (filename == NULL) {
+            *res = ERR_INTERNAL_MEM;
+        } else {
+            str = filename;
+            str += xml_strncpy(str, running->src_url, len);
+            xml_strcpy(str, target_url);
+        }
+    } else if (yumahome != NULL) {
+        len = xml_strlen(NCX_YUMA_HOME_STARTUP_DIR);
+        tempbuff = m__getMem(len + xml_strlen(target_url) + 1);
+        if (tempbuff == NULL) {
+            *res = ERR_INTERNAL_MEM;
+        } else {
+            filename = ncx_get_source(tempbuff, res);
+        }
+    } else {
+        len = xml_strlen(NCX_DOT_YUMA_STARTUP_DIR);
+        tempbuff = m__getMem(len + xml_strlen(target_url) + 1);
+        if (tempbuff == NULL) {
+            *res = ERR_INTERNAL_MEM;
+        } else {
+            filename = ncx_get_source(tempbuff, res);
+        }
+    }
+
+    if (tempbuff != NULL) {
+        m__free(tempbuff);
+    }
+
+    return filename;
+
+}  /* agt_get_target_filespec */
 
 
 /* END file agt_util.c */

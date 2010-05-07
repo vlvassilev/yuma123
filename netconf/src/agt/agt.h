@@ -145,9 +145,13 @@ date	     init     comment
 
 #define AGT_MAX_PORTS  4
 
-#define AGT_DEF_CONF_FILE (const xmlChar *)"/etc/yuma/netconfd.conf"
+#define AGT_DEF_CONF_FILE   (const xmlChar *)"/etc/yuma/netconfd.conf"
 
-#define AGT_USER_VAR      (const xmlChar *)"user"
+#define AGT_USER_VAR        (const xmlChar *)"user"
+
+#define AGT_URL_SCHEME_LIST (const xmlChar *)"file"
+
+#define AGT_FILE_SCHEME     (const xmlChar *)"file:///"
 
 
 /********************************************************************
@@ -205,7 +209,8 @@ typedef struct agt_profile_t_ {
     uint32              agt_idle_timeout;
     uint32              agt_linesize;
     int32               agt_indent;
-    boolean             agt_usevalidate;
+    boolean             agt_usevalidate;          /* --with-validate */
+    boolean             agt_useurl;                    /* --with-url */
     ncx_withdefaults_t  agt_defaultStyleEnum;
     agt_acmode_t        agt_accesscontrol_enum;
     uint16              agt_ports[AGT_MAX_PORTS];

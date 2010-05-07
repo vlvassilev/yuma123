@@ -272,6 +272,15 @@ module netconfd {
         default candidate;
       }
 
+      leaf usexmlorder {
+        description
+          "If present, then XML element order will be enforced.
+           Otherwise, XML element order errors will not be
+           generated if possible. Default is no enforcement of
+           strict XML order.";
+        type empty;
+      }
+
       leaf with-startup {
         description
           "If set to 'true', then the :startup capability will be 
@@ -283,6 +292,18 @@ module netconfd {
         default false;
       }
 
+      leaf with-url {
+        description
+          "If set to 'true', then the :url capability will be 
+           enabled. Otherwise, the :url capability
+           will not be enabled.  This capability requires a
+           file system and may introduce security risks
+           because internal files such as startup-cfg.xml
+           and backup-cfg.xml will be exposed.";
+        type boolean;
+        default true;
+      }
+
       leaf with-validate {
         description
           "If set to 'true', then the :validate capability will be 
@@ -292,16 +313,5 @@ module netconfd {
         type boolean;
         default true;
       }
-
-      leaf usexmlorder {
-        description
-          "If present, then XML element order will be enforced.
-           Otherwise, XML element order errors will not be
-           generated if possible. Default is no enforcement of
-           strict XML order.";
-        type empty;
-      }
-
     }
-
 }

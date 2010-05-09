@@ -465,7 +465,8 @@ static status_t
             }
 
             if (total + pathlen + modlen >= bufflen) {
-                log_info("\nncxmod: Filename too long error. Max: %d Got %u",
+                log_info("\nncxmod: Filename too long "
+                         "error. Max: %d Got %u",
                          bufflen,
                          total + pathlen + modlen);
                 return ERR_BUFF_OVFL;
@@ -804,11 +805,12 @@ static boolean
 }  /* test_pathlist_make */
 
 
+
 /********************************************************************
-* FUNCTION search_subdirs
+* FUNCTION check_module_in_dir
 *
-* Search any subdirs for the specified filename,
-* starting at the specified location,
+* Check the directory specified in the buffer
+* for any possible for of a YANG/YIN module
 *
 * INPUTS:
 *    buff == buffer to use for filespec construction
@@ -817,12 +819,114 @@ static boolean
 *            as the subdirs are searched, until the 'fname' file
 *            is found or an error occurs
 *    bufflen == size of buff in bytes
-*    fname == filename (with extension) to find
-*    matchmode == TRUE if searching for a partial filename match
-*              == FALSE for full filename match 
-*   isyang == TRUE for YANG format
-*             FALSE for YIN format
-*    done == address of recurse done flag
+*    pathlen == current end of buffer in use marker
+*    modname == module name
+*    revision == module revision string
+*    done == address of return search done flag
+*
+* OUTPUTS:
+*   *done == TRUE if done processing
+*            FALSE to keep going
+* RETURNS:
+*    NO_ERR if file found okay, full filespec in the 'buff' variable
+*    OR some error if not found or buffer overflow
+*********************************************************************/
+static status_t
+    check_module_in_dir (xmlChar *buff, 
+                         uint32 bufflen,
+                         uint32 pathlen,
+                         const xmlChar *modname,
+                         const xmlChar *revision,
+                         boolean *done)
+{
+    struct stat    statbuf;
+    uint32         buffleft;
+    int            ret;
+    status_t       res;
+
+    /* init locals and return done flag */
+    *done = FALSE;
+    res = NO_ERR;
+
+    buffleft = bufflen - pathlen;
+
+    /* try YANG first */
+    res = yang_copy_filename(modname,
+                             revision,
+                             &buff[pathlen],
+                             buffleft,
+                             TRUE);
+    if (res != NO_ERR) {
+        return res;
+    }
+    ret = stat((const char *)buff, &statbuf);
+    if (ret == 0) {
+        *done = TRUE;
+        if (S_ISREG(statbuf.st_mode)) {
+            return NO_ERR;
+        } else {
+            return ERR_FIL_BAD_FILENAME;
+        }
+    }
+
+    /* make sure the path buffer is restored */
+    buff[pathlen] = 0;
+
+    /* try YIN next */
+    res = yang_copy_filename(modname,
+                             revision,
+                             &buff[pathlen],
+                             buffleft,
+                             FALSE);
+    if (res != NO_ERR) {
+        return res;
+    }
+    ret = stat((const char *)buff, &statbuf);
+    if (ret == 0) {
+        *done = TRUE;
+        if (S_ISREG(statbuf.st_mode)) {
+            return NO_ERR;
+        } else {
+            return ERR_FIL_BAD_FILENAME;
+        }
+    }
+
+    /* not done searching yet */
+    buff[pathlen] = 0;
+    return NO_ERR;
+
+}  /* check_module_in_dir */
+
+
+/********************************************************************
+* FUNCTION search_subdirs
+*
+* Search any subdirs for the specified module name,
+* with optional revision, starting at the specified location,
+*
+* Modules will be searched as follows:
+* if revision == NULL
+*    1) modname.yang
+*    2) modname.yin
+*    3) modname@<??>.yang
+*    4) modname@<??>.yin
+*
+* if revision != NULL
+*    1) modname.yang
+*    2) modname.yin
+*    3) modname@revision.yang
+*    4) modname@revision.yin
+*
+* INPUTS:
+*    buff == buffer to use for filespec construction
+*            at the start it contains the path string to use;
+*            new directory names will be added to this buffer
+*            as the subdirs are searched, until the 'fname' file
+*            is found or an error occurs
+*    bufflen == size of buff in bytes
+*    modname == module name
+*    revision == module revision string
+*    done == address of return search done flag
 *
 * OUTPUTS:
 *   *done == TRUE if done processing
@@ -834,26 +938,29 @@ static boolean
 static status_t
     search_subdirs (xmlChar *buff, 
                     uint32 bufflen,
-                    const xmlChar *fname,
-                    boolean matchmode,
-                    boolean isyang,
+                    const xmlChar *modname,
+                    const xmlChar *revision,
                     boolean *done)
 {
     DIR           *dp;
     struct dirent *ep;
-    struct stat    statbuf;
-    uint32         pathlen, fnamelen, dentlen;
-    int            ret;
+    uint32         pathlen, modnamelen, revisionlen, dentlen;
     boolean        dirdone;
     status_t       res;
 
+    /* init locals and return done flag */
     *done = FALSE;
     pathlen = xml_strlen(buff);
-    fnamelen = xml_strlen(fname);
-
+    modnamelen = xml_strlen(modname);
+    if (revision != NULL) {
+        revisionlen = xml_strlen(revision);
+    } else {
+        revisionlen = 0;
+    }
     res = NO_ERR;
 
-    if (pathlen+fnamelen+2 >= bufflen) {
+    /* check minimal buffer space exists to even start */
+    if (pathlen + modnamelen + revisionlen + 2 >= bufflen) {
         *done = TRUE;
         return ERR_BUFF_OVFL;
     } 
@@ -864,35 +971,14 @@ static status_t
         buff[pathlen] = 0;
     }
 
-    /* first see if the requested file is in this directory
-     * do not use the dirent loop because the recursive
-     * algorithm could result in a file at a lower level
-     * in the subtree matching, instead of a file higher up
-     * in the tree
-     *
-     * This will happen anyway if matchmode == TRUE
-     */
-    if (matchmode) {
-        buff[pathlen] = 0;
-    } else {
-        /* try to open the full filespec in this directory
-         * do not bother if this is matchmode, since the
-         * filename is intentionally truncated, and might
-         * match something unrelated by mistake
-         */
-        xml_strcpy(&buff[pathlen], fname);
-        ret = stat((const char *)buff, &statbuf);
-        if (ret == 0) {
-            *done = TRUE;
-            if (S_ISREG(statbuf.st_mode)) {
-                res = NO_ERR;
-            } else {
-                res = ERR_FIL_BAD_FILENAME;
-            }
-            return res;        
-        } else {
-            buff[pathlen] = 0;
-        }
+    res = check_module_in_dir(buff, 
+                              bufflen,
+                              pathlen,
+                              modname,
+                              revision,
+                              done);
+    if (*done || res != NO_ERR) {
+        return res;
     }
 
     /* try to open the buffer spec as a directory */
@@ -931,42 +1017,61 @@ static status_t
                     *done = TRUE;
                     dirdone = TRUE;
                 } else {
-                    xml_strcpy(&buff[pathlen], (const xmlChar *)ep->d_name);
+                    xml_strcpy(&buff[pathlen], 
+                               (const xmlChar *)ep->d_name);
                     res = search_subdirs(buff, 
                                          bufflen, 
-                                         fname, 
-                                         matchmode, 
-                                         isyang,
+                                         modname, 
+                                         revision, 
                                          done);
                     if (*done) {
                         dirdone = TRUE;
                     } else {
-                        /* erase the filename and keep trying */
+                        /* erase the directory name and keep trying */
                         res = NO_ERR;
                         buff[pathlen] = 0;
                     }
                 }
             }
-        } else if (matchmode && (ep->d_type == DT_REG)) {
-            if (!xml_strncmp(fname, 
+        } else if (ep->d_type == DT_REG) {
+            if (!xml_strncmp(modname, 
                              (const xmlChar *)ep->d_name,
-                             fnamelen)) {
+                             modnamelen)) {
                 /* filename is a partial match so check it out
                  * further to see if it is a pattern match;
                  * check if length matches foo@YYYY-MM-DD.yang
                  */
-                if ((dentlen == fnamelen + 16) ||
-                    (dentlen == fnamelen + 15)) {
-                    /* check if the file extension is
-                     * really .yang | .yin
-                     * TBD: validate the date-string format
-                     * even more TBD: search the entire dir
-                     * for the highest valued date string
+                if ((dentlen == modnamelen + 16) ||
+                    (dentlen == modnamelen + 15)) {
+
+                    /* check if the at-sign is 
+                     * present in the filespec 
+                     */
+                    if (ep->d_name[modnamelen] != '@') {
+                        continue;
+                    }
+
+                    /* check if the revision matches, if specified */
+                    if (revision != NULL) {
+                        if (xml_strncmp((const xmlChar *)
+                                        &ep->d_name[modnamelen+1],
+                                        revision, 
+                                        revisionlen)) {
+                            continue;
+                        }
+                    }
+
+                    /* check if the file extension is really
+                     *.yang or .yin
+                     * TBD: search the entire dir for the 
+                     * highest valued date string
+                     * if the revision == NULL
                      */
                     if (!xml_strcmp((const xmlChar *)
-                                    &ep->d_name[fnamelen+12], 
-                                    (isyang) ? 
-                                    YANG_SUFFIX : 
+                                    &ep->d_name[modnamelen+12], 
+                                    YANG_SUFFIX) ||
+                        !xml_strcmp((const xmlChar *)
+                                    &ep->d_name[modnamelen+12], 
                                     YIN_SUFFIX)) {
                         *done = TRUE;
                         if ((pathlen + dentlen) >= bufflen) {
@@ -1330,10 +1435,6 @@ static status_t
 *   ptyp == parser source type
 *   usepath == TRUE if path should be used directly
 *              FALSE if the path should be appended with the 'modules' dir
-*   matchmode == TRUE if partial filename match OK
-*                FALSE for full filename match only
-*   isyang == TRUE for YANG format
-*             FALSE for YIN format
 *   done == address of return done flag
 *
 * OUTPUTS:
@@ -1352,12 +1453,9 @@ static status_t
                        yang_pcb_t *pcb,
                        yang_parsetype_t ptyp,
                        boolean usepath,
-                       boolean matchmode,
-                       boolean isyang,
                        boolean *done)
 {
     const xmlChar  *path2;
-    xmlChar        *fnamebuff;
     uint32          total;
     status_t        res, res2;
 
@@ -1382,34 +1480,21 @@ static status_t
             return res;
         }
 
-        if (matchmode) {
-            fnamebuff = xml_strdup(modname);
-        } else {
-            fnamebuff = yang_make_filename(modname, 
-                                           revision,
-                                           isyang);
-        }
-
-        if (!fnamebuff) {
-            *done = TRUE;
-            return ERR_INTERNAL_MEM;
-        }
-
         /* try YANG or YIN file */
         res = search_subdirs(buff, 
                              bufflen, 
-                             fnamebuff, 
-                             matchmode, 
-                             isyang,
+                             modname,
+                             revision,
                              done);
         if (*done && res == NO_ERR) {
+
             res = try_module(buff, 
                              bufflen, 
                              NULL, 
                              NULL,
                              NULL, 
                              NULL,
-                             (isyang) ? 
+                             yang_fileext_is_yang(buff) ? 
                              NCXMOD_MODE_FILEYANG : 
                              NCXMOD_MODE_FILEYIN,
                              TRUE, 
@@ -1423,8 +1508,7 @@ static status_t
                                   res);
             }
         }
-        m__free(fnamebuff);
-        return (res2 != NO_ERR) ? res2 : res;
+        return (res != NO_ERR) ? res : res2;
     }
 
     /* else subdir searches not allowed
@@ -1436,20 +1520,34 @@ static status_t
                      path2,
                      modname,
                      revision,
-                     (isyang) ? 
-                     NCXMOD_MODE_YANG : 
-                     NCXMOD_MODE_YIN,
+                     NCXMOD_MODE_YANG,
                      FALSE, 
                      done,
                      pcb,
                      ptyp);
+
+    if (!*done && res == NO_ERR) {
+        /* check for YIN file in the current path */
+        res = try_module(buff,
+                         bufflen, 
+                         path,
+                         path2,
+                         modname,
+                         revision,
+                         NCXMOD_MODE_YIN,
+                         FALSE, 
+                         done,
+                         pcb,
+                         ptyp);
+    }
+
     if (*done && res != NO_ERR) {
         res2 = add_failed(modname,
                           revision,
                           pcb,
                           res);
     }
-    return (res2 != NO_ERR) ? res2 : res;
+    return (res != NO_ERR) ? res : res2;
 
 }  /* check_module_path */
 
@@ -1470,10 +1568,6 @@ static status_t
 *   revision == module revision date (may be NULL)
 *   pcb == parser control block in progress
 *   ptyp == parser source type
-*   matchmode == TRUE if partial filename match OK
-*                FALSE for full filename match only
-*   isyang == TRUE for YANG format
-*             FALSE for YIN format
 *   done == address of return done flag
 *
 * OUTPUTS:
@@ -1491,8 +1585,6 @@ static status_t
                            const xmlChar *revision,
                            yang_pcb_t *pcb,
                            yang_parsetype_t ptyp,
-                           boolean matchmode,
-                           boolean isyang,
                            boolean *done)
 {
     const xmlChar  *str, *p;
@@ -1533,8 +1625,6 @@ static status_t
                                 pcb,
                                 ptyp,
                                 TRUE,
-                                matchmode,
-                                isyang,
                                 done);
         if (*done) {
             m__free(pathbuff);
@@ -1576,8 +1666,6 @@ static status_t
 *   revision == optional revision date of 'modname' to find
 *   pcb == parser control block
 *   ptyp == current parser source type
-*   matchmode == TRUE if partial filename match OK
-*                FALSE for full filename match only
 *   retmod == address of return module (may be NULL)
 *
 * OUTPUTS:
@@ -1592,7 +1680,6 @@ static status_t
                  const xmlChar *revision,
                  yang_pcb_t *pcb,
                  yang_parsetype_t ptyp,
-                 boolean matchmode,
                  ncx_module_t **retmod)
 {
     const xmlChar  *str;
@@ -1600,7 +1687,7 @@ static status_t
     ncx_module_t   *testmod;
     uint32          modlen, bufflen;
     status_t        res, res2;
-    boolean         done, isfile, isyang;
+    boolean         done, isfile, try_yin;;
     ncxmod_mode_t   mode;
 
 
@@ -1614,9 +1701,9 @@ static status_t
     res = NO_ERR;
     res2 = NO_ERR;
     isfile = FALSE;
-    isyang = TRUE;
     bufflen = 0;
     done = FALSE;
+    try_yin = FALSE;
     modlen = xml_strlen(modname);
     mode = NCXMOD_MODE_NONE;
 
@@ -1661,7 +1748,6 @@ static status_t
         } else if (!xml_strcmp(str+1, YIN_SUFFIX)) {
             isfile = TRUE;
             mode = NCXMOD_MODE_FILEYIN;
-            isyang = FALSE;
         }
     }
 
@@ -1683,6 +1769,7 @@ static status_t
     if (!isfile &&
         !pcb->savetkc &&
         (pcb->importmode || !pcb->parsemode)) {
+
         testmod = ncx_find_module(modname, revision);
         if (testmod) {
             if (LOGDEBUG2) {
@@ -1701,12 +1788,12 @@ static status_t
             /*** hack for now, check if this is ietf-netconf ***/
             if (!xml_strcmp(modname, NCXMOD_IETF_NETCONF)) {
                 /* check if yuma-netconf already loaded */
-                testmod = ncx_find_module(NCXMOD_NETCONF, NULL);
+                testmod = ncx_find_module(NCXMOD_YUMA_NETCONF, NULL);
                 if (testmod) {
                     /* use yuma-netconf instead of ietf-netconf */
-                    if (LOGDEBUG2) {
-                        log_debug2("\nncxmod: cannot load ietf-netconf; "
-                                   "yuma-netconf already loaded");
+                    if (LOGDEBUG) {
+                        log_debug("\nncxmod: cannot load ietf-netconf; "
+                                  "yuma-netconf already loaded");
                     }
                     if (!pcb->top) {
                         pcb->top = testmod;
@@ -1721,7 +1808,7 @@ static status_t
         }
     }
 
-    /* get a temp buffer to construct filespacs */
+    /* get a temp buffer to construct filespecs */
     bufflen = NCXMOD_MAX_FSPEC_LEN+1;
     buff = m__getMem(bufflen);
     if (!buff) {
@@ -1735,12 +1822,13 @@ static status_t
      */
     if (isfile) {
         if (mode == NCXMOD_MODE_NONE) {
+            try_yin = TRUE;
             mode = NCXMOD_MODE_FILEYANG;
         }
         res = try_module(buff, 
                          bufflen,
-                         modname,   /****/
-                         NULL,      /* should be on this line? */
+                         modname,
+                         NULL,
                          NULL,
                          revision,
                          mode,
@@ -1748,6 +1836,21 @@ static status_t
                          &done, 
                          pcb,
                          ptyp);
+
+        if (res == ERR_NCX_MISSING_FILE && try_yin) {
+            res = try_module(buff, 
+                             bufflen,
+                             modname,
+                             NULL,
+                             NULL,
+                             revision,
+                             NCXMOD_MODE_FILEYIN,
+                             FALSE,
+                             &done, 
+                             pcb,
+                             ptyp);
+        }
+
         m__free(buff);
         if (res == ERR_NCX_MISSING_FILE) {
             log_error("\nError: file not found (%s)", modname);
@@ -1761,7 +1864,6 @@ static status_t
 
     /* 2) try alt_path variable if set; used by yangdiff */
     if (!done && ncxmod_alt_path) {
-        isyang = TRUE;
         res = check_module_path(ncxmod_alt_path,
                                 buff,
                                 bufflen,
@@ -1770,24 +1872,7 @@ static status_t
                                 pcb,
                                 ptyp,
                                 TRUE, 
-                                matchmode,
-                                isyang,
                                 &done);
-
-        if (!done) {
-            isyang = FALSE;
-            res = check_module_path(ncxmod_alt_path,
-                                    buff,
-                                    bufflen,
-                                    modname,
-                                    revision,
-                                    pcb,
-                                    ptyp,
-                                    TRUE, 
-                                    matchmode,
-                                    isyang,
-                                    &done);
-        }
     }
 
     /* 3a) try as module in current dir, YANG format  */
@@ -1822,7 +1907,6 @@ static status_t
 
     /* 4) try YUMA_MODPATH environment variable if set */
     if (!done && ncxmod_mod_path) {
-        isyang = TRUE;
         res = check_module_pathlist(ncxmod_mod_path,
                                     buff,
                                     bufflen,
@@ -1830,27 +1914,11 @@ static status_t
                                     revision,
                                     pcb,
                                     ptyp, 
-                                    matchmode, 
-                                    isyang,
                                     &done);
-        if (!done) {
-            isyang = FALSE;
-            res = check_module_pathlist(ncxmod_mod_path,
-                                        buff,
-                                        bufflen,
-                                        modname, 
-                                        revision,
-                                        pcb,
-                                        ptyp, 
-                                        matchmode, 
-                                        isyang,
-                                        &done);
-        }
     }
 
     /* 5) HOME/modules directory */
     if (!done && ncxmod_env_userhome) {
-        isyang = TRUE;
         res = check_module_path(ncxmod_env_userhome,
                                 buff,
                                 bufflen,
@@ -1859,28 +1927,11 @@ static status_t
                                 pcb,
                                 ptyp,
                                 FALSE, 
-                                matchmode,
-                                isyang,
                                 &done);
-        if (!done) {
-            isyang = FALSE;
-            res = check_module_path(ncxmod_env_userhome,
-                                    buff,
-                                    bufflen,
-                                    modname,
-                                    revision,
-                                    pcb,
-                                    ptyp,
-                                    FALSE, 
-                                    matchmode,
-                                    isyang,
-                                    &done);
-        }
     }
 
     /* 6) YUMA_HOME/modules directory */
     if (!done && ncxmod_yuma_home) {
-        isyang = TRUE;
         res = check_module_path(ncxmod_yuma_home,
                                 buff,
                                 bufflen,
@@ -1889,23 +1940,7 @@ static status_t
                                 pcb,
                                 ptyp,
                                 FALSE, 
-                                matchmode,
-                                isyang,
                                 &done);
-        if (!done) {
-            isyang = FALSE;
-            res = check_module_path(ncxmod_yuma_home,
-                                    buff,
-                                    bufflen,
-                                    modname, 
-                                    revision,
-                                    pcb,
-                                    ptyp,
-                                    FALSE, 
-                                    matchmode,
-                                    isyang,
-                                    &done);
-        }
     }
 
     /* 7) YUMA_INSTALL/modules directory or default install path
@@ -1914,7 +1949,6 @@ static status_t
      */
     if (!done) {
         if (ncxmod_env_install) {
-            isyang = TRUE;
             res = check_module_path(ncxmod_env_install, 
                                     buff,
                                     bufflen,
@@ -1923,26 +1957,8 @@ static status_t
                                     pcb,
                                     ptyp,
                                     FALSE, 
-                                    matchmode,
-                                    isyang,
                                     &done);
-            if (!done) {
-                isyang = FALSE;
-                res = check_module_path(ncxmod_env_install, 
-                                        buff,
-                                        bufflen,
-                                        modname,
-                                        revision,
-                                        pcb,
-                                        ptyp,
-                                        FALSE, 
-                                        matchmode,
-                                        isyang,
-                                        &done);
-
-            }
         } else {
-            isyang = TRUE;
             res = check_module_path(NCXMOD_DEFAULT_INSTALL, 
                                     buff,
                                     bufflen,
@@ -1951,23 +1967,7 @@ static status_t
                                     pcb,
                                     ptyp,
                                     FALSE, 
-                                    matchmode,
-                                    isyang,
                                     &done);
-            if (!done) {
-                isyang = FALSE;
-                res = check_module_path(NCXMOD_DEFAULT_INSTALL, 
-                                        buff,
-                                        bufflen,
-                                        modname, 
-                                        revision,
-                                        pcb,
-                                        ptyp,
-                                        FALSE, 
-                                        matchmode,
-                                        isyang,
-                                        &done);
-            }
         }
     }
 
@@ -2177,41 +2177,29 @@ static status_t
 
     testmod = NULL;
 
+    /* need to choose the correct match mode from the start
+     * so that foo@rev-date.yang early in the search path
+     * does not get passed over for a generic foo.yang
+     * later on in the search path
+     */
     res = load_module(modname, 
                       revision,
                       pcb, 
                       ptyp, 
-                      FALSE, 
                       &testmod);
 
-    if (res == ERR_NCX_MOD_NOT_FOUND && revision == NULL) {
-        res = load_module(modname, 
-                          NULL,
-                          pcb, 
-                          ptyp, 
-                          TRUE, 
-                          &testmod);
-    }
-    
     if (res == ERR_NCX_MOD_NOT_FOUND) {
         if (revision && *revision) {
-            /***********************************************
-             *** !!! this should not load the wrong version
-             *** !!! because the pcb->revision string
-             *** !!! was set to a certain data
-             *** !!! need to verify
-             ***/
             /* try filenames without revision dates in them */
             res = load_module(modname, 
                               NULL,
                               pcb, 
                               ptyp, 
-                              FALSE, 
                               &testmod);
             if (res == NO_ERR && testmod) {
-                if (!testmod->version) {
-                    /* asked for a spcific version; 
-                     * got a generic version instead
+                if (testmod->version == NULL) {
+                    /* asked for a specific revision; 
+                     * got a generic revision instead
                      * rejected!; return error
                      */
                     res = ERR_NCX_WRONG_VERSION;
@@ -2219,9 +2207,8 @@ static status_t
                                                        testmod->version)) {
                     /* error should already be reported */
                     res = ERR_NCX_WRONG_VERSION;
-                }
+                } /* else got correct revision */
             }
-            /************************************************/
         }
     }
 

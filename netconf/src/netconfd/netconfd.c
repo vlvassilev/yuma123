@@ -118,8 +118,8 @@ static status_t
 {
     status_t res;
 
-    /* load in the agent boot parameter definition file */
-    res = ncxmod_load_module(NCXMOD_NETCONFD, 
+    /* load in the NETCONF data types and RPC methods */
+    res = ncxmod_load_module(NCXMOD_YUMA_NETCONF, 
                              NULL, 
                              NULL,
                              NULL);
@@ -127,8 +127,8 @@ static status_t
         return res;
     }
 
-    /* load in the NETCONF data types and RPC methods */
-    res = ncxmod_load_module(NCXMOD_NETCONF, 
+    /* load in the agent boot parameter definition file */
+    res = ncxmod_load_module(NCXMOD_NETCONFD, 
                              NULL, 
                              NULL,
                              NULL);

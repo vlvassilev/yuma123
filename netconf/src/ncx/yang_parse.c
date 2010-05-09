@@ -1366,6 +1366,7 @@ static status_t
     yang_node_t        *node;
     yang_import_ptr_t  *impptr;
     xmlChar            *str;
+    ncx_module_t       *testmod;
     tk_type_t           tktyp;
     boolean             done, pfixdone, revdone;
     status_t            res, retres;
@@ -1401,6 +1402,20 @@ static status_t
         if (NEED_EXIT(res)) {
             ncx_free_import(imp);
             return res;
+        }
+    }
+
+    /* HACK: need to replace when ietf-netconf.yang is supported */
+    if (res == NO_ERR &&
+        !xml_strcmp(imp->module, NCXMOD_IETF_NETCONF)) {
+
+        /* force the parser to skip loading this import and just
+         * use the yuma-netconf module instead
+         */
+        testmod = ncx_find_module(NCXMOD_YUMA_NETCONF, NULL);
+        if (testmod != NULL) {
+            imp->force_yuma_nc = TRUE;
+            imp->mod = testmod;
         }
     }
         
@@ -1700,10 +1715,16 @@ static status_t
                 /* load the module now instead of later for validation
                  * it may not get used, but assume it will
                  */
-                res = ncxmod_load_imodule(imp->module, 
-                                          imp->revision,
-                                          pcb, 
-                                          YANG_PT_IMPORT);
+                if (!imp->force_yuma_nc) {
+                    res = ncxmod_load_imodule(imp->module, 
+                                              imp->revision,
+                                              pcb, 
+                                              YANG_PT_IMPORT);
+                } else if (LOGDEBUG) {
+                    log_debug("\nSkipping import of ietf-netconf, "
+                              "using yuma-netconf instead");
+                }
+
                 if (res != NO_ERR) {
                     /* skip error if module has just warnings */
                     if (get_errtyp(res) < ERR_TYP_WARN) {

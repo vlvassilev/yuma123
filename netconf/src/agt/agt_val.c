@@ -1895,10 +1895,13 @@ static void
         if (undo->newnode) {
             val_remove_child(undo->newnode);
             if (undo->curnode) {
-                val_swap_child(undo->curnode, undo->newnode);
+                /*** THIS IS WRONG; REPLACEMENT TBD !!!!! ****/
+                /**** val_swap_child(undo->curnode, undo->newnode); ***/
+                
             } 
             /* remove new node */
             val_free_value(undo->newnode);
+            undo->newnode = NULL;
 
         } /* else should not happen */
         break;
@@ -1961,6 +1964,7 @@ static void
                 /* finish deleting 'curnode' */
                 if (undo->curnode) {
                     val_free_value(undo->curnode);
+                    undo->curnode = NULL;
                 }
                 break;
             case OP_EDITOP_LOAD:

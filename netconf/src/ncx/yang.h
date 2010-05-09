@@ -1401,6 +1401,31 @@ extern xmlChar *
 
 
 /********************************************************************
+* FUNCTION yang_copy_filename
+* 
+* Construct a YANG filename into a provided buffer
+*
+* INPUTS:
+*   modname == [sub]module name
+*   revision == [sub]module revision date (may be NULL)
+*   buffer == buffer to copy filename into
+*   bufflen == number of bytes available in buffer
+*   isyang == TRUE for YANG extension
+*             FALSE for YIN extension
+*
+* RETURNS:
+*    malloced and filled in string buffer with filename
+*    NULL if any error
+*********************************************************************/
+extern status_t
+    yang_copy_filename (const xmlChar *modname,
+                        const xmlChar *revision,
+                        xmlChar *buffer,
+                        uint32 bufflen,
+                        boolean isyang);
+
+
+/********************************************************************
 * FUNCTION yang_split_filename
 * 
 * Split a module parameter into its filename components
@@ -1420,5 +1445,39 @@ extern xmlChar *
 extern boolean
     yang_split_filename (const xmlChar *filename,
                          uint32 *modnamelen);
+
+
+/********************************************************************
+* FUNCTION yang_fileext_is_yang
+* 
+* Check if the filespec ends with the .yang extension
+*
+* INPUTS:
+*   filename == filename string
+*
+* RETURNS:
+*    TRUE if .yang file extension found
+*    FALSE if not
+*********************************************************************/
+extern boolean
+    yang_fileext_is_yang (const xmlChar *filename);
+
+
+/********************************************************************
+* FUNCTION yang_fileext_is_yin
+* 
+* Check if the filespec ends with the .yin extension
+*
+* INPUTS:
+*   filename == filename string
+*
+* RETURNS:
+*    TRUE if .yin file extension found
+*    FALSE if not
+*********************************************************************/
+extern boolean
+    yang_fileext_is_yin (const xmlChar *filename);
+
+
 
 #endif	    /* _H_yang */

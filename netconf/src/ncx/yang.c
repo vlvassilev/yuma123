@@ -2661,10 +2661,21 @@ void
             }
         }
 
-        /* check if the import is newer than this file */
-        impmod = ncx_find_module(testimp->module,
-                                 testimp->revision);
-        if (impmod && impmod->version && mod->version) {
+        /* find the imported module */
+        if (testimp->mod == NULL) {
+            impmod = ncx_find_module(testimp->module,
+                                     testimp->revision);
+
+            /* save the import back-ptr since it is not already set */
+            testimp->mod = impmod;
+        }
+
+        /* check if the import is newer than this file, skip yuma-netconf hack */
+        if (!testimp->force_yuma_nc && 
+            impmod && 
+            impmod->version && 
+            mod->version) {
+
             ret = yang_compare_revision_dates(impmod->version,
                                               mod->version);
             if (ret > 0 && LOGDEBUG2) {
@@ -3767,6 +3778,68 @@ xmlChar *
 
 
 /********************************************************************
+* FUNCTION yang_copy_filename
+* 
+* Construct a YANG filename into a provided buffer
+*
+* INPUTS:
+*   modname == [sub]module name
+*   revision == [sub]module revision date (may be NULL)
+*   buffer == buffer to copy filename into
+*   bufflen == number of bytes available in buffer
+*   isyang == TRUE for YANG extension
+*             FALSE for YIN extension
+*
+* RETURNS:
+*    malloced and filled in string buffer with filename
+*    NULL if any error
+*********************************************************************/
+status_t
+    yang_copy_filename (const xmlChar *modname,
+                        const xmlChar *revision,
+                        xmlChar *buffer,
+                        uint32 bufflen,
+                        boolean isyang)
+{
+    xmlChar    *p;
+    uint32      mlen, rlen, slen;
+
+#ifdef DEBUG
+    if (!modname) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    mlen = xml_strlen(modname);
+    rlen = (revision) ? xml_strlen(revision) : 0;
+    if (rlen) {
+        rlen++;   /* file sep char */
+    }
+    slen = (isyang) ? xml_strlen(YANG_SUFFIX) :
+        xml_strlen(YIN_SUFFIX);
+
+    if ((mlen + rlen + slen + 2) < bufflen) {
+        p = buffer;
+        p += xml_strcpy(p, modname);
+        if (revision && *revision) {
+            *p++ = YANG_FILE_SEPCHAR;
+            p += xml_strcpy(p, revision);
+        }
+        *p++ = '.';
+        if (isyang) {
+            xml_strcpy(p, YANG_SUFFIX);
+        } else {
+            xml_strcpy(p, YIN_SUFFIX);
+        }
+        return NO_ERR;
+    } else {
+        return ERR_BUFF_OVFL;
+    }
+
+}  /* yang_copy_filename */
+
+
+/********************************************************************
 * FUNCTION yang_split_filename
 * 
 * Split a module parameter into its filename components
@@ -3841,6 +3914,83 @@ boolean
     return TRUE;
 
 }  /* yang_split_filename */
+
+
+/********************************************************************
+* FUNCTION yang_fileext_is_yang
+* 
+* Check if the filespec ends with the .yang extension
+*
+* INPUTS:
+*   filename == filename string
+*
+* RETURNS:
+*    TRUE if .yang file extension found
+*    FALSE if not
+*********************************************************************/
+boolean
+    yang_fileext_is_yang (const xmlChar *filename)
+{
+    uint32   len;
+
+#ifdef DEBUG
+    if (filename == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    len = xml_strlen(filename);
+    if (len < 6) {
+        return FALSE;
+    }
+
+    if (filename[len - 5] != '.') {
+        return FALSE;
+    }
+
+    return !xml_strcmp(&filename[len - 4], YANG_SUFFIX);
+
+}  /* yang_fileext_is_yang */
+
+
+/********************************************************************
+* FUNCTION yang_fileext_is_yin
+* 
+* Check if the filespec ends with the .yin extension
+*
+* INPUTS:
+*   filename == filename string
+*
+* RETURNS:
+*    TRUE if .yin file extension found
+*    FALSE if not
+*********************************************************************/
+boolean
+    yang_fileext_is_yin (const xmlChar *filename)
+{
+    uint32   len;
+
+#ifdef DEBUG
+    if (filename == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    len = xml_strlen(filename);
+    if (len < 5) {
+        return FALSE;
+    }
+
+    if (filename[len - 4] != '.') {
+        return FALSE;
+    }
+
+    return !xml_strcmp(&filename[len - 3], YIN_SUFFIX);
+
+}  /* yang_fileext_is_yin */
+
 
 
 /* END file yang.c */

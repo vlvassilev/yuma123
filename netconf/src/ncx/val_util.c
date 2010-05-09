@@ -362,6 +362,10 @@ static status_t
             /* leaf list objects never get default entries */
             break;
         case OBJ_TYP_CONTAINER:
+            if (obj_is_root(chobj)) {
+                break;
+            }
+            /* else fall through */
         case OBJ_TYP_RPCIO:
         case OBJ_TYP_LIST:
         case OBJ_TYP_CASE:

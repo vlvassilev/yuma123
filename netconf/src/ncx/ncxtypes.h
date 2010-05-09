@@ -674,6 +674,7 @@ typedef struct ncx_import_t_ {
     ncx_module_t       *mod;                   /* back-ptr */
     boolean             used;
     boolean             usexsd;        /* FALSE if duplicate */
+    boolean             force_yuma_nc;  /* HACK: TRUE is yuma-nc replacing ietf-nc */
     dlq_hdr_t           appinfoQ;
     ncx_error_t         tkerr;
 } ncx_import_t;

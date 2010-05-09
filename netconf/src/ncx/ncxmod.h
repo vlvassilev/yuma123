@@ -96,6 +96,8 @@ date	     init     comment
 
 #define NCXMOD_NCX        (const xmlChar *)"yuma-ncx"
 
+#define NCXMOD_YUMA_NACM  (const xmlChar *)"yuma-nacm"
+
 #define NCXMOD_WITH_DEFAULTS (const xmlChar *)"ietf-netconf-with-defaults"
 
 /* name of the NETCONF module containing NETCONF protocol definitions,
@@ -103,7 +105,12 @@ date	     init     comment
  */
 #define NCXMOD_NETCONF        (const xmlChar *)"yuma-netconf"
 
+#define NCXMOD_YUMA_NETCONF   (const xmlChar *)"yuma-netconf"
+
 #define NCXMOD_IETF_NETCONF   (const xmlChar *)"ietf-netconf"
+
+#define NCXMOD_IETF_YANG_TYPES   (const xmlChar *)"ietf-yang-types"
+
 
 #define NCXMOD_IETF_NETCONF_STATE (const xmlChar *)"ietf-netconf-monitoring"
 

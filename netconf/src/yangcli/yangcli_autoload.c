@@ -595,16 +595,18 @@ static status_t
     dlq_createSQue(&savedevQ);
 
     /* first load any deviations */
-    for (listmember = ncx_first_lmem(devlist);
-         listmember != NULL && res == NO_ERR;
-         listmember = (ncx_lmem_t *)dlq_nextEntry(listmember)) {
+    if (devlist != NULL) {
+        for (listmember = ncx_first_lmem(devlist);
+             listmember != NULL && res == NO_ERR;
+             listmember = (ncx_lmem_t *)dlq_nextEntry(listmember)) {
 
-        res = ncxmod_load_deviation(listmember->val.str,
-                                    &savedevQ);
-        if (res != NO_ERR) {
-            log_error("\nError: Deviation module %s not loaded (%s)!!",
-                      listmember->val.str, 
-                      get_error_string(res));
+            res = ncxmod_load_deviation(listmember->val.str,
+                                        &savedevQ);
+            if (res != NO_ERR) {
+                log_error("\nError: Deviation module %s not loaded (%s)!!",
+                          listmember->val.str, 
+                          get_error_string(res));
+            }
         }
     }
 
@@ -666,7 +668,9 @@ status_t
 {
     mgr_scb_t               *mscb;
     ncxmod_search_result_t  *searchresult;
+    ncx_module_t            *testmod;
     status_t                 res, retres;
+    boolean                  need_yt, need_ncx, need_nacm, need_ync;
 
 #ifdef DEBUG
     if (!server_cb || !scb) {
@@ -677,6 +681,11 @@ status_t
     res = NO_ERR;
     retres = NO_ERR;
     mscb = (mgr_scb_t *)scb->mgrcb;
+
+    need_yt = TRUE;
+    need_ncx = TRUE;
+    need_nacm = TRUE;
+    need_ync = TRUE;
 
     /* try to copy as many files as possible, even if some errors */
     for (searchresult = (ncxmod_search_result_t *)
@@ -701,6 +710,23 @@ status_t
             continue;
         }
 
+        /* check yuma-netconf hack; remove this code
+         * when ietf-netconf is supported
+         */
+        if (!xml_strcmp(searchresult->module, 
+                        NCXMOD_NCX)) {
+            need_ncx = FALSE;
+        } else if (!xml_strcmp(searchresult->module, 
+                               NCXMOD_IETF_YANG_TYPES)) {
+            need_yt = FALSE;
+        } else if (!xml_strcmp(searchresult->module, 
+                               NCXMOD_YUMA_NACM)) {
+            need_nacm = FALSE;
+        } else if (!xml_strcmp(searchresult->module, 
+                               NCXMOD_YUMA_NETCONF)) {
+            need_ync = FALSE;
+        }
+
         /* copy this local module to the work dir so
          * it will be found in an import, even if the
          * revision-date is missing from the import
@@ -715,6 +741,53 @@ status_t
         }
     }
 
+    if (retres == NO_ERR) {
+        if (need_yt) {
+            testmod = ncx_find_module(NCXMOD_IETF_YANG_TYPES,
+                                      NULL);
+            if (testmod != NULL) {
+                res = copy_module_to_tempdir(mscb,
+                                             testmod->name,
+                                             testmod->version,
+                                             testmod->source);
+            } else {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }
+        if (need_ncx) {
+            testmod = ncx_find_module(NCXMOD_NCX, NULL);
+            if (testmod != NULL) {
+                res = copy_module_to_tempdir(mscb,
+                                             testmod->name,
+                                             testmod->version,
+                                             testmod->source);
+            } else {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }
+        if (need_nacm) {
+            testmod = ncx_find_module(NCXMOD_YUMA_NACM, NULL);
+            if (testmod != NULL) {
+                res = copy_module_to_tempdir(mscb,
+                                             testmod->name,
+                                             testmod->version,
+                                             testmod->source);
+            } else {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }
+        if (need_ync) {
+            testmod = ncx_find_module(NCXMOD_YUMA_NETCONF, NULL);
+            if (testmod != NULL) {
+                res = copy_module_to_tempdir(mscb,
+                                             testmod->name,
+                                             testmod->version,
+                                             testmod->source);
+            } else {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }
+    }
     return retres;
 
 }  /* autoload_setup_tempdir */
@@ -970,7 +1043,7 @@ status_t
     mgr_scb_t              *mscb;
     ncxmod_search_result_t *searchresult;
     modptr_t               *modptr;
-    ncx_module_t           *mod;
+    ncx_module_t           *mod, *ncmod;
     status_t                res;
 
 #ifdef DEBUG
@@ -986,6 +1059,8 @@ status_t
         return NO_ERR;
     }
 
+    mod = NULL;
+    ncmod = NULL;
     res = NO_ERR;
     mscb = (mgr_scb_t *)scb->mgrcb;
 
@@ -1002,11 +1077,29 @@ status_t
      */
     ncx_set_cur_modQ(&mscb->temp_modQ);
 
+    res = autoload_module(NCXMOD_YUMA_NETCONF,
+                          NULL,
+                          NULL, 
+                          &ncmod);
+    if (res == NO_ERR && ncmod != NULL) {
+        /* the netconf module features have not been set yet */
+        modptr = new_modptr(ncmod, 
+                            /* &searchresult->cap->cap_feature_list, */ NULL,
+                            NULL);
+        if (modptr == NULL) {
+            res = ERR_INTERNAL_MEM;
+            log_error("\nMalloc failure");
+        } else {
+            dlq_enque(modptr, &server_cb->modptrQ);
+        }
+    }
+
     /* go through all the search results and load
      * the modules in order; all imports should already
      * be preloaded into the session work directory
      */
-    while (!dlq_empty(&server_cb->searchresultQ)) {
+    while (res == NO_ERR && 
+           !dlq_empty(&server_cb->searchresultQ)) {
 
         searchresult = (ncxmod_search_result_t *)
             dlq_deque(&server_cb->searchresultQ);
@@ -1029,6 +1122,7 @@ status_t
 
         if (res == NO_ERR) {
             if (mod == NULL) {
+                /* ??? not sure if this could happen ?? */
                 mod = ncx_find_module(searchresult->module,
                                       searchresult->revision);
                 if (mod == NULL) {

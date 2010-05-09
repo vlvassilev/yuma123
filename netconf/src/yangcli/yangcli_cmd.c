@@ -7414,7 +7414,7 @@ void *
 {
     void           *def, *firstmatch;
     xmlChar        *start, *p, *q, oldp, oldq;
-    const xmlChar  *prefix, *defname, *modname;
+    const xmlChar  *prefix, *defname, *modname, *defmod;
     ncx_module_t   *mod;
     obj_template_t *obj;
     modptr_t       *modptr;
@@ -7499,21 +7499,26 @@ void *
                             defname, 
                             dtyp);
 
-        if (!def && get_default_module()) {
-            def = try_parse_def(server_cb,
-                                get_default_module(), 
-                                defname, 
-                                dtyp);
+        defmod = get_default_module();
+        if (!def && defmod) {
+            if (xml_strcmp(defmod, NC_MODULE) &&
+                xml_strcmp(defmod, NCXMOD_IETF_NETCONF)) {
+                def = try_parse_def(server_cb,
+                                    defmod, 
+                                    defname, 
+                                    dtyp);
+            }
         }
-        if (!def && (!get_default_module() ||
-                     xml_strcmp(get_default_module(), 
-                                NC_MODULE))) {
 
+#if 0
+        /* force the yuma-netconf module in the tempdir to be used */
+        if (!def && (!defmod || xml_strcmp(defmod, NC_MODULE))) {
             def = try_parse_def(server_cb,
                                 NC_MODULE, 
                                 defname, 
                                 dtyp);
         }
+#endif
 
         /* if not found, try any module */
         if (!def) {

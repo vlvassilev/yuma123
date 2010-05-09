@@ -561,7 +561,7 @@ static status_t
         }
         log_error("\nError: object '%s' not found in module %s"
                   " in Xpath target %s",
-                  name, (imp) ? imp->module : mod->name,
+                  name, (imp && imp->mod) ? imp->mod->name : mod->name,
                   target);
         do_errmsg(tkc, mod, tkerr, res);
         if (prefix) {
@@ -659,7 +659,7 @@ static status_t
 
         if (name && curQ) {
             nextobj = obj_find_template(curQ,
-                                        (imp) ? imp->module : 
+                                        (imp && imp->mod) ? imp->mod->name : 
                                         ncx_get_modname(mod), 
                                         name);
         } else {
@@ -687,7 +687,7 @@ static status_t
             res = ERR_NCX_DEFSEG_NOT_FOUND;
             log_error("\nError: object '%s' not found in module %s",
                       name, 
-                      (imp) ? imp->module : mod->name);
+                      (imp && imp->mod) ? imp->mod->name : mod->name);
             do_errmsg(tkc, mod, tkerr, res);
             if (prefix) {
                 m__free(prefix);
@@ -2268,10 +2268,15 @@ status_t
             if (!imp) {
                 res = ERR_NCX_INVALID_NAME;
             } else {
-                *targmod = ncx_find_module(imp->module, 
-                                           imp->revision);
+                if (imp->mod) {
+                    *targmod = imp->mod;
+                } else {
+                    *targmod = ncx_find_module(imp->module, imp->revision);
+                }
                 if (!*targmod) {
                     res = ERR_NCX_MOD_NOT_FOUND;
+                } else {
+                    imp->mod = *targmod;
                 }
             }
         } else {

@@ -110,6 +110,10 @@ date         init     comment
 #include "agt_timer.h"
 #endif
 
+#ifndef _H_agt_util
+#include "agt_util.h"
+#endif
+
 #ifndef _H_log
 #include "log.h"
 #endif
@@ -292,6 +296,7 @@ static status_t
     res = agt_ncx_cfg_load(cfg, CFG_LOC_FILE, fname);
     if (res != NO_ERR) {
         if (!dlq_empty(&cfg->load_errQ)) {
+            *loaded = TRUE;
             if (profile->agt_startup_error) {
                 /* quit if any startup errors */
                 log_error("\nError: configuration errors occurred loading the "
@@ -765,13 +770,14 @@ status_t
 
 
 #ifdef STATIC_SERVER
-    /* iniit phase 2 for static modules should be 
+    /* init phase 2 for static modules should be 
      * initialized here
      */
 #else
     for (dynlib = (agt_dynlib_cb_t *)dlq_firstEntry(&agt_dynlibQ);
          dynlib != NULL;
          dynlib = (agt_dynlib_cb_t *)dlq_nextEntry(dynlib)) {
+
         if (dynlib->init_status == NO_ERR &&
             !dynlib->init2_done &&
             !dynlib->cleanup_done) {
@@ -781,30 +787,48 @@ status_t
                            dynlib->modname);
             }
             res = (*dynlib->init2fn)();
+            dynlib->init2_status = res;
+            dynlib->init2_done = TRUE;
+
             if (res != NO_ERR) {
                 log_error("\nError: SIL init2 function "
                           "failed for module '%s' (%s)",
                           dynlib->modname,
                           get_error_string(res));
-            }
-            dynlib->init2_status = res;
-            dynlib->init2_done = TRUE;
+                return res;
 
-            /* TBD: should cleanup be called and somehow
-             * remove the module that was loaded?
-             */
+                /* TBD: should cleanup be called and somehow
+                 * remove the module that was loaded?
+                 * Currently abort entire server startup
+                 */
+            }
         }
     }
 #endif
 
+    /* add any top-level defaults to the running config
+     * that were not covered by SIL callbacks
+     */
+    for (retmod = ncx_get_first_module();
+         retmod != NULL;
+         retmod = ncx_get_next_module(retmod)) {
+        res = agt_set_mod_defaults(retmod);
+        if (res != NO_ERR) {
+            log_error("\nError: Set mod defaults for module '%s' failed (%s)",
+                      retmod->name,
+                      get_error_string(res));
+            return res;
+        }
+    }
+
     /* dump the running config at boot-time */
-    if ((LOGDEBUG && !startup_loaded) || LOGDEBUG3) {
+    if ((LOGDEBUG && res != NO_ERR) || LOGDEBUG3) {
         if (startup_loaded) {
-            log_debug("\nRunning config contents at boot-time");
+            log_debug("\nRunning config contents after all init done");
         } else {
             log_debug("\nFactory default running config contents");
         }
-        cfg = cfg_get_config(NCX_CFG_RUNNING);
+        cfg = cfg_get_config_id(NCX_CFGID_RUNNING);
         val_dump_value_max(cfg->root, 
                            0,
                            NCX_DEF_INDENT,

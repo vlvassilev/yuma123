@@ -343,7 +343,7 @@ static status_t
         break;
     case NCX_NT_OBJ:
         *dptr = obj_find_template(&imp->mod->datadefQ, 
-                                  imp->module, 
+                                  imp->mod->name, 
                                   defname);
         break;
     case NCX_NT_NONE:
@@ -359,7 +359,7 @@ static status_t
         }
         if (!*dptr) {
             *dptr = obj_find_template(&imp->mod->datadefQ, 
-                                      imp->module, 
+                                      imp->mod->name, 
                                       defname);
             if (*dptr) {
                 *dtyp = NCX_NT_OBJ;

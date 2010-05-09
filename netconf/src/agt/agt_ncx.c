@@ -2523,12 +2523,13 @@ static status_t
     xmlChar               *moduri;
     agt_profile_t         *agt_profile;
     status_t               res;
-    boolean                module_added, errdone;
+    boolean                module_added, errdone, sil_loaded;
 
     res = NO_ERR;
     newval = NULL;
     mod = NULL;
     errdone = FALSE;
+    sil_loaded = FALSE;
     module_added = FALSE;
     agt_profile = agt_get_profile();
 
@@ -2552,7 +2553,10 @@ static status_t
 
     /* check for any version of this module already loaded */
     mod = ncx_find_module(VAL_STR(modval), NULL);
-    if (!mod) {
+    if (mod == NULL) {
+        /* module not loaded already
+         * load all the deviations first
+         */
         for (devval = val_find_child(msg->rpc_input, 
                                      AGT_SYS_MODULE,
                                      NCX_EL_DEVIATION);
@@ -2578,7 +2582,6 @@ static status_t
             }
         }
 
-
         if (res == NO_ERR) {
 #ifdef STATIC_SERVER
             res = ncxmod_load_module(VAL_STR(modval), 
@@ -2596,7 +2599,12 @@ static status_t
                                          (revval) ? VAL_STR(revval) : NULL, 
                                          &agt_profile->agt_savedevQ,
                                          &mod);
+            } else if (res == NO_ERR) {
+                sil_loaded = TRUE;
             }
+#endif
+
+            /* reget the module; it should be found if status == NO_ERR */
             if (res == NO_ERR) {
                 mod = ncx_find_module(VAL_STR(modval),
                                       (revval) ? VAL_STR(revval) : NULL);
@@ -2604,7 +2612,7 @@ static status_t
                     res = SET_ERROR(ERR_INTERNAL_VAL);
                 }
             }
-#endif
+
             if (res == NO_ERR) {
                 module_added = TRUE;
             } else {
@@ -2620,13 +2628,13 @@ static status_t
                 errdone = TRUE;
             }
         }
-    } else if (revval) {
+    } else if (revval != NULL) {
         /* some version of the module is already loaded
          * try again to get the exact version requested 
          */
         testmod = ncx_find_module(VAL_STR(modval),
                                   VAL_STR(revval));
-        if (testmod) {
+        if (testmod != NULL) {
             mod = testmod;
         } else {
             res = ERR_NCX_WRONG_VERSION;
@@ -2644,25 +2652,43 @@ static status_t
     }
 
     /* generate the return value */
-    if (res == NO_ERR && mod) {
+    if (res == NO_ERR && mod != NULL) {
         newval = val_make_string(val_get_nsid(modval),
                                  NCX_EL_MOD_REVISION,
                                  (mod->version) ? 
                                  mod->version : EMPTY_STRING);
         if (newval == NULL) {
             res = ERR_INTERNAL_MEM;
+            agt_record_error(scb, 
+                             &msg->mhdr, 
+                             NCX_LAYER_OPERATION, 
+                             res,
+                             methnode, 
+                             NCX_NT_NONE, 
+                             NULL, 
+                             NCX_NT_NONE, 
+                             NULL);
+            errdone = TRUE;
         }
     }
 
+    if (res == NO_ERR && mod && module_added && !sil_loaded) {
+        /* make sure any top-level defaults are set */
+        res = agt_set_mod_defaults(mod);
+    }
+
     if (res == NO_ERR && mod && module_added) {
+        /* add the <schema> node in netconf-state module */
         res = agt_state_add_module_schema(mod);
     }
 
     if (res == NO_ERR && mod && module_added) {
+        /* add the <capability> node in <hello> template */
         res = agt_cap_add_module(mod);
     }
 
     if (res == NO_ERR && mod && module_added) {
+        /* send the capability change notification */
         moduri = cap_make_moduri(mod);
         if (!moduri) {
             res = ERR_INTERNAL_MEM;

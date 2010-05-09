@@ -777,4 +777,22 @@ extern xmlChar *
     agt_get_target_filespec (const xmlChar *target_url,
                              status_t *res);
 
+
+/********************************************************************
+* FUNCTION agt_set_mod_defaults
+*
+* Check for any top-level config leafs that have a default
+* value, and add them to the running configuration.
+*
+* INPUTS:
+*   mod == module that was just added and should be used
+*          to check for top-level database leafs with a default
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    agt_set_mod_defaults (ncx_module_t *mod);
+
+
 #endif	    /* _H_agt_util */

@@ -259,6 +259,54 @@ static boolean
 } /* check_withdef */
 
 
+/********************************************************************
+* FUNCTION add_default_leaf
+*
+* Make a default leaf and add it to the running config
+*
+* INPUTS:
+*    parentval == parent complex type to add the default
+*               as the new last child (could be cfg->root)
+*    defobj == object template for the default leaf
+*    defstr == string containing the default value to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    add_default_leaf (val_value_t *parentval,
+                      obj_template_t *defobj,
+                      const xmlChar *defstr)
+{
+    val_value_t    *newval;
+    status_t        res;
+
+    res = NO_ERR;
+
+    newval = val_find_child(parentval,
+                            obj_get_mod_name(defobj),
+                            obj_get_name(defobj));
+    if (newval != NULL) {
+        /* node already exists */
+        return NO_ERR;
+    }
+
+    newval = val_make_simval_obj(defobj, defstr, &res);
+
+    if (res != NO_ERR) {
+        if (newval != NULL) {
+            val_free_value(newval);
+        }
+    } else {
+        newval->flags |= VAL_FL_DEFSET;
+        val_add_child(newval, parentval);
+    }
+
+    return res;
+
+}  /* add_default_leaf */
+
+
 /************  E X T E R N A L    F U N C T I O N S    **************/
 
 
@@ -2399,6 +2447,88 @@ xmlChar *
     return filename;
 
 }  /* agt_get_target_filespec */
+
+
+/********************************************************************
+* FUNCTION agt_set_mod_defaults
+*
+* Check for any top-level config leafs that have a default
+* value, and add them to the running configuration.
+*
+* INPUTS:
+*   mod == module that was just added and should be used
+*          to check for top-level database leafs with a default
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    agt_set_mod_defaults (ncx_module_t *mod)
+{
+    cfg_template_t    *running;
+    obj_template_t    *defobj, *defcase, *childobj;
+    const xmlChar     *defstr;
+    status_t           res;
+
+#ifdef DEBUG
+    if (mod == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    running = cfg_get_config_id(NCX_CFGID_RUNNING);
+    if (running == NULL || running->root == NULL) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    res = NO_ERR;
+
+    for (defobj = ncx_get_first_data_object(mod);
+         defobj != NULL && res == NO_ERR;
+         defobj = ncx_get_next_data_object(mod, defobj)) {
+
+        /* only care about top-level leafs and choices */
+        if (defobj->objtype == OBJ_TYP_CHOICE) {
+            defcase = obj_get_default_case(defobj);
+            if (defcase != NULL) {
+                /* check the default case for any default leafs,
+                 * there should be at least one of them
+                 */
+                for (childobj = obj_first_child(defcase);
+                     childobj != NULL;
+                     childobj = obj_next_child(childobj)) {
+
+                    /* only care about config leafs */
+                    /* !!! should dive into choices with default cases !!! */
+                    if (childobj->objtype == OBJ_TYP_LEAF &&
+                        obj_get_config_flag(childobj)) {
+                        /* only care about leafs with default values */
+                        defstr = obj_get_default(childobj);
+                        if (defstr != NULL) {
+                            /* create this top-level leaf */
+                            res = add_default_leaf(running->root, 
+                                                   childobj,
+                                                   defstr);
+                        }
+                    }
+                }
+            }
+        } else if (defobj->objtype == OBJ_TYP_LEAF &&
+                   obj_get_config_flag(defobj)) {
+            /* only care about config leafs with default values */
+            defstr = obj_get_default(defobj);
+            if (defstr != NULL) {
+                /* create this top-level leaf */
+                res = add_default_leaf(running->root, 
+                                       defobj,
+                                       defstr);
+            }
+        }
+    }
+
+    return res;
+
+} /* agt_set_mod_defaults */
 
 
 /* END file agt_util.c */

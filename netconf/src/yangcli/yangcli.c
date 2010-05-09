@@ -2386,7 +2386,6 @@ static void
     ncx_module_t           *mod;
     cap_rec_t              *cap;
     const xmlChar          *module, *revision, *namespace;
-    modptr_t               *modptr;
     ncxmod_search_result_t *searchresult;
     status_t                res;
     boolean                 retrieval_supported;
@@ -2401,22 +2400,6 @@ static void
 
     retrieval_supported = cap_set(&mscb->caplist,
                                   CAP_SCHEMA_RETRIEVAL);
-
-    /**** !!! HARDWIRE ADD NETCONF V1 TO THE QUEUE
-     **** !!! EVEN IF THE SERVER LEFT IT OUT
-     **** !!! NEED TO CHECK THE ietf-netconf.yang
-     **** !!! MODULE CAPABILITY
-     ****/
-    mod = ncx_find_module(NC_MODULE, NULL);
-    if (mod) {
-        modptr = new_modptr(mod, NULL, NULL);
-        if (modptr == NULL) {
-            log_error("\nMalloc failure");
-            return;
-        } else {
-            dlq_enque(modptr, &server_cb->modptrQ);
-        }
-    }
 
     /* check all the YANG modules;
      * build a list of modules that

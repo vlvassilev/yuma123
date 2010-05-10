@@ -94,7 +94,7 @@ date	     init     comment
 typedef boolean 
     (*val_nodetest_fn_t) (ncx_withdefaults_t withdef,
                           boolean realtest,
-			  const val_value_t *node);
+			  val_value_t *node);
 
 
 /********************************************************************

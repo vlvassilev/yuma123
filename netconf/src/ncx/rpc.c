@@ -90,6 +90,53 @@ date         init     comment
 
 
 /********************************************************************
+* FUNCTION clean_undorec
+*
+* Clean all the memory used by the specified rpc_undo_rec_t
+* but do not free the struct itself
+*
+*  !!! The caller must free internal pointers that were malloced
+*  !!! instead of copied.  This function does not check them!!!
+*  
+* INPUTS:
+*   undo == rpc_undo_rec_t to clean
+*   reuse == TRUE if possible reuse
+*            FALSE if this node is being freed right now
+*
+* RETURNS:
+*   none
+*********************************************************************/
+static void 
+    clean_undorec (rpc_undo_rec_t *undo,
+                   boolean reuse)
+{
+    val_value_t *val;
+
+    if (undo->free_curnode) {
+        val_free_value(undo->curnode);
+    }
+
+    if (undo->curnode_clone) {
+        val_free_value(undo->curnode_clone);
+    }
+
+    while (!dlq_empty(&undo->extra_deleteQ)) {
+        val = (val_value_t *)
+            dlq_deque(&undo->extra_deleteQ);
+        val_free_value(val);
+    }
+
+    if (reuse) {
+        rpc_init_undorec(undo);
+    }
+
+} /* clean_undorec */
+
+
+/******************* E X T E R N   F U N C T I O N S ***************/
+
+
+/********************************************************************
 * FUNCTION rpc_new_msg
 *
 * Malloc and initialize a new rpc_msg_t struct
@@ -325,7 +372,7 @@ void
     }
 #endif
 
-    rpc_clean_undorec(undo);
+    clean_undorec(undo, FALSE);
     m__free(undo);
 
 } /* rpc_free_undorec */
@@ -348,8 +395,6 @@ void
 void 
     rpc_clean_undorec (rpc_undo_rec_t *undo)
 {
-    val_value_t *val;
-
 #ifdef DEBUG
     if (!undo) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -357,21 +402,35 @@ void
     }
 #endif
 
-    undo->newnode = NULL;  /*********************/
-
-    if (undo->curnode) {
-        val_free_value(undo->curnode);
-    }
-
-    while (!dlq_empty(&undo->extra_deleteQ)) {
-        val = (val_value_t *)
-            dlq_deque(&undo->extra_deleteQ);
-        val_free_value(val);
-    }
-
-    rpc_init_undorec(undo);
+    clean_undorec(undo, TRUE);
 
 } /* rpc_clean_undorec */
+
+
+/********************************************************************
+* FUNCTION rpc_set_undorec_free_curnode
+*
+* Set the undo rec status so the curnode will
+* be deleted when commit or undo phase is completed
+* But the curnode is no longer in the tree, so skip 
+* val_remove_child step
+*
+* INPUTS:
+*   undo == rpc_undo_rec_t to set
+*********************************************************************/
+void 
+    rpc_set_undorec_free_curnode (rpc_undo_rec_t *undo)
+{
+#ifdef DEBUG
+    if (!undo) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    undo->free_curnode = TRUE;
+
+}  /* rpc_set_undorec_free_curnode */
 
 
 /********************************************************************

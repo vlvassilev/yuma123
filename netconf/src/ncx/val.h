@@ -171,6 +171,14 @@ date	     init     comment
 /* if set, value is a list which has unique-stmt already failed */
 #define VAL_FL_UNIDONE   bit5
 
+/* if set, value has been checked to see if it is the default value */
+#define VAL_FL_DEFVALSET bit6
+
+/* if set, value is set to the YANG default value;
+ * only use if VAL_FL_DEFVALSET is 1
+ */
+#define VAL_FL_DEFVAL    bit7
+
 
 /* macros to access simple value types */
 #define VAL_BOOL(V)    ((V)->v.boo)
@@ -222,6 +230,7 @@ date	     init     comment
 #define VAL_LIST(V)    ((V)->v.list)
 
 #define VAL_BITS VAL_LIST
+
 
 
 /********************************************************************
@@ -2882,13 +2891,20 @@ extern val_value_t *
 * 
 * INPUTS:
 *   val == value to check
-*   
+*
+* SIDE EFFECTS:
+*   val->flags may be adjsuted
+*         VAL_FL_DEFVALSET will be set if not set already
+*         VAL_FL_DEFVAL will be set or cleared if 
+*            VAL_FL_DEFSETVAL is not already set,
+*            after determining if the value == its default
+*
 * RETURNS:
 *   TRUE if the val is set to the default value
 *   FALSE otherwise
 *********************************************************************/
 extern boolean
-    val_is_default (const val_value_t *val);
+    val_is_default (val_value_t *val);
 
 
 /********************************************************************
@@ -3379,5 +3395,22 @@ extern void *
 *********************************************************************/
 extern int
     val_get_icookie (val_value_t *val);
+
+
+/********************************************************************
+* FUNCTION val_delete_default_leaf
+* 
+* Do the internal work to setup a delete of
+* a default leaf
+*
+* INPUTS:
+*    val == val_value_t struct to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
+extern status_t
+    val_delete_default_leaf (val_value_t *val);
+
 
 #endif	    /* _H_val */

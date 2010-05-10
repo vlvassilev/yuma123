@@ -4503,7 +4503,7 @@ boolean
     ncx_btype_t      btyp;
     ncx_iqual_t      iqual;
     ncx_merge_t      mergetyp;
-    boolean          dupsok;
+    boolean          dupsok, retval;
     status_t         res;
 
 #ifdef DEBUG
@@ -4518,19 +4518,18 @@ boolean
     }   
 #endif
 
+    res = NO_ERR;
+    retval = FALSE;
     btyp = dest->btyp;
     iqual = typ_get_iqualval_def(dest->typdef);
 
     if (obj_is_system_ordered(dest->obj)) {
         mergetyp = typ_get_mergetype(dest->typdef);
-        if (mergetyp == NCX_MERGE_NONE) {
-            mergetyp = NCX_MERGE_LAST;
-        }
     } else {
         mergetyp = typ_get_mergetype(dest->typdef);
-        if (mergetyp == NCX_MERGE_NONE) {
-            mergetyp = NCX_MERGE_LAST;
-        }
+    }
+    if (mergetyp == NCX_MERGE_NONE) {
+        mergetyp = NCX_MERGE_LAST;
     }
 
     switch (iqual) {
@@ -4547,12 +4546,13 @@ boolean
              *** MOVE HANDLED ELSEWHERE (VERIFY?)
              ***/
 
-            return TRUE;
+            retval = TRUE;
+            break;
         default:
             SET_ERROR(ERR_INTERNAL_VAL);
-            return TRUE;
+            retval = TRUE;
         }
-        /*NOTREACHED*/
+        break;
     case NCX_IQUAL_ONE:
     case NCX_IQUAL_OPT:
         /* need to replace the current value or merge a list, etc. */
@@ -4577,7 +4577,7 @@ boolean
             merge_simple(btyp, src, dest);
             break;
         case NCX_BT_UNION:
-            SET_ERROR(ERR_INTERNAL_VAL);
+            res = SET_ERROR(ERR_INTERNAL_VAL);
             break;
         case NCX_BT_SLIST:
             dupsok = val_duplicates_allowed(dest);
@@ -4597,26 +4597,35 @@ boolean
         case NCX_BT_LIST:
         case NCX_BT_CHOICE:
         case NCX_BT_CASE:
-            SET_ERROR(ERR_INTERNAL_VAL);
-            return TRUE;
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+            retval = TRUE;
+            break;
         default:
-            SET_ERROR(ERR_INTERNAL_VAL);
-            return TRUE;
+            res = SET_ERROR(ERR_INTERNAL_VAL);
+            retval = TRUE;
         }
 
         /* copy the editvars struct to the leaf */
-        res = copy_editvars(src, dest);
-        if (res != NO_ERR) {
-            /* !!! may not be an internal error !!! */
-            SET_ERROR(res);
+        if (res == NO_ERR) {
+            res = copy_editvars(src, dest);
+            if (res != NO_ERR) {
+                /* !!! may not be an internal error !!! */
+                SET_ERROR(res);
+            }
         }
-
-        return TRUE;
+        retval = TRUE;
+        break;
     default:
-        SET_ERROR(ERR_INTERNAL_VAL);
+        retval = SET_ERROR(ERR_INTERNAL_VAL);
         return TRUE;
     }
-    /*NOTREACHED*/
+
+    /* clear the set-by-default flag */
+    if (res == NO_ERR) {
+        dest->flags &= ~VAL_FL_DEFSET;
+    }
+
+    return retval;
 
 }  /* val_merge */
 
@@ -4966,31 +4975,32 @@ status_t
         copy->v.str = val->v.str;
         val->v.str = NULL;
         copy->btyp = val->btyp;
-        return NO_ERR;
-    }
-
-    res = val_sprintf_simval_nc(NULL, val, &len);
-    if (res == NO_ERR) {
-        buffer = m__getMem(len+1);
-        if (!buffer) {
-            return ERR_INTERNAL_MEM;
-        }
-        res = val_sprintf_simval_nc(buffer, val, &len);
+    } else {
+        res = val_sprintf_simval_nc(NULL, val, &len);
         if (res == NO_ERR) {
-            res = val_set_simval(copy,
-                                 val->typdef,
-                                 val->nsid,
-                                 val->name,
-                                 buffer);
+            buffer = m__getMem(len+1);
+            if (!buffer) {
+                return ERR_INTERNAL_MEM;
+            }
+            res = val_sprintf_simval_nc(buffer, val, &len);
+            if (res == NO_ERR) {
+                res = val_set_simval(copy,
+                                     val->typdef,
+                                     val->nsid,
+                                     val->name,
+                                     buffer);
+            }
         }
-    }
-    if (buffer) {
-        m__free(buffer);
+        if (buffer) {
+            m__free(buffer);
+        }
     }
 
     if (res == NO_ERR) {
         res = copy_editvars(val, copy);
     }
+
+    copy->flags &= ~VAL_FL_DEFSET;
 
     return res;
     
@@ -8566,13 +8576,20 @@ val_value_t *
 * 
 * INPUTS:
 *   val == value to check
-*   
+*
+* SIDE EFFECTS:
+*   val->flags may be adjsuted
+*         VAL_FL_DEFVALSET will be set if not set already
+*         VAL_FL_DEFVAL will be set or cleared if 
+*            VAL_FL_DEFSETVAL is not already set,
+*            after determining if the value == its default
+*
 * RETURNS:
 *   TRUE if the val is set to the default value
 *   FALSE otherwise
 *********************************************************************/
 boolean
-    val_is_default (const val_value_t *val)
+    val_is_default (val_value_t *val)
 {
     const xmlChar *def;
     xmlChar       *binbuff;
@@ -8590,28 +8607,46 @@ boolean
     }
 #endif
 
+    /* complex types do not have defaults */
+    if (val->typdef == NULL) {
+        return FALSE;
+    }
+
+    /* check added by default */
+    if (val->flags & VAL_FL_DEFSET) {
+        return TRUE;
+    }
+
+    /* check the cached response for a normal leaf */
+    if (val->flags & VAL_FL_DEFVALSET) {
+        return (val->flags & VAL_FL_DEFVAL) ? TRUE : FALSE;
+    }
+
     /* check general corner-case: if the value is part of
      * an index, then return FALSE, even if the data type
      * for the index node has a default
      */
     if (val->index) {
+        val->flags |= VAL_FL_DEFVALSET;
+        val->flags &= ~VAL_FL_DEFVAL;
         return FALSE;
     }
 
-    if (!val->typdef) {
-        return FALSE;
-    }
 
     /* check if the data type has a default */
     def = obj_get_default(val->obj);
-    if (!def) {
+    if (def == NULL) {
+        val->flags |= VAL_FL_DEFVALSET;
+        val->flags &= ~VAL_FL_DEFVAL;
         return FALSE;
     }
 
     /* check if this is a virtual value, return FALSE instead
      * of retrieving the value!!! Used for monitoring only!!!
      */
-    if (val->getcb) {
+    if (val->getcb != NULL) {
+        val->flags |= VAL_FL_DEFVALSET;
+        val->flags &= ~VAL_FL_DEFVAL;
         return FALSE;
     }
 
@@ -8709,6 +8744,13 @@ boolean
         break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    val->flags |= VAL_FL_DEFVALSET;
+    if (ret) {
+        val->flags |= VAL_FL_DEFVAL;
+    } else {
+        val->flags &= ~VAL_FL_DEFVAL;
     }
 
     return ret;
@@ -9871,6 +9913,44 @@ int
     return val->editvars->icookie;
 
 } /* val_get_icookie */
+
+
+/********************************************************************
+* FUNCTION val_delete_default_leaf
+* 
+* Do the internal work to setup a delete of
+* a default leaf
+*
+* INPUTS:
+*    val == val_value_t struct to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    val_delete_default_leaf (val_value_t *val)
+{
+    status_t   res;
+
+#ifdef DEBUG
+    if (val == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    val->flags |= VAL_FL_DEFSET;
+    if (val->editvars == NULL) {
+        res = val_new_editvars(val);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+    val->editvars->curparent = val->parent;
+    val->editvars->editop = OP_EDITOP_DELETE;
+    val->editvars->operset = TRUE;
+    return NO_ERR;
+
+} /* val_delete_default_leaf */
 
 
 /* END file val.c */

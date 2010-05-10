@@ -437,7 +437,7 @@ extern status_t
 extern boolean
     agt_check_config (ncx_withdefaults_t withdef,
                       boolean realtest,
-		      const val_value_t *node);
+		      val_value_t *node);
 
 
 /********************************************************************
@@ -457,7 +457,7 @@ extern boolean
 extern boolean
     agt_check_default (ncx_withdefaults_t withdef,
                        boolean realtest,
-		       const val_value_t *node);
+		       val_value_t *node);
 
 
 
@@ -478,7 +478,7 @@ extern boolean
 extern boolean
     agt_check_save (ncx_withdefaults_t withdef,
                     boolean realtest,
-		    const val_value_t *node);
+		    val_value_t *node);
 
 
 /********************************************************************
@@ -570,8 +570,8 @@ extern status_t
 extern status_t
     agt_check_editop (op_editop_t pop,
 		      op_editop_t *cop,
-		      const val_value_t *newnode,
-		      const val_value_t *curnode,
+		      val_value_t *newnode,
+		      val_value_t *curnode,
 		      ncx_iqual_t  iqual);
 
 

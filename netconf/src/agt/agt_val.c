@@ -385,21 +385,23 @@ static rpc_undo_rec_t *
         *result = ERR_INTERNAL_MEM;
         return NULL;
     }
-    undo->ismeta = FALSE;
-    undo->editop = editop;
-    undo->newnode = newnode;
 
     /* save a copy of the current value in case it gets modified
      * in a merge operation
      */
-    if (curnode) {
-        undo->curnode = val_clone(curnode);
-        if (!undo->curnode) {
+    if (curnode != NULL && msg->rpc_need_undo) {
+        undo->curnode_clone = val_clone(curnode);
+        if (!undo->curnode_clone) {
             rpc_free_undorec(undo);
             *result = ERR_INTERNAL_MEM;
             return NULL;
         }
     }
+
+    undo->ismeta = FALSE;
+    undo->editop = editop;
+    undo->newnode = newnode;
+    undo->curnode = curnode;
     undo->parentnode = parentnode;
     undo->res = res;
 
@@ -976,10 +978,6 @@ static status_t
             return res;
         }
 
-        if (!msg->rpc_need_undo) {
-            undo = NULL;
-        }
-
         if (target->cfg_id == NCX_CFGID_RUNNING) {
             handle_audit_record(cur_editop, 
                                 scb, 
@@ -1015,12 +1013,16 @@ static status_t
                     move_child_node(newval, 
                                     curval, 
                                     parent, 
-                                    undo);
+                                    (msg->rpc_need_undo) ?
+                                    undo : NULL);
                 } else {
                     freenew = val_merge(newval, curval);
                 }
             } else {
-                add_child_node(newval, parent, undo);
+                add_child_node(newval, 
+                               parent,
+                               (msg->rpc_need_undo) ?
+                               undo : NULL);
             }
 
             if (!freenew) {
@@ -1035,32 +1037,57 @@ static status_t
                     move_child_node(newval, 
                                     curval, 
                                     parent, 
-                                    undo);
+                                    (msg->rpc_need_undo) ?
+                                    undo : NULL);
                 } else {
                     val_set_canonical_order(newval);
                     val_swap_child(newval, curval);
-                    if (!msg->rpc_need_undo) {
-                        val_free_value(curval);
-                    } /* else curval not freed yet, hold in undo record */
+                    rpc_set_undorec_free_curnode(undo);
                 }
             } else {
-                add_child_node(newval, parent, undo);
+                add_child_node(newval, 
+                               parent, 
+                               (msg->rpc_need_undo) ?
+                               undo : NULL);
                 val_set_canonical_order(parent);
             }
             break;
         case OP_EDITOP_CREATE:
             val_remove_child(newval);
-            add_child_node(newval, parent, undo);
-            val_set_canonical_order(parent);
+            if (curval != NULL) {
+                /* there must be a default leaf */
+                freenew = val_merge(newval, curval);
+            } else {
+                freenew = FALSE;
+                add_child_node(newval, 
+                               parent, 
+                               (msg->rpc_need_undo) ?
+                               undo : NULL);
+                val_set_canonical_order(parent);
+            }
             break;
         case OP_EDITOP_LOAD:
             break;
         case OP_EDITOP_DELETE:
             if (curval) {
-                val_remove_child(curval);
-                if (!msg->rpc_need_undo) {
-                    val_free_value(curval);
-                } /* else curval not freed yet, hold in undo record */
+                if (val_is_default(curval)) {
+                    /* need to mark this leaf as a default
+                     * instead of actually deleting it
+                     */
+                    res = val_delete_default_leaf(curval);
+                    /* NEED TO RECORD ERROR !!! */
+                } else {
+                    /* need to really remove the deleted
+                     * node so that any commit validation
+                     * against the deleted node works
+                     *
+                     * But also need to keep it in the
+                     * undorec in case a user callback for
+                     * COMMIT or ROLLBACK is needed
+                     */
+                    val_remove_child(curval);
+                    rpc_set_undorec_free_curnode(undo);
+                }
             }
             break;
         default:
@@ -1068,13 +1095,18 @@ static status_t
         }
     }
 
-    if (res == NO_ERR && newval && 
+    if (res == NO_ERR && 
+        newval != NULL && 
         newval->btyp == NCX_BT_LIST && 
         cur_editop == OP_EDITOP_MERGE) {
         
         if (newval->editvars) {
             /* move the list entry after the merge is done */
-            move_mergedlist_node(newval, curval, parent, undo);
+            move_mergedlist_node(newval, 
+                                 curval, 
+                                 parent, 
+                                 (msg->rpc_need_undo) ?
+                                 undo : NULL);
         } else {
             SET_ERROR(ERR_INTERNAL_VAL);
             freenew = TRUE;
@@ -1131,6 +1163,7 @@ static status_t
 {
     const xmlChar   *name;
     val_value_t     *testval;
+    agt_profile_t   *profile;
     status_t         res;
     boolean          applyhere, freetest;
     op_editop_t      cur_editop;
@@ -1302,6 +1335,9 @@ static status_t
             }
             if (!testval) {
                 res = ERR_INTERNAL_MEM;
+            } else if (curval != NULL) {
+                /* there must be a default leaf */
+                freetest = val_merge(testval, curval);
             } else {
                 add_child_node(testval, parent, NULL);
                 /* val_set_canonical_order(parent); */
@@ -1313,8 +1349,24 @@ static status_t
             break;
         case OP_EDITOP_DELETE:
             if (curval) {
-                val_remove_child(curval);
-                val_free_value(curval);
+                profile = agt_get_profile();
+                switch (profile->agt_defaultStyleEnum) {
+                case NCX_WITHDEF_REPORT_ALL:
+                case NCX_WITHDEF_TRIM:
+                    if (val_is_default(curval)) {
+                        curval->flags |= VAL_FL_DEFSET;
+                    } else {
+                        val_remove_child(curval);
+                        val_free_value(curval);
+                    }
+                    break;
+                case NCX_WITHDEF_EXPLICIT:
+                    val_remove_child(curval);
+                    val_free_value(curval);
+                    break;
+                default:
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                }
             }
             break;
         default:
@@ -1801,9 +1853,16 @@ static void
                         rpc_msg_t  *msg,
                         cfg_template_t *target)
 {
-    status_t   res;
+    val_value_t  *curval;
+    status_t      res;
 
     (void)target;
+
+    if (undo->curnode_clone != NULL) {
+        curval = undo->curnode_clone;
+    } else {
+        curval = undo->curnode;
+    }
 
     switch (undo->editop) {
     case OP_EDITOP_LOAD:
@@ -1818,24 +1877,17 @@ static void
                                    scb, 
                                    msg, 
                                    undo->newnode, 
-                                   undo->curnode);
+                                   curval);
 
-#ifdef NOT_YET
-        /**** SET done !!! ***/
-        if (!done) {
-            /* no rollback callback, so apply a delete operation */
-            res = handle_user_callback(AGT_CB_APPLY, 
-                                       OP_EDITOP_DELETE,
-                                       scb, 
-                                       msg, 
-                                       undo->newnode, 
-                                       NULL);
+        /* delete the node from the tree
+         * unless it is a default leaf
+         */
+        if (val_is_default(undo->newnode)) {
+            undo->newnode->flags |= VAL_FL_DEFSET;
+        } else {
+            val_remove_child(undo->newnode);
+            val_free_value(undo->newnode);
         }
-#endif
-
-        /* delete the node from the tree */
-        val_remove_child(undo->newnode);
-        val_free_value(undo->newnode);
         undo->newnode = NULL;
         break;
     case OP_EDITOP_DELETE:
@@ -1847,62 +1899,44 @@ static void
                                    scb,
                                    msg, 
                                    undo->newnode,
-                                   undo->curnode);
+                                   curval);
 
-#ifdef NOT_YET
-        /**** SET done !!! ***/
-        if (!done) {
-            /* no rollback callback, so apply a create operation */
-            res = handle_user_callback(AGT_CB_APPLY,
-                                       OP_EDITOP_CREATE,
-                                       scb,
-                                       msg,
-                                       undo->curnode, 
-                                       NULL);
-        }
-#endif
-
-        /* add the node back in the tree */
-        add_child_node(undo->curnode, undo->parentnode, NULL);
+        /* the node is still in the tree,
+         * do not need to do anything to undo a delete
+         */
         break;
     case OP_EDITOP_MERGE:
     case OP_EDITOP_REPLACE:
-        /*** NEED TO CHECK FOR MERGED META DATA FOR MERGE ***/
-
         /* call the user rollback handler, if any */
         res = handle_user_callback(AGT_CB_ROLLBACK, 
                                    undo->editop,
                                    scb,
                                    msg, 
                                    undo->newnode,
-                                   undo->curnode);
-#ifdef NOT_YET
-        /**** SET done !!! ***/
-        if (!done) {
-            /* no rollback callback, so apply a create operation */
-            res = handle_user_callback(AGT_CB_APPLY,
-                                       OP_EDITOP_DELETE,
-                                       scb,
-                                       msg,
-                                       undo->newnode,
-                                       undo->curnode);
-        }
-#endif
+                                   curval);
 
         /* check if the old node needs to be swapped back
          * of if the new node is just removed
          */
         if (undo->newnode) {
-            val_remove_child(undo->newnode);
             if (undo->curnode) {
-                /*** THIS IS WRONG; REPLACEMENT TBD !!!!! ****/
-                /**** val_swap_child(undo->curnode, undo->newnode); ***/
-                
-            } 
-            /* remove new node */
-            val_free_value(undo->newnode);
-            undo->newnode = NULL;
-
+                /* try to replace old curval */
+                if (undo->curnode_clone) {
+                    val_swap_child(undo->curnode_clone, 
+                                   undo->curnode);
+                    undo->curnode_clone = NULL;
+                } else if (LOGWARN) {
+                    log_warn("\nError: no rollback selected. "
+                             "Cannot undo %s operation",
+                             (undo->editop == OP_EDITOP_MERGE) ?
+                             "merge" : "replace");
+                }
+            } else {
+                /* remove new node */
+                val_remove_child(undo->newnode);
+                val_free_value(undo->newnode);
+                undo->newnode = NULL;
+            }
         } /* else should not happen */
         break;
     default:
@@ -1956,26 +1990,6 @@ static void
                                        msg, 
                                        undo->newnode, 
                                        undo->curnode);
-
-            /* just clean up 'curnode' if it was held instead of deleted */
-            switch (undo->editop) {
-            case OP_EDITOP_REPLACE:
-            case OP_EDITOP_DELETE:
-                /* finish deleting 'curnode' */
-                if (undo->curnode) {
-                    val_free_value(undo->curnode);
-                    undo->curnode = NULL;
-                }
-                break;
-            case OP_EDITOP_LOAD:
-            case OP_EDITOP_CREATE:
-            case OP_EDITOP_MERGE:
-                /* no nodes in the undo rec need to be freed */
-                break;
-            default:
-                /* should not happen */
-                SET_ERROR(ERR_INTERNAL_VAL);
-            }
         } else {
             /* rollback the edit operation */
             process_undo_entry(undo, scb, msg, target);

@@ -441,6 +441,7 @@ status_t
                                                    TRUE, 
                                                    TRUE);
                 if (res != NO_ERR) {
+                    val_free_value(valset);
                     return res;
                 } else {
                     /* transfer the parmset values again */
@@ -458,6 +459,7 @@ status_t
                                                    TRUE, 
                                                    TRUE);
                 if (res != NO_ERR) {
+                    val_free_value(valset);
                     return res;
                 } else {
                     /* transfer the parmset values again */
@@ -501,7 +503,9 @@ status_t
         }
     }
 
-    /* cleanup and exit */
+    /* cleanup and exit
+     * handoff the malloced 'valset' memory here 
+     */
     cli_val = valset;
 
     return res;

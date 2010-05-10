@@ -182,7 +182,7 @@ date         init     comment
 *********************************************************************/
 static boolean
     is_default (ncx_withdefaults_t withdef,
-                const val_value_t *val)
+                val_value_t *val)
 {
     boolean retval;
 
@@ -228,7 +228,7 @@ static boolean
 *********************************************************************/
 static boolean
     check_withdef (ncx_withdefaults_t withdef,
-                   const val_value_t *node)
+                   val_value_t *node)
 {
     const agt_profile_t     *profile;
     boolean                  ret;
@@ -1336,7 +1336,7 @@ status_t
 boolean
     agt_check_config (ncx_withdefaults_t withdef,
                       boolean realtest,
-                      const val_value_t *node)
+                      val_value_t *node)
 {
     boolean           ret;
 
@@ -1377,7 +1377,7 @@ boolean
 boolean
     agt_check_default (ncx_withdefaults_t withdef,
                        boolean realtest,
-                       const val_value_t *node)
+                       val_value_t *node)
 {
     boolean ret;
 
@@ -1412,7 +1412,7 @@ boolean
 boolean
     agt_check_save (ncx_withdefaults_t withdef,
                     boolean realtest,
-                    const val_value_t *node)
+                    val_value_t *node)
 {
     boolean ret;
 
@@ -1732,13 +1732,15 @@ status_t
 status_t
     agt_check_editop (op_editop_t   pop,
                       op_editop_t  *cop,
-                      const val_value_t *newnode,
-                      const val_value_t *curnode,
+                      val_value_t *newnode,
+                      val_value_t *curnode,
                       ncx_iqual_t iqual)
 {
     status_t           res;
+    agt_profile_t     *profile;
 
     res = NO_ERR;
+    profile = agt_get_profile();
 
     /* adjust the child if it has not been set 
      * this heuristic saves the real operation on the way down
@@ -1786,7 +1788,23 @@ status_t
                 switch (iqual) {
                 case NCX_IQUAL_ONE:
                 case NCX_IQUAL_OPT:
-                    res = ERR_NCX_DATA_EXISTS;
+                    switch (profile->agt_defaultStyleEnum) {
+                    case NCX_WITHDEF_REPORT_ALL:
+                        res = ERR_NCX_DATA_EXISTS;
+                        break;
+                    case NCX_WITHDEF_TRIM:
+                        if (!val_is_default(curnode)) {
+                            res = ERR_NCX_DATA_EXISTS;
+                        }
+                        break;
+                    case NCX_WITHDEF_EXPLICIT:
+                        if (!val_set_by_default(curnode)) {
+                            res = ERR_NCX_DATA_EXISTS;
+                        }
+                        break;
+                    default:
+                        res = SET_ERROR(ERR_INTERNAL_VAL);
+                    }
                     break;
                 default:
                     ;
@@ -1811,15 +1829,35 @@ status_t
     case OP_EDITOP_CREATE:
         /* the child op is an explicit create
          * the current node cannot exist unless multiple
-         * instances are allowed
+         * instances are allowed; depends on the defaults style
          */
         if (curnode) {
             switch (iqual) {
             case NCX_IQUAL_ONE:
             case NCX_IQUAL_OPT:
-                return ERR_NCX_DATA_EXISTS;
+                switch (profile->agt_defaultStyleEnum) {
+                case NCX_WITHDEF_REPORT_ALL:
+                    res = ERR_NCX_DATA_EXISTS;
+                    break;
+                case NCX_WITHDEF_TRIM:
+                    if (!val_is_default(curnode)) {
+                        res = ERR_NCX_DATA_EXISTS;
+                    }
+                    break;
+                case NCX_WITHDEF_EXPLICIT:
+                    if (!val_set_by_default(curnode)) {
+                        res = ERR_NCX_DATA_EXISTS;
+                    }
+                    break;
+                default:
+                    res = SET_ERROR(ERR_INTERNAL_VAL);
+                }
+                break;
             default:
                 ;
+            }
+            if (res != NO_ERR) {
+                return res;
             }
         }
 
@@ -1861,6 +1899,28 @@ status_t
             /* delete on non-existing node is always an error */
             res = ERR_NCX_DATA_MISSING;
         } else {
+            /* check if the node is really present for delete */
+            switch (profile->agt_defaultStyleEnum) {
+            case NCX_WITHDEF_REPORT_ALL:
+                break;
+            case NCX_WITHDEF_TRIM:
+                if (val_is_default(curnode)) {
+                    res = ERR_NCX_DATA_MISSING;
+                }
+                break;
+            case NCX_WITHDEF_EXPLICIT:
+                if (val_set_by_default(curnode)) {
+                    res = ERR_NCX_DATA_MISSING;
+                }
+                break;
+            default:
+                res = SET_ERROR(ERR_INTERNAL_VAL);
+            }
+
+            if (res != NO_ERR) {
+                return res;
+            }
+
             /* check the delete against the parent edit-op */
             switch (pop) {
             case OP_EDITOP_NONE:

@@ -621,7 +621,7 @@ static status_t
     val_value_t            *curparm, *newparm;
     status_t                res;
     ncx_iqual_t             iqual;
-    boolean                 match, usewarning;
+    boolean                 match, usewarning, isdefault;
 
     
     /* get the next token, which must be a TSTRING
@@ -699,6 +699,7 @@ static status_t
      * add the newparm to the parmset
      */
     if (curparm) {
+        isdefault = val_set_by_default(curparm);
         iqual = obj_get_iqualval(obj);
         if (iqual == NCX_IQUAL_ONE || iqual == NCX_IQUAL_OPT) {
             /* only one allowed, check really a match */
@@ -710,15 +711,19 @@ static status_t
 
             if (!match) {
                 val_add_child(newparm, val);
+            } else if (isdefault) {
+                dlq_remove(curparm);
+                val_free_value(curparm);
+                val_add_child(newparm, val);
             } else if (keepvals) {
                 if (usewarning) {
                     /* keep current value and toss new value */
                     log_warn("\nWarning: Parameter '%s' already exists. "
                              "Not using new value\n", 
                              curparm->name);
-                    if (LOGDEBUG) {
+                    if (LOGDEBUG2) {
                         val_dump_value(newparm, NCX_DEF_INDENT);
-                        log_debug("\n");
+                        log_debug2("\n");
                     }
                 }
                 val_free_value(newparm);
@@ -728,9 +733,9 @@ static status_t
                     log_warn("\nconf: Parameter '%s' already exists. "
                              "Overwriting with new value\n",
                              curparm->name);
-                    if (LOGDEBUG) {
+                    if (LOGDEBUG2) {
                         val_dump_value(newparm, NCX_DEF_INDENT);
-                        log_debug("\n");
+                        log_debug2("\n");
                     }
                 }
                 dlq_remove(curparm);
@@ -886,9 +891,8 @@ status_t
 
     fp = fopen((const char *)sourcespec, "r");
 
-    m__free(sourcespec);
-
     if (!fp) {
+        m__free(sourcespec);
         if (fileerr) {
             log_error("\nError: config file '%s' could not be opened",
                       filespec);
@@ -897,6 +901,13 @@ status_t
             return NO_ERR;
         }
     }
+
+    if (LOGINFO) {
+        log_info("Loading CLI parameters from '%s'", sourcespec);
+    }
+
+    m__free(sourcespec);
+    sourcespec = NULL;
 
     /* get a new token chain */
     res = NO_ERR;
@@ -926,6 +937,12 @@ status_t
     fclose(fp);
     tkc->fp = NULL;
     tk_free_chain(tkc);
+
+    if (res != NO_ERR) {
+        log_error("\nError: invalid .conf file '%s' (%s)",
+                  filespec,
+                  get_error_string(res));
+    }
 
     return res;
 

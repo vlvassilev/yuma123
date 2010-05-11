@@ -598,9 +598,7 @@ static void
             m__free(val->dname);
             val->dname = NULL;
         }
-    }
-
-    if (full) {
+        val->nsid = 0;
         while (!dlq_empty(&val->metaQ)) {
             cur = (val_value_t *)dlq_deque(&val->metaQ);
             val_free_value(cur);
@@ -9951,6 +9949,37 @@ status_t
     return NO_ERR;
 
 } /* val_delete_default_leaf */
+
+
+/********************************************************************
+* FUNCTION val_force_empty
+* 
+* Convert a simple node to an empty type
+*
+* INPUTS:
+*    val == val_value_t struct to use
+*
+*********************************************************************/
+void
+    val_force_empty (val_value_t *val)
+{
+#ifdef DEBUG
+    if (val == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (!typ_is_simple(val->btyp)) {
+        SET_ERROR(ERR_NCX_WRONG_TYPE);
+        return;
+    }
+
+    clean_value(val, FALSE);
+    val->btyp = NCX_BT_EMPTY;
+    val->v.boo = TRUE;
+
+} /* val_force_empty */
 
 
 /* END file val.c */

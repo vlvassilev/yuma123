@@ -3413,4 +3413,16 @@ extern status_t
     val_delete_default_leaf (val_value_t *val);
 
 
+/********************************************************************
+* FUNCTION val_force_empty
+* 
+* Convert a simple node to an empty type
+*
+* INPUTS:
+*    val == val_value_t struct to use
+*
+*********************************************************************/
+extern void
+    val_force_empty (val_value_t *val);
+
 #endif	    /* _H_val */

@@ -1360,8 +1360,13 @@ static status_t
     /* check corner-case -- choice with no cases defined */
     cas = obj_first_child(choic);
     if (!cas) {
-        log_stdout("\nNo case nodes defined for choice %s\n",
+        if (obj_get_child_count(choic)) {
+            log_stdout("\nNo case nodes enabled for choice %s\n",
                    obj_get_name(choic));
+        } else {
+            log_stdout("\nNo case nodes defined for choice %s\n",
+                       obj_get_name(choic));
+        }
         server_cb->get_optional = saveopt;
         return NO_ERR;
     }
@@ -1370,13 +1375,17 @@ static status_t
     /* else not a partial block corner case but a normal
      * situation where no case has been selected at all
      */
-    log_stdout("\nEnter a number of the selected case statement:\n");
+    log_stdout("\nEnter the number of the selected case statement:\n");
 
     num = 1;
     usedef = FALSE;
 
     for (; cas != NULL;
          cas = obj_next_child(cas)) {
+
+        if (!obj_is_config(cas) || obj_is_abstract(cas)) {
+            continue;
+        }
 
         first = TRUE;
         for (parm = obj_first_child(cas);
@@ -1389,7 +1398,8 @@ static status_t
 
             if (first) {
                 log_stdout("\n  %d: case %s:", 
-                           num++, obj_get_name(cas));
+                           num++, 
+                           obj_get_name(cas));
                 first = FALSE;
             }
 
@@ -1501,6 +1511,11 @@ static status_t
              cas = obj_next_child(cas)) {
 
             if (!obj_is_config(cas) || obj_is_abstract(cas)) {
+                continue;
+            }
+
+            if (obj_first_child(cas) == NULL) {
+                /* skip case if no enabled children */
                 continue;
             }
 
@@ -4479,6 +4494,21 @@ static val_value_t *
             return NULL;
         } else {
             /* *valroot is active and in use */
+            if (newparm != NULL) {
+                return newparm;
+            } else if (targval == *valroot) {
+                /* need to make sure that a top-level
+                 * leaf is not treated as match-node
+                 * instead of a selection node
+                 */
+                if (obj_is_leafy(targval->obj)) {
+                    /* force the data type to be
+                     * empty so it will be treated
+                     * as a selection node
+                     */
+                    val_force_empty(targval);
+                }
+            }
             return (newparm) ? newparm : targval;
         }
     } else if (isselect) {

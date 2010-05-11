@@ -679,7 +679,7 @@ status_t
     ncx_lmem_t        *lmem;
     uint32             len;
     status_t           res;
-    boolean            done;
+    boolean            done, checkexists;
 
 #ifdef DEBUG
     if (!strval || !list) {
@@ -689,6 +689,8 @@ status_t
 
     /* probably already set but make sure */
     list->btyp = btyp;
+
+    checkexists = !dlq_empty(&list->memQ);
 
     if (!*strval) {
         return NO_ERR;
@@ -758,8 +760,17 @@ status_t
             return res;
         }
 
-        /* save the list member in the Q */
-        dlq_enque(lmem, &list->memQ);
+        if (checkexists &&
+            ncx_string_in_list(lmem->val.str, list)) {
+            /* just toss this existing entry 
+             * this mode is rarely used, so do not care
+             * that it is non-optimal
+             */
+            ncx_free_lmem(lmem, NCX_BT_STRING);
+        } else {            
+            /* save the list member in the Q */
+            dlq_enque(lmem, &list->memQ);
+        }
 
         /* reset the string pointer and loop */
         str1 = str2;

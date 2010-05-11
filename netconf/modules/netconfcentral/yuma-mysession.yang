@@ -18,6 +18,11 @@ module yuma-mysession {
      customizing the default session settings
      for the current session.";
 
+  revision 2010-05-10 {
+    description 
+       "Added default to line-size parameter.";
+  }
+
   revision 2009-08-11 {
     description 
        "Initial published version";
@@ -32,6 +37,7 @@ module yuma-mysession {
          per line.  The server may exceed this number.
          It is only a suggestion, not a hard limit.";
       type uint32 { range "40 .. 1024"; }
+      default 72;
     }
     leaf with-defaults {
       description

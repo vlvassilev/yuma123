@@ -10134,4 +10134,52 @@ void
 }   /* obj_set_ncx_flags */
 
 
+/********************************************************************
+* FUNCTION obj_enabled_child_count
+*
+* Get the count of the number of enabled child nodes
+* for the object template
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   number of enabled child nodes
+*********************************************************************/
+uint32
+    obj_enabled_child_count (obj_template_t *obj)
+{
+    dlq_hdr_t       *childQ;
+    obj_template_t  *chobj;
+    uint32           count;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    childQ = obj_get_datadefQ(obj);
+    if (childQ == NULL) {
+        return 0;
+    }
+
+    count = 0;
+
+    for (chobj = (obj_template_t *)dlq_firstEntry(childQ);
+         chobj != NULL;
+         chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
+        if (!obj_has_name(chobj)) {
+            continue;
+        }
+        if (obj_is_enabled(chobj)) {
+            count++;
+        }
+    }
+    return count;
+
+}  /* obj_enabled_child_count */
+
+
 /* END obj.c */

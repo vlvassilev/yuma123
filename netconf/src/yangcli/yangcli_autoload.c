@@ -558,6 +558,100 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION set_temp_ync_features
+* 
+* Set the features list for the new session
+* based on the capabilities reported by the server
+*
+* INPUTS:
+*    mscb == manager session control block to use
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    set_temp_ync_features (mgr_scb_t *mscb)
+{
+    status_t    res;
+
+    if (cap_std_set(&mscb->caplist, CAP_STDID_WRITE_RUNNING)) {
+        res = ncx_set_list(NCX_BT_STRING,
+                           NCX_EL_WRITABLE_RUNNING,
+                           &mscb->temp_ync_features);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
+    if (cap_std_set(&mscb->caplist, CAP_STDID_CANDIDATE)) {
+        res = ncx_set_list(NCX_BT_STRING,
+                           NCX_EL_CANDIDATE,
+                           &mscb->temp_ync_features);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
+    if (cap_std_set(&mscb->caplist, CAP_STDID_CONF_COMMIT)) {
+        res = ncx_set_list(NCX_BT_STRING,
+                           NCX_EL_CONFIRMED_COMMIT,
+                           &mscb->temp_ync_features);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
+    if (cap_std_set(&mscb->caplist, CAP_STDID_ROLLBACK_ERR)) {
+        res = ncx_set_list(NCX_BT_STRING,
+                           NCX_EL_ROLLBACK_ON_ERROR,
+                           &mscb->temp_ync_features);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
+    if (cap_std_set(&mscb->caplist, CAP_STDID_VALIDATE)) {
+        res = ncx_set_list(NCX_BT_STRING,
+                           NCX_EL_VALIDATE,
+                           &mscb->temp_ync_features);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
+    if (cap_std_set(&mscb->caplist, CAP_STDID_STARTUP)) {
+        res = ncx_set_list(NCX_BT_STRING,
+                           NCX_EL_STARTUP,
+                           &mscb->temp_ync_features);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
+    if (cap_std_set(&mscb->caplist, CAP_STDID_URL)) {
+        res = ncx_set_list(NCX_BT_STRING,
+                           NCX_EL_URL,
+                           &mscb->temp_ync_features);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
+    if (cap_std_set(&mscb->caplist, CAP_STDID_XPATH)) {
+        res = ncx_set_list(NCX_BT_STRING,
+                           NCX_EL_XPATH,
+                           &mscb->temp_ync_features);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
+    return NO_ERR;
+    
+}  /* set_temp_ync_features */
+
+
+/********************************************************************
 * FUNCTION autoload_module
 * 
 * auto-load the specified module
@@ -1077,14 +1171,23 @@ status_t
      */
     ncx_set_cur_modQ(&mscb->temp_modQ);
 
+    /* !!! temp until the ietf-netconf.yang module
+     * is fully supported.  The yuma-netconf.yang
+     * module is pre-loaded as the first module
+     */
     res = autoload_module(NCXMOD_YUMA_NETCONF,
                           NULL,
                           NULL, 
                           &ncmod);
     if (res == NO_ERR && ncmod != NULL) {
-        /* the netconf module features have not been set yet */
+        /* Set the features in yuma-netconf.yang according
+         * to the standard capabilities that were announced
+         * by the server
+         */
+        set_temp_ync_features(mscb);
+
         modptr = new_modptr(ncmod, 
-                            /* &searchresult->cap->cap_feature_list, */ NULL,
+                            &mscb->temp_ync_features,
                             NULL);
         if (modptr == NULL) {
             res = ERR_INTERNAL_MEM;

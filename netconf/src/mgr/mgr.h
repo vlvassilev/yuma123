@@ -89,6 +89,7 @@ typedef struct mgr_scb_t_ {
     ncxmod_temp_progcb_t *temp_progcb;
     ncxmod_temp_sescb_t  *temp_sescb;
     dlq_hdr_t             temp_modQ;   /* Q of ncx_module_t */
+    ncx_list_t            temp_ync_features;  
 
     /* running config cached info */
     val_value_t    *root;

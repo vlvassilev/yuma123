@@ -83,6 +83,10 @@ date         init     comment
 #include "ncxconst.h"
 #endif
 
+#ifndef _H_ncx_list
+#include "ncx_list.h"
+#endif
+
 #ifndef _H_status
 #include  "status.h"
 #endif
@@ -246,6 +250,7 @@ void
     cap_init_caplist(&mscb->caplist);
     dlq_createSQue(&mscb->reqQ);
     dlq_createSQue(&mscb->temp_modQ);
+    ncx_init_list(&mscb->temp_ync_features, NCX_BT_STRING);
     mscb->next_id = 1;
 
 }  /* mgr_init_scb */
@@ -302,6 +307,8 @@ void
         mscb->temp_sescb = NULL;
     }
 
+    ncx_clean_list(&mscb->temp_ync_features);
+    
     cap_clean_caplist(&mscb->caplist);
 
     if (mscb->root) {

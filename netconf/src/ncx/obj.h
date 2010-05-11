@@ -3280,4 +3280,21 @@ extern void
 extern void
     obj_set_ncx_flags (obj_template_t *obj);
 
+
+
+/********************************************************************
+* FUNCTION obj_enabled_child_count
+*
+* Get the count of the number of enabled child nodes
+* for the object template
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   number of enabled child nodes
+*********************************************************************/
+extern uint32
+    obj_enabled_child_count (obj_template_t *obj);
+
 #endif	    /* _H_obj */

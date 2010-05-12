@@ -99,7 +99,7 @@ module yangcli {
             assigned to the desired YANG module. Prefix usage is
             optional.";
 
-         // type instance-identifier;  TBD
+         // type schema-instance-identifier;  TBD
 
          type string {
            length "1..max";

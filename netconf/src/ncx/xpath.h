@@ -236,6 +236,7 @@ typedef enum xpath_source_t_ {
     XP_SRC_LEAFREF,
     XP_SRC_YANG,
     XP_SRC_INSTANCEID,
+    XP_SRC_SCHEMA_INSTANCEID,
     XP_SRC_XML
 } xpath_source_t;
 

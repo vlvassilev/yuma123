@@ -829,6 +829,8 @@ val_value_t *
     /* initial parse into a token chain */
     res = xpath_yang_parse_path(NULL, 
                                 NULL, 
+                                (schemainst) ?
+                                XP_SRC_SCHEMA_INSTANCEID :
                                 XP_SRC_INSTANCEID,
                                 xpathpcb);
     if (res != NO_ERR) {

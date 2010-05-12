@@ -1140,6 +1140,16 @@ static status_t
             continue;
         }
 
+        if (pcb->flags & XP_FL_SCHEMA_INSTANCEID &&
+            tk_next_typ(pcb->tkc) == TK_TT_NONE) {
+            /* corner-case: a schema-instance-string
+             * is allowed to be a single forward slash
+             * to indicate the entire document
+             */
+            done = TRUE;
+            continue;
+        }
+
         /* get the node-identifier next */
         res = parse_node_identifier(pcb);
         if (res != NO_ERR) {
@@ -1422,7 +1432,12 @@ status_t
     if (!pcb || !pcb->exprstr) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
-    if (source != XP_SRC_LEAFREF && source != XP_SRC_INSTANCEID) {
+    switch (source) {
+    case XP_SRC_LEAFREF:
+    case XP_SRC_INSTANCEID:
+    case XP_SRC_SCHEMA_INSTANCEID:
+        break;
+    default:
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 #endif
@@ -1462,6 +1477,8 @@ status_t
     pcb->source = source;
     if (source == XP_SRC_INSTANCEID) {
         pcb->flags |= XP_FL_INSTANCEID;
+    } else if (source == XP_SRC_SCHEMA_INSTANCEID) {
+        pcb->flags |= XP_FL_SCHEMA_INSTANCEID;
     }
         
     /* since the pcb->obj is not set, this validation
@@ -1926,6 +1943,15 @@ val_value_t *
         /* absolute path, use objroot to start */
         curobj = pcb->docroot;
         res = TK_ADV(pcb->tkc);
+
+        if (res == ERR_NCX_EOF && 
+            (pcb->flags & XP_FL_SCHEMA_INSTANCEID)) {
+            /* return NO_ERR and NULL to indicate that the
+             * docroot is requested
+             */
+            return NULL;
+        }
+
         if (res != NO_ERR) {
             if (retres) {
                 *retres = res;

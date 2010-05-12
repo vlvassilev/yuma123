@@ -1551,6 +1551,7 @@ status_t
 {
     xpath_pcb_t           *xpathpcb;
     obj_template_t       *leafobj, *objroot;
+    xpath_source_t        xpath_source;
     status_t               res;
     ncx_num_t              len;
 
@@ -1561,6 +1562,7 @@ status_t
 #endif
 
     res = NO_ERR;
+    xpath_source = XP_SRC_INSTANCEID;
 
     if (errinfo) {
         *errinfo = NULL;
@@ -1585,6 +1587,7 @@ status_t
     case NCX_BT_STRING:
         if (!(typ_is_xpath_string(typdef) ||
               typ_is_schema_instance_string(typdef))) {
+
             len.u = xml_strlen(strval);
             res = val_range_ok_errinfo(typdef, 
                                        NCX_BT_UINT32, 
@@ -1600,6 +1603,10 @@ status_t
         /* else fall through and treat XPath string */
     case NCX_BT_INSTANCE_ID:
         /* instance-identifier is handled with xpath.c xpath1.c */
+        if (typ_is_schema_instance_string(typdef)) {
+            xpath_source = XP_SRC_SCHEMA_INSTANCEID;
+        }
+
         xpathpcb = xpath_new_pcb(strval, NULL);
         if (xpathpcb == NULL) {
             res = ERR_INTERNAL_MEM;
@@ -1610,14 +1617,15 @@ status_t
              */
             res = xpath_yang_parse_path(NULL, 
                                         NULL,
-                                        XP_SRC_INSTANCEID,
+                                        xpath_source,
                                         xpathpcb);
             if (res == NO_ERR) {
                 leafobj = NULL;
                 res = xpath_yang_validate_path(NULL, 
                                                ncx_get_gen_root(), 
                                                xpathpcb, 
-                                               (btyp == NCX_BT_INSTANCE_ID) 
+                                               (xpath_source == 
+                                                XP_SRC_INSTANCEID) 
                                                ? FALSE : TRUE,
                                                &leafobj);
             }
@@ -4099,6 +4107,7 @@ status_t
     uint32                ulen;
     xmlns_id_t            qname_nsid;
     boolean               startsimple;
+    xpath_source_t        xpath_source;
 
 #ifdef DEBUG
     if (!val || !typdef) {
@@ -4154,6 +4163,7 @@ status_t
      */
     val->nsid = nsid;
     val->typdef = typdef;
+    xpath_source = XP_SRC_INSTANCEID;
 
     /* convert the value string, if any */
     switch (val->btyp) {
@@ -4234,7 +4244,7 @@ status_t
         break;
     case NCX_BT_STRING:
         if (val->obj && obj_is_schema_instance_string(val->obj)) {
-            ;
+            xpath_source = XP_SRC_SCHEMA_INSTANCEID;
         } else {
             if (valstr) {
                 VAL_STR(val) = xml_strdup(valstr);
@@ -4284,15 +4294,15 @@ status_t
             } else {
                 res = xpath_yang_parse_path(NULL, 
                                             NULL,
-                                            XP_SRC_INSTANCEID,
+                                            xpath_source,
                                             xpathpcb);
                 if (res == NO_ERR) {
                     leafobj = NULL;
                     res = xpath_yang_validate_path(NULL, 
                                                    ncx_get_gen_root(), 
                                                    xpathpcb, 
-                                                   (val->btyp 
-                                                    == NCX_BT_INSTANCE_ID) 
+                                                   (xpath_source 
+                                                    == XP_SRC_INSTANCEID) 
                                                    ? FALSE : TRUE,
                                                    &leafobj);
                 }

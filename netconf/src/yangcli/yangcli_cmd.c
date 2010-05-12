@@ -2982,6 +2982,13 @@ static status_t
         val_free_value(valset);
         clear_result(server_cb);
         return res;
+    } else if (valroot == NULL) {
+        /* this means the docroot was selected */
+        log_error("\nError: The document root is not allowed here as a target");
+        res = ERR_NCX_OPERATION_NOT_SUPPORTED;
+        val_free_value(valset);
+        clear_result(server_cb);
+        return res;
     } else if (targval != valroot) {
         /* keep targval, toss valroot */
         val_remove_child(targval);
@@ -3939,6 +3946,9 @@ static status_t
 *             == NULL to use selectval instead
 *   selectval == value with select string in it
 *             == NULL to use get_content instead
+*
+*   (if both == NULL then no filter is added)
+*
 *   source == optional database source 
 *             <candidate>, <running>
 *   timeoutval == timeout value to use
@@ -3989,6 +3999,7 @@ static status_t
     reqdata = NULL;
     res = NO_ERR;
     input = NULL;
+    filter = NULL;
 
     /* either going to free valroot or config_content */
     if (valroot == NULL || valroot == get_content) {
@@ -4025,7 +4036,7 @@ static status_t
     }
 
     /* add /get-star/input/filter */
-    if (res == NO_ERR) {
+    if (res == NO_ERR && (get_content || selectval)) {
         if (get_content) {
             /* set the get/input/filter node to the
              * get_content, but after filling in any
@@ -4041,11 +4052,11 @@ static status_t
         } else {
             val_add_child(filter, reqdata);
         }
-    }
 
-    /* add the type and maybe select attributes */
-    if (res == NO_ERR) {
-        res = add_filter_attrs(filter, selectval);
+        /* add the type and maybe select attributes */
+        if (res == NO_ERR) {
+            res = add_filter_attrs(filter, selectval);
+        }
     }
 
     /* check any errors so far */
@@ -4201,6 +4212,7 @@ static status_t
  *              FALSE to skip fill phase
  *    iswrite == TRUE if write operation
  *               FALSE if a read operation
+ *    retres == address of return status
  *    valroot == address of return value root pointer
  *               used when the content is from the CLI XPath
  *
@@ -4212,6 +4224,7 @@ static status_t
  *        not be freed. This pointer should be freed instead.
  *        == NULL if the from choice mode does not use
  *           an XPath schema-instance node as input
+ *    *retres == return status
  *
  * RETURNS:
  *    result of the choice; this is the content
@@ -4225,6 +4238,10 @@ static status_t
  *
  *   If *valroot == NULL then this is a malloced pointer that
  *   must be freed by the caller
+ *
+ *   If the retun value is NULL and the *retres is NO_ERR
+ *   then the document root was selected so there is no
+ *   specific node to return as a subtree.
  *********************************************************************/
 static val_value_t *
     get_content_from_choice (server_cb_t *server_cb,
@@ -4234,6 +4251,7 @@ static val_value_t *
                              boolean isdelete,
                              boolean dofill,
                              boolean iswrite,
+                             status_t *retres,
                              val_value_t **valroot)
 {
     val_value_t           *parm, *curparm, *newparm;
@@ -4256,6 +4274,7 @@ static val_value_t *
     vartype = VAR_TYP_NONE;
 
     *valroot = NULL;
+    *retres = NO_ERR;
 
     /* look for the 'from' parameter variant */
     parm = val_find_child(valset, 
@@ -4289,6 +4308,7 @@ static val_value_t *
         if (!parm) {
             log_error("\nError: target parameter is missing");
             server_cb->get_optional = saveopt;
+            *retres = ERR_NCX_MISSING_PARM;
             return NULL;
         }
 
@@ -4308,6 +4328,10 @@ static val_value_t *
                 *valroot = NULL;
             }
             server_cb->get_optional = saveopt;
+            *retres = res;
+            return NULL;
+        } else if (*valroot == NULL) {
+            /* indicates the docroot was selected */
             return NULL;
         }
 
@@ -4332,15 +4356,18 @@ static val_value_t *
                 if (curparm) {
                     val_free_value(curparm);
                 }
+                *retres = res;
                 return NULL;
             }
             if (curparm->obj != targobj) {
+                res = ERR_NCX_INVALID_VALUE;
                 log_error("\nError: current value '%s' "
                           "object type is incorrect.",
                           VAL_STR(parm));
                 server_cb->get_optional = saveopt;
                 val_free_value(*valroot);
                 *valroot = NULL;
+                *retres = res;
                 val_free_value(curparm);
                 return NULL;
             }
@@ -4463,6 +4490,7 @@ static val_value_t *
 
         server_cb->get_optional = saveopt;
         if (res == ERR_NCX_SKIPPED) {
+            res = NO_ERR;
             if (newparm) {
                 val_free_value(newparm);
             }
@@ -4484,6 +4512,7 @@ static val_value_t *
                 *valroot = NULL;
             } /* else *valroot is active and in use */
 
+            *retres = res;
             return newparm;
         } else if (res != NO_ERR) {
             if (newparm) {
@@ -4491,10 +4520,12 @@ static val_value_t *
             }
             val_free_value(*valroot);
             *valroot = NULL;
+            *retres = res;
             return NULL;
         } else {
             /* *valroot is active and in use */
             if (newparm != NULL) {
+                *retres = res;
                 return newparm;
             } else if (targval == *valroot) {
                 /* need to make sure that a top-level
@@ -4528,6 +4559,7 @@ static val_value_t *
             }
         }
         /*  *valroot == NULL and not in use */
+        *retres = res;
         return newparm;
     } else {
         /* from global or local variable 
@@ -4554,16 +4586,19 @@ static val_value_t *
             if (!userval) {
                 log_error("\nError: variable '%s' not found", 
                           fromstr);
+                *retres = ERR_NCX_NOT_FOUND;
                 return NULL;
             } else {
                 newparm = val_clone(userval);
                 if (!newparm) {
                     log_error("\nError: malloc failed");
                 }
+                *retres = ERR_INTERNAL_MEM;
                 return newparm;
             }
         }
     }
+    *retres = res;
     return NULL;
 
 }  /* get_content_from_choice */
@@ -4916,10 +4951,11 @@ static status_t
                                       isdelete,
                                       dofill,
                                       TRUE,
+                                      &res,
                                       &valroot);
     if (!content) {
         val_free_value(valset);
-        return ERR_NCX_MISSING_PARM;
+        return (res == NO_ERR) ? ERR_NCX_MISSING_PARM : res;
     }
 
     if (valroot == NULL && content->btyp == NCX_BT_CONTAINER) {
@@ -5047,10 +5083,11 @@ static status_t
                                       FALSE,
                                       dofill,
                                       TRUE,
+                                      &res,
                                       &valroot);
     if (!content) {
         val_free_value(valset);
-        return ERR_NCX_MISSING_PARM;
+        return (res == NO_ERR) ? ERR_NCX_MISSING_PARM : res;
     }
 
     /* get the timeout parameter */
@@ -5252,10 +5289,11 @@ static status_t
                                       FALSE,
                                       dofill,
                                       FALSE,
+                                      &res,
                                       &valroot);
-    if (!content) {
+    if (res != NO_ERR) {
         val_free_value(valset);
-        return ERR_NCX_MISSING_PARM;
+        return (res==NO_ERR) ? ERR_NCX_MISSING_PARM : res;
     }
 
     /* construct a get PDU with the content as the filter */
@@ -5378,10 +5416,11 @@ static status_t
                                       FALSE,
                                       dofill,
                                       FALSE,
+                                      &res,
                                       &valroot);
-    if (!content) {
+    if (res != NO_ERR) {
         val_free_value(valset);
-        return ERR_NCX_MISSING_PARM;
+        return res;
     }
 
     /* hand off this malloced node to send_get_to_server */
@@ -5536,6 +5575,7 @@ static status_t
                                       FALSE,
                                       FALSE,
                                       FALSE,
+                                      &res,
                                       &valroot);
     if (content) {
         if (content->btyp == NCX_BT_STRING && VAL_STR(content)) {
@@ -5720,6 +5760,7 @@ static status_t
                                       FALSE,
                                       FALSE,
                                       FALSE,
+                                      &res,
                                       &valroot);
     if (content) {
         if (content->btyp == NCX_BT_STRING && VAL_STR(content)) {

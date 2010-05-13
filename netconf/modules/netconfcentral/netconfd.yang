@@ -46,7 +46,7 @@ module netconfd {
 
               If present, overrides the default startup config
               file name 'startup-cfg.xml',  This will also
-              override the YUMA_DATAPATH environement variable
+              override the YUMA_DATAPATH environment variable
               and the datapath CLI parameter, if the first
               character is the forward slash '/', indicating
               an absolute file path.";
@@ -136,7 +136,7 @@ module netconfd {
         description
            "Specifies the number of seconds that a session
             may exist before the hello PDU is received.
-            A seesion will be dropped if no hello PDU 
+            A session will be dropped if no hello PDU 
             is received before this number of seconds elapses.
 
             If this parameter is set to zero, then the server
@@ -158,7 +158,7 @@ module netconfd {
         description
            "Specifies the number of seconds that a session
             may remain idle without issuing any RPC requests.
-            A seesion will be dropped if it is idle for an
+            A session will be dropped if it is idle for an
             interval longer than this number of seconds.
 
             Sessions that have a notification subscription

@@ -739,7 +739,7 @@ module yangcli {
            description 
              "Retry interval to use if a lock is temporarily
               unavailable.  The client will wait this number of
-              seconds before reattempting to get the current lock.";
+              seconds before attempting to get the current lock.";
            units seconds;
            type uint32 { range "1 .. 300"; }
            default 2;
@@ -880,7 +880,7 @@ module yangcli {
 	leaf edit-target {
           description 
             "The value or key clause that should be used.
-             This parameter shoul only be present if the
+             This parameter should only be present if the
              order selected is 'before' or 'after'.
 
              For a leaf-list, the edit-target contains the
@@ -1281,7 +1281,7 @@ module yangcli {
             "Set a maximum number of loops that can be
              iterated for this while command.
              The value zero means that no maximum will be
-             enforced.  Use this mode with caustion.";
+             enforced.  Use this mode with caution.";
           type uint32;
           default 65535;
         }

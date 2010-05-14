@@ -122,14 +122,18 @@ rm -rf $RPM_BUILD_ROOT
   * Added if, elif, else, eval, end, while, log-*
 	commands to yangcli
   * Supporting yang-12 draft
-  * Added $user valriable to XPath
+  * Supporting yang-types-09 draft
+  * Supporting ietf-netconf-with-defaults-07 draft
+  * Added 'user' valriable to XPath
   * Added module-loaded and feature-enabled functions
-	to XPath function library
+    to XPath function library
   * Fixed bugs in sget, sget-config commands in yangcli
   * Fixed module search order bug that favored plain YANG
-	file names over names with revision dates in them,
-	and favored YANG over YIN files from a later directory
-	in the search path.
+    file names over names with revision dates in them,
+    and favored YANG over YIN files from a later directory
+    in the search path.
+  * yangcli now limits remote NETCONF operations based
+    on the capabilities reported by the server
 * Fri Apr 02 2010 Andy Bierman <andy at @iwl.com> 0.11-2
   * Added 'stream_output' boolean to session hdr to disable
     server output streaming, if desired
@@ -221,6 +225,7 @@ echo "Check the user manuals in /etc/share/doc/yuma"
 /usr/share/doc/yuma/yumatools-legal-notices.pdf
 /usr/share/doc/yuma/yuma-dev-manual.pdf
 %{_mandir}/man1/yangdumpcode.1.gz
+%{_mandir}/man1/make_sil_dir.sh.1.gz
 %{_includedir}/yuma/
 %{_datadir}/yuma/util/
 %{_datadir}/yuma/src/libtoaster/

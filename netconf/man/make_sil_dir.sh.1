@@ -1,0 +1,64 @@
+.\" Process this file with
+.\" nroff -e -mandoc foo.1
+.\"
+.TH make_sil_dir.sh 1 "May 14, 2010" Linux "make_sil_dir.sh 0.12-1"
+.SH NAME
+make_sil_dir.sh \- create a server instrumentation library working directory
+
+.SH SYNOPSIS
+.nf
+
+   make_sil_dir.sh module-name
+
+.fi
+.SH DESCRIPTION
+.B make_sil_dir.sh
+is a scipt to create a server instrumentation library (SIL)
+root work directory, for a specific YANG module.
+
+The following directories and files would be created
+if the command 'make_sil_dir.sh test' was called from the
+directory ~/work:
+.nf
+
+ ~/work/test/ -+
+               |
+               + bin/
+               |
+               + lib/
+               |
+               + Makefile
+               |
+               + src/ -+
+                       |
+                       + Makefile
+                       |
+                       + test.c
+                       |
+                       + test.h
+
+.fi
+
+.SH USAGE
+This script must be called from the parent directory
+where the SIL root work directory should be created.
+The 'module-name' parameter will be used for the name
+of the directory created.  It must match a module in the
+normal module search path for the SIL code to
+be generated.
+.SH LICENSE
+The Yuma Tools programs and documentation are subject to
+a software license, available at:
+.nf
+
+    http://yuma.iwl.com/licenses/yumatools-cs-license.pdf
+     
+.fi
+.SH AUTHOR
+Andy Bierman, <andyb at iwl dot com>
+
+.SH SEE ALSO
+.BR netconfd (1)
+.BR yangcli (1)
+.BR yangdumpcode (1)
+

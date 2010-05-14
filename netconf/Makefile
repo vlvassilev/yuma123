@@ -9,11 +9,7 @@
 # Put only the directories that build object files in the list
 
 # make all targets
-DIRS = src modules etc doc man
-
-ifdef RELEASE
-  DIRS += util
-endif
+DIRS = src modules etc doc man util
 
 TOP_INSTALL = $(DESTDIR)/usr/share/yuma
 

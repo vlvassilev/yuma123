@@ -1,3 +1,17 @@
+yuma (0.12-1) unstable; urgency=low
+  * Added :url capability support to netconfd
+  * Added if, elif, else, eval, end, while, log-*
+	commands to yangcli
+  * Supporting yang-12 draft
+  * Added $user valriable to XPath
+  * Added module-loaded and feature-enabled functions
+	to XPath function library
+  * Fixed bugs in sget, sget-config commands in yangcli
+  * Fixed module search order bug that favored plain YANG
+	file names over names with revision dates in them,
+	and favored YANG over YIN files from a later directory
+	in the search path.
+ -- Andy Bierman <andyb@iwl.com>  Fri, 14 May 2010 09:00:00 -0700
 yuma (0.11-2) unstable; urgency=low
   * Added 'stream_output' boolean to session hdr to disable
     server output streaming, if desired

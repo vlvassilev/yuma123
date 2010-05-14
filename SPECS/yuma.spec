@@ -1,6 +1,6 @@
 Name:           yuma
-Version:        0.11
-Release:        2%{?dist}
+Version:        0.12
+Release:        1%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -36,6 +36,8 @@ echo "Check the user manuals in /etc/share/doc/yuma"
 %{_libdir}/libncx.so.1.0
 /usr/share/doc/yuma/yumatools-cs-license.pdf
 /usr/share/doc/yuma/yumatools-legal-notices.pdf
+/usr/share/doc/yuma/yuma-installation-guide.pdf
+/usr/share/doc/yuma/yuma-quickstart-guide.pdf
 /usr/share/doc/yuma/AUTHORS
 /usr/share/doc/yuma/ChangeLog
 /usr/share/doc/yuma/README
@@ -103,8 +105,10 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/doc/yuma/AUTHORS
 /usr/share/doc/yuma/ChangeLog
 /usr/share/doc/yuma/README
-/usr/share/doc/yuma/yuma-quickstart-guide.pdf
-/usr/share/doc/yuma/yuma-user-manual.pdf
+/usr/share/doc/yuma/yuma-user-cmn-manual.pdf
+/usr/share/doc/yuma/yuma-yangcli-manual.pdf
+/usr/share/doc/yuma/yuma-yangdiff-manual.pdf
+/usr/share/doc/yuma/yuma-yangdump-manual.pdf
 %{_mandir}/man1/yangcli.1.gz
 %{_mandir}/man1/yangdiff.1.gz
 %{_mandir}/man1/yangdump.1.gz
@@ -113,6 +117,19 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/yuma/modules/netconfcentral/yangdump.yang
 
 %changelog
+* Fri May 14 2010 Andy Bierman <andy at @iwl.com> 0.12-1
+  * Added :url capability support to netconfd
+  * Added if, elif, else, eval, end, while, log-*
+	commands to yangcli
+  * Supporting yang-12 draft
+  * Added $user valriable to XPath
+  * Added module-loaded and feature-enabled functions
+	to XPath function library
+  * Fixed bugs in sget, sget-config commands in yangcli
+  * Fixed module search order bug that favored plain YANG
+	file names over names with revision dates in them,
+	and favored YANG over YIN files from a later directory
+	in the search path.
 * Fri Apr 02 2010 Andy Bierman <andy at @iwl.com> 0.11-2
   * Added 'stream_output' boolean to session hdr to disable
     server output streaming, if desired
@@ -165,6 +182,7 @@ echo "Check the user manuals in /etc/share/doc/yuma"
 %{_sysconfdir}/yuma/netconfd-sample.conf
 /usr/share/doc/yuma/yumatools-cs-license.pdf
 /usr/share/doc/yuma/yumatools-legal-notices.pdf
+/usr/share/doc/yuma/yuma-netconfd-manual.pdf
 /usr/share/doc/yuma/AUTHORS
 /usr/share/doc/yuma/ChangeLog
 /usr/share/doc/yuma/README

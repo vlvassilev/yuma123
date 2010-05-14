@@ -1,6 +1,8 @@
 usr/lib/libncx*
 usr/share/doc/yuma/yumatools-cs-license.pdf.gz
 usr/share/doc/yuma/yumatools-legal-notices.pdf.gz
+usr/share/doc/yuma/yuma-installation-guide.pdf.gz
+usr/share/doc/yuma/yuma-quickstart-guide.pdf.gz
 usr/share/doc/yuma/AUTHORS.gz
 usr/share/doc/yuma/ChangeLog.gz
 usr/share/doc/yuma/README.gz

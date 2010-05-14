@@ -1094,4 +1094,34 @@ ncx_var_t *
 }  /* xpath_getvar_fn */
 
 
+/********************************************************************
+* FUNCTION get_netconf_mod
+* 
+*  Get the netconf module
+*
+* INPUTS:
+*   server_cb == server control block to use
+* 
+* RETURNS:
+*    netconf module
+*********************************************************************/
+ncx_module_t *
+    get_netconf_mod (server_cb_t *server_cb)
+{
+    ncx_module_t  *mod;
+
+#ifdef DEBUG
+    if (server_cb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    mod = find_module(server_cb, NCXMOD_YUMA_NETCONF);
+    return mod;
+
+}  /* get_netconf_mod */
+
+
+
 /* END yangcli_util.c */

@@ -532,17 +532,6 @@ extern ncx_bad_data_t
     get_baddata (void);
 
 
-/********************************************************************
-* FUNCTION get_netconf_mod
-* 
-*  Get the netconf module
-* 
-* RETURNS:
-*    netconf module
-*********************************************************************/
-extern ncx_module_t *
-    get_netconf_mod (void);
-
 
 /********************************************************************
 * FUNCTION get_yangcli_mod

@@ -2648,6 +2648,8 @@ void
     }
 #endif
 
+    impmod = NULL;
+
     for (testimp = (ncx_import_t *)dlq_firstEntry(&mod->importQ);
          testimp != NULL;
          testimp = (ncx_import_t *)dlq_nextEntry(testimp)) {

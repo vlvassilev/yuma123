@@ -163,7 +163,7 @@ static status_t
     rpc = NULL;
 
     /* get the <copy-config> template */
-    rpc = ncx_find_object(get_netconf_mod(), 
+    rpc = ncx_find_object(get_netconf_mod(server_cb), 
                           NCX_EL_COPY_CONFIG);
     if (!rpc) {
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);

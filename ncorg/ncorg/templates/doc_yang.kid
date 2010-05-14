@@ -63,7 +63,7 @@
 	    <br/><br/>
 	    <b>Intended Status:</b> Proposed Standard RFC, mandatory-to-implement<br/><br/>
 	    <a target="_blank" 
-               href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-types-08.txt">
+               href="http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-types-09.txt">
               Common YANG Data Types
 	    </a>
 	  </p>

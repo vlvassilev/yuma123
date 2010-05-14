@@ -1751,8 +1751,71 @@ static status_t
         }
     }
 
-    /* check valid module name pattern */
-    if (!isfile && !ncx_valid_name(modname, modlen)) {
+
+    /* 1) if parameter is a filespec, then try it and exit
+     *    if it does not work, instead of trying other directories
+     */
+    if (isfile) {
+        /* the try_module function expects the first
+         * parm to be a writable buffer, even though
+         * in this case there will be nothing altered
+         * in the module name string.  Need to copy it
+         * instead of pass it directly :-(
+         */
+        buff = xml_strdup(modname);
+        if (buff == NULL) {
+            return ERR_INTERNAL_MEM;
+        }
+        if (mode == NCXMOD_MODE_NONE) {
+            try_yin = TRUE;
+            mode = NCXMOD_MODE_FILEYANG;
+        }
+
+        if (mode == NCXMOD_MODE_FILEYANG) {
+            res = try_module(buff, 
+                             modlen,
+                             NULL,
+                             NULL,
+                             NULL,
+                             NULL,
+                             mode,
+                             TRUE,
+                             &done, 
+                             pcb,
+                             ptyp);
+        } else {
+            res = ERR_NCX_MISSING_FILE;
+        }
+
+        if (res == ERR_NCX_MISSING_FILE && try_yin) {
+            res = try_module(buff, 
+                             modlen,
+                             NULL,
+                             NULL,
+                             NULL,
+                             NULL,
+                             NCXMOD_MODE_FILEYIN,
+                             TRUE,
+                             &done, 
+                             pcb,
+                             ptyp);
+        }
+        if (res == ERR_NCX_MISSING_FILE) {
+            log_error("\nError: file not found (%s)", modname);
+        } else if (res == NO_ERR) {
+            if (retmod) {
+                *retmod = pcb->top;
+            }
+        }
+        m__free(buff);
+        return res;
+    }
+
+    /* the module name is not a file;
+     * the revision may be relevant now;
+     * make sure the module name is even valid
+     */
+    if (!ncx_valid_name(modname, modlen)) {
         log_error("\nError: Invalid module name (%s)", modname);
         res = add_failed(modname, revision, pcb, res);
         if (res != NO_ERR) {
@@ -1762,14 +1825,12 @@ static status_t
         }
     }
 
-    /* check if the module is already loaded (in the current ncx_modQ) 
+    /* check if the module is already loaded (in the 
+     * current ncx_modQ) 
      * skip if this is parsemode in yangcli, and a new copy of the
      * module is desired
      */
-    if (!isfile &&
-        !pcb->savetkc &&
-        (pcb->importmode || !pcb->parsemode)) {
-
+    if (!pcb->savetkc && (pcb->importmode || !pcb->parsemode)) {
         testmod = ncx_find_module(modname, revision);
         if (testmod) {
             if (LOGDEBUG2) {
@@ -1815,51 +1876,6 @@ static status_t
         return ERR_INTERNAL_MEM;
     } else {
         *buff = 0;
-    }
-
-    /* 1) if parameter is a filespec, then try it and exit
-     *    if it does not work, instead of trying other directories
-     */
-    if (isfile) {
-        if (mode == NCXMOD_MODE_NONE) {
-            try_yin = TRUE;
-            mode = NCXMOD_MODE_FILEYANG;
-        }
-        res = try_module(buff, 
-                         bufflen,
-                         modname,
-                         NULL,
-                         NULL,
-                         revision,
-                         mode,
-                         FALSE,
-                         &done, 
-                         pcb,
-                         ptyp);
-
-        if (res == ERR_NCX_MISSING_FILE && try_yin) {
-            res = try_module(buff, 
-                             bufflen,
-                             modname,
-                             NULL,
-                             NULL,
-                             revision,
-                             NCXMOD_MODE_FILEYIN,
-                             FALSE,
-                             &done, 
-                             pcb,
-                             ptyp);
-        }
-
-        m__free(buff);
-        if (res == ERR_NCX_MISSING_FILE) {
-            log_error("\nError: file not found (%s)", modname);
-        } else if (res == NO_ERR) {
-            if (retmod) {
-                *retmod = pcb->top;
-            }
-        }
-        return res;
     }
 
     /* 2) try alt_path variable if set; used by yangdiff */

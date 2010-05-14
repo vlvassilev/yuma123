@@ -23,6 +23,11 @@ module netconfd {
         This module is not advertised by the server.
         It contains only CLI parameters.";
 
+    revision 2010-05-13 {
+       description 
+         "Added --with-url to enable :url capability.";
+    }
+
     revision 2010-01-14 {
        description 
          "Initial version for 0.9.9 release.";

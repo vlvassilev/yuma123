@@ -451,4 +451,19 @@ extern ncx_var_t *
                      const xmlChar *varname,
                      status_t *res);
 
+/********************************************************************
+* FUNCTION get_netconf_mod
+* 
+*  Get the netconf module
+*
+* INPUTS:
+*   server_cb == server control block to use
+* 
+* RETURNS:
+*    netconf module
+*********************************************************************/
+extern ncx_module_t *
+    get_netconf_mod (server_cb_t *server_cb);
+
+
 #endif	    /* _H_yangcli_util */

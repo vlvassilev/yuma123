@@ -249,13 +249,15 @@ static void
          */
         if (!curval->index) {
             if (getop) {
-                xml_wr_full_val(scb, 
-                                &msg->mhdr, 
-                                curval, 
-                                indent);
+                xml_wr_full_check_val(scb, 
+                                      &msg->mhdr, 
+                                      curval, 
+                                      indent,
+                                      agt_check_default);
             } else {
                 xml_wr_full_check_val(scb, 
-                                      &msg->mhdr, curval, 
+                                      &msg->mhdr,
+                                      curval, 
                                       indent, 
                                       agt_check_config);
             }

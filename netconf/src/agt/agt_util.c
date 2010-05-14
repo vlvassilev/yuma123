@@ -195,13 +195,7 @@ static boolean
         retval = val_is_default(val);
         break;
     case NCX_WITHDEF_EXPLICIT:
-        if (!val_set_by_default(val)) {
-            /* set by operator, never a default */
-            retval = FALSE;
-        } else {
-            /* set by server, could be a default */
-            retval = val_is_default(val);
-        }
+        retval = val_set_by_default(val);
         break;
     case NCX_WITHDEF_NONE:
     default:

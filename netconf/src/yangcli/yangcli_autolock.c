@@ -259,10 +259,10 @@ static status_t
     cfg_id = lockcb->config_id;
 
     if (islock) {
-        rpc = ncx_find_object(get_netconf_mod(), 
+        rpc = ncx_find_object(get_netconf_mod(server_cb), 
                               NCX_EL_LOCK);
     } else {
-        rpc = ncx_find_object(get_netconf_mod(), 
+        rpc = ncx_find_object(get_netconf_mod(server_cb), 
                               NCX_EL_UNLOCK);
     }
     if (!rpc) {
@@ -854,7 +854,7 @@ status_t
     reqdata = NULL;
     res = NO_ERR;
 
-    rpc = ncx_find_object(get_netconf_mod(), 
+    rpc = ncx_find_object(get_netconf_mod(server_cb), 
                           NCX_EL_DISCARD_CHANGES);
     if (!rpc) {
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);

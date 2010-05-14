@@ -1,6 +1,6 @@
  module ietf-netconf-with-defaults {
 
-    namespace "urn:ietf:params:netconf:capability:with-defaults";
+    namespace "urn:ietf:params:xml:ns:yang:ietf-netconf-with-defaults";
 
     prefix nwd;
 
@@ -49,7 +49,7 @@
     // RFC Ed.: remove this note
     // Note: extracted from draft-ietf-netmod-with-defaults-06.txt
 
-    revision 2010-03-25 {
+    revision 2010-04-19 {
       description
         "Initial version.";
       reference

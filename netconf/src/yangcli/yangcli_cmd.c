@@ -3627,7 +3627,7 @@ static status_t
     }
 
     /* get the <edit-config> template */
-    rpc = ncx_find_object(get_netconf_mod(), 
+    rpc = ncx_find_object(get_netconf_mod(server_cb), 
                           NCX_EL_EDIT_CONFIG);
     if (!rpc) {
         if (freeroot) {
@@ -3978,13 +3978,13 @@ static status_t
 *********************************************************************/
 static status_t
     send_get_to_server (server_cb_t *server_cb,
-                       val_value_t *valroot,
-                       val_value_t *get_content,
-                       val_value_t *selectval,
-                       val_value_t *source,
-                       uint32 timeoutval,
-                       boolean dofill,
-                       ncx_withdefaults_t withdef)
+                        val_value_t *valroot,
+                        val_value_t *get_content,
+                        val_value_t *selectval,
+                        val_value_t *source,
+                        uint32 timeoutval,
+                        boolean dofill,
+                        ncx_withdefaults_t withdef)
 {
     obj_template_t        *rpc, *input, *withdefobj;
     val_value_t           *reqdata, *filter;
@@ -4009,7 +4009,7 @@ static status_t
     }
 
     /* get the <get> or <get-config> input template */
-    rpc = ncx_find_object(get_netconf_mod(),
+    rpc = ncx_find_object(get_netconf_mod(server_cb),
                           (source) ? 
                           NCX_EL_GET_CONFIG : NCX_EL_GET);
     if (rpc) {
@@ -4610,6 +4610,7 @@ static val_value_t *
  * Add the nc:operation attribute to a value node
  *
  * INPUTS:
+ *    server_cb == server control block to use
  *    val == value node to set
  *    op == edit operation to use
  *
@@ -4617,7 +4618,8 @@ static val_value_t *
  *   status
  *********************************************************************/
 static status_t
-    add_one_operation_attr (val_value_t *val,
+    add_one_operation_attr (server_cb_t *server_cb,
+                            val_value_t *val,
                             op_editop_t op)
 {
     obj_template_t       *operobj;
@@ -4626,7 +4628,7 @@ static status_t
     status_t              res;
 
     /* get the internal nc:operation object */
-    operobj = ncx_find_object(get_netconf_mod(), 
+    operobj = ncx_find_object(get_netconf_mod(server_cb), 
                               NC_OPERATION_ATTR_NAME);
     if (!operobj) {
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
@@ -4670,6 +4672,7 @@ static status_t
  * Add the nc:operation attribute to a value node
  *
  * INPUTS:
+ *    server_cb == server control block to use
  *    val == value node to set
  *    op == edit operation to use
  *    topcontainer == TRUE if a top-level container
@@ -4680,7 +4683,8 @@ static status_t
  *   status
  *********************************************************************/
 static status_t
-    add_operation_attr (val_value_t *val,
+    add_operation_attr (server_cb_t *server_cb,
+                        val_value_t *val,
                         op_editop_t op,
                         boolean topcontainer)
 {
@@ -4692,7 +4696,9 @@ static status_t
     switch (val->obj->objtype) {
     case OBJ_TYP_CONTAINER:
         if (!topcontainer) {
-            res = add_one_operation_attr(val, op);
+            res = add_one_operation_attr(server_cb,
+                                         val, 
+                                         op);
             break;
         } /* else fall through */
     case OBJ_TYP_CHOICE:
@@ -4701,14 +4707,18 @@ static status_t
              childval != NULL;
              childval = val_get_next_child(childval)) {
 
-            res = add_one_operation_attr(childval, op);
+            res = add_one_operation_attr(server_cb,
+                                         childval, 
+                                         op);
             if (res != NO_ERR) {
                 return res;
             }
         }
         break;
     default:
-        res = add_one_operation_attr(val, op);
+        res = add_one_operation_attr(server_cb,
+                                     val, 
+                                     op);
     }
 
     return res;
@@ -4977,7 +4987,10 @@ static status_t
 
     if (doattr) {
         /* add nc:operation attribute to the value node */
-        res = add_operation_attr(content, editop, topcontainer);
+        res = add_operation_attr(server_cb,
+                                 content, 
+                                 editop, 
+                                 topcontainer);
         if (res != NO_ERR) {
             log_error("\nError: Creation of nc:operation"
                       " attribute failed");
@@ -5152,7 +5165,10 @@ static status_t
     }
 
     /* add nc:operation attribute to the value node */
-    res = add_operation_attr(content, editop, FALSE);
+    res = add_operation_attr(server_cb,
+                             content, 
+                             editop, 
+                             FALSE);
     if (res != NO_ERR) {
         log_error("\nError: Creation of nc:operation"
                   " attribute failed");
@@ -5298,13 +5314,13 @@ static status_t
 
     /* construct a get PDU with the content as the filter */
     res = send_get_to_server(server_cb, 
-                            valroot,
-                            content, 
-                            NULL, 
-                            NULL, 
-                            timeoutval, 
-                            dofill,
-                            withdef);
+                             valroot,
+                             content, 
+                             NULL, 
+                             NULL, 
+                             timeoutval, 
+                             dofill,
+                             withdef);
     if (res != NO_ERR) {
         log_error("\nError: send get operation failed (%s)",
                   get_error_string(res));

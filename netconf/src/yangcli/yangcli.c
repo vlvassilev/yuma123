@@ -3713,21 +3713,6 @@ ncx_bad_data_t
 
 
 /********************************************************************
-* FUNCTION get_netconf_mod
-* 
-*  Get the netconf module
-* 
-* RETURNS:
-*    netconf module
-*********************************************************************/
-ncx_module_t *
-    get_netconf_mod (void)
-{
-    return netconf_mod;
-}  /* get_netconf_mod */
-
-
-/********************************************************************
 * FUNCTION get_yangcli_mod
 * 
 *  Get the yangcli module

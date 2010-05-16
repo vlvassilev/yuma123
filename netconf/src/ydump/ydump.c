@@ -1708,10 +1708,6 @@ status_t
     status_t       res;
     xmlns_id_t     nsid;
 
-    /* init module static variables */
-    malloc_cnt = 0;
-    free_cnt = 0;
-
     memset(cvtparms, 0x0, sizeof(yangdump_cvtparms_t));
 
     cvtparms->allowcode = allowcode;

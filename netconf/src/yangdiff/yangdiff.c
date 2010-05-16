@@ -1972,8 +1972,6 @@ static status_t
     status_t       res;
 
     /* init module static variables */
-    malloc_cnt = 0;
-    free_cnt = 0;
     memset(&diffparms, 0x0, sizeof(yangdiff_diffparms_t));
     dlq_createSQue(&diffparms.oldmodQ);
     dlq_createSQue(&diffparms.newmodQ);

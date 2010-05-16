@@ -91,9 +91,6 @@ int
     mtrace();
 #endif
 
-    malloc_cnt = 0;
-    free_cnt = 0;
-
     res = ydump_init(argc, argv, FALSE, &mycvtparms);
 
     if (res == NO_ERR) {

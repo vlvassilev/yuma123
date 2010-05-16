@@ -1025,14 +1025,10 @@ status_t
             if (rawparm->value) {
                 m__free(rawparm->value);
             }
-            rawparm->value = strdup(parmval);
+            rawparm->value = (char *)
+                xml_strdup((const xmlChar *)parmval);
             if (!rawparm->value) {
                 res = ERR_INTERNAL_MEM;
-            } else {
-                /* manually bump the malloc count since 
-                 * strdup did not do that
-                 */
-                malloc_cnt++;
             }
         }
     }

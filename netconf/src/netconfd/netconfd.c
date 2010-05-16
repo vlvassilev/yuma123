@@ -222,10 +222,12 @@ static status_t
               boolean *showver,
               help_mode_t *showhelpmode)
 {
+#define BUFFLEN 256
+
     status_t     res;
     log_debug_t  dlevel;
     int          len;
-    char        *buff;
+    char         buff[BUFFLEN];
 
     /* set the default debug output level */
     dlevel = LOG_DEBUG_INFO;
@@ -236,13 +238,12 @@ static status_t
      */
     len = strlen(START_MSG) + strlen(COPYRIGHT_STRING) + 2;
 
-    buff = m__getMem(len);
-    if (buff == NULL) {
-        return ERR_INTERNAL_MEM;
+    if (len < BUFFLEN) {
+        strcpy(buff, START_MSG);
+        strcat(buff, COPYRIGHT_STRING);
+    } else {
+        return ERR_BUFF_OVFL;
     }
-
-    strcpy(buff, START_MSG);
-    strcat(buff, COPYRIGHT_STRING);
 
     res = ncx_init(FALSE, 
                    dlevel, 
@@ -251,15 +252,13 @@ static status_t
                    argc, 
                    argv);
 
-    m__free(buff);
-
     if (res != NO_ERR) {
         return res;
     }
 
 #ifdef NETCONFD_DEBUG
     if (LOGDEBUG2) {
-        log_debug2("\nnetconfd: Starting Netconf Agent Library");
+        log_debug2("\nnetconfd: Loading Netconf Server Library");
     }
 #endif
 
@@ -273,7 +272,7 @@ static status_t
         return res;
     }
 
-    /* Initialize the Netconf Agent Library
+    /* Initialize the Netconf Server Library
      * with command line and conf file parameters 
      */
     res = agt_init1(argc, argv, showver, showhelpmode);
@@ -387,9 +386,6 @@ int
 #endif
 
     done = FALSE;
-
-    malloc_cnt = 0;
-    free_cnt = 0;
 
     while (!done) {
 

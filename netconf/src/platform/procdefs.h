@@ -225,8 +225,9 @@ typedef		long double		LDBL;
 #endif	    /* FALSE | TRUE */
 
 
-PUBLIC uint32  malloc_cnt;
-PUBLIC uint32  free_cnt;
+/* memory for these vars in ncx/ncx.c */
+extern uint32  malloc_cnt;
+extern uint32  free_cnt;
 
 #ifndef m__getMem
 #define m__getMem(X)   malloc(X);malloc_cnt++

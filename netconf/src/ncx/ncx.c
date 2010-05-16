@@ -274,6 +274,9 @@ static dlq_hdr_t   *temp_modQ;
  */
 static ncx_display_mode_t  display_mode;
 
+/* memory leak debugging vars */
+uint32              malloc_cnt;
+uint32              free_cnt;
 
 
 /********************************************************************
@@ -880,6 +883,9 @@ status_t
     if (ncx_init_done) {
         return NO_ERR;
     }
+
+    malloc_cnt = 0;
+    free_cnt = 0;
 
     status_init();
 

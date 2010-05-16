@@ -3243,10 +3243,6 @@ static status_t
     withdefaults = NCX_WITHDEF_NONE;
     temp_progcb = NULL;
 
-    /* global vars */
-    malloc_cnt = 0;
-    free_cnt = 0;
-
     /* set the character set LOCALE to the user default */
     setlocale(LC_CTYPE, "");
 

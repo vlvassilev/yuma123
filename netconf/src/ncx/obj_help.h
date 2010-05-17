@@ -47,7 +47,7 @@ date	     init     comment
 
 #ifdef __cplusplus
 extern "C" {
-#endi
+#endif
 
 /********************************************************************
 *								    *

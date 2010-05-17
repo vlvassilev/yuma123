@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -38,6 +38,10 @@ date	     init     comment
 
 #ifndef _H_status
 #include "status.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /********************************************************************
@@ -179,5 +183,9 @@ extern status_t
 extern boolean
     mgr_io_process_timeout (ses_id_t  cursid,
                             boolean *wantdata);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_mgr_io */

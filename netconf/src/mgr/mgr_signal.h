@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -37,9 +37,19 @@ date	     init     comment
 #include "status.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/********************************************************************
+*								    *
+*			     T Y P E S				    *
+*								    *
+*********************************************************************/
 
 /* don't rely on GNU extension being defined */
 typedef void (*sighandler_t)(int signum);
+
 
 /********************************************************************
 *								    *
@@ -96,5 +106,9 @@ extern void
 *********************************************************************/
 extern void 
     mgr_signal_install_break_handler (sighandler_t handler);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_mgr_signal */

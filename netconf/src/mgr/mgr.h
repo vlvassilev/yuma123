@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -59,6 +59,9 @@ date	     init     comment
 #include "xpath.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************************************************************
 *								    *
@@ -230,6 +233,8 @@ extern status_t
     mgr_set_getvar_fn (ses_id_t  sid,
                        xpath_getvar_fn_t getvar_fn);
 
-
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_mgr */

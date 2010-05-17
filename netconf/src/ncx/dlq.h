@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -92,6 +92,9 @@ date         init     comment
 12-oct-07    abb      add dlq_count
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************************************************************
 *
@@ -435,5 +438,9 @@ extern void dlq_block_move (dlq_hdrT *srcQ, void *srcP, dlq_hdrT * dstQ);
 *********************************************************************/
 extern unsigned int dlq_count (const dlq_hdrT *listP);
 
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif    /* _H_dlq */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -30,6 +30,9 @@ date	     init     comment
 22-apr-05    abb      begun
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************************************************************
 * FUNCTION blob2bin
@@ -70,5 +73,9 @@ extern void
     bin2blob (const unsigned char *pbuff,
 	      char  *pblob,
 	      uint32 bsize);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_blob */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -31,6 +31,9 @@ date             init     comment
 18-apr-96    abb      adapted for gr8cgi project
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*********************************************************************
 *                                                                    *
@@ -508,5 +511,9 @@ extern void
 *********************************************************************/
 extern void
     print_error_messages (void);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif     /* _H_status */

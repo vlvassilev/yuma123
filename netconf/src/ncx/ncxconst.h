@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -35,6 +35,10 @@ date	     init     comment
 
 #include <math.h>
 #include <xmlstring.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************************************************************
 *								    *
@@ -699,5 +703,9 @@ date	     init     comment
 #define INIT_SUFFIX      (const xmlChar *)"_init"
 #define INIT2_SUFFIX     (const xmlChar *)"_init2"
 #define CLEANUP_SUFFIX   (const xmlChar *)"_cleanup"
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_ncxconst */

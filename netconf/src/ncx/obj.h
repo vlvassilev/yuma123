@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -72,6 +72,9 @@ date	     init     comment
 #include "xml_util.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************************************************************
 *								    *
@@ -3296,5 +3299,9 @@ extern void
 *********************************************************************/
 extern uint32
     obj_enabled_child_count (obj_template_t *obj);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_obj */

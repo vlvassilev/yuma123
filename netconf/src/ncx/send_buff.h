@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -34,6 +34,9 @@ date	     init     comment
 #include "status.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************************************************************
 *								    *
@@ -69,5 +72,9 @@ extern status_t
     send_buff (int fd,
 	       const char *buffer, 
 	       size_t cnt);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_send_buff */

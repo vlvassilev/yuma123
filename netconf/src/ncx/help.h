@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -46,7 +46,15 @@ date	     init     comment
 #include "typ.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+/********************************************************************
+*								    *
+*			 C O N S T A N T S			    *
+*								    *
+*********************************************************************/
 
 #define HELP_MODE_BRIEF_MAX            60
 #define HELP_MODE_NORMAL_MAX           100
@@ -165,5 +173,9 @@ extern void
 			  uint32 indent,
 			  boolean startnl,
 			  uint32 maxlen);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_help */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -34,6 +34,9 @@ date	     init     comment
 
 #include <xmlstring.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************************************************************
 *								    *
@@ -76,5 +79,8 @@ typedef struct yin_mapping_t_ {
 extern const yin_mapping_t *
     yin_find_mapping (const xmlChar *name);
 
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_yin */

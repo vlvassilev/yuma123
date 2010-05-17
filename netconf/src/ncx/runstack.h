@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -45,6 +45,10 @@ date	     init     comment
 
 #ifndef _H_val
 #include "val.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /********************************************************************
@@ -599,5 +603,9 @@ extern status_t
 *********************************************************************/
 extern boolean
     runstack_get_if_used (runstack_context_t *rcxt);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_runstack */

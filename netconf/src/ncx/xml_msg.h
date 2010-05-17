@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -59,6 +59,9 @@ date             init     comment
 #include "xml_util.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************************************************************
 *                                                                   *
@@ -325,5 +328,9 @@ extern status_t
     xml_msg_gen_xmlns_attrs (xml_msg_hdr_t *msg, 
 			     xml_attrs_t *attrs,
                              boolean addncx);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif            /* _H_xml_msg */

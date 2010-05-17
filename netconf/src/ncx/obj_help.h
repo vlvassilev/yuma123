@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -45,6 +45,9 @@ date	     init     comment
 #include "obj.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endi
 
 /********************************************************************
 *								    *
@@ -90,5 +93,8 @@ extern void
 		       uint32 nestlevel,
 		       uint32 indent);
 
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_obj_help */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -45,6 +45,9 @@ date	     init     comment
 #include "val.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************************************************************
 *								    *
@@ -72,5 +75,9 @@ date	     init     comment
 extern status_t
     xpath_wr_expr (ses_cb_t *scb,
 		   val_value_t *xpathval);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_xpath_wr */

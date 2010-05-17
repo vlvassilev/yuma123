@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -68,6 +68,10 @@ date	     init     comment
 #include "status.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /********************************************************************
 *								    *
 *			 C O N S T A N T S			    *
@@ -112,5 +116,9 @@ typedef status_t
 		   getcb_mode_t cbmode,
 		   const val_value_t *virval,
 		   val_value_t *dstval);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_getcb */

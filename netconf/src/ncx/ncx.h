@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -109,6 +109,10 @@ date	     init     comment
 
 #ifndef _H_yang
 #include "yang.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /********************************************************************
@@ -2477,5 +2481,9 @@ extern ncx_display_mode_t
 *********************************************************************/
 extern const xmlChar *
     ncx_get_confirm_event_str (ncx_confirm_event_t event);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_ncx */

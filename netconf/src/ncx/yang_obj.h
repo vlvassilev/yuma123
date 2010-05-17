@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -70,6 +70,9 @@ date	     init     comment
 #include "yang.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************************************************************
 *								    *
@@ -477,6 +480,10 @@ extern status_t
                                    tk_chain_t *tkc,
                                    ncx_module_t *mod,
                                    dlq_hdr_t *datadefQ);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 
 #endif	    /* _H_yang_obj */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -31,6 +31,10 @@ date             init     comment
 */
 
 #include <xmlstring.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************************************************************
 *                                                                   *
@@ -351,5 +355,10 @@ extern op_errop_t
 *********************************************************************/
 extern op_defop_t 
     op_defop_id2 (const xmlChar *defstr);
+
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif            /* _H_op */

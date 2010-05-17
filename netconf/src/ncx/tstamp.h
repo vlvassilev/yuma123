@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -30,6 +30,15 @@ date	     init     comment
 17-apr-06    abb      begun
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+/********************************************************************
+*								    *
+*			 C O N S T A N T S			    *
+*								    *
+*********************************************************************/
 
 #define TSTAMP_MIN_SIZE   22
 #define TSTAMP_DATE_SIZE  12
@@ -121,5 +130,9 @@ extern xmlChar *
 *********************************************************************/
 extern void 
     tstamp_datetime_dirname (xmlChar *buff);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_tstamp */

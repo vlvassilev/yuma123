@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -30,6 +30,10 @@ date             init     comment
 23-jun-09    abb      Begun.
 */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /********************************************************************
 *                                                                   *
 *                         C O N S T A N T S                         *
@@ -37,5 +41,9 @@ date             init     comment
 *********************************************************************/
 
 #define YUMA_VERSION  (const xmlChar *)"0.12"
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif            /* _H_version */

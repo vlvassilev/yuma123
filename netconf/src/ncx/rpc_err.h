@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -40,6 +40,10 @@ date             init     comment
 
 #ifndef _H_rpc
 #include "rpc.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /********************************************************************
@@ -519,5 +523,9 @@ extern const xmlChar *
 *********************************************************************/
 extern void 
     rpc_err_clean_errQ (dlq_hdr_t *errQ);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif            /* _H_rpc_err */

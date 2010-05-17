@@ -50,6 +50,10 @@ date             init     comment
 #include "yangdump.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /********************************************************************
 *                                                                   *
 *                         C O N S T A N T S                         *
@@ -154,5 +158,8 @@ extern void
 
 #endif
 
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif            /* _H_py_util */

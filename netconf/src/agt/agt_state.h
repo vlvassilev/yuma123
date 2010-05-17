@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -48,6 +48,9 @@ date             init     comment
 #include "status.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************************************************************
 *                                                                   *
@@ -157,6 +160,10 @@ extern void
 *********************************************************************/
 extern status_t
     agt_state_add_module_schema (ncx_module_t *mod);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 
 #endif            /* _H_agt_state */

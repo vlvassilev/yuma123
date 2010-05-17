@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -48,6 +48,10 @@ date             init     comment
 
 #ifndef _H_yangdump
 #include "yangdump.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /********************************************************************
@@ -505,5 +509,9 @@ extern status_t
                     dlq_hdr_t *datadefQ,
                     dlq_hdr_t *savecdefQ,
                     c_mode_t cmode);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif            /* _H_c_util */

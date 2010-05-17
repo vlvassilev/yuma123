@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -56,6 +56,9 @@ date             init     comment
 #include "tstamp.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************************************************************
 *                                                                   *
@@ -352,5 +355,9 @@ extern void
 *********************************************************************/
 extern boolean
     agt_not_is_replay_event (const obj_template_t *notifobj);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif            /* _H_agt_not */

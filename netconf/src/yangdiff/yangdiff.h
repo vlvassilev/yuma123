@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -48,6 +48,10 @@ date	     init     comment
 
 #ifndef _H_ses
 #include "ses.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /********************************************************************
@@ -166,5 +170,8 @@ typedef struct yangdiff_cdb_t_ {
     boolean        changed;
 } yangdiff_cdb_t;
 
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_yangdiff */

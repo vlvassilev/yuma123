@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -54,6 +54,10 @@ date	     init     comment
 
 #ifndef _H_val
 #include "val.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /********************************************************************
@@ -211,5 +215,8 @@ extern void
     agt_cb_unregister_callbacks (const xmlChar *modname,
 				 const xmlChar *defpath);
 
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_agt_cb */

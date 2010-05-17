@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -48,6 +48,10 @@ date	     init     comment
 #include "yangdump.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /********************************************************************
 *								    *
 *			 C O N S T A N T S			    *
@@ -87,5 +91,9 @@ extern status_t
     cyang_convert_module (const yang_pcb_t *pcb,
 			  const yangdump_cvtparms_t *cp,
 			  ses_cb_t *scb);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_cyang */

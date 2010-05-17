@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -46,6 +46,10 @@ date	     init     comment
 
 #ifndef _H_val
 #include "val.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /********************************************************************
@@ -181,5 +185,9 @@ extern status_t
     xsd_finish_union (const ncx_module_t *mod,
 		      typ_def_t *typdef,
 		      val_value_t *val);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_xsd_typ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -74,6 +74,10 @@ date	     init     comment
 
 #ifndef _H_yangdump
 #include "yangdump.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /********************************************************************
@@ -698,5 +702,9 @@ extern status_t
     test_basetype_attr (const ncx_module_t *mod,
                         const typ_def_t *typdef);
 
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_xsd_util */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -43,6 +43,16 @@ date	     init     comment
 #include "status.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+/********************************************************************
+*								    *
+*			     T Y P E S				    *
+*								    *
+*********************************************************************/
 
 /* timer callback function
  *
@@ -177,5 +187,9 @@ extern status_t
 *********************************************************************/
 extern void
     agt_timer_delete (uint32  timer_id);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_agt_timer */

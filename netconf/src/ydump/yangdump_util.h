@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -36,6 +36,10 @@ date	     init     comment
 #include "ses.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /********************************************************************
 *								    *
 *			 C O N S T A N T S			    *
@@ -43,7 +47,7 @@ date	     init     comment
 *********************************************************************/
 
 #define COPYRIGHT_HEADER (const xmlChar *)\
-"\n * Copyright (c) 2010, Netconf Central, Inc.\
+"\n * Copyright (c) 2009, 2010, Netconf Central, Inc.\
 \n * All Rights Reserved.\
 \n *\
 \n * Unless required by applicable law or agreed to in writing,\
@@ -125,5 +129,9 @@ extern uint32
     find_reference (const xmlChar *buffer,
                     const xmlChar **ref,
                     uint32 *reflen);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_yangdump_util */

@@ -1,3 +1,13 @@
+/*
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
+ * 
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.    
+ */
 #ifndef _H_procdefs
 #define _H_procdefs
 #define _INC_PROCDEFS
@@ -14,6 +24,10 @@
  * and use the defined base types provided below
  */
 #include    <limits.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifdef DEBUG
 #define CPP_DEBUG           1
@@ -240,5 +254,9 @@ extern uint32  free_cnt;
 #ifndef m__getObj
 #define m__getObj(OBJ)	(OBJ *)malloc(sizeof(OBJ));malloc_cnt++
 #endif		/* m__getObj */
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif		/* _H_procdefs */

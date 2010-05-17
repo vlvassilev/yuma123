@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -52,6 +52,10 @@ date             init     comment
 
 #ifndef _H_xml_util
 #include "xml_util.h"
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 
@@ -339,5 +343,8 @@ extern val_value_t *
 extern status_t
     agt_rpc_fill_rpc_error (const rpc_err_rec_t *err,
 			    val_value_t *rpcerror);
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif            /* _H_agt_rpc */

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -56,6 +56,9 @@ date             init     comment
 #include "tstamp.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************************************************************
 *                                                                   *
@@ -223,5 +226,10 @@ extern void
 extern void
     agt_sys_send_sysConfirmedCommit (const ses_cb_t *scb,
                                      ncx_confirm_event_t event);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
+
 
 #endif            /* _H_agt_sys */

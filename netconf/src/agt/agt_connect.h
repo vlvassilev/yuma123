@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -52,6 +52,10 @@ date	     init     comment
 #include "xml_util.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /********************************************************************
 *								    *
 *			F U N C T I O N S			    *
@@ -99,5 +103,8 @@ extern void
     agt_connect_dispatch (ses_cb_t *scb,
 			  xml_node_t *top);
 
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_agt_connect */

@@ -46,6 +46,9 @@ date	     init     comment
 #include "yangcli.h"
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /********************************************************************
 *								    *
@@ -75,5 +78,9 @@ extern status_t
 	     obj_template_t *rpc,
 	     const xmlChar *line,
 	     uint32  len);
+
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif	    /* _H_yangcli_eval */

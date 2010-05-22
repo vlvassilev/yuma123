@@ -204,12 +204,12 @@ static boolean
 *    some other error like ERR_INTERNAL_MEM
 *********************************************************************/
 static status_t 
-    get_ifname_string (char *buffer,
+    get_ifname_string (signed char *buffer,
                        char **nameptr,
                        int *namelen)
 {
-    char        *name, *str;
-    status_t     res;
+    signed char  *name, *str;
+    status_t      res;
 
     res = NO_ERR;
     *nameptr = NULL;

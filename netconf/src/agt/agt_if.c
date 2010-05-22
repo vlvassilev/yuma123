@@ -204,11 +204,11 @@ static boolean
 *    some other error like ERR_INTERNAL_MEM
 *********************************************************************/
 static status_t 
-    get_ifname_string (signed char *buffer,
-                       char **nameptr,
+    get_ifname_string (xmlChar *buffer,
+                       xmlChar **nameptr,
                        int *namelen)
 {
-    signed char  *name, *str;
+    xmlChar      *name, *str;
     status_t      res;
 
     res = NO_ERR;
@@ -217,7 +217,7 @@ static status_t
 
     /* get the start of the interface name */
     str = buffer;
-    while (*str && isspace(*str)) {
+    while (*str && xml_isspace(*str)) {
         str++;
     }
     if (*str == '\0') {
@@ -259,7 +259,7 @@ static status_t
 *********************************************************************/
 static val_value_t *
     find_interface_entry (val_value_t *interfacesval,
-                          const char *nameptr,
+                          const xmlChar *nameptr,
                           int namelen)
 {
     val_value_t  *childval, *nameval;
@@ -278,7 +278,7 @@ static val_value_t *
         }
 
         if (!xml_strncmp(VAL_STR(nameval),
-                         (const xmlChar *)nameptr,
+                         nameptr,
                          (uint32)namelen) &&
             xml_strlen(VAL_STR(nameval)) == (uint32)namelen) {
             return childval;
@@ -308,7 +308,7 @@ static val_value_t *
 *********************************************************************/
 static val_value_t *
     make_interface_entry (obj_template_t *interfaceobj,
-                          char *nameptr,
+                          xmlChar *nameptr,
                           status_t *res)
 {
     obj_template_t     *nameobj;
@@ -331,9 +331,7 @@ static val_value_t *
     }
     val_init_from_template(interfaceval, interfaceobj);
 
-    nameval = val_make_simval_obj(nameobj,
-                                  (const xmlChar *)nameptr,
-                                  res);
+    nameval = val_make_simval_obj(nameobj, nameptr, res);
     if (nameval == NULL) {
         val_free_value(interfaceval);
         return NULL;
@@ -377,12 +375,12 @@ static val_value_t *
 static status_t 
     fill_if_counters (obj_template_t *countersobj,
                       val_value_t *nameval,
-                      char *buffer,
+                      xmlChar *buffer,
                       val_value_t  *dstval)
 {
-    obj_template_t       *childobj;
+    obj_template_t        *childobj;
     val_value_t           *childval;
-    char                  *str, *name, *endptr;
+    xmlChar               *str, *name, *endptr;
     status_t               res;
     uint32                 leafcount;
     uint64                 counter;
@@ -436,7 +434,7 @@ static status_t
     endptr = NULL;
     done = FALSE;
     while (!done) {
-        counter = strtoull(str, &endptr, 10);
+      counter = strtoull((char *)str, (char **)&endptr, 10);
         if (counter == 0 && str == endptr) {
             /* number conversion failed */
             log_error("\nError: /proc/net/dev number conversion failed");
@@ -495,7 +493,7 @@ static status_t
     FILE                  *countersfile;
     obj_template_t        *countersobj;
     val_value_t           *parentval, *nameval;
-    char                  *buffer, *readtest;
+    xmlChar               *buffer, *readtest;
     boolean                done;
     status_t               res;
     uint32                 linecount;
@@ -544,7 +542,8 @@ static status_t
     linecount = 0;
 
     while (!done) {
-        readtest = fgets(buffer, NCX_MAX_LINELEN, countersfile);
+      readtest = (xmlChar *)
+	fgets((char *)buffer, NCX_MAX_LINELEN, countersfile);
         if (readtest == NULL) {
             done = TRUE;
             continue;
@@ -597,7 +596,7 @@ static status_t
     FILE                  *countersfile;
     obj_template_t        *interfaceobj, *countersobj;
     val_value_t           *interfaceval, *countersval;
-    char                  *buffer, *readtest, *ifname;
+    xmlChar               *buffer, *readtest, *ifname;
     boolean                done;
     status_t               res;
     uint32                 linecount;
@@ -638,7 +637,8 @@ static status_t
     linecount = 0;
 
     while (!done) {
-        readtest = fgets(buffer, NCX_MAX_LINELEN, countersfile);
+      readtest = (xmlChar *)
+	fgets((char *)buffer, NCX_MAX_LINELEN, countersfile);
         if (readtest == NULL) {
             done = TRUE;
             continue;

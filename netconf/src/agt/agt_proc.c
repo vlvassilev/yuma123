@@ -215,7 +215,7 @@ static xmlChar *
     buff = retbuff;
 
     while (*str && count < varnamelen) {
-        if (isalnum(*str)) {
+      if (isalnum((xmlChar)*str)) {
             *buff++ = (xmlChar)*str++;
         } else {
             *buff++ = (xmlChar)'_';
@@ -250,7 +250,7 @@ static xmlChar *
 
     str = line;
 
-    while (isspace(*str) && *str != '\n' && *str != '\0') {
+    while (isspace((xmlChar)*str) && *str != '\n' && *str != '\0') {
         str++;
     }
 
@@ -312,7 +312,7 @@ static val_value_t *
 
     /* look backward until the first non-whitespace */
     str = colonchar - 1;
-    while (str >= buffer && isspace(*str)) {
+    while (str >= buffer && isspace((xmlChar)*str)) {
         str--;
     }
 

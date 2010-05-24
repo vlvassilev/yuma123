@@ -8876,6 +8876,7 @@ boolean
 * FUNCTION obj_is_match
 * 
 * Check if one object is a match in identity with another one
+* Only used by yangdiff to compare objects.
 *
 * INPUTS:
 *    obj1  == first object to match
@@ -8888,8 +8889,9 @@ boolean
     obj_is_match (const obj_template_t  *obj1,
                   const obj_template_t *obj2)
 {
-    if (xml_strcmp(obj_get_mod_name(obj1),
-                   obj_get_mod_name(obj2))) {
+
+    if (!xmlns_ids_equal(obj_get_nsid(obj1),
+                         obj_get_nsid(obj2))) {
         return FALSE;
     }
 

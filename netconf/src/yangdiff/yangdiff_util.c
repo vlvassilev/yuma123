@@ -569,36 +569,70 @@ void
 {
     if (!olderr && newerr) {
         /* errinfo added in new revision */
-        output_diff(cp, YANG_K_ERROR_MESSAGE, NULL,
-                    newerr->error_message, FALSE);
-        output_diff(cp, YANG_K_ERROR_APP_TAG, NULL, 
-                    newerr->error_app_tag, FALSE);
-        output_diff(cp, YANG_K_DESCRIPTION, NULL, 
-                    newerr->descr, FALSE);
-        output_diff(cp, YANG_K_REFERENCE, NULL, 
-                    newerr->ref, FALSE);
+        output_diff(cp, 
+                    YANG_K_ERROR_MESSAGE, 
+                    NULL,
+                    newerr->error_message, 
+                    FALSE);
+        output_diff(cp, 
+                    YANG_K_ERROR_APP_TAG, 
+                    NULL, 
+                    newerr->error_app_tag, 
+                    FALSE);
+        output_diff(cp, 
+                    YANG_K_DESCRIPTION, 
+                    NULL, 
+                    newerr->descr, 
+                    FALSE);
+        output_diff(cp, 
+                    YANG_K_REFERENCE, 
+                    NULL, 
+                    newerr->ref, 
+                    FALSE);
     } else if (olderr && !newerr) {
         /* errinfo removed in new revision */
-        output_diff(cp, YANG_K_ERROR_MESSAGE,
-                    olderr->error_message, NULL, FALSE);
-        output_diff(cp, YANG_K_ERROR_APP_TAG,
-                    olderr->error_app_tag, NULL, FALSE);
-        output_diff(cp, YANG_K_DESCRIPTION,
-                    olderr->descr, NULL, FALSE);
-        output_diff(cp, YANG_K_REFERENCE,
-                    newerr->ref, NULL, FALSE);
+        output_diff(cp, 
+                    YANG_K_ERROR_MESSAGE,
+                    olderr->error_message, 
+                    NULL, 
+                    FALSE);
+        output_diff(cp, 
+                    YANG_K_ERROR_APP_TAG,
+                    olderr->error_app_tag, 
+                    NULL, 
+                    FALSE);
+        output_diff(cp, 
+                    YANG_K_DESCRIPTION,
+                    olderr->descr, 
+                    NULL, 
+                    FALSE);
+        output_diff(cp, 
+                    YANG_K_REFERENCE,
+                    olderr->ref, 
+                    NULL, 
+                    FALSE);
     } else if (olderr && newerr) {
         /* errinfo maybe changed in new revision */
-        output_diff(cp, YANG_K_ERROR_MESSAGE,
+        output_diff(cp, 
+                    YANG_K_ERROR_MESSAGE,
                     olderr->error_message,
-                    newerr->error_message, FALSE);
-        output_diff(cp, YANG_K_ERROR_APP_TAG,
+                    newerr->error_message, 
+                    FALSE);
+        output_diff(cp, 
+                    YANG_K_ERROR_APP_TAG,
                     olderr->error_app_tag,
-                    newerr->error_app_tag, FALSE);
-        output_diff(cp, YANG_K_DESCRIPTION,
-                    olderr->descr, newerr->descr, FALSE);
-        output_diff(cp, YANG_K_REFERENCE,
-                    olderr->ref, newerr->ref, FALSE);
+                    newerr->error_app_tag, 
+                    FALSE);
+        output_diff(cp, 
+                    YANG_K_DESCRIPTION,
+                    olderr->descr, 
+                    newerr->descr, 
+                    FALSE);
+        output_diff(cp, 
+                    YANG_K_REFERENCE,
+                    olderr->ref, 
+                    newerr->ref, 
+                    FALSE);
     }
 } /* output_errinfo_diff */
 

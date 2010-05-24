@@ -2220,8 +2220,10 @@ uint32
         oldobj = (obj_template_t *)dlq_firstEntry(oldQ);
         newobj = (obj_template_t *)dlq_firstEntry(newQ);
         while (oldobj && newobj) {
-            if (obj_has_name(oldobj) && obj_has_name(newobj) &&
-                !(obj_is_hidden(oldobj) || obj_is_hidden(newobj))) {
+            if (obj_has_name(oldobj) && 
+                obj_has_name(newobj) &&
+                !(obj_is_hidden(oldobj) || 
+                  obj_is_hidden(newobj))) {
                 if (!obj_is_match(oldobj, newobj)) {
                     return 1;
                 }

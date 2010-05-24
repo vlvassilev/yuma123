@@ -27,6 +27,10 @@ module yuma-system {
     description 
       "NETCONF Basic System Group.";
 
+    revision 2010-05-24 {
+        description  
+          "Change SessionId to standard session-id-type.";
+    }
 
     revision 2009-12-27 {
         description  
@@ -43,7 +47,7 @@ module yuma-system {
        leaf sessionId {
           description
              "Identifier of the session.";
-          type nc:SessionId;
+          type nc:session-id-type;
           mandatory true;
        }
 
@@ -297,7 +301,7 @@ module yuma-system {
           description
              "Session ID that issued the <kill-session>,
               if the session was terminated by this operation.";
-          type nc:SessionId;
+          type nc:session-id-type;
        }
 
        leaf terminationReason {

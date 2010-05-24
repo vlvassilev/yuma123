@@ -407,14 +407,23 @@ status_t
         if (!xml_strcmp(val, YANG_K_ARGUMENT)) {
             res = consume_yang_arg(tkc, mod, ext, &arg);
         } else if (!xml_strcmp(val, YANG_K_STATUS)) {
-            res = yang_consume_status(tkc, mod, &ext->status,
-                                      &stat, &ext->appinfoQ);
+            res = yang_consume_status(tkc, 
+                                      mod, 
+                                      &ext->status,
+                                      &stat, 
+                                      &ext->appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_DESCRIPTION)) {
-            res = yang_consume_descr(tkc, mod, &ext->descr,
-                                     &desc, &ext->appinfoQ);
+            res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &ext->descr,
+                                     &desc, 
+                                     &ext->appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_REFERENCE)) {
-            res = yang_consume_descr(tkc, mod, &ext->ref,
-                                     &ref, &ext->appinfoQ);
+            res = yang_consume_descr(tkc, 
+                                     mod, 
+                                     &ext->ref,
+                                     &ref, 
+                                     &ext->appinfoQ);
         } else {
             res = ERR_NCX_WRONG_TKVAL;
             ncx_mod_exp_err(tkc, mod, res, expstr);

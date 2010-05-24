@@ -2989,12 +2989,13 @@ static status_t
         return res;
     }
 
-    /* make sure the deviation parameter is pointing at
+    /* make sure the deviation or annotation parameter is pointing at
      * a module and not a submodule, if this is deviation mode
      */
     if (pcb->deviationmode && !ismain) {
         res = ERR_NCX_EXP_MODULE;
-        log_error("\nError: deviation cannot be a submodule");
+        log_error("\nError: deviation or annotation "
+                  "cannot be a submodule");
         ncx_print_errormsg(tkc, mod, res);
         return res;
     }
@@ -3578,19 +3579,33 @@ status_t
             pcb->topadded = TRUE;
         }
         if (res != NO_ERR) {
+            /* cleanup in all modes if there was an error */
             if (!wasadd) {
+                /* module was not added to registry so it is live */
                 if (pcb->top == mod) {
+                    /* make sure top is not pointing at garbage */
                     pcb->top = NULL;
                 }
+                /* free the parsed module here */
                 ncx_free_module(mod);
-            }
+            } /* else the module will be freed in ncx_cleanup */
         } else if (pcb->deviationmode) {
+            /* toss the module even if NO_ERR, not needed since
+             * the savedevQ contains the deviations and annotations
+             */
             if (pcb->top == mod) {
                 pcb->top = NULL;
             }
             ncx_free_module(mod);
         } else if (!wasadd) {
+            /* module was not added to the registry which means
+             * it was already there; decide if the caller really
+             * wants the return module in this case
+             */
             if (pcb->parsemode) {
+                /* parse mode for yangdump or yangdiff
+                 * does not need to keep the duplicate
+                 */
                 if (pcb->top == mod) {
                     pcb->top = NULL;
                 }
@@ -3598,8 +3613,11 @@ status_t
             } else if (!(pcb->diffmode || 
                          pcb->searchmode ||
                          pcb->deviationmode)) {
-
-                /* do not swap out diffmode, searchmode, or deviationmode */
+                /* do not swap out diffmode, searchmode, or deviationmode
+                 * for all other modes, check if the new module should
+                 * be returned or a different module for the yuma-netconf
+                 * hack
+                 */
                 if (mod->ismod) {
                     if (pcb->top == mod) {
                         /* hack: make sure netconf-ietf does not 
@@ -3628,6 +3646,9 @@ status_t
                                                    mod->version);
                     }
                 } else if (pcb->top == mod) {
+                    /* don't care about submods in this mode so clear
+                     * the top pointer so it won't be used
+                     */
                     pcb->top = NULL;
                 }
                 if (!keepmod) {
@@ -3642,10 +3663,10 @@ status_t
         }
     }
 
+    /* final cleanup */
     if (fp != NULL) {
         fclose(fp);
     }
-
     if (tkc) {
         tkc->fp = NULL;
         tk_free_chain(tkc);

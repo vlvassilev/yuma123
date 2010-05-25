@@ -802,4 +802,33 @@ extern status_t
 }  /* end extern 'C' */
 #endif
 
+
+/********************************************************************
+* FUNCTION agt_set_with_defaults
+*
+* Check if the <with-defaults> parameter is set
+* in the request message, and if so, is it 
+* one of the server's supported values
+*
+* If not, then record an error
+* If so, then set the msg->mhdr.withdef enum
+*
+* INPUTS:
+*   scb == session control block to use
+*   msg == rpc message in progress
+*   methnode == XML node for the method name
+*
+* OUTPUTS:
+*   msg->mhdr.withdef set if NO_ERR
+*   rpc-error recorded if any error detected
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    agt_set_with_defaults (ses_cb_t *scb,
+                           rpc_msg_t *msg,
+                           xml_node_t *methnode);
+
+
 #endif	    /* _H_agt_util */

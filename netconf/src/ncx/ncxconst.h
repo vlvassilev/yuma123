@@ -566,6 +566,7 @@ extern "C" {
 #define NCX_EL_QNAME           (const xmlChar *)"qname"
 #define NCX_EL_REPLACE         (const xmlChar *)"replace"
 #define NCX_EL_REPORT_ALL      (const xmlChar *)"report-all"
+#define NCX_EL_REPORT_ALL_TAGGED (const xmlChar *)"report-all-tagged"
 #define NCX_EL_RESTART         (const xmlChar *)"restart"
 #define NCX_EL_REVISION        (const xmlChar *)"revision"
 #define NCX_EL_REVISION_HISTORY (const xmlChar *)"revision-history"

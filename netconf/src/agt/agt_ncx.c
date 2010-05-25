@@ -340,9 +340,8 @@ static status_t
                   rpc_msg_t *msg,
                   xml_node_t *methnode)
 {
-    cfg_template_t *source;
-    val_value_t    *parm;
-    status_t        res;
+    cfg_template_t     *source;
+    status_t            res, res2;
 
     /* check if the <running> config is ready to read */
     source = cfg_get_config_id(NCX_CFGID_RUNNING);
@@ -364,19 +363,18 @@ static status_t
         return res;
     }
 
-    /* check the with-defaults parameter */
-    parm = val_find_child(msg->rpc_input,
-                          NULL, 
-                          NCX_EL_WITH_DEFAULTS);
-    if (parm && parm->res == NO_ERR) {
-        msg->mhdr.withdef = 
-            ncx_get_withdefaults_enum(VAL_ENUM_NAME(parm));
-    }
-
     /* check if the optional filter parameter is ok */
     res = agt_validate_filter(scb, msg);
+
+    /* check the with-defaults parameter */
+    res2 = agt_set_with_defaults(scb, msg, methnode);
+
     if (res != NO_ERR) {
         return res;   /* error already recorded */
+    }
+
+    if (res2 != NO_ERR) {
+        return res2;   /* error already recorded */
     }
 
     /* cache the 2 parameters and the data output callback function 
@@ -408,8 +406,7 @@ static status_t
                          xml_node_t *methnode)
 {
     cfg_template_t *source;
-    val_value_t    *parm;
-    status_t        res;
+    status_t        res, res2;
 
     /* check if the source config database exists */
     res = agt_get_cfg_from_parm(NCX_EL_SOURCE, 
@@ -435,19 +432,18 @@ static status_t
         return res;
     }
 
-    /* check the with-defaults parameter */
-    parm = val_find_child(msg->rpc_input,
-                          NULL, 
-                          NCX_EL_WITH_DEFAULTS);
-    if (parm && parm->res == NO_ERR) {
-        msg->mhdr.withdef = 
-            ncx_get_withdefaults_enum(VAL_ENUM_NAME(parm));
-    }
-
     /* check if the optional filter parameter is ok */
     res = agt_validate_filter(scb, msg);
+
+    /* check the with-defaults parameter */
+    res2 = agt_set_with_defaults(scb, msg, methnode);
+
     if (res != NO_ERR) {
         return res;   /* error already recorded */
+    }
+
+    if (res2 != NO_ERR) {
+        return res2;   /* error already recorded */
     }
 
     /* cache the 2 parameters and the data output callback function 
@@ -759,7 +755,7 @@ static status_t
     const cap_list_t   *mycaps;
     const xmlChar      *srcurl, *desturl;
     xmlChar            *srcfile, *destfile, *srcurlspec, *desturlspec;
-    val_value_t        *parm, *srcval, *srcurlval, *errval;
+    val_value_t        *srcval, *srcurlval, *errval;
     copy_parms_t       *copyparms;
     status_t            res, retres;
 
@@ -972,14 +968,12 @@ static status_t
                          errval);
     }
 
-    /* get the with-defaults parameter */
+    /* check the with-defaults parameter */
     if (retres == NO_ERR) {
-        parm = val_find_child(msg->rpc_input,
-                              NULL,
-                              NCX_EL_WITH_DEFAULTS);
-        if (parm && parm->res == NO_ERR) {
-            msg->mhdr.withdef = 
-                ncx_get_withdefaults_enum(VAL_ENUM_NAME(parm));
+        res = agt_set_with_defaults(scb, msg, methnode);
+        if (res != NO_ERR) {
+            /* error already recorded */
+            retres = res;
         }
     }
 

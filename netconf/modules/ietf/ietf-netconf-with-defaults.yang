@@ -47,9 +47,9 @@
     // RFC Ed.: replace XXXX with actual RFC number and remove this note
 
     // RFC Ed.: remove this note
-    // Note: extracted from draft-ietf-netmod-with-defaults-06.txt
+    // Note: extracted from draft-ietf-netmod-with-defaults-08.txt
 
-    revision 2010-04-19 {
+    revision 2010-05-19 {
       description
         "Initial version.";
       reference
@@ -64,7 +64,14 @@
        type enumeration {
           enum report-all {
               description
-                "All default data is always reported.";
+                "All default data is reported.";
+          }
+          enum report-all-tagged {
+              description
+                "All default data is reported.
+                 Any nodes considered to be default data
+                 will contain a 'wd:default' XML attribute,
+                 set to 'true'.";
           }
           enum trim {
               description

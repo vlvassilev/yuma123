@@ -6153,6 +6153,8 @@ const xmlChar *
         return NCX_EL_NONE;
     case NCX_WITHDEF_REPORT_ALL:
         return NCX_EL_REPORT_ALL;
+    case NCX_WITHDEF_REPORT_ALL_TAGGED:
+        return NCX_EL_REPORT_ALL_TAGGED;
     case NCX_WITHDEF_TRIM:
         return NCX_EL_TRIM;
     case NCX_WITHDEF_EXPLICIT:
@@ -6189,6 +6191,8 @@ ncx_withdefaults_t
 
     if (!xml_strcmp(withdefstr, NCX_EL_REPORT_ALL)) {
         return NCX_WITHDEF_REPORT_ALL;
+    } else if (!xml_strcmp(withdefstr, NCX_EL_REPORT_ALL_TAGGED)) {
+        return NCX_WITHDEF_REPORT_ALL_TAGGED;
     } else if (!xml_strcmp(withdefstr, NCX_EL_TRIM)) {
         return NCX_WITHDEF_TRIM;
     } else if (!xml_strcmp(withdefstr, NCX_EL_EXPLICIT)) {

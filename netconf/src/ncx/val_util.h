@@ -88,7 +88,7 @@ extern "C" {
  *   realtest == FALSE to just check object properties
  *               in the val->obj template
  *            == TRUE if OK to check the other fields
- *   mode == void pointer to the node to check
+ *   node == pointer to the value struct to check
  *
  * RETURNS:
  *   TRUE if the node should be output

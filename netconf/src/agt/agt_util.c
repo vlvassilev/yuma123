@@ -2585,4 +2585,82 @@ status_t
 } /* agt_set_mod_defaults */
 
 
+/********************************************************************
+* FUNCTION agt_set_with_defaults
+*
+* Check if the <with-defaults> parameter is set
+* in the request message, and if so, is it 
+* one of the server's supported values
+*
+* If not, then record an error
+* If so, then set the msg->mhdr.withdef enum
+*
+* INPUTS:
+*   scb == session control block to use
+*   msg == rpc message in progress
+*   methnode == XML node for the method name
+*
+* OUTPUTS:
+*   msg->mhdr.withdef set if NO_ERR
+*   rpc-error recorded if any error detected
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    agt_set_with_defaults (ses_cb_t *scb,
+                           rpc_msg_t *msg,
+                           xml_node_t *methnode)
+{
+    val_value_t     *parm;
+    status_t         res;
+
+#ifdef DEBUG
+    if (scb == NULL || msg == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+
+    /* check the with-defaults parameter */
+    parm = val_find_child(msg->rpc_input,
+                          NCXMOD_WITH_DEFAULTS, 
+                          NCX_EL_WITH_DEFAULTS);
+    if (parm == NULL) {
+        /* optional parameter not found;
+         * the proper with-defaults enum should
+         * have been set when the msg was initialized
+         */
+        return NO_ERR;
+    }
+
+    if (parm->res != NO_ERR) {
+        /* error should already be recorded */
+        return parm->res;
+    }
+
+    /* for now, report-all-tagged is not supported */
+    if (!xml_strcmp(VAL_ENUM_NAME(parm),
+                    NCX_EL_REPORT_ALL_TAGGED)) {
+        res = ERR_NCX_INVALID_VALUE;
+        agt_record_error(scb, 
+                         &msg->mhdr, 
+                         NCX_LAYER_OPERATION, 
+                         res,
+                         methnode,
+                         NCX_NT_NONE, 
+                         NULL, 
+                         NCX_NT_VAL, 
+                         parm);
+    } else {
+        msg->mhdr.withdef = 
+            ncx_get_withdefaults_enum(VAL_ENUM_NAME(parm));
+    }
+
+    return res;
+
+}  /* agt_set_with_defaults */
+
+
 /* END file agt_util.c */

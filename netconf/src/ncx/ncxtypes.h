@@ -664,6 +664,7 @@ typedef enum ncx_cvttyp_t_ {
 typedef enum ncx_withdefaults_t_ { 
     NCX_WITHDEF_NONE,
     NCX_WITHDEF_REPORT_ALL,
+    NCX_WITHDEF_REPORT_ALL_TAGGED,
     NCX_WITHDEF_TRIM,
     NCX_WITHDEF_EXPLICIT
 } ncx_withdefaults_t;

@@ -1,2 +1,0 @@
-db_module=ncorg.model
-history_dir=$base/ncorg/sqlobject-history

@@ -1,2 +1,0 @@
-TurboGears >= 1.0.4.3
-SQLObject>=0.8,<=0.10.0

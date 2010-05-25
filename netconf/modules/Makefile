@@ -2,82 +2,22 @@
 #  
 # modules directory
 #
-# processes all the modules in this subtree
-# For each YANG file in the subtree, generate
-# an HTML and XSD file for that file in the directory
-#
-#    XSD: $TRUNK/ncorg/ncorg/static/xsd
-#
-#    HTML: $TRUNK/ncorg/ncorg/static/modules
-#
-# within the trunk subtree
 
 
 ############### SOURCE PROFILE ##############################
 
 SUBDIR_NM=modules
-YANGDUMP=../target/bin/yangdumpcode
-SUBDIR_CPP=""
-SUBTREE_PARMS=--subtree=./yang --subtree=./ietf --subtree=./netconfcentral
+SUBDIR_CPP=
 
 ############### TARGET PROFILE ##############################
 
 # copy modules to /usr/share/yuma
-TOP_INSTALL = $(DESTDIR)/usr/share/yuma
+TOP_INSTALL=$(DESTDIR)/usr/share/yuma
 INSTALL_TARGET=$(TOP_INSTALL)/modules
-
-# setup files in ncorg WEB site
-TROOT=$(HOME)/swdev/ncorg
-TBASE=$(TROOT)/ncorg/ncorg/static
-XSD_TARGET=$(TBASE)/xsd
-COPY_TARGET=$(TBASE)/src
-HTML_TARGET=$(TBASE)/modules
-COOKEDHTML_TARGET=$(TBASE)/cookedmodules
-
-SQLDB_TARGET=$(TROOT)/mysql/newmod.sql
-
-WARNINGS=--warn-linelen=0 --warn-idlen=0 --log-level=warn
 
 ######################### MAKE RULES ######################
 
 all: 
-
-.PHONY: ncorg clean-install
-
-ncorg: xsd html cookedhtml sqldb copy
-
-xsd:
-	if [ -d "$(TROOT)" ]; then\
-	  $(YANGDUMP) --format=xsd $(SUBTREE_PARMS) --defnames=true \
-	  --output=$(XSD_TARGET) --urlstart=/xsd $(WARNINGS); \
-	fi
-
-html:
-	if [ -d "$(TROOT)" ]; then\
-	  $(YANGDUMP) --format=html $(SUBTREE_PARMS) --defnames=true \
-	  --output=$(HTML_TARGET) --html-div=true --html-toc=menu \
-	  --urlstart=/modules --simurls=true $(WARNINGS); \
-	fi
-
-cookedhtml:
-	if [ -d "$(TROOT)" ]; then\
-	  $(YANGDUMP) --format=html $(SUBTREE_PARMS) --defnames=true \
-	  --output=$(COOKEDHTML_TARGET) --html-div=true \
-	  --html-toc=menu --urlstart=/modules --simurls=true \
-	  --objview=cooked $(WARNINGS); \
-	fi
-
-sqldb:
-	if [ -d "$(TROOT)" ]; then\
-	  $(YANGDUMP) --format=sqldb $(SUBTREE_PARMS) \
-	  --output=$(SQLDB_TARGET) --urlstart=/modules \
-	  --simurls=true $(WARNINGS); \
-	fi
-copy:
-	if [ -d "$(TROOT)" ]; then\
-	  $(YANGDUMP) --format=copy $(SUBTREE_PARMS) --defnames=true \
-	  --output=$(COPY_TARGET) $(WARNINGS); \
-	fi
 
 test:
 

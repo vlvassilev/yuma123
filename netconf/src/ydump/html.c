@@ -968,7 +968,7 @@ static void
                     ses_putchar(scb, ' ');
                     start++;
                 } else {
-                    ses_putchar(scb, *start++);
+                    ses_putcchar(scb, *start++);
                 }
             }
             write_a_ref(scb, str, reflen);
@@ -979,7 +979,7 @@ static void
                     ses_indent(scb, indent);
                     ref++;
                 } else {
-                    ses_putchar(scb, *ref++);
+                    ses_putcchar(scb, *ref++);
                 }
                 len--;
             }
@@ -987,7 +987,7 @@ static void
 
         /* only allow 1 reference per line at this time */
         while (*ref && *ref != '\n') {
-            ses_putchar(scb, *ref++);
+            ses_putcchar(scb, *ref++);
         }
         if (*ref != '\n') {
             done = TRUE;

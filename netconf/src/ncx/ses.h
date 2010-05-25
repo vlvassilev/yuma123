@@ -413,6 +413,28 @@ extern void
 
 
 /********************************************************************
+* FUNCTION ses_putcchar
+*
+* Write one content char to the session, with translation as needed
+*
+* THIS FUNCTION DOES NOT CHECK ANY PARAMETERS TO SAVE TIME
+*
+* NO CHARS ARE ACTUALLY WRITTEN TO A REAL SESSION!!!
+* The 'output ready' indicator will be set and the session
+* queued in the outreadyQ.  Non-blocking IO functions
+* will send the data when the connection allows.
+*
+* INPUTS:
+*   scb == session control block to write 
+*   ch = xmlChar to write, cast as uint32 to avoid compiler warnings
+*
+*********************************************************************/
+extern void
+    ses_putcchar (ses_cb_t *scb,
+                  uint32    ch);
+
+
+/********************************************************************
 * FUNCTION ses_putastr
 *
 * write XML attribute safe content string

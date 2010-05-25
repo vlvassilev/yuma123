@@ -1,0 +1,53 @@
+
+Yuma Tools README
+-----------------
+
+Version:  2010-05-25 (v0.12-1.M)
+
+Pre-Build steps:
+
+   - set netconf/src/platform/platform.profile details
+      - see procdefs.h in this directory for common H defs
+      - CFLAGS and other make details are here
+
+Build Variables:
+
+  DEBUG=1: set to add gdb symbols instead of -O2
+  MAC=1: set to compile for MacOsX
+  STATIC=1:set to use static libraries such as libncx.a,
+         instead of dynamic libraries like libncx.so 
+  MAXWELL=1: set to use /lib instead of /usr/lib for install
+         of dynamic libraries
+  RELEASE=N: sets the version to ver-release instead of
+             version.svnversion
+  MEMTRACE=1: enables mtrace debugging
+
+To build everything:
+
+   - make
+   - [sudo] make install
+
+ This will build everything and install it in its default location
+
+External file dependencies:
+   - /etc/services (for netconfd, optional)
+   - /etc/ssh/sshd_config
+   - SELinux config to allow access to port 830
+
+Installed Programs:
+   - /usr/bin/yangcli
+   - /usr/bin/yangdump
+   - /usr/bin/yangdiff
+   - /usr/sbin/netconfd
+   - /usr/sbin/netconf-subsystem
+
+Installed Libraries:
+  - /usr/lib/libncx.so.1
+  - /usr/lib/yuma/libtoaster.so
+   
+Installed Additional Files:
+  /usr/share/doc/yuma/*     -- user documentation
+  /etc/yuma/*               -- sample application config files
+  /usr/share/yuma/*         -- root of all YUMA data files
+  /usr/share/yuma/modules/* -- root of installed YANG modules
+

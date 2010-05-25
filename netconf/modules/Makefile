@@ -27,13 +27,14 @@ TOP_INSTALL = $(DESTDIR)/usr/share/yuma
 INSTALL_TARGET=$(TOP_INSTALL)/modules
 
 # setup files in ncorg WEB site
-TBASE=$(TRUNK)/ncorg/ncorg/static
+TROOT=$(HOME)/swdev/ncorg
+TBASE=$(TROOT)/ncorg/ncorg/static
 XSD_TARGET=$(TBASE)/xsd
 COPY_TARGET=$(TBASE)/src
 HTML_TARGET=$(TBASE)/modules
 COOKEDHTML_TARGET=$(TBASE)/cookedmodules
 
-SQLDB_TARGET=$(TRUNK)/mysql/newmod.sql
+SQLDB_TARGET=$(TROOT)/mysql/newmod.sql
 
 WARNINGS=--warn-linelen=0 --warn-idlen=0 --log-level=warn
 
@@ -46,20 +47,20 @@ all:
 ncorg: xsd html cookedhtml sqldb copy
 
 xsd:
-	if [ -d "$(TRUNK)" ]; then\
+	if [ -d "$(TROOT)" ]; then\
 	  $(YANGDUMP) --format=xsd $(SUBTREE_PARMS) --defnames=true \
 	  --output=$(XSD_TARGET) --urlstart=/xsd $(WARNINGS); \
 	fi
 
 html:
-	if [ -d "$(TRUNK)" ]; then\
+	if [ -d "$(TROOT)" ]; then\
 	  $(YANGDUMP) --format=html $(SUBTREE_PARMS) --defnames=true \
 	  --output=$(HTML_TARGET) --html-div=true --html-toc=menu \
 	  --urlstart=/modules --simurls=true $(WARNINGS); \
 	fi
 
 cookedhtml:
-	if [ -d "$(TRUNK)" ]; then\
+	if [ -d "$(TROOT)" ]; then\
 	  $(YANGDUMP) --format=html $(SUBTREE_PARMS) --defnames=true \
 	  --output=$(COOKEDHTML_TARGET) --html-div=true \
 	  --html-toc=menu --urlstart=/modules --simurls=true \
@@ -67,13 +68,13 @@ cookedhtml:
 	fi
 
 sqldb:
-	if [ -d "$(TRUNK)" ]; then\
+	if [ -d "$(TROOT)" ]; then\
 	  $(YANGDUMP) --format=sqldb $(SUBTREE_PARMS) \
 	  --output=$(SQLDB_TARGET) --urlstart=/modules \
 	  --simurls=true $(WARNINGS); \
 	fi
 copy:
-	if [ -d "$(TRUNK)" ]; then\
+	if [ -d "$(TROOT)" ]; then\
 	  $(YANGDUMP) --format=copy $(SUBTREE_PARMS) --defnames=true \
 	  --output=$(COPY_TARGET) $(WARNINGS); \
 	fi

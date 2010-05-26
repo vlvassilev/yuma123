@@ -103,7 +103,7 @@ extern "C" {
 #define CAP_NAME_NOTIFICATION       ((const xmlChar *)"notification:1.0")
 #define CAP_NAME_INTERLEAVE         ((const xmlChar *)"interleave:1.0")
 #define CAP_NAME_PARTIAL_LOCK       ((const xmlChar *)"partial-lock:1.0")
-#define CAP_NAME_WITH_DEFAULTS      ((const xmlChar *)"with-defaults")
+#define CAP_NAME_WITH_DEFAULTS      ((const xmlChar *)"with-defaults:1.0")
 
 /* some YANG capability details */
 #define CAP_REVISION_EQ        (const xmlChar *)"revision="

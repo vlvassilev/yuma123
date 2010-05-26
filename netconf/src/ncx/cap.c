@@ -1215,8 +1215,7 @@ status_t
 #endif
 
     /* setup the string 
-     * <capability-uri>:with-defaults:1.0?basic-mode=<defstyle>
-     *    &also-supported=<other-two-enums>
+     *   <capability-uri>:url:1.0?scheme=file
      */
     pfix = CAP_URN;
     scheme = CAP_SCHEME_EQ;

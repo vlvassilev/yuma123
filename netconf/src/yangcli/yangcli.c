@@ -3229,12 +3229,12 @@ static status_t
     autocomp = TRUE;
     autohistory = TRUE;
     autoload = TRUE;
-    baddata = NCX_BAD_DATA_NONE;
+    baddata = BAD_DATA_DEFAULT;
     connect_valset = NULL;
     confname = NULL;
     default_module = NULL;
     default_timeout = 30;
-    display_mode = NCX_DISPLAY_MODE_NONE;
+    display_mode = NCX_DISPLAY_MODE_PLAIN;
     fixorder = TRUE;
     optional = FALSE;
     testoption = OP_TESTOP_NONE;

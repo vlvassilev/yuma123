@@ -12,9 +12,62 @@
 
    NETCONF State Data Model implementation: Agent Side Support
 
-From draft-07:
+From draft-13:
 
 identifiers:
+container /netconf-state
+container /netconf-state/capabilities
+leaf-list /netconf-state/capabilities/capability
+container /netconf-state/datastores
+list /netconf-state/datastores/datastore
+leaf /netconf-state/datastores/datastore/name
+container /netconf-state/datastores/datastore/locks
+choice /netconf-state/datastores/datastore/locks/lock-type
+case /netconf-state/datastores/datastore/locks/lock-type/global-lock
+container /netconf-state/datastores/datastore/locks/lock-type/global-lock/global-lock
+leaf /netconf-state/datastores/datastore/locks/lock-type/global-lock/global-lock/locked-by-session
+leaf /netconf-state/datastores/datastore/locks/lock-type/global-lock/global-lock/locked-time
+case /netconf-state/datastores/datastore/locks/lock-type/partial-locks
+list /netconf-state/datastores/datastore/locks/lock-type/partial-locks/partial-locks
+leaf /netconf-state/datastores/datastore/locks/lock-type/partial-locks/partial-locks/lock-id
+leaf /netconf-state/datastores/datastore/locks/lock-type/partial-locks/partial-locks/locked-by-session
+leaf /netconf-state/datastores/datastore/locks/lock-type/partial-locks/partial-locks/locked-time
+leaf-list /netconf-state/datastores/datastore/locks/lock-type/partial-locks/partial-locks/select
+leaf-list /netconf-state/datastores/datastore/locks/lock-type/partial-locks/partial-locks/locked-nodes
+container /netconf-state/schemas
+list /netconf-state/schemas/schema
+leaf /netconf-state/schemas/schema/identifier
+leaf /netconf-state/schemas/schema/version
+leaf /netconf-state/schemas/schema/format
+leaf /netconf-state/schemas/schema/namespace
+leaf-list /netconf-state/schemas/schema/location
+container /netconf-state/sessions
+list /netconf-state/sessions/session
+leaf /netconf-state/sessions/session/session-id
+leaf /netconf-state/sessions/session/transport
+leaf /netconf-state/sessions/session/username
+leaf /netconf-state/sessions/session/source-host
+leaf /netconf-state/sessions/session/login-time
+leaf /netconf-state/sessions/session/in-rpcs
+leaf /netconf-state/sessions/session/in-bad-rpcs
+leaf /netconf-state/sessions/session/out-rpc-errors
+leaf /netconf-state/sessions/session/out-notifications
+container /netconf-state/statistics
+leaf /netconf-state/statistics/netconf-start-time
+leaf /netconf-state/statistics/in-bad-hellos
+leaf /netconf-state/statistics/in-sessions
+leaf /netconf-state/statistics/dropped-sessions
+leaf /netconf-state/statistics/in-rpcs
+leaf /netconf-state/statistics/in-bad-rpcs
+leaf /netconf-state/statistics/out-rpc-errors
+leaf /netconf-state/statistics/out-notifications
+rpc /get-schema
+container /get-schema/input
+leaf /get-schema/input/identifier
+leaf /get-schema/input/version
+leaf /get-schema/input/format
+container /get-schema/output
+anyxml /get-schema/output/data
 
 *********************************************************************
 *                                                                   *
@@ -272,7 +325,7 @@ static status_t
                val_value_t *virval,
                val_value_t  *dstval)
 {
-    val_value_t       *nameval, *targval, *newval, *globallockval;
+    val_value_t       *nameval, *newval, *globallockval;
     obj_template_t    *globallock;
     cfg_template_t    *cfg;
     const xmlChar     *locktime;
@@ -299,11 +352,7 @@ static status_t
             return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
         }
         
-        targval = val_get_first_child(nameval);
-        if (!targval) {
-            return SET_ERROR(ERR_NCX_DATA_MISSING);
-        }
-        cfg = cfg_get_config(targval->name);
+        cfg = cfg_get_config(VAL_ENUM_NAME(nameval));
         if (!cfg) {
             return SET_ERROR(ERR_NCX_CFG_NOT_FOUND);            
         }
@@ -315,7 +364,7 @@ static status_t
              */
             res = cfg_get_global_lock_info(cfg, &sid, &locktime);
             if (res == NO_ERR) {
-                /* add locks/globalLock */
+                /* add locks/global-lock */
                 globallockval = val_new_value();
                 if (!globallockval) {
                     return ERR_INTERNAL_MEM;
@@ -323,7 +372,7 @@ static status_t
                 val_init_from_template(globallockval, globallock);
                 val_add_child(globallockval, dstval);
 
-                /* add locks/globalLock/lockedBySession */ 
+                /* add locks/global-lock/locked-by-session */ 
                 sprintf((char *)numbuff, "%u", sid);
                 newval = agt_make_leaf(globallock,
                                        AGT_STATE_OBJ_LOCKED_BY_SESSION,
@@ -333,7 +382,7 @@ static status_t
                     val_add_child(newval, globallockval);
                 }
 
-                /* add locks/globalLock/lockedTime */ 
+                /* add locks/global-lock/locked-time */ 
                 newval = agt_make_leaf(globallock,
                                        AGT_STATE_OBJ_LOCKED_TIME,
                                        locktime, 
@@ -374,16 +423,10 @@ static val_value_t *
                         obj_template_t *confobj,
                         status_t *res)
 {
-    obj_template_t  *nameobj, *testobj;
-    val_value_t           *confval, *nameval, *leafval;
+    obj_template_t  *testobj;
+    val_value_t     *confval, *nameval, *leafval;
 
-    nameobj = obj_find_child(confobj, 
-                             AGT_STATE_MODULE, 
-                             NCX_EL_NAME);
-    if (!nameobj) {
-        *res = SET_ERROR(ERR_INTERNAL_VAL);
-        return NULL;
-    }
+    *res = NO_ERR;
 
     /* create datastore node */
     confval = val_new_value();
@@ -393,35 +436,20 @@ static val_value_t *
     }
     val_init_from_template(confval, confobj);
 
-    /* create datastore/name */
-    nameval = val_new_value();
-    if (!nameval) {
+    nameval = agt_make_leaf(confobj,
+                            NCX_EL_NAME,
+                            confname,
+                            res);
+    if (*res != NO_ERR) {
+        if (nameval != NULL) {
+            val_free_value(nameval);
+        }
         val_free_value(confval);
-        *res = ERR_INTERNAL_MEM;
-        return NULL;
-    }
-    val_init_from_template(nameval, nameobj);
-    val_add_child(nameval, confval);
-    
-    /* create datastore/name/<config-name> */
-    testobj = obj_find_child(nameobj, 
-                             AGT_STATE_MODULE,
-                             confname);
-    if (!testobj) {
-        val_free_value(confval);
-        *res = SET_ERROR(ERR_INTERNAL_VAL);
-        return NULL;
-    }
-    leafval = val_new_value();
-    if (!leafval) {
-        val_free_value(confval);
-        *res = ERR_INTERNAL_MEM;
         return NULL;
     } else {
-        val_init_from_template(leafval, testobj);
-        val_add_child(leafval, nameval);
+        val_add_child(nameval, confval);
     }
-
+    
     /* create datastore/locks */
     testobj = obj_find_child(confobj, 
                              AGT_STATE_MODULE, 

@@ -240,7 +240,7 @@ static val_value_t *
      * convert the CLI into a parmset 
      */
     obj = obj_find_child(rpc, NULL, YANG_K_INPUT);
-    if (obj && obj_get_child_count(obj)) {
+    if (obj) {
         myargv[0] = (const char *)obj_get_name(rpc);
         myargv[1] = (const char *)args;
         return cli_parse(server_cb->runstack_context,
@@ -253,7 +253,7 @@ static val_value_t *
                          CLI_MODE_COMMAND,
                          res);
     } else {
-        *res = ERR_NCX_SKIPPED;
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
         return NULL;
     }
     /*NOTREACHED*/
@@ -524,8 +524,12 @@ static xmlChar *
 * Parse the possibly module-qualified definition (module:def)
 * and find the template for the requested definition
 *
+* !!! DO NOT USE DIRECTLY !!!
+* !!! CALLED ONLY BY parse_def !!!
+*
 * INPUTS:
 *   server_cb == server control block to use
+*   mymod == module struct if available (may be NULL)
 *   modname == module name to try
 *   defname == definition name to try
 *   dtyp == definition type 
@@ -538,6 +542,7 @@ static xmlChar *
 *********************************************************************/
 static void *
     try_parse_def (server_cb_t *server_cb,
+                   ncx_module_t *mymod,
                    const xmlChar *modname,
                    const xmlChar *defname,
                    ncx_node_t *dtyp)
@@ -546,9 +551,13 @@ static void *
     void          *def;
     ncx_module_t  *mod;
 
-    mod = find_module(server_cb, modname);
-    if (!mod) {
-        return NULL;
+    if (mymod != NULL) {
+        mod = mymod;
+    } else {
+        mod = find_module(server_cb, modname);
+        if (!mod) {
+            return NULL;
+        }
     }
 
     def = NULL;
@@ -2355,19 +2364,49 @@ static status_t
                           YANGCLI_COMMAND);
     if (parm && parm->res == NO_ERR) {
         dtyp = NCX_NT_OBJ;
-        obj = parse_def(server_cb, &dtyp, VAL_STR(parm), &dlen);
-        if (obj && 
-            obj->objtype == OBJ_TYP_RPC && 
-            !obj_is_hidden(obj)) {
-            help_object(obj, mode);
-        } else {
-            res = ERR_NCX_DEF_NOT_FOUND;
-            if (imode) {
-                log_stdout("\nyangcli: command (%s) not found",
-                           VAL_STR(parm));
+        res = NO_ERR;
+        obj = parse_def(server_cb, 
+                        &dtyp, 
+                        VAL_STR(parm), 
+                        &dlen,
+                        &res);
+        if (obj != NULL) {
+            if (obj->objtype == OBJ_TYP_RPC && 
+                !obj_is_hidden(obj)) {
+                help_object(obj, mode);
             } else {
-                log_error("\nyangcli: command (%s) not found",
-                          VAL_STR(parm));
+                res = ERR_NCX_DEF_NOT_FOUND;
+                if (imode) {
+                    log_stdout("\nError: command (%s) not found",
+                               VAL_STR(parm));
+                } else {
+                    log_error("\nError: command (%s) not found",
+                              VAL_STR(parm));
+                }
+            }
+        } else {
+            if (res == ERR_NCX_DEF_NOT_FOUND) {
+                if (imode) {
+                    log_stdout("\nError: command (%s) not found",
+                               VAL_STR(parm));
+                } else {
+                    log_error("\nError: command (%s) not found",
+                              VAL_STR(parm));
+                }
+            } else if (res == ERR_NCX_AMBIGUOUS_CMD) {
+                if (imode) {
+                    log_stdout("\n");
+                } else {
+                    log_error("\n");
+                }
+            } else {
+                if (imode) {
+                    log_stdout("\nError: command error (%s)",
+                               get_error_string(res));
+                } else {
+                    log_error("\nError: command error (%s)",
+                              get_error_string(res));
+                }
             }
         }
         val_free_value(valset);
@@ -2388,18 +2427,38 @@ static status_t
                           YANGCLI_MOD, 
                           NCX_EL_TYPE);
     if (parm && parm->res==NO_ERR) {
+        res = NO_ERR;
         dtyp = NCX_NT_TYP;
-        typ = parse_def(server_cb, &dtyp, VAL_STR(parm), &dlen);
+        typ = parse_def(server_cb, 
+                        &dtyp, 
+                        VAL_STR(parm), 
+                        &dlen,
+                        &res);
         if (typ) {
             help_type(typ, mode);
         } else {
-            res = ERR_NCX_DEF_NOT_FOUND;
-            if (imode) {
-                log_stdout("\nyangcli: type definition (%s) not found",
-                           VAL_STR(parm));
+            if (res == ERR_NCX_DEF_NOT_FOUND) {
+                if (imode) {
+                    log_stdout("\nError: type definition (%s) not found",
+                               VAL_STR(parm));
+                } else {
+                    log_error("\nError: type definition (%s) not found",
+                              VAL_STR(parm));
+                }
+            } else if (res == ERR_NCX_AMBIGUOUS_CMD) {
+                if (imode) {
+                    log_stdout("\n");
+                } else {
+                    log_error("\n");
+                }
             } else {
-                log_error("\nyangcli: type definition (%s) not found",
-                          VAL_STR(parm));
+                if (imode) {
+                    log_stdout("\nError: type error (%s)",
+                               get_error_string(res));
+                } else {
+                    log_error("\nError: type error (%s)",
+                              get_error_string(res));
+                }
             }
         }
         val_free_value(valset);
@@ -2410,18 +2469,48 @@ static status_t
                           YANGCLI_MOD, 
                           NCX_EL_OBJECT);
     if (parm && parm->res == NO_ERR) {
+        res = NO_ERR;
         dtyp = NCX_NT_OBJ;
-        obj = parse_def(server_cb, &dtyp, VAL_STR(parm), &dlen);
-        if (obj && obj_is_data(obj) && !obj_is_hidden(obj)) {
-            help_object(obj, mode);
-        } else {
-            res = ERR_NCX_DEF_NOT_FOUND;
-            if (imode) {
-                log_stdout("\nyangcli: object definition (%s) not found",
-                           VAL_STR(parm));
+        obj = parse_def(server_cb, 
+                        &dtyp, 
+                        VAL_STR(parm), 
+                        &dlen,
+                        &res);
+        if (obj) {
+            if (obj_is_data(obj) && !obj_is_hidden(obj)) {
+                help_object(obj, mode);
             } else {
-                log_error("\nyangcli: object definition (%s) not found",
-                          VAL_STR(parm));
+                if (imode) {
+                    log_stdout("\nError: object definition (%s) not found",
+                               VAL_STR(parm));
+                } else {
+                    log_error("\nError: object definition (%s) not found",
+                              VAL_STR(parm));
+                }
+            }
+        } else {
+            if (res == ERR_NCX_DEF_NOT_FOUND) {
+                if (imode) {
+                    log_stdout("\nError: object definition (%s) not found",
+                               VAL_STR(parm));
+                } else {
+                    log_error("\nError: object definition (%s) not found",
+                              VAL_STR(parm));
+                }
+            } else if (res == ERR_NCX_AMBIGUOUS_CMD) {
+                if (imode) {
+                    log_stdout("\n");
+                } else {
+                    log_error("\n");
+                }
+            } else {
+                if (imode) {
+                    log_stdout("\nError: object error (%s)",
+                               get_error_string(res));
+                } else {
+                    log_error("\nError: object error (%s)",
+                              get_error_string(res));
+                }
             }
         }
         val_free_value(valset);
@@ -2433,20 +2522,54 @@ static status_t
                           YANGCLI_MOD, 
                           NCX_EL_NOTIFICATION);
     if (parm && parm->res == NO_ERR) {
+        res = NO_ERR;
         dtyp = NCX_NT_OBJ;
-        obj = parse_def(server_cb, &dtyp, VAL_STR(parm), &dlen);
-        if (obj && 
-            obj->objtype == OBJ_TYP_NOTIF &&
-            !obj_is_hidden(obj)) {
-            help_object(obj, mode);
-        } else {
-            res = ERR_NCX_DEF_NOT_FOUND;
-            if (imode) {
-                log_stdout("\nyangcli: notification definition (%s) not found",
-                           VAL_STR(parm));
+        obj = parse_def(server_cb, 
+                        &dtyp, 
+                        VAL_STR(parm), 
+                        &dlen,
+                        &res);
+        if (obj != NULL) {
+            if (obj->objtype == OBJ_TYP_NOTIF &&
+                !obj_is_hidden(obj)) {
+                help_object(obj, mode);
             } else {
-                log_error("\nyangcli: notification definition (%s) not found",
-                          VAL_STR(parm));
+                res = ERR_NCX_DEF_NOT_FOUND;
+                if (imode) {
+                    log_stdout("\nError: notification definition "
+                               "(%s) not found",
+                               VAL_STR(parm));
+                } else {
+                    log_error("\nError: notification definition "
+                              "(%s) not found",
+                              VAL_STR(parm));
+                }
+            }
+        } else {
+            if (res == ERR_NCX_DEF_NOT_FOUND) {
+                if (imode) {
+                    log_stdout("\nError: notification definition "
+                               "(%s) not found",
+                               VAL_STR(parm));
+                } else {
+                    log_error("\nError: notification definition "
+                              "(%s) not found",
+                              VAL_STR(parm));
+                }
+            } else if (res == ERR_NCX_AMBIGUOUS_CMD) {
+                if (imode) {
+                    log_stdout("\n");
+                } else {
+                    log_error("\n");
+                }
+            } else {
+                if (imode) {
+                    log_stdout("\nError: notification error (%s)",
+                               get_error_string(res));
+                } else {
+                    log_error("\nError: notification error (%s)",
+                              get_error_string(res));
+                }
             }
         }
         val_free_value(valset);
@@ -6731,6 +6854,9 @@ static status_t
         log_debug("\nrSkipping false conditional command '%s'",
                   rpcname);
     }
+    if (res != NO_ERR) {
+        log_error("\n");
+    }
 
     return res;
 
@@ -6781,14 +6907,20 @@ status_t
     rpc = (obj_template_t *)parse_def(server_cb,
                                       &dtyp, 
                                       line, 
-                                      &len);
+                                      &len,
+                                      &res);
     if (!rpc) {
         if (server_cb->result_name || server_cb->result_filename) {
             res = finish_result_assign(server_cb, NULL, line);
         } else {
-            res = ERR_NCX_INVALID_VALUE;
-            /* this is an unknown command */
-            log_error("\nError: Unrecognized command");
+            if (res == ERR_NCX_DEF_NOT_FOUND) {
+                /* this is an unknown command */
+                log_error("\nError: Unrecognized command\n");
+            } else if (res == ERR_NCX_AMBIGUOUS_CMD) {
+                log_error("\n");
+            } else {
+                log_error("\nError: %s\n", get_error_string(res));
+            }
         }
         return res;
     }
@@ -6799,7 +6931,7 @@ status_t
     } else {
         res = ERR_NCX_OPERATION_FAILED;
         log_error("\nError: Not connected to server."
-                  "\nLocal commands only in this mode.");
+                  "\nLocal commands only in this mode.\n");
     }
 
     return res;
@@ -6859,14 +6991,20 @@ status_t
     rpc = (obj_template_t *)parse_def(server_cb,
                                       &dtyp, 
                                       line, 
-                                      &len);
+                                      &len,
+                                      &res);
     if (!rpc) {
         if (server_cb->result_name || server_cb->result_filename) {
             res = finish_result_assign(server_cb, NULL, line);
         } else {
-            res = ERR_NCX_DEF_NOT_FOUND;
-            /* this is an unknown command */
-            log_stdout("\nUnrecognized command");
+            if (res == ERR_NCX_DEF_NOT_FOUND) {
+                /* this is an unknown command */
+                log_error("\nError: Unrecognized command");
+            } else if (res == ERR_NCX_AMBIGUOUS_CMD) {
+                log_error("\n");
+            } else {
+                log_error("\nError: %s", get_error_string(res));
+            }
         }
         return res;
     }
@@ -6898,13 +7036,13 @@ status_t
     if (!reqdata) {
         log_error("\nError allocating a new RPC request");
         res = ERR_INTERNAL_MEM;
+    } else {
+        /* should find an input node */
+        input = obj_find_child(rpc, NULL, YANG_K_INPUT);
     }
 
-    /* should find an input node */
-    input = obj_find_child(rpc, NULL, YANG_K_INPUT);
-
     /* check if any params are expected */
-    if (res == NO_ERR && input && obj_get_child_count(input)) {
+    if (res == NO_ERR && input) {
         while (line[len] && xml_isspace(line[len])) {
             len++;
         }
@@ -6915,7 +7053,7 @@ status_t
                                    &line[len], 
                                    &res);
             if (res != NO_ERR) {
-                log_error("\nError in the parameters for RPC %s (%s)",
+                log_error("\nError in the parameters for '%s' command (%s)",
                           obj_get_name(rpc), get_error_string(res));
             }
         }
@@ -6988,13 +7126,16 @@ status_t
 
             /* the request will be stored if this returns NO_ERR */
             res = mgr_rpc_send_request(scb, req, yangcli_reply_handler);
+            if (res != NO_ERR) {
+                log_error("\nError: send <%s> message failed (%s)",
+                          obj_get_name(rpc),
+                          get_error_string(res));
+            }
         }
     }
 
     if (res != NO_ERR) {
-        log_error("\nError: send <%s> RPC failed (%s)",
-                  obj_get_name(rpc),
-                  get_error_string(res));
+        log_error("\n");
     }
 
     if (valset) {
@@ -7332,7 +7473,7 @@ status_t
                 if (valset) {
                     val_free_value(valset);
                 }
-                log_write("\nError in the parameters for RPC %s (%s)",
+                log_write("\nError in the parameters for '%s' command (%s)",
                           obj_get_name(rpc), 
                           get_error_string(res));
                 server_cb->state = MGR_IO_ST_IDLE;
@@ -7450,7 +7591,7 @@ status_t
 * FUNCTION parse_def
 * 
 * Definitions have two forms:
-*   def       (default module used)
+*   def       (all available modules searched)
 *   module:def (explicit module name used)
 *   prefix:def (if prefix-to-module found, explicit module name used)
 *
@@ -7462,11 +7603,13 @@ status_t
 *   dtyp == definition type 
 *       (NCX_NT_OBJ or  NCX_NT_TYP)
 *   line == input command line from user
-*   len  == pointer to output var for number of bytes parsed
+*   len == address of output var for number of bytes parsed
+*   retres == address of return status
 *
 * OUTPUTS:
 *    *dtyp is set if it started as NONE
 *    *len == number of bytes parsed
+*    *retres == return status
 *
 * RETURNS:
 *   pointer to the found definition template or NULL if not found
@@ -7475,23 +7618,27 @@ void *
     parse_def (server_cb_t *server_cb,
                ncx_node_t *dtyp,
                xmlChar *line,
-               uint32 *len)
+               uint32 *len,
+               status_t *retres)
 {
-    void           *def, *firstmatch;
+    void           *def, *lastmatch;
     xmlChar        *start, *p, *q, oldp, oldq;
     const xmlChar  *prefix, *defname, *modname, *defmod;
     ncx_module_t   *mod;
-    obj_template_t *obj;
     modptr_t       *modptr;
     uint32          prelen, tempcount, matchcount;
     xmlns_id_t      nsid;
-    
+    status_t        res;
+    boolean         first;
+
     def = NULL;
     q = NULL;
     oldq = 0;
     prelen = 0;
     *len = 0;
     start = line;
+    modname = NULL;
+    res = NO_ERR;
 
     /* skip any leading whitespace */
     while (*start && xml_isspace(*start)) {
@@ -7500,7 +7647,7 @@ void *
 
     p = start;
 
-    /* look for a colon or EOS or whitespace to end method name */
+    /* look for a colon or EOS or whitespace to end command name */
     while (*p && (*p != ':') && !xml_isspace(*p)) {
         p++;
     }
@@ -7513,7 +7660,9 @@ void *
     /* search for a module prefix if a separator was found */
     if (*p == ':') {
 
-        /* use an explicit module prefix in YANG */
+        /* use an explicit module prefix in YANG
+         * only this exact module will be tried
+         */
         prelen = p - start;
         q = p+1;
         while (*q && !xml_isspace(*q)) {
@@ -7521,6 +7670,9 @@ void *
         }
         *len = q - line;
 
+        /* save the old char and zero-terminate the definition
+         * that will be parsed as a command name
+         */
         oldq = *q;
         *q = 0;
         oldp = *p;
@@ -7529,15 +7681,12 @@ void *
         prefix = start;
         defname = p+1;
     } else {
-        /* no module prefix, use default module, if any */
+        /* no prefix given so search all the available modules */
         *len = p - line;
 
         oldp = *p;
         *p = 0;
 
-        /* try the default module, which will be NULL
-         * unless set by the default-module CLI param
-         */
         prefix = NULL;
         defname = start;
     }
@@ -7546,118 +7695,229 @@ void *
      * first check if only the user supplied a module name
      */
     if (prefix) {
-        modname = NULL;
         nsid = xmlns_find_ns_by_prefix(prefix);
         if (nsid) {
             modname = xmlns_get_module(nsid);
         }
         if (modname) {
+            /* try exact match in specified module */
             def = try_parse_def(server_cb,
-                                modname, defname, dtyp);
+                                NULL,
+                                modname, 
+                                defname, 
+                                dtyp);
         } else {
             log_error("\nError: no module found for prefix '%s'", 
                       prefix);
         }
     } else {
+        /* search for the command; try YANGCLI module first
+         * do not care about duplicate matches in other
+         * modules. An unprefixed keyword will match
+         * a yangcli command first
+         */
         def = try_parse_def(server_cb,
+                            NULL,
                             YANGCLI_MOD, 
                             defname, 
                             dtyp);
 
-        defmod = get_default_module();
-        if (!def && defmod) {
-            if (xml_strcmp(defmod, NC_MODULE) &&
-                xml_strcmp(defmod, NCXMOD_IETF_NETCONF)) {
-                def = try_parse_def(server_cb,
-                                    defmod, 
-                                    defname, 
-                                    dtyp);
-            }
-        }
-
-        /* if not found, try any module */
-        if (!def) {
-            /* try any of the server modules first */
-            if (use_servercb(server_cb)) {
-                for (modptr = (modptr_t *)
-                         dlq_firstEntry(&server_cb->modptrQ);
-                     modptr != NULL && !def;
-                     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
-
-                    def = try_parse_def(server_cb, 
-                                        modptr->mod->name, 
+        if (def == NULL) {
+            /* 2) try an exact match in the default module
+             * do not care about duplicates because the purpose
+             * of the default-module parm is to resolve any name
+             * collisions by picking the default module
+             */
+            defmod = get_default_module();
+            if (defmod != NULL) {
+                /* do not re-check the yangcli and netconf modules */
+                if (xml_strcmp(defmod, NC_MODULE) &&
+                    xml_strcmp(defmod, NCXMOD_IETF_NETCONF)) {
+                    def = try_parse_def(server_cb,
+                                        NULL,
+                                        defmod, 
                                         defname, 
                                         dtyp);
                 }
             }
+        }
 
-            /* try any of the manager-loaded modules */
-            for (mod = ncx_get_first_module();
-                 mod != NULL && !def;
-                 mod = ncx_get_next_module(mod)) {
+        /* 3) if not found, try any server advertised module */
+        if (def == NULL && use_servercb(server_cb)) {
+            /* try any of the server modules first
+             * make sure there is only 1 exact match 
+             */
+            matchcount = 0;
+            lastmatch = NULL;
+            for (modptr = (modptr_t *)
+                     dlq_firstEntry(&server_cb->modptrQ);
+                 modptr != NULL;
+                 modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
                 def = try_parse_def(server_cb, 
-                                    mod->name, 
+                                    modptr->mod,
+                                    modptr->mod->name, 
                                     defname, 
                                     dtyp);
+                if (def != NULL) {
+                    matchcount++;
+                    lastmatch = def;
+                }
+            }
+
+            if (matchcount > 1) {
+                /* generate ambiguous command error */
+                res = ERR_NCX_AMBIGUOUS_CMD;
+                first = TRUE;
+                for (modptr = (modptr_t *)
+                         dlq_firstEntry(&server_cb->modptrQ);
+                     modptr != NULL;
+                     modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+
+                    ncx_match_rpc_error(modptr->mod,
+                                        modptr->mod->name,
+                                        defname,
+                                        FALSE,
+                                        first);
+                    if (first) {
+                        first = FALSE;
+                    }
+                }
+                /* check any matches for local commands too */
+                ncx_match_rpc_error(get_yangcli_mod(),
+                                    NULL,
+                                    defname,
+                                    FALSE,
+                                    FALSE);
+            } else {
+                /*  0 or 1 matches found */
+                def = lastmatch;
             }
         }
 
-        /* if not found, try a partial RPC command name */
-        if (def == NULL && get_autocomp()) {
+        /* 4) try any of the manager-loaded modules */
+        if (res == NO_ERR && def == NULL) {
+            /* make sure there is only 1 exact match */
+            matchcount = 0;
+            lastmatch = NULL;
+            for (mod = ncx_get_first_module();
+                 mod != NULL;
+                 mod = ncx_get_next_module(mod)) {
+
+                def = try_parse_def(server_cb, 
+                                    mod,
+                                    mod->name, 
+                                    defname, 
+                                    dtyp);
+                if (def != NULL) {
+                    lastmatch = def;
+                    matchcount++;
+                }
+            }
+
+            if (matchcount > 1) {
+                /* generate ambiguous command error */
+                res = ERR_NCX_AMBIGUOUS_CMD;
+                ncx_match_rpc_error(NULL, 
+                                    NULL, 
+                                    defname,
+                                    FALSE,
+                                    TRUE);
+            } else {
+                /* 0 or 1 matches found */
+                def = lastmatch;
+            }
+        }
+    }
+
+    /* if not found and no error, try a partial command name */
+    if (res == NO_ERR && def == NULL && get_autocomp()) {
+        matchcount = 0;
+        lastmatch = NULL;
+
+        if (prefix != NULL) {
+            if (modname != NULL) {
+                /* try to match a command from this module */
+                def = ncx_match_any_rpc(modname, 
+                                        defname,
+                                        &matchcount);
+                if (matchcount > 1) {
+                    res = ERR_NCX_AMBIGUOUS_CMD;
+                    ncx_match_rpc_error(NULL, 
+                                        modname, 
+                                        defname,
+                                        TRUE,
+                                        TRUE);
+                } /* else 0 or 1 matches found */
+            } /* else module not found error already done */
+        } else {
             switch (*dtyp) {
             case NCX_NT_NONE:
             case NCX_NT_OBJ:
-                matchcount = 0;
-                firstmatch = NULL;
-
                 if (use_servercb(server_cb)) {
+                    /* check for 1 or more matches */
                     for (modptr = (modptr_t *)
                              dlq_firstEntry(&server_cb->modptrQ);
                          modptr != NULL;
                          modptr = (modptr_t *)dlq_nextEntry(modptr)) {
 
                         tempcount = 0;
-                        def = ncx_match_any_rpc(modptr->mod->name, 
-                                                defname,
-                                                &tempcount);
+                        def = ncx_match_any_rpc_mod(modptr->mod, 
+                                                    defname,
+                                                    &tempcount);
                         if (def) {
-                            if (firstmatch == NULL) {
-                                firstmatch = def;
-                            }
+                            lastmatch = def;
                             matchcount += tempcount;
                         }
                     }
-                }
-
-                if (firstmatch == NULL) {
-                    tempcount = 0;
-                    def = ncx_match_any_rpc(NULL, defname, &tempcount);
-                    if (def) {
-                        matchcount += tempcount;
-
-                        obj = (obj_template_t *)def;
-                        if (obj_get_nsid(obj) == xmlns_nc_id()) {
-                            /* matched a NETCONF RPC and not connected;
-                             * would have matched in the use_servercb()
-                             * code above if this is a partial NC op
-                             */
-                            def = NULL;
-                        } else {
-                            firstmatch = def;
+                    if (matchcount > 1) {
+                        /* server_cb had multiple matches */
+                        res = ERR_NCX_AMBIGUOUS_CMD;
+                        first = TRUE;
+                        for (modptr = (modptr_t *)
+                                 dlq_firstEntry(&server_cb->modptrQ);
+                             modptr != NULL;
+                             modptr = (modptr_t *)dlq_nextEntry(modptr)) {
+                            ncx_match_rpc_error(modptr->mod,
+                                                modptr->mod->name,
+                                                defname,
+                                                TRUE,
+                                                first);
+                            if (first) {
+                                first = FALSE;
+                            }
                         }
+                        /* list any partial local command matches */
+                        ncx_match_rpc_error(get_yangcli_mod(),
+                                            NULL,
+                                            defname,
+                                            TRUE,
+                                            FALSE);
                     }
                 }
 
-                if (matchcount > 1) {
-                    log_error("\nError: Ambiguous partial command");
-                    def = NULL;
-                } else {
-                    def = firstmatch;
-                    *dtyp = NCX_NT_OBJ;
+                if (res == NO_ERR && lastmatch == NULL) {
+                    /* did not match any of the server modules
+                     * or maybe no session active right now
+                     * check the modules that the client has loaded
+                     * with mgrload or at boot-time with the CLI
+                     */
+                    matchcount = 0;
+                    def = ncx_match_any_rpc(NULL, defname, &matchcount);
+                    if (matchcount > 1) {
+                        res = ERR_NCX_AMBIGUOUS_CMD;
+                        ncx_match_rpc_error(NULL,
+                                            NULL,
+                                            defname,
+                                            TRUE,
+                                            TRUE);
+                    }
                 }
                 break;
             default:
+                /* return NULL because only object types or
+                 * match anything mode will cause a partial match
+                 */
                 ;
             }
         }
@@ -7669,7 +7929,22 @@ void *
         *q = oldq;
     }
 
-    return def;
+    /* return status if requested */
+    if (retres != NULL) {
+        if (res != NO_ERR) {
+            *retres = res;
+        } else if (def == NULL) {
+            *retres = ERR_NCX_DEF_NOT_FOUND;
+        } else {
+            *retres = NO_ERR;
+        }
+    }
+
+    if (res == NO_ERR) {
+        return def;
+    } else {
+        return NULL;
+    }
     
 } /* parse_def */
 
@@ -7681,6 +7956,8 @@ void *
 * from getting timed out; server sent a keepalive request
 * and SSH will drop the session unless data is sent
 * within a configured time
+*
+* !!! NOT IMPLEMENTED !!!
 *
 * INPUTS:
 *    server_cb == server control block to use
@@ -7747,10 +8024,10 @@ val_value_t *
                                &line[len], 
                                res);
         if (*res == ERR_NCX_SKIPPED) {
-            log_stdout("\nError: no parameters defined for RPC %s",
+            log_stdout("\nError: no parameters defined for '%s' command",
                        obj_get_name(rpc));
         } else if (*res != NO_ERR) {
-            log_stdout("\nError in the parameters for RPC %s (%s)",
+            log_stdout("\nError in the parameters for '%s' command (%s)",
                        obj_get_name(rpc), 
                        get_error_string(*res));
         }

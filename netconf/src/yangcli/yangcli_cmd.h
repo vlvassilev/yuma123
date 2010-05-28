@@ -212,11 +212,13 @@ extern status_t
 *   dtyp == definition type 
 *       (NCX_NT_OBJ or  NCX_NT_TYP)
 *   line == input command line from user
-*   len  == pointer to output var for number of bytes parsed
+*   len == address of output var for number of bytes parsed
+*   retres == address of return status
 *
 * OUTPUTS:
 *    *dtyp is set if it started as NONE
 *    *len == number of bytes parsed
+*    *retres == return status
 *
 * RETURNS:
 *   pointer to the found definition template or NULL if not found
@@ -225,7 +227,8 @@ extern void *
     parse_def (server_cb_t *server_cb,
 	       ncx_node_t *dtyp,
 	       xmlChar *line,
-	       uint32 *len);
+	       uint32 *len,
+               status_t *retres);
 
 
 /********************************************************************

@@ -1405,16 +1405,18 @@ static status_t
     }
     retlen = 0;
     dtyp = NCX_NT_OBJ;
+    res = NO_ERR;
     comstate->cmdobj = (obj_template_t *)
         parse_def(comstate->server_cb,
                   &dtyp,
                   buffer,
-                  &retlen);
+                  &retlen,
+                  &res);
     m__free(buffer);
 
     if (comstate->cmdobj == NULL) {
         if (cpl != NULL) {
-            cpl_record_error(cpl, "unknown command");
+            cpl_record_error(cpl, get_error_string(res));
         }
         return 1;
     }

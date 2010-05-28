@@ -842,6 +842,62 @@ static void
 }  /* add_to_modQ */
 
 
+/********************************************************************
+* FUNCTION do_match_rpc_error
+*
+* Generate an error for multiple matches for 1 module
+*
+* INPUTS:
+*   mod == module struct to use
+*   rpcname == partial name string to match
+*   match == TRUE if match allowed, FALSE for exact match only
+*********************************************************************/
+static void
+    do_match_rpc_error (ncx_module_t *mod,
+                        const xmlChar *rpcname,
+                        boolean match)
+{
+    obj_template_t *rpc;
+    uint32          len;
+
+    if (match) {
+        len = xml_strlen(rpcname);
+    }
+
+    for (rpc = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
+         rpc != NULL;
+         rpc = (obj_template_t *)dlq_nextEntry(rpc)) {
+        if (rpc->objtype != OBJ_TYP_RPC) {
+            continue;
+        }
+        if (match) {
+            if (xml_strncmp(obj_get_name(rpc), rpcname, len)) {
+                continue;
+            }
+        } else {
+            if (xml_strcmp(obj_get_name(rpc), rpcname)) {
+                continue;
+            }
+        }
+
+        if (mod->version) {
+            log_error("\n    '%s:%s' from module '%s@%s'",
+                      ncx_get_mod_xmlprefix(mod),
+                      obj_get_name(rpc),
+                      obj_get_mod_name(rpc),
+                      mod->version);
+        } else {
+            log_error("\n    '%s:%s' from module '%s'",
+                      ncx_get_mod_xmlprefix(mod),
+                      obj_get_name(rpc),
+                      obj_get_mod_name(rpc));
+        }
+    }
+
+}   /* do_match_rpc_error */
+
+
+
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
@@ -1703,7 +1759,8 @@ obj_template_t *
 /********************************************************************
 * FUNCTION ncx_match_rpc
 *
-* Check if a rpc_template_t in the mod->rpcQ
+* Check if a rpc_template_t is in the mod->rpcQ
+* Partial match the commmand name
 *
 * INPUTS:
 *   mod == ncx_module to check
@@ -1758,8 +1815,8 @@ obj_template_t *
 /********************************************************************
 * FUNCTION ncx_match_any_rpc
 *
-* Check if a rpc_template_t in in any module that
-* matches the rpc name string and maybe the owner
+* Check if a rpc_template_t is in any module that
+* matches the rpc name string
 *
 * INPUTS:
 *   module == module name to check (NULL == check all)
@@ -1817,6 +1874,103 @@ obj_template_t *
     return firstfound;
 
 }   /* ncx_match_any_rpc */
+
+
+/********************************************************************
+* FUNCTION ncx_match_any_rpc_mod
+*
+* Check if a rpc_template_t is in the specified module
+*
+* INPUTS:
+*   mod == module struct to check
+*   rpcname == RPC name to match
+*   retcount == address of return count of matches
+*
+* OUTPUTS:
+*   *retcount == number of matches found
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
+obj_template_t *
+    ncx_match_any_rpc_mod (ncx_module_t *mod,
+                           const xmlChar *rpcname,
+                           uint32 *retcount)
+{
+    obj_template_t *firstfound;
+
+#ifdef DEBUG
+    if (!mod || !rpcname || !retcount) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    *retcount = 0;
+
+    firstfound = ncx_match_rpc(mod, rpcname, retcount);
+
+    return firstfound;
+
+}   /* ncx_match_any_rpc_mod */
+
+
+/********************************************************************
+* FUNCTION ncx_match_rpc_error
+*
+* Generate an error for multiple matches
+*
+* INPUTS:
+*   mod == module struct to check (may be NULL)
+*   modname == module name if mod not set
+*           == NULL to match all modules
+*   rpcname == RPC name to match
+*   match == TRUE to match partial command names
+*            FALSE for exact match only
+*   firstmsg == TRUE to do the first log_error banner msg
+*               FALSE to skip this step
+*********************************************************************/
+void
+    ncx_match_rpc_error (ncx_module_t *mod,
+                         const xmlChar *modname,
+                         const xmlChar *rpcname,
+                         boolean match,
+                         boolean firstmsg)
+{
+
+#ifdef DEBUG
+    if (rpcname == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (firstmsg) {
+        if (match) {
+            log_error("\nError: Ambiguous partial command name: '%s'",
+                      rpcname);
+        } else {
+            log_error("\nError: Ambiguous command name: '%s'",
+                      rpcname);
+        }
+    }
+
+    if (mod != NULL) {
+        do_match_rpc_error(mod, rpcname, match);
+    } else if (modname != NULL) {
+        mod = ncx_find_module(modname, NULL);
+        if (mod != NULL) {
+            do_match_rpc_error(mod, rpcname, match);
+        }
+    } else {
+        for (mod = ncx_get_first_module();
+             mod != NULL;
+             mod =  ncx_get_next_module(mod)) {
+            do_match_rpc_error(mod, rpcname, match);
+        }
+    }
+
+}   /* ncx_match_rpc_error */
 
 
 /********************************************************************

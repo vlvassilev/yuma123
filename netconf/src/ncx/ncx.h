@@ -422,6 +422,51 @@ extern obj_template_t *
 
 
 /********************************************************************
+* FUNCTION ncx_match_any_rpc_mod
+*
+* Check if a rpc_template_t is in the specified module
+*
+* INPUTS:
+*   mod == module struct to check
+*   rpcname == RPC name to match
+*   retcount == address of return count of matches
+*
+* OUTPUTS:
+*   *retcount == number of matches found
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
+extern obj_template_t *
+    ncx_match_any_rpc_mod (ncx_module_t *mod,
+                           const xmlChar *rpcname,
+                           uint32 *retcount);
+
+
+/********************************************************************
+* FUNCTION ncx_match_rpc_error
+*
+* Generate an error for multiple matches
+*
+* INPUTS:
+*   mod == module struct to check (may be NULL)
+*   modname == module name if mod not set
+*           == NULL to match all modules
+*   rpcname == RPC name to match
+*   match == TRUE to match partial command names
+*            FALSE for exact match only
+*   firstmsg == TRUE to do the first log_error banner msg
+*               FALSE to skip this step
+*********************************************************************/
+extern void
+    ncx_match_rpc_error (ncx_module_t *mod,
+                         const xmlChar *modname,
+                         const xmlChar *rpcname,
+                         boolean match,
+                         boolean firstmsg);
+
+
+/********************************************************************
 * FUNCTION ncx_find_any_object
 *
 * Check if an obj_template_t in in any module that

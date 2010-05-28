@@ -17,7 +17,7 @@ module testgrp {
 
    rpc foo {
     input {
-     leaf bar { type string; }
+     leaf bar { type int32; }
     }
   }
 

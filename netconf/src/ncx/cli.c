@@ -1148,7 +1148,7 @@ val_value_t *
     val_value_t    *val;
     obj_template_t *chobj;
     const char     *msg;
-    char           *parmname, *parmval, *str, *buff;
+    char           *parmname, *parmval, *str, *buff, testch;
     int32           buffpos, bufflen;
     uint32          parmnamelen, copylen, matchcount;
     ncx_btype_t     btyp;
@@ -1292,17 +1292,26 @@ val_value_t *
             continue;
         } else if (buff[buffpos] == NCX_CLI_START_CH) {
             if (!buff[buffpos+1]) {
-                res = ERR_NCX_WRONG_LEN;
+                res = ERR_NCX_INVALID_VALUE;
             } else if (buff[buffpos+1] == NCX_CLI_START_CH) {
-                if (!buff[buffpos+2]) {
-                    res = ERR_NCX_WRONG_LEN;
+                testch = buff[buffpos+2];
+                if (testch == '\0' ||
+                    isspace(testch) ||
+                    testch == NCX_CLI_START_CH) {
+                    res = ERR_NCX_INVALID_VALUE;
                 } else {
                     buffpos += 2;  /* skip past 2 dashes */
                     gotdashes = TRUE;
                 }
             } else {
-                buffpos++;    /* skip past 1 dash */
-                gotdashes = TRUE;
+                testch = buff[buffpos+1];
+                if (testch == '\0' ||
+                    isspace(testch)) {
+                    res = ERR_NCX_INVALID_VALUE;
+                } else {
+                    buffpos++;    /* skip past 1 dash */
+                    gotdashes = TRUE;
+                }
             }
         } /* else no dashes, leave parmname pointer alone */
 
@@ -1355,6 +1364,12 @@ val_value_t *
 
 
             if (res != NO_ERR) {
+                if (res == ERR_NCX_INVALID_VALUE) {
+                    log_error("\nError: invalid CLI parameter prefix");
+                } else {
+                    log_error("\nError: invalid CLI syntax (%s)",
+                              get_error_string(res));
+                }
                 continue;
             }
 
@@ -1378,9 +1393,7 @@ val_value_t *
                 }
             }
 
-            if (res != NO_ERR) {
-                /* got ambiguous cmd error */;
-            } else if (!chobj) {
+            if (!chobj) {
                 res = ERR_NCX_UNKNOWN_PARM;
             } else {
                 /* do not check parameter order for CLI */
@@ -1527,9 +1540,12 @@ val_value_t *
         /* check any errors in the parm name or value */
         if (res != NO_ERR) {
             msg = get_error_string(res);
-            xml_strncpy(errbuff, 
-                        (const xmlChar *)parmname, 
-                        min(parmnamelen, ERRLEN));
+            errbuff[0] = 0;
+            if (parmname != NULL) {
+                xml_strncpy(errbuff, 
+                            (const xmlChar *)parmname, 
+                            min(parmnamelen, ERRLEN));
+            }
             switch (res) {
             case ERR_NCX_UNKNOWN_PARM:
                 log_error("\nError: Unknown parameter (%s)", errbuff);
@@ -1540,23 +1556,26 @@ val_value_t *
                           parmname);
                 break;
             default:
-                if (buffpos < bufflen) {
-                    log_error("\nError: %s (%s = %s)", 
-                              msg, 
-                              errbuff, 
-                              &buff[buffpos]);
-                } else if (parmval) {
-                    log_error("\nError: %s (%s = %s)", 
-                              msg, 
-                              errbuff, 
-                              parmval);
+                if (*errbuff) {
+                    if (buffpos < bufflen) {
+                        log_error("\nError: %s (%s = %s)", 
+                                  msg, 
+                                  errbuff, 
+                                  &buff[buffpos]);
+                    } else if (parmval != NULL) {
+                        log_error("\nError: %s (%s = %s)", 
+                                  msg, 
+                                  errbuff, 
+                                  parmval);
+                    } else {
+                        log_error("\nError: %s (%s)", 
+                                  msg, 
+                                  errbuff);
+                    }
                 } else {
-                    log_error("\nError: %s (%s)", 
-                              msg, 
-                              errbuff);
+                    log_error("\nError: %s");
                 }
             }
-            ncx_print_errormsg(NULL, NULL, res);
             m__free(buff);
             *status = res;
             return val;

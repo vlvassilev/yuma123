@@ -454,13 +454,15 @@ typedef struct obj_template_t_ {
     /* cbset is agt_rpc_cbset_t for RPC or agt_cb_fnset_t for OBJ */
     void                   *cbset;   
 
-    /* object namespace ID assigned at runtime
+    /* object module and namespace ID 
+     * assigned at runtime
      * this can be changed over and over as a
      * uses statement is expanded.  The final
      * expansion into a real object will leave
      * the correct value in place
      */
-    xmlns_id_t             nsid;
+    struct ncx_module_t_ *mod;
+    xmlns_id_t            nsid;
 
     union def_ {
 	obj_container_t   *container;

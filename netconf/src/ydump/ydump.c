@@ -1737,13 +1737,6 @@ status_t
     }
 
     if (res == NO_ERR) {
-        res = ncxmod_load_module(NCXMOD_NCX, 
-                                 NULL, 
-                                 NULL,
-                                 NULL);
-    }
-
-    if (res == NO_ERR) {
         res = ncx_stage2_init();
     }
 

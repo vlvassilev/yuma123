@@ -187,7 +187,7 @@ static status_t
 
     res = NO_ERR;
 
-    if (typdef->class == NCX_CL_NAMED) {
+    if (typdef->tclass == NCX_CL_NAMED) {
         testdef = typ_get_parent_typdef(typdef);
         lastdef = testdef;
         while (testdef && res==NO_ERR) {
@@ -195,7 +195,7 @@ static status_t
                 res = ERR_NCX_DEF_LOOP;
                 log_error("\nError: named type loops with "
                           "type '%s' on line %u",
-                          testdef->typename,
+                          testdef->typenamestr,
                           lastdef->tkerr.linenum);
             } else {
                 lastdef = testdef;    
@@ -327,9 +327,9 @@ static status_t
     status_t      res, retres;
 
 
-    if (typdef->class == NCX_CL_SIMPLE) {
+    if (typdef->tclass == NCX_CL_SIMPLE) {
         return one_restriction_test(tkc, mod, typdef);
-    } else if (typdef->class != NCX_CL_NAMED) {
+    } else if (typdef->tclass != NCX_CL_NAMED) {
         return NO_ERR;
     }
 
@@ -342,7 +342,7 @@ static status_t
      * added; If NULL, then just a type name was given
      */
     testdef = typdef;
-    while (testdef && testdef->class==NCX_CL_NAMED) {
+    while (testdef && testdef->tclass==NCX_CL_NAMED) {
         newdef = typ_get_new_named(testdef);
         if (!newdef) {
             testdef = typ_get_parent_typdef(testdef);
@@ -2643,7 +2643,7 @@ static status_t
     
     res = NO_ERR;
 
-    switch (typdef->class) {
+    switch (typdef->tclass) {
     case NCX_CL_NAMED:
         parentdef = typ_get_parent_typdef(typdef);
         if (parentdef) {
@@ -3046,7 +3046,7 @@ static status_t
             ncx_print_errormsg(tkc, mod, retres);
         }
 
-        if (un->typdef->class == NCX_CL_NAMED) {
+        if (un->typdef->tclass == NCX_CL_NAMED) {
             un->typ = un->typdef->def.named.typ;
             /* keep the typdef around for ncxdump */
         }
@@ -3118,14 +3118,15 @@ static status_t
     retres = NO_ERR;
     errdone = FALSE;
 
-    if (typdef->class == NCX_CL_BASE) {
+    if (typdef->tclass == NCX_CL_BASE) {
         return NO_ERR;
     }
 
 #ifdef YANG_TYP_DEBUG
     if (LOGDEBUG4) {
         log_debug4("\nyang_typ: resolve type '%s' (name %s) on line %u",
-                   (typdef->typename) ? typdef->typename : NCX_EL_NONE,
+                   (typdef->typenamestr) ? 
+                   typdef->typenamestr : NCX_EL_NONE,
                    (name) ? name : NCX_EL_NONE,
                    typdef->tkerr.linenum);
     }
@@ -3193,9 +3194,9 @@ static status_t
      * Errors printed in the called fn
      */
     if (res == NO_ERR) {
-        if (!name && (typdef->class == NCX_CL_NAMED)) {
+        if (!name && (typdef->tclass == NCX_CL_NAMED)) {
             /* name field just used for error messages */
-            errname = typdef->typename;
+            errname = typdef->typenamestr;
         } else {
             errname = name;
         }
@@ -3231,7 +3232,7 @@ static status_t
                 tkc->curerr = &typdef->tkerr;
                 ncx_print_errormsg(tkc, mod, res);
             }
-        } else if (typdef->class == NCX_CL_NAMED) {
+        } else if (typdef->tclass == NCX_CL_NAMED) {
             typdefval = typ_get_defval(typdef->def.named.typ);
             if (typdefval) {
                 if (btyp == NCX_BT_IDREF) {
@@ -3271,7 +3272,7 @@ static status_t
         case NCX_BT_ENUM:
         case NCX_BT_BITS:
             /* check each enumeration appinfoQ */
-            if (typdef->class == NCX_CL_SIMPLE) {
+            if (typdef->tclass == NCX_CL_SIMPLE) {
                 for (enu = (typ_enum_t *)
                          dlq_firstEntry(&typdef->def.simple.valQ);
                      enu != NO_ERR;
@@ -3330,7 +3331,7 @@ static status_t
 
     /* special check for union typdefs, errors printed by called fn */
     if (res == NO_ERR) {
-        if (typdef->class == NCX_CL_SIMPLE &&
+        if (typdef->tclass == NCX_CL_SIMPLE &&
             typ_get_basetype(typdef) == NCX_BT_UNION) {
             testdef = typ_get_base_typdef(typdef);
             res = resolve_union_type(pcb,
@@ -3500,18 +3501,18 @@ static status_t
     res = yang_consume_pid_string(tkc, 
                                   mod, 
                                   &intypdef->prefix,
-                                  &intypdef->typename);
+                                  &intypdef->typenamestr);
     CHK_EXIT(res, retres);
 
     /* got ID and prefix if there is one */
-    if (intypdef->prefix && intypdef->typename &&
+    if (intypdef->prefix && intypdef->typenamestr &&
         xml_strcmp(intypdef->prefix, mod->prefix)) {
         /* real import - not the same as this module's prefix */
         res = yang_find_imp_typedef(pcb,
                                     tkc, 
                                     mod,
                                     intypdef->prefix,
-                                    intypdef->typename,
+                                    intypdef->typenamestr,
                                     NULL,
                                     &imptyp);
         if (res != NO_ERR) {
@@ -3524,13 +3525,13 @@ static status_t
             btyp = typ_get_basetype(&imptyp->typdef);
             typ_set_named_typdef(intypdef, imptyp);
         }
-    } else if (intypdef->typename) {
+    } else if (intypdef->typenamestr) {
         /* there was no real prefix, so try to resolve this ID
          * as a builtin type, else save as a local type
          * btyp == NCX_BT_NONE indicates a local type
          */
-        btyp = tk_get_yang_btype_id(intypdef->typename,
-                                    xml_strlen(intypdef->typename));
+        btyp = tk_get_yang_btype_id(intypdef->typenamestr,
+                                    xml_strlen(intypdef->typenamestr));
         if (btyp != NCX_BT_NONE) {
             /* base type is builtin type */
             typ_init_simple(intypdef, btyp);

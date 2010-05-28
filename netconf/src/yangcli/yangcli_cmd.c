@@ -2519,7 +2519,6 @@ static status_t
                      const xmlChar *source,
                      val_value_t *valset)
 {
-    /* xmlChar       *str, *fspec; */
     xmlChar       *fspec;
     FILE          *fp;
     val_value_t   *parm;
@@ -2574,27 +2573,6 @@ static status_t
             }
         }
     }
-
-#if 0
-    /* execute the first command in the script */
-    str = runstack_get_cmd(server_cb->runstack_context, &res);
-    if (str && res == NO_ERR) {
-        /* do not need to save this command
-         * the new script would not have started
-         * if the condiition state was FALSE
-         * Now there is a new runstack frame and there
-         * connot be any while loops started alread
-         * so the runstack_save_line function is not needed
-         *
-         * just execute the line as an RPC command 
-         */
-        if (is_top(server_cb->state)) {
-            res = top_command(server_cb, str);
-        } else {
-            res = conn_command(server_cb, str);
-        }
-    }
-#endif
 
     return res;
 
@@ -7596,16 +7574,6 @@ void *
                                     dtyp);
             }
         }
-
-#if 0
-        /* force the yuma-netconf module in the tempdir to be used */
-        if (!def && (!defmod || xml_strcmp(defmod, NC_MODULE))) {
-            def = try_parse_def(server_cb,
-                                NC_MODULE, 
-                                defname, 
-                                dtyp);
-        }
-#endif
 
         /* if not found, try any module */
         if (!def) {

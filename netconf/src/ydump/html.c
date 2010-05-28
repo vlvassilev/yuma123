@@ -193,22 +193,22 @@ static void
 * INPUTS:
 *   scb == session control block to use for writing
 *   name == element name
-*   class == CSS class to use (may be NULL)
+*   css_class == CSS class to use (may be NULL)
 *   indent == indent count
 *
 *********************************************************************/
 static void
     start_elem (ses_cb_t *scb,
                 const xmlChar *name,
-                const xmlChar *class,
+                const xmlChar *css_class,
                 int32 indent)
 
 {
     ses_putstr_indent(scb, (const xmlChar *)"<", indent);
     ses_putstr(scb, name);
-    if (class) {
+    if (css_class) {
         ses_putstr(scb, (const xmlChar *)" class=\"");
-        ses_putstr(scb, class);
+        ses_putstr(scb, css_class);
         ses_putstr(scb, (const xmlChar *)"\">");
     } else {
         ses_putchar(scb, '>');
@@ -1037,7 +1037,7 @@ static void
     fversion = NULL;
     if (typdef->prefix && 
         xml_strcmp(typdef->prefix, mod->prefix)) {
-        if (typdef->class == NCX_CL_NAMED && typdef->def.named.typ
+        if (typdef->tclass == NCX_CL_NAMED && typdef->def.named.typ
             && typdef->def.named.typ->tkerr.mod) {
             fname = typdef->def.named.typ->tkerr.mod->name;
             fversion = typdef->def.named.typ->tkerr.mod->version;
@@ -1049,7 +1049,7 @@ static void
     /* write the identifier with an href to the type
      * unless the type is one of the yang builtin types
      */
-    if (typdef->class == NCX_CL_NAMED) {
+    if (typdef->tclass == NCX_CL_NAMED) {
         ses_putstr(scb, (const xmlChar *)"<span class=\"yang_id\">");
         write_a(scb, 
                 cp, 
@@ -1057,11 +1057,11 @@ static void
                 fversion, 
                 submod,
                 (fname) ? typdef->prefix : NULL,
-                typdef->typename, 
+                typdef->typenamestr, 
                 typ_get_named_type_linenum(typdef));
         ses_putstr(scb, (const xmlChar *)"</span>");
     } else {
-        write_id(scb, typdef->typename);
+        write_id(scb, typdef->typenamestr);
     }
 
 }  /* write_type */
@@ -1270,7 +1270,7 @@ static void
 
     indent = startindent + ses_indent_count(scb);
 
-    switch (typdef->class) {
+    switch (typdef->tclass) {
     case NCX_CL_BASE:
         break;
     case NCX_CL_NAMED:

@@ -158,15 +158,6 @@ static status_t
     }
 #endif
 
-    /* load in the NCX extensions module */
-    res = ncxmod_load_module(NCXMOD_NCX,
-                             NULL,
-                             &profile->agt_savedevQ,
-                             NULL);
-    if (res != NO_ERR) {
-        return res;
-    }
-
     /* load in the with-defaults extension module */
     res = ncxmod_load_module(NCXMOD_WITH_DEFAULTS,
                              NULL,

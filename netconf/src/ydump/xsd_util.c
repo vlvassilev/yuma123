@@ -937,7 +937,7 @@ static status_t
     targns = mod->nsid;
 
     /* figure out the correct namespace and name for the typename */
-    switch (typdef->class) {
+    switch (typdef->tclass) {
     case NCX_CL_BASE:
     case NCX_CL_SIMPLE:
         typ_id = xmlns_xs_id();
@@ -2681,7 +2681,7 @@ status_t
 
 }   /* xsd_add_parmtype_attr */
 
-#if 0
+#if 0  /* complex types not supported in YANG */
 /********************************************************************
 * FUNCTION xsd_add_key
 * 
@@ -3053,7 +3053,7 @@ status_t
     annot = NULL;
     res = NO_ERR;
 
-    if (typ->typdef.class == NCX_CL_SIMPLE &&
+    if (typ->typdef.tclass == NCX_CL_SIMPLE &&
         typ_get_basetype(&typ->typdef)==NCX_BT_LEAFREF) {
         path = typ_get_leafref_path(&typ->typdef);
     }
@@ -3356,7 +3356,7 @@ status_t
     res = NO_ERR;
 
     /* figure out the correct namespace and name for the typename */
-    switch (typdef->class) {
+    switch (typdef->tclass) {
     case NCX_CL_BASE:
     case NCX_CL_SIMPLE:
         break;

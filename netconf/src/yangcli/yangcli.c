@@ -2130,15 +2130,6 @@ static status_t
         return res;
     }
 
-    /* load in the NCX extensions */
-    res = ncxmod_load_module(NCXMOD_NCX, 
-                             NULL, 
-                             NULL,
-                             NULL);
-    if (res != NO_ERR) {
-        return res;
-    }
-
     /* load the netconf-state module to use
      * the <get-schema> operation 
      */

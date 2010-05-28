@@ -964,7 +964,7 @@ static status_t
 
     elem = xsd_new_leaf_element(mod, obj,
                                 (annot) ? TRUE : FALSE,
-                                (typdef->class == NCX_CL_NAMED),
+                                (typdef->tclass == NCX_CL_NAMED),
                                 iskey);
     if (!elem) {
         if (annot) {
@@ -1057,7 +1057,7 @@ static status_t
 
     res = test_basetype_attr(mod, typdef);
 
-    switch (typdef->class) {
+    switch (typdef->tclass) {
     case NCX_CL_BASE:
         empty = TRUE;
         break;
@@ -1145,7 +1145,7 @@ static status_t
             val_add_child(toptyp, elem);  /* add early */
         }
 
-        switch (typdef->class) {
+        switch (typdef->tclass) {
         case NCX_CL_SIMPLE:
             res = xsd_finish_simpleType(mod, typdef, toptyp);
             break;

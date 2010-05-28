@@ -1828,7 +1828,7 @@ status_t
     }
 
     /* check which string Q to use for further processing */
-    switch (typdef->class) {
+    switch (typdef->tclass) {
     case NCX_CL_SIMPLE:
         checkQ = &typdef->def.simple.valQ;
         last = TRUE;
@@ -1877,7 +1877,7 @@ status_t
         if (!typdef) {
             return SET_ERROR(ERR_INTERNAL_VAL);
         }
-        switch (typdef->class) {
+        switch (typdef->tclass) {
         case NCX_CL_SIMPLE:
             checkQ = &typdef->def.simple.valQ;
             last = TRUE;
@@ -1932,7 +1932,7 @@ status_t
 #endif
 
     /* check which string Q to use for further processing */
-    switch (typdef->class) {
+    switch (typdef->tclass) {
     case NCX_CL_SIMPLE:
         checkQ = &typdef->def.simple.valQ;
         last = TRUE;
@@ -1981,7 +1981,7 @@ status_t
         if (!typdef) {
             return SET_ERROR(ERR_INTERNAL_VAL);
         }
-        switch (typdef->class) {
+        switch (typdef->tclass) {
         case NCX_CL_SIMPLE:
             checkQ = &typdef->def.simple.valQ;
             last = TRUE;

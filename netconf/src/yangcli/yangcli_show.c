@@ -534,7 +534,7 @@ static status_t
     } else if (mode == HELP_MODE_NORMAL) {
         if (imode) {
             if (mod->version) {
-                log_stdout("\n  %s:%s/%s", 
+                log_stdout("\n  %s:%s@%s", 
                            ncx_get_mod_xmlprefix(mod), 
                            mod->name, 
                            mod->version);
@@ -545,12 +545,9 @@ static status_t
             }
         } else {
             if (mod->version) {
-                log_write("\n  %s/%s", 
-                          mod->name, 
-                          mod->version);
+                log_write("\n  %s@%s", mod->name, mod->version);
             } else {
-                log_write("\n  %s", 
-                          mod->name);
+                log_write("\n  %s", mod->name);
             }
         }
     } else {

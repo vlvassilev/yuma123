@@ -526,7 +526,7 @@ static status_t
                                                pcb->tkerr.mod, 
                                                res);
                         }
-                        break;
+                        break;  /* out of switch */
                     } else {
                         testmod = ncx_find_module(import->module,
                                                   import->revision);
@@ -537,6 +537,18 @@ static status_t
                 }
             } else {
                 nsid = xmlns_find_ns_by_prefix(prefix);
+                if (nsid == XMLNS_NULL_NS_ID) {
+                    res = ERR_NCX_PREFIX_NOT_FOUND;
+                    if (pcb->logerrors) {
+                        log_error("\nError: module for prefix "
+                                  "'%s' not found",
+                                  prefix);
+                        ncx_print_errormsg(pcb->tkc, 
+                                           pcb->tkerr.mod, 
+                                           res);
+                    }
+                    break;  /* out of switch */
+                }
             }
         } else {
             res = xml_get_namespace_id(pcb->reader,
@@ -566,7 +578,7 @@ static status_t
         ncx_mod_exp_err(pcb->tkc, 
                         pcb->tkerr.mod, 
                         res,
-                        tk_get_token_name(TK_CUR_TYP(pcb->tkc)));
+                        "node identifier");
     }
 
     return res;
@@ -911,7 +923,8 @@ static status_t
                               obj_get_name(pcb->varobj));
                     ncx_mod_exp_err(pcb->tkc, 
                                     pcb->objmod, 
-                                    res, "leaf");
+                                    res, 
+                                    "leaf");
                 }
                 done = TRUE;
                 continue;
@@ -1315,6 +1328,9 @@ static status_t
 
     nexttyp = tk_next_typ(pcb->tkc);
     if (nexttyp == TK_TT_FSLASH) {
+        pcb->flags |= XP_FL_ABSPATH;
+        return parse_absolute_path(pcb);
+    } else if (pcb->obj != NULL && pcb->obj == pcb->docroot) {
         pcb->flags |= XP_FL_ABSPATH;
         return parse_absolute_path(pcb);
     } else {

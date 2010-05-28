@@ -768,7 +768,7 @@ static void
         m__free(leaf->ref);
     }
 
-    if (leaf->typdef && (leaf->typdef->class != NCX_CL_BASE)
+    if (leaf->typdef && (leaf->typdef->tclass != NCX_CL_BASE)
         && notclone) {
         typ_free_typdef(leaf->typdef);
     }
@@ -1984,6 +1984,7 @@ static obj_template_t *
             if (modname && xml_strcmp(modname, mname)) {
                 continue;
             }
+
             if (ret == 0) {
                 if (match) {
                     if (obj->objtype == OBJ_TYP_CHOICE ||
@@ -4683,7 +4684,6 @@ obj_template_t *
                   rpcobj->tkerr.mod,
                   rpcobj->tkerr.linenum,
                   rpcobj->tkerr.linepos);
-
     rpcio->parent = rpcobj;
 
     return rpcio;
@@ -4946,7 +4946,7 @@ status_t
 {
     typ_template_t *testtyp;
 
-    if (typdef->class == NCX_CL_NAMED &&
+    if (typdef->tclass == NCX_CL_NAMED &&
         typdef->def.named.typ==NULL) {
 
         /* assumed to be a named type from this module
@@ -4954,7 +4954,7 @@ status_t
          * would get resolved OK, or fail due to syntax
          * or dependency loop
          */
-        if (typname && !xml_strcmp(typname, typdef->typename)) {
+        if (typname && !xml_strcmp(typname, typdef->typenamestr)) {
             log_error("\nError: typedef '%s' cannot use type '%s'",
                       typname, typname);
             tkc->curerr = &typdef->tkerr;
@@ -4964,22 +4964,25 @@ status_t
         testtyp = NULL;
 
         /* find the type within the specified typedef Q */
-        if (typdef->typename) {
+        if (typdef->typenamestr) {
             if (grp) {
-                testtyp = find_type_in_grpchain(grp, typdef->typename);
+                testtyp = find_type_in_grpchain(grp, 
+                                                typdef->typenamestr);
             }
 
             if (!testtyp && parent) {
-                testtyp = obj_find_type(parent, typdef->typename);
+                testtyp = obj_find_type(parent, 
+                                        typdef->typenamestr);
             }
 
             if (!testtyp) {
-                testtyp = ncx_find_type(mod, typdef->typename);
+                testtyp = ncx_find_type(mod, typdef->typenamestr);
             }
         }
 
         if (!testtyp) {
-            log_error("\nError: type '%s' not found", typdef->typename);
+            log_error("\nError: type '%s' not found", 
+                      typdef->typenamestr);
             tkc->curerr = &typdef->tkerr;
             return ERR_NCX_UNKNOWN_TYPE;
         } else {
@@ -5063,6 +5066,7 @@ obj_template_t *
                   srcobj->tkerr.linenum,
                   srcobj->tkerr.linepos);
     newobj->flags = (srcobj->flags | OBJ_FL_CLONE);
+    newobj->mod = mod;
     newobj->nsid = mod->nsid;
 
     /* do not set the group in a clone */
@@ -7352,17 +7356,28 @@ const xmlChar *
 const xmlChar *
     obj_get_mod_name (const obj_template_t  *obj)
 {
+    ncx_module_t  *usemod;
+
 #ifdef DEBUG
-    if (!obj || !obj->tkerr.mod) {
+    if (obj == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
 #endif
 
-    if (obj->tkerr.mod->ismod) {
-        return obj->tkerr.mod->name;
+    if (obj->mod != NULL) {
+        usemod = obj->mod;
+    } else if (obj->tkerr.mod != NULL) {
+        usemod = obj->tkerr.mod;
     } else {
-        return obj->tkerr.mod->belongs;
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+
+    if (usemod->ismod) {
+        return usemod->name;
+    } else {
+        return usemod->belongs;
     }
 
 }  /* obj_get_mod_name */
@@ -7421,8 +7436,8 @@ const xmlChar *
 
     typdef = obj_get_ctypdef(obj);
     if (typdef) {
-        if (typdef->typename) {
-            return typdef->typename;
+        if (typdef->typenamestr) {
+            return typdef->typenamestr;
         } else {
             return (const xmlChar *)
                 tk_get_btype_sym(obj_get_basetype(obj));

@@ -416,9 +416,9 @@ static status_t
     if (testobj) {
         if (testobj->tkerr.mod != mod) {
             log_error("\nError: object '%s' already defined "
-                      "in submodule '%s' at line %u",
+                      "in [sub]module '%s' at line %u",
                       name, 
-                      mod->name, 
+                      testobj->tkerr.mod->name, 
                       testobj->tkerr.linenum);
         } else {
             log_error("\nError: object '%s' already defined at line %u",
@@ -2132,7 +2132,7 @@ static status_t
         if (testobj) {
             if (testobj->tkerr.mod != mod) {
                 log_error("\nError: object '%s' already defined "
-                          "in submodule '%s' at line %u",
+                          "in [sub]module '%s' at line %u",
                           choic->name, 
                           testobj->tkerr.mod->name,
                           testobj->tkerr.linenum);
@@ -5845,9 +5845,11 @@ static status_t
             continue;
         } 
 
-        /* make sure the leaf is a child of the list object */
-        if (keyobj->parent != obj || 
-            keyobj->tkerr.mod != obj->tkerr.mod) {
+        /* make sure the leaf is a child of the list object
+         * and not a deep key; this is a CLR in YANG but it
+         * is supported by Yuma
+         */
+        if (keyobj->parent != obj) {
             log_error("\nError: leaf node '%s' on line %u not child "
                       "of list '%s'",
                       obj_get_name(keyobj),
@@ -7106,8 +7108,12 @@ static status_t
                 } else {
                     /* set the object module (and namespace)
                      * to the target, not the module w/ grouping
+                     * !!! this does not work -- it just sets
+                     * !!! the top-level node being expanded;
+                     * !!! all the children get the old module name
+                     *
+                     * !!! newobj->tkerr.mod = obj->tkerr.mod;
                      */
-                    newobj->tkerr.mod = obj->tkerr.mod;  /****/
                     newobj->parent = obj->parent;
                     newobj->usesobj = obj;
 

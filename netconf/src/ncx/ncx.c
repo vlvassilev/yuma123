@@ -1052,14 +1052,19 @@ status_t
     ncx_stage2_init (void)
 {
     ncx_module_t     *mod;
+    status_t          res;
 
     if (stage2_init_done) {
         return NO_ERR;
     }
 
-    mod = ncx_find_module(NCX_MODULE, NULL);
-    if (!mod) {
-        return ERR_NCX_MOD_NOT_FOUND;
+    mod = NULL;
+    res = ncxmod_load_module(NCXMOD_NCX, 
+                             NULL, 
+                             NULL,
+                             &mod);
+    if (mod == NULL) {
+        return res;
     }
 
     gen_anyxml = ncx_find_object(mod, NCX_EL_ANY);

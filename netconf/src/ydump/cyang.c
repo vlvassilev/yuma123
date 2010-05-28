@@ -434,9 +434,11 @@ static void
     ses_putchar(scb, ' ');
 
     if (typdef->prefix && xml_strcmp(typdef->prefix, mod->prefix)) {
-        write_cyang_extkw(scb, typdef->prefix, typdef->typename);
+        write_cyang_extkw(scb, 
+                          typdef->prefix, 
+                          typdef->typenamestr);
     } else {
-        ses_putstr(scb, typdef->typename);
+        ses_putstr(scb, typdef->typenamestr);
     }
 
 }  /* write_cyang_type */
@@ -626,7 +628,7 @@ static void
 
     indent = startindent + ses_indent_count(scb);
 
-    switch (typdef->class) {
+    switch (typdef->tclass) {
     case NCX_CL_BASE:
         break;
     case NCX_CL_NAMED:

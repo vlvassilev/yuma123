@@ -995,7 +995,7 @@ static status_t
 
 }   /* finish_list */
 
-#if 0
+#if 0  /* attributes not supported in YANG */
 /********************************************************************
 * FUNCTION finish_attributes
 * 
@@ -1154,7 +1154,7 @@ static status_t
         return ERR_INTERNAL_MEM;
     }
 
-#if 0
+#if 0 /* attributes not supported in YANG */
     /* convert all the metadata to attribute nodes */
     res = finish_attributes(mod, &typ->typdef, ext);
     if (res != NO_ERR) {
@@ -1211,7 +1211,7 @@ status_t
         /* get type info */
         typdef = &typ->typdef;
         btyp = typ_get_basetype(typdef);
-        tclass = typdef->class;
+        tclass = typdef->tclass;
 
         /* A simple type that has attributes defined needs
          * to be declared in a simpleType for the base without
@@ -1360,7 +1360,7 @@ status_t
         typ = typnam->typ;
         typdef = &typ->typdef;
         btyp = typ_get_basetype(typdef);
-        tclass = typdef->class;
+        tclass = typdef->tclass;
 
         /* figure out if this is a complexType or a simpleType
          * The ename and flag data types are simple in NCX but
@@ -1818,7 +1818,7 @@ status_t
             res = finish_range(typdef, range, rdef, chval);
         }
 
-#if 0
+#if 0  /* attributes not supported in YANG */
         /* check if this is an attribute extension */
         if (res==NO_ERR && isext && mdef) {
             /* add any attributes defined for this type */
@@ -1973,7 +1973,7 @@ status_t
 
             untypdef = un->typdef;
 
-            if (untypdef->class == NCX_CL_NAMED) {
+            if (untypdef->tclass == NCX_CL_NAMED) {
                 res = xsd_finish_namedType(mod, untypdef, simtyp);
             } else {
                 res = xsd_finish_simpleType(mod, untypdef, simtyp);

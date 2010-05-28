@@ -314,13 +314,13 @@ typedef union typ_def_u_t_ {
  * the typ_def_t struct in the type template
  */
 typedef struct typ_def_t_ {
-    ncx_tclass_t     class;
+    ncx_tclass_t     tclass;
     ncx_iqual_t      iqual;
     ncx_access_t     maxaccess;
     ncx_data_class_t dataclass;
     ncx_merge_t      mergetype;
     xmlChar         *prefix;            /* pfix used in type field */
-    xmlChar         *typename;      /* typename used in type field */
+    xmlChar         *typenamestr;   /* typename used in type field */
     dlq_hdr_t        appinfoQ;             /* Q of ncx_appinfo_t */
     ncx_error_t      tkerr;
     typ_def_u_t      def;

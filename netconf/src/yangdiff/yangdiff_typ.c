@@ -958,20 +958,24 @@ uint32
     }
 #endif
 
-    if (oldtypdef->class != newtypdef->class) {
+    if (oldtypdef->tclass != newtypdef->tclass) {
         return 1;
     }
-    if (prefix_field_changed(cp->oldmod, cp->newmod,
+    if (prefix_field_changed(cp->oldmod, 
+                             cp->newmod,
                              oldtypdef->prefix, 
                              newtypdef->prefix)) {
         return 1;
     }
-    if (str_field_changed(NULL, oldtypdef->typename, 
-                          newtypdef->typename, FALSE, NULL)) {
+    if (str_field_changed(NULL, 
+                          oldtypdef->typenamestr, 
+                          newtypdef->typenamestr, 
+                          FALSE, 
+                          NULL)) {
         return 1;
     }
 
-    switch (oldtypdef->class) {
+    switch (oldtypdef->tclass) {
     case NCX_CL_BASE:
         return (uint32)((oldtypdef->def.base == newtypdef->def.base) ? 0 : 1);
     case NCX_CL_SIMPLE:
@@ -983,8 +987,11 @@ uint32
         if (oldbtyp == NCX_BT_LEAFREF) {
             oldpath = typ_get_leafref_path(oldtypdef);
             newpath = typ_get_leafref_path(newtypdef);
-            return str_field_changed(YANG_K_PATH, oldpath, newpath, 
-                                     FALSE, NULL);
+            return str_field_changed(YANG_K_PATH, 
+                                     oldpath, 
+                                     newpath, 
+                                     FALSE, 
+                                     NULL);
         } else if (typ_is_string(oldbtyp)) {
             if (patternQ_changed(oldtypdef, newtypdef)) {
                 return 1;
@@ -1000,12 +1007,15 @@ uint32
             switch (oldbtyp) {
             case NCX_BT_BITS:
                 return ebQ_changed(&oldtypdef->def.simple.valQ,
-                                   &newtypdef->def.simple.valQ, TRUE);
+                                   &newtypdef->def.simple.valQ, 
+                                   TRUE);
             case NCX_BT_ENUM:
                 return ebQ_changed(&oldtypdef->def.simple.valQ,
-                                   &newtypdef->def.simple.valQ, FALSE);
+                                   &newtypdef->def.simple.valQ,
+                                   FALSE);
             case NCX_BT_UNION:
-                return unQ_changed(cp, &oldtypdef->def.simple.unionQ,
+                return unQ_changed(cp, 
+                                   &oldtypdef->def.simple.unionQ,
                                    &newtypdef->def.simple.unionQ);
             default:
                 ;
@@ -1032,7 +1042,8 @@ uint32
          ***                &newtypdef->def.named.typ->typdef);
          ***/
     case NCX_CL_REF:
-        return type_changed(cp, oldtypdef->def.ref.typdef,
+        return type_changed(cp, 
+                            oldtypdef->def.ref.typdef,
                             newtypdef->def.ref.typdef);
     default:
         SET_ERROR(ERR_INTERNAL_VAL);
@@ -1067,28 +1078,38 @@ uint32
     }
 
     if (str_field_changed(YANG_K_UNITS,
-                          oldtyp->units, newtyp->units, 
-                          FALSE, NULL)) {
+                          oldtyp->units, 
+                          newtyp->units, 
+                          FALSE, 
+                          NULL)) {
         return 1;
     }
     if (str_field_changed(YANG_K_DEFAULT,
-                          oldtyp->defval, newtyp->defval, 
-                          FALSE, NULL)) {
+                          oldtyp->defval, 
+                          newtyp->defval, 
+                          FALSE, 
+                          NULL)) {
         return 1;
     }
     if (status_field_changed(YANG_K_STATUS,
-                             oldtyp->status, newtyp->status, 
-                             FALSE, NULL)) {
+                             oldtyp->status, 
+                             newtyp->status, 
+                             FALSE,
+                             NULL)) {
         return 1;
     }
     if (str_field_changed(YANG_K_DESCRIPTION,
-                          oldtyp->descr, newtyp->descr, 
-                          FALSE, NULL)) {
+                          oldtyp->descr,
+                          newtyp->descr, 
+                          FALSE,
+                          NULL)) {
         return 1;
     }
     if (str_field_changed(YANG_K_REFERENCE,
-                          oldtyp->ref, newtyp->ref, 
-                          FALSE, NULL)) {
+                          oldtyp->ref,
+                          newtyp->ref, 
+                          FALSE,
+                          NULL)) {
         return 1;
     }
 
@@ -1250,8 +1271,8 @@ void
 
     isrev = (cp->edifftype==YANGDIFF_DT_REVISION) ? TRUE : FALSE;
 
-    oldclass = oldtypdef->class;
-    newclass = newtypdef->class;
+    oldclass = oldtypdef->tclass;
+    newclass = newtypdef->tclass;
 
     oldname = typ_get_name(oldtypdef);
     newname = typ_get_name(newtypdef);
@@ -1282,7 +1303,7 @@ void
         p += xml_strcpy(p, oldtypdef->prefix);
         *p++ = ':';
         p += xml_strcpy(p, oldname);
-        if (oldtypdef->class==NCX_CL_NAMED) {
+        if (oldtypdef->tclass==NCX_CL_NAMED) {
             *p++ = ' ';
             *p++ = '(';
             p += xml_strcpy(p, (const xmlChar *)
@@ -1298,7 +1319,7 @@ void
         p += xml_strcpy(p, newtypdef->prefix);
         *p++ = ':';
         p += xml_strcpy(p, newname);
-        if (newtypdef->class==NCX_CL_NAMED) {
+        if (newtypdef->tclass==NCX_CL_NAMED) {
             *p++ = ' ';
             *p++ = '(';
             p += xml_strcpy(p, (const xmlChar *)

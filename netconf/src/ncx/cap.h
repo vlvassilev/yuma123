@@ -569,12 +569,12 @@ extern cap_rec_t *
 *    cap ==  capability rec to parse
 *    module == address of return module name
 *    revision == address of return module revision date string
-*    namespace == address of return module namespace
+*    namespacestr == address of return module namespace
 *
 * OUTPUTS:
 *    *module == return module name
 *    *revision == return module revision date string
-*    *namespace == return module namepsace
+*    *namespacestr == return module namepsace
 *
 * RETURNS:
 *    status
@@ -583,7 +583,7 @@ extern void
     cap_split_modcap (cap_rec_t *cap,
 		      const xmlChar **module,
 		      const xmlChar **revision,
-		      const xmlChar **namespace);
+		      const xmlChar **namespacestr);
 
 
 /********************************************************************

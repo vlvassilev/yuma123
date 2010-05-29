@@ -2376,7 +2376,7 @@ static void
     mgr_scb_t              *mscb;
     ncx_module_t           *mod;
     cap_rec_t              *cap;
-    const xmlChar          *module, *revision, *namespace;
+    const xmlChar          *module, *revision, *namespacestr;
     ncxmod_search_result_t *searchresult;
     status_t                res;
     boolean                 retrieval_supported;
@@ -2402,14 +2402,14 @@ static void
     while (cap) {
         module = NULL;
         revision = NULL;
-        namespace = NULL;
+        namespacestr = NULL;
 
         cap_split_modcap(cap,
                          &module,
                          &revision,
-                         &namespace);
+                         &namespacestr);
 
-        if (module==NULL || namespace==NULL) {
+        if (module==NULL || namespacestr==NULL) {
             if (ncx_warning_enabled(ERR_NCX_RCV_INVALID_MODCAP)) {
                 log_warn("\nWarning: skipping invalid module capability "
                          "for URI '%s'", 
@@ -2422,7 +2422,7 @@ static void
         mod = ncx_find_module(module, revision);
         if (mod != NULL) {
             /* make sure that the namespace URIs match */
-            if (xml_strcmp(mod->ns, namespace)) {
+            if (xml_strcmp(mod->ns, namespacestr)) {
                 /* !!! need a warning number for suppression */
                 log_warn("\nWarning: module namespace URI mismatch:"
                           "\n   module:    '%s'"
@@ -2431,7 +2431,7 @@ static void
                           "\n   client ns: '%s'",
                           module,
                           (revision) ? revision : EMPTY_STRING,
-                          namespace,
+                          namespacestr,
                           mod->ns);
                 mod = NULL;
             }
@@ -2456,9 +2456,9 @@ static void
                          * was found on the local system;
                          * check if the namespace also matches
                          */
-                        if (searchresult->namespace) {
-                            if (xml_strcmp(searchresult->namespace,
-                                           namespace)) {
+                        if (searchresult->namespacestr) {
+                            if (xml_strcmp(searchresult->namespacestr,
+                                           namespacestr)) {
                                 /* cannot use this local file because
                                  * it has a different namespace
                                  * !!! need a warning number for suppression 
@@ -2471,8 +2471,8 @@ static void
                                          "\n   client ns: '%s'",
                                          module,
                                          (revision) ? revision : EMPTY_STRING,
-                                         namespace,
-                                         searchresult->namespace);
+                                         namespacestr,
+                                         searchresult->namespacestr);
                             } else {
                                 /* can use the local system file found */
                                 searchresult->capmatch = TRUE;

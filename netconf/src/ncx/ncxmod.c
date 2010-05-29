@@ -2793,8 +2793,8 @@ ncxmod_search_result_t *
             }
         }
         if (retmod->ns) {
-            searchresult->namespace = xml_strdup(retmod->ns);
-            if (searchresult->namespace == NULL) {
+            searchresult->namespacestr = xml_strdup(retmod->ns);
+            if (searchresult->namespacestr == NULL) {
                 searchresult->res = ERR_INTERNAL_MEM;
             }
         }
@@ -5141,8 +5141,8 @@ ncxmod_search_result_t *
     }
 
     if (mod->ns) {
-        searchresult->namespace = xml_strdup(mod->ns);
-        if (searchresult->namespace == NULL) {
+        searchresult->namespacestr = xml_strdup(mod->ns);
+        if (searchresult->namespacestr == NULL) {
             ncxmod_free_search_result(searchresult);
             return NULL;
         }
@@ -5185,8 +5185,8 @@ void
     if (searchresult->revision) {
         m__free(searchresult->revision);
     }
-    if (searchresult->namespace) {
-        m__free(searchresult->namespace);
+    if (searchresult->namespacestr) {
+        m__free(searchresult->namespacestr);
     }
     if (searchresult->source) {
         m__free(searchresult->source);

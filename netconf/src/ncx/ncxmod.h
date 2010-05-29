@@ -220,7 +220,7 @@ typedef struct ncxmod_search_result_t_ {
     dlq_hdr_t      qhdr;
     xmlChar       *module;
     xmlChar       *revision;
-    xmlChar       *namespace;
+    xmlChar       *namespacestr;
     xmlChar       *source;
     ncx_module_t  *mod;      /* back-ptr to found module if loaded */
     cap_rec_t     *cap;      /* back-ptr to source capabuility URI */

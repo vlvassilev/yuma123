@@ -860,6 +860,7 @@ static void
     obj_template_t *rpc;
     uint32          len;
 
+    len = 0;
     if (match) {
         len = xml_strlen(rpcname);
     }

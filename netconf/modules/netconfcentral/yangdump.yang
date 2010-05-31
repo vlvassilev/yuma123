@@ -135,6 +135,12 @@ module yangdump {
                debug2: print verbose debugging trace info
         ";
 
+    revision 2010-05-31 {
+       description 
+          "Added --stats and --totals parameters
+           for YANG statistics reporting.";
+    }
+
     revision 2010-03-11 {
        description 
           "Added new format enum for TG2 code generation.";

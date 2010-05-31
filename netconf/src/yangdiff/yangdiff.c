@@ -2000,10 +2000,6 @@ static status_t
     }
 
     if (res == NO_ERR) {
-        res = ncx_stage2_init();
-    }
-
-    if (res == NO_ERR) {
         res = process_cli_input(argc, argv, &diffparms);
     }
 

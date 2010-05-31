@@ -106,14 +106,101 @@ extern "C" {
 #define YANGDUMP_PARM_XSD_SCHEMALOC (const xmlChar *)"xsd-schemaloc"
 #define YANGDUMP_PARM_SIMURLS       (const xmlChar *)"simurls"
 #define YANGDUMP_PARM_SUBTREE       (const xmlChar *)"subtree"
+#define YANGDUMP_PARM_STATS         (const xmlChar *)"stats"
+#define YANGDUMP_PARM_STAT_TOTALS   (const xmlChar *)"totals"
 #define YANGDUMP_PARM_URLSTART      (const xmlChar *)"urlstart"
 #define YANGDUMP_PARM_UNIFIED       (const xmlChar *)"unified"
+
+#define YANGDUMP_PV_STATS_NONE         (const xmlChar *)"none"
+#define YANGDUMP_PV_STATS_BRIEF        (const xmlChar *)"brief"
+#define YANGDUMP_PV_STATS_BASIC        (const xmlChar *)"basic"
+#define YANGDUMP_PV_STATS_ADVANCED     (const xmlChar *)"advanced"
+#define YANGDUMP_PV_STATS_ALL          (const xmlChar *)"all"
+
+#define YANGDUMP_PV_TOTALS_NONE        (const xmlChar *)"none"
+#define YANGDUMP_PV_TOTALS_SUMMARY     (const xmlChar *)"summary"
+#define YANGDUMP_PV_TOTALS_SUMMARY_ONLY  (const xmlChar *)"summary-only"
+
 
 /********************************************************************
 *                                                                   *
 *                             T Y P E S                             *
 *                                                                   *
 *********************************************************************/
+
+/* --stats CLI parameter */
+typedef enum yangdump_statreport_t_ {
+    YANGDUMP_REPORT_NONE,  /* significant value */
+    YANGDUMP_REPORT_BRIEF,
+    YANGDUMP_REPORT_BASIC,
+    YANGDUMP_REPORT_ADVANCED,
+    YANGDUMP_REPORT_ALL
+} yangdump_statreport_t;
+
+/* --totals CLI parameter */
+typedef enum yangdump_totals_t_ {
+    YANGDUMP_TOTALS_NONE,   /* significant value */
+    YANGDUMP_TOTALS_SUMMARY,
+    YANGDUMP_TOTALS_SUMMARY_ONLY
+} yangdump_totals_t;
+
+/* this structure represents all the statistics that can
+ * be reported with the --stats parameter, and can be collected
+ * by the yangdump program.
+ */
+typedef struct yangdump_stats_t_ {
+    /* brief */
+    uint32     complexity_score;
+
+    /* total nodes derived from num_config_objs
+     * + num_state_objs
+     */
+
+    /* basic */
+    uint32     num_extensions;
+    uint32     num_features;
+    uint32     num_groupings;
+    uint32     num_typedefs;
+    uint32     num_deviations;
+    uint32     num_top_datanodes;
+    uint32     num_config_objs;
+    uint32     num_state_objs;
+
+    /* advanced */
+    uint32     num_mandatory_nodes;
+    uint32     num_optional_nodes;
+    uint32     num_notifications;
+    uint32     num_rpcs;
+    uint32     num_inputs;
+    uint32     num_outputs;
+    uint32     num_augments;
+    uint32     num_uses;
+    uint32     num_choices;
+    uint32     num_cases;
+    uint32     num_anyxmls;
+    uint32     num_np_containers;
+    uint32     num_p_containers;
+    uint32     num_lists;
+    uint32     num_leaf_lists;
+    uint32     num_key_leafs;
+    uint32     num_plain_leafs;
+
+    /* all */
+    uint32     num_imports;
+    uint32     num_numbers;
+    uint32     num_dec64s;
+    uint32     num_enums;
+    uint32     num_bits;
+    uint32     num_booleans;
+    uint32     num_emptys;
+    uint32     num_strings;
+    uint32     num_binarys;
+    uint32     num_iis;
+    uint32     num_leafrefs;
+    uint32     num_idrefs;    
+    uint32     num_unions;
+} yangdump_stats_t;
+
 
 /* struct of yangdump conversion parameters */
 typedef struct yangdump_cvtparms_t_ {
@@ -138,6 +225,9 @@ typedef struct yangdump_cvtparms_t_ {
     boolean         defnames;
     boolean         dependencies;
     boolean         exports;
+    boolean         collect_stats;
+    yangdump_statreport_t stats;
+    yangdump_totals_t stat_totals;
     boolean         showerrorsmode;
     boolean         identifiers;
     boolean         html_div;
@@ -157,6 +247,9 @@ typedef struct yangdump_cvtparms_t_ {
     char           *srcfile;
     char           *buff;
     val_value_t    *cli_val;
+    yangdump_stats_t *cur_stats;
+    yangdump_stats_t *final_stats;
+    uint32          stat_reports;
     uint32          bufflen;
     boolean         firstdone;
     dlq_hdr_t       savedevQ;

@@ -448,6 +448,75 @@ module yangdump {
 
         uses ncxapp:SubdirsParm;
 
+        choice stats-report {
+          default statistics;
+          case statistics {
+             leaf stats {
+               description
+                 "Generate a statistics report for each input
+                  module. 
+
+                  The following metrics are reported:
+                    ...
+                  Developers: see ydump/yangstats.h";
+               type enumeration {
+                  enum none {
+                     description 
+                       "No statistics reporting will be done.";
+                  }
+                  enum brief {
+                     description 
+                       "Brief statistics reporting will be done:
+                          - Complexity score
+                          - Total nodes
+                       ";
+                  }
+                  enum basic {
+                     description 
+                       "Basic statistics reporting will be done.";
+                  }
+                  enum advanced {
+                     description 
+                       "Advanced statistics reporting will be done.";
+                  }
+                  enum all {
+                    description 
+                      "All possible statistics reporting will be done.";
+                  }
+               }
+               default "none";
+             }
+
+             leaf totals {
+                description
+                   "Controls how stats totals are displayed.";
+                type enumeration {
+                   enum none {
+                     description
+                       "No statistics totals will be reported.";
+                   }
+                   enum summary {
+                     description
+                       "Summary statistics totals will be 
+                        reported, based on the stats mode 
+                        that is requested.";
+                   }
+                   enum summary-only {
+                     description
+                       "Only the summary statistics totals
+                        will be reported, based on the stats
+                        mode that is requested.  This mode
+                        will cause all individual module
+                        statistics reports to be generated,
+                        and a summary for all input modules
+                        will be generated instead.";
+                   }
+                }
+                default "summary";
+             }
+          }
+        }
+
         leaf unified {
           description
             "If set to 'true', then submodules will be processed

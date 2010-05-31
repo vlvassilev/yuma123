@@ -238,14 +238,11 @@ static obj_template_t   *gen_binary;
  */
 static ncx_load_cbfn_t  mod_load_callback;
 
-/* 1st stage init */
+/* module init */
 static boolean       ncx_init_done = FALSE;
 
-/* 2nd stage init */
-static boolean       stage2_init_done = FALSE;
-
 /* save descriptive clauses like description, reference */
-static boolean       save_descr = FALSE;
+static boolean       save_descr;
 
 /* system warning length for identifiers */
 static uint32        warn_idlen;
@@ -921,7 +918,8 @@ static void
 *    startmsg == log_debug2 message to print before starting;
 *                NULL if not used;
 *    argc == CLI argument count for bootstrap CLI
-*    argv == array of CLI parms for bootstrap CLI
+*    argv == array of CLI parms for bootstrap CLI 
+*            (may be NULL to skip bootstrap CLI parameter parsing)
 *
 * RETURNS:
 *   status of the initialization procedure
@@ -934,8 +932,9 @@ status_t
               int argc,
               const char *argv[])
 {
-    status_t     res;
-    xmlns_id_t   nsid;
+    ncx_module_t  *mod;
+    status_t       res;
+    xmlns_id_t     nsid;
     
     if (ncx_init_done) {
         return NO_ERR;
@@ -975,9 +974,11 @@ status_t
     ncxmod_init();
 
     /* deal with bootstrap CLI parms */
-    res = bootstrap_cli(argc, argv, dlevel, logtstamps);
-    if (res != NO_ERR) {
-        return res;
+    if (argv != NULL) {
+        res = bootstrap_cli(argc, argv, dlevel, logtstamps);
+        if (res != NO_ERR) {
+            return res;
+        }
     }
 
     if (startmsg) {
@@ -1090,31 +1091,6 @@ status_t
     /* initialize the session message manager */
     ses_msg_init();
 
-    return NO_ERR;
-
-}  /* ncx_init */
-
-
-/********************************************************************
-* FUNCTION ncx_stage2_init
-* 
-* Initialize the NCX module during stage 2 startup,
-* after the object database has been loaded, but before the 
-* agent has started accepting PDUs
-*
-* RETURNS:
-*   status of the initialization procedure
-*********************************************************************/
-status_t 
-    ncx_stage2_init (void)
-{
-    ncx_module_t     *mod;
-    status_t          res;
-
-    if (stage2_init_done) {
-        return NO_ERR;
-    }
-
     mod = NULL;
     res = ncxmod_load_module(NCXMOD_NCX, 
                              NULL, 
@@ -1154,10 +1130,9 @@ status_t
         return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
     }
 
-    stage2_init_done = TRUE;
     return NO_ERR;
 
-}  /* ncx_stage2_init */
+}  /* ncx_init */
 
 
 /********************************************************************
@@ -1191,14 +1166,12 @@ void
         m__free(warnoff);
     }
 
-    if (stage2_init_done) {
-        gen_anyxml = NULL;
-        gen_container = NULL;
-        gen_string = NULL;
-        gen_empty = NULL;
-        gen_root = NULL;
-        gen_binary = NULL;
-    }
+    gen_anyxml = NULL;
+    gen_container = NULL;
+    gen_string = NULL;
+    gen_empty = NULL;
+    gen_root = NULL;
+    gen_binary = NULL;
 
     ncx_feature_cleanup();
     typ_unload_basetypes();
@@ -1212,7 +1185,6 @@ void
     xmlCleanupParser();
     status_cleanup();
     ncx_init_done = FALSE;
-    stage2_init_done = FALSE;
 
 }   /* ncx_cleanup */
 
@@ -4331,9 +4303,6 @@ void
 obj_template_t *
     ncx_get_gen_anyxml (void)
 {
-    if (!stage2_init_done) {
-        return NULL;
-    }
     return gen_anyxml;
 
 } /* ncx_get_gen_anyxml */
@@ -4350,9 +4319,6 @@ obj_template_t *
 obj_template_t *
     ncx_get_gen_container (void)
 {
-    if (!stage2_init_done) {
-        return NULL;
-    }
     return gen_container;
 
 } /* ncx_get_gen_container */
@@ -4369,9 +4335,6 @@ obj_template_t *
 obj_template_t *
     ncx_get_gen_string (void)
 {
-    if (!stage2_init_done) {
-        return NULL;
-    }
     return gen_string;
 
 } /* ncx_get_gen_string */
@@ -4388,9 +4351,6 @@ obj_template_t *
 obj_template_t *
     ncx_get_gen_empty (void)
 {
-    if (!stage2_init_done) {
-        return NULL;
-    }
     return gen_empty;
 
 } /* ncx_get_gen_empty */
@@ -4407,9 +4367,6 @@ obj_template_t *
 obj_template_t *
     ncx_get_gen_root (void)
 {
-    if (!stage2_init_done) {
-        return NULL;
-    }
     return gen_root;
 
 } /* ncx_get_gen_root */
@@ -4426,9 +4383,6 @@ obj_template_t *
 obj_template_t *
     ncx_get_gen_binary (void)
 {
-    if (!stage2_init_done) {
-        return NULL;
-    }
     return gen_binary;
 
 } /* ncx_get_gen_binary */

@@ -3592,7 +3592,7 @@ obj_template_t *
 #endif
 
     que = obj_get_datadefQ(obj);
-    if (que) {
+    if (que != NULL) {
         for (chobj = (obj_template_t *)dlq_firstEntry(que);
              chobj != NULL;
              chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
@@ -9047,15 +9047,20 @@ boolean
 boolean
     obj_is_cli (const obj_template_t *obj)
 {
-
-#ifdef DEBUG
+#ifdef DEBUG 
     if (!obj) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return FALSE;
     }
 #endif
 
-    return (obj->flags & OBJ_FL_CLI) ? TRUE : FALSE;
+    if (obj->flags & OBJ_FL_CLI) {
+        return TRUE;
+    } else if (obj->parent != NULL) {
+        return obj_is_cli(obj->parent);
+    } else {
+        return FALSE;
+    }
 
 }   /* obj_is_cli */
 

@@ -156,20 +156,6 @@ extern status_t
 
 
 /********************************************************************
-* FUNCTION ncx_stage2_init
-* 
-* Initialize the NCX module during stage 2 startup,
-* after the object database has been loaded, but before the 
-* agent has started accepting PDUs
-*
-* RETURNS:
-*   status of the initialization procedure
-*********************************************************************/
-extern status_t
-    ncx_stage2_init (void);
-
-
-/********************************************************************
 * FUNCTION ncx_cleanup
 *
 *  cleanup NCX module

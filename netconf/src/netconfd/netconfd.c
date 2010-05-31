@@ -167,14 +167,6 @@ static status_t
         return res;
     }
 
-    /* initialize the NETCONF operation attribute 
-     * MUST be after the netconf.yang module is loaded
-     */
-    res = ncx_stage2_init();
-    if (res != NO_ERR) {
-        return res;
-    }
-
 
 #ifdef NETCONFD_DEBUG_LOAD_TEST
     if (LOGDEBUG2) {

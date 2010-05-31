@@ -136,6 +136,10 @@ date         init     comment
 #include  "yangdump_util.h"
 #endif
 
+#ifndef _H_yangstats
+#include  "yangstats.h"
+#endif
+
 #ifndef _H_yangyin
 #include  "yangyin.h"
 #endif
@@ -144,18 +148,114 @@ date         init     comment
 #include  "ydump.h"
 #endif
 
-/********************************************************************
-*                                                                   *
-*                       C O N S T A N T S                           *
-*                                                                   *
-*********************************************************************/
-/* #define YDUMP_DEBUG   1 */
 
 /********************************************************************
-*                                                                   *
-*                       V A R I A B L E S                            *
-*                                                                   *
+* FUNCTION init_cvtparms
+*
+* Initialize a preallocated yangdump_cvtparms_t struct
+*
+* INPUTS:
+*    cp == conversion parms struct to init
+*    allowcode == TRUE to allow code generation
+*
+* RETURNS:
+*    status
 *********************************************************************/
+static status_t
+    init_cvtparms (yangdump_cvtparms_t *cp,
+                   boolean allowcode)
+{
+
+    /* memset(cp, 0x0, sizeof(yangdump_cvtparms_t)); */
+    cp->allowcode = allowcode;
+    dlq_createSQue(&cp->savedevQ);
+    cp->buff = m__getMem(YANGDUMP_BUFFSIZE);
+    if (!cp->buff) {
+        return ERR_INTERNAL_MEM;
+    }
+    cp->bufflen = YANGDUMP_BUFFSIZE;
+    return NO_ERR;
+
+} /* init_cvtparms */
+
+
+/********************************************************************
+* FUNCTION init_cvtparms_stats
+*
+* Initialize a preallocated yangdump_cvtparms_t struct
+* for statistics collection
+*
+* INPUTS:
+*    cp == conversion parms struct to init
+*
+* RETURNS:
+*    status
+*********************************************************************/
+static status_t
+    init_cvtparms_stats (yangdump_cvtparms_t *cp)
+{
+    cp->cur_stats = m__getObj(yangdump_stats_t);
+    if (cp->cur_stats == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+    memset(cp->cur_stats, 0x0, sizeof(yangdump_stats_t));
+
+    if (cp->stat_totals != YANGDUMP_TOTALS_NONE) {
+        cp->final_stats = m__getObj(yangdump_stats_t);
+        if (cp->final_stats == NULL) {
+            return ERR_INTERNAL_MEM;
+        }
+        memset(cp->final_stats, 0x0, sizeof(yangdump_stats_t));
+    }
+
+    return NO_ERR;
+
+} /* init_cvtparms_stats */
+
+
+/********************************************************************
+* FUNCTION clean_cvtparms
+*
+* Clean a preallocated yangdump_cvtparms_t struct
+* but do not free it
+*
+* INPUTS:
+*    cp == conversion parms struct to clean
+*
+*********************************************************************/
+static void
+    clean_cvtparms (yangdump_cvtparms_t *cp)
+{
+    if (cp->cli_val) {
+        val_free_value(cp->cli_val);
+    }
+    if (cp->mod) {
+        ncx_free_module(cp->mod);
+    }
+    if (cp->srcfile) {
+        m__free(cp->srcfile);
+    }
+    if (cp->module) {
+        m__free(cp->module);
+    }
+    if (cp->full_output) {
+        m__free(cp->full_output);
+    }
+    if (cp->buff) {
+        m__free(cp->buff);
+    }
+    if (cp->cur_stats) {
+        m__free(cp->cur_stats);
+    }
+    if (cp->final_stats) {
+        m__free(cp->final_stats);
+    }
+
+    ncx_clean_save_deviationsQ(&cp->savedevQ);
+
+    memset(cp, 0x0, sizeof(yangdump_cvtparms_t));
+
+} /* clean_cvtparms */
 
 
 /********************************************************************
@@ -225,43 +325,46 @@ static status_t
 
     res = NO_ERR;
     valset = NULL;
-
-    cp->buff = m__getMem(YANGDUMP_BUFFSIZE);
-    if (!cp->buff) {
-        return ERR_INTERNAL_MEM;
-    }
-    cp->bufflen = YANGDUMP_BUFFSIZE;
-
-    /* find the CLI container definition in the registry */
     obj = NULL;
+
+    /* find the CLI container definition */
     mod = ncx_find_module(YANGDUMP_MOD, NULL);
-    if (mod) {
+    if (mod != NULL) {
         obj = ncx_find_object(mod, YANGDUMP_CONTAINER);
     }
 
-    if (!obj) {
+    if (obj == NULL) {
         log_error("\nError: yangdump module with CLI definitions not loaded");
         res = ERR_NCX_NOT_FOUND;
     }
 
     /* parse the command line against the object template */
     if (res == NO_ERR) {
-        valset = cli_parse(NULL,
-                           argc, 
-                           argv, 
-                           obj,
-                           FULLTEST, 
-                           PLAINMODE, 
-                           TRUE,
-                           CLI_MODE_PROGRAM,
-                           &res);
+        if (argv != NULL) {
+            valset = cli_parse(NULL,
+                               argc, 
+                               argv, 
+                               obj,
+                               FULLTEST, 
+                               PLAINMODE, 
+                               TRUE,
+                               CLI_MODE_PROGRAM,
+                               &res);
+        } else {
+            valset = val_new_value();
+            if (valset == NULL) {
+                return ERR_INTERNAL_MEM;
+            }
+            val_init_from_template(valset, obj);
+        }
     }
+            
     if (res != NO_ERR) {
-        if (valset) {
+        if (valset != NULL) {
             val_free_value(valset);
         }
         return res;
-    } else if (!valset) {
+    } else if (valset == NULL) {
         pr_usage();
         return ERR_NCX_SKIPPED;
     } else {
@@ -486,6 +589,63 @@ static status_t
         cp->simurls = TRUE;
     }
 
+    /* stats parameter */
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_STATS);
+    if (val && val->res == NO_ERR) {
+        if (!xml_strcmp(VAL_ENUM_NAME(val),
+                        YANGDUMP_PV_STATS_NONE)) {
+            cp->stats = YANGDUMP_REPORT_NONE;
+        } else {
+            cp->collect_stats = TRUE;
+            if (!xml_strcmp(VAL_ENUM_NAME(val),
+                        YANGDUMP_PV_STATS_BRIEF)) {
+                cp->stats = YANGDUMP_REPORT_BRIEF;
+            } else if (!xml_strcmp(VAL_ENUM_NAME(val),
+                                   YANGDUMP_PV_STATS_BASIC)) {
+                cp->stats = YANGDUMP_REPORT_BASIC;
+            } else if (!xml_strcmp(VAL_ENUM_NAME(val),
+                                   YANGDUMP_PV_STATS_ADVANCED)) {
+                cp->stats = YANGDUMP_REPORT_ADVANCED;
+            } else if (!xml_strcmp(VAL_ENUM_NAME(val),
+                                   YANGDUMP_PV_STATS_ALL)) {
+                cp->stats = YANGDUMP_REPORT_ALL;
+            } else {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }
+    }
+
+    /* stat-totals parameter */
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_STAT_TOTALS);
+    if (val && val->res == NO_ERR) {
+        if (!xml_strcmp(VAL_ENUM_NAME(val),
+                        YANGDUMP_PV_TOTALS_NONE)) {
+            cp->stat_totals = YANGDUMP_TOTALS_NONE;
+        } else {
+            if (!xml_strcmp(VAL_ENUM_NAME(val),
+                        YANGDUMP_PV_TOTALS_SUMMARY)) {
+                if (cp->collect_stats) {
+                    cp->stat_totals = YANGDUMP_TOTALS_SUMMARY;
+                }
+            } else if (!xml_strcmp(VAL_ENUM_NAME(val),
+                                   YANGDUMP_PV_TOTALS_SUMMARY_ONLY)) {
+                if (cp->collect_stats) {
+                    cp->stat_totals = YANGDUMP_TOTALS_SUMMARY_ONLY;
+                }
+            } else {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
+        }
+    } else if (val == NULL) {
+        if (cp->collect_stats) {
+            cp->stat_totals = YANGDUMP_TOTALS_SUMMARY;
+        }
+    }
+
     /* subtree parameter */
     cp->subtreecount = val_instance_count(valset, 
                                           NULL, 
@@ -559,18 +719,22 @@ static ses_cb_t *
 
     fp = NULL;
     scb = NULL;
+    mod = NULL;
     namebuff = NULL;
     *res = NO_ERR;
 
-    mod = pcb->top;
-    if (!mod) {
-        *res = SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
+    if (pcb != NULL) {
+        mod = pcb->top;
+        if (mod == NULL) {
+            *res = SET_ERROR(ERR_NCX_MOD_NOT_FOUND);
+        }
     }
 
     /* open the output file if not STDOUT */
     if (*res == NO_ERR) {
-        if ((cp->defnames && cp->format != NCX_CVTTYP_NONE) || 
-            (cp->output && cp->output_isdir)) {
+        if (mod != NULL &&
+            ((cp->defnames && cp->format != NCX_CVTTYP_NONE) || 
+             (cp->output && cp->output_isdir))) {
             namebuff = xsd_make_output_filename(mod, cp);
             if (!namebuff) {
                 *res = ERR_INTERNAL_MEM;
@@ -737,7 +901,7 @@ static void
         }
         ses_putstr(scb, (const xmlChar *)cp->buff);
         if (mod->version) {
-            ses_putchar(scb, ' ');
+            ses_putchar(scb, '@');
             ses_putstr(scb, mod->version);
         }
     }
@@ -785,7 +949,7 @@ static void
         sprintf(cp->buff, "\nimport %s", impptr->modname);
         ses_putstr(scb,(const xmlChar *)cp->buff);
         if (testmod && testmod->version) {
-            sprintf(cp->buff, " %s", testmod->version);
+            sprintf(cp->buff, "@%s", testmod->version);
             ses_putstr(scb,(const xmlChar *)cp->buff);                
         }
     }
@@ -797,7 +961,7 @@ static void
             sprintf(cp->buff, "\ninclude %s", node->name);
             ses_putstr(scb,(const xmlChar *)cp->buff);
             if (node->submod && node->submod->version) {
-                sprintf(cp->buff, " %s", node->submod->version);
+                sprintf(cp->buff, "@%s", node->submod->version);
                 ses_putstr(scb,(const xmlChar *)cp->buff);
             }
         }
@@ -843,7 +1007,7 @@ static void
         }
         ses_putstr(scb,(const xmlChar *)cp->buff);
         if (mod->version) {
-            ses_putchar(scb, ' ');
+            ses_putchar(scb, '@');
             ses_putstr(scb, mod->version);
         }
     }
@@ -986,7 +1150,7 @@ static void
         ses_putstr(scb, (const xmlChar *)cp->buff);
 
         if (mod->version) {
-            sprintf((char *)cp->buff, " %s", mod->version);
+            sprintf((char *)cp->buff, "@%s", mod->version);
             ses_putstr(scb, (const xmlChar *)cp->buff);
         }
     }
@@ -1033,7 +1197,7 @@ static void
     }
     ses_putstr(scb, (const xmlChar *)buff);
 
-    sprintf(buff, " %s", (mod->version) ? mod->version : NCX_EL_NONE);
+    sprintf(buff, "@%s", (mod->version) ? mod->version : NCX_EL_NONE);
     ses_putstr(scb, (const xmlChar *)buff);
 
     if (mod->source && LOGDEBUG2) {
@@ -1321,6 +1485,7 @@ static status_t
         cp->exports || 
         cp->dependencies || 
         cp->identifiers || 
+        cp->collect_stats || 
         !(cp->format == NCX_CVTTYP_NONE || 
           cp->format == NCX_CVTTYP_XSD)) {
 
@@ -1353,6 +1518,13 @@ static status_t
 
         if (cp->identifiers) {
             output_module_identifiers(pcb, cp, scb);
+        }
+
+        if (cp->collect_stats) {
+            yangstats_collect_module_stats(pcb, cp);
+            if (cp->stat_totals != YANGDUMP_TOTALS_SUMMARY_ONLY) {
+                yangstats_output_module_stats(pcb, cp, scb);
+            }
         }
     }
 
@@ -1677,7 +1849,7 @@ static status_t
 
 
 
-/*****************    E X T E R N A L    F U N C T I O N S   ************/
+/************    E X T E R N A L    F U N C T I O N S   ************/
 
 
 
@@ -1688,7 +1860,7 @@ static status_t
  * 
  * INPUTS:
  *   argc == number of argv parameters
- *   argv == array of CLI parameters
+ *   argv == array of CLI parameters (may be NULL to skip)
  *   allowcode == TRUE if code generation should be allowed
  *                FALSE otherwise
  *   cvtparms == address of conversion parms to fill in
@@ -1708,10 +1880,13 @@ status_t
     status_t       res;
     xmlns_id_t     nsid;
 
-    memset(cvtparms, 0x0, sizeof(yangdump_cvtparms_t));
+#ifdef DEBUG
+    if (cvtparms == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
 
-    cvtparms->allowcode = allowcode;
-    dlq_createSQue(&cvtparms->savedevQ);
+    memset(cvtparms, 0x0, sizeof(yangdump_cvtparms_t));
 
     /* initialize the NCX Library first to allow NCX modules
      * to be processed.  No module can get its internal config
@@ -1726,7 +1901,9 @@ status_t
                    argc, 
                    argv);
 
-    dlq_createSQue(&cvtparms->savedevQ);
+    if (res == NO_ERR) {
+        res = init_cvtparms(cvtparms, allowcode);
+    }
 
     if (res == NO_ERR) {
         /* load in the YANGDUMP converter parmset definition file */
@@ -1734,10 +1911,6 @@ status_t
                                  NULL, 
                                  NULL,
                                  NULL);
-    }
-
-    if (res == NO_ERR) {
-        res = ncx_stage2_init();
     }
 
     /* Initialize the Notifications namespace */
@@ -1753,10 +1926,14 @@ status_t
         res = process_cli_input(argc, argv, cvtparms);
     }
 
+    if (res == NO_ERR && cvtparms->collect_stats) {
+        res = init_cvtparms_stats(cvtparms);
+    }
+
     if (res != NO_ERR && res != ERR_NCX_SKIPPED) {
         pr_err(res);
     }
-
+    
     return res;
 
 }  /* ydump_init */
@@ -1782,9 +1959,10 @@ status_t
     ydump_main (yangdump_cvtparms_t *cvtparms)
 {
     val_value_t  *val;
+    const char   *progname;
+    ses_cb_t     *scb;
     status_t      res;
     boolean       done, quickexit;
-    const char   *progname;
     xmlChar       buffer[NCX_VERSION_BUFFSIZE];
 
     if (cvtparms->allowcode) {
@@ -1924,6 +2102,14 @@ status_t
 		  NCX_EL_SUBTREE);
     }
 
+    if (res == NO_ERR && cvtparms->final_stats != NULL) {
+        scb = get_output_session(NULL, cvtparms, &res);
+        if (scb != NULL) {
+            yangstats_output_final_stats(cvtparms, scb);
+            ses_free_scb(scb);
+        }
+    }
+        
     return res;
 
 }  /* ydump_main */
@@ -1946,28 +2132,7 @@ void
     }
 #endif
 
-    if (cvtparms->cli_val) {
-        val_free_value(cvtparms->cli_val);
-    }
-
-    /* free the input parameters */
-    if (cvtparms->mod) {
-        ncx_free_module(cvtparms->mod);
-    }
-    if (cvtparms->srcfile) {
-        m__free(cvtparms->srcfile);
-    }
-    if (cvtparms->module) {
-        m__free(cvtparms->module);
-    }
-    if (cvtparms->full_output) {
-        m__free(cvtparms->full_output);
-    }
-    if (cvtparms->buff) {
-        m__free(cvtparms->buff);
-    }
-
-    ncx_clean_save_deviationsQ(&cvtparms->savedevQ);
+    clean_cvtparms(cvtparms);
 
     /* cleanup the NCX engine and registries */
     ncx_cleanup();

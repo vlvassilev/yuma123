@@ -18,7 +18,7 @@
 *								    *
 *********************************************************************
 
-    Agent XPath filter processing for select attribute in
+    Server XPath filter processing for select attribute in
     <filter> element in <get> and <get-config> operations
 
 *********************************************************************

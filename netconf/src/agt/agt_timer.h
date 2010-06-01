@@ -18,7 +18,7 @@
 *								    *
 *********************************************************************
 
-    Handle timer services for the agent
+    Handle timer services for the server
 
 
 *********************************************************************
@@ -116,7 +116,7 @@ extern void
 /********************************************************************
 * FUNCTION agt_timer_handler
 *
-* Handle an incoming agent timer polling interval
+* Handle an incoming server timer polling interval
 * main routine called by agt_signal_handler
 *
 *********************************************************************/

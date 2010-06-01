@@ -99,7 +99,7 @@ extern void
 /********************************************************************
 * FUNCTION agt_hello_send
 *
-* Send the agent <hello> message to the manager on the 
+* Send the server <hello> message to the manager on the 
 * specified session
 *
 * INPUTS:

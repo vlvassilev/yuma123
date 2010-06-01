@@ -18,7 +18,7 @@
 *								    *
 *********************************************************************
 
-    NCX Agent message handler
+    NETCONF Server message handler
 
      - NETCONF PDUs
 
@@ -37,7 +37,7 @@
         - Value instance default value insertion
 
 
-    The netconfd agent <edit-config> handler registers callbacks
+    The netconfd server <edit-config> handler registers callbacks
     with the agt_val module that can be called IN ADDITION
     to the automated callback, for referential integrity checking,
     resource reservation, etc.
@@ -174,7 +174,7 @@ typedef enum agt_acmode_t_ {
 } agt_acmode_t;
 
 
-/* enumeration of the different agent callback types 
+/* enumeration of the different server callback types 
  * These are used are array indices so there is no dummy zero enum
  */
 typedef enum agt_cbtyp_t_ {
@@ -186,7 +186,7 @@ typedef enum agt_cbtyp_t_ {
 } agt_cbtyp_t;
 
 
-/* hardwire some of the agent profile parameters
+/* hardwire some of the server profile parameters
  * because they are needed before the NCX engine is running
  * They cannot be changed after boot-time.
  */

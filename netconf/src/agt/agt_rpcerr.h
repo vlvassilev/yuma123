@@ -17,7 +17,7 @@
 *                                                                   *
 *********************************************************************
 
-    NETCONF protocol <rpc-error> agent-side handler
+    NETCONF protocol <rpc-error> server-side handler
 
 *********************************************************************
 *                                                                   *

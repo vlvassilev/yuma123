@@ -18,7 +18,7 @@
 *								    *
 *********************************************************************
 
-    Agent subtree filter processing for <filter> element in
+    Server subtree filter processing for <filter> element in
     <get> and <get-config> operations
 
 *********************************************************************

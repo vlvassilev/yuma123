@@ -433,7 +433,7 @@ cap_list_t *
 /********************************************************************
 * FUNCTION agt_cap_get_capsval
 *
-* Get the NETCONF agent capabilities ain val_value_t format
+* Get the NETCONF agent capabilities in val_value_t format
 *
 * INPUTS:
 *    none

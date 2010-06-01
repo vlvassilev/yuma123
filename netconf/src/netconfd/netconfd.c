@@ -127,7 +127,7 @@ static status_t
         return res;
     }
 
-    /* load in the agent boot parameter definition file */
+    /* load in the server boot parameter definition file */
     res = ncxmod_load_module(NCXMOD_NETCONFD, 
                              NULL, 
                              NULL,
@@ -274,7 +274,7 @@ static status_t
         return res;
     }
 
-    /* finidh initializing agent data structures */
+    /* finidh initializing server data structures */
     res = agt_init2();
     if (res != NO_ERR) {
         return res;
@@ -292,6 +292,32 @@ static status_t
 
 
 /********************************************************************
+ * FUNCTION show_server_banner
+ *  
+ * Show startup server string
+ * 
+ *********************************************************************/
+static void
+    show_server_banner (void)
+{
+#define BANNER_BUFFLEN 32
+
+    xmlChar buff[BANNER_BUFFLEN];
+    status_t  res;
+
+    if (LOGINFO) {
+        res = ncx_get_version(buff, BANNER_BUFFLEN);
+        if (res == NO_ERR) {
+            log_info("\nRunning netconfd server (%s)\n", buff);
+        } else {
+            log_info("\nRunning netconfd server\n");
+        }
+    }
+    
+}  /* show_server_banner */
+
+
+/********************************************************************
  * FUNCTION netconfd_run
  *  
  * Startup and run the NCX server loop
@@ -305,15 +331,9 @@ static status_t
 static status_t
     netconfd_run (void)
 {
-
     status_t  res;
 
-#ifdef NETCONFD_DEBUG
-    if (LOGDEBUG) {
-        log_debug("\nStart running netconfd agent\n");
-    }
-#endif
-
+    show_server_banner();
     res = agt_ncxserver_run();
     if (res != NO_ERR) {
         log_error("\nncxserver failed (%s)",
@@ -334,13 +354,11 @@ static void
     netconfd_cleanup (void)
 {
 
-#ifdef NETCONFD_DEBUG
-    if (LOGDEBUG) {
-        log_debug("\nShutting down netconf agent\n");
+    if (LOGINFO) {
+        log_info("\nShutting down the netconfd server\n");
     }
-#endif
 
-    /* Cleanup the Netconf Agent Library */
+    /* Cleanup the Netconf Server Library */
     agt_cleanup();
 
     /* cleanup the NCX engine and registries */

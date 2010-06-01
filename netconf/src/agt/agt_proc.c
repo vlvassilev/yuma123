@@ -340,7 +340,9 @@ static val_value_t *
     if (parmobj == NULL) {
         /* no parameter to match this line */
         if (LOGDEBUG) {
-            log_debug("\nagt_proc: skipping line '%s'", buffer);
+            log_debug("\nagt_proc: skipping <%s> line '%s'", 
+                      obj_get_name(parentobj),
+                      buffer);
         }
         return NULL;
     }

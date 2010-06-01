@@ -304,9 +304,13 @@ static status_t
     log_debug2("\n*** fill parm %s ***\n", obj_get_name(parmobj));
 #endif
 
-    res = NO_ERR;
     parmname = obj_get_name(parmobj);
     typdef = obj_get_typdef(parmobj);
+    if (typdef == NULL) {
+        return NO_ERR;
+    }
+
+    res = NO_ERR;
     basetypdef = typ_get_base_typdef(typdef);
     btyp = obj_get_basetype(parmobj);
 

@@ -126,7 +126,7 @@ static ses_total_stats_t   *mytotals;
 * FUNCTION check_manager_hello
 *
 * Verify that the same NETCONF protocol verion is supported
-* by the manager and this agent
+* by the manager and this server
 * 
 * INPUTS:
 *    val == value struct for the hello message to check
@@ -300,7 +300,7 @@ void
     }
     
     /* check that the NETCONF base capability is included
-     * and it matches the agent protocol version
+     * and it matches the server protocol version
      */
     if (res == NO_ERR) {
         res = check_manager_hello(val);
@@ -344,7 +344,7 @@ void
 /********************************************************************
 * FUNCTION agt_hello_send
 *
-* Send the agent <hello> message to the manager on the 
+* Send the server <hello> message to the manager on the 
 * specified session
 *
 * INPUTS:
@@ -380,7 +380,7 @@ status_t
     /* start the hello timeout */
     (void)time(&scb->hello_time);
 
-    /* get the agent caps */
+    /* get the server caps */
     mycaps = agt_cap_get_capsval();
     if (!mycaps) {
         res = SET_ERROR(ERR_INTERNAL_PTR);

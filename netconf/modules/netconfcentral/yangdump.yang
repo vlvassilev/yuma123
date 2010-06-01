@@ -518,7 +518,7 @@ module yangdump {
                         will be generated instead.";
                    }
                 }
-                default "summary";
+                default "none";
              }
           }
         }

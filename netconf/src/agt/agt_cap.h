@@ -18,7 +18,7 @@
 *								    *
 *********************************************************************
 
-    NCX Agent capabilities handler
+    NETCONF Server capabilities handler
 
 *********************************************************************
 *								    *
@@ -65,7 +65,7 @@ extern "C" {
 /********************************************************************
 * FUNCTION agt_cap_cleanup
 *
-* Clean the NETCONF agent capabilities
+* Clean the NETCONF server capabilities
 *
 * INPUTS:
 *    none
@@ -79,12 +79,12 @@ extern void
 /********************************************************************
 * FUNCTION agt_cap_set_caps
 *
-* Initialize the NETCONF agent capabilities
+* Initialize the NETCONF server capabilities
 *
 * INPUTS:
-*    agttarg == the target of edit-config for this agent
-*    agtstart == the type of startup configuration for this agent
-*    defstyle == default with-defaults style for the entire agent
+*    agttarg == the target of edit-config for this server
+*    agtstart == the type of startup configuration for this server
+*    defstyle == default with-defaults style for the entire server
 *
 * RETURNS:
 *    NO_ERR if all goes well
@@ -98,11 +98,11 @@ extern status_t
 /********************************************************************
 * FUNCTION agt_cap_set_modules
 *
-* Initialize the NETCONF agent capabilities modules list
+* Initialize the NETCONF server capabilities modules list
 * MUST call after agt_cap_set_caps
 *
 * INPUTS:
-*   profile == agent profile control block to use
+*   profile == server profile control block to use
 *
 * RETURNS:
 *    status
@@ -127,12 +127,12 @@ extern status_t
 /********************************************************************
 * FUNCTION agt_cap_get_caps
 *
-* Get the NETCONF agent capabilities
+* Get the NETCONF server capabilities
 *
 * INPUTS:
 *    none
 * RETURNS:
-*    pointer to the agent caps list
+*    pointer to the server caps list
 *********************************************************************/
 extern cap_list_t * 
     agt_cap_get_caps (void);
@@ -141,12 +141,12 @@ extern cap_list_t *
 /********************************************************************
 * FUNCTION agt_cap_get_capsval
 *
-* Get the NETCONF agent capabilities ain val_value_t format
+* Get the NETCONF server capabilities in val_value_t format
 *
 * INPUTS:
 *    none
 * RETURNS:
-*    pointer to the agent caps list
+*    pointer to the server caps list
 *********************************************************************/
 extern val_value_t * 
     agt_cap_get_capsval (void);
@@ -155,7 +155,7 @@ extern val_value_t *
 /********************************************************************
 * FUNCTION agt_cap_std_set
 *
-* Check if the STD capability is set for the agent
+* Check if the STD capability is set for the server
 *
 * INPUTS:
 *    cap == ID of capability to check

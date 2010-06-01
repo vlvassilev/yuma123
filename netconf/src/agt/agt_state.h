@@ -78,7 +78,7 @@ extern "C" {
 * FUNCTION agt_state_init
 *
 * INIT 1:
-*   Initialize the agent state monitor module data structures
+*   Initialize the server state monitor module data structures
 *
 * INPUTS:
 *   none

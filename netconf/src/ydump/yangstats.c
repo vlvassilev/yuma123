@@ -317,7 +317,7 @@ static void
 
     output_stat(cp,
                 scb,
-                "Enumerationss",
+                "Enumerations",
                 stats->num_enums);
 
     output_stat(cp,

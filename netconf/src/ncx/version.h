@@ -28,6 +28,8 @@
 date             init     comment
 ----------------------------------------------------------------------
 23-jun-09    abb      Begun.
+01-jun-10    abb      Switched to 1.x instead of 0.x
+                      to align with debian packaging standards
 */
 
 #ifdef __cplusplus
@@ -40,7 +42,7 @@ extern "C" {
 *                                                                   *
 *********************************************************************/
 
-#define YUMA_VERSION  (const xmlChar *)"0.12"
+#define YUMA_VERSION  (const xmlChar *)"1.12"
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

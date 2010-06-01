@@ -17,7 +17,7 @@
 *                                                                   *
 *********************************************************************
 
-    NETCONF protocol remote procedure call agent-side definitions
+    NETCONF protocol remote procedure call server-side definitions
 
 *********************************************************************
 *                                                                   *
@@ -78,7 +78,7 @@ extern "C" {
 *********************************************************************/
 
 /* There are 3 different callbacks possible in the
- * agent processing chain. 
+ * server processing chain. 
  *
  * Only AGT_RPC_PH_INVOKE is needed to do any work
  * Validate is needed if parameter checking beyond the
@@ -98,7 +98,7 @@ typedef enum agt_rpc_phase_t_ {
 } agt_rpc_phase_t;
 
 
-/* Template for RPC agentserver callbacks
+/* Template for RPC server callbacks
  * The same template is used for all RPC callback phases
  */
 typedef status_t 
@@ -119,7 +119,7 @@ typedef struct agt_rpc_cbset_t_ {
  * INPUTS:
  *   scb == session control block
  *   msg == RPC request in progress
- *   indent == start indent amount; ignored if the agent
+ *   indent == start indent amount; ignored if the server
  *             is configured not to use PDU indentation
  * RETURNS:
  *   status of the output operation
@@ -144,7 +144,7 @@ typedef status_t
 * Initialize the agt_rpc module
 * Adds the agt_rpc_dispatch function as the handler
 * for the NETCONF <rpc> top-level element.
-* should call once to init RPC agent module
+* should call once to init RPC server module
 *
 * INPUTS:
 *   none
@@ -160,7 +160,7 @@ extern status_t
 *
 * Cleanup the agt_rpc module.
 * Unregister the top-level NETCONF <rpc> element
-* should call once to cleanup RPC agent module
+* should call once to cleanup RPC server module
 *
 *********************************************************************/
 extern void 
@@ -175,7 +175,7 @@ extern void
 * INPUTS:
 *    module == module name or RPC method
 *    method_name == RPC method name
-*    phase == RPC agent callback phase for this callback
+*    phase == RPC server callback phase for this callback
 *    method == pointer to callback function
 *
 * RETURNS:
@@ -191,7 +191,7 @@ extern status_t
 /********************************************************************
 * FUNCTION agt_rpc_support_method
 *
-* mark an RPC method as supported within the agent
+* mark an RPC method as supported within the server
 * this is needed for operations dependent on capabilities
 *
 * INPUTS:
@@ -206,7 +206,7 @@ extern void
 /********************************************************************
 * FUNCTION agt_rpc_unsupport_method
 *
-* mark an RPC method as unsupported within the agent
+* mark an RPC method as unsupported within the server
 * this is needed for operations dependent on capabilities
 *
 * INPUTS:

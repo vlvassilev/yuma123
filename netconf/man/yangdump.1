@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH yangdump 1 "May 14, 2010" Linux "yangdump 0.12-1"
+.TH yangdump 1 "June 1, 2010" Linux "yangdump 1.12-2"
 .SH NAME
 yangdump \- validate YANG modules and convert them to different formats
 
@@ -322,6 +322,23 @@ The default is false.
    Simplified URL format:
      example/foo/bar#frag
 .fi
+.IP --\fBstats\fP=enumeration[none, brief, basic, advanced, all]
+Controls YANG usage statistics report generation.
+.nf
+   enum values:
+      none: (default)
+         No statistics reporting will be done.
+      brief:
+        Brief statistics reporting will be done:
+          - Complexity score
+          - Total nodes
+      basic:
+         Basic statistics reporting will be done.
+      advanced:
+         Advanced statistics reporting will be done.
+      all:
+         All possible statistics reporting will be done.
+.fi
 .IP --\fBsubdirs\fP=boolean
 If false, the file search paths for modules, scripts, and data
 files will not include sub-directories if they exist in the
@@ -360,6 +377,26 @@ This parameter may be present zero or more times.
       ~fred/some/path ==> <fred-home-dir>/some/path
 
       $workdir/some/path ==> <workdir-env-var>/some/path
+.fi
+.IP --\fBtotals\fP=enumeration[none, summary, summary-only]
+Controls summary YANG usage statistics report generation.
+Must be used with the '--stats' parameter.
+.nf
+   enum values:
+      none: (default)
+         No summary statistics reporting will be done.
+      summary:
+         Summary statistics totals will be 
+         reported, based on the stats mode 
+         that is requested.
+      summary-only
+         Only the summary statistics totals
+         will be reported, based on the stats
+         mode that is requested.  This mode
+         will cause all individual module
+         statistics reports to be generated,
+         and a summary for all input modules
+         will be generated instead.
 .fi
 .IP --\fBunified\fP=boolean
 If true, then submodules will be processed within

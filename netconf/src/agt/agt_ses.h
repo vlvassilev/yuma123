@@ -17,7 +17,7 @@
 *                                                                   *
 *********************************************************************
 
-   NETCONF Session Agent definitions module
+   NETCONF Session Server definitions module
 
 *********************************************************************
 *                                                                   *
@@ -155,7 +155,7 @@ extern void
 /********************************************************************
 * FUNCTION agt_ses_new_session
 *
-* Create a real agent session control block
+* Create a real server session control block
 *
 * INPUTS:
 *   transport == the transport type

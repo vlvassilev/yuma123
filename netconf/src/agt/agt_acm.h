@@ -18,7 +18,7 @@
 *								    *
 *********************************************************************
 
-    NCX Agent Access Control handler
+    NETCONF Server Access Control handler
 
 *********************************************************************
 *								    *
@@ -148,7 +148,7 @@ typedef struct agt_acm_cache_t_ {
 /********************************************************************
 * FUNCTION agt_acm_init
 * 
-* Initialize the NCX Agent access control module
+* Initialize the NETCONF Server access control module
 * 
 * INPUTS:
 *   none
@@ -177,7 +177,7 @@ extern status_t
 /********************************************************************
 * FUNCTION agt_acm_cleanup
 *
-* Cleanup the NCX Agent access control module
+* Cleanup the NETCONF Server access control module
 * 
 *********************************************************************/
 extern void 

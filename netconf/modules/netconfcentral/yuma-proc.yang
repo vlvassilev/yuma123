@@ -11,6 +11,10 @@ module yuma-proc {
     description 
       "NETCONF /proc file system monitoring.";
 
+    revision 2010-06-01 {
+        description  
+	  "Add more counters for ubuntu 10.04 support.";
+    }
 
     revision 2009-11-21 {
         description  
@@ -303,7 +307,12 @@ module yuma-proc {
           }
 
           leaf Mapped {
-            description "Mapeed string";
+            description "Mapped string";
+            type string;
+          }
+
+          leaf Shmem {
+            description "Shmem string";
             type string;
           }
 
@@ -319,6 +328,11 @@ module yuma-proc {
 
           leaf SUnreclaim {
             description "SUnreclaim string";
+            type string;
+          }
+
+          leaf KernelStack {
+            description "KernelStack string";
             type string;
           }
 
@@ -364,6 +378,11 @@ module yuma-proc {
 
           leaf VmallocChunk {
             description "Vmalloc Chunk string";
+            type string;
+          }
+
+          leaf HardwareCorrupted {
+            description "HardwareCorrupted string";
             type string;
           }
 

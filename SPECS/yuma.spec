@@ -1,6 +1,6 @@
 Name:           yuma
-Version:        0.12
-Release:        1%{?dist}
+Version:        1.12
+Release:        2%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -20,7 +20,6 @@ included, to compile and process YANG modules.
 
 Summary:  YANG-based Unified Modular Automation Tools (shared libs)
 Requires: libxml2
-
 
 %description shlibs
 Yuma Tools is a YANG-based NETCONF-over-SSH client and server
@@ -55,8 +54,8 @@ echo "Check the user manuals in /etc/share/doc/yuma"
 %package client
 
 Summary: YANG-based Unified Modular Automation Tools (client-side)
-Group:          Development/Tools
-License:        BSD
+Group: Development/Tools
+License: IWL
 
 Requires: ncurses
 Requires: libssh2
@@ -117,6 +116,26 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/yuma/modules/netconfcentral/yangdump.yang
 
 %changelog
+* Tu Jun 01 2010 Andy Bierman <andy at @iwl.com> 1.12-2
+  * Changed numbering to align with debian standards
+  * Fixed bugs in yangcli:
+     * tab completion on complex types
+     * parse-def bug sometimes ignored XML prefix
+     * improved ambiguous command error handling
+ * Fixed yangdump HTML generation for references,
+   sometimes caused invalid xHTML output
+  * Fixed bugs in yangdiff causing incorrect diff results
+  * Added YANG usage statistical reporting to yangdump
+  * Fixed parser bug incorrectly treating list in a
+    grouping from another module as an error
+  * Updated YANG modules in netconfd:
+      * ietf-netconf-with-defaults
+      * ietf-netconf-monitoring
+      * ietf-netconf
+      * ietf-inet-types
+      * ietf-yang-types
+      * yuma-proc
+  * Made all code C++ safe for yangui project
 * Fri May 14 2010 Andy Bierman <andy at @iwl.com> 0.12-1
   * Added :url capability support to netconfd
   * Added if, elif, else, eval, end, while, log-*

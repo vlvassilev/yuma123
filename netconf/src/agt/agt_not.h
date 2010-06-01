@@ -120,7 +120,7 @@ typedef enum agt_not_state_t_ {
 } agt_not_state_t;
 
 
-/* agent supported stream types */
+/* server supported stream types */
 typedef enum agt_not_stream_t_ {
     AGT_NOT_STREAM_NONE,
     AGT_NOT_STREAM_NETCONF
@@ -176,7 +176,7 @@ typedef struct agt_not_subscription_t_ {
 * FUNCTION agt_not_init
 *
 * INIT 1:
-*   Initialize the agent notification module data structures
+*   Initialize the server notification module data structures
 *
 * INPUTS:
 *   none

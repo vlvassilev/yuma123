@@ -18,7 +18,7 @@
 *								    *
 *********************************************************************
 
-    NCX Agent Top Element module
+    NETCONF Server Top Element module
 
     Manage callback registry for received XML messages
 

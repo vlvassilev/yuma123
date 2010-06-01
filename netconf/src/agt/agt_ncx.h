@@ -18,7 +18,7 @@
 *								    *
 *********************************************************************
 
-    NCX Agent standard method routines
+    NETCONF Server standard method routines
 
 *********************************************************************
 *								    *
@@ -65,7 +65,7 @@ extern "C" {
 /********************************************************************
 * FUNCTION agt_ncx_init
 * 
-* Initialize the NCX Agent standard method routines
+* Initialize the NETCONF Server standard method routines
 * 
 * RETURNS:
 *   status of the initialization procedure
@@ -77,7 +77,7 @@ extern status_t
 /********************************************************************
 * FUNCTION agt_ncx_cleanup
 *
-* Cleanup the NCX Agent standard method routines
+* Cleanup the NETCONF Server standard method routines
 * 
 *********************************************************************/
 extern void 

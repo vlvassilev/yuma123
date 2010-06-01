@@ -18,7 +18,7 @@
 *								    *
 *********************************************************************
 
-    NCX Agent Data Model callback handler
+    NETCONF Server Data Model callback handler
 
 *********************************************************************
 *								    *
@@ -76,7 +76,7 @@ extern "C" {
 *								    *
 *********************************************************************/
 
-/* Callback function for agent object handler 
+/* Callback function for server object handler 
  * Used to provide a callback sub-mode for
  * a specific named object
  * 
@@ -106,7 +106,7 @@ typedef status_t
 		    val_value_t  *curval);
 
 
-/* set of agent object callback functions */
+/* set of server object callback functions */
 typedef struct agt_cb_fnset_t_ {
     agt_cb_fn_t    cbfn[AGT_NUM_CB];
 } agt_cb_fnset_t;
@@ -121,7 +121,7 @@ typedef struct agt_cb_fnset_t_ {
 /********************************************************************
 * FUNCTION agt_cb_init
 * 
-* Init the agent callback module
+* Init the server callback module
 *
 *********************************************************************/
 extern void
@@ -131,7 +131,7 @@ extern void
 /********************************************************************
 * FUNCTION agt_cb_cleanup
 * 
-* CLeanup the agent callback module
+* Cleanup the server callback module
 *
 *********************************************************************/
 extern void

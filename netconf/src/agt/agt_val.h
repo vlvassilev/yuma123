@@ -18,7 +18,7 @@
 *								    *
 *********************************************************************
 
-    NCX Agent Value/Typedef callback handler
+    NETCONF Server database callback handler
 
 *********************************************************************
 *								    *

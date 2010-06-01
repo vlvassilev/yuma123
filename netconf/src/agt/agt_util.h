@@ -18,7 +18,7 @@
 *								    *
 *********************************************************************
 
-    Utility Functions for NCX Agent method routines
+    Utility Functions for NCX Server method routines
 
 *********************************************************************
 *								    *
@@ -582,10 +582,10 @@ extern status_t
 /********************************************************************
 * FUNCTION agt_enable_feature
 * 
-* Enable a YANG feature in the agent
+* Enable a YANG feature in the server
 * This will not be detected by any sessions in progress!!!
 * It will take affect the next time a <hello> message
-* is sent by the agent
+* is sent by the server
 *
 * INPUTS:
 *   modname == module name containing the feature
@@ -602,10 +602,10 @@ extern status_t
 /********************************************************************
 * FUNCTION agt_disable_feature
 * 
-* Disable a YANG feature in the agent
+* Disable a YANG feature in the server
 * This will not be detected by any sessions in progress!!!
 * It will take affect the next time a <hello> message
-* is sent by the agent
+* is sent by the server
 *
 * INPUTS:
 *   modname == module name containing the feature

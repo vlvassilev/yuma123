@@ -18,7 +18,7 @@
 *								    *
 *********************************************************************
 
-    NCX Agent Command Line Interface handler
+    NETCONF Server Command Line Interface handler
 
 *********************************************************************
 *								    *
@@ -89,7 +89,7 @@ extern "C" {
 * INPUTS:
 *    argc == argument count
 *    argv == array of command line argument strings
-*    agt_profile == agent profile struct to fill in
+*    agt_profile == server profile struct to fill in
 *    showver == address of version return quick-exit status
 *    showhelpmode == address of help return quick-exit status
 *

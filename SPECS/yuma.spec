@@ -116,14 +116,14 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/yuma/modules/netconfcentral/yangdump.yang
 
 %changelog
-* Tu Jun 01 2010 Andy Bierman <andy at @iwl.com> 1.12-2
+* Tue Jun 01 2010 Andy Bierman <andy at @iwl.com> 1.12-2
   * Changed numbering to align with debian standards
   * Fixed bugs in yangcli:
      * tab completion on complex types
      * parse-def bug sometimes ignored XML prefix
      * improved ambiguous command error handling
- * Fixed yangdump HTML generation for references,
-   sometimes caused invalid xHTML output
+  * Fixed yangdump HTML generation for references,
+    sometimes caused invalid xHTML output
   * Fixed bugs in yangdiff causing incorrect diff results
   * Added YANG usage statistical reporting to yangdump
   * Fixed parser bug incorrectly treating list in a

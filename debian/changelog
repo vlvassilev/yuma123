@@ -4,8 +4,8 @@ yuma (1.12-2) unstable; urgency=medium
      * tab completion on complex types
      * parse-def bug sometimes ignored XML prefix
      * improved ambiguous command error handling
- * Fixed yangdump HTML generation for references,
-   sometimes caused invalid xHTML output
+  * Fixed yangdump HTML generation for references,
+    sometimes caused invalid xHTML output
   * Fixed bugs in yangdiff causing incorrect diff results
   * Added YANG usage statistical reporting to yangdump
   * Fixed parser bug incorrectly treating list in a
@@ -18,7 +18,7 @@ yuma (1.12-2) unstable; urgency=medium
       * ietf-yang-types
       * yuma-proc
   * Made all code C++ safe for yangui project
- -- Andy Bierman <andyb@iwl.com>  Tu, 01 Jun 2010 14:02:00 -0700
+ -- Andy Bierman <andyb@iwl.com>  Tue, 01 Jun 2010 14:02:00 -0700
 yuma (0.12-1) unstable; urgency=low
   * Added :url capability support to netconfd
   * Added if, elif, else, eval, end, while, log-*

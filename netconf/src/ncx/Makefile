@@ -113,10 +113,6 @@ distclean: superclean uninstall
 $(LBASE)/libncx.so.$(SOVERSION): $(OBJS)
 	gcc -shared -dynamic -Wl,-soname,libncx.so.$(SOVERSION) \
 	-o $@ $(OBJS) -lc
-	#cp $@ $@.$(LIBNCX_MAJOR_VERSION).$(LIBNCX_MINOR_VERSION)
-
-
-#	gcc -shared -dynamic -Wl,-soname,libncx.so -o $@ $(OBJS) -lc
 
 $(LBASE)/libncx.dylib: $(OBJS)
 	gcc -shared -dynamiclib -std=gnu99 -current_version \

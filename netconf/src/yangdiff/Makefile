@@ -29,7 +29,7 @@ PROG=yangdiff
 
 LIBS =	-lncx -L/usr/lib -lxml2
 
-LIBTARGS= $(LBASE)/libncx.$(LIBSUFFIX)
+LIBTARGS= $(LBASE)/libncx.$(LIBNCXSUFFIX)
 
 ############################# MAKE RULES ##################
 all: yangdiff

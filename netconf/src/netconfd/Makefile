@@ -31,7 +31,7 @@ LIBS = 	-lagt \
 	-L/usr/lib -lxml2
 
 LIBTARGS= $(LBASE)/libagt.a \
-	$(LBASE)/libncx.$(LIBSUFFIX)
+	$(LBASE)/libncx.$(LIBNCXSUFFIX)
 
 ############################# MAKE RULES ##################
 all: netconfd

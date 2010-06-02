@@ -29,7 +29,7 @@ REAL_INST=$(DESTDIR)/usr/bin
 
 LIBS =	-lydump -lncx -L/usr/lib -lxml2
 
-LIBTARGS= $(LBASE)/libncx.$(LIBSUFFIX) $(LBASE)/libydump.a
+LIBTARGS= $(LBASE)/libncx.$(LIBNCXSUFFIX) $(LBASE)/libydump.a
 
 ############################# MAKE RULES ##################
 all: yangdumpcode

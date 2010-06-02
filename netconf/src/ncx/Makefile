@@ -11,8 +11,6 @@ SUBDIR_CPP=
 
 TARGET=$(TBASE)/$(SUBDIR_NM)
 LIB_INST=$(TBASE)/lib
-LIB_MAJOR_VERSION=1
-LIB_MINOR_VERSION=0
 
 ifdef MAXWELL
 REAL_INST=/lib
@@ -59,20 +57,15 @@ install: includes
 ifndef STATIC
 # install dynamic libncx file
 	mkdir -p $(REAL_INST)
-ifdef MAC
 	install $(OWNER) $(GRP) \
-	  $(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) $(REAL_INST)
-else
-	install $(OWNER) $(GRP) \
-	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIB_MAJOR_VERSION).$(LIB_MINOR_VERSION) \
-	$(REAL_INST)
-endif
-ifdef SHLIBS
-# this symbolic link needs to be created in the debian SHLIBS build
+	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBNCXSUFFIX) $(REAL_INST)
+#ifdef SHLIBS
+# libncx.so --> libncx.so.1.0
+# libncx.so.1 --> libncx.so.1.0
 	(cd $(REAL_INST); \
-	ln -s lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIB_MAJOR_VERSION).$(LIB_MINOR_VERSION) \
-	lib$(SUBDIR_NM).$(LIBSUFFIX))
-endif
+	ln -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) lib$(SUBDIR_NM).$(LIBSUFFIX);\
+	ln -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIBNCX_MAJOR_VERSION))
+#endif
 ifndef DESTDIR
 ifndef MAC
 # skip in MacOsX, RPM, and rest of debian fakeroot builds
@@ -96,7 +89,7 @@ else
 ifdef DEVELOPER
 ncxlib:
 else
-ncxlib: $(LBASE)/lib$(SUBDIR_NM).$(LIBSUFFIX)
+ncxlib: $(LBASE)/lib$(SUBDIR_NM).$(LIBNCXSUFFIX)
 endif
 endif
 endif
@@ -114,16 +107,17 @@ superclean:
 
 distclean: superclean uninstall
 
-$(LBASE)/libncx.so: $(OBJS)
-	gcc -shared -dynamic -Wl,-soname,libncx.so -o $@ $(OBJS) -lc
-	cp $@ $@.$(LIB_MAJOR_VERSION).$(LIB_MINOR_VERSION)
+$(LBASE)/libncx.so.$(SOVERSION): $(OBJS)
+	gcc -shared -dynamic -Wl,-soname,libncx.so.$(SOVERSION) \
+	-o $@ $(OBJS) -lc
+	#cp $@ $@.$(LIBNCX_MAJOR_VERSION).$(LIBNCX_MINOR_VERSION)
 
 
 #	gcc -shared -dynamic -Wl,-soname,libncx.so -o $@ $(OBJS) -lc
 
 $(LBASE)/libncx.dylib: $(OBJS)
 	gcc -shared -dynamiclib -std=gnu99 -current_version \
-	$(LIB_MAJOR_VERSION).$(LIB_MINOR_VERSION) \
+	$(SOVERSION) \
 	-undefined dynamic_lookup \
 	-o $@ -install_name libncx.dylib $(OBJS) -lxml2
 

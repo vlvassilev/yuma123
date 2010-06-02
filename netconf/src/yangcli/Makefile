@@ -32,7 +32,7 @@ LIBS = 	-lmgr \
 	-L../../../libtecla -ltecla
 
 LIBTARGS= $(LBASE)/libmgr.a \
-	$(LBASE)/libncx.$(LIBSUFFIX)
+	$(LBASE)/libncx.$(LIBNCXSUFFIX)
 
 ############################# MAKE RULES ##################
 all: yangcli

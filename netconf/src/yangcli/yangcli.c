@@ -3546,17 +3546,8 @@ static void
         temp_progcb = NULL;
     }
 
-
     /* cleanup the NCX engine and registries */
     ncx_cleanup();
-
-    if (malloc_cnt != free_cnt) {
-        log_error("\n*** Error: memory leak (m:%u f:%u)\n", 
-                  malloc_cnt, 
-                  free_cnt);
-    }
-
-    log_close();
 
 }  /* yangcli_cleanup */
 

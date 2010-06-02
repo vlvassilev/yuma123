@@ -388,6 +388,12 @@ int
 
     done = FALSE;
 
+    /* this loop is used to implement the restart command
+     * the sw image is not reloaded; instead
+     * everything is cleaned up and re-initialized from scrath
+     * if the shutdown operation (or Ctl-C exit) is used instead
+     * of restart, then the loop will only be executed once
+     */
     while (!done) {
 
         res = cmn_init(argc, argv, &showver, &showhelpmode);
@@ -431,12 +437,6 @@ int
         if (shutmode == NCX_SHUT_EXIT) {
             done = TRUE;
         }
-    }
-
-    if (malloc_cnt != free_cnt) {
-        printf("\n*** netconfd error: memory leak (m:%u f:%u)\n", 
-               malloc_cnt, 
-               free_cnt);
     }
 
     print_errors();

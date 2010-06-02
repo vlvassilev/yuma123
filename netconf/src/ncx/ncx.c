@@ -1184,6 +1184,19 @@ void
     ncxmod_cleanup();
     xmlCleanupParser();
     status_cleanup();
+
+    if (malloc_cnt > free_cnt) {
+        log_error("\n*** Error: memory leak (m:%u f:%u)\n", 
+                  malloc_cnt, 
+                  free_cnt);
+    } else if (malloc_cnt < free_cnt) {
+        log_error("\n*** Error: memory corruption (m:%u f:%u)\n", 
+                  malloc_cnt, 
+                  free_cnt);
+    }
+
+    log_close();
+
     ncx_init_done = FALSE;
 
 }   /* ncx_cleanup */

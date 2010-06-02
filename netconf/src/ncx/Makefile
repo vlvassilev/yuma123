@@ -63,8 +63,8 @@ ifndef STATIC
 # libncx.so --> libncx.so.1.0
 # libncx.so.1 --> libncx.so.1.0
 	(cd $(REAL_INST); \
-	ln -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) lib$(SUBDIR_NM).$(LIBSUFFIX);\
-	ln -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIBNCX_MAJOR_VERSION))
+	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) lib$(SUBDIR_NM).$(LIBSUFFIX);\
+	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIBNCX_MAJOR_VERSION))
 #endif
 ifndef DESTDIR
 ifndef MAC

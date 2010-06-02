@@ -33,6 +33,8 @@ echo "Check the user manuals in /etc/share/doc/yuma"
 %files shlibs
 %defattr(-,root,root,-)
 %{_libdir}/libncx.so.1.0
+%{_libdir}/libncx.so
+%{_libdir}/libncx.so.1
 /usr/share/doc/yuma/yumatools-cs-license.pdf
 /usr/share/doc/yuma/yumatools-legal-notices.pdf
 /usr/share/doc/yuma/yuma-installation-guide.pdf
@@ -76,12 +78,12 @@ included, to compile and process YANG modules.
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make RELEASE=1 %{?_smp_mflags}
-make DEVELOPER=1 RELEASE=1 %{?_smp_mflags}
+make RELEASE=2 %{?_smp_mflags}
+make DEVELOPER=1 RELEASE=2 %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id RELEASE=1 \
+make install LDFLAGS+=--build-id RELEASE=2 \
 DESTDIR=$RPM_BUILD_ROOT
 
 %post client

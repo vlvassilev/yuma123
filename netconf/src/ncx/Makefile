@@ -90,6 +90,9 @@ ifdef DEVELOPER
 ncxlib:
 else
 ncxlib: $(LBASE)/lib$(SUBDIR_NM).$(LIBNCXSUFFIX)
+ifndef STATIC
+	(cd $(LBASE); ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) lib$(SUBDIR_NM).$(LIBSUFFIX))
+endif
 endif
 endif
 endif

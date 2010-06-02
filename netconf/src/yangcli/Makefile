@@ -25,10 +25,8 @@ PROG=yangcli
 # that contains bar. 
 
 ## LINUX
-LIBS = 	-lmgr \
-	-lncx \
-	-L/lib \
-	-L/usr/lib -lxml2 -lncurses -lssh2 \
+LIBS = 	-L../../target/lib -lmgr -lncx \
+	-L/lib -L/usr/lib -lxml2 -lncurses -lssh2 \
 	-L../../../libtecla -ltecla
 
 LIBTARGS= $(LBASE)/libmgr.a \

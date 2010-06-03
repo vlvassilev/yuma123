@@ -2,6 +2,15 @@
 # platform.profile
 #
 
+# libncx version
+# need some way to set versions without using
+# environment vars, so it works in plain debuild, rpmbuild
+#
+LIBNCX_MAJOR_VERSION=1
+LIBNCX_MINOR_VERSION=12
+SOVERSION=$(LIBNCX_MAJOR_VERSION).$(LIBNCX_MINOR_VERSION)
+
+
 CINC=-I. -I../agt -I../mgr \
     -I../ncx -I../platform \
     -I../ydump \
@@ -79,10 +88,6 @@ ifdef RELEASE
   CFLAGS += -DRELEASE=$(RELEASE)
 endif
 
-# libncx version
-LIBNCX_MAJOR_VERSION=1
-LIBNCX_MINOR_VERSION=0
-SOVERSION=$(LIBNCX_MAJOR_VERSION).$(LIBNCX_MINOR_VERSION)
 
 ifdef MAC
    GRP=
@@ -134,7 +139,7 @@ PLATFORM_CPP=
 .PHONY: all superclean clean test install uninstall \
         distclean depend lint
 
-######################### MAKE DEPENDENCIES ###############
+######################### MAKE RULES ######################
 COMPILE.c= $(CC) $(CFLAGS) $(CPPFLAGS) $(PLATFORM_CPP) \
            $(CINC) $(SUBDIR_CPP) $(TARGET_ARCH) -c
 

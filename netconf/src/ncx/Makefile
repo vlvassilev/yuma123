@@ -60,11 +60,13 @@ ifndef STATIC
 	install $(OWNER) $(GRP) \
 	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBNCXSUFFIX) $(REAL_INST)
 #ifdef SHLIBS
-# libncx.so --> libncx.so.1.0
-# libncx.so.1 --> libncx.so.1.0
+# libncx.so --> libncx.so.M.N
+# libncx.so.1 --> libncx.so.M.N
 	(cd $(REAL_INST); \
-	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) lib$(SUBDIR_NM).$(LIBSUFFIX);\
-	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIBNCX_MAJOR_VERSION))
+	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
+	lib$(SUBDIR_NM).$(LIBSUFFIX);\
+	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
+	lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIBNCX_MAJOR_VERSION))
 #endif
 ifndef DESTDIR
 ifndef MAC

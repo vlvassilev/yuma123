@@ -91,7 +91,8 @@ ncxlib:
 else
 ncxlib: $(LBASE)/lib$(SUBDIR_NM).$(LIBNCXSUFFIX)
 ifndef STATIC
-	(cd $(LBASE); ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) lib$(SUBDIR_NM).$(LIBSUFFIX))
+	(cd $(LBASE); ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
+	lib$(SUBDIR_NM).$(LIBSUFFIX))
 endif
 endif
 endif
@@ -111,7 +112,7 @@ superclean:
 distclean: superclean uninstall
 
 $(LBASE)/libncx.so.$(SOVERSION): $(OBJS)
-	gcc -shared -dynamic -Wl,-soname,libncx.so.$(SOVERSION) \
+	gcc -shared -rdynamic -dynamic -Wl,-soname,libncx.so.$(SOVERSION) \
 	-o $@ $(OBJS) -lc
 
 $(LBASE)/libncx.dylib: $(OBJS)

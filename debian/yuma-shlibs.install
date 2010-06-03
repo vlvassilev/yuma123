@@ -1,4 +1,4 @@
-usr/lib/libncx*
+usr/lib/libncx.so.1.12
 usr/share/doc/yuma/yumatools-cs-license.pdf.gz
 usr/share/doc/yuma/yumatools-legal-notices.pdf.gz
 usr/share/doc/yuma/yuma-installation-guide.pdf.gz

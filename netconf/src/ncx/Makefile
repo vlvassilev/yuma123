@@ -114,7 +114,7 @@ superclean:
 distclean: superclean uninstall
 
 $(LBASE)/libncx.so.$(SOVERSION): $(OBJS)
-	gcc -shared -rdynamic -dynamic -Wl,-soname,libncx.so.$(SOVERSION) \
+	gcc -shared -rdynamic -Wl,-soname,libncx.so.$(SOVERSION) \
 	-o $@ $(OBJS) -lc
 
 $(LBASE)/libncx.dylib: $(OBJS)

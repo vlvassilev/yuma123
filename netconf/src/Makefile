@@ -23,7 +23,7 @@ DIRS = agt $(APPS)
 else
 ifdef DEVELOPER
 APPS = yangdumpcode
-DIRS = agt ydump ncx
+DIRS = agt ydump ncx $(APPS)
 else
 ifdef SHLIBS
 APPS =

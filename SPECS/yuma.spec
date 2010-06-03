@@ -32,9 +32,7 @@ echo "Check the user manuals in /etc/share/doc/yuma"
 
 %files shlibs
 %defattr(-,root,root,-)
-%{_libdir}/libncx.so.1.0
-%{_libdir}/libncx.so
-%{_libdir}/libncx.so.1
+%{_libdir}/libncx*
 /usr/share/doc/yuma/yumatools-cs-license.pdf
 /usr/share/doc/yuma/yumatools-legal-notices.pdf
 /usr/share/doc/yuma/yuma-installation-guide.pdf

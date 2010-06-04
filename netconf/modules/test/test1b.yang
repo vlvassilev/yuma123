@@ -1,6 +1,6 @@
 submodule test1b {
 
-    belongs-to test1;
+    belongs-to test1 { prefix t1; }
 
     revision 2008-10-12 {
         description "Initial revision.";

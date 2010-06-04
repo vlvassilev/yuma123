@@ -159,6 +159,7 @@ module test {
         }
 
         list deepz {
+          key zz3;
           leaf zz1 { type instance-identifier; }
           leaf zz2 { type int64; }
           leaf zz3 { type int32; }

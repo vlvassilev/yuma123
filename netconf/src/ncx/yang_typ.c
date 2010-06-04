@@ -419,7 +419,7 @@ static status_t
 
     rangeQ = typ_get_rangeQ_con(typdef);
     if (!rangeQ) {
-        res = SET_ERROR(ERR_NCX_DATA_MISSING);
+        res = SET_ERROR(ERR_NCX_INVALID_VALUE);
         ncx_print_errormsg(tkc, mod, res);
         return res;
     }
@@ -1647,9 +1647,11 @@ static status_t
 
     /* check all the mandatory clauses are present */
     if (!bitdone) {
-        expstr = "mandatory bit clause";
         retres = ERR_NCX_DATA_MISSING;
-        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        ncx_mod_missing_err(tkc, 
+                            mod, 
+                            "bits", 
+                            "bit");
     }
 
     return retres;
@@ -1959,9 +1961,11 @@ static status_t
 
     /* check all the mandatory clauses are present */
     if (!enumdone) {
-        expstr = "mandatory enum clause";
         retres = ERR_NCX_DATA_MISSING;
-        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        ncx_mod_missing_err(tkc, 
+                            mod, 
+                            "enumeration", 
+                            "enum");
     }
 
     return retres;
@@ -2086,9 +2090,11 @@ static status_t
 
     /* check all the mandatory clauses are present */
     if (!typedone) {
-        expstr = "mandatory type clause";
         retres = ERR_NCX_DATA_MISSING;
-        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        ncx_mod_missing_err(tkc, 
+                            mod, 
+                            "union", 
+                            "type");
     }
 
     return retres;
@@ -4024,9 +4030,11 @@ status_t
 
     /* check all the mandatory clauses are present */
     if (!typdone) {
-        expstr = "mandatory type clause";
         retres = ERR_NCX_DATA_MISSING;
-        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        ncx_mod_missing_err(tkc, 
+                            mod, 
+                            "typedef", 
+                            "type");
     }
 
     /* check if the type name is already used in this module */

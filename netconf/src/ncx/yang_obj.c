@@ -1122,9 +1122,11 @@ static status_t
 
     /* check mandatory params */
     if (!typ) {
-        expstr = "mandatory type statement";
         retres = ERR_NCX_DATA_MISSING;
-        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        ncx_mod_missing_err(tkc, 
+                            mod, 
+                            "leaf", 
+                            "type");
     }
 
     /* save or delete the obj_template_t struct */
@@ -1365,9 +1367,11 @@ static status_t
 
     /* check mandatory params */
     if (!typ) {
-        expstr = "mandatory type-stmt";
         retres = ERR_NCX_DATA_MISSING;
-        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        ncx_mod_missing_err(tkc, 
+                            mod, 
+                            "leaf-list",
+                            "type");
     }
 
     /* save or delete the obj_template_t struct */
@@ -1636,8 +1640,8 @@ static status_t
         CHK_OBJ_EXIT(obj, res, retres);
     }
 
-    if (!list->keystr && (obj->flags & OBJ_FL_CONFIG)) {
-        log_error("\nError: No key entered for list '%s' on line %u",
+    if (!list->keystr && obj_get_config_flag_deep(obj)) {
+        log_error("\nError: No key present for list '%s' on line %u",
                   list->name, 
                   obj->tkerr.linenum);
         retres = ERR_NCX_DATA_MISSING;
@@ -1645,9 +1649,11 @@ static status_t
     }
 
     if (dlq_empty(list->datadefQ)) {
-        expstr = "mandatory data-def statement";
         retres = ERR_NCX_DATA_MISSING;
-        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        ncx_mod_missing_err(tkc, 
+                            mod, 
+                            "list", 
+                            "data-def");
     }
 
     /* save or delete the obj_template_t struct */

@@ -4923,6 +4923,80 @@ void
 
 
 /********************************************************************
+* FUNCTION ncx_mod_missing_err
+* 
+* Print an error for wrong token, mandatory
+* sub-statement is missing
+* 
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   stmtstr == parent statement
+*   expstr == expected sub-statement
+*
+*********************************************************************/
+void
+    ncx_mod_missing_err (tk_chain_t  *tkc,
+                         ncx_module_t *mod,
+                         const char *stmtstr,
+                         const char *expstr)
+{
+    tk_type_t   tktyp;
+    boolean     skip, done;
+    uint32      skipcount;
+    status_t    res;
+
+    skip = FALSE;
+
+    if (LOGERROR) {
+        if (stmtstr && expstr) {
+            log_error("\nError: '%s' statement missing "
+                      "mandatory '%s' sub-statement", 
+                      stmtstr, 
+                      expstr);
+        } else {
+            SET_ERROR(ERR_INTERNAL_VAL);
+        }
+
+        ncx_print_errormsg_ex(tkc, 
+                              mod, 
+                              ERR_NCX_DATA_MISSING,
+                              NULL, 
+                              0,
+                              (expstr) ? FALSE : TRUE);
+        log_error("\n");
+    }
+
+    if (skip) {
+        /* got an unexpected left brace, so skip to the
+         * end of this unknown section to resynch;
+         * otherwise the first unknown closing right brace
+         * will end the parent section, which causes
+         * a false 'unexpected EOF' error
+         */
+        skipcount = 1;
+        done = FALSE;
+        res = NO_ERR;
+        while (!done && res == NO_ERR) {
+            res = TK_ADV(tkc);
+            if (res == NO_ERR) {
+                tktyp = TK_CUR_TYP(tkc);
+                if (tktyp == TK_TT_LBRACE) {
+                    skipcount++;
+                } else if (tktyp == TK_TT_RBRACE) {
+                    skipcount--;
+                }
+                if (!skipcount) {
+                    done = TRUE;
+                }
+            }
+        }
+    }
+
+}  /* ncx_mod_missing_err */
+
+
+/********************************************************************
 * FUNCTION ncx_free_node
 * 
 * Delete a node based on its type

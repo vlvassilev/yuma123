@@ -1623,6 +1623,26 @@ extern void
 
 
 /********************************************************************
+* FUNCTION ncx_mod_missing_err
+* 
+* Print an error for wrong token, mandatory
+* sub-statement is missing
+* 
+* INPUTS:
+*   tkc == token chain
+*   mod == module in progress
+*   stmtstr == parent statement
+*   expstr == expected sub-statement
+*
+*********************************************************************/
+extern void
+    ncx_mod_missing_err (tk_chain_t  *tkc,
+                         ncx_module_t *mod,
+                         const char *stmtstr,
+                         const char *expstr);
+
+
+/********************************************************************
 * FUNCTION ncx_free_node
 * 
 * Delete a node based on its type

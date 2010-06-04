@@ -368,13 +368,17 @@ static status_t
     /* check missing mandatory sub-clauses */
     if (!mod->ns) {
         retres = ERR_NCX_DATA_MISSING;
-        expstr = "namespace statement";
-        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        ncx_mod_missing_err(tkc, 
+                            mod, 
+                            "mod-hdr", 
+                            "namespace");
     }
     if (!mod->prefix) {
         retres = ERR_NCX_DATA_MISSING;
-        expstr = "prefix statement";
-        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        ncx_mod_missing_err(tkc, 
+                            mod, 
+                            "mod-hdr", 
+                            "prefix");
     }
 
     return retres;
@@ -505,10 +509,11 @@ static status_t
     }
 
     if (!mod->prefix) {
-        mod->prefix = xml_strdup(EMPTY_STRING);
-        if (!mod->prefix) {
-            retres = ERR_INTERNAL_MEM;
-        }
+        retres = ERR_NCX_DATA_MISSING;
+        ncx_mod_missing_err(tkc, 
+                            mod, 
+                            "belongs-to", 
+                            "prefix");
     }
 
     return retres;
@@ -1327,8 +1332,10 @@ static status_t
     /* check missing mandatory sub-clause */
     if (!mod->belongs) {
         retres = ERR_NCX_DATA_MISSING;
-        expstr = "belongs-to statement";
-        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        ncx_mod_missing_err(tkc, 
+                            mod, 
+                            "submod-hdr", 
+                            "belongs-to");
     }
 
     return retres;
@@ -1557,9 +1564,11 @@ static status_t
     /* check all the mandatory clauses are present */
     if (!imp->prefix) {
         retres = ERR_NCX_DATA_MISSING;
-        expstr = "prefix string";
         tkc->curerr = &imp->tkerr;
-        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        ncx_mod_missing_err(tkc, 
+                            mod, 
+                            "import", 
+                            "prefix");
     }
 
     /* check if the import is already present */
@@ -2208,16 +2217,13 @@ static status_t
 * INPUTS:
 *   tkc    == token chain
 *   mod    == module in progress
-*   ismain == TRUE for meta-stmts
-*             FALSE for submodule-meta-stmts
 *
 * RETURNS:
 *   status of the operation
 *********************************************************************/
 static status_t 
     consume_meta_stmts (tk_chain_t  *tkc,
-                        ncx_module_t *mod,
-                        boolean ismain)
+                        ncx_module_t *mod)
 {
     const xmlChar *val;
     const char    *expstr;
@@ -2313,23 +2319,6 @@ static status_t
             done = TRUE;
         }
     }
-
-#ifdef WAS_REMOVED_FROM_SPEC
-    if (ismain) {
-        if (!mod->organization) {
-            retres = ERR_NCX_DATA_MISSING;
-            expstr = "organization clause";
-            ncx_mod_exp_err(tkc, mod, retres, expstr);
-        }
-    }
-    if (!descr) {
-        retres = ERR_NCX_DATA_MISSING;
-        expstr = "description clause";
-        ncx_mod_exp_err(tkc, mod, retres, expstr);
-    }
-#else
-    ismain=FALSE;
-#endif
 
     return retres;
 
@@ -2582,8 +2571,10 @@ static status_t
     /* check all the mandatory clauses are present */
     if (!descrdone) {
         retres = ERR_NCX_DATA_MISSING;
-        expstr = "description clause";
-        ncx_mod_exp_err(tkc, mod, retres, expstr);
+        ncx_mod_missing_err(tkc, 
+                            mod, 
+                            "revision", 
+                            "description");
     }
 
 
@@ -3057,7 +3048,7 @@ static status_t
     CHK_EXIT(res, retres);
 
     /* Get the meta statements (organization, etc.) */
-    res = consume_meta_stmts(tkc, mod, ismain);
+    res = consume_meta_stmts(tkc, mod);
     CHK_EXIT(res, retres);
 
     /* Get the revision statements */

@@ -267,6 +267,9 @@ extern "C" {
 #define RPC_ERR_APPTAG_DATA_REST   \
     (const xmlChar *)"data-restriction-violation"
 
+#define RPC_ERR_APPTAG_DATA_NOT_UNIQUE \
+    (const xmlChar *)"data-not-unique"
+
 /* ietf-netconf-state:get-schema */
 #define RPC_ERR_APPTAG_NO_MATCHES     (const xmlChar *)"no-matches"
 

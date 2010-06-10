@@ -643,6 +643,8 @@ const char *
         return "candidate cannot be locked, discard-changes needed";
     case ERR_NCX_TIMEOUT:
         return "timeout occurred";
+    case ERR_NCX_GET_SCHEMA_DUPLICATES:
+        return "multiple module revisions exist";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

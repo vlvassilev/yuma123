@@ -7135,4 +7135,82 @@ const xmlChar *
 }  /* ncx_get_confirm_event_str */
 
 
+/********************************************************************
+* FUNCTION ncx_mod_revision_count
+*
+* Find all the ncx_module_t structs in the ncx_modQ
+* that have the same module name
+*
+* INPUTS:
+*   modname == module name
+*
+* RETURNS:
+*   count of modules that have this name (exact match)
+*********************************************************************/
+uint32
+    ncx_mod_revision_count (const xmlChar *modname)
+{
+    uint32        count;
+
+#ifdef DEBUG
+    if (modname == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    if (ncx_sesmodQ != NULL) {
+        count = ncx_mod_revision_count_que(ncx_sesmodQ, modname);
+    } else {
+        count = ncx_mod_revision_count_que(ncx_curQ, modname);
+    }
+
+    return count;
+
+}   /* ncx_mod_revision_count */
+
+
+/********************************************************************
+* FUNCTION ncx_mod_revision_count_que
+*
+* Find all the ncx_module_t structs in the specified queue
+* that have the same module name
+*
+* INPUTS:
+*   modQ == queue of ncx_module_t structs to check
+*   modname == module name
+*
+* RETURNS:
+*   count of modules that have this name (exact match)
+*********************************************************************/
+uint32
+    ncx_mod_revision_count_que (dlq_hdr_t *modQ,
+                                const xmlChar *modname)
+{
+    ncx_module_t *mod;
+    uint32        count;
+    int32         retval;
+
+#ifdef DEBUG
+    if (modQ == NULL || modname == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+
+    count = 0;
+    for (mod = (ncx_module_t *)dlq_firstEntry(modQ);
+         mod != NULL;
+         mod = (ncx_module_t *)dlq_nextEntry(mod)) {
+
+        retval = xml_strcmp(modname, mod->name);
+        if (retval == 0) {
+            count++;
+        }
+    }
+    return count;
+
+}   /* ncx_mod_revision_count_que */
+
+
 /* END file ncx.c */

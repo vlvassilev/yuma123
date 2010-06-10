@@ -2533,6 +2533,41 @@ extern ncx_display_mode_t
 extern const xmlChar *
     ncx_get_confirm_event_str (ncx_confirm_event_t event);
 
+
+/********************************************************************
+* FUNCTION ncx_mod_revision_count
+*
+* Find all the ncx_module_t structs in the ncx_modQ
+* that have the same module name
+*
+* INPUTS:
+*   modname == module name
+*
+* RETURNS:
+*   count of modules that have this name (exact match)
+*********************************************************************/
+extern uint32
+    ncx_mod_revision_count (const xmlChar *modname);
+
+
+/********************************************************************
+* FUNCTION ncx_mod_revision_count_que
+*
+* Find all the ncx_module_t structs in the specified queue
+* that have the same module name
+*
+* INPUTS:
+*   modQ == queue of ncx_module_t structs to check
+*   modname == module name
+*
+* RETURNS:
+*   count of modules that have this name (exact match)
+*********************************************************************/
+extern uint32
+    ncx_mod_revision_count_que (dlq_hdr_t *modQ,
+                                const xmlChar *modname);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

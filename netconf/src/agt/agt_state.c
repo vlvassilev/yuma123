@@ -862,6 +862,7 @@ static status_t
     val_value_t     *validentifier, *valversion, *valformat;
     xmlns_id_t       nsid;
     status_t         res;
+    uint32           revcount;
 
     res = NO_ERR;
     findmod = NULL;
@@ -925,6 +926,22 @@ static status_t
     if (version && !*version) {
         /* send NULL instead of empty string */
         version = NULL;
+    }
+
+    if (version == NULL) {
+        revcount = ncx_mod_revision_count(identifier);
+        if (revcount > 1) {
+            res = ERR_NCX_GET_SCHEMA_DUPLICATES;
+            agt_record_error(scb, 
+                             &msg->mhdr, 
+                             NCX_LAYER_OPERATION, 
+                             res, 
+                             methnode, 
+                             NCX_NT_NONE, 
+                             NULL,
+                             NCX_NT_NONE, 
+                             NULL);
+        }
     }
 
     /* check format parameter: only YANG supported for now */

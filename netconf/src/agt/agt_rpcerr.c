@@ -652,6 +652,9 @@ static rpc_err_t
     case ERR_NCX_TIMEOUT:
         *apptag = RPC_ERR_APPTAG_LIMIT_REACHED;
         return RPC_ERR_OPERATION_FAILED;
+    case ERR_NCX_GET_SCHEMA_DUPLICATES:
+        *apptag = RPC_ERR_APPTAG_DATA_NOT_UNIQUE;
+        return RPC_ERR_OPERATION_FAILED;
 
     /* user warnings start at 400 and do not need to be listed here */
     default:

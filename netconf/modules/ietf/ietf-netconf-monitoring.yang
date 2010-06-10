@@ -37,37 +37,18 @@
       to the license terms contained in, the Simplified BSD License
       set forth in Section 4.c of the IETF Trust's Legal Provisions
       Relating to IETF Documents
-
       (http://trustee.ietf.org/license-info).
 
       This version of this YANG module is part of RFC XXXX; see
       the RFC itself for full legal notices.";
     // RFC Ed.: replace XXXX with actual RFC number and remove this note
 
-   revision 2010-05-19 {
+   revision 2010-06-01 {
      description
        "Initial revision.";
      reference
        "RFC XXXX: YANG Module for NETCONF Monitoring";
    // RFC Ed.: replace XXXX with actual RFC number and remove this note
-   }
-
-   typedef session-id {
-     type uint32 {
-       range "1..max";
-     }
-     description
-       "NETCONF Session Id.";
-     reference
-       "RFC 4741: NETCONF Configuration Protocol";
-   }
-
-   typedef session-id-or-zero {
-     type uint32;
-     description
-       "NETCONF Session Id or Zero to indicate none.";
-     reference
-       "RFC 4741: NETCONF Configuration Protocol";
    }
 
    typedef netconf-datastore-type {
@@ -267,7 +248,7 @@
                 partial locks.";
 
              leaf locked-by-session {
-               type session-id-or-zero;
+               type uint32;
                mandatory true;
                description
                  "The session ID of the session that has locked
@@ -277,6 +258,8 @@
                   If the lock is held by a session which is not managed
                   by the NETCONF server (e.g., a CLI session), a session
                   id of 0 (zero) is reported.";
+               reference
+                 "RFC 4741: NETCONF Configuration Protocol";
              }
              leaf locked-time {
                type yang:date-and-time;
@@ -326,6 +309,7 @@
                  description
                    "The list of instance-identifiers (i.e. the
                     locked nodes).
+
                     The scope of the partial lock is defined by the list
                     of locked nodes.";
                }
@@ -389,7 +373,6 @@
            mandatory true;
            description
              "The XML namespace defined by the data model.
-
               For YANG data models, this is the module's namespace.
               If the list entry describes a submodule, this field
               contains the namespace of the module to which the
@@ -431,10 +414,14 @@
             session identifier 0 MUST be excluded.";
 
          leaf session-id {
-           type session-id;
+           type uint32 {
+             range "1..max";
+           }
            description
              "Unique identifier for the session.  This value is the
               NETCONF session identifier, as defined in [RFC4741].";
+           reference
+             "RFC 4741: NETCONF Configuration Protocol";
          }
          leaf transport {
            type identityref {

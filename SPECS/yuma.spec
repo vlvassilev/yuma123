@@ -28,7 +28,7 @@ development toolkit.  This package contains the libncx shared library.
 %post shlibs
 ldconfig
 echo "Yuma Tools shared libraries installed."
-echo "Check the user manuals in /etc/share/doc/yuma"
+echo "Check the user manuals in /usr/share/doc/yuma"
 
 %files shlibs
 %defattr(-,root,root,-)
@@ -86,7 +86,7 @@ DESTDIR=$RPM_BUILD_ROOT
 
 %post client
 echo "Yuma Tools client programs installed."
-echo "Check the user manuals in /etc/share/doc/yuma"
+echo "Check the user manuals in /usr/share/doc/yuma"
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -196,7 +196,7 @@ central NETCONF protocol stack, based directly on YANG modules.
 
 %post server
 echo "Yuma Tools server programs installed."
-echo "Check the user manuals in /etc/share/doc/yuma"
+echo "Check the user manuals in /usr/share/doc/yuma"
 
 %files server
 %defattr(-,root,root,-)
@@ -233,7 +233,7 @@ the netconfd server.
 
 %post dev
 echo "Yuma Tools developer files installed."
-echo "Check the user manuals in /etc/share/doc/yuma"
+echo "Check the user manuals in /usr/share/doc/yuma"
 
 %files dev
 %defattr(-,root,root,-)

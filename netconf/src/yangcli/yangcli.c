@@ -490,7 +490,6 @@ static void
 
     modptr_t                *modptr;
     mgr_not_msg_t           *notif;
-    ncxmod_search_result_t  *searchresult;
     int                      retval;
 
     /* save the history buffer if needed */
@@ -541,11 +540,7 @@ static void
 
     var_clean_varQ(&server_cb->varbindQ);
 
-    while (!dlq_empty(&server_cb->searchresultQ)) {
-        searchresult = (ncxmod_search_result_t *)
-            dlq_deque(&server_cb->searchresultQ);
-        ncxmod_free_search_result(searchresult);
-    }
+    ncxmod_clean_search_result_queue(&server_cb->searchresultQ);
 
     while (!dlq_empty(&server_cb->modptrQ)) {
         modptr = (modptr_t *)dlq_deque(&server_cb->modptrQ);

@@ -5197,6 +5197,35 @@ void
 
 
 /********************************************************************
+* FUNCTION ncxmod_clean_search_result_queue
+*
+*  Clean and free all the search result structs
+*  in the specified Q
+*
+* INPUTS:
+*    searchQ = Q of ncxmod_search_result_t to clean and free
+*********************************************************************/
+void
+    ncxmod_clean_search_result_queue (dlq_hdr_t *searchQ)
+{
+    ncxmod_search_result_t *searchresult;
+
+#ifdef DEBUG
+    if (searchQ == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    while (!dlq_empty(searchQ)) {
+        searchresult = (ncxmod_search_result_t *)dlq_deque(searchQ);
+        ncxmod_free_search_result(searchresult);
+    }
+
+}  /* ncxmod_clean_search_result_queue */
+
+
+/********************************************************************
 * FUNCTION ncxmod_test_filespec
 *
 * Check the exact filespec to see if it a file

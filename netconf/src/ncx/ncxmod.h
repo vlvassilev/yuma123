@@ -1142,6 +1142,19 @@ extern void
 
 
 /********************************************************************
+* FUNCTION ncxmod_clean_search_result_queue
+*
+*  Clean and free all the search result structs
+*  in the specified Q
+*
+* INPUTS:
+*    searchQ = Q of ncxmod_search_result_t to clean and free
+*********************************************************************/
+extern void
+    ncxmod_clean_search_result_queue (dlq_hdr_t *searchQ);
+
+
+/********************************************************************
 * FUNCTION ncxmod_test_filespec
 *
 * Check the exact filespec to see if it a file

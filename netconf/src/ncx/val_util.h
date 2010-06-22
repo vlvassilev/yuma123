@@ -48,6 +48,14 @@ date	     init     comment
 #include "op.h"
 #endif
 
+#ifndef _H_plock
+#include "plock.h"
+#endif
+
+#ifndef _H_ses
+#include "ses.h"
+#endif
+
 #ifndef _H_status
 #include "status.h"
 #endif
@@ -745,6 +753,67 @@ extern void
 *********************************************************************/
 extern void
     val_set_feature_parms (val_value_t *parentval);
+
+
+/********************************************************************
+* FUNCTION val_ok_to_partial_lock
+*
+* Check if the specified root val could be locked
+* right now by the specified session
+*
+* INPUTS:
+*   val == start value struct to use
+*   sesid == session ID requesting the partial lock
+*   badval == address of first error val found
+*
+* OUTPUTS:
+*   *badval == pointer to value node that caused the error
+*
+* RETURNS:
+*   status:  if any error, then val_clear_partial_lock
+*   MUST be called with the start root, to back out any
+*   partial operations.  This can happen if the max number
+*   of 
+*********************************************************************/
+extern status_t
+    val_ok_to_partial_lock (val_value_t *val,
+                            ses_id_t sesid,
+                            val_value_t  **badval);
+
+
+/********************************************************************
+* FUNCTION val_set_partial_lock
+*
+* Set the partial lock throughout the value tree
+*
+* INPUTS:
+*   val == start value struct to use
+*   plcb == partial lock to set on entire subtree
+*
+* RETURNS:
+*   status:  if any error, then val_clear_partial_lock
+*   MUST be called with the start root, to back out any
+*   partial operations.  This can happen if the max number
+*   of locks reached or lock already help by another session
+*********************************************************************/
+extern status_t
+    val_set_partial_lock (val_value_t *val,
+                          plock_cb_t *plcb);
+
+
+/********************************************************************
+* FUNCTION val_clear_partial_lock
+*
+* Clear the partial lock throughout the value tree
+*
+* INPUTS:
+*   val == start value struct to use
+*   plcb == partial lock to clear
+*
+*********************************************************************/
+extern void
+    val_clear_partial_lock (val_value_t *val,
+                            plock_cb_t *plcb);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

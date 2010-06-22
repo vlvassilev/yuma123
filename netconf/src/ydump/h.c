@@ -304,7 +304,7 @@ static void
     /* generate a line for a Q header or a Queue */
     if (obj->objtype == OBJ_TYP_LIST || 
         obj->objtype == OBJ_TYP_LEAF_LIST) {
-        ses_putstr(scb, QHEADER);
+        write_qheader(scb);
     }
 
     if (isleaflist) { 
@@ -325,10 +325,10 @@ static void
             }
 
             if (childobj->objtype == OBJ_TYP_LEAF_LIST) {
-                ses_putstr(scb, START_LINE);
+                ses_indent(scb, ses_indent_count(scb));
                 ses_putstr(scb, QUEUE);
                 ses_putchar(scb, ' ');
-                ses_putstr(scb, cdef->valstr);
+                write_c_safe_str(scb, obj_get_name(childobj)); /***/
                 ses_putchar(scb, ';');
             } else {
                 ses_indent(scb, ses_indent_count(scb));

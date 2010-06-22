@@ -1813,6 +1813,24 @@ extern const xmlChar *
     obj_get_name (const obj_template_t *obj);
 
 
+
+/********************************************************************
+* FUNCTION obj_set_name
+* 
+* Set the name field for this obj
+*
+* INPUTS:
+*   obj == the specific object to set or change the name
+*   objname == new name string to use
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    obj_set_name (obj_template_t *obj,
+                  const xmlChar *objname);
+
+
 /********************************************************************
 * FUNCTION obj_has_name
 * 

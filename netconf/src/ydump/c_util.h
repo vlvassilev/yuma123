@@ -109,7 +109,7 @@ extern "C" {
 #define STRUCT        (const xmlChar *)"struct"
 #define UNION         (const xmlChar *)"union"
 
-#define QHEADER       (const xmlChar *)"\n    dlq_hdr_t qhdr;"
+#define QHEADER       (const xmlChar *)"dlq_hdr_t qhdr;"
 
 #define QUEUE         (const xmlChar *)"dlq_hdr_t"
 
@@ -301,6 +301,21 @@ extern void
 extern void
     write_ncx_include (ses_cb_t *scb,
                        const xmlChar *modname);
+
+
+/********************************************************************
+* FUNCTION write_qheader
+* 
+* Generate a QHEADER with indentation
+*
+*  \n{indentcnt}QHEADER
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*
+*********************************************************************/
+extern void
+    write_qheader (ses_cb_t *scb);
 
 
 /********************************************************************

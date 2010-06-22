@@ -6413,6 +6413,93 @@ const xmlChar *
 }  /* obj_get_name */
 
 
+
+/********************************************************************
+* FUNCTION obj_set_name
+* 
+* Set the name field for this obj
+*
+* INPUTS:
+*   obj == the specific object to set or change the name
+*   objname == new name string to use
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    obj_set_name (obj_template_t *obj,
+                  const xmlChar *objname)
+{
+    xmlChar  **namevar, *newname;
+    boolean   *nameclone, defnameclone;
+
+#ifdef DEBUG
+    if (obj == NULL || objname == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    namevar = NULL;
+    defnameclone = FALSE;
+    nameclone = &defnameclone;
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+        namevar = &obj->def.container->name;
+        break;
+    case OBJ_TYP_ANYXML:
+    case OBJ_TYP_LEAF:
+        namevar = &obj->def.leaf->name;
+        break;
+    case OBJ_TYP_LEAF_LIST:
+        namevar = &obj->def.leaflist->name;
+        break;
+    case OBJ_TYP_LIST:
+        namevar = &obj->def.list->name;
+        break;
+    case OBJ_TYP_CHOICE:
+        namevar = &obj->def.choic->name;
+        break;
+    case OBJ_TYP_CASE:
+        namevar = &obj->def.cas->name;
+        nameclone = &obj->def.cas->nameclone;
+        break;
+    case OBJ_TYP_USES:
+    case OBJ_TYP_AUGMENT:
+    case OBJ_TYP_REFINE:
+        return ERR_NCX_SKIPPED;
+    case OBJ_TYP_RPC:
+        namevar = &obj->def.rpc->name;
+        break;
+    case OBJ_TYP_RPCIO:
+        namevar = &obj->def.rpcio->name;
+        break;
+    case OBJ_TYP_NOTIF:
+        namevar = &obj->def.notif->name;
+        break;
+    case OBJ_TYP_NONE:
+    default:
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    newname = xml_strdup(objname);
+    if (newname == NULL) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    if (*namevar != NULL && !*nameclone) {
+        m__free(*namevar);
+        *namevar = NULL;
+    }
+
+    *namevar = newname;
+    *nameclone = TRUE;
+
+    return NO_ERR;
+
+}  /* obj_set_name */
+
+
 /********************************************************************
 * FUNCTION obj_has_name
 * 

@@ -2,7 +2,6 @@ module ietf-netconf-partial-lock {
 
   namespace urn:ietf:params:xml:ns:netconf:partial-lock:1.0;
   prefix pl;
-  import yuma-ncx { prefix ncx; }
 
   organization "IETF Network Configuration (netconf) Working Group";
 
@@ -19,10 +18,9 @@ module ietf-netconf-partial-lock {
    "This YANG module defines the <partial-lock> and
     <partial-unlock> operations.";
 
-  revision 2009-02-19 {
+  revision 2009-10-19 {
     description
-     "Initial version, published as RFC yyyy.";
-     // RFC Ed.: replace yyyy with actual RFC number & remove this note.
+     "Initial version, published as RFC 5717.";
   }
 
   typedef lock-id-type {
@@ -35,23 +33,10 @@ module ietf-netconf-partial-lock {
 
   rpc partial-lock {
     description
-     "A NETCONF operation that locks part of one or more datastores.";
+     "A NETCONF operation that locks parts of the running datastore.";
     input {
-      list target {
-        min-elements 1;
-        description
-         "A list of one or more datastore names.
-          Each list entry must contain a different datastore name.";
-        choice datastore {
-          leaf running   { type empty; }
-          leaf candidate { type empty; }
-          leaf startup   { type empty; }
-        }
-      }
       leaf-list select {
-        type string {
-	    ncx:xpath;
-        }
+        type string;
         min-elements 1;
         description
          "XPath expression that specifies the scope of the lock.
@@ -64,32 +49,14 @@ module ietf-netconf-partial-lock {
       leaf lock-id {
         type lock-id-type;
         description
-         "Identifies the lock, if granted. The lock-id SHOULD be
+         "Identifies the lock, if granted.  The lock-id SHOULD be
           used in the partial-unlock rpc.";
       }
-      container running {
-        leaf-list locked-node {
-          type instance-identifier;
-          min-elements 1;
-          description
-           "List of locked nodes in the running datastore";
-        }
-      }
-      container candidate {
-        leaf-list locked-node {
-          type instance-identifier;
-          min-elements 1;
-          description
-           "List of locked nodes in the candidate datastore";
-        }
-      }
-      container startup {
-        leaf-list locked-node {
-          type instance-identifier;
-          min-elements 1;
-          description
-           "List of locked nodes in the startup datastore";
-        }
+      leaf-list locked-node {
+        type instance-identifier;
+        min-elements 1;
+        description
+         "List of locked nodes in the running datastore";
       }
     }
   }
@@ -102,10 +69,9 @@ module ietf-netconf-partial-lock {
       leaf lock-id {
         type lock-id-type;
         description
-         "Identifies the lock to be released. MUST be the value
-          received in the response to the partial-lock operation.";
+         "Identifies the lock to be released.  MUST be the value
+          received in the response to a partial-lock operation.";
       }
     }
   }
 }
-

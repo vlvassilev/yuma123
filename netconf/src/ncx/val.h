@@ -106,6 +106,10 @@ date	     init     comment
 #include "op.h"
 #endif
 
+#ifndef _H_plock
+#include "plock.h"
+#endif
+
 #ifndef _H_status
 #include "status.h"
 #endif
@@ -132,7 +136,10 @@ extern "C" {
 *								    *
 *********************************************************************/
 
+/* max number of concurrent partial locks by the same session */
+#define VAL_MAX_PLOCKS  4
 
+/* maximum number of bytes in a number string */
 #define VAL_MAX_NUMLEN  NCX_MAX_NUMLEN
 
 /* constants used in generating C and Xpath instance ID strings */
@@ -339,6 +346,11 @@ typedef struct val_value_t_ {
      * value stored in v union as a string
      */
     struct xpath_pcb_t_            *xpathpcb;
+
+    /* back-ptr to the partial locks that are held
+     * against this node
+     */
+    plock_cb_t  *plock[VAL_MAX_PLOCKS];
 
     /* union of all the NCX-specific sub-types
      * note that the following invisible constructs should

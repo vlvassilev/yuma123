@@ -2827,4 +2827,219 @@ void
 }  /* val_set_feature_parms */
 
 
+/********************************************************************
+* FUNCTION val_ok_to_partial_lock
+*
+* Check if the specified root val could be locked
+* right now by the specified session
+*
+* INPUTS:
+*   val == start value struct to use
+*   sesid == session ID requesting the partial lock
+*   badval == address of first error val found
+*
+* OUTPUTS:
+*   *badval == pointer to value node that caused the error
+*
+* RETURNS:
+*   status:  if any error, then val_clear_partial_lock
+*   MUST be called with the start root, to back out any
+*   partial operations.  This can happen if the max number
+*   of 
+*********************************************************************/
+status_t
+    val_ok_to_partial_lock (val_value_t *val,
+                            ses_id_t sesid,
+                            val_value_t  **badval)
+{
+    val_value_t   *childval;
+    status_t       res;
+    uint32         i;
+    boolean        anyavail;
+
+#ifdef DEBUG
+    if (val == NULL || badval == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+    if (sesid == 0) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }        
+#endif
+
+    if (!val_is_config_data(val)) {
+        *badval = val;
+        return ERR_NCX_NOT_CONFIG;
+    }
+
+    res = NO_ERR;
+
+    /* check for an empty slot and locked-by-another session */
+    anyavail = FALSE;
+    for (i = 0; i < VAL_MAX_PLOCKS; i++) {
+        if (val->plock[i] == NULL) {
+            anyavail = TRUE;
+        } else if (plock_get_sid(val->plock[i]) != sesid) {
+            *badval = val;
+            return ERR_NCX_LOCK_DENIED;
+        }
+    }
+
+    if (!anyavail) {
+        *badval = val;
+        return ERR_NCX_RESOURCE_DENIED;
+    }
+
+    for (childval = val_get_first_child(val);
+         childval != NULL;
+         childval = val_get_next_child(childval)) {
+
+        if (!val_is_config_data(childval)) {
+            continue;
+        }
+
+        res = val_ok_to_partial_lock(childval, 
+                                     sesid, 
+                                     badval);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
+    *badval = NULL;
+    return NO_ERR;
+
+} /* val_ok_to_partial_lock */
+
+
+/********************************************************************
+* FUNCTION val_set_partial_lock
+*
+* Set the partial lock throughout the value tree
+*
+* INPUTS:
+*   val == start value struct to use
+*   plcb == partial lock to set on entire subtree
+*
+* RETURNS:
+*   status:  if any error, then val_clear_partial_lock
+*   MUST be called with the start root, to back out any
+*   partial operations.  This can happen if the max number
+*   of locks reached or lock already help by another session
+*********************************************************************/
+status_t
+    val_set_partial_lock (val_value_t *val,
+                          plock_cb_t *plcb)
+{
+    val_value_t     *childval;
+    status_t         res;
+    uint32           i;
+    boolean          anyavail, done;
+    ses_id_t         newsid;
+
+#ifdef DEBUG
+    if (val == NULL || plcb == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (!val_is_config_data(val)) {
+        return ERR_NCX_NOT_CONFIG;
+    }
+
+    newsid = plock_get_sid(plcb);
+
+    /* check for an empty slot and locked-by-another session */
+    anyavail = FALSE;
+    for (i = 0; i < VAL_MAX_PLOCKS; i++) {
+        if (val->plock[i] == NULL) {
+            anyavail = TRUE;
+        } else if (plock_get_sid(val->plock[i]) != newsid) {
+            return ERR_NCX_LOCK_DENIED;
+        }
+    }
+
+    if (!anyavail) {
+        return ERR_NCX_RESOURCE_DENIED;
+    }
+
+    done = FALSE;
+    for (i = 0; i < VAL_MAX_PLOCKS && !done; i++) {
+        if (val->plock[i] == NULL) {
+            val->plock[i] = plcb;
+            done = TRUE;
+        }
+    }
+
+    for (childval = val_get_first_child(val);
+         childval != NULL;
+         childval = val_get_next_child(childval)) {
+
+        if (!val_is_config_data(childval)) {
+            continue;
+        }
+
+        res = val_set_partial_lock(childval, plcb);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
+    return NO_ERR;
+
+}  /* val_set_partial_lock */
+
+
+/********************************************************************
+* FUNCTION val_clear_partial_lock
+*
+* Clear the partial lock throughout the value tree
+*
+* INPUTS:
+*   val == start value struct to use
+*   plcb == partial lock to clear
+*
+*********************************************************************/
+void
+    val_clear_partial_lock (val_value_t *val,
+                            plock_cb_t *plcb)
+{
+    val_value_t   *childval;
+    uint32         i;
+    boolean        done;
+
+#ifdef DEBUG
+    if (val == NULL || plcb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (!val_is_config_data(val)) {
+        return;
+    }
+
+    /* check for the specified plcb */
+    done = FALSE;
+    for (i = 0; i < VAL_MAX_PLOCKS && !done; i++) {
+        if (val->plock[i] == plcb) {
+            val->plock[i] = NULL;
+            done = TRUE;
+        }
+    }
+
+    for (childval = val_get_first_child(val);
+         childval != NULL;
+         childval = val_get_next_child(childval)) {
+
+        if (val_is_config_data(childval)) {
+            val_clear_partial_lock(childval, plcb);
+        }
+    }
+
+}  /* val_clear_partial_lock */
+
+
+
 /* END file val_util.c */
+
+

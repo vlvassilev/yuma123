@@ -410,7 +410,7 @@ void
         ses_putstr(scb, defpart);
         ses_putchar(scb, '_');
     }
-    write_c_safe_str(scb, idname);
+    write_c_safe_str(scb, idname); /***/
 
 }  /* write_identifier */
 
@@ -458,7 +458,7 @@ void
 {
     ses_putstr(scb, POUND_IFNDEF);
     ses_putstr(scb, BAR_H);
-    ses_putstr(scb, modname);
+    write_c_safe_str(scb, modname);
     ses_putstr(scb, POUND_INCLUDE);
     ses_putchar(scb, '"');
     ses_putstr(scb, modname);
@@ -467,6 +467,26 @@ void
     ses_putchar(scb, '\n');
 
 }  /* write_ncx_include */
+
+
+/********************************************************************
+* FUNCTION write_qheader
+* 
+* Generate a QHEADER with indentation
+*
+*  \n{indentcnt}QHEADER
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*
+*********************************************************************/
+void
+    write_qheader (ses_cb_t *scb)
+{
+    ses_indent(scb, ses_indent_count(scb));
+    ses_putstr(scb, QHEADER);
+
+}  /* write_qheader */
 
 
 /********************************************************************
@@ -899,14 +919,14 @@ void
         write_identifier(scb,
                          obj_get_mod_name(obj),
                          DEF_TYPE,
-                         obj_get_name(obj));
+                         obj_get_name(obj)); /***/
     }
 
     if (needspace) {
         ses_putchar(scb, ' ');
     }
 
-    write_c_safe_str(scb, obj_get_name(obj));
+    write_c_safe_str(scb, obj_get_name(obj)); /***/
 
     if (endchar != '\0') {
         ses_putchar(scb, endchar);

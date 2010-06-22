@@ -93,6 +93,10 @@ date             init     comment
 #include "ncxconst.h"
 #endif
 
+#ifndef _H_plock
+#include "plock.h"
+#endif
+
 #ifndef _H_ses
 #include "ses.h"
 #endif
@@ -103,6 +107,10 @@ date             init     comment
 
 #ifndef _H_val
 #include "val.h"
+#endif
+
+#ifndef _H_val_util
+#include "val_util.h"
 #endif
 
 #ifdef __cplusplus
@@ -174,6 +182,7 @@ typedef struct cfg_template_t_ {
     ses_id_t       locked_by;
     cfg_source_t   lock_src;
     dlq_hdr_t      load_errQ;    /* Q of rpc_err_rec_t */
+    dlq_hdr_t      plockQ;          /* Q of plock_cb_t */
     val_value_t   *root;          /* btyp == container */
 } cfg_template_t;
 
@@ -402,6 +411,7 @@ extern boolean
 * FUNCTION cfg_ok_to_lock
 *
 * Check if the specified config can be locked right now
+* for global lock only
 *
 * INPUTS:
 *    cfg = Config template to check 
@@ -417,7 +427,7 @@ extern status_t
 * FUNCTION cfg_ok_to_unlock
 *
 * Check if the specified config can be unlocked right now
-* by the specified session ID
+* by the specified session ID; for global lock only
 *
 * INPUTS:
 *    cfg = Config template to check 
@@ -552,6 +562,19 @@ extern void
 
 
 /********************************************************************
+* FUNCTION cfg_release_partial_locks
+*
+* Release any configuration locks held by the specified session
+*
+* INPUTS:
+*    sesid == session ID to check for
+*
+*********************************************************************/
+extern void
+    cfg_release_partial_locks (ses_id_t sesid);
+
+
+/********************************************************************
 * FUNCTION cfg_get_lock_list
 *
 * Get a list of all the locks held by a session
@@ -585,6 +608,76 @@ extern void
 extern status_t
     cfg_apply_load_root (cfg_template_t *cfg,
 			 val_value_t *newroot);
+
+
+/********************************************************************
+* FUNCTION cfg_add_partial_lock
+*
+* Add a partial lock the specified config.
+* This will not really have an effect unless the
+* CFG_FL_TARGET flag in the specified config is also set
+* For global lock only
+*
+* INPUTS:
+*    cfg = Config template to lock
+*    plcb == partial lock control block, already filled
+*            out, to add to this configuration
+*
+* RETURNS:
+*    status; if NO_ERR then the memory in plcb is handed off
+*    and will be released when cfg_remove_partial_lock
+*    is called for 'plcb'
+*********************************************************************/
+extern status_t
+    cfg_add_partial_lock (cfg_template_t *cfg,
+                          plock_cb_t *plcb);
+
+
+/********************************************************************
+* FUNCTION cfg_find_partial_lock
+*
+* Find a partial lock in the specified config.
+*
+* INPUTS:
+*    cfg = Config template to use
+*    lockid == lock-id for the plcb to find
+*
+*********************************************************************/
+extern plock_cb_t *
+    cfg_find_partial_lock (cfg_template_t *cfg,
+                           plock_id_t lockid);
+
+
+/********************************************************************
+* FUNCTION cfg_delete_partial_lock
+*
+* Remove a partial lock from the specified config.
+*
+* INPUTS:
+*    cfg = Config template to use
+*    lockid == lock-id for the plcb  to remove
+*
+*********************************************************************/
+extern void
+    cfg_delete_partial_lock (cfg_template_t *cfg,
+                             plock_id_t lockid);
+
+
+/********************************************************************
+* FUNCTION cfg_ok_to_partial_lock
+*
+* Check if the specified config can be locked right now
+* for partial lock only
+*
+* INPUTS:
+*    cfg = Config template to check 
+*
+* RETURNS:
+*    status
+*********************************************************************/
+extern status_t
+    cfg_ok_to_partial_lock (const cfg_template_t *cfg);
+
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

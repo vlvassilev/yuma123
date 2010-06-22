@@ -10,7 +10,29 @@
  */
 /*  FILE: cfg.c
 
-                
+   CFG locking:
+     - if a partial lock exists then a global lock will fail
+     - if a global lock exists then the same session ID
+       can still add partial locks
+     - Only VAL_MAX_PARTIAL_LOCKS con-current partial locks
+       can be held for the same value node; MUST be at least 2
+     - A partial lock will fail if any part of the subtree
+       is already partial-locked by another session
+     - CFG_ST_READY to CFG_ST_FLOCK is always OK
+     - CFG_ST_FLOCK to CFG_ST_PLOCK is also OK
+       - the state will return to CFG_ST_FLOCK if the
+         when the last partial lock is released and there
+         is a global lock
+       - the state will return to CFG_ST_READY if the
+         when the last partial lock is released and there
+         is no global lock
+    - CFG_ST_PLOCK to CFG_ST_FLOCK is not allowed for
+      the global lock command.  This must fail if any
+      partial locks are currently held
+    - deleting a session will cause all locks for that session
+      to be deleted.  Any global locks on the candidate
+      will cause a discard-changes
+           
 *********************************************************************
 *                                                                   *
 *                  C H A N G E   H I S T O R Y                      *
@@ -57,6 +79,10 @@ date         init     comment
 
 #ifndef _H_ncxmod
 #include  "ncxmod.h"
+#endif
+
+#ifndef _H_plock
+#include  "plock.h"
 #endif
 
 #ifndef _H_rpc
@@ -194,6 +220,7 @@ static void
 {
 
     rpc_err_rec_t  *err;
+    plock_cb_t     *plock;
 
 #ifdef DEBUG
     if (!cfg) {
@@ -225,6 +252,11 @@ static void
     while (!dlq_empty(&cfg->load_errQ)) {
         err = (rpc_err_rec_t *)dlq_deque(&cfg->load_errQ);
         rpc_err_free_record(err);
+    }
+
+    while (!dlq_empty(&cfg->plockQ)) {
+        plock = (plock_cb_t *)dlq_deque(&cfg->plockQ);
+        plock_free_cb(plock);
     }
 
     m__free(cfg);
@@ -269,16 +301,18 @@ static cfg_template_t *
 
     memset(cfg, 0x0, sizeof(cfg_template_t));
 
+    dlq_createSQue(&cfg->load_errQ);
+    dlq_createSQue(&cfg->plockQ);
+
     cfg->name = xml_strdup(name);
     if (!cfg->name) {
-        m__free(cfg);
+        free_template(cfg);
         return NULL;
     }
 
     cfg->lock_time = m__getMem(TSTAMP_MIN_SIZE);
     if (!cfg->lock_time) {
-        m__free(cfg->name);
-        m__free(cfg);
+        free_template(cfg);
         return NULL;
     } else {
         memset(cfg->lock_time, 0x0, TSTAMP_MIN_SIZE);
@@ -286,7 +320,6 @@ static cfg_template_t *
 
     cfg->cfg_id = cfg_id;
     cfg->cfg_state = CFG_ST_INIT;
-    dlq_createSQue(&cfg->load_errQ);
 
     if (cfg_id != NCX_CFGID_CANDIDATE) {
         cfg->root = val_new_value();
@@ -842,6 +875,7 @@ boolean
 * FUNCTION cfg_ok_to_lock
 *
 * Check if the specified config can be locked right now
+* for global lock only
 *
 * INPUTS:
 *    cfg = Config template to check 
@@ -874,9 +908,8 @@ status_t
         }
         break;
     case CFG_ST_PLOCK:
-        /* fall through -- TBD -- treat as full lock */
     case CFG_ST_FLOCK:
-        /* full lock already held by a session 
+        /* full or partial lock already held by a session 
          * get the session ID of the lock holder 
          */
         res = ERR_NCX_LOCK_DENIED;
@@ -901,7 +934,7 @@ status_t
 * FUNCTION cfg_ok_to_unlock
 *
 * Check if the specified config can be unlocked right now
-* by the specified session ID
+* by the specified session ID; for global lock only
 *
 * INPUTS:
 *    cfg = Config template to check 
@@ -923,27 +956,25 @@ status_t
 
     switch (cfg->cfg_state) {
     case CFG_ST_PLOCK:
-        /* Partial locks still TBD */
-        /* fall through */
+        res = ERR_NCX_NO_ACCESS_STATE;
+        break;
     case CFG_ST_FLOCK:
-        /* lock is granted
-         * setup the user1 scratchpad with the cfg to lock 
-         */
+        /* check if global lock is granted to the correct user */
         if (cfg->locked_by == sesid) {
             res = NO_ERR;
         } else {
             res = ERR_NCX_NO_ACCESS_LOCK;
         }
         break;
-    default:
-        SET_ERROR(ERR_INTERNAL_VAL);
-        /* fall through */
     case CFG_ST_NONE:
     case CFG_ST_INIT:
     case CFG_ST_READY:
     case CFG_ST_CLEANUP:
         /* config is not in a locked state */
         res = ERR_NCX_NO_ACCESS_STATE;
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     return res;
@@ -1047,10 +1078,11 @@ status_t
     /* check the current config state */
     switch (cfg->cfg_state) {
     case CFG_ST_PLOCK:
-        /* Partial locks still TBD */
-        /* fall through */
     case CFG_ST_FLOCK:
-        if (cfg->locked_by == sesid) {
+        if (cfg->locked_by == 0) {
+            /* partial lock only and cannot tell yet */
+            res = NO_ERR;
+        } else if (cfg->locked_by == sesid) {
             res = NO_ERR;
         } else {
             res = ERR_NCX_NO_ACCESS_LOCK;
@@ -1098,7 +1130,14 @@ boolean
     }
 #endif
 
-    return (cfg->cfg_state == CFG_ST_FLOCK) ? TRUE : FALSE;
+    switch (cfg->cfg_state) {
+    case CFG_ST_FLOCK:
+        return TRUE;
+    case CFG_ST_PLOCK:
+        return (cfg->locked_by) ? TRUE : FALSE;
+    default:
+        return FALSE;
+    }
 
 } /* cfg_is_global_locked */
 
@@ -1139,6 +1178,11 @@ status_t
         *sid = cfg->locked_by;
         *locktime = cfg->lock_time;
         return NO_ERR;
+    } else if (cfg->cfg_state == CFG_ST_PLOCK && 
+               cfg->locked_by) {
+        *sid = cfg->locked_by;
+        *locktime = cfg->lock_time;
+        return NO_ERR;
     } else {
         return ERR_NCX_SKIPPED;
     }
@@ -1153,6 +1197,7 @@ status_t
 * Lock the specified config.
 * This will not really have an effect unless the
 * CFG_FL_TARGET flag in the specified config is also set
+* For global lock only
 *
 * INPUTS:
 *    cfg = Config template to lock
@@ -1214,7 +1259,11 @@ status_t
     res = cfg_ok_to_unlock(cfg, locked_by);
 
     if (res == NO_ERR) {
-        cfg->cfg_state = CFG_ST_READY;
+        if (dlq_empty(&cfg->plockQ)) {
+            cfg->cfg_state = CFG_ST_READY;
+        } else {
+            cfg->cfg_state = CFG_ST_PLOCK;
+        }
         cfg->locked_by = 0;
         cfg->lock_src = CFG_SRC_NONE;
 
@@ -1251,14 +1300,28 @@ void
         return;
     }
 
+    if (sesid == 0) {
+        return;
+    }
+
+    /* check for partial locks */
+    cfg_release_partial_locks(sesid);
+
+    /* check for global locks */
     for (i=0; i<CFG_NUM_STATIC; i++) {
         cfg = cfg_arr[i];
-        if (cfg && cfg->locked_by == sesid) {
-            cfg->cfg_state = CFG_ST_READY;
+        if (cfg != NULL && cfg->locked_by == sesid) {
+            if (dlq_empty(&cfg->plockQ)) {
+                cfg->cfg_state = CFG_ST_READY;
+            } else {
+                cfg->cfg_state = CFG_ST_PLOCK;
+            }                    
             cfg->locked_by = 0;
             cfg->lock_src = CFG_SRC_NONE;
-            log_info("\ncfg forced unlock on %s config, held by session %d",
-                     cfg->name, sesid);
+            log_info("\ncfg forced unlock on %s config, "
+                     "held by session %d",
+                     cfg->name, 
+                     sesid);
 
             /* sec 8.3.5.2 requires a discard-changes
              * when a lock is released on the candidate
@@ -1273,7 +1336,57 @@ void
         }
     }
 
+
 } /* cfg_release_locks */
+
+
+/********************************************************************
+* FUNCTION cfg_release_partial_locks
+*
+* Release any configuration locks held by the specified session
+*
+* INPUTS:
+*    sesid == session ID to check for
+*
+*********************************************************************/
+void
+    cfg_release_partial_locks (ses_id_t sesid)
+{
+    cfg_template_t *cfg;
+    plock_cb_t     *plcb, *nextplcb;
+    ses_id_t        plock_sid;
+
+    if (!cfg_init_done) {
+        return;
+    }
+
+    cfg = cfg_arr[NCX_CFGID_RUNNING];
+    if (cfg == NULL) {
+        return;
+    }
+
+    for (plcb = (plock_cb_t *)dlq_firstEntry(&cfg->plockQ);
+         plcb != NULL;
+         plcb = nextplcb) {
+
+        nextplcb = (plock_cb_t *)dlq_nextEntry(plcb);
+        plock_sid = plock_get_sid(plcb);
+
+        if (plock_sid == sesid) {
+            log_info("\ncfg forced partial unlock (id:%u) "
+                     "on running config, "
+                     "held by session %d",
+                     plock_sid,
+                     sesid);
+            dlq_remove(plcb);
+            if (cfg->root != NULL) {
+                val_clear_partial_lock(cfg->root, plcb);
+            }
+            plock_free_cb(plcb);
+        }
+    }
+
+} /* cfg_release_partial_locks */
 
 
 /********************************************************************
@@ -1370,5 +1483,181 @@ status_t
 
 } /* cfg_apply_load_root */
 
+
+/********************************************************************
+* FUNCTION cfg_add_partial_lock
+*
+* Add a partial lock the specified config.
+* This will not really have an effect unless the
+* CFG_FL_TARGET flag in the specified config is also set
+* For global lock only
+*
+* INPUTS:
+*    cfg = Config template to lock
+*    plcb == partial lock control block, already filled
+*            out, to add to this configuration
+*
+* RETURNS:
+*    status; if NO_ERR then the memory in plcb is handed off
+*    and will be released when cfg_remove_partial_lock
+*    is called for 'plcb'
+*********************************************************************/
+status_t
+    cfg_add_partial_lock (cfg_template_t *cfg,
+                          plock_cb_t *plcb)
+{
+    status_t  res;
+
+#ifdef DEBUG
+    if (cfg == NULL || plcb == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = cfg_ok_to_partial_lock(cfg);
+
+    if (res == NO_ERR) {
+        cfg->cfg_state = CFG_ST_PLOCK;
+        dlq_enque(plcb, &cfg->plockQ);
+    }
+
+    return res;
+
+}  /* cfg_add_partial_lock */
+
+
+/********************************************************************
+* FUNCTION cfg_find_partial_lock
+*
+* Find a partial lock in the specified config.
+*
+* INPUTS:
+*    cfg = Config template to use
+*    lockid == lock-id for the plcb to find
+*
+*********************************************************************/
+plock_cb_t *
+    cfg_find_partial_lock (cfg_template_t *cfg,
+                           plock_id_t lockid)
+{
+    plock_cb_t   *plock;
+
+#ifdef DEBUG
+    if (cfg == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    for (plock = (plock_cb_t *)dlq_firstEntry(&cfg->plockQ);
+         plock != NULL;
+         plock = (plock_cb_t *)dlq_nextEntry(plock)) {
+
+        if (plock_get_id(plock) == lockid) {
+            return plock;
+        }
+    }
+    return NULL;
+
+}  /* cfg_find_partial_lock */
+
+
+/********************************************************************
+* FUNCTION cfg_delete_partial_lock
+*
+* Remove a partial lock from the specified config.
+*
+* INPUTS:
+*    cfg = Config template to use
+*    lockid == lock-id for the plcb  to remove
+*
+*********************************************************************/
+void
+    cfg_delete_partial_lock (cfg_template_t *cfg,
+                             plock_id_t lockid)
+{
+    plock_cb_t   *plock, *nextplock;
+
+#ifdef DEBUG
+    if (cfg == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    for (plock = (plock_cb_t *)dlq_firstEntry(&cfg->plockQ);
+         plock != NULL;
+         plock = nextplock) {
+
+        nextplock = (plock_cb_t *)dlq_nextEntry(plock);
+
+        if (plock_get_id(plock) == lockid) {
+            dlq_remove(plock);
+            if (cfg->root != NULL) {
+                val_clear_partial_lock(cfg->root, plock);
+            }
+            plock_free_cb(plock);
+            if (dlq_empty(&cfg->plockQ)) {
+                if (cfg->locked_by) {
+                    cfg->cfg_state = CFG_ST_FLOCK;
+                } else {
+                    cfg->cfg_state = CFG_ST_READY;
+                }
+            } else {
+                cfg->cfg_state = CFG_ST_PLOCK;
+            }
+            return;
+        }
+    }
+
+}  /* cfg_delete_partial_lock */
+
+
+/********************************************************************
+* FUNCTION cfg_ok_to_partial_lock
+*
+* Check if the specified config can be locked right now
+* for partial lock only
+*
+* INPUTS:
+*    cfg = Config template to check 
+*
+* RETURNS:
+*    status
+*********************************************************************/
+status_t
+    cfg_ok_to_partial_lock (const cfg_template_t *cfg)
+{
+    status_t  res;
+
+#ifdef DEBUG
+    if (!cfg) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (cfg->cfg_id != NCX_CFGID_RUNNING) {
+        return ERR_NCX_LOCK_DENIED;
+    }
+
+    switch (cfg->cfg_state) {
+    case CFG_ST_READY:
+    case CFG_ST_PLOCK:
+    case CFG_ST_FLOCK:
+        res = NO_ERR;
+        break;
+    case CFG_ST_NONE:
+    case CFG_ST_INIT:
+    case CFG_ST_CLEANUP:
+        /* config is in a state where locks cannot be granted */
+        res = ERR_NCX_NO_ACCESS_STATE;
+        break;
+    default:
+        res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    return res;
+
+} /* cfg_ok_to_partial_lock */
 
 /* END file cfg.c */

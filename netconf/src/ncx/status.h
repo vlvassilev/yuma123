@@ -312,7 +312,11 @@ typedef enum status_t_
     ERR_NCX_CANDIDATE_DIRTY,            /* 367 */
     ERR_NCX_TIMEOUT,                    /* 368 */
     ERR_NCX_GET_SCHEMA_DUPLICATES,      /* 369 */
-    ERR_LAST_USR_ERR,                   /* 370 -- not really used */
+    ERR_NCX_XPATH_NOT_NODESET,          /* 370 */
+    ERR_NCX_XPATH_NODESET_EMPTY,        /* 371 */
+    ERR_NCX_IN_USE_LOCKED,              /* 372 */
+    ERR_NCX_IN_USE_COMMIT,              /* 373 */
+    ERR_LAST_USR_ERR,                   /* 374 -- not really used */
 
     /* user warnings start at 400 */
     ERR_MAKFILE_DUP_SRC=ERR_WARN_BASE,  /* 400 */

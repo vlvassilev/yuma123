@@ -642,10 +642,47 @@ extern status_t
 *    cfg = Config template to use
 *    lockid == lock-id for the plcb to find
 *
+* RETURNS:
+*   pointer to the partial lock control block found
+*   NULL if not found
 *********************************************************************/
 extern plock_cb_t *
     cfg_find_partial_lock (cfg_template_t *cfg,
                            plock_id_t lockid);
+
+
+/********************************************************************
+* FUNCTION cfg_first_partial_lock
+*
+* Get the first partial lock in the specified config.
+*
+* INPUTS:
+*    cfg = Config template to use
+*
+* RETURNS:
+*   pointer to the first partial lock control block
+*   NULL if none exist at this time
+*********************************************************************/
+extern plock_cb_t *
+    cfg_first_partial_lock (cfg_template_t *cfg);
+
+
+/********************************************************************
+* FUNCTION cfg_next_partial_lock
+*
+* Get the next partial lock in the specified config.
+*
+* INPUTS:
+*    cfg = Config template to use
+*    curlockcb == current lock control block; get next CB
+*
+* RETURNS:
+*   pointer to the next partial lock control block
+*   NULL if none exist at this time
+*********************************************************************/
+extern plock_cb_t *
+    cfg_next_partial_lock (cfg_template_t *cfg,
+                           plock_cb_t *curplockcb);
 
 
 /********************************************************************

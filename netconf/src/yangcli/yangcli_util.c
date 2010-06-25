@@ -826,7 +826,9 @@ val_value_t *
         return NULL;
     }
 
-    /* initial parse into a token chain */
+    /* initial parse into a token chain
+     * this is only for parsing leafref paths! 
+     */
     res = xpath_yang_parse_path(NULL, 
                                 NULL, 
                                 (schemainst) ?

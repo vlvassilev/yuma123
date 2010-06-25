@@ -70,8 +70,9 @@ typedef struct plock_cb_t_ {
     dlq_hdr_t       qhdr;
     plock_id_t      plock_id;
     uint32          plock_sesid;
-    struct xpath_pcb_t_    *plock_pcb;
-    struct xpath_result_t_ *plock_result;
+    dlq_hdr_t       plock_xpathpcbQ;     /* Q of xpath_pcb_t */
+    dlq_hdr_t       plock_resultQ;    /* Q of xpath_result_t */
+    struct xpath_result_t_ *plock_final_result;
     xmlChar         plock_time[TSTAMP_MIN_SIZE];
 } plock_cb_t;
 
@@ -89,6 +90,7 @@ typedef struct plock_cb_t_ {
 * Create a new partial lock control block
 *
 * INPUTS:
+*   sid == session ID reqauesting this partial lock
 *   res == address of return status
 *
 * OUTPUTS:
@@ -99,7 +101,8 @@ typedef struct plock_cb_t_ {
 *   this struct must be freed by the caller
 *********************************************************************/
 extern plock_cb_t *
-    plock_new_cb (status_t *res);
+    plock_new_cb (uint32 sid,
+                  status_t *res);
 
 
 /********************************************************************
@@ -140,6 +143,8 @@ extern void
 * INPUTS:
 *   plcb == partial lock control block to use
 *
+* RETURNS:
+*   the lock ID for this lock
 *********************************************************************/
 extern plock_id_t
     plock_get_id (plock_cb_t *plcb);
@@ -153,9 +158,29 @@ extern plock_id_t
 * INPUTS:
 *   plcb == partial lock control block to use
 *
+* RETURNS:
+*   session ID that owns this lock
 *********************************************************************/
 extern uint32
     plock_get_sid (plock_cb_t *plcb);
+
+
+/********************************************************************
+* FUNCTION plock_make_final_result
+*
+* Create a final XPath result for all the partial results
+*
+* This does not add the partial lock to the target config!
+* This is an intermediate step!
+*
+* INPUTS:
+*   plcb == partial lock control block to use
+*
+* RETURNS:
+*    status; NCX_ERR_INVALID_VALUE if the final nodeset is empty
+*********************************************************************/
+extern status_t
+    plock_make_final_result (plock_cb_t *plcb);
 
 
 #endif            /* _H_plock */

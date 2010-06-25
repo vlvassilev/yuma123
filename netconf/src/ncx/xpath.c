@@ -2702,6 +2702,89 @@ dlq_hdr_t *
 
 
 /********************************************************************
+* FUNCTION xpath_get_first_resnode
+* 
+* Get the first result in the renodeQ from a result struct
+*
+* INPUTS:
+*    result == result struct to check
+*
+* RETURNS:
+*   pointer to resnode or NULL if some error
+*********************************************************************/
+xpath_resnode_t *
+    xpath_get_first_resnode (xpath_result_t *result)
+{
+#ifdef DEBUG
+    if (!result) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    if (result->restype != XP_RT_NODESET) {
+        return NULL;
+    }
+
+    return (xpath_resnode_t *)
+        dlq_firstEntry(&result->r.nodeQ);
+
+}  /* xpath_get_first_resnode */
+
+
+/********************************************************************
+* FUNCTION xpath_get_next_resnode
+* 
+* Get the first result in the renodeQ from a result struct
+*
+* INPUTS:
+*    result == result struct to check
+*
+* RETURNS:
+*   pointer to resnode or NULL if some error
+*********************************************************************/
+xpath_resnode_t *
+    xpath_get_next_resnode (xpath_resnode_t *resnode)
+{
+#ifdef DEBUG
+    if (!resnode) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    return (xpath_resnode_t *)dlq_nextEntry(resnode);
+
+}  /* xpath_get_next_resnode */
+
+
+/********************************************************************
+* FUNCTION xpath_get_resnode_valptr
+* 
+* Get the first result in the renodeQ from a result struct
+*
+* INPUTS:
+*    result == result struct to check
+*
+* RETURNS:
+*   pointer to resnode or NULL if some error
+*********************************************************************/
+val_value_t *
+    xpath_get_resnode_valptr (xpath_resnode_t *resnode)
+{
+#ifdef DEBUG
+    if (!resnode) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    return resnode->node.valptr;
+
+}  /* xpath_get_resnode_valptr */
+
+
+/********************************************************************
 * FUNCTION xpath_get_varbindQ
 * 
 * Get the varbindQ from a parser control block struct
@@ -2725,6 +2808,162 @@ dlq_hdr_t *
     return &pcb->varbindQ;
 
 }  /* xpath_get_varbindQ */
+
+
+/********************************************************************
+* FUNCTION xpath_move_nodeset
+* 
+* Move the nodes from a nodeset reult into the
+* target nodeset result.
+* This is needed to support partial lock
+* because multiple select expressions are allowed
+* for the same partial lock
+*
+* INPUTS:
+*    srcresult == XPath result nodeset source
+*    destresult == XPath result nodeset target
+*
+* OUTPUTS:
+*    srcresult nodes will be moved to the target result
+*********************************************************************/
+void
+    xpath_move_nodeset (xpath_result_t *srcresult,
+                        xpath_result_t *destresult)
+{
+#ifdef DEBUG
+    if (srcresult == NULL || destresult == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (srcresult->restype != XP_RT_NODESET) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+
+    if (destresult->restype != XP_RT_NODESET) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+
+    dlq_block_enque(&srcresult->r.nodeQ,
+                    &destresult->r.nodeQ);
+
+}  /* xpath_move_nodeset */
+
+
+/********************************************************************
+* FUNCTION xpath_nodeset_empty
+* 
+* Check if the result is an empty nodeset
+*
+* INPUTS:
+*    result == XPath result to check
+*
+* RETURNS:
+*    TRUE if this is an empty nodeset
+*    FALSE if not empty or not a nodeset
+*********************************************************************/
+boolean
+    xpath_nodeset_empty (const xpath_result_t *result)
+{
+#ifdef DEBUG
+    if (result == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    if (result->restype != XP_RT_NODESET) {
+        return FALSE;
+    }
+
+    return dlq_empty(&result->r.nodeQ) ? TRUE : FALSE;
+
+}  /* xpath_nodeset_empty */
+
+
+/********************************************************************
+* FUNCTION xpath_nodeset_swap_valptr
+* 
+* Check if the result has the oldval ptr and if so,
+* replace it with the newval ptr
+*
+* INPUTS:
+*    result == result struct to check
+*    oldval == value ptr to find
+*    newval == new value replace it with if oldval is found
+*
+*********************************************************************/
+void
+    xpath_nodeset_swap_valptr (xpath_result_t *result,
+                               val_value_t *oldval,
+                               val_value_t *newval)
+{
+    xpath_resnode_t *resnode;
+
+#ifdef DEBUG
+    if (result == NULL || oldval == NULL || newval == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+    if (result->restype != XP_RT_NODESET) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+    }
+#endif
+
+    for (resnode = xpath_get_first_resnode(result);
+         resnode != NULL;
+         resnode = xpath_get_next_resnode(resnode)) {
+        if (resnode->node.valptr == oldval) {
+            resnode->node.valptr = newval;
+        }            
+    }
+
+}  /* xpath_nodeset_swap_valptr */
+
+
+/********************************************************************
+* FUNCTION xpath_nodeset_delete_valptr
+* 
+* Check if the result has the oldval ptr and if so,
+* delete it
+*
+* INPUTS:
+*    result == result struct to check
+*    oldval == value ptr to find
+*
+*********************************************************************/
+void
+    xpath_nodeset_delete_valptr (xpath_result_t *result,
+                                 val_value_t *oldval)
+{
+    xpath_resnode_t *resnode, *nextnode;
+
+#ifdef DEBUG
+    if (result == NULL || oldval == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+    if (result->restype != XP_RT_NODESET) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+    }
+#endif
+
+    for (resnode = xpath_get_first_resnode(result);
+         resnode != NULL;
+         resnode = nextnode) {
+
+        nextnode = xpath_get_next_resnode(resnode);
+
+        if (resnode->node.valptr == oldval) {
+            dlq_remove(resnode);
+            xpath_free_resnode(resnode);
+        }            
+    }
+
+}  /* xpath_nodeset_delete_valptr */
 
 
 /* END xpath.c */

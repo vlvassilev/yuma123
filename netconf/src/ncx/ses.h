@@ -67,6 +67,8 @@ extern "C" {
 
 #define SES_MY_SID(S)   ((S)->sid)
 
+#define SES_MY_USERNAME(S)   ((S)->username)
+
 #define SES_REQ_KILL(S) agt_ses_request_close((S)->sid)
 
 #define SES_KILLREQ_SET(S) ((S)->state >= SES_ST_SHUTDOWN_REQ)

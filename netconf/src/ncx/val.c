@@ -1012,7 +1012,7 @@ static boolean
     boolean         fnresult;
 
     *fncalled = FALSE;
-    if (configonly && !name && !obj_is_config(val->obj)) {
+    if (configonly && !obj_is_config(val->obj)) {
         return TRUE;
     }
 
@@ -3458,10 +3458,8 @@ void
 
     bump_amount = max(0, indent_amount);
 
-    if (configonly) {
-        if (!val_is_config_data(val)) {
-            return;
-        }
+    if (configonly && !obj_is_config(val->obj)) {
+        return;
     }
 
     if (display_mode == NCX_DISPLAY_MODE_XML) {
@@ -4692,6 +4690,7 @@ val_value_t *
     const val_value_t *ch;
     val_value_t       *copy, *copych;
     boolean            testres;
+    uint32             i;
 
 #ifdef DEBUG
     if (!val || !res) {
@@ -4736,6 +4735,15 @@ val_value_t *
     copy->btyp = val->btyp;
     copy->flags = val->flags;
     copy->dataclass = val->dataclass;
+
+    /* copy any active partial locks;
+     * this should be empty for candidate or PDU source
+     * vals, but in case a copy of running is made, this
+     * array of partial locks needs to be transferred
+     */
+    for (i=0; i<VAL_MAX_PLOCKS; i++) {
+        copy->plock[i] = val->plock[i];
+    }
 
     /* copy meta-data */
     for (ch = (const val_value_t *)dlq_firstEntry(&val->metaQ);
@@ -6357,7 +6365,7 @@ boolean
      * value node checked and expanded if a virtual node
      */
     while (val) {
-        if (configonly && !name && !obj_is_config(val->obj)) {
+        if (configonly && !obj_is_config(val->obj)) {
             /* skip this entry */
             if (forward) {
                 val = (val_value_t *)dlq_nextEntry(val);
@@ -6520,7 +6528,7 @@ boolean
     }
 
     while (val) {
-        if (configonly && !name && !obj_is_config(val->obj)) {
+        if (configonly && !obj_is_config(val->obj)) {
             if (forward) {
                 val = (val_value_t *)dlq_nextEntry(val);
             } else {

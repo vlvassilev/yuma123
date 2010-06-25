@@ -116,6 +116,7 @@ static uint32 last_id = 0;
 * Create a new partial lock control block
 *
 * INPUTS:
+*   sid == session ID reqauesting this partial lock
 *   res == address of return status
 *
 * OUTPUTS:
@@ -126,10 +127,11 @@ static uint32 last_id = 0;
 *   this struct must be freed by the caller
 *********************************************************************/
 plock_cb_t *
-    plock_new_cb (status_t *res)
+    plock_new_cb (uint32 sid,
+                  status_t *res)
 {
     plock_cb_t     *plcb;
-
+    
 #ifdef DEBUG
     if (res == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -152,9 +154,17 @@ plock_cb_t *
     }
     memset(plcb, 0x0, sizeof(plock_cb_t));
 
-    plcb->plock_id = ++last_id;
-    tstamp_datetime(plcb->plock_time);
+    plcb->plock_final_result = xpath_new_result(XP_RT_NODESET);
+    if (plcb->plock_final_result == NULL) {
+        m__free(plcb);
+        return NULL;
+    }
 
+    plcb->plock_id = ++last_id;
+    dlq_createSQue(&plcb->plock_xpathpcbQ);
+    dlq_createSQue(&plcb->plock_resultQ);
+    tstamp_datetime(plcb->plock_time);
+    plcb->plock_sesid = sid;
     return plcb;
 
 }  /* plock_new_cb */
@@ -172,6 +182,9 @@ plock_cb_t *
 void
     plock_free_cb (plock_cb_t *plcb)
 {
+    xpath_pcb_t  *xpathpcb;
+    xpath_result_t *result;
+
 #ifdef DEBUG
     if (plcb == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -179,12 +192,20 @@ void
     }
 #endif
 
-    if (plcb->plock_pcb != NULL) {
-        xpath_free_pcb(plcb->plock_pcb);
+    while (!dlq_empty(&plcb->plock_xpathpcbQ)) {
+        xpathpcb = (xpath_pcb_t *)
+            dlq_deque(&plcb->plock_xpathpcbQ);
+        xpath_free_pcb(xpathpcb);
     }
 
-    if (plcb->plock_result != NULL) {
-        xpath_free_result(plcb->plock_result);
+    while (!dlq_empty(&plcb->plock_resultQ)) {
+        result = (xpath_result_t *)
+            dlq_deque(&plcb->plock_resultQ);
+        xpath_free_result(result);
+    }
+
+    if (plcb->plock_final_result != NULL) {
+        xpath_free_result(plcb->plock_final_result);
     }
 
     m__free(plcb);
@@ -218,6 +239,8 @@ void
 * INPUTS:
 *   plcb == partial lock control block to use
 *
+* RETURNS:
+*   the lock ID for this lock
 *********************************************************************/
 plock_id_t
     plock_get_id (plock_cb_t *plcb)
@@ -240,8 +263,10 @@ plock_id_t
 * Get the session ID holding this partial lock
 *
 * INPUTS:
-*   plcb == partial lock control block to reset
+*   plcb == partial lock control block to use
 *
+* RETURNS:
+*   session ID that owns this lock
 *********************************************************************/
 uint32
     plock_get_sid (plock_cb_t *plcb)
@@ -256,6 +281,56 @@ uint32
     return plcb->plock_sesid;
 
 }  /* plock_get_sid */
+
+
+/********************************************************************
+* FUNCTION plock_make_final_result
+*
+* Create a final XPath result for all the partial results
+*
+* This does not add the partial lock to the target config!
+* This is an intermediate step!
+*
+* INPUTS:
+*   plcb == partial lock control block to use
+*
+* RETURNS:
+*    status; NCX_ERR_INVALID_VALUE if the final nodeset is empty
+*********************************************************************/
+status_t
+    plock_make_final_result (plock_cb_t *plcb)
+{
+    xpath_result_t *result;
+    xpath_pcb_t    *xpathpcb;
+
+#ifdef DEBUG
+    if (plcb == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    xpathpcb = (xpath_pcb_t *)
+        dlq_firstEntry(&plcb->plock_xpathpcbQ);
+    if (xpathpcb == NULL) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    for (result = (xpath_result_t *)
+             dlq_firstEntry(&plcb->plock_resultQ);
+         result != NULL;
+         result = (xpath_result_t *)dlq_nextEntry(result)) {
+        xpath_move_nodeset(result, plcb->plock_final_result);
+    }
+
+    xpath1_prune_nodeset(xpathpcb, plcb->plock_final_result);
+
+    if (xpath_nodeset_empty(plcb->plock_final_result)) {
+        return ERR_NCX_XPATH_NODESET_EMPTY;
+    } else {
+        return NO_ERR;
+    }
+
+}  /* plock_make_final_result */
 
 
 /* END file plock.c */

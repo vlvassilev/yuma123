@@ -99,6 +99,10 @@ date         init     comment
 #include "op.h"
 #endif
 
+#ifndef _H_plock
+#include "plock.h"
+#endif
+
 #ifndef _H_rpc
 #include "rpc.h"
 #endif
@@ -820,6 +824,7 @@ static status_t
 * source and target and write operation
 *
 * INPUTS:
+*   cbtyp == callback type in case it is AGT_CB_COMMIT_CHECK
 *   editop == edit operation in effect on the current node
 *   scb == session control block
 *   msg == incoming rpc_msg_t in progress
@@ -839,7 +844,8 @@ static status_t
 *   status
 *********************************************************************/
 static status_t
-    apply_write_val (op_editop_t  editop,
+    apply_write_val (agt_cbtyp_t cbtyp,
+                     op_editop_t  editop,
                      ses_cb_t  *scb,
                      rpc_msg_t  *msg,
                      cfg_template_t *target,
@@ -854,6 +860,7 @@ static status_t
     op_editop_t       cur_editop;
     boolean           applyhere, freenew, add_defs_done;
     int               retval;
+    uint32            lockid;
 
     res = NO_ERR;
     freenew = FALSE;
@@ -874,7 +881,12 @@ static status_t
 
 #ifdef AGT_VAL_DEBUG
     if (LOGDEBUG4) {
-        log_debug4("\napply_write_val: %s start", name);
+        if (cbtyp == AGT_CB_COMMIT_CHECK) {
+            log_debug4("\napply_write_val: commit-check %s start", 
+                       name);
+        } else {
+            log_debug4("\napply_write_val: %s start", name);
+        }
     }
 #endif
 
@@ -899,19 +911,22 @@ static status_t
                  * is supposed to be deleted in the current node,
                  * and a default will get added right back again
                  */
-                res = val_add_defaults(newval, FALSE);
-                if (res != NO_ERR) {
-                    *done = TRUE;
-                    return res;
+                if (cbtyp != AGT_CB_COMMIT_CHECK) {
+                    res = val_add_defaults(newval, FALSE);
+                    if (res != NO_ERR) {
+                        *done = TRUE;
+                        return res;
+                    }
+                    add_defs_done = TRUE;
+                    val_set_canonical_order(newval);
                 }
-                add_defs_done = TRUE;
-                val_set_canonical_order(newval);
+
                 retval = val_compare_ex(newval, curval, TRUE);
                 if (retval == 0) {
                     /* apply here but nothing to do,
                      * so skip this entire subtree
                      */
-                    if (LOGDEBUG) {
+                    if (LOGDEBUG && cbtyp != AGT_CB_COMMIT_CHECK) {
                         log_debug("\napply_write_val: "
                                   "Skipping replace node "
                                   "'%s', no changes",
@@ -921,7 +936,7 @@ static status_t
                 } else {
                     retval = val_compare_for_replace(newval, curval);
                     if (retval == 0) {
-                        if (LOGDEBUG2) {
+                        if (LOGDEBUG2 && cbtyp != AGT_CB_COMMIT_CHECK) {
                             log_debug2("\napply_write_val: "
                                        "Skip replace level '%s'",
                                        (name) ? name : (const xmlChar *)"--");
@@ -939,10 +954,12 @@ static status_t
         if (newval && obj_is_root(newval->obj)) {
             ;
         } else if (!add_defs_done && editop != OP_EDITOP_DELETE) {
-            res = val_add_defaults(newval, FALSE);
-            if (res != NO_ERR) {
-                log_error("\nError: add defaults failed");
-                applyhere = FALSE;
+            if (cbtyp != AGT_CB_COMMIT_CHECK) {
+                res = val_add_defaults(newval, FALSE);
+                if (res != NO_ERR) {
+                    log_error("\nError: add defaults failed");
+                    applyhere = FALSE;
+                }
             }
         }
     }
@@ -950,13 +967,38 @@ static status_t
     /* apply the requested edit operation */
     if (applyhere) {
 
+        /* check the user callbacks before altering
+         * the database
+         */
+        if (cbtyp == AGT_CB_COMMIT_CHECK) {
+            res = NO_ERR;
+            lockid = 0;
+            if (curval != NULL) {
+                res = val_write_ok(curval,
+                                   editop,
+                                   SES_MY_SID(scb),
+                                   TRUE,
+                                   &lockid);
+                if (res != NO_ERR) {
+                    agt_record_error(scb, 
+                                     &msg->mhdr, 
+                                     NCX_LAYER_OPERATION, 
+                                     res, 
+                                     NULL, 
+                                     NCX_NT_UINT32_PTR, 
+                                     &lockid, 
+                                     NCX_NT_VAL, 
+                                     curval);
+                }
+            }
+            return res;
+        }
+
         if (LOGDEBUG2) {
             log_debug2("\napply_write_val: %s applyhere", name);
         }
 
-        /* check the user callbacks before altering
-         * the database
-         */
+
         res = handle_user_callback(AGT_CB_APPLY, 
                                    editop,
                                    scb, 
@@ -998,12 +1040,12 @@ static status_t
                 val_set_dirty_flag(parent);
             }
         }
+    
 
         /* make sure the node is not a virtual value */
         if (curval && val_is_virtual(curval)) {
             return NO_ERR;
         }
-
 
         switch (cur_editop) {
         case OP_EDITOP_MERGE:
@@ -1042,6 +1084,12 @@ static status_t
                 } else {
                     val_set_canonical_order(newval);
                     val_swap_child(newval, curval);
+
+                    if (target->cfg_id == NCX_CFGID_RUNNING) {
+                        val_check_swap_resnode(curval, newval);
+                    }
+
+                    /* flag the curnode needs to be deleted */
                     rpc_set_undorec_free_curnode(undo);
                 }
             } else {
@@ -1086,6 +1134,11 @@ static status_t
                      * COMMIT or ROLLBACK is needed
                      */
                     val_remove_child(curval);
+
+                    if (target->cfg_id == NCX_CFGID_RUNNING) {
+                        val_check_delete_resnode(curval);
+                    }
+
                     rpc_set_undorec_free_curnode(undo);
                 }
             }
@@ -1430,6 +1483,7 @@ static status_t
     status_t         res;
     ncx_iqual_t      iqual;
     op_editop_t      cureditop;
+    uint32           lockid;
 
     res = NO_ERR;
 
@@ -1460,6 +1514,37 @@ static status_t
             res = agt_check_max_access(newval->editvars->editop, 
                                        obj_get_max_access(newval->obj), 
                                        (curval != NULL));
+        }
+
+        /* make sure the node is not partial locked
+         * by another session; there is a corner case where
+         * all the PDU nodes are OP_EDITOP_NONE, and
+         * so nodes that touch a partial lock will never
+         * actually request an operation; treat this
+         * as an error anyway, since it is too hard
+         * to defer the test until later, and this is
+         * a useless corner-case so clients should not do it
+         */
+        if (res == NO_ERR &&
+            curval != NULL &&
+            target->cfg_id == NCX_CFGID_RUNNING) {
+
+            res = val_write_ok(curval,
+                               newval->editvars->editop, 
+                               SES_MY_SID(scb),
+                               FALSE,
+                               &lockid);
+            if (res != NO_ERR) {
+                agt_record_error(scb, 
+                                 &msg->mhdr, 
+                                 NCX_LAYER_OPERATION, 
+                                 res, 
+                                 NULL, 
+                                 NCX_NT_UINT32_PTR, 
+                                 &lockid, 
+                                 NCX_NT_VAL, 
+                                 curval);
+            }
         }
 
         /* check the user callback only if there is some
@@ -1507,6 +1592,7 @@ static status_t
                                    &done);
         break;
     case AGT_CB_APPLY:
+    case AGT_CB_COMMIT_CHECK:
         if (newval) {
             curparent = newval->editvars->curparent;
             cureditop = newval->editvars->editop;
@@ -1520,7 +1606,8 @@ static status_t
                 }
             }
         }
-        res = apply_write_val(cureditop, 
+        res = apply_write_val(cbtyp,
+                              cureditop, 
                               scb, 
                               msg, 
                               target, 
@@ -1578,6 +1665,7 @@ static status_t
     ncx_iqual_t       iqual;
     op_editop_t       cur_editop;
     boolean           initialdone;
+    uint32            lockid;
 
     retres = NO_ERR;
     initialdone = done;
@@ -1628,6 +1716,44 @@ static status_t
             CHK_EXIT(res, retres);
         }
 
+        /* make sure the node is not partial locked
+         * by another session; there is a corner case where
+         * all the PDU nodes are OP_EDITOP_NONE, and
+         * so nodes that touch a partial lock will never
+         * actually request an operation; treat this
+         * as an error anyway, since it is too hard
+         * to defer the test until later, and this is
+         * a useless corner-case so clients should not do it
+         */
+        if (res == NO_ERR &&
+            curval != NULL &&
+            target->cfg_id == NCX_CFGID_RUNNING) {
+
+            lockid = 0;
+            if (obj_is_root(curval->obj) &&
+                newval->editvars->editop == OP_EDITOP_NONE) {
+                /* do not check OP=none on the config root */
+                ;
+            } else {
+                res = val_write_ok(curval,
+                                   newval->editvars->editop, 
+                                   SES_MY_SID(scb),
+                                   FALSE,
+                                   &lockid);
+            }
+            if (res != NO_ERR) {
+                agt_record_error(scb, 
+                                 &msg->mhdr, 
+                                 NCX_LAYER_OPERATION, 
+                                 res, 
+                                 NULL, 
+                                 NCX_NT_UINT32_PTR, 
+                                 &lockid, 
+                                 NCX_NT_VAL, 
+                                 curval);
+            }
+        }
+
         /* check the user callback only if there is some
          * operation in affect already
          */
@@ -1641,6 +1767,10 @@ static status_t
                                        newval, 
                                        curval);
         }
+
+        if (res != NO_ERR) {
+            retres = res;
+        }
         break;
     case AGT_CB_TEST_APPLY:
         retres = test_apply_write_val(newval->editvars->curparent, 
@@ -1649,6 +1779,7 @@ static status_t
                                       &done);
         break;
     case AGT_CB_APPLY:
+    case AGT_CB_COMMIT_CHECK:
         if (newval) {
             cur_editop = newval->editvars->editop;
             curparent = newval->editvars->curparent;
@@ -1660,7 +1791,8 @@ static status_t
         }
 
         if (retres == NO_ERR) {
-            retres = apply_write_val(cur_editop, 
+            retres = apply_write_val(cbtyp,
+                                     cur_editop, 
                                      scb, 
                                      msg, 
                                      target,
@@ -1924,6 +2056,12 @@ static void
                 if (undo->curnode_clone) {
                     val_swap_child(undo->curnode_clone, 
                                    undo->curnode);
+
+                    if (target->cfg_id == NCX_CFGID_RUNNING) {
+                        val_check_swap_resnode(undo->curnode, 
+                                               undo->curnode_clone);
+                    }
+
                     undo->curnode_clone = NULL;
                 } else if (LOGWARN) {
                     log_warn("\nError: no rollback selected. "
@@ -1981,6 +2119,8 @@ static void
     rpc_undo_rec_t  *undo;
     status_t         res;
 
+    res = NO_ERR;
+
     while (!dlq_empty(&msg->rpc_undoQ)) {
         undo = (rpc_undo_rec_t *)dlq_deque(&msg->rpc_undoQ);
         if (cbtyp==AGT_CB_COMMIT) {
@@ -2032,6 +2172,7 @@ static status_t
     case AGT_CB_VALIDATE:
     case AGT_CB_APPLY:
     case AGT_CB_TEST_APPLY:
+    case AGT_CB_COMMIT_CHECK:
         /* keep checking until all the child nodes have been processed */
         res = invoke_btype_cb(cbtyp, 
                               editop, 
@@ -3638,6 +3779,91 @@ static status_t
 }   /* apply_commit_deletes */
 
 
+/********************************************************************
+* FUNCTION check_commit_deletes
+* 
+* Check the requested commit delete operations
+*
+* INPUTS:
+*   scb == session control block
+*   msg == incoming commit rpc_msg_t in progress
+*   target == target database (NCX_CFGID_RUNNING)
+*   candval == value struct from the candidate config
+*   runval == value struct from the running config
+*
+* OUTPUTS:
+*   rpc_err_rec_t structs may be malloced and added 
+*   to the msg->mhsr.errQ
+*
+* RETURNS:
+*   none
+*********************************************************************/
+static status_t
+    check_commit_deletes (ses_cb_t  *scb,
+                          rpc_msg_t  *msg,
+                          cfg_template_t *target,
+                          val_value_t *candval,
+                          val_value_t *runval)
+{
+    val_value_t      *curval, *nextval, *matchval;
+    status_t          res;
+    uint32            lockid;
+
+    res = NO_ERR;
+
+    /* go through running config
+     * if the matching node is not in the candidate,
+     * then delete that node in the running config as well
+     */
+    for (curval = val_get_first_child(runval);
+         curval != NULL && res == NO_ERR; 
+         curval = nextval) {
+
+        nextval = val_get_next_child(curval);
+
+        /* check only database config nodes */
+        if (obj_is_data_db(curval->obj) &&
+            obj_is_config(curval->obj)) {
+
+            /* check if node deleted in source */
+            matchval = val_first_child_match(candval, curval);
+            if (!matchval) {
+                /* check if this curval is partially locked */
+                lockid = 0;
+                res = val_write_ok(curval,
+                                   OP_EDITOP_DELETE,
+                                   SES_MY_SID(scb),
+                                   TRUE,
+                                   &lockid);
+                if (res != NO_ERR) {
+                    agt_record_error(scb, 
+                                     &msg->mhdr, 
+                                     NCX_LAYER_CONTENT,
+                                     res,
+                                     NULL,
+                                     NCX_NT_UINT32_PTR, 
+                                     &lockid,
+                                     NCX_NT_VAL, 
+                                     curval);
+                }
+            } else {
+                /* else keeping this node in target config
+                 * but check any child nodes for deletion
+                 */
+                res = check_commit_deletes(scb, 
+                                           msg, 
+                                           target,
+                                           matchval, 
+                                           curval);
+            }
+        }  /* else skip non-config database node */
+    }
+
+    return res;
+
+}   /* check_commit_deletes */
+
+
 /******************* E X T E R N   F U N C T I O N S ***************/
 
 
@@ -4345,7 +4571,7 @@ status_t
 *
 * OUTPUTS:
 *   rpc_err_rec_t structs may be malloced and added 
-*   to the msg->mhsr.errQ
+*   to the msg->mhdr.errQ
 *
 * RETURNS:
 *   status
@@ -4500,6 +4726,74 @@ status_t
     return res;
 
 }  /* agt_val_apply_commit */
+
+
+/********************************************************************
+* FUNCTION agt_val_check_commit_locks
+* 
+* Check if the requested commit operation
+* would cause any partial lock violations 
+* in the running config
+* Invoke all the AGT_CB_COMMIT_CHECK callbacks for a 
+* source and target and write operation
+*
+* INPUTS:
+*   scb == session control block
+*   msg == incoming commit rpc_msg_t in progress
+*   source == cfg_template_t for the source (candidate)
+*   target == cfg_template_t for the config database to 
+*             write (running)
+*
+* OUTPUTS:
+*   rpc_err_rec_t structs may be malloced and added 
+*   to the msg->mhdr.errQ
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    agt_val_check_commit_locks (ses_cb_t  *scb,
+                                rpc_msg_t  *msg,
+                                cfg_template_t *source,
+                                cfg_template_t *target)
+{
+    status_t          res;
+
+#ifdef DEBUG
+    if (!scb || !msg || !source || !target) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+
+    /* usually only save if the source config was touched */
+    if (!cfg_get_dirty_flag(source)) {
+        /* no need to check for partial-lock violations */
+        return NO_ERR;
+    }
+
+    /* check if any config nodes have been deleted in the target */
+    res = check_commit_deletes(scb, 
+                               msg, 
+                               target,
+                               source->root,
+                               target->root);
+    if (res != NO_ERR) {
+        /* error already recorded */
+        return res;
+    }
+
+    res = handle_callback(AGT_CB_COMMIT_CHECK,
+                          OP_EDITOP_COMMIT,
+                          scb,
+                          msg,
+                          target,
+                          source->root,
+                          target->root);
+    return res;
+
+}  /* agt_val_check_commit_locks */
 
 
 /* END file agt_val.c */

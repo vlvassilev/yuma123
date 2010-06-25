@@ -2492,6 +2492,43 @@ boolean
 
 
 /********************************************************************
+* FUNCTION agt_acm_val_write_lock_allowed
+*
+* Check if the specified user is allowed to get a write lock on
+* a value node
+* 
+* INPUTS:
+*   msg == XML header from incoming message in progress
+*   user == user name string
+*   val  == val_value_t in progress to check
+*
+* RETURNS:
+*   TRUE if user allowed this level of access to the value node
+*********************************************************************/
+boolean 
+    agt_acm_val_write_lock_allowed (xml_msg_hdr_t *msg,
+                                    const xmlChar *user,
+                                    const val_value_t *val)
+{
+    boolean  retval;
+
+#ifdef DEBUG
+    if (!msg || !msg->acm_cache || !user || !val) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    retval = valnode_access_allowed(msg->acm_cache,
+                                    user,
+                                    val,
+                                    nacm_E_allowedRights_write);
+    return retval;
+
+}   /* agt_acm_val_write_lock_allowed */
+
+
+/********************************************************************
 * FUNCTION agt_acm_val_read_allowed
 *
 * Check if the specified user is allowed to read a value node

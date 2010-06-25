@@ -271,7 +271,18 @@ extern "C" {
     (const xmlChar *)"data-not-unique"
 
 /* ietf-netconf-state:get-schema */
+/* ietf-netconf-partial-lock:partial-lock */
 #define RPC_ERR_APPTAG_NO_MATCHES     (const xmlChar *)"no-matches"
+
+/* ietf-netconf-partial-lock:partial-lock */
+#define RPC_ERR_APPTAG_NOT_NODESET      (const xmlChar *)"not-a-node-set"
+
+/* ietf-netconf-partial-lock:partial-lock */
+#define RPC_ERR_APPTAG_LOCKED           (const xmlChar *)"locked"
+
+/* ietf-netconf-partial-lock:partial-lock */
+#define RPC_ERR_APPTAG_COMMIT           (const xmlChar *)\
+    "outstanding-confirmed-commit"
 
 
 /*** netconfcentral errror-app-tag values ***/
@@ -293,6 +304,8 @@ extern "C" {
 #define RPC_ERR_APPTAG_NO_ACCESS        (const xmlChar *)"no-access"
 #define RPC_ERR_APPTAG_RECOVER_FAILED   (const xmlChar *)"recover-failed"
 #define RPC_ERR_APPTAG_NO_SUPPORT       (const xmlChar *)"no-support"
+
+
 
 
 /********************************************************************

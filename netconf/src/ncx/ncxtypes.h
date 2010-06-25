@@ -220,7 +220,8 @@ typedef enum ncx_node_t_ {
     NCX_NT_STRING,                      /* xmlChar *, error only */
     NCX_NT_CFG,                  /* cfg_template_t *, error only */
     NCX_NT_INDEX,                     /* obj_key_t *, error only */
-    NCX_NT_QNAME                  /* xmlns_qname_t *, error only */
+    NCX_NT_QNAME,                 /* xmlns_qname_t *, error only */
+    NCX_NT_UINT32_PTR                  /* session ID, error only */
 } ncx_node_t;
 
 

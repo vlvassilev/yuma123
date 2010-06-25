@@ -1975,6 +1975,16 @@ static status_t
                     errdone = TRUE;
                 }
             }
+
+            if (res == NO_ERR) {
+                res = agt_val_check_commit_locks(scb,
+                                                 msg,
+                                                 candidate,
+                                                 running);
+                if (res != NO_ERR) {
+                    errdone = TRUE;
+                }
+            }
         }
     }
 

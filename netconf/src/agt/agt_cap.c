@@ -274,7 +274,6 @@ status_t
         }
     }
 
-#ifdef NOT_YET 
     /* set the partial-lock capability */
     if (res == NO_ERR) {
         res = cap_add_std(newmycaps, CAP_STDID_PARTIAL_LOCK);
@@ -283,7 +282,6 @@ status_t
                                  CAP_STDID_PARTIAL_LOCK);
         }
     }
-#endif
 
     /* set the with-defaults capability */
     if (res == NO_ERR) {

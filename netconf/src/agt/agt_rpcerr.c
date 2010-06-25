@@ -655,6 +655,18 @@ static rpc_err_t
     case ERR_NCX_GET_SCHEMA_DUPLICATES:
         *apptag = RPC_ERR_APPTAG_DATA_NOT_UNIQUE;
         return RPC_ERR_OPERATION_FAILED;
+    case ERR_NCX_XPATH_NOT_NODESET:
+        *apptag = RPC_ERR_APPTAG_NOT_NODESET;
+        return RPC_ERR_INVALID_VALUE;
+    case ERR_NCX_XPATH_NODESET_EMPTY:
+        *apptag = RPC_ERR_APPTAG_NO_MATCHES;
+        return RPC_ERR_OPERATION_FAILED;
+    case ERR_NCX_IN_USE_LOCKED:
+        *apptag = RPC_ERR_APPTAG_LOCKED;
+        return RPC_ERR_IN_USE;
+    case ERR_NCX_IN_USE_COMMIT:
+        *apptag = RPC_ERR_APPTAG_COMMIT;
+        return RPC_ERR_IN_USE;
 
     /* user warnings start at 400 and do not need to be listed here */
     default:
@@ -705,7 +717,7 @@ static status_t
 {
     rpc_err_info_t       *errinfo;
     const xmlChar        *badel;
-    const cfg_template_t *badcfg;
+    const uint32         *numptr;
     ses_id_t              sesid;
     boolean               attrerr;
     xmlns_id_t            ncid, ncxid, badid;
@@ -819,8 +831,13 @@ static status_t
         break;
     case RPC_ERR_LOCK_DENIED:
         /* generate session-id value */
-        badcfg = (const cfg_template_t *)errparm1;
-        sesid = badcfg->locked_by;
+        numptr = (const uint32 *)errparm1;
+        if (numptr != NULL) {
+            sesid = *numptr;
+        } else {
+            SET_ERROR(ERR_INTERNAL_VAL);
+            sesid = 0;
+        }
 
         errinfo = rpc_err_new_info();
         if (!errinfo) {
@@ -1088,6 +1105,7 @@ rpc_err_rec_t *
     xmlChar                  *error_msg;
     const xmlChar            *badval, *badns, *msg, *apptag;
     const void               *err1, *err2, *err4;
+    const cfg_template_t     *badcfg;
     rpc_err_t                 rpcerr;
     status_t                  res;
     rpc_err_sev_t             errsev;
@@ -1154,10 +1172,21 @@ rpc_err_rec_t *
         }
         break;
     case ERR_NCX_LOCK_DENIED:
-        if (!error_parm || parmtyp != NCX_NT_CFG) {
+        if (!error_parm) {
             SET_ERROR(ERR_INTERNAL_VAL);
         } else {
-            err1 = error_parm;
+            if (parmtyp == NCX_NT_CFG) {
+                badcfg = (const cfg_template_t *)error_parm;
+                if (badcfg != NULL) {
+                    err1 = &badcfg->locked_by;
+                } else {
+                    SET_ERROR(ERR_INTERNAL_VAL);
+                }
+            } else if (parmtyp == NCX_NT_UINT32_PTR) {
+                err1 = error_parm;
+            } else {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            }
         }
         break;
     case ERR_NCX_MISSING_INDEX:

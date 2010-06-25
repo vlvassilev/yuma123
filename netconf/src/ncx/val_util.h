@@ -764,10 +764,10 @@ extern void
 * INPUTS:
 *   val == start value struct to use
 *   sesid == session ID requesting the partial lock
-*   badval == address of first error val found
+*   lockowner == address of first lock owner violation
 *
 * OUTPUTS:
-*   *badval == pointer to value node that caused the error
+*   *lockowner == pointer to first lock owner violation
 *
 * RETURNS:
 *   status:  if any error, then val_clear_partial_lock
@@ -778,7 +778,7 @@ extern void
 extern status_t
     val_ok_to_partial_lock (val_value_t *val,
                             ses_id_t sesid,
-                            val_value_t  **badval);
+                            ses_id_t *lockowner);
 
 
 /********************************************************************
@@ -814,6 +814,69 @@ extern status_t
 extern void
     val_clear_partial_lock (val_value_t *val,
                             plock_cb_t *plcb);
+
+
+/********************************************************************
+* FUNCTION val_write_ok
+*
+* Check if there are any partial-locks owned by another
+* session in the node that is going to be written
+* If the operation is replace or delete, then the
+* entire target subtree will be checked
+*
+* INPUTS:
+*   val == start value struct to use
+*   editop == requested write operation
+*   sesid == session requesting this write operation
+*   checkup == TRUE to check up the tree as well
+*   lockid == address of return partial lock ID
+*
+* OUTPUTS:
+*   *lockid == return lock ID if any portion is locked
+*              Only the first lock violation detected will
+*              be reported
+*    error code will be NCX_ERR_IN_USE if *lockid is set
+*
+* RETURNS:
+*    status, NO_ERR indicates no partial lock conflicts
+*********************************************************************/
+extern status_t
+    val_write_ok (val_value_t *val,
+                  op_editop_t editop,
+                  ses_id_t sesid,
+                  boolean checkup,
+                  uint32 *lockid);
+
+
+/********************************************************************
+* FUNCTION val_check_swap_resnode
+*
+* Check if the curnode has any partial locks
+* and if so, transfer them to the new node
+* and change any resnodes as well
+*
+* INPUTS:
+*   curval == current node to check
+*   newval == new value taking its place
+*
+*********************************************************************/
+extern void
+    val_check_swap_resnode (val_value_t *curval,
+                            val_value_t *newval);
+
+
+/********************************************************************
+* FUNCTION val_check_delete_resnode
+*
+* Check if the curnode has any partial locks
+* and if so, remove them from the final result
+*
+* INPUTS:
+*   curval == current node to check
+*
+*********************************************************************/
+extern void
+    val_check_delete_resnode (val_value_t *curval);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

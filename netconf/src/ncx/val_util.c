@@ -2836,10 +2836,10 @@ void
 * INPUTS:
 *   val == start value struct to use
 *   sesid == session ID requesting the partial lock
-*   badval == address of first error val found
+*   lockowner == address of first lock owner violation
 *
 * OUTPUTS:
-*   *badval == pointer to value node that caused the error
+*   *lockowner == pointer to first lock owner violation
 *
 * RETURNS:
 *   status:  if any error, then val_clear_partial_lock
@@ -2850,15 +2850,16 @@ void
 status_t
     val_ok_to_partial_lock (val_value_t *val,
                             ses_id_t sesid,
-                            val_value_t  **badval)
+                            ses_id_t *lockowner)
 {
     val_value_t   *childval;
     status_t       res;
     uint32         i;
     boolean        anyavail;
+    ses_id_t       owner;
 
 #ifdef DEBUG
-    if (val == NULL || badval == NULL) {
+    if (val == NULL || lockowner == NULL) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
     if (sesid == 0) {
@@ -2867,25 +2868,27 @@ status_t
 #endif
 
     if (!val_is_config_data(val)) {
-        *badval = val;
         return ERR_NCX_NOT_CONFIG;
     }
 
     res = NO_ERR;
+    *lockowner = 0;
 
     /* check for an empty slot and locked-by-another session */
     anyavail = FALSE;
     for (i = 0; i < VAL_MAX_PLOCKS; i++) {
         if (val->plock[i] == NULL) {
             anyavail = TRUE;
-        } else if (plock_get_sid(val->plock[i]) != sesid) {
-            *badval = val;
-            return ERR_NCX_LOCK_DENIED;
+        } else {
+            owner = plock_get_sid(val->plock[i]);
+            if (owner != sesid) {
+                *lockowner = owner;
+                return ERR_NCX_LOCK_DENIED;
+            }
         }
     }
 
     if (!anyavail) {
-        *badval = val;
         return ERR_NCX_RESOURCE_DENIED;
     }
 
@@ -2899,16 +2902,15 @@ status_t
 
         res = val_ok_to_partial_lock(childval, 
                                      sesid, 
-                                     badval);
+                                     lockowner);
         if (res != NO_ERR) {
             return res;
         }
     }
 
-    *badval = NULL;
     return NO_ERR;
 
-} /* val_ok_to_partial_lock */
+    } /* val_ok_to_partial_lock */
 
 
 /********************************************************************
@@ -2930,8 +2932,6 @@ status_t
     val_set_partial_lock (val_value_t *val,
                           plock_cb_t *plcb)
 {
-    val_value_t     *childval;
-    status_t         res;
     uint32           i;
     boolean          anyavail, done;
     ses_id_t         newsid;
@@ -2970,20 +2970,6 @@ status_t
         }
     }
 
-    for (childval = val_get_first_child(val);
-         childval != NULL;
-         childval = val_get_next_child(childval)) {
-
-        if (!val_is_config_data(childval)) {
-            continue;
-        }
-
-        res = val_set_partial_lock(childval, plcb);
-        if (res != NO_ERR) {
-            return res;
-        }
-    }
-
     return NO_ERR;
 
 }  /* val_set_partial_lock */
@@ -3005,7 +2991,6 @@ void
 {
     val_value_t   *childval;
     uint32         i;
-    boolean        done;
 
 #ifdef DEBUG
     if (val == NULL || plcb == NULL) {
@@ -3019,11 +3004,10 @@ void
     }
 
     /* check for the specified plcb */
-    done = FALSE;
-    for (i = 0; i < VAL_MAX_PLOCKS && !done; i++) {
+    for (i = 0; i < VAL_MAX_PLOCKS; i++) {
         if (val->plock[i] == plcb) {
             val->plock[i] = NULL;
-            done = TRUE;
+            return;
         }
     }
 
@@ -3038,6 +3022,199 @@ void
 
 }  /* val_clear_partial_lock */
 
+
+/********************************************************************
+* FUNCTION val_write_ok
+*
+* Check if there are any partial-locks owned by another
+* session in the node that is going to be written
+* If the operation is replace or delete, then the
+* entire target subtree will be checked
+*
+* INPUTS:
+*   val == start value struct to use
+*   editop == requested write operation
+*   sesid == session requesting this write operation
+*   checkup == TRUE to check up the tree as well
+*   lockid == address of return partial lock ID
+*
+* OUTPUTS:
+*   *lockid == return lock ID if any portion is locked
+*              Only the first lock violation detected will
+*              be reported
+*    error code will be NCX_ERR_IN_USE if *lockid is set
+*
+* RETURNS:
+*    status, NO_ERR indicates no partial lock conflicts
+*********************************************************************/
+status_t
+    val_write_ok (val_value_t *val,
+                  op_editop_t editop,
+                  ses_id_t sesid,
+                  boolean checkup,
+                  uint32 *lockid)
+
+{
+    val_value_t   *childval, *upval;
+    uint32         i;
+    status_t       res;
+
+#ifdef DEBUG
+    if (val == NULL || lockid == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (!val_is_config_data(val)) {
+        return NO_ERR;
+    }
+
+    /* check for the specified session ID
+     * this function should not be called for
+     * the create operation, since there must not be
+     * an existing instance that could be locked
+     * in order for the createoperation to be valid
+     */
+    for (i = 0; i < VAL_MAX_PLOCKS; i++) {
+        if (val->plock[i] == NULL) {
+            continue;
+        }
+        if (plock_get_sid(val->plock[i]) != sesid) {
+            /* this node locked by another session */
+            *lockid = plock_get_id(val->plock[i]);
+            return ERR_NCX_IN_USE_LOCKED;
+        }
+    }
+
+    /* see if the path to root needs to be checked
+     * because the AGT_CB_COMMIT_CHECK waited until
+     * applyhere to check the partial lock
+     */
+    if (checkup) {
+        upval = val->parent;
+        while (upval != NULL && !obj_is_root(upval->obj)) {
+            for (i = 0; i < VAL_MAX_PLOCKS; i++) {
+                if (upval->plock[i] == NULL) {
+                    continue;
+                }
+                if (plock_get_sid(upval->plock[i]) != sesid) {
+                    /* this node locked by another session */
+                    *lockid = plock_get_id(upval->plock[i]);
+                    return ERR_NCX_IN_USE_LOCKED;
+                }
+            }
+            upval = upval->parent;
+        }
+    }
+
+    /* only replace a delete need to dive into the subtree
+     * because the config in the PDU does not need to
+     * align with the target data tree; and the request
+     * is all-or-nothing.  The merge operation will
+     * dive into the subtree as indicated by the
+     * config in the PDU input, and not all subtrees
+     * may be affected by the merge, so any partial locks
+     * in those subtrees need to be ignored now
+     */
+    if (editop == OP_EDITOP_REPLACE ||
+        editop == OP_EDITOP_DELETE) {
+
+        for (childval = val_get_first_child(val);
+             childval != NULL;
+             childval = val_get_next_child(childval)) {
+
+            if (val_is_config_data(childval)) {
+                res = val_write_ok(childval,
+                                   editop,
+                                   sesid,
+                                   FALSE,
+                                   lockid);
+                if (res != NO_ERR) {
+                    return res;
+                }
+            }
+        }
+    }
+
+    return NO_ERR;
+
+}  /* val_write_ok */
+
+
+/********************************************************************
+* FUNCTION val_check_swap_resnode
+*
+* Check if the curnode has any partial locks
+* and if so, transfer them to the new node
+* and change any resnodes as well
+*
+* INPUTS:
+*   curval == current node to check
+*   newval == new value taking its place
+*
+*********************************************************************/
+void
+    val_check_swap_resnode (val_value_t *curval,
+                            val_value_t *newval)
+{
+    xpath_result_t *result;
+    uint32          i;
+
+#ifdef DEBUG
+    if (curval == NULL || newval == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    for (i=0; i < VAL_MAX_PLOCKS; i++) {
+        newval->plock[i] = curval->plock[i];
+        if (curval->plock[i] != NULL) {
+            result = (curval->plock[i])->plock_final_result;
+            if (result != NULL) {
+                xpath_nodeset_swap_valptr(result, 
+                                          curval, 
+                                          newval);
+            }
+        }
+    }
+
+}  /* val_check_swap_resnode */
+
+
+/********************************************************************
+* FUNCTION val_check_delete_resnode
+*
+* Check if the curnode has any partial locks
+* and if so, remove them from the final result
+*
+* INPUTS:
+*   curval == current node to check
+*
+*********************************************************************/
+void
+    val_check_delete_resnode (val_value_t *curval)
+{
+    xpath_result_t *result;
+    uint32          i;
+
+#ifdef DEBUG
+    if (curval == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    for (i=0; i < VAL_MAX_PLOCKS; i++) {
+        if (curval->plock[i] != NULL) {
+            result = (curval->plock[i])->plock_final_result;
+            if (result != NULL) {
+                xpath_nodeset_delete_valptr(result, curval);
+            }
+        }
+    }
+
+}  /* val_check_delete_resnode */
 
 
 /* END file val_util.c */

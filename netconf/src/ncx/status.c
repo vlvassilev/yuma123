@@ -645,6 +645,14 @@ const char *
         return "timeout occurred";
     case ERR_NCX_GET_SCHEMA_DUPLICATES:
         return "multiple module revisions exist";
+    case ERR_NCX_XPATH_NOT_NODESET:
+        return "XPath result not a nodeset";
+    case ERR_NCX_XPATH_NODESET_EMPTY:
+        return "XPath node-set result is empty";
+    case ERR_NCX_IN_USE_LOCKED:
+        return "node is protected by a partial lock";
+    case ERR_NCX_IN_USE_COMMIT:
+        return "cannot start a partial lock with confirmed-commit pending";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

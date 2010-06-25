@@ -377,6 +377,36 @@ extern status_t
 			  cfg_template_t *target,
                           boolean save_nvstore);
 
+
+/********************************************************************
+* FUNCTION agt_val_check_commit_locks
+* 
+* Check if the requested commit operation
+* would cause any partial lock violations 
+* in the running config
+* Invoke all the AGT_CB_COMMIT_CHECK callbacks for a 
+* source and target and write operation
+*
+* INPUTS:
+*   scb == session control block
+*   msg == incoming commit rpc_msg_t in progress
+*   source == cfg_template_t for the source (candidate)
+*   target == cfg_template_t for the config database to 
+*             write (running)
+*
+* OUTPUTS:
+*   rpc_err_rec_t structs may be malloced and added 
+*   to the msg->mhdr.errQ
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    agt_val_check_commit_locks (ses_cb_t  *scb,
+                                rpc_msg_t  *msg,
+                                cfg_template_t *source,
+                                cfg_template_t *target);
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

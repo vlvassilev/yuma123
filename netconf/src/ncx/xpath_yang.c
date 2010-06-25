@@ -969,7 +969,9 @@ static status_t
             continue;
         }
 
-        if (pcb->flags & XP_FL_INSTANCEID) {
+        if (pcb->flags & 
+            (XP_FL_INSTANCEID | XP_FL_SCHEMA_INSTANCEID)) {
+
             pcb->altobj = NULL;
 
             /* parse literal */

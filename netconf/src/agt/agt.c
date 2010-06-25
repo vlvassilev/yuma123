@@ -78,6 +78,10 @@ date         init     comment
 #include "agt_not.h"
 #endif
 
+#ifndef _H_agt_plock
+#include "agt_plock.h"
+#endif
+
 #ifndef _H_agt_proc
 #include "agt_proc.h"
 #endif
@@ -593,6 +597,14 @@ status_t
         return res;
     }
 
+    /* load the partial lock module */
+    res = y_ietf_netconf_partial_lock_init
+        (y_ietf_netconf_partial_lock_M_ietf_netconf_partial_lock,
+         NULL);
+    if (res != NO_ERR) {
+        return res;
+    }
+
     /* load the NETCONF interface monitoring data model module */
     res = agt_if_init();
     if (res != NO_ERR) {
@@ -738,14 +750,20 @@ status_t
         return res;
     }
 
-    /* load the system module callback functions and data */
+    /* load any system module non-config data */
     res = agt_sys_init2();
     if (res != NO_ERR) {
         return res;
     }
     
-    /* load the server state monitoring callback functions and data */
+    /* load any server state monitoring data */
     res = agt_state_init2();
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* load any partial lock runtime data */
+    res = y_ietf_netconf_partial_lock_init2();
     if (res != NO_ERR) {
         return res;
     }
@@ -761,6 +779,7 @@ status_t
     if (res != NO_ERR) {
         return res;
     }
+
 
     /* load the interface monitoring callback functions and data */
     res = agt_if_init2();
@@ -912,6 +931,7 @@ void
         agt_state_cleanup();
         agt_not_cleanup();
         agt_proc_cleanup();
+        y_ietf_netconf_partial_lock_cleanup();
         agt_if_cleanup();
         agt_ses_cleanup();
         agt_cap_cleanup();

@@ -1024,6 +1024,51 @@ extern dlq_hdr_t *
 
 
 /********************************************************************
+* FUNCTION xpath_get_first_resnode
+* 
+* Get the first result in the renodeQ from a result struct
+*
+* INPUTS:
+*    result == result struct to check
+*
+* RETURNS:
+*   pointer to resnode or NULL if some error
+*********************************************************************/
+extern xpath_resnode_t *
+    xpath_get_first_resnode (xpath_result_t *result);
+
+
+/********************************************************************
+* FUNCTION xpath_get_next_resnode
+* 
+* Get the first result in the renodeQ from a result struct
+*
+* INPUTS:
+*    result == result struct to check
+*
+* RETURNS:
+*   pointer to resnode or NULL if some error
+*********************************************************************/
+extern xpath_resnode_t *
+    xpath_get_next_resnode (xpath_resnode_t *resnode);
+
+
+/********************************************************************
+* FUNCTION xpath_get_resnode_valptr
+* 
+* Get the first result in the renodeQ from a result struct
+*
+* INPUTS:
+*    result == result struct to check
+*
+* RETURNS:
+*   pointer to resnode or NULL if some error
+*********************************************************************/
+extern val_value_t *
+    xpath_get_resnode_valptr (xpath_resnode_t *resnode);
+
+
+/********************************************************************
 * FUNCTION xpath_get_varbindQ
 * 
 * Get the varbindQ from a parser control block struct
@@ -1037,6 +1082,77 @@ extern dlq_hdr_t *
 extern dlq_hdr_t *
     xpath_get_varbindQ (xpath_pcb_t *pcb);
 
+
+/********************************************************************
+* FUNCTION xpath_move_nodeset
+* 
+* Move the nodes from a nodeset reult into the
+* target nodeset result.
+* This is needed to support partial lock
+* because multiple select expressions are allowed
+* for the same partial lock
+*
+* INPUTS:
+*    srcresult == XPath result nodeset source
+*    destresult == XPath result nodeset target
+*
+* OUTPUTS:
+*    srcresult nodes will be moved to the target result
+*********************************************************************/
+extern void
+    xpath_move_nodeset (xpath_result_t *srcresult,
+                        xpath_result_t *destresult);
+
+
+
+/********************************************************************
+* FUNCTION xpath_nodeset_empty
+* 
+* Check if the result is an empty nodeset
+*
+* INPUTS:
+*    result == XPath result to check
+*
+* RETURNS:
+*    TRUE if this is an empty nodeset
+*    FALSE if not empty or not a nodeset
+*********************************************************************/
+extern boolean
+    xpath_nodeset_empty (const xpath_result_t *result);
+
+
+/********************************************************************
+* FUNCTION xpath_nodeset_swap_valptr
+* 
+* Check if the result has the oldval ptr and if so,
+* replace it with the newval ptr
+*
+* INPUTS:
+*    result == result struct to check
+*    oldval == value ptr to find
+*    newval == new value replace it with if oldval is found
+*
+*********************************************************************/
+extern void
+    xpath_nodeset_swap_valptr (xpath_result_t *result,
+                               val_value_t *oldval,
+                               val_value_t *newval);
+
+
+/********************************************************************
+* FUNCTION xpath_nodeset_delete_valptr
+* 
+* Check if the result has the oldval ptr and if so,
+* delete it
+*
+* INPUTS:
+*    result == result struct to check
+*    oldval == value ptr to find
+*
+*********************************************************************/
+extern void
+    xpath_nodeset_delete_valptr (xpath_result_t *result,
+                                 val_value_t *oldval);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

@@ -25,9 +25,25 @@ PROG=yangcli
 # that contains bar. 
 
 ## LINUX
-LIBS = 	-L../../target/lib -lmgr -lncx \
+DLIBS =	-L../../target/lib -lmgr -lncx \
 	-L/lib -L/usr/lib -lxml2 -lncurses -lssh2 \
 	-L../../../libtecla -ltecla
+
+SLIBS = -L../../target/lib -lmgr -lncx \
+	-L/lib -L/usr/lib -lxml2 \
+	-l:/usr/lib/libssh2.a \
+	-l:/lib/libgcrypt.a \
+	-l:/lib/libgpg-error.a \
+	-L../../../libtecla -ltecla \
+	-l:/usr/lib/libncurses.a
+
+# by default use static versions of the obscure libraries
+ifdef FULL_SHARED
+LIBS=$(DLIBS)
+else
+LIBS=$(SLIBS)
+endif
+
 
 LIBTARGS= $(LBASE)/libmgr.a \
 	$(LBASE)/libncx.$(LIBNCXSUFFIX)

@@ -483,6 +483,13 @@ static val_value_t *
         pathbuff = NULL;
     }
 
+    *res = val_gen_index_chain(plockobj, plockval);
+    if (*res != NO_ERR) {
+        val_free_value(plockval);
+        return NULL;
+    }
+
+
     *res = NO_ERR;
     return plockval;
 

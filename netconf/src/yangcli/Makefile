@@ -37,11 +37,14 @@ SLIBS = -L../../target/lib -lmgr -lncx \
 	-l:../../../libtecla/libtecla.a \
 	-l:/usr/lib/libncurses.a
 
-# by default use static versions of the obscure libraries
-ifdef FULL_SHARED
-LIBS=$(DLIBS)
-else
+# set FULL_STATIC=1 to force complete shared libraries
+# except libxml2 which is always installed on linux
+# this does not work yet for fedora 12; a libtecla
+# file is not resolving a few symbols from libncurses.a
+ifdef FULL_STATIC
 LIBS=$(SLIBS)
+else
+LIBS=$(DLIBS)
 endif
 
 

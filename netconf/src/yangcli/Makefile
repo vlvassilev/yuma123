@@ -34,7 +34,7 @@ SLIBS = -L../../target/lib -lmgr -lncx \
 	-l:/usr/lib/libssh2.a \
 	-l:/lib/libgcrypt.a \
 	-l:/lib/libgpg-error.a \
-	-L../../../libtecla -ltecla \
+	-l:../../../libtecla/libtecla.a \
 	-l:/usr/lib/libncurses.a
 
 # by default use static versions of the obscure libraries

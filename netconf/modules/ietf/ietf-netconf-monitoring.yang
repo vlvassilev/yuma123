@@ -297,7 +297,8 @@
                }
                uses lock-info;
                leaf-list select {
-                 type string;
+                 //type string;
+                 type yang:xpath1.0;
                  min-elements 1;
                  description
                    "The xpath expression which was used to request

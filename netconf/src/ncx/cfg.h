@@ -490,6 +490,21 @@ extern boolean
 
 
 /********************************************************************
+* FUNCTION cfg_is_partial_locked
+*
+* Check if the specified config has any active partial locks
+*
+* INPUTS:
+*    cfg = Config template to check 
+*
+* RETURNS:
+*    TRUE if partial lock active, FALSE if not
+*********************************************************************/
+extern boolean
+    cfg_is_partial_locked (const cfg_template_t *cfg);
+
+
+/********************************************************************
 * FUNCTION cfg_get_global_lock_info
 *
 * Get the current global lock info
@@ -673,16 +688,14 @@ extern plock_cb_t *
 * Get the next partial lock in the specified config.
 *
 * INPUTS:
-*    cfg = Config template to use
-*    curlockcb == current lock control block; get next CB
+*    curplockcb == current lock control block; get next CB
 *
 * RETURNS:
 *   pointer to the next partial lock control block
 *   NULL if none exist at this time
 *********************************************************************/
 extern plock_cb_t *
-    cfg_next_partial_lock (cfg_template_t *cfg,
-                           plock_cb_t *curplockcb);
+    cfg_next_partial_lock (plock_cb_t *curplockcb);
 
 
 /********************************************************************

@@ -51,6 +51,10 @@ date         init     comment
 #include  "plock.h"
 #endif
 
+#ifndef _H_plock_cb
+#include  "plock_cb.h"
+#endif
+
 #ifndef _H_ses
 #include  "ses.h"
 #endif
@@ -93,7 +97,6 @@ date         init     comment
 #define PLOCK_DEBUG 1
 #endif
 
-
 /********************************************************************
 *                                                                   *
 *                           T Y P E S                               *
@@ -106,129 +109,6 @@ date         init     comment
 *                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
-/* the ID zero will not get used */
-static uint32 last_id = 0;
-
-
-/********************************************************************
-* FUNCTION plock_new_cb
-*
-* Create a new partial lock control block
-*
-* INPUTS:
-*   sid == session ID reqauesting this partial lock
-*   res == address of return status
-*
-* OUTPUTS:
-*   *res == return status
-*
-* RETURNS:
-*   pointer to initialized PLCB, or NULL if some error
-*   this struct must be freed by the caller
-*********************************************************************/
-plock_cb_t *
-    plock_new_cb (uint32 sid,
-                  status_t *res)
-{
-    plock_cb_t     *plcb;
-    
-#ifdef DEBUG
-    if (res == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    /* temp design: only 4G partial locks supported
-     * until server stops giving out partial locks
-     */
-    if (last_id == NCX_MAX_UINT) {
-        *res = ERR_NCX_RESOURCE_DENIED;
-        return NULL;
-    }
-
-    plcb = m__getObj(plock_cb_t);
-    if (plcb == NULL) {
-        *res = ERR_INTERNAL_MEM;
-        return NULL;
-    }
-    memset(plcb, 0x0, sizeof(plock_cb_t));
-
-    plcb->plock_final_result = xpath_new_result(XP_RT_NODESET);
-    if (plcb->plock_final_result == NULL) {
-        m__free(plcb);
-        return NULL;
-    }
-
-    plcb->plock_id = ++last_id;
-    dlq_createSQue(&plcb->plock_xpathpcbQ);
-    dlq_createSQue(&plcb->plock_resultQ);
-    tstamp_datetime(plcb->plock_time);
-    plcb->plock_sesid = sid;
-    return plcb;
-
-}  /* plock_new_cb */
-
-
-/********************************************************************
-* FUNCTION plock_free_cb
-*
-* Free a partial lock control block
-*
-* INPUTS:
-*   plcb == partial lock control block to free
-*
-*********************************************************************/
-void
-    plock_free_cb (plock_cb_t *plcb)
-{
-    xpath_pcb_t  *xpathpcb;
-    xpath_result_t *result;
-
-#ifdef DEBUG
-    if (plcb == NULL) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    while (!dlq_empty(&plcb->plock_xpathpcbQ)) {
-        xpathpcb = (xpath_pcb_t *)
-            dlq_deque(&plcb->plock_xpathpcbQ);
-        xpath_free_pcb(xpathpcb);
-    }
-
-    while (!dlq_empty(&plcb->plock_resultQ)) {
-        result = (xpath_result_t *)
-            dlq_deque(&plcb->plock_resultQ);
-        xpath_free_result(result);
-    }
-
-    if (plcb->plock_final_result != NULL) {
-        xpath_free_result(plcb->plock_final_result);
-    }
-
-    m__free(plcb);
-
-}  /* plock_free_cb */
-
-
-/********************************************************************
-* FUNCTION plock_reset_id
-*
-* Set the next ID number back to the start
-* Only the caller maintaining a queue of plcb
-* can decide if the ID should rollover
-*
-*********************************************************************/
-void
-    plock_reset_id (void)
-{
-    if (last_id == NCX_MAX_UINT) {
-        last_id = 0;
-    }
-
-}  /* plock_reset_id */
 
 
 /********************************************************************
@@ -281,6 +161,139 @@ uint32
     return plcb->plock_sesid;
 
 }  /* plock_get_sid */
+
+
+
+/********************************************************************
+* FUNCTION plock_get_timestamp
+*
+* Get the timestamp of the lock start time
+*
+* INPUTS:
+*   plcb == partial lock control block to use
+*
+* RETURNS:
+*   timestamp in date-time format
+*********************************************************************/
+const xmlChar *
+    plock_get_timestamp (plock_cb_t *plcb)
+{
+#ifdef DEBUG
+    if (plcb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    return plcb->plock_time;
+
+}  /* plock_get_timestamp */
+
+
+/********************************************************************
+* FUNCTION plock_get_final_result
+*
+* Get the final result for this partial lock
+*
+* INPUTS:
+*   plcb == partial lock control block to use
+*
+* RETURNS:
+*   pointer to final result struct
+*********************************************************************/
+xpath_result_t *
+    plock_get_final_result (plock_cb_t *plcb)
+{
+#ifdef DEBUG
+    if (plcb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    return plcb->plock_final_result;
+
+}  /* plock_get_final_result */
+
+
+/********************************************************************
+* FUNCTION plock_get_first_select
+*
+* Get the first select XPath control block for the partial lock
+*
+* INPUTS:
+*   plcb == partial lock control block to use
+*
+* RETURNS:
+*   pointer to first xpath_pcb_t for the lock
+*********************************************************************/
+xpath_pcb_t *
+    plock_get_first_select (plock_cb_t *plcb)
+{
+#ifdef DEBUG
+    if (plcb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    return (xpath_pcb_t *)dlq_firstEntry(&plcb->plock_xpathpcbQ);
+
+}  /* plock_get_first_select */
+
+
+/********************************************************************
+* FUNCTION plock_get_next_select
+*
+* Get the next select XPath control block for the partial lock
+*
+* INPUTS:
+*   xpathpcb == current select block to use
+*
+* RETURNS:
+*   pointer to first xpath_pcb_t for the lock
+*********************************************************************/
+xpath_pcb_t *
+    plock_get_next_select (xpath_pcb_t *xpathpcb)
+{
+#ifdef DEBUG
+    if (xpathpcb == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    return (xpath_pcb_t *)dlq_nextEntry(xpathpcb);
+
+}  /* plock_get_next_select */
+
+
+/********************************************************************
+* FUNCTION plock_add_select
+*
+* Add a select XPath control block to the partial lock
+*
+* INPUTS:
+*   plcb == partial lock control block to use
+*   xpathpcb == xpath select block to add
+*   result == result struct to add
+*
+*********************************************************************/
+void
+    plock_add_select (plock_cb_t *plcb,
+                      xpath_pcb_t *xpathpcb,
+                      xpath_result_t *result)
+{
+#ifdef DEBUG
+    if (plcb == NULL || xpathpcb == NULL || result == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+    dlq_enque(xpathpcb, &plcb->plock_xpathpcbQ);
+    dlq_enque(result, &plcb->plock_resultQ);
+
+}  /* plock_add_select */
 
 
 /********************************************************************

@@ -234,6 +234,11 @@ date         init     comment
 #define AGT_STATE_OBJ_LOCKED_BY_SESSION (const xmlChar *)"locked-by-session"
 #define AGT_STATE_OBJ_LOCKED_TIME     (const xmlChar *)"locked-time"
 
+#define AGT_STATE_OBJ_PARTIAL_LOCKS   (const xmlChar *)"partial-locks"
+#define AGT_STATE_OBJ_LOCK_ID         (const xmlChar *)"lock-id"
+#define AGT_STATE_OBJ_SELECT          (const xmlChar *)"select"
+#define AGT_STATE_OBJ_LOCKED_NODES    (const xmlChar *)"locked-nodes"
+
 #define AGT_STATE_FORMAT_YANG         (const xmlChar *)"yang"
 
 #define AGT_STATE_ENUM_NETCONF        (const xmlChar *)"NETCONF"
@@ -308,6 +313,182 @@ static status_t
 }  /* get_caps */
 
 
+
+/********************************************************************
+* FUNCTION make_plock_entry
+*
+* Make a partial-lock list entry
+*
+* INPUTS:
+*    plcb == partial lock control block to use
+*    plockobj == object template to use for the list struct
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == return status
+*
+* RETURNS:
+*    pointer to malloc value struct for this data; 
+*    NULL if malloc error
+*********************************************************************/
+static val_value_t *
+    make_plock_entry (plock_cb_t *plcb,
+                      obj_template_t *plockobj,
+                      status_t *res)
+{
+    val_value_t  *plockval, *leafval, *valptr;
+    obj_template_t *selectobj, *lockednodeobj;
+    xpath_pcb_t *xpathpcb;
+    xpath_resnode_t *resnode;
+    xpath_result_t *result;
+    xmlChar *pathbuff;
+
+
+    *res = NO_ERR;
+
+    selectobj = obj_find_child(plockobj,
+                               AGT_STATE_MODULE,
+                               AGT_STATE_OBJ_SELECT);
+    if (selectobj == NULL) {
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+
+    lockednodeobj = obj_find_child(plockobj,
+                                   AGT_STATE_MODULE,
+                                   AGT_STATE_OBJ_LOCKED_NODES);
+    if (lockednodeobj == NULL) {
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+                               
+    plockval = val_new_value();
+    if (plockval == NULL) {
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+    val_init_from_template(plockval, plockobj);
+
+    /* add the list key: lock-id */
+    leafval = agt_make_uint_leaf(plockobj,
+                                 AGT_STATE_OBJ_LOCK_ID,
+                                 plock_get_id(plcb),
+                                 res);
+    if (leafval == NULL) {
+        val_free_value(plockval);
+        return NULL;
+    } else {
+        val_add_child(leafval, plockval);
+    }
+
+    /* add the session ID of the lock-owner */
+    leafval = agt_make_uint_leaf(plockobj,
+                                 AGT_STATE_OBJ_LOCKED_BY_SESSION,
+                                 plock_get_sid(plcb),
+                                 res);
+    if (leafval == NULL) {
+        val_free_value(plockval);
+        return NULL;
+    } else {
+        val_add_child(leafval, plockval);
+    }
+
+    /* add the lock start timestamp */
+    leafval = agt_make_leaf(plockobj,
+                            AGT_STATE_OBJ_LOCKED_TIME,
+                            plock_get_timestamp(plcb),
+                            res);
+    if (leafval == NULL) {
+        val_free_value(plockval);
+        return NULL;
+    } else {
+        val_add_child(leafval, plockval);
+    }
+
+    /* add a 'select' leaf for each parm in the request */
+    for (xpathpcb = plock_get_first_select(plcb);
+         xpathpcb != NULL;
+         xpathpcb = plock_get_next_select(xpathpcb)) {
+
+        /* cobble an XPath string together making sure to
+         * preserve the XML prefix mappings originally parsed
+         */
+        leafval = val_new_value();
+        if (leafval == NULL) {
+            val_free_value(plockval);
+            *res = ERR_INTERNAL_MEM;
+            return NULL;
+        }
+        val_init_from_template(leafval, selectobj);
+        VAL_STR(leafval) = xml_strdup(xpathpcb->exprstr);
+        if (VAL_STR(leafval) == NULL) {
+            val_free_value(plockval);
+            *res = ERR_INTERNAL_MEM;
+            return NULL;
+        }
+        leafval->xpathpcb = xpath_clone_pcb(xpathpcb);
+        if (leafval->xpathpcb == NULL) {
+            val_free_value(plockval);
+            *res = ERR_INTERNAL_MEM;
+            return NULL;
+        }
+        val_add_child(leafval, plockval);
+    }
+
+    /* add a 'locked-nodes' leaf for each valptr in the 
+     * final node-set result
+     */
+    pathbuff = NULL;
+    result = plock_get_final_result(plcb);
+    for (resnode = xpath_get_first_resnode(result);
+         resnode != NULL;
+         resnode = xpath_get_next_resnode(resnode)) {
+
+        /* cobble an i-i string together making sure to
+         * preserve the XML prefix mappings originally parsed
+         */
+        leafval = val_new_value();
+        if (leafval == NULL) {
+            val_free_value(plockval);
+            *res = ERR_INTERNAL_MEM;
+            return NULL;
+        }
+        val_init_from_template(leafval, lockednodeobj);
+
+        valptr = xpath_get_resnode_valptr(resnode);
+        *res = val_gen_instance_id(NULL, 
+                                   valptr,
+                                   NCX_IFMT_XPATH1,
+                                   &pathbuff);
+        if (*res != NO_ERR) {
+            if (pathbuff != NULL) {
+                m__free(pathbuff);
+            }
+            val_free_value(leafval);
+            val_free_value(plockval);
+            return NULL;
+        }
+
+        *res = val_set_simval_obj(leafval,
+                                  lockednodeobj,
+                                  pathbuff);
+        if (*res != NO_ERR) {
+            m__free(pathbuff);
+            val_free_value(leafval);
+            val_free_value(plockval);
+            return NULL;
+        }
+        val_add_child(leafval, plockval);
+        m__free(pathbuff);
+        pathbuff = NULL;
+    }
+
+    *res = NO_ERR;
+    return plockval;
+
+}  /* make_plock_entry */
+
+
 /********************************************************************
 * FUNCTION get_locks
 *
@@ -325,14 +506,13 @@ static status_t
                val_value_t *virval,
                val_value_t  *dstval)
 {
-    val_value_t       *nameval, *newval, *globallockval;
-    obj_template_t    *globallock;
+    val_value_t       *nameval, *newval, *globallockval, *plockval;
+    obj_template_t    *globallock, *plockobj;
     cfg_template_t    *cfg;
     const xmlChar     *locktime;
+    plock_cb_t        *plcb;
     status_t           res;
     ses_id_t           sid;
-    boolean            globallocked;
-    xmlChar            numbuff[NCX_MAX_NUMLEN+1];
 
     (void)scb;
     res = NO_ERR;
@@ -342,6 +522,14 @@ static status_t
                                     AGT_STATE_MODULE,
                                     AGT_STATE_OBJ_GLOBAL_LOCK);
         if (!globallock) {
+            return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
+        }
+
+
+        plockobj = obj_find_child(virval->obj,
+                                  AGT_STATE_MODULE,
+                                  AGT_STATE_OBJ_PARTIAL_LOCKS);
+        if (!plockobj) {
             return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
         }
 
@@ -357,8 +545,7 @@ static status_t
             return SET_ERROR(ERR_NCX_CFG_NOT_FOUND);            
         }
 
-        globallocked = cfg_is_global_locked(cfg);
-        if (globallocked) {
+        if (cfg_is_global_locked(cfg)) {
             /* make the 2 return value leafs to put into
              * the retval container
              */
@@ -373,10 +560,10 @@ static status_t
                 val_add_child(globallockval, dstval);
 
                 /* add locks/global-lock/locked-by-session */ 
-                sprintf((char *)numbuff, "%u", sid);
-                newval = agt_make_leaf(globallock,
+                newval = 
+                    agt_make_uint_leaf(globallock,
                                        AGT_STATE_OBJ_LOCKED_BY_SESSION,
-                                       numbuff, 
+                                       sid,
                                        &res);
                 if (newval) {
                     val_add_child(newval, globallockval);
@@ -389,6 +576,20 @@ static status_t
                                        &res);
                 if (newval) {
                     val_add_child(newval, globallockval);
+                } else {
+                    res = ERR_INTERNAL_MEM;
+                }
+            }
+        } else if (cfg_is_partial_locked(cfg)) {
+            for (plcb = cfg_first_partial_lock(cfg);
+                 plcb != NULL && res == NO_ERR;
+                 plcb = cfg_next_partial_lock(plcb)) {
+
+                plockval = make_plock_entry(plcb, 
+                                            plockobj,
+                                            &res);
+                if (plockval) {
+                    val_add_child(plockval, dstval);
                 }
             }
         } else {

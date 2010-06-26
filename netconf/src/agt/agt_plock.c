@@ -82,6 +82,10 @@
 #include "plock.h"
 #endif
 
+#ifndef _H_plock_cb
+#include "plock_cb.h"
+#endif
+
 #ifndef _H_rpc
 #include "rpc.h"
 #endif
@@ -195,7 +199,7 @@ static status_t
 
     /* allocate a new lock cb */
     res = NO_ERR;
-    plcb = plock_new_cb(SES_MY_SID(scb), &res);
+    plcb = plock_cb_new(SES_MY_SID(scb), &res);
     if (res != NO_ERR) {
         agt_record_error(scb,
                          &msg->mhdr,
@@ -255,13 +259,13 @@ static status_t
         } else {
             /* save these pointers; the result will be
              * pruned for redundant nodes after all the
-             * select expressions have been processed
-             * hack: transfer the memory straight across
+             * select expressions have been processed;
+             * transfer the memory straight across
              */
-            dlq_enque(select_val->xpathpcb, 
-                      &plcb->plock_xpathpcbQ);
+            plock_add_select(plcb, 
+                             select_val->xpathpcb,
+                             result);
             select_val->xpathpcb = NULL;
-            dlq_enque(result, &plcb->plock_resultQ);
             result = NULL;
         }
 
@@ -297,7 +301,7 @@ static status_t
      * only if the final result is a non-empty nodeset
      */
     if (retres == NO_ERR) {
-        result = plcb->plock_final_result;
+        result = plock_get_final_result(plcb);
 
         for (resnode = xpath_get_first_resnode(result);
              resnode != NULL;
@@ -385,7 +389,7 @@ static status_t
         /* the invoke function must free this pointer */
         msg->rpc_user1 = plcb;
     } else {
-        plock_free_cb(plcb);
+        plock_cb_free(plcb);
     }
 
     return retres;
@@ -424,7 +428,7 @@ static status_t
     res = NO_ERR;
 
     plcb = (plock_cb_t *)msg->rpc_user1;
-    result = plcb->plock_final_result;
+    result = plock_get_final_result(plcb);
     running = cfg_get_config_id(NCX_CFGID_RUNNING);
 
     /* try to lock all the target nodes */
@@ -486,7 +490,7 @@ static status_t
             testval = xpath_get_resnode_valptr(clearnode);
             val_clear_partial_lock(testval, plcb);
         }
-        plock_free_cb(plcb);
+        plock_cb_free(plcb);
         return res;
     }
 

@@ -106,8 +106,8 @@ date	     init     comment
 #include "op.h"
 #endif
 
-#ifndef _H_plock
-#include "plock.h"
+#ifndef _H_plock_cb
+#include "plock_cb.h"
 #endif
 
 #ifndef _H_status

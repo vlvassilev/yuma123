@@ -509,7 +509,6 @@ static void
                               agt_not_msg_t *not)
 {
     val_value_t     *leafval;
-    xmlChar          numbuff[NCX_MAX_NUMLEN];
     status_t         res;
     ses_id_t         use_sid;
 
@@ -540,11 +539,10 @@ static void
 
     leafval = NULL;
     if (use_sid) {
-        sprintf((char *)numbuff, "%u", use_sid);
-        leafval = agt_make_leaf(not->notobj,
-                                system_N_sessionId,
-                                numbuff,
-                                &res);
+        leafval = agt_make_uint_leaf(not->notobj,
+                                     system_N_sessionId,
+                                     use_sid,
+                                     &res);
     }
     if (leafval) {
         agt_not_add_to_payload(not, leafval);
@@ -989,7 +987,6 @@ void
     val_value_t           *leafval;
     const xmlChar         *termreasonstr;
     status_t               res;
-    xmlChar                numbuff[NCX_MAX_NUMLEN];
 
 #ifdef DEBUG
     if (!scb || !termreason) {
@@ -1021,11 +1018,10 @@ void
 
     /* add sysSessionEnd/killedBy */
     if (termreason == SES_TR_KILLED) {
-        sprintf((char *)numbuff, "%u", killedby);
-        leafval = agt_make_leaf(sysSessionEndobj,
-                                system_N_killedBy,
-                                numbuff,
-                                &res);
+        leafval = agt_make_uint_leaf(sysSessionEndobj,
+                                     system_N_killedBy,
+                                     killedby,
+                                     &res);
         if (leafval) {
             agt_not_add_to_payload(not, leafval);
         } else {
@@ -1210,7 +1206,6 @@ void
     val_value_t           *changedbyval, *leafval;
     obj_template_t        *changedbyobj;
     status_t               res;
-    xmlChar                numbuff[NCX_MAX_NUMLEN];
 
 #ifdef DEBUG
     if (!capstr) {
@@ -1265,11 +1260,10 @@ void
         }
 
         /* add sessionId */
-        sprintf((char *)numbuff, "%u", changed_by->sid);
-        leafval = agt_make_leaf(changedbyobj,
-                                system_N_sessionId,
-                                numbuff,
-                                &res);
+        leafval = agt_make_uint_leaf(changedbyobj,
+                                     system_N_sessionId,
+                                     changed_by->sid,
+                                     &res);
         if (leafval) {
             val_add_child(leafval, changedbyval);
         } else {

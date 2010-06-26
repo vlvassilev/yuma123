@@ -32,16 +32,16 @@ date             init     comment
 
 */
 
-#ifndef _H_dlq
-#include "dlq.h"
+#ifndef _H_plock_cb
+#include "plock_cb.h"
 #endif
 
 #ifndef _H_status
 #include "status.h"
 #endif
 
-#ifndef _H_tstamp
-#include "tstamp.h"
+#ifndef _H_xpath
+#include "xpath.h"
 #endif
 
 #ifdef __cplusplus
@@ -55,26 +55,11 @@ extern "C" {
 *********************************************************************/
 
 
-
 /********************************************************************
 *                                                                   *
 *                        T Y P E S                                  *
 *                                                                   *
 *********************************************************************/
-
-/* matches lock-id-type in YANG module */
-typedef uint32 plock_id_t;
-
-/* struct representing 1 configuration database */
-typedef struct plock_cb_t_ {
-    dlq_hdr_t       qhdr;
-    plock_id_t      plock_id;
-    uint32          plock_sesid;
-    dlq_hdr_t       plock_xpathpcbQ;     /* Q of xpath_pcb_t */
-    dlq_hdr_t       plock_resultQ;    /* Q of xpath_result_t */
-    struct xpath_result_t_ *plock_final_result;
-    xmlChar         plock_time[TSTAMP_MIN_SIZE];
-} plock_cb_t;
 
 
 /********************************************************************
@@ -82,57 +67,6 @@ typedef struct plock_cb_t_ {
 *                        F U N C T I O N S                          *
 *                                                                   *
 *********************************************************************/
-
-
-/********************************************************************
-* FUNCTION plock_new_cb
-*
-* Create a new partial lock control block
-*
-* INPUTS:
-*   sid == session ID reqauesting this partial lock
-*   res == address of return status
-*
-* OUTPUTS:
-*   *res == return status
-*
-* RETURNS:
-*   pointer to initialized PLCB, or NULL if some error
-*   this struct must be freed by the caller
-*********************************************************************/
-extern plock_cb_t *
-    plock_new_cb (uint32 sid,
-                  status_t *res);
-
-
-/********************************************************************
-* FUNCTION plock_free_cb
-*
-* Free a partial lock control block
-*
-* INPUTS:
-*   plcb == partial lock control block to free
-*
-*********************************************************************/
-extern void
-    plock_free_cb (plock_cb_t *plcb);
-
-
-#ifdef __cplusplus
-}  /* end extern 'C' */
-#endif
-
-
-/********************************************************************
-* FUNCTION plock_reset_id
-*
-* Set the next ID number back to the start
-* Only the caller maintaining a queue of plcb
-* can decide if the ID should rollover
-*
-*********************************************************************/
-extern void
-    plock_reset_id (void);
 
 
 /********************************************************************
@@ -166,6 +100,84 @@ extern uint32
 
 
 /********************************************************************
+* FUNCTION plock_get_timestamp
+*
+* Get the timestamp of the lock start time
+*
+* INPUTS:
+*   plcb == partial lock control block to use
+*
+* RETURNS:
+*   timestamp in date-time format
+*********************************************************************/
+extern const xmlChar *
+    plock_get_timestamp (plock_cb_t *plcb);
+
+
+
+/********************************************************************
+* FUNCTION plock_get_final_result
+*
+* Get the session ID holding this partial lock
+*
+* INPUTS:
+*   plcb == partial lock control block to use
+*
+* RETURNS:
+*   session ID that owns this lock
+*********************************************************************/
+extern xpath_result_t *
+    plock_get_final_result (plock_cb_t *plcb);
+
+
+/********************************************************************
+* FUNCTION plock_get_first_select
+*
+* Get the first select XPath control block for the partial lock
+*
+* INPUTS:
+*   plcb == partial lock control block to use
+*
+* RETURNS:
+*   pointer to first xpath_pcb_t for the lock
+*********************************************************************/
+extern xpath_pcb_t *
+    plock_get_first_select (plock_cb_t *plcb);
+
+
+/********************************************************************
+* FUNCTION plock_get_next_select
+*
+* Get the next select XPath control block for the partial lock
+*
+* INPUTS:
+*   xpathpcb == current select block to use
+*
+* RETURNS:
+*   pointer to first xpath_pcb_t for the lock
+*********************************************************************/
+extern xpath_pcb_t *
+    plock_get_next_select (xpath_pcb_t *xpathpcb);
+
+
+/********************************************************************
+* FUNCTION plock_add_select
+*
+* Add a select XPath control block to the partial lock
+*
+* INPUTS:
+*   plcb == partial lock control block to use
+*   xpathpcb == xpath select block to add
+*   result == result struct to add
+*
+*********************************************************************/
+extern void
+    plock_add_select (plock_cb_t *plcb,
+                      xpath_pcb_t *xpathpcb,
+                      xpath_result_t *result);
+
+
+/********************************************************************
 * FUNCTION plock_make_final_result
 *
 * Create a final XPath result for all the partial results
@@ -182,5 +194,8 @@ extern uint32
 extern status_t
     plock_make_final_result (plock_cb_t *plcb);
 
+#ifdef __cplusplus
+}  /* end extern 'C' */
+#endif
 
 #endif            /* _H_plock */

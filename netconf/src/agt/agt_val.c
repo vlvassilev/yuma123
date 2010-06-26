@@ -4767,6 +4767,11 @@ status_t
 
     res = NO_ERR;
 
+    if (cfg_first_partial_lock(target) == NULL) {
+        /* no need to check for partial-lock violations */
+        return NO_ERR;
+    }
+
     /* usually only save if the source config was touched */
     if (!cfg_get_dirty_flag(source)) {
         /* no need to check for partial-lock violations */

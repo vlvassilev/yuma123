@@ -2940,6 +2940,8 @@ void
                                  val_value_t *oldval)
 {
     xpath_resnode_t *resnode, *nextnode;
+    val_value_t     *valptr;
+    boolean          done;
 
 #ifdef DEBUG
     if (result == NULL || oldval == NULL) {
@@ -2957,10 +2959,23 @@ void
 
         nextnode = xpath_get_next_resnode(resnode);
 
-        if (resnode->node.valptr == oldval) {
-            dlq_remove(resnode);
-            xpath_free_resnode(resnode);
-        }            
+        /* check if the oldval is an ancestor-or-self
+         * node for this valptr in the result node-set
+         */
+        valptr = resnode->node.valptr;
+        done = FALSE;
+        while (!done) {
+            if (valptr == oldval) {
+                dlq_remove(resnode);
+                xpath_free_resnode(resnode);
+                done = TRUE;
+            } else if (valptr->parent != NULL &&
+                       !obj_is_root(valptr->parent->obj)) {
+                valptr = valptr->parent;
+            } else {
+                done = TRUE;
+            }
+        }
     }
 
 }  /* xpath_nodeset_delete_valptr */

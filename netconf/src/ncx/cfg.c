@@ -20,7 +20,7 @@
        is already partial-locked by another session
      - CFG_ST_READY to CFG_ST_FLOCK is always OK
      - CFG_ST_FLOCK to/from CFG_ST_PLOCK is not allowed
-     - partial-lock or global lock active, but not both
+     - partial-lock(s) or global lock can be active, but not both
      - deleting a session will cause all locks for that session
        to be deleted.  Any global locks on the candidate
        will cause a discard-changes
@@ -75,6 +75,10 @@ date         init     comment
 
 #ifndef _H_plock
 #include  "plock.h"
+#endif
+
+#ifndef _H_plock_cb
+#include  "plock_cb.h"
 #endif
 
 #ifndef _H_rpc
@@ -248,7 +252,7 @@ static void
 
     while (!dlq_empty(&cfg->plockQ)) {
         plock = (plock_cb_t *)dlq_deque(&cfg->plockQ);
-        plock_free_cb(plock);
+        plock_cb_free(plock);
     }
 
     m__free(cfg);
@@ -1076,7 +1080,7 @@ status_t
 /********************************************************************
 * FUNCTION cfg_is_global_locked
 *
-* Check if the specified config has ab active global lock
+* Check if the specified config has an active global lock
 *
 * INPUTS:
 *    cfg = Config template to check 
@@ -1095,14 +1099,36 @@ boolean
     }
 #endif
 
-    switch (cfg->cfg_state) {
-    case CFG_ST_FLOCK:
-        return TRUE;
-    default:
-        return FALSE;
-    }
+    return (cfg->cfg_state == CFG_ST_FLOCK) ? TRUE : FALSE;
 
 } /* cfg_is_global_locked */
+
+
+/********************************************************************
+* FUNCTION cfg_is_partial_locked
+*
+* Check if the specified config has any active partial locks
+*
+* INPUTS:
+*    cfg = Config template to check 
+*
+* RETURNS:
+*    TRUE if partial lock active, FALSE if not
+*********************************************************************/
+boolean
+    cfg_is_partial_locked (const cfg_template_t *cfg)
+{
+
+#ifdef DEBUG
+    if (!cfg) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return (cfg->cfg_state == CFG_ST_PLOCK) ? TRUE : FALSE;
+
+} /* cfg_is_partial_locked */
 
 
 /********************************************************************
@@ -1332,7 +1358,7 @@ void
             if (cfg->root != NULL) {
                 val_clear_partial_lock(cfg->root, plcb);
             }
-            plock_free_cb(plcb);
+            plock_cb_free(plcb);
         }
     }
 
@@ -1548,27 +1574,25 @@ plock_cb_t *
 * Get the next partial lock in the specified config.
 *
 * INPUTS:
-*    cfg = Config template to use
-*    curlockcb == current lock control block; get next CB
+*    curplockcb == current lock control block; get next CB
 *
 * RETURNS:
 *   pointer to the next partial lock control block
 *   NULL if none exist at this time
 *********************************************************************/
 plock_cb_t *
-    cfg_next_partial_lock (cfg_template_t *cfg,
-                           plock_cb_t *curplockcb)
+    cfg_next_partial_lock (plock_cb_t *curplockcb)
 {
 #ifdef DEBUG
-    if (cfg == NULL || curplockcb == NULL) {
+    if (curplockcb == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
 #endif
 
-    return (plock_cb_t *)dlq_firstEntry(&cfg->plockQ);
+    return (plock_cb_t *)dlq_nextEntry(curplockcb);
 
-}  /* cfg_first_partial_lock */
+}  /* cfg_next_partial_lock */
 
 
 
@@ -1610,7 +1634,7 @@ void
             if (cfg->root != NULL) {
                 val_clear_partial_lock(cfg->root, plock);
             }
-            plock_free_cb(plock);
+            plock_cb_free(plock);
             if (dlq_empty(&cfg->plockQ)) {
                 cfg->cfg_state = CFG_ST_READY;
             } else {

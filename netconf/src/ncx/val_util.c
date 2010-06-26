@@ -40,6 +40,10 @@ date         init     comment
 #include  "procdefs.h"
 #endif
 
+#ifndef _H_cfg
+#include "cfg.h"
+#endif
+
 #ifndef _H_cli
 #include "cli.h"
 #endif
@@ -3056,6 +3060,7 @@ status_t
 
 {
     val_value_t   *childval, *upval;
+    cfg_template_t *running;
     uint32         i;
     status_t       res;
 
@@ -3066,6 +3071,12 @@ status_t
 #endif
 
     if (!val_is_config_data(val)) {
+        return NO_ERR;
+    }
+
+    /* quick exist check */
+    running = cfg_get_config_id(NCX_CFGID_RUNNING);
+    if (cfg_first_partial_lock(running) == NULL) {
         return NO_ERR;
     }
 
@@ -3170,12 +3181,10 @@ void
     for (i=0; i < VAL_MAX_PLOCKS; i++) {
         newval->plock[i] = curval->plock[i];
         if (curval->plock[i] != NULL) {
-            result = (curval->plock[i])->plock_final_result;
-            if (result != NULL) {
-                xpath_nodeset_swap_valptr(result, 
-                                          curval, 
-                                          newval);
-            }
+            result = plock_get_final_result(curval->plock[i]);
+            xpath_nodeset_swap_valptr(result, 
+                                      curval, 
+                                      newval);
         }
     }
 
@@ -3207,10 +3216,8 @@ void
 
     for (i=0; i < VAL_MAX_PLOCKS; i++) {
         if (curval->plock[i] != NULL) {
-            result = (curval->plock[i])->plock_final_result;
-            if (result != NULL) {
-                xpath_nodeset_delete_valptr(result, curval);
-            }
+            result = plock_get_final_result((curval->plock[i]));
+            xpath_nodeset_delete_valptr(result, curval);
         }
     }
 

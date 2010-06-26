@@ -2098,6 +2098,91 @@ val_value_t *
 }  /* agt_make_leaf */
 
 
+
+/********************************************************************
+* FUNCTION agt_make_uint_leaf
+*
+* make a val_value_t struct for a specified leaf or leaf-list
+*
+INPUTS:
+*   parentobj == parent object to find child leaf object
+*   leafname == name of leaf to find (namespace hardwired)
+*   leafval == number value for leaf
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced value struct or NULL if some error
+*********************************************************************/
+val_value_t *
+    agt_make_uint_leaf (obj_template_t *parentobj,
+                        const xmlChar *leafname,
+                        uint32 leafval,
+                        status_t *res)
+{
+    xmlChar numbuff[NCX_MAX_NUMLEN];
+
+    sprintf((char *)numbuff, "%u", leafval);
+
+    return agt_make_leaf(parentobj,
+                         leafname,
+                         numbuff,
+                         res);
+
+}  /* agt_make_uint_leaf */
+
+
+/********************************************************************
+* FUNCTION agt_make_list
+*
+* make a val_value_t struct for a specified list
+*
+INPUTS:
+*   parentobj == parent object to find child leaf object
+*   listame == name of list object to find (namespace hardwired)
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced value struct for the list or NULL if some error
+*********************************************************************/
+val_value_t *
+    agt_make_list (obj_template_t *parentobj,
+                   const xmlChar *listname,
+                   status_t *res)
+{
+    obj_template_t  *listobj;
+    val_value_t     *listval;
+    
+    listobj = obj_find_child(parentobj,
+                             obj_get_mod_name(parentobj),
+                             listname);
+    if (!listobj) {
+        *res =ERR_NCX_DEF_NOT_FOUND;
+        return NULL;
+    }
+    if (listobj->objtype != OBJ_TYP_LIST) {
+        *res = ERR_NCX_WRONG_TYPE;
+        return NULL;
+    }
+
+    listval = val_new_value();
+    if (listval == NULL) {
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+
+    val_init_from_template(listval, listobj);
+
+    return listval;
+
+}  /* agt_make_list */
+
+
 /********************************************************************
 * FUNCTION agt_make_virtual_leaf
 *

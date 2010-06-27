@@ -36,11 +36,15 @@ clean:
 	rm -f build-stamp configure-stamp
 
 	# Add here commands to clean up after the build process.
-	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma-tools; cd ..)
-	$(MAKE) DEBIAN=1  \
-	DESTDIR=$(CURDIR)/debian/yuma-tools clean
+	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma-client; cd ..)
+	$(MAKE) DEBIAN=1 CLIENT=1 \
+	DESTDIR=$(CURDIR)/debian/yuma-client clean
+	$(MAKE) DEBIAN=1 SERVER=1 \
+	DESTDIR=$(CURDIR)/debian/yuma-server clean
+	$(MAKE) DEBIAN=1 SHLIBS=1 \
+	DESTDIR=$(CURDIR)/debian/yuma-shlibs clean
 	$(MAKE) DEBIAN=1 DEVELOPER=1 \
-	DESTDIR=$(CURDIR)/debian/yuma-tools-dev clean
+	DESTDIR=$(CURDIR)/debian/yuma-dev clean
 
 	dh_clean 
 
@@ -51,14 +55,18 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/yuma.
-	$(MAKE) RELEASE=$(MY_REL) \
-	DESTDIR=$(CURDIR)/debian/yuma-tools install
+	$(MAKE) CLIENT=1 RELEASE=$(MY_REL) \
+	DESTDIR=$(CURDIR)/debian/yuma-client install
+	$(MAKE) SERVER=1 RELEASE=$(MY_REL) \
+	DESTDIR=$(CURDIR)/debian/yuma-server install
+	$(MAKE) SHLIBS=1 RELEASE=$(MY_REL) \
+	DESTDIR=$(CURDIR)/debian/yuma-shlibs install
 	$(MAKE) DEVELOPER=1 RELEASE=$(MY_REL) \
 	DESTDIR=$(CURDIR)/debian/yuma-dev install
 
 postinst: 
-	#ldconfig
-	#echo "*** did ldconfig ***"
+	ldconfig
+	echo "*** did ldconfig ***"
 
 # Build architecture-independent files here.
 binary-indep: install
@@ -88,9 +96,9 @@ binary-arch: install
 	dh_compress
 	dh_fixperms
 #	dh_perl
-#	dh_makeshlibs
+	dh_makeshlibs
 	dh_installdeb
-#	dh_shlibdeps
+	dh_shlibdeps
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb

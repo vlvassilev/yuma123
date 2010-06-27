@@ -7,7 +7,7 @@
 # environment vars, so it works in plain debuild, rpmbuild
 #
 LIBNCX_MAJOR_VERSION=1
-LIBNCX_MINOR_VERSION=12
+LIBNCX_MINOR_VERSION=13
 SOVERSION=$(LIBNCX_MAJOR_VERSION).$(LIBNCX_MINOR_VERSION)
 
 

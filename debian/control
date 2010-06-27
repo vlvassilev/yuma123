@@ -19,7 +19,7 @@ Depends: yuma-tools, ${shlibs:Depends}, ${misc:Depends}
 Description: YANG-based Unified Modular Automation tools (dev)
  Yuma Tools is a YANG-based NETCONF-over-SSH client and server
  development toolkit.  This package contains H files, scripts,
- and other files needed to create SIL code for use with
- the netconfd server.
+ and other files needed to create server instrumentation code
+ for use with the netconfd server.
 
 

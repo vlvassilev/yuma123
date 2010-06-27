@@ -1,4 +1,4 @@
-Source: yuma-tools
+Source: yuma
 Section: devel
 Priority: extra
 Maintainer: Andy Bierman <andyb@iwl.com>
@@ -6,16 +6,16 @@ Build-Depends: debhelper (>= 7)
 Standards-Version: 3.8.1
 Homepage: http://yuma.iwl.com/
 
-Package: yuma-tools
+Package: yuma
 Architecture: any
 Depends: libxml2, ${shlibs:Depends}, ${misc:Depends}
 Description: YANG-based Unified Modular Automation tools (libs)
  Yuma Tools is a YANG-based NETCONF-over-SSH client and server
  development toolkit.
 
-Package: yuma-tools-dev
+Package: yuma-dev
 Architecture: any
-Depends: yuma-tools, ${shlibs:Depends}, ${misc:Depends}
+Depends: yuma, ${shlibs:Depends}, ${misc:Depends}
 Description: YANG-based Unified Modular Automation tools (dev)
  Yuma Tools is a YANG-based NETCONF-over-SSH client and server
  development toolkit.  This package contains H files, scripts,

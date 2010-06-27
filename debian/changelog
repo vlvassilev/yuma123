@@ -1,10 +1,12 @@
-yuma-tools (1.13-1) unstable; urgency=medium
-  * Changed name because a program called yuma already exists
+yuma (1.13-1) unstable; urgency=medium
   * Added partial lock support (RFC 57517)
   * Added partial-lock monitoring support
   * Bugfixes in XPath validation, config filtering,
     H file code generation
- -- Andy Bierman <andyb@iwl.com>  Sun, 27 Jun 2010 09:17:00 -0700
+  * Static link of obscure libraries on debian build
+  * Static link of libncx to allow install without root priv
+  * Single package instead of 3 packages for tools
+ -- Andy Bierman <andyb@iwl.com>  Sun, 27 Jun 2010 17:17:00 -0700
 yuma (1.12-2) unstable; urgency=medium
   * Changed numbering to align with debian standards
   * Fixed bugs in yangcli:

@@ -14,7 +14,7 @@ configure: configure-stamp
 configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
-	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma-tools; cd ..)
+	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma; cd ..)
 	touch configure-stamp
 
 
@@ -36,11 +36,11 @@ clean:
 	rm -f build-stamp configure-stamp
 
 	# Add here commands to clean up after the build process.
-	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma-tools; cd ..)
+	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma; cd ..)
 	$(MAKE) DEBIAN=1  STATIC=1 \
-	DESTDIR=$(CURDIR)/debian/yuma-tools clean
+	DESTDIR=$(CURDIR)/debian/yuma clean
 	$(MAKE) DEBIAN=1 STATIC=1 DEVELOPER=1 \
-	DESTDIR=$(CURDIR)/debian/yuma-tools-dev clean
+	DESTDIR=$(CURDIR)/debian/yuma-dev clean
 
 	dh_clean 
 
@@ -52,9 +52,9 @@ install: build
 
 	# Add here commands to install the package into debian/yuma.
 	$(MAKE) DEBIAN=1 STATIC=1 RELEASE=$(MY_REL) \
-	DESTDIR=$(CURDIR)/debian/yuma-tools install
+	DESTDIR=$(CURDIR)/debian/yuma install
 	$(MAKE) DEBIAN=1 STATIC=1 DEVELOPER=1 RELEASE=$(MY_REL) \
-	DESTDIR=$(CURDIR)/debian/yuma-tools-dev install
+	DESTDIR=$(CURDIR)/debian/yuma-dev install
 
 postinst: 
 	#ldconfig

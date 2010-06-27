@@ -24,7 +24,7 @@ build-stamp: configure-stamp
 	dh_testdir
 
 	# Add here commands to compile the package.
-	$(MAKE) DEBIAN=1 RELEASE=$(MY_REL)
+	$(MAKE) DEBIAN=1 FULL_STATIC=1 STATIC=1 RELEASE=$(MY_REL)
 
 	#docbook-to-man debian/yuma.sgml > yuma.1
 
@@ -37,9 +37,9 @@ clean:
 
 	# Add here commands to clean up after the build process.
 	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma-tools; cd ..)
-	$(MAKE) DEBIAN=1  \
+	$(MAKE) DEBIAN=1  STATIC=1 \
 	DESTDIR=$(CURDIR)/debian/yuma-tools clean
-	$(MAKE) DEBIAN=1 DEVELOPER=1 \
+	$(MAKE) DEBIAN=1 STATIC=1 DEVELOPER=1 \
 	DESTDIR=$(CURDIR)/debian/yuma-tools-dev clean
 
 	dh_clean 
@@ -51,9 +51,9 @@ install: build
 	dh_installdirs
 
 	# Add here commands to install the package into debian/yuma.
-	$(MAKE) RELEASE=$(MY_REL) \
+	$(MAKE) STATIC=1 RELEASE=$(MY_REL) \
 	DESTDIR=$(CURDIR)/debian/yuma-tools install
-	$(MAKE) DEVELOPER=1 RELEASE=$(MY_REL) \
+	$(MAKE) STATIC=1 DEVELOPER=1 RELEASE=$(MY_REL) \
 	DESTDIR=$(CURDIR)/debian/yuma-dev install
 
 postinst: 
@@ -88,9 +88,9 @@ binary-arch: install
 	dh_compress
 	dh_fixperms
 #	dh_perl
-#	dh_makeshlibs
+	dh_makeshlibs
 	dh_installdeb
-#	dh_shlibdeps
+	dh_shlibdeps
 	dh_gencontrol
 	dh_md5sums
 	dh_builddeb

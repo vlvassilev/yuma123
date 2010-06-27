@@ -45,10 +45,7 @@ toasterinstall:
 	for dir in $(DIRS); do\
           cd $$dir && $(MAKE) install && cd ..;\
         done
-ifdef RELEASE
-ifndef SHLIBS
-ifndef SERVER
-ifndef CLIENT
+ifndef DEBIAN
 	mkdir -p $(SRC_INST)
 	mkdir -p $(SRC_INST)/src
 	mkdir -p $(SRC_INST)/lib
@@ -58,8 +55,17 @@ ifndef CLIENT
 	cp src/*c $(SRC_INST)/src/
 	cp src/*h $(SRC_INST)/src/
 	cp src/Makefile $(SRC_INST)/src/
-endif
-endif
+else
+ifdef DEVELOPER
+	mkdir -p $(SRC_INST)
+	mkdir -p $(SRC_INST)/src
+	mkdir -p $(SRC_INST)/lib
+	mkdir -p $(SRC_INST)/bin
+	cp Makefile $(SRC_INST)
+	cp src/*start $(SRC_INST)/src/
+	cp src/*c $(SRC_INST)/src/
+	cp src/*h $(SRC_INST)/src/
+	cp src/Makefile $(SRC_INST)/src/
 endif
 endif
 

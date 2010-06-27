@@ -36,6 +36,14 @@ install:
 	mkdir -p $(ETC_INSTALL)
 	cp yangdumpcode-sample.conf $(ETC_INSTALL)/
 else
+ifdef DEBIAN
+install:
+	mkdir -p $(ETC_INSTALL)
+	cp netconfd-sample.conf $(ETC_INSTALL)/
+	cp yangcli-sample.conf $(ETC_INSTALL)/
+	cp yangdiff-sample.conf $(ETC_INSTALL)/
+	cp yangdump-sample.conf $(ETC_INSTALL)/
+else
 install:
 	mkdir -p $(ETC_INSTALL)
 	cp netconfd-sample.conf $(ETC_INSTALL)/
@@ -43,6 +51,7 @@ install:
 	cp yangdiff-sample.conf $(ETC_INSTALL)/
 	cp yangdump-sample.conf $(ETC_INSTALL)/
 	cp yangdumpcode-sample.conf $(ETC_INSTALL)/
+endif
 endif
 endif
 endif

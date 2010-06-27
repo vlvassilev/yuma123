@@ -204,6 +204,19 @@ dependencies: $(DEPS)
 ################ DEPENDENCIES #########################
 # depend rule must be included after the 'all' make rule
 
+ifdef RELEASE
+# force .so build in debian and RPM releases
+ifdef MAC
+SIL_LIB=$(LIB_INST)/lib$(SUBDIR_NM).dylib
+else
+SIL_LIB=$(LIB_INST)/lib$(SUBDIR_NM).so
+endif
+else
+SIL_LIB=$(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
+endif
+
+
+
 test:
 
 install:
@@ -211,24 +224,17 @@ ifndef SHLIBS
 ifndef CLIENT
 ifndef DEVELOPER
 	mkdir -p $(REAL_INST)
-	install $(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) $(REAL_INST)
+	install $(SIL_LIB) $(REAL_INST)
 endif
 endif
 endif
 
 work:
-	install $(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) $(WORK_INST)
+	install $(SIL_LIB) $(WORK_INST)
 
-ifdef RELEASE
-# forse .so build in debian and RPM releases
-ifdef MAC
-sil_lib: $(LIB_INST)/lib$(SUBDIR_NM).dylib
-else
-sil_lib: $(LIB_INST)/lib$(SUBDIR_NM).so
-endif
-else
-sil_lib: $(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
-endif
+
+sil_lib: $(SIL_LIB)
+
 
 # this dummy rule keeps make from deleting the $(OBJS) as
 # intermediate files

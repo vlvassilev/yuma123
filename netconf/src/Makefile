@@ -29,8 +29,13 @@ ifdef SHLIBS
 APPS =
 DIRS = ncx
 else
+ifdef DEBIAN
+APPS = subsys netconfd yangdump yangdiff yangcli
+DIRS = agt mgr ncx ydump $(APPS)
+else
 APPS = subsys netconfd yangdump yangdumpcode yangdiff yangcli
 DIRS = agt mgr ncx ydump $(APPS)
+endif
 endif
 endif
 endif

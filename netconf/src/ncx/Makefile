@@ -34,6 +34,11 @@ include ../platform/platform.profile
 
 include ../platform/platform.profile.depend
 
+ifdef DEBIAN
+BLD_INCLUDES=
+else
+BLD_INCLUDES=includes
+endif
 
 test:
 
@@ -53,7 +58,7 @@ ifdef DEVELOPER
 # just install the H files
 install: includes
 else
-install: includes
+install: $(BLD_INCLUDES)
 ifndef STATIC
 # install dynamic libncx file
 	mkdir -p $(REAL_INST)
@@ -79,9 +84,13 @@ endif
 endif
 endif
 
+# 1 librarr uninstall rule for all variants
+# TBD: uninstall includes
 uninstall:
 	rm -f $(REAL_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)*
 
+
+# check which variant of the library to build
 ifdef SERVER
 ncxlib:
 else
@@ -113,16 +122,20 @@ superclean:
 
 distclean: superclean uninstall
 
+# this rule is ignored if STATIC=1; used only in linux
 $(LBASE)/libncx.so.$(SOVERSION): $(OBJS)
 	gcc -shared -rdynamic -Wl,-soname,libncx.so.$(SOVERSION) \
 	-o $@ $(OBJS) -lc
 
+# this rule is ignored if STATIC=1; used only on MacOSX
 $(LBASE)/libncx.dylib: $(OBJS)
 	gcc -shared -dynamiclib -std=gnu99 -current_version \
 	$(SOVERSION) \
 	-undefined dynamic_lookup \
 	-o $@ -install_name libncx.dylib $(OBJS) -lxml2
 
+
+# install the H files into $DESTDIR/usr/include
 includes:
 ifndef SHLIBS
 ifndef SERVER

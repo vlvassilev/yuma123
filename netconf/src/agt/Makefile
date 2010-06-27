@@ -28,6 +28,12 @@ include ../platform/platform.profile
 
 include ../platform/platform.profile.depend
 
+ifdef DEBIAN
+BLD_INCLUDES=
+else
+BLD_INCLUDES=includes
+endif
+
 test:
 
 ifdef SHLIBS
@@ -46,8 +52,8 @@ ifdef DEVELOPER
 # just install the H files
 install: includes
 else
-# just install the H files
-install: includes
+# just install the H files, except debian yuma-tools build
+install: $(BLD_INCLUDES)
 endif
 endif
 endif

@@ -29,7 +29,11 @@ else
 ifdef DEVELOPER
 install: installfiles
 else
+ifdef DEBIAN
+install:
+else
 install: installfiles
+endif
 endif
 endif
 endif
@@ -40,7 +44,7 @@ installfiles:
 	cp makefile.sil $(UTIL_INSTALL)/
 	cp makefile-top.sil $(UTIL_INSTALL)/
 	mkdir -p $(BIN_INSTALL)
-	install $(OWNER) $(GRP) make_sil_dir.sh $(BIN_INSTALL)
+	install $(OWNER) $(GRP) make_sil_dir $(BIN_INSTALL)
 
 distclean: superclean uninstall
 

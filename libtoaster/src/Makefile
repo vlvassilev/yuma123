@@ -219,7 +219,16 @@ endif
 work:
 	install $(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) $(WORK_INST)
 
+ifdef RELEASE
+# forse .so build in debian and RPM releases
+ifdef MAC
+sil_lib: $(LIB_INST)/lib$(SUBDIR_NM).dylib
+else
+sil_lib: $(LIB_INST)/lib$(SUBDIR_NM).so
+endif
+else
 sil_lib: $(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
+endif
 
 # this dummy rule keeps make from deleting the $(OBJS) as
 # intermediate files

@@ -1,4 +1,4 @@
-usr/bin/make_sil_dir.sh
+usr/bin/make_sil_dir
 usr/bin/yangdumpcode
 usr/share/doc/yuma/yumatools-dev-license.pdf.gz
 usr/share/doc/yuma/yuma-dev-manual.pdf.gz

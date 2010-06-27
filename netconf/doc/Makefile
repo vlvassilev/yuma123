@@ -35,7 +35,6 @@ ifdef SHLIBS
 install:
 	mkdir -p $(DOC_INSTALL)
 	cp extra/AUTHORS $(DOC_INSTALL)
-	cp extra/ChangeLog $(DOC_INSTALL)
 	cp extra/README $(DOC_INSTALL)
 	cp extra/yumatools-cs-license.pdf $(DOC_INSTALL)
 	cp extra/yumatools-legal-notices.pdf $(DOC_INSTALL)
@@ -61,7 +60,6 @@ install:
 	cp yuma_docs/yuma-yangdiff-manual.pdf $(DOC_INSTALL)
 	cp yuma_docs/yuma-yangdump-manual.pdf $(DOC_INSTALL)
 	cp extra/AUTHORS $(DOC_INSTALL)
-	cp extra/ChangeLog $(DOC_INSTALL)
 	cp extra/README $(DOC_INSTALL)
 	cp extra/yumatools-cs-license.pdf $(DOC_INSTALL)
 	cp extra/yumatools-legal-notices.pdf $(DOC_INSTALL)
@@ -78,7 +76,6 @@ install:
 	cp yuma_docs/yuma-yangdump-manual.pdf $(DOC_INSTALL)
 	cp yuma_docs/yuma-dev-manual.pdf $(DOC_INSTALL)
 	cp extra/AUTHORS $(DOC_INSTALL)
-	cp extra/ChangeLog $(DOC_INSTALL)
 	cp extra/README $(DOC_INSTALL)
 	cp extra/yumatools-cs-license.pdf $(DOC_INSTALL)
 	cp extra/yumatools-legal-notices.pdf $(DOC_INSTALL)

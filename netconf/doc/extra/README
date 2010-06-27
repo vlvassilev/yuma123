@@ -32,6 +32,7 @@ FILES:
    /usr/share/yuma/modules/*
  - a set of sample CLI 'conf' files for the programs above
    /etc/yuma/etc/*
+   (copy foo-sample.conf to foo.conf to enable)
  - developer utilities
    /usr/share/yuma/util/*
  - yangcli user-history file
@@ -66,7 +67,7 @@ IMPORTANT INSTALLATION NOTE
   *  the module path.                                          *
   *                                                            *
   *  These files must be installed in one of the default       *
-  *  locatations, such as ~/modules or /usr/share/yang/modules *
+  *  locations, such as ~/modules or /usr/share/yang/modules   *
   *                                                            *
   *  These files are used for CLI and config file processing.  *
   *                                                            *

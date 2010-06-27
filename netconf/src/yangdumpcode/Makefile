@@ -48,9 +48,19 @@ test:
 
 
 # needs to be done by root
+ifdef DEVELOPER
 install:
 	mkdir -p $(REAL_INST)
 	install $(OWNER) $(GRP) $(BIN_INST)/$(SUBDIR_NM) $(REAL_INST)
+else
+ifndef RELEASE
+install:
+	mkdir -p $(REAL_INST)
+	install $(OWNER) $(GRP) $(BIN_INST)/$(SUBDIR_NM) $(REAL_INST)
+else
+install:
+endif
+endif
 
 uninstall:
 	rm -f  $(REAL_INST)/$(SUBDIR_NM)

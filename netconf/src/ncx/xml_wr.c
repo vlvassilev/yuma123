@@ -215,7 +215,7 @@ static void
                 ch = fgetc(fil);
 
                 if (ch == EOF) {
-                    if (lastch) {
+                    if (lastch && !inxml) {
                         ses_putchar(scb, (uint32)lastch);
                     }
                     fclose(fil);

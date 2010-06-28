@@ -197,9 +197,19 @@ static status_t
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    /* allocate a new lock cb */
+    /* allocate a new lock cb
+     * the plcb pointer will be NULL if the result is not NO_ERR
+     */
     res = NO_ERR;
     plcb = plock_cb_new(SES_MY_SID(scb), &res);
+    if (res == ERR_NCX_RESOURCE_DENIED &&
+        !cfg_is_partial_locked(running)) {
+        /* no partial locks so it is safe to reset the lock index */
+        plock_cb_reset_id();
+        res = NO_ERR;
+        plcb = plock_cb_new(SES_MY_SID(scb), &res);
+    }
+
     if (res != NO_ERR) {
         agt_record_error(scb,
                          &msg->mhdr,

@@ -98,6 +98,10 @@ the netconfd server.
 echo "Yuma Tools installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
+%post dev
+echo "Yuma Tools SIL developer files installed."
+echo "Check the user manuals in /usr/share/doc/yuma"
+
 %changelog
 * Mon Jun 28 2010 Andy Bierman <andy at iwl.com> 1.13-1
   * Added partial lock support (RFC 57517)

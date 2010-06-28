@@ -10,7 +10,6 @@ Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
 Requires: ncurses
-Requires: libssh2
 Requires: libxml2
 
 %description

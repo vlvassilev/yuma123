@@ -13,6 +13,7 @@ TARGET=$(TBASE)/$(SUBDIR_NM)
 BIN_INST=$(TBASE)/bin
 REAL_INST=$(DESTDIR)/usr/bin
 PROG=yangcli
+LN_EXTRA=-Wl,-utputs -Wl,-utparm -Wl,-utigetnum -Wl,-utigetstr -Wl,-usetupterm
 
 ##################### LIBRARIES ########################
 
@@ -29,6 +30,7 @@ DLIBS =	-L../../target/lib -lmgr -lncx \
 	-L/lib -L/usr/lib -lxml2 -lncurses -lssh2 \
 	-L../../../libtecla -ltecla
 
+ifdef DEBIAN
 SLIBS = -L../../target/lib -lmgr -lncx \
 	-L/lib -L/usr/lib -lxml2 \
 	-l:/usr/lib/libssh2.a \
@@ -36,6 +38,15 @@ SLIBS = -L../../target/lib -lmgr -lncx \
 	-l:/lib/libgpg-error.a \
 	-l:../../../libtecla/libtecla.a \
 	-l:/usr/lib/libncurses.a
+else
+SLIBS = -L../../target/lib -lmgr -lncx \
+	-L/lib -L/usr/lib -lxml2 \
+	-l:/usr/lib/libssh2.a \
+	-l:/lib/libgcrypt.a \
+	-l:/lib/libgpg-error.a \
+	-l:../../../libtecla/libtecla.a \
+	-l:/usr/lib/libncurses.so
+endif
 
 # set FULL_STATIC=1 to force complete shared libraries
 # except libxml2 which is always installed on linux
@@ -87,7 +98,7 @@ distclean: superclean uninstall
 # this real rule keeps make from deleting the $(OBJS) as
 # intermediate files
 yangcli: $(OBJS) $(LIBTARGS)
-	$(LINK) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(PROG) $(LPATH) $(LIBS)
+	$(LINK) $(LN_EXTRA) $(LFLAGS) $(OBJS) -o $(BIN_INST)/$(PROG) $(LPATH) $(LIBS)
 
 
 

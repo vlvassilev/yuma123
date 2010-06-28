@@ -34,6 +34,8 @@ make STATIC=1 DEVELOPER=1 RELEASE=1 %{?_smp_mflags}
 rm -rf $RPM_BUILD_ROOT
 make install LDFLAGS+=--build-id STATIC=1 RELEASE=1 \
 DESTDIR=$RPM_BUILD_ROOT
+make install LDFLAGS+=--build-id STATIC=1 RELEASE=1 DEVELOPER=1 \
+DESTDIR=$RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT

@@ -199,23 +199,79 @@ static void
                   const val_value_t *val)
 {
     FILE               *fil;
-    boolean             done;
-    int                 ch;
+    boolean             done, inxml, xmldone, firstline;
+    int                 ch, lastch;
+
+    xmldone = FALSE;
+    inxml = FALSE;
+    done = FALSE;
+    firstline = TRUE;
+    lastch = 0;
 
     if (val->v.fname) {
         fil = fopen((const char *)val->v.fname, "r");
         if (fil) {
-            done = FALSE;
             while (!done) {
                 ch = fgetc(fil);
+
                 if (ch == EOF) {
+                    if (lastch) {
+                        ses_putchar(scb, (uint32)lastch);
+                    }
                     fclose(fil);
                     done = TRUE;
-                } else {
-                    ses_putchar(scb, (uint32)ch);
+                    continue;
                 }
+
+                if (firstline) {
+                    /* do not match the first char in the file */
+                    if (ch == '\n' && lastch) {
+                        /* done with xml checking */
+                        firstline = FALSE;
+                        xmldone = TRUE;
+                    } else if (!xmldone) {
+                        /* look for xml declaration and remove it */
+                        if (inxml) {
+                            /* look for end */
+                            if (lastch == '?' && ch == '>') {
+                                xmldone = TRUE;
+                            }
+                        } else {
+                            /* look for start */
+                            if (lastch == '<' && ch == '?') {
+                                inxml = TRUE;
+                            }
+                        }
+                    }
+
+                    /* first time xmldone is true skip this */
+                    if (xmldone && !inxml) {
+                        if (lastch) {
+                            ses_putchar(scb, (uint32)lastch);
+                        }
+                    }
+
+                    /* setup 3rd loop to print char after '?>' */
+                    if (xmldone && inxml) {
+                        if (ch != '>') {
+                            inxml = FALSE;
+                        }
+                    }
+                } else {
+                    if (lastch) {
+                        ses_putchar(scb, (uint32)lastch);
+                    }
+                }
+
+                lastch = ch;
             }
+        } else {
+            log_error("\nError: open extern var "
+                      "file '%s' failed",
+                      val->v.fname);
         }
+    } else {
+        SET_ERROR(ERR_INTERNAL_VAL);
     }
     
 }  /* write_extern */

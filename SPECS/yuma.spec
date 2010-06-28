@@ -9,15 +9,6 @@ URL:            http://yuma.iwl.com/
 Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-%description
-Yuma Tools is a YANG-based NETCONF-over-SSH client and server
-development toolkit.  The netconfd server includes an automated
-central NETCONF protocol stack, based directly on YANG modules.
-The yangdump and yangdiff development tools are also
-included, to compile and process YANG modules.
-
-%package yuma
-
 Summary: YANG-based Unified Modular Automation Tools
 Group: Development/Tools
 License: IWL
@@ -26,10 +17,10 @@ Requires: ncurses
 Requires: libssh2
 Requires: libxml2
 
-%description yuma
-Yuma Tools (client only) is a YANG-based NETCONF-over-SSH 
-client application, which provides a CLI-like interface
-for any NETCONF server that supports YANG modules.
+%description
+Yuma Tools is a YANG-based NETCONF-over-SSH client and server
+development toolkit.  The netconfd server includes an automated
+central NETCONF protocol stack, based directly on YANG modules.
 The yangdump and yangdiff development tools are also
 included, to compile and process YANG modules.
 
@@ -51,7 +42,7 @@ DESTDIR=$RPM_BUILD_ROOT
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files yuma
+%files
 %defattr(-,root,root,-)
 %{_bindir}/yangcli
 %{_bindir}/yangdump
@@ -65,7 +56,6 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/doc/yuma/yumatools-cs-license.pdf
 /usr/share/doc/yuma/yumatools-legal-notices.pdf
 /usr/share/doc/yuma/AUTHORS
-/usr/share/doc/yuma/ChangeLog
 /usr/share/doc/yuma/README
 /usr/share/doc/yuma/yuma-user-cmn-manual.pdf
 /usr/share/doc/yuma/yuma-yangcli-manual.pdf

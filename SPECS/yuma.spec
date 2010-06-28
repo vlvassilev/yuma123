@@ -9,10 +9,6 @@ URL:            http://yuma.iwl.com/
 Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
-Summary: YANG-based Unified Modular Automation Tools
-Group: Development/Tools
-License: IWL
-
 Requires: ncurses
 Requires: libssh2
 Requires: libxml2

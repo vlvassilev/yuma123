@@ -1,6 +1,6 @@
 Name:           yuma
-Version:        1.13
-Release:        1%{?dist}
+Version:        1.12
+Release:        2%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -16,17 +16,53 @@ central NETCONF protocol stack, based directly on YANG modules.
 The yangdump and yangdiff development tools are also
 included, to compile and process YANG modules.
 
-%package yuma
+%package shlibs
 
-Summary: YANG-based Unified Modular Automation Tools
+Summary:  YANG-based Unified Modular Automation Tools (shared libs)
+Requires: libxml2
+
+%description shlibs
+Yuma Tools is a YANG-based NETCONF-over-SSH client and server
+development toolkit.  This package contains the libncx shared library.
+
+%post shlibs
+ldconfig
+echo "Yuma Tools shared libraries installed."
+echo "Check the user manuals in /usr/share/doc/yuma"
+
+%files shlibs
+%defattr(-,root,root,-)
+%{_libdir}/libncx*
+/usr/share/doc/yuma/yumatools-cs-license.pdf
+/usr/share/doc/yuma/yumatools-legal-notices.pdf
+/usr/share/doc/yuma/yuma-installation-guide.pdf
+/usr/share/doc/yuma/yuma-quickstart-guide.pdf
+/usr/share/doc/yuma/AUTHORS
+/usr/share/doc/yuma/ChangeLog
+/usr/share/doc/yuma/README
+%{_datadir}/yuma/modules/ietf/*
+%{_datadir}/yuma/modules/netconfcentral/toaster.yang
+%{_datadir}/yuma/modules/netconfcentral/yuma-nacm.yang
+%{_datadir}/yuma/modules/netconfcentral/yuma-app-common.yang
+%{_datadir}/yuma/modules/netconfcentral/yuma-ncx.yang
+%{_datadir}/yuma/modules/netconfcentral/yuma-types.yang
+%{_datadir}/yuma/modules/netconfcentral/yuma-xsd.yang
+%{_datadir}/yuma/modules/netconfcentral/yuma-netconf.yang
+%{_datadir}/yuma/modules/test/*
+%{_datadir}/yuma/modules/yang/*
+
+%package client
+
+Summary: YANG-based Unified Modular Automation Tools (client-side)
 Group: Development/Tools
 License: IWL
 
 Requires: ncurses
 Requires: libssh2
 Requires: libxml2
+Requires: yuma-shlibs
 
-%description yuma
+%description client
 Yuma Tools (client only) is a YANG-based NETCONF-over-SSH 
 client application, which provides a CLI-like interface
 for any NETCONF server that supports YANG modules.
@@ -40,28 +76,29 @@ included, to compile and process YANG modules.
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make STATIC=1 RELEASE=1 %{?_smp_mflags}
-make STATIC=1 DEVELOPER=1 RELEASE=1 %{?_smp_mflags}
+make RELEASE=2 %{?_smp_mflags}
+make DEVELOPER=1 RELEASE=2 %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id STATIC=1 RELEASE=1 \
+make install LDFLAGS+=--build-id RELEASE=2 \
 DESTDIR=$RPM_BUILD_ROOT
+
+%post client
+echo "Yuma Tools client programs installed."
+echo "Check the user manuals in /usr/share/doc/yuma"
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
-%files yuma
+%files client
 %defattr(-,root,root,-)
 %{_bindir}/yangcli
 %{_bindir}/yangdump
 %{_bindir}/yangdiff
-%{_sbindir}/netconfd
-%{_sbindir}/netconf-subsystem
 %{_sysconfdir}/yuma/yangcli-sample.conf
 %{_sysconfdir}/yuma/yangdiff-sample.conf
 %{_sysconfdir}/yuma/yangdump-sample.conf
-%{_sysconfdir}/yuma/netconfd-sample.conf
 /usr/share/doc/yuma/yumatools-cs-license.pdf
 /usr/share/doc/yuma/yumatools-legal-notices.pdf
 /usr/share/doc/yuma/AUTHORS
@@ -71,56 +108,15 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/doc/yuma/yuma-yangcli-manual.pdf
 /usr/share/doc/yuma/yuma-yangdiff-manual.pdf
 /usr/share/doc/yuma/yuma-yangdump-manual.pdf
-/usr/share/doc/yuma/yuma-installation-guide.pdf
-/usr/share/doc/yuma/yuma-quickstart-guide.pdf
-/usr/share/doc/yuma/yuma-netconfd-manual.pdf
 %{_mandir}/man1/yangcli.1.gz
 %{_mandir}/man1/yangdiff.1.gz
 %{_mandir}/man1/yangdump.1.gz
-%{_mandir}/man1/netconfd.1.gz
-%{_mandir}/man1/netconf-subsystem.1.gz
-%{_datadir}/yuma/modules/*
-%{_libdir}/yuma/
-
-%package dev
-
-Summary:  YANG-based Unified Modular Automation Tools (developer)
-Requires: yuma
-
-%description dev
-Yuma Tools is a YANG-based NETCONF-over-SSH client and server
-development toolkit.  This package contains H files, scripts,
-and other files needed to create SIL code for use with
-the netconfd server.
-
-%files dev
-%defattr(-,root,root,-)
-%{_bindir}/make_sil_dir
-%{_bindir}/yangdumpcode
-%{_sysconfdir}/yuma/yangdumpcode-sample.conf
-/usr/share/doc/yuma/yumatools-dev-license.pdf
-/usr/share/doc/yuma/yumatools-legal-notices.pdf
-/usr/share/doc/yuma/yuma-dev-manual.pdf
-%{_mandir}/man1/yangdumpcode.1.gz
-%{_mandir}/man1/make_sil_dir.1.gz
-%{_includedir}/yuma/
-%{_datadir}/yuma/util/
-%{_datadir}/yuma/src/libtoaster/
-
-%post
-echo "Yuma Tools installed."
-echo "Check the user manuals in /usr/share/doc/yuma"
+%{_datadir}/yuma/modules/netconfcentral/yangcli.yang
+%{_datadir}/yuma/modules/netconfcentral/yangdiff.yang
+%{_datadir}/yuma/modules/netconfcentral/yangdump.yang
 
 %changelog
-* Mon Jun 28 2010 Andy Bierman <andy at iwl.com> 1.13-1
-  * Added partial lock support (RFC 57517)
-  * Added partial-lock monitoring support
-  * Bugfixes in XPath validation, config filtering,
-    H file code generation
-  * Static link of obscure libraries on debian build
-  * Static link of libncx to allow install without root priv
-  * Single package instead of 3 packages for tools
-* Tue Jun 01 2010 Andy Bierman <andy at iwl.com> 1.12-2
+* Tue Jun 01 2010 Andy Bierman <andy at @iwl.com> 1.12-2
   * Changed numbering to align with debian standards
   * Fixed bugs in yangcli:
      * tab completion on complex types
@@ -140,7 +136,7 @@ echo "Check the user manuals in /usr/share/doc/yuma"
       * ietf-yang-types
       * yuma-proc
   * Made all code C++ safe for yangui project
-* Fri May 14 2010 Andy Bierman <andy at iwl.com> 0.12-1
+* Fri May 14 2010 Andy Bierman <andy at @iwl.com> 0.12-1
   * Added :url capability support to netconfd
   * Added if, elif, else, eval, end, while, log-*
 	commands to yangcli
@@ -157,7 +153,7 @@ echo "Check the user manuals in /usr/share/doc/yuma"
     in the search path.
   * yangcli now limits remote NETCONF operations based
     on the capabilities reported by the server
-* Fri Apr 02 2010 Andy Bierman <andy at iwl.com> 0.11-2
+* Fri Apr 02 2010 Andy Bierman <andy at @iwl.com> 0.11-2
   * Added 'stream_output' boolean to session hdr to disable
     server output streaming, if desired
   * Updated ietf-yang-types and ietf-netconf-with-defaults
@@ -166,7 +162,7 @@ echo "Check the user manuals in /usr/share/doc/yuma"
   * Fixed packaging bug that put some YANG modules in the
     wrong package
   * Fixed bug in yangcli autoload feature
-* Thu Mar 04 2010 Andy Bierman <andy at iwl.com> 0.11-1
+* Thu Mar 04 2010 Andy Bierman <andy at @iwl.com> 0.11-1
   * Align with YANG draft-11
   * Changed default startup-cfg.xml creation path so
     the current directory is not used.
@@ -185,6 +181,74 @@ echo "Check the user manuals in /usr/share/doc/yuma"
   - Align with yang-draft-10; add some bugfixes
 * Sun Jan 17 2010 Andy Bierman <andyb at iwl.com> 0.9.8.636
   - First RPM build
+
+%package server
+
+Summary:  YANG-based Unified Modular Automation Tools (server-side)
+Requires: openssh
+Requires: libxml2
+Requires: yuma-shlibs
+
+%description server
+Yuma Tools is a YANG-based NETCONF-over-SSH client and server
+development toolkit.  The netconfd server includes an automated
+central NETCONF protocol stack, based directly on YANG modules.
+
+%post server
+echo "Yuma Tools server programs installed."
+echo "Check the user manuals in /usr/share/doc/yuma"
+
+%files server
+%defattr(-,root,root,-)
+%{_sbindir}/netconfd
+%{_sbindir}/netconf-subsystem
+%{_sysconfdir}/yuma/netconfd-sample.conf
+/usr/share/doc/yuma/yumatools-cs-license.pdf
+/usr/share/doc/yuma/yumatools-legal-notices.pdf
+/usr/share/doc/yuma/yuma-netconfd-manual.pdf
+/usr/share/doc/yuma/AUTHORS
+/usr/share/doc/yuma/ChangeLog
+/usr/share/doc/yuma/README
+%{_libdir}/yuma/
+%{_mandir}/man1/netconfd.1.gz
+%{_mandir}/man1/netconf-subsystem.1.gz
+%{_datadir}/yuma/modules/netconfcentral/netconfd.yang
+%{_datadir}/yuma/modules/netconfcentral/yuma-interfaces.yang
+%{_datadir}/yuma/modules/netconfcentral/yuma-mysession.yang
+%{_datadir}/yuma/modules/netconfcentral/yuma-proc.yang
+%{_datadir}/yuma/modules/netconfcentral/yuma-system.yang
+
+
+%package dev
+
+Summary:  YANG-based Unified Modular Automation Tools (developer)
+Requires: yuma-shlibs
+Requires: yuma-server
+
+%description dev
+Yuma Tools is a YANG-based NETCONF-over-SSH client and server
+development toolkit.  This package contains H files, scripts,
+and other files needed to create SIL code for use with
+the netconfd server.
+
+%post dev
+echo "Yuma Tools developer files installed."
+echo "Check the user manuals in /usr/share/doc/yuma"
+
+%files dev
+%defattr(-,root,root,-)
+%{_bindir}/make_sil_dir.sh
+%{_bindir}/yangdumpcode
+%{_sysconfdir}/yuma/yangdumpcode-sample.conf
+/usr/share/doc/yuma/yumatools-dev-license.pdf
+/usr/share/doc/yuma/yumatools-legal-notices.pdf
+/usr/share/doc/yuma/yuma-dev-manual.pdf
+%{_mandir}/man1/yangdumpcode.1.gz
+%{_mandir}/man1/make_sil_dir.sh.1.gz
+%{_includedir}/yuma/
+%{_datadir}/yuma/util/
+%{_datadir}/yuma/src/libtoaster/
+
 
 
 

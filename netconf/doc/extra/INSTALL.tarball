@@ -1,0 +1,153 @@
+
+Yuma Tools -- A Toolset for the YANG data modeling language 
+        and NETCONF protocol
+===========================================================
+
+Copyright (c) 2008 - 2010, Netconf Central, Inc.
+
+See the file "yumatools-cs-license.pdf" for information on usage 
+and redistribution of this toolset, and for a 
+DISCLAIMER OF ALL WARRANTIES.
+
+Source:
+-------
+
+  http://www.netconfcentral.org/
+
+To install the tarball:
+-----------------------
+
+   tar xvf yuma-(version).tar.gz
+
+This will create a child directory in the current
+directory, with all the Yuma Tools files.
+
+Example:
+
+  /mydir> tar xvf yuma-1.13-1.fc12.i686.tar.gz
+
+This creates the directory /mydir/yuma-1.13.
+
+
+USING Yuma Tools tarball programs From a Non Default Location
+--------------------------------------------------------------
+
+After the Yuma Tools files have been installed,
+the programs need to find YANG modules.
+
+There are 2 default locations that Yuma Tools programs
+will look for the 'modules' directory:
+
+   /usr/share/yuma/modules
+
+   $HOME/modules
+
+If these default locations are not used, then
+the $YUMA_INSTALL or $YUMA_HOME
+environment variables can be used to
+identify the directory path string
+for the parent of the 'modules' directory.
+
+For example (bash):
+
+   YUMA_INSTALL=$HOME/yuma-1.13
+   export YUMA_INSTALL
+
+   YUMA_HOME=/mydir/yuma=1.13
+   export YUMA_HOME
+
+A CLI parameter called --yuma-home can also be
+passed at run-time if environment variables
+are not used.
+
+For example:
+
+    /mydir/yuma-1.13/bin/yangcli --yuma-home=/mydir/yuma-1.13
+
+Running the netconfd server from a non-default
+location is no different than the default, except
+the path to the netconf-subsystem in the sshd config
+file is different.
+
+The netconfd program is in the 'sbin' directory.
+For example:
+
+    /mydir/yuma-1.13/sbin/netconfd
+
+The SSH config file needs to be edited.
+For example (/etc/ssh/sshd_config):
+
+  Port 22
+  Port 830
+  Subsystem /mydir/yuma1.13/sbin/netconf-subsystem
+
+
+TARBALL FILES: (relative to the yuma-VERSION directory)
+-------------------------------------------------------
+
+ - a binary linux program called 'yangdump'
+   bin/yangdump
+ - a binary linux program called 'yangdiff'
+   bin/yangdiff
+ - a binary linux program called 'yangcli'
+   bin/yangcli
+ - a binary linux program called 'netconfd'
+   sbin/netconfd
+ - a binary linux program called 'netconf-subsystem'
+   sbin/netconf-subsystem
+ - a binary linux library called 'libtoaster.so'
+   lib/libtoaster.so
+ - documentation pages
+   doc/*
+ - a set of freely available YANG modules 
+   modules/*
+ - a set of sample CLI 'conf' files for the programs above
+   etc/*
+   (copy foo-sample.conf to foo.conf to enable)
+ - a set of man page files for the yuma programs
+   man/*
+ - yangcli user-history file
+   $HOME/.yuma/.yangcli_history
+ - yangcli user-specific temporary files
+   $HOME/.yuma/tmp/*
+
+
+Some of the YANG modules includes with this software were
+generated with the smidump program, available at:
+
+ http://www.ibr.cs.tu-bs.de/projects/libsmi/
+
+WARNING
+=======
+
+This version of yuma implements the YANG language specification
+as defined in:
+
+http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-13.txt
+
+Future versions of yuma may not maintain full 
+compatibility with this Internet Draft.
+
+IMPORTANT INSTALLATION NOTE
+===========================
+
+  **************************************************************
+  *                                                            *
+  *  These programs will not function unless the YANG          *
+  *  modules are properly installed and available in           *
+  *  the module path.                                          *
+  *                                                            *
+  *  These files must be installed in one of the default       *
+  *  locations, such as ~/modules or /usr/share/yuma/modules   *
+  *  or the YUMA_INSTALL or YUMA_HOME environment variable     *
+  *  must be properly set.                                     *
+  *                                                            *
+  *  These files are used for CLI and config file processing.  *
+  *                                                            *
+  **************************************************************
+
+Refer to the manuals in the 'doc' directory
+for installation and operation instructions.
+
+
+

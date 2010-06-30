@@ -1,6 +1,6 @@
 Name:           yuma
 Version:        1.13
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -103,6 +103,10 @@ echo "Yuma Tools SIL developer files installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
+* Wed Jun 30 2010 Andy Bierman <andy at iwl.com> 1.13-2
+  * Fixed bug in yangcli command prompt
+  * Fixed bug in README file
+  * Added support for tarball release and non-root install
 * Mon Jun 28 2010 Andy Bierman <andy at iwl.com> 1.13-1
   * Added partial lock support (RFC 57517)
   * Added partial-lock monitoring support

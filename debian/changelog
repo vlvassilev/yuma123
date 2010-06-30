@@ -1,3 +1,8 @@
+yuma (1.13-2) unstable; urgency=low
+  * Fixed bug in yangcli command prompt
+  * Fixed bug in README file
+  * Added support for tarball release and non-root install
+ -- Andy Bierman <andyb@iwl.com>  Wed, 30 Jun 2010 12:29:00 -0700
 yuma (1.13-1) unstable; urgency=medium
   * Added partial lock support (RFC 57517)
   * Added partial-lock monitoring support

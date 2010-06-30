@@ -287,7 +287,7 @@ static void
     }
 
     cond = runstack_get_cond_state(server_cb->runstack_context);
-    condlen = (cond) ? xml_strlen(FALSE_PROMPT) : 0;
+    condlen = (cond) ? 0: xml_strlen(FALSE_PROMPT);
 
     switch (server_cb->state) {
     case MGR_IO_ST_INIT:

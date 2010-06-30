@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<nc:config xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0">
+   <nacm:nacm xmlns:nacm="http://netconfcentral.org/ns/yuma-nacm">
+      <nacm:enable-nacm>true</nacm:enable-nacm>
+      <nacm:read-default>permit</nacm:read-default>
+      <nacm:write-default>deny</nacm:write-default>
+      <nacm:exec-default>permit</nacm:exec-default>
+      <nacm:rules>
+         <nacm:module-rule>
+            <nacm:module-name>yuma-interfaces</nacm:module-name>
+            <nacm:rule-name>1</nacm:rule-name>
+            <nacm:allowed-rights>read write</nacm:allowed-rights>
+            <nacm:allowed-group>nacm:admin</nacm:allowed-group>
+         </nacm:module-rule>
+      </nacm:rules>
+   </nacm:nacm>
+   <if:interfaces xmlns:if="http://netconfcentral.org/ns/yuma-interfaces">
+      <if:interface>
+         <if:name>lo</if:name>
+      </if:interface>
+      <if:interface>
+         <if:name>eth0</if:name>
+      </if:interface>
+      <if:interface>
+         <if:name>virbr0</if:name>
+      </if:interface>
+   </if:interfaces>
+</nc:config>

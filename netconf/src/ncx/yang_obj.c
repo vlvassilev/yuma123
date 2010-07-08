@@ -6893,7 +6893,7 @@ static status_t
          */
         res = xpath_find_schema_target(pcb,
                                        tkc, 
-                                       mod, 
+                                       uses->grp->tkerr.mod, 
                                        obj,
                                        &uses->grp->datadefQ,
                                        refine->target, 

@@ -2584,6 +2584,31 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION ncx_get_modsource
+* 
+* Get the module filespec source string
+*
+* INPUTS:
+*   mod == module or submodule to use
+* 
+* RETURNS:
+*   module filespec source string
+*********************************************************************/
+const xmlChar *
+    ncx_get_modsource (const ncx_module_t *mod)
+{
+#ifdef DEBUG
+    if (!mod) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+    return mod->source;
+
+}  /* ncx_get_modsource */
+
+
+/********************************************************************
 * FUNCTION ncx_get_mainmod
 * 
 * Get the main module

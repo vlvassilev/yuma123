@@ -672,6 +672,21 @@ extern const xmlChar *
 
 
 /********************************************************************
+* FUNCTION ncx_get_modsource
+* 
+* Get the module filespec source string
+*
+* INPUTS:
+*   mod == module or submodule to use
+* 
+* RETURNS:
+*   module filespec source string
+*********************************************************************/
+extern const xmlChar *
+    ncx_get_modsource (const ncx_module_t *mod);
+
+
+/********************************************************************
 * FUNCTION ncx_get_mainmod
 * 
 * Get the main module

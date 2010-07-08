@@ -221,7 +221,9 @@ typedef enum ncx_node_t_ {
     NCX_NT_CFG,                  /* cfg_template_t *, error only */
     NCX_NT_INDEX,                     /* obj_key_t *, error only */
     NCX_NT_QNAME,                 /* xmlns_qname_t *, error only */
-    NCX_NT_UINT32_PTR                  /* session ID, error only */
+    NCX_NT_UINT32_PTR,                 /* session ID, error only */
+    NCX_NT_IMPORT_CB,                  /* ncx_import_t */
+    NCX_NT_INCLUDE_CB                  /* ncx_include_t */
 } ncx_node_t;
 
 

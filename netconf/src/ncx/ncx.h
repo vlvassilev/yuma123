@@ -1067,7 +1067,7 @@ extern void
 *    name == identity name to find
 *
 * RETURNS:
-*    pointer to found feature or NULL if not found
+*    pointer to found identity or NULL if not found
 *********************************************************************/
 extern ncx_identity_t *
     ncx_find_identity (ncx_module_t *mod,

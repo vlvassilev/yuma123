@@ -227,7 +227,8 @@ typedef enum ncx_node_t_ {
     NCX_NT_REVISION_CB,                         /* ncx_revhist_t */
     NCX_NT_EXTENSION_CB,                       /* ext_template_t */
     NCX_NT_FEATURE_CB,                          /* ncx_feature_t */
-    NCX_NT_IDENTITY_CB                         /* ncx_identity_t */
+    NCX_NT_IDENTITY_CB,                        /* ncx_identity_t */
+    NCX_NT_TYPDEF_CB                                /* typ_def_t */
 } ncx_node_t;
 
 

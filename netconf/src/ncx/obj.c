@@ -4820,6 +4820,71 @@ typ_template_t *
 
 
 /********************************************************************
+* FUNCTION obj_first_typedef
+*
+* Get the first local typedef for this object, if any
+*
+* INPUTS:
+*   obj == obj_template to use
+*
+* RETURNS:
+*  pointer to first typ_template_t struct if present, NULL otherwise
+*********************************************************************/
+typ_template_t *
+    obj_first_typedef (obj_template_t *obj)
+{
+    dlq_hdr_t      *que;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    que = NULL;
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+        que = obj->def.container->typedefQ;
+        break;
+    case OBJ_TYP_ANYXML:
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+        break;
+    case OBJ_TYP_LIST:
+        que = obj->def.list->typedefQ;
+        break;
+    case OBJ_TYP_CHOICE:
+    case OBJ_TYP_CASE:
+    case OBJ_TYP_USES:
+    case OBJ_TYP_REFINE:
+    case OBJ_TYP_AUGMENT:
+        break;
+    case OBJ_TYP_RPC:
+        que = &obj->def.rpc->typedefQ;
+        break;
+    case OBJ_TYP_RPCIO:
+        que = &obj->def.rpcio->typedefQ;
+        break;
+    case OBJ_TYP_NOTIF:
+        que = &obj->def.notif->typedefQ;
+        break;
+    case OBJ_TYP_NONE:
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+
+    if (que) {
+        return (typ_template_t *)dlq_firstEntry(que);
+    }
+    return NULL;
+
+}   /* obj_first_typedef */
+
+
+/********************************************************************
 * FUNCTION obj_find_grouping
 *
 * Check if a grp_template_t in the obj groupingQ hierarchy
@@ -4915,6 +4980,70 @@ grp_template_t *
     }
 
 }   /* obj_find_grouping */
+
+
+/********************************************************************
+* FUNCTION obj_first_grouping
+*
+* Get the first local grouping if any
+*
+* INPUTS:
+*   obj == obj_template to use
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
+grp_template_t *
+    obj_first_grouping (obj_template_t *obj)
+{
+    dlq_hdr_t      *que;
+
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    que = NULL;
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+        que = obj->def.container->groupingQ;
+        break;
+    case OBJ_TYP_ANYXML:
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+        break;
+    case OBJ_TYP_LIST:
+        que = obj->def.list->groupingQ;
+        break;
+    case OBJ_TYP_CHOICE:
+    case OBJ_TYP_CASE:
+    case OBJ_TYP_USES:
+    case OBJ_TYP_REFINE:
+    case OBJ_TYP_AUGMENT:
+        break;
+    case OBJ_TYP_RPC:
+        que = &obj->def.rpc->groupingQ;
+        break;
+    case OBJ_TYP_RPCIO:
+        que = &obj->def.rpcio->groupingQ;
+        break;
+    case OBJ_TYP_NOTIF:
+        que = &obj->def.notif->groupingQ;
+        break;
+    case OBJ_TYP_NONE:
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    if (que) {
+        return (grp_template_t *)dlq_firstEntry(que);
+    }
+    return NULL;
+
+}   /* obj_first_grouping */
 
 
 /********************************************************************

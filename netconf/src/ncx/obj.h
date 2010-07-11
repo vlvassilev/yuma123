@@ -1200,6 +1200,21 @@ extern typ_template_t *
 
 
 /********************************************************************
+* FUNCTION obj_first_typedef
+*
+* Get the first local typedef for this object, if any
+*
+* INPUTS:
+*   obj == obj_template to use
+*
+* RETURNS:
+*  pointer to first typ_template_t struct if present, NULL otherwise
+*********************************************************************/
+extern typ_template_t *
+    obj_first_typedef (obj_template_t *obj);
+
+
+/********************************************************************
 * FUNCTION obj_find_grouping
 *
 * Check if a grp_template_t in the obj groupingQ hierarchy
@@ -1214,6 +1229,20 @@ extern typ_template_t *
 extern grp_template_t *
     obj_find_grouping (obj_template_t *obj,
 		       const xmlChar *grpname);
+
+/********************************************************************
+* FUNCTION obj_first_grouping
+*
+* Get the first local grouping if any
+*
+* INPUTS:
+*   obj == obj_template to use
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
+extern grp_template_t *
+    obj_first_grouping (obj_template_t *obj);
 
 
 /********************************************************************

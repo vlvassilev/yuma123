@@ -2504,6 +2504,30 @@ extern boolean
 
 
 /********************************************************************
+* FUNCTION obj_get_config_flag_check
+*
+* get config flag during YANG module checking
+* Used by yang_obj.c to make sure ncx:root objects
+* are not treated as 'config', like obj_get_config_deep
+*
+* INPUTS:
+*   obj == obj_template to check
+*   ingrp == address if in grouping flag
+*
+* OUTPUTS:
+*   *ingrp == TRUE if hit grouping top without finding
+*             a definitive answer
+* RETURNS:
+*   TRUE if config set to TRUE
+*   FALSE if config set to FALSE
+*   !!! ignore if *ingrp == TRUE
+*********************************************************************/
+extern boolean
+    obj_get_config_flag_check (const obj_template_t *obj,
+                               boolean *ingrp);
+
+
+/********************************************************************
 * FUNCTION obj_get_fraction_digits
 * 
 * Get the fraction-digits field from the object typdef

@@ -1732,6 +1732,22 @@ extern typ_unionnode_t *
 
 
 /********************************************************************
+* FUNCTION typ_first_con_unionnode
+* 
+* Get the first union node in the queue for a given typdef
+* constrained
+*
+* INPUTS:
+*   typdef == pointer to type definition for the union node
+*
+* RETURNS:
+*   pointer to first typ_unionnode struct or NULL if none
+*********************************************************************/
+extern const typ_unionnode_t *
+    typ_first_con_unionnode (const typ_def_t *typdef);
+
+
+/********************************************************************
 * FUNCTION typ_is_number
 * 
 * Check if the base type is numeric

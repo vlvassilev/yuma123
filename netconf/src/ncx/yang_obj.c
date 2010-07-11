@@ -357,7 +357,7 @@ static void
 
     if (!(obj->flags & OBJ_FL_CONFSET)) {
         if (obj->parent && !obj_is_root(obj->parent)) {
-            flag = obj_get_config_flag(obj->parent);
+            flag = obj_get_config_flag_deep(obj->parent);
             if (flag) {
                 obj->flags |= OBJ_FL_CONFIG;
             } else {
@@ -1425,7 +1425,7 @@ static status_t
     xmlChar         *str;
     tk_type_t        tktyp;
     boolean          done, when, key, conf;
-    boolean          minel, maxel, ord, stat, desc, ref, flagset;
+    boolean          minel, maxel, ord, stat, desc, ref, flagset, ingrp;
     status_t         res, retres;
     ncx_error_t      savetkerr;
 
@@ -1640,12 +1640,15 @@ static status_t
         CHK_OBJ_EXIT(obj, res, retres);
     }
 
-    if (!list->keystr && obj_get_config_flag_deep(obj)) {
-        log_error("\nError: No key present for list '%s' on line %u",
-                  list->name, 
-                  obj->tkerr.linenum);
-        retres = ERR_NCX_DATA_MISSING;
-        ncx_print_errormsg(tkc, mod, retres);
+    ingrp = FALSE;
+    if (!list->keystr && obj_get_config_flag_check(obj, &ingrp)) {
+        if (!ingrp) {
+            log_error("\nError: No key present for list '%s' on line %u",
+                      list->name, 
+                      obj->tkerr.linenum);
+            retres = ERR_NCX_DATA_MISSING;
+            ncx_print_errormsg(tkc, mod, retres);
+        }
     }
 
     if (dlq_empty(list->datadefQ)) {
@@ -4911,7 +4914,7 @@ static status_t
 {
     status_t      res;
     ncx_status_t  stat, parentstat;
-    boolean       conf, parentconf;
+    boolean       conf, parentconf, ingrp1, ingrp2;
 
     res = NO_ERR;
 
@@ -4940,9 +4943,10 @@ static status_t
         /* check invalid config flag error for real object only */
         if (obj->objtype <= OBJ_TYP_CASE &&
             obj->parent->objtype <= OBJ_TYP_CASE) {
-            conf = obj_get_config_flag(obj);
-            parentconf = obj_get_config_flag(obj->parent);
-            if (!parentconf && conf) {
+            ingrp1 = ingrp2 = FALSE;
+            conf = obj_get_config_flag_check(obj, &ingrp1);
+            parentconf = obj_get_config_flag_check(obj->parent, &ingrp2);
+            if ((!parentconf && conf) && (!ingrp1 && !ingrp2))  {
                 if (obj_is_data(obj)) {
                     log_error("\nError: Node '%s' is marked as configuration, "
                               "but parent node '%s' is not",
@@ -5402,13 +5406,15 @@ static status_t
 {
     const xmlChar *errstr;
     status_t       res;
+    boolean        ingrp;
 
     res = NO_ERR;
+    ingrp = FALSE;
 
     if (!ingrouping && 
         !obj_is_abstract(obj) &&
         (obj->def.container->presence == NULL) &&
-        obj_get_config_flag(obj) &&
+        obj_get_config_flag_check(obj, &ingrp) &&
         ((obj->parent != NULL && obj_is_root(obj->parent)) ||
          (obj->parent == NULL && obj->grp == NULL)) &&
         obj_is_mandatory_when(obj)) {
@@ -5536,13 +5542,15 @@ static status_t
 {
     const xmlChar *errstr;
     status_t       res;
+    boolean        ingrp;
 
     res = NO_ERR;
+    ingrp = FALSE;
 
     if (!ingrouping &&
         !obj_is_abstract(obj) &&
         obj_is_mandatory_when(obj) &&
-        obj_get_config_flag(obj) &&
+        obj_get_config_flag_check(obj, &ingrp) &&
         ((obj->parent && obj_is_root(obj->parent)) || 
          (obj->parent == NULL && obj->grp == NULL))) {
 
@@ -5756,7 +5764,7 @@ static status_t
     obj_key_t         *objkey;
     status_t           retres;
     ncx_btype_t        btyp;
-    boolean            keyconfig, listconfig;
+    boolean            keyconfig, listconfig, ingrp1, ingrp2;
 
     retres = NO_ERR;
     tkerr = (list->keytkerr.mod) ? &list->keytkerr : &obj->tkerr;
@@ -5895,10 +5903,11 @@ static status_t
         }
 
         /* make sure config has same setting as the list parent */
-        keyconfig = obj_get_config_flag_deep(keyobj);
-        listconfig = obj_get_config_flag_deep(obj);
+        ingrp1 = ingrp2 = FALSE;
+        keyconfig = obj_get_config_flag_check(keyobj, &ingrp1);
+        listconfig = obj_get_config_flag_check(obj, &ingrp2);
 
-        if (keyconfig != listconfig) {
+        if ((keyconfig != listconfig) && (!ingrp1 && !ingrp2)) {
             retres = ERR_NCX_WRONG_INDEX_TYPE;
             log_error("\nError: 'config-stmt for key leaf '%s' "
                       "on line %u must match list '%s'",
@@ -5983,7 +5992,7 @@ static status_t
     ncx_error_t       *tkerr;
     obj_unique_comp_t *unicomp, *testcomp;
     status_t           res, retres;
-    boolean            firstset;
+    boolean            firstset, ingrp;
 
     firstset = FALSE;
     savestr = NULL;
@@ -6062,27 +6071,31 @@ static status_t
 
         /* make sure there is a no config mismatch */
         if (firstset) {
-            if (obj_is_config(obj) && !uni->isconfig) {
+            ingrp = FALSE;
+            if (obj_get_config_flag_check(obj, &ingrp) 
+                && !uni->isconfig) {
                 /* mix of config and non-config leafs
                  * in the unique-stmt
                  */
-                log_error("\nError: leaf '%s' on line "
-                          "%u; unique-stmt config mismatch in "
-                          "list '%s'",
-                          obj_get_name(uniobj),
-                          uniobj->tkerr.linenum,
-                          list->name);
-                retres = ERR_NCX_INVALID_UNIQUE_NODE;
-                tkc->curerr = tkerr;
-                ncx_print_errormsg(tkc, mod, retres);
-                m__free(savestr);
-                continue;
+                if (!ingrp) {
+                    log_error("\nError: leaf '%s' on line "
+                              "%u; unique-stmt config mismatch in "
+                              "list '%s'",
+                              obj_get_name(uniobj),
+                              uniobj->tkerr.linenum,
+                              list->name);
+                    retres = ERR_NCX_INVALID_UNIQUE_NODE;
+                    tkc->curerr = tkerr;
+                    ncx_print_errormsg(tkc, mod, retres);
+                    m__free(savestr);
+                    continue;
+                }
             }
         } else {
             /* unique-stmt can be for all config leafs or
              * all non-config leafs, but no mix
              */
-            uni->isconfig = obj_is_config(obj);
+            uni->isconfig = obj_get_config_flag_deep(obj);
             firstset = TRUE;
         }
 
@@ -6382,13 +6395,15 @@ static status_t
 {
     const xmlChar *errstr;
     status_t       res;
+    boolean        ingrp;
 
     res = NO_ERR;
+    ingrp = FALSE;
 
     if (!ingrouping &&
         !obj_is_abstract(obj) &&
         obj_is_mandatory_when(obj) &&
-        obj_get_config_flag(obj) &&
+        obj_get_config_flag_check(obj, &ingrp) &&
         ((obj->parent && obj_is_root(obj->parent)) ||
          (obj->parent == NULL && obj->grp == NULL))) {
 
@@ -7607,7 +7622,7 @@ static status_t
     obj_unique_t      *unique, *targunique;
     dlq_hdr_t         *targQ;
     status_t           res, retres;
-    boolean            instancetest, curexists;
+    boolean            instancetest, curexists, ingrp;
 
     retres = NO_ERR;
     targobj = NULL;
@@ -7806,17 +7821,21 @@ static status_t
         if (devi->config_tkerr.mod) {
             switch (targobj->objtype) {
             case OBJ_TYP_LEAF:
-                if (!devi->config && obj_is_key(targobj) &&
-                    obj_is_config(targobj)) {
-                    res = retres = ERR_NCX_INVALID_DEV_STMT;
-                    log_error("\nError: leaf %s:%s is a key; "
-                              "cannot change config to false",
-                              obj_get_mod_name(targobj),
-                              obj_get_name(targobj));
-                    if (tkc) {
-                        tkc->curerr = &devi->tkerr;
+                ingrp = FALSE;
+                if (!devi->config && 
+                    obj_is_key(targobj) &&
+                    obj_get_config_flag_check(targobj, &ingrp)) {
+                    if (!ingrp) {
+                        res = retres = ERR_NCX_INVALID_DEV_STMT;
+                        log_error("\nError: leaf %s:%s is a key; "
+                                  "cannot change config to false",
+                                  obj_get_mod_name(targobj),
+                                  obj_get_name(targobj));
+                        if (tkc) {
+                            tkc->curerr = &devi->tkerr;
+                        }
+                        ncx_print_errormsg(tkc, mod, retres);                   
                     }
-                    ncx_print_errormsg(tkc, mod, retres);                   
                 }
                 break;
             case OBJ_TYP_CONTAINER:

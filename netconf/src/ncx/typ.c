@@ -3903,6 +3903,51 @@ typ_unionnode_t *
 }  /* typ_first_unionnode */
 
 
+
+/********************************************************************
+* FUNCTION typ_first_con_unionnode
+* 
+* Get the first union node in the queue for a given typdef
+*
+* INPUTS:
+*   typdef == pointer to type definition for the union node
+*
+* RETURNS:
+*   pointer to first typ_unionnode struct or NULL if none
+*********************************************************************/
+const typ_unionnode_t *
+    typ_first_con_unionnode (const typ_def_t *typdef)
+{
+
+#ifdef DEBUG
+    if (!typdef) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    switch (typdef->tclass) {
+    case NCX_CL_SIMPLE:
+        if (typdef->def.simple.btyp != NCX_BT_UNION) {
+            SET_ERROR(ERR_INTERNAL_VAL);
+            return NULL;
+        } else {
+            return (const typ_unionnode_t *)
+                dlq_firstEntry(&typdef->def.simple.unionQ);
+        }
+    case NCX_CL_NAMED:
+        return typ_first_con_unionnode(&typdef->def.named.typ->typdef);
+    case NCX_CL_REF:
+        return typ_first_con_unionnode(typdef->def.ref.typdef);
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+    /*NOTREACHED*/
+
+}  /* typ_first_con_unionnode */
+
+
 /********************************************************************
 * FUNCTION typ_is_number
 * 

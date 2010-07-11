@@ -8270,7 +8270,7 @@ boolean
     case OBJ_TYP_LIST:
     case OBJ_TYP_CHOICE:
         if (obj_is_root(obj)) {
-            return TRUE;
+            return TRUE;   
         }
         /* check if this normal object has a config-stmt */
         if (obj->flags & OBJ_FL_CONFSET) {
@@ -8281,11 +8281,13 @@ boolean
             return obj_get_config_flag_deep(obj->parent);
         }
 
-        /* should not really get here, since all 
-         * top-level objects should have the OBJ_FL_CONFSET
-         * flag set: default ifor top-level is config=true
-         */
-        return TRUE;
+        /* this should be an object in a grouping */
+        if (obj->grp) {
+            return TRUE;  // !!! this is the old default !!!
+            // return FALSE;
+        } else {
+            return TRUE;
+        }
     case OBJ_TYP_CASE:
         if (obj->parent) {
             return obj_get_config_flag_deep(obj->parent);
@@ -8319,6 +8321,96 @@ boolean
     /*NOTREACHED*/
 
 }   /* obj_get_config_flag_deep */
+
+
+/********************************************************************
+* FUNCTION obj_get_config_flag_check
+*
+* get config flag during YANG module checking
+* Used by yang_obj.c to make sure ncx:root objects
+* are not treated as 'config', like obj_get_config_deep
+*
+* INPUTS:
+*   obj == obj_template to check
+*   ingrp == address if in grouping flag
+*
+* OUTPUTS:
+*   *ingrp == TRUE if hit grouping top without finding
+*             a definitive answer
+* RETURNS:
+*   TRUE if config set to TRUE
+*   FALSE if config set to FALSE
+*   !!! ignore if *ingrp == TRUE
+*********************************************************************/
+boolean
+    obj_get_config_flag_check (const obj_template_t *obj,
+                               boolean *ingrp)
+{
+#ifdef DEBUG
+    if (obj == NULL || ingrp == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    *ingrp = FALSE;
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+    case OBJ_TYP_ANYXML:
+    case OBJ_TYP_LEAF:
+    case OBJ_TYP_LEAF_LIST:
+    case OBJ_TYP_LIST:
+    case OBJ_TYP_CHOICE:
+        /* check if this normal object has a config-stmt */
+        if (obj->flags & OBJ_FL_CONFSET) {
+            return (obj->flags & OBJ_FL_CONFIG) ? TRUE : FALSE;
+        }
+
+        if (obj->parent) {
+            return obj_get_config_flag_check(obj->parent, ingrp);
+        }
+
+        /* this should be an object in a grouping */
+        if (obj->grp) {
+            *ingrp = TRUE;
+            return FALSE;
+        } else {
+            return TRUE;
+        }
+    case OBJ_TYP_CASE:
+        if (obj->parent) {
+            return obj_get_config_flag_check(obj->parent, ingrp);
+        } else {
+            /* should not happen */
+            return FALSE;
+        }
+    case OBJ_TYP_USES:
+    case OBJ_TYP_AUGMENT:
+    case OBJ_TYP_REFINE:
+        /* no real setting -- not applicable */
+        return FALSE;
+    case OBJ_TYP_RPC:
+        /* no real setting for this, but has to be true
+         * to allow rpc/input to be true
+         */
+        return TRUE;
+    case OBJ_TYP_RPCIO:
+        if (!xml_strcmp(obj->def.rpcio->name, YANG_K_INPUT)) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    case OBJ_TYP_NOTIF:
+        return FALSE;
+    case OBJ_TYP_NONE:
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return FALSE;
+    }
+    /*NOTREACHED*/
+
+}   /* obj_get_config_flag_check */
 
 
 /********************************************************************

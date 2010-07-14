@@ -8,7 +8,7 @@
 
 # Uncomment this to turn on verbose mode.
 export DH_VERBOSE=1
-export MY_REL=2
+export MY_REL=3
 
 configure: configure-stamp
 configure-stamp:
@@ -39,8 +39,8 @@ clean:
 	(cd libtecla; ./configure --prefix=$(CURDIR)/debian/yuma; cd ..)
 	$(MAKE) DEBIAN=1  STATIC=1 \
 	DESTDIR=$(CURDIR)/debian/yuma clean
-	$(MAKE) DEBIAN=1 STATIC=1 DEVELOPER=1 \
-	DESTDIR=$(CURDIR)/debian/yuma-dev clean
+	#$(MAKE) DEBIAN=1 STATIC=1 DEVELOPER=1 \
+	#DESTDIR=$(CURDIR)/debian/yuma-dev clean
 
 	dh_clean 
 
@@ -53,8 +53,8 @@ install: build
 	# Add here commands to install the package into debian/yuma.
 	$(MAKE) DEBIAN=1 STATIC=1 RELEASE=$(MY_REL) \
 	DESTDIR=$(CURDIR)/debian/yuma install
-	$(MAKE) DEBIAN=1 STATIC=1 DEVELOPER=1 RELEASE=$(MY_REL) \
-	DESTDIR=$(CURDIR)/debian/yuma-dev install
+	#$(MAKE) DEBIAN=1 STATIC=1 DEVELOPER=1 RELEASE=$(MY_REL) \
+	#DESTDIR=$(CURDIR)/debian/yuma-dev install
 
 postinst: 
 	#ldconfig

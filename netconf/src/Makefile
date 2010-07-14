@@ -22,14 +22,14 @@ APPS = subsys netconfd
 DIRS = agt $(APPS)
 else
 ifdef DEVELOPER
-APPS = yangdumpcode
+APPS = 
 DIRS = agt ydump ncx $(APPS)
 else
 ifdef SHLIBS
 APPS =
 DIRS = ncx
 else
-APPS = subsys netconfd yangdump yangdumpcode yangdiff yangcli
+APPS = subsys netconfd yangdump yangdiff yangcli
 DIRS = agt mgr ncx ydump $(APPS)
 endif
 endif

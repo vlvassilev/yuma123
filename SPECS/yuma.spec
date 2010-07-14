@@ -1,11 +1,11 @@
 Name:           yuma
 Version:        1.13
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
-License:        IWL
-URL:            http://yuma.iwl.com/
+License:        BSD
+URL:            http://www.netconfcentral.org/
 Source0:        %{name}-%{version}.tar.gz
 BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 
@@ -44,6 +44,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_bindir}/yangcli
 %{_bindir}/yangdump
 %{_bindir}/yangdiff
+%{_bindir}/make_sil_dir
 %{_sbindir}/netconfd
 %{_sbindir}/netconf-subsystem
 %{_sysconfdir}/yuma/yangcli-sample.conf
@@ -61,35 +62,15 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/doc/yuma/yuma-installation-guide.pdf
 /usr/share/doc/yuma/yuma-quickstart-guide.pdf
 /usr/share/doc/yuma/yuma-netconfd-manual.pdf
+/usr/share/doc/yuma/yuma-dev-manual.pdf
 %{_mandir}/man1/yangcli.1.gz
 %{_mandir}/man1/yangdiff.1.gz
 %{_mandir}/man1/yangdump.1.gz
 %{_mandir}/man1/netconfd.1.gz
 %{_mandir}/man1/netconf-subsystem.1.gz
+%{_mandir}/man1/make_sil_dir.1.gz
 %{_datadir}/yuma/modules/*
 %{_libdir}/yuma/
-
-%package dev
-
-Summary:  YANG-based Unified Modular Automation Tools (developer)
-Requires: yuma
-
-%description dev
-Yuma Tools is a YANG-based NETCONF-over-SSH client and server
-development toolkit.  This package contains H files, scripts,
-and other files needed to create SIL code for use with
-the netconfd server.
-
-%files dev
-%defattr(-,root,root,-)
-%{_bindir}/make_sil_dir
-%{_bindir}/yangdumpcode
-%{_sysconfdir}/yuma/yangdumpcode-sample.conf
-/usr/share/doc/yuma/yumatools-dev-license.pdf
-/usr/share/doc/yuma/yumatools-legal-notices.pdf
-/usr/share/doc/yuma/yuma-dev-manual.pdf
-%{_mandir}/man1/yangdumpcode.1.gz
-%{_mandir}/man1/make_sil_dir.1.gz
 %{_includedir}/yuma/
 %{_datadir}/yuma/util/
 %{_datadir}/yuma/src/libtoaster/
@@ -98,11 +79,13 @@ the netconfd server.
 echo "Yuma Tools installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
-%post dev
-echo "Yuma Tools SIL developer files installed."
-echo "Check the user manuals in /usr/share/doc/yuma"
-
 %changelog
+* Friday Jul 16 2010 Andy Bierman <andy at netconfcentral.org> 1.13-3
+  * Fixed bug in yangdump refine-stmt validation
+  * Changed license from IWL to BSD
+  * moved yuma project back to netconfcentral.org
+  * combined yuma and yuma-dev packages
+  * added code gen to yangdump; removed yangdumpcode
 * Wed Jun 30 2010 Andy Bierman <andy at iwl.com> 1.13-2
   * Fixed bug in yangcli command prompt
   * Fixed bug in README file

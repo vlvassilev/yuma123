@@ -1,11 +1,11 @@
-This package was debianized by Andy Bierman <andyb@iwl.com> on
-Mon, 01 Feb 2010 10:20:00 -0800.
+This package was debianized by Andy Bierman <andy@netconfcentral.org> on
+Wed, 14 Jul 2010 12:01:00 -0700.
 
-It was downloaded from <http://yuma.iwl.com>
+It was downloaded from <http://www.netconfcentral.org>
 
 Upstream Author(s):
 
-    Andy Bierman <andyb@iwl.com>
+    Andy Bierman <andy@netconfcentral.org>
 
 Copyright:
 
@@ -13,19 +13,16 @@ Copyright:
 
 License:
 
-    IWL
+    BSD
 
 The Debian packaging is:
 
-    Copyright (C) 2010, InterWorking Labs <yuma-support@iwl.com>
+    Copyright (C) 2010, Andy Bierman <andy@netconfcentral.org>
 
-and is licensed under the IWL license.
-See `yumatools-cs-license.pdf' installed
-in the '/usr/share/doc/yuma' directory.
-This license is also available online at
-http://yuma.iwl.com/licenses/yumatools-cs-license.pdf.
+and is licensed under the BSD license.
 The Yuma software and documentation is subject to a 
-software license.  Contact info@iwl.com for more information. 
+software license.  Contact support@netconfcentral.org
+for more information. 
 
 See `yumatools-legal-notices.pdf' installed
 in the '/usr/share/doc/yuma' directory for

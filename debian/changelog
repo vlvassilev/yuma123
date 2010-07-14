@@ -1,3 +1,10 @@
+yuma (1.13-3) unstable; urgency=low
+  * Fixed bug in yangdump refine-stmt validation
+  * Changed license from IWL to BSD
+  * moved yuma project back to netconfcentral.org
+  * combined yuma and yuma-dev packages
+  * added code gen to yangdump; removed yangdumpcode
+ -- Andy Bierman <andy@netconfcentral.org>  Fri, 16 Jul 2010 14:17:00 -0700
 yuma (1.13-2) unstable; urgency=low
   * Fixed bug in yangcli command prompt
   * Fixed bug in README file

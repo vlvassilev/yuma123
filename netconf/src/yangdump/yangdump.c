@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010 Netconf Central, Inc.
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -91,7 +91,7 @@ int
     mtrace();
 #endif
 
-    res = ydump_init(argc, argv, FALSE, &mycvtparms);
+    res = ydump_init(argc, argv, TRUE, &mycvtparms);
 
     if (res == NO_ERR) {
 	res = ydump_main(&mycvtparms);

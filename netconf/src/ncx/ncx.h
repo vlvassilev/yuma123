@@ -1206,33 +1206,6 @@ extern int32
 
 
 /********************************************************************
-* FUNCTION ncx_decode_enum
-* 
-* Parse an enumerated integer string into its 2 parts
-*
-* Form 1: name only : foo
-* Form 2: number only : 16
-* Form 3: name and number : foo(16)
-*
-* INPUTS:
-*    enumval == enum string value to parse
-*    retval == pointer to return integer variable
-*    retlen == pointer to return string name length variable
-* OUTPUTS:
-*    *retval == integer value of enum
-*    *retset == TRUE if *retval is set
-*    *retlen == length of enumval that is the name portion
-* RETURNS:
-*    status
-*********************************************************************/
-extern status_t
-    ncx_decode_enum (const xmlChar *enumval,
-		     int32 *retval,
-		     boolean *retset,
-		     uint32 *retlen);
-
-
-/********************************************************************
 * FUNCTION ncx_set_enum
 * 
 * Parse an enumerated integer string into an ncx_enum_t

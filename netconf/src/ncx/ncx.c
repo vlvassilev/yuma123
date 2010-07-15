@@ -3913,117 +3913,10 @@ int32
     }
 #endif
 
-    /*** !!! just check strings, not int value !!! */
+    /* just check strings exact match */
     return xml_strcmp(enu1->name, enu2->name);
 
 } /* ncx_compare_enums */
-
-
-/********************************************************************
-* FUNCTION ncx_decode_enum
-* 
-* Parse an enumerated integer string into its 2 parts
-*
-* Form 1: name only : foo
-* Form 2: number only : 16
-* Form 3: name and number : foo(16)
-*
-* INPUTS:
-*    enumval == enum string value to parse
-*    retval == pointer to return integer variable
-*    retlen == pointer to return string name length variable
-* OUTPUTS:
-*    *retval == integer value of enum
-*    *retset == TRUE if *retval is set
-*    *retlen == length of enumval that is the name portion
-* RETURNS:
-*    status
-*********************************************************************/
-status_t
-    ncx_decode_enum (const xmlChar *enumval,
-                     int32 *retval,
-                     boolean *retset,
-                     uint32 *retlen)
-{
-    status_t       res, res2;
-    const xmlChar  *str1, *str2;
-    xmlChar        numstr[NCX_MAX_NUMLEN];
-    uint32         i;
-    ncx_num_t      num;
-
-#ifdef DEBUG
-    if (!enumval ||!retval ||!retset || !retlen) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    res = NO_ERR;
-
-    /* split the buffer into name and value parts as needed */
-    if (isdigit(*((const char *)enumval))) {
-        /* Can only be the 2nd form -- number only */
-        res = ncx_decode_num(enumval, NCX_BT_INT32, &num);
-        if (res == NO_ERR) {
-            *retval = num.i;
-            *retset = TRUE;
-            *retlen = 0;
-            return NO_ERR;
-        }
-    } else {
-        /* look for the 3rd form -- name and number */
-        str1 = enumval;
-        while (*str1 && (*str1 != NCX_ENU_START)) {
-            str1++;
-        }
-        if (!*str1) {
-            /* did not find any left paren
-             * can only be the 1st form 'foo'
-             */
-            *retval = 0;
-            *retset = FALSE;
-            *retlen = (uint32)(str1-enumval);
-            return NO_ERR;
-        } else {
-            /* found a left paren -- get a number and rparen */
-            numstr[0] = 0;
-            str2 = str1+1;
-            for (i=0; i<NCX_MAX_NUMLEN && *str2!=NCX_ENU_END; i++) {
-                numstr[i] = *str2++;
-            }
-            if (i==NCX_MAX_NUMLEN) {
-                /* ran out of buffer before right paren 
-                 * the number couldn't be valid if this happens
-                 */
-                return ERR_NCX_NUMLEN_TOOBIG;
-            } else {
-                /* setup the string return now */
-                *retlen = (uint32)(str1-enumval);
-
-                /* terminate the number buffer */
-                numstr[i] = 0;
-
-                /* make sure the enum is terminated properly */
-                if (*(str2+1)) {
-                    /* should be zero -- treat this as a warning */
-                    res = ERR_NCX_EXTRA_ENUMCH;
-                } else {
-                    res = NO_ERR;
-                }
-            }
-            res2 = ncx_decode_num(numstr, NCX_BT_INT32, &num);
-            if (res2 == NO_ERR) {
-                /* return the name and number that was decoded */
-                *retval = num.i;
-                *retset = TRUE;
-            } else {
-                res = res2;   /* drop the res warning if set */
-            }
-        }
-    }
-
-    return res;
-
-} /* ncx_decode_enum */
 
 
 /********************************************************************
@@ -4049,10 +3942,6 @@ status_t
                   ncx_enum_t *retenu)
 {
     xmlChar       *str;
-    int32          ev;
-    boolean        evset;
-    uint32         namlen;
-    status_t       res;
 
 #ifdef DEBUG
     if (!enumval ||!retenu) {
@@ -4060,20 +3949,18 @@ status_t
     }
 #endif
 
-    res = ncx_decode_enum(enumval, &ev, &evset, &namlen);
-    if (res != NO_ERR) {
-        return res;
-    }
-    
-    str = m__getMem(namlen+1);
+    str = xml_strdup(enumval);
     if (!str) {
         return ERR_INTERNAL_MEM;
     }
-    xml_strncpy(str, enumval, namlen);
+
+    if (retenu->dname != NULL) {
+        m__free(retenu->dname);
+    }
 
     retenu->dname = str;
     retenu->name = str;
-    retenu->val = ev;
+    retenu->val = 0;   /***  NOT USED ***/
 
     return NO_ERR;
 

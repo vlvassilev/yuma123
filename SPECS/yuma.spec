@@ -82,6 +82,7 @@ echo "Check the user manuals in /usr/share/doc/yuma"
 %changelog
 * Friday Jul 16 2010 Andy Bierman <andy at netconfcentral.org> 1.13-3
   * Fixed bug in yangdump refine-stmt validation
+  * Fixed bug in yangdump enumeration validation
   * Changed license from IWL to BSD
   * moved yuma project back to netconfcentral.org
   * combined yuma and yuma-dev packages

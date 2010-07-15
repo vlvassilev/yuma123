@@ -442,11 +442,9 @@ static boolean
 * Check all the ncx_enum_t structs in a queue of typ_sval_t 
 *
 * INPUTS:
-*    intval == enum integer value
-*    useval == TRUE if the intval is valid
-*    name == enum len (use if non-NULL)
-*    namelen == length of name string to use
+*    name == enum string
 *    checkQ == pointer to Q of typ_sval_t to check
+*    reten == address of return typ_enum_t
 * 
 * OUTPUTS:
 *    *reten == typ_enum_t found if matched (res == NO_ERR)
@@ -454,10 +452,7 @@ static boolean
 *    status, NO_ERR if string value is in the set
 *********************************************************************/
 static status_t
-    check_svalQ_enum (int32 intval,
-                      boolean useint,
-                      const xmlChar *name,
-                      uint32  namelen,
+    check_svalQ_enum (const xmlChar *name,
                       dlq_hdr_t *checkQ,
                       typ_enum_t  **reten)
 {
@@ -467,26 +462,10 @@ static status_t
     for (en = (typ_enum_t *)dlq_firstEntry(checkQ);
          en != NULL;
          en = (typ_enum_t *)dlq_nextEntry(en)) {
-        if (useint) {
-            if (intval == en->val) {
-                if (name && namelen) {
-                    if (!xml_strncmp(name, en->name, namelen)) {
-                        /* both name and num match */
-                        *reten = en;  
-                        return NO_ERR;
-                    }
-                } else {
-                    /* just num used and it matches */
-                    *reten = en;
-                    return NO_ERR;
-                }
-            }
-        } else if (name && namelen) {
-            if (!xml_strncmp(name, en->name, namelen)) {
-                /* just name used and it matches */
-                *reten = en;
-                return NO_ERR;
-            }
+
+        if (!xml_strcmp(name, en->name)) {
+            *reten = en;
+            return NO_ERR;
         }
     }
     return ERR_NCX_NOT_FOUND;
@@ -1801,13 +1780,11 @@ status_t
                  int32 *retval,
                  const xmlChar **retstr)
 {
-    ncx_btype_t    btyp;
     dlq_hdr_t     *checkQ;
-    status_t       res;
-    int32          i;
-    boolean        iset, last;
-    uint32         elen;
     typ_enum_t    *en;
+    status_t       res;
+    boolean        last;
+    ncx_btype_t    btyp;
 
 #ifdef DEBUG
     if (!typdef || !enumval ||!retval ||!retstr) {
@@ -1819,12 +1796,6 @@ status_t
     btyp = typ_get_basetype(typdef);
     if (btyp != NCX_BT_ENUM) {
         return ERR_NCX_WRONG_DATATYP;
-    }
-
-    /* split the enum string into its parts */
-    res = ncx_decode_enum(enumval, &i, &iset, &elen);
-    if (res != NO_ERR) {
-        return res;
     }
 
     /* check which string Q to use for further processing */
@@ -1851,12 +1822,7 @@ status_t
     /* check typdefs until the final one in the chain is reached */
     for (;;) {
         if (checkQ) {
-            res = check_svalQ_enum(i, 
-                                   iset, 
-                                   (elen) ? enumval : NULL, 
-                                   elen, 
-                                   checkQ, 
-                                   &en);
+            res = check_svalQ_enum(enumval, checkQ, &en);
             if (res == NO_ERR) {
                 /* return both the name and number of the found enum */
                 *retval = en->val;
@@ -1865,9 +1831,7 @@ status_t
             }
         }
 
-        /* check if any more typdefs to search 
-         * NOT SUPPORTED IN YANG, WILL NOT FIND ANY MORE ENUMS
-         */
+        /* check if any more typdefs to search */
         if (last) {
             return ERR_NCX_VAL_NOTINSET;
         }
@@ -1955,12 +1919,7 @@ status_t
     /* check typdefs until the final one in the chain is reached */
     for (;;) {
         if (checkQ) {
-            res = check_svalQ_enum(0, 
-                                   FALSE, 
-                                   bitname,
-                                   xml_strlen(bitname),
-                                   checkQ, 
-                                   &en);
+            res = check_svalQ_enum(bitname, checkQ, &en);
             if (res == NO_ERR) {
                 if (position) {
                     *position = en->pos;
@@ -1969,9 +1928,7 @@ status_t
             }
         }
 
-        /* check if any more typdefs to search 
-         * NOT SUPPORTED IN YANG, WILL NOT FIND ANY MORE BITS 
-         */     
+        /* check if any more typdefs to search */     
         if (last) {
             return ERR_NCX_VAL_NOTINSET;
         }

@@ -80,11 +80,16 @@ echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
 * Friday Jul 16 2010 Andy Bierman <andy at netconfcentral.org> 1.13-3
-  * Fixed bug in yangdump refine-stmt validation
-  * Fixed bug in yangdump enumeration validation
+  * Fixed yangdump bugs
+	- yangdump refine-stmt validation
+	- enumeration validation corrected
+	- false config-mismatch error in groupings fixed
+  * Added '$YUMA_INSTALL/lib' to SIL search path to support tarball install
   * Changed license from IWL to BSD
   * moved yuma project back to netconfcentral.org
   * combined yuma and yuma-dev packages
+	- yangdump now generates SIL code (format=c,h,sqldb)
+	- usr/include/yuma/* files installed
   * added code gen to yangdump; removed yangdumpcode
 * Wed Jun 30 2010 Andy Bierman <andy at iwl.com> 1.13-2
   * Fixed bug in yangcli command prompt

@@ -578,7 +578,8 @@ extern xmlChar *
 *
 *  1) $YUMA_HOME/target/lib directory 
 *  2) $YUMA_RUNPATH environment variable
-*  3) /usr/lib/yuma directory
+*  3) $YUMA_RUNPATH environment variable
+*  4) /usr/lib/yuma directory
 *
 * INPUTS:
 *   fname == SIL file name with extension

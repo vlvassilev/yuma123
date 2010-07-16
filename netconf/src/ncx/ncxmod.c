@@ -3286,7 +3286,8 @@ xmlChar *
 *
 *  1) $YUMA_HOME/target/lib directory 
 *  2) $YUMA_RUNPATH environment variable
-*  3) /usr/lib/yuma directory
+*  3) $YUMA_INSTALL/lib   
+*  4) /usr/lib/yuma directory
 *
 * INPUTS:
 *   fname == SIL file name with extension
@@ -3360,7 +3361,18 @@ xmlChar *
         }
     }
 
-    /* 3) /usr/lib/yuma directory */
+    /* 3) YUMA_INSTALL/lib directory */
+    if (ncxmod_env_install) {
+        if (test_file(buff, 
+                      bufflen, 
+                      ncxmod_env_install,
+                      (const xmlChar *)"lib/",
+                      fname)) {
+            return buff;
+        }
+    }
+
+    /* 4) /usr/lib/yuma directory */
     if (test_file(buff, 
                   bufflen, 
                   NCXMOD_DEFAULT_YUMALIB,

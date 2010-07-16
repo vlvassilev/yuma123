@@ -36,7 +36,6 @@ install:
 	mkdir -p $(DOC_INSTALL)
 	cp extra/AUTHORS $(DOC_INSTALL)
 	cp extra/README $(DOC_INSTALL)
-	cp extra/yumatools-cs-license.pdf $(DOC_INSTALL)
 	cp extra/yumatools-legal-notices.pdf $(DOC_INSTALL)
 	cp yuma_docs/yuma-installation-guide.pdf $(DOC_INSTALL)
 	cp yuma_docs/yuma-quickstart-guide.pdf $(DOC_INSTALL)
@@ -48,23 +47,7 @@ install:
 	cp yuma_docs/yuma-dev-manual.pdf $(DOC_INSTALL)
 	cp extra/yumatools-dev-license.pdf $(DOC_INSTALL)
 else
-ifdef DEBIAN
-# install everything except yangdumpcode license
-install:
-	mkdir -p $(DOC_INSTALL)
-	cp yuma_docs/yuma-installation-guide.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-quickstart-guide.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-user-cmn-manual.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-netconfd-manual.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-yangcli-manual.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-yangdiff-manual.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-yangdump-manual.pdf $(DOC_INSTALL)
-	cp extra/AUTHORS $(DOC_INSTALL)
-	cp extra/README $(DOC_INSTALL)
-	cp extra/yumatools-cs-license.pdf $(DOC_INSTALL)
-	cp extra/yumatools-legal-notices.pdf $(DOC_INSTALL)
-else
-# install everything in real or RPM build
+# install everything
 install:
 	mkdir -p $(DOC_INSTALL)
 	cp yuma_docs/yuma-installation-guide.pdf $(DOC_INSTALL)
@@ -77,10 +60,8 @@ install:
 	cp yuma_docs/yuma-dev-manual.pdf $(DOC_INSTALL)
 	cp extra/AUTHORS $(DOC_INSTALL)
 	cp extra/README $(DOC_INSTALL)
-	cp extra/yumatools-cs-license.pdf $(DOC_INSTALL)
 	cp extra/yumatools-legal-notices.pdf $(DOC_INSTALL)
 	cp extra/yumatools-dev-license.pdf $(DOC_INSTALL)
-endif
 endif
 endif
 endif

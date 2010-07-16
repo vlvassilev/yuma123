@@ -26,15 +26,7 @@ else
 ifdef SERVER
 install:
 else
-ifdef DEVELOPER
 install: installfiles
-else
-ifdef DEBIAN
-install:
-else
-install: installfiles
-endif
-endif
 endif
 endif
 endif

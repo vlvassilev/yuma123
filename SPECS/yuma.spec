@@ -26,15 +26,15 @@ included, to compile and process YANG modules.
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make STATIC=1 RELEASE=1 %{?_smp_mflags}
-make STATIC=1 DEVELOPER=1 RELEASE=1 %{?_smp_mflags}
+make STATIC=1 RELEASE=3 %{?_smp_mflags}
+#make STATIC=1 DEVELOPER=1 RELEASE=3 %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id STATIC=1 RELEASE=1 \
+make install LDFLAGS+=--build-id STATIC=1 RELEASE=3 \
 DESTDIR=$RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id STATIC=1 RELEASE=1 DEVELOPER=1 \
-DESTDIR=$RPM_BUILD_ROOT
+#make install LDFLAGS+=--build-id STATIC=1 RELEASE=3 DEVELOPER=1 \
+#DESTDIR=$RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -51,7 +51,6 @@ rm -rf $RPM_BUILD_ROOT
 %{_sysconfdir}/yuma/yangdiff-sample.conf
 %{_sysconfdir}/yuma/yangdump-sample.conf
 %{_sysconfdir}/yuma/netconfd-sample.conf
-/usr/share/doc/yuma/yumatools-cs-license.pdf
 /usr/share/doc/yuma/yumatools-legal-notices.pdf
 /usr/share/doc/yuma/AUTHORS
 /usr/share/doc/yuma/README

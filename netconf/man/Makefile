@@ -10,21 +10,16 @@ ifdef CLIENT
 MAN_FILES = yangdump.1 yangdiff.1 yangcli.1
 else
 ifdef SERVER
-MAN_FILES = netconfd.1 netconf-subsystem.1
+MAN_FILES = netconfd.1 netconf-subsystem.1 make_sil_dir.1
 else
 ifdef SHLIBS
 MAN_FILES=
 else
 ifdef DEVELOPER
-MAN_FILES= yangdumpcode.1 make_sil_dir.1
+MAN_FILES= 
 else
-ifdef DEBIAN
 MAN_FILES = yangdump.1 yangdiff.1 yangcli.1 \
-	netconfd.1 netconf-subsystem.1
-else
-MAN_FILES = yangdump.1 yangdumpcode.1 make_sil_dir.1 \
-	yangdiff.1 yangcli.1 netconfd.1 netconf-subsystem.1
-endif
+	netconfd.1 netconf-subsystem.1 make_sil_dir.1
 endif
 endif
 endif

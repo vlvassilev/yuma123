@@ -45,7 +45,6 @@ ifdef DEVELOPER
 install:
 	mkdir -p $(DOC_INSTALL)
 	cp yuma_docs/yuma-dev-manual.pdf $(DOC_INSTALL)
-	cp extra/yumatools-dev-license.pdf $(DOC_INSTALL)
 else
 # install everything
 install:
@@ -61,7 +60,6 @@ install:
 	cp extra/AUTHORS $(DOC_INSTALL)
 	cp extra/README $(DOC_INSTALL)
 	cp extra/yumatools-legal-notices.pdf $(DOC_INSTALL)
-	cp extra/yumatools-dev-license.pdf $(DOC_INSTALL)
 endif
 endif
 endif

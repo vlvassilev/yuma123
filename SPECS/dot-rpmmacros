@@ -5,5 +5,5 @@
 %vendor Netconf Central
 %_signature gpg
 %_gpg_path /home/andy/.gnupg
-%_gpg_name Andy Bierman <andb@netconfcentral.org>
+%_gpg_name Andy Bierman <andy@netconfcentral.org>
 %_gpgbin /usr/bin/gpg

@@ -6,7 +6,7 @@ module yuma-interfaces {
 
     import ietf-yang-types { prefix yang; }
 
-    organization  "Netconf Central, Inc.";
+    organization  "Netconf Central";
 
     contact "Andy Bierman <andy@netconfcentral.org>.";
 

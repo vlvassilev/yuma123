@@ -5,7 +5,7 @@ module toaster {
     prefix "toast";
 
     organization
-        "Netconf Central, Inc.";
+        "Netconf Central";
 
     contact
         "Andy Bierman <andy@netconfcentral.org>";

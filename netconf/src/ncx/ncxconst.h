@@ -694,7 +694,7 @@ extern "C" {
 #define E_BAD_DATA_ERROR  (const xmlChar *)"error"
 
 #define COPYRIGHT_STRING \
-    "Copyright (c) 2008-2010, Netconf Central, Inc., All Rights Reserved.\n"
+    "Copyright (c) 2008-2010, Andy Bierman, All Rights Reserved.\n"
 
 
 #define Y_PREFIX         (const xmlChar *)"y_"

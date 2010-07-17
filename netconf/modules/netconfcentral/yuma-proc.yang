@@ -4,7 +4,7 @@ module yuma-proc {
 
     prefix "proc";
 
-    organization  "Netconf Central, Inc.";
+    organization  "Netconf Central";
 
     contact "Andy Bierman <andy@netconfcentral.org>.";
 

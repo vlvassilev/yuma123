@@ -4,7 +4,7 @@ module yuma-xsd {
     prefix "xsd";
 
     organization
-        "Netconf Central, Inc.";
+        "Netconf Central";
 
     contact
         "Andy Bierman <andy@netconfcentral.org>";

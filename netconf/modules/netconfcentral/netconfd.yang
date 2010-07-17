@@ -14,7 +14,7 @@ module netconfd {
 
     import ietf-netconf-with-defaults { prefix wd; }
 
-    organization  "Netconf Central, Inc.";
+    organization  "Netconf Central";
 
     contact "Andy Bierman <support@netconfcentral.org>.";
 

@@ -8,7 +8,7 @@ module yangdump {
 
     import yuma-app-common { prefix ncxapp; }
 
-    organization "Netconf Central, Inc.";
+    organization "Netconf Central";
 
     contact
         "Andy Bierman <andy at netconfcentral.org>";

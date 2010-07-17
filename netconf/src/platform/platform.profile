@@ -199,3 +199,14 @@ addheader:
 	  mv $$h.hdr $$h;\
 	done
 
+
+fixcopyright:
+	for c in $(CEES); do\
+          sed 's/Netconf Central, Inc./Andy Bierman/' $$c > $$c.tmp;\
+	  mv $$c.tmp $$c;\
+	done
+	for h in $(HEES); do\
+          sed 's/Netconf Central, Inc./Andy Bierman/' $$h > $$h.tmp;\
+	  mv $$h.tmp $$h;\
+	done
+

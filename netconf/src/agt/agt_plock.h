@@ -3,7 +3,7 @@
 #define _H_agt_plock
 /* 
 
- * Copyright (c) 2009, 2010, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Andy Bierman
  * All Rights Reserved.
  *
  * Unless required by applicable law or agreed to in writing,

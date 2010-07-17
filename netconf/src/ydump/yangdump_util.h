@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Netconf Central, Inc.
+ * Copyright (c) 2009, 2010, Andy Bierman
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -47,7 +47,7 @@ extern "C" {
 *********************************************************************/
 
 #define COPYRIGHT_HEADER (const xmlChar *)\
-"\n * Copyright (c) 2009, 2010, Netconf Central, Inc.\
+"\n * Copyright (c) 2009, 2010, Andy Bierman\
 \n * All Rights Reserved.\
 \n *\
 \n * Unless required by applicable law or agreed to in writing,\

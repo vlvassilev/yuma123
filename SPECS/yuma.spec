@@ -79,7 +79,7 @@ echo "Yuma Tools installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
-* Friday Jul 16 2010 Andy Bierman <andy at netconfcentral.org> 1.13-3
+* Fri Jul 16 2010 Andy Bierman <andy at netconfcentral.org> 1.13-3
   * Fixed yangdump bugs
     * yangdump refine-stmt validation
     * enumeration validation corrected

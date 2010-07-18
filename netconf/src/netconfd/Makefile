@@ -28,7 +28,8 @@ PROG=netconfd
 
 LIBS = 	-lagt \
 	-lncx \
-	-L/usr/lib -lxml2
+	-L/usr/lib -lxml2 \
+	-L/lib -ldl
 
 LIBTARGS= $(LBASE)/libagt.a \
 	$(LBASE)/libncx.$(LIBNCXSUFFIX)

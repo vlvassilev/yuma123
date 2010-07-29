@@ -170,7 +170,6 @@ typedef struct yang_pcb_t_ {
     boolean       with_submods;
     boolean       stmtmode;      /* save top-level stmt order */
     boolean       diffmode;        /* TRUE = yangdiff old ver */
-    boolean       cookedmode;  /* TRUE = OK to cook in deviations */
     boolean       deviationmode;  /* TRUE if keeping deviations only */
     boolean       searchmode;  /* TRUE if just getting ns & version */
     boolean       parsemode;  /* TRUE if full parse but no reg-load */

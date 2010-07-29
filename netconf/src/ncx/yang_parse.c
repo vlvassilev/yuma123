@@ -3351,7 +3351,7 @@ static status_t
                     /* if mod==top, and top is a submodule, then 
                      * yang_free_pcb will delete the submodule later
                      */
-                    if (!ietfnetconf) {
+                    if (!ietfnetconf && mod->ismod) {
                         *wasadded = TRUE;
                     }
                 }
@@ -3590,7 +3590,8 @@ status_t
             ncx_free_module(mod);
         } else if (!wasadd) {
             /* module was not added to the registry which means
-             * it was already there; decide if the caller really
+             * it was already there or it is a submodule;
+             * decide if the caller really
              * wants the return module in this case
              */
             if (pcb->parsemode) {
@@ -3604,7 +3605,7 @@ status_t
             } else if (!(pcb->diffmode || 
                          pcb->searchmode ||
                          pcb->deviationmode)) {
-                /* do not swap out diffmode, searchmode, or deviationmode
+                /* do not swap out diffmode, searchmode, or deviationmode;
                  * for all other modes, check if the new module should
                  * be returned or a different module for the yuma-netconf
                  * hack
@@ -3627,26 +3628,43 @@ status_t
                             keepmod = TRUE;
                         }
                     }
-                } else if (!pcb->with_submods) {
-                    /* subtree parsing mode can cause top-level to already
-                     * be loaded into the registry, swap out the new dummy
-                     * module with the real one
-                     */
-                    if (pcb->top == mod) {
-                        pcb->top = ncx_find_module(mod->belongs,
-                                                   mod->version);
+                } else {
+                    /* this is a submodule */
+                    if (pcb->keepmode) {
+                        keepmod = TRUE;
                     }
-                } else if (pcb->top == mod) {
-                    /* don't care about submods in this mode so clear
-                     * the top pointer so it won't be used
-                     */
-                    pcb->top = NULL;
-                }
-                if (!keepmod) {
-                    ncx_free_module(mod);
+
+                    if (!pcb->with_submods) {
+                        /* this is a submodule and they are being
+                         * processed instead of skipped;
+                         * sub tree parsing mode can cause top-level to already
+                         * be loaded into the registry, swap out the new dummy
+                         * module with the real one
+                         */
+                        if (!pcb->keepmode && pcb->top == mod) {
+                            pcb->top = ncx_find_module(mod->belongs,
+                                                       mod->version);
+                        }
+                    } else if (pcb->top == mod) {
+                        /* don't care about submods in this mode so clear
+                         * the top pointer so it won't be used
+                         */
+                        pcb->top = NULL;
+                    }
                 }
                 if (!pcb->top && !pcb->with_submods) {
-                    res = ERR_NCX_MOD_NOT_FOUND;
+                    if (mod->ismod) {
+                        res = ERR_NCX_MOD_NOT_FOUND;
+                    } else if (!keepmod) {
+                        res = ERR_NCX_SUBMOD_NOT_LOADED;
+                    } else {
+                        res = NO_ERR;
+                    }
+                }
+
+                if (!keepmod) {
+                    ncx_free_module(mod);
+                    mod = NULL;
                 }
             }  /* else the module went into an alternate mod Q 
                 * or the pcb->top pointer is live and will be freed later

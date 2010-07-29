@@ -653,6 +653,8 @@ const char *
         return "node is protected by a partial lock";
     case ERR_NCX_IN_USE_COMMIT:
         return "cannot start a partial lock with confirmed-commit pending";
+    case ERR_NCX_SUBMOD_NOT_LOADED:
+        return "cannot directly load a submodule";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

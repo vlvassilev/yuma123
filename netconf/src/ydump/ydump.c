@@ -1422,8 +1422,6 @@ static status_t
                                 cp->subtree ? TRUE : FALSE,
                                 cp->unified, 
                                 !cp->rawmode,
-                                (cp->format == NCX_CVTTYP_YIN) 
-                                ? TRUE : FALSE,
                                 TRUE,
                                 &cp->savedevQ,
                                 &res);

@@ -2913,11 +2913,6 @@ yang_pcb_t *
      */
     pcb->stmtmode = ncx_save_descr(); 
 
-    /* only ncxmod_load_module_ex will set this to FALSE
-     * T: merge deviations into cooked objects
-     * F: leave deviations out of cooked objects
-     */
-    pcb->cookedmode = TRUE;
     return pcb;
 
 } /* yang_new_pcb */

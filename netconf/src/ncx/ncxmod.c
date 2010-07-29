@@ -2989,9 +2989,7 @@ status_t
 *   subtree_mode == TRUE if in a subtree loop
 *                == FALSE if processing one module in yangdump
 *   with_submods == TRUE if YANG_PT_TOP mode should skip submodules
-*                == FALSE if top-level mode skip process sub-modules 
-*   cookedmode == TRUE if producing cooked output
-*                 FALSE if producing raw output
+*                == FALSE if top-level mode should process sub-modules 
 *   savetkc == TRUE if the parse chain should be saved (e.g., YIN)
 *   keepmode == TRUE if pcb->top should be saved even if it
 *               is already loaded;  FALSE will allow the mod
@@ -3011,7 +3009,6 @@ yang_pcb_t *
                            const xmlChar *revision,
                            boolean subtree_mode,
                            boolean with_submods,
-                           boolean cookedmode,
                            boolean savetkc,
                            boolean keepmode,
                            dlq_hdr_t *savedevQ,
@@ -3035,7 +3032,6 @@ yang_pcb_t *
         pcb->revision = revision;
         pcb->subtree_mode = subtree_mode;
         pcb->with_submods = with_submods;
-        pcb->cookedmode = cookedmode;
         pcb->savetkc = savetkc;
         *res = try_load_module(pcb,
                                YANG_PT_TOP,
@@ -3063,7 +3059,7 @@ yang_pcb_t *
 *   subtree_mode == TRUE if in a subtree loop
 *                == FALSE if processing one module in yangdump
 *   with_submods == TRUE if YANG_PT_TOP mode should skip submodules
-*                == FALSE if top-level mode skip process sub-modules 
+*                == FALSE if top-level mode should process sub-modules 
 *   modpath == module path to override the modpath CLI var or
 *              the YUMA_MODPATH env var
 *   savedevQ == Q of ncx_save_deviations_t to use

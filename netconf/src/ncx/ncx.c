@@ -2268,6 +2268,10 @@ status_t
     }
 #endif
 
+    if (!mod->ismod) {
+        return NO_ERR;
+    }
+
     res = NO_ERR;
 
     /* check module parse code */
@@ -2357,8 +2361,10 @@ status_t
     }
 #endif
 
-    add_to_modQ(mod, ncx_curQ);
-    mod->added = TRUE;
+    if (mod->ismod) {
+        add_to_modQ(mod, ncx_curQ);
+        mod->added = TRUE;
+    }
     return NO_ERR;
 
 } /* ncx_add_to_modQ */

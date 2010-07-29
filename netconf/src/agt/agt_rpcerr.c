@@ -667,6 +667,9 @@ static rpc_err_t
     case ERR_NCX_IN_USE_COMMIT:
         *apptag = RPC_ERR_APPTAG_COMMIT;
         return RPC_ERR_IN_USE;
+    case ERR_NCX_SUBMOD_NOT_LOADED:
+        *apptag = RPC_ERR_APPTAG_GEN_ERROR;
+        return ERR_NCX_OPERATION_FAILED;
 
     /* user warnings start at 400 and do not need to be listed here */
     default:

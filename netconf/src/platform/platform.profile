@@ -48,8 +48,13 @@ OWNER= --owner=root
 endif
 endif
 
-### GCC + [LINUX or MACOSX]
+ifdef DEBUG
+WERROR=-Werror
+else
+WERROR=
+endif
 
+#std=gnu99 is only used for floating point libraries
 CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 	-Wmissing-include-dirs -Wswitch-default -Wunused-parameter \
 	-Wextra -Wundef -Wshadow -Wpointer-arith \
@@ -57,7 +62,7 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 	-Waggregate-return -Wstrict-prototypes -Wold-style-definition \
 	-Wmissing-prototypes -Wmissing-declarations \
 	-Wpacked -Winvalid-pch \
-	-Wredundant-decls -Wnested-externs -Winline -std=gnu99 -Werror
+	-Wredundant-decls -Wnested-externs -Winline -std=gnu99 $(WERROR)
 
 
 # -Wunreachable-code removed due to -O3
@@ -137,7 +142,7 @@ DEPS = $(patsubst %.c,%.D,$(wildcard *.c))
 PLATFORM_CPP=
 
 .PHONY: all superclean clean test install uninstall \
-        distclean depend lint
+        distclean depend lint notabs addheader fixcopyright
 
 ######################### MAKE RULES ######################
 COMPILE.c= $(CC) $(CFLAGS) $(CPPFLAGS) $(PLATFORM_CPP) \

@@ -1,5 +1,5 @@
 This package was debianized by Andy Bierman <andy@netconfcentral.org> on
-Wed, 14 Jul 2010 12:01:00 -0700.
+Sat, 17 Jul 2010 12:01:00 -0700.
 
 It was downloaded from <http://www.netconfcentral.org>
 
@@ -9,7 +9,7 @@ Upstream Author(s):
 
 Copyright:
 
-    Copyright (C) 2008 - 2010, Netconf Central, Inc.
+    Copyright (C) 2008 - 2010, Andy Bierman
 
 License:
 
@@ -21,8 +21,7 @@ The Debian packaging is:
 
 and is licensed under the BSD license.
 The Yuma software and documentation is subject to a 
-software license.  Contact support@netconfcentral.org
-for more information. 
+software license.
 
 See `yumatools-legal-notices.pdf' installed
 in the '/usr/share/doc/yuma' directory for

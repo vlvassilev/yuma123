@@ -1,3 +1,8 @@
+yuma (1.13-4) unstable; urgency=low
+  * prepare for initial sourceforge release
+  * fix bugs in parsing and retention of sub-modules
+    as the top-level file for yangdump and yangcli
+ -- Andy Bierman <andy@netconfcentral.org>  Sat, 17 Jul 2010 18:17:00 -0700
 yuma (1.13-3) unstable; urgency=low
   * Fixed yangdump bugs
     * yangdump refine-stmt validation

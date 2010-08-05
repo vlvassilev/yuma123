@@ -12,8 +12,13 @@ OWNER= --owner=root
 endif
 endif
 
-### GCC + [LINUX or MACOSX]
+ifdef DEBUG
+WERROR=-Werror
+else
+WERROR=
+endif
 
+#std=gnu99 is only used for floating point libraries
 CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 	-Wmissing-include-dirs -Wswitch-default -Wunused-parameter \
 	-Wextra -Wundef -Wshadow -Wpointer-arith \
@@ -21,7 +26,7 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 	-Waggregate-return -Wstrict-prototypes -Wold-style-definition \
 	-Wmissing-prototypes -Wmissing-declarations \
 	-Wpacked -Winvalid-pch \
-	-Wredundant-decls -Wnested-externs -Winline -std=gnu99 -Werror
+	-Wredundant-decls -Wnested-externs -Winline -std=gnu99 $(WERROR)
 
 
 # -Wunreachable-code removed due to -O3
@@ -132,29 +137,4 @@ lint:
 	-Wall -Wcomment $(CPPFLAGS) $(PLATFORM_CPP) $(CINC) \
 	$(SUBDIR_CPP) $(TARGET_ARCH) -c $< > $@
 
-
-notabs:
-	for c in $(CEES); do\
-	  cp $$c $$c.save;\
-	  expand $$c > $$c.ex;\
-	  mv $$c.ex $$c;\
-	done
-
-addheader:
-	if [ ! -f ../platform/header.txt]; then \
-	  echo "Error: platform/header.txt is missing!"; \
-	  exit 1; \
-	fi
-	for c in $(CEES); do\
-	  cp $$c $$c.save;\
-	  cp ../platform/header.txt $$c.hdr;\
-	  cat $$c >> $$c.hdr;\
-	  mv $$c.hdr $$c;\
-	done
-	for h in $(HEES); do\
-	  cp $$h $$h.save;\
-	  cp ../platform/header.txt $$h.hdr;\
-	  cat $$h >> $$h.hdr;\
-	  mv $$h.hdr $$h;\
-	done
 

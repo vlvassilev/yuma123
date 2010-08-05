@@ -18,9 +18,9 @@ rm -rf ~/rpmprep/*
 cd ~/rpmprep
 
 if [ $1 ]; then
-  svn export -r$1 http://svnserver/svn/yuma/trunk yuma-$VER
+  svn export -r$1 http://svn.netconfcentral.org/svn/yuma/trunk yuma-$VER
 else
-  svn export http://svnserver/svn/yuma/trunk yuma-$VER
+  svn export http://svn.netconfcentral.org/svn/yuma/trunk yuma-$VER
 fi
 
 touch yuma-$VER/configure

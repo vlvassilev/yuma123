@@ -16,7 +16,8 @@ Requires: libxml2
 Yuma Tools is a YANG-based NETCONF-over-SSH client and server
 development toolkit.  The netconfd server includes an automated
 central NETCONF protocol stack, based directly on YANG modules.
-The yangdump and yangdiff development tools are also
+The yangcli client supports single sessions over SSH with some
+script support.  The yangdump and yangdiff development tools are also
 included, to compile and process YANG modules.
 
 %prep

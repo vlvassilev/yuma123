@@ -204,8 +204,8 @@ install:
 
 work:
 ifdef YUMA_HOME
-      mkdir -p $(WORK_INST)        
-      install $(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) $(WORK_INST)
+	mkdir -p $(WORK_INST)        
+	install $(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX) $(WORK_INST)
 endif
 
 sil_lib: $(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)

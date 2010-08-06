@@ -60,14 +60,25 @@ They should be added to the bug tracker.
        used; not sure why the SSH application timeout occurs even
        if there is NETCONF traffic; must be doing something
        wrong in the client or server SSH code.
-   -- server optimizations not done:
-      -- NACM cache per-msg, not more persistent
-      -- virtual node caching
-      -- mechanisms to bypass must-stmt and when-stmt evaluation
-         during validation
-      -- save to NVstore:
-        -- user hook to override output to XML file
-        -- write /config/foo in sub-directories instead of
-           XML. Start the XML file(s) for the next layer.
-           /config/foo/bar.xml 
+    -- load module chicken-and-egg bug:
+      - load a module dynamically and then save some config in
+        in the newly loaded module namespace.  Since there is no
+        'load foo' added to the netconfd CLI or .conf file,
+        this new config will be treated as unknown namespace error
+        on the next reboot
+    -- SIL user callback functions do not yet support a 'PASS' mode,
+       so that multiple callback handlers within the same YANG
+       data structure can be utilized.  
+    -- searching for SILL callback handlers is done self-or-ancestor,
+       it should be done self-or-descendant, then ancestor
+  -- server optimizations not done:
+    -- NACM cache per-msg, not more persistent
+    -- virtual node caching
+    -- mechanisms to bypass must-stmt and when-stmt evaluation
+       during validation
+    -- save to NVstore:
+      -- user hook to override output to XML file
+      -- write /config/foo in sub-directories instead of
+         XML. Start the XML file(s) for the next layer.
+         /config/foo/bar.xml 
    

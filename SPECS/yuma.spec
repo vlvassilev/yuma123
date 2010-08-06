@@ -1,6 +1,6 @@
 Name:           yuma
 Version:        1.13
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -80,6 +80,8 @@ echo "Yuma Tools installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
+* Fri Aug 06 2010 Andy Bierman <andy at netconfcentral.org> 1.13-5
+  * fix bug in make_sil_dir
 * Sat Jul 17 2010 Andy Bierman <andy at netconfcentral.org> 1.13-4
   * prepare for initial sourceforge release
   * fix bugs in parsing and retention of sub-modules

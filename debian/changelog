@@ -1,3 +1,6 @@
+yuma (1.13-5) unstable; urgency=low
+  * fix bug in make_sil_dir
+ -- Andy Bierman <andy@netconfcentral.org>  Fri, 06 Aug 2010 06:08:00 -0700
 yuma (1.13-4) unstable; urgency=low
   * prepare for initial sourceforge release
   * fix bugs in parsing and retention of sub-modules

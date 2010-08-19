@@ -485,7 +485,7 @@ static int32
                                   (const xmlChar *)parmstr);
         *str2++ = '"';
         *str2 = '\0';
-        return (str2 - parmstr);
+        return (str2 - buffer);
     }
 
     /* started with some non-whitespace; go until the

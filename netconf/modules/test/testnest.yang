@@ -1,0 +1,11 @@
+submodule testnest {
+
+    belongs-to test1 { prefix t1a; }
+
+    include testnest2 { revision-date "2010-07-12"; }
+
+    revision 2010-07-14 {
+        description "Initial revision.";
+    }
+
+}

@@ -433,7 +433,7 @@ status_t
 
     /* save or delete the ext_template_t struct */
     if (ext->name && ncx_valid_name2(ext->name)) {
-        testext = ext_find_extension(&mod->extensionQ, ext->name);
+        testext = ext_find_extension(mod, ext->name);
         if (testext) {
             log_error("\nError: extension '%s' already defined at line %u",
                       ext->name, 

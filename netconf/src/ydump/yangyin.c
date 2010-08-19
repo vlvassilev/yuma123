@@ -539,14 +539,14 @@ static status_t
         modprefix = ncx_get_mod_prefix(pcb->top);
         if (modprefix != NULL && !xml_strcmp(prefix, modprefix)) {
             /* local module */
-            extension = ext_find_extension(&pcb->top->extensionQ, 
+            extension = ext_find_extension(pcb->top, 
                                            TK_CUR_VAL(pcb->tkc));
         } else {
             import = ncx_find_pre_import(pcb->top, prefix);
             if (import == NULL || import->mod == NULL) {
                 return ERR_NCX_IMP_NOT_FOUND;
             }
-            extension = ext_find_extension(&import->mod->extensionQ, 
+            extension = ext_find_extension(import->mod, 
                                            TK_CUR_VAL(pcb->tkc));
         }
         if (extension == NULL) {

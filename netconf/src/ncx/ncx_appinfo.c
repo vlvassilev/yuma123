@@ -760,7 +760,7 @@ status_t
             CHK_EXIT(res, retres);
         } else {
 
-            ext = ext_find_extension(&mod->extensionQ, appinfo->name);
+            ext = ext_find_extension(mod, appinfo->name);
             if (!ext) {
                 log_error("\nError: Local module extension '%s' not found",
                           appinfo->name);

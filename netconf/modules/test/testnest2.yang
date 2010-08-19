@@ -1,0 +1,9 @@
+submodule testnest2 {
+
+    belongs-to test1 { prefix t1a; }
+
+    revision 2010-07-12 {
+        description "Initial revision.";
+    }
+
+}

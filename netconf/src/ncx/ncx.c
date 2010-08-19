@@ -3592,7 +3592,7 @@ ncx_identity_t *
     que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
 
     /* check all the submodules, but only the ones visible
-     * to this module or submodule, YANG only
+     * to this module or submodule
      */
     for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
          inc != NULL;
@@ -3613,7 +3613,7 @@ ncx_identity_t *
             }
         }
 
-        /* check the type Q in this submodule */
+        /* check the identity Q in this submodule */
         identity = ncx_find_identity_que(&inc->submod->identityQ, name);
         if (identity) {
             return identity;

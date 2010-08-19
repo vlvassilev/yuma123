@@ -537,8 +537,7 @@ static void
          oldext = (ext_template_t *)dlq_nextEntry(oldext)) {
 
         /* find this extension in the new module */
-        newext = ext_find_extension(&newpcb->top->extensionQ, 
-                                    oldext->name);
+        newext = ext_find_extension(newpcb->top, oldext->name);
         if (newext) {
             output_one_extension_diff(cp, oldext, newext);
             newext->used = TRUE;

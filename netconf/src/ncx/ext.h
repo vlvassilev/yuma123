@@ -147,8 +147,25 @@ extern void
 *   pointer to found entry, or NULL if not found
 *********************************************************************/
 extern ext_template_t *
-    ext_find_extension (dlq_hdr_t *que,
-			const xmlChar *name);
+    ext_find_extension (ncx_module_t *mod,
+                        const xmlChar *name);
+
+
+/********************************************************************
+* FUNCTION ext_find_extension_que
+* 
+* Find an ext_template_t struct in the specified Q
+*
+* INPUTS:
+*    extensionQ == Q of ext_template_t to search
+*    name == extension name to find
+*
+* RETURNS:
+*    pointer to found extension or NULL if not found
+*********************************************************************/
+extern ext_template_t *
+    ext_find_extension_que (dlq_hdr_t *extensionQ,
+                            const xmlChar *name);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

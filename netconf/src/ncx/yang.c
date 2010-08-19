@@ -2352,7 +2352,7 @@ status_t
         
     /* found import OK, look up imported extension definition */
     if (imod) {
-        *ext = ext_find_extension(&imod->extensionQ, name);
+        *ext = ext_find_extension(imod, name);
         if (!*ext) {
             res = ERR_NCX_DEF_NOT_FOUND;
             log_error("\nError: extension definition for '%s:%s' not found"

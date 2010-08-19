@@ -258,6 +258,7 @@ void
                      scb->sid);
         }
         mytotals->inBadHellos++;
+        mytotals->droppedSessions++;
         agt_ses_request_close(scb->sid,
                               scb->sid,
                               SES_TR_BAD_HELLO);
@@ -315,6 +316,7 @@ void
                      scb->sid);
         }
         mytotals->inBadHellos++;
+        mytotals->droppedSessions++;
         agt_ses_request_close(scb->sid,
                               scb->sid,
                               SES_TR_BAD_HELLO);

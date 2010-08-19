@@ -198,29 +198,98 @@ void
 *   pointer to found entry, or NULL if not found
 *********************************************************************/
 ext_template_t *
-    ext_find_extension (dlq_hdr_t *que,
+    ext_find_extension (ncx_module_t *mod,
                         const xmlChar *name)
 {
-    ext_template_t *ext;
+    ext_template_t  *extension;
+    dlq_hdr_t       *que;
+    yang_node_t     *node;
+    ncx_include_t   *inc;
 
 #ifdef DEBUG
-    if (!que || !name) {
+    if (!mod || !name) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
 #endif
 
-    for (ext = (ext_template_t *)dlq_firstEntry(que);
-         ext != NULL;
-         ext = (ext_template_t *)dlq_nextEntry(ext)) {
+    extension = ext_find_extension_que(&mod->extensionQ, name);
+    if (extension) {
+        return extension;
+    }
 
-        if (!xml_strcmp(ext->name, name)) {
-            return ext;
+    que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
+
+    /* check all the submodules, but only the ones visible
+     * to this module or submodule
+     */
+    for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+         inc != NULL;
+         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+
+        /* get the real submodule struct */
+        if (!inc->submod) {
+            node = yang_find_node(que, 
+                                  inc->submodule,
+                                  inc->revision);
+            if (node) {
+                inc->submod = node->submod;
+            }
+            if (!inc->submod) {
+                /* include not found, should not be in Q !!! */
+                SET_ERROR(ERR_INTERNAL_VAL);
+                continue;
+            }
+        }
+
+        /* check the extension Q in this submodule */
+        extension = ext_find_extension_que(&inc->submod->extensionQ, name);
+        if (extension) {
+            return extension;
         }
     }
+
     return NULL;
 
 }  /* ext_find_extension */
+
+
+/********************************************************************
+* FUNCTION ext_find_extension_que
+* 
+* Find an ext_template_t struct in the specified Q
+*
+* INPUTS:
+*    extensionQ == Q of ext_template_t to search
+*    name == extension name to find
+*
+* RETURNS:
+*    pointer to found extension or NULL if not found
+*********************************************************************/
+ext_template_t *
+    ext_find_extension_que (dlq_hdr_t *extensionQ,
+                            const xmlChar *name)
+{
+    ext_template_t *extension;
+
+#ifdef DEBUG
+    if (!extensionQ || !name) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    for (extension = (ext_template_t *)dlq_firstEntry(extensionQ);
+         extension != NULL;
+         extension = (ext_template_t *)dlq_nextEntry(extension)) {
+
+        if (!xml_strcmp(extension->name, name)) {
+            return extension;
+        }
+    }
+    return NULL;
+         
+} /* ext_find_extension_que */
 
 
 /* END ext.c */

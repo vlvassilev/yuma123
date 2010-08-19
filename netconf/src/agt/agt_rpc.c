@@ -1351,7 +1351,7 @@ void
                      res, 
                      get_error_string(res));
         }
-         agttotals->stats.inBadRpcs++;
+        agttotals->stats.inBadRpcs++;
         agttotals->droppedSessions++;
         agt_ses_request_close(scb->sid, 
                               scb->sid, 

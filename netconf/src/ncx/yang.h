@@ -165,6 +165,7 @@ typedef struct yang_import_ptr_t_ {
  */
 typedef struct yang_pcb_t_ {
     struct ncx_module_t_ *top;        /* top-level file */
+    struct ncx_module_t_ *retmod;   /* nested mod being returned */
     const xmlChar *revision;        /* back-ptr to rev to match */
     boolean       subtree_mode;
     boolean       with_submods;

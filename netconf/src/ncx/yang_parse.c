@@ -3616,7 +3616,7 @@ status_t
                          * get swapped out for netconf.yang;
                          * the internal version is used instead of
                          * the standard one to fill in the
-                         * missing peices
+                         * missing pieces
                          */
                         if (pcb->keepmode) {
                             keepmod = TRUE;
@@ -3644,6 +3644,7 @@ status_t
                         if (!pcb->keepmode && pcb->top == mod) {
                             pcb->top = ncx_find_module(mod->belongs,
                                                        mod->version);
+                            pcb->retmod = mod;
                         }
                     } else if (pcb->top == mod) {
                         /* don't care about submods in this mode so clear
@@ -3669,6 +3670,8 @@ status_t
             }  /* else the module went into an alternate mod Q 
                 * or the pcb->top pointer is live and will be freed later
                 */
+        } else {
+            pcb->retmod = mod;
         }
     }
 

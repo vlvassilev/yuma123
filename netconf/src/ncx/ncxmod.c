@@ -2000,9 +2000,13 @@ static status_t
 
     if (done) {
         if (res == NO_ERR && retmod) {
-            *retmod = pcb->top;
+            if (pcb->retmod != NULL) {
+                *retmod = pcb->retmod;
+            } else {
+                *retmod = pcb->top;
+            }
         }
-        return res;
+        return NO_ERR;
     } else {
         return (res == NO_ERR) ? ERR_NCX_MOD_NOT_FOUND : res;
     }

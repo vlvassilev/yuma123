@@ -3356,7 +3356,7 @@ static status_t
                     }
                 }
             }
-        } else {
+        } else if (mod->ns) {
             mod->nsid = xmlns_find_ns_by_name(mod->ns);
         }
         break;

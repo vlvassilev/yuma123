@@ -1042,7 +1042,7 @@ status_t
     /* Initialize the XMLNS namespace for xmlns attributes */
     res = xmlns_register_ns(NS_URN, 
                             NS_PREFIX, 
-                            NCX_MODULE, 
+                            (const xmlChar *)"W3C XML Namespaces", 
                             NULL, 
                             &nsid);
     if (res != NO_ERR) {
@@ -1052,7 +1052,7 @@ status_t
     /* Initialize the XSD namespace for ncxdump program */
     res = xmlns_register_ns(XSD_URN, 
                             XSD_PREFIX, 
-                            NCX_MODULE, 
+                            (const xmlChar *)"W3C XML Schema Definition",
                             NULL, 
                             &nsid);
     if (res != NO_ERR) {
@@ -1062,7 +1062,7 @@ status_t
     /* Initialize the XSI namespace for ncxdump program */
     res = xmlns_register_ns(XSI_URN, 
                             XSI_PREFIX, 
-                            NCX_MODULE, 
+                            (const xmlChar *)"W3C XML Schema Instance",
                             NULL, 
                             &nsid);
     if (res != NO_ERR) {
@@ -1071,8 +1071,8 @@ status_t
 
     /* Initialize the XML namespace for xml:lang attribute support */
     res = xmlns_register_ns(XML_URN, 
-                            XML_PREFIX, 
-                            NCX_MODULE, 
+                            XML_PREFIX,
+                            (const xmlChar *)"W3C XML Lang Attribute",
                             NULL, 
                             &nsid);
     if (res != NO_ERR) {

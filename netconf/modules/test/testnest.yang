@@ -8,4 +8,20 @@ submodule testnest {
         description "Initial revision.";
     }
 
+    leaf plus {
+      type enumeration {
+       enum t+ { value 1; }
+       enum +;
+      }
+      description "foo" + " " + "bar";
+    }
+
+
+    typedef plus {
+      type enumeration {
+       enum t+ { value 1; }
+       enum +;
+      }
+      description "foo" + " " + "bar";
+    }
 }

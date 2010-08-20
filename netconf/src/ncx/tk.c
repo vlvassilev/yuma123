@@ -668,34 +668,6 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION yang_hack_char_test
-* 
-* Check a char to see if it could be a YANG char that would not
-* be part of an unquoted string
-*
-* INPUTS:
-*  str == pointer to char to check
-*
-* RETURNS:
-*   TRUE if char is a break char
-*   FALSE if char could be in an unquopted string
-*********************************************************************/
-static boolean
-    yang_hack_char_test (const xmlChar *str)
-{
-    if (xml_isspace(*str)) {
-        return TRUE;
-    } else if (*str == '"' || *str =='\'') {
-        return TRUE;
-    } else if (!*str || *str == '\n') {
-        return TRUE;
-    }
-    return FALSE;
-
-}  /* yang_hack_char_test */
-
-
-/********************************************************************
 * FUNCTION get_token_id
 * 
 * Check if the spceified string is a NCX non-string token
@@ -1319,14 +1291,13 @@ static status_t
     finish_string (tk_chain_t  *tkc,
                    xmlChar *str)
 {
-    boolean      done, first;
+    boolean      done;
     tk_type_t    ttyp;
     uint32       startpos, total;
     status_t     res;
 
     startpos = tkc->linepos;
 
-    first = TRUE;
     done = FALSE;
     while (!done) {
         if (!*str) {
@@ -1336,31 +1307,13 @@ static status_t
         } else if (tkc->source == TK_SOURCE_YANG) {
             ttyp = get_token_id(str, 1, tkc->source);
             switch (ttyp) {
-            case TK_TT_NONE:
-                break;
-            case TK_TT_BAR:
-            case TK_TT_PLUS:
-                /* need a hack for YANG because these tokens
-                 * are skipped if part of an unquoted string
-                 * but could be tokens is not in an unquoted string
-                 *
-                 * This may misclassify a simple string as a
-                 * one char token.  If so, the YANG parser code
-                 * will use the token symbol as the string
-                 */
-                if (first) {
-                    if (yang_hack_char_test(str+1)) {
-                        done = TRUE;
-                    } /* else inside an unquoted string */
-                } else {
-                    if (yang_hack_char_test(str-1) ||
-                        yang_hack_char_test(str+1)) {
-                        done = TRUE;
-                    } /* else inside an unquoted string */
-                }
+            case TK_TT_SEMICOL:
+            case TK_TT_LBRACE:
+            case TK_TT_RBRACE:
+                done = TRUE;
                 break;
             default:
-                done = TRUE;
+                ;
             }
         } else if (get_token_id(str, 1, tkc->source) != TK_TT_NONE) {
             done = TRUE;
@@ -1374,8 +1327,6 @@ static status_t
             }
             str++;
         }
-
-        first = FALSE;
     }
 
     total = (uint32)(str - tkc->bptr);

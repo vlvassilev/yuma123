@@ -426,6 +426,7 @@ static status_t
                       testobj->tkerr.linenum);
         }
         res = ERR_NCX_DUP_ENTRY;
+        SET_OBJ_CURERR(tkc, obj);
         ncx_print_errormsg(tkc, mod, res);
         obj_free_template(obj);
     } else {
@@ -439,6 +440,7 @@ static status_t
             } else {
                 log_error("\nError: malloc failure for obj_stmt");
                 res = ERR_INTERNAL_MEM;
+                SET_OBJ_CURERR(tkc, obj);
                 ncx_print_errormsg(tkc, mod, res);
             }
         }

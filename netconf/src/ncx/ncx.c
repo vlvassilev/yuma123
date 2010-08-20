@@ -2205,17 +2205,23 @@ status_t
         if (tempmod) {
             mod->nsid = ns->ns_id;
         } else if (isnetconf) {
+            /* ignore the hack corner-case for yuma-netconf */
+            ;
+        } else if (ns->ns_id == xmlns_xs_id() ||
+                   ns->ns_id == xmlns_xsi_id() ||
+                   ns->ns_id == xmlns_xml_id()) {
+            /* ignore these special XML duplicates used by yangdump */
             ;
         } else if (xml_strcmp(mod->name, ns->ns_module) &&
                    xml_strcmp(ns->ns_module, NCX_MODULE)) {
             /* this NS string already registered to another module */
-            log_error("\nncx reg: Module '%s' registering "
+            log_error("\nError: Module '%s' registering "
                       "duplicate namespace '%s'\n    "
                       "registered by module '%s'",
                       mod->name, 
                       mod->ns, 
                       ns->ns_module);
-            return ERR_DUP_NS;
+            res = ERR_DUP_NS;
         } else {
             /* same owner so okay */
             mod->nsid = ns->ns_id;

@@ -1438,16 +1438,16 @@ static status_t
     } else if (res != NO_ERR) {
         if (pcb && pcb->top) {
             print_score_banner(pcb);
-        } else {
+        } else if (LOGDEBUG2) {
             /* invalid module name and/or revision date */
             if (revision) {
-                log_error("\nError: module '%s' revision '%s' "
+                log_debug2("\n[sub]module '%s' revision '%s' "
                           "not loaded", modname, revision);
             } else {
-                log_error("\nError: module '%s' not loaded",
+                log_debug2("\n[sub]module '%s' not loaded",
                           modname);
             }
-            ncx_print_errormsg(NULL, NULL, res);
+            log_debug2(" (%s)", get_error_string(res));
         }
         if (!pcb || !pcb->top || pcb->top->errors) {
             if (pcb) {

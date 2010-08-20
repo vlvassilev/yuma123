@@ -10376,9 +10376,8 @@ status_t
                             ncx_module_t  *mod,
                             dlq_hdr_t *datadefQ)
 {
-    yang_node_t        *node;
+    ncx_include_t      *inc;
     status_t            res, retres;
-    boolean             done;
 
 #ifdef DEBUG
     if (!tkc || !mod || !datadefQ) {
@@ -10393,16 +10392,14 @@ status_t
     CHK_EXIT(res, retres);
 
     if (mod->ismod) {
-        done = FALSE;
-        for (node = (yang_node_t *)
-                 dlq_firstEntry(mod->allincQ);
-             node != NULL && !done;
-             node = (yang_node_t *)dlq_nextEntry(node)) {
+        for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+             inc != NULL;
+             inc = (ncx_include_t *)dlq_nextEntry(inc)) {
 
-            if (node->submod) {
+            if (inc->submod) {
                 res = resolve_xpath(tkc, 
-                                    node->submod,
-                                    &node->submod->datadefQ);
+                                    inc->submod,
+                                    &inc->submod->datadefQ);
                 CHK_EXIT(res, retres);
             }
         }

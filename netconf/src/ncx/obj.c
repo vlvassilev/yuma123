@@ -3344,10 +3344,6 @@ obj_template_t *
         return obj;
     }
 
-    if (!mod->allincQ) {
-        return NULL;  /* NCX module */
-    }
-
     /* check all the submodules, but only the ones visible
      * to this module or submodule, YANG only
      */

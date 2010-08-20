@@ -1651,14 +1651,6 @@ static status_t
         }
     }
 
-    if (dlq_empty(list->datadefQ)) {
-        retres = ERR_NCX_DATA_MISSING;
-        ncx_mod_missing_err(tkc, 
-                            mod, 
-                            "list", 
-                            "data-def");
-    }
-
     /* save or delete the obj_template_t struct */
     if (list->name && ncx_valid_name2(list->name)) {
         res = add_object(tkc, mod, que, obj);

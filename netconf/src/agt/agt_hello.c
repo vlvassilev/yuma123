@@ -250,7 +250,6 @@ void
 
     /* only process this message in hello wait state */
     if (scb->state != SES_ST_HELLO_WAIT) {
-        /* TBD: stats update */
         if (LOGINFO) {
             log_info("\nagt_hello dropped, wrong state "
                      "(%d) for session %d",

@@ -335,10 +335,10 @@ static status_t
      */
     switch (*dtyp) {
     case NCX_NT_TYP:
-        *dptr = ncx_find_type(imp->mod, defname);
+        *dptr = ncx_find_type(imp->mod, defname, FALSE);
         break;
     case NCX_NT_GRP:
-        *dptr = ncx_find_grouping(imp->mod, defname);
+        *dptr = ncx_find_grouping(imp->mod, defname, FALSE);
         break;
         break;
     case NCX_NT_OBJ:
@@ -347,12 +347,12 @@ static status_t
                                   defname);
         break;
     case NCX_NT_NONE:
-        *dptr = ncx_find_type(imp->mod, defname);
+        *dptr = ncx_find_type(imp->mod, defname, FALSE);
         if (*dptr) {
             *dtyp = NCX_NT_TYP;
         }
         if (!*dptr) {
-            *dptr = ncx_find_grouping(imp->mod, defname);
+            *dptr = ncx_find_grouping(imp->mod, defname, FALSE);
             if (*dptr) {
                 *dtyp = NCX_NT_GRP;
             }
@@ -474,6 +474,12 @@ static void
         ncx_free_include(incl);
     }
 
+    /* clear the allinc Q , empty unless this is a mod w/ submods */
+    yang_clean_nodeQ(&mod->allincQ);
+
+    /* clear the incchain Q , empty unless this is a mod w/ submods */
+    yang_clean_nodeQ(&mod->incchainQ);
+
     /* clear the type Que */
     typ_clean_typeQ(&mod->typeQ);
 
@@ -493,8 +499,6 @@ static void
     ncx_clean_typnameQ(&mod->typnameQ);
 
     yang_clean_import_ptrQ(&mod->saveimpQ);
-
-    yang_clean_nodeQ(&mod->saveincQ);
 
     /* clear the YANG stmtQ, used for docmode only */
     while (!dlq_empty(&mod->stmtQ)) {
@@ -1226,6 +1230,8 @@ ncx_module_t *
     dlq_createSQue(&mod->revhistQ);
     dlq_createSQue(&mod->importQ);
     dlq_createSQue(&mod->includeQ);
+    dlq_createSQue(&mod->allincQ);
+    dlq_createSQue(&mod->incchainQ);
     dlq_createSQue(&mod->typeQ);
     dlq_createSQue(&mod->groupingQ);
     dlq_createSQue(&mod->datadefQ);
@@ -1234,7 +1240,6 @@ ncx_module_t *
     dlq_createSQue(&mod->appinfoQ);
     dlq_createSQue(&mod->typnameQ);
     dlq_createSQue(&mod->saveimpQ);
-    dlq_createSQue(&mod->saveincQ);
     dlq_createSQue(&mod->stmtQ);
     dlq_createSQue(&mod->featureQ);
     dlq_createSQue(&mod->identityQ);
@@ -1500,12 +1505,15 @@ boolean
 * INPUTS:
 *   mod == ncx_module to check
 *   typname == type name
+*   useall == TRUE to use all submodules
+*             FALSE to only use the ones in the mod->includeQ
 * RETURNS:
 *  pointer to struct if present, NULL otherwise
 *********************************************************************/
 typ_template_t *
     ncx_find_type (ncx_module_t *mod,
-                   const xmlChar *typname)
+                   const xmlChar *typname,
+                   boolean useall)
 {
     typ_template_t *typ;
     yang_node_t    *node;
@@ -1524,34 +1532,49 @@ typ_template_t *
         return typ;
     }
 
-    que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
+    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
 
-    /* check all the submodules, but only the ones visible
-     * to this module or submodule, YANG only
-     */
-    for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
-         inc != NULL;
-         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+    if (useall) {
+        for (node = (yang_node_t *)dlq_firstEntry(que);
+             node != NULL;
+             node = (yang_node_t *)dlq_nextEntry(node)) {
 
-        /* get the real submodule struct */
-        if (!inc->submod) {
-            node = yang_find_node(que, 
-                                  inc->submodule,
-                                  inc->revision);
-            if (node) {
-                inc->submod = node->submod;
-            }
-            if (!inc->submod) {
-                /* include not found, should not be in Q !!! */
-                SET_ERROR(ERR_INTERNAL_VAL);
-                continue;
+            if (node->submod) {
+                typ = ncx_find_type_que(&node->submod->typeQ, 
+                                        typname);
+                if (typ) {
+                    return typ;
+                }
             }
         }
+    } else {
+        /* check all the submodules, but only the ones visible
+         * to this module or submodule, YANG only
+         */
+        for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+             inc != NULL;
+             inc = (ncx_include_t *)dlq_nextEntry(inc)) {
 
-        /* check the type Q in this submodule */
-        typ = ncx_find_type_que(&inc->submod->typeQ, typname);
-        if (typ) {
-            return typ;
+            /* get the real submodule struct */
+            if (!inc->submod) {
+                node = yang_find_node(que, 
+                                      inc->submodule,
+                                      inc->revision);
+                if (node) {
+                    inc->submod = node->submod;
+                }
+                if (!inc->submod) {
+                    /* include not found, should not be in Q !!! */
+                    SET_ERROR(ERR_INTERNAL_VAL);
+                    continue;
+                }
+            }
+
+            /* check the type Q in this submodule */
+            typ = ncx_find_type_que(&inc->submod->typeQ, typname);
+            if (typ) {
+                return typ;
+            }
         }
     }
 
@@ -1605,13 +1628,15 @@ typ_template_t *
 * INPUTS:
 *   mod == ncx_module to check
 *   grpname == group name
-*
+*   useall == TRUE to check all existing nodes
+*             FALSE to only use includes visible to this [sub]mod
 * RETURNS:
 *  pointer to struct if present, NULL otherwise
 *********************************************************************/
 grp_template_t *
     ncx_find_grouping (ncx_module_t *mod,
-                       const xmlChar *grpname)
+                       const xmlChar *grpname,
+                       boolean useall)
 {
     grp_template_t *grp;
     yang_node_t    *node;
@@ -1631,37 +1656,51 @@ grp_template_t *
         return grp;
     }
 
-    que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
+    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
 
-    /* check all the submodules, but only the ones visible
-     * to this module or submodule, YANG only
-     */
-    for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
-         inc != NULL;
-         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+    if (useall) {
+        for (node = (yang_node_t *)dlq_firstEntry(que);
+             node != NULL;
+             node = (yang_node_t *)dlq_nextEntry(node)) {
 
-        /* get the real submodule struct */
-        if (!inc->submod) {
-            node = yang_find_node(que, 
-                                  inc->submodule,
-                                  inc->revision);
-            if (node) {
-                inc->submod = node->submod;
-            }
-            if (!inc->submod) {
-                /* include not found, should not be in Q !!! */
-                SET_ERROR(ERR_INTERNAL_VAL);
-                continue;
+            if (node->submod) {
+                grp = ncx_find_grouping_que(&node->submod->groupingQ, 
+                                            grpname);
+                if (grp) {
+                    return grp;
+                }
             }
         }
+    } else {
+        /* check all the submodules, but only the ones visible
+         * to this module or submodule, YANG only
+         */
+        for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+             inc != NULL;
+             inc = (ncx_include_t *)dlq_nextEntry(inc)) {
 
-        /* check the type Q in this submodule */
-        grp = ncx_find_grouping_que(&inc->submod->groupingQ, grpname);
-        if (grp) {
-            return grp;
+            /* get the real submodule struct */
+            if (!inc->submod) {
+                node = yang_find_node(que, 
+                                      inc->submodule,
+                                      inc->revision);
+                if (node) {
+                    inc->submod = node->submod;
+                }
+                if (!inc->submod) {
+                    /* include not found, should not be in Q !!! */
+                    SET_ERROR(ERR_INTERNAL_VAL);
+                    continue;
+                }
+            }
+
+            /* check the grouping Q in this submodule */
+            grp = ncx_find_grouping_que(&inc->submod->groupingQ, grpname);
+            if (grp) {
+                return grp;
+            }
         }
     }
-
     return NULL;
 
 }   /* ncx_find_grouping */
@@ -2304,7 +2343,7 @@ status_t
     }
 
     /* add all the submodules included in this module */
-    for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+    for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
          node != NULL;
          node = (yang_node_t *)dlq_nextEntry(node)) {
 
@@ -2400,7 +2439,7 @@ boolean
     }
 #endif
 
-    if (ncx_find_type(mod, defname)) {
+    if (ncx_find_type(mod, defname, TRUE)) {
         return TRUE;
     }
     if (ncx_find_rpc(mod, defname)) {
@@ -2688,7 +2727,11 @@ obj_template_t *
         return obj;
     }
 
-    for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+    if (!mod->ismod) {
+        return NULL;
+    }
+
+    for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
          node != NULL;
          node = (yang_node_t *)dlq_nextEntry(node)) {
 
@@ -2762,7 +2805,11 @@ obj_template_t *
 
     start = (curobj->tkerr.mod == mod) ? TRUE : FALSE;
 
-    for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+    if (!mod->ismod) {
+        return NULL;
+    }
+
+    for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
          node != NULL;
          node = (yang_node_t *)dlq_nextEntry(node)) {
 
@@ -2838,7 +2885,11 @@ obj_template_t *
         }
     }
 
-    for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+    if (!mod->ismod) {
+        return NULL;
+    }
+
+    for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
          node != NULL;
          node = (yang_node_t *)dlq_nextEntry(node)) {
 
@@ -2913,9 +2964,13 @@ obj_template_t *
         }
     }
 
+    if (!mod->ismod) {
+        return NULL;
+    }
+
     start = (curobj->tkerr.mod == mod) ? TRUE : FALSE;
 
-    for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+    for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
          node != NULL;
          node = (yang_node_t *)dlq_nextEntry(node)) {
 
@@ -3570,13 +3625,16 @@ void
 * INPUTS:
 *    mod == module to search
 *    name == identity name to find
-*
+*    useall == TRUE if all submodules should be checked
+*              FALSE if only visible included submodules
+*              should be checked
 * RETURNS:
 *    pointer to found feature or NULL if not found
 *********************************************************************/
 ncx_identity_t *
     ncx_find_identity (ncx_module_t *mod,
-                       const xmlChar *name)
+                       const xmlChar *name,
+                       boolean useall)
 {
     ncx_identity_t  *identity;
     dlq_hdr_t       *que;
@@ -3595,37 +3653,52 @@ ncx_identity_t *
         return identity;
     }
 
-    que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
+    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
 
-    /* check all the submodules, but only the ones visible
-     * to this module or submodule
-     */
-    for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
-         inc != NULL;
-         inc = (ncx_include_t *)dlq_nextEntry(inc)) {
+    if (useall) {
+        for (node = (yang_node_t *)dlq_firstEntry(que);
+             node != NULL;
+             node = (yang_node_t *)dlq_nextEntry(node)) {
 
-        /* get the real submodule struct */
-        if (!inc->submod) {
-            node = yang_find_node(que, 
-                                  inc->submodule,
-                                  inc->revision);
-            if (node) {
-                inc->submod = node->submod;
-            }
-            if (!inc->submod) {
-                /* include not found, should not be in Q !!! */
-                SET_ERROR(ERR_INTERNAL_VAL);
-                continue;
+            if (node->submod) {
+                /* check the identity Q in this submodule */
+                identity = ncx_find_identity_que(&node->submod->identityQ, 
+                                                 name);
+                if (identity) {
+                    return identity;
+                }
             }
         }
+    } else {
+        /* check all the submodules, but only the ones visible
+         * to this module or submodule
+         */
+        for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
+             inc != NULL;
+             inc = (ncx_include_t *)dlq_nextEntry(inc)) {
 
-        /* check the identity Q in this submodule */
-        identity = ncx_find_identity_que(&inc->submod->identityQ, name);
-        if (identity) {
-            return identity;
+            /* get the real submodule struct */
+            if (!inc->submod) {
+                node = yang_find_node(que, 
+                                      inc->submodule,
+                                      inc->revision);
+                if (node) {
+                    inc->submod = node->submod;
+                }
+                if (!inc->submod) {
+                    /* include not found, should not be in Q !!! */
+                    SET_ERROR(ERR_INTERNAL_VAL);
+                    continue;
+                }
+            }
+
+            /* check the identity Q in this submodule */
+            identity = ncx_find_identity_que(&inc->submod->identityQ, name);
+            if (identity) {
+                return identity;
+            }
         }
     }
-
     return NULL;
 
 } /* ncx_find_identity */

@@ -433,10 +433,12 @@ status_t
 
     /* save or delete the ext_template_t struct */
     if (ext->name && ncx_valid_name2(ext->name)) {
-        testext = ext_find_extension(mod, ext->name);
+        testext = ext_find_extension_all(mod, ext->name);
         if (testext) {
-            log_error("\nError: extension '%s' already defined at line %u",
+            log_error("\nError: extension '%s' already defined "
+                      "in '%s' at line %u",
                       ext->name, 
+                      testext->tkerr.mod->name,
                       testext->tkerr.linenum);
             retres = ERR_NCX_DUP_ENTRY;
             ncx_print_errormsg(tkc, mod, retres);

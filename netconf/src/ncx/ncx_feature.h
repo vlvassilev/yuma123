@@ -223,6 +223,24 @@ extern ncx_feature_t *
 
 
 /********************************************************************
+* FUNCTION ncx_find_feature_all
+* 
+* Find a ncx_feature_t struct in the module and perhaps
+* any of its submodules
+*
+* INPUTS:
+*    mod == module to search
+*    name == feature name to find
+*
+* RETURNS:
+*    pointer to found feature or NULL if not found
+*********************************************************************/
+extern ncx_feature_t *
+    ncx_find_feature_all (ncx_module_t *mod,
+                          const xmlChar *name);
+
+
+/********************************************************************
 * FUNCTION ncx_for_all_features
 * 
 * Execute a callback function for all features in this module

@@ -568,12 +568,12 @@ static void *
             *dtyp = NCX_NT_OBJ;
             break;
         }
-        def = ncx_find_grouping(mod, defname);
+        def = ncx_find_grouping(mod, defname, FALSE);
         if (def) {
             *dtyp = NCX_NT_GRP;
             break;
         }
-        def = ncx_find_type(mod, defname);
+        def = ncx_find_type(mod, defname, FALSE);
         if (def) {
             *dtyp = NCX_NT_TYP;
             break;
@@ -583,10 +583,10 @@ static void *
         def = ncx_find_object(mod, defname);
         break;
     case NCX_NT_GRP:
-        def = ncx_find_grouping(mod, defname);
+        def = ncx_find_grouping(mod, defname, FALSE);
         break;
     case NCX_NT_TYP:
-        def = ncx_find_type(mod, defname);
+        def = ncx_find_type(mod, defname, FALSE);
         break;
     default:
         def = NULL;

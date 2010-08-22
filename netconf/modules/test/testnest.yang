@@ -1,27 +1,16 @@
 submodule testnest {
 
-    belongs-to test1 { prefix t1a; }
+    belongs-to testnesttop { prefix tntop; }
 
-    include testnest2 { revision-date "2010-07-12"; }
-
-    revision 2010-07-14 {
+    revision 2010-08-21 {
         description "Initial revision.";
     }
 
-    leaf plus {
-      type enumeration {
-       enum t+ { value 1; }
-       enum +;
-      }
-      description "foo" + " " + "bar";
-    }
+    grouping one { leaf two { type string; } }
+    feature A;
+    identity B;
+    typedef C { type string; }
+    leaf D { type uint32; }
+    extension E;
 
-
-    typedef plus {
-      type enumeration {
-       enum t+ { value 1; }
-       enum +;
-      }
-      description "foo" + " " + "bar";
-    }
 }

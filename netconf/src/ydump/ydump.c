@@ -909,7 +909,7 @@ static void
     output_one_module_exports(mod, scb, cp->buff);
 
     if (cp->unified && mod->ismod) {
-        for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -954,7 +954,7 @@ static void
         }
     }
     if (!cp->unified) {
-        for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (yang_node_t *)dlq_nextEntry(node)) {
 
@@ -1015,7 +1015,7 @@ static void
     output_one_module_dependencies(mod, scb, cp);
 
     if (cp->unified && mod->ismod) {
-        for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -1160,7 +1160,7 @@ static void
                                   cp->bufflen);
 
     if (cp->unified && mod->ismod) {
-        for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -1238,7 +1238,7 @@ static void
     output_one_module_version(mod, scb, cp->buff);
 
     if (cp->unified && mod->ismod) {
-        for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {

@@ -623,7 +623,7 @@ void
 * FUNCTION ncx_find_feature
 * 
 * Find a ncx_feature_t struct in the module and perhaps
-* any of its submodules
+* any of its visible submodules
 *
 * INPUTS:
 *    mod == module to search
@@ -653,10 +653,10 @@ ncx_feature_t *
         return feature;
     }
 
-    que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
+    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
 
     /* check all the submodules, but only the ones visible
-     * to this module or submodule, YANG only
+     * to this module or submodule
      */
     for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
          inc != NULL;
@@ -677,7 +677,7 @@ ncx_feature_t *
             }
         }
 
-        /* check the type Q in this submodule */
+        /* check the feature Q in this submodule */
         feature = ncx_find_feature_que(&inc->submod->featureQ, name);
         if (feature) {
             return feature;
@@ -728,6 +728,60 @@ ncx_feature_t *
 
 
 /********************************************************************
+* FUNCTION ncx_find_feature_all
+* 
+* Find a ncx_feature_t struct in the module and perhaps
+* any of its submodules
+*
+* INPUTS:
+*    mod == module to search
+*    name == feature name to find
+*
+* RETURNS:
+*    pointer to found feature or NULL if not found
+*********************************************************************/
+ncx_feature_t *
+    ncx_find_feature_all (ncx_module_t *mod,
+                          const xmlChar *name)
+{
+    ncx_feature_t  *feature;
+    dlq_hdr_t      *que;
+    yang_node_t    *node;
+
+#ifdef DEBUG
+    if (!mod || !name) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    feature = ncx_find_feature_que(&mod->featureQ, name);
+    if (feature) {
+        return feature;
+    }
+
+    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
+
+    /* check all the submodules */
+    for (node = (yang_node_t *)dlq_firstEntry(que);
+         node != NULL;
+         node = (yang_node_t *)dlq_nextEntry(node)) {
+
+        if (node->submod) {
+            /* check the feature Q in this submodule */
+            feature = ncx_find_feature_que(&node->submod->featureQ, name);
+            if (feature) {
+                return feature;
+            }
+        }
+    }
+
+    return NULL;
+
+} /* ncx_find_feature_all */
+
+
+/********************************************************************
 * FUNCTION ncx_for_all_features
 * 
 * Execute a callback function for all features in this module
@@ -772,10 +826,10 @@ void
         keepgoing = (*cbfn)(mod, feature, cookie);
     }   
         
-    que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
+    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
 
     /* check all the submodules, but only the ones visible
-     * to this module or submodule, YANG only
+     * to this module or submodule
      */
     for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
          inc != NULL && keepgoing;
@@ -856,10 +910,10 @@ uint32
         count++;
     }   
         
-    que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
+    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
 
     /* check all the submodules, but only the ones visible
-     * to this module or submodule, YANG only
+     * to this module or submodule
      */
     for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
          inc != NULL;

@@ -698,6 +698,30 @@ extern obj_template_t *
 
 
 /********************************************************************
+* FUNCTION obj_find_template_all
+*
+* Check if an obj_template_t in the mod->datadefQ or any
+* of the include files used within the entire main module
+*
+* Top-level access is not tracked, so the 'test' variable
+* is hard-wired to FALSE
+*
+* INPUTS:
+*   mod == ncx_module to check
+*   modname == module name for the object (needed for augments)
+*              (may be NULL to match any 'objname' instance)
+*   objname == object name to find
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
+extern obj_template_t *
+    obj_find_template_all (ncx_module_t *mod,
+                           const xmlChar *modname,
+                           const xmlChar *objname);
+
+
+/********************************************************************
 * FUNCTION obj_find_child
 * 
 * Find a child object with the specified Qname

@@ -687,13 +687,17 @@ static status_t
 
     /* check if feature already exists in this module */
     if (keep) {
-        testfeature = ncx_find_feature(mod, feature->name);
+        testfeature = ncx_find_feature_all(mod, feature->name);
         if (testfeature) {
             retres = ERR_NCX_DUP_ENTRY;
             log_error("\nError: feature '%s' already defined "
-                      "in this module", feature->name);
+                      "in '%s' at line %u", 
+                      feature->name,
+                      feature->tkerr.mod->name,
+                      feature->tkerr.linenum);
             ncx_print_errormsg(tkc, mod, retres);
         }
+
         feature->res = retres;
         dlq_enque(feature, &mod->featureQ);
 
@@ -1045,11 +1049,14 @@ static status_t
 
     /* check if feature already exists in this module */
     if (keep) {
-        testidentity = ncx_find_identity(mod, identity->name);
+        testidentity = ncx_find_identity(mod, identity->name, TRUE);
         if (testidentity) {
             retres = ERR_NCX_DUP_ENTRY;
             log_error("\nError: identity '%s' already defined "
-                      "in this module", identity->name);
+                      "in %s at line %u", 
+                      identity->name,
+                      identity->tkerr.mod->name,
+                      identity->tkerr.linenum);
             ncx_print_errormsg(tkc, mod, retres);
         }
         identity->res = retres;
@@ -1134,7 +1141,8 @@ static status_t
     } else {
         testidentity = 
             ncx_find_identity(mod, 
-                              identity->basename);
+                              identity->basename,
+                              FALSE);
     }
 
     if (!testidentity && !errdone) {
@@ -1728,7 +1736,8 @@ static status_t
                     res = ncxmod_load_imodule(imp->module, 
                                               imp->revision,
                                               pcb, 
-                                              YANG_PT_IMPORT);
+                                              YANG_PT_IMPORT,
+                                              NULL);
                 } else if (LOGDEBUG) {
                     log_debug("\nSkipping import of ietf-netconf, "
                               "using yuma-netconf instead");
@@ -1805,6 +1814,7 @@ static status_t
     const char     *expstr;
     const xmlChar  *val;
     yang_node_t    *node, *testnode;
+    dlq_hdr_t      *allQ, *chainQ;
     tk_type_t       tktyp;
     status_t        res, retres;
     boolean         done, revdone;
@@ -1963,6 +1973,15 @@ static status_t
         }
     }
 
+    /* get the include Qs to use */
+    allQ = (mod->parent) ? 
+        &mod->parent->allincQ :
+        &mod->allincQ;
+
+    chainQ = (mod->parent) ? 
+        &mod->parent->incchainQ :
+        &mod->incchainQ;
+
     /* check if the mandatory submodule name is valid
      * and if the include is already present 
      */
@@ -2036,7 +2055,7 @@ static status_t
 
             /* check for include loop */
             if (retres == NO_ERR) {
-                node = yang_find_node(&pcb->incchainQ, 
+                node = yang_find_node(chainQ, 
                                       inc->submodule,
                                       inc->revision);
                 if (node) {
@@ -2061,7 +2080,7 @@ static status_t
             ncx_print_errormsg(tkc, mod, retres);
             ncx_free_include(inc);
         } else {
-            /* save the import used record and the include */
+            /* save the include */
             node->name = inc->submodule;
             node->revision = inc->revision;
             node->mod = mod;
@@ -2074,22 +2093,24 @@ static status_t
             dlq_enque(inc, &mod->includeQ);
 
             /* check if already parsed, and in the allincQ */
-            testnode = yang_find_node(&pcb->allincQ, 
+            testnode = yang_find_node(allQ,
                                       inc->submodule,
                                       inc->revision);
             if (!testnode) {
-                dlq_enque(node, &pcb->incchainQ);
+                dlq_enque(node, chainQ);
 
                 /* load the module now instead of later for validation */
-                retres = ncxmod_load_imodule(inc->submodule, 
-                                             inc->revision,
-                                             pcb, 
-                                             YANG_PT_INCLUDE);
+                retres = 
+                    ncxmod_load_imodule(inc->submodule, 
+                                        inc->revision,
+                                        pcb, 
+                                        YANG_PT_INCLUDE,
+                                        (mod->parent) ? mod->parent : mod);
 
                 /* remove the node in the include chain that 
                  * was added before the submodule was loaded
                  */
-                node = (yang_node_t *)dlq_lastEntry(&pcb->incchainQ);
+                node = (yang_node_t *)dlq_lastEntry(chainQ);
                 if (node) {
                     dlq_remove(node);
                     yang_free_node(node);
@@ -2931,7 +2952,9 @@ static status_t
         }
         yang_dump_nodeQ(&pcb->impchainQ, "impchainQ");
         yang_dump_nodeQ(&pcb->incchainQ, "incchainQ");
-        yang_dump_nodeQ(&pcb->allincQ, "allincQ");
+        if (mod->ismod) {
+            yang_dump_nodeQ(&mod->allincQ, "allincQ");
+        }
     }
 #endif
 
@@ -3306,20 +3329,12 @@ static status_t
     case YANG_PT_IMPORT:
         /* finish up the import or top module */
         if (mod->ismod || pcb->top == mod) {
-
-            if (pcb->top == mod) {
-                dlq_block_enque(mod->allimpQ, &mod->saveimpQ);
-                dlq_block_enque(mod->allincQ, &mod->saveincQ);
-            }  /* else leave the pcb->allimpQ and pcb->allincQ alone */
-            mod->allincQ = NULL;
-            mod->allimpQ = NULL;
-
             /* update the result, errors, and warnings */
             if (mod->ismod) {
                 res = NO_ERR;
                 done = FALSE;
                 for (node = (yang_node_t *)
-                         dlq_firstEntry(&mod->saveincQ);
+                         dlq_firstEntry(&mod->allincQ);
                      node != NULL && !done;
                      node = (yang_node_t *)dlq_nextEntry(node)) {
 
@@ -3375,9 +3390,11 @@ static status_t
             node->mod = NULL;
             node->submod = mod;
             mod->allimpQ = NULL;
-            mod->allincQ = NULL;
             node->res = retres;
-            dlq_enque(node, &pcb->allincQ);
+            dlq_enque(node, 
+                      (mod->parent) ?
+                      &mod->parent->allincQ :
+                      &mod->allincQ);
             *wasadded = TRUE;
         }
         break;
@@ -3388,6 +3405,38 @@ static status_t
     return retres;
 
 }  /* parse_yang_module */
+
+
+/********************************************************************
+* FUNCTION set_source
+* 
+* Set the [sub]module source
+*
+* INPUTS:
+*   mod == ncx_module_t struct in progress
+*   str == source string to use
+*********************************************************************/
+static void
+    set_source (ncx_module_t *mod,
+                xmlChar *str)
+{
+    /* save the source of this ncx-module for monitor / debug 
+     * hand off malloced src string here
+     */
+    mod->source = str;
+
+    /* find the start of the file name */
+    mod->sourcefn = &str[xml_strlen(str)];
+    while (mod->sourcefn > str &&
+           *mod->sourcefn != NCX_PATHSEP_CH) {
+        mod->sourcefn--;
+    }
+    if (*mod->sourcefn == NCX_PATHSEP_CH) {
+        mod->sourcefn++;
+    }
+    
+}  /* set_source */
+
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -3447,7 +3496,6 @@ status_t
     tkc = NULL;
     mod = NULL;
     res = NO_ERR;
-    str = NULL;
     keepmod = FALSE;
     wasadd = FALSE;
 
@@ -3508,26 +3556,16 @@ status_t
             m__free(str);
             str = NULL;
         } else {
-            /* save the source of this ncx-module for monitor / debug 
-             * hand off malloced src string here
-             */
-            mod->source = str;
-
-            /* find the start of the file name */
-            mod->sourcefn = &str[xml_strlen(str)];
-            while (mod->sourcefn > str &&
-                   *mod->sourcefn != NCX_PATHSEP_CH) {
-                mod->sourcefn--;
-            }
-            if (*mod->sourcefn == NCX_PATHSEP_CH) {
-                mod->sourcefn++;
-            }
+            /* hand off 'str' malloced memory here */
+            set_source(mod, str);
 
             /* set the back-ptr to Q of all the import files */
             mod->allimpQ = &pcb->allimpQ;
 
-            /* set the back-ptr to Q of all the include files */
-            mod->allincQ = &pcb->allincQ;
+            /* set the back-ptr to parent of this submodule 
+             * or NULL if this is not a submodule
+             */
+            mod->parent = pcb->parentparm;
 
             /* set the stmt-track mode flag to the master flag in the PCB */
             mod->stmtmode = pcb->stmtmode;

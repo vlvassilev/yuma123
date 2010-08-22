@@ -616,7 +616,7 @@ typedef struct ncx_module_t_ {
     const xmlChar    *belongsver;    /* back ptr to mod ver */
 
     dlq_hdr_t        *allimpQ;  /* back-ptr to pcb->allimpQ */
-    dlq_hdr_t        *allincQ;  /* back-ptr to pcb->allincQ */
+
 
     xmlns_id_t        nsid;            /* assigned by xmlns */
     uint32            langver;
@@ -643,10 +643,16 @@ typedef struct ncx_module_t_ {
     dlq_hdr_t         typnameQ;        /* Q of ncx_typname_t */
     dlq_hdr_t         saveimpQ;    /* Q of yang_import_ptr_t */   
                                   /* saved from pcb->allimpQ */
-    dlq_hdr_t         saveincQ;          /* Q of yang_node_t */ 
-                                  /* saved from pcb->allincQ */
     dlq_hdr_t         stmtQ;             /* Q of yang_stmt_t */
                              /* saved for top, yang, docmode */
+
+    struct ncx_module_t_ *parent;  /* if this is a submodule */
+
+    /* Q of yang_node_t to track all submodules */
+    dlq_hdr_t         allincQ;     /* used if parent == NULL */
+
+    dlq_hdr_t         incchainQ;   /* used if parent == NULL */
+
     ncx_list_t        devmodlist;     /* for deviations list */
 
 } ncx_module_t;

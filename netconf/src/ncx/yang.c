@@ -2536,7 +2536,7 @@ status_t
 
     if (imod) {
         /* found import OK, look up imported extension definition */
-        *identity = ncx_find_identity(imod, name);
+        *identity = ncx_find_identity(imod, name, FALSE);
         if (!*identity) {
             res = ERR_NCX_DEF_NOT_FOUND;
             log_error("\nError: identity definition for '%s:%s' not found"
@@ -2904,8 +2904,6 @@ yang_pcb_t *
     memset(pcb, 0x0, sizeof(yang_pcb_t));
     dlq_createSQue(&pcb->impchainQ);
     dlq_createSQue(&pcb->allimpQ);
-    dlq_createSQue(&pcb->allincQ);
-    dlq_createSQue(&pcb->incchainQ);
     dlq_createSQue(&pcb->failedQ);
     /* needed for init load and imports for yangdump
      * do not do this for the agent, which will set 'save descr' 
@@ -2957,8 +2955,6 @@ void
     }
 
     yang_clean_nodeQ(&pcb->impchainQ);
-    yang_clean_nodeQ(&pcb->allincQ);
-    yang_clean_nodeQ(&pcb->incchainQ);
     yang_clean_nodeQ(&pcb->failedQ);
     m__free(pcb);
 

@@ -287,12 +287,15 @@ extern boolean
 * INPUTS:
 *   mod == ncx_module to check
 *   typname == type name
+*   useall == TRUE to use all submodules
+*             FALSE to only use the ones in the mod->includeQ
 * RETURNS:
 *  pointer to struct if present, NULL otherwise
 *********************************************************************/
-extern typ_template_t * 
+extern typ_template_t *
     ncx_find_type (ncx_module_t *mod,
-		   const xmlChar *typname);
+                   const xmlChar *typname,
+                   boolean useall);
 
 
 /********************************************************************
@@ -320,13 +323,15 @@ extern typ_template_t *
 * INPUTS:
 *   mod == ncx_module to check
 *   grpname == group name
-*
+*   useall == TRUE to check all existing nodes
+*             FALSE to only use includes visible to this [sub]mod
 * RETURNS:
 *  pointer to struct if present, NULL otherwise
 *********************************************************************/
-extern grp_template_t * 
+extern grp_template_t *
     ncx_find_grouping (ncx_module_t *mod,
-		       const xmlChar *grpname);
+                       const xmlChar *grpname,
+                       boolean useall);
 
 
 /********************************************************************
@@ -1065,14 +1070,16 @@ extern void
 * INPUTS:
 *    mod == module to search
 *    name == identity name to find
-*
+*    useall == TRUE if all submodules should be checked
+*              FALSE if only visible included submodules
+*              should be checked
 * RETURNS:
-*    pointer to found identity or NULL if not found
+*    pointer to found feature or NULL if not found
 *********************************************************************/
 extern ncx_identity_t *
     ncx_find_identity (ncx_module_t *mod,
-		       const xmlChar *name);
-
+                       const xmlChar *name,
+                       boolean useall);
 
 /********************************************************************
 * FUNCTION ncx_find_identity_que

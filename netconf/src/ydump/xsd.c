@@ -449,7 +449,7 @@ status_t
     if (obj_any_notifs(&mod->datadefQ)) {
         needed = TRUE;
     } else if (cp->unified && mod->ismod) {
-        for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (yang_node_t *)dlq_nextEntry(node)) {
             if (obj_any_notifs(&node->submod->datadefQ)) {
@@ -545,7 +545,7 @@ status_t
     }
 
     if (cp->unified && mod->ismod) {
-        for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -591,7 +591,7 @@ status_t
      * after this fn call, there might be malloced data in the
      * mod->typnameQ that has to be freed before exiting
      */
-    for (node = (yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+    for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
          node != NULL && res==NO_ERR;
          node = (yang_node_t *)dlq_nextEntry(node)) {
 

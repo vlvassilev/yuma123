@@ -951,7 +951,7 @@ static status_t
     write_h_features(scb, &mod->featureQ);
     if (cp->unified && mod->ismod) {
         for (node = (yang_node_t *)
-                 dlq_firstEntry(&mod->saveincQ);
+                 dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -964,7 +964,7 @@ static status_t
     write_h_identities(scb, &mod->identityQ);
     if (cp->unified && mod->ismod) {
         for (node = (yang_node_t *)
-                 dlq_firstEntry(&mod->saveincQ);
+                 dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -978,7 +978,7 @@ static status_t
     if (res == NO_ERR) {
         if (cp->unified && mod->ismod) {
             for (node = (yang_node_t *)
-                     dlq_firstEntry(&mod->saveincQ);
+                     dlq_firstEntry(&mod->allincQ);
                  node != NULL && res == NO_ERR;
                  node = (yang_node_t *)dlq_nextEntry(node)) {
                 if (node->submod) {
@@ -1003,7 +1003,7 @@ static status_t
         if (res == NO_ERR) {
             if (cp->unified && mod->ismod) {
                 for (node = (yang_node_t *)
-                         dlq_firstEntry(&mod->saveincQ);
+                         dlq_firstEntry(&mod->allincQ);
                      node != NULL && res == NO_ERR;
                      node = (yang_node_t *)dlq_nextEntry(node)) {
                     if (node->submod) {
@@ -1021,7 +1021,7 @@ static status_t
         write_h_objects(scb, &mod->datadefQ, &typenameQ);
         if (cp->unified && mod->ismod) {
             for (node = (yang_node_t *)
-                     dlq_firstEntry(&mod->saveincQ);
+                     dlq_firstEntry(&mod->allincQ);
                  node != NULL;
                  node = (yang_node_t *)dlq_nextEntry(node)) {
                 if (node->submod) {
@@ -1036,7 +1036,7 @@ static status_t
         write_h_rpcs(scb, &mod->datadefQ);
         if (cp->unified && mod->ismod) {
             for (node = (yang_node_t *)
-                     dlq_firstEntry(&mod->saveincQ);
+                     dlq_firstEntry(&mod->allincQ);
                  node != NULL;
                  node = (yang_node_t *)dlq_nextEntry(node)) {
                 if (node->submod) {
@@ -1051,7 +1051,7 @@ static status_t
         write_h_notifs(scb, &mod->datadefQ, cp);
         if (cp->unified && mod->ismod) {
             for (node = (yang_node_t *)
-                     dlq_firstEntry(&mod->saveincQ);
+                     dlq_firstEntry(&mod->allincQ);
                  node != NULL;
                  node = (yang_node_t *)dlq_nextEntry(node)) {
                 if (node->submod) {

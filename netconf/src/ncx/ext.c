@@ -218,7 +218,7 @@ ext_template_t *
         return extension;
     }
 
-    que = (mod->allincQ) ? mod->allincQ : &mod->saveincQ;
+    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
 
     /* check all the submodules, but only the ones visible
      * to this module or submodule
@@ -290,6 +290,64 @@ ext_template_t *
     return NULL;
          
 } /* ext_find_extension_que */
+
+
+/********************************************************************
+* FUNCTION ext_find_extension_all
+* 
+* Search a module of ext_template_t structs for a given name
+* Check all submodules as well
+*
+* INPUTS:
+*    mod == module to check
+*    name == name string to find
+*
+* RETURNS:
+*   pointer to found entry, or NULL if not found
+*********************************************************************/
+ext_template_t *
+    ext_find_extension_all (ncx_module_t *mod,
+                            const xmlChar *name)
+{
+    ext_template_t  *extension;
+    dlq_hdr_t       *que;
+    yang_node_t     *node;
+
+#ifdef DEBUG
+    if (!mod || !name) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    extension = ext_find_extension_que(&mod->extensionQ, name);
+    if (extension) {
+        return extension;
+    }
+
+    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
+
+    /* check all the submodules, but only the ones visible
+     * to this module or submodule
+     */
+    for (node = (yang_node_t *)dlq_firstEntry(que);
+         node != NULL;
+         node = (yang_node_t *)dlq_nextEntry(node)) {
+
+        if (node->submod) {
+            /* check the extension Q in this submodule */
+            extension = ext_find_extension_que(&node->submod->extensionQ, 
+                                               name);
+            if (extension) {
+                return extension;
+            }
+        }
+    }
+
+    return NULL;
+
+}  /* ext_find_extension_all */
+
 
 
 /* END ext.c */

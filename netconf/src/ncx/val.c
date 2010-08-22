@@ -2038,7 +2038,7 @@ status_t
         /* the namespace produced a module which should have
          * the identity-stmt with this name
          */
-        identity = ncx_find_identity(mod, str);
+        identity = ncx_find_identity(mod, str, FALSE);
     } else {
         /* no default namespace, so be liberal and
          * try to find any matching value
@@ -2047,7 +2047,7 @@ status_t
         for (mod = ncx_get_first_module();
              mod != NULL && identity == NULL;
              mod = ncx_get_next_module(mod)) {
-            identity = ncx_find_identity(mod, str); 
+            identity = ncx_find_identity(mod, str, FALSE); 
         }
     }
 
@@ -2168,7 +2168,7 @@ status_t
                                              import->revision);
                     if (impmod) {
                         prefixnsid = impmod->nsid;
-                        identity = ncx_find_identity(impmod, str);
+                        identity = ncx_find_identity(impmod, str, FALSE);
                     } else {
                         res = ERR_NCX_MOD_NOT_FOUND;
                     }
@@ -2177,7 +2177,7 @@ status_t
                 }
             } else {
                 prefixnsid = mod->nsid;
-                identity = ncx_find_identity(mod, str);
+                identity = ncx_find_identity(mod, str, FALSE);
             }
         } else {
             /* look up the default prefix for a module */
@@ -2188,7 +2188,7 @@ status_t
                     impmod = ncx_find_module(modname, NULL);
                     if (impmod) {
                         prefixnsid = impmod->nsid;
-                        identity = ncx_find_identity(impmod, str);
+                        identity = ncx_find_identity(impmod, str, FALSE);
                     } else {
                         res = ERR_NCX_MOD_NOT_FOUND;
                     }
@@ -2210,7 +2210,7 @@ status_t
         }
         if (mod) {
             prefixnsid = mod->nsid;
-            identity = ncx_find_identity(mod, qname);
+            identity = ncx_find_identity(mod, qname, FALSE);
         } else {
             /*** TBD: agent module check only ***/
             /* check all modules */
@@ -2218,7 +2218,7 @@ status_t
             for (mod = ncx_get_first_module();
                  mod != NULL && identity == NULL;
                  mod = ncx_get_next_module(mod)) {
-                identity = ncx_find_identity(mod, qname);
+                identity = ncx_find_identity(mod, qname, FALSE);
                 if (identity) {
                     prefixnsid = mod->nsid;                 
                 }

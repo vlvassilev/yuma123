@@ -3310,7 +3310,7 @@ static status_t
                                                  &testidentity);
                 } else {
                     testidentity = ncx_find_identity
-                        (mod, idref->basename);
+                        (mod, idref->basename, FALSE);
                     if (!testidentity) {
                         res = ERR_NCX_DEF_NOT_FOUND;
                     } else {
@@ -3379,17 +3379,20 @@ static status_t
         /* check module-global (exportable) typedef shadowed
          * only check for nested typedefs
          */
-        if (!errtyp && obj && 
-            (name || obj->grp || 
+        if (!errtyp && 
+            obj && 
+            (name || 
+             obj->grp || 
              (obj->parent && !obj_is_root(obj->parent)))) {
-            errtyp = ncx_find_type(mod, name);
+            errtyp = ncx_find_type(mod, name, TRUE);
         }
 
         if (errtyp) {
             res = ERR_NCX_DUP_ENTRY;
             log_error("\nError: local typedef %s shadows "
-                      "definition on line %u", 
+                      "definition in %s on line %u", 
                       name,
+                      errtyp->tkerr.mod->name,
                       errtyp->tkerr.linenum);
             tkc->curerr = &typdef->tkerr;
             ncx_print_errormsg(tkc, mod, res);
@@ -4040,11 +4043,16 @@ status_t
     /* check if the type name is already used in this module */
     if (typ->name && ncx_valid_name2(typ->name)) {
         testtyp = ncx_find_type_que(que, typ->name);
+        if (testtyp == NULL) {
+            testtyp = ncx_find_type(mod, typ->name, TRUE);
+        }
         if (testtyp) {
             /* fatal error for duplicate type w/ same name */
             retres = ERR_NCX_DUP_ENTRY;
-            log_error("\nError: type '%s' is already defined on line %u",
-                      typ->name, 
+            log_error("\nError: type '%s' is already defined in '%s' "
+                      "on line %u",
+                      testtyp->name, 
+                      testtyp->tkerr.mod->name,
                       testtyp->tkerr.linenum);
             tkc->curerr = &typ->tkerr;
             ncx_print_errormsg(tkc, mod, retres);

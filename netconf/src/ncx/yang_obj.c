@@ -413,6 +413,11 @@ static status_t
                                          obj_get_mod_name(obj), 
                                          name);
     }
+    if (testobj == NULL && obj_is_data_db(obj)) {
+        testobj = obj_find_template_all(mod, 
+                                        obj_get_mod_name(obj), 
+                                        name);
+    }        
     if (testobj) {
         if (testobj->tkerr.mod != mod) {
             log_error("\nError: object '%s' already defined "
@@ -6851,7 +6856,7 @@ static status_t
     if (!uses->grp) {
         uses->grp = obj_find_grouping(obj, uses->name);
         if (!uses->grp) {
-            uses->grp = ncx_find_grouping(mod, uses->name);
+            uses->grp = ncx_find_grouping(mod, uses->name, FALSE);
             if (!uses->grp) {
                 log_error("\nError: grouping '%s' not found",
                           uses->name);

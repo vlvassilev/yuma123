@@ -2984,7 +2984,8 @@ static void
     }
 
     if (cp->unified && mod->ismod) {
-        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (const yang_node_t *)
+                 dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -3008,7 +3009,7 @@ static void
 
     if (cp->unified && mod->ismod) {
         for (node = (const yang_node_t *)
-                 dlq_firstEntry(&mod->saveincQ);
+                 dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -3032,7 +3033,7 @@ static void
 
     if (cp->unified && mod->ismod) {
         for (node = (const yang_node_t *)
-                 dlq_firstEntry(&mod->saveincQ);
+                 dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -3056,7 +3057,7 @@ static void
 
     if (cp->unified && mod->ismod) {
         for (node = (const yang_node_t *)
-                 dlq_firstEntry(&mod->saveincQ);
+                 dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -3080,7 +3081,7 @@ static void
 
     if (cp->unified && mod->ismod) {
         for (node = (const yang_node_t *)
-                 dlq_firstEntry(&mod->saveincQ);
+                 dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -3104,7 +3105,7 @@ static void
 
     if (cp->unified && mod->ismod) {
         for (node = (const yang_node_t *)
-                 dlq_firstEntry(&mod->saveincQ);
+                 dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -3128,7 +3129,7 @@ static void
 
     if (cp->unified && mod->ismod) {
         for (node = (const yang_node_t *)
-                 dlq_firstEntry(&mod->saveincQ);
+                 dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -3221,7 +3222,8 @@ static void
     write_cyang_appinfoQ(scb, mod, cp, &mod->appinfoQ, cp->indent);
 
     if (cp->unified && mod->ismod) {
-        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (const yang_node_t *)
+                 dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {

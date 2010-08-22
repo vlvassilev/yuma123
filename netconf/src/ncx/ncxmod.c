@@ -2933,6 +2933,9 @@ status_t
 *   revision == optional revision date of 'modname' to find
 *   pcb == YANG parser control block
 *   ptyp == YANG parser source type
+*   parent == pointer to module being parsed if this is a
+*     a request to parse a submodule; there is only 1 parent for 
+*     all submodules, based on the value of belongs-to
 *
 * RETURNS:
 *   status
@@ -2941,7 +2944,8 @@ status_t
     ncxmod_load_imodule (const xmlChar *modname,
                          const xmlChar *revision,
                          yang_pcb_t *pcb,
-                         yang_parsetype_t ptyp)
+                         yang_parsetype_t ptyp,
+                         ncx_module_t *parent)
 {
     yang_node_t     *node;
     const xmlChar   *savedrev;
@@ -2965,6 +2969,7 @@ status_t
 
     savedimportmode = pcb->importmode;
     pcb->importmode = TRUE;
+    pcb->parentparm = parent;
 
     res = try_load_module(pcb, 
                           ptyp,

@@ -165,7 +165,8 @@ typedef struct yang_import_ptr_t_ {
  */
 typedef struct yang_pcb_t_ {
     struct ncx_module_t_ *top;        /* top-level file */
-    struct ncx_module_t_ *retmod;   /* nested mod being returned */
+    struct ncx_module_t_ *retmod;   /* nested [sub]mod being returned */
+    struct ncx_module_t_ *parentparm;   /* parent passed for submodule */
     const xmlChar *revision;        /* back-ptr to rev to match */
     boolean       subtree_mode;
     boolean       with_submods;
@@ -186,8 +187,8 @@ typedef struct yang_pcb_t_ {
 
     /* 4 Qs of yang_node_t */
     dlq_hdr_t     impchainQ;      /* cur chain of import used */
-    dlq_hdr_t     allincQ;               /* all includes used */
-    dlq_hdr_t     incchainQ;     /* cur chain of include used */
+    // dlq_hdr_t     allincQ;               /* all includes used */
+    // dlq_hdr_t     incchainQ;     /* cur chain of include used */
     dlq_hdr_t     failedQ;       /* load mod or submod failed */
 } yang_pcb_t;
 

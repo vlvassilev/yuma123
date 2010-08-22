@@ -167,6 +167,25 @@ extern ext_template_t *
     ext_find_extension_que (dlq_hdr_t *extensionQ,
                             const xmlChar *name);
 
+
+/********************************************************************
+* FUNCTION ext_find_extension_all
+* 
+* Search a module of ext_template_t structs for a given name
+* Check all submodules as well
+*
+* INPUTS:
+*    mod == module to check
+*    name == name string to find
+*
+* RETURNS:
+*   pointer to found entry, or NULL if not found
+*********************************************************************/
+extern ext_template_t *
+    ext_find_extension_all (ncx_module_t *mod,
+                            const xmlChar *name);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

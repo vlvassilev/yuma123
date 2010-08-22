@@ -454,7 +454,7 @@ status_t
     /* convert_one_module_model(mod, cp, scb); */
 
     if (cp->unified && mod->ismod) {
-        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {

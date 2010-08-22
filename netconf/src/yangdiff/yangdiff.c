@@ -829,7 +829,8 @@ static void
 
         /* find this identure in the new module */
         newident = ncx_find_identity(newpcb->top, 
-                                     oldident->name);
+                                     oldident->name,
+                                     FALSE);
         if (newident) {
             output_one_identity_diff(cp, 
                                      oldident, 

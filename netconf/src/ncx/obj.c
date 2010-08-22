@@ -3325,6 +3325,7 @@ obj_template_t *
     obj_template_t *obj;
     yang_node_t    *node;
     ncx_include_t  *inc;
+    dlq_hdr_t      *que;
 
 #ifdef DEBUG
     if (!mod || !objname) {
@@ -3344,6 +3345,8 @@ obj_template_t *
         return obj;
     }
 
+    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
+
     /* check all the submodules, but only the ones visible
      * to this module or submodule, YANG only
      */
@@ -3353,7 +3356,7 @@ obj_template_t *
 
         /* get the real submodule struct */
         if (!inc->submod) {
-            node = yang_find_node(mod->allincQ, 
+            node = yang_find_node(que, 
                                   inc->submodule,
                                   inc->revision);
             if (node) {
@@ -3381,6 +3384,80 @@ obj_template_t *
     return NULL;
 
 }   /* obj_find_template_top */
+
+
+
+/********************************************************************
+* FUNCTION obj_find_template_all
+*
+* Check if an obj_template_t in the mod->datadefQ or any
+* of the include files used within the entire main module
+*
+* Top-level access is not tracked, so the 'test' variable
+* is hard-wired to FALSE
+*
+* INPUTS:
+*   mod == ncx_module to check
+*   modname == module name for the object (needed for augments)
+*              (may be NULL to match any 'objname' instance)
+*   objname == object name to find
+*
+* RETURNS:
+*  pointer to struct if present, NULL otherwise
+*********************************************************************/
+obj_template_t *
+    obj_find_template_all (ncx_module_t *mod,
+                           const xmlChar *modname,
+                           const xmlChar *objname)
+{
+    obj_template_t *obj;
+    yang_node_t    *node;
+    dlq_hdr_t      *que;
+
+#ifdef DEBUG
+    if (!mod || !objname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    /* check the main module */
+    obj = find_template(&mod->datadefQ, 
+                        modname, 
+                        objname, 
+                        FALSE, 
+                        FALSE, 
+                        NULL);
+    if (obj) {
+        return obj;
+    }
+
+    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
+
+    /* check all the submodules, but only the ones visible
+     * to this module or submodule, YANG only
+     */
+    for (node = (yang_node_t *)dlq_firstEntry(que);
+         node != NULL;
+         node = (yang_node_t *)dlq_nextEntry(node)) {
+
+        if (node->submod) {
+            /* check the object Q in this submodule */
+            obj = find_template(&node->submod->datadefQ,
+                                modname, 
+                                objname,
+                                FALSE, 
+                                FALSE, 
+                                NULL);
+            if (obj) {
+                return obj;
+            }
+        }
+    }
+
+    return NULL;
+
+}   /* obj_find_template_all */
 
 
 /********************************************************************
@@ -5101,7 +5178,9 @@ status_t
             }
 
             if (!testtyp) {
-                testtyp = ncx_find_type(mod, typdef->typenamestr);
+                testtyp = ncx_find_type(mod, 
+                                        typdef->typenamestr,
+                                        FALSE);
             }
         }
 

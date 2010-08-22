@@ -425,11 +425,29 @@ status_t
 
     /* save or delete the grp_template_t struct */
     if (grp->name && ncx_valid_name2(grp->name)) {
+        boolean errone;
+
         testgrp = ncx_find_grouping_que(que, grp->name);
+        if (testgrp == NULL) {
+            errone = FALSE;
+            testgrp = ncx_find_grouping(mod, grp->name, TRUE);
+        } else {
+            errone = TRUE;
+        }
+
         if (testgrp) {
-            log_error("\nError: grouping '%s' already defined at line %u",
-                      grp->name, 
-                      testgrp->tkerr.linenum);
+            if (errone) {
+                log_error("\nError: grouping '%s' already "
+                          "defined at line %u",
+                          testgrp->name, 
+                          testgrp->tkerr.linenum);
+            } else {
+                log_error("\nError: grouping '%s' already "
+                          "defined in '%s' at line %u",
+                          testgrp->name,
+                          testgrp->tkerr.mod->name, 
+                          testgrp->tkerr.linenum);
+            }
             retres = ERR_NCX_DUP_ENTRY;
             ncx_print_errormsg(tkc, mod, retres);
             grp_free_template(grp);
@@ -607,13 +625,14 @@ status_t
             }
         }
 
-        /* check nesteed groupings for module-level conflict */
+        /* check nested groupings for module-level conflict */
         if (grp->parent) {
-            nextgrp = ncx_find_grouping(mod, grp->name);
+            nextgrp = ncx_find_grouping(mod, grp->name, TRUE);
             if (nextgrp) {
                 log_error("\nError: local grouping '%s' shadows"
-                          " module definition on line %u",
+                          " module definition in '%s' on line %u",
                           grp->name,
+                          nextgrp->tkerr.mod->name,                          
                           nextgrp->tkerr.linenum);
                 res = ERR_NCX_DUP_ENTRY;
                 tkc->curerr = &grp->tkerr;

@@ -2571,7 +2571,7 @@ static status_t
     if (res == NO_ERR) {
         if (cp->unified && mod->ismod) {
             for (node = (yang_node_t *)
-                     dlq_firstEntry(&mod->saveincQ);
+                     dlq_firstEntry(&mod->allincQ);
                  node != NULL && res == NO_ERR;
                  node = (yang_node_t *)dlq_nextEntry(node)) {
                 if (node->submod) {
@@ -2598,7 +2598,7 @@ static status_t
                         &objnameQ);
         if (cp->unified && mod->ismod) {
             for (node = (yang_node_t *)
-                     dlq_firstEntry(&mod->saveincQ);
+                     dlq_firstEntry(&mod->allincQ);
                  node != NULL && res == NO_ERR;
                  node = (yang_node_t *)dlq_nextEntry(node)) {
                 if (node->submod) {

@@ -4134,7 +4134,7 @@ static void
     /* check if any typedef ToC entries to generate */
     anytyp = dlq_empty(&mod->typeQ) ? FALSE : TRUE;
     if (cp->unified && mod->ismod) {
-        node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
         while (!anytyp && node) {
             anytyp = dlq_empty(&node->submod->typeQ) ? FALSE : TRUE;
             node = (const yang_node_t *)dlq_nextEntry(node);
@@ -4168,7 +4168,7 @@ static void
             end_elem(scb, EL_LI, -1);
         }
         if (cp->unified && mod->ismod) {
-            for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+            for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
                  node != NULL;
                  node = (const yang_node_t *)dlq_nextEntry(node)) {
                 for (typ = (const typ_template_t *)
@@ -4198,7 +4198,7 @@ static void
     } else {
         anygrp = dlq_empty(&mod->groupingQ) ? FALSE : TRUE;
         if (cp->unified && mod->ismod) {
-            node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+            node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
             while (!anygrp && node) {
                 anygrp = dlq_empty(&node->submod->groupingQ) ? FALSE : TRUE;
                 node = (const yang_node_t *)dlq_nextEntry(node);
@@ -4220,7 +4220,7 @@ static void
         start_elem(scb, EL_UL, NULL,  3*indent);
         write_toc_menu_grp(scb, mod, cp, 4*indent);
         if (cp->unified && mod->ismod) {
-            for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+            for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
                  node != NULL;
                  node = (const yang_node_t *)dlq_nextEntry(node)) {
                 write_toc_menu_grp(scb, node->submod, cp, 4*indent);
@@ -4233,7 +4233,7 @@ static void
     /* check if any object, RPC, or notification ToC entries to generate */
     check_obj_toc_needed(mod, cooked, &anyobj, &anyrpc, &anynotif);
     if (cp->unified && mod->ismod) {
-        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             check_obj_toc_needed(node->submod,
@@ -4258,7 +4258,7 @@ static void
         start_elem(scb, EL_UL, NULL,  3*indent);
         write_toc_menu_datadefQ(scb, mod, cp, &mod->datadefQ, 4*indent);
         if (cp->unified && mod->ismod) {
-            for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+            for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
                  node != NULL;
                  node = (const yang_node_t *)dlq_nextEntry(node)) {
                 write_toc_menu_datadefQ(scb,
@@ -4286,7 +4286,7 @@ static void
         start_elem(scb, EL_UL, NULL,  3*indent);
         write_toc_menu_rpc(scb, mod, cp, 4*indent);
         if (cp->unified && mod->ismod) {
-            for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+            for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
                  node != NULL;
                  node = (const yang_node_t *)dlq_nextEntry(node)) {
                 write_toc_menu_rpc(scb, node->submod, cp, 4*indent);
@@ -4310,7 +4310,7 @@ static void
         start_elem(scb, EL_UL, NULL,  3*indent);
         write_toc_menu_notif(scb, mod, cp, 4*indent);
         if (cp->unified && mod->ismod) {
-            for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+            for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
                  node != NULL;
                  node = (const yang_node_t *)dlq_nextEntry(node)) {
                 write_toc_menu_notif(scb, node->submod, cp, 4*indent);
@@ -4323,7 +4323,7 @@ static void
     /* check if any extension ToC entries to generate */
     anyext = dlq_empty(&mod->extensionQ) ? FALSE : TRUE;
     if (cp->unified && mod->ismod) {
-        node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
         while (!anyext && node) {
             anyext = dlq_empty(&node->submod->extensionQ) ? FALSE : TRUE;
             node = (const yang_node_t *)dlq_nextEntry(node);
@@ -4359,7 +4359,7 @@ static void
             end_elem(scb, EL_LI, -1);
         }
         if (cp->unified && mod->ismod) {
-            for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+            for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
                  node != NULL;
                  node = (const yang_node_t *)dlq_nextEntry(node)) {
                 for (ext = (const ext_template_t *)
@@ -4575,7 +4575,7 @@ static void
     }
 
     if (cp->unified && mod->ismod) {
-        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -4598,7 +4598,7 @@ static void
     }
 
     if (cp->unified && mod->ismod) {
-        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -4617,7 +4617,7 @@ static void
     }
 
     if (cp->unified && mod->ismod) {
-        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -4636,7 +4636,7 @@ static void
     }
 
     if (cp->unified && mod->ismod) {
-        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -4655,7 +4655,7 @@ static void
     }
 
     if (cp->unified && mod->ismod) {
-        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -4674,7 +4674,7 @@ static void
     }
 
     if (cp->unified && mod->ismod) {
-        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -4693,7 +4693,7 @@ static void
     }
 
     if (cp->unified && mod->ismod) {
-        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {
@@ -4784,7 +4784,7 @@ static void
     write_appinfoQ(scb, mod, cp, &mod->appinfoQ, 2*cp->indent);
 
     if (cp->unified && mod->ismod) {
-        for (node = (const yang_node_t *)dlq_firstEntry(&mod->saveincQ);
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (const yang_node_t *)dlq_nextEntry(node)) {
             if (node->submod) {

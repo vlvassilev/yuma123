@@ -177,9 +177,9 @@ static status_t
 
     if (!bkup && appinfo->prefix == NULL) {
         /* skip the entire YANG statement */
-        if (LOGDEBUG) {
-            log_debug("\nSkipping YANG statement inside "
-                      "an unknown-stmt");
+        if (LOGDEBUG4) {
+            log_debug4("\nSkipping YANG statement inside "
+                       "an unknown-stmt");
         }
         yang_skip_statement(tkc, mod);
         ncx_free_appinfo(appinfo);

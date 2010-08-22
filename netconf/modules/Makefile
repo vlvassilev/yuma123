@@ -47,9 +47,12 @@ install:
 	mkdir -p $(INSTALL_TARGET)/ietf
 	mkdir -p $(INSTALL_TARGET)/yang
 	mkdir -p $(INSTALL_TARGET)/test
+	mkdir -p $(INSTALL_TARGET)/test/pass
+	mkdir -p $(INSTALL_TARGET)/test/fail
 	cp ietf/*.yang $(INSTALL_TARGET)/ietf
 	cp yang/*.yang $(INSTALL_TARGET)/yang
-	cp test/*.yang $(INSTALL_TARGET)/test
+	cp test/pass/*.yang $(INSTALL_TARGET)/test/pass
+	cp test/fail/*.yang $(INSTALL_TARGET)/test/fail
 	cp netconfcentral/toaster.yang $(INSTALL_TARGET)/netconfcentral
 	cp netconfcentral/yuma-nacm.yang $(INSTALL_TARGET)/netconfcentral
 	cp netconfcentral/yuma-app-common.yang $(INSTALL_TARGET)/netconfcentral
@@ -67,9 +70,12 @@ install:
 	mkdir -p $(INSTALL_TARGET)/ietf
 	mkdir -p $(INSTALL_TARGET)/yang
 	mkdir -p $(INSTALL_TARGET)/test
+	mkdir -p $(INSTALL_TARGET)/test/pass
+	mkdir -p $(INSTALL_TARGET)/test/fail
 	cp ietf/*.yang $(INSTALL_TARGET)/ietf
 	cp yang/*.yang $(INSTALL_TARGET)/yang
-	cp test/*.yang $(INSTALL_TARGET)/test
+	cp test/pass/*.yang $(INSTALL_TARGET)/test/pass
+	cp test/fail/*.yang $(INSTALL_TARGET)/test/fail
 	cp netconfcentral/*.yang $(INSTALL_TARGET)/netconfcentral
 endif
 endif
@@ -84,10 +90,13 @@ clean-install:
 	mkdir -p $(INSTALL_TARGET)/netconfcentral
 	mkdir -p $(INSTALL_TARGET)/yang
 	mkdir -p $(INSTALL_TARGET)/test
+	mkdir -p $(INSTALL_TARGET)/test/pass
+	mkdir -p $(INSTALL_TARGET)/test/fail
 	cp ietf/*.yang $(INSTALL_TARGET)/ietf
 	cp netconfcentral/*.yang $(INSTALL_TARGET)/netconfcentral
 	cp yang/*.yang $(INSTALL_TARGET)/yang
-	cp test/*.yang $(INSTALL_TARGET)/test
+	cp test/pass/*.yang $(INSTALL_TARGET)/test/pass
+	cp test/fail/*.yang $(INSTALL_TARGET)/test/fail
 
 .PHONY: clean-install
 

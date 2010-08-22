@@ -423,7 +423,8 @@ module testmust {
 
       must "//foo[@x = 1]";
 
-      must "//foo:*[@x = 1]";
+      // causing missing prefix error
+      // must "//foo:*[@x = 1]";
 
       must ".//foo/bar[x='fred'] or .=10";
 

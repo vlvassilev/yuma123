@@ -413,7 +413,9 @@ static status_t
                                          obj_get_mod_name(obj), 
                                          name);
     }
-    if (testobj == NULL && obj_is_data_db(obj)) {
+    if (testobj == NULL && 
+        obj_is_top(obj) &&
+        obj_is_data_db(obj)) {
         testobj = obj_find_template_all(mod, 
                                         obj_get_mod_name(obj), 
                                         name);

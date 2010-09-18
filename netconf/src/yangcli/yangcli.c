@@ -3128,7 +3128,7 @@ static void
     /***  TBD: multi-session support ***/
     server_cb = cur_server_cb;
 
-    /* check the contents of the reply */
+    /* check the contents of the notification */
     if (msg && msg->notification) {
         if (LOGWARN) {
             gl_normal_io(server_cb->cli_gl);

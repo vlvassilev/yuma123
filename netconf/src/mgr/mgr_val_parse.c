@@ -1626,7 +1626,7 @@ static status_t
                                   (errmode) ? 
                                   chnode.elname : 
                                   obj_get_name(curchild), 
-                                  FALSE, 
+                                  errmode, 
                                   retval, 
                                   get_editop(&chnode));
             if (!chval) {

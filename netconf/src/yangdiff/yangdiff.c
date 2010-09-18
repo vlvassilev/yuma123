@@ -2104,6 +2104,10 @@ int
 
     print_error_count();
 
+#ifdef MEMORY_DEBUG
+    muntrace();
+#endif
+
     return (res == NO_ERR) ? 0 : 1;
 
 } /* main */

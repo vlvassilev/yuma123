@@ -447,6 +447,10 @@ int
         printf("\n");
     }
 
+#ifdef MEMORY_DEBUG
+    muntrace();
+#endif
+
     return 0;
 
 } /* main */

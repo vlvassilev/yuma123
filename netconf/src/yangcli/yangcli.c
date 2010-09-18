@@ -710,6 +710,36 @@ static server_cb_t *
 
 
 /********************************************************************
+* FUNCTION update_server_cb_vars
+* 
+*  Update the 
+* 
+* INPUTS:
+*    server_cb == server_cb to update
+*
+* OUTPUTS: 
+*     server_cb->foo is updated if it is a shadow of a global var
+*
+*********************************************************************/
+static void
+    update_server_cb_vars (server_cb_t *server_cb)
+{
+    server_cb->baddata = baddata;
+    server_cb->log_level = log_get_debug_level();
+    server_cb->autoload = autoload;
+    server_cb->fixorder = fixorder;
+    server_cb->get_optional = optional;
+    server_cb->testoption = testoption;
+    server_cb->erroption = erroption;
+    server_cb->defop = defop;
+    server_cb->timeout = default_timeout;
+    server_cb->display_mode = display_mode;
+    server_cb->withdefaults = withdefaults;
+
+}  /* update_server_cb_vars */
+
+
+/********************************************************************
  * FUNCTION handle_config_assign
  * 
  * handle a user assignment of a config variable
@@ -1951,8 +1981,7 @@ static status_t
     }
 
     /* get the baddata parameter */
-    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, 
-                          YANGCLI_BADDATA);
+    parm = val_find_child(mgr_cli_valset, YANGCLI_MOD, YANGCLI_BADDATA);
     if (parm && parm->res == NO_ERR) {
         baddata = ncx_get_baddata_enum(VAL_ENUM_NAME(parm));
         if (baddata == NCX_BAD_DATA_NONE) {
@@ -3350,6 +3379,11 @@ static status_t
         return NO_ERR;
     }
 
+    /* set any server control block defaults which were supplied
+     * in the CLI or conf file
+     */
+    update_server_cb_vars(server_cb);
+
     /* Load the NETCONF, XSD, SMI and other core modules */
     if (autoload) {
         res = load_core_schema();
@@ -4128,16 +4162,12 @@ int
           const char *argv[])
 {
     status_t   res;
-    int32      retval;
 
 #ifdef MEMORY_DEBUG
     mtrace();
 #endif
 
     res = yangcli_init(argc, argv);
-
-    retval = xml_strcmp((const xmlChar *)"aaa",
-                        (const xmlChar *)"aa");
 
     if (res != NO_ERR) {
         log_error("\nyangcli: init returned error (%s)\n", 
@@ -4158,6 +4188,11 @@ int
     yangcli_cleanup();
 
     print_error_count();
+
+#ifdef MEMORY_DEBUG
+    muntrace();
+#endif
+
 
     return 0;
 

@@ -1557,8 +1557,8 @@ static status_t
         }
     }
 
-    /* check special deviation mode processing mode */
-    if (pcb->deviationmode) {
+    /* check special deviation or search processing mode */
+    if (pcb->deviationmode || pcb->searchmode) {
         /* save the import for prefix translation later
          * do not need to actually import any of the symbols
          * now; may be a waste of time unless there are
@@ -1981,6 +1981,15 @@ static status_t
     chainQ = (mod->parent) ? 
         &mod->parent->incchainQ :
         &mod->incchainQ;
+
+    /* check special scan mode looking for mod info */
+    if (pcb->searchmode) {
+        /* hand off malloced 'inc' struct here
+         * do not load the sub-module; not being used
+         */
+        dlq_enque(inc, &mod->includeQ);
+        return NO_ERR;
+    }
 
     /* check if the mandatory submodule name is valid
      * and if the include is already present 
@@ -2754,6 +2763,11 @@ static status_t
     if (val) {
         /* valid date string found */
         mod->version = xml_strdup(val);
+    }
+
+    /* check if revision warnings should be skipped */
+    if (pcb->searchmode) {
+        return retres;
     }
 
     /* leave the version NULL if no good revision dates found */

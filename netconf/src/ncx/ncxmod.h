@@ -223,7 +223,7 @@ typedef struct ncxmod_search_result_t_ {
     xmlChar       *namespacestr;
     xmlChar       *source;
     ncx_module_t  *mod;      /* back-ptr to found module if loaded */
-    cap_rec_t     *cap;      /* back-ptr to source capabuility URI */
+    cap_rec_t     *cap;      /* back-ptr to source capability URI */
     status_t       res;
     boolean        capmatch;     /* set by yangcli */
 } ncxmod_search_result_t;

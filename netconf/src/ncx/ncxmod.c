@@ -2017,7 +2017,7 @@ static status_t
 /********************************************************************
 * FUNCTION has_mod_ext
 *
-* Check if the filespec ends in '.yang' or '.ncx'
+* Check if the filespec ends in '.yang' or '.yin'
 *
 * INPUTS:
 *    filespec == file spec string to check
@@ -2033,6 +2033,7 @@ static boolean
     const char *p;
 
     p = filespec;
+
     while (*p) {
         p++;
     }
@@ -2045,8 +2046,15 @@ static boolean
         return FALSE;
     }
 
-    return (!strcmp(p+1, "yang")) 
-        ? TRUE : FALSE;
+    if (!strcmp(p+1, (const char *)YANG_SUFFIX)) {
+        return TRUE;
+    }
+
+    if (!strcmp(p+1, (const char *)YIN_SUFFIX)) {
+        return TRUE;
+    }
+
+    return FALSE;
     
 }  /* has_mod_ext */
 

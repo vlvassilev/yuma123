@@ -1377,12 +1377,13 @@ static status_t
     int                   retval;
 
     res = NO_ERR;
+    fname = NULL;
 
     (void)scb;
 
     target = (cfg_template_t *)msg->rpc_user1;
     destfile = (xmlChar *)msg->rpc_user2;  /* malloced if non-NULL */
-
+    
     if (destfile != NULL) {
         fname = destfile;
     } 

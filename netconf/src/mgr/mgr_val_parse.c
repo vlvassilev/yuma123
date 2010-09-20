@@ -364,6 +364,7 @@ static status_t
                 val_init_from_template(retval, ncx_get_gen_empty());
                 retval->v.boo = TRUE;
                 retval->nsid = startnode->nsid;
+                xml_clean_node(&nextnode);
                 return NO_ERR;
             }
             break;

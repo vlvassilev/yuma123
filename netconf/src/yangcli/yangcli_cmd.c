@@ -7027,15 +7027,13 @@ status_t
      * make sure this is a TRUE conditional command
      */
 
-
-
-
     /* construct a method + parameter tree */
     reqdata = xml_val_new_struct(obj_get_name(rpc), 
                                  obj_get_nsid(rpc));
     if (!reqdata) {
         log_error("\nError allocating a new RPC request");
         res = ERR_INTERNAL_MEM;
+        input = NULL;
     } else {
         /* should find an input node */
         input = obj_find_child(rpc, NULL, YANG_K_INPUT);

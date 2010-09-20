@@ -1963,6 +1963,8 @@ status_t
     boolean       done, quickexit;
     xmlChar       buffer[NCX_VERSION_BUFFSIZE];
 
+    done = FALSE;
+
     if (cvtparms->allowcode) {
 	progname = "yangdumpcode";
     } else {

@@ -191,6 +191,10 @@ extern "C" {
 #define VAL_FL_DEFVAL    bit7
 
 
+/* set the virtualval lifetime to 3 seconds */
+#define VAL_VIRTUAL_CACHE_TIME   3
+
+
 /* macros to access simple value types */
 #define VAL_BOOL(V)    ((V)->v.boo)
 
@@ -328,6 +332,7 @@ typedef struct val_value_t_ {
      * period
      */
     struct val_value_t_ *virtualval;
+    time_t               cachetime;
 
     /* these fields are used for NCX_BT_LIST */
     struct val_index_t_ *index;   /* back-ptr/flag in use as index */
@@ -2863,41 +2868,6 @@ extern val_value_t *
     val_get_virtual_value (void *session,  /* really ses_cb_t *   */
 			   const val_value_t *val,
 			   status_t *res);
-
-
-/********************************************************************
-* FUNCTION val_cache_virtual_value
-* 
-* get + cache as val->virtualval; DO NOT FREE the return val
-* Get the value of a value node and store the malloced
-* pointer in the virtualval cache 
-* 
-* If the val->getcb is NULL, then an error will be returned
-*
-* Caller should check for *res == ERR_NCX_SKIPPED
-* This will be returned if virtual value has no
-* instance at this time.
-*
-* INPUTS:
-*   session == session CB ptr cast as void *
-*              that is getting the virtual value
-*   val == virtual value to get value for
-*   res == pointer to output function return status value
-*
-* OUTPUTS:
-*    val->virtualval set to the malloced val; will be cleared
-*        if already set
-*    *res == the function return status
-*
-* RETURNS:
-*   A malloced and filled in val_value_t struct
-*   The val_free_value function must be called if the
-*   return value is non-NULL
-*********************************************************************/
-extern val_value_t *
-    val_cache_virtual_value (void *session,  /* really ses_cb_t *   */
-                             val_value_t *val,
-                             status_t *res);
 
 
 /********************************************************************

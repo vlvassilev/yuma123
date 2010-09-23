@@ -274,6 +274,11 @@ static dlq_hdr_t       mgrloadQ;
 /* temporary file control block for the program instance */
 static ncxmod_temp_progcb_t  *temp_progcb;
 
+/* Q of ncxmod_search_result_t structs representing all modules
+ * and submodules found in the module library path at boot-time
+ */
+static dlq_hdr_t      modlibQ;
+
 
 /*****************  C O N F I G   V A R S  ****************/
 
@@ -338,8 +343,6 @@ static op_defop_t      defop;
 
 /* default NETCONF with-defaults value */
 static ncx_withdefaults_t  withdefaults;
-
-
 
 
 /********************************************************************
@@ -2123,8 +2126,9 @@ static status_t
 /********************************************************************
  * FUNCTION load_base_schema 
  * 
- * Load the following NCX modules:
+ * Load the following YANG modules:
  *   yangcli
+ *   yuma-netconf
  *
  * RETURNS:
  *     status
@@ -2174,11 +2178,9 @@ static status_t
 /********************************************************************
  * FUNCTION load_core_schema 
  * 
- * Load the following NCX modules:
- *   xsd
- *   ncxtypes
- *   netconf
- *   inetAddress
+ * Load the following YANG modules:
+ *   yuma-xsd
+ *   yuma-types
  *
  * RETURNS:
  *     status
@@ -2394,7 +2396,7 @@ static void
     ncx_module_t           *mod;
     cap_rec_t              *cap;
     const xmlChar          *module, *revision, *namespacestr;
-    ncxmod_search_result_t *searchresult;
+    ncxmod_search_result_t *searchresult, *libresult;
     status_t                res;
     boolean                 retrieval_supported;
 
@@ -2417,23 +2419,48 @@ static void
      */
     cap = cap_first_modcap(&mscb->caplist);
     while (cap) {
+        mod = NULL;
         module = NULL;
         revision = NULL;
         namespacestr = NULL;
+        libresult = NULL;
 
         cap_split_modcap(cap,
                          &module,
                          &revision,
                          &namespacestr);
 
-        if (module==NULL || namespacestr==NULL) {
+        if (namespacestr == NULL) {
             if (ncx_warning_enabled(ERR_NCX_RCV_INVALID_MODCAP)) {
-                log_warn("\nWarning: skipping invalid module capability "
+                log_warn("\nWarning: skipping enterprise capability "
                          "for URI '%s'", 
                          cap->cap_uri);
             }
             cap = cap_next_modcap(cap);
             continue;
+        }
+
+        if (module == NULL) {
+            /* check if there is a module in the modlibQ that
+             * has the same namespace URI as 'namespacestr' base
+             */
+            libresult = ncxmod_find_search_result(&modlibQ,
+                                                  NULL,
+                                                  NULL,
+                                                  namespacestr);
+            if (libresult != NULL) {
+                module = libresult->module;
+                revision = libresult->revision;
+            } else {
+                /* nothing found and modname is NULL, so continue */
+                if (ncx_warning_enabled(ERR_NCX_RCV_INVALID_MODCAP)) {
+                    log_warn("\nWarning: skipping enterprise capability "
+                             "for URI '%s'", 
+                             cap->cap_uri);
+                }
+                cap = cap_next_modcap(cap);
+                continue;
+            }
         }
 
         mod = ncx_find_module(module, revision);
@@ -2442,17 +2469,17 @@ static void
             if (xml_strcmp(mod->ns, namespacestr)) {
                 /* !!! need a warning number for suppression */
                 log_warn("\nWarning: module namespace URI mismatch:"
-                          "\n   module:    '%s'"
-                          "\n   revision:  '%s'"
-                          "\n   server ns: '%s'"
-                          "\n   client ns: '%s'",
-                          module,
-                          (revision) ? revision : EMPTY_STRING,
-                          namespacestr,
-                          mod->ns);
+                         "\n   module:    '%s'"
+                         "\n   revision:  '%s'"
+                         "\n   server ns: '%s'"
+                         "\n   client ns: '%s'",
+                         module,
+                         (revision) ? revision : EMPTY_STRING,
+                         namespacestr,
+                         mod->ns);
                 mod = NULL;
             }
-        } 
+        }
 
         if (mod == NULL) {
             /* module was not found already loaded into
@@ -2460,7 +2487,11 @@ static void
              * try to auto-load the module if enabled
              */
             if (server_cb->autoload) {
-                searchresult = ncxmod_find_module(module, revision);
+                if (libresult) {
+                    searchresult = ncxmod_clone_search_result(libresult);
+                } else {
+                    searchresult = ncxmod_find_module(module, revision);
+                }
                 if (searchresult) {
                     searchresult->cap = cap;
                     if (searchresult->res != NO_ERR) {
@@ -3250,6 +3281,7 @@ static status_t
     defop = OP_DEFOP_NONE;   /* real enum 'none' */
     withdefaults = NCX_WITHDEF_NONE;
     temp_progcb = NULL;
+    dlq_createSQue(&modlibQ);
 
     /* set the character set LOCALE to the user default */
     setlocale(LC_CTYPE, "");
@@ -3472,6 +3504,17 @@ static status_t
         return res;
     }
 
+    /* initialize the module library search result queue */
+    {
+        log_debug_t dbglevel = log_get_debug_level();
+        log_set_debug_level(LOG_DEBUG_NONE);
+        res = ncxmod_find_all_modules(&modlibQ);
+        log_set_debug_level(dbglevel);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
     /* make sure the startup screen is generated
      * before the auto-connect sequence starts
      */
@@ -3574,6 +3617,9 @@ static void
         ncxmod_free_program_tempdir(temp_progcb);
         temp_progcb = NULL;
     }
+
+    /* cleanup the module library search results */
+    ncxmod_clean_search_result_queue(&modlibQ);
 
     /* cleanup the NCX engine and registries */
     ncx_cleanup();

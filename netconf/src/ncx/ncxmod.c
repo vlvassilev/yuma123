@@ -1647,6 +1647,121 @@ static status_t
 
 
 /********************************************************************
+* FUNCTION search_module_path
+*
+*  Check the specified path for all YANG files
+*
+* INPUTS:
+*   path == starting path to check
+*   buff == buffer to use for the filespec
+*   bufflen == size of 'buff' in bytes
+*   callback == callback function to use for process_subdir
+*   cookie == parameter for the callback
+*
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    search_module_path (const xmlChar *path,
+                        xmlChar *buff,
+                        uint32 bufflen,
+                        ncxmod_callback_fn_t callback,
+                        void *cookie)
+
+
+
+{
+    status_t        res;
+    uint32          total;
+
+    total = 0;
+    res = prep_dirpath(buff, bufflen, path, NCXMOD_DIR, &total);
+    if (res == NO_ERR) {
+        res = ncxmod_process_subtree((const char *)buff, 
+                                     callback, 
+                                     cookie);
+    }
+    return res;
+
+}  /* search_module_path */
+
+
+/********************************************************************
+* FUNCTION search_module_pathlist
+*
+*  Check a list of pathnames for all the YANG files in the path
+*
+*  Example:   path1:path2/foo/bar:path3
+*
+* INPUTS:
+*   pathlist == formatted string containing list of path strings
+*   callback == callback function to use for process_subdir
+*   cookie == parameter for the callback
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    search_module_pathlist (const xmlChar *pathlist,
+                            ncxmod_callback_fn_t callback,
+                            void *cookie)
+
+{
+    const xmlChar  *str, *p;
+    xmlChar        *pathbuff;
+    uint32          pathbufflen, pathlen;
+    status_t        res;
+
+    pathbufflen = NCXMOD_MAX_FSPEC_LEN+1;
+    pathbuff = m__getMem(pathbufflen);
+    if (!pathbuff) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    /* go through the path list and check each string */
+    str = pathlist;
+    res = NO_ERR;
+
+    while (*str) {
+        /* find end of path entry or EOS */
+        p = str+1;
+        while (*p && *p != ':') {
+            p++;
+        }
+
+        pathlen = (uint32)(p-str);
+        if (pathlen >= pathbufflen) {
+            m__free(pathbuff);
+            return ERR_BUFF_OVFL;
+        }
+
+        /* copy the next string into the path buffer */
+        xml_strncpy(pathbuff, str, pathlen);
+
+        res = ncxmod_process_subtree((const char *)pathbuff, 
+                                     callback, 
+                                     cookie);
+        if (res != NO_ERR) {
+            m__free(pathbuff);
+            return res;
+        }
+    
+        /* setup the next path string to try */
+        if (*p) {
+            str = p+1;   /* one past ':' char */
+        } else {
+            str = p;        /* already at EOS */
+        }
+    }
+
+    m__free(pathbuff);
+    return NO_ERR;
+
+}  /* search_module_pathlist */
+
+
+/********************************************************************
 * FUNCTION load_module
 *
 * Determine the location of the specified module
@@ -2428,6 +2543,131 @@ static void
 }  /* free_temp_progcb */
 
 
+/********************************************************************
+* FUNCTION make_search_result
+*
+* Make a ncxmod_search_result_t struct for the given module
+*
+* INPUTS:
+*   mod == module to use
+*
+* RETURNS:
+*   == malloced and filled in search result struct
+*      MUST call ncxmod_free_search_result() if the
+*      return value is non-NULL
+*      CHECK result->res TO SEE IF MODULE WAS FOUND
+*      A SEARCH RESULT WILL BE RETURNED IF A SEARCH WAS
+*      ATTEMPTED, EVEN IF NOTHING FOUND
+*   == NULL if any error preventing a search
+*********************************************************************/
+static ncxmod_search_result_t *
+    make_search_result (ncx_module_t *mod)
+{
+    ncxmod_search_result_t   *searchresult;
+    status_t                  res;
+
+    res = NO_ERR;
+
+    if (LOGDEBUG2) {
+        log_debug2("\nFound %smodule"
+                   "\n   name:      '%s'"
+                   "\n   revision:  '%s':"
+                   "\n   namespace: '%s'"
+                   "\n   source:    '%s'",
+                   (mod->ismod) ? "" : "sub",
+                   (mod->name) ? mod->name : EMPTY_STRING,
+                   (mod->version) ? mod->version : EMPTY_STRING,
+                   (mod->ns) ? mod->ns : EMPTY_STRING,
+                   (mod->source) ? mod->source : EMPTY_STRING);
+    }
+
+    searchresult = ncxmod_new_search_result_ex(mod);
+    if (searchresult == NULL) {
+        return NULL;
+    }
+    searchresult->res = NO_ERR;
+
+    return searchresult;
+
+}  /* make_search_result */
+
+
+/********************************************************************
+* FUNCTION search_subtree_callback
+* 
+* Handle the current filename in the subtree traversal
+* Quick parse and generate a search result for the module
+*
+* INPUTS:
+*   fullspec == absolute or relative path spec, with filename and ext.
+*               this regular file exists, but has not been checked for
+*               read access of 
+*   cookie == resultQ to store malloced search result
+*
+* RETURNS:
+*    status
+*
+*    Return fatal error to stop the traversal or NO_ERR to
+*    keep the traversal going.  Do not return any warning or
+*    recoverable error, just log and move on
+*********************************************************************/
+static status_t
+    search_subtree_callback (const char *fullspec,
+                             void *cookie)
+{
+    dlq_hdr_t               *resultQ;
+    ncx_module_t            *retmod;
+    yang_pcb_t              *pcb;
+    ncxmod_search_result_t  *searchresult;
+    status_t                 res;
+
+    resultQ = (dlq_hdr_t *)cookie;
+
+    if (resultQ == NULL) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    pcb = yang_new_pcb();
+    if (pcb == NULL) {
+        return ERR_INTERNAL_MEM;
+    } 
+    pcb->searchmode = TRUE;
+
+    retmod = NULL;
+    searchresult = NULL;
+
+    res = try_load_module(pcb, 
+                          YANG_PT_TOP,
+                          (const xmlChar *)fullspec, 
+                          NULL, 
+                          &retmod);
+
+    if (res != NO_ERR || retmod == NULL) {
+        if (LOGDEBUG2) {
+            log_debug2("\nFind module '%s' failed (%s)",
+                       fullspec,
+                       get_error_string(res));
+        }
+    } else {
+        searchresult = make_search_result(retmod);
+        if (searchresult != NULL) {
+            /* hand off malloced memory here */
+            dlq_enque(searchresult, resultQ);
+        } else {
+            res = ERR_INTERNAL_MEM;
+        }
+    }
+
+    if (pcb) {
+        yang_free_pcb(pcb);
+    }
+
+    return res;
+
+}  /* search_subtree_callback */
+
+
+
 /**************    E X T E R N A L   F U N C T I O N S **********/
 
 
@@ -2729,28 +2969,23 @@ ncxmod_search_result_t *
     }
 #endif
 
-    res = NO_ERR;
-
-    searchresult = ncxmod_new_search_result();
-    if (searchresult == NULL) {
-        return NULL;
-    }
-
     pcb = yang_new_pcb();
     if (pcb == NULL) {
-        ncxmod_free_search_result(searchresult);
         return NULL;
     } 
-
     pcb->revision = revision;
     pcb->searchmode = TRUE;
+
     retmod = NULL;
+    searchresult = NULL;
+
     res = try_load_module(pcb, 
                           YANG_PT_TOP,
                           modname, 
                           revision, 
                           &retmod);
-    if (res != NO_ERR) {
+
+    if (res != NO_ERR || retmod == NULL) {
         if (LOGDEBUG2) {
             if (revision) {
                 log_debug2("\nFind module '%s', revision '%s' failed (%s)",
@@ -2763,68 +2998,122 @@ ncxmod_search_result_t *
                            get_error_string(res));
             }
         }
-
-        retmod = NULL;
-        searchresult->res = res;
-        searchresult->module = xml_strdup(modname);
-        if (searchresult->module == NULL) {
-            searchresult->res = ERR_INTERNAL_MEM;
-        } else if (revision) {
-            searchresult->revision = xml_strdup(revision);
-            if (searchresult->revision == NULL) {
-                searchresult->res = ERR_INTERNAL_MEM;
-            }
-        }
-    }
-
-    if (res == NO_ERR && LOGDEBUG2) {
-        log_debug2("\nFound module"
-                   "\n   name:      '%s'"
-                   "\n   revision:  '%s':"
-                   "\n   namespace: '%s'"
-                   "\n   source:    '%s'",
-                   (retmod->name) ? retmod->name : EMPTY_STRING,
-                   (retmod->version) ? retmod->version : EMPTY_STRING,
-                   (retmod->ns) ? retmod->ns : EMPTY_STRING,
-                   (retmod->source) ? retmod->source : EMPTY_STRING);
-    }
-
-    if (retmod) {
-        searchresult->mod = NULL;
-
-        if (retmod->name) {
-            searchresult->module = xml_strdup(retmod->name);
-            if (searchresult->module == NULL) {
-                searchresult->res = ERR_INTERNAL_MEM;
-            }
-        }
-        if (retmod->version) {
-            searchresult->revision = xml_strdup(retmod->version);
-            if (searchresult->revision == NULL) {
-                searchresult->res = ERR_INTERNAL_MEM;
-            }
-        }
-        if (retmod->ns) {
-            searchresult->namespacestr = xml_strdup(retmod->ns);
-            if (searchresult->namespacestr == NULL) {
-                searchresult->res = ERR_INTERNAL_MEM;
-            }
-        }
-        if (retmod->source) {
-            searchresult->source = xml_strdup(retmod->source);
-            if (searchresult->source == NULL) {
-                searchresult->res = ERR_INTERNAL_MEM;
-            }
-        }
+    } else {
+        searchresult = make_search_result(retmod);
     }
 
     if (pcb) {
         yang_free_pcb(pcb);
     }
-
+    
     return searchresult;
 
 }  /* ncxmod_find_module */
+
+
+/********************************************************************
+* FUNCTION ncxmod_find_all_modules
+*
+* Determine the location of all possible YANG modules and submodules
+* within the configured YUMA_MODPATH and default search path
+* All files with .yang and .yin file extensions found in the
+* search directories will be checked.
+* 
+* Does not cause modules to be fully parsed and registered.
+* Quick parse only is done, and modules are discarded.
+* Strings from the module are copied into the searchresult struct
+*
+* Module Search order:
+*
+* 1) YUMA_MODPATH environment var (or set by modpath CLI var)
+* 2) HOME/modules directory
+* 3) YUMA_HOME/modules directory
+* 4) YUMA_INSTALL/modules directory
+*
+* INPUTS:
+*   resultQ == address of Q to stor malloced search results
+*
+* OUTPUTS:
+*  resultQ may have malloced ncxmod_zsearch_result_t structs
+*  queued into it representing the modules found in the search
+*
+* RETURNS:
+*  status
+*********************************************************************/
+status_t 
+    ncxmod_find_all_modules (dlq_hdr_t *resultQ)
+{
+    xmlChar        *buff;
+    uint32          bufflen;
+    status_t        res;
+
+#ifdef DEBUG
+    if (!resultQ) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+
+    /* get a temp buffer to construct filespecs */
+    bufflen = NCXMOD_MAX_FSPEC_LEN+1;
+    buff = m__getMem(bufflen);
+    if (!buff) {
+        return ERR_INTERNAL_MEM;
+    } else {
+        *buff = 0;
+    }
+
+    /* 1) try YUMA_MODPATH environment variable if set */
+    if (ncxmod_mod_path) {
+        res = search_module_pathlist(ncxmod_mod_path,
+                                     search_subtree_callback,
+                                     resultQ);
+    }
+
+    /* 2) HOME/modules directory */
+    if (res == NO_ERR && ncxmod_env_userhome) {
+        res = search_module_path(ncxmod_env_userhome,
+                                 buff,
+                                 bufflen,
+                                 search_subtree_callback,
+                                 resultQ);
+    }
+
+    /* 3) YUMA_HOME/modules directory */
+    if (res == NO_ERR && ncxmod_yuma_home) {
+        res = search_module_path(ncxmod_yuma_home,
+                                 buff,
+                                 bufflen,
+                                 search_subtree_callback,
+                                 resultQ);
+    }
+
+    /* 4) YUMA_INSTALL/modules directory or default install path
+     *    If this envvar is set then the default install path will not
+     *    be tried
+     */
+    if (res == NO_ERR) {
+        if (ncxmod_env_install) {
+            res = search_module_path(ncxmod_env_install, 
+                                     buff,
+                                     bufflen,
+                                     search_subtree_callback,
+                                     resultQ);
+        } else {
+            res = search_module_path(NCXMOD_DEFAULT_INSTALL, 
+                                     buff,
+                                     bufflen,
+                                     search_subtree_callback,
+                                     resultQ);
+        }
+    }
+
+    m__free(buff);
+
+    return res;
+
+}  /* ncxmod_find_all_modules */
 
 
 /********************************************************************
@@ -3945,9 +4234,6 @@ void
 *         to use for this traveral
 *    cookie == cookie to pass to each invocation of the callback
 *
-* OUTPUTS:
-*   *done == TRUE if done processing
-*            FALSE to keep going
 * RETURNS:
 *    NO_ERR if file found okay, full filespec in the 'buff' variable
 *    OR some error if not found or buffer overflow
@@ -5137,6 +5423,7 @@ ncxmod_search_result_t *
     ncxmod_new_search_result_ex (const ncx_module_t *mod)
 {
     ncxmod_search_result_t *searchresult;
+    const xmlChar          *str;
 
 #ifdef DEBUG
     if (mod == NULL) {
@@ -5171,6 +5458,12 @@ ncxmod_search_result_t *
             ncxmod_free_search_result(searchresult);
             return NULL;
         }
+        str = searchresult->namespacestr;
+        while (*str && *str != '?') {
+            str++;
+        }
+        searchresult->nslen = 
+            (uint32)(str - searchresult->namespacestr);
     }
 
     if (mod->source) {
@@ -5181,6 +5474,16 @@ ncxmod_search_result_t *
         }
     }
 
+    if (mod->belongs) {
+        searchresult->belongsto = xml_strdup(mod->belongs);
+        if (searchresult->belongsto == NULL) {
+            ncxmod_free_search_result(searchresult);
+            return NULL;
+        }
+    }
+
+    searchresult->ismod = mod->ismod;
+    
     return searchresult;
 
 }  /* ncxmod_new_search_result_ex */
@@ -5206,6 +5509,9 @@ void
 
     if (searchresult->module) {
         m__free(searchresult->module);
+    }
+    if (searchresult->belongsto) {
+        m__free(searchresult->belongsto);
     }
     if (searchresult->revision) {
         m__free(searchresult->revision);
@@ -5248,6 +5554,154 @@ void
     }
 
 }  /* ncxmod_clean_search_result_queue */
+
+
+/********************************************************************
+* FUNCTION ncxmod_find_search_result
+*
+*  Find a search result in the specified Q
+*
+* Either modname or nsuri must be set
+* If modname is set, then revision will be checked
+*
+* INPUTS:
+*    searchQ = Q of ncxmod_search_result_t to check
+*    modname == module or submodule name to find
+*    revision == revision-date to find
+*    nsuri == namespace URI fo find
+* RETURNS:
+*   pointer to first matching record; NULL if not found
+*********************************************************************/
+ncxmod_search_result_t *
+    ncxmod_find_search_result (dlq_hdr_t *searchQ,
+                               const xmlChar *modname,
+                               const xmlChar *revision,
+                               const xmlChar *nsuri)
+{
+    ncxmod_search_result_t *sr;
+
+#ifdef DEBUG
+    if (searchQ == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    for (sr = (ncxmod_search_result_t *)dlq_firstEntry(searchQ);
+         sr != NULL;
+         sr = (ncxmod_search_result_t *)dlq_nextEntry(sr)) {
+
+        if (modname) {
+            if (sr->module == NULL ||
+                xml_strcmp(sr->module, modname)) {
+                continue;
+            }
+            if (revision) {
+                if (sr->revision == NULL || 
+                    xml_strcmp(sr->revision, revision)) {
+                    continue;
+                }
+            }
+            return sr;
+        } else if (nsuri) {
+            if (sr->namespacestr == NULL || sr->nslen == 0) {
+                continue;
+            }
+            if (xml_strlen(nsuri) != sr->nslen) {
+                continue;
+            }
+            if (xml_strncmp(sr->namespacestr, nsuri, sr->nslen)) {
+                continue;
+            }
+            return sr;
+        } else {
+            SET_ERROR(ERR_INTERNAL_PTR);
+            return NULL;
+        }
+    }
+    return NULL;
+
+}  /* ncxmod_find_search_result */
+
+
+/********************************************************************
+* FUNCTION ncxmod_clone_search_result
+*
+*  Clone a search result
+*
+* INPUTS:
+*    sr = searchresult to clone
+*
+* RETURNS:
+*   pointer to malloced and filled in clone of sr
+*********************************************************************/
+ncxmod_search_result_t *
+    ncxmod_clone_search_result (const ncxmod_search_result_t *sr)
+{
+    ncxmod_search_result_t *newsr;
+
+#ifdef DEBUG
+    if (sr == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    newsr = ncxmod_new_search_result();
+    if (newsr == NULL) {
+        return NULL;
+    }
+
+    if (sr->module) {
+        newsr->module = xml_strdup(sr->module);
+        if (newsr->module == NULL) {
+            ncxmod_free_search_result(newsr);
+            return NULL;
+        }
+    }
+
+    if (sr->belongsto) {
+        newsr->belongsto = xml_strdup(sr->belongsto);
+        if (newsr->belongsto == NULL) {
+            ncxmod_free_search_result(newsr);
+            return NULL;
+        }
+    }
+
+    if (sr->revision) {
+        newsr->revision = xml_strdup(sr->revision);
+        if (newsr->revision == NULL) {
+            ncxmod_free_search_result(newsr);
+            return NULL;
+        }
+    }
+
+    if (sr->namespacestr) {
+        newsr->namespacestr = xml_strdup(sr->namespacestr);
+        if (newsr->namespacestr == NULL) {
+            ncxmod_free_search_result(newsr);
+            return NULL;
+        }
+    }
+
+    if (sr->source) {
+        newsr->source = xml_strdup(sr->source);
+        if (newsr->source == NULL) {
+            ncxmod_free_search_result(newsr);
+            return NULL;
+        }
+    }
+
+    newsr->mod = sr->mod;
+    newsr->res = sr->res;
+    newsr->nslen = sr->nslen;
+    newsr->cap = sr->cap;
+    newsr->capmatch = sr->capmatch;
+    newsr->ismod = sr->ismod;
+
+    return newsr;
+
+}  /* ncxmod_clone_search_result */
 
 
 /********************************************************************

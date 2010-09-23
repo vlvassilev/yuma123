@@ -218,14 +218,17 @@ typedef struct ncxmod_temp_filcb_t_ {
  */
 typedef struct ncxmod_search_result_t_ {
     dlq_hdr_t      qhdr;
-    xmlChar       *module;
-    xmlChar       *revision;
-    xmlChar       *namespacestr;
-    xmlChar       *source;
-    ncx_module_t  *mod;      /* back-ptr to found module if loaded */
-    cap_rec_t     *cap;      /* back-ptr to source capability URI */
-    status_t       res;
-    boolean        capmatch;     /* set by yangcli */
+    xmlChar       *module;        /* module or submodule name */
+    xmlChar       *belongsto;     /* set if submodule & belongs-to found */
+    xmlChar       *revision;      /* set if most recent revision found */
+    xmlChar       *namespacestr;  /* set if module & namespace found */
+    xmlChar       *source;        /* file location */
+    ncx_module_t  *mod;           /* back-ptr to found module if loaded */
+    status_t       res;           /* search result, only use if NO_ERR */
+    uint32         nslen;         /* length of base part of namespacestr */
+    cap_rec_t     *cap;           /* back-ptr to source capability URI */
+    boolean        capmatch;      /* set by yangcli; internal use only */
+    boolean        ismod;         /* TRUE=module; FALSE=submodule */
 } ncxmod_search_result_t;
 
 
@@ -386,6 +389,39 @@ extern status_t
 extern ncxmod_search_result_t *
     ncxmod_find_module (const xmlChar *modname,
 			const xmlChar *revision);
+
+
+/********************************************************************
+* FUNCTION ncxmod_find_all_modules
+*
+* Determine the location of all possible YANG modules and submodules
+* within the configured YUMA_MODPATH and default search path
+* All files with .yang and .yin file extensions found in the
+* search directories will be checked.
+* 
+* Does not cause modules to be fully parsed and registered.
+* Quick parse only is done, and modules are discarded.
+* Strings from the module are copied into the searchresult struct
+*
+* Module Search order:
+*
+* 1) YUMA_MODPATH environment var (or set by modpath CLI var)
+* 2) HOME/modules directory
+* 3) YUMA_HOME/modules directory
+* 4) YUMA_INSTALL/modules directory
+*
+* INPUTS:
+*   resultQ == address of Q to stor malloced search results
+*
+* OUTPUTS:
+*  resultQ may have malloced ncxmod_zsearch_result_t structs
+*  queued into it representing the modules found in the search
+*
+* RETURNS:
+*  status
+*********************************************************************/
+extern status_t 
+    ncxmod_find_all_modules (dlq_hdr_t *resultQ);
 
 
 /********************************************************************
@@ -1143,6 +1179,7 @@ extern void
     ncxmod_free_search_result (ncxmod_search_result_t *searchresult);
 
 
+
 /********************************************************************
 * FUNCTION ncxmod_clean_search_result_queue
 *
@@ -1154,6 +1191,44 @@ extern void
 *********************************************************************/
 extern void
     ncxmod_clean_search_result_queue (dlq_hdr_t *searchQ);
+
+
+/********************************************************************
+* FUNCTION ncxmod_find_search_result
+*
+*  Find a search result inthe specified Q
+*
+* Either modname or nsuri must be set
+* If modname is set, then revision will be checked
+*
+* INPUTS:
+*    searchQ = Q of ncxmod_search_result_t to check
+*    modname == module or submodule name to find
+*    revision == revision-date to find
+*    nsuri == namespace URI fo find
+* RETURNS:
+*   pointer to first matching record; NULL if not found
+*********************************************************************/
+extern ncxmod_search_result_t *
+    ncxmod_find_search_result (dlq_hdr_t *searchQ,
+                               const xmlChar *modname,
+                               const xmlChar *revision,
+                               const xmlChar *nsuri);
+
+
+/********************************************************************
+* FUNCTION ncxmod_clone_search_result
+*
+*  Clone a search result
+*
+* INPUTS:
+*    sr = searchresult to clone
+*
+* RETURNS:
+*   pointer to malloced and filled in clone of sr
+*********************************************************************/
+extern ncxmod_search_result_t *
+    ncxmod_clone_search_result (const ncxmod_search_result_t *sr);
 
 
 /********************************************************************

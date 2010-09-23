@@ -1805,7 +1805,7 @@ static status_t
  *   fullspec == absolute or relative path spec, with filename and ext.
  *               this regular file exists, but has not been checked for
  *               read access of 
- *   cookie == NOT USED
+ *   cookie == yangcli conversion parms
  *
  * RETURNS:
  *    status

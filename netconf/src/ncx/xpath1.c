@@ -97,6 +97,7 @@ date         init     comment
 *********************************************************************/
 
 /* #define XPATH1_PARSE_DEBUG 1 */
+/* #define EXTRA_DEBUG 1 */
 
 #define TEMP_BUFFSIZE  1024
 
@@ -6865,6 +6866,13 @@ static status_t
                 pcb->context.last = contextset->last;
                 pcb->context.dblslash = resnode->dblslash;
 
+#ifdef EXTRA_DEBUG
+                if (LOGDEBUG3 && pcb->val) {
+                    log_debug3("\nXPath setting context node: %s",
+                               pcb->context.node.valptr->name);
+                }
+#endif
+
                 val1 = parse_expr(pcb, &res);
                 if (res != NO_ERR) {
                     if (val1) {
@@ -6920,6 +6928,13 @@ static status_t
             pcb->context.position = lastcontext.position;
             pcb->context.last = lastcontext.last;
             pcb->context.dblslash = lastcontext.dblslash;
+
+#ifdef EXTRA_DEBUG
+            if (LOGDEBUG3 && pcb->val) {
+                log_debug3("\nXPath set context node to last: %s",
+                           pcb->context.node.valptr->name);
+            }
+#endif
 
         } else {
             /* result is from a primary expression and
@@ -7383,6 +7398,10 @@ static xpath_result_t *
                     log_debug3("\nXPath fn %s result:",
                                fncb->name);
                     dump_result(pcb, val1, NULL);
+                    if (pcb->val && pcb->context.node.valptr->name) {
+                        log_debug3("\nXPath context val name: %s",
+                                   pcb->context.node.valptr->name);
+                    }
                 }
             }
         }
@@ -9132,9 +9151,23 @@ xpath_result_t *
     if (val) {
         pcb->context.node.valptr = val;
         pcb->orig_context.node.valptr = val;
+
+#ifdef EXTRA_DEBUG
+        if (LOGDEBUG3 && pcb->val) {
+            log_debug3("\nXPath setting context node to val: %s",
+                       pcb->context.node.valptr->name);
+        }
+#endif
     } else {
         pcb->context.node.valptr = docroot;
         pcb->orig_context.node.valptr = docroot;
+
+#ifdef EXTRA_DEBUG
+        if (LOGDEBUG3 && pcb->val) {
+            log_debug3("\nXPath setting context node to docroot: %s",
+                       pcb->context.node.valptr->name);
+        }
+#endif
     }
 
     if (configonly ||
@@ -9249,9 +9282,24 @@ xpath_result_t *
     if (val) {
         pcb->context.node.valptr = val;
         pcb->orig_context.node.valptr = val;
+
+#ifdef EXTRA_DEBUG
+        if (LOGDEBUG3 && pcb->val) {
+            log_debug3("\nXPath setting context node to val: %s",
+                       pcb->context.node.valptr->name);
+        }
+#endif
     } else {
+
         pcb->context.node.valptr = docroot;
         pcb->orig_context.node.valptr = docroot;
+
+#ifdef EXTRA_DEBUG
+        if (LOGDEBUG3 && pcb->val) {
+            log_debug3("\nXPath setting context node to docroot: %s",
+                       pcb->context.node.valptr->name);
+        }
+#endif
     }
 
     if (configonly ||

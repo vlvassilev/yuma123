@@ -1137,6 +1137,102 @@ static status_t
 }  /* copy_editvars */
 
 
+
+/********************************************************************
+* FUNCTION cache_virtual_value
+* 
+* get + cache as val->virtualval; DO NOT FREE the return val
+* Get the value of a value node and store the malloced
+* pointer in the virtualval cache 
+* 
+* If the val->getcb is NULL, then an error will be returned
+*
+* Caller should check for *res == ERR_NCX_SKIPPED
+* This will be returned if virtual value has no
+* instance at this time.
+*
+* INPUTS:
+*   val == virtual value to get value for
+*   res == pointer to output function return status value
+*
+* OUTPUTS:
+*    val->virtualval set to the malloced val; will be cleared
+*        if already set
+*    val->cachetime set to the current time if the getcb is used
+*    *res == the function return status
+*
+* RETURNS:
+*   A pointer to the malloced val;
+*   This pointer can not be stored; it is free as part of virtualval
+*
+*********************************************************************/
+static val_value_t *
+    cache_virtual_value (val_value_t *val,
+                         status_t *res)
+{
+    val_value_t *retval;
+    getcb_fn_t   getcb;
+    time_t       timenow;
+    double       timediff;
+
+#ifdef DEBUG
+    if (!val || !res) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    if (!val->getcb) {
+        *res = ERR_NCX_OPERATION_FAILED;
+        return NULL;
+    }
+
+    getcb = (getcb_fn_t)val->getcb;
+
+
+    if (val->virtualval != NULL) {
+        /* already have a value; check if it is fresh enough */
+        (void)time(&timenow);
+        timediff = difftime(timenow, val->cachetime);
+
+        if (LOGDEBUG3) {
+            log_debug3("\nval: virtual val timer %e", timediff);
+        }
+
+        if (timediff > (double)VAL_VIRTUAL_CACHE_TIME) {
+            if (LOGDEBUG3) {
+                log_debug3("\nval: refresh virtual val %s",
+                           val->name);
+            }
+            val_free_value(val->virtualval);
+            val->virtualval = NULL;
+        } else {
+            return val->virtualval;
+        }
+    }
+
+    /* first get or stale and need a refresh */
+    retval = val_new_value();
+    if (!retval) {
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+    setup_virtual_retval(val, retval);
+    (void)time(&val->cachetime);
+
+    *res = (*getcb)(NULL, GETCB_GET_VALUE, val, retval);
+    if (*res != NO_ERR) {
+        val_free_value(retval);
+        retval = NULL;
+    } else {
+        val->virtualval = retval;
+        val->virtualval->parent = val->parent;
+    }
+    return retval;
+
+}  /* cache_virtual_value */
+
+
 /*************** E X T E R N A L    F U N C T I O N S  *************/
 
 
@@ -5989,7 +6085,7 @@ boolean
 
     if (val_is_virtual(startnode)) {
         res = NO_ERR;
-        useval = val_cache_virtual_value(NULL, startnode, &res);
+        useval = cache_virtual_value(startnode, &res);
         if (useval == NULL) {
             return FALSE;
         }
@@ -6164,7 +6260,7 @@ boolean
 
     if (val_is_virtual(startnode)) {
         res = NO_ERR;
-        useval = val_cache_virtual_value(NULL, startnode, &res);
+        useval = cache_virtual_value(startnode, &res);
         if (useval == NULL) {
             return res;
         }
@@ -6334,7 +6430,7 @@ boolean
 
         if (val_is_virtual(val)) {
             res = NO_ERR;
-            useval = val_cache_virtual_value(NULL, val, &res);
+            useval = cache_virtual_value(val, &res);
             if (useval == NULL) {
                 return res;
             }
@@ -6496,7 +6592,7 @@ boolean
 
         if (val_is_virtual(val)) {
             res = NO_ERR;
-            useval = val_cache_virtual_value(NULL, val, &res);
+            useval = cache_virtual_value(val, &res);
             if (useval == NULL) {
                 return FALSE;
             }
@@ -8465,81 +8561,6 @@ val_value_t *
 }  /* val_get_virtual_value */
 
 
-/********************************************************************
-* FUNCTION val_cache_virtual_value
-* 
-* get + cache as val->virtualval; DO NOT FREE the return val
-* Get the value of a value node and store the malloced
-* pointer in the virtualval cache 
-* 
-* If the val->getcb is NULL, then an error will be returned
-*
-* Caller should check for *res == ERR_NCX_SKIPPED
-* This will be returned if virtual value has no
-* instance at this time.
-*
-* INPUTS:
-*   session == session CB ptr cast as void *
-*              that is getting the virtual value
-*   val == virtual value to get value for
-*   res == pointer to output function return status value
-*
-* OUTPUTS:
-*    val->virtualval set to the malloced val; will be cleared
-*        if already set
-*    *res == the function return status
-*
-* RETURNS:
-*   A malloced and filled in val_value_t struct
-*   The val_free_value function must be called if the
-*   return value is non-NULL
-*********************************************************************/
-val_value_t *
-    val_cache_virtual_value (void *session,
-                             val_value_t *val,
-                             status_t *res)
-{
-    ses_cb_t    *scb;
-    val_value_t *retval;
-    getcb_fn_t   getcb;
-
-#ifdef DEBUG
-    if (!val || !res) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
-
-    if (!val->getcb) {
-        *res = ERR_NCX_OPERATION_FAILED;
-        return NULL;
-    }
-
-    scb = (ses_cb_t *)session;
-    getcb = (getcb_fn_t)val->getcb;
-
-    retval = val_new_value();
-    if (!retval) {
-        *res = ERR_INTERNAL_MEM;
-        return NULL;
-    }
-    setup_virtual_retval(val, retval);
-
-    *res = (*getcb)(scb, GETCB_GET_VALUE, val, retval);
-    if (*res != NO_ERR) {
-        val_free_value(retval);
-        retval = NULL;
-    } else {
-        if (val->virtualval) {
-            val_free_value(val->virtualval);
-        }
-        val->virtualval = retval;
-        val->virtualval->parent = val->parent;
-    }
-
-    return retval;
-
-}  /* val_cache_virtual_value */
 
 
 /********************************************************************

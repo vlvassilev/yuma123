@@ -1478,6 +1478,13 @@ boolean
          impptr != NULL;
          impptr = (yang_import_ptr_t *)dlq_nextEntry(impptr)) {
 
+        /*** hack: skip ietf-netconf because it is not stored
+         *** remove when ietf-netconf is supported
+         ***/
+        if (!xml_strcmp(impptr->modname, NCXMOD_IETF_NETCONF)) {
+            continue;
+        }
+
         testmod = ncx_find_module(impptr->modname,
                                   impptr->revision);
         if (!testmod) {

@@ -4268,9 +4268,12 @@ status_t
 
     dp = opendir((const char *)sourcespec);
     if (!dp) {
-        log_error("\nError: invalid pathspec '%s'\n", startspec);
+        if (LOGDEBUG) {
+            log_debug("\nncxmod: could not open directory '%s'\n", 
+		      startspec);
+	}
         m__free(sourcespec);
-        return ERR_NCX_INVALID_VALUE;
+        return NO_ERR;
     } else {
         (void)closedir(dp);
     }

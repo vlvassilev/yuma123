@@ -130,6 +130,26 @@ extern uint32
                     const xmlChar **ref,
                     uint32 *reflen);
 
+
+
+
+/********************************************************************
+ * FUNCTION print_subtree_banner
+ * 
+ *   Print the banner for the next module starting when 
+ *   multiple modules are being processed by yangdump
+ *
+ * INPUTS:
+ *   cp == conversion parms to use
+ *   mod == module to use
+ *
+ *********************************************************************/
+extern void
+    print_subtree_banner (yangdump_cvtparms_t *cp,
+                          ncx_module_t *mod,
+                          ses_cb_t *scb);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

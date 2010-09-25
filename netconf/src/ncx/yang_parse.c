@@ -1816,7 +1816,7 @@ static status_t
     const xmlChar  *val;
     yang_node_t    *node, *testnode;
     dlq_hdr_t      *allQ, *chainQ;
-    ncx_module_t   *foundmod;
+    ncx_module_t   *foundmod, *realmod;
     tk_type_t       tktyp;
     status_t        res, retres;
     boolean         done, revdone;
@@ -1975,14 +1975,16 @@ static status_t
         }
     }
 
-    /* get the include Qs to use */
-    allQ = (mod->parent) ? 
-        &mod->parent->allincQ :
-        &mod->allincQ;
+    /* get the include Qs to use
+     * keep checking parents until the real module is reached
+     */
+    realmod = mod;
+    while (realmod->parent != NULL) {
+        realmod = realmod->parent;
+    }
 
-    chainQ = (mod->parent) ? 
-        &mod->parent->incchainQ :
-        &mod->incchainQ;
+    allQ = &realmod->allincQ;
+    chainQ = &realmod->incchainQ;
 
     /* check special scan mode looking for mod info */
     if (pcb->searchmode) {
@@ -2134,11 +2136,7 @@ static status_t
                      */
                     node->submod = foundmod;
                     node->res = retres;
-
-                    dlq_enque(node,
-                              (mod->parent) ?
-                              &mod->parent->allincQ :
-                              &mod->allincQ);
+                    dlq_enque(node, allQ);
                 } else {
                     SET_ERROR(ERR_INTERNAL_VAL);
                 }
@@ -3605,9 +3603,6 @@ status_t
 
             /* set the stmt-track mode flag to the master flag in the PCB */
             mod->stmtmode = pcb->stmtmode;
-
-            /* set the diff-mode flag */
-            mod->diffmode = pcb->diffmode;
         }
     }
 
@@ -3629,9 +3624,7 @@ status_t
     /* parse the module and validate it only if a token chain
      * was properly parsed; set this only once for the top module
      */
-    if (res == NO_ERR && 
-        pcb->savetkc &&
-        pcb->tkc == NULL) {
+    if (res == NO_ERR && pcb->savetkc && pcb->tkc == NULL) {
         pcb->tkc = tk_clone_chain(tkc);
         if (pcb->tkc == NULL) {
             res = ERR_INTERNAL_MEM;
@@ -3669,8 +3662,8 @@ status_t
              * wants the return module in this case
              */
             if (pcb->parsemode) {
-                /* parse mode for yangdump or yangdiff
-                 * does not need to keep the duplicate
+                /* parse mode for yangcli_autoload
+                 * do not need to keep the duplicate
                  */
                 if (pcb->top == mod) {
                     pcb->top = NULL;

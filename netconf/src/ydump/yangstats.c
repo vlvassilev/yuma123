@@ -55,6 +55,10 @@ date         init     comment
 #include  "yangdump.h"
 #endif
 
+#ifndef _H_yangdump_util
+#include  "yangdump_util.h"
+#endif
+
 #ifndef _H_yangstats
 #include  "yangstats.h"
 #endif
@@ -789,17 +793,9 @@ void
 
     ses_putstr(scb, (const xmlChar *)"\nStatistics:");
 
-    if (pcb->subtree_mode) {
-        if (mod->ismod) {
-            sprintf(cp->buff, "\nmodule %s", mod->name);
-        } else {
-            sprintf(cp->buff, "\nsubmodule %s", mod->name);
-        }
-        ses_putstr(scb, (const xmlChar *)cp->buff);
-        if (mod->version) {
-            ses_putchar(scb, '@');
-            ses_putstr(scb, mod->version);
-        }
+    /* check subtree mode */
+    if (cp->subtree) {
+        print_subtree_banner(cp, mod, scb);
     }
 
     output_stats(scb, cp->cur_stats, cp);

@@ -1237,7 +1237,6 @@ static status_t
 
     newpcb = ncxmod_load_module_diff(modparm,
                                      revision,
-                                     (cp->curnew) ? TRUE : FALSE,
                                      FALSE, 
                                      modpath,
                                      NULL,
@@ -1335,7 +1334,6 @@ static status_t
      */
     oldpcb = ncxmod_load_module_diff(cp->curold, 
                                      revision,
-                                     (cp->new_isdir) ? TRUE : FALSE,
                                      FALSE, 
                                      modpath,
                                      NULL,

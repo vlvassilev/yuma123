@@ -622,7 +622,6 @@ typedef struct ncx_module_t_ {
     uint32            langver;
     boolean           ismod;     /* module/submodule keyword */
     boolean           stmtmode;       /* T: save yang_stmt_t */
-    boolean           diffmode;      /* T: don't use def_reg */
     boolean           added;         /* T: don't free on err */
     boolean           defaultrev;  /* T: use for default ver */
     status_t          status;         /* module parse result */

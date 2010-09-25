@@ -506,8 +506,6 @@ extern status_t
 * INPUTS:
 *   modname == module name with no path prefix or file extension
 *   revision == optional revision date of 'modname' to find
-*   subtree_mode == TRUE if in a subtree loop
-*                == FALSE if processing one module in yangdump
 *   with_submods == TRUE if YANG_PT_TOP mode should skip submodules
 *                == FALSE if top-level mode should process sub-modules 
 *   savetkc == TRUE if the parse chain should be saved (e.g., YIN)
@@ -527,7 +525,6 @@ extern status_t
 extern yang_pcb_t *
     ncxmod_load_module_ex (const xmlChar *modname,
                            const xmlChar *revision,
-                           boolean subtree_mode,
                            boolean with_submods,
                            boolean savetkc,
                            boolean keepmode,
@@ -546,8 +543,6 @@ extern yang_pcb_t *
 * INPUTS:
 *   modname == module name with no path prefix or file extension
 *   revision == optional revision date of 'modname' to find
-*   subtree_mode == TRUE if in a subtree loop
-*                == FALSE if processing one module in yangdump
 *   with_submods == TRUE if YANG_PT_TOP mode should skip submodules
 *                == FALSE if top-level mode should process sub-modules 
 *   modpath == module path to override the modpath CLI var or
@@ -564,7 +559,6 @@ extern yang_pcb_t *
 extern yang_pcb_t *
     ncxmod_load_module_diff (const xmlChar *modname,
 			     const xmlChar *revision,
-			     boolean subtree_mode,
 			     boolean with_submods,
 			     const xmlChar *modpath,
                              dlq_hdr_t  *savedevQ,

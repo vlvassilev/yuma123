@@ -46,9 +46,18 @@ date         init     comment
 #include  "ncx.h"
 #endif
 
+#ifndef _H_ncxtypes
+#include  "ncxtypes.h"
+#endif
+
 #ifndef _H_status
 #include  "status.h"
 #endif
+
+#ifndef _H_yangdump
+#include  "yangdump.h"
+#endif
+
 
 #ifndef _H_yangdump_util
 #include  "yangdump_util.h"
@@ -233,6 +242,43 @@ uint32
     }
 
 }   /* find_reference */
+
+
+/********************************************************************
+ * FUNCTION print_subtree_banner
+ * 
+ *   Print the banner for the next module starting when 
+ *   multiple modules are being processed by yangdump
+ *
+ * INPUTS:
+ *   cp == conversion parms to use
+ *   mod == module to use
+ *
+ *********************************************************************/
+void
+    print_subtree_banner (yangdump_cvtparms_t *cp,
+                          ncx_module_t *mod,
+                          ses_cb_t *scb)
+{
+#ifdef DEBUG
+    if (cp == NULL || mod == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    if (mod->ismod) {
+        sprintf((char *)cp->buff, "\nmodule %s", mod->name);
+    } else {
+        sprintf((char *)cp->buff, "\nsubmodule %s", mod->name);
+    }
+    ses_putstr(scb, (const xmlChar *)cp->buff);
+
+    if (mod->version) {
+        sprintf((char *)cp->buff, "@%s", mod->version);
+        ses_putstr(scb, (const xmlChar *)cp->buff);
+    }
+}  /* print_subtree_banner */
 
 
 /* END yangdump_util.c */

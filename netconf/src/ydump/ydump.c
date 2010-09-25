@@ -893,17 +893,9 @@ static void
 
     ses_putstr(scb, (const xmlChar *)"\nexports:");
 
-    if (pcb->subtree_mode) {
-        if (mod->ismod) {
-            sprintf(cp->buff, "\nmodule %s", mod->name);
-        } else {
-            sprintf(cp->buff, "\nsubmodule %s", mod->name);
-        }
-        ses_putstr(scb, (const xmlChar *)cp->buff);
-        if (mod->version) {
-            ses_putchar(scb, '@');
-            ses_putstr(scb, mod->version);
-        }
+    /* check subtree mode */
+    if (cp->subtree) {
+        print_subtree_banner(cp, mod, scb);
     }
 
     output_one_module_exports(mod, scb, cp->buff);
@@ -999,17 +991,9 @@ static void
 
     ses_putstr(scb, (const xmlChar *)"\ndependencies:");
 
-    if (pcb->subtree_mode) {
-        if (mod->ismod) {
-            sprintf(cp->buff, "\nmodule %s", mod->name);
-        } else {
-            sprintf(cp->buff, "\nsubmodule %s", mod->name);
-        }
-        ses_putstr(scb,(const xmlChar *)cp->buff);
-        if (mod->version) {
-            ses_putchar(scb, '@');
-            ses_putstr(scb, mod->version);
-        }
+    /* check subtree mode */
+    if (cp->subtree) {
+        print_subtree_banner(cp, mod, scb);
     }
 
     output_one_module_dependencies(mod, scb, cp);
@@ -1141,18 +1125,9 @@ static void
 
     ses_putstr(scb, (const xmlChar *)"\nidentifiers:");
 
-    if (pcb->subtree_mode) {
-        if (mod->ismod) {
-            sprintf((char *)cp->buff, "\nmodule %s", mod->name);
-        } else {
-            sprintf((char *)cp->buff, "\nsubmodule %s", mod->name);
-        }
-        ses_putstr(scb, (const xmlChar *)cp->buff);
-
-        if (mod->version) {
-            sprintf((char *)cp->buff, "@%s", mod->version);
-            ses_putstr(scb, (const xmlChar *)cp->buff);
-        }
+    /* check subtree mode */
+    if (cp->subtree) {
+        print_subtree_banner(cp, mod, scb);
     }
 
     output_one_module_identifiers(mod, scb,
@@ -1419,10 +1394,9 @@ static status_t
     /* load in the requested module to convert */
     pcb = ncxmod_load_module_ex(modname,
                                 revision,
-                                cp->subtree ? TRUE : FALSE,
-                                cp->unified, 
-                                !cp->rawmode,
-                                TRUE,
+                                cp->unified, /* with_submods */
+                                !cp->rawmode, /* savetkc for yin */
+                                TRUE,    /* keepmode to force new load */
                                 &cp->savedevQ,
                                 &res);
 
@@ -2079,7 +2053,14 @@ status_t
 			     YANGDUMP_PARM_SUBTREE);
 	while (val) {
 	    done = TRUE;
+
+            /* this var cvtparms->subtree will be non-NULL
+             * if there are any subtrees to process;
+             * this will cause subtree mode to be true, so
+             * a banner is printed after every file
+             */
 	    cvtparms->subtree = (const char *)VAL_STR(val);
+
 	    res = ncxmod_process_subtree(cvtparms->subtree,
 					 subtree_callback,
 					 cvtparms);

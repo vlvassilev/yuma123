@@ -144,11 +144,9 @@ typedef struct yang_import_ptr_t_ {
  * top level parse can be for a module or a submodule
  *
  * The allimpQ is a cache of pointers to all the imports that
- *  have been processed.  This is used by yangdump for
- *  document processing and error detection.  Imports
- *  are stored in the def_reg, so this Q is not really needed
- *  by manager or agent applications.
-
+ * have been processed.  This is used by yangdump for
+ * document processing and error detection. 
+ *
  * The impchainQ is really a stack of imports that
  * are being processed, used for import loop detection
  * 
@@ -168,14 +166,12 @@ typedef struct yang_pcb_t_ {
     struct ncx_module_t_ *retmod;   /* nested [sub]mod being returned */
     struct ncx_module_t_ *parentparm;   /* parent passed for submodule */
     const xmlChar *revision;        /* back-ptr to rev to match */
-    boolean       subtree_mode;
     boolean       with_submods;
     boolean       stmtmode;      /* save top-level stmt order */
     boolean       diffmode;        /* TRUE = yangdiff old ver */
     boolean       deviationmode;  /* TRUE if keeping deviations only */
     boolean       searchmode;  /* TRUE if just getting ns & version */
     boolean       parsemode;  /* TRUE if full parse but no reg-load */
-    boolean       importmode;  /* TRUE if parsing from an import-stmt */
     boolean       keepmode;    /* TRUE to keep new mod even if loaded */
     boolean       topfound;    /* TRUE if top found, not added */
     boolean       topadded;    /* TRUE if top in registry; F: need free */
@@ -185,10 +181,8 @@ typedef struct yang_pcb_t_ {
     dlq_hdr_t    *savedevQ;  /* ptr to Q of ncx_save_deviations_t */
     tk_chain_t   *tkc;              /* live or NULL parse chain  */
 
-    /* 4 Qs of yang_node_t */
+    /* 2 Qs of yang_node_t */
     dlq_hdr_t     impchainQ;      /* cur chain of import used */
-    // dlq_hdr_t     allincQ;               /* all includes used */
-    // dlq_hdr_t     incchainQ;     /* cur chain of include used */
     dlq_hdr_t     failedQ;       /* load mod or submod failed */
 } yang_pcb_t;
 

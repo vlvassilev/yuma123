@@ -3620,6 +3620,9 @@ status_t
                     /* make sure top is not pointing at garbage */
                     pcb->top = NULL;
                 }
+                if (pcb->retmod == mod) {
+                    pcb->retmod = NULL;
+                }
                 /* free the parsed module here */
                 ncx_free_module(mod);
             } /* else the module will be freed in ncx_cleanup */
@@ -3629,6 +3632,9 @@ status_t
              */
             if (pcb->top == mod) {
                 pcb->top = NULL;
+            }
+            if (pcb->retmod == mod) {
+                pcb->retmod = NULL;
             }
             ncx_free_module(mod);
         } else if (!wasadd) {
@@ -3643,6 +3649,9 @@ status_t
                  */
                 if (pcb->top == mod) {
                     pcb->top = NULL;
+                }
+                if (pcb->retmod == mod) {
+                    pcb->retmod = NULL;
                 }
                 ncx_free_module(mod);
             } else if (!(pcb->diffmode || 
@@ -3693,7 +3702,11 @@ status_t
                         /* don't care about submods in this mode so clear
                          * the top pointer so it won't be used
                          */
+                        if (pcb->retmod == mod) {
+                            pcb->retmod = NULL;
+                        }
                         pcb->top = NULL;
+                        
                     }
                 }
                 if (!pcb->top && !pcb->with_submods) {

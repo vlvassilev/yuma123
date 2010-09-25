@@ -2116,7 +2116,7 @@ static status_t
     m__free(buff);
 
     if (done) {
-        if (res == NO_ERR && retmod) {
+        if (retmod) {
             if (pcb->retmod != NULL) {
                 *retmod = pcb->retmod;
             } else {

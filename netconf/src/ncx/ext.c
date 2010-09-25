@@ -218,7 +218,7 @@ ext_template_t *
         return extension;
     }
 
-    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
+    que = ncx_get_allincQ(mod);
 
     /* check all the submodules, but only the ones visible
      * to this module or submodule
@@ -325,7 +325,7 @@ ext_template_t *
         return extension;
     }
 
-    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
+    que = ncx_get_allincQ(mod);
 
     /* check all the submodules, but only the ones visible
      * to this module or submodule

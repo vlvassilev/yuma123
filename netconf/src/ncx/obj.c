@@ -3345,7 +3345,7 @@ obj_template_t *
         return obj;
     }
 
-    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
+    que = ncx_get_allincQ(mod);
 
     /* check all the submodules, but only the ones visible
      * to this module or submodule, YANG only
@@ -3432,7 +3432,7 @@ obj_template_t *
         return obj;
     }
 
-    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
+    que = ncx_get_allincQ(mod);
 
     /* check all the submodules, but only the ones visible
      * to this module or submodule, YANG only

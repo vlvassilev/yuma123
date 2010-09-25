@@ -2563,6 +2563,39 @@ extern uint32
                                 const xmlChar *modname);
 
 
+
+
+/********************************************************************
+* FUNCTION ncx_get_allincQ
+*
+* Find the correct Q of yang_node_t for all include files
+* that have the same 'belongs-to' value
+*
+* INPUTS:
+*   mod == module to check
+*
+* RETURNS:
+*   pointer to Q  of all include nodes
+*********************************************************************/
+extern dlq_hdr_t *
+    ncx_get_allincQ (ncx_module_t *mod);
+
+/********************************************************************
+* FUNCTION ncx_get_const_allincQ
+*
+* Find the correct Q of yang_node_t for all include files
+* that have the same 'belongs-to' value (const version)
+*
+* INPUTS:
+*   mod == module to check
+*
+* RETURNS:
+*   pointer to Q  of all include nodes
+*********************************************************************/
+extern const dlq_hdr_t *
+    ncx_get_const_allincQ (const ncx_module_t *mod);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

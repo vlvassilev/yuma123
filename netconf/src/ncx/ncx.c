@@ -1539,7 +1539,7 @@ typ_template_t *
         return typ;
     }
 
-    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
+    que = ncx_get_allincQ(mod);
 
     if (useall) {
         for (node = (yang_node_t *)dlq_firstEntry(que);
@@ -1663,7 +1663,7 @@ grp_template_t *
         return grp;
     }
 
-    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
+    que = ncx_get_allincQ(mod);
 
     if (useall) {
         for (node = (yang_node_t *)dlq_firstEntry(que);
@@ -3660,7 +3660,7 @@ ncx_identity_t *
         return identity;
     }
 
-    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
+    que = ncx_get_allincQ(mod);
 
     if (useall) {
         for (node = (yang_node_t *)dlq_firstEntry(que);
@@ -7215,6 +7215,66 @@ uint32
     return count;
 
 }   /* ncx_mod_revision_count_que */
+
+
+/********************************************************************
+* FUNCTION ncx_get_allincQ
+*
+* Find the correct Q of yang_node_t for all include files
+* that have the same 'belongs-to' value
+*
+* INPUTS:
+*   mod == module to check
+*
+* RETURNS:
+*   pointer to Q  of all include nodes
+*********************************************************************/
+dlq_hdr_t *
+    ncx_get_allincQ (ncx_module_t *mod)
+{
+#ifdef DEBUG
+    if (mod == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    while (mod->parent != NULL) {
+        mod = mod->parent;
+    }
+    return &mod->allincQ;
+
+}   /* ncx_get_allincQ */
+
+
+/********************************************************************
+* FUNCTION ncx_get_const_allincQ
+*
+* Find the correct Q of yang_node_t for all include files
+* that have the same 'belongs-to' value (const version)
+*
+* INPUTS:
+*   mod == module to check
+*
+* RETURNS:
+*   pointer to Q  of all include nodes
+*********************************************************************/
+const dlq_hdr_t *
+    ncx_get_const_allincQ (const ncx_module_t *mod)
+{
+#ifdef DEBUG
+    if (mod == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    while (mod->parent != NULL) {
+        mod = mod->parent;
+    }
+    return &mod->allincQ;
+
+}   /* ncx_get_allincQ */
 
 
 /* END file ncx.c */

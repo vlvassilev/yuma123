@@ -2120,7 +2120,7 @@ static status_t
                                         inc->revision,
                                         pcb, 
                                         YANG_PT_INCLUDE,
-                                        (mod->parent) ? mod->parent : mod,
+                                        realmod,
                                         &foundmod);
 
                 /* remove the node in the include chain that 
@@ -3404,32 +3404,8 @@ static status_t
         }
         break;
     case YANG_PT_INCLUDE:
-#if 0
-        // does not work because added at end, and some processing
-        // of submodules requires that the included submodule be found
-
-        /* create an entry in the allinc Q to cache this entry
-         * and keep only one copy for all includes of the same
-         * submodule
-         */
-        node = yang_new_node();
-        if (!node) {
-            retres = ERR_INTERNAL_MEM;
-            ncx_print_errormsg(tkc, mod, retres);
-        } else {
-            node->name = mod->name;
-            node->revision = mod->version;
-            node->mod = NULL;
-            node->submod = mod;
-            mod->allimpQ = NULL;
-            node->res = retres;
-            dlq_enque(node, 
-                      (mod->parent) ?
-                      &mod->parent->allincQ :
-                      &mod->allincQ);
-            *wasadded = TRUE;
-        }
-#endif
+        /* set to TRUE because module is live in the realmod allincQ */
+        *wasadded = TRUE;
         pcb->retmod = mod;
         break;
     default:
@@ -3738,6 +3714,7 @@ status_t
                 * or the pcb->top pointer is live and will be freed later
                 */
         } else {
+            /* module was added to registry or accounted for somehow */
             pcb->retmod = mod;
         }
     }

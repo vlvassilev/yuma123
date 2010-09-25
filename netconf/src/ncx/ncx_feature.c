@@ -653,7 +653,7 @@ ncx_feature_t *
         return feature;
     }
 
-    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
+    que = ncx_get_allincQ(mod);
 
     /* check all the submodules, but only the ones visible
      * to this module or submodule
@@ -760,7 +760,7 @@ ncx_feature_t *
         return feature;
     }
 
-    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
+    que = ncx_get_allincQ(mod);
 
     /* check all the submodules */
     for (node = (yang_node_t *)dlq_firstEntry(que);
@@ -826,7 +826,7 @@ void
         keepgoing = (*cbfn)(mod, feature, cookie);
     }   
         
-    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
+    que = ncx_get_const_allincQ(mod);
 
     /* check all the submodules, but only the ones visible
      * to this module or submodule
@@ -910,7 +910,7 @@ uint32
         count++;
     }   
         
-    que = (mod->parent) ? &mod->parent->allincQ : &mod->allincQ;
+    que = ncx_get_const_allincQ(mod);
 
     /* check all the submodules, but only the ones visible
      * to this module or submodule

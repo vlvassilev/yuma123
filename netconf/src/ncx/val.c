@@ -1152,6 +1152,9 @@ static status_t
 * instance at this time.
 *
 * INPUTS:
+*   scb == session control block getting the virtual value
+*          the scb->cache_timeout value will be used
+*          id scb is not NULL
 *   val == virtual value to get value for
 *   res == pointer to output function return status value
 *
@@ -1167,20 +1170,16 @@ static status_t
 *
 *********************************************************************/
 static val_value_t *
-    cache_virtual_value (val_value_t *val,
+    cache_virtual_value (ses_cb_t *scb,
+                         val_value_t *val,
                          status_t *res)
 {
     val_value_t *retval;
     getcb_fn_t   getcb;
     time_t       timenow;
-    double       timediff;
-
-#ifdef DEBUG
-    if (!val || !res) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return NULL;
-    }
-#endif
+    double       timediff, timerval;
+    uint32       deftimeout;
+    boolean      disable_cache;
 
     if (!val->getcb) {
         *res = ERR_NCX_OPERATION_FAILED;
@@ -1189,19 +1188,29 @@ static val_value_t *
 
     getcb = (getcb_fn_t)val->getcb;
 
-
     if (val->virtualval != NULL) {
         /* already have a value; check if it is fresh enough */
         (void)time(&timenow);
         timediff = difftime(timenow, val->cachetime);
 
-        if (LOGDEBUG3) {
-            log_debug3("\nval: virtual val timer %e", timediff);
+        disable_cache = FALSE;
+        if (scb != NULL) {
+            timerval = (double)scb->cache_timeout;
+            if (scb->cache_timeout == 0) {
+                disable_cache = TRUE;
+            }
+        } else {
+            deftimeout = ncx_get_vtimeout_value();
+            timerval = (double)deftimeout;
         }
 
-        if (timediff > (double)VAL_VIRTUAL_CACHE_TIME) {
-            if (LOGDEBUG3) {
-                log_debug3("\nval: refresh virtual val %s",
+        if (LOGDEBUG4) {
+            log_debug4("\nval: virtual val timer %e", timediff);
+        }
+
+        if (disable_cache || timediff > timerval) {
+            if (LOGDEBUG4) {
+                log_debug4("\nval: refresh virtual val %s",
                            val->name);
             }
             val_free_value(val->virtualval);
@@ -6085,7 +6094,7 @@ boolean
 
     if (val_is_virtual(startnode)) {
         res = NO_ERR;
-        useval = cache_virtual_value(startnode, &res);
+        useval = cache_virtual_value(NULL, startnode, &res);
         if (useval == NULL) {
             return FALSE;
         }
@@ -6260,7 +6269,7 @@ boolean
 
     if (val_is_virtual(startnode)) {
         res = NO_ERR;
-        useval = cache_virtual_value(startnode, &res);
+        useval = cache_virtual_value(NULL, startnode, &res);
         if (useval == NULL) {
             return res;
         }
@@ -6430,7 +6439,7 @@ boolean
 
         if (val_is_virtual(val)) {
             res = NO_ERR;
-            useval = cache_virtual_value(val, &res);
+            useval = cache_virtual_value(NULL, val, &res);
             if (useval == NULL) {
                 return res;
             }
@@ -6592,7 +6601,7 @@ boolean
 
         if (val_is_virtual(val)) {
             res = NO_ERR;
-            useval = cache_virtual_value(val, &res);
+            useval = cache_virtual_value(NULL, val, &res);
             if (useval == NULL) {
                 return FALSE;
             }
@@ -8505,6 +8514,9 @@ boolean
 * This will be returned if virtual value has no
 * instance at this time.
 *
+*  !!! DO NOT SAVE THE RETURN VALUE LONGER THAN THE 
+*  !!! VIRTUAL VALUE CACHE TIMEOUT VALUE
+*
 * INPUTS:
 *   session == session CB ptr cast as void *
 *              that is getting the virtual value
@@ -8512,55 +8524,39 @@ boolean
 *   res == pointer to output function return status value
 *
 * OUTPUTS:
+*    val->virtualval will be set with the cached return value
 *    *res == the function return status
 *
 * RETURNS:
 *   A malloced and filled in val_value_t struct
-*   The val_free_value function must be called if the
-*   return value is non-NULL
+*   This value is cached in the val->virtualval pointer
+*   and will be freed when the cache is replaced or when
+*   val is freed
 *********************************************************************/
 val_value_t *
     val_get_virtual_value (void *session,
-                           const val_value_t *val,
+                           val_value_t *val,
                            status_t *res)
 {
     ses_cb_t    *scb;
     val_value_t *retval;
-    getcb_fn_t   getcb;
 
 #ifdef DEBUG
     if (!val || !res) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
+    if (!val->getcb) {
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
 #endif
 
-    if (!val->getcb) {
-        *res = ERR_NCX_OPERATION_FAILED;
-        return NULL;
-    }
-
     scb = (ses_cb_t *)session;
-    getcb = (getcb_fn_t)val->getcb;
-
-    retval = val_new_value();
-    if (!retval) {
-        *res = ERR_INTERNAL_MEM;
-        return NULL;
-    }
-    setup_virtual_retval(val, retval);
-
-    *res = (*getcb)(scb, GETCB_GET_VALUE, val, retval);
-    if (*res != NO_ERR) {
-        val_free_value(retval);
-        retval = NULL;
-    }
-
+    retval = cache_virtual_value(scb, val, res);
     return retval;
 
 }  /* val_get_virtual_value */
-
-
 
 
 /********************************************************************

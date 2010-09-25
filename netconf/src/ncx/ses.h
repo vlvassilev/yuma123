@@ -281,6 +281,7 @@ typedef struct ses_cb_t_ {
     int32            indent;          /* indent N spaces (0..9) */
     uint32           linesize;              /* TERM line length */
     ncx_withdefaults_t  withdef;       /* with-defaults default */
+    uint32           cache_timeout;  /* vir-val cache tmr in sec */
 } ses_cb_t;
 
 

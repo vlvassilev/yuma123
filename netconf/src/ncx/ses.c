@@ -416,6 +416,7 @@ ses_cb_t *
     scb->linesize = SES_DEF_LINESIZE;
     scb->withdef = NCX_DEF_WITHDEF;
     scb->indent = NCX_DEF_INDENT;
+    scb->cache_timeout = NCX_DEF_VTIMEOUT;
     return scb;
 
 }  /* ses_new_scb */

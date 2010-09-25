@@ -2850,6 +2850,9 @@ extern boolean
 * This will be returned if virtual value has no
 * instance at this time.
 *
+*  !!! DO NOT SAVE THE RETURN VALUE LONGER THAN THE 
+*  !!! VIRTUAL VALUE CACHE TIMEOUT VALUE
+*
 * INPUTS:
 *   session == session CB ptr cast as void *
 *              that is getting the virtual value
@@ -2857,16 +2860,18 @@ extern boolean
 *   res == pointer to output function return status value
 *
 * OUTPUTS:
+*    val->virtualval will be set with the cached return value
 *    *res == the function return status
 *
 * RETURNS:
 *   A malloced and filled in val_value_t struct
-*   The val_free_value function must be called if the
-*   return value is non-NULL
+*   This value is cached in the val->virtualval pointer
+*   and will be freed when the cache is replaced or when
+*   val is freed
 *********************************************************************/
 extern val_value_t *
     val_get_virtual_value (void *session,  /* really ses_cb_t *   */
-			   const val_value_t *val,
+			   val_value_t *val,
 			   status_t *res);
 
 

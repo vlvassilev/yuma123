@@ -244,6 +244,12 @@ extern "C" {
 /* default indent amount for nesting XML output */
 #define NCX_DEF_INDENT  3
 
+/* default virtual value cache timeout value in seconds
+ * use 0 to disable the cache and refresh a virtual value
+ * every time is is retrieved (2 second default)
+ */
+#define NCX_DEF_VTIMEOUT  2
+
 /* Default startup config data file name */
 #define NCX_DEF_STARTUP_FILE  (const xmlChar *)"startup-cfg.xml"
 

@@ -1081,10 +1081,6 @@ static void
         SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    if (v_val) {
-        val_free_value(v_val);
-    }
-
     if (realval) {
         val_free_value(realval);
     }
@@ -1667,9 +1663,6 @@ void
     /* check the user filter callback function */
     if (testfn) {
         if (!(*testfn)(msg->withdef, TRUE, out)) {
-            if (vir) {
-                val_free_value(vir);
-            }
             return;   /* skip this entry: filtered */
         }
     }
@@ -1678,9 +1671,6 @@ void
         cbfn = (xml_msg_authfn_t)msg->acm_cbfn;
         acmtest = (*cbfn)(msg, scb->username, val);
         if (!acmtest) {
-            if (vir) {
-                val_free_value(vir);
-            }
             return;  /* skip this entry: access-denied */
         }
     }
@@ -1718,9 +1708,6 @@ void
 
     /* check if this is a false (not present) flag */
     if (out->btyp==NCX_BT_EMPTY && !VAL_BOOL(out)) {
-        if (vir) {
-            val_free_value(vir);
-        }
         if (realval) {
             val_free_value(realval);
         }
@@ -1769,9 +1756,6 @@ void
                        indent);
     }
 
-    if (vir) {
-        val_free_value(vir);
-    }
     if (realval) {
         val_free_value(realval);
     }

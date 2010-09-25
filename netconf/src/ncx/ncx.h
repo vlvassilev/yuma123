@@ -2596,6 +2596,18 @@ extern const dlq_hdr_t *
     ncx_get_const_allincQ (const ncx_module_t *mod);
 
 
+
+/********************************************************************
+* FUNCTION ncx_get_vtimeout_value
+*
+* Get the virtual node cache timeout value
+*
+* RETURNS:
+*   number of seconds for the cache timeout; 0 == disabled
+*********************************************************************/
+extern uint32
+    ncx_get_vtimeout_value (void);
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

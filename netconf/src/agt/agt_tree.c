@@ -348,6 +348,9 @@ static boolean
     uint32              binlen, retlen, testlen;
     ncx_num_t           num;
 
+    /* virtual values are cached in the real values so they do
+     * not have to be freed after use
+     */
     v_val = NULL;
 
     /* skip matches of any password object */
@@ -445,10 +448,6 @@ static boolean
     case NCX_BT_LIST:
     default:
         ;   /* test is automatically FALSE for these data types */
-    }
-
-    if (v_val) {
-        val_free_value(v_val);
     }
 
     return testres;

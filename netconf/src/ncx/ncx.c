@@ -7277,4 +7277,22 @@ const dlq_hdr_t *
 }   /* ncx_get_allincQ */
 
 
+
+/********************************************************************
+* FUNCTION ncx_get_vtimeout_value
+*
+* Get the virtual node cache timeout value
+*
+* RETURNS:
+*   number of seconds for the cache timeout; 0 == disabled
+*********************************************************************/
+uint32
+    ncx_get_vtimeout_value (void)
+{
+    /* TBD: make configurable */
+    return NCX_DEF_VTIMEOUT;
+
+}   /* ncx_get_vtimeout_value */
+
+
 /* END file ncx.c */

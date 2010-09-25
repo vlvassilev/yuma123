@@ -1128,7 +1128,7 @@ static boolean
                        void *cookie1,
                        void *cookie2)
 {
-    val_value_t              *useval, *newval;
+    val_value_t              *useval, *v_val;
     xpath_compwalkerparms_t  *parms;
     xmlChar                  *buffer;
     status_t                  res;
@@ -1142,17 +1142,17 @@ static boolean
         return TRUE;
     }
 
-    newval = NULL;
+    v_val = NULL;
     res = NO_ERR;
 
     if (val_is_virtual(val)) {
-        newval = val_get_virtual_value(NULL, val, &res);
-        if (newval == NULL) {
+        v_val = val_get_virtual_value(NULL, val, &res);
+        if (v_val == NULL) {
             parms->res = res;
             parms->cmpresult = FALSE;
             return FALSE;
         } else {
-            useval = newval;
+            useval = v_val;
         }
     } else {
         useval = val;
@@ -1177,9 +1177,6 @@ static boolean
         res = val_sprintf_simval_nc(NULL, useval, &cnt);
         if (res != NO_ERR) {
             parms->res = res;
-            if (newval != NULL) {
-                val_free_value(newval);
-            }
             return FALSE;
         }
 
@@ -1200,9 +1197,6 @@ static boolean
                 }
             } else {
                 parms->res = res;
-                if (newval != NULL) {
-                    val_free_value(newval);
-                }
                 return FALSE;
             }
         } else {
@@ -1216,9 +1210,6 @@ static boolean
             res = val_sprintf_simval_nc(buffer, useval, &cnt);
             if (res != NO_ERR) {
                 m__free(buffer);
-                if (newval) {
-                    val_free_value(newval);
-                }
                 parms->res = res;
                 return FALSE;
             }
@@ -1237,10 +1228,6 @@ static boolean
 
             m__free(buffer);
         }
-    }
-
-    if (newval != NULL) {
-        val_free_value(newval);
     }
 
     return !parms->cmpresult;
@@ -1326,9 +1313,6 @@ static boolean
         res = val_sprintf_simval_nc(NULL, useval, &cnt);
         if (res != NO_ERR) {
             parms->res = res;
-            if (newval) {
-                val_free_value(newval);
-            }
             return FALSE;
         }
 
@@ -1337,9 +1321,6 @@ static boolean
             res = val_sprintf_simval_nc(parms->buffer, useval, &cnt);
             if (res != NO_ERR) {
                 parms->res = res;
-                if (newval) {
-                    val_free_value(newval);
-                }
                 return FALSE;
             }
             comparestr = parms->buffer;
@@ -1348,9 +1329,6 @@ static boolean
             buffer = m__getMem(cnt+1);
             if (!buffer) {
                 parms->res = ERR_INTERNAL_MEM;
-                if (newval) {
-                    val_free_value(newval);
-                }
                 return FALSE;
             }
 
@@ -1358,9 +1336,6 @@ static boolean
             if (res != NO_ERR) {
                 m__free(buffer);
                 parms->res = res;
-                if (newval) {
-                    val_free_value(newval);
-                }
                 return FALSE;
             }
             comparestr = buffer;
@@ -1376,9 +1351,6 @@ static boolean
             m__free(buffer);
         }
         parms->res = ERR_INTERNAL_MEM;
-        if (newval) {
-            val_free_value(newval);
-        }
         return FALSE;
     }
     newparms.buffsize = TEMP_BUFFSIZE;
@@ -1427,10 +1399,6 @@ static boolean
 
     if (buffer != NULL) {
         m__free(buffer);
-    }
-
-    if (newval != NULL) {
-        val_free_value(newval);
     }
 
     m__free(newparms.buffer);
@@ -1593,10 +1561,6 @@ static boolean
             break;
         default:
             SET_ERROR(ERR_INTERNAL_VAL);
-        }
-
-        if (newval) {
-            val_free_value(newval);
         }
     }
 
@@ -2183,9 +2147,6 @@ static boolean
                            VAL_STR(useval));
             } else {
                 parms->res = ERR_BUFF_OVFL;
-                if (newval) {
-                    val_free_value(newval);
-                }
                 return FALSE;
             }
             parms->buffpos += cnt;
@@ -2197,9 +2158,6 @@ static boolean
         res = val_sprintf_simval_nc(NULL, useval, &cnt);
         if (res != NO_ERR) {
             parms->res = res;
-            if (newval) {
-                val_free_value(newval);
-            }
             return FALSE;
         }
         if (parms->buffer) {
@@ -2209,26 +2167,16 @@ static boolean
                     (&parms->buffer[parms->buffpos], useval, &cnt);
                 if (res != NO_ERR) {
                     parms->res = res;
-                    if (newval) {
-                        val_free_value(newval);
-                    }
                     return FALSE;
                 }
             } else {
                 parms->res = ERR_BUFF_OVFL;
-                if (newval) {
-                    val_free_value(newval);
-                }
                 return FALSE;
             }
             parms->buffpos += cnt;
         } else {
             parms->buffpos += (cnt+1);
         }
-    }
-
-    if (newval) {
-        val_free_value(newval);
     }
 
     return TRUE;
@@ -4875,7 +4823,7 @@ static status_t
 *********************************************************************/
 static xpath_result_t *
     cvt_from_value (xpath_pcb_t *pcb,
-                    const val_value_t *val)
+                    val_value_t *val)
 {
     xpath_result_t    *result;
     val_value_t       *newval;
@@ -4944,10 +4892,6 @@ static xpath_result_t *
                 }
             }
         }
-    }
-
-    if (newval) {
-        val_free_value(newval);
     }
 
     return result;

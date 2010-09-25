@@ -1958,10 +1958,6 @@ static status_t
         res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    if (v_val) {
-        val_free_value(v_val);
-    }
-
     return res;
 
 }  /* invoke_btype_cb */

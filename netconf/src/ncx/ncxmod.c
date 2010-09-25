@@ -3233,6 +3233,9 @@ status_t
 *   parent == pointer to module being parsed if this is a
 *     a request to parse a submodule; there is only 1 parent for 
 *     all submodules, based on the value of belongs-to
+*   retmod == address of return module
+* OUTPUTS:
+*  *retmod == pointer to found module (if NO_ERR)
 *
 * RETURNS:
 *   status
@@ -3242,7 +3245,8 @@ status_t
                          const xmlChar *revision,
                          yang_pcb_t *pcb,
                          yang_parsetype_t ptyp,
-                         ncx_module_t *parent)
+                         ncx_module_t *parent,
+                         ncx_module_t **retmod)
 {
     yang_node_t     *node;
     const xmlChar   *savedrev;
@@ -3254,6 +3258,11 @@ status_t
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
+
+    /* check if return module is requested */
+    if (retmod != NULL) {
+        *retmod = NULL;
+    }
 
     /* see if [sub]module already tried and failed */
     node = yang_find_node(&pcb->failedQ, modname, revision);
@@ -3272,7 +3281,7 @@ status_t
                           ptyp,
                           modname,
                           revision,
-                          NULL);
+                          retmod);
 
     pcb->revision = savedrev;
     pcb->importmode = savedimportmode;

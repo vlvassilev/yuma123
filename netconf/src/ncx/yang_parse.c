@@ -1737,6 +1737,7 @@ static status_t
                                               imp->revision,
                                               pcb, 
                                               YANG_PT_IMPORT,
+                                              NULL,
                                               NULL);
                 } else if (LOGDEBUG) {
                     log_debug("\nSkipping import of ietf-netconf, "
@@ -1815,6 +1816,7 @@ static status_t
     const xmlChar  *val;
     yang_node_t    *node, *testnode;
     dlq_hdr_t      *allQ, *chainQ;
+    ncx_module_t   *foundmod;
     tk_type_t       tktyp;
     status_t        res, retres;
     boolean         done, revdone;
@@ -2108,13 +2110,16 @@ static status_t
             if (!testnode) {
                 dlq_enque(node, chainQ);
 
+                foundmod = NULL;
+
                 /* load the module now instead of later for validation */
                 retres = 
                     ncxmod_load_imodule(inc->submodule, 
                                         inc->revision,
                                         pcb, 
                                         YANG_PT_INCLUDE,
-                                        (mod->parent) ? mod->parent : mod);
+                                        (mod->parent) ? mod->parent : mod,
+                                        &foundmod);
 
                 /* remove the node in the include chain that 
                  * was added before the submodule was loaded
@@ -2122,7 +2127,18 @@ static status_t
                 node = (yang_node_t *)dlq_lastEntry(chainQ);
                 if (node) {
                     dlq_remove(node);
-                    yang_free_node(node);
+
+                    /* save this node in the mod->allincQ now
+                     * because it may be needed while body-stmts
+                     * are being processed and nodes are searched
+                     */
+                    node->submod = foundmod;
+                    node->res = retres;
+
+                    dlq_enque(node,
+                              (mod->parent) ?
+                              &mod->parent->allincQ :
+                              &mod->allincQ);
                 } else {
                     SET_ERROR(ERR_INTERNAL_VAL);
                 }
@@ -3390,6 +3406,10 @@ static status_t
         }
         break;
     case YANG_PT_INCLUDE:
+#if 0
+        // does not work because added at end, and some processing
+        // of submodules requires that the included submodule be found
+
         /* create an entry in the allinc Q to cache this entry
          * and keep only one copy for all includes of the same
          * submodule
@@ -3411,6 +3431,8 @@ static status_t
                       &mod->allincQ);
             *wasadded = TRUE;
         }
+#endif
+        pcb->retmod = mod;
         break;
     default:
         retres = SET_ERROR(ERR_INTERNAL_VAL);

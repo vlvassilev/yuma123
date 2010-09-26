@@ -3113,8 +3113,7 @@ status_t
 
     m__free(buff);
 
-    return res;
-
+    return NO_ERR;  /* ignore any module errors found */
 }  /* ncxmod_find_all_modules */
 
 

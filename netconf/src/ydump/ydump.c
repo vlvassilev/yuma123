@@ -1376,13 +1376,14 @@ static status_t
     uint32             modlen;
 
     scb = NULL;
-    res = NO_ERR;
+    mainmod = NULL;
     revision = NULL;
     savestr = NULL;
     savechar = '\0';
     bannerdone = FALSE;
     modlen = 0;
     modname = (xmlChar *)cp->curmodule;
+    res = NO_ERR;
 
     if (yang_split_filename(modname, &modlen)) {
         savestr = &modname[modlen];

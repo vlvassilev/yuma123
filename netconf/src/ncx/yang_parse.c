@@ -693,8 +693,8 @@ static status_t
             log_error("\nError: feature '%s' already defined "
                       "in '%s' at line %u", 
                       feature->name,
-                      feature->tkerr.mod->name,
-                      feature->tkerr.linenum);
+                      testfeature->tkerr.mod->name,
+                      testfeature->tkerr.linenum);
             ncx_print_errormsg(tkc, mod, retres);
         }
 
@@ -1055,8 +1055,8 @@ static status_t
             log_error("\nError: identity '%s' already defined "
                       "in %s at line %u", 
                       identity->name,
-                      identity->tkerr.mod->name,
-                      identity->tkerr.linenum);
+                      testidentity->tkerr.mod->name,
+                      testidentity->tkerr.linenum);
             ncx_print_errormsg(tkc, mod, retres);
         }
         identity->res = retres;
@@ -3406,7 +3406,6 @@ static status_t
     case YANG_PT_INCLUDE:
         /* set to TRUE because module is live in the realmod allincQ */
         *wasadded = TRUE;
-        pcb->retmod = mod;
         break;
     default:
         retres = SET_ERROR(ERR_INTERNAL_VAL);
@@ -3610,19 +3609,20 @@ status_t
     if (res == NO_ERR) {
         res = parse_yang_module(tkc, mod, pcb, ptyp, &wasadd);
 
-        if (pcb->top == mod && wasadd) {
-            pcb->topadded = TRUE;
+        if (pcb->top == mod) {
+            pcb->topadded = wasadd;
             pcb->retmod = NULL;
-        } else if (res == NO_ERR) {
-            pcb->retmod = mod;
         } else {
-            pcb->retmod = NULL;
+            pcb->retmod = mod;
         }
 
         if (res != NO_ERR) {
             /* cleanup in all modes if there was an error */
-            if (!wasadd) {
-                /* module was not added to registry so it is live */
+            if (!wasadd && !pcb->keepmode) {
+                /* module was not added to registry so it is live
+                 * this will be skipped for an include file
+                 * because wasadd is always set to TRUE for submods
+                 */
                 if (pcb->top == mod) {
                     /* make sure top is not pointing at garbage */
                     pcb->top = NULL;
@@ -3631,7 +3631,10 @@ status_t
 
                 /* free the parsed module here */
                 ncx_free_module(mod);
-            } /* else the module will be freed in ncx_cleanup */
+                mod = NULL;
+            } /* else the module will be freed in ncx_cleanup 
+               * or ncx_free_module for a submodule
+               */
         } else if (pcb->deviationmode) {
             /* toss the module even if NO_ERR, not needed since
              * the savedevQ contains the deviations and annotations
@@ -3641,6 +3644,7 @@ status_t
             }
             pcb->retmod = NULL;
             ncx_free_module(mod);
+            mod = NULL;
         } else if (!wasadd) {
             /* module was not added to the registry which means
              * it was already there or it is a submodule;
@@ -3656,10 +3660,9 @@ status_t
                 }
                 pcb->retmod = NULL;
                 ncx_free_module(mod);
-            } else if (!(pcb->diffmode || 
-                         pcb->searchmode ||
-                         pcb->deviationmode)) {
-                /* do not swap out diffmode, searchmode, or deviationmode;
+                mod = NULL;
+            } else if (!(pcb->diffmode || pcb->searchmode)) {
+                /* do not swap out diffmode or searchmode
                  * for all other modes, check if the new module should
                  * be returned or a different module for the yuma-netconf
                  * hack
@@ -3678,6 +3681,7 @@ status_t
                             /* swap with the real module already done */
                             pcb->top = ncx_find_module(mod->name,
                                                        mod->version);
+                            pcb->retmod = NULL;
                         } else {
                             keepmod = TRUE;
                         }

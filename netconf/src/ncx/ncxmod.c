@@ -1945,8 +1945,9 @@ static status_t
      * skip if this is yangdump converting a YANG file to a YIN file
      * of yangcli_autoload parsing a server module 
      */
-    if (!((pcb->savetkc && pcb->tkc == NULL) || pcb->parsemode)) {
-
+    if ((ptyp != YANG_PT_INCLUDE) &&
+        !pcb->parsemode &&
+        !(pcb->savetkc && pcb->tkc == NULL)) {
 
         testmod = ncx_find_module(modname, revision);
         if (testmod) {
@@ -2116,7 +2117,7 @@ static status_t
     m__free(buff);
 
     if (done) {
-        if (res == NO_ERR) {
+        if (res == NO_ERR || ptyp == YANG_PT_INCLUDE) {
             if (retmod) {
                 if (pcb->retmod != NULL) {
                     *retmod = pcb->retmod;

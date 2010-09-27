@@ -456,6 +456,13 @@ static void
     ncx_identity_t *identity;
     yang_stmt_t    *stmt;
 
+    if (LOGDEBUG3) {
+        log_debug3("\nncx_freemod: %p (%s) %d", 
+                   mod, 
+                   mod->name, 
+                   mod->ismod);
+    }
+
     /* clear the revision Q */
     while (!dlq_empty(&mod->revhistQ)) {
         revhist = (ncx_revhist_t *)dlq_deque(&mod->revhistQ);
@@ -1222,6 +1229,10 @@ ncx_module_t *
     mod = m__getObj(ncx_module_t);
     if (!mod) {
         return NULL;
+    }
+
+    if (LOGDEBUG3) {
+        log_debug3("\nncx_newmod: %p", mod);
     }
 
     (void)memset(mod, 0x0, sizeof(ncx_module_t));

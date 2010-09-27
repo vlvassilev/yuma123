@@ -315,7 +315,7 @@ static status_t
 
     /* First find or load the module if it has not already been tried */
     if (imp->res != NO_ERR) {
-        return res;
+        return imp->res;
     }
 
     if (!imp->mod) {

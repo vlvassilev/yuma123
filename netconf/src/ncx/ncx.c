@@ -313,7 +313,11 @@ static status_t
 
     retres = NO_ERR;
 
-    /* First find or load the module */
+    /* First find or load the module if it has not already been tried */
+    if (imp->res != NO_ERR) {
+        return res;
+    }
+
     if (!imp->mod) {
         imp->mod = ncx_find_module(imp->module, imp->revision);
     }

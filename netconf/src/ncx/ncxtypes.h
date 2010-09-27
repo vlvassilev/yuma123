@@ -695,6 +695,7 @@ typedef struct ncx_import_t_ {
     boolean             force_yuma_nc;  /* HACK: TRUE is yuma-nc replacing ietf-nc */
     dlq_hdr_t           appinfoQ;
     ncx_error_t         tkerr;
+    status_t            res;           /* set to NO_ERR if the import was parsed OK */
 } ncx_import_t;
 
 

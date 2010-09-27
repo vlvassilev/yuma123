@@ -1739,6 +1739,8 @@ static status_t
                                               YANG_PT_IMPORT,
                                               NULL,
                                               NULL);
+                    /* save the status to prevent retrying this module */
+                    imp->res = res;
                 } else if (LOGDEBUG) {
                     log_debug("\nSkipping import of ietf-netconf, "
                               "using yuma-netconf instead");
@@ -3057,6 +3059,7 @@ static status_t
                       "should be submodule", mod->name);
             retres = ERR_NCX_EXP_SUBMODULE;
             ncx_print_errormsg(tkc, mod, retres);
+            return retres;
         }
         break;
     case YANG_PT_IMPORT:
@@ -3065,6 +3068,7 @@ static status_t
                       "should be module", mod->name);
             retres = ERR_NCX_EXP_MODULE;
             ncx_print_errormsg(tkc, mod, retres);
+            return retres;
         }
         break;
     default:
@@ -3618,7 +3622,20 @@ status_t
 
         if (res != NO_ERR) {
             /* cleanup in all modes if there was an error */
-            if (!wasadd && !pcb->keepmode) {
+            if (pcb->retmod != NULL) {
+                /* got a submodule or import module that is not top 
+                 * make sure this does not end up in the wrong Q
+                 * and get freed incorrectly if import/include mismatch
+                 */
+                if ((ptyp == YANG_PT_IMPORT && !mod->ismod) ||
+                    (ptyp == YANG_PT_INCLUDE && mod->ismod)) {
+                    pcb->retmod = NULL;
+                    ncx_free_module(mod);
+                    mod = NULL;
+                }
+            } 
+
+            if (mod != NULL && !wasadd && !pcb->keepmode) {
                 /* module was not added to registry so it is live
                  * this will be skipped for an include file
                  * because wasadd is always set to TRUE for submods
@@ -3687,9 +3704,11 @@ status_t
                         }
                     }
                 } else {
-                    /* this is a submodule */
-                    if (pcb->keepmode) {
-                        keepmod = TRUE;
+                    /* this is a submodule, make sure it was included */
+                    if (ptyp != YANG_PT_IMPORT) {
+                        if (pcb->keepmode) {
+                            keepmod = TRUE;
+                        }
                     }
 
                     if (!pcb->with_submods) {

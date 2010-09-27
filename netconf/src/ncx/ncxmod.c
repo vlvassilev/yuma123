@@ -2116,14 +2116,16 @@ static status_t
     m__free(buff);
 
     if (done) {
-        if (retmod) {
-            if (pcb->retmod != NULL) {
-                *retmod = pcb->retmod;
-            } else {
-                *retmod = pcb->top;
+        if (res == NO_ERR) {
+            if (retmod) {
+                if (pcb->retmod != NULL) {
+                    *retmod = pcb->retmod;
+                } else {
+                    *retmod = pcb->top;
+                }
             }
         }
-        return NO_ERR;
+        return res;
     } else {
         return (res == NO_ERR) ? ERR_NCX_MOD_NOT_FOUND : res;
     }

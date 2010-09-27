@@ -1533,7 +1533,7 @@ static status_t
     }
 
     /* should be ready to convert the requested [sub]module now */
-    if (res == NO_ERR) {
+    if (res == NO_ERR && pcb->top) {
         /* check the type of translation requested */
         switch (cp->format) {
         case NCX_CVTTYP_NONE:

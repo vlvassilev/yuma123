@@ -3380,7 +3380,7 @@ static status_t
             }
             
             /* add this regular module to the registry */
-            if (!loaded) {
+            if (!loaded && retres == NO_ERR) {
                 if (ietfnetconf) {
                     res = NO_ERR;
                 } else if (pcb->diffmode || pcb->parsemode) {
@@ -3609,9 +3609,16 @@ status_t
 
     if (res == NO_ERR) {
         res = parse_yang_module(tkc, mod, pcb, ptyp, &wasadd);
+
         if (pcb->top == mod && wasadd) {
             pcb->topadded = TRUE;
+            pcb->retmod = NULL;
+        } else if (res == NO_ERR) {
+            pcb->retmod = mod;
+        } else {
+            pcb->retmod = NULL;
         }
+
         if (res != NO_ERR) {
             /* cleanup in all modes if there was an error */
             if (!wasadd) {
@@ -3620,9 +3627,8 @@ status_t
                     /* make sure top is not pointing at garbage */
                     pcb->top = NULL;
                 }
-                if (pcb->retmod == mod) {
-                    pcb->retmod = NULL;
-                }
+                pcb->retmod = NULL;
+
                 /* free the parsed module here */
                 ncx_free_module(mod);
             } /* else the module will be freed in ncx_cleanup */
@@ -3633,9 +3639,7 @@ status_t
             if (pcb->top == mod) {
                 pcb->top = NULL;
             }
-            if (pcb->retmod == mod) {
-                pcb->retmod = NULL;
-            }
+            pcb->retmod = NULL;
             ncx_free_module(mod);
         } else if (!wasadd) {
             /* module was not added to the registry which means
@@ -3650,9 +3654,7 @@ status_t
                 if (pcb->top == mod) {
                     pcb->top = NULL;
                 }
-                if (pcb->retmod == mod) {
-                    pcb->retmod = NULL;
-                }
+                pcb->retmod = NULL;
                 ncx_free_module(mod);
             } else if (!(pcb->diffmode || 
                          pcb->searchmode ||
@@ -3694,19 +3696,20 @@ status_t
                          * module with the real one
                          */
                         if (!pcb->keepmode && pcb->top == mod) {
+
+                            /*  !!!! leave this out now !!!
                             pcb->top = ncx_find_module(mod->belongs,
                                                        mod->version);
                             pcb->retmod = mod;
+                            */
+                            pcb->retmod = NULL;
                         }
                     } else if (pcb->top == mod) {
                         /* don't care about submods in this mode so clear
                          * the top pointer so it won't be used
                          */
-                        if (pcb->retmod == mod) {
-                            pcb->retmod = NULL;
-                        }
+                        pcb->retmod = NULL;
                         pcb->top = NULL;
-                        
                     }
                 }
                 if (!pcb->top && !pcb->with_submods) {
@@ -3726,9 +3729,6 @@ status_t
             }  /* else the module went into an alternate mod Q 
                 * or the pcb->top pointer is live and will be freed later
                 */
-        } else {
-            /* module was added to registry or accounted for somehow */
-            pcb->retmod = mod;
         }
     }
 

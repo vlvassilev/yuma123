@@ -607,6 +607,12 @@ static status_t
      */
     while (*str == '/') {
         str++;
+
+        /* check for trailing '/' */
+        if (*str == '\0') {
+            continue;
+        }
+
         /* get the next QName (prefix, name) */
         res = next_nodeid(tkc, mod, obj, str, &prefix, &name, &len);
         if (res != NO_ERR) {

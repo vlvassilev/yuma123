@@ -1289,19 +1289,10 @@ static status_t
 static void
     print_score_banner (yang_pcb_t *pcb)
 {
-    const xmlChar       *logsource;
-    uint32               errors, warnings;
-
-    errors = pcb->top->errors;
-    warnings = pcb->top->warnings;
-    
-    logsource = (LOGINFO) 
-        ? pcb->top->source : pcb->top->sourcefn;
-
     log_write("\n*** %s\n*** %u Errors, %u Warnings\n", 
-              logsource, 
-              errors, 
-              warnings);
+              pcb->top->source, 
+              pcb->top->errors, 
+              pcb->top->warnings);
 
 }   /* print_score_banner */
 

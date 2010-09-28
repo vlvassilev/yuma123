@@ -2431,6 +2431,13 @@ static void
                          &namespacestr);
 
         if (namespacestr == NULL) {
+            /* try the entire base part of the URI if there was
+             * no module capability parsed
+             */
+            namespacestr = cap->cap_uri;
+        }
+
+        if (namespacestr == NULL) {
             if (ncx_warning_enabled(ERR_NCX_RCV_INVALID_MODCAP)) {
                 log_warn("\nWarning: skipping enterprise capability "
                          "for URI '%s'", 

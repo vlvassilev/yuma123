@@ -5582,6 +5582,8 @@ ncxmod_search_result_t *
                                const xmlChar *nsuri)
 {
     ncxmod_search_result_t *sr;
+    const xmlChar          *str;
+    uint32                 nslen;
 
 #ifdef DEBUG
     if (searchQ == NULL) {
@@ -5607,13 +5609,22 @@ ncxmod_search_result_t *
             }
             return sr;
         } else if (nsuri) {
+            str = nsuri;
+            while (*str && *str != '?') {
+                str++;
+            }
+            nslen = (uint32)(str - nsuri);
+            if (nslen == 0) {
+                continue;
+            }
+
             if (sr->namespacestr == NULL || sr->nslen == 0) {
                 continue;
             }
-            if (xml_strlen(nsuri) != sr->nslen) {
+            if (nslen != sr->nslen) {
                 continue;
             }
-            if (xml_strncmp(sr->namespacestr, nsuri, sr->nslen)) {
+            if (xml_strncmp(sr->namespacestr, nsuri, nslen)) {
                 continue;
             }
             return sr;

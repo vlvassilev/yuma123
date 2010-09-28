@@ -181,10 +181,16 @@ static status_t
         if (res == ERR_NCX_SKIPPED) {
             res = cap_add_module_string(&mscb->caplist, VAL_STR(cap));
             if (res == ERR_NCX_SKIPPED) {
-                if (ncx_warning_enabled(ERR_NCX_RCV_UNKNOWN_CAP)) {
-                    log_warn("\nWarning: received unknown capability '%s'",
-                             VAL_STR(cap));
+                /* 
+                 * if (ncx_warning_enabled(ERR_NCX_RCV_UNKNOWN_CAP)) {
+                 *    log_warn("\nWarning: received unknown capability '%s'",
+                 *             VAL_STR(cap));
+                 * }
+                 */
+                if (LOGDEBUG2) {
+                    log_debug2("\nmgr: Got enterprise capability %s", VAL_STR(cap));
                 }
+
                 res = cap_add_ent(&mscb->caplist, VAL_STR(cap));
                 if (res != NO_ERR) {
                     return res;

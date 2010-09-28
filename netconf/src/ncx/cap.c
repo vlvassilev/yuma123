@@ -1872,8 +1872,6 @@ void
 cap_rec_t *
     cap_first_modcap (cap_list_t *caplist)
 {
-    cap_rec_t *cap;
-
 #ifdef DEBUG
     if (!caplist) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -1881,16 +1879,7 @@ cap_rec_t *
     }
 #endif
 
-    for (cap = (cap_rec_t *)dlq_firstEntry(&caplist->capQ);
-         cap != NULL;
-         cap = (cap_rec_t *)dlq_nextEntry(cap)) {
-
-        if (cap->cap_subject != CAP_SUBJTYP_DM) {
-            continue;
-        }
-        return cap;
-    }
-    return NULL;
+    return (cap_rec_t *)dlq_firstEntry(&caplist->capQ);
 
 } /* cap_first_modcap */
 
@@ -1910,8 +1899,6 @@ cap_rec_t *
 cap_rec_t *
     cap_next_modcap (cap_rec_t *curcap)
 {
-    cap_rec_t *cap;
-
 #ifdef DEBUG
     if (!curcap) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -1919,16 +1906,7 @@ cap_rec_t *
     }
 #endif
 
-    for (cap = (cap_rec_t *)dlq_nextEntry(curcap);
-         cap != NULL;
-         cap = (cap_rec_t *)dlq_nextEntry(cap)) {
-
-        if (cap->cap_subject != CAP_SUBJTYP_DM) {
-            continue;
-        }
-        return cap;
-    }
-    return NULL;
+    return (cap_rec_t *)dlq_nextEntry(curcap);
 
 } /* cap_next_modcap */
 

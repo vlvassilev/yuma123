@@ -3091,7 +3091,7 @@ static status_t
      * so all namespace assignments in XPath
      * expressions will be valid when first parsed
      */
-    if (!(pcb->deviationmode || pcb->diffmode)) {
+    if (!(pcb->deviationmode || pcb->diffmode || pcb->searchmode)) {
         /* add real or temp module NS to the registry */
         res = ncx_add_namespace_to_registry(mod, 
                                             pcb->parsemode);

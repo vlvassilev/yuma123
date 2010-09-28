@@ -2473,7 +2473,7 @@ static void
         mod = ncx_find_module(module, revision);
         if (mod != NULL) {
             /* make sure that the namespace URIs match */
-            if (xml_strcmp(mod->ns, namespacestr)) {
+            if (ncx_compare_base_uris(mod->ns, namespacestr)) {
                 /* !!! need a warning number for suppression */
                 log_warn("\nWarning: module namespace URI mismatch:"
                          "\n   module:    '%s'"
@@ -2512,8 +2512,8 @@ static void
                          * check if the namespace also matches
                          */
                         if (searchresult->namespacestr) {
-                            if (xml_strcmp(searchresult->namespacestr,
-                                           namespacestr)) {
+                            if (ncx_compare_base_uris(searchresult->namespacestr,
+                                                      namespacestr)) {
                                 /* cannot use this local file because
                                  * it has a different namespace
                                  * !!! need a warning number for suppression 

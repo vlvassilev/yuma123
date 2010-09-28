@@ -2608,6 +2608,24 @@ extern const dlq_hdr_t *
 extern uint32
     ncx_get_vtimeout_value (void);
 
+
+/********************************************************************
+* FUNCTION ncx_compare_base_uris
+*
+* Compare the base part of 2 URI strings
+*
+* INPUTS:
+*    str1 == URI string 1
+*    str2 == URI string 2
+*
+* RETURNS:
+*   compare of base parts (up to '?')
+*   -1, 0 or 1
+*********************************************************************/
+extern int32
+    ncx_compare_base_uris (const xmlChar *str1,
+                           const xmlChar *str2);
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

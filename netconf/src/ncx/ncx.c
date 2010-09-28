@@ -7310,4 +7310,56 @@ uint32
 }   /* ncx_get_vtimeout_value */
 
 
+/********************************************************************
+* FUNCTION ncx_compare_base_uris
+*
+* Compare the base part of 2 URI strings
+*
+* INPUTS:
+*    str1 == URI string 1
+*    str2 == URI string 2
+*
+* RETURNS:
+*   compare of base parts (up to '?')
+*   -1, 0 or 1
+*********************************************************************/
+int32
+    ncx_compare_base_uris (const xmlChar *str1,
+                           const xmlChar *str2)
+{ 
+    const xmlChar *s;
+    uint32  len1, len2; 
+
+#ifdef DEBUG
+    if (str1 == NULL || str2 == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return -1;
+    }
+#endif
+
+    s = str1;
+    while (*s && *s != '?') {
+        s++;
+    }
+    len1 = (uint32)(s - str1);
+
+    s = str2;
+    while (*s && *s != '?') {
+        s++;
+    }
+    len2 = (uint32)(s - str2);
+
+    if (len1 != len2) {
+        return (len1 > len2) ? 1 : -1;
+    }
+
+    if (len1 == 0) {
+        return 0;
+    }
+
+    return xml_strncmp(str1, str2, len1);
+
+}   /* ncx_compare_base_uris */
+
+
 /* END file ncx.c */

@@ -645,6 +645,22 @@ extern const xmlChar *
     ncx_get_modname (const ncx_module_t *mod);
 
 
+
+/********************************************************************
+* FUNCTION ncx_get_mod_nsid
+* 
+* Get the main module namespace ID
+* 
+* INPUTS:
+*   mod == module or submodule to get main module namespace ID
+*
+* RETURNS:
+*   namespace id number
+*********************************************************************/
+extern xmlns_id_t
+    ncx_get_mod_nsid (const ncx_module_t *mod);
+
+
 /********************************************************************
 * FUNCTION ncx_get_modversion
 * 

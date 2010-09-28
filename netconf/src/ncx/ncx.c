@@ -2607,6 +2607,34 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION ncx_get_mod_nsid
+* 
+* Get the main module namespace ID
+* 
+* INPUTS:
+*   mod == module or submodule to get main module namespace ID
+*
+* RETURNS:
+*   namespace id number
+*********************************************************************/
+xmlns_id_t
+    ncx_get_mod_nsid (const ncx_module_t *mod)
+{
+#ifdef DEBUG
+    if (!mod) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return 0;
+    }
+#endif
+    while (mod->parent != NULL) {
+        mod = mod->parent;
+    }
+    return mod->nsid;
+
+}  /* ncx_get_mod_nsid */
+
+
+/********************************************************************
 * FUNCTION ncx_get_modversion
 * 
 * Get the [sub]module version

@@ -739,6 +739,7 @@ xmlChar *
             log_info("\nScript '%s' canceled", se->source);
         }
         done = TRUE;
+        *res = ERR_NCX_CANCELED;
         if (rcxt->script_level <= 1) {
             rcxt->script_cancel = FALSE;
         }
@@ -802,7 +803,7 @@ xmlChar *
         }
                 
         /* check first line or line continuation in progress */
-        if (!retstr) {
+        if (retstr == NULL) {
             /* retstr not set yet, allowed to have a comment line here */
             if (*str == '#') {
                 /* got a comment, try for another line */
@@ -829,7 +830,7 @@ xmlChar *
         }
     }
 
-    if (!retstr) {
+    if (retstr == NULL) {
         runstack_pop(rcxt);
     } else if (LOGDEBUG) {
         log_debug("\nrunstack: run line %u, %s\n cmd: %s",

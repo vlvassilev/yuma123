@@ -3547,7 +3547,7 @@ static status_t
                 keyval = val_find_child(curnode,
                                         obj_get_mod_name(curkey->keyobj),
                                         obj_get_name(curkey->keyobj));
-                if (!keyval && dofill) {
+                if (keyval == NULL && dofill) {
                     res = get_parm(server_cb, 
                                    rpc, 
                                    curkey->keyobj, 
@@ -3707,7 +3707,7 @@ static status_t
     req = NULL;
     reqdata = NULL;
     res = NO_ERR;
-    dofill = FALSE;
+    dofill = TRUE;
 
     /* either going to free valroot or config_content */
     if (valroot == NULL || valroot == config_content) {

@@ -7755,13 +7755,19 @@ xmlns_id_t
     obj_get_nsid (const obj_template_t  *obj)
 {
 #ifdef DEBUG
-    if (!obj || !obj->tkerr.mod) {
+    if (!obj) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return 0;
     }
 #endif
 
-    return obj->nsid;
+    if (obj->nsid != 0) {
+        return obj->nsid;
+    } else if (obj->tkerr.mod) {
+        return ncx_get_mod_nsid(obj->tkerr.mod);
+    } else {
+        return 0;
+    }
 
 }  /* obj_get_nsid */
 

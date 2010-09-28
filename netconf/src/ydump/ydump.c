@@ -1404,16 +1404,21 @@ static status_t
     } else if (res != NO_ERR) {
         if (pcb && pcb->top) {
             print_score_banner(pcb);
+        } else if (res == ERR_NCX_MOD_NOT_FOUND) {
+            log_error("\nError: [sub]module '%s' not found\n",
+                      modname);
         } else if (LOGDEBUG2) {
             /* invalid module name and/or revision date */
             if (revision) {
                 log_debug2("\n[sub]module '%s' revision '%s' "
-                          "not loaded", modname, revision);
+                          "not loaded", 
+                           modname, 
+                           revision);
             } else {
-                log_debug2("\n[sub]module '%s' not loaded",
-                          modname);
+                log_debug2("\n[sub]module '%s' not loaded", 
+                           modname);
             }
-            log_debug2(" (%s)", get_error_string(res));
+            log_debug2(" (%s)\n", get_error_string(res));
         }
         if (!pcb || !pcb->top || pcb->top->errors) {
             if (pcb) {
@@ -2053,9 +2058,15 @@ status_t
              */
 	    cvtparms->subtree = (const char *)VAL_STR(val);
 
-	    res = ncxmod_process_subtree(cvtparms->subtree,
-					 subtree_callback,
-					 cvtparms);
+            if (ncxmod_test_subdir((const xmlChar *)cvtparms->subtree)) {
+                res = ncxmod_process_subtree(cvtparms->subtree,
+                                             subtree_callback,
+                                             cvtparms);
+            } else {
+                res = ERR_NCX_NOT_FOUND;
+                log_error("\nError: directory '%s' not found\n",
+                          cvtparms->subtree);
+            }
 	    if (NEED_EXIT(res)) {
 		val = NULL;
 	    } else {

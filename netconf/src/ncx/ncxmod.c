@@ -1946,13 +1946,13 @@ static status_t
      * of yangcli_autoload parsing a server module 
      */
     if ((ptyp != YANG_PT_INCLUDE) &&
-        !pcb->parsemode &&
+        !(pcb->parsemode && ptyp == YANG_PT_TOP) &&
         !(pcb->savetkc && pcb->tkc == NULL)) {
 
         testmod = ncx_find_module(modname, revision);
         if (testmod) {
             if (LOGDEBUG2) {
-                log_debug2("\nncxmod: module %s already loaded", 
+                log_debug2("\nncxmod: Using module '%s' already loaded", 
                            modname);
             }
             if (!pcb->top) {
@@ -1971,8 +1971,8 @@ static status_t
                 if (testmod) {
                     /* use yuma-netconf instead of ietf-netconf */
                     if (LOGDEBUG) {
-                        log_debug("\nncxmod: cannot load ietf-netconf; "
-                                  "yuma-netconf already loaded");
+                        log_debug("\nncxmod: cannot load 'ietf-netconf'; "
+                                  "'yuma-netconf' already loaded");
                     }
                     if (!pcb->top) {
                         pcb->top = testmod;

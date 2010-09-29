@@ -2111,7 +2111,7 @@ static status_t
             testnode = yang_find_node(allQ,
                                       inc->submodule,
                                       inc->revision);
-            if (!testnode) {
+            if (testnode == NULL) {
                 dlq_enque(node, chainQ);
 
                 foundmod = NULL;
@@ -2139,10 +2139,14 @@ static status_t
                     node->submod = foundmod;
                     node->res = retres;
                     dlq_enque(node, allQ);
+
+                    /* save a back-ptr in the include directive as well */
+                    inc->submod = foundmod;
                 } else {
                     SET_ERROR(ERR_INTERNAL_VAL);
                 }
             } else {
+                inc->submod = testnode->submod;
                 yang_free_node(node);
             }
         }

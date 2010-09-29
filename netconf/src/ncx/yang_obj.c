@@ -9096,6 +9096,15 @@ static status_t
          testobj != NULL;
          testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
 
+        /* check corner case -- submodules augmenting other
+         * submodules; only evaluate in the context of the
+         * submodule that defined the objects (augmentor, 
+         * not augmentee)
+         */
+        if (testobj->tkerr.mod != mod) {
+            continue;
+        }
+
         /* check the when-stmt in the object itself 
          * check uses and augment since they can have
          * their own when statements

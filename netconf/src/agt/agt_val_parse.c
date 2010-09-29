@@ -1455,6 +1455,7 @@ static status_t
     }
 
     if (empty) {
+        xml_clean_node(&valnode);
         return NO_ERR;
     }
 

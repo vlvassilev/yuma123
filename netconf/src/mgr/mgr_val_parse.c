@@ -986,13 +986,9 @@ static status_t
         }
     }
 
-    if (res != NO_ERR) {
+    if (res != NO_ERR || empty) {
         xml_clean_node(&valnode);
         return res;
-    }
-
-    if (empty) {
-        return NO_ERR;
     }
 
 #ifdef MGR_VAL_PARSE_DEBUG

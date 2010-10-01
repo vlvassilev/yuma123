@@ -5652,89 +5652,6 @@ static status_t
 
 
 /********************************************************************
-* FUNCTION resolve_list
-* 
-* Check the list object type
-
-* Error messages are printed by this function!!
-* Do not duplicate error messages upon error return
-*
-* INPUTS:
-*   pcb == parser control block to use
-*   tkc == token chain
-*   mod == module in progress
-*   list == obj_list_t to check
-*   obj == parent object for 'list'
-*   redo == TRUE if this is a 2nd pass due to deviations added
-*
-* RETURNS:
-*   status of the operation
-*********************************************************************/
-static status_t 
-    resolve_list (yang_pcb_t *pcb,
-                  tk_chain_t *tkc,
-                  ncx_module_t  *mod,
-                  obj_list_t *list,
-                  obj_template_t *obj,
-                  boolean redo)
-{
-    status_t res, retres;
-
-    retres = NO_ERR;
-
-    if (!redo) {
-        res = resolve_metadata(pcb,
-                               tkc, 
-                               mod, 
-                               obj);
-        CHK_EXIT(res, retres);
-    }
-
-    if (!obj_is_refine(obj) && !redo) {
-        res = yang_typ_resolve_typedefs(pcb,
-                                        tkc, 
-                                        mod, 
-                                        list->typedefQ, 
-                                        obj);
-        CHK_EXIT(res, retres);
-
-        res = yang_grp_resolve_groupings(pcb,
-                                         tkc, 
-                                         mod, 
-                                         list->groupingQ, 
-                                         obj);
-        CHK_EXIT(res, retres);
-    }
-
-    finish_config_flag(obj);
-
-    res = resolve_datadefs(pcb, 
-                           tkc, 
-                           mod, 
-                           list->datadefQ, 
-                           redo);
-    CHK_EXIT(res, retres);
-
-    res = check_parent(tkc, mod, obj);
-    CHK_EXIT(res, retres);
-
-    /* check if minelems and maxelems are valid */
-    if (list->minelems && list->maxelems) {
-        if (list->minelems > list->maxelems) {
-            log_error("\nError: list '%s' min-elements > max-elements",
-                      obj_get_name(obj));
-            retres = ERR_NCX_INVALID_VALUE;
-            SET_OBJ_CURERR(tkc, obj);
-            ncx_print_errormsg(tkc, mod, retres);
-        }
-    }
-
-    return retres;
-                                    
-}  /* resolve_list */
-
-
-/********************************************************************
 * FUNCTION get_list_key
 * 
 * Get the key components and validate, save them
@@ -5954,6 +5871,89 @@ static status_t
     return retres;
 
 }  /* get_list_key */
+
+
+/********************************************************************
+* FUNCTION resolve_list
+* 
+* Check the list object type
+
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   pcb == parser control block to use
+*   tkc == token chain
+*   mod == module in progress
+*   list == obj_list_t to check
+*   obj == parent object for 'list'
+*   redo == TRUE if this is a 2nd pass due to deviations added
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+static status_t 
+    resolve_list (yang_pcb_t *pcb,
+                  tk_chain_t *tkc,
+                  ncx_module_t  *mod,
+                  obj_list_t *list,
+                  obj_template_t *obj,
+                  boolean redo)
+{
+    status_t res, retres;
+
+    retres = NO_ERR;
+
+    if (!redo) {
+        res = resolve_metadata(pcb,
+                               tkc, 
+                               mod, 
+                               obj);
+        CHK_EXIT(res, retres);
+    }
+
+    if (!obj_is_refine(obj) && !redo) {
+        res = yang_typ_resolve_typedefs(pcb,
+                                        tkc, 
+                                        mod, 
+                                        list->typedefQ, 
+                                        obj);
+        CHK_EXIT(res, retres);
+
+        res = yang_grp_resolve_groupings(pcb,
+                                         tkc, 
+                                         mod, 
+                                         list->groupingQ, 
+                                         obj);
+        CHK_EXIT(res, retres);
+    }
+
+    finish_config_flag(obj);
+
+    res = resolve_datadefs(pcb, 
+                           tkc, 
+                           mod, 
+                           list->datadefQ, 
+                           redo);
+    CHK_EXIT(res, retres);
+
+    res = check_parent(tkc, mod, obj);
+    CHK_EXIT(res, retres);
+
+    /* check if minelems and maxelems are valid */
+    if (list->minelems && list->maxelems) {
+        if (list->minelems > list->maxelems) {
+            log_error("\nError: list '%s' min-elements > max-elements",
+                      obj_get_name(obj));
+            retres = ERR_NCX_INVALID_VALUE;
+            SET_OBJ_CURERR(tkc, obj);
+            ncx_print_errormsg(tkc, mod, retres);
+        }
+    }
+
+    return retres;
+                                    
+}  /* resolve_list */
 
 
 /********************************************************************
@@ -6212,8 +6212,20 @@ static status_t
 
     retres = NO_ERR;
 
-    /* validate key clause */
-    if (list->keystr) {
+    /***** augment is processed before resolve_list_final and the list keys
+     ***** are filled into the orginal list (under augment, not in the
+     ***** expanded list under the augment target
+     ***** THIS DOES NOT ALWAYS WORK FOR augment /obj-in-submod-a with obj-in-submod-b
+     ***** if submod-a processed before submod-b, this step will get skipped
+     *****
+     ***** The function yang_obj_top_resolve_final will be called for the
+     ***** main module and all submodules will attempt this code again
+     ***** in case the submod datadefQ was filled in by another submod
+     ***** after the first submod called yang_obj_resolve_final
+     *****/
+
+    /* validate key clause only if this has probably not been attempted yet */
+    if (list->keystr && dlq_empty(&list->keyQ)) {
         res = get_list_key(pcb,
                            tkc, 
                            mod, 
@@ -6222,10 +6234,18 @@ static status_t
         CHK_EXIT(res, retres);
     }
 
-    /* validate Q of unique clauses */
+    /* validate Q of unique clauses only if probably not attempted yet */
     for (uni = (obj_unique_t *)dlq_firstEntry(&list->uniqueQ);
          uni != NULL;
          uni = (obj_unique_t *)dlq_nextEntry(uni)) {
+
+        if (!dlq_empty(&uni->compQ)) {
+            /* this list was processed already and some or all
+             * unique components were found already
+             */
+            continue;
+        }
+
         res = get_unique_comps(pcb,
                                tkc, 
                                mod, 
@@ -10355,6 +10375,80 @@ status_t
     return retres;
 
 }  /* yang_obj_resolve_final */
+
+
+/********************************************************************
+* FUNCTION yang_obj_top_resolve_final
+* 
+* Fourth pass object validation; for top-level module with submodules
+*
+* Check various final stage errors and warnings
+* within a single file
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   pcb == parser control block
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   datadefQ == Q of obj_template_t structs to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+status_t 
+    yang_obj_top_resolve_final (yang_pcb_t *pcb,
+                                tk_chain_t *tkc,
+                                ncx_module_t  *mod,
+                                dlq_hdr_t *datadefQ)
+{
+    obj_template_t  *testobj;
+    dlq_hdr_t       *childdefQ;
+    status_t         res, retres;
+
+
+#ifdef DEBUG
+    if (!tkc || !mod || !datadefQ) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    res = NO_ERR;
+    retres = NO_ERR;
+
+    /* first resolve all the local object names */
+    for (testobj = (obj_template_t *)dlq_firstEntry(datadefQ);
+         testobj != NULL;
+         testobj = (obj_template_t *)dlq_nextEntry(testobj)) {
+
+#ifdef YANG_OBJ_DEBUG
+        if (LOGDEBUG4) {
+            log_debug4("\nresolve_top_final: mod %s, object %s, on line %u",
+                       mod->name, 
+                       obj_get_name(testobj), 
+                       testobj->tkerr.linenum);
+        }
+#endif
+
+        if (testobj->objtype == OBJ_TYP_LIST) {
+            res = resolve_list_final(pcb,
+                                     tkc, 
+                                     mod, 
+                                     testobj->def.list, 
+                                     testobj);
+            CHK_EXIT(res, retres);
+        }
+        childdefQ = obj_get_datadefQ(testobj);
+        if (childdefQ != NULL) {
+            res = yang_obj_top_resolve_final(pcb, tkc, mod, childdefQ);
+            CHK_EXIT(res, retres);
+        }
+    }
+
+    return retres;
+
+}  /* yang_obj_top_resolve_final */
 
 
 /********************************************************************

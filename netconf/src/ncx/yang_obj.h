@@ -408,6 +408,35 @@ extern status_t
                             boolean ingrouping);
 
 
+
+
+/********************************************************************
+* FUNCTION yang_obj_top_resolve_final
+* 
+* Fourth pass object validation; for top-level module with submodules
+*
+* Check various final stage errors and warnings
+* within a single file
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*   pcb == parser control block
+*   tkc == token chain from parsing (needed for error msgs)
+*   mod == module in progress
+*   datadefQ == Q of obj_template_t structs to check
+*
+* RETURNS:
+*   status of the operation
+*********************************************************************/
+extern status_t 
+    yang_obj_top_resolve_final (yang_pcb_t *pcb,
+                                tk_chain_t *tkc,
+                                ncx_module_t  *mod,
+                                dlq_hdr_t *datadefQ);
+
+
 /********************************************************************
 * FUNCTION yang_obj_resolve_xpath
 * 

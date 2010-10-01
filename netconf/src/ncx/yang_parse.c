@@ -3326,6 +3326,20 @@ static status_t
     if (mod->ismod || pcb->top == mod) {
         res = yang_obj_resolve_xpath(tkc, mod, &mod->datadefQ);
         CHK_EXIT(res, retres);
+
+        /* fill in all the list keys in cross-submodule augments */
+        for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
+             node != NULL;
+             node = (yang_node_t *)dlq_nextEntry(node)) {
+
+            if (node->submod) {
+                res = yang_obj_top_resolve_final(pcb, 
+                                                 tkc,
+                                                 node->submod,
+                                                 &node->submod->datadefQ);
+                CHK_EXIT(res, retres);
+            }
+        }
     }
 
     /* check for loops in any leafref XPath targets */

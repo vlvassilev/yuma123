@@ -24,26 +24,23 @@
      YANG data types.
 
      Copyright (c) 2010 IETF Trust and the persons identified as
-     the document authors.  All rights reserved.
+     authors of the code.  All rights reserved.
 
-     Redistribution and use in source and binary forms, with or
-     without modification, is permitted pursuant to, and subject
-     to the license terms contained in, the Simplified BSD License
-     set forth in Section 4.c of the IETF Trust's Legal Provisions
-     Relating to IETF Documents
+     Redistribution and use in source and binary forms, with or without
+     modification, is permitted pursuant to, and subject to the license
+     terms contained in, the Simplified BSD License set forth in Section
+     4.c of the IETF Trust's Legal Provisions Relating to IETF Documents
      (http://trustee.ietf.org/license-info).
 
-     This version of this YANG module is part of RFC XXXX; see
+     This version of this YANG module is part of RFC 6021; see
      the RFC itself for full legal notices.";
-   // RFC Ed.: replace XXXX with actual RFC number and remove this note
 
-   revision 2010-04-24 {
+   revision 2010-09-24 {
      description
       "Initial revision.";
      reference
-      "RFC XXXX: Common YANG Data Types";
+      "RFC 6021: Common YANG Data Types";
    }
-   // RFC Ed.: replace XXXX with actual RFC number and remove this note
 
    /*** collection of counter and gauge types ***/
 
@@ -51,27 +48,27 @@
      type uint32;
      description
       "The counter32 type represents a non-negative integer
-       which monotonically increases until it reaches a
+       that monotonically increases until it reaches a
        maximum value of 2^32-1 (4294967295 decimal), when it
        wraps around and starts increasing again from zero.
 
-       Counters have no defined `initial' value, and thus, a
+       Counters have no defined 'initial' value, and thus, a
        single value of a counter has (in general) no information
        content.  Discontinuities in the monotonically increasing
        value normally occur at re-initialization of the
        management system, and at other times as specified in the
        description of a schema node using this type.  If such
-       other times can occur, for example, the creation of an
+       other times can occur, for example, the creation of
        a schema node of type counter32 at times other than
        re-initialization, then a corresponding schema node
        should be defined, with an appropriate type, to indicate
        the last discontinuity.
 
        The counter32 type should not be used for configuration
-       schema nodes. A default statement SHOULD NOT be used in
+       schema nodes.  A default statement SHOULD NOT be used in
        combination with the type counter32.
 
-       This type is in the value set and its semantics equivalent
+       In the value set and its semantics, this type is equivalent
        to the Counter32 type of the SMIv2.";
      reference
       "RFC 2578: Structure of Management Information Version 2 (SMIv2)";
@@ -82,36 +79,36 @@
      default "0";
      description
       "The zero-based-counter32 type represents a counter32
-       which has the defined `initial' value zero.
+       that has the defined 'initial' value zero.
 
-       A schema node of this type will be set to zero(0) on creation
+       A schema node of this type will be set to zero (0) on creation
        and will thereafter increase monotonically until it reaches
        a maximum value of 2^32-1 (4294967295 decimal), when it
        wraps around and starts increasing again from zero.
 
        Provided that an application discovers a new schema node
        of this type within the minimum time to wrap, it can use the
-       initial value as a delta.  It is important for a management
+       'initial' value as a delta.  It is important for a management
        station to be aware of this minimum time and the actual time
        between polls, and to discard data if the actual time is too
        long or there is no defined minimum time.
 
-       This type is in the value set and its semantics equivalent
+       In the value set and its semantics, this type is equivalent
        to the ZeroBasedCounter32 textual convention of the SMIv2.";
      reference
        "RFC 4502: Remote Network Monitoring Management Information
-                  Base Version 2 using SMIv2";
+                  Base Version 2";
    }
 
    typedef counter64 {
      type uint64;
      description
       "The counter64 type represents a non-negative integer
-       which monotonically increases until it reaches a
+       that monotonically increases until it reaches a
        maximum value of 2^64-1 (18446744073709551615 decimal),
        when it wraps around and starts increasing again from zero.
 
-       Counters have no defined `initial' value, and thus, a
+       Counters have no defined 'initial' value, and thus, a
        single value of a counter has (in general) no information
        content.  Discontinuities in the monotonically increasing
        value normally occur at re-initialization of the
@@ -124,10 +121,10 @@
        the last discontinuity.
 
        The counter64 type should not be used for configuration
-       schema nodes. A default statement SHOULD NOT be used in
+       schema nodes.  A default statement SHOULD NOT be used in
        combination with the type counter64.
 
-       This type is in the value set and its semantics equivalent
+       In the value set and its semantics, this type is equivalent
        to the Counter64 type of the SMIv2.";
      reference
       "RFC 2578: Structure of Management Information Version 2 (SMIv2)";
@@ -137,22 +134,22 @@
      type yang:counter64;
      default "0";
      description
-      "The zero-based-counter64 type represents a counter64 which
-       has the defined `initial' value zero.
+      "The zero-based-counter64 type represents a counter64 that
+       has the defined 'initial' value zero.
 
-       A schema node of this type will be set to zero(0) on creation
+       A schema node of this type will be set to zero (0) on creation
        and will thereafter increase monotonically until it reaches
        a maximum value of 2^64-1 (18446744073709551615 decimal),
        when it wraps around and starts increasing again from zero.
 
        Provided that an application discovers a new schema node
        of this type within the minimum time to wrap, it can use the
-       initial value as a delta.  It is important for a management
+       'initial' value as a delta.  It is important for a management
        station to be aware of this minimum time and the actual time
        between polls, and to discard data if the actual time is too
        long or there is no defined minimum time.
 
-       This type is in the value set and its semantics equivalent
+       In the value set and its semantics, this type is equivalent
        to the ZeroBasedCounter64 textual convention of the SMIv2.";
      reference
       "RFC 2856: Textual Conventions for Additional High Capacity
@@ -175,7 +172,7 @@
        below (increases above) the maximum (minimum) value, the
        gauge32 also decreases (increases).
 
-       This type is in the value set and its semantics equivalent
+       In the value set and its semantics, this type is equivalent
        to the Gauge32 type of the SMIv2.";
      reference
       "RFC 2578: Structure of Management Information Version 2 (SMIv2)";
@@ -197,7 +194,7 @@
        below (increases above) the maximum (minimum) value, the
        gauge64 also decreases (increases).
 
-       This type is in the value set and its semantics equivalent
+       In the value set and its semantics, this type is equivalent
        to the CounterBasedGauge64 SMIv2 textual convention defined
        in RFC 2856";
      reference
@@ -217,17 +214,17 @@
        assigned names in a registration-hierarchical-name tree.
 
        Values of this type are denoted as a sequence of numerical
-       non-negative sub-identifier values. Each sub-identifier
-       value MUST NOT exceed 2^32-1 (4294967295). Sub-identifiers
+       non-negative sub-identifier values.  Each sub-identifier
+       value MUST NOT exceed 2^32-1 (4294967295).  Sub-identifiers
        are separated by single dots and without any intermediate
-       white space.
+       whitespace.
 
        The ASN.1 standard restricts the value space of the first
-       sub-identifier to 0, 1, or 2. Furthermore, the value space
+       sub-identifier to 0, 1, or 2.  Furthermore, the value space
        of the second sub-identifier is restricted to the range
-       0 to 39 if the first sub-identifier is 0 or 1. Finally,
+       0 to 39 if the first sub-identifier is 0 or 1.  Finally,
        the ASN.1 standard requires that an object identifier
-       has always at least two sub-identifier. The pattern
+       has always at least two sub-identifier.  The pattern
        captures these restrictions.
 
        Although the number of sub-identifiers is not limited,
@@ -236,16 +233,19 @@
        sub-identifiers.
 
        This type is a superset of the SMIv2 OBJECT IDENTIFIER type
-       since it is not restricted to 128 sub-identifiers. Hence,
+       since it is not restricted to 128 sub-identifiers.  Hence,
        this type SHOULD NOT be used to represent the SMIv2 OBJECT
        IDENTIFIER type, the object-identifier-128 type SHOULD be
        used instead.";
      reference
-      "ISO/IEC 9834-1: Information technology -- Open Systems
+      "ISO9834-1: Information technology -- Open Systems
        Interconnection -- Procedures for the operation of OSI
        Registration Authorities: General procedures and top
        arcs of the ASN.1 Object Identifier tree";
    }
+
+
+
 
    typedef object-identifier-128 {
      type object-identifier {
@@ -255,7 +255,7 @@
       "This type represents object-identifiers restricted to 128
        sub-identifiers.
 
-       This type is in the value set and its semantics equivalent
+       In the value set and its semantics, this type is equivalent
        to the OBJECT IDENTIFIER type of the SMIv2.";
      reference
       "RFC 2578: Structure of Management Information Version 2 (SMIv2)";
@@ -266,13 +266,13 @@
    typedef date-and-time {
      type string {
        pattern '\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?'
-             + '(Z|[\+|-]\d{2}:\d{2})';
+             + '(Z|[\+\-]\d{2}:\d{2})';
      }
      description
       "The date-and-time type is a profile of the ISO 8601
        standard for representation of dates and times using the
-       Gregorian calendar. The profile is defined by the
-       date-time production in section 5.6 of RFC 3339.
+       Gregorian calendar.  The profile is defined by the
+       date-time production in Section 5.6 of RFC 3339.
 
        The date-and-time type is compatible with the dateTime XML
        schema type with the following notable exceptions:
@@ -295,30 +295,29 @@
 
        The canonical format for date-and-time values with a known time
        zone uses a numeric time zone offset that is calculated using
-       the device's configured known offset to UTC time. A change of
+       the device's configured known offset to UTC time.  A change of
        the device's offset to UTC time will cause date-and-time values
        to change accordingly.  Such changes might happen periodically
        in case a server follows automatically daylight saving time
-       (DST) time zone offset changes. The canonical format for
-       date-and-time values with an unknown time zone (usually refering
+       (DST) time zone offset changes.  The canonical format for
+       date-and-time values with an unknown time zone (usually referring
        to the notion of local time) uses the time-offset -00:00.";
      reference
       "RFC 3339: Date and Time on the Internet: Timestamps
        RFC 2579: Textual Conventions for SMIv2
-       W3C REC-xmlschema-2-20041028: XML Schema Part 2: Datatypes
-                 Second Edition";
+       XSD-TYPES: XML Schema Part 2: Datatypes Second Edition";
    }
 
    typedef timeticks {
      type uint32;
      description
-      "The timeticks type represents a non-negative integer which
+      "The timeticks type represents a non-negative integer that
        represents the time, modulo 2^32 (4294967296 decimal), in
-       hundredths of a second between two epochs. When a schema
-       node is defined which uses this type, the description of
+       hundredths of a second between two epochs.  When a schema
+       node is defined that uses this type, the description of
        the schema node identifies both of the reference epochs.
 
-       This type is in the value set and its semantics equivalent
+       In the value set and its semantics, this type is equivalent
        to the TimeTicks type of the SMIv2.";
      reference
       "RFC 2578: Structure of Management Information Version 2 (SMIv2)";
@@ -340,7 +339,7 @@
        The associated timeticks schema node must be specified
        in the description of any schema node using this type.
 
-       This type is in the value set and its semantics equivalent
+       In the value set and its semantics, this type is equivalent
        to the TimeStamp textual convention of the SMIv2.";
      reference
       "RFC 2579: Textual Conventions for SMIv2";
@@ -355,10 +354,10 @@
      description
       "Represents media- or physical-level addresses represented
        as a sequence octets, each octet represented by two hexadecimal
-       numbers. Octets are separated by colons. The canonical
-       representation uses lower-case characters.
+       numbers.  Octets are separated by colons.  The canonical
+       representation uses lowercase characters.
 
-       This type is in the value set and its semantics equivalent
+       In the value set and its semantics, this type is equivalent
        to the PhysAddress textual convention of the SMIv2.";
      reference
       "RFC 2579: Textual Conventions for SMIv2";
@@ -370,10 +369,10 @@
      }
      description
       "The mac-address type represents an IEEE 802 MAC address.
-       The canonical representation uses lower-case characters.
+       The canonical representation uses lowercase characters.
 
-       This type is in the value set and its semantics equivalent to
-       the MacAddress textual convention of the SMIv2.";
+       In the value set and its semantics, this type is equivalent
+       to the MacAddress textual convention of the SMIv2.";
      reference
       "IEEE 802: IEEE Standard for Local and Metropolitan Area
                  Networks: Overview and Architecture
@@ -387,7 +386,7 @@
      description
       "This type represents an XPATH 1.0 expression.
 
-       When a schema node is defined which uses this type, the
+       When a schema node is defined that uses this type, the
        description of the schema node MUST specify the XPath
        context in which the XPath expression is evaluated.";
      reference

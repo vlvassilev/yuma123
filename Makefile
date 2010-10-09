@@ -17,7 +17,7 @@ L_DIRS = netconf
 ifdef DESTDIR
 JFLAG= 
 else
-JFLAG = -j3
+JFLAG = -j4
 endif
 
 #################### PLATFORM DEFINITIONS ############

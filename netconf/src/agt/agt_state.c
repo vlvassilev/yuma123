@@ -234,7 +234,7 @@ date         init     comment
 #define AGT_STATE_OBJ_LOCKED_BY_SESSION (const xmlChar *)"locked-by-session"
 #define AGT_STATE_OBJ_LOCKED_TIME     (const xmlChar *)"locked-time"
 
-#define AGT_STATE_OBJ_PARTIAL_LOCKS   (const xmlChar *)"partial-locks"
+#define AGT_STATE_OBJ_PARTIAL_LOCK    (const xmlChar *)"partial-lock"
 #define AGT_STATE_OBJ_LOCK_ID         (const xmlChar *)"lock-id"
 #define AGT_STATE_OBJ_SELECT          (const xmlChar *)"select"
 #define AGT_STATE_OBJ_LOCKED_NODES    (const xmlChar *)"locked-nodes"
@@ -535,7 +535,7 @@ static status_t
 
         plockobj = obj_find_child(virval->obj,
                                   AGT_STATE_MODULE,
-                                  AGT_STATE_OBJ_PARTIAL_LOCKS);
+                                  AGT_STATE_OBJ_PARTIAL_LOCK);
         if (!plockobj) {
             return SET_ERROR(ERR_NCX_DEF_NOT_FOUND);
         }

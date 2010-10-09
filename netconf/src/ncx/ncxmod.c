@@ -290,7 +290,7 @@ static status_t
     }
 
     if (total >= bufflen) {
-        log_error("\nncxmod: Path spec too long error. Max: %d Got %u",
+        log_error("\nncxmod: Path spec too long error. Max: %d Got %u\n",
                   bufflen, total);
         return ERR_BUFF_OVFL;
     }
@@ -425,7 +425,7 @@ static status_t
                 xml_strlen(suffix) + 1;
             if (total >= bufflen) {
                 *done = TRUE;
-                log_error("\nncxmod: Filename too long error. Max: %d Got %u",
+                log_error("\nncxmod: Filename too long error. Max: %d Got %u\n",
                           bufflen,
                           total);
                 return ERR_BUFF_OVFL;
@@ -543,7 +543,7 @@ static boolean
 
     flen = xml_strlen(filename);
     if (flen+total >= bufflen) {
-        log_error("\nError: Filename too long error. Max: %d Got %u",
+        log_error("\nError: Filename too long error. Max: %d Got %u\n",
                   NCXMOD_MAX_FSPEC_LEN, 
                   flen+total);
         return FALSE;
@@ -595,7 +595,7 @@ static status_t
 
     flen = xml_strlen(filename);
     if (flen+total >= bufflen) {
-        log_error("\nError: Filename too long error. Max: %d Got %u",
+        log_error("\nError: Filename too long error. Max: %d Got %u\n",
                   NCXMOD_MAX_FSPEC_LEN, 
                   flen+total);
         return ERR_BUFF_OVFL;
@@ -1916,7 +1916,7 @@ static status_t
                              ptyp);
         }
         if (res == ERR_NCX_MISSING_FILE) {
-            log_error("\nError: file not found (%s)", modname);
+            log_error("\nError: file not found (%s)\n", modname);
         } else if (res == NO_ERR) {
             if (retmod) {
                 *retmod = pcb->top;
@@ -1931,7 +1931,7 @@ static status_t
      * make sure the module name is even valid
      */
     if (!ncx_valid_name(modname, modlen)) {
-        log_error("\nError: Invalid module name (%s)", modname);
+        log_error("\nError: Invalid module name (%s)\n", modname);
         res = add_failed(modname, revision, pcb, res);
         if (res != NO_ERR) {
             return res;
@@ -2220,7 +2220,7 @@ static status_t
 
     /* make sure a min-length YANG file can be added (x.yang) */
     if ((pathlen + 8) >= bufflen) {
-        log_error("\nError: pathspec too long '%s'", buff);
+        log_error("\nError: pathspec too long '%s'\n", buff);
         return ERR_BUFF_OVFL;
     } 
 
@@ -2233,7 +2233,7 @@ static status_t
     /* try to open the buffer spec as a directory */
     dp = opendir(buff);
     if (!dp) {
-        log_error("\nError: open directory '%s' failed", buff);
+        log_error("\nError: open directory '%s' failed\n", buff);
         return ERR_OPEN_DIR_FAILED;
     }
 
@@ -2411,7 +2411,7 @@ static void
     if (filcb->source) {
         retval = remove((const char *)filcb->source);
         if (retval < 0) {
-            log_error("\nError: could not delete temp file '%s' (%s)",
+            log_error("\nError: could not delete temp file '%s' (%s)\n",
                       filcb->source,
                       get_error_string(errno_to_status()));
         }
@@ -2472,7 +2472,7 @@ static void
     if (sescb->source) {
         retval = rmdir((const char *)sescb->source);
         if (retval < 0) {
-            log_error("\nError: could not delete temp directory '%s' (%s)",
+            log_error("\nError: could not delete temp directory '%s' (%s)\n",
                       sescb->source,
                       get_error_string(errno_to_status()));
 
@@ -2535,7 +2535,7 @@ static void
     if (progcb->source) {
         retval = rmdir((const char *)progcb->source);
         if (retval < 0) {
-            log_error("\nError: could not delete temp directory '%s' (%s)",
+            log_error("\nError: could not delete temp directory '%s' (%s)\n",
                       progcb->source,
                       get_error_string(errno_to_status()));
 
@@ -3198,7 +3198,7 @@ status_t
     }
 
     if (res != NO_ERR) {
-        log_error("\nError: Load deviation module '%s' failed (%s)",
+        log_error("\nError: Load deviation module '%s' failed (%s)\n",
                   deviname,
                   get_error_string(res));
     } else if (LOGDEBUG) {
@@ -3568,7 +3568,7 @@ xmlChar *
     }
 
     if (generrors) {
-        log_error("\nError: data file (%s) not found.", fname);
+        log_error("\nError: data file (%s) not found.\n", fname);
     }
 
     m__free(buff);
@@ -3684,7 +3684,7 @@ xmlChar *
     }
 
     if (generrors) {
-        log_error("\nError: SIL file (%s) not found.", fname);
+        log_error("\nError: SIL file (%s) not found.\n", fname);
     }
 
     m__free(buff);
@@ -4925,7 +4925,7 @@ status_t
     m__free(yumadir_path);
 
     if (res != NO_ERR) {
-        log_error("\nError: Could not setup Yuma work directory");
+        log_error("\nError: Could not setup Yuma work directory\n");
     }
 
     return res;
@@ -5320,7 +5320,7 @@ ncxmod_temp_filcb_t *
 
         if (!xml_strcmp(filcb->filename, filename)) {
             log_error("\nError: cannot create temp file '%s', "
-                      "duplicate entry");
+                      "duplicate entry\n");
             *res = ERR_NCX_ENTRY_EXISTS;
             return NULL;
         }

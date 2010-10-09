@@ -1,6 +1,6 @@
 Name:           yuma
-Version:        1.13
-Release:        6%{?dist}
+Version:        1.14
+Release:        1%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -27,15 +27,11 @@ included, to compile and process YANG modules.
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make STATIC=1 RELEASE=3 %{?_smp_mflags}
-#make STATIC=1 DEVELOPER=1 RELEASE=3 %{?_smp_mflags}
+make STATIC=1 RELEASE=1 %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id STATIC=1 RELEASE=3 \
-DESTDIR=$RPM_BUILD_ROOT
-#make install LDFLAGS+=--build-id STATIC=1 RELEASE=3 DEVELOPER=1 \
-#DESTDIR=$RPM_BUILD_ROOT
+make install LDFLAGS+=--build-id STATIC=1 RELEASE=1 DESTDIR=$RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -80,9 +76,10 @@ echo "Yuma Tools installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
+* Sat Oct 09 2010 Andy Bierman <andy at netconfcentral.org> 1.14-1
+
 * Sat Aug 28 2010 Andy Bierman <andy at netconfcentral.org> 1.13-6
   * fixed yangdump bugs in submodule processing
-  
 * Fri Aug 06 2010 Andy Bierman <andy at netconfcentral.org> 1.13-5
   * fix bug in make_sil_dir
 * Sat Jul 17 2010 Andy Bierman <andy at netconfcentral.org> 1.13-4

@@ -1,8 +1,25 @@
-yuma (1.14-1) unstable; urgency=low
-  * 
+yuma (1.14-1) [955] unstable; urgency=low
+  * added 'muntrace' call to clean up MEMTRACE=1 debug build mode
+  * bumped library version to 1.14
+  * improved yangcli capability processing:
+    * all module namespace URIs are found in the module search path
+    * capability URIs without 'module' parameter are checked against 
+      the base namespace URI instead of declaring 'unknown'
+  * fixed bugs in yangcli fill mode where get key was sometimes skipped
+  * fixed bug in yangcli session startup not getting latest system vars
+    in the session copy
+  * fix bugs in compiler submodule list and XPath validation
+  * added virtual node caching and made return value copy to netconfd,
+    val_get_virtual_value() return not not live pointer anymore
+  * fixed import module processing bug, some imports not getting
+    cached, and instead parsed over again
+  * fixed yangcli memory leak handling unknown (anyxml) reply content
+  * added more error messages and checking to yangdump
+  * updated ietf-netconf-monitoring to RFC 6022 version
+  * updated ietf-yang-types and ietf-inet-types to RFC 6021 version
+  * YANG compiler is now fixed to RFC 6020 version
  -- Andy Bierman <andy@netconfcentral.org>  Sat, 10 Oct 2010 12:00:00 -0700
-
-yuma (1.13-6) unstable; urgency=low
+yuma (1.13-6) [926] unstable; urgency=low
   * fixed bugs in yangdump submodule processing
  -- Andy Bierman <andy@netconfcentral.org>  Sat, 28 Aug 2010 16:08:00 -0700
 yuma (1.13-5) unstable; urgency=low
@@ -13,7 +30,7 @@ yuma (1.13-4) unstable; urgency=low
   * fix bugs in parsing and retention of sub-modules
     as the top-level file for yangdump and yangcli
  -- Andy Bierman <andy@netconfcentral.org>  Sat, 17 Jul 2010 18:17:00 -0700
-yuma (1.13-3) unstable; urgency=low
+yuma (1.13-3) [894] unstable; urgency=low
   * Fixed yangdump bugs
     * yangdump refine-stmt validation
     * enumeration validation corrected

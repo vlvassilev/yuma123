@@ -76,9 +76,27 @@ echo "Yuma Tools installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
-* Sat Oct 09 2010 Andy Bierman <andy at netconfcentral.org> 1.14-1
-
-* Sat Aug 28 2010 Andy Bierman <andy at netconfcentral.org> 1.13-6
+* Sat Oct 09 2010 Andy Bierman <andy at netconfcentral.org> 1.14-1 [955]
+  * added 'muntrace' call to clean up MEMTRACE=1 debug build mode
+  * bumped library version to 1.14
+  * improved yangcli capability processing:
+    * all module namespace URIs are found in the module search path
+    * capability URIs without 'module' parameter are checked against 
+      the base namespace URI instead of declaring 'unknown'
+  * fixed bugs in yangcli fill mode where get key was sometimes skipped
+  * fixed bug in yangcli session startup not getting latest system vars
+    in the session copy
+  * fix bugs in compiler submodule list and XPath validation
+  * added virtual node caching and made return value copy to netconfd,
+    val_get_virtual_value() return not not live pointer anymore
+  * fixed import module processing bug, some imports not getting
+    cached, and instead parsed over again
+  * fixed yangcli memory leak handling unknown (anyxml) reply content
+  * added more error messages and checking to yangdump
+  * updated ietf-netconf-monitoring to RFC 6022 version
+  * updated ietf-yang-types and ietf-inet-types to RFC 6021 version
+  * YANG compiler is now fixed to RFC 6020 version
+* Sat Aug 28 2010 Andy Bierman <andy at netconfcentral.org> 1.13-6 [926]
   * fixed yangdump bugs in submodule processing
 * Fri Aug 06 2010 Andy Bierman <andy at netconfcentral.org> 1.13-5
   * fix bug in make_sil_dir

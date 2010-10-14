@@ -152,6 +152,7 @@ static status_t
      */
     caps = val_find_child(hello, NC_MODULE, NCX_EL_CAPABILITIES);
     if (!caps || caps->res != NO_ERR) {
+        log_error("\nError: no <capabilities> found in server <hello>");
         return ERR_NCX_MISSING_VAL_INST;
     }   
 
@@ -160,6 +161,7 @@ static status_t
      */
     sidval = val_find_child(hello, NC_MODULE, NCX_EL_SESSION_ID);
     if (!sidval || sidval->res != NO_ERR) {
+        log_error("\nError: no <session-id> found in server <hello>");
         return ERR_NCX_MISSING_VAL_INST;
     } else {
         mscb->agtsid = VAL_UINT(sidval);
@@ -201,6 +203,8 @@ static status_t
 
     /* check if the mandatory base protocol capability was set */
     if (!cap_std_set(&mscb->caplist, CAP_STDID_V1)) {
+        log_error("\nError: no support for RFC 4741 (base:1.0) "
+                  "found in server <hello>");
         return ERR_NCX_MISSING_VAL_INST;
     }   
 

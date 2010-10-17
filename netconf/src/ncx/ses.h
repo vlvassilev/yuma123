@@ -173,6 +173,14 @@ typedef enum ses_term_reason_t_ {
 } ses_term_reason_t;
 
 
+/* prolog parsing state */
+typedef enum ses_prolog_state_t_ {
+    SES_PRST_NONE,
+    SES_PRST_WAITING,
+    SES_PRST_DONE
+} ses_prolog_state_t;
+
+
 /*** using uint32 instead of uint64 because the netconf-state
  *** data model is specified that way
  ***/
@@ -230,6 +238,7 @@ typedef struct ses_msg_t_ {
     boolean          ready;               /* ready for parsing */
     ses_msg_buff_t  *curbuff;         /* cur position in buffQ */
     dlq_hdr_t        buffQ;             /* Q of ses_msg_buff_t */
+    ses_prolog_state_t prolog_state;      /* for insert prolog */
 } ses_msg_t;
 
 /* optional read function for the session */

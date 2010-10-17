@@ -377,6 +377,139 @@ static void
 }  /* put_char_entity */
 
 
+/********************************************************************
+* FUNCTION handle_prolog_state
+*
+* Deal with the first few characters of an incoming message
+* hack: xmlTextReaderRead wants to start off
+* with a newline for some reason, so always
+* start the first buffer with a newline, even if
+* none was sent by the NETCONF peer.
+* Only the first 0xa char seems to matter
+* Trailing newlines do not seem to affect the problem
+*
+* Also, the first line needs to be the <?xml ... ?>
+* prolog directive, or the libxml2 parser refuses
+* to use the incoming message.  
+* It quits and returns EOF instead.
+*
+* Only the current buffer is processed within the message
+* INPUTS:
+*   msg == current message to process
+*   buffer == buffer to fill in
+*   bufflen == max buff size
+*   buff == current buffer about to be read
+*   retlen == address of running return length
+*
+* OUTPUTS:
+*   buffer is filled in with the prolog if needed
+*   msg->prolog_state is updated as needed
+*   *retlen may be increased if prolog or newline added
+*********************************************************************/
+static void
+    handle_prolog_state (ses_msg_t *msg,
+                         char *buffer,
+                         int bufflen,
+                         ses_msg_buff_t *buff,
+                         int *retlen)
+{
+    boolean needprolog = FALSE;
+    boolean needfirstnl = FALSE;
+    char    tempbuff[4];
+    int     i, j, k;
+
+    memset(tempbuff, 0x0, 4);
+
+    switch (msg->prolog_state) {
+    case SES_PRST_NONE:
+        if (buff->bufflen < 3) {
+            msg->prolog_state = SES_PRST_WAITING;
+            return;
+        } else if (!strncmp((const char *)buff->buff, "\n<?", 3)) {
+            /* expected string is present */
+            msg->prolog_state = SES_PRST_DONE;
+            return;
+        } else if (!strncmp((const char *)buff->buff, "<?", 2)) {
+            /* expected string except a newline needs
+             * to be inserted first to make libxml2 happy
+             */
+            needfirstnl = TRUE;
+            msg->prolog_state = SES_PRST_DONE;
+        } else {
+            needprolog = TRUE;
+            msg->prolog_state = SES_PRST_DONE;
+        }
+        break;
+    case SES_PRST_WAITING:
+        if ((*retlen + buff->bufflen) < 3) {
+            /* keep waiting */
+            return;
+        } else {
+            msg->prolog_state = SES_PRST_DONE;
+
+            /* save the first 3 chars in the temp buffer */
+            strncpy(tempbuff, buffer, *retlen);
+            for (i = *retlen, j=0; i <= 3; i++, j++) {
+                tempbuff[i] = (char)buff->buff[j];
+            }
+
+            if (!strncmp(tempbuff, "\n<?", 3)) {
+                /* expected string is present */
+                ;
+            } else if (!strncmp(tempbuff, "<?", 2)) {
+                /* expected string except a newline needs
+                 * to be inserted first to make libxml2 happy
+                 */
+                needfirstnl = TRUE;
+            } else {
+                needprolog = TRUE;
+            }
+        }
+        break;
+    case SES_PRST_DONE:
+        return;
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+
+    if (needfirstnl || needprolog) {
+        buffer[0] = '\n';
+        i = 1;
+    } else {
+        i = 0;
+    }
+
+    if (needprolog) {
+        /* expected string sequence is not present */
+        if (bufflen < XML_START_MSG_SIZE+5) {
+            SET_ERROR(ERR_INTERNAL_VAL);
+        } else {
+            /* copy the prolog string inline
+             * to make libxml2 happy
+             */
+            strcpy(&buffer[i], (const char *)XML_START_MSG);
+
+            if (tempbuff[0]) {
+                for (j = XML_START_MSG_SIZE+i, k = 0; 
+                     k <= *retlen; 
+                     j++, k++) {
+                    if (k == *retlen) {
+                        buffer[j] = 0;
+                    } else {
+                        buffer[j] = tempbuff[k];
+                    }
+                }
+            }
+            *retlen += XML_START_MSG_SIZE;
+        }
+    }
+
+    *retlen += i;
+
+}  /* handle_prolog_state */
+
+
 /************   E X T E R N A L   F U N C T I O N S     ***********/
 
 
@@ -1049,7 +1182,7 @@ int
     ses_msg_t        *msg;
     ses_msg_buff_t   *buff, *buff2;
     int               retlen;
-    boolean           done, neednewline, needprolog;
+    boolean           done;
 
     if (len == 0) {
         return 0;
@@ -1076,10 +1209,8 @@ int
     }
 
     retlen = 0;
-    neednewline = FALSE;
-    needprolog = FALSE;
 
-    /* check if this is the first read */
+    /* check if this is the first read for this message */
     buff = msg->curbuff;
     if (!buff) {
         buff = (ses_msg_buff_t *)dlq_firstEntry(&msg->buffQ);
@@ -1102,59 +1233,7 @@ int
         }
     }
 
-    /* hack: xmlTextReaderRead wants to start off
-     * with a newline for some reason, so always
-     * start the first buffer with a newline, even if
-     * none was sent by the NETCONF peer.
-     * Only the first 0xa char seems to matter
-     * Trailing newlines do not seem to affect the problem
-     *
-     * Also, the first line needs to be the <?xml ... ?>
-     * prolog directive, or the libxml2 parser refuses
-     * to use the incoming message.  
-     * It quits and returns EOF instead.
-     */
-    if (buff->bufflen < 2) {
-        neednewline = TRUE;
-        needprolog = TRUE;
-    } else if (!strncmp((const char *)buff->buff, "\n<?", 3)) {
-        /* expected string is present */
-        ;
-    } else if (!strncmp((const char *)buff->buff, "<?", 2)) {
-        /* expected string except a newline needs
-         * to be inserted first to make libxml2 happy
-         */
-        neednewline = TRUE;
-    } else if (buff->buff[0] != '\n') {
-        neednewline = TRUE;
-        needprolog = TRUE;
-    } else {
-        needprolog = TRUE;
-    }
-
-    if (neednewline || needprolog) {
-        buffer[0] = '\n';
-        retlen++;
-    }
-
-    if (needprolog) {
-        /* expected string sequence is not present */
-        if (len < XML_START_MSG_SIZE+3) {
-            /* just copy what is there 
-             * it will be an error
-             */
-            ;
-        } else {
-            /* copy the prolog string inline
-             * to make libxml2 happy
-             */
-            strcpy(&buffer[retlen], (const char *)XML_START_MSG);
-            retlen += XML_START_MSG_SIZE;
-            if (neednewline) {
-                buffer[retlen++] = '\n';
-            }
-        }
-    }
+    handle_prolog_state(msg, buffer, len, buff, &retlen);
 
     /* start transferring bytes to the return buffer */
     done = FALSE;

@@ -1257,6 +1257,7 @@ int
                 buff = buff2;
                 buff->buffpos = 0;
                 msg->curbuff = buff;
+                handle_prolog_state(msg, buffer, len, buff, &retlen);
             }
         }
     }

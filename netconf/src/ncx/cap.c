@@ -796,6 +796,12 @@ status_t
     /* the base capability is a different form than the rest */
     if (!xml_strcmp(uri, CAP_BASE_URN)) {
         return cap_add_std(caplist, CAP_STDID_V1);
+    } else if (!xml_strcmp(uri, NC_URN)) {
+        /* hack: support juniper servers which send the NETCONF
+         * XML namespace instead of the NETCONF base URI
+         * as the protocol indicator
+         */
+        return cap_add_std(caplist, CAP_STDID_V1);
     } else if (!xml_strncmp(uri, CAP_URN, caplen)) {
         /* matched the standard capability prefix string;
          * get the suffix with the capability name and version 
@@ -814,6 +820,8 @@ status_t
                     str += namelen;
                     if (*str == (xmlChar)'?') {
                         str++;
+
+                        /* first check standard scheme= string */
                         schemelen = xml_strlen(CAP_SCHEME_EQ);
                         if (!xml_strncmp(str,
                                          CAP_SCHEME_EQ,
@@ -822,7 +830,18 @@ status_t
                             if (*str) {
                                 return cap_add_url(caplist, str);
                             }
-                        }
+                        } else {
+                            /* check juniper bug: protocol= */
+                            schemelen = xml_strlen(CAP_PROTOCOL_EQ);
+                            if (!xml_strncmp(str,
+                                             CAP_PROTOCOL_EQ,
+                                             schemelen)) {
+                                str += schemelen;
+                                if (*str) {
+                                    return cap_add_url(caplist, str);
+                                }
+                            }
+                        }                        
                     }
                 }
                 break;

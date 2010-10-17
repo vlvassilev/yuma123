@@ -111,6 +111,7 @@ extern "C" {
 #define CAP_FEATURES_EQ        (const xmlChar *)"features="
 #define CAP_DEVIATIONS_EQ      (const xmlChar *)"deviations="
 #define CAP_SCHEME_EQ          (const xmlChar *)"scheme="
+#define CAP_PROTOCOL_EQ        (const xmlChar *)"protocol="
 #define CAP_BASIC_EQ           (const xmlChar *)"basic-mode="
 #define CAP_SUPPORTED_EQ       (const xmlChar *)"also-supported="
 

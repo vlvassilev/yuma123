@@ -202,77 +202,80 @@ static void
     boolean             done, inxml, xmldone, firstline;
     int                 ch, lastch;
 
+    if (val->v.fname == NULL) {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return;
+    }
+
+    fil = fopen((const char *)val->v.fname, "r");
+    if (fil == NULL) {
+        log_error("\nError: open extern var "
+                  "file '%s' failed",
+                  val->v.fname);
+        return;
+    }
+
     xmldone = FALSE;
     inxml = FALSE;
     done = FALSE;
     firstline = TRUE;
     lastch = 0;
 
-    if (val->v.fname) {
-        fil = fopen((const char *)val->v.fname, "r");
-        if (fil) {
-            while (!done) {
-                ch = fgetc(fil);
+    while (!done) {
+        ch = fgetc(fil);
 
-                if (ch == EOF) {
-                    if (lastch && !inxml) {
-                        ses_putchar(scb, (uint32)lastch);
-                    }
-                    fclose(fil);
-                    done = TRUE;
-                    continue;
-                }
+        if (ch == EOF) {
+            if (lastch && !inxml) {
+                ses_putchar(scb, (uint32)lastch);
+            }
+            fclose(fil);
+            done = TRUE;
+            continue;
+        }
 
-                if (firstline) {
-                    /* do not match the first char in the file */
-                    if (ch == '\n' && lastch) {
-                        /* done with xml checking */
-                        firstline = FALSE;
-                        xmldone = TRUE;
-                    } else if (!xmldone) {
-                        /* look for xml declaration and remove it */
-                        if (inxml) {
-                            /* look for end */
-                            if (lastch == '?' && ch == '>') {
-                                xmldone = TRUE;
-                            }
-                        } else {
-                            /* look for start */
-                            if (lastch == '<' && ch == '?') {
-                                inxml = TRUE;
-                            }
-                        }
-                    }
-
-                    /* first time xmldone is true skip this */
-                    if (xmldone && !inxml) {
-                        if (lastch) {
-                            ses_putchar(scb, (uint32)lastch);
-                        }
-                    }
-
-                    /* setup 3rd loop to print char after '?>' */
-                    if (xmldone && inxml) {
-                        if (ch != '>') {
-                            inxml = FALSE;
-                        }
-                    }
+        if (firstline) {
+            /* do not match the first char in the file */
+            if (lastch && !inxml) {
+                if (lastch == '<' && ch == '?') {
+                    inxml = TRUE;
                 } else {
-                    if (lastch) {
-                        ses_putchar(scb, (uint32)lastch);
-                    }
+                    /* done with xml checking */
+                    xmldone = TRUE;
+                    firstline = FALSE;
                 }
+            } else if (lastch && ch == '\n') {
+                /* done with xml checking */
+                firstline = FALSE;
+                xmldone = TRUE;
+            } else if (!xmldone && inxml) {
+                /* look for xml declaration and remove it */
+                if (lastch == '?' && ch == '>') {
+                    xmldone = TRUE;
+                }
+            }
 
-                lastch = ch;
+            /* first time xmldone is true skip this */
+            if (xmldone && !inxml) {
+                if (lastch) {
+                    ses_putchar(scb, (uint32)lastch);
+                }
+            }
+
+            /* setup 3rd loop to print char after '?>' */
+            if (xmldone && inxml) {
+                if (ch != '>') {
+                    inxml = FALSE;
+                }
             }
         } else {
-            log_error("\nError: open extern var "
-                      "file '%s' failed",
-                      val->v.fname);
+            if (lastch) {
+                ses_putchar(scb, (uint32)lastch);
+            }
         }
-    } else {
-        SET_ERROR(ERR_INTERNAL_VAL);
+
+        lastch = ch;
     }
+
     
 }  /* write_extern */
 

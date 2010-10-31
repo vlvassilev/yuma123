@@ -398,6 +398,7 @@ static status_t
     status_t             res;
 
     *retcount = 0;
+    num_nsids = 0;
 
     res = xpath_yang_get_namespaces(xpathpcb,
                                     nsid_array,
@@ -1317,6 +1318,7 @@ void
 *   scb == session control block to start msg 
 *   msg == header from message in progress
 *   nsid == namespace ID of the element to write
+*        == zero to force no prefix lookup; use default NS
 *   elname == unqualified name of element to write
 *   indent == number of chars to indent after a newline
 *             will be ignored if indent is turned off
@@ -1349,14 +1351,17 @@ void
     /* start the element and write the prefix, if any */
     ses_putchar(scb, '<');
     ses_putchar(scb, '/');
-    pfix = xml_msg_get_prefix(msg, 
-                              0, 
-                              nsid, 
-                              NULL, 
-                              &xneeded);
-    if (pfix) {
-        ses_putstr(scb, pfix);
-        ses_putchar(scb, ':');
+    pfix = NULL;
+    if (nsid) {
+        pfix = xml_msg_get_prefix(msg, 
+                                  0, 
+                                  nsid, 
+                                  NULL, 
+                                  &xneeded);
+        if (pfix) {
+            ses_putstr(scb, pfix);
+            ses_putchar(scb, ':');
+        }
     }
 
     /* write the element name */

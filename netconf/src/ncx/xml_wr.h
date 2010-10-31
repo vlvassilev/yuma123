@@ -228,6 +228,7 @@ extern void
 *   scb == session control block to start msg 
 *   msg == header from message in progress
 *   nsid == namespace ID of the element to write
+*        == zero to force no prefix lookup; use default NS
 *   elname == unqualified name of element to write
 *   indent == number of chars to indent after a newline
 *             will be ignored if indent is turned off

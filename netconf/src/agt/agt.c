@@ -205,7 +205,7 @@ static void
     agt_profile.agt_hello_timeout = 300;
     agt_profile.agt_idle_timeout = 3600;
     agt_profile.agt_linesize = 72;
-    agt_profile.agt_indent = NCX_DEF_INDENT;
+    agt_profile.agt_indent = 1;
     agt_profile.agt_usevalidate = TRUE;
     agt_profile.agt_useurl = TRUE;
     agt_profile.agt_defaultStyleEnum = NCX_WITHDEF_EXPLICIT;

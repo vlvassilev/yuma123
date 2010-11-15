@@ -2048,6 +2048,37 @@ static void
 
 
 /********************************************************************
+* FUNCTION write_config_stmt_force
+* 
+* Write the config-stmt; force output even if default
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object to check
+*   indent = indent amount
+*********************************************************************/
+static void
+    write_config_stmt_force (ses_cb_t *scb,
+                             const obj_template_t *obj,
+                             int32 indent)
+{
+    boolean flag;
+
+    /* config-stmt */
+    if (obj->flags & OBJ_FL_CONFSET) {
+        flag = (obj->flags & OBJ_FL_CONFIG);
+        write_simple_str(scb, 
+                         YANG_K_CONFIG, 
+                         (flag) ? NCX_EL_TRUE : NCX_EL_FALSE,
+                         indent, 
+                         2, 
+                         TRUE);
+    }
+
+}  /* write_config_stmt_force */
+
+
+/********************************************************************
 * FUNCTION write_mandatory_stmt
 * 
 * Write the mandatory-stmt
@@ -2076,6 +2107,37 @@ static void
     }
 
 }  /* write__mandatory_stmt */
+
+
+/********************************************************************
+* FUNCTION write_mandatory_stmt_force
+* 
+* Write the mandatory-stmt; force output even if default
+*
+* INPUTS:
+*   scb == session control block to use for writing
+*   obj == object to check
+*   indent = indent amount
+*********************************************************************/
+static void
+    write_mandatory_stmt_force (ses_cb_t *scb,
+                                const obj_template_t *obj,
+                                int32 indent)
+{
+    boolean flag;
+
+    /* mandatory field, only if actually set to true */
+    if (obj->flags & OBJ_FL_MANDSET) {
+        flag = (obj->flags & OBJ_FL_MANDATORY);
+        write_simple_str(scb, 
+                         YANG_K_MANDATORY,
+                         (flag) ? NCX_EL_TRUE : NCX_EL_FALSE,
+                         indent,
+                         2,
+                         TRUE);
+    }
+
+}  /* write__mandatory_stmt_force */
 
 
 /********************************************************************
@@ -2636,14 +2698,14 @@ static status_t
         case OBJ_TYP_ANYXML:
             /* must-stmt refine not in -07*/
             write_musts(scb, obj_get_mustQ(obj), indent); 
-            write_config_stmt(scb, obj, indent);
-            write_mandatory_stmt(scb, obj, indent);
+            write_config_stmt_force(scb, obj, indent);
+            write_mandatory_stmt_force(scb, obj, indent);
             write_sdr(scb, obj, indent);
             break;
         case OBJ_TYP_CONTAINER:
             write_musts(scb, obj_get_mustQ(obj), indent); 
             write_presence_stmt(scb, refine->presence, indent);
-            write_config_stmt(scb, obj, indent);
+            write_config_stmt_force(scb, obj, indent);
             write_sdr(scb, obj, indent);
             break;
         case OBJ_TYP_LEAF:
@@ -2656,14 +2718,14 @@ static status_t
                                  2, 
                                  TRUE);
             }
-            write_config_stmt(scb, obj, indent);
-            write_mandatory_stmt(scb, obj, indent);
+            write_config_stmt_force(scb, obj, indent);
+            write_mandatory_stmt_force(scb, obj, indent);
             write_sdr(scb, obj, indent);
             break;
         case OBJ_TYP_LEAF_LIST:
         case OBJ_TYP_LIST:
             write_musts(scb, obj_get_mustQ(obj), indent); 
-            write_config_stmt(scb, obj, indent);
+            write_config_stmt_force(scb, obj, indent);
             write_minmax(scb,
                          refine->minelems_tkerr.linenum != 0,
                          refine->minelems,
@@ -2681,8 +2743,8 @@ static status_t
                                  2, 
                                  TRUE);
             }
-            write_config_stmt(scb, obj, indent);
-            write_mandatory_stmt(scb, obj, indent);
+            write_config_stmt_force(scb, obj, indent);
+            write_mandatory_stmt_force(scb, obj, indent);
             write_sdr(scb, obj, indent);
             break;
         case OBJ_TYP_CASE:

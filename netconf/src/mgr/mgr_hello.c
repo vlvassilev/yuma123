@@ -458,8 +458,15 @@ status_t
     /* start the hello element */
     if (res == NO_ERR) {
         anyout = TRUE;
-        xml_wr_begin_elem_ex(scb, &msg, 0, nc_id, NCX_EL_HELLO, 
-                             &attrs, ATTRQ, 0, START);
+        xml_wr_begin_elem_ex(scb, 
+                             &msg, 
+                             0, 
+                             nc_id, 
+                             NCX_EL_HELLO, 
+                             &attrs, 
+                             ATTRQ, 
+                             0, 
+                             START);
     }
     
     /* send the capabilities list */

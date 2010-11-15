@@ -1359,18 +1359,23 @@ static void
 *   scb == session control block to use for writing
 *   obj == object to check
 *   indent = indent amount
+*   force = force output even if not default
 *********************************************************************/
 static void
     write_cyang_config_stmt (ses_cb_t *scb,
                              const obj_template_t *obj,
-                             int32 indent)
+                             int32 indent,
+                             boolean force)
 {
+    boolean flag;
+
     /* config-stmt, only if actually set to false */
     if (obj->flags & OBJ_FL_CONFSET) {
-        if (!(obj->flags & OBJ_FL_CONFIG)) {
+        flag = (obj->flags & OBJ_FL_CONFIG);
+        if (force || !flag) {
             write_cyang_simple_str(scb, 
                                    YANG_K_CONFIG, 
-                                   NCX_EL_FALSE,
+                                   (flag) ? NCX_EL_TRUE : NCX_EL_FALSE,
                                    indent, 
                                    2, 
                                    TRUE);
@@ -1389,19 +1394,24 @@ static void
 *   scb == session control block to use for writing
 *   obj == object to check
 *   indent = indent amount
+*   force == TRUE if the statement should be printed even
+*            when not the default (needed for refine-stmt)
 *********************************************************************/
 static void
     write_cyang_mandatory_stmt (ses_cb_t *scb,
                                 const obj_template_t *obj,
-                                int32 indent)
+                                int32 indent,
+                                boolean force)
 {
+    boolean flag;
 
     /* mandatory field, only if actually set to true */
     if (obj->flags & OBJ_FL_MANDSET) {
-        if (obj->flags & OBJ_FL_MANDATORY) {
+        flag = (obj->flags & OBJ_FL_MANDATORY);
+        if (force || flag) {
             write_cyang_simple_str(scb, 
                                    YANG_K_MANDATORY,
-                                   NCX_EL_TRUE,
+                                   (flag) ? NCX_EL_TRUE : NCX_EL_FALSE,
                                    indent,
                                    2,
                                    TRUE);
@@ -1642,8 +1652,8 @@ static status_t
     case OBJ_TYP_ANYXML:
         write_cyang_whenif(scb, obj, indent);
         write_cyang_musts(scb, obj_get_mustQ(obj), indent);
-        write_cyang_config_stmt(scb, obj, indent);
-        write_cyang_mandatory_stmt(scb, obj, indent);
+        write_cyang_config_stmt(scb, obj, indent, FALSE);
+        write_cyang_mandatory_stmt(scb, obj, indent, FALSE);
         write_cyang_sdr(scb, obj, indent);
         write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
@@ -1654,7 +1664,7 @@ static status_t
         write_cyang_musts(scb, obj_get_mustQ(obj), indent);
         str = obj_get_presence_string(obj);
         write_cyang_presence_stmt(scb, str, indent);
-        write_cyang_config_stmt(scb, obj, indent);
+        write_cyang_config_stmt(scb, obj, indent, FALSE);
         write_cyang_sdr(scb, obj, indent);
         write_cyang_typedefs(scb, mod, cp, con->typedefQ, indent);
         write_cyang_groupings(scb, mod, cp, con->groupingQ, indent);
@@ -1677,8 +1687,8 @@ static status_t
         }
         write_cyang_musts(scb, obj_get_mustQ(obj), indent);
         write_cyang_default_stmt(scb, leaf->defval, indent);
-        write_cyang_config_stmt(scb, obj, indent);
-        write_cyang_mandatory_stmt(scb, obj, indent);
+        write_cyang_config_stmt(scb, obj, indent, FALSE);
+        write_cyang_mandatory_stmt(scb, obj, indent, FALSE);
         write_cyang_sdr(scb, obj, indent);
         write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
@@ -1696,7 +1706,7 @@ static status_t
                                    TRUE);
         }
         write_cyang_musts(scb, obj_get_mustQ(obj), indent);
-        write_cyang_config_stmt(scb, obj, indent);
+        write_cyang_config_stmt(scb, obj, indent, FALSE);
 
         write_cyang_minmax(scb, 
                            leaflist->minset,
@@ -1742,7 +1752,7 @@ static status_t
 
         write_cyang_unique_stmts(scb, &list->uniqueQ, indent);
 
-        write_cyang_config_stmt(scb, obj, indent);
+        write_cyang_config_stmt(scb, obj, indent, FALSE);
 
         /*  min-elements */
         write_cyang_minmax(scb,
@@ -1784,7 +1794,7 @@ static status_t
                                    TRUE);
         }
 
-        write_cyang_mandatory_stmt(scb, obj, indent);
+        write_cyang_mandatory_stmt(scb, obj, indent, FALSE);
         write_cyang_sdr(scb, obj, indent);
         write_cyang_objects(scb, mod, cp, choic->caseQ, indent);
         write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
@@ -1932,27 +1942,27 @@ static status_t
         case OBJ_TYP_ANYXML:
             /* must-stmt refine not in -07*/
             write_cyang_musts(scb, obj_get_mustQ(obj), indent); 
-            write_cyang_config_stmt(scb, obj, indent);
-            write_cyang_mandatory_stmt(scb, obj, indent);
+            write_cyang_config_stmt(scb, obj, indent, TRUE);
+            write_cyang_mandatory_stmt(scb, obj, indent, TRUE);
             write_cyang_sdr(scb, obj, indent);
             break;
         case OBJ_TYP_CONTAINER:
             write_cyang_musts(scb, obj_get_mustQ(obj), indent); 
             write_cyang_presence_stmt(scb, refine->presence, indent);
-            write_cyang_config_stmt(scb, obj, indent);
+            write_cyang_config_stmt(scb, obj, indent, TRUE);
             write_cyang_sdr(scb, obj, indent);
             break;
         case OBJ_TYP_LEAF:
             write_cyang_musts(scb, obj_get_mustQ(obj), indent); 
             write_cyang_default_stmt(scb, refine->def, indent);
-            write_cyang_config_stmt(scb, obj, indent);
-            write_cyang_mandatory_stmt(scb, obj, indent);
+            write_cyang_config_stmt(scb, obj, indent, TRUE);
+            write_cyang_mandatory_stmt(scb, obj, indent, TRUE);
             write_cyang_sdr(scb, obj, indent);
             break;
         case OBJ_TYP_LEAF_LIST:
         case OBJ_TYP_LIST:
             write_cyang_musts(scb, obj_get_mustQ(obj), indent); 
-            write_cyang_config_stmt(scb, obj, indent);
+            write_cyang_config_stmt(scb, obj, indent, TRUE);
             write_cyang_minmax(scb,
                                refine->minelems_tkerr.linenum != 0,
                                refine->minelems,
@@ -1963,8 +1973,8 @@ static status_t
             break;
         case OBJ_TYP_CHOICE:
             write_cyang_default_stmt(scb, refine->def, indent);
-            write_cyang_config_stmt(scb, obj, indent);
-            write_cyang_mandatory_stmt(scb, obj, indent);
+            write_cyang_config_stmt(scb, obj, indent, TRUE);
+            write_cyang_mandatory_stmt(scb, obj, indent, TRUE);
             write_cyang_sdr(scb, obj, indent);
             break;
         case OBJ_TYP_CASE:

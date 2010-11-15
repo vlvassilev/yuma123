@@ -349,9 +349,6 @@ void
 
     /* clean error queue */
     rpc_err_clean_errQ(&msg->errQ);
-
-    msg->defns = 0;
-    msg->cur_defns = 0;
     msg->withdef = NCX_DEF_WITHDEF;
 
 } /* xml_msg_clean_hdr */
@@ -399,7 +396,7 @@ const xmlChar *
     *xneeded = FALSE;
 
     /* check if the default namespace is requested */
-    if (nsid == msg->defns || nsid == 0) {
+    if (nsid == 0) {
         return NULL;
     }
 
@@ -438,6 +435,9 @@ const xmlChar *
     /* xmlns directive will be needed if this is a new prefix */
     if (!pmap) {
         /* this is the first use */
+        *xneeded = TRUE;
+    } else if (!msg->useprefix && (parent_nsid != nsid)) {
+        /* the default prefix needs to be generated again */
         *xneeded = TRUE;
     } else if (!pmap->nm_topattr) {
         /* this is not the first use, and the xmlns directive
@@ -750,17 +750,15 @@ status_t
         /* check if this attribute has a prefix */
         if (attr->attr_qname == attr->attr_name) {
             /* no prefix in the name so this must be the
-             * default namespace; set the msg->defns
+             * default namespace
              */
             if (invalid) {
                 /* the default namespace is not one of ours,
                  * so it will not be used in the reply
                  */
                 attr->attr_xmlns_ns = invid;
-                msg->defns = invid;
             } else {
                 attr->attr_xmlns_ns = nsrec->ns_id;
-                msg->defns = nsrec->ns_id;
             }
             continue;
         }
@@ -803,16 +801,19 @@ status_t
      * xmlns with a prefix -- needed by XPath 1.0 
      */
     if (addncid && !find_prefix(msg, ncid)) {
-        if (msg->defns == ncid) {
-            msg->defns = 0;
-        }
-
         /* add a prefix an xmlns attr for NETCONF */
         buff = NULL;
         res = xml_msg_gen_new_prefix(msg, ncid, &buff, 0);
         if (res == NO_ERR) {
             res = xml_add_xmlns_attr(attrs, ncid, buff);
+#if 0
+            if (res == NO_ERR && !msg->useprefix) {
+                /* add another with no prefix in this mode */
+                res = xml_add_xmlns_attr(attrs, ncid, NULL);
+            }
+#endif
         }
+        
         if (res == NO_ERR) {
             /* create a new prefix map */
             newpmap = xmlns_new_pmap(0);
@@ -833,8 +834,7 @@ status_t
     /* make sure XMLNS decl for NCX is in the map 
      * try even if errors in setting up the NETCONF pmap 
      */
-    if (addncxid && msg->defns != ncxid 
-        && !find_prefix(msg, ncxid)) {
+    if (addncxid && !find_prefix(msg, ncxid)) {
 
         /* add a prefix an xmlns attr for NCX */
         buff = NULL;
@@ -903,7 +903,7 @@ status_t
     /* no namespace is always ok, and if it is the same as the
      * current default, then nothing to do
      */
-    if (msg->defns == nsid || !nsid) {
+    if (!nsid) {
         return NO_ERR;
     }
 
@@ -1043,6 +1043,63 @@ status_t
     return retres;
 
 }  /* xml_msg_gen_xmlns_attrs */
+
+
+
+
+/********************************************************************
+* FUNCTION xml_msg_clean_defns_attr
+*
+* Get rid of an xmlns=foo default attribute
+*
+* INPUTS:
+*    attrs == xmlns_attrs_t Q to process
+*
+* OUTPUTS:
+*   *attrs will be cleaned as needed,
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xml_msg_clean_defns_attr (xml_attrs_t *attrs)
+{
+    xml_attr_t  *attr, *nextattr;
+    uint32       len, len2;
+
+#ifdef DEBUG
+    if (!attrs) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    len = xml_strlen(XMLNS);
+
+    for (attr = (xml_attr_t *)xml_first_attr(attrs);
+         attr != NULL;
+         attr = nextattr) {
+
+
+        nextattr = (xml_attr_t *)xml_next_attr(attr);
+
+        len2 = xml_strlen(attr->attr_qname);
+        if (len2 >= len) {
+            if (!xml_strncmp(attr->attr_qname, XMLNS, len)) {
+                if (len == len2) {
+                    /* this xmlns=foo is getting toosed so
+                     * the netconf NSID can be the default
+                     */
+                    dlq_remove(attr);
+                    xml_free_attr(attr);
+                    return NO_ERR;
+                } /* else xmlns:foo=bar found */
+            }  /* else not xmlns */
+        }  /* else not 'xmlns' */
+    }
+
+    return NO_ERR;
+
+}  /* xml_msg_clean_defns_attr */
 
 
 /* END file xml_msg.c */

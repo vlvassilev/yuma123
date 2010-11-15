@@ -761,8 +761,9 @@ void
              attr != NULL;
              attr = (const xml_attr_t *)dlq_nextEntry(attr)) {
             log_write("\n   attr: ns:%d name:%s (%s)",
-                   attr->attr_ns, (const char *)attr->attr_name, 
-                   (const char *)attr->attr_val);
+                      attr->attr_ns, 
+                      (const char *)attr->attr_name, 
+                      (const char *)attr->attr_val);
         }
     } else {
         log_write("\nXML node ERR (%s)", typ);

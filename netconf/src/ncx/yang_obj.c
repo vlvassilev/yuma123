@@ -2362,6 +2362,7 @@ static status_t
                                          &def, 
                                          &obj->appinfoQ);
         } else if (!xml_strcmp(val, YANG_K_CONFIG)) {
+            flagset = FALSE;
             ncx_set_error(&refine->config_tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
@@ -2378,6 +2379,7 @@ static status_t
                 obj->flags &= ~OBJ_FL_CONFIG;
             }
         } else if (!xml_strcmp(val, YANG_K_MANDATORY)) {
+            flagset = FALSE;
             ncx_set_error(&refine->mandatory_tkerr,
                           mod,
                           TK_CUR_LNUM(tkc),
@@ -2390,6 +2392,8 @@ static status_t
             obj->flags |= OBJ_FL_MANDSET;
             if (flagset) {
                 obj->flags |= OBJ_FL_MANDATORY;
+            } else {
+                obj->flags &= ~OBJ_FL_MANDATORY;
             }
         } else if (!xml_strcmp(val, YANG_K_MIN_ELEMENTS)) {
             ncx_set_error(&refine->minelems_tkerr,

@@ -331,7 +331,7 @@ static void
         return;
     }
 
-    if (indent <= 0) {
+    if (indent < 0) {
         ses_putchar(scb, ' ');
     } else {
         ses_indent(scb, indent);
@@ -371,7 +371,6 @@ static void
 *
 * INPUTS:
 *   scb == session control block
-*   msg == top header from message in progress
 *   xpathpcb == XPath parser control block to use
 *   indent == number of chars to indent after a newline
 *           == -1 means no newline or indent
@@ -386,7 +385,6 @@ static void
 *********************************************************************/
 static status_t
     handle_xpath_start_tag (ses_cb_t *scb,
-                            xml_msg_hdr_t *msg,
                             const xpath_pcb_t *xpathpcb,
                             int32 indent,
                             uint32 *retcount)
@@ -399,6 +397,7 @@ static status_t
 
     *retcount = 0;
     num_nsids = 0;
+    msgpfix = NULL;
 
     res = xpath_yang_get_namespaces(xpathpcb,
                                     nsid_array,
@@ -416,30 +415,20 @@ static status_t
 
         cur_nsid = nsid_array[i];
 
+
         /* get the default and message prefixes */
         defpfix = xmlns_get_ns_prefix(cur_nsid);
         if (defpfix == NULL) {
             return SET_ERROR(ERR_INTERNAL_VAL);
         }
 
-        msgpfix = 
-            xml_msg_get_prefix_start_tag(msg, 
-                                         cur_nsid);
-        if (msgpfix != NULL && 
-            !xml_strcmp(defpfix, msgpfix)) {
-            /* this nsid/prefix mapping already
-             * accounted for in the message header
-             */
-            continue;
-        } else {
-            /* this element start tag needs an
-             * xmlns attribute for this NSID
-             */
-            write_xmlns_decl(scb,
-                             defpfix,
-                             cur_nsid,
-                             indent);
-        }
+        /* force this namespace to have a prefix and
+         * xmlns attribute
+         */
+        write_xmlns_decl(scb,
+                         defpfix,
+                         cur_nsid,
+                         indent);
     }
 
     *retcount = num_nsids;
@@ -570,7 +559,6 @@ static void
                  */
                 retcount = 0;
                 res = handle_xpath_start_tag(scb,
-                                             msg,
                                              val->xpathpcb,
                                              indent,
                                              &retcount);
@@ -672,6 +660,14 @@ static void
 
     if (val->parent) {
         parent_nsid = val->parent->nsid;
+    } else if (!msg->useprefix && 
+               (val->nsid == xmlns_nc_id())) {
+        /* hack: using default prefix and the client or server
+         * sometimes sends detached data structures with no
+         * parent.  Assume that the NETCONF namespace is
+         * the parent
+         */
+        parent_nsid = xmlns_nc_id();
     } else {
         parent_nsid = 0;
     }
@@ -692,7 +688,7 @@ static void
                               nsid, 
                               val, 
                               &xneeded);
-    if (pfix) {
+    if (pfix && msg->useprefix) {
         ses_putstr(scb, pfix);
         ses_putchar(scb, ':');
     }
@@ -721,7 +717,7 @@ static void
                 indent = -1;
             }
             write_xmlns_decl(scb,
-                             pfix,
+                             (msg->useprefix) ? pfix : NULL,
                              nsid,
                              indent);
         }
@@ -731,7 +727,6 @@ static void
              * for the content following this start tag to be valid
              */
             res = handle_xpath_start_tag(scb,
-                                         msg,
                                          xpathpcb,
                                          indent,
                                          &retcount);
@@ -959,6 +954,7 @@ static void
                                   useval, 
                                   &xneeded);
         if (pfix) {
+            /* need the prefix all the time on XML content */
             ses_putstr(scb, pfix);
             ses_putchar(scb, XMLNS_SEPCH);
         }
@@ -1092,6 +1088,123 @@ static void
 }  /* write_check_val */
 
 
+
+/********************************************************************
+* FUNCTION begin_elem_ex
+*
+* Write a start or empty XML tag to the specified session
+*
+* INPUTS:
+*   scb == session control block
+*   msg == top header from message in progress
+*   parent_nsid == namespace ID of the parent element, if known
+*   nsid == namespace ID of the element to write
+*   elname == unqualified name of element to write
+*   attrQ == Q of xml_attr_t or val_value_t records to write in
+*            the element; NULL == none
+*   isattrq == TRUE if the qQ contains xml_attr_t nodes
+*              FALSE if the Q contains val_value_t nodes (metadata)
+*   indent == number of chars to indent after a newline
+*           == -1 means no newline or indent
+*           == 0 means just newline
+*   empty == TRUE for empty node
+*         == FALSE for start node
+*    qname_nsid == namespace ID if the content is a QName
+*       and an xmlns with a prefix is needed
+*
+* RETURNS:
+*   none
+*********************************************************************/
+static void
+    begin_elem_ex (ses_cb_t *scb,
+                   xml_msg_hdr_t *msg,
+                   xmlns_id_t  parent_nsid,
+                   xmlns_id_t  nsid,
+                   const xmlChar *elname,
+                   const dlq_hdr_t *attrQ,
+                   boolean isattrq,
+                   int32 indent,
+                   boolean empty,
+                   xmlns_id_t  qname_nsid)
+{
+    const xmlChar       *pfix, *qname_pfix;
+    boolean              xneeded;
+
+#ifdef DEBUG
+    if (!scb || !msg || !elname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    ses_indent(scb, indent);
+
+    /* start the element and write the prefix, if any */
+    ses_putchar(scb, '<');
+    pfix = xml_msg_get_prefix(msg, 
+                              parent_nsid,
+                              nsid, 
+                              NULL, 
+                              &xneeded);
+    if (pfix && msg->useprefix) {
+        ses_putstr(scb, pfix);
+        ses_putchar(scb, ':');
+    }
+
+    /* write the element name */
+    ses_putstr(scb, elname);
+
+    if (xneeded || qname_nsid || (attrQ && !dlq_empty(attrQ))) {
+        if (indent >= 0) {
+            indent += ses_indent_count(scb);
+        }
+        if (attrQ) {
+            write_attrs(scb, 
+                        msg, 
+                        attrQ, 
+                        isattrq, 
+                        NULL, 
+                        indent, 
+                        nsid);
+        }
+        if (xneeded) {
+            if (!attrQ || dlq_empty(attrQ)) {
+                indent = -1;
+            }
+            write_xmlns_decl(scb, 
+                             (msg->useprefix) ? pfix  : NULL, 
+                             nsid, 
+                             indent);
+        }
+        if (qname_nsid) {
+            qname_pfix = xml_msg_get_prefix_xpath(msg, qname_nsid);
+            if (qname_pfix == NULL) {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            } else {
+                /* force an xmlns attribute with a prefix */
+                write_xmlns_decl(scb, 
+                                 qname_pfix, 
+                                 qname_nsid, 
+                                 indent);
+            }
+        }
+    }
+
+    /* finish up the element */
+    if (empty) {
+        ses_putchar(scb, '/');
+    }
+    ses_putchar(scb, '>');
+
+    /* hack in XMLDOC mode to get more readable XSD output */
+    if (empty && scb->mode==SES_MODE_XMLDOC && indent < 
+        (3*ses_indent_count(scb))) {
+        ses_putchar(scb, '\n');
+    }
+
+}  /* begin_elem_ex */
+
+
 /************  E X T E R N A L    F U N C T I O N S    **************/
 
 
@@ -1165,9 +1278,6 @@ void
                           int32 indent,
                           boolean empty)
 {
-    const xmlChar       *pfix;
-    boolean              xneeded;
-
 #ifdef DEBUG
     if (!scb || !msg || !elname) {
         SET_ERROR(ERR_INTERNAL_PTR);
@@ -1175,58 +1285,16 @@ void
     }
 #endif
 
-    ses_indent(scb, indent);
-
-    /* start the element and write the prefix, if any */
-    ses_putchar(scb, '<');
-    pfix = xml_msg_get_prefix(msg, 
-                              parent_nsid,
-                              nsid, 
-                              NULL, 
-                              &xneeded);
-    if (pfix) {
-        ses_putstr(scb, pfix);
-        ses_putchar(scb, ':');
-    }
-
-    /* write the element name */
-    ses_putstr(scb, elname);
-
-    if (xneeded || (attrQ && !dlq_empty(attrQ))) {
-        if (indent >= 0) {
-            indent += ses_indent_count(scb);
-        }
-        if (attrQ) {
-            write_attrs(scb, 
-                        msg, 
-                        attrQ, 
-                        isattrq, 
-                        NULL, 
-                        indent, 
-                        nsid);
-        }
-        if (xneeded) {
-            if (!attrQ || dlq_empty(attrQ)) {
-                indent = -1;
-            }
-            write_xmlns_decl(scb, 
-                             pfix, 
-                             nsid, 
-                             indent);
-        }
-    }
-
-    /* finish up the element */
-    if (empty) {
-        ses_putchar(scb, '/');
-    }
-    ses_putchar(scb, '>');
-
-    /* hack in XMLDOC mode to get more readable XSD output */
-    if (empty && scb->mode==SES_MODE_XMLDOC && indent < 
-        (3*ses_indent_count(scb))) {
-        ses_putchar(scb, '\n');
-    }
+    begin_elem_ex(scb,
+                  msg,
+                  parent_nsid,
+                  nsid,
+                  elname,
+                  attrQ,
+                  isattrq,
+                  indent,
+                  empty,
+                  0);
 
 }  /* xml_wr_begin_elem_ex */
 
@@ -1257,15 +1325,23 @@ void
                        const xmlChar *elname,
                        int32 indent)
 {
-    xml_wr_begin_elem_ex(scb, 
-                         msg, 
-                         parent_nsid,
-                         nsid,
-                         elname,
-                         NULL,
-                         FALSE,
-                         indent,
-                         FALSE);
+#ifdef DEBUG
+    if (!scb || !msg || !elname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    begin_elem_ex(scb, 
+                  msg, 
+                  parent_nsid,
+                  nsid,
+                  elname,
+                  NULL,
+                  FALSE,
+                  indent,
+                  FALSE,
+                  0);
 
 } /* xml_wr_begin_elem */
 
@@ -1296,15 +1372,23 @@ void
                        const xmlChar *elname,
                        int32 indent)
 {
-    xml_wr_begin_elem_ex(scb, 
-                         msg, 
-                         parent_nsid, 
-                         nsid, 
-                         elname,
-                         NULL, 
-                         FALSE, 
-                         indent,
-                         TRUE);
+#ifdef DEBUG
+    if (!scb || !msg || !elname) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    begin_elem_ex(scb, 
+                  msg, 
+                  parent_nsid, 
+                  nsid, 
+                  elname,
+                  NULL, 
+                  FALSE, 
+                  indent,
+                  TRUE,
+                  0);
 
 } /* xml_wr_empty_elem */
 
@@ -1352,7 +1436,7 @@ void
     ses_putchar(scb, '<');
     ses_putchar(scb, '/');
     pfix = NULL;
-    if (nsid) {
+    if (nsid && msg->useprefix) {
         pfix = xml_msg_get_prefix(msg, 
                                   0, 
                                   nsid, 
@@ -1425,15 +1509,16 @@ void
     }
 #endif
 
-    xml_wr_begin_elem_ex(scb, 
-                         msg, 
-                         parent_nsid, 
-                         nsid, 
-                         elname, 
-                         attrQ,
-                         isattrq, 
-                         indent,
-                         FALSE);
+    begin_elem_ex(scb, 
+                  msg, 
+                  parent_nsid, 
+                  nsid, 
+                  elname, 
+                  attrQ,
+                  isattrq, 
+                  indent,
+                  FALSE,
+                  0);
     ses_putstr(scb, str);
     xml_wr_end_elem(scb, 
                     msg, 
@@ -1482,7 +1567,6 @@ void
                        boolean isattrq,
                        int32 indent)
 {
-    boolean         xneeded;
     const xmlChar  *pfix;
 
 #ifdef DEBUG
@@ -1492,25 +1576,24 @@ void
     }
 #endif
 
-    xml_wr_begin_elem_ex(scb,
-                         msg,
-                         parent_nsid, 
-                         nsid,
-                         elname,
-                         attrQ,
-                         isattrq, 
-                         indent,
-                         FALSE);
+    begin_elem_ex(scb,
+                  msg,
+                  parent_nsid, 
+                  nsid,
+                  elname,
+                  attrQ,
+                  isattrq, 
+                  indent,
+                  FALSE,
+                  val_nsid);
 
-    /* counting on xmlns decl to be in ancestor node
-     * because the xneeded node is being ignored here
-     */
-    pfix = xml_msg_get_prefix(msg,
-                              parent_nsid,
-                              val_nsid, 
-                              NULL,
-                              &xneeded);
+    pfix = xml_msg_get_prefix_xpath(msg, val_nsid);
     if (pfix) {
+        /* should always be non-NULL
+         * should already have the xmlns:pfix
+         * in the start tag 
+         * do not check msg->useprefix here!
+         */
         ses_putstr(scb, pfix);
         ses_putchar(scb, XMLNS_SEPCH);
     }
@@ -1528,7 +1611,7 @@ void
 /********************************************************************
 * FUNCTION xml_wr_check_val
 * 
-* Write an NCX value in XML encoding
+* Write a YANG value in XML encoding
 * while checking nodes for suppression of output with
 * the supplied test fn
 *
@@ -1569,7 +1652,12 @@ void
         return;
     }
 #endif
-    write_check_val(scb, msg, val, indent, testfn, TRUE);
+    write_check_val(scb, 
+                    msg, 
+                    val, 
+                    indent, 
+                    testfn, 
+                    TRUE);
 
 }  /* xml_wr_check_val */
 

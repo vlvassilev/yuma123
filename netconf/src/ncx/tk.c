@@ -11,9 +11,9 @@
 /*  FILE: tk.c
 
 
-    NCX Token Manager : Low level token management functions
+    YANG Token Manager : Low level token management functions
 
-     - Tokenization of NCX modules
+     - Tokenization of YANG modules
      - Tokenization of text config files
 
 *********************************************************************
@@ -190,10 +190,12 @@ static tk_ent_t tlist [] = {
 };
 
 
-/* lookup list of NCX builtin type names 
- * 
+/* lookup list of YANG builtin type names
+ * also includes NCX extensions xsdlist 
+ * and placeholder types for YANG data node types
+ *
  *  !!! ORDER IS HARD-WIRED TO PREVENT RUNTIME INIT FUNCTION !!!
- *  !!! NEED TO CHANGE IF NCX DATA TYPE NAMES ARE CHANGED !!!
+ *  !!! NEED TO CHANGE IF YANG DATA TYPE NAMES ARE CHANGED !!!
  *  !!! NEED TO KEEP ARRAY POSITION AND NCX_BT_ VALUE THE SAME !!!
  *
  * hack: string lengths are stored so only string compares

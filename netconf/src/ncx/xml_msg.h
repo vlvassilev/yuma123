@@ -83,9 +83,13 @@ typedef struct xml_msg_hdr_t_ {
      * request are used in the <rpc-reply>, so the same prefixes
      * will be used, and the XML on the wire will be easier to debug
      * by examining packet traces
+     *
+     * if useprefix=TRUE then prefixes will be used for
+     * element start and end tags. FALSE then default NS
+     * will be used so no prefixes will be needed except
+     * for XML content
      */
-    xmlns_id_t      defns;       /* req. default namespace ID */
-    xmlns_id_t      cur_defns;        /* minimize xmlns decls */
+    boolean           useprefix;
     ncx_withdefaults_t withdef;       /* with-defaults value */
     dlq_hdr_t       prefixQ;             /* Q of xmlns_pmap_t */
     dlq_hdr_t       errQ;               /* Q of rpc_err_rec_t */
@@ -328,6 +332,24 @@ extern status_t
     xml_msg_gen_xmlns_attrs (xml_msg_hdr_t *msg, 
 			     xml_attrs_t *attrs,
                              boolean addncx);
+
+
+/********************************************************************
+* FUNCTION xml_msg_clean_defns_attr
+*
+* Get rid of an xmlns=foo default attribute
+*
+* INPUTS:
+*    attrs == xmlns_attrs_t Q to process
+*
+* OUTPUTS:
+*   *attrs will be cleaned as needed,
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    xml_msg_clean_defns_attr (xml_attrs_t *attrs);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

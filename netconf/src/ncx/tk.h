@@ -18,7 +18,7 @@
 *								    *
 *********************************************************************
 
-    NCX Module Compact Syntax Token Handler
+    YANG Module Compact Syntax Token Handler
 
 *********************************************************************
 *								    *
@@ -56,7 +56,7 @@ extern "C" {
 *								    *
 *********************************************************************/
 
-/* maximum line size allowed in an NCX module */
+/* maximum line size allowed in an YANG module */
 #define TK_BUFF_SIZE                0xffff
 
 
@@ -238,7 +238,7 @@ typedef enum tk_source_t_ {
 } tk_source_t;
 
 
-/* single NCX language token type */
+/* single YANG language token type */
 typedef struct tk_token_t_ {
     dlq_hdr_t   qhdr;
     tk_type_t   typ;
@@ -535,7 +535,7 @@ extern status_t
 * FUNCTION tk_retokenize_cur_string
 * 
 * The current token is some sort of a string
-* Reparse it according to the full NCX token list, as needed
+* Reparse it according to the full YANG token list, as needed
 *
 * The current token may be replaced with one or more tokens
 *

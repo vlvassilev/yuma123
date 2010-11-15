@@ -242,7 +242,7 @@ extern "C" {
 #define NCX_DEF_FILPTR_CACHESIZE  300
 
 /* default indent amount for nesting XML output */
-#define NCX_DEF_INDENT  3
+#define NCX_DEF_INDENT  2
 
 /* default virtual value cache timeout value in seconds
  * use 0 to disable the cache and refresh a virtual value

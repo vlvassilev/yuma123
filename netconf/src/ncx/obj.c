@@ -5294,6 +5294,16 @@ obj_template_t *
 
     if (mobj) {
         newobj->flags |= mobj->flags;
+
+        /* check if special flags need to be cleared */
+        if ((mobj->flags & OBJ_FL_MANDSET) &&
+            !(mobj->flags & OBJ_FL_MANDATORY)) {
+            newobj->flags &= ~OBJ_FL_MANDATORY;
+        }
+        if ((mobj->flags & OBJ_FL_CONFSET) &&
+            !(mobj->flags & OBJ_FL_CONFIG)) {
+            newobj->flags &= ~OBJ_FL_CONFIG;
+        }
     }
 
     res = clone_appinfoQ(&newobj->appinfoQ,

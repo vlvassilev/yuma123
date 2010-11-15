@@ -561,6 +561,12 @@ static void
     agttotals = ses_get_total_stats();
     errsend = !dlq_empty(&msg->mhdr.errQ);
 
+    res = xml_msg_clean_defns_attr(msg->rpc_in_attrs);
+    if (res != NO_ERR) {
+        ses_finish_msg(scb);
+        return;
+    }
+    
     res = xml_msg_gen_xmlns_attrs(&msg->mhdr, 
                                   msg->rpc_in_attrs,
                                   errsend);

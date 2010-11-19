@@ -1,6 +1,6 @@
 Name:           yuma
 Version:        1.14
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -76,6 +76,16 @@ echo "Yuma Tools installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
+* Thu Nov 18 2010 Andy Bierman <andy at netconfcentral.org> 1.14-2 [966]
+  * yangcli: fixed bug handling XML preamble in extern variables
+  * XML: now using default namespace in XML output to reduce
+    message size
+  * yangdump: fixed bug generating refine-stmt sub-statements
+  * yangcli: added support for Juniper incorrect base:1.0 namespace
+  * added server_call_chain.txt docs to doc/extra
+  * netconfd: added some error messages to agt_hello_dispatch to
+    log error messages when bad <hello> found
+  * modules: update some IETF YANG modules
 * Sat Oct 09 2010 Andy Bierman <andy at netconfcentral.org> 1.14-1 [955]
   * added 'muntrace' call to clean up MEMTRACE=1 debug build mode
   * bumped library version to 1.14

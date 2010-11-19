@@ -76,7 +76,7 @@ echo "Yuma Tools installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
-* Thu Nov 18 2010 Andy Bierman <andy at netconfcentral.org> 1.14-2 [967]
+* Thu Nov 18 2010 Andy Bierman <andy at netconfcentral.org> 1.14-2 [968]
   * yangcli: fixed bug handling XML preamble in extern variables
   * XML: now using default namespace in XML output to reduce
     message size

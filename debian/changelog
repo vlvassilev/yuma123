@@ -8,7 +8,7 @@ yuma (1.14-2) unstable; urgency=low
   * netconfd: added some error messages to agt_hello_dispatch to
     log error messages when bad <hello> found
   * modules: update some IETF YANG modules
-  * svn r966
+  * svn r967
  -- Andy Bierman <andy@netconfcentral.org>  Thu, 18 Nov 2010 12:00:00 -0800
 yuma (1.14-1) unstable; urgency=low
   * added 'muntrace' call to clean up MEMTRACE=1 debug build mode

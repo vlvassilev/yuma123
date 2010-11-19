@@ -59,6 +59,7 @@ rm -rf $RPM_BUILD_ROOT
 /usr/share/doc/yuma/yuma-quickstart-guide.pdf
 /usr/share/doc/yuma/yuma-netconfd-manual.pdf
 /usr/share/doc/yuma/yuma-dev-manual.pdf
+/usr/share/doc/yuma/server-call-chain.txt
 %{_mandir}/man1/yangcli.1.gz
 %{_mandir}/man1/yangdiff.1.gz
 %{_mandir}/man1/yangdump.1.gz
@@ -76,7 +77,7 @@ echo "Yuma Tools installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
-* Thu Nov 18 2010 Andy Bierman <andy at netconfcentral.org> 1.14-2 [968]
+* Thu Nov 18 2010 Andy Bierman <andy at netconfcentral.org> 1.14-2 [969]
   * yangcli: fixed bug handling XML preamble in extern variables
   * XML: now using default namespace in XML output to reduce
     message size

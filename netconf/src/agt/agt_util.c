@@ -1633,8 +1633,9 @@ status_t
     case OP_EDITOP_MERGE:
         switch (acc) {
         case NCX_ACCESS_NONE:
-        case NCX_ACCESS_RO:
             return ERR_NCX_NO_ACCESS_MAX;
+        case NCX_ACCESS_RO:
+            return ERR_NCX_ACCESS_READ_ONLY;
         case NCX_ACCESS_RW:
             /* edit but not create is allowed */
             return (cur_exists) ? NO_ERR : ERR_NCX_NO_ACCESS_MAX;
@@ -1646,7 +1647,9 @@ status_t
     case OP_EDITOP_REPLACE:
         switch (acc) {
         case NCX_ACCESS_NONE:
+            return ERR_NCX_NO_ACCESS_MAX;
         case NCX_ACCESS_RO:
+            return ERR_NCX_ACCESS_READ_ONLY;
         case NCX_ACCESS_RW:
             return (cur_exists) ? NO_ERR : ERR_NCX_NO_ACCESS_MAX;
         case NCX_ACCESS_RC:
@@ -1658,7 +1661,9 @@ status_t
     case OP_EDITOP_DELETE:
         switch (acc) {
         case NCX_ACCESS_NONE:
+            return ERR_NCX_NO_ACCESS_MAX;
         case NCX_ACCESS_RO:
+            return ERR_NCX_ACCESS_READ_ONLY;
         case NCX_ACCESS_RW:
             return ERR_NCX_NO_ACCESS_MAX;
         case NCX_ACCESS_RC:
@@ -1671,8 +1676,9 @@ status_t
         /* allow for agent loading of read-write objects */
         switch (acc) {
         case NCX_ACCESS_NONE:
-        case NCX_ACCESS_RO:
             return ERR_NCX_NO_ACCESS_MAX;
+        case NCX_ACCESS_RO:
+            return ERR_NCX_ACCESS_READ_ONLY;
         case NCX_ACCESS_RW:
         case NCX_ACCESS_RC:
             /* create/edit/delete allowed */

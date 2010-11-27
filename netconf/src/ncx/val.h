@@ -547,39 +547,6 @@ extern void
 
 
 /********************************************************************
-* FUNCTION val_new_editvars
-* 
-* Malloc and initialize the val->editvars field
-*
-* INPUTS:
-*    val == val_value_t data structure to use
-*
-* OUTPUTS:
-*    val->editvars is malloced and initialized
-* 
-* RETURNS:
-*   status
-*********************************************************************/
-extern status_t
-    val_new_editvars (val_value_t *val);
-
-
-/********************************************************************
-* FUNCTION val_free_editvars
-* 
-* Clean and free the val->editvars field
-*
-* INPUTS:
-*    val == val_value_t data structure to use
-*
-* OUTPUTS:
-*    val->editvars is cleaned, freed, and set to NULL
-*********************************************************************/
-extern void
-    val_free_editvars (val_value_t *val);
-
-
-/********************************************************************
 * FUNCTION val_set_name
 * 
 * Set (or reset) the name of a value struct
@@ -1574,27 +1541,19 @@ extern val_value_t *
 
 
 /********************************************************************
-* FUNCTION val_clone_test
+* FUNCTION val_clone2
 * 
 * Clone a specified val_value_t struct and sub-trees
-* Only clone the nodes that pass the test function callback
+* but not the editvars
 *
 * INPUTS:
 *    val == value to clone
-*    testcb  == filter test callback function to use
-*               NULL means no filter
-*    res == address of return status
-*
-* OUTPUTS:
-*    *res == resturn status
-*
+*   
 * RETURNS:
-*   clone of val, or NULL if a malloc failure or entire node filtered
+*   clone of val, or NULL if a malloc failure
 *********************************************************************/
 extern val_value_t *
-    val_clone_test (const val_value_t *val,
-		    val_test_fn_t  testfn,
-		    status_t *res);
+    val_clone2 (const val_value_t *val);
 
 
 /********************************************************************

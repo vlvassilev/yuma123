@@ -296,7 +296,7 @@ typedef enum ncx_agttarg_t_ {
     NCX_AGT_TARG_RUNNING,
     NCX_AGT_TARG_LOCAL,   /* TBD */
     NCX_AGT_TARG_REMOTE,   /* TBD */
-    NCX_AGT_TARG_CAND_RUNNING
+    NCX_AGT_TARG_CAND_RUNNING  /* TBD */
 } ncx_agttarg_t;
 
 

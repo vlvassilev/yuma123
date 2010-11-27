@@ -492,7 +492,7 @@ static rpc_err_t
         *apptag = RPC_ERR_APPTAG_NO_ACCESS;
         return RPC_ERR_OPERATION_FAILED;
     case ERR_NCX_NO_ACCESS_MAX:
-        *apptag = RPC_ERR_APPTAG_LIMIT_REACHED;
+        *apptag = RPC_ERR_APPTAG_NO_ACCESS;
         return RPC_ERR_ACCESS_DENIED;
     case ERR_NCX_WRONG_INDEX_TYPE:
         *apptag = RPC_ERR_APPTAG_DATA_INVALID;
@@ -669,7 +669,10 @@ static rpc_err_t
         return RPC_ERR_IN_USE;
     case ERR_NCX_SUBMOD_NOT_LOADED:
         *apptag = RPC_ERR_APPTAG_GEN_ERROR;
-        return ERR_NCX_OPERATION_FAILED;
+        return RPC_ERR_OPERATION_FAILED;
+    case ERR_NCX_ACCESS_READ_ONLY:
+        *apptag = RPC_ERR_APPTAG_NO_ACCESS;
+        return RPC_ERR_ACCESS_DENIED;
 
     /* user warnings start at 400 and do not need to be listed here */
     default:

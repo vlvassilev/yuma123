@@ -473,6 +473,50 @@ static status_t
 } /* check_svalQ_enum */
 
 
+
+/********************************************************************
+* FUNCTION free_editvars
+* 
+* Clean and free the val->editvars field
+*
+* INPUTS:
+*    val == val_value_t data structure to use
+*
+* OUTPUTS:
+*    val->editvars is cleaned, freed, and set to NULL
+*********************************************************************/
+static void
+    free_editvars (val_value_t *val)
+{
+    if (val->editvars) {
+#ifdef VAL_EDITVARS_DEBUG
+        log_debug3("\n\nfree_editvars: %s: %d = %p\n",
+                   (val->name) ? val->name : NCX_EL_NONE,
+                   ++editvars_free,
+                   val->editvars);
+#endif
+
+        if (val->editvars->insertstr) {
+            m__free(val->editvars->insertstr);
+        }
+
+        if (val->editvars->insertxpcb) {
+            xpath_free_pcb(val->editvars->insertxpcb);
+        }
+
+        m__free(val->editvars);
+        val->editvars = NULL;
+    } else {
+#ifdef VAL_EDITVARS_DEBUG
+        log_debug3("\nval_free_editvars skipped (%u, %s)",
+                   editvars_free, 
+                   val->name);
+#endif
+    }
+
+}  /* free_editvars */
+
+
 /********************************************************************
 * FUNCTION clean_value
 * 
@@ -503,7 +547,7 @@ static void
     btyp = val->btyp;
 
     if (full && val->editvars) {
-        val_free_editvars(val);
+        free_editvars(val);
     }
 
     /* clean the val->v union, depending on base type */
@@ -1080,6 +1124,50 @@ static void
 
 
 /********************************************************************
+* FUNCTION new_editvars
+* 
+* Malloc and initialize the val->editvars field
+*
+* INPUTS:
+*    val == val_value_t data structure to use
+*
+* OUTPUTS:
+*    val->editvars is malloced and initialized
+* 
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    new_editvars (val_value_t *val)
+{
+    val_editvars_t  *editvars;
+
+    if (val->editvars) {
+        return SET_ERROR(ERR_NCX_DATA_EXISTS);
+    }
+
+    editvars = m__getObj(val_editvars_t);
+    if (!editvars) {
+        return ERR_INTERNAL_MEM;
+    }
+    memset(editvars, 0x0, sizeof(val_editvars_t));
+
+    val->editvars = editvars;
+
+#ifdef VAL_EDITVARS_DEBUG
+    log_debug3("\n\nnew_editvars: %u = %p\n",
+               ++editvars_malloc,
+               editvars);
+#endif
+
+    return NO_ERR;
+
+}  /* new_editvars */
+
+
+
+
+/********************************************************************
 * FUNCTION copy_editvars
 * 
 * Copy the editvars struct contents
@@ -1102,7 +1190,7 @@ static status_t
     /* set the copy->editvars */
     if (val->editvars) {
         if (!copy->editvars) {
-            res = val_new_editvars(copy);
+            res = new_editvars(copy);
             if (res != NO_ERR) {
                 return res;
             }
@@ -1242,6 +1330,248 @@ static val_value_t *
 }  /* cache_virtual_value */
 
 
+/********************************************************************
+* FUNCTION clone_test
+* 
+* Clone a specified val_value_t struct and sub-trees
+* Only clone the nodes that pass the test function callback
+*
+* INPUTS:
+*    val == value to clone
+*    testcb  == filter test callback function to use
+*               NULL means no filter
+*    with_editvars == TRUE if the new editvars should be cloned;
+*                     FALSE if the new editvars should be NULL
+*    res == address of return status
+*
+* OUTPUTS:
+*    *res == resturn status
+*
+* RETURNS:
+*   clone of val, or NULL if a malloc failure or entire node filtered
+*********************************************************************/
+static val_value_t *
+    clone_test (const val_value_t *val,
+                val_test_fn_t  testfn,
+                boolean with_editvars,
+                status_t *res)
+{
+    const val_value_t *ch;
+    val_value_t       *copy, *copych;
+    boolean            testres;
+    uint32             i;
+
+#ifdef DEBUG
+    if (!val || !res) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    if (testfn) {
+        testres = (*testfn)(val);
+        if (!testres) {
+            *res = ERR_NCX_SKIPPED;
+            return NULL;
+        }
+    }
+
+    copy = val_new_value();
+    if (!copy) {
+        *res = ERR_INTERNAL_MEM;
+        return NULL;
+    }
+
+    /* copy all the fields */
+    copy->obj = val->obj;
+    copy->typdef = val->typdef;
+
+    if (val->dname) {
+        copy->dname = xml_strdup(val->dname);
+        if (!copy->dname) {
+            *res = ERR_INTERNAL_MEM;
+            val_free_value(copy);
+            return NULL;
+        }
+        copy->name = copy->dname;
+    } else {
+        copy->dname = NULL;
+        copy->name = val->name;
+    }
+
+    copy->parent = val->parent;
+    copy->nsid = val->nsid;
+    copy->btyp = val->btyp;
+    copy->flags = val->flags;
+    copy->dataclass = val->dataclass;
+
+    /* copy any active partial locks;
+     * this should be empty for candidate or PDU source
+     * vals, but in case a copy of running is made, this
+     * array of partial locks needs to be transferred
+     */
+    for (i=0; i<VAL_MAX_PLOCKS; i++) {
+        copy->plock[i] = val->plock[i];
+    }
+
+    /* copy meta-data */
+    for (ch = (const val_value_t *)dlq_firstEntry(&val->metaQ);
+         ch != NULL;
+         ch = (const val_value_t *)dlq_nextEntry(ch)) {
+        copych = clone_test(ch, testfn, with_editvars, res);
+        if (!copych) {
+            if (*res == ERR_NCX_SKIPPED) {
+                *res = NO_ERR;
+            } else {
+                val_free_value(copy);
+                return NULL;
+            }
+        } else {
+            dlq_enque(copych, &copy->metaQ);
+        }
+    }
+
+    /* set the copy->editvars */
+    if (with_editvars) {
+        *res = copy_editvars(val, copy);
+        if (*res != NO_ERR) {
+            val_free_value(copy);
+            return NULL;
+        }
+    }
+
+    copy->res = val->res;
+    copy->getcb = val->getcb;
+
+    /* clone the XPath control block if there is one */
+    if (val->xpathpcb) {
+        copy->xpathpcb = xpath_clone_pcb(val->xpathpcb);
+        if (copy->xpathpcb == NULL) {
+            *res = ERR_INTERNAL_MEM;
+            val_free_value(copy);
+            return NULL;
+        }
+    }
+
+    /* DO NOT COPY copy->index = val->index; */
+    /* set copy->indexQ after cloning child nodes is done */
+
+    copy->casobj = val->casobj;
+
+    /* assume OK return for now */
+    *res = NO_ERR;
+
+    /* v_ union: copy the actual value or children for complex types */
+    switch (val->btyp) {
+    case NCX_BT_ENUM:
+        copy->v.enu.name = val->v.enu.name;
+        VAL_ENUM(copy) = VAL_ENUM(val);
+        break;
+    case NCX_BT_EMPTY:
+    case NCX_BT_BOOLEAN:
+        copy->v.boo = val->v.boo;
+        break;
+    case NCX_BT_INT8:
+    case NCX_BT_INT16:
+    case NCX_BT_INT32:
+    case NCX_BT_INT64:
+    case NCX_BT_UINT8:
+    case NCX_BT_UINT16:
+    case NCX_BT_UINT32:
+    case NCX_BT_UINT64:
+    case NCX_BT_DECIMAL64:
+    case NCX_BT_FLOAT64:
+        *res = ncx_copy_num(&val->v.num, &copy->v.num, val->btyp);
+        break;
+    case NCX_BT_BINARY:
+        ncx_init_binary(&copy->v.binary);
+        if (val->v.binary.ustr) {
+            copy->v.binary.ustr = m__getMem(val->v.binary.ustrlen);
+            if (!copy->v.binary.ustr) {
+                *res = ERR_INTERNAL_MEM;
+            } else {
+                memcpy(copy->v.binary.ustr, 
+                       val->v.binary.ustr, 
+                       val->v.binary.ustrlen);
+                copy->v.binary.ustrlen = val->v.binary.ustrlen;
+                copy->v.binary.ubufflen = val->v.binary.ustrlen;
+            }
+        }
+        break;
+    case NCX_BT_STRING: 
+    case NCX_BT_INSTANCE_ID:
+    case NCX_BT_LEAFREF:
+        *res = ncx_copy_str(&val->v.str, &copy->v.str, val->btyp);
+        break;
+    case NCX_BT_IDREF:
+        copy->v.idref.name = xml_strdup(val->v.idref.name);
+        if (!copy->v.idref.name) {
+            *res = ERR_INTERNAL_MEM;
+        } else {
+            *res = NO_ERR;
+        }
+        copy->v.idref.nsid = val->v.idref.nsid;
+        copy->v.idref.identity = val->v.idref.identity;
+        break;
+    case NCX_BT_BITS:
+    case NCX_BT_SLIST:
+        *res = ncx_copy_list(&val->v.list, &copy->v.list);
+        break;
+    case NCX_BT_ANY:
+    case NCX_BT_LIST:
+    case NCX_BT_CONTAINER:
+    case NCX_BT_CHOICE:
+    case NCX_BT_CASE:
+        val_init_complex(copy, val->btyp);
+        for (ch = (const val_value_t *)dlq_firstEntry(&val->v.childQ);
+             ch != NULL && *res==NO_ERR;
+             ch = (const val_value_t *)dlq_nextEntry(ch)) {
+            copych = clone_test(ch, testfn, with_editvars, res);
+            if (!copych) {
+                if (*res == ERR_NCX_SKIPPED) {
+                    *res = NO_ERR;
+                }
+            } else {
+                copych->parent = copy;
+                dlq_enque(copych, &copy->v.childQ);
+            }
+        }
+        break;
+    case NCX_BT_EXTERN:
+        if (val->v.fname) {
+            copy->v.fname = xml_strdup(val->v.fname);
+            if (!copy->v.fname) {
+                *res = ERR_INTERNAL_MEM;
+            }
+        }
+        break;
+    case NCX_BT_INTERN:
+        if (val->v.intbuff) {
+            copy->v.intbuff = xml_strdup(val->v.intbuff);
+            if (!copy->v.intbuff) {
+                *res = ERR_INTERNAL_MEM;
+            }
+        }
+        break;
+    default:
+        *res = SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
+    /* reconstruct index records if needed */
+    if (*res==NO_ERR && !dlq_empty(&val->indexQ)) {
+        *res = val_gen_index_chain(val->obj, copy);
+    }
+
+    if (*res != NO_ERR) {
+        val_free_value(copy);
+        copy = NULL;
+    }
+
+    return copy;
+
+}  /* clone_test */
+
+
 /*************** E X T E R N A L    F U N C T I O N S  *************/
 
 
@@ -1268,7 +1598,7 @@ val_value_t *
     dlq_createSQue(&val->metaQ);
     dlq_createSQue(&val->indexQ);
 
-    res = val_new_editvars(val);
+    res = new_editvars(val);
     if (res != NO_ERR) {
         val_free_value(val);
         val = NULL;
@@ -1391,103 +1721,6 @@ void
     m__free(val);
 
 }  /* val_free_value */
-
-
-/********************************************************************
-* FUNCTION val_new_editvars
-* 
-* Malloc and initialize the val->editvars field
-*
-* INPUTS:
-*    val == val_value_t data structure to use
-*
-* OUTPUTS:
-*    val->editvars is malloced and initialized
-* 
-* RETURNS:
-*   status
-*********************************************************************/
-status_t
-    val_new_editvars (val_value_t *val)
-{
-    val_editvars_t  *editvars;
-
-#ifdef DEBUG
-    if (!val) {
-        return SET_ERROR(ERR_INTERNAL_PTR);
-    }
-#endif
-
-    if (val->editvars) {
-        return SET_ERROR(ERR_NCX_DATA_EXISTS);
-    }
-
-    editvars = m__getObj(val_editvars_t);
-    if (!editvars) {
-        return ERR_INTERNAL_MEM;
-    }
-    memset(editvars, 0x0, sizeof(val_editvars_t));
-
-    val->editvars = editvars;
-
-#ifdef VAL_EDITVARS_DEBUG
-    log_debug3("\n\nnew_editvars: %u = %p\n",
-               ++editvars_malloc,
-               editvars);
-#endif
-
-    return NO_ERR;
-
-}  /* val_new_editvars */
-
-
-/********************************************************************
-* FUNCTION val_free_editvars
-* 
-* Clean and free the val->editvars field
-*
-* INPUTS:
-*    val == val_value_t data structure to use
-*
-* OUTPUTS:
-*    val->editvars is cleaned, freed, and set to NULL
-*********************************************************************/
-void
-    val_free_editvars (val_value_t *val)
-{
-#ifdef DEBUG
-    if (!val) {
-        SET_ERROR(ERR_INTERNAL_PTR);
-        return;
-    }
-#endif
-
-    if (val->editvars) {
-#ifdef VAL_EDITVARS_DEBUG
-        log_debug3("\n\nfree_editvars: %s: %d = %p\n",
-                   (val->name) ? val->name : NCX_EL_NONE,
-                   ++editvars_free,
-                   val->editvars);
-#endif
-
-        if (val->editvars->insertstr) {
-            m__free(val->editvars->insertstr);
-        }
-
-        if (val->editvars->insertxpcb) {
-            xpath_free_pcb(val->editvars->insertxpcb);
-        }
-
-        m__free(val->editvars);
-        val->editvars = NULL;
-    } else {
-#ifdef VAL_EDITVARS_DEBUG
-        log_debug3("\nval_free_editvars skipped (%u, %s)",
-                   editvars_free, val->name);
-#endif
-    }
-
-}  /* val_free_editvars */
 
 
 /********************************************************************
@@ -4581,7 +4814,7 @@ boolean
     }
     if (!typ_is_simple(src->btyp) || 
         !typ_is_simple(dest->btyp)) {
-        SET_ERROR(ERR_INTERNAL_PTR);
+        SET_ERROR(ERR_INTERNAL_VAL);
         return TRUE;
     }   
 #endif
@@ -4721,246 +4954,38 @@ val_value_t *
     }
 #endif
 
-    return val_clone_test(val, NULL, &res);
+    return clone_test(val, NULL, TRUE, &res);
 
 }  /* val_clone */
 
 
 /********************************************************************
-* FUNCTION val_clone_test
+* FUNCTION val_clone2
 * 
 * Clone a specified val_value_t struct and sub-trees
-* Only clone the nodes that pass the test function callback
+* but not the editvars
 *
 * INPUTS:
 *    val == value to clone
-*    testcb  == filter test callback function to use
-*               NULL means no filter
-*    res == address of return status
-*
-* OUTPUTS:
-*    *res == resturn status
-*
+*   
 * RETURNS:
-*   clone of val, or NULL if a malloc failure or entire node filtered
+*   clone of val, or NULL if a malloc failure
 *********************************************************************/
 val_value_t *
-    val_clone_test (const val_value_t *val,
-                    val_test_fn_t  testfn,
-                    status_t *res)
+    val_clone2 (const val_value_t *val)
 {
-    const val_value_t *ch;
-    val_value_t       *copy, *copych;
-    boolean            testres;
-    uint32             i;
+    status_t res;
 
 #ifdef DEBUG
-    if (!val || !res) {
+    if (!val) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return NULL;
     }
 #endif
 
-    if (testfn) {
-        testres = (*testfn)(val);
-        if (!testres) {
-            *res = ERR_NCX_SKIPPED;
-            return NULL;
-        }
-    }
+    return clone_test(val, NULL, FALSE, &res);
 
-    copy = val_new_value();
-    if (!copy) {
-        *res = ERR_INTERNAL_MEM;
-        return NULL;
-    }
-
-    /* copy all the fields */
-    copy->obj = val->obj;
-    copy->typdef = val->typdef;
-
-    if (val->dname) {
-        copy->dname = xml_strdup(val->dname);
-        if (!copy->dname) {
-            *res = ERR_INTERNAL_MEM;
-            val_free_value(copy);
-            return NULL;
-        }
-        copy->name = copy->dname;
-    } else {
-        copy->dname = NULL;
-        copy->name = val->name;
-    }
-
-    copy->parent = val->parent;
-    copy->nsid = val->nsid;
-    copy->btyp = val->btyp;
-    copy->flags = val->flags;
-    copy->dataclass = val->dataclass;
-
-    /* copy any active partial locks;
-     * this should be empty for candidate or PDU source
-     * vals, but in case a copy of running is made, this
-     * array of partial locks needs to be transferred
-     */
-    for (i=0; i<VAL_MAX_PLOCKS; i++) {
-        copy->plock[i] = val->plock[i];
-    }
-
-    /* copy meta-data */
-    for (ch = (const val_value_t *)dlq_firstEntry(&val->metaQ);
-         ch != NULL;
-         ch = (const val_value_t *)dlq_nextEntry(ch)) {
-        copych = val_clone_test(ch, testfn, res);
-        if (!copych) {
-            if (*res == ERR_NCX_SKIPPED) {
-                *res = NO_ERR;
-            } else {
-                val_free_value(copy);
-                return NULL;
-            }
-        } else {
-            dlq_enque(copych, &copy->metaQ);
-        }
-    }
-
-    /* set the copy->editvars */
-    *res = copy_editvars(val, copy);
-    if (*res != NO_ERR) {
-        val_free_value(copy);
-        return NULL;
-    }
-
-    copy->res = val->res;
-    copy->getcb = val->getcb;
-
-    /* clone the XPath control block if there is one */
-    if (val->xpathpcb) {
-        copy->xpathpcb = xpath_clone_pcb(val->xpathpcb);
-        if (copy->xpathpcb == NULL) {
-            *res = ERR_INTERNAL_MEM;
-            val_free_value(copy);
-            return NULL;
-        }
-    }
-
-    /* DO NOT COPY copy->index = val->index; */
-    /* set copy->indexQ after cloning child nodes is done */
-
-    copy->casobj = val->casobj;
-
-    /* assume OK return for now */
-    *res = NO_ERR;
-
-    /* v_ union: copy the actual value or children for complex types */
-    switch (val->btyp) {
-    case NCX_BT_ENUM:
-        copy->v.enu.name = val->v.enu.name;
-        VAL_ENUM(copy) = VAL_ENUM(val);
-        break;
-    case NCX_BT_EMPTY:
-    case NCX_BT_BOOLEAN:
-        copy->v.boo = val->v.boo;
-        break;
-    case NCX_BT_INT8:
-    case NCX_BT_INT16:
-    case NCX_BT_INT32:
-    case NCX_BT_INT64:
-    case NCX_BT_UINT8:
-    case NCX_BT_UINT16:
-    case NCX_BT_UINT32:
-    case NCX_BT_UINT64:
-    case NCX_BT_DECIMAL64:
-    case NCX_BT_FLOAT64:
-        *res = ncx_copy_num(&val->v.num, &copy->v.num, val->btyp);
-        break;
-    case NCX_BT_BINARY:
-        ncx_init_binary(&copy->v.binary);
-        if (val->v.binary.ustr) {
-            copy->v.binary.ustr = m__getMem(val->v.binary.ustrlen);
-            if (!copy->v.binary.ustr) {
-                *res = ERR_INTERNAL_MEM;
-            } else {
-                memcpy(copy->v.binary.ustr, 
-                       val->v.binary.ustr, 
-                       val->v.binary.ustrlen);
-                copy->v.binary.ustrlen = val->v.binary.ustrlen;
-                copy->v.binary.ubufflen = val->v.binary.ustrlen;
-            }
-        }
-        break;
-    case NCX_BT_STRING: 
-    case NCX_BT_INSTANCE_ID:
-    case NCX_BT_LEAFREF:
-        *res = ncx_copy_str(&val->v.str, &copy->v.str, val->btyp);
-        break;
-    case NCX_BT_IDREF:
-        copy->v.idref.name = xml_strdup(val->v.idref.name);
-        if (!copy->v.idref.name) {
-            *res = ERR_INTERNAL_MEM;
-        } else {
-            *res = NO_ERR;
-        }
-        copy->v.idref.nsid = val->v.idref.nsid;
-        copy->v.idref.identity = val->v.idref.identity;
-        break;
-    case NCX_BT_BITS:
-    case NCX_BT_SLIST:
-        *res = ncx_copy_list(&val->v.list, &copy->v.list);
-        break;
-    case NCX_BT_ANY:
-    case NCX_BT_LIST:
-    case NCX_BT_CONTAINER:
-    case NCX_BT_CHOICE:
-    case NCX_BT_CASE:
-        val_init_complex(copy, val->btyp);
-        for (ch = (const val_value_t *)dlq_firstEntry(&val->v.childQ);
-             ch != NULL && *res==NO_ERR;
-             ch = (const val_value_t *)dlq_nextEntry(ch)) {
-            copych = val_clone_test(ch, testfn, res);
-            if (!copych) {
-                if (*res == ERR_NCX_SKIPPED) {
-                    *res = NO_ERR;
-                }
-            } else {
-                copych->parent = copy;
-                dlq_enque(copych, &copy->v.childQ);
-            }
-        }
-        break;
-    case NCX_BT_EXTERN:
-        if (val->v.fname) {
-            copy->v.fname = xml_strdup(val->v.fname);
-            if (!copy->v.fname) {
-                *res = ERR_INTERNAL_MEM;
-            }
-        }
-        break;
-    case NCX_BT_INTERN:
-        if (val->v.intbuff) {
-            copy->v.intbuff = xml_strdup(val->v.intbuff);
-            if (!copy->v.intbuff) {
-                *res = ERR_INTERNAL_MEM;
-            }
-        }
-        break;
-    default:
-        *res = SET_ERROR(ERR_INTERNAL_VAL);
-    }
-
-    /* reconstruct index records if needed */
-    if (*res==NO_ERR && !dlq_empty(&val->indexQ)) {
-        *res = val_gen_index_chain(val->obj, copy);
-    }
-
-    if (*res != NO_ERR) {
-        val_free_value(copy);
-        copy = NULL;
-    }
-
-    return copy;
-
-}  /* val_clone_test */
+}  /* val_clone2 */
 
 
 /********************************************************************
@@ -4969,8 +4994,10 @@ val_value_t *
 * Clone a specified val_value_t struct and sub-trees
 * Filter with the val_is_config_data callback function
 * pass in a config node, such as <config> root
-* will call val_clone_test with the val_is_config_data
+* will call clone_test with the val_is_config_data
 * callbacck function
+*
+* DOES NOT CLONE THE EDITVARS!!!!
 *
 * INPUTS:
 *    val == config data value to clone
@@ -4993,7 +5020,7 @@ val_value_t *
     }
 #endif
 
-    return val_clone_test(val, val_is_config_data, res);
+    return clone_test(val, val_is_config_data, FALSE, res);
 
 }  /* val_clone_config_data */
 
@@ -8451,7 +8478,7 @@ boolean
     val_is_config_data (const val_value_t *val)
 {
 #ifdef DEBUG
-    if (!val) {
+    if (val == NULL || val->obj == NULL) {
         SET_ERROR(ERR_INTERNAL_PTR);
         return FALSE;
     }
@@ -9120,7 +9147,7 @@ void
  * OUTPUTS:
  *   val and all its child nodes (if any) are cleaned
  *     val->flags: VAL_FL_DIRTY bit cleared to 0
- *     val->editop: cleared to OP_EDITOP_NONE
+ *     val->editvars deleted
  *     val->curparent: cleared to NULL
  *********************************************************************/
 void
@@ -9142,7 +9169,7 @@ void
             val_clean_tree(chval);
         }
         val->flags &= ~VAL_FL_DIRTY;
-        val_free_editvars(val);
+        free_editvars(val);
     }
 
 }  /* val_clean_tree */
@@ -9930,7 +9957,7 @@ status_t
 
     val->flags |= VAL_FL_DEFSET;
     if (val->editvars == NULL) {
-        res = val_new_editvars(val);
+        res = new_editvars(val);
         if (res != NO_ERR) {
             return res;
         }

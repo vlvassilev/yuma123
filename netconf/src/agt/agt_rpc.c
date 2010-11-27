@@ -1632,11 +1632,11 @@ void
 
     /* validate state */
     if ((res==NO_ERR) && (cbset && cbset->acb[AGT_RPC_PH_VALIDATE])) {
-        /* input passes the basic NCX schema tests at this point;
+        /* input passes the basic YANG schema tests at this point;
          * check if there is a validate callback for
          * referential integrity, locks, resource reservation, etc.
-         * Only the top level parmset has been checked for instance
-         * qualifer usage.  The caller must do Data Parmset instance
+         * Only the top level data node has been checked for instance
+         * qualifer usage.  The caller must do data node instance
          * validataion in this VALIDATE callback, as needed
          */
         msg->rpc_agt_state = AGT_RPC_PH_VALIDATE;
@@ -1645,7 +1645,7 @@ void
 
     /* there does not always have to be an invoke callback,
      * especially since the return of data can be automated
-     * in the send_rpc_reply phase
+     * in the send_rpc_reply phase. 
      */
     if ((res==NO_ERR) && cbset && cbset->acb[AGT_RPC_PH_INVOKE]) {
         msg->rpc_agt_state = AGT_RPC_PH_INVOKE;

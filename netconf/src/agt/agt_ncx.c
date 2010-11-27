@@ -38,10 +38,6 @@ date         init     comment
 #include "agt.h"
 #endif
 
-#ifndef _H_agt_acm
-#include "agt_acm.h"
-#endif
-
 #ifndef _H_agt_cap
 #include "agt_cap.h"
 #endif
@@ -609,17 +605,11 @@ static status_t
                                      val, 
                                      defop);
 
-        /* for continue-on-error, ignore the validate return value
-         * in case there are multiple parmsets and not all of them
-         * had errors.  Force a NO_ERR return.
-         */
-        if (!NEED_EXIT(res)) {
-            if (errop == OP_ERROP_CONTINUE) {
-                res = NO_ERR;
-            }
-        }
-
-        /* if this is an edit-config on running
+        /* for continue-on-error, DO NOT ignore the validate return value
+         * make sure the entire change set is acceptable to the server
+         * schema syntax and server callback validate functions
+         *
+         * if this is an edit-config on running
          * or a test-then-set edit on candidate
          * then make a copy of the root and do a
          * complete non-destructive validation
@@ -641,7 +631,6 @@ static status_t
         res = val->res;
     }
 
-    
     /* save the edit options in 'user1' */
     if (res == NO_ERR) {
         editparms = m__getObj(edit_parms_t);
@@ -697,6 +686,7 @@ static status_t
     cfg_template_t *target;
     val_value_t    *srcval, *urlval;
     edit_parms_t   *editparms;
+    agt_profile_t  *profile;
     op_editop_t     defop;
     op_testop_t     testop;
     status_t        res;
@@ -710,7 +700,8 @@ static status_t
     target = editparms->target;
     urlval = editparms->urlval;
     srcval = editparms->srcval;
-
+    profile = agt_get_profile();
+    
     /* quick exit if this is a test-only request */
     if (testop == OP_TESTOP_TESTONLY) {
         return NO_ERR;
@@ -722,6 +713,21 @@ static status_t
                               target, 
                               (srcval) ? srcval : urlval,
                               defop);
+
+    /* check if the NV-storage needs to be updated after each
+     * successful edit-config 
+     */
+    if (res == NO_ERR &&
+        profile->agt_targ == NCX_AGT_TARG_RUNNING &&
+        profile->agt_has_startup == FALSE) {
+
+        res = agt_ncx_cfg_save(target, FALSE);
+        if (res != NO_ERR) {
+            log_error("\nError: Save <running> to NV-storage failed (%s)",
+                      get_error_string(res));
+        }
+    }
+
 
     /* cleanup the urlval and editparms
      * allocated in validate callback 

@@ -39,10 +39,6 @@ date         init     comment
 #include "agt.h"
 #endif
 
-#ifndef _H_agt_acm
-#include "agt_acm.h"
-#endif
-
 #ifndef _H_agt_cap
 #include "agt_cap.h"
 #endif
@@ -2164,6 +2160,39 @@ static status_t
 {
     status_t  res;
 
+    /* check if trying to write to a config=false node */
+    if (newval != NULL && !val_is_config_data(newval)) {
+        res = ERR_NCX_ACCESS_READ_ONLY;
+        agt_record_error(scb, 
+                         (msg) ? &msg->mhdr : NULL,
+                         NCX_LAYER_OPERATION, 
+                         res,
+                         NULL, 
+                         NCX_NT_NONE, 
+                         NULL,
+                         NCX_NT_VAL, 
+                         newval);
+        return res;
+    }
+
+    /* check if trying to delete a config=false node */
+    if (newval == NULL && 
+        curval != NULL &&
+        !val_is_config_data(curval)) {
+        res = ERR_NCX_ACCESS_READ_ONLY;
+        agt_record_error(scb, 
+                         (msg) ? &msg->mhdr : NULL,
+                         NCX_LAYER_OPERATION, 
+                         res,
+                         NULL, 
+                         NCX_NT_NONE, 
+                         NULL,
+                         NCX_NT_VAL, 
+                         curval);
+        return res;
+    }
+
+    /* this is a config node so check the operation further */
     switch (cbtyp) {
     case AGT_CB_VALIDATE:
     case AGT_CB_APPLY:

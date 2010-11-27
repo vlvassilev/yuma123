@@ -655,6 +655,8 @@ const char *
         return "cannot start a partial lock with confirmed-commit pending";
     case ERR_NCX_SUBMOD_NOT_LOADED:
         return "cannot directly load a submodule";
+    case ERR_NCX_ACCESS_READ_ONLY:
+        return "cannot write to a read-only object";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

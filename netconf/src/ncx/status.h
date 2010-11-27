@@ -317,7 +317,8 @@ typedef enum status_t_
     ERR_NCX_IN_USE_LOCKED,              /* 372 */
     ERR_NCX_IN_USE_COMMIT,              /* 373 */
     ERR_NCX_SUBMOD_NOT_LOADED,          /* 374 */
-    ERR_LAST_USR_ERR,                   /* 375 -- not really used */
+    ERR_NCX_ACCESS_READ_ONLY,           /* 375 */
+    ERR_LAST_USR_ERR,                   /* 376 -- not really used */
 
     /* user warnings start at 400 */
     ERR_MAKFILE_DUP_SRC=ERR_WARN_BASE,  /* 400 */

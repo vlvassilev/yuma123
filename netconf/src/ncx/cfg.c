@@ -326,7 +326,7 @@ static cfg_template_t *
         
         /* finish setting up the <config> root value */
         val_init_from_template(cfg->root, cfgobj);
-    }  /* else root will be set next with val_clone_config */
+    }  /* else root will be set next with val_clone_config_data */
 
     return cfg;
 
@@ -684,13 +684,8 @@ status_t
     }
 
     res = NO_ERR;
-    candidate->root = 
-        val_clone_config_data(running->root, &res);
-
-    if (res == NO_ERR) {
-        /* clear the candidate dirty flag */
-        candidate->flags &= ~CFG_FL_DIRTY;
-    }
+    candidate->root = val_clone_config_data(running->root, &res);
+    candidate->flags &= ~CFG_FL_DIRTY;
     return res;
 
 } /* cfg_fill_candidate_from_running */
@@ -730,14 +725,11 @@ status_t
         candidate->root = NULL;
     }
 
-    candidate->root = val_clone(startup->root);
+    res = NO_ERR;
+    candidate->root = val_clone2(startup->root);
     if (candidate->root == NULL) {
         res = ERR_INTERNAL_MEM;
-    } else {
-        res = NO_ERR;
     }
-
-    /* clear the candidate dirty flag */
     candidate->flags &= ~CFG_FL_DIRTY;
 
     return res;
@@ -779,14 +771,8 @@ status_t
         candidate->root = NULL;
     }
 
-    candidate->root = val_clone(newroot);
-    if (candidate->root == NULL) {
-        res = ERR_INTERNAL_MEM;
-    } else {
-        res = NO_ERR;
-    }
-
-    /* clear the candidate dirty flag */
+    res = NO_ERR;
+    candidate->root = val_clone_config_data(newroot, &res);
     candidate->flags &= ~CFG_FL_DIRTY;
 
     return res;

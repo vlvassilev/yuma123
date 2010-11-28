@@ -170,6 +170,12 @@ date         init     comment
 
 #define INV_PREFIX  ((const xmlChar *)"inv")
 
+
+/* this flag will cause debug3 trace statements to be printed
+ * to the log during operation for module alloc and free operations
+ */
+/* #define NCX_DEBUG_MOD_MEMORY  1 */
+
 /********************************************************************
 *                                                                   *
 *                            T Y P E S                              *
@@ -460,12 +466,14 @@ static void
     ncx_identity_t *identity;
     yang_stmt_t    *stmt;
 
+#ifdef NCX_DEBUG_MOD_MEMORY
     if (LOGDEBUG3) {
         log_debug3("\nncx_freemod: %p (%s) %d", 
                    mod, 
                    mod->name, 
                    mod->ismod);
     }
+#endif
 
     /* clear the revision Q */
     while (!dlq_empty(&mod->revhistQ)) {
@@ -1235,9 +1243,11 @@ ncx_module_t *
         return NULL;
     }
 
+#ifdef NCX_DEBUG_MOD_MEMORY
     if (LOGDEBUG3) {
         log_debug3("\nncx_newmod: %p", mod);
     }
+#endif
 
     (void)memset(mod, 0x0, sizeof(ncx_module_t));
     mod->langver = 1;
@@ -2352,9 +2362,9 @@ status_t
             ncx_print_errormsg(NULL, mod, res);
             return SET_ERROR(ERR_INTERNAL_VAL);
         } else {
-            log_debug2("\nAdding module '%s' to registry"
-                       " with errors", 
-                       mod->name);
+            log_warn("\nWarning: Adding module '%s' to registry"
+                     " with errors", 
+                     mod->name);
             res = NO_ERR;
         }
     }

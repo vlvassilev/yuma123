@@ -270,9 +270,13 @@ static status_t
         } 
         if (LOGDEBUG2) {
             log_debug2("\nabout to send RPC request with reqdata:");
-            val_dump_value_ex(reqdata, 
-                              NCX_DEF_INDENT,
-                              server_cb->display_mode);
+            val_dump_value_max(reqdata, 
+                               0,
+                               server_cb->defindent,
+                               DUMP_VAL_LOG,
+                               server_cb->display_mode,
+                               FALSE,
+                               FALSE);
         }
 
         /* the request will be stored if this returns NO_ERR */
@@ -354,6 +358,9 @@ static status_t
                   targetfile,
                   get_error_string(res));
     } else {
+        /* do not use session display mode and other parameters
+         * when saving a schema file; save as-is
+         */
         val_dump_alt_value(resultval, 0);
         log_alt_close();
 
@@ -1023,7 +1030,13 @@ status_t
         if (!LOGDEBUG2) {
             /* the error was never printed */
             if (LOGINFO) {
-                val_dump_value(reply, NCX_DEF_INDENT);
+                val_dump_value_max(reply, 
+                                   0,
+                                   server_cb->defindent,
+                                   DUMP_VAL_LOG,
+                                   server_cb->display_mode,
+                                   FALSE,
+                                   FALSE);
             }
         }
     } else {

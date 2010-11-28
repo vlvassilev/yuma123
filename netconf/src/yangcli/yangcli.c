@@ -344,6 +344,9 @@ static op_defop_t      defop;
 /* default NETCONF with-defaults value */
 static ncx_withdefaults_t  withdefaults;
 
+/* default indent amount */
+static int32            defindent;
+
 
 /********************************************************************
 * FUNCTION get_line_timeout
@@ -707,6 +710,7 @@ static server_cb_t *
     server_cb->withdefaults = withdefaults;
     server_cb->history_size = YANGCLI_HISTLEN;
     server_cb->command_mode = CMD_MODE_NORMAL;
+    server_cb->defindent = defindent;
     return server_cb;
 
 }  /* new_server_cb */
@@ -738,6 +742,7 @@ static void
     server_cb->timeout = default_timeout;
     server_cb->display_mode = display_mode;
     server_cb->withdefaults = withdefaults;
+    server_cb->defindent = defindent;
 
 }  /* update_server_cb_vars */
 
@@ -958,9 +963,7 @@ static status_t
         }
     } else if (!xml_strcmp(configval->name, YANGCLI_TIMEOUT)) {
         ncx_init_num(&testnum);
-        res = ncx_decode_num(usestr,
-                             NCX_BT_UINT32,
-                             &testnum);
+        res = ncx_decode_num(usestr, NCX_BT_UINT32, &testnum);
         if (res == NO_ERR) {
             server_cb->timeout = testnum.u;
             default_timeout = testnum.u;
@@ -1015,7 +1018,24 @@ static status_t
                 server_cb->withdefaults = withdefaults;
             }
         }
+    } else if (!xml_strcmp(configval->name, NCX_EL_INDENT)) {
+        ncx_init_num(&testnum);
+        res = ncx_decode_num(usestr, NCX_BT_UINT32, &testnum);
+        if (res == NO_ERR) {
+            if (testnum.u > YANGCLI_MAX_INDENT) {
+                log_error("\nError: value must be a uint32 (0..9)");
+                res = ERR_NCX_INVALID_VALUE;
+            } else {
+                /* indent value is valid */
+                defindent = (int32)testnum.u;
+                server_cb->defindent = defindent;
+            }
+        } else {
+            log_error("\nError: must be valid uint32 value");
+        }
+        ncx_clean_num(NCX_BT_INT32, &testnum);
     } else {
+        /* unknown parameter name */
         res = SET_ERROR(ERR_INTERNAL_VAL);
     }
 
@@ -1157,7 +1177,13 @@ static status_t
                           server_cb->result_filename,
                           get_error_string(res));
             } else {
-                val_dump_alt_value(resultval, 0);
+                val_dump_value_max(resultval,
+                                   0,   /* startindent */
+                                   server_cb->defindent,
+                                   DUMP_VAL_ALT_LOG, /* dumpmode */
+                                   server_cb->display_mode,
+                                   FALSE,    /* withmeta */
+                                   FALSE);   /* configonly */
                 log_alt_close();
             }
         } else {
@@ -1169,7 +1195,7 @@ static status_t
                               XMLMODE, 
                               WITHHDR, 
                               0,
-                              NCX_DEF_INDENT);
+                              server_cb->defindent);
             xml_clean_attrs(&attrs);
         }
     } else {
@@ -1794,6 +1820,14 @@ static status_t
         return res;
     }
 
+    sprintf((char *)numbuff, "%d", defindent);
+    res = create_config_var(server_cb,
+                            NCX_EL_INDENT, 
+                            numbuff);
+    if (res != NO_ERR) {
+        return res;
+    }
+
     res = create_config_var(server_cb,
                             YANGCLI_OPTIONAL, 
                             (cur_server_cb->get_optional) 
@@ -2047,6 +2081,16 @@ static status_t
         } else {
             helpsubmode = HELP_MODE_NORMAL;
         }
+    }
+
+    /* get indent param */
+    parm = val_find_child(mgr_cli_valset, 
+                          YANGCLI_MOD, 
+                          NCX_EL_INDENT);
+    if (parm && parm->res == NO_ERR) {
+        defindent = (int32)VAL_UINT(parm);
+    } else {
+        defindent = NCX_DEF_INDENT;
     }
 
     /* get the password parameter */
@@ -3201,9 +3245,13 @@ static void
             gl_normal_io(server_cb->cli_gl);
             if (LOGINFO) {
                 log_info("\n\nIncoming notification:");
-                val_dump_value_ex(msg->notification, 
-                                  NCX_DEF_INDENT,
-                                  server_cb->display_mode);
+                val_dump_value_max(msg->notification, 
+                                   0,
+                                   server_cb->defindent,
+                                   DUMP_VAL_LOG,
+                                   server_cb->display_mode,
+                                   FALSE,
+                                   FALSE);
                 log_info("\n\n");
             } else if (msg->eventType) {
                 log_warn("\n\nIncoming <%s> "
@@ -3897,8 +3945,6 @@ void
     }
 #endif
 
-
-
     mgrcb = scb->mgrcb;
     if (mgrcb) {
         usesid = mgrcb->agtsid;
@@ -3922,9 +3968,13 @@ void
                 log_error("\nRPC Error Reply %s for session %u:\n",
                           rpy->msg_id, 
                           usesid);
-                val_dump_value_ex(rpy->reply, 
-                                  0,
-                                  server_cb->display_mode);
+                val_dump_value_max(rpy->reply, 
+                                   0,
+                                   server_cb->defindent,
+                                   DUMP_VAL_LOG,
+                                   server_cb->display_mode,
+                                   FALSE,
+                                   FALSE);
                 log_error("\n");
                 anyout = TRUE;
             }
@@ -3942,9 +3992,13 @@ void
             log_info("\nRPC Data Reply %s for session %u:\n",
                      rpy->msg_id, 
                      usesid);
-            val_dump_value_ex(rpy->reply, 
-                              0,
-                              server_cb->display_mode);
+            val_dump_value_max(rpy->reply, 
+                               0,
+                               server_cb->defindent,
+                               DUMP_VAL_LOG,
+                               server_cb->display_mode,
+                               FALSE,
+                               FALSE);
             log_info("\n");
             anyout = TRUE;
         }

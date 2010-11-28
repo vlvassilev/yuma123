@@ -209,15 +209,13 @@ static status_t
                      tk_get_btype_sym(val->btyp));
         }
     } else {
-        if (imode) {
-            val_stdout_value_ex(val, 
-                                NCX_DEF_INDENT * doubleindent,
-                                server_cb->display_mode);
-        } else {
-            val_dump_value_ex(val, 
-                              NCX_DEF_INDENT * doubleindent,
-                              server_cb->display_mode);
-        }
+        val_dump_value_max(val, 
+                           server_cb->defindent * doubleindent,
+                           server_cb->defindent,
+                           (imode) ? DUMP_VAL_STDOUT : DUMP_VAL_LOG,
+                           server_cb->display_mode,
+                           FALSE,
+                           FALSE);
     }
 
     return res;
@@ -270,15 +268,13 @@ static status_t
         /* CLI Parameters */
         if (mgrset && val_child_cnt(mgrset)) {
             (*logfn)("\nCLI Variables\n");
-            if (imode) {
-                val_stdout_value_ex(mgrset, 
-                                    NCX_DEF_INDENT,
-                                    server_cb->display_mode);
-            } else {
-                val_dump_value_ex(mgrset, 
-                                  NCX_DEF_INDENT,
-                                  server_cb->display_mode);
-            }
+            val_dump_value_max(mgrset, 
+                               server_cb->defindent,
+                               server_cb->defindent,
+                               (imode) ? DUMP_VAL_STDOUT : DUMP_VAL_LOG,
+                               server_cb->display_mode,
+                               FALSE,
+                               FALSE);
             (*logfn)("\n");
         } else {
             (*logfn)("\nNo CLI variables\n");

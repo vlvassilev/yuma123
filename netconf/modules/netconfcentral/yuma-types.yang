@@ -11,6 +11,11 @@ module yuma-types {
 
     description "Yuma Common Data Types";
 
+    revision 2010-11-28 {
+       description 
+         "Change default indent from 3 to 2.";
+    }
+
     revision 2010-01-25 {
        description 
           "Adjust name lengths in ranges and patterns.";
@@ -259,7 +264,7 @@ module yuma-types {
         type uint32 {
             range "0..9"; 
         }
-        default "3";
+        default "2";
     }
 
     typedef Timeout {

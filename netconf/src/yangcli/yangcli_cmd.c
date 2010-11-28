@@ -906,7 +906,7 @@ static status_t
                 obj_dump_template(parm, 
                                   HELP_MODE_FULL, 
                                   0,
-                                  NCX_DEF_INDENT);
+                                  server_cb->defindent);
             } else if (start[1] == 'C' || start[1] == 'c') {
                 /* ?c or ?C == cancel the operation */
                 log_stdout("\n%s command canceled",
@@ -922,7 +922,7 @@ static status_t
                 obj_dump_template(parm, 
                                   HELP_MODE_NORMAL, 
                                   4,
-                                  NCX_DEF_INDENT);
+                                  server_cb->defindent);
             }
             log_stdout("\n");
             continue;
@@ -1077,7 +1077,7 @@ static status_t
                         obj_dump_template(parm, 
                                           HELP_MODE_FULL, 
                                           0,
-                                          NCX_DEF_INDENT);
+                                          server_cb->defindent);
                     } else if (start2[1] == 'C' || start2[1] == 'c') {
                         /* ?c or ?C == cancel the operation */
                         log_stdout("\n%s command canceled",
@@ -1097,7 +1097,7 @@ static status_t
                         obj_dump_template(parm, 
                                           HELP_MODE_NORMAL, 
                                           4,
-                                          NCX_DEF_INDENT);
+                                          server_cb->defindent);
                     }
                     log_stdout("\n");
                     continue;
@@ -1459,7 +1459,7 @@ static status_t
                 obj_dump_template(choic, 
                                   HELP_MODE_FULL, 
                                   0,
-                                  NCX_DEF_INDENT);
+                                  server_cb->defindent);
             } else if (str[1] == 'C' || str[1] == 'c') {
                 log_stdout("\n%s command canceled\n",
                            obj_get_name(rpc));
@@ -1474,7 +1474,7 @@ static status_t
                 obj_dump_template(choic, 
                                   HELP_MODE_NORMAL,
                                   4,
-                                  NCX_DEF_INDENT);
+                                  server_cb->defindent);
             }
             log_stdout("\n");
         } else {
@@ -1958,7 +1958,13 @@ static void
 
     if (LOGDEBUG) {
         log_debug("\nConnect attempt with following parameters:");
-        val_dump_value(server_cb->connect_valset, NCX_DEF_INDENT);
+        val_dump_value_max(server_cb->connect_valset,
+                           0,
+                           server_cb->defindent,
+                           DUMP_VAL_LOG,
+                           server_cb->display_mode,
+                           FALSE,
+                           FALSE);
         log_debug("\n");
     }
     
@@ -3956,9 +3962,13 @@ static status_t
     if (res == NO_ERR) {
         if (LOGDEBUG2) {
             log_debug2("\nabout to send RPC request with reqdata:");
-            val_dump_value_ex(reqdata, 
-                              NCX_DEF_INDENT,
-                              server_cb->display_mode);
+            val_dump_value_max(reqdata, 
+                               0,
+                               server_cb->defindent,
+                               DUMP_VAL_LOG,
+                               server_cb->display_mode,
+                               FALSE,
+                               FALSE);
         }
 
         /* the request will be stored if this returns NO_ERR */
@@ -4269,9 +4279,13 @@ static status_t
     if (res == NO_ERR) {
         if (LOGDEBUG2) {
             log_debug2("\nabout to send RPC request with reqdata:");
-            val_dump_value_ex(reqdata, 
-                              NCX_DEF_INDENT,
-                              server_cb->display_mode);
+            val_dump_value_max(reqdata, 
+                               0,
+                               server_cb->defindent,
+                               DUMP_VAL_LOG,
+                               server_cb->display_mode,
+                               FALSE,
+                               FALSE);
         }
 
         /* the request will be stored if this returns NO_ERR */
@@ -6443,15 +6457,13 @@ static status_t
             }
 
             if (mode == HELP_MODE_FULL) {
-                if (imode) {
-                    val_stdout_value_ex(notif->notification,
-                                        NCX_DEF_INDENT,
-                                        server_cb->display_mode);
-                } else {
-                    val_dump_value_ex(notif->notification,
-                                      NCX_DEF_INDENT,
-                                      server_cb->display_mode);
-                }
+                val_dump_value_max(notif->notification,
+                                   0,
+                                   server_cb->defindent,
+                                   (imode) ? DUMP_VAL_STDOUT : DUMP_VAL_LOG,
+                                   server_cb->display_mode,
+                                   FALSE,
+                                   FALSE);
                 (*logfn)("\n");
             }
             eventsdone++;
@@ -7117,9 +7129,13 @@ status_t
             if (LOGDEBUG2) {
                 log_debug2("\nabout to send <%s> RPC request with reqdata:",
                            obj_get_name(rpc));
-                val_dump_value_ex(reqdata, 
-                                  NCX_DEF_INDENT,
-                                  server_cb->display_mode);
+                val_dump_value_max(reqdata, 
+                                   0,
+                                   server_cb->defindent,
+                                   DUMP_VAL_LOG,
+                                   server_cb->display_mode,
+                                   FALSE,
+                                   FALSE);
             }
 
             /* the request will be stored if this returns NO_ERR */

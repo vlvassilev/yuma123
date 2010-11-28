@@ -187,7 +187,7 @@ static void
     /* get indent param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_INDENT);
     if (val && val->res == NO_ERR) {
-        agt_profile->agt_indent = VAL_INT(val);
+        agt_profile->agt_indent = (int32)VAL_UINT(val);
     }
 
     /* get log param */

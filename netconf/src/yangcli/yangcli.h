@@ -113,6 +113,8 @@ extern "C" {
 
 #define YANGCLI_MOD  (const xmlChar *)"yangcli"
 
+#define YANGCLI_DEF_INDENT    2
+
 
 #ifdef MACOSX
 #define ENV_HOST        (const char *)"HOST"
@@ -255,6 +257,8 @@ extern "C" {
 
 #define YANGCLI_DEF_MAXLOOPS  65535
 
+#define YANGCLI_MAX_INDENT    9
+
 /********************************************************************
 *								    *
 *			     T Y P E S				    *
@@ -390,6 +394,7 @@ typedef struct server_cb_t_ {
     op_errop_t           erroption;
     op_defop_t           defop;
     ncx_withdefaults_t   withdefaults;
+    int32                defindent;
 
     /* session support */
     mgr_io_state_t       state;

@@ -322,9 +322,13 @@ static status_t
     if (res == NO_ERR) {
         if (LOGDEBUG2) {
             log_debug2("\nabout to send RPC request with reqdata:");
-            val_dump_value_ex(reqdata, 
-                              NCX_DEF_INDENT,
-                              server_cb->display_mode);
+            val_dump_value_max(reqdata, 
+                               0,
+                               server_cb->defindent,
+                               DUMP_VAL_LOG,
+                               server_cb->display_mode,
+                               FALSE,
+                               FALSE);
         }
 
         /* the request will be stored if this returns NO_ERR */
@@ -889,9 +893,13 @@ status_t
     if (res == NO_ERR) {
         if (LOGDEBUG2) {
             log_debug2("\nabout to send RPC request with reqdata:");
-            val_dump_value_ex(reqdata, 
-                              NCX_DEF_INDENT,
-                              server_cb->display_mode);
+            val_dump_value_max(reqdata, 
+                               0,
+                               server_cb->defindent,
+                               DUMP_VAL_LOG,
+                               server_cb->display_mode,
+                               FALSE,
+                               FALSE);
         }
 
         /* the request will be stored if this returns NO_ERR */

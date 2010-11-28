@@ -791,83 +791,98 @@ status_t
     }
 #endif
 
-    caplen = xml_strlen(CAP_URN);
-
     /* the base capability is a different form than the rest */
     if (!xml_strcmp(uri, CAP_BASE_URN)) {
         return cap_add_std(caplist, CAP_STDID_V1);
-    } else if (!xml_strcmp(uri, NC_URN)) {
-        /* hack: support juniper servers which send the NETCONF
-         * XML namespace instead of the NETCONF base URI
-         * as the protocol indicator
-         */
+    }
+
+    /* hack: support juniper servers which send the NETCONF
+     * XML namespace instead of the NETCONF base URI
+     * as the protocol indicator
+     */
+    if (!xml_strcmp(uri, NC_URN)) {
         return cap_add_std(caplist, CAP_STDID_V1);
-    } else if (!xml_strncmp(uri, CAP_URN, caplen)) {
+    }
+
+    caplen = xml_strlen(CAP_URN);
+    if (!xml_strncmp(uri, CAP_URN, caplen)) {
         /* matched the standard capability prefix string;
          * get the suffix with the capability name and version 
          */
         str = uri + caplen;
+    } else {
+        caplen = xml_strlen(CAP_J_URN); 
+        if (!xml_strncmp(uri, CAP_J_URN, caplen)) {
+            /* matched the juniper standard capability prefix string;
+             * get the suffix with the capability name and version 
+             */
+            str = uri + caplen;
+        } else {
+            return ERR_NCX_SKIPPED;
+        }
+    }
 
-        /* go through the standard capability suffix strings */
-        for (stdid=CAP_STDID_WRITE_RUNNING;
-             stdid < CAP_STDID_LAST_MARKER; stdid++) {
+    /* go through the standard capability suffix strings */
+    for (stdid=CAP_STDID_WRITE_RUNNING;
+         stdid < CAP_STDID_LAST_MARKER; 
+         stdid++) {
 
-            switch (stdid) {
-            case CAP_STDID_URL:
-                namelen = xml_strlen(stdcaps[stdid].cap_name);
-                if (!xml_strncmp(str, stdcaps[stdid].cap_name,
-                                 namelen)) {
-                    str += namelen;
-                    if (*str == (xmlChar)'?') {
-                        str++;
+        switch (stdid) {
+        case CAP_STDID_URL:
+            namelen = xml_strlen(stdcaps[stdid].cap_name);
+            if (!xml_strncmp(str, 
+                             stdcaps[stdid].cap_name,
+                             namelen)) {
+                str += namelen;
+                if (*str == (xmlChar)'?') {
+                    str++;
 
-                        /* first check standard scheme= string */
-                        schemelen = xml_strlen(CAP_SCHEME_EQ);
+                    /* first check standard scheme= string */
+                    schemelen = xml_strlen(CAP_SCHEME_EQ);
+                    if (!xml_strncmp(str,
+                                     CAP_SCHEME_EQ,
+                                     schemelen)) {
+                        str += schemelen;
+                        if (*str) {
+                            return cap_add_url(caplist, str);
+                        }
+                    } else {
+                        /* check juniper bug: protocol= */
+                        schemelen = xml_strlen(CAP_PROTOCOL_EQ);
                         if (!xml_strncmp(str,
-                                         CAP_SCHEME_EQ,
+                                         CAP_PROTOCOL_EQ,
                                          schemelen)) {
                             str += schemelen;
                             if (*str) {
                                 return cap_add_url(caplist, str);
                             }
-                        } else {
-                            /* check juniper bug: protocol= */
-                            schemelen = xml_strlen(CAP_PROTOCOL_EQ);
-                            if (!xml_strncmp(str,
-                                             CAP_PROTOCOL_EQ,
-                                             schemelen)) {
-                                str += schemelen;
-                                if (*str) {
-                                    return cap_add_url(caplist, str);
-                                }
-                            }
-                        }                        
-                    }
-                }
-                break;
-            case CAP_STDID_WITH_DEFAULTS:
-                namelen = xml_strlen(stdcaps[stdid].cap_name);
-                if (!xml_strncmp(str, stdcaps[stdid].cap_name,
-                                 namelen)) {
-                    str += namelen;
-                    if (*str == (xmlChar)'?') {
-                        str++;
-                        basiclen = xml_strlen(CAP_BASIC_EQ);
-                        if (!xml_strncmp(str,
-                                         CAP_BASIC_EQ,
-                                         basiclen)) {
-                            str += basiclen;
-                            if (*str) {
-                                return cap_add_withdef(caplist, str);
-                            }
                         }
                     }
                 }
-                break;
-            default:
-                if (!xml_strcmp(str, stdcaps[stdid].cap_name)) {
-                    return cap_add_std(caplist, stdid);
+            }
+            break;
+        case CAP_STDID_WITH_DEFAULTS:
+            namelen = xml_strlen(stdcaps[stdid].cap_name);
+            if (!xml_strncmp(str, stdcaps[stdid].cap_name,
+                             namelen)) {
+                str += namelen;
+                if (*str == (xmlChar)'?') {
+                    str++;
+                    basiclen = xml_strlen(CAP_BASIC_EQ);
+                    if (!xml_strncmp(str,
+                                     CAP_BASIC_EQ,
+                                     basiclen)) {
+                        str += basiclen;
+                        if (*str) {
+                            return cap_add_withdef(caplist, str);
+                        }
+                    }
                 }
+            }
+            break;
+        default:
+            if (!xml_strcmp(str, stdcaps[stdid].cap_name)) {
+                return cap_add_std(caplist, stdid);
             }
         }
     }

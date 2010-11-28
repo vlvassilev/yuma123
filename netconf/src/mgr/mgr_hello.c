@@ -117,9 +117,9 @@ static boolean mgr_hello_init_done = FALSE;
 
 
 /********************************************************************
-* FUNCTION process_agent_hello
+* FUNCTION process_server_hello
 *
-* Process the agent hello contents
+* Process the NETCONF server <hello> contents
 *
 *  1) Protocol capabilities
 *  2) Module capabilities
@@ -130,13 +130,13 @@ static boolean mgr_hello_init_done = FALSE;
 *    hello == value struct for the hello message to check
 *
 * OUTPUTS:
-*    agent caps in the scb->mgrcb is set
+*    server caps in the scb->mgrcb is set
 *
 * RETURNS:
 *   status
 *********************************************************************/
 static status_t
-    process_agent_hello (ses_cb_t *scb,
+    process_server_hello (ses_cb_t *scb,
                          val_value_t *hello)
 {
 
@@ -237,7 +237,7 @@ static status_t
 
     return NO_ERR;
 
-} /* process_agent_hello */
+} /* process_server_hello */
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -347,7 +347,7 @@ void
     dtyp = NCX_NT_OBJ;
     xml_msg_init_hdr(&msg);
 
-    /* get a value struct to hold the agent hello msg */
+    /* get a value struct to hold the server hello msg */
     val = val_new_value();
     if (!val) {
         res = ERR_INTERNAL_MEM;
@@ -365,16 +365,16 @@ void
         }
     }
 
-    /* parse an agent hello message */
+    /* parse an server hello message */
     if (res == NO_ERR) {
         res = mgr_val_parse(scb, obj, top, val);
     }
     
-    /* examine the agent capability list
-     * and it matches the agent protocol version
+    /* examine the server capability list
+     * and it matches the server protocol version
      */
     if (res == NO_ERR) {
-        res = process_agent_hello(scb, val);
+        res = process_server_hello(scb, val);
     }
 
     /* report first error and close session */
@@ -402,7 +402,7 @@ void
 /********************************************************************
 * FUNCTION mgr_hello_send
 *
-* Send the manager <hello> message to the agent on the 
+* Send the manager <hello> message to the server on the 
 * specified session
 *
 * INPUTS:
@@ -439,7 +439,7 @@ status_t
     xml_init_attrs(&attrs);
     nc_id = xmlns_nc_id();
 
-    /* get the agent caps */
+    /* get my client caps */
     mycaps = mgr_cap_get_capsval();
     if (!mycaps) {
         res = SET_ERROR(ERR_INTERNAL_PTR);

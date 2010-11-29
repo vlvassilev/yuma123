@@ -2642,6 +2642,34 @@ extern int32
     ncx_compare_base_uris (const xmlChar *str1,
                            const xmlChar *str2);
 
+
+/********************************************************************
+* FUNCTION ncx_get_useprefix
+*
+* Get the use_prefix value
+*
+* RETURNS:
+*   TRUE if XML prefixes should be used
+*   FALSE if XML messages should use default namespace (no prefix)
+*********************************************************************/
+extern boolean
+    ncx_get_useprefix (void);
+
+
+/********************************************************************
+* FUNCTION ncx_set_useprefix
+*
+* Set the use_prefix value
+*
+* INPUTS:
+*   val == 
+*      TRUE if XML prefixes should be used
+*      FALSE if XML messages should use default namespace (no prefix)
+*********************************************************************/
+extern void
+    ncx_set_useprefix (boolean val);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

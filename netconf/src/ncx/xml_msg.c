@@ -314,6 +314,7 @@ void
     dlq_createSQue(&msg->prefixQ);
     dlq_createSQue(&msg->errQ);
     msg->withdef = NCX_DEF_WITHDEF;
+    msg->useprefix = ncx_get_useprefix();
 
 } /* xml_msg_init_hdr */
 

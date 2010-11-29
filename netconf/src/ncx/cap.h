@@ -67,7 +67,10 @@ extern "C" {
 
 /* NETCONF Capability Identifier Base String Implemented by Juniper */
 #define CAP_J_URN \
-    ((const xmlChar *)"urn:ietf:params:xml:ns:netconf:capability:")
+    (const xmlChar *)"urn:ietf:params:xml:ns:netconf:capability:"
+
+#define CAP_JUNOS \
+    (const xmlChar *)"http://xml.juniper.net/netconf/junos/1.0"
 
 #define CAP_SEP_CH   '/'
 

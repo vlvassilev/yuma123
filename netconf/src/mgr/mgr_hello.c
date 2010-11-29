@@ -193,6 +193,18 @@ static status_t
                     log_debug2("\nmgr: Got enterprise capability %s", VAL_STR(cap));
                 }
 
+                /* hack: check for juniper 1.0 server
+                 * change the useprefix mode to TRUE to get
+                 * <rpc> operations to work with this server
+                 */
+                if (!xml_strcmp(VAL_STR(cap), CAP_JUNOS)) {
+                    if (LOGDEBUG) {
+                        log_debug("\nUsing XML prefixes to work "
+                                  "with Junos 1.0 server\n");
+                    }
+                    ncx_set_useprefix(TRUE);
+                }
+
                 res = cap_add_ent(&mscb->caplist, VAL_STR(cap));
                 if (res != NO_ERR) {
                     return res;

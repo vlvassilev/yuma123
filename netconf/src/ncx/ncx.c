@@ -281,6 +281,9 @@ static ncx_display_mode_t  display_mode;
 uint32              malloc_cnt;
 uint32              free_cnt;
 
+/* use XML prefix flag */
+boolean             use_prefix;
+
 
 /********************************************************************
 * FUNCTION check_moddef
@@ -989,6 +992,8 @@ status_t
 
     ncx_max_filptrs = NCX_DEF_FILPTR_CACHESIZE;
     ncx_cur_filptrs = 0;
+
+    use_prefix = FALSE;
 
     /* check that the correct version of libxml2 is installed */
     LIBXML_TEST_VERSION;
@@ -7330,7 +7335,6 @@ const dlq_hdr_t *
 }   /* ncx_get_allincQ */
 
 
-
 /********************************************************************
 * FUNCTION ncx_get_vtimeout_value
 *
@@ -7398,6 +7402,41 @@ int32
     return xml_strncmp(str1, str2, len1);
 
 }   /* ncx_compare_base_uris */
+
+
+/********************************************************************
+* FUNCTION ncx_get_useprefix
+*
+* Get the use_prefix value
+*
+* RETURNS:
+*   TRUE if XML prefixes should be used
+*   FALSE if XML messages should use default namespace (no prefix)
+*********************************************************************/
+boolean
+    ncx_get_useprefix (void)
+{
+    return use_prefix;
+
+}   /* ncx_get_useprefix */
+
+
+/********************************************************************
+* FUNCTION ncx_set_useprefix
+*
+* Set the use_prefix value
+*
+* INPUTS:
+*   val == 
+*      TRUE if XML prefixes should be used
+*      FALSE if XML messages should use default namespace (no prefix)
+*********************************************************************/
+void
+    ncx_set_useprefix (boolean val)
+{
+    use_prefix = val;
+
+}   /* ncx_set_useprefix */
 
 
 /* END file ncx.c */

@@ -66,6 +66,22 @@ extern "C" {
 extern status_t
     do_save (server_cb_t *server_cb);
 
+
+/********************************************************************
+ * FUNCTION finish_save
+ * 
+ * INPUTS:
+ *    server_cb == server control block to use
+ *
+ * OUTPUTS:
+ *   copy-config will be sent to server
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+extern status_t
+    finish_save (server_cb_t *server_cb);
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

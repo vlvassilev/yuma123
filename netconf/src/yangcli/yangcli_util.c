@@ -777,6 +777,9 @@ status_t
  *    target == XPath expression for the instance-identifier
  *    schemainst == TRUE if ncx:schema-instance string
  *                  FALSE if instance-identifier
+ *    configonly == TRUE if there should be an error given
+ *                  if the target does not point to a config node
+ *                  FALSE if the target can be config false
  *    targobj == address of return target object for this expr
  *    targval == address of return pointer to target value
  *               node within the value subtree returned
@@ -799,6 +802,7 @@ val_value_t *
     get_instanceid_parm (server_cb_t *server_cb,
                          const xmlChar *target,
                          boolean schemainst,
+                         boolean configonly,
                          obj_template_t **targobj,
                          val_value_t **targval,
                          status_t *retres)
@@ -857,6 +861,19 @@ val_value_t *
         return NULL;
     }
 
+    /* check if the target is a config node or not
+     * TBD: check the baddata parm and possibly allow
+     * the target of a write to be a config=false for
+     * server testing purposes
+     */
+    if (configonly && !obj_get_config_flag(*targobj)) {
+        log_error("\nError: XPath target '%s' is not a config=true node",
+                  xpathpcb->exprstr);
+        xpath_free_pcb(xpathpcb);
+        *retres = ERR_NCX_ACCESS_READ_ONLY;
+        return NULL;
+    }
+    
     /* have a valid target object, so follow the
      * parser chain and build a value subtree
      * from the XPath expression

@@ -48,6 +48,10 @@ module test {
         }
         // mandatory true;
       }
+      leaf noconfig { 
+        type string;
+        config false;
+      }
       container e {
         leaf-list ee {
           ordered-by user;

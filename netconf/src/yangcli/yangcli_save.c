@@ -307,14 +307,16 @@ status_t
         line = xml_strdup(NCX_EL_COMMIT);
         if (line) {
             res = conn_command(server_cb, line);
-#ifdef NOT_YET
-            if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
-                log_stdout(" + copy-config <running> <startup>");
-            }
-#endif
             m__free(line);
         } else {
             log_stdout("\nError: Malloc failed");
+        }
+        if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
+            /* need 2 operations so set the command mode and the 
+             * reply handler will initiate the 2nd command
+             * if the first one worked
+             */
+            server_cb->command_mode = CMD_MODE_SAVE;
         }
         break;
     case NCX_AGT_TARG_RUNNING:
@@ -343,6 +345,52 @@ status_t
     return res;
 
 }  /* do_save */
+
+
+/********************************************************************
+ * FUNCTION finish_save
+ * 
+ * INPUTS:
+ *    server_cb == server control block to use
+ *
+ * OUTPUTS:
+ *   copy-config will be sent to server
+ *
+ * RETURNS:
+ *   status
+ *********************************************************************/
+status_t
+    finish_save (server_cb_t *server_cb)
+{
+    const ses_cb_t   *scb;
+    const mgr_scb_t  *mscb;
+    status_t          res;
+
+    res = NO_ERR;
+
+    /* get the session info */
+    scb = mgr_ses_get_scb(server_cb->mysid);
+    if (!scb) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+    mscb = (const mgr_scb_t *)scb->mgrcb;
+
+    log_info("\nFinal step saving configuration to non-volative storage");
+
+    if (mscb->starttyp == NCX_AGT_START_DISTINCT) {
+        res = send_copy_config_to_server(server_cb);
+        if (res != NO_ERR) {
+            log_stdout("\nError: send copy-config failed (%s)",
+                       get_error_string(res));
+        }
+    } else {
+        log_stdout("\nWarning: No distinct save operation needed "
+                   "for this server");
+    }
+
+    return res;
+
+}  /* finish_save */
 
 
 /* END yangcli_save.c */

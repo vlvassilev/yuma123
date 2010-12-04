@@ -327,6 +327,9 @@ extern status_t
  *    target == XPath expression for the instance-identifier
  *    schemainst == TRUE if ncx:schema-instance string
  *                  FALSE if instance-identifier
+ *    configonly == TRUE if there should be an error given
+ *                  if the target does not point to a config node
+ *                  FALSE if the target can be config false
  *    targobj == address of return target object for this expr
  *    targval == address of return pointer to target value
  *               node within the value subtree returned
@@ -349,6 +352,7 @@ extern val_value_t *
     get_instanceid_parm (server_cb_t *server_cb,
 			 const xmlChar *target,
 			 boolean schemainst,
+                         boolean configonly,
 			 obj_template_t **targobj,
 			 val_value_t **targval,
 			 status_t *retres);

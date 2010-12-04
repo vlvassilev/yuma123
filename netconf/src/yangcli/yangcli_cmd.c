@@ -3076,8 +3076,13 @@ static status_t
     targobj = NULL;
     targval = NULL;
 
+    /* get the root object and the target node
+     * if target == /foo/bar/baz then
+     * valroot --> /foo and targobj --> /foo/bar/baz
+     */
     valroot = get_instanceid_parm(server_cb,
                                   target,
+                                  TRUE,
                                   TRUE,
                                   &targobj,
                                   &targval,
@@ -4432,6 +4437,7 @@ static val_value_t *
         *valroot = get_instanceid_parm(server_cb,
                                        target,
                                        TRUE,
+                                       TRUE,
                                        &targobj,
                                        &targval,
                                        &res);
@@ -5666,7 +5672,8 @@ static status_t
             log_warn("\nWarning: server does not have :xpath support");
             res = get_yesno(server_cb,
                             (const xmlChar *)"Send request anyway?",
-                            YESNO_NO, &retcode);
+                            YESNO_NO,
+                            &retcode);
             if (res == NO_ERR) {
                 switch (retcode) {
                 case YESNO_CANCEL:

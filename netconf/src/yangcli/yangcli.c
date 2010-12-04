@@ -185,6 +185,10 @@ date         init     comment
 #include "yangcli_autolock.h"
 #endif
 
+#ifndef _H_yangcli_save
+#include "yangcli_save.h"
+#endif
+
 #ifndef _H_yangcli_tab
 #include "yangcli_tab.h"
 #endif
@@ -856,7 +860,8 @@ static status_t
             server_cb->baddata = testbaddata;
             baddata = testbaddata;
         } else {
-            log_error("\nError: value must be 'true' or 'false'");
+            log_error("\nError: value must be 'ignore', 'warn', "
+                      "'check', or 'error'");
             res = ERR_NCX_INVALID_VALUE;
         }
     } else if (!xml_strcmp(configval->name, YANGCLI_DEF_MODULE)) {
@@ -2313,6 +2318,7 @@ static void
     log_write("\n");
 
     log_write("\nDefault target set to: ");
+
     switch (mscb->targtyp) {
     case NCX_AGT_TARG_NONE:
         server_cb->default_target = NULL;
@@ -2755,7 +2761,6 @@ static boolean
 }  /* get_lock_worked */
 
 
-
 /********************************************************************
 * FUNCTION get_input_line
  *
@@ -2997,7 +3002,8 @@ static mgr_io_state_t
             if (message_timed_out(scb)) {
                 res = ERR_NCX_TIMEOUT;
             } else if (!(server_cb->command_mode == CMD_MODE_NORMAL ||
-                         server_cb->command_mode == CMD_MODE_AUTOLOAD)) {
+                         server_cb->command_mode == CMD_MODE_AUTOLOAD ||
+                         server_cb->command_mode == CMD_MODE_SAVE)) {
                 if (check_locks_timeout(server_cb)) {
                     res = ERR_NCX_TIMEOUT;
                 }
@@ -3030,6 +3036,9 @@ static mgr_io_state_t
                     break;
                 case CMD_MODE_AUTOUNLOCK:
                     clear_lock_cbs(server_cb);
+                    break;
+                case CMD_MODE_SAVE:
+                    server_cb->command_mode = CMD_MODE_NORMAL;
                     break;
                 default:
                     SET_ERROR(ERR_INTERNAL_VAL);
@@ -4064,7 +4073,7 @@ void
         case CMD_MODE_NORMAL:
             break;
         case CMD_MODE_AUTOLOAD:
-            res = autoload_handle_rpc_reply(server_cb,
+            (void)autoload_handle_rpc_reply(server_cb,
                                             scb,
                                             rpy->reply,
                                             anyerrors);
@@ -4117,9 +4126,9 @@ void
                 lockcb->lock_state = LOCK_STATE_RELEASED;
             }
 
-            res = handle_release_locks_request_to_server(server_cb,
-                                                        FALSE,
-                                                        &done);
+            (void)handle_release_locks_request_to_server(server_cb,
+                                                         FALSE,
+                                                         &done);
             if (done) {
                 clear_lock_cbs(server_cb);
             }
@@ -4149,8 +4158,17 @@ void
                 }
             }            
             break;
+        case CMD_MODE_SAVE:
+            if (anyerrors) {
+                log_warn("\nWarning: Final <copy-config> canceled  because "
+                         "<commit> failed");
+            } else {
+                (void)finish_save(server_cb);
+            }
+            server_cb->command_mode = CMD_MODE_NORMAL;
+            break;
         default:
-            res = SET_ERROR(ERR_INTERNAL_VAL);
+            SET_ERROR(ERR_INTERNAL_VAL);
         }
         break;
     default:

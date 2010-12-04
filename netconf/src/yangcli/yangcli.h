@@ -303,7 +303,8 @@ typedef enum command_mode_t {
     CMD_MODE_AUTOLOAD,
     CMD_MODE_AUTOLOCK,
     CMD_MODE_AUTOUNLOCK,
-    CMD_MODE_AUTODISCARD
+    CMD_MODE_AUTODISCARD,
+    CMD_MODE_SAVE
 } command_mode_t;
 
 

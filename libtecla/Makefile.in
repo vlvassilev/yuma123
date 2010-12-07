@@ -171,8 +171,6 @@ PROGRAMS_R =
 
 CFLAGS = $(OPT) $(WARNING_FLAGS) $(DEFINES) @CFLAGS@ @SHARED_CFLAGS@
 
-all: default
-
 default: $(TARGETS)
 
 normal:

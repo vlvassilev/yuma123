@@ -94,21 +94,24 @@ int
     res = ydump_init(argc, argv, TRUE, &mycvtparms);
 
     if (res == NO_ERR) {
+
 	res = ydump_main(&mycvtparms);
+
+        /* if warnings+ are enabled, then res could be NO_ERR and still
+         * have output to STDOUT
+         */
+        if (res == NO_ERR) {
+            log_warn("\n");   /*** producing extra blank lines ***/
+        }
+
+        print_errors();
+
+        print_error_count();
+
+        ydump_cleanup(&mycvtparms);
+    } else {
+        print_errors();
     }
-
-    /* if warnings+ are enabled, then res could be NO_ERR and still
-     * have output to STDOUT
-     */
-    if (res == NO_ERR) {
-        log_warn("\n");   /*** producing extra blank lines ***/
-    }
-
-    print_errors();
-
-    print_error_count();
-
-    ydump_cleanup(&mycvtparms);
 
     print_error_count();
 

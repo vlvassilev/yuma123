@@ -113,6 +113,7 @@ date         init     comment
 
 #ifdef DEBUG
 #define YANG_GRP_DEBUG 1
+/* #define YANG_GRP_USES_DEBUG 1 */
 #endif
 
 
@@ -546,6 +547,12 @@ status_t
          grp != NULL;
          grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
+#ifdef YANG_GRP_DEBUG
+        if (LOGDEBUG4) {
+            log_debug4("\nyang_grp: resolve grouping '%s'",
+                       (grp->name) ? grp->name : EMPTY_STRING);
+        }
+#endif
         /* check the appinfoQ */
         res = ncx_resolve_appinfoQ(pcb,
                                    tkc, 
@@ -718,7 +725,8 @@ status_t
         res = yang_grp_resolve_complete(pcb,
                                         tkc, 
                                         mod, 
-                                        &grp->groupingQ, parent);
+                                        &grp->groupingQ,
+                                        parent);
         CHK_EXIT(res, retres);
     }
 
@@ -727,12 +735,39 @@ status_t
          grp != NULL;
          grp = (grp_template_t *)dlq_nextEntry(grp)) {
 
+#ifdef YANG_GRP_DEBUG
+        if (LOGDEBUG4) {
+            log_debug4("\nyang_grp_resolve: %s", grp->name);
+        }
+#endif
+
+        if (grp->expand_done) {
+#ifdef YANG_GRP_USES_DEBUG
+            if (LOGDEBUG4) {
+                log_debug4("\n   skip expanded group %s",
+                           grp->name);
+            }
+#endif
+            continue;
+        }
+
         /* check any local objects for uses clauses */
         res = yang_obj_resolve_uses(pcb,
                                     tkc, 
                                     mod, 
                                     &grp->datadefQ);
         CHK_EXIT(res, retres);
+        grp->expand_done = TRUE;
+
+#ifdef YANG_GRP_USES_DEBUG
+        if (LOGDEBUG4) {
+            log_debug4("\nyang_grp: '%s' after expand",
+                       grp->name);
+            obj_dump_child_list(&grp->datadefQ,
+                                NCX_DEF_INDENT,
+                                NCX_DEF_INDENT);
+        }
+#endif
     }
 
     return retres;

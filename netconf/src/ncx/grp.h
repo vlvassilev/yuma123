@@ -85,6 +85,7 @@ typedef struct grp_template_t_ {
     xmlns_id_t       nsid;
     boolean          used;
     boolean          istop;
+    boolean          expand_done;
     ncx_status_t     status;
     uint32           grpindex;         /* used for XSD generation */
     dlq_hdr_t        typedefQ;             /* Q of typ_template_t */

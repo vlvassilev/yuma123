@@ -108,6 +108,7 @@ extern "C" {
 #define YANGDUMP_PARM_SUBTREE       (const xmlChar *)"subtree"
 #define YANGDUMP_PARM_STATS         (const xmlChar *)"stats"
 #define YANGDUMP_PARM_STAT_TOTALS   (const xmlChar *)"totals"
+#define YANGDUMP_PARM_TREE_IDENTIFIERS   (const xmlChar *)"tree-identifiers"
 #define YANGDUMP_PARM_URLSTART      (const xmlChar *)"urlstart"
 #define YANGDUMP_PARM_UNIFIED       (const xmlChar *)"unified"
 
@@ -230,6 +231,7 @@ typedef struct yangdump_cvtparms_t_ {
     yangdump_totals_t stat_totals;
     boolean         showerrorsmode;
     boolean         identifiers;
+    boolean         tree_identifiers;
     boolean         html_div;
     boolean         modversion;
     boolean         subdirs;

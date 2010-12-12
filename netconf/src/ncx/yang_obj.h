@@ -300,12 +300,13 @@ extern status_t
 * FUNCTION yang_obj_resolve_uses
 * 
 * Second pass object validation
+* This calls expand_uses not resolve_uses!
 *
+* Refine-stmts have already been patched into objects in phase 1.
 * Expand and validate any uses clauses within any objects
-* within the datadefQ
+* within the datadefQ.
 *
-* Search through the entire datadefQ tree(s) and call
-* the expand_uses() function
+* Validate and expand any augments within a uses-stmt
 *
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return

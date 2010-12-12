@@ -77,6 +77,9 @@ module yangdump {
             For a listing of all the accessible object identifiers that
             the file contains, use the 'identifiers' parameter.
 
+            For a tree listing of all the accessible object identifiers that
+            the file contains, use the 'tree-identifiers' parameter.
+
         OUTPUT MODES
 
             By default, any translation output will be sent to STDOUT.
@@ -521,6 +524,19 @@ module yangdump {
                 default "none";
              }
           }
+        }
+
+        leaf tree-identifiers {
+          description 
+             "Validate the file, write the list of object identifiers,
+              in tree format, that this [sub]module contains, then exit.
+
+              Each accessible object node is listed once,
+              including all child nodes.  Notifications and
+              RPC methods are considered top-level objects,
+              and have object identifiers as well as configuration
+              and state data..";
+          type empty;
         }
 
         leaf unified {

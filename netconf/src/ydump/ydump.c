@@ -535,6 +535,14 @@ static status_t
         cp->subdirs = TRUE;
     }
 
+    /* tree-identifiers parameter */
+    val = val_find_child(valset, 
+                         YANGDUMP_MOD, 
+                         YANGDUMP_PARM_TREE_IDENTIFIERS);
+    if (val && val->res == NO_ERR) {
+        cp->tree_identifiers = TRUE;
+    }
+
     /* versionnames */
     val = val_find_child(valset, 
                          YANGDUMP_MOD, 
@@ -1022,6 +1030,9 @@ static void
  *    scb == session control block for output
  *    buff == scratch buffer to use 
  *    bufflen == size of buff in bytes
+ *    treeformat == TRUE for tree format; FALSE for list forma
+ *    startindent == startindent amount
+ *    indent == indent amount
  *
  * RETURNS:
  *    status
@@ -1030,11 +1041,14 @@ static status_t
     output_identifiers (dlq_hdr_t *datadefQ,
                         ses_cb_t *scb,
                         xmlChar *buff,
-                        uint32 bufflen)
+                        uint32 bufflen,
+                        boolean treeformat,
+                        uint32 startindent,
+                        uint32 indent)
 {
     obj_template_t    *obj;
     dlq_hdr_t         *childQ;
-    uint32             reallen;
+    uint32             reallen, i;
     status_t           res;
 
     for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
@@ -1045,21 +1059,38 @@ static status_t
             continue;  /* skip uses and augment */
         }
 
-        res = obj_copy_object_id(obj, buff, bufflen, &reallen);
-        if (res != NO_ERR) {
-            log_error("\nError: copy object ID failed (%s)",
-                      get_error_string(res));
-            return res;
+        if (!treeformat) {
+            res = obj_copy_object_id(obj, buff, bufflen, &reallen);
+            if (res != NO_ERR) {
+                log_error("\nError: copy object ID failed (%s)",
+                          get_error_string(res));
+                return res;
+            }
         }
 
         ses_putchar(scb, '\n');
+        if (treeformat) {
+            for (i=0; i < startindent; i++) {
+                ses_putchar(scb, ' ');
+            }
+        }
         ses_putstr(scb, obj_get_typestr(obj));
         ses_putchar(scb, ' ');
-        ses_putstr(scb, buff);
+        if (treeformat) {
+            ses_putstr(scb, obj_get_name(obj));
+        } else {
+            ses_putstr(scb, buff);
+        }
 
         childQ = obj_get_datadefQ(obj);
         if (childQ) {
-            res = output_identifiers(childQ, scb, buff, bufflen);
+            res = output_identifiers(childQ, 
+                                     scb, 
+                                     buff, 
+                                     bufflen,
+                                     treeformat,
+                                     startindent+indent,
+                                     indent);
             if (res != NO_ERR) {
                 return res;
             }
@@ -1082,14 +1113,24 @@ static status_t
  *    scb == session control block to use for output
  *    buff == scratch buffer to use 
  *    bufflen == size of buff in bytes
+ *    treeformat == TRUE for tree format; FALSE for list format
+ *    indent == indent amount
  *********************************************************************/
 static void
     output_one_module_identifiers (ncx_module_t *mod,
                                    ses_cb_t *scb,
                                    xmlChar *buff,
-                                   uint32 bufflen)
+                                   uint32 bufflen,
+                                   boolean treeformat,
+                                   uint32 indent)
 {
-    (void)output_identifiers(&mod->datadefQ, scb, buff, bufflen);
+    (void)output_identifiers(&mod->datadefQ, 
+                             scb, 
+                             buff, 
+                             bufflen,
+                             treeformat,
+                             indent,
+                             indent);
     ses_putchar(scb, '\n');
 
 }   /* output_one_module_identifiers */
@@ -1105,13 +1146,13 @@ static void
  *    pcb == parser control block with module to use
  *    cp == conversion parameters to use
  *    scb == session control block for output
- *
+ *    treeformat == TRUE for tree format; FALSE for list format
  *********************************************************************/
 static void
     output_module_identifiers (yang_pcb_t *pcb,
                                yangdump_cvtparms_t *cp,
-                               ses_cb_t *scb)
-
+                               ses_cb_t *scb,
+                               boolean treeformat)
 {
     ncx_module_t      *mod;
     yang_node_t       *node; 
@@ -1130,9 +1171,12 @@ static void
         print_subtree_banner(cp, mod, scb);
     }
 
-    output_one_module_identifiers(mod, scb,
+    output_one_module_identifiers(mod, 
+                                  scb,
                                   (xmlChar *)cp->buff,
-                                  cp->bufflen);
+                                  cp->bufflen,
+                                  treeformat,
+                                  cp->indent);
 
     if (cp->unified && mod->ismod) {
         for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
@@ -1142,7 +1186,9 @@ static void
                 output_one_module_identifiers(node->submod, 
                                               scb, 
                                               (xmlChar *)cp->buff,
-                                              cp->bufflen);
+                                              cp->bufflen,
+                                              treeformat,
+                                              cp->indent);
             }
         }
     }
@@ -1454,6 +1500,7 @@ static status_t
         cp->exports || 
         cp->dependencies || 
         cp->identifiers || 
+        cp->tree_identifiers ||
         cp->collect_stats || 
         !(cp->format == NCX_CVTTYP_NONE || 
           cp->format == NCX_CVTTYP_XSD)) {
@@ -1486,7 +1533,11 @@ static status_t
         }
 
         if (cp->identifiers) {
-            output_module_identifiers(pcb, cp, scb);
+            output_module_identifiers(pcb, cp, scb, FALSE);
+        }
+
+        if (cp->tree_identifiers) {
+            output_module_identifiers(pcb, cp, scb, TRUE);
         }
 
         if (cp->collect_stats) {

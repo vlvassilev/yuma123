@@ -3187,11 +3187,17 @@ static status_t
          * and save the deviation in the global
          * deviationQ within the parser control block
          */
+        if (LOGDEBUG4) {
+            log_debug4("\nyang_parse: resolve deviations");
+        }
         res = yang_obj_resolve_deviations(pcb, tkc, mod);
         return res;
     }
 
     /* check all the module level extension usage */
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_parse: resolve appinfoQ");
+    }
     res = ncx_resolve_appinfoQ(pcb,
                                tkc, 
                                mod, 
@@ -3205,6 +3211,9 @@ static status_t
     CHK_EXIT(res, retres);
 
     /* resolve any if-feature statements within the featureQ */
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_parse: resolve features");
+    }
     for (feature = (ncx_feature_t *)dlq_firstEntry(&mod->featureQ);
          feature != NULL;
          feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
@@ -3225,6 +3234,9 @@ static status_t
     /* resolve the base-stmt within any identity statements 
      * within the identityQ 
      */
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_parse: resolve identities");
+    }
     for (identity = (ncx_identity_t *)dlq_firstEntry(&mod->identityQ);
          identity != NULL;
          identity = (ncx_identity_t *)dlq_nextEntry(identity)) {
@@ -3246,6 +3258,9 @@ static status_t
     }
 
     /* Validate any module-level typedefs */
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_parse: resolve typedefs");
+    }
     res = yang_typ_resolve_typedefs(pcb,
                                     tkc,
                                     mod, 
@@ -3254,6 +3269,9 @@ static status_t
     CHK_EXIT(res, retres);
 
     /* Validate any module-level groupings */
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_parse: resolve groupings");
+    }
     res = yang_grp_resolve_groupings(pcb,
                                      tkc, 
                                      mod, 
@@ -3262,6 +3280,9 @@ static status_t
     CHK_EXIT(res, retres);
 
     /* Validate any module-level data-def-stmts */
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_parse: resolve datadefs");
+    }
     res = yang_obj_resolve_datadefs(pcb,
                                     tkc, 
                                     mod, 
@@ -3269,6 +3290,9 @@ static status_t
     CHK_EXIT(res, retres);
 
     /* Expand and validate any uses-stmts within module-level groupings */
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_parse: resolve groupings complete");
+    }
     res = yang_grp_resolve_complete(pcb,
                                     tkc, 
                                     mod, 
@@ -3277,6 +3301,9 @@ static status_t
     CHK_EXIT(res, retres);
 
     /* Expand and validate any uses-stmts within module-level datadefs */
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_parse: resolve uses");
+    }
     res = yang_obj_resolve_uses(pcb,
                                 tkc, 
                                 mod, 
@@ -3284,6 +3311,9 @@ static status_t
     CHK_EXIT(res, retres);
 
     /* Expand and validate any augment-stmts within module-level datadefs */
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_parse: resolve augments");
+    }
     res = yang_obj_resolve_augments(pcb,
                                     tkc, 
                                     mod, 
@@ -3297,17 +3327,27 @@ static status_t
      * !!! function should be used instead of caching leafref
      * !!! target object pointers
      */
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_parse: resolve deviations");
+    }
     res = yang_obj_resolve_deviations(pcb, 
                                       tkc, 
                                       mod);
     CHK_EXIT(res, retres);
 
+    /* remove any nodes that were marked as deleted by deviations */
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_parse: remove deleted nodes");
+    }
     res = yang_obj_remove_deleted_nodes(pcb,
                                         tkc,
                                         mod,
                                         &mod->datadefQ);
 
     /* One final check for grouping integrity */
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_parse: resolve grp final");
+    }
     res = yang_grp_resolve_final(pcb,
                                  tkc, 
                                  mod, 
@@ -3315,6 +3355,9 @@ static status_t
     CHK_EXIT(res, retres);
 
     /* One final check for object integrity */
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_parse: resolve obj final");
+    }
     res = yang_obj_resolve_final(pcb,
                                  tkc, 
                                  mod, 

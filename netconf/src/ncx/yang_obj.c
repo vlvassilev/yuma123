@@ -216,7 +216,9 @@ date         init     comment
 
 #ifdef DEBUG
 #define YANG_OBJ_DEBUG 1
+/* #define YANG_OBJ_USES_DEBUG 1 */
 #endif
+
 
 
 /********************************************************************
@@ -3701,11 +3703,13 @@ static status_t
             }
 
             /* remove the node and toss it out */
+#ifdef YANG_OBJ_DEBUG
             if (LOGDEBUG2) {
                 log_debug2("\napply_dev: mark target obj %s:%s for removal",
                            obj_get_mod_name(targobj),
                            obj_get_name(targobj));
             }
+#endif
             targobj->flags |= OBJ_FL_DELETED;
             *deleted = TRUE;
             done = TRUE;
@@ -3719,12 +3723,14 @@ static status_t
                  * replace the typdef; minor alteration :-) 
                  */
                 retest = TRUE;
+#ifdef YANG_OBJ_DEBUG
                 if (LOGDEBUG3) {
                     log_debug3("\napply_dev: replacing type in "
                                "target obj %s:%s",
                                obj_get_mod_name(targobj),
                                obj_get_name(targobj));
                 }
+#endif
                 switch (targobj->objtype) {
                 case OBJ_TYP_ANYXML:
                 case OBJ_TYP_LEAF:
@@ -3758,12 +3764,14 @@ static status_t
                 }
                 switch (devi->arg) {
                 case OBJ_DARG_ADD:
+#ifdef YANG_OBJ_DEBUG
                     if (LOGDEBUG3) {
                         log_debug3("\napply_dev: adding units to "
                                    "target obj %s:%s",
                                    obj_get_mod_name(targobj),
                                    obj_get_name(targobj));
                     }
+#endif
                     if (*strarg != NULL) {
                         SET_ERROR(ERR_INTERNAL_VAL);
                         m__free(*strarg);
@@ -3772,12 +3780,14 @@ static status_t
                     devi->units = NULL;
                     break;
                 case OBJ_DARG_DELETE:
+#ifdef YANG_OBJ_DEBUG
                     if (LOGDEBUG3) {
                         log_debug3("\napply_dev: deleting units in "
                                    "target obj %s:%s",
                                    obj_get_mod_name(targobj),
                                    obj_get_name(targobj));
                     }
+#endif
                     if (*strarg == NULL) {
                         SET_ERROR(ERR_INTERNAL_VAL);
                     }
@@ -3788,12 +3798,14 @@ static status_t
                     if (*strarg == NULL) {
                         SET_ERROR(ERR_INTERNAL_VAL);
                     } else {
+#ifdef YANG_OBJ_DEBUG
                         if (LOGDEBUG3) {
                             log_debug3("\napply_dev: replacing units in "
                                        "target obj %s:%s",
                                        obj_get_mod_name(targobj),
                                        obj_get_name(targobj));
                         }
+#endif
                         m__free(*strarg);
                         *strarg = devi->units;
                         devi->units = NULL;
@@ -3824,12 +3836,14 @@ static status_t
                     if (*strarg != NULL) {
                         SET_ERROR(ERR_INTERNAL_VAL);
                     } else {
+#ifdef YANG_OBJ_DEBUG
                         if (LOGDEBUG3) {
                             log_debug3("\napply_dev: adding default to "
                                        "target obj %s:%s",
                                        obj_get_mod_name(targobj),
                                        obj_get_name(targobj));
                         }
+#endif
                         *strarg = devi->defval;
                         devi->defval = NULL;
                     }
@@ -3838,12 +3852,14 @@ static status_t
                     if (*strarg == NULL) {
                         SET_ERROR(ERR_INTERNAL_VAL);
                     } else {
+#ifdef YANG_OBJ_DEBUG
                         if (LOGDEBUG3) {
                             log_debug3("\napply_dev: deleting default in "
                                        "target obj %s:%s",
                                        obj_get_mod_name(targobj),
                                        obj_get_name(targobj));
                         }
+#endif
                         m__free(*strarg);
                         *strarg = NULL;
                     }
@@ -3852,12 +3868,14 @@ static status_t
                     if (*strarg == NULL) {
                         SET_ERROR(ERR_INTERNAL_VAL);
                     } else {
+#ifdef YANG_OBJ_DEBUG
                         if (LOGDEBUG3) {
                             log_debug3("\napply_dev: replacing default in "
                                        "target obj %s:%s",
                                        obj_get_mod_name(targobj),
                                        obj_get_name(targobj));
                         }
+#endif
                         m__free(*strarg);
                         *strarg = devi->units;
                         devi->units = NULL;
@@ -3872,12 +3890,14 @@ static status_t
             /* config-stmt */
             if (devi->config_tkerr.mod) {
                 retest = TRUE;
+#ifdef YANG_OBJ_DEBUG
                 if (LOGDEBUG3) {
                     log_debug3("\napply_dev: replacing config-stmt in "
                                "target obj %s:%s",
                                obj_get_mod_name(targobj),
                                obj_get_name(targobj));
                 }
+#endif
 
                 targobj->flags |= OBJ_FL_CONFSET;
                 if (devi->config) {
@@ -3890,12 +3910,15 @@ static status_t
             /* mandatory-stmt */
             if (devi->mandatory_tkerr.mod) {
                 retest = TRUE;
+
+#ifdef YANG_OBJ_DEBUG
                 if (LOGDEBUG3) {
                     log_debug3("\napply_dev: replacing mandatory-stmt in "
                                "target obj %s:%s",
                                obj_get_mod_name(targobj),
                                obj_get_name(targobj));
                 }
+#endif
 
                 targobj->flags |= OBJ_FL_MANDSET;
                 if (devi->mandatory) {
@@ -3908,12 +3931,16 @@ static status_t
             /* min-elements-stmt */
             if (devi->minelems_tkerr.mod) {
                 retest = TRUE;
+
+#ifdef YANG_OBJ_DEBUG
                 if (LOGDEBUG3) {
                     log_debug3("\napply_dev: replacing min-elements in "
                                "target obj %s:%s",
                                obj_get_mod_name(targobj),
                                obj_get_name(targobj));
                 }
+#endif
+
                 switch (targobj->objtype) {
                 case OBJ_TYP_LIST:
                     targobj->def.list->minelems = devi->minelems;
@@ -3930,12 +3957,16 @@ static status_t
             /* max-elements-stmt */
             if (devi->maxelems_tkerr.mod) {
                 retest = TRUE;
+
+#ifdef YANG_OBJ_DEBUG
                 if (LOGDEBUG3) {
                     log_debug3("\napply_dev: replacing max-elements in "
                                "target obj %s:%s",
                                obj_get_mod_name(targobj),
                                obj_get_name(targobj));
                 }
+#endif
+
                 switch (targobj->objtype) {
                 case OBJ_TYP_LIST:
                     targobj->def.list->maxelems = devi->maxelems;
@@ -3958,21 +3989,25 @@ static status_t
                 }
                 switch (devi->arg) {
                 case OBJ_DARG_ADD:
+#ifdef YANG_OBJ_DEBUG
                     if (LOGDEBUG3) {
                         log_debug3("\napply_dev: adding must-stmt(s) to "
                                    "target obj %s:%s",
                                    obj_get_mod_name(targobj),
                                    obj_get_name(targobj));
                     }
+#endif
                     dlq_block_enque(&devi->mustQ, targQ);
                     break;
                 case OBJ_DARG_DELETE:
+#ifdef YANG_OBJ_DEBUG
                     if (LOGDEBUG3) {
                         log_debug3("\napply_dev: removing must-stmt(s) from "
                                    "target obj %s:%s",
                                    obj_get_mod_name(targobj),
                                    obj_get_name(targobj));
                     }
+#endif
                     for (must = (xpath_pcb_t *)dlq_firstEntry(&devi->mustQ);
                          must != NULL;
                          must = (xpath_pcb_t *)dlq_nextEntry(must)) {
@@ -4005,21 +4040,25 @@ static status_t
                 }
                 switch (devi->arg) {
                 case OBJ_DARG_ADD:
+#ifdef YANG_OBJ_DEBUG
                     if (LOGDEBUG3) {
                         log_debug3("\napply_dev: adding unique-stmt(s) to "
                                    "target obj %s:%s",
                                    obj_get_mod_name(targobj),
                                    obj_get_name(targobj));
                     }
+#endif
                     dlq_block_enque(&devi->uniqueQ, targQ);
                     break;
                 case OBJ_DARG_DELETE:
+#ifdef YANG_OBJ_DEBUG
                     if (LOGDEBUG3) {
                         log_debug3("\napply_dev: removing unique-stmt(s) from "
                                    "target obj %s:%s",
                                    obj_get_mod_name(targobj),
                                    obj_get_name(targobj));
                     }
+#endif
                     for (unique = (obj_unique_t *)
                              dlq_firstEntry(&devi->uniqueQ);
                          unique != NULL;
@@ -4047,12 +4086,14 @@ static status_t
     }
 
     if (res == NO_ERR && retest && !deleted) {
+#ifdef YANG_OBJ_DEBUG
         if (LOGDEBUG3) {
             log_debug3("\nRechecking %s:%s after "
                        "applying deviation(s)",
                        obj_get_mod_name(targobj),
                        obj_get_name(targobj));
         }
+#endif
         res = resolve_datadef(pcb,
                               tkc, 
                               mod, 
@@ -6848,7 +6889,15 @@ static status_t
 * FUNCTION resolve_uses
 * 
 * Check the uses object type
-
+* This is done before the groupings are expanded
+*
+*   - Find the grouping being used
+*   - Check for uses loop errors
+*   - check all the local augment statements
+*   - check all the refine statements
+*   - patch the objects with the refinements
+*   - change refine-stmts to canonical form; no duplicate targets
+*   
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
 *
@@ -7104,7 +7153,42 @@ static status_t
         /* this node has errors, currently proccessing for
          * errors only, so just keep going
          */
+        if (LOGDEBUG) {
+            log_debug("\nSkipping uses w/errors in mod %s on line %u",
+                      mod->name,
+                      obj->tkerr.linenum);
+        }
+                      
         return NO_ERR;
+    }
+
+#ifdef YANG_OBJ_USES_DEBUG
+    if (LOGDEBUG4) {
+        log_debug4("\nexpand_uses: uses '%s' in mod '%s' on line %u",
+                   uses->grp->name,
+                   mod->name,
+                   obj->tkerr.linenum);
+    }
+#endif
+
+    if (!uses->grp->expand_done) {
+        /* go through the grouping and make sure all the
+         * nested uses-stmts are expanded first
+         */
+
+#ifdef YANG_OBJ_USES_DEBUG
+        if (LOGDEBUG4) {
+            log_debug4("\nexpand_uses: need expand of grouping %s",
+                       uses->grp->name);
+            }
+#endif
+
+        res = yang_obj_resolve_uses(pcb,
+                                    tkc,
+                                    mod,
+                                    &uses->grp->datadefQ);
+        CHK_EXIT(res, retres);
+        uses->grp->expand_done = TRUE;
     }
 
     /* go through each node in the grouping
@@ -7118,11 +7202,11 @@ static status_t
          chobj != NULL;
          chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 
-#ifdef YANG_OBJ_DEBUG
+#ifdef YANG_OBJ_USES_DEBUG
         if (LOGDEBUG4) {
-            log_debug4("\nexpand_uses: mod %s, object %s, on line %u",
-                       mod->name,
+            log_debug4("\nexpand_uses: object %s in mod %s on line %u",
                        obj_get_name(chobj),
+                       mod->name,
                        chobj->tkerr.linenum);
         }
 #endif
@@ -7174,10 +7258,10 @@ static status_t
                     
                     dlq_insertAhead(newobj, obj);
 
-#ifdef YANG_OBJ_DEBUG
+#ifdef YANG_OBJ_USES_DEBUG
                     if (LOGDEBUG4) {
                         log_debug4("\nexpand_uses: add new "
-                                   "obj %s to parent %s,"
+                                   "obj '%s' to parent '%s',"
                                    " uses.%u",
                                    obj_get_name(newobj),
                                    (obj->grp) ? obj->grp->name :
@@ -7205,7 +7289,7 @@ static status_t
             continue;
         }
 
-#ifdef YANG_OBJ_DEBUG
+#ifdef YANG_OBJ_USES_DEBUG
         if (LOGDEBUG3) {
             log_debug3("\nexpand_uses_augment: "
                        "mod %s, augment on line %u",
@@ -7221,6 +7305,16 @@ static status_t
                              datadefQ);
         CHK_EXIT(res, retres);
     }
+
+#ifdef YANG_OBJ_USES_DEBUG
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_obj: uses '%s'; datadefQ after expand",
+                   uses->grp->name);
+        obj_dump_child_list(datadefQ,
+                            NCX_DEF_INDENT,
+                            NCX_DEF_INDENT);
+    }
+#endif
 
     return retres;
                                     
@@ -7598,7 +7692,7 @@ static status_t
 
 #ifdef YANG_OBJ_DEBUG
                     if (LOGDEBUG4) {
-                        log_debug4("\nexpand_aug: add new obj %s "
+                        log_debug4("\nexpand_aug: add new obj '%s' "
                                    "to target %s.%u, aug.%u",
                                    obj_get_name(newobj),
                                    obj_get_name(targobj),
@@ -8426,6 +8520,12 @@ static status_t
     res = NO_ERR;
     retres = NO_ERR;
 
+#ifdef YANG_OBJ_DEBUG
+    if (LOGDEBUG4) {
+        log_debug4("\nyang_obj_resolve: %s", obj_get_name(testobj));
+    }
+#endif
+
     if (!redo) {
         res = ncx_resolve_appinfoQ(pcb,
                                    tkc, 
@@ -9159,6 +9259,7 @@ static status_t
         case OBJ_TYP_LEAF:
         case OBJ_TYP_LEAF_LIST:
             if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
+
 #ifdef YANG_OBJ_DEBUG
                 if (LOGDEBUG4) {
                     log_debug4("\nresolve_xpath: mod %s, "
@@ -9749,12 +9850,13 @@ status_t
 * FUNCTION yang_obj_resolve_uses
 * 
 * Second pass object validation
+* This calls expand_uses not resolve_uses!
 *
+* Refine-stmts have already been patched into objects in phase 1.
 * Expand and validate any uses clauses within any objects
-* within the datadefQ
+* within the datadefQ.
 *
-* Search through the entire datadefQ tree(s) and call
-* the expand_uses() function
+* Validate and expand any augments within a uses-stmt
 *
 * Error messages are printed by this function!!
 * Do not duplicate error messages upon error return
@@ -9802,6 +9904,9 @@ status_t
         }
 #endif
 
+        /* all node types are just traversing the object tree
+         * except OBJ_TYP_USES, which is expanded with expand_uses
+         */
         switch (testobj->objtype) {
         case OBJ_TYP_CONTAINER:
             res = 
@@ -10680,11 +10785,15 @@ status_t
 
         if (testobj->flags & OBJ_FL_DELETED) {
             dlq_remove(testobj);
+
+#ifdef YANG_OBJ_DEBUG
             if (LOGDEBUG2) {
                 log_debug2("\nDeviation caused deletion of object %s:%s",
                            obj_get_mod_name(testobj),
                            obj_get_name(testobj));
             }
+#endif
+
             parentobj = testobj->parent;
             obj_free_template(testobj);
 
@@ -10693,12 +10802,14 @@ status_t
                  * is still OK; there should not be any other
                  * deviations with the same target object
                  */
+#ifdef YANG_OBJ_DEBUG
                 if (LOGDEBUG2) {
                     log_debug2("\nRechecking %s:%s after "
                                "applying deviation(s) to child",
                                obj_get_mod_name(parentobj),
                                obj_get_name(parentobj));
                 }
+#endif
                 res = resolve_datadef(pcb,
                                       tkc, 
                                       mod, 

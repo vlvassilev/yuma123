@@ -98,7 +98,7 @@ date         init     comment
 *                       C O N S T A N T S                           *
 *                                                                   *
 *********************************************************************/
-
+/* #define OBJ_CLONE_DEBUG 1 */
 
 /********************************************************************
 *                                                                   *
@@ -5244,6 +5244,15 @@ obj_template_t *
         srcobj->objtype > OBJ_TYP_AUGMENT) {
         SET_ERROR(ERR_INTERNAL_VAL);
         return NULL;
+    }
+#endif
+
+#ifdef OBJ_CLONE_DEBUG
+    if (LOGDEBUG4) {
+        log_debug4("\nobj_clone: '%s' in mod '%s' on line %u",
+                   obj_get_name(srcobj),
+                   obj_get_mod_name(srcobj),
+                   srcobj->tkerr.linenum);
     }
 #endif
 
@@ -10601,6 +10610,59 @@ uint32
     return count;
 
 }  /* obj_enabled_child_count */
+
+
+/********************************************************************
+* FUNCTION obj_dump_child_list
+*
+* Dump the object names in a datadefQ -- just child level
+* uses log_write for output
+*
+* INPUTS:
+*   datadefQ == Q of obj_template_t to dump
+*   startindent == start-indent columns
+*   indent == indent amount
+*********************************************************************/
+void
+    obj_dump_child_list (dlq_hdr_t *datadefQ,
+                         uint32  startindent,
+                         uint32 indent)
+{
+    obj_template_t  *obj;
+    dlq_hdr_t       *child_datadefQ;
+    uint32           i;
+
+#ifdef DEBUG
+    if (!datadefQ) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
+         obj != NULL;
+         obj = (obj_template_t *)dlq_nextEntry(obj)) {
+
+        log_write("\n");
+        for (i=0; i < startindent; i++) {
+            log_write(" ");
+        }
+
+        log_write("%s", obj_get_typestr(obj));
+
+        if (obj_has_name(obj)) {
+            log_write(" %s", obj_get_name(obj));
+        }
+
+        child_datadefQ = obj_get_datadefQ(obj);
+        if (child_datadefQ != NULL) {
+            obj_dump_child_list(child_datadefQ,
+                                startindent+indent,
+                                indent);
+        }
+    }
+
+}  /* obj_dump_child_list */
 
 
 /* END obj.c */

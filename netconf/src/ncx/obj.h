@@ -348,6 +348,7 @@ typedef struct obj_uses_t_ {
     grp_template_t   *grp;      /* const back-ptr to grouping */
     dlq_hdr_t        *datadefQ;         /* Q of obj_template_t */
     ncx_status_t      status;
+    boolean           expand_done;
 } obj_uses_t;
 
 
@@ -3396,6 +3397,25 @@ extern void
 *********************************************************************/
 extern uint32
     obj_enabled_child_count (obj_template_t *obj);
+
+
+/********************************************************************
+* FUNCTION obj_dump_child_list
+*
+* Dump the object names in a datadefQ -- just child level
+* uses log_debug for writing
+*
+* INPUTS:
+*   datadefQ == Q of obj_template_t to dump
+*   startindent == start-indent columns
+*   indent == indent amount
+*********************************************************************/
+extern void
+    obj_dump_child_list (dlq_hdr_t *datadefQ,
+                         uint32  startindent,
+                         uint32 indent);
+
+
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

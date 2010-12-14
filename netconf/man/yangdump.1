@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH yangdump 1 "July 16, 2010" Linux "yangdump 1.13-3"
+.TH yangdump 1 "December 19, 2010" Linux "yangdump 1.14-3"
 .SH NAME
 yangdump \- validate YANG modules and convert them to different formats
 
@@ -46,6 +46,10 @@ to compile, use the \fBdependencies\fP parameter.
     
 For a listing of all the accessible object identifiers that
 the file contains, use the \fBidentifiers\fP parameter.
+
+For a listing of all the accessible object identifiers that
+the file contains, in tree format, use the \fBtree-identifiers\fP 
+parameter.
 
 .SH USAGE
 Parameters can be entered in any order, and have the form:
@@ -398,6 +402,15 @@ Must be used with the '--stats' parameter.
          and a summary for all input modules
          will be generated instead.
 .fi
+.IP --\fBtree-identifiers\fP
+Validate the file, write the hierarchy of node names
+in tree format, that this [sub]module contains, then exit.
+        
+Each accessible object node is listed once,
+including all child nodes.  Notifications and
+RPC methods are considered top-level objects,
+and have object identifiers as well as configuration
+and state data..
 .IP --\fBunified\fP=boolean
 If true, then submodules will be processed within
 the main module, in a unified report, 

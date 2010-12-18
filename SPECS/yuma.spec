@@ -1,6 +1,6 @@
 Name:           yuma
 Version:        1.14
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -77,6 +77,33 @@ echo "Yuma Tools installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
+* Sat Dec 18 2010 Andy Bierman <andy at netconfcentral.org> 1.14-3 [983]
+  * yangcli: fixed bug in var display for boolean type
+  * fixed bug in sprintf val to buffer for empty string
+  * changed warn-linelen default to 0 to turn warning off by default
+  * fix YANG parsing error for out-of-order nested uses expansion
+    see test/pass/test9.yang
+  * add -tree-identifiers option to yangcli to print in tree format
+  * add some ifdef wrappers around debug statements
+  * add more YANG parsing debug trace statements in debug4
+  * started new branch for conversion to autoconf
+  * yangcli: fix bug not checking if edit target is config=false
+  * yangcli: fixed error message for setting config var
+  * yangcli: fixed 'save' meta command for commit+copy-config
+  * adding support for juniper capability encoding in hello
+  * yangcli: added 'indent' system variable
+  * yangcli: changed val_dump_ usage to use indent
+    and display-mode settings
+  * modules: changed yuma-types::IndentType default from
+    3 to 2 to match implementation
+  * added new error message for trying to write a read-only object
+  * fixed netconfd bug where candidate not getting filled from
+    running with clean editvars if with-startup=true
+  * fixed netconfd bug where edit-config on running was not
+    getting saved to NV-storage if with-startup=false
+  * fixed bug in netconfd where continue-on-error would continue
+    even if the config data was not schema valid.
+    Now the validate phase must complete OK for the apply phase to exec
 * Thu Nov 18 2010 Andy Bierman <andy at netconfcentral.org> 1.14-2 [969]
   * yangcli: fixed bug handling XML preamble in extern variables
   * XML: now using default namespace in XML output to reduce

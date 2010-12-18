@@ -178,7 +178,14 @@ static val_value_t *
         resultval = xml_val_new_cstring(NCX_EL_DATA, ncid, result->r.str);
         break;
     case XP_RT_BOOLEAN:
-        resultval = xml_val_new_boolean(NCX_EL_DATA, ncid, result->r.boo);
+        /* !!! this is wrong but not sure if any XML conversion used it !!!
+         * contains empty string if FALSE; <data/> if TUR
+         *resultval = xml_val_new_boolean(NCX_EL_DATA, ncid, result->r.boo);
+         */
+        resultval = xml_val_new_cstring(NCX_EL_DATA, 
+                                        ncid,
+                                        (result->r.boo) ? 
+                                        NCX_EL_TRUE : NCX_EL_FALSE);
         break;
     default:
         SET_ERROR(ERR_INTERNAL_VAL);

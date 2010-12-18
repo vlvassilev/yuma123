@@ -7518,6 +7518,9 @@ status_t
                 *len = xml_strlen(val->name) + 3;
             }
         } else {
+            if (buff) {
+                *buff = 0;
+            }
             *len = 0;
         }
         break;

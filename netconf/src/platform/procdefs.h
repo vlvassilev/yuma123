@@ -179,7 +179,9 @@ extern "C" {
 #endif	    /* CPP_DEBUG */
 
 #if !CPV_UNIX
+#ifndef WINDOWS
 typedef		unsigned int		uint; 
+#endif
 #else
 #include <sys/types.h>
 #endif	    /* !CPV_UNIX */

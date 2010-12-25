@@ -10,12 +10,17 @@ LIBNCX_MAJOR_VERSION=1
 LIBNCX_MINOR_VERSION=14
 SOVERSION=$(LIBNCX_MAJOR_VERSION).$(LIBNCX_MINOR_VERSION)
 
+CINC=
+ifdef WINDOWS
+   CINC += -I/usr/i586-mingw32msvc/include
+endif
 
-CINC=-I. -I../agt -I../mgr \
+CINC +=-I. -I../agt -I../mgr \
     -I../ncx -I../platform \
     -I../ydump \
     -I/usr/include -I/usr/include/libxml2 \
     -I/usr/include/libxml2/libxml
+
 
 # added /sw/include for MacOSX
 ifdef MAC
@@ -68,10 +73,18 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 # -Wunreachable-code removed due to -O3
 # -O3 changed to -O2 due to code bloat from inline functions
 
+ifdef WINDOWS
+CDEFS=-DDEBUG -DWINDOWS -DGCC
+else
 CDEFS=-DDEBUG -DLINUX -DGCC
+endif
 
 ifndef NOFLOAT
   CDEFS += -DHAS_FLOAT
+endif
+
+ifdef P64BIT
+  CDEFS += -DP64BIT
 endif
 
 CFLAGS=$(CDEFS) $(CWARN) -fPIC
@@ -117,13 +130,23 @@ LIBNCXSUFFIX=so.$(SOVERSION)
 endif
 endif
 
+ifdef WINDOWS
+CC=i586-mingw32msvc-gcc
+LINK=i586-mingw32msvc-gcc
+LIBTOOL=i586-mingw32msvc-ar
+RANLIB=i586-mingw32msvc-ranlib
+else
 CC=gcc
 LINK=gcc
+LIBTOOL=ar
+RANLIB=ranlib
+endif
+
 LINT=splint
 LINTFLAGS= '-weak -macrovarprefix "m_"'
 ##LIBFLAGS=-lsocket
 
-LIBTOOL=ar
+
 #LFLAGS=-v --no-as-needed
 LFLAGS=-lm
 LPATH=-L$(LBASE)
@@ -159,7 +182,7 @@ $(TARGET)/%.o: %.c
 
 $(LBASE)/lib%.a: $(OBJS)
 	$(LIBTOOL) cr $@ $(OBJS)
-	ranlib $@
+	$(RANLIB) $@
 
 
 #### common cleanup rules

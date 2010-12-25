@@ -122,14 +122,22 @@ superclean:
 
 distclean: superclean uninstall
 
+ifdef WINDOWS
+RDYNAMIC=
+LC=
+else
+RDYNAMIC=-rdynamic
+LC=-lc
+endif
+
 # this rule is ignored if STATIC=1; used only in linux
 $(LBASE)/libncx.so.$(SOVERSION): $(OBJS)
-	gcc -shared -rdynamic -Wl,-soname,libncx.so.$(SOVERSION) \
-	-o $@ $(OBJS) -lc
+	$(CC) -shared $(RDYNAMIC) -Wl,-soname,libncx.so.$(SOVERSION) \
+	-o $@ $(OBJS) $(LC)
 
 # this rule is ignored if STATIC=1; used only on MacOSX
 $(LBASE)/libncx.dylib: $(OBJS)
-	gcc -shared -dynamiclib -std=gnu99 -current_version \
+	$(CC) -shared -dynamiclib -std=gnu99 -current_version \
 	$(SOVERSION) \
 	-undefined dynamic_lookup \
 	-o $@ -install_name libncx.dylib $(OBJS) -lxml2

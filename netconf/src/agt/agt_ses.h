@@ -30,6 +30,8 @@ date             init     comment
 06-jun-06    abb      Begun.
 */
 
+#include <sys/select.h>
+
 #include <xmlstring.h>
 
 #ifndef _H_getcb

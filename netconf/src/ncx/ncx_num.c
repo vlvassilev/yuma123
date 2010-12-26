@@ -105,6 +105,7 @@ date         init     comment
 *********************************************************************/
 
 
+#ifdef HAS_FLOAT
 /********************************************************************
 * FUNCTION remove_trailing_zero_count
 * 
@@ -142,6 +143,7 @@ static int32
     return len - newlen;
 
 }  /* remove_trailing_zero_count */
+#endif
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -702,8 +704,6 @@ status_t
 
 #ifdef HAS_FLOAT
     double d;
-#else
-    int64 d;
 #endif
 
 #ifdef DEBUG
@@ -2063,10 +2063,13 @@ status_t
                      uint32   *len)
 {
     xmlChar  *point;
-    int32     ilen, pos, tzcount;
+    int32     ilen, pos;
     uint32    ulen;
     xmlChar   dumbuff[VAL_MAX_NUMLEN];
     xmlChar   decbuff[VAL_MAX_NUMLEN];
+#ifdef HAS_FLOAT
+    int32     tzcount;
+#endif
 
 #ifdef DEBUG
     if (!num || !len) {

@@ -397,6 +397,12 @@ status_t
     if (dummydoc) {
         val_free_value(dummydoc);
     }
+
+    if (res != NO_ERR) {
+        log_error("\nError: XPath evaluation failed (%s)",
+                  get_error_string(res));
+    }
+
     return res;
 
 }  /* do_eval */

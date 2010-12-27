@@ -12,21 +12,34 @@ Pre-Build steps:
 
 Build Variables:
 
-  DEBUG=1: set to add gdb symbols instead of -O2
+  DEBUG=1: set to add gdb symbols instead of -O2;
+           does not remove the #ifdef DEBUG function
+           NULL pointer checks in external functions
   MAC=1: set to compile for MacOsX
   STATIC=1:set to use static libraries such as libncx.a,
          instead of dynamic libraries like libncx.so 
+  FULL_STATIC=1: solve linking problems forcing static versions
+      of all external librarues
   MAXWELL=1: set to use /lib instead of /usr/lib for install
          of dynamic libraries
   RELEASE=N: sets the version to ver-release instead of
              version.svnversion
   MEMTRACE=1: enables mtrace debugging
+  CYGWIN=1: build on windows within cygwin environment
+  NOFLOAT: disable use of double and tgmath.h; XPath eval
+           of complex numbers will cause invalid results;
+           Cygwin does not support complex.h
 
-To build everything:
+To build everything on Linux:
 
    - make
    - [sudo] make install
 
+ To build everything on Cygwin
+   - make STATIC=1 NOFLOAT=1 CYGWIN=1
+   - [sudo] make STATIC=1 CYGWIN=1 install
+
+   
  This will build everything and install it in its default location
 
 External file dependencies:

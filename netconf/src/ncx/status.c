@@ -120,6 +120,7 @@ status_t set_error (const char *filename,
         error_stack[error_level].status = status;
         strncpy(error_stack[error_level].filename, 
                 filename, MAX_ERR_FILENAME-1);
+        error_stack[error_level].filename[MAX_ERR_FILENAME-1] = 0;      
         error_stack[error_level].msg = get_error_string(status);
         error_level++;
     }

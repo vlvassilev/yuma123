@@ -4355,6 +4355,7 @@ const xmlChar *
     }
 
     strncpy(buff, (const char *)user, userlen);
+    buff[userlen] = 0;
     pw = getpwnam(buff);
     if (!pw) {
         return NULL;
@@ -4397,6 +4398,7 @@ const xmlChar *
     }
 
     strncpy(buff, (const char *)name, namelen);
+    buff[namelen] = 0;
     return (const xmlChar *)getenv(buff);
 
 }  /* ncxmod_get_envvar */

@@ -658,6 +658,8 @@ const char *
         return "cannot directly load a submodule";
     case ERR_NCX_ACCESS_READ_ONLY:
         return "cannot write to a read-only object";
+    case ERR_NCX_CONFIG_NOT_TARGET:
+        return "cannot write to this configuration directly";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

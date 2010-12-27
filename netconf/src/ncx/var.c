@@ -1696,7 +1696,7 @@ val_value_t *
     val_value_t           *varval;
     const xmlChar         *str, *name;
     val_value_t           *newval, *useval;
-    xmlChar               *fname, *intbuff;
+    xmlChar               *fname, *intbuff, *sourcefile;
     uint32                 namelen, len;
     boolean                isvarref;
     var_type_t             vartype;
@@ -1747,13 +1747,21 @@ val_value_t *
     } else if (*strval==NCX_AT_CH) {
         /* this is a NCX_BT_EXTERNAL value
          * find the file with the raw XML data
+         * treat this as a source file name which
+         * may need to be expanded (e.g., ~/foo.xml)
          */
-        fname = ncxmod_find_data_file(&strval[1], TRUE, res);
-        if (fname) {
-            /* hand off the malloced 'fname' to be freed later */
-            val_set_extern(useval, fname);
-            
-        } /* else res already set */
+        sourcefile = ncx_get_source(&strval[1], res);
+        if (*res == NO_ERR && sourcefile != NULL) {
+            fname = ncxmod_find_data_file(sourcefile, TRUE, res);
+            if (fname) {
+                /* hand off the malloced 'fname' to be freed later */
+                val_set_extern(useval, fname);
+            } /* else res already set */
+        }
+        if (sourcefile != NULL) {
+            m__free(sourcefile);
+            sourcefile = NULL;
+        }
     } else if (*strval == NCX_VAR_CH) {
         /* this is a variable reference
          * get the value and clone it for the new value

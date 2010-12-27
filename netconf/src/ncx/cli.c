@@ -165,16 +165,35 @@ static status_t
                                      ISPARM, 
                                      &res);
         } else {
+            log_error("\nError: ncx:root object only "
+                      "supported in script mode");
             res = ERR_NCX_INVALID_VALUE;
         }
     } else if (obj->objtype == OBJ_TYP_CONTAINER) {
         /* check if the only child is an OBJ_TYP_CHOICE */
         choiceobj = obj_first_child(obj);
-        if (choiceobj == NULL || 
-            choiceobj->objtype != OBJ_TYP_CHOICE) {
-            res = ERR_NCX_INVALID_VALUE;
-        } else if (strval != NULL &&
-                (*strval == '$' || *strval == '@')) {
+        if (choiceobj == NULL) {
+            log_error("\nError: container %s does not "
+                      "have any child nodes", 
+                      obj_get_name(obj));
+            return ERR_NCX_INVALID_VALUE;
+        }
+        if (choiceobj->objtype != OBJ_TYP_CHOICE) {
+            log_error("\nError: child %s in container %s must be "
+                      "a 'choice' object",
+                      obj_get_name(choiceobj),
+                      obj_get_name(obj));
+            return ERR_NCX_INVALID_VALUE;
+        }
+        if (strval == NULL || *strval == 0) {
+            log_error("\nError: 'missing value string");
+            return ERR_NCX_INVALID_VALUE;
+        }
+
+        /* figure out how to create the child node (newchild)
+         * that will be added to the new_parm container
+         */
+        if (*strval == '$' || *strval == '@') {
             /* this is a file or var reference */
             if (script) {
                 newchild = var_get_script_val(rcxt,
@@ -187,25 +206,53 @@ static status_t
                     val_add_child(newchild, new_parm);
                 }
             } else {
-                res = ERR_NCX_INVALID_VALUE;
+                log_error("\nError: var or file reference only "
+                          "supported in script mode");
+                return ERR_NCX_INVALID_VALUE;
             }
         } else {
-            /* check if a child of any case is named 'strval' */
+            /* check if a child of any case is named 'strval'
+             * this check will look deep and find child nodes
+             * within a choice or case with the same name
+             * as a member of the choice or case node
+             */
             targobj = obj_find_child(choiceobj,
-                                     obj_get_mod_name(obj),
+                                     obj_get_mod_name(choiceobj),
                                      strval);
-            if (targobj && 
-                obj_get_basetype(targobj) == NCX_BT_EMPTY) {
-                /* found a match so create a value node */
-                newchild = val_new_value();
-                if (!newchild) {
-                    res = ERR_INTERNAL_MEM;
-                } else {
-                    val_init_from_template(newchild, targobj);
-                    val_add_child(newchild, new_parm);
-                }
+            if (targobj == NULL) {
+                log_error("\nError: choice %s in container %s"
+                          " does not have any child nodes named '%s'",
+                          obj_get_name(choiceobj),
+                          obj_get_name(obj),
+                          strval);
+                return ERR_NCX_INVALID_VALUE;
+            }
+
+            if (targobj->objtype != OBJ_TYP_LEAF) {
+                log_error("\nError: case %s in choice %s in container %s"
+                          " is not a leaf node",
+                          obj_get_name(targobj),
+                          obj_get_name(choiceobj),
+                          obj_get_name(obj));
+                return ERR_NCX_INVALID_VALUE;
+            }
+
+            if (obj_get_basetype(targobj) != NCX_BT_EMPTY) {
+                log_error("\nError: leaf %s in choice %s in container %s"
+                          " is not type 'empty'",
+                          obj_get_name(targobj),
+                          obj_get_name(choiceobj),
+                          obj_get_name(obj));
+                return ERR_NCX_INVALID_VALUE;
+            }
+
+            /* found a match so create a value node */
+            newchild = val_new_value();
+            if (!newchild) {
+                res = ERR_INTERNAL_MEM;
             } else {
-                res = ERR_NCX_INVALID_VALUE;
+                val_init_from_template(newchild, targobj);
+                val_add_child(newchild, new_parm);
             }
         }
     } else if (obj->objtype == OBJ_TYP_CHOICE &&
@@ -1557,16 +1604,16 @@ val_value_t *
                 break;
             default:
                 if (*errbuff) {
-                    if (buffpos < bufflen) {
-                        log_error("\nError: %s (%s = %s)", 
-                                  msg, 
-                                  errbuff, 
-                                  &buff[buffpos]);
-                    } else if (parmval != NULL) {
+                    if (parmval != NULL) {
                         log_error("\nError: %s (%s = %s)", 
                                   msg, 
                                   errbuff, 
                                   parmval);
+                    } else if (buffpos < bufflen) {
+                        log_error("\nError: %s (%s = %s)", 
+                                  msg, 
+                                  errbuff, 
+                                  &buff[buffpos]);
                     } else {
                         log_error("\nError: %s (%s)", 
                                   msg, 

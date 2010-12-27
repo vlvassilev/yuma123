@@ -489,7 +489,7 @@ static status_t
     urlspec = NULL;
     target = NULL;
 
-    /* check if the source config database exists */
+    /* check if the target config database exists */
     res = agt_get_cfg_from_parm(NCX_EL_TARGET, 
                                 msg, 
                                 methnode, 
@@ -499,6 +499,29 @@ static status_t
     } 
 
     agt_profile = agt_get_profile();
+
+    /* check if the server supports this config as a target */
+    if (target->cfg_id == NCX_CFGID_STARTUP ||
+        (target->cfg_id == NCX_CFGID_RUNNING &&
+         !(agt_profile->agt_targ == NCX_AGT_TARG_RUNNING ||
+           agt_profile->agt_targ == NCX_AGT_TARG_CAND_RUNNING))) {
+
+        /* trying to edit running but this is not allowed */
+        res = ERR_NCX_CONFIG_NOT_TARGET;
+        val = val_find_child(msg->rpc_input, 
+                             NC_MODULE,
+                             NCX_EL_TARGET);
+        agt_record_error(scb, 
+                         &msg->mhdr, 
+                         NCX_LAYER_OPERATION, 
+                         res,
+                         methnode, 
+                         NCX_NT_STRING, 
+                         target->name, 
+                         (val != NULL) ? NCX_NT_VAL : NCX_NT_NONE, 
+                         val);
+        return res;
+    }
 
     /* get the default-operation parameter */
     val = val_find_child(msg->rpc_input, 
@@ -562,6 +585,7 @@ static status_t
                          val, 
                          NCX_NT_VAL, 
                          val);
+        return res;
     } else {
         testop = op_testop_enum(VAL_ENUM_NAME(val));
     }

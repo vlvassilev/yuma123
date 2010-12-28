@@ -2500,7 +2500,7 @@ static status_t
     status_t       res, retres;
 
     val = NULL;
-    expstr = "module name";
+    expstr = "description or reference";
     done = FALSE;
     descrdone = FALSE;
     refdone = FALSE;
@@ -2613,6 +2613,7 @@ static status_t
             }
         } else {
             retres = ERR_NCX_WRONG_TKVAL;
+            log_error("\nError: invalid reference-stmt");
             ncx_mod_exp_err(tkc, mod, retres, expstr);
             continue;
         }

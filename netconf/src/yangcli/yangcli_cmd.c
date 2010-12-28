@@ -7095,6 +7095,11 @@ status_t
             }
         }
 
+        /* make sure the values are in canonical order
+         * so compliant some servers will not complain
+         */
+        val_set_canonical_order(valset);
+
         /* go through the parm list and move the values 
          * to the reqdata struct. 
          */

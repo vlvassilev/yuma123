@@ -4262,7 +4262,7 @@ static status_t
             default:
                 SET_ERROR(ERR_INTERNAL_VAL);
             }
-        } else {
+        } else if (withdef != NCX_WITHDEF_NONE) {
             log_warn("\nWarning: 'with-defaults' "
                      "capability not-supported so parameter ignored");
         }

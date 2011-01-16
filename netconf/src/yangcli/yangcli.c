@@ -1920,8 +1920,8 @@ static status_t
             if (mgr_cli_valset == NULL) {
                 res = ERR_INTERNAL_MEM;
             } else {
-                res = NO_ERR;
                 val_init_from_template(mgr_cli_valset, obj);
+                res = val_add_defaults(mgr_cli_valset, FALSE);
             }
         } else {
             /* parse the command line against the object template */    

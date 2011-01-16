@@ -684,6 +684,7 @@ static status_t
     dlq_hdr_t               savedevQ;
     ncx_lmem_t             *listmember;
     status_t                res;
+    log_debug_t             loglevel;
 
     if (LOGDEBUG2) {
         log_debug2("\nStarting autoload for module '%s', "
@@ -715,10 +716,21 @@ static status_t
      * retmod is a live pointer
      */
     if (res == NO_ERR) {
-        res = ncxmod_parse_module(modname, 
-                                 revision, 
-                                 &savedevQ,
-                                 retmod);
+        if (LOGDEBUG) {
+            res = ncxmod_parse_module(modname, 
+                                      revision, 
+                                      &savedevQ,
+                                      retmod);
+        } else {
+            /* ignore parse warnings during autoload unless debug mode */
+            loglevel = log_get_debug_level();
+            log_set_debug_level(LOG_DEBUG_ERROR);
+            res = ncxmod_parse_module(modname, 
+                                      revision, 
+                                      &savedevQ,
+                                      retmod);
+            log_set_debug_level(loglevel);
+        }
         if (res != NO_ERR) {
             log_error("\nError: Auto-load for module '%s' failed (%s)",
                       modname, 

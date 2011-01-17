@@ -37,7 +37,6 @@
 
       Copyright (c) 2010 IETF Trust and the persons identified as
       the document authors.  All rights reserved.
-
       Redistribution and use in source and binary forms, with or
       without modification, is permitted pursuant to, and subject
       to the license terms contained in, the Simplified BSD License
@@ -49,7 +48,8 @@
       the RFC itself for full legal notices.";
     // RFC Ed.: replace XXXX with actual RFC number and remove this note
 
-   revision 2010-06-04 {
+   // RFC Ed.: please update the date to the date of publication
+   revision 2011-01-16 {
      description
        "Initial revision";
      reference
@@ -88,7 +88,6 @@
         capability for a session, then this feature must
         also be enabled for that session.  Otherwise,
         this feature must not be enabled.";
-
      reference "RFC XXXX, section 8.2.";
    }
 
@@ -326,6 +325,7 @@
             configuration if and only if the configuration
             data does not already exist in the configuration
             datastore.  If the configuration data exists, an
+
             <rpc-error> element is returned with an
             <error-tag> value of 'data-exists'.";
        }
@@ -403,15 +403,13 @@
      }
 
      output {
-       container data {
-         presence
-           "An empty data container indicates that the
-            request did not produce any results.";
+       anyxml data {
          description
            "Copy of the source datastore subset which matched
-            the filter criteria (if any).";
+            the filter criteria (if any).  An empty data container
+            indicates that the request did not produce any results.";
        }
-      }
+     }
    }
 
    rpc edit-config {
@@ -425,6 +423,7 @@
        container target {
          description
            "Particular configuration to edit.";
+
          choice config-target {
            mandatory true;
            description
@@ -519,6 +518,7 @@
            description
              "Inline Config content.";
          }
+
          leaf url {
            if-feature url;
            type inet:uri;
@@ -744,13 +744,12 @@
      }
 
      output {
-       container data {
-         presence
-           "An empty data container indicates that the filter
-            request did not match any results.";
+       anyxml data {
          description
            "Copy of the running datastore subset and/or state
-            data which matched the filter criteria (if any).";
+            data which matched the filter criteria (if any).
+            An empty data container indicates that the request did not
+            produce any results.";
        }
      }
    }
@@ -926,5 +925,4 @@
    }
 
  }
-
 

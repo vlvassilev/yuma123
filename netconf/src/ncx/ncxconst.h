@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2009 - 2011, Andy Bierman
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -700,7 +700,7 @@ extern "C" {
 #define E_BAD_DATA_ERROR  (const xmlChar *)"error"
 
 #define COPYRIGHT_STRING \
-    "Copyright (c) 2008-2010, Andy Bierman, All Rights Reserved.\n"
+    "Copyright (c) 2008-2011, Andy Bierman, All Rights Reserved.\n"
 
 
 #define Y_PREFIX         (const xmlChar *)"y_"

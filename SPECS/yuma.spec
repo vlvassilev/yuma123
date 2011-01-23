@@ -78,24 +78,24 @@ echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
 * Sat Jan 22 2011 Andy Bierman <andy at netconfcentral.org> 1.14-4 [996]
- - fix typo in netconfd.yang
- - updated ietf-netconf.yang to latest IETF version
- - yangcli: suppress YANG warnings during start session autoload
- - yangcli: fix bug CLI defaults not getting applied if no parameters given
- - yangcli: fix with-defaults warning getting generated incorrectly
- - all: fix error message in YANG parsing
- - yangcli: set rpc/input in canonical order for generic conn_command
- - yangcli: add error messages for some corner-case parameter
-   assignment cases, such as choice, container for <source> and <target>
- - netconfd: add new error ERR_NCX_CONFIG_NOT_TARGET and check
-   in edit-config validate if running or startup is the target
-   but this is not supported in the agt_profile settings
- - add build comments for Cygwin to README
- - fix string truncation bus in various files that can sometimes
-   fail to add a terminating zero after strncmp
- - fixing warnings and adding error message for NOFLOAT support
- - getting ready to support windows binaries
- - fix rpm release number
+  * fix typo in netconfd.yang
+  * updated ietf-netconf.yang to latest IETF version
+  * yangcli: suppress YANG warnings during start session autoload
+  * yangcli: fix bug CLI defaults not getting applied if no parameters given
+  * yangcli: fix with-defaults warning getting generated incorrectly
+  * all: fix error message in YANG parsing
+  * yangcli: set rpc/input in canonical order for generic conn_command
+  * yangcli: add error messages for some corner-case parameter
+    assignment cases, such as choice, container for <source> and <target>
+  * netconfd: add new error ERR_NCX_CONFIG_NOT_TARGET and check
+    in edit-config validate if running or startup is the target
+    but this is not supported in the agt_profile settings
+  * add build comments for Cygwin to README
+  * fix string truncation bus in various files that can sometimes
+    fail to add a terminating zero after strncmp
+  * fixing warnings and adding error message for NOFLOAT support
+  * getting ready to support windows binaries
+  * fix rpm release number
 * Sat Dec 18 2010 Andy Bierman <andy at netconfcentral.org> 1.14-3 [983]
   * yangcli: fixed bug in var display for boolean type
   * fixed bug in sprintf val to buffer for empty string

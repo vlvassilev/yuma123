@@ -26,10 +26,17 @@ LN_EXTRA=-Wl,-utputs -Wl,-utparm -Wl,-utigetnum -Wl,-utigetstr -Wl,-usetupterm
 # that contains bar. 
 
 ## LINUX
+ifdef CROSS_TARGET
 DLIBS =	-L../../target/lib -lmgr -lncx \
 	-L/lib -L$(PREFIX)/lib -lxml2 -lncurses -lssh2 \
 	-L../../../libtecla -ltecla \
 	-L/lib -L$(PREFIX)/lib -lz -lcrypto -ldl
+else
+DLIBS =	-L../../target/lib -lmgr -lncx \
+	-L/lib -L$(PREFIX)/lib -lxml2 -lncurses -lssh2 \
+	-L../../../libtecla -ltecla \
+	-L/lib -L$(PREFIX)/lib -lz -ldl
+endif
 
 ifdef DEBIAN
 SLIBS = -L../../target/lib -lmgr -lncx \

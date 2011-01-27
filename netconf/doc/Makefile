@@ -2,6 +2,10 @@
 #  
 #   doc directory
 
+ifndef PREFIX
+    PREFIX=/usr
+endif
+
 DOC_INSTALL = $(DESTDIR)$(PREFIX)/share/doc/yuma
 
 all:

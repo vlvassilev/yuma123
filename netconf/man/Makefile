@@ -2,6 +2,10 @@
 #  
 #   man directory
 
+ifndef PREFIX
+    PREFIX=/usr
+endif
+
 MAN_INSTALL = $(DESTDIR)$(PREFIX)/share/man/man1
 
 WEB_INSTALL = $(DESTDIR)/$(HOME)/MAN_WEBPAGES

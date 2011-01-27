@@ -3,6 +3,9 @@
 # modules directory
 #
 
+ifndef PREFIX
+    PREFIX=/usr
+endif
 
 ############### SOURCE PROFILE ##############################
 

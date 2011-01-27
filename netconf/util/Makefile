@@ -2,6 +2,10 @@
 #  
 #   util directory
 
+ifndef PREFIX
+    PREFIX=/usr
+endif
+
 UTIL_INSTALL = $(DESTDIR)$(PREFIX)/share/yuma/util
 
 BIN_INSTALL = $(DESTDIR)$(PREFIX)/bin

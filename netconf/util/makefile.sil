@@ -50,14 +50,20 @@ endif
 
 ### GCC + [LINUX or MACOSX]
 
+ifdef DEBUG
+WERROR= -Werror
+else
+WERROR=
+endif
+
 CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
-	-Wmissing-include-dirs -Wswitch-default -Wunused-parameter \
+	-Wswitch-default -Wunused-parameter \
 	-Wextra -Wundef -Wshadow -Wpointer-arith \
 	-Wwrite-strings -Wbad-function-cast -Wcast-qual -Wcast-align \
 	-Waggregate-return -Wstrict-prototypes -Wold-style-definition \
 	-Wmissing-prototypes -Wmissing-declarations \
 	-Wpacked -Winvalid-pch \
-	-Wredundant-decls -Wnested-externs -Winline -std=gnu99 -Werror
+	-Wredundant-decls -Wnested-externs -Winline -std=gnu99 $(WERROR)
 
 
 # -Wunreachable-code removed due to -O3

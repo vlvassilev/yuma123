@@ -8,6 +8,10 @@
 # This is an ordered list
 # Put only the directories that build object files in the list
 
+ifndef PREFIX
+    PREFIX=/usr
+endif
+
 # make all targets
 DIRS = src modules etc doc man util
 

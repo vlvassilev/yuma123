@@ -10,6 +10,13 @@ LIBNCX_MAJOR_VERSION=1
 LIBNCX_MINOR_VERSION=14
 SOVERSION=$(LIBNCX_MAJOR_VERSION).$(LIBNCX_MINOR_VERSION)
 
+# default DESTDIR is NULL; it is only used by packaging builds
+
+# set default PREFIX to /usr
+ifndef PREFIX
+  PREFIX=/usr
+endif
+
 CINC=
 ifdef WINDOWS
    CINC += -I/usr/i586-mingw32msvc/include
@@ -18,8 +25,8 @@ endif
 CINC +=-I. -I../agt -I../mgr \
     -I../ncx -I../platform \
     -I../ydump \
-    -I/usr/include -I/usr/include/libxml2 \
-    -I/usr/include/libxml2/libxml
+    -I$(DESTDIR)$(PREFIX)/include/libxml2 \
+    -I$(DESTDIR)$(PREFIX)/include/libxml2/libxml
 
 
 # added /sw/include for MacOSX
@@ -32,7 +39,7 @@ endif
 TBASE=../../target
 
 ifdef DESTDIR
-LBASE=$(DESTDIR)/target/lib
+LBASE=$(DESTDIR)$(PREFIX)/lib
 else
 LBASE=$(TBASE)/lib
 endif
@@ -87,14 +94,7 @@ ifdef P64BIT
   CDEFS += -DP64BIT
 endif
 
-CFLAGS=$(CDEFS) $(CWARN) -fPIC
-
-# production (0) or debug (1) build
-ifdef DEBUG
-  CFLAGS += -ggdb3
-else
-  CFLAGS += -O2
-endif
+CFLAGS+=$(CDEFS) $(CWARN) -fPIC
 
 # memory leak debugging mode
 ifdef MEMTRACE
@@ -136,10 +136,10 @@ LINK=i586-mingw32msvc-gcc
 LIBTOOL=i586-mingw32msvc-ar
 RANLIB=i586-mingw32msvc-ranlib
 else
-CC=gcc
-LINK=gcc
-LIBTOOL=ar
-RANLIB=ranlib
+CC=$(CROSS_TARGET)gcc
+LINK=$(CC)
+LIBTOOL=$(CROSS_TARGET)ar
+RANLIB=$(CROSS_TARGET)ranlib
 endif
 
 LINT=splint

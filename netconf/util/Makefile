@@ -2,9 +2,9 @@
 #  
 #   util directory
 
-UTIL_INSTALL = $(DESTDIR)/usr/share/yuma/util
+UTIL_INSTALL = $(DESTDIR)$(PREFIX)/share/yuma/util
 
-BIN_INSTALL = $(DESTDIR)/usr/bin
+BIN_INSTALL = $(DESTDIR)$(PREFIX)/bin
 
 all:
 

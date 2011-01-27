@@ -14,7 +14,7 @@ BIN_INST=$(TBASE)/bin
 
 # if the target is DEBIAN or RPM package, then
 # install the include files
-REAL_INC_INST=$(DESTDIR)/usr/include/yuma
+REAL_INC_INST=$(DESTDIR)$(PREFIX)/include/yuma
 
 #################### MAKE RULES ########################
 

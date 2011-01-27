@@ -11,7 +11,7 @@
 # make all targets
 DIRS = src modules etc doc man util
 
-TOP_INSTALL = $(DESTDIR)/usr/share/yuma
+TOP_INSTALL = $(DESTDIR)$(PREFIX)/share/yuma
 
 ifndef JFLAG
 JFLAG = -j3

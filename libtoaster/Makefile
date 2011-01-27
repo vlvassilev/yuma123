@@ -11,7 +11,7 @@
 # make all targets
 DIRS = src
 
-SRC_INST=$(DESTDIR)/usr/share/yuma/src/libtoaster
+SRC_INST=$(DESTDIR)$(PREFIX)/share/yuma/src/libtoaster
 
 #################### PLATFORM DEFINITIONS ############
 all: toasterall

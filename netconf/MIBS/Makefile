@@ -5,7 +5,7 @@
 ############### SOURCE PROFILE ##############################
 
 SUBDIR_NM=MIBS
-SMIDUMP=/usr/local/bin/smidump
+SMIDUMP=$(DESTDIR)$(PREFIX)/local/bin/smidump
 SUBDIR_CPP=""
 
 

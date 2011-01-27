@@ -24,14 +24,10 @@ REAL_INST=$(DESTDIR)/usr/lib/yuma
 all: sil_dummy sil_lib
 
 #################### PLATFORM DEFINITIONS ############
-ifdef YUMA_HOME
-CINCBASE=$(YUMA_HOME)/src
-else
-CINCBASE=/usr/include/yuma
-endif
+CINCBASE=$(DESTDIR)/usr/include
 
-CINC = -I. -I$(CINCBASE)/platform -I$(CINCBASE)/ncx -I$(CINCBASE)/agt \
-     -I/usr/include -I/usr/include/libxml2 -I/usr/include/libxml2/libxml
+CINC = -I. -I$(CINCBASE)/yuma/platform -I$(CINCBASE)/yuma/ncx -I$(CINCBASE)/yuma/agt \
+     -I$(CINCBASE) -I$(CINCBASE)/libxml2 -I$(CINCBASE)/libxml2/libxml
 
 # added /sw/include for MacOSX
 ifdef MAC
@@ -73,14 +69,14 @@ ifndef NOFLOAT
   CDEFS += -DHAS_FLOAT
 endif
 
-CFLAGS=$(CDEFS) $(CWARN) -fPIC
-
 # production (0) or debug (1) build
 ifdef DEBUG
-  CFLAGS += -ggdb3
+  CFLAGS ?= -ggdb3
 else
-  CFLAGS += -O2
+  CFLAGS ?= -O2
 endif
+
+CFLAGS += $(CDEFS) $(CWARN) -fPIC
 
 # memory leak debugging mode
 ifdef MEMTRACE
@@ -116,8 +112,8 @@ LIBSUFFIX=so
 endif
 endif
 
-CC=gcc
-LINK=gcc
+CC?=gcc
+LINK?=$(CC)
 LINT=splint
 LINTFLAGS= '-weak -macrovarprefix "m_"'
 ##LIBFLAGS=-lsocket
@@ -222,11 +218,11 @@ superclean:
 	$(LIB_INST)/lib$(SUBDIR_NM).*
 
 $(LIB_INST)/lib$(SUBDIR_NM).so: $(OBJS)
-	gcc -shared -rdynamic -Wl,-soname,lib$(SUBDIR_NM).so -o $@ $(OBJS) -ldl
+	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -rdynamic -Wl,-soname,lib$(SUBDIR_NM).so -o $@ $(OBJS) -ldl -lagt
 
 
 $(LBASE)/lib$(SUBDIR_NM).dylib: $(OBJS)
-	gcc -shared -dynamiclib -std=gnu99 -current_version 1.0 \
+	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -dynamiclib -std=gnu99 -current_version 1.0 \
 	-undefined dynamic_lookup \
 	-o $@ -install_name lib$(SUBDIR_NM).dylib $(OBJS) -lxml2
 

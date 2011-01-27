@@ -15,10 +15,10 @@ srcdir = @srcdir@
 
 prefix=@prefix@
 exec_prefix=@exec_prefix@
-LIBDIR=@libdir@
-INCDIR=@includedir@
-MANDIR=@mandir@
-BINDIR=@bindir@
+LIBDIR=$(DESTDIR)@libdir@
+INCDIR=$(DESTDIR)@includedir@
+MANDIR=$(DESTDIR)@mandir@
+BINDIR=$(DESTDIR)@bindir@
 
 # Which C compiler do you want to use?
 
@@ -35,12 +35,7 @@ RANLIB = @RANLIB@
 
 # Optional flags to pass to the linker.
 
-ifdef DEBIAN
 LDFLAGS = @LDFLAGS@
-else
-LDFLAGS = @LDFLAGS@ --build-id
-endif
-
 
 # Optional C pre-processor flags.
 
@@ -191,7 +186,7 @@ clean:
 	  rm -f $$lib; echo rm -f $$lib ; \
 	done
 
-superclean: clean
+superclean: distclean
 
 distclean: clean
 	rm -rf config.cache config.status config.log Makefile libtecla.map.opt \
@@ -274,8 +269,12 @@ install_bin: $(BINDIR) $(PROGRAMS) $(PROGRAMS_R)
 	  $(srcdir)/install-sh -c -m 755 -s $$prog $(BINDIR)/; \
 	done
 
+# uncomment this if you want to really install libtecla
+# on your system instead of linking it statically into yangcli
 #install: install_lib install_inc install_man install_bin
 
+# comment this out if you want to really install libtecla
+# on your system instead of linking it statically into yangcli
 install:
 
 # Make any missing installation directories.

@@ -2,7 +2,7 @@
 #  
 #   man directory
 
-MAN_INSTALL = $(DESTDIR)/usr/share/man/man1
+MAN_INSTALL = $(DESTDIR)$(PREFIX)/share/man/man1
 
 WEB_INSTALL = $(DESTDIR)/$(HOME)/MAN_WEBPAGES
 

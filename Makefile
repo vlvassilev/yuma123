@@ -67,8 +67,10 @@ yuma-shlibs:
 	  cd $$dir && $(MAKE) $(JFLAG) && cd ..;\
         done
 
-yuma-client:
-	cd libtecla && ./configure;
+libtecla/Makefile:
+	cd libtecla && ./configure
+
+yuma-client: libtecla/Makefile
 	for dir in $(C_DIRS); do\
 	  cd $$dir && $(MAKE) $(JFLAG) && cd ..;\
         done
@@ -79,19 +81,18 @@ yuma-server:
         done
 
 
-yuma-all:
-	cd libtecla && ./configure; 
+yuma-all: libtecla/Makefile
 	for dir in $(DIRS); do\
 	  cd $$dir && $(MAKE) $(JFLAG) && cd ..;\
         done
 
 
-yumaclean:
+yumaclean: libtecla/Makefile
 	for dir in $(DIRS); do\
 	  cd $$dir && $(MAKE) clean && cd ..;\
         done
 
-yumasuperclean:
+yumasuperclean: libtecla/Makefile
 	for dir in $(DIRS); do\
 	  cd $$dir && $(MAKE) superclean && cd ..;\
         done
@@ -101,7 +102,7 @@ yuma-shlibs-install:
           cd $$dir && $(MAKE) install && cd ..;\
         done
 
-yuma-client-install:
+yuma-client-install: libtecla/Makefile
 	for dir in $(C_DIRS); do\
           cd $$dir && $(MAKE) install && cd ..;\
         done

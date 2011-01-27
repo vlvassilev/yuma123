@@ -12,15 +12,11 @@ SUBDIR_CPP=
 TARGET=$(TBASE)/$(SUBDIR_NM)
 LIB_INST=$(TBASE)/lib
 
-ifdef MAXWELL
-REAL_INST=/lib
-else
-REAL_INST=$(DESTDIR)/usr/lib
-endif
+REAL_INST=$(DESTDIR)$(PREFIX)/lib
 
 # if the target is DEBIAN or RPM package, then
 # install the include files
-REAL_INC_INST=$(DESTDIR)/usr/include/yuma
+REAL_INC_INST=$(DESTDIR)$(PREFIX)/include/yuma
 
 ######################### MAKE RULES ######################
 
@@ -58,13 +54,16 @@ ifdef DEVELOPER
 # just install the H files
 install: includes
 else
+ifdef CROSS_TARGET
+# don't install anything
+install:
+else
 install: $(BLD_INCLUDES)
 ifndef STATIC
 # install dynamic libncx file
 	mkdir -p $(REAL_INST)
 	install $(OWNER) $(GRP) \
 	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBNCXSUFFIX) $(REAL_INST)
-#ifdef SHLIBS
 # libncx.so --> libncx.so.M.N
 # libncx.so.1 --> libncx.so.M.N
 	(cd $(REAL_INST); \
@@ -72,11 +71,11 @@ ifndef STATIC
 	lib$(SUBDIR_NM).$(LIBSUFFIX);\
 	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
 	lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIBNCX_MAJOR_VERSION))
-#endif
 ifndef DESTDIR
 ifndef MAC
 # skip in MacOsX, RPM, and rest of debian fakeroot builds
 	ldconfig
+endif
 endif
 endif
 endif
@@ -132,12 +131,12 @@ endif
 
 # this rule is ignored if STATIC=1; used only in linux
 $(LBASE)/libncx.so.$(SOVERSION): $(OBJS)
-	$(CC) -shared $(RDYNAMIC) -Wl,-soname,libncx.so.$(SOVERSION) \
-	-o $@ $(OBJS) $(LC)
+	$(CC) $(CFLAGS) -shared $(RDYNAMIC) -Wl,-soname,libncx.so.$(SOVERSION) \
+	-o $@ $(OBJS) $(LC) -lxml2
 
 # this rule is ignored if STATIC=1; used only on MacOSX
 $(LBASE)/libncx.dylib: $(OBJS)
-	$(CC) -shared -dynamiclib -std=gnu99 -current_version \
+	$(CC) $(CFLAGS) -shared -dynamiclib -std=gnu99 -current_version \
 	$(SOVERSION) \
 	-undefined dynamic_lookup \
 	-o $@ -install_name libncx.dylib $(OBJS) -lxml2
@@ -163,6 +162,6 @@ endif
 .NOEXPORT:
 
 ifndef DEVELOPER
-include dependencies
+include ./dependencies
 endif
 

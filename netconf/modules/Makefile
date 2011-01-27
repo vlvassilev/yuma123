@@ -12,7 +12,7 @@ SUBDIR_CPP=
 ############### TARGET PROFILE ##############################
 
 # copy modules to /usr/share/yuma
-TOP_INSTALL=$(DESTDIR)/usr/share/yuma
+TOP_INSTALL=$(DESTDIR)$(PREFIX)/share/yuma
 INSTALL_TARGET=$(TOP_INSTALL)/modules
 
 ######################### MAKE RULES ######################

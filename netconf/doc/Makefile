@@ -2,7 +2,7 @@
 #  
 #   doc directory
 
-DOC_INSTALL = $(DESTDIR)/usr/share/doc/yuma
+DOC_INSTALL = $(DESTDIR)$(PREFIX)/share/doc/yuma
 
 all:
 

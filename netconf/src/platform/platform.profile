@@ -68,7 +68,7 @@ endif
 
 #std=gnu99 is only used for floating point libraries
 CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
-	-Wmissing-include-dirs -Wswitch-default -Wunused-parameter \
+	-Wswitch-default -Wunused-parameter \
 	-Wextra -Wundef -Wshadow -Wpointer-arith \
 	-Wwrite-strings -Wbad-function-cast -Wcast-qual -Wcast-align \
 	-Waggregate-return -Wstrict-prototypes -Wold-style-definition \

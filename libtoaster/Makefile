@@ -11,6 +11,11 @@
 # make all targets
 DIRS = src
 
+
+ifndef PREFIX
+    PREFIX=/usr
+endif
+
 SRC_INST=$(DESTDIR)$(PREFIX)/share/yuma/src/libtoaster
 
 #################### PLATFORM DEFINITIONS ############
@@ -23,6 +28,8 @@ all: toasterall
 clean: toasterclean
 
 superclean: toastersuperclean
+
+distclean: toastersuperclean
 
 install: toasterinstall
 
@@ -70,7 +77,7 @@ endif
 endif
 
 .PHONY: all clean superclean install \
-	toasterall toasterclean toastersuperclean toasterinstall 
+	toasterall toasterclean toastersuperclean toasterinstall distclean
 
 
 # prevent the make program from choking on all the symbols

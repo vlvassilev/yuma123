@@ -63,7 +63,13 @@ ifndef DEBIAN
 	cp src/*h $(SRC_INST)/src/
 	cp src/Makefile $(SRC_INST)/src/
 else
-ifdef DEVELOPER
+ifdef SERVER
+else
+ifdef CLIENT
+else
+ifdef SHLIBS
+else
+#  this is DEVELOPER or no subtag in DEBIAN
 	mkdir -p $(SRC_INST)
 	mkdir -p $(SRC_INST)/src
 	mkdir -p $(SRC_INST)/lib
@@ -73,6 +79,8 @@ ifdef DEVELOPER
 	cp src/*c $(SRC_INST)/src/
 	cp src/*h $(SRC_INST)/src/
 	cp src/Makefile $(SRC_INST)/src/
+endif
+endif
 endif
 endif
 

@@ -93,9 +93,9 @@ endif
 
 # production (0) or debug (1) build
 ifdef DEBUG
-  CFLAGS?=-ggdb3
+  CFLAGS+=-ggdb3
 else
-  CFLAGS?=-O2
+  CFLAGS+=-O2
 endif
 
 CFLAGS+=$(CDEFS) $(CWARN) -fPIC

@@ -2977,7 +2977,9 @@ static status_t
     parm = val_find_child(valset, 
                           YANGCLI_MOD, 
                           YANGCLI_DIR);
-    if (!parm || parm->res != NO_ERR) {
+    if (parm == NULL || 
+	parm->res != NO_ERR || 
+	xml_strlen(VAL_STR(parm)) == 0) {
         val_free_value(valset);
         log_error("\nError: 'dir' parameter is missing");
         return ERR_NCX_MISSING_PARM;

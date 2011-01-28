@@ -96,6 +96,12 @@ endif
 
 CFLAGS+=$(CDEFS) $(CWARN) -fPIC
 
+ifdef DEBUG
+  CFLAGS += -ggdb3
+else
+  CFLAGS += -O2
+endif
+
 # memory leak debugging mode
 ifdef MEMTRACE
   CFLAGS += -DMEMORY_DEBUG=1

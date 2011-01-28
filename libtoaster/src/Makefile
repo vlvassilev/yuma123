@@ -189,9 +189,6 @@ $(LBASE)/lib%.a: $(OBJS)
 
 ################## MAKE DEPENDENCIES #####################
 # following depend rule is the GNU version! Other versions TBD
-# this rule cannot be included by the top level makefile
-# so platform.profile.cmn was created to allow that Makefile
-# to define a different 'depend' rule.
 depend: dependencies
 
 dependencies: $(DEPS)

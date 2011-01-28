@@ -25,6 +25,7 @@ endif
 CINC +=-I. -I../agt -I../mgr \
     -I../ncx -I../platform \
     -I../ydump \
+    -I$(DESTDIR)$(PREFIX)/include \
     -I$(DESTDIR)$(PREFIX)/include/libxml2 \
     -I$(DESTDIR)$(PREFIX)/include/libxml2/libxml
 

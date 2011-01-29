@@ -30,8 +30,8 @@ LN_EXTRA=-Wl,-utputs -Wl,-utparm -Wl,-utigetnum -Wl,-utigetstr -Wl,-usetupterm
 # $(LCRYPTO) -lcrypto 
 ## LINUX
 DLIBS =	-L../../target/lib -lmgr -lncx \
-	-L$(PREFIX)/lib -lxml2 -lncurses -lssh2 \
 	-L../../../libtecla -ltecla \
+	-L$(PREFIX)/lib -lxml2 -lncurses -lssh2 \
 	-L$(PREFIX)/lib -lz -ldl
 
 

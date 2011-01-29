@@ -322,10 +322,12 @@ static status_t
     ncx_module_t          *mod;
     val_value_t           *valset, *val;
     status_t               res;
+    boolean                defs_done;
 
     res = NO_ERR;
     valset = NULL;
     obj = NULL;
+    defs_done = FALSE;
 
     /* find the CLI container definition */
     mod = ncx_find_module(YANGDUMP_MOD, NULL);
@@ -350,6 +352,7 @@ static status_t
                                TRUE,
                                CLI_MODE_PROGRAM,
                                &res);
+            defs_done = TRUE;
         } else {
             valset = val_new_value();
             if (valset == NULL) {
@@ -393,6 +396,13 @@ static status_t
                                            valset, 
                                            TRUE, 
                                            FALSE);
+        if (res != NO_ERR) {
+            return res;
+        }
+    }
+
+    if (!defs_done) {
+        res = val_add_defaults(valset, FALSE);
         if (res != NO_ERR) {
             return res;
         }

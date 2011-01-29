@@ -1903,9 +1903,11 @@ static status_t
     val_value_t           *parm;
     status_t               res;
     ncx_display_mode_t     dmode;
+    boolean                defs_done;
 
     res = NO_ERR;
     mgr_cli_valset = NULL;
+    defs_done = FALSE;
 
     /* find the parmset definition in the registry */
     obj = ncx_find_object(yangcli_mod, YANGCLI_BOOT);
@@ -1921,7 +1923,6 @@ static status_t
                 res = ERR_INTERNAL_MEM;
             } else {
                 val_init_from_template(mgr_cli_valset, obj);
-                res = val_add_defaults(mgr_cli_valset, FALSE);
             }
         } else {
             /* parse the command line against the object template */    
@@ -1934,6 +1935,7 @@ static status_t
                                        autocomp,
                                        CLI_MODE_PROGRAM,
                                        &res);
+	    defs_done = TRUE;
         }
     }
 
@@ -1961,10 +1963,13 @@ static status_t
                                            FALSE);
     }
 
+    if (res == NO_ERR && defs_done == FALSE) {
+        res = val_add_defaults(mgr_cli_valset, FALSE);
+    }
+
     if (res != NO_ERR) {
         return res;
     }
-
 
     /****************************************************
      * go through the yangcli params in order,

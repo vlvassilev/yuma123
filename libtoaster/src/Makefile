@@ -106,7 +106,11 @@ else
   CFLAGS+=-O2
 endif
 
-CFLAGS+=$(CDEFS) $(CWARN) -fPIC
+CFLAGS+=$(CDEFS) $(CWARN)
+
+ifndef CYGWIN
+  CFLAGS += -fPIC
+endif
 
 # memory leak debugging mode
 ifdef MEMTRACE

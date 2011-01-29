@@ -48,7 +48,11 @@ else
 ifdef MAC
 OWNER=-oroot
 else
+ifdef CYGWIN
+OWNER=
+else
 OWNER= --owner=root
+endif
 endif
 endif
 
@@ -86,7 +90,11 @@ else
   CFLAGS ?= -O2
 endif
 
-CFLAGS += $(CDEFS) $(CWARN) -fPIC
+CFLAGS += $(CDEFS) $(CWARN)
+
+ifndef CYGWIN
+   CFLAGS += -fPIC
+endif
 
 # memory leak debugging mode
 ifdef MEMTRACE
@@ -108,7 +116,11 @@ else
 ifdef DESTDIR
    GRP=
 else
+ifdef CYGWIN
+   GRP=
+else
    GRP=--group=root
+endif
 endif
 endif
 

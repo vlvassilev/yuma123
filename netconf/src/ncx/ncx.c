@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2009- 2011, Andy Bierman
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -6038,7 +6038,8 @@ xmlChar *
     const xmlChar  *p, *start, *user;
     xmlChar        *buff, *bp;
     uint32          bufflen, userlen, len;
-    
+    boolean         with_dot;
+
 #define DIRBUFF_SIZE 1500
 
 #ifdef DEBUG
@@ -6143,9 +6144,15 @@ xmlChar *
             bp += xml_strcpy(bp, user);
         }
         xml_strcpy(bp, p);
-    } else if (*p == NCXMOD_DOTCHAR && p[1] == NCXMOD_PSCHAR) {
-        /* check for ./some/path */
-        p++;
+    } else if ((*p == NCXMOD_DOTCHAR && p[1] == NCXMOD_PSCHAR) ||
+               (*p != NCXMOD_DOTCHAR)) {
+
+        /* check for ./some/path or some/path */
+        with_dot = (*p == NCXMOD_DOTCHAR);
+
+	if (with_dot) {
+	    p++;
+	}
 
         /* prepend string with current directory */
         buff = m__getMem(DIRBUFF_SIZE);
@@ -6162,14 +6169,18 @@ xmlChar *
             
         bufflen = xml_strlen(buff);
 
-        if ((bufflen + xml_strlen(p) + 1) >= DIRBUFF_SIZE) {
+        if ((bufflen + xml_strlen(p) + 2) >= DIRBUFF_SIZE) {
             *res = ERR_BUFF_OVFL;
             m__free(buff);
             return NULL;
         }
 
+        if (!with_dot) {
+            buff[bufflen++] = NCXMOD_PSCHAR;
+        }
         xml_strcpy(&buff[bufflen], p);
     } else {
+        /* probably contains ../ and that is not handled yet */
         buff = xml_strdup(fspec);
         if (buff == NULL) {
             *res = ERR_INTERNAL_MEM;

@@ -9,10 +9,15 @@ module yuma-app-common {
     organization "Netconf Central";
 
     contact
-        "Andy Bierman <andy at netconfcentral.com>";
+        "Andy Bierman <andy at netconfcentral.org>";
 
     description 
        "Common CLI parameters used in all yuma applications.";
+
+    revision 2011-01-28 {
+       description 
+         "Add OutputParm grouping";
+    }
 
     revision 2010-12-18 {
        description 
@@ -342,7 +347,52 @@ module yuma-app-common {
     }
 
     grouping FeatureParms {
-   }
+    }
+
+    grouping OutputParm {
+        leaf output {
+          description 
+            "Output directory or file name to use. 
+             Default is STDOUT if none specified and the
+             'defnames' parameter is also set to 'false'.
+
+             For yangdump, if this parameter represents an existing
+             directory, then the 'defnames' parameter will be set 
+             to 'true' by default, and the translation output file(s)
+             will be generated in the specified directory.
+
+             For yangdump, if this parameter represents a file name,
+             then the 'defnames' parameter will be ignored,
+             and all translation output will be directed
+             to the specified file.
+
+             If this string begins with a '~' character,
+             then a username is expected to follow or
+             a directory separator character.   If it begins
+             with a '$' character, then an environment variable
+             name is expected to follow.
+
+               ~/some/path ==> <my-home-dir>/some/path
+
+               ~fred/some/path ==> <fred-home-dir>/some/path
+
+               $workdir/some/path ==> <workdir-env-var>/some/path
+
+             If this parameter is present, and identifies
+             an existing directory, then any translation output
+             files will be generated in that directory.  If that
+             parameter identifies a file, then that one file will
+             be used for output.
+
+             For yangdump, if the 'format' parameter is present, 
+             then one file with the default name will be generated
+             for each YANG or YIN file found in the sub-tree.";
+
+          type string;
+        }
+    }
+
+
 
 }
 

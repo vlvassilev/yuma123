@@ -25,35 +25,32 @@ LN_EXTRA=-Wl,-utputs -Wl,-utparm -Wl,-utigetnum -Wl,-utigetstr -Wl,-usetupterm
 # Then put the library that contains foo BEFORE the one
 # that contains bar. 
 
+# this breaks ubuntu build cannot find libcrypto
+#LCRYPTO=-L/lib
+# $(LCRYPTO) -lcrypto 
 ## LINUX
-ifdef CROSS_TARGET
 DLIBS =	-L../../target/lib -lmgr -lncx \
-	-L/lib -L$(PREFIX)/lib -lxml2 -lncurses -lssh2 \
+	-L$(PREFIX)/lib -lxml2 -lncurses -lssh2 \
 	-L../../../libtecla -ltecla \
-	-L/lib -L$(PREFIX)/lib -lz -lcrypto -ldl
-else
-DLIBS =	-L../../target/lib -lmgr -lncx \
-	-L/lib -L$(PREFIX)/lib -lxml2 -lncurses -lssh2 \
-	-L../../../libtecla -ltecla \
-	-L/lib -L$(PREFIX)/lib -lz -ldl
-endif
+	-L$(PREFIX)/lib -lz -ldl
+
 
 ifdef DEBIAN
 SLIBS = -L../../target/lib -lmgr -lncx \
-	-L/lib -L$(PREFIX)/lib -lxml2 \
-	-l:/usr/lib/libssh2.a \
+	-L$(PREFIX)/lib -lxml2 \
+	-l:$(PREFIX)/lib/libssh2.a \
 	-l:/lib/libgcrypt.a \
 	-l:/lib/libgpg-error.a \
 	-l:../../../libtecla/libtecla.a \
-	-l:/usr/lib/libncurses.a
+	-l:$(PREFIX)/lib/libncurses.a
 else
 SLIBS = -L../../target/lib -lmgr -lncx \
-	-L/lib -L$(PREFIX)/lib -lxml2 \
-	-l:/usr/lib/libssh2.a \
+	-L$(PREFIX)/lib -lxml2 \
+	-l:$(PREFIX)/lib/libssh2.a \
 	-l:/lib/libgcrypt.a \
 	-l:/lib/libgpg-error.a \
 	-l:../../../libtecla/libtecla.a \
-	-l:/usr/lib/libncurses.so
+	-l:$(PREFIX)/lib/libncurses.so
 endif
 
 # set FULL_STATIC=1 to force complete shared libraries

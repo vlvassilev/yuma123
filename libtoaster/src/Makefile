@@ -14,7 +14,11 @@ TARGET=../bin
 
 LIB_INST=../lib
 
+ifdef YUMA_HOME
 WORK_INST=$(YUMA_HOME)/target/lib
+else
+WORK_INST=
+endif
 
 ifndef PREFIX
     PREFIX=/usr
@@ -225,7 +229,11 @@ else
 SIL_LIB=$(LIB_INST)/lib$(SUBDIR_NM).$(LIBSUFFIX)
 endif
 
-
+ifdef CYGWIN
+LAGT=
+else
+LAGT=-L../../netconf/target/lib
+endif
 
 test:
 
@@ -258,7 +266,7 @@ superclean:
 	$(LIB_INST)/lib$(SUBDIR_NM).*
 
 $(LIB_INST)/lib$(SUBDIR_NM).so: $(OBJS)
-	$(CC) $(CFLAGS) -shared -rdynamic -Wl,-soname,lib$(SUBDIR_NM).so -o $@ $(OBJS) -ldl
+	$(CC) $(CFLAGS) -shared -rdynamic -Wl,-soname,lib$(SUBDIR_NM).so -o $@ $(OBJS) -ldl $(LAGT) -lagt
 
 #	$(CC) $(CFLAGS) -shared -Wl,-soname,libtoaster.so -o $@ $(OBJS) -lc
 

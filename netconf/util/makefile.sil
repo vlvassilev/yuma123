@@ -10,13 +10,17 @@ SUBDIR_CPP=
 
 ############### TARGET PROFILE ##############################
 
+ifndef PREFIX
+    PREFIX=/usr
+endif
+
 TARGET=../bin
 
 LIB_INST=../lib
 
 WORK_INST=$(YUMA_HOME)/target/lib
 
-REAL_INST=$(DESTDIR)/usr/lib/yuma
+REAL_INST=$(DESTDIR)$(PREFIX)/lib/yuma
 
 
 #################### MAKE RULES ########################

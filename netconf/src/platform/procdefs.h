@@ -145,7 +145,9 @@ extern "C" {
 #define	    VOLATILE	volatile
 
 #ifdef __STDC__
+#ifndef WINDOWS
 #define	    strcmpi	_strcmpi
+#endif
 #endif
 
 #if CPV_ALLOW_FAR

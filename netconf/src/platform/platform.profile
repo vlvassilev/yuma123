@@ -95,7 +95,11 @@ ifdef P64BIT
   CDEFS += -DP64BIT
 endif
 
-CFLAGS+=$(CDEFS) $(CWARN) -fPIC
+CFLAGS+=$(CDEFS) $(CWARN)
+
+ifndef CYGWIN
+   CFLAGS += -fPIC
+endif
 
 ifdef DEBUG
   CFLAGS += -ggdb3

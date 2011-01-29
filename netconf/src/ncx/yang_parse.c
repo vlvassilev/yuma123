@@ -3823,7 +3823,11 @@ status_t
     }
     if (tkc) {
         tkc->fp = NULL;
-        tk_free_chain(tkc);
+        if (keepmod && pcb->tkc == NULL) {
+            pcb->tkc = tkc;
+        } else {
+            tk_free_chain(tkc);
+        }
     }
 
     return res;

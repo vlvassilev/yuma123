@@ -1443,7 +1443,8 @@ static status_t
     pcb = ncxmod_load_module_ex(modname,
                                 revision,
                                 cp->unified, /* with_submods */
-                                !cp->rawmode, /* savetkc for yin */
+                                /* savetkc for yin */
+                                !cp->rawmode || cp->format == NCX_CVTTYP_YIN,
                                 TRUE,    /* keepmode to force new load */
                                 &cp->savedevQ,
                                 &res);

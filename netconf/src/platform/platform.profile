@@ -57,7 +57,11 @@ else
 ifdef MAC
 OWNER=-oroot
 else
+ifdef CYGWIN
+OWNER=
+else
 OWNER= --owner=root
+endif
 endif
 endif
 
@@ -124,7 +128,11 @@ else
 ifdef DESTDIR
    GRP=
 else
+ifdef CYGWIN
+   GRP=
+else
    GRP=--group=root
+endif
 endif
 endif
 

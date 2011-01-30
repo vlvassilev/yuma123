@@ -457,14 +457,13 @@ static status_t
         } /* else already have an active 'cpu' entry */
 
         if (strlen(buffer) == 1 && *buffer == '\n') {
-            /* force a new CPU entry; or last entry */
+            /* force a new CPU entry */
             if (cpuval) {
                 res = val_gen_index_chain(cpuobj, cpuval);
-                if (res != NO_ERR) {
-                    log_error("\nError: could not add index");
-                    done = TRUE;
+                if (NO_ERR == val_gen_index_chain(cpuobj, cpuval)) {
+                    cpuval = NULL;
                 }
-                cpuval = NULL;
+                /* else empty line in cpu entry, e.g. arm */
             }
         } else {
             res = NO_ERR;
@@ -477,10 +476,7 @@ static status_t
 
     if (res == NO_ERR && cpuval) {
         if (val_get_first_index(cpuval) == NULL) {
-            res = val_gen_index_chain(cpuobj, cpuval);
-            if (res != NO_ERR) {
-                log_error("\nError: could not add index");
-            }
+            val_gen_index_chain(cpuobj, cpuval);
         }
     }
             

@@ -2598,7 +2598,7 @@ static void
                                       (revision) ? revision : EMPTY_STRING);
                         }
                     } else {
-                        /* the search result is valid;
+                        /* the search result is valid, but no source;
                          * specified module is not available
                          * on the manager platform; see if the
                          * get-schema operation is available
@@ -2607,21 +2607,49 @@ static void
                             /* no <get-schema> so SOL, do without this module 
                              * !!! need warning number 
                              */
-                            log_warn("\nWarning: module '%s' "
-                                     "revision '%s' not "
-                                     "available and no <get-schema>",
-                                     module,
-                                     revision ? (revision) : EMPTY_STRING);
+                            if (revision != NULL) {
+                                log_warn("\nWarning: module '%s' "
+                                         "revision '%s' not available",
+                                         module,
+                                         revision);
+                            } else {
+                                log_warn("\nWarning: module '%s' "
+                                         "(no revision) not available",
+                                         module);
+                            }
+                        } else if (LOGDEBUG) {
+                            log_debug("\nyangcli_autoload: Module '%s' "
+                                      "not available, will try <get-schema>",
+                                      module);
                         }
                     }
 
                     /* save the search result no matter what */
                     dlq_enque(searchresult, &server_cb->searchresultQ);
                 } else {
-                    /* search result was NULL, so there was some
-                     * bad error, like malloc-failed
+                    /* libresult was NULL, so there was no searchresult
+                     * ncxmod did not find any YANG module with this namespace
+                     * the module is not available
                      */
-                    log_error("\nError: module search malloc failed");
+                    if (!retrieval_supported) {
+                        /* no <get-schema> so SOL, do without this module 
+                         * !!! need warning number 
+                         */
+                        if (revision != NULL) {
+                            log_warn("\nWarning: module '%s' "
+                                     "revision '%s' not available",
+                                     module,
+                                     revision);
+                        } else {
+                            log_warn("\nWarning: module '%s' "
+                                     "(no revision) not available",
+                                     module);
+                        }
+                    } else if (LOGDEBUG) {
+                        log_debug("\nyangcli_autoload: Module '%s' "
+                                  "not available, will try <get-schema>",
+                                  module);
+                    }
                 }
             } else {
                 /* --autoload=false */

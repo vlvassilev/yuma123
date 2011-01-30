@@ -2,7 +2,11 @@
 #  
 #   etc directory
 
-ETC_INSTALL = $(DESTDIR)/etc/yuma
+ifndef ETC_PREFIX
+   ETC_PREFIX=/etc
+endif
+
+ETC_INSTALL = $(DESTDIR)$(ETC_PREFIX)/yuma
 
 all:
 

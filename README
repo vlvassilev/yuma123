@@ -21,6 +21,9 @@ Build Variables:
   PREFIX=string: set the top install dir (after DESTDIR)
          default: /usr
 
+  ETC_PREFIX=string: set the top etc dir (after DESTDIR)
+         default: /etc
+
   MAC=1: set to compile for MacOsX
 
   STATIC=1:set to use static libraries such as libncx.a,

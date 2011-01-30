@@ -2986,7 +2986,7 @@ static status_t
     }
 
     res = NO_ERR;
-    pathstr = ncx_get_source(VAL_STR(parm), &res);
+    pathstr = ncx_get_source_ex(VAL_STR(parm), FALSE, &res);
     if (!pathstr) {
         val_free_value(valset);
         log_error("\nError: get path string failed (%s)",

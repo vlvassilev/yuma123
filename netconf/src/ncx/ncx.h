@@ -2027,6 +2027,40 @@ extern status_t
 		      ncx_errinfo_t *dest);
 
 
+
+/********************************************************************
+* FUNCTION ncx_get_source_ex
+* 
+* Get a malloced buffer containing the complete filespec
+* for the given input string.  If this is a complete dirspec,
+* this this will just strdup the value.
+*
+* This is just a best effort to get the full spec.
+* If the full spec is greater than 1500 bytes,
+* then a NULL value (error) will be returned
+*
+*   - Change ./ --> cwd/
+*   - Remove ~/  --> $HOME
+*   - add trailing '/' if not present
+*
+* INPUTS:
+*    fspec == input filespec
+*    expand_cwd == TRUE if foo should be expanded to /cur/dir/foo
+*                  FALSE if not
+*    res == address of return status
+*
+* OUTPUTS:
+*   *res == return status, NO_ERR if return is non-NULL
+*
+* RETURNS:
+*   malloced buffer containing possibly expanded full filespec
+*********************************************************************/
+extern xmlChar *
+    ncx_get_source_ex (const xmlChar *fspec,
+                       boolean expand_cwd,
+                       status_t *res);
+
+
 /********************************************************************
 * FUNCTION ncx_get_source
 * 

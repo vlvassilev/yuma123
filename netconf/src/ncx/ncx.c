@@ -6007,7 +6007,7 @@ status_t
 
 
 /********************************************************************
-* FUNCTION ncx_get_source
+* FUNCTION ncx_get_source_ex
 * 
 * Get a malloced buffer containing the complete filespec
 * for the given input string.  If this is a complete dirspec,
@@ -6023,6 +6023,8 @@ status_t
 *
 * INPUTS:
 *    fspec == input filespec
+*    expand_cwd == TRUE if foo should be expanded to /cur/dir/foo
+*                  FALSE if not
 *    res == address of return status
 *
 * OUTPUTS:
@@ -6032,8 +6034,9 @@ status_t
 *   malloced buffer containing possibly expanded full filespec
 *********************************************************************/
 xmlChar *
-    ncx_get_source (const xmlChar *fspec,
-                    status_t *res)
+    ncx_get_source_ex (const xmlChar *fspec,
+                       boolean expand_cwd,
+                       status_t *res)
 {
     const xmlChar  *p, *start, *user;
     xmlChar        *buff, *bp;
@@ -6145,7 +6148,7 @@ xmlChar *
         }
         xml_strcpy(bp, p);
     } else if ((*p == NCXMOD_DOTCHAR && p[1] == NCXMOD_PSCHAR) ||
-               (*p != NCXMOD_DOTCHAR)) {
+               (*p != NCXMOD_DOTCHAR && expand_cwd)) {
 
         /* check for ./some/path or some/path */
         with_dot = (*p == NCXMOD_DOTCHAR);
@@ -6189,6 +6192,41 @@ xmlChar *
 
     return buff;
 
+}  /* ncx_get_source_ex */
+
+
+/********************************************************************
+* FUNCTION ncx_get_source
+* 
+* Get a malloced buffer containing the complete filespec
+* for the given input string.  If this is a complete dirspec,
+* this this will just strdup the value.
+*
+* This is just a best effort to get the full spec.
+* If the full spec is greater than 1500 bytes,
+* then a NULL value (error) will be returned
+*
+* This will expand the cwd!
+*
+*   - Change ./ --> cwd/
+*   - Remove ~/  --> $HOME
+*   - add trailing '/' if not present
+*
+* INPUTS:
+*    fspec == input filespec
+*    res == address of return status
+*
+* OUTPUTS:
+*   *res == return status, NO_ERR if return is non-NULL
+*
+* RETURNS:
+*   malloced buffer containing possibly expanded full filespec
+*********************************************************************/
+xmlChar *
+    ncx_get_source (const xmlChar *fspec,
+                    status_t *res)
+{
+    return ncx_get_source_ex(fspec, TRUE, res);
 }  /* ncx_get_source */
 
 

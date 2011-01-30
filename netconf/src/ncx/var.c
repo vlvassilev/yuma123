@@ -1750,7 +1750,7 @@ val_value_t *
          * treat this as a source file name which
          * may need to be expanded (e.g., ~/foo.xml)
          */
-        sourcefile = ncx_get_source(&strval[1], res);
+        sourcefile = ncx_get_source_ex(&strval[1], FALSE, res);
         if (*res == NO_ERR && sourcefile != NULL) {
             fname = ncxmod_find_data_file(sourcefile, TRUE, res);
             if (fname) {

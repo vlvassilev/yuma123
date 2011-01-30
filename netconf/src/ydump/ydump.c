@@ -584,7 +584,7 @@ static status_t
         /* output -- use filename provided */
         cp->output = (const char *)VAL_STR(val);
         res = NO_ERR;
-        cp->full_output = ncx_get_source(VAL_STR(val), &res);
+        cp->full_output = ncx_get_source_ex(VAL_STR(val), FALSE, &res);
         if (!cp->full_output) {
             return res;
         }

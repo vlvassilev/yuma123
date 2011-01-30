@@ -1878,7 +1878,7 @@ static status_t
     if (val && val->res == NO_ERR) {
         cp->old = VAL_STR(val);
         res = NO_ERR;
-        cp->full_old = ncx_get_source(VAL_STR(val), &res);
+        cp->full_old = ncx_get_source_ex(VAL_STR(val), FALSE, &res);
         if (!cp->full_old) {
             return res;
         } else {
@@ -1891,7 +1891,7 @@ static status_t
     if (val && val->res == NO_ERR) {
         cp->new = VAL_STR(val);
         res = NO_ERR;
-        cp->full_new = ncx_get_source(VAL_STR(val), &res);
+        cp->full_new = ncx_get_source_ex(VAL_STR(val), FALSE, &res);
         if (!cp->full_new) {
             return res;
         } else {
@@ -1938,7 +1938,7 @@ static status_t
     if (val && val->res == NO_ERR) {
         cp->output = VAL_STR(val);
         res = NO_ERR;
-        cp->full_output = ncx_get_source(VAL_STR(val), &res);
+        cp->full_output = ncx_get_source_ex(VAL_STR(val), FALSE, &res);
         if (!cp->full_output) {
             return res;
         } else {

@@ -1528,10 +1528,16 @@ status_t
         case NCX_BT_DECIMAL64:
             return ERR_NCX_INVALID_VALUE;
         case NCX_BT_INT64:
-            num2->l = (int64)lrint(num1->d);
+            {
+                double d = num1->d;
+                num2->l = (int64)lrint(d);
+            }
             break;
         case NCX_BT_UINT64:
-            num2->ul = (uint64)lrint(num1->d);
+            {
+                double d = num1->d;
+                num2->ul = (uint64)lrint(d);
+           }
             break;
         case NCX_BT_FLOAT64:
             num2->d = num1->d;
@@ -1632,7 +1638,10 @@ status_t
         break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-        num2->d = floor(num1->d);
+        {
+            double d = num1->d;
+            num2->d = floor(d);
+        }
 #else
         num2->d = num1->d;
 #endif
@@ -1707,7 +1716,10 @@ status_t
         break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-        num2->d = ceil(num1->d);
+        {
+            double d = num1->d;
+            num2->d = ceil(d);
+        }
 #else
         num2->d = num1->d;
 #endif
@@ -1783,7 +1795,10 @@ status_t
         break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
-        num2->d = round(num1->d);
+        {
+            double d = num1->d;
+            num2->d = round(d);
+        }
 #else
         num2->d = num1->d;
 #endif
@@ -1851,7 +1866,8 @@ boolean
         }
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT        
-        d = round(num->d);
+        d = num->d;
+        d = round(d);
         return (d == num->d) ? TRUE : FALSE;
 #else
         return TRUE;
@@ -1910,7 +1926,10 @@ int64
         return (int64)(num->dec.val / (10 * num->dec.digits));
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT        
-        return lrint(num->d);
+        {
+            double d = num->d;
+            return lrint(d);
+        }
 #else
         return num->d;
 #endif

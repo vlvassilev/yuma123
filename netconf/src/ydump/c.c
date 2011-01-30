@@ -286,9 +286,7 @@ static void
      */
     write_ncx_include(scb, (const xmlChar *)"agt");
 
-    if (needrpc) {
-        write_ncx_include(scb, (const xmlChar *)"agt_cb");
-    }
+    write_ncx_include(scb, (const xmlChar *)"agt_cb");
 
     if (neednotif) {
         write_ncx_include(scb, (const xmlChar *)"agt_not");
@@ -952,7 +950,7 @@ static void
                       indent);
 
     ses_indent(scb, indent);
-    write_c_objtype_ex(scb, obj, ';', TRUE);
+    write_c_objtype_ex(scb, obj, NULL, ';', TRUE);
 
 
     /* initialize the static vars */
@@ -1758,6 +1756,7 @@ static void
         ses_indent(scb, indent+indent);
         write_c_objtype_ex(scb, 
                            obj,
+                           NULL,
                            (nextobj == NULL) ? ')' : ',',
                            TRUE);
     }

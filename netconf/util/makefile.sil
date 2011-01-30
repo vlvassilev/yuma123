@@ -28,10 +28,11 @@ REAL_INST=$(DESTDIR)$(PREFIX)/lib/yuma
 all: sil_dummy sil_lib
 
 #################### PLATFORM DEFINITIONS ############
-CINCBASE=$(DESTDIR)/usr/include
+CINCBASE=$(DESTDIR)$(PREFIX)/include
 
-CINC = -I. -I$(CINCBASE)/yuma/platform -I$(CINCBASE)/yuma/ncx -I$(CINCBASE)/yuma/agt \
-     -I$(CINCBASE) -I$(CINCBASE)/libxml2 -I$(CINCBASE)/libxml2/libxml
+CINC = -I. -I$(CINCBASE)/yuma/platform -I$(CINCBASE)/yuma/ncx \
+     -I$(CINCBASE)/yuma/agt -I$(CINCBASE) -I$(CINCBASE)/libxml2 \
+     -I$(CINCBASE)/libxml2/libxml
 
 # added /sw/include for MacOSX
 ifdef MAC
@@ -149,6 +150,13 @@ CEES = $(wildcard *.c)
 
 HEES = $(wildcard *.h)
 
+ifdef YUMA_HOME
+LAGT= -L$(YUMA_HOME)/target/lib -lagt -lncx
+else
+LAGT=
+endif
+
+
 ################ OBJS RULE #############
 OBJS = $(patsubst %.c,$(TARGET)/%.o,$(CEES))
 
@@ -237,7 +245,7 @@ superclean:
 	$(LIB_INST)/lib$(SUBDIR_NM).*
 
 $(LIB_INST)/lib$(SUBDIR_NM).so: $(OBJS)
-	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -rdynamic -Wl,-soname,lib$(SUBDIR_NM).so -o $@ $(OBJS) -ldl -lagt
+	$(LINK) $(CFLAGS) $(LDFLAGS) -shared -rdynamic -Wl,-soname,lib$(SUBDIR_NM).so -o $@ $(OBJS) -ldl $(LAGT)
 
 
 $(LBASE)/lib$(SUBDIR_NM).dylib: $(OBJS)

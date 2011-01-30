@@ -317,10 +317,10 @@ static void
              childobj != NULL;
              childobj = obj_next_child(childobj)) {
 
-            if (!obj_has_name(obj) || 
-                obj_is_cli(obj) ||
-                !obj_is_enabled(obj) ||
-                obj_is_abstract(obj)) {
+            if (!obj_has_name(childobj) || 
+                obj_is_cli(childobj) ||
+                !obj_is_enabled(childobj) ||
+                obj_is_abstract(childobj)) {
                 continue;
             }
 
@@ -328,11 +328,15 @@ static void
                 ses_indent(scb, ses_indent_count(scb));
                 ses_putstr(scb, QUEUE);
                 ses_putchar(scb, ' ');
-                write_c_safe_str(scb, obj_get_name(childobj)); /***/
+                write_c_safe_str(scb, obj_get_name(childobj));
                 ses_putchar(scb, ';');
             } else {
                 ses_indent(scb, ses_indent_count(scb));
-                write_c_objtype(scb, childobj);
+                write_c_objtype_ex(scb, 
+                                   childobj,
+                                   cdefQ,
+                                   ';',
+                                   FALSE);
             }
         }
     }
@@ -498,6 +502,7 @@ static void
             ses_indent(scb, cp->indent);
             write_c_objtype_ex(scb, 
                                obj,
+                               NULL,
                                (nextobj == NULL) ? ')' : ',',
                                TRUE);
         }
@@ -1064,6 +1069,7 @@ static status_t
     /* 5) init and cleanup functions */
     if (mod->ismod && res == NO_ERR) {
         /* extern status_t y_<module>_init (void); */
+        ses_putchar(scb, '\n');        
         ses_putstr(scb, START_COMMENT);
         ses_putstr(scb, mod->name);
         ses_putstr(scb, (const xmlChar *)" module init 1");

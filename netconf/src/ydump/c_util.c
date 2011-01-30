@@ -661,7 +661,7 @@ status_t
 *********************************************************************/
 c_define_t *
     find_path_cdefine (dlq_hdr_t *cdefineQ,
-                       obj_template_t *obj)
+                       const obj_template_t *obj)
 {
     c_define_t    *testcdef;
 
@@ -829,7 +829,7 @@ void
     write_c_objtype (ses_cb_t *scb,
                      const obj_template_t *obj)
 {
-    write_c_objtype_ex(scb, obj, ';', FALSE);
+    write_c_objtype_ex(scb, obj, NULL, ';', FALSE);
 
 }  /* write_c_objtype */
 
@@ -842,6 +842,7 @@ void
 * INPUTS:
 *   scb == session control block to use for writing
 *   obj == object template to check
+*   cdefQ == Q of c_define_t to check for obj
 *   endchar == char to use at end (semi-colon, comma, right-paren)
 *   isconst == TRUE if a const pointer is needed
 *              FALSE if pointers should not be 'const'
@@ -849,11 +850,21 @@ void
 void
     write_c_objtype_ex (ses_cb_t *scb,
                         const obj_template_t *obj,
+                        dlq_hdr_t  *cdefQ,
                         xmlChar endchar,
                         boolean isconst)
 {
+    const c_define_t *cdef;
     boolean        needspace;
     ncx_btype_t    btyp;
+
+
+#ifdef DEBUG
+    if (scb == NULL || obj == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
 
     needspace = TRUE;
     btyp = obj_get_basetype(obj);
@@ -916,17 +927,23 @@ void
         break;
     default:
         /* assume complex type */
-        write_identifier(scb,
-                         obj_get_mod_name(obj),
-                         DEF_TYPE,
-                         obj_get_name(obj)); /***/
+        if (cdefQ == NULL) {
+            SET_ERROR(ERR_INTERNAL_VAL);
+        } else {
+            cdef = find_path_cdefine(cdefQ, obj);
+            if (cdef == NULL) {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            } else {
+                ses_putstr(scb, cdef->idstr);
+            }
+        }
     }
 
     if (needspace) {
         ses_putchar(scb, ' ');
     }
 
-    write_c_safe_str(scb, obj_get_name(obj)); /***/
+    write_c_safe_str(scb, obj_get_name(obj));
 
     if (endchar != '\0') {
         ses_putchar(scb, endchar);

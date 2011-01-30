@@ -390,7 +390,7 @@ extern status_t
 *********************************************************************/
 extern c_define_t *
     find_path_cdefine (dlq_hdr_t *cdefineQ,
-                       obj_template_t *obj);
+                       const obj_template_t *obj);
 
 
 /********************************************************************
@@ -461,6 +461,7 @@ extern void
 * INPUTS:
 *   scb == session control block to use for writing
 *   obj == object template to check
+*   cdefQ == Q of c_define_t to check for obj
 *   endchar == char to use at end (semi-colon, comma, right-paren)
 *   isconst == TRUE if a const pointer is needed
 *              FALSE if pointers should not be 'const'
@@ -468,6 +469,7 @@ extern void
 extern void
     write_c_objtype_ex (ses_cb_t *scb,
                         const obj_template_t *obj,
+                        dlq_hdr_t  *cdefQ,
                         xmlChar endchar,
                         boolean isconst);
 

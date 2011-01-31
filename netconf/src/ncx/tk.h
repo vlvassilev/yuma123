@@ -67,9 +67,9 @@ extern "C" {
  */
 
 /* advance the current token pointer */
-#define TK_ADV(T)  \
-    (((T)->cur = (tk_token_t *)dlq_nextEntry((T)->cur)) \
-     ? NO_ERR : ERR_NCX_EOF)
+#define TK_ADV(T) \
+    ((T)->cur ? (((T)->cur = (tk_token_t *)dlq_nextEntry((T)->cur)) \
+                 ? NO_ERR : ERR_NCX_EOF) : ERR_NCX_EOF)
 
 /* back-up the current token pointer */
 #define TK_BKUP(T) \

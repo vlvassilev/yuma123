@@ -2853,6 +2853,9 @@ static status_t
         res = TK_ADV(tkc);
         if (res != NO_ERR) {
             ncx_mod_exp_err(tkc, mod, res, expstr);
+            if (res == ERR_NCX_EOF) {
+                res = ERR_NCX_MISSING_RBRACE;
+            }
             return res;
         }
 
@@ -3164,22 +3167,24 @@ static status_t
     res = consume_body_stmts(pcb, tkc, mod);
     if (res != ERR_NCX_EOF) {
         CHK_EXIT(res, retres);
+        if (res != ERR_NCX_MISSING_RBRACE) {
+            /* the next node should be the '(sub)module' end node */
+            res = ncx_consume_token(tkc, mod, TK_TT_RBRACE);
+            if (res != ERR_NCX_EOF) {
+                CHK_EXIT(res, retres);
 
-        /* the next node should be the '(sub)module' end node */
-        res = ncx_consume_token(tkc, mod, TK_TT_RBRACE);
-        if (res != ERR_NCX_EOF) {
-            CHK_EXIT(res, retres);
-
-            /* check extra tokens left over */
-            res = TK_ADV(tkc);
-            if (res == NO_ERR) {
-                retres = ERR_NCX_EXTRA_NODE;
-                log_error("\nError: Extra input after end of module"
-                          " starting on line %u", TK_CUR_LNUM(tkc));
-                ncx_print_errormsg(tkc, mod, retres);
+                /* check extra tokens left over */
+                res = TK_ADV(tkc);
+                if (res == NO_ERR) {
+                    retres = ERR_NCX_EXTRA_NODE;
+                    log_error("\nError: Extra input after end of module"
+                              " starting on line %u", TK_CUR_LNUM(tkc));
+                    ncx_print_errormsg(tkc, mod, retres);
+                }
             }
-        } /* else errors already reported; missing right brace */
+        }
     }  /* else errors already reported; inside body-stmts */
+
 
     /**************** Module Validation *************************/
 

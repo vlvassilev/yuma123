@@ -676,6 +676,9 @@ static rpc_err_t
     case ERR_NCX_CONFIG_NOT_TARGET:
         *apptag = RPC_ERR_APPTAG_NO_ACCESS;
         return RPC_ERR_OPERATION_FAILED;
+    case ERR_NCX_MISSING_RBRACE:
+        *apptag = RPC_ERR_APPTAG_GEN_ERROR;
+        return RPC_ERR_OPERATION_FAILED;
 
     /* user warnings start at 400 and do not need to be listed here */
     default:

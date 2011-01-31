@@ -87,6 +87,10 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
+#ifdef DEBUG
+/* #define C_UTIL_DEBUG 1 */
+#endif
+
 /********************************************************************
 *                                                                   *
 *                       V A R I A B L E S                           *
@@ -605,6 +609,12 @@ status_t
     if (res != NO_ERR) {
         return res;
     }
+
+#ifdef C_UTIL_DEBUG
+    if (LOGDEBUG) {
+        log_debug("\nyangdump: Saving cdefine for %s", buffer);
+    }
+#endif
 
     newcdef = new_c_define(modname, buffer, cmode);
     m__free(buffer);

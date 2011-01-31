@@ -660,6 +660,8 @@ const char *
         return "cannot write to a read-only object";
     case ERR_NCX_CONFIG_NOT_TARGET:
         return "cannot write to this configuration directly";
+    case ERR_NCX_MISSING_RBRACE:
+        return "YANG file missing right brace";
 
     /* user warnings start at 400 */
     case ERR_MAKFILE_DUP_SRC:

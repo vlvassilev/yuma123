@@ -5,6 +5,7 @@
 ##################### LIBRARIES ########################
 #
 # DIRS:  
+# 
 # This is an ordered list
 # Put only the directories that build object files in the list
 
@@ -14,11 +15,11 @@ S_DIRS = netconf libtoaster
 C_DIRS = libtecla netconf
 L_DIRS = netconf
 
-ifdef DESTDIR
-JFLAG= 
-else
-JFLAG = -j4
-endif
+#ifdef DESTDIR
+#JFLAG= 
+#else
+#JFLAG = -j4
+#endif
 
 #################### PLATFORM DEFINITIONS ############
 

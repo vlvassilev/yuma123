@@ -310,7 +310,7 @@ static void
     if (isleaflist) { 
         /* generate a line for the leaf-list data type */
         ses_indent(scb, ses_indent_count(scb));
-        write_c_objtype(scb, obj);
+        write_c_objtype_ex(scb, obj, cdefQ, ';', FALSE);
     } else {
         /* generate a line for each child node */
         for (childobj = obj_first_child(obj);
@@ -469,13 +469,15 @@ static void
 *
 * INPUTS:
 *   scb == session control block to use for writing
-*   datadefQ == que of obj_template_t to use
+*   notifobj == obj_template_t to use
 *   cp == conversion parms to use
+*   cdefineQ == queue of c_define_t structs to use
 *********************************************************************/
 static void
     write_h_notif (ses_cb_t *scb,
                    obj_template_t *notifobj,
-                   const yangdump_cvtparms_t *cp)
+                   const yangdump_cvtparms_t *cp,
+                   dlq_hdr_t *cdefineQ)
 {
     obj_template_t    *obj, *nextobj;
 
@@ -502,7 +504,7 @@ static void
             ses_indent(scb, cp->indent);
             write_c_objtype_ex(scb, 
                                obj,
-                               NULL,
+                               cdefineQ,
                                (nextobj == NULL) ? ')' : ',',
                                TRUE);
         }
@@ -525,11 +527,13 @@ static void
 *   scb == session control block to use for writing
 *   datadefQ == que of obj_template_t to use
 *   cp == conversion parms to use
+*   cdefineQ == queue of c_define_t structs to use
 *********************************************************************/
 static void
     write_h_notifs (ses_cb_t *scb,
                     dlq_hdr_t *datadefQ,
-                    const yangdump_cvtparms_t *cp)
+                    const yangdump_cvtparms_t *cp,
+                    dlq_hdr_t *cdefineQ)
 {
     obj_template_t    *obj;
     boolean            first;
@@ -550,7 +554,7 @@ static void
             first = FALSE;
         }
 
-        write_h_notif(scb, obj, cp);
+        write_h_notif(scb, obj, cp, cdefineQ);
     }
 
 }  /* write_h_notifs */
@@ -1053,14 +1057,14 @@ static status_t
 
     /* 6) typedefs and function prototypes for notifications */
     if (res == NO_ERR) {
-        write_h_notifs(scb, &mod->datadefQ, cp);
+        write_h_notifs(scb, &mod->datadefQ, cp, &cdefineQ);
         if (cp->unified && mod->ismod) {
             for (node = (yang_node_t *)
                      dlq_firstEntry(&mod->allincQ);
                  node != NULL;
                  node = (yang_node_t *)dlq_nextEntry(node)) {
                 if (node->submod) {
-                    write_h_notifs(scb, &node->submod->datadefQ, cp);
+                    write_h_notifs(scb, &node->submod->datadefQ, cp, &cdefineQ);
                 }
             }
         }

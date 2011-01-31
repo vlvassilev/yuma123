@@ -2072,6 +2072,8 @@ extern xmlChar *
 * If the full spec is greater than 1500 bytes,
 * then a NULL value (error) will be returned
 *
+* This will expand the cwd!
+*
 *   - Change ./ --> cwd/
 *   - Remove ~/  --> $HOME
 *   - add trailing '/' if not present

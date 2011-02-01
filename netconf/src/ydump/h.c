@@ -241,16 +241,18 @@ static void
     c_define_t              *cdef;
     obj_template_t          *childobj;
     ncx_btype_t              btyp;
-    boolean                  isleaflist;
+    boolean                  isleaflist, isanyxml;
 
     isleaflist = FALSE;
+    isanyxml = FALSE;
 
     /* typedefs not needed for simple objects */
-    if (obj->objtype == OBJ_TYP_LEAF ||
-        obj->objtype == OBJ_TYP_ANYXML) {
+    if (obj->objtype == OBJ_TYP_LEAF) {
         return;
     } else if (obj->objtype == OBJ_TYP_LEAF_LIST) {
         isleaflist = TRUE;
+    } else if (obj->objtype == OBJ_TYP_ANYXML) {
+        isanyxml = TRUE;
     }
 
     cdef = find_path_cdefine(cdefQ, obj);
@@ -261,12 +263,6 @@ static void
 
     btyp = obj_get_basetype(obj);
 
-    if (obj->objtype == OBJ_TYP_CONTAINER &&
-        !obj_has_children(obj)) {
-        /* skip empty containers */
-        return;
-    }
-
     /* generate the YOID as a comment */
     ses_putchar(scb, '\n');
     write_c_oid_comment(scb, obj);
@@ -274,7 +270,7 @@ static void
     /* start a new line and a C type definition */
     ses_putstr(scb, START_TYPEDEF);
 
-    if (isleaflist) {
+    if (isleaflist || isanyxml) {
         ses_putstr(scb, STRUCT);
     } else {
         /* print the C top-level data type */
@@ -303,15 +299,16 @@ static void
 
     /* generate a line for a Q header or a Queue */
     if (obj->objtype == OBJ_TYP_LIST || 
-        obj->objtype == OBJ_TYP_LEAF_LIST) {
+        obj->objtype == OBJ_TYP_LEAF_LIST ||
+        isanyxml) {
         write_qheader(scb);
     }
 
     if (isleaflist) { 
         /* generate a line for the leaf-list data type */
         ses_indent(scb, ses_indent_count(scb));
-        write_c_objtype_ex(scb, obj, cdefQ, ';', FALSE);
-    } else {
+        write_c_objtype_ex(scb, obj, cdefQ, ';', FALSE, FALSE);
+    } else if (!isanyxml) {
         /* generate a line for each child node */
         for (childobj = obj_first_child(obj);
              childobj != NULL;
@@ -336,6 +333,7 @@ static void
                                    childobj,
                                    cdefQ,
                                    ';',
+                                   FALSE,
                                    FALSE);
             }
         }
@@ -390,6 +388,7 @@ static void
 
         dowrite = TRUE;
 
+#if 0
         switch (obj->objtype) {
         case OBJ_TYP_RPC:
             dowrite = FALSE;
@@ -405,6 +404,8 @@ static void
         default:
             ;
         }
+#endif
+
         if (dowrite) {
             write_h_object_typdef(scb, obj, typcdefQ);
         }
@@ -501,11 +502,12 @@ static void
              obj = nextobj) {
 
             nextobj = obj_next_child(obj);
-            ses_indent(scb, cp->indent);
+            ses_indent(scb, cp->indent + cp->indent);
             write_c_objtype_ex(scb, 
                                obj,
                                cdefineQ,
                                (nextobj == NULL) ? ')' : ',',
+                               TRUE,
                                TRUE);
         }
     } else {
@@ -1057,14 +1059,17 @@ static status_t
 
     /* 6) typedefs and function prototypes for notifications */
     if (res == NO_ERR) {
-        write_h_notifs(scb, &mod->datadefQ, cp, &cdefineQ);
+        write_h_notifs(scb, &mod->datadefQ, cp, &typenameQ);
         if (cp->unified && mod->ismod) {
             for (node = (yang_node_t *)
                      dlq_firstEntry(&mod->allincQ);
                  node != NULL;
                  node = (yang_node_t *)dlq_nextEntry(node)) {
                 if (node->submod) {
-                    write_h_notifs(scb, &node->submod->datadefQ, cp, &cdefineQ);
+                    write_h_notifs(scb, 
+                                   &node->submod->datadefQ, 
+                                   cp, 
+                                   &typenameQ);
                 }
             }
         }

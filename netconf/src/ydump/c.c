@@ -950,7 +950,7 @@ static void
                       indent);
 
     ses_indent(scb, indent);
-    write_c_objtype_ex(scb, obj, NULL, ';', TRUE);
+    write_c_objtype_ex(scb, obj, objnameQ, ';', TRUE, FALSE);
 
 
     /* initialize the static vars */
@@ -1000,12 +1000,14 @@ static void
     defval = obj_get_default(obj);
 
     if (defval) {
-        ses_putstr(scb, (const xmlChar *)"replace default value */");
-        ses_indent(scb, indent);
+        ses_putstr(scb, 
+                   (const xmlChar *)"replace (void) or use "
+                   "default value */");
+        ses_putstr_indent(scb, 
+                          (const xmlChar *)"(void)",
+                          indent);
         write_c_safe_str(scb, obj_get_name(obj));
-        ses_putstr(scb, (const xmlChar *)" = (const xmlChar *)\"");
-        ses_putstr(scb, defval);
-        ses_putstr(scb, (const xmlChar *)"\";");
+        ses_putchar(scb, ';');
         ses_putstr_indent(scb, 
                           (const xmlChar *)"res = val_set_simval_obj(",
                           indent);
@@ -1016,13 +1018,15 @@ static void
                           (const xmlChar *)"dstval->obj,",
                           indent+indent);
         ses_indent(scb, indent+indent);
-        write_c_safe_str(scb, obj_get_name(obj));
-        ses_putstr(scb, (const xmlChar *)");");
+        ses_putstr(scb, (const xmlChar *)"(const xmlChar *)\"");
+        ses_putstr(scb, defval);
+        ses_putstr(scb, (const xmlChar *)"\");");
     } else if (typ_is_string(btyp) || 
-        btyp == NCX_BT_IDREF ||
-        btyp == NCX_BT_INSTANCE_ID ||
-        btyp == NCX_BT_UNION ||
-        btyp == NCX_BT_LEAFREF) {
+               btyp == NCX_BT_IDREF ||
+               btyp == NCX_BT_INSTANCE_ID ||
+               btyp == NCX_BT_UNION ||
+               btyp == NCX_BT_LEAFREF ||
+               btyp == NCX_BT_BINARY) {
 
         ses_putstr(scb, (const xmlChar *)"change EMPTY_STRING */");
         ses_indent(scb, indent);
@@ -1387,13 +1391,16 @@ static void
 *   cp == conversion parameters to use
 *   rpcobj == object struct for the RPC method
 *   is_validate == TUE for _validate, FALSE for _invoke
+*   objnameQ == Q of c_define_t structs to use to find
+*               the mapped C identifier for each object
 *********************************************************************/
 static void
     write_c_rpc_fn (ses_cb_t *scb,
                     ncx_module_t *mod,
                     const yangdump_cvtparms_t *cp,
                     obj_template_t *rpcobj,
-                    boolean is_validate)
+                    boolean is_validate,
+                    dlq_hdr_t *objnameQ)
 {
     obj_template_t  *inputobj, *outputobj, *obj;
     const xmlChar   *modname;
@@ -1516,7 +1523,7 @@ static void
             }
 
             ses_indent(scb, indent);
-            write_c_objtype(scb, obj);
+            write_c_objtype_ex(scb, obj, objnameQ, ';', FALSE, FALSE);
         }
     }
 
@@ -1573,13 +1580,26 @@ static void
             write_c_safe_str(scb, obj_get_name(obj));
             ses_putstr(scb, (const xmlChar *)"_val->res == NO_ERR) {");
 
-            ses_indent(scb, indent+indent);
-            write_c_safe_str(scb, obj_get_name(obj));
-            ses_putstr(scb, (const xmlChar *)" = ");
-            write_c_val_macro_type(scb, obj);
-            ses_putchar(scb, '(');
-            write_c_safe_str(scb, obj_get_name(obj));
-            ses_putstr(scb, (const xmlChar *)"_val);");
+            if (obj_is_leafy(obj)) {
+                ses_indent(scb, indent+indent);
+                write_c_safe_str(scb, obj_get_name(obj));
+                ses_putstr(scb, (const xmlChar *)" = ");
+                write_c_val_macro_type(scb, obj);
+                ses_putchar(scb, '(');
+                write_c_safe_str(scb, obj_get_name(obj));
+                ses_putstr(scb, (const xmlChar *)"_val);");
+            } else {
+                ses_putstr_indent(scb,
+                                  (const xmlChar *)"/* replace the "
+                                  "following line with real code to "
+                                  "fill in structure */", 
+                                  indent+indent);
+                ses_putstr_indent(scb,
+                                  (const xmlChar *)"(void)",
+                                  indent+indent);
+                write_c_safe_str(scb, obj_get_name(obj));
+                ses_putchar(scb, ';');
+            }
             ses_indent(scb, indent);
             ses_putchar(scb, '}');
 
@@ -1660,11 +1680,14 @@ static void
 *   scb == session control block to use for writing
 *   mod == que of obj_template_t to use
 *   cp == conversion parameters to use
+*   objnameQ == Q of c_define_t structs to use to find
+*               the mapped C identifier for each object
 *********************************************************************/
 static void
     write_c_rpcs (ses_cb_t *scb,
                   ncx_module_t *mod,
-                  const yangdump_cvtparms_t *cp)                  
+                  const yangdump_cvtparms_t *cp,
+                  dlq_hdr_t *objnameQ)                  
 {
     obj_template_t    *obj;
     /* dlq_hdr_t         *childdatadefQ; */
@@ -1684,8 +1707,8 @@ static void
             continue;
         }
 
-        write_c_rpc_fn(scb, mod, cp, obj, TRUE);
-        write_c_rpc_fn(scb, mod, cp, obj, FALSE);
+        write_c_rpc_fn(scb, mod, cp, obj, TRUE, objnameQ);
+        write_c_rpc_fn(scb, mod, cp, obj, FALSE, objnameQ);
     }
 
 }  /* write_c_rpcs */
@@ -1700,11 +1723,14 @@ static void
 *   scb == session control block to use for writing
 *   datadefQ == que of obj_template_t to use
 *   cp == conversion parms to use
+*   objnameQ == Q of c_define_t structs to use to find
+*               the mapped C identifier for each object
 *********************************************************************/
 static void
     write_c_notif (ses_cb_t *scb,
                    obj_template_t *notifobj,
-                   const yangdump_cvtparms_t *cp)
+                   const yangdump_cvtparms_t *cp,
+                   dlq_hdr_t *objnameQ)
 {
     obj_template_t  *obj, *nextobj;
     const xmlChar   *modname;
@@ -1756,8 +1782,9 @@ static void
         ses_indent(scb, indent+indent);
         write_c_objtype_ex(scb, 
                            obj,
-                           NULL,
+                           objnameQ,
                            (nextobj == NULL) ? ')' : ',',
+                           TRUE,
                            TRUE);
     }
     if (!anydone) {
@@ -1842,9 +1869,10 @@ static void
             write_c_safe_str(scb, obj_get_name(obj));
             ses_putstr(scb, (const xmlChar *)" to payload");
             ses_putstr_indent(scb,
-                              (const xmlChar *)"* replace following line"
-                              "with real code",
+                              (const xmlChar *)" * replace following line"
+                              " with real code",
                               indent);
+            ses_putstr_indent(scb, (const xmlChar *)" */", indent);
             ses_putstr_indent(scb,
                               (const xmlChar *)"(void)",
                               indent);
@@ -1935,11 +1963,14 @@ static void
 *   scb == session control block to use for writing
 *   mod == module in progress
 *   cp == conversion parms to use
+*   objnameQ == Q of c_define_t structs to use to find
+*               the mapped C identifier for each object
 *********************************************************************/
 static void
     write_c_notifs (ses_cb_t *scb,
                     ncx_module_t *mod,
-                    const yangdump_cvtparms_t *cp)
+                    const yangdump_cvtparms_t *cp,
+                    dlq_hdr_t *objnameQ)
 {
     obj_template_t    *obj;
 
@@ -1953,7 +1984,7 @@ static void
             continue;
         }
 
-        write_c_notif(scb, obj, cp);
+        write_c_notif(scb, obj, cp, objnameQ);
     }
 
 }  /* write_c_notifs */
@@ -2610,12 +2641,12 @@ static status_t
             }
         }
 
-        write_c_rpcs(scb, mod, cp);
+        write_c_rpcs(scb, mod, cp, &objnameQ);
 
         write_c_init_static_vars_fn(scb, mod, cp);
 
         /* external functions */
-        write_c_notifs(scb, mod, cp);
+        write_c_notifs(scb, mod, cp, &objnameQ);
         write_c_init_fn(scb, mod, cp, &objnameQ);
         write_c_init2_fn(scb, mod, cp, &objnameQ);
         write_c_cleanup_fn(scb, mod, cp, &objnameQ);

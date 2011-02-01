@@ -87,10 +87,6 @@ date         init     comment
 *                                                                   *
 *********************************************************************/
 
-#ifdef DEBUG
-/* #define C_UTIL_DEBUG 1 */
-#endif
-
 /********************************************************************
 *                                                                   *
 *                       V A R I A B L E S                           *
@@ -610,12 +606,6 @@ status_t
         return res;
     }
 
-#ifdef C_UTIL_DEBUG
-    if (LOGDEBUG) {
-        log_debug("\nyangdump: Saving cdefine for %s", buffer);
-    }
-#endif
-
     newcdef = new_c_define(modname, buffer, cmode);
     m__free(buffer);
     buffer = NULL;
@@ -686,12 +676,10 @@ c_define_t *
     for (testcdef = (c_define_t *)dlq_firstEntry(cdefineQ);
          testcdef != NULL;
          testcdef = (c_define_t *)dlq_nextEntry(testcdef)) {
-
         if (testcdef->obj == obj) {
             return testcdef;
         }
     }
-
     return NULL;
 
 }  /* find_path_cdefine */
@@ -839,7 +827,7 @@ void
     write_c_objtype (ses_cb_t *scb,
                      const obj_template_t *obj)
 {
-    write_c_objtype_ex(scb, obj, NULL, ';', FALSE);
+    write_c_objtype_ex(scb, obj, NULL, ';', FALSE, FALSE);
 
 }  /* write_c_objtype */
 
@@ -856,13 +844,17 @@ void
 *   endchar == char to use at end (semi-colon, comma, right-paren)
 *   isconst == TRUE if a const pointer is needed
 *              FALSE if pointers should not be 'const'
+*   needstar == TRUE if this object reference is a reference
+*               or a pointer to the data type
+*               FALSE if this is a direct usage of the object data type
 **********************************************************************/
 void
     write_c_objtype_ex (ses_cb_t *scb,
                         const obj_template_t *obj,
                         dlq_hdr_t  *cdefQ,
                         xmlChar endchar,
-                        boolean isconst)
+                        boolean isconst,
+                        boolean needstar)
 {
     const c_define_t *cdef;
     boolean        needspace;
@@ -877,9 +869,11 @@ void
 #endif
 
     needspace = TRUE;
+
     btyp = obj_get_basetype(obj);
 
     switch (btyp) {
+    case NCX_BT_EMPTY:
     case NCX_BT_BOOLEAN:
         ses_putstr(scb, BOOLEAN);
         break;
@@ -935,6 +929,12 @@ void
     case NCX_BT_LIST:
         ses_putstr(scb, QUEUE);
         break;
+    case NCX_BT_UNION:
+        if (isconst) {
+            ses_putstr(scb, (const xmlChar *)"const ");
+        }
+        ses_putstr(scb, STRING);
+        break;
     default:
         /* assume complex type */
         if (cdefQ == NULL) {
@@ -951,6 +951,10 @@ void
 
     if (needspace) {
         ses_putchar(scb, ' ');
+    }
+
+    if (needstar) {
+        ses_putchar(scb, '*');
     }
 
     write_c_safe_str(scb, obj_get_name(obj));
@@ -1021,6 +1025,7 @@ void
         ses_putstr(scb, (const xmlChar *)"VAL_ENUM_NAME");
         break;
     case NCX_BT_STRING:
+    case NCX_BT_UNION:
         ses_putstr(scb, (const xmlChar *)"VAL_STRING");
         break;
     case NCX_BT_BINARY:

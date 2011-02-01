@@ -75,7 +75,9 @@ extern "C" {
 #define BAR_REV       (const xmlChar *)"R"
 #define DEF_TYPE      (const xmlChar *)"T"
 
+
 #define BAR_CONST     (const xmlChar *)"(const xmlChar *)"
+
 
 #define POUND_DEFINE  (const xmlChar *)"\n#define "
 #define POUND_ENDIF   (const xmlChar *)"\n#endif"
@@ -453,6 +455,7 @@ extern void
                      const obj_template_t *obj);
 
 
+
 /*******************************************************************
 * FUNCTION write_c_objtype_ex
 * 
@@ -465,13 +468,17 @@ extern void
 *   endchar == char to use at end (semi-colon, comma, right-paren)
 *   isconst == TRUE if a const pointer is needed
 *              FALSE if pointers should not be 'const'
+*   needstar == TRUE if this object reference is a reference
+*               or a pointer to the data type
+*               FALSE if this is a direct usage of the object data type
 **********************************************************************/
 extern void
     write_c_objtype_ex (ses_cb_t *scb,
                         const obj_template_t *obj,
                         dlq_hdr_t  *cdefQ,
                         xmlChar endchar,
-                        boolean isconst);
+                        boolean isconst,
+                        boolean needstar);
 
 
 /*******************************************************************

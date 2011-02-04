@@ -729,7 +729,7 @@ status_t
 
     /* check for acceptable chars */
     res = NO_ERR;
-    newstr = ncx_get_source(filespec, &res);
+    newstr = ncx_get_source_ex(filespec, FALSE, &res);
     if (newstr == NULL || res != NO_ERR) {
         log_error("\nError: get source for '%s' failed (%s)",
                   filespec, res);

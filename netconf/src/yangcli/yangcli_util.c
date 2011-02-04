@@ -690,15 +690,16 @@ status_t
                     const xmlChar *filespec,
                     const xmlChar *varname)
 {
+    xmlChar       *newstr;
     const xmlChar *teststr;
-
+    status_t       res;
 #ifdef DEBUG
     if (!server_cb || !filespec) {
         return SET_ERROR(ERR_INTERNAL_PTR);
     }
 #endif
 
-    if (!filespec || !*filespec) {
+    if (!*filespec) {
         if (varname) {
             log_error("\nError: file assignment variable '%s' "
                       "is empty string", varname);
@@ -727,7 +728,18 @@ status_t
     }
 
     /* check for acceptable chars */
-    teststr = filespec;
+    res = NO_ERR;
+    newstr = ncx_get_source(filespec, &res);
+    if (newstr == NULL || res != NO_ERR) {
+        log_error("\nError: get source for '%s' failed (%s)",
+                  filespec, res);
+        if (newstr != NULL) {
+            m__free(newstr);
+        }
+        return res;
+    }
+
+    teststr = newstr;
     while (*teststr) {
         if (*teststr == NCXMOD_PSCHAR ||
             *teststr == '.' ||
@@ -745,6 +757,7 @@ status_t
                 log_error("\nError: file assignment filespec '%s' "
                           "contains invalid filespec", filespec);
             }
+            m__free(newstr);
             return ERR_NCX_INVALID_VALUE;
         }
     }
@@ -754,8 +767,10 @@ status_t
         m__free(server_cb->result_filename);
     }
 
-    /* save the filename, may still be an invalid fspec  */
-    server_cb->result_filename = xml_strdup(filespec);
+    /* save the filename, may still be an invalid fspec
+     * pass off newstr memory here
+     */
+    server_cb->result_filename = newstr;
     if (!server_cb->result_filename) {
         return ERR_INTERNAL_MEM;
     }

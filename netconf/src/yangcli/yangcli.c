@@ -3188,6 +3188,26 @@ static mgr_io_state_t
         log_error("\nyangcli: Variable assignment failed (%s) (%s)",
                   line, 
                   get_error_string(res));
+
+        if (runstack_level(server_cb->runstack_context)) {
+            runstack_cancel(server_cb->runstack_context);
+        }
+
+        switch (server_cb->command_mode) {
+            break;
+        case CMD_MODE_AUTODISCARD:
+        case CMD_MODE_AUTOLOCK:
+            handle_locks_cleanup(server_cb);
+            break;
+        case CMD_MODE_AUTOUNLOCK:
+            clear_lock_cbs(server_cb);
+            break;
+        case CMD_MODE_AUTOLOAD:
+        case CMD_MODE_NORMAL:
+            break;
+        default:
+            SET_ERROR(ERR_INTERNAL_VAL);
+        }
     } else if (getrpc) {
         switch (server_cb->state) {
         case MGR_IO_ST_IDLE:

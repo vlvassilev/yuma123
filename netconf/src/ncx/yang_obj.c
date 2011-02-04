@@ -9225,7 +9225,17 @@ static status_t
          * submodule that defined the objects (augmentor, 
          * not augmentee)
          */
+
+        if (LOGDEBUG3) {
+            log_debug3("\nresolve_xpath: %s", obj_get_name(testobj));
+        }
+
         if (testobj->tkerr.mod != mod) {
+#ifdef YANG_OBJ_DEBUG
+            if (LOGDEBUG3) {
+                log_debug3(" -- skipped not this mod");
+            }
+#endif
             continue;
         }
 
@@ -9261,8 +9271,8 @@ static status_t
             if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
 
 #ifdef YANG_OBJ_DEBUG
-                if (LOGDEBUG4) {
-                    log_debug4("\nresolve_xpath: mod %s, "
+                if (LOGDEBUG3) {
+                    log_debug3("\nresolve_xpath: leafref in mod %s, "
                                "object %s, on line %u",
                                mod->name,
                                obj_get_name(testobj), 
@@ -9276,6 +9286,13 @@ static status_t
                  */
                 typdef = obj_get_typdef(testobj);
                 pcb = typ_get_leafref_pcb(typdef);
+
+#ifdef YANG_OBJ_DEBUG
+                if (LOGDEBUG3) {
+                    log_debug3(" expr: %s", pcb->exprstr);
+                }
+#endif
+
                 pcbclone = xpath_clone_pcb(pcb);
                 if (!pcbclone) {
                     res = ERR_INTERNAL_MEM;
@@ -9305,6 +9322,14 @@ static status_t
                     xpath_free_pcb(pcbclone);
                 }
             }
+
+#ifdef YANG_OBJ_DEBUG
+            if (LOGDEBUG3 && res != NO_ERR) {
+                log_debug3("\nresolve_xpath: FAILED (%s)",
+                           get_error_string(res));
+            }
+#endif
+
             break;
         case OBJ_TYP_LIST:
             /* check that none of the key leafs have more
@@ -10601,6 +10626,13 @@ status_t
     res = NO_ERR;
     retres = NO_ERR;
 
+    if (LOGDEBUG3) {
+        log_debug3("\nyang_obj_resolve_xpath for %smodule '%s'",
+                   (mod->ismod) ? EMPTY_STRING : (const xmlChar *)"sub",
+                   mod->name);
+    }
+
+
     res = resolve_xpath(tkc, mod, datadefQ);
     CHK_EXIT(res, retres);
 
@@ -10610,6 +10642,12 @@ status_t
              inc = (ncx_include_t *)dlq_nextEntry(inc)) {
 
             if (inc->submod) {
+
+                if (LOGDEBUG3) {
+                    log_debug3("\nyang_obj_resolve_xpath for submodule '%s'",
+                               inc->submod->name);
+                }
+
                 res = resolve_xpath(tkc, 
                                     inc->submod,
                                     &inc->submod->datadefQ);

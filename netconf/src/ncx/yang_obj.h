@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2010, Andy Bierman
+ * Copyright (c) 2009 - 2011, Andy Bierman
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -28,6 +28,92 @@
           - choice-stmt
           - uses-stmt
           - augment-stmt
+
+    YANG module parser, data-def-stmt support
+
+        /ns1:value/ns2:value/ns3:value/...
+
+    An obj_template_t is essentially a QName node in the
+    conceptual <config> element,
+
+    Every leaf/leaf-list definition node has a typ_def_t,
+    and every value instance node has a val_value_t struct.
+    This allows engine callbacks to process arbitrarily complex
+    data structues with the same code.
+
+    There are 13 types of objects:
+
+      enum constant          has value node
+      ----------------------------------------
+      OBJ_TYP_ANYXML            Y (1)
+      OBJ_TYP_CONTAINER         Y
+      OBJ_TYP_LEAF              Y
+      OBJ_TYP_LEAF_LIST         Y
+      OBJ_TYP_LIST              Y
+      OBJ_TYP_CHOICE            N
+      OBJ_TYP_CASE              N
+      OBJ_TYP_USES              N
+      OBJ_TYP_REFINE            N
+      OBJ_TYP_AUGMENT           N
+      OBJ_TYP_RPC               N
+      OBJ_TYP_RPCIO             Y (2)
+      OBJ_TYP_NOTIF             N
+
+   (1) ANYXML is not stored in the value tree as type anyxml.
+       It is converted as follows:
+           Complex Node -> NCX_BT_CONTAINER
+           Simple Node  -> NCX_BT_STRING
+           Empty Node   -> NCX_BT_EMPTY
+
+   (2) RPCIO nodes are instantiated only within the implementation,
+       to act as a container for collected parameters or results.
+       It is not found under the <config> element.
+
+   These objects are grouped as follows:
+      * concrete data node objects (anyxml, container - list)
+      * meta grouping constructs (choice, case) 
+        and (uses, refine, augment)
+      * RPC method objects (rpc, input, output)
+      * notification objects (notification)
+
+    5 Pass Validation Process
+    --------------------------
+
+    In pass 1, the source file is parsed into YANG tokens.
+    String concatentation are quoted string adjustment are
+    handled in this pass.
+
+    In pass 2, the objects are parsed via yang_obj_consume_datadef.
+    Syntax errors and any other static errors are reported
+
+    In pass 3, the object definitions are validated for correctness,
+    via the yang_obj_resolve_datadefs function.  This is mixed with
+    calls to yang_typ_resolve_typedefs and yang_grp_resolve_groupings.
+
+    Uses and augments are not expanded in pass 3, so some details
+    like key validation for a list cannot be done, since the
+    contents may depend on the expanded uses or descendant form
+    augment statement.
+   
+    In pass 4, groupings are completed with yang_grp_resolve_complete.
+    Then all the uses-based data is cloned and placed into
+    the tree, via yang_obj_resolve_uses
+
+    In pass 5, all the augment-based data is cloned and placed into
+    the tree, via yang_obj_resolve_augments
+
+    The uses and augment objects are kept for
+    XSD and other translation, and needed for internal data sharing.
+    In a cloned object, a minimal amount of data is copied,
+    and the rest is shadowed with back-pointers.
+
+    For the 'uses' statement, refined objects are merged into
+    the cloned tree as specified by the grouping and any
+    refine statements within the uses statement.
+
+    For the 'augment' statement, one exact clone of each augmenting
+    node is placed in the target, based on the schema node target
+    for the augment clause.
 
 
 *********************************************************************

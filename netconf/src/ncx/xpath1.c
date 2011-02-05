@@ -8889,7 +8889,7 @@ status_t
 
 
 /********************************************************************
-* FUNCTION xpath1_validate_expr
+* FUNCTION xpath1_validate_expr_ex
 * 
 * Validate the previously parsed expression string
 *   - QName prefixes are valid
@@ -8911,7 +8911,8 @@ status_t
 *    mod == module containing the 'obj' (in progress)
 *    obj == object containing the XPath clause
 *    pcb == the XPath parser control block to process
-*
+*    missing_is_error == TRUE if a missing node is an error
+*                     == FALSE if a warning
 * OUTPUTS:
 *   pcb->obj and pcb->objmod are set
 *   pcb->validateres is set
@@ -8920,9 +8921,10 @@ status_t
 *   status
 *********************************************************************/
 status_t
-    xpath1_validate_expr (ncx_module_t *mod,
-                          obj_template_t *obj,
-                          xpath_pcb_t *pcb)
+    xpath1_validate_expr_ex (ncx_module_t *mod,
+                             obj_template_t *obj,
+                             xpath_pcb_t *pcb,
+                             boolean missing_is_error)
 {
     xpath_result_t       *result;
     obj_template_t       *rootobj;
@@ -8942,6 +8944,7 @@ status_t
     pcb->logerrors = TRUE;
     pcb->val = NULL;
     pcb->val_docroot = NULL;
+    pcb->missing_errors = missing_is_error;
 
     if (pcb->source == XP_SRC_YANG && obj_is_config(obj)) {
         pcb->flags |= XP_FL_CONFIGONLY;
@@ -9010,7 +9013,47 @@ status_t
 
     return pcb->validateres;
 
-}  /* xpath1_validate_expr */
+}  /* xpath1_validate_expr_ex */
+
+
+/********************************************************************
+* FUNCTION xpath1_validate_expr
+* 
+* Validate the previously parsed expression string
+*   - QName prefixes are valid
+*   - function calls are well-formed and exist in
+*     the pcb->functions array
+*   - variable references exist in the &pcb->varbindQ
+*
+* parse expr with YANG prefixes: must/when
+* called from final OBJ xpath check after all
+* cooked objects are in place
+*
+* Called after all 'uses' and 'augment' expansion
+* so validation against cooked object tree can be done
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*    mod == module containing the 'obj' (in progress)
+*    obj == object containing the XPath clause
+*    pcb == the XPath parser control block to process
+*
+* OUTPUTS:
+*   pcb->obj and pcb->objmod are set
+*   pcb->validateres is set
+*
+* RETURNS:
+*   status
+*********************************************************************/
+status_t
+    xpath1_validate_expr (ncx_module_t *mod,
+                          obj_template_t *obj,
+                          xpath_pcb_t *pcb)
+{
+    return xpath1_validate_expr_ex(mod, obj, pcb, TRUE);
+}
 
 
 /********************************************************************

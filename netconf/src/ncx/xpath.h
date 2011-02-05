@@ -349,6 +349,7 @@ typedef struct xpath_pcb_t_ {
     xpath_source_t       source;
     ncx_errinfo_t        errinfo;            /* must error extras */
     boolean              logerrors;     /* T: use log_error F: agt */
+    boolean              missing_errors; /* T: missing node is error */
 
     /* these parms are used to parse leafref path-arg 
      * limited object tree syntax allowed only

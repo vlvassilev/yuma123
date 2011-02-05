@@ -3373,6 +3373,11 @@ static status_t
 
     /* Validate all the XPath expressions within all cooked objects */
     if (mod->ismod || pcb->top == mod) {
+        /* this will resolve all the XPath usage within
+         * this module or submodule; 
+         * need to wait until all the includes are processed for
+         * the imported module, top module, or top submodule
+         */
         res = yang_obj_resolve_xpath(tkc, mod, &mod->datadefQ);
         CHK_EXIT(res, retres);
 

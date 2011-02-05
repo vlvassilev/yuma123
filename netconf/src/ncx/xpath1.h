@@ -170,6 +170,45 @@ extern status_t
 
 
 /********************************************************************
+* FUNCTION xpath1_validate_expr_ex
+* 
+* Validate the previously parsed expression string
+*   - QName prefixes are valid
+*   - function calls are well-formed and exist in
+*     the pcb->functions array
+*   - variable references exist in the &pcb->varbindQ
+*
+* parse expr with YANG prefixes: must/when
+* called from final OBJ xpath check after all
+* cooked objects are in place
+*
+* Called after all 'uses' and 'augment' expansion
+* so validation against cooked object tree can be done
+*
+* Error messages are printed by this function!!
+* Do not duplicate error messages upon error return
+*
+* INPUTS:
+*    mod == module containing the 'obj' (in progress)
+*    obj == object containing the XPath clause
+*    pcb == the XPath parser control block to process
+*    missing_is_error == TRUE if a missing node is an error
+*                     == FALSE if a warning
+* OUTPUTS:
+*   pcb->obj and pcb->objmod are set
+*   pcb->validateres is set
+*
+* RETURNS:
+*   status
+*********************************************************************/
+extern status_t
+    xpath1_validate_expr_ex (ncx_module_t *mod,
+                             obj_template_t *obj,
+                             xpath_pcb_t *pcb,
+                             boolean missing_is_error);
+
+
+/********************************************************************
 * FUNCTION xpath1_eval_expr
 * 
 * use if the prefixes are YANG: must/when

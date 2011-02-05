@@ -1794,6 +1794,7 @@ xpath_pcb_t *
     pcb->functions = xpath1_get_functions_ptr();
     pcb->getvar_fn = getvar_fn;
     pcb->cookie = cookie;
+    pcb->missing_errors = TRUE;
 
     dlq_createSQue(&pcb->result_cacheQ);
     dlq_createSQue(&pcb->resnode_cacheQ);

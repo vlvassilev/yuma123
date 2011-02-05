@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2009 - 2011, Andy Bierman
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -12,40 +12,43 @@
 
     YANG module parser, data-def-stmt support
 
-    YANG data is (currently) much different than NCX parmsets
-    because no complexTypes exist in YANG, and no groupings
-    or augments exist in NCX.
-
-    Currently migrating from NCX data format:
- 
-         /ns:application/parmset/parm/value/value/...
-
-    to YANG object format, based on the obj_template_t struct
-
         /ns1:value/ns2:value/ns3:value/...
 
-    An obj_template_t is essentially a QName + typ_def_t within the code
+    An obj_template_t is essentially a QName node in the
+    conceptual <config> element,
 
-    Every definition node has a typ_def_t, and every value
-    instance node has a val_value_t struct.  This allows
-    engine callbacks to process arbitrarily complex
+    Every leaf/leaf-list definition node has a typ_def_t,
+    and every value instance node has a val_value_t struct.
+    This allows engine callbacks to process arbitrarily complex
     data structues with the same code.
 
     There are 13 types of objects:
 
-      OBJ_TYP_ANYXML
-      OBJ_TYP_CONTAINER
-      OBJ_TYP_LEAF
-      OBJ_TYP_LEAF_LIST
-      OBJ_TYP_LIST
-      OBJ_TYP_CHOICE
-      OBJ_TYP_CASE
-      OBJ_TYP_USES
-      OBJ_TYP_REFINE
-      OBJ_TYP_AUGMENT
-      OBJ_TYP_RPC
-      OBJ_TYP_RPCIO
-      OBJ_TYP_NOTIF
+      enum constant          has value node
+      ----------------------------------------
+      OBJ_TYP_ANYXML            Y (1)
+      OBJ_TYP_CONTAINER         Y
+      OBJ_TYP_LEAF              Y
+      OBJ_TYP_LEAF_LIST         Y
+      OBJ_TYP_LIST              Y
+      OBJ_TYP_CHOICE            N
+      OBJ_TYP_CASE              N
+      OBJ_TYP_USES              N
+      OBJ_TYP_REFINE            N
+      OBJ_TYP_AUGMENT           N
+      OBJ_TYP_RPC               N
+      OBJ_TYP_RPCIO             Y (2)
+      OBJ_TYP_NOTIF             N
+
+   (1) ANYXML is not stored in the value tree as type anyxml.
+       It is converted as follows:
+           Complex Node -> NCX_BT_CONTAINER
+           Simple Node  -> NCX_BT_STRING
+           Empty Node   -> NCX_BT_EMPTY
+
+   (2) RPCIO nodes are instantiated only within the implementation,
+       to act as a container for collected parameters or results.
+       It is not found under the <config> element.
 
    These objects are grouped as follows:
       * concrete data node objects (anyxml, container - list)
@@ -55,6 +58,7 @@
       * notification objects (notification)
 
     5 Pass Validation Process
+    --------------------------
 
     In pass 1, the source file is parsed into YANG tokens.
     String concatentation are quoted string adjustment are
@@ -103,6 +107,7 @@ date         init     comment
 ----------------------------------------------------------------------
 09dec07      abb      begun; start from yang_typ.c
 29nov08      abb      added when-stmt support as per yang-02
+05def11      abb      update docs; fix skipped resolve_xpath bug
 
 *********************************************************************
 *                                                                   *
@@ -5141,7 +5146,7 @@ static status_t
             continue;
         }
 
-        res = xpath1_validate_expr(mod, obj, must);
+        res = xpath1_validate_expr_ex(mod, obj, must, FALSE);
         CHK_EXIT(res, retres);
     }
     return retres;
@@ -5180,7 +5185,7 @@ static status_t
          */
         return NO_ERR;
     }
-    return xpath1_validate_expr(mod, obj, when);
+    return xpath1_validate_expr_ex(mod, obj, when, FALSE);
 
 }  /* resolve_when */
 
@@ -9190,7 +9195,7 @@ static status_t
 *
 * INPUTS:
 *   tkc == token chain from parsing (needed for error msgs)
-*   mod == module in progress
+*   mod == [sub]module in progress within the tree walking
 *   datadefQ == Q of obj_template_t structs to check
 *
 * RETURNS:
@@ -9210,7 +9215,7 @@ static status_t
     xpath_pcb_t           *pcb;
     xpath_pcb_t           *pcbclone;
     status_t               res, retres;
-
+    boolean                is_targetmod;
 
     res = NO_ERR;
     retres = NO_ERR;
@@ -9226,33 +9231,35 @@ static status_t
          * not augmentee)
          */
 
+        is_targetmod = (testobj->tkerr.mod == mod);
+
         if (LOGDEBUG3) {
-            xmlChar *mybuff = NULL;
-            res = obj_gen_object_id(testobj, &mybuff);
-            if (res == NO_ERR) {
-                log_debug3("\nresolve_xpath: %s", mybuff);
+            if (!obj_has_name(testobj)) {
+                log_debug3("\nresolve_xpath: %s", 
+                           obj_get_typestr(testobj));
             } else {
-                log_debug3("\nresolve_xpath: %s", obj_get_name(testobj));
+                xmlChar *mybuff = NULL;
+                res = obj_gen_object_id(testobj, &mybuff);
+                if (res == NO_ERR) {
+                    log_debug3("\nresolve_xpath: %s", mybuff);
+                } else {
+                    log_debug3("\nresolve_xpath: %s", obj_get_name(testobj));
+                }
+                if (mybuff) {
+                    m__free(mybuff);
+                }
             }
-            if (mybuff) {
-                m__free(mybuff);
+            if (is_targetmod) {
+                log_debug3(" (targmod)");
             }
         }
 
-        if (testobj->tkerr.mod != mod) {
-#ifdef YANG_OBJ_DEBUG
-            if (LOGDEBUG3) {
-                log_debug3(" -- skipped not this mod");
-            }
-#endif
-            continue;
-        }
 
         /* check the when-stmt in the object itself 
          * check uses and augment since they can have
          * their own when statements
          */
-        if (testobj->when) {
+        if (testobj->when && is_targetmod) {
             res = resolve_when(mod, testobj->when, testobj);
             CHK_EXIT(res, retres);
         }
@@ -9263,8 +9270,10 @@ static status_t
         }
 
         /* validate correct Xpath in must clauses */
-        res = resolve_mustQ(tkc, mod, testobj);
-        CHK_EXIT(res, retres);
+        if (is_targetmod) {
+            res = resolve_mustQ(tkc, mod, testobj);
+            CHK_EXIT(res, retres);
+        }
         
         switch (testobj->objtype) {
         case OBJ_TYP_CONTAINER:
@@ -9277,6 +9286,9 @@ static status_t
             break;
         case OBJ_TYP_LEAF:
         case OBJ_TYP_LEAF_LIST:
+            if (!is_targetmod) {
+                break;
+            }
             if (obj_get_basetype(testobj) == NCX_BT_LEAFREF) {
 
 #ifdef YANG_OBJ_DEBUG
@@ -9344,36 +9356,40 @@ static status_t
             /* check that none of the key leafs have more
              * conditionals than their list parent
              */
-            for (key = obj_first_key(testobj);
-                 key != NULL;
-                 key = obj_next_key(key)) {
+            if (is_targetmod) {
+                for (key = obj_first_key(testobj);
+                     key != NULL;
+                     key = obj_next_key(key)) {
 
-                if (key->keyobj) {
-                    res = check_conditional_mismatch(tkc, 
-                                                     mod,
-                                                     testobj,
-                                                     key->keyobj);
-                    CHK_EXIT(res, retres);
+                    if (key->keyobj) {
+                        res = check_conditional_mismatch(tkc, 
+                                                         mod,
+                                                         testobj,
+                                                         key->keyobj);
+                        CHK_EXIT(res, retres);
+                    }
                 }
             }
 
             /* check that none of the unique set leafs have more
              * conditionals than their list parent
              */
-            for (uniq = obj_first_unique(testobj);
-                 uniq != NULL;
-                 uniq = obj_next_unique(uniq)) {
+            if (is_targetmod) {
+                for (uniq = obj_first_unique(testobj);
+                     uniq != NULL;
+                     uniq = obj_next_unique(uniq)) {
 
-                for (uncomp = obj_first_unique_comp(uniq);
-                     uncomp != NULL;
-                     uncomp = obj_next_unique_comp(uncomp)) {
+                    for (uncomp = obj_first_unique_comp(uniq);
+                         uncomp != NULL;
+                         uncomp = obj_next_unique_comp(uncomp)) {
 
-                    if (uncomp->unobj) {
-                        res = check_conditional_mismatch(tkc, 
-                                                         mod,
-                                                         testobj,
-                                                         uncomp->unobj);
-                        CHK_EXIT(res, retres);
+                        if (uncomp->unobj) {
+                            res = check_conditional_mismatch(tkc, 
+                                                             mod,
+                                                             testobj,
+                                                             uncomp->unobj);
+                            CHK_EXIT(res, retres);
+                        }
                     }
                 }
             }
@@ -10623,7 +10639,8 @@ status_t
                             ncx_module_t  *mod,
                             dlq_hdr_t *datadefQ)
 {
-    ncx_include_t      *inc;
+    //ncx_include_t      *inc;
+    yang_node_t        *node, *node2;
     status_t            res, retres;
 
 #ifdef DEBUG
@@ -10641,27 +10658,51 @@ status_t
                    mod->name);
     }
 
-
+    /* first resolve the main module or top submodule */
     res = resolve_xpath(tkc, mod, datadefQ);
     CHK_EXIT(res, retres);
 
-    if (mod->ismod) {
-        for (inc = (ncx_include_t *)dlq_firstEntry(&mod->includeQ);
-             inc != NULL;
-             inc = (ncx_include_t *)dlq_nextEntry(inc)) {
 
-            if (inc->submod) {
+    for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
+         node != NULL;
+         node = (yang_node_t *)dlq_nextEntry(node)) {
 
-                if (LOGDEBUG3) {
-                    log_debug3("\nyang_obj_resolve_xpath for submodule '%s'",
-                               inc->submod->name);
-                }
+        if (node->submod == NULL) {
+            /* error in processing this submod */
+            continue;
+        }
 
-                res = resolve_xpath(tkc, 
-                                    inc->submod,
-                                    &inc->submod->datadefQ);
-                CHK_EXIT(res, retres);
+        if (LOGDEBUG3) {
+            log_debug3("\nyang_obj_resolve_xpath "
+                       "for submodule '%s' against main mod '%s'",
+                       node->submod->name,
+                       mod->name);
+        }
+
+        /* check node submod against main module */
+        res = resolve_xpath(tkc, 
+                            node->submod,
+                            datadefQ);
+        CHK_EXIT(res, retres);
+
+        for (node2 = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
+             node2 != NULL;
+             node2 = (yang_node_t *)dlq_nextEntry(node2)) {
+
+            if (node2->submod == NULL) {
+                continue;
             }
+            if (LOGDEBUG3) {
+                log_debug3("\nyang_obj_resolve_xpath "
+                           "for submodule '%s' against sub mod '%s'",
+                           node->submod->name,
+                           node2->submod->name);
+            }
+
+            res = resolve_xpath(tkc, 
+                                node->submod,
+                                &node2->submod->datadefQ);
+            CHK_EXIT(res, retres);
         }
     }
 

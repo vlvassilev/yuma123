@@ -9227,7 +9227,16 @@ static status_t
          */
 
         if (LOGDEBUG3) {
-            log_debug3("\nresolve_xpath: %s", obj_get_name(testobj));
+            xmlChar *mybuff = NULL;
+            res = obj_gen_object_id(testobj, &mybuff);
+            if (res == NO_ERR) {
+                log_debug3("\nresolve_xpath: %s", mybuff);
+            } else {
+                log_debug3("\nresolve_xpath: %s", obj_get_name(testobj));
+            }
+            if (mybuff) {
+                m__free(mybuff);
+            }
         }
 
         if (testobj->tkerr.mod != mod) {

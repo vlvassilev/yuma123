@@ -310,8 +310,10 @@ static void
                  const xmlChar *kwname)
 {
     ses_putstr(scb, (const xmlChar *)"<span class=\"yang_kw\">");
-    ses_putstr(scb, kwpfix);
-    ses_putchar(scb, ':');
+    if (kwpfix != NULL) {
+        ses_putstr(scb, kwpfix);
+        ses_putchar(scb, ':');
+    }
     ses_putstr(scb, kwname);
     ses_putstr(scb, (const xmlChar *)"</span>");
 
@@ -1270,6 +1272,8 @@ static void
 
     indent = startindent + ses_indent_count(scb);
 
+    write_appinfoQ(scb, mod, cp, &typdef->appinfoQ, startindent);
+
     switch (typdef->tclass) {
     case NCX_CL_BASE:
         break;
@@ -1309,6 +1313,8 @@ static void
                                  2, 
                                  FALSE);
 
+                write_appinfoQ(scb, mod, cp, &bit->appinfoQ, indent);
+
                 sprintf(buff, "%u", bit->pos);
                 write_simple_str(scb, 
                                  YANG_K_POSITION,
@@ -1332,8 +1338,6 @@ static void
                     write_reference_str(scb, bit->ref, indent);
                 }
 
-                write_appinfoQ(scb, mod, cp, &bit->appinfoQ, indent);
-
                 ses_putstr_indent(scb, END_SEC, startindent);
             }
             break;
@@ -1348,6 +1352,8 @@ static void
                                  startindent, 
                                  2, 
                                  FALSE);
+
+                write_appinfoQ(scb, mod, cp, &enu->appinfoQ, indent);
 
                 sprintf(buff, "%d", enu->val);
                 write_simple_str(scb, 
@@ -1371,8 +1377,6 @@ static void
                 if (enu->ref) {
                     write_reference_str(scb, enu->ref, indent);
                 }
-
-                write_appinfoQ(scb, mod, cp, &enu->appinfoQ, indent);
 
                 ses_putstr_indent(scb, END_SEC,  startindent);
             }
@@ -1495,8 +1499,6 @@ static void
         SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    write_appinfoQ(scb, mod, cp, &typdef->appinfoQ, startindent);
-
 }  /* write_type_contents */
 
 
@@ -1572,6 +1574,9 @@ static void
                   FALSE, 
                   !first);
 
+    /* appinfoQ */
+    write_appinfoQ(scb, mod, cp, &typ->appinfoQ, indent);
+
     /* type field */
     write_type_clause(scb, mod, cp, &typ->typdef, indent);
 
@@ -1612,9 +1617,6 @@ static void
     if (typ->ref) {
         write_reference_str(scb, typ->ref, indent);
     }
-
-    /* appinfoQ */
-    write_appinfoQ(scb, mod, cp, &typ->appinfoQ, indent);
 
     /* end typedef clause */
     ses_putstr_indent(scb, END_SEC, startindent);
@@ -1713,6 +1715,9 @@ static void
                   FALSE,
                   !first);
 
+    /* appinfoQ */
+    write_appinfoQ(scb, mod, cp, &grp->appinfoQ, indent);
+
     /* status field */
     write_status(scb, grp->status, indent);
 
@@ -1738,9 +1743,6 @@ static void
     if (!cooked) {
         write_objects(scb, mod, cp, &grp->datadefQ, indent);
     }
-
-    /* appinfoQ */
-    write_appinfoQ(scb, mod, cp, &grp->appinfoQ, indent);
 
     /* end grouping clause */
     ses_putstr_indent(scb, END_SEC, startindent);
@@ -2330,17 +2332,18 @@ static status_t
 
     switch (obj->objtype) {
     case OBJ_TYP_ANYXML:
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_when(scb, obj, indent);
         write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
         write_musts(scb, obj_get_mustQ(obj), indent);
         write_config_stmt(scb, obj, indent);
         write_mandatory_stmt(scb, obj, indent);
         write_sdr(scb, obj, indent);
-        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         break;
     case OBJ_TYP_CONTAINER:
         con = obj->def.container;
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_when(scb, obj, indent);
         write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
         write_musts(scb, obj_get_mustQ(obj), indent);
@@ -2351,12 +2354,12 @@ static status_t
         write_typedefs(scb, mod, cp, con->typedefQ, indent);
         write_groupings(scb, mod, cp, con->groupingQ, indent);
         write_objects(scb, mod, cp, con->datadefQ, indent);
-        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         write_endsec_cmt(scb, YANG_K_CONTAINER, con->name);
         break;
     case OBJ_TYP_LEAF:
         leaf = obj->def.leaf;
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_when(scb, obj, indent);
         write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
         write_type_clause(scb, mod, cp, leaf->typdef, indent);
@@ -2384,11 +2387,11 @@ static status_t
         write_config_stmt(scb, obj, indent);
         write_mandatory_stmt(scb, obj, indent);
         write_sdr(scb, obj, indent);
-        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         break;
     case OBJ_TYP_LEAF_LIST:
         leaflist = obj->def.leaflist;
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_when(scb, obj, indent);
         write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
         write_type_clause(scb, mod, cp, leaflist->typdef, indent);
@@ -2417,11 +2420,11 @@ static status_t
                              TRUE);
         }
         write_sdr(scb, obj, indent);
-        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         break;
     case OBJ_TYP_LIST:
         list = obj->def.list;
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_when(scb, obj, indent);
         write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
         write_musts(scb, obj_get_mustQ(obj), indent);
@@ -2473,12 +2476,12 @@ static status_t
         write_typedefs(scb, mod, cp, list->typedefQ, indent);
         write_groupings(scb, mod, cp, list->groupingQ, indent);
         write_objects(scb, mod, cp, list->datadefQ, indent);
-        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         write_endsec_cmt(scb, YANG_K_LIST, list->name);
         break;
     case OBJ_TYP_CHOICE:
         choic = obj->def.choic;
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_when(scb, obj, indent);
         write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
         if (choic->defval) {
@@ -2493,12 +2496,12 @@ static status_t
         write_sdr(scb, obj, indent);
         write_objects(scb, mod, cp, choic->caseQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
-        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_endsec_cmt(scb, YANG_K_CHOICE, choic->name);
         break;
     case OBJ_TYP_CASE:
         cas = obj->def.cas;
         if (fullcase) {
+            write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
             write_when(scb, obj, indent);
             write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
             write_sdr(scb, obj, indent);
@@ -2511,7 +2514,6 @@ static status_t
                       (fullcase) ? indent : startindent);
 
         if (fullcase) {
-            write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
             ses_putstr_indent(scb, END_SEC, startindent);
             write_endsec_cmt(scb, YANG_K_CASE, cas->name);
         }
@@ -2556,11 +2558,11 @@ static status_t
             !dlq_empty(&obj->appinfoQ)) {
 
             ses_putstr(scb, START_SEC);
+            write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
             write_when(scb, obj, indent);
             write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
             write_sdr(scb, obj, indent);
             write_objects(scb, mod, cp, uses->datadefQ, indent);
-            write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
             ses_putstr_indent(scb, END_SEC, startindent);
         } else {
             ses_putchar(scb, ';');
@@ -2603,21 +2605,21 @@ static status_t
         }
 
         ses_putstr(scb, START_SEC);
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_when(scb, obj, indent);
         write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
         write_sdr(scb, obj, indent);
         write_objects(scb, mod, cp, &aug->datadefQ, indent);
-        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         break;
     case OBJ_TYP_RPC:
         rpc = obj->def.rpc;
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
         write_sdr(scb, obj, indent);
         write_typedefs(scb, mod, cp, &rpc->typedefQ, indent);
         write_groupings(scb, mod, cp, &rpc->groupingQ, indent);
         write_objects(scb, mod, cp, &rpc->datadefQ, indent);
-        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         write_endsec_cmt(scb, YANG_K_RPC, rpc->name);
         break;
@@ -2638,21 +2640,21 @@ static status_t
                           FALSE, 
                           !first);
 
+            write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
             write_typedefs(scb, mod, cp, &rpcio->typedefQ, indent);
             write_groupings(scb, mod, cp, &rpcio->groupingQ, indent);
             write_objects(scb, mod, cp, &rpcio->datadefQ, indent);
-            write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
             ses_putstr_indent(scb, END_SEC, startindent);
         }
         break;
     case OBJ_TYP_NOTIF:
         notif = obj->def.notif;
+        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_iffeatureQ(scb, mod, cp, &obj->iffeatureQ, indent);
         write_sdr(scb, obj, indent);
         write_typedefs(scb, mod, cp, &notif->typedefQ, indent);
         write_groupings(scb, mod, cp, &notif->groupingQ, indent);
         write_objects(scb, mod, cp, &notif->datadefQ, indent);
-        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         write_endsec_cmt(scb, YANG_K_NOTIFICATION, notif->name);
         break;
@@ -2754,7 +2756,6 @@ static status_t
             ;
         }
 
-        write_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         break;
     default:
@@ -2859,6 +2860,8 @@ static void
                   FALSE, 
                   TRUE);
 
+    write_appinfoQ(scb, mod, cp, &ext->appinfoQ, indent);
+
     /* argument sub-clause */
     if (ext->arg) {
         write_simple_str(scb, 
@@ -2893,8 +2896,6 @@ static void
     if (ext->ref) {
         write_reference_str(scb, ext->ref, indent);
     }
-
-    write_appinfoQ(scb, mod, cp, &ext->appinfoQ, indent);
 
     /* end extension clause */
     ses_putstr_indent(scb, END_SEC, startindent);
@@ -2979,6 +2980,12 @@ static void
                   FALSE, 
                   TRUE);
 
+    write_appinfoQ(scb, 
+                   mod, 
+                   cp, 
+                   &identity->appinfoQ, 
+                   indent);
+
     /* optional base sub-clause */
     if (identity->base) {
         write_identity_base(scb, 
@@ -3005,12 +3012,6 @@ static void
     if (identity->ref) {
         write_reference_str(scb, identity->ref, indent);
     }
-
-    write_appinfoQ(scb, 
-                   mod, 
-                   cp, 
-                   &identity->appinfoQ, 
-                   indent);
 
     /* end identity clause */
     ses_putstr_indent(scb, END_SEC, startindent);
@@ -3099,6 +3100,12 @@ static void
                   FALSE, 
                   TRUE);
 
+    write_appinfoQ(scb, 
+                   mod, 
+                   cp, 
+                   &feature->appinfoQ, 
+                   indent);
+
     /* optional Q of if-feature statements */
     write_iffeatureQ(scb, mod, cp, &feature->iffeatureQ, indent);
 
@@ -3119,12 +3126,6 @@ static void
     if (feature->ref) {
         write_reference_str(scb, feature->ref, indent);
     }
-
-    write_appinfoQ(scb, 
-                   mod, 
-                   cp, 
-                   &feature->appinfoQ, 
-                   indent);
 
     /* end feature clause */
     ses_putstr_indent(scb, END_SEC, startindent);
@@ -3218,6 +3219,13 @@ static void
 
     ses_putstr(scb, START_SEC);
 
+    /* extension usage */
+    write_appinfoQ(scb, 
+                   mod, 
+                   cp, 
+                   &deviate->appinfoQ, 
+                   indent);
+
     /* type-stmt */
     if (deviate->typdef) {
         write_type_clause(scb, 
@@ -3287,13 +3295,6 @@ static void
                        &deviate->uniqueQ, 
                        indent);
 
-    /* extension usage */
-    write_appinfoQ(scb, 
-                   mod, 
-                   cp, 
-                   &deviate->appinfoQ, 
-                   indent);
-
     ses_putstr_indent(scb, END_SEC, startindent);
 
 }  /* write_deviate */
@@ -3356,6 +3357,12 @@ static void
 
     ses_putstr(scb, START_SEC);
 
+    write_appinfoQ(scb, 
+                   mod, 
+                   cp, 
+                   &deviation->appinfoQ, 
+                   indent);
+
     /* description field */
     if (deviation->descr) {
         write_simple_str(scb,
@@ -3379,12 +3386,6 @@ static void
              dlq_nextEntry(deviate)) {
         write_deviate(scb, mod, cp, deviate, indent);
     }
-
-    write_appinfoQ(scb, 
-                   mod, 
-                   cp, 
-                   &deviation->appinfoQ, 
-                   indent);
 
     /* end deviation statement */
     ses_putstr_indent(scb, END_SEC, startindent);
@@ -3480,6 +3481,13 @@ static void
             NULL,
             0);
     ses_putstr(scb, START_SEC);
+    if (appinfoQ) {
+        write_appinfoQ(scb, 
+                       mod, 
+                       cp, 
+                       appinfoQ,
+                       indent + ses_indent_count(scb));
+    }
     write_simple_str(scb, 
                      YANG_K_PREFIX, 
                      modprefix,
@@ -3494,13 +3502,6 @@ static void
                          2, 
                          TRUE);
 
-    }
-    if (appinfoQ) {
-        write_appinfoQ(scb, 
-                       mod, 
-                       cp, 
-                       appinfoQ,
-                       indent + ses_indent_count(scb));
     }
     ses_putstr_indent(scb, END_SEC, indent);
 
@@ -3654,6 +3655,11 @@ static void
                     0);
             if (inc->revision || !dlq_empty(&inc->appinfoQ)) {
                 ses_putstr(scb, START_SEC);
+                write_appinfoQ(scb, 
+                               mod,
+                               cp,
+                               &inc->appinfoQ,
+                               indent + ses_indent_count(scb));
                 if (inc->revision) {
                     write_simple_str(scb, 
                                      YANG_K_REVISION, 
@@ -3662,11 +3668,6 @@ static void
                                      2, 
                                      TRUE);
                 }
-                write_appinfoQ(scb, 
-                               mod,
-                               cp,
-                               &inc->appinfoQ,
-                               indent + ses_indent_count(scb));
                 ses_putstr_indent(scb, END_SEC, indent);
             } else {
                 ses_putchar(scb, ';');
@@ -4627,6 +4628,29 @@ static void
      */
     stmtmode = dlq_empty(&mod->stmtQ) ? FALSE : TRUE;
 
+    /* TBD: need a better way to generate all the top-level
+     * extensions.  This approach is broken because it gathers
+     * them and puts them at the start after the header
+     *
+     * will need to check line numbers as other constructs
+     * are generated to find any extensions that 'fit'
+     * in particuolar line number ranges
+     */
+    write_appinfoQ(scb, mod, cp, &mod->appinfoQ, 2*cp->indent);
+    if (cp->unified && mod->ismod) {
+        for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_appinfoQ(scb,
+                               node->submod,
+                               cp, 
+                               &node->submod->appinfoQ, 
+                               2*cp->indent);
+            }
+        }
+    }
+
     /* 1) features */
     if (!stmtmode) {
         write_features(scb, 
@@ -4831,30 +4855,6 @@ static void
                 break;
             default:
                 SET_ERROR(ERR_INTERNAL_VAL);
-            }
-        }
-    }
-
-    /* TBD: need a better way to generate all the top-level
-     * extensions.  This approach is broken because it gathers
-     * them and puts them at the end
-     *
-     * will need to check line numbers as other constructs
-     * are generated to find any extensions that 'fit'
-     * in particuolar line number ranges
-     */
-    write_appinfoQ(scb, mod, cp, &mod->appinfoQ, 2*cp->indent);
-
-    if (cp->unified && mod->ismod) {
-        for (node = (const yang_node_t *)dlq_firstEntry(&mod->allincQ);
-             node != NULL;
-             node = (const yang_node_t *)dlq_nextEntry(node)) {
-            if (node->submod) {
-                write_appinfoQ(scb,
-                               node->submod,
-                               cp, 
-                               &node->submod->appinfoQ, 
-                               2*cp->indent);
             }
         }
     }

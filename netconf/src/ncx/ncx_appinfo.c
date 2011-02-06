@@ -175,20 +175,9 @@ static status_t
                   TK_CUR_LNUM(tkc),
                   TK_CUR_LPOS(tkc));
 
-    if (!bkup && appinfo->prefix == NULL) {
-        /* skip the entire YANG statement */
-        if (LOGDEBUG4) {
-            log_debug4("\nSkipping YANG statement inside "
-                       "an unknown-stmt");
-        }
-        yang_skip_statement(tkc, mod);
-        ncx_free_appinfo(appinfo);
-        return NO_ERR;
-    }
-
     /* at this point, if appinfoQ non-NULL:
      *    appinfo is malloced initialized
-     *    appinfo prefix and name are set
+     *    appinfo name is set, prefix may be set
      *
      * Now get the optional appinfo value string
      *
@@ -758,8 +747,7 @@ status_t
                                           &appinfo->tkerr,
                                           &ext);
             CHK_EXIT(res, retres);
-        } else {
-
+        } else if (appinfo->prefix != NULL) {
             ext = ext_find_extension(mod, appinfo->name);
             if (!ext) {
                 log_error("\nError: Local module extension '%s' not found",
@@ -770,9 +758,9 @@ status_t
             } else {
                 res = NO_ERR;
             }
-        }
+        }  /* else skipping stmt assumed to be YANG inside an ext-stmt */
 
-        if (res == NO_ERR) {
+        if (res == NO_ERR && appinfo->prefix != NULL) {
             appinfo->ext = ext;
             if (ext->arg && !appinfo->value) {
                 retres = ERR_NCX_MISSING_PARM;

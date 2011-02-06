@@ -3914,7 +3914,12 @@ status_t
             typ_free_template(typ);
             return res;
         case TK_TT_MSTRING:
-            /* vendor-specific clause found instead */
+            /* vendor-specific clause found instead
+             * Note that typ appinfo is saved in typ.type appinfo
+             * so leaf processing code can access it in the typdef
+             * instead of needed a back pointer access to the 
+             * typ_template_t
+             */
             res = ncx_consume_appinfo(tkc, mod, &typ->typdef.appinfoQ);
             if (res != NO_ERR) {
                 retres = res;

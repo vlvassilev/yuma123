@@ -182,8 +182,10 @@ static void
                        const xmlChar *kwpfix,
                        const xmlChar *kwname)
 {
-    ses_putstr(scb, kwpfix);
-    ses_putchar(scb, ':');
+    if (kwpfix != NULL) {
+        ses_putstr(scb, kwpfix);
+        ses_putchar(scb, ':');
+    }
     ses_putstr(scb, kwname);
 
 }  /* write_cyang_extkw */
@@ -628,6 +630,8 @@ static void
 
     indent = startindent + ses_indent_count(scb);
 
+    write_cyang_appinfoQ(scb, mod, cp, &typdef->appinfoQ, startindent);
+
     switch (typdef->tclass) {
     case NCX_CL_BASE:
         break;
@@ -673,6 +677,12 @@ static void
                                        2, 
                                        FALSE);
 
+                write_cyang_appinfoQ(scb, 
+                                     mod, 
+                                     cp, 
+                                     &bit->appinfoQ, 
+                                     indent);
+
                 sprintf(buff, "%u", bit->pos);
                 write_cyang_simple_str(scb, 
                                        YANG_K_POSITION,
@@ -701,12 +711,6 @@ static void
                                            TRUE);
                 }
 
-                write_cyang_appinfoQ(scb, 
-                                     mod, 
-                                     cp, 
-                                     &bit->appinfoQ, 
-                                     indent);
-
                 ses_putstr_indent(scb, END_SEC, startindent);
             }
             break;
@@ -721,6 +725,12 @@ static void
                                        startindent, 
                                        2, 
                                        FALSE);
+
+                write_cyang_appinfoQ(scb, 
+                                     mod, 
+                                     cp, 
+                                     &enu->appinfoQ, 
+                                     indent);
 
                 sprintf(buff, "%d", enu->val);
                 write_cyang_simple_str(scb, 
@@ -749,12 +759,6 @@ static void
                                            2, 
                                            TRUE);
                 }
-
-                write_cyang_appinfoQ(scb, 
-                                     mod, 
-                                     cp, 
-                                     &enu->appinfoQ, 
-                                     indent);
 
                 ses_putstr_indent(scb, END_SEC,  startindent);
             }
@@ -881,8 +885,6 @@ static void
         SET_ERROR(ERR_INTERNAL_VAL);
     }
 
-    write_cyang_appinfoQ(scb, mod, cp, &typdef->appinfoQ, startindent);
-
 }  /* write_cyang_type_contents */
 
 
@@ -954,6 +956,9 @@ static void
                    FALSE, 
                    !first);
 
+    /* appinfoQ */
+    write_cyang_appinfoQ(scb, mod, cp, &typ->appinfoQ, indent);
+
     /* type field */
     write_cyang_type_clause(scb, mod, cp, &typ->typdef, indent);
 
@@ -999,9 +1004,6 @@ static void
                                2, 
                                TRUE);
     }
-
-    /* appinfoQ */
-    write_cyang_appinfoQ(scb, mod, cp, &typ->appinfoQ, indent);
 
     /* end typedef clause */
     ses_putstr_indent(scb, END_SEC, startindent);
@@ -1093,6 +1095,9 @@ static void
                    FALSE, 
                    !first);
 
+    /* appinfoQ */
+    write_cyang_appinfoQ(scb, mod, cp, &grp->appinfoQ, indent);
+
     /* status field */
     write_cyang_status(scb, grp->status, indent);
 
@@ -1123,9 +1128,6 @@ static void
     if (!cooked) {
         write_cyang_objects(scb, mod, cp, &grp->datadefQ, indent);
     }
-
-    /* appinfoQ */
-    write_cyang_appinfoQ(scb, mod, cp, &grp->appinfoQ, indent);
 
     /* end grouping clause */
     ses_putstr_indent(scb, END_SEC, startindent);
@@ -1650,16 +1652,17 @@ static status_t
 
     switch (obj->objtype) {
     case OBJ_TYP_ANYXML:
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_cyang_whenif(scb, obj, indent);
         write_cyang_musts(scb, obj_get_mustQ(obj), indent);
         write_cyang_config_stmt(scb, obj, indent, FALSE);
         write_cyang_mandatory_stmt(scb, obj, indent, FALSE);
         write_cyang_sdr(scb, obj, indent);
-        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         break;
     case OBJ_TYP_CONTAINER:
         con = obj->def.container;
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_cyang_whenif(scb, obj, indent);
         write_cyang_musts(scb, obj_get_mustQ(obj), indent);
         str = obj_get_presence_string(obj);
@@ -1669,12 +1672,12 @@ static status_t
         write_cyang_typedefs(scb, mod, cp, con->typedefQ, indent);
         write_cyang_groupings(scb, mod, cp, con->groupingQ, indent);
         write_cyang_objects(scb, mod, cp, con->datadefQ, indent);
-        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         write_cyang_endsec_cmt(scb, YANG_K_CONTAINER, con->name);
         break;
     case OBJ_TYP_LEAF:
         leaf = obj->def.leaf;
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_cyang_whenif(scb, obj, indent);
         write_cyang_type_clause(scb, mod, cp, leaf->typdef, indent);
         if (leaf->units) {
@@ -1690,11 +1693,11 @@ static status_t
         write_cyang_config_stmt(scb, obj, indent, FALSE);
         write_cyang_mandatory_stmt(scb, obj, indent, FALSE);
         write_cyang_sdr(scb, obj, indent);
-        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         break;
     case OBJ_TYP_LEAF_LIST:
         leaflist = obj->def.leaflist;
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_cyang_whenif(scb, obj, indent);
         write_cyang_type_clause(scb, mod, cp, leaflist->typdef, indent);
         if (leaflist->units) {
@@ -1724,11 +1727,11 @@ static status_t
                                    TRUE);
         }
         write_cyang_sdr(scb, obj, indent);
-        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         break;
     case OBJ_TYP_LIST:
         list = obj->def.list;
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_cyang_whenif(scb, obj, indent);
         write_cyang_musts(scb, obj_get_mustQ(obj), indent);
 
@@ -1775,13 +1778,12 @@ static status_t
         write_cyang_typedefs(scb, mod, cp, list->typedefQ, indent);
         write_cyang_groupings(scb, mod, cp, list->groupingQ, indent);
         write_cyang_objects(scb, mod, cp, list->datadefQ, indent);
-        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         write_cyang_endsec_cmt(scb, YANG_K_LIST, list->name);
         break;
     case OBJ_TYP_CHOICE:
         choic = obj->def.choic;
-
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_cyang_whenif(scb, obj, indent);
 
         /* default case field */
@@ -1797,13 +1799,13 @@ static status_t
         write_cyang_mandatory_stmt(scb, obj, indent, FALSE);
         write_cyang_sdr(scb, obj, indent);
         write_cyang_objects(scb, mod, cp, choic->caseQ, indent);
-        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         write_cyang_endsec_cmt(scb, YANG_K_CHOICE, choic->name);
         break;
     case OBJ_TYP_CASE:
         cas = obj->def.cas;
         if (fullcase) {
+            write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
             write_cyang_whenif(scb, obj, indent);
             write_cyang_sdr(scb, obj, indent);
         }
@@ -1813,7 +1815,6 @@ static status_t
                             cas->datadefQ, 
                             (fullcase) ? indent : startindent);
         if (fullcase) {
-            write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
             ses_putstr_indent(scb, END_SEC, startindent);
             write_cyang_endsec_cmt(scb, YANG_K_CASE, cas->name);
         }
@@ -1844,11 +1845,10 @@ static status_t
             !dlq_empty(&obj->appinfoQ)) {
 
             ses_putstr(scb, START_SEC);
-
+            write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
             write_cyang_whenif(scb, obj, indent);
             write_cyang_sdr(scb, obj, indent);
             write_cyang_objects(scb, mod, cp, uses->datadefQ, indent);
-            write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
             ses_putstr_indent(scb, END_SEC, startindent);
         } else {
             ses_putchar(scb, ';');
@@ -1871,20 +1871,20 @@ static status_t
             return NO_ERR;
         }
         ses_putstr(scb, START_SEC);
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_cyang_whenif(scb, obj, indent);
         write_cyang_sdr(scb, obj, indent);
         write_cyang_objects(scb, mod, cp, &aug->datadefQ, indent);
-        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         break;
     case OBJ_TYP_RPC:
         rpc = obj->def.rpc;
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_cyang_whenif(scb, obj, indent);      /* when-stmt NULL */
         write_cyang_sdr(scb, obj, indent);
         write_cyang_typedefs(scb, mod, cp, &rpc->typedefQ, indent);
         write_cyang_groupings(scb, mod, cp, &rpc->groupingQ, indent);
         write_cyang_objects(scb, mod, cp, &rpc->datadefQ, indent);
-        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         write_cyang_endsec_cmt(scb, YANG_K_RPC, rpc->name);
         break;
@@ -1902,21 +1902,21 @@ static status_t
                            FALSE, 
                            !first);
 
+            write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
             write_cyang_typedefs(scb, mod, cp, &rpcio->typedefQ, indent);
             write_cyang_groupings(scb, mod, cp, &rpcio->groupingQ, indent);
             write_cyang_objects(scb, mod, cp, &rpcio->datadefQ, indent);
-            write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
             ses_putstr_indent(scb, END_SEC, startindent);
         }
         break;
     case OBJ_TYP_NOTIF:
         notif = obj->def.notif;
+        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         write_cyang_whenif(scb, obj, indent);      /* when-stmt NULL */
         write_cyang_sdr(scb, obj, indent);
         write_cyang_typedefs(scb, mod, cp, &notif->typedefQ, indent);
         write_cyang_groupings(scb, mod, cp, &notif->groupingQ, indent);
         write_cyang_objects(scb, mod, cp, &notif->datadefQ, indent);
-        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         write_cyang_endsec_cmt(scb, YANG_K_NOTIFICATION, notif->name);
         break;
@@ -1984,7 +1984,6 @@ static status_t
             ;
         }
 
-        write_cyang_appinfoQ(scb, mod, cp, &obj->appinfoQ, indent);
         ses_putstr_indent(scb, END_SEC, startindent);
         break;
     default:
@@ -2083,6 +2082,8 @@ static void
                    FALSE, 
                    FALSE);
 
+    write_cyang_appinfoQ(scb, mod, cp, &ext->appinfoQ, indent);
+
     /* argument sub-clause */
     if (ext->arg) {
         write_cyang_simple_str(scb,
@@ -2122,8 +2123,6 @@ static void
                                2, 
                                TRUE);
     }
-
-    write_cyang_appinfoQ(scb, mod, cp, &ext->appinfoQ, indent);
 
     /* end extension clause */
     ses_putstr_indent(scb, END_SEC, startindent);
@@ -2205,6 +2204,12 @@ static void
                    FALSE, 
                    FALSE);
 
+    write_cyang_appinfoQ(scb, 
+                         mod, 
+                         cp, 
+                         &identity->appinfoQ, 
+                         indent);
+
     /* base sub-clause */
     if (identity->base) {
         ses_putstr_indent(scb, YANG_K_BASE, indent);
@@ -2238,12 +2243,6 @@ static void
                                2, 
                                TRUE);
     }
-
-    write_cyang_appinfoQ(scb, 
-                         mod, 
-                         cp, 
-                         &identity->appinfoQ, 
-                         indent);
 
     /* end identity clause */
     ses_putstr_indent(scb, END_SEC, startindent);
@@ -2331,6 +2330,12 @@ static void
                    FALSE, 
                    FALSE);
 
+    write_cyang_appinfoQ(scb, 
+                         mod, 
+                         cp, 
+                         &feature->appinfoQ, 
+                         indent);
+
     /* optional Q of if-feature statements */
     write_cyang_iffeatureQ(scb, &feature->iffeatureQ, indent);
 
@@ -2356,12 +2361,6 @@ static void
                                2, 
                                TRUE);
     }
-
-    write_cyang_appinfoQ(scb, 
-                         mod, 
-                         cp, 
-                         &feature->appinfoQ, 
-                         indent);
 
     /* end feature clause */
     ses_putstr_indent(scb, END_SEC, startindent);
@@ -2456,6 +2455,12 @@ static void
      */
     ses_putstr(scb, START_SEC);
 
+    write_cyang_appinfoQ(scb, 
+                         mod, 
+                         cp, 
+                         &deviate->appinfoQ, 
+                         indent);
+
     /* type-stmt */
     if (deviate->typdef) {
         write_cyang_type_clause(scb, 
@@ -2518,12 +2523,6 @@ static void
 
     write_cyang_unique_stmts(scb, &deviate->uniqueQ, indent);
 
-    write_cyang_appinfoQ(scb, 
-                         mod, 
-                         cp, 
-                         &deviate->appinfoQ, 
-                         indent);
-
     ses_putstr_indent(scb, END_SEC, startindent);
 
 }  /* write_cyang_deviate */
@@ -2566,6 +2565,12 @@ static void
 
     ses_putstr(scb, START_SEC);
 
+    write_cyang_appinfoQ(scb, 
+                         mod, 
+                         cp, 
+                         &deviation->appinfoQ, 
+                         indent);
+
     /* description field */
     if (deviation->descr) {
         write_cyang_simple_str(scb, 
@@ -2594,13 +2599,6 @@ static void
              dlq_nextEntry(deviate)) {
         write_cyang_deviate(scb, mod, cp, deviate, indent);
     }
-
-    write_cyang_appinfoQ(scb, 
-                         mod, 
-                         cp, 
-                         &deviation->appinfoQ, 
-                         indent);
-
 
     ses_putstr_indent(scb, END_SEC, startindent);
 
@@ -2686,6 +2684,13 @@ static void
     ses_putchar(scb, ' ');
     ses_putstr(scb, modname);
     ses_putstr(scb, START_SEC);
+    if (appinfoQ) {
+        write_cyang_appinfoQ(scb, 
+                             mod, 
+                             cp, 
+                             appinfoQ,
+                             indent + ses_indent_count(scb));
+    }
     write_cyang_simple_str(scb, 
                            YANG_K_PREFIX,
                            modprefix,
@@ -2700,13 +2705,6 @@ static void
                                2, 
                                TRUE);
 
-    }
-    if (appinfoQ) {
-        write_cyang_appinfoQ(scb, 
-                             mod, 
-                             cp, 
-                             appinfoQ,
-                             indent + ses_indent_count(scb));
     }
     ses_putstr_indent(scb, END_SEC, indent);
 
@@ -2847,6 +2845,11 @@ static void
             ses_putstr(scb, inc->submodule);
             if (inc->revision || !dlq_empty(&inc->appinfoQ)) {
                 ses_putstr(scb, START_SEC);
+                write_cyang_appinfoQ(scb, 
+                                     mod, 
+                                     cp, 
+                                     &inc->appinfoQ,
+                                     indent + ses_indent_count(scb));
                 if (inc->revision) {
                     write_cyang_simple_str(scb, 
                                            YANG_K_REVISION, 
@@ -2855,11 +2858,6 @@ static void
                                            2, 
                                            TRUE);
                 }
-                write_cyang_appinfoQ(scb, 
-                                     mod, 
-                                     cp, 
-                                     &inc->appinfoQ,
-                                     indent + ses_indent_count(scb));
                 ses_putstr_indent(scb, END_SEC, indent);
             } else {
                 ses_putchar(scb, ';');
@@ -2983,6 +2981,32 @@ static void
     } else {
         stmtmode = dlq_empty(&mod->stmtQ) ? FALSE : TRUE;
     }
+
+    /* TBD: need a better way to generate all the top-level
+     * extensions.  This approach is broken because it gathers
+     * them and puts them at the start, after the header
+     * the relative order with top-level stmts is not preserved 
+     *
+     * will need to check line numbers as other constructs
+     * are generated to find any extensions that 'fit'
+     * in particuolar line number ranges
+     */
+    write_cyang_appinfoQ(scb, mod, cp, &mod->appinfoQ, cp->indent);
+    if (cp->unified && mod->ismod) {
+        for (node = (const yang_node_t *)
+                 dlq_firstEntry(&mod->allincQ);
+             node != NULL;
+             node = (const yang_node_t *)dlq_nextEntry(node)) {
+            if (node->submod) {
+                write_cyang_appinfoQ(scb, 
+                                     node->submod,
+                                     cp, 
+                                     &node->submod->appinfoQ,
+                                     cp->indent);
+            }
+        }
+    }
+
 
     /* 1) features */
     if (!stmtmode) {
@@ -3221,31 +3245,6 @@ static void
         }
     }
     
-    /* TBD: need a better way to generate all the top-level
-     * extensions.  This approach is broken because it gathers
-     * them and puts them at the end
-     *
-     * will need to check line numbers as other constructs
-     * are generated to find any extensions that 'fit'
-     * in particuolar line number ranges
-     */
-    write_cyang_appinfoQ(scb, mod, cp, &mod->appinfoQ, cp->indent);
-
-    if (cp->unified && mod->ismod) {
-        for (node = (const yang_node_t *)
-                 dlq_firstEntry(&mod->allincQ);
-             node != NULL;
-             node = (const yang_node_t *)dlq_nextEntry(node)) {
-            if (node->submod) {
-                write_cyang_appinfoQ(scb, 
-                                     node->submod,
-                                     cp, 
-                                     &node->submod->appinfoQ,
-                                     cp->indent);
-            }
-        }
-    }
-
     /* end module */
     ses_putstr(scb, (const xmlChar *)"\n}\n");
 

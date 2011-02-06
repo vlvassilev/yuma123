@@ -8944,6 +8944,10 @@ status_t
     pcb->logerrors = TRUE;
     pcb->val = NULL;
     pcb->val_docroot = NULL;
+
+    /* this is not used yet; a missing child node is always
+     * a warning at this time
+     */
     pcb->missing_errors = missing_is_error;
 
     if (pcb->source == XP_SRC_YANG && obj_is_config(obj)) {

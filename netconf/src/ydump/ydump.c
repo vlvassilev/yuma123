@@ -817,8 +817,10 @@ static void
     obj_template_t    *obj;
     ext_template_t    *ext;
     ncx_feature_t     *feature;
+    boolean            anyout = FALSE;
 
     if (mod->ismod) {
+        anyout = TRUE;
         sprintf(buff, "\nnamespace %s", mod->ns);
         ses_putstr(scb, (const xmlChar *)buff);
         if (mod->prefix) {
@@ -828,9 +830,6 @@ static void
             sprintf(buff, "\nprefix %s", mod->name);
             ses_putstr(scb, (const xmlChar *)buff);
         }
-    } else {
-        sprintf(buff, "\nbelongs-to %s", mod->belongs);
-        ses_putstr(scb, (const xmlChar *)buff);
     }
 
     for (typ = (typ_template_t *)dlq_firstEntry(&mod->typeQ);
@@ -838,6 +837,7 @@ static void
          typ = (typ_template_t *)dlq_nextEntry(typ)) {
         sprintf(buff, "\ntypedef %s", typ->name);
         ses_putstr(scb, (const xmlChar *)buff);
+        anyout = TRUE;
     }
 
     for (grp = (grp_template_t *)dlq_firstEntry(&mod->groupingQ);
@@ -845,6 +845,7 @@ static void
          grp = (grp_template_t *)dlq_nextEntry(grp)) {
         sprintf(buff, "\ngrouping %s", grp->name);
         ses_putstr(scb, (const xmlChar *)buff);
+        anyout = TRUE;
     }
 
     for (obj = (obj_template_t *)dlq_firstEntry(&mod->datadefQ);
@@ -861,6 +862,7 @@ static void
             sprintf(buff, "\n%s %s", obj_get_typestr(obj),
                     obj_get_name(obj));
             ses_putstr(scb, (const xmlChar *)buff);
+            anyout = TRUE;
         }
     }
 
@@ -869,6 +871,7 @@ static void
          ext = (ext_template_t *)dlq_nextEntry(ext)) {
         sprintf(buff, "\nextension %s", ext->name);
         ses_putstr(scb, (const xmlChar *)buff);
+        anyout = TRUE;
     }
 
     for (feature = (ncx_feature_t *)dlq_firstEntry(&mod->featureQ);
@@ -876,9 +879,12 @@ static void
          feature = (ncx_feature_t *)dlq_nextEntry(feature)) {
         sprintf(buff, "\nfeature %s", feature->name);
         ses_putstr(scb, (const xmlChar *)buff);
+        anyout = TRUE;
     }
 
-    ses_putchar(scb, '\n');
+    if (anyout) {
+        ses_putchar(scb, '\n');
+    }
 
 }   /* output_one_module_exports */
 
@@ -918,7 +924,7 @@ static void
 
     output_one_module_exports(mod, scb, cp->buff);
 
-    if (cp->unified && mod->ismod) {
+    if ((cp->unified || cp->onemodule) && mod->ismod) {
         for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (yang_node_t *)dlq_nextEntry(node)) {
@@ -949,6 +955,7 @@ static void
     ncx_module_t      *testmod;
     yang_import_ptr_t *impptr;
     yang_node_t       *node; 
+    boolean            anyout = FALSE;
 
     for (impptr = (yang_import_ptr_t *)dlq_firstEntry(&mod->saveimpQ);
          impptr != NULL;
@@ -962,6 +969,7 @@ static void
             sprintf(cp->buff, "@%s", testmod->version);
             ses_putstr(scb,(const xmlChar *)cp->buff);                
         }
+        anyout = TRUE;
     }
     if (!cp->unified) {
         for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
@@ -974,10 +982,13 @@ static void
                 sprintf(cp->buff, "@%s", node->submod->version);
                 ses_putstr(scb,(const xmlChar *)cp->buff);
             }
+            anyout = TRUE;
         }
     }
 
-    ses_putchar(scb, '\n');
+    if (anyout) {
+        ses_putchar(scb, '\n');
+    }
 
 }   /* output_one_module_dependencies */
 
@@ -1016,7 +1027,7 @@ static void
 
     output_one_module_dependencies(mod, scb, cp);
 
-    if (cp->unified && mod->ismod) {
+    if ((cp->unified || cp->onemodule) && mod->ismod) {
         for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (yang_node_t *)dlq_nextEntry(node)) {
@@ -1060,6 +1071,7 @@ static status_t
     dlq_hdr_t         *childQ;
     uint32             reallen, i;
     status_t           res;
+    boolean            anyout = FALSE;
 
     for (obj = (obj_template_t *)dlq_firstEntry(datadefQ);
          obj != NULL;
@@ -1092,6 +1104,8 @@ static status_t
             ses_putstr(scb, buff);
         }
 
+        anyout = TRUE;
+
         childQ = obj_get_datadefQ(obj);
         if (childQ) {
             res = output_identifiers(childQ, 
@@ -1107,7 +1121,7 @@ static status_t
         }
     }
 
-    return NO_ERR;
+    return (anyout) ? NO_ERR : ERR_NCX_SKIPPED;
 
 }   /* output_identifiers */
 
@@ -1134,14 +1148,18 @@ static void
                                    boolean treeformat,
                                    uint32 indent)
 {
-    (void)output_identifiers(&mod->datadefQ, 
+    status_t  res;
+
+    res = output_identifiers(&mod->datadefQ, 
                              scb, 
                              buff, 
                              bufflen,
                              treeformat,
                              indent,
                              indent);
-    ses_putchar(scb, '\n');
+    if (res == NO_ERR) {
+        ses_putchar(scb, '\n');
+    }
 
 }   /* output_one_module_identifiers */
 
@@ -1188,7 +1206,7 @@ static void
                                   treeformat,
                                   cp->indent);
 
-    if (cp->unified && mod->ismod) {
+    if ((cp->unified || cp->onemodule) && mod->ismod) {
         for (node = (yang_node_t *)dlq_firstEntry(&mod->allincQ);
              node != NULL;
              node = (yang_node_t *)dlq_nextEntry(node)) {
@@ -2086,6 +2104,7 @@ status_t
     while (val) {
 	done = TRUE;
 	cvtparms->curmodule = (char *)VAL_STR(val);
+        cvtparms->onemodule = TRUE;
 	res = convert_one(cvtparms);
 	if (NEED_EXIT(res)) {
 	    val = NULL;
@@ -2097,6 +2116,7 @@ status_t
 	}
     }
 
+    cvtparms->onemodule = FALSE;
     if (res == NO_ERR &&
 	cvtparms->subtreecount >= 1) {
 	if (cvtparms->format == NCX_CVTTYP_XSD ||

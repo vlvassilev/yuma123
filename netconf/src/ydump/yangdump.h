@@ -242,7 +242,7 @@ typedef struct yangdump_cvtparms_t_ {
     boolean         versionmode;
     boolean         rawmode;
     boolean         allowcode;
-
+    boolean         onemodule;   /* processing MODULE, force unified */
     /* internal vars */
     xmlChar        *full_output;
     ncx_module_t   *mod;

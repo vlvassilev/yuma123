@@ -2663,6 +2663,25 @@ extern boolean
 
 
 /********************************************************************
+* FUNCTION obj_is_mandatory_when_ex
+*
+* Figure out if the obj is YANG mandatory or not
+* Check the when-stmts, not just mandatory-stmt
+*
+* INPUTS:
+*   obj == obj_template to check
+*   config_only == TRUE to check config only and ignore non-config
+*               == FALSE to check mandatory confoig or non-config
+* RETURNS:
+*   TRUE if object is mandatory
+*   FALSE if object is not mandatory
+*********************************************************************/
+extern boolean
+    obj_is_mandatory_when_ex (obj_template_t *obj,
+                              boolean config_only);
+
+
+/********************************************************************
 * FUNCTION obj_is_mandatory_when
 *
 * Figure out if the obj is YANG mandatory or not

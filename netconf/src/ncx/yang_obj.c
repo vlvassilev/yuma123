@@ -5468,7 +5468,7 @@ static status_t
         obj_get_config_flag_check(obj, &ingrp) &&
         ((obj->parent != NULL && obj_is_root(obj->parent)) ||
          (obj->parent == NULL && obj->grp == NULL)) &&
-        obj_is_mandatory_when(obj)) {
+        obj_is_mandatory_when_ex(obj, TRUE)) {
         
         if (ncx_warning_enabled(ERR_NCX_TOP_LEVEL_MANDATORY)) {
 

@@ -8827,20 +8827,22 @@ boolean
 
 
 /********************************************************************
-* FUNCTION obj_is_mandatory_when
+* FUNCTION obj_is_mandatory_when_ex
 *
 * Figure out if the obj is YANG mandatory or not
 * Check the when-stmts, not just mandatory-stmt
 *
 * INPUTS:
 *   obj == obj_template to check
-*
+*   config_only == TRUE to check config only and ignore non-config
+*               == FALSE to check mandatory confoig or non-config
 * RETURNS:
 *   TRUE if object is mandatory
 *   FALSE if object is not mandatory
 *********************************************************************/
 boolean
-    obj_is_mandatory_when (obj_template_t *obj)
+    obj_is_mandatory_when_ex (obj_template_t *obj,
+                              boolean config_only)
 {
     obj_template_t *chobj;
 
@@ -8850,6 +8852,10 @@ boolean
         return FALSE;
     }
 #endif
+
+    if (config_only && !obj_is_config(obj)) {
+        return FALSE;
+    }
 
     switch (obj->objtype) {
     case OBJ_TYP_CONTAINER:
@@ -8862,7 +8868,7 @@ boolean
         for (chobj = obj_first_child(obj);
              chobj != NULL;
              chobj = obj_next_child(chobj)) {
-            if (obj_is_mandatory_when(chobj)) {
+            if (obj_is_mandatory_when_ex(chobj, config_only)) {
                 return TRUE;
             }
         }
@@ -8899,6 +8905,34 @@ boolean
         SET_ERROR(ERR_INTERNAL_VAL);
         return FALSE;
     }
+
+}   /* obj_is_mandatory_when_ex */
+
+
+/********************************************************************
+* FUNCTION obj_is_mandatory_when
+*
+* Figure out if the obj is YANG mandatory or not
+* Check the when-stmts, not just mandatory-stmt
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   TRUE if object is mandatory
+*   FALSE if object is not mandatory
+*********************************************************************/
+boolean
+    obj_is_mandatory_when (obj_template_t *obj)
+{
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return FALSE;
+    }
+#endif
+
+    return obj_is_mandatory_when_ex(obj, FALSE);
 
 }   /* obj_is_mandatory_when */
 

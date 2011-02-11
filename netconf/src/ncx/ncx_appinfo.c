@@ -710,7 +710,7 @@ status_t
                           ncx_module_t  *mod,
                           dlq_hdr_t *appinfoQ)
 {
-     ncx_appinfo_t  *appinfo;
+    ncx_appinfo_t  *appinfo;
     ext_template_t  *ext;
     status_t         res, retres;
 
@@ -735,7 +735,7 @@ status_t
             continue;
         }
 
-
+        res = NO_ERR;
         if (appinfo->prefix &&
             xml_strcmp(appinfo->prefix, mod->prefix)) {
 

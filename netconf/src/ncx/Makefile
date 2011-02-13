@@ -66,11 +66,13 @@ ifndef STATIC
 	$(LIB_INST)/lib$(SUBDIR_NM).$(LIBNCXSUFFIX) $(REAL_INST)
 # libncx.so --> libncx.so.M.N
 # libncx.so.1 --> libncx.so.M.N
+ifndef MAC
 	(cd $(REAL_INST); \
 	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
 	lib$(SUBDIR_NM).$(LIBSUFFIX);\
 	ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
 	lib$(SUBDIR_NM).$(LIBSUFFIX).$(LIBNCX_MAJOR_VERSION))
+endif
 ifndef DESTDIR
 ifndef MAC
 # skip in MacOsX, RPM, and rest of debian fakeroot builds
@@ -101,8 +103,10 @@ ncxlib:
 else
 ncxlib: $(LBASE)/lib$(SUBDIR_NM).$(LIBNCXSUFFIX)
 ifndef STATIC
+ifndef MAC
 	(cd $(LBASE); ln -f -s lib$(SUBDIR_NM).$(LIBNCXSUFFIX) \
 	lib$(SUBDIR_NM).$(LIBSUFFIX))
+endif
 endif
 endif
 endif

@@ -125,7 +125,7 @@ WARNING_FLAGS=
 #  LIBS = -lncurses
 #
 
-LIBS = @LIBS@
+LIBS = @LIBS@ -lncurses
 
 #
 # List the default target libraries. This should be one or

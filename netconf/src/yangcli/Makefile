@@ -13,7 +13,10 @@ TARGET=$(TBASE)/$(SUBDIR_NM)
 BIN_INST=$(TBASE)/bin
 REAL_INST=$(DESTDIR)$(PREFIX)/bin
 PROG=yangcli
+
+ifndef MAC
 LN_EXTRA=-Wl,-utputs -Wl,-utparm -Wl,-utigetnum -Wl,-utigetstr -Wl,-usetupterm
+endif
 
 ##################### LIBRARIES ########################
 
@@ -29,9 +32,16 @@ LN_EXTRA=-Wl,-utputs -Wl,-utparm -Wl,-utigetnum -Wl,-utigetstr -Wl,-usetupterm
 #LCRYPTO=-L/lib
 # $(LCRYPTO) -lcrypto 
 ## LINUX
+
+ifdef MAC
+LFIRST=-L/sw/lib/x86_64
+else
+LFIRST=
+endif
+
 DLIBS =	-L../../target/lib -lmgr -lncx \
 	-L../../../libtecla -ltecla \
-	-L$(PREFIX)/lib -lxml2 -lncurses -lssh2 \
+	$(LFIRST) -L$(PREFIX)/lib -lxml2 -lncurses -lssh2 \
 	-L$(PREFIX)/lib -lz -ldl
 
 

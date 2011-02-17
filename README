@@ -36,7 +36,11 @@ Build Variables:
              version.svnversion
 
   MEMTRACE=1: enables mtrace debugging
-
+       Used when Memory leak error message printed upon exit.
+       Need to install glibc-utils for the 'mtrace' program.
+       Tools will generate an 'mtracefile' in the CWD.
+       Run mtrace /path/to/program ./mtracefile
+       
   CYGWIN=1: build on windows within cygwin environment
 
   NOFLOAT: disable use of double and tgmath.h; XPath eval

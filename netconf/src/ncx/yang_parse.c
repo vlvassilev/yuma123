@@ -145,6 +145,7 @@ date         init     comment
 /* #define YANG_PARSE_TK_DEBUG 1 */
 /* #define YANG_PARSE_RDLN_DEBUG 1 */
 /* #define YANG_PARSE_DEBUG_TRACE 1 */
+/* #define YANG_PARSE_DEBUG_MEMORY 1 */
 #endif
 
 static status_t 
@@ -3008,6 +3009,7 @@ static status_t
         ncx_print_errormsg(tkc, mod, res);
     } else if (TK_CUR_ID(tkc)) {
         /* got an ID token, make sure it is correct to continue */
+        res = NO_ERR;
         if (!xml_strcmp(TK_CUR_VAL(tkc), YANG_K_MODULE)) {
             ismain = TRUE;
             TK_BKUP(tkc);
@@ -3030,6 +3032,14 @@ static status_t
             res = ERR_NCX_WRONG_TKVAL;
             ncx_print_errormsg(tkc, mod, res);
         }
+#ifdef YANG_PARSE_DEBUG_MEMORY
+        if (res == NO_ERR && LOGDEBUG3) {
+            log_debug3(" malloced %p %smodule '%s'",
+                       mod,
+                       ismain ? "" : "sub",
+                       mod->name);
+        }
+#endif
     } else {
         res = ERR_NCX_WRONG_TKTYPE;
         ncx_print_errormsg(tkc, mod, res);
@@ -3699,7 +3709,8 @@ status_t
                  * make sure this does not end up in the wrong Q
                  * and get freed incorrectly if import/include mismatch
                  */
-                if ((ptyp == YANG_PT_IMPORT && !mod->ismod) ||
+                if ((res == ERR_NCX_SKIPPED) ||
+                    (ptyp == YANG_PT_IMPORT && !mod->ismod) ||
                     (ptyp == YANG_PT_INCLUDE && mod->ismod)) {
                     pcb->retmod = NULL;
                     ncx_free_module(mod);

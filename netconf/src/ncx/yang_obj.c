@@ -221,7 +221,8 @@ date         init     comment
 
 #ifdef DEBUG
 #define YANG_OBJ_DEBUG 1
-/* #define YANG_OBJ_USES_DEBUG 1 */
+/* #define YANG_OBJ_DEBUG_USES 1 */
+/* #define YANG_OBJ_DEBUG_MEMORY 1 */
 #endif
 
 
@@ -7167,7 +7168,7 @@ static status_t
         return NO_ERR;
     }
 
-#ifdef YANG_OBJ_USES_DEBUG
+#ifdef YANG_OBJ_DEBUG_USES
     if (LOGDEBUG4) {
         log_debug4("\nexpand_uses: uses '%s' in mod '%s' on line %u",
                    uses->grp->name,
@@ -7181,7 +7182,7 @@ static status_t
          * nested uses-stmts are expanded first
          */
 
-#ifdef YANG_OBJ_USES_DEBUG
+#ifdef YANG_OBJ_DEBUG_USES
         if (LOGDEBUG4) {
             log_debug4("\nexpand_uses: need expand of grouping %s",
                        uses->grp->name);
@@ -7207,7 +7208,7 @@ static status_t
          chobj != NULL;
          chobj = (obj_template_t *)dlq_nextEntry(chobj)) {
 
-#ifdef YANG_OBJ_USES_DEBUG
+#ifdef YANG_OBJ_DEBUG_USES
         if (LOGDEBUG4) {
             log_debug4("\nexpand_uses: object %s in mod %s on line %u",
                        obj_get_name(chobj),
@@ -7263,7 +7264,7 @@ static status_t
                     
                     dlq_insertAhead(newobj, obj);
 
-#ifdef YANG_OBJ_USES_DEBUG
+#ifdef YANG_OBJ_DEBUG_USES
                     if (LOGDEBUG4) {
                         log_debug4("\nexpand_uses: add new "
                                    "obj '%s' to parent '%s',"
@@ -7294,7 +7295,7 @@ static status_t
             continue;
         }
 
-#ifdef YANG_OBJ_USES_DEBUG
+#ifdef YANG_OBJ_DEBUG_USES
         if (LOGDEBUG3) {
             log_debug3("\nexpand_uses_augment: "
                        "mod %s, augment on line %u",
@@ -7311,7 +7312,7 @@ static status_t
         CHK_EXIT(res, retres);
     }
 
-#ifdef YANG_OBJ_USES_DEBUG
+#ifdef YANG_OBJ_DEBUG_USES
     if (LOGDEBUG4) {
         log_debug4("\nyang_obj: uses '%s'; datadefQ after expand",
                    uses->grp->name);
@@ -8239,6 +8240,15 @@ static status_t
 
     /* borrow some pointers from the savedev */
     dummymod->name = savedev->devmodule;
+
+#ifdef YANG_OBJ_DEBUG_MEMORY
+    if (LOGDEBUG3) {
+        log_debug3("\n   malloced %p module '%s'",
+                   dummymod,
+                   dummymod->name);
+    }
+#endif
+
     dummymod->ismod = TRUE;
     dummymod->prefix = savedev->devprefix;
     myimport->mod = mod;

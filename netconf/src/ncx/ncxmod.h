@@ -147,7 +147,10 @@ extern "C" {
 #define NCXMOD_DEFAULT_INSTALL (const xmlChar *)"/usr/share/yuma"
 
 /* !! should import this from make !! */
+#define NCXMOD_DEFAULT_YUMALIB64 (const xmlChar *)"/usr/lib64/yuma"
+
 #define NCXMOD_DEFAULT_YUMALIB (const xmlChar *)"/usr/lib/yuma"
+
 
 /* !! should import this from make !! */
 #define NCXMOD_ETC_DATA (const xmlChar *)"/etc/yuma"

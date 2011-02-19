@@ -3683,6 +3683,17 @@ xmlChar *
         return buff;
     }
 
+#ifdef LIB64
+    /* 5) /usr/lib64/yuma directory */
+    if (test_file(buff, 
+                  bufflen, 
+                  NCXMOD_DEFAULT_YUMALIB64,
+                  NULL,
+                  fname)) {
+        return buff;
+    }
+#endif
+
     if (generrors) {
         log_error("\nError: SIL file (%s) not found.\n", fname);
     }

@@ -12,7 +12,11 @@ SUBDIR_CPP=
 TARGET=$(TBASE)/$(SUBDIR_NM)
 LIB_INST=$(TBASE)/lib
 
+ifdef LIB64
+REAL_INST=$(DESTDIR)$(PREFIX)/lib64
+else
 REAL_INST=$(DESTDIR)$(PREFIX)/lib
+endif
 
 # if the target is DEBIAN or RPM package, then
 # install the include files

@@ -24,6 +24,9 @@ Build Variables:
   ETC_PREFIX=string: set the top etc dir (after DESTDIR)
          default: /etc
 
+  LIB64=1: install look for SIL libs in /usr/lib64/yuma
+         instead of /usr/lib/yuma (used by FC14 64 bit)
+
   MAC=1: set to compile for MacOsX
 
   STATIC=1:set to use static libraries such as libncx.a,

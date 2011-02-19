@@ -86,17 +86,17 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 # -O3 changed to -O2 due to code bloat from inline functions
 
 ifdef WINDOWS
-CDEFS=-DDEBUG -DWINDOWS -DGCC
+CDEFS=-DDEBUG=1 -DWINDOWS=1 -DGCC=1
 else
-CDEFS=-DDEBUG -DLINUX -DGCC
+CDEFS=-DDEBUG=1 -DLINUX=1 -DGCC=1
 endif
 
 ifndef NOFLOAT
-  CDEFS += -DHAS_FLOAT
+  CDEFS += -DHAS_FLOAT=1
 endif
 
-ifdef P64BIT
-  CDEFS += -DP64BIT
+ifdef LIB64
+  CDEFS += -DLIB64=1
 endif
 
 CFLAGS+=$(CDEFS) $(CWARN)

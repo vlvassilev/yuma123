@@ -24,7 +24,11 @@ ifndef PREFIX
     PREFIX=/usr
 endif
 
+ifdef LIB64
+REAL_INST=$(DESTDIR)$(PREFIX)/lib64/yuma
+else
 REAL_INST=$(DESTDIR)$(PREFIX)/lib/yuma
+endif
 
 #################### MAKE RULES ########################
 
@@ -93,10 +97,10 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 # -Wunreachable-code removed due to -O3
 # -O3 changed to -O2 due to code bloat from inline functions
 
-CDEFS=-DDEBUG -DLINUX -DGCC
+CDEFS=-DDEBUG=1 -DLINUX=1 -DGCC=1
 
 ifndef NOFLOAT
-  CDEFS += -DHAS_FLOAT
+  CDEFS += -DHAS_FLOAT=1
 endif
 
 # production (0) or debug (1) build
@@ -117,13 +121,12 @@ ifdef MEMTRACE
   CFLAGS += -DMEMORY_DEBUG=1
 endif
 
-# free or SDK version
-ifdef FREE
-  CFLAGS += -DFREE_VERSION
-endif
-
 ifdef RELEASE
   CFLAGS += -DRELEASE=$(RELEASE)
+endif
+
+ifdef LIB64
+   CFLAGS += -DLIB64=1
 endif
 
 ifdef MAC

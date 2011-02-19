@@ -10,7 +10,7 @@
     revision 2009-11-20
 
     namespace http://netconfcentral.com/ns/toaster
-    organization Netconf Central, Inc.
+    organization Netconf Central
 
  */
 

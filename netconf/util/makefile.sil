@@ -20,7 +20,11 @@ LIB_INST=../lib
 
 WORK_INST=$(YUMA_HOME)/target/lib
 
+ifdef LIB64
+REAL_INST=$(DESTDIR)$(PREFIX)/lib64/yuma
+else
 REAL_INST=$(DESTDIR)$(PREFIX)/lib/yuma
+endif
 
 
 #################### MAKE RULES ########################
@@ -78,17 +82,17 @@ CWARN=-Wall -Wno-long-long -Wformat-y2k -Winit-self \
 # -Wunreachable-code removed due to -O3
 # -O3 changed to -O2 due to code bloat from inline functions
 
-CDEFS=-DDEBUG -DLINUX -DGCC
+CDEFS=-DDEBUG=1 -DLINUX=1 -DGCC=1
 
 ifndef NOFLOAT
-  CDEFS += -DHAS_FLOAT
+  CDEFS += -DHAS_FLOAT=1
 endif
 
 # production (0) or debug (1) build
 ifdef DEBUG
-  CFLAGS ?= -ggdb3
+  CFLAGS += -ggdb3
 else
-  CFLAGS ?= -O2
+  CFLAGS += -O2
 endif
 
 CFLAGS += $(CDEFS) $(CWARN)
@@ -102,14 +106,14 @@ ifdef MEMTRACE
   CFLAGS += -DMEMORY_DEBUG=1
 endif
 
-# free or SDK version
-ifdef FREE
-  CFLAGS += -DFREE_VERSION
-endif
-
 ifdef RELEASE
   CFLAGS += -DRELEASE=$(RELEASE)
 endif
+
+ifdef LIB64
+   CFLAGS += -DLIB64=1
+endif
+
 
 ifdef MAC
    GRP=
@@ -254,8 +258,8 @@ $(LBASE)/lib$(SUBDIR_NM).dylib: $(OBJS)
 	-o $@ -install_name lib$(SUBDIR_NM).dylib $(OBJS) -lxml2
 
 code:
-	yangdumpcode format=h indent=4 module=$(SUBDIR_NM) output=$(SUBDIR_NM).h
-	yangdumpcode format=c indent=4 module=$(SUBDIR_NM) output=$(SUBDIR_NM).c
+	yangdump format=h indent=4 module=$(SUBDIR_NM) output=$(SUBDIR_NM).h
+	yangdump format=c indent=4 module=$(SUBDIR_NM) output=$(SUBDIR_NM).c
 
 
 # prevent the make program from choking on all the symbols

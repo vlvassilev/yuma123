@@ -23,16 +23,16 @@ ifdef SERVER
 install:
 # install the server user documentation in debian SERVER build
 	mkdir -p $(DOC_INSTALL)
-	cp yuma_docs/yuma-netconfd-manual.pdf $(DOC_INSTALL)
+	cp yuma_docs/pdf/yuma-netconfd-manual.pdf $(DOC_INSTALL)
 else
 ifdef CLIENT
 # install the client user documentation in debian CLIENT build
 install:
 	mkdir -p $(DOC_INSTALL)
-	cp yuma_docs/yuma-user-cmn-manual.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-yangcli-manual.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-yangdiff-manual.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-yangdump-manual.pdf $(DOC_INSTALL)
+	cp yuma_docs/pdf/yuma-user-cmn-manual.pdf $(DOC_INSTALL)
+	cp yuma_docs/pdf/yuma-yangcli-manual.pdf $(DOC_INSTALL)
+	cp yuma_docs/pdf/yuma-yangdiff-manual.pdf $(DOC_INSTALL)
+	cp yuma_docs/pdf/yuma-yangdump-manual.pdf $(DOC_INSTALL)
 else
 ifdef SHLIBS
 # install the base license documentation in debian SHLIBS build
@@ -41,27 +41,27 @@ install:
 	cp extra/AUTHORS $(DOC_INSTALL)
 	cp extra/README $(DOC_INSTALL)
 	cp extra/yumatools-legal-notices.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-installation-guide.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-quickstart-guide.pdf $(DOC_INSTALL)
+	cp yuma_docs/pdf/yuma-installation-guide.pdf $(DOC_INSTALL)
+	cp yuma_docs/pdf/yuma-quickstart-guide.pdf $(DOC_INSTALL)
 else
 ifdef DEVELOPER
 # install the developer documentation in debian DEVELOPER build
 install:
 	mkdir -p $(DOC_INSTALL)
-	cp yuma_docs/yuma-dev-manual.pdf $(DOC_INSTALL)
-	cp yuma_docs/server-call-chain.txt $(DOC_INSTALL)
+	cp yuma_docs/pdf/yuma-dev-manual.pdf $(DOC_INSTALL)
+	cp yuma_docs/pdf/server-call-chain.txt $(DOC_INSTALL)
 else
 # install everything
 install:
 	mkdir -p $(DOC_INSTALL)
-	cp yuma_docs/yuma-installation-guide.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-quickstart-guide.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-user-cmn-manual.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-netconfd-manual.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-yangcli-manual.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-yangdiff-manual.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-yangdump-manual.pdf $(DOC_INSTALL)
-	cp yuma_docs/yuma-dev-manual.pdf $(DOC_INSTALL)
+	cp yuma_docs/pdf/yuma-installation-guide.pdf $(DOC_INSTALL)
+	cp yuma_docs/pdf/yuma-quickstart-guide.pdf $(DOC_INSTALL)
+	cp yuma_docs/pdf/yuma-user-cmn-manual.pdf $(DOC_INSTALL)
+	cp yuma_docs/pdf/yuma-netconfd-manual.pdf $(DOC_INSTALL)
+	cp yuma_docs/pdf/yuma-yangcli-manual.pdf $(DOC_INSTALL)
+	cp yuma_docs/pdf/yuma-yangdiff-manual.pdf $(DOC_INSTALL)
+	cp yuma_docs/pdf/yuma-yangdump-manual.pdf $(DOC_INSTALL)
+	cp yuma_docs/pdf/yuma-dev-manual.pdf $(DOC_INSTALL)
 	cp yuma_docs/server-call-chain.txt $(DOC_INSTALL)
 	cp extra/AUTHORS $(DOC_INSTALL)
 	cp extra/README $(DOC_INSTALL)

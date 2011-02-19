@@ -150,6 +150,7 @@ typedef enum c_mode_t_ {
 typedef struct c_define_t_ {
     dlq_hdr_t        qhdr;
     xmlChar         *idstr;
+    xmlChar         *typstr;  /* when c_def for object */
     xmlChar         *valstr;
     obj_template_t  *obj;   /* back-ptr to object for typdef */
 } c_define_t;

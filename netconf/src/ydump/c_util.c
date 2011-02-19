@@ -94,8 +94,9 @@ date         init     comment
 *********************************************************************/
 
 
+
 /********************************************************************
-* FUNCTION new_c_define
+* FUNCTION new_id_string
 * 
 * Allocate and fill in a constructed identifier to string binding
 * for an object struct of some kind
@@ -105,13 +106,12 @@ date         init     comment
 *   defname == definition name to use
 *   cdefmode == c definition mode
 *********************************************************************/
-static c_define_t *
-    new_c_define (const xmlChar *modname,
-                  const xmlChar *defname,
-                  c_mode_t cmode)
+static xmlChar *
+    new_id_string (const xmlChar *modname,
+                   const xmlChar *defname,
+                   c_mode_t cmode)
 {
-    c_define_t  *cdef;
-    xmlChar     *buffer, *value, *p;
+    xmlChar     *buffer, *p;
     uint32       len;
 
     /* get the idstr length */
@@ -139,20 +139,6 @@ static c_define_t *
         return NULL;
     }
 
-    value = xml_strdup(defname);
-    if (value == NULL) {
-        m__free(buffer);
-        return NULL;
-    }
-
-    cdef = m__getObj(c_define_t);
-    if (cdef == NULL) {
-        m__free(buffer);
-        m__free(value);
-        return NULL;
-    }
-    memset(cdef, 0x0, sizeof(c_define_t));
-
     /* fill in the idstr buffer */
     p = buffer;
     p += xml_strcpy(p, Y_PREFIX);
@@ -172,11 +158,9 @@ static c_define_t *
     }
     p += ncx_copy_c_safe_str(p, defname);    
 
-    cdef->idstr = buffer;     /* transfer buffer memory here */
-    cdef->valstr = value;     /* transfer value memory here */    
-    return cdef;
+    return buffer;    /* transfer buffer memory here */
 
-}  /* new_c_define */
+}  /* new_id_string */
 
 
 /********************************************************************
@@ -193,12 +177,65 @@ static void
     if (cdef->idstr != NULL) {
         m__free(cdef->idstr);
     }
+    if (cdef->typstr != NULL) {
+        m__free(cdef->typstr);
+    }
     if (cdef->valstr != NULL) {
         m__free(cdef->valstr);
     }
     m__free(cdef);
 
 }  /* free_c_define */
+
+
+/********************************************************************
+* FUNCTION new_c_define
+* 
+* Allocate and fill in a constructed identifier to string binding
+* for an object struct of some kind
+*
+* INPUTS:
+*   modname == module name to use
+*   defname == definition name to use
+*   cdefmode == c definition mode
+*********************************************************************/
+static c_define_t *
+    new_c_define (const xmlChar *modname,
+                  const xmlChar *defname,
+                  c_mode_t cmode)
+{
+    c_define_t  *cdef;
+
+    cdef = m__getObj(c_define_t);
+    if (cdef == NULL) {
+        return NULL;
+    }
+    memset(cdef, 0x0, sizeof(c_define_t));
+
+    cdef->idstr = new_id_string(modname, defname, cmode);
+    if (cdef->idstr == NULL) {
+        free_c_define(cdef);
+        return NULL;
+    }
+
+    if (cmode == C_MODE_CALLBACK) {
+        cdef->typstr = new_id_string(modname, defname, C_MODE_TYPEDEF);
+        if (cdef->typstr == NULL) {
+            free_c_define(cdef);
+            return NULL;
+        }
+    }
+        
+    cdef->valstr = xml_strdup(defname);
+    if (cdef->valstr == NULL) {
+        free_c_define(cdef);
+        return NULL;
+    }
+
+    return cdef;
+
+}  /* new_c_define */
+
 
 
 /**************    E X T E R N A L   F U N C T I O N S **********/
@@ -847,6 +884,7 @@ void
 *   needstar == TRUE if this object reference is a reference
 *               or a pointer to the data type
 *               FALSE if this is a direct usage of the object data type
+*               !! only affects complex types, not simple types
 **********************************************************************/
 void
     write_c_objtype_ex (ses_cb_t *scb,
@@ -871,6 +909,10 @@ void
     needspace = TRUE;
 
     btyp = obj_get_basetype(obj);
+
+    if (typ_is_simple(btyp)) {
+        needstar = FALSE;
+    }
 
     switch (btyp) {
     case NCX_BT_EMPTY:
@@ -944,7 +986,11 @@ void
             if (cdef == NULL) {
                 SET_ERROR(ERR_INTERNAL_VAL);
             } else {
-                ses_putstr(scb, cdef->idstr);
+                if (cdef->typstr) {
+                    ses_putstr(scb, cdef->typstr);
+                } else {
+                    ses_putstr(scb, cdef->idstr);
+                }
             }
         }
     }

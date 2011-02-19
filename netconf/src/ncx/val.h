@@ -218,9 +218,9 @@ extern "C" {
 
 #define VAL_INT(V)     ((V)->v.num.i)
 
-#define VAL_INT8(V)     ((int8)((V)->v.num.i))
+#define VAL_INT8(V)     ((V)->v.num.i)
 
-#define VAL_INT16(V)    ((int16)((V)->v.num.i))
+#define VAL_INT16(V)    ((V)->v.num.i)
 
 #define VAL_STR(V)     ((V)->v.str)
 
@@ -234,9 +234,9 @@ extern "C" {
 
 #define VAL_UINT(V)    ((V)->v.num.u)
 
-#define VAL_UINT8(V)    ((uint8)((V)->v.num.u))
+#define VAL_UINT8(V)    ((V)->v.num.u)
 
-#define VAL_UINT16(V)   ((uint16)((V)->v.num.u))
+#define VAL_UINT16(V)   ((V)->v.num.u)
 
 #define VAL_ULONG(V)   ((V)->v.num.ul)
 

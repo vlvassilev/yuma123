@@ -918,6 +918,13 @@ static void
     ses_putstr(scb, FN_BANNER_LN);
     ses_putstr(scb, (const xmlChar *)"Fill in 'dstval' contents");
     ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, (const xmlChar *)"TBD: automatic get-callback registration");
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, (const xmlChar *)"FOR NOW: use agt_make_virtual_leaf to ");
+    ses_putstr(scb, FN_BANNER_LN);
+    ses_putstr(scb, (const xmlChar *)"register this get callback fn");
+
+    ses_putstr(scb, FN_BANNER_LN);
     ses_putstr(scb, FN_BANNER_INPUT);
     ses_putstr(scb, (const xmlChar *)"    see ncx/getcb.h for details");
     ses_putstr(scb, FN_BANNER_LN);
@@ -1104,12 +1111,14 @@ static void
             break;
         case NCX_BT_BOOLEAN:
         case NCX_BT_EMPTY:
-            ses_putstr(scb, (const xmlChar *)"change TRUE */");
+            ses_putstr(scb, (const xmlChar *)"change TRUE if needed */");
             ses_indent(scb, indent);
-            write_c_val_macro_type(scb, obj);
-            ses_putchar(scb, '(');
             write_c_safe_str(scb, obj_get_name(obj));
-            ses_putstr(scb, (const xmlChar *)") = TRUE;");
+            ses_putstr(scb, (const xmlChar *)" = TRUE;");
+            write_c_val_macro_type(scb, obj);
+            ses_putstr(scb, (const xmlChar *)"(dstval) = ");
+            write_c_safe_str(scb, obj_get_name(obj));
+            ses_putchar(scb, ';');
             break;
         default:
             SET_ERROR(ERR_INTERNAL_VAL);
@@ -1523,7 +1532,7 @@ static void
             }
 
             ses_indent(scb, indent);
-            write_c_objtype_ex(scb, obj, objnameQ, ';', FALSE, FALSE);
+            write_c_objtype_ex(scb, obj, objnameQ, ';', TRUE, FALSE);
         }
     }
 
@@ -1733,9 +1742,10 @@ static void
                    dlq_hdr_t *objnameQ)
 {
     obj_template_t  *obj, *nextobj;
-    const xmlChar   *modname;
+    const xmlChar   *modname, *fname;
     int32            indent;
     boolean          haspayload, anydone;
+    ncx_btype_t      btyp;
 
     modname = obj_get_mod_name(notifobj);
     indent = cp->indent;
@@ -1888,10 +1898,33 @@ static void
         write_c_safe_str(scb, obj_get_name(obj));
         ses_putstr(scb, (const xmlChar *)" to payload */");
 
+        btyp = obj_get_basetype(obj);
+        switch (btyp) {
+        case NCX_BT_UINT8:
+        case NCX_BT_UINT16:
+        case NCX_BT_UINT32:
+            fname = (const xmlChar *)"agt_make_uint_leaf";
+            break;
+        case NCX_BT_INT8:
+        case NCX_BT_INT16:
+        case NCX_BT_INT32:
+            fname = (const xmlChar *)"agt_make_int_leaf";
+            break;
+        default:
+            /* not all types are covered yet!!! such as:
+             * uint64, int64, decimal64, binary, boolean
+             * instance-identifier, leafref
+             */
+            fname = (const xmlChar *)"agt_make_leaf";
+        }
+
         /* agt_make_leaf stmt */
         ses_putstr_indent(scb, 
-                          (const xmlChar *)"parmval = agt_make_leaf(",
+                          (const xmlChar *)"parmval = ",
                           indent);
+        ses_putstr(scb, fname);
+        ses_putchar(scb, '(');
+
         ses_indent(scb, indent+indent);
         write_c_safe_str(scb, obj_get_name(notifobj));
         ses_putstr(scb, (const xmlChar *)"_obj,");

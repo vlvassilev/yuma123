@@ -47,7 +47,7 @@ extern "C" {
 *********************************************************************/
 
 #define COPYRIGHT_HEADER (const xmlChar *)\
-"\n * Copyright (c) 2009, 2010, Andy Bierman\
+"\n * Copyright (c) 2009 - 2011, Andy Bierman\
 \n * All Rights Reserved.\
 \n *\
 \n * Unless required by applicable law or agreed to in writing,\

@@ -666,6 +666,29 @@ extern val_value_t *
                         uint32 leafval,
                         status_t *res);
 
+/********************************************************************
+* FUNCTION agt_make_int_leaf
+*
+* make a val_value_t struct for a specified leaf or leaf-list
+*
+INPUTS:
+*   parentobj == parent object to find child leaf object
+*   leafname == name of leaf to find (namespace hardwired)
+*   leafval == integer number value for leaf
+*   res == address of return status
+*
+* OUTPUTS:
+*   *res == return status
+*
+* RETURNS:
+*   malloced value struct or NULL if some error
+*********************************************************************/
+extern val_value_t *
+    agt_make_int_leaf (obj_template_t *parentobj,
+                       const xmlChar *leafname,
+                       int32 leafval,
+                       status_t *res);
+
 
 /********************************************************************
 * FUNCTION agt_make_list

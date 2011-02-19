@@ -1,6 +1,6 @@
 Name:           yuma
 Version:        1.14
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -27,11 +27,11 @@ included, to compile and process YANG modules.
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make STATIC=1 RELEASE=4 %{?_smp_mflags}
+make STATIC=1 RELEASE=5 %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id STATIC=1 RELEASE=4 DESTDIR=$RPM_BUILD_ROOT
+make install LDFLAGS+=--build-id STATIC=1 RELEASE=5 DESTDIR=$RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -48,7 +48,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_sysconfdir}/yuma/yangdiff-sample.conf
 %{_sysconfdir}/yuma/yangdump-sample.conf
 %{_sysconfdir}/yuma/netconfd-sample.conf
-/usr/share/doc/yuma/yumatools-legal-notices.pdf
+/usr/share/doc/yuma/yuma-legal-notices.pdf
 /usr/share/doc/yuma/AUTHORS
 /usr/share/doc/yuma/README
 /usr/share/doc/yuma/yuma-user-cmn-manual.pdf

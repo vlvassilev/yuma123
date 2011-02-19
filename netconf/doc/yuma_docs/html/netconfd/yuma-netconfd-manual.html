@@ -2,16 +2,16 @@
 <html lang="en-US" xml:lang="en-US" xmlns="http://www.w3.org/1999/xhtml">
   <!-- This file was converted to xhtml by Writer2xhtml ver. 1.0.2. See http://writer2latex.sourceforge.net for more info. -->
   <head profile="http://dublincore.org/documents/dcq-html/">
-    <title>Yuma Tools netconfd Manual</title>
+    <title>Yuma netconfd Manual</title>
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
     <meta content="" name="description" />
     <meta content="" name="keywords" />
     <link href="http://purl.org/dc/elements/1.1/" rel="schema.DC" />
-    <meta content="Yuma Tools netconfd Manual" name="DC.title" />
+    <meta content="Yuma netconfd Manual" name="DC.title" />
     <meta content="" name="DC.subject" />
     <meta content="" name="DC.description" />
     <meta content="andy " name="DC.creator" />
-    <meta content="2011-02-18T19:58:11" name="DC.date" />
+    <meta content="2011-02-19T13:56:32" name="DC.date" />
     <meta content="" name="DC.language" />
     <style media="all" type="text/css">
       body {font-family:'Nimbus Roman No9 L',serif;font-size:16.0px}
@@ -28,7 +28,8 @@
       p.Textbody {margin-left:0;margin-right:0;margin-top:0;margin-bottom:8.016px;border:none;padding:0;font-family:'Luxi Sans',sans-serif;font-size:13.333334px}
       p.Contents2 {margin-left:15.984px;margin-right:0;margin-top:0;margin-bottom:0;border:none;padding:0;text-indent:0;font-family:'Luxi Sans',sans-serif;font-size:16.0px}
       p.Contents1 {margin-left:0;margin-right:0;margin-top:0;margin-bottom:0;border:none;padding:0;background-color:transparent;text-align:left;font-family:'Luxi Sans',sans-serif;font-size:16.0px}
-      p.Example {margin-left:17.2704px;margin-right:0;margin-top:7.6703997px;margin-bottom:7.6703997px;border:1.0px solid #000000;padding-top:5.7408px;padding-bottom:5.7408px;padding-left:13.4592px;padding-right:5.7408px;background-color:#ffffcc;text-indent:0;font-family:Courier,monospace;font-size:12.0px}
+      p.Example2 {margin-left:9.6px;margin-right:9.6px;margin-top:0;margin-bottom:0;border:none;padding:0;background-color:#ffffcc;text-indent:0;font-family:'CM Typewriter',monospace;font-size:12.0px}
+      p.Example {margin-left:96.0px;margin-right:96.0px;margin-top:0;margin-bottom:0;border:none;padding:0;background-color:#ffffcc;text-indent:0;font-family:'CM Typewriter',monospace;font-size:12.0px}
       h1 {margin-left:0;margin-right:0;margin-top:18.672px;margin-bottom:18.672px;border:none;padding:0;background-color:#e6e6ff;font-family:'Luxi Sans',sans-serif;font-weight:bold;font-size:26.666668px;clear:left}
       h2 {margin-left:0;margin-right:0;margin-top:18.672px;margin-bottom:18.672px;border:none;padding:0;background-color:#9999ff;font-family:'Luxi Sans',sans-serif;font-weight:bold;font-size:21.333334px;clear:left}
       h3 {margin-left:0;margin-right:0;margin-top:18.672px;margin-bottom:18.672px;border:none;padding:0;background-color:#83caff;font-family:'Luxi Sans',sans-serif;font-variant:small-caps;font-weight:bold;font-size:17.333334px;color:#000000;clear:left}
@@ -37,7 +38,7 @@
     </style>
   </head>
   <body dir="ltr">
-    <p class="TitlePageTitle" dir="ltr" lang="en-US" style="text-align:center" xml:lang="en-US">Yuma Tools<span style="font-family:&#39;Luxi Sans&#39;,sans-serif;font-size:58%;vertical-align:super">®</span> netconfd Manual</p>
+    <p class="TitlePageTitle" dir="ltr" lang="en-US" style="text-align:center" xml:lang="en-US">Yuma netconfd Manual</p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:24.0px" xml:lang="en-US"> </p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:24.0px" xml:lang="en-US"> </p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:24.0px" xml:lang="en-US"> </p>
@@ -45,9 +46,13 @@
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US"> </p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US"> </p>
     <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US">NETCONF Over SSH Server</p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:21.333334px" xml:lang="en-US"> </p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">Version 1.14-5</p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US"> </p>
+    <p class="Standard" dir="ltr" lang="en-US" style="text-align:center;font-size:16.0px" xml:lang="en-US">February 19, 2011</p>
     <p class="TableofContentsPageTitle" dir="ltr" lang="en-US" xml:lang="en-US">Table Of Contents</p>
     <div id="TableofContents1" style="background-color:transparent">
-      <p class="ContentsHeading" dir="ltr" lang="en-US" xml:lang="en-US">Yuma Tools netconfd Manual</p>
+      <p class="ContentsHeading" dir="ltr" lang="en-US" xml:lang="en-US">Yuma netconfd Manual</p>
       <p class="Contents1" dir="ltr" lang="en-US" xml:lang="en-US">
         <span class="SectionNumber">1</span>
         <a href="#toc0"> Preface</a>
@@ -631,30 +636,37 @@
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Copyright 2009 - 2011 Andy Bierman,  All Rights Reserved.</p>
     <h2 dir="ltr" id="toc2"><span class="SectionNumber">1.2</span> Additional Resources</h2>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This document assumes you have successfully set up the software as described in the printed document:</p>
-    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-family:Arial,sans-serif"> Yuma Tools</span><span style="font-family:&#39;Luxi Sans&#39;,sans-serif;font-size:58%;vertical-align:super">® </span> Installation Guide</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-family:Arial,sans-serif"> Yuma</span><span style="font-family:&#39;Luxi Sans&#39;,sans-serif;font-size:58%;vertical-align:super"> </span> Installation Guide</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
-    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Depending on the version of Yuma you purchased, other documentation includes:</p>
-    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-family:Arial,sans-serif"> Yuma Tools</span><span style="font-family:&#39;Luxi Sans&#39;,sans-serif;font-size:58%;vertical-align:super">® </span> Quickstart Guide</p>
-    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-family:Arial,sans-serif"> Yuma Tools</span><span style="font-family:&#39;Luxi Sans&#39;,sans-serif;font-size:58%;vertical-align:super">® </span> User Manual</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Other documentation includes:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-family:Arial,sans-serif"> Yuma</span><span style="font-family:&#39;Luxi Sans&#39;,sans-serif;font-size:58%;vertical-align:super"> </span> Quickstart Guide</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-family:Arial,sans-serif"> Yuma</span> User Manual</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
-      <span style="font-family:Arial,sans-serif"> Yuma Tools</span>
-      <span style="font-family:&#39;Luxi Sans&#39;,sans-serif;font-size:58%;vertical-align:super">® </span>
-      <span style="font-family:Arial,sans-serif"> yangcli Manual</span>
+      <span style="font-family:Arial,sans-serif"> Yuma yangcli Manual</span>
     </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
-      <span style="font-family:Arial,sans-serif"> Yuma Tools</span>
-      <span style="font-family:&#39;Luxi Sans&#39;,sans-serif;font-size:58%;vertical-align:super">® </span>
-      <span style="font-family:Arial,sans-serif"> yangdiff Manual</span>
+      <span style="font-family:Arial,sans-serif"> Yuma yangdiff Manual</span>
     </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
-      <span style="font-family:Arial,sans-serif"> Yuma Tools</span>
-      <span style="font-family:&#39;Luxi Sans&#39;,sans-serif;font-size:58%;vertical-align:super">® </span>
+      <span style="font-family:Arial,sans-serif"> Yuma</span>
+      <span style="font-family:&#39;Luxi Sans&#39;,sans-serif;font-size:58%;vertical-align:super"> </span>
       <span style="font-family:Arial,sans-serif"> yangdump Manual</span>
     </p>
-    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-family:Arial,sans-serif"> Yuma Tools</span><span style="font-family:&#39;Luxi Sans&#39;,sans-serif;font-size:58%;vertical-align:super">® </span> Developer Manual</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-family:Arial,sans-serif"> Yuma </span>Developer Manual</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">To obtain additional support you may send email to this e-mail address</p>
-    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> <a href="mailto:support@netconfcentral.com"><span class="Internetlink">s</span></a><span class="Internetlink">upport@netconfcentral.org</span></p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> andy<span class="Internetlink">@netconfcentral.org</span></p>
     <p class="Standard" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+      <span class="Internetlink">The SourceForge.net Support Page for Yuma can be found at this WEB page:</span>
+    </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
+      <span class="Internetlink"> </span>
+      <a href="http://sourceforge.net/projects/yuma/support">
+        <span class="Internetlink">http://sourceforge.net/projects/yuma/support</span>
+      </a>
+    </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">There are several sources of free information and tools for use with YANG and/or NETCONF.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">
       <span class="Internetlink">The following section lists the resources available at this time.</span>
@@ -670,10 +682,25 @@
             </p>
           </li>
           <li>
-            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Yuma Tools Home Page</p>
+            <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Yuma Home Page</p>
             <ul style="margin-top:0;margin-bottom:0;list-style-type:square;clear:left">
               <li>
                 <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Free information on NETCONF and YANG, tutorials, on-line YANG module validation and documentation database </p>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:bold" xml:lang="en-US">Yuma SourceFource OpenSource Project</p>
+        <ul style="margin-top:0;margin-bottom:0;list-style-type:bullet;clear:left">
+          <li>
+            <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">
+              <a href="http://sourceforge.net/projects/yuma/">http://sourceforge.net/projects/yuma/</a>
+            </p>
+            <ul style="margin-top:0;margin-bottom:0;list-style-type:square;clear:left">
+              <li>
+                <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">Download Yuma source and binaries; project forums and help</p>
               </li>
             </ul>
           </li>
@@ -839,7 +866,7 @@
         </tr>
         <tr>
           <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:none;padding:3.6671999px;vertical-align:top;width:199.6688px">
-            <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">some text</p>
+            <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">some text</p>
           </td>
           <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:281.6704px">
             <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example command or PDU</p>
@@ -856,6 +883,7 @@
       </tbody>
     </table>
     <h1 dir="ltr" id="toc6"><span class="SectionNumber">2</span> netconfd User Guide</h1>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="TableHeading" dir="ltr" lang="en-US" xml:lang="en-US">netconfd Program Components</p>
     <div style="text-align:center">
@@ -1077,14 +1105,19 @@
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">To get the current version and exit:</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
       </li>
     </ul>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  <span style="font-weight:bold">netconfd --version</span></p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li style="list-style-type:none">
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+      </li>
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">To get program help and exit:</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
       </li>
     </ul>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -1093,35 +1126,50 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  <span style="font-weight:bold">netconfd --help --full</span></p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li style="list-style-type:none">
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+      </li>
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">To start the server in the background, set the loggin level to 'debug', and send logging messages to a log file</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
       </li>
     </ul>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  <span style="font-weight:bold">netconfd --log-level=debug --log=~/mylog &amp;</span></p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li style="list-style-type:none">
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+      </li>
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">To start the server interactively, and send all log messages to STDOUT:</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
       </li>
     </ul>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  <span style="font-weight:bold">netconfd</span></p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li style="list-style-type:none">
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+      </li>
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">To start the server interactively, with a new log file:</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
       </li>
     </ul>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">  <span style="font-weight:bold">netconfd --logfile=</span><span style="font-style:italic;font-weight:bold">mylogfile</span></p>
     <p class="Example" dir="ltr" lang="en-US" style="font-style:italic" xml:lang="en-US"> </p>
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li style="list-style-type:none">
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-style:normal" xml:lang="en-US"> </p>
+      </li>
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" style="font-style:normal" xml:lang="en-US">To start the server interactively, and append to an existing log file:</p>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-style:normal" xml:lang="en-US"> </p>
       </li>
     </ul>
-    <p class="Example" dir="ltr" lang="en-US" style="font-style:italic" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">
       <span style="font-style:italic">  </span>
       <span style="font-style:normal;font-weight:bold">netconfd</span>
@@ -1130,10 +1178,13 @@
       <span style="font-style:italic;font-weight:bold">=mylogfile </span>
       <span style="font-style:normal;font-weight:bold">--log-append</span>
     </p>
-    <p class="Example" dir="ltr" lang="en-US" style="font-style:normal" xml:lang="en-US"> </p>
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li style="list-style-type:none">
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-style:normal" xml:lang="en-US"> </p>
+      </li>
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" style="font-style:normal" xml:lang="en-US">To get parameters from a configuration file:</p>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-style:normal" xml:lang="en-US"> </p>
       </li>
     </ul>
     <p class="Example" dir="ltr" lang="en-US" style="font-style:italic" xml:lang="en-US"> </p>
@@ -2345,7 +2396,8 @@
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">The file extension '.xml' should be used.  The server only generates and expects XML configuration files.  The NETCONF 'config' element is used as the top-level element in all &lt;url&gt; files.</p>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">The $YUMA_DATAPATH environment variable or the $$datapth system variable is used to find the file names specified in the &lt;url&gt; URI string.</p>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">Example:</p>
-    <p class="Example" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">&lt;url&gt;file:///my-backup.xml&lt;/url&gt;</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> &lt;url&gt;file:///my-backup.xml&lt;/url&gt;</p>
     <h3 dir="ltr" id="toc31"><span class="SectionNumber">2.2.12</span> :with-defaults</h3>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">The<span style="font-weight:bold"> :with-defaults</span> capability indicates that the server will accept the &lt;with-defaults&gt; parameter for the following operations:</p>
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
@@ -2485,6 +2537,8 @@
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The user name string associated with a NETCONF session is derived from the <span style="font-weight:bold">$SSH_CONNECTION</span> environment variable, which is available to the <span style="font-weight:bold">netconf-subsystem</span> program when it is called by <span style="font-weight:bold">sshd</span>.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Any user name accepted by <span style="font-weight:bold">sshd</span> will be accepted by <span style="font-weight:bold">netconfd</span>.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">In order for access control to work properly, the <span style="font-weight:bold">sshd</span> user name must also conform to the <span style="font-weight:bold">NacmUserName</span> type definition:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:32.016px;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> typedef NacmUserName {</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">     description "General Purpose User Name string.";</p>
@@ -2495,6 +2549,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> }</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
+      <li style="list-style-type:none">
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+      </li>
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">A user name cane be 1 to 63 characters long.</p>
       </li>
@@ -2507,6 +2564,7 @@
     </ul>
     <h3 dir="ltr" id="toc41"><span class="SectionNumber">2.4.2</span> Session ID</h3>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The &lt;session-id&gt; assigned by the server is simply a monotonically increasing number:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> typedef SessionId {</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">     description "NETCONF Session Id";</p>
@@ -2515,6 +2573,7 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">     }</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> }</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The server will start using session ID values over again at 1, if the maximum session-id value is ever reached.</p>
     <h3 dir="ltr" id="toc42"><span class="SectionNumber">2.4.3</span> Server &lt;hello&gt; Message</h3>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">netconfd</span> server will send a &lt;hello&gt; message if a valid SSH2 session to the netconf subsystem is established.</p>
@@ -2536,6 +2595,7 @@
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Note that the deviation modules will be listed in the capabilities, along with other modules.  The 'deviations' extension allows a client tool to know that the deviations apply to the specific module, since special processing may be required.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example server &lt;hello&gt; Message:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:hello xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0"&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;nc:capabilities&gt; </p>
@@ -3175,15 +3235,18 @@
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">The &lt;error-path&gt; field indicates the node that caused the error.</p>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">It is encoded as a YANG instance-identifier.</p>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">If the node that caused the error is within the incoming &lt;rpc&gt; request, then the error path will start with the &lt;rpc&gt; element, and contain all the node identifiers from this document root to the node that caused the error.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;error-path&gt;</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">    /nc:rpc/nc:edit-config/nc:config/nacm:nacm/nacm:groups/nacm:group</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/error-path&gt;</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The 'xmlns' attributes which define the 'nc' and 'nacm' prefixes would be present in the &lt;rpc-reply&gt; or the &lt;rpc-error&gt; element start tags.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If the node that caused the error is <span style="font-weight:bold">not</span> within the incoming &lt;rpc&gt; request, then the error path will start with the top-level YANG module element that contains the error, not the &lt;rpc&gt; element.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This extended usage of the &lt;error-path&gt; field is defined in the YANG specification, not the NETCONF specification.  This situation will occur if &lt;validate&gt; or &lt;commit&gt; operations detect errors.  It can also occur if the &lt;test-option&gt; for the &lt;edit-config&gt; operation is 'test-then-set', and errors unrelated to the provided in-line &lt;config&gt; content are reported. and contain all the node identifiers from this document root to the node that caused the error.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;error-path&gt;</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">    /nacm:nacm/nacm:groups/nacm:group[name='admin']/groupIdentity</p>
@@ -3317,10 +3380,12 @@
       </tr>
     </table>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">Example Request:</p>
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">create /test2   (?s used to skip the mandatory &lt;a2&gt; leaf, but the &lt;foo&gt; leaf is set)</p>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
       </li>
     </ul>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -3341,7 +3406,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:edit-config&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">Example Error Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -3424,6 +3491,7 @@
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">create --target=/musttest (?s skip the mandatory choice)</p>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
       </li>
     </ul>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -3442,7 +3510,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:edit-config&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt;]</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">Example Error Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -3522,6 +3592,7 @@
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">get-schema identifier=foo version= format=yang</p>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
       </li>
     </ul>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -3535,7 +3606,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/ns:get-schema&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">Example Error Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -3615,6 +3688,7 @@
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">create /int8.1 value=1000</p>
+        <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
       </li>
     </ul>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -3633,7 +3707,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:edit-config&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">Example Error Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -3728,6 +3804,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -3735,7 +3812,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;nc:close-session/&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -3846,7 +3925,9 @@
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"><span style="font-weight:normal">data-missing</span>: mandatory statement violation or missing leafref path object</p>
       </li>
     </ul>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -3854,7 +3935,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;nc:commit/&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -4090,6 +4173,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -4104,7 +4188,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:copy-config&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -4268,6 +4354,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -4278,7 +4365,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/ncEvent:create-subscription&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt;</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -4382,6 +4471,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -4393,7 +4483,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:delete-config&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -4475,6 +4567,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -4482,7 +4575,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;nc:discard-changes/&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt;</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   message-id="3"&gt; </p>
@@ -4668,6 +4763,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -4687,7 +4783,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:edit-config&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -4817,7 +4915,9 @@
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">access-denied</p>
       </li>
     </ul>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example subtree Filter Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -4835,7 +4935,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:get&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Equivalent XPath Filter Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -4845,7 +4947,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:get&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt;]</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -5037,6 +5141,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example subtree Filter Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -5055,7 +5160,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:get-config&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Equivalent XPath Filter Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -5068,7 +5175,10 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:get-config&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -5205,6 +5315,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -5212,7 +5323,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;myses:get-my-session xmlns:myses="http://netconfcentral.org/ns/mysession"/&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt;</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -5348,6 +5461,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -5359,7 +5473,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/ns:get-schema&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -5452,7 +5568,9 @@
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">access-denied</p>
       </li>
     </ul>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -5462,7 +5580,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:kill-session&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -5583,7 +5703,9 @@
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">resource errors</p>
       </li>
     </ul>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -5593,7 +5715,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nd:load&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt;</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -5741,7 +5865,9 @@
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">resource-denied (candidate is dirty; &lt;discard-changes&gt; needed)</p>
       </li>
     </ul>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -5753,7 +5879,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:lock&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -5834,7 +5962,9 @@
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">access-denied</p>
       </li>
     </ul>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -5842,7 +5972,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;nd:no-op xmlns:nd="http://netconfcentral.org/ns/netconfd"/&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -5963,6 +6095,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -5972,7 +6105,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/pl:partial-lock&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt;</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -6072,6 +6207,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -6081,7 +6217,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/pl:partial-unlock&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -6165,6 +6303,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -6172,7 +6311,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;nd:restart xmlns:nd="http://netconfcentral.org/ns/netconfd"/&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">[no reply will be sent; session will be dropped instead.]</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -6261,6 +6402,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -6272,7 +6414,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/myses:set-my-session&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -6396,6 +6540,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -6407,7 +6552,10 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/myses:set-my-session&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -6490,6 +6638,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -6497,7 +6646,10 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;nd:shutdown xmlns:nd="http://netconfcentral.org/ns/netconfd"/&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">[no reply will be sent; session will be dropped instead.]</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -6636,6 +6788,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -6647,7 +6800,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:unlock&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -6796,6 +6951,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -6807,7 +6963,10 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:validate&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="margin-left:0;margin-right:0;text-indent:0" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -6980,7 +7139,9 @@
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Access rights in NACM are given to groups.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">A group entry consists of a group identifier and a list of user names that are members of the group.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">A group is named with is a YANG identity, which has a base of 'nacmRoot':</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> identity nacmGroups {<br />     description <br />  "Root of all NETCONF Administrative Groups";<br /> }</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">There are 3 hard-wired group names that can be used:</p>
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
       <li>
@@ -6995,8 +7156,10 @@
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Any module can define an extension identity for the 'nacmGroups' base type, and use it as a group name.  There are no special semantics associated with any particular group name.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"><br /> import nacm { prefix nacm; }<br /><br /> identity mygroup {<br />     description <br />  "My special administrator's group.";<br />  base nacm:nacmGroups;<br /> }</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">By default, there are no groups created.  Each <span style="font-weight:bold">/nacm/groups/group</span> entry must be created by the client.  There is no user name table either.  It is assumed that the operator will know which user names are valid within each managed device.</p>
     <h3 dir="ltr" id="toc84"><span class="SectionNumber">2.7.3</span> Creating New Groups</h3>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The &lt;edit-config&gt; operation can be used to create new group entries.</p>
@@ -7006,6 +7169,8 @@
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">When a user is a member of multiple groups, all these groups will be used to match against rules, in a conceptual 'OR' expression.  If any of these groups matches one of the &lt;allowed-group&gt; leaf-list nodes within one of the 3 rule types, then that rule will be the one that is used.  Rules are always searched in the order they are entered, even the system-ordered lists.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The path to the group element is <span style="font-weight:bold">/nacm:nacm/nacm:groups/nacm:group.</span></p>
     <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">The following &lt;edit-config&gt; example shows how a group can be defined.  The group name is 'nacm:guest',and the users 'fred' and 'barney' are the initial members of this group.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -7392,6 +7557,7 @@
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Multiple instances can appear for a single module, as long as the &lt;allowed-access&gt; key leaf value is different in each entry.  This allows different groups to get different access to the same module (e.g., read vs. read and write).</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">There is no way to move &lt;module-rule&gt; entries around, once they are created.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If a group appears in multiple entries for the same module name, then the first one encountered will be used.  Entries are checked in the same order they are returned in a &lt;get-config&gt; reply message.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The following example shows an &lt;edit-config&gt; operation which creates 2 &lt;moduleRule&gt; entries, for the following configuration:</p>
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
       <li>
@@ -7399,6 +7565,7 @@
       </li>
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">the 'monitor' group is allowed to read the NACM module.</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
       </li>
     </ul>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -7434,6 +7601,7 @@
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">There is no way to move &lt;rpc-rule&gt; entries around, once they are created.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If a group appears in multiple entries for the same RPC operation, then the first one encountered will be used.  Entries are checked in the same order they are returned in a &lt;get-config&gt; reply message.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">If the 'read' or 'write' access bits are set in the &lt;allowed-rights&gt; key leaf, then they will be ignored.  This will not cause an error, but it these bits have no effect within an RPC rule.</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The following example shows an &lt;edit-config&gt; operation which creates 2 &lt;module-rule&gt; entries, for the following configuration:</p>
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
       <li>
@@ -7441,6 +7609,7 @@
       </li>
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">the 'guest' group is <span style="font-weight:bold">not</span> allowed to execute the &lt;get-config&gt; operation</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
       </li>
     </ul>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -7490,6 +7659,7 @@
       </li>
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">the 'guest' group is not allowed to read any interfaces information</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
       </li>
     </ul>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -7632,6 +7802,7 @@
       </li>
     </ul>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">For example, the following PDU would be valid, even though it is not technically valid XML:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -7645,8 +7816,10 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:get&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt;</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Note that there is no default namespace in effect for the &lt;nacm&gt; subtree.  However, the server will accept this filter as if the yuma-nacm.yang module namespace was properly declared.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Subtree filters can select specific list entries using content match nodes.  The following example would return the entire contents of the &lt;interface&gt; entry for 'eth0':</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -7662,10 +7835,13 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:get&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">To retrieve only specific nodes (such as counters) from a single list entry, use select nodes for the desired counter(s), and include a content match node for each key leaf.  A missing key leaf will match any entry for that key.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The following example request shows how just the &lt;inBytes&gt; and &lt;outBytes&gt; counters could be retrieved from the &lt;interface&gt; entry for 'eth0'.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example Request:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -7685,7 +7861,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:get&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -7717,6 +7895,7 @@
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">xget //name</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
       </li>
     </ul>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -7727,7 +7906,9 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:get&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt;]]&gt;]]&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -7789,12 +7970,14 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:data&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc-reply&gt;</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">In order to refine the previous filter to select nodes from just one module, the use the XML prefix in the node identifier.   The example below selects only the &lt;name&gt; nodes from the interfaces module.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example Request:</p>
     <ul style="margin-top:0;margin-bottom:0;list-style-type:disc;clear:left">
       <li>
         <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">xget //if:name</p>
+        <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
       </li>
     </ul>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -7808,7 +7991,10 @@
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">   &lt;/nc:get&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;/nc:rpc&gt;</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example Reply:</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;nc:rpc-reply xmlns:nc="urn:ietf:params:xml:ns:netconf:base:1.0" </p>
@@ -7991,6 +8177,7 @@
       </tr>
     </table>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
@@ -8076,6 +8263,7 @@
         </ul>
       </li>
     </ul>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
@@ -8175,6 +8363,7 @@
         </ul>
       </li>
     </ul>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
@@ -8445,6 +8634,7 @@
         </ul>
       </li>
     </ul>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
@@ -8618,6 +8808,7 @@
         </ul>
       </li>
     </ul>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
     <p class="Example" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" style="font-weight:normal" xml:lang="en-US">&lt;?xml version="1.0" encoding="UTF-8"?&gt; </p>
@@ -8896,7 +9087,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd \<br />  --access-control=permissive</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd \<br />  --access-control=permissive</p>
         </td>
       </tr>
     </table>
@@ -8953,7 +9144,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">yangdump testmod \<br />  --config=~/testconf.conf</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd \<br />  --config=~/testconf.conf</p>
         </td>
       </tr>
     </table>
@@ -9010,7 +9201,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd \<br />  --datapath=”~/work2:~/data”</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd \<br />  --datapath=”~/work2:~/data”</p>
         </td>
       </tr>
     </table>
@@ -9078,7 +9269,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd \<br />  --default-style=trim</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd \<br />  --default-style=trim</p>
         </td>
       </tr>
     </table>
@@ -9140,7 +9331,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">yangcli \<br />  --module=test1 \<br />  --deviation=test1_deviations</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd \<br />  --deviation=test1_deviations</p>
         </td>
       </tr>
     </table>
@@ -9199,7 +9390,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --eventlog-size=20000</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --eventlog-size=20000</p>
         </td>
       </tr>
     </table>
@@ -9207,9 +9398,11 @@
     <h2 dir="ltr" id="toc115"><span class="SectionNumber">3.7</span> --feature-disable</h2>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--feature-disable</span> parameter directs all programs to disable a specific feature.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This parameter is a formatted string containing a module name, followed by a colon ':', followed by a feature name, e.g.,</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">test:feature1</p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> test:feature1</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">It is an error if a <span style="font-weight:bold">--feature-enable</span> and <span style="font-weight:bold">--feature-disable</span> parameter specify the same feature.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Parameters for unknown features will be ignored.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -9261,7 +9454,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">yangdump --format=c \<br />    --feature-disable=test:feature1 \<br />    --module=test</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd\<br />    --feature-disable=test:feature1</p>
         </td>
       </tr>
     </table>
@@ -9269,9 +9462,11 @@
     <h2 dir="ltr" id="toc116"><span class="SectionNumber">3.8</span> --feature-enable</h2>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">The <span style="font-weight:bold">--feature-enable</span> parameter directs all programs to enable a specific feature.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This parameter is a formatted string containing a module name, followed by a colon ':', followed by a feature name, e.g.,</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">test:feature1</p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> test:feature1</p>
     <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">It is an error if a <span style="font-weight:bold">--feature-disable</span> and <span style="font-weight:bold">--feature-enable</span> parameter specify the same feature.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">Parameters for unknown features will be ignored.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -9323,7 +9518,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">yangdump --format=c \<br />    --feature-enable=test:feature1 \<br />    --module=test</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd <br />    --feature-enable=test:feature1</p>
         </td>
       </tr>
     </table>
@@ -9382,7 +9577,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd \<br />   --feature-enable-default=false</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd \<br />   --feature-enable-default=false</p>
         </td>
       </tr>
     </table>
@@ -9442,7 +9637,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --hello-timeout=300</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --hello-timeout=300</p>
         </td>
       </tr>
     </table>
@@ -9501,7 +9696,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">yangdump --help</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --help</p>
         </td>
       </tr>
     </table>
@@ -9558,7 +9753,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">yangdump --help --help-mode=full</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --help --help-mode=full</p>
         </td>
       </tr>
     </table>
@@ -9667,7 +9862,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --idle-timeout=30000</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --idle-timeout=30000</p>
         </td>
       </tr>
     </table>
@@ -9723,7 +9918,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">yangcli --indent=4</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --indent=4</p>
         </td>
       </tr>
     </table>
@@ -9779,7 +9974,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --log=~/server.log&amp;</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --log=~/server.log&amp;</p>
         </td>
       </tr>
     </table>
@@ -9835,7 +10030,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --log-append \<br />  --log=~/server.log&amp;</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --log-append \<br />  --log=~/server.log&amp;</p>
         </td>
       </tr>
     </table>
@@ -9916,7 +10111,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --log-level=debug \<br />  --log=~/server.log&amp;</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --log-level=debug \<br />  --log=~/server.log&amp;</p>
         </td>
       </tr>
     </table>
@@ -9973,7 +10168,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --max-burst=100</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --max-burst=100</p>
         </td>
       </tr>
     </table>
@@ -10030,7 +10225,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">yangdump \<br />  --modpath=”~/testmodules:~/modules:~/trunk/netconf/modules” \<br />  --module=~/test42.yang</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd \<br />  --modpath=”~/testmodules:~/modules:~/trunk/netconf/modules”</p>
         </td>
       </tr>
     </table>
@@ -10089,7 +10284,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">yangcli \<br />  --module=test1 \<br />  --module=test2</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd \<br />  --module=test1 \<br />  --module=test2</p>
         </td>
       </tr>
     </table>
@@ -10146,7 +10341,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --port=22 \<br />   --port=830</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --port=22 \<br />   --port=830</p>
         </td>
       </tr>
     </table>
@@ -10231,7 +10426,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd \<br />  --startup=$TESTDIR/testrun</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd \<br />  --startup=$TESTDIR/testrun</p>
         </td>
       </tr>
     </table>
@@ -10301,7 +10496,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd  --startup-error=stop</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd  --startup-error=stop</p>
         </td>
       </tr>
     </table>
@@ -10358,7 +10553,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">yangdump \<br />  --subdirs=false \<br />  --subtree=/testpath</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd \<br />  --subdirs=false</p>
         </td>
       </tr>
     </table>
@@ -10417,7 +10612,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --superuser=admin</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --superuser=admin</p>
         </td>
       </tr>
     </table>
@@ -10481,7 +10676,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --target=running</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --target=running</p>
         </td>
       </tr>
     </table>
@@ -10537,7 +10732,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --usexmlorder</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --usexmlorder</p>
         </td>
       </tr>
     </table>
@@ -10547,7 +10742,9 @@
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">All Yuma version strings use the same format:</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> &lt;major&gt;.&lt;minor&gt;.&lt;yang-draft-version&gt;.&lt;svn-build-version&gt;</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">An example version number that may be printed:</p>
-    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> yangdump 0.9.6.390</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
+    <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US"> netconfd 0.9.6.390</p>
+    <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This indicates that the <span style="font-weight:bold">yangdump</span> program version is '0.9', it supports YANG draft version '-06', and the subversion build identifier is '390'.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US">This parameter can be combined with the <span style="font-weight:bold">--help </span>parameter.</p>
     <p class="Textbody" dir="ltr" lang="en-US" xml:lang="en-US"> </p>
@@ -10599,7 +10796,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">yangdump --version</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --version</p>
         </td>
       </tr>
     </table>
@@ -10656,7 +10853,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">yangcli --warn-idlen=50</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --warn-idlen=50</p>
         </td>
       </tr>
     </table>
@@ -10714,7 +10911,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">yangcli --warn-linelen=79</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --warn-linelen=79</p>
         </td>
       </tr>
     </table>
@@ -10772,7 +10969,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --warn-off=435<br /># revision order not descending</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --warn-off=435<br /># revision order not descending</p>
         </td>
       </tr>
     </table>
@@ -10828,7 +11025,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --with-startup=true</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --with-startup=true</p>
         </td>
       </tr>
     </table>
@@ -10884,7 +11081,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --with-url=false</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --with-url=false</p>
         </td>
       </tr>
     </table>
@@ -10940,7 +11137,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --with-validate=false</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd --with-validate=false</p>
         </td>
       </tr>
     </table>
@@ -11024,7 +11221,7 @@
           <p class="TableContents" dir="ltr" lang="en-US" xml:lang="en-US">Example:</p>
         </td>
         <td style="border-top:none;border-bottom:1.0px solid #000000;border-left:1.0px solid #000000;border-right:1.0px solid #000000;padding:3.6671999px;vertical-align:top;width:288.66876px">
-          <p class="Example" dir="ltr" lang="en-US" xml:lang="en-US">netconfd \<br />  --yuma-home=~/sw/netconf \<br />  --log=~/server.log&amp;</p>
+          <p class="Example2" dir="ltr" lang="en-US" xml:lang="en-US">netconfd \<br />  --yuma-home=~/sw/netconf \<br />  --log=~/server.log&amp;</p>
         </td>
       </tr>
     </table>

@@ -40,7 +40,7 @@ install:
 	mkdir -p $(DOC_INSTALL)
 	cp extra/AUTHORS $(DOC_INSTALL)
 	cp extra/README $(DOC_INSTALL)
-	cp extra/yumatools-legal-notices.pdf $(DOC_INSTALL)
+	cp extra/yuma-legal-notices.pdf $(DOC_INSTALL)
 	cp yuma_docs/pdf/yuma-installation-guide.pdf $(DOC_INSTALL)
 	cp yuma_docs/pdf/yuma-quickstart-guide.pdf $(DOC_INSTALL)
 else
@@ -49,7 +49,7 @@ ifdef DEVELOPER
 install:
 	mkdir -p $(DOC_INSTALL)
 	cp yuma_docs/pdf/yuma-dev-manual.pdf $(DOC_INSTALL)
-	cp yuma_docs/pdf/server-call-chain.txt $(DOC_INSTALL)
+	cp yuma_docs/server-call-chain.txt $(DOC_INSTALL)
 else
 # install everything
 install:
@@ -65,7 +65,7 @@ install:
 	cp yuma_docs/server-call-chain.txt $(DOC_INSTALL)
 	cp extra/AUTHORS $(DOC_INSTALL)
 	cp extra/README $(DOC_INSTALL)
-	cp extra/yumatools-legal-notices.pdf $(DOC_INSTALL)
+	cp extra/yuma-legal-notices.pdf $(DOC_INSTALL)
 endif
 endif
 endif

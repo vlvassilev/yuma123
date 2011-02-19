@@ -2,7 +2,7 @@
 Yuma Tools README
 -----------------
 
-Version:  2010-05-25 (v0.12-1.M)
+Version:  2011-02-19 (v1.14-5)
 
 Pre-Build steps:
 
@@ -49,15 +49,15 @@ Build Variables:
 
 To build everything on Linux:
 
-   - make
-   - [sudo] make install
+   - make [FLAGS]
+   - [sudo] make [FLAGS] install
 
- To build everything on Cygwin
+For example, to build everything on Cygwin:
+
    - make STATIC=1 NOFLOAT=1 CYGWIN=1
    - [sudo] make STATIC=1 CYGWIN=1 install
 
-   
- This will build everything and install it in its default location
+This will build everything and install it in its default location
 
 External file dependencies:
    - /etc/services (for netconfd, optional)

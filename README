@@ -24,7 +24,7 @@ Build Variables:
   ETC_PREFIX=string: set the top etc dir (after DESTDIR)
          default: /etc
 
-  LIB64=1: install look for SIL libs in /usr/lib64/yuma
+  LIB64=1: install and look for SIL libs in /usr/lib64/yuma
          instead of /usr/lib/yuma (used by FC14 64 bit)
 
   MAC=1: set to compile for MacOsX
@@ -50,15 +50,20 @@ Build Variables:
            of complex numbers will cause invalid results;
            Cygwin does not support complex.h
 
-To build everything on Linux:
+To build everything (shared libs) on Linux:
 
    - make [FLAGS]
    - [sudo] make [FLAGS] install
 
-For example, to build everything on Cygwin:
+For example, to build everything (static libs only) on Cygwin:
 
    - make STATIC=1 NOFLOAT=1 CYGWIN=1
    - [sudo] make STATIC=1 CYGWIN=1 install
+
+For example, to build everything (shared libs) on Fedora 14, 84-bit:
+
+   - make LIB64=1
+   - [sudo] make LIB64=1 install
 
 This will build everything and install it in its default location
 
@@ -67,18 +72,22 @@ External file dependencies:
    - /etc/ssh/sshd_config
    - SELinux config to allow access to port 830
 
-Installed Programs:
+Default Installed Programs:
    - /usr/bin/yangcli
    - /usr/bin/yangdump
    - /usr/bin/yangdiff
    - /usr/sbin/netconfd
    - /usr/sbin/netconf-subsystem
 
-Installed Libraries:
+Default Installed Libraries:
   - /usr/lib/libncx.so.1
   - /usr/lib/yuma/libtoaster.so
+
+Default Installed Libraries if LIB64=1:
+  - /usr/lib64/libncx.so.1
+  - /usr/lib64/yuma/libtoaster.so
    
-Installed Additional Files:
+Default Installed Additional Files:
   /usr/share/doc/yuma/*     -- user documentation
   /etc/yuma/*               -- sample application config files
   /usr/share/yuma/*         -- root of all YUMA data files

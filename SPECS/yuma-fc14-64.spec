@@ -77,6 +77,42 @@ echo "Yuma Tools installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
+* Sat Feb 19 2011 Andy Bierman <andy at netconfcentral.org> 1.14-5 [1054]
+  * update copyright strings
+  * add more test YANG modules
+  * added some cross-compile support thanks to Chris Steel submitted patch
+  * Makefile cleanup
+  * yangcli: fix missing check for empty string
+  * get rid of compiler warning for missing include dirs; not supported
+    on older gcc
+  * all: fix ncx_get_source so CWD is expanded
+  * update YANG data models for output parm reuse
+  * postpone val_add_defaults until after conf file is checked
+  * yangdump: fix segfault in YIN conversion
+  * fix lrint usage in ncx_num.c from uclibc patch by Chris Steel
+  * netconfd: fix bug not handling arm CPU; from patch by Chris Steel
+  * yangcli: fix error message for module not found on local system
+  * add ETC_PREFIX make parameter for non-std install
+  * add LIB64 make parameter for non-std install
+  * yangdump: fixed bug in typedef struct definition (format=h)
+  * yangdump: fixed code generation bugs for SIL (format=c)
+  * fix parsing bug -- missing right brace at EOF not reported to
+    yangdump as error
+  * yangcli: fix bug @~/foo.txt not getting expanded
+  * fix parser bug where resolve_xpath was not getting called for
+    expanded nodes from other[sub]modules
+  * yangdump: clean up output_identifiers etc. so module=foo treated
+    as unified=true if foo is a main module with submodules
+  * yangdump: fix bug incorrectly generating mandatory warning
+    for config=false nodes
+  * replace ietf-nacm with ietf-netconf-access-control
+  * yangdump (format=html) moved external statements to generate first
+  * parser now keeping YANG statements inside extensions
+  * fixed build for MAC=1 (dynamic libraries)
+  * fix parser memory leak if subtree parameter used and unified=true
+  * updated user manuals and generating HTML versions
+  * add packaging support for Fedora 14 (not building debug RPMs
+    because bug in rpmbuild causes rpmbuild to crash
 * Sat Jan 22 2011 Andy Bierman <andy at netconfcentral.org> 1.14-4 [996]
   * fix typo in netconfd.yang
   * updated ietf-netconf.yang to latest IETF version

@@ -20,6 +20,8 @@ The yangcli client supports single sessions over SSH with some
 script support.  The yangdump and yangdiff development tools are also
 included, to compile and process YANG modules.
 
+%define debug_package %{nil}
+
 %prep
 %setup -q
 

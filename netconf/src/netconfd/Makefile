@@ -12,7 +12,13 @@ SUBDIR_CPP=
 TARGET=$(TBASE)/$(SUBDIR_NM)
 BIN_INST=$(TBASE)/bin
 REAL_INST=$(DESTDIR)$(PREFIX)/sbin
+
+ifdef LIB64
+LIB_INST=$(DESTDIR)$(PREFIX)/lib64/yuma
+else
 LIB_INST=$(DESTDIR)$(PREFIX)/lib/yuma
+endif
+
 PROG=netconfd
 
 ##################### LIBRARIES ########################

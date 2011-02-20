@@ -20,6 +20,8 @@ The yangcli client supports single sessions over SSH with some
 script support.  The yangdump and yangdiff development tools are also
 included, to compile and process YANG modules.
 
+%define debug_package %{nil}
+
 %prep
 %setup -q
 
@@ -77,7 +79,7 @@ echo "Yuma Tools installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
-* Sat Feb 19 2011 Andy Bierman <andy at netconfcentral.org> 1.14-5 [1054]
+* Sat Feb 19 2011 Andy Bierman <andy at netconfcentral.org> 1.14-5 [1055]
   * update copyright strings
   * add more test YANG modules
   * added some cross-compile support thanks to Chris Steel submitted patch

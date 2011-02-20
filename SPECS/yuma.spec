@@ -79,7 +79,7 @@ echo "Yuma Tools installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
-* Sat Feb 19 2011 Andy Bierman <andy at netconfcentral.org> 1.14-5 [1054]
+* Sat Feb 19 2011 Andy Bierman <andy at netconfcentral.org> 1.14-5 [1055]
   * update copyright strings
   * add more test YANG modules
   * added some cross-compile support thanks to Chris Steel submitted patch

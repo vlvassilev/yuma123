@@ -75,14 +75,15 @@ date         init     comment
 
 #ifdef DEBUG
 #define SES_DEBUG 1
+/* #define SES_SSH_DEBUG 1 */
 #endif
 
 #define LTSTR     (const xmlChar *)"&lt;"
 #define GTSTR     (const xmlChar *)"&gt;"
 #define AMPSTR    (const xmlChar *)"&amp;"
-#define QSTR      (const xmlChar *)"&quote;"
+#define QSTR      (const xmlChar *)"&quot;"
 
-#define MAX_READ_TRIES   5
+#define MAX_READ_TRIES   8
 
 
 /********************************************************************
@@ -1328,15 +1329,17 @@ status_t
         readdone = FALSE;
         while (!readdone && res == NO_ERR) {
 
+#ifdef SES_SSH_DEBUG
             if (++readtries > MAX_READ_TRIES) {
-                if (LOGDEBUG3) {
-                    log_debug3("\nses: max EAGAIN reached for ses(%u)",
+                if (LOGDEBUG4) {
+                    log_debug4("\nses: max EAGAIN reached for ses(%u)",
                                scb->sid);
                 }
                 res = NO_ERR;  /* res = ERR_NCX_READ_FAILED; */
                 ses_msg_free_buff(scb, buff);
                 return res;
             }
+#endif
 
             /* read data into the new buffer */
             if (scb->rdfn) {

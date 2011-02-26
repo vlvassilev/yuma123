@@ -1637,6 +1637,7 @@ static status_t
             } else {
                 val = NULL;
                 xml_init_attrs(&attrs);
+                ncx_set_useprefix(TRUE);
                 res = xsd_convert_module(pcb,
                                          pcb->top, 
                                          cp, 

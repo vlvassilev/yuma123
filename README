@@ -60,15 +60,15 @@ For example, to build everything (static libs only) on Cygwin:
    - make STATIC=1 NOFLOAT=1 CYGWIN=1
    - [sudo] make STATIC=1 CYGWIN=1 install
 
-For example, to build everything (shared libs) on Fedora 14, 84-bit:
+For example, to build everything (shared libs) on Fedora 14, 64-bit:
 
    - make LIB64=1
    - [sudo] make LIB64=1 install
 
 This will build everything and install it in its default location
 
-External file dependencies:
-   - /etc/services (for netconfd, optional)
+External file dependencies (for netconfd, optional):
+   - /etc/services 
    - /etc/ssh/sshd_config
    - SELinux config to allow access to port 830
 

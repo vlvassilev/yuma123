@@ -50,6 +50,9 @@ Build Variables:
            of complex numbers will cause invalid results;
            Cygwin does not support complex.h
 
+  USE_WERROR=1: use -Werror in the compile process
+    Default is not to use -Werror.
+
 To build everything (shared libs) on Linux:
 
    - make [FLAGS]

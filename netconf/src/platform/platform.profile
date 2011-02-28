@@ -65,7 +65,7 @@ endif
 endif
 endif
 
-ifdef DEBUG
+ifdef USE_WERROR
 WERROR=-Werror
 else
 WERROR=

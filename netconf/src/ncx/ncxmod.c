@@ -1010,7 +1010,7 @@ static status_t
          * but do not have a 'stat' function for partial filenames
          * so just going through the directory block in order
          */
-        if (ep->d_type == DT_DIR) {
+        if (ep->d_type == DT_DIR || ep->d_type == DT_UNKNOWN) {
             if (*ep->d_name != '.' && strcmp(ep->d_name, "CVS")) {
                 if ((pathlen + dentlen) >= bufflen) {
                     res = ERR_BUFF_OVFL;
@@ -1033,7 +1033,9 @@ static status_t
                     }
                 }
             }
-        } else if (ep->d_type == DT_REG) {
+        } 
+
+        if (ep->d_type == DT_REG || ep->d_type == DT_UNKNOWN) {
             if (!xml_strncmp(modname, 
                              (const xmlChar *)ep->d_name,
                              modnamelen)) {

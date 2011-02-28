@@ -2641,7 +2641,8 @@ static status_t
         }
     }
 
-    /* check all the mandatory clauses are present */
+#if 0
+    /* !!! change this to a warning; not an error !!! */
     if (!descrdone) {
         retres = ERR_NCX_DATA_MISSING;
         ncx_mod_missing_err(tkc, 
@@ -2649,7 +2650,7 @@ static status_t
                             "revision", 
                             "description");
     }
-
+#endif
 
     if (rev->version) {
         /* check if the version string is valid */

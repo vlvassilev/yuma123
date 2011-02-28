@@ -3636,8 +3636,8 @@ status_t
         }
     }            
 
-    if (LOGDEBUG2) {
-        log_debug2("\nLoading %s module from file %s", 
+    if (LOGDEBUG) {
+        log_debug("\nLoading %s module from file %s", 
                    (isyang) ? "YANG" : "YIN",
                    filespec);
     }

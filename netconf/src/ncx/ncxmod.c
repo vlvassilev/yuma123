@@ -1769,7 +1769,7 @@ static status_t
 *
 * Module Search order:
 *   1) filespec == try that only and exit
-*   2) current directory
+*   2) current directory and its subdirs
 *   3) YUMA_MODPATH environment var (or set by modpath CLI var)
 *   4) HOME/modules directory
 *   5) YUMA_HOME/modules directory
@@ -1806,10 +1806,10 @@ static status_t
     ncxmod_mode_t   mode;
 
 
-    if (LOGDEBUG2) {
-        log_debug2("\nAttempting to load module '%s'", modname);
+    if (LOGDEBUG) {
+        log_debug("\nAttempting to load module '%s'", modname);
         if (revision) {
-            log_debug2(" r:%s", revision);
+            log_debug(" r:%s", revision);
         }
     }
 
@@ -2009,6 +2009,9 @@ static status_t
                                 &done);
     }
 
+
+#if 0
+    /*** DO NOT CHECK JUST THE CURRENT DIR AND NO SUBDIRS ***/
     /* 3a) try as module in current dir, YANG format  */
     if (!done) {
         res = try_module(buff, 
@@ -2038,6 +2041,23 @@ static status_t
                          pcb,
                          ptyp);
     }
+#else
+    /*** CHECK THE CURRENT DIR AND ANY SUBDIRS ***/
+    /* 3) try current working directory and subdirs
+     *    if the subdirs parameter is true
+     * check before the modpath
+     */
+    if (!done) {
+        res = check_module_pathlist((const xmlChar *)".",
+                                    buff,
+                                    bufflen,
+                                    modname, 
+                                    revision,
+                                    pcb,
+                                    ptyp, 
+                                    &done);
+    }
+#endif
 
     /* 4) try YUMA_MODPATH environment variable if set */
     if (!done && ncxmod_mod_path) {

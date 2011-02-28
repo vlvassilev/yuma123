@@ -2126,6 +2126,27 @@ static status_t
                                         realmod,
                                         &foundmod);
 
+                if (retres != NO_ERR) {
+                    if (retres == ERR_NCX_MOD_NOT_FOUND ||
+                        get_errtyp(res) < ERR_TYP_WARN) {
+                        if (inc->revision) {
+                            log_error("\nError: include of "
+                                      "submodule '%s' revision '%s' failed",
+                                      inc->submodule, 
+                                      inc->revision);
+                        } else {
+                            log_error("\nError: include of "
+                                      "submodule '%s' failed",
+                                      inc->submodule); 
+                        }
+                        tkc->curerr = &inc->tkerr;
+                        ncx_print_errormsg(tkc, mod, retres);
+                    } else {
+                        /* ignore warnings */
+                        retres = NO_ERR;
+                    }
+                }
+
                 /* remove the node in the include chain that 
                  * was added before the submodule was loaded
                  */

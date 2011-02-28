@@ -2107,6 +2107,10 @@ static status_t
 
     res2 = NO_ERR;
     if (res != NO_ERR || !done) {
+        if (!done) {
+            res = ERR_NCX_MOD_NOT_FOUND;
+        }
+
         res2 = add_failed(modname, revision, pcb, res);
     }
 

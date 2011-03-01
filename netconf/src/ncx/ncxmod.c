@@ -1155,7 +1155,7 @@ static status_t
             continue;
         }
 
-        if (ep->d_type == DT_REG) {
+        if (ep->d_type == DT_REG || ep->d_type == DT_UNKNOWN) {
 
             /* skip files that start with a dot char */
             if (*ep->d_name == '.') {
@@ -1218,7 +1218,11 @@ static status_t
     /* try to open the buffer spec as a directory */
     dp = opendir((const char *)buff);
     if (!dp) {
+#if 0
         return SET_ERROR(ERR_INTERNAL_VAL);
+#else
+        return NO_ERR;
+#endif
     }
 
     /* go through again but this time just dive into the subdirs */
@@ -1235,6 +1239,7 @@ static status_t
          * according to the glibc 2.7 documentation!!
          * only using dir file which works on linux. 
          * !!!No support for symbolic links at this time!!!
+         * If d_type == DT_UNKNOWN then guessing this is a file
          *
          * Always skip any directory or file that starts with
          * the dot-char or is named CVS
@@ -1245,7 +1250,7 @@ static status_t
          * but do not have a 'stat' function for partial filenames
          * so just going through the directory block in order
          */
-        if (ep->d_type == DT_DIR) {
+        if (ep->d_type == DT_DIR || ep->d_type == DT_UNKNOWN) {
             if (*ep->d_name != '.' && strcmp(ep->d_name, "CVS")) {
                 if ((pathlen + dentlen + 2) >= bufflen) {
                     res = ERR_BUFF_OVFL;
@@ -2259,8 +2264,12 @@ static status_t
     /* try to open the buffer spec as a directory */
     dp = opendir(buff);
     if (!dp) {
+#if 0
         log_error("\nError: open directory '%s' failed\n", buff);
         return ERR_OPEN_DIR_FAILED;
+#else
+        return NO_ERR;
+#endif
     }
 
     dirdone = FALSE;
@@ -2277,8 +2286,7 @@ static status_t
          * only using dir file which works on linux. 
          * !!!No support for symbolic links at this time!!!
          */
-        switch (ep->d_type) {
-        case DT_DIR:
+        if (ep->d_type == DT_DIR || ep->d_type == DT_UNKNOWN) {
             if ((*ep->d_name != '.') && strcmp(ep->d_name, "CVS")) {
                 if ((pathlen + 
                      xml_strlen((const xmlChar *)ep->d_name)) >=  bufflen) {
@@ -2289,8 +2297,9 @@ static status_t
                     buff[pathlen] = 0;
                 }
             }
-            break;
-        case DT_REG:
+        }
+
+        if (ep->d_type == DT_REG || ep->d_type == DT_UNKNOWN) {
             if ((*ep->d_name != '.') && has_mod_ext(ep->d_name)) {
                 if ((pathlen + 
                      xml_strlen((const xmlChar *)ep->d_name)) >=  bufflen) {
@@ -2300,9 +2309,6 @@ static status_t
                     res = (*callback)(buff, cookie);
                 }
             }
-            break;
-        default:
-            ;
         }
     }
 

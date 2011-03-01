@@ -2017,11 +2017,7 @@ status_t
 
     done = FALSE;
 
-    if (cvtparms->allowcode) {
-	progname = "yangdumpcode";
-    } else {
-	progname = "yangdump";
-    }
+    progname = "yangdump";
 
     quickexit = cvtparms->helpmode ||
 	cvtparms->versionmode ||

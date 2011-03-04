@@ -301,7 +301,7 @@ static status_t
     done = FALSE;
     while (!done) {
         cbset = NULL;
-        if (val->obj->cbset) {
+        if (val->obj && val->obj->cbset) {
             cbset = val->obj->cbset;
         }
         if (cbset != NULL && cbset->cbfn[cbtyp] != NULL) {
@@ -658,6 +658,10 @@ static status_t
     if (newval->editvars->editop == OP_EDITOP_DELETE) {
         /* this error already checked in agt_val_parse */
         return NO_ERR;
+    }
+
+    if (newval->obj == NULL) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
     switch (newval->obj->objtype) {
@@ -2306,6 +2310,10 @@ static status_t
     }
 
     /* need to get a non-const pointer to the module */
+    if (curval->obj == NULL) {
+        return SET_ERROR(ERR_INTERNAL_VAL);
+    }
+
     mod = curval->obj->tkerr.mod;
 
     /* for each unique component, get the descendant

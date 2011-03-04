@@ -1742,6 +1742,7 @@ static status_t
     status_t        res;
     xmlChar         numbuff[NCX_MAX_NUMLEN];
 
+    /* $$server = ip-address */
     strval = NULL;
     parm = val_find_child(mgr_cli_valset, NULL, YANGCLI_SERVER);
     if (parm) {
@@ -1754,6 +1755,7 @@ static status_t
         return res;
     }
 
+    /* $$autocomp = boolean */
     res = create_config_var(server_cb,
                             YANGCLI_AUTOCOMP, 
                             (autocomp) ? NCX_EL_TRUE : NCX_EL_FALSE);
@@ -1761,6 +1763,7 @@ static status_t
         return res;
     }
 
+    /* $$ autoload = boolean */
     res = create_config_var(server_cb,
                             YANGCLI_AUTOLOAD, 
                             (autoload) ? NCX_EL_TRUE : NCX_EL_FALSE);
@@ -1768,6 +1771,7 @@ static status_t
         return res;
     }
 
+    /* $$baddata = enum */
     res = create_config_var(server_cb,
                             YANGCLI_BADDATA, 
                             ncx_get_baddata_string(baddata));
@@ -1775,12 +1779,15 @@ static status_t
         return res;
     }
 
+    /* $$default-module = string */
     res = create_config_var(server_cb,
-                            YANGCLI_DEF_MODULE, default_module);
+                            YANGCLI_DEF_MODULE, 
+                            default_module);
     if (res != NO_ERR) {
         return res;
     }
 
+    /* $$display-mode = enum */
     res = create_config_var(server_cb,
                             YANGCLI_DISPLAY_MODE, 
                             ncx_get_display_mode_str(display_mode));
@@ -1788,6 +1795,7 @@ static status_t
         return res;
     }
 
+    /* $$user = string */
     strval = NULL;
     parm = val_find_child(mgr_cli_valset, NULL, YANGCLI_USER);
     if (parm) {
@@ -1795,7 +1803,6 @@ static status_t
     } else {
         strval = (const xmlChar *)getenv(ENV_USER);
     }
-
     res = create_config_var(server_cb,
                             YANGCLI_USER, 
                             strval);
@@ -1803,20 +1810,23 @@ static status_t
         return res;
     }
 
+    /* $$test-option = enum */
     res = create_config_var(server_cb,
                             YANGCLI_TEST_OPTION,
-                            NCX_EL_NONE);
+                            op_testop_name(testoption));
     if (res != NO_ERR) {
         return res;
     }
 
+    /* $$error-optiona = enum */
     res = create_config_var(server_cb,
                             YANGCLI_ERROR_OPTION,
-                            NCX_EL_NONE); 
+                            op_errop_name(erroption)); 
     if (res != NO_ERR) {
         return res;
     }
 
+    /* $$default-timeout = uint32 */
     sprintf((char *)numbuff, "%u", default_timeout);
     res = create_config_var(server_cb,
                             YANGCLI_TIMEOUT, 
@@ -1825,6 +1835,7 @@ static status_t
         return res;
     }
 
+    /* $$indent = int32 */
     sprintf((char *)numbuff, "%d", defindent);
     res = create_config_var(server_cb,
                             NCX_EL_INDENT, 
@@ -1833,6 +1844,7 @@ static status_t
         return res;
     }
 
+    /* $$optional = boolean */
     res = create_config_var(server_cb,
                             YANGCLI_OPTIONAL, 
                             (cur_server_cb->get_optional) 
@@ -1841,7 +1853,9 @@ static status_t
         return res;
     }
 
-    /* could have changed during CLI processing */
+    /* $$log-level = enum
+     * could have changed during CLI processing; do not cache
+     */
     res = create_config_var(server_cb,
                             NCX_EL_LOGLEVEL, 
                             log_get_debug_level_string
@@ -1850,6 +1864,7 @@ static status_t
         return res;
     }
 
+    /* $$fixorder = boolean */
     res = create_config_var(server_cb,
                             YANGCLI_FIXORDER, 
                             (fixorder) ? NCX_EL_TRUE : NCX_EL_FALSE);
@@ -1857,16 +1872,18 @@ static status_t
         return res;
     }
 
+    /* $$with-defaults = enum */
     res = create_config_var(server_cb,
                             YANGCLI_WITH_DEFAULTS,
-                            NCX_EL_NONE); 
+                            ncx_get_withdefaults_string(withdefaults)); 
     if (res != NO_ERR) {
         return res;
     }
 
+    /* $$default-operation = enum */
     res = create_config_var(server_cb,
                             NCX_EL_DEFAULT_OPERATION,
-                            NCX_EL_NONE); 
+                            op_defop_name(defop)); 
     if (res != NO_ERR) {
         return res;
     }
@@ -3395,7 +3412,7 @@ static status_t
     optional = FALSE;
     testoption = OP_TESTOP_NONE;
     erroption = OP_ERROP_NONE;
-    defop = OP_DEFOP_NONE;   /* real enum 'none' */
+    defop = OP_DEFOP_MERGE;   /* was 'none' , now 'merge' */
     withdefaults = NCX_WITHDEF_NONE;
     temp_progcb = NULL;
     dlq_createSQue(&modlibQ);

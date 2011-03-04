@@ -1607,6 +1607,8 @@ static status_t
                         res = ERR_NCX_DUP_IMPORT;
                         tkc->curerr = &imp->tkerr;
                         ncx_print_errormsg(tkc, mod, res);
+                    } else {
+                        ncx_inc_warnings(mod);
                     }
                 } else if (ncx_warning_enabled(ERR_NCX_PREFIX_DUP_IMPORT)) {
                     /* warning for dup. import w/ different prefix */
@@ -1615,6 +1617,8 @@ static status_t
                     res = ERR_NCX_PREFIX_DUP_IMPORT;
                     tkc->curerr = &imp->tkerr;
                     ncx_print_errormsg(tkc, mod, res);
+                } else {
+                    ncx_inc_warnings(mod);
                 }
             }
         }
@@ -2036,6 +2040,8 @@ static status_t
                     res = ERR_NCX_DUP_INCLUDE;
                     tkc->curerr = &inc->tkerr;
                     ncx_print_errormsg(tkc, mod, res);
+                }  else {
+                    ncx_inc_warnings(mod);
                 }
             }
         } else {
@@ -2800,7 +2806,10 @@ static status_t
                         ncx_print_errormsg(tkc, 
                                            mod, 
                                            ERR_NCX_BAD_REV_ORDER);
+                    } else {
+                        ncx_inc_warnings(mod);
                     }
+
                     val = rev->version;
                 }
             }
@@ -2825,6 +2834,8 @@ static status_t
                      "for %smodule '%s'",
                      (mod->ismod) ? "" : "sub", mod->name);
             mod->warnings++;
+        } else {
+            ncx_inc_warnings(mod);
         }
     } else if (pcb->revision && 
                yang_compare_revision_dates(val, pcb->revision)) {

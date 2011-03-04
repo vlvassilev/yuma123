@@ -375,6 +375,8 @@ static void
         ncx_print_errormsg(pcb->tkc, 
                            pcb->objmod, 
                            ERR_NCX_NO_XPATH_PARENT);
+    } else if (pcb->objmod != NULL) {
+        ncx_inc_warnings(pcb->objmod);
     }
 
 }  /* no_parent_warning */
@@ -5421,6 +5423,8 @@ static status_t
                         ncx_print_errormsg(pcb->tkc, 
                                            pcb->objmod, 
                                            ERR_NCX_NO_XPATH_NODES);
+                    } else if (pcb->objmod != NULL) {
+                        ncx_inc_warnings(pcb->objmod);
                     }
                     free_resnode(pcb, resnode);
                 }
@@ -5895,6 +5899,8 @@ static status_t
                              "in XPath expr '%s'", 
                              pcb->exprstr);
                     ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+                } else if (pcb->objmod) {
+                    ncx_inc_warnings(pcb->objmod);
                 }
             } else {
                 res = ERR_NCX_NO_XPATH_CHILD;
@@ -5903,6 +5909,8 @@ static status_t
                              "in XPath expr '%s'", 
                              pcb->exprstr);
                     ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+                } else if (pcb->objmod) {
+                    ncx_inc_warnings(pcb->objmod);
                 }
             }
             res = NO_ERR;
@@ -6079,6 +6087,8 @@ static status_t
                      "in XPath expr '%s'", 
                      pcb->exprstr);
             ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+        } else if (pcb->objmod != NULL) {
+            ncx_inc_warnings(pcb->objmod);
         }
         res = NO_ERR;
     }
@@ -6283,6 +6293,8 @@ static status_t
                          "in XPath expr '%s'", pcb->exprstr);
             }
             ncx_print_errormsg(pcb->tkc, pcb->objmod, res);
+        } else if (pcb->objmod != NULL) {
+            ncx_inc_warnings(pcb->objmod);
         }
         res = NO_ERR;
     }
@@ -6454,7 +6466,10 @@ static status_t
                 ncx_print_errormsg(pcb->tkc, 
                                    pcb->tkerr.mod,
                                    ERR_NCX_EMPTY_XPATH_RESULT);
+            } else if (pcb->objmod != NULL) {
+                ncx_inc_warnings(pcb->objmod);
             }
+
             break;
         case XP_EXNT_TEXT:
             /* match all leaf of leaf-list content */
@@ -6474,6 +6489,8 @@ static status_t
                 ncx_print_errormsg(pcb->tkc, 
                                    pcb->tkerr.mod,
                                    ERR_NCX_EMPTY_XPATH_RESULT);
+            } else if (pcb->objmod != NULL) {
+                ncx_inc_warnings(pcb->objmod);
             }
             break;
         case XP_EXNT_NODE:
@@ -6561,7 +6578,10 @@ static status_t
             ncx_print_errormsg(pcb->tkc, 
                                pcb->tkerr.mod,
                                ERR_NCX_EMPTY_XPATH_RESULT);
+        } else if (pcb->objmod != NULL) {
+            ncx_inc_warnings(pcb->objmod);
         }
+
         if (*result) {
             free_result(pcb, *result);
         }
@@ -6645,7 +6665,10 @@ static status_t
             ncx_print_errormsg(pcb->tkc, 
                                pcb->tkerr.mod,
                                ERR_NCX_EMPTY_XPATH_RESULT);
+        } else if (pcb->objmod != NULL) {
+            ncx_inc_warnings(pcb->objmod);
         }
+
         if (*result) {
             free_result(pcb, *result);
         }
@@ -6666,7 +6689,10 @@ static status_t
                 ncx_print_errormsg(pcb->tkc, 
                                    pcb->tkerr.mod,
                                    ERR_NCX_EMPTY_XPATH_RESULT);
+            } else if (pcb->objmod != NULL) {
+                ncx_inc_warnings(pcb->objmod);
             }
+
             if (*result) {
                 free_result(pcb, *result);
             }

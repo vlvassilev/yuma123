@@ -1834,6 +1834,8 @@ status_t
                          name,
                          iff->tkerr.linenum);
                 ncx_print_errormsg(tkc, mod, ERR_NCX_DUP_IF_FEATURE);
+            } else {
+                ncx_inc_warnings(mod);
             }
             if (prefix) {
                 m__free(prefix);
@@ -2599,6 +2601,8 @@ void
                          testtyp->name);
                 tkc->curerr = &testtyp->tkerr;
                 ncx_print_errormsg(tkc, mod, ERR_NCX_TYPDEF_NOT_USED);
+            } else {
+                ncx_inc_warnings(mod);
             }
         }
     }
@@ -2611,6 +2615,8 @@ void
                          testgrp->name);
                 tkc->curerr = &testgrp->tkerr;
                 ncx_print_errormsg(tkc, mod, ERR_NCX_GRPDEF_NOT_USED);
+            } else {
+                ncx_inc_warnings(mod);
             }
         }
     }
@@ -2660,7 +2666,10 @@ void
                          testimp->module);
                 tkc->curerr = &testimp->tkerr;
                 ncx_print_errormsg(tkc, mod, ERR_NCX_IMPORT_NOT_USED);
+            } else {
+                ncx_inc_warnings(mod);
             }
+
         }
 
         /* find the imported module */
@@ -3329,7 +3338,10 @@ status_t
                          numbuff);
                 tkc->curerr = tkerr;
                 ncx_print_errormsg(tkc, mod, ERR_NCX_DATE_PAST);
+            } else {
+                ncx_inc_warnings(mod);
             }
+
         } 
     }
 
@@ -3407,7 +3419,10 @@ status_t
                          datestr);
                 tkc->curerr = tkerr;
                 ncx_print_errormsg(tkc, mod, ERR_NCX_DATE_FUTURE);
+            } else {
+                ncx_inc_warnings(mod);
             }
+
         }
     }
 

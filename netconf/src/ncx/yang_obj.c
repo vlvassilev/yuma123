@@ -4988,6 +4988,8 @@ static status_t
                              ncx_get_status_string(parentstat));
                     SET_OBJ_CURERR(tkc, obj);
                     ncx_print_errormsg(tkc, mod, ERR_NCX_INVALID_STATUS);
+                } else if (mod != NULL) {
+                    ncx_inc_warnings(mod);
                 }
             }
         }
@@ -5296,6 +5298,8 @@ static status_t
                                          "reserved name 'operation' "
                                          "for object %s",
                                          obj_get_name(obj));
+                            } else {
+                                ncx_inc_warnings(mod);
                             }
                         } else if (!xml_strcmp(meta->name, 
                                                YANG_K_KEY)) {
@@ -5304,7 +5308,10 @@ static status_t
                                          "reserved name 'key' "
                                          "for object %s",
                                          obj_get_name(obj));
+                            } else {
+                                ncx_inc_warnings(mod);
                             }
+
                         } else if (!xml_strcmp(meta->name, 
                                                YANG_K_INSERT)) {
                             if (usewarning) {
@@ -5312,6 +5319,8 @@ static status_t
                                          "reserved name 'insert' "
                                          "for object %s",
                                          obj_get_name(obj));
+                            } else {
+                                ncx_inc_warnings(mod);
                             }
                         } else if (!xml_strcmp(meta->name, 
                                                YANG_K_VALUE)) {
@@ -5320,6 +5329,8 @@ static status_t
                                          "reserved name 'value' "
                                          "for object %s",
                                          obj_get_name(obj));
+                            } else {
+                                ncx_inc_warnings(mod);
                             }
                         }
 
@@ -5353,7 +5364,6 @@ static status_t
     }
 
     return retres;
-
 
 } /* resolve_metadata */
 
@@ -5484,6 +5494,8 @@ static status_t
             SET_OBJ_CURERR(tkc, obj);
             ncx_print_errormsg(tkc, mod, res);
             res = NO_ERR;
+        } else if (mod != NULL) {
+            ncx_inc_warnings(mod);
         }
     }
 
@@ -5618,6 +5630,8 @@ static status_t
             SET_OBJ_CURERR(tkc, obj);
             ncx_print_errormsg(tkc, mod, res);
             res = NO_ERR;
+        } else if (mod != NULL) {
+            ncx_inc_warnings(mod);
         }
     }
 
@@ -5868,6 +5882,8 @@ static status_t
                          list->name);
                 tkc->curerr = tkerr;
                 ncx_print_errormsg(tkc, mod, ERR_NCX_STMT_IGNORED);
+            } else if (mod != NULL) {
+                ncx_inc_warnings(mod);
             }
         }
 
@@ -6200,6 +6216,8 @@ static status_t
                     ncx_print_errormsg(tkc, 
                                        mod,
                                        ERR_NCX_DUP_UNIQUE_COMP);
+                } else if (mod != NULL) {
+                    ncx_inc_warnings(mod);
                 }
             }
         }
@@ -6491,6 +6509,8 @@ static status_t
             SET_OBJ_CURERR(tkc, obj);
             ncx_print_errormsg(tkc, mod, res);
             res = NO_ERR;
+        } else if (mod != NULL) {
+            ncx_inc_warnings(mod);
         }
     }
 
@@ -7638,6 +7658,8 @@ static status_t
                     res = ERR_NCX_DUP_AUGNODE;
                     tkc->curerr = &chobj->tkerr;
                     ncx_print_errormsg(tkc, mod, res);
+                } else if (mod != NULL) {
+                    ncx_inc_warnings(mod);
                 }
             }
 

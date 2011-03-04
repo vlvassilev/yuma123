@@ -2242,6 +2242,8 @@ status_t
                              mod->prefix, 
                              modname);
                     ncx_print_errormsg(NULL, mod, ERR_NCX_DUP_PREFIX);
+                } else {
+                    ncx_inc_warnings(mod);
                 }
                 
                 /* redo the module xmlprefix */
@@ -7483,6 +7485,29 @@ void
     use_prefix = val;
 
 }   /* ncx_set_useprefix */
+
+
+/********************************************************************
+* FUNCTION ncx_inc_warnings
+*
+* Increment the module warning count
+*
+* INPUTS:
+*   mod == module being parsed
+*********************************************************************/
+void
+    ncx_inc_warnings (ncx_module_t *mod)
+{
+#ifdef DEBUG
+    if (mod == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    mod->warnings++;
+
+}   /* ncx_inc_warnings */
 
 
 /* END file ncx.c */

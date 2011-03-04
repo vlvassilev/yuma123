@@ -866,6 +866,8 @@ static status_t
                          " can be checked in XPath expression", 
                          MAX_KEYS,
                          obj_get_name(pcb->obj));
+            } else if (pcb->objmod != NULL) {
+                ncx_inc_warnings(pcb->objmod);
             }
         }
     } else if ((pcb->flags & XP_FL_INSTANCEID) && 
@@ -958,6 +960,8 @@ static status_t
                     log_warn("\nWarning: Key '%s' skipped "
                              "in validation test",
                              obj_get_name(pcb->varobj));
+                } else if (pcb->objmod != NULL) {
+                    ncx_inc_warnings(pcb->objmod);
                 }
             }
         } 

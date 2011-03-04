@@ -2706,6 +2706,18 @@ extern void
     ncx_set_useprefix (boolean val);
 
 
+/********************************************************************
+* FUNCTION ncx_inc_warnings
+*
+* Increment the module warning count
+*
+* INPUTS:
+*   mod == module being parsed
+*********************************************************************/
+extern void
+    ncx_inc_warnings (ncx_module_t *mod);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

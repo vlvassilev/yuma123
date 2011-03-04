@@ -1319,6 +1319,8 @@ static status_t
                         log_warn("\nWarning: Out of order enum '%s' = %d",
                                  (char *)en->name, en->val);
                         ncx_print_errormsg(tkc, mod, res);
+                    } else {
+                        ncx_inc_warnings(mod);
                     }
                     done = TRUE;
                 }
@@ -1329,6 +1331,8 @@ static status_t
                         log_warn("\nWarning: Out of order bit '%s' = %u",
                                  (char *)en->name, en->pos);
                         ncx_print_errormsg(tkc, mod, res);
+                    } else {
+                        ncx_inc_warnings(mod);
                     }
                     done = TRUE;
                 }

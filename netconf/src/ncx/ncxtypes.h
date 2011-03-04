@@ -403,6 +403,7 @@ typedef enum ncx_xpath_axis_t_ {
 typedef struct ncx_dec64_t_ {
     int64  val;        /* adjusted number to fit in 64 bits */
     uint8  digits;      /* number of decimal digits 1 .. 18 */
+    uint8  zeroes;      /* number of leading zeroes 0 .. 17 */
 } ncx_dec64_t;
 
 

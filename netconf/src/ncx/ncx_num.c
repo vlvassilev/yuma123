@@ -211,6 +211,7 @@ void
     case NCX_BT_DECIMAL64:
         num->dec.val = 0;
         num->dec.digits = 0;
+        num->dec.zeroes = 0;
         break;
     case NCX_BT_FLOAT64:
         num->d = 0;
@@ -296,6 +297,15 @@ int32
         if (temp1 < temp2) {
             return -1;
         } else if (temp1 == temp2) {
+            /* check if any leading zeroes */
+            if (temp1 == 0) {
+                if (num1->dec.zeroes < num2->dec.zeroes) {
+                    return 1;
+                } else if (num1->dec.zeroes > num2->dec.zeroes) {
+                    return -1;
+                }  /* else need to compare fraction parts */
+            }
+
             /* check fraction parts next */
             temp1 = ncx_get_dec64_fraction(num1);
             temp2 = ncx_get_dec64_fraction(num2);
@@ -379,6 +389,7 @@ void
         break;
     case NCX_BT_DECIMAL64:
         num->dec.val = NCX_MIN_LONG;
+        num->dec.zeroes = 0;
         break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
@@ -442,6 +453,7 @@ void
         break;
     case NCX_BT_DECIMAL64:
         num->dec.val = NCX_MAX_LONG;
+        num->dec.zeroes = 0;
         break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
@@ -495,6 +507,7 @@ void
         break;
     case NCX_BT_DECIMAL64:
         num->dec.val = 10 * num->dec.digits;
+        num->dec.zeroes = 0;
         break;
     case NCX_BT_FLOAT64:
         num->d = 1;
@@ -544,6 +557,7 @@ void
         break;
     case NCX_BT_DECIMAL64:
         num->dec.val = 0;
+        num->dec.zeroes = 1;
         break;
     case NCX_BT_FLOAT64:
         num->d = 0;
@@ -947,7 +961,7 @@ status_t
     int64           basenum, fracnum, testnum;
     uint32          numdigits;
     boolean         isneg;
-    uint8           i;
+    uint8           i, lzeroes;
     xmlChar         numbuff[NCX_MAX_NUMLEN];
 
 #ifdef DEBUG
@@ -967,6 +981,7 @@ status_t
     basenum = 0;
     fracnum = 0;
     isneg = FALSE;
+    lzeroes = 0;
 
     /* check the number format set to don't know */
     if (numfmt==NCX_NF_NONE) {
@@ -993,6 +1008,17 @@ status_t
                     numstr, 
                     (uint32)(point - numstr));
         basenum = strtoll((const char *)numbuff, &err, 10);
+
+        if (basenum == 0) {
+            /* need to count all the zeroes in the number
+             * since they will get lost in the conversion algorithm
+             * 0.00034 --> 34    0.0034 --> 34
+             */
+            lzeroes = 1;   /* count the leading 0.xxx */
+            while (point[lzeroes] == '0') {
+                lzeroes++;
+            }
+        }
     } else {
         /* assume the entire string is just a base part
          * the token parser broke up the string
@@ -1092,6 +1118,7 @@ status_t
     /* save the number with the fraction-digits value added in */
     val->dec.val = basenum + fracnum;
     val->dec.digits = digits;
+    val->dec.zeroes = lzeroes;
 
     return NO_ERR;
 
@@ -1276,6 +1303,7 @@ status_t
     case NCX_BT_DECIMAL64:
         num2->dec.val = num1->dec.val;
         num2->dec.digits = num1->dec.digits;
+        num2->dec.zeroes = num1->dec.zeroes;
         break;
     case NCX_BT_FLOAT64:
         num2->d = num1->d;
@@ -1507,6 +1535,7 @@ status_t
             case NCX_BT_DECIMAL64:
                 num2->dec.val = num1->dec.val;
                 num2->dec.digits = num1->dec.digits;
+                num2->dec.zeroes = num1->dec.zeroes;
                 break;
             case NCX_BT_FLOAT64:
                 num2->d = (double)testbase;
@@ -1635,6 +1664,7 @@ status_t
     case NCX_BT_DECIMAL64:
         num2->dec.digits = num1->dec.digits;
         num2->dec.val = num1->dec.val % (10 * num1->dec.digits);
+        num2->dec.zeroes = num1->dec.zeroes;
         break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
@@ -1711,8 +1741,9 @@ status_t
         break;
     case NCX_BT_DECIMAL64:
         num2->dec.digits = num1->dec.digits;
-        /*** this is not right !!!! ***/
+        /*** !!!!! this is not right !!!! ***/
         num2->dec.val = num1->dec.val % (10 * num1->dec.digits);
+        num2->dec.zeroes = num1->dec.zeroes;
         break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
@@ -1792,6 +1823,7 @@ status_t
         num2->dec.digits = num1->dec.digits;
         /*** this is not right !!!! ***/
         num2->dec.val = num1->dec.val % (10 * num1->dec.digits);
+        num2->dec.zeroes = num1->dec.zeroes;
         break;
     case NCX_BT_FLOAT64:
 #ifdef HAS_FLOAT
@@ -2082,7 +2114,7 @@ status_t
                      uint32   *len)
 {
     xmlChar  *point;
-    int32     ilen, pos;
+    int32     ilen, pos, i;
     uint32    ulen;
     xmlChar   dumbuff[VAL_MAX_NUMLEN];
     xmlChar   decbuff[VAL_MAX_NUMLEN];
@@ -2122,6 +2154,14 @@ status_t
     case NCX_BT_DECIMAL64:
         if (num->dec.val == 0) {
             ilen = xml_strcpy(buff, (const xmlChar *)"0.0");
+        } else if (num->dec.zeroes > 0) {
+            ilen = xml_strcpy(buff, (const xmlChar *)"0.");
+            i = 1;
+            while (i < num->dec.zeroes) {
+                buff[ilen++] = '0';
+                i++;
+            }
+            ilen += sprintf((char *)&buff[ilen], "%lld", num->dec.val);
         } else {
             if (num->dec.digits == 0) {
                 return SET_ERROR(ERR_INTERNAL_VAL);

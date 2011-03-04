@@ -690,6 +690,7 @@ static void
         ncx_clean_num(btyp, &dest->v.num);
         dest->v.num.dec.val = src->v.num.dec.val;
         dest->v.num.dec.digits = src->v.num.dec.digits;
+        dest->v.num.dec.zeroes = src->v.num.dec.zeroes;
         break;
     case NCX_BT_FLOAT64:
         ncx_clean_num(btyp, &dest->v.num);

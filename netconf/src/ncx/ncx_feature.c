@@ -671,8 +671,7 @@ ncx_feature_t *
                 inc->submod = node->submod;
             }
             if (!inc->submod) {
-                /* include not found, should not be in Q !!! */
-                SET_ERROR(ERR_INTERNAL_VAL);
+                /* include not found or errors in it */
                 continue;
             }
         }
@@ -844,8 +843,7 @@ void
                 inc->submod = node->submod;
             }
             if (!inc->submod) {
-                /* include not found, should not be in Q !!! */
-                SET_ERROR(ERR_INTERNAL_VAL);
+                /* include not found or errors in it */
                 continue;
             }
         }
@@ -928,8 +926,7 @@ uint32
                 inc->submod = node->submod;
             }
             if (!inc->submod) {
-                /* include not found, should not be in Q !!! */
-                SET_ERROR(ERR_INTERNAL_VAL);
+                /* include not found or errors in it */
                 continue;
             }
         }

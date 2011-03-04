@@ -2150,11 +2150,21 @@ static status_t
     if (done) {
         if (res == NO_ERR || ptyp == YANG_PT_INCLUDE) {
             if (retmod) {
+
+                if (pcb->retmod != NULL) {
+                    *retmod = pcb->retmod;
+                } else if (ptyp == YANG_PT_TOP) {
+                    *retmod = pcb->top;
+                } 
+
+#if 0
                 if (pcb->retmod != NULL) {
                     *retmod = pcb->retmod;
                 } else {
                     *retmod = pcb->top;
                 }
+#endif
+
             }
         }
         return res;

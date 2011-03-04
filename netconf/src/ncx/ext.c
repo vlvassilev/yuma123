@@ -236,8 +236,7 @@ ext_template_t *
                 inc->submod = node->submod;
             }
             if (!inc->submod) {
-                /* include not found, should not be in Q !!! */
-                SET_ERROR(ERR_INTERNAL_VAL);
+                /* include not found or errors found in it */
                 continue;
             }
         }

@@ -2154,16 +2154,20 @@ static status_t
                 if (node) {
                     dlq_remove(node);
 
-                    /* save this node in the mod->allincQ now
-                     * because it may be needed while body-stmts
-                     * are being processed and nodes are searched
-                     */
-                    node->submod = foundmod;
-                    node->res = retres;
-                    dlq_enque(node, allQ);
+                    if (foundmod == NULL) {
+                        yang_free_node(node);
+                    } else {
+                        /* save this node in the mod->allincQ now
+                         * because it may be needed while body-stmts
+                         * are being processed and nodes are searched
+                         */
+                        node->submod = foundmod;
+                        node->res = retres;
+                        dlq_enque(node, allQ);
 
-                    /* save a back-ptr in the include directive as well */
-                    inc->submod = foundmod;
+                        /* save a back-ptr in the include directive as well */
+                        inc->submod = foundmod;
+                    }
                 } else {
                     SET_ERROR(ERR_INTERNAL_VAL);
                 }

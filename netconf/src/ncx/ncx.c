@@ -1601,8 +1601,7 @@ typ_template_t *
                     inc->submod = node->submod;
                 }
                 if (!inc->submod) {
-                    /* include not found, should not be in Q !!! */
-                    SET_ERROR(ERR_INTERNAL_VAL);
+                    /* include not found or errors in it */
                     continue;
                 }
             }
@@ -1725,8 +1724,7 @@ grp_template_t *
                     inc->submod = node->submod;
                 }
                 if (!inc->submod) {
-                    /* include not found, should not be in Q !!! */
-                    SET_ERROR(ERR_INTERNAL_VAL);
+                    /* include not found or errors in it */
                     continue;
                 }
             }
@@ -3751,8 +3749,7 @@ ncx_identity_t *
                     inc->submod = node->submod;
                 }
                 if (!inc->submod) {
-                    /* include not found, should not be in Q !!! */
-                    SET_ERROR(ERR_INTERNAL_VAL);
+                    /* include not found or errors in it */
                     continue;
                 }
             }

@@ -83,7 +83,7 @@ date         init     comment
 #define AMPSTR    (const xmlChar *)"&amp;"
 #define QSTR      (const xmlChar *)"&quot;"
 
-#define MAX_READ_TRIES   8
+#define MAX_READ_TRIES   1000
 
 
 /********************************************************************
@@ -1329,7 +1329,7 @@ status_t
         readdone = FALSE;
         while (!readdone && res == NO_ERR) {
 
-#ifdef SES_SSH_DEBUG
+            /*#ifdef SES_SSH_DEBUG*/
             if (++readtries > MAX_READ_TRIES) {
                 if (LOGDEBUG4) {
                     log_debug4("\nses: max EAGAIN reached for ses(%u)",
@@ -1339,7 +1339,7 @@ status_t
                 ses_msg_free_buff(scb, buff);
                 return res;
             }
-#endif
+            /*#endif*/
 
             /* read data into the new buffer */
             if (scb->rdfn) {

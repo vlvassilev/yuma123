@@ -139,6 +139,10 @@ date         init     comment
 #include "yangcli_util.h"
 #endif
 
+#ifdef DEBUG
+#define YANGCLI_AUTOLOAD_DEBUG 1
+#endif
+
 
 /********************************************************************
 * FUNCTION send_get_schema_to_server
@@ -522,6 +526,14 @@ static status_t
         ncxmod_free_session_tempfile(temp_filcb);
         return ERR_INTERNAL_MEM;
     }
+
+#ifdef YANGCLI_AUTOLOAD_DEBUG
+    if (LOGDEBUG3) {
+        log_debug3("\nyangcli_autoload: Copying '%s' to '%s'",
+                   source,
+                   temp_filcb->source);
+    }
+#endif
 
     /* open the destination file for writing */
     destfile = fopen((const char *)temp_filcb->source, "w");

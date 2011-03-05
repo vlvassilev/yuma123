@@ -24,7 +24,8 @@ module yangcli {
 
         Usage:
            yangcli [parameters]
-
+           yangcli --help
+           yangcli --version
 
         Normal Mode:
            An interactive CLI shell with command line history.
@@ -45,20 +46,16 @@ module yangcli {
         Batch-mode:
            If the 'batch-mode' parameter is present, then either the
            'run-script' or 'run-command' parameter will be invoked, if
-           present, and then the program will exit.
-
-        Autostart-mode:
-           If the 'server' parameter is present, then yangcli will
- 	   attempt to connect to that server upon startup.  If the
-           'user' and 'password' parameters are also present, then
-           the user will not be prompted before the connection 
-           is attempted.
-
-         Script-mode:
-            If the 'run-script' parameter is present, then the
-            specified script will be run automatically upon startup.
-
+           present, and then the program will exit.  Any interactive
+           input breaks in the script or command will be skipped.
          ";
+
+    revision 2011-03-05 {
+       description 
+          "Added 'xml-nons' display mode to display-mode parameter.
+           Added 'cli' and 'system' to show command; subset of 
+           show vars.";
+    }
 
     revision 2010-04-16 {
        description 
@@ -431,6 +428,11 @@ module yangcli {
            enum xml {
              description 
                 "XML format.";
+           }
+           enum xml-nons {
+             description 
+                "XML format, but no namespace (xmlns) attributes 
+                 will be generated.";
            }
         }
         default plain;
@@ -1211,6 +1213,11 @@ module yangcli {
         choice showtype {
           mandatory true;
 
+          leaf cli {
+            description "Show the yangcli CLI parameters";
+            type empty;
+          }
+
           leaf module {
             description "Show full info for one module";
             type nt:NcxIdentifier;
@@ -1244,6 +1251,13 @@ module yangcli {
           leaf objects {
             description 
               "Show config database objects available at this time";
+            type empty;
+          }
+
+          leaf system {
+            description 
+              "Show the read-only system environment variables
+               and the read-write yangcli program variables.";
             type empty;
           }
 

@@ -446,6 +446,8 @@ extern void
 *            == FALSE if XML output mode should be used
 *    xmlhdr == TRUE if <?xml?> directive should be output
 *            == FALSE if not
+*    withns == TRUE if xmlns attributes should be used
+*              FALSE to leave them out
 *    startindent == starting indent point
 *    indent == indent amount (0..9 spaces)
 *    testfn == callback test function to use
@@ -459,6 +461,7 @@ extern status_t
                             xml_attrs_t *attrs,
                             boolean docmode,
                             boolean xmlhdr,
+                            boolean withns,
                             int32 startindent,
                             int32  indent,
                             val_nodetest_fn_t testfn);
@@ -477,6 +480,8 @@ extern status_t
 *            == FALSE if XML output mode should be used
 *    xmlhdr == TRUE if <?xml?> directive should be output
 *            == FALSE if not
+*    withns == TRUE if xmlns attributes should be used
+*              FALSE to leave them out
 *    startindent == starting indent point
 *    indent == indent amount (0..9 spaces)
 *    testfn == callback test function to use
@@ -490,6 +495,7 @@ extern status_t
 		       xml_attrs_t *attrs,
 		       boolean docmode,
 		       boolean xmlhdr,
+                       boolean withns,
                        int32 startindent,
 		       int32 indent,
 		       val_nodetest_fn_t testfn);
@@ -508,6 +514,8 @@ extern status_t
 *            == FALSE if XML output mode should be used
 *    xmlhdr == TRUE if <?xml?> directive should be output
 *            == FALSE if not
+*    withns == TRUE if xmlns attributes should be used
+*              FALSE to leave them out
 *    startindent == starting indent point
 *    indent == indent amount (0..9 spaces)
 *
@@ -520,6 +528,7 @@ extern status_t
 		 xml_attrs_t *attrs,
 		 boolean docmode,
 		 boolean xmlhdr,
+                 boolean withns,
                  int32 startindent,
 		 int32 indent);
 

@@ -156,8 +156,8 @@ static status_t
 
     /* Give the socket a name. */
     name.sun_family = AF_LOCAL;
-    strncpy(name.sun_path, filename, sizeof(name.sun_path));
-    name.sun_path[sizeof(name.sun_path)] = 0;
+    strncpy(name.sun_path, filename, sizeof(name.sun_path)-1);
+    name.sun_path[sizeof(name.sun_path)-1] = 0;
     size = SUN_LEN(&name);
     ret = bind(*sock, (struct sockaddr *)&name, size);
     if (ret != 0) {

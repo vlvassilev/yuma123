@@ -1136,8 +1136,10 @@ void
         ses_putstr(scb, (const xmlChar *)NC_SSH_END);
     }
 
-    /* add a final newline when writing to a file or STDOUT */
-    if (scb->fp || !scb->fd) {
+    /* add a final newline when writing to a file
+     * but never if writing to a socket or STDOUT
+     */
+    if (scb->fd == 0 && scb->fp != stdout) {
         ses_putchar(scb, '\n');
     }
 
@@ -1593,4 +1595,42 @@ const xmlChar *
 } /* ses_get_transport_name */
 
 
+/********************************************************************
+* FUNCTION ses_set_xml_nons
+* 
+*  force xmlns attributes to be skipped in XML mode
+*
+* INPUTS:
+*    scb == session to set
+*
+*********************************************************************/
+void
+    ses_set_xml_nons (ses_cb_t *scb)
+{
+    scb->noxmlns = TRUE;
+
+} /* ses_set_xml_nons */
+
+
+/********************************************************************
+* FUNCTION ses_get_xml_nons
+* 
+*  force xmlns attributes to be skipped in XML mode
+*
+* INPUTS:
+*    scb == session to get
+*
+* RETURNS:
+*   TRUE if no xmlns attributes set
+*   FALSE if OK to use xmlns attributes
+*********************************************************************/
+boolean
+    ses_get_xml_nons (const ses_cb_t *scb)
+{
+    return scb->noxmlns;
+
+} /* ses_get_xml_nons */
+
+
 /* END file ses.c */
+

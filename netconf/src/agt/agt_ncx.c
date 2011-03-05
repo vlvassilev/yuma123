@@ -291,11 +291,12 @@ static status_t
         xml_init_attrs(&attrs);
 
         /* output to the specified file or STDOUT */
-        res = xml_wr_check_file(target_url, 
-                                newroot, 
-                                &attrs, 
-                                XMLMODE, 
-                                WITHHDR, 
+        res = xml_wr_check_file(target_url,
+                                newroot,
+                                &attrs,
+                                XMLMODE,
+                                WITHHDR,
+                                TRUE,
                                 0,
                                 profile->agt_indent,
                                 agt_check_save);
@@ -2066,11 +2067,12 @@ static status_t
     xml_init_attrs(&attrs);
 
     /* output to the specified file or STDOUT */
-    res = xml_wr_check_file(filespec, 
-                            cfg->root, 
-                            &attrs, 
-                            XMLMODE, 
-                            WITHHDR, 
+    res = xml_wr_check_file(filespec,
+                            cfg->root,
+                            &attrs,
+                            XMLMODE,
+                            WITHHDR,
+                            TRUE,
                             0,
                             profile->agt_indent,
                             agt_check_save);
@@ -3385,10 +3387,11 @@ status_t
 
                 /* output to the specified file or STDOUT */
                 res = xml_wr_check_file(filebuffer,
-                                        cfg->root, 
+                                        cfg->root,
                                         &attrs,
-                                        XMLMODE, 
-                                        WITHHDR, 
+                                        XMLMODE,
+                                        WITHHDR,
+                                        TRUE,
                                         0,
                                         profile->agt_indent,
                                         agt_check_save);

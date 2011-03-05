@@ -269,6 +269,7 @@ typedef struct ses_cb_t_ {
     boolean          active;            /* <hello> completed ok */
     boolean          notif_active;       /* subscription active */
     boolean          stream_output;        /* buffer/stream svr */
+    boolean          noxmlns;          /* xml-nons display-mode */
     xmlTextReaderPtr reader;             /* input stream reader */
     FILE            *fp;             /* set if output to a file */
     int              fd;           /* set if output to a socket */
@@ -720,6 +721,36 @@ extern ses_total_stats_t *
 *********************************************************************/
 extern const xmlChar *
     ses_get_transport_name (ses_transport_t transport);
+
+
+/********************************************************************
+* FUNCTION ses_set_xml_nons
+* 
+*  force xmlns attributes to be skipped in XML mode
+*
+* INPUTS:
+*    scb == session to set
+*
+*********************************************************************/
+extern void
+    ses_set_xml_nons (ses_cb_t *scb);
+
+
+/********************************************************************
+* FUNCTION ses_get_xml_nons
+* 
+*  force xmlns attributes to be skipped in XML mode
+*
+* INPUTS:
+*    scb == session to get
+*
+* RETURNS:
+*   TRUE if no xmlns attributes set
+*   FALSE if OK to use xmlns attributes
+*********************************************************************/
+extern boolean
+    ses_get_xml_nons (const ses_cb_t *scb);
+
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

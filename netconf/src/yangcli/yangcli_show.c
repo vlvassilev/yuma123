@@ -224,6 +224,128 @@ static status_t
 
 
 /********************************************************************
+ * FUNCTION do_show_cli (sub-mode of local RPC)
+ * 
+ * show CLI parms
+ *
+ * INPUTS:
+ *  server_cb == server control block to use
+ *********************************************************************/
+static void
+    do_show_cli (server_cb_t *server_cb)
+{
+    val_value_t  *mgrset;
+    logfn_t       logfn;
+    boolean       imode;
+
+    imode = interactive_mode();
+    if (imode) {
+        logfn = log_stdout;
+    } else {
+        logfn = log_write;
+    }
+
+    mgrset = get_mgr_cli_valset();
+
+    /* CLI Parameters */
+    if (mgrset && val_child_cnt(mgrset)) {
+        (*logfn)("\nCLI Variables\n");
+        val_dump_value_max(mgrset, 
+                           0,
+                           server_cb->defindent,
+                           (imode) ? DUMP_VAL_STDOUT : DUMP_VAL_LOG,
+                           server_cb->display_mode,
+                           FALSE,
+                           FALSE);
+        (*logfn)("\n");
+    } else {
+        (*logfn)("\nNo CLI variables\n");
+    }
+
+}  /* do_show_cli */
+
+
+/********************************************************************
+ * FUNCTION do_show_system (sub-mode of local RPC)
+ * 
+ * show system parms
+ *
+ * INPUTS:
+ *  server_cb == server control block to use
+ *  mode == help mode
+ *********************************************************************/
+static void
+    do_show_system (server_cb_t *server_cb,
+                    help_mode_t mode)
+{
+    ncx_var_t    *var;
+    dlq_hdr_t    *que;
+    logfn_t       logfn;
+    boolean       imode, first;
+
+    imode = interactive_mode();
+    if (imode) {
+        logfn = log_stdout;
+    } else {
+        logfn = log_write;
+    }
+
+    /* System Script Variables */
+    que = runstack_get_que(server_cb->runstack_context, ISGLOBAL);
+    first = TRUE;
+    for (var = (ncx_var_t *)dlq_firstEntry(que);
+         var != NULL;
+         var = (ncx_var_t *)dlq_nextEntry(var)) {
+        
+        if (var->vartype != VAR_TYP_SYSTEM) {
+            continue;
+        }
+
+        if (first) {
+            (*logfn)("\nRead-only environment variables\n");
+            first = FALSE;
+        }
+        show_user_var(server_cb,
+                      var->name, 
+                      var->vartype,
+                      var->val,
+                      mode);
+    }
+    if (first) {
+        (*logfn)("\nNo read-only environment variables\n");
+    }
+    (*logfn)("\n");
+
+    /* System Config Variables */
+    que = runstack_get_que(server_cb->runstack_context, ISGLOBAL);
+    first = TRUE;
+    for (var = (ncx_var_t *)dlq_firstEntry(que);
+         var != NULL;
+         var = (ncx_var_t *)dlq_nextEntry(var)) {
+
+        if (var->vartype != VAR_TYP_CONFIG) {
+            continue;
+        }
+
+        if (first) {
+            (*logfn)("\nRead-write system variables\n");
+            first = FALSE;
+        }
+        show_user_var(server_cb,
+                      var->name,
+                      var->vartype,
+                      var->val,
+                      mode);
+    }
+    if (first) {
+        (*logfn)("\nNo system config variables\n");
+    }
+    (*logfn)("\n");
+
+}  /* do_show_system */
+
+
+/********************************************************************
  * FUNCTION do_show_vars (sub-mode of local RPC)
  * 
  * show brief info for all user variables
@@ -266,77 +388,12 @@ static status_t
 
     if (mode > HELP_MODE_BRIEF && !shortmode) {
         /* CLI Parameters */
-        if (mgrset && val_child_cnt(mgrset)) {
-            (*logfn)("\nCLI Variables\n");
-            val_dump_value_max(mgrset, 
-                               server_cb->defindent,
-                               server_cb->defindent,
-                               (imode) ? DUMP_VAL_STDOUT : DUMP_VAL_LOG,
-                               server_cb->display_mode,
-                               FALSE,
-                               FALSE);
-            (*logfn)("\n");
-        } else {
-            (*logfn)("\nNo CLI variables\n");
-        }
+        do_show_cli(server_cb);
     }
 
     /* System Script Variables */
     if (!shortmode) {
-        que = runstack_get_que(server_cb->runstack_context,
-                               ISGLOBAL);
-        first = TRUE;
-        for (var = (ncx_var_t *)dlq_firstEntry(que);
-             var != NULL;
-             var = (ncx_var_t *)dlq_nextEntry(var)) {
-
-            if (var->vartype != VAR_TYP_SYSTEM) {
-                continue;
-            }
-
-            if (first) {
-                (*logfn)("\nRead-only system variables\n");
-                first = FALSE;
-            }
-            show_user_var(server_cb,
-                          var->name, 
-                          var->vartype,
-                          var->val,
-                          mode);
-        }
-        if (first) {
-            (*logfn)("\nNo read-only system variables\n");
-        }
-        (*logfn)("\n");
-    }
-
-    /* System Config Variables */
-    if (!shortmode) {
-        que = runstack_get_que(server_cb->runstack_context,
-                               ISGLOBAL);
-        first = TRUE;
-        for (var = (ncx_var_t *)dlq_firstEntry(que);
-             var != NULL;
-             var = (ncx_var_t *)dlq_nextEntry(var)) {
-
-            if (var->vartype != VAR_TYP_CONFIG) {
-                continue;
-            }
-
-            if (first) {
-                (*logfn)("\nRead-write system variables\n");
-                first = FALSE;
-            }
-            show_user_var(server_cb,
-                          var->name,
-                          var->vartype,
-                          var->val,
-                          mode);
-        }
-        if (first) {
-            (*logfn)("\nNo system config variables\n");
-        }
-        (*logfn)("\n");
+        do_show_system(server_cb, mode);
     }
 
     /* Global Script Variables */
@@ -808,6 +865,15 @@ status_t
         done = FALSE;
         parm = val_find_child(valset, 
                               YANGCLI_MOD,
+                              YANGCLI_CLI);
+        if (parm) {
+            do_show_cli(server_cb);
+            done = TRUE;
+        }
+
+        done = FALSE;
+        parm = val_find_child(valset, 
+                              YANGCLI_MOD,
                               YANGCLI_LOCAL);
         if (parm) {
             res = do_show_var(server_cb,
@@ -868,6 +934,15 @@ status_t
                                    FALSE);
                 done = TRUE;
             }
+        }
+
+        done = FALSE;
+        parm = val_find_child(valset, 
+                              YANGCLI_MOD,
+                              YANGCLI_SYSTEM);
+        if (parm) {
+            do_show_system(server_cb, mode);
+            done = TRUE;
         }
 
         if (!done) {

@@ -665,6 +665,7 @@ extern "C" {
 #define NCX_EL_XCONTAINER      (const xmlChar *)"xcontainer"
 #define NCX_EL_XLIST           (const xmlChar *)"xlist"
 #define NCX_EL_XML             (const xmlChar *)"xml"
+#define NCX_EL_XML_NONS        (const xmlChar *)"xml-nons"
 #define NCX_EL_XPATH           (const xmlChar *)"xpath"
 #define NCX_EL_XSD             (const xmlChar *)"xsd"
 #define NCX_EL_XSDLIST         (const xmlChar *)"xsdlist"

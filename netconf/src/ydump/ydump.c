@@ -1646,10 +1646,10 @@ static status_t
                 if (res != NO_ERR) {
                     pr_err(res);
                 } else {
-                    if (cp->defnames || 
+                    if (cp->defnames ||
                         (cp->output && cp->output_isdir)) {
 
-                        namebuff = xsd_make_output_filename(pcb->top, 
+                        namebuff = xsd_make_output_filename(pcb->top,
                                                             cp);
                         if (!namebuff) {
                             res = ERR_INTERNAL_MEM;
@@ -1658,11 +1658,12 @@ static status_t
                              * the specified file, or generated
                              * with the default name
                              */
-                            res = xml_wr_file(namebuff, 
-                                              val, 
-                                              &attrs, 
-                                              DOCMODE, 
-                                              WITHHDR, 
+                            res = xml_wr_file(namebuff,
+                                              val,
+                                              &attrs,
+                                              DOCMODE,
+                                              WITHHDR,
+                                              TRUE,
                                               0,
                                               cp->indent);
                             m__free(namebuff);
@@ -1670,20 +1671,22 @@ static status_t
                     } else if (cp->output) {
                         /* output to the specified file */
                         res = xml_wr_file((const xmlChar *)cp->output,
-                                          val, 
-                                          &attrs, 
-                                          DOCMODE, 
-                                          WITHHDR, 
+                                          val,
+                                          &attrs,
+                                          DOCMODE,
+                                          WITHHDR,
+                                          TRUE,
                                           0,
                                           cp->indent);
                     } else {
                         /* output to the specified file */
                         res = 
                             xml_wr_check_open_file(stdout,
-                                                   val, 
-                                                   &attrs, 
+                                                   val,
+                                                   &attrs,
                                                    DOCMODE, 
-                                                   WITHHDR, 
+                                                   WITHHDR,
+                                                   TRUE,
                                                    0,
                                                    cp->indent,
                                                    NULL);

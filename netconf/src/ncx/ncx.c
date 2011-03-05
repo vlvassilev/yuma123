@@ -6601,6 +6601,8 @@ ncx_display_mode_t
         return NCX_DISPLAY_MODE_MODULE;
     } else if (!xml_strcmp(dmstr, NCX_EL_XML)) {
         return NCX_DISPLAY_MODE_XML;
+    } else if (!xml_strcmp(dmstr, NCX_EL_XML_NONS)) {
+        return NCX_DISPLAY_MODE_XML_NONS;
     } else {
         return NCX_DISPLAY_MODE_NONE;
     }
@@ -6634,6 +6636,8 @@ const xmlChar *
         return NCX_EL_MODULE;
     case NCX_DISPLAY_MODE_XML:
         return NCX_EL_XML;
+    case NCX_DISPLAY_MODE_XML_NONS:
+        return NCX_EL_XML_NONS;
     default:
         return NULL;
     }

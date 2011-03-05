@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH yangcli 1 "February 19, 2011" Linux "yangcli 1.14-5"
+.TH yangcli 1 "March 5, 2011" Linux "yangcli 1.14-6"
 .SH NAME
 yangcli \- YANG-based NETCONF-over-SSH client application
 
@@ -174,6 +174,8 @@ to STDOUT or a log file.
           Plain text with module name as prefix added format.
        xml(3)
           XML format.
+       xml-nons(4)
+          XML format, but without any namespace (xmlns) attributes.
 .fi
 .IP --\fBfeature-disable\fP=module:feature
 Identifies a feature which should be considered disabled.

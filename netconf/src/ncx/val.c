@@ -3758,7 +3758,9 @@ void
         return;
     }
 
-    if (display_mode == NCX_DISPLAY_MODE_XML) {
+    if (display_mode == NCX_DISPLAY_MODE_XML ||
+        display_mode == NCX_DISPLAY_MODE_XML_NONS) {
+
         outputfile = log_get_logfile();
         if (!outputfile) {
             outputfile = stdout;
@@ -3768,6 +3770,7 @@ void
                                      NULL,
                                      FALSE,
                                      FALSE,
+                                     (display_mode == NCX_DISPLAY_MODE_XML),
                                      startindent,
                                      indent_amount,
                                      NULL);

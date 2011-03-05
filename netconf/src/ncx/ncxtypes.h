@@ -377,7 +377,8 @@ typedef enum ncx_display_mode_t_ {
     NCX_DISPLAY_MODE_PLAIN,
     NCX_DISPLAY_MODE_PREFIX,
     NCX_DISPLAY_MODE_MODULE,
-    NCX_DISPLAY_MODE_XML
+    NCX_DISPLAY_MODE_XML,
+    NCX_DISPLAY_MODE_XML_NONS
 } ncx_display_mode_t;
 
 

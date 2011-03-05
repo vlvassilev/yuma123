@@ -888,7 +888,7 @@ static status_t
             server_cb->display_mode = dmode;
         } else {
             log_error("\nError: value must be 'plain', 'prefixed' "
-                      "or 'xml'");
+                      "'xml' or 'xml-nons'");
             res = ERR_NCX_INVALID_VALUE;
         }
     } else if (!xml_strcmp(configval->name, YANGCLI_USER)) {
@@ -1198,7 +1198,10 @@ static status_t
                               resultval,
                               &attrs, 
                               XMLMODE, 
-                              WITHHDR, 
+                              WITHHDR,
+                              (server_cb->display_mode 
+                               == NCX_DISPLAY_MODE_XML_NONS) 
+                              ? FALSE : TRUE,
                               0,
                               server_cb->defindent);
             xml_clean_attrs(&attrs);

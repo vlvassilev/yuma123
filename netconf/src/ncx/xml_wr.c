@@ -132,52 +132,22 @@ static boolean
     fit_on_line (ses_cb_t *scb,
                  const val_value_t *val)
 {
-    uint32     vallen, elemlen, prefixlen;
-    xmlns_id_t nsid;
-    status_t   res;
-
     /* metavals must be put on 1 line */
     if (val_is_metaval(val)) {
         return TRUE;
     }
 
     /* make sure leafs are printed without leading and
-     * trailing whitespace in a normal session
+     * trailing whitespace in a normal session or
+     * output to an XML file
      */
-    if (scb->mode == SES_MODE_XML) {
+    if (scb->mode == SES_MODE_XML || scb->mode == SES_MODE_XMLDOC) {
         if (obj_is_leafy(val->obj)) {
             return TRUE;
         }
     }
 
-    if (!val_fit_oneline(val, SES_LINESIZE(scb))) {
-        return FALSE;
-    }
-
-    if (ses_get_mode(scb) != SES_MODE_XMLDOC) {
-        return TRUE;
-    }
-    
-    /* don't bother generating the actual size unless
-     * the session is requesting the XMLDOC mode
-     */
-    vallen = 0;
-    res = val_sprintf_simval_nc(NULL, val, &vallen);
-    if (res != NO_ERR) {
-        return TRUE;
-    }
-
-    prefixlen = 0;
-    nsid = val_get_nsid(val);
-    if (nsid) {
-        prefixlen = 
-            (xml_strlen(xmlns_get_ns_prefix(nsid)) * 2) + 2;
-    }
-    
-    elemlen = xml_strlen(val->name) * 2;
-
-    return ((vallen + prefixlen + elemlen + 1) <= ses_line_left(scb)) 
-        ? TRUE : FALSE;
+    return val_fit_oneline(val, SES_LINESIZE(scb));
 
 }  /* fit_on_line */
 

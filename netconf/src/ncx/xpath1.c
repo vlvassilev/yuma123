@@ -5620,14 +5620,8 @@ static status_t
             } else {
                 testobj = resnode->node.objptr;
                 if (testobj == pcb->docroot) {
-                    if (resnode->dblslash) {
-                        resnode->position = ++position;
-                        dlq_enque(resnode, &resnodeQ);
-                    } else {
-                        /* this is an RPC or notification */
-                        no_parent_warning(pcb);
-                        free_resnode(pcb, resnode);
-                    }
+                    resnode->position = ++position;
+                    dlq_enque(resnode, &resnodeQ);
                 } else if (!testobj->parent) {
                     if (!resnode->dblslash && (modname || name)) {
                         no_parent_warning(pcb);

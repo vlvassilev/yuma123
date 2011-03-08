@@ -1776,7 +1776,7 @@ static status_t
 *
 * Module Search order:
 *   1) filespec == try that only and exit
-*   2) current directory and its subdirs
+*   2) current directory
 *   3) YUMA_MODPATH environment var (or set by modpath CLI var)
 *   4) HOME/modules directory
 *   5) YUMA_HOME/modules directory
@@ -2016,55 +2016,57 @@ static status_t
                                 &done);
     }
 
+    if (ncx_get_cwd_subdirs()) {
+        /* CHECK THE CURRENT DIR AND ANY SUBDIRS
+         * 3) try current working directory and subdirs
+         *    if the subdirs parameter is true
+         * check before the modpath, which can cause
+         * the wrong version to be picked, depending
+         * on the CWD used by the application.
+         */
+        if (!done) {
+            res = check_module_pathlist((const xmlChar *)".",
+                                        buff,
+                                        bufflen,
+                                        modname, 
+                                        revision,
+                                        pcb,
+                                        ptyp, 
+                                        &done);
+        }
+    } else {
+        /* CHECK THE CURRENT DIR BUT NOT ANY SUBDIRS
+         * 3a) try as module in current dir, YANG format
+         */
+        if (!done) {
+            res = try_module(buff, 
+                             bufflen,
+                             NULL,
+                             NULL,
+                             modname, 
+                             revision,
+                             NCXMOD_MODE_YANG,
+                             FALSE,
+                             &done,
+                             pcb,
+                             ptyp);
+        }
 
-#if 0
-    /*** DO NOT CHECK JUST THE CURRENT DIR AND NO SUBDIRS ***/
-    /* 3a) try as module in current dir, YANG format  */
-    if (!done) {
-        res = try_module(buff, 
-                         bufflen,
-                         NULL,
-                         NULL,
-                         modname, 
-                         revision,
-                         NCXMOD_MODE_YANG,
-                         FALSE,
-                         &done,
-                         pcb,
-                         ptyp);
+        /* 3b) try as module in current dir, YIN format  */
+        if (!done) {
+            res = try_module(buff, 
+                             bufflen,
+                             NULL,
+                             NULL,
+                             modname, 
+                             revision,
+                             NCXMOD_MODE_YIN,
+                             FALSE,
+                             &done,
+                             pcb,
+                             ptyp);
+        }
     }
-
-    /* 3b) try as module in current dir, YIN format  */
-    if (!done) {
-        res = try_module(buff, 
-                         bufflen,
-                         NULL,
-                         NULL,
-                         modname, 
-                         revision,
-                         NCXMOD_MODE_YIN,
-                         FALSE,
-                         &done,
-                         pcb,
-                         ptyp);
-    }
-#else
-    /*** CHECK THE CURRENT DIR AND ANY SUBDIRS ***/
-    /* 3) try current working directory and subdirs
-     *    if the subdirs parameter is true
-     * check before the modpath
-     */
-    if (!done) {
-        res = check_module_pathlist((const xmlChar *)".",
-                                    buff,
-                                    bufflen,
-                                    modname, 
-                                    revision,
-                                    pcb,
-                                    ptyp, 
-                                    &done);
-    }
-#endif
 
     /* 4) try YUMA_MODPATH environment variable if set */
     if (!done && ncxmod_mod_path) {
@@ -2149,22 +2151,12 @@ static status_t
 
     if (done) {
         if (res == NO_ERR || ptyp == YANG_PT_INCLUDE) {
-            if (retmod) {
-
+            if (retmod != NULL) {
                 if (pcb->retmod != NULL) {
                     *retmod = pcb->retmod;
                 } else if (ptyp == YANG_PT_TOP) {
                     *retmod = pcb->top;
                 } 
-
-#if 0
-                if (pcb->retmod != NULL) {
-                    *retmod = pcb->retmod;
-                } else {
-                    *retmod = pcb->top;
-                }
-#endif
-
             }
         }
         return res;

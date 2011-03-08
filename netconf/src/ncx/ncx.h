@@ -2718,6 +2718,21 @@ extern void
     ncx_inc_warnings (ncx_module_t *mod);
 
 
+/********************************************************************
+* FUNCTION ncx_get_cwd_subdirs
+*
+* Get the CLI parameter value whether to search for modules
+* in subdirs of the CWD by default.  Does not affect YUMA_MODPATH
+* or other hard-wired searches
+*
+* RETURNS:
+*   TRUE if ncxmod should search for modules in subdirs of the CWD
+*   FALSE if ncxmod should not search for modules in subdirs of the CWD
+*********************************************************************/
+extern boolean
+    ncx_get_cwd_subdirs (void);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

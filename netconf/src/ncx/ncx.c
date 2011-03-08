@@ -284,6 +284,11 @@ uint32              free_cnt;
 /* use XML prefix flag */
 boolean             use_prefix;
 
+/* search subdirs in the CWD for modules, for default search
+ * not YUMA_MODPATH or YUMA_HOME, or YUMA_INSTALL subdirs
+ * this is over-ridden by the --subdirs=false parameter
+ */
+boolean             cwd_subdirs;
 
 /********************************************************************
 * FUNCTION check_moddef
@@ -993,7 +998,9 @@ status_t
     ncx_max_filptrs = NCX_DEF_FILPTR_CACHESIZE;
     ncx_cur_filptrs = 0;
 
+    /* no CLI parameters for these 2 parms yet */
     use_prefix = FALSE;
+    cwd_subdirs = FALSE;
 
     /* check that the correct version of libxml2 is installed */
     LIBXML_TEST_VERSION;
@@ -7512,6 +7519,24 @@ void
     mod->warnings++;
 
 }   /* ncx_inc_warnings */
+
+
+/********************************************************************
+* FUNCTION ncx_get_cwd_subdirs
+*
+* Get the CLI parameter value whether to search for modules
+* in subdirs of the CWD by default.  Does not affect YUMA_MODPATH
+* or other hard-wired searches
+*
+* RETURNS:
+*   TRUE if ncxmod should search for modules in subdirs of the CWD
+*   FALSE if ncxmod should not search for modules in subdirs of the CWD
+*********************************************************************/
+boolean
+    ncx_get_cwd_subdirs (void)
+{
+    return cwd_subdirs;
+}   /* ncx_get_cwd_subdirs */
 
 
 /* END file ncx.c */

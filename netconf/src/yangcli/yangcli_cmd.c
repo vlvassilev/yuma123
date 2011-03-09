@@ -3722,6 +3722,10 @@ static status_t
     res = NO_ERR;
     dofill = TRUE;
 
+    if (LOGDEBUG) {
+        log_debug("\nSending <edit-config> request");
+    }
+
     /* either going to free valroot or config_content */
     if (valroot == NULL || valroot == config_content) {
         freeroot = FALSE;
@@ -4119,6 +4123,14 @@ static status_t
     input = NULL;
     filter = NULL;
 
+    if (LOGDEBUG) {
+        if (source != NULL) {
+            log_debug("\nSending <get-config> request");
+        } else {
+            log_debug("\nSending <get> request");
+        }
+    }
+
     /* either going to free valroot or config_content */
     if (valroot == NULL || valroot == get_content) {
         freeroot = FALSE;
@@ -4439,7 +4451,7 @@ static val_value_t *
         *valroot = get_instanceid_parm(server_cb,
                                        target,
                                        TRUE,
-                                       TRUE,
+                                       iswrite,
                                        &targobj,
                                        &targval,
                                        &res);

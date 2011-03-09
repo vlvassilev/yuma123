@@ -258,6 +258,11 @@ static status_t
     res = NO_ERR;
     cfg_id = lockcb->config_id;
 
+    if (LOGDEBUG) {
+        log_debug("\nSending <%s> request",
+                  (islock) ? NCX_EL_LOCK : NCX_EL_UNLOCK);
+    }
+
     if (islock) {
         rpc = ncx_find_object(get_netconf_mod(server_cb), 
                               NCX_EL_LOCK);
@@ -858,6 +863,10 @@ status_t
     reqdata = NULL;
     res = NO_ERR;
 
+    if (LOGDEBUG) {
+        log_debug("\nSending <discard-changes> request");
+    }
+    
     rpc = ncx_find_object(get_netconf_mod(server_cb), 
                           NCX_EL_DISCARD_CHANGES);
     if (!rpc) {

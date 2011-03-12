@@ -399,8 +399,6 @@ static status_t
 *   mscb == manager control block to use
 *   operation == string to use for operation (read, write, open)
 *
-* RETURNS:
-*   number of bytes read; -1  for error; 0 for connection closed
 *********************************************************************/
 static void
     log_ssh2_error (ses_cb_t *scb,
@@ -432,6 +430,41 @@ static void
     }
 
 }  /* log_ssh2_error */
+
+
+/********************************************************************
+* FUNCTION check_channel_eof
+*
+* Check if the channel_eof condition is true
+*
+* INPUTS:
+*   scb == session control block to use
+*   mscb == manager control block to use
+*
+* RETURNS:
+*   1 if channel EOF condition is true
+*   0 if channel OK
+*********************************************************************/
+static int
+    check_channel_eof (ses_cb_t *scb,
+                       mgr_scb_t  *mscb)
+{
+    int ret;
+
+    ret = libssh2_channel_eof(mscb->channel);
+
+    if (LOGDEBUG4) {
+        log_debug4("\nmgr_ses: test channel EOF: ses(%u) ret(%d)", 
+                   scb->sid,
+                   ret);
+    }
+    if (LOGDEBUG && ret) {
+        log_debug4("\nmgr_ses: channel closed by server: ses(%u)", 
+                   scb->sid);
+    }
+    return ret;
+
+}  /* check_channel_eof */
 
 
 /************ E X T E R N A L   F U N C T I O N S *****************/
@@ -587,7 +620,7 @@ status_t
         return res;
     }
 
-    /* initialize the static vars */
+    /* initialize the static fields */
     scb->type = SES_TYP_NETCONF;
     scb->transport = SES_TRANSPORT_SSH;
     scb->state = SES_ST_INIT;
@@ -596,7 +629,7 @@ status_t
     scb->instate = SES_INST_IDLE;
     scb->rdfn = mgr_ses_readfn;
     scb->wrfn = mgr_ses_writefn;
-    
+
     /* get a temp files directory for this session */
     if (progcb != NULL) {
         res = NO_ERR;
@@ -1005,12 +1038,16 @@ ssize_t
     scb = (ses_cb_t *)s;
     mscb = mgr_ses_get_mscb(scb);
 
-    ret = libssh2_channel_read(mscb->channel, buff, bufflen);
+    if (check_channel_eof(scb, mscb)) {
+        ret = 0;
+    } else {
+        ret = libssh2_channel_read(mscb->channel, buff, bufflen);
 
-    if (LOGDEBUG3) {
-        log_debug3("\nmgr_ses: read channel ses(%u) ret(%d)", 
-                   scb->sid,
-                   ret);
+        if (LOGDEBUG3) {
+            log_debug3("\nmgr_ses: read channel ses(%u) ret(%d)", 
+                       scb->sid,
+                       ret);
+        }
     }
 
     mscb->returncode = ret;
@@ -1078,40 +1115,46 @@ status_t
         }
     }
 
-    while (buff) {
-        done = FALSE;
-        while (!done) {
-            ret = libssh2_channel_write(mscb->channel, 
-                                        (char *)buff->buff, 
-                                        buff->bufflen);
-            if (ret < 0 || ret != (int)buff->bufflen) {
-                if (ret == LIBSSH2_ERROR_EAGAIN) {
-                    /* not done; sleep and try again */
-                    usleep(1000);   /* 1000 micro-seconds */
-                    continue;
-                }
-                log_ssh2_error(scb, mscb, "write");
-            }
-            done = TRUE;
-        }
+    if (check_channel_eof(scb, mscb)) {
+        res = ERR_NCX_SESSION_CLOSED;
+    }
 
-        if (ret == 0) {
-            res = ERR_NCX_SESSION_CLOSED;
-        } else if (ret > 0) {
-            if (LOGDEBUG2) {
-                log_debug2("\nmgr_ses: channel write %u bytes OK "
-                           "on session %u (a:%u)",
-                           buff->bufflen,
-                           scb->sid,
-                           mscb->agtsid);
-            }
-            if (LOGDEBUG3) {
-                for (i=0; i < buff->bufflen; i++) {
-                    log_debug3("%c", buff->buff[i]);
+    while (buff) {
+        if (res == NO_ERR) {
+            done = FALSE;
+            while (!done) {
+                ret = libssh2_channel_write(mscb->channel, 
+                                            (char *)buff->buff, 
+                                            buff->bufflen);
+                if (ret < 0 || ret != (int)buff->bufflen) {
+                    if (ret == LIBSSH2_ERROR_EAGAIN) {
+                        /* not done; sleep and try again */
+                        usleep(1000);   /* 1000 micro-seconds */
+                        continue;
+                    }
+                    log_ssh2_error(scb, mscb, "write");
                 }
+                done = TRUE;
             }
-        } else {
-            res = ERR_NCX_OPERATION_FAILED;
+
+            if (ret == 0) {
+                res = ERR_NCX_SESSION_CLOSED;
+            } else if (ret > 0) {
+                if (LOGDEBUG2) {
+                    log_debug2("\nmgr_ses: channel write %u bytes OK "
+                               "on session %u (a:%u)",
+                               buff->bufflen,
+                               scb->sid,
+                               mscb->agtsid);
+                }
+                if (LOGDEBUG3) {
+                    for (i=0; i < buff->bufflen; i++) {
+                        log_debug3("%c", buff->buff[i]);
+                    }
+                }
+            } else {
+                res = ERR_NCX_OPERATION_FAILED;
+            }
         }
 
         ses_msg_free_buff(scb, buff);

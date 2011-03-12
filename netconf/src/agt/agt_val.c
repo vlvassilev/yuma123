@@ -1150,6 +1150,7 @@ static status_t
 
     if (res == NO_ERR && 
         newval != NULL && 
+        curval != NULL &&
         newval->btyp == NCX_BT_LIST && 
         cur_editop == OP_EDITOP_MERGE) {
         
@@ -1167,7 +1168,7 @@ static status_t
     }
 
     if (res == NO_ERR && 
-        newval &&
+        newval != NULL &&
         obj_is_root(newval->obj) &&
         editop == OP_EDITOP_LOAD) {
         val_remove_child(newval);

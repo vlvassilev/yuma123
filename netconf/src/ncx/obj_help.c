@@ -314,6 +314,11 @@ void
                 help_write_lines(val, 0, FALSE);
                 help_write_lines((const xmlChar *)"]", 0, FALSE); 
             }
+            if (obj_is_mandatory(obj)) {
+                help_write_lines((const xmlChar *)" <Mandatory>", 
+                                 0, 
+                                 FALSE);
+            }
         }
     }
 

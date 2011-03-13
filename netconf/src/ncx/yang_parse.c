@@ -2977,6 +2977,68 @@ static status_t
 }  /* consume_body_stmts */
 
 
+
+
+/********************************************************************
+* FUNCTION check_module_name
+* 
+*  Check if the module name part of the sourcefn is the
+*  same as the mod name
+*
+* INPUTS:
+*   mod == ncx_module in progress
+*
+* RETURNS:
+*   TRUE if name check OK
+*   FALSE if name check failed
+*********************************************************************/
+static boolean
+    check_module_name (ncx_module_t *mod)
+{
+    const xmlChar *str;
+    boolean  ret = TRUE;
+    uint32   len1, len2;
+
+    if (mod->sourcefn != NULL && mod->name != NULL) {
+        str = mod->sourcefn;
+        while (*str != '\0' && *str != '@') {
+            str++;
+        }
+        if (*str == '@') {
+            len1 = (uint32)(str - mod->sourcefn);
+        } else {
+            len1 = xml_strlen(mod->sourcefn);
+            if (len1 > 2) {
+                str = &mod->sourcefn[len1-1];
+                while (str > mod->sourcefn && *str != '.') {
+                    str--;
+                }
+                if (str > mod->sourcefn) {
+                    len1 = (uint32)(str - mod->sourcefn);
+                } else {
+                    return FALSE;
+                }
+            } else {
+                return FALSE;
+            }
+        }
+
+        len2 = xml_strlen(mod->name);
+
+        if (len1 != len2) {
+            ret = FALSE;
+        } else if (xml_strncmp(mod->sourcefn,
+                               mod->name,
+                               len1)) {
+            ret = FALSE;
+        }
+    }
+
+    return ret;
+
+}  /* check_module_name */
+
+
 /********************************************************************
 * FUNCTION parse_yang_module
 * 
@@ -3130,7 +3192,32 @@ static status_t
         return SET_ERROR(ERR_INTERNAL_VAL);
     }
 
+
+#ifdef YANG_PARSE_DEBUG
+    if (res == NO_ERR && LOGDEBUG2) {
+        log_debug2("\nyang_parse: Start %smodule '%s' OK",
+                   ismain ? "" : "sub",
+                   mod->name);
+    }
+#endif
+
     mod->ismod = ismain;
+
+    /* check if the file name matches the [sub]module name given */
+    if (check_module_name(mod) == FALSE) {
+        if (ncx_warning_enabled(ERR_NCX_FILE_MOD_MISMATCH)) {
+            log_warn("\nWarning: base file name in '%s' should match "
+                     "the %smodule name '%s'",
+                     mod->sourcefn,
+                     ismain ? "" : "sub",
+                     mod->name);
+            ncx_print_errormsg(tkc, 
+                               mod, 
+                               ERR_NCX_FILE_MOD_MISMATCH);
+        } else {
+            ncx_inc_warnings(mod);
+        }
+    }
 
     if (ismain) {
         /* consume module-header-stmts */

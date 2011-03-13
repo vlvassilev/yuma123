@@ -762,6 +762,8 @@ const char *
         return "dependency file has errors";
     case ERR_NCX_TOP_LEVEL_MANDATORY:
         return "top-level object is mandatory";
+    case ERR_NCX_FILE_MOD_MISMATCH:
+        return "file name does not match [sub]module name";
 
     /* system info codes start at 500 */
     case ERR_PARS_SECDONE:

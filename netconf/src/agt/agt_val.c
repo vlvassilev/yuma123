@@ -419,8 +419,9 @@ static rpc_undo_rec_t *
 *
 * INPUTS:
 *    editop == edit operation value
-*    curnode == pointer to current value node 
-*                   (just used to check if non-NULL)
+*    newnode == pointer to new node (if any)
+*    curnode == pointer to current value node (if any)
+*                (just used to check if non-NULL or compare leaf)
 *
 * RETURNS:
 *    TRUE if the current node needs the write operation applied
@@ -428,7 +429,8 @@ static rpc_undo_rec_t *
 *********************************************************************/
 static boolean
     apply_this_node (op_editop_t editop,
-                     const val_value_t *curnode)
+                     val_value_t *newnode,
+                     val_value_t *curnode)
 {
     boolean retval;
 
@@ -446,17 +448,44 @@ static boolean
             retval = TRUE;
         } else {
             /* if this is a leaf and not an index leaf, then
-             * apply the merge here
+             * apply the merge here, if value changed
              */
             if (curnode && !curnode->index) {
-                retval = typ_is_simple
-                    (obj_get_basetype(curnode->obj));
+                if (typ_is_simple
+                    (obj_get_basetype(curnode->obj))) {
+                    if (newnode == NULL) {
+                        retval = TRUE;
+                    } else if (newnode->editvars != NULL &&
+                               newnode->editvars->insertop != OP_INSOP_NONE) {
+                        retval = TRUE;
+                    } else if (val_compare(newnode, curnode) != 0) {
+                        retval = TRUE;
+                    } /* else if this is a complex node, keep checking
+                       * all the descendents in case an insert operation
+                       * is present in a nested list or leaf list
+                       * this will compare the same for a move op
+                       */
+                }
             }
         }
         break;
     case OP_EDITOP_REPLACE:
-        if (curnode == NULL || !obj_is_root(curnode->obj)) {
+        if (curnode == NULL) {
             retval = TRUE;
+        } else if (!obj_is_root(curnode->obj)) {
+            /* apply here if value has changed */
+            if (newnode == NULL) {
+                SET_ERROR(ERR_INTERNAL_VAL);
+            } else if (newnode->editvars != NULL &&
+                       newnode->editvars->insertop != OP_INSOP_NONE) {
+                retval = TRUE;
+            } else if (val_compare(newnode, curnode) != 0) {
+                retval = TRUE;
+            } /* else if this is a complex node, keep checking
+               * all the descendents in case an insert operation
+               * is present in a nested list or leaf list
+               * this will compare the same for a move op
+               */
         }
         break;
     case OP_EDITOP_COMMIT:
@@ -900,7 +929,7 @@ static status_t
         applyhere = TRUE;
         *done = TRUE;
     } else {
-        applyhere = apply_this_node(cur_editop, curval);
+        applyhere = apply_this_node(cur_editop, newval, curval);
         *done = applyhere;
 
         /* try to make sure subtree has changed in a replace */
@@ -997,7 +1026,6 @@ static status_t
         if (LOGDEBUG2) {
             log_debug2("\napply_write_val: %s applyhere", name);
         }
-
 
         res = handle_user_callback(AGT_CB_APPLY, 
                                    editop,
@@ -1149,6 +1177,7 @@ static status_t
     }
 
     if (res == NO_ERR && 
+        applyhere == TRUE &&
         newval != NULL && 
         curval != NULL &&
         newval->btyp == NCX_BT_LIST && 
@@ -1253,7 +1282,9 @@ static status_t
         applyhere = TRUE;
         *done = TRUE;
     } else {
-        applyhere = apply_this_node(newval->editvars->editop, curval);
+        applyhere = apply_this_node(newval->editvars->editop, 
+                                    newval, 
+                                    curval);
         *done = applyhere;
 
         /* try to make sure subtree has changed in a replace */
@@ -1429,6 +1460,7 @@ static status_t
     } /* else ignore metadata merge */
 
     if (res == NO_ERR 
+        && applyhere == TRUE
         && newval->btyp == NCX_BT_LIST
         && newval->editvars->insertstr 
         && newval->editvars->editop == OP_EDITOP_MERGE) {
@@ -1485,8 +1517,10 @@ static status_t
     ncx_iqual_t      iqual;
     op_editop_t      cureditop;
     uint32           lockid;
+    boolean          errdone;
 
     res = NO_ERR;
+    errdone = FALSE;
 
     /* check the 'operation' attribute in VALIDATE phase */
     switch (cbtyp) {
@@ -1545,6 +1579,15 @@ static status_t
                                  &lockid, 
                                  NCX_NT_VAL, 
                                  curval);
+                errdone = TRUE;
+            }
+        }
+
+        if (res == NO_ERR) {
+            res = check_insert_attr(scb, msg, newval);
+            /* any errors already recorded */
+            if (res != NO_ERR) {
+                errdone = TRUE;
             }
         }
 
@@ -1552,7 +1595,9 @@ static status_t
          * operation in affect already
          */
         if (res == NO_ERR && 
-            newval->editvars->editop != OP_EDITOP_NONE) {
+            apply_this_node(newval->editvars->editop,
+                            newval,
+                            curval)) {
 
             res = handle_user_callback(AGT_CB_VALIDATE, 
                                        newval->editvars->editop,
@@ -1560,13 +1605,13 @@ static status_t
                                        msg, 
                                        newval, 
                                        curval);
+            if (res != NO_ERR) {
+                errdone = TRUE;
+            }
         }
 
         /* check the insert operation, if any */
-        if (res == NO_ERR) {
-            res = check_insert_attr(scb, msg, newval);
-            /* any errors already recorded */
-        } else {
+        if (res != NO_ERR && !errdone) {
             /* record error that happened above */
             agt_record_error(scb, 
                              &msg->mhdr, 
@@ -1759,8 +1804,9 @@ static status_t
          * operation in affect already
          */
         if (res == NO_ERR && 
-            newval->editvars->editop != OP_EDITOP_NONE) {
-
+            apply_this_node(newval->editvars->editop,
+                            newval,
+                            curval)) {
             res = handle_user_callback(AGT_CB_VALIDATE, 
                                        newval->editvars->editop,
                                        scb, 

@@ -124,7 +124,6 @@ extern "C" {
 #define XSD_HEX_BINARY     (const xmlChar *)"hexBinary"
 #define XSD_ITEMTYPE       (const xmlChar *)"itemType"
 #define XSD_KEY            (const xmlChar *)"key"
-#define XSD_KEY_SUFFIX     (const xmlChar *)"_Key"
 #define XSD_LANG           (const xmlChar *)"xml:lang"
 #define XSD_LAX            (const xmlChar *)"lax"
 #define XSD_LENGTH         (const xmlChar *)"length"
@@ -137,6 +136,7 @@ extern "C" {
 #define XSD_MIN_INCL       (const xmlChar *)"minInclusive"
 #define XSD_MIN_LEN        (const xmlChar *)"minLength"
 #define XSD_MIN_OCCURS     (const xmlChar *)"minOccurs"
+#define XSD_NAMESPACE      (const xmlChar *)"namespace"
 #define XSD_NOTIF_CONTENT  (const xmlChar *)"notificationContent"
 #define XSD_NOTIF_CTYPE    (const xmlChar *)"NotificationContentType"
 #define XSD_OPTIONAL       (const xmlChar *)"optional"
@@ -529,6 +529,7 @@ extern status_t
 *
 * INPUTS:
 *    descr == description string (may be NULL)
+*    ref == reference string (may be NULL)
 *    condition == condition string (may be NULL)
 *    units == units clause contents (or NULL if not used)
 *    maxacc == max-access clause (NONE == omit)
@@ -545,12 +546,13 @@ extern status_t
 *********************************************************************/
 extern status_t
     xsd_do_annotation (const xmlChar *descr,
-		       const xmlChar *condition,
-		       const xmlChar *units,
-		       ncx_access_t maxacc,
-		       ncx_status_t status,
-		       const dlq_hdr_t *appinfoQ,
-		       val_value_t  *val);
+                       const xmlChar *ref,
+                       const xmlChar *condition,
+                       const xmlChar *units,
+                       ncx_access_t maxacc,
+                       ncx_status_t status,
+                       const dlq_hdr_t *appinfoQ,
+                       val_value_t  *val);
 
 
 /********************************************************************
@@ -620,30 +622,16 @@ extern val_value_t *
 /********************************************************************
 * FUNCTION xsd_add_aughook
 * 
-*   Add an abstract element to set a substitutionGroup that
-*   can be used by an augment clause to create new nodes
-*   within an existing structure.  This allows any namespace,
-*   not just external namespaces like xsd_add_any
-*
-*   augment /foo/bar  -->   substitutionGroup='__.foo.bar.A__'
-*
-*   This function is called for /foo and /foo/bar, which
-*   creates abstract elements /foo/__.foo.A__ and /foo/bar/__.foo.bar.A__
-*
-*   The YANG name length restrictions, and internal NcxName
-*   restrictions do not matter since these constructed element names
-*   are only used within the XSD
+* Create an xs:any hook to add augments
 *  
 * INPUTS:
 *    val == val_value_t struct to add new last child leaf 
-*    obj == object to use as the template for the new last leaf
 *
 * RETURNS:
 *   status
 *********************************************************************/
 extern status_t
-    xsd_add_aughook (val_value_t *val,
-		     const obj_template_t *obj);
+    xsd_add_aughook (val_value_t *val);
 
 
 /********************************************************************
@@ -701,6 +689,18 @@ extern status_t
 extern status_t
     test_basetype_attr (const ncx_module_t *mod,
                         const typ_def_t *typdef);
+
+
+/********************************************************************
+* FUNCTION get_next_seqnum
+* 
+*  Get a unique integer
+*
+* RETURNS:
+*   next seqnum
+*********************************************************************/
+extern uint32
+    get_next_seqnum (void);
 
 
 #ifdef __cplusplus

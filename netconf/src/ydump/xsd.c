@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Andy Bierman
+ * Copyright (c) 2009 - 2011, Andy Bierman
  * 
  * Unless required by applicable law or agreed to in writing,
  * software distributed under the License is distributed on an
@@ -435,7 +435,7 @@ status_t
 
     /* add the NETCONF NS if any RPC or OBJECT definitions */
     nc_id = xmlns_nc_id();
-    if (mod->nsid != nc_id && !dlq_empty(&mod->datadefQ)) {
+    if (!dlq_empty(&mod->datadefQ)) {
         res = xml_add_xmlns_attr(top_attrs, 
                                  nc_id, 
                                  xmlns_get_ns_prefix(nc_id));

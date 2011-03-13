@@ -346,12 +346,10 @@ static status_t
 {
     val_value_t      *elem, *cpx, *seq, *annot;
     obj_template_t   *child;
-    obj_container_t  *con;
     status_t          res;
     xmlns_id_t        xsd_id;
 
     res = NO_ERR;
-    con = obj->def.container;
     xsd_id = xmlns_xs_id();
 
     /* element struct of N arbitrary nodes */
@@ -363,7 +361,10 @@ static status_t
     } 
 
     /* add the name attribute */
-    res = xml_val_add_cattr(NCX_EL_NAME, 0, con->name, elem);
+    res = xml_val_add_cattr(NCX_EL_NAME, 
+                            0, 
+                            obj_get_name(obj), 
+                            elem);
     if (res != NO_ERR) {
         return res;
     }
@@ -401,19 +402,122 @@ static status_t
     }
 
     /* go through all the child nodes and generate elements for them */
-    for (child = (obj_template_t *)dlq_firstEntry(con->datadefQ);
+    for (child = (obj_template_t *)
+             dlq_firstEntry(obj_get_datadefQ(obj));
          child != NULL && res==NO_ERR;
          child = (obj_template_t *)dlq_nextEntry(child)) {
         res = do_yang_elem_btype(mod, child, NULL, FALSE, seq);
     }
 
     if (res == NO_ERR) {
-        res = xsd_add_aughook(seq, obj);
+        res = xsd_add_aughook(seq);
     }
 
     return res;
 
 }  /* do_yang_elem_container */
+
+
+/********************************************************************
+* FUNCTION do_yang_elem_anyxml
+* 
+*   Generate the element node for an anyxml object type
+*
+* INPUTS:
+*    obj == object to convert to XSD element
+*    val == struct parent to contain child nodes
+*
+* OUTPUTS:
+*    val->v.childQ has entries added for complex content (xs:anyType)
+*
+* RETURNS:
+*   status
+*********************************************************************/
+static status_t
+    do_yang_elem_anyxml (obj_template_t *obj,
+                         val_value_t *val)
+{
+    val_value_t      *elem, *cpx, *cpxcon, *annot, *ext;
+    xmlChar          *qname;
+    status_t          res;
+    xmlns_id_t        xsd_id;
+    
+    res = NO_ERR;
+    xsd_id = xmlns_xs_id();
+
+    /* element struct of N arbitrary nodes */
+    elem = xml_val_new_struct(XSD_ELEMENT, xsd_id);
+    if (!elem) {
+        return ERR_INTERNAL_MEM;
+    } else {
+        val_add_child(elem, val);  /* add early */
+    } 
+
+    /* add the name attribute */
+    res = xml_val_add_cattr(NCX_EL_NAME, 
+                            0, 
+                            obj_get_name(obj), 
+                            elem);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* add the minOccurs="0" attribute */
+    res = xml_val_add_cattr(XSD_MIN_OCCURS, 
+                            0, 
+                            XSD_ZERO, 
+                            elem);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    /* check if an annotation is needed for the element */
+    annot = xsd_make_obj_annotation(obj, &res);
+    if (res != NO_ERR) {
+        return res;
+    } else if (annot) {
+        val_add_child(annot, elem);
+    }
+
+    /* next level is complexType */
+    cpx = xml_val_new_struct(XSD_CPX_TYP, xsd_id);
+    if (!cpx) {
+        return ERR_INTERNAL_MEM;
+    } else {
+        val_add_child(cpx, elem);  /* add early */
+    }
+
+    /* complex content */
+    cpxcon = xml_val_new_struct(XSD_CPX_CON, xsd_id);
+    if (!cpxcon) {
+        return ERR_INTERNAL_MEM;
+    } else {
+        val_add_child(cpxcon, cpx);   /* add early */
+    }
+
+    /* extension */
+    ext = xml_val_new_flag(XSD_EXTENSION, xsd_id);
+    if (!ext) {
+        return ERR_INTERNAL_MEM;
+    } else {
+        val_add_child(ext, cpxcon);   /* add early */
+    }
+
+    /* add baseType attribute */
+    qname = xml_val_make_qname(xsd_id, XSD_ANY_TYPE);
+    if (!qname) {
+        return ERR_INTERNAL_MEM;
+    }
+
+    /* pass off qname memory here */
+    res = xml_val_add_attr(XSD_BASE, 0, qname, ext);
+    if (res != NO_ERR) {
+        m__free(qname);
+    }
+    
+    return res;
+
+}  /* do_yang_elem_anyxml */
 
 
 /********************************************************************
@@ -493,7 +597,7 @@ static status_t
                        obj_template_t *augtargobj,
                        val_value_t *val)
 {
-    val_value_t            *elem, *cpx, *annot, *seq, *key, *chnode, *uniqval;
+    val_value_t       *elem, *cpx, *annot, *seq, *key, *chnode, *uniqval;
     obj_template_t    *child;
     obj_list_t        *list;
     obj_key_t         *idx;
@@ -531,24 +635,27 @@ static status_t
         }
     }
 
-    /* add minOccurs and maxOccurs attribbutes to the element */
-    if (list->minset) {
-        sprintf((char *)numbuff, "%u", list->minelems);
-        res = xml_val_add_cattr(XSD_MIN_OCCURS, 0, numbuff, elem);
-    } else {
-        res = xml_val_add_cattr(XSD_MIN_OCCURS, 0, XSD_ZERO, elem);
-    }
-    if (res != NO_ERR) {
-        return res;
-    }
-    if (list->maxset && list->maxelems) {
-        sprintf((char *)numbuff, "%u", list->maxelems);
-        res = xml_val_add_cattr(XSD_MAX_OCCURS, 0, numbuff, elem);
-    } else {
-        res = xml_val_add_cattr(XSD_MAX_OCCURS, 0, XSD_UNBOUNDED, elem);
-    }
-    if (res != NO_ERR) {
-        return res;
+    /* do not put minOccurs or maxOccurs on top-level elements */
+    if (!obj_is_top(obj)) {
+        /* add minOccurs and maxOccurs attributes to the element */
+        if (list->minset) {
+            sprintf((char *)numbuff, "%u", list->minelems);
+            res = xml_val_add_cattr(XSD_MIN_OCCURS, 0, numbuff, elem);
+        } else {
+            res = xml_val_add_cattr(XSD_MIN_OCCURS, 0, XSD_ZERO, elem);
+        }
+        if (res != NO_ERR) {
+            return res;
+        }
+        if (list->maxset && list->maxelems) {
+            sprintf((char *)numbuff, "%u", list->maxelems);
+            res = xml_val_add_cattr(XSD_MAX_OCCURS, 0, numbuff, elem);
+        } else {
+            res = xml_val_add_cattr(XSD_MAX_OCCURS, 0, XSD_UNBOUNDED, elem);
+        }
+        if (res != NO_ERR) {
+            return res;
+        }
     }
 
     /* add an annotation node if needed */
@@ -608,7 +715,7 @@ static status_t
         }
     }
 
-    res = xsd_add_aughook(seq, obj);
+    res = xsd_add_aughook(seq);
     if (res != NO_ERR) {
         return res;
     }
@@ -624,13 +731,16 @@ static status_t
 
         /* generate a key name */
         buff = m__getMem(xml_strlen(list->name) + 
-                         xml_strlen(XSD_KEY_SUFFIX) + 1);
+                         xml_strlen(XSD_KEY) + 
+                         NCX_MAX_NUMLEN + 1);
+
         if (!buff) {
             return ERR_INTERNAL_MEM;
         }
         str = buff;
         str += xml_strcpy(str, list->name);
-        str += xml_strcpy(str, XSD_KEY_SUFFIX);
+        str += xml_strcpy(str, XSD_KEY);
+        sprintf((char *)str, "%u", get_next_seqnum());
 
         /* add the name attribute to the key node */
         res = xml_val_add_attr(NCX_EL_NAME, 0, buff, key);
@@ -908,12 +1018,12 @@ static status_t
             res = do_yang_elem_btype(mod, child, NULL, FALSE, seq);
         }
         if (res == NO_ERR) {
-            res = xsd_add_aughook(seq, casobj);
+            res = xsd_add_aughook(seq);
         }
     }
 
     if (res == NO_ERR) {
-        res = xsd_add_aughook(top, obj);
+        res = xsd_add_aughook(top);
     }
 
     return res;
@@ -1217,8 +1327,7 @@ static status_t
         res = do_yang_elem_container(mod, obj, augtargobj, val);
         break;
     case OBJ_TYP_ANYXML:
-        /**** NOT HANDLED YET *****/
-        res = NO_ERR;
+        res = do_yang_elem_anyxml(obj, val);
         break;
     case OBJ_TYP_LEAF:
         if (typ_get_basetype(typdef) == NCX_BT_UNION) {
@@ -1687,7 +1796,7 @@ static status_t
         }
     }
 
-    res = xsd_add_aughook(seq, obj);
+    res = xsd_add_aughook(seq);
     return res;
 
 } /* add_yang_rpcio */
@@ -1717,7 +1826,6 @@ static status_t
 {
     val_value_t          *elem, *annot;
     obj_template_t       *inputobj, *outputobj;
-    obj_rpc_t            *rpc;
     xmlChar              *qname;
     xmlns_id_t            xsd_id, nc_id;
     status_t              res;
@@ -1725,9 +1833,12 @@ static status_t
     xsd_id = xmlns_xs_id();
     nc_id = xmlns_nc_id();
 
-    rpc = obj->def.rpc;
-    inputobj = obj_find_template(&rpc->datadefQ, NULL, YANG_K_INPUT);
-    outputobj = obj_find_template(&rpc->datadefQ, NULL, YANG_K_OUTPUT);
+    inputobj = obj_find_template(obj_get_datadefQ(obj),
+                                 NULL,
+                                 YANG_K_INPUT);
+    outputobj = obj_find_template(obj_get_datadefQ(obj),
+                                  NULL,
+                                  YANG_K_OUTPUT);
 
     /* add a named typedef for the output if needed */
     if (outputobj) {
@@ -1748,7 +1859,10 @@ static status_t
     }
 
     /* add the name attribute */
-    res = xml_val_add_cattr(NCX_EL_NAME, 0, rpc->name, elem);
+    res = xml_val_add_cattr(NCX_EL_NAME, 
+                            0, 
+                            obj_get_name(obj),
+                            elem);
     if (res != NO_ERR) {
         return res;
     }
@@ -1904,7 +2018,7 @@ static status_t
         }
     }
 
-    res = xsd_add_aughook(seq, obj);
+    res = xsd_add_aughook(seq);
     return res;
 
 } /* add_yang_notif */

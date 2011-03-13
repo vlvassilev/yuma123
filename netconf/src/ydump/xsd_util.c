@@ -140,6 +140,7 @@ date         init     comment
 *                       V A R I A B L E S                           *
 *                                                                   *
 *********************************************************************/
+static uint32 seqnum = 1;
 
 
 /********************************************************************
@@ -356,6 +357,125 @@ static status_t
 }  /* add_appinfoQ */
 
 
+/********************************************************************
+* FUNCTION make_reference
+* 
+*   Create a value struct representing the documentation node
+*   Add this element to an <appinfo> element
+*
+* INPUTS:
+*    ref == reference clause (may be NULL)
+*
+* RETURNS:
+*   value struct or NULL if malloc error
+*********************************************************************/
+static val_value_t *
+    make_reference (const xmlChar *ref)
+{
+    val_value_t    *retval, *textval, *urlval;
+    const xmlChar  *str, *p;
+    xmlChar        *buff, *q;
+    uint32          len, numlen, i;
+    xmlns_id_t      ncx_id;
+
+    if (!ref) {
+        return NULL;
+    }
+
+    ncx_id = xmlns_ncx_id();
+    len = xml_strlen(ref);
+
+    retval = xml_val_new_struct(YANG_K_REFERENCE,  ncx_id);
+    if (!retval) {
+        return NULL;
+    }
+
+    textval = xml_val_new_cstring(NCX_EL_TEXT, ncx_id, ref);
+    if (!textval) {
+        val_free_value(retval);
+        return NULL;
+    } else {
+        val_add_child(textval, retval);
+    }
+
+    /* check if the reference is to an RFC and if so generate
+     * a 'url' element as well
+     */
+    if (len > 4 && 
+        !xml_strncmp(ref, (const xmlChar *)"RFC ", 4)) {
+        str = &ref[4];
+        p = str;
+        while (*p && isdigit(*p)) {
+            p++;
+        }
+        numlen = (uint32)(p-str);
+
+        /* IETF RFC URLs are currently hard-wired 4 digit number */
+        if (numlen && (numlen <= 4) && (len >= numlen+4)) {
+            buff = m__getMem(xml_strlen(XSD_RFC_URL) + 9);
+            if (!buff) {
+                val_free_value(retval);
+                return NULL;
+            }
+
+            q = buff;
+            q += xml_strcpy(q, XSD_RFC_URL);
+            for (i = 4 - numlen; i; i--) {
+                *q++ = '0';
+            }
+            for (i=0; i<numlen; i++) {
+                *q++ = *str++;
+            } 
+            xml_strcpy(q, (const xmlChar *)".txt");
+
+            urlval = xml_val_new_string(NCX_EL_URL, ncx_id, buff);
+            if (!urlval) {
+                m__free(buff);
+                val_free_value(retval);
+                return NULL;
+            } else {
+                val_add_child(urlval, retval);
+            }
+        }
+    } else if (len > 6 &&
+               !xml_strncmp(ref, (const xmlChar *)"draft-", 6)) {
+        str = &ref[6];
+        while (*str && 
+               (!xml_isspace(*str)) && 
+               (*str != ';') && 
+               (*str != ':') && 
+               (*str != ',')) {
+            str++;
+        }
+
+        if (str != &ref[6] && *str == '.') {    \
+            str--;
+        }
+
+        numlen = (uint32)(str-ref);
+        buff = m__getMem(xml_strlen(XSD_DRAFT_URL) + numlen + 1);
+        if (!buff) {
+            val_free_value(retval);
+            return NULL;
+        }
+        q = buff;
+        q += xml_strcpy(q, XSD_DRAFT_URL);
+        q += xml_strncpy(q, ref, numlen);
+
+        urlval = xml_val_new_string(NCX_EL_URL, ncx_id, buff);
+        if (!urlval) {
+            m__free(buff);
+            val_free_value(retval);
+            return NULL;
+        } else {
+            val_add_child(urlval, retval);
+        }
+    }
+
+    return retval;
+
+}   /* make_reference */
+
 
 /********************************************************************
 * FUNCTION make_obj_appinfo
@@ -378,12 +498,12 @@ static val_value_t *
     make_obj_appinfo (obj_template_t *obj,
                       status_t  *res)
 {
-    val_value_t          *newval, *appval, *mustval;
+    val_value_t          *newval, *appval, *mustval, *refval;
     dlq_hdr_t            *mustQ, *appinfoQ, *datadefQ;
     xpath_pcb_t          *must;
     ncx_errinfo_t        *errinfo;
     obj_template_t       *outputobj;
-    const xmlChar        *units, *presence;
+    const xmlChar        *units, *presence, *ref;
     xmlChar              *buff;
     ncx_status_t          status;
     xmlns_id_t            ncx_id;
@@ -740,6 +860,18 @@ static val_value_t *
         return NULL;
     }
 
+    /* check if reference needed */
+    ref = obj_get_reference(obj);
+    if (ref != NULL) {
+        needed = TRUE;
+        refval = make_reference(ref);
+        if (!refval) {
+            val_free_value(appval);
+            return NULL;
+        } else {
+            val_add_child(refval, appval);
+        }
+    }
 
     /* add an element for each appinfo record */
     if (appinfoQ && !dlq_empty(appinfoQ)) {
@@ -1041,126 +1173,6 @@ static val_value_t *
 
 
 /********************************************************************
-* FUNCTION make_reference
-* 
-*   Create a value struct representing the documentation node
-*   Add this element to an <appinfo> element
-*
-* INPUTS:
-*    ref == reference clause (may be NULL)
-*
-* RETURNS:
-*   value struct or NULL if malloc error
-*********************************************************************/
-static val_value_t *
-    make_reference (const xmlChar *ref)
-{
-    val_value_t    *retval, *textval, *urlval;
-    const xmlChar  *str, *p;
-    xmlChar        *buff, *q;
-    uint32          len, numlen, i;
-    xmlns_id_t      ncx_id;
-
-    if (!ref) {
-        return NULL;
-    }
-
-    ncx_id = xmlns_ncx_id();
-    len = xml_strlen(ref);
-
-    retval = xml_val_new_struct(YANG_K_REFERENCE,  ncx_id);
-    if (!retval) {
-        return NULL;
-    }
-
-    textval = xml_val_new_cstring(NCX_EL_TEXT, ncx_id, ref);
-    if (!textval) {
-        val_free_value(retval);
-        return NULL;
-    } else {
-        val_add_child(textval, retval);
-    }
-
-    /* check if the reference is to an RFC and if so generate
-     * a 'url' element as well
-     */
-    if (len > 4 && 
-        !xml_strncmp(ref, (const xmlChar *)"RFC ", 4)) {
-        str = &ref[4];
-        p = str;
-        while (*p && isdigit(*p)) {
-            p++;
-        }
-        numlen = (uint32)(p-str);
-
-        /* IETF RFC URLs are currently hard-wired 4 digit number */
-        if (numlen && (numlen <= 4) && (len >= numlen+4)) {
-            buff = m__getMem(xml_strlen(XSD_RFC_URL) + 9);
-            if (!buff) {
-                val_free_value(retval);
-                return NULL;
-            }
-
-            q = buff;
-            q += xml_strcpy(q, XSD_RFC_URL);
-            for (i = 4 - numlen; i; i--) {
-                *q++ = '0';
-            }
-            for (i=0; i<numlen; i++) {
-                *q++ = *str++;
-            } 
-            xml_strcpy(q, (const xmlChar *)".txt");
-
-            urlval = xml_val_new_string(NCX_EL_URL, ncx_id, buff);
-            if (!urlval) {
-                m__free(buff);
-                val_free_value(retval);
-                return NULL;
-            } else {
-                val_add_child(urlval, retval);
-            }
-        }
-    } else if (len > 6 &&
-               !xml_strncmp(ref, (const xmlChar *)"draft-", 6)) {
-        str = &ref[6];
-        while (*str && 
-               (!xml_isspace(*str)) && 
-               (*str != ';') && 
-               (*str != ':') && 
-               (*str != ',')) {
-            str++;
-        }
-
-        if (str != &ref[6] && *str == '.') {    \
-            str--;
-        }
-
-        numlen = (uint32)(str-ref);
-        buff = m__getMem(xml_strlen(XSD_DRAFT_URL) + numlen + 1);
-        if (!buff) {
-            val_free_value(retval);
-            return NULL;
-        }
-        q = buff;
-        q += xml_strcpy(q, XSD_DRAFT_URL);
-        q += xml_strncpy(q, ref, numlen);
-
-        urlval = xml_val_new_string(NCX_EL_URL, ncx_id, buff);
-        if (!urlval) {
-            m__free(buff);
-            val_free_value(retval);
-            return NULL;
-        } else {
-            val_add_child(urlval, retval);
-        }
-    }
-
-    return retval;
-
-}   /* make_reference */
-
-
-/********************************************************************
 * FUNCTION make_schema_loc
 * 
 *   Get the schemaLocation string for this module
@@ -1244,6 +1256,7 @@ static xmlChar *
 *    maxacc   == value > none if max access clause should be added
 *    condition == condition string (may be NULL)
 *    units == units string (may be NULL)
+*    ref == reference statement (may be NULL)
 *    status == status value (may be NCX_STATUS_NONE)
 *              clause not generated for default (current)
 *
@@ -1255,6 +1268,7 @@ static val_value_t *
                   ncx_access_t maxacc,
                   const xmlChar *condition,
                   const xmlChar *units,
+                  const xmlChar *ref,
                   ncx_status_t status)
 {
     val_value_t   *newval, *appval;
@@ -1305,6 +1319,16 @@ static val_value_t *
     /* add condition clause if needed */
     if (condition) {
         newval = xml_val_new_cstring(NCX_EL_CONDITION, ncx_id, condition);
+        if (!newval) {
+            val_free_value(appval);
+        } else {
+            val_add_child(newval, appval);
+        }
+    }
+
+    /* add reference clause if needed */
+    if (ref) {
+        newval = make_reference(ref);
         if (!newval) {
             val_free_value(appval);
         } else {
@@ -2209,8 +2233,11 @@ status_t
         }
     }
 
-    if (mod->ref || mod->source ||
-        mod->belongs || mod->organization || mod->contact_info) {
+    if (mod->ref || 
+        mod->source ||
+        mod->belongs || 
+        mod->organization || 
+        mod->contact_info) {
 
         appinfo = xml_val_new_struct(NCX_EL_APPINFO, xsd_id);
         if (!appinfo) {
@@ -2284,7 +2311,10 @@ status_t
     if (!dlq_empty(&mod->appinfoQ)) {
         appval = make_appinfo(&mod->appinfoQ,
                               NCX_ACCESS_NONE, 
-                              NULL, NULL, NCX_STATUS_CURRENT);
+                              NULL, 
+                              NULL, 
+                              NULL,
+                              NCX_STATUS_CURRENT);
         if (!appval) {
             return ERR_INTERNAL_MEM;
         } else {
@@ -2852,6 +2882,7 @@ status_t
 *
 * INPUTS:
 *    descr == description string (may be NULL)
+*    ref == reference string (may be NULL)
 *    condition == condition string (may be NULL)
 *    units == units clause contents (or NULL if not used)
 *    maxacc == max-access clause (NONE == omit)
@@ -2868,6 +2899,7 @@ status_t
 *********************************************************************/
 status_t
     xsd_do_annotation (const xmlChar *descr,
+                       const xmlChar *ref,
                        const xmlChar *condition,
                        const xmlChar *units,
                        ncx_access_t maxacc,
@@ -2880,13 +2912,19 @@ status_t
     /* add an annotation node if there are any 
      * description, condition, or appinfo clauses present
      */
-    if (descr || condition || units || (appinfoQ && !dlq_empty(appinfoQ))
-        || maxacc != NCX_ACCESS_NONE || 
+    if (descr || 
+        ref || 
+        condition || 
+        units || 
+        (appinfoQ && !dlq_empty(appinfoQ)) ||
+        maxacc != NCX_ACCESS_NONE || 
         (status != NCX_STATUS_NONE && status != NCX_STATUS_CURRENT)) {
+
         annot = xml_val_new_struct(XSD_ANNOTATION, xmlns_xs_id());
         if (!annot) {
             return ERR_INTERNAL_MEM;
         }
+
         if (descr) {
             chval = make_documentation(descr);
             if (!chval) {
@@ -2898,10 +2936,17 @@ status_t
         }
 
         if ((appinfoQ && !dlq_empty(appinfoQ)) ||
-            maxacc != NCX_ACCESS_NONE || condition || units ||
+            maxacc != NCX_ACCESS_NONE || 
+            condition || 
+            units ||
+            ref ||
             (status != NCX_STATUS_NONE && status != NCX_STATUS_CURRENT)) {
-            chval = make_appinfo(appinfoQ, maxacc, condition,
-                                 units,  status);
+            chval = make_appinfo(appinfoQ, 
+                                 maxacc,
+                                 condition,
+                                 units, 
+                                 ref,
+                                 status);
             if (!chval) {
                 val_free_value(annot);
                 return ERR_INTERNAL_MEM;
@@ -2938,8 +2983,8 @@ val_value_t *
     xsd_make_obj_annotation (obj_template_t *obj,
                              status_t  *res)
 {
-    val_value_t    *annot, *doc, *refval, *appinfo;
-    const xmlChar  *descr, *ref;
+    val_value_t    *annot, *doc, *appinfo;
+    const xmlChar  *descr;
 
 #ifdef DEBUG
     if (!obj || !res) {
@@ -2950,26 +2995,13 @@ val_value_t *
 
     annot = NULL;
     doc = NULL;
-    refval = NULL;
     appinfo = NULL;
 
     descr = obj_get_description(obj);
-    ref = obj_get_reference(obj);
-
     if (descr) {
         doc = make_documentation(descr);
         if (!doc) {
             *res = ERR_INTERNAL_MEM;
-            return NULL;
-        }
-    }
-    if (ref) {
-        refval = make_reference(ref);
-        if (!refval) {
-            *res = ERR_INTERNAL_MEM;
-            if (doc) {
-                val_free_value(doc);
-            }
             return NULL;
         }
     }
@@ -2979,13 +3011,10 @@ val_value_t *
         if (doc) {
             val_free_value(doc);
         }
-        if (refval) {
-            val_free_value(refval);
-        }
         return NULL;
     }
 
-    if (doc || refval || appinfo) {
+    if (doc != NULL || appinfo != NULL) {
         annot = xml_val_new_struct(XSD_ANNOTATION, xmlns_xs_id());
         if (!annot) {
             if (appinfo) {
@@ -2994,17 +3023,11 @@ val_value_t *
             if (doc) {
                 val_free_value(doc);
             }
-            if (refval) {
-                val_free_value(refval);
-            }
             *res = ERR_INTERNAL_MEM;
             return NULL;
         } else {
             if (doc) {
                 val_add_child(doc, annot);
-            }
-            if (refval) {
-                val_add_child(refval, annot);
             }
             if (appinfo) {
                 val_add_child(appinfo, annot);
@@ -3158,22 +3181,16 @@ val_value_t *
             }
         }
 
-        if (grp->ref) {
-            chval = make_reference(grp->ref);
-            if (!chval) {
-                val_free_value(annot);
-                *res = ERR_INTERNAL_MEM;
-                return NULL;
-            } else {
-                val_add_child(chval, annot);
-            }
-        }
-
-        if (!dlq_empty(&grp->appinfoQ) ||
+        if (grp->ref ||
+            !dlq_empty(&grp->appinfoQ) ||
             (grp->status != NCX_STATUS_NONE && 
              grp->status != NCX_STATUS_CURRENT)) {
-            chval = make_appinfo(&grp->appinfoQ, NCX_ACCESS_NONE,
-                                 NULL, NULL,  grp->status);
+            chval = make_appinfo(&grp->appinfoQ, 
+                                 NCX_ACCESS_NONE,
+                                 NULL, 
+                                 NULL,
+                                 grp->ref,
+                                 grp->status);
             if (!chval) {
                 val_free_value(annot);
                 *res = ERR_INTERNAL_MEM;
@@ -3215,29 +3232,16 @@ val_value_t *
 *   status
 *********************************************************************/
 status_t
-    xsd_add_aughook (val_value_t *val,
-                     const obj_template_t *obj)
+    xsd_add_aughook (val_value_t *val)
 {
     val_value_t   *aug;
-    xmlChar       *buff;
     status_t       res;
     
-    aug = xml_val_new_flag(XSD_ELEMENT, xmlns_xs_id());
+    aug = xml_val_new_flag(XSD_ANY, xmlns_xs_id());
     if (!aug) {
         return ERR_INTERNAL_MEM;
     } else {
         val_add_child(aug, val);  /* add early */
-    }
-
-    res = obj_gen_aughook_id(obj, &buff);
-    if (res != NO_ERR) {
-        return res;
-    }
-
-    res = xml_val_add_attr(NCX_EL_NAME, 0, buff, aug);
-    if (res != NO_ERR) {
-        m__free(buff);
-        return res;
     }
 
     res = xml_val_add_cattr(XSD_MIN_OCCURS, 0, XSD_ZERO, aug);
@@ -3250,7 +3254,12 @@ status_t
         return res;
     }
 
-    res = xml_val_add_cattr(XSD_ABSTRACT, 0, XSD_TRUE, aug);
+    res = xml_val_add_cattr(XSD_NAMESPACE, 0, XSD_OTHER, aug);
+    if (res != NO_ERR) {
+        return res;
+    }
+
+    res = xml_val_add_cattr(XSD_PROC_CONTENTS, 0, XSD_LAX, aug);
     if (res != NO_ERR) {
         return res;
     }
@@ -3266,7 +3275,7 @@ status_t
 *   Create a type name for the RPC function output data structure
 *
 * INPUTS:
-*    obj == reference clause (may be NULL)
+*    obj == object to make an RPC name from
 *    
 * RETURNS:
 *   malloced buffer with the typename
@@ -3398,5 +3407,20 @@ status_t
 
 }   /* test_basetype_attr */
 
+
+/********************************************************************
+* FUNCTION get_next_seqnum
+* 
+*  Get a unique integer
+*
+* RETURNS:
+*   next seqnum
+*********************************************************************/
+uint32
+    get_next_seqnum (void)
+{
+    return seqnum++;
+
+} /* get_next_seqnum */
 
 /* END file xsd_util.c */

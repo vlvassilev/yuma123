@@ -417,7 +417,7 @@ status_t
         buff = (ses_msg_buff_t *)dlq_firstEntry(&scb->outQ);
         if (buff) {
             if (LOGDEBUG3) {
-                log_debug3("\nses_msg_send full reply:\n%s",
+                log_debug3("\nses_msg_send full msg:\n%s",
                            &buff->buff[buff->buffpos]);
                 buff = (ses_msg_buff_t *)dlq_nextEntry(buff);
                 while (buff != NULL) {

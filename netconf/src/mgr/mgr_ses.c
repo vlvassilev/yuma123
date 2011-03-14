@@ -459,8 +459,8 @@ static int
                    ret);
     }
     if (LOGDEBUG && ret) {
-        log_debug4("\nmgr_ses: channel closed by server: ses(%u)", 
-                   scb->sid);
+        log_debug("\nmgr_ses: channel closed by server: ses(%u)", 
+                  scb->sid);
     }
     return ret;
 
@@ -1072,6 +1072,19 @@ ssize_t
                        mscb->agtsid);
         }
         mscb->closed = TRUE;
+    }
+
+    /* check if the buffer ended with an EOF
+     * !!! this is not supported; any SSH-EOF message from
+     * !!! the server will cause the client to drop the session 
+     * !!! right away and not process the bytes in the return buffer
+     * !!!
+     */
+    if (mscb->closed == FALSE && ret > 0) {
+        if (check_channel_eof(scb, mscb)) {
+            ret = 0;
+            mscb->closed = TRUE;
+        }
     }
 
     return (ssize_t)ret;

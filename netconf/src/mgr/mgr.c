@@ -419,4 +419,25 @@ extern status_t
 }  /* mgr_set_getvar_fn */
 
 
+/********************************************************************
+* FUNCTION mgr_print_libssh2_version
+* 
+* Print the version of libssh2 used by the manager
+* Indenting must already be done!
+*
+* INPUTS:
+*   tolog == TRUE to print to log; FALSE to print to stdout
+*********************************************************************/
+void
+    mgr_print_libssh2_version (boolean tolog)
+{
+    if (tolog) {
+        log_write("libssh2 version %s", libssh2_version(0));
+    } else {
+        log_stdout("libssh2 version %s", libssh2_version(0));
+    }
+
+}  /* mgr_print_libssh2_version */
+
+
 /* END file mgr.c */

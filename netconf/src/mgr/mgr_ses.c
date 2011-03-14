@@ -1084,6 +1084,14 @@ ssize_t
         if (check_channel_eof(scb, mscb)) {
             ret = 0;
             mscb->closed = TRUE;
+
+            if (LOGDEBUG2) {
+                log_debug2("\nmgr_ses: tossing final buffer with EOF "
+                           "on session %u (a:%u)\n%s",
+                           scb->sid,
+                           mscb->agtsid,
+                           buff);
+            }
         }
     }
 

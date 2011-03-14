@@ -449,6 +449,10 @@ static void
     res = ncx_get_version(versionbuffer, NCX_VERSION_BUFFSIZE);
     if (res == NO_ERR) {
         (*logfn)("\n  yangcli version %s",  versionbuffer);
+        if (LOGINFO) {
+            (*logfn)("\n  ");
+            mgr_print_libssh2_version(!imode);
+        }
     } else {
         SET_ERROR(res);
     }

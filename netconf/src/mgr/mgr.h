@@ -233,6 +233,20 @@ extern status_t
     mgr_set_getvar_fn (ses_id_t  sid,
                        xpath_getvar_fn_t getvar_fn);
 
+
+/********************************************************************
+* FUNCTION mgr_print_libssh2_version
+* 
+* Print the version of libssh2 used by the manager
+* Indenting must already be done!
+*
+* INPUTS:
+*   tolog == TRUE to print to log; FALSE to print to stdout
+*********************************************************************/
+extern void
+    mgr_print_libssh2_version (boolean tolog);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

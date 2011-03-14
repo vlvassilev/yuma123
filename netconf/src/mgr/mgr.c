@@ -431,11 +431,24 @@ extern status_t
 void
     mgr_print_libssh2_version (boolean tolog)
 {
+
+#ifdef LIBSSH2_VERSION_MAJOR
+#ifdef LIBSSH2_VERSION_MINOR
+#if (LIBSSH2_VERSION_MAJOR >= 1 && LIBSSH2_VERSION_MINOR >= 1)
     if (tolog) {
         log_write("libssh2 version %s", libssh2_version(0));
     } else {
         log_stdout("libssh2 version %s", libssh2_version(0));
     }
+#else
+    if (tolog) {
+        log_write("libssh2 version lower than 1.1 (unavailable)");
+    } else {
+        log_stdout("libssh2 version lower than 1.1 (unavailable)");
+    }
+#endif
+#endif
+#endif
 
 }  /* mgr_print_libssh2_version */
 

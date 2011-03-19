@@ -12,6 +12,10 @@ module testmust {
     description
         "YANG must-stmt test module.";
 
+    revision 2011-03-19 {
+        description "Add more test cases.";
+    }
+
     revision 2008-12-18 {
         description "Initial version.";
     }

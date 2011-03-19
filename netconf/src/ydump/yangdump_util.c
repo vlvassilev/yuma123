@@ -196,15 +196,24 @@ uint32
     *ref = NULL;
     *reflen = 0;
 
+    /* skip starting whitespace */
     str = buffer;
     while (*str && xml_isspace(*str)) {
         str++;
     }
 
     /* check if the reference is to an RFC */
-    if (!xml_strncmp(str, (const xmlChar *)"RFC ", 4)) {
-        num = &str[4];
-        p = num;
+    if (xml_strlen(str) >= 7 &&
+        !xml_strncmp(str, (const xmlChar *)"RFC", 3)) {
+
+        /* look for the number to follow RFC; skip any whitespace */
+        p = &str[3];
+        while (*p && isspace(*p)) {
+            p++;
+        }
+
+        /* find the number of consecutive digits */
+        num = p;
         while (*p && isdigit(*p)) {
             p++;
         }

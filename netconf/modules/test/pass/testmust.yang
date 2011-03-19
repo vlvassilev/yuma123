@@ -459,5 +459,34 @@ module testmust {
     }
   }
 
+  rpc rpc-must1 {
+    input {
+       leaf a { type int32; }
+       leaf b { 
+         type string;
+         must "../a > 10";
+       }
+    }
+    output {
+       leaf x { type int32; }
+       leaf y { 
+         type string;
+         must "../x != 10";
+       }
+    }
+  }
+
+  notification notif-must1 {
+     leaf a { type int32; }
+     leaf b { 
+       type string;
+       must "../a > 10 and starts-with(../c/d, 'foo')";
+     }
+     container c {
+       leaf d { type string; }
+     }
+  }
+      
+
 }
 

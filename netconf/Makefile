@@ -17,9 +17,9 @@ DIRS = src modules etc doc man util
 
 TOP_INSTALL = $(DESTDIR)$(PREFIX)/share/yuma
 
-ifndef JFLAG
-JFLAG = -j3
-endif
+#ifndef JFLAG
+#JFLAG = -j3
+#endif
 
 #################### PLATFORM DEFINITIONS ############
 

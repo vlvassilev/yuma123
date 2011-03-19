@@ -36,9 +36,9 @@ endif
 endif
 endif
 
-ifndef JFLAG
-JFLAG = -j3
-endif
+#ifndef JFLAG
+#JFLAG = -j3
+#endif
 
 #################### PLATFORM DEFINITIONS ############
 

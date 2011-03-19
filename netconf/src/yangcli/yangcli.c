@@ -457,7 +457,7 @@ static void
         SET_ERROR(res);
     }
 
-    (*logfn)("\n  ");
+    (*logfn)("\n\n  ");
     (*logfn)(COPYRIGHT_STRING);
 
     if (!imode) {
@@ -465,7 +465,6 @@ static void
     }
 
     (*logfn)("\n  Type 'help' or 'help <command-name>' to get started");
-    (*logfn)("\n    e.g., 'help help' or 'help connect'");
     (*logfn)("\n  Use the <tab> key for command and value completion");
     (*logfn)("\n  Use the <enter> key to accept the default value ");
     (*logfn)("in brackets");
@@ -481,8 +480,7 @@ static void
     (*logfn)("when entering commands:");
     (*logfn)("\n\n\t$<varname> = <expr>\tLocal user variable assignment");
     (*logfn)("\n\t$$<varname> = <expr>\tGlobal user variable assignment");
-    (*logfn)("\n\t@<filespec> = <expr>\tFile assignment");
-    (*logfn)("\n\n  Refer to the user manual for more details\n");
+    (*logfn)("\n\t@<filespec> = <expr>\tFile assignment\n");
 
 
 }  /* do_startup_screen */

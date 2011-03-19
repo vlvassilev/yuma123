@@ -1,3 +1,47 @@
+yuma (1.14-6) unstable; urgency=medium
+ * yangcli:
+   * fix bug not checking for ssh2 channel EOF with data
+   * no longer removing top container for edit-config,
+     when saving data reply to a variable
+   * added xml-nons display-mode option
+   * added show cli and show system commands
+   * clean up xml display mode some extra newlines
+   * change default history show lines from all to 25
+   * start screen now shows libssh2 version if LOGINFO
+   * update yangcli.yang module and user docs
+   * change $$default-operation from none to merge
+   * fix bugs related to consume_include finding a module instead
+     of a submodule
+ * yangdump:
+   * --format=html: accept RFCnnnn for make_reference
+   * --format=xsd: fix XSD generation so it validates with xmllint
+ * YANG parser:
+   * add warning if file name and module name do not match
+   * add help text <Mandatory> in obj_help.c
+   * fix incorrect XPath warning for no parent for OK notifications
+   * xml_wr: force simple element content to fit on one line
+     instead of introducing extra whitespace
+   * add ncx_inc_warnings so warning count is correct even
+     if log-level is error or off
+   * fix NCX_BT_DECIMAL64 design bug; number starting with
+     leading zero.zeroes was not decoded correctly
+   * ncxmod: support directory search even if DT_UNKNOWN
+     returned for d_type
+   * remove incorrect error sometimes 'revision missing a description'
+   * show YANG files opened during log-level=debug
+   * fix bug missing include getting ignored
+ * netconfd:
+   * fixed bug SIL callback functions for nodes getting called
+     for validate and apply even if they did not change;
+   * default-operation=merge caused too many nodes to be checked;
+   * fix bug not checking for NULL curval in move operation
+   * fix bug writing 1 byte past array bounds warning in agt_ncxserver
+ * build:
+   * updated scripts to generate correct version string
+   * update several IETF YANG modules to latest version
+   * remove JFLAG usage and add make test to modules Makefile
+   * change Werror to never be added by default, use USE_WERROR switch
+-- Andy Bierman <andy@netconfcentral.org>  Sat, 19 Mar 2011 12:06:00 -0800
 yuma (1.14-5) unstable; urgency=medium
   * update copyright strings
   * add more test YANG modules

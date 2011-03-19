@@ -1,5 +1,5 @@
 yuma (1.14-6) unstable; urgency=medium
- * yangcli:
+ * yangcli
    * fix bug not checking for ssh2 channel EOF with data
    * no longer removing top container for edit-config,
      when saving data reply to a variable
@@ -12,10 +12,10 @@ yuma (1.14-6) unstable; urgency=medium
    * change $$default-operation from none to merge
    * fix bugs related to consume_include finding a module instead
      of a submodule
- * yangdump:
+ * yangdump
    * --format=html: accept RFCnnnn for make_reference
    * --format=xsd: fix XSD generation so it validates with xmllint
- * YANG parser:
+ * YANG parser
    * add warning if file name and module name do not match
    * add help text <Mandatory> in obj_help.c
    * fix incorrect XPath warning for no parent for OK notifications
@@ -30,18 +30,18 @@ yuma (1.14-6) unstable; urgency=medium
    * remove incorrect error sometimes 'revision missing a description'
    * show YANG files opened during log-level=debug
    * fix bug missing include getting ignored
- * netconfd:
+ * netconfd
    * fixed bug SIL callback functions for nodes getting called
      for validate and apply even if they did not change;
    * default-operation=merge caused too many nodes to be checked;
    * fix bug not checking for NULL curval in move operation
    * fix bug writing 1 byte past array bounds warning in agt_ncxserver
- * build:
+ * build
    * updated scripts to generate correct version string
    * update several IETF YANG modules to latest version
    * remove JFLAG usage and add make test to modules Makefile
    * change Werror to never be added by default, use USE_WERROR switch
--- Andy Bierman <andy@netconfcentral.org>  Sat, 19 Mar 2011 12:06:00 -0800
+-- Andy Bierman <andy@netconfcentral.org>  Sat, 19 Mar 2011 14:00:00 -0700
 yuma (1.14-5) unstable; urgency=medium
   * update copyright strings
   * add more test YANG modules

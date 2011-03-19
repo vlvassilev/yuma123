@@ -33,9 +33,8 @@
       Relating to IETF Documents
       (http://trustee.ietf.org/license-info).";
 
-    revision 2010-10-25 {
-      description "Version of draft-ietf-ipfix-configuration-model-08";
-
+    revision 2011-03-09 {
+      description "Version of draft-ietf-ipfix-configuration-model-09";
       reference "RFC XXXX: IPFIX/PSAMP Configuration Data Model";
     }
 
@@ -94,24 +93,28 @@
         configured.";
     }
 
-    feature cacheModeImmediate {
+    feature immediateCache {
       description "If supported, the Monitoring Device supports
-        Cache Mode 'immediate'.";
+        Caches generating PSAMP Packet Reports by configuration with
+        immediateCache.";
     }
 
-    feature cacheModeTimeout {
+    feature timeoutCache {
       description "If supported, the Monitoring Device supports
-        Cache Mode 'timeout'.";
+        Caches generating IPFIX Flow Records by configuration with
+        timeoutCache.";
     }
 
-    feature cacheModeNatural {
+    feature naturalCache {
       description "If supported, the Monitoring Device supports
-        Cache Mode 'natural'.";
+        Caches generating IPFIX Flow Records by configuration with
+        naturalCache.";
     }
 
-    feature cacheModePermanent {
+    feature permanentCache {
       description "If supported, the Monitoring Device supports
-        Cache Mode 'permanent'.";
+        Caches generating IPFIX Flow Records by configuration with
+        permanentCache.";
     }
 
     feature udpTransport {
@@ -161,42 +164,6 @@
       reference "RFC5475, Section 6.2.4.1.";
     }
 
-    /*** Cache mode identities ***/
-    identity cacheMode {
-      description "Base identity for all Cache Modes specifying
-        Flow expiration policies of a Cache. Identities derived from
-        this base are used by the leaf /ipfix/cache/cacheMode.";
-    }
-    identity immediate {
-      base "cacheMode";
-      description "Flow expiration after the first packet;
-        generation of Packet Records.
-        This identity MUST NOT be referred to unless the feature
-        cacheModeImmediate is supported by the Monitoring Device.";
-    }
-    identity timeout {
-      base "cacheMode";
-      description "Flow expiration after active and inactive timeout;
-        generation of Flow Records.
-        This identity MUST NOT be referred to unless the feature
-        cacheModeTimeout is supported by the Monitoring Device.";
-    }
-    identity natural {
-      base "cacheMode";
-      description "Flow expiration after active and inactive timeout,
-        or on natural termination (e.g. TCP FIN, or TCP RST) of the
-        Flow; generation of Flow Records.
-        This identity MUST NOT be referred to unless the feature
-        cacheModeNatural is supported by the Monitoring Device.";
-    }
-    identity permanent {
-      base "cacheMode";
-      description "No flow expiration, periodical export with
-        time interval exportInterval; generation of Flow Records.
-        This identity MUST NOT be referred to unless the feature
-        cacheModePermanent is supported by the Monitoring Device.";
-    }
-
     /*** Export mode identities ***/
     identity exportMode {
       description "Base identity for different usages of export
@@ -209,7 +176,6 @@
       description "Parallel export of Data Records to all
         destinations configured for the Exporting Process.";
     }
-
     identity loadBalancing {
       base "exportMode";
       description "Load-balancing between the different destinations
@@ -285,6 +251,15 @@
     * Type definitions
     *****************************************************************/
 
+    typedef ieNameType {
+      type string {
+        length "1..max";
+        pattern "\S+";
+      }
+      description "Type for Information Element names. Whitespaces
+        are not allowed.";
+    }
+
     typedef ieIdType {
       type uint16 {
         range "1..32767" {
@@ -304,6 +279,16 @@
       description "Type for 'name' leafs which are used to identify
         specific instances within lists etc.
         Leading and trailing whitespaces are not allowed.";
+    }
+
+    typedef ifNameType {
+      type string {
+        length "1..255";
+      }
+      description "This corresponds to the DisplayString textual
+        convention of SNMPv2-TC, which is used for ifName in the IF
+        MIB module.";
+      reference "RFC2863 (ifName).";
     }
 
     typedef direction {
@@ -354,7 +339,6 @@
 
     grouping observationPointParameters {
       description "Interface as input to Observation Point.";
-
       leaf observationPointId {
         type uint32;
         config false;
@@ -377,7 +361,7 @@
           (ipfixObservationPointObservationDomainId).";
       }
       leaf-list ifName {
-        type string;
+        type ifNameType;
         description "List of names identifying interfaces of the
           Monitoring Device. The Observation Point observes packets at
           the specified interfaces.";
@@ -426,6 +410,251 @@
       }
     }
 
+    grouping sampCountBasedParameters {
+      description "Configuration parameters of a Selector applying
+        systematic count-based packet sampling to the packet
+        stream.";
+      reference "RFC5475, Section 5.1; RFC5476, Section 6.5.2.1.";
+      leaf packetInterval {
+        type uint32;
+        units packets;
+        mandatory true;
+        description "The number of packets that are consecutively
+          sampled between gaps of length packetSpace.
+          This parameter corresponds to the Information Element
+          samplingPacketInterval.";
+        reference "RFC5477, Section 8.2.2.";
+      }
+      leaf packetSpace {
+        type uint32;
+        units packets;
+        mandatory true;
+        description "The number of unsampled packets between two
+          sampling intervals.
+          This parameter corresponds to the Information Element
+          samplingPacketSpace.";
+        reference "RFC5477, Section 8.2.3.";
+      }
+    }
+
+    grouping sampTimeBasedParameters {
+      description "Configuration parameters of a Selector applying
+        systematic time-based packet sampling to the packet
+        stream.";
+      reference "RFC5475, Section 5.1; RFC5476, Section 6.5.2.2.";
+      leaf timeInterval {
+        type uint32;
+        units microseconds;
+        mandatory true;
+        description "The time interval in microseconds during
+          which all arriving packets are sampled between gaps
+          of length timeSpace.
+          This parameter corresponds to the Information Element
+          samplingTimeInterval.";
+        reference "RFC5477, Section 8.2.4.";
+      }
+      leaf timeSpace {
+        type uint32;
+        units microseconds;
+        mandatory true;
+        description "The time interval in microseconds during
+          which no packets are sampled between two sampling
+          intervals specified by timeInterval.
+          This parameter corresponds to the Information Element
+          samplingTimeInterval.";
+        reference "RFC5477, Section 8.2.5.";
+      }
+    }
+
+    grouping sampUniProbParameters {
+      description "Configuration parameters of a Selector applying
+        uniform probabilistic packet sampling (with equal
+        probability per packet) to the packet stream.";
+      reference "RFC5475, Section 5.2.2.1;
+        RFC5476, Section 6.5.2.4.";
+      leaf probability {
+        type decimal64 {
+          fraction-digits 18;
+          range "0..1";
+        }
+        mandatory true;
+        description "Probability that a packet is sampled,
+          expressed as a value between 0 and 1. The probability
+          is equal for every packet.
+          This parameter corresponds to the Information Element
+          samplingProbability.";
+        reference "RFC5477, Section 8.2.8.";
+      }
+    }
+
+    grouping filterMatchParameters {
+      description "Configuration parameters of a Selector applying
+        property match filtering to the packet stream.
+        The field to be matched is specified as Information
+        Element.";
+      reference "RFC5475, Section 6.1; RFC5476, Section 6.5.2.5.";
+      choice nameOrId {
+        mandatory true;
+        description "The field to be matched is specified by
+          either the name or the ID of the Information
+          Element.";
+        leaf ieName {
+          type ieNameType;
+          description "Name of the Information Element.";
+        }
+        leaf ieId {
+          type ieIdType;
+          description "ID of the Information Element.";
+        }
+      }
+      leaf ieEnterpriseNumber {
+        type uint32;
+        default 0;
+        description "If this parameter is zero, the Information
+          Element is registered in the IANA registry of IPFIX
+          Information Elements.
+          If this parameter is configured with a non-zero private
+          enterprise number, the Information Element is
+          enterprise-specific.";
+        reference "RFC5102.";
+      }
+      leaf value {
+        type string;
+        mandatory true;
+        description "Matching value of the Information Element.";
+      }
+    }
+
+    grouping filterHashParameters {
+      description "Configuration parameters of a Selector applying
+        hash-based filtering to the packet stream.";
+      reference "RFC5475, Section 6.2; RFC5476, Section 6.5.2.6.";
+      leaf hashFunction {
+        type identityref {
+          base "hashFunction";
+        }
+        default BOB;
+        description "Hash function to be applied. According to
+          RFC5475, Section 6.2.4.1, 'BOB' must be used in order to
+          be compliant with PSAMP.";
+      }
+      leaf initializerValue {
+        type uint64;
+        description "Initializer value to the hash function.
+          If not configured by the user, the Monitoring Device
+          arbitrarily chooses an initializer value.";
+        reference "RFC5477, Section 8.3.9.";
+      }
+      leaf ipPayloadOffset {
+        type uint64;
+        units octets;
+        default 0;
+        description "IP payload offset indicating the position of
+          the first payload byte considered as input to the hash
+          function.
+          Default value 0 corresponds to the minimum offset that
+          must be configurable according to RFC5476, Section
+          6.2.5.6.
+          This parameter corresponds to the Information Element
+          hashIPPayloadOffset.";
+        reference "RFC5477, Section 8.3.2.";
+      }
+      leaf ipPayloadSize {
+        type uint64;
+        units octets;
+        default 8;
+        description "Number of IP payload bytes used as input to
+          the hash function, counted from the payload offset.
+          If the IP payload is shorter than the payload range,
+          all available payload octets are used as input.
+          Default value 8 corresponds to the minimum IP payload
+          size that must be configurable according to RFC5476,
+          Section 6.2.5.6.
+          This parameter corresponds to the Information Element
+          hashIPPayloadSize.";
+        reference "RFC5477, Section 8.3.3.";
+      }
+      leaf digestOutput {
+        type boolean;
+        default false;
+        description "If true, the output from this Selector is
+          included in the Packet Report as a packet digest.
+          Therefore, the configured Cache Layout needs to contain
+          a digestHashValue field.
+          This parameter corresponds to the Information Element
+          hashDigestOutput.";
+        reference "RFC5477, Section 8.3.8.";
+      }
+      leaf outputRangeMin {
+        type uint64;
+        config false;
+        description "Beginning of the hash function's potential
+          range.
+          This parameter corresponds to the Information Element
+          hashOutputRangeMin.";
+        reference "RFC5477, Section 8.3.4.";
+      }
+      leaf outputRangeMax {
+        type uint64;
+        config false;
+        description "End of the hash function's potential range.
+          This parameter corresponds to the Information Element
+          hashOutputRangeMax.";
+        reference "RFC5477, Section 8.3.5.";
+      }
+      list selectedRange {
+        key name;
+        min-elements 1;
+        description "List of hash function return ranges for
+          which packets are selected.";
+        leaf name {
+          type nameType;
+          description "Key of this list.";
+        }
+        leaf min {
+          type uint64;
+          description "Beginning of the hash function's selected
+            range.
+            This parameter corresponds to the Information Element
+            hashSelectedRangeMin.";
+          reference "RFC5477, Section 8.3.6.";
+        }
+        leaf max {
+          type uint64;
+          description "End of the hash function's selected range.
+            This parameter corresponds to the Information Element
+            hashSelectedRangeMax.";
+          reference "RFC5477, Section 8.3.7.";
+        }
+      }
+    }
+
+    grouping sampRandOutOfNParameters {
+      description "Configuration parameters of a Selector applying
+        n-out-of-N packet sampling to the packet stream.";
+      reference "RFC5475, Section 5.2.1; RFC5476, Section 6.5.2.3.";
+      leaf size {
+        type uint32;
+        units packets;
+        mandatory true;
+        description "The number of elements taken from the parent
+          population.
+          This parameter corresponds to the Information Element
+          samplingSize.";
+        reference "RFC5477, Section 8.2.6.";
+      }
+      leaf population {
+        type uint32;
+        units packets;
+        mandatory true;
+        description "The number of elements in the parent
+          population.
+          This parameter corresponds to the Information Element
+          samplingPopulation.";
+        reference "RFC5477, Section 8.2.7.";
+      }
+    }
+
     grouping selectorParameters {
       description "Configuration and state parameters of a Selector.";
       choice Method {
@@ -437,235 +666,33 @@
         }
         container sampCountBased {
           if-feature psampSampCountBased;
-          description "This container contains the configuration
-            parameters of a Selector applying systematic count-based
-            packet sampling to the packet stream.";
-          reference "RFC5475, Section 5.1;
-            RFC5476, Section 6.5.2.1.";
-          leaf packetInterval {
-            type uint32;
-            units packets;
-            mandatory true;
-            description "The number of packets that are consecutively
-              sampled between gaps of length packetSpace.
-              This parameter corresponds to the Information Element
-              samplingPacketInterval.";
-            reference "RFC5477, Section 8.2.2.";
-          }
-          leaf packetSpace {
-            type uint32;
-            units packets;
-            mandatory true;
-            description "The number of unsampled packets between two
-              sampling intervals.
-              This parameter corresponds to the Information Element
-              samplingPacketSpace.";
-            reference "RFC5477, Section 8.2.3.";
-          }
+          description "Systematic count-based packet sampling.";
+          uses sampCountBasedParameters;
         }
         container sampTimeBased {
           if-feature psampSampTimeBased;
-          description "This container contains the configuration
-            parameters of a Selector applying systematic time-based
-            packet sampling to the packet stream.";
-          reference "RFC5475, Section 5.1;
-            RFC5476, Section 6.5.2.2.";
-          leaf timeInterval {
-            type uint32;
-            units microseconds;
-            mandatory true;
-            description "The time interval in microseconds during
-              which all arriving packets are sampled between gaps
-              of length timeSpace.
-              This parameter corresponds to the Information Element
-              samplingTimeInterval.";
-            reference "RFC5477, Section 8.2.4.";
-          }
-          leaf timeSpace {
-            type uint32;
-            units microseconds;
-            mandatory true;
-            description "The time interval in microseconds during
-              which no packets are sampled between two sampling
-              intervals specified by timeInterval.
-              This parameter corresponds to the Information Element
-              samplingTimeInterval.";
-            reference "RFC5477, Section 8.2.5.";
-          }
+          description "Systematic time-based packet sampling.";
+          uses sampTimeBasedParameters;
         }
         container sampRandOutOfN {
           if-feature psampSampRandOutOfN;
-          description "This container contains the configuration
-            parameters of a Selector applying n-out-of-N packet
-            sampling to the packet stream.";
-          reference "RFC5475, Section 5.2.1;
-            RFC5476, Section 6.5.2.3.";
-          leaf size {
-            type uint32;
-            units packets;
-            mandatory true;
-            description "The number of elements taken from the parent
-              population.
-              This parameter corresponds to the Information Element
-              samplingSize.";
-            reference "RFC5477, Section 8.2.6.";
-          }
-          leaf population {
-            type uint32;
-            units packets;
-            mandatory true;
-            description "The number of elements in the parent
-              population.
-              This parameter corresponds to the Information Element
-              samplingPopulation.";
-            reference "RFC5477, Section 8.2.7.";
-          }
+          description "n-out-of-N packet sampling.";
+          uses sampRandOutOfNParameters;
         }
         container sampUniProb {
           if-feature psampSampUniProb;
-          description "This container contains the configuration
-            parameters of a Selector applying uniform probabilistic
-            packet sampling (with equal probability per packet) to the
-            packet stream.";
-          reference "RFC5475, Section 5.2.2.1;
-            RFC5476, Section 6.5.2.4.";
-          leaf probability {
-            type decimal64 {
-              fraction-digits 18;
-              range "0..1";
-            }
-            mandatory true;
-            description "Probability that a packet is sampled,
-              expressed as a value between 0 and 1. The probability
-              is equal for every packet.
-              This parameter corresponds to the Information Element
-              samplingProbability.";
-            reference "RFC5477, Section 8.2.8.";
-          }
+          description "Uniform probabilistic packet sampling.";
+          uses sampUniProbParameters;
         }
         container filterMatch {
           if-feature psampFilterMatch;
-          description "This container contains the configuration
-            parameters of a Selector applying property match filtering
-            to the packet stream.";
-          reference "RFC5475, Section 6.1;
-            RFC5476, Section 6.5.2.5.";
-          choice nameOrId {
-            mandatory true;
-            description "The field to be matched is specified by
-              either the name or the ID of the Information
-              Element.";
-            leaf ieName {
-              type string;
-              description "Name of the Information Element.";
-            }
-            leaf ieId {
-              type ieIdType;
-              description "ID of the Information Element.";
-            }
-          }
-          leaf ieEnterpriseNumber {
-            type uint32;
-            description "If present, the Information Element is
-              enterprise-specific. The field value configures the
-              enterprise number. If omitted or zero, the Information
-              Element is registered in the IANA registry of IPFIX
-              Information Elements.";
-          }
-          leaf value {
-            type string;
-            mandatory true;
-            description "Matching value of the Information Element.";
-          }
+          description "Property match filtering.";
+          uses filterMatchParameters;
         }
         container filterHash {
           if-feature psampFilterHash;
-          description "This container contains the configuration
-            parameters of a Selector applying hash-based filtering
-            to the packet stream.";
-          reference "RFC5475, Section 6.2;
-            RFC5476, Section 6.5.2.6.";
-          leaf hashFunction {
-            type identityref {
-              base "hashFunction";
-            }
-            default BOB;
-            description "Hash function to be applied. According to
-              RFC5475, Section 6.2.4.1, 'BOB' must be used in order to
-              be compliant with PSAMP.";
-          }
-          leaf ipPayloadOffset {
-            type uint64;
-            units octets;
-            default 0;
-            description "IP payload offset indicating the position of
-              the first payload byte considered as input to the hash
-              function.
-              Default value 0 corresponds to the minimum offset that
-              must be configurable according to RFC5476, Section
-              6.2.5.6.
-              This parameter corresponds to the Information Element
-              hashIPPayloadOffset.";
-            reference "RFC5477, Section 8.3.2.";
-          }
-          leaf ipPayloadSize {
-            type uint64;
-            units octets;
-            default 8;
-            description "Number of IP payload bytes used as input to
-              the hash function, counted from the payload offset.
-              If the IP payload is shorter than the payload range,
-              all available payload octets are used as input.
-              Default value 8 corresponds to the minimum IP payload
-              size that must be configurable according to RFC5476,
-              Section 6.2.5.6.
-              This parameter corresponds to the Information Element
-              hashIPPayloadSize.";
-            reference "RFC5477, Section 8.3.3.";
-          }
-          leaf digestOutput {
-            type boolean;
-            default false;
-            description "If true, the output from this Selector is
-              included in the Packet Report as a packet digest.
-              Therefore, the configured Cache Layout needs to contain
-              a digestHashValue field.
-              This parameter corresponds to the Information Element
-              hashDigestOutput.";
-            reference "RFC5477, Section 8.3.8.";
-          }
-          leaf initializerValue {
-            type uint64;
-            description "Initializer value to the hash function.
-              If not configured by the user, the Monitoring Device
-              arbitrarily chooses an initializer value.";
-            reference "RFC5477, Section 8.3.9.";
-          }
-          list selectedRange {
-            key name;
-            min-elements 1;
-            description "List of hash function return ranges for
-              which packets are selected.";
-            leaf name {
-              type nameType;
-              description "Key of this list.";
-            }
-            leaf min {
-              type uint64;
-              description "Beginning of the hash function's selected
-                range.
-                This parameter corresponds to the Information Element
-                hashSelectedRangeMin.";
-              reference "RFC5477, Section 8.3.6.";
-            }
-            leaf max {
-              type uint64;
-              description "End of the hash function's selected range.
-                This parameter corresponds to the Information Element
-                hashSelectedRangeMax.";
-              reference "RFC5477, Section 8.3.7.";
-            }
-          }
+          description "Hash-based filtering.";
+          uses filterHashParameters;
         }
       }
       leaf packetsObserved {
@@ -711,93 +738,16 @@
       }
     }
 
-    grouping cacheParameters {
-      description "Configuration and state parameters of a Cache.";
-      leaf cacheMode {
-        type identityref {
-          base "cacheMode";
-        }
-        mandatory true;
-        description "Cache Mode of this Cache.";
-      }
-      leaf maxFlows {
-        when "../cacheMode != 'ipfix:immediate'" {
-          description "This parameter is not available for Cache Mode
-            'immediate'.";
-        }
-        type uint32;
-        units flows;
-        description "This parameter configures the maximum number of
-          Flows in the Cache, which is the maximum number of Flows
-          that can be measured simultaneously.
-          The Monitoring Device MUST ensure that sufficient resources
-          are available to store the configured maximum number of
-          Flows.
-          If the maximum number of Flows is measured, no additional
-          Flows can be measured before any of the existing entries is
-          removed. However, traffic which pertains to existing Flows
-          can continue to be measured.";
-      }
-      leaf activeTimeout {
-        when "(../cacheMode = 'ipfix:timeout') or
-          (../cacheMode = 'ipfix:natural')" {
-          description "This parameter is only available for Cache Modes
-            'timeout' and 'natural'.";
-        }
-        type uint32;
-        units seconds;
-        description "This parameter configures the time in
-          seconds after which a Flow is expired even though packets
-          matching this Flow are still received by the Cache.
-          The parameter value zero indicates infinity, meaning that
-          there is no active timeout.
-          If not configured by the user, the Monitoring Device sets
-          this parameter.
-          Note that this parameter corresponds to
-          ipfixMeteringProcessCacheActiveTimeout in the IPFIX
-          MIB module.";
-        reference "RFC5815, Section 8
-          (ipfixMeteringProcessCacheActiveTimeout).";
-      }
-      leaf inactiveTimeout {
-        when "(../cacheMode = 'ipfix:timeout') or
-          (../cacheMode = 'ipfix:natural')" {
-          description "This parameter is only available for Cache Modes
-            'timeout' and 'natural'.";
-        }
-        type uint32;
-        units seconds;
-        description "This parameter configures the time in
-          seconds after which a Flow is expired if no more packets
-          matching this Flow are received by the Cache.
-          The parameter value zero indicates infinity, meaning that
-          there is no inactive timeout.
-          If not configured by the user, the Monitoring Device sets
-          this parameter.
-          Note that this parameter corresponds to
-          ipfixMeteringProcessCacheInactiveTimeout in the IPFIX
-          MIB module.";
-        reference "RFC5815, Section 8
-          (ipfixMeteringProcessCacheInactiveTimeout).";
-      }
-      leaf exportInterval {
-        when "../cacheMode = 'ipfix:permanent'" {
-          description "This parameter is only available for Cache Mode
-            'permanent'.";
-        }
-        type uint32;
-        units seconds;
-        description "This parameter configures the interval (in seconds)
-          for periodical export of Flow Records.
-          If not configured by the user, the Monitoring Device sets
-          this parameter.";
-      }
+    grouping cacheLayoutParameters {
+      description "Cache Layout parameters used by immediateCache,
+        timeoutCache, naturalCache, and permanentCache.";
       container cacheLayout {
-        description "Cache Layout.";
+        description "Cache Layout parameters.";
         list cacheField {
           key name;
           min-elements 1;
-          description "List of fields in the Cache Layout.";
+          description "Superset of fields that are included in the
+            Packet Reports or Flow Records generated by the Cache.";
           leaf name {
             type nameType;
             description "Key of this list.";
@@ -807,7 +757,7 @@
             description "Name or ID of the Information Element.";
             reference "RFC5102.";
             leaf ieName {
-              type string;
+              type ieNameType;
               description "Name of the Information Element.";
             }
             leaf ieId {
@@ -831,19 +781,21 @@
           }
           leaf ieEnterpriseNumber {
             type uint32;
-            description "If present, the Information Element is
-              enterprise-specific. The field value configures the
-              enterprise number. If omitted or zero, the Information
+            default 0;
+            description "If this parameter is zero, the Information
               Element is registered in the IANA registry of IPFIX
               Information Elements.
+              If this parameter is configured with a non-zero private
+              enterprise number, the Information Element is
+              enterprise-specific.
               If the enterprise number is set to 29305, this field
               contains a Reverse Information Element. In this case,
               the Cache MUST generate Data Records in accordance to
               RFC5103.";
-            reference "RFC5101; RFC5102.";
+            reference "RFC5101; RFC5102; RFC5103.";
           }
           leaf isFlowKey {
-            when "(../../../cacheMode != 'ipfix:immediate')
+            when "(name(../../..) != 'immediateCache')
               and
               ((count(../ieEnterpriseNumber) = 0)
               or
@@ -857,55 +809,96 @@
           }
         }
       }
-      leaf activeFlows {
-        when "../cacheMode != 'ipfix:immediate'" {
-          description "This parameter is not available for Cache Mode
-            'immediate'.";
+    }
+
+    grouping flowCacheParameters {
+      description "Configuration and state parameters of a Cache
+        generating Flow Records.";
+      leaf maxFlows {
+        type uint32;
+        units flows;
+        description "This parameter configures the maximum number of
+          Flows in the Cache, which is the maximum number of Flows
+          that can be measured simultaneously.
+          The Monitoring Device MUST ensure that sufficient resources
+          are available to store the configured maximum number of
+          Flows.
+          If the maximum number of Flows is measured, no additional
+          Flows can be measured before any of the existing entries is
+          removed. However, traffic which pertains to existing Flows
+          can continue to be measured.";
+      }
+      leaf activeTimeout {
+        when "(name(..) = 'timeoutCache') or
+          (name(..) = 'naturalCache')" {
+          description "This parameter is only available for
+            timeoutCache and naturalCache.";
         }
+        type uint32;
+        units seconds;
+        description "This parameter configures the time in
+          seconds after which a Flow is expired even though packets
+          matching this Flow are still received by the Cache.
+          The parameter value zero indicates infinity, meaning that
+          there is no active timeout.
+          If not configured by the user, the Monitoring Device sets
+          this parameter.
+          Note that this parameter corresponds to
+          ipfixMeteringProcessCacheActiveTimeout in the IPFIX
+          MIB module.";
+        reference "RFC5815, Section 8
+          (ipfixMeteringProcessCacheActiveTimeout).";
+      }
+      leaf inactiveTimeout {
+        when "(name(..) = 'timeoutCache') or
+          (name(..) = 'naturalCache')" {
+          description "This parameter is only available for
+            timeoutCache and naturalCache.";
+        }
+        type uint32;
+        units seconds;
+        description "This parameter configures the time in
+          seconds after which a Flow is expired if no more packets
+          matching this Flow are received by the Cache.
+          The parameter value zero indicates infinity, meaning that
+          there is no inactive timeout.
+          If not configured by the user, the Monitoring Device sets
+          this parameter.
+          Note that this parameter corresponds to
+          ipfixMeteringProcessCacheInactiveTimeout in the IPFIX
+          MIB module.";
+        reference "RFC5815, Section 8
+          (ipfixMeteringProcessCacheInactiveTimeout).";
+      }
+      leaf exportInterval {
+        when "name(..) = 'permanentCache'" {
+          description "This parameter is only available for
+            permanentCache.";
+        }
+        type uint32;
+        units seconds;
+        description "This parameter configures the interval (in seconds)
+          for periodical export of Flow Records.
+          If not configured by the user, the Monitoring Device sets
+          this parameter.";
+      }
+      leaf activeFlows {
         type yang:gauge32;
         units flows;
         config false;
         description "The number of Flows currently active in this
           Cache.";
-        reference "ietf-draft-ipfix-mib-10, Section 8
+        reference "RFC5815, Section 8
           (ipfixMeteringProcessCacheActiveFlows).";
       }
       leaf unusedCacheEntries {
-        when "../cacheMode != 'ipfix:immediate'" {
-          description "This parameter is not available for Cache Mode
-            'immediate'.";
-        }
         type yang:gauge32;
         units flows;
         config false;
         description "The number of unused Cache entries in this
           Cache.";
-        reference "ietf-draft-ipfix-mib-10, Section 8
+        reference "RFC5815, Section 8
           (ipfixMeteringProcessCacheUnusedCacheEntries).";
-      }
-      leaf dataRecords {
-        type yang:counter64;
-        units "Data Records";
-        config false;
-        description "The number of Data Records generated by this
-          Cache.
-          Discontinuities in the value of this counter can occur at
-          re-initialization of the management system, and at other
-          times as indicated by the value of
-          cacheDiscontinuityTime.";
-        reference "ietf-draft-ipfix-mib-10, Section 8
-          (ipfixMeteringProcessDataRecords).";
-      }
-      leaf cacheDiscontinuityTime {
-        type yang:date-and-time;
-        config false;
-        description "Timestamp of the most recent occasion at which
-          the counter dataRecords suffered a discontinuity.
-          In contrast to ipfixMeteringProcessDiscontinuityTime
-          in the IPFIX MIB module, the time is absolute and not
-          relative to sysUpTime.";
-        reference "ietf-draft-ipfix-mib-10, Section 8
-          (ipfixMeteringProcessDiscontinuityTime).";
       }
     }
 
@@ -1123,6 +1116,7 @@
         default 600;
         description "Sets time after which Options Templates are
           resent in the UDP Transport Session.
+
           Note that the configured lifetime MUST be adapted to the
           optionsTemplateLifeTime parameter value at the receiving
           Collecting Process.
@@ -1679,7 +1673,7 @@
             number of the authority defining the Information Element
             Id.
             If the Information Element is not enterprise-specific,
-            this state parameter is omitted.";
+            this state parameter is zero.";
           reference "RFC5815, Section 8
             (ipfixTemplateDefinitionIeEnterpriseNumber).";
         }
@@ -2006,7 +2000,63 @@
           type nameType;
           description "Key of this list.";
         }
-        uses cacheParameters;
+        leaf dataRecords {
+          type yang:counter64;
+          units "Data Records";
+          config false;
+          description "The number of Data Records generated by this
+            Cache.
+            Discontinuities in the value of this counter can occur at
+            re-initialization of the management system, and at other
+            times as indicated by the value of
+            cacheDiscontinuityTime.";
+          reference "RFC5815, Section 8
+            (ipfixMeteringProcessDataRecords).";
+        }
+        leaf cacheDiscontinuityTime {
+          type yang:date-and-time;
+          config false;
+          description "Timestamp of the most recent occasion at which
+            the counter dataRecords suffered a discontinuity.
+            In contrast to ipfixMeteringProcessDiscontinuityTime
+            in the IPFIX MIB module, the time is absolute and not
+            relative to sysUpTime.";
+          reference "RFC5815, Section 8
+            (ipfixMeteringProcessDiscontinuityTime).";
+        }
+        choice CacheType {
+          mandatory true;
+          description "Type of Cache and specific parameters.";
+          container immediateCache {
+            if-feature immediateCache;
+            description "Flow expiration after the first packet;
+              generation of Packet Records.";
+            uses cacheLayoutParameters;
+          }
+          container timeoutCache {
+            if-feature timeoutCache;
+            description "Flow expiration after active and inactive
+              timeout; generation of Flow Records.";
+            uses flowCacheParameters;
+            uses cacheLayoutParameters;
+          }
+          container naturalCache {
+            if-feature naturalCache;
+            description "Flow expiration after active and inactive
+              timeout, or on natural termination (e.g. TCP FIN, or
+              TCP RST) of the Flow; generation of Flow Records.";
+            uses flowCacheParameters;
+            uses cacheLayoutParameters;
+          }
+          container permanentCache {
+            if-feature permanentCache;
+            description "No flow expiration, periodical export with
+              time interval exportInterval; generation of Flow
+              Records.";
+            uses flowCacheParameters;
+            uses cacheLayoutParameters;
+          }
+        }
         leaf-list exportingProcess {
           if-feature exporter;
           type leafref { path "/ipfix/exportingProcess/name"; }

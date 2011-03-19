@@ -1,7 +1,7 @@
  module ietf-netconf {
 
-   // the namespace for NETCONF XML definitions has not changed
-   // this value is pre-determined by RFC 4741
+   // the namespace for NETCONF XML definitions is unchanged
+   // from RFC 4741 which this document replaces
    namespace "urn:ietf:params:xml:ns:netconf:base:1.0";
 
    prefix nc;
@@ -50,7 +50,7 @@
     // RFC Ed.: replace XXXX with actual RFC number and remove this note
 
    // RFC Ed.: please update the date to the date of publication
-   revision 2011-01-16 {
+   revision 2011-03-08 {
      description
        "Initial revision";
      reference
@@ -287,7 +287,7 @@
         }
       }
       description "NETCONF Error Tag";
-      reference "RFC XXXX, section YYY";
+      reference "RFC XXXX, Appendix A.";
    }
 
    typedef error-severity-type {
@@ -300,7 +300,7 @@
        }
      }
      description "NETCONF Error Severity";
-     reference "RFC XXXX, section YYY";
+     reference "RFC XXXX, section 4.3.";
    }
 
    typedef edit-operation-type {

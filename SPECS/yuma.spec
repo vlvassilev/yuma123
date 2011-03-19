@@ -13,7 +13,7 @@ Requires: ncurses
 Requires: libxml2
 
 %description
-Yuma Tools is a YANG-based NETCONF-over-SSH client and server
+Yuma is a YANG-based NETCONF-over-SSH client and server
 development toolkit.  The netconfd server includes an automated
 central NETCONF protocol stack, based directly on YANG modules.
 The yangcli client supports single sessions over SSH with some
@@ -75,11 +75,11 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/yuma/src/libtoaster/
 
 %post
-echo "Yuma Tools installed."
+echo "Yuma installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
-* Sat Mar 19 2011 Andy Bierman <andy at netconfcentral.org> 1.14-6 [1099]
+* Sat Mar 19 2011 Andy Bierman <andy at netconfcentral.org> 1.14-6 [1100]
  * yangcli:
    * fix bug not checking for ssh2 channel EOF with data
    * no longer removing top container for edit-config,

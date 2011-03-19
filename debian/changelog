@@ -41,7 +41,7 @@ yuma (1.14-6) unstable; urgency=medium
    * update several IETF YANG modules to latest version
    * remove JFLAG usage and add make test to modules Makefile
    * change Werror to never be added by default, use USE_WERROR switch
--- Andy Bierman <andy@netconfcentral.org>  Sat, 19 Mar 2011 14:00:00 -0700
+ -- Andy Bierman <andy@netconfcentral.org>  Sat, 19 Mar 2011 14:00:00 -0700
 yuma (1.14-5) unstable; urgency=medium
   * update copyright strings
   * add more test YANG modules

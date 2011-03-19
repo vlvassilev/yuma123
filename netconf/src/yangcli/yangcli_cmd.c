@@ -6276,7 +6276,9 @@ static status_t
         }
 
         if (!done) {
-            res = do_history_show(server_cb, -1, mode);
+            res = do_history_show(server_cb,
+                                  YANGCLI_DEF_HISTORY_LINES, 
+                                  mode);
         }
     }
 

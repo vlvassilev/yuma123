@@ -259,6 +259,8 @@ extern "C" {
 
 #define YANGCLI_DEF_MAXLOOPS  65535
 
+#define YANGCLI_DEF_HISTORY_LINES  25
+
 #define YANGCLI_MAX_INDENT    9
 
 /********************************************************************

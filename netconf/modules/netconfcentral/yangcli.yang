@@ -50,11 +50,12 @@ module yangcli {
            input breaks in the script or command will be skipped.
          ";
 
-    revision 2011-03-05 {
+    revision 2011-03-19 {
        description 
           "Added 'xml-nons' display mode to display-mode parameter.
            Added 'cli' and 'system' to show command; subset of 
-           show vars.";
+           show vars.
+           Changed history show default from -1 to 25.";
     }
 
     revision 2010-04-16 {
@@ -804,7 +805,7 @@ module yangcli {
                 "Show the specified number of history
                  buffer entries. -1 means show all entries.";
               type LogCount;
-              default -1;
+              default 25;
             }
             uses ncxapp:HelpMode;
           }

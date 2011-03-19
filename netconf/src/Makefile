@@ -84,7 +84,6 @@ treedepend:
         done
 
 treeclean:
-	/bin/sh platform/setversion.sh
 	for dir in $(DIRS); do\
 	  cd $$dir && $(MAKE) clean && cd ..;\
         done

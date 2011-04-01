@@ -61,11 +61,11 @@
     --------------------------
 
     In pass 1, the source file is parsed into YANG tokens.
-    String concatentation are quoted string adjustment are
+    String concatentation and quoted string adjustment are
     handled in this pass.
 
     In pass 2, the objects are parsed via yang_obj_consume_datadef.
-    Syntax errors and any other static errors are reported
+    Syntax errors and any other static errors are reported.
 
     In pass 3, the object definitions are validated for correctness,
     via the yang_obj_resolve_datadefs function.  This is mixed with

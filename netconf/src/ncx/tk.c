@@ -1760,7 +1760,7 @@ static status_t
             first = next;
         }
     }
-                
+
     return NO_ERR;
 
 }  /* concat_qstrings */

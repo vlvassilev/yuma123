@@ -67,7 +67,7 @@ status_t
     ssize_t  retsiz;
     uint32   retry_cnt;
 
-    retry_cnt = 5;
+    retry_cnt = 1000;
     sent = 0;
     left = cnt;
     

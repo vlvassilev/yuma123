@@ -6408,7 +6408,8 @@ static status_t
     case TK_TT_TSTRING:
         /* check the ID token for a NodeType name */
         nodetyp = get_nodetype_id(TK_CUR_VAL(pcb->tkc));
-        if (nodetyp == XP_EXNT_NONE) {
+        if (nodetyp == XP_EXNT_NONE ||
+            (tk_next_typ(pcb->tkc) != TK_TT_LPAREN)) {
             name = TK_CUR_VAL(pcb->tkc);
             break;
         }

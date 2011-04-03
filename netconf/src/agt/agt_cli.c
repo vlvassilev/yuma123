@@ -184,6 +184,17 @@ static void
      * a different value selected
      */
 
+    /* get delete-empty-npcontainters param */
+    val = val_find_child(valset, 
+                         AGT_CLI_MODULE,
+                         AGT_CLI_DELETE_EMPTY_NPCONTAINERS);
+    if (val && val->res == NO_ERR) {
+        agt_profile->agt_delete_empty_npcontainers = VAL_BOOL(val);
+    } else {
+        agt_profile->agt_delete_empty_npcontainers = 
+            AGT_DEF_DELETE_EMPTY_NP;
+    }        
+
     /* get indent param */
     val = val_find_child(valset, AGT_CLI_MODULE, NCX_EL_INDENT);
     if (val && val->res == NO_ERR) {

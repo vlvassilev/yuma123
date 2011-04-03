@@ -23,6 +23,11 @@ module netconfd {
         This module is not advertised by the server.
         It contains only CLI parameters.";
 
+    revision 2011-04-02 {
+       description 
+         "Added --delete-np-containers parameter.";
+    }
+
     revision 2010-05-13 {
        description 
          "Added --with-url to enable :url capability.";
@@ -126,6 +131,18 @@ module netconfd {
             from the saved configuration.";
          type wd:with-defaults-mode;
          default explicit;
+      }
+
+      leaf delete-empty-npcontainers {
+        description
+           "An empty non-presence container has no meaning
+            in NETCONF/YANG so it may be deleted by the server.
+            This takes non-trivial processing time for large
+            databases, but uses less memory.
+            Disabling this parameter will result in a larger
+            database in both memory and NV-save.";
+        type boolean;
+        default true;
       }
 
       leaf eventlog-size {

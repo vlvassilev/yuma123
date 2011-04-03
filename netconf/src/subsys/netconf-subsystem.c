@@ -20,6 +20,8 @@
 date         init     comment
 ----------------------------------------------------------------------
 14-jan-07    abb      begun;
+03-mar-11    abb      get rid of usleeps and replace with
+                      design that checks for EAGAIN
 
 *********************************************************************
 *                                                                   *
@@ -384,7 +386,7 @@ static ssize_t
             }
             errdirty = 1;
 #endif
-            *retres = ERR_NCX_READ_FAILED;
+            *retres = ERR_NCX_SKIPPED;
             continue;
         }
 
@@ -502,6 +504,8 @@ static status_t
                 res = NO_ERR;
                 done = TRUE;
                 continue;
+            } else if (res == ERR_NCX_SKIPPED) {
+                res = NO_ERR;
             } else if (res == NO_ERR && retcnt > 0) {
 #ifdef SUBSYS_TRACE
                 if (errfile && errok) {
@@ -560,6 +564,8 @@ static status_t
                 res = NO_ERR;
                 done = TRUE;
                 continue;
+            } else if (res == ERR_NCX_SKIPPED) {
+                res = NO_ERR;
             } else if (res == NO_ERR && retcnt > 0) {
 #ifdef SUBSYS_TRACE
                 if (errfile && errok) {

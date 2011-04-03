@@ -3616,15 +3616,26 @@ static void
                                boolean *deleteme)
 {
     obj_template_t  *obj;
-    val_value_t           *chval, *nextchild;
-    boolean                deletechild;
+    agt_profile_t   *profile;
+    val_value_t     *chval, *nextchild;
+    boolean         deletechild;
 
     *deleteme = FALSE;
+
+    profile = agt_get_profile();
+
+    if (!profile->agt_delete_empty_npcontainers) {
+        /* --delete-empty-npcontainers=false */
+        return;
+    }
+
     obj = curval->obj;
 
     if (configmode != obj_is_config(obj)) {
+        /* not a config container */
         return;
     }
+
 
     if (obj_is_np_container(curval->obj) &&
         !val_get_first_child(curval)) {
@@ -4216,9 +4227,13 @@ status_t
 /********************************************************************
 * FUNCTION agt_val_root_check
 * 
+* !!! Full database validation !!!
 * Check for the proper number of object instances for
 * the specified configuration database
-* 
+* Check must and when statements
+* Check empty NP containers
+* Check choices (selected case, and it is complete)
+*
 * INPUTS:
 *   scb == session control block (may be NULL; no session stats)
 *   msg == RPC msg in progress 
@@ -4266,8 +4281,13 @@ status_t
      * config objects and empty NP containers
      * and then see if the config is valid
      */
-    res = delete_dead_nodes(scb, msg, root, TRUE, TRUE);
+    res = delete_dead_nodes(scb, 
+                            msg, 
+                            root, 
+                            TRUE, 
+                            FALSE);
     CHK_EXIT(res, retres);
+    
 
     /* check the instance counts for the subtrees that are present */
     res = agt_val_instance_check(scb, 
@@ -4621,7 +4641,7 @@ status_t
                                 msg, 
                                 target->root, 
                                 TRUE,
-                                FALSE);
+                                TRUE);
     }
 
     return res;

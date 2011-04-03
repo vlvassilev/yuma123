@@ -3884,7 +3884,11 @@ void
         break;
     case NCX_BT_ENUM:
         if (val->v.enu.name) {
-            (*dumpfn)("%s", (const char *)val->v.enu.name);
+            if (val_need_quotes(val->v.enu.name)) {
+                (*dumpfn)("\'%s\'", (const char *)val->v.enu.name);
+            } else {
+                (*dumpfn)("%s", (const char *)val->v.enu.name);
+            }
         }
         break;
     case NCX_BT_EMPTY:

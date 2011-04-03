@@ -151,6 +151,9 @@ extern "C" {
 
 #define AGT_DEF_CONF_FILE   (const xmlChar *)"/etc/yuma/netconfd.conf"
 
+/* this behavior used to set to TRUE, before 1.15-1 */
+#define AGT_DEF_DELETE_EMPTY_NP   FALSE
+
 #define AGT_USER_VAR        (const xmlChar *)"user"
 
 #define AGT_URL_SCHEME_LIST (const xmlChar *)"file"
@@ -201,7 +204,8 @@ typedef struct agt_profile_t_ {
     boolean             agt_logappend;
     boolean             agt_xmlorder;
     boolean             agt_deleteall_ok;   /* TBD: not implemented */
-    boolean             agt_stream_output;   /* TBD: no CLI support yet */
+    boolean             agt_stream_output;   /* d:true; no CLI support yet */
+    boolean             agt_delete_empty_npcontainers;     /* d: false */
     const xmlChar      *agt_accesscontrol;
     const xmlChar      *agt_conffile;
     const xmlChar      *agt_logfile;

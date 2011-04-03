@@ -112,6 +112,10 @@ static void
 {
     val_value_t *val;
 
+    if (undo->free_newnode) {
+        val_free_value(undo->newnode);
+    }
+
     if (undo->free_curnode) {
         val_free_value(undo->curnode);
     }
@@ -408,11 +412,37 @@ void
 
 
 /********************************************************************
+* FUNCTION rpc_set_undorec_free_newnode
+*
+* Set the undo rec status so the newnode will
+* be deleted when commit or undo phase is completed
+* The newnode is no longer in the tree, so skip 
+* val_remove_child step
+*
+* INPUTS:
+*   undo == rpc_undo_rec_t to set
+*********************************************************************/
+void 
+    rpc_set_undorec_free_newnode (rpc_undo_rec_t *undo)
+{
+#ifdef DEBUG
+    if (!undo) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    undo->free_newnode = TRUE;
+
+}  /* rpc_set_undorec_free_newnode */
+
+
+/********************************************************************
 * FUNCTION rpc_set_undorec_free_curnode
 *
 * Set the undo rec status so the curnode will
 * be deleted when commit or undo phase is completed
-* But the curnode is no longer in the tree, so skip 
+* The curnode is no longer in the tree, so skip 
 * val_remove_child step
 *
 * INPUTS:

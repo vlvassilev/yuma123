@@ -229,7 +229,7 @@ static void
                  (scb->peeraddr) ? 
                  scb->peeraddr : (const xmlChar *)"localhost",
                  tbuff,
-                 (ibuff) ? (const char *)ibuff : "--");
+                 (ibuff) ? (const char *)ibuff : "??");
     }
 
     /* generate a sysConfigChange notification */
@@ -1023,8 +1023,35 @@ static status_t
             return res;
         }
 
-        if (LOGDEBUG2) {
-            log_debug2("\napply_write_val: %s applyhere", name);
+        if (LOGDEBUG) {
+            val_value_t *logval;
+
+            if (curval) {
+                logval = curval;
+            } else if (newval) {
+                logval = newval;
+            } else {
+                logval = NULL;
+            }
+            if (logval) {
+                xmlChar *buff = NULL;
+                res = val_gen_instance_id(&msg->mhdr,
+                                          logval,
+                                          NCX_IFMT_XPATH1,
+                                          &buff);
+                if (res == NO_ERR) {
+                    log_debug("\napply_write_val: apply %s on %s",
+                              op_editop_name(editop),
+                              buff);
+                } else {
+                    log_debug("\napply_write_val: apply %s on %s", 
+                              op_editop_name(editop),
+                              name);
+                }
+                if (buff) {
+                    m__free(buff);
+                }
+            }
         }
 
         res = handle_user_callback(AGT_CB_APPLY, 
@@ -1209,7 +1236,11 @@ static status_t
     }
 
     if (freenew) {
-        val_free_value(newval);
+        if (undo==NULL) {
+            val_free_value(newval);
+        } else {
+            rpc_set_undorec_free_newnode(undo);
+        }
     }
 
     return res;

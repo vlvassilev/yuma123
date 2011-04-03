@@ -125,6 +125,7 @@ typedef enum rpc_data_t_ {
 typedef struct rpc_undo_rec_t_ {
     dlq_hdr_t       qhdr;
     boolean         ismeta;
+    boolean         free_newnode;
     boolean         free_curnode;
     op_editop_t     editop;
     val_value_t    *newnode; 
@@ -328,11 +329,26 @@ extern void
 
 
 /********************************************************************
+* FUNCTION rpc_set_undorec_free_newnode
+*
+* Set the undo rec status so the newnode will
+* be deleted when commit or undo phase is completed
+* The newnode is no longer in the tree, so skip 
+* val_remove_child step
+*
+* INPUTS:
+*   undo == rpc_undo_rec_t to set
+*********************************************************************/
+extern void 
+    rpc_set_undorec_free_newnode (rpc_undo_rec_t *undo);
+
+
+/********************************************************************
 * FUNCTION rpc_set_undorec_free_curnode
 *
 * Set the undo rec status so the curnode will
 * be deleted when commit or undo phase is completed
-* But the curnode is no longer in the tree, so skip 
+* The curnode is no longer in the tree, so skip 
 * val_remove_child step
 *
 * INPUTS:

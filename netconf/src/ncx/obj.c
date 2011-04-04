@@ -10697,4 +10697,34 @@ void
 }  /* obj_dump_child_list */
 
 
+/********************************************************************
+* FUNCTION obj_get_keystr
+*
+* Get the key string for this list object
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   pointer to key string or NULL if none or not a list
+*********************************************************************/
+const xmlChar *
+    obj_get_keystr (obj_template_t *obj)
+{
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    if (obj->objtype != OBJ_TYP_LIST) {
+        return NULL;
+    }
+
+    return obj->def.list->keystr;
+
+}  /* obj_get_keystr */
+
+
 /* END obj.c */

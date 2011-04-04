@@ -894,8 +894,8 @@ static void
     }
 
     /* column: listkey */
-    if (obj->objtype == OBJ_TYP_LIST && obj->def.list->keystr) {
-        sprintf(buff, "\n    '%s',", obj->def.list->keystr);
+    if (obj_get_keystr(obj) != NULL) {
+        sprintf(buff, "\n    '%s',", obj_get_keystr(obj));
         ses_putstr(scb, (const xmlChar *)buff);
     } else {
         write_empty_col(scb);

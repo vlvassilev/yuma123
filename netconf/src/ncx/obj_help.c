@@ -234,7 +234,7 @@ void
                        uint32 nestlevel,
                        uint32 indent)
 {
-    const xmlChar        *val;
+    const xmlChar        *val, *keystr;
     obj_template_t       *testobj;
     uint32                count, objnestlevel;
     char                  numbuff[NCX_MAX_NUMLEN];
@@ -524,11 +524,12 @@ void
             break;
         case HELP_MODE_NORMAL:
         case HELP_MODE_FULL:
-            if (obj->def.list->keystr) {
+            keystr = obj_get_keystr(obj);
+            if (keystr != NULL) {
                 help_write_lines((const xmlChar *)"key: ", 
                                  indent+NCX_DEF_INDENT, 
                                  TRUE); 
-                help_write_lines(obj->def.list->keystr, 0, FALSE);
+                help_write_lines(keystr, 0, FALSE);
             }
             if (!obj->def.list->ordersys) {
                 help_write_lines((const xmlChar *)"ordered-by: user", 

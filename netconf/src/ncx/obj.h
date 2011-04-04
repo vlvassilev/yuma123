@@ -3435,6 +3435,19 @@ extern void
                          uint32 indent);
 
 
+/********************************************************************
+* FUNCTION obj_get_keystr
+*
+* Get the key string for this list object
+*
+* INPUTS:
+*   obj == obj_template to check
+*
+* RETURNS:
+*   pointer to key string or NULL if none or not a list
+*********************************************************************/
+extern const xmlChar *
+    obj_get_keystr (obj_template_t *obj);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

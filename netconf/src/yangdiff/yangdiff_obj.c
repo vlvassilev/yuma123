@@ -1093,8 +1093,8 @@ static uint32
     }
 
     if (str_field_changed(YANG_K_KEY, 
-                          old->keystr, 
-                          new->keystr, 
+                          obj_get_keystr(oldobj), 
+                          obj_get_keystr(newobj), 
                           FALSE, 
                           NULL)) {
         return 1;
@@ -1210,8 +1210,8 @@ static void
     output_mustQ_diff(cp, &old->mustQ, &new->mustQ);
 
     if (str_field_changed(YANG_K_KEY, 
-                          old->keystr,
-                          new->keystr,
+                          obj_get_keystr(oldobj),
+                          obj_get_keystr(newobj),
                           isrev,
                           &cdb)) {
         output_cdb_line(cp, &cdb);

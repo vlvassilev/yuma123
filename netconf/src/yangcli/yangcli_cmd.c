@@ -6955,7 +6955,7 @@ status_t
                                       line, 
                                       &len,
                                       &res);
-    if (!rpc) {
+    if (rpc==NULL || !obj_is_rpc(rpc)) {
         if (server_cb->result_name || server_cb->result_filename) {
             res = finish_result_assign(server_cb, NULL, line);
         } else {
@@ -7039,7 +7039,7 @@ status_t
                                       line, 
                                       &len,
                                       &res);
-    if (!rpc) {
+    if (rpc == NULL || !obj_is_rpc(rpc)) {
         if (server_cb->result_name || server_cb->result_filename) {
             res = finish_result_assign(server_cb, NULL, line);
         } else {

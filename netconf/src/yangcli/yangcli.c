@@ -3786,7 +3786,7 @@ static rpc_err_t
                             NC_MODULE,
                             NCX_EL_RPC_ERROR);
     if (errval == NULL) {
-        log_error("\nError: No <rpc-error> elemenst found");
+        log_error("\nError: No <rpc-error> elements found");
         return RPC_ERR_NONE;
     }
 

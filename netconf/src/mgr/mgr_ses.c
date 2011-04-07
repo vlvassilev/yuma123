@@ -1043,7 +1043,7 @@ ssize_t
     } else {
         ret = libssh2_channel_read(mscb->channel, buff, bufflen);
 
-        if (LOGDEBUG3) {
+        if (ret != LIBSSH2_ERROR_EAGAIN && LOGDEBUG3) {
             log_debug3("\nmgr_ses: read channel ses(%u) ret(%d)", 
                        scb->sid,
                        ret);

@@ -83,7 +83,8 @@ date         init     comment
 #define AMPSTR    (const xmlChar *)"&amp;"
 #define QSTR      (const xmlChar *)"&quot;"
 
-#define MAX_READ_TRIES   1000
+/* used by yangcli to read in between stdin polling */
+#define MAX_READ_TRIES   100
 
 
 /********************************************************************

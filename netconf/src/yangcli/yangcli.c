@@ -2565,6 +2565,20 @@ static void
             }
         }
 
+        if (mod == NULL && module != NULL) {
+            /* check if there is a module in the modlibQ that
+             * has the same namespace URI as 'namespacestr' base
+             */
+            libresult = ncxmod_find_search_result(&modlibQ,
+                                                  NULL,
+                                                  NULL,
+                                                  namespacestr);
+            if (libresult != NULL) {
+                module = libresult->module;
+                revision = libresult->revision;
+            }
+        }
+
         if (mod == NULL) {
             /* module was not found already loaded into
              * this instance of yangcli

@@ -807,12 +807,6 @@ status_t
         res = xml_msg_gen_new_prefix(msg, ncid, &buff, 0);
         if (res == NO_ERR) {
             res = xml_add_xmlns_attr(attrs, ncid, buff);
-#if 0
-            if (res == NO_ERR && !msg->useprefix) {
-                /* add another with no prefix in this mode */
-                res = xml_add_xmlns_attr(attrs, ncid, NULL);
-            }
-#endif
         }
         
         if (res == NO_ERR) {

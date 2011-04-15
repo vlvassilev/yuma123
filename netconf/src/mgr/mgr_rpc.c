@@ -556,7 +556,7 @@ status_t
     /* setup the prefix map with the NETCONF (and maybe NCX) namespace */
     res = xml_msg_build_prefix_map(&msg, 
                                    &req->attrs, 
-                                   TRUE, 
+                                   FALSE, 
                                    (req->data->nsid == xmlns_ncx_id()));
 
     /* add the message-id attribute */

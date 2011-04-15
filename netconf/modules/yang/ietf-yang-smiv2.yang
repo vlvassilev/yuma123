@@ -3,20 +3,23 @@ module ietf-yang-smiv2 {
     // XXX namespace to be allocated by IANA
 
     namespace "urn:ietf:params:xml:ns:yang:yang-smiv2";
-    prefix "smiv2";
-
-    organization
-        "YANG Language Design Team";
-
-    contact
-        "Martin Bjorklund (Editor) <mbj@tail-f.com>";
+    prefix "smi";
 
     description
         "This module contains extensions for dealing with 
          SMIv2 modules.";
 
+    revision 2011-04-14 {
+        description "Update to support object-identity"; 
+    }
+
     revision 2011-02-18 {
         description "Initial revision, cloned from yang-smi.yang.";
+    }
+
+    identity object-identity {
+      description
+        "base identity for OBJECT-IDENTITY macrros.";
     }
 
     extension oid {

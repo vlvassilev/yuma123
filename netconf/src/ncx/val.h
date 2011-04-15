@@ -3375,6 +3375,24 @@ extern status_t
 extern void
     val_force_empty (val_value_t *val);
 
+
+/********************************************************************
+* FUNCTION val_move_fields_for_xml
+* 
+* Move or copy the internal fields from one val to another
+* for xml_wr purposes
+*
+* INPUTS:
+*    srcval == source val_value_t struct to move from
+*    destval == destination val to move to
+*    movemeta == TRUE if metaQ should be transferred
+*********************************************************************/
+extern void
+    val_move_fields_for_xml (val_value_t *srcval,
+                             val_value_t *destval,
+                             boolean movemeta);
+
+
 #ifdef __cplusplus
 }  /* end extern 'C' */
 #endif

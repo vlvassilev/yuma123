@@ -10012,4 +10012,37 @@ void
 } /* val_force_empty */
 
 
+/********************************************************************
+* FUNCTION val_move_fields_for_xml
+* 
+* Move or copy the internal fields from one val to another
+* for xml_wr purposes
+*
+* INPUTS:
+*    srcval == source val_value_t struct to move from
+*    destval == destination val to move to
+*    movemeta == TRUE if metaQ should be transferred
+*********************************************************************/
+void
+    val_move_fields_for_xml (val_value_t *srcval,
+                             val_value_t *destval,
+                             boolean movemeta)
+{
+#ifdef DEBUG
+    if (srcval == NULL || destval == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    destval->parent = srcval->parent;
+    destval->dataclass = srcval->dataclass;
+    if (movemeta) {
+        dlq_block_enque(&srcval->metaQ, &destval->metaQ);
+    }
+
+} /* val_move_fields_for_xml */
+
+
+
 /* END file val.c */

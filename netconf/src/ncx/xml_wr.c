@@ -848,8 +848,9 @@ static void
                                           VAL_STR(useval),
                                           &res);
                 if (realval) {
-                    realval->parent = val->parent;
-                    realval->dataclass = val->dataclass;
+                    val_move_fields_for_xml(val, 
+                                            realval,
+                                            msg->acm_cbfn == NULL);
                     useval = realval;
                 } else {
                     log_error("\nError: write leafref '%s' failed (%s)",
@@ -1767,8 +1768,9 @@ void
                                           VAL_STR(out),
                                           &res);
                 if (realval) {
-                    realval->parent = val->parent;
-                    realval->dataclass = val->dataclass;
+                    val_move_fields_for_xml(val, 
+                                            realval,
+                                            msg->acm_cbfn == NULL);
                     out = realval;
                 } else {
                     log_error("\nError: write leafref '%s' failed (%s)",

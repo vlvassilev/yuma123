@@ -1421,26 +1421,46 @@ val_value_t *
             }
 
             if (!chobj && !gotdashes) {
-                /* try the default parameter
-                 * if any defined, then use the unknown parm
-                 * name as a parameter value for the default parm
-                 */
-                chobj = obj_get_default_parm(obj);
-                if (chobj) {
-                    if (chobj->objtype != OBJ_TYP_LEAF_LIST &&
-                        gotdefaultparm) {
-                        log_error("\nError: default parm '%s' "
-                                  "already entered",
-                                  obj_get_name(chobj));
-                        res = ERR_NCX_DUP_ENTRY;
-                        continue;
+                if (parmnamelen) {
+                    int32 idx = buffpos + parmnamelen;
+
+                    /* check for whitespace following value */
+                    while (isspace(buff[idx]) && idx < bufflen) {
+                        idx++;
                     }
-                    gotdefaultparm = TRUE;
-                    isdefaultparm = TRUE;
+
+                    /* check for equals sign, indicating an unknown
+                     * parameter name, not a value string for the
+                     * default parameter
+                     */
+                    if (buff[idx] == '=') {
+                        /* will prevent chobj from getting set */
+                        res = ERR_NCX_UNKNOWN_PARM;
+                    }
+                }
+
+                if (res == NO_ERR) {
+                    /* try the default parameter
+                     * if any defined, then use the unknown parm
+                     * name as a parameter value for the default parm
+                     */
+                    chobj = obj_get_default_parm(obj);
+                    if (chobj) {
+                        if (chobj->objtype != OBJ_TYP_LEAF_LIST &&
+                            gotdefaultparm) {
+                            log_error("\nError: default parm '%s' "
+                                      "already entered",
+                                      obj_get_name(chobj));
+                            res = ERR_NCX_DUP_ENTRY;
+                            continue;
+                        }
+                        gotdefaultparm = TRUE;
+                        isdefaultparm = TRUE;
+                    }
                 }
             }
 
-            if (!chobj) {
+            if (chobj == NULL) {
                 res = ERR_NCX_UNKNOWN_PARM;
             } else {
                 /* do not check parameter order for CLI */

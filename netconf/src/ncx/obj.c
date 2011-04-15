@@ -8455,7 +8455,18 @@ obj_template_t *
     case OBJ_TYP_ANYXML:
         return NULL;
     case OBJ_TYP_RPCIO:
-        return obj->def.rpcio->defaultparm;
+        if (obj->def.rpcio->defaultparm != NULL) {
+            return obj->def.rpcio->defaultparm;
+        }
+        if (!xml_strcmp(obj_get_name(obj), YANG_K_INPUT)) {
+            if (obj_get_child_count(obj) == 1) {
+                obj_template_t  *childobj = obj_first_child(obj);
+                if (childobj != NULL && obj_is_leafy(childobj)) {
+                    return childobj;
+                }
+            }
+        }
+        return NULL;
     case OBJ_TYP_NOTIF:
         return NULL;
     case OBJ_TYP_NONE:

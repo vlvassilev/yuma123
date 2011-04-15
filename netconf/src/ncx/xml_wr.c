@@ -848,6 +848,8 @@ static void
                                           VAL_STR(useval),
                                           &res);
                 if (realval) {
+                    realval->parent = val->parent;
+                    realval->dataclass = val->dataclass;
                     useval = realval;
                 } else {
                     log_error("\nError: write leafref '%s' failed (%s)",
@@ -1765,6 +1767,8 @@ void
                                           VAL_STR(out),
                                           &res);
                 if (realval) {
+                    realval->parent = val->parent;
+                    realval->dataclass = val->dataclass;
                     out = realval;
                 } else {
                     log_error("\nError: write leafref '%s' failed (%s)",

@@ -1461,9 +1461,15 @@ static status_t
     pcb = ncxmod_load_module_ex(modname,
                                 revision,
                                 cp->unified, /* with_submods */
-                                /* savetkc for yin */
-                                !cp->rawmode || cp->format == NCX_CVTTYP_YIN,
+                                /* savetkc for yin, yang, html */
+                                !cp->rawmode || 
+                                cp->format == NCX_CVTTYP_YIN ||
+                                cp->format == NCX_CVTTYP_YANG ||
+                                cp->format == NCX_CVTTYP_HTML,
                                 TRUE,    /* keepmode to force new load */
+                                /* docmode for --format=html or yang */
+                                cp->format == NCX_CVTTYP_YANG ||
+                                cp->format == NCX_CVTTYP_HTML,
                                 &cp->savedevQ,
                                 &res);
 
@@ -1743,6 +1749,7 @@ static status_t
                 res = ERR_NCX_IMPORT_ERRORS;
                 ncx_print_errormsg(NULL, pcb->top, res);
             } else {
+                cp->tkc = pcb->tkc;
                 res = html_convert_module(pcb, cp, scb);
                 if (res != NO_ERR) {
                     pr_err(res);
@@ -1785,6 +1792,7 @@ static status_t
                 res = ERR_NCX_IMPORT_ERRORS;
                 ncx_print_errormsg(NULL, pcb->top, res);
             } else {
+                cp->tkc = pcb->tkc;
                 res = cyang_convert_module(pcb, cp, scb);
                 if (res != NO_ERR) {
                     pr_err(res);

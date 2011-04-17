@@ -332,7 +332,15 @@ status_t
                 res = ERR_INTERNAL_MEM;
                 ncx_print_errormsg(tkc, mod, res);
             }
-        }
+            if (res == NO_ERR) {
+                res = tk_check_save_origstr(tkc, 
+                                            TK_CUR(tkc),
+                                            (const void *)field);
+                if (res != NO_ERR) {
+                    ncx_print_errormsg(tkc, mod, res);
+                }                    
+            }
+        } /* else server does not save descr/ref */
     } else {
         switch (TK_CUR_TYP(tkc)) {
         case TK_TT_NONE:

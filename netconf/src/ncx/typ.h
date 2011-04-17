@@ -2035,6 +2035,21 @@ extern const xmlChar *
 
 
 /********************************************************************
+* FUNCTION typ_get_leafref_path_addr
+* 
+*   Get the address of the path argument for the leafref data type
+*
+* INPUTS:
+*    typdef == typdef for the the leafref
+*
+* RETURNS:
+*    pointer to the path argument or NULL if some error
+*********************************************************************/
+extern const void *
+    typ_get_leafref_path_addr (const typ_def_t *typdef);
+
+
+/********************************************************************
 * FUNCTION typ_get_leafref_pcb
 * 
 *   Get the XPath parser control block for the leafref data type

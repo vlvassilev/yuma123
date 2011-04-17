@@ -176,6 +176,7 @@ typedef struct yang_pcb_t_ {
     boolean       topfound;    /* TRUE if top found, not added */
     boolean       topadded;    /* TRUE if top in registry; F: need free */
     boolean       savetkc;     /* TRUE if tkc should be kept in tkc */
+    boolean       docmode;     /* TRUE if saving strings in origtkQ */
     dlq_hdr_t     allimpQ;          /* Q of yang_import_ptr_t */
 
     dlq_hdr_t    *savedevQ;  /* ptr to Q of ncx_save_deviations_t */

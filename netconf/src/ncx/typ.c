@@ -4679,6 +4679,45 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION typ_get_leafref_path_addr
+* 
+*   Get the address of the path argument for the leafref data type
+*
+* INPUTS:
+*    typdef == typdef for the the leafref
+*
+* RETURNS:
+*    pointer to the path argument or NULL if some error
+*********************************************************************/
+const void *
+    typ_get_leafref_path_addr (const typ_def_t *typdef)
+{
+    const void         *pathstr;
+    const typ_def_t    *tdef;
+
+#ifdef DEBUG
+    if (!typdef) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    pathstr = NULL;
+
+    if (typ_get_basetype(typdef) != NCX_BT_LEAFREF) {
+        return NULL;
+    }
+
+    tdef = typ_get_cbase_typdef(typdef);
+    if (tdef && tdef->def.simple.xleafref) {
+        pathstr = &tdef->def.simple.xleafref->exprstr;
+    }
+    return pathstr;
+
+}   /* typ_get_leafref_path_addr */
+
+
+/********************************************************************
 * FUNCTION typ_get_leafref_pcb
 * 
 *   Get the XPath parser control block for the leafref data type

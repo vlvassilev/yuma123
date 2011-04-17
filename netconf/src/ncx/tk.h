@@ -151,6 +151,12 @@ extern "C" {
 /* return the namespace ID field in the token */
 #define TK_CUR_NSID(T) ((T)->cur->nsid)
 
+/* return non-zero if token preservation docmode */
+#define TK_DOCMODE(TKC)  ((TKC)->flags & TK_FL_DOCMODE)
+
+#define TK_HAS_ORIGTK(TK) (((TK)->typ == TK_TT_QSTRING ||   \
+                            (TK)->typ == TK_TT_SQSTRING) && \
+                           (TK)->origval != NULL)
 
 /* bits for tk_chain_t flags field */
 
@@ -166,6 +172,16 @@ extern "C" {
  *       and will not be freed in tk_free_chain
  */
 #define TK_FL_MALLOC      bit1
+
+/* == 1: DOC mode: the tk->origtkQ field will be used 
+ *       to preserve pre-string concat and processing
+ * == 0: normal mode: the rk-origtkQ will not be used
+ *       and only the result token will be saved
+ */
+#define TK_FL_DOCMODE     bit2
+
+
+
 
 
 /********************************************************************
@@ -230,6 +246,7 @@ typedef enum tk_type_t_ {
     TK_TT_NEWLINE               /* \n is significant in conf files */
 } tk_type_t;
 
+
 typedef enum tk_source_t_ {
     TK_SOURCE_CONF,
     TK_SOURCE_YANG,
@@ -238,24 +255,57 @@ typedef enum tk_source_t_ {
 } tk_source_t;
 
 
+typedef enum tk_origstr_typ_t_ {
+    TK_ORIGSTR_NONE,
+    TK_ORIGSTR_DQUOTE,
+    TK_ORIGSTR_DQUOTE_NL,
+    TK_ORIGSTR_SQUOTE,
+    TK_ORIGSTR_SQUOTE_NL
+} tk_origstr_typ_t;
+
+
+/* each entry in the origstrQ is the 2nd through Nth string
+ * to be concated.  The first string is in the tk->origval
+ *  string for double quote and tk->val for single quote
+ */
+typedef struct tk_origstr_t_ {
+    dlq_hdr_t          qhdr;
+    tk_origstr_typ_t   origtyp;
+    xmlChar           *str;
+} tk_origstr_t;
+
+
 /* single YANG language token type */
 typedef struct tk_token_t_ {
     dlq_hdr_t   qhdr;
     tk_type_t   typ;
     xmlChar    *mod;                  /* only used if prefix found */
     uint32      modlen;          /* length of 'mod'; not Z-string! */
-    xmlChar    *val;       /* only used for variable length tokens */
+    xmlChar    *val;
+    xmlChar    *origval;           /* used in DOCMODE for yangdump */
     uint32      len;
     uint32      linenum;
     uint32      linepos;
     xmlns_id_t  nsid;        /* only used for TK_TT_MSTRING tokens */
+    dlq_hdr_t   origstrQ;  /* Q of tk_origstr_t only used in DOCMODE */
 } tk_token_t;
+
+
+/* token backptr to get at original token chain for strings
+ * used only by yangdump --format=yang|html
+ */
+typedef struct tk_token_ptr_t_ {
+    dlq_hdr_t       qhdr;
+    tk_token_t     *tk;
+    const void     *field;
+} tk_token_ptr_t;
 
 
 /* token parsing chain */
 typedef struct tk_chain_t_ {
     dlq_hdr_t      qhdr;
-    dlq_hdr_t      tkQ;
+    dlq_hdr_t      tkQ;            /* Q of tk_token_t */
+    dlq_hdr_t      tkptrQ;     /* Q of tk_token_ptr_t */
     tk_token_t    *cur;
     ncx_error_t   *curerr;
     const xmlChar *filename;
@@ -332,6 +382,18 @@ extern void
 extern void
     tk_setup_chain_yin (tk_chain_t *tkc,
                         const xmlChar *filename);
+
+
+/********************************************************************
+* FUNCTION tk_setup_chain_docmode
+* 
+* Setup a previously allocated chain for a yangdump docmode output
+*
+* INPUTS
+*    tkc == token chain to setup
+*********************************************************************/
+extern void
+    tk_setup_chain_docmode (tk_chain_t *tkc);
 
 
 /********************************************************************
@@ -746,6 +808,121 @@ extern status_t
 *********************************************************************/
 extern status_t
     tk_add_semicol_token (tk_chain_t *tkc);
+
+
+/********************************************************************
+* FUNCTION tk_check_save_origstr
+* 
+* Check the docmode and the specified token;
+* Save a tk_origptr_t if needed with the field address
+*
+* INPUTS:
+*   tkc = token chain to use
+*   tk  = token to use (usually TK_CUR())
+*   field == address of string field to save as the key
+*
+* RETURNS:
+*    status; ERR_INTERNAL_MEM if entry cannot be malloced
+*********************************************************************/
+extern status_t
+    tk_check_save_origstr (tk_chain_t  *tkc,
+                           tk_token_t *tk,
+                           const void *field);
+
+
+/********************************************************************
+* FUNCTION tk_get_first_origstr
+* 
+* Get the first original string to use
+*
+* INPUTS:
+*   tkptr  = token pointer to use
+*   dquote = address of return double quote flag
+*   morestr == addres of return more string fragments flag
+* OUTPUTS:
+*   *dquote = return double quote flag
+*            TRUE == TK_TT_QSTRING
+*           FALSE == TK_TTSQSTRING
+*   *morestr == addres of return more string fragments flag
+*           TRUE == more string fragments after first one
+* RETURNS:
+*   pointer to the first string fragment
+*********************************************************************/
+extern const xmlChar *
+    tk_get_first_origstr (const tk_token_ptr_t  *tkptr,
+                          boolean *dquote,
+                          boolean *morestr);
+
+
+/********************************************************************
+* FUNCTION tk_first_origstr_rec
+* 
+* Get the first tk_origstr_t struct (if any)
+*
+* INPUTS:
+*   tkptr  = token pointer to use
+*
+* RETURNS:
+*   pointer to the first original string record
+*********************************************************************/
+extern const tk_origstr_t *
+    tk_first_origstr_rec (const tk_token_ptr_t  *tkptr);
+
+
+/********************************************************************
+* FUNCTION tk_next_origstr_rec
+* 
+* Get the next tk_origstr_t struct (if any)
+*
+* INPUTS:
+*   origstr  = origisnal string record pointer to use
+*
+* RETURNS:
+*   pointer to the next original string record
+*********************************************************************/
+extern const tk_origstr_t *
+    tk_next_origstr_rec (const tk_origstr_t  *origstr);
+
+
+/********************************************************************
+* FUNCTION tk_get_origstr_parts
+* 
+* Get the fields from the original string record
+*
+* INPUTS:
+*   origstr  = original string record pointer to use
+*   dquote = address of return double quote flag
+*   newline == addres of return need newline flag
+* OUTPUTS:
+*   *dquote = return double quote flag
+*            TRUE == TK_TT_QSTRING
+*           FALSE == TK_TTSQSTRING
+*   *newline == return need newline flag
+*           TRUE == need newline + indent before this string
+* RETURNS:
+*   pointer to the string fragment
+*********************************************************************/
+extern const xmlChar *
+    tk_get_origstr_parts (const tk_origstr_t  *origstr,
+                          boolean *dquote,
+                          boolean *newline);
+
+
+/********************************************************************
+* FUNCTION tk_find_tkptr
+* 
+* Find the specified token pointer record
+*
+* INPUTS:
+*   tkc  = token chain to use
+*   field == address of field to use as key to find
+*
+* RETURNS:
+*   pointer to the token pointer record or NULL if not found
+*********************************************************************/
+extern const tk_token_ptr_t *
+    tk_find_tkptr (const tk_chain_t  *tkc,
+                   const void *field);
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

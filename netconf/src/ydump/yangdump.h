@@ -29,7 +29,7 @@
 date             init     comment
 ----------------------------------------------------------------------
 01-mar-08    abb      Begun; moved from ncx/ncxtypes.h
-
+16-apr-11    abb      Add support for string token preservation
 */
 
 #include <xmlstring.h>
@@ -255,6 +255,7 @@ typedef struct yangdump_cvtparms_t_ {
     uint32          bufflen;
     boolean         firstdone;
     dlq_hdr_t       savedevQ;
+    tk_chain_t     *tkc;   /* if docmode for format=html|yang */
 } yangdump_cvtparms_t;
 
 #ifdef __cplusplus

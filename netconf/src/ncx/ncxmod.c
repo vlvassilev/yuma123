@@ -3341,6 +3341,8 @@ status_t
 *               is already loaded;  FALSE will allow the mod
 *               to be swapped out and the new copy deleted
 *               yangdump sets this to true
+*   docmode == TRUE if need to preserve strings for --format=html or yang
+*           == FALSE if no need to preserve string token sequences
 *   savedevQ == Q of ncx_save_deviations_t to use
 *   res == address of return status
 *
@@ -3356,6 +3358,7 @@ yang_pcb_t *
                            boolean with_submods,
                            boolean savetkc,
                            boolean keepmode,
+                           boolean docmode,
                            dlq_hdr_t *savedevQ,
                            status_t *res)
 {
@@ -3377,6 +3380,7 @@ yang_pcb_t *
         pcb->revision = revision;
         pcb->with_submods = with_submods;
         pcb->savetkc = savetkc;
+        pcb->docmode = docmode;
         *res = try_load_module(pcb,
                                YANG_PT_TOP,
                                modname, 

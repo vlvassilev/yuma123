@@ -6926,6 +6926,63 @@ const xmlChar *
 
 
 /********************************************************************
+* FUNCTION obj_get_description_addr
+* 
+* Get the address of the description field for this obj
+*
+* INPUTS:
+*   obj == the specific object to check
+*
+* RETURNS:
+*   YANG description string for this object
+*********************************************************************/
+const void *
+    obj_get_description_addr (const obj_template_t *obj)
+{
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+        return &obj->def.container->descr;
+    case OBJ_TYP_ANYXML:
+    case OBJ_TYP_LEAF:
+        return &obj->def.leaf->descr;
+    case OBJ_TYP_LEAF_LIST:
+        return &obj->def.leaflist->descr;
+    case OBJ_TYP_LIST:
+        return &obj->def.list->descr;
+    case OBJ_TYP_CHOICE:
+        return &obj->def.choic->descr;
+    case OBJ_TYP_CASE:
+        return &obj->def.cas->descr;
+    case OBJ_TYP_USES:
+        return &obj->def.uses->descr;
+    case OBJ_TYP_REFINE:
+        return &obj->def.refine->descr;
+    case OBJ_TYP_AUGMENT:
+        return &obj->def.augment->descr;
+    case OBJ_TYP_RPC:
+        return &obj->def.rpc->descr;
+    case OBJ_TYP_RPCIO:
+        return NULL;
+    case OBJ_TYP_NOTIF:
+        return &obj->def.notif->descr;
+    case OBJ_TYP_NONE:
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+    /*NOTREACHED*/
+
+}  /* obj_get_description_addr */
+
+
+/********************************************************************
 * FUNCTION obj_get_reference
 * 
 * Get the reference field for this obj
@@ -6980,6 +7037,63 @@ const xmlChar *
     /*NOTREACHED*/
 
 }  /* obj_get_reference */
+
+
+/********************************************************************
+* FUNCTION obj_get_reference_addr
+* 
+* Get the reference field for this obj
+*
+* INPUTS:
+*   obj == the specific object to check
+*
+* RETURNS:
+*   YANG reference string for this object
+*********************************************************************/
+const void *
+    obj_get_reference_addr (const obj_template_t *obj)
+{
+#ifdef DEBUG
+    if (!obj) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    switch (obj->objtype) {
+    case OBJ_TYP_CONTAINER:
+        return &obj->def.container->ref;
+    case OBJ_TYP_ANYXML:
+    case OBJ_TYP_LEAF:
+        return &obj->def.leaf->ref;
+    case OBJ_TYP_LEAF_LIST:
+        return &obj->def.leaflist->ref;
+    case OBJ_TYP_LIST:
+        return &obj->def.list->ref;
+    case OBJ_TYP_CHOICE:
+        return &obj->def.choic->ref;
+    case OBJ_TYP_CASE:
+        return &obj->def.cas->ref;
+    case OBJ_TYP_USES:
+        return &obj->def.uses->ref;
+    case OBJ_TYP_REFINE:
+        return &obj->def.refine->ref;
+    case OBJ_TYP_AUGMENT:
+        return &obj->def.augment->ref;
+    case OBJ_TYP_RPC:
+        return &obj->def.rpc->ref;
+    case OBJ_TYP_RPCIO:
+        return NULL;
+    case OBJ_TYP_NOTIF:
+        return &obj->def.notif->ref;
+    case OBJ_TYP_NONE:
+    default:
+        SET_ERROR(ERR_INTERNAL_VAL);
+        return NULL;
+    }
+    /*NOTREACHED*/
+
+}  /* obj_get_reference_addr */
 
 
 /********************************************************************

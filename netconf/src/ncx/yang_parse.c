@@ -3768,6 +3768,13 @@ status_t
             tk_setup_chain_yang(tkc, fp, str);
         }
 
+        if (pcb->docmode && 
+            (ptyp == YANG_PT_TOP ||
+             ptyp == YANG_PT_INCLUDE)) {
+            tk_setup_chain_docmode(tkc);
+        }
+
+
         /* start a new ncx_module_t struct */
         mod = ncx_new_module();
         if (!mod) {
@@ -3809,7 +3816,7 @@ status_t
     /* parse the module and validate it only if a token chain
      * was properly parsed; set this only once for the top module
      */
-    if (res == NO_ERR && pcb->savetkc && pcb->tkc == NULL) {
+    if (res == NO_ERR && pcb->savetkc && !pcb->docmode && pcb->tkc == NULL) {
         pcb->tkc = tk_clone_chain(tkc);
         if (pcb->tkc == NULL) {
             res = ERR_INTERNAL_MEM;
@@ -3956,9 +3963,11 @@ status_t
                     ncx_free_module(mod);
                     mod = NULL;
                 }
-            }  /* else the module went into an alternate mod Q 
-                * or the pcb->top pointer is live and will be freed later
-                */
+            }
+        } else {
+            /* was added */
+            keepmod = (pcb->keepmode && pcb->top == mod) 
+                ? TRUE : FALSE;
         }
     }
 
@@ -3969,6 +3978,10 @@ status_t
     if (tkc) {
         tkc->fp = NULL;
         if (keepmod && pcb->tkc == NULL) {
+            /* this is still NULL because pcb->docmode is TRUE
+             * and the altered token chain is desired, not
+             * the clone like YIN parsing
+             */
             pcb->tkc = tkc;
         } else {
             tk_free_chain(tkc);

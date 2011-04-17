@@ -237,6 +237,113 @@ static tk_btyp_t blist [] = {
 };
 
 
+
+/********************************************************************
+* FUNCTION new_origstr
+* 
+* Allocatate a new tk_origstr_t
+*
+* INPUTS:
+*  ttyp == token type
+*  newline == TRUE if newline added; FALSE if not
+*  strval == malloced string handed over to this data structure
+*
+* RETURNS:
+*   new token or NULL if some error
+*********************************************************************/
+static tk_origstr_t *
+    new_origstr (tk_type_t ttyp, 
+                boolean newline,
+                xmlChar *strval)
+{
+    tk_origstr_t  *origstr;
+
+    origstr = m__getObj(tk_origstr_t);
+    if (origstr == NULL) {
+        return NULL;
+    }
+    memset(origstr, 0x0, sizeof(tk_origstr_t));
+    if (ttyp == TK_TT_QSTRING) {
+        origstr->origtyp = ((newline) 
+                            ? TK_ORIGSTR_DQUOTE_NL : TK_ORIGSTR_DQUOTE);
+    } else if (ttyp == TK_TT_SQSTRING) {
+        origstr->origtyp = ((newline) 
+                            ? TK_ORIGSTR_SQUOTE_NL : TK_ORIGSTR_SQUOTE);
+    } else {
+        SET_ERROR(ERR_INTERNAL_VAL);
+        m__free(origstr);
+        return NULL;
+    }
+    origstr->str = strval;  /* hand off memory here */
+    return origstr;
+
+}  /* new_origstr */
+
+
+/********************************************************************
+* FUNCTION free_origstr
+* 
+* Deallocatate a tk_origstr_t
+*
+* INPUTS:
+*  origstr == original token string struct to delete
+*********************************************************************/
+static void
+    free_origstr (tk_origstr_t *origstr)
+{
+    if (origstr->str != NULL) {
+        m__free(origstr->str);
+    }
+    m__free(origstr);
+
+}  /* free_origstr */
+
+
+/********************************************************************
+* FUNCTION new_token_ptr
+* 
+* Allocatate a new token pointer 
+*
+* INPUTS:
+*  tk == token to copy
+*  field == field key to save
+*
+* RETURNS:
+*   new token pointer struct or NULL if some error
+*********************************************************************/
+static tk_token_ptr_t *
+    new_token_ptr (tk_token_t *tk, 
+                   const void *field)
+{
+    tk_token_ptr_t  *tkptr;
+
+    tkptr = m__getObj(tk_token_ptr_t);
+    if (!tkptr) {
+        return NULL;
+    }
+    memset(tkptr, 0x0, sizeof(tk_token_ptr_t));
+    tkptr->tk = tk;
+    tkptr->field = field;
+    return tkptr;
+    
+} /* new_token_ptr */
+
+
+/********************************************************************
+* FUNCTION free_token_ptr
+* 
+* Free a token pointer struct
+*
+* INPUTS:
+*  tkptr == token pointer to free
+*********************************************************************/
+static void
+    free_token_ptr (tk_token_ptr_t *tkptr)
+{
+    m__free(tkptr);
+} /* free_token_ptr */
+
+
 /********************************************************************
 * FUNCTION new_token
 * 
@@ -271,15 +378,18 @@ static tk_token_t *
             return NULL;
         }
     }
+    dlq_createSQue(&tk->origstrQ);
 
 #ifdef TK_DEBUG
-    log_debug4("\ntk: new token (%s) ", tk_get_token_name(ttyp));
-    if (LOGDEBUG4 && tval) {
-        while (tlen--) {
-            log_debug4("%c", *tval++);
+    if (LOGDEBUG4) {
+        log_debug4("\ntk: new token (%s) ", tk_get_token_name(ttyp));
+        if (tval) {
+            while (tlen--) {
+                log_debug4("%c", *tval++);
+            }
+        } else {
+            log_debug4("%s", tk_get_token_sym(ttyp));
         }
-    } else {
-        log_debug4("%s", tk_get_token_sym(ttyp));
     }
 #endif
             
@@ -317,15 +427,18 @@ static tk_token_t *
         tk->len = xml_strlen(tval);
         tk->val = tval;
     }
+    dlq_createSQue(&tk->origstrQ);
 
 #ifdef TK_DEBUG
-    log_debug4("\ntk: new mtoken (%s) ", tk_get_token_name(ttyp));
-    if (LOGDEBUG4 && tval) {
-        while (tlen--) {
-            log_debug4("%c", *tval++);
+    if (LOGDEBUG4) {
+        log_debug4("\ntk: new mtoken (%s) ", tk_get_token_name(ttyp));
+        if (tval) {
+            while (tlen--) {
+                log_debug4("%c", *tval++);
+            }
+        } else {
+            log_debug4("%s", tk_get_token_sym(ttyp));
         }
-    } else {
-        log_debug4("%s", tk_get_token_sym(ttyp));
     }
 #endif
             
@@ -345,10 +458,14 @@ static tk_token_t *
 static void 
     free_token (tk_token_t *tk)
 {
+    tk_origstr_t  *origstr;
+
 #ifdef TK_DEBUG
-    log_debug4("\ntk: free_token: (%s)", tk_get_token_name(tk->typ));
-    if (tk->val) {
-        log_debug4(" val=(%s) ", tk->val);
+    if (LOGDEBUG4) {
+        log_debug4("\ntk: free_token: (%s)", tk_get_token_name(tk->typ));
+        if (tk->val) {
+            log_debug4(" val=(%s) ", tk->val);
+        }
     }
 #endif
 
@@ -358,6 +475,15 @@ static void
     if (tk->val) {
         m__free(tk->val);
     }
+    if (tk->origval) {
+        m__free(tk->origval);
+    }
+
+    while (!dlq_empty(&tk->origstrQ)) {
+        origstr = (tk_origstr_t *)dlq_deque(&tk->origstrQ);
+        free_origstr(origstr);
+    }
+
     m__free(tk);
 
 } /* free_token */
@@ -504,13 +630,15 @@ static status_t
                     uint32 startpos)
 {
     tk_token_t    *tk;
-    xmlChar       *buff, *outstr, *teststr;
+    xmlChar       *buff, *outstr, *teststr, *origbuff;
     const xmlChar *instr, *spstr;
     uint32         total, linepos, cnt, tcnt, scnt, chcnt;
     boolean        done;
 
     tk = NULL;
     buff = NULL;
+    origbuff = NULL;
+
     total = (endstr) ? (uint32)(endstr - tkbuff) : 0;
     
     if (total > NCX_MAX_STRLEN) {
@@ -530,6 +658,18 @@ static status_t
         buff = (xmlChar *)m__getMem(total+1);
         if (!buff) {
             return ERR_INTERNAL_MEM;
+        }
+
+        /* if --format=html or --format=yang then the
+         * original double quoted string needs to be saved
+         * instead of altered according to the YANG spec
+         */
+        if (TK_DOCMODE(tkc)) {
+            origbuff = xml_strndup(tkbuff, total);
+            if (origbuff == NULL) {
+                m__free(buff);
+                return ERR_INTERNAL_MEM;
+            }
         }
 
         instr = tkbuff;  /* points to next char to be read */
@@ -662,6 +802,7 @@ static status_t
 
     tk->linenum = startline;
     tk->linepos = startpos;
+    tk->origval = origbuff;
     dlq_enque(tk, &tkc->tkQ);
 
     return NO_ERR;
@@ -871,11 +1012,13 @@ static status_t
         }
 
 #ifdef TK_RDLN_DEBUG
-        if (xml_strlen(tkc->buff) < 128) {
-            log_debug3("\nNCX Parse: read line (%s)", tkc->buff);
-        } else {
-            log_debug3("\nNCX Parse: read line len  (%u)", 
-                      xml_strlen(tkc->buff));
+        if (LOGDEBUG3) {
+            if (xml_strlen(tkc->buff) < 128) {
+                log_debug3("\nNCX Parse: read line (%s)", tkc->buff);
+            } else {
+                log_debug3("\nNCX Parse: read line len  (%u)", 
+                           xml_strlen(tkc->buff));
+            }
         }
 #endif
 
@@ -1005,11 +1148,13 @@ static status_t
         }
 
 #ifdef TK_RDLN_DEBUG
-        if (xml_strlen(tkc->buff) < 128) {
-            log_debug3("\nNCX Parse: read line (%s)", tkc->buff);
-        } else {
-            log_debug3("\nNCX Parse: read line len  (%u)", 
-                      xml_strlen(tkc->buff));
+        if (LOGDEBUG3) {
+            if (xml_strlen(tkc->buff) < 128) {
+                log_debug3("\nNCX Parse: read line (%s)", tkc->buff);
+            } else {
+                log_debug3("\nNCX Parse: read line len  (%u)", 
+                           xml_strlen(tkc->buff));
+            }
         }
 #endif
         str = tkc->bptr;
@@ -1109,11 +1254,13 @@ static status_t
         }
 
 #ifdef TK_RDLN_DEBUG
-        if (xml_strlen(tkc->buff) < 128) {
-            log_debug3("\nNCX Parse: read line (%s)", tkc->buff);
-        } else {
-            log_debug3("\nNCX Parse: read line len  (%u)", 
-                      xml_strlen(tkc->buff));
+        if (LOGDEBUG3) {
+            if (xml_strlen(tkc->buff) < 128) {
+                log_debug3("\nNCX Parse: read line (%s)", tkc->buff);
+            } else {
+                log_debug3("\nNCX Parse: read line len  (%u)", 
+                           xml_strlen(tkc->buff));
+            }
         }
 #endif
 
@@ -1656,7 +1803,7 @@ static status_t
 static status_t
     concat_qstrings (tk_chain_t *tkc)
 {
-    tk_token_t  *first, *plus, *next, *last;
+    tk_token_t  *first, *plus, *prev, *next, *last;
     xmlChar     *buff, *str;
     uint32       bufflen;
     boolean      done;
@@ -1668,7 +1815,6 @@ static status_t
      *
      *  "string1" + "string2" + 'string3' ...
      */
-
     first = (tk_token_t *)dlq_firstEntry(&tkc->tkQ);
     while (first) {
         /* check if 'first' is a quoted string */
@@ -1678,7 +1824,11 @@ static status_t
             continue;
         }
 
-        /* check if any string concat is requested */
+        /* check if any string concat is requested
+         * loop through the tokens following the string 'first'
+         * and find the buffer length needed and the last token
+         * in the "str1" + "str2" + "strn" sequence
+         */
         last = NULL;
         next = (tk_token_t *)dlq_nextEntry(first);
         bufflen = first->len;
@@ -1739,9 +1889,71 @@ static status_t
                 }
             }
 
+            if (TK_DOCMODE(tkc)) {
+                /* make the Q of tk_origstr_t structs
+                 * and add it to the &first->origstrQ
+                 */
+                tk_origstr_t  *origstr;
+                boolean newline;
+
+                prev = first;
+                next = first;
+                done = FALSE;
+                while (!done) {
+                    origstr = NULL;
+                    if (next != first) {
+                        xmlChar  *usestr;
+
+                        if (next->origval != NULL) {
+                            usestr = next->origval;
+                        } else {
+                            usestr = next->val;
+                        }
+
+                        newline = (prev->linenum != next->linenum);
+                        origstr = new_origstr(next->typ,
+                                              newline,
+                                              usestr);
+                        if (origstr == NULL) {
+                            tkc->cur = first;
+                            m__free(buff);
+                            return ERR_INTERNAL_MEM;
+                        }
+
+                        /* transferred 'usestr' memory OK
+                         * clear pointer to prevent double free
+                         */
+                        if (next->origval != NULL) {
+                            next->origval = NULL;
+                        } else {
+                            next->val = NULL;
+                        }
+                        dlq_enque(origstr, &first->origstrQ);
+                    }
+                    if (next == last) {
+                        done = TRUE;
+                    } else {
+                        prev = next;
+                        next = (tk_token_t *)dlq_nextEntry(next);
+                    }
+                }
+            }
+
             /* fixup the first token */
             first->len = bufflen;
-            m__free(first->val);
+            if (first->origval == NULL) {
+                /* save the first SQSTRING since its value
+                 * is about to get changed to the entire concat string
+                 */
+                first->origval = first->val;
+            } else {
+                /* the first part of a QSTRING has already been 
+                 * converted so it cannot be used as 'origval'
+                 * like an SQSTRING; just toss it as origval copy is
+                 * already set before the conversion was done
+                 */
+                m__free(first->val);
+            }
             first->val = buff;
         
             /* remove the 2nd through the 'last' token */
@@ -1754,6 +1966,8 @@ static status_t
                 }
                 free_token(next);
             }
+
+            /* setup the next search for a 'first' string */
             first = (tk_token_t *)dlq_nextEntry(first);
         } else {
             /* did not find a string concat, continue search */
@@ -1789,7 +2003,7 @@ tk_chain_t *
     memset(tkc, 0x0, sizeof(tk_chain_t));
     dlq_createSQue(&tkc->tkQ);
     tkc->cur = (tk_token_t *)&tkc->tkQ;
-
+    dlq_createSQue(&tkc->tkptrQ);
     return tkc;
            
 } /* tk_new_chain */
@@ -1883,6 +2097,29 @@ void
 
 
 /********************************************************************
+* FUNCTION tk_setup_chain_docmode
+* 
+* Setup a previously allocated chain for a yangdump doc output mode
+*
+* INPUTS
+*    tkc == token chain to setup
+*********************************************************************/
+void
+    tk_setup_chain_docmode (tk_chain_t *tkc)
+{
+#ifdef DEBUG
+    if (!tkc) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return;
+    }
+#endif
+
+    tkc->flags |= TK_FL_DOCMODE;
+           
+} /* tk_setup_chain_docmode */
+
+
+/********************************************************************
 * FUNCTION tk_free_chain
 * 
 * Cleanup and deallocate a tk_chain_t 
@@ -1894,7 +2131,8 @@ void
 void 
     tk_free_chain (tk_chain_t *tkc)
 {
-    tk_token_t *tk;
+    tk_token_t      *tk;
+    tk_token_ptr_t  *tkptr;
 
 #ifdef DEBUG
     if (!tkc) {
@@ -1910,6 +2148,10 @@ void
     while (!dlq_empty(&tkc->tkQ)) {
         tk = (tk_token_t *)dlq_deque(&tkc->tkQ);
         free_token(tk);
+    }
+    while (!dlq_empty(&tkc->tkptrQ)) {
+        tkptr = (tk_token_ptr_t *)dlq_deque(&tkc->tkptrQ);
+        free_token_ptr(tkptr);
     }
     if ((tkc->flags & TK_FL_MALLOC) && tkc->buff) {
         m__free(tkc->buff);
@@ -2363,11 +2605,13 @@ status_t
             tkc->bptr = tkc->buff;
 
 #ifdef TK_RDLN_DEBUG
-            if (xml_strlen(tkc->buff) < 80) {
-                log_debug3("\ntk_tokenize: read line (%s)", tkc->buff);
-            } else {
-                log_debug3("\ntk_tokenize: read line len  (%d)", 
-                       xml_strlen(tkc->buff));
+            if (LOGDEBUG3) {
+                if (xml_strlen(tkc->buff) < 80) {
+                    log_debug3("\ntk_tokenize: read line (%s)", tkc->buff);
+                } else {
+                    log_debug3("\ntk_tokenize: read line len  (%d)", 
+                               xml_strlen(tkc->buff));
+                }
             }
 #endif
             ncx_check_warn_linelen(tkc, mod, tkc->buff);
@@ -3078,6 +3322,250 @@ status_t
     return NO_ERR;
     
 }  /* tk_add_semicol_token */
+
+
+/********************************************************************
+* FUNCTION tk_check_save_origstr
+* 
+* Check the docmode and the specified token;
+* Save a tk_origptr_t if needed with the field address
+*
+* INPUTS:
+*   tkc = token chain to use
+*   tk  = token to use (usually TK_CUR())
+*   field == address of string field to save as the key
+*
+* RETURNS:
+*    status; ERR_INTERNAL_MEM if entry cannot be malloced
+*********************************************************************/
+status_t
+    tk_check_save_origstr (tk_chain_t  *tkc,
+                           tk_token_t *tk,
+                           const void *field)
+{
+    tk_token_ptr_t  *tkptr;
+
+#ifdef DEBUG
+    if (tkc == NULL || tk == NULL || field == NULL) {
+        return SET_ERROR(ERR_INTERNAL_PTR);
+    }
+#endif
+
+    if (!TK_DOCMODE(tkc)) {
+        return NO_ERR;
+    }
+
+    if (!TK_HAS_ORIGTK(tk)) {
+        return NO_ERR;
+    }
+
+    if (!dlq_empty(&tk->origstrQ)) {
+        /* need token pointer because there is string concat */
+        tkptr = new_token_ptr(tk, field);
+        if (tkptr == NULL) {
+            return ERR_INTERNAL_MEM;
+        }
+        dlq_enque(tkptr, &tkc->tkptrQ);
+    } else if (tk->typ == TK_TT_QSTRING) {
+        /* just 1 double quoted string; 
+         * check if it changed after processing
+         */
+        if (xml_strcmp(tk->val, tk->origval)) {
+            tkptr = new_token_ptr(tk, field);
+            if (tkptr == NULL) {
+                return ERR_INTERNAL_MEM;
+            }
+            dlq_enque(tkptr, &tkc->tkptrQ);
+        }
+    } else {
+        /* just 1 single-quoted string that can be freed */
+        m__free(tk->origval);
+        tk->origval = NULL;
+    }
+
+    return NO_ERR;
+
+} /* tk_check_save_origstr */
+
+
+/********************************************************************
+* FUNCTION tk_get_first_origstr
+* 
+* Get the first original string to use
+*
+* INPUTS:
+*   tkptr  = token pointer to use
+*   dquote = address of return double quote flag
+*   morestr == addres of return more string fragments flag
+* OUTPUTS:
+*   *dquote = return double quote flag
+*            TRUE == TK_TT_QSTRING
+*           FALSE == TK_TTSQSTRING
+*   *morestr == addres of return more string fragments flag
+*           TRUE == more string fragments after first one
+* RETURNS:
+*   pointer to the first string fragment
+*********************************************************************/
+const xmlChar *
+    tk_get_first_origstr (const tk_token_ptr_t  *tkptr,
+                          boolean *dquote,
+                          boolean *morestr)
+
+{
+    const tk_token_t  *tk;
+
+#ifdef DEBUG
+    if (tkptr == NULL || dquote == NULL || morestr == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    tk = tkptr->tk;
+
+    *morestr = !dlq_empty(&tk->origstrQ);
+    *dquote = (tk->typ == TK_TT_QSTRING) ? TRUE : FALSE;
+    if (tk->origval) {
+        return tk->origval;
+    }
+    return tk->val;
+}
+
+
+/********************************************************************
+* FUNCTION tk_first_origstr_rec
+* 
+* Get the first tk_origstr_t struct (if any)
+*
+* INPUTS:
+*   tkptr  = token pointer to use
+*
+* RETURNS:
+*   pointer to the first original string record
+*********************************************************************/
+const tk_origstr_t *
+    tk_first_origstr_rec (const tk_token_ptr_t  *tkptr)
+{
+    const tk_token_t  *tk;
+
+#ifdef DEBUG
+    if (tkptr == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    tk = tkptr->tk;
+    return (const tk_origstr_t *)dlq_firstEntry(&tk->origstrQ);
+
+}  /* tk_first_origstr_rec */
+
+
+/********************************************************************
+* FUNCTION tk_next_origstr_rec
+* 
+* Get the next tk_origstr_t struct (if any)
+*
+* INPUTS:
+*   origstr  = origisnal string record pointer to use
+*
+* RETURNS:
+*   pointer to the next original string record
+*********************************************************************/
+const tk_origstr_t *
+    tk_next_origstr_rec (const tk_origstr_t  *origstr)
+{
+#ifdef DEBUG
+    if (origstr == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    return (const tk_origstr_t *)dlq_nextEntry(origstr);
+
+}  /* tk_next_origstr_rec */
+
+
+/********************************************************************
+* FUNCTION tk_get_origstr_parts
+* 
+* Get the fields from the original string record
+*
+* INPUTS:
+*   origstr  = original string record pointer to use
+*   dquote = address of return double quote flag
+*   newline == addres of return need newline flag
+* OUTPUTS:
+*   *dquote = return double quote flag
+*            TRUE == TK_TT_QSTRING
+*           FALSE == TK_TTSQSTRING
+*   *newline == return need newline flag
+*           TRUE == need newline + indent before this string
+* RETURNS:
+*   pointer to the string fragment
+*********************************************************************/
+const xmlChar *
+    tk_get_origstr_parts (const tk_origstr_t  *origstr,
+                          boolean *dquote,
+                          boolean *newline)
+
+{
+#ifdef DEBUG
+    if (origstr == NULL || dquote == NULL || newline == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    *dquote = (origstr->origtyp == TK_ORIGSTR_DQUOTE ||
+               origstr->origtyp == TK_ORIGSTR_DQUOTE_NL);
+    *newline = (origstr->origtyp == TK_ORIGSTR_DQUOTE_NL ||
+               origstr->origtyp == TK_ORIGSTR_SQUOTE_NL);
+    return origstr->str;
+
+}  /* tk_get_origstr_parts */
+
+
+/********************************************************************
+* FUNCTION tk_find_tkptr
+* 
+* Find the specified token pointer record
+*
+* INPUTS:
+*   tkc  = token chain to use
+*   field == address of field to use as key to find
+*
+* RETURNS:
+*   pointer to the token pointer record or NULL if not found
+*********************************************************************/
+const tk_token_ptr_t *
+    tk_find_tkptr (const tk_chain_t  *tkc,
+                   const void *field)
+{
+    const tk_token_ptr_t *tkptr;
+
+#ifdef DEBUG
+    if (tkc == NULL || field == NULL) {
+        SET_ERROR(ERR_INTERNAL_PTR);
+        return NULL;
+    }
+#endif
+
+    for (tkptr = (const tk_token_ptr_t *)
+             dlq_firstEntry(&tkc->tkptrQ);
+         tkptr != NULL;
+         tkptr = (const tk_token_ptr_t *)
+             dlq_nextEntry(tkptr)) {
+
+        if (field == tkptr->field) {
+            return tkptr;
+        }
+    }
+
+    return NULL;
+
+}  /* tk_find_tkptr */
 
 
 /* END file tk.c */

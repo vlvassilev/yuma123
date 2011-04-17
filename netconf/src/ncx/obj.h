@@ -1955,6 +1955,21 @@ extern const xmlChar *
 
 
 /********************************************************************
+* FUNCTION obj_get_description_addr
+* 
+* Get the address of the description field for this obj
+*
+* INPUTS:
+*   obj == the specific object to check
+*
+* RETURNS:
+*   YANG description string for this object
+*********************************************************************/
+extern const void *
+    obj_get_description_addr (const obj_template_t *obj);
+
+
+/********************************************************************
 * FUNCTION obj_get_reference
 * 
 * Get the reference field for this obj
@@ -1967,6 +1982,21 @@ extern const xmlChar *
 *********************************************************************/
 extern const xmlChar *
     obj_get_reference (const obj_template_t *obj);
+
+
+/********************************************************************
+* FUNCTION obj_get_reference_addr
+* 
+* Get the reference field for this obj
+*
+* INPUTS:
+*   obj == the specific object to check
+*
+* RETURNS:
+*   YANG reference string for this object
+*********************************************************************/
+extern const void *
+    obj_get_reference_addr (const obj_template_t *obj);
 
 
 /********************************************************************

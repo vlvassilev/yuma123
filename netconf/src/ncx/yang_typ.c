@@ -2216,14 +2216,20 @@ static status_t
                         ncx_print_errormsg(tkc, mod, res);
                         return res;
                     } else {
-                        ncx_set_error(&sim->xleafref->tkerr,
-                                      mod,
-                                      TK_CUR_LNUM(tkc),
-                                      TK_CUR_LPOS(tkc));
-                        res = xpath_yang_parse_path(tkc, 
-                                                    mod, 
-                                                    XP_SRC_LEAFREF,
-                                                    sim->xleafref);
+                        res = tk_check_save_origstr
+                            (tkc, 
+                             TK_CUR(tkc),
+                             (const void *)&sim->xleafref->exprstr);
+                        if (res == NO_ERR) {
+                            ncx_set_error(&sim->xleafref->tkerr,
+                                          mod,
+                                          TK_CUR_LNUM(tkc),
+                                          TK_CUR_LPOS(tkc));
+                            res = xpath_yang_parse_path(tkc, 
+                                                        mod, 
+                                                        XP_SRC_LEAFREF,
+                                                        sim->xleafref);
+                        }
                         if (res != NO_ERR) {
                             /* errors already reported */
                             retres = res;

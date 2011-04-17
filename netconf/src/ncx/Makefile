@@ -129,6 +129,9 @@ superclean:
 
 distclean: superclean uninstall
 
+curversion.h:
+
+
 ifdef WINDOWS
 RDYNAMIC=
 LC=

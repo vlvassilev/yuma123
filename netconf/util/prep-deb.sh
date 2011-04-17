@@ -11,7 +11,7 @@
 # the $1 parameter must be a revision number if present
 # this will be used instead of HEAD in the svn export step
 
-VER="1.13"
+VER="1.15"
 
 mkdir -p ~/build
 mkdir -p ~/rpmprep
@@ -31,7 +31,7 @@ cp yuma_$VER.tar.gz ~/build
 
 cd ~/build
 if [ ! -f yuma_$VER.orig.tar.gz ]; then
-  cp yuma_$VER.tar.gz yuma-tools_$VER.orig.tar.gz
+  cp yuma_$VER.tar.gz yuma_$VER.orig.tar.gz
 fi
 
 tar xvf yuma_$VER.tar.gz

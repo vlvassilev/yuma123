@@ -31,6 +31,7 @@ date             init     comment
 01-jun-10    abb      Switched to 1.x instead of 0.x
                       to align with debian packaging standards
 09-oct-10    abb      Bumped version to 1.14 
+17-apr-11    abb      Bumped version to 1.15
 */
 
 #ifdef __cplusplus
@@ -43,7 +44,7 @@ extern "C" {
 *                                                                   *
 *********************************************************************/
 
-#define YUMA_VERSION  (const xmlChar *)"1.14"
+#define YUMA_VERSION  (const xmlChar *)"1.15"
 
 #ifdef __cplusplus
 }  /* end extern 'C' */

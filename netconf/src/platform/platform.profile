@@ -7,7 +7,7 @@
 # environment vars, so it works in plain debuild, rpmbuild
 #
 LIBNCX_MAJOR_VERSION=1
-LIBNCX_MINOR_VERSION=14
+LIBNCX_MINOR_VERSION=15
 SOVERSION=$(LIBNCX_MAJOR_VERSION).$(LIBNCX_MINOR_VERSION)
 
 # default DESTDIR is NULL; it is only used by packaging builds

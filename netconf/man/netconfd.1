@@ -1,7 +1,7 @@
 .\" Process this file with
 .\" nroff -e -mandoc foo.1
 .\"
-.TH netconfd 1 "February 19, 2011" Linux "netconfd 1.14-5"
+.TH netconfd 1 "April 17, 2011" Linux "netconfd 1.15-1"
 .SH NAME
 netconfd \- YANG-based NETCONF-over-SSH server
 
@@ -121,6 +121,11 @@ from the saved configuration.
         been created by the client or the server.
         This is the default value.
 .fi
+.IP --\fBdelete-empty-npcontainers\fP=boolean
+Selects whether the server will keep or delete empty
+non-presence containers in the running and startup 
+configurations. Set to true to delete these containers,
+and false to keep them.  Default: false.
 .IP --\fBdeviation\fP=string
  This parameter identifies a YANG module that
 should only be checked for deviation statements

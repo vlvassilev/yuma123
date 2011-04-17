@@ -142,7 +142,7 @@ module netconfd {
             Disabling this parameter will result in a larger
             database in both memory and NV-save.";
         type boolean;
-        default true;
+        default false;
       }
 
       leaf eventlog-size {

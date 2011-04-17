@@ -29,4 +29,4 @@ chmod 775 yuma-$VER/configure
 tar cvf yuma-$VER.tar yuma-$VER/
 gzip yuma-$VER.tar
 cp yuma-$VER.tar.gz ~/rpmbuild/SOURCES
-cp yuma-$VER/SPECS/yuma.spec ~/rpmbuild/SPECS
+cp yuma-$VER/SPECS/yuma-fc14-64.spec ~/rpmbuild/SPECS

@@ -1,9 +1,9 @@
 
-Yuma Tools -- A Toolset for the YANG data modeling language 
+Yuma -- A Toolset for the YANG data modeling language 
         and NETCONF protocol
 ===========================================================
 
-Copyright (c) 2008 - 2010, Andy Bierman
+Copyright (c) 2008 - 2011, Andy Bierman
 
 Source:
 -------
@@ -20,9 +20,9 @@ directory, with all the Yuma Tools files.
 
 Example:
 
-  /mydir> tar xvf yuma-1.13-1.fc12.i686.tar.gz
+  /mydir> tar xvf yuma-1.15-1.fc12.i686.tar.gz
 
-This creates the directory /mydir/yuma-1.13.
+This creates the directory /mydir/yuma-1.15-1.
 
 
 USING Yuma Tools tarball programs From a Non Default Location
@@ -46,10 +46,10 @@ for the parent of the 'modules' directory.
 
 For example (bash):
 
-   YUMA_INSTALL=$HOME/yuma-1.13
+   YUMA_INSTALL=$HOME/yuma-1.15-1
    export YUMA_INSTALL
 
-   YUMA_HOME=/mydir/yuma=1.13
+   YUMA_HOME=/mydir/yuma=1.15-1
    export YUMA_HOME
 
 A CLI parameter called --yuma-home can also be
@@ -58,7 +58,7 @@ are not used.
 
 For example:
 
-    /mydir/yuma-1.13/bin/yangcli --yuma-home=/mydir/yuma-1.13
+    /mydir/yuma-1.15-1/bin/yangcli --yuma-home=/mydir/yuma-1.15-1
 
 Running the netconfd server from a non-default
 location is no different than the default, except
@@ -68,14 +68,14 @@ file is different.
 The netconfd program is in the 'sbin' directory.
 For example:
 
-    /mydir/yuma-1.13/sbin/netconfd
+    /mydir/yuma-1.15-1/sbin/netconfd
 
 The SSH config file needs to be edited.
 For example (/etc/ssh/sshd_config):
 
   Port 22
   Port 830
-  Subsystem /mydir/yuma1.13/sbin/netconf-subsystem
+  Subsystem /mydir/yuma-1.15-1/sbin/netconf-subsystem
 
 
 TARBALL FILES: (relative to the yuma-VERSION directory)
@@ -117,12 +117,9 @@ WARNING
 =======
 
 This version of yuma implements the YANG language specification
-as defined in:
+as defined in RFC 6020:
 
-http://www.ietf.org/internet-drafts/draft-ietf-netmod-yang-13.txt
-
-Future versions of yuma may not maintain full 
-compatibility with this Internet Draft.
+http://www.ietf.org/rfc/rfc6020.txt
 
 IMPORTANT INSTALLATION NOTE
 ===========================

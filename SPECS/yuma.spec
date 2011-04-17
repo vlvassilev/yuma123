@@ -1,6 +1,6 @@
 Name:           yuma
-Version:        1.14
-Release:        6%{?dist}
+Version:        1.15
+Release:        1%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -29,11 +29,11 @@ included, to compile and process YANG modules.
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make STATIC=1 RELEASE=6 %{?_smp_mflags}
+make STATIC=1 RELEASE=1 %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id STATIC=1 RELEASE=6 DESTDIR=$RPM_BUILD_ROOT
+make install LDFLAGS+=--build-id STATIC=1 RELEASE=1 DESTDIR=$RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT

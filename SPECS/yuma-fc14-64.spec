@@ -1,6 +1,6 @@
 Name:           yuma
-Version:        1.14
-Release:        6%{?dist}
+Version:        1.15
+Release:        1%{?dist}
 Summary:        YANG-based Unified Modular Automation Tools
 
 Group:          Development/Tools
@@ -29,11 +29,11 @@ included, to compile and process YANG modules.
 cd libtecla
 ./configure --prefix=$RPM_BUILD_ROOT 
 cd ..
-make STATIC=1 LIB64=1 RELEASE=6 %{?_smp_mflags}
+make STATIC=1 LIB64=1 RELEASE=1 %{?_smp_mflags}
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make install LDFLAGS+=--build-id STATIC=1 LIB64=1 RELEASE=6 DESTDIR=$RPM_BUILD_ROOT
+make install LDFLAGS+=--build-id STATIC=1 LIB64=1 RELEASE=1 DESTDIR=$RPM_BUILD_ROOT
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -79,6 +79,39 @@ echo "Yuma installed."
 echo "Check the user manuals in /usr/share/doc/yuma"
 
 %changelog
+* Sat Apr 17 2011 Andy Bierman <andy at netconfcentral.org> 1.15-1 [1125]
+  netconfd:
+   - added --delete-empty-npcontainers CLI parameter
+   T:F (d:F) this is a change from the previous default of TRUE;
+   - fix bug deleting newval but leaving undo->newnode
+   pointing at deleted memory; then used in commit phase if
+   a user callback is registered; now saving in undo rec until end
+  netconf-subsystem:
+   - remove usleep calls from netconf-subsystem and check for
+   EAGAIN errors instead
+  yangcli:
+   - fix bug command matching incorrectly on a data node instead of
+   just rpc node
+   - fix bug not auto-finding module if module name not the
+   same as the file-name
+   - fix bug nc:operation attribute not getting generated in
+   leafref nodes
+  yangdump:
+   - add support for string token preservation (string concat,
+   pre-processed double-quote strings in yang and html output
+  common:
+   -xpath: fix bug where local-name node incorrectly parsed
+   as a node-type value
+   - val_dump: fix bug enum name printed as unquoted string when it
+   contains whitespace
+   - XMLDOC output cleaned up wrt/ extra namespace decls and newlines
+   - update SMI module to support latest smidump translation
+   - xml_wr: fixed bug leafref rendered with extra xmlns and empty value
+   if get-config
+   - cli: check for = after parm name instead of letting unknown parm
+   get used as a value for the default parm
+   - cli: for RPC input with a single parm, allow parameter name to
+   be dropped in the CLI input
 * Sat Mar 19 2011 Andy Bierman <andy at netconfcentral.org> 1.14-6 [1100]
  * yangcli:
    * fix bug not checking for ssh2 channel EOF with data

@@ -7153,7 +7153,8 @@ static status_t
             if (pcb->logerrors) {
                 log_error("\nError: invalid axis name '%s' in "
                           "XPath expression '%s'",
-                          TK_CUR_VAL(pcb->tkc),
+                          (TK_CUR_VAL(pcb->tkc) != NULL) ?
+                          TK_CUR_VAL(pcb->tkc) : EMPTY_STRING,
                           pcb->exprstr);
                 ncx_print_errormsg(pcb->tkc, pcb->tkerr.mod, res);
             } else {
@@ -7304,7 +7305,10 @@ static xpath_result_t *
     }
 
     /* find the function in the library */
-    fncb = find_fncb(pcb, TK_CUR_VAL(pcb->tkc));
+    fncb = NULL;
+    if (TK_CUR_VAL(pcb->tkc) != NULL) {
+        fncb = find_fncb(pcb, TK_CUR_VAL(pcb->tkc));
+    }
     if (fncb) {
         /* get the mandatory left paren */
         *res = xpath_parse_token(pcb, TK_TT_LPAREN);
@@ -7375,7 +7379,8 @@ static xpath_result_t *
 
         if (pcb->logerrors) {   
             log_error("\nError: Invalid XPath function name '%s'",
-                      TK_CUR_VAL(pcb->tkc));
+                      (TK_CUR_VAL(pcb->tkc) != NULL) ?
+                      TK_CUR_VAL(pcb->tkc) : EMPTY_STRING);
             ncx_print_errormsg(pcb->tkc, pcb->tkerr.mod, *res);
         } else {
             /*** log agent error ***/
@@ -7544,7 +7549,11 @@ static xpath_result_t *
                 return NULL;
             }
 
-            val1->r.str = xml_strdup(TK_CUR_VAL(pcb->tkc));
+            if (TK_CUR_VAL(pcb->tkc) != NULL) {
+                val1->r.str = xml_strdup(TK_CUR_VAL(pcb->tkc));
+            } else {
+                val1->r.str = xml_strdup(EMPTY_STRING);
+            }
             if (!val1->r.str) {
                 *res = ERR_INTERNAL_MEM;
                 malloc_failed_error(pcb);

@@ -1117,10 +1117,12 @@ status_t
     ses_cb_t          *scb;
     mgr_scb_t         *mscb;
     ses_msg_buff_t    *buff;
+    char              *outp;
     int                ret;
     uint32             i;
     boolean            done;
     status_t           res;
+    size_t             left;
 
     scb = (ses_cb_t *)s;
     mscb = mgr_ses_get_mscb(scb);
@@ -1142,19 +1144,27 @@ status_t
 
     while (buff) {
         if (res == NO_ERR) {
+            outp = (char *)buff->buff;
+            left = buff->bufflen;
+
             done = FALSE;
             while (!done) {
                 ret = libssh2_channel_write(mscb->channel, 
-                                            (char *)buff->buff, 
-                                            buff->bufflen);
-                if (ret < 0 || ret != (int)buff->bufflen) {
+                                            outp,
+                                            left);
+                if (ret > 0 && ret != (int)left) {
+                    outp += ret;
+                    left -= ret;
+                    continue;
+                } else if (ret < 0) {
                     if (ret == LIBSSH2_ERROR_EAGAIN) {
                         /* not done; sleep and try again */
-                        usleep(1000);   /* 1000 micro-seconds */
+                        // usleep(1000);   /* 1000 micro-seconds */
                         continue;
                     }
                     log_ssh2_error(scb, mscb, "write");
                 }
+                    
                 done = TRUE;
             }
 

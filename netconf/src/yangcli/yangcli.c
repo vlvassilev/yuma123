@@ -2310,6 +2310,10 @@ static void
     const xmlChar      *server;
     const val_value_t  *parm;
 
+    if (!LOGINFO) {
+        /* skip unless log level is INFO or higher */
+        return;
+    }
 
     mscb = (const mgr_scb_t *)scb->mgrcb;
 
@@ -2326,10 +2330,6 @@ static void
               scb->username, 
               mscb->target ? mscb->target : server);
 
-    if (!LOGINFO) {
-        /* skip the rest unless log level is INFO or higher */
-        return;
-    }
 
     log_write("\n\nClient Session Id: %u", scb->sid);
     log_write("\nServer Session Id: %u", mscb->agtsid);
@@ -4126,7 +4126,8 @@ void
 
             /* hand off the malloced 'val' node here */
             res = finish_result_assign(server_cb, val, NULL);
-        }  else if (!anyout && 
+        }  else if (LOGINFO && 
+                    !anyout && 
                     !anyerrors && 
                     server_cb->command_mode == CMD_MODE_NORMAL &&
                     interactive_mode()) {

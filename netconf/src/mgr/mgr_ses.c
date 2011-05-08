@@ -1159,7 +1159,7 @@ status_t
                 } else if (ret < 0) {
                     if (ret == LIBSSH2_ERROR_EAGAIN) {
                         /* not done; sleep and try again */
-                        // usleep(1000);   /* 1000 micro-seconds */
+                        usleep(100);   /* 100 micro-seconds */
                         continue;
                     }
                     log_ssh2_error(scb, mscb, "write");

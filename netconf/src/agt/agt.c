@@ -1117,7 +1117,7 @@ status_t
     p += xml_strcpy(p, (const xmlChar *)"lib");    
     p += xml_strcpy(p, modname);
 
-#ifdef MACOS
+#ifdef MACOSX
     xml_strcpy(p, (const xmlChar *)".dylib");
 #else
     xml_strcpy(p, (const xmlChar *)".so");

@@ -3245,6 +3245,7 @@ static mgr_io_state_t
             SET_ERROR(ERR_INTERNAL_VAL);
         }
     } else if (getrpc) {
+        res = NO_ERR;
         switch (server_cb->state) {
         case MGR_IO_ST_IDLE:
             /* waiting for top-level commands */
@@ -3261,6 +3262,12 @@ static mgr_io_state_t
             break;
         default:
             break;
+        }
+
+        if (res != NO_ERR) {
+            if (runstack_level(server_cb->runstack_context)) {
+                runstack_cancel(server_cb->runstack_context);
+            }
         }
 
         switch (server_cb->state) {

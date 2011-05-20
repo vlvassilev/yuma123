@@ -740,7 +740,7 @@ xmlChar *
         }
         done = TRUE;
         *res = ERR_NCX_CANCELED;
-        if (rcxt->script_level <= 1) {
+        if (rcxt->script_level == 0) {
             rcxt->script_cancel = FALSE;
         }
     }
@@ -1282,6 +1282,19 @@ xmlChar *
 
     if (rcxt == NULL) {
         rcxt = &defcxt;
+    }
+
+    if (rcxt->script_cancel) {
+        if (LOGINFO) {
+            log_info("\nScript in loop canceled");
+        }
+        *res = ERR_NCX_CANCELED;
+        if (rcxt->script_level == 0) {
+            rcxt->script_cancel = FALSE;
+        } else {
+            runstack_pop(rcxt);
+        }
+        return NULL;
     }
 
     condcb = get_loopcb(rcxt);
